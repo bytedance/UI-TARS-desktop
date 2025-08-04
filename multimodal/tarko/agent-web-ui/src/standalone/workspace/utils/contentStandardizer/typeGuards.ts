@@ -1,4 +1,4 @@
-import { ChatCompletionContentPart } from '@multimodal/agent-interface';
+import { ChatCompletionContentPart } from '@tarko/agent-interface';
 import { MultimodalContent, SearchResult, CommandResult, FileResult, ScriptResult } from './types';
 
 export function isMultimodalContent(source: unknown): source is MultimodalContent[] {

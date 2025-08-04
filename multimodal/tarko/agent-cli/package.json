@@ -31,7 +31,7 @@
     "@multimodal/shared-utils": "workspace:*"
   },
   "devDependencies": {
-    "@multimodal/agent-interface": "workspace:*",
+    "@tarko/agent-interface": "workspace:*",
     "@tarko/agent-server-interface": "workspace:*",
     "@multimodal/web-ui": "workspace:*",
     "@multimodal/agio": "workspace:*",

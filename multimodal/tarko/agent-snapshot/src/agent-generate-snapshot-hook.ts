@@ -14,7 +14,7 @@ import {
   ChatCompletionChunk,
   ChatCompletionMessageToolCall,
   ToolCallResult,
-} from '@multimodal/agent-interface';
+} from '@tarko/agent-interface';
 import { logger } from './utils/logger';
 import { AgentHookBase } from './agent-hook-base';
 

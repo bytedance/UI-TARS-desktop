@@ -1,5 +1,5 @@
 import { atom } from 'jotai';
-import type { AgentEventStream } from '@multimodal/agent-interface';
+import type { AgentEventStream } from '@tarko/agent-interface';
 
 /**
  * Plan keyframe interface for storing plan history snapshots

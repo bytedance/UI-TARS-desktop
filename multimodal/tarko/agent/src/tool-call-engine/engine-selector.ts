@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ToolCallEngineType } from '@multimodal/agent-interface';
+import { ToolCallEngineType } from '@tarko/agent-interface';
 
 /**
  * ProviderEngineSelector - Maps model providers to their optimal tool call engines

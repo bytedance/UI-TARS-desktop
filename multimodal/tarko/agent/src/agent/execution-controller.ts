@@ -1,5 +1,5 @@
 import { getLogger } from '@multimodal/shared-utils';
-import { AgentStatus } from '@multimodal/agent-interface';
+import { AgentStatus } from '@tarko/agent-interface';
 
 /**
  * Controls the execution state of an Agent and manages abort functionality

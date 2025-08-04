@@ -303,7 +303,7 @@ importers:
 
   tarko/agent:
     dependencies:
-      '@multimodal/agent-interface':
+      '@tarko/agent-interface':
         specifier: workspace:*
         version: link:../agent-interface
       '@multimodal/llm-client':
@@ -371,7 +371,7 @@ importers:
       '@clack/prompts':
         specifier: 0.11.0
         version: 0.11.0
-      '@multimodal/agent-interface':
+      '@tarko/agent-interface':
         specifier: workspace:*
         version: link:../agent-interface
       '@multimodal/agio':
@@ -517,7 +517,7 @@ importers:
 
   tarko/agent-server-interface:
     dependencies:
-      '@multimodal/agent-interface':
+      '@tarko/agent-interface':
         specifier: workspace:*
         version: link:../agent-interface
       '@multimodal/agio':
@@ -545,7 +545,7 @@ importers:
       '@tarko/agent':
         specifier: workspace:*
         version: link:../agent
-      '@multimodal/agent-interface':
+      '@tarko/agent-interface':
         specifier: workspace:*
         version: link:../agent-interface
       chalk:
@@ -640,7 +640,7 @@ importers:
       '@agent-tars/interface':
         specifier: workspace:*
         version: link:../../agent-tars/interface
-      '@multimodal/agent-interface':
+      '@tarko/agent-interface':
         specifier: workspace:*
         version: link:../agent-interface
       '@rsbuild/core':
@@ -679,7 +679,7 @@ importers:
 
   tarko/agio:
     dependencies:
-      '@multimodal/agent-interface':
+      '@tarko/agent-interface':
         specifier: workspace:*
         version: link:../agent-interface
     devDependencies:
@@ -809,7 +809,7 @@ importers:
 
   tarko/mcp-agent-interface:
     dependencies:
-      '@multimodal/agent-interface':
+      '@tarko/agent-interface':
         specifier: workspace:*
         version: link:../agent-interface
     devDependencies:

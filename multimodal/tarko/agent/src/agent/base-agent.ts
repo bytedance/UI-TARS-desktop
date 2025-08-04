@@ -16,7 +16,7 @@ import {
   Tool,
   PrepareRequestContext,
   PrepareRequestResult,
-} from '@multimodal/agent-interface';
+} from '@tarko/agent-interface';
 import { getLogger } from '@multimodal/shared-utils';
 
 /**

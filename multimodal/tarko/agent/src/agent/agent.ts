@@ -23,7 +23,7 @@ import {
   IAgent,
   ChatCompletionCreateParams,
   ChatCompletion,
-} from '@multimodal/agent-interface';
+} from '@tarko/agent-interface';
 
 import { BaseAgent } from './base-agent';
 import { AgentRunner } from './agent-runner';

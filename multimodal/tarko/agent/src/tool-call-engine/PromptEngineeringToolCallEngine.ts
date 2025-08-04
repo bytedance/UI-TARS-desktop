@@ -19,7 +19,7 @@ import {
   StreamChunkResult,
   StreamingToolCallUpdate,
   AgentEventStream,
-} from '@multimodal/agent-interface';
+} from '@tarko/agent-interface';
 
 import { zodToJsonSchema } from '../utils';
 import { getLogger } from '@multimodal/shared-utils';

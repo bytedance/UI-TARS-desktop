@@ -19,7 +19,7 @@ The `@multimodal/agent-interface` package provides the core types, interfaces, a
 The core interface that all agent implementations must implement:
 
 ```typescript
-import { IAgent, AgentOptions } from '@multimodal/agent-interface';
+import { IAgent, AgentOptions } from '@tarko/agent-interface';
 
 class MyAgent implements IAgent {
   async initialize() {
@@ -39,7 +39,7 @@ class MyAgent implements IAgent {
 Comprehensive configuration options for agent behavior:
 
 ```typescript
-import { AgentOptions } from '@multimodal/agent-interface';
+import { AgentOptions } from '@tarko/agent-interface';
 
 const options: AgentOptions = {
   // Base configuration
@@ -91,7 +91,7 @@ const options: AgentOptions = {
 Define and register tools for agent capabilities:
 
 ```typescript
-import { Tool } from '@multimodal/agent-interface';
+import { Tool } from '@tarko/agent-interface';
 import { z } from 'zod';
 
 const weatherTool: Tool = {
@@ -152,7 +152,7 @@ The event stream supports various categories of events:
 #### Basic Event Subscription
 
 ```typescript
-import { AgentEventStream } from '@multimodal/agent-interface';
+import { AgentEventStream } from '@tarko/agent-interface';
 
 // Get the event stream from your agent
 const eventStream = agent.getEventStream();
@@ -246,7 +246,7 @@ interface MyCustomEventInterface extends AgentEventStream.BaseEvent {
 }
 
 // Extend the event mapping through module augmentation
-declare module '@multimodal/agent-interface' {
+declare module '@tarko/agent-interface' {
   namespace AgentEventStream {
     interface ExtendedEventMapping {
       custom_analysis: MyCustomEventInterface;

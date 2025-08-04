@@ -14,7 +14,7 @@ import {
   AgentEventStream,
   isStreamingOptions,
   isAgentRunObjectOptions,
-} from '@multimodal/agent-interface';
+} from '@tarko/agent-interface';
 import {
   AgentSnapshotOptions,
   SnapshotGenerationResult,

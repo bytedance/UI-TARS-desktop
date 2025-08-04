@@ -5,7 +5,7 @@
  */
 
 import { AgioEvent } from '@multimodal/agio';
-import { IAgent, TConstructor, AgentOptions } from '@multimodal/agent-interface';
+import { IAgent, TConstructor, AgentOptions } from '@tarko/agent-interface';
 import { AgentImplementation } from './implementation';
 
 /**

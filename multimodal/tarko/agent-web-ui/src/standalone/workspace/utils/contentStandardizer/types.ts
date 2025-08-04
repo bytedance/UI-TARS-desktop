@@ -1,4 +1,4 @@
-import { ChatCompletionContentPart } from '@multimodal/agent-interface';
+import { ChatCompletionContentPart } from '@tarko/agent-interface';
 
 export interface MultimodalTextContent {
   type: 'text';

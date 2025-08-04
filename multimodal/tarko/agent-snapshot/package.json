@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@tarko/agent": "workspace:*",
-    "@multimodal/agent-interface": "workspace:*",
+    "@tarko/agent-interface": "workspace:*",
     "@agent-infra/logger": "0.0.2-beta.2",
     "fast-json-stable-stringify": "^2.1.0",
     "snapshot-diff": "0.10.0",

@@ -9,7 +9,7 @@ import { isProcessingAtom, activePanelContentAtom, modelInfoAtom } from '../atom
 import { plansAtom, PlanKeyframe } from '../atoms/plan';
 import { replayStateAtom } from '../atoms/replay';
 import { sessionFilesAtom, FileItem } from '../atoms/files';
-import { ChatCompletionContentPartImage } from '@multimodal/agent-interface';
+import { ChatCompletionContentPartImage } from '@tarko/agent-interface';
 import { jsonrepair } from 'jsonrepair';
 
 // Internal cache - not an Atom to avoid unnecessary reactivity

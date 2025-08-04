@@ -33,7 +33,7 @@ import {
   AgentEventStream,
   ChatCompletionContentPart,
   ToolCallEngineType,
-} from '@multimodal/agent-interface';
+} from '@tarko/agent-interface';
 
 export namespace AgioEvent {
   /**

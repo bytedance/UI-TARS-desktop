@@ -1,4 +1,4 @@
-import { AgentEventStream } from '@multimodal/agent-interface';
+import { AgentEventStream } from '@tarko/agent-interface';
 import type { AgentServerVersionInfo } from '@agent-tars/interface';
 
 /**

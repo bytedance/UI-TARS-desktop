@@ -211,7 +211,7 @@ protected async processCommonOptions(options: MyAgentCLIArguments) {
 创建自定义 Agent 需要实现 `IAgent` 接口：
 
 ```typescript
-import { IAgent, AgentOptions, AgentEventStream } from '@multimodal/agent-interface';
+import { IAgent, AgentOptions, AgentEventStream } from '@tarko/agent-interface';
 
 export class MyAgent implements IAgent {
   constructor(private options: AgentOptions) {}

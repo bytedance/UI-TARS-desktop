@@ -1,5 +1,5 @@
 {
-  "name": "@multimodal/agent-interface",
+  "name": "@tarko/agent-interface",
   "version": "0.3.0-beta.1",
   "description": "Standard protocol, types, event stream and other specifications for `@multimodal/agent`",
   "main": "dist/index.js",

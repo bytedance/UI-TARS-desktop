@@ -12,7 +12,7 @@ import {
   ToolCallEngineType,
   AgentContextAwarenessOptions,
   TConstructor,
-} from '@multimodal/agent-interface';
+} from '@tarko/agent-interface';
 import { ToolManager } from './tool-manager';
 import { ResolvedModel, LLMReasoningOptions } from '@multimodal/model-provider';
 import { getLogger } from '@multimodal/shared-utils';

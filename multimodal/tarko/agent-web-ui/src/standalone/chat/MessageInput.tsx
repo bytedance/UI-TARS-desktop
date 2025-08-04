@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ConnectionStatus } from '@/common/types';
 import { useLocation } from 'react-router-dom';
 import './MessageInput.css';
-import { ChatCompletionContentPart } from '@multimodal/agent-interface';
+import { ChatCompletionContentPart } from '@tarko/agent-interface';
 import { ImagePreview } from './ImagePreview';
 
 interface MessageInputProps {

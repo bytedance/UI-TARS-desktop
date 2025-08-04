@@ -10,7 +10,7 @@ import { Message } from '@/common/types';
 import { connectionStatusAtom } from '../atoms/ui';
 import { replayStateAtom } from '../atoms/replay';
 import { sessionFilesAtom, FileItem } from '../atoms/files';
-import { ChatCompletionContentPart, AgentEventStream } from '@multimodal/agent-interface';
+import { ChatCompletionContentPart, AgentEventStream } from '@tarko/agent-interface';
 
 // Cache model information to avoid re-fetching on session switches
 const sessionMetadataCache = new Map<

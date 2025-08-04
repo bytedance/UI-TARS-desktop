@@ -14,7 +14,7 @@ import {
   ChatCompletionChunk,
   ToolCallResult,
   ChatCompletionMessageToolCall,
-} from '@multimodal/agent-interface';
+} from '@tarko/agent-interface';
 import { logger } from './utils/logger';
 import { SnapshotManager } from './snapshot-manager';
 

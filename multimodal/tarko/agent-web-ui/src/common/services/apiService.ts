@@ -1,7 +1,7 @@
 import { API_BASE_URL, API_ENDPOINTS } from '@/common/constants';
 import { AgentEventStream, SessionMetadata } from '@/common/types';
 import { socketService } from './socketService';
-import { ChatCompletionContentPart } from '@multimodal/agent-interface';
+import { ChatCompletionContentPart } from '@tarko/agent-interface';
 import { AgentServerVersionInfo } from '@agent-tars/interface';
 
 /**

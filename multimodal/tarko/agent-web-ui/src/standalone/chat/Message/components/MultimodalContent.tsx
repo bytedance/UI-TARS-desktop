@@ -1,4 +1,4 @@
-import { ChatCompletionContentPart } from '@multimodal/agent-interface';
+import { ChatCompletionContentPart } from '@tarko/agent-interface';
 import React from 'react';
 import { motion } from 'framer-motion';
 import { MarkdownRenderer } from '@/sdk/markdown-renderer';

@@ -47,7 +47,7 @@
     "@multimodal/llm-client": "workspace:*",
     "@multimodal/shared-utils": "workspace:*",
     "@multimodal/model-provider": "workspace:*",
-    "@multimodal/agent-interface": "workspace:*"
+    "@tarko/agent-interface": "workspace:*"
   },
   "devDependencies": {
     "@types/uuid": "^9.0.8",

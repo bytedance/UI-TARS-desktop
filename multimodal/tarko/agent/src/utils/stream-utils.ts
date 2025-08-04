@@ -6,7 +6,7 @@ import {
   ChatCompletion,
   ChatCompletionChunk,
   ChatCompletionMessageToolCall,
-} from '@multimodal/agent-interface';
+} from '@tarko/agent-interface';
 
 /**
  * Reconstruct a ChatCompletion object from an array of chunks

@@ -5,7 +5,7 @@
 
 import { beforeEach, describe, it, expect } from 'vitest';
 import { PromptEngineeringToolCallEngine } from '../../src/tool-call-engine/PromptEngineeringToolCallEngine';
-import { ChatCompletionChunk, StreamingToolCallUpdate } from '@multimodal/agent-interface';
+import { ChatCompletionChunk, StreamingToolCallUpdate } from '@tarko/agent-interface';
 
 describe('PromptEngineeringToolCallEngine - Streaming Updates Merging', () => {
   let engine: PromptEngineeringToolCallEngine;

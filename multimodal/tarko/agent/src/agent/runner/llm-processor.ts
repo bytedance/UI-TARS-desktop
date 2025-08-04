@@ -17,7 +17,7 @@ import {
   ChatCompletion,
   AgentContextAwarenessOptions,
   Tool,
-} from '@multimodal/agent-interface';
+} from '@tarko/agent-interface';
 import {
   ResolvedModel,
   LLMReasoningOptions,

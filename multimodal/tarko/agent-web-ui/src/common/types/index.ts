@@ -3,7 +3,7 @@ import {
   AgentEventStream,
   ChatCompletionContentPart,
   ChatCompletionMessageToolCall,
-} from '@multimodal/agent-interface';
+} from '@tarko/agent-interface';
 import { ToolCategory } from '../constants/toolTypes';
 
 export { AgentEventStream };

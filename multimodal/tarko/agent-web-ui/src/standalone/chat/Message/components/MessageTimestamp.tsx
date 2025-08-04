@@ -1,4 +1,4 @@
-import { ChatCompletionContentPart } from '@multimodal/agent-interface';
+import { ChatCompletionContentPart } from '@tarko/agent-interface';
 import React from 'react';
 import { FiCheck, FiCopy } from 'react-icons/fi';
 import { formatTimestamp } from '@/common/utils/formatters';

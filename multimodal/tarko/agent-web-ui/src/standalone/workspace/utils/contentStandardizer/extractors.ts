@@ -1,7 +1,4 @@
-import {
-  ChatCompletionContentPart,
-  ChatCompletionContentPartImage,
-} from '@multimodal/agent-interface';
+import { ChatCompletionContentPart, ChatCompletionContentPartImage } from '@tarko/agent-interface';
 import {
   MultimodalContent,
   MultimodalTextContent,

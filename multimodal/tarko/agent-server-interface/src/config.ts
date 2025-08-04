@@ -5,6 +5,6 @@
  */
 
 import { AgentServerOptions } from './server';
-import { AgentOptions } from '@multimodal/agent-interface';
+import { AgentOptions } from '@tarko/agent-interface';
 
 export type AgentAppConfig<T extends AgentOptions = AgentOptions> = T & AgentServerOptions;

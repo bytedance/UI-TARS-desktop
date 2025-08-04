@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentOptions } from '@multimodal/agent-interface';
+import { AgentOptions } from '@tarko/agent-interface';
 
 // FIXME: remove enum-based logger
-export { LogLevel } from '@multimodal/agent-interface';
-export type * from '@multimodal/agent-interface';
+export { LogLevel } from '@tarko/agent-interface';
+export type * from '@tarko/agent-interface';
 
 export interface MCPAgentOptions extends AgentOptions {
   /**

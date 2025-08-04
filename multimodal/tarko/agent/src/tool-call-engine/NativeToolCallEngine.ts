@@ -16,7 +16,7 @@ import {
   StreamProcessingState,
   StreamChunkResult,
   ChatCompletionMessageToolCall,
-} from '@multimodal/agent-interface';
+} from '@tarko/agent-interface';
 import { buildToolCallResultMessages } from './utils';
 
 /**

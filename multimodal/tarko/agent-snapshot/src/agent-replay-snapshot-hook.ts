@@ -17,7 +17,7 @@ import {
   ToolCallResult,
   ChatCompletionMessageToolCall,
   OpenAI,
-} from '@multimodal/agent-interface';
+} from '@tarko/agent-interface';
 import { AgentHookBase } from './agent-hook-base';
 import { AgentNormalizerConfig } from './utils/snapshot-normalizer';
 

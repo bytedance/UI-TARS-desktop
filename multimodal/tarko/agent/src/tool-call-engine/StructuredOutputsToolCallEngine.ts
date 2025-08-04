@@ -18,7 +18,7 @@ import {
   StreamProcessingState,
   StreamChunkResult,
   FinishReason,
-} from '@multimodal/agent-interface';
+} from '@tarko/agent-interface';
 import { zodToJsonSchema } from '../utils';
 import { getLogger } from '@multimodal/shared-utils';
 import { buildToolCallResultMessages } from './utils';

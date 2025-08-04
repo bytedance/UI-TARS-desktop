@@ -12,7 +12,7 @@ import {
   ParsedModelResponse,
   StreamProcessingState,
   StreamChunkResult,
-} from '@multimodal/agent-interface';
+} from '@tarko/agent-interface';
 import { zodToJsonSchema } from '../../src/utils';
 
 /**
