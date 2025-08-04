@@ -98,6 +98,8 @@ export function addCommonOptions(command: Command): Command {
 }
 
 /**
+ * FIXME: Support markdown agent.
+ *
  * Resolve agent implementation from cli argument
  */
 export async function resolveAgentFromCLIArgument(

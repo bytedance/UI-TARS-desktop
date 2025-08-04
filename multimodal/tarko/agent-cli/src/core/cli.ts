@@ -12,7 +12,7 @@ import {
 import { addCommonOptions, resolveAgentFromCLIArgument } from './options';
 import { buildConfigPaths } from '../config/paths';
 import { readFromStdin } from './stdin';
-import { logger, printWelcomeLogo } from '../utils';
+import { logger, printWelcomeLogo, resolveWorkspacePath } from '../utils';
 import { buildAppConfig, CLIOptionsEnhancer, loadAgentConfig } from '../config';
 import { GlobalWorkspaceCommand } from './commands';
 import { CLICommand, CLIInstance, AgentCLIInitOptions, AgentServerInitOptions } from '../types';
@@ -311,8 +311,7 @@ export class AgentCLI {
     isDebug: boolean;
   }> {
     const isDebug = !!cliArguments.debug;
-    // FIXME: using cwd passed from options
-    const workspace = cliArguments.workspace ?? process.cwd();
+    const workspace = resolveWorkspacePath(process.cwd(), cliArguments.workspace);
     const globalWorkspaceCommand = new GlobalWorkspaceCommand(
       this.options.directories?.globalWorkspaceDir,
     );
@@ -349,13 +348,15 @@ export class AgentCLI {
     // the AgentServer and hand them over to the Server for processing
     const agentImplementation = await resolveAgentFromCLIArgument(
       cliArguments.agent,
-      this.options.appConfig?.agent,
+      appConfig.agent ?? this.options.appConfig?.agent,
     );
 
     logger.debug(`Using agent: ${agentImplementation.label ?? cliArguments.agent}`);
 
     // Set agent config.
     appConfig.agent = agentImplementation;
+    // Set workspace config
+    appConfig.workspace = workspace;
 
     return {
       agentServerInitOptions: {

@@ -75,11 +75,13 @@ export async function startInteractiveWebUI(
     const modelId = appConfig.model?.id;
 
     const boxContent = [
-      brandGradient.multiline(`🎉 ${server.getCurrentAgentName()} is available at: `, {
-        interpolation: 'hsv',
-      }) + chalk.underline(brandGradient(serverUrl)),
+      `🎉 ${chalk.underline(chalk.bgBlue(` ${chalk.bold(server.getCurrentAgentName())} `))}` +
+        brandGradient.multiline(` is available at: `, {
+          interpolation: 'hsv',
+        }) +
+        chalk.underline(brandGradient(serverUrl)),
       '',
-      `📁 ${chalk.gray('Workspace:')} ${brandGradient(workspaceDir)} ${chalk.dim('(browse at /')}`,
+      `📁 ${chalk.gray('Workspace:')} ${brandGradient(workspaceDir)}`,
       '',
       `🤖 ${chalk.gray('Model:')} ${appConfig.model?.provider ? brandGradient(`${provider} | ${modelId}`) : chalk.gray('Not specified')}`,
     ].join('\n');
