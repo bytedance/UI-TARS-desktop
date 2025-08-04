@@ -114,7 +114,7 @@ importers:
         version: link:../../gui-agent/operator-browser
       '@mcp-agent/core':
         specifier: workspace:*
-        version: link:../../mcp-agent
+        version: link:../../tarko/mcp-agent
       '@multimodal/agent':
         specifier: workspace:*
         version: link:../../tarko/agent
@@ -138,7 +138,7 @@ importers:
     dependencies:
       '@mcp-agent/interface':
         specifier: workspace:*
-        version: link:../../mcp-agent-interface
+        version: link:../../tarko/mcp-agent-interface
       '@multimodal/agio':
         specifier: workspace:*
         version: link:../../tarko/agio
@@ -224,53 +224,6 @@ importers:
       vitest:
         specifier: ^3.0.2
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
-
-  mcp-agent:
-    dependencies:
-      '@agent-infra/logger':
-        specifier: 0.0.2-beta.2
-        version: 0.0.2-beta.2
-      '@agent-infra/mcp-client':
-        specifier: 1.1.6-beta.3
-        version: 1.1.6-beta.3
-      '@mcp-agent/interface':
-        specifier: workspace:*
-        version: link:../mcp-agent-interface
-      '@modelcontextprotocol/sdk':
-        specifier: ^1.12.1
-        version: 1.12.1
-      '@multimodal/agent':
-        specifier: workspace:*
-        version: link:../tarko/agent
-      '@multimodal/agent-snapshot':
-        specifier: workspace:*
-        version: link:../tarko/agent-snapshot
-    devDependencies:
-      '@rslib/core':
-        specifier: 0.10.0
-        version: 0.10.0(typescript@5.8.3)
-      '@types/node':
-        specifier: 22.15.30
-        version: 22.15.30
-      typescript:
-        specifier: ^5.5.3
-        version: 5.8.3
-
-  mcp-agent-interface:
-    dependencies:
-      '@multimodal/agent-interface':
-        specifier: workspace:*
-        version: link:../tarko/agent-interface
-    devDependencies:
-      '@rslib/core':
-        specifier: 0.10.0
-        version: 0.10.0(typescript@5.8.3)
-      '@types/node':
-        specifier: 22.15.30
-        version: 22.15.30
-      typescript:
-        specifier: ^5.5.3
-        version: 5.8.3
 
   pnpm-toolkit:
     dependencies:
@@ -822,6 +775,53 @@ importers:
       '@types/mime-types':
         specifier: 2.1.4
         version: 2.1.4
+
+  tarko/mcp-agent:
+    dependencies:
+      '@agent-infra/logger':
+        specifier: 0.0.2-beta.2
+        version: 0.0.2-beta.2
+      '@agent-infra/mcp-client':
+        specifier: 1.1.6-beta.3
+        version: 1.1.6-beta.3
+      '@mcp-agent/interface':
+        specifier: workspace:*
+        version: link:../mcp-agent-interface
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.12.1
+        version: 1.12.1
+      '@multimodal/agent':
+        specifier: workspace:*
+        version: link:../agent
+      '@multimodal/agent-snapshot':
+        specifier: workspace:*
+        version: link:../agent-snapshot
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.10.0
+        version: 0.10.0(typescript@5.8.3)
+      '@types/node':
+        specifier: 22.15.30
+        version: 22.15.30
+      typescript:
+        specifier: ^5.5.3
+        version: 5.8.3
+
+  tarko/mcp-agent-interface:
+    dependencies:
+      '@multimodal/agent-interface':
+        specifier: workspace:*
+        version: link:../agent-interface
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.10.0
+        version: 0.10.0(typescript@5.8.3)
+      '@types/node':
+        specifier: 22.15.30
+        version: 22.15.30
+      typescript:
+        specifier: ^5.5.3
+        version: 5.8.3
 
   tarko/model-provider:
     dependencies:
@@ -9874,9 +9874,6 @@ packages:
     peerDependencies:
       zod: ^3.24.1
 
-  zod@3.24.2:
-    resolution: {integrity: sha512-lY7CDW43ECgW9u1TcT3IoXHflywfVqDYze4waEz812jR/bZ8FHDsl7pFQoSZTz5N+2NqRXs8GBwnAwo3ZNxqhQ==}
-
   zod@3.25.36:
     resolution: {integrity: sha512-eRFS3i8T0IrpGdL8HQyqFAugGOn7jOjyGgGdtv5NY4Wkhi7lJDk732bNZ609YMIGFbLoaj6J69O1Mura23gfIw==}
 
@@ -9933,7 +9930,7 @@ snapshots:
       '@agent-infra/mcp-shared': 1.1.6-beta.3
       '@modelcontextprotocol/sdk': 1.12.1
       uuid: 11.1.0
-      zod: 3.24.2
+      zod: 3.25.36
     transitivePeerDependencies:
       - supports-color
 
@@ -23835,8 +23832,6 @@ snapshots:
   zod-to-json-schema@3.24.3(zod@3.25.36):
     dependencies:
       zod: 3.25.36
-
-  zod@3.24.2: {}
 
   zod@3.25.36: {}
 
