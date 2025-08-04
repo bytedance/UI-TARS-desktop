@@ -22,7 +22,7 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@multimodal/model-provider": "workspace:*",
+    "@tarko/model-provider": "workspace:*",
     "boxen": "4",
     "cac": "^6.5.10",
     "chalk": "2.4.1",

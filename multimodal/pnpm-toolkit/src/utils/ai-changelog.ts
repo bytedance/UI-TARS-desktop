@@ -163,7 +163,7 @@ export class AIChangelogGenerator {
       };
     }
 
-    const { createLLMClient, ModelResolver } = await import('@multimodal/model-provider');
+    const { createLLMClient, ModelResolver } = await import('@tarko/model-provider');
 
     // Set up LLM client
     const resolver = new ModelResolver({

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ModelResolver, ResolvedModel } from '@multimodal/model-provider';
+import { ModelResolver, ResolvedModel } from '@tarko/model-provider';
 import { LLMRequestHookPayload } from '@tarko/agent-interface';
 import { getLogger } from '@multimodal/shared-utils';
 import { getLLMClient } from '../agent';

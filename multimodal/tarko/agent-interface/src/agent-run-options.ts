@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ChatCompletionContentPart, ModelProviderName } from '@multimodal/model-provider/types';
+import { ChatCompletionContentPart, ModelProviderName } from '@tarko/model-provider/types';
 import { ToolCallEngineType } from './tool-call-engine';
 
 /**

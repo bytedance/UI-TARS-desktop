@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Agent, Tool, z, PrepareRequestContext, PrepareRequestResult } from '../../../src';
-import { OpenAI } from '@multimodal/model-provider';
+import { OpenAI } from '@tarko/model-provider';
 import { setupAgentTest } from './utils/testUtils';
 
 describe('Agent Execution Tools Cleanup', () => {

@@ -6,7 +6,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AgentSnapshotNormalizer } from '../../../../agent-snapshot';
 import { Agent, Tool, AgentStatus, ChatCompletionMessageToolCall, z } from '../../../src';
-import { OpenAI } from '@multimodal/model-provider';
+import { OpenAI } from '@tarko/model-provider';
 import { createTestAgent, setupAgentTest } from './utils/testUtils';
 
 const normalizer = new AgentSnapshotNormalizer({});

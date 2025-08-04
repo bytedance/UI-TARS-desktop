@@ -19,8 +19,8 @@ export { getLogger, LogLevel, ConsoleLogger } from '@multimodal/shared-utils';
 // Export utils
 export * from './utils';
 
-export { ModelResolver } from '@multimodal/model-provider';
-export type { ResolvedModel } from '@multimodal/model-provider';
+export { ModelResolver } from '@tarko/model-provider';
+export type { ResolvedModel } from '@tarko/model-provider';
 
 // Export constructor type for convenience
 export type { TConstructor } from '@tarko/agent-interface';

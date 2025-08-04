@@ -27,7 +27,7 @@
   "dependencies": {
     "@agent-infra/logger": "0.0.2-beta.2",
     "@tarko/llm-client": "workspace:*",
-    "@multimodal/model-provider": "workspace:*"
+    "@tarko/model-provider": "workspace:*"
   },
   "devDependencies": {
     "@rslib/core": "0.10.0",

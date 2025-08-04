@@ -23,7 +23,7 @@ import {
   LLMReasoningOptions,
   OpenAI,
   ChatCompletionMessageToolCall,
-} from '@multimodal/model-provider';
+} from '@tarko/model-provider';
 import { getLogger } from '@multimodal/shared-utils';
 import { ToolProcessor } from './tool-processor';
 import { StructuredOutputsToolCallEngine } from '../../tool-call-engine';

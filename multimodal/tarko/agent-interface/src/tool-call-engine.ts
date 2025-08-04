@@ -11,7 +11,7 @@ import type {
   ChatCompletionCreateParams,
   ChatCompletionMessageToolCall,
   ChatCompletionAssistantMessageParam,
-} from '@multimodal/model-provider/types';
+} from '@tarko/model-provider/types';
 import { Tool } from './tool';
 import { AgentEventStream } from './agent-event-stream';
 

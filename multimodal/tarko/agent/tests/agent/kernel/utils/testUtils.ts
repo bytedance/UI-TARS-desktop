@@ -3,7 +3,7 @@
 import { vi, beforeEach, afterEach } from 'vitest';
 import { Agent, AgentEventStream } from '../../../../src';
 import type { AgentOptions } from '../../../../src';
-import { ChatCompletionMessageToolCall } from '@multimodal/model-provider';
+import { ChatCompletionMessageToolCall } from '@tarko/model-provider';
 
 /**
  * Utility type for deep partial objects

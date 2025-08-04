@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ModelProviderName } from '@multimodal/model-provider/types';
+import { ModelProviderName } from '@tarko/model-provider/types';
 import {
   ChatCompletion,
   ChatCompletionMessageParam,
   ChatCompletionMessageToolCall,
   ChatCompletionChunk,
   LLMRequest,
-} from '@multimodal/model-provider/types';
+} from '@tarko/model-provider/types';
 import { Tool } from './tool';
 import { AgentEventStream } from './agent-event-stream';
 

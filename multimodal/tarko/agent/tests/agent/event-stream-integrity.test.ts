@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach, MockInstance } from 'vitest';
 import { Agent, Tool } from '../../src';
-import { OpenAI } from '@multimodal/model-provider';
+import { OpenAI } from '@tarko/model-provider';
 import { setupAgentTest } from './kernel/utils/testUtils';
 
 describe('Event Stream Integrity Tests', () => {

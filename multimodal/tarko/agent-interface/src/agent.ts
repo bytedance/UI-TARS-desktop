@@ -24,9 +24,9 @@ import {
   ChatCompletion,
   RequestOptions,
   ChatCompletionChunk,
-} from '@multimodal/model-provider/types';
+} from '@tarko/model-provider/types';
 import { ToolCallResult } from './tool-call-engine';
-import { ResolvedModel } from '@multimodal/model-provider';
+import { ResolvedModel } from '@tarko/model-provider';
 import { AgentEventStream } from './agent-event-stream';
 import { Tool } from './tool';
 

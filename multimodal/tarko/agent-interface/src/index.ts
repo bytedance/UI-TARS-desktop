@@ -11,4 +11,4 @@ export * from './agent-constructor';
 export * from './tool';
 export * from './tool-call-engine';
 export * from './agent-event-stream';
-export * from '@multimodal/model-provider/types';
+export * from '@tarko/model-provider/types';

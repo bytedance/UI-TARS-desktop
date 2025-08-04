@@ -8,7 +8,7 @@
 import {
   ChatCompletionContentPart,
   ChatCompletionMessageToolCall,
-} from '@multimodal/model-provider/types';
+} from '@tarko/model-provider/types';
 import { AgentStatus } from './agent-instance';
 import { AgentRunObjectOptions, AgentRunOptions } from './agent-run-options';
 

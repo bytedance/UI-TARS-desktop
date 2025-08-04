@@ -6,7 +6,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Agent, Tool, AgentStatus } from '../../../src';
 import { AgentEventStreamProcessor } from '../../../src/agent/event-stream';
-import { OpenAI, z } from '@multimodal/model-provider';
+import { OpenAI, z } from '@tarko/model-provider';
 import { createTestAgent, setupAgentTest } from './utils/testUtils';
 
 describe('Agent', () => {

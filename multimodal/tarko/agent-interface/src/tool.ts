@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { z, JSONSchema7 } from '@multimodal/model-provider/types';
+import { z, JSONSchema7 } from '@tarko/model-provider/types';
 
 /**
  * Type guard to check if the parameter is a Zod schema

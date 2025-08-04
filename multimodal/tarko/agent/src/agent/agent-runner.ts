@@ -14,7 +14,7 @@ import {
   TConstructor,
 } from '@tarko/agent-interface';
 import { ToolManager } from './tool-manager';
-import { ResolvedModel, LLMReasoningOptions } from '@multimodal/model-provider';
+import { ResolvedModel, LLMReasoningOptions } from '@tarko/model-provider';
 import { getLogger } from '@multimodal/shared-utils';
 import type { Agent } from './agent';
 import {

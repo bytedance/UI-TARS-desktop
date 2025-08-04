@@ -227,7 +227,7 @@ importers:
 
   pnpm-toolkit:
     dependencies:
-      '@multimodal/model-provider':
+      '@tarko/model-provider':
         specifier: workspace:*
         version: link:../tarko/model-provider
       boxen:
@@ -306,7 +306,7 @@ importers:
       '@tarko/llm-client':
         specifier: workspace:*
         version: link:../llm-client
-      '@multimodal/model-provider':
+      '@tarko/model-provider':
         specifier: workspace:*
         version: link:../model-provider
       '@multimodal/shared-utils':
@@ -437,7 +437,7 @@ importers:
       '@tarko/llm-client':
         specifier: workspace:*
         version: link:../llm-client
-      '@multimodal/model-provider':
+      '@tarko/model-provider':
         specifier: workspace:*
         version: link:../model-provider
     devDependencies:

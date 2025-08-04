@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Agent, Tool, z, AgentEventStream } from '../../src';
-import { OpenAI, ChatCompletionChunk } from '@multimodal/model-provider';
+import { OpenAI, ChatCompletionChunk } from '@tarko/model-provider';
 import { sleep } from './kernel/utils/testUtils';
 
 describe('Streaming Tool Call Events Configuration', () => {

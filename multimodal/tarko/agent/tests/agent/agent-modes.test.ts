@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { Agent, AgentStatus, AgentEventStream } from '../../src';
-import { ChatCompletionChunk, OpenAI } from '@multimodal/model-provider';
+import { ChatCompletionChunk, OpenAI } from '@tarko/model-provider';
 import { sleep } from './kernel/utils/testUtils';
 
 describe('Agent Return Value Integrity Tests', () => {

@@ -35,7 +35,7 @@ import {
   OpenAI,
   RequestOptions,
   ChatCompletionChunk,
-} from '@multimodal/model-provider';
+} from '@tarko/model-provider';
 import { getLogger, LogLevel, rootLogger } from '@multimodal/shared-utils';
 import { AgentExecutionController } from './execution-controller';
 import { getLLMClient } from './llm-client';

@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { getLogger } from '@multimodal/shared-utils';
-import { ResolvedModel } from '@multimodal/model-provider';
-import { createLLMClient, LLMReasoningOptions, LLMRequest } from '@multimodal/model-provider';
+import { ResolvedModel } from '@tarko/model-provider';
+import { createLLMClient, LLMReasoningOptions, LLMRequest } from '@tarko/model-provider';
 
 const logger = getLogger('ModelProvider');
 
