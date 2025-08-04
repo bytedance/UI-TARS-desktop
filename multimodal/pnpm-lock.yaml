@@ -200,37 +200,6 @@ importers:
         specifier: ^5.5.3
         version: 5.8.3
 
-  deep-research-agent:
-    dependencies:
-      '@agent-infra/browser':
-        specifier: 0.1.1
-        version: 0.1.1
-      '@agent-infra/browser-search':
-        specifier: 0.0.5
-        version: 0.0.5
-      '@agent-infra/logger':
-        specifier: 0.0.2-beta.2
-        version: 0.0.2-beta.2
-      '@agent-infra/shared':
-        specifier: 0.0.2
-        version: 0.0.2
-      '@modelcontextprotocol/sdk':
-        specifier: ^1.12.1
-        version: 1.12.1
-      '@multimodal/agent':
-        specifier: workspace:*
-        version: link:../tarko/agent
-    devDependencies:
-      '@rslib/core':
-        specifier: 0.10.0
-        version: 0.10.0(typescript@5.8.3)
-      '@types/node':
-        specifier: 22.15.30
-        version: 22.15.30
-      typescript:
-        specifier: ^5.5.3
-        version: 5.8.3
-
   gui-agent/operator-browser:
     dependencies:
       '@agent-infra/browser':
