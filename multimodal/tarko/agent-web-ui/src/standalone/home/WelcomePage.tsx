@@ -6,7 +6,7 @@ import { useSession } from '@/common/hooks/useSession';
 
 const WelcomePage: React.FC = () => {
   const navigate = useNavigate();
-  const { createSession, sendMessage, sessions } = useSession();
+  const { createSession, sendMessage, sessions, agentInfo } = useSession();
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isDirectChatLoading, setIsDirectChatLoading] = useState(false);
@@ -120,10 +120,10 @@ const WelcomePage: React.FC = () => {
               whileTap={{ scale: 0.95 }}
               src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png"
               className="w-8 h-8 rounded-xl flex items-center justify-center mx-auto text-white dark:text-gray-900 cursor-pointer mr-3"
-              alt="Agent TARS"
+              alt="Tarko"
             />
             <span className="text-xl font-display font-bold text-gray-900 dark:text-gray-100">
-              Agent TARS
+              {agentInfo.name || 'Tarko'}
             </span>
           </div>
         </div>
