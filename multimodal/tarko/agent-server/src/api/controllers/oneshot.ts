@@ -52,6 +52,8 @@ export async function createAndQuery(req: Request, res: Response) {
       sessionId,
       server.workspacePath,
       isolateSessions,
+      false,
+      server.directories.defaultWorkspaceDir,
     );
 
     // Create session with custom AGIO provider if available
@@ -128,6 +130,8 @@ export async function createAndStreamingQuery(req: Request, res: Response) {
       sessionId,
       server.workspacePath,
       isolateSessions,
+      false,
+      server.directories.defaultWorkspaceDir,
     );
 
     // Create session with custom AGIO provider if available

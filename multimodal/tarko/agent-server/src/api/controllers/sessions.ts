@@ -5,7 +5,6 @@
 
 import { Request, Response } from 'express';
 import { nanoid } from 'nanoid';
-import { AgentServer } from '../../server';
 import { ensureWorkingDirectory } from '../../utils/workspace';
 import { SessionMetadata } from '../../storage';
 import { AgentSession } from '../../core';
@@ -55,6 +54,8 @@ export async function createSession(req: Request, res: Response) {
       sessionId,
       server.workspacePath,
       isolateSessions,
+      false,
+      server.directories.defaultWorkspaceDir,
     );
 
     // Pass custom AGIO provider if available

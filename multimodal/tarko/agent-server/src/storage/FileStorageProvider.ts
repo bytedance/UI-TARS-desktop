@@ -28,7 +28,7 @@ export class FileStorageProvider implements StorageProvider {
   private initialized = false;
   public readonly dbPath: string;
 
-  constructor(storagePath?: string, globalStorageDir = TARKO_CONSTANTS.GLOBAL_STORAGE_DIR) {
+  constructor(storagePath?: string, globalStorageDir: string = TARKO_CONSTANTS.GLOBAL_STORAGE_DIR) {
     // Default to the user's home directory
     const defaultPath = process.env.HOME || process.env.USERPROFILE || '.';
     const baseDir = storagePath || path.join(defaultPath, globalStorageDir);

@@ -13,6 +13,7 @@ import { WorkspacePathManager } from './workspace-path';
  * @param workspacePath optional path to workspace directory (defaults to CWD/agent-tars-workspace)
  * @param isolateSessions whether to create isolated session directories (default: false)
  * @param isDebug whether to log debug information
+ * @param defaultWorkspaceDir optional default workspace directory name
  * @returns Path to the working directory
  */
 export function ensureWorkingDirectory(
@@ -20,6 +21,7 @@ export function ensureWorkingDirectory(
   workspacePath?: string,
   isolateSessions = false,
   isDebug = false,
+  defaultWorkspaceDir?: string,
 ): string {
   try {
     // Resolve the workspace path using the workspace path manager
@@ -29,6 +31,7 @@ export function ensureWorkingDirectory(
       workspacePath,
       namespace,
       isolateSessions,
+      defaultWorkspaceDir,
     );
 
     // Ensure the directory exists

@@ -15,21 +15,17 @@ import { TARKO_CONSTANTS } from '@tarko/agent-server-interface';
  */
 export class WorkspacePathManager {
   /**
-   * Default workspace directory name
-   */
-  private static readonly DEFAULT_WORKSPACE_DIR = TARKO_CONSTANTS.DEFAULT_WORKSPACE_DIR;
-
-  /**
    * Resolve a workspace path, supporting various formats:
    * - Relative paths: './workspace', 'workspace'
    * - Home directory: '~/.agent-tars', '~/workspace'
    * - Absolute paths: '/path/to/workspace'
-   * If no path is provided, uses the default path: 'cwd/agent-tars-workspace'
+   * If no path is provided, uses the provided default or fallback to constant
    *
    * @param baseDir The base directory to resolve relative paths from (usually cwd)
    * @param workspacePath Optional workspace path specification
    * @param namespace Optional workspace namespace for isolation (e.g. session ID)
    * @param isolateSessions Whether to create isolated session directories
+   * @param defaultWorkspaceDir Default workspace directory name to use when no path is provided
    * @returns Resolved absolute path to the workspace directory
    */
   public static resolveWorkspacePath(
@@ -37,12 +33,14 @@ export class WorkspacePathManager {
     workspacePath?: string,
     namespace?: string,
     isolateSessions?: boolean,
+    defaultWorkspaceDir?: string,
   ): string {
     let resolvedPath: string;
 
-    // If no workspace path provided, use default
+    // If no workspace path provided, use provided default or fallback to constant
     if (!workspacePath) {
-      resolvedPath = path.join(baseDir, this.DEFAULT_WORKSPACE_DIR);
+      const workspaceDirName = defaultWorkspaceDir || TARKO_CONSTANTS.DEFAULT_WORKSPACE_DIR;
+      resolvedPath = path.join(baseDir, workspaceDirName);
     }
     // Handle home directory paths (starting with ~)
     else if (workspacePath.startsWith('~')) {
