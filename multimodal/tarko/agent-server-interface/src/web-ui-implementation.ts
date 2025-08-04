@@ -18,8 +18,10 @@ export type AgentWebUIImplementationType = 'static' | 'remote';
 export interface BaseAgentWebUIImplementation {
   /**
    * Agent implementation type
+   *
+   * @defaultValue static
    */
-  type: AgentWebUIImplementationType;
+  type?: AgentWebUIImplementationType;
   /**
    * Web UI title
    *
@@ -42,7 +44,7 @@ export interface BaseAgentWebUIImplementation {
  * Static implementation
  */
 export interface StaticAgentWebUIImplementation extends BaseAgentWebUIImplementation {
-  type: 'static';
+  type?: 'static';
   /**
    * Web UI Static Path, example implementation: `@tarko/web-ui`.
    */

@@ -65,9 +65,7 @@ export async function startInteractiveWebUI(
     // Define brand colors
     const brandColor1 = '#4d9de0';
     const brandColor2 = '#7289da';
-
     const brandGradient = gradient(brandColor1, brandColor2);
-
     const workspaceDir = toUserFriendlyPath(server.getCurrentWorkspace());
     const provider = appConfig.model?.provider;
     const modelId = appConfig.model?.id;
