@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { MCPAgent } from '../src';
-import { TEST_MODEL_PROVIDERS } from '@multimodal/agent/_config';
+import { TEST_MODEL_PROVIDERS } from '@tarko/agent/_config';
 
 async function main() {
   const agent = new MCPAgent({

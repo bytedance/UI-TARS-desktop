@@ -90,7 +90,7 @@ export function addCommonOptions(command: Command): Command {
                             Built-in agents or custom agents can be specified.
                             Custom agents should provide path to a module that exports an Agent class.
                               
-                            The agent must implement the IAgent interface from @multimodal/agent-interface
+                            The agent must implement the IAgent interface from @tarko/agent-interface
       `,
     );
 

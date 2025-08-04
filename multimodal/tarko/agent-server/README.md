@@ -80,7 +80,7 @@ The server uses Express.js to provide an HTTP interface and Socket.IO to impleme
 ### Installation
 
 ```bash
-npm install @multimodal/agent-server
+npm install @tarko/agent-server
 ```
 
 ### curl examples

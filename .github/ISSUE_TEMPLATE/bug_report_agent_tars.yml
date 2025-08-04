@@ -24,8 +24,8 @@ body:
       - label: Agent TARS CLI (`@agent-tars/server`)
       - label: Agent TARS Server (`@agent-tars/server`)
       - label: Agent TARS (`@agent-tars/core`)
-      - label: MCP Agent (`@mcp-agent/core`)
-      - label: Agent Kernel (`@multimodal/agent`)
+      - label: MCP Agent (`@tarko/mcp-agent`)
+      - label: Agent Kernel (`@tarko/agent`)
       - label: Other (please specify in description)
 - type: checkboxes
   attributes:

@@ -1,6 +1,6 @@
 # @tarko/agent-snapshot
 
-A snapshot-based agent test framework for `@multimodal/agent` based Agents",
+A snapshot-based agent test framework for `@tarko/agent` based Agents",
 
 ## Installation
 

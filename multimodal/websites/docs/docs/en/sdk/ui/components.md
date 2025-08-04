@@ -1,1 +1,1 @@
-# @multimodal/components
+# @tarko/ui

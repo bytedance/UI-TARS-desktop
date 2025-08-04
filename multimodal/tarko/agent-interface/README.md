@@ -1,16 +1,16 @@
-# @multimodal/agent-interface
+# @tarko/agent-interface
 
-Standard protocol, types, event stream and other specifications for `@multimodal/agent`
+Standard protocol, types, event stream and other specifications for `@tarko/agent`
 
 ## Installation
 
 ```bash
-npm install @multimodal/agent-interface
+npm install @tarko/agent-interface
 ```
 
 ## Overview
 
-The `@multimodal/agent-interface` package provides the core types, interfaces, and event stream specifications for building intelligent agents in the `@multimodal/agent` framework. It serves as the foundation for agent communication, tool integration, and real-time event processing.
+The `@tarko/agent-interface` package provides the core types, interfaces, and event stream specifications for building intelligent agents in the `@tarko/agent` framework. It serves as the foundation for agent communication, tool integration, and real-time event processing.
 
 ## Key Components
 

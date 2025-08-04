@@ -1,16 +1,16 @@
-# @multimodal/agio
+# @tarko/agio
 
 ## Overview
 
 **Agio** (**Ag**ent **I**nsights and **O**bservations) is a standardized multimodal AI Agent Server monitoring protocol for server-side agent operation monitoring and analytics. It provides a consistent event schema for tracking agent behavior, performance metrics, and usage patterns.
 
-It's designed for [@multimodal/agent](https://www.npmjs.com/@multimodal/agent) and all of agents built on `@multimodal/agent`, such as [@mcp-agent/core](https://www.npmjs.com/package/@mcp-agent/core), [@agent-tars/core](https://www.npmjs.com/@agent-tars/core) etc.
+It's designed for [@tarko/agent](https://www.npmjs.com/@tarko/agent) and all of agents built on `@tarko/agent`, such as [@tarko/mcp-agent](https://www.npmjs.com/package/@tarko/mcp-agent), [@agent-tars/core](https://www.npmjs.com/@agent-tars/core) etc.
 
 ## Motivation
 
 The goal of this protocol is to provide standardized server-side monitoring for Agent operations, allowing service providers to focus on implementing monitoring infrastructure rather than designing data schemas.
 
-While Agio shares some conceptual similarities with the `Agent Event Stream` in [@multimodal/agent](https://www.npmjs.com/@multimodal/agent), they serve distinct purposes:
+While Agio shares some conceptual similarities with the `Agent Event Stream` in [@tarko/agent](https://www.npmjs.com/@tarko/agent), they serve distinct purposes:
 
 | Feature | Agent Event Stream | Agio |
 | --- | --- | --- |

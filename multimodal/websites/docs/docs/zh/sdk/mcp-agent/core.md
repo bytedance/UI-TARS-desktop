@@ -1,1 +1,1 @@
-# @mcp-agent/core
+# @tarko/mcp-agent

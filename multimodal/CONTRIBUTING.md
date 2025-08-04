@@ -41,7 +41,7 @@ pnpm dev
 
 ### 2.3 Debugging Core Packages
 
-When you're working on lower-level core packages (such as `@multimodal/agent`), it's recommended to use the following command:
+When you're working on lower-level core packages (such as `@tarko/agent`), it's recommended to use the following command:
 
 ```bash
 pnpm dev:core

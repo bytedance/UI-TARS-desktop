@@ -425,7 +425,7 @@ tarko --debug run "test" --include-logs
 
 详细的 API 文档请参考 TypeScript 类型定义：
 
-- `@multimodal/agent-interface` - Agent 核心接口
+- `@tarko/agent-interface` - Agent 核心接口
 - `@tarko/agent-server-interface` - 服务器接口  
 - `@tarko/agent-cli` - CLI 框架接口
 

@@ -1,10 +1,10 @@
-# @multimodal/agent-interface
+# @tarko/agent-interface
 
-Standard protocol, types, event stream and other specifications for `@multimodal/agent`
+Standard protocol, types, event stream and other specifications for `@tarko/agent`
 
 ## Installation
 
 ```bash
-npm install @multimodal/agent-interface
+npm install @tarko/agent-interface
 ```
 
