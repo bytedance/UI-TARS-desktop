@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { deepMerge, DeepPartial } from '@multimodal/shared-utils';
+import { deepMerge, DeepPartial } from '@tarko/shared-utils';
 import { AgentTARSOptions } from '../types';
 
 /**

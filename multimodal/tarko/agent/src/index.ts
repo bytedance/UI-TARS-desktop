@@ -14,7 +14,7 @@ export * from './agent';
 export * from './tool-call-engine';
 
 // Export logger
-export { getLogger, LogLevel, ConsoleLogger } from '@multimodal/shared-utils';
+export { getLogger, LogLevel, ConsoleLogger } from '@tarko/shared-utils';
 
 // Export utils
 export * from './utils';

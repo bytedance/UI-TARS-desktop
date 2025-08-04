@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { deepMerge } from '@multimodal/shared-utils';
+import { deepMerge } from '@tarko/shared-utils';
 import { loadAgentConfig } from '../src/config/loader';
 import type { MockedFunction } from 'vitest';
 import type { Response } from 'node-fetch';

@@ -4,7 +4,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import { getLogger } from '@multimodal/shared-utils';
+import { getLogger } from '@tarko/shared-utils';
 import { AgentServer } from '../../server';
 import { AgentSession } from '../../core';
 

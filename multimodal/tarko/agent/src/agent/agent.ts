@@ -36,7 +36,7 @@ import {
   RequestOptions,
   ChatCompletionChunk,
 } from '@tarko/model-provider';
-import { getLogger, LogLevel, rootLogger } from '@multimodal/shared-utils';
+import { getLogger, LogLevel, rootLogger } from '@tarko/shared-utils';
 import { AgentExecutionController } from './execution-controller';
 import { getLLMClient } from './llm-client';
 import { getToolCallEngineForProvider } from '../tool-call-engine/engine-selector';

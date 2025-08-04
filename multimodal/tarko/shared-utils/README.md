@@ -1,4 +1,4 @@
-# @multimodal/shared-utils
+# @tarko/shared-utils
 
 Shared utilities for Tarko
 

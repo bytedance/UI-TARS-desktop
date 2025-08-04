@@ -5,7 +5,7 @@
  */
 
 import { AgentEventStream } from '@tarko/agent-interface';
-import { getLogger } from '@multimodal/shared-utils';
+import { getLogger } from '@tarko/shared-utils';
 
 /**
  * StreamAdapter - Adapts between standard events and streaming iterations

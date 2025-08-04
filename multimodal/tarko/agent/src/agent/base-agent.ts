@@ -17,7 +17,7 @@ import {
   PrepareRequestContext,
   PrepareRequestResult,
 } from '@tarko/agent-interface';
-import { getLogger } from '@multimodal/shared-utils';
+import { getLogger } from '@tarko/shared-utils';
 
 /**
  * BaseAgent - Handles all Agent lifecycle-related methods

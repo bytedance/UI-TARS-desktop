@@ -20,7 +20,7 @@ import {
   FinishReason,
 } from '@tarko/agent-interface';
 import { zodToJsonSchema } from '../utils';
-import { getLogger } from '@multimodal/shared-utils';
+import { getLogger } from '@tarko/shared-utils';
 import { buildToolCallResultMessages } from './utils';
 import { jsonrepair } from 'jsonrepair';
 

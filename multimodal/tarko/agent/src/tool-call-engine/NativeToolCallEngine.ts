@@ -1,5 +1,5 @@
 import { zodToJsonSchema } from '../utils';
-import { getLogger } from '@multimodal/shared-utils';
+import { getLogger } from '@tarko/shared-utils';
 import {
   Tool,
   ToolCallEngine,

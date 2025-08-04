@@ -22,7 +22,7 @@
     "benchmark:crawl": "cd benchmark/crawl && pnpm start"
   },
   "dependencies": {
-    "@multimodal/shared-utils": "workspace:*",
+    "@tarko/shared-utils": "workspace:*",
     "@tarko/shared-media-utils": "workspace:*"
   },
   "devDependencies": {

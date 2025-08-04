@@ -6,7 +6,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { AgentEventStream } from '@tarko/agent-interface';
-import { getLogger } from '@multimodal/shared-utils';
+import { getLogger } from '@tarko/shared-utils';
 
 /**
  * Default event stream options

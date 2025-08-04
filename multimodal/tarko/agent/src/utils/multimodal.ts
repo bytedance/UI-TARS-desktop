@@ -9,7 +9,7 @@ import type {
   MultimodalToolCallResult,
   ToolCallResult,
 } from '@tarko/agent-interface';
-import { getLogger } from '@multimodal/shared-utils';
+import { getLogger } from '@tarko/shared-utils';
 
 const logger = getLogger('Multimodal');
 

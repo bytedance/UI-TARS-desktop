@@ -4,7 +4,7 @@
  */
 
 import { AgentEventStream, ToolCallEngine } from '@tarko/agent-interface';
-import { getLogger } from '@multimodal/shared-utils';
+import { getLogger } from '@tarko/shared-utils';
 import { ResolvedModel } from '@tarko/model-provider';
 import { LLMProcessor } from './llm-processor';
 import { ToolProcessor } from './tool-processor';

@@ -15,7 +15,7 @@ import {
 } from '@tarko/agent-interface';
 import { ToolManager } from './tool-manager';
 import { ResolvedModel, LLMReasoningOptions } from '@tarko/model-provider';
-import { getLogger } from '@multimodal/shared-utils';
+import { getLogger } from '@tarko/shared-utils';
 import type { Agent } from './agent';
 import {
   NativeToolCallEngine,

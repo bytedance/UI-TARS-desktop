@@ -1,4 +1,4 @@
-import { getLogger } from '@multimodal/shared-utils';
+import { getLogger } from '@tarko/shared-utils';
 import { AgentStatus } from '@tarko/agent-interface';
 
 /**

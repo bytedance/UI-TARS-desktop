@@ -12,7 +12,7 @@ import {
   ToolCallResult,
 } from '@tarko/agent-interface';
 import { convertToMultimodalToolCallResult } from '../utils/multimodal';
-import { getLogger } from '@multimodal/shared-utils';
+import { getLogger } from '@tarko/shared-utils';
 import { isTest } from '../utils/env';
 
 /**

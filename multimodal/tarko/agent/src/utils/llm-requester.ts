@@ -6,7 +6,7 @@
 
 import { ModelResolver, ResolvedModel } from '@tarko/model-provider';
 import { LLMRequestHookPayload } from '@tarko/agent-interface';
-import { getLogger } from '@multimodal/shared-utils';
+import { getLogger } from '@tarko/shared-utils';
 import { getLLMClient } from '../agent';
 import fs from 'fs';
 

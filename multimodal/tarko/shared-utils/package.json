@@ -1,5 +1,5 @@
 {
-  "name": "@multimodal/shared-utils",
+  "name": "@tarko/shared-utils",
   "version": "0.3.0-beta.1",
   "description": "Core and tiny shared utilities for Tarko",
   "main": "dist/index.js",

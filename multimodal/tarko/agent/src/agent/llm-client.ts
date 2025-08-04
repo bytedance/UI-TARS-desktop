@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { getLogger } from '@multimodal/shared-utils';
+import { getLogger } from '@tarko/shared-utils';
 import { ResolvedModel } from '@tarko/model-provider';
 import { createLLMClient, LLMReasoningOptions, LLMRequest } from '@tarko/model-provider';
 

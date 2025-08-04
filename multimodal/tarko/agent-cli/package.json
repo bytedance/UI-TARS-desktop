@@ -28,7 +28,7 @@
   "dependencies": {
     "@tarko/agent": "workspace:*",
     "@tarko/agent-server": "workspace:*",
-    "@multimodal/shared-utils": "workspace:*"
+    "@tarko/shared-utils": "workspace:*"
   },
   "devDependencies": {
     "@tarko/agent-interface": "workspace:*",

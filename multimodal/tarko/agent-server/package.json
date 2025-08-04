@@ -19,7 +19,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@multimodal/shared-utils": "workspace:*",
+    "@tarko/shared-utils": "workspace:*",
     "@tarko/shared-media-utils": "workspace:*"
   },
   "devDependencies": {

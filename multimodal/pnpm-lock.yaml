@@ -81,7 +81,7 @@ importers:
       '@tarko/shared-media-utils':
         specifier: workspace:*
         version: link:../../tarko/shared-media-utils
-      '@multimodal/shared-utils':
+      '@tarko/shared-utils':
         specifier: workspace:*
         version: link:../../tarko/shared-utils
     devDependencies:
@@ -309,7 +309,7 @@ importers:
       '@tarko/model-provider':
         specifier: workspace:*
         version: link:../model-provider
-      '@multimodal/shared-utils':
+      '@tarko/shared-utils':
         specifier: workspace:*
         version: link:../shared-utils
       '@tarko/agent-interface':
@@ -358,7 +358,7 @@ importers:
 
   tarko/agent-cli:
     dependencies:
-      '@multimodal/shared-utils':
+      '@tarko/shared-utils':
         specifier: workspace:*
         version: link:../shared-utils
       '@tarko/agent':
@@ -462,7 +462,7 @@ importers:
       '@tarko/shared-media-utils':
         specifier: workspace:*
         version: link:../shared-media-utils
-      '@multimodal/shared-utils':
+      '@tarko/shared-utils':
         specifier: workspace:*
         version: link:../shared-utils
     devDependencies:

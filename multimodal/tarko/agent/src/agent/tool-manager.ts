@@ -4,7 +4,7 @@
  */
 
 import { Tool } from '@tarko/agent-interface';
-import { ConsoleLogger } from '@multimodal/shared-utils';
+import { ConsoleLogger } from '@tarko/shared-utils';
 
 /**
  * Manages tools for the Agent, handling registration, lookup, and execution
