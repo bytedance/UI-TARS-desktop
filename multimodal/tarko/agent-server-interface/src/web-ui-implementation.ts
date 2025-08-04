@@ -55,7 +55,7 @@ export interface StaticAgentWebUIImplementation extends BaseAgentWebUIImplementa
  * Remote implementation (TODO)
  */
 export interface RemoteAgentWebUIImplementation extends BaseAgentWebUIImplementation {
-  type: 'remote';
+  type?: 'remote';
 }
 
 /**

@@ -9,8 +9,11 @@ import {
   ModelProviderName,
   AgentAppConfig,
   LogLevel,
+  isAgentWebUIImplementationType,
 } from '@tarko/agent-server-interface';
 import { resolveValue } from '../utils';
+import path from 'path';
+import { isTest } from '../../../agent/src/utils/env';
 
 /**
  * Handler for processing deprecated CLI options
@@ -88,6 +91,9 @@ export function buildAppConfig<
   // Apply CLI shortcuts and special handling
   applyLoggingShortcuts(config, { debug, quiet });
   applyServerConfiguration(config, { port });
+
+  // Apply WebUI defaults after all merging is complete
+  applyWebUIDefaults(config as AgentAppConfig);
 
   return config as U;
 }
@@ -211,5 +217,22 @@ function resolveModelSecrets(cliConfigProps: Partial<AgentAppConfig>): void {
     if (cliConfigProps.model.baseURL) {
       cliConfigProps.model.baseURL = resolveValue(cliConfigProps.model.baseURL, 'base URL');
     }
+  }
+}
+
+/**
+ * Apply WebUI configuration defaults
+ */
+function applyWebUIDefaults(config: AgentAppConfig): void {
+  if (!config.webui) {
+    config.webui = {};
+  }
+
+  if (!config.webui.type) {
+    config.webui.type = 'static';
+  }
+
+  if (isAgentWebUIImplementationType(config.webui, 'static') && !config.webui.staticPath) {
+    config.webui.staticPath = isTest() ? '/path/to/web-ui' : path.resolve(__dirname, '../static');
   }
 }

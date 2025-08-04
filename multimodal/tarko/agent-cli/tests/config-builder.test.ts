@@ -62,6 +62,10 @@ describe('buildAppConfig', () => {
             type: 'sqlite',
           },
         },
+        webui: {
+          staticPath: '/path/to/web-ui',
+          type: 'static',
+        },
       });
     });
 
@@ -317,6 +321,10 @@ describe('buildAppConfig', () => {
             type: 'sqlite',
           },
         },
+        webui: {
+          staticPath: '/path/to/web-ui',
+          type: 'static',
+        },
       });
     });
 
@@ -407,6 +415,10 @@ describe('buildAppConfig', () => {
           storage: {
             type: 'sqlite',
           },
+        },
+        webui: {
+          staticPath: '/path/to/web-ui',
+          type: 'static',
         },
       });
     });

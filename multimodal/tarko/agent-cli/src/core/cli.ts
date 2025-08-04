@@ -24,12 +24,6 @@ const DEFAULT_OPTIONS: Partial<AgentCLIInitOptions> = {
     buildTime: __BUILD_TIME__,
     gitHash: __GIT_HASH__,
   },
-  appConfig: {
-    webui: {
-      type: 'static',
-      staticPath: path.resolve(__dirname, '../static'),
-    },
-  },
 };
 
 /**
