@@ -1,5 +1,5 @@
 import { AgentEventStream } from '@tarko/agent-interface';
-import type { AgentServerVersionInfo } from '@agent-tars/interface';
+import type { AgentServerVersionInfo, AgentWebUIImplementation } from '@agent-tars/interface';
 
 /**
  * Session metadata interface
@@ -14,9 +14,13 @@ export interface SessionMetadata {
   tags?: string[];
 }
 
+/**
+ * FIXME: move to Agent Server.
+ */
 declare global {
   interface Window {
     AGENT_BASE_URL?: string;
+    AGENT_WEB_UI_CONFIG?: AgentWebUIImplementation;
     AGENT_REPLAY_MODE?: boolean;
     AGENT_SESSION_DATA?: SessionMetadata;
     AGENT_EVENT_STREAM?: AgentEventStream.Event[];
