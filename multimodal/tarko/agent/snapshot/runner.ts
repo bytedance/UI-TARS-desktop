@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// We do not directly depend on @multimodal/agent-snapshot to avoid circular dependencies.
+// We do not directly depend on @tarko/agent-snapshot to avoid circular dependencies.
 import { AgentSnapshotRunner, CaseConfig } from '../../agent-snapshot';
 import { resolve } from 'path';
 

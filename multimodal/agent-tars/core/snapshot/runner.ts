@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentSnapshotRunner } from '@multimodal/agent-snapshot';
+import { AgentSnapshotRunner } from '@tarko/agent-snapshot';
 import { resolve } from 'path';
-import { CaseConfig } from '@multimodal/agent-snapshot';
+import { CaseConfig } from '@tarko/agent-snapshot';
 
 // Base paths for better maintainability
 const ROOT_DIR = resolve(__dirname, '..');

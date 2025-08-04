@@ -1,7 +1,7 @@
 {
-  "name": "@multimodal/agent-snapshot",
+  "name": "@tarko/agent-snapshot",
   "version": "0.3.0-beta.1",
-  "description": "A snapshot-based agent test framework for `@multimodal/agent` based Agents",
+  "description": "A snapshot-based agent test framework for `@tarko/agent` based Agents",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",

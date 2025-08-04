@@ -115,15 +115,15 @@ importers:
       '@mcp-agent/core':
         specifier: workspace:*
         version: link:../../tarko/mcp-agent
-      '@tarko/agent':
-        specifier: workspace:*
-        version: link:../../tarko/agent
-      '@multimodal/agent-snapshot':
-        specifier: workspace:*
-        version: link:../../tarko/agent-snapshot
       '@rslib/core':
         specifier: 0.10.0
         version: 0.10.0(typescript@5.8.3)
+      '@tarko/agent':
+        specifier: workspace:*
+        version: link:../../tarko/agent
+      '@tarko/agent-snapshot':
+        specifier: workspace:*
+        version: link:../../tarko/agent-snapshot
       '@types/node':
         specifier: 22.15.30
         version: 22.15.30
@@ -303,9 +303,6 @@ importers:
 
   tarko/agent:
     dependencies:
-      '@tarko/agent-interface':
-        specifier: workspace:*
-        version: link:../agent-interface
       '@multimodal/llm-client':
         specifier: workspace:*
         version: link:../llm-client
@@ -315,6 +312,9 @@ importers:
       '@multimodal/shared-utils':
         specifier: workspace:*
         version: link:../shared-utils
+      '@tarko/agent-interface':
+        specifier: workspace:*
+        version: link:../agent-interface
       jsonrepair:
         specifier: 3.12.0
         version: 3.12.0
@@ -358,12 +358,12 @@ importers:
 
   tarko/agent-cli:
     dependencies:
-      '@tarko/agent':
-        specifier: workspace:*
-        version: link:../agent
       '@multimodal/shared-utils':
         specifier: workspace:*
         version: link:../shared-utils
+      '@tarko/agent':
+        specifier: workspace:*
+        version: link:../agent
       '@tarko/agent-server':
         specifier: workspace:*
         version: link:../agent-server
@@ -371,24 +371,24 @@ importers:
       '@clack/prompts':
         specifier: 0.11.0
         version: 0.11.0
-      '@tarko/agent-interface':
-        specifier: workspace:*
-        version: link:../agent-interface
       '@multimodal/agio':
         specifier: workspace:*
         version: link:../agio
       '@multimodal/config-loader':
         specifier: workspace:*
         version: link:../config-loader
-      '@multimodal/web-ui':
-        specifier: workspace:*
-        version: link:../agent-web-ui
       '@rslib/core':
         specifier: 0.10.0
         version: 0.10.0(typescript@5.8.3)
+      '@tarko/agent-interface':
+        specifier: workspace:*
+        version: link:../agent-interface
       '@tarko/agent-server-interface':
         specifier: workspace:*
         version: link:../agent-server-interface
+      '@tarko/web-ui':
+        specifier: workspace:*
+        version: link:../agent-web-ui
       '@types/gradient-string':
         specifier: 1.1.6
         version: 1.1.6
@@ -469,9 +469,6 @@ importers:
       '@agent-infra/shared':
         specifier: 0.0.2
         version: 0.0.2
-      '@multimodal/agent-snapshot':
-        specifier: workspace:*
-        version: link:../agent-snapshot
       '@multimodal/agio':
         specifier: workspace:*
         version: link:../agio
@@ -481,6 +478,9 @@ importers:
       '@tarko/agent-server-interface':
         specifier: workspace:*
         version: link:../agent-server-interface
+      '@tarko/agent-snapshot':
+        specifier: workspace:*
+        version: link:../agent-snapshot
       '@types/cors':
         specifier: ^2.8.17
         version: 2.8.18
@@ -517,12 +517,12 @@ importers:
 
   tarko/agent-server-interface:
     dependencies:
-      '@tarko/agent-interface':
-        specifier: workspace:*
-        version: link:../agent-interface
       '@multimodal/agio':
         specifier: workspace:*
         version: link:../agio
+      '@tarko/agent-interface':
+        specifier: workspace:*
+        version: link:../agent-interface
     devDependencies:
       '@rslib/core':
         specifier: 0.10.0
@@ -640,15 +640,15 @@ importers:
       '@agent-tars/interface':
         specifier: workspace:*
         version: link:../../agent-tars/interface
-      '@tarko/agent-interface':
-        specifier: workspace:*
-        version: link:../agent-interface
       '@rsbuild/core':
         specifier: 1.3.18
         version: 1.3.18
       '@rsbuild/plugin-react':
         specifier: 1.1.1
         version: 1.1.1(@rsbuild/core@1.3.18)
+      '@tarko/agent-interface':
+        specifier: workspace:*
+        version: link:../agent-interface
       '@types/react':
         specifier: ^18.2.75
         version: 18.3.23
@@ -793,7 +793,7 @@ importers:
       '@tarko/agent':
         specifier: workspace:*
         version: link:../agent
-      '@multimodal/agent-snapshot':
+      '@tarko/agent-snapshot':
         specifier: workspace:*
         version: link:../agent-snapshot
     devDependencies:
@@ -989,12 +989,12 @@ importers:
         specifier: ^3.4.17
         version: 3.4.17(ts-node@10.9.2(@types/node@18.19.105)(typescript@5.8.3))
     devDependencies:
-      '@tarko/agent':
-        specifier: workspace:*
-        version: link:../../tarko/agent
       '@rspress/plugin-client-redirects':
         specifier: 2.0.0-beta.16
         version: 2.0.0-beta.16(@rspress/runtime@2.0.0-beta.16)
+      '@tarko/agent':
+        specifier: workspace:*
+        version: link:../../tarko/agent
       '@types/node':
         specifier: ^18.11.17
         version: 18.19.105

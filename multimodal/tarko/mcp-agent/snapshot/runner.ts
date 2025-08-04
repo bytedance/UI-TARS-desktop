@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentSnapshotRunner, CaseConfig } from '@multimodal/agent-snapshot';
+import { AgentSnapshotRunner, CaseConfig } from '@tarko/agent-snapshot';
 import { resolve } from 'path';
 
 // Base paths for better maintainability

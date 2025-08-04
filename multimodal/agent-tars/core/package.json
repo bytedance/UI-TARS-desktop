@@ -37,7 +37,7 @@
     "@agent-infra/browser-search": "0.0.5",
     "@agent-infra/shared": "0.0.2",
     "@tarko/agent": "workspace:*",
-    "@multimodal/agent-snapshot": "workspace:*",
+    "@tarko/agent-snapshot": "workspace:*",
     "@rslib/core": "0.10.0",
     "@types/node": "22.15.30",
     "typescript": "^5.5.3",

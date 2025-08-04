@@ -4,7 +4,7 @@
  */
 
 import { vi, describe, test, expect } from 'vitest';
-import { AgentSnapshotNormalizer } from '@multimodal/agent-snapshot';
+import { AgentSnapshotNormalizer } from '@tarko/agent-snapshot';
 import { snapshotRunner } from './runner';
 
 const normalizer = new AgentSnapshotNormalizer({});

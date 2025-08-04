@@ -12,7 +12,7 @@ import {
   ChatCompletionContentPart,
   IAgent,
 } from '@tarko/agent-server-interface';
-import { AgentSnapshot } from '@multimodal/agent-snapshot';
+import { AgentSnapshot } from '@tarko/agent-snapshot';
 import { EventStreamBridge } from '../utils/event-stream';
 import type { AgentServer } from '../server';
 import { AgioEvent } from '@multimodal/agio';
