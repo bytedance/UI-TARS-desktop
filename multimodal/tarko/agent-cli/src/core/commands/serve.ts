@@ -26,10 +26,6 @@ export async function startHeadlessServer(
     };
   }
 
-  if (!appConfig.workspace) {
-    appConfig.workspace = {};
-  }
-
   // Create and start the server with injected agent
   const server = new AgentServer(agentServerInitOptions);
   const httpServer = await server.start();

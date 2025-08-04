@@ -8,9 +8,7 @@ import { AgentTARS, AgentTARSOptions, LogLevel } from '../src';
 import { TEST_MODEL_PROVIDERS } from '@multimodal/agent/_config';
 
 export const DEFUALT_OPTIONS: AgentTARSOptions = {
-  workspace: {
-    workingDirectory: join(__dirname, './workspace'),
-  },
+  workspace: join(__dirname, './workspace'),
   model: {
     providers: TEST_MODEL_PROVIDERS,
     //   provider: 'azure-openai',

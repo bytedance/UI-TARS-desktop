@@ -16,10 +16,6 @@ export async function processSilentRun(options: AgentCLIRunCommandOptions): Prom
 
   const { appConfig } = agentServerInitOptions;
 
-  if (!appConfig.workspace) {
-    appConfig.workspace = {};
-  }
-
   const isDebugMode = appConfig.logLevel === LogLevel.DEBUG;
   const shouldCaptureLogs = includeLogs || isDebugMode;
   const shouldSilenceLogs = !isDebugMode;
@@ -76,10 +72,6 @@ export async function processServerRun(options: AgentCLIRunCommandOptions): Prom
   } = options;
 
   const { appConfig } = agentServerInitOptions;
-
-  if (!appConfig.workspace) {
-    appConfig.workspace = {};
-  }
 
   appConfig.server = {
     ...(appConfig.server || {}),

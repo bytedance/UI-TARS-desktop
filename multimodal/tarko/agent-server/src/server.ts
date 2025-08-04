@@ -52,7 +52,6 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
 
   // Configuration
   public readonly port: number;
-  public readonly workspacePath?: string;
   public readonly isDebug: boolean;
   public readonly storageProvider: StorageProvider | null = null;
   public readonly appConfig: T;
@@ -77,13 +76,10 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     this.directories = {
       globalWorkspaceDir: directories?.globalWorkspaceDir || TARKO_CONSTANTS.GLOBAL_WORKSPACE_DIR,
       globalStorageDir: directories?.globalStorageDir || TARKO_CONSTANTS.GLOBAL_STORAGE_DIR,
-      defaultWorkspaceDir:
-        directories?.defaultWorkspaceDir || TARKO_CONSTANTS.DEFAULT_WORKSPACE_DIR,
     };
 
     // Extract server configuration from agent options
     this.port = appConfig.server?.port ?? 3000;
-    this.workspacePath = appConfig.workspace?.workingDirectory;
     this.isDebug = appConfig.logLevel === LogLevel.DEBUG;
 
     // Initialize Express app and HTTP server
@@ -100,8 +96,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
 
     // Setup API routes and middleware (includes workspace static server)
     setupAPI(this.app, {
-      workspacePath: this.workspacePath,
-      isolateSessions: appConfig.workspace?.isolateSessions ?? false,
+      workspacePath: this.getCurrentWorkspace(),
       isDebug: this.isDebug,
     });
 
@@ -118,6 +113,16 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    */
   getCustomAgioProvider(): AgioProviderConstructor | undefined {
     return this.currentAgentResolution?.agioProviderConstructor;
+  }
+
+  /**
+   * Get the label of current agent
+   */
+  getCurrentWorkspace(): string {
+    if (!this.appConfig?.workspace) {
+      throw new Error('Workspace not specified');
+    }
+    return this.appConfig.workspace;
   }
 
   /**

@@ -32,7 +32,6 @@ describe('Browser Control Strategies', () => {
           provider: 'volcengine', // Use a provider that supports all modes
           id: 'doubao-pro',
         },
-        workspace: {},
       });
 
       try {

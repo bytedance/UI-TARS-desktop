@@ -6,7 +6,6 @@
 import { Request, Response } from 'express';
 import { ChatCompletionContentPart } from '@tarko/agent-server-interface';
 import { nanoid } from 'nanoid';
-import { ensureWorkingDirectory } from '../../utils/workspace';
 import { SessionMetadata } from '../../storage';
 import { AgentSession } from '../../core';
 import { createErrorResponse } from '../../utils/error-handler';
@@ -46,23 +45,8 @@ export async function createAndQuery(req: Request, res: Response) {
     const server = req.app.locals.server;
     const sessionId = nanoid();
 
-    // Use config.workspace?.isolateSessions (defaulting to false) to determine directory isolation
-    const isolateSessions = server.appConfig.workspace?.isolateSessions ?? false;
-    const workingDirectory = ensureWorkingDirectory(
-      sessionId,
-      server.workspacePath,
-      isolateSessions,
-      false,
-      server.directories.defaultWorkspaceDir,
-    );
-
     // Create session with custom AGIO provider if available
-    const session = new AgentSession(
-      server,
-      sessionId,
-      server.getCustomAgioProvider(),
-      workingDirectory,
-    );
+    const session = new AgentSession(server, sessionId, server.getCustomAgioProvider());
 
     server.sessions[sessionId] = session;
 
@@ -81,7 +65,7 @@ export async function createAndQuery(req: Request, res: Response) {
         createdAt: Date.now(),
         updatedAt: Date.now(),
         name: sessionName,
-        workingDirectory,
+        workspace: server.getCurrentWorkspace(),
         tags: sessionTags,
       };
 
@@ -124,23 +108,8 @@ export async function createAndStreamingQuery(req: Request, res: Response) {
     const server = req.app.locals.server;
     const sessionId = nanoid();
 
-    // Use config.workspace?.isolateSessions (defaulting to false) to determine directory isolation
-    const isolateSessions = server.appConfig.workspace?.isolateSessions ?? false;
-    const workingDirectory = ensureWorkingDirectory(
-      sessionId,
-      server.workspacePath,
-      isolateSessions,
-      false,
-      server.directories.defaultWorkspaceDir,
-    );
-
     // Create session with custom AGIO provider if available
-    const session = new AgentSession(
-      server,
-      sessionId,
-      server.getCustomAgioProvider(),
-      workingDirectory,
-    );
+    const session = new AgentSession(server, sessionId, server.getCustomAgioProvider());
 
     server.sessions[sessionId] = session;
 
@@ -159,7 +128,7 @@ export async function createAndStreamingQuery(req: Request, res: Response) {
         createdAt: Date.now(),
         updatedAt: Date.now(),
         name: sessionName,
-        workingDirectory,
+        workspace: server.getCurrentWorkspace(),
         tags: sessionTags,
       };
 

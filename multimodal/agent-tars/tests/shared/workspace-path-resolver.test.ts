@@ -14,7 +14,7 @@ describe('WorkspacePathResolver', () => {
   const testWorkingDir = '/workspace/test-project';
 
   beforeEach(() => {
-    config = { workingDirectory: testWorkingDir };
+    config = { workspace: testWorkingDir };
     resolver = new WorkspacePathResolver(config);
   });
 
@@ -232,7 +232,7 @@ describe('WorkspacePathResolver', () => {
 
     it('should work with different working directory formats', () => {
       const absoluteWorkingDir = path.resolve('/workspace/project');
-      const config = { workingDirectory: absoluteWorkingDir };
+      const config = { workspace: absoluteWorkingDir };
       const testResolver = new WorkspacePathResolver(config);
 
       const args: ToolCallArgs = { path: 'src/file.ts' };

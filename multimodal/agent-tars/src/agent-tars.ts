@@ -45,7 +45,7 @@ import { WorkspacePathResolver } from './shared/workspace-path-resolver';
  */
 export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MCPAgent<T> {
   static label = 'Agent TARS';
-  private workingDirectory: string;
+  private workspace: string;
   // FIXME: remove it since options is strict type already
   private tarsOptions: AgentTARSOptions;
   private mcpServers: BuiltInMCPServers = {};
@@ -76,7 +76,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
       );
     }
 
-    const { workingDirectory = process.cwd() } = tarsOptions.workspace!;
+    const workspace = tarsOptions.workspace ?? process.cwd();
 
     // Under the 'in-memory' implementation, the built-in mcp server will be implemented independently
     // Note that the usage of the attached mcp server will be the same as the implementation,
@@ -90,7 +90,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
             },
             filesystem: {
               command: 'npx',
-              args: ['-y', '@agent-infra/mcp-server-filesystem', workingDirectory],
+              args: ['-y', '@agent-infra/mcp-server-filesystem', workspace],
             },
             commands: {
               command: 'npx',
@@ -116,7 +116,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
 ${browserRules}
 
 <envirnoment>
-Current Working Directory: ${workingDirectory}
+Current Working Directory: ${workspace}
 </envirnoment>
 
     `;
@@ -136,8 +136,8 @@ Current Working Directory: ${workingDirectory}
 
     this.logger = this.logger.spawn('AgentTARS');
     this.tarsOptions = tarsOptions;
-    this.workingDirectory = workingDirectory;
-    this.logger.info(`🤖 AgentTARS initialized | Working directory: ${workingDirectory}`);
+    this.workspace = workspace;
+    this.logger.info(`🤖 AgentTARS initialized | Working directory: ${workspace}`);
 
     // Initialize browser manager instead of direct browser instance
     this.browserManager = BrowserManager.getInstance(this.logger);
@@ -152,7 +152,7 @@ Current Working Directory: ${workingDirectory}
     // Initialize message history dumper if experimental feature is enabled
     if (options.experimental?.dumpMessageHistory) {
       this.messageHistoryDumper = new MessageHistoryDumper({
-        workingDirectory: this.workingDirectory,
+        workspace: this.workspace,
         agentId: this.id,
         agentName: this.name,
         logger: this.logger,
@@ -168,7 +168,7 @@ Current Working Directory: ${workingDirectory}
 
     // Initialize workspace path resolver
     this.workspacePathResolver = new WorkspacePathResolver({
-      workingDirectory: this.workingDirectory,
+      workspace: this.workspace,
     });
   }
 
@@ -355,7 +355,7 @@ Current Working Directory: ${workingDirectory}
           },
         }),
         filesystem: mcpModules.filesystem.createServer({
-          allowedDirectories: [this.workingDirectory],
+          allowedDirectories: [this.workspace],
         }),
         commands: mcpModules.commands.createServer(),
       };
@@ -631,7 +631,7 @@ Current Working Directory: ${workingDirectory}
    * Get the current working directory for filesystem operations
    */
   public getWorkingDirectory(): string {
-    return this.workingDirectory;
+    return this.workspace;
   }
 
   /**

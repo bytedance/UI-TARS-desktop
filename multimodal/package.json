@@ -10,6 +10,7 @@
     "dev": "ptk d",
     "dev:core": "ptk d --packages @agent-tars/core",
     "build": "pnpm run -r build",
+    "build:tarko": "pnpm --filter \"./tarko/**\" --include-dependencies build",
     "test": "vitest run",
     "test:watch": "vitest",
     "coverage": "vitest run --coverage",

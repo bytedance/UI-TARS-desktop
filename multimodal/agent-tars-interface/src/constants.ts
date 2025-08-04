@@ -18,9 +18,4 @@ export const AGENT_TARS_CONSTANTS = {
    * Used for storing application data like databases, logs, etc.
    */
   GLOBAL_STORAGE_DIR: '.agent-tars',
-
-  /**
-   * Default workspace directory name for Agent TARS projects
-   */
-  DEFAULT_WORKSPACE_DIR: 'agent-tars-workspace',
 } as const;

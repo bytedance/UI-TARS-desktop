@@ -74,7 +74,7 @@ export default defineConfig({
 When you've created a Global Workspace, the specific effects regardless of which directory you run `agent-tars` from are:
 
 1. The Config File in the Global Workspace will take effect;
-2. The Agent's `workspace.workingDirectory` will be set to `~/.agent-tars-workspace`;
+2. The Agent's `workspace` will be set to `~/.agent-tars-workspace`;
 3. The File System will point to the Global Workspace, meaning files output by the LLM through the File tool will be in this directory;
 4. Some capabilities in the Agent TARS CLI that depend on the File System will also point to this directory, such as Snapshot.
 
@@ -110,7 +110,7 @@ agent-tars workspace --disable
 
 ### Can I have multiple workspaces?
 
-The `workspace` command creates a global workspace in `~/.agent-tars-workspace`. While you can only have one global workspace, you can create and use different configurations in different project folders by simply specifying the `--workspace.workingDirectory` (shorthand `--workspace`) option when running other commands.
+The `workspace` command creates a global workspace in `~/.agent-tars-workspace`. While you can only have one global workspace, you can create and use different configurations in different project folders by simply specifying the `--workspace` option when running other commands.
 
 ### How do I update my configuration?
 
@@ -137,4 +137,4 @@ agent-tars --model.provider openai --model.apiKey YOUR_API_KEY
 
 ### How do I use workspaces in CI/CD pipelines?
 
-For continuous integration environments, we recommend creating a specific workspace directory in your project and explicitly specifying it with `--workspace.workingDirectory` rather than relying on the global workspace.
+For continuous integration environments, we recommend creating a specific workspace directory in your project and explicitly specifying it with `--workspace` rather than relying on the global workspace.

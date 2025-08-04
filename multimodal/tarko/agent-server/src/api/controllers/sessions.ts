@@ -5,7 +5,6 @@
 
 import { Request, Response } from 'express';
 import { nanoid } from 'nanoid';
-import { ensureWorkingDirectory } from '../../utils/workspace';
 import { SessionMetadata } from '../../storage';
 import { AgentSession } from '../../core';
 import { ShareService } from '../../services';
@@ -48,23 +47,8 @@ export async function createSession(req: Request, res: Response) {
 
     const sessionId = nanoid();
 
-    // Use config.workspace?.isolateSessions (defaulting to false) to determine directory isolation
-    const isolateSessions = server.appConfig.workspace?.isolateSessions ?? false;
-    const workingDirectory = ensureWorkingDirectory(
-      sessionId,
-      server.workspacePath,
-      isolateSessions,
-      false,
-      server.directories.defaultWorkspaceDir,
-    );
-
     // Pass custom AGIO provider if available
-    const session = new AgentSession(
-      server,
-      sessionId,
-      server.getCustomAgioProvider(),
-      workingDirectory,
-    );
+    const session = new AgentSession(server, sessionId, server.getCustomAgioProvider());
 
     server.sessions[sessionId] = session;
 
@@ -81,7 +65,7 @@ export async function createSession(req: Request, res: Response) {
         id: sessionId,
         createdAt: Date.now(),
         updatedAt: Date.now(),
-        workingDirectory,
+        workspace: server.getCurrentWorkspace(),
       };
 
       await server.storageProvider.createSession(metadata);
@@ -399,15 +383,11 @@ export async function getSessionWorkspaceFiles(req: Request, res: Response) {
       return res.status(404).json({ error: 'Session not found' });
     }
 
-    const isolateSessions = server.appConfig.workspace?.isolateSessions ?? false;
-    const baseWorkspacePath = server.workspacePath || process.cwd();
+    const baseWorkspacePath = server.getCurrentWorkspace();
 
     // Build potential file paths
     const pathsToCheck: string[] = [];
 
-    if (isolateSessions) {
-      pathsToCheck.push(path.join(baseWorkspacePath, sessionId, requestPath));
-    }
     pathsToCheck.push(path.join(baseWorkspacePath, requestPath));
 
     // Find the first existing path

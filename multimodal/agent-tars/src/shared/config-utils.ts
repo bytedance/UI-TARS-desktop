@@ -11,7 +11,6 @@ import { AgentTARSOptions } from '../types';
  * Creates default configuration options for AgentTARS
  */
 export const AGENT_TARS_DEFAULT_OPTIONS: AgentTARSOptions = {
-  workspace: {},
   search: {
     provider: 'browser_search',
     count: 10,

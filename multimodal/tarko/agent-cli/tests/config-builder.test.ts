@@ -62,7 +62,6 @@ describe('buildAppConfig', () => {
             type: 'sqlite',
           },
         },
-        workspace: {},
       });
     });
 
@@ -83,20 +82,6 @@ describe('buildAppConfig', () => {
         id: 'gpt-4',
         apiKey: 'test-key',
         baseURL: 'https://api.test.com',
-      });
-    });
-
-    it('should handle workspace configuration', () => {
-      const cliArgs: AgentCLIArguments = {
-        workspace: {
-          workingDirectory: '/custom/workspace',
-        },
-      };
-
-      const result = buildAppConfig(cliArgs, {});
-
-      expect(result.workspace).toEqual({
-        workingDirectory: '/custom/workspace',
       });
     });
 
@@ -293,18 +278,12 @@ describe('buildAppConfig', () => {
         model: {
           provider: 'openai',
         },
-        workspace: {
-          workingDirectory: '/cli/workspace',
-        },
       };
 
       const userConfig: AgentAppConfig = {
         model: {
           id: 'user-model',
           apiKey: 'user-key',
-        },
-        workspace: {
-          isolateSessions: true,
         },
         tools: [
           new Tool({
@@ -323,10 +302,6 @@ describe('buildAppConfig', () => {
           provider: 'openai', // From CLI
           id: 'user-model', // From user config
           apiKey: 'user-key', // From user config
-        },
-        workspace: {
-          workingDirectory: '/cli/workspace', // From CLI
-          isolateSessions: true, // From user config
         },
         tools: [
           new Tool({
@@ -427,7 +402,6 @@ describe('buildAppConfig', () => {
         share: {
           provider: 'https://share.test.com',
         },
-        workspace: {},
         server: {
           port: 8888,
           storage: {

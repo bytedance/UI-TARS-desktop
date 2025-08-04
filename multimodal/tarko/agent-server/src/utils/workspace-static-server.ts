@@ -43,10 +43,7 @@ function extractSessionIdFromReferer(referer: string | undefined): string | unde
  * Workspace file resolver that handles session isolation and absolute paths
  */
 export class WorkspaceFileResolver {
-  constructor(
-    private baseWorkspacePath: string,
-    private isolateSessions: boolean = false,
-  ) {}
+  constructor(private baseWorkspacePath: string) {}
 
   /**
    * Resolve file path considering session isolation and security
@@ -64,12 +61,6 @@ export class WorkspaceFileResolver {
     const pathsToTry: string[] = [];
 
     pathsToTry.push(normalizedPath);
-
-    // If we have a session ID and isolation is enabled, try session-specific directory first
-    if (sessionId && this.isolateSessions) {
-      const sessionPath = path.join(this.baseWorkspacePath, sessionId, normalizedPath);
-      pathsToTry.push(sessionPath);
-    }
 
     // Always try the base workspace path as fallback
     const basePath = path.join(this.baseWorkspacePath, normalizedPath);
@@ -102,14 +93,6 @@ export class WorkspaceFileResolver {
    */
   getAccessibleDirectories(sessionId?: string): string[] {
     const directories: string[] = [];
-
-    // Add session-specific directory if applicable
-    if (sessionId && this.isolateSessions) {
-      const sessionDir = path.join(this.baseWorkspacePath, sessionId);
-      if (fs.existsSync(sessionDir)) {
-        directories.push(sessionDir);
-      }
-    }
 
     // Add base workspace directory
     if (fs.existsSync(this.baseWorkspacePath)) {
@@ -271,13 +254,11 @@ function formatFileSize(bytes: number): string {
  * Serves static files from workspace directories with proper session handling
  * @param app Express application instance
  * @param workspacePath Path to workspace directory
- * @param isolateSessions Whether sessions are isolated in subdirectories
  * @param isDebug Whether to show debug logs
  */
 export function setupWorkspaceStaticServer(
   app: express.Application,
   workspacePath: string,
-  isolateSessions = false,
   isDebug = false,
 ): void {
   if (!workspacePath || !fs.existsSync(workspacePath)) {
@@ -289,10 +270,9 @@ export function setupWorkspaceStaticServer(
 
   if (isDebug) {
     console.log(`Setting up workspace static server at: ${workspacePath}`);
-    console.log(`Session isolation: ${isolateSessions ? 'enabled' : 'disabled'}`);
   }
 
-  const fileResolver = new WorkspaceFileResolver(workspacePath, isolateSessions);
+  const fileResolver = new WorkspaceFileResolver(workspacePath);
 
   // Serve workspace files with lower priority (after web UI)
   // Use a middleware function to handle directory listing and file serving

@@ -34,14 +34,6 @@ export async function startInteractiveWebUI(
     };
   }
 
-  if (!appConfig.workspace) {
-    appConfig.workspace = {};
-  }
-
-  if (appConfig.workspace.isolateSessions === undefined) {
-    appConfig.workspace.isolateSessions = false;
-  }
-
   // Set up static path if provided
   if (staticPath) {
     if (!fs.existsSync(staticPath)) {
@@ -78,9 +70,7 @@ export async function startInteractiveWebUI(
 
     const brandGradient = gradient(brandColor1, brandColor2);
 
-    const workspaceDir = appConfig.workspace?.workingDirectory
-      ? toUserFriendlyPath(appConfig.workspace.workingDirectory)
-      : 'Not specified';
+    const workspaceDir = toUserFriendlyPath(server.getCurrentWorkspace());
     const provider = appConfig.model?.provider;
     const modelId = appConfig.model?.id;
 

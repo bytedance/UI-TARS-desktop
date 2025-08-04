@@ -10,7 +10,7 @@ import path from 'path';
  */
 export interface WorkspacePathResolverConfig {
   /** The working directory to resolve relative paths against */
-  workingDirectory: string;
+  workspace: string;
 }
 
 /**
@@ -152,7 +152,7 @@ export class WorkspacePathResolver {
     }
 
     // Resolve relative path against workspace directory
-    return path.resolve(this.config.workingDirectory, inputPath);
+    return path.resolve(this.config.workspace, inputPath);
   }
 
   /**
@@ -182,7 +182,7 @@ export class WorkspacePathResolver {
    * @returns The configured working directory
    */
   getWorkingDirectory(): string {
-    return this.config.workingDirectory;
+    return this.config.workspace;
   }
 
   /**

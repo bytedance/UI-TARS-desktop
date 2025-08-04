@@ -67,8 +67,7 @@ export function addCommonOptions(command: Command): Command {
     )
 
     // Workspace configuration
-    .option('--workspace <workspace>', 'workspace config')
-    .option('--workspace.workingDirectory <path>', 'Path to workspace directory')
+    .option('--workspace <path>', 'workspace path')
 
     // Share configuration
     .option('--share <share>', 'Share config')

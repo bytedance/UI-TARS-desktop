@@ -10,7 +10,7 @@ export interface SessionMetadata {
   createdAt: number;
   updatedAt: number;
   name?: string;
-  workingDirectory: string;
+  workspace: string;
   tags?: string[];
 }
 

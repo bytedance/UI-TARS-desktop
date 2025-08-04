@@ -23,9 +23,4 @@ export const TARKO_CONSTANTS = {
    * Used for storing application data like databases, logs, etc.
    */
   GLOBAL_STORAGE_DIR: '.tarko-storage',
-
-  /**
-   * Default workspace directory name for projects
-   */
-  DEFAULT_WORKSPACE_DIR: 'tarko-workspace',
 } as const;

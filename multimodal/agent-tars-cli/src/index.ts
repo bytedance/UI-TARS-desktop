@@ -39,7 +39,6 @@ const DEFAULT_OPTIONS: Partial<AgentCLIInitOptions> = {
   directories: {
     globalWorkspaceDir: AGENT_TARS_CONSTANTS.GLOBAL_WORKSPACE_DIR,
     globalStorageDir: AGENT_TARS_CONSTANTS.GLOBAL_STORAGE_DIR,
-    defaultWorkspaceDir: AGENT_TARS_CONSTANTS.DEFAULT_WORKSPACE_DIR,
   },
 };
 

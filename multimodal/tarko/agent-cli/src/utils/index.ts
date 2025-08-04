@@ -7,3 +7,4 @@ export * from '@multimodal/shared-utils';
 export * from './logo';
 export * from './misc';
 export * from './console-interceptor';
+export * from './workspace-path';

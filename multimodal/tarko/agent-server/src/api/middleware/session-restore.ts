@@ -7,7 +7,6 @@ import { Request, Response, NextFunction } from 'express';
 import { getLogger } from '@multimodal/shared-utils';
 import { AgentServer } from '../../server';
 import { AgentSession } from '../../core';
-import { ensureWorkingDirectory } from '../../utils/workspace';
 
 const logger = getLogger('SessionRestoreMiddleware');
 /**
@@ -35,20 +34,8 @@ export async function sessionRestoreMiddleware(
       const metadata = await server.storageProvider.getSessionMetadata(sessionId);
       if (metadata) {
         try {
-          const isolateSessions = server.appConfig.workspace?.isolateSessions ?? false;
-          const workingDirectory = ensureWorkingDirectory(
-            sessionId,
-            server.workspacePath,
-            isolateSessions,
-          );
-
           // Recover sessions from storage using a custom AGIO provider
-          session = new AgentSession(
-            server,
-            sessionId,
-            server.getCustomAgioProvider(),
-            workingDirectory,
-          );
+          session = new AgentSession(server, sessionId, server.getCustomAgioProvider());
 
           server.sessions[sessionId] = session;
 

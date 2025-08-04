@@ -6,7 +6,6 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { TARKO_CONSTANTS } from '@tarko/agent-server-interface';
 
 /**
  * WorkspacePathManager provides utilities for handling workspace directory paths,
@@ -19,45 +18,33 @@ export class WorkspacePathManager {
    * - Relative paths: './workspace', 'workspace'
    * - Home directory: '~/.agent-tars', '~/workspace'
    * - Absolute paths: '/path/to/workspace'
-   * If no path is provided, uses the provided default or fallback to constant
+   * If no path is provided, uses current working directory
    *
    * @param baseDir The base directory to resolve relative paths from (usually cwd)
    * @param workspacePath Optional workspace path specification
-   * @param namespace Optional workspace namespace for isolation (e.g. session ID)
-   * @param isolateSessions Whether to create isolated session directories
-   * @param defaultWorkspaceDir Default workspace directory name to use when no path is provided
    * @returns Resolved absolute path to the workspace directory
    */
-  public static resolveWorkspacePath(
-    baseDir: string,
-    workspacePath?: string,
-    namespace?: string,
-    isolateSessions?: boolean,
-    defaultWorkspaceDir?: string,
-  ): string {
+  public static resolveWorkspacePath(baseDir: string, workspacePath?: string): string {
     let resolvedPath: string;
 
-    // If no workspace path provided, use provided default or fallback to constant
+    // If no workspace path provided, use current working directory
     if (!workspacePath) {
-      const workspaceDirName = defaultWorkspaceDir || TARKO_CONSTANTS.DEFAULT_WORKSPACE_DIR;
-      resolvedPath = path.join(baseDir, workspaceDirName);
+      resolvedPath = baseDir;
     }
+
     // Handle home directory paths (starting with ~)
     else if (workspacePath.startsWith('~')) {
       resolvedPath = workspacePath.replace(/^~/, os.homedir());
     }
+
     // Handle absolute paths
     else if (path.isAbsolute(workspacePath)) {
       resolvedPath = workspacePath;
     }
+
     // Handle relative paths
     else {
       resolvedPath = path.resolve(baseDir, workspacePath);
-    }
-
-    // Add namespace subdirectory only if isolateSessions is true and namespace is provided
-    if (isolateSessions && namespace) {
-      resolvedPath = path.join(resolvedPath, namespace);
     }
 
     return resolvedPath;

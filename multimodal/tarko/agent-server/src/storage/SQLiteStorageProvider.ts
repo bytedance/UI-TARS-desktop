@@ -15,7 +15,7 @@ interface SessionRow {
   createdAt: number;
   updatedAt: number;
   name: string | null;
-  workingDirectory: string;
+  workspace: string;
   tags: string | null;
 }
 
@@ -70,7 +70,7 @@ export class SQLiteStorageProvider implements StorageProvider {
             createdAt INTEGER NOT NULL,
             updatedAt INTEGER NOT NULL,
             name TEXT,
-            workingDirectory TEXT NOT NULL,
+            workspace TEXT NOT NULL,
             tags TEXT
           )
         `);
@@ -115,7 +115,7 @@ export class SQLiteStorageProvider implements StorageProvider {
 
     try {
       const stmt = this.db.prepare(`
-        INSERT INTO sessions (id, createdAt, updatedAt, name, workingDirectory, tags)
+        INSERT INTO sessions (id, createdAt, updatedAt, name, workspace, tags)
         VALUES (?, ?, ?, ?, ?, ?)
       `);
 
@@ -124,7 +124,7 @@ export class SQLiteStorageProvider implements StorageProvider {
         sessionData.createdAt,
         sessionData.updatedAt,
         sessionData.name || null,
-        sessionData.workingDirectory,
+        sessionData.workspace,
         tagsJson,
       );
       return sessionData;
@@ -163,9 +163,9 @@ export class SQLiteStorageProvider implements StorageProvider {
         params.push(metadata.name || null);
       }
 
-      if (metadata.workingDirectory !== undefined) {
-        setClauses.push('workingDirectory = ?');
-        params.push(metadata.workingDirectory);
+      if (metadata.workspace !== undefined) {
+        setClauses.push('workspace = ?');
+        params.push(metadata.workspace);
       }
 
       if (metadata.tags !== undefined) {
@@ -207,7 +207,7 @@ export class SQLiteStorageProvider implements StorageProvider {
 
     try {
       const stmt = this.db.prepare(`
-        SELECT id, createdAt, updatedAt, name, workingDirectory, tags
+        SELECT id, createdAt, updatedAt, name, workspace, tags
         FROM sessions
         WHERE id = ?
       `);
@@ -223,7 +223,7 @@ export class SQLiteStorageProvider implements StorageProvider {
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
         name: row.name || undefined,
-        workingDirectory: row.workingDirectory,
+        workspace: row.workspace,
         tags: row.tags ? JSON.parse(row.tags) : undefined,
       };
     } catch (error) {
@@ -239,7 +239,7 @@ export class SQLiteStorageProvider implements StorageProvider {
 
     try {
       const stmt = this.db.prepare(`
-        SELECT id, createdAt, updatedAt, name, workingDirectory, tags
+        SELECT id, createdAt, updatedAt, name, workspace, tags
         FROM sessions
         ORDER BY updatedAt DESC
       `);
@@ -251,7 +251,7 @@ export class SQLiteStorageProvider implements StorageProvider {
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
         name: row.name || undefined,
-        workingDirectory: row.workingDirectory,
+        workspace: row.workspace,
         tags: row.tags ? JSON.parse(row.tags) : undefined,
       }));
     } catch (error) {

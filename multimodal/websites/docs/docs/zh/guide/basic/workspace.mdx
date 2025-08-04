@@ -74,7 +74,7 @@ export default defineConfig({
 当你完成 Global Workspace 的创建后，对你带来的具体影响是，无论你在什么目录下运行 `agent-tars`：
 
 1. Global Workspace 中的 Config File 都将生效；
-2. Agent 的 `workspace.workingDirectory` 将会被设定为 `~/.agent-tars-workspace`；
+2. Agent 的 `workspace` 将会被设定为 `~/.agent-tars-workspace`；
 3. File System 将指向 Global Workspace，也就是说，LLM 通过 File 工具输出的文件都将位于这个目录；
 4. Agent TARS CLI 中一些依赖 File System 的能力也会指向这个目录，如 Snapshot。
 
@@ -110,7 +110,7 @@ agent-tars workspace --disable
 
 ### 我可以有多个工作区吗？
 
-`workspace` 命令在 `~/.agent-tars-workspace` 创建一个全局工作区。虽然你只能有一个全局工作区，但可以在不同的项目文件夹中创建和使用不同的配置，只需在运行其他命令时指定 `--workspace.workingDirectory`（缩写 `--workspace`）选项。
+`workspace` 命令在 `~/.agent-tars-workspace` 创建一个全局工作区。虽然你只能有一个全局工作区，但可以在不同的项目文件夹中创建和使用不同的配置，只需在运行其他命令时指定 `--workspace` 选项。
 
 ### 如何更新我的配置？
 
@@ -137,4 +137,4 @@ agent-tars --model.provider openai --model.apiKey YOUR_API_KEY
 
 ### 如何在 CI/CD 管道中使用工作区？
 
-对于持续集成环境，我们建议在你的项目中创建一个特定的工作区目录，并使用 `--workspace.workingDirectory` 显式指定它，而不是依赖全局工作区。
+对于持续集成环境，我们建议在你的项目中创建一个特定的工作区目录，并使用 `--workspace` 显式指定它，而不是依赖全局工作区。

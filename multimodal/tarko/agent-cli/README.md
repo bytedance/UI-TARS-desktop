@@ -42,9 +42,7 @@ const config: AgentAppConfig = {
     id: 'gpt-4',
     apiKey: process.env.OPENAI_API_KEY,
   },
-  workspace: {
-    workingDirectory: './workspace',
-  },
+  workspace: './workspace',
   server: {
     port: 8888,
   },
@@ -63,7 +61,7 @@ tarko --model.provider openai --model.id gpt-4 --model.apiKey sk-xxx
 tarko serve --port 3000
 
 # 工作空间
-tarko --workspace.workingDirectory ./my-workspace
+tarko --workspace ./my-workspace
 
 # 调试模式
 tarko --debug
@@ -355,19 +353,6 @@ const { result, logs } = await ConsoleInterceptor.run(
     capture: true,  // 捕获日志
   }
 );
-```
-
-### 工作空间隔离
-
-支持基于会话的工作空间隔离：
-
-```typescript
-const config = {
-  workspace: {
-    workingDirectory: './workspace',
-    isolateSessions: true,  // 每个会话使用独立子目录
-  },
-};
 ```
 
 ## 部署

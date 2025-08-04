@@ -25,7 +25,6 @@ export function setupAPI(
   app: express.Application,
   options?: {
     workspacePath?: string;
-    isolateSessions?: boolean;
     isDebug?: boolean;
   },
 ) {
@@ -53,11 +52,6 @@ export function setupAPI(
 
   // Setup workspace static server (lower priority, after API routes)
   if (options?.workspacePath) {
-    setupWorkspaceStaticServer(
-      app,
-      options.workspacePath,
-      options.isolateSessions,
-      options.isDebug,
-    );
+    setupWorkspaceStaticServer(app, options.workspacePath, options.isDebug);
   }
 }

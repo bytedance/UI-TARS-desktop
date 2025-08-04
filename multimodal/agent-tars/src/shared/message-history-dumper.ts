@@ -43,7 +43,7 @@ export interface MessageHistoryOutput {
  */
 export interface MessageHistoryDumperOptions {
   /** Working directory where files will be saved */
-  workingDirectory: string;
+  workspace: string;
   /** Agent identifier */
   agentId: string;
   /** Agent name */
@@ -128,7 +128,7 @@ export class MessageHistoryDumper {
   private dumpToFile(sessionId: string): void {
     try {
       const filename = `session_${sessionId}.json`;
-      const filePath = path.join(this.options.workingDirectory, filename);
+      const filePath = path.join(this.options.workspace, filename);
 
       const output: MessageHistoryOutput = {
         agent: {

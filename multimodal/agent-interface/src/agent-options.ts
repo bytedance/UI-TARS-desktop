@@ -163,27 +163,11 @@ export interface AgentMiscOptions {
  */
 export interface AgentWorkspaceOptions {
   /**
-   * Workspace settings.
+   * Directory to use for filesystem operations
+   *
+   * @defaultValue Defaults to current working directory if not specified
    */
-  workspace?: {
-    /**
-     * Directory to use for filesystem operations
-     *
-     * @defaultValue Defaults to current working directory if not specified
-     */
-    workingDirectory?: string;
-
-    /**
-     * Whether to isolate workspace for each session by creating a subdirectory with session ID
-     * When true, creates: workingDirectory/sessionId
-     * When false, uses the workingDirectory directly for all sessions
-     *
-     * FIXME: move to CLI only.
-     *
-     * @defaultValue false
-     */
-    isolateSessions?: boolean;
-  };
+  workspace?: string;
 }
 
 /**

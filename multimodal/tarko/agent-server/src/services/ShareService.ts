@@ -75,10 +75,7 @@ export class ShareService {
       let processedEvents = keyFrameEvents;
       if (upload && this.appConfig.share?.provider) {
         // @ts-expect-error
-        processedEvents = await this.processWorkspaceImages(
-          keyFrameEvents,
-          metadata.workingDirectory,
-        );
+        processedEvents = await this.processWorkspaceImages(keyFrameEvents, metadata.workspace);
       }
 
       // Generate HTML content
@@ -114,7 +111,7 @@ export class ShareService {
    */
   private async processWorkspaceImages(
     events: AgentEventStream.Event[],
-    workingDirectory: string,
+    workspace: string,
   ): Promise<AgentEventStream.Event[]> {
     if (!this.appConfig.share?.provider) {
       return events;
@@ -129,7 +126,7 @@ export class ShareService {
       // Process different event types that might contain file references
       if (event.type === 'tool_call' && event.name === 'write_file') {
         // Check write_file tool results for image references
-        processedEvents[i] = await this.processEventImages(event, workingDirectory, imageCache);
+        processedEvents[i] = await this.processEventImages(event, workspace, imageCache);
       }
     }
 
@@ -141,7 +138,7 @@ export class ShareService {
    */
   private async processEventImages(
     event: AgentEventStream.Event,
-    workingDirectory: string,
+    workspace: string,
     imageCache: Map<string, string>,
   ): Promise<AgentEventStream.Event> {
     console.log('processEventImages');
@@ -179,7 +176,7 @@ export class ShareService {
 
       try {
         // Resolve absolute path
-        const absolutePath = path.resolve(workingDirectory, relativePath);
+        const absolutePath = path.resolve(workspace, relativePath);
 
         // Check if file exists and is an image
         if (fs.existsSync(absolutePath) && this.isImageFile(absolutePath)) {

@@ -6,9 +6,9 @@
 import { deepMerge } from '@multimodal/shared-utils';
 import {
   AgentCLIArguments,
+  ModelProviderName,
   AgentAppConfig,
   LogLevel,
-  ModelProviderName,
 } from '@tarko/agent-server-interface';
 import { resolveValue } from '../utils';
 
@@ -86,30 +86,10 @@ export function buildAppConfig<
   config = deepMerge(config, cliConfigProps);
 
   // Apply CLI shortcuts and special handling
-  handleWorkspaceOptions(config, workspace);
   applyLoggingShortcuts(config, { debug, quiet });
   applyServerConfiguration(config, { port });
 
   return config as U;
-}
-
-/**
- * Handle workspace config shortcut
- */
-function handleWorkspaceOptions(
-  config: Partial<AgentAppConfig>,
-  workspace: AgentAppConfig['workspace'],
-): void {
-  const workspaceConfig: AgentAppConfig['workspace'] = {};
-  if (typeof workspace === 'string') {
-    workspaceConfig.workingDirectory = workspace;
-  } else if (typeof workspace === 'object') {
-    Object.assign(workspaceConfig, workspace);
-  }
-  if (!config.workspace) {
-    config.workspace = {};
-  }
-  Object.assign(config.workspace, workspaceConfig);
 }
 
 /**

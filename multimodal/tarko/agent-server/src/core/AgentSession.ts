@@ -69,7 +69,6 @@ export class AgentSession {
     private server: AgentServer,
     sessionId: string,
     agioProviderImpl?: AgioProviderConstructor,
-    workingDirectory?: string,
   ) {
     this.id = sessionId;
     this.eventBridge = new EventStreamBridge();
@@ -77,18 +76,13 @@ export class AgentSession {
     // Get agent options from server
     const agentOptions = { ...server.appConfig };
 
-    // Update workspace directory if provided
-    if (workingDirectory && agentOptions.workspace) {
-      agentOptions.workspace.workingDirectory = workingDirectory;
-    }
-
     // Create agent instance using the server's factory method
     const agent = server.createAgent();
 
     // Initialize agent snapshot if enabled
     if (agentOptions.snapshot?.enable) {
       const snapshotStoragesDirectory =
-        agentOptions.snapshot.storageDirectory ?? agentOptions.workspace?.workingDirectory;
+        agentOptions.snapshot.storageDirectory ?? server.getCurrentWorkspace();
 
       if (snapshotStoragesDirectory) {
         const snapshotPath = path.join(snapshotStoragesDirectory, sessionId);
