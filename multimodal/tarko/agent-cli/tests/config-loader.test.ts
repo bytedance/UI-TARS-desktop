@@ -181,8 +181,8 @@ describe('Config Loader', () => {
     });
 
     it('should return empty config when no config paths provided', async () => {
-      // Mock @multimodal/config-loader to throw error for auto-discovery
-      vi.doMock('@multimodal/config-loader', () => ({
+      // Mock @tarko/config-loader to throw error for auto-discovery
+      vi.doMock('@tarko/config-loader', () => ({
         loadConfig: vi.fn().mockRejectedValue(new Error('No config found')),
       }));
 

@@ -374,7 +374,7 @@ importers:
       '@tarko/agio':
         specifier: workspace:*
         version: link:../agio
-      '@multimodal/config-loader':
+      '@tarko/config-loader':
         specifier: workspace:*
         version: link:../config-loader
       '@rslib/core':

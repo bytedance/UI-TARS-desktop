@@ -1,17 +1,17 @@
-# @multimodal/config-loader
+# @tarko/config-loader
 
 A TypeScript SDK to load your configuration from various file formats.
 
 ## Installation
 
 ```bash
-pnpm install @multimodal/config-loader
+pnpm install @tarko/config-loader
 ```
 
 ## Quick Start
 
 ```ts
-import { loadConfig } from '@multimodal/config-loader';
+import { loadConfig } from '@tarko/config-loader';
 
 // Define your config type for better type safety
 interface MyConfig {
@@ -101,7 +101,7 @@ export interface ServerConfig {
 }
 
 // usage.ts
-import { loadConfig } from '@multimodal/config-loader';
+import { loadConfig } from '@tarko/config-loader';
 import type { ServerConfig } from './types';
 
 const { content } = await loadConfig<ServerConfig>({

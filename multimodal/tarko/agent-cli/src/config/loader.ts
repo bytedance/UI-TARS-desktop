@@ -5,7 +5,7 @@
  */
 
 import { deepMerge } from '@multimodal/shared-utils';
-import { loadConfig } from '@multimodal/config-loader';
+import { loadConfig } from '@tarko/config-loader';
 import { AgentAppConfig } from '@tarko/agent-server-interface';
 import fetch from 'node-fetch';
 import { logger } from '../utils';
