@@ -5,8 +5,8 @@
  */
 
 // FIXME: remove enum-based logger
-export { LogLevel } from '@mcp-agent/interface';
-export type * from '@mcp-agent/interface';
+export { LogLevel } from '@tarko/mcp-agent-interface';
+export type * from '@tarko/mcp-agent-interface';
 
 import { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';

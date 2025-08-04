@@ -4,7 +4,7 @@
  */
 
 import { MCPAgent, Tool } from '../../src';
-import { LogLevel, MCPAgentOptions } from '@mcp-agent/interface';
+import { LogLevel, MCPAgentOptions } from '@tarko/mcp-agent-interface';
 import { join } from 'path';
 
 const MAX_TOOL_RESULT_LENGTH = 20000;
