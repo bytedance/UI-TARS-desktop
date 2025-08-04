@@ -33,7 +33,7 @@ While Agio shares some conceptual similarities with the `Agent Event Stream` in 
 ## Installation
 
 ```bash
-npm install @multimodal/agio
+npm install @tarko/agio
 ```
 
 ## Usage
