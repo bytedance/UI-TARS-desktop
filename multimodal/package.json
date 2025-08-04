@@ -27,7 +27,7 @@
     "pnpm": "9"
   },
   "devDependencies": {
-    "@multimodal/pnpm-toolkit": "workspace:*",
+    "@tarko/pnpm-toolkit": "workspace:*",
     "@types/node": "22.15.30",
     "@vitest/coverage-v8": "3.2.4",
     "doctoc": "2.2.1",

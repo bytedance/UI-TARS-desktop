@@ -8,9 +8,9 @@ importers:
 
   .:
     devDependencies:
-      '@multimodal/pnpm-toolkit':
+      '@tarko/pnpm-toolkit':
         specifier: workspace:*
-        version: link:pnpm-toolkit
+        version: link:tarko/pnpm-toolkit
       '@types/node':
         specifier: 22.15.30
         version: 22.15.30
@@ -51,12 +51,12 @@ importers:
       '@clack/prompts':
         specifier: 0.11.0
         version: 0.11.0
-      '@tarko/agio':
-        specifier: workspace:*
-        version: link:../../tarko/agio
       '@rslib/core':
         specifier: 0.10.0
         version: 0.10.0(typescript@5.8.3)
+      '@tarko/agio':
+        specifier: workspace:*
+        version: link:../../tarko/agio
       '@types/node':
         specifier: ^20.14.8
         version: 20.19.1
@@ -112,9 +112,6 @@ importers:
       '@gui-agent/operator-browser':
         specifier: workspace:*
         version: link:../../gui-agent/operator-browser
-      '@tarko/mcp-agent':
-        specifier: workspace:*
-        version: link:../../tarko/mcp-agent
       '@rslib/core':
         specifier: 0.10.0
         version: 0.10.0(typescript@5.8.3)
@@ -124,6 +121,9 @@ importers:
       '@tarko/agent-snapshot':
         specifier: workspace:*
         version: link:../../tarko/agent-snapshot
+      '@tarko/mcp-agent':
+        specifier: workspace:*
+        version: link:../../tarko/mcp-agent
       '@types/node':
         specifier: 22.15.30
         version: 22.15.30
@@ -136,15 +136,15 @@ importers:
 
   agent-tars/interface:
     dependencies:
-      '@tarko/mcp-agent-interface':
-        specifier: workspace:*
-        version: link:../../tarko/mcp-agent-interface
-      '@tarko/agio':
-        specifier: workspace:*
-        version: link:../../tarko/agio
       '@tarko/agent-server-interface':
         specifier: workspace:*
         version: link:../../tarko/agent-server-interface
+      '@tarko/agio':
+        specifier: workspace:*
+        version: link:../../tarko/agio
+      '@tarko/mcp-agent-interface':
+        specifier: workspace:*
+        version: link:../../tarko/mcp-agent-interface
     devDependencies:
       '@rslib/core':
         specifier: 0.10.0
@@ -225,84 +225,11 @@ importers:
         specifier: ^3.0.2
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
 
-  pnpm-toolkit:
-    dependencies:
-      '@tarko/model-provider':
-        specifier: workspace:*
-        version: link:../tarko/model-provider
-      boxen:
-        specifier: '4'
-        version: 4.2.0
-      cac:
-        specifier: ^6.5.10
-        version: 6.7.14
-      chalk:
-        specifier: 2.4.1
-        version: 2.4.1
-      chokidar:
-        specifier: 3.4.0
-        version: 3.4.0
-      execa:
-        specifier: 9.6.0
-        version: 9.6.0
-      fast-glob:
-        specifier: ^3.3.2
-        version: 3.3.3
-      fs-extra:
-        specifier: ^11.1.1
-        version: 11.3.0
-      inquirer:
-        specifier: ^8.2.5
-        version: 8.2.6
-      js-yaml:
-        specifier: ^4.1.0
-        version: 4.1.0
-      semver:
-        specifier: ^7.5.4
-        version: 7.7.2
-      string-width:
-        specifier: ^4.2.0
-        version: 4.2.3
-      text-table:
-        specifier: ^0.2.0
-        version: 0.2.0
-      tiny-conventional-commits-parser:
-        specifier: ^0.0.1
-        version: 0.0.1
-    devDependencies:
-      '@rslib/core':
-        specifier: 0.10.0
-        version: 0.10.0(typescript@5.8.3)
-      '@types/fs-extra':
-        specifier: 11.0.2
-        version: 11.0.2
-      '@types/inquirer':
-        specifier: ^8.2.5
-        version: 8.2.11
-      '@types/js-yaml':
-        specifier: ^4.0.5
-        version: 4.0.9
-      '@types/node':
-        specifier: 22.15.30
-        version: 22.15.30
-      '@types/semver':
-        specifier: ^7.5.0
-        version: 7.7.0
-      '@types/string-width':
-        specifier: ^4.0.1
-        version: 4.0.1
-      '@types/text-table':
-        specifier: ^0.2.0
-        version: 0.2.5
-      rimraf:
-        specifier: 4.1.0
-        version: 4.1.0
-      typescript:
-        specifier: 5.8.3
-        version: 5.8.3
-
   tarko/agent:
     dependencies:
+      '@tarko/agent-interface':
+        specifier: workspace:*
+        version: link:../agent-interface
       '@tarko/llm-client':
         specifier: workspace:*
         version: link:../llm-client
@@ -312,9 +239,6 @@ importers:
       '@tarko/shared-utils':
         specifier: workspace:*
         version: link:../shared-utils
-      '@tarko/agent-interface':
-        specifier: workspace:*
-        version: link:../agent-interface
       jsonrepair:
         specifier: 3.12.0
         version: 3.12.0
@@ -358,25 +282,19 @@ importers:
 
   tarko/agent-cli:
     dependencies:
-      '@tarko/shared-utils':
-        specifier: workspace:*
-        version: link:../shared-utils
       '@tarko/agent':
         specifier: workspace:*
         version: link:../agent
       '@tarko/agent-server':
         specifier: workspace:*
         version: link:../agent-server
+      '@tarko/shared-utils':
+        specifier: workspace:*
+        version: link:../shared-utils
     devDependencies:
       '@clack/prompts':
         specifier: 0.11.0
         version: 0.11.0
-      '@tarko/agio':
-        specifier: workspace:*
-        version: link:../agio
-      '@tarko/config-loader':
-        specifier: workspace:*
-        version: link:../config-loader
       '@rslib/core':
         specifier: 0.10.0
         version: 0.10.0(typescript@5.8.3)
@@ -386,6 +304,12 @@ importers:
       '@tarko/agent-server-interface':
         specifier: workspace:*
         version: link:../agent-server-interface
+      '@tarko/agio':
+        specifier: workspace:*
+        version: link:../agio
+      '@tarko/config-loader':
+        specifier: workspace:*
+        version: link:../config-loader
       '@tarko/web-ui':
         specifier: workspace:*
         version: link:../agent-web-ui
@@ -469,9 +393,6 @@ importers:
       '@agent-infra/shared':
         specifier: 0.0.2
         version: 0.0.2
-      '@tarko/agio':
-        specifier: workspace:*
-        version: link:../agio
       '@rslib/core':
         specifier: 0.10.0
         version: 0.10.0(typescript@5.8.3)
@@ -481,6 +402,9 @@ importers:
       '@tarko/agent-snapshot':
         specifier: workspace:*
         version: link:../agent-snapshot
+      '@tarko/agio':
+        specifier: workspace:*
+        version: link:../agio
       '@types/cors':
         specifier: ^2.8.17
         version: 2.8.18
@@ -517,12 +441,12 @@ importers:
 
   tarko/agent-server-interface:
     dependencies:
-      '@tarko/agio':
-        specifier: workspace:*
-        version: link:../agio
       '@tarko/agent-interface':
         specifier: workspace:*
         version: link:../agent-interface
+      '@tarko/agio':
+        specifier: workspace:*
+        version: link:../agio
     devDependencies:
       '@rslib/core':
         specifier: 0.10.0
@@ -784,9 +708,6 @@ importers:
       '@agent-infra/mcp-client':
         specifier: 1.1.6-beta.3
         version: 1.1.6-beta.3
-      '@tarko/mcp-agent-interface':
-        specifier: workspace:*
-        version: link:../mcp-agent-interface
       '@modelcontextprotocol/sdk':
         specifier: ^1.12.1
         version: 1.12.1
@@ -796,6 +717,9 @@ importers:
       '@tarko/agent-snapshot':
         specifier: workspace:*
         version: link:../agent-snapshot
+      '@tarko/mcp-agent-interface':
+        specifier: workspace:*
+        version: link:../mcp-agent-interface
     devDependencies:
       '@rslib/core':
         specifier: 0.10.0
@@ -853,6 +777,82 @@ importers:
       vitest:
         specifier: 3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
+
+  tarko/pnpm-toolkit:
+    dependencies:
+      '@tarko/model-provider':
+        specifier: workspace:*
+        version: link:../model-provider
+      boxen:
+        specifier: '4'
+        version: 4.2.0
+      cac:
+        specifier: ^6.5.10
+        version: 6.7.14
+      chalk:
+        specifier: 2.4.1
+        version: 2.4.1
+      chokidar:
+        specifier: 3.4.0
+        version: 3.4.0
+      execa:
+        specifier: 9.6.0
+        version: 9.6.0
+      fast-glob:
+        specifier: ^3.3.2
+        version: 3.3.3
+      fs-extra:
+        specifier: ^11.1.1
+        version: 11.3.0
+      inquirer:
+        specifier: ^8.2.5
+        version: 8.2.6
+      js-yaml:
+        specifier: ^4.1.0
+        version: 4.1.0
+      semver:
+        specifier: ^7.5.4
+        version: 7.7.2
+      string-width:
+        specifier: ^4.2.0
+        version: 4.2.3
+      text-table:
+        specifier: ^0.2.0
+        version: 0.2.0
+      tiny-conventional-commits-parser:
+        specifier: ^0.0.1
+        version: 0.0.1
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.10.0
+        version: 0.10.0(typescript@5.8.3)
+      '@types/fs-extra':
+        specifier: 11.0.2
+        version: 11.0.2
+      '@types/inquirer':
+        specifier: ^8.2.5
+        version: 8.2.11
+      '@types/js-yaml':
+        specifier: ^4.0.5
+        version: 4.0.9
+      '@types/node':
+        specifier: 22.15.30
+        version: 22.15.30
+      '@types/semver':
+        specifier: ^7.5.0
+        version: 7.7.0
+      '@types/string-width':
+        specifier: ^4.0.1
+        version: 4.0.1
+      '@types/text-table':
+        specifier: ^0.2.0
+        version: 0.2.5
+      rimraf:
+        specifier: 4.1.0
+        version: 4.1.0
+      typescript:
+        specifier: 5.8.3
+        version: 5.8.3
 
   tarko/shared-media-utils:
     dependencies:

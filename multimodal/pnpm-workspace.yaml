@@ -1,14 +1,11 @@
 packages:
   # agent tars
   - 'agent-tars/*'
+  # gui agent
+  - 'gui-agent/*'
   # low-level (tarko)
   - 'tarko/*'
-  # ci/cd
-  - 'pnpm-toolkit'
   # benchmark
   - 'benchmark/*'
   # docs
-  - 'websites/main'
-  - 'websites/docs'
-  # gui agent
-  - 'gui-agent/*'
+  - 'websites/*'
