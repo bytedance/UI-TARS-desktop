@@ -16,6 +16,7 @@ import {
   AgentTARSCLIArguments,
   AgentTARSAppConfig,
   BrowserControlMode,
+  AGENT_TARS_CONSTANTS,
 } from '@agent-tars/interface';
 
 export type { AgentTARSCLIArguments } from '@agent-tars/interface';
@@ -35,6 +36,11 @@ const DEFAULT_OPTIONS: Partial<AgentCLIInitOptions> = {
       constructor: AgentTARS,
     },
   },
+  directories: {
+    globalWorkspaceDir: AGENT_TARS_CONSTANTS.GLOBAL_WORKSPACE_DIR,
+    globalStorageDir: AGENT_TARS_CONSTANTS.GLOBAL_STORAGE_DIR,
+    defaultWorkspaceDir: AGENT_TARS_CONSTANTS.DEFAULT_WORKSPACE_DIR,
+  },
 };
 
 /**
@@ -42,7 +48,7 @@ const DEFAULT_OPTIONS: Partial<AgentCLIInitOptions> = {
  */
 export class AgentTARSCLI extends AgentCLI {
   constructor(options: AgentCLIInitOptions) {
-    const mergedOptions = deepMerge(DEFAULT_OPTIONS, options);
+    const mergedOptions = deepMerge(DEFAULT_OPTIONS, options ?? {});
     super(mergedOptions as AgentCLIInitOptions);
   }
 

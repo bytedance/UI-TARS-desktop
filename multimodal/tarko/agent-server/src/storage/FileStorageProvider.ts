@@ -7,7 +7,7 @@ import path from 'path';
 import fs from 'fs';
 import { Low } from 'lowdb';
 import { JSONFile } from 'lowdb/node';
-import { AgentEventStream } from '@tarko/agent-server-interface';
+import { AgentEventStream, TARKO_CONSTANTS } from '@tarko/agent-server-interface';
 import { StorageProvider, SessionMetadata } from './types';
 
 /**
@@ -28,10 +28,10 @@ export class FileStorageProvider implements StorageProvider {
   private initialized = false;
   public readonly dbPath: string;
 
-  constructor(storagePath?: string) {
+  constructor(storagePath?: string, globalStorageDir = TARKO_CONSTANTS.GLOBAL_STORAGE_DIR) {
     // Default to the user's home directory
     const defaultPath = process.env.HOME || process.env.USERPROFILE || '.';
-    const baseDir = storagePath || path.join(defaultPath, '.agent-tars');
+    const baseDir = storagePath || path.join(defaultPath, globalStorageDir);
 
     // Create the directory if it doesn't exist
     if (!fs.existsSync(baseDir)) {

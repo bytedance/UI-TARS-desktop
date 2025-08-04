@@ -4,7 +4,11 @@
  */
 
 import cac from 'cac';
-import { AgentCLIArguments, AgentServerVersionInfo } from '@tarko/agent-server-interface';
+import {
+  AgentCLIArguments,
+  AgentServerVersionInfo,
+  TARKO_CONSTANTS,
+} from '@tarko/agent-server-interface';
 import { addCommonOptions, resolveAgentFromCLIArgument } from './options';
 import { buildConfigPaths } from '../config/paths';
 import { readFromStdin } from './stdin';
@@ -307,16 +311,19 @@ export class AgentCLI {
     isDebug: boolean;
   }> {
     const isDebug = !!cliArguments.debug;
-
-    // Check if global workspace should be enabled
-    const workspaceCommand = new WorkspaceCommand();
+    // FIXME: using cwd passed from options
+    const workspacePath = cliArguments.workspace ?? process.cwd();
+    const workspaceCommand = new WorkspaceCommand(this.options.directories?.globalWorkspaceDir);
     const globalWorkspaceEnabled = await workspaceCommand.isGlobalWorkspaceEnabled();
 
     // Build config paths with proper priority order
     const configPaths = buildConfigPaths({
       cliConfigPaths: cliArguments.config,
       remoteConfig: this.options.remoteConfig,
+      workspacePath,
       globalWorkspaceEnabled,
+      globalWorkspaceDir:
+        this.options.directories?.globalWorkspaceDir || TARKO_CONSTANTS.GLOBAL_WORKSPACE_DIR,
       isDebug,
     });
 
@@ -377,7 +384,7 @@ export class AgentCLI {
           } = {},
         ) => {
           try {
-            const workspaceCmd = new WorkspaceCommand();
+            const workspaceCmd = new WorkspaceCommand(this.options.directories?.globalWorkspaceDir);
             await workspaceCmd.execute(options);
           } catch (err) {
             console.error(

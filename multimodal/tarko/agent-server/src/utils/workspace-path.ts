@@ -6,6 +6,7 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import { TARKO_CONSTANTS } from '@tarko/agent-server-interface';
 
 /**
  * WorkspacePathManager provides utilities for handling workspace directory paths,
@@ -16,7 +17,7 @@ export class WorkspacePathManager {
   /**
    * Default workspace directory name
    */
-  private static readonly DEFAULT_WORKSPACE_DIR = 'agent-tars-workspace';
+  private static readonly DEFAULT_WORKSPACE_DIR = TARKO_CONSTANTS.DEFAULT_WORKSPACE_DIR;
 
   /**
    * Resolve a workspace path, supporting various formats:

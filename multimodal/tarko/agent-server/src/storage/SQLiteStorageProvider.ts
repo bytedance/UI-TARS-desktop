@@ -6,7 +6,7 @@
 import path from 'path';
 import fs from 'fs';
 import { DatabaseSync } from 'node:sqlite';
-import { AgentEventStream } from '@tarko/agent-server-interface';
+import { AgentEventStream, TARKO_CONSTANTS } from '@tarko/agent-server-interface';
 import { StorageProvider, SessionMetadata } from './types';
 
 // Define row types for better type safety
@@ -40,17 +40,17 @@ export class SQLiteStorageProvider implements StorageProvider {
   private initialized = false;
   public readonly dbPath: string;
 
-  constructor(storagePath?: string) {
+  constructor(storagePath?: string, globalStorageDir: string = TARKO_CONSTANTS.GLOBAL_STORAGE_DIR) {
     // Default to the user's home directory
     const defaultPath = process.env.HOME || process.env.USERPROFILE || '.';
-    const baseDir = storagePath || path.join(defaultPath, '.agent-tars');
+    const baseDir = storagePath || path.join(defaultPath, globalStorageDir);
 
     // Create the directory if it doesn't exist
     if (!fs.existsSync(baseDir)) {
       fs.mkdirSync(baseDir, { recursive: true });
     }
 
-    this.dbPath = path.join(baseDir, 'agent-tars.db');
+    this.dbPath = path.join(baseDir, TARKO_CONSTANTS.SESSION_DATA_DB_NAME);
     this.db = new DatabaseSync(this.dbPath, { open: false });
   }
 

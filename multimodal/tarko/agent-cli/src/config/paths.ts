@@ -7,6 +7,7 @@ import { logger } from '../utils';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
+import { CLI_CONSTANTS } from '../constants';
 
 /**
  * Default configuration files that will be automatically detected
@@ -30,6 +31,7 @@ export const CONFIG_FILES = ['tarko.config.ts', 'tarko.config.yaml', 'tarko.conf
  * @param options.remoteConfig Remote config from bootstrap options (L4)
  * @param options.workspacePath Path to workspace for L1 config
  * @param options.globalWorkspaceEnabled Whether to check global workspace (L2)
+ * @param options.globalWorkspaceDir Global workspace directory name
  * @param options.isDebug Debug mode flag
  * @returns Array of configuration paths in priority order (lowest to highest)
  */
@@ -38,12 +40,14 @@ export function buildConfigPaths({
   remoteConfig,
   workspacePath,
   globalWorkspaceEnabled = false,
+  globalWorkspaceDir = CLI_CONSTANTS.GLOBAL_WORKSPACE_DIR,
   isDebug = false,
 }: {
   cliConfigPaths?: string[];
   remoteConfig?: string;
   workspacePath?: string;
   globalWorkspaceEnabled?: boolean;
+  globalWorkspaceDir?: string;
   isDebug?: boolean;
 }): string[] {
   const configPaths: string[] = [];
@@ -64,7 +68,7 @@ export function buildConfigPaths({
 
   // L2: Global workspace config file
   if (globalWorkspaceEnabled) {
-    const globalWorkspacePath = path.join(os.homedir(), '.tarko');
+    const globalWorkspacePath = path.join(os.homedir(), globalWorkspaceDir);
     let foundGlobalConfig = false;
 
     for (const file of CONFIG_FILES) {

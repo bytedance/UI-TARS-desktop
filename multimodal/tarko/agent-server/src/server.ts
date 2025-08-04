@@ -20,6 +20,7 @@ import type {
   AgioProviderConstructor,
   IAgent,
 } from './types';
+import { TARKO_CONSTANTS, GlobalDirectoryOptions } from '@tarko/agent-server-interface';
 
 export { express };
 
@@ -56,6 +57,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   public readonly storageProvider: StorageProvider | null = null;
   public readonly appConfig: T;
   public readonly versionInfo?: AgentServerVersionInfo;
+  public readonly directories: Required<GlobalDirectoryOptions>;
 
   // Current agent resolution, resolved before server started
   private currentAgentResolution?: AgentResolutionResult;
@@ -63,13 +65,21 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   // Server information
 
   constructor(instantiationOptions: AgentServerInitOptions<T>) {
-    const { appConfig, versionInfo } = instantiationOptions;
+    const { appConfig, versionInfo, directories } = instantiationOptions;
 
     // Store injected Agent constructor and options
     this.appConfig = appConfig;
 
     // Store version info
     this.versionInfo = versionInfo;
+
+    // Initialize directories with defaults
+    this.directories = {
+      globalWorkspaceDir: directories?.globalWorkspaceDir || TARKO_CONSTANTS.GLOBAL_WORKSPACE_DIR,
+      globalStorageDir: directories?.globalStorageDir || TARKO_CONSTANTS.GLOBAL_STORAGE_DIR,
+      defaultWorkspaceDir:
+        directories?.defaultWorkspaceDir || TARKO_CONSTANTS.DEFAULT_WORKSPACE_DIR,
+    };
 
     // Extract server configuration from agent options
     this.port = appConfig.server?.port ?? 3000;
@@ -82,7 +92,10 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
 
     // Initialize storage if provided
     if (appConfig.server?.storage) {
-      this.storageProvider = createStorageProvider(appConfig.server.storage);
+      this.storageProvider = createStorageProvider(
+        appConfig.server.storage,
+        this.directories.globalStorageDir,
+      );
     }
 
     // Setup API routes and middleware (includes workspace static server)

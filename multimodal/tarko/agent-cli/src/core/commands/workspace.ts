@@ -9,6 +9,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import { spawn, exec } from 'child_process';
 import { promisify } from 'util';
+import { CLI_CONSTANTS } from '../../constants';
 
 interface WorkspaceConfig {
   globalWorkspaceCreated: boolean;
@@ -46,6 +47,12 @@ interface WorkspaceOptions {
  * Workspace management command handler
  */
 export class WorkspaceCommand {
+  private readonly globalWorkspaceDir: string;
+
+  constructor(globalWorkspaceDir?: string) {
+    this.globalWorkspaceDir = globalWorkspaceDir || CLI_CONSTANTS.GLOBAL_WORKSPACE_DIR;
+  }
+
   async execute(options: WorkspaceOptions): Promise<void> {
     try {
       if (options.init) {
@@ -69,7 +76,7 @@ export class WorkspaceCommand {
   }
 
   private async initWorkspace(): Promise<void> {
-    const workspacePath = path.join(os.homedir(), '.tarko');
+    const workspacePath = path.join(os.homedir(), this.globalWorkspaceDir);
 
     const p = await import('@clack/prompts');
     const { default: chalk } = await import('chalk');
@@ -294,7 +301,7 @@ export default config;
   }
 
   private async openWorkspace(): Promise<void> {
-    const workspacePath = path.join(os.homedir(), '.tarko');
+    const workspacePath = path.join(os.homedir(), this.globalWorkspaceDir);
 
     if (!fs.existsSync(workspacePath)) {
       console.error(
@@ -319,7 +326,7 @@ export default config;
   }
 
   private async enableGlobalWorkspace(): Promise<void> {
-    const workspacePath = path.join(os.homedir(), '.tarko');
+    const workspacePath = path.join(os.homedir(), this.globalWorkspaceDir);
     const { default: chalk } = await import('chalk');
     const { default: boxen } = await import('boxen');
 
@@ -357,7 +364,7 @@ export default config;
   }
 
   private async disableGlobalWorkspace(): Promise<void> {
-    const workspacePath = path.join(os.homedir(), '.tarko');
+    const workspacePath = path.join(os.homedir(), this.globalWorkspaceDir);
     const { default: chalk } = await import('chalk');
     const { default: boxen } = await import('boxen');
 
@@ -448,6 +455,6 @@ export default config;
   }
 
   public getGlobalWorkspacePath(): string {
-    return path.join(os.homedir(), '.tarko');
+    return path.join(os.homedir(), this.globalWorkspaceDir);
   }
 }

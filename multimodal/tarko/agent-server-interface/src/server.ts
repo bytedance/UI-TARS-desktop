@@ -5,8 +5,31 @@
  */
 
 import { AgioEvent } from '@multimodal/agio';
-import { IAgent, TConstructor, AgentOptions, AgentConstructor } from '@multimodal/agent-interface';
+import { IAgent, TConstructor, AgentOptions } from '@multimodal/agent-interface';
 import { AgentImplementation } from './implementation';
+
+/**
+ * Global directory configuration options
+ */
+export interface GlobalDirectoryOptions {
+  /**
+   * Global workspace directory name
+   * @default '.tarko'
+   */
+  globalWorkspaceDir?: string;
+
+  /**
+   * Global storage directory name
+   * @default '.tarko-storage'
+   */
+  globalStorageDir?: string;
+
+  /**
+   * Default workspace directory name for projects
+   * @default 'tarko-workspace'
+   */
+  defaultWorkspaceDir?: string;
+}
 
 /**
  * Version information for the Agent Server
@@ -61,6 +84,7 @@ export interface AgentServerStorageOptions {
  * - Storage configuration
  * - Sharing capabilities
  * - AGIO monitoring integration
+ * - Global directory configuration
  */
 export interface AgentServerOptions {
   /**

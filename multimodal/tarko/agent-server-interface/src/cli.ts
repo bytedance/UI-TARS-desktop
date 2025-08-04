@@ -18,6 +18,11 @@ export type AgentCLIArguments = Pick<
   AgentAppConfig,
   'model' | 'thinking' | 'toolCallEngine' | 'share' | 'snapshot' | 'logLevel' | 'server'
 > & {
+  /**
+   * Workspace shortcut
+   */
+  workspace?: string;
+
   // Server configuration
   /** Server port number - maps to server.port */
   port?: number;
