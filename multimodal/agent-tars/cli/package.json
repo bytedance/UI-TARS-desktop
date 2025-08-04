@@ -33,7 +33,7 @@
   "devDependencies": {
     "@rslib/core": "0.10.0",
     "@agent-tars/interface": "workspace:*",
-    "@multimodal/agio": "workspace:*",
+    "@tarko/agio": "workspace:*",
     "@clack/prompts": "0.11.0",
     "conf": "^14.0.0",
     "chalk": "5.4.1",

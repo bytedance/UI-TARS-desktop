@@ -27,7 +27,7 @@
   "dependencies": {
     "@mcp-agent/interface": "workspace:*",
     "@tarko/agent-server-interface": "workspace:*",
-    "@multimodal/agio": "workspace:*"
+    "@tarko/agio": "workspace:*"
   },
   "devDependencies": {
     "@rslib/core": "0.10.0",

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgioEvent } from '@multimodal/agio';
+import { AgioEvent } from '@tarko/agio';
 
 /**
  * Options for configuring the AgioBatchProcessor.

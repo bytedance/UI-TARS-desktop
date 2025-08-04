@@ -25,7 +25,7 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@multimodal/agio": "workspace:*",
+    "@tarko/agio": "workspace:*",
     "@tarko/agent-interface": "workspace:*"
   },
   "devDependencies": {

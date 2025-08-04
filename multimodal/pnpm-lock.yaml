@@ -51,7 +51,7 @@ importers:
       '@clack/prompts':
         specifier: 0.11.0
         version: 0.11.0
-      '@multimodal/agio':
+      '@tarko/agio':
         specifier: workspace:*
         version: link:../../tarko/agio
       '@rslib/core':
@@ -139,7 +139,7 @@ importers:
       '@mcp-agent/interface':
         specifier: workspace:*
         version: link:../../tarko/mcp-agent-interface
-      '@multimodal/agio':
+      '@tarko/agio':
         specifier: workspace:*
         version: link:../../tarko/agio
       '@tarko/agent-server-interface':
@@ -371,7 +371,7 @@ importers:
       '@clack/prompts':
         specifier: 0.11.0
         version: 0.11.0
-      '@multimodal/agio':
+      '@tarko/agio':
         specifier: workspace:*
         version: link:../agio
       '@multimodal/config-loader':
@@ -469,7 +469,7 @@ importers:
       '@agent-infra/shared':
         specifier: 0.0.2
         version: 0.0.2
-      '@multimodal/agio':
+      '@tarko/agio':
         specifier: workspace:*
         version: link:../agio
       '@rslib/core':
@@ -517,7 +517,7 @@ importers:
 
   tarko/agent-server-interface:
     dependencies:
-      '@multimodal/agio':
+      '@tarko/agio':
         specifier: workspace:*
         version: link:../agio
       '@tarko/agent-interface':

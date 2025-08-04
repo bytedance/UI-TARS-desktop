@@ -15,7 +15,7 @@ import {
 import { AgentSnapshot } from '@tarko/agent-snapshot';
 import { EventStreamBridge } from '../utils/event-stream';
 import type { AgentServer } from '../server';
-import { AgioEvent } from '@multimodal/agio';
+import { AgioEvent } from '@tarko/agio';
 import { handleAgentError, ErrorWithCode } from '../utils/error-handler';
 
 /**

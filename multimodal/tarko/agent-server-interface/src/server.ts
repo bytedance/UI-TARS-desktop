@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgioEvent } from '@multimodal/agio';
+import { AgioEvent } from '@tarko/agio';
 import { IAgent, TConstructor, AgentOptions } from '@tarko/agent-interface';
 import { AgentImplementation } from './implementation';
 

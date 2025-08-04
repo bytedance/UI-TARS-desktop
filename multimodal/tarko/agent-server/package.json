@@ -25,7 +25,7 @@
   "devDependencies": {
     "@tarko/agent-server-interface": "workspace:*",
     "@tarko/agent-snapshot": "workspace:*",
-    "@multimodal/agio": "workspace:*",
+    "@tarko/agio": "workspace:*",
     "@agent-infra/shared": "0.0.2",
     "cors": "^2.8.5",
     "express": "4.21.2",
