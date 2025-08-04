@@ -1,5 +1,5 @@
 import { atom } from 'jotai';
-import { ConnectionStatus, ModelInfo, PanelContent } from '@/common/types';
+import { ConnectionStatus, ModelInfo, PanelContent, AgentInfo } from '@/common/types';
 
 /**
  * Atom for the content currently displayed in the panel
@@ -22,6 +22,13 @@ export const connectionStatusAtom = atom<ConnectionStatus>({
 export const modelInfoAtom = atom<ModelInfo>({
   provider: '',
   model: '',
+});
+
+/**
+ * Atom for agent info (agent name)
+ */
+export const agentInfoAtom = atom<AgentInfo>({
+  name: 'Unknown Agent',
 });
 
 /**

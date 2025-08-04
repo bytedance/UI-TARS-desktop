@@ -23,6 +23,13 @@ export interface SessionMetadata {
 }
 
 /**
+ * Agent information
+ */
+export interface AgentInfo {
+  name: string;
+}
+
+/**
  * Tool result type with categorization and timing information
  */
 export interface ToolResult {

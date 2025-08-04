@@ -23,3 +23,13 @@ export function getVersion(req: Request, res: Response) {
     gitHash: server.versionInfo?.gitHash,
   });
 }
+
+/**
+ * Get current agent information
+ */
+export function getAgentInfo(req: Request, res: Response) {
+  const server = req.app.locals.server;
+  res.status(200).json({
+    name: server.getCurrentAgentName() || 'Unknown Agent',
+  });
+}

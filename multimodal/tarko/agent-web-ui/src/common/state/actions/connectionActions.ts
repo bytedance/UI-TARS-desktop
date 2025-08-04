@@ -2,7 +2,7 @@ import { atom } from 'jotai';
 import { SOCKET_EVENTS } from '@/common/constants';
 import { apiService } from '@/common/services/apiService';
 import { socketService } from '@/common/services/socketService';
-import { connectionStatusAtom } from '@/common/state/atoms/ui';
+import { connectionStatusAtom, agentInfoAtom } from '@/common/state/atoms/ui';
 
 /**
  * Check server connection status
@@ -19,6 +19,16 @@ export const checkConnectionStatusAction = atom(null, async (get, set) => {
       lastConnected: isConnected ? Date.now() : currentStatus.lastConnected,
       lastError: isConnected ? null : currentStatus.lastError,
     });
+
+    // Load agent info when connection is successful
+    if (isConnected) {
+      try {
+        const agentInfo = await apiService.getAgentInfo();
+        set(agentInfoAtom, agentInfo);
+      } catch (error) {
+        console.warn('Failed to load agent info:', error);
+      }
+    }
 
     return isConnected;
   } catch (error) {

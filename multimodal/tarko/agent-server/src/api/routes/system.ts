@@ -16,4 +16,7 @@ export function registerSystemRoutes(app: express.Application): void {
 
   // Version information endpoint
   app.get('/api/v1/version', systemController.getVersion);
+
+  // Agent information endpoint
+  app.get('/api/v1/agent', systemController.getAgentInfo);
 }

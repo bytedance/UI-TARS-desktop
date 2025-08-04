@@ -1,5 +1,5 @@
 import { API_BASE_URL, API_ENDPOINTS } from '@/common/constants';
-import { AgentEventStream, SessionMetadata } from '@/common/types';
+import { AgentEventStream, SessionMetadata, AgentInfo } from '@/common/types';
 import { socketService } from './socketService';
 import { ChatCompletionContentPart } from '@tarko/agent-interface';
 import { AgentServerVersionInfo } from '@agent-tars/interface';
@@ -12,6 +12,7 @@ import { AgentServerVersionInfo } from '@agent-tars/interface';
  * - Query execution (streaming and non-streaming)
  * - Server health checks
  * - Version information
+ * - Agent information
  */
 class ApiService {
   /**
@@ -370,6 +371,31 @@ class ApiService {
     } catch (error) {
       console.error('Error getting version info:', error);
       return { version: '0.0.0', buildTime: Date.now() };
+    }
+  }
+
+  /**
+   * Get current agent information
+   */
+  async getAgentInfo(): Promise<AgentInfo> {
+    try {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.AGENT_INFO}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(3000),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get agent info: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return {
+        name: data.name || 'Unknown Agent',
+      };
+    } catch (error) {
+      console.error('Error getting agent info:', error);
+      return { name: 'Unknown Agent' };
     }
   }
 }
