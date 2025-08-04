@@ -230,7 +230,7 @@ In Agent TARS, the main challenge in long-step task scenarios is that the intern
 For this, we need to introduce a design pattern that can save the environment on which the Agent depends as a Snapshot at runtime, and then replay the Agent based on the Snapshot to ensure that the Agent's Context, Run Loop state, and final Response remain deterministic. Finally, our designed Snapshot framework example is as follows:
 
 ```ts
-import { Agent } from '@multimodal/agent';
+import { Agent } from '@tarko/agent';
 import { AgentSnapshot } from '@multimodal/agent-snapshot';
 
 const agent = new Agent({

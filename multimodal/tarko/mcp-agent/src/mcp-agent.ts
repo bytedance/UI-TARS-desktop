@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { Agent, Tool } from '@multimodal/agent';
+import { Agent, Tool } from '@tarko/agent';
 import { MCPAgentOptions, IMCPClient, MCPServerRegistry } from './mcp-types';
 import { MCPClient } from './mcp-client';
 import { MCPClientV2 } from './mcp-client-v2';

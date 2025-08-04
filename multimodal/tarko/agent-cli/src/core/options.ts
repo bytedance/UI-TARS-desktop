@@ -119,7 +119,7 @@ export async function resolveAgentFromCLIArgument(
     return defaultAgent;
   }
 
-  const { Agent } = await import('@multimodal/agent');
+  const { Agent } = await import('@tarko/agent');
   return {
     type: 'module',
     label: 'Tarko',

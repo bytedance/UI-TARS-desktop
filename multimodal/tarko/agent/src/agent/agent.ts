@@ -89,7 +89,7 @@ export class Agent<T extends AgentOptions = AgentOptions>
     this.maxIterations = options.maxIterations ?? 10;
     this.maxTokens = options.maxTokens;
     this.name = options.name ?? 'Anonymous';
-    this.id = options.id ?? '@multimodal/agent';
+    this.id = options.id ?? '@tarko/agent';
 
     // console.log(JSON.stringify(options, null, 2));
 

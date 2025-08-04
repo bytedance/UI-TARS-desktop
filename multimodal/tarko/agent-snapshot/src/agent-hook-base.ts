@@ -5,7 +5,7 @@
 
 import path from 'path';
 import fs from 'fs';
-import { Agent } from '@multimodal/agent';
+import { Agent } from '@tarko/agent';
 import {
   AgentRunOptions,
   LLMRequestHookPayload,

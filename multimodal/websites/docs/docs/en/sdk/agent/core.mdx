@@ -32,7 +32,7 @@ npm install @multimodal/agent
 Create a `index.ts`:
 
 ```ts
-import { Agent, Tool, z } from '@multimodal/agent';
+import { Agent, Tool, z } from '@tarko/agent';
 
 const locationTool = new Tool({
   id: 'getCurrentLocation',
@@ -114,7 +114,7 @@ All agent options please refer to [Agent Config](../../api/config/agent.md).
 Define a `Tool` instance:
 
 ```ts
-import { Tool, z } from '@multimodal/agent';
+import { Tool, z } from '@tarko/agent';
 
 const locationTool = new Tool({
   id: 'getCurrentLocation',

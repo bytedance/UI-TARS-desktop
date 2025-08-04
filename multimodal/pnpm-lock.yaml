@@ -115,7 +115,7 @@ importers:
       '@mcp-agent/core':
         specifier: workspace:*
         version: link:../../tarko/mcp-agent
-      '@multimodal/agent':
+      '@tarko/agent':
         specifier: workspace:*
         version: link:../../tarko/agent
       '@multimodal/agent-snapshot':
@@ -358,7 +358,7 @@ importers:
 
   tarko/agent-cli:
     dependencies:
-      '@multimodal/agent':
+      '@tarko/agent':
         specifier: workspace:*
         version: link:../agent
       '@multimodal/shared-utils':
@@ -542,7 +542,7 @@ importers:
       '@agent-infra/logger':
         specifier: 0.0.2-beta.2
         version: 0.0.2-beta.2
-      '@multimodal/agent':
+      '@tarko/agent':
         specifier: workspace:*
         version: link:../agent
       '@multimodal/agent-interface':
@@ -790,7 +790,7 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.12.1
         version: 1.12.1
-      '@multimodal/agent':
+      '@tarko/agent':
         specifier: workspace:*
         version: link:../agent
       '@multimodal/agent-snapshot':
@@ -989,7 +989,7 @@ importers:
         specifier: ^3.4.17
         version: 3.4.17(ts-node@10.9.2(@types/node@18.19.105)(typescript@5.8.3))
     devDependencies:
-      '@multimodal/agent':
+      '@tarko/agent':
         specifier: workspace:*
         version: link:../../tarko/agent
       '@rspress/plugin-client-redirects':

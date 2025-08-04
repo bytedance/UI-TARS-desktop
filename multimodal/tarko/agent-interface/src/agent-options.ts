@@ -20,7 +20,7 @@ export interface AgentBaseOptions {
    * Optional unique identifier for this agent instance.
    * Useful for tracking and logging purposes.
    *
-   * @defaultValue `"@multimodal/agent"`
+   * @defaultValue `"@tarko/agent"`
    */
   id?: string;
 

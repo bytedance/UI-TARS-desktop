@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Agent, AgentRunOptions } from '@multimodal/agent';
+import { Agent, AgentRunOptions } from '@tarko/agent';
 import { AgentSnapshot } from './agent-snapshot';
 import { SnapshotRunResult } from './types';
 

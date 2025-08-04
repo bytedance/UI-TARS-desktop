@@ -27,7 +27,7 @@
     "agent:snapshot:test": "npx vitest snapshot/index.test.ts"
   },
   "dependencies": {
-    "@multimodal/agent": "workspace:*",
+    "@tarko/agent": "workspace:*",
     "@multimodal/agent-snapshot": "workspace:*",
     "@mcp-agent/interface": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.12.1",

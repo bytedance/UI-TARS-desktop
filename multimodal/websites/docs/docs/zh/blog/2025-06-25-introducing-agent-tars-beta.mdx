@@ -219,7 +219,7 @@ Agent TARS 中建设的差异，以及我们的一些演进方向。
 为此，我们需要引入一种设计模式，能够在运行时将 Agent 所依赖的环境保存为 Snapshot，接着，可以基于 Snapshot 来回放 Agent，确保 Agent 的 Context、Run Loop state，与最终的 Response 保持确定。最终，我们设计的 Snapshot 框架示例如下：
 
 ```ts
-import { Agent } from '@multimodal/agent';
+import { Agent } from '@tarko/agent';
 import { AgentSnapshot } from '@multimodal/agent-snapshot';
 
 const agent = new Agent({

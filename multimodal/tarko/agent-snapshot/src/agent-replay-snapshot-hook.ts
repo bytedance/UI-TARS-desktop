@@ -4,7 +4,7 @@
  */
 
 import path from 'path';
-import { Agent } from '@multimodal/agent';
+import { Agent } from '@tarko/agent';
 import { SnapshotManager, ToolCallData } from './snapshot-manager';
 import { logger } from './utils/logger';
 import {

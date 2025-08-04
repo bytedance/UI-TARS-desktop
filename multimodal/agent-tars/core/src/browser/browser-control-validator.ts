@@ -5,7 +5,7 @@
 
 import { ConsoleLogger } from '@mcp-agent/core';
 import { BrowserControlMode } from '../types';
-import { ModelProviderName } from '@multimodal/agent';
+import { ModelProviderName } from '@tarko/agent';
 
 /**
  * Supported providers for GUI-based browser control strategies

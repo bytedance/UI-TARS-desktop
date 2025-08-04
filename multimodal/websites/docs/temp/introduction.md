@@ -257,7 +257,7 @@ Agent TARS can be integrated into various applications using different patterns:
 Direct integration within a Node.js application:
 
 ```ts
-import { Agent } from '@multimodal/agent';
+import { Agent } from '@tarko/agent';
 
 const agent = new Agent(options);
 const response = await agent.run('Research quantum computing advancements');
