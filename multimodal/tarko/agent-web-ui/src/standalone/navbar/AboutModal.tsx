@@ -4,15 +4,21 @@ import { motion } from 'framer-motion';
 import { FiX, FiExternalLink, FiGithub, FiGlobe, FiCpu, FiCopy, FiCheck } from 'react-icons/fi';
 import { apiService } from '@/common/services/apiService';
 import { AgentServerVersionInfo } from '@agent-tars/interface';
-import { ModelInfo } from '@/common/types';
+import { ModelInfo, AgentInfo } from '@/common/types';
 
 interface AboutModalProps {
   isOpen: boolean;
   onClose: () => void;
   modelInfo: ModelInfo;
+  agentInfo: AgentInfo;
 }
 
-export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, modelInfo }) => {
+export const AboutModal: React.FC<AboutModalProps> = ({
+  isOpen,
+  onClose,
+  modelInfo,
+  agentInfo,
+}) => {
   const [versionInfo, setVersionInfo] = useState<AgentServerVersionInfo | null>(null);
   const [copiedModel, setCopiedModel] = useState(false);
 
@@ -82,11 +88,11 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, modelIn
               </div>
 
               <h1 className="text-4xl md:text-5xl font-light text-gray-900 dark:text-gray-100 mb-4 tracking-wide">
-                Agent TARS
+                {agentInfo.name || 'Tarko'}
               </h1>
 
               <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 font-light tracking-wider uppercase">
-                An Open-Source Multimodal AI Agent
+                {'An Open-Source Multimodal AI Agent'}
               </p>
             </motion.div>
 

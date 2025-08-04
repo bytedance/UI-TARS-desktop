@@ -2,7 +2,7 @@ import React, { useCallback, useEffect } from 'react';
 import { ShareButton } from '@/standalone/share';
 import { AboutModal } from './AboutModal';
 import { motion } from 'framer-motion';
-import { FiMoon, FiSun, FiInfo } from 'react-icons/fi';
+import { FiMoon, FiSun, FiInfo, FiCpu } from 'react-icons/fi';
 import { GoSidebarCollapse, GoSidebarExpand } from 'react-icons/go';
 import { useLayout } from '@/common/hooks/useLayout';
 import { useSession } from '@/common/hooks/useSession';
@@ -12,7 +12,7 @@ import './Navbar.css';
 
 export const Navbar: React.FC = () => {
   const { isSidebarCollapsed, toggleSidebar } = useLayout();
-  const { activeSessionId, isProcessing, modelInfo } = useSession();
+  const { activeSessionId, isProcessing, modelInfo, agentInfo } = useSession();
   const { isReplayMode } = useReplayMode();
   const [isDarkMode, setIsDarkMode] = React.useState(true);
   const [showAboutModal, setShowAboutModal] = React.useState(false);
@@ -93,8 +93,19 @@ export const Navbar: React.FC = () => {
           </div>
         )}
 
-        {/* Center section - now empty, model info moved to About modal */}
-        <div className="flex-1" />
+        {/* Center section - Smaller Agent name badge */}
+        <div className="flex-1 flex justify-center">
+          {agentInfo.name && (
+            <div className="agent-name-badge">
+              <div className="flex items-center gap-1.5 px-2 py-1 bg-gradient-to-r from-blue-500/10 to-purple-500/10 dark:from-blue-400/15 dark:to-purple-400/15 border border-blue-200/30 dark:border-blue-400/20 rounded-full shadow-sm backdrop-blur-sm">
+                <FiCpu size={12} className="text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                <span className="text-xs font-medium text-blue-800 dark:text-blue-200 truncate max-w-[150px]">
+                  {agentInfo.name}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Right section - reordered buttons: About, Dark mode, Share */}
         <div className="flex items-center space-x-1 md:space-x-2">
@@ -125,11 +136,12 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* About Modal - pass modelInfo */}
+      {/* About Modal - pass modelInfo and agentInfo */}
       <AboutModal
         isOpen={showAboutModal}
         onClose={() => setShowAboutModal(false)}
         modelInfo={modelInfo}
+        agentInfo={agentInfo}
       />
     </>
   );
