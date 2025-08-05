@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { deepMerge } from '@tarko/shared-utils';
+import { deepMerge, isTest } from '@tarko/shared-utils';
 import {
   AgentCLIArguments,
   ModelProviderName,
@@ -13,7 +13,6 @@ import {
 } from '@tarko/agent-server-interface';
 import { resolveValue } from '../utils';
 import path from 'path';
-import { isTest } from '../../../agent/src/utils/env';
 
 /**
  * Handler for processing deprecated CLI options

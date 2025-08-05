@@ -22,8 +22,7 @@ import {
 } from '@tarko/agent-interface';
 
 import { zodToJsonSchema } from '../utils';
-import { getLogger } from '@tarko/shared-utils';
-import { isTest } from '../utils/env';
+import { getLogger, isTest } from '@tarko/shared-utils';
 import { buildToolCallResultMessages } from './utils';
 
 /**
