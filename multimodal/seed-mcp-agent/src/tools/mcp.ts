@@ -9,6 +9,7 @@ export class McpManager {
   static McpClientType = {
     Tavily: 'tavily_client',
     Google: 'google_search_client',
+    ShellCI: 'shell_ci_client',
   };
 
   public client: MCPClient;
@@ -34,6 +35,12 @@ export class McpManager {
         headers: {
           'x-serper-api-key': options.googleApiKey,
         },
+      },
+      {
+        type: 'streamable-http',
+        name: McpManager.McpClientType.ShellCI,
+        description: 'code runner tool',
+        url: process.env.SHELLCI_MCP_URL,
       },
     ]);
   }

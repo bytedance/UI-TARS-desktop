@@ -44,6 +44,8 @@ export class SeedMcpAgent extends Agent {
 
     this.registerTool(new SearchToolProvider(mcpManager).getTool());
     this.registerTool(new LinkReaderToolProvider(mcpManager).getTool());
+    //TODO: 暂时不注册shell
+    //this.registerTool(new ShellToolProvider(mcpManager).getTool());
     await super.initialize();
   }
 
