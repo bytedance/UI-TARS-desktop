@@ -1,12 +1,14 @@
 @multimodal/seed-mcp-agent
 
-## 配置模型 和 mcp apiKey
+## configure model and mcp apiKey
 
 ```
-# bernald proxy
-export SEED_PROXY_URL=""
-# seed 模型 apikey
-export ARK_TEST_KEY=""
+# model proxy
+export OMNI_TARS_BASE_URL=""
+# model apikey
+export OMNI_TARS_API_KEY=""
+# model id
+export OMNI_TARS_MODEL_ID=""
 # tavily api key
 export TAVILY_API_KEY=""
 # google search mcp url
@@ -15,7 +17,7 @@ export GOOGLE_MCP_URL=""
 export GOOGLE_API_KEY=""
 ```
 
-## 本地启动
+## local startup
 
 ```bash
 pnpm dev:agent

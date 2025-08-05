@@ -28,7 +28,7 @@ export class LinkReaderToolProvider {
         return this.mcpManager.client.callTool({
           client: McpManager.McpClientType.Tavily,
           name: 'tavily_extract',
-          // name: 'tavily-extract', // 使用 stdio 时所有 tool是中划线连接
+          // name: 'tavily-extract', // All tools are midscore connections when using stdio
           args: {
             extract_depth: 'basic',
             format: 'markdown',

@@ -48,8 +48,6 @@ export default class SeedMcpAgent extends Agent {
 
     this.registerTool(new SearchToolProvider(mcpManager).getTool());
     this.registerTool(new LinkReaderToolProvider(mcpManager).getTool());
-    //TODO:
-    //this.registerTool(new ShellToolProvider(mcpManager).getTool());
     await super.initialize();
   }
 

@@ -8,8 +8,8 @@ import { Questions } from './question';
 
 async function main() {
   const openai = new OpenAI({
-    apiKey: process.env.ARK_TEST_KEY,
-    baseURL: process.env.ARK_TEST_URL,
+    apiKey: process.env.OMNI_TARS_API_KEY,
+    baseURL: process.env.OMNI_TARS_BASE_URL,
   });
 
   const messages: Array<ChatCompletionMessageParam> = [
@@ -17,7 +17,7 @@ async function main() {
   ];
 
   const ans = await openai.chat.completions.create({
-    model: 'ep-20250627155918-4jmhg',
+    model: process.env.OMNI_TARS_MODEL_ID,
     messages: messages,
   });
 

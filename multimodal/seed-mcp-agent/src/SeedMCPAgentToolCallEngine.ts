@@ -85,7 +85,7 @@ export class SeedMCPAgentToolCallEngine extends ToolCallEngine {
    * Extracts information from the LLM response.
    * @param content The string containing think, FunctionCall, and answer.
    */
-  private parseContent(content: string): {
+  public parseContent(content: string): {
     answer: string;
     think: string;
     tools: ChatCompletionMessageToolCall[];

@@ -40,12 +40,6 @@ export class McpManager {
           'x-serper-api-key': options.googleApiKey,
         },
       },
-      // {
-      //   type: 'streamable-http',
-      //   name: McpManager.McpClientType.ShellCI,
-      //   description: 'code runner tool',
-      //   url: process.env.SWALM_MCP_URL,
-      // },
     ]);
   }
 

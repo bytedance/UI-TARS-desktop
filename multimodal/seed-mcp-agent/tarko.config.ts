@@ -5,16 +5,11 @@
 import { defineConfig, LogLevel } from '@tarko/agent-cli';
 
 export default defineConfig({
-  // model: {
-  //   baseURL: process.env.ARK_TEST_URL,
-  //   apiKey: process.env.ARK_TEST_KEY,
-  //   id: 'ep-20250627155918-4jmhg',
-  // },
   model: {
     provider: 'openai-non-streaming',
-    baseURL: process.env.SEED_PROXY_URL,
-    apiKey: process.env.ARK_TEST_KEY,
-    id: '{search.nlp.seed_vision}.{hl}.{M8-23B-MoE-250717_m8_agentrlmodel_codeformatv2_0711_google_roll_back-S100}.{gui_23b_rl_s100}',
+    baseURL: process.env.OMNI_TARS_BASE_URL,
+    apiKey: process.env.OMNI_TARS_API_KEY,
+    id: process.env.OMNI_TARS_MODEL_ID,
   },
   tavilyApiKey: process.env.TAVILY_API_KEY!,
   googleApiKey: process.env.GOOGLE_API_KEY!,
