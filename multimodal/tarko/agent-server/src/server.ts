@@ -198,8 +198,10 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    * @returns Promise resolving with the server instance
    */
   async start(): Promise<http.Server> {
-    // Resolve agent implementation
-    const agentResolutionResult = await resolveAgentImplementation(this.appConfig.agent);
+    // Resolve agent implementation with workspace context
+    const agentResolutionResult = await resolveAgentImplementation(this.appConfig.agent, {
+      workspace: this.appConfig.workspace,
+    });
     this.currentAgentResolution = agentResolutionResult;
 
     // Initialize storage if available

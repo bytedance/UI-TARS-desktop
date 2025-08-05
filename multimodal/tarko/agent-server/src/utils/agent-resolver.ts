@@ -10,8 +10,19 @@ import {
   AgentConstructor,
 } from '@tarko/agent-server-interface';
 
+/**
+ * Options for agent implementation resolution
+ */
+interface AgentResolutionOptions {
+  /**
+   * Workspace directory path for resolving relative module paths
+   */
+  workspace?: string;
+}
+
 export async function resolveAgentImplementation(
   implementaion?: AgentImplementation,
+  options?: AgentResolutionOptions,
 ): Promise<AgentResolutionResult> {
   if (!implementaion) {
     throw new Error(`Missing agent implmentation`);
@@ -29,9 +40,16 @@ export async function resolveAgentImplementation(
     const agentModulePathIdentifier = implementaion.value;
 
     try {
+      // Build resolve options with workspace path if provided
+      const resolveOptions: { paths?: string[] } = {};
+      if (options?.workspace) {
+        resolveOptions.paths = [options.workspace];
+      }
+
       // First, use require.resolve to validate module existence and get absolute path
       // This handles npm packages, relative paths, and directories more robustly
-      const resolvedPath = require.resolve(agentModulePathIdentifier);
+      // When workspace is provided, it will be used as the base path for relative imports
+      const resolvedPath = require.resolve(agentModulePathIdentifier, resolveOptions);
 
       // Use the resolved absolute path for import to ensure consistency
       const agentModule = await import(resolvedPath);
