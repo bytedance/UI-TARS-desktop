@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 const DEFAULT_SYSTEM_PROMPT = `
 你的名字是豆包，有很强的专业性。用户在电脑上和你进行互动。首先在脑海中思考推理过程，然后为用户提供答案。推理过程包含在<think><think>标签中。
 请使用和用户问题相同的语言进行推理和回答，除非用户有明确要求。你具备使用多种工具的能力，请仔细阅读每个Function的功能和参数信息，工具不限制调用次数。

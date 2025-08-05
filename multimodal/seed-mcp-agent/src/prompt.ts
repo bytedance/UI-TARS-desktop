@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 export const SYSTEM_PROMPT = `
     You are a general AI agent, a helpful AI assistant that can interact with the following environments to solve tasks: code, mcp functions and computer.
 

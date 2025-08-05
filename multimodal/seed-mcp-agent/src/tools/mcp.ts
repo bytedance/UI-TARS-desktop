@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import { MCPClient } from '@agent-infra/mcp-client';
 
 export interface McpManagerOptions {
@@ -40,7 +44,7 @@ export class McpManager {
       //   type: 'streamable-http',
       //   name: McpManager.McpClientType.ShellCI,
       //   description: 'code runner tool',
-      //   url: process.env.SHELLCI_MCP_URL,
+      //   url: process.env.SWALM_MCP_URL,
       // },
     ]);
   }

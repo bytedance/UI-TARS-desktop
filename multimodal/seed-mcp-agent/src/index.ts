@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import {
   Agent,
   AgentOptions,
@@ -44,7 +48,7 @@ export default class SeedMcpAgent extends Agent {
 
     this.registerTool(new SearchToolProvider(mcpManager).getTool());
     this.registerTool(new LinkReaderToolProvider(mcpManager).getTool());
-    //TODO: 暂时不注册shell
+    //TODO:
     //this.registerTool(new ShellToolProvider(mcpManager).getTool());
     await super.initialize();
   }

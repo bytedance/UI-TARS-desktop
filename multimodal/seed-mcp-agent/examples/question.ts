@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 export const Questions = {
   Weather: 'how is the weather in beijing？',
   //gaia task id: c61d22de-5f6c-4958-a7f6-5e9707bd3466

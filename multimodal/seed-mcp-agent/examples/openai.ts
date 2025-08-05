@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import { OpenAI } from 'openai';
 import { ChatCompletionMessageParam, ChatCompletionMessageToolCall } from 'openai/resources';
 import { Questions } from './question';

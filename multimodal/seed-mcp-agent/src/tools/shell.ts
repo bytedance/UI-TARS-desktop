@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import { Tool, z } from '@tarko/agent';
 import { McpManager } from './mcp';
 
@@ -21,6 +25,7 @@ export class ShellToolProvider {
           name: 'run_code',
           args: {
             code: command,
+            token: process.env.SWALM_ENV_TOKEN,
           },
         });
       },
