@@ -4,7 +4,7 @@
  */
 
 import { Command } from 'cac';
-import { AgentCLIArguments, AgentImplementation } from '@tarko/agent-server-interface';
+import { AgentCLIArguments, AgentImplementation } from '@tarko/interface';
 import { AgioProvider } from '../agio/AgioProvider';
 
 export type { AgentCLIArguments };

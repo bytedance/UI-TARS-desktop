@@ -6,7 +6,7 @@
 
 import { deepMerge } from '@tarko/shared-utils';
 import { loadConfig } from '@tarko/config-loader';
-import { AgentAppConfig } from '@tarko/agent-server-interface';
+import { AgentAppConfig } from '@tarko/interface';
 import fetch from 'node-fetch';
 import { logger } from '../utils';
 import { CONFIG_FILES } from './paths';

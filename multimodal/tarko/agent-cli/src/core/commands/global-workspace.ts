@@ -9,7 +9,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import { spawn, exec } from 'child_process';
 import { promisify } from 'util';
-import { TARKO_CONSTANTS } from '@tarko/agent-server-interface';
+import { TARKO_CONSTANTS } from '@tarko/interface';
 
 interface GlobalWorkspaceConfig {
   globalWorkspaceCreated: boolean;
@@ -196,7 +196,7 @@ export class GlobalWorkspaceCommand {
       version: '0.1.0',
       private: true,
       dependencies: {
-        '@tarko/agent-server-interface': 'latest',
+        '@tarko/interface': 'latest',
       },
     };
 
@@ -218,7 +218,7 @@ export class GlobalWorkspaceCommand {
 
     fs.writeFileSync(path.join(workspacePath, 'tsconfig.json'), JSON.stringify(tsConfig, null, 2));
 
-    const configContent = `import { AgentAppConfig } from '@tarko/agent-server-interface';
+    const configContent = `import { AgentAppConfig } from '@tarko/interface';
 
 /**
  * Tarko Agent Configuration

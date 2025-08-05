@@ -121,12 +121,12 @@ importers:
 
   agent-tars/interface:
     dependencies:
-      '@tarko/agent-server-interface':
-        specifier: workspace:*
-        version: link:../../tarko/agent-server-interface
       '@tarko/agio':
         specifier: workspace:*
         version: link:../../tarko/agio
+      '@tarko/interface':
+        specifier: workspace:*
+        version: link:../../tarko/interface
       '@tarko/mcp-agent-interface':
         specifier: workspace:*
         version: link:../../tarko/mcp-agent-interface
@@ -286,15 +286,15 @@ importers:
       '@tarko/agent-interface':
         specifier: workspace:*
         version: link:../agent-interface
-      '@tarko/agent-server-interface':
-        specifier: workspace:*
-        version: link:../agent-server-interface
       '@tarko/agio':
         specifier: workspace:*
         version: link:../agio
       '@tarko/config-loader':
         specifier: workspace:*
         version: link:../config-loader
+      '@tarko/interface':
+        specifier: workspace:*
+        version: link:../interface
       '@tarko/web-ui':
         specifier: workspace:*
         version: link:../agent-web-ui
@@ -381,15 +381,15 @@ importers:
       '@rslib/core':
         specifier: 0.10.0
         version: 0.10.0(typescript@5.8.3)
-      '@tarko/agent-server-interface':
-        specifier: workspace:*
-        version: link:../agent-server-interface
       '@tarko/agent-snapshot':
         specifier: workspace:*
         version: link:../agent-snapshot
       '@tarko/agio':
         specifier: workspace:*
         version: link:../agio
+      '@tarko/interface':
+        specifier: workspace:*
+        version: link:../interface
       '@types/cors':
         specifier: ^2.8.17
         version: 2.8.18
@@ -423,28 +423,6 @@ importers:
       vitest:
         specifier: 3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
-
-  tarko/agent-server-interface:
-    dependencies:
-      '@tarko/agent-interface':
-        specifier: workspace:*
-        version: link:../agent-interface
-      '@tarko/agio':
-        specifier: workspace:*
-        version: link:../agio
-    devDependencies:
-      '@rslib/core':
-        specifier: 0.10.0
-        version: 0.10.0(typescript@5.8.3)
-      '@types/node':
-        specifier: 22.15.30
-        version: 22.15.30
-      tsx:
-        specifier: ^4.19.2
-        version: 4.19.4
-      typescript:
-        specifier: ^5.5.3
-        version: 5.8.3
 
   tarko/agent-snapshot:
     dependencies:
@@ -632,6 +610,28 @@ importers:
       vitest:
         specifier: 3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
+
+  tarko/interface:
+    dependencies:
+      '@tarko/agent-interface':
+        specifier: workspace:*
+        version: link:../agent-interface
+      '@tarko/agio':
+        specifier: workspace:*
+        version: link:../agio
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.10.0
+        version: 0.10.0(typescript@5.8.3)
+      '@types/node':
+        specifier: 22.15.30
+        version: 22.15.30
+      tsx:
+        specifier: ^4.19.2
+        version: 4.19.4
+      typescript:
+        specifier: ^5.5.3
+        version: 5.8.3
 
   tarko/llm:
     devDependencies:

@@ -10,7 +10,7 @@ import {
   AgentAppConfig,
   LogLevel,
   isAgentWebUIImplementationType,
-} from '@tarko/agent-server-interface';
+} from '@tarko/interface';
 import { resolveValue } from '../utils';
 import path from 'path';
 

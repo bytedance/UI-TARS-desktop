@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { TARKO_CONSTANTS } from '@tarko/agent-server-interface';
+import { TARKO_CONSTANTS } from '@tarko/interface';
 import { logger } from '../utils';
 import * as path from 'path';
 import * as fs from 'fs';

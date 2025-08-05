@@ -6,7 +6,7 @@
 import path from 'path';
 import fs from 'fs';
 import { DatabaseSync } from 'node:sqlite';
-import { AgentEventStream, TARKO_CONSTANTS } from '@tarko/agent-server-interface';
+import { AgentEventStream, TARKO_CONSTANTS } from '@tarko/interface';
 import { StorageProvider, SessionMetadata } from './types';
 
 // Define row types for better type safety

@@ -6,10 +6,7 @@
 import { Request, Response } from 'express';
 import { getLogger } from '@tarko/shared-utils';
 import { ImageCompressor, formatBytes } from '@tarko/shared-media-utils';
-import {
-  ChatCompletionContentPart,
-  ChatCompletionContentPartImage,
-} from '@tarko/agent-server-interface';
+import { ChatCompletionContentPart, ChatCompletionContentPartImage } from '@tarko/interface';
 import { createErrorResponse } from '../../utils/error-handler';
 
 const imageCompressor = new ImageCompressor({

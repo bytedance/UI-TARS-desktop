@@ -8,7 +8,7 @@ import {
   isAgentImplementationType,
   AgentResolutionResult,
   AgentConstructor,
-} from '@tarko/agent-server-interface';
+} from '@tarko/interface';
 
 /**
  * Options for agent implementation resolution

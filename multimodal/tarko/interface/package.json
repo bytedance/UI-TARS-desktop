@@ -1,7 +1,7 @@
 {
-  "name": "@tarko/agent-server-interface",
+  "name": "@tarko/interface",
   "version": "0.3.0-beta.1",
-  "description": "Interface for Agent Server",
+  "description": "High-level interfaces for Tarko, including Tarko Agent Server and Tarko Agent CLI",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -10,6 +10,18 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
+    },
+    "./define-config": {
+      "types": "./dist/define-config.d.ts",
+      "import": "./dist/define-config.mjs",
+      "require": "./dist/define-config.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "define-config": [
+        "dist/define-config/index.d.ts"
+      ]
     }
   },
   "publishConfig": {

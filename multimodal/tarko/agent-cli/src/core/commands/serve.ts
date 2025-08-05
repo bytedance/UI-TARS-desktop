@@ -4,7 +4,7 @@
  */
 
 import http from 'http';
-import { LogLevel } from '@tarko/agent-server-interface';
+import { LogLevel } from '@tarko/interface';
 import { AgentCLIServeCommandOptions } from '../../types';
 import { AgentServer } from '@tarko/agent-server';
 import boxen from 'boxen';

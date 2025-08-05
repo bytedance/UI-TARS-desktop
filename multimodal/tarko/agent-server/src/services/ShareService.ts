@@ -4,7 +4,7 @@
  */
 
 import crypto from 'crypto';
-import { AgentEventStream, isAgentWebUIImplementationType } from '@tarko/agent-server-interface';
+import { AgentEventStream, isAgentWebUIImplementationType } from '@tarko/interface';
 import { SessionMetadata, StorageProvider } from '../storage';
 import { ShareUtils } from '../utils/share';
 import { SlugGenerator } from '../utils/slug-generator';

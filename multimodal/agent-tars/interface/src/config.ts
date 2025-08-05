@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentAppConfig } from '@tarko/agent-server-interface';
+import { AgentAppConfig } from '@tarko/interface';
 import { AgentTARSOptions } from './core';
 
 export type AgentTARSAppConfig = AgentAppConfig<AgentTARSOptions>;

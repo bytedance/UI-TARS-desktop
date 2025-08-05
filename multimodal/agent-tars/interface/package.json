@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@tarko/mcp-agent-interface": "workspace:*",
-    "@tarko/agent-server-interface": "workspace:*",
+    "@tarko/interface": "workspace:*",
     "@tarko/agio": "workspace:*"
   },
   "devDependencies": {

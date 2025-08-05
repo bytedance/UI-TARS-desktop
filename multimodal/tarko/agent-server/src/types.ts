@@ -3,13 +3,9 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import {
-  AgentAppConfig,
-  AgentServerVersionInfo,
-  GlobalDirectoryOptions,
-} from '@tarko/agent-server-interface';
+import { AgentAppConfig, AgentServerVersionInfo, GlobalDirectoryOptions } from '@tarko/interface';
 
-export * from '@tarko/agent-server-interface';
+export * from '@tarko/interface';
 
 /**
  * Agent Server instantiation configuration

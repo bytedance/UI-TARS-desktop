@@ -11,7 +11,7 @@ import {
   AgioProviderConstructor,
   ChatCompletionContentPart,
   IAgent,
-} from '@tarko/agent-server-interface';
+} from '@tarko/interface';
 import { AgentSnapshot } from '@tarko/agent-snapshot';
 import { EventStreamBridge } from '../utils/event-stream';
 import type { AgentServer } from '../server';

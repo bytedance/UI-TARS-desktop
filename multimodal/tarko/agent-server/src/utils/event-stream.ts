@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentEventStream } from '@tarko/agent-server-interface';
+import { AgentEventStream } from '@tarko/interface';
 
 /**
  * Implement event stream bridging to forward Agent's native events to the client

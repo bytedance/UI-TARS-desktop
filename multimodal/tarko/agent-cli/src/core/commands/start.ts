@@ -11,7 +11,7 @@ import {
   LogLevel,
   isAgentWebUIImplementationType,
   AgentWebUIImplementation,
-} from '@tarko/agent-server-interface';
+} from '@tarko/interface';
 import { AgentServer, AgentServerOptions, express } from '@tarko/agent-server';
 import boxen from 'boxen';
 import chalk from 'chalk';

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LogLevel } from '@tarko/agent-server-interface';
+import { LogLevel } from '@tarko/interface';
 import { AgentServer, resolveAgentImplementation } from '@tarko/agent-server';
 import { ConsoleInterceptor } from '../../utils';
 import { AgentCLIRunCommandOptions } from '../../types';

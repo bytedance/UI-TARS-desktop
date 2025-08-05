@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentEventStream } from '@tarko/agent-server-interface';
+import { AgentEventStream } from '@tarko/interface';
 import { StorageProvider, SessionMetadata, AgentServerStorageOptions } from './types';
 
 /**

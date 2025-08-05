@@ -7,7 +7,7 @@ import { StorageProvider, AgentServerStorageOptions } from './types';
 import { MemoryStorageProvider } from './MemoryStorageProvider';
 import { FileStorageProvider } from './FileStorageProvider';
 import { SQLiteStorageProvider } from './SQLiteStorageProvider';
-import { TARKO_CONSTANTS } from '@tarko/agent-server-interface';
+import { TARKO_CONSTANTS } from '@tarko/interface';
 
 export * from './types';
 

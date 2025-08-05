@@ -5,12 +5,7 @@
  */
 
 import { AgioEvent } from '@tarko/agio';
-import {
-  IAgent,
-  AgentEventStream,
-  AgentAppConfig,
-  AgentStatus,
-} from '@tarko/agent-server-interface';
+import { IAgent, AgentEventStream, AgentAppConfig, AgentStatus } from '@tarko/interface';
 import { AgioBatchProcessor } from './AgioBatchProcessor';
 
 /**

@@ -23,7 +23,7 @@
     "@tarko/shared-media-utils": "workspace:*"
   },
   "devDependencies": {
-    "@tarko/agent-server-interface": "workspace:*",
+    "@tarko/interface": "workspace:*",
     "@tarko/agent-snapshot": "workspace:*",
     "@tarko/agio": "workspace:*",
     "@agent-infra/shared": "0.0.2",

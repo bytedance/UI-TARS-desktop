@@ -32,7 +32,7 @@
   },
   "devDependencies": {
     "@tarko/agent-interface": "workspace:*",
-    "@tarko/agent-server-interface": "workspace:*",
+    "@tarko/interface": "workspace:*",
     "@tarko/web-ui": "workspace:*",
     "@tarko/agio": "workspace:*",
     "@tarko/config-loader": "workspace:*",

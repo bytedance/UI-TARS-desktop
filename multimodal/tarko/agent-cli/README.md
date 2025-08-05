@@ -34,7 +34,7 @@ echo "总结这段代码" | tarko run
 
 ```typescript
 // tarko.config.ts
-import { AgentAppConfig } from '@tarko/agent-server-interface';
+import { AgentAppConfig } from '@tarko/interface';
 
 const config: AgentAppConfig = {
   model: {
@@ -426,7 +426,7 @@ tarko --debug run "test" --include-logs
 详细的 API 文档请参考 TypeScript 类型定义：
 
 - `@tarko/agent-interface` - Agent 核心接口
-- `@tarko/agent-server-interface` - 服务器接口  
+- `@tarko/interface` - 接近应用层的上层接口，如 Server、CLI  
 - `@tarko/agent-cli` - CLI 框架接口
 
 ## 贡献指南

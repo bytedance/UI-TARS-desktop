@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IAgent } from '@tarko/agent-server-interface';
+import { IAgent } from '@tarko/interface';
 
 /**
  * Response schema for LLM-generated slug

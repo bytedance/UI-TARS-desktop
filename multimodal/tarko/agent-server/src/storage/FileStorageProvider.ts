@@ -7,7 +7,7 @@ import path from 'path';
 import fs from 'fs';
 import { Low } from 'lowdb';
 import { JSONFile } from 'lowdb/node';
-import { AgentEventStream, TARKO_CONSTANTS } from '@tarko/agent-server-interface';
+import { AgentEventStream, TARKO_CONSTANTS } from '@tarko/interface';
 import { StorageProvider, SessionMetadata } from './types';
 
 /**

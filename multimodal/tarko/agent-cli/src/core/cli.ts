@@ -5,11 +5,7 @@
 
 import cac from 'cac';
 import path from 'path';
-import {
-  AgentCLIArguments,
-  AgentServerVersionInfo,
-  TARKO_CONSTANTS,
-} from '@tarko/agent-server-interface';
+import { AgentCLIArguments, AgentServerVersionInfo, TARKO_CONSTANTS } from '@tarko/interface';
 import { addCommonOptions, resolveAgentFromCLIArgument } from './options';
 import { buildConfigPaths } from '../config/paths';
 import { readFromStdin } from './stdin';
