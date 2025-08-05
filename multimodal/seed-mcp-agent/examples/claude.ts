@@ -1,5 +1,5 @@
-import { SeedMcpAgent } from '../src/index';
-import { LogLevel } from '@multimodal/agent';
+import SeedMcpAgent from '../src/index';
+import { LogLevel } from '@tarko/agent';
 import { Questions } from './question';
 
 async function main() {

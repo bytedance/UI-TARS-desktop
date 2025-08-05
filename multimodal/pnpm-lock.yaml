@@ -210,6 +210,40 @@ importers:
         specifier: ^3.0.2
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
 
+  seed-mcp-agent:
+    dependencies:
+      '@agent-infra/logger':
+        specifier: 0.0.2-beta.2
+        version: 0.0.2-beta.2
+      '@agent-infra/mcp-client':
+        specifier: 1.1.6-beta.3
+        version: 1.1.6-beta.3
+      '@tarko/agent':
+        specifier: workspace:*
+        version: link:../tarko/agent
+      '@tarko/agent-interface':
+        specifier: workspace:*
+        version: link:../tarko/agent-interface
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.10.0
+        version: 0.10.0(typescript@5.8.3)
+      '@tarko/agent-cli':
+        specifier: workspace:*
+        version: link:../tarko/agent-cli
+      '@types/node':
+        specifier: 22.15.30
+        version: 22.15.30
+      openai:
+        specifier: 4.93.0
+        version: 4.93.0(ws@8.18.2)(zod@3.25.36)
+      typescript:
+        specifier: ^5.5.3
+        version: 5.8.3
+      vitest:
+        specifier: ^1.0.0
+        version: 1.6.1(@types/node@22.15.30)(sass-embedded@1.89.0)(terser@5.40.0)
+
   tarko/agent:
     dependencies:
       '@tarko/agent-interface':

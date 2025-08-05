@@ -1,9 +1,4 @@
-import {
-  getLogger,
-  Tool,
-  ToolCallEngine,
-  ToolCallEnginePrepareRequestContext,
-} from '@multimodal/agent';
+import { getLogger, Tool, ToolCallEngine, ToolCallEnginePrepareRequestContext } from '@tarko/agent';
 import {
   AgentEventStream,
   ChatCompletionAssistantMessageParam,
@@ -15,7 +10,7 @@ import {
   ParsedModelResponse,
   StreamChunkResult,
   StreamProcessingState,
-} from '@multimodal/agent-interface';
+} from '@tarko/agent-interface';
 
 export class SeedMCPAgentToolCallEngine extends ToolCallEngine {
   private logger = getLogger('SeedMCPAgentToolCallEngine');

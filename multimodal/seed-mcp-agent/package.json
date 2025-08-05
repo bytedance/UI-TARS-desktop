@@ -26,11 +26,12 @@
     "test:watch": "vitest",
     "prepublishOnly": "pnpm run build",
     "agent:snapshot:genreate": "npx tsx snapshot/runner.ts generate all",
-    "agent:snapshot:test": "npx vitest snapshot/index.test.ts"
+    "agent:snapshot:test": "npx vitest snapshot/index.test.ts",
+    "dev:agent": "tarko --agent ./"
   },
   "dependencies": {
-    "@multimodal/agent": "workspace:*",
-    "@multimodal/agent-interface": "workspace:*",
+    "@tarko/agent": "workspace:*",
+    "@tarko/agent-interface": "workspace:*",
     "@agent-infra/logger": "0.0.2-beta.2",
     "@agent-infra/mcp-client": "1.1.6-beta.3"
   },
@@ -39,6 +40,7 @@
     "@types/node": "22.15.30",
     "typescript": "^5.5.3",
     "vitest": "^1.0.0",
-    "openai": "4.93.0"
+    "openai": "4.93.0",
+    "@tarko/agent-cli": "workspace:*"
   }
 }

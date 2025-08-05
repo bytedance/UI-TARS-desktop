@@ -4,8 +4,7 @@ import {
   getLogger,
   LLMRequestHookPayload,
   LLMResponseHookPayload,
-  LogLevel,
-} from '@multimodal/agent';
+} from '@tarko/agent';
 import { SYSTEM_PROMPT } from './prompt';
 import { SeedMCPAgentToolCallEngine } from './SeedMCPAgentToolCallEngine';
 import { SearchToolProvider } from './tools/search';
@@ -19,7 +18,8 @@ export interface SeedMcpAgentOption extends AgentOptions {
   tavilyApiKey: string;
 }
 
-export class SeedMcpAgent extends Agent {
+export default class SeedMcpAgent extends Agent {
+  static label = 'seed-mcp-agent';
   private loop = 0;
   private _options: SeedMcpAgentOption;
   constructor(options: SeedMcpAgentOption) {

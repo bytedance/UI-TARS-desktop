@@ -1,4 +1,4 @@
-import { Tool, z } from '@multimodal/agent';
+import { Tool, z } from '@tarko/agent';
 import { McpManager } from './mcp';
 
 export class LinkReaderToolProvider {
