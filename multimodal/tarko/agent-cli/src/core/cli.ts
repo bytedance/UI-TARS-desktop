@@ -349,6 +349,7 @@ export class AgentCLI {
       agentServerInitOptions: {
         appConfig,
         versionInfo: this.options.versionInfo,
+        directories: this.options.directories,
       },
       isDebug,
     };
