@@ -25,7 +25,7 @@ function getModelConfig() {
   return {
     baseURL: env.SEED_BASE_URL!,
     id: env.SEED_MODEL!,
-    apiKey: env.SEED_API_KEY!,
+    apiKey: env.SEED_API_KEY!, // secretlint-disable-line
     uiTarsVersion: 'doubao-1.5-ui-tars-20b',
   } as const;
 }
@@ -49,7 +49,7 @@ async function testBrowserOperator() {
   });
 
   const seedGUIAgentForBrowser = new SeedGUIAgent({
-    operator: browserOperator,
+    operatorType: 'browser',
     model: getModelConfig(),
   });
 
@@ -70,7 +70,7 @@ async function testComputerOperator() {
 
   const computerOperator = new ComputerOperator();
   const seedGUIAgentForComputer = new SeedGUIAgent({
-    operator: computerOperator,
+    operatorType: 'computer',
     model: getModelConfig(),
   });
 
@@ -95,7 +95,7 @@ async function testAndroidOperator() {
 
   const adbOperator = new AdbOperator(deviceId);
   const seedGUIAgentForAndroid = new SeedGUIAgent({
-    operator: adbOperator,
+    operatorType: 'android',
     model: getModelConfig(),
   });
 
@@ -155,3 +155,6 @@ async function main() {
 if (require.main === module) {
   main().catch(console.error);
 }
+
+export * from './SeedGUIAgent';
+export { SeedGUIAgent as default } from './SeedGUIAgent';

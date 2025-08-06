@@ -21,12 +21,16 @@
   ],
   "scripts": {
     "dev": "rslib build --watch",
+    "dev:agent": "tarko --agent ./",
     "build": "rslib build",
     "prepublishOnly": "pnpm run build",
     "test": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@tarko/agent": "workspace:*",
+    "@tarko/agent-interface": "workspace:*",
+    "@tarko/agent-cli": "workspace:*",
     "@ui-tars/action-parser": "1.2.3",
     "@ui-tars/sdk": "1.2.3",
     "@ui-tars/operator-nut-js": "1.2.3",
@@ -36,13 +40,11 @@
     "jimp": "1.6.0",
     "@computer-use/nut-js": "^4.2.0",
     "@gui-agent/operator-browser": "workspace:*",
-    "@multimodal/agent-interface": "workspace:*",
     "@agent-infra/browser": "0.1.1",
     "uuid": "^9.0.0",
     "jsonrepair": "3.12.0",
     "zod-to-json-schema": "3.24.3",
-    "@agent-infra/logger": "0.0.2-beta.2",
-    "@multimodal/agent": "workspace:*"
+    "@agent-infra/logger": "0.0.2-beta.2"
   },
   "devDependencies": {
     "@types/uuid": "^9.0.8",

@@ -12,12 +12,12 @@ import {
   ParsedModelResponse,
   StreamProcessingState,
   StreamChunkResult,
-} from '@multimodal/agent-interface';
+} from '@tarko/agent-interface';
 import { actionParser } from '@ui-tars/action-parser';
 import { getScreenInfo } from './shared';
 
 /**
- * SimpleKorToolCallEngine - Minimal prompt engineering tool call engine
+ * SeedGUIAgentToolCallEngine - Minimal prompt engineering tool call engine
  *
  * This is the simplest possible implementation of a tool call engine that:
  * 1. Uses prompt engineering to instruct the LLM to output tool calls in a specific format
