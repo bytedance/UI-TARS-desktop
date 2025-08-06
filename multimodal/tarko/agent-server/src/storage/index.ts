@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { StorageProvider, AgentServerStorageOptions } from './types';
+import { StorageProvider } from './types';
 import { MemoryStorageProvider } from './MemoryStorageProvider';
 import { FileStorageProvider } from './FileStorageProvider';
 import { SQLiteStorageProvider } from './SQLiteStorageProvider';
-import { TARKO_CONSTANTS } from '@tarko/interface';
+import { AgentStorageImplementation, TARKO_CONSTANTS } from '@tarko/interface';
 
 export * from './types';
 
@@ -18,7 +18,7 @@ export * from './types';
  * @returns Configured storage provider
  */
 export function createStorageProvider(
-  options?: AgentServerStorageOptions,
+  options?: AgentStorageImplementation,
   globalStorageDir: string = TARKO_CONSTANTS.GLOBAL_STORAGE_DIR,
 ): StorageProvider {
   if (!options || options.type === 'memory') {
@@ -37,5 +37,6 @@ export function createStorageProvider(
     throw new Error('Database storage not implemented');
   }
 
+  // @ts-expect-error intercept unexpected storage type
   throw new Error(`Unknown storage type: ${options.type}`);
 }

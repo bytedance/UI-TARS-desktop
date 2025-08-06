@@ -5,8 +5,6 @@
 
 import { AgentEventStream } from '@tarko/interface';
 
-export type { AgentServerStorageOptions } from '../types';
-
 /**
  * Session metadata interface
  */

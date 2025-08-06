@@ -8,6 +8,7 @@ import { AgioEvent } from '@tarko/agio';
 import { IAgent, TConstructor, AgentOptions } from '@tarko/agent-interface';
 import { AgentImplementation } from './agent-implementation';
 import { AgentWebUIImplementation } from './web-ui-implementation';
+import { AgentStorageImplementation } from './storage-implementation';
 
 /**
  * Global directory configuration options
@@ -54,22 +55,6 @@ export interface AgentServerSnapshotOptions {
 }
 
 /**
- * Storage configuration options
- */
-export interface AgentServerStorageOptions {
-  /** Storage type: 'memory', 'file', 'sqlite', or 'database' */
-  type: 'memory' | 'file' | 'sqlite' | 'database';
-  /** File path for file-based storage or SQLite database */
-  path?: string;
-  /** Database connection configuration for database storage */
-  database?: {
-    url: string;
-    name?: string;
-    [key: string]: any;
-  };
-}
-
-/**
  * Options implemented by Agent Server
  *
  * Defines all customizable aspects of the server including:
@@ -93,7 +78,7 @@ export interface AgentServerOptions {
     /**
      * Server Storage options.
      */
-    storage?: AgentServerStorageOptions;
+    storage?: AgentStorageImplementation;
   };
   /**
    * Share config

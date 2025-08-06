@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentEventStream } from '@tarko/interface';
-import { StorageProvider, SessionMetadata, AgentServerStorageOptions } from './types';
+import { AgentEventStream, AgentStorageImplementation } from '@tarko/interface';
+import { StorageProvider, SessionMetadata } from './types';
 
 /**
  * Abstract database storage provider
@@ -12,10 +12,10 @@ import { StorageProvider, SessionMetadata, AgentServerStorageOptions } from './t
  * Extend this class to implement storage with MongoDB, PostgreSQL, etc.
  */
 export abstract class DatabaseStorageProvider implements StorageProvider {
-  protected config: AgentServerStorageOptions['database'];
+  protected config: AgentStorageImplementation;
 
-  constructor(config?: AgentServerStorageOptions['database']) {
-    this.config = config || { url: '' };
+  constructor(config: AgentStorageImplementation) {
+    this.config = config;
   }
 
   abstract initialize(): Promise<void>;
