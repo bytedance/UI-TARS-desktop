@@ -7,7 +7,12 @@ import path from 'path';
 import fs from 'fs';
 import { Low } from 'lowdb';
 import { JSONFile } from 'lowdb/node';
-import { AgentEventStream, TARKO_CONSTANTS } from '@tarko/interface';
+import {
+  AgentEventStream,
+  FileAgentStorageImplementation,
+  getGlobalStorageDirectory,
+  TARKO_CONSTANTS,
+} from '@tarko/interface';
 import { StorageProvider, SessionMetadata } from './types';
 
 /**
@@ -28,17 +33,17 @@ export class FileStorageProvider implements StorageProvider {
   private initialized = false;
   public readonly dbPath: string;
 
-  constructor(storagePath?: string, globalStorageDir: string = TARKO_CONSTANTS.GLOBAL_STORAGE_DIR) {
+  constructor(config: FileAgentStorageImplementation) {
     // Default to the user's home directory
-    const defaultPath = process.env.HOME || process.env.USERPROFILE || '.';
-    const baseDir = storagePath || path.join(defaultPath, globalStorageDir);
+    const baseDir = getGlobalStorageDirectory(config.baseDir);
+    const fileName = config.fileName ?? TARKO_CONSTANTS.SESSION_DATA_JSON_NAME;
 
     // Create the directory if it doesn't exist
     if (!fs.existsSync(baseDir)) {
       fs.mkdirSync(baseDir, { recursive: true });
     }
 
-    this.dbPath = path.join(baseDir, 'storage.json');
+    this.dbPath = path.join(baseDir, fileName);
     const adapter = new JSONFile<DbSchema>(this.dbPath);
     this.db = new Low<DbSchema>(adapter, { sessions: {}, events: {} });
   }

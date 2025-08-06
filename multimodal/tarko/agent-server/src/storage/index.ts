@@ -14,23 +14,18 @@ export * from './types';
 /**
  * Creates and returns a storage provider based on the options
  * @param options Storage configuration options
- * @param globalStorageDir Global storage directory name
- * @returns Configured storage provider
  */
-export function createStorageProvider(
-  options?: AgentStorageImplementation,
-  globalStorageDir: string = TARKO_CONSTANTS.GLOBAL_STORAGE_DIR,
-): StorageProvider {
+export function createStorageProvider(options?: AgentStorageImplementation): StorageProvider {
   if (!options || options.type === 'memory') {
     return new MemoryStorageProvider();
   }
 
   if (options.type === 'file') {
-    return new FileStorageProvider(options.path, globalStorageDir);
+    return new FileStorageProvider(options);
   }
 
   if (options.type === 'sqlite') {
-    return new SQLiteStorageProvider(options.path, globalStorageDir);
+    return new SQLiteStorageProvider(options);
   }
 
   if (options.type === 'database') {
