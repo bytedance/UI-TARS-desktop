@@ -4,6 +4,7 @@
  */
 
 import { AgentTARS } from '@agent-tars/core';
+import path, { join } from 'path';
 import {
   AgentCLI,
   AgentCLIInitOptions,
@@ -18,6 +19,7 @@ import {
   BrowserControlMode,
   AGENT_TARS_CONSTANTS,
 } from '@agent-tars/interface';
+import { homedir } from 'os';
 
 export type { AgentTARSCLIArguments } from '@agent-tars/interface';
 
@@ -47,10 +49,16 @@ const DEFAULT_OPTIONS: Partial<AgentCLIInitOptions> = {
         'Please book me the earliest flight from Hangzhou to Shenzhen on 10.1',
       ],
     },
+    server: {
+      storage: {
+        type: 'sqlite',
+        baseDir: path.join(homedir(), AGENT_TARS_CONSTANTS.GLOBAL_STORAGE_DIR),
+        dbName: AGENT_TARS_CONSTANTS.SESSION_DATA_DB_NAME,
+      },
+    },
   },
   directories: {
     globalWorkspaceDir: AGENT_TARS_CONSTANTS.GLOBAL_WORKSPACE_DIR,
-    globalStorageDir: AGENT_TARS_CONSTANTS.GLOBAL_STORAGE_DIR,
   },
 };
 

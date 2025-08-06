@@ -19,12 +19,6 @@ export interface GlobalDirectoryOptions {
    * @default '.tarko'
    */
   globalWorkspaceDir?: string;
-
-  /**
-   * Global storage directory name
-   * @default '.tarko-storage'
-   */
-  globalStorageDir?: string;
 }
 
 /**

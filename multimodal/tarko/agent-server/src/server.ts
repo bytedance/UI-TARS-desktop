@@ -75,7 +75,6 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     // Initialize directories with defaults
     this.directories = {
       globalWorkspaceDir: directories?.globalWorkspaceDir || TARKO_CONSTANTS.GLOBAL_WORKSPACE_DIR,
-      globalStorageDir: directories?.globalStorageDir || TARKO_CONSTANTS.GLOBAL_STORAGE_DIR,
     };
 
     // Extract server configuration from agent options
@@ -88,10 +87,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
 
     // Initialize storage if provided
     if (appConfig.server?.storage) {
-      this.storageProvider = createStorageProvider(
-        appConfig.server.storage,
-        this.directories.globalStorageDir,
-      );
+      this.storageProvider = createStorageProvider(appConfig.server.storage);
     }
 
     // Setup API routes and middleware (includes workspace static server)

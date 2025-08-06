@@ -37,9 +37,17 @@ export interface MemoryAgentStorageImplementation extends BaseAgentStorageImplem
 export interface FileAgentStorageImplementation extends BaseAgentStorageImplementation {
   type: 'file';
   /**
-   * File path for file-based storage
+   * Base directory for SQLite database
+   *
+   * @defaultValue `~/.tarko`
    */
-  path: string;
+  baseDir?: string;
+  /**
+   * File name for the JSON database
+   *
+   * @defaultValue tarko.json
+   */
+  fileName?: string;
 }
 
 /**
@@ -48,9 +56,17 @@ export interface FileAgentStorageImplementation extends BaseAgentStorageImplemen
 export interface SqliteAgentStorageImplementation extends BaseAgentStorageImplementation {
   type: 'sqlite';
   /**
-   * File path for SQLite database
+   * Base directory for SQLite database
+   *
+   * @defaultValue `~/.tarko`
    */
-  path: string;
+  baseDir?: string;
+  /**
+   * Database name for SQLite
+   *
+   * @defaultValue tarko.db
+   */
+  dbName?: string;
 }
 
 /**

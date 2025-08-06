@@ -12,7 +12,7 @@ import {
   isAgentWebUIImplementationType,
 } from '@tarko/interface';
 import { resolveValue } from '../utils';
-import path from 'path';
+import path, { join } from 'path';
 
 /**
  * Handler for processing deprecated CLI options
