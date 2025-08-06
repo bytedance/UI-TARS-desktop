@@ -6,7 +6,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 
-import { LLMRequestHookPayload } from '@multimodal/agent';
+import { LLMRequestHookPayload } from '@tarko/agent';
 
 /**
  * Save base64 image data as files
