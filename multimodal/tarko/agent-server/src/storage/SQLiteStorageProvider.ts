@@ -63,7 +63,10 @@ export class SQLiteStorageProvider implements StorageProvider {
         // Enable WAL mode for better concurrent performance
         this.db.exec('PRAGMA journal_mode = WAL');
 
-        // Create sessions table
+        // Check if we need to migrate from old schema
+        await this.migrateIfNeeded();
+
+        // Create sessions table with current schema
         this.db.exec(`
           CREATE TABLE IF NOT EXISTS sessions (
             id TEXT PRIMARY KEY,
@@ -99,6 +102,71 @@ export class SQLiteStorageProvider implements StorageProvider {
         console.error('Failed to initialize SQLite database:', error);
         throw error;
       }
+    }
+  }
+
+  /**
+   * Check and migrate from old database schema if needed
+   */
+  private async migrateIfNeeded(): Promise<void> {
+    try {
+      // Check if sessions table exists and get its schema
+      const tableInfoStmt = this.db.prepare(`
+        PRAGMA table_info(sessions)
+      `);
+
+      const columns = tableInfoStmt.all() as Array<{
+        cid: number;
+        name: string;
+        type: string;
+        notnull: number;
+        dflt_value: any;
+        pk: number;
+      }>;
+
+      if (columns.length === 0) {
+        // Table doesn't exist yet, no migration needed
+        return;
+      }
+
+      // Check if we have the old 'workingDirectory' column instead of 'workspace'
+      const hasWorkingDirectory = columns.some((col) => col.name === 'workingDirectory');
+      const hasWorkspace = columns.some((col) => col.name === 'workspace');
+
+      if (hasWorkingDirectory && !hasWorkspace) {
+        console.log('Migrating database schema: renaming workingDirectory to workspace');
+
+        // SQLite doesn't support column renaming directly in older versions
+        // We need to create a new table and copy data
+        this.db.exec(`
+          CREATE TABLE sessions_new (
+            id TEXT PRIMARY KEY,
+            createdAt INTEGER NOT NULL,
+            updatedAt INTEGER NOT NULL,
+            name TEXT,
+            workspace TEXT NOT NULL,
+            tags TEXT
+          )
+        `);
+
+        // Copy data from old table to new table
+        this.db.exec(`
+          INSERT INTO sessions_new (id, createdAt, updatedAt, name, workspace, tags)
+          SELECT id, createdAt, updatedAt, name, workingDirectory, tags
+          FROM sessions
+        `);
+
+        // Drop old table and rename new table
+        this.db.exec('DROP TABLE sessions');
+        this.db.exec('ALTER TABLE sessions_new RENAME TO sessions');
+
+        console.log('Database schema migration completed successfully');
+      }
+    } catch (error) {
+      console.error('Failed to migrate database schema:', error);
+      throw new Error(
+        `Database migration failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
