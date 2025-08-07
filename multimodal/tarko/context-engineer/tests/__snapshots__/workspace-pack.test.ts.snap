@@ -1,691 +1,418 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`DirectoryExpander 1`] = `
-"<dir path="src">
-  <file path="index.ts">
+"<directory path="../config-loader/src">
+  <file path="index.test.ts">
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     /*
      * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
      * SPDX-License-Identifier: Apache-2.0
      */
     
-    export * from './node';
-    export * from './runtime';
+    import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
+    import { loadConfig } from './index';
     
-  </file>
-  <file path="node/context-reference-processor.ts">
-    /*
-     * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
-     * SPDX-License-Identifier: Apache-2.0
-     */
+    // Mock the console to avoid noise in test output
+    vi.spyOn(console, 'debug').mockImplementation(() => {});
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
     
-    import fs from 'fs';
-    import path from 'path';
-    import type { ChatCompletionContentPart } from '@tarko/agent-interface';
-    import { WorkspacePack } from './workspace-pack';
+    // Mock fs module
+    vi.mock('node:fs', () => {
+      const mockExistsSync = vi.fn();
+      const mockReadFile = vi.fn();
     
-    /**
-     * ContextReferenceProcessor - Processes contextual references in agent queries
-     *
-     * Features:
-     * - Expands @file: references to actual file content
-     * - Expands @dir: references to directory structure and content
-     * - Security validation to prevent path traversal
-     * - High-performance workspace packing
-     */
-    export class ContextReferenceProcessor {
-      private workspacePack: WorkspacePack;
-    
-      constructor(
-        options: {
-          maxFileSize?: number;
-          ignoreExtensions?: string[];
-          ignoreDirs?: string[];
-          maxDepth?: number;
-        } = {},
-      ) {
-        this.workspacePack = new WorkspacePack({
-          maxFileSize: options.maxFileSize ?? 2 * 1024 * 1024, // 2MB limit for LLM context
-          ignoreExtensions: options.ignoreExtensions ?? [
-            '.jpg',
-            '.jpeg',
-            '.png',
-            '.gif',
-            '.webp',
-            '.svg',
-            '.pdf',
-            '.zip',
-            '.tar',
-            '.gz',
-            '.exe',
-            '.dll',
-          ],
-          ignoreDirs: options.ignoreDirs ?? [
-            'node_modules',
-            '.git',
-            '.next',
-            'dist',
-            'build',
-            'coverage',
-            '.vscode',
-            '.idea',
-          ],
-          maxDepth: options.maxDepth ?? 8,
-        });
-      }
-    
-      /**
-       * Process contextual references in query content
-       * Expands @file: and @dir: references to actual content and prepends to original query
-       * @param query - The query content that may contain contextual references
-       * @param workspacePath - Base workspace path for security validation and path resolution
-       * @returns Processed query with expanded contextual content prepended
-       */
-      async processContextualReferences(
-        query: string | ChatCompletionContentPart[],
-        workspacePath: string,
-      ): Promise<string | ChatCompletionContentPart[]> {
-        // Only process string queries for now
-        if (typeof query !== 'string') {
-          return query;
-        }
-    
-        // Find all contextual references
-        const contextualReferencePattern = /@(file|dir):([^\\s]+)/g;
-        const matches = Array.from(query.matchAll(contextualReferencePattern));
-    
-        if (matches.length === 0) {
-          return query;
-        }
-    
-        // Separate file and directory references
-        const fileReferences: string[] = [];
-        const dirReferences: string[] = [];
-    
-        for (const match of matches) {
-          const [, type, relativePath] = match;
-          if (type === 'file') {
-            fileReferences.push(relativePath);
-          } else if (type === 'dir') {
-            dirReferences.push(relativePath);
-          }
-        }
-    
-        const expandedContents: string[] = [];
-    
-        // Process individual file references
-        for (const fileRef of fileReferences) {
-          try {
-            const absolutePath = path.resolve(workspacePath, fileRef);
-    
-            // Security check: ensure path is within workspace
-            const normalizedWorkspace = path.resolve(workspacePath);
-            const normalizedTarget = path.resolve(absolutePath);
-    
-            if (!normalizedTarget.startsWith(normalizedWorkspace)) {
-              console.warn(\`File reference outside workspace: \${fileRef}\`);
-              expandedContents.push(\`<file path="\${fileRef}">\\nError: File reference outside workspace\\n</file>\`);
-              continue;
-            }
-    
-            if (!fs.existsSync(absolutePath)) {
-              console.warn(\`File reference not found: \${fileRef}\`);
-              expandedContents.push(\`<file path="\${fileRef}">\\nError: File not found\\n</file>\`);
-              continue;
-            }
-    
-            const stats = fs.statSync(absolutePath);
-            if (stats.isFile()) {
-              try {
-                const fileContent = fs.readFileSync(absolutePath, 'utf8');
-                expandedContents.push(\`<file path="\${fileRef}">\\n\${fileContent}\\n</file>\`);
-              } catch (error) {
-                console.error(\`Failed to read file \${fileRef}:\`, error);
-                expandedContents.push(\`<file path="\${fileRef}">\\nError: Failed to read file\\n</file>\`);
-              }
-            }
-          } catch (error) {
-            console.error(\`Failed to process file reference \${fileRef}:\`, error);
-            expandedContents.push(\`<file path="\${fileRef}">\\nError: Failed to process file reference\\n</file>\`);
-          }
-        }
-    
-        // Process directory references with high-performance packing
-        if (dirReferences.length > 0) {
-          try {
-            // Convert relative paths to absolute paths
-            const absoluteDirPaths = dirReferences
-              .map((dirRef) => {
-                const absolutePath = path.resolve(workspacePath, dirRef);
-    
-                // Security check: ensure path is within workspace
-                const normalizedWorkspace = path.resolve(workspacePath);
-                const normalizedTarget = path.resolve(absolutePath);
-    
-                if (!normalizedTarget.startsWith(normalizedWorkspace)) {
-                  console.warn(\`Directory reference outside workspace: \${dirRef}\`);
-                  return null;
-                }
-    
-                return { relativePath: dirRef, absolutePath };
-              })
-              .filter((p): p is { relativePath: string; absolutePath: string } => p !== null);
-    
-            if (absoluteDirPaths.length > 0) {
-              const packResult = await this.workspacePack.packPaths(
-                absoluteDirPaths.map(p => p.absolutePath)
-              );
-    
-              // Add packed content for each directory reference
-              for (const { relativePath } of absoluteDirPaths) {
-                expandedContents.push(\`<directory path="\${relativePath}">\\n\${packResult.packedContent}\\n</directory>\`);
-              }
-    
-              // Log packing statistics
-              console.log('Workspace packing completed:', {
-                paths: packResult.processedPaths.length,
-                files: packResult.stats.totalFiles,
-                totalSize: packResult.stats.totalSize,
-                errors: packResult.stats.errorCount,
-              });
-            }
-          } catch (error) {
-            console.error('Failed to pack workspace paths:', error);
-    
-            // Fallback to error message for failed packing
-            for (const dirRef of dirReferences) {
-              expandedContents.push(\`<directory path="\${dirRef}">\\nError: Failed to pack directory\\n</directory>\`);
-            }
-          }
-        }
-    
-        // Combine expanded content with original query
-        if (expandedContents.length > 0) {
-          return \`\${expandedContents.join('\\n\\n')}\\n\\n\${query}\`;
-        }
-    
-        return query;
-      }
-    }
-    
-  </file>
-  <file path="node/image-processor.ts">
-    /*
-     * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
-     * SPDX-License-Identifier: Apache-2.0
-     */
-    
-    import type {
-      ChatCompletionContentPart,
-      ChatCompletionContentPartImage,
-    } from '@tarko/agent-interface';
-    import { ImageCompressor, formatBytes } from '@tarko/shared-media-utils';
-    
-    /**
-     * ImageProcessor - Handles image compression and processing for agent queries
-     *
-     * Features:
-     * - Compresses base64 images to reduce token usage
-     * - Maintains image quality while optimizing size
-     * - Provides compression statistics
-     */
-    export class ImageProcessor {
-      private compressor: ImageCompressor;
-    
-      constructor(options: { quality?: number; format?: 'webp' | 'jpeg' | 'png' } = {}) {
-        this.compressor = new ImageCompressor({
-          quality: options.quality ?? 5,
-          format: options.format ?? 'webp',
-        });
-      }
-    
-      /**
-       * Compress images in query content if present
-       * @param query - The query content that may contain images
-       * @returns Processed query with compressed images
-       */
-      async compressImagesInQuery(
-        query: string | ChatCompletionContentPart[],
-      ): Promise<string | ChatCompletionContentPart[]> {
-        try {
-          // Handle different query formats
-          if (typeof query === 'string') {
-            return query; // Text only, no compression needed
-          }
-    
-          // Handle array of content parts (multimodal format)
-          if (Array.isArray(query)) {
-            const compressedQuery = await Promise.all(
-              query.map(async (part: ChatCompletionContentPart) => {
-                if (part.type === 'image_url' && part.image_url?.url) {
-                  return await this.compressImageUrl(part);
-                }
-                return part;
-              }),
-            );
-            return compressedQuery;
-          }
-    
-          return query;
-        } catch (error) {
-          console.error('Error compressing images in query:', error);
-          // Return original query if compression fails
-          return query;
-        }
-      }
-    
-      /**
-       * Compress a single image URL
-       * @param imagePart - Content part containing image URL
-       * @returns Compressed image content part
-       */
-      async compressImageUrl(
-        imagePart: ChatCompletionContentPartImage,
-      ): Promise<ChatCompletionContentPartImage> {
-        try {
-          const imageUrl = imagePart.image_url.url;
-    
-          // Skip if not a base64 image
-          if (!imageUrl.startsWith('data:image/')) {
-            return imagePart;
-          }
-    
-          // Extract base64 data
-          const base64Data = imageUrl.replace(/^data:image\\/\\w+;base64,/, '');
-          const originalBuffer = Buffer.from(base64Data, 'base64');
-          const originalSize = originalBuffer.length;
-    
-          // Compress the image
-          const compressedBuffer = await this.compressor.compressToBuffer(originalBuffer);
-          const compressedSize = compressedBuffer.length;
-    
-          // Convert compressed buffer to base64
-          const compressedBase64 = \`data:image/webp;base64,\${compressedBuffer.toString('base64')}\`;
-    
-          // Log compression stats
-          const compressionRatio = originalSize / compressedSize;
-          const compressionPercentage = ((1 - compressedSize / originalSize) * 100).toFixed(2);
-    
-          console.log('Image compression stats:', {
-            original: formatBytes(originalSize),
-            compressed: formatBytes(compressedSize),
-            ratio: \`\${compressionRatio.toFixed(2)}x (\${compressionPercentage}% smaller)\`,
-            format: 'webp',
-            quality: 80,
-          });
-    
-          return {
-            ...imagePart,
-            image_url: {
-              url: compressedBase64,
-            },
-          };
-        } catch (error) {
-          console.error('Error compressing individual image:', error);
-          // Return original image part if compression fails
-          return imagePart;
-        }
-      }
-    }
-    
-  </file>
-  <file path="node/index.ts">
-    export * from './workspace-pack';
-    export * from './context-reference-processor';
-    export * from './image-processor';
-    
-  </file>
-  <file path="node/workspace-pack.ts">
-    import fs from 'fs/promises';
-    import fsSync from 'fs';
-    import path from 'path';
-    
-    /**
-     * Information about a single file
-     */
-    interface FileInfo {
-      /** Absolute path */
-      absolutePath: string;
-      /** File content or error message */
-      content: string;
-      /** Whether reading the file failed */
-      hasError: boolean;
-      /** File size in bytes */
-      size: number;
-    }
-    
-    /**
-     * Result of workspace packing operation
-     */
-    interface WorkspacePackResult {
-      /** List of paths that were processed */
-      processedPaths: string[];
-      /** All files found in the paths */
-      files: FileInfo[];
-      /** Formatted content ready for LLM consumption */
-      packedContent: string;
-      /** Summary statistics */
-      stats: {
-        totalFiles: number;
-        totalSize: number;
-        errorCount: number;
+      return {
+        default: {
+          existsSync: mockExistsSync,
+          promises: {
+            readFile: mockReadFile,
+          },
+        },
+        existsSync: mockExistsSync,
+        promises: {
+          readFile: mockReadFile,
+        },
       };
-    }
+    });
+    
+    // Mock path module
+    vi.mock('node:path', () => {
+      const mockJoin = vi.fn((root, file) => \`\${root}/\${file}\`);
+      const mockIsAbsolute = vi.fn((p) => p.startsWith('/'));
+    
+      return {
+        default: {
+          join: mockJoin,
+          isAbsolute: mockIsAbsolute,
+        },
+        join: mockJoin,
+        isAbsolute: mockIsAbsolute,
+      };
+    });
+    
+    // Mock jiti
+    vi.mock('jiti', () => ({
+      createJiti: vi.fn(() => ({
+        import: vi.fn(),
+      })),
+    }));
+    
+    // Mock js-yaml
+    vi.mock('js-yaml', () => ({
+      default: {
+        load: vi.fn(),
+      },
+    }));
+    
+    // Mock dynamic imports
+    vi.mock('node:url', () => ({
+      pathToFileURL: vi.fn((path) => ({ href: \`file://\${path}\` })),
+    }));
+    
+    describe('loadConfig', async () => {
+      const mockCwd = '/mock/cwd';
+      const fs = await import('node:fs');
+      const path = await import('node:path');
+      const { createJiti } = await import('jiti');
+      const yaml = await import('js-yaml');
+    
+      beforeEach(() => {
+        vi.resetAllMocks();
+      });
+    
+      afterEach(() => {
+        vi.resetModules();
+      });
+    
+      it('returns empty object when no config file is found', async () => {
+        vi.mocked(fs.existsSync).mockReturnValue(false);
+    
+        const result = await loadConfig({
+          cwd: mockCwd,
+          configFiles: ['config.ts'],
+        });
+    
+        expect(result).toEqual({
+          content: {},
+          filePath: null,
+        });
+      });
+    
+      it('loads JSON config file correctly', async () => {
+        const mockConfigPath = \`\${mockCwd}/config.json\`;
+        const mockConfig = { key: 'value' };
+    
+        vi.mocked(fs.existsSync).mockImplementation((path) => path === mockConfigPath);
+        vi.mocked(fs.promises.readFile).mockResolvedValue(JSON.stringify(mockConfig));
+    
+        const result = await loadConfig({
+          cwd: mockCwd,
+          configFiles: ['config.json'],
+        });
+    
+        expect(result.filePath).toBe(mockConfigPath);
+        expect(result.content).toEqual(mockConfig);
+      });
+    
+      it('loads YAML config file correctly', async () => {
+        const mockConfigPath = \`\${mockCwd}/config.yml\`;
+        const mockConfig = { key: 'value' };
+    
+        vi.mocked(fs.existsSync).mockImplementation((path) => path === mockConfigPath);
+        vi.mocked(fs.promises.readFile).mockResolvedValue('key: value');
+        vi.mocked(yaml.default.load).mockReturnValue(mockConfig);
+    
+        const result = await loadConfig({
+          cwd: mockCwd,
+          configFiles: ['config.yml'],
+        });
+    
+        expect(result.filePath).toBe(mockConfigPath);
+        expect(result.content).toEqual(mockConfig);
+      });
+    
+      it('should support custom config path', async () => {
+        const customPath = 'custom/path/config.js';
+        const absolutePath = \`\${mockCwd}/\${customPath}\`;
+    
+        vi.mocked(path.isAbsolute).mockReturnValue(false);
+        vi.mocked(path.join).mockReturnValue(absolutePath);
+        vi.mocked(fs.existsSync).mockImplementation((p) => p === absolutePath);
+    
+        // Mock jiti to return a config object
+        const mockConfig = { key: 'custom' };
+        const mockJitiImport = vi.fn().mockResolvedValue(mockConfig);
+        vi.mocked(createJiti).mockReturnValue({
+          import: mockJitiImport,
+        } as any);
+    
+        const result = await loadConfig({
+          cwd: mockCwd,
+          path: customPath,
+        });
+    
+        expect(result.filePath).toBe(absolutePath);
+        expect(result.content).toEqual(mockConfig);
+      });
+    
+      it('handles function exports with environment info', async () => {
+        const mockConfigPath = \`\${mockCwd}/config.ts\`;
+        const mockConfigFn = vi.fn(({ env }) => ({ mode: env }));
+    
+        vi.mocked(fs.existsSync).mockImplementation((path) => path === mockConfigPath);
+    
+        // Mock jiti to return a function
+        vi.mocked(createJiti).mockReturnValue({
+          import: vi.fn().mockResolvedValue(mockConfigFn),
+        } as any);
+    
+        // Set environment
+        const originalNodeEnv = process.env.NODE_ENV;
+        process.env.NODE_ENV = 'test';
+    
+        const result = await loadConfig({
+          cwd: mockCwd,
+          configFiles: ['config.ts'],
+        });
+    
+        expect(mockConfigFn).toHaveBeenCalledWith({
+          env: 'test',
+          envMode: 'test',
+          meta: {},
+        });
+        expect(result.content.mode).toBe('test');
+    
+        // Restore environment
+        process.env.NODE_ENV = originalNodeEnv;
+      });
+    
+      it('supports generic type parameters', async () => {
+        interface TestConfig {
+          port: number;
+          debug: boolean;
+        }
+    
+        const mockConfigPath = \`\${mockCwd}/config.json\`;
+        const mockConfig: TestConfig = { port: 3000, debug: true };
+    
+        vi.mocked(fs.existsSync).mockImplementation((path) => path === mockConfigPath);
+        vi.mocked(fs.promises.readFile).mockResolvedValue(JSON.stringify(mockConfig));
+    
+        const result = await loadConfig<TestConfig>({
+          cwd: mockCwd,
+          configFiles: ['config.json'],
+        });
+    
+        // TypeScript should recognize result.content as TestConfig
+        expect(result.content.port).toBe(3000);
+        expect(result.content.debug).toBe(true);
+      });
+    });
+    
+  </file>
+  <file path="index.ts">
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    /*
+     * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+     * SPDX-License-Identifier: Apache-2.0
+     */
+    import fs from 'node:fs';
+    import path from 'node:path';
+    import { pathToFileURL } from 'node:url';
     
     /**
-     * Options for workspace packing
+     * Checks if a value is a plain object (not an array, function, or other object type)
      */
-    interface WorkspacePackOptions {
-      /** Maximum file size to read (in bytes, default: 1MB) */
-      maxFileSize?: number;
-      /** File extensions to ignore (e.g., ['.jpg', '.png', '.pdf']) */
-      ignoreExtensions?: string[];
-      /** Directory names to ignore (e.g., ['node_modules', '.git']) */
-      ignoreDirs?: string[];
-      /** Maximum depth for recursive reading (default: 10) */
-      maxDepth?: number;
-    }
+    export const isObject = (obj: unknown): obj is Record<string, any> => {
+      return obj !== null && typeof obj === 'object' && Object.getPrototypeOf(obj) === Object.prototype;
+    };
     
-    /**
-     * Default options for workspace packing
-     */
-    const DEFAULT_OPTIONS: Required<WorkspacePackOptions> = {
-      maxFileSize: 1024 * 1024, // 1MB
-      ignoreExtensions: [
-        '.jpg',
-        '.jpeg',
-        '.png',
-        '.gif',
-        '.webp',
-        '.svg',
-        '.pdf',
-        '.zip',
-        '.tar',
-        '.gz',
-      ],
-      ignoreDirs: ['node_modules', '.git', '.next', 'dist', 'build', 'coverage'],
-      maxDepth: 10,
+    export type ConfigLoader = 'jiti' | 'native';
+    
+    export type LoadConfigOptions = {
+      /**
+       * The root path to resolve the config file.
+       * @default process.cwd()
+       */
+      cwd?: string;
+      /**
+       * The path to the config file, can be a relative or absolute path.
+       * If not provided, the function will search for the config file in the \`cwd\`.
+       */
+      path?: string;
+      /**
+       * A custom meta object to be passed into the config function.
+       */
+      meta?: Record<string, unknown>;
+      /**
+       * The environment mode to be passed into the config function.
+       * @default process.env.NODE_ENV
+       */
+      envMode?: string;
+      /**
+       * Specify the config loader, can be \`jiti\` or \`native\`.
+       * - 'jiti': Use \`jiti\` as loader, which supports TypeScript and ESM out of the box
+       * - 'native': Use native Node.js loader, requires TypeScript support in Node.js >= 22.6
+       * @default 'jiti'
+       */
+      loader?: ConfigLoader;
+      /**
+       * The list of config file names to search for.
+       * For example: ['app.config.ts', 'app.config.js']
+       * @default []
+       */
+      configFiles?: string[];
+    };
+    
+    export type LoadConfigResult<T extends Record<string, any> = Record<string, any>> = {
+      /**
+       * The loaded configuration object with specified type.
+       */
+      content: T;
+      /**
+       * The path to the loaded configuration file.
+       * Return \`null\` if the configuration file is not found.
+       */
+      filePath: string | null;
     };
     
     /**
-     * WorkspacePack - High-performance workspace content packer
-     *
-     * Features:
-     * - Parallel file reading for optimal performance
-     * - Automatic deduplication of paths
-     * - Recursive directory traversal with depth limits
-     * - Smart filtering of binary and large files
-     * - LLM-optimized output formatting
+     * Resolves the path to the config file.
      */
-    export class WorkspacePack {
-      private options: Required<WorkspacePackOptions>;
-    
-      constructor(options: WorkspacePackOptions = {}) {
-        this.options = { ...DEFAULT_OPTIONS, ...options };
+    export const resolveConfigPath = (root: string, configFiles: string[], customConfig?: string) => {
+      if (customConfig) {
+        const customConfigPath = path.isAbsolute(customConfig)
+          ? customConfig
+          : path.join(root, customConfig);
+        if (fs.existsSync(customConfigPath)) {
+          return customConfigPath;
+        }
       }
     
-      /**
-       * Pack multiple files and directories with deduplication and parallel processing
-       * @param paths Array of absolute file and directory paths to pack
-       * @returns Promise resolving to pack result
-       */
-      async packPaths(paths: string[]): Promise<WorkspacePackResult> {
-        // Step 1: Validate and deduplicate paths
-        const validatedPaths = this.validateAndDeduplicatePaths(paths);
+      if (configFiles.length === 0) {
+        return null;
+      }
     
-        if (validatedPaths.length === 0) {
-          return {
-            processedPaths: [],
-            files: [],
-            packedContent: '',
-            stats: { totalFiles: 0, totalSize: 0, errorCount: 0 },
-          };
+      for (const file of configFiles) {
+        const configFile = path.join(root, file);
+        if (fs.existsSync(configFile)) {
+          return configFile;
         }
+      }
     
-        // Step 2: Collect all files from all paths in parallel
-        const fileCollectionPromises = validatedPaths.map((targetPath) =>
-          this.collectFilesFromPath(targetPath, 0),
-        );
+      return null;
+    };
     
-        const fileArrays = await Promise.all(fileCollectionPromises);
-        const allFilePaths = fileArrays.flat();
+    /**
+     * Loads configuration from a file with generic type support.
+     */
+    export async function loadConfig<T extends Record<string, any> = Record<string, any>>({
+      cwd = process.cwd(),
+      path: configPath,
+      meta = {},
+      envMode,
+      loader = 'jiti',
+      configFiles = [],
+    }: LoadConfigOptions = {}): Promise<LoadConfigResult<T>> {
+      const configFilePath = resolveConfigPath(cwd, configFiles, configPath);
     
-        // Step 3: Deduplicate files (in case paths overlap)
-        const uniqueFilePaths = [...new Set(allFilePaths)];
+      if (!configFilePath) {
+        return {
+          content: {} as T,
+          filePath: configFilePath,
+        };
+      }
     
-        // Step 4: Read all files in parallel
-        const fileReadPromises = uniqueFilePaths.map((filePath) => this.readFileInfo(filePath));
+      let configExport: any;
     
-        const files = await Promise.all(fileReadPromises);
+      // Handle JSON files
+      if (/\\.json$/.test(configFilePath)) {
+        try {
+          const content = await fs.promises.readFile(configFilePath, 'utf-8');
+          configExport = JSON.parse(content);
+        } catch (err) {
+          console.error(\`Failed to load JSON file: \${configFilePath}\`);
+          throw err;
+        }
+      }
+      // Handle YAML files
+      else if (/\\.ya?ml$/.test(configFilePath)) {
+        try {
+          const { default: yaml } = await import('js-yaml');
+          const content = await fs.promises.readFile(configFilePath, 'utf-8');
+          configExport = yaml.load(content);
+        } catch (err) {
+          console.error(\`Failed to load YAML file: \${configFilePath}\`);
+          throw err;
+        }
+      }
+      // Handle JavaScript files or when using native loader
+      else if (loader === 'native' || /\\.(?:js|mjs|cjs)$/.test(configFilePath)) {
+        try {
+          const configFileURL = pathToFileURL(configFilePath).href;
+          const exportModule = await import(\`\${configFileURL}?t=\${Date.now()}\`);
+          configExport = exportModule.default ? exportModule.default : exportModule;
+        } catch (err) {
+          if (loader === 'native') {
+            console.error(\`Failed to load file with native loader: \${configFilePath}\`);
+            throw err;
+          }
+          console.debug(\`Failed to load file with dynamic import: \${configFilePath}\`);
+        }
+      }
     
-        // Step 5: Calculate statistics
-        const stats = {
-          totalFiles: files.length,
-          totalSize: files.reduce((sum, file) => sum + file.size, 0),
-          errorCount: files.filter((file) => file.hasError).length,
+      // Handle TypeScript files with jiti
+      try {
+        if (configExport === undefined) {
+          const { createJiti } = await import('jiti');
+          const jiti = createJiti(__filename, {
+            // disable require cache to support restart and read the new config
+            moduleCache: false,
+            interopDefault: true,
+          });
+    
+          configExport = await jiti.import(configFilePath, {
+            default: true,
+          });
+        }
+      } catch (err) {
+        console.error(\`Failed to load file with jiti: \${configFilePath}\`);
+        throw err;
+      }
+    
+      // Handle function export
+      if (typeof configExport === 'function') {
+        const nodeEnv = process.env.NODE_ENV || 'development';
+        const configParams = {
+          env: nodeEnv,
+          envMode: envMode || nodeEnv,
+          meta,
         };
     
-        // Step 6: Format content for LLM consumption
-        const packedContent = this.formatForLLM(validatedPaths, files);
+        const result = await configExport(configParams);
+    
+        if (result === undefined) {
+          throw new Error('[loadConfig] The config function must return a config object.');
+        }
     
         return {
-          processedPaths: validatedPaths,
-          files,
-          packedContent,
-          stats,
+          content: result as T,
+          filePath: configFilePath,
         };
       }
     
-      /**
-       * Validate and deduplicate absolute paths
-       */
-      private validateAndDeduplicatePaths(paths: string[]): string[] {
-        const validPaths: string[] = [];
-        const seenPaths = new Set<string>();
-    
-        for (const targetPath of paths) {
-          try {
-            const absolutePath = path.resolve(targetPath);
-    
-            // Deduplicate
-            if (seenPaths.has(absolutePath)) {
-              continue;
-            }
-            seenPaths.add(absolutePath);
-    
-            // Existence check
-            if (!fsSync.existsSync(absolutePath)) {
-              console.warn(\`Path not found: \${targetPath}\`);
-              continue;
-            }
-    
-            validPaths.push(absolutePath);
-          } catch (error) {
-            console.warn(\`Failed to validate path \${targetPath}:\`, error);
-          }
-        }
-    
-        return validPaths;
+      if (!isObject(configExport)) {
+        throw new Error(
+          \`[loadConfig] The config must be an object or a function that returns an object, got \${configExport}\`,
+        );
       }
     
-      /**
-       * Collect files from a single path (file or directory)
-       */
-      private async collectFilesFromPath(targetPath: string, depth: number): Promise<string[]> {
-        try {
-          const stat = await fs.stat(targetPath);
-    
-          if (stat.isFile()) {
-            // Check file extension
-            const ext = path.extname(targetPath).toLowerCase();
-            if (!this.options.ignoreExtensions.includes(ext)) {
-              return [targetPath];
-            }
-            return [];
-          }
-    
-          if (stat.isDirectory()) {
-            return await this.collectFilesRecursively(targetPath, depth);
-          }
-    
-          return [];
-        } catch (error) {
-          console.warn(\`Failed to access path \${targetPath}:\`, error);
-          return [];
-        }
-      }
-    
-      /**
-       * Recursively collect all file paths in a directory
-       */
-      private async collectFilesRecursively(directoryPath: string, depth: number): Promise<string[]> {
-        if (depth > this.options.maxDepth) {
-          return [];
-        }
-    
-        try {
-          const entries = await fs.readdir(directoryPath, { withFileTypes: true });
-          const filePaths: string[] = [];
-    
-          for (const entry of entries) {
-            const fullPath = path.join(directoryPath, entry.name);
-    
-            if (entry.isFile()) {
-              // Check file extension
-              const ext = path.extname(entry.name).toLowerCase();
-              if (!this.options.ignoreExtensions.includes(ext)) {
-                filePaths.push(fullPath);
-              }
-            } else if (entry.isDirectory()) {
-              // Check if directory should be ignored
-              if (!this.options.ignoreDirs.includes(entry.name)) {
-                const subFiles = await this.collectFilesRecursively(fullPath, depth + 1);
-                filePaths.push(...subFiles);
-              }
-            }
-          }
-    
-          return filePaths;
-        } catch (error) {
-          console.warn(\`Failed to read directory \${directoryPath}:\`, error);
-          return [];
-        }
-      }
-    
-      /**
-       * Read file information including content
-       */
-      private async readFileInfo(filePath: string): Promise<FileInfo> {
-        try {
-          const stats = await fs.stat(filePath);
-    
-          // Check file size limit
-          if (stats.size > this.options.maxFileSize) {
-            return {
-              absolutePath: filePath,
-              content: \`[File too large: \${this.formatFileSize(stats.size)}]\`,
-              hasError: true,
-              size: stats.size,
-            };
-          }
-    
-          // Read file content
-          const content = await fs.readFile(filePath, 'utf8');
-    
-          return {
-            absolutePath: filePath,
-            content,
-            hasError: false,
-            size: stats.size,
-          };
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-    
-          return {
-            absolutePath: filePath,
-            content: \`[Error reading file: \${errorMessage}]\`,
-            hasError: true,
-            size: 0,
-          };
-        }
-      }
-    
-      /**
-       * Format the results for optimal LLM consumption using XML structure
-       */
-      private formatForLLM(processedPaths: string[], files: FileInfo[]): string {
-        const sections: string[] = [];
-    
-        // Group files by their relative paths from processed paths
-        const filesByProcessedPath = new Map<string, FileInfo[]>();
-    
-        for (const processedPath of processedPaths) {
-          const pathFiles = files.filter((file) => file.absolutePath.startsWith(processedPath));
-          filesByProcessedPath.set(processedPath, pathFiles);
-        }
-    
-        // Format each processed path as a directory XML block
-        for (const processedPath of processedPaths) {
-          const pathFiles = filesByProcessedPath.get(processedPath) || [];
-    
-          if (pathFiles.length === 0) {
-            continue;
-          }
-    
-          // Sort files for consistent output
-          const sortedFiles = pathFiles.sort((a, b) => a.absolutePath.localeCompare(b.absolutePath));
-    
-          // Use relative path for cleaner output
-          const relativePath = path.relative(process.cwd(), processedPath);
-          const displayPath = relativePath || processedPath;
-    
-          sections.push(\`<dir path="\${displayPath}">\`);
-    
-          for (const file of sortedFiles) {
-            // Calculate relative path from the processed path
-            const fileRelativePath = path.relative(processedPath, file.absolutePath);
-            const displayFilePath = fileRelativePath || path.basename(file.absolutePath);
-    
-            sections.push(\`  <file path="\${displayFilePath}">\`);
-    
-            // Indent file content for better readability
-            const indentedContent = file.content
-              .split('\\n')
-              .map((line) => \`    \${line}\`)
-              .join('\\n');
-    
-            sections.push(indentedContent);
-            sections.push(\`  </file>\`);
-          }
-    
-          sections.push(\`</dir>\`);
-        }
-    
-        return sections.join('\\n');
-      }
-    
-      /**
-       * Format file size in human-readable format
-       */
-      private formatFileSize(bytes: number): string {
-        if (bytes === 0) return '0 B';
-    
-        const k = 1024;
-        const sizes = ['B', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
-        return \`\${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} \${sizes[i]}\`;
-      }
+      return {
+        content: configExport as T,
+        filePath: configFilePath,
+      };
     }
     
   </file>
-  <file path="runtime/index.ts">
-    /*
-     * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
-     * SPDX-License-Identifier: Apache-2.0
-     */
-    
-    export {};
-    
-  </file>
-</dir>"
+</directory>"
 `;

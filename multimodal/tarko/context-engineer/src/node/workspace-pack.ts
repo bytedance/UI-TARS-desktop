@@ -274,6 +274,7 @@ export class WorkspacePack {
 
   /**
    * Format the results for optimal LLM consumption using XML structure
+   * Uses consistent <directory> tags to align with ContextReferenceProcessor output
    */
   private formatForLLM(processedPaths: string[], files: FileInfo[]): string {
     const sections: string[] = [];
@@ -301,7 +302,7 @@ export class WorkspacePack {
       const relativePath = path.relative(process.cwd(), processedPath);
       const displayPath = relativePath || processedPath;
 
-      sections.push(`<dir path="${displayPath}">`);
+      sections.push(`<directory path="${displayPath}">`);
 
       for (const file of sortedFiles) {
         // Calculate relative path from the processed path
@@ -320,7 +321,7 @@ export class WorkspacePack {
         sections.push(`  </file>`);
       }
 
-      sections.push(`</dir>`);
+      sections.push(`</directory>`);
     }
 
     return sections.join('\n');

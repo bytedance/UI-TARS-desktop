@@ -2,7 +2,7 @@ import { it, expect } from 'vitest';
 import { WorkspacePack } from '../src';
 import path from 'path';
 
-const PACK_DIR = path.join(__dirname, '../../context-engineer/src');
+const PACK_DIR = path.join(__dirname, '../../config-loader/src');
 
 it('DirectoryExpander', async () => {
   const directoryExpander = new WorkspacePack();

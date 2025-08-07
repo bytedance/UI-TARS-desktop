@@ -108,7 +108,9 @@ export class ContextReferenceProcessor {
 
         if (!normalizedTarget.startsWith(normalizedWorkspace)) {
           console.warn(`File reference outside workspace: ${fileRef}`);
-          expandedContents.push(`<file path="${fileRef}">\nError: File reference outside workspace\n</file>`);
+          expandedContents.push(
+            `<file path="${fileRef}">\nError: File reference outside workspace\n</file>`,
+          );
           continue;
         }
 
@@ -130,7 +132,9 @@ export class ContextReferenceProcessor {
         }
       } catch (error) {
         console.error(`Failed to process file reference ${fileRef}:`, error);
-        expandedContents.push(`<file path="${fileRef}">\nError: Failed to process file reference\n</file>`);
+        expandedContents.push(
+          `<file path="${fileRef}">\nError: Failed to process file reference\n</file>`,
+        );
       }
     }
 
@@ -157,12 +161,14 @@ export class ContextReferenceProcessor {
 
         if (absoluteDirPaths.length > 0) {
           const packResult = await this.workspacePack.packPaths(
-            absoluteDirPaths.map(p => p.absolutePath)
+            absoluteDirPaths.map((p) => p.absolutePath),
           );
 
           // Add packed content for each directory reference
           for (const { relativePath } of absoluteDirPaths) {
-            expandedContents.push(`<directory path="${relativePath}">\n${packResult.packedContent}\n</directory>`);
+            expandedContents.push(
+              `<directory path="${relativePath}">\n${packResult.packedContent}\n</directory>`,
+            );
           }
 
           // Log packing statistics
@@ -178,7 +184,9 @@ export class ContextReferenceProcessor {
 
         // Fallback to error message for failed packing
         for (const dirRef of dirReferences) {
-          expandedContents.push(`<directory path="${dirRef}">\nError: Failed to pack directory\n</directory>`);
+          expandedContents.push(
+            `<directory path="${dirRef}">\nError: Failed to pack directory\n</directory>`,
+          );
         }
       }
     }
