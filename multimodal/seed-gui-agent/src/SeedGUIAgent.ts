@@ -24,7 +24,8 @@ export interface GUIAgentConfig extends AgentOptions {
     | 'ui-tars-1.0'
     | 'ui-tars-1.5'
     | 'doubao-1.5-ui-tars-15b'
-    | 'doubao-1.5-ui-tars-20b';
+    | 'doubao-1.5-ui-tars-20b'
+    | 'latest';
   // ===== Optional =====
   systemPrompt?: string;
   signal?: AbortSignal;
@@ -67,7 +68,7 @@ export class SeedGUIAgent extends Agent {
       const browserOperator = new BrowserOperator({
         browser,
         browserType: 'chrome',
-        logger: undefined,
+        logger: this.logger,
         highlightClickableElements: false,
         showActionInfo: false,
       });
@@ -84,7 +85,7 @@ export class SeedGUIAgent extends Agent {
     } else if (this.operatorType === 'android') {
       const deviceId = await getAndroidDeviceId();
       if (deviceId == null) {
-        console.error('No Android devices found. Please connect a device and try again.');
+        this.logger.error('No Android devices found. Please connect a device and try again.');
         process.exit(0);
       }
       const adbOperator = new AdbOperator(deviceId);
@@ -103,7 +104,7 @@ export class SeedGUIAgent extends Agent {
         description: 'operator tool',
         parameters: {},
         function: async (input) => {
-          console.log(input);
+          this.logger.log(input);
           await this.operator!.execute({
             parsedPrediction: input,
             screenWidth: getScreenInfo().screenWidth ?? 1000,
@@ -118,38 +119,13 @@ export class SeedGUIAgent extends Agent {
     const eventStream = this.getEventStream();
     eventStream.subscribe((event) => {
       const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 19);
-      console.log(`[${timestamp}] 收到事件: ${event.type}`, event);
-      switch (event.type) {
-        case 'user_message':
-          console.log('用户消息:', event.content);
-          break;
-        case 'assistant_message':
-          console.log('助手回复:', event.content);
-          break;
-        case 'tool_call':
-          console.log('工具调用:', event.name, event.arguments);
-          break;
-        case 'tool_result':
-          console.log('工具结果:', event.content);
-          break;
-        case 'environment_input':
-          console.log('环境输入:', event.description);
-          break;
-        case 'agent_run_start':
-          console.log('Agent开始执行');
-          break;
-        case 'agent_run_end':
-          console.log('Agent执行结束');
-          break;
-        default:
-          console.log('其他事件:', event);
-      }
+      this.logger.log(`[${timestamp}] 收到事件: ${event.type}`, event);
     });
     super.initialize();
   }
 
   async onLLMRequest(id: string, payload: LLMRequestHookPayload): Promise<void> {
-    console.log('onLLMRequest', id, payload);
+    this.logger.log('onLLMRequest', id, payload);
     // await ImageSaver.saveImagesFromPayload(id, payload);
   }
 
@@ -158,10 +134,6 @@ export class SeedGUIAgent extends Agent {
     const event = this.eventStream.createEvent('environment_input', {
       description: 'Browser Screenshot',
       content: [
-        {
-          type: 'text',
-          text: 'Screenshot: ',
-        },
         {
           type: 'image_url',
           image_url: {

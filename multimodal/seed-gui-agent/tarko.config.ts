@@ -3,16 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { defineConfig } from '@tarko/agent-cli';
+import { SYSTEM_PROMPT_LATEST } from './src/constants';
 
 export default defineConfig({
   operatorType: 'browser',
   model: {
-    provider: 'volcengine',
-    baseURL: process.env.ARK_BASE_URL,
-    id: process.env.ARK_MODEL,
-    apiKey: process.env.ARK_API_KEY, // secretlint-disable-line
-    uiTarsVersion: 'doubao-1.5-ui-tars-20b',
+    // provider: 'volcengine',
+    // baseURL: process.env.ARK_BASE_URL,
+    // id: process.env.ARK_MODEL,
+    // apiKey: process.env.ARK_API_KEY, // secretlint-disable-line
+    provider: 'openai-non-streaming',
+    baseURL: process.env.SEED_BASE_URL,
+    id: process.env.SEED_MODEL,
+    apiKey: process.env.SEED_API_KEY, // secretlint-disable-line
   },
+  systemPrompt: SYSTEM_PROMPT_LATEST,
+  uiTarsVersion: 'latest',
   webui: {
     logo: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png',
     title: 'Agent TARS',

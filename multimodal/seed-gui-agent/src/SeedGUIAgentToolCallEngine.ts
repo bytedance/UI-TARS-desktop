@@ -142,6 +142,21 @@ export class SeedGUIAgentToolCallEngine extends ToolCallEngine {
       }
     }
 
+    // TODO: Remove this logic after the new model instruction is followed
+    if (fullContent.includes('</answer>')) {
+      // 兼容两种格式：FunctionCallBegin 和 FCResponseBegin
+      const functionCallBeginMatch = fullContent.match(
+        /<\|(FunctionCallBegin|FCResponseBegin)\|>([\s\S]*?)(?:<\/answer>|$)/,
+      );
+      let extractedContent: string | null = null;
+      if (functionCallBeginMatch) {
+        extractedContent = functionCallBeginMatch[2]; // Use the second capture group, as the first is the tag name
+      }
+      finished = true;
+      finishMessage = extractedContent;
+      console.log('extractedContent', extractedContent);
+    }
+
     // No tool calls found - return regular response
     return {
       content: finishMessage ? finishMessage : fullContent,
