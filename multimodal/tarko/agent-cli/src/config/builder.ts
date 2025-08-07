@@ -64,6 +64,8 @@ export function buildAppConfig<
     apiKey,
     baseURL,
     shareProvider,
+    // Extract tool filter options
+    tool,
     ...cliConfigProps
   } = cliArguments;
 
@@ -74,6 +76,9 @@ export function buildAppConfig<
     baseURL,
     shareProvider,
   });
+
+  // Handle tool filter options
+  handleToolFilterOptions(cliConfigProps, { tool });
 
   // Allow external handler to process additional options
   if (cliOptionsEnhancer) {
@@ -254,5 +259,59 @@ function applyWebUIDefaults(config: AgentAppConfig): void {
   if (!config.webui.logo) {
     config.webui.logo =
       'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png';
+  }
+}
+
+/**
+ * Handle tool filter CLI options
+ */
+function handleToolFilterOptions(
+  config: Partial<AgentAppConfig>,
+  toolOptions: {
+    tool?: {
+      include?: string | string[];
+      exclude?: string | string[];
+    };
+  },
+): void {
+  const { tool } = toolOptions;
+
+  if (!tool) {
+    return;
+  }
+
+  // Initialize tool config if it doesn't exist
+  if (!config.tool) {
+    config.tool = {};
+  }
+
+  // Handle include patterns
+  if (tool.include) {
+    const includePatterns = Array.isArray(tool.include) ? tool.include : [tool.include];
+    // Flatten comma-separated patterns
+    const flattenedInclude = includePatterns.flatMap((pattern) =>
+      pattern
+        .split(',')
+        .map((p) => p.trim())
+        .filter((p) => p.length > 0),
+    );
+    if (flattenedInclude.length > 0) {
+      config.tool.include = flattenedInclude;
+    }
+  }
+
+  // Handle exclude patterns
+  if (tool.exclude) {
+    const excludePatterns = Array.isArray(tool.exclude) ? tool.exclude : [tool.exclude];
+    // Flatten comma-separated patterns
+    const flattenedExclude = excludePatterns.flatMap((pattern) =>
+      pattern
+        .split(',')
+        .map((p) => p.trim())
+        .filter((p) => p.length > 0),
+    );
+    if (flattenedExclude.length > 0) {
+      config.tool.exclude = flattenedExclude;
+    }
   }
 }

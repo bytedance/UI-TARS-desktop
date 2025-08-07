@@ -40,6 +40,7 @@ import { getLogger, LogLevel, rootLogger } from '@tarko/shared-utils';
 import { AgentExecutionController } from './execution-controller';
 import { getLLMClient } from './llm-client';
 import { getToolCallEngineForProvider } from '../tool-call-engine/engine-selector';
+import { filterTools } from '../utils/tool-filter';
 
 /**
  * An event-stream driven agent framework for building effective multimodal Agents.
@@ -215,12 +216,15 @@ export class Agent<T extends AgentOptions = AgentOptions>
   }
 
   /**
-   * Returns all registered tools as an array.
+   * Returns all registered tools as an array, filtered by tool filter options.
    *
-   * @returns Array of all registered tool definitions
+   * @returns Array of all registered tool definitions after applying filters
    */
   public getTools(): Tool[] {
-    return this.toolManager.getTools();
+    const allTools = this.toolManager.getTools();
+    const toolFilterOptions = this.options.tool;
+    
+    return filterTools(allTools, toolFilterOptions);
   }
 
   /**
@@ -682,12 +686,12 @@ Provide concise and accurate responses.`;
    * @returns Promise resolving to array of available tool definitions
    */
   public async getAvailableTools(): Promise<Tool[]> {
-    const registeredTools = this.getTools();
+    const filteredTools = this.getTools(); // This now applies filtering
     try {
-      return await this.onRetrieveTools(registeredTools);
+      return await this.onRetrieveTools(filteredTools);
     } catch (error) {
       this.logger.error(`[Agent] Error in onRetrieveTools hook: ${error}`);
-      return registeredTools;
+      return filteredTools;
     }
   }
 

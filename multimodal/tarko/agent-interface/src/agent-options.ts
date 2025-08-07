@@ -73,6 +73,23 @@ export interface AgentModelOptions {
 }
 
 /**
+ * Tool filtering options for controlling which tools are available
+ */
+export interface AgentToolFilterOptions {
+  /**
+   * Include only tools whose names contain any of these strings
+   * Applied before exclude filters
+   */
+  include?: string[];
+
+  /**
+   * Exclude tools whose names contain any of these strings
+   * Applied after include filters
+   */
+  exclude?: string[];
+}
+
+/**
  * Tool configuration options for agent capabilities and execution engine
  */
 export interface AgentToolOptions {
@@ -82,6 +99,11 @@ export interface AgentToolOptions {
    * @defaultValue `undefined`
    */
   tools?: Tool[];
+
+  /**
+   * Tool filtering options for controlling which tools are available
+   */
+  tool?: AgentToolFilterOptions;
 
   /**
    * Tool Call Engine configuration - supports both predefined engines and custom constructors.
