@@ -60,10 +60,10 @@ export class ContextReferenceProcessor {
 
   /**
    * Process contextual references in query content
-   * Expands @file: and @dir: references to actual content
+   * Expands @file: and @dir: references to actual content and prepends to original query
    * @param query - The query content that may contain contextual references
    * @param workspacePath - Base workspace path for security validation and path resolution
-   * @returns Processed query with expanded contextual content
+   * @returns Processed query with expanded contextual content prepended
    */
   async processContextualReferences(
     query: string | ChatCompletionContentPart[],
@@ -95,7 +95,44 @@ export class ContextReferenceProcessor {
       }
     }
 
-    let processedQuery = query;
+    const expandedContents: string[] = [];
+
+    // Process individual file references
+    for (const fileRef of fileReferences) {
+      try {
+        const absolutePath = path.resolve(workspacePath, fileRef);
+
+        // Security check: ensure path is within workspace
+        const normalizedWorkspace = path.resolve(workspacePath);
+        const normalizedTarget = path.resolve(absolutePath);
+
+        if (!normalizedTarget.startsWith(normalizedWorkspace)) {
+          console.warn(`File reference outside workspace: ${fileRef}`);
+          expandedContents.push(`<file path="${fileRef}">\nError: File reference outside workspace\n</file>`);
+          continue;
+        }
+
+        if (!fs.existsSync(absolutePath)) {
+          console.warn(`File reference not found: ${fileRef}`);
+          expandedContents.push(`<file path="${fileRef}">\nError: File not found\n</file>`);
+          continue;
+        }
+
+        const stats = fs.statSync(absolutePath);
+        if (stats.isFile()) {
+          try {
+            const fileContent = fs.readFileSync(absolutePath, 'utf8');
+            expandedContents.push(`<file path="${fileRef}">\n${fileContent}\n</file>`);
+          } catch (error) {
+            console.error(`Failed to read file ${fileRef}:`, error);
+            expandedContents.push(`<file path="${fileRef}">\nError: Failed to read file\n</file>`);
+          }
+        }
+      } catch (error) {
+        console.error(`Failed to process file reference ${fileRef}:`, error);
+        expandedContents.push(`<file path="${fileRef}">\nError: Failed to process file reference\n</file>`);
+      }
+    }
 
     // Process directory references with high-performance packing
     if (dirReferences.length > 0) {
@@ -114,20 +151,18 @@ export class ContextReferenceProcessor {
               return null;
             }
 
-            return absolutePath;
+            return { relativePath: dirRef, absolutePath };
           })
-          .filter((p): p is string => p !== null);
+          .filter((p): p is { relativePath: string; absolutePath: string } => p !== null);
 
         if (absoluteDirPaths.length > 0) {
-          const packResult = await this.workspacePack.packPaths(absoluteDirPaths);
+          const packResult = await this.workspacePack.packPaths(
+            absoluteDirPaths.map(p => p.absolutePath)
+          );
 
-          // Replace all @dir: references with the packed content
-          for (const dirRef of dirReferences) {
-            const pattern = new RegExp(
-              `@dir:${dirRef.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`,
-              'g',
-            );
-            processedQuery = processedQuery.replace(pattern, `\n\n${packResult.packedContent}\n\n`);
+          // Add packed content for each directory reference
+          for (const { relativePath } of absoluteDirPaths) {
+            expandedContents.push(`<directory path="${relativePath}">\n${packResult.packedContent}\n</directory>`);
           }
 
           // Log packing statistics
@@ -143,62 +178,16 @@ export class ContextReferenceProcessor {
 
         // Fallback to error message for failed packing
         for (const dirRef of dirReferences) {
-          const pattern = new RegExp(`@dir:${dirRef.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'g');
-          processedQuery = processedQuery.replace(
-            pattern,
-            `\n\n=== Error packing directory: ${dirRef} ===\n`,
-          );
+          expandedContents.push(`<directory path="${dirRef}">\nError: Failed to pack directory\n</directory>`);
         }
       }
     }
 
-    // Process individual file references
-    for (const fileRef of fileReferences) {
-      try {
-        const absolutePath = path.resolve(workspacePath, fileRef);
-
-        // Security check: ensure path is within workspace
-        const normalizedWorkspace = path.resolve(workspacePath);
-        const normalizedTarget = path.resolve(absolutePath);
-
-        if (!normalizedTarget.startsWith(normalizedWorkspace)) {
-          console.warn(`File reference outside workspace: ${fileRef}`);
-          continue;
-        }
-
-        if (!fs.existsSync(absolutePath)) {
-          console.warn(`File reference not found: ${fileRef}`);
-          continue;
-        }
-
-        const stats = fs.statSync(absolutePath);
-        if (stats.isFile()) {
-          try {
-            const fileContent = fs.readFileSync(absolutePath, 'utf8');
-            const expandedContent = `\n\n=== File: ${fileRef} ===\n${fileContent}\n=== End of File ===\n`;
-
-            const pattern = new RegExp(
-              `@file:${fileRef.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`,
-              'g',
-            );
-            processedQuery = processedQuery.replace(pattern, expandedContent);
-          } catch (error) {
-            console.error(`Failed to read file ${fileRef}:`, error);
-            const pattern = new RegExp(
-              `@file:${fileRef.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`,
-              'g',
-            );
-            processedQuery = processedQuery.replace(
-              pattern,
-              `\n\n=== Error reading file: ${fileRef} ===\n`,
-            );
-          }
-        }
-      } catch (error) {
-        console.error(`Failed to process file reference ${fileRef}:`, error);
-      }
+    // Combine expanded content with original query
+    if (expandedContents.length > 0) {
+      return `${expandedContents.join('\n\n')}\n\n${query}`;
     }
 
-    return processedQuery;
+    return query;
   }
 }
