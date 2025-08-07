@@ -66,6 +66,7 @@ export function addCommonOptions(command: Command): Command {
       'Tool call engine type (native, prompt_engineering, structured_outputs)',
     )
 
+    .option('--tool', 'Tool config including filter options')
     // Tool filtering
     .option(
       '--tool.include <patterns>',
