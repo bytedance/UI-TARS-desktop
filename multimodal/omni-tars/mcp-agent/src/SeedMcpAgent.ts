@@ -22,6 +22,10 @@ export interface SeedMcpAgentOption extends AgentOptions {
   tavilyApiKey: string;
 }
 
+/**
+ * Legacy SeedMcpAgent for backward compatibility
+ * @deprecated Use McpAgentPlugin with ComposableAgent instead
+ */
 export default class SeedMcpAgent extends Agent {
   static label = 'seed-mcp-agent';
   private loop = 0;
@@ -40,8 +44,27 @@ export default class SeedMcpAgent extends Agent {
 
   async initialize(): Promise<void> {
     const mcpManager = new McpManager({
-      tavilyApiKey: this._options.tavilyApiKey,
-      googleApiKey: this._options.googleApiKey,
+      mcpServers: [
+        {
+          type: 'streamable-http',
+          name: McpManager.McpClientType.Tavily,
+          description: 'tavily search tool',
+          url: `https://mcp.tavily.com/mcp/?tavilyApiKey=${process.env.GOOGLE_API_KEY}`,
+          timeout: 60,
+          header: {
+            'x-tavily-api-key': process.env.TAVILY_API_KEY,
+          },
+        },
+        {
+          type: 'streamable-http',
+          name: McpManager.McpClientType.Google,
+          description: 'google search tool',
+          url: process.env.GOOGLE_MCP_URL,
+          headers: {
+            'x-serper-api-key': process.env.GOOGLE_API_KEY,
+          },
+        },
+      ],
     });
 
     await mcpManager.init();

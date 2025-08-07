@@ -1,0 +1,43 @@
+{
+  "name": "@omni-tars/mcp-agent",
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "rslib build --watch",
+    "build": "rslib build",
+    "test": "vitest",
+    "dev:agent": "tarko --agent ./"
+  },
+  "dependencies": {
+    "@tarko/agent": "workspace:*",
+    "@tarko/agent-interface": "workspace:*",
+    "@agent-infra/logger": "0.0.2-beta.2",
+    "@agent-infra/mcp-client": "1.1.6-beta.3",
+    "@omni-tars/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@rslib/core": "0.10.0",
+    "@types/node": "22.15.30",
+    "typescript": "^5.5.3",
+    "vitest": "^1.0.0",
+    "openai": "4.93.0",
+    "@tarko/agent-cli": "workspace:*"
+  }
+}

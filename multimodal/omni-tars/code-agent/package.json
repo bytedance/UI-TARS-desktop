@@ -1,7 +1,7 @@
 {
-  "name": "@multimodal/seed-mcp-agent",
+  "name": "@omni-tars/code-agent",
   "version": "0.0.1",
-  "description": "seed-mcp-agent",
+  "description": "",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -27,9 +27,7 @@
   },
   "dependencies": {
     "@tarko/agent": "workspace:*",
-    "@tarko/agent-interface": "workspace:*",
-    "@agent-infra/logger": "0.0.2-beta.2",
-    "@agent-infra/mcp-client": "1.1.6-beta.3"
+    "@omni-tars/core": "workspace:*"
   },
   "devDependencies": {
     "@rslib/core": "0.10.0",

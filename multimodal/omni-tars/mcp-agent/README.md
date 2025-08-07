@@ -22,3 +22,19 @@ export GOOGLE_API_KEY=""
 ```bash
 pnpm dev:agent
 ```
+
+## Custom MCP Servers
+
+```typescript
+const mcpPlugin = new McpAgentPlugin({
+  googleApiKey: 'key',
+  tavilyApiKey: 'key',
+  mcpServers: [
+    {
+      name: 'file-server',
+      command: 'npx',
+      args: ['@modelcontextprotocol/server-filesystem', '/workspace'],
+    },
+  ],
+});
+```

@@ -17,24 +17,24 @@ export default defineConfig({
   },
   lib: [
     {
-      format: 'cjs',
+      format: 'esm',
       syntax: 'es2021',
-      bundle: true,
+      bundle: false,
+      autoExternal: false,
       dts: true,
       banner: { js: BANNER },
-      autoExternal: {
-        dependencies: false,
-        optionalDependencies: true,
-        peerDependencies: true,
-      },
-      output: {
-        externals: ['imagemin-webp', 'imagemin-mozjpeg'],
-      },
+    },
+    {
+      format: 'cjs',
+      syntax: 'es2021',
+      bundle: false,
+      dts: true,
+      banner: { js: BANNER },
     },
   ],
   output: {
     target: 'node',
-    cleanDistPath: false,
+    cleanDistPath: true,
     sourceMap: true,
   },
 });

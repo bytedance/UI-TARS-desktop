@@ -9,5 +9,5 @@ packages:
   - 'benchmark/*'
   # docs
   - 'websites/*'
-  # seed mcp agent
-  - 'seed-mcp-agent'
+  # omni-tars agent
+  - 'omni-tars/*'
