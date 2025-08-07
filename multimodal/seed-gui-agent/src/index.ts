@@ -2,13 +2,10 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { LocalBrowser } from '@agent-infra/browser';
-import { BrowserOperator } from '@gui-agent/operator-browser';
-import { ComputerOperator } from './ComputerOperator';
-import { getAndroidDeviceId, AdbOperator } from '@ui-tars/operator-adb';
 import { SeedGUIAgent } from './SeedGUIAgent';
 import { env } from 'process';
 import { Command } from 'commander';
+import { SYSTEM_PROMPT_LATEST } from './constants';
 
 function validateEnvironmentVariables() {
   if (!env.SEED_BASE_URL || !env.SEED_MODEL || !env.SEED_API_KEY) {
@@ -23,34 +20,21 @@ function validateEnvironmentVariables() {
 
 function getModelConfig() {
   return {
+    provider: 'openai-non-streaming',
     baseURL: env.SEED_BASE_URL!,
     id: env.SEED_MODEL!,
     apiKey: env.SEED_API_KEY!, // secretlint-disable-line
-    uiTarsVersion: 'doubao-1.5-ui-tars-20b',
   } as const;
 }
 
 async function testBrowserOperator() {
   console.log('🌐 Testing Browser Operator...');
 
-  const browser = new LocalBrowser();
-  const browserOperator = new BrowserOperator({
-    browser,
-    browserType: 'chrome',
-    logger: undefined,
-    highlightClickableElements: false,
-    showActionInfo: false,
-  });
-
-  await browser.launch();
-  const openingPage = await browser.createPage();
-  await openingPage.goto('https://www.google.com/', {
-    waitUntil: 'networkidle2',
-  });
-
   const seedGUIAgentForBrowser = new SeedGUIAgent({
     operatorType: 'browser',
     model: getModelConfig(),
+    uiTarsVersion: 'latest',
+    systemPrompt: SYSTEM_PROMPT_LATEST,
   });
 
   const browserResponse = await seedGUIAgentForBrowser.run({
@@ -61,17 +45,16 @@ async function testBrowserOperator() {
   console.log('================================================');
   console.log(browserResponse.content);
   console.log('================================================');
-
-  await browser.close();
 }
 
 async function testComputerOperator() {
   console.log('💻 Testing Computer Operator...');
 
-  const computerOperator = new ComputerOperator();
   const seedGUIAgentForComputer = new SeedGUIAgent({
     operatorType: 'computer',
     model: getModelConfig(),
+    uiTarsVersion: 'latest',
+    systemPrompt: SYSTEM_PROMPT_LATEST,
   });
 
   const computerResponse = await seedGUIAgentForComputer.run({
@@ -87,16 +70,12 @@ async function testComputerOperator() {
 async function testAndroidOperator() {
   console.log('📱 Testing Android Operator...');
 
-  const deviceId = await getAndroidDeviceId();
-  if (deviceId == null) {
-    console.error('No Android devices found. Please connect a device and try again.');
-    process.exit(0);
-  }
-
-  const adbOperator = new AdbOperator(deviceId);
   const seedGUIAgentForAndroid = new SeedGUIAgent({
     operatorType: 'android',
     model: getModelConfig(),
+    uiTarsVersion: 'latest',
+    // TODO: 这里的systemPrompt需要根据android的prompt来写
+    systemPrompt: SYSTEM_PROMPT_LATEST,
   });
 
   const androidResponse = await seedGUIAgentForAndroid.run({
