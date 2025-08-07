@@ -17,7 +17,17 @@ export class CodeToolCallEngineProvider extends ToolCallEngineProvider<CodeToolC
   }
 
   canHandle(context: ToolCallEngineContext): boolean {
-    // Check if any tools are code-related
+    // Check if the latest model output contains <code_env></code_env> tags
+    if (context.latestAssistantMessage) {
+      const hasCodeEnvTags =
+        context.latestAssistantMessage.includes('<code_env>') &&
+        context.latestAssistantMessage.includes('</code_env>');
+      if (hasCodeEnvTags) {
+        return true;
+      }
+    }
+
+    // Fallback: Check if any tools are code-related
     const codeToolNames = [
       'execute_code',
       'run_bash',
@@ -31,12 +41,12 @@ export class CodeToolCallEngineProvider extends ToolCallEngineProvider<CodeToolC
       'git',
     ];
 
-    const hasCodeTools = context.tools.some((tool) =>
+    const hasCodeTools = context?.toolCalls?.some((tool) =>
       codeToolNames.some((codeName) =>
         tool.function.name.toLowerCase().includes(codeName.toLowerCase()),
       ),
     );
 
-    return hasCodeTools;
+    return !!hasCodeTools;
   }
 }

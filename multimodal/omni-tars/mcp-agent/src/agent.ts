@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentBuilder, ComposableAgent } from '@omni-tars/core';
+import { ComposableAgent } from '@omni-tars/core';
 import { McpAgentPlugin } from './McpAgentPlugin';
 import { McpManager } from './tools/mcp';
+import { McpToolCallEngine } from './McpToolCallEngine';
 
 const mcpPlugin = new McpAgentPlugin({
   mcpServers: [
@@ -35,6 +36,7 @@ const mcpPlugin = new McpAgentPlugin({
 const agent = new ComposableAgent({
   name: 'Seed MCP Agent',
   plugins: [mcpPlugin],
+  toolCallEngine: McpToolCallEngine,
 });
 
 export { agent, mcpPlugin };

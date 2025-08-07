@@ -255,6 +255,9 @@ importers:
       '@tarko/agent-interface':
         specifier: workspace:*
         version: link:../../tarko/agent-interface
+      '@tarko/model-provider':
+        specifier: workspace:*
+        version: link:../../tarko/model-provider
     devDependencies:
       '@rslib/core':
         specifier: 0.10.0
@@ -357,6 +360,9 @@ importers:
       '@omni-tars/mcp-agent':
         specifier: workspace:*
         version: link:../mcp-agent
+      '@tarko/agent':
+        specifier: workspace:*
+        version: link:../../tarko/agent
     devDependencies:
       '@rslib/core':
         specifier: 0.10.0
@@ -364,6 +370,9 @@ importers:
       '@tarko/agent-cli':
         specifier: workspace:*
         version: link:../../tarko/agent-cli
+      '@tarko/agent-interface':
+        specifier: workspace:*
+        version: link:../../tarko/agent-interface
       '@types/node':
         specifier: 22.15.30
         version: 22.15.30

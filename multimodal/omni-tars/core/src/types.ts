@@ -3,7 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LLMRequestHookPayload, LLMResponseHookPayload, Tool, ToolCallEngine } from '@tarko/agent';
+import {
+  ChatCompletionMessageToolCall,
+  LLMRequestHookPayload,
+  LLMResponseHookPayload,
+  Tool,
+  ToolCallEngine,
+} from '@tarko/agent';
 /**
  * Standard interface that all agent plugins must implement
  */
@@ -164,10 +170,15 @@ export abstract class ToolCallEngineProvider<T extends ToolCallEngine = ToolCall
  */
 export interface ToolCallEngineContext {
   /** Current tools available */
-  tools: Tool[];
+  tools?: Tool[];
+
+  toolCalls?: ChatCompletionMessageToolCall[];
 
   /** Message history */
-  messages: unknown[];
+  messageHistory?: unknown[];
+
+  /** Latest model output from in current loop */
+  latestAssistantMessage?: string;
 }
 
 /**
@@ -176,10 +187,6 @@ export interface ToolCallEngineContext {
 export interface ToolCallEngineCompositionConfig {
   /** List of tool call engine providers to compose */
   engines: ToolCallEngineProvider[];
-
-  /** Strategy for engine selection */
-  strategy?: 'priority' | 'first_match' | 'fallback';
-
   /** Default engine to use when no specific engine matches */
   defaultEngine?: ToolCallEngineProvider;
 }

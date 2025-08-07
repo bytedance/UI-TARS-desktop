@@ -17,7 +17,17 @@ export class GuiToolCallEngineProvider extends ToolCallEngineProvider<GuiToolCal
   }
 
   canHandle(context: ToolCallEngineContext): boolean {
-    // Check if any tools are GUI/computer use related
+    // Check if the latest model output contains <computer_env></computer_env> tags
+    if (context.latestAssistantMessage) {
+      const hasComputerEnvTags =
+        context.latestAssistantMessage.includes('<computer_env>') &&
+        context.latestAssistantMessage.includes('</computer_env>');
+      if (hasComputerEnvTags) {
+        return true;
+      }
+    }
+
+    // Fallback: Check if any tools are GUI/computer use related
     const guiToolNames = [
       'screenshot',
       'click',
@@ -33,20 +43,12 @@ export class GuiToolCallEngineProvider extends ToolCallEngineProvider<GuiToolCal
       'browser',
     ];
 
-    const hasGuiTools = context.tools.some((tool) =>
+    const hasGuiTools = context?.toolCalls?.some((tool) =>
       guiToolNames.some((guiName) =>
         tool.function.name.toLowerCase().includes(guiName.toLowerCase()),
       ),
     );
 
-    // Also check for computer use in tool descriptions
-    const hasComputerUseDescription = context.tools.some(
-      (tool) =>
-        tool.description?.toLowerCase().includes('computer use') ||
-        tool.description?.toLowerCase().includes('gui') ||
-        tool.description?.toLowerCase().includes('screen'),
-    );
-
-    return hasGuiTools || hasComputerUseDescription;
+    return !!hasGuiTools;
   }
 }

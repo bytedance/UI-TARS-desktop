@@ -29,7 +29,8 @@
     "@omni-tars/core": "workspace:*",
     "@omni-tars/gui-agent": "workspace:*",
     "@omni-tars/mcp-agent": "workspace:*",
-    "@omni-tars/code-agent": "workspace:*"
+    "@omni-tars/code-agent": "workspace:*",
+    "@tarko/agent": "workspace:*"
   },
   "devDependencies": {
     "@rslib/core": "0.10.0",
@@ -37,6 +38,7 @@
     "typescript": "^5.5.3",
     "vitest": "^1.0.0",
     "openai": "4.93.0",
-    "@tarko/agent-cli": "workspace:*"
+    "@tarko/agent-cli": "workspace:*",
+    "@tarko/agent-interface": "workspace:*"
   }
 }

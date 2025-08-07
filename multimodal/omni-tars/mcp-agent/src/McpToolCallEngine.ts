@@ -16,8 +16,8 @@ import {
   StreamProcessingState,
 } from '@tarko/agent-interface';
 
-export class SeedMCPAgentToolCallEngine extends ToolCallEngine {
-  private logger = getLogger('SeedMCPAgentToolCallEngine');
+export class McpToolCallEngine extends ToolCallEngine {
+  private logger = getLogger('McpToolCallEngine');
 
   preparePrompt(instructions: string, tools: Tool[]): string {
     return instructions;
@@ -28,6 +28,14 @@ export class SeedMCPAgentToolCallEngine extends ToolCallEngine {
       messages: context.messages,
       temperature: context.temperature || 0.7,
       stream: true,
+    };
+  }
+  initStreamProcessingState(): StreamProcessingState {
+    return {
+      contentBuffer: '',
+      toolCalls: [],
+      reasoningBuffer: '',
+      finishReason: null,
     };
   }
 
@@ -211,15 +219,6 @@ export class SeedMCPAgentToolCallEngine extends ToolCallEngine {
       think,
       tools,
       answer,
-    };
-  }
-
-  initStreamProcessingState(): StreamProcessingState {
-    return {
-      contentBuffer: '',
-      toolCalls: [],
-      reasoningBuffer: '',
-      finishReason: null,
     };
   }
 

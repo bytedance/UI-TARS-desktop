@@ -19,7 +19,7 @@ const agent = AgentBuilder.create()
 
 ### 📈 Extensibility
 
-Easy to create a new Agent Plugin following the same pattern:
+1. create a new Agent Plugin following the same pattern:
 
 ```typescript
 import { AgentPlugin } from '@omni-tars/core';
@@ -44,36 +44,49 @@ export class MyCustomPlugin implements AgentPlugin {
 }
 ```
 
+2. create a new ToolCallEngineProvider
+
+```
+export class MyCustomToolCallEngineProvider extends ToolCallEngineProvider<MyCustomToolCallEngine> {
+  readonly name = 'my-custom-engine';
+  readonly priority = 70;
+  readonly description = 'My custom tool call engine for specific tasks';
+
+  protected createEngine(): MyCustomToolCallEngine {
+    return new MyCustomToolCallEngine();
+  }
+
+  canHandle(context: ToolCallEngineContext): boolean {
+    return context.tools.some(tool =>
+      tool.function.name.includes('my_special_tool')
+    );
+  }
+}
+```
+
 ## Usage Examples
 
 ### Creating a Composed Agent
 
 ```typescript
-import { AgentBuilder } from '@omni-tars/core';
-import { McpAgentPlugin } from '@omni-tars/mcp-agent';
-import { GuiAgentPlugin } from '@omni-tars/gui-agent';
-import { CodeAgentPlugin } from '@omni-tars/code-agent';
+import { codePlugin, CodeToolCallEngineProvider } from '@omni-tars/code-agent';
+import { mcpPlugin, McpToolCallEngineProvider } from '@omni-tars/mcp-agent';
+import { guiPlugin, GuiToolCallEngineProvider } from '@omni-tars/gui-agent';
+import { ComposableAgent, createComposableToolCallEngineFactory } from '@omni-tars/core';
 
-const agent = AgentBuilder.create()
-  .withName('Multi-Modal Agent')
-  .addPlugin(
-    new McpAgentPlugin({
-      /* config */
-    }),
-  )
-  .addPlugin(
-    new GuiAgentPlugin({
-      /* config */
-    }),
-  )
-  .addPlugin(
-    new CodeAgentPlugin({
-      /* config */
-    }),
-  )
-  .build();
+const toolCallEngine = createComposableToolCallEngineFactory({
+  engines: [
+    new GuiToolCallEngineProvider(),
+    new McpToolCallEngineProvider(),
+    new CodeToolCallEngineProvider(),
+  ],
+});
 
-await agent.initialize();
+const agent = new ComposableAgent({
+  name: 'Omni TARS Agent',
+  plugins: [mcpPlugin, guiPlugin, codePlugin],
+  toolCallEngine,
+});
 ```
 
 ## File Structure

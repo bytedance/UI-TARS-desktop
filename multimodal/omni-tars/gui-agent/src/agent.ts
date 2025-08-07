@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentBuilder } from '@omni-tars/core';
+import { ComposableAgent } from '@omni-tars/core';
 import { GuiAgentPlugin } from './GuiAgentPlugin';
+import { GuiToolCallEngine } from './GuiToolCallEngine';
 
 const guiPlugin = new GuiAgentPlugin({
   screenWidth: 1920,
@@ -12,6 +13,10 @@ const guiPlugin = new GuiAgentPlugin({
   actionBudget: 100,
 });
 
-const agent = AgentBuilder.create().withName('Seed GUI Agent').addPlugin(guiPlugin).build();
+const agent = new ComposableAgent({
+  name: 'Seed GUI Agent',
+  plugins: [guiPlugin],
+  toolCallEngine: GuiToolCallEngine,
+});
 
 export { agent, guiPlugin };

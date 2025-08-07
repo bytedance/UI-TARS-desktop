@@ -29,7 +29,6 @@ async function createComposableAgent() {
       // Code has medium priority for development tasks
       new CodeToolCallEngineProvider(),
     ],
-    strategy: 'priority', // Use priority-based selection
   });
 
   // Create the composable agent

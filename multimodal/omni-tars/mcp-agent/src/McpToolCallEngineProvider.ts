@@ -4,31 +4,41 @@
  */
 
 import { ToolCallEngineProvider, ToolCallEngineContext } from '@omni-tars/core';
-import { SeedMCPAgentToolCallEngine } from './SeedMCPAgentToolCallEngine';
+import { McpToolCallEngine } from './McpToolCallEngine';
 
 /**
  * MCP Tool Call Engine Provider
  * Provides the SeedMCPAgentToolCallEngine for MCP-related tasks
  */
-export class McpToolCallEngineProvider extends ToolCallEngineProvider<SeedMCPAgentToolCallEngine> {
+export class McpToolCallEngineProvider extends ToolCallEngineProvider<McpToolCallEngine> {
   readonly name = 'mcp-tool-call-engine';
   readonly priority = 100; // High priority for MCP tasks
   readonly description =
     'Tool call engine optimized for MCP (Model Context Protocol) tasks with custom prompt parsing';
 
-  protected createEngine(): SeedMCPAgentToolCallEngine {
-    return new SeedMCPAgentToolCallEngine();
+  protected createEngine(): McpToolCallEngine {
+    return new McpToolCallEngine();
   }
 
   canHandle(context: ToolCallEngineContext): boolean {
-    // Check if any of the available tools are MCP-related
+    // Check if the latest model output contains <mcp_env></mcp_env> tags
+    if (context.latestAssistantMessage) {
+      const hasMcpEnvTags =
+        context.latestAssistantMessage.includes('<mcp_env>') &&
+        context.latestAssistantMessage.includes('</mcp_env>');
+      if (hasMcpEnvTags) {
+        return true;
+      }
+    }
+
+    // Fallback: Check if any of the available tools are MCP-related
     const mcpToolNames = ['search', 'link_reader', 'tavily_search', 'google_search'];
-    const hasMcpTools = context.tools.some((tool) =>
+    const hasMcpTools = context?.toolCalls?.some((tool) =>
       mcpToolNames.some((mcpName) =>
         tool.function.name.toLowerCase().includes(mcpName.toLowerCase()),
       ),
     );
 
-    return hasMcpTools;
+    return !!hasMcpTools;
   }
 }
