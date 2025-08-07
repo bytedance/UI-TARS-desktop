@@ -273,59 +273,54 @@ export class WorkspacePack {
   }
 
   /**
-   * Format the results for optimal LLM consumption
+   * Format the results for optimal LLM consumption using XML structure
    */
   private formatForLLM(processedPaths: string[], files: FileInfo[]): string {
     const sections: string[] = [];
 
-    // Add summary section
-    const stats = {
-      totalFiles: files.length,
-      successfulFiles: files.filter((f) => !f.hasError).length,
-      totalSize: files.reduce((sum, file) => sum + file.size, 0),
-    };
+    // Group files by their relative paths from processed paths
+    const filesByProcessedPath = new Map<string, FileInfo[]>();
 
-    sections.push(
-      `=== Workspace Content Summary ===`,
-      `Processed Paths: ${processedPaths.length}`,
-      `Total Files: ${stats.totalFiles}`,
-      `Successfully Read: ${stats.successfulFiles}`,
-      `Total Size: ${this.formatFileSize(stats.totalSize)}`,
-      ``,
-    );
-
-    // Group files by directory for better organization
-    const filesByDirectory = new Map<string, FileInfo[]>();
-
-    for (const file of files) {
-      const dir = path.dirname(file.absolutePath);
-      if (!filesByDirectory.has(dir)) {
-        filesByDirectory.set(dir, []);
-      }
-      filesByDirectory.get(dir)!.push(file);
+    for (const processedPath of processedPaths) {
+      const pathFiles = files.filter((file) => file.absolutePath.startsWith(processedPath));
+      filesByProcessedPath.set(processedPath, pathFiles);
     }
 
-    // Sort directories and files for consistent output
-    const sortedDirectories = Array.from(filesByDirectory.keys()).sort();
+    // Format each processed path as a directory XML block
+    for (const processedPath of processedPaths) {
+      const pathFiles = filesByProcessedPath.get(processedPath) || [];
 
-    for (const dir of sortedDirectories) {
-      const dirFiles = filesByDirectory
-        .get(dir)!
-        .sort((a, b) => a.absolutePath.localeCompare(b.absolutePath));
-
-      sections.push(`=== Directory: ${dir} ===`);
-
-      for (const file of dirFiles) {
-        const fileName = path.basename(file.absolutePath);
-        sections.push(
-          ``,
-          `--- File: ${file.absolutePath} ---`,
-          file.content,
-          `--- End of ${fileName} ---`,
-        );
+      if (pathFiles.length === 0) {
+        continue;
       }
 
-      sections.push(`=== End of Directory: ${dir} ===`, ``);
+      // Sort files for consistent output
+      const sortedFiles = pathFiles.sort((a, b) => a.absolutePath.localeCompare(b.absolutePath));
+
+      // Use relative path for cleaner output
+      const relativePath = path.relative(process.cwd(), processedPath);
+      const displayPath = relativePath || processedPath;
+
+      sections.push(`<dir path="${displayPath}">`);
+
+      for (const file of sortedFiles) {
+        // Calculate relative path from the processed path
+        const fileRelativePath = path.relative(processedPath, file.absolutePath);
+        const displayFilePath = fileRelativePath || path.basename(file.absolutePath);
+
+        sections.push(`  <file path="${displayFilePath}">`);
+
+        // Indent file content for better readability
+        const indentedContent = file.content
+          .split('\n')
+          .map((line) => `    ${line}`)
+          .join('\n');
+
+        sections.push(indentedContent);
+        sections.push(`  </file>`);
+      }
+
+      sections.push(`</dir>`);
     }
 
     return sections.join('\n');
