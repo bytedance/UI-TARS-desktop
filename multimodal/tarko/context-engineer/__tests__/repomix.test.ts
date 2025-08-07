@@ -1,8 +1,8 @@
-import { it, expect } from 'vitest';
-import { pack, RepomixConfig } from 'repomix';
+import { it } from 'vitest';
+import { pack } from 'repomix';
 import path from 'path';
 
-const AgentServer = path.join(__dirname, '../../agent-server');
+const AgentServer = path.join(__dirname, '../../agent-server/src');
 
 /**
  * TODO: figure it out
