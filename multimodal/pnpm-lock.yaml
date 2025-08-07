@@ -218,6 +218,9 @@ importers:
       '@tarko/agent':
         specifier: workspace:*
         version: link:../../tarko/agent
+      '@tarko/agent-interface':
+        specifier: workspace:*
+        version: link:../../tarko/agent-interface
     devDependencies:
       '@rslib/core':
         specifier: 0.10.0
@@ -280,6 +283,9 @@ importers:
       '@tarko/agent':
         specifier: workspace:*
         version: link:../../tarko/agent
+      '@tarko/agent-interface':
+        specifier: workspace:*
+        version: link:../../tarko/agent-interface
     devDependencies:
       '@rslib/core':
         specifier: 0.10.0

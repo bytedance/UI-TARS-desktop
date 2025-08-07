@@ -59,14 +59,10 @@ export class AgentBuilder {
    * Build the composed agent
    */
   build(): ComposableAgent {
-    const composition: AgentCompositionConfig = {
+    const options: ComposableAgentOptions = {
       name: this.name,
       plugins: this.plugins,
       maxIterations: this.maxIterations,
-    };
-
-    const options: ComposableAgentOptions = {
-      composition,
       ...this.otherOptions,
     };
 

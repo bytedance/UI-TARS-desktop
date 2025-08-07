@@ -4,3 +4,5 @@
  */
 
 export { agent as default, guiPlugin } from './agent';
+export { GuiAgentPlugin } from './GuiAgentPlugin';
+export { GuiToolCallEngineProvider } from './GuiToolCallEngineProvider';

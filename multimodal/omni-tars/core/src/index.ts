@@ -7,7 +7,19 @@
 export { ComposableAgent, ComposableAgentOptions } from './ComposableAgent';
 export { AgentComposer } from './AgentComposer';
 export { AgentBuilder } from './AgentBuilder';
-export { AgentPlugin, AgentCompositionConfig, EnvironmentSection } from './types';
+export { ComposableToolCallEngine } from './ComposableToolCallEngine';
+export {
+  ComposableToolCallEngineFactory,
+  createComposableToolCallEngineFactory,
+} from './ComposableToolCallEngineFactory';
+export {
+  AgentPlugin,
+  AgentCompositionConfig,
+  EnvironmentSection,
+  ToolCallEngineProvider,
+  ToolCallEngineContext,
+  ToolCallEngineCompositionConfig,
+} from './types';
 
 // Export environment sections for use by agent plugins
 export { CODE_ENVIRONMENT } from './environments/code';

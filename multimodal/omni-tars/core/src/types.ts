@@ -3,9 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LLMRequestHookPayload, LLMResponseHookPayload, Tool } from '@tarko/agent';
-// import { existsSync, mkdirSync, writeFileSync } from 'fs';
-// import { join } from 'path';
+import { LLMRequestHookPayload, LLMResponseHookPayload, Tool, ToolCallEngine } from '@tarko/agent';
 /**
  * Standard interface that all agent plugins must implement
  */
@@ -112,11 +110,11 @@ export interface AgentCompositionConfig {
   /** Agent plugins to compose */
   plugins: AgentPlugin[];
 
+  /** Tool call engine */
+  toolCallEngine: ToolCallEngine;
+
   /** Maximum iterations for the composed agent */
   maxIterations?: number;
-
-  /** Additional configuration options */
-  [key: string]: unknown;
 }
 
 /**
@@ -128,4 +126,60 @@ export interface EnvironmentSection {
 
   /** The prompt content for this environment */
   content: string;
+}
+
+/**
+ * Abstract base class for tool call engine providers that can be composed
+ */
+export abstract class ToolCallEngineProvider<T extends ToolCallEngine = ToolCallEngine> {
+  /** Unique identifier for this tool call engine */
+  abstract readonly name: string;
+
+  /** Priority for this engine (higher priority engines are tried first) */
+  abstract readonly priority: number;
+
+  /** Description of what this engine handles */
+  abstract readonly description?: string;
+
+  /** Singleton instance cache */
+  private engineInstance?: T;
+
+  /** Get an instance of the tool call engine (using singleton pattern) */
+  getEngine(): T {
+    if (!this.engineInstance) {
+      this.engineInstance = this.createEngine();
+    }
+    return this.engineInstance;
+  }
+
+  /** Create a new instance of the tool call engine */
+  protected abstract createEngine(): T;
+
+  /** Determine if this engine should handle the given context */
+  abstract canHandle?(context: ToolCallEngineContext): boolean;
+}
+
+/**
+ * Context for determining which tool call engine to use
+ */
+export interface ToolCallEngineContext {
+  /** Current tools available */
+  tools: Tool[];
+
+  /** Message history */
+  messages: unknown[];
+}
+
+/**
+ * Configuration for composing tool call engines
+ */
+export interface ToolCallEngineCompositionConfig {
+  /** List of tool call engine providers to compose */
+  engines: ToolCallEngineProvider[];
+
+  /** Strategy for engine selection */
+  strategy?: 'priority' | 'first_match' | 'fallback';
+
+  /** Default engine to use when no specific engine matches */
+  defaultEngine?: ToolCallEngineProvider;
 }

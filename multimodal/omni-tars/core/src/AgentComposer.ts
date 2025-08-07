@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentPlugin, AgentCompositionConfig } from './types';
+import { ComposableAgentOptions } from './ComposableAgent';
+import { AgentPlugin } from './types';
 import { LLMRequestHookPayload, LLMResponseHookPayload } from '@tarko/agent';
 
 /**
@@ -12,8 +13,8 @@ import { LLMRequestHookPayload, LLMResponseHookPayload } from '@tarko/agent';
 export class AgentComposer {
   private plugins: AgentPlugin[] = [];
 
-  constructor(private config: AgentCompositionConfig) {
-    this.plugins = config.plugins;
+  constructor(option: ComposableAgentOptions) {
+    this.plugins = option.plugins;
   }
 
   /**
@@ -36,7 +37,7 @@ export class AgentComposer {
 
     // Combine all environment sections
     const environmentSections = this.plugins
-      .map(plugin => plugin.environmentSection)
+      .map((plugin) => plugin.environmentSection)
       .join('\n\n');
 
     // Generate the environment usage instructions
@@ -49,7 +50,7 @@ export class AgentComposer {
    * Get all tools from all agent plugins
    */
   getAllTools() {
-    return this.plugins.flatMap(plugin => plugin.getTools());
+    return this.plugins.flatMap((plugin) => plugin.getTools());
   }
 
   /**
@@ -101,11 +102,11 @@ export class AgentComposer {
    */
   private getAvailableEnvironments(): string {
     const environments = [];
-    
+
     if (this.hasPlugin('code')) environments.push('code');
     if (this.hasPlugin('mcp')) environments.push('mcp functions');
     if (this.hasPlugin('computer') || this.hasPlugin('gui')) environments.push('computer');
-    
+
     return environments.join(', ');
   }
 
@@ -113,9 +114,7 @@ export class AgentComposer {
    * Check if a specific plugin type is available
    */
   private hasPlugin(type: string): boolean {
-    return this.plugins.some(plugin => 
-      plugin.name.toLowerCase().includes(type)
-    );
+    return this.plugins.some((plugin) => plugin.name.toLowerCase().includes(type));
   }
 
   /**
@@ -123,7 +122,7 @@ export class AgentComposer {
    */
   private generateUsageInstructions(): string {
     const availableEnvs = [];
-    
+
     if (this.hasPlugin('code')) {
       availableEnvs.push('<code_env>');
     }
@@ -146,19 +145,27 @@ export class AgentComposer {
 </function>
 </code_env>
 
-${this.hasPlugin('mcp') ? `To use mcp functions:
+${
+  this.hasPlugin('mcp')
+    ? `To use mcp functions:
 
 <think_never_used_51bce0c785ca2f68081bfa7d91973934> I need to search information about Season 2015/16 Stats UEFA Champions League top goal scoring teams </think_never_used_51bce0c785ca2f68081bfa7d91973934>
 <mcp_env>
 <|FunctionCallBegin|>[{"name":"Search","parameters":{"query":"Season 2015/16 Stats UEFA Champions League top goal scoring teams"}}]<|FunctionCallEnd|>
-</mcp_env>` : ''}
+</mcp_env>`
+    : ''
+}
 
-${this.hasPlugin('computer') || this.hasPlugin('gui') ? `To use computer:
+${
+  this.hasPlugin('computer') || this.hasPlugin('gui')
+    ? `To use computer:
 
 <think_never_used_51bce0c785ca2f68081bfa7d91973934> To continue, I need to operate the computer to pass the verification process. </think_never_used_51bce0c785ca2f68081bfa7d91973934>
 <computer_env>
 Action: click(point='<point>100 200</point>')
-</computer_env>` : ''}
+</computer_env>`
+    : ''
+}
 
 - To finish a task, please submit your answer by enclosing <answer> and </answer> tags. For example:
 <answer>

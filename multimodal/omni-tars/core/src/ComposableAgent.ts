@@ -9,12 +9,17 @@ import {
   getLogger,
   LLMRequestHookPayload,
   LLMResponseHookPayload,
+  ToolCallEngine,
 } from '@tarko/agent';
+import { TConstructor } from '@tarko/agent-interface';
 import { AgentComposer } from './AgentComposer';
-import { AgentCompositionConfig } from './types';
+import { AgentPlugin } from './types';
+import { createComposableToolCallEngineFactory } from './ComposableToolCallEngineFactory';
+import { ComposableToolCallEngine } from './ComposableToolCallEngine';
 
 export interface ComposableAgentOptions extends AgentOptions {
-  composition: AgentCompositionConfig;
+  /** Agent plugins to compose */
+  plugins: AgentPlugin[];
 }
 
 /**
@@ -25,12 +30,12 @@ export class ComposableAgent extends Agent {
 
   constructor(options: ComposableAgentOptions) {
     // Initialize composer first to generate system prompt
-    const composer = new AgentComposer(options.composition);
+    const composer = new AgentComposer(options);
 
     super({
-      name: options.composition.name,
       instructions: composer.generateSystemPrompt(),
-      maxIterations: options.composition.maxIterations || 100,
+      toolCallEngine: options.toolCallEngine,
+      maxIterations: options.maxIterations || 100,
       ...options,
     });
 

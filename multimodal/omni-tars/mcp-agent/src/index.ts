@@ -4,3 +4,5 @@
  */
 
 export { agent as default, mcpPlugin } from './agent';
+export { McpAgentPlugin } from './McpAgentPlugin';
+export { McpToolCallEngineProvider } from './McpToolCallEngineProvider';

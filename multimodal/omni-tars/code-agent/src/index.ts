@@ -4,3 +4,5 @@
  */
 
 export { agent as default, codePlugin } from './agent';
+export { CodeAgentPlugin } from './CodeAgentPlugin';
+export { CodeToolCallEngineProvider } from './CodeToolCallEngineProvider';
