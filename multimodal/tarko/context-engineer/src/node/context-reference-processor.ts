@@ -6,7 +6,7 @@
 import fs from 'fs';
 import path from 'path';
 import type { ChatCompletionContentPart } from '@tarko/agent-interface';
-import { DirectoryExpander } from './directory-expander';
+import { WorkspacePack } from './workspace-pack';
 
 /**
  * ContextReferenceProcessor - Processes contextual references in agent queries
@@ -15,10 +15,10 @@ import { DirectoryExpander } from './directory-expander';
  * - Expands @file: references to actual file content
  * - Expands @dir: references to directory structure and content
  * - Security validation to prevent path traversal
- * - High-performance directory expansion
+ * - High-performance workspace packing
  */
 export class ContextReferenceProcessor {
-  private directoryExpander: DirectoryExpander;
+  private workspacePack: WorkspacePack;
 
   constructor(
     options: {
@@ -28,7 +28,7 @@ export class ContextReferenceProcessor {
       maxDepth?: number;
     } = {},
   ) {
-    this.directoryExpander = new DirectoryExpander({
+    this.workspacePack = new WorkspacePack({
       maxFileSize: options.maxFileSize ?? 2 * 1024 * 1024, // 2MB limit for LLM context
       ignoreExtensions: options.ignoreExtensions ?? [
         '.jpg',
@@ -62,7 +62,7 @@ export class ContextReferenceProcessor {
    * Process contextual references in query content
    * Expands @file: and @dir: references to actual content
    * @param query - The query content that may contain contextual references
-   * @param workspacePath - Base workspace path for security validation
+   * @param workspacePath - Base workspace path for security validation and path resolution
    * @returns Processed query with expanded contextual content
    */
   async processContextualReferences(
@@ -97,39 +97,56 @@ export class ContextReferenceProcessor {
 
     let processedQuery = query;
 
-    // Process directory references with high-performance expansion
+    // Process directory references with high-performance packing
     if (dirReferences.length > 0) {
       try {
-        const expansionResult = await this.directoryExpander.expandDirectories(
-          dirReferences,
-          workspacePath,
-        );
+        // Convert relative paths to absolute paths
+        const absoluteDirPaths = dirReferences
+          .map((dirRef) => {
+            const absolutePath = path.resolve(workspacePath, dirRef);
 
-        // Replace all @dir: references with the expanded content
-        for (const dirRef of dirReferences) {
-          const pattern = new RegExp(`@dir:${dirRef.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'g');
-          processedQuery = processedQuery.replace(
-            pattern,
-            `\n\n${expansionResult.expandedContent}\n\n`,
-          );
+            // Security check: ensure path is within workspace
+            const normalizedWorkspace = path.resolve(workspacePath);
+            const normalizedTarget = path.resolve(absolutePath);
+
+            if (!normalizedTarget.startsWith(normalizedWorkspace)) {
+              console.warn(`Directory reference outside workspace: ${dirRef}`);
+              return null;
+            }
+
+            return absolutePath;
+          })
+          .filter((p): p is string => p !== null);
+
+        if (absoluteDirPaths.length > 0) {
+          const packResult = await this.workspacePack.packPaths(absoluteDirPaths);
+
+          // Replace all @dir: references with the packed content
+          for (const dirRef of dirReferences) {
+            const pattern = new RegExp(
+              `@dir:${dirRef.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`,
+              'g',
+            );
+            processedQuery = processedQuery.replace(pattern, `\n\n${packResult.packedContent}\n\n`);
+          }
+
+          // Log packing statistics
+          console.log('Workspace packing completed:', {
+            paths: packResult.processedPaths.length,
+            files: packResult.stats.totalFiles,
+            totalSize: packResult.stats.totalSize,
+            errors: packResult.stats.errorCount,
+          });
         }
-
-        // Log expansion statistics
-        console.log('Directory expansion completed:', {
-          directories: expansionResult.processedDirectories.length,
-          files: expansionResult.stats.totalFiles,
-          totalSize: expansionResult.stats.totalSize,
-          errors: expansionResult.stats.errorCount,
-        });
       } catch (error) {
-        console.error('Failed to expand directories:', error);
+        console.error('Failed to pack workspace paths:', error);
 
-        // Fallback to original simple directory listing for error cases
+        // Fallback to error message for failed packing
         for (const dirRef of dirReferences) {
           const pattern = new RegExp(`@dir:${dirRef.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'g');
           processedQuery = processedQuery.replace(
             pattern,
-            `\n\n=== Error expanding directory: ${dirRef} ===\n`,
+            `\n\n=== Error packing directory: ${dirRef} ===\n`,
           );
         }
       }

@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import fs from 'fs/promises';
 import fsSync from 'fs';
 import path from 'path';
@@ -11,8 +6,8 @@ import path from 'path';
  * Information about a single file
  */
 interface FileInfo {
-  /** Relative path from workspace root */
-  relativePath: string;
+  /** Absolute path */
+  absolutePath: string;
   /** File content or error message */
   content: string;
   /** Whether reading the file failed */
@@ -22,15 +17,15 @@ interface FileInfo {
 }
 
 /**
- * Result of directory expansion operation
+ * Result of workspace packing operation
  */
-interface DirectoryExpansionResult {
-  /** List of directories that were processed */
-  processedDirectories: string[];
-  /** All files found in the directories */
+interface WorkspacePackResult {
+  /** List of paths that were processed */
+  processedPaths: string[];
+  /** All files found in the paths */
   files: FileInfo[];
   /** Formatted content ready for LLM consumption */
-  expandedContent: string;
+  packedContent: string;
   /** Summary statistics */
   stats: {
     totalFiles: number;
@@ -40,9 +35,9 @@ interface DirectoryExpansionResult {
 }
 
 /**
- * Options for directory expansion
+ * Options for workspace packing
  */
-interface DirectoryExpansionOptions {
+interface WorkspacePackOptions {
   /** Maximum file size to read (in bytes, default: 1MB) */
   maxFileSize?: number;
   /** File extensions to ignore (e.g., ['.jpg', '.png', '.pdf']) */
@@ -54,9 +49,9 @@ interface DirectoryExpansionOptions {
 }
 
 /**
- * Default options for directory expansion
+ * Default options for workspace packing
  */
-const DEFAULT_OPTIONS: Required<DirectoryExpansionOptions> = {
+const DEFAULT_OPTIONS: Required<WorkspacePackOptions> = {
   maxFileSize: 1024 * 1024, // 1MB
   ignoreExtensions: [
     '.jpg',
@@ -75,60 +70,53 @@ const DEFAULT_OPTIONS: Required<DirectoryExpansionOptions> = {
 };
 
 /**
- * DirectoryExpander - High-performance directory content reader
+ * WorkspacePack - High-performance workspace content packer
  *
  * Features:
  * - Parallel file reading for optimal performance
- * - Automatic deduplication of directory paths
+ * - Automatic deduplication of paths
  * - Recursive directory traversal with depth limits
  * - Smart filtering of binary and large files
  * - LLM-optimized output formatting
  */
-export class DirectoryExpander {
-  private options: Required<DirectoryExpansionOptions>;
+export class WorkspacePack {
+  private options: Required<WorkspacePackOptions>;
 
-  constructor(options: DirectoryExpansionOptions = {}) {
+  constructor(options: WorkspacePackOptions = {}) {
     this.options = { ...DEFAULT_OPTIONS, ...options };
   }
 
   /**
-   * Expand multiple directories with deduplication and parallel processing
-   * @param directoryPaths Array of directory paths to expand
-   * @param workspacePath Base workspace path for security validation
-   * @returns Promise resolving to expansion result
+   * Pack multiple files and directories with deduplication and parallel processing
+   * @param paths Array of absolute file and directory paths to pack
+   * @returns Promise resolving to pack result
    */
-  async expandDirectories(
-    directoryPaths: string[],
-    workspacePath: string,
-  ): Promise<DirectoryExpansionResult> {
-    // Step 1: Deduplicate and validate paths
-    const uniquePaths = this.deduplicatePaths(directoryPaths);
-    const validatedPaths = this.validatePaths(uniquePaths, workspacePath);
+  async packPaths(paths: string[]): Promise<WorkspacePackResult> {
+    // Step 1: Validate and deduplicate paths
+    const validatedPaths = this.validateAndDeduplicatePaths(paths);
 
     if (validatedPaths.length === 0) {
       return {
-        processedDirectories: [],
+        processedPaths: [],
         files: [],
-        expandedContent: '',
+        packedContent: '',
         stats: { totalFiles: 0, totalSize: 0, errorCount: 0 },
       };
     }
 
-    // Step 2: Collect all files from all directories in parallel
-    const fileCollectionPromises = validatedPaths.map((dirPath) =>
-      this.collectFilesRecursively(dirPath, workspacePath, 0),
+    // Step 2: Collect all files from all paths in parallel
+    const fileCollectionPromises = validatedPaths.map((targetPath) =>
+      this.collectFilesFromPath(targetPath, 0),
     );
 
     const fileArrays = await Promise.all(fileCollectionPromises);
     const allFilePaths = fileArrays.flat();
 
-    // Step 3: Deduplicate files (in case directories overlap)
+    // Step 3: Deduplicate files (in case paths overlap)
     const uniqueFilePaths = [...new Set(allFilePaths)];
 
     // Step 4: Read all files in parallel
-    const fileReadPromises = uniqueFilePaths.map((filePath) =>
-      this.readFileInfo(filePath, workspacePath),
-    );
+    const fileReadPromises = uniqueFilePaths.map((filePath) => this.readFileInfo(filePath));
 
     const files = await Promise.all(fileReadPromises);
 
@@ -140,53 +128,42 @@ export class DirectoryExpander {
     };
 
     // Step 6: Format content for LLM consumption
-    const expandedContent = this.formatForLLM(validatedPaths, files);
+    const packedContent = this.formatForLLM(validatedPaths, files);
 
     return {
-      processedDirectories: validatedPaths,
+      processedPaths: validatedPaths,
       files,
-      expandedContent,
+      packedContent,
       stats,
     };
   }
 
   /**
-   * Deduplicate directory paths and resolve relative paths
+   * Validate and deduplicate absolute paths
    */
-  private deduplicatePaths(directoryPaths: string[]): string[] {
-    const normalizedPaths = directoryPaths
-      .map((p) => path.normalize(p))
-      .filter((p) => p.length > 0);
-
-    return [...new Set(normalizedPaths)];
-  }
-
-  /**
-   * Validate paths for security and existence
-   */
-  private validatePaths(directoryPaths: string[], workspacePath: string): string[] {
+  private validateAndDeduplicatePaths(paths: string[]): string[] {
     const validPaths: string[] = [];
+    const seenPaths = new Set<string>();
 
-    for (const dirPath of directoryPaths) {
+    for (const targetPath of paths) {
       try {
-        const absolutePath = path.resolve(workspacePath, dirPath);
-        const normalizedWorkspace = path.resolve(workspacePath);
+        const absolutePath = path.resolve(targetPath);
 
-        // Security check: ensure path is within workspace
-        if (!absolutePath.startsWith(normalizedWorkspace)) {
-          console.warn(`Directory path outside workspace: ${dirPath}`);
+        // Deduplicate
+        if (seenPaths.has(absolutePath)) {
           continue;
         }
+        seenPaths.add(absolutePath);
 
         // Existence check
-        if (!fsSync.existsSync(absolutePath) || !fsSync.statSync(absolutePath).isDirectory()) {
-          console.warn(`Directory not found or not a directory: ${dirPath}`);
+        if (!fsSync.existsSync(absolutePath)) {
+          console.warn(`Path not found: ${targetPath}`);
           continue;
         }
 
         validPaths.push(absolutePath);
       } catch (error) {
-        console.warn(`Failed to validate directory path ${dirPath}:`, error);
+        console.warn(`Failed to validate path ${targetPath}:`, error);
       }
     }
 
@@ -194,13 +171,36 @@ export class DirectoryExpander {
   }
 
   /**
+   * Collect files from a single path (file or directory)
+   */
+  private async collectFilesFromPath(targetPath: string, depth: number): Promise<string[]> {
+    try {
+      const stat = await fs.stat(targetPath);
+
+      if (stat.isFile()) {
+        // Check file extension
+        const ext = path.extname(targetPath).toLowerCase();
+        if (!this.options.ignoreExtensions.includes(ext)) {
+          return [targetPath];
+        }
+        return [];
+      }
+
+      if (stat.isDirectory()) {
+        return await this.collectFilesRecursively(targetPath, depth);
+      }
+
+      return [];
+    } catch (error) {
+      console.warn(`Failed to access path ${targetPath}:`, error);
+      return [];
+    }
+  }
+
+  /**
    * Recursively collect all file paths in a directory
    */
-  private async collectFilesRecursively(
-    directoryPath: string,
-    workspacePath: string,
-    depth: number,
-  ): Promise<string[]> {
+  private async collectFilesRecursively(directoryPath: string, depth: number): Promise<string[]> {
     if (depth > this.options.maxDepth) {
       return [];
     }
@@ -221,7 +221,7 @@ export class DirectoryExpander {
         } else if (entry.isDirectory()) {
           // Check if directory should be ignored
           if (!this.options.ignoreDirs.includes(entry.name)) {
-            const subFiles = await this.collectFilesRecursively(fullPath, workspacePath, depth + 1);
+            const subFiles = await this.collectFilesRecursively(fullPath, depth + 1);
             filePaths.push(...subFiles);
           }
         }
@@ -237,16 +237,14 @@ export class DirectoryExpander {
   /**
    * Read file information including content
    */
-  private async readFileInfo(filePath: string, workspacePath: string): Promise<FileInfo> {
-    const relativePath = path.relative(workspacePath, filePath);
-
+  private async readFileInfo(filePath: string): Promise<FileInfo> {
     try {
       const stats = await fs.stat(filePath);
 
       // Check file size limit
       if (stats.size > this.options.maxFileSize) {
         return {
-          relativePath,
+          absolutePath: filePath,
           content: `[File too large: ${this.formatFileSize(stats.size)}]`,
           hasError: true,
           size: stats.size,
@@ -257,7 +255,7 @@ export class DirectoryExpander {
       const content = await fs.readFile(filePath, 'utf8');
 
       return {
-        relativePath,
+        absolutePath: filePath,
         content,
         hasError: false,
         size: stats.size,
@@ -266,7 +264,7 @@ export class DirectoryExpander {
       const errorMessage = error instanceof Error ? error.message : String(error);
 
       return {
-        relativePath,
+        absolutePath: filePath,
         content: `[Error reading file: ${errorMessage}]`,
         hasError: true,
         size: 0,
@@ -277,7 +275,7 @@ export class DirectoryExpander {
   /**
    * Format the results for optimal LLM consumption
    */
-  private formatForLLM(directories: string[], files: FileInfo[]): string {
+  private formatForLLM(processedPaths: string[], files: FileInfo[]): string {
     const sections: string[] = [];
 
     // Add summary section
@@ -288,8 +286,8 @@ export class DirectoryExpander {
     };
 
     sections.push(
-      `=== Directory Content Summary ===`,
-      `Processed Directories: ${directories.length}`,
+      `=== Workspace Content Summary ===`,
+      `Processed Paths: ${processedPaths.length}`,
       `Total Files: ${stats.totalFiles}`,
       `Successfully Read: ${stats.successfulFiles}`,
       `Total Size: ${this.formatFileSize(stats.totalSize)}`,
@@ -300,7 +298,7 @@ export class DirectoryExpander {
     const filesByDirectory = new Map<string, FileInfo[]>();
 
     for (const file of files) {
-      const dir = path.dirname(file.relativePath);
+      const dir = path.dirname(file.absolutePath);
       if (!filesByDirectory.has(dir)) {
         filesByDirectory.set(dir, []);
       }
@@ -313,20 +311,21 @@ export class DirectoryExpander {
     for (const dir of sortedDirectories) {
       const dirFiles = filesByDirectory
         .get(dir)!
-        .sort((a, b) => a.relativePath.localeCompare(b.relativePath));
+        .sort((a, b) => a.absolutePath.localeCompare(b.absolutePath));
 
-      sections.push(`=== Directory: ${dir || '.'} ===`);
+      sections.push(`=== Directory: ${dir} ===`);
 
       for (const file of dirFiles) {
+        const fileName = path.basename(file.absolutePath);
         sections.push(
           ``,
-          `--- File: ${file.relativePath} ---`,
+          `--- File: ${file.absolutePath} ---`,
           file.content,
-          `--- End of ${file.relativePath} ---`,
+          `--- End of ${fileName} ---`,
         );
       }
 
-      sections.push(`=== End of Directory: ${dir || '.'} ===`, ``);
+      sections.push(`=== End of Directory: ${dir} ===`, ``);
     }
 
     return sections.join('\n');

@@ -1,0 +1,726 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`DirectoryExpander 1`] = `
+"=== Workspace Content Summary ===
+Processed Paths: 1
+Total Files: 6
+Successfully Read: 6
+Total Size: 19.6 KB
+
+=== Directory: /Users/chenhaoli/workspace/code/UI-TARS-desktop-5/multimodal/tarko/context-engineer/src ===
+
+--- File: /Users/chenhaoli/workspace/code/UI-TARS-desktop-5/multimodal/tarko/context-engineer/src/index.ts ---
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+export * from './node';
+export * from './runtime';
+
+--- End of index.ts ---
+=== End of Directory: /Users/chenhaoli/workspace/code/UI-TARS-desktop-5/multimodal/tarko/context-engineer/src ===
+
+=== Directory: /Users/chenhaoli/workspace/code/UI-TARS-desktop-5/multimodal/tarko/context-engineer/src/node ===
+
+--- File: /Users/chenhaoli/workspace/code/UI-TARS-desktop-5/multimodal/tarko/context-engineer/src/node/context-reference-processor.ts ---
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import fs from 'fs';
+import path from 'path';
+import type { ChatCompletionContentPart } from '@tarko/agent-interface';
+import { WorkspacePack } from './workspace-pack';
+
+/**
+ * ContextReferenceProcessor - Processes contextual references in agent queries
+ *
+ * Features:
+ * - Expands @file: references to actual file content
+ * - Expands @dir: references to directory structure and content
+ * - Security validation to prevent path traversal
+ * - High-performance workspace packing
+ */
+export class ContextReferenceProcessor {
+  private workspacePack: WorkspacePack;
+
+  constructor(
+    options: {
+      maxFileSize?: number;
+      ignoreExtensions?: string[];
+      ignoreDirs?: string[];
+      maxDepth?: number;
+    } = {},
+  ) {
+    this.workspacePack = new WorkspacePack({
+      maxFileSize: options.maxFileSize ?? 2 * 1024 * 1024, // 2MB limit for LLM context
+      ignoreExtensions: options.ignoreExtensions ?? [
+        '.jpg',
+        '.jpeg',
+        '.png',
+        '.gif',
+        '.webp',
+        '.svg',
+        '.pdf',
+        '.zip',
+        '.tar',
+        '.gz',
+        '.exe',
+        '.dll',
+      ],
+      ignoreDirs: options.ignoreDirs ?? [
+        'node_modules',
+        '.git',
+        '.next',
+        'dist',
+        'build',
+        'coverage',
+        '.vscode',
+        '.idea',
+      ],
+      maxDepth: options.maxDepth ?? 8,
+    });
+  }
+
+  /**
+   * Process contextual references in query content
+   * Expands @file: and @dir: references to actual content
+   * @param query - The query content that may contain contextual references
+   * @param workspacePath - Base workspace path for security validation and path resolution
+   * @returns Processed query with expanded contextual content
+   */
+  async processContextualReferences(
+    query: string | ChatCompletionContentPart[],
+    workspacePath: string,
+  ): Promise<string | ChatCompletionContentPart[]> {
+    // Only process string queries for now
+    if (typeof query !== 'string') {
+      return query;
+    }
+
+    // Find all contextual references
+    const contextualReferencePattern = /@(file|dir):([^\\s]+)/g;
+    const matches = Array.from(query.matchAll(contextualReferencePattern));
+
+    if (matches.length === 0) {
+      return query;
+    }
+
+    // Separate file and directory references
+    const fileReferences: string[] = [];
+    const dirReferences: string[] = [];
+
+    for (const match of matches) {
+      const [, type, relativePath] = match;
+      if (type === 'file') {
+        fileReferences.push(relativePath);
+      } else if (type === 'dir') {
+        dirReferences.push(relativePath);
+      }
+    }
+
+    let processedQuery = query;
+
+    // Process directory references with high-performance packing
+    if (dirReferences.length > 0) {
+      try {
+        // Convert relative paths to absolute paths
+        const absoluteDirPaths = dirReferences
+          .map((dirRef) => {
+            const absolutePath = path.resolve(workspacePath, dirRef);
+
+            // Security check: ensure path is within workspace
+            const normalizedWorkspace = path.resolve(workspacePath);
+            const normalizedTarget = path.resolve(absolutePath);
+
+            if (!normalizedTarget.startsWith(normalizedWorkspace)) {
+              console.warn(\`Directory reference outside workspace: \${dirRef}\`);
+              return null;
+            }
+
+            return absolutePath;
+          })
+          .filter((p): p is string => p !== null);
+
+        if (absoluteDirPaths.length > 0) {
+          const packResult = await this.workspacePack.packPaths(absoluteDirPaths);
+
+          // Replace all @dir: references with the packed content
+          for (const dirRef of dirReferences) {
+            const pattern = new RegExp(
+              \`@dir:\${dirRef.replace(/[.*+?^\${}()|[\\]\\\\]/g, '\\\\$&')}\`,
+              'g',
+            );
+            processedQuery = processedQuery.replace(pattern, \`\\n\\n\${packResult.packedContent}\\n\\n\`);
+          }
+
+          // Log packing statistics
+          console.log('Workspace packing completed:', {
+            paths: packResult.processedPaths.length,
+            files: packResult.stats.totalFiles,
+            totalSize: packResult.stats.totalSize,
+            errors: packResult.stats.errorCount,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to pack workspace paths:', error);
+
+        // Fallback to error message for failed packing
+        for (const dirRef of dirReferences) {
+          const pattern = new RegExp(\`@dir:\${dirRef.replace(/[.*+?^\${}()|[\\]\\\\]/g, '\\\\$&')}\`, 'g');
+          processedQuery = processedQuery.replace(
+            pattern,
+            \`\\n\\n=== Error packing directory: \${dirRef} ===\\n\`,
+          );
+        }
+      }
+    }
+
+    // Process individual file references
+    for (const fileRef of fileReferences) {
+      try {
+        const absolutePath = path.resolve(workspacePath, fileRef);
+
+        // Security check: ensure path is within workspace
+        const normalizedWorkspace = path.resolve(workspacePath);
+        const normalizedTarget = path.resolve(absolutePath);
+
+        if (!normalizedTarget.startsWith(normalizedWorkspace)) {
+          console.warn(\`File reference outside workspace: \${fileRef}\`);
+          continue;
+        }
+
+        if (!fs.existsSync(absolutePath)) {
+          console.warn(\`File reference not found: \${fileRef}\`);
+          continue;
+        }
+
+        const stats = fs.statSync(absolutePath);
+        if (stats.isFile()) {
+          try {
+            const fileContent = fs.readFileSync(absolutePath, 'utf8');
+            const expandedContent = \`\\n\\n=== File: \${fileRef} ===\\n\${fileContent}\\n=== End of File ===\\n\`;
+
+            const pattern = new RegExp(
+              \`@file:\${fileRef.replace(/[.*+?^\${}()|[\\]\\\\]/g, '\\\\$&')}\`,
+              'g',
+            );
+            processedQuery = processedQuery.replace(pattern, expandedContent);
+          } catch (error) {
+            console.error(\`Failed to read file \${fileRef}:\`, error);
+            const pattern = new RegExp(
+              \`@file:\${fileRef.replace(/[.*+?^\${}()|[\\]\\\\]/g, '\\\\$&')}\`,
+              'g',
+            );
+            processedQuery = processedQuery.replace(
+              pattern,
+              \`\\n\\n=== Error reading file: \${fileRef} ===\\n\`,
+            );
+          }
+        }
+      } catch (error) {
+        console.error(\`Failed to process file reference \${fileRef}:\`, error);
+      }
+    }
+
+    return processedQuery;
+  }
+}
+
+--- End of context-reference-processor.ts ---
+
+--- File: /Users/chenhaoli/workspace/code/UI-TARS-desktop-5/multimodal/tarko/context-engineer/src/node/image-processor.ts ---
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import type {
+  ChatCompletionContentPart,
+  ChatCompletionContentPartImage,
+} from '@tarko/agent-interface';
+import { ImageCompressor, formatBytes } from '@tarko/shared-media-utils';
+
+/**
+ * ImageProcessor - Handles image compression and processing for agent queries
+ *
+ * Features:
+ * - Compresses base64 images to reduce token usage
+ * - Maintains image quality while optimizing size
+ * - Provides compression statistics
+ */
+export class ImageProcessor {
+  private compressor: ImageCompressor;
+
+  constructor(options: { quality?: number; format?: 'webp' | 'jpeg' | 'png' } = {}) {
+    this.compressor = new ImageCompressor({
+      quality: options.quality ?? 5,
+      format: options.format ?? 'webp',
+    });
+  }
+
+  /**
+   * Compress images in query content if present
+   * @param query - The query content that may contain images
+   * @returns Processed query with compressed images
+   */
+  async compressImagesInQuery(
+    query: string | ChatCompletionContentPart[],
+  ): Promise<string | ChatCompletionContentPart[]> {
+    try {
+      // Handle different query formats
+      if (typeof query === 'string') {
+        return query; // Text only, no compression needed
+      }
+
+      // Handle array of content parts (multimodal format)
+      if (Array.isArray(query)) {
+        const compressedQuery = await Promise.all(
+          query.map(async (part: ChatCompletionContentPart) => {
+            if (part.type === 'image_url' && part.image_url?.url) {
+              return await this.compressImageUrl(part);
+            }
+            return part;
+          }),
+        );
+        return compressedQuery;
+      }
+
+      return query;
+    } catch (error) {
+      console.error('Error compressing images in query:', error);
+      // Return original query if compression fails
+      return query;
+    }
+  }
+
+  /**
+   * Compress a single image URL
+   * @param imagePart - Content part containing image URL
+   * @returns Compressed image content part
+   */
+  async compressImageUrl(
+    imagePart: ChatCompletionContentPartImage,
+  ): Promise<ChatCompletionContentPartImage> {
+    try {
+      const imageUrl = imagePart.image_url.url;
+
+      // Skip if not a base64 image
+      if (!imageUrl.startsWith('data:image/')) {
+        return imagePart;
+      }
+
+      // Extract base64 data
+      const base64Data = imageUrl.replace(/^data:image\\/\\w+;base64,/, '');
+      const originalBuffer = Buffer.from(base64Data, 'base64');
+      const originalSize = originalBuffer.length;
+
+      // Compress the image
+      const compressedBuffer = await this.compressor.compressToBuffer(originalBuffer);
+      const compressedSize = compressedBuffer.length;
+
+      // Convert compressed buffer to base64
+      const compressedBase64 = \`data:image/webp;base64,\${compressedBuffer.toString('base64')}\`;
+
+      // Log compression stats
+      const compressionRatio = originalSize / compressedSize;
+      const compressionPercentage = ((1 - compressedSize / originalSize) * 100).toFixed(2);
+
+      console.log('Image compression stats:', {
+        original: formatBytes(originalSize),
+        compressed: formatBytes(compressedSize),
+        ratio: \`\${compressionRatio.toFixed(2)}x (\${compressionPercentage}% smaller)\`,
+        format: 'webp',
+        quality: 80,
+      });
+
+      return {
+        ...imagePart,
+        image_url: {
+          url: compressedBase64,
+        },
+      };
+    } catch (error) {
+      console.error('Error compressing individual image:', error);
+      // Return original image part if compression fails
+      return imagePart;
+    }
+  }
+}
+
+--- End of image-processor.ts ---
+
+--- File: /Users/chenhaoli/workspace/code/UI-TARS-desktop-5/multimodal/tarko/context-engineer/src/node/index.ts ---
+export * from './workspace-pack';
+export * from './context-reference-processor';
+export * from './image-processor';
+
+--- End of index.ts ---
+
+--- File: /Users/chenhaoli/workspace/code/UI-TARS-desktop-5/multimodal/tarko/context-engineer/src/node/workspace-pack.ts ---
+import fs from 'fs/promises';
+import fsSync from 'fs';
+import path from 'path';
+
+/**
+ * Information about a single file
+ */
+interface FileInfo {
+  /** Absolute path */
+  absolutePath: string;
+  /** File content or error message */
+  content: string;
+  /** Whether reading the file failed */
+  hasError: boolean;
+  /** File size in bytes */
+  size: number;
+}
+
+/**
+ * Result of workspace packing operation
+ */
+interface WorkspacePackResult {
+  /** List of paths that were processed */
+  processedPaths: string[];
+  /** All files found in the paths */
+  files: FileInfo[];
+  /** Formatted content ready for LLM consumption */
+  packedContent: string;
+  /** Summary statistics */
+  stats: {
+    totalFiles: number;
+    totalSize: number;
+    errorCount: number;
+  };
+}
+
+/**
+ * Options for workspace packing
+ */
+interface WorkspacePackOptions {
+  /** Maximum file size to read (in bytes, default: 1MB) */
+  maxFileSize?: number;
+  /** File extensions to ignore (e.g., ['.jpg', '.png', '.pdf']) */
+  ignoreExtensions?: string[];
+  /** Directory names to ignore (e.g., ['node_modules', '.git']) */
+  ignoreDirs?: string[];
+  /** Maximum depth for recursive reading (default: 10) */
+  maxDepth?: number;
+}
+
+/**
+ * Default options for workspace packing
+ */
+const DEFAULT_OPTIONS: Required<WorkspacePackOptions> = {
+  maxFileSize: 1024 * 1024, // 1MB
+  ignoreExtensions: [
+    '.jpg',
+    '.jpeg',
+    '.png',
+    '.gif',
+    '.webp',
+    '.svg',
+    '.pdf',
+    '.zip',
+    '.tar',
+    '.gz',
+  ],
+  ignoreDirs: ['node_modules', '.git', '.next', 'dist', 'build', 'coverage'],
+  maxDepth: 10,
+};
+
+/**
+ * WorkspacePack - High-performance workspace content packer
+ *
+ * Features:
+ * - Parallel file reading for optimal performance
+ * - Automatic deduplication of paths
+ * - Recursive directory traversal with depth limits
+ * - Smart filtering of binary and large files
+ * - LLM-optimized output formatting
+ */
+export class WorkspacePack {
+  private options: Required<WorkspacePackOptions>;
+
+  constructor(options: WorkspacePackOptions = {}) {
+    this.options = { ...DEFAULT_OPTIONS, ...options };
+  }
+
+  /**
+   * Pack multiple files and directories with deduplication and parallel processing
+   * @param paths Array of absolute file and directory paths to pack
+   * @returns Promise resolving to pack result
+   */
+  async packPaths(paths: string[]): Promise<WorkspacePackResult> {
+    // Step 1: Validate and deduplicate paths
+    const validatedPaths = this.validateAndDeduplicatePaths(paths);
+
+    if (validatedPaths.length === 0) {
+      return {
+        processedPaths: [],
+        files: [],
+        packedContent: '',
+        stats: { totalFiles: 0, totalSize: 0, errorCount: 0 },
+      };
+    }
+
+    // Step 2: Collect all files from all paths in parallel
+    const fileCollectionPromises = validatedPaths.map((targetPath) =>
+      this.collectFilesFromPath(targetPath, 0),
+    );
+
+    const fileArrays = await Promise.all(fileCollectionPromises);
+    const allFilePaths = fileArrays.flat();
+
+    // Step 3: Deduplicate files (in case paths overlap)
+    const uniqueFilePaths = [...new Set(allFilePaths)];
+
+    // Step 4: Read all files in parallel
+    const fileReadPromises = uniqueFilePaths.map((filePath) => this.readFileInfo(filePath));
+
+    const files = await Promise.all(fileReadPromises);
+
+    // Step 5: Calculate statistics
+    const stats = {
+      totalFiles: files.length,
+      totalSize: files.reduce((sum, file) => sum + file.size, 0),
+      errorCount: files.filter((file) => file.hasError).length,
+    };
+
+    // Step 6: Format content for LLM consumption
+    const packedContent = this.formatForLLM(validatedPaths, files);
+
+    return {
+      processedPaths: validatedPaths,
+      files,
+      packedContent,
+      stats,
+    };
+  }
+
+  /**
+   * Validate and deduplicate absolute paths
+   */
+  private validateAndDeduplicatePaths(paths: string[]): string[] {
+    const validPaths: string[] = [];
+    const seenPaths = new Set<string>();
+
+    for (const targetPath of paths) {
+      try {
+        const absolutePath = path.resolve(targetPath);
+        
+        // Deduplicate
+        if (seenPaths.has(absolutePath)) {
+          continue;
+        }
+        seenPaths.add(absolutePath);
+
+        // Existence check
+        if (!fsSync.existsSync(absolutePath)) {
+          console.warn(\`Path not found: \${targetPath}\`);
+          continue;
+        }
+
+        validPaths.push(absolutePath);
+      } catch (error) {
+        console.warn(\`Failed to validate path \${targetPath}:\`, error);
+      }
+    }
+
+    return validPaths;
+  }
+
+  /**
+   * Collect files from a single path (file or directory)
+   */
+  private async collectFilesFromPath(targetPath: string, depth: number): Promise<string[]> {
+    try {
+      const stat = await fs.stat(targetPath);
+
+      if (stat.isFile()) {
+        // Check file extension
+        const ext = path.extname(targetPath).toLowerCase();
+        if (!this.options.ignoreExtensions.includes(ext)) {
+          return [targetPath];
+        }
+        return [];
+      }
+
+      if (stat.isDirectory()) {
+        return await this.collectFilesRecursively(targetPath, depth);
+      }
+
+      return [];
+    } catch (error) {
+      console.warn(\`Failed to access path \${targetPath}:\`, error);
+      return [];
+    }
+  }
+
+  /**
+   * Recursively collect all file paths in a directory
+   */
+  private async collectFilesRecursively(directoryPath: string, depth: number): Promise<string[]> {
+    if (depth > this.options.maxDepth) {
+      return [];
+    }
+
+    try {
+      const entries = await fs.readdir(directoryPath, { withFileTypes: true });
+      const filePaths: string[] = [];
+
+      for (const entry of entries) {
+        const fullPath = path.join(directoryPath, entry.name);
+
+        if (entry.isFile()) {
+          // Check file extension
+          const ext = path.extname(entry.name).toLowerCase();
+          if (!this.options.ignoreExtensions.includes(ext)) {
+            filePaths.push(fullPath);
+          }
+        } else if (entry.isDirectory()) {
+          // Check if directory should be ignored
+          if (!this.options.ignoreDirs.includes(entry.name)) {
+            const subFiles = await this.collectFilesRecursively(fullPath, depth + 1);
+            filePaths.push(...subFiles);
+          }
+        }
+      }
+
+      return filePaths;
+    } catch (error) {
+      console.warn(\`Failed to read directory \${directoryPath}:\`, error);
+      return [];
+    }
+  }
+
+  /**
+   * Read file information including content
+   */
+  private async readFileInfo(filePath: string): Promise<FileInfo> {
+    try {
+      const stats = await fs.stat(filePath);
+
+      // Check file size limit
+      if (stats.size > this.options.maxFileSize) {
+        return {
+          absolutePath: filePath,
+          content: \`[File too large: \${this.formatFileSize(stats.size)}]\`,
+          hasError: true,
+          size: stats.size,
+        };
+      }
+
+      // Read file content
+      const content = await fs.readFile(filePath, 'utf8');
+
+      return {
+        absolutePath: filePath,
+        content,
+        hasError: false,
+        size: stats.size,
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+
+      return {
+        absolutePath: filePath,
+        content: \`[Error reading file: \${errorMessage}]\`,
+        hasError: true,
+        size: 0,
+      };
+    }
+  }
+
+  /**
+   * Format the results for optimal LLM consumption
+   */
+  private formatForLLM(processedPaths: string[], files: FileInfo[]): string {
+    const sections: string[] = [];
+
+    // Add summary section
+    const stats = {
+      totalFiles: files.length,
+      successfulFiles: files.filter((f) => !f.hasError).length,
+      totalSize: files.reduce((sum, file) => sum + file.size, 0),
+    };
+
+    sections.push(
+      \`=== Workspace Content Summary ===\`,
+      \`Processed Paths: \${processedPaths.length}\`,
+      \`Total Files: \${stats.totalFiles}\`,
+      \`Successfully Read: \${stats.successfulFiles}\`,
+      \`Total Size: \${this.formatFileSize(stats.totalSize)}\`,
+      \`\`,
+    );
+
+    // Group files by directory for better organization
+    const filesByDirectory = new Map<string, FileInfo[]>();
+
+    for (const file of files) {
+      const dir = path.dirname(file.absolutePath);
+      if (!filesByDirectory.has(dir)) {
+        filesByDirectory.set(dir, []);
+      }
+      filesByDirectory.get(dir)!.push(file);
+    }
+
+    // Sort directories and files for consistent output
+    const sortedDirectories = Array.from(filesByDirectory.keys()).sort();
+
+    for (const dir of sortedDirectories) {
+      const dirFiles = filesByDirectory
+        .get(dir)!
+        .sort((a, b) => a.absolutePath.localeCompare(b.absolutePath));
+
+      sections.push(\`=== Directory: \${dir} ===\`);
+
+      for (const file of dirFiles) {
+        const fileName = path.basename(file.absolutePath);
+        sections.push(
+          \`\`,
+          \`--- File: \${file.absolutePath} ---\`,
+          file.content,
+          \`--- End of \${fileName} ---\`,
+        );
+      }
+
+      sections.push(\`=== End of Directory: \${dir} ===\`, \`\`);
+    }
+
+    return sections.join('\\n');
+  }
+
+  /**
+   * Format file size in human-readable format
+   */
+  private formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 B';
+
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+    return \`\${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} \${sizes[i]}\`;
+  }
+}
+
+--- End of workspace-pack.ts ---
+=== End of Directory: /Users/chenhaoli/workspace/code/UI-TARS-desktop-5/multimodal/tarko/context-engineer/src/node ===
+
+=== Directory: /Users/chenhaoli/workspace/code/UI-TARS-desktop-5/multimodal/tarko/context-engineer/src/runtime ===
+
+--- File: /Users/chenhaoli/workspace/code/UI-TARS-desktop-5/multimodal/tarko/context-engineer/src/runtime/index.ts ---
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+export {};
+
+--- End of index.ts ---
+=== End of Directory: /Users/chenhaoli/workspace/code/UI-TARS-desktop-5/multimodal/tarko/context-engineer/src/runtime ===
+"
+`;
