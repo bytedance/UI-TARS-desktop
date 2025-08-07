@@ -1,7 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`DirectoryExpander 1`] = `
-"<directory path="../config-loader/src">
+"<directory path="src">
   <file path="index.test.ts">
     /* eslint-disable @typescript-eslint/no-explicit-any */
     /*

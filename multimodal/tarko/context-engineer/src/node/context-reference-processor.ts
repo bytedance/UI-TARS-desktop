@@ -162,6 +162,7 @@ export class ContextReferenceProcessor {
         if (absoluteDirPaths.length > 0) {
           const packResult = await this.workspacePack.packPaths(
             absoluteDirPaths.map((p) => p.absolutePath),
+            workspacePath,
           );
 
           // Add packed content for each directory reference

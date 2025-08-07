@@ -89,9 +89,10 @@ export class WorkspacePack {
   /**
    * Pack multiple files and directories with deduplication and parallel processing
    * @param paths Array of absolute file and directory paths to pack
+   * @param cwd Optional current working directory for relative path calculation
    * @returns Promise resolving to pack result
    */
-  async packPaths(paths: string[]): Promise<WorkspacePackResult> {
+  async packPaths(paths: string[], cwd?: string): Promise<WorkspacePackResult> {
     // Step 1: Validate and deduplicate paths
     const validatedPaths = this.validateAndDeduplicatePaths(paths);
 
@@ -128,7 +129,7 @@ export class WorkspacePack {
     };
 
     // Step 6: Format content for LLM consumption
-    const packedContent = this.formatForLLM(validatedPaths, files);
+    const packedContent = this.formatForLLM(validatedPaths, files, cwd);
 
     return {
       processedPaths: validatedPaths,
@@ -276,7 +277,7 @@ export class WorkspacePack {
    * Format the results for optimal LLM consumption using XML structure
    * Uses consistent <directory> tags to align with ContextReferenceProcessor output
    */
-  private formatForLLM(processedPaths: string[], files: FileInfo[]): string {
+  private formatForLLM(processedPaths: string[], files: FileInfo[], cwd?: string): string {
     const sections: string[] = [];
 
     // Group files by their relative paths from processed paths
@@ -298,9 +299,8 @@ export class WorkspacePack {
       // Sort files for consistent output
       const sortedFiles = pathFiles.sort((a, b) => a.absolutePath.localeCompare(b.absolutePath));
 
-      // Use relative path for cleaner output
-      const relativePath = path.relative(process.cwd(), processedPath);
-      const displayPath = relativePath || processedPath;
+      // Calculate display path based on cwd parameter
+      const displayPath = cwd ? path.relative(cwd, processedPath) || processedPath : processedPath;
 
       sections.push(`<directory path="${displayPath}">`);
 
