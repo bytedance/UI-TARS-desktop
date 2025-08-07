@@ -1,53 +1,62 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ChatCompletionContentPart } from '@tarko/agent-interface';
 import fs from 'fs';
 import path from 'path';
-import { beforeAll, afterAll, describe, it, expect, vi } from 'vitest';
+import { beforeEach, afterEach, describe, it, expect, vi } from 'vitest';
 import { ContextReferenceProcessor } from '../src/node/context-reference-processor';
 
 describe('ContextReferenceProcessor', () => {
   let processor: ContextReferenceProcessor;
   let testWorkspace: string;
-  let testFile1: string;
-  let testFile2: string;
-  let testDir: string;
 
-  beforeAll(async () => {
-    // Setup test workspace
-    testWorkspace = path.join(__dirname, 'test-workspace');
-    testDir = path.join(testWorkspace, 'test-dir');
-    testFile1 = path.join(testWorkspace, 'test1.txt');
-    testFile2 = path.join(testDir, 'test2.js');
-
-    // Create test directory structure
-    fs.mkdirSync(testWorkspace, { recursive: true });
-    fs.mkdirSync(testDir, { recursive: true });
-
-    // Create test files
-    fs.writeFileSync(testFile1, 'Hello from test1.txt');
-    fs.writeFileSync(testFile2, 'const test = "Hello from test2.js";');
-
+  beforeEach(() => {
+    testWorkspace = '/test/workspace';
     processor = new ContextReferenceProcessor({
       maxFileSize: 1024 * 1024, // 1MB
       ignoreExtensions: ['.png', '.jpg'],
       ignoreDirs: ['node_modules'],
       maxDepth: 5,
     });
+
+    // Mock fs module
+    vi.mock('fs', () => ({
+      default: {
+        existsSync: vi.fn(),
+        statSync: vi.fn(),
+        readFileSync: vi.fn(),
+      },
+    }));
+
+    vi.mock('path', async () => {
+      const actual = await vi.importActual('path');
+      return {
+        ...actual,
+        resolve: vi.fn((basePath: string, relativePath: string) => {
+          if (basePath === testWorkspace) {
+            return path.join(testWorkspace, relativePath);
+          }
+          return path.resolve(basePath, relativePath);
+        }),
+      };
+    });
   });
 
-  afterAll(() => {
-    // Cleanup test workspace
-    try {
-      fs.rmSync(testWorkspace, { recursive: true, force: true });
-    } catch (error) {
-      // Ignore cleanup errors
-    }
+  afterEach(() => {
+    vi.clearAllMocks();
   });
 
   describe('processContextualReferences', () => {
     it('should return non-string queries unchanged', async () => {
       const arrayQuery: ChatCompletionContentPart[] = [{ type: 'text', text: 'hello' }];
       const result = await processor.processContextualReferences(arrayQuery, testWorkspace);
-      expect(result).toBe(arrayQuery);
+      expect(result).toMatchInlineSnapshot(`
+        [
+          {
+            "text": "hello",
+            "type": "text",
+          },
+        ]
+      `);
     });
 
     it('should return queries without references unchanged', async () => {
@@ -57,25 +66,50 @@ describe('ContextReferenceProcessor', () => {
     });
 
     it('should process @file: references successfully', async () => {
+      // Mock file system calls
+      vi.mocked(fs.existsSync).mockReturnValue(true);
+      vi.mocked(fs.statSync).mockReturnValue({
+        isFile: () => true,
+        isDirectory: () => false,
+      } as any);
+      vi.mocked(fs.readFileSync).mockReturnValue('Hello from test1.txt');
+
       const query = 'Please check @file:test1.txt for content';
       const result = await processor.processContextualReferences(query, testWorkspace);
 
-      expect(typeof result).toBe('string');
-      expect(result).toMatchInlineSnapshot(`
+      expect(result).toMatchInlineSnapshot(
+        `
         "<file path="test1.txt">
         Hello from test1.txt
         </file>
 
         Please check @file:test1.txt for content"
-      `);
+      `,
+      );
     });
 
     it('should process multiple @file: references', async () => {
+      // Mock file system calls
+      vi.mocked(fs.existsSync).mockReturnValue(true);
+      vi.mocked(fs.statSync).mockReturnValue({
+        isFile: () => true,
+        isDirectory: () => false,
+      } as any);
+      vi.mocked(fs.readFileSync).mockImplementation((filePath: string) => {
+        if (filePath.includes('test1.txt')) {
+          return 'Hello from test1.txt';
+        }
+        if (filePath.includes('test2.js')) {
+          return 'const test = "Hello from test2.js";';
+        }
+        return 'default content';
+      });
+
       const query = 'Check @file:test1.txt and @file:test-dir/test2.js';
       const result = await processor.processContextualReferences(query, testWorkspace);
 
-      expect(typeof result).toBe('string');
-      expect(result).toMatchInlineSnapshot(`
+      expect(result).toMatchInlineSnapshot(
+        `
         "<file path="test1.txt">
         Hello from test1.txt
         </file>
@@ -85,36 +119,54 @@ describe('ContextReferenceProcessor', () => {
         </file>
 
         Check @file:test1.txt and @file:test-dir/test2.js"
-      `);
+      `,
+      );
     });
 
     it('should process @dir: references successfully', async () => {
+      // Mock WorkspacePack.packPaths method
+      const mockPackResult = {
+        processedPaths: ['/test/workspace/test-dir'],
+        files: [],
+        packedContent: `=== Workspace Content Summary ===
+Processed Paths: 1
+Total Files: 1
+
+--- File: /test/workspace/test-dir/test2.js ---
+const test = "Hello from test2.js";
+--- End of test2.js ---`,
+        stats: { totalFiles: 1, totalSize: 100, errorCount: 0 },
+      };
+
+      vi.spyOn(processor['workspacePack'], 'packPaths').mockResolvedValue(mockPackResult);
+
       const query = 'Analyze @dir:test-dir directory';
       const result = await processor.processContextualReferences(query, testWorkspace);
 
-      expect(typeof result).toBe('string');
-      // Use a more flexible assertion for directory content since paths can vary
+      expect(result).toContain('<directory path="test-dir">');
       expect(result).toContain('Workspace Content Summary');
-      expect(result).toContain('test2.js');
-      expect(result).toContain('Hello from test2.js');
+      expect(result).toContain('Analyze @dir:test-dir directory');
     });
 
     it('should handle non-existent file references gracefully', async () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
+      // Mock file not found
+      vi.mocked(fs.existsSync).mockReturnValue(false);
+
       const query = 'Check @file:non-existent.txt';
       const result = await processor.processContextualReferences(query, testWorkspace);
 
-      expect(result).toMatchInlineSnapshot(`
+      expect(result).toMatchInlineSnapshot(
+        `
         "<file path="non-existent.txt">
         Error: File not found
         </file>
 
         Check @file:non-existent.txt"
-      `);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('File reference not found: non-existent.txt'),
+      `,
       );
+      expect(consoleSpy).toHaveBeenCalledWith('File reference not found: non-existent.txt');
 
       consoleSpy.mockRestore();
     });
@@ -125,15 +177,17 @@ describe('ContextReferenceProcessor', () => {
       const query = 'Check @file:../../../etc/passwd';
       const result = await processor.processContextualReferences(query, testWorkspace);
 
-      expect(result).toMatchInlineSnapshot(`
+      expect(result).toMatchInlineSnapshot(
+        `
         "<file path="../../../etc/passwd">
         Error: File reference outside workspace
         </file>
 
         Check @file:../../../etc/passwd"
-      `);
+      `,
+      );
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('File reference outside workspace: ../../../etc/passwd'),
+        'File reference outside workspace: ../../../etc/passwd',
       );
 
       consoleSpy.mockRestore();
@@ -147,7 +201,7 @@ describe('ContextReferenceProcessor', () => {
 
       expect(result).toMatchInlineSnapshot(`"Analyze @dir:../../../etc"`);
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Directory reference outside workspace: ../../../etc'),
+        'Directory reference outside workspace: ../../../etc',
       );
 
       consoleSpy.mockRestore();
@@ -156,92 +210,109 @@ describe('ContextReferenceProcessor', () => {
     it('should handle file read errors gracefully', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-      // Create a file and then make it unreadable (simulate permission error)
-      const restrictedFile = path.join(testWorkspace, 'restricted.txt');
-      fs.writeFileSync(restrictedFile, 'secret content');
-
-      // Mock fs.readFileSync to throw an error
-      const originalReadFile = fs.readFileSync;
-      vi.spyOn(fs, 'readFileSync').mockImplementation((filePath, ...args) => {
-        if (filePath === restrictedFile) {
-          throw new Error('Permission denied');
-        }
-        return originalReadFile(filePath, ...args);
+      // Mock file exists but read fails
+      vi.mocked(fs.existsSync).mockReturnValue(true);
+      vi.mocked(fs.statSync).mockReturnValue({
+        isFile: () => true,
+        isDirectory: () => false,
+      } as any);
+      vi.mocked(fs.readFileSync).mockImplementation(() => {
+        throw new Error('Permission denied');
       });
 
       const query = 'Check @file:restricted.txt';
       const result = await processor.processContextualReferences(query, testWorkspace);
 
-      expect(result).toMatchInlineSnapshot(`
+      expect(result).toMatchInlineSnapshot(
+        `
         "<file path="restricted.txt">
         Error: Failed to read file
         </file>
 
         Check @file:restricted.txt"
-      `);
-      expect(consoleSpy).toHaveBeenCalled();
+      `,
+      );
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Failed to read file restricted.txt:',
+        expect.any(Error),
+      );
 
-      // Restore mocks
-      vi.restoreAllMocks();
       consoleSpy.mockRestore();
-
-      // Cleanup
-      try {
-        fs.unlinkSync(restrictedFile);
-      } catch (error) {
-        // Ignore cleanup errors
-      }
     });
 
     it('should handle workspace packing errors for directories', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       // Mock WorkspacePack to throw an error
-      const mockPackPaths = vi.fn().mockRejectedValue(new Error('Packing failed'));
-      processor['workspacePack'].packPaths = mockPackPaths;
+      vi.spyOn(processor['workspacePack'], 'packPaths').mockRejectedValue(
+        new Error('Packing failed'),
+      );
 
       const query = 'Analyze @dir:test-dir';
       const result = await processor.processContextualReferences(query, testWorkspace);
 
-      expect(result).toMatchInlineSnapshot(`
+      expect(result).toMatchInlineSnapshot(
+        `
         "<directory path="test-dir">
         Error: Failed to pack directory
         </directory>
 
         Analyze @dir:test-dir"
-      `);
+      `,
+      );
       expect(consoleSpy).toHaveBeenCalledWith('Failed to pack workspace paths:', expect.any(Error));
 
       consoleSpy.mockRestore();
     });
 
     it('should handle mixed @file: and @dir: references', async () => {
+      // Mock file system calls for file reference
+      vi.mocked(fs.existsSync).mockReturnValue(true);
+      vi.mocked(fs.statSync).mockReturnValue({
+        isFile: () => true,
+        isDirectory: () => false,
+      } as any);
+      vi.mocked(fs.readFileSync).mockReturnValue('Hello from test1.txt');
+
+      // Mock WorkspacePack.packPaths method for directory reference
+      const mockPackResult = {
+        processedPaths: ['/test/workspace/test-dir'],
+        files: [],
+        packedContent: 'Directory content here',
+        stats: { totalFiles: 1, totalSize: 100, errorCount: 0 },
+      };
+
+      vi.spyOn(processor['workspacePack'], 'packPaths').mockResolvedValue(mockPackResult);
+
       const query = 'Check @file:test1.txt and analyze @dir:test-dir';
       const result = await processor.processContextualReferences(query, testWorkspace);
 
-      expect(typeof result).toBe('string');
-      // For mixed references, keep some flexible assertions since directory content can vary
-      expect(result).toMatchFileSnapshot('Hello from test1.txt');
+      expect(result).toContain('Hello from test1.txt');
+      expect(result).toContain('Directory content here');
+      expect(result).toContain('Check @file:test1.txt and analyze @dir:test-dir');
     });
 
     it('should handle references with special regex characters', async () => {
-      // Create a file with special characters in name
-      const specialFile = path.join(testWorkspace, 'test[special].txt');
-      fs.writeFileSync(specialFile, 'special content');
+      // Mock file system calls
+      vi.mocked(fs.existsSync).mockReturnValue(true);
+      vi.mocked(fs.statSync).mockReturnValue({
+        isFile: () => true,
+        isDirectory: () => false,
+      } as any);
+      vi.mocked(fs.readFileSync).mockReturnValue('special content');
 
       const query = 'Check @file:test[special].txt';
       const result = await processor.processContextualReferences(query, testWorkspace);
 
-      expect(result).toMatchInlineSnapshot(`
+      expect(result).toMatchInlineSnapshot(
+        `
         "<file path="test[special].txt">
         special content
         </file>
 
         Check @file:test[special].txt"
-      `);
-
-      // Cleanup
-      fs.unlinkSync(specialFile);
+      `,
+      );
     });
   });
 
