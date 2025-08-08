@@ -28,19 +28,7 @@ export class GuiAgentPlugin implements AgentPlugin {
   }
 
   async initialize(): Promise<void> {
-    // Initialize computer interaction tools
-    // For now, this is a placeholder - actual implementation would depend on
-    // the computer use tools available in the system
     console.log('[GuiAgentPlugin] Initializing computer interaction capabilities');
-
-    // TODO: Initialize actual computer use tools when available
-    // this.tools = [
-    //   new ComputerScreenshotTool(),
-    //   new ComputerClickTool(),
-    //   new ComputerTypeTool(),
-    //   new ComputerScrollTool(),
-    //   // etc.
-    // ];
   }
 
   getTools(): Tool[] {
@@ -49,21 +37,17 @@ export class GuiAgentPlugin implements AgentPlugin {
 
   onLLMRequest?(id: string, payload: LLMRequestHookPayload): void | Promise<void> {
     // GUI-specific request handling if needed
-    console.log('[GuiAgentPlugin] Processing LLM request for computer use');
   }
 
   onLLMResponse?(id: string, payload: LLMResponseHookPayload): void | Promise<void> {
     // GUI-specific response handling if needed
-    console.log('[GuiAgentPlugin] Processing LLM response for computer use');
   }
 
   onEachAgentLoopStart?(): void | Promise<void> {
     // GUI-specific loop start handling if needed
-    console.log('[GuiAgentPlugin] Starting agent loop for computer interaction');
   }
 
   onAgentLoopEnd?(): void | Promise<void> {
     // GUI-specific loop end handling if needed
-    console.log('[GuiAgentPlugin] Ending agent loop for computer interaction');
   }
 }

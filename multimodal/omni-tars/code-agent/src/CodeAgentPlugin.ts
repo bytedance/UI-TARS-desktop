@@ -46,21 +46,17 @@ export class CodeAgentPlugin implements AgentPlugin {
 
   onLLMRequest?(id: string, payload: LLMRequestHookPayload): void | Promise<void> {
     // Code-specific request handling if needed
-    console.log('[CodeAgentPlugin] Processing LLM request for code execution');
   }
 
   onLLMResponse?(id: string, payload: LLMResponseHookPayload): void | Promise<void> {
     // Code-specific response handling if needed
-    console.log('[CodeAgentPlugin] Processing LLM response for code execution');
   }
 
   onEachAgentLoopStart?(): void | Promise<void> {
     // Code-specific loop start handling if needed
-    console.log('[CodeAgentPlugin] Starting agent loop for code execution');
   }
 
   onAgentLoopEnd?(): void | Promise<void> {
     // Code-specific loop end handling if needed
-    console.log('[CodeAgentPlugin] Ending agent loop for code execution');
   }
 }

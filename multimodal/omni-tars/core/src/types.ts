@@ -18,13 +18,13 @@ export interface AgentPlugin {
   readonly name: string;
 
   /** Environment section this agent provides (will be combined with others) */
-  readonly environmentSection: string;
+  readonly environmentSection?: string;
 
   /** Initialize the agent plugin (called during composition setup) */
-  initialize(): Promise<void>;
+  initialize?(): Promise<void>;
 
   /** Register tools provided by this agent plugin */
-  getTools(): Tool[];
+  getTools?(): Tool[];
 
   /** Hook called on each LLM request */
   onLLMRequest?(id: string, payload: LLMRequestHookPayload): void | Promise<void>;

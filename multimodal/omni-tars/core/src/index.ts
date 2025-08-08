@@ -29,3 +29,4 @@ export { COMPUTER_USE_ENVIRONMENT } from './environments/computer';
 export { SearchToolProvider } from './tools/search';
 export { LinkReaderToolProvider } from './tools/linkReader';
 export { McpManager } from './tools/mcp';
+export { SnapshotPlugin } from './plugins/snapshot';

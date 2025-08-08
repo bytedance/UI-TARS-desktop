@@ -18,7 +18,7 @@ export interface McpAgentConfig {
  * MCP Agent Plugin - handles MCP_ENVIRONMENT and provides search/link reading capabilities
  */
 export class McpAgentPlugin implements AgentPlugin {
-  readonly name = 'mcp-agent';
+  readonly name = 'mcp-agent-plugin';
   readonly environmentSection = MCP_ENVIRONMENT;
 
   private mcpManager: McpManager;

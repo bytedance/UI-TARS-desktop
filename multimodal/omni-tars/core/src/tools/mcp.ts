@@ -25,7 +25,6 @@ export class McpManager {
         name: McpManager.McpClientType.Tavily,
         description: 'tavily search tool',
         url: `https://mcp.tavily.com/mcp/?tavilyApiKey=${options.tavilyApiKey}`,
-        // url: 'https://mcp.byted.org/api/node_fc/tavily',
         timeout: 60,
         header: {
           'x-tavily-api-key': options.tavilyApiKey,

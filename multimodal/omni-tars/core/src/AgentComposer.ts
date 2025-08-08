@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ComposableAgentOptions } from './ComposableAgent';
 import { AgentPlugin } from './types';
 import { LLMRequestHookPayload, LLMResponseHookPayload } from '@tarko/agent';
 
@@ -13,7 +12,7 @@ import { LLMRequestHookPayload, LLMResponseHookPayload } from '@tarko/agent';
 export class AgentComposer {
   private plugins: AgentPlugin[] = [];
 
-  constructor(option: ComposableAgentOptions) {
+  constructor(option: { plugins: AgentPlugin[] }) {
     this.plugins = option.plugins;
   }
 
@@ -22,7 +21,7 @@ export class AgentComposer {
    */
   async initialize(): Promise<void> {
     for (const plugin of this.plugins) {
-      await plugin.initialize();
+      await plugin.initialize?.();
     }
   }
 
@@ -37,6 +36,7 @@ export class AgentComposer {
 
     // Combine all environment sections
     const environmentSections = this.plugins
+      .filter((plugin) => plugin.environmentSection)
       .map((plugin) => plugin.environmentSection)
       .join('\n\n');
 
@@ -50,7 +50,7 @@ export class AgentComposer {
    * Get all tools from all agent plugins
    */
   getAllTools() {
-    return this.plugins.flatMap((plugin) => plugin.getTools());
+    return this.plugins.flatMap((plugin) => plugin.getTools?.() || []);
   }
 
   /**

@@ -14,8 +14,6 @@ async function main() {
       apiKey: process.env.AZURE_OPENAI_API_KEY,
       baseURL: process.env.GPT_I18N_URL,
     },
-    tavilyApiKey: process.env.TavilyApiKey,
-    googleApiKey: process.env.GOOGLE_API_KEY,
     logLevel: LogLevel.INFO,
   });
 

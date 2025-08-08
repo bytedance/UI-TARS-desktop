@@ -7,11 +7,14 @@ import {
   ComposableAgent,
   ComposableAgentOptions,
   createComposableToolCallEngineFactory,
+  SnapshotPlugin,
 } from '@omni-tars/core';
 import { mcpPlugin, McpToolCallEngineProvider } from '@omni-tars/mcp-agent';
 import { codePlugin, CodeToolCallEngineProvider } from '@omni-tars/code-agent';
 import { guiPlugin, GuiToolCallEngineProvider } from '@omni-tars/gui-agent';
 import { LogLevel } from '@tarko/agent-interface';
+import path from 'path';
+import OmniTARSAgent from '../dist';
 
 async function main() {
   const toolCallEngine = createComposableToolCallEngineFactory({
@@ -24,7 +27,12 @@ async function main() {
 
   const options: ComposableAgentOptions = {
     name: 'Omni Agent',
-    plugins: [mcpPlugin, codePlugin, guiPlugin],
+    plugins: [
+      mcpPlugin,
+      codePlugin,
+      guiPlugin,
+      new SnapshotPlugin({ baseDir: path.resolve(__dirname, '../snapshot') }),
+    ],
     toolCallEngine,
     model: {
       provider: 'openai-non-streaming',
@@ -35,9 +43,10 @@ async function main() {
     logLevel: LogLevel.DEBUG,
   };
 
-  const agent = new ComposableAgent(options);
+  // const agent = new ComposableAgent(options);
+  const agent = new OmniTARSAgent(options);
 
-  const res = await agent.run('北京的天气如何');
+  const res = await agent.run('search papers about ui-tars ');
 
   console.log(res);
 }
