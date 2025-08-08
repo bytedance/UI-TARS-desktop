@@ -40,7 +40,7 @@ export const Message: React.FC<MessageProps> = ({
   isInGroup = false,
   shouldDisplayTimestamp = true,
 }) => {
-  const [showThinking, setShowThinking] = useState(false);
+  const [showThinking, setShowThinking] = useState(true);
   const [showSteps, setShowSteps] = useState(false);
   const { setActivePanelContent, activeSessionId } = useSession();
   const { getToolIcon } = useTool();
@@ -217,6 +217,17 @@ export const Message: React.FC<MessageProps> = ({
           />
         ) : (
           <>
+            {/* Enhanced thinking display with duration support */}
+            {message.thinking && (
+              <ThinkingToggle
+                thinking={message.thinking}
+                showThinking={showThinking}
+                setShowThinking={setShowThinking}
+                // @ts-expect-error support it later
+                duration={message.thinkingDuration} // Pass thinking duration if available
+              />
+            )}
+
             <div className={getProseClasses()}>{renderContent()}</div>
 
             {isFinalAssistantResponse && hasEnvironmentState && (
@@ -243,14 +254,6 @@ export const Message: React.FC<MessageProps> = ({
                 onToolCallClick={handleToolCallClick}
                 getToolIcon={getToolIcon}
                 toolResults={message.toolResults || []} // Pass tool results for status checking
-              />
-            )}
-
-            {message.thinking && (
-              <ThinkingToggle
-                thinking={message.thinking}
-                showThinking={showThinking}
-                setShowThinking={setShowThinking}
               />
             )}
           </>
