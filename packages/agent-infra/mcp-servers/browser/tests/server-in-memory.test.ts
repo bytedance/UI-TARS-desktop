@@ -343,6 +343,9 @@ describe('MCP Server in memory', () => {
       });
 
       expect(result).toEqual({
+        _meta: {
+          screenCoords: [100, 100],
+        },
         content: [
           {
             text: 'Vision click at 100, 100',

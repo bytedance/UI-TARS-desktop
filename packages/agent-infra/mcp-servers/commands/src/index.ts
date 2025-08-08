@@ -17,6 +17,7 @@ program
   .name(process.env.NAME || 'mcp-server-commands')
   .description(process.env.DESCRIPTION || 'MCP server for commands')
   .version(process.env.VERSION || '0.0.1')
+  .option('--cwd <cwd>', 'current working directory')
   .option(
     '--host <host>',
     'host to bind server to. Default is localhost. Use 0.0.0.0 to bind to all interfaces.',
@@ -25,7 +26,9 @@ program
   .action(async (options) => {
     try {
       const createMcpServer = async () => {
-        const server: McpServer = createServer();
+        const server: McpServer = createServer({
+          cwd: options.cwd ?? '',
+        });
         return server;
       };
       if (options.port || options.host) {
