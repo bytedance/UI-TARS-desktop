@@ -81,29 +81,6 @@ export const ChatPanel: React.FC = () => {
   // Use messages from current session
   const activeMessages = activeSessionId ? groupedMessages[activeSessionId] || [] : [];
 
-  // Auto-scroll when new messages arrive
-  useEffect(() => {
-    if (messagesEndRef.current && messagesContainerRef.current) {
-      const container = messagesContainerRef.current;
-      const { scrollTop, scrollHeight, clientHeight } = container;
-      const isAtBottom = Math.abs(scrollHeight - scrollTop - clientHeight) < 30;
-
-      if (
-        isAtBottom ||
-        isProcessing ||
-        (activeMessages.length > 0 &&
-          activeMessages[activeMessages.length - 1].messages[0]?.role === 'user')
-      ) {
-        setTimeout(() => {
-          container.scrollTo({
-            top: container.scrollHeight,
-            behavior: 'smooth',
-          });
-        }, 100);
-      }
-    }
-  }, [activeMessages, isProcessing]);
-
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
