@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { describe, it, expect, beforeEach } from 'vitest';
-import { SeedMCPAgentToolCallEngine } from '../src/SeedMCPAgentToolCallEngine';
+import { McpToolCallEngine } from '../src/McpToolCallEngine';
 
 describe('SeedMCPAgentToolCallEngine', () => {
-  let engine: SeedMCPAgentToolCallEngine;
+  let engine: McpToolCallEngine;
 
   beforeEach(() => {
-    engine = new SeedMCPAgentToolCallEngine();
+    engine = new McpToolCallEngine();
   });
 
   describe('parseContent', () => {
