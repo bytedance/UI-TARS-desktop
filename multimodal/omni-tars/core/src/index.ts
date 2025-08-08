@@ -3,9 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// Export the new composable architecture
 export { ComposableAgent, ComposableAgentOptions } from './ComposableAgent';
-export { AgentComposer } from './AgentComposer';
 export { AgentBuilder } from './AgentBuilder';
 export { ComposableToolCallEngine } from './ComposableToolCallEngine';
 export {
@@ -13,7 +11,6 @@ export {
   createComposableToolCallEngineFactory,
 } from './ComposableToolCallEngineFactory';
 export {
-  AgentPlugin,
   AgentCompositionConfig,
   EnvironmentSection,
   ToolCallEngineProvider,
@@ -26,7 +23,5 @@ export { CODE_ENVIRONMENT } from './environments/code';
 export { MCP_ENVIRONMENT } from './environments/mcp';
 export { COMPUTER_USE_ENVIRONMENT } from './environments/computer';
 
-export { SearchToolProvider } from './tools/search';
-export { LinkReaderToolProvider } from './tools/linkReader';
-export { McpManager } from './tools/mcp';
 export { SnapshotPlugin } from './plugins/snapshot';
+export { AgentPlugin } from './AgentPlugin';

@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentPlugin } from './types';
-import { LLMRequestHookPayload, LLMResponseHookPayload } from '@tarko/agent';
+import { AgentPlugin } from './AgentPlugin';
+import Agent, { LLMRequestHookPayload, LLMResponseHookPayload } from '@tarko/agent';
 
 /**
  * Composes multiple agent plugins into a unified system prompt and instruction set
@@ -14,6 +14,16 @@ export class AgentComposer {
 
   constructor(option: { plugins: AgentPlugin[] }) {
     this.plugins = option.plugins;
+  }
+
+  /**
+   *
+   * @param agent Inject agent instance into all plugins that support it
+   */
+  setAgent(agent: Agent) {
+    for (const plugin of this.plugins) {
+      plugin.setAgent(agent);
+    }
   }
 
   /**
@@ -114,7 +124,8 @@ export class AgentComposer {
    * Check if a specific plugin type is available
    */
   private hasPlugin(type: string): boolean {
-    return this.plugins.some((plugin) => plugin.name.toLowerCase().includes(type));
+    //TODO: Currently, it is determined whether a plugin is matched through the name string, and it needs to be optimized.
+    return this.plugins.some((plugin) => plugin.name?.toLowerCase().includes(type));
   }
 
   /**
