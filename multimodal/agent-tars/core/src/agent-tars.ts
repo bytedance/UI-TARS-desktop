@@ -28,6 +28,7 @@ import { DEFAULT_SYSTEM_PROMPT, generateBrowserRulesPrompt } from './prompt';
 import { BrowserGUIAgent, BrowserManager, BrowserToolsManager } from './browser';
 import { validateBrowserControlMode } from './browser/browser-control-validator';
 import { SearchToolProvider } from './search';
+import { FilesystemToolsManager } from './filesystem';
 import { applyDefaultOptions } from './shared/config-utils';
 import { MessageHistoryDumper } from './shared/message-history-dumper';
 
@@ -53,6 +54,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   private browserGUIAgent?: BrowserGUIAgent;
   private browserManager: BrowserManager;
   private browserToolsManager?: BrowserToolsManager;
+  private filesystemToolsManager?: FilesystemToolsManager;
   private searchToolProvider?: SearchToolProvider;
   private browserState: BrowserState = {};
 
@@ -185,6 +187,11 @@ Current Working Directory: ${workspace}
       // Always initialize browser tools manager regardless of control mode
       this.browserToolsManager = new BrowserToolsManager(this.logger, control);
       this.browserToolsManager.setBrowserManager(this.browserManager);
+
+      // Initialize filesystem tools manager
+      this.filesystemToolsManager = new FilesystemToolsManager(this.logger, {
+        workspace: this.workspace,
+      });
 
       // First initialize GUI Agent if needed
       if (control !== 'dom') {
@@ -397,6 +404,11 @@ Current Working Directory: ${workspace}
         this.browserToolsManager.setBrowserClient(this.inMemoryMCPClients.browser);
       }
 
+      // If filesystem tools manager exists, set the filesystem client
+      if (this.filesystemToolsManager && this.inMemoryMCPClients.filesystem) {
+        this.filesystemToolsManager.setFilesystemClient(this.inMemoryMCPClients.filesystem);
+      }
+
       // Register browser tools using the strategy if available
       if (this.browserToolsManager) {
         const registeredTools = await this.browserToolsManager.registerTools((tool) =>
@@ -408,10 +420,24 @@ Current Working Directory: ${workspace}
         );
       }
 
-      // Always register non-browser tools regardless of browser tools manager
+      // Register filesystem tools using the manager if available
+      if (this.filesystemToolsManager) {
+        const registeredTools = await this.filesystemToolsManager.registerTools((tool) =>
+          this.registerTool(tool),
+        );
+
+        this.logger.info(
+          `✅ Registered ${registeredTools.length} filesystem tools with safe filtering`,
+        );
+      }
+
+      // Register remaining non-browser and non-filesystem tools
       await Promise.all(
         Object.entries(this.inMemoryMCPClients).map(async ([name, client]) => {
-          if (name !== 'browser' || !this.browserToolsManager) {
+          if (
+            (name !== 'browser' || !this.browserToolsManager) &&
+            (name !== 'filesystem' || !this.filesystemToolsManager)
+          ) {
             await this.registerToolsFromClient(name as BuiltInMCPServerName, client!);
           }
         }),
