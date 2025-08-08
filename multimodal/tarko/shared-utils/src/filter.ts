@@ -4,26 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { CommonFilterOptions } from '@tarko/agent-interface';
 import { getLogger } from './logger';
 
 const logger = getLogger('Filter');
-
-/**
- * Filter options interface for include/exclude patterns
- */
-export interface FilterOptions {
-  /**
-   * Include only items whose names contain any of these strings
-   * Applied before exclude filters
-   */
-  include?: string[];
-
-  /**
-   * Exclude items whose names contain any of these strings
-   * Applied after include filters
-   */
-  exclude?: string[];
-}
 
 /**
  * Interface for items that can be filtered by name
@@ -42,7 +26,7 @@ export interface FilterableItem {
  */
 export function filterItems<T extends FilterableItem>(
   items: T[],
-  filterOptions?: FilterOptions,
+  filterOptions?: CommonFilterOptions,
   itemType = 'items',
 ): T[] {
   if (!filterOptions || (!filterOptions.include && !filterOptions.exclude)) {

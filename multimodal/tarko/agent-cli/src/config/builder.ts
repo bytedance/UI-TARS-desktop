@@ -3,8 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import path from 'path';
 import { deepMerge, isTest } from '@tarko/shared-utils';
 import {
+  CommonFilterOptions,
   AgentCLIArguments,
   ModelProviderName,
   AgentAppConfig,
@@ -12,7 +14,6 @@ import {
   isAgentWebUIImplementationType,
 } from '@tarko/interface';
 import { resolveValue } from '../utils';
-import path, { join } from 'path';
 
 /**
  * Handler for processing deprecated CLI options
@@ -327,10 +328,7 @@ function handleToolFilterOptions(
 function handleMCPServerFilterOptions(
   config: Partial<AgentAppConfig>,
   mcpServerOptions: {
-    mcpServer?: {
-      include?: string | string[];
-      exclude?: string | string[];
-    };
+    mcpServer?: CommonFilterOptions;
   },
 ): void {
   const { mcpServer } = mcpServerOptions;
@@ -348,7 +346,9 @@ function handleMCPServerFilterOptions(
 
   // Handle include patterns
   if (mcpServer.include) {
-    const includePatterns = Array.isArray(mcpServer.include) ? mcpServer.include : [mcpServer.include];
+    const includePatterns = Array.isArray(mcpServer.include)
+      ? mcpServer.include
+      : [mcpServer.include];
     // Flatten comma-separated patterns
     const flattenedInclude = includePatterns.flatMap((pattern) =>
       pattern
@@ -364,7 +364,9 @@ function handleMCPServerFilterOptions(
 
   // Handle exclude patterns
   if (mcpServer.exclude) {
-    const excludePatterns = Array.isArray(mcpServer.exclude) ? mcpServer.exclude : [mcpServer.exclude];
+    const excludePatterns = Array.isArray(mcpServer.exclude)
+      ? mcpServer.exclude
+      : [mcpServer.exclude];
     // Flatten comma-separated patterns
     const flattenedExclude = excludePatterns.flatMap((pattern) =>
       pattern

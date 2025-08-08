@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { filterItems, FilterableItem, FilterOptions } from '../src/filter';
+import { filterItems, FilterableItem, CommonFilterOptions } from '../src/filter';
 
 vi.mock('./logger', () => ({
   getLogger: vi.fn(() => ({

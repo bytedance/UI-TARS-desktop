@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentOptions } from '@tarko/agent-interface';
+import { AgentOptions, CommonFilterOptions } from '@tarko/agent-interface';
 
 // FIXME: remove enum-based logger
 export { LogLevel } from '@tarko/agent-interface';
@@ -12,19 +12,7 @@ export type * from '@tarko/agent-interface';
 /**
  * MCP Server filtering options for controlling which servers are connected
  */
-export interface MCPServerFilterOptions {
-  /**
-   * Include only servers whose names contain any of these strings
-   * Applied before exclude filters
-   */
-  include?: string[];
-
-  /**
-   * Exclude servers whose names contain any of these strings
-   * Applied after include filters
-   */
-  exclude?: string[];
-}
+export interface MCPServerFilterOptions extends CommonFilterOptions {}
 
 export interface MCPAgentOptions extends AgentOptions {
   /**

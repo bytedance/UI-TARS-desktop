@@ -940,6 +940,9 @@ importers:
       '@agent-infra/logger':
         specifier: 0.0.2-beta.2
         version: 0.0.2-beta.2
+      '@tarko/agent-interface':
+        specifier: workspace:*
+        version: link:../agent-interface
     devDependencies:
       '@rslib/core':
         specifier: 0.10.0

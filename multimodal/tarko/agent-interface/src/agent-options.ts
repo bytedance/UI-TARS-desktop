@@ -10,6 +10,23 @@ import { ProviderOptions, LLMReasoningOptions } from '@tarko/model-provider/type
 import { AgentEventStream } from './agent-event-stream';
 import { LogLevel } from '@agent-infra/logger';
 
+/**
+ * Filter options interface for include/exclude patterns
+ */
+export interface CommonFilterOptions {
+  /**
+   * Include only items whose names contain any of these strings
+   * Applied before exclude filters
+   */
+  include?: string[];
+
+  /**
+   * Exclude items whose names contain any of these strings
+   * Applied after include filters
+   */
+  exclude?: string[];
+}
+
 export { LogLevel };
 
 /**
@@ -75,19 +92,7 @@ export interface AgentModelOptions {
 /**
  * Tool filtering options for controlling which tools are available
  */
-export interface AgentToolFilterOptions {
-  /**
-   * Include only tools whose names contain any of these strings
-   * Applied before exclude filters
-   */
-  include?: string[];
-
-  /**
-   * Exclude tools whose names contain any of these strings
-   * Applied after include filters
-   */
-  exclude?: string[];
-}
+export interface AgentToolFilterOptions extends CommonFilterOptions {}
 
 /**
  * Tool configuration options for agent capabilities and execution engine
