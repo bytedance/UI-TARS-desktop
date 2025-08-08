@@ -66,6 +66,8 @@ export function buildAppConfig<
     shareProvider,
     // Extract tool filter options
     tool,
+    // Extract MCP server filter options
+    mcpServer,
     ...cliConfigProps
   } = cliArguments;
 
@@ -79,6 +81,9 @@ export function buildAppConfig<
 
   // Handle tool filter options
   handleToolFilterOptions(cliConfigProps, { tool });
+
+  // Handle MCP server filter options
+  handleMCPServerFilterOptions(cliConfigProps, { mcpServer });
 
   // Allow external handler to process additional options
   if (cliOptionsEnhancer) {
@@ -312,6 +317,64 @@ function handleToolFilterOptions(
     );
     if (flattenedExclude.length > 0) {
       config.tool.exclude = flattenedExclude;
+    }
+  }
+}
+
+/**
+ * Handle MCP server filter CLI options
+ */
+function handleMCPServerFilterOptions(
+  config: Partial<AgentAppConfig>,
+  mcpServerOptions: {
+    mcpServer?: {
+      include?: string | string[];
+      exclude?: string | string[];
+    };
+  },
+): void {
+  const { mcpServer } = mcpServerOptions;
+
+  if (!mcpServer) {
+    return;
+  }
+
+  // Initialize mcpServer config if it doesn't exist
+  // @ts-expect-error
+  if (!config.mcpServer) {
+    // @ts-expect-error
+    config.mcpServer = {};
+  }
+
+  // Handle include patterns
+  if (mcpServer.include) {
+    const includePatterns = Array.isArray(mcpServer.include) ? mcpServer.include : [mcpServer.include];
+    // Flatten comma-separated patterns
+    const flattenedInclude = includePatterns.flatMap((pattern) =>
+      pattern
+        .split(',')
+        .map((p) => p.trim())
+        .filter((p) => p.length > 0),
+    );
+    if (flattenedInclude.length > 0) {
+      // @ts-expect-error
+      config.mcpServer.include = flattenedInclude;
+    }
+  }
+
+  // Handle exclude patterns
+  if (mcpServer.exclude) {
+    const excludePatterns = Array.isArray(mcpServer.exclude) ? mcpServer.exclude : [mcpServer.exclude];
+    // Flatten comma-separated patterns
+    const flattenedExclude = excludePatterns.flatMap((pattern) =>
+      pattern
+        .split(',')
+        .map((p) => p.trim())
+        .filter((p) => p.length > 0),
+    );
+    if (flattenedExclude.length > 0) {
+      // @ts-expect-error
+      config.mcpServer.exclude = flattenedExclude;
     }
   }
 }

@@ -83,6 +83,23 @@ export function addCommonOptions(command: Command): Command {
       },
     )
 
+    // MCP Server filtering
+    .option('--mcpServer', 'MCP server config including filter options')
+    .option(
+      '--mcpServer.include <patterns>',
+      'Include only MCP servers whose names contain these patterns (comma-separated)',
+      {
+        type: [String],
+      },
+    )
+    .option(
+      '--mcpServer.exclude <patterns>',
+      'Exclude MCP servers whose names contain these patterns (comma-separated)',
+      {
+        type: [String],
+      },
+    )
+
     // Workspace configuration
     .option('--workspace <path>', 'workspace path')
 

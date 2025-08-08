@@ -7,6 +7,7 @@ import { MCPAgentOptions, IMCPClient, MCPServerRegistry } from './mcp-types';
 import { MCPClient } from './mcp-client';
 import { MCPClientV2 } from './mcp-client-v2';
 import { MCPToolAdapter } from './mcp-tool-adapter';
+import { filterItems } from '@tarko/shared-utils';
 
 export class MCPAgent<T extends MCPAgentOptions = MCPAgentOptions> extends Agent<T> {
   static label = '@tarko/mcp-agent';
@@ -23,11 +24,46 @@ export class MCPAgent<T extends MCPAgentOptions = MCPAgentOptions> extends Agent
   }
 
   /**
+   * Filter MCP servers based on include/exclude patterns
+   */
+  private filterMCPServers(
+    mcpServerConfig: MCPServerRegistry,
+    filterOptions?: MCPAgentOptions['mcpServer'],
+  ): MCPServerRegistry {
+    if (!filterOptions || (!filterOptions.include && !filterOptions.exclude)) {
+      return mcpServerConfig;
+    }
+
+    // Convert server registry to filterable items
+    const serverItems = Object.entries(mcpServerConfig).map(([name, config]) => ({
+      name,
+      config,
+    }));
+
+    // Apply filtering
+    const filteredServers = filterItems(serverItems, filterOptions, 'MCP servers');
+
+    // Convert back to registry format
+    const filteredRegistry: MCPServerRegistry = {};
+    filteredServers.forEach(({ name, config }) => {
+      filteredRegistry[name] = config;
+    });
+
+    return filteredRegistry;
+  }
+
+  /**
    * Initialize the MCP Agent and connect to MCP servers
    */
   async initialize(): Promise<void> {
+    // Apply MCP server filtering
+    const filteredMcpServerConfig = this.filterMCPServers(
+      this.mcpServerConfig,
+      this.options.mcpServer,
+    );
+
     // Initialize MCP clients and register tools
-    for (const [serverName, config] of Object.entries(this.mcpServerConfig)) {
+    for (const [serverName, config] of Object.entries(filteredMcpServerConfig)) {
       try {
         this.logger.info(`🔌 Connecting to MCP server: ${serverName}`);
 

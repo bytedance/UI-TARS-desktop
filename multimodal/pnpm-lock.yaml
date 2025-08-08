@@ -767,6 +767,9 @@ importers:
       '@tarko/mcp-agent-interface':
         specifier: workspace:*
         version: link:../mcp-agent-interface
+      '@tarko/shared-utils':
+        specifier: workspace:*
+        version: link:../shared-utils
     devDependencies:
       '@rslib/core':
         specifier: 0.10.0
