@@ -129,6 +129,65 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   }
 
   /**
+   * Get currently available model providers
+   */
+  getAvailableModels(): Array<{ name: string; models: string[]; baseURL?: string }> {
+    return this.appConfig.model?.providers || [];
+  }
+
+  /**
+   * Validate if a model configuration is still valid
+   */
+  isModelConfigValid(provider: string, modelId: string): boolean {
+    const availableModels = this.getAvailableModels();
+    return availableModels.some((p) => p.name === provider && p.models.includes(modelId));
+  }
+
+  /**
+   * Get default model configuration
+   */
+  getDefaultModelConfig(): { provider: string; modelId: string } {
+    return {
+      provider: this.appConfig.model?.provider || '',
+      modelId: this.appConfig.model?.id || '',
+    };
+  }
+
+  /**
+   * Create Agent with session-specific model configuration
+   */
+  createAgentWithSessionModel(sessionMetadata?: import('./storage').SessionMetadata): IAgent {
+    let modelConfig = this.getDefaultModelConfig();
+
+    // If session has specific model config and it's still valid, use session config
+    if (sessionMetadata?.modelConfig) {
+      const { provider, modelId } = sessionMetadata.modelConfig;
+      if (this.isModelConfigValid(provider, modelId)) {
+        modelConfig = { provider, modelId };
+      } else {
+        console.warn(
+          `Session ${sessionMetadata.id} model config is invalid, falling back to default`,
+        );
+      }
+    }
+
+    // Create Agent with specific model configuration
+    const agentOptions = {
+      ...this.appConfig,
+      model: {
+        ...this.appConfig.model,
+        provider: modelConfig.provider,
+        id: modelConfig.modelId,
+      },
+    };
+
+    if (!this.currentAgentResolution) {
+      throw new Error('Cannot found available resolved agent');
+    }
+    return new this.currentAgentResolution.agentConstructor(agentOptions);
+  }
+
+  /**
    * Get the Express application instance
    * @returns Express application
    */

@@ -21,6 +21,21 @@ export interface WorkspaceItem {
 }
 
 /**
+ * Available models response interface
+ */
+export interface AvailableModelsResponse {
+  models: Array<{
+    provider: string;
+    models: string[];
+  }>;
+  defaultModel: {
+    provider: string;
+    modelId: string;
+  };
+  hasMultipleProviders: boolean;
+}
+
+/**
  * API Service - Handles HTTP requests to the Agent TARS Server
  *
  * Provides methods for:
@@ -517,6 +532,55 @@ class ApiService {
     } catch (error) {
       console.error('Error validating workspace paths:', error);
       return paths.map((path) => ({ path, exists: false, error: 'Validation failed' }));
+    }
+  }
+
+  /**
+   * Get available model providers and configurations
+   */
+  async getAvailableModels(): Promise<AvailableModelsResponse> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/models`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(3000),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get available models: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error getting available models:', error);
+      return {
+        models: [],
+        defaultModel: { provider: '', modelId: '' },
+        hasMultipleProviders: false,
+      };
+    }
+  }
+
+  /**
+   * Update session model configuration
+   */
+  async updateSessionModel(sessionId: string, provider: string, modelId: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/sessions/model`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId, provider, modelId }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update session model: ${response.statusText}`);
+      }
+
+      const { success } = await response.json();
+      return success;
+    } catch (error) {
+      console.error('Error updating session model:', error);
+      return false;
     }
   }
 }

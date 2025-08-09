@@ -47,8 +47,23 @@ export async function createSession(req: Request, res: Response) {
 
     const sessionId = nanoid();
 
-    // Pass custom AGIO provider if available
-    const session = new AgentSession(server, sessionId, server.getCustomAgioProvider());
+    // Get session metadata if it exists (for restored sessions)
+    let sessionMetadata = null;
+    if (server.storageProvider) {
+      try {
+        sessionMetadata = await server.storageProvider.getSessionMetadata(sessionId);
+      } catch (error) {
+        // Session doesn't exist yet, will be created below
+      }
+    }
+
+    // Pass custom AGIO provider and session metadata if available
+    const session = new AgentSession(
+      server,
+      sessionId,
+      server.getCustomAgioProvider(),
+      sessionMetadata || undefined,
+    );
 
     server.sessions[sessionId] = session;
 

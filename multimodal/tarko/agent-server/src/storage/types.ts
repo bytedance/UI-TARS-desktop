@@ -15,6 +15,12 @@ export interface SessionMetadata {
   name?: string;
   workspace: string;
   tags?: string[];
+  // Session-specific model configuration
+  modelConfig?: {
+    provider: string;
+    modelId: string;
+    configuredAt: number;
+  };
 }
 
 /**
