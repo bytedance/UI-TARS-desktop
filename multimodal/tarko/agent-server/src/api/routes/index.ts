@@ -9,6 +9,7 @@ import { registerQueryRoutes } from './queries';
 import { registerSystemRoutes } from './system';
 import { registerShareRoutes } from './share';
 import { registerOneshotRoutes } from './oneshot';
+import { registerSnapshotRoutes } from './snapshots';
 
 /**
  * Register all API routes with the Express application
@@ -20,4 +21,5 @@ export function registerAllRoutes(app: express.Application): void {
   registerSystemRoutes(app);
   registerShareRoutes(app);
   registerOneshotRoutes(app);
+  registerSnapshotRoutes(app);
 }
