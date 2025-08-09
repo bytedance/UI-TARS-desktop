@@ -164,12 +164,6 @@ export class FilesystemToolsManager {
             default: this.DEFAULT_EXCLUDE_PATTERNS,
             description: 'Patterns to exclude from the tree',
           },
-          unsafe: {
-            type: 'boolean',
-            default: false,
-            description:
-              'If true, behaves like original MCP directory_tree (no limits, may cause prompt overflow)',
-          },
         },
         required: ['path'],
       } as JSONSchema7,
@@ -178,20 +172,13 @@ export class FilesystemToolsManager {
         maxDepth?: number;
         maxFiles?: number;
         excludePatterns?: string[];
-        unsafe?: boolean;
       }) => {
         const {
           path: rootPath,
           maxDepth = 3,
           maxFiles = 1000,
           excludePatterns = this.DEFAULT_EXCLUDE_PATTERNS,
-          unsafe = false,
         } = args;
-
-        // If unsafe mode, behave like original MCP directory_tree (backward compatibility)
-        if (unsafe) {
-          return this.buildUnsafeTree(rootPath);
-        }
 
         interface TreeEntry {
           name: string;
@@ -201,10 +188,7 @@ export class FilesystemToolsManager {
 
         const fileCount = { value: 0 };
 
-        const buildSafeTree = async (
-          currentPath: string,
-          depth: number = 0,
-        ): Promise<TreeEntry[]> => {
+        const buildSafeTree = async (currentPath: string, depth = 0): Promise<TreeEntry[]> => {
           // Check depth and file count limits
           if (depth >= maxDepth || fileCount.value >= maxFiles) {
             return [];
@@ -313,88 +297,5 @@ export class FilesystemToolsManager {
    */
   getDefaultExcludePatterns(): string[] {
     return [...this.DEFAULT_EXCLUDE_PATTERNS];
-  }
-
-  /**
-   * Build unsafe tree (original MCP behavior) for backward compatibility
-   * WARNING: This may cause prompt overflow with large directories
-   */
-  private async buildUnsafeTree(rootPath: string) {
-    interface TreeEntry {
-      name: string;
-      type: 'file' | 'directory';
-      children?: TreeEntry[];
-    }
-
-    const buildTree = async (currentPath: string): Promise<TreeEntry[]> => {
-      try {
-        // Use the filesystem MCP client to read directory
-        const listResult = await this.filesystemClient!.callTool({
-          name: 'list_directory',
-          arguments: { path: currentPath },
-        });
-
-        if (
-          !listResult?.content ||
-          !Array.isArray(listResult.content) ||
-          listResult.content.length === 0
-        ) {
-          return [];
-        }
-
-        const firstContent = listResult.content[0] as { type: string; text: string };
-        if (!firstContent?.text) {
-          return [];
-        }
-
-        const entries = firstContent.text
-          .split('\n')
-          .filter((line: string) => line.trim())
-          .map((line: string) => {
-            const isDir = line.startsWith('[DIR]');
-            const name = line.replace(/^\[(FILE|DIR)\]\s+/, '');
-            return { name, isDirectory: isDir };
-          });
-
-        const result: TreeEntry[] = [];
-
-        for (const entry of entries) {
-          const entryData: TreeEntry = {
-            name: entry.name,
-            type: entry.isDirectory ? 'directory' : 'file',
-          };
-
-          if (entry.isDirectory) {
-            const subPath = `${currentPath}/${entry.name}`;
-            entryData.children = await buildTree(subPath);
-          }
-
-          result.push(entryData);
-        }
-
-        return result;
-      } catch (error) {
-        this.logger.warn(`Failed to read directory ${currentPath}:`, error);
-        return [];
-      }
-    };
-
-    try {
-      const treeData = await buildTree(rootPath);
-      this.logger.warn('⚠️  Using unsafe directory_tree mode - may cause prompt overflow');
-
-      return {
-        content: [
-          {
-            type: 'text',
-            text: JSON.stringify(treeData, null, 2),
-          },
-        ],
-      };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.error('Error in unsafe directory tree:', error);
-      throw new Error(`Failed to generate directory tree: ${errorMessage}`);
-    }
   }
 }
