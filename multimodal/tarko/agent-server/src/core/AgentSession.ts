@@ -69,6 +69,7 @@ export class AgentSession {
     private server: AgentServer,
     sessionId: string,
     agioProviderImpl?: AgioProviderConstructor,
+    sessionMetadata?: import('../storage').SessionMetadata,
   ) {
     this.id = sessionId;
     this.eventBridge = new EventStreamBridge();
@@ -76,8 +77,8 @@ export class AgentSession {
     // Get agent options from server
     const agentOptions = { ...server.appConfig };
 
-    // Create agent instance using the server's factory method
-    const agent = server.createAgent();
+    // Create agent instance using the server's session-aware factory method
+    const agent = server.createAgentWithSessionModel(sessionMetadata);
 
     // Initialize agent snapshot if enabled
     if (agentOptions.snapshot?.enable) {

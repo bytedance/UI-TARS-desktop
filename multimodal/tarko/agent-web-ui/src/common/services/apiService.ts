@@ -15,6 +15,21 @@ export interface WorkspaceItem {
 }
 
 /**
+ * Available models response interface
+ */
+export interface AvailableModelsResponse {
+  models: Array<{
+    provider: string;
+    models: string[];
+  }>;
+  defaultModel: {
+    provider: string;
+    modelId: string;
+  };
+  hasMultipleProviders: boolean;
+}
+
+/**
  * API Service - Handles HTTP requests to the Agent TARS Server
  *
  * Provides methods for:
@@ -416,7 +431,7 @@ class ApiService {
   async searchWorkspaceItems(
     sessionId: string,
     query: string,
-    type?: 'file' | 'directory' | 'all'
+    type?: 'file' | 'directory' | 'all',
   ): Promise<WorkspaceItem[]> {
     try {
       const params = new URLSearchParams({
@@ -425,14 +440,11 @@ class ApiService {
         ...(type && { type }),
       });
 
-      const response = await fetch(
-        `${API_BASE_URL}${API_ENDPOINTS.WORKSPACE_SEARCH}?${params}`,
-        {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-          signal: AbortSignal.timeout(3000),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.WORKSPACE_SEARCH}?${params}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(3000),
+      });
 
       if (!response.ok) {
         throw new Error(`Failed to search workspace items: ${response.statusText}`);
@@ -443,6 +455,55 @@ class ApiService {
     } catch (error) {
       console.error('Error searching workspace items:', error);
       return [];
+    }
+  }
+
+  /**
+   * Get available model providers and configurations
+   */
+  async getAvailableModels(): Promise<AvailableModelsResponse> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/models`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(3000),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get available models: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error getting available models:', error);
+      return {
+        models: [],
+        defaultModel: { provider: '', modelId: '' },
+        hasMultipleProviders: false,
+      };
+    }
+  }
+
+  /**
+   * Update session model configuration
+   */
+  async updateSessionModel(sessionId: string, provider: string, modelId: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/sessions/model`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId, provider, modelId }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update session model: ${response.statusText}`);
+      }
+
+      const { success } = await response.json();
+      return success;
+    } catch (error) {
+      console.error('Error updating session model:', error);
+      return false;
     }
   }
 }

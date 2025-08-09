@@ -4,6 +4,7 @@ import { FiCpu } from 'react-icons/fi';
 import { useSession } from '@/common/hooks/useSession';
 import { usePlan } from '@/common/hooks/usePlan';
 import { FilesDisplay } from './FilesDisplay';
+import { ModelSelector } from './ModelSelector';
 import { useAtomValue } from 'jotai';
 import { sessionFilesAtom } from '@/common/state/atoms/files';
 
@@ -102,7 +103,10 @@ export const ActionBar: React.FC<ActionBarProps> = ({ sessionId, className = '' 
               <FilesDisplay files={allFiles[sessionId]} sessionId={sessionId} compact={true} />
             )}
           </div>
-          {shouldShowPlan && <div className="flex-shrink-0">{renderPlanButton()}</div>}
+          <div className="flex items-center gap-3 flex-shrink-0">
+            {sessionId && <ModelSelector sessionId={sessionId} />}
+            {shouldShowPlan && renderPlanButton()}
+          </div>
         </div>
       </motion.div>
     </AnimatePresence>
