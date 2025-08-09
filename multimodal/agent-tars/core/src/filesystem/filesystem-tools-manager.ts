@@ -266,16 +266,14 @@ export class FilesystemToolsManager {
 
         try {
           const treeData = await buildSafeTree(rootPath);
-          const summary = `Directory tree for ${rootPath} (max depth: ${maxDepth}, files included: ${fileCount.value}/${maxFiles})`;
 
-          return {
-            content: [
-              {
-                type: 'text',
-                text: `${summary}\n\n${JSON.stringify(treeData, null, 2)}`,
-              },
-            ],
-          };
+          // Return format consistent with original MCP directory_tree
+          return [
+            {
+              type: 'text',
+              text: JSON.stringify(treeData, null, 2),
+            },
+          ];
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);
           this.logger.error('Error in safe directory tree:', error);
