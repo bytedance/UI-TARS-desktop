@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentPlugin, AgentCompositionConfig } from './types';
+import { AgentCompositionConfig } from './types';
 import { ComposableAgent, ComposableAgentOptions } from './ComposableAgent';
-
+import { AgentPlugin } from './AgentPlugin';
 /**
  * Builder pattern for easy creation of composed agents
  */

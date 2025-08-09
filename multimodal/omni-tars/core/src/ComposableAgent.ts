@@ -11,7 +11,7 @@ import {
   LLMResponseHookPayload,
 } from '@tarko/agent';
 import { AgentComposer } from './AgentComposer';
-import { AgentPlugin } from './types';
+import { AgentPlugin } from './AgentPlugin';
 
 export interface ComposableAgentOptions extends AgentOptions {
   /** Agent plugins to compose */
@@ -25,21 +25,23 @@ export class ComposableAgent extends Agent {
   private composer: AgentComposer;
 
   constructor(options: ComposableAgentOptions) {
+    const { plugins, ...optionsWithoutPlugins } = options;
     // Initialize composer first to generate system prompt
-    const composer = new AgentComposer({ plugins: options.plugins });
+    const composer = new AgentComposer({ plugins });
 
     super({
       instructions: composer.generateSystemPrompt(),
-      maxIterations: options.maxIterations || 100,
-      ...options,
+      maxIterations: optionsWithoutPlugins.maxIterations || 100,
+      //Remove plugins to prevent circular reference from reporting errors
+      ...optionsWithoutPlugins,
     });
 
     this.composer = composer;
+    this.composer.setAgent(this);
     this.logger = getLogger('ComposableAgent');
   }
 
   async initialize(): Promise<void> {
-    // Initialize the composer and all plugins
     await this.composer.initialize();
 
     // Register all tools from all plugins

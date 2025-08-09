@@ -4,7 +4,6 @@
  */
 
 import {
-  ComposableAgent,
   ComposableAgentOptions,
   createComposableToolCallEngineFactory,
   SnapshotPlugin,
@@ -46,7 +45,9 @@ async function main() {
   // const agent = new ComposableAgent(options);
   const agent = new OmniTARSAgent(options);
 
-  const res = await agent.run('search papers about ui-tars ');
+  const res = await agent.run(
+    'Use LinkReader to read the content of https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching',
+  );
 
   console.log(res);
 }

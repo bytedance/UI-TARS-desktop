@@ -16,14 +16,14 @@ export interface CodeAgentConfig {
 /**
  * Code Agent Plugin - handles CODE_ENVIRONMENT for bash, file editing, and Jupyter execution
  */
-export class CodeAgentPlugin implements AgentPlugin {
-  readonly name = 'code-agent';
+export class CodeAgentPlugin extends AgentPlugin {
+  readonly name = 'code-agent-plugin';
   readonly environmentSection = CODE_ENVIRONMENT;
 
-  private tools: Tool[] = [];
   private config: CodeAgentConfig;
 
   constructor(config: CodeAgentConfig = {}) {
+    super();
     this.config = config;
   }
 
@@ -40,23 +40,19 @@ export class CodeAgentPlugin implements AgentPlugin {
     // ];
   }
 
-  getTools(): Tool[] {
-    return this.tools;
-  }
-
-  onLLMRequest?(id: string, payload: LLMRequestHookPayload): void | Promise<void> {
+  onLLMRequest(id: string, payload: LLMRequestHookPayload): void | Promise<void> {
     // Code-specific request handling if needed
   }
 
-  onLLMResponse?(id: string, payload: LLMResponseHookPayload): void | Promise<void> {
+  onLLMResponse(id: string, payload: LLMResponseHookPayload): void | Promise<void> {
     // Code-specific response handling if needed
   }
 
-  onEachAgentLoopStart?(): void | Promise<void> {
+  onEachAgentLoopStart(): void | Promise<void> {
     // Code-specific loop start handling if needed
   }
 
-  onAgentLoopEnd?(): void | Promise<void> {
+  onAgentLoopEnd(): void | Promise<void> {
     // Code-specific loop end handling if needed
   }
 }
