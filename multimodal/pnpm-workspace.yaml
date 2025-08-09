@@ -3,6 +3,8 @@ packages:
   - 'agent-tars/*'
   # gui agent
   - 'gui-agent/*'
+  # seed gui agent
+  - 'seed-gui-agent'
   # low-level (tarko)
   - 'tarko/*'
   # benchmark
