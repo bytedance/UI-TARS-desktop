@@ -64,6 +64,7 @@ export class AgentSession {
   eventBridge: EventStreamBridge;
   private unsubscribe: (() => void) | null = null;
   private agioProvider?: AgioEvent.AgioProvider;
+  private sessionMetadata?: import('../storage').SessionMetadata;
 
   constructor(
     private server: AgentServer,
@@ -73,6 +74,7 @@ export class AgentSession {
   ) {
     this.id = sessionId;
     this.eventBridge = new EventStreamBridge();
+    this.sessionMetadata = sessionMetadata;
 
     // Get agent options from server
     const agentOptions = { ...server.appConfig };
@@ -190,10 +192,21 @@ export class AgentSession {
    */
   async runQuery(query: string | ChatCompletionContentPart[]): Promise<AgentQueryResponse> {
     try {
-      // Run agent to process the query
-      const result = await this.agent.run({
+      // Prepare run options with session-specific model configuration
+      const runOptions: any = {
         input: query,
-      });
+        sessionId: this.id,
+      };
+
+      // Add model configuration if available in session metadata
+      if (this.sessionMetadata?.modelConfig) {
+        runOptions.provider = this.sessionMetadata.modelConfig.provider;
+        runOptions.model = this.sessionMetadata.modelConfig.modelId;
+        console.log(`🎯 [AgentSession] Using session model: ${runOptions.provider}:${runOptions.model}`);
+      }
+
+      // Run agent to process the query
+      const result = await this.agent.run(runOptions);
       return {
         success: true,
         result,
@@ -227,11 +240,22 @@ export class AgentSession {
     query: string | ChatCompletionContentPart[],
   ): Promise<AsyncIterable<AgentEventStream.Event>> {
     try {
-      // Run agent in streaming mode
-      return await this.agent.run({
+      // Prepare run options with session-specific model configuration
+      const runOptions: any = {
         input: query,
         stream: true,
-      });
+        sessionId: this.id,
+      };
+
+      // Add model configuration if available in session metadata
+      if (this.sessionMetadata?.modelConfig) {
+        runOptions.provider = this.sessionMetadata.modelConfig.provider;
+        runOptions.model = this.sessionMetadata.modelConfig.modelId;
+        console.log(`🎯 [AgentSession] Using session model for streaming: ${runOptions.provider}:${runOptions.model}`);
+      }
+
+      // Run agent in streaming mode
+      return await this.agent.run(runOptions);
     } catch (error) {
       // Emit error event
       this.eventBridge.emit('error', {
@@ -283,96 +307,23 @@ export class AgentSession {
   }
 
   /**
-   * Update model configuration by recreating the agent
+   * Store the updated model configuration for this session
+   * The model will be used in subsequent queries via Agent.run() parameters
    * @param sessionMetadata Updated session metadata with new model config
    */
   async updateModelConfig(sessionMetadata: import('../storage').SessionMetadata): Promise<void> {
-    // Check if agent is currently processing
-    if (this.getProcessingStatus()) {
-      throw new Error('Cannot update model config while agent is processing a query');
-    }
-
-    console.log(`🔄 [AgentSession] Updating model config for session ${this.id}`);
+    console.log(`🔄 [AgentSession] Storing model config for session ${this.id}: ${sessionMetadata.modelConfig?.provider}:${sessionMetadata.modelConfig?.modelId}`);
     
-    try {
-      // Clean up current agent
-      await this.agent.dispose();
-      console.log(`🧹 [AgentSession] Disposed old agent for session ${this.id}`);
+    // Store the session metadata for use in future queries
+    this.sessionMetadata = sessionMetadata;
+    
+    // Emit model updated event to client
+    this.eventBridge.emit('model_updated', {
+      sessionId: this.id,
+      modelConfig: sessionMetadata.modelConfig,
+    });
 
-      // Create new agent with updated model configuration
-      const newAgent = this.server.createAgentWithSessionModel(sessionMetadata);
-      console.log(`🆕 [AgentSession] Created new agent with model: ${sessionMetadata.modelConfig?.provider}:${sessionMetadata.modelConfig?.modelId}`);
-
-      // Handle snapshot wrapping if enabled
-      const agentOptions = { ...this.server.appConfig };
-      if (agentOptions.snapshot?.enable) {
-        const snapshotStoragesDirectory =
-          agentOptions.snapshot.storageDirectory ?? this.server.getCurrentWorkspace();
-
-        if (snapshotStoragesDirectory) {
-          const snapshotPath = path.join(snapshotStoragesDirectory, this.id);
-          // @ts-expect-error
-          this.agent = new AgentSnapshot(newAgent, {
-            snapshotPath,
-            snapshotName: this.id,
-          }) as unknown as IAgent;
-        } else {
-          this.agent = newAgent;
-        }
-      } else {
-        this.agent = newAgent;
-      }
-
-      // Reinitialize the agent
-      await this.agent.initialize();
-      console.log(`✅ [AgentSession] Agent reinitialized for session ${this.id}`);
-
-      // Reconnect to agent's event stream
-      if (this.unsubscribe) {
-        this.unsubscribe();
-      }
-
-      const agentEventStream = this.agent.getEventStream();
-
-      // Recreate event handler for storage and AGIO
-      const handleEvent = async (event: AgentEventStream.Event) => {
-        if (this.server.storageProvider && shouldStoreEvent(event)) {
-          try {
-            await this.server.storageProvider.saveEvent(this.id, event);
-          } catch (error) {
-            console.error(`Failed to save event to storage: ${error}`);
-          }
-        }
-
-        if (this.agioProvider) {
-          try {
-            await this.agioProvider.processAgentEvent(event);
-          } catch (error) {
-            console.error('Failed to process AGIO event:', error);
-          }
-        }
-      };
-
-      // Subscribe to events for storage and AGIO processing
-      const storageUnsubscribe = agentEventStream.subscribe(handleEvent);
-
-      // Reconnect to event bridge for client communication
-      this.unsubscribe = this.eventBridge.connectToAgentEventStream(agentEventStream);
-
-      // Store the storage unsubscribe function
-      this.server.storageUnsubscribes[this.id] = storageUnsubscribe;
-
-      // Emit model updated event to client
-      this.eventBridge.emit('model_updated', {
-        sessionId: this.id,
-        modelConfig: sessionMetadata.modelConfig,
-      });
-
-      console.log(`🎯 [AgentSession] Model config update completed for session ${this.id}`);
-    } catch (error) {
-      console.error(`💥 [AgentSession] Failed to update model config for session ${this.id}:`, error);
-      throw error;
-    }
+    console.log(`✅ [AgentSession] Model config stored for session ${this.id}`);
   }
 
   async cleanup() {
