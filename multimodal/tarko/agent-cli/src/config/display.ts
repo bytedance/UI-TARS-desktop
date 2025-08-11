@@ -5,6 +5,7 @@
 
 import { AgentAppConfig } from '@tarko/interface';
 import chalk from 'chalk';
+import * as os from 'os';
 
 /**
  * Simple and elegant configuration logging
@@ -13,6 +14,17 @@ import chalk from 'chalk';
 
 const INDENT = '  ';
 const SUB_INDENT = '    ';
+
+/**
+ * Format file path to use ~ for home directory (cross-platform)
+ */
+function formatPath(filePath: string): string {
+  const homeDir = os.homedir();
+  if (filePath.startsWith(homeDir)) {
+    return '~' + filePath.slice(homeDir.length);
+  }
+  return filePath;
+}
 
 /**
  * Display configuration loading start
@@ -26,8 +38,14 @@ export function displayConfigStart() {
  */
 export function displayConfigLoaded(source: string, keyCount: number) {
   if (keyCount > 0) {
+    // Format the source path for better display
+    const displaySource = source.startsWith('Remote:') ? source : formatPath(source);
     console.log(
-      INDENT + chalk.green('✓') + ' ' + chalk.cyan(source) + chalk.dim(` (${keyCount} settings)`),
+      INDENT +
+        chalk.green('✓') +
+        ' ' +
+        chalk.cyan(displaySource) +
+        chalk.dim(` (${keyCount} settings)`),
     );
   }
 }
@@ -58,9 +76,9 @@ export function displayDeprecatedWarning(options: string[]) {
 export function displayConfigComplete(config: AgentAppConfig) {
   console.log(chalk.bold.green('✅ Configuration loaded'));
 
-  // Show key configuration settings with consistent indentation
+  // Show key configuration settings with aligned indentation
   if (config.model?.provider) {
-    console.log(INDENT + chalk.cyan('Model:') + ' ' + chalk.bold(config.model.provider));
+    console.log(INDENT + chalk.cyan('Model:   ') + chalk.bold(config.model.provider));
     if (config.model.id) {
       console.log(SUB_INDENT + chalk.dim('ID: ') + config.model.id);
     }
@@ -70,27 +88,24 @@ export function displayConfigComplete(config: AgentAppConfig) {
     const storage = config.server.storage?.type || 'sqlite';
     console.log(
       INDENT +
-        chalk.cyan('Server:') +
-        ' ' +
+        chalk.cyan('Server:  ') +
         chalk.bold(`port ${config.server.port}`) +
         chalk.dim(`, ${storage}`),
     );
   }
 
   if (config.logLevel) {
-    console.log(INDENT + chalk.cyan('Logging:') + ' ' + chalk.bold(config.logLevel));
+    console.log(INDENT + chalk.cyan('Logging: ') + chalk.bold(config.logLevel));
   }
 
   // Show tool configuration if present
   if (config.tools && config.tools.length > 0) {
-    console.log(
-      INDENT + chalk.cyan('Tools:') + ' ' + chalk.bold(`${config.tools.length} configured`),
-    );
+    console.log(INDENT + chalk.cyan('Tools:   ') + chalk.bold(`${config.tools.length} configured`));
   }
 
   // Show workspace if configured
   if (config.workspace) {
-    console.log(INDENT + chalk.cyan('Workspace:') + ' ' + chalk.dim(config.workspace));
+    console.log(INDENT + chalk.cyan('Workspace: ') + chalk.dim(formatPath(config.workspace)));
   }
 
   console.log('');
