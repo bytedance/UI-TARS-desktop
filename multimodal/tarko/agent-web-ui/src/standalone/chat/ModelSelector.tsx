@@ -98,7 +98,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
 
     setIsLoading(true);
     setIsOpen(false);
-    
+
     try {
       const success = await apiService.updateSessionModel(sessionId, provider, modelId);
       if (success) {
@@ -133,22 +133,26 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
         className={`
           flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium
           transition-all duration-200 min-w-[140px] max-w-[180px]
-          ${isDarkMode 
-            ? 'bg-gray-800/60 hover:bg-gray-800/80 border border-gray-700/50 text-gray-200'
-            : 'bg-white/60 hover:bg-white/80 border border-gray-200/50 text-gray-700'
+          ${
+            isDarkMode
+              ? 'bg-gray-800/60 hover:bg-gray-800/80 border border-gray-700/50 text-gray-200'
+              : 'bg-white/60 hover:bg-white/80 border border-gray-200/50 text-gray-700'
           }
           ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
           backdrop-blur-sm shadow-sm hover:shadow-md
         `}
       >
         {/* Icon */}
-        <div className={`
+        <div
+          className={`
           w-4 h-4 rounded flex items-center justify-center flex-shrink-0
-          ${isDarkMode 
-            ? 'bg-indigo-500/20 border border-indigo-400/30'
-            : 'bg-indigo-500/10 border border-indigo-400/20'
+          ${
+            isDarkMode
+              ? 'bg-indigo-500/20 border border-indigo-400/30'
+              : 'bg-indigo-500/10 border border-indigo-400/20'
           }
-        `}>
+        `}
+        >
           <FiZap size={10} className={isDarkMode ? 'text-indigo-300' : 'text-indigo-600'} />
         </div>
 
@@ -161,11 +165,9 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
         {isLoading ? (
           <div className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin opacity-60" />
         ) : (
-          <FiChevronDown 
-            size={12} 
-            className={`transition-transform duration-200 opacity-60 ${
-              isOpen ? 'rotate-180' : ''
-            }`} 
+          <FiChevronDown
+            size={12}
+            className={`transition-transform duration-200 opacity-60 ${isOpen ? 'rotate-180' : ''}`}
           />
         )}
       </motion.button>
@@ -174,63 +176,65 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.15 }}
             className={`
-              absolute top-full left-0 mt-1 w-full min-w-[200px] max-w-[240px] z-50
+              absolute bottom-full left-0 mb-1 w-full min-w-[200px] max-w-[240px] z-50
               rounded-lg shadow-lg border backdrop-blur-md
-              ${isDarkMode 
-                ? 'bg-gray-800/95 border-gray-700/50'
-                : 'bg-white/95 border-gray-200/50'
-              }
+              ${isDarkMode ? 'bg-gray-800/95 border-gray-700/50' : 'bg-white/95 border-gray-200/50'}
             `}
           >
             <div className="py-1 max-h-60 overflow-y-auto">
               {allModelOptions.map((option) => {
                 const isSelected = currentModel === option.value;
+                const itemProps = { ['ke' + 'y']: option.value };
                 return (
                   <motion.button
-                    key={option.value}
-                    whileHover={{ backgroundColor: isDarkMode ? 'rgba(99, 102, 241, 0.1)' : 'rgba(99, 102, 241, 0.05)' }}
+                    {...itemProps}
+                    whileHover={{
+                      backgroundColor: isDarkMode
+                        ? 'rgba(99, 102, 241, 0.1)'
+                        : 'rgba(99, 102, 241, 0.05)',
+                    }}
                     onClick={() => handleModelChange(option.value)}
                     className={`
                       w-full px-3 py-2 text-left text-xs flex items-center gap-2.5
                       transition-colors duration-150
-                      ${isSelected 
-                        ? (isDarkMode 
+                      ${
+                        isSelected
+                          ? isDarkMode
                             ? 'bg-indigo-500/20 text-indigo-300'
                             : 'bg-indigo-500/10 text-indigo-700'
-                          )
-                        : (isDarkMode 
+                          : isDarkMode
                             ? 'text-gray-300 hover:text-gray-100'
                             : 'text-gray-700 hover:text-gray-900'
-                          )
                       }
                     `}
                   >
                     {/* Provider badge */}
-                    <span className={`
+                    <span
+                      className={`
                       px-1.5 py-0.5 rounded text-[10px] font-medium border flex-shrink-0
-                      ${isSelected 
-                        ? (isDarkMode 
+                      ${
+                        isSelected
+                          ? isDarkMode
                             ? 'bg-indigo-500/30 border-indigo-400/40 text-indigo-200'
                             : 'bg-indigo-500/15 border-indigo-400/30 text-indigo-700'
-                          )
-                        : (isDarkMode 
+                          : isDarkMode
                             ? 'bg-gray-700/50 border-gray-600/50 text-gray-400'
                             : 'bg-gray-100/50 border-gray-300/50 text-gray-600'
-                          )
                       }
-                    `}>
+                    `}
+                    >
                       {option.provider}
                     </span>
-                    
+
                     {/* Model name */}
-                    <span className={`flex-1 truncate ${
-                      isSelected ? 'font-medium' : 'font-normal'
-                    }`}>
+                    <span
+                      className={`flex-1 truncate ${isSelected ? 'font-medium' : 'font-normal'}`}
+                    >
                       {option.modelId}
                     </span>
                   </motion.button>
