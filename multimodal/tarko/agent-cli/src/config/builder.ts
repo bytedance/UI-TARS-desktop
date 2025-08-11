@@ -232,7 +232,7 @@ function applyServerConfiguration(config: AgentAppConfig, serverOptions: { port?
   }
 
   // Display server configuration
-  displayServerConfig(config.server.port, config.server.storage?.type || 'sqlite');
+  displayServerConfig(config.server.port || 8888, config.server.storage?.type || 'sqlite');
 }
 
 /**
