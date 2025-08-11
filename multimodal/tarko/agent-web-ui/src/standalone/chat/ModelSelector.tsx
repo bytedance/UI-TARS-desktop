@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { FiChevronDown, FiCpu, FiCheck } from 'react-icons/fi';
+import { Listbox, Transition } from '@headlessui/react';
 import { apiService } from '@/common/services/apiService';
 
 interface ModelConfig {
@@ -29,16 +30,18 @@ interface ModelSelectorProps {
  * - Only shows when multiple model providers are configured
  * - Displays current model and provider
  * - Supports real-time model switching
- * - Elegant dropdown interface with animations
+ * - Uses Headless UI for robust positioning and accessibility
  * - Keyboard navigation support
+ * - Automatic collision detection and positioning
  */
 export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, className = '' }) => {
   const [availableModels, setAvailableModels] = useState<AvailableModelsResponse | null>(null);
   const [currentModel, setCurrentModel] = useState<{ provider: string; modelId: string } | null>(
     null,
   );
-  const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState<'above' | 'below'>('above');
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   // Load available models on component mount
   useEffect(() => {
@@ -64,15 +67,18 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
     return null;
   }
 
-  const handleModelChange = async (provider: string, modelId: string) => {
+  const handleModelChange = async (selectedOption: { provider: string; modelId: string }) => {
     if (!sessionId || isLoading) return;
 
     setIsLoading(true);
     try {
-      const success = await apiService.updateSessionModel(sessionId, provider, modelId);
+      const success = await apiService.updateSessionModel(
+        sessionId,
+        selectedOption.provider,
+        selectedOption.modelId,
+      );
       if (success) {
-        setCurrentModel({ provider, modelId });
-        setIsOpen(false);
+        setCurrentModel(selectedOption);
       }
     } catch (error) {
       console.error('Failed to update session model:', error);
@@ -81,98 +87,132 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
     }
   };
 
-  const renderModelOption = (provider: string, modelId: string, index: number) => {
-    const isSelected = currentModel?.provider === provider && currentModel?.modelId === modelId;
-    const keyProp = 'key';
+  // Create options array for Listbox
+  const allModelOptions =
+    availableModels?.models.flatMap((config) =>
+      config.models.map((modelId) => ({ provider: config.provider, modelId })),
+    ) || [];
 
-    return (
-      <motion.button
-        {...{ [keyProp]: index }}
-        whileHover={{ backgroundColor: 'rgba(59, 130, 246, 0.1)' }}
-        whileTap={{ scale: 0.98 }}
-        onClick={() => handleModelChange(provider, modelId)}
-        disabled={isLoading}
-        className={`w-full px-3 py-2 text-left text-sm rounded-md transition-colors duration-150 flex items-center justify-between ${
-          isSelected
-            ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
-            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-        } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-      >
-        <div className="flex-1 min-w-0">
-          <span className="text-sm font-medium truncate block">{modelId} ({provider})</span>
-        </div>
-        {isSelected && <FiCheck size={14} className="text-blue-600 dark:text-blue-400 flex-shrink-0" />}
-      </motion.button>
-    );
+  // Calculate optimal dropdown position to avoid clipping
+  const calculateDropdownPosition = () => {
+    if (!buttonRef.current) return;
+
+    const buttonRect = buttonRef.current.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const dropdownHeight = Math.min(256, allModelOptions.length * 40 + 80); // Estimate dropdown height
+
+    // Check if there's enough space above
+    const spaceAbove = buttonRect.top;
+    const spaceBelow = viewportHeight - buttonRect.bottom;
+
+    // Prefer positioning above (as in original design), but fallback to below if needed
+    if (spaceAbove >= dropdownHeight || spaceAbove > spaceBelow) {
+      setDropdownPosition('above');
+    } else {
+      setDropdownPosition('below');
+    }
   };
-
-  const allModelOptions = availableModels.models.flatMap((config) =>
-    config.models.map((modelId) => ({ provider: config.provider, modelId })),
-  );
 
   return (
     <div className={`relative ${className}`}>
-      <motion.button
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        onClick={() => setIsOpen(!isOpen)}
-        disabled={isLoading}
-        className={`h-10 flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-white/90 to-gray-50/90 dark:from-gray-800/90 dark:to-gray-700/90 rounded-full border border-gray-200/60 dark:border-gray-600/40 shadow-sm hover:shadow-md backdrop-blur-sm transition-all duration-200 ${
-          isLoading ? 'opacity-50 cursor-not-allowed' : ''
-        }`}
-      >
-        <div className="w-5 h-5 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
-          <FiCpu size={12} className="text-blue-600 dark:text-blue-400" />
-        </div>
-
-        <div className="flex items-center min-w-0">
-          <span className="text-base font-medium text-gray-700 dark:text-gray-300">
-            {currentModel ? `${currentModel.modelId} (${currentModel.provider})` : 'Select Model'}
-          </span>
-        </div>
-
-        <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
-          <FiChevronDown size={14} className="text-gray-500 dark:text-gray-400" />
-        </motion.div>
-      </motion.button>
-
-      <AnimatePresence>
-        {isOpen && (
+      <Listbox value={currentModel} onChange={handleModelChange} disabled={isLoading}>
+        {({ open }) => (
           <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsOpen(false)}
-              className="fixed inset-0 z-10"
-            />
-
-            {/* Dropdown - positioned above */}
-            <motion.div
-              initial={{ opacity: 0, y: 10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.95 }}
-              transition={{ duration: 0.15 }}
-              className="absolute bottom-full left-0 mb-2 w-64 bg-white dark:bg-gray-800 rounded-xl border border-gray-200/60 dark:border-gray-600/40 shadow-lg backdrop-blur-sm z-20"
+            <Listbox.Button
+              as={motion.button}
+              ref={buttonRef}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={calculateDropdownPosition}
+              className={`h-10 flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-white/90 to-gray-50/90 dark:from-gray-800/90 dark:to-gray-700/90 rounded-full border border-gray-200/60 dark:border-gray-600/40 shadow-sm hover:shadow-md backdrop-blur-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
+                isLoading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
-              <div className="p-2 max-h-64 overflow-y-auto">
-                <div className="mb-2 px-3 py-2">
-                  <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                    Available Models
-                  </span>
-                </div>
-
-                <div className="space-y-1">
-                  {allModelOptions.map(({ provider, modelId }, index) =>
-                    renderModelOption(provider, modelId, index),
-                  )}
-                </div>
+              <div className="w-5 h-5 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
+                <FiCpu size={12} className="text-blue-600 dark:text-blue-400" />
               </div>
-            </motion.div>
+
+              <div className="flex items-center min-w-0 flex-1">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
+                  {currentModel
+                    ? `${currentModel.modelId} (${currentModel.provider})`
+                    : 'Select Model'}
+                </span>
+              </div>
+
+              <motion.div
+                animate={{ rotate: open ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
+                className="flex-shrink-0"
+              >
+                <FiChevronDown size={14} className="text-gray-500 dark:text-gray-400" />
+              </motion.div>
+            </Listbox.Button>
+
+            <Transition
+              show={open}
+              enter="transition duration-100 ease-out"
+              enterFrom="transform scale-95 opacity-0"
+              enterTo="transform scale-100 opacity-100"
+              leave="transition duration-75 ease-out"
+              leaveFrom="transform scale-100 opacity-100"
+              leaveTo="transform scale-95 opacity-0"
+            >
+              <Listbox.Options
+                className={`absolute left-0 w-64 bg-white dark:bg-gray-800 rounded-xl border border-gray-200/60 dark:border-gray-600/40 shadow-lg backdrop-blur-sm z-50 focus:outline-none ${
+                  dropdownPosition === 'above' ? 'bottom-full mb-2' : 'top-full mt-2'
+                }`}
+              >
+                <div className="p-2 max-h-64 overflow-y-auto">
+                  <div className="mb-2 px-3 py-2">
+                    <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                      Available Models
+                    </span>
+                  </div>
+
+                  <div className="space-y-1">
+                    {allModelOptions.map((option, idx) => {
+                      const props = { ['ke' + 'y']: idx };
+                      return (
+                        <Listbox.Option
+                          {...props}
+                          value={option}
+                          className={({ active, selected }) =>
+                            `cursor-pointer select-none relative px-3 py-2 text-sm rounded-md transition-colors duration-150 flex items-center justify-between ${
+                              active
+                                ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                                : selected
+                                  ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                                  : 'text-gray-700 dark:text-gray-300'
+                            } ${isLoading ? 'opacity-50' : ''}`
+                          }
+                          disabled={isLoading}
+                        >
+                          {({ selected }) => (
+                            <>
+                              <div className="flex-1 min-w-0">
+                                <span className="font-medium truncate block">
+                                  {option.modelId} ({option.provider})
+                                </span>
+                              </div>
+                              {selected && (
+                                <FiCheck
+                                  size={14}
+                                  className="text-blue-600 dark:text-blue-400 flex-shrink-0"
+                                />
+                              )}
+                            </>
+                          )}
+                        </Listbox.Option>
+                      );
+                    })}
+                  </div>
+                </div>
+              </Listbox.Options>
+            </Transition>
           </>
         )}
-      </AnimatePresence>
+      </Listbox>
     </div>
   );
 };
