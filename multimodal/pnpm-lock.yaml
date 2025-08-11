@@ -302,6 +302,12 @@ importers:
 
   omni-tars/gui-agent:
     dependencies:
+      '@agent-infra/browser':
+        specifier: 0.1.1
+        version: 0.1.1
+      '@gui-agent/operator-browser':
+        specifier: workspace:*
+        version: link:../../gui-agent/operator-browser
       '@omni-tars/core':
         specifier: workspace:*
         version: link:../core
@@ -311,6 +317,12 @@ importers:
       '@tarko/agent-interface':
         specifier: workspace:*
         version: link:../../tarko/agent-interface
+      '@ui-tars/action-parser':
+        specifier: 1.2.3
+        version: 1.2.3
+      '@ui-tars/sdk':
+        specifier: 1.2.3
+        version: 1.2.3(ws@8.18.2)(zod@3.25.36)
     devDependencies:
       '@rslib/core':
         specifier: 0.10.0

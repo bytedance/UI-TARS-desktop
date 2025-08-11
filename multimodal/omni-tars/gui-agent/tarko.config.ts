@@ -10,11 +10,11 @@ export default defineConfig({
     baseURL: process.env.OMNI_TARS_BASE_URL,
     apiKey: process.env.OMNI_TARS_API_KEY,
     id: process.env.OMNI_TARS_MODEL_ID,
+    uiTarsVersion: 'ui-tars-1.5',
   },
   logLevel: LogLevel.DEBUG,
   webui: {
     logo: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png',
-    title: 'Seed MCP Agent',
     subtitle: 'Offering seamless integration with a wide range of real-world tools.',
     welcomTitle: 'An multimodal AI agent',
     welcomePrompts: [

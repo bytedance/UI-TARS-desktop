@@ -6,24 +6,42 @@
 import { ComposableAgent } from '@omni-tars/core';
 import { GuiAgentPlugin } from './GuiAgentPlugin';
 import { AgentOptions } from '@tarko/agent';
-import { GuiToolCallEngine } from './GuiToolCallEngine';
+import { GUIAgentToolCallEngine } from './GUIAgentToolCallEngine';
+import { OperatorManager } from './OperatorManager';
 
 export { GuiAgentPlugin } from './GuiAgentPlugin';
 export { GuiToolCallEngineProvider } from './GuiToolCallEngineProvider';
 
+export interface GUIAgentConfig<TOperator> {
+  operator: TOperator;
+  model: {
+    baseURL: string;
+    id: string;
+    apiKey: string;
+    uiTarsVersion?:
+      | 'ui-tars-1.0'
+      | 'ui-tars-1.5'
+      | 'doubao-1.5-ui-tars-15b'
+      | 'doubao-1.5-ui-tars-20b';
+  };
+  // ===== Optional =====
+  systemPrompt?: string;
+  signal?: AbortSignal;
+  maxLoopCount?: number;
+  loopIntervalInMs?: number;
+}
+
 export const guiPlugin = new GuiAgentPlugin({
-  screenWidth: 1920,
-  screenHeight: 1080,
-  actionBudget: 100,
+  operatorManager: new OperatorManager(),
 });
 
 export default class GUIAgent extends ComposableAgent {
-  static label: 'Seed GUI Agent';
+  static label: 'Browser GUI Agent';
   constructor(options: AgentOptions) {
     super({
       ...options,
       plugins: [guiPlugin],
-      toolCallEngine: GuiToolCallEngine,
+      toolCallEngine: GUIAgentToolCallEngine,
     });
   }
 }
