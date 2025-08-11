@@ -181,9 +181,9 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.15 }}
             className={`
-              absolute bottom-full left-0 mb-1 w-full min-w-[200px] max-w-[240px] z-50
-              rounded-lg shadow-lg border backdrop-blur-md
-              ${isDarkMode ? 'bg-gray-800/95 border-gray-700/50' : 'bg-white/95 border-gray-200/50'}
+              absolute bottom-full left-0 mb-1 w-full min-w-[200px] max-w-[240px] z-[9999]
+              rounded-lg shadow-xl border backdrop-blur-md
+              ${isDarkMode ? 'bg-gray-800/98 border-gray-700/60' : 'bg-white/98 border-gray-200/60'}
             `}
           >
             <div className="py-1 max-h-60 overflow-y-auto">
