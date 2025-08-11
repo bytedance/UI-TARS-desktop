@@ -130,21 +130,62 @@ export interface WorkspaceInfo {
 }
 
 /**
- * Sanitized agent options from server
+ * Sanitized agent options from server - matches backend SanitizedAgentOptions
+ * This extends the base AgentOptions with additional workspace name field
  */
 export interface AgentOptions {
-  workspace?: string;
-  workspaceName?: string;
-  agent?: {
-    name?: string;
-    id?: string;
-  };
-  server?: {
-    port?: number;
-  };
+  // Base options
+  id?: string;
+  name?: string;
+  instructions?: string;
+  
+  // Model configuration
   model?: {
     provider?: string;
-    model?: string;
-    auth?: string; // Sanitized authentication token
+    id?: string;
+    apiKey?: string; // Sanitized authentication token
+    [key: string]: any;
   };
+  maxTokens?: number;
+  temperature?: number;
+  thinking?: {
+    enabled?: boolean;
+    showInResponse?: boolean;
+    [key: string]: any;
+  };
+  
+  // Tool configuration
+  tools?: Array<{
+    name: string;
+    description?: string;
+    schema?: any;
+    [key: string]: any; // Allow other tool properties except handler
+  }>;
+  tool?: {
+    include?: string[];
+    exclude?: string[];
+  };
+  toolCallEngine?: string;
+  
+  // Loop options
+  maxIterations?: number;
+  
+  // Memory options
+  context?: {
+    maxImagesCount?: number;
+    [key: string]: any;
+  };
+  eventStreamOptions?: {
+    bufferSize?: number;
+    flushInterval?: number;
+    [key: string]: any;
+  };
+  enableStreamingToolCallEvents?: boolean;
+  
+  // Misc options
+  logLevel?: string;
+  
+  // Workspace options (AgentOptions + workspaceName)
+  workspace?: string;
+  workspaceName?: string;
 }

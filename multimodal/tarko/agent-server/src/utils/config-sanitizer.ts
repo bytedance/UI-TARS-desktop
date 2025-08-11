@@ -1,21 +1,22 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import path from 'path';
 import { AgentAppConfig } from '../types';
+import { AgentOptions, Tool, CommonFilterOptions, ProviderOptions, LLMReasoningOptions, AgentEventStream, LogLevel, ToolCallEngineType } from '@tarko/interface';
 
-export interface SanitizedAgentOptions {
-  workspace?: string;
+/**
+ * Sanitized tool interface that extends Tool but excludes function implementations
+ */
+type SanitizedTool = Omit<Tool, 'function'> & {
+  // Keep all Tool properties except function implementation
+};
+
+/**
+ * Sanitized AgentOptions with workspace name addition and serialized tool call engine
+ */
+type SanitizedAgentOptions = Omit<AgentOptions, 'toolCallEngine' | 'tools'> & {
   workspaceName?: string;
-  agent?: {
-    name?: string;
-    id?: string;
-  };
-  server?: {
-    port?: number;
-  };
-  model?: {
-    provider?: string;
-    model?: string;
-    auth?: string; // Sanitized authentication token
-  };
+  toolCallEngine?: string; // Serialized as string instead of ToolCallEngineType
+  tools?: SanitizedTool[]; // Sanitized tools without function implementations
 }
 
 /**
@@ -24,42 +25,96 @@ export interface SanitizedAgentOptions {
 export function sanitizeAgentOptions(options: AgentAppConfig): SanitizedAgentOptions {
   const sanitized: SanitizedAgentOptions = {};
 
-  // Workspace information
-  if (options.workspace) {
+  // Base agent options
+  if (options.id !== undefined) sanitized.id = options.id;
+  if (options.name !== undefined) sanitized.name = options.name;
+  if (options.instructions !== undefined) {
+    // Truncate instructions for UI display
+    sanitized.instructions = options.instructions.length > 100 
+      ? options.instructions.substring(0, 100) + '...'
+      : options.instructions;
+  }
+
+  // Model configuration
+  if (options.model !== undefined) {
+    const modelConfig: ProviderOptions = { ...options.model };
+    
+    // Sanitize API key if present
+    if (modelConfig.apiKey) {
+      modelConfig.apiKey = sanitizeApiKey(modelConfig.apiKey);
+    }
+    
+    sanitized.model = modelConfig;
+  }
+
+  // Model-related options
+  if (options.maxTokens !== undefined) sanitized.maxTokens = options.maxTokens;
+  if (options.temperature !== undefined) sanitized.temperature = options.temperature;
+  if (options.thinking !== undefined) sanitized.thinking = options.thinking;
+
+  // Tool configuration
+  if (options.tools !== undefined && Array.isArray(options.tools)) {
+    sanitized.tools = options.tools.map(sanitizeTool);
+  }
+  
+  if (options.tool !== undefined) {
+    sanitized.tool = {
+      include: options.tool.include,
+      exclude: options.tool.exclude,
+    };
+  }
+  
+  if (options.toolCallEngine !== undefined) {
+    // Convert tool call engine to string representation for serialization
+    if (typeof options.toolCallEngine === 'string') {
+      sanitized.toolCallEngine = options.toolCallEngine;
+    } else if (typeof options.toolCallEngine === 'function') {
+      // For constructor functions, use the class name or 'CustomEngine'
+      sanitized.toolCallEngine = options.toolCallEngine.name || 'CustomEngine';
+    } else {
+      sanitized.toolCallEngine = 'Unknown';
+    }
+  }
+
+  // Loop options
+  if (options.maxIterations !== undefined) {
+    sanitized.maxIterations = options.maxIterations;
+  }
+
+  // Memory options
+  if (options.context !== undefined) {
+    sanitized.context = options.context;
+  }
+  
+  if (options.eventStreamOptions !== undefined) {
+    sanitized.eventStreamOptions = options.eventStreamOptions;
+  }
+  
+  if (options.enableStreamingToolCallEvents !== undefined) {
+    sanitized.enableStreamingToolCallEvents = options.enableStreamingToolCallEvents;
+  }
+
+  // Misc options
+  if (options.logLevel !== undefined) {
+    sanitized.logLevel = options.logLevel;
+  }
+
+  // Workspace options
+  if (options.workspace !== undefined) {
     sanitized.workspace = options.workspace;
     sanitized.workspaceName = path.basename(options.workspace);
   }
 
-  // Agent configuration
-  if (options.name || options.id) {
-    sanitized.agent = {
-      name: options.name,
-      id: options.id,
-    };
-  }
-
-  // Server configuration
-  if (options.server) {
-    sanitized.server = {
-      port: options.server.port,
-    };
-  }
-
-  // Model configuration (with authentication token sanitization)
-  if (options.model) {
-    const modelConfig: any = {
-      provider: options.model.provider,
-      model: options.model.id, // Use 'id' instead of 'model'
-    };
-    // Add sanitized authentication token if present
-    const authToken = options.model.apiKey;
-    if (authToken) {
-      modelConfig.auth = sanitizeApiKey(authToken);
-    }
-    sanitized.model = modelConfig;
-  }
-
   return sanitized;
+}
+
+/**
+ * Sanitize tool configuration, removing function implementations
+ */
+function sanitizeTool(tool: Tool): SanitizedTool {
+  // Create a copy of the tool without the function property
+  const { function: toolFunction, ...sanitized } = tool;
+  return sanitized as SanitizedTool;
 }
 
 /**

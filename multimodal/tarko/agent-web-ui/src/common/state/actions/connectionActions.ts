@@ -7,6 +7,7 @@ import {
   agentInfoAtom,
   workspaceInfoAtom,
   agentOptionsAtom,
+  modelInfoAtom,
 } from '@/common/state/atoms/ui';
 
 /**
@@ -44,6 +45,13 @@ export const checkConnectionStatusAction = atom(null, async (get, set) => {
           path: agentOptions.workspace || '',
         };
         set(workspaceInfoAtom, workspaceInfo);
+
+        // Extract model info from agent options
+        const modelInfo = {
+          model: agentOptions.model?.id || agentOptions.model?.model,
+          provider: agentOptions.model?.provider,
+        };
+        set(modelInfoAtom, modelInfo);
       } catch (error) {
         console.warn('Failed to load agent options:', error);
       }
