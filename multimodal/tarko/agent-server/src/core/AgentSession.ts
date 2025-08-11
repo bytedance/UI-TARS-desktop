@@ -7,10 +7,12 @@
 import path from 'path';
 import {
   AgentEventStream,
+  AgentRunStreamingOptions,
   AgentStatus,
   AgioProviderConstructor,
   ChatCompletionContentPart,
   IAgent,
+  ModelProviderName,
 } from '@tarko/interface';
 import { AgentSnapshot } from '@tarko/agent-snapshot';
 import { EventStreamBridge } from '../utils/event-stream';
@@ -202,7 +204,9 @@ export class AgentSession {
       if (this.sessionMetadata?.modelConfig) {
         runOptions.provider = this.sessionMetadata.modelConfig.provider;
         runOptions.model = this.sessionMetadata.modelConfig.modelId;
-        console.log(`🎯 [AgentSession] Using session model: ${runOptions.provider}:${runOptions.model}`);
+        console.log(
+          `🎯 [AgentSession] Using session model: ${runOptions.provider}:${runOptions.model}`,
+        );
       }
 
       // Run agent to process the query
@@ -241,7 +245,7 @@ export class AgentSession {
   ): Promise<AsyncIterable<AgentEventStream.Event>> {
     try {
       // Prepare run options with session-specific model configuration
-      const runOptions: any = {
+      const runOptions: AgentRunStreamingOptions = {
         input: query,
         stream: true,
         sessionId: this.id,
@@ -249,9 +253,11 @@ export class AgentSession {
 
       // Add model configuration if available in session metadata
       if (this.sessionMetadata?.modelConfig) {
-        runOptions.provider = this.sessionMetadata.modelConfig.provider;
+        runOptions.provider = this.sessionMetadata.modelConfig.provider as ModelProviderName;
         runOptions.model = this.sessionMetadata.modelConfig.modelId;
-        console.log(`🎯 [AgentSession] Using session model for streaming: ${runOptions.provider}:${runOptions.model}`);
+        console.log(
+          `🎯 [AgentSession] Using session model for streaming: ${runOptions.provider}:${runOptions.model}`,
+        );
       }
 
       // Run agent in streaming mode
@@ -312,11 +318,13 @@ export class AgentSession {
    * @param sessionMetadata Updated session metadata with new model config
    */
   async updateModelConfig(sessionMetadata: import('../storage').SessionMetadata): Promise<void> {
-    console.log(`🔄 [AgentSession] Storing model config for session ${this.id}: ${sessionMetadata.modelConfig?.provider}:${sessionMetadata.modelConfig?.modelId}`);
-    
+    console.log(
+      `🔄 [AgentSession] Storing model config for session ${this.id}: ${sessionMetadata.modelConfig?.provider}:${sessionMetadata.modelConfig?.modelId}`,
+    );
+
     // Store the session metadata for use in future queries
     this.sessionMetadata = sessionMetadata;
-    
+
     // Emit model updated event to client
     this.eventBridge.emit('model_updated', {
       sessionId: this.id,
