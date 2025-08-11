@@ -11,6 +11,7 @@ import {
   updateSelectorStateAction 
 } from '@/common/state/atoms/contextualSelector';
 import { ContextualSelector, ContextualItem } from '../ContextualSelector';
+import { ModelSelector } from '../ModelSelector';
 
 interface MessageInputFieldProps {
   uploadedImages: ChatCompletionContentPart[];
@@ -20,6 +21,7 @@ interface MessageInputFieldProps {
   connectionStatus?: ConnectionStatus;
   onSubmit: () => Promise<void>;
   onReconnect?: () => void;
+  sessionId?: string;
 }
 
 /**
@@ -35,6 +37,7 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
   connectionStatus,
   onSubmit,
   onReconnect,
+  sessionId,
 }) => {
   const [isAborting, setIsAborting] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -360,6 +363,14 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
               >
                 <FiImage size={18} />
               </motion.button>
+              
+              {sessionId && (
+                <ModelSelector 
+                  sessionId={sessionId} 
+                  className="scale-75 origin-left" 
+                />
+              )}
+              
               <input
                 type="file"
                 ref={fileInputRef}
