@@ -8,7 +8,7 @@ export default defineConfig({
   model: {
     provider: 'openai-non-streaming',
     baseURL: process.env.OMNI_TARS_BASE_URL,
-    apiKey: process.env.OMNI_TARS_API_KEY,
+    apiKey: process.env.OMNI_TARS_API_KEY, // secretlint-disable-line
     id: process.env.OMNI_TARS_MODEL_ID,
     uiTarsVersion: 'ui-tars-1.5',
   },
@@ -22,6 +22,7 @@ export default defineConfig({
       'Find information about UI TARS',
       'Tell me the top 5 most popular projects on ProductHunt today',
       'Please book me the earliest flight from Hangzhou to Shenzhen on 10.1',
+      'What is Agent TARS',
     ],
   },
 });

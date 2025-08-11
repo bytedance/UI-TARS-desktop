@@ -2,11 +2,9 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { Operator } from '@ui-tars/sdk/dist/core';
 import { AgentPlugin, COMPUTER_USE_ENVIRONMENT } from '@omni-tars/core';
 import { Tool, LLMRequestHookPayload, LLMResponseHookPayload } from '@tarko/agent';
 import { getScreenInfo, setScreenInfo } from './shared';
-import { ImageSaver } from './utils/ImageSaver';
 import { OperatorManager } from './OperatorManager';
 
 const addBase64ImagePrefix = (base64: string) => {
@@ -55,8 +53,7 @@ export class GuiAgentPlugin extends AgentPlugin {
   }
 
   async onLLMRequest(id: string, payload: LLMRequestHookPayload): Promise<void> {
-    console.log('onLLMRequest', id, payload);
-    await ImageSaver.saveImagesFromPayload(id, payload);
+    // console.log('onLLMRequest', id, payload);
   }
 
   async onEachAgentLoopStart(): Promise<void> {
@@ -66,10 +63,6 @@ export class GuiAgentPlugin extends AgentPlugin {
     const event = eventStream.createEvent('environment_input', {
       description: 'Browser Screenshot',
       content: [
-        {
-          type: 'text',
-          text: 'Screenshot: ',
-        },
         {
           type: 'image_url',
           image_url: {

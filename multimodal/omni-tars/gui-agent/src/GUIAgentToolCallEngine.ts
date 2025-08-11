@@ -13,7 +13,7 @@ import {
   StreamProcessingState,
   StreamChunkResult,
 } from '@tarko/agent-interface';
-import { actionParser } from '@ui-tars/action-parser';
+import { actionParser } from '@gui-agent/action-parser';
 import { getScreenInfo } from './shared';
 
 /**
@@ -142,9 +142,23 @@ export class GUIAgentToolCallEngine extends ToolCallEngine {
       }
     }
 
+    // TODO: Remove this logic after the new model instruction is followed
+    if (fullContent.includes('</answer>')) {
+      const functionCallBeginMatch = fullContent.match(
+        /<\|(FunctionCallBegin|FCResponseBegin)\|>([\s\S]*?)(?:<\/answer>|$)/,
+      );
+      let extractedContent: string | null = null;
+      if (functionCallBeginMatch) {
+        extractedContent = functionCallBeginMatch[2]; // Use the second capture group, as the first is the tag name
+      }
+      finished = true;
+      finishMessage = extractedContent;
+      console.log('extractedContent', extractedContent);
+    }
+
     // No tool calls found - return regular response
     return {
-      content: finishMessage ? finishMessage : fullContent,
+      content: finishMessage ? finishMessage : (parsed[0].thought ?? fullContent),
       rawContent: fullContent,
       toolCalls,
       finishReason: toolCalls.length > 0 && !finished ? 'tool_calls' : 'stop',

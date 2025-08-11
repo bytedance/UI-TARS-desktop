@@ -100,7 +100,11 @@ export class BrowserOperator extends Operator {
     this.logger.info('Starting screenshot...');
 
     if (this.showWaterFlowEffect) {
-      this.uiHelper.showWaterFlow();
+      try {
+        await this.uiHelper.showWaterFlow();
+      } catch (error) {
+        this.logger.error('Failed to show water flow effect:', error);
+      }
     }
 
     const page = await this.getActivePage();
@@ -407,6 +411,7 @@ export class BrowserOperator extends Operator {
     this.logger.info(`Executing hotkey: ${keyStr}`);
 
     const keys = keyStr.split(/[\s+]/);
+    // secretlint-disable-next-line
     const normalizedKeys: KeyInput[] = keys.map((key: string) => {
       const lowercaseKey = key.toLowerCase();
       const keyInput = KEY_MAPPINGS[lowercaseKey];
@@ -415,7 +420,7 @@ export class BrowserOperator extends Operator {
         return keyInput;
       }
 
-      throw new Error(`Unsupported key: ${key}`);
+      throw new Error(`Unsupported key: ${key}`); // secretlint-disable-line
     });
 
     this.logger.info(`Normalized keys:`, normalizedKeys);
@@ -425,6 +430,7 @@ export class BrowserOperator extends Operator {
     // For hotkey combinations that may trigger navigation,
     // wait for navigation to complete
     const navigationKeys = ['Enter', 'F5'];
+    // secretlint-disable-next-line
     if (normalizedKeys.some((key: string) => navigationKeys.includes(key))) {
       this.logger.info('Waiting for possible navigation after hotkey');
       await this.waitForPossibleNavigation(page);
@@ -444,9 +450,10 @@ export class BrowserOperator extends Operator {
       throw new Error(`No key specified for press`);
     }
 
-    this.logger.info(`Pressing key: ${keyStr}`);
+    this.logger.info(`Pressing key: ${keyStr}`); // secretlint-disable-line
 
     const keys = keyStr.split(/[\s+]/);
+    // secretlint-disable-next-line
     const normalizedKeys: KeyInput[] = keys.map((key: string) => {
       const lowercaseKey = key.toLowerCase();
       const keyInput = KEY_MAPPINGS[lowercaseKey];
@@ -455,7 +462,7 @@ export class BrowserOperator extends Operator {
         return keyInput;
       }
 
-      throw new Error(`Unsupported key: ${key}`);
+      throw new Error(`Unsupported key: ${key}`); // secretlint-disable-line
     });
 
     this.logger.info(`Normalized keys for press:`, normalizedKeys);
@@ -478,9 +485,10 @@ export class BrowserOperator extends Operator {
       throw new Error(`No key specified for release`);
     }
 
-    this.logger.info(`Releasing key: ${keyStr}`);
+    this.logger.info(`Releasing key: ${keyStr}`); // secretlint-disable-line
 
     const keys = keyStr.split(/[\s+]/);
+    // secretlint-disable-next-line
     const normalizedKeys: KeyInput[] = keys.map((key: string) => {
       const lowercaseKey = key.toLowerCase();
       const keyInput = KEY_MAPPINGS[lowercaseKey];
@@ -489,7 +497,7 @@ export class BrowserOperator extends Operator {
         return keyInput;
       }
 
-      throw new Error(`Unsupported key: ${key}`);
+      throw new Error(`Unsupported key: ${key}`); // secretlint-disable-line
     });
 
     this.logger.info(`Normalized keys for release:`, normalizedKeys);
@@ -503,6 +511,7 @@ export class BrowserOperator extends Operator {
     // For hotkey combinations that may trigger navigation,
     // wait for navigation to complete
     const navigationKeys = ['Enter', 'F5'];
+    // secretlint-disable-next-line
     if (normalizedKeys.some((key: string) => navigationKeys.includes(key))) {
       this.logger.info('Waiting for possible navigation after key release');
       await this.waitForPossibleNavigation(page);
