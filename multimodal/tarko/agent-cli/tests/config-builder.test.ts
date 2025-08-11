@@ -11,10 +11,7 @@ import { AgentCLIArguments, AgentAppConfig, LogLevel, Tool } from '@tarko/interf
 
 // Mock the display module
 vi.mock('../src/config/display', () => ({
-  displayBuildStart: vi.fn(),
-  displayMergeSummary: vi.fn(),
   displayDeprecatedWarning: vi.fn(),
-  displayServerConfig: vi.fn(),
   displayConfigComplete: vi.fn(),
   displayDebugInfo: vi.fn(),
 }));
@@ -22,19 +19,6 @@ vi.mock('../src/config/display', () => ({
 // Mock the utils module
 vi.mock('../src/utils', () => ({
   resolveValue: vi.fn((value: string) => value),
-  elegantOutput: {
-    configStart: vi.fn(),
-    configSuccess: vi.fn(),
-    configInfo: vi.fn(),
-    configWarn: vi.fn(),
-    configError: vi.fn(),
-    configDetail: vi.fn(),
-    configItem: vi.fn(),
-    configSection: vi.fn(),
-    configKeys: vi.fn(),
-    configPath: vi.fn(),
-    configSummary: vi.fn(),
-  },
 }));
 
 /**

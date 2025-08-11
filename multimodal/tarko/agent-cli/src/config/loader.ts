@@ -8,7 +8,6 @@ import { deepMerge } from '@tarko/shared-utils';
 import { loadConfig } from '@tarko/config-loader';
 import { AgentAppConfig } from '@tarko/interface';
 import fetch from 'node-fetch';
-import chalk from 'chalk';
 
 import { CONFIG_FILES } from './paths';
 import {
@@ -34,7 +33,6 @@ async function loadRemoteConfig(url: string, isDebug = false): Promise<AgentAppC
     }
 
     const contentType = response.headers.get('content-type') || '';
-    displayDebugInfo(`Remote config content type`, contentType, isDebug);
 
     let config: AgentAppConfig;
     if (contentType.includes('application/json')) {
@@ -50,7 +48,7 @@ async function loadRemoteConfig(url: string, isDebug = false): Promise<AgentAppC
       }
     }
 
-    displayConfigLoaded(`Remote: ${url}`, Object.keys(config));
+    displayConfigLoaded(`Remote: ${url}`, Object.keys(config).length);
     displayDebugInfo(`Remote config keys`, Object.keys(config), isDebug);
 
     return config;
@@ -83,8 +81,6 @@ export async function loadAgentConfig(
 
   // Handle no config case - try to load from default locations
   if (!configPaths || configPaths.length === 0) {
-    displayDebugInfo('Searching for default config files', CONFIG_FILES, isDebug);
-
     try {
       const { content, filePath } = await loadConfig<AgentAppConfig>({
         cwd: process.cwd(),
@@ -92,38 +88,30 @@ export async function loadAgentConfig(
       });
 
       if (filePath) {
-        displayConfigLoaded(`Default: ${filePath}`, Object.keys(content));
+        displayConfigLoaded(filePath, Object.keys(content).length);
         displayDebugInfo(`Default config keys`, Object.keys(content), isDebug);
       }
 
       return content;
     } catch (err) {
-      displayConfigError('Default config search', err instanceof Error ? err.message : String(err));
+      displayDebugInfo(
+        'No default config found',
+        err instanceof Error ? err.message : String(err),
+        isDebug,
+      );
       return {};
     }
   }
 
   let mergedConfig: AgentAppConfig = {};
-  const loadedSources: string[] = [];
-  const failedSources: string[] = [];
 
   // Process each config path in order, merging sequentially
-  for (const [index, path] of configPaths.entries()) {
-    displayDebugInfo(
-      `Processing config source [${index + 1}/${configPaths.length}]`,
-      path,
-      isDebug,
-    );
+  for (const path of configPaths) {
     let config: AgentAppConfig = {};
 
     if (isUrl(path)) {
       // Load from URL
       config = await loadRemoteConfig(path, isDebug);
-      if (Object.keys(config).length > 0) {
-        loadedSources.push(`${path} (remote)`);
-      } else {
-        failedSources.push(`${path} (remote)`);
-      }
     } else {
       // Load from file
       try {
@@ -133,60 +121,19 @@ export async function loadAgentConfig(
         });
 
         if (filePath) {
-          displayConfigLoaded(filePath, Object.keys(content));
+          displayConfigLoaded(filePath, Object.keys(content).length);
           displayDebugInfo(`Config keys from ${filePath}`, Object.keys(content), isDebug);
-          loadedSources.push(filePath);
         }
 
         config = content;
       } catch (err) {
         displayConfigError(path, err instanceof Error ? err.message : String(err));
-        failedSources.push(path);
         continue;
       }
     }
 
     // Merge with existing config
-    const beforeMergeKeys = Object.keys(mergedConfig);
     mergedConfig = deepMerge(mergedConfig, config);
-    const afterMergeKeys = Object.keys(mergedConfig);
-
-    if (isDebug && Object.keys(config).length > 0) {
-      const newKeys = afterMergeKeys.filter((configKey) => !beforeMergeKeys.includes(configKey));
-      const overriddenKeys = beforeMergeKeys.filter(
-        (configKey) =>
-          Object.keys(config).includes(configKey) &&
-          JSON.stringify((mergedConfig as any)[configKey]) !==
-            JSON.stringify((config as any)[configKey]),
-      );
-
-      if (newKeys.length > 0) {
-        displayDebugInfo(`New config keys added`, newKeys, isDebug);
-      }
-      if (overriddenKeys.length > 0) {
-        displayDebugInfo(`Config keys merged/overridden`, overriddenKeys, isDebug);
-      }
-    }
-  }
-
-  // Display final summary
-  if (loadedSources.length > 0) {
-    console.log(
-      '\n' +
-        chalk.bold.green('✅ ') +
-        chalk.bold(
-          `Loaded ${loadedSources.length} config source${loadedSources.length > 1 ? 's' : ''}`,
-        ),
-    );
-  }
-
-  if (failedSources.length > 0) {
-    console.log(
-      chalk.bold.yellow('⚠️  ') +
-        chalk.italic(
-          `Failed to load ${failedSources.length} source${failedSources.length > 1 ? 's' : ''}`,
-        ),
-    );
   }
 
   displayDebugInfo(`Final merged config keys`, Object.keys(mergedConfig), isDebug);

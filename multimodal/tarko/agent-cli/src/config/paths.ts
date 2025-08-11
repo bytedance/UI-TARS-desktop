@@ -8,7 +8,7 @@ import { TARKO_CONSTANTS } from '@tarko/interface';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
-import { displayPathDiscovery, displayDebugInfo } from './display';
+import { displayDebugInfo } from './display';
 
 /**
  * Default configuration files that will be automatically detected
@@ -56,58 +56,42 @@ export function buildConfigPaths({
   // L4: Remote config has lower priority
   if (remoteConfig) {
     configPaths.push(remoteConfig);
-    displayDebugInfo(`[L4] Adding remote config`, remoteConfig, isDebug);
+    displayDebugInfo(`Adding remote config`, remoteConfig, isDebug);
   }
 
   // L3: CLI config files
   if (cliConfigPaths.length > 0) {
     configPaths.push(...cliConfigPaths);
-    displayDebugInfo(`[L3] Adding CLI config paths`, cliConfigPaths, isDebug);
+    displayDebugInfo(`Adding CLI config paths`, cliConfigPaths, isDebug);
   }
 
   // L2: Global workspace config file
   if (globalWorkspaceEnabled) {
     const globalWorkspacePath = path.join(os.homedir(), globalWorkspaceDir);
-    displayDebugInfo(`[L2] Searching for global workspace config in`, globalWorkspacePath, isDebug);
-    let foundGlobalConfig = false;
 
     for (const file of CONFIG_FILES) {
       const configPath = path.join(globalWorkspacePath, file);
       if (fs.existsSync(configPath)) {
         configPaths.push(configPath);
-        foundGlobalConfig = true;
-        displayDebugInfo(`[L2] Found global workspace config`, configPath, isDebug);
+        displayDebugInfo(`Found global workspace config`, configPath, isDebug);
         break;
       }
-    }
-
-    if (!foundGlobalConfig) {
-      displayDebugInfo(`[L2] No global workspace config found in`, globalWorkspacePath, isDebug);
     }
   }
 
   // L1: Workspace config file (highest priority among config files)
   if (workspace) {
-    displayDebugInfo(`[L1] Searching for workspace config in`, workspace, isDebug);
-    let foundWorkspaceConfig = false;
-
     for (const file of CONFIG_FILES) {
       const configPath = path.join(workspace, file);
       if (fs.existsSync(configPath)) {
         configPaths.push(configPath);
-        foundWorkspaceConfig = true;
-        displayDebugInfo(`[L1] Found workspace config`, configPath, isDebug);
+        displayDebugInfo(`Found workspace config`, configPath, isDebug);
         break;
       }
     }
-
-    if (!foundWorkspaceConfig) {
-      displayDebugInfo(`[L1] No config file found in workspace`, workspace, isDebug);
-    }
   }
 
-  // Display path summary
-  displayPathDiscovery(configPaths);
+  displayDebugInfo(`Config search paths`, configPaths, isDebug);
 
   return configPaths;
 }

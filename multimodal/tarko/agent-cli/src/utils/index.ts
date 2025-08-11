@@ -8,4 +8,3 @@ export * from './logo';
 export * from './misc';
 export * from './console-interceptor';
 export * from './workspace-path';
-export * from './elegant-output';
