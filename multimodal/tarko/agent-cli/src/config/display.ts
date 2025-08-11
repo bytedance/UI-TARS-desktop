@@ -15,7 +15,7 @@ import { toUserFriendlyPath } from '../utils';
 /**
  * Log configuration loading start (debug only)
  */
-export function logConfigStart(isDebug: boolean = false) {
+export function logConfigStart(isDebug = false) {
   if (isDebug) {
     logger.debug('Loading configuration...');
   }
@@ -24,7 +24,7 @@ export function logConfigStart(isDebug: boolean = false) {
 /**
  * Log successful config loading (debug only)
  */
-export function logConfigLoaded(source: string, keyCount: number, isDebug: boolean = false) {
+export function logConfigLoaded(source: string, keyCount: number, isDebug = false) {
   if (!isDebug || keyCount === 0) return;
 
   const displaySource = source.startsWith('Remote:') ? source : toUserFriendlyPath(source);
@@ -54,7 +54,7 @@ export function logDeprecatedWarning(options: string[]) {
  * Log final configuration summary (debug only)
  * Web UI will display the final config, so CLI stays clean
  */
-export function logConfigComplete(config: AgentAppConfig, isDebug: boolean = false) {
+export function logConfigComplete(config: AgentAppConfig, isDebug = false) {
   if (!isDebug) return;
 
   logger.debug('Configuration loaded successfully');
@@ -87,7 +87,7 @@ export function logConfigComplete(config: AgentAppConfig, isDebug: boolean = fal
 /**
  * Log debug information (debug only)
  */
-export function logDebugInfo(label: string, data: any, isDebug: boolean = false) {
+export function logDebugInfo(label: string, data: any, isDebug = false) {
   if (!isDebug) return;
 
   if (Array.isArray(data)) {

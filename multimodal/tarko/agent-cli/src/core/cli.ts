@@ -5,7 +5,12 @@
 
 import cac from 'cac';
 import path from 'path';
-import { AgentCLIArguments, AgentServerVersionInfo, TARKO_CONSTANTS } from '@tarko/interface';
+import {
+  AgentCLIArguments,
+  AgentServerVersionInfo,
+  TARKO_CONSTANTS,
+  LogLevel,
+} from '@tarko/interface';
 import { addCommonOptions, resolveAgentFromCLIArgument } from './options';
 import { buildConfigPaths } from '../config/paths';
 import { readFromStdin } from './stdin';
@@ -298,6 +303,14 @@ export class AgentCLI {
     isDebug: boolean;
   }> {
     const isDebug = !!cliArguments.debug;
+
+    // Set logger level early based on CLI arguments
+    if (cliArguments.quiet) {
+      logger.setLevel(LogLevel.SILENT);
+    } else if (isDebug) {
+      logger.setLevel(LogLevel.DEBUG);
+    }
+
     const workspace = resolveWorkspacePath(process.cwd(), cliArguments.workspace);
     const globalWorkspaceCommand = new GlobalWorkspaceCommand(
       this.options.directories?.globalWorkspaceDir,
@@ -327,7 +340,8 @@ export class AgentCLI {
       cliOptionsEnhancer,
     );
 
-    if (appConfig.logLevel) {
+    // Update logger level with final config if it differs from CLI arguments
+    if (appConfig.logLevel && !cliArguments.quiet && !isDebug) {
       logger.setLevel(appConfig.logLevel);
     }
 
