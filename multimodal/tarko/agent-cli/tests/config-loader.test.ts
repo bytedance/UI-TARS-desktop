@@ -162,8 +162,8 @@ describe('Config Loader', () => {
         .mockResolvedValueOnce(mockResponse1 as unknown as Response)
         .mockResolvedValueOnce(mockResponse2 as unknown as Response);
 
-      // Set up console.error mock to prevent test output noise
-      const mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+      // Set up console.log mock to capture displayConfigError output
+      const mockConsoleLog = vi.spyOn(console, 'log').mockImplementation(() => {});
 
       const result = await loadAgentConfig(
         ['https://example.com/config1.json', 'https://example.com/config2.json'],
@@ -173,11 +173,11 @@ describe('Config Loader', () => {
       // We should still get the first config
       expect(result).toEqual({ setting: 'value1' });
 
-      // Error should have been logged
-      expect(mockConsoleError).toHaveBeenCalled();
+      // Error should have been logged via displayConfigError (which uses console.log)
+      expect(mockConsoleLog).toHaveBeenCalled();
 
-      // Restore console.error
-      mockConsoleError.mockRestore();
+      // Restore console.log
+      mockConsoleLog.mockRestore();
     });
 
     it('should return empty config when no config paths provided', async () => {

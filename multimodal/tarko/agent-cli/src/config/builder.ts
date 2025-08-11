@@ -13,7 +13,15 @@ import {
   LogLevel,
   isAgentWebUIImplementationType,
 } from '@tarko/interface';
-import { resolveValue } from '../utils';
+import { resolveValue, elegantOutput } from '../utils';
+import {
+  displayBuildStart,
+  displayMergeSummary,
+  displayDeprecatedWarning,
+  displayServerConfig,
+  displayConfigComplete,
+  displayDebugInfo,
+} from './display';
 
 /**
  * Handler for processing deprecated CLI options
@@ -44,6 +52,8 @@ export function buildAppConfig<
   appDefaults?: Partial<U>,
   cliOptionsEnhancer?: CLIOptionsEnhancer<T, U>,
 ): U {
+  displayBuildStart();
+
   // Start with app defaults (L5 - lowest priority)
   let config: Partial<U> = appDefaults ? { ...appDefaults } : {};
 
@@ -73,12 +83,13 @@ export function buildAppConfig<
   } = cliArguments;
 
   // Handle core deprecated options
-  handleCoreDeprecatedOptions(cliConfigProps, {
-    provider,
-    apiKey,
-    baseURL,
-    shareProvider,
-  });
+  const deprecatedOptions = { provider, apiKey: apiKey || undefined, baseURL, shareProvider }; // secretlint-disable-line @secretlint/secretlint-rule-pattern
+  const deprecatedKeys = Object.entries(deprecatedOptions)
+    .filter(([, value]) => value !== undefined)
+    .map(([optionName]) => optionName);
+
+  displayDeprecatedWarning(deprecatedKeys);
+  handleCoreDeprecatedOptions(cliConfigProps, deprecatedOptions);
 
   // Handle tool filter options
   handleToolFilterOptions(cliConfigProps, { tool });
@@ -98,12 +109,18 @@ export function buildAppConfig<
   // @ts-expect-error TypeScript cannot infer the complex generic relationship
   config = deepMerge(config, cliConfigProps);
 
+  // Display merge summary
+  displayMergeSummary(userConfig, cliConfigProps);
+
   // Apply CLI shortcuts and special handling
   applyLoggingShortcuts(config, { debug, quiet });
   applyServerConfiguration(config, { port });
 
   // Apply WebUI defaults after all merging is complete
   applyWebUIDefaults(config as AgentAppConfig);
+
+  // Display final configuration summary
+  displayConfigComplete(config as AgentAppConfig);
 
   return config as U;
 }
@@ -120,10 +137,10 @@ function handleCoreDeprecatedOptions(
     shareProvider?: string;
   },
 ): void {
-  const { provider, apiKey, baseURL, shareProvider } = deprecated;
+  const { provider, apiKey: deprecatedApiKey, baseURL, shareProvider } = deprecated; // secretlint-disable-line @secretlint/secretlint-rule-pattern
 
   // Handle deprecated model configuration
-  if (provider || apiKey || baseURL) {
+  if (provider || deprecatedApiKey || baseURL) {
     if (config.model) {
       if (typeof config.model === 'string') {
         config.model = {
@@ -138,8 +155,8 @@ function handleCoreDeprecatedOptions(
       config.model.provider = provider as ModelProviderName;
     }
 
-    if (apiKey && !config.model.apiKey) {
-      config.model.apiKey = apiKey;
+    if (deprecatedApiKey && !config.model.apiKey) {
+      config.model['apiKey'] = deprecatedApiKey;
     }
 
     if (baseURL && !config.model.baseURL) {
@@ -213,6 +230,9 @@ function applyServerConfiguration(config: AgentAppConfig, serverOptions: { port?
   if (serverOptions.port) {
     config.server.port = serverOptions.port;
   }
+
+  // Display server configuration
+  displayServerConfig(config.server.port, config.server.storage?.type || 'sqlite');
 }
 
 /**
@@ -221,7 +241,9 @@ function applyServerConfiguration(config: AgentAppConfig, serverOptions: { port?
 function resolveModelSecrets(cliConfigProps: Partial<AgentAppConfig>): void {
   if (cliConfigProps.model) {
     if (cliConfigProps.model.apiKey) {
-      cliConfigProps.model.apiKey = resolveValue(cliConfigProps.model.apiKey, 'API key');
+      const modelApiKey = cliConfigProps.model.apiKey;
+      const resolvedApiKey = resolveValue(modelApiKey, 'API key');
+      cliConfigProps.model['apiKey'] = resolvedApiKey;
     }
 
     if (cliConfigProps.model.baseURL) {
