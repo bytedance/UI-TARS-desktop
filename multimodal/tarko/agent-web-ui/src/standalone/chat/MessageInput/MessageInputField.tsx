@@ -367,7 +367,6 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
               {sessionId && (
                 <ModelSelector 
                   sessionId={sessionId} 
-                  className="scale-75 origin-left" 
                 />
               )}
               

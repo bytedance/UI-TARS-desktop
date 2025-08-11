@@ -125,8 +125,8 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
           <FiCpu size={12} className="text-blue-600 dark:text-blue-400" />
         </div>
 
-        <div className="flex items-center max-w-48">
-          <span className="text-base font-medium text-gray-700 dark:text-gray-300 truncate">
+        <div className="flex items-center min-w-0">
+          <span className="text-base font-medium text-gray-700 dark:text-gray-300">
             {currentModel ? `${currentModel.modelId} (${currentModel.provider})` : 'Select Model'}
           </span>
         </div>
