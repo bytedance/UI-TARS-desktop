@@ -11,9 +11,9 @@ import {
   CircularProgress,
   createTheme,
   ThemeProvider,
-  useTheme,
 } from '@mui/material';
 import { apiService } from '@/common/services/apiService';
+import { useDarkMode } from '@/common/hooks/useDarkMode';
 
 interface ModelConfig {
   provider: string;
@@ -50,91 +50,99 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
-  const theme = useTheme();
-  const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const isDarkMode = useDarkMode();
 
   // Create custom theme for MUI components to match the app's design
-  const muiTheme = createTheme({
-    palette: {
-      mode: isDarkMode ? 'dark' : 'light',
-      primary: {
-        main: '#6366f1', // Indigo color to match the design
-      },
-      background: {
-        paper: isDarkMode ? '#374151' : '#ffffff',
-        default: isDarkMode ? '#1f2937' : '#f9fafb',
-      },
-      text: {
-        primary: isDarkMode ? '#f3f4f6' : '#374151',
-        secondary: isDarkMode ? '#9ca3af' : '#6b7280',
-      },
-    },
-    components: {
-      MuiSelect: {
-        styleOverrides: {
-          root: {
-            borderRadius: '12px', // Moderate rounded corners
-            minHeight: '32px', // Reduced height
-            fontSize: '13px', // Slightly smaller font
-            fontWeight: 500,
-            '& .MuiOutlinedInput-notchedOutline': {
-              borderColor: isDarkMode ? 'rgba(156, 163, 175, 0.4)' : 'rgba(209, 213, 219, 0.6)',
-              borderWidth: '1px',
-            },
-            '&:hover .MuiOutlinedInput-notchedOutline': {
-              borderColor: isDarkMode ? 'rgba(156, 163, 175, 0.6)' : 'rgba(107, 114, 128, 0.4)',
-            },
-            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-              borderColor: '#6366f1',
-              borderWidth: '1px', // Thinner focus border
-            },
+  // Recreate theme when dark mode changes
+  const muiTheme = React.useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode: isDarkMode ? 'dark' : 'light',
+          primary: {
+            main: '#6366f1', // Indigo color to match the design
           },
-          select: {
-            paddingLeft: '10px', // Reduced padding
-            paddingRight: '32px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px', // Smaller gap
+          background: {
+            paper: isDarkMode ? '#374151' : '#ffffff',
+            default: isDarkMode ? '#1f2937' : '#f9fafb',
+          },
+          text: {
+            primary: isDarkMode ? '#f3f4f6' : '#374151',
+            secondary: isDarkMode ? '#9ca3af' : '#6b7280',
           },
         },
-      },
-      MuiMenuItem: {
-        styleOverrides: {
-          root: {
-            fontSize: '14px',
-            padding: '8px 16px',
-            borderRadius: '6px',
-            margin: '2px 8px',
-            '&:hover': {
-              backgroundColor: isDarkMode ? 'rgba(99, 102, 241, 0.1)' : 'rgba(99, 102, 241, 0.05)',
+        components: {
+          MuiSelect: {
+            styleOverrides: {
+              root: {
+                borderRadius: '12px', // Moderate rounded corners
+                minHeight: '32px', // Reduced height
+                fontSize: '13px', // Slightly smaller font
+                fontWeight: 500,
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: isDarkMode ? 'rgba(156, 163, 175, 0.4)' : 'rgba(209, 213, 219, 0.6)',
+                  borderWidth: '1px',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: isDarkMode ? 'rgba(156, 163, 175, 0.6)' : 'rgba(107, 114, 128, 0.4)',
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#6366f1',
+                  borderWidth: '1px', // Thinner focus border
+                },
+              },
+              select: {
+                paddingLeft: '10px', // Reduced padding
+                paddingRight: '32px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px', // Smaller gap
+              },
             },
-            '&.Mui-selected': {
-              backgroundColor: isDarkMode ? 'rgba(99, 102, 241, 0.2)' : 'rgba(99, 102, 241, 0.1)',
-              color: '#6366f1',
-              '&:hover': {
-                backgroundColor: isDarkMode
-                  ? 'rgba(99, 102, 241, 0.25)'
-                  : 'rgba(99, 102, 241, 0.15)',
+          },
+          MuiMenuItem: {
+            styleOverrides: {
+              root: {
+                fontSize: '14px',
+                padding: '8px 16px',
+                borderRadius: '6px',
+                margin: '2px 8px',
+                '&:hover': {
+                  backgroundColor: isDarkMode
+                    ? 'rgba(99, 102, 241, 0.1)'
+                    : 'rgba(99, 102, 241, 0.05)',
+                },
+                '&.Mui-selected': {
+                  backgroundColor: isDarkMode
+                    ? 'rgba(99, 102, 241, 0.2)'
+                    : 'rgba(99, 102, 241, 0.1)',
+                  color: '#6366f1',
+                  '&:hover': {
+                    backgroundColor: isDarkMode
+                      ? 'rgba(99, 102, 241, 0.25)'
+                      : 'rgba(99, 102, 241, 0.15)',
+                  },
+                },
+              },
+            },
+          },
+          MuiPaper: {
+            styleOverrides: {
+              root: {
+                borderRadius: '16px', // Slightly more rounded for dropdown
+                // Much lighter shadow to match app design
+                boxShadow: 'none',
+                backdropFilter: 'blur(8px)',
+                border: isDarkMode
+                  ? '1px solid rgba(75, 85, 99, 0.4)'
+                  : '1px solid rgba(229, 231, 235, 0.6)',
               },
             },
           },
         },
-      },
-      MuiPaper: {
-        styleOverrides: {
-          root: {
-            borderRadius: '16px', // Slightly more rounded for dropdown
-            // Much lighter shadow to match app design
-            boxShadow: 'none',
-            backdropFilter: 'blur(8px)',
-            border: isDarkMode
-              ? '1px solid rgba(75, 85, 99, 0.4)'
-              : '1px solid rgba(229, 231, 235, 0.6)',
-          },
-        },
-      },
-    },
-  });
+      }),
+    [isDarkMode],
+  );
 
   // Load available models on component mount
   useEffect(() => {
@@ -179,21 +187,21 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
       selectedValue,
       sessionId,
       isLoading,
-      currentModel
+      currentModel,
     });
 
     if (!sessionId || isLoading || !selectedValue) {
       console.warn('⚠️ [ModelSelector] Model change blocked:', {
         hasSessionId: !!sessionId,
         isLoading,
-        hasSelectedValue: !!selectedValue
+        hasSelectedValue: !!selectedValue,
       });
       return;
     }
 
     const [provider, modelId] = selectedValue.split(':');
     console.log('🔍 [ModelSelector] Parsed model selection:', { provider, modelId });
-    
+
     if (!provider || !modelId) {
       console.error('❌ [ModelSelector] Invalid model format:', selectedValue);
       return;
@@ -201,13 +209,13 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
 
     console.log('⏳ [ModelSelector] Starting model update...');
     setIsLoading(true);
-    
+
     try {
       console.log('📞 [ModelSelector] Calling API service...');
       const success = await apiService.updateSessionModel(sessionId, provider, modelId);
-      
+
       console.log('📋 [ModelSelector] API response:', { success });
-      
+
       if (success) {
         console.log('✅ [ModelSelector] Model updated successfully, updating UI state');
         setCurrentModel(selectedValue);
@@ -253,7 +261,9 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            border: isDarkMode ? '1px solid rgba(99, 102, 241, 0.3)' : '1px solid rgba(99, 102, 241, 0.2)',
+            border: isDarkMode
+              ? '1px solid rgba(99, 102, 241, 0.3)'
+              : '1px solid rgba(99, 102, 241, 0.2)',
           }}
         >
           <FiZap size={11} color={isDarkMode ? '#a5b4fc' : '#6366f1'} />
