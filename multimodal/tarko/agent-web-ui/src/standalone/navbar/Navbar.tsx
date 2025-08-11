@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ShareButton } from '@/standalone/share';
 import { AboutModal } from './AboutModal';
 import { motion } from 'framer-motion';
@@ -96,51 +96,8 @@ export const Navbar: React.FC = () => {
           </div>
         )}
 
-        {/* Center section - Enhanced Agent and Model info display */}
-        <div className="flex-1 flex justify-center min-w-0">
-          <div className="flex items-center gap-3 max-w-lg min-w-0">
-            {/* Agent Name Badge */}
-            {agentInfo.name && (
-              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-blue-500/10 to-purple-500/10 dark:from-blue-400/15 dark:to-purple-400/15 border border-blue-200/30 dark:border-blue-400/20 rounded-full shadow-sm backdrop-blur-sm min-w-0">
-                <FaBrain size={12} className="text-blue-600 dark:text-blue-400 flex-shrink-0" />
-                <span
-                  className="text-xs font-medium text-blue-800 dark:text-blue-200 truncate"
-                  title={agentInfo.name}
-                >
-                  {agentInfo.name}
-                </span>
-              </div>
-            )}
-
-            {/* Model Info Badge */}
-            {(modelInfo.model || modelInfo.provider) && (
-              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-purple-500/10 to-pink-500/10 dark:from-purple-400/15 dark:to-pink-400/15 border border-purple-200/30 dark:border-purple-400/20 rounded-full shadow-sm backdrop-blur-sm min-w-0">
-                <FiCpu size={12} className="text-purple-600 dark:text-purple-400 flex-shrink-0" />
-                <div className="flex items-center gap-1 text-xs min-w-0">
-                  {modelInfo.model && (
-                    <span
-                      className="font-medium text-purple-800 dark:text-purple-200 truncate"
-                      title={modelInfo.model}
-                    >
-                      {modelInfo.model}
-                    </span>
-                  )}
-                  {modelInfo.provider && modelInfo.model && (
-                    <span className="text-purple-500 dark:text-purple-400 flex-shrink-0">•</span>
-                  )}
-                  {modelInfo.provider && (
-                    <span
-                      className="text-purple-700 dark:text-purple-300 font-medium truncate"
-                      title={modelInfo.provider}
-                    >
-                      {modelInfo.provider}
-                    </span>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+        {/* Center section - Enhanced Agent and Model info display with dynamic sizing */}
+        <DynamicNavbarCenter agentInfo={agentInfo} modelInfo={modelInfo} />
 
         {/* Right section - reordered buttons: About, Dark mode, Share */}
         <div className="flex items-center space-x-1 md:space-x-2">
@@ -179,5 +136,133 @@ export const Navbar: React.FC = () => {
         agentInfo={agentInfo}
       />
     </>
+  );
+};
+
+// Dynamic Navbar Center Component with space optimization
+interface DynamicNavbarCenterProps {
+  agentInfo: { name?: string };
+  modelInfo: { model?: string; provider?: string };
+}
+
+const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({ agentInfo, modelInfo }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [availableWidth, setAvailableWidth] = useState(0);
+  const [agentTextWidth, setAgentTextWidth] = useState(0);
+  const [modelTextWidth, setModelTextWidth] = useState(0);
+
+  // Calculate text widths and available space
+  useEffect(() => {
+    const calculateWidths = () => {
+      if (!containerRef.current) return;
+
+      const container = containerRef.current;
+      const containerWidth = container.offsetWidth;
+      
+      // Reserve space for padding, gaps, icons, and badges
+      const reservedSpace = 120; // Approximate space for icons, padding, gaps
+      const available = Math.max(containerWidth - reservedSpace, 200);
+      
+      setAvailableWidth(available);
+
+      // Calculate text widths using a temporary element
+      const measureText = (text: string, className: string) => {
+        const temp = document.createElement('span');
+        temp.style.visibility = 'hidden';
+        temp.style.position = 'absolute';
+        temp.style.fontSize = '12px';
+        temp.style.fontWeight = className.includes('font-medium') ? '500' : '400';
+        temp.textContent = text;
+        document.body.appendChild(temp);
+        const width = temp.offsetWidth;
+        document.body.removeChild(temp);
+        return width;
+      };
+
+      if (agentInfo.name) {
+        setAgentTextWidth(measureText(agentInfo.name, 'font-medium'));
+      }
+
+      if (modelInfo.model || modelInfo.provider) {
+        const modelText = [modelInfo.model, modelInfo.provider].filter(Boolean).join(' • ');
+        setModelTextWidth(measureText(modelText, 'font-medium'));
+      }
+    };
+
+    calculateWidths();
+    
+    // Recalculate on window resize
+    const handleResize = () => {
+      setTimeout(calculateWidths, 100);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [agentInfo.name, modelInfo.model, modelInfo.provider]);
+
+  // Calculate dynamic widths for badges
+  const totalTextWidth = agentTextWidth + modelTextWidth;
+  const hasSpace = totalTextWidth <= availableWidth;
+  
+  // If we have space, use natural widths; otherwise, distribute proportionally
+  const agentMaxWidth = hasSpace 
+    ? 'none' 
+    : `${Math.max((agentTextWidth / totalTextWidth) * availableWidth * 0.85, 80)}px`;
+  
+  const modelMaxWidth = hasSpace 
+    ? 'none' 
+    : `${Math.max((modelTextWidth / totalTextWidth) * availableWidth * 0.85, 100)}px`;
+
+  return (
+    <div ref={containerRef} className="flex-1 flex justify-center min-w-0">
+      <div className="flex items-center gap-3 min-w-0" style={{ maxWidth: '100%' }}>
+        {/* Agent Name Badge */}
+        {agentInfo.name && (
+          <div 
+            className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-blue-500/10 to-purple-500/10 dark:from-blue-400/15 dark:to-purple-400/15 border border-blue-200/30 dark:border-blue-400/20 rounded-full shadow-sm backdrop-blur-sm min-w-0"
+            style={{ maxWidth: agentMaxWidth }}
+          >
+            <FaBrain size={12} className="text-blue-600 dark:text-blue-400 flex-shrink-0" />
+            <span
+              className={`text-xs font-medium text-blue-800 dark:text-blue-200 ${!hasSpace ? 'truncate' : ''}`}
+              title={agentInfo.name}
+            >
+              {agentInfo.name}
+            </span>
+          </div>
+        )}
+
+        {/* Model Info Badge */}
+        {(modelInfo.model || modelInfo.provider) && (
+          <div 
+            className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-purple-500/10 to-pink-500/10 dark:from-purple-400/15 dark:to-pink-400/15 border border-purple-200/30 dark:border-purple-400/20 rounded-full shadow-sm backdrop-blur-sm min-w-0"
+            style={{ maxWidth: modelMaxWidth }}
+          >
+            <FiCpu size={12} className="text-purple-600 dark:text-purple-400 flex-shrink-0" />
+            <div className="flex items-center gap-1 text-xs min-w-0">
+              {modelInfo.model && (
+                <span
+                  className={`font-medium text-purple-800 dark:text-purple-200 ${!hasSpace ? 'truncate' : ''}`}
+                  title={modelInfo.model}
+                >
+                  {modelInfo.model}
+                </span>
+              )}
+              {modelInfo.provider && modelInfo.model && (
+                <span className="text-purple-500 dark:text-purple-400 flex-shrink-0">•</span>
+              )}
+              {modelInfo.provider && (
+                <span
+                  className={`text-purple-700 dark:text-purple-300 font-medium ${!hasSpace ? 'truncate' : ''}`}
+                  title={modelInfo.provider}
+                >
+                  {modelInfo.provider}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
