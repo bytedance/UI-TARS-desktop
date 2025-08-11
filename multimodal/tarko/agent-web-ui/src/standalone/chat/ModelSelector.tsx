@@ -1,17 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { FiZap } from 'react-icons/fi';
-import {
-  Select,
-  MenuItem,
-  FormControl,
-  Box,
-  Chip,
-  Typography,
-  CircularProgress,
-  createTheme,
-  ThemeProvider,
-} from '@mui/material';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiZap, FiChevronDown } from 'react-icons/fi';
 import { apiService } from '@/common/services/apiService';
 import { useDarkMode } from '@/common/hooks/useDarkMode';
 
@@ -35,114 +24,35 @@ interface ModelSelectorProps {
 }
 
 /**
- * ModelSelector Component - Professional model switching with MUI Select
+ * ModelSelector Component - Clean, native implementation with app-consistent styling
  *
  * Features:
- * - Uses Material-UI Select for enterprise-grade reliability
- * - Automatic portal rendering to prevent clipping
- * - Built-in accessibility and keyboard navigation
- * - Responsive design with proper theming
- * - Loading states and error handling
+ * - Native dropdown with custom styling
+ * - Responsive dark mode support
+ * - Smooth animations
+ * - Minimal design matching app aesthetics
  */
 export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, className = '' }) => {
   const [availableModels, setAvailableModels] = useState<AvailableModelsResponse | null>(null);
   const [currentModel, setCurrentModel] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const isDarkMode = useDarkMode();
 
-  // Create custom theme for MUI components to match the app's design
-  // Recreate theme when dark mode changes
-  const muiTheme = React.useMemo(
-    () =>
-      createTheme({
-        palette: {
-          mode: isDarkMode ? 'dark' : 'light',
-          primary: {
-            main: '#6366f1', // Indigo color to match the design
-          },
-          background: {
-            paper: isDarkMode ? '#374151' : '#ffffff',
-            default: isDarkMode ? '#1f2937' : '#f9fafb',
-          },
-          text: {
-            primary: isDarkMode ? '#f3f4f6' : '#374151',
-            secondary: isDarkMode ? '#9ca3af' : '#6b7280',
-          },
-        },
-        components: {
-          MuiSelect: {
-            styleOverrides: {
-              root: {
-                borderRadius: '12px', // Moderate rounded corners
-                minHeight: '32px', // Reduced height
-                fontSize: '13px', // Slightly smaller font
-                fontWeight: 500,
-                '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: isDarkMode ? 'rgba(156, 163, 175, 0.4)' : 'rgba(209, 213, 219, 0.6)',
-                  borderWidth: '1px',
-                },
-                '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: isDarkMode ? 'rgba(156, 163, 175, 0.6)' : 'rgba(107, 114, 128, 0.4)',
-                },
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#6366f1',
-                  borderWidth: '1px', // Thinner focus border
-                },
-              },
-              select: {
-                paddingLeft: '10px', // Reduced padding
-                paddingRight: '32px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px', // Smaller gap
-              },
-            },
-          },
-          MuiMenuItem: {
-            styleOverrides: {
-              root: {
-                fontSize: '14px',
-                padding: '8px 16px',
-                borderRadius: '6px',
-                margin: '2px 8px',
-                '&:hover': {
-                  backgroundColor: isDarkMode
-                    ? 'rgba(99, 102, 241, 0.1)'
-                    : 'rgba(99, 102, 241, 0.05)',
-                },
-                '&.Mui-selected': {
-                  backgroundColor: isDarkMode
-                    ? 'rgba(99, 102, 241, 0.2)'
-                    : 'rgba(99, 102, 241, 0.1)',
-                  color: '#6366f1',
-                  '&:hover': {
-                    backgroundColor: isDarkMode
-                      ? 'rgba(99, 102, 241, 0.25)'
-                      : 'rgba(99, 102, 241, 0.15)',
-                  },
-                },
-              },
-            },
-          },
-          MuiPaper: {
-            styleOverrides: {
-              root: {
-                borderRadius: '16px', // Slightly more rounded for dropdown
-                // Much lighter shadow to match app design
-                boxShadow: 'none',
-                backdropFilter: 'blur(8px)',
-                border: isDarkMode
-                  ? '1px solid rgba(75, 85, 99, 0.4)'
-                  : '1px solid rgba(229, 231, 235, 0.6)',
-              },
-            },
-          },
-        },
-      }),
-    [isDarkMode],
-  );
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Load available models on component mount
   useEffect(() => {
@@ -169,12 +79,10 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
   // Don't render if no multiple providers available
   if (isInitialLoading) {
     return (
-      <Box className={`flex items-center gap-2 ${className}`}>
-        <CircularProgress size={16} thickness={4} />
-        <Typography variant="caption" color="textSecondary">
-          Loading models...
-        </Typography>
-      </Box>
+      <div className={`flex items-center gap-1.5 ${className}`}>
+        <div className="w-3 h-3 border border-gray-300 dark:border-gray-600 border-t-transparent rounded-full animate-spin" />
+        <span className="text-xs text-gray-500 dark:text-gray-400">Loading...</span>
+      </div>
     );
   }
 
@@ -183,196 +91,155 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
   }
 
   const handleModelChange = async (selectedValue: string) => {
-    console.log('🎛️ [ModelSelector] Model change initiated:', {
-      selectedValue,
-      sessionId,
-      isLoading,
-      currentModel,
-    });
-
-    if (!sessionId || isLoading || !selectedValue) {
-      console.warn('⚠️ [ModelSelector] Model change blocked:', {
-        hasSessionId: !!sessionId,
-        isLoading,
-        hasSelectedValue: !!selectedValue,
-      });
-      return;
-    }
+    if (!sessionId || isLoading || !selectedValue) return;
 
     const [provider, modelId] = selectedValue.split(':');
-    console.log('🔍 [ModelSelector] Parsed model selection:', { provider, modelId });
+    if (!provider || !modelId) return;
 
-    if (!provider || !modelId) {
-      console.error('❌ [ModelSelector] Invalid model format:', selectedValue);
-      return;
-    }
-
-    console.log('⏳ [ModelSelector] Starting model update...');
     setIsLoading(true);
-
+    setIsOpen(false);
+    
     try {
-      console.log('📞 [ModelSelector] Calling API service...');
       const success = await apiService.updateSessionModel(sessionId, provider, modelId);
-
-      console.log('📋 [ModelSelector] API response:', { success });
-
       if (success) {
-        console.log('✅ [ModelSelector] Model updated successfully, updating UI state');
         setCurrentModel(selectedValue);
-      } else {
-        console.error('❌ [ModelSelector] Server returned success=false');
-        // Revert selection on server failure
-        setCurrentModel(currentModel);
       }
     } catch (error) {
-      console.error('💥 [ModelSelector] Failed to update session model:', error);
-      // Revert selection on error
-      setCurrentModel(currentModel);
+      console.error('Failed to update session model:', error);
     } finally {
-      console.log('🏁 [ModelSelector] Model change completed');
       setIsLoading(false);
     }
   };
 
-  // Create options array for Select
+  // Create options array
   const allModelOptions = availableModels.models.flatMap((config) =>
     config.models.map((modelId) => ({
       value: `${config.provider}:${modelId}`,
       provider: config.provider,
       modelId,
-      label: `${modelId} (${config.provider})`,
+      label: `${modelId}`,
     })),
   );
 
-  const renderValue = (selected: string) => {
-    const option = allModelOptions.find((opt) => opt.value === selected);
-    if (!option) return 'Select Model';
-
-    return (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <Box
-          sx={{
-            width: 18, // Slightly larger icon container
-            height: 18,
-            borderRadius: '6px', // Rounded square instead of circle
-            background: isDarkMode
-              ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2))'
-              : 'linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1))',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            border: isDarkMode
-              ? '1px solid rgba(99, 102, 241, 0.3)'
-              : '1px solid rgba(99, 102, 241, 0.2)',
-          }}
-        >
-          <FiZap size={11} color={isDarkMode ? '#a5b4fc' : '#6366f1'} />
-        </Box>
-        <Typography
-          variant="body2"
-          sx={{
-            fontWeight: 500,
-            fontSize: '12px', // Smaller text
-            color: isDarkMode ? '#f3f4f6' : '#374151',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            maxWidth: '160px', // Increased max width for better text display
-          }}
-        >
-          {option.label}
-        </Typography>
-        {isLoading && (
-          <CircularProgress size={14} thickness={4} sx={{ color: '#6366f1', marginLeft: 'auto' }} />
-        )}
-      </Box>
-    );
-  };
+  const selectedOption = allModelOptions.find((opt) => opt.value === currentModel);
 
   return (
-    <ThemeProvider theme={muiTheme}>
-      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className={className}>
-        <FormControl size="small" fullWidth>
-          <Select
-            value={currentModel}
-            onChange={(event) => handleModelChange(event.target.value)}
-            disabled={isLoading}
-            displayEmpty
-            renderValue={renderValue}
-            size="small"
-            MenuProps={{
-              PaperProps: {
-                style: {
-                  maxHeight: 280,
-                  marginTop: 4,
-                  // Remove heavy shadows from dropdown
-                  boxShadow: isDarkMode
-                    ? '0 4px 12px -2px rgba(0, 0, 0, 0.3)'
-                    : '0 4px 12px -2px rgba(0, 0, 0, 0.08)',
-                },
-              },
-              anchorOrigin: {
-                vertical: 'top',
-                horizontal: 'left',
-              },
-              transformOrigin: {
-                vertical: 'bottom',
-                horizontal: 'left',
-              },
-              disablePortal: false,
-            }}
-            sx={{
-              minWidth: 200,
-              maxWidth: 240,
-              background: isDarkMode
-                ? 'linear-gradient(135deg, rgba(55, 65, 81, 0.9), rgba(75, 85, 99, 0.9))'
-                : 'linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(249, 250, 251, 0.9))',
-              backdropFilter: 'blur(8px)',
-              // Remove heavy shadows to match app design
-              boxShadow: 'none',
-              border: isDarkMode
-                ? '1px solid rgba(75, 85, 99, 0.4)'
-                : '1px solid rgba(229, 231, 235, 0.6)',
-              '&:hover': {
-                // Subtle shadow on hover only
-                boxShadow: isDarkMode
-                  ? '0 2px 4px -1px rgba(0, 0, 0, 0.2)'
-                  : '0 2px 4px -1px rgba(0, 0, 0, 0.05)',
-              },
-            }}
+    <div className={`relative ${className}`} ref={dropdownRef}>
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        onClick={() => setIsOpen(!isOpen)}
+        disabled={isLoading}
+        className={`
+          flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium
+          transition-all duration-200 min-w-[140px] max-w-[180px]
+          ${isDarkMode 
+            ? 'bg-gray-800/60 hover:bg-gray-800/80 border border-gray-700/50 text-gray-200'
+            : 'bg-white/60 hover:bg-white/80 border border-gray-200/50 text-gray-700'
+          }
+          ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+          backdrop-blur-sm shadow-sm hover:shadow-md
+        `}
+      >
+        {/* Icon */}
+        <div className={`
+          w-4 h-4 rounded flex items-center justify-center flex-shrink-0
+          ${isDarkMode 
+            ? 'bg-indigo-500/20 border border-indigo-400/30'
+            : 'bg-indigo-500/10 border border-indigo-400/20'
+          }
+        `}>
+          <FiZap size={10} className={isDarkMode ? 'text-indigo-300' : 'text-indigo-600'} />
+        </div>
+
+        {/* Model name */}
+        <span className="flex-1 truncate text-left">
+          {selectedOption ? selectedOption.label : 'Select Model'}
+        </span>
+
+        {/* Loading or chevron */}
+        {isLoading ? (
+          <div className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin opacity-60" />
+        ) : (
+          <FiChevronDown 
+            size={12} 
+            className={`transition-transform duration-200 opacity-60 ${
+              isOpen ? 'rotate-180' : ''
+            }`} 
+          />
+        )}
+      </motion.button>
+
+      {/* Dropdown */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ duration: 0.15 }}
+            className={`
+              absolute top-full left-0 mt-1 w-full min-w-[200px] max-w-[240px] z-50
+              rounded-lg shadow-lg border backdrop-blur-md
+              ${isDarkMode 
+                ? 'bg-gray-800/95 border-gray-700/50'
+                : 'bg-white/95 border-gray-200/50'
+              }
+            `}
           >
-            {allModelOptions.map((option, idx) => {
-              const itemProps = { ['ke' + 'y']: option.value };
-              return (
-                <MenuItem {...itemProps} value={option.value}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, width: '100%' }}>
-                    <Chip
-                      label={option.provider}
-                      size="small"
-                      variant="outlined"
-                      sx={{
-                        fontSize: '11px',
-                        height: '20px',
-                        borderColor: currentModel === option.value ? '#6366f1' : 'currentColor',
-                        color: currentModel === option.value ? '#6366f1' : 'currentColor',
-                      }}
-                    />
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontWeight: currentModel === option.value ? 600 : 400,
-                        flex: 1,
-                      }}
-                    >
+            <div className="py-1 max-h-60 overflow-y-auto">
+              {allModelOptions.map((option) => {
+                const isSelected = currentModel === option.value;
+                return (
+                  <motion.button
+                    key={option.value}
+                    whileHover={{ backgroundColor: isDarkMode ? 'rgba(99, 102, 241, 0.1)' : 'rgba(99, 102, 241, 0.05)' }}
+                    onClick={() => handleModelChange(option.value)}
+                    className={`
+                      w-full px-3 py-2 text-left text-xs flex items-center gap-2.5
+                      transition-colors duration-150
+                      ${isSelected 
+                        ? (isDarkMode 
+                            ? 'bg-indigo-500/20 text-indigo-300'
+                            : 'bg-indigo-500/10 text-indigo-700'
+                          )
+                        : (isDarkMode 
+                            ? 'text-gray-300 hover:text-gray-100'
+                            : 'text-gray-700 hover:text-gray-900'
+                          )
+                      }
+                    `}
+                  >
+                    {/* Provider badge */}
+                    <span className={`
+                      px-1.5 py-0.5 rounded text-[10px] font-medium border flex-shrink-0
+                      ${isSelected 
+                        ? (isDarkMode 
+                            ? 'bg-indigo-500/30 border-indigo-400/40 text-indigo-200'
+                            : 'bg-indigo-500/15 border-indigo-400/30 text-indigo-700'
+                          )
+                        : (isDarkMode 
+                            ? 'bg-gray-700/50 border-gray-600/50 text-gray-400'
+                            : 'bg-gray-100/50 border-gray-300/50 text-gray-600'
+                          )
+                      }
+                    `}>
+                      {option.provider}
+                    </span>
+                    
+                    {/* Model name */}
+                    <span className={`flex-1 truncate ${
+                      isSelected ? 'font-medium' : 'font-normal'
+                    }`}>
                       {option.modelId}
-                    </Typography>
-                  </Box>
-                </MenuItem>
-              );
-            })}
-          </Select>
-        </FormControl>
-      </motion.div>
-    </ThemeProvider>
+                    </span>
+                  </motion.button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
