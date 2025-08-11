@@ -67,6 +67,19 @@ export const workspacePanelCollapsedAtom = atom<boolean>(false);
 export const isProcessingAtom = atom<boolean>(false);
 
 /**
+ * Enhanced agent status atom for TTFT optimization
+ */
+export const agentStatusAtom = atom<{
+  isProcessing: boolean;
+  state?: string;
+  phase?: 'initializing' | 'processing' | 'generating' | 'streaming' | 'executing_tools' | 'warming_up' | 'query_preparation' | 'streaming_preparation' | 'model_initialization' | 'request_processing' | 'first_token_received' | 'model_warmup' | 'response_generation' | 'tool_execution';
+  message?: string;
+  estimatedTime?: string;
+}>({ 
+  isProcessing: false 
+});
+
+/**
  * Atom for offline mode state (view-only when disconnected)
  */
 export const offlineModeAtom = atom<boolean>(false);

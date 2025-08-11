@@ -7,6 +7,7 @@
 import path from 'path';
 import {
   AgentEventStream,
+  AgentRunNonStreamingOptions,
   AgentRunStreamingOptions,
   AgentStatus,
   AgioProviderConstructor,
@@ -195,14 +196,25 @@ export class AgentSession {
   async runQuery(query: string | ChatCompletionContentPart[]): Promise<AgentQueryResponse> {
     try {
       // Prepare run options with session-specific model configuration
-      const runOptions: any = {
+      // Emit TTFT initialization status
+      this.eventBridge.emit('agent-status', {
+        isProcessing: true,
+        state: 'initializing',
+        phase: 'query_preparation',
+        message: 'Preparing to process your request...',
+        estimatedTime: '5-15 seconds',
+      });
+
+      const runOptions: AgentRunNonStreamingOptions = {
         input: query,
         sessionId: this.id,
       };
 
+      // Run agent to process the query
+
       // Add model configuration if available in session metadata
       if (this.sessionMetadata?.modelConfig) {
-        runOptions.provider = this.sessionMetadata.modelConfig.provider;
+        runOptions.provider = this.sessionMetadata.modelConfig.provider as ModelProviderName;
         runOptions.model = this.sessionMetadata.modelConfig.modelId;
         console.log(
           `🎯 [AgentSession] Using session model: ${runOptions.provider}:${runOptions.model}`,
@@ -245,6 +257,15 @@ export class AgentSession {
   ): Promise<AsyncIterable<AgentEventStream.Event>> {
     try {
       // Prepare run options with session-specific model configuration
+      // Emit enhanced TTFT initialization status for streaming
+      this.eventBridge.emit('agent-status', {
+        isProcessing: true,
+        state: 'initializing',
+        phase: 'streaming_preparation',
+        message: 'Preparing streaming response...',
+        estimatedTime: '3-10 seconds for first token',
+      });
+
       const runOptions: AgentRunStreamingOptions = {
         input: query,
         stream: true,

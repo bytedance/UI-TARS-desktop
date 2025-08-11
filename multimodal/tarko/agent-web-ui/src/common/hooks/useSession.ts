@@ -12,6 +12,7 @@ import {
   agentInfoAtom,
   workspaceInfoAtom,
   agentOptionsAtom,
+  agentStatusAtom,
 } from '../state/atoms/ui';
 import { replayStateAtom } from '../state/atoms/replay';
 import {
@@ -45,6 +46,7 @@ export function useSession() {
   const toolResults = useAtomValue(toolResultsAtom);
   const sessionFiles = useAtomValue(sessionFilesAtom);
   const [isProcessing, setIsProcessing] = useAtom(isProcessingAtom);
+  const [agentStatus, setAgentStatus] = useAtom(agentStatusAtom);
   const [activePanelContent, setActivePanelContent] = useAtom(activePanelContentAtom);
   const [connectionStatus, setConnectionStatus] = useAtom(connectionStatusAtom);
   const [plans, setPlans] = useAtom(plansAtom);
@@ -83,9 +85,18 @@ export function useSession() {
     (status: any) => {
       if (status && typeof status.isProcessing === 'boolean' && !isReplayMode) {
         setIsProcessing(status.isProcessing);
+        
+        // Update enhanced agent status for TTFT optimization
+        setAgentStatus({
+          isProcessing: status.isProcessing,
+          state: status.state,
+          phase: status.phase,
+          message: status.message,
+          estimatedTime: status.estimatedTime,
+        });
       }
     },
-    [setIsProcessing, isReplayMode],
+    [setIsProcessing, setAgentStatus, isReplayMode],
   );
 
   // Set up socket event handlers when active session changes - do not set up socket event handling in replay mode
@@ -136,6 +147,7 @@ export function useSession() {
       toolResults,
       sessionFiles,
       isProcessing,
+      agentStatus,
       activePanelContent,
       connectionStatus,
       plans,
@@ -174,6 +186,7 @@ export function useSession() {
       toolResults,
       sessionFiles,
       isProcessing,
+      agentStatus,
       activePanelContent,
       connectionStatus,
       plans,
