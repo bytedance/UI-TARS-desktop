@@ -288,7 +288,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
-            maxWidth: '140px',
+            maxWidth: '200px',
           }}
         >
           {option.label}
@@ -330,8 +330,8 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
               disablePortal: false,
             }}
             sx={{
-              minWidth: 160,
-              maxWidth: 200,
+              minWidth: 200,
+              maxWidth: 280,
             }}
           >
             {allModelOptions.map((option, idx) => {
