@@ -103,11 +103,19 @@ export async function updateSessionModel(req: Request, res: Response) {
         updatedAt: Date.now(),
       });
 
-      // If session is currently active, log the change
+      // If session is currently active, recreate the agent with new model config
       const activeSession = server.sessions[sessionId];
       if (activeSession) {
         console.log(`Session ${sessionId} model updated to ${provider}:${modelId}`);
-        // Note: The model change will take effect on next agent creation/restart
+        
+        try {
+          // Recreate agent with new model configuration
+          await activeSession.updateModelConfig(updatedMetadata);
+          console.log(`Session ${sessionId} agent recreated with new model config`);
+        } catch (error) {
+          console.error(`Failed to update agent model config for session ${sessionId}:`, error);
+          // Continue execution - the model config is saved, will apply on next session
+        }
       }
 
       res.status(200).json({
