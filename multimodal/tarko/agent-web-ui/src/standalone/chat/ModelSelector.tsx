@@ -78,10 +78,10 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
                 minHeight: '32px',
                 fontSize: '12px',
                 fontWeight: 500,
-                background: isDarkMode ? 'rgba(55, 65, 81, 0.6)' : 'rgba(255, 255, 255, 0.6)',
+                background: isDarkMode ? 'rgba(55, 65, 81, 0.3)' : 'rgba(255, 255, 255, 0.6)',
                 backdropFilter: 'blur(8px)',
                 border: isDarkMode
-                  ? '1px solid rgba(75, 85, 99, 0.5)'
+                  ? '1px solid rgba(75, 85, 99, 0.3)'
                   : '1px solid rgba(229, 231, 235, 0.5)',
                 '& .MuiOutlinedInput-notchedOutline': {
                   border: 'none',
@@ -97,6 +97,10 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
                   boxShadow: isDarkMode
                     ? '0 2px 4px -1px rgba(0, 0, 0, 0.2)'
                     : '0 2px 4px -1px rgba(0, 0, 0, 0.05)',
+                },
+                // Hide the dropdown arrow
+                '& .MuiSelect-icon': {
+                  display: 'none',
                 },
               },
               select: {
