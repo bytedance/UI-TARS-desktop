@@ -566,13 +566,102 @@ async function searchWorkspaceItemsRecursive(
 
   await searchInDirectory(basePath);
 
-  // Sort by type (directories first) then by name
+  // Smart relevance-based sorting
   return items.sort((a, b) => {
+    const scoreA = calculateRelevanceScore(a, query);
+    const scoreB = calculateRelevanceScore(b, query);
+
+    // Higher score comes first
+    if (scoreA !== scoreB) {
+      return scoreB - scoreA;
+    }
+
+    // If scores are equal, prefer directories over files
     if (a.type !== b.type) {
       return a.type === 'directory' ? -1 : 1;
     }
+
+    // Finally, sort by name
     return a.name.localeCompare(b.name);
   });
+}
+
+/**
+ * Calculate relevance score for search results
+ * Higher score means more relevant to the query
+ */
+function calculateRelevanceScore(
+  item: { name: string; relativePath: string; type: 'file' | 'directory' },
+  query: string,
+): number {
+  const queryLower = query.toLowerCase();
+  const nameLower = item.name.toLowerCase();
+  const pathLower = item.relativePath.toLowerCase();
+
+  let score = 0;
+
+  // 1. Exact name match gets highest score
+  if (nameLower === queryLower) {
+    score += 1000;
+  }
+  // 2. Name starts with query
+  else if (nameLower.startsWith(queryLower)) {
+    score += 800;
+  }
+  // 3. Name ends with query (good for searching package names like '@tarko/agent')
+  else if (nameLower.endsWith(queryLower)) {
+    score += 700;
+  }
+  // 4. Name contains query
+  else if (nameLower.includes(queryLower)) {
+    score += 500;
+  }
+
+  // 5. Path-based scoring
+  if (pathLower.endsWith(queryLower)) {
+    score += 600; // Path ends with query is very relevant
+  } else if (pathLower.includes(queryLower)) {
+    score += 300; // Path contains query
+  }
+
+  // 6. Bonus for shorter paths (closer to root)
+  const pathDepth = item.relativePath.split('/').length;
+  score += Math.max(0, 50 - pathDepth * 5); // Subtract 5 points per level deep
+
+  // 7. Bonus for directories when searching for package-like names
+  if (item.type === 'directory' && queryLower.includes('/')) {
+    score += 100;
+  }
+
+  // 8. Penalty for very deep nested files when name doesn't match well
+  if (pathDepth > 4 && !nameLower.includes(queryLower)) {
+    score -= 200;
+  }
+
+  // 9. Special bonus for exact path segment matches
+  const pathSegments = item.relativePath.toLowerCase().split('/');
+  const querySegments = queryLower.split('/');
+
+  // Check if query segments match path segments in order
+  if (querySegments.length > 1) {
+    let segmentMatches = 0;
+    let queryIndex = 0;
+
+    for (const pathSegment of pathSegments) {
+      if (queryIndex < querySegments.length && pathSegment.includes(querySegments[queryIndex])) {
+        segmentMatches++;
+        queryIndex++;
+      }
+    }
+
+    if (segmentMatches === querySegments.length) {
+      score += 400; // All query segments found in path order
+    } else if (segmentMatches > 0) {
+      score += segmentMatches * 100; // Partial segment matches
+    }
+  }
+
+  return score;
 }
 
 /**
