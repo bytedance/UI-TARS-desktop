@@ -1,0 +1,46 @@
+{
+  "name": "@gui-agent/action-parser",
+  "version": "0.3.0-beta.1",
+  "description": "Action parser SDK for general action parser",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bytedance/UI-TARS-desktop"
+  },
+  "bugs": {
+    "url": "https://github.com/bytedance/UI-TARS-desktop/issues"
+  },
+  "keywords": [
+    "AI",
+    "Action",
+    "Parser",
+    "UI-TARS"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "dev": "rslib build --watch",
+    "build": "rslib build",
+    "build:watch": "rslib build --watch",
+    "prepare": "npm run build",
+    "test": "vitest"
+  },
+  "license": "Apache-2.0",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "dependencies": {
+    "@ui-tars/shared": "1.2.3",
+    "lodash.isnumber": "3.0.3"
+  },
+  "devDependencies": {
+    "@rslib/core": "0.10.0",
+    "@types/lodash.isnumber": "3.0.3",
+    "typescript": "^5.7.2",
+    "vitest": "^3.0.2"
+  }
+}
