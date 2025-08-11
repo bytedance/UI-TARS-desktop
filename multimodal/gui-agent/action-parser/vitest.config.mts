@@ -6,22 +6,29 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import tsconfigPath from 'vite-tsconfig-paths';
-import { defineProject } from 'vitest/config';
+import { defineProject, defineConfig } from 'vitest/config';
 
-const __dirname = fileURLToPath(new URL('.', import.meta.url));
+// const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
-export default defineProject({
-  root: './',
+// export default defineProject({
+//   root: './',
+//   test: {
+//     globals: true,
+//     setupFiles: [resolve(__dirname, '../../../scripts/vitest-setup.ts')],
+//     environment: 'node',
+//     include: ['test/**/*.test.ts'],
+//   },
+
+//   plugins: [
+//     tsconfigPath({
+//       projects: ['./tsconfig.json'],
+//     }),
+//   ],
+// });
+
+export default defineConfig({
   test: {
-    globals: true,
-    setupFiles: [resolve(__dirname, '../../../scripts/vitest-setup.ts')],
     environment: 'node',
-    include: ['test/**/*.test.ts'],
+    include: ['**/*.test.ts'],
   },
-
-  plugins: [
-    tsconfigPath({
-      projects: ['../tsconfig.node.json'],
-    }),
-  ],
 });
