@@ -74,8 +74,8 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
         styleOverrides: {
           root: {
             borderRadius: '9999px', // Full rounded
-            minHeight: '40px',
-            fontSize: '14px',
+            minHeight: '32px', // Reduced height
+            fontSize: '13px', // Slightly smaller font
             fontWeight: 500,
             '& .MuiOutlinedInput-notchedOutline': {
               borderColor: isDarkMode ? 'rgba(156, 163, 175, 0.4)' : 'rgba(209, 213, 219, 0.6)',
@@ -86,15 +86,15 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
             },
             '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
               borderColor: '#6366f1',
-              borderWidth: '2px',
+              borderWidth: '1px', // Thinner focus border
             },
           },
           select: {
-            paddingLeft: '12px',
-            paddingRight: '40px',
+            paddingLeft: '10px', // Reduced padding
+            paddingRight: '32px',
             display: 'flex',
             alignItems: 'center',
-            gap: '8px',
+            gap: '6px', // Smaller gap
           },
         },
       },
@@ -124,9 +124,8 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
         styleOverrides: {
           root: {
             borderRadius: '12px',
-            boxShadow: isDarkMode
-              ? '0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.2)'
-              : '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            // Much lighter shadow to match app design
+            boxShadow: 'none',
             backdropFilter: 'blur(8px)',
             border: isDarkMode
               ? '1px solid rgba(75, 85, 99, 0.4)'
@@ -214,8 +213,8 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Box
           sx={{
-            width: 20,
-            height: 20,
+            width: 16, // Smaller icon container
+            height: 16,
             borderRadius: '50%',
             background: isDarkMode
               ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(139, 92, 246, 0.3))'
@@ -225,17 +224,18 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
             justifyContent: 'center',
           }}
         >
-          <FiCpu size={12} color={isDarkMode ? '#a5b4fc' : '#6366f1'} />
+          <FiCpu size={10} color={isDarkMode ? '#a5b4fc' : '#6366f1'} />
         </Box>
         <Typography
           variant="body2"
           sx={{
             fontWeight: 500,
+            fontSize: '12px', // Smaller text
             color: isDarkMode ? '#f3f4f6' : '#374151',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
-            maxWidth: '180px',
+            maxWidth: '140px', // Reduced max width
           }}
         >
           {option.label}
@@ -257,11 +257,16 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
             disabled={isLoading}
             displayEmpty
             renderValue={renderValue}
+            size="small"
             MenuProps={{
               PaperProps: {
                 style: {
-                  maxHeight: 300,
-                  marginTop: 8,
+                  maxHeight: 280,
+                  marginTop: 4,
+                  // Remove heavy shadows from dropdown
+                  boxShadow: isDarkMode
+                    ? '0 4px 12px -2px rgba(0, 0, 0, 0.3)'
+                    : '0 4px 12px -2px rgba(0, 0, 0, 0.08)',
                 },
               },
               anchorOrigin: {
@@ -272,22 +277,25 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
                 vertical: 'bottom',
                 horizontal: 'left',
               },
-              // Use portal to prevent clipping issues
               disablePortal: false,
             }}
             sx={{
-              minWidth: 200,
+              minWidth: 160,
+              maxWidth: 180,
               background: isDarkMode
                 ? 'linear-gradient(135deg, rgba(55, 65, 81, 0.9), rgba(75, 85, 99, 0.9))'
                 : 'linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(249, 250, 251, 0.9))',
               backdropFilter: 'blur(8px)',
-              boxShadow: isDarkMode
-                ? '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2)'
-                : '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+              // Remove heavy shadows to match app design
+              boxShadow: 'none',
+              border: isDarkMode
+                ? '1px solid rgba(75, 85, 99, 0.4)'
+                : '1px solid rgba(229, 231, 235, 0.6)',
               '&:hover': {
+                // Subtle shadow on hover only
                 boxShadow: isDarkMode
-                  ? '0 6px 10px -1px rgba(0, 0, 0, 0.4), 0 4px 6px -1px rgba(0, 0, 0, 0.3)'
-                  : '0 6px 10px -1px rgba(0, 0, 0, 0.15), 0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                  ? '0 2px 4px -1px rgba(0, 0, 0, 0.2)'
+                  : '0 2px 4px -1px rgba(0, 0, 0, 0.05)',
               },
             }}
           >
