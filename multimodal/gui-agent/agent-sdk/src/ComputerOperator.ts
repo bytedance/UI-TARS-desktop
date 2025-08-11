@@ -37,7 +37,7 @@ export class ComputerOperator extends Operator {
       `left_double(start_box='[x1, y1, x2, y2]')`,
       `right_single(start_box='[x1, y1, x2, y2]')`,
       `drag(start_box='[x1, y1, x2, y2]', end_box='[x3, y3, x4, y4]')`,
-      `hotkey(key='')`,
+      `hotkey(key='')`, // secretlint-disable-line
       `type(content='') #If you want to submit your input, use "\\n" at the end of \`content\`.`,
       `scroll(start_box='[x1, y1, x2, y2]', direction='down or up or right or left')`,
       `wait() #Sleep for 5s and take a screenshot to check for any changes.`,
