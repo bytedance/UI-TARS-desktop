@@ -566,20 +566,39 @@ class ApiService {
    */
   async updateSessionModel(sessionId: string, provider: string, modelId: string): Promise<boolean> {
     try {
+      console.log('🔄 [ModelSelector] Updating session model:', {
+        sessionId,
+        provider,
+        modelId,
+        endpoint: `${API_BASE_URL}/api/v1/sessions/model`
+      });
+
+      const requestBody = { sessionId, provider, modelId };
+      console.log('📤 [ModelSelector] Request payload:', requestBody);
+
       const response = await fetch(`${API_BASE_URL}/api/v1/sessions/model`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId, provider, modelId }),
+        body: JSON.stringify(requestBody),
       });
 
+      console.log('📥 [ModelSelector] Response status:', response.status, response.statusText);
+
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ [ModelSelector] Server error response:', errorText);
         throw new Error(`Failed to update session model: ${response.statusText}`);
       }
 
-      const { success } = await response.json();
+      const responseData = await response.json();
+      console.log('✅ [ModelSelector] Response data:', responseData);
+
+      const { success } = responseData;
+      console.log('🎯 [ModelSelector] Update result:', success ? 'SUCCESS' : 'FAILED');
+      
       return success;
     } catch (error) {
-      console.error('Error updating session model:', error);
+      console.error('💥 [ModelSelector] Error updating session model:', error);
       return false;
     }
   }

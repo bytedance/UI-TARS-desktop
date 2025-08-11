@@ -175,22 +175,53 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
   }
 
   const handleModelChange = async (selectedValue: string) => {
-    if (!sessionId || isLoading || !selectedValue) return;
+    console.log('🎛️ [ModelSelector] Model change initiated:', {
+      selectedValue,
+      sessionId,
+      isLoading,
+      currentModel
+    });
+
+    if (!sessionId || isLoading || !selectedValue) {
+      console.warn('⚠️ [ModelSelector] Model change blocked:', {
+        hasSessionId: !!sessionId,
+        isLoading,
+        hasSelectedValue: !!selectedValue
+      });
+      return;
+    }
 
     const [provider, modelId] = selectedValue.split(':');
-    if (!provider || !modelId) return;
+    console.log('🔍 [ModelSelector] Parsed model selection:', { provider, modelId });
+    
+    if (!provider || !modelId) {
+      console.error('❌ [ModelSelector] Invalid model format:', selectedValue);
+      return;
+    }
 
+    console.log('⏳ [ModelSelector] Starting model update...');
     setIsLoading(true);
+    
     try {
+      console.log('📞 [ModelSelector] Calling API service...');
       const success = await apiService.updateSessionModel(sessionId, provider, modelId);
+      
+      console.log('📋 [ModelSelector] API response:', { success });
+      
       if (success) {
+        console.log('✅ [ModelSelector] Model updated successfully, updating UI state');
         setCurrentModel(selectedValue);
+      } else {
+        console.error('❌ [ModelSelector] Server returned success=false');
+        // Revert selection on server failure
+        setCurrentModel(currentModel);
       }
     } catch (error) {
-      console.error('Failed to update session model:', error);
+      console.error('💥 [ModelSelector] Failed to update session model:', error);
       // Revert selection on error
       setCurrentModel(currentModel);
     } finally {
+      console.log('🏁 [ModelSelector] Model change completed');
       setIsLoading(false);
     }
   };
