@@ -5,12 +5,14 @@
 
 import { AgentPlugin, CODE_ENVIRONMENT } from '@omni-tars/core';
 import { Tool, LLMRequestHookPayload, LLMResponseHookPayload } from '@tarko/agent';
+import { McpManager } from './tools/mcp';
+import { MCPServer } from '@agent-infra/mcp-client';
+import { ExcuteBashProvider } from './tools/ExcuteBash';
+import { JupyterCIProvider } from './tools/JupyterCI';
+import { StrReplaceEditorProvider } from './tools/StrReplaceEditor';
 
-export interface CodeAgentConfig {
-  // Configuration specific to code execution
-  workingDirectory?: string;
-  allowedFileExtensions?: string[];
-  maxExecutionTime?: number;
+export interface CodeAgentPluginOption {
+  mcpServers: MCPServer[];
 }
 
 /**
@@ -20,24 +22,24 @@ export class CodeAgentPlugin extends AgentPlugin {
   readonly name = 'code-agent-plugin';
   readonly environmentSection = CODE_ENVIRONMENT;
 
-  private config: CodeAgentConfig;
+  private mcpManager: McpManager;
 
-  constructor(config: CodeAgentConfig = {}) {
+  constructor(config: CodeAgentPluginOption) {
     super();
-    this.config = config;
+    this.mcpManager = new McpManager({
+      mcpServers: config.mcpServers,
+    });
   }
 
   async initialize(): Promise<void> {
-    // Initialize code execution tools
-    console.log('[CodeAgentPlugin] Initializing code execution capabilities');
+    await this.mcpManager.init();
 
-    // TODO: Initialize actual code execution tools when available
-    // this.tools = [
-    //   new BashExecutionTool(),
-    //   new FileEditorTool(),
-    //   new JupyterNotebookTool(),
-    //   // etc.
-    // ];
+    // Initialize tools
+    this.tools = [
+      new ExcuteBashProvider(this.mcpManager).getTool(),
+      new JupyterCIProvider(this.mcpManager).getTool(),
+      new StrReplaceEditorProvider(this.mcpManager).getTool(),
+    ];
   }
 
   async onLLMRequest(id: string, payload: LLMRequestHookPayload): Promise<void> {

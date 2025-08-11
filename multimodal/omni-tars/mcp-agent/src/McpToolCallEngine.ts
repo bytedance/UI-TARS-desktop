@@ -15,6 +15,7 @@ import {
   StreamChunkResult,
   StreamProcessingState,
 } from '@tarko/agent-interface';
+import { parseMcpContent } from '@omni-tars/core';
 
 export class McpToolCallEngine extends ToolCallEngine {
   private logger = getLogger('McpToolCallEngine');
@@ -67,7 +68,8 @@ export class McpToolCallEngine extends ToolCallEngine {
     const fullContent = state.contentBuffer;
     this.logger.info('finalizeStreamProcessing content \n', fullContent);
 
-    const extracted = this.parseContent(fullContent);
+    // const extracted = this.parseContent(fullContent);
+    const extracted = parseMcpContent(fullContent);
 
     this.logger.info('extracted', JSON.stringify(extracted, null, 2));
 
@@ -78,7 +80,7 @@ export class McpToolCallEngine extends ToolCallEngine {
       rawContent: fullContent,
       reasoningContent: think ?? '',
       toolCalls: tools,
-      finishReason: tools.length > 0 ? 'tool_calls' : 'stop',
+      finishReason: (tools || []).length > 0 ? 'tool_calls' : 'stop',
     };
   }
 

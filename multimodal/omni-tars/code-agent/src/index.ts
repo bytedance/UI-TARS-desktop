@@ -7,13 +7,19 @@ import { ComposableAgent } from '@omni-tars/core';
 import { CodeAgentPlugin } from './CodeAgentPlugin';
 import { AgentOptions } from '@tarko/agent';
 import { CodeToolCallEngine } from './CodeToolCallEngine';
-
-export { CodeAgentPlugin } from './CodeAgentPlugin';
+import { McpManager } from './tools/mcp';
 export { CodeToolCallEngineProvider } from './CodeToolCallEngineProvider';
 
 export const codePlugin = new CodeAgentPlugin({
-  workingDirectory: '/workspace',
-  maxExecutionTime: 30000,
+  mcpServers: [
+    {
+      type: 'sse',
+      name: McpManager.McpClientType.AIO,
+      description: 'all in one sandbox tools',
+      url: process.env.AIO_MCP_URL,
+      timeout: 60,
+    },
+  ],
 });
 
 export default class CodeAgent extends ComposableAgent {

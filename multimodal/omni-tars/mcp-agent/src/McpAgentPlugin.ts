@@ -4,8 +4,8 @@
  */
 
 import { AgentPlugin, MCP_ENVIRONMENT } from '@omni-tars/core';
-import { SearchToolProvider } from './tools/search';
-import { LinkReaderToolProvider } from './tools/linkReader';
+import { SearchToolProvider } from './tools/Search';
+import { LinkReaderToolProvider } from './tools/LinkReader';
 import { McpManager } from './tools/mcp';
 import { MCPServer } from '@agent-infra/mcp-client';
 

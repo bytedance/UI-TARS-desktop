@@ -25,3 +25,4 @@ export { COMPUTER_USE_ENVIRONMENT } from './environments/computer';
 
 export { SnapshotPlugin } from './plugins/snapshot';
 export { AgentPlugin } from './AgentPlugin';
+export * from './utils/parser';
