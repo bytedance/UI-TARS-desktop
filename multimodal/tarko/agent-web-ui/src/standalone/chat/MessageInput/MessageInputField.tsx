@@ -326,8 +326,8 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
               uploadedImages.length > 0 ||
               contextualState.contextualItems.length > 0
                 ? 'from-indigo-500 via-purple-500 to-pink-500 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 animate-border-flow'
-                : 'from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700'
-            } bg-[length:200%_200%] ${isFocused ? 'opacity-100' : 'opacity-70'}`}
+                : 'from-indigo-400 via-purple-400 to-pink-400 dark:from-indigo-300 dark:via-purple-300 dark:to-pink-300'
+            } bg-[length:200%_200%] ${isFocused ? 'opacity-100' : 'opacity-80'}`}
           ></div>
 
           <div
