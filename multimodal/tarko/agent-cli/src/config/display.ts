@@ -4,141 +4,97 @@
  */
 
 import { AgentAppConfig } from '@tarko/interface';
-import chalk from 'chalk';
-import * as os from 'os';
+import { logger } from '../utils';
+import { toUserFriendlyPath } from '../utils';
 
 /**
- * Simple and elegant configuration logging
- * Only shows essential information with consistent indentation
+ * Logger-based configuration logging
+ * Clean CLI output by default, detailed logs only in debug mode
  */
-
-const INDENT = '  ';
-const SUB_INDENT = '    ';
 
 /**
- * Format file path to use ~ for home directory (cross-platform)
+ * Log configuration loading start (debug only)
  */
-function formatPath(filePath: string): string {
-  const homeDir = os.homedir();
-  if (filePath.startsWith(homeDir)) {
-    return '~' + filePath.slice(homeDir.length);
-  }
-  return filePath;
-}
-
-/**
- * Display configuration loading start
- */
-export function displayConfigStart() {
-  console.log(chalk.bold.blue('🔧 Loading configuration...'));
-}
-
-/**
- * Display successful config loading (only for important sources)
- */
-export function displayConfigLoaded(source: string, keyCount: number) {
-  if (keyCount > 0) {
-    // Format the source path for better display
-    const displaySource = source.startsWith('Remote:') ? source : formatPath(source);
-    console.log(
-      INDENT +
-        chalk.green('✓') +
-        ' ' +
-        chalk.cyan(displaySource) +
-        chalk.dim(` (${keyCount} settings)`),
-    );
+export function logConfigStart(isDebug: boolean = false) {
+  if (isDebug) {
+    logger.debug('Loading configuration...');
   }
 }
 
 /**
- * Display config loading error (only for user-provided paths)
+ * Log successful config loading (debug only)
  */
-export function displayConfigError(source: string, error: string) {
-  console.log(INDENT + chalk.red('✗') + ' ' + chalk.red(source));
-  console.log(SUB_INDENT + chalk.dim(error));
+export function logConfigLoaded(source: string, keyCount: number, isDebug: boolean = false) {
+  if (!isDebug || keyCount === 0) return;
+
+  const displaySource = source.startsWith('Remote:') ? source : toUserFriendlyPath(source);
+  logger.debug(`Loaded config from ${displaySource} (${keyCount} settings)`);
 }
 
 /**
- * Display deprecated options warning
+ * Log config loading error (always shown for user-provided paths)
  */
-export function displayDeprecatedWarning(options: string[]) {
+export function logConfigError(source: string, error: string) {
+  const displaySource = source.startsWith('Remote:') ? source : toUserFriendlyPath(source);
+  logger.error(`Failed to load config from ${displaySource}: ${error}`);
+}
+
+/**
+ * Log deprecated options warning (always shown)
+ */
+export function logDeprecatedWarning(options: string[]) {
   if (options.length === 0) return;
 
-  console.log(
-    INDENT + chalk.yellow('⚠️  Deprecated options:') + ' ' + chalk.yellow(options.join(', ')),
+  logger.warn(
+    `Deprecated CLI options detected: ${options.join(', ')}. Consider using config file format.`,
   );
-  console.log(SUB_INDENT + chalk.dim('Consider using config file format'));
 }
 
 /**
- * Display final configuration summary with key settings
+ * Log final configuration summary (debug only)
+ * Web UI will display the final config, so CLI stays clean
  */
-export function displayConfigComplete(config: AgentAppConfig) {
-  console.log(chalk.bold.green('✅ Configuration loaded'));
+export function logConfigComplete(config: AgentAppConfig, isDebug: boolean = false) {
+  if (!isDebug) return;
 
-  // Show key configuration settings with aligned indentation
+  logger.debug('Configuration loaded successfully');
+
+  // Log key configuration settings in debug mode
   if (config.model?.provider) {
-    console.log(INDENT + chalk.cyan('Model:   ') + chalk.bold(config.model.provider));
-    if (config.model.id) {
-      console.log(SUB_INDENT + chalk.dim('ID: ') + config.model.id);
-    }
+    logger.debug(
+      `Model: ${config.model.provider}${config.model.id ? ` (${config.model.id})` : ''}`,
+    );
   }
 
   if (config.server?.port) {
     const storage = config.server.storage?.type || 'sqlite';
-    console.log(
-      INDENT +
-        chalk.cyan('Server:  ') +
-        chalk.bold(`port ${config.server.port}`) +
-        chalk.dim(`, ${storage}`),
-    );
+    logger.debug(`Server: port ${config.server.port}, storage ${storage}`);
   }
 
   if (config.logLevel) {
-    console.log(INDENT + chalk.cyan('Logging: ') + chalk.bold(config.logLevel));
+    logger.debug(`Log level: ${config.logLevel}`);
   }
 
-  // Show tool configuration if present
   if (config.tools && config.tools.length > 0) {
-    console.log(INDENT + chalk.cyan('Tools:   ') + chalk.bold(`${config.tools.length} configured`));
+    logger.debug(`Tools: ${config.tools.length} configured`);
   }
 
-  // Show workspace if configured
   if (config.workspace) {
-    console.log(INDENT + chalk.cyan('Workspace: ') + chalk.dim(formatPath(config.workspace)));
+    logger.debug(`Workspace: ${toUserFriendlyPath(config.workspace)}`);
   }
-
-  console.log('');
 }
 
 /**
- * Display debug information (only when debug mode is enabled)
+ * Log debug information (debug only)
  */
-export function displayDebugInfo(label: string, data: any, isDebug: boolean = false) {
+export function logDebugInfo(label: string, data: any, isDebug: boolean = false) {
   if (!isDebug) return;
 
   if (Array.isArray(data)) {
-    console.log(INDENT + chalk.dim(`🔍 ${label}: [${data.join(', ')}]`));
+    logger.debug(`${label}: [${data.join(', ')}]`);
   } else if (typeof data === 'object' && data !== null) {
-    console.log(INDENT + chalk.dim(`🔍 ${label}: {${Object.keys(data).join(', ')}}`));
+    logger.debug(`${label}: {${Object.keys(data).join(', ')}}`);
   } else {
-    console.log(INDENT + chalk.dim(`🔍 ${label}: ${data}`));
+    logger.debug(`${label}: ${data}`);
   }
-}
-
-// Remove unused functions - keep only essential ones
-export function displayBuildStart() {
-  // Removed - too verbose
-}
-
-export function displayMergeSummary() {
-  // Removed - not essential for users
-}
-
-export function displayServerConfig() {
-  // Moved to displayConfigComplete
-}
-
-export function displayPathDiscovery() {
-  // Removed - internal implementation detail
 }

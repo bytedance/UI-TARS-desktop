@@ -10,12 +10,7 @@ import { AgentAppConfig } from '@tarko/interface';
 import fetch from 'node-fetch';
 
 import { CONFIG_FILES } from './paths';
-import {
-  displayConfigStart,
-  displayConfigLoaded,
-  displayConfigError,
-  displayDebugInfo,
-} from './display';
+import { logConfigStart, logConfigLoaded, logConfigError, logDebugInfo } from './display';
 
 /**
  * Load remote configuration from URL
@@ -48,12 +43,12 @@ async function loadRemoteConfig(url: string, isDebug = false): Promise<AgentAppC
       }
     }
 
-    displayConfigLoaded(`Remote: ${url}`, Object.keys(config).length);
-    displayDebugInfo(`Remote config keys`, Object.keys(config), isDebug);
+    logConfigLoaded(`Remote: ${url}`, Object.keys(config).length, isDebug);
+    logDebugInfo(`Remote config keys`, Object.keys(config), isDebug);
 
     return config;
   } catch (error) {
-    displayConfigError(`Remote: ${url}`, error instanceof Error ? error.message : String(error));
+    logConfigError(`Remote: ${url}`, error instanceof Error ? error.message : String(error));
     return {};
   }
 }
@@ -77,7 +72,7 @@ export async function loadAgentConfig(
   configPaths?: string[],
   isDebug = false,
 ): Promise<AgentAppConfig> {
-  displayConfigStart();
+  logConfigStart(isDebug);
 
   // Handle no config case - try to load from default locations
   if (!configPaths || configPaths.length === 0) {
@@ -88,13 +83,13 @@ export async function loadAgentConfig(
       });
 
       if (filePath) {
-        displayConfigLoaded(filePath, Object.keys(content).length);
-        displayDebugInfo(`Default config keys`, Object.keys(content), isDebug);
+        logConfigLoaded(filePath, Object.keys(content).length, isDebug);
+        logDebugInfo(`Default config keys`, Object.keys(content), isDebug);
       }
 
       return content;
     } catch (err) {
-      displayDebugInfo(
+      logDebugInfo(
         'No default config found',
         err instanceof Error ? err.message : String(err),
         isDebug,
@@ -121,13 +116,13 @@ export async function loadAgentConfig(
         });
 
         if (filePath) {
-          displayConfigLoaded(filePath, Object.keys(content).length);
-          displayDebugInfo(`Config keys from ${filePath}`, Object.keys(content), isDebug);
+          logConfigLoaded(filePath, Object.keys(content).length, isDebug);
+          logDebugInfo(`Config keys from ${filePath}`, Object.keys(content), isDebug);
         }
 
         config = content;
       } catch (err) {
-        displayConfigError(path, err instanceof Error ? err.message : String(err));
+        logConfigError(path, err instanceof Error ? err.message : String(err));
         continue;
       }
     }
@@ -136,7 +131,7 @@ export async function loadAgentConfig(
     mergedConfig = deepMerge(mergedConfig, config);
   }
 
-  displayDebugInfo(`Final merged config keys`, Object.keys(mergedConfig), isDebug);
+  logDebugInfo(`Final merged config keys`, Object.keys(mergedConfig), isDebug);
 
   return mergedConfig;
 }

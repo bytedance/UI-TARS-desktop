@@ -14,7 +14,7 @@ import {
   isAgentWebUIImplementationType,
 } from '@tarko/interface';
 import { resolveValue } from '../utils';
-import { displayDeprecatedWarning, displayConfigComplete } from './display';
+import { logDeprecatedWarning, logConfigComplete } from './display';
 
 /**
  * Handler for processing deprecated CLI options
@@ -79,7 +79,7 @@ export function buildAppConfig<
     .filter(([, value]) => value !== undefined)
     .map(([optionName]) => optionName);
 
-  displayDeprecatedWarning(deprecatedKeys);
+  logDeprecatedWarning(deprecatedKeys);
   handleCoreDeprecatedOptions(cliConfigProps, deprecatedOptions);
 
   // Handle tool filter options
@@ -107,8 +107,9 @@ export function buildAppConfig<
   // Apply WebUI defaults after all merging is complete
   applyWebUIDefaults(config as AgentAppConfig);
 
-  // Display final configuration summary
-  displayConfigComplete(config as AgentAppConfig);
+  // Log final configuration summary (debug only)
+  const isDebug = cliArguments.debug || false;
+  logConfigComplete(config as AgentAppConfig, isDebug);
 
   return config as U;
 }

@@ -11,9 +11,9 @@ import { AgentCLIArguments, AgentAppConfig, LogLevel, Tool } from '@tarko/interf
 
 // Mock the display module
 vi.mock('../src/config/display', () => ({
-  displayDeprecatedWarning: vi.fn(),
-  displayConfigComplete: vi.fn(),
-  displayDebugInfo: vi.fn(),
+  logDeprecatedWarning: vi.fn(),
+  logConfigComplete: vi.fn(),
+  logDebugInfo: vi.fn(),
 }));
 
 // Mock the utils module

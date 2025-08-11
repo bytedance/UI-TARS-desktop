@@ -8,7 +8,7 @@ import { TARKO_CONSTANTS } from '@tarko/interface';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
-import { displayDebugInfo } from './display';
+import { logDebugInfo } from './display';
 
 /**
  * Default configuration files that will be automatically detected
@@ -56,13 +56,13 @@ export function buildConfigPaths({
   // L4: Remote config has lower priority
   if (remoteConfig) {
     configPaths.push(remoteConfig);
-    displayDebugInfo(`Adding remote config`, remoteConfig, isDebug);
+    logDebugInfo(`Adding remote config`, remoteConfig, isDebug);
   }
 
   // L3: CLI config files
   if (cliConfigPaths.length > 0) {
     configPaths.push(...cliConfigPaths);
-    displayDebugInfo(`Adding CLI config paths`, cliConfigPaths, isDebug);
+    logDebugInfo(`Adding CLI config paths`, cliConfigPaths, isDebug);
   }
 
   // L2: Global workspace config file
@@ -73,7 +73,7 @@ export function buildConfigPaths({
       const configPath = path.join(globalWorkspacePath, file);
       if (fs.existsSync(configPath)) {
         configPaths.push(configPath);
-        displayDebugInfo(`Found global workspace config`, configPath, isDebug);
+        logDebugInfo(`Found global workspace config`, configPath, isDebug);
         break;
       }
     }
@@ -85,13 +85,13 @@ export function buildConfigPaths({
       const configPath = path.join(workspace, file);
       if (fs.existsSync(configPath)) {
         configPaths.push(configPath);
-        displayDebugInfo(`Found workspace config`, configPath, isDebug);
+        logDebugInfo(`Found workspace config`, configPath, isDebug);
         break;
       }
     }
   }
 
-  displayDebugInfo(`Config search paths`, configPaths, isDebug);
+  logDebugInfo(`Config search paths`, configPaths, isDebug);
 
   return configPaths;
 }
