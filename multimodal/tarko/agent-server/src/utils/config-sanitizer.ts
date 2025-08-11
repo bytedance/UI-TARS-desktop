@@ -15,20 +15,21 @@ export function sanitizeAgentOptions(options: AgentAppConfig): SanitizedAgentOpt
   if (options.name !== undefined) sanitized.name = options.name;
   if (options.instructions !== undefined) {
     // Truncate instructions for UI display
-    sanitized.instructions = options.instructions.length > 100 
-      ? options.instructions.substring(0, 100) + '...'
-      : options.instructions;
+    sanitized.instructions =
+      options.instructions.length > 100
+        ? options.instructions.substring(0, 100) + '...'
+        : options.instructions;
   }
 
   // Model configuration
   if (options.model !== undefined) {
     const modelConfig: ProviderOptions = { ...options.model };
-    
+
     // Sanitize API key if present
     if (modelConfig.apiKey) {
       modelConfig.apiKey = sanitizeApiKey(modelConfig.apiKey); // secretlint-disable-line
     }
-    
+
     sanitized.model = modelConfig;
   }
 
@@ -41,14 +42,14 @@ export function sanitizeAgentOptions(options: AgentAppConfig): SanitizedAgentOpt
   if (options.tools !== undefined && Array.isArray(options.tools)) {
     sanitized.tools = options.tools.map(sanitizeTool);
   }
-  
+
   if (options.tool !== undefined) {
     sanitized.tool = {
       include: options.tool.include,
       exclude: options.tool.exclude,
     };
   }
-  
+
   if (options.toolCallEngine !== undefined) {
     // Convert tool call engine to string representation for serialization
     if (typeof options.toolCallEngine === 'string') {
@@ -70,11 +71,11 @@ export function sanitizeAgentOptions(options: AgentAppConfig): SanitizedAgentOpt
   if (options.context !== undefined) {
     sanitized.context = options.context;
   }
-  
+
   if (options.eventStreamOptions !== undefined) {
     sanitized.eventStreamOptions = options.eventStreamOptions;
   }
-  
+
   if (options.enableStreamingToolCallEvents !== undefined) {
     sanitized.enableStreamingToolCallEvents = options.enableStreamingToolCallEvents;
   }

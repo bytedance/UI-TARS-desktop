@@ -5,7 +5,7 @@ import {
   PanelContent,
   AgentInfo,
   WorkspaceInfo,
-  AgentOptions,
+  SanitizedAgentOptions,
 } from '@/common/types';
 
 /**
@@ -49,7 +49,7 @@ export const workspaceInfoAtom = atom<WorkspaceInfo>({
 /**
  * Atom for agent options (sanitized configuration)
  */
-export const agentOptionsAtom = atom<AgentOptions>({});
+export const agentOptionsAtom = atom<SanitizedAgentOptions>({});
 
 /**
  * Atom for sidebar collapsed state

@@ -8,7 +8,7 @@ import { SanitizedAgentOptions, WorkspaceInfo } from '@tarko/interface';
 import { ToolCategory } from '../constants/toolTypes';
 
 export { AgentEventStream };
-export type { SanitizedAgentOptions as AgentOptions, WorkspaceInfo };
+export type { SanitizedAgentOptions, WorkspaceInfo };
 
 export type { ChatCompletionContentPart, ChatCompletionMessageToolCall };
 
@@ -122,5 +122,3 @@ export interface ModelInfo {
   model?: string;
   provider?: string;
 }
-
-

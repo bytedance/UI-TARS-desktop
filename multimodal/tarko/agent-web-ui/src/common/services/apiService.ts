@@ -3,7 +3,7 @@ import {
   AgentEventStream,
   SessionMetadata,
   AgentInfo,
-  AgentOptions,
+  SanitizedAgentOptions,
   WorkspaceInfo,
 } from '@/common/types';
 import { socketService } from './socketService';
@@ -419,7 +419,7 @@ class ApiService {
   /**
    * Get current agent options (sanitized)
    */
-  async getAgentOptions(): Promise<AgentOptions> {
+  async getAgentOptions(): Promise<SanitizedAgentOptions> {
     try {
       const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.AGENT_OPTIONS}`, {
         method: 'GET',

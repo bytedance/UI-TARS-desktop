@@ -25,12 +25,12 @@ export interface SanitizedAgentOptions extends Omit<AgentOptions, 'toolCallEngin
    * Workspace directory basename for UI display
    */
   workspaceName?: string;
-  
+
   /**
    * Tool call engine serialized as string instead of ToolCallEngineType
    */
   toolCallEngine?: string;
-  
+
   /**
    * Sanitized tools without function implementations
    */

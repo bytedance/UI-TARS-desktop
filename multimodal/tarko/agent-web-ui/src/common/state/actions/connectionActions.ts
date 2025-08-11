@@ -48,7 +48,7 @@ export const checkConnectionStatusAction = atom(null, async (get, set) => {
 
         // Extract model info from agent options
         const modelInfo = {
-          model: agentOptions.model?.id || agentOptions.model?.model,
+          model: agentOptions.model?.id || agentOptions.model?.id,
           provider: agentOptions.model?.provider,
         };
         set(modelInfoAtom, modelInfo);
