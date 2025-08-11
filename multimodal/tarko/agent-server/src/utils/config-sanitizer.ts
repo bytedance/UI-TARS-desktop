@@ -41,7 +41,7 @@ export function sanitizeAgentOptions(options: AgentAppConfig): SanitizedAgentOpt
     
     // Sanitize API key if present
     if (modelConfig.apiKey) {
-      modelConfig.apiKey = sanitizeApiKey(modelConfig.apiKey);
+      modelConfig.apiKey = sanitizeApiKey(modelConfig.apiKey); // secretlint-disable-line
     }
     
     sanitized.model = modelConfig;

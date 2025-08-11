@@ -144,14 +144,14 @@ export interface AgentOptions {
     provider?: string;
     id?: string;
     apiKey?: string; // Sanitized authentication token
-    [key: string]: any;
+    [key: string]: any; // secretlint-disable-line
   };
   maxTokens?: number;
   temperature?: number;
   thinking?: {
     enabled?: boolean;
     showInResponse?: boolean;
-    [key: string]: any;
+    [key: string]: any; // secretlint-disable-line
   };
   
   // Tool configuration
@@ -159,7 +159,7 @@ export interface AgentOptions {
     name: string;
     description?: string;
     schema?: any;
-    [key: string]: any; // Allow other tool properties except handler
+    [key: string]: any; // Allow other tool properties except handler // secretlint-disable-line
   }>;
   tool?: {
     include?: string[];
@@ -173,12 +173,12 @@ export interface AgentOptions {
   // Memory options
   context?: {
     maxImagesCount?: number;
-    [key: string]: any;
+    [key: string]: any; // secretlint-disable-line
   };
   eventStreamOptions?: {
     bufferSize?: number;
     flushInterval?: number;
-    [key: string]: any;
+    [key: string]: any; // secretlint-disable-line
   };
   enableStreamingToolCallEvents?: boolean;
   
