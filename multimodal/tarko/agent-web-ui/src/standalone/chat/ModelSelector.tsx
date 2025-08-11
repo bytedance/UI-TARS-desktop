@@ -99,7 +99,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
         } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         <div className="flex-1 min-w-0">
-          <span className="font-medium truncate block">{modelId} ({provider})</span>
+          <span className="text-sm font-medium truncate block">{modelId} ({provider})</span>
         </div>
         {isSelected && <FiCheck size={14} className="text-blue-600 dark:text-blue-400 flex-shrink-0" />}
       </motion.button>
@@ -125,8 +125,8 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
           <FiCpu size={12} className="text-blue-600 dark:text-blue-400" />
         </div>
 
-        <div className="flex items-center max-w-32">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
+        <div className="flex items-center max-w-48">
+          <span className="text-base font-medium text-gray-700 dark:text-gray-300 truncate">
             {currentModel ? `${currentModel.modelId} (${currentModel.provider})` : 'Select Model'}
           </span>
         </div>
