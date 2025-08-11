@@ -9,6 +9,7 @@ import { isProcessingAtom, activePanelContentAtom, modelInfoAtom } from '../atom
 import { plansAtom, PlanKeyframe } from '../atoms/plan';
 import { replayStateAtom } from '../atoms/replay';
 import { sessionFilesAtom, FileItem } from '../atoms/files';
+import { activeSessionIdAtom } from '../atoms/session';
 import { ChatCompletionContentPartImage } from '@tarko/agent-interface';
 import { jsonrepair } from 'jsonrepair';
 
@@ -17,6 +18,25 @@ const toolCallArgumentsMap = new Map<string, any>();
 
 // Accumulate streaming tool call arguments for real-time display
 const streamingToolCallArgsMap = new Map<string, string>();
+
+/**
+ * Helper function to validate if the event belongs to the current active session
+ * Prevents cross-session content bleeding in workspace panel
+ */
+function shouldUpdatePanelContent(get: Getter, sessionId: string): boolean {
+  const activeSessionId = get(activeSessionIdAtom);
+  const replayState = get(replayStateAtom);
+
+  // Don't update panel content if:
+  // 1. No active session
+  // 2. Event is from a different session than the active one
+  // 3. In replay mode (replay handles its own content updates)
+  if (!activeSessionId || sessionId !== activeSessionId || replayState.isActive) {
+    return false;
+  }
+
+  return true;
+}
 
 export const processEventAction = atom(
   null,
@@ -27,7 +47,7 @@ export const processEventAction = atom(
 
     switch (event.type) {
       case 'user_message':
-        handleUserMessage(set, sessionId, event);
+        handleUserMessage(get, set, sessionId, event);
         break;
 
       case 'assistant_message':
@@ -56,7 +76,7 @@ export const processEventAction = atom(
         break;
 
       case 'tool_result':
-        handleToolResult(set, sessionId, event);
+        handleToolResult(get, set, sessionId, event);
         break;
 
       case 'system':
@@ -107,6 +127,7 @@ export const processEventAction = atom(
 );
 
 function handleUserMessage(
+  get: Getter,
   set: Setter,
   sessionId: string,
   event: AgentEventStream.UserMessageEvent,
@@ -126,8 +147,8 @@ function handleUserMessage(
     };
   });
 
-  // Auto-show user uploaded images in workspace panel
-  if (Array.isArray(event.content)) {
+  // Auto-show user uploaded images in workspace panel (only for active session)
+  if (Array.isArray(event.content) && shouldUpdatePanelContent(get, sessionId)) {
     const images = event.content.filter((part) => part.type === 'image_url');
     if (images.length > 0) {
       set(activePanelContentAtom, {
@@ -190,7 +211,7 @@ function handleAssistantMessage(
     };
   });
 
-  if (event.finishReason !== 'tool_calls') {
+  if (event.finishReason !== 'tool_calls' && shouldUpdatePanelContent(get, sessionId)) {
     // Auto-associate with recent environment input for final browser state display
     const currentMessages = get(messagesAtom)[sessionId] || [];
 
@@ -418,7 +439,12 @@ function collectFileInfo(
   }
 }
 
-function handleToolResult(set: Setter, sessionId: string, event: AgentEventStream.ToolResultEvent) {
+function handleToolResult(
+  get: Getter,
+  set: Setter,
+  sessionId: string,
+  event: AgentEventStream.ToolResultEvent,
+) {
   const args = toolCallArgumentsMap.get(event.toolCallId);
 
   collectFileInfo(
@@ -483,50 +509,53 @@ function handleToolResult(set: Setter, sessionId: string, event: AgentEventStrea
     };
   });
 
-  // Special handling for browser vision control to preserve environment context
-  if (result.type === 'browser_vision_control') {
-    set(activePanelContentAtom, (prev) => {
-      if (prev && prev.type === 'image' && prev.environmentId) {
-        const environmentId = prev.environmentId;
+  // Update panel content only for active session
+  if (shouldUpdatePanelContent(get, sessionId)) {
+    // Special handling for browser vision control to preserve environment context
+    if (result.type === 'browser_vision_control') {
+      set(activePanelContentAtom, (prev) => {
+        if (prev && prev.type === 'image' && prev.environmentId) {
+          const environmentId = prev.environmentId;
 
-        return {
-          ...prev,
-          type: 'browser_vision_control',
-          source: event.content,
-          title: prev.title,
-          timestamp: event.timestamp,
-          toolCallId: event.toolCallId,
-          error: event.error,
-          arguments: args,
-          originalContent: prev.source,
+          return {
+            ...prev,
+            type: 'browser_vision_control',
+            source: event.content,
+            title: prev.title,
+            timestamp: event.timestamp,
+            toolCallId: event.toolCallId,
+            error: event.error,
+            arguments: args,
+            originalContent: prev.source,
 
-          environmentId: environmentId,
-          processedEnvironmentIds: [environmentId], // Track processed environment IDs
-        };
-      } else {
-        return {
-          type: result.type,
-          source: result.content,
-          title: result.name,
-          timestamp: result.timestamp,
-          toolCallId: result.toolCallId,
-          error: result.error,
+            environmentId: environmentId,
+            processedEnvironmentIds: [environmentId], // Track processed environment IDs
+          };
+        } else {
+          return {
+            type: result.type,
+            source: result.content,
+            title: result.name,
+            timestamp: result.timestamp,
+            toolCallId: result.toolCallId,
+            error: result.error,
 
-          arguments: args,
-        };
-      }
-    });
-  } else {
-    set(activePanelContentAtom, {
-      type: result.type,
-      source: result.content,
-      title: result.name,
-      timestamp: result.timestamp,
-      toolCallId: result.toolCallId,
-      error: result.error,
-      arguments: args,
-      _extra: result._extra,
-    });
+            arguments: args,
+          };
+        }
+      });
+    } else {
+      set(activePanelContentAtom, {
+        type: result.type,
+        source: result.content,
+        title: result.name,
+        timestamp: result.timestamp,
+        toolCallId: result.toolCallId,
+        error: result.error,
+        arguments: args,
+        _extra: result._extra,
+      });
+    }
   }
 
   toolCallResultMap.set(result.toolCallId, result);
@@ -578,7 +607,7 @@ function handleEnvironmentInput(
     };
   });
 
-  if (Array.isArray(event.content)) {
+  if (Array.isArray(event.content) && shouldUpdatePanelContent(get, sessionId)) {
     const imageContent = event.content.find(
       (item) => item.type === 'image_url' && item.image_url && item.image_url.url,
     ) as ChatCompletionContentPartImage;
@@ -702,14 +731,17 @@ function handleFinalAnswer(
 ): void {
   const messageId = event.messageId || `final-answer-${uuidv4()}`;
 
-  set(activePanelContentAtom, {
-    type: 'research_report',
-    source: event.content,
-    title: event.title || 'Research Report',
-    timestamp: event.timestamp,
-    isDeepResearch: true,
-    messageId,
-  });
+  // Update panel content only for active session
+  if (shouldUpdatePanelContent(get, sessionId)) {
+    set(activePanelContentAtom, {
+      type: 'research_report',
+      source: event.content,
+      title: event.title || 'Research Report',
+      timestamp: event.timestamp,
+      isDeepResearch: true,
+      messageId,
+    });
+  }
 
   const finalAnswerMessage: Message = {
     id: event.id || uuidv4(),
@@ -792,31 +824,33 @@ function handleFinalAnswerStreaming(
     };
   });
 
-  // Sync panel content with message state
-  set(activePanelContentAtom, (prev: any) => {
-    // Start new stream or different messageId
-    if (!prev || prev.type !== 'research_report' || prev.messageId !== messageId) {
-      return {
-        role: 'assistant',
-        type: 'research_report',
-        source: event.content,
-        title: event.title || 'Research Report (Generating...)',
-        timestamp: event.timestamp,
-        isDeepResearch: true,
-        messageId,
-        isStreaming: !event.isComplete,
-      };
-    }
+  // Sync panel content with message state (only for active session)
+  if (shouldUpdatePanelContent(get, sessionId)) {
+    set(activePanelContentAtom, (prev: any) => {
+      // Start new stream or different messageId
+      if (!prev || prev.type !== 'research_report' || prev.messageId !== messageId) {
+        return {
+          role: 'assistant',
+          type: 'research_report',
+          source: event.content,
+          title: event.title || 'Research Report (Generating...)',
+          timestamp: event.timestamp,
+          isDeepResearch: true,
+          messageId,
+          isStreaming: !event.isComplete,
+        };
+      }
 
-    // Append to existing content
-    return {
-      ...prev,
-      source: prev.source + event.content,
-      isStreaming: !event.isComplete,
-      timestamp: event.timestamp,
-      title: event.title || prev.title,
-    };
-  });
+      // Append to existing content
+      return {
+        ...prev,
+        source: prev.source + event.content,
+        isStreaming: !event.isComplete,
+        timestamp: event.timestamp,
+        title: event.title || prev.title,
+      };
+    });
+  }
 
   // Handle first chunk and completion state
   const prevActivePanelContent = get(activePanelContentAtom);
@@ -987,8 +1021,8 @@ function handleStreamingToolCall(
     };
   });
 
-  // Real-time preview for write_file operations
-  if (toolName === 'write_file' && parsedArgs.path) {
+  // Real-time preview for write_file operations (only for active session)
+  if (toolName === 'write_file' && parsedArgs.path && shouldUpdatePanelContent(get, sessionId)) {
     set(activePanelContentAtom, {
       type: 'file',
       source: parsedArgs.content || '',
