@@ -4,6 +4,7 @@
  */
 
 import { Request, Response } from 'express';
+import { sanitizeAgentOptions } from '../../utils/config-sanitizer';
 
 /**
  * Health check endpoint
@@ -31,5 +32,17 @@ export function getAgentInfo(req: Request, res: Response) {
   const server = req.app.locals.server;
   res.status(200).json({
     name: server.getCurrentAgentName() || 'Unknown Agent',
+  });
+}
+
+/**
+ * Get current agent options (sanitized)
+ */
+export function getAgentOptions(req: Request, res: Response) {
+  const server = req.app.locals.server;
+  const sanitizedOptions = sanitizeAgentOptions(server.appConfig);
+
+  res.status(200).json({
+    options: sanitizedOptions,
   });
 }

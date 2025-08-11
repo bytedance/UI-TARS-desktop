@@ -120,3 +120,31 @@ export interface ModelInfo {
   model?: string;
   provider?: string;
 }
+
+/**
+ * Workspace information
+ */
+export interface WorkspaceInfo {
+  name: string;
+  path: string;
+}
+
+/**
+ * Sanitized agent options from server
+ */
+export interface AgentOptions {
+  workspace?: string;
+  workspaceName?: string;
+  agent?: {
+    name?: string;
+    id?: string;
+  };
+  server?: {
+    port?: number;
+  };
+  model?: {
+    provider?: string;
+    model?: string;
+    auth?: string; // Sanitized authentication token
+  };
+}

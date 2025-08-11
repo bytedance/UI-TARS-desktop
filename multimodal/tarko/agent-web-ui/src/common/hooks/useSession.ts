@@ -10,6 +10,8 @@ import {
   connectionStatusAtom,
   modelInfoAtom,
   agentInfoAtom,
+  workspaceInfoAtom,
+  agentOptionsAtom,
 } from '../state/atoms/ui';
 import { replayStateAtom } from '../state/atoms/replay';
 import {
@@ -50,6 +52,8 @@ export function useSession() {
   const [replayState, setReplayState] = useAtom(replayStateAtom);
   const modelInfo = useAtomValue(modelInfoAtom);
   const agentInfo = useAtomValue(agentInfoAtom);
+  const workspaceInfo = useAtomValue(workspaceInfoAtom);
+  const agentOptions = useAtomValue(agentOptionsAtom);
 
   // Check if we're in replay mode using the context hook
   const { isReplayMode } = useReplayMode();
@@ -137,7 +141,9 @@ export function useSession() {
       plans,
       replayState,
       modelInfo,
-      agentInfo, // Add agent info to the returned state
+      agentInfo,
+      workspaceInfo,
+      agentOptions,
 
       // Session operations
       loadSessions,
@@ -174,6 +180,8 @@ export function useSession() {
       replayState,
       modelInfo,
       agentInfo,
+      workspaceInfo,
+      agentOptions,
       loadSessions,
       createSession,
       setActiveSession,
