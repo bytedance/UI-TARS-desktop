@@ -125,7 +125,7 @@ export class SeedGUIAgent extends Agent {
   }
 
   async onLLMRequest(id: string, payload: LLMRequestHookPayload): Promise<void> {
-    this.logger.log('onLLMRequest', id, payload);
+    // this.logger.log('onLLMRequest', id, payload);
     // await ImageSaver.saveImagesFromPayload(id, payload);
   }
 

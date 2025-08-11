@@ -13,7 +13,7 @@ import {
   StreamProcessingState,
   StreamChunkResult,
 } from '@tarko/agent-interface';
-import { actionParser } from '@ui-tars/action-parser';
+import { actionParser } from '@gui-agent/action-parser';
 import { getScreenInfo } from './shared';
 
 /**
@@ -159,7 +159,7 @@ export class SeedGUIAgentToolCallEngine extends ToolCallEngine {
 
     // No tool calls found - return regular response
     return {
-      content: finishMessage ? finishMessage : fullContent,
+      content: finishMessage ? finishMessage : (parsed[0].thought ?? fullContent),
       rawContent: fullContent,
       toolCalls,
       finishReason: toolCalls.length > 0 && !finished ? 'tool_calls' : 'stop',

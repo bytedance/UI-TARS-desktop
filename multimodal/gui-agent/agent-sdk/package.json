@@ -31,7 +31,7 @@
     "@tarko/agent": "workspace:*",
     "@tarko/agent-interface": "workspace:*",
     "@tarko/agent-cli": "workspace:*",
-    "@ui-tars/action-parser": "1.2.3",
+    "@gui-agent/action-parser": "workspace:*",
     "@ui-tars/sdk": "1.2.3",
     "@ui-tars/operator-nut-js": "1.2.3",
     "@ui-tars/operator-adb": "1.2.3",
