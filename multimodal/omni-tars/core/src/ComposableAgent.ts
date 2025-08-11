@@ -68,8 +68,10 @@ export class ComposableAgent extends Agent {
     await this.composer.executeOnEachAgentLoopStart();
   }
 
-  async onAgentLoopEnd(): Promise<void> {
+  async onAgentLoopEnd(id: string): Promise<void> {
     // Execute hooks for all plugins
     await this.composer.executeOnAgentLoopEnd();
+    // Call parent implementation to ensure proper agent loop termination
+    await super.onAgentLoopEnd(id);
   }
 }
