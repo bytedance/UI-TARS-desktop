@@ -4,9 +4,11 @@ import {
   ChatCompletionContentPart,
   ChatCompletionMessageToolCall,
 } from '@tarko/agent-interface';
+import { SanitizedAgentOptions, WorkspaceInfo } from '@tarko/interface';
 import { ToolCategory } from '../constants/toolTypes';
 
 export { AgentEventStream };
+export type { SanitizedAgentOptions as AgentOptions, WorkspaceInfo };
 
 export type { ChatCompletionContentPart, ChatCompletionMessageToolCall };
 
@@ -121,71 +123,4 @@ export interface ModelInfo {
   provider?: string;
 }
 
-/**
- * Workspace information
- */
-export interface WorkspaceInfo {
-  name: string;
-  path: string;
-}
 
-/**
- * Sanitized agent options from server - matches backend SanitizedAgentOptions
- * This extends the base AgentOptions with additional workspace name field
- */
-export interface AgentOptions {
-  // Base options
-  id?: string;
-  name?: string;
-  instructions?: string;
-  
-  // Model configuration
-  model?: {
-    provider?: string;
-    id?: string;
-    apiKey?: string; // Sanitized authentication token
-    [key: string]: any; // secretlint-disable-line
-  };
-  maxTokens?: number;
-  temperature?: number;
-  thinking?: {
-    enabled?: boolean;
-    showInResponse?: boolean;
-    [key: string]: any; // secretlint-disable-line
-  };
-  
-  // Tool configuration
-  tools?: Array<{
-    name: string;
-    description?: string;
-    schema?: any;
-    [key: string]: any; // Allow other tool properties except handler // secretlint-disable-line
-  }>;
-  tool?: {
-    include?: string[];
-    exclude?: string[];
-  };
-  toolCallEngine?: string;
-  
-  // Loop options
-  maxIterations?: number;
-  
-  // Memory options
-  context?: {
-    maxImagesCount?: number;
-    [key: string]: any; // secretlint-disable-line
-  };
-  eventStreamOptions?: {
-    bufferSize?: number;
-    flushInterval?: number;
-    [key: string]: any; // secretlint-disable-line
-  };
-  enableStreamingToolCallEvents?: boolean;
-  
-  // Misc options
-  logLevel?: string;
-  
-  // Workspace options (AgentOptions + workspaceName)
-  workspace?: string;
-  workspaceName?: string;
-}

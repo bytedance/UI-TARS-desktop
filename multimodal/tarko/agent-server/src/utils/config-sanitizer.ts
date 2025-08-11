@@ -1,23 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import path from 'path';
 import { AgentAppConfig } from '../types';
-import { AgentOptions, Tool, CommonFilterOptions, ProviderOptions, LLMReasoningOptions, AgentEventStream, LogLevel, ToolCallEngineType } from '@tarko/interface';
-
-/**
- * Sanitized tool interface that extends Tool but excludes function implementations
- */
-type SanitizedTool = Omit<Tool, 'function'> & {
-  // Keep all Tool properties except function implementation
-};
-
-/**
- * Sanitized AgentOptions with workspace name addition and serialized tool call engine
- */
-type SanitizedAgentOptions = Omit<AgentOptions, 'toolCallEngine' | 'tools'> & {
-  workspaceName?: string;
-  toolCallEngine?: string; // Serialized as string instead of ToolCallEngineType
-  tools?: SanitizedTool[]; // Sanitized tools without function implementations
-}
+import { SanitizedAgentOptions, SanitizedTool } from '@tarko/interface';
+import { Tool, ProviderOptions } from '@tarko/interface';
 
 /**
  * Sanitize agent configuration, hiding sensitive information
