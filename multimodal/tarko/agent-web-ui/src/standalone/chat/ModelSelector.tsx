@@ -98,11 +98,10 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
             : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
         } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
-        <div className="flex flex-col">
-          <span className="font-medium">{modelId}</span>
-          <span className="text-xs text-gray-500 dark:text-gray-400">{provider}</span>
+        <div className="flex-1 min-w-0">
+          <span className="font-medium truncate block">{modelId} ({provider})</span>
         </div>
-        {isSelected && <FiCheck size={14} className="text-blue-600 dark:text-blue-400" />}
+        {isSelected && <FiCheck size={14} className="text-blue-600 dark:text-blue-400 flex-shrink-0" />}
       </motion.button>
     );
   };
@@ -126,15 +125,10 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
           <FiCpu size={12} className="text-blue-600 dark:text-blue-400" />
         </div>
 
-        <div className="flex flex-col items-start">
-          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-            {currentModel?.modelId || 'Select Model'}
+        <div className="flex items-center max-w-32">
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
+            {currentModel ? `${currentModel.modelId} (${currentModel.provider})` : 'Select Model'}
           </span>
-          {currentModel?.provider && (
-            <span className="text-xs text-gray-500 dark:text-gray-400">
-              {currentModel.provider}
-            </span>
-          )}
         </div>
 
         <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
@@ -154,13 +148,13 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
               className="fixed inset-0 z-10"
             />
 
-            {/* Dropdown */}
+            {/* Dropdown - positioned above */}
             <motion.div
-              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              exit={{ opacity: 0, y: 10, scale: 0.95 }}
               transition={{ duration: 0.15 }}
-              className="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-xl border border-gray-200/60 dark:border-gray-600/40 shadow-lg backdrop-blur-sm z-20"
+              className="absolute bottom-full left-0 mb-2 w-64 bg-white dark:bg-gray-800 rounded-xl border border-gray-200/60 dark:border-gray-600/40 shadow-lg backdrop-blur-sm z-20"
             >
               <div className="p-2 max-h-64 overflow-y-auto">
                 <div className="mb-2 px-3 py-2">
