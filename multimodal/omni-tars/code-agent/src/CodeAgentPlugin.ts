@@ -40,19 +40,19 @@ export class CodeAgentPlugin extends AgentPlugin {
     // ];
   }
 
-  onLLMRequest(id: string, payload: LLMRequestHookPayload): void | Promise<void> {
+  async onLLMRequest(id: string, payload: LLMRequestHookPayload): Promise<void> {
     // Code-specific request handling if needed
   }
 
-  onLLMResponse(id: string, payload: LLMResponseHookPayload): void | Promise<void> {
+  async onLLMResponse(id: string, payload: LLMResponseHookPayload): Promise<void> {
     // Code-specific response handling if needed
   }
 
-  onEachAgentLoopStart(): void | Promise<void> {
+  async onEachAgentLoopStart(): Promise<void> {
     // Code-specific loop start handling if needed
   }
 
-  onAgentLoopEnd(): void | Promise<void> {
+  async onAgentLoopEnd(): Promise<void> {
     // Code-specific loop end handling if needed
   }
 }

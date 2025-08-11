@@ -6,7 +6,7 @@
 import Agent, { LLMRequestHookPayload, LLMResponseHookPayload, Tool } from '@tarko/agent';
 
 /**
- * Standard interface that all agent plugins must implement
+ * Base class that all agent plugins must extends
  */
 export class AgentPlugin {
   /** Unique identifier for this agent plugin */
@@ -19,7 +19,7 @@ export class AgentPlugin {
 
   get agent() {
     if (!this._agent) {
-      throw new Error('The current plugin does not associate any agent instances');
+      throw new Error('The current plugin does not associate any agent instance');
     }
     return this._agent;
   }
@@ -28,30 +28,31 @@ export class AgentPlugin {
     this._agent = agent;
   }
 
-  /** Initialize the agent plugin (called during composition setup) */
-  initialize?(): Promise<void>;
-
   /** Register tools provided by this agent plugin */
   getTools(): Tool[] {
     return this.tools;
   }
+
+  /** Initialize the agent plugin (called during composition setup) */
+  async initialize?(): Promise<void>;
+
   /** Hook called on each LLM request */
-  onLLMRequest(id: string, payload: LLMRequestHookPayload): void | Promise<void> {
+  async onLLMRequest(id: string, payload: LLMRequestHookPayload): Promise<void> {
     //logic here
   }
 
   /** Hook called on each LLM response */
-  onLLMResponse(id: string, payload: LLMResponseHookPayload): void | Promise<void> {
+  async onLLMResponse(id: string, payload: LLMResponseHookPayload): Promise<void> {
     //logic here
   }
 
   /** Hook called at the start of each agent loop */
-  onEachAgentLoopStart(): void | Promise<void> {
+  async onEachAgentLoopStart(): Promise<void> {
     //logic here
   }
 
   /** Hook called at the end of each agent loop */
-  onAgentLoopEnd(): void | Promise<void> {
+  async onAgentLoopEnd(): Promise<void> {
     //logic here
   }
 }

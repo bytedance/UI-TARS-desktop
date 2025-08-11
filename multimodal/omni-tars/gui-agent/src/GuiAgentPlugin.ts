@@ -28,19 +28,19 @@ export class GuiAgentPlugin extends AgentPlugin {
     console.log('[GuiAgentPlugin] Initializing computer interaction capabilities');
   }
 
-  onLLMRequest(id: string, payload: LLMRequestHookPayload): void | Promise<void> {
+  async onLLMRequest(id: string, payload: LLMRequestHookPayload): Promise<void> {
     // GUI-specific request handling if needed
   }
 
-  onLLMResponse(id: string, payload: LLMResponseHookPayload): void | Promise<void> {
+  async onLLMResponse(id: string, payload: LLMResponseHookPayload): Promise<void> {
     // GUI-specific response handling if needed
   }
 
-  onEachAgentLoopStart(): void | Promise<void> {
+  async onEachAgentLoopStart(): Promise<void> {
     // GUI-specific loop start handling if needed
   }
 
-  onAgentLoopEnd(): void | Promise<void> {
+  async onAgentLoopEnd(): Promise<void> {
     // GUI-specific loop end handling if needed
   }
 }

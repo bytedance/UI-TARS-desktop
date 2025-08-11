@@ -39,7 +39,7 @@ export class McpAgentPlugin extends AgentPlugin {
     ];
   }
 
-  onEachAgentLoopStart(): void | Promise<void> {
+  async onEachAgentLoopStart(): Promise<void> {
     // MCP-specific loop start handling if needed
     // const eventStream = this.agent.getEventStream();
     // const systemEvent = eventStream.createEvent('system', {

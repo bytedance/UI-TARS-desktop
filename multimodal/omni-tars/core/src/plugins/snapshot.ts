@@ -25,19 +25,19 @@ export class SnapshotPlugin extends AgentPlugin {
     this.baseDir = option.baseDir;
   }
 
-  onLLMRequest(id: string, payload: LLMRequestHookPayload): void | Promise<void> {
+  async onLLMRequest(id: string, payload: LLMRequestHookPayload): Promise<void> {
     this.saveSnapshot(id, 'request.json', payload);
   }
 
-  onLLMResponse(id: string, payload: LLMResponseHookPayload): void | Promise<void> {
+  async onLLMResponse(id: string, payload: LLMResponseHookPayload): Promise<void> {
     this.saveSnapshot(id, 'response.json', payload);
   }
 
-  onEachAgentLoopStart(): void | Promise<void> {
+  async onEachAgentLoopStart(): Promise<void> {
     this.loop++;
   }
 
-  onAgentLoopEnd(): void | Promise<void> {
+  async onAgentLoopEnd(): Promise<void> {
     this.loop++;
     return Promise.resolve();
   }
