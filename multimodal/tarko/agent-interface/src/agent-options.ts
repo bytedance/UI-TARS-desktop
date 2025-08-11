@@ -50,8 +50,9 @@ export interface AgentBaseOptions {
 
   /**
    * Used to define the Agent's system prompt.
+   * This completely replaces the default system prompt when provided.
    *
-   * @defaultValue `undefined`
+   * @defaultValue `undefined` (uses default prompt: "You are an intelligent assistant...")
    */
   instructions?: string;
 }
