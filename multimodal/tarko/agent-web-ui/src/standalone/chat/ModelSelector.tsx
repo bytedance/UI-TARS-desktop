@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FiCpu } from 'react-icons/fi';
+import { FiZap } from 'react-icons/fi';
 import {
   Select,
   MenuItem,
@@ -73,7 +73,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
       MuiSelect: {
         styleOverrides: {
           root: {
-            borderRadius: '9999px', // Full rounded
+            borderRadius: '12px', // Moderate rounded corners
             minHeight: '32px', // Reduced height
             fontSize: '13px', // Slightly smaller font
             fontWeight: 500,
@@ -123,7 +123,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
       MuiPaper: {
         styleOverrides: {
           root: {
-            borderRadius: '12px',
+            borderRadius: '16px', // Slightly more rounded for dropdown
             // Much lighter shadow to match app design
             boxShadow: 'none',
             backdropFilter: 'blur(8px)',
@@ -213,18 +213,19 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Box
           sx={{
-            width: 16, // Smaller icon container
-            height: 16,
-            borderRadius: '50%',
+            width: 18, // Slightly larger icon container
+            height: 18,
+            borderRadius: '6px', // Rounded square instead of circle
             background: isDarkMode
-              ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(139, 92, 246, 0.3))'
+              ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2))'
               : 'linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1))',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            border: isDarkMode ? '1px solid rgba(99, 102, 241, 0.3)' : '1px solid rgba(99, 102, 241, 0.2)',
           }}
         >
-          <FiCpu size={10} color={isDarkMode ? '#a5b4fc' : '#6366f1'} />
+          <FiZap size={11} color={isDarkMode ? '#a5b4fc' : '#6366f1'} />
         </Box>
         <Typography
           variant="body2"
@@ -235,7 +236,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
-            maxWidth: '140px', // Reduced max width
+            maxWidth: '160px', // Increased max width for better text display
           }}
         >
           {option.label}
@@ -280,8 +281,8 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ sessionId, classNa
               disablePortal: false,
             }}
             sx={{
-              minWidth: 160,
-              maxWidth: 180,
+              minWidth: 200,
+              maxWidth: 240,
               background: isDarkMode
                 ? 'linear-gradient(135deg, rgba(55, 65, 81, 0.9), rgba(75, 85, 99, 0.9))'
                 : 'linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(249, 250, 251, 0.9))',
