@@ -4,11 +4,9 @@ import {
   MultimodalTextContent,
   MultimodalImageContent,
   ImageContentData,
-  SearchResultData,
   CommandResultData,
   ScriptResultData,
   FileContentData,
-  SearchResult,
 } from './types';
 
 export function extractImageUrl(content: ChatCompletionContentPart[]): string | null {
@@ -38,36 +36,7 @@ export function parseImageContent(source: string): ImageContentData | null {
   return { mimeType, base64Data };
 }
 
-export function extractSearchResults(source: MultimodalContent[]): SearchResultData {
-  const resultsItem = source.find(
-    (item): item is MultimodalTextContent => item.type === 'text' && item.name === 'RESULTS',
-  );
-  const queryItem = source.find(
-    (item): item is MultimodalTextContent => item.type === 'text' && item.name === 'QUERY',
-  );
 
-  if (!resultsItem?.text) {
-    return { results: [] };
-  }
-
-  const resultBlocks = resultsItem.text.split('---').filter(Boolean);
-  const results = resultBlocks.map((block): SearchResult => {
-    const lines = block.trim().split('\n');
-    const titleLine = lines[0] || '';
-    const urlLine = lines[1] || '';
-    const snippet = lines.slice(2).join('\n');
-
-    const title = titleLine.replace(/^\[\d+\]\s*/, '').trim();
-    const url = urlLine.replace(/^URL:\s*/, '').trim();
-
-    return { title, url, snippet };
-  });
-
-  return {
-    results,
-    query: queryItem?.text,
-  };
-}
 
 export function extractCommandResult(source: MultimodalContent[]): CommandResultData {
   const commandItem = source.find(

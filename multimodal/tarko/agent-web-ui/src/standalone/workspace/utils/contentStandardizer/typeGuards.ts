@@ -11,16 +11,7 @@ export function isMultimodalContent(source: unknown): source is MultimodalConten
   );
 }
 
-export function isSearchResults(source: unknown): source is SearchResult[] {
-  return (
-    Array.isArray(source) &&
-    source.length > 0 &&
-    typeof source[0] === 'object' &&
-    source[0] !== null &&
-    'title' in source[0] &&
-    'url' in source[0]
-  );
-}
+
 
 export function isCommandResult(source: unknown): source is CommandResult {
   return (
@@ -40,13 +31,4 @@ export function isScriptResult(source: unknown): source is ScriptResult {
   );
 }
 
-export function isObjectWithResults(
-  source: unknown,
-): source is { results: SearchResult[]; query?: string } {
-  return (
-    source !== null &&
-    typeof source === 'object' &&
-    'results' in source &&
-    Array.isArray((source as { results: unknown }).results)
-  );
-}
+

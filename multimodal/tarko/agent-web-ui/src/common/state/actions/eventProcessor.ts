@@ -13,7 +13,7 @@ import { activeSessionIdAtom } from '../atoms/session';
 import { ChatCompletionContentPartImage } from '@tarko/agent-interface';
 import { jsonrepair } from 'jsonrepair';
 import { TOOL_NAMES } from '@/common/constants';
-import { SearchResultNormalizer } from '../../services/SearchResultNormalizer';
+import { SearchService } from '../../services/SearchService';
 
 // Internal cache - not an Atom to avoid unnecessary reactivity
 const toolCallArgumentsMap = new Map<string, any>();
@@ -441,11 +441,11 @@ function collectFileInfo(
   }
 }
 
-// Helper function to normalize search results using centralized service
+// Helper function to normalize search results using unified search service
 function normalizeSearchResult(toolName: string, content: any, args: any): any {
-  // Use centralized normalizer for search tools
-  if (SearchResultNormalizer.shouldNormalize(toolName)) {
-    return SearchResultNormalizer.normalize(toolName, content, args);
+  // Use unified search service for all search-related processing
+  if (SearchService.isSearchTool(toolName)) {
+    return SearchService.normalizeSearchContent(toolName, content, args);
   }
 
   // Return original content for non-search tools

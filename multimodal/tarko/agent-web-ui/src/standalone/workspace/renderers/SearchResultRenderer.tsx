@@ -3,7 +3,7 @@ import React from 'react';
 import { ToolResultContentPart } from '../types';
 import { motion } from 'framer-motion';
 import { FiExternalLink, FiSearch, FiInfo, FiGlobe } from 'react-icons/fi';
-import { SearchResultNormalizer } from '../../../common/services/SearchResultNormalizer';
+import { SearchService } from '../../../common/services/SearchService';
 
 interface SearchResultRendererProps {
   part: ToolResultContentPart;
@@ -22,8 +22,8 @@ interface SearchResultRendererProps {
  * - Support for structured web_search results
  */
 export const SearchResultRenderer: React.FC<SearchResultRendererProps> = ({ part }) => {
-  // Use centralized data extraction
-  const searchData = SearchResultNormalizer.extractSearchData(part);
+  // Use unified search service for data extraction
+  const searchData = SearchService.extractSearchData(part);
   if (!searchData) {
     return <div className="text-gray-500 italic">Invalid search data format</div>;
   }
@@ -66,7 +66,7 @@ export const SearchResultRenderer: React.FC<SearchResultRendererProps> = ({ part
         {results.map((result, index) => {
           return (
             <motion.div
-              key={index}
+              key={`search-result-${index}`}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.05 }}
@@ -135,7 +135,7 @@ export const SearchResultRenderer: React.FC<SearchResultRendererProps> = ({ part
               {relatedSearches.map((searchQuery, index) => {
                 return (
                   <span
-                    key={index}
+                    key={`related-search-${index}`}
                     className="inline-block px-3 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors cursor-pointer"
                   >
                     {searchQuery}

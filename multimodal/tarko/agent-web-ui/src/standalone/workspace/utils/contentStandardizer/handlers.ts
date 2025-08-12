@@ -1,18 +1,10 @@
-import { SearchResultNormalizer } from '@/common/services/SearchResultNormalizer';
+import { SearchService } from '@/common/services/SearchService';
 import { ToolResultContentPart } from '../../types';
-import { StandardPanelContent, SearchResult, PanelContentSource } from '../../types/panelContent';
-import {
-  isMultimodalContent,
-  isSearchResults,
-  isCommandResult,
-  isScriptResult,
-  isFileResult,
-  isObjectWithResults,
-} from './typeGuards';
+import { StandardPanelContent, PanelContentSource } from '../../types/panelContent';
+import { isMultimodalContent, isCommandResult, isScriptResult, isFileResult } from './typeGuards';
 import {
   extractImageUrl,
   parseImageContent,
-  extractSearchResults,
   extractCommandResult,
   extractScriptResult,
   extractFileContent,
@@ -66,12 +58,14 @@ export function handleSearchContent(
   toolArguments?: Record<string, unknown>,
   title?: string,
 ): ToolResultContentPart[] {
-  // Check if already normalized by eventProcessor
-  if (SearchResultNormalizer.isNormalized(source)) {
+  // All search processing is now handled by eventProcessor using SearchService
+  // This function should only handle already-normalized search data
+
+  if (SearchService.isNormalizedSearchData(source)) {
     return source as ToolResultContentPart[];
   }
 
-  // Handle flat search result object (already processed by eventProcessor)
+  // Handle flat search result object (fallback for edge cases)
   if (
     source &&
     typeof source === 'object' &&
@@ -87,49 +81,7 @@ export function handleSearchContent(
     ];
   }
 
-  // Legacy format handling (fallback)
-  if (isSearchResults(source)) {
-    return [
-      {
-        type: 'search_result',
-        name: 'SEARCH_RESULTS',
-        results: source.map(
-          (item): SearchResult => ({
-            title: item.title,
-            url: item.url,
-            snippet: item.content || item.snippet || '',
-          }),
-        ),
-        query: (toolArguments?.query as string) || title?.replace(/^Search: /i, ''),
-      },
-    ];
-  }
-
-  if (isMultimodalContent(source)) {
-    const { results, query } = extractSearchResults(source);
-    return [
-      {
-        type: 'search_result',
-        name: 'SEARCH_RESULTS',
-        results,
-        query,
-      },
-    ];
-  }
-
-  if (isObjectWithResults(source)) {
-    return [
-      {
-        type: 'search_result',
-        name: 'SEARCH_RESULTS',
-        results: source.results,
-        query: source.query,
-        relatedSearches: source.relatedSearches,
-      },
-    ];
-  }
-
-  // Fallback to text content
+  // Final fallback to text content
   return [
     {
       type: 'text',

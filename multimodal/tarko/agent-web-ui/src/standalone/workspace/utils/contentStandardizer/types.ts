@@ -21,10 +21,7 @@ export interface ImageContentData {
   base64Data: string;
 }
 
-export interface SearchResultData {
-  results: SearchResult[];
-  query?: string;
-}
+
 
 export interface CommandResultData {
   command?: string;
@@ -37,12 +34,7 @@ export interface FileContentData {
   content?: string;
 }
 
-export interface SearchResult {
-  title: string;
-  url: string;
-  snippet?: string;
-  content?: string;
-}
+
 
 export interface CommandResult {
   command?: string;
