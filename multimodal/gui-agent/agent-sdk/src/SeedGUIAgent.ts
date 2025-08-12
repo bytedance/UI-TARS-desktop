@@ -105,7 +105,7 @@ export class SeedGUIAgent extends Agent {
         parameters: {},
         function: async (input) => {
           this.logger.log('browser_vision_control input:', input);
-          await this.operator!.execute({
+          const result = await this.operator!.execute({
             parsedPrediction: input.operator_action,
             screenWidth: getScreenInfo().screenWidth ?? 1000,
             screenHeight: getScreenInfo().screenHeight ?? 1000,
@@ -113,6 +113,7 @@ export class SeedGUIAgent extends Agent {
             scaleFactor: 1000,
             factors: [1, 1],
           });
+          return { action: input.action, status: 'success', result };
         },
       }),
     );
