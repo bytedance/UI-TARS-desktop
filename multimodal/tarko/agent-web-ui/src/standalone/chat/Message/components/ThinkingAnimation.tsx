@@ -73,15 +73,16 @@ const GradientText: React.FC<GradientTextProps> = ({
       <motion.span
         className={`absolute inset-0 font-medium bg-gradient-to-r ${getGradientClasses(phase)} bg-clip-text text-transparent`}
         style={{
-          backgroundSize: '200% 100%',
+          backgroundSize: '300% 100%',
         }}
         animate={{
           backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
         }}
         transition={{
-          duration: animationDuration,
+          duration: animationDuration * 0.7, // Faster animation
           repeat: Infinity,
           ease: 'easeInOut',
+          repeatType: 'reverse',
         }}
       >
         {text}
@@ -95,16 +96,16 @@ const getGradientClasses = (phase?: string) => {
   switch (phase) {
     case 'initializing':
     case 'warming_up':
-      return 'from-blue-600 via-blue-400 to-blue-600 dark:from-blue-400 dark:via-blue-300 dark:to-blue-400';
+      return 'from-blue-600 via-blue-300 to-blue-600 dark:from-blue-400 dark:via-blue-200 dark:to-blue-400';
     case 'processing':
-      return 'from-violet-600 via-violet-400 to-violet-600 dark:from-violet-400 dark:via-violet-300 dark:to-violet-400';
+      return 'from-violet-600 via-violet-300 to-violet-600 dark:from-violet-400 dark:via-violet-200 dark:to-violet-400';
     case 'generating':
     case 'streaming':
-      return 'from-emerald-600 via-emerald-400 to-emerald-600 dark:from-emerald-400 dark:via-emerald-300 dark:to-emerald-400';
+      return 'from-emerald-600 via-emerald-300 to-emerald-600 dark:from-emerald-400 dark:via-emerald-200 dark:to-emerald-400';
     case 'executing_tools':
-      return 'from-orange-600 via-orange-400 to-orange-600 dark:from-orange-400 dark:via-orange-300 dark:to-orange-400';
+      return 'from-orange-600 via-orange-300 to-orange-600 dark:from-orange-400 dark:via-orange-200 dark:to-orange-400';
     default:
-      return 'from-violet-600 via-violet-400 to-violet-600 dark:from-violet-400 dark:via-violet-300 dark:to-violet-400';
+      return 'from-violet-600 via-violet-300 to-violet-600 dark:from-violet-400 dark:via-violet-200 dark:to-violet-400';
   }
 };
 
@@ -122,38 +123,38 @@ export const ThinkingAnimation: React.FC<ThinkingAnimationProps> = ({
 
   return (
     <div className={`p-3 flex items-center space-x-3 ${className}`}>
-      {/* Enhanced animated icon */}
+      {/* Enhanced animated icon with more pronounced animation */}
       <motion.div
         animate={{
           rotate: phase === 'processing' || phase === 'warming_up' ? 360 : 0,
-          scale: [1, 1.1, 1],
+          scale: [1, 1.2, 1],
         }}
         transition={{
           rotate: {
-            duration: 2,
+            duration: 1.5, // Faster rotation
             repeat: Infinity,
             ease: 'linear',
           },
           scale: {
-            duration: 1.5,
+            duration: 1.2, // Faster pulsing
             repeat: Infinity,
             ease: 'easeInOut',
           },
         }}
-        className={colorClass}
+        className={`${colorClass} drop-shadow-md`} // Added drop shadow for emphasis
       >
-        <IconComponent size={size === 'small' ? 14 : size === 'medium' ? 16 : 18} />
+        <IconComponent size={size === 'small' ? 14 : size === 'medium' ? 18 : 20} />
       </motion.div>
 
       <div className="flex-1">
-        {/* Main status text with gradient effect */}
+        {/* Main status text with enhanced gradient effect */}
         <div className="flex items-center space-x-2">
-          <GradientText text={text} phase={phase} className={textClass} animationDuration={2.5} />
+          <GradientText text={text} phase={phase} className={`${textClass} font-semibold`} animationDuration={1.8} />
           <motion.span
-            className={`${textClass} ${colorClass} inline-block`}
-            animate={{ opacity: [0, 1, 0] }}
+            className={`${textClass} ${colorClass} inline-block font-bold`}
+            animate={{ opacity: [0, 1, 0], scale: [0.8, 1.1, 0.8] }}
             transition={{
-              duration: 1.2,
+              duration: 0.8, // Faster animation
               repeat: Infinity,
               repeatType: 'loop',
               ease: 'easeInOut',
@@ -164,7 +165,7 @@ export const ThinkingAnimation: React.FC<ThinkingAnimationProps> = ({
           </motion.span>
         </div>
 
-        {/* Estimated time */}
+        {/* Estimated time with subtle animation */}
         {estimatedTime && (
           <motion.div
             initial={{ opacity: 0, y: 5 }}
@@ -176,22 +177,36 @@ export const ThinkingAnimation: React.FC<ThinkingAnimationProps> = ({
           </motion.div>
         )}
 
-        {/* Progress bar for TTFT */}
+        {/* Enhanced progress bar with flowing animation */}
         {showProgress && (
           <motion.div
             initial={{ opacity: 0, scaleX: 0 }}
             animate={{ opacity: 1, scaleX: 1 }}
             transition={{ delay: 0.5, duration: 0.8 }}
-            className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5"
+            className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden relative"
           >
+            {/* Main progress bar */}
             <motion.div
-              className={`h-1.5 rounded-full ${colorClass.replace('text-', 'bg-')}`}
-              animate={{ width: ['0%', '30%', '60%', '30%'] }}
+              className={`h-full rounded-full ${colorClass.replace('text-', 'bg-')}`}
+              animate={{ width: ['15%', '70%', '40%'] }}
               transition={{
-                duration: 3,
+                duration: 2,
                 repeat: Infinity,
                 ease: 'easeInOut',
               }}
+            />
+            
+            {/* Flowing highlight effect */}
+            <motion.div 
+              className="absolute top-0 h-full w-20 bg-white bg-opacity-30 blur-sm"
+              animate={{ left: ['-10%', '100%'] }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                ease: 'linear',
+                repeatDelay: 0.3
+              }}
+              style={{ borderRadius: 'inherit' }}
             />
           </motion.div>
         )}
