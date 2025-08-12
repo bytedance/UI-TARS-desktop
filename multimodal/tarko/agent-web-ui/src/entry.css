@@ -175,3 +175,8 @@ strong {
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }
+
+/* Limit image height in specific container */
+#root > div > div.flex.flex-1.overflow-hidden > div.flex-1.flex.flex-col.overflow-hidden.pr-2.pb-2.lg\:pr-3.lg\:pb-3 > div.hidden.md\:flex.gap-3.flex-1.min-h-0 > div:nth-child(2) > div > div > div > div > div > div.flex-1.overflow-auto.p-4.pt-0 > div > div > div > div:nth-child(1) > div > div.overflow-auto.max-h-\[100vh\] > div > img {
+  max-height: 70vh;
+}
