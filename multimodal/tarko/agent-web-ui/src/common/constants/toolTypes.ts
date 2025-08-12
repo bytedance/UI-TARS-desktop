@@ -8,6 +8,7 @@ export const TOOL_NAMES = {
   // General tools
   WEB_SEARCH: 'web_search',
   SEARCH: 'Search', // Omni TARS search tool
+  LINK_READER: 'LinkReader', // Link content reader tool
 
   // Browser tools
   BROWSER_VISION_CONTROL: 'browser_vision_control',
@@ -54,6 +55,7 @@ export type ToolName = (typeof TOOL_NAMES)[keyof typeof TOOL_NAMES];
 // Tool category constants
 export const TOOL_CATEGORIES = {
   SEARCH: 'search',
+  CONTENT: 'content', // Content reading and processing tools
   BROWSER: 'browser',
   COMMAND: 'command',
   SCRIPT: 'script',
@@ -71,6 +73,7 @@ export const TOOL_NAME_TO_CATEGORY_MAP: Record<ToolName, ToolCategory> = {
   // General tools
   [TOOL_NAMES.WEB_SEARCH]: TOOL_CATEGORIES.SEARCH,
   [TOOL_NAMES.SEARCH]: TOOL_CATEGORIES.SEARCH,
+  [TOOL_NAMES.LINK_READER]: TOOL_CATEGORIES.CONTENT,
 
   // Browser tools
   [TOOL_NAMES.BROWSER_VISION_CONTROL]: TOOL_CATEGORIES.BROWSER_VISION_CONTROL,
@@ -125,6 +128,7 @@ export function getToolCategory(toolName: string): ToolCategory {
   const lowerName = toolName.toLowerCase();
 
   if (lowerName.includes('search')) return TOOL_CATEGORIES.SEARCH;
+  if (lowerName.includes('reader') || lowerName.includes('content')) return TOOL_CATEGORIES.CONTENT;
   if (lowerName.includes('browser')) return TOOL_CATEGORIES.BROWSER;
   if (lowerName.includes('command') || lowerName.includes('terminal'))
     return TOOL_CATEGORIES.COMMAND;

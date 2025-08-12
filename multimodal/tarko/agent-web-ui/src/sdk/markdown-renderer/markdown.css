@@ -5,6 +5,36 @@
  * primarily complex selectors and pseudo-classes for table styling.
  */
 
+/* Ensure proper scrolling for long content */
+.markdown-content {
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+.markdown-content pre {
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.markdown-content code {
+  word-break: break-all;
+  overflow-wrap: break-word;
+}
+
+.markdown-content table {
+  max-width: 100%;
+  overflow-x: auto;
+  display: block;
+  white-space: nowrap;
+}
+
+.markdown-content table tbody {
+  display: table;
+  width: 100%;
+}
+
 /* Table styling - nth-child and complex selectors */
 .markdown-content table tr:nth-child(even) {
   background-color: #f8fafc;

@@ -1,6 +1,7 @@
 import React from 'react';
 import { ImageRenderer } from './ImageRenderer';
 import { LinkRenderer } from './LinkRenderer';
+import { LinkReaderRenderer } from './LinkReaderRenderer';
 import { SearchResultRenderer } from './SearchResultRenderer';
 import { CommandResultRenderer } from './CommandResultRenderer';
 import { ScriptResultRenderer } from './ScriptResultRenderer';
@@ -26,6 +27,7 @@ const CONTENT_RENDERERS: Record<
 > = {
   image: ImageRenderer,
   link: LinkRenderer,
+  link_reader: LinkReaderRenderer,
   search_result: SearchResultRenderer,
   command_result: CommandResultRenderer,
   script_result: ScriptResultRenderer,
@@ -80,9 +82,11 @@ export const ToolResultRenderer: React.FC<ToolResultRendererProps> = ({
   return (
     <div className={`space-y-4 ${className}`}>
       {content.map((part, index) => {
+        const partId = `part${index}`;
+        
         if (part.type === 'json') {
           return (
-            <div key={`json-${part.name || ''}-${index}`} className="tool-result-part">
+            <div key={partId} className="tool-result-part">
               <GenericResultRenderer part={part} onAction={onAction} displayMode={displayMode} />
             </div>
           );
@@ -91,7 +95,7 @@ export const ToolResultRenderer: React.FC<ToolResultRendererProps> = ({
         const Renderer = CONTENT_RENDERERS[part.type] || GenericResultRenderer;
 
         return (
-          <div key={`${part.type}-${part.name || ''}-${index}`} className="tool-result-part">
+          <div key={partId} className="tool-result-part">
             <Renderer part={part} onAction={onAction} displayMode={displayMode} />
           </div>
         );
