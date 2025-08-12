@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiExternalLink, FiCopy, FiCheck, FiLink } from 'react-icons/fi';
+import { FiExternalLink, FiCopy, FiCheck } from 'react-icons/fi';
 import { ToolResultContentPart } from '../types';
 
 interface LinkReaderRendererProps {
@@ -26,19 +26,19 @@ interface LinkReaderResponse {
 }
 
 /**
- * Simplified renderer for LinkReader tool results
- * Shows raw content by default with minimal UI
+ * Clean and minimal LinkReader renderer
+ * Focus on content with simple, elegant design
  */
-export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ part, onAction }) => {
-  const [copiedStates, setCopiedStates] = useState<Set<number>>(new Set());
+export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ part }) => {
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
-  // Extract LinkReader data directly from the part
   const linkData = extractLinkReaderData(part);
 
-  if (!linkData || !linkData.results || linkData.results.length === 0) {
+  if (!linkData?.results?.length) {
     return (
-      <div className="p-4 text-gray-500 dark:text-gray-400 text-sm italic">
-        No link content available
+      <div className="text-gray-500 dark:text-gray-400 text-sm p-3">
+        No content available
       </div>
     );
   }
@@ -46,95 +46,89 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ part, on
   const copyContent = async (content: string, index: number) => {
     try {
       await navigator.clipboard.writeText(content);
-      setCopiedStates((prev) => new Set([...prev, index]));
-      setTimeout(() => {
-        setCopiedStates((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(index);
-          return newSet;
-        });
-      }, 2000);
+      setCopiedIndex(index);
+      setTimeout(() => setCopiedIndex(null), 1500);
     } catch (error) {
-      console.error('Failed to copy content:', error);
+      console.error('Copy failed:', error);
     }
   };
 
+  const toggleExpanded = (index: number) => {
+    setExpandedIndex(expandedIndex === index ? null : index);
+  };
+
   return (
-    <div className="space-y-4">
-      {/* Simple header */}
-      <div className="flex items-center gap-2">
-        <FiLink className="text-blue-600 dark:text-blue-400" size={18} />
-        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Link Content</h3>
-        <span className="text-sm text-gray-500 dark:text-gray-400">
-          ({linkData.results.length} {linkData.results.length === 1 ? 'result' : 'results'})
-        </span>
-      </div>
+    <div className="space-y-3">
+      {linkData.results.map((result, index) => {
+        const isExpanded = expandedIndex === index;
+        const isCopied = copiedIndex === index;
+        const previewContent = result.content.slice(0, 200);
+        const needsExpansion = result.content.length > 200;
 
-      {/* Results */}
-      <div className="space-y-3">
-        {linkData.results.map((result, index) => {
-          const isCopied = copiedStates.has(index);
-
-          return (
-            <div
-              key={`result-${index}`} // secretlint-disable-line
-              className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-800/50"
-            >
-              {/* Result header */}
-              <div className="p-4 border-b border-gray-100 dark:border-gray-700/50">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 leading-tight mb-2">
-                      {result.title}
-                    </h4>
-                    <a
-                      href={result.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors group"
-                    >
-                      <FiExternalLink size={14} className="flex-shrink-0" />
-                      <span className="truncate group-hover:underline">
-                        {formatUrl(result.url)}
-                      </span>
-                    </a>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => copyContent(result.content, index)}
-                      className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                      title="Copy content"
-                    >
-                      {isCopied ? (
-                        <FiCheck size={14} className="text-green-500" />
-                      ) : (
-                        <FiCopy size={14} />
-                      )}
-                    </button>
-                  </div>
+        return (
+          <div
+            key={index}
+            className="border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800/30 overflow-hidden hover:shadow-sm transition-shadow"
+          >
+            {/* Header */}
+            <div className="p-4 pb-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-1 leading-snug">
+                    {result.title}
+                  </h3>
+                  <a
+                    href={result.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    <FiExternalLink size={12} />
+                    {formatUrl(result.url)}
+                  </a>
                 </div>
-              </div>
-
-              {/* Raw content */}
-              <div className="p-4">
-                <div className="max-h-96 overflow-auto border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-800/50">
-                  <pre className="text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words font-mono">
-                    {result.content}
-                  </pre>
-                </div>
+                
+                <button
+                  onClick={() => copyContent(result.content, index)}
+                  className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                  title="Copy content"
+                >
+                  {isCopied ? (
+                    <FiCheck size={14} className="text-green-500" />
+                  ) : (
+                    <FiCopy size={14} />
+                  )}
+                </button>
               </div>
             </div>
-          );
-        })}
-      </div>
+
+            {/* Content */}
+            <div className="px-4 pb-4">
+              <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-3 text-sm">
+                <pre className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words font-mono leading-relaxed">
+                  {isExpanded ? result.content : previewContent}
+                  {!isExpanded && needsExpansion && '...'}
+                </pre>
+                
+                {needsExpansion && (
+                  <button
+                    onClick={() => toggleExpanded(index)}
+                    className="mt-2 text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                  >
+                    {isExpanded ? 'Show less' : 'Show more'}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 };
 
 /**
  * Extract LinkReader data from tool result part
- * This function handles the raw data format independently
  */
 function extractLinkReaderData(part: ToolResultContentPart): {
   results: LinkResult[];
@@ -143,8 +137,7 @@ function extractLinkReaderData(part: ToolResultContentPart): {
     let parsedData: LinkReaderResponse;
 
     // Handle different data formats
-    // FIXME: handle mcp tool return both `content` and `structuredContent`
-    if (typeof part.data === 'object' && part.data.content && part.data.structuredContent) {
+    if (typeof part.data === 'object' && part.data?.content && part.data?.structuredContent) {
       parsedData = part.data.structuredContent;
     } else if (
       Array.isArray(part.data) &&
@@ -152,40 +145,26 @@ function extractLinkReaderData(part: ToolResultContentPart): {
       typeof part.data[0] === 'object' &&
       'text' in part.data[0]
     ) {
-      // MCP format with text content
       parsedData = JSON.parse(part.data[0].text as string);
     } else if (typeof part.text === 'string') {
-      // Direct text format
       parsedData = JSON.parse(part.text);
     } else if (typeof part.data === 'object' && part.data !== null) {
-      // Direct object format
       parsedData = part.data as LinkReaderResponse;
     } else {
       return null;
     }
 
-    // Validate the parsed data
-    if (!parsedData || !Array.isArray(parsedData.results)) {
+    if (!parsedData?.results || !Array.isArray(parsedData.results)) {
       return null;
     }
 
-    // Transform to our internal format
     const results: LinkResult[] = parsedData.results.map((item) => {
-      let hostname: string;
-      try {
-        const url = new URL(item.url);
-        hostname = url.hostname;
-      } catch {
-        hostname = item.url;
-      }
-
-      const extractedTitle = extractTitleFromContent(item.raw_content);
-      const fallbackTitle = hostname.replace(/^www\./, ''); // Remove www prefix
-
+      const title = extractTitleFromContent(item.raw_content) || getHostname(item.url);
+      
       return {
         url: item.url,
-        title: extractedTitle || fallbackTitle,
-        content: item.raw_content, // Use raw content directly
+        title,
+        content: item.raw_content,
       };
     });
 
@@ -197,41 +176,30 @@ function extractLinkReaderData(part: ToolResultContentPart): {
 }
 
 /**
- * Extract title from content using various patterns with better heuristics
+ * Extract title from content using simple patterns
  */
 function extractTitleFromContent(content: string): string | null {
-  const titlePatterns = [
-    // HTML title tag (highest priority)
+  const patterns = [
     /<title[^>]*>([^<]+)<\/title>/i,
-    // HTML h1 tag
     /<h1[^>]*>([^<]+)<\/h1>/i,
-    // Markdown h1
     /^#\s+(.+)$/m,
-    // Underlined title
     /^(.+)\n[=]{3,}$/m,
-    // Bold title at start
-    /^\*\*(.+)\*\*$/m,
   ];
 
-  for (const pattern of titlePatterns) {
+  for (const pattern of patterns) {
     const match = content.match(pattern);
-    if (match && match[1]) {
+    if (match?.[1]) {
       const title = match[1].trim();
-      // Filter out obviously bad titles
-      if (!isBadTitle(title)) {
+      if (isValidTitle(title)) {
         return title;
       }
     }
   }
 
-  // Fallback: use first meaningful line
-  const lines = content
-    .split('\n')
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0);
-  for (const line of lines.slice(0, 5)) {
-    // Check first 5 non-empty lines
-    if (line.length > 10 && line.length <= 100 && !isBadTitle(line)) {
+  // Fallback to first meaningful line
+  const lines = content.split('\n').map(line => line.trim()).filter(Boolean);
+  for (const line of lines.slice(0, 3)) {
+    if (line.length > 10 && line.length <= 100 && isValidTitle(line)) {
       return line;
     }
   }
@@ -240,25 +208,34 @@ function extractTitleFromContent(content: string): string | null {
 }
 
 /**
- * Check if a title candidate is likely to be a bad title
+ * Check if title is valid
  */
-function isBadTitle(title: string): boolean {
+function isValidTitle(title: string): boolean {
   const badPatterns = [
-    /^https?:\/\//i, // URLs
-    /^\w+\s*[:：]\s*\w+/i, // Key-value pairs like "Content-Type: text/html"
-    /blob:|localhost|127\.0\.0\.1/i, // Technical URLs
-    /^[\w\s]*\.(com|cn|org|net)/i, // Domain names
-    /^\d+$/, // Just numbers
-    /^[^\w\s]+$/, // Just symbols
-    /^.{1,3}$/, // Too short
-    /导航|跳过|skip|navigation/i, // Navigation text
+    /^https?:\/\//i,
+    /^\w+\s*[:：]/i,
+    /blob:|localhost/i,
+    /^\d+$/,
+    /^[^\w\s]+$/,
+    /^.{1,3}$/,
   ];
 
-  return badPatterns.some((pattern) => pattern.test(title));
+  return !badPatterns.some(pattern => pattern.test(title));
 }
 
 /**
- * Format URL for display - show hostname and path nicely
+ * Get hostname from URL
+ */
+function getHostname(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return url;
+  }
+}
+
+/**
+ * Format URL for display
  */
 function formatUrl(url: string): string {
   try {
@@ -270,9 +247,8 @@ function formatUrl(url: string): string {
       return hostname;
     }
 
-    // Show hostname + shortened path
-    if (path.length > 30) {
-      return `${hostname}${path.substring(0, 25)}...`;
+    if (path.length > 25) {
+      return `${hostname}${path.substring(0, 20)}...`;
     }
 
     return `${hostname}${path}`;
