@@ -442,6 +442,13 @@ function collectFileInfo(
 // Helper function to normalize search results
 function normalizeSearchResult(toolName: string, content: any, args: any): any {
   // Handle omni TARS Search tool
+
+  // Handle `content.content`
+  // FIXME: remove it when Omni TARS do not directly return MCP result.
+  if (typeof content === 'object' && Object.keys(content).length === 1) {
+    content = content.content;
+  }
+
   if (
     toolName === 'Search' &&
     Array.isArray(content) &&
