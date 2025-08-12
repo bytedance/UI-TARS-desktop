@@ -31,16 +31,11 @@ interface LinkReaderResponse {
  */
 export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ part }) => {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
-  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
   const linkData = extractLinkReaderData(part);
 
   if (!linkData?.results?.length) {
-    return (
-      <div className="text-gray-500 dark:text-gray-400 text-sm p-3">
-        No content available
-      </div>
-    );
+    return <div className="text-gray-500 dark:text-gray-400 text-sm p-3">No content available</div>;
   }
 
   const copyContent = async (content: string, index: number) => {
@@ -53,21 +48,14 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ part }) 
     }
   };
 
-  const toggleExpanded = (index: number) => {
-    setExpandedIndex(expandedIndex === index ? null : index);
-  };
-
   return (
     <div className="space-y-3">
       {linkData.results.map((result, index) => {
-        const isExpanded = expandedIndex === index;
         const isCopied = copiedIndex === index;
-        const previewContent = result.content.slice(0, 200);
-        const needsExpansion = result.content.length > 200;
 
         return (
           <div
-            key={index}
+            key={`link-${index}`} // secretlint-disable-line
             className="border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800/30 overflow-hidden hover:shadow-sm transition-shadow"
           >
             {/* Header */}
@@ -87,7 +75,7 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ part }) 
                     {formatUrl(result.url)}
                   </a>
                 </div>
-                
+
                 <button
                   onClick={() => copyContent(result.content, index)}
                   className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
@@ -102,22 +90,12 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ part }) 
               </div>
             </div>
 
-            {/* Content */}
+            {/* Content - Always show full content */}
             <div className="px-4 pb-4">
-              <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-3 text-sm">
+              <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-3 text-sm h-96 overflow-auto">
                 <pre className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words font-mono leading-relaxed">
-                  {isExpanded ? result.content : previewContent}
-                  {!isExpanded && needsExpansion && '...'}
+                  {result.content}
                 </pre>
-                
-                {needsExpansion && (
-                  <button
-                    onClick={() => toggleExpanded(index)}
-                    className="mt-2 text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium"
-                  >
-                    {isExpanded ? 'Show less' : 'Show more'}
-                  </button>
-                )}
               </div>
             </div>
           </div>
@@ -160,7 +138,7 @@ function extractLinkReaderData(part: ToolResultContentPart): {
 
     const results: LinkResult[] = parsedData.results.map((item) => {
       const title = extractTitleFromContent(item.raw_content) || getHostname(item.url);
-      
+
       return {
         url: item.url,
         title,
@@ -197,7 +175,10 @@ function extractTitleFromContent(content: string): string | null {
   }
 
   // Fallback to first meaningful line
-  const lines = content.split('\n').map(line => line.trim()).filter(Boolean);
+  const lines = content
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
   for (const line of lines.slice(0, 3)) {
     if (line.length > 10 && line.length <= 100 && isValidTitle(line)) {
       return line;
@@ -220,7 +201,7 @@ function isValidTitle(title: string): boolean {
     /^.{1,3}$/,
   ];
 
-  return !badPatterns.some(pattern => pattern.test(title));
+  return !badPatterns.some((pattern) => pattern.test(title));
 }
 
 /**
