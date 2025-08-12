@@ -69,22 +69,48 @@ const GradientText: React.FC<GradientTextProps> = ({
 }) => {
   const colorClass = getPhaseColor(phase);
 
-  // Use simple animated color instead of complex gradient to ensure text visibility
   return (
-    <motion.span
-      className={`relative inline-block font-medium ${className} ${colorClass}`}
-      animate={{
-        opacity: [0.7, 1, 0.7],
-      }}
-      transition={{
-        duration: animationDuration,
-        repeat: Infinity,
-        ease: 'easeInOut',
-      }}
-    >
-      {text}
-    </motion.span>
+    <span className={`relative inline-block ${className}`}>
+      {/* Fallback text for browsers that don't support gradients */}
+      <span className={`font-medium ${colorClass}`}>{text}</span>
+
+      {/* Enhanced gradient overlay with CSS gradients (more reliable than SVG) */}
+      <motion.span
+        className={`absolute inset-0 font-medium bg-gradient-to-r ${getGradientClasses(phase)} bg-clip-text text-transparent`}
+        style={{
+          backgroundSize: '200% 100%',
+        }}
+        animate={{
+          backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+        }}
+        transition={{
+          duration: animationDuration,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      >
+        {text}
+      </motion.span>
+    </span>
   );
+};
+
+// CSS gradient classes for better browser support
+const getGradientClasses = (phase?: string) => {
+  switch (phase) {
+    case 'initializing':
+    case 'warming_up':
+      return 'from-blue-600 via-blue-400 to-blue-600 dark:from-blue-400 dark:via-blue-300 dark:to-blue-400';
+    case 'processing':
+      return 'from-violet-600 via-violet-400 to-violet-600 dark:from-violet-400 dark:via-violet-300 dark:to-violet-400';
+    case 'generating':
+    case 'streaming':
+      return 'from-emerald-600 via-emerald-400 to-emerald-600 dark:from-emerald-400 dark:via-emerald-300 dark:to-emerald-400';
+    case 'executing_tools':
+      return 'from-orange-600 via-orange-400 to-orange-600 dark:from-orange-400 dark:via-orange-300 dark:to-orange-400';
+    default:
+      return 'from-violet-600 via-violet-400 to-violet-600 dark:from-violet-400 dark:via-violet-300 dark:to-violet-400';
+  }
 };
 
 export const ThinkingAnimation: React.FC<ThinkingAnimationProps> = ({
