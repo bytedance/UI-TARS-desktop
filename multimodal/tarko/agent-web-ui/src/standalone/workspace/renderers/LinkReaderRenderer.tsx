@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FiExternalLink, FiCopy, FiCheck } from 'react-icons/fi';
 import { ToolResultContentPart } from '../types';
+import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 
 interface LinkReaderRendererProps {
   part: ToolResultContentPart;
@@ -93,9 +94,7 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ part }) 
             {/* Content - Always show full content */}
             <div className="px-4 pb-4">
               <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-3 text-sm">
-                <pre className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words font-mono leading-relaxed">
-                  {result.content}
-                </pre>
+                <MarkdownRenderer content={result.content} />
               </div>
             </div>
           </div>
