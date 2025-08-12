@@ -17,7 +17,7 @@ const toolCallEngine = createComposableToolCallEngineFactory({
   engines: [
     // new GuiToolCallEngineProvider(),
     new McpToolCallEngineProvider(),
-    new CodeToolCallEngineProvider(),
+    // new CodeToolCallEngineProvider(),
   ],
 });
 
@@ -30,7 +30,7 @@ export default class OmniTARSAgent extends ComposableAgent {
       plugins: [
         mcpPlugin,
         // guiPlugin,
-        codePlugin,
+        // codePlugin,
         new SnapshotPlugin({ baseDir: path.resolve(__dirname, '../snapshot') }),
       ],
       toolCallEngine,

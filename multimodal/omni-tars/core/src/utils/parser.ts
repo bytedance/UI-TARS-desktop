@@ -8,7 +8,7 @@ import { ChatCompletionMessageToolCall } from '@tarko/agent-interface';
 interface ParsedContent {
   answer: string;
   think: string;
-  tools?: ChatCompletionMessageToolCall[];
+  tools: ChatCompletionMessageToolCall[];
 }
 
 /**
@@ -19,21 +19,59 @@ function generateToolCallId(): string {
 }
 
 /**
- * Extract think content from think_never_used tag
+ * Extract think content from various think tags (think, think_*, or custom think tags)
  */
 function extractThinkContent(content: string): string {
-  const thinkMatch = content.match(
-    /<think_never_used_51bce0c785ca2f68081bfa7d91973934>([\s\S]*?)<\/think_never_used_51bce0c785ca2f68081bfa7d91973934>/,
-  );
+  // Match think or think_* tags with a single regex
+  const thinkMatch = content.match(/<think[^>]*>([\s\S]*?)<\/think[^>]*>/);
   return thinkMatch ? thinkMatch[1].trim() : '';
 }
 
 /**
- * Extract answer content from answer tag
+ * Extract answer content from answer tag or content outside think tags
  */
-function extractAnswerContent(content: string): string {
+function extractAnswerContent(content: string): string | null {
+  // First try to extract from <answer> tag
   const answerMatch = content.match(/<answer>([\s\S]*?)<\/answer>/);
-  return answerMatch ? answerMatch[1].trim() : '';
+  if (answerMatch) {
+    return answerMatch[1].trim();
+  }
+
+  return null;
+}
+
+function isUndefined(str: string | null | undefined) {
+  return typeof str === 'undefined' || str === null;
+}
+
+function finalizeAnswer(parsed: {
+  answer: string | null;
+  think: string;
+  tools?: ChatCompletionMessageToolCall[];
+  content: string;
+}) {
+  const { answer, tools = [], think, content } = parsed;
+
+  // If no answer tag is found, but there is content and no tool calls, use the entire content as the answer
+  if (isUndefined(answer) && !tools.length && content.trim()) {
+    // The remaining content after removing the think part is used as the answer
+    let contentWithoutThink = content;
+
+    if (think) {
+      contentWithoutThink = content.replace(/<think[^>]*>[\s\S]*?<\/think[^>]*>/g, '').trim();
+    }
+
+    if (contentWithoutThink) {
+      return contentWithoutThink;
+    }
+  }
+
+  if (tools.length > 0) {
+    // If a tool call is detected but there is no explicit answer, the answer should be empty
+    return '';
+  }
+
+  return answer;
 }
 
 /**
@@ -41,7 +79,7 @@ function extractAnswerContent(content: string): string {
  */
 export function parseCodeContent(content: string): ParsedContent {
   const think = extractThinkContent(content);
-  const answer = extractAnswerContent(content);
+  let answer = extractAnswerContent(content);
 
   const tools: ChatCompletionMessageToolCall[] = [];
 
@@ -73,10 +111,12 @@ export function parseCodeContent(content: string): ParsedContent {
     }
   }
 
+  answer = finalizeAnswer({ answer, tools, think, content });
+
   return {
     think,
-    answer,
-    ...(tools.length > 0 && { tools }),
+    answer: answer || '',
+    tools,
   };
 }
 
@@ -85,7 +125,7 @@ export function parseCodeContent(content: string): ParsedContent {
  */
 export function parseMcpContent(content: string): ParsedContent {
   const think = extractThinkContent(content);
-  const answer = extractAnswerContent(content);
+  let answer = extractAnswerContent(content);
 
   const tools: ChatCompletionMessageToolCall[] = [];
 
@@ -122,11 +162,12 @@ export function parseMcpContent(content: string): ParsedContent {
       }
     }
   }
+  answer = finalizeAnswer({ answer, tools, think, content });
 
   return {
     think,
-    answer,
-    ...(tools.length > 0 && { tools }),
+    answer: answer || '',
+    tools,
   };
 }
 
@@ -135,7 +176,7 @@ export function parseMcpContent(content: string): ParsedContent {
  */
 export function parseComputerContent(content: string): ParsedContent {
   const think = extractThinkContent(content);
-  const answer = extractAnswerContent(content);
+  let answer = extractAnswerContent(content);
 
   const tools: ChatCompletionMessageToolCall[] = [];
 
@@ -183,9 +224,11 @@ export function parseComputerContent(content: string): ParsedContent {
     }
   }
 
+  answer = finalizeAnswer({ answer, tools, think, content });
+
   return {
     think,
-    answer,
-    ...(tools.length > 0 && { tools }),
+    answer: answer || '',
+    tools,
   };
 }

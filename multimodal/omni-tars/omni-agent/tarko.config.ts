@@ -3,13 +3,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { defineConfig, LogLevel } from '@tarko/agent-cli';
+import { resolve } from 'node:path';
 
 export default defineConfig({
   model: {
-    provider: 'openai-non-streaming',
-    baseURL: process.env.OMNI_TARS_BASE_URL,
-    apiKey: process.env.OMNI_TARS_API_KEY,
-    id: process.env.OMNI_TARS_MODEL_ID,
+    // provider: 'openai-non-streaming',
+    // baseURL: process.env.OMNI_TARS_BASE_URL,
+    // apiKey: process.env.OMNI_TARS_API_KEY,
+    // id: process.env.OMNI_TARS_MODEL_ID,
+
+    // McpToolCallEngine parseContent 需要同时切换
+    // id: '{search.nlp.seed_vision}.{hl}.{M8-23B-MoE-250717_m8_agentrlmodel_codeformatv2_0711_google_roll_back-S100}.{gui_23b_rl_s100}',
+    // id: 'gcp-claude4-sonnet',
+    // id: 'aws_sdk_claude37_sonnet',
+    id: 'aws_claude35_sonnet',
+    // id: 'aws_sdk_claude4_sonnet',
+    provider: 'azure-openai',
+    apiKey: process.env.ANTHROPIC_AUTH_TOKEN,
+    baseURL: process.env.GPT_I18N_URL,
+    // thinking: {
+    //   type: 'disabled',
+    // },
   },
   logLevel: LogLevel.DEBUG,
   webui: {
@@ -22,6 +36,8 @@ export default defineConfig({
       'Find information about UI TARS',
       'Tell me the top 5 most popular projects on ProductHunt today',
       'Please book me the earliest flight from Hangzhou to Shenzhen on 10.1',
+      // '编写斐波拉契数列函数和example，执行后返回结果'
     ],
   },
+  snapshot: { storageDirectory: resolve(__dirname, 'snapshots'), enable: true },
 });

@@ -4,8 +4,8 @@
  */
 
 import { AgentPlugin, MCP_ENVIRONMENT } from '@omni-tars/core';
-import { SearchToolProvider } from './tools/Search';
-import { LinkReaderToolProvider } from './tools/LinkReader';
+import { SearchToolProvider } from './tools/search';
+import { LinkReaderToolProvider } from './tools/linkReader';
 import { McpManager } from './tools/mcp';
 import { MCPServer } from '@agent-infra/mcp-client';
 
@@ -37,16 +37,5 @@ export class McpAgentPlugin extends AgentPlugin {
       new SearchToolProvider(this.mcpManager).getTool(),
       new LinkReaderToolProvider(this.mcpManager).getTool(),
     ];
-  }
-
-  async onEachAgentLoopStart(): Promise<void> {
-    // MCP-specific loop start handling if needed
-    // const eventStream = this.agent.getEventStream();
-    // const systemEvent = eventStream.createEvent('system', {
-    //   level: 'info',
-    //   message: 'MCP Agent Plugin - Loop Start',
-    //   details: { pluginName: this.name },
-    // });
-    // eventStream.sendEvent(systemEvent);
   }
 }

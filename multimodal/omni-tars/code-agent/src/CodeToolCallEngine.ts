@@ -74,7 +74,7 @@ export class CodeToolCallEngine extends ToolCallEngine {
       rawContent: fullContent,
       reasoningContent: think ?? '',
       toolCalls: tools,
-      finishReason: (tools || []).length > 0 ? 'tool_calls' : 'stop',
+      finishReason: tools.length > 0 ? 'tool_calls' : 'stop',
     };
   }
 
