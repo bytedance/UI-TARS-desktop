@@ -80,10 +80,9 @@ export const SearchResultRenderer: React.FC<SearchResultRendererProps> = ({ part
       {/* Results list with refined card design */}
       <div className="space-y-4 !mt-4">
         {results.map((result, index) => {
-          const resultKey = `search-result-${index}-${result.url}`;
           return (
             <motion.div
-              {...{ ['k' + 'ey']: resultKey }}
+              key={index}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.05 }}
@@ -150,10 +149,9 @@ export const SearchResultRenderer: React.FC<SearchResultRendererProps> = ({ part
             </h3>
             <div className="flex flex-wrap gap-2">
               {relatedSearches.map((searchQuery, index) => {
-                const searchKey = `related-search-${index}-${searchQuery}`;
                 return (
                   <span
-                    {...{ ['k' + 'ey']: searchKey }}
+                    key={index}
                     className="inline-block px-3 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors cursor-pointer"
                   >
                     {searchQuery}

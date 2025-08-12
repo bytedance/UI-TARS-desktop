@@ -12,6 +12,7 @@ import { sessionFilesAtom, FileItem } from '../atoms/files';
 import { activeSessionIdAtom } from '../atoms/session';
 import { ChatCompletionContentPartImage } from '@tarko/agent-interface';
 import { jsonrepair } from 'jsonrepair';
+import { TOOL_NAMES } from '@/common/constants';
 
 // Internal cache - not an Atom to avoid unnecessary reactivity
 const toolCallArgumentsMap = new Map<string, any>();
@@ -450,7 +451,7 @@ function normalizeSearchResult(toolName: string, content: any, args: any): any {
   }
 
   if (
-    toolName === 'Search' &&
+    toolName === TOOL_NAMES.SEARCH &&
     Array.isArray(content) &&
     content.length > 0 &&
     content[0]?.type === 'text'
@@ -549,7 +550,7 @@ function handleToolResult(
     _extra: event._extra,
   };
 
-  debugger;
+  console.log(JSON.stringify(result));
 
   // Update both message and tool result atoms for immediate UI response
   set(messagesAtom, (prev: Record<string, Message[]>) => {
