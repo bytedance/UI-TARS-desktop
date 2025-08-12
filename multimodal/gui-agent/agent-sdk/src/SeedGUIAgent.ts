@@ -7,7 +7,6 @@ import { Agent, AgentOptions, LLMRequestHookPayload, LogLevel, Tool } from '@tar
 import { SeedGUIAgentToolCallEngine } from './SeedGUIAgentToolCallEngine';
 import { SYSTEM_PROMPT } from './constants';
 import { getScreenInfo, setScreenInfo } from './shared';
-import { ImageSaver } from './utils/ImageSaver';
 import { LocalBrowser } from '@agent-infra/browser';
 import { BrowserOperator } from '@gui-agent/operator-browser';
 import { ComputerOperator } from './ComputerOperator';

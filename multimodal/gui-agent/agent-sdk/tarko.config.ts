@@ -5,6 +5,7 @@
 import { defineConfig } from '@tarko/agent-cli';
 import { SYSTEM_PROMPT_LATEST } from './src/constants';
 import { SYSTEM_PROMPT } from './dist/constants';
+import path from 'path';
 
 export default defineConfig({
   operatorType: 'browser',
@@ -19,6 +20,10 @@ export default defineConfig({
     // apiKey: process.env.SEED_API_KEY, // secretlint-disable-line
   },
   systemPrompt: SYSTEM_PROMPT,
+  snapshot: {
+    enable: true,
+    storageDirectory: path.join(__dirname, 'snapshot'),
+  },
   uiTarsVersion: 'latest',
   webui: {
     logo: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png',
