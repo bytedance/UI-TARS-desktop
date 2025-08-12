@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { FiExternalLink, FiCopy, FiCheck } from 'react-icons/fi';
+import { FiExternalLink, FiCopy, FiCheck, FiFileText, FiCode } from 'react-icons/fi';
 import { ToolResultContentPart } from '../types';
 import { MarkdownRenderer } from '@/sdk/markdown-renderer';
+import { wrapMarkdown } from '@/common/utils/markdown';
 
 interface LinkReaderRendererProps {
   part: ToolResultContentPart;
@@ -32,6 +33,7 @@ interface LinkReaderResponse {
  */
 export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ part }) => {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [showMarkdownSource, setShowMarkdownSource] = useState(false);
 
   const linkData = extractLinkReaderData(part);
 
@@ -50,73 +52,84 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ part }) 
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {linkData.results.map((result, index) => {
         const isCopied = copiedIndex === index;
 
         return (
           <div
             key={`link-${index}`} // secretlint-disable-line
-            className="group relative bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-800/90 dark:to-gray-900/80 rounded-2xl border border-gray-200/60 dark:border-gray-700/60 shadow-sm hover:shadow-xl hover:shadow-blue-500/10 dark:hover:shadow-blue-400/10 transition-all duration-300 overflow-hidden backdrop-blur-sm"
+            className="bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm hover:shadow-md transition-shadow duration-200"
           >
-            {/* Subtle gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/3 to-purple-500/3 dark:from-blue-400/5 dark:to-purple-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-            {/* Header with enhanced design */}
-            <div className="relative p-6 pb-4">
+            {/* Header with better contrast */}
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
-                  {/* Enhanced title with icon */}
-                  <div className="flex items-start gap-3 mb-3">
-                    <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                      <FiExternalLink size={18} className="text-white" />
+                  {/* Title with document icon */}
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                      <FiFileText size={16} className="text-blue-600 dark:text-blue-400" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 leading-tight mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                      <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 leading-tight mb-1">
                         {result.title}
                       </h3>
                       <a
                         href={result.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group/link"
+                        className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                       >
                         <span className="truncate">{formatUrl(result.url)}</span>
-                        <FiExternalLink
-                          size={12}
-                          className="flex-shrink-0 opacity-60 group-hover/link:opacity-100 transition-opacity"
-                        />
+                        <FiExternalLink size={12} className="flex-shrink-0" />
                       </a>
                     </div>
                   </div>
                 </div>
 
-                {/* Enhanced copy button */}
-                <button
-                  onClick={() => copyContent(result.content, index)}
-                  className="flex-shrink-0 p-3 text-gray-400 hover:text-white hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 rounded-xl transition-all duration-200 hover:shadow-lg hover:scale-105 group/copy"
-                  title="Copy content"
-                >
-                  {isCopied ? (
-                    <FiCheck size={16} className="text-green-500 group-hover/copy:text-white" />
-                  ) : (
-                    <FiCopy size={16} />
-                  )}
-                </button>
-              </div>
-            </div>
+                {/* Control buttons */}
+                <div className="flex items-center gap-1">
+                  {/* View mode toggle */}
+                  <button
+                    onClick={() => setShowMarkdownSource(!showMarkdownSource)}
+                    className={`p-2 rounded-md transition-colors ${
+                      showMarkdownSource
+                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                    title={showMarkdownSource ? 'Show rendered content' : 'Show markdown source'}
+                  >
+                    {showMarkdownSource ? <FiFileText size={14} /> : <FiCode size={14} />}
+                  </button>
 
-            {/* Enhanced content area */}
-            <div className="relative px-6 pb-6">
-              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner overflow-hidden">
-                <div className="p-5">
-                  <MarkdownRenderer content={result.content} />
+                  {/* Copy button */}
+                  <button
+                    onClick={() => copyContent(result.content, index)}
+                    className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                    title="Copy content"
+                  >
+                    {isCopied ? (
+                      <FiCheck size={14} className="text-green-600 dark:text-green-400" />
+                    ) : (
+                      <FiCopy size={14} />
+                    )}
+                  </button>
                 </div>
               </div>
             </div>
 
-            {/* Subtle bottom accent */}
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 opacity-20 group-hover:opacity-40 transition-opacity duration-300" />
+            {/* Content area with better contrast */}
+            <div className="p-4">
+              <div className="bg-gray-50 dark:bg-gray-900/50 rounded-md border border-gray-200 dark:border-gray-700">
+                <div className="p-3">
+                  {showMarkdownSource ? (
+                    <MarkdownRenderer content={wrapMarkdown(result.content)} />
+                  ) : (
+                    <MarkdownRenderer content={result.content} />
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         );
       })}
