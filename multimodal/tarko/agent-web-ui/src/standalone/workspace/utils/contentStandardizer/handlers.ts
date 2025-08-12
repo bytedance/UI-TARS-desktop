@@ -59,29 +59,27 @@ export function handleSearchContent(
   title?: string,
 ): ToolResultContentPart[] {
   // All search processing is now handled by eventProcessor using SearchService
-  // This function should only handle already-normalized search data
+  // This function should only receive already-normalized search data
 
   if (SearchService.isNormalizedSearchData(source)) {
     return source as ToolResultContentPart[];
   }
 
-  // Handle flat search result object (fallback for edge cases)
-  if (
-    source &&
-    typeof source === 'object' &&
-    'results' in source &&
-    Array.isArray((source as any).results)
-  ) {
-    return [
-      {
-        type: 'search_result',
-        name: 'SEARCH_RESULTS',
-        ...source,
-      },
-    ];
+  // If we reach here, something went wrong in the pipeline
+  console.warn('handleSearchContent: Received non-normalized search data', {
+    source,
+    toolArguments,
+  });
+
+  // Delegate back to SearchService as last resort
+  const toolName = (toolArguments?.toolName as string) || 'unknown';
+  const normalizedResult = SearchService.normalizeSearchContent(toolName, source, toolArguments);
+
+  if (SearchService.isNormalizedSearchData(normalizedResult)) {
+    return normalizedResult as ToolResultContentPart[];
   }
 
-  // Final fallback to text content
+  // Absolute fallback - this should rarely happen
   return [
     {
       type: 'text',
