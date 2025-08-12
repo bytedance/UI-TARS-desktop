@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { Tool, z } from '@tarko/agent';
-import { McpManager } from './mcp';
+import { AioClient } from './AioFetch';
 
 export class StrReplaceEditorProvider {
-  private mcpManager: McpManager;
+  private client: AioClient;
 
-  constructor(mcpManager: McpManager) {
-    this.mcpManager = mcpManager;
+  constructor(client: AioClient) {
+    this.client = client;
   }
 
   getTool(): Tool {
@@ -44,14 +44,7 @@ export class StrReplaceEditorProvider {
           .optional(),
       }),
       function: async (args) => {
-        return this.mcpManager.client.callTool({
-          client: McpManager.McpClientType.AIO,
-          // name: 'str_replace_editor',
-          name: 'sandbox__str_replace_editor_v1_file_str_replace_editor_post',
-          args: {
-            ...args,
-          },
-        });
+        return this.client.fileEditor(args);
       },
     });
   }

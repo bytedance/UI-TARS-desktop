@@ -4,16 +4,12 @@
  */
 
 import { AgentPlugin, CODE_ENVIRONMENT } from '@omni-tars/core';
-import { Tool, LLMRequestHookPayload, LLMResponseHookPayload } from '@tarko/agent';
-import { McpManager } from './tools/mcp';
-import { MCPServer } from '@agent-infra/mcp-client';
+import { LLMRequestHookPayload, LLMResponseHookPayload } from '@tarko/agent';
 import { ExcuteBashProvider } from './tools/ExcuteBash';
 import { JupyterCIProvider } from './tools/JupyterCI';
 import { StrReplaceEditorProvider } from './tools/StrReplaceEditor';
-
-export interface CodeAgentPluginOption {
-  mcpServers: MCPServer[];
-}
+import { AioClient } from './tools/AioFetch';
+import assert from 'assert';
 
 /**
  * Code Agent Plugin - handles CODE_ENVIRONMENT for bash, file editing, and Jupyter execution
@@ -21,24 +17,24 @@ export interface CodeAgentPluginOption {
 export class CodeAgentPlugin extends AgentPlugin {
   readonly name = 'code-agent-plugin';
   readonly environmentSection = CODE_ENVIRONMENT;
+  private client: AioClient;
 
-  private mcpManager: McpManager;
-
-  constructor(config: CodeAgentPluginOption) {
+  constructor() {
     super();
-    this.mcpManager = new McpManager({
-      mcpServers: config.mcpServers,
+
+    assert(process.env.AIO_MCP_URL, 'no base url provided.');
+
+    this.client = new AioClient({
+      baseUrl: process.env.AIO_MCP_URL,
     });
   }
 
   async initialize(): Promise<void> {
-    await this.mcpManager.init();
-
     // Initialize tools
     this.tools = [
-      new ExcuteBashProvider(this.mcpManager).getTool(),
-      new JupyterCIProvider(this.mcpManager).getTool(),
-      new StrReplaceEditorProvider(this.mcpManager).getTool(),
+      new ExcuteBashProvider(this.client).getTool(),
+      new JupyterCIProvider(this.client).getTool(),
+      new StrReplaceEditorProvider(this.client).getTool(),
     ];
   }
 

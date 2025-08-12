@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { Tool, z } from '@tarko/agent';
-import { McpManager } from './mcp';
+import { AioClient } from './AioFetch';
 
 export class JupyterCIProvider {
-  private mcpManager: McpManager;
+  private client: AioClient;
 
-  constructor(mcpManager: McpManager) {
-    this.mcpManager = mcpManager;
+  constructor(client: AioClient) {
+    this.client = client;
   }
 
   getTool(): Tool {
@@ -21,15 +21,10 @@ export class JupyterCIProvider {
         timeout: z.number().describe('timeout in seconds').optional(),
       }),
       function: async ({ code, timeout }) => {
-        return this.mcpManager.client.callTool({
-          client: McpManager.McpClientType.AIO,
-          // name: 'JupyterCI',
-          name: 'sandbox__execute_jupyter_code_v1_jupyter_execute_post',
-          args: {
-            code,
-            timeout,
-            kernel_name: 'python3',
-          },
+        return this.client.jupyterExecute({
+          code,
+          timeout,
+          kernel_name: 'python3',
         });
       },
     });

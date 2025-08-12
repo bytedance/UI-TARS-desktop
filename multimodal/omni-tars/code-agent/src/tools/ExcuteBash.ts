@@ -3,13 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { Tool, z } from '@tarko/agent';
-import { McpManager } from './mcp';
-
+import { AioClient } from './AioFetch';
 export class ExcuteBashProvider {
-  private mcpManager: McpManager;
+  private client: AioClient;
 
-  constructor(mcpManager: McpManager) {
-    this.mcpManager = mcpManager;
+  constructor(client: AioClient) {
+    this.client = client;
   }
 
   getTool(): Tool {
@@ -20,14 +19,7 @@ export class ExcuteBashProvider {
         command: z.string().describe('Execute a bash command in the terminal.'),
       }),
       function: async ({ command }) => {
-        return this.mcpManager.client.callTool({
-          client: McpManager.McpClientType.AIO,
-          // name: 'execute_bash',
-          name: 'sandbox__exec_command_v1_shell_exec_post',
-          args: {
-            command,
-          },
-        });
+        return this.client.shellExecWithPolling({ command });
       },
     });
   }
