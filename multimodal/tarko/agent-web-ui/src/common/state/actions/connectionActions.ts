@@ -2,7 +2,13 @@ import { atom } from 'jotai';
 import { SOCKET_EVENTS } from '@/common/constants';
 import { apiService } from '@/common/services/apiService';
 import { socketService } from '@/common/services/socketService';
-import { connectionStatusAtom, agentInfoAtom } from '@/common/state/atoms/ui';
+import {
+  connectionStatusAtom,
+  agentInfoAtom,
+  workspaceInfoAtom,
+  agentOptionsAtom,
+  modelInfoAtom,
+} from '@/common/state/atoms/ui';
 
 /**
  * Check server connection status
@@ -20,13 +26,34 @@ export const checkConnectionStatusAction = atom(null, async (get, set) => {
       lastError: isConnected ? null : currentStatus.lastError,
     });
 
-    // Load agent info when connection is successful
+    // Load agent info and workspace info when connection is successful
     if (isConnected) {
       try {
         const agentInfo = await apiService.getAgentInfo();
         set(agentInfoAtom, agentInfo);
       } catch (error) {
         console.warn('Failed to load agent info:', error);
+      }
+
+      try {
+        const agentOptions = await apiService.getAgentOptions();
+        set(agentOptionsAtom, agentOptions);
+
+        // Extract workspace info from agent options
+        const workspaceInfo = {
+          name: agentOptions.workspaceName || 'Unknown',
+          path: agentOptions.workspace || '',
+        };
+        set(workspaceInfoAtom, workspaceInfo);
+
+        // Extract model info from agent options
+        const modelInfo = {
+          model: agentOptions.model?.id || agentOptions.model?.id,
+          provider: agentOptions.model?.provider,
+        };
+        set(modelInfoAtom, modelInfo);
+      } catch (error) {
+        console.warn('Failed to load agent options:', error);
       }
     }
 

@@ -28,7 +28,11 @@
   "dependencies": {
     "@tarko/agent": "workspace:*",
     "@omni-tars/core": "workspace:*",
-    "@tarko/agent-interface": "workspace:*"
+    "@tarko/agent-interface": "workspace:*",
+    "@ui-tars/sdk": "1.2.3",
+    "@agent-infra/browser": "0.1.1",
+    "@gui-agent/operator-browser": "workspace:*",
+    "@gui-agent/action-parser": "workspace:*"
   },
   "devDependencies": {
     "@rslib/core": "0.10.0",

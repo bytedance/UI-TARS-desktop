@@ -243,7 +243,7 @@ export class LLMProcessor {
 
     // Use either the custom LLM client or create one using model resolver
     this.logger.info(
-      `[LLM] Sending streaming request to ${resolvedModel.provider} | SessionId: ${sessionId}`,
+      `[LLM] Sending streaming request to ${resolvedModel.provider} | ${resolvedModel.id} | SessionId: ${sessionId}`,
     );
 
     // Make the streaming request with abort signal if available

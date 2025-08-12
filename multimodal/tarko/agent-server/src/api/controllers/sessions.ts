@@ -47,8 +47,23 @@ export async function createSession(req: Request, res: Response) {
 
     const sessionId = nanoid();
 
-    // Pass custom AGIO provider if available
-    const session = new AgentSession(server, sessionId, server.getCustomAgioProvider());
+    // Get session metadata if it exists (for restored sessions)
+    let sessionMetadata = null;
+    if (server.storageProvider) {
+      try {
+        sessionMetadata = await server.storageProvider.getSessionMetadata(sessionId);
+      } catch (error) {
+        // Session doesn't exist yet, will be created below
+      }
+    }
+
+    // Pass custom AGIO provider and session metadata if available
+    const session = new AgentSession(
+      server,
+      sessionId,
+      server.getCustomAgioProvider(),
+      sessionMetadata || undefined,
+    );
 
     server.sessions[sessionId] = session;
 
@@ -474,7 +489,12 @@ export async function searchWorkspaceItems(req: Request, res: Response) {
     const server = req.app.locals.server;
     const baseWorkspacePath = server.getCurrentWorkspace();
 
-    let items: Array<{ name: string; path: string; type: 'file' | 'directory'; relativePath: string }>;
+    let items: Array<{
+      name: string;
+      path: string;
+      type: 'file' | 'directory';
+      relativePath: string;
+    }>;
 
     if (query.length === 0) {
       // Empty query: return current directory contents (top-level files and directories)
@@ -531,8 +551,11 @@ async function searchWorkspaceItemsRecursive(
         const stats = fs.statSync(fullPath);
         const relativePath = path.relative(basePath, fullPath);
 
-        // Check if name matches query (case-insensitive)
-        if (entry.toLowerCase().includes(query.toLowerCase())) {
+        // Check if name or relative path matches query (case-insensitive)
+        const nameMatches = entry.toLowerCase().includes(query.toLowerCase());
+        const pathMatches = relativePath.toLowerCase().includes(query.toLowerCase());
+
+        if (nameMatches || pathMatches) {
           const itemType = stats.isDirectory() ? 'directory' : 'file';
 
           if (type === 'all' || type === itemType) {
@@ -558,13 +581,161 @@ async function searchWorkspaceItemsRecursive(
 
   await searchInDirectory(basePath);
 
-  // Sort by type (directories first) then by name
+  // Smart relevance-based sorting
   return items.sort((a, b) => {
+    const scoreA = calculateRelevanceScore(a, query);
+    const scoreB = calculateRelevanceScore(b, query);
+
+    // Higher score comes first
+    if (scoreA !== scoreB) {
+      return scoreB - scoreA;
+    }
+
+    // If scores are equal, prefer directories over files
     if (a.type !== b.type) {
       return a.type === 'directory' ? -1 : 1;
     }
+
+    // Finally, sort by name
     return a.name.localeCompare(b.name);
   });
+}
+
+/**
+ * Calculate relevance score for search results
+ * Higher score means more relevant to the query
+ */
+function calculateRelevanceScore(
+  item: { name: string; relativePath: string; type: 'file' | 'directory' },
+  query: string,
+): number {
+  const queryLower = query.toLowerCase();
+  const nameLower = item.name.toLowerCase();
+  const pathLower = item.relativePath.toLowerCase();
+
+  let score = 0;
+
+  // 1. Exact name match gets highest score
+  if (nameLower === queryLower) {
+    score += 1000;
+  }
+  // 2. Name starts with query
+  else if (nameLower.startsWith(queryLower)) {
+    score += 800;
+  }
+  // 3. Name ends with query (good for searching package names like '@tarko/agent')
+  else if (nameLower.endsWith(queryLower)) {
+    score += 700;
+  }
+  // 4. Name contains query
+  else if (nameLower.includes(queryLower)) {
+    score += 500;
+  }
+
+  // 5. Path-based scoring
+  if (pathLower.endsWith(queryLower)) {
+    score += 600; // Path ends with query is very relevant
+  } else if (pathLower.includes(queryLower)) {
+    score += 300; // Path contains query
+  }
+
+  // 6. Bonus for shorter paths (closer to root)
+  const pathDepth = item.relativePath.split('/').length;
+  score += Math.max(0, 50 - pathDepth * 5); // Subtract 5 points per level deep
+
+  // 7. Bonus for directories when searching for package-like names
+  if (item.type === 'directory' && queryLower.includes('/')) {
+    score += 100;
+  }
+
+  // 8. Penalty for very deep nested files when name doesn't match well
+  if (pathDepth > 4 && !nameLower.includes(queryLower)) {
+    score -= 200;
+  }
+
+  // 9. Special bonus for exact path segment matches
+  const pathSegments = item.relativePath.toLowerCase().split('/');
+  const querySegments = queryLower.split('/');
+
+  // Check if query segments match path segments in order
+  if (querySegments.length > 1) {
+    let segmentMatches = 0;
+    let queryIndex = 0;
+
+    for (const pathSegment of pathSegments) {
+      if (queryIndex < querySegments.length && pathSegment.includes(querySegments[queryIndex])) {
+        segmentMatches++;
+        queryIndex++;
+      }
+    }
+
+    if (segmentMatches === querySegments.length) {
+      score += 400; // All query segments found in path order
+    } else if (segmentMatches > 0) {
+      score += segmentMatches * 100; // Partial segment matches
+    }
+  }
+
+  return score;
+}
+
+/**
+ * Validate if workspace paths exist
+ */
+export async function validateWorkspacePaths(req: Request, res: Response) {
+  const sessionId = req.query.sessionId as string;
+  const paths = req.body.paths as string[];
+
+  if (!sessionId) {
+    return res.status(400).json({ error: 'Session ID is required' });
+  }
+
+  if (!Array.isArray(paths)) {
+    return res.status(400).json({ error: 'Paths array is required' });
+  }
+
+  try {
+    const server = req.app.locals.server;
+    const baseWorkspacePath = server.getCurrentWorkspace();
+
+    const validationResults = paths.map((relativePath) => {
+      try {
+        const fullPath = path.join(baseWorkspacePath, relativePath);
+        const normalizedPath = path.resolve(fullPath);
+        const normalizedWorkspace = path.resolve(baseWorkspacePath);
+
+        // Security check
+        if (!normalizedPath.startsWith(normalizedWorkspace)) {
+          return { path: relativePath, exists: false, error: 'Path outside workspace' };
+        }
+
+        const exists = fs.existsSync(normalizedPath);
+        let type: 'file' | 'directory' | undefined;
+
+        if (exists) {
+          const stats = fs.statSync(normalizedPath);
+          type = stats.isDirectory() ? 'directory' : 'file';
+        }
+
+        return { path: relativePath, exists, type };
+      } catch (error) {
+        return { path: relativePath, exists: false, error: 'Access denied' };
+      }
+    });
+
+    res.status(200).json({ results: validationResults });
+  } catch (error) {
+    // FIXME: Security - Log injection vulnerability
+    // The sessionId comes from user input and is directly interpolated into the log message.
+    // This could allow attackers to inject malicious content into logs.
+    // Solution: Use structured logging or sanitize the sessionId before logging.
+    // Example: console.error('Error validating workspace paths:', { sessionId: sessionId?.substring(0, 8) + '***' }, error);
+    console.error(`Error validating workspace paths for session ${sessionId}:`, error);
+    res.status(500).json({
+      error: 'Failed to validate workspace paths',
+      message: error instanceof Error ? error.message : String(error),
+    });
+  }
 }
 
 /**
@@ -573,7 +744,9 @@ async function searchWorkspaceItemsRecursive(
 async function getWorkspaceRootItems(
   basePath: string,
   type: 'file' | 'directory' | 'all',
-): Promise<Array<{ name: string; path: string; type: 'file' | 'directory'; relativePath: string }>> {
+): Promise<
+  Array<{ name: string; path: string; type: 'file' | 'directory'; relativePath: string }>
+> {
   const items: Array<{
     name: string;
     path: string;

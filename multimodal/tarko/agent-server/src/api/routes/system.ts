@@ -19,4 +19,11 @@ export function registerSystemRoutes(app: express.Application): void {
 
   // Agent information endpoint
   app.get('/api/v1/agent', systemController.getAgentInfo);
+
+  // Agent options endpoint (sanitized)
+  app.get('/api/v1/agent/options', systemController.getAgentOptions);
+
+  // Model management endpoints
+  app.get('/api/v1/models', systemController.getAvailableModels);
+  app.post('/api/v1/sessions/model', systemController.updateSessionModel);
 }

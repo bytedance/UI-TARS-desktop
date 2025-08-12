@@ -7,10 +7,12 @@
 import path from 'path';
 import {
   AgentEventStream,
+  AgentRunStreamingOptions,
   AgentStatus,
   AgioProviderConstructor,
   ChatCompletionContentPart,
   IAgent,
+  ModelProviderName,
 } from '@tarko/interface';
 import { AgentSnapshot } from '@tarko/agent-snapshot';
 import { EventStreamBridge } from '../utils/event-stream';
@@ -64,20 +66,23 @@ export class AgentSession {
   eventBridge: EventStreamBridge;
   private unsubscribe: (() => void) | null = null;
   private agioProvider?: AgioEvent.AgioProvider;
+  private sessionMetadata?: import('../storage').SessionMetadata;
 
   constructor(
     private server: AgentServer,
     sessionId: string,
     agioProviderImpl?: AgioProviderConstructor,
+    sessionMetadata?: import('../storage').SessionMetadata,
   ) {
     this.id = sessionId;
     this.eventBridge = new EventStreamBridge();
+    this.sessionMetadata = sessionMetadata;
 
     // Get agent options from server
     const agentOptions = { ...server.appConfig };
 
-    // Create agent instance using the server's factory method
-    const agent = server.createAgent();
+    // Create agent instance using the server's session-aware factory method
+    const agent = server.createAgentWithSessionModel(sessionMetadata);
 
     // Initialize agent snapshot if enabled
     if (agentOptions.snapshot?.enable) {
@@ -189,10 +194,23 @@ export class AgentSession {
    */
   async runQuery(query: string | ChatCompletionContentPart[]): Promise<AgentQueryResponse> {
     try {
-      // Run agent to process the query
-      const result = await this.agent.run({
+      // Prepare run options with session-specific model configuration
+      const runOptions: any = {
         input: query,
-      });
+        sessionId: this.id,
+      };
+
+      // Add model configuration if available in session metadata
+      if (this.sessionMetadata?.modelConfig) {
+        runOptions.provider = this.sessionMetadata.modelConfig.provider;
+        runOptions.model = this.sessionMetadata.modelConfig.modelId;
+        console.log(
+          `🎯 [AgentSession] Using session model: ${runOptions.provider}:${runOptions.model}`,
+        );
+      }
+
+      // Run agent to process the query
+      const result = await this.agent.run(runOptions);
       return {
         success: true,
         result,
@@ -226,11 +244,24 @@ export class AgentSession {
     query: string | ChatCompletionContentPart[],
   ): Promise<AsyncIterable<AgentEventStream.Event>> {
     try {
-      // Run agent in streaming mode
-      return await this.agent.run({
+      // Prepare run options with session-specific model configuration
+      const runOptions: AgentRunStreamingOptions = {
         input: query,
         stream: true,
-      });
+        sessionId: this.id,
+      };
+
+      // Add model configuration if available in session metadata
+      if (this.sessionMetadata?.modelConfig) {
+        runOptions.provider = this.sessionMetadata.modelConfig.provider as ModelProviderName;
+        runOptions.model = this.sessionMetadata.modelConfig.modelId;
+        console.log(
+          `🎯 [AgentSession] Using session model for streaming: ${runOptions.provider}:${runOptions.model}`,
+        );
+      }
+
+      // Run agent in streaming mode
+      return await this.agent.run(runOptions);
     } catch (error) {
       // Emit error event
       this.eventBridge.emit('error', {
@@ -279,6 +310,28 @@ export class AgentSession {
       });
       return false;
     }
+  }
+
+  /**
+   * Store the updated model configuration for this session
+   * The model will be used in subsequent queries via Agent.run() parameters
+   * @param sessionMetadata Updated session metadata with new model config
+   */
+  async updateModelConfig(sessionMetadata: import('../storage').SessionMetadata): Promise<void> {
+    console.log(
+      `🔄 [AgentSession] Storing model config for session ${this.id}: ${sessionMetadata.modelConfig?.provider}:${sessionMetadata.modelConfig?.modelId}`,
+    );
+
+    // Store the session metadata for use in future queries
+    this.sessionMetadata = sessionMetadata;
+
+    // Emit model updated event to client
+    this.eventBridge.emit('model_updated', {
+      sessionId: this.id,
+      modelConfig: sessionMetadata.modelConfig,
+    });
+
+    console.log(`✅ [AgentSession] Model config stored for session ${this.id}`);
   }
 
   async cleanup() {

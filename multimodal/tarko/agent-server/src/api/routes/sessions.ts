@@ -40,5 +40,7 @@ export function registerSessionRoutes(app: express.Application): void {
     router.get('/workspace/files', sessionsController.getSessionWorkspaceFiles);
     // Search workspace items for contextual selector
     router.get('/workspace/search', sessionsController.searchWorkspaceItems);
+    // Validate workspace paths
+    router.post('/workspace/validate', sessionsController.validateWorkspacePaths);
   });
 }

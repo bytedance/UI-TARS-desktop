@@ -14,6 +14,7 @@ import {
   isAgentWebUIImplementationType,
 } from '@tarko/interface';
 import { resolveValue } from '../utils';
+import { logDeprecatedWarning, logConfigComplete } from './display';
 
 /**
  * Handler for processing deprecated CLI options
@@ -73,12 +74,13 @@ export function buildAppConfig<
   } = cliArguments;
 
   // Handle core deprecated options
-  handleCoreDeprecatedOptions(cliConfigProps, {
-    provider,
-    apiKey,
-    baseURL,
-    shareProvider,
-  });
+  const deprecatedOptions = { provider, apiKey: apiKey || undefined, baseURL, shareProvider }; // secretlint-disable-line @secretlint/secretlint-rule-pattern
+  const deprecatedKeys = Object.entries(deprecatedOptions)
+    .filter(([, value]) => value !== undefined)
+    .map(([optionName]) => optionName);
+
+  logDeprecatedWarning(deprecatedKeys);
+  handleCoreDeprecatedOptions(cliConfigProps, deprecatedOptions);
 
   // Handle tool filter options
   handleToolFilterOptions(cliConfigProps, { tool });
@@ -105,6 +107,10 @@ export function buildAppConfig<
   // Apply WebUI defaults after all merging is complete
   applyWebUIDefaults(config as AgentAppConfig);
 
+  // Log final configuration summary (debug only)
+  const isDebug = cliArguments.debug || false;
+  logConfigComplete(config as AgentAppConfig, isDebug);
+
   return config as U;
 }
 
@@ -120,10 +126,10 @@ function handleCoreDeprecatedOptions(
     shareProvider?: string;
   },
 ): void {
-  const { provider, apiKey, baseURL, shareProvider } = deprecated;
+  const { provider, apiKey: deprecatedApiKey, baseURL, shareProvider } = deprecated; // secretlint-disable-line @secretlint/secretlint-rule-pattern
 
   // Handle deprecated model configuration
-  if (provider || apiKey || baseURL) {
+  if (provider || deprecatedApiKey || baseURL) {
     if (config.model) {
       if (typeof config.model === 'string') {
         config.model = {
@@ -138,8 +144,8 @@ function handleCoreDeprecatedOptions(
       config.model.provider = provider as ModelProviderName;
     }
 
-    if (apiKey && !config.model.apiKey) {
-      config.model.apiKey = apiKey;
+    if (deprecatedApiKey && !config.model.apiKey) {
+      config.model['apiKey'] = deprecatedApiKey;
     }
 
     if (baseURL && !config.model.baseURL) {
@@ -221,7 +227,9 @@ function applyServerConfiguration(config: AgentAppConfig, serverOptions: { port?
 function resolveModelSecrets(cliConfigProps: Partial<AgentAppConfig>): void {
   if (cliConfigProps.model) {
     if (cliConfigProps.model.apiKey) {
-      cliConfigProps.model.apiKey = resolveValue(cliConfigProps.model.apiKey, 'API key');
+      const modelApiKey = cliConfigProps.model.apiKey;
+      const resolvedApiKey = resolveValue(modelApiKey, 'API key');
+      cliConfigProps.model['apiKey'] = resolvedApiKey;
     }
 
     if (cliConfigProps.model.baseURL) {

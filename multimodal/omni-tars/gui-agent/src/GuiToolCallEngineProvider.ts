@@ -4,16 +4,16 @@
  */
 
 import { ToolCallEngineProvider, ToolCallEngineContext } from '@omni-tars/core';
-import { GuiToolCallEngine } from './GuiToolCallEngine';
+import { GUIAgentToolCallEngine } from './GUIAgentToolCallEngine';
 
-export class GuiToolCallEngineProvider extends ToolCallEngineProvider<GuiToolCallEngine> {
+export class GuiToolCallEngineProvider extends ToolCallEngineProvider<GUIAgentToolCallEngine> {
   readonly name = 'gui-tool-call-engine';
   readonly priority = 90; // High priority for GUI tasks
   readonly description =
     'Tool call engine optimized for GUI automation, computer use, and visual interface interactions';
 
-  protected createEngine(): GuiToolCallEngine {
-    return new GuiToolCallEngine();
+  protected createEngine(): GUIAgentToolCallEngine {
+    return new GUIAgentToolCallEngine();
   }
 
   canHandle(context: ToolCallEngineContext): boolean {

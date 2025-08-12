@@ -119,6 +119,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         connectionStatus={connectionStatus}
         onSubmit={handleSubmit}
         onReconnect={onReconnect}
+        sessionId={activeSessionId}
       />
     </div>
   );

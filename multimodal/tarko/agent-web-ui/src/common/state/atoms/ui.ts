@@ -1,5 +1,12 @@
 import { atom } from 'jotai';
-import { ConnectionStatus, ModelInfo, PanelContent, AgentInfo } from '@/common/types';
+import {
+  ConnectionStatus,
+  ModelInfo,
+  PanelContent,
+  AgentInfo,
+  WorkspaceInfo,
+  SanitizedAgentOptions,
+} from '@/common/types';
 
 /**
  * Atom for the content currently displayed in the panel
@@ -30,6 +37,19 @@ export const modelInfoAtom = atom<ModelInfo>({
 export const agentInfoAtom = atom<AgentInfo>({
   name: 'Unknown Agent',
 });
+
+/**
+ * Atom for workspace info (workspace name and path)
+ */
+export const workspaceInfoAtom = atom<WorkspaceInfo>({
+  name: 'Unknown',
+  path: '',
+});
+
+/**
+ * Atom for agent options (sanitized configuration)
+ */
+export const agentOptionsAtom = atom<SanitizedAgentOptions>({});
 
 /**
  * Atom for sidebar collapsed state

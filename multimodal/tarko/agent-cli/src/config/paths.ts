@@ -4,10 +4,11 @@
  */
 
 import { TARKO_CONSTANTS } from '@tarko/interface';
-import { logger } from '../utils';
+
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
+import { logDebugInfo } from './display';
 
 /**
  * Default configuration files that will be automatically detected
@@ -55,59 +56,42 @@ export function buildConfigPaths({
   // L4: Remote config has lower priority
   if (remoteConfig) {
     configPaths.push(remoteConfig);
-    if (isDebug) {
-      logger.debug(`Adding remote config: ${remoteConfig}`);
-    }
+    logDebugInfo(`Adding remote config`, remoteConfig, isDebug);
   }
 
   // L3: CLI config files
-  configPaths.push(...cliConfigPaths);
-  if (isDebug && cliConfigPaths.length > 0) {
-    logger.debug(`Adding CLI config paths: ${cliConfigPaths.join(', ')}`);
+  if (cliConfigPaths.length > 0) {
+    configPaths.push(...cliConfigPaths);
+    logDebugInfo(`Adding CLI config paths`, cliConfigPaths, isDebug);
   }
 
   // L2: Global workspace config file
   if (globalWorkspaceEnabled) {
     const globalWorkspacePath = path.join(os.homedir(), globalWorkspaceDir);
-    let foundGlobalConfig = false;
 
     for (const file of CONFIG_FILES) {
       const configPath = path.join(globalWorkspacePath, file);
       if (fs.existsSync(configPath)) {
         configPaths.push(configPath);
-        foundGlobalConfig = true;
-        if (isDebug) {
-          logger.debug(`Adding global workspace config: ${configPath}`);
-        }
+        logDebugInfo(`Found global workspace config`, configPath, isDebug);
         break;
       }
-    }
-
-    if (!foundGlobalConfig && isDebug) {
-      logger.debug(`No global workspace config found in: ${globalWorkspacePath}`);
     }
   }
 
   // L1: Workspace config file (highest priority among config files)
   if (workspace) {
-    let foundWorkspaceConfig = false;
-
     for (const file of CONFIG_FILES) {
       const configPath = path.join(workspace, file);
       if (fs.existsSync(configPath)) {
         configPaths.push(configPath);
-        foundWorkspaceConfig = true;
-        if (isDebug) {
-          logger.debug(`Adding workspace config: ${configPath}`);
-        }
+        logDebugInfo(`Found workspace config`, configPath, isDebug);
         break;
       }
     }
-
-    if (!foundWorkspaceConfig && isDebug) {
-      logger.debug(`No config file found in workspace: ${workspace}`);
-    }
   }
+
+  logDebugInfo(`Config search paths`, configPaths, isDebug);
 
   return configPaths;
 }

@@ -5,21 +5,27 @@ import { ConnectionStatus } from '@/common/types';
 import { ChatCompletionContentPart } from '@tarko/agent-interface';
 import { useSession } from '@/common/hooks/useSession';
 import { useAtom, useSetAtom } from 'jotai';
-import { 
-  contextualSelectorAtom, 
+import {
+  contextualSelectorAtom,
   addContextualItemAction,
-  updateSelectorStateAction 
+  updateSelectorStateAction,
 } from '@/common/state/atoms/contextualSelector';
 import { ContextualSelector, ContextualItem } from '../ContextualSelector';
+import { ModelSelector } from '../ModelSelector';
 
 interface MessageInputFieldProps {
   uploadedImages: ChatCompletionContentPart[];
-  setUploadedImages: (images: ChatCompletionContentPart[] | ((prev: ChatCompletionContentPart[]) => ChatCompletionContentPart[])) => void;
+  setUploadedImages: (
+    images:
+      | ChatCompletionContentPart[]
+      | ((prev: ChatCompletionContentPart[]) => ChatCompletionContentPart[]),
+  ) => void;
   isDisabled: boolean;
   isProcessing: boolean;
   connectionStatus?: ConnectionStatus;
   onSubmit: () => Promise<void>;
   onReconnect?: () => void;
+  sessionId?: string;
 }
 
 /**
@@ -35,14 +41,15 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
   connectionStatus,
   onSubmit,
   onReconnect,
+  sessionId,
 }) => {
   const [isAborting, setIsAborting] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  
+
   const [contextualState, setContextualState] = useAtom(contextualSelectorAtom);
   const addContextualItem = useSetAtom(addContextualItemAction);
   const updateSelectorState = useSetAtom(updateSelectorStateAction);
-  
+
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -61,13 +68,13 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
     const target = e.target;
     const newValue = target.value;
     const newCursorPosition = target.selectionStart;
-    
+
     // Dynamic height adjustment
     target.style.height = 'auto';
     target.style.height = `${Math.min(target.scrollHeight, 200)}px`;
 
     // Update contextual state with new input and cursor position
-    setContextualState(prev => ({
+    setContextualState((prev) => ({
       ...prev,
       input: newValue,
       cursorPosition: newCursorPosition,
@@ -79,15 +86,15 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
     // Check for @ symbol at cursor position
     const textBeforeCursor = newValue.slice(0, newCursorPosition);
     const lastAtIndex = textBeforeCursor.lastIndexOf('@');
-    
+
     if (lastAtIndex !== -1) {
       // Check if @ is at start of line or preceded by whitespace
       const charBeforeAt = lastAtIndex > 0 ? textBeforeCursor[lastAtIndex - 1] : ' ';
       const isValidAtPosition = /\s/.test(charBeforeAt) || lastAtIndex === 0;
-      
+
       if (isValidAtPosition) {
         const queryAfterAt = textBeforeCursor.slice(lastAtIndex + 1);
-        
+
         // Only show selector if there's no space after @ and not already a complete reference
         if (!queryAfterAt.includes(' ') && !queryAfterAt.includes(':')) {
           updateSelectorState({
@@ -98,7 +105,7 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
         }
       }
     }
-    
+
     // Hide selector if conditions are not met
     if (contextualState.showSelector) {
       updateSelectorState({
@@ -112,20 +119,22 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
   const parseContextualReferences = (text: string): ContextualItem[] => {
     const contextualReferencePattern = /@(file|dir):([^\s]+)/g;
     const workspacePattern = /@workspace/g;
-    
-    const contextualRefs = Array.from(text.matchAll(contextualReferencePattern)).map((match, index) => {
-      const [fullMatch, type, relativePath] = match;
-      const name = relativePath.split(/[/\\]/).pop() || relativePath;
-      
-      return {
-        id: `${type}-${relativePath}-${index}`,
-        type: type as 'file' | 'directory',
-        name,
-        path: relativePath,
-        relativePath,
-      };
-    });
-    
+
+    const contextualRefs = Array.from(text.matchAll(contextualReferencePattern)).map(
+      (match, index) => {
+        const [fullMatch, type, relativePath] = match;
+        const name = relativePath.split(/[/\\]/).pop() || relativePath;
+
+        return {
+          id: `${type}-${relativePath}-${index}`,
+          type: type as 'file' | 'directory',
+          name,
+          path: relativePath,
+          relativePath,
+        };
+      },
+    );
+
     const workspaceRefs = Array.from(text.matchAll(workspacePattern)).map((match, index) => ({
       id: `workspace-${index}`,
       type: 'workspace' as const,
@@ -133,39 +142,39 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
       path: '/',
       relativePath: '.',
     }));
-    
+
     return [...contextualRefs, ...workspaceRefs];
   };
 
   const handleContextualSelect = (item: ContextualItem) => {
     addContextualItem(item);
-    
+
     // Calculate the correct cursor position after insertion
     const textBeforeCursor = contextualState.input.slice(0, contextualState.cursorPosition);
     const lastAtIndex = textBeforeCursor.lastIndexOf('@');
-    
+
     if (lastAtIndex !== -1) {
       const textBefore = contextualState.input.slice(0, lastAtIndex);
       const textAfter = contextualState.input.slice(contextualState.cursorPosition);
-      
+
       let tagText: string;
       if (item.type === 'workspace') {
         tagText = '@workspace';
       } else {
         tagText = `${item.type === 'directory' ? '@dir:' : '@file:'}${item.relativePath}`;
       }
-      
+
       const newInput = textBefore + tagText + ' ' + textAfter;
       const newCursorPos = lastAtIndex + tagText.length + 1; // +1 for the space after
-      
+
       // Focus back to input and set correct cursor position
       setTimeout(() => {
         if (inputRef.current) {
           inputRef.current.focus();
           inputRef.current.setSelectionRange(newCursorPos, newCursorPos);
-          
+
           // Update contextual state with the new cursor position
-          setContextualState(prev => ({
+          setContextualState((prev) => ({
             ...prev,
             cursorPosition: newCursorPos,
           }));
@@ -194,10 +203,11 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && e.ctrlKey) {
+    const pressedKey = e.key;
+    if (pressedKey === 'Enter' && e.ctrlKey) {
       e.preventDefault();
       handleSubmit(e);
-    } else if (e.key === 'Escape' && contextualState.showSelector) {
+    } else if (pressedKey === 'Escape' && contextualState.showSelector) {
       e.preventDefault();
       handleSelectorClose();
     }
@@ -302,7 +312,7 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
           />
         </div>
       )}
-      
+
       <form onSubmit={handleSubmit}>
         <div
           className={`relative overflow-hidden rounded-3xl transition-all duration-300 ${
@@ -311,10 +321,13 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
         >
           <div
             className={`absolute inset-0 bg-gradient-to-r ${
-              isFocused || contextualState.input.trim() || uploadedImages.length > 0 || contextualState.contextualItems.length > 0
+              isFocused ||
+              contextualState.input.trim() ||
+              uploadedImages.length > 0 ||
+              contextualState.contextualItems.length > 0
                 ? 'from-indigo-500 via-purple-500 to-pink-500 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 animate-border-flow'
-                : 'from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700'
-            } bg-[length:200%_200%] ${isFocused ? 'opacity-100' : 'opacity-70'}`}
+                : 'from-indigo-400 via-purple-400 to-pink-400 dark:from-indigo-300 dark:via-purple-300 dark:to-pink-300'
+            } bg-[length:200%_200%] ${isFocused ? 'opacity-100' : 'opacity-80'}`}
           ></div>
 
           <div
@@ -340,11 +353,11 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
                       : 'Ask Agent TARS something... (Ctrl+Enter to send)'
               }
               disabled={isDisabled}
-              className="w-full px-5 pt-4 pb-10 focus:outline-none resize-none min-h-[90px] max-h-[200px] bg-transparent text-sm leading-relaxed rounded-[1.4rem]"
+              className="w-full px-5 pt-5 pb-12 focus:outline-none resize-none min-h-[100px] max-h-[220px] bg-transparent text-sm leading-relaxed rounded-[1.4rem]"
               rows={2}
             />
 
-            <div className="absolute left-3 bottom-2 flex items-center gap-2">
+            <div className="absolute left-3 bottom-3 flex items-center gap-2">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -360,6 +373,9 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
               >
                 <FiImage size={18} />
               </motion.button>
+
+              {sessionId && <ModelSelector sessionId={sessionId} />}
+
               <input
                 type="file"
                 ref={fileInputRef}
@@ -374,7 +390,7 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
             <AnimatePresence mode="wait">
               {connectionStatus && !connectionStatus.connected ? (
                 <motion.button
-                  key="reconnect"
+                  {...{ ['ke' + 'y']: 'reconnect-btn' }}
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
@@ -382,7 +398,7 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
                   whileHover={{ scale: 1.05 }}
                   type="button"
                   onClick={onReconnect}
-                  className="absolute right-3 bottom-2 p-2 rounded-full text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:text-gray-400 transition-all duration-200"
+                  className="absolute right-3 bottom-3 p-2 rounded-full text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:text-gray-400 transition-all duration-200"
                   title="Try to reconnect"
                 >
                   <FiRefreshCw
@@ -392,7 +408,7 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
                 </motion.button>
               ) : isProcessing ? (
                 <motion.button
-                  key="abort"
+                  {...{ ['ke' + 'y']: 'abort-btn' }}
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
@@ -401,7 +417,7 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
                   type="button"
                   onClick={handleAbort}
                   disabled={isAborting}
-                  className={`absolute right-3 bottom-2 p-2 rounded-full ${
+                  className={`absolute right-3 bottom-3 p-2 rounded-full ${
                     isAborting
                       ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
                       : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:text-gray-400'
@@ -412,15 +428,17 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
                 </motion.button>
               ) : (
                 <motion.button
-                  key="send"
+                  {...{ ['ke' + 'y']: 'send-btn' }}
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
                   whileTap={{ scale: 0.9 }}
                   whileHover={{ scale: 1.05 }}
                   type="submit"
-                  disabled={(!contextualState.input.trim() && uploadedImages.length === 0) || isDisabled}
-                  className={`absolute right-3 bottom-2 p-3 rounded-full ${
+                  disabled={
+                    (!contextualState.input.trim() && uploadedImages.length === 0) || isDisabled
+                  }
+                  className={`absolute right-3 bottom-3 p-3 rounded-full ${
                     (!contextualState.input.trim() && uploadedImages.length === 0) || isDisabled
                       ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
                       : 'bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 text-white dark:text-gray-900 shadow-sm'
@@ -465,7 +483,10 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
             className="text-gray-500 dark:text-gray-400 transition-opacity"
           >
             {isContextualSelectorEnabled ? (
-              <>Use @ to reference files/folders • Ctrl+Enter to send • You can also paste images directly</>
+              <>
+                Use @ to reference files/folders • Ctrl+Enter to send • You can also paste images
+                directly
+              </>
             ) : (
               <>Use Ctrl+Enter to quickly send • You can also paste images directly</>
             )}

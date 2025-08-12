@@ -4,6 +4,7 @@ import { FiCpu } from 'react-icons/fi';
 import { useSession } from '@/common/hooks/useSession';
 import { usePlan } from '@/common/hooks/usePlan';
 import { FilesDisplay } from './FilesDisplay';
+
 import { useAtomValue } from 'jotai';
 import { sessionFilesAtom } from '@/common/state/atoms/files';
 

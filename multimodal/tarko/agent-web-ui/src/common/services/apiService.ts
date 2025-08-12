@@ -1,5 +1,11 @@
 import { API_BASE_URL, API_ENDPOINTS } from '@/common/constants';
-import { AgentEventStream, SessionMetadata, AgentInfo } from '@/common/types';
+import {
+  AgentEventStream,
+  SessionMetadata,
+  AgentInfo,
+  SanitizedAgentOptions,
+  WorkspaceInfo,
+} from '@/common/types';
 import { socketService } from './socketService';
 import { ChatCompletionContentPart } from '@tarko/agent-interface';
 import { AgentServerVersionInfo } from '@agent-tars/interface';
@@ -12,6 +18,21 @@ export interface WorkspaceItem {
   path: string;
   type: 'file' | 'directory';
   relativePath: string;
+}
+
+/**
+ * Available models response interface
+ */
+export interface AvailableModelsResponse {
+  models: Array<{
+    provider: string;
+    models: string[];
+  }>;
+  defaultModel: {
+    provider: string;
+    modelId: string;
+  };
+  hasMultipleProviders: boolean;
 }
 
 /**
@@ -411,12 +432,51 @@ class ApiService {
   }
 
   /**
+   * Get current agent options (sanitized)
+   */
+  async getAgentOptions(): Promise<SanitizedAgentOptions> {
+    try {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.AGENT_OPTIONS}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(3000),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get agent options: ${response.statusText}`);
+      }
+
+      const { options } = await response.json();
+      return options;
+    } catch (error) {
+      console.error('Error getting agent options:', error);
+      return {};
+    }
+  }
+
+  /**
+   * Get workspace info from agent options
+   */
+  async getWorkspaceInfo(): Promise<WorkspaceInfo> {
+    try {
+      const options = await this.getAgentOptions();
+      return {
+        name: options.workspaceName || 'Unknown',
+        path: options.workspace || '',
+      };
+    } catch (error) {
+      console.error('Error getting workspace info:', error);
+      return { name: 'Unknown', path: '' };
+    }
+  }
+
+  /**
    * Search workspace files and directories for contextual selector
    */
   async searchWorkspaceItems(
     sessionId: string,
     query: string,
-    type?: 'file' | 'directory' | 'all'
+    type?: 'file' | 'directory' | 'all',
   ): Promise<WorkspaceItem[]> {
     try {
       const params = new URLSearchParams({
@@ -425,14 +485,11 @@ class ApiService {
         ...(type && { type }),
       });
 
-      const response = await fetch(
-        `${API_BASE_URL}${API_ENDPOINTS.WORKSPACE_SEARCH}?${params}`,
-        {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-          signal: AbortSignal.timeout(3000),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.WORKSPACE_SEARCH}?${params}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(3000),
+      });
 
       if (!response.ok) {
         throw new Error(`Failed to search workspace items: ${response.statusText}`);
@@ -443,6 +500,106 @@ class ApiService {
     } catch (error) {
       console.error('Error searching workspace items:', error);
       return [];
+    }
+  }
+
+  /**
+   * Validate workspace paths existence
+   */
+  async validateWorkspacePaths(
+    sessionId: string,
+    paths: string[],
+  ): Promise<
+    Array<{ path: string; exists: boolean; type?: 'file' | 'directory'; error?: string }>
+  > {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}${API_ENDPOINTS.WORKSPACE_VALIDATE}?sessionId=${sessionId}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ paths }),
+          signal: AbortSignal.timeout(3000),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to validate workspace paths: ${response.statusText}`);
+      }
+
+      const { results } = await response.json();
+      return results;
+    } catch (error) {
+      console.error('Error validating workspace paths:', error);
+      return paths.map((path) => ({ path, exists: false, error: 'Validation failed' }));
+    }
+  }
+
+  /**
+   * Get available model providers and configurations
+   */
+  async getAvailableModels(): Promise<AvailableModelsResponse> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/models`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(3000),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get available models: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error getting available models:', error);
+      return {
+        models: [],
+        defaultModel: { provider: '', modelId: '' },
+        hasMultipleProviders: false,
+      };
+    }
+  }
+
+  /**
+   * Update session model configuration
+   */
+  async updateSessionModel(sessionId: string, provider: string, modelId: string): Promise<boolean> {
+    try {
+      console.log('🔄 [ModelSelector] Updating session model:', {
+        sessionId,
+        provider,
+        modelId,
+        endpoint: `${API_BASE_URL}/api/v1/sessions/model`
+      });
+
+      const requestBody = { sessionId, provider, modelId };
+      console.log('📤 [ModelSelector] Request payload:', requestBody);
+
+      const response = await fetch(`${API_BASE_URL}/api/v1/sessions/model`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+      });
+
+      console.log('📥 [ModelSelector] Response status:', response.status, response.statusText);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ [ModelSelector] Server error response:', errorText);
+        throw new Error(`Failed to update session model: ${response.statusText}`);
+      }
+
+      const responseData = await response.json();
+      console.log('✅ [ModelSelector] Response data:', responseData);
+
+      const { success } = responseData;
+      console.log('🎯 [ModelSelector] Update result:', success ? 'SUCCESS' : 'FAILED');
+      
+      return success;
+    } catch (error) {
+      console.error('💥 [ModelSelector] Error updating session model:', error);
+      return false;
     }
   }
 }

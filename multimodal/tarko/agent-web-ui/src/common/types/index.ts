@@ -4,9 +4,11 @@ import {
   ChatCompletionContentPart,
   ChatCompletionMessageToolCall,
 } from '@tarko/agent-interface';
+import { SanitizedAgentOptions, WorkspaceInfo } from '@tarko/interface';
 import { ToolCategory } from '../constants/toolTypes';
 
 export { AgentEventStream };
+export type { SanitizedAgentOptions, WorkspaceInfo };
 
 export type { ChatCompletionContentPart, ChatCompletionMessageToolCall };
 
