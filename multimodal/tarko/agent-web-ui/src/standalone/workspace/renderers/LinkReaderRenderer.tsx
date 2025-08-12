@@ -41,6 +41,7 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ part, on
 
   // Extract LinkReader data directly from the part
   const linkData = extractLinkReaderData(part);
+  debugger;
 
   if (!linkData || !linkData.results || linkData.results.length === 0) {
     return (
@@ -161,7 +162,7 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ part, on
 
           return (
             <motion.div
-              key={index}
+              key={`result-${index}`} // secretlint-disable-line
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.1 }}
@@ -171,17 +172,19 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ part, on
               <div className="p-4 border-b border-gray-100 dark:border-gray-700/50">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 leading-tight mb-2">
                       {result.title}
                     </h4>
                     <a
                       href={result.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 mt-1"
+                      className="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors group"
                     >
-                      <span className="truncate">{result.url}</span>
-                      <FiExternalLink size={12} className="flex-shrink-0" />
+                      <FiExternalLink size={14} className="flex-shrink-0" />
+                      <span className="truncate group-hover:underline">
+                        {formatUrl(result.url)}
+                      </span>
                     </a>
                   </div>
 
@@ -217,17 +220,21 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ part, on
                 <AnimatePresence mode="wait">
                   {viewMode === 'summary' ? (
                     <motion.div
-                      key="summary"
+                      key="summary-view" // secretlint-disable-line
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      className="text-sm text-gray-700 dark:text-gray-300"
+                      className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed"
                     >
-                      {result.snippet}
+                      {result.snippet || (
+                        <span className="italic text-gray-500 dark:text-gray-400">
+                          No preview available for this content
+                        </span>
+                      )}
                     </motion.div>
                   ) : (
                     <motion.div
-                      key="full"
+                      key="full-view" // secretlint-disable-line
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
@@ -286,15 +293,19 @@ function extractLinkReaderData(part: ToolResultContentPart): {
     const results: LinkResult[] = parsedData.results.map((item) => {
       let hostname: string;
       try {
-        hostname = new URL(item.url).hostname;
+        const url = new URL(item.url);
+        hostname = url.hostname;
       } catch {
         hostname = item.url;
       }
 
+      const extractedTitle = extractTitleFromContent(item.raw_content);
+      const fallbackTitle = hostname.replace(/^www\./, ''); // Remove www prefix
+
       return {
         url: item.url,
-        title: extractTitleFromContent(item.raw_content) || hostname,
-        snippet: truncateContent(item.raw_content, 200),
+        title: extractedTitle || fallbackTitle,
+        snippet: truncateContent(item.raw_content, 300), // Increased length for better context
         fullContent: item.raw_content,
       };
     });
@@ -307,42 +318,108 @@ function extractLinkReaderData(part: ToolResultContentPart): {
 }
 
 /**
- * Extract title from content using various patterns
+ * Extract title from content using various patterns with better heuristics
  */
 function extractTitleFromContent(content: string): string | null {
   const titlePatterns = [
+    // HTML title tag (highest priority)
     /<title[^>]*>([^<]+)<\/title>/i,
-    /^#\s+(.+)$/m, // Markdown h1
-    /^(.+)\n[=]{3,}$/m, // Underlined title
-    /^\*\*(.+)\*\*$/m, // Bold title
+    // HTML h1 tag
+    /<h1[^>]*>([^<]+)<\/h1>/i,
+    // Markdown h1
+    /^#\s+(.+)$/m,
+    // Underlined title
+    /^(.+)\n[=]{3,}$/m,
+    // Bold title at start
+    /^\*\*(.+)\*\*$/m,
   ];
 
   for (const pattern of titlePatterns) {
     const match = content.match(pattern);
     if (match && match[1]) {
-      return match[1].trim();
+      const title = match[1].trim();
+      // Filter out obviously bad titles
+      if (!isBadTitle(title)) {
+        return title;
+      }
     }
   }
 
-  // Fallback: use first line if it's not too long
-  const firstLine = content.split('\n')[0]?.trim();
-  if (firstLine && firstLine.length > 0 && firstLine.length <= 100) {
-    return firstLine;
+  // Fallback: use first meaningful line
+  const lines = content
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+  for (const line of lines.slice(0, 5)) {
+    // Check first 5 non-empty lines
+    if (line.length > 10 && line.length <= 100 && !isBadTitle(line)) {
+      return line;
+    }
   }
 
   return null;
 }
 
 /**
- * Truncate content to specified length with word boundary awareness
+ * Check if a title candidate is likely to be a bad title
+ */
+function isBadTitle(title: string): boolean {
+  const badPatterns = [
+    /^https?:\/\//i, // URLs
+    /^\w+\s*[:：]\s*\w+/i, // Key-value pairs like "Content-Type: text/html"
+    /blob:|localhost|127\.0\.0\.1/i, // Technical URLs
+    /^[\w\s]*\.(com|cn|org|net)/i, // Domain names
+    /^\d+$/, // Just numbers
+    /^[^\w\s]+$/, // Just symbols
+    /^.{1,3}$/, // Too short
+    /导航|跳过|skip|navigation/i, // Navigation text
+  ];
+
+  return badPatterns.some((pattern) => pattern.test(title));
+}
+
+/**
+ * Create a clean snippet from content, filtering out technical noise
  */
 function truncateContent(content: string, maxLength: number): string {
-  if (content.length <= maxLength) {
-    return content;
+  // Clean the content first
+  let cleanContent = content
+    // Remove HTML tags
+    .replace(/<[^>]*>/g, ' ')
+    // Remove URLs
+    .replace(/https?:\/\/[^\s]+/g, '')
+    // Remove blob URLs and localhost references
+    .replace(/blob:[^\s]+|localhost[^\s]*/g, '')
+    // Remove technical markers
+    .replace(/\[Image \d+\]|\[跳过导航\]/g, '')
+    // Remove excessive whitespace
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (cleanContent.length <= maxLength) {
+    return cleanContent;
   }
 
-  // Try to truncate at word boundary
-  const truncated = content.substring(0, maxLength);
+  // Find meaningful sentences
+  const sentences = cleanContent.split(/[。！？.!?]/).filter((s) => s.trim().length > 10);
+
+  if (sentences.length > 0) {
+    let result = '';
+    for (const sentence of sentences) {
+      const potential = result + sentence.trim() + '。';
+      if (potential.length <= maxLength) {
+        result = potential;
+      } else {
+        break;
+      }
+    }
+    if (result.length > 20) {
+      return result;
+    }
+  }
+
+  // Fallback to word boundary truncation
+  const truncated = cleanContent.substring(0, maxLength);
   const lastSpaceIndex = truncated.lastIndexOf(' ');
 
   if (lastSpaceIndex > maxLength * 0.8) {
@@ -350,4 +427,28 @@ function truncateContent(content: string, maxLength: number): string {
   }
 
   return truncated + '...';
+}
+
+/**
+ * Format URL for display - show hostname and path nicely
+ */
+function formatUrl(url: string): string {
+  try {
+    const urlObj = new URL(url);
+    const hostname = urlObj.hostname.replace(/^www\./, '');
+    const path = urlObj.pathname;
+
+    if (path === '/' || path === '') {
+      return hostname;
+    }
+
+    // Show hostname + shortened path
+    if (path.length > 30) {
+      return `${hostname}${path.substring(0, 25)}...`;
+    }
+
+    return `${hostname}${path}`;
+  } catch {
+    return url;
+  }
 }
