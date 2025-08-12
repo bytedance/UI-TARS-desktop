@@ -202,7 +202,7 @@ export class AgentSession {
       this.eventBridge.emit('agent-status', {
         isProcessing: true,
         state: 'initializing',
-        phase: 'query_preparation' as AgentProcessingPhase,
+        phase: 'query_preparation',
         message: 'Preparing to process your request...',
         estimatedTime: '5-15 seconds',
       } as AgentStatusInfo);
@@ -263,7 +263,7 @@ export class AgentSession {
       this.eventBridge.emit('agent-status', {
         isProcessing: true,
         state: 'initializing',
-        phase: 'streaming_preparation' as AgentProcessingPhase,
+        phase: 'streaming_preparation',
         message: 'Preparing streaming response...',
         estimatedTime: '3-10 seconds for first token',
       } as AgentStatusInfo);

@@ -50,11 +50,11 @@ export class EventStreamBridge {
       switch (event.type) {
         case 'agent_run_start':
           // Enhanced TTFT status with detailed state
-          this.emit('agent-status', { 
-            isProcessing: true, 
+          this.emit('agent-status', {
+            isProcessing: true,
             state: 'initializing',
             phase: 'model_initialization' as AgentProcessingPhase,
-            message: 'Initializing model and processing request...' 
+            message: 'Initializing model and processing request...',
           } as AgentStatusInfo);
           break;
 
@@ -65,11 +65,11 @@ export class EventStreamBridge {
 
         case 'user_message':
           // Enhanced TTFT phase tracking
-          this.emit('agent-status', { 
-            isProcessing: true, 
+          this.emit('agent-status', {
+            isProcessing: true,
             state: 'processing',
             phase: 'request_processing' as AgentProcessingPhase,
-            message: 'Processing your request...' 
+            message: 'Processing your request...',
           } as AgentStatusInfo);
           this.emit('query', { text: event.content });
           break;
@@ -79,25 +79,25 @@ export class EventStreamBridge {
         case 'assistant_streaming_message':
           // First token received - TTFT milestone reached
           if (!event.isComplete) {
-            this.emit('agent-status', { 
-              isProcessing: true, 
+            this.emit('agent-status', {
+              isProcessing: true,
               state: 'streaming',
               phase: 'first_token_received' as AgentProcessingPhase,
-              message: 'Generating response...' 
+              message: 'Generating response...',
             } as AgentStatusInfo);
           }
-          this.emit('streaming_message', { 
+          this.emit('streaming_message', {
             content: event.content,
             isComplete: event.isComplete,
-            messageId: event.messageId 
+            messageId: event.messageId,
           });
           break;
         case 'tool_call':
-          this.emit('agent-status', { 
-            isProcessing: true, 
+          this.emit('agent-status', {
+            isProcessing: true,
             state: 'executing_tools',
             phase: 'tool_execution' as AgentProcessingPhase,
-            message: `Executing ${event.name}...` 
+            message: `Executing ${event.name}...`,
           } as AgentStatusInfo);
           this.emit('event', {
             type: 'tool_call',
@@ -118,18 +118,18 @@ export class EventStreamBridge {
         case 'system':
           // Enhanced system event handling for TTFT phases
           if (event.message?.includes('model warming up')) {
-            this.emit('agent-status', { 
-              isProcessing: true, 
+            this.emit('agent-status', {
+              isProcessing: true,
               state: 'warming_up',
               phase: 'model_warmup' as AgentProcessingPhase,
-              message: 'Warming up model...' 
+              message: 'Warming up model...',
             } as AgentStatusInfo);
           } else if (event.message?.includes('generating')) {
-            this.emit('agent-status', { 
-              isProcessing: true, 
+            this.emit('agent-status', {
+              isProcessing: true,
               state: 'generating',
               phase: 'response_generation' as AgentProcessingPhase,
-              message: 'Generating response...' 
+              message: 'Generating response...',
             } as AgentStatusInfo);
           }
           this.emit(event.level, { message: event.message });
@@ -138,10 +138,8 @@ export class EventStreamBridge {
           this.emit('event', event);
       }
 
-      // 特别处理中止事件
       if (event.type === 'system' && event.message?.includes('aborted')) {
         this.emit('aborted', { message: event.message });
-        // 中止后明确设置非处理状态
         this.emit('agent-status', { isProcessing: false, state: 'idle' });
       }
 
