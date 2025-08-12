@@ -584,18 +584,3 @@
 .workspace-control-panel {
   @apply bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm;
 }
-
-/* Ensure workspace doesn't interfere with navbar dropdowns */
-.workspace-container {
-  position: relative;
-  z-index: 10;
-}
-
-/* Navbar dropdowns should have higher z-index than workspace */
-.navbar-dropdown {
-  z-index: 60 !important;
-}
-
-.navbar-dropdown-backdrop {
-  z-index: 50 !important;
-}

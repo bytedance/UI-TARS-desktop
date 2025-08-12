@@ -197,7 +197,7 @@ export const WorkspaceContent: React.FC = () => {
   const hasContent = currentPlan && currentPlan.hasGeneratedPlan && currentPlan.steps.length > 0;
 
   return (
-    <div className="h-full flex flex-col workspace-container">
+    <div className="h-full flex flex-col">
       {/* Header with refined styling */}
       <div className="flex items-center px-6 py-5 border-b border-gray-100/60 dark:border-gray-700/30 bg-white dark:bg-gray-800/90">
         <div className="w-10 h-10 mr-4 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 border border-gray-200/60 dark:border-gray-700/40 shadow-sm">
