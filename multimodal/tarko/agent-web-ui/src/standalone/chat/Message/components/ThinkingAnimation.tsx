@@ -76,12 +76,12 @@ const GradientText: React.FC<GradientTextProps> = ({
           backgroundSize: '300% 100%',
         }}
         animate={{
-          backgroundPosition: ['-100% 50%', '200% 50%'],
+          backgroundPosition: ['200% 50%', '-100% 50%'],
         }}
         transition={{
           duration: animationDuration * 0.7, // Faster animation
           repeat: Infinity,
-          ease: 'easeInOut',
+          ease: 'linear', // Using linear for smoother animation
         }}
       >
         {text}
@@ -187,9 +187,9 @@ export const ThinkingAnimation: React.FC<ThinkingAnimationProps> = ({
             {/* Main progress bar */}
             <motion.div
               className={`h-full rounded-full ${colorClass.replace('text-', 'bg-')}`}
-              animate={{ width: ['15%', '85%'] }}
+              animate={{ width: ['15%', '90%'] }}
               transition={{
-                duration: 2,
+                duration: 1.8, // Slightly faster
                 repeat: Infinity,
                 ease: 'easeInOut',
               }}
@@ -198,12 +198,12 @@ export const ThinkingAnimation: React.FC<ThinkingAnimationProps> = ({
             {/* Primary flowing highlight effect */}
             <motion.div 
               className="absolute top-0 h-full w-20 bg-white bg-opacity-30 blur-sm"
-              animate={{ left: ['-10%', '100%'] }}
+              animate={{ left: ['-5%', '105%'] }}
               transition={{
-                duration: 1.2,
+                duration: 1.0, // Faster for more fluid motion
                 repeat: Infinity,
                 ease: 'linear',
-                repeatDelay: 0.1
+                repeatDelay: 0.05 // Shorter delay for more continuous flow
               }}
               style={{ borderRadius: 'inherit' }}
             />
@@ -211,12 +211,12 @@ export const ThinkingAnimation: React.FC<ThinkingAnimationProps> = ({
             {/* Secondary flowing highlight effect (offset) */}
             <motion.div 
               className="absolute top-0 h-full w-12 bg-white bg-opacity-20 blur-sm"
-              animate={{ left: ['-20%', '100%'] }}
+              animate={{ left: ['-15%', '110%'] }}
               transition={{
-                duration: 1.5,
+                duration: 1.3,
                 repeat: Infinity,
                 ease: 'linear',
-                delay: 0.4 // Offset start time
+                delay: 0.3 // Shorter offset for better flow
               }}
               style={{ borderRadius: 'inherit' }}
             />
