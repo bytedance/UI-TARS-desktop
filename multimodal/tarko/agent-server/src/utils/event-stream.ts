@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentEventStream } from '@tarko/interface';
+import { AgentEventStream, AgentProcessingPhase, AgentStatusInfo } from '@tarko/interface';
 
 /**
  * Implement event stream bridging to forward Agent's native events to the client
@@ -53,9 +53,9 @@ export class EventStreamBridge {
           this.emit('agent-status', { 
             isProcessing: true, 
             state: 'initializing',
-            phase: 'model_initialization',
+            phase: 'model_initialization' as AgentProcessingPhase,
             message: 'Initializing model and processing request...' 
-          });
+          } as AgentStatusInfo);
           break;
 
         case 'agent_run_end':
@@ -68,9 +68,9 @@ export class EventStreamBridge {
           this.emit('agent-status', { 
             isProcessing: true, 
             state: 'processing',
-            phase: 'request_processing',
+            phase: 'request_processing' as AgentProcessingPhase,
             message: 'Processing your request...' 
-          });
+          } as AgentStatusInfo);
           this.emit('query', { text: event.content });
           break;
         case 'assistant_message':
@@ -82,9 +82,9 @@ export class EventStreamBridge {
             this.emit('agent-status', { 
               isProcessing: true, 
               state: 'streaming',
-              phase: 'first_token_received',
+              phase: 'first_token_received' as AgentProcessingPhase,
               message: 'Generating response...' 
-            });
+            } as AgentStatusInfo);
           }
           this.emit('streaming_message', { 
             content: event.content,
@@ -96,9 +96,9 @@ export class EventStreamBridge {
           this.emit('agent-status', { 
             isProcessing: true, 
             state: 'executing_tools',
-            phase: 'tool_execution',
+            phase: 'tool_execution' as AgentProcessingPhase,
             message: `Executing ${event.name}...` 
-          });
+          } as AgentStatusInfo);
           this.emit('event', {
             type: 'tool_call',
             name: event.name,
@@ -121,16 +121,16 @@ export class EventStreamBridge {
             this.emit('agent-status', { 
               isProcessing: true, 
               state: 'warming_up',
-              phase: 'model_warmup',
+              phase: 'model_warmup' as AgentProcessingPhase,
               message: 'Warming up model...' 
-            });
+            } as AgentStatusInfo);
           } else if (event.message?.includes('generating')) {
             this.emit('agent-status', { 
               isProcessing: true, 
               state: 'generating',
-              phase: 'response_generation',
+              phase: 'response_generation' as AgentProcessingPhase,
               message: 'Generating response...' 
-            });
+            } as AgentStatusInfo);
           }
           this.emit(event.level, { message: event.message });
           break;

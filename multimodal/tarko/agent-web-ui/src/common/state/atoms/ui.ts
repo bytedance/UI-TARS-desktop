@@ -1,4 +1,5 @@
 import { atom } from 'jotai';
+import { AgentProcessingPhase, AgentStatusInfo } from '@tarko/interface';
 import {
   ConnectionStatus,
   ModelInfo,
@@ -69,13 +70,7 @@ export const isProcessingAtom = atom<boolean>(false);
 /**
  * Enhanced agent status atom for TTFT optimization
  */
-export const agentStatusAtom = atom<{
-  isProcessing: boolean;
-  state?: string;
-  phase?: 'initializing' | 'processing' | 'generating' | 'streaming' | 'executing_tools' | 'warming_up' | 'query_preparation' | 'streaming_preparation' | 'model_initialization' | 'request_processing' | 'first_token_received' | 'model_warmup' | 'response_generation' | 'tool_execution';
-  message?: string;
-  estimatedTime?: string;
-}>({ 
+export const agentStatusAtom = atom<AgentStatusInfo>({ 
   isProcessing: false 
 });
 

@@ -1,18 +1,13 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FiCpu, FiZap, FiLoader, FiPlay } from 'react-icons/fi';
+import { AgentProcessingPhase } from '@tarko/interface';
 
 interface ThinkingAnimationProps {
   size?: 'small' | 'medium' | 'large';
   text?: string;
   className?: string;
-  phase?:
-    | 'initializing'
-    | 'processing'
-    | 'generating'
-    | 'streaming'
-    | 'executing_tools'
-    | 'warming_up';
+  phase?: AgentProcessingPhase;
   estimatedTime?: string;
   showProgress?: boolean;
 }

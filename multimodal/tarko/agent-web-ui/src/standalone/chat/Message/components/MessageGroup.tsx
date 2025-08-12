@@ -9,6 +9,7 @@ import { ThinkingAnimation } from './ThinkingAnimation';
 import { SkeletonLoader } from './SkeletonLoader';
 import { useAtomValue } from 'jotai';
 import { agentStatusAtom } from '@/common/state/atoms/ui';
+import { AgentProcessingPhase } from '@tarko/interface';
 
 interface MessageGroupProps {
   messages: MessageType[];
