@@ -92,7 +92,7 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ part }) 
 
             {/* Content - Always show full content */}
             <div className="px-4 pb-4">
-              <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-3 text-sm h-96 overflow-auto">
+              <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-3 text-sm">
                 <pre className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words font-mono leading-relaxed">
                   {result.content}
                 </pre>
