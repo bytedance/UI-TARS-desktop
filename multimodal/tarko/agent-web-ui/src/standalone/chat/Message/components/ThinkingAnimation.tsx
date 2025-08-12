@@ -76,13 +76,12 @@ const GradientText: React.FC<GradientTextProps> = ({
           backgroundSize: '300% 100%',
         }}
         animate={{
-          backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+          backgroundPosition: ['-100% 50%', '200% 50%'],
         }}
         transition={{
           duration: animationDuration * 0.7, // Faster animation
           repeat: Infinity,
           ease: 'easeInOut',
-          repeatType: 'reverse',
         }}
       >
         {text}
@@ -188,7 +187,7 @@ export const ThinkingAnimation: React.FC<ThinkingAnimationProps> = ({
             {/* Main progress bar */}
             <motion.div
               className={`h-full rounded-full ${colorClass.replace('text-', 'bg-')}`}
-              animate={{ width: ['15%', '70%', '40%'] }}
+              animate={{ width: ['15%', '85%'] }}
               transition={{
                 duration: 2,
                 repeat: Infinity,
@@ -196,15 +195,28 @@ export const ThinkingAnimation: React.FC<ThinkingAnimationProps> = ({
               }}
             />
             
-            {/* Flowing highlight effect */}
+            {/* Primary flowing highlight effect */}
             <motion.div 
               className="absolute top-0 h-full w-20 bg-white bg-opacity-30 blur-sm"
               animate={{ left: ['-10%', '100%'] }}
               transition={{
+                duration: 1.2,
+                repeat: Infinity,
+                ease: 'linear',
+                repeatDelay: 0.1
+              }}
+              style={{ borderRadius: 'inherit' }}
+            />
+            
+            {/* Secondary flowing highlight effect (offset) */}
+            <motion.div 
+              className="absolute top-0 h-full w-12 bg-white bg-opacity-20 blur-sm"
+              animate={{ left: ['-20%', '100%'] }}
+              transition={{
                 duration: 1.5,
                 repeat: Infinity,
                 ease: 'linear',
-                repeatDelay: 0.3
+                delay: 0.4 // Offset start time
               }}
               style={{ borderRadius: 'inherit' }}
             />
