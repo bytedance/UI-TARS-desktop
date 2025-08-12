@@ -32,26 +32,6 @@ export function standardizeContent(panelContent: StandardPanelContent): ToolResu
     ];
   }
 
-  // Special handling for Search tool results that come as multimodal content with JSON
-  if (Array.isArray(source) && source.length > 0 && source[0]?.type === 'text') {
-    try {
-      const textContent = source[0].text;
-      if (typeof textContent === 'string') {
-        const parsedContent = JSON.parse(textContent);
-        // Check if this is an omni TARS search result
-        if (
-          parsedContent.searchParameters &&
-          parsedContent.organic &&
-          Array.isArray(parsedContent.organic)
-        ) {
-          return handleSearchContent(parsedContent, toolArguments, title);
-        }
-      }
-    } catch (e) {
-      // If JSON parsing fails, continue with normal processing
-    }
-  }
-
   // Handle file operations with explicit path or content
   if (type === 'file' && (toolArguments?.path || toolArguments?.content)) {
     const content = toolArguments.content || (typeof source === 'string' ? source : null);

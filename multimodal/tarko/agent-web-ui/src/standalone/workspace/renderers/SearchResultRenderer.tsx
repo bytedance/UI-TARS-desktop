@@ -9,16 +9,6 @@ interface SearchResultRendererProps {
   onAction?: (action: string, data: any) => void;
 }
 
-interface SearchResultPart extends ToolResultContentPart {
-  results: Array<{
-    title: string;
-    url: string;
-    snippet: string;
-  }>;
-  query?: string;
-  relatedSearches?: string[];
-}
-
 /**
  * Renders search results with refined visual design
  *
@@ -31,8 +21,7 @@ interface SearchResultPart extends ToolResultContentPart {
  * - Support for structured web_search results
  */
 export const SearchResultRenderer: React.FC<SearchResultRendererProps> = ({ part }) => {
-  const searchPart = part as SearchResultPart;
-  const { results, query, relatedSearches } = searchPart;
+  const { results, query, relatedSearches } = part;
 
   if (!results || !Array.isArray(results)) {
     return <div className="text-gray-500 italic">Search results missing</div>;

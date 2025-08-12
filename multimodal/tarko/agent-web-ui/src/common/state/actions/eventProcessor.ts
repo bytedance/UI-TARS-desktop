@@ -439,6 +439,75 @@ function collectFileInfo(
   }
 }
 
+// Helper function to normalize search results
+function normalizeSearchResult(toolName: string, content: any, args: any): any {
+  // Handle omni TARS Search tool
+  if (
+    toolName === 'Search' &&
+    Array.isArray(content) &&
+    content.length > 0 &&
+    content[0]?.type === 'text'
+  ) {
+    try {
+      const textContent = content[0].text;
+      if (typeof textContent === 'string') {
+        const parsedContent = JSON.parse(textContent);
+        // Check if this is an omni TARS search result
+        if (
+          parsedContent.searchParameters &&
+          parsedContent.organic &&
+          Array.isArray(parsedContent.organic)
+        ) {
+          // Normalize to standard search result format
+          return [
+            {
+              type: 'search_result',
+              name: 'SEARCH_RESULTS',
+              results: parsedContent.organic.map((item: any) => ({
+                title: item.title,
+                url: item.link,
+                snippet: item.snippet || '',
+              })),
+              query: parsedContent.searchParameters.q,
+              relatedSearches: parsedContent.relatedSearches?.map((rs: any) => rs.query),
+            },
+          ];
+        }
+      }
+    } catch (e) {
+      // If JSON parsing fails, return original content
+      console.warn('Failed to parse omni TARS search result:', e);
+    }
+  }
+
+  // Handle traditional web_search format (already normalized)
+  if (toolName === 'web_search' && Array.isArray(content)) {
+    // Check if it's already in the expected format
+    const hasResults = content.some(
+      (item) => item.title && item.url && typeof item.content === 'string',
+    );
+
+    if (hasResults) {
+      // Convert old format to new normalized format
+      return [
+        {
+          type: 'search_result',
+          name: 'SEARCH_RESULTS',
+          results: content.map((item) => ({
+            title: item.title,
+            url: item.url,
+            snippet: item.content,
+          })),
+          query: args?.query || args?.q || '',
+        },
+      ];
+    }
+  }
+
+  // Return original content if no normalization needed
+  return content;
+}
+
 function handleToolResult(
   get: Getter,
   set: Setter,
@@ -457,18 +526,23 @@ function handleToolResult(
     event.timestamp,
   );
 
+  // Normalize content for search results
+  const normalizedContent = normalizeSearchResult(event.name, event.content, args);
+
   const result: ToolResult = {
     id: uuidv4(),
     toolCallId: event.toolCallId,
     name: event.name,
-    content: event.content,
+    content: normalizedContent,
     timestamp: event.timestamp,
     error: event.error,
-    type: determineToolType(event.name, event.content),
+    type: determineToolType(event.name, normalizedContent),
     arguments: args,
     elapsedMs: event.elapsedMs,
     _extra: event._extra,
   };
+
+  debugger;
 
   // Update both message and tool result atoms for immediate UI response
   set(messagesAtom, (prev: Record<string, Message[]>) => {
