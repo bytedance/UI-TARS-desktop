@@ -1,21 +1,16 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FiExternalLink, FiEye, FiCode, FiCopy, FiCheck, FiLink } from 'react-icons/fi';
+import { FiExternalLink, FiCopy, FiCheck, FiLink } from 'react-icons/fi';
 import { ToolResultContentPart } from '../types';
-import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 
 interface LinkReaderRendererProps {
   part: ToolResultContentPart;
   onAction?: (action: string, data: unknown) => void;
 }
 
-type ViewMode = 'summary' | 'full' | 'raw';
-
 interface LinkResult {
   url: string;
   title: string;
-  snippet: string;
-  fullContent: string;
+  content: string;
 }
 
 interface LinkReaderResult {
@@ -31,17 +26,14 @@ interface LinkReaderResponse {
 }
 
 /**
- * Specialized renderer for LinkReader tool results
- * Handles link content reading independently without coupling to SearchService
+ * Simplified renderer for LinkReader tool results
+ * Shows raw content by default with minimal UI
  */
 export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ part, onAction }) => {
-  const [viewMode, setViewMode] = useState<ViewMode>('summary');
-  const [expandedResults, setExpandedResults] = useState<Set<number>>(new Set());
   const [copiedStates, setCopiedStates] = useState<Set<number>>(new Set());
 
   // Extract LinkReader data directly from the part
   const linkData = extractLinkReaderData(part);
-  debugger;
 
   if (!linkData || !linkData.results || linkData.results.length === 0) {
     return (
@@ -50,16 +42,6 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ part, on
       </div>
     );
   }
-
-  const toggleExpanded = (index: number) => {
-    const newExpanded = new Set(expandedResults);
-    if (newExpanded.has(index)) {
-      newExpanded.delete(index);
-    } else {
-      newExpanded.add(index);
-    }
-    setExpandedResults(newExpanded);
-  };
 
   const copyContent = async (content: string, index: number) => {
     try {
@@ -77,95 +59,25 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ part, on
     }
   };
 
-  const renderContent = (content: string, isExpanded: boolean) => {
-    if (!isExpanded) {
-      return <div className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">{content}</div>;
-    }
-
-    // For full content, provide better formatting
-    const isLikelyMarkdown = /^#+\s|\[.+\]\(|\*\*.+\*\*|```/.test(content);
-
-    if (isLikelyMarkdown && viewMode !== 'raw') {
-      return (
-        <div className="max-h-96 overflow-auto border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-800/50">
-          <MarkdownRenderer
-            content={content}
-            className="prose dark:prose-invert prose-sm max-w-none"
-          />
-        </div>
-      );
-    }
-
-    return (
-      <div className="max-h-96 overflow-auto border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-800/50">
-        <pre className="text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words font-mono">
-          {content}
-        </pre>
-      </div>
-    );
-  };
-
   return (
     <div className="space-y-4">
-      {/* Header with view mode controls */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <FiLink className="text-blue-600 dark:text-blue-400" size={18} />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Link Content</h3>
-          <span className="text-sm text-gray-500 dark:text-gray-400">
-            ({linkData.results.length} {linkData.results.length === 1 ? 'result' : 'results'})
-          </span>
-        </div>
-
-        <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
-          <button
-            onClick={() => setViewMode('summary')}
-            className={`px-3 py-1 text-xs rounded-md transition-colors ${
-              viewMode === 'summary'
-                ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
-            }`}
-          >
-            Summary
-          </button>
-          <button
-            onClick={() => setViewMode('full')}
-            className={`px-3 py-1 text-xs rounded-md transition-colors flex items-center gap-1 ${
-              viewMode === 'full'
-                ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
-            }`}
-          >
-            <FiEye size={12} />
-            Full
-          </button>
-          <button
-            onClick={() => setViewMode('raw')}
-            className={`px-3 py-1 text-xs rounded-md transition-colors flex items-center gap-1 ${
-              viewMode === 'raw'
-                ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
-            }`}
-          >
-            <FiCode size={12} />
-            Raw
-          </button>
-        </div>
+      {/* Simple header */}
+      <div className="flex items-center gap-2">
+        <FiLink className="text-blue-600 dark:text-blue-400" size={18} />
+        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Link Content</h3>
+        <span className="text-sm text-gray-500 dark:text-gray-400">
+          ({linkData.results.length} {linkData.results.length === 1 ? 'result' : 'results'})
+        </span>
       </div>
 
       {/* Results */}
       <div className="space-y-3">
         {linkData.results.map((result, index) => {
-          const isExpanded = expandedResults.has(index);
           const isCopied = copiedStates.has(index);
-          const contentToShow = viewMode === 'summary' ? result.snippet : result.fullContent;
 
           return (
-            <motion.div
+            <div
               key={`result-${index}`} // secretlint-disable-line
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
               className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-800/50"
             >
               {/* Result header */}
@@ -189,62 +101,30 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ part, on
                   </div>
 
                   <div className="flex items-center gap-2">
-                    {viewMode !== 'summary' && result.fullContent && (
-                      <button
-                        onClick={() => copyContent(result.fullContent, index)}
-                        className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                        title="Copy content"
-                      >
-                        {isCopied ? (
-                          <FiCheck size={14} className="text-green-500" />
-                        ) : (
-                          <FiCopy size={14} />
-                        )}
-                      </button>
-                    )}
-
-                    {viewMode !== 'summary' && result.fullContent && (
-                      <button
-                        onClick={() => toggleExpanded(index)}
-                        className="px-3 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                      >
-                        {isExpanded ? 'Collapse' : 'Expand'}
-                      </button>
-                    )}
+                    <button
+                      onClick={() => copyContent(result.content, index)}
+                      className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                      title="Copy content"
+                    >
+                      {isCopied ? (
+                        <FiCheck size={14} className="text-green-500" />
+                      ) : (
+                        <FiCopy size={14} />
+                      )}
+                    </button>
                   </div>
                 </div>
               </div>
 
-              {/* Content */}
+              {/* Raw content */}
               <div className="p-4">
-                <AnimatePresence mode="wait">
-                  {viewMode === 'summary' ? (
-                    <motion.div
-                      key="summary-view" // secretlint-disable-line
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed"
-                    >
-                      {result.snippet || (
-                        <span className="italic text-gray-500 dark:text-gray-400">
-                          No preview available for this content
-                        </span>
-                      )}
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="full-view" // secretlint-disable-line
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                    >
-                      {renderContent(contentToShow, isExpanded)}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                <div className="max-h-96 overflow-auto border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-800/50">
+                  <pre className="text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words font-mono">
+                    {result.content}
+                  </pre>
+                </div>
               </div>
-            </motion.div>
+            </div>
           );
         })}
       </div>
@@ -305,8 +185,7 @@ function extractLinkReaderData(part: ToolResultContentPart): {
       return {
         url: item.url,
         title: extractedTitle || fallbackTitle,
-        snippet: truncateContent(item.raw_content, 300), // Increased length for better context
-        fullContent: item.raw_content,
+        content: item.raw_content, // Use raw content directly
       };
     });
 
@@ -376,57 +255,6 @@ function isBadTitle(title: string): boolean {
   ];
 
   return badPatterns.some((pattern) => pattern.test(title));
-}
-
-/**
- * Create a clean snippet from content, filtering out technical noise
- */
-function truncateContent(content: string, maxLength: number): string {
-  // Clean the content first
-  let cleanContent = content
-    // Remove HTML tags
-    .replace(/<[^>]*>/g, ' ')
-    // Remove URLs
-    .replace(/https?:\/\/[^\s]+/g, '')
-    // Remove blob URLs and localhost references
-    .replace(/blob:[^\s]+|localhost[^\s]*/g, '')
-    // Remove technical markers
-    .replace(/\[Image \d+\]|\[跳过导航\]/g, '')
-    // Remove excessive whitespace
-    .replace(/\s+/g, ' ')
-    .trim();
-
-  if (cleanContent.length <= maxLength) {
-    return cleanContent;
-  }
-
-  // Find meaningful sentences
-  const sentences = cleanContent.split(/[。！？.!?]/).filter((s) => s.trim().length > 10);
-
-  if (sentences.length > 0) {
-    let result = '';
-    for (const sentence of sentences) {
-      const potential = result + sentence.trim() + '。';
-      if (potential.length <= maxLength) {
-        result = potential;
-      } else {
-        break;
-      }
-    }
-    if (result.length > 20) {
-      return result;
-    }
-  }
-
-  // Fallback to word boundary truncation
-  const truncated = cleanContent.substring(0, maxLength);
-  const lastSpaceIndex = truncated.lastIndexOf(' ');
-
-  if (lastSpaceIndex > maxLength * 0.8) {
-    return truncated.substring(0, lastSpaceIndex) + '...';
-  }
-
-  return truncated + '...';
 }
 
 /**
