@@ -12,15 +12,16 @@ export default defineConfig({
     // apiKey: process.env.OMNI_TARS_API_KEY,
     // id: process.env.OMNI_TARS_MODEL_ID,
 
-    // McpToolCallEngine parseContent 需要同时切换
     // id: '{search.nlp.seed_vision}.{hl}.{M8-23B-MoE-250717_m8_agentrlmodel_codeformatv2_0711_google_roll_back-S100}.{gui_23b_rl_s100}',
-    // id: 'gcp-claude4-sonnet',
-    // id: 'aws_sdk_claude37_sonnet',
-    id: 'aws_claude35_sonnet',
+    // id: 'aws_claude35_sonnet',
     // id: 'aws_sdk_claude4_sonnet',
-    provider: 'azure-openai',
-    apiKey: process.env.ANTHROPIC_AUTH_TOKEN,
-    baseURL: process.env.GPT_I18N_URL,
+    // provider: 'azure-openai',
+    // apiKey: process.env.ANTHROPIC_AUTH_TOKEN,
+    // baseURL: process.env.GPT_I18N_URL,
+
+    provider: 'volcengine',
+    id: 'ep-20250613182556-7z8pl',
+    apiKey: process.env.ARK_API_KEY,
     // thinking: {
     //   type: 'disabled',
     // },

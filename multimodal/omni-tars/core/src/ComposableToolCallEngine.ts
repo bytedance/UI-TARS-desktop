@@ -60,7 +60,7 @@ export class ComposableToolCallEngine extends ToolCallEngine {
         return engineProvider.getEngine();
       }
     }
-    this.logger.debug(`Using default engine: ${this.defaultEngine.name}`);
+    // this.logger.debug(`Using default engine: ${this.defaultEngine.name}`);
     return this.defaultEngine.getEngine();
   }
 
