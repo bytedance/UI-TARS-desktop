@@ -33,8 +33,14 @@ export function formatRelativeDate(timestamp: number): string {
 
 /**
  * Determine the tool type from name and content
+ * Returns specific content types for renderer mapping
  */
-export function determineToolType(name: string, content: any): ToolCategory {
+export function determineToolType(name: string, content: any): string {
+  // Handle specific tool names first for precise mapping
+  if (name === 'LinkReader') {
+    return 'link_reader';
+  }
+
   // Use the centralized tool category mapping
   const category = getToolCategory(name);
 
