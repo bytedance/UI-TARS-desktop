@@ -21,7 +21,30 @@ interface SearchResultRendererProps {
  * - Support for structured web_search results
  */
 export const SearchResultRenderer: React.FC<SearchResultRendererProps> = ({ part }) => {
-  const { results, query, relatedSearches } = part;
+  // Handle both direct format and nested array format
+  let results: Array<{ title: string; url: string; snippet: string }>;
+  let query: string;
+  let relatedSearches: string[] | undefined;
+
+  // Check if part has direct results property (flat format)
+  if (part.results && Array.isArray(part.results)) {
+    results = part.results;
+    query = part.query || '';
+    relatedSearches = part.relatedSearches;
+  }
+  // Check if part is an array with search_result type (nested format)
+  else if (Array.isArray(part) && part.length > 0 && part[0]?.type === 'search_result') {
+    const searchResult = part[0];
+    results = searchResult.results || [];
+    query = searchResult.query || '';
+    relatedSearches = searchResult.relatedSearches;
+  }
+  // Fallback: try to extract from part directly
+  else {
+    results = part.results || [];
+    query = part.query || '';
+    relatedSearches = part.relatedSearches;
+  }
 
   if (!results || !Array.isArray(results)) {
     return <div className="text-gray-500 italic">Search results missing</div>;
@@ -57,11 +80,10 @@ export const SearchResultRenderer: React.FC<SearchResultRendererProps> = ({ part
       {/* Results list with refined card design */}
       <div className="space-y-4 !mt-4">
         {results.map((result, index) => {
-          const itemId = `item-${index}`;
-          const motionProps = { ['k' + 'ey']: itemId };
+          const resultKey = `search-result-${index}-${result.url}`;
           return (
             <motion.div
-              {...motionProps}
+              {...{ ['k' + 'ey']: resultKey }}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.05 }}
@@ -128,11 +150,10 @@ export const SearchResultRenderer: React.FC<SearchResultRendererProps> = ({ part
             </h3>
             <div className="flex flex-wrap gap-2">
               {relatedSearches.map((searchQuery, index) => {
-                const tagId = `tag-${index}`;
-                const spanProps = { ['k' + 'ey']: tagId };
+                const searchKey = `related-search-${index}-${searchQuery}`;
                 return (
                   <span
-                    {...spanProps}
+                    {...{ ['k' + 'ey']: searchKey }}
                     className="inline-block px-3 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors cursor-pointer"
                   >
                     {searchQuery}

@@ -65,6 +65,28 @@ export function handleSearchContent(
   toolArguments?: Record<string, unknown>,
   title?: string,
 ): ToolResultContentPart[] {
+  // Handle already normalized search content from eventProcessor
+  if (Array.isArray(source) && source.length > 0 && source[0]?.type === 'search_result') {
+    // Pass through already normalized content
+    return source;
+  }
+
+  // Handle flat search result object from eventProcessor
+  if (
+    source &&
+    typeof source === 'object' &&
+    'results' in source &&
+    Array.isArray((source as any).results)
+  ) {
+    return [
+      {
+        type: 'search_result',
+        name: 'SEARCH_RESULTS',
+        ...source,
+      },
+    ];
+  }
+
   if (isSearchResults(source)) {
     return [
       {
@@ -101,6 +123,7 @@ export function handleSearchContent(
         name: 'SEARCH_RESULTS',
         results: source.results,
         query: source.query,
+        relatedSearches: source.relatedSearches,
       },
     ];
   }
