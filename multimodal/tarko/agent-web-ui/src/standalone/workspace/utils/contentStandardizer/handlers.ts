@@ -7,6 +7,7 @@ import {
   isScriptResult,
   isFileResult,
   isObjectWithResults,
+  isOmniTarsSearchResult,
 } from './typeGuards';
 import {
   extractImageUrl,
@@ -65,6 +66,25 @@ export function handleSearchContent(
   toolArguments?: Record<string, unknown>,
   title?: string,
 ): ToolResultContentPart[] {
+  // Handle omni TARS search result format
+  if (isOmniTarsSearchResult(source)) {
+    return [
+      {
+        type: 'search_result',
+        name: 'SEARCH_RESULTS',
+        results: source.organic.map(
+          (item): SearchResult => ({
+            title: item.title,
+            url: item.link,
+            snippet: item.snippet || '',
+          }),
+        ),
+        query: source.searchParameters.q,
+        relatedSearches: source.relatedSearches?.map((rs) => rs.query),
+      },
+    ];
+  }
+
   if (isSearchResults(source)) {
     return [
       {

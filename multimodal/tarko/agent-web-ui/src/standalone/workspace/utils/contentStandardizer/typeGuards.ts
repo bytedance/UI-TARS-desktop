@@ -50,3 +50,20 @@ export function isObjectWithResults(
     Array.isArray((source as { results: unknown }).results)
   );
 }
+
+// Type guard for omni TARS search results format
+export function isOmniTarsSearchResult(source: unknown): source is {
+  searchParameters: { q: string; [k: string]: any };
+  organic: Array<{ title: string; link: string; snippet: string; [k: string]: any }>;
+  relatedSearches?: Array<{ query: string }>;
+} {
+  return (
+    source !== null &&
+    typeof source === 'object' &&
+    'searchParameters' in source &&
+    'organic' in source &&
+    Array.isArray((source as any).organic) &&
+    typeof (source as any).searchParameters === 'object' &&
+    typeof (source as any).searchParameters.q === 'string'
+  );
+}

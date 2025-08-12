@@ -7,6 +7,7 @@
 export const TOOL_NAMES = {
   // General tools
   WEB_SEARCH: 'web_search',
+  SEARCH: 'Search', // Omni TARS search tool
 
   // Browser tools
   BROWSER_VISION_CONTROL: 'browser_vision_control',
@@ -69,6 +70,7 @@ export type ToolCategory = (typeof TOOL_CATEGORIES)[keyof typeof TOOL_CATEGORIES
 export const TOOL_NAME_TO_CATEGORY_MAP: Record<ToolName, ToolCategory> = {
   // General tools
   [TOOL_NAMES.WEB_SEARCH]: TOOL_CATEGORIES.SEARCH,
+  [TOOL_NAMES.SEARCH]: TOOL_CATEGORIES.SEARCH,
 
   // Browser tools
   [TOOL_NAMES.BROWSER_VISION_CONTROL]: TOOL_CATEGORIES.BROWSER_VISION_CONTROL,
