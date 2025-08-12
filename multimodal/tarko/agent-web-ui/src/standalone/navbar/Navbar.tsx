@@ -230,7 +230,7 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
 
   const modelMaxWidth = hasSpace
     ? 'none'
-    : `${Math.max((modelTextWidth / totalTextWidth) * availableWidth * 0.85, 100)}px`;
+    : `${Math.max((modelTextWidth / totalTextWidth) * availableWidth * 0.85, 150)}px`;
 
   return (
     <div ref={containerRef} className="flex-1 flex justify-center min-w-0">

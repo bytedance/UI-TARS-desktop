@@ -106,7 +106,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({ classN
         } ${isLoading ? 'opacity-75 cursor-not-allowed' : 'cursor-pointer'}`}
       >
         <FiCpu size={12} className="text-purple-600 dark:text-purple-400 flex-shrink-0" />
-        <div className="flex items-center gap-1 text-xs max-w-32">
+        <div className="flex items-center gap-1 text-xs max-w-48">
           {modelInfo.model ? (
             <>
               <span className="font-medium text-purple-800 dark:text-purple-200 truncate">
@@ -137,7 +137,10 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({ classN
         {isOpen && (
           <>
             {/* Backdrop */}
-            <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+            <div
+              className="fixed inset-0 navbar-dropdown-backdrop"
+              onClick={() => setIsOpen(false)}
+            />
 
             {/* Dropdown */}
             <motion.div
@@ -145,7 +148,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({ classN
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.15 }}
-              className="absolute top-full left-0 mt-2 min-w-64 max-w-80 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm z-50 overflow-hidden"
+              className="absolute top-full left-0 mt-2 min-w-64 max-w-80 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm navbar-dropdown overflow-hidden"
             >
               <div className="p-2 max-h-64 overflow-y-auto">
                 <div className="text-xs font-medium text-gray-500 dark:text-gray-400 px-3 py-2 border-b border-gray-100 dark:border-gray-700 mb-1">
