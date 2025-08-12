@@ -8,6 +8,7 @@ import { FaBrain } from 'react-icons/fa';
 import { useLayout } from '@/common/hooks/useLayout';
 import { useSession } from '@/common/hooks/useSession';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
+import { NavbarModelSelector } from './ModelSelector';
 
 import './Navbar.css';
 
@@ -266,36 +267,8 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
           </div>
         )}
 
-        {/* Model Info Badge */}
-        {(modelInfo.model || modelInfo.provider) && (
-          <div
-            className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-purple-500/10 to-pink-500/10 dark:from-purple-400/15 dark:to-pink-400/15 border border-purple-200/30 dark:border-purple-400/20 rounded-full shadow-sm backdrop-blur-sm min-w-0"
-            style={{ maxWidth: modelMaxWidth }}
-          >
-            <FiCpu size={12} className="text-purple-600 dark:text-purple-400 flex-shrink-0" />
-            <div className="flex items-center gap-1 text-xs min-w-0">
-              {modelInfo.model && (
-                <span
-                  className={`font-medium text-purple-800 dark:text-purple-200 ${!hasSpace ? 'truncate' : ''}`}
-                  title={modelInfo.model}
-                >
-                  {modelInfo.model}
-                </span>
-              )}
-              {modelInfo.provider && modelInfo.model && (
-                <span className="text-purple-500 dark:text-purple-400 flex-shrink-0">•</span>
-              )}
-              {modelInfo.provider && (
-                <span
-                  className={`text-purple-700 dark:text-purple-300 font-medium ${!hasSpace ? 'truncate' : ''}`}
-                  title={modelInfo.provider}
-                >
-                  {modelInfo.provider}
-                </span>
-              )}
-            </div>
-          </div>
-        )}
+        {/* Model Selector - Interactive dropdown for model selection */}
+        <NavbarModelSelector className="min-w-0" />
       </div>
     </div>
   );
