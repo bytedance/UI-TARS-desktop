@@ -9,7 +9,11 @@
  * All search-related processing should go through this service.
  */
 
-import { TOOL_NAMES } from '../constants/toolTypes';
+// Tool name constants for search tools
+const SEARCH_TOOL_NAMES = {
+  SEARCH: 'Search',
+  WEB_SEARCH: 'web_search',
+} as const;
 
 // ============================================================================
 // STANDARD INTERFACES - Single source of truth for search data
@@ -89,9 +93,9 @@ export class SearchService {
 
     // Route to specific normalizer
     switch (toolName) {
-      case TOOL_NAMES.SEARCH:
+      case SEARCH_TOOL_NAMES.SEARCH:
         return this.normalizeOmniTarsSearch(unwrappedContent, args);
-      case TOOL_NAMES.WEB_SEARCH:
+      case SEARCH_TOOL_NAMES.WEB_SEARCH:
         return this.normalizeWebSearch(unwrappedContent, args);
       default:
         return content;
@@ -128,7 +132,7 @@ export class SearchService {
    * Check if tool is search-related
    */
   static isSearchTool(toolName: string): boolean {
-    return toolName === TOOL_NAMES.SEARCH || toolName === TOOL_NAMES.WEB_SEARCH;
+    return toolName === SEARCH_TOOL_NAMES.SEARCH || toolName === SEARCH_TOOL_NAMES.WEB_SEARCH;
   }
 
   /**

@@ -9,7 +9,42 @@ import {
   RiScreenshot2Line,
   RiCursorLine,
 } from 'react-icons/ri';
-import { TOOL_NAMES, TOOL_CATEGORIES, getToolCategory } from '../constants/toolTypes';
+
+// Direct tool name to icon mapping
+const TOOL_ICON_MAP: Record<string, React.ReactNode> = {
+  // Search tools
+  web_search: <RiSearchLine size={16} className="text-blue-500 dark:text-blue-400" />,
+  Search: <RiSearchLine size={16} className="text-blue-500 dark:text-blue-400" />,
+
+  // Content tools
+  LinkReader: <RiNewspaperLine size={16} className="text-purple-500 dark:text-purple-400" />,
+
+  // Browser tools
+  browser_navigate: <RiGlobalLine size={16} className="text-indigo-500 dark:text-indigo-400" />,
+  browser_get_markdown: (
+    <RiNewspaperLine size={16} className="text-purple-500 dark:text-purple-400" />
+  ),
+  browser_get_clickable_elements: (
+    <FiFileText size={16} className="text-violet-500 dark:text-violet-400" />
+  ),
+  browser_vision_control: (
+    <RiScreenshot2Line size={16} className="text-fuchsia-500 dark:text-fuchsia-400" />
+  ),
+  browser_click: <RiCursorLine size={16} className="text-pink-500 dark:text-pink-400" />,
+  browser_screenshot: (
+    <RiScreenshot2Line size={16} className="text-fuchsia-500 dark:text-fuchsia-400" />
+  ),
+
+  // File system tools
+  read_file: <FiFileText size={16} className="text-emerald-500 dark:text-emerald-400" />,
+  list_directory: <RiFolderLine size={16} className="text-green-500 dark:text-green-400" />,
+  write_file: <FiSave size={16} className="text-sky-500 dark:text-sky-400" />,
+  edit_file: <FiFileText size={16} className="text-emerald-500 dark:text-emerald-400" />,
+
+  // Command tools
+  run_command: <RiTerminalLine size={16} className="text-amber-500 dark:text-amber-400" />,
+  run_script: <FiCode size={16} className="text-rose-500 dark:text-rose-400" />,
+};
 
 /**
  * Custom hook for tool-related functionality
@@ -21,58 +56,35 @@ export const useTool = () => {
    * Get the appropriate icon for a tool based on its name
    */
   const getToolIcon = (toolName: string): React.ReactNode => {
-    // Handle known tool names first
-    switch (toolName) {
-      // Web tools
-      case TOOL_NAMES.WEB_SEARCH:
-        return <RiSearchLine size={16} className="text-blue-500 dark:text-blue-400" />;
-      case TOOL_NAMES.BROWSER_NAVIGATE:
-        return <RiGlobalLine size={16} className="text-indigo-500 dark:text-indigo-400" />;
-      case TOOL_NAMES.BROWSER_GET_MARKDOWN:
-        return <RiNewspaperLine size={16} className="text-purple-500 dark:text-purple-400" />;
-      case TOOL_NAMES.BROWSER_GET_CLICKABLE_ELEMENTS:
-        return <FiFileText size={16} className="text-violet-500 dark:text-violet-400" />;
-      case TOOL_NAMES.BROWSER_VISION_CONTROL:
-        return <RiScreenshot2Line size={16} className="text-fuchsia-500 dark:text-fuchsia-400" />;
-      case TOOL_NAMES.BROWSER_CLICK:
-        return <RiCursorLine size={16} className="text-pink-500 dark:text-pink-400" />;
-
-      // File system tools
-      case TOOL_NAMES.READ_FILE:
-        return <FiFileText size={16} className="text-emerald-500 dark:text-emerald-400" />;
-      case TOOL_NAMES.LIST_DIRECTORY:
-        return <RiFolderLine size={16} className="text-green-500 dark:text-green-400" />;
-      case TOOL_NAMES.WRITE_FILE:
-        return <FiSave size={16} className="text-sky-500 dark:text-sky-400" />;
-
-      // Command tools
-      case TOOL_NAMES.RUN_COMMAND:
-        return <RiTerminalLine size={16} className="text-amber-500 dark:text-amber-400" />;
-      case TOOL_NAMES.RUN_SCRIPT:
-        return <FiCode size={16} className="text-rose-500 dark:text-rose-400" />;
+    // Direct tool name lookup
+    if (TOOL_ICON_MAP[toolName]) {
+      return TOOL_ICON_MAP[toolName];
     }
 
-    // Fallback to category-based icons
-    const category = getToolCategory(toolName);
+    // Pattern-based fallback for unknown tools
+    const lowerName = toolName.toLowerCase();
 
-    switch (category) {
-      case TOOL_CATEGORIES.SEARCH:
-        return <RiSearchLine size={16} className="text-blue-500 dark:text-blue-400" />;
-      case TOOL_CATEGORIES.BROWSER:
-        return <RiGlobalLine size={16} className="text-indigo-500 dark:text-indigo-400" />;
-      case TOOL_CATEGORIES.BROWSER_VISION_CONTROL:
-        return <RiScreenshot2Line size={16} className="text-fuchsia-500 dark:text-fuchsia-400" />;
-      case TOOL_CATEGORIES.COMMAND:
-        return <RiTerminalLine size={16} className="text-amber-500 dark:text-amber-400" />;
-      case TOOL_CATEGORIES.SCRIPT:
-        return <FiCode size={16} className="text-rose-500 dark:text-rose-400" />;
-      case TOOL_CATEGORIES.FILE:
-        return <FiFileText size={16} className="text-emerald-500 dark:text-emerald-400" />;
-      case TOOL_CATEGORIES.IMAGE:
-        return <FiImage size={16} className="text-purple-500 dark:text-purple-400" />;
-      default:
-        return <FiTool size={16} className="text-gray-500 dark:text-gray-400" />;
+    if (lowerName.includes('search')) {
+      return <RiSearchLine size={16} className="text-blue-500 dark:text-blue-400" />;
     }
+    if (lowerName.includes('browser')) {
+      return <RiGlobalLine size={16} className="text-indigo-500 dark:text-indigo-400" />;
+    }
+    if (lowerName.includes('command') || lowerName.includes('terminal')) {
+      return <RiTerminalLine size={16} className="text-amber-500 dark:text-amber-400" />;
+    }
+    if (lowerName.includes('script')) {
+      return <FiCode size={16} className="text-rose-500 dark:text-rose-400" />;
+    }
+    if (lowerName.includes('file') || lowerName.includes('directory')) {
+      return <FiFileText size={16} className="text-emerald-500 dark:text-emerald-400" />;
+    }
+    if (lowerName.includes('image')) {
+      return <FiImage size={16} className="text-purple-500 dark:text-purple-400" />;
+    }
+
+    // Default fallback
+    return <FiTool size={16} className="text-gray-500 dark:text-gray-400" />;
   };
 
   return {

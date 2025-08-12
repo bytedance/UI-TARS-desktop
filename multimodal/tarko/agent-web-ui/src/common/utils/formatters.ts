@@ -1,5 +1,3 @@
-import { getToolCategory, ToolCategory } from '@/common/constants/toolTypes';
-
 /**
  * Format a timestamp to a user-friendly date string
  */

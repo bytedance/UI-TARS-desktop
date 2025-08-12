@@ -5,7 +5,6 @@ import {
   ChatCompletionMessageToolCall,
 } from '@tarko/agent-interface';
 import { SanitizedAgentOptions, WorkspaceInfo } from '@tarko/interface';
-import { ToolCategory } from '../constants/toolTypes';
 
 export { AgentEventStream };
 export type { SanitizedAgentOptions, WorkspaceInfo };
@@ -41,7 +40,7 @@ export interface ToolResult {
   content: any;
   timestamp: number;
   error?: string;
-  type: ToolCategory;
+  type: string;
   arguments?: any;
   elapsedMs?: number;
   _extra?: { currentScreenshot: string };
@@ -94,7 +93,7 @@ export interface ConnectionStatus {
  * Content to be displayed in the workspace panel
  */
 export interface PanelContent {
-  type: ToolCategory | 'plan' | 'research_report' | 'deliverable';
+  type: string;
   source: string | ChatCompletionContentPart[] | null;
   title: string;
   timestamp: number;
