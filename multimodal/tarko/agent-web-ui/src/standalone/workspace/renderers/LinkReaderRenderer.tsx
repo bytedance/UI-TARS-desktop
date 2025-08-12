@@ -63,9 +63,9 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ part, on
   const copyContent = async (content: string, index: number) => {
     try {
       await navigator.clipboard.writeText(content);
-      setCopiedStates(prev => new Set([...prev, index]));
+      setCopiedStates((prev) => new Set([...prev, index]));
       setTimeout(() => {
-        setCopiedStates(prev => {
+        setCopiedStates((prev) => {
           const newSet = new Set(prev);
           newSet.delete(index);
           return newSet;
@@ -78,20 +78,19 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ part, on
 
   const renderContent = (content: string, isExpanded: boolean) => {
     if (!isExpanded) {
-      return (
-        <div className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">
-          {content}
-        </div>
-      );
+      return <div className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">{content}</div>;
     }
 
     // For full content, provide better formatting
     const isLikelyMarkdown = /^#+\s|\[.+\]\(|\*\*.+\*\*|```/.test(content);
-    
+
     if (isLikelyMarkdown && viewMode !== 'raw') {
       return (
         <div className="max-h-96 overflow-auto border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-800/50">
-          <MarkdownRenderer content={content} className="prose dark:prose-invert prose-sm max-w-none" />
+          <MarkdownRenderer
+            content={content}
+            className="prose dark:prose-invert prose-sm max-w-none"
+          />
         </div>
       );
     }
@@ -111,14 +110,12 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ part, on
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <FiLink className="text-blue-600 dark:text-blue-400" size={18} />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-            Link Content
-          </h3>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Link Content</h3>
           <span className="text-sm text-gray-500 dark:text-gray-400">
             ({linkData.results.length} {linkData.results.length === 1 ? 'result' : 'results'})
           </span>
         </div>
-        
+
         <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
           <button
             onClick={() => setViewMode('summary')}
@@ -187,7 +184,7 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ part, on
                       <FiExternalLink size={12} className="flex-shrink-0" />
                     </a>
                   </div>
-                  
+
                   <div className="flex items-center gap-2">
                     {viewMode !== 'summary' && result.fullContent && (
                       <button
@@ -202,7 +199,7 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ part, on
                         )}
                       </button>
                     )}
-                    
+
                     {viewMode !== 'summary' && result.fullContent && (
                       <button
                         onClick={() => toggleExpanded(index)}
@@ -259,7 +256,15 @@ function extractLinkReaderData(part: ToolResultContentPart): {
     let parsedData: LinkReaderResponse;
 
     // Handle different data formats
-    if (Array.isArray(part.data) && part.data[0] && typeof part.data[0] === 'object' && 'text' in part.data[0]) {
+    // FIXME: handle mcp tool return both `content` and `structuredContent`
+    if (typeof part.data === 'object' && part.data.content && part.data.structuredContent) {
+      parsedData = part.data.structuredContent;
+    } else if (
+      Array.isArray(part.data) &&
+      part.data[0] &&
+      typeof part.data[0] === 'object' &&
+      'text' in part.data[0]
+    ) {
       // MCP format with text content
       parsedData = JSON.parse(part.data[0].text as string);
     } else if (typeof part.text === 'string') {
@@ -339,7 +344,7 @@ function truncateContent(content: string, maxLength: number): string {
   // Try to truncate at word boundary
   const truncated = content.substring(0, maxLength);
   const lastSpaceIndex = truncated.lastIndexOf(' ');
-  
+
   if (lastSpaceIndex > maxLength * 0.8) {
     return truncated.substring(0, lastSpaceIndex) + '...';
   }
