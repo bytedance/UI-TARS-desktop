@@ -3,6 +3,7 @@ import React from 'react';
 import { ToolResultContentPart } from '../types';
 import { motion } from 'framer-motion';
 import { FiExternalLink, FiSearch, FiInfo, FiGlobe } from 'react-icons/fi';
+import { SearchResultNormalizer } from '../../../common/services/SearchResultNormalizer';
 
 interface SearchResultRendererProps {
   part: ToolResultContentPart;
@@ -21,30 +22,13 @@ interface SearchResultRendererProps {
  * - Support for structured web_search results
  */
 export const SearchResultRenderer: React.FC<SearchResultRendererProps> = ({ part }) => {
-  // Handle both direct format and nested array format
-  let results: Array<{ title: string; url: string; snippet: string }>;
-  let query: string;
-  let relatedSearches: string[] | undefined;
+  // Use centralized data extraction
+  const searchData = SearchResultNormalizer.extractSearchData(part);
+  if (!searchData) {
+    return <div className="text-gray-500 italic">Invalid search data format</div>;
+  }
 
-  // Check if part has direct results property (flat format)
-  if (part.results && Array.isArray(part.results)) {
-    results = part.results;
-    query = part.query || '';
-    relatedSearches = part.relatedSearches;
-  }
-  // Check if part is an array with search_result type (nested format)
-  else if (Array.isArray(part) && part.length > 0 && part[0]?.type === 'search_result') {
-    const searchResult = part[0];
-    results = searchResult.results || [];
-    query = searchResult.query || '';
-    relatedSearches = searchResult.relatedSearches;
-  }
-  // Fallback: try to extract from part directly
-  else {
-    results = part.results || [];
-    query = part.query || '';
-    relatedSearches = part.relatedSearches;
-  }
+  const { results, query, relatedSearches } = searchData;
 
   if (!results || !Array.isArray(results)) {
     return <div className="text-gray-500 italic">Search results missing</div>;

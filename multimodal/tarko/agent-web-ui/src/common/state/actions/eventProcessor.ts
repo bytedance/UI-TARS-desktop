@@ -13,6 +13,7 @@ import { activeSessionIdAtom } from '../atoms/session';
 import { ChatCompletionContentPartImage } from '@tarko/agent-interface';
 import { jsonrepair } from 'jsonrepair';
 import { TOOL_NAMES } from '@/common/constants';
+import { SearchResultNormalizer } from '../../services/SearchResultNormalizer';
 
 // Internal cache - not an Atom to avoid unnecessary reactivity
 const toolCallArgumentsMap = new Map<string, any>();
@@ -440,79 +441,14 @@ function collectFileInfo(
   }
 }
 
-// Helper function to normalize search results
+// Helper function to normalize search results using centralized service
 function normalizeSearchResult(toolName: string, content: any, args: any): any {
-  // Handle omni TARS Search tool
-
-  // Handle `content.content`
-  // FIXME: remove it when Omni TARS do not directly return MCP result.
-  if (typeof content === 'object' && Object.keys(content).length === 1) {
-    content = content.content;
+  // Use centralized normalizer for search tools
+  if (SearchResultNormalizer.shouldNormalize(toolName)) {
+    return SearchResultNormalizer.normalize(toolName, content, args);
   }
 
-  if (
-    toolName === TOOL_NAMES.SEARCH &&
-    Array.isArray(content) &&
-    content.length > 0 &&
-    content[0]?.type === 'text'
-  ) {
-    try {
-      const textContent = content[0].text;
-      if (typeof textContent === 'string') {
-        const parsedContent = JSON.parse(textContent);
-        // Check if this is an omni TARS search result
-        if (
-          parsedContent.searchParameters &&
-          parsedContent.organic &&
-          Array.isArray(parsedContent.organic)
-        ) {
-          // Normalize to standard search result format
-          return [
-            {
-              type: 'search_result',
-              name: 'SEARCH_RESULTS',
-              results: parsedContent.organic.map((item: any) => ({
-                title: item.title,
-                url: item.link,
-                snippet: item.snippet || '',
-              })),
-              query: parsedContent.searchParameters.q,
-              relatedSearches: parsedContent.relatedSearches?.map((rs: any) => rs.query),
-            },
-          ];
-        }
-      }
-    } catch (e) {
-      // If JSON parsing fails, return original content
-      console.warn('Failed to parse omni TARS search result:', e);
-    }
-  }
-
-  // Handle traditional web_search format (already normalized)
-  if (toolName === 'web_search' && Array.isArray(content)) {
-    // Check if it's already in the expected format
-    const hasResults = content.some(
-      (item) => item.title && item.url && typeof item.content === 'string',
-    );
-
-    if (hasResults) {
-      // Convert old format to new normalized format
-      return [
-        {
-          type: 'search_result',
-          name: 'SEARCH_RESULTS',
-          results: content.map((item) => ({
-            title: item.title,
-            url: item.url,
-            snippet: item.content,
-          })),
-          query: args?.query || args?.q || '',
-        },
-      ];
-    }
-  }
-
-  // Return original content if no normalization needed
+  // Return original content for non-search tools
   return content;
 }
 
@@ -550,7 +486,7 @@ function handleToolResult(
     _extra: event._extra,
   };
 
-  console.log(JSON.stringify(result));
+  // Removed debug logging
 
   // Update both message and tool result atoms for immediate UI response
   set(messagesAtom, (prev: Record<string, Message[]>) => {

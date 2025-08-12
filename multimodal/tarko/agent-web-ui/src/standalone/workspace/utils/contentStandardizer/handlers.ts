@@ -1,3 +1,4 @@
+import { SearchResultNormalizer } from '@/common/services/SearchResultNormalizer';
 import { ToolResultContentPart } from '../../types';
 import { StandardPanelContent, SearchResult, PanelContentSource } from '../../types/panelContent';
 import {
@@ -65,13 +66,12 @@ export function handleSearchContent(
   toolArguments?: Record<string, unknown>,
   title?: string,
 ): ToolResultContentPart[] {
-  // Handle already normalized search content from eventProcessor
-  if (Array.isArray(source) && source.length > 0 && source[0]?.type === 'search_result') {
-    // Pass through already normalized content
-    return source;
+  // Check if already normalized by eventProcessor
+  if (SearchResultNormalizer.isNormalized(source)) {
+    return source as ToolResultContentPart[];
   }
 
-  // Handle flat search result object from eventProcessor
+  // Handle flat search result object (already processed by eventProcessor)
   if (
     source &&
     typeof source === 'object' &&
@@ -87,6 +87,7 @@ export function handleSearchContent(
     ];
   }
 
+  // Legacy format handling (fallback)
   if (isSearchResults(source)) {
     return [
       {
@@ -128,6 +129,7 @@ export function handleSearchContent(
     ];
   }
 
+  // Fallback to text content
   return [
     {
       type: 'text',
