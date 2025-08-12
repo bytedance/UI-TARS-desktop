@@ -62,25 +62,28 @@ export function standardizeContent(panelContent: StandardPanelContent): ToolResu
     return handleImageContent(source, title);
   }
 
-  // Handle different content types
+  // Handle different content types based on renderer type
   switch (type) {
     case 'image':
       return handleImageContent(source, title);
 
-    case 'search':
+    case 'search_result':
       return handleSearchContent(source, toolArguments, title);
 
-    case 'content':
     case 'link_reader':
       return handleLinkReaderContent(source, toolArguments);
 
-    case 'command':
+    case 'command_result':
       return handleCommandContent(source, toolArguments);
 
-    case 'script':
+    case 'script_result':
       return handleScriptContent(source, toolArguments);
 
-    case 'browser':
+    case 'file_result':
+      return handleFileContent(source, toolArguments);
+
+    case 'browser_vision_control':
+    case 'browser_result':
       return [
         {
           type: 'json',
@@ -90,11 +93,7 @@ export function standardizeContent(panelContent: StandardPanelContent): ToolResu
         },
       ];
 
-    case 'file':
-    case 'read_file':
-    case 'write_file':
-      return handleFileContent(source, toolArguments);
-
+    case 'json':
     default:
       return handleDefaultContent(source);
   }

@@ -32,60 +32,77 @@ export function formatRelativeDate(timestamp: number): string {
 }
 
 /**
- * Determine the tool type from name and content
- * Returns specific content types for renderer mapping
+ * Direct mapping from tool name to renderer type
+ * Simple one-to-one mapping without intermediate categories
+ */
+const TOOL_TO_RENDERER_MAP: Record<string, string> = {
+  // Content tools
+  LinkReader: 'link_reader',
+
+  // Search tools
+  web_search: 'search_result',
+  Search: 'search_result',
+
+  // Browser tools
+  browser_vision_control: 'browser_vision_control',
+  browser_screenshot: 'image',
+
+  // File tools
+  write_file: 'file_result',
+  read_file: 'file_result',
+  edit_file: 'file_result',
+
+  // Command tools
+  run_command: 'command_result',
+  run_script: 'script_result',
+};
+
+/**
+ * Determine the renderer type from tool name and content
+ * Returns specific renderer types for direct mapping
  */
 export function determineToolType(name: string, content: any): string {
-  // Handle specific tool names first for precise mapping
-  if (name === 'LinkReader') {
-    return 'link_reader';
+  // Direct tool name mapping
+  if (TOOL_TO_RENDERER_MAP[name]) {
+    return TOOL_TO_RENDERER_MAP[name];
   }
 
-  // Use the centralized tool category mapping
-  const category = getToolCategory(name);
-
-  // Additional content-based detection for edge cases
-  if (category === 'other') {
-    // Check content patterns for better categorization
+  // Content-based detection for edge cases
+  if (Array.isArray(content)) {
     if (
-      Array.isArray(content) &&
       content.some(
         (item) => item.type === 'text' && (item.name === 'RESULTS' || item.name === 'QUERY'),
       )
     ) {
-      return 'search';
+      return 'search_result';
     }
 
-    if (
-      Array.isArray(content) &&
-      content.some(
-        (item) => item.type === 'text' && item.text && item.text.startsWith('Navigated to'),
-      )
-    ) {
-      return 'browser';
+    if (content.some((item) => item.type === 'text' && item.text?.startsWith('Navigated to'))) {
+      return 'browser_result';
     }
 
-    if (
-      content &&
-      ((typeof content === 'object' && content.type === 'image') ||
-        (typeof content === 'string' && content.startsWith('data:image/')))
-    ) {
-      return 'image';
-    }
-
-    if (Array.isArray(content) && content.some((item) => item.type === 'image_url')) {
+    if (content.some((item) => item.type === 'image_url')) {
       return 'image';
     }
 
     if (
-      Array.isArray(content) &&
       content.some(
         (item) => item.type === 'text' && (item.name === 'STDOUT' || item.name === 'COMMAND'),
       )
     ) {
-      return 'command';
+      return 'command_result';
     }
   }
 
-  return category;
+  // Image content detection
+  if (
+    content &&
+    ((typeof content === 'object' && content.type === 'image') ||
+      (typeof content === 'string' && content.startsWith('data:image/')))
+  ) {
+    return 'image';
+  }
+
+  // Fallback to generic JSON renderer
+  return 'json';
 }
