@@ -240,6 +240,21 @@ export function handleBrowserControlContent(
   ];
 }
 
+export function handleLinkReaderContent(
+  source: unknown,
+  toolArguments?: Record<string, unknown>,
+): ToolResultContentPart[] {
+  // Handle LinkReader tool results specifically
+  return [
+    {
+      type: 'link_reader',
+      name: 'LINK_READER',
+      data: source,
+      text: typeof source === 'string' ? source : undefined,
+    },
+  ];
+}
+
 export function handleDefaultContent(source: unknown): ToolResultContentPart[] {
   if (typeof source === 'object' && source !== null) {
     return [

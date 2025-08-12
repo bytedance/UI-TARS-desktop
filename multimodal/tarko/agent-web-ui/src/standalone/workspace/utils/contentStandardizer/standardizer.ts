@@ -7,6 +7,7 @@ import {
   handleScriptContent,
   handleFileContent,
   handleBrowserControlContent,
+  handleLinkReaderContent,
   handleDefaultContent,
 } from './handlers';
 
@@ -68,6 +69,10 @@ export function standardizeContent(panelContent: StandardPanelContent): ToolResu
 
     case 'search':
       return handleSearchContent(source, toolArguments, title);
+
+    case 'content':
+    case 'link_reader':
+      return handleLinkReaderContent(source, toolArguments);
 
     case 'command':
       return handleCommandContent(source, toolArguments);
