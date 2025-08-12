@@ -100,16 +100,16 @@ export class SeedGUIAgent extends Agent {
 
     this.registerTool(
       new Tool({
-        id: 'operator-adaptor-tool',
+        id: 'browser_vision_control',
         description: 'operator tool',
         parameters: {},
         function: async (input) => {
-          this.logger.log(input);
+          this.logger.log('browser_vision_control input:', input);
           await this.operator!.execute({
-            parsedPrediction: input,
+            parsedPrediction: input.operator_action,
             screenWidth: getScreenInfo().screenWidth ?? 1000,
             screenHeight: getScreenInfo().screenHeight ?? 1000,
-            prediction: input,
+            prediction: input.operator_action,
             scaleFactor: 1000,
             factors: [1, 1],
           });

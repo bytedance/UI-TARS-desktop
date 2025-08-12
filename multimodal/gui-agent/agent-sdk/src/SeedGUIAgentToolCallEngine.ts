@@ -13,7 +13,7 @@ import {
   StreamProcessingState,
   StreamChunkResult,
 } from '@tarko/agent-interface';
-import { actionParser } from '@gui-agent/action-parser';
+import { actionParser, actionStringParser } from '@gui-agent/action-parser';
 import { getScreenInfo } from './shared';
 
 /**
@@ -117,14 +117,20 @@ export class SeedGUIAgentToolCallEngine extends ToolCallEngine {
       },
     });
 
+    const actionStrList = actionStringParser(fullContent);
+
     console.log('parsed', parsed);
+
+    console.log('actionStrList', actionStrList);
 
     const toolCalls: ChatCompletionMessageToolCall[] = [];
 
     let finished = false;
     let finishMessage: string | null = null;
+    let idx = 0;
     if (Array.isArray(parsed)) {
       for (const action of parsed) {
+        idx = idx + 1;
         if (action.action_type === 'finished') {
           finished = true;
           finishMessage = action.action_inputs.content ?? null;
@@ -135,8 +141,13 @@ export class SeedGUIAgentToolCallEngine extends ToolCallEngine {
           id: toolCallId,
           type: 'function',
           function: {
-            name: 'operator-adaptor-tool',
-            arguments: JSON.stringify(action),
+            name: 'browser_vision_control',
+            arguments: JSON.stringify({
+              action: actionStrList[idx - 1],
+              step: action.thought,
+              thought: action.thought,
+              operator_action: action,
+            }),
           },
         });
       }
