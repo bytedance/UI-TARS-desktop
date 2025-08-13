@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FiSettings } from 'react-icons/fi';
 import {
   Select,
   MenuItem,
@@ -87,8 +86,8 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
             styleOverrides: {
               root: {
                 borderRadius: '8px',
-                height: '32px',
-                minHeight: '32px',
+                height: '28px',
+                minHeight: '28px',
                 fontSize: '12px',
                 fontWeight: 500,
                 background: isDarkMode ? 'rgba(55, 65, 81, 0.3)' : 'rgba(248, 250, 252, 0.8)',
@@ -221,8 +220,8 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
               gap: 0.75,
               px: 1.25,
               py: 0.375,
-              height: '32px',
-              minHeight: '32px',
+              height: '28px',
+              minHeight: '28px',
               background: isDarkMode ? 'rgba(55, 65, 81, 0.3)' : 'rgba(248, 250, 252, 0.8)',
               backdropFilter: 'blur(8px)',
               border: isDarkMode
@@ -239,11 +238,6 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
               },
             }}
           >
-            <FiSettings
-              size={12}
-              color={isDarkMode ? '#9ca3af' : '#6b7280'}
-              style={{ flexShrink: 0 }}
-            />
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
               {modelInfo.model && (
                 <Typography
@@ -365,11 +359,6 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
 
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-        <FiSettings
-          size={12}
-          color={isDarkMode ? '#9ca3af' : '#6b7280'}
-          style={{ flexShrink: 0 }}
-        />
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
           <Typography
             variant="body2"
@@ -447,28 +436,14 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
               disablePortal: false,
             }}
             sx={{
-              minWidth: 240, // Increased width to prevent early truncation
+              // minWidth: 240, // Increased width to prevent early truncation
               maxWidth: 300, // Increased max width for better display
             }}
           >
             {allModelOptions.map((option, idx) => {
-              const itemProps = { ['ke' + 'y']: option.value };
               return (
-                <MenuItem {...itemProps} value={option.value}>
+                <MenuItem key={idx} value={option.value}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, width: '100%' }}>
-                    <FiSettings
-                      size={12}
-                      color={
-                        currentModel === option.value
-                          ? isDarkMode
-                            ? '#a5b4fc'
-                            : '#6366f1'
-                          : isDarkMode
-                            ? '#9ca3af'
-                            : '#6b7280'
-                      }
-                      style={{ flexShrink: 0 }}
-                    />
                     <Box
                       sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0, flex: 1 }}
                     >
