@@ -168,10 +168,16 @@ export class SeedGUIAgentToolCallEngine extends ToolCallEngine {
       console.log('extractedContent', extractedContent);
     }
 
+    const content = finishMessage ?? '';
+    const reasoningContent = parsed[0].thought ?? '';
+    const contentForWebUI = content.replace(/\\n|\n/g, '<br>');
+    const reasoningContentForWebUI = reasoningContent.replace(/\\n|\n/g, '<br>');
+
     // No tool calls found - return regular response
     return {
-      content: finishMessage ? finishMessage : (parsed[0].thought ?? fullContent),
+      content: contentForWebUI,
       rawContent: fullContent,
+      reasoningContent: reasoningContentForWebUI,
       toolCalls,
       finishReason: toolCalls.length > 0 && !finished ? 'tool_calls' : 'stop',
     };
