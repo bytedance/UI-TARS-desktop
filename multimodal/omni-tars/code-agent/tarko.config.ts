@@ -19,9 +19,9 @@ export default defineConfig({
     welcomTitle: 'An multimodal AI agent',
     welcomePrompts: [
       'Search for the latest GUI Agent papers',
-      'Find information about UI TARS',
-      'Tell me the top 5 most popular projects on ProductHunt today',
-      'Please book me the earliest flight from Hangzhou to Shenzhen on 10.1',
+      'Excute ls -al',
+      'Write hello world using python',
+      '写一个python代码下载https://arxiv.org/abs/2505.12370的论文，并且把pdf转成markdown',
     ],
   },
   snapshot: { storageDirectory: resolve(__dirname, 'snapshots'), enable: true },

@@ -29,6 +29,10 @@ export class McpToolCallEngine extends ToolCallEngine {
       messages: context.messages,
       temperature: context.temperature || 0.7,
       stream: true,
+      // For OpenAI standard stop sequence API.
+      stop: ['</code_env>', '</mcp_env>'],
+      // @ts-expect-error For non-standard provider, e.g. AWS.
+      stop_sequences: ['</code_env>', '</mcp_env>'],
     };
   }
   initStreamProcessingState(): StreamProcessingState {

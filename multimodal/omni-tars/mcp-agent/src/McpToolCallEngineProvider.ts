@@ -23,9 +23,7 @@ export class McpToolCallEngineProvider extends ToolCallEngineProvider<McpToolCal
   canHandle(context: ToolCallEngineContext): boolean {
     // Check if the latest model output contains <mcp_env></mcp_env> tags
     if (context.latestAssistantMessage) {
-      const hasMcpEnvTags =
-        context.latestAssistantMessage.includes('<mcp_env>') &&
-        context.latestAssistantMessage.includes('</mcp_env>');
+      const hasMcpEnvTags = context.latestAssistantMessage.includes('<mcp_env>');
       if (hasMcpEnvTags) {
         return true;
       }

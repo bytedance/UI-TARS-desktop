@@ -29,7 +29,7 @@ export class AioClient {
   constructor(config: ClientConfig) {
     this.baseUrl = config.baseUrl.replace(/\/$/, ''); // Remove trailing slash
     this.timeout = config.timeout || 30000; // 30 seconds default
-    this.retries = config.retries || 3;
+    this.retries = config.retries || 1;
     this.retryDelay = config.retryDelay || 1000; // 1 second default
   }
 
@@ -71,7 +71,14 @@ export class AioClient {
         });
 
         if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          let extra = '';
+
+          if (response.headers.get('content-type') === 'application/json') {
+            const body = (await response.json()) as ApiResponse<T>;
+            extra = body.message;
+          }
+
+          throw new Error(`HTTP ${response.status}: ${response.statusText}  ${extra}`);
         }
 
         const result = (await response.json()) as ApiResponse<T>;

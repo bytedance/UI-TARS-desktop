@@ -10,6 +10,14 @@ async function main() {
   });
 
   console.log(c);
+
+  const p = await client.fileEditor({
+    command: 'create',
+    path: '/home/gem/tmp/hello_world.py',
+    file_text: 'print("Hello, World!")\n',
+  });
+
+  console.log(p);
 }
 
 main();

@@ -31,8 +31,8 @@ export class ComposableAgent extends Agent {
     const composer = new AgentComposer({ plugins });
 
     super({
-      instructions: SYSTEM_PROMPT,
-      // instructions: composer.generateSystemPrompt(),
+      // instructions: SYSTEM_PROMPT,
+      instructions: composer.generateSystemPrompt(),
       maxIterations: optionsWithoutPlugins.maxIterations || 100,
       //Remove plugins to prevent circular reference from reporting errors
       ...optionsWithoutPlugins,

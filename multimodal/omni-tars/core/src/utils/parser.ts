@@ -77,7 +77,8 @@ function finalizeAnswer(parsed: {
 /**
  * Parse code environment content and extract tool calls
  */
-export function parseCodeContent(content: string): ParsedContent {
+export function parseCodeContent(c: string): ParsedContent {
+  const content = enhanceContent(c);
   const think = extractThinkContent(content);
   let answer = extractAnswerContent(content);
 
@@ -123,7 +124,8 @@ export function parseCodeContent(content: string): ParsedContent {
 /**
  * Parse MCP environment content and extract tool calls
  */
-export function parseMcpContent(content: string): ParsedContent {
+export function parseMcpContent(c: string): ParsedContent {
+  const content = enhanceContent(c);
   const think = extractThinkContent(content);
   let answer = extractAnswerContent(content);
 
@@ -231,4 +233,23 @@ export function parseComputerContent(content: string): ParsedContent {
     answer: answer || '',
     tools,
   };
+}
+
+/**
+ * Complete environment tags in content
+ *
+ * This function ensures that environment tags are properly closed by adding
+ * missing closing tags for mcp_env and code_env elements.
+ *
+ * @param c - The content string to process
+ * @returns The content with properly closed environment tags
+ */
+function enhanceContent(c: string): string {
+  if (c.includes('<mcp_env>') && !c.includes('</mcp_env>')) {
+    return c + '\n</mcp_env>';
+  }
+  if (c.includes('<code_env>') && !c.includes('</code_env>')) {
+    return c + '\n</code_env>';
+  }
+  return c;
 }

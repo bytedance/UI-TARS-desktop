@@ -304,4 +304,21 @@ Answer content with spaces around
       expect(result2.tools![0].id).toMatch(/^call_\d+_[a-z0-9]{9}$/);
     });
   });
+
+  describe('Tool call without closed tag', () => {
+    it('should parse correctly for mcp_env and code_env', () => {
+      const input1 = `<think_never_used_51bce0c785ca2f68081bfa7d91973934>xxx</think_never_used_51bce0c785ca2f68081bfa7d91973934>
+      <code_env>
+        <function=str_replace_editor>
+        <parameter=command>view</parameter>
+        <parameter=path>/app/src/data_processor.py</parameter>
+        </function>`;
+
+      const result1 = parseCodeContent(input1);
+
+      expect(result1.think).toBe('xxx');
+      expect(result1.tools.length).toBe(1);
+      expect(result1.tools[0].function.name).toBe('str_replace_editor');
+    });
+  });
 });

@@ -3,6 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+const HOME_INSTRUCTION = `- execute_bash, str_replace_editor, and JupyterCI must be executed based on the /home/gem root directory.  For example, if you want to create a hello.py file, you will be given priority to creating it under /home/gem/tmp. For the specific directory name, please be reasonably named according to the content of the task.`;
+
+const STOP_INSTRUCTION = `\n
+  ## WARNING:
+  - After outputting </code_env>, you MUST STOP immediately and wait for the tool result in the next agent loop. DO NOT generate any additional text.
+  - When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
+  `;
+
 export const CODE_ENVIRONMENT = `<CODE_ENVIRONMENT>
 
 ---- BEGIN FUNCTION #1: execute_bash ----
@@ -56,7 +64,10 @@ that can span
 multiple lines
 </parameter>
 </function>
+
 - Function calls MUST follow the specified format, start with <function= and end with </function>
 - Required parameters MUST be specified
 - Only call one function at a time
+${HOME_INSTRUCTION}
+${STOP_INSTRUCTION}
 </CODE_ENVIRONMENT>`;
