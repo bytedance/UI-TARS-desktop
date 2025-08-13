@@ -264,7 +264,6 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
                 : '1px solid rgba(99, 102, 241, 0.15)',
               borderRadius: '8px',
               minWidth: 0,
-              maxWidth: agentMaxWidth,
               position: 'relative',
               '&::before': {
                 content: '""',
