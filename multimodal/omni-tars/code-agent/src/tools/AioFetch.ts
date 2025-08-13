@@ -16,7 +16,6 @@ import type {
   JupyterExecuteParams,
   FileEditorParams,
 } from './types';
-import { assert } from 'console';
 
 export class AioClient {
   private baseUrl: string;
@@ -187,12 +186,13 @@ export class AioClient {
         }
 
         // Check if command is completed (you may need to adjust this logic based on actual API behavior)
-        const latestConsole = viewResult.data.console[viewResult.data.console.length - 1];
-        const hasOutput = latestConsole && latestConsole.output !== '';
+
+        const isFinished = viewResult?.data?.status === 'completed';
 
         // If there's output or the status indicates completion, return the result
-        if (hasOutput || viewResult.data.output) {
+        if (isFinished) {
           this.logger.info(`Command completed for session ${sessionId}`);
+
           return {
             success: true,
             message: 'Command completed successfully',

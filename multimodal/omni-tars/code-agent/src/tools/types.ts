@@ -31,6 +31,7 @@ export interface ShellViewParams {
 export interface ShellViewResponse {
   output: string;
   session_id: string;
+  status: string;
   console: Array<{
     ps1: string;
     command: string;

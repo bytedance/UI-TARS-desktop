@@ -15,16 +15,19 @@ export default defineConfig({
     // id: '{search.nlp.seed_vision}.{hl}.{M8-23B-MoE-250717_m8_agentrlmodel_codeformatv2_0711_google_roll_back-S100}.{gui_23b_rl_s100}',
     // id: 'aws_claude35_sonnet',
     // id: 'aws_sdk_claude4_sonnet',
-    // provider: 'azure-openai',
-    // apiKey: process.env.ANTHROPIC_AUTH_TOKEN,
-    // baseURL: process.env.GPT_I18N_URL,
-
-    provider: 'volcengine',
-    id: 'ep-20250613182556-7z8pl',
-    apiKey: process.env.ARK_API_KEY,
-    // thinking: {
-    //   type: 'disabled',
-    // },
+    // id: 'gpt-5-2025-08-07	',
+    // id: 'gcp-claude4.1-opus	',
+    // id: 'gemini-2.5-pro-preview-06-05',
+    id: 'aws_sdk_claude4_sonnet',
+    provider: 'azure-openai',
+    apiKey: process.env.ANTHROPIC_AUTH_TOKEN,
+    baseURL: process.env.GPT_I18N_URL,
+    // provider: 'volcengine',
+    // id: 'ep-20250613182556-7z8pl',
+    // apiKey: process.env.ARK_API_KEY,
+    thinking: {
+      type: 'disabled',
+    },
   },
   logLevel: LogLevel.DEBUG,
   webui: {
@@ -37,7 +40,7 @@ export default defineConfig({
       'Find information about UI TARS',
       'Tell me the top 5 most popular projects on ProductHunt today',
       'Please book me the earliest flight from Hangzhou to Shenzhen on 10.1',
-      // '编写斐波拉契数列函数和example，执行后返回结果'
+      '写一个python代码下载https://arxiv.org/abs/2505.12370的论文，并且把pdf转成markdown',
     ],
   },
   snapshot: { storageDirectory: resolve(__dirname, 'snapshots'), enable: true },
