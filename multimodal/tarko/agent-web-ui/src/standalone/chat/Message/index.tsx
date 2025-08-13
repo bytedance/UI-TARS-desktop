@@ -126,7 +126,13 @@ export const Message: React.FC<MessageProps> = ({
 
     if (isUserMessage) {
       return (
-        <MarkdownRenderer content={message.content as string} forceDarkTheme={true} />
+        <div
+          style={{
+            whiteSpace: 'break-spaces',
+          }}
+        >
+          {message.content as string}
+        </div>
       );
     }
 
