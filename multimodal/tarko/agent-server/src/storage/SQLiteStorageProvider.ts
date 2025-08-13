@@ -476,15 +476,8 @@ export class SQLiteStorageProvider implements StorageProvider {
     await this.ensureInitialized();
 
     try {
-      const sessionExistsStmt = this.db.prepare(`
-        SELECT 1 as existsFlag FROM sessions WHERE id = ?
-      `);
-
-      const sessionExists = sessionExistsStmt.get(sessionId) as ExistsResult | undefined;
-      if (!sessionExists || !sessionExists.existsFlag) {
-        throw new Error(`Session not found: ${sessionId}`);
-      }
-
+      // Skip session existence check - just try to get events directly
+      // This handles cases where migration may have broken foreign key relationships
       const stmt = this.db.prepare(`
         SELECT eventData
         FROM events
@@ -493,6 +486,11 @@ export class SQLiteStorageProvider implements StorageProvider {
       `);
 
       const rows = stmt.all(sessionId) as unknown as { eventData: string }[];
+
+      // Return empty array if no events found (instead of throwing error)
+      if (!rows || rows.length === 0) {
+        return [];
+      }
 
       return rows.map((row) => {
         try {
@@ -508,9 +506,8 @@ export class SQLiteStorageProvider implements StorageProvider {
       });
     } catch (error) {
       console.error(`Failed to get events for session ${sessionId}:`, error);
-      throw new Error(
-        `Failed to get session events: ${error instanceof Error ? error.message : String(error)}`,
-      );
+      // Return empty array instead of throwing error to allow sessions to load
+      return [];
     }
   }
 
