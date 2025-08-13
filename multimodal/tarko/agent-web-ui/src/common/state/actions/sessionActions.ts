@@ -5,7 +5,7 @@ import { sessionsAtom, activeSessionIdAtom } from '../atoms/session';
 import { messagesAtom } from '../atoms/message';
 import { toolResultsAtom, toolCallResultMap } from '../atoms/tool';
 import { isProcessingAtom, activePanelContentAtom, modelInfoAtom } from '../atoms/ui';
-import { processEventAction } from './eventProcessor';
+import { processEventAction } from './eventProcessors';
 import { Message } from '@/common/types';
 import { connectionStatusAtom } from '../atoms/ui';
 import { replayStateAtom } from '../atoms/replay';

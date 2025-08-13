@@ -4,7 +4,7 @@ import { replayStateAtom } from '../state/atoms/replay';
 import { useSession } from './useSession';
 import { messagesAtom } from '../state/atoms/message';
 import { toolResultsAtom } from '../state/atoms/tool';
-import { processEventAction } from '../state/actions/eventProcessor';
+import { processEventAction } from '../state/actions/eventProcessors';
 import { useSetAtom } from 'jotai';
 import { plansAtom } from '../state/atoms/plan';
 
