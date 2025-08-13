@@ -39,16 +39,6 @@ interface NavbarModelSelectorProps {
   onUpdateModel?: (sessionId: string, provider: string, modelId: string) => Promise<boolean>;
 }
 
-/**
- * NavbarModelSelector Component - Pure component for model selection
- *
- * Features:
- * - Uses Material-UI Select for enterprise-grade reliability
- * - Responsive dark mode support
- * - Modern styling matching app aesthetics
- * - Proper z-index handling for dropdown positioning
- * - Pure component with no external dependencies
- */
 export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   className = '',
   activeSessionId,
@@ -62,8 +52,6 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
-  // Create custom theme for MUI components to match the app's design
-  // Recreate theme when dark mode changes
   const muiTheme = React.useMemo(
     () =>
       createTheme({
@@ -110,7 +98,6 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
                     ? '0 2px 4px -1px rgba(0, 0, 0, 0.2)'
                     : '0 2px 4px -1px rgba(0, 0, 0, 0.05)',
                 },
-                // Hide the dropdown arrow
                 '& .MuiSelect-icon': {
                   display: 'none',
                 },
@@ -128,14 +115,17 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
           MuiMenuItem: {
             styleOverrides: {
               root: {
-                fontSize: '12px',
-                padding: '6px 12px',
-                borderRadius: '6px',
-                margin: '2px 6px',
+                fontSize: '13px',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                margin: '3px 8px',
+                minHeight: '40px',
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                 '&:hover': {
                   backgroundColor: isDarkMode
                     ? 'rgba(99, 102, 241, 0.15)'
                     : 'rgba(99, 102, 241, 0.08)',
+                  transform: 'translateX(2px)',
                 },
                 '&.Mui-selected': {
                   backgroundColor: isDarkMode
@@ -146,6 +136,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
                     backgroundColor: isDarkMode
                       ? 'rgba(99, 102, 241, 0.3)'
                       : 'rgba(99, 102, 241, 0.18)',
+                    transform: 'translateX(2px)',
                   },
                 },
               },
@@ -154,15 +145,18 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
           MuiPaper: {
             styleOverrides: {
               root: {
-                borderRadius: '12px',
+                borderRadius: '16px',
+                maxWidth: '400px',
                 boxShadow: isDarkMode
-                  ? '0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2)'
-                  : '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-                backdropFilter: 'blur(16px)',
+                  ? '0 20px 40px -10px rgba(0, 0, 0, 0.5), 0 8px 16px -4px rgba(0, 0, 0, 0.3)'
+                  : '0 20px 40px -10px rgba(0, 0, 0, 0.15), 0 8px 16px -4px rgba(0, 0, 0, 0.08)',
+                backdropFilter: 'blur(20px)',
                 border: isDarkMode
-                  ? '1px solid rgba(75, 85, 99, 0.3)'
-                  : '1px solid rgba(229, 231, 235, 0.5)',
-                background: isDarkMode ? 'rgba(31, 41, 55, 0.98)' : 'rgba(255, 255, 255, 0.98)',
+                  ? '1px solid rgba(75, 85, 99, 0.4)'
+                  : '1px solid rgba(229, 231, 235, 0.6)',
+                background: isDarkMode ? 'rgba(31, 41, 55, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                animation: 'menuSlideIn 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                transformOrigin: 'top center',
               },
             },
           },
@@ -171,7 +165,6 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     [isDarkMode],
   );
 
-  // Load available models on component mount
   useEffect(() => {
     const loadModels = async () => {
       if (!onLoadModels) {
@@ -183,7 +176,6 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
         const models = await onLoadModels();
         setAvailableModels(models);
 
-        // Set initial current model to default
         if (models.defaultModel) {
           const modelKey = `${models.defaultModel.provider}:${models.defaultModel.modelId}`;
           setCurrentModel(modelKey);
@@ -198,14 +190,11 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     loadModels();
   }, [onLoadModels]);
 
-  // Don't render if no session
   if (!activeSessionId || isInitialLoading) {
     return null;
   }
 
-  // If no multiple providers available, show static model info badge
   if (!availableModels?.hasMultipleProviders || availableModels.models.length === 0) {
-    // Only show static badge if we have model info
     if (!modelInfo.model && !modelInfo.provider) {
       return null;
     }
@@ -330,12 +319,10 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
         setCurrentModel(selectedValue);
       } else {
         console.error('❌ [NavbarModelSelector] Update handler returned success=false');
-        // Revert selection on server failure
         setCurrentModel(currentModel);
       }
     } catch (error) {
       console.error('💥 [NavbarModelSelector] Failed to update session model:', error);
-      // Revert selection on error
       setCurrentModel(currentModel);
     } finally {
       console.log('🏁 [NavbarModelSelector] Model change completed');
@@ -343,7 +330,6 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     }
   };
 
-  // Create options array for Select
   const allModelOptions = availableModels.models.flatMap((config) =>
     config.models.map((modelId) => ({
       value: `${config.provider}:${modelId}`,
@@ -420,30 +406,44 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
             MenuProps={{
               PaperProps: {
                 style: {
-                  maxHeight: 280,
-                  marginTop: 4,
-                  zIndex: 9999, // High z-index to ensure it appears above other elements
+                  maxHeight: 360,
+                  marginTop: 8,
+                  zIndex: 9999,
+                },
+                sx: {
+                  '@keyframes menuSlideIn': {
+                    '0%': {
+                      opacity: 0,
+                      transform: 'translateY(-8px) scale(0.95)',
+                    },
+                    '100%': {
+                      opacity: 1,
+                      transform: 'translateY(0) scale(1)',
+                    },
+                  },
                 },
               },
               anchorOrigin: {
-                vertical: 'top',
-                horizontal: 'left',
-              },
-              transformOrigin: {
                 vertical: 'bottom',
                 horizontal: 'left',
               },
+              transformOrigin: {
+                vertical: 'top',
+                horizontal: 'left',
+              },
               disablePortal: false,
+              TransitionProps: {
+                timeout: 200,
+              },
             }}
             sx={{
-              // minWidth: 240, // Increased width to prevent early truncation
-              maxWidth: 300, // Increased max width for better display
+              maxWidth: 360,
             }}
           >
             {allModelOptions.map((option, idx) => {
               return (
                 <MenuItem key={idx} value={option.value}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, width: '100%' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
                     <Box
                       sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0, flex: 1 }}
                     >
@@ -451,7 +451,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
                         variant="body2"
                         sx={{
                           fontWeight: currentModel === option.value ? 600 : 500,
-                          fontSize: '12px',
+                          fontSize: '14px',
                           color:
                             currentModel === option.value
                               ? isDarkMode
@@ -472,7 +472,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
                         variant="body2"
                         sx={{
                           color: isDarkMode ? '#9ca3af' : '#6b7280',
-                          fontSize: '12px',
+                          fontSize: '14px',
                           flexShrink: 0,
                         }}
                       >
@@ -482,7 +482,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
                         variant="body2"
                         sx={{
                           fontWeight: currentModel === option.value ? 600 : 500,
-                          fontSize: '12px',
+                          fontSize: '13px',
                           color:
                             currentModel === option.value
                               ? isDarkMode
