@@ -23,9 +23,9 @@ export interface GUIAgentConfig extends AgentOptions {
     | 'latest';
   // ===== Optional =====
   systemPrompt?: string;
-  signal?: AbortSignal;
+  // signal?: AbortSignal;
   maxLoopCount?: number;
-  loopIntervalInMs?: number;
+  // loopIntervalInMs?: number;
 }
 
 export class SeedGUIAgent extends Agent {
@@ -35,7 +35,12 @@ export class SeedGUIAgent extends Agent {
   private operator: Operator | undefined;
 
   constructor(config: GUIAgentConfig) {
-    const { operatorType, model, systemPrompt, signal, maxLoopCount, loopIntervalInMs } = config;
+    const {
+      operatorType,
+      model,
+      systemPrompt,
+      /* signal, */ maxLoopCount /*, loopIntervalInMs */,
+    } = config;
     super({
       name: 'Seed GUI Agent',
       instructions: systemPrompt ?? SYSTEM_PROMPT,

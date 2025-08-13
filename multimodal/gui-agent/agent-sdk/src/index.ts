@@ -2,15 +2,19 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import * as p from '@clack/prompts';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { SeedGUIAgent } from './SeedGUIAgent';
 import { env } from 'process';
+import * as p from '@clack/prompts';
 import { Command } from 'commander';
 import { SYSTEM_PROMPT_LATEST, SYSTEM_PROMPT } from './constants';
+import { SeedGUIAgent } from './SeedGUIAgent';
 import { ProviderOptions } from '@tarko/agent-interface';
+
+interface TestOptions {
+  target?: string;
+}
 
 interface CliOptions {
   target?: string;
@@ -262,10 +266,10 @@ async function main() {
     .command('test')
     .description('测试 SeedGUIAgent 不同Operator')
     .option('-t, --target <target>', '目标Operator (browser|computer|android|all)', 'all')
-    .action(async (options) => {
+    .action(async (options: TestOptions) => {
       validateEnvironmentVariables();
       const { target } = options;
-      switch (target.toLowerCase()) {
+      switch (target?.toLowerCase()) {
         case 'browser':
           await testBrowserOperator();
           break;
