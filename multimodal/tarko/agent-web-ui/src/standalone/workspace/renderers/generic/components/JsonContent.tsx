@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface JsonContentProps {
-  data: any;
+  data: unknown;
 }
 
 export const JsonContent: React.FC<JsonContentProps> = ({ data }) => {

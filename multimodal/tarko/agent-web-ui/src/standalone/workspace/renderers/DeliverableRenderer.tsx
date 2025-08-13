@@ -1,32 +1,36 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FiFileText, FiCode, FiDownload, FiExternalLink, FiCopy, FiCheck } from 'react-icons/fi';
-import { ToolResultContentPart } from '..//types';
+import { StandardPanelContent } from '../types/panelContent';
 import { MarkdownRenderer } from '@/sdk/markdown-renderer';
+import { FileDisplayMode } from '../types';
 
 interface DeliverableRendererProps {
-  part: ToolResultContentPart;
-  onAction?: (action: string, data: any) => void;
+  panelContent: StandardPanelContent;
+  onAction?: (action: string, data: unknown) => void;
+  displayMode?: FileDisplayMode;
 }
 
 /**
  * DeliverableRenderer - Specialized component for rendering deliverable content
- * such as reports, code artifacts, and other final products
- *
- * Features:
- * - Categorizes deliverables by type (code, document, data)
- * - Provides download and copy functionality
- * - Offers appropriate preview for different content types
- * - Visual design consistent with other workspace renderers
  */
-export const DeliverableRenderer: React.FC<DeliverableRendererProps> = ({ part, onAction }) => {
-  const { title, text, data, name } = part;
+export const DeliverableRenderer: React.FC<DeliverableRendererProps> = ({
+  panelContent,
+  onAction,
+}) => {
   const [copied, setCopied] = React.useState(false);
+
+  // Extract deliverable data from panelContent
+  const deliverableData = extractDeliverableData(panelContent);
+
+  if (!deliverableData) {
+    return <div className="text-gray-500 italic">No deliverable content available</div>;
+  }
+
+  const { title, content, name } = deliverableData;
 
   // Determine deliverable type based on available data
   const getDeliverableType = () => {
-    if (!part) return 'unknown';
-
     // Check extensions if name exists
     if (name) {
       if (/\.(js|ts|jsx|tsx|py|java|c|cpp|php|html|css|json)$/i.test(name)) return 'code';
@@ -46,11 +50,6 @@ export const DeliverableRenderer: React.FC<DeliverableRendererProps> = ({ part, 
   };
 
   const deliverableType = getDeliverableType();
-  const content = text || (typeof data === 'string' ? data : JSON.stringify(data, null, 2));
-
-  if (!content) {
-    return <div className="text-gray-500 italic">No deliverable content available</div>;
-  }
 
   // Handle copy to clipboard
   const handleCopy = () => {
@@ -146,3 +145,54 @@ export const DeliverableRenderer: React.FC<DeliverableRendererProps> = ({ part, 
     </div>
   );
 };
+
+function extractDeliverableData(panelContent: StandardPanelContent): {
+  title?: string;
+  content: string;
+  name?: string;
+} | null {
+  try {
+    // Try arguments first
+    if (panelContent.arguments) {
+      const { title, text, data, name } = panelContent.arguments;
+      const content = text || (typeof data === 'string' ? data : JSON.stringify(data, null, 2));
+
+      if (content && typeof content === 'string') {
+        return {
+          title: title ? String(title) : panelContent.title,
+          content,
+          name: name ? String(name) : undefined,
+        };
+      }
+    }
+
+    // Try to extract from source
+    if (typeof panelContent.source === 'object' && panelContent.source !== null) {
+      const sourceObj = panelContent.source as any;
+      const { title, text, data, name } = sourceObj;
+      const content = text || (typeof data === 'string' ? data : JSON.stringify(data, null, 2));
+
+      if (content && typeof content === 'string') {
+        return {
+          title: title ? String(title) : panelContent.title,
+          content,
+          name: name ? String(name) : undefined,
+        };
+      }
+    }
+
+    // If source is a string, treat it as content
+    if (typeof panelContent.source === 'string') {
+      return {
+        title: panelContent.title,
+        content: panelContent.source,
+        name: undefined,
+      };
+    }
+
+    return null;
+  } catch (error) {
+    console.warn('Failed to extract deliverable data:', error);
+    return null;
+  }
+}

@@ -3,11 +3,13 @@ import { motion } from 'framer-motion';
 
 import { FiDownload, FiBookOpen, FiLoader, FiShare2, FiCopy, FiCheck } from 'react-icons/fi';
 import { MarkdownRenderer } from '@/sdk/markdown-renderer';
+import { StandardPanelContent } from '../types/panelContent';
+import { FileDisplayMode } from '../types';
 
 interface ResearchReportRendererProps {
-  content: string;
-  title?: string;
-  isStreaming?: boolean;
+  panelContent: StandardPanelContent;
+  onAction?: (action: string, data: unknown) => void;
+  displayMode?: FileDisplayMode;
 }
 
 /**
@@ -21,13 +23,18 @@ interface ResearchReportRendererProps {
  * - Auto-scrolling during streaming updates
  */
 export const ResearchReportRenderer: React.FC<ResearchReportRendererProps> = ({
-  content,
-  title = 'Research Report',
-  isStreaming = false,
+  panelContent,
+  onAction,
+  displayMode,
 }) => {
   const [scrollToBottom, setScrollToBottom] = useState(true);
   const [copied, setCopied] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
+
+  // Extract content and metadata from panelContent
+  const content = getReportContent(panelContent);
+  const title = panelContent.title || 'Research Report';
+  const isStreaming = Boolean(panelContent.isStreaming);
 
   // Handle content formatting to ensure it's always a string
   const formattedContent = React.useMemo(() => {
@@ -51,18 +58,18 @@ export const ResearchReportRenderer: React.FC<ResearchReportRendererProps> = ({
   }, [content, isStreaming, scrollToBottom]);
 
   // Handle content scroll
-  const handleScroll = () => {
+  function handleScroll() {
     if (!contentRef.current) return;
 
     const { scrollTop, scrollHeight, clientHeight } = contentRef.current;
     const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
 
     setScrollToBottom(isNearBottom);
-  };
+  }
 
   // Handle report download
   const handleDownload = () => {
-    const blob = new Blob([content], { type: 'text/markdown' });
+    const blob = new Blob([formattedContent], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
 
     const a = document.createElement('a');
@@ -160,3 +167,10 @@ export const ResearchReportRenderer: React.FC<ResearchReportRendererProps> = ({
     </div>
   );
 };
+
+function getReportContent(panelContent: StandardPanelContent): string {
+  if (typeof panelContent.source === 'string') {
+    return panelContent.source;
+  }
+  return JSON.stringify(panelContent.source, null, 2);
+}

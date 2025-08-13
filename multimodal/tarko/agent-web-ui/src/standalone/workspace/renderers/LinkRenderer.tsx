@@ -1,22 +1,27 @@
 import React from 'react';
-import { ToolResultContentPart } from '..//types';
+import { StandardPanelContent } from '../types/panelContent';
 import { motion } from 'framer-motion';
 import { FiExternalLink } from 'react-icons/fi';
+import { FileDisplayMode } from '../types';
 
 interface LinkRendererProps {
-  part: ToolResultContentPart;
-  onAction?: (action: string, data: any) => void;
+  panelContent: StandardPanelContent;
+  onAction?: (action: string, data: unknown) => void;
+  displayMode?: FileDisplayMode;
 }
 
 /**
  * Renders link content with external icon
  */
-export const LinkRenderer: React.FC<LinkRendererProps> = ({ part }) => {
-  const { url, title } = part;
+export const LinkRenderer: React.FC<LinkRendererProps> = ({ panelContent }) => {
+  // Extract link data from panelContent
+  const linkData = extractLinkData(panelContent);
 
-  if (!url) {
+  if (!linkData) {
     return <div className="text-gray-500 italic">Link URL missing</div>;
   }
+
+  const { url, title } = linkData;
 
   return (
     <motion.a
@@ -42,3 +47,48 @@ export const LinkRenderer: React.FC<LinkRendererProps> = ({ part }) => {
     </motion.a>
   );
 };
+
+function extractLinkData(panelContent: StandardPanelContent): {
+  url: string;
+  title?: string;
+} | null {
+  try {
+    // Try arguments first
+    if (panelContent.arguments) {
+      const { url, title } = panelContent.arguments;
+
+      if (url && typeof url === 'string') {
+        return {
+          url,
+          title: title ? String(title) : panelContent.title,
+        };
+      }
+    }
+
+    // Try to extract from source
+    if (typeof panelContent.source === 'object' && panelContent.source !== null) {
+      const sourceObj = panelContent.source as any;
+      const { url, title } = sourceObj;
+
+      if (url && typeof url === 'string') {
+        return {
+          url,
+          title: title ? String(title) : panelContent.title,
+        };
+      }
+    }
+
+    // Check if source is a direct URL
+    if (typeof panelContent.source === 'string' && panelContent.source.startsWith('http')) {
+      return {
+        url: panelContent.source,
+        title: panelContent.title,
+      };
+    }
+
+    return null;
+  } catch (error) {
+    console.warn('Failed to extract link data:', error);
+    return null;
+  }
+}

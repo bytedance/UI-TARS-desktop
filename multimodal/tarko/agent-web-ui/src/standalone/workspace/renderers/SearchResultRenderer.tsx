@@ -1,29 +1,22 @@
-// /multimodal/agent-tars-web-ui/src/standalone/workspace/renderers/SearchResultRenderer.tsx
 import React from 'react';
-import { ToolResultContentPart } from '../types';
+import { StandardPanelContent } from '../types/panelContent';
 import { motion } from 'framer-motion';
 import { FiExternalLink, FiSearch, FiInfo, FiGlobe } from 'react-icons/fi';
 import { SearchService } from '../../../common/services/SearchService';
+import { FileDisplayMode } from '../types';
 
 interface SearchResultRendererProps {
-  part: ToolResultContentPart;
-  onAction?: (action: string, data: any) => void;
+  panelContent: StandardPanelContent;
+  onAction?: (action: string, data: unknown) => void;
+  displayMode?: FileDisplayMode;
 }
 
 /**
  * Renders search results with refined visual design
- *
- * Design improvements:
- * - Clean, minimalist card layout with subtle animations
- * - Consistent typography with proper hierarchy
- * - Refined spacing and subtle borders
- * - Simplified URL display
- * - Elegant interaction feedback
- * - Support for structured web_search results
  */
-export const SearchResultRenderer: React.FC<SearchResultRendererProps> = ({ part }) => {
+export const SearchResultRenderer: React.FC<SearchResultRendererProps> = ({ panelContent }) => {
   // Use unified search service for data extraction
-  const searchData = SearchService.extractSearchData(part);
+  const searchData = SearchService.extractSearchData(panelContent.source);
   if (!searchData) {
     return <div className="text-gray-500 italic">Invalid search data format</div>;
   }

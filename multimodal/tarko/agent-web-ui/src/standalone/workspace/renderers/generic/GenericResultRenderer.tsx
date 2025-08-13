@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ToolResultContentPart } from '../../types';
+import { StandardPanelContent } from '../../types/panelContent';
 import { DisplayMode } from './types';
 import { analyzeResult, extractImagesFromContent, isPossibleMarkdown } from './utils';
 import { BrowserShell } from '../BrowserShell';
@@ -16,8 +16,8 @@ import { formatKey, formatValue } from './utils';
 import { FileDisplayMode } from '../../types';
 
 interface GenericResultRendererProps {
-  part: ToolResultContentPart;
-  onAction?: (action: string, data: any) => void;
+  panelContent: StandardPanelContent;
+  onAction?: (action: string, data: unknown) => void;
   displayMode?: FileDisplayMode;
 }
 
@@ -30,21 +30,38 @@ const ResultCard: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({
-  part,
+  panelContent,
   onAction,
   displayMode,
 }) => {
-  if (part.type === 'file_result') {
-    return <FileResultRenderer part={part} onAction={onAction} displayMode={displayMode} />;
+  // Handle file_result type directly
+  if (panelContent.type === 'file_result' || panelContent.type === 'file') {
+    return (
+      <FileResultRenderer
+        panelContent={panelContent}
+        onAction={onAction}
+        displayMode={displayMode}
+      />
+    );
   }
 
+  // Extract content from panelContent
   const content = React.useMemo(() => {
-    if (Array.isArray(part.data)) {
-      const textContent = part.data.find((item) => item.type === 'text');
-      if (textContent?.text) return textContent.text;
+    if (Array.isArray(panelContent.source)) {
+      const textContent = panelContent.source.find(
+        (item) =>
+          typeof item === 'object' &&
+          item !== null &&
+          'type' in item &&
+          item.type === 'text' &&
+          'text' in item,
+      );
+      if (textContent && 'text' in textContent && typeof textContent.text === 'string') {
+        return textContent.text;
+      }
     }
-    return part.text || part.data || {};
-  }, [part.data, part.text]);
+    return panelContent.source || {};
+  }, [panelContent.source]);
 
   const { images, hasImages, textContent } = React.useMemo(
     () =>
@@ -55,7 +72,7 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({
   );
 
   const isPureImageUrl = hasImages && images.length === 1 && textContent === '';
-  const hasScreenshot = part._extra && part._extra.currentScreenshot;
+  const hasScreenshot = panelContent._extra && panelContent._extra.currentScreenshot;
 
   const parsedContent = React.useMemo(() => {
     if (typeof content === 'string' && !isPureImageUrl) {
@@ -69,7 +86,7 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({
   }, [content, isPureImageUrl]);
 
   const resultInfo = React.useMemo(() => {
-    const result = analyzeResult(parsedContent, part.name);
+    const result = analyzeResult(parsedContent, panelContent.type);
 
     if (typeof content === 'string' && content.includes('Navigated to ')) {
       const splits = content.split('\n');
@@ -85,15 +102,14 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({
     }
 
     return result;
-  }, [parsedContent, part.name, content]);
+  }, [parsedContent, panelContent.type, content]);
 
   const isMarkdownContent = React.useMemo(() => {
     return (
-      part.name?.includes('markdown') ||
-      part.name?.includes('browser_get_markdown') ||
+      panelContent.type?.includes('markdown') ||
       (typeof content === 'string' && isPossibleMarkdown(content))
     );
-  }, [part.name, content]);
+  }, [panelContent.type, content]);
 
   const isShortString =
     typeof resultInfo.message === 'string' && resultInfo.message.length < 80 && !isMarkdownContent;
@@ -101,7 +117,7 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({
   if (isPureImageUrl) {
     return (
       <ResultCard>
-        <ImageContent imageUrl={images[0]} name={part.name} />
+        <ImageContent imageUrl={images[0]} name={panelContent.title} />
       </ResultCard>
     );
   }
@@ -111,7 +127,7 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({
       <ResultCard>
         <BrowserShell title={resultInfo.title} url={resultInfo.url}>
           <img
-            src={part._extra.currentScreenshot}
+            src={panelContent._extra.currentScreenshot}
             alt="Browser Screenshot"
             className="w-full h-auto object-contain max-h-[70vh]"
           />

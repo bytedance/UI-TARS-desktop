@@ -1,29 +1,32 @@
 import React from 'react';
-import { ToolResultContentPart } from '..//types';
+import { StandardPanelContent } from '../types/panelContent';
 import { motion } from 'framer-motion';
 import { FiDownload, FiZoomIn } from 'react-icons/fi';
 import { BrowserShell } from './BrowserShell';
+import { FileDisplayMode } from '../types';
 
 interface ImageRendererProps {
-  part: ToolResultContentPart;
-  onAction?: (action: string, data: any) => void;
+  panelContent: StandardPanelContent;
+  onAction?: (action: string, data: unknown) => void;
+  displayMode?: FileDisplayMode;
 }
 
 /**
  * Renders image content with zoom and download actions
  */
-export const ImageRenderer: React.FC<ImageRendererProps> = ({ part, onAction }) => {
-  const { imageData, mimeType = 'image/png', name } = part;
+export const ImageRenderer: React.FC<ImageRendererProps> = ({ panelContent, onAction }) => {
+  // Extract image data from panelContent
+  const imageData = extractImageData(panelContent);
 
   if (!imageData) {
     return <div className="text-gray-500 italic">Image data missing</div>;
   }
 
-  const imgSrc = `data:${mimeType};base64,${imageData}`;
+  const { src, mimeType, name } = imageData;
 
   const handleDownload = () => {
     const link = document.createElement('a');
-    link.href = imgSrc;
+    link.href = src;
     link.download = name || 'image';
     document.body.appendChild(link);
     link.click();
@@ -32,7 +35,7 @@ export const ImageRenderer: React.FC<ImageRendererProps> = ({ part, onAction }) 
 
   const handleZoom = () => {
     if (onAction) {
-      onAction('zoom', { src: imgSrc, alt: name });
+      onAction('zoom', { src, alt: name });
     }
   };
 
@@ -68,7 +71,7 @@ export const ImageRenderer: React.FC<ImageRendererProps> = ({ part, onAction }) 
       <div className="relative group">
         <BrowserShell title={name || 'Browser Screenshot'}>
           <img
-            src={imgSrc}
+            src={src}
             alt={name || 'Image'}
             className="w-full h-auto object-contain max-h-[70vh]"
           />
@@ -86,7 +89,7 @@ export const ImageRenderer: React.FC<ImageRendererProps> = ({ part, onAction }) 
       >
         <div className="relative">
           <img
-            src={imgSrc}
+            src={src}
             alt={name || 'Image'}
             className="max-h-[70vh] object-contain rounded-lg mx-auto"
           />
@@ -97,3 +100,52 @@ export const ImageRenderer: React.FC<ImageRendererProps> = ({ part, onAction }) 
     </div>
   );
 };
+
+function extractImageData(panelContent: StandardPanelContent): {
+  src: string;
+  mimeType: string;
+  name: string;
+} | null {
+  try {
+    // Try arguments first
+    if (panelContent.arguments) {
+      const { imageData, mimeType = 'image/png', name } = panelContent.arguments;
+
+      if (imageData && typeof imageData === 'string') {
+        return {
+          src: `data:${mimeType};base64,${imageData}`,
+          mimeType,
+          name: String(name || panelContent.title || 'Image'),
+        };
+      }
+    }
+
+    // Try to extract from source
+    if (typeof panelContent.source === 'object' && panelContent.source !== null) {
+      const sourceObj = panelContent.source as any;
+      const { imageData, mimeType = 'image/png', name } = sourceObj;
+
+      if (imageData && typeof imageData === 'string') {
+        return {
+          src: `data:${mimeType};base64,${imageData}`,
+          mimeType,
+          name: String(name || panelContent.title || 'Image'),
+        };
+      }
+    }
+
+    // Check if source is a direct URL
+    if (typeof panelContent.source === 'string' && panelContent.source.startsWith('http')) {
+      return {
+        src: panelContent.source,
+        mimeType: 'image/png',
+        name: panelContent.title || 'Image',
+      };
+    }
+
+    return null;
+  } catch (error) {
+    console.warn('Failed to extract image data:', error);
+    return null;
+  }
+}

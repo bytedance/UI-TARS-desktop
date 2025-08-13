@@ -1,124 +1,54 @@
 import React from 'react';
-import { ImageRenderer } from './ImageRenderer';
-import { LinkRenderer } from './LinkRenderer';
-import { LinkReaderRenderer } from './LinkReaderRenderer';
-import { SearchResultRenderer } from './SearchResultRenderer';
-import { CommandResultRenderer } from './CommandResultRenderer';
-import { ScriptResultRenderer } from './ScriptResultRenderer';
-import { BrowserResultRenderer } from './BrowserResultRenderer';
-import { BrowserControlRenderer } from './BrowserControlRenderer';
-import { PlanViewerRenderer } from './PlanViewerRenderer';
-import { ResearchReportRenderer } from './ResearchReportRenderer';
-import { GenericResultRenderer } from './generic/GenericResultRenderer';
-import { DeliverableRenderer } from './DeliverableRenderer';
-import { DiffRenderer } from './DiffRenderer';
-import { FileDisplayMode, ToolResultContentPart } from '../types';
+import { StandardPanelContent } from '../types/panelContent';
+import { FileDisplayMode } from '../types';
 
 /**
- * Registry of content part renderers
- * Maps content types to their renderer components
+ * ToolResultRenderer - 已废弃，直接使用各自的 Renderer
+ *
+ * @deprecated 这个文件已经不再使用。
+ * 现在所有的渲染器都直接在 WorkspaceDetail.tsx 中的 CONTENT_RENDERERS 注册，
+ * 并直接接收 StandardPanelContent 参数。
+ *
+ * 保留这个文件只是为了避免潜在的导入错误，
+ * 实际功能已经移到 WorkspaceDetail.tsx 中。
  */
-const CONTENT_RENDERERS: Record<
-  string,
-  React.FC<{
-    part: ToolResultContentPart;
-    onAction?: (action: string, data: any) => void;
-    displayMode?: FileDisplayMode;
-  }>
-> = {
-  image: ImageRenderer,
-  link: LinkRenderer,
-  link_reader: LinkReaderRenderer,
-  search_result: SearchResultRenderer,
-  command_result: CommandResultRenderer,
-  script_result: ScriptResultRenderer,
-  browser_result: BrowserResultRenderer,
-  browser_control: BrowserControlRenderer,
-  plan: PlanViewerRenderer,
-  research_report: ResearchReportRenderer,
-  json: GenericResultRenderer,
-  deliverable: DeliverableRenderer,
-  file_result: GenericResultRenderer,
-  diff_result: DiffRenderer,
-};
 
 interface ToolResultRendererProps {
-  /**
-   * Array of content parts to render
-   */
-  content: ToolResultContentPart[];
-
-  /**
-   * Optional handler for interactive actions
-   */
-  onAction?: (action: string, data: any) => void;
-
-  /**
-   * Optional className for the container
-   */
+  panelContent: StandardPanelContent;
+  onAction?: (action: string, data: unknown) => void;
   className?: string;
-
-  /**
-   * Display mode for content that supports toggling
-   */
   displayMode?: FileDisplayMode;
 }
 
 /**
- * Renders tool result content parts using the appropriate renderer for each part
+ * @deprecated 请直接使用各自的 Renderer 组件
  */
 export const ToolResultRenderer: React.FC<ToolResultRendererProps> = ({
-  content,
+  panelContent,
   onAction,
   className = '',
   displayMode,
 }) => {
-  if (!content || content.length === 0) {
-    return (
-      <div className="p-4 text-gray-500 dark:text-gray-400 text-sm italic">
-        No content to display
-      </div>
-    );
-  }
+  console.warn(
+    '[ToolResultRenderer] This component is deprecated. Use individual renderers directly through WorkspaceDetail.tsx',
+  );
 
   return (
     <div className={`space-y-4 ${className}`}>
-      {content.map((part, index) => {
-        const partId = `part${index}`;
-
-        if (part.type === 'json') {
-          return (
-            // secretlint-disable-next-line @secretlint/secretlint-rule-pattern
-            <div key={partId} className="tool-result-part">
-              <GenericResultRenderer part={part} onAction={onAction} displayMode={displayMode} />
-            </div>
-          );
-        }
-
-        const Renderer = CONTENT_RENDERERS[part.type] || GenericResultRenderer;
-
-        return (
-          // secretlint-disable-next-line @secretlint/secretlint-rule-pattern
-          <div key={partId} className="tool-result-part">
-            <Renderer part={part} onAction={onAction} displayMode={displayMode} />
-          </div>
-        );
-      })}
+      <div className="p-4 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800/30">
+        <div className="font-medium mb-1">Deprecated Component</div>
+        <div className="text-sm">
+          ToolResultRenderer is deprecated. Content is now rendered directly through
+          WorkspaceDetail.tsx
+        </div>
+      </div>
     </div>
   );
 };
 
 /**
- * Register a custom renderer for a specific content type
- * This allows extending the system with new renderers without modifying this file
+ * @deprecated No longer used
  */
-export function registerRenderer(
-  contentType: string,
-  renderer: React.FC<{
-    part: ToolResultContentPart;
-    onAction?: (action: string, data: any) => void;
-    displayMode?: FileDisplayMode;
-  }>,
-): void {
-  CONTENT_RENDERERS[contentType] = renderer;
+export function registerRenderer(): void {
+  console.warn('[ToolResultRenderer] registerRenderer is deprecated.');
 }

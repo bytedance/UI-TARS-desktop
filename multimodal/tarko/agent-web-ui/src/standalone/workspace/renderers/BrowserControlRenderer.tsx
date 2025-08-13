@@ -1,34 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ToolResultContentPart } from '../types';
+import { StandardPanelContent } from '../types/panelContent';
 import { motion } from 'framer-motion';
 import { FiEye, FiMousePointer, FiType, FiChevronsRight, FiImage } from 'react-icons/fi';
 import { useSession } from '@/common/hooks/useSession';
 import { BrowserShell } from './BrowserShell';
+import { FileDisplayMode } from '../types';
 
 interface BrowserControlRendererProps {
-  part: ToolResultContentPart;
-  onAction?: (action: string, data: any) => void;
+  panelContent: StandardPanelContent;
+  onAction?: (action: string, data: unknown) => void;
+  displayMode?: FileDisplayMode;
 }
 
 /**
  * Specialized renderer for browser_vision_control tool results
- *
- * This renderer displays:
- * 1. The screenshot from the environment input
- * 2. A mouse cursor overlay showing the action point
- * 3. The thought process of the agent
- * 4. The step being performed
- * 5. The specific action taken
- *
- * Design improvements:
- * - Shows screenshot at the top for better visual context
- * - Displays enhanced mouse cursor with artistic animations
- * - Uses browser shell wrapper for consistent styling
- * - Applies smooth transitions for mouse movements
- * - Features visually engaging click animations
  */
 export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
-  part,
+  panelContent,
   onAction,
 }) => {
   const { activeSessionId, messages, toolResults, replayState } = useSession();
@@ -41,8 +29,14 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
   } | null>(null);
   const imageRef = useRef<HTMLImageElement>(null);
 
-  // Extract the visual operation details from the part
-  const { thought, step, action, status, toolCallId, environmentImage } = part;
+  // Extract the visual operation details from panelContent
+  const operationData = extractBrowserControlData(panelContent);
+
+  if (!operationData) {
+    return <div className="text-gray-500 italic">Browser control details unavailable</div>;
+  }
+
+  const { thought, step, action, status, toolCallId, environmentImage } = operationData;
 
   // Get coordinates directly from tool result instead of parsing action string
   useEffect(() => {
@@ -145,11 +139,6 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
     }
   };
 
-  // If no valid data, show a placeholder
-  if (!thought && !step && !action) {
-    return <div className="text-gray-500 italic">Browser control details unavailable</div>;
-  }
-
   return (
     <div className="space-y-4">
       {/* Screenshot section - moved to the top */}
@@ -199,7 +188,6 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
                       xmlns="http://www.w3.org/2000/svg"
                       style={{
                         filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.3))',
-
                         transform: 'translate(0px, 2px)',
                       }}
                     >
@@ -354,3 +342,51 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
     </div>
   );
 };
+
+function extractBrowserControlData(panelContent: StandardPanelContent): {
+  thought?: string;
+  step?: string;
+  action?: string;
+  status?: string;
+  toolCallId?: string;
+  environmentImage?: string;
+} | null {
+  try {
+    // Try arguments first
+    if (panelContent.arguments) {
+      const { thought, step, action, status } = panelContent.arguments;
+
+      return {
+        thought: thought ? String(thought) : undefined,
+        step: step ? String(step) : undefined,
+        action: action ? String(action) : undefined,
+        status: status ? String(status) : undefined,
+        toolCallId: panelContent.toolCallId,
+        environmentImage: panelContent._extra?.currentScreenshot,
+      };
+    }
+
+    // Try to extract from source
+    if (typeof panelContent.source === 'object' && panelContent.source !== null) {
+      const sourceObj = panelContent.source as any;
+      const { thought, step, action, status } = sourceObj;
+
+      return {
+        thought: thought ? String(thought) : undefined,
+        step: step ? String(step) : undefined,
+        action: action ? String(action) : undefined,
+        status: status ? String(status) : undefined,
+        toolCallId: panelContent.toolCallId,
+        environmentImage: panelContent._extra?.currentScreenshot,
+      };
+    }
+
+    return {
+      toolCallId: panelContent.toolCallId,
+      environmentImage: panelContent._extra?.currentScreenshot,
+    };
+  } catch (error) {
+    console.warn('Failed to extract browser control data:', error);
+    return null;
+  }
+}

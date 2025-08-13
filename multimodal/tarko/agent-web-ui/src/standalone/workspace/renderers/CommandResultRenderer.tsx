@@ -1,9 +1,11 @@
 import React from 'react';
-import { ToolResultContentPart } from '../types';
+import { StandardPanelContent } from '../types/panelContent';
+import { FileDisplayMode } from '../types';
 
 interface CommandResultRendererProps {
-  part: ToolResultContentPart;
-  onAction?: (action: string, data: any) => void;
+  panelContent: StandardPanelContent;
+  onAction?: (action: string, data: unknown) => void;
+  displayMode?: FileDisplayMode;
 }
 
 /**
@@ -91,21 +93,18 @@ const highlightCommand = (command: string) => {
 /**
  * Renders a terminal-like command and output result
  */
-export const CommandResultRenderer: React.FC<CommandResultRendererProps> = ({ part }) => {
-  const { command, stdout, stderr, exitCode } = part;
+export const CommandResultRenderer: React.FC<CommandResultRendererProps> = ({ panelContent }) => {
+  // Extract command data from panelContent
+  const commandData = extractCommandData(panelContent);
 
-  if (!command && !stdout && !stderr) {
+  if (!commandData) {
     return <div className="text-gray-500 italic">Command result is empty</div>;
   }
 
+  const { command, stdout, stderr, exitCode } = commandData;
+
   // Exit code styling
   const isError = exitCode !== 0 && exitCode !== undefined;
-  const exitCodeDisplay =
-    exitCode !== undefined ? (
-      <span className={`ml-2 text-xs ${isError ? 'text-red-500' : 'text-green-500'}`}>
-        (exit code: {exitCode})
-      </span>
-    ) : null;
 
   return (
     <div className="space-y-2">
@@ -155,3 +154,46 @@ export const CommandResultRenderer: React.FC<CommandResultRendererProps> = ({ pa
     </div>
   );
 };
+
+function extractCommandData(panelContent: StandardPanelContent): {
+  command?: string;
+  stdout?: string;
+  stderr?: string;
+  exitCode?: number;
+} | null {
+  try {
+    // Try arguments first
+    if (panelContent.arguments) {
+      const { command, stdout, stderr, exitCode } = panelContent.arguments;
+
+      if (command || stdout || stderr) {
+        return {
+          command: command ? String(command) : undefined,
+          stdout: stdout ? String(stdout) : undefined,
+          stderr: stderr ? String(stderr) : undefined,
+          exitCode: typeof exitCode === 'number' ? exitCode : undefined,
+        };
+      }
+    }
+
+    // Try to extract from source
+    if (typeof panelContent.source === 'object' && panelContent.source !== null) {
+      const sourceObj = panelContent.source as any;
+      const { command, stdout, stderr, exitCode } = sourceObj;
+
+      if (command || stdout || stderr) {
+        return {
+          command: command ? String(command) : undefined,
+          stdout: stdout ? String(stdout) : undefined,
+          stderr: stderr ? String(stderr) : undefined,
+          exitCode: typeof exitCode === 'number' ? exitCode : undefined,
+        };
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.warn('Failed to extract command data:', error);
+    return null;
+  }
+}

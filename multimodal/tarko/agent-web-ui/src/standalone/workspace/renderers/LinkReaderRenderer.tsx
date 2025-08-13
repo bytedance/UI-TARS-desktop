@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { FiExternalLink, FiCopy, FiCheck, FiFileText, FiCode } from 'react-icons/fi';
-import { ToolResultContentPart } from '../types';
+import { StandardPanelContent } from '../types/panelContent';
 import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 import { wrapMarkdown } from '@/common/utils/markdown';
+import { FileDisplayMode } from '../types';
 
 interface LinkReaderRendererProps {
-  part: ToolResultContentPart;
+  panelContent: StandardPanelContent;
   onAction?: (action: string, data: unknown) => void;
+  displayMode?: FileDisplayMode;
 }
 
 interface LinkResult {
@@ -31,11 +33,11 @@ interface LinkReaderResponse {
  * Clean and minimal LinkReader renderer
  * Focus on content with simple, elegant design
  */
-export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ part }) => {
+export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelContent }) => {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [showMarkdownSource, setShowMarkdownSource] = useState(false);
 
-  const linkData = extractLinkReaderData(part);
+  const linkData = extractLinkReaderData(panelContent);
 
   if (!linkData?.results?.length) {
     return <div className="text-gray-500 dark:text-gray-400 text-sm p-3">No content available</div>;
@@ -58,7 +60,7 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ part }) 
 
         return (
           <div
-            key={`link-${index}`} // secretlint-disable-line
+            key={`link-${index}`}
             className="bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm hover:shadow-md transition-shadow duration-200"
           >
             {/* Header with better contrast */}
@@ -138,28 +140,41 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ part }) 
 };
 
 /**
- * Extract LinkReader data from tool result part
+ * Extract LinkReader data from panelContent
  */
-function extractLinkReaderData(part: ToolResultContentPart): {
+function extractLinkReaderData(panelContent: StandardPanelContent): {
   results: LinkResult[];
 } | null {
   try {
     let parsedData: LinkReaderResponse;
 
     // Handle different data formats
-    if (typeof part.data === 'object' && part.data?.content && part.data?.structuredContent) {
-      parsedData = part.data.structuredContent;
-    } else if (
-      Array.isArray(part.data) &&
-      part.data[0] &&
-      typeof part.data[0] === 'object' &&
-      'text' in part.data[0]
-    ) {
-      parsedData = JSON.parse(part.data[0].text as string);
-    } else if (typeof part.text === 'string') {
-      parsedData = JSON.parse(part.text);
-    } else if (typeof part.data === 'object' && part.data !== null) {
-      parsedData = part.data as LinkReaderResponse;
+    if (typeof panelContent.source === 'object' && panelContent.source !== null) {
+      // Try arguments first
+      if (panelContent.arguments && typeof panelContent.arguments === 'object') {
+        const argsObj = panelContent.arguments as any;
+        if (argsObj.data && typeof argsObj.data === 'object') {
+          parsedData = argsObj.data;
+        } else if (argsObj.content && argsObj.structuredContent) {
+          parsedData = argsObj.structuredContent;
+        } else {
+          parsedData = argsObj;
+        }
+      } else {
+        // Try source directly
+        const sourceObj = panelContent.source as any;
+        if (Array.isArray(sourceObj) && sourceObj[0] && typeof sourceObj[0] === 'object' && 'text' in sourceObj[0]) {
+          parsedData = JSON.parse(sourceObj[0].text as string);
+        } else {
+          parsedData = sourceObj;
+        }
+      }
+    } else if (typeof panelContent.source === 'string') {
+      try {
+        parsedData = JSON.parse(panelContent.source);
+      } catch {
+        return null;
+      }
     } else {
       return null;
     }
@@ -185,9 +200,6 @@ function extractLinkReaderData(part: ToolResultContentPart): {
   }
 }
 
-/**
- * Extract title from content using simple patterns
- */
 function extractTitleFromContent(content: string): string | null {
   const patterns = [
     /<title[^>]*>([^<]+)<\/title>/i,
@@ -220,9 +232,6 @@ function extractTitleFromContent(content: string): string | null {
   return null;
 }
 
-/**
- * Check if title is valid
- */
 function isValidTitle(title: string): boolean {
   const badPatterns = [
     /^https?:\/\//i,
@@ -236,9 +245,6 @@ function isValidTitle(title: string): boolean {
   return !badPatterns.some((pattern) => pattern.test(title));
 }
 
-/**
- * Get hostname from URL
- */
 function getHostname(url: string): string {
   try {
     return new URL(url).hostname.replace(/^www\./, '');
@@ -247,9 +253,6 @@ function getHostname(url: string): string {
   }
 }
 
-/**
- * Format URL for display
- */
 function formatUrl(url: string): string {
   try {
     const urlObj = new URL(url);
