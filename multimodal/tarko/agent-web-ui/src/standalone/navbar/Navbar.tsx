@@ -22,6 +22,29 @@ export const Navbar: React.FC = () => {
   const isDarkMode = useDarkMode();
   const [showAboutModal, setShowAboutModal] = React.useState(false);
 
+  // Update HTML title with workspace and agent info
+  useEffect(() => {
+    const updateTitle = () => {
+      const parts = [];
+
+      // Add workspace name if available
+      if (workspaceInfo.name && workspaceInfo.name !== 'Unknown') {
+        parts.push(workspaceInfo.name);
+      }
+
+      // Add agent name if available
+      if (agentInfo.name) {
+        parts.push(agentInfo.name);
+      }
+
+      // Create title with format: "dir | agent" or fallback to "Agent TARS"
+      const title = parts.length > 0 ? parts.join(' | ') : 'Agent TARS';
+      document.title = title;
+    };
+
+    updateTitle();
+  }, [workspaceInfo.name, agentInfo.name]);
+
   // Get configuration from global window object
   const webUIConfig = window.AGENT_WEB_UI_CONFIG;
   const logoUrl =
@@ -88,9 +111,8 @@ export const Navbar: React.FC = () => {
           </div>
         )}
 
-        {/* Center section - Enhanced Workspace, Agent and Model info display with dynamic sizing */}
+        {/* Center section - Agent and Model info display with dynamic sizing */}
         <DynamicNavbarCenter
-          workspaceInfo={workspaceInfo}
           agentInfo={agentInfo}
           modelInfo={modelInfo}
           activeSessionId={activeSessionId}
@@ -138,21 +160,19 @@ export const Navbar: React.FC = () => {
 
 // Dynamic Navbar Center Component with space optimization
 interface DynamicNavbarCenterProps {
-  workspaceInfo: { name?: string; path?: string };
   agentInfo: { name?: string };
   modelInfo: { model?: string; provider?: string };
   activeSessionId?: string;
 }
 
 const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
-  workspaceInfo,
   agentInfo,
   modelInfo,
   activeSessionId,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [availableWidth, setAvailableWidth] = useState(0);
-  const [workspaceTextWidth, setWorkspaceTextWidth] = useState(0);
+  // const [workspaceTextWidth, setWorkspaceTextWidth] = useState(0); // Removed since workspace badge is commented out
   const [agentTextWidth, setAgentTextWidth] = useState(0);
   const [modelTextWidth, setModelTextWidth] = useState(0);
   const isDarkMode = useDarkMode();
@@ -185,9 +205,10 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
         return width;
       };
 
-      if (workspaceInfo.name && workspaceInfo.name !== 'Unknown') {
-        setWorkspaceTextWidth(measureText(workspaceInfo.name, 'font-medium'));
-      }
+      // Workspace text width calculation removed since badge is commented out
+      // if (workspaceInfo.name && workspaceInfo.name !== 'Unknown') {
+      //   setWorkspaceTextWidth(measureText(workspaceInfo.name, 'font-medium'));
+      // }
 
       if (agentInfo.name) {
         setAgentTextWidth(measureText(agentInfo.name, 'font-medium'));
@@ -208,74 +229,25 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [workspaceInfo.name, agentInfo.name, modelInfo.model, modelInfo.provider]);
+  }, [agentInfo.name, modelInfo.model, modelInfo.provider]);
 
-  // Calculate dynamic widths for badges
-  const totalTextWidth = workspaceTextWidth + agentTextWidth + modelTextWidth;
+  // Calculate dynamic widths for badges (workspace removed)
+  const totalTextWidth = agentTextWidth + modelTextWidth;
   const hasSpace = totalTextWidth <= availableWidth;
 
   // If we have space, use natural widths; otherwise, distribute proportionally
-  const workspaceMaxWidth = hasSpace
-    ? 'none'
-    : `${Math.max((workspaceTextWidth / totalTextWidth) * availableWidth * 0.85, 100)}px`;
-
   const agentMaxWidth = hasSpace
     ? 'none'
-    : `${Math.max((agentTextWidth / totalTextWidth) * availableWidth * 0.85, 80)}px`;
+    : `${Math.max((agentTextWidth / totalTextWidth) * availableWidth * 0.85, 120)}px`;
 
   const modelMaxWidth = hasSpace
     ? 'none'
-    : `${Math.max((modelTextWidth / totalTextWidth) * availableWidth * 0.85, 100)}px`;
+    : `${Math.max((modelTextWidth / totalTextWidth) * availableWidth * 0.85, 180)}px`;
 
   return (
     <div ref={containerRef} className="flex-1 flex justify-center min-w-0">
       <div className="flex items-center gap-3 min-w-0" style={{ maxWidth: '100%' }}>
-        {/* Workspace Badge */}
-        {workspaceInfo.name && workspaceInfo.name !== 'Unknown' && (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 0.75,
-              px: 1.25,
-              py: 0.5,
-              background: isDarkMode ? 'rgba(55, 65, 81, 0.3)' : 'rgba(255, 255, 255, 0.6)',
-              backdropFilter: 'blur(8px)',
-              border: isDarkMode
-                ? '1px solid rgba(75, 85, 99, 0.3)'
-                : '1px solid rgba(229, 231, 235, 0.5)',
-              borderRadius: '8px',
-              minWidth: 0,
-              maxWidth: workspaceMaxWidth,
-              '&:hover': {
-                background: isDarkMode ? 'rgba(55, 65, 81, 0.8)' : 'rgba(255, 255, 255, 0.8)',
-                boxShadow: isDarkMode
-                  ? '0 2px 4px -1px rgba(0, 0, 0, 0.2)'
-                  : '0 2px 4px -1px rgba(0, 0, 0, 0.05)',
-              },
-            }}
-          >
-            <FiFolder
-              size={12}
-              color={isDarkMode ? '#9ca3af' : '#6b7280'}
-              style={{ flexShrink: 0 }}
-            />
-            <Typography
-              variant="body2"
-              sx={{
-                fontWeight: 500,
-                fontSize: '12px',
-                color: isDarkMode ? '#f3f4f6' : '#374151',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-              title={workspaceInfo.path || workspaceInfo.name}
-            >
-              {workspaceInfo.name}
-            </Typography>
-          </Box>
-        )}
+        {/* Workspace Badge - Removed and moved to HTML title */}
 
         {/* Agent Name Badge */}
         {agentInfo.name && (
