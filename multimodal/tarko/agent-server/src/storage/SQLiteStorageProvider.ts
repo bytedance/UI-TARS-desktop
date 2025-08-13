@@ -292,9 +292,28 @@ export class SQLiteStorageProvider implements StorageProvider {
       const eventsCount = (eventsCountStmt.get() as { count: number }).count;
       console.log(`Events table verified: ${eventsCount} events preserved`);
 
-      // Only after verification, replace the old table
+      // CRITICAL: Temporarily rename events table to preserve data during sessions table replacement
+      // The foreign key constraint would delete all events when we DROP TABLE sessions
+      this.db.exec('ALTER TABLE events RENAME TO events_backup');
+      console.log('Temporarily backed up events table');
+
+      // Only after backing up events, replace the sessions table
       this.db.exec('DROP TABLE sessions');
       this.db.exec('ALTER TABLE sessions_new RENAME TO sessions');
+      
+      // Restore events table
+      this.db.exec('ALTER TABLE events_backup RENAME TO events');
+      console.log('Restored events table');
+
+      // FINAL SAFETY CHECK: Verify events are still there
+      const finalEventsCountStmt = this.db.prepare('SELECT COUNT(*) as count FROM events');
+      const finalEventsCount = (finalEventsCountStmt.get() as { count: number }).count;
+      
+      if (finalEventsCount !== eventsCount) {
+        throw new Error(`Events data loss detected! Before: ${eventsCount}, After: ${finalEventsCount}`);
+      }
+      
+      console.log(`Final verification: ${finalEventsCount} events preserved`);
 
       // Re-enable foreign key constraints
       this.db.exec('PRAGMA foreign_keys = ON');
