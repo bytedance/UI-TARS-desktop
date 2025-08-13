@@ -60,13 +60,16 @@ export async function createAndQuery(req: Request, res: Response) {
 
     // Store session metadata if storage is available
     if (server.storageProvider) {
+      const metadataContent: any = { version: 1 };
+      if (sessionName) metadataContent.name = sessionName;
+      if (sessionTags) metadataContent.tags = sessionTags;
+
       const metadata: SessionMetadata = {
         id: sessionId,
         createdAt: Date.now(),
         updatedAt: Date.now(),
-        name: sessionName,
         workspace: server.getCurrentWorkspace(),
-        tags: sessionTags,
+        metadata: Object.keys(metadataContent).length > 1 ? metadataContent : undefined,
       };
 
       await server.storageProvider.createSession(metadata);
@@ -123,13 +126,16 @@ export async function createAndStreamingQuery(req: Request, res: Response) {
 
     // Store session metadata if storage is available
     if (server.storageProvider) {
+      const metadataContent: any = { version: 1 };
+      if (sessionName) metadataContent.name = sessionName;
+      if (sessionTags) metadataContent.tags = sessionTags;
+
       const metadata: SessionMetadata = {
         id: sessionId,
         createdAt: Date.now(),
         updatedAt: Date.now(),
-        name: sessionName,
         workspace: server.getCurrentWorkspace(),
-        tags: sessionTags,
+        metadata: Object.keys(metadataContent).length > 1 ? metadataContent : undefined,
       };
 
       await server.storageProvider.createSession(metadata);

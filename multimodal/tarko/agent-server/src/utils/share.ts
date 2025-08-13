@@ -175,10 +175,10 @@ export class ShareUtils {
 
         // Add session metadata fields
         if (options.metadata) {
-          formData.append('name', options.metadata.name || '');
+          formData.append('name', options.metadata.metadata?.name || '');
           // Add tags if available
-          if (options.metadata.tags && options.metadata.tags.length > 0) {
-            formData.append('tags', JSON.stringify(options.metadata.tags));
+          if (options.metadata.metadata?.tags && options.metadata.metadata.tags.length > 0) {
+            formData.append('tags', JSON.stringify(options.metadata.metadata.tags));
           }
         }
       }
