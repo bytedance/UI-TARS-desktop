@@ -294,15 +294,47 @@ export class SQLiteStorageProvider implements StorageProvider {
 
       console.log(`Migration verification passed: ${newCount}/${originalCount} sessions migrated`);
 
-      // SAFE: Replace sessions table without breaking foreign key references
-      // This prevents events table data loss by avoiding direct DROP of referenced table
-      this.db.exec('ALTER TABLE sessions RENAME TO sessions_old');
-      this.db.exec('ALTER TABLE sessions_new RENAME TO sessions');
+      // ULTRA-SAFE: Use column-by-column migration instead of table replacement
+      // This completely avoids any table rename/drop operations that could trigger FK issues
 
-      // Now safe to drop old table since foreign keys point to new sessions table
-      this.db.exec('DROP TABLE sessions_old');
+      // Step 1: Add new metadata column to existing sessions table
+      this.db.exec('ALTER TABLE sessions ADD COLUMN metadata TEXT');
 
-      console.log('Sessions table replaced successfully');
+      // Step 2: Migrate data from old columns to new metadata column
+      const updateStmt = this.db.prepare(`
+        UPDATE sessions 
+        SET metadata = ?
+        WHERE id = ?
+      `);
+
+      for (const row of legacyRows) {
+        const metadata: any = { version: 1 };
+        if (row.name) metadata.name = row.name;
+        if (row.tags) {
+          try {
+            metadata.tags = JSON.parse(row.tags);
+          } catch {
+            metadata.tags = [row.tags];
+          }
+        }
+        if (row.modelConfig) {
+          try {
+            metadata.modelConfig = JSON.parse(row.modelConfig);
+          } catch {}
+        }
+
+        const metadataJson = Object.keys(metadata).length > 1 ? JSON.stringify(metadata) : null;
+        updateStmt.run(metadataJson, row.id);
+      }
+
+      // Step 3: Drop old columns (safe operations that don't affect FK)
+      // Note: SQLite doesn't support DROP COLUMN directly, but that's fine
+      // We'll just leave the old columns and ignore them in queries
+
+      // Clean up temporary table
+      this.db.exec('DROP TABLE sessions_new');
+
+      console.log('Column-based migration completed successfully - events table preserved');
 
       // Re-enable foreign key constraints
       this.db.exec('PRAGMA foreign_keys = ON');
