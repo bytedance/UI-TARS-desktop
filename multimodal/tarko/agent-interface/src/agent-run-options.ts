@@ -8,6 +8,27 @@ import { ChatCompletionContentPart, ModelProviderName } from '@tarko/model-provi
 import { ToolCallEngineType } from './tool-call-engine';
 
 /**
+ * Context type definition for dynamic context injection
+ */
+export interface AgentContext {
+  /** Unique identifier for this context */
+  id: string;
+  /** Type of context being injected */
+  type: 'file' | 'directory' | 'workspace' | 'custom';
+  /** The actual context content (can be multimodal) */
+  content: string | ChatCompletionContentPart[];
+  /** Optional description of the context */
+  description?: string;
+  /** Additional metadata about the context */
+  metadata?: {
+    /** File or directory path */
+    path?: string;
+    /** Display name */
+    name?: string;
+  } & Record<string, unknown>;
+}
+
+/**
  * Base options for running an agent without specifying streaming mode
  */
 export interface AgentRunBaseOptions {
@@ -43,6 +64,11 @@ export interface AgentRunBaseOptions {
    * @internal This is set internally by the Agent class
    */
   abortSignal?: AbortSignal;
+  /**
+   * Dynamic contexts to inject into the agent execution
+   * These will be processed as environment_input events
+   */
+  contexts?: AgentContext[];
 }
 
 /**

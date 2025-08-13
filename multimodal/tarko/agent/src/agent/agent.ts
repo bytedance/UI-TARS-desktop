@@ -223,7 +223,7 @@ export class Agent<T extends AgentOptions = AgentOptions>
   public getTools(): Tool[] {
     const allTools = this.toolManager.getTools();
     const toolFilterOptions = this.options.tool;
-    
+
     return filterTools(allTools, toolFilterOptions);
   }
 
@@ -365,6 +365,29 @@ Provide concise and accurate responses.`;
       });
 
       this.eventStream.sendEvent(userEvent);
+
+      // Process and inject contexts (if any)
+      if (normalizedOptions.contexts && normalizedOptions.contexts.length > 0) {
+        try {
+          const processedContexts = await this.onProcessContexts(
+            sessionId,
+            normalizedOptions.contexts,
+          );
+          const contextEvents = await this.onContextsToEvents(sessionId, processedContexts);
+
+          // Send environment_input events for each context
+          contextEvents.forEach((event) => {
+            this.eventStream.sendEvent(event);
+          });
+
+          this.logger.info(
+            `[Agent] Injected ${processedContexts.length} context(s) as environment_input events`,
+          );
+        } catch (error) {
+          this.logger.error(`[Agent] Error processing contexts: ${error}`);
+          // Continue execution even if context processing fails
+        }
+      }
 
       // Inject abort signal into the execution context
       normalizedOptions.abortSignal = abortSignal;

@@ -16,6 +16,7 @@ import {
   Tool,
   PrepareRequestContext,
   PrepareRequestResult,
+  AgentContext,
 } from '@tarko/agent-interface';
 import { getLogger } from '@tarko/shared-utils';
 
@@ -342,5 +343,43 @@ export abstract class BaseAgent<T extends AgentOptions = AgentOptions> {
   public onRetrieveTools(tools: Tool[]): Promise<Tool[]> | Tool[] {
     // Default implementation: return all tools without modification
     return tools;
+  }
+
+  /**
+   * Hook called before processing injected contexts
+   * Allows derived classes to filter, transform, or enhance contexts
+   *
+   * @param sessionId Session identifier for this conversation
+   * @param contexts Array of contexts to be processed
+   * @returns The processed contexts (can be modified, filtered, or enhanced)
+   */
+  public onProcessContexts(
+    sessionId: string,
+    contexts: AgentContext[],
+  ): Promise<AgentContext[]> | AgentContext[] {
+    // Default implementation: pass-through
+    return contexts;
+  }
+
+  /**
+   * Hook called to convert contexts into event stream events
+   * Uses existing environment_input events for context injection
+   *
+   * @param sessionId Session identifier for this conversation
+   * @param contexts Array of processed contexts to convert to events
+   * @returns Array of environment_input events to be sent to the event stream
+   */
+  public onContextsToEvents(
+    sessionId: string,
+    contexts: AgentContext[],
+  ): Promise<AgentEventStream.EnvironmentInputEvent[]> | AgentEventStream.EnvironmentInputEvent[] {
+    // Default implementation: convert to environment_input events
+    return contexts.map((context) => ({
+      type: 'environment_input' as const,
+      timestamp: Date.now(),
+      content: context.content,
+      description:
+        context.description || `Context: ${context.type} - ${context.metadata?.name || context.id}`,
+    }));
   }
 }

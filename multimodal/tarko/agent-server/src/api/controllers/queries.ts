@@ -6,6 +6,7 @@
 import { Request, Response } from 'express';
 import { createErrorResponse } from '../../utils/error-handler';
 import { ContextReferenceProcessor, ImageProcessor } from '@tarko/context-engineer/node';
+import { AgentContext } from '@tarko/agent-interface';
 
 const imageProcessor = new ImageProcessor({
   quality: 5,
@@ -33,6 +34,74 @@ const contextReferenceProcessor = new ContextReferenceProcessor({
 });
 
 /**
+ * Parse contextual references from user input and separate pure user input from context references
+ * @param input - The user input potentially containing @file:path, @dir:path, @workspace references
+ * @returns Object containing pure user input and array of contextual references
+ */
+function parseContextualReferences(input: string): {
+  pureUserInput: string;
+  contextualReferences: Array<{
+    id: string;
+    type: 'file' | 'directory' | 'workspace';
+    path: string;
+    name: string;
+    metadata: any;
+  }>;
+} {
+  const contextualRefs: any[] = [];
+  let pureInput = input;
+
+  // Parse @file:path references
+  const fileMatches = input.matchAll(/@file:([^\s]+)/g);
+  for (const match of fileMatches) {
+    const [fullMatch, path] = match;
+    contextualRefs.push({
+      id: `file-${path}`,
+      type: 'file',
+      path,
+      name: path.split('/').pop() || path,
+      metadata: { relativePath: path },
+    });
+    pureInput = pureInput.replace(fullMatch, '').trim();
+  }
+
+  // Parse @dir:path references
+  const dirMatches = input.matchAll(/@dir:([^\s]+)/g);
+  for (const match of dirMatches) {
+    const [fullMatch, path] = match;
+    contextualRefs.push({
+      id: `dir-${path}`,
+      type: 'directory',
+      path,
+      name: path.split('/').pop() || path,
+      metadata: { relativePath: path },
+    });
+    pureInput = pureInput.replace(fullMatch, '').trim();
+  }
+
+  // Parse @workspace references
+  const workspaceMatches = input.matchAll(/@workspace/g);
+  for (const match of workspaceMatches) {
+    contextualRefs.push({
+      id: 'workspace',
+      type: 'workspace',
+      path: '/',
+      name: 'workspace',
+      metadata: { relativePath: '.' },
+    });
+    pureInput = pureInput.replace(match[0], '').trim();
+  }
+
+  // Clean up extra whitespace
+  pureInput = pureInput.replace(/\s+/g, ' ').trim();
+
+  return {
+    pureUserInput: pureInput,
+    contextualReferences: contextualRefs,
+  };
+}
+
+/**
  * Execute a non-streaming query
  */
 export async function executeQuery(req: Request, res: Response) {
@@ -47,17 +116,42 @@ export async function executeQuery(req: Request, res: Response) {
     const server = req.app.locals.server;
     const workspacePath = server.getCurrentWorkspace();
 
-    // Process contextual references first
-    const processedQuery = await contextReferenceProcessor.processContextualReferences(
-      query,
-      workspacePath,
-    );
+    // Parse contextual references from user input
+    const { pureUserInput, contextualReferences } = parseContextualReferences(query);
 
-    // Compress images in processed query
-    const compressedQuery = await imageProcessor.compressImagesInQuery(processedQuery);
+    // Process contexts (without modifying original query for display)
+    const processedContexts: AgentContext[] = [];
+    if (contextualReferences.length > 0) {
+      for (const contextRef of contextualReferences) {
+        try {
+          // Create a temporary query with just this context reference to process it
+          const tempQuery = `@${contextRef.type}:${contextRef.path}`;
+          const processedContent = await contextReferenceProcessor.processContextualReferences(
+            tempQuery,
+            workspacePath,
+          );
+          processedContexts.push({
+            id: contextRef.id,
+            type: contextRef.type,
+            content: processedContent,
+            description: `${contextRef.type}: ${contextRef.name || contextRef.path}`,
+            metadata: contextRef.metadata,
+          });
+        } catch (error) {
+          console.warn(`Failed to process context reference ${contextRef.id}:`, error);
+          // Continue with other contexts even if one fails
+        }
+      }
+    }
 
-    // Use enhanced error handling in runQuery
-    const response = await req.session!.runQuery(compressedQuery);
+    // Compress images (only for user input)
+    const compressedQuery = await imageProcessor.compressImagesInQuery(pureUserInput);
+
+    // Run Agent with new interface - pass contexts separately
+    const response = await req.session!.runQuery({
+      input: compressedQuery,
+      contexts: processedContexts,
+    });
 
     if (response.success) {
       res.status(200).json({ result: response.result });
@@ -92,17 +186,42 @@ export async function executeStreamingQuery(req: Request, res: Response) {
     const server = req.app.locals.server;
     const workspacePath = server.getCurrentWorkspace();
 
-    // Process contextual references first
-    const processedQuery = await contextReferenceProcessor.processContextualReferences(
-      query,
-      workspacePath,
-    );
+    // Parse contextual references from user input
+    const { pureUserInput, contextualReferences } = parseContextualReferences(query);
 
-    // Compress images in processed query
-    const compressedQuery = await imageProcessor.compressImagesInQuery(processedQuery);
+    // Process contexts (without modifying original query for display)
+    const processedContexts: AgentContext[] = [];
+    if (contextualReferences.length > 0) {
+      for (const contextRef of contextualReferences) {
+        try {
+          // Create a temporary query with just this context reference to process it
+          const tempQuery = `@${contextRef.type}:${contextRef.path}`;
+          const processedContent = await contextReferenceProcessor.processContextualReferences(
+            tempQuery,
+            workspacePath,
+          );
+          processedContexts.push({
+            id: contextRef.id,
+            type: contextRef.type,
+            content: processedContent,
+            description: `${contextRef.type}: ${contextRef.name || contextRef.path}`,
+            metadata: contextRef.metadata,
+          });
+        } catch (error) {
+          console.warn(`Failed to process context reference ${contextRef.id}:`, error);
+          // Continue with other contexts even if one fails
+        }
+      }
+    }
 
-    // Get streaming response - any errors will be returned as events
-    const eventStream = await req.session!.runQueryStreaming(compressedQuery);
+    // Compress images (only for user input)
+    const compressedQuery = await imageProcessor.compressImagesInQuery(pureUserInput);
+
+    // Get streaming response with separated contexts - any errors will be returned as events
+    const eventStream = await req.session!.runQueryStreaming({
+      input: compressedQuery,
+      contexts: processedContexts,
+    });
 
     // Stream events one by one
     for await (const event of eventStream) {
