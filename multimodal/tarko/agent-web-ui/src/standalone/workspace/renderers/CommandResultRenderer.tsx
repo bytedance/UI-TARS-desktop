@@ -181,9 +181,18 @@ export const CommandResultRenderer: React.FC<CommandResultRendererProps> = ({ pa
  */
 function extractCommandData(panelContent: StandardPanelContent) {
   const command = panelContent.arguments?.command;
-  // @ts-expect-error MAKE `panelContent.source` is Array
-  const stdout = panelContent.source?.find((s) => s.name === 'STDOUT')?.text;
-  // @ts-expect-error MAKE `panelContent.source` is Array
-  const stderr = panelContent.source?.find((s) => s.name === 'STDERR')?.text;
-  return command || stdout || stderr ? { command, stdout, stderr } : null;
+  if (Array.isArray(panelContent.source)) {
+    // @ts-expect-error MAKE `panelContent.source` is Array
+    const stdout = panelContent.source?.find((s) => s.name === 'STDOUT')?.text;
+    // @ts-expect-error MAKE `panelContent.source` is Array
+    const stderr = panelContent.source?.find((s) => s.name === 'STDERR')?.text;
+    return { command, stdout, stderr };
+  }
+
+  if (typeof panelContent.source === 'string') {
+    if (panelContent.source.startsWith('Error: ')) {
+      return { command, stderr: panelContent.source };
+    }
+    return { command, stdout: panelContent.source };
+  }
 }
