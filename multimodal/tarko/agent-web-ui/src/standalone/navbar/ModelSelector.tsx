@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FiZap, FiCpu } from 'react-icons/fi';
+import { FiSettings } from 'react-icons/fi';
 import {
   Select,
   MenuItem,
@@ -235,7 +235,11 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
               },
             }}
           >
-            <FiCpu size={12} color={isDarkMode ? '#9ca3af' : '#6b7280'} style={{ flexShrink: 0 }} />
+            <FiSettings
+              size={12}
+              color={isDarkMode ? '#9ca3af' : '#6b7280'}
+              style={{ flexShrink: 0 }}
+            />
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
               {modelInfo.model && (
                 <Typography
@@ -371,7 +375,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
               : '1px solid rgba(99, 102, 241, 0.2)',
           }}
         >
-          <FiZap size={9} color={isDarkMode ? '#a5b4fc' : '#6366f1'} />
+          <FiSettings size={9} color={isDarkMode ? '#a5b4fc' : '#6366f1'} />
         </Box>
         <Typography
           variant="body2"

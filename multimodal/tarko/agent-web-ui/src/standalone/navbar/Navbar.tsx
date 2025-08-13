@@ -2,9 +2,9 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ShareButton } from '@/standalone/share';
 import { AboutModal } from './AboutModal';
 import { motion } from 'framer-motion';
-import { FiMoon, FiSun, FiInfo, FiCpu, FiFolder } from 'react-icons/fi';
+import { FiMoon, FiSun, FiInfo, FiCpu, FiFolder, FiZap, FiSettings } from 'react-icons/fi';
 import { GoSidebarCollapse, GoSidebarExpand } from 'react-icons/go';
-import { FaBrain } from 'react-icons/fa';
+
 import { Box, Typography, createTheme, ThemeProvider } from '@mui/material';
 import { useLayout } from '@/common/hooks/useLayout';
 import { useSession } from '@/common/hooks/useSession';
@@ -302,11 +302,7 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
               },
             }}
           >
-            <FaBrain
-              size={12}
-              color={isDarkMode ? '#9ca3af' : '#6b7280'}
-              style={{ flexShrink: 0 }}
-            />
+            <FiZap size={12} color={isDarkMode ? '#9ca3af' : '#6b7280'} style={{ flexShrink: 0 }} />
             <Typography
               variant="body2"
               sx={{
