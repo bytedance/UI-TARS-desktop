@@ -11,11 +11,7 @@ import { LocalBrowser } from '@agent-infra/browser';
 import { BrowserOperator } from '@gui-agent/operator-browser';
 import { ComputerOperator } from './ComputerOperator';
 import { AdbOperator, getAndroidDeviceId } from '@ui-tars/operator-adb';
-
-const addBase64ImagePrefix = (base64: string) => {
-  if (!base64) return '';
-  return base64.startsWith('data:') ? base64 : `data:image/jpeg;base64,${base64}`;
-};
+import { Base64ImageParser } from '@agent-infra/media-utils';
 
 export interface GUIAgentConfig extends AgentOptions {
   operatorType: 'browser' | 'computer' | 'android';
@@ -131,64 +127,37 @@ export class SeedGUIAgent extends Agent {
 
   async onEachAgentLoopStart(sessionId: string) {
     const output = await this.operator!.screenshot();
+    const base64Tool = new Base64ImageParser(output.base64);
+    const base64Uri = base64Tool.getDataUri();
+    if (!base64Uri) {
+      this.logger.error('Failed to get base64 image uri');
+      return;
+    }
+
     const event = this.eventStream.createEvent('environment_input', {
       description: 'Browser Screenshot',
       content: [
         {
           type: 'image_url',
           image_url: {
-            url: addBase64ImagePrefix(output.base64),
+            url: base64Uri,
           },
         },
       ],
     });
 
     // Extract image dimensions from screenshot
-    this.extractImageDimensionsFromBase64(output.base64);
+    const dimensions = base64Tool.getDimensions();
+    if (dimensions) {
+      setScreenInfo({
+        screenWidth: dimensions.width,
+        screenHeight: dimensions.height,
+      });
+    }
     this.eventStream.sendEvent(event);
   }
 
   async onAgentLoopEnd(id: string): Promise<void> {
     // await this.browserOperator.cleanup();
-  }
-
-  /**
-   * Extract width and height information from base64 encoded image
-   */
-  private extractImageDimensionsFromBase64(base64String: string): void {
-    // Remove base64 prefix (if any)
-    const base64Data = base64String.replace(/^data:image\/\w+;base64,/, '');
-
-    // Decode base64 to binary data
-    const buffer = Buffer.from(base64Data, 'base64');
-
-    // Check image type and extract dimensions
-    if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47) {
-      // PNG format: width in bytes 16-19, height in bytes 20-23
-      setScreenInfo({
-        screenWidth: buffer.readUInt32BE(16),
-        screenHeight: buffer.readUInt32BE(20),
-      });
-    } else if (buffer[0] === 0xff && buffer[1] === 0xd8) {
-      // JPEG format: need to parse SOF0 marker (0xFFC0)
-      let offset = 2;
-      while (offset < buffer.length) {
-        if (buffer[offset] !== 0xff) break;
-
-        const marker = buffer[offset + 1];
-        const segmentLength = buffer.readUInt16BE(offset + 2);
-
-        // SOF0, SOF2 markers contain dimension information
-        if ((marker >= 0xc0 && marker <= 0xc3) || (marker >= 0xc5 && marker <= 0xc7)) {
-          setScreenInfo({
-            screenHeight: buffer.readUInt16BE(offset + 5),
-            screenWidth: buffer.readUInt16BE(offset + 7),
-          });
-          break;
-        }
-
-        offset += 2 + segmentLength;
-      }
-    }
   }
 }

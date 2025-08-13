@@ -38,6 +38,7 @@
     "@ui-tars/shared": "1.2.3",
     "big.js": "^6.2.2",
     "jimp": "1.6.0",
+    "@agent-infra/media-utils": "0.1.5",
     "@computer-use/nut-js": "^4.2.0",
     "@gui-agent/operator-browser": "workspace:*",
     "@agent-infra/browser": "0.1.1",

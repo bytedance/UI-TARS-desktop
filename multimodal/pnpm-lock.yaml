@@ -215,6 +215,9 @@ importers:
       '@agent-infra/logger':
         specifier: 0.0.2-beta.2
         version: 0.0.2-beta.2
+      '@agent-infra/media-utils':
+        specifier: 0.1.5
+        version: 0.1.5
       '@computer-use/nut-js':
         specifier: ^4.2.0
         version: 4.2.0
@@ -1453,6 +1456,9 @@ packages:
 
   '@agent-infra/mcp-shared@1.1.6-beta.3':
     resolution: {integrity: sha512-qCmwZ+jMnj9acVGeQDheq41YrbGJQfd8gsHwxxxBaNrREMOQgV5/XzDIEKFdvJUkvAysvxqEUSGyzdJ6Bz/4sQ==}
+
+  '@agent-infra/media-utils@0.1.5':
+    resolution: {integrity: sha512-3irZBomzhNOw/HMZg4rmJ7w87BPbXTgYA0LZV0nlgpoE5w3GydmWx/S0EF1MCfPHE1r1QrldFqpqZ38smSGF4Q==}
 
   '@agent-infra/search@0.0.5':
     resolution: {integrity: sha512-c+oKOg4kpx7DiXbI4wsnsrbkOvqqU2v5QrHrCJ1I+aGeyg4G46ZCtFhtpLg9kqmazt+EJ8Wy86yqot2fXVk1Ig==}
@@ -6073,6 +6079,10 @@ packages:
 
   delaunator@5.0.1:
     resolution: {integrity: sha512-8nvh+XBe96aCESrGOqMp/84b13H9cdKbG5P2ejQCh4d4sK9RL4371qou9drQjMhvnPmhWl5hnmqbEE0fXr9Xnw==}
+
+  delay@6.0.0:
+    resolution: {integrity: sha512-2NJozoOHQ4NuZuVIr5CWd0iiLVIRSDepakaovIN+9eIDHEhdCAEvSy2cuf1DCrPPQLvHmbqTHODlhHg8UCy4zw==}
+    engines: {node: '>=16'}
 
   delayed-stream@1.0.0:
     resolution: {integrity: sha512-ZySD7Nf91aLB0RxL4KGrKHBXl7Eds1DAmEdcoVawXnLD7SDhpNgtuII2aAkg7a7QS41jxPSZ17p4VdGnMHk3MQ==}
@@ -11045,6 +11055,11 @@ snapshots:
       zod: 3.25.36
     transitivePeerDependencies:
       - supports-color
+
+  '@agent-infra/media-utils@0.1.5':
+    dependencies:
+      '@agent-infra/logger': 0.0.2-beta.2
+      delay: 6.0.0
 
   '@agent-infra/search@0.0.5':
     dependencies:
@@ -19445,6 +19460,8 @@ snapshots:
   delaunator@5.0.1:
     dependencies:
       robust-predicates: 3.0.2
+
+  delay@6.0.0: {}
 
   delayed-stream@1.0.0: {}
 
