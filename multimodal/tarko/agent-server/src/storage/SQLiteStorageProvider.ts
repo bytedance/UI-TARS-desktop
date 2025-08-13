@@ -297,41 +297,59 @@ export class SQLiteStorageProvider implements StorageProvider {
       // ULTRA-SAFE: Use column-by-column migration instead of table replacement
       // This completely avoids any table rename/drop operations that could trigger FK issues
 
-      // Step 1: Add new metadata column to existing sessions table
-      this.db.exec('ALTER TABLE sessions ADD COLUMN metadata TEXT');
+      // Step 1: Add missing columns to existing sessions table
+      const hasWorkspaceColumn = columnNames.includes('workspace');
+      const hasMetadataColumn = columnNames.includes('metadata');
 
-      // Step 2: Migrate data from old columns to new metadata column
-      const updateStmt = this.db.prepare(`
-        UPDATE sessions 
-        SET metadata = ?
-        WHERE id = ?
-      `);
-
-      for (const row of legacyRows) {
-        const metadata: any = { version: 1 };
-        if (row.name) metadata.name = row.name;
-        if (row.tags) {
-          try {
-            metadata.tags = JSON.parse(row.tags);
-          } catch {
-            metadata.tags = [row.tags];
-          }
-        }
-        if (row.modelConfig) {
-          try {
-            metadata.modelConfig = JSON.parse(row.modelConfig);
-          } catch {}
-        }
-
-        const metadataJson = Object.keys(metadata).length > 1 ? JSON.stringify(metadata) : null;
-        updateStmt.run(metadataJson, row.id);
+      if (!hasWorkspaceColumn) {
+        console.log('Adding workspace column...');
+        this.db.exec('ALTER TABLE sessions ADD COLUMN workspace TEXT DEFAULT ""');
       }
 
-      // Step 3: Drop old columns (safe operations that don't affect FK)
-      // Note: SQLite doesn't support DROP COLUMN directly, but that's fine
-      // We'll just leave the old columns and ignore them in queries
+      if (!hasMetadataColumn) {
+        console.log('Adding metadata column...');
+        this.db.exec('ALTER TABLE sessions ADD COLUMN metadata TEXT');
+      }
 
-      // Clean up temporary table
+      // Step 2: Update workspace column from workingDirectory if needed
+      if (!hasWorkspaceColumn && columnNames.includes('workingDirectory')) {
+        console.log('Migrating workingDirectory to workspace...');
+        this.db.exec(
+          'UPDATE sessions SET workspace = COALESCE(workingDirectory, "") WHERE workspace IS NULL OR workspace = ""',
+        );
+      }
+
+      // Step 3: Migrate data from old columns to new metadata column
+      if (!hasMetadataColumn) {
+        console.log('Migrating legacy columns to metadata...');
+        const updateStmt = this.db.prepare(`
+          UPDATE sessions 
+          SET metadata = ?
+          WHERE id = ?
+        `);
+
+        for (const row of legacyRows) {
+          const metadata: any = { version: 1 };
+          if (row.name) metadata.name = row.name;
+          if (row.tags) {
+            try {
+              metadata.tags = JSON.parse(row.tags);
+            } catch {
+              metadata.tags = [row.tags];
+            }
+          }
+          if (row.modelConfig) {
+            try {
+              metadata.modelConfig = JSON.parse(row.modelConfig);
+            } catch {}
+          }
+
+          const metadataJson = Object.keys(metadata).length > 1 ? JSON.stringify(metadata) : null;
+          updateStmt.run(metadataJson, row.id);
+        }
+      }
+
+      // Step 4: Clean up temporary table
       this.db.exec('DROP TABLE sessions_new');
 
       console.log('Column-based migration completed successfully - events table preserved');
@@ -452,8 +470,22 @@ export class SQLiteStorageProvider implements StorageProvider {
     await this.ensureInitialized();
 
     try {
+      // Dynamic query to handle missing workspace column
+      const tableInfoStmt = this.db.prepare('PRAGMA table_info(sessions)');
+      const columns = tableInfoStmt.all() as Array<{ name: string }>;
+      const columnNames = columns.map((col) => col.name);
+
+      const hasWorkspace = columnNames.includes('workspace');
+      const hasWorkingDirectory = columnNames.includes('workingDirectory');
+
+      const workspaceSelect = hasWorkspace
+        ? 'workspace'
+        : hasWorkingDirectory
+          ? 'workingDirectory as workspace'
+          : '"" as workspace';
+
       const stmt = this.db.prepare(`
-        SELECT id, createdAt, updatedAt, workspace, metadata
+        SELECT id, createdAt, updatedAt, ${workspaceSelect}, metadata
         FROM sessions
         WHERE id = ?
       `);
@@ -468,7 +500,7 @@ export class SQLiteStorageProvider implements StorageProvider {
         id: row.id,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
-        workspace: row.workspace,
+        workspace: row.workspace || '',
         metadata: row.metadata ? JSON.parse(row.metadata) : undefined,
       };
     } catch (error) {
@@ -483,8 +515,22 @@ export class SQLiteStorageProvider implements StorageProvider {
     await this.ensureInitialized();
 
     try {
+      // Dynamic query to handle missing workspace column
+      const tableInfoStmt = this.db.prepare('PRAGMA table_info(sessions)');
+      const columns = tableInfoStmt.all() as Array<{ name: string }>;
+      const columnNames = columns.map((col) => col.name);
+
+      const hasWorkspace = columnNames.includes('workspace');
+      const hasWorkingDirectory = columnNames.includes('workingDirectory');
+
+      const workspaceSelect = hasWorkspace
+        ? 'workspace'
+        : hasWorkingDirectory
+          ? 'workingDirectory as workspace'
+          : '"" as workspace';
+
       const stmt = this.db.prepare(`
-        SELECT id, createdAt, updatedAt, workspace, metadata
+        SELECT id, createdAt, updatedAt, ${workspaceSelect}, metadata
         FROM sessions
         ORDER BY updatedAt DESC
       `);
@@ -495,7 +541,7 @@ export class SQLiteStorageProvider implements StorageProvider {
         id: row.id,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
-        workspace: row.workspace,
+        workspace: row.workspace || '',
         metadata: row.metadata ? JSON.parse(row.metadata) : undefined,
       }));
     } catch (error) {
