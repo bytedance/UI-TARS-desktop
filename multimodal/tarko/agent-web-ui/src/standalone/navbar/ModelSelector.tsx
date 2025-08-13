@@ -87,14 +87,15 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
             styleOverrides: {
               root: {
                 borderRadius: '8px',
+                height: '32px',
                 minHeight: '32px',
                 fontSize: '12px',
                 fontWeight: 500,
-                background: isDarkMode ? 'rgba(55, 65, 81, 0.3)' : 'rgba(255, 255, 255, 0.6)',
+                background: isDarkMode ? 'rgba(55, 65, 81, 0.3)' : 'rgba(248, 250, 252, 0.8)',
                 backdropFilter: 'blur(8px)',
                 border: isDarkMode
                   ? '1px solid rgba(75, 85, 99, 0.3)'
-                  : '1px solid rgba(229, 231, 235, 0.5)',
+                  : '1px solid rgba(203, 213, 225, 0.6)',
                 '& .MuiOutlinedInput-notchedOutline': {
                   border: 'none',
                 },
@@ -105,7 +106,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
                   border: 'none',
                 },
                 '&:hover': {
-                  background: isDarkMode ? 'rgba(55, 65, 81, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+                  background: isDarkMode ? 'rgba(55, 65, 81, 0.8)' : 'rgba(241, 245, 249, 0.9)',
                   boxShadow: isDarkMode
                     ? '0 2px 4px -1px rgba(0, 0, 0, 0.2)'
                     : '0 2px 4px -1px rgba(0, 0, 0, 0.05)',
@@ -116,10 +117,12 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
                 },
               },
               select: {
-                padding: '6px 10px !important',
+                padding: '4px 10px !important',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px',
+                height: '24px',
+                minHeight: '24px',
               },
             },
           },
@@ -218,16 +221,16 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
               gap: 0.75,
               px: 1.25,
               py: 0.5,
-              background: isDarkMode ? 'rgba(55, 65, 81, 0.3)' : 'rgba(255, 255, 255, 0.6)',
+              background: isDarkMode ? 'rgba(55, 65, 81, 0.3)' : 'rgba(248, 250, 252, 0.8)',
               backdropFilter: 'blur(8px)',
               border: isDarkMode
                 ? '1px solid rgba(75, 85, 99, 0.3)'
-                : '1px solid rgba(229, 231, 235, 0.5)',
+                : '1px solid rgba(203, 213, 225, 0.6)',
               borderRadius: '8px',
               minWidth: 0,
               maxWidth: '220px',
               '&:hover': {
-                background: isDarkMode ? 'rgba(55, 65, 81, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+                background: isDarkMode ? 'rgba(55, 65, 81, 0.8)' : 'rgba(241, 245, 249, 0.9)',
                 boxShadow: isDarkMode
                   ? '0 2px 4px -1px rgba(0, 0, 0, 0.2)'
                   : '0 2px 4px -1px rgba(0, 0, 0, 0.05)',
