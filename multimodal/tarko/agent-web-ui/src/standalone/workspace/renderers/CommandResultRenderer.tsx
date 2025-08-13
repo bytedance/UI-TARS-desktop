@@ -1,5 +1,5 @@
 import React from 'react';
-import { StandardPanelContent } from '../types/panelContent';
+import { PanelContentArguments, StandardPanelContent } from '../types/panelContent';
 import { FileDisplayMode } from '../types';
 
 interface CommandResultRendererProps {
@@ -96,6 +96,7 @@ const highlightCommand = (command: string) => {
 export const CommandResultRenderer: React.FC<CommandResultRendererProps> = ({ panelContent }) => {
   // Extract command data from panelContent
   const commandData = extractCommandData(panelContent);
+  debugger;
 
   if (!commandData) {
     return <div className="text-gray-500 italic">Command result is empty</div>;
@@ -155,45 +156,35 @@ export const CommandResultRenderer: React.FC<CommandResultRendererProps> = ({ pa
   );
 };
 
-function extractCommandData(panelContent: StandardPanelContent): {
-  command?: string;
-  stdout?: string;
-  stderr?: string;
-  exitCode?: number;
-} | null {
-  try {
-    // Try arguments first
-    if (panelContent.arguments) {
-      const { command, stdout, stderr, exitCode } = panelContent.arguments;
-
-      if (command || stdout || stderr) {
-        return {
-          command: command ? String(command) : undefined,
-          stdout: stdout ? String(stdout) : undefined,
-          stderr: stderr ? String(stderr) : undefined,
-          exitCode: typeof exitCode === 'number' ? exitCode : undefined,
-        };
-      }
-    }
-
-    // Try to extract from source
-    if (typeof panelContent.source === 'object' && panelContent.source !== null) {
-      const sourceObj = panelContent.source as any;
-      const { command, stdout, stderr, exitCode } = sourceObj;
-
-      if (command || stdout || stderr) {
-        return {
-          command: command ? String(command) : undefined,
-          stdout: stdout ? String(stdout) : undefined,
-          stderr: stderr ? String(stderr) : undefined,
-          exitCode: typeof exitCode === 'number' ? exitCode : undefined,
-        };
-      }
-    }
-
-    return null;
-  } catch (error) {
-    console.warn('Failed to extract command data:', error);
-    return null;
-  }
+/**
+ * panelContent example:
+ *
+ * {
+ *   "panelContent": {
+ *     "type": "command_result",
+ *     "source": [
+ *       {
+ *         "type": "text",
+ *         "text": "On branch feat/tarko-workspace-path-display\nChanges to be committed:\n  (use \"git restore --staged <file>...\" to unstage)\n\tmodified:   multimodal/tarko/agent-web-ui/src/common/state/actions/eventProcessor.ts\n\tnew file:   multimodal/tarko/agent-web-ui/src/common/state/atoms/rawEvents.ts\n\n",
+ *         "name": "STDOUT"
+ *       }
+ *     ],
+ *     "title": "run_command",
+ *     "timestamp": 1755111391440,
+ *     "toolCallId": "call_1755111391072_htk5vylkv",
+ *     "arguments": {
+ *       "command": "git status"
+ *     }
+ *   }
+ * }
+ * @param panelContent
+ * @returns
+ */
+function extractCommandData(panelContent: StandardPanelContent) {
+  const command = panelContent.arguments?.command;
+  // @ts-expect-error MAKE `panelContent.source` is Array
+  const stdout = panelContent.source?.find((s) => s.name === 'STDOUT')?.text;
+  // @ts-expect-error MAKE `panelContent.source` is Array
+  const stderr = panelContent.source?.find((s) => s.name === 'STDERR')?.text;
+  return command || stdout || stderr ? { command, stdout, stderr } : null;
 }
