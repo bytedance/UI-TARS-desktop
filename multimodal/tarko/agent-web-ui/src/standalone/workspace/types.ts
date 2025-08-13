@@ -19,7 +19,17 @@ export interface ToolResultContentPart {
   metadata?: Record<string, any>;
 
   /** Actual content - could be text, base64 image, or other data */
+  // secretlint-disable-next-line @secretlint/secretlint-rule-pattern
   [key: string]: any;
+}
+
+/**
+ * Diff result content part for file edits
+ */
+export interface DiffResultContentPart extends ToolResultContentPart {
+  type: 'diff_result';
+  content: string;
+  path?: string;
 }
 
 /**

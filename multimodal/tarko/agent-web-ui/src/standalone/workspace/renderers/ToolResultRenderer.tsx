@@ -11,6 +11,7 @@ import { PlanViewerRenderer } from './PlanViewerRenderer';
 import { ResearchReportRenderer } from './ResearchReportRenderer';
 import { GenericResultRenderer } from './generic/GenericResultRenderer';
 import { DeliverableRenderer } from './DeliverableRenderer';
+import { DiffRenderer } from './DiffRenderer';
 import { FileDisplayMode, ToolResultContentPart } from '../types';
 
 /**
@@ -38,6 +39,7 @@ const CONTENT_RENDERERS: Record<
   json: GenericResultRenderer,
   deliverable: DeliverableRenderer,
   file_result: GenericResultRenderer,
+  diff_result: DiffRenderer,
 };
 
 interface ToolResultRendererProps {
@@ -83,9 +85,10 @@ export const ToolResultRenderer: React.FC<ToolResultRendererProps> = ({
     <div className={`space-y-4 ${className}`}>
       {content.map((part, index) => {
         const partId = `part${index}`;
-        
+
         if (part.type === 'json') {
           return (
+            // secretlint-disable-next-line @secretlint/secretlint-rule-pattern
             <div key={partId} className="tool-result-part">
               <GenericResultRenderer part={part} onAction={onAction} displayMode={displayMode} />
             </div>
@@ -95,6 +98,7 @@ export const ToolResultRenderer: React.FC<ToolResultRendererProps> = ({
         const Renderer = CONTENT_RENDERERS[part.type] || GenericResultRenderer;
 
         return (
+          // secretlint-disable-next-line @secretlint/secretlint-rule-pattern
           <div key={partId} className="tool-result-part">
             <Renderer part={part} onAction={onAction} displayMode={displayMode} />
           </div>

@@ -48,7 +48,7 @@ const TOOL_TO_RENDERER_MAP: Record<string, string> = {
   // File tools
   write_file: 'file_result',
   read_file: 'file_result',
-  edit_file: 'file_result',
+  edit_file: 'diff_result',
 
   // Command tools
   run_command: 'command_result',
