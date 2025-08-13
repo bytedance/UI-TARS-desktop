@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FiZap } from 'react-icons/fi';
+import { FiZap, FiCpu } from 'react-icons/fi';
 import {
   Select,
   MenuItem,
@@ -45,7 +45,7 @@ interface NavbarModelSelectorProps {
  * - Adapted from chat ModelSelector for navbar use
  */
 export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({ className = '' }) => {
-  const { activeSessionId } = useSession();
+  const { activeSessionId, modelInfo } = useSession();
   const [availableModels, setAvailableModels] = useState<AvailableModelsResponse | null>(null);
   const [currentModel, setCurrentModel] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
@@ -181,13 +181,95 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({ classN
     loadModels();
   }, []);
 
-  // Don't render if no session or no multiple providers available
+  // Don't render if no session
   if (!activeSessionId || isInitialLoading) {
     return null;
   }
 
+  // If no multiple providers available, show static model info badge
   if (!availableModels?.hasMultipleProviders || availableModels.models.length === 0) {
-    return null;
+    // Only show static badge if we have model info
+    if (!modelInfo.model && !modelInfo.provider) {
+      return null;
+    }
+
+    return (
+      <ThemeProvider theme={muiTheme}>
+        <motion.div whileHover={{ scale: 1.02 }} className={className}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.75,
+              px: 1.25,
+              py: 0.5,
+              background: isDarkMode ? 'rgba(55, 65, 81, 0.3)' : 'rgba(255, 255, 255, 0.6)',
+              backdropFilter: 'blur(8px)',
+              border: isDarkMode
+                ? '1px solid rgba(75, 85, 99, 0.3)'
+                : '1px solid rgba(229, 231, 235, 0.5)',
+              borderRadius: '8px',
+              minWidth: 0,
+              maxWidth: '220px',
+              '&:hover': {
+                background: isDarkMode ? 'rgba(55, 65, 81, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+                boxShadow: isDarkMode
+                  ? '0 2px 4px -1px rgba(0, 0, 0, 0.2)'
+                  : '0 2px 4px -1px rgba(0, 0, 0, 0.05)',
+              },
+            }}
+          >
+            <FiCpu size={12} color={isDarkMode ? '#9ca3af' : '#6b7280'} style={{ flexShrink: 0 }} />
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
+              {modelInfo.model && (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 500,
+                    fontSize: '12px',
+                    color: isDarkMode ? '#f3f4f6' : '#374151',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                  title={modelInfo.model}
+                >
+                  {modelInfo.model}
+                </Typography>
+              )}
+              {modelInfo.provider && modelInfo.model && (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: isDarkMode ? '#9ca3af' : '#6b7280',
+                    fontSize: '12px',
+                    flexShrink: 0,
+                  }}
+                >
+                  •
+                </Typography>
+              )}
+              {modelInfo.provider && (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 500,
+                    fontSize: '12px',
+                    color: isDarkMode ? '#d1d5db' : '#6b7280',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                  title={modelInfo.provider}
+                >
+                  {modelInfo.provider}
+                </Typography>
+              )}
+            </Box>
+          </Box>
+        </motion.div>
+      </ThemeProvider>
+    );
   }
 
   const handleModelChange = async (selectedValue: string) => {
