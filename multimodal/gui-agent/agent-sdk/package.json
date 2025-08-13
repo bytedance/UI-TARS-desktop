@@ -21,7 +21,10 @@
   ],
   "scripts": {
     "dev": "rslib build --watch",
-    "dev:agent": "tarko --agent ./",
+    "dev:agent": "tarko --agent ./ --config ./tarko.bu.config.ts",
+    "dev:agent:browser": "tarko --agent ./ --config ./tarko.bu.config.ts",
+    "dev:agent:computer": "tarko --agent ./ --config ./tarko.cu.config.ts",
+    "dev:agent:android": "tarko --agent ./ --config ./tarko.mu.config.ts",
     "build": "rslib build",
     "prepublishOnly": "pnpm run build",
     "test": "vitest run",
