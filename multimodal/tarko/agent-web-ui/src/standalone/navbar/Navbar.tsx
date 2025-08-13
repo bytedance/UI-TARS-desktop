@@ -151,6 +151,7 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
   const [workspaceTextWidth, setWorkspaceTextWidth] = useState(0);
   const [agentTextWidth, setAgentTextWidth] = useState(0);
   const [modelTextWidth, setModelTextWidth] = useState(0);
+  const isDarkMode = useDarkMode();
 
   // Calculate text widths and available space
   useEffect(() => {
