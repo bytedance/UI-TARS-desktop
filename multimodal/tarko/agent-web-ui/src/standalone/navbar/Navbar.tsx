@@ -93,6 +93,7 @@ export const Navbar: React.FC = () => {
           workspaceInfo={workspaceInfo}
           agentInfo={agentInfo}
           modelInfo={modelInfo}
+          activeSessionId={activeSessionId}
         />
 
         {/* Right section - reordered buttons: About, Dark mode, Share */}
@@ -140,12 +141,14 @@ interface DynamicNavbarCenterProps {
   workspaceInfo: { name?: string; path?: string };
   agentInfo: { name?: string };
   modelInfo: { model?: string; provider?: string };
+  activeSessionId?: string;
 }
 
 const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
   workspaceInfo,
   agentInfo,
   modelInfo,
+  activeSessionId,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [availableWidth, setAvailableWidth] = useState(0);
