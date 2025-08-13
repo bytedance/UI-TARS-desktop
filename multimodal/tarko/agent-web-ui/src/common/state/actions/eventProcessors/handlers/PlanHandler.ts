@@ -1,6 +1,6 @@
 import { EventHandler, EventHandlerContext } from '../types';
 import { AgentEventStream } from '@/common/types';
-import { plansAtom, PlanKeyframe } from '@/common/state/atoms/plan';
+import { plansAtom, PlanKeyframe, DEFAULT_PLAN_STATE } from '@/common/state/atoms/plan';
 
 export class PlanStartHandler implements EventHandler<AgentEventStream.PlanStartEvent> {
   canHandle(event: AgentEventStream.Event): event is AgentEventStream.PlanStartEvent {
@@ -14,15 +14,9 @@ export class PlanStartHandler implements EventHandler<AgentEventStream.PlanStart
   ): void {
     const { set } = context;
 
-    set(plansAtom, (prev: Record<string, unknown>) => ({
+    set(plansAtom, (prev) => ({
       ...prev,
-      [sessionId]: {
-        steps: [],
-        isComplete: false,
-        summary: null,
-        hasGeneratedPlan: true,
-        keyframes: [],
-      },
+      [sessionId]: DEFAULT_PLAN_STATE,
     }));
   }
 }
@@ -40,7 +34,7 @@ export class PlanUpdateHandler implements EventHandler<AgentEventStream.PlanUpda
     const { set } = context;
 
     console.log('Plan update event:', event);
-    set(plansAtom, (prev: Record<string, unknown>) => {
+    set(plansAtom, (prev) => {
       const currentPlan = prev[sessionId] || {
         steps: [],
         isComplete: false,
@@ -91,7 +85,7 @@ export class PlanFinishHandler
     const { set } = context;
 
     console.log('Plan finish event:', event);
-    set(plansAtom, (prev: Record<string, unknown>) => {
+    set(plansAtom, (prev) => {
       const currentPlan = prev[sessionId] || {
         steps: [],
         isComplete: false,

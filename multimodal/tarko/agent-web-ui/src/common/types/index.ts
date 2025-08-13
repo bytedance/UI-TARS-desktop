@@ -104,6 +104,9 @@ export interface PanelContent {
   originalContent?: string | ChatCompletionContentPart[];
   _extra?: { currentScreenshot: string };
   isStreaming?: boolean;
+  // FIXME: Consider whether to remove it
+  isDeepResearch?: boolean;
+  messageId?: string;
 }
 
 /**

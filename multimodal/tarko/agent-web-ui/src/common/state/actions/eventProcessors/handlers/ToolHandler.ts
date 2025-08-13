@@ -263,6 +263,8 @@ export class StreamingToolCallHandler
             function: {
               ...updatedToolCalls[toolCallIndex].function,
               name: toolName || updatedToolCalls[toolCallIndex].function.name,
+              // @ts-expect-error
+              // FIXME: type
               arguments: parsedArgs,
             },
           };
@@ -272,6 +274,8 @@ export class StreamingToolCallHandler
             type: 'function',
             function: {
               name: toolName,
+              // @ts-expect-error
+              // FIXME: type
               arguments: parsedArgs,
             },
           });

@@ -1,9 +1,9 @@
 import { v4 as uuidv4 } from 'uuid';
-import { EventHandler, EventHandlerContext } from '../types';
 import { AgentEventStream, Message } from '@/common/types';
 import { messagesAtom } from '@/common/state/atoms/message';
 import { activePanelContentAtom, isProcessingAtom } from '@/common/state/atoms/ui';
 import { shouldUpdatePanelContent } from '../utils/panelContentUpdater';
+import { EventHandler, EventHandlerContext } from '../types';
 
 export class FinalAnswerHandler implements EventHandler<AgentEventStream.FinalAnswerEvent> {
   canHandle(event: AgentEventStream.Event): event is AgentEventStream.FinalAnswerEvent {

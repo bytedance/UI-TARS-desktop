@@ -15,26 +15,13 @@ import {
   StreamingToolCallHandler,
 } from './handlers/ToolHandler';
 
-import {
-  PlanStartHandler,
-  PlanUpdateHandler,
-  PlanFinishHandler,
-} from './handlers/PlanHandler';
+import { PlanStartHandler, PlanUpdateHandler, PlanFinishHandler } from './handlers/PlanHandler';
 
-import {
-  SystemMessageHandler,
-  EnvironmentInputHandler,
-} from './handlers/SystemHandler';
+import { SystemMessageHandler, EnvironmentInputHandler } from './handlers/SystemHandler';
 
-import {
-  FinalAnswerHandler,
-  FinalAnswerStreamingHandler,
-} from './handlers/FinalAnswerHandler';
+import { FinalAnswerHandler, FinalAnswerStreamingHandler } from './handlers/FinalAnswerHandler';
 
-import {
-  AgentRunStartHandler,
-  AgentRunEndHandler,
-} from './handlers/AgentRunHandler';
+import { AgentRunStartHandler, AgentRunEndHandler } from './handlers/AgentRunHandler';
 
 /**
  * Event handler registry manages all event handlers
@@ -90,7 +77,7 @@ export class EventHandlerRegistry {
    * Find the appropriate handler for an event
    */
   findHandler(event: AgentEventStream.Event): EventHandler | null {
-    return this.handlers.find(handler => handler.canHandle(event)) || null;
+    return this.handlers.find((handler) => handler.canHandle(event)) || null;
   }
 
   /**

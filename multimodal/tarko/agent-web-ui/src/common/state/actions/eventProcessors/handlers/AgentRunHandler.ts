@@ -1,6 +1,6 @@
-import { EventHandler, EventHandlerContext } from '../types';
-import { AgentEventStream } from '@/common/types';
 import { isProcessingAtom, modelInfoAtom } from '@/common/state/atoms/ui';
+import { AgentEventStream } from '@/common/types';
+import { EventHandler, EventHandlerContext } from '../types';
 
 export class AgentRunStartHandler
   implements EventHandler<AgentEventStream.Event & { provider?: string; model?: string }>
