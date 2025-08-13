@@ -15,6 +15,8 @@ import type {
   ShellViewResponse,
   JupyterExecuteParams,
   FileEditorParams,
+  FileListParams,
+  FileListResp,
 } from './types';
 
 export class AioClient {
@@ -145,6 +147,41 @@ export class AioClient {
     return this.base<string>('/v1/file/str_replace_editor', {
       method: 'POST',
       body: JSON.stringify(params),
+    });
+  }
+
+  /**
+   * View shell session
+   */
+  async fileDownload(params: { path: string }): Promise<ApiResponse<ShellViewResponse>> {
+    return this.base<ShellViewResponse>('/v1/file/download', {
+      method: 'POST',
+      body: JSON.stringify(params),
+    });
+  }
+
+  async fileList({
+    path,
+    sort_by = 'name',
+    file_types = ['string'],
+    recursive = false,
+    show_hidden = false,
+    sort_desc = false,
+    include_permissions = false,
+    include_size = true,
+  }: FileListParams): Promise<ApiResponse<FileListResp>> {
+    return this.base<FileListResp>('/v1/file/list', {
+      method: 'POST',
+      body: JSON.stringify({
+        path,
+        sort_by,
+        sort_desc,
+        file_types,
+        recursive,
+        show_hidden,
+        include_permissions,
+        include_size,
+      }),
     });
   }
 

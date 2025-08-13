@@ -39,7 +39,7 @@ export default defineConfig({
       'Search for the latest GUI Agent papers',
       'Find information about UI TARS',
       'Tell me the top 5 most popular projects on ProductHunt today',
-      'Please book me the earliest flight from Hangzhou to Shenzhen on 10.1',
+      'Write a python to say hello world and excute it',
       '写一个python代码下载https://arxiv.org/abs/2505.12370的论文，并且把pdf转成markdown',
     ],
   },

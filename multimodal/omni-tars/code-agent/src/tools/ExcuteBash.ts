@@ -19,7 +19,7 @@ export class ExcuteBashProvider {
         command: z.string().describe('Execute a bash command in the terminal.'),
       }),
       function: async ({ command }) => {
-        return this.client.shellExecWithPolling({ command });
+        return (await this.client.shellExecWithPolling({ command })).data;
       },
     });
   }

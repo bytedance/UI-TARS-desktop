@@ -59,6 +59,34 @@ export interface FileEditorParams {
   view_range?: number[];
 }
 
+export interface FileListParams {
+  path: string;
+  recursive: boolean;
+  show_hidden: boolean;
+  file_types: string[];
+  max_depth: number;
+  include_size: boolean;
+  include_permissions: boolean;
+  sort_by: string;
+  sort_desc: boolean;
+}
+
+export interface FileListResp {
+  path: string;
+  files: Array<{
+    name: string;
+    path: string;
+    is_directory: boolean;
+    size?: unknown;
+    modified_time: string;
+    permissions?: unknown;
+    extension?: unknown;
+  }>;
+  total_count: number;
+  directory_count: number;
+  file_count: number;
+}
+
 export interface ClientConfig {
   baseUrl: string;
   timeout?: number;

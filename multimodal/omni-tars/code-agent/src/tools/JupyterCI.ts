@@ -21,11 +21,13 @@ export class JupyterCIProvider {
         timeout: z.number().describe('timeout in seconds').optional(),
       }),
       function: async ({ code, timeout }) => {
-        return this.client.jupyterExecute({
-          code,
-          timeout,
-          kernel_name: 'python3',
-        });
+        return (
+          await this.client.jupyterExecute({
+            code,
+            timeout,
+            kernel_name: 'python3',
+          })
+        ).data;
       },
     });
   }

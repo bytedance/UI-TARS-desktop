@@ -44,7 +44,7 @@ export class StrReplaceEditorProvider {
           .optional(),
       }),
       function: async (args) => {
-        return this.client.fileEditor(args);
+        return (await this.client.fileEditor(args)).data;
       },
     });
   }
