@@ -161,7 +161,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
                 ref={imageRef}
                 src={relatedImage}
                 alt="Browser Screenshot"
-                className="w-full h-auto object-contain"
+                className="w-full h-auto object-contain max-h-[70vh]"
                 onLoad={handleImageLoad}
               />
 

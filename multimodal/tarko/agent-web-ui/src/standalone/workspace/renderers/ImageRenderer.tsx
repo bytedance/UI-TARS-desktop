@@ -67,7 +67,11 @@ export const ImageRenderer: React.FC<ImageRendererProps> = ({ part, onAction }) 
     return (
       <div className="relative group">
         <BrowserShell title={name || 'Browser Screenshot'}>
-          <img src={imgSrc} alt={name || 'Image'} className="w-full h-auto object-contain" />
+          <img
+            src={imgSrc}
+            alt={name || 'Image'}
+            className="w-full h-auto object-contain max-h-[70vh]"
+          />
         </BrowserShell>
         {actionButtons}
       </div>
