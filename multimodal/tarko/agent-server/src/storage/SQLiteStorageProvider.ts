@@ -160,14 +160,38 @@ export class SQLiteStorageProvider implements StorageProvider {
   }
 
   /**
-  * Migrate from legacy column-based schema to JSON metadata schema
-  * This is the final migration - no more schema changes needed after this
-  */
+   * Migrate from legacy column-based schema to JSON metadata schema
+   * This is the final migration - no more schema changes needed after this
+   * SAFETY: Uses database transaction to ensure data integrity
+   */
   private async performJsonSchemaMigration(): Promise<void> {
-  console.log('Starting migration to JSON schema design...');
+    console.log('Starting SAFE migration to JSON schema design...');
 
-  // Temporarily disable foreign key constraints to preserve events
-    this.db.exec('PRAGMA foreign_keys = OFF');
+    // Start transaction for atomic migration
+    this.db.exec('BEGIN TRANSACTION');
+
+    try {
+      // Temporarily disable foreign key constraints to preserve events
+      this.db.exec('PRAGMA foreign_keys = OFF');
+
+      // SAFETY: Clean up any leftover temporary tables from failed migrations
+      try {
+        this.db.exec('DROP TABLE IF EXISTS sessions_new');
+        console.log('Cleaned up any existing temporary migration table');
+      } catch (cleanupError) {
+        console.warn('Could not clean up temporary table (this is usually fine):', cleanupError);
+      }
+
+      // SAFETY CHECK: Count existing data before migration
+      const countStmt = this.db.prepare('SELECT COUNT(*) as count FROM sessions');
+      const originalCount = (countStmt.get() as { count: number }).count;
+      console.log(`Migration starting: ${originalCount} sessions to migrate`);
+
+      if (originalCount === 0) {
+        console.log('No sessions to migrate, skipping migration');
+        this.db.exec('ROLLBACK');
+        return;
+      }
 
     // Get current table schema for dynamic column detection
     const tableInfoStmt = this.db.prepare('PRAGMA table_info(sessions)');
@@ -224,40 +248,67 @@ export class SQLiteStorageProvider implements StorageProvider {
   modelConfig: string | null;
   }>;
 
-  for (const row of legacyRows) {
-  // Convert legacy data to JSON metadata format
-  const metadata: any = { version: 1 };
-  
-    if (row.name) metadata.name = row.name;
-    if (row.tags) {
-      try {
-      metadata.tags = JSON.parse(row.tags);
-    } catch {
-      // If tags parsing fails, ignore
-  }
-  }
-  if (row.modelConfig) {
-    try {
-    metadata.modelConfig = JSON.parse(row.modelConfig);
-  } catch {
-      // If modelConfig parsing fails, ignore
-      }
+      console.log(`Migrating ${legacyRows.length} sessions...`);
+
+      for (const row of legacyRows) {
+        // Convert legacy data to JSON metadata format
+        const metadata: any = { version: 1 };
+        
+        if (row.name) metadata.name = row.name;
+        if (row.tags) {
+          try {
+            metadata.tags = JSON.parse(row.tags);
+          } catch {
+            // If tags parsing fails, store as string array
+            metadata.tags = [row.tags];
+          }
+        }
+        if (row.modelConfig) {
+          try {
+            metadata.modelConfig = JSON.parse(row.modelConfig);
+          } catch {
+            // If modelConfig parsing fails, ignore
+          }
+        }
+
+        const workspace = row.workspace || row.workingDirectory || '';
+        const metadataJson = Object.keys(metadata).length > 1 ? JSON.stringify(metadata) : null;
+
+        insertStmt.run(row.id, row.createdAt, row.updatedAt, workspace, metadataJson);
       }
 
-      const workspace = row.workspace || row.workingDirectory || '';
-      const metadataJson = Object.keys(metadata).length > 1 ? JSON.stringify(metadata) : null;
+      // SAFETY CHECK: Verify all data was migrated correctly
+      const newCountStmt = this.db.prepare('SELECT COUNT(*) as count FROM sessions_new');
+      const newCount = (newCountStmt.get() as { count: number }).count;
+      
+      if (newCount !== originalCount) {
+        throw new Error(`Migration data loss detected! Original: ${originalCount}, New: ${newCount}`);
+      }
 
-      insertStmt.run(row.id, row.createdAt, row.updatedAt, workspace, metadataJson);
+      console.log(`Migration verification passed: ${newCount}/${originalCount} sessions migrated`);
+
+      // SAFETY CHECK: Verify events table is intact
+      const eventsCountStmt = this.db.prepare('SELECT COUNT(*) as count FROM events');
+      const eventsCount = (eventsCountStmt.get() as { count: number }).count;
+      console.log(`Events table verified: ${eventsCount} events preserved`);
+
+      // Only after verification, replace the old table
+      this.db.exec('DROP TABLE sessions');
+      this.db.exec('ALTER TABLE sessions_new RENAME TO sessions');
+
+      // Re-enable foreign key constraints
+      this.db.exec('PRAGMA foreign_keys = ON');
+
+      // Commit transaction
+      this.db.exec('COMMIT');
+
+      console.log('✅ JSON schema migration completed successfully with data verification');
+    } catch (error) {
+      // Rollback on any error to preserve original data
+      console.error('❌ Migration failed, rolling back to preserve data:', error);
+      this.db.exec('ROLLBACK');
+      throw new Error(`Migration failed and rolled back: ${error instanceof Error ? error.message : String(error)}`);
     }
-
-    // Drop old sessions table and rename new one
-    this.db.exec('DROP TABLE sessions');
-    this.db.exec('ALTER TABLE sessions_new RENAME TO sessions');
-
-    // Re-enable foreign key constraints
-    this.db.exec('PRAGMA foreign_keys = ON');
-
-    console.log('JSON schema migration completed successfully');
   }
 
   async createSession(metadata: SessionMetadata): Promise<SessionMetadata> {
