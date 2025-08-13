@@ -15,6 +15,7 @@ import {
   LoopTerminationCheckResult,
   PrepareRequestContext,
   PrepareRequestResult,
+  EachAgentLoopEndContext,
 } from './agent-instance';
 import { AgentRunObjectOptions, AgentRunStreamingOptions } from './agent-run-options';
 import {
@@ -208,6 +209,18 @@ export interface IAgent<T extends AgentOptions = AgentOptions> {
    * @returns A promise that resolves when pre-iteration setup is complete
    */
   onEachAgentLoopStart(sessionId: string): void | Promise<void>;
+
+  /**
+   * Hook called at the end of each agent loop iteration
+   *
+   * This method is invoked after each iteration of the agent loop completes,
+   * allowing derived classes to perform cleanup, logging, or state updates
+   * based on the iteration results.
+   *
+   * @param context The iteration end context including session info and results
+   * @returns A promise that resolves when post-iteration cleanup is complete
+   */
+  onEachAgentLoopEnd(context: EachAgentLoopEndContext): void | Promise<void>;
 
   /**
    * Hook called at the end of the agent's execution loop
