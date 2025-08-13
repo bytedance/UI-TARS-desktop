@@ -117,6 +117,12 @@ export const WorkspaceDetail: React.FC = () => {
 
   // Handle research reports and deliverables
   if (isResearchReportType(panelContent)) {
+    console.log(
+      '%c🎯 [WorkspaceDetail] Using Renderer: %cResearchReportRenderer',
+      'color: #ff6b6b; font-weight: bold; font-size: 12px;',
+      'color: #4ecdc4; font-weight: bold; background: #1a1a1a; padding: 2px 8px; border-radius: 4px;',
+    );
+
     return (
       <ResearchReportRenderer
         panelContent={panelContent}
@@ -238,6 +244,15 @@ export const WorkspaceDetail: React.FC = () => {
 
   // Find appropriate renderer
   const RendererComponent = CONTENT_RENDERERS[panelContent.type] || GenericResultRenderer;
+
+  const rendererName = CONTENT_RENDERERS[panelContent.type]
+    ? `${panelContent.type}`
+    : 'GenericResultRenderer';
+  console.log(
+    '%c🎯 [WorkspaceDetail] Using Renderer: %c' + `[${rendererName}]`,
+    'color: #ff6b6b; font-weight: bold; font-size: 12px;',
+    'color: #4ecdc4; font-weight: bold; background: #1a1a1a; padding: 2px 8px; border-radius: 4px;',
+  );
 
   return (
     <>

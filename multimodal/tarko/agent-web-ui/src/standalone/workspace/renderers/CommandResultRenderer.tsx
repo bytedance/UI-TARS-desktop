@@ -96,7 +96,6 @@ const highlightCommand = (command: string) => {
 export const CommandResultRenderer: React.FC<CommandResultRendererProps> = ({ panelContent }) => {
   // Extract command data from panelContent
   const commandData = extractCommandData(panelContent);
-  debugger;
 
   if (!commandData) {
     return <div className="text-gray-500 italic">Command result is empty</div>;
