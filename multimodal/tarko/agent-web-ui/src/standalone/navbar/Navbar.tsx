@@ -240,7 +240,7 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
     : `${Math.max((modelTextWidth / totalTextWidth) * availableWidth * 0.85, 180)}px`;
 
   return (
-    <div ref={containerRef} className="flex-1 flex justify-center min-w-0">
+    <div ref={containerRef} className="flex-1 flex justify-center min-w-0 mx-[10vw]">
       <div className="flex items-center gap-3 min-w-0" style={{ maxWidth: '100%' }}>
         {/* Agent Name Badge - Enhanced with colorful gradient */}
         {agentInfo.name && (

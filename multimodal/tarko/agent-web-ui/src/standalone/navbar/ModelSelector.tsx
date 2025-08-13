@@ -218,7 +218,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
                 : '1px solid rgba(203, 213, 225, 0.6)',
               borderRadius: '8px',
               minWidth: 0,
-              maxWidth: '220px',
+              // maxWidth: '220px',
               '&:hover': {
                 background: isDarkMode ? 'rgba(55, 65, 81, 0.8)' : 'rgba(241, 245, 249, 0.9)',
                 boxShadow: isDarkMode
@@ -442,7 +442,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
           >
             {allModelOptions.map((option, idx) => {
               return (
-                <MenuItem key={idx} value={option.value}>
+                <MenuItem key={`model-${idx}`} value={option.value}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
                     <Box
                       sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0, flex: 1 }}
