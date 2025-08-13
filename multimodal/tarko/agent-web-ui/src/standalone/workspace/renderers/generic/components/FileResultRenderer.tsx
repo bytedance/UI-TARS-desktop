@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import { FileDisplayMode } from '../../../types';
 import { StandardPanelContent } from '../../../types/panelContent';
 import { MessageContent } from './MessageContent';
@@ -22,9 +21,6 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
   onAction,
   displayMode,
 }) => {
-  // If not a file result, don't render
-  if (panelContent.type !== 'file_result' && panelContent.type !== 'file') return null;
-
   // Extract file content from panelContent
   const fileContent = getFileContent(panelContent);
   const filePath = getFilePath(panelContent);
@@ -185,7 +181,15 @@ function getFileContent(panelContent: StandardPanelContent): string | null {
     return panelContent.arguments.content;
   }
 
-  // Try source
+  // Handle source array format
+  if (Array.isArray(panelContent.source)) {
+    return panelContent.source
+      .filter((item) => item.type === 'text')
+      .map((item) => item.text)
+      .join('');
+  }
+
+  // Try source as string (fallback for old format)
   if (typeof panelContent.source === 'string') {
     return panelContent.source;
   }
