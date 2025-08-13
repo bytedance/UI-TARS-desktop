@@ -4,12 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import {
-  ComposableToolCallEngine,
-  ToolCallEngineCompositionConfig,
-  ToolCallEngineProvider,
-  ToolCallEngineContext,
-} from '../src';
+import { ToolCallEngineProvider, ToolCallEngineContext } from '../src';
 import { ToolCallEngine, Tool } from '@tarko/agent';
 import {
   ToolCallEnginePrepareRequestContext,
@@ -23,6 +18,8 @@ import {
   MultimodalToolCallResult,
   AgentEventStream,
 } from '@tarko/agent-interface';
+import { ToolCallEngineCompositionConfig } from '../src/types';
+import { ComposableToolCallEngine } from '../src/ComposableToolCallEngine';
 
 // Mock Tool Call Engine for testing
 class MockToolCallEngine extends ToolCallEngine {

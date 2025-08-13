@@ -12,7 +12,6 @@ import {
 } from '@tarko/agent';
 import { AgentComposer } from './AgentComposer';
 import { AgentPlugin } from './AgentPlugin';
-import { SYSTEM_PROMPT } from './environments/prompt';
 
 export interface ComposableAgentOptions extends AgentOptions {
   /** Agent plugins to compose */

@@ -4,7 +4,6 @@
  */
 
 import { getLogger } from '@tarko/agent';
-import fetch, { RequestInit, Response } from 'node-fetch';
 import type {
   ClientConfig,
   ApiResponse,
@@ -17,6 +16,7 @@ import type {
   FileEditorParams,
   FileListParams,
   FileListResp,
+  CDPVersionResp,
 } from './types';
 
 export class AioClient {
@@ -189,6 +189,12 @@ export class AioClient {
         include_permissions,
         include_size,
       }),
+    });
+  }
+
+  async cdpVersion(): Promise<ApiResponse<CDPVersionResp>> {
+    return this.base<CDPVersionResp>('/cdp/json/version', {
+      method: 'GET',
     });
   }
 

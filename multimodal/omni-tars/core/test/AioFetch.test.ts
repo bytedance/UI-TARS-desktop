@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { AioClient } from '../src/tools/AioFetch';
+import { AioClient } from '../src/utils/aio';
 import type {
   ClientConfig,
   ShellExecParams,
@@ -12,12 +12,7 @@ import type {
   JupyterExecuteParams,
   FileEditorParams,
   FileListParams,
-} from '../src/tools/types';
-
-// Mock node-fetch
-vi.mock('node-fetch', () => ({
-  default: vi.fn(),
-}));
+} from '../src/utils/types';
 
 // Mock logger
 vi.mock('@tarko/agent', () => ({
@@ -29,9 +24,9 @@ vi.mock('@tarko/agent', () => ({
   })),
 }));
 
-// Import the mocked fetch
-import fetch from 'node-fetch';
-const mockFetch = vi.mocked(fetch);
+// Mock fetch globally
+const mockFetch = vi.fn();
+vi.stubGlobal('fetch', mockFetch);
 
 describe('AioClient', () => {
   let client: AioClient;
@@ -83,7 +78,7 @@ describe('AioClient', () => {
         },
       };
       const mockResponse = { ok: true, json: vi.fn().mockResolvedValue(mockResponseData) };
-      mockFetch.mockResolvedValue(mockResponse as any);
+      mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       const params: ShellExecParams = { command: 'ls -la', exec_dir: '/tmp' };
       const result = await client.shellExec(params);
@@ -113,7 +108,7 @@ describe('AioClient', () => {
         },
       };
       const mockResponse = { ok: true, json: vi.fn().mockResolvedValue(mockResponseData) };
-      mockFetch.mockResolvedValue(mockResponse as any);
+      mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       const params: ShellViewParams = { id: 'test-session' };
       const result = await client.shellView(params);
@@ -138,7 +133,7 @@ describe('AioClient', () => {
         data: 'Session terminated',
       };
       const mockResponse = { ok: true, json: vi.fn().mockResolvedValue(mockResponseData) };
-      mockFetch.mockResolvedValue(mockResponse as any);
+      mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       const params: ShellKillParams = { id: 'test-session' };
       const result = await client.shellKill(params);
@@ -155,7 +150,7 @@ describe('AioClient', () => {
         data: 'Execution result',
       };
       const mockResponse = { ok: true, json: vi.fn().mockResolvedValue(mockResponseData) };
-      mockFetch.mockResolvedValue(mockResponse as any);
+      mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       const params: JupyterExecuteParams = {
         code: 'print("Hello World")',
@@ -174,7 +169,7 @@ describe('AioClient', () => {
         data: 'Execution result',
       };
       const mockResponse = { ok: true, json: vi.fn().mockResolvedValue(mockResponseData) };
-      mockFetch.mockResolvedValue(mockResponse as any);
+      mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       const params: JupyterExecuteParams = { code: 'print("Hello")' };
       await client.jupyterExecute(params);
@@ -197,7 +192,7 @@ describe('AioClient', () => {
         data: 'File content updated',
       };
       const mockResponse = { ok: true, json: vi.fn().mockResolvedValue(mockResponseData) };
-      mockFetch.mockResolvedValue(mockResponse as any);
+      mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       const params: FileEditorParams = {
         command: 'str_replace',
@@ -224,7 +219,7 @@ describe('AioClient', () => {
         },
       };
       const mockResponse = { ok: true, json: vi.fn().mockResolvedValue(mockResponseData) };
-      mockFetch.mockResolvedValue(mockResponse as any);
+      mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       const result = await client.fileDownload({ path: '/tmp/test.txt' });
       expect(result).toEqual(mockResponseData);
@@ -253,7 +248,7 @@ describe('AioClient', () => {
         },
       };
       const mockResponse = { ok: true, json: vi.fn().mockResolvedValue(mockResponseData) };
-      mockFetch.mockResolvedValue(mockResponse as any);
+      mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       const params: FileListParams = {
         path: '/tmp',
@@ -314,9 +309,9 @@ describe('AioClient', () => {
       };
 
       mockFetch
-        .mockResolvedValueOnce(mockExecResponse as any)
-        .mockResolvedValueOnce(mockViewResponse1 as any)
-        .mockResolvedValueOnce(mockViewResponse2 as any);
+        .mockResolvedValueOnce(mockExecResponse as unknown as Response)
+        .mockResolvedValueOnce(mockViewResponse1 as unknown as Response)
+        .mockResolvedValueOnce(mockViewResponse2 as unknown as Response);
 
       const params = { command: 'long-command', exec_dir: '/tmp' };
       const result = await client.shellExecWithPolling(params, 4000, 100);
@@ -354,9 +349,9 @@ describe('AioClient', () => {
       const mockKillResponse = { ok: true, json: vi.fn().mockResolvedValue(killMockData) };
 
       mockFetch
-        .mockResolvedValueOnce(mockExecResponse as any)
-        .mockResolvedValue(mockViewResponse as any)
-        .mockResolvedValueOnce(mockKillResponse as any);
+        .mockResolvedValueOnce(mockExecResponse as unknown as Response)
+        .mockResolvedValue(mockViewResponse as unknown as Response)
+        .mockResolvedValueOnce(mockKillResponse as unknown as Response);
 
       const params = { command: 'long-command', exec_dir: '/tmp' };
 
@@ -383,7 +378,7 @@ describe('AioClient', () => {
           },
         },
       };
-      mockFetch.mockResolvedValue(mockResponse as any);
+      mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       await expect(client.shellExec({ command: 'test' })).rejects.toThrow('HTTP 404: Not Found');
     });

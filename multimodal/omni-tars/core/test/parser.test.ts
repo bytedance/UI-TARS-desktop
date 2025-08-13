@@ -89,6 +89,7 @@ Based on the search results, here is the answer.
       expect(result.think).toBe('Planning the search');
       expect(result.answer).toBe('');
       expect(result.tools).toHaveLength(1);
+      expect(result.tools[0].function.name).toBe('Search');
     });
 
     it('should handle multiple function calls', () => {
@@ -305,20 +306,36 @@ Answer content with spaces around
     });
   });
 
-  describe('Tool call without closed tag', () => {
-    it('should parse correctly for mcp_env and code_env', () => {
-      const input1 = `<think_never_used_51bce0c785ca2f68081bfa7d91973934>xxx</think_never_used_51bce0c785ca2f68081bfa7d91973934>
+  describe('tool call without closed tag, eg: lose </code_env>', () => {
+    it('should parse correctly for code_env', () => {
+      const input = `<think_never_used_51bce0c785ca2f68081bfa7d91973934>xxx</think_never_used_51bce0c785ca2f68081bfa7d91973934>
       <code_env>
         <function=str_replace_editor>
         <parameter=command>view</parameter>
         <parameter=path>/app/src/data_processor.py</parameter>
         </function>`;
 
-      const result1 = parseCodeContent(input1);
+      const result = parseCodeContent(input);
 
-      expect(result1.think).toBe('xxx');
-      expect(result1.tools.length).toBe(1);
-      expect(result1.tools[0].function.name).toBe('str_replace_editor');
+      expect(result.think).toBe('xxx');
+      expect(result.tools.length).toBe(1);
+      expect(result.tools[0].function.name).toBe('str_replace_editor');
+    });
+
+    it('should parse correctly for mcp_env', () => {
+      const input = ` <think_never_used_51bce0c785ca2f68081bfa7d91973934>
+          xxx
+          </think_never_used_51bce0c785ca2f68081bfa7d91973934>
+
+          <mcp_env>
+          <|FunctionCallBegin|>
+          [{"name": "Search", "parameters": {"query": "latest GUI Agent papers 2024 2025"}}]
+          <|FunctionCallEnd|>`;
+      const result = parseMcpContent(input);
+
+      expect(result.think).toBe('xxx');
+      expect(result.tools.length).toBe(1);
+      expect(result.tools[0].function.name).toBe('Search');
     });
   });
 });

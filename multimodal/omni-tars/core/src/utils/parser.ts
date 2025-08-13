@@ -138,11 +138,11 @@ export function parseMcpContent(c: string): ParsedContent {
 
     // Extract function calls between FunctionCallBegin and FunctionCallEnd
     const functionCallMatch = mcpEnvContent.match(
-      /<\|FunctionCallBegin\|>\[([\s\S]*?)\]<\|FunctionCallEnd\|>/,
+      /<\|FunctionCallBegin\|>\s*(\[[\s\S]*?\])\s*<\|FunctionCallEnd\|>/,
     );
     if (functionCallMatch) {
       try {
-        const functionCallData = JSON.parse(`[${functionCallMatch[1]}]`) as Array<{
+        const functionCallData = JSON.parse(functionCallMatch[1]) as Array<{
           name: string;
           parameters: Record<string, unknown>;
         }>;
