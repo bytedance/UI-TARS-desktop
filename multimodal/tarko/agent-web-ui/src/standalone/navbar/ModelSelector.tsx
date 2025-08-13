@@ -6,7 +6,6 @@ import {
   MenuItem,
   FormControl,
   Box,
-  Chip,
   Typography,
   CircularProgress,
   createTheme,
@@ -360,37 +359,52 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     if (!option) return 'Select Model';
 
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <Box
-          sx={{
-            width: 16,
-            height: 16,
-            borderRadius: '4px',
-            background: isDarkMode ? 'rgba(99, 102, 241, 0.2)' : 'rgba(99, 102, 241, 0.1)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            border: isDarkMode
-              ? '1px solid rgba(99, 102, 241, 0.3)'
-              : '1px solid rgba(99, 102, 241, 0.2)',
-          }}
-        >
-          <FiSettings size={9} color={isDarkMode ? '#a5b4fc' : '#6366f1'} />
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+        <FiSettings
+          size={12}
+          color={isDarkMode ? '#9ca3af' : '#6b7280'}
+          style={{ flexShrink: 0 }}
+        />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              fontWeight: 500,
+              fontSize: '12px',
+              color: isDarkMode ? '#f3f4f6' : '#374151',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+            title={option.modelId}
+          >
+            {option.modelId}
+          </Typography>
+          <Typography
+            variant="body2"
+            sx={{
+              color: isDarkMode ? '#9ca3af' : '#6b7280',
+              fontSize: '12px',
+              flexShrink: 0,
+            }}
+          >
+            •
+          </Typography>
+          <Typography
+            variant="body2"
+            sx={{
+              fontWeight: 500,
+              fontSize: '12px',
+              color: isDarkMode ? '#d1d5db' : '#6b7280',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+            title={option.provider}
+          >
+            {option.provider}
+          </Typography>
         </Box>
-        <Typography
-          variant="body2"
-          sx={{
-            fontWeight: 500,
-            fontSize: '12px',
-            color: isDarkMode ? '#f3f4f6' : '#374151',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            maxWidth: '150px', // Reduced for navbar
-          }}
-        >
-          {option.label}
-        </Typography>
         {isLoading && (
           <CircularProgress size={12} thickness={4} sx={{ color: '#6366f1', marginLeft: 'auto' }} />
         )}
@@ -428,36 +442,84 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
               disablePortal: false,
             }}
             sx={{
-              minWidth: 180, // Reduced for navbar
-              maxWidth: 220, // Reduced for navbar
+              minWidth: 240, // Increased width to prevent early truncation
+              maxWidth: 300, // Increased max width for better display
             }}
           >
             {allModelOptions.map((option, idx) => {
               const itemProps = { ['ke' + 'y']: option.value };
               return (
                 <MenuItem {...itemProps} value={option.value}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, width: '100%' }}>
-                    <Chip
-                      label={option.provider}
-                      size="small"
-                      variant="outlined"
-                      sx={{
-                        fontSize: '10px',
-                        height: '18px',
-                        borderColor: currentModel === option.value ? '#6366f1' : 'currentColor',
-                        color: currentModel === option.value ? '#6366f1' : 'currentColor',
-                      }}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, width: '100%' }}>
+                    <FiSettings
+                      size={12}
+                      color={
+                        currentModel === option.value
+                          ? isDarkMode
+                            ? '#a5b4fc'
+                            : '#6366f1'
+                          : isDarkMode
+                            ? '#9ca3af'
+                            : '#6b7280'
+                      }
+                      style={{ flexShrink: 0 }}
                     />
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontWeight: currentModel === option.value ? 600 : 400,
-                        flex: 1,
-                        fontSize: '12px',
-                      }}
+                    <Box
+                      sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0, flex: 1 }}
                     >
-                      {option.modelId}
-                    </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: currentModel === option.value ? 600 : 500,
+                          fontSize: '12px',
+                          color:
+                            currentModel === option.value
+                              ? isDarkMode
+                                ? '#a5b4fc'
+                                : '#6366f1'
+                              : isDarkMode
+                                ? '#f3f4f6'
+                                : '#374151',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                        title={option.modelId}
+                      >
+                        {option.modelId}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: isDarkMode ? '#9ca3af' : '#6b7280',
+                          fontSize: '12px',
+                          flexShrink: 0,
+                        }}
+                      >
+                        •
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: currentModel === option.value ? 600 : 500,
+                          fontSize: '12px',
+                          color:
+                            currentModel === option.value
+                              ? isDarkMode
+                                ? '#a5b4fc'
+                                : '#6366f1'
+                              : isDarkMode
+                                ? '#d1d5db'
+                                : '#6b7280',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                        title={option.provider}
+                      >
+                        {option.provider}
+                      </Typography>
+                    </Box>
                   </Box>
                 </MenuItem>
               );
