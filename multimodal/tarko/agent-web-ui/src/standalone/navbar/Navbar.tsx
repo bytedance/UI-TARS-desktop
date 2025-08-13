@@ -257,7 +257,9 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
               alignItems: 'center',
               gap: 0.75,
               px: 1.25,
-              py: 0.5,
+              py: 0.375,
+              height: '32px',
+              minHeight: '32px',
               background: isDarkMode ? 'rgba(55, 65, 81, 0.3)' : 'rgba(248, 250, 252, 0.8)',
               backdropFilter: 'blur(8px)',
               border: isDarkMode
