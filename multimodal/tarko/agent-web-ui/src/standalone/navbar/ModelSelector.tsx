@@ -12,9 +12,6 @@ import {
   createTheme,
   ThemeProvider,
 } from '@mui/material';
-import { apiService } from '@/common/services/apiService';
-import { useDarkMode } from '@/common/hooks/useDarkMode';
-import { useSession } from '@/common/hooks/useSession';
 
 interface ModelConfig {
   provider: string;
@@ -30,28 +27,42 @@ interface AvailableModelsResponse {
   hasMultipleProviders: boolean;
 }
 
+interface ModelInfo {
+  model?: string;
+  provider?: string;
+}
+
 interface NavbarModelSelectorProps {
   className?: string;
+  activeSessionId?: string;
+  modelInfo?: ModelInfo;
+  isDarkMode?: boolean;
+  onLoadModels?: () => Promise<AvailableModelsResponse>;
+  onUpdateModel?: (sessionId: string, provider: string, modelId: string) => Promise<boolean>;
 }
 
 /**
- * NavbarModelSelector Component - MUI implementation adapted for navbar
+ * NavbarModelSelector Component - Pure component for model selection
  *
  * Features:
  * - Uses Material-UI Select for enterprise-grade reliability
- * - Responsive dark mode support with useDarkMode hook
+ * - Responsive dark mode support
  * - Modern styling matching app aesthetics
  * - Proper z-index handling for dropdown positioning
- * - Adapted from chat ModelSelector for navbar use
+ * - Pure component with no external dependencies
  */
-export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({ className = '' }) => {
-  const { activeSessionId, modelInfo } = useSession();
+export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
+  className = '',
+  activeSessionId,
+  modelInfo = {},
+  isDarkMode = false,
+  onLoadModels,
+  onUpdateModel,
+}) => {
   const [availableModels, setAvailableModels] = useState<AvailableModelsResponse | null>(null);
   const [currentModel, setCurrentModel] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
-
-  const isDarkMode = useDarkMode();
 
   // Create custom theme for MUI components to match the app's design
   // Recreate theme when dark mode changes
@@ -162,8 +173,13 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({ classN
   // Load available models on component mount
   useEffect(() => {
     const loadModels = async () => {
+      if (!onLoadModels) {
+        setIsInitialLoading(false);
+        return;
+      }
+
       try {
-        const models = await apiService.getAvailableModels();
+        const models = await onLoadModels();
         setAvailableModels(models);
 
         // Set initial current model to default
@@ -179,7 +195,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({ classN
     };
 
     loadModels();
-  }, []);
+  }, [onLoadModels]);
 
   // Don't render if no session
   if (!activeSessionId || isInitialLoading) {
@@ -280,9 +296,10 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({ classN
       currentModel,
     });
 
-    if (!activeSessionId || isLoading || !selectedValue) {
+    if (!activeSessionId || !onUpdateModel || isLoading || !selectedValue) {
       console.warn('⚠️ [NavbarModelSelector] Model change blocked:', {
         hasSessionId: !!activeSessionId,
+        hasUpdateHandler: !!onUpdateModel,
         isLoading,
         hasSelectedValue: !!selectedValue,
       });
@@ -301,16 +318,16 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({ classN
     setIsLoading(true);
 
     try {
-      console.log('📞 [NavbarModelSelector] Calling API service...');
-      const success = await apiService.updateSessionModel(activeSessionId, provider, modelId);
+      console.log('📞 [NavbarModelSelector] Calling update handler...');
+      const success = await onUpdateModel(activeSessionId, provider, modelId);
 
-      console.log('📋 [NavbarModelSelector] API response:', { success });
+      console.log('📋 [NavbarModelSelector] Update response:', { success });
 
       if (success) {
         console.log('✅ [NavbarModelSelector] Model updated successfully, updating UI state');
         setCurrentModel(selectedValue);
       } else {
-        console.error('❌ [NavbarModelSelector] Server returned success=false');
+        console.error('❌ [NavbarModelSelector] Update handler returned success=false');
         // Revert selection on server failure
         setCurrentModel(currentModel);
       }

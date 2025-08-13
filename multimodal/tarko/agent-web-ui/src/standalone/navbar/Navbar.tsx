@@ -10,6 +10,7 @@ import { useLayout } from '@/common/hooks/useLayout';
 import { useSession } from '@/common/hooks/useSession';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useDarkMode } from '@/common/hooks/useDarkMode';
+import { apiService } from '@/common/services/apiService';
 import { NavbarModelSelector } from './ModelSelector';
 
 import './Navbar.css';
@@ -321,7 +322,16 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
         )}
 
         {/* Model Selector - Interactive dropdown for model selection */}
-        <NavbarModelSelector className="min-w-0" />
+        <NavbarModelSelector
+          className="min-w-0"
+          activeSessionId={activeSessionId}
+          modelInfo={modelInfo}
+          isDarkMode={isDarkMode}
+          onLoadModels={() => apiService.getAvailableModels()}
+          onUpdateModel={(sessionId, provider, modelId) =>
+            apiService.updateSessionModel(sessionId, provider, modelId)
+          }
+        />
       </div>
     </div>
   );
