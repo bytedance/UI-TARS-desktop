@@ -26,10 +26,10 @@ export default defineConfig({
   },
   uiTarsVersion: 'latest',
   webui: {
-    logo: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png',
-    title: 'Agent TARS',
-    subtitle: 'Offering seamless integration with a wide range of real-world tools.',
-    welcomTitle: 'An multimodal AI agent',
+    logo: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/icon.png',
+    title: 'GUI Agent',
+    subtitle: 'The GUI agent driven by UI-TARS and Seed-1.5-VL/1.6 series models.',
+    welcomTitle: 'An multimodal GUI agent',
     welcomePrompts: [
       'Search for the latest GUI Agent papers',
       'Find information about UI TARS',
