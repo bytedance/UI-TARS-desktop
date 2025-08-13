@@ -12,8 +12,8 @@ import { sessionFilesAtom, FileItem } from '../atoms/files';
 import { activeSessionIdAtom } from '../atoms/session';
 import { ChatCompletionContentPartImage } from '@tarko/agent-interface';
 import { jsonrepair } from 'jsonrepair';
-import { TOOL_NAMES } from '@/common/constants';
 import { SearchService } from '../../services/SearchService';
+import { rawEventsAtom, rawToolMappingAtom } from '../atoms/rawEvents';
 
 // Internal cache - not an Atom to avoid unnecessary reactivity
 const toolCallArgumentsMap = new Map<string, any>();
@@ -44,6 +44,17 @@ export const processEventAction = atom(
   null,
   (get, set, params: { sessionId: string; event: AgentEventStream.Event }) => {
     const { sessionId, event } = params;
+
+    // First save the original event
+    // Comment it out because we are not using it yet
+    // set(rawEventsAtom, (prev) => {
+    //   const sessionEvents = prev[sessionId] || [];
+    //   return {
+    //     ...prev,
+    //     [sessionId]: [...sessionEvents, event],
+    //   };
+    // });
+
     const replayState = get(replayStateAtom);
     const isReplayMode = replayState.isActive;
 
@@ -75,10 +86,42 @@ export const processEventAction = atom(
 
       case 'tool_call':
         handleToolCall(set, sessionId, event);
+        // Save the original tool call
+        set(rawToolMappingAtom, (prev) => {
+          const sessionMappings = prev[sessionId] || {};
+          return {
+            ...prev,
+            [sessionId]: {
+              ...sessionMappings,
+              [event.toolCallId]: {
+                toolCall: event,
+                toolResult: sessionMappings[event.toolCallId]?.toolResult || null,
+              },
+            },
+          };
+        });
         break;
 
       case 'tool_result':
         handleToolResult(get, set, sessionId, event);
+        // Save the original tool result
+        set(rawToolMappingAtom, (prev) => {
+          const sessionMappings = prev[sessionId] || {};
+          const existing = sessionMappings[event.toolCallId] || {
+            toolCall: null,
+            toolResult: null,
+          };
+          return {
+            ...prev,
+            [sessionId]: {
+              ...sessionMappings,
+              [event.toolCallId]: {
+                ...existing,
+                toolResult: event,
+              },
+            },
+          };
+        });
         break;
 
       case 'system':
@@ -485,7 +528,6 @@ function handleToolResult(
     elapsedMs: event.elapsedMs,
     _extra: event._extra,
   };
-
 
   // Update both message and tool result atoms for immediate UI response
   set(messagesAtom, (prev: Record<string, Message[]>) => {
