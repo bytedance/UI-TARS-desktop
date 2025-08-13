@@ -263,7 +263,6 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
                 ? '1px solid rgba(139, 92, 246, 0.25)'
                 : '1px solid rgba(99, 102, 241, 0.15)',
               borderRadius: '8px',
-              minWidth: 0,
               position: 'relative',
               '&::before': {
                 content: '""',
@@ -298,7 +297,6 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
-                minWidth: 0,
               }}
               title={agentInfo.name}
             >
