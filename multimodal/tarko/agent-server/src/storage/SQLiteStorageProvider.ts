@@ -181,10 +181,21 @@ export class SQLiteStorageProvider implements StorageProvider {
   `);
 
   // Migrate data from legacy schema to JSON schema
-  const legacyStmt = this.db.prepare(`
-  SELECT id, createdAt, updatedAt, name, workspace, workingDirectory, tags, modelConfig
-  FROM sessions
-  `);
+  // Dynamically build SELECT query based on available columns
+  const columnNames = columns.map(col => col.name);
+  const selectColumns = [
+    'id', 'createdAt', 'updatedAt',
+        columnNames.includes('name') ? 'name' : 'NULL as name',
+        columnNames.includes('workspace') ? 'workspace' : 'NULL as workspace',
+        columnNames.includes('workingDirectory') ? 'workingDirectory' : 'NULL as workingDirectory',
+        columnNames.includes('tags') ? 'tags' : 'NULL as tags',
+        columnNames.includes('modelConfig') ? 'modelConfig' : 'NULL as modelConfig'
+      ].join(', ');
+
+      const legacyStmt = this.db.prepare(`
+        SELECT ${selectColumns}
+        FROM sessions
+      `);
 
   const insertStmt = this.db.prepare(`
   INSERT INTO sessions_new (id, createdAt, updatedAt, workspace, metadata)
