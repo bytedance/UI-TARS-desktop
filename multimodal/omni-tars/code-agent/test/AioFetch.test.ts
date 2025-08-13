@@ -63,7 +63,7 @@ describe('AioClient', () => {
     it('Default value should be used', () => {
       const clientWithDefaults = new AioClient({ baseUrl: 'http://localhost:8080' });
       expect(clientWithDefaults['timeout']).toBe(30000);
-      expect(clientWithDefaults['retries']).toBe(3);
+      expect(clientWithDefaults['retries']).toBe(1);
       expect(clientWithDefaults['retryDelay']).toBe(1000);
     });
   });
@@ -319,7 +319,7 @@ describe('AioClient', () => {
         .mockResolvedValueOnce(mockViewResponse2 as any);
 
       const params = { command: 'long-command', exec_dir: '/tmp' };
-      const result = await client.shellExecWithPolling(params, 5000, 100);
+      const result = await client.shellExecWithPolling(params, 4000, 100);
 
       expect(result.success).toBe(true);
       expect(result.data.session_id).toBe('test-session');
@@ -368,7 +368,21 @@ describe('AioClient', () => {
 
   describe('Error handling', () => {
     it('An exception should be thrown in an HTTP error', async () => {
-      const mockResponse = { ok: false, status: 404, statusText: 'Not Found' };
+      const mockResponse = {
+        ok: false,
+        status: 404,
+        statusText: 'Not Found',
+        async json() {
+          return { message: 'err detail' };
+        },
+        headers: {
+          get(type: string) {
+            if (type === 'content-type') {
+              return 'application/json';
+            }
+          },
+        },
+      };
       mockFetch.mockResolvedValue(mockResponse as any);
 
       await expect(client.shellExec({ command: 'test' })).rejects.toThrow('HTTP 404: Not Found');

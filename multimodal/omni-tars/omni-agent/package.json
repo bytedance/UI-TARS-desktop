@@ -23,7 +23,7 @@
     "dev": "rslib build --watch",
     "build": "rslib build",
     "test": "vitest",
-    "dev:agent": "tarko --agent ./ --config https://api.agent-tars.bytedance.net/config/v1"
+    "dev:agent": "tarko --agent ./"
   },
   "dependencies": {
     "@omni-tars/core": "workspace:*",

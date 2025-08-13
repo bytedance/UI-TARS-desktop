@@ -59,7 +59,8 @@ export class CodeToolCallEngine extends ToolCallEngine {
 
     // Return incremental content without tool call detection during streaming
     return {
-      content: delta?.content || '',
+      // content: delta?.content || '',
+      content: '',
       reasoningContent: '',
       hasToolCallUpdate: false,
       toolCalls: [],
@@ -68,8 +69,11 @@ export class CodeToolCallEngine extends ToolCallEngine {
 
   finalizeStreamProcessing(state: StreamProcessingState): ParsedModelResponse {
     const fullContent = state.contentBuffer;
+    this.logger.info('finalizeStreamProcessing content \n', fullContent);
 
     const extracted = parseCodeContent(fullContent);
+
+    this.logger.info('extracted', JSON.stringify(extracted, null, 2));
 
     const { think, tools, answer } = extracted;
 

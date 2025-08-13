@@ -201,7 +201,7 @@ export class AioClient {
   async shellExecWithPolling(
     params: Omit<ShellExecParams, 'async_mode'>,
     maxWaitTime = 10 * 60 * 1000, // 10 minutes
-    pollInterval = 1000, // 2 seconds
+    pollInterval = 1000, // 1s
   ): Promise<ApiResponse<ShellExecResponse>> {
     // Start async execution
     const execResult = await this.shellExec({
@@ -230,12 +230,19 @@ export class AioClient {
         }
 
         // Check if command is completed (you may need to adjust this logic based on actual API behavior)
-
         const isFinished = viewResult?.data?.status === 'completed';
 
         // If there's output or the status indicates completion, return the result
         if (isFinished) {
           this.logger.info(`Command completed for session ${sessionId}`);
+
+          // There is a problem with the view interface return in exec asynchronous mode.
+          // console[number].output is always empty, and you need to manually get the value from data.output.
+          const consoleData = viewResult.data.console;
+
+          if (consoleData[0] && !consoleData[0]?.output) {
+            consoleData[0].output = viewResult.data.output;
+          }
 
           return {
             success: true,
@@ -246,7 +253,7 @@ export class AioClient {
               status: 'completed',
               returncode: 0, // Assume success if we have output
               output: viewResult.data.output,
-              console: viewResult.data.console,
+              console: consoleData,
             },
           };
         }

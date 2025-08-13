@@ -22,7 +22,7 @@ export class CodeAgentPlugin extends AgentPlugin {
   constructor() {
     super();
 
-    assert(process.env.AIO_SANDBOX_URL, 'no base url provided.');
+    assert(process.env.AIO_SANDBOX_URL, 'no AIO_SANDBOX_URL url providered.');
 
     this.client = new AioClient({
       baseUrl: process.env.AIO_SANDBOX_URL,

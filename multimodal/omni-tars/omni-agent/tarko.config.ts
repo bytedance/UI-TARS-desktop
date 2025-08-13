@@ -41,7 +41,7 @@ export default defineConfig({
       'Tell me the top 5 most popular projects on ProductHunt today',
       'Excute ls -al',
       'Write hello world using python',
-      '写一个python代码下载https://arxiv.org/abs/2505.12370的论文，并且把pdf转成markdown',
+      'Write a python code to download the paper https://arxiv.org/abs/2505.12370, and convert the pdf to markdown',
     ],
   },
   snapshot: { storageDirectory: resolve(__dirname, 'snapshots'), enable: true },
