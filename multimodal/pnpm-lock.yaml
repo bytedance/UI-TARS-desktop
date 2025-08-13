@@ -218,6 +218,9 @@ importers:
       '@agent-infra/media-utils':
         specifier: 0.1.5
         version: 0.1.5
+      '@clack/prompts':
+        specifier: 0.11.0
+        version: 0.11.0
       '@computer-use/nut-js':
         specifier: ^4.2.0
         version: 4.2.0
@@ -251,6 +254,9 @@ importers:
       big.js:
         specifier: ^6.2.2
         version: 6.2.2
+      commander:
+        specifier: ^14.0.0
+        version: 14.0.0
       jimp:
         specifier: 1.6.0
         version: 1.6.0
