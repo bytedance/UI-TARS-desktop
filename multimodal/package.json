@@ -13,6 +13,7 @@
     "build:tarko": "pnpm --filter \"./tarko/**\" --include-dependencies build",
     "build:agent-tars": "pnpm --filter \"./agent-tars/**\" --include-dependencies build",
     "build:omni-tars": "pnpm --filter \"./omni-tars/**\" --include-dependencies build",
+    "build:gui-agent": "pnpm --filter \"./gui-agent/**\" --include-dependencies build",
     "test": "vitest run",
     "test:watch": "vitest",
     "coverage": "vitest run --coverage",

@@ -113,7 +113,7 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({
           <img
             src={part._extra.currentScreenshot}
             alt="Browser Screenshot"
-            className="w-full h-auto object-contain"
+            className="w-full h-auto object-contain max-h-[70vh]"
           />
         </BrowserShell>
       </ResultCard>
