@@ -296,6 +296,10 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
                 fontWeight: 500,
                 fontSize: '12px',
                 color: isDarkMode ? '#e0e7ff' : '#4338ca',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                minWidth: 0,
               }}
               title={agentInfo.name}
             >
