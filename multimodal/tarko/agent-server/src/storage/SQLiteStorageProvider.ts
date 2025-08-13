@@ -169,22 +169,33 @@ export class SQLiteStorageProvider implements StorageProvider {
   // Temporarily disable foreign key constraints to preserve events
     this.db.exec('PRAGMA foreign_keys = OFF');
 
-    // Create new sessions table with JSON schema
-  this.db.exec(`
-    CREATE TABLE sessions_new (
-      id TEXT PRIMARY KEY,
-    createdAt INTEGER NOT NULL,
-    updatedAt INTEGER NOT NULL,
-    workspace TEXT NOT NULL,
-    metadata TEXT
-  )
-  `);
+    // Get current table schema for dynamic column detection
+    const tableInfoStmt = this.db.prepare('PRAGMA table_info(sessions)');
+    const currentColumns = tableInfoStmt.all() as Array<{
+    cid: number;
+    name: string;
+    type: string;
+    notnull: number;
+    dflt_value: any;
+    pk: number;
+    }>;
 
-  // Migrate data from legacy schema to JSON schema
-  // Dynamically build SELECT query based on available columns
-  const columnNames = columns.map(col => col.name);
-  const selectColumns = [
-    'id', 'createdAt', 'updatedAt',
+    // Create new sessions table with JSON schema
+    this.db.exec(`
+      CREATE TABLE sessions_new (
+        id TEXT PRIMARY KEY,
+      createdAt INTEGER NOT NULL,
+      updatedAt INTEGER NOT NULL,
+      workspace TEXT NOT NULL,
+      metadata TEXT
+    )
+    `);
+
+      // Migrate data from legacy schema to JSON schema
+    // Dynamically build SELECT query based on available columns
+    const columnNames = currentColumns.map((col: any) => col.name);
+    const selectColumns = [
+      'id', 'createdAt', 'updatedAt',
         columnNames.includes('name') ? 'name' : 'NULL as name',
         columnNames.includes('workspace') ? 'workspace' : 'NULL as workspace',
         columnNames.includes('workingDirectory') ? 'workingDirectory' : 'NULL as workingDirectory',
