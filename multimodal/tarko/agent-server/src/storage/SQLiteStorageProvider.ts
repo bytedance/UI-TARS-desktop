@@ -477,7 +477,6 @@ export class SQLiteStorageProvider implements StorageProvider {
       `);
 
       const rows = stmt.all(sessionId) as unknown as { eventData: string }[];
-      console.log('rows', sessionId, rows);
 
       // Return empty array if no events found (instead of throwing error)
       if (!rows || rows.length === 0) {
