@@ -53,43 +53,28 @@ function extractDiffData(panelContent: StandardPanelContent): {
   name?: string;
 } | null {
   try {
-    // Try arguments first
-    if (panelContent.arguments) {
-      const { content, path, name } = panelContent.arguments;
-
-      if (content && typeof content === 'string') {
-        return {
-          content,
-          path: path ? String(path) : undefined,
-          name: name ? String(name) : undefined,
-        };
-      }
+    // Extract diff content from source array
+    const sourceArray = panelContent.source;
+    if (!Array.isArray(sourceArray) || sourceArray.length === 0) {
+      return null;
     }
 
-    // Try to extract from source
-    if (typeof panelContent.source === 'object' && panelContent.source !== null) {
-      const sourceObj = panelContent.source as any;
-      const { content, path, name } = sourceObj;
+    const textSource = sourceArray.find(
+      (item) => typeof item === 'object' && item !== null && 'text' in item,
+    );
 
-      if (content && typeof content === 'string') {
-        return {
-          content,
-          path: path ? String(path) : undefined,
-          name: name ? String(name) : undefined,
-        };
-      }
+    if (!textSource || typeof textSource.text !== 'string') {
+      return null;
     }
 
-    // If source is a string, treat it as content
-    if (typeof panelContent.source === 'string') {
-      return {
-        content: panelContent.source,
-        path: undefined,
-        name: undefined,
-      };
-    }
+    // Extract path from arguments
+    const path = panelContent.arguments?.path ? String(panelContent.arguments.path) : undefined;
 
-    return null;
+    return {
+      content: textSource.text,
+      path,
+      name: path ? path.split('/').pop() : undefined,
+    };
   } catch (error) {
     console.warn('Failed to extract diff data:', error);
     return null;

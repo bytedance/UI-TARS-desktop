@@ -94,8 +94,6 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
     );
   }, [sessions, searchQuery]);
 
-  console.log('filteredSessions', filteredSessions);
-
   // Optimize grouping calculation to reduce unnecessary re-computation
   const groupedSessions = useMemo(() => {
     // If in search mode, use separate search results group
