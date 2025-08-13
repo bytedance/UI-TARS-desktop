@@ -172,7 +172,7 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [availableWidth, setAvailableWidth] = useState(0);
-  // const [workspaceTextWidth, setWorkspaceTextWidth] = useState(0); // Removed since workspace badge is commented out
+
   const [agentTextWidth, setAgentTextWidth] = useState(0);
   const [modelTextWidth, setModelTextWidth] = useState(0);
   const isDarkMode = useDarkMode();
@@ -205,11 +205,6 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
         return width;
       };
 
-      // Workspace text width calculation removed since badge is commented out
-      // if (workspaceInfo.name && workspaceInfo.name !== 'Unknown') {
-      //   setWorkspaceTextWidth(measureText(workspaceInfo.name, 'font-medium'));
-      // }
-
       if (agentInfo.name) {
         setAgentTextWidth(measureText(agentInfo.name, 'font-medium'));
       }
@@ -231,7 +226,7 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, [agentInfo.name, modelInfo.model, modelInfo.provider]);
 
-  // Calculate dynamic widths for badges (workspace removed)
+  // Calculate dynamic widths for badges
   const totalTextWidth = agentTextWidth + modelTextWidth;
   const hasSpace = totalTextWidth <= availableWidth;
 
@@ -247,9 +242,7 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
   return (
     <div ref={containerRef} className="flex-1 flex justify-center min-w-0">
       <div className="flex items-center gap-3 min-w-0" style={{ maxWidth: '100%' }}>
-        {/* Workspace Badge - Removed and moved to HTML title */}
-
-        {/* Agent Name Badge */}
+        {/* Agent Name Badge - Enhanced with colorful gradient */}
         {agentInfo.name && (
           <Box
             sx={{
@@ -260,29 +253,50 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
               py: 0.375,
               height: '28px',
               minHeight: '28px',
-              background: isDarkMode ? 'rgba(55, 65, 81, 0.3)' : 'rgba(248, 250, 252, 0.8)',
+
+              // Colorful gradient background for Agent
+              background: isDarkMode
+                ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 50%, rgba(168, 85, 247, 0.15) 100%)'
+                : 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.08) 50%, rgba(168, 85, 247, 0.08) 100%)',
               backdropFilter: 'blur(8px)',
               border: isDarkMode
-                ? '1px solid rgba(75, 85, 99, 0.3)'
-                : '1px solid rgba(203, 213, 225, 0.6)',
+                ? '1px solid rgba(139, 92, 246, 0.25)'
+                : '1px solid rgba(99, 102, 241, 0.15)',
               borderRadius: '8px',
               minWidth: 0,
               maxWidth: agentMaxWidth,
+              position: 'relative',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                inset: 0,
+                borderRadius: '8px',
+                background: isDarkMode
+                  ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 50%, rgba(168, 85, 247, 0.05) 100%)'
+                  : 'linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(139, 92, 246, 0.03) 50%, rgba(168, 85, 247, 0.03) 100%)',
+                zIndex: -1,
+              },
               '&:hover': {
-                background: isDarkMode ? 'rgba(55, 65, 81, 0.8)' : 'rgba(241, 245, 249, 0.9)',
+                background: isDarkMode
+                  ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(139, 92, 246, 0.25) 50%, rgba(168, 85, 247, 0.25) 100%)'
+                  : 'linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(139, 92, 246, 0.12) 50%, rgba(168, 85, 247, 0.12) 100%)',
+                border: isDarkMode
+                  ? '1px solid rgba(139, 92, 246, 0.35)'
+                  : '1px solid rgba(99, 102, 241, 0.25)',
                 boxShadow: isDarkMode
-                  ? '0 2px 4px -1px rgba(0, 0, 0, 0.2)'
-                  : '0 2px 4px -1px rgba(0, 0, 0, 0.05)',
+                  ? '0 2px 8px -1px rgba(99, 102, 241, 0.15)'
+                  : '0 2px 8px -1px rgba(99, 102, 241, 0.08)',
               },
             }}
           >
-            <FiZap size={12} color={isDarkMode ? '#9ca3af' : '#6b7280'} style={{ flexShrink: 0 }} />
+            <FiZap size={12} color={isDarkMode ? '#a5b4fc' : '#6366f1'} style={{ flexShrink: 0 }} />
             <Typography
               variant="body2"
               sx={{
                 fontWeight: 500,
                 fontSize: '12px',
-                color: isDarkMode ? '#f3f4f6' : '#374151',
+
+                color: isDarkMode ? '#e0e7ff' : '#4338ca',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
