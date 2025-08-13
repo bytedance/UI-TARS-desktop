@@ -215,9 +215,9 @@ export class AgentSession {
       // Run agent to process the query
 
       // Add model configuration if available in session metadata
-      if (this.sessionMetadata?.modelConfig) {
-        runOptions.provider = this.sessionMetadata.modelConfig.provider as ModelProviderName;
-        runOptions.model = this.sessionMetadata.modelConfig.modelId;
+      if (this.sessionMetadata?.metadata?.modelConfig) {
+        runOptions.provider = this.sessionMetadata.metadata.modelConfig.provider as ModelProviderName;
+        runOptions.model = this.sessionMetadata.metadata.modelConfig.modelId;
         console.log(
           `🎯 [AgentSession] Using session model: ${runOptions.provider}:${runOptions.model}`,
         );
@@ -275,9 +275,9 @@ export class AgentSession {
       };
 
       // Add model configuration if available in session metadata
-      if (this.sessionMetadata?.modelConfig) {
-        runOptions.provider = this.sessionMetadata.modelConfig.provider as ModelProviderName;
-        runOptions.model = this.sessionMetadata.modelConfig.modelId;
+      if (this.sessionMetadata?.metadata?.modelConfig) {
+        runOptions.provider = this.sessionMetadata.metadata.modelConfig.provider as ModelProviderName;
+        runOptions.model = this.sessionMetadata.metadata.modelConfig.modelId;
         console.log(
           `🎯 [AgentSession] Using session model for streaming: ${runOptions.provider}:${runOptions.model}`,
         );
@@ -342,7 +342,7 @@ export class AgentSession {
    */
   async updateModelConfig(sessionMetadata: import('../storage').SessionMetadata): Promise<void> {
     console.log(
-      `🔄 [AgentSession] Storing model config for session ${this.id}: ${sessionMetadata.modelConfig?.provider}:${sessionMetadata.modelConfig?.modelId}`,
+      `🔄 [AgentSession] Storing model config for session ${this.id}: ${sessionMetadata.metadata?.modelConfig?.provider}:${sessionMetadata.metadata?.modelConfig?.modelId}`,
     );
 
     // Store the session metadata for use in future queries
@@ -351,7 +351,7 @@ export class AgentSession {
     // Emit model updated event to client
     this.eventBridge.emit('model_updated', {
       sessionId: this.id,
-      modelConfig: sessionMetadata.modelConfig,
+      modelConfig: sessionMetadata.metadata?.modelConfig,
     });
 
     console.log(`✅ [AgentSession] Model config stored for session ${this.id}`);

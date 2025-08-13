@@ -12,10 +12,19 @@ import {
   SqliteAgentStorageImplementation,
   TARKO_CONSTANTS,
 } from '@tarko/interface';
-import { StorageProvider, SessionMetadata } from './types';
+import { StorageProvider, SessionMetadata, LegacySessionMetadata } from './types';
 
 // Define row types for better type safety
 interface SessionRow {
+  id: string;
+  createdAt: number;
+  updatedAt: number;
+  workspace: string;
+  metadata: string | null; // JSON string containing all extensible metadata
+}
+
+// Legacy row type for migration compatibility
+interface LegacySessionRow {
   id: string;
   createdAt: number;
   updatedAt: number;
@@ -72,16 +81,14 @@ export class SQLiteStorageProvider implements StorageProvider {
         // Check if we need to migrate from old schema
         await this.migrateIfNeeded();
 
-        // Create sessions table with current schema
+        // Create sessions table with JSON schema design
         this.db.exec(`
           CREATE TABLE IF NOT EXISTS sessions (
             id TEXT PRIMARY KEY,
             createdAt INTEGER NOT NULL,
             updatedAt INTEGER NOT NULL,
-            name TEXT,
             workspace TEXT NOT NULL,
-            tags TEXT,
-            modelConfig TEXT
+            metadata TEXT -- JSON string for all extensible metadata
           )
         `);
 
@@ -113,7 +120,7 @@ export class SQLiteStorageProvider implements StorageProvider {
   }
 
   /**
-   * Check and migrate from old database schema if needed
+   * Check and migrate from old database schema to JSON schema if needed
    */
   private async migrateIfNeeded(): Promise<void> {
     try {
@@ -136,27 +143,13 @@ export class SQLiteStorageProvider implements StorageProvider {
         return;
       }
 
-      let needsMigration = false;
+      // Check if we need to migrate to JSON schema
+      const hasMetadataColumn = columns.some((col) => col.name === 'metadata');
+      const hasLegacyColumns = columns.some((col) => ['name', 'tags', 'modelConfig'].includes(col.name));
 
-      // Check if we have the old 'workingDirectory' column instead of 'workspace'
-      const hasWorkingDirectory = columns.some((col) => col.name === 'workingDirectory');
-      const hasWorkspace = columns.some((col) => col.name === 'workspace');
-
-      // Check if we need to add modelConfig column
-      const hasModelConfig = columns.some((col) => col.name === 'modelConfig');
-
-      if (hasWorkingDirectory && !hasWorkspace) {
-        needsMigration = true;
-        console.log('Migration needed: workingDirectory → workspace');
-      }
-
-      if (!hasModelConfig) {
-        needsMigration = true;
-        console.log('Migration needed: adding modelConfig column');
-      }
-
-      if (needsMigration) {
-        await this.performSchemaMigration(hasWorkingDirectory, hasWorkspace, hasModelConfig);
+      if (!hasMetadataColumn && hasLegacyColumns) {
+        console.log('Migration needed: converting to JSON schema design');
+        await this.performJsonSchemaMigration();
       }
     } catch (error) {
       console.error('Failed to migrate database schema:', error);
@@ -167,68 +160,82 @@ export class SQLiteStorageProvider implements StorageProvider {
   }
 
   /**
-   * Execute database schema migration without losing events data
-   * Uses ALTER TABLE ADD COLUMN for safe migration that preserves foreign key relationships
-   */
-  private async performSchemaMigration(
-    hasWorkingDirectory: boolean,
-    hasWorkspace: boolean,
-    hasModelConfig: boolean,
-  ): Promise<void> {
-    console.log('Starting safe database schema migration...');
+  * Migrate from legacy column-based schema to JSON metadata schema
+  * This is the final migration - no more schema changes needed after this
+  */
+  private async performJsonSchemaMigration(): Promise<void> {
+  console.log('Starting migration to JSON schema design...');
 
-    // For workingDirectory -> workspace migration, we need to use the table recreation approach
-    // but we'll preserve events by temporarily disabling foreign keys
-    if (hasWorkingDirectory && !hasWorkspace) {
-      console.log('Migrating workingDirectory to workspace column...');
+  // Temporarily disable foreign key constraints to preserve events
+    this.db.exec('PRAGMA foreign_keys = OFF');
 
-      // Temporarily disable foreign key constraints to preserve events
-      this.db.exec('PRAGMA foreign_keys = OFF');
+    // Create new sessions table with JSON schema
+  this.db.exec(`
+    CREATE TABLE sessions_new (
+      id TEXT PRIMARY KEY,
+    createdAt INTEGER NOT NULL,
+    updatedAt INTEGER NOT NULL,
+    workspace TEXT NOT NULL,
+    metadata TEXT
+  )
+  `);
 
-      // Create new sessions table with updated schema
-      this.db.exec(`
-        CREATE TABLE sessions_new (
-          id TEXT PRIMARY KEY,
-          createdAt INTEGER NOT NULL,
-          updatedAt INTEGER NOT NULL,
-          name TEXT,
-          workspace TEXT NOT NULL,
-          tags TEXT,
-          modelConfig TEXT
-        )
-      `);
+  // Migrate data from legacy schema to JSON schema
+  const legacyStmt = this.db.prepare(`
+  SELECT id, createdAt, updatedAt, name, workspace, workingDirectory, tags, modelConfig
+  FROM sessions
+  `);
 
-      // Copy data from old sessions table, renaming workingDirectory to workspace
-      this.db.exec(`
-        INSERT INTO sessions_new (id, createdAt, updatedAt, name, workspace, tags, modelConfig)
-        SELECT id, createdAt, updatedAt, name, workingDirectory, tags, NULL
-        FROM sessions
-      `);
+  const insertStmt = this.db.prepare(`
+  INSERT INTO sessions_new (id, createdAt, updatedAt, workspace, metadata)
+  VALUES (?, ?, ?, ?, ?)
+  `);
 
-      // Drop old sessions table and rename new one
-      this.db.exec('DROP TABLE sessions');
-      this.db.exec('ALTER TABLE sessions_new RENAME TO sessions');
+  const legacyRows = legacyStmt.all() as Array<{
+  id: string;
+  createdAt: number;
+  updatedAt: number;
+  name: string | null;
+  workspace: string | null;
+      workingDirectory: string | null;
+  tags: string | null;
+  modelConfig: string | null;
+  }>;
 
-      // Re-enable foreign key constraints
-      this.db.exec('PRAGMA foreign_keys = ON');
-
-      console.log('workingDirectory -> workspace migration completed');
-    }
-    // For adding modelConfig column, use ALTER TABLE ADD COLUMN (safe operation)
-    else if (!hasModelConfig) {
-      console.log('Adding modelConfig column...');
-
+  for (const row of legacyRows) {
+  // Convert legacy data to JSON metadata format
+  const metadata: any = { version: 1 };
+  
+    if (row.name) metadata.name = row.name;
+    if (row.tags) {
       try {
-        // Use ALTER TABLE ADD COLUMN for safe schema change that preserves all data and relationships
-        this.db.exec('ALTER TABLE sessions ADD COLUMN modelConfig TEXT');
-        console.log('modelConfig column added successfully');
-      } catch (error) {
-        console.error('Failed to add modelConfig column:', error);
-        throw error;
+      metadata.tags = JSON.parse(row.tags);
+    } catch {
+      // If tags parsing fails, ignore
+  }
+  }
+  if (row.modelConfig) {
+    try {
+    metadata.modelConfig = JSON.parse(row.modelConfig);
+  } catch {
+      // If modelConfig parsing fails, ignore
       }
+      }
+
+      const workspace = row.workspace || row.workingDirectory || '';
+      const metadataJson = Object.keys(metadata).length > 1 ? JSON.stringify(metadata) : null;
+
+      insertStmt.run(row.id, row.createdAt, row.updatedAt, workspace, metadataJson);
     }
 
-    console.log('Database schema migration completed successfully');
+    // Drop old sessions table and rename new one
+    this.db.exec('DROP TABLE sessions');
+    this.db.exec('ALTER TABLE sessions_new RENAME TO sessions');
+
+    // Re-enable foreign key constraints
+    this.db.exec('PRAGMA foreign_keys = ON');
+
+    console.log('JSON schema migration completed successfully');
   }
 
   async createSession(metadata: SessionMetadata): Promise<SessionMetadata> {
@@ -240,25 +247,20 @@ export class SQLiteStorageProvider implements StorageProvider {
       updatedAt: metadata.updatedAt || Date.now(),
     };
 
-    const tagsJson = sessionData.tags ? JSON.stringify(sessionData.tags) : null;
-    const modelConfigJson = sessionData.modelConfig
-      ? JSON.stringify(sessionData.modelConfig)
-      : null;
+    const metadataJson = sessionData.metadata ? JSON.stringify(sessionData.metadata) : null;
 
     try {
       const stmt = this.db.prepare(`
-        INSERT INTO sessions (id, createdAt, updatedAt, name, workspace, tags, modelConfig)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO sessions (id, createdAt, updatedAt, workspace, metadata)
+        VALUES (?, ?, ?, ?, ?)
       `);
 
       stmt.run(
         sessionData.id,
         sessionData.createdAt,
         sessionData.updatedAt,
-        sessionData.name || null,
         sessionData.workspace,
-        tagsJson,
-        modelConfigJson,
+        metadataJson,
       );
       return sessionData;
     } catch (error) {
@@ -291,24 +293,14 @@ export class SQLiteStorageProvider implements StorageProvider {
       const params: Array<string | number | null> = [];
       const setClauses: string[] = [];
 
-      if (metadata.name !== undefined) {
-        setClauses.push('name = ?');
-        params.push(metadata.name || null);
-      }
-
       if (metadata.workspace !== undefined) {
         setClauses.push('workspace = ?');
         params.push(metadata.workspace);
       }
 
-      if (metadata.tags !== undefined) {
-        setClauses.push('tags = ?');
-        params.push(metadata.tags ? JSON.stringify(metadata.tags) : null);
-      }
-
-      if (metadata.modelConfig !== undefined) {
-        setClauses.push('modelConfig = ?');
-        params.push(metadata.modelConfig ? JSON.stringify(metadata.modelConfig) : null);
+      if (metadata.metadata !== undefined) {
+        setClauses.push('metadata = ?');
+        params.push(metadata.metadata ? JSON.stringify(metadata.metadata) : null);
       }
 
       // Always update the timestamp
@@ -346,7 +338,7 @@ export class SQLiteStorageProvider implements StorageProvider {
 
     try {
       const stmt = this.db.prepare(`
-        SELECT id, createdAt, updatedAt, name, workspace, tags, modelConfig
+        SELECT id, createdAt, updatedAt, workspace, metadata
         FROM sessions
         WHERE id = ?
       `);
@@ -361,10 +353,8 @@ export class SQLiteStorageProvider implements StorageProvider {
         id: row.id,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
-        name: row.name || undefined,
         workspace: row.workspace,
-        tags: row.tags ? JSON.parse(row.tags) : undefined,
-        modelConfig: row.modelConfig ? JSON.parse(row.modelConfig) : undefined,
+        metadata: row.metadata ? JSON.parse(row.metadata) : undefined,
       };
     } catch (error) {
       console.error(`Failed to get session ${sessionId}:`, error);
@@ -379,7 +369,7 @@ export class SQLiteStorageProvider implements StorageProvider {
 
     try {
       const stmt = this.db.prepare(`
-        SELECT id, createdAt, updatedAt, name, workspace, tags, modelConfig
+        SELECT id, createdAt, updatedAt, workspace, metadata
         FROM sessions
         ORDER BY updatedAt DESC
       `);
@@ -390,10 +380,8 @@ export class SQLiteStorageProvider implements StorageProvider {
         id: row.id,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
-        name: row.name || undefined,
         workspace: row.workspace,
-        tags: row.tags ? JSON.parse(row.tags) : undefined,
-        modelConfig: row.modelConfig ? JSON.parse(row.modelConfig) : undefined,
+        metadata: row.metadata ? JSON.parse(row.metadata) : undefined,
       }));
     } catch (error) {
       console.error('Failed to get all sessions:', error);

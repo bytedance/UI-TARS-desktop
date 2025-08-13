@@ -160,8 +160,8 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     let modelConfig = this.getDefaultModelConfig();
 
     // If session has specific model config and it's still valid, use session config
-    if (sessionMetadata?.modelConfig) {
-      const { provider, modelId } = sessionMetadata.modelConfig;
+    if (sessionMetadata?.metadata?.modelConfig) {
+      const { provider, modelId } = sessionMetadata.metadata.modelConfig;
       if (this.isModelConfigValid(provider, modelId)) {
         modelConfig = { provider, modelId };
       } else {

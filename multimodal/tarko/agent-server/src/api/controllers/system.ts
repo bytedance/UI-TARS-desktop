@@ -94,13 +94,22 @@ export async function updateSessionModel(req: Request, res: Response) {
   try {
     // Update session model configuration
     if (server.storageProvider) {
+      // Get current session metadata
+      const currentMetadata = await server.storageProvider.getSessionMetadata(sessionId);
+      if (!currentMetadata) {
+        return res.status(404).json({ error: 'Session not found' });
+      }
+
+      // Update metadata with new model config
       const updatedMetadata = await server.storageProvider.updateSessionMetadata(sessionId, {
-        modelConfig: {
-          provider,
-          modelId,
-          configuredAt: Date.now(),
+        metadata: {
+          ...currentMetadata.metadata,
+          modelConfig: {
+            provider,
+            modelId,
+            configuredAt: Date.now(),
+          },
         },
-        updatedAt: Date.now(),
       });
 
       // If session is currently active, recreate the agent with new model config
