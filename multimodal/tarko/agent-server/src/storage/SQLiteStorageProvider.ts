@@ -145,7 +145,9 @@ export class SQLiteStorageProvider implements StorageProvider {
 
       // Check if we need to migrate to JSON schema
       const hasMetadataColumn = columns.some((col) => col.name === 'metadata');
-      const hasLegacyColumns = columns.some((col) => ['name', 'tags', 'modelConfig'].includes(col.name));
+      const hasLegacyColumns = columns.some((col) =>
+        ['name', 'tags', 'modelConfig'].includes(col.name),
+      );
 
       if (!hasMetadataColumn && hasLegacyColumns) {
         console.log('Migration needed: converting to JSON schema design');
@@ -162,7 +164,8 @@ export class SQLiteStorageProvider implements StorageProvider {
   /**
    * Migrate from legacy column-based schema to JSON metadata schema
    * This is the final migration - no more schema changes needed after this
-   * SAFETY: Uses database transaction to ensure data integrity
+   * SAFETY: Uses database transaction and safe table renaming to ensure data integrity
+   * FIXED: Prevents events table data loss by avoiding direct DROP of FK-referenced table
    */
   private async performJsonSchemaMigration(): Promise<void> {
     console.log('Starting SAFE migration to JSON schema design...');
@@ -193,19 +196,19 @@ export class SQLiteStorageProvider implements StorageProvider {
         return;
       }
 
-    // Get current table schema for dynamic column detection
-    const tableInfoStmt = this.db.prepare('PRAGMA table_info(sessions)');
-    const currentColumns = tableInfoStmt.all() as Array<{
-    cid: number;
-    name: string;
-    type: string;
-    notnull: number;
-    dflt_value: any;
-    pk: number;
-    }>;
+      // Get current table schema for dynamic column detection
+      const tableInfoStmt = this.db.prepare('PRAGMA table_info(sessions)');
+      const currentColumns = tableInfoStmt.all() as Array<{
+        cid: number;
+        name: string;
+        type: string;
+        notnull: number;
+        dflt_value: any;
+        pk: number;
+      }>;
 
-    // Create new sessions table with JSON schema
-    this.db.exec(`
+      // Create new sessions table with JSON schema
+      this.db.exec(`
       CREATE TABLE sessions_new (
         id TEXT PRIMARY KEY,
       createdAt INTEGER NOT NULL,
@@ -216,15 +219,17 @@ export class SQLiteStorageProvider implements StorageProvider {
     `);
 
       // Migrate data from legacy schema to JSON schema
-    // Dynamically build SELECT query based on available columns
-    const columnNames = currentColumns.map((col: any) => col.name);
-    const selectColumns = [
-      'id', 'createdAt', 'updatedAt',
+      // Dynamically build SELECT query based on available columns
+      const columnNames = currentColumns.map((col: any) => col.name);
+      const selectColumns = [
+        'id',
+        'createdAt',
+        'updatedAt',
         columnNames.includes('name') ? 'name' : 'NULL as name',
         columnNames.includes('workspace') ? 'workspace' : 'NULL as workspace',
         columnNames.includes('workingDirectory') ? 'workingDirectory' : 'NULL as workingDirectory',
         columnNames.includes('tags') ? 'tags' : 'NULL as tags',
-        columnNames.includes('modelConfig') ? 'modelConfig' : 'NULL as modelConfig'
+        columnNames.includes('modelConfig') ? 'modelConfig' : 'NULL as modelConfig',
       ].join(', ');
 
       const legacyStmt = this.db.prepare(`
@@ -232,28 +237,28 @@ export class SQLiteStorageProvider implements StorageProvider {
         FROM sessions
       `);
 
-  const insertStmt = this.db.prepare(`
+      const insertStmt = this.db.prepare(`
   INSERT INTO sessions_new (id, createdAt, updatedAt, workspace, metadata)
   VALUES (?, ?, ?, ?, ?)
   `);
 
-  const legacyRows = legacyStmt.all() as Array<{
-  id: string;
-  createdAt: number;
-  updatedAt: number;
-  name: string | null;
-  workspace: string | null;
-      workingDirectory: string | null;
-  tags: string | null;
-  modelConfig: string | null;
-  }>;
+      const legacyRows = legacyStmt.all() as Array<{
+        id: string;
+        createdAt: number;
+        updatedAt: number;
+        name: string | null;
+        workspace: string | null;
+        workingDirectory: string | null;
+        tags: string | null;
+        modelConfig: string | null;
+      }>;
 
       console.log(`Migrating ${legacyRows.length} sessions...`);
 
       for (const row of legacyRows) {
         // Convert legacy data to JSON metadata format
         const metadata: any = { version: 1 };
-        
+
         if (row.name) metadata.name = row.name;
         if (row.tags) {
           try {
@@ -280,17 +285,23 @@ export class SQLiteStorageProvider implements StorageProvider {
       // SAFETY CHECK: Verify all data was migrated correctly
       const newCountStmt = this.db.prepare('SELECT COUNT(*) as count FROM sessions_new');
       const newCount = (newCountStmt.get() as { count: number }).count;
-      
+
       if (newCount !== originalCount) {
-        throw new Error(`Migration data loss detected! Original: ${originalCount}, New: ${newCount}`);
+        throw new Error(
+          `Migration data loss detected! Original: ${originalCount}, New: ${newCount}`,
+        );
       }
 
       console.log(`Migration verification passed: ${newCount}/${originalCount} sessions migrated`);
 
-      // Simply replace the sessions table - events will be fine
-      this.db.exec('DROP TABLE sessions');
+      // SAFE: Replace sessions table without breaking foreign key references
+      // This prevents events table data loss by avoiding direct DROP of referenced table
+      this.db.exec('ALTER TABLE sessions RENAME TO sessions_old');
       this.db.exec('ALTER TABLE sessions_new RENAME TO sessions');
-      
+
+      // Now safe to drop old table since foreign keys point to new sessions table
+      this.db.exec('DROP TABLE sessions_old');
+
       console.log('Sessions table replaced successfully');
 
       // Re-enable foreign key constraints
@@ -304,7 +315,9 @@ export class SQLiteStorageProvider implements StorageProvider {
       // Rollback on any error to preserve original data
       console.error('❌ Migration failed, rolling back to preserve data:', error);
       this.db.exec('ROLLBACK');
-      throw new Error(`Migration failed and rolled back: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Migration failed and rolled back: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
