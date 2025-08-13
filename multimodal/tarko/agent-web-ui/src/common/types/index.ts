@@ -4,24 +4,12 @@ import {
   ChatCompletionContentPart,
   ChatCompletionMessageToolCall,
 } from '@tarko/agent-interface';
-import { SanitizedAgentOptions, WorkspaceInfo } from '@tarko/interface';
+import { SanitizedAgentOptions, WorkspaceInfo, SessionMetadata } from '@tarko/interface';
 
 export { AgentEventStream };
-export type { SanitizedAgentOptions, WorkspaceInfo };
+export type { SanitizedAgentOptions, WorkspaceInfo, SessionMetadata };
 
 export type { ChatCompletionContentPart, ChatCompletionMessageToolCall };
-
-/**
- * Session metadata information
- */
-export interface SessionMetadata {
-  id: string;
-  createdAt: number;
-  updatedAt: number;
-  name?: string;
-  workspace: string;
-  tags?: string[];
-}
 
 /**
  * Agent information

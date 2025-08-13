@@ -43,9 +43,9 @@ const SessionItem: React.FC<SessionItemProps> = React.memo(
     const handleEdit = useCallback(
       (e: React.MouseEvent) => {
         e.stopPropagation();
-        onEditSession(session.id, session.name);
+        onEditSession(session.id, session.metadata?.name);
       },
-      [onEditSession, session.id, session.name],
+      [onEditSession, session.id, session.metadata?.name],
     );
 
     const handleDelete = useCallback(
@@ -135,7 +135,10 @@ const SessionItem: React.FC<SessionItemProps> = React.memo(
 
             <div className="flex-1 min-w-0">
               <div className="font-medium truncate">
-                <HighlightText text={session.name || 'Untitled Task'} highlight={searchQuery} />
+                <HighlightText
+                  text={session.metadata?.name || 'Untitled Task'}
+                  highlight={searchQuery}
+                />
               </div>
               <div className="text-xs flex items-center mt-0.5 text-gray-500 dark:text-gray-400">
                 <FiClock className="mr-1" size={10} />

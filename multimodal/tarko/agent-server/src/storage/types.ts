@@ -3,52 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentEventStream } from '@tarko/interface';
+import { AgentEventStream, SessionMetadata } from '@tarko/interface';
 
-/**
- * Session metadata interface - JSON schema design for extensibility
- */
-export interface SessionMetadata {
-  id: string;
-  createdAt: number;
-  updatedAt: number;
-  workspace: string;
-  // All extensible metadata in JSON format - no more schema migrations needed
-  metadata?: {
-    version?: number; // Schema version for backward compatibility
-    name?: string;
-    tags?: string[];
-    modelConfig?: {
-      provider: string;
-      modelId: string;
-      configuredAt: number;
-    };
-    agentConfig?: {
-      agentId: string;
-      configuredAt: number;
-      [key: string]: any; // Future agent configurations
-    };
-    [key: string]: any; // Future extensible fields
-  };
-}
-
-/**
- * Legacy interface for backward compatibility during transition
- * @deprecated Use SessionMetadata.metadata instead
- */
-export interface LegacySessionMetadata {
-  id: string;
-  createdAt: number;
-  updatedAt: number;
-  name?: string;
-  workspace: string;
-  tags?: string[];
-  modelConfig?: {
-    provider: string;
-    modelId: string;
-    configuredAt: number;
-  };
-}
+export type { SessionMetadata, LegacySessionMetadata } from '@tarko/interface';
 
 /**
  * Abstract storage provider interface
