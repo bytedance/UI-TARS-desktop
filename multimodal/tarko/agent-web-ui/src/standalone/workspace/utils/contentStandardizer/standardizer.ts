@@ -1,5 +1,7 @@
 import { ToolResultContentPart } from '../../types';
 import { StandardPanelContent } from '../../types/panelContent';
+import { extractFileContent } from './extractors';
+import { MultimodalContent } from '../../../chat/Message/components/MultimodalContent';
 import {
   handleImageContent,
   handleSearchContent,
@@ -29,6 +31,21 @@ export function standardizeContent(panelContent: StandardPanelContent): ToolResu
         type: 'text',
         name: 'ERROR',
         text: error,
+      },
+    ];
+  }
+
+  if (type === 'diff_result') {
+    // @ts-expect-error
+    const { content } = extractFileContent(source);
+
+    return [
+      {
+        type: 'diff_result',
+        name: 'FILE_RESULT',
+        // @ts-expect-error
+        path: toolArguments.path,
+        content: content,
       },
     ];
   }

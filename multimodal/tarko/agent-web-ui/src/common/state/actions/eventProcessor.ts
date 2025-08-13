@@ -486,7 +486,6 @@ function handleToolResult(
     _extra: event._extra,
   };
 
-  // Removed debug logging
 
   // Update both message and tool result atoms for immediate UI response
   set(messagesAtom, (prev: Record<string, Message[]>) => {

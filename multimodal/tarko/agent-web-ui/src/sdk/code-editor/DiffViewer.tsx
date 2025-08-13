@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { DiffEditor } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
+import parseDiff from 'parse-diff';
 import { FiCopy, FiGitBranch } from 'react-icons/fi';
 import './MonacoCodeEditor.css';
 
@@ -9,52 +10,6 @@ interface DiffViewerProps {
   fileName?: string;
   maxHeight?: string;
   className?: string;
-}
-
-// Parse unified diff to original/modified content
-function parseDiff(diffContent: string) {
-  const lines = diffContent.split('\n');
-  let original = '';
-  let modified = '';
-  let additions = 0;
-  let deletions = 0;
-
-  for (const line of lines) {
-    // Skip diff headers
-    if (
-      line.startsWith('@@') ||
-      line.startsWith('---') ||
-      line.startsWith('+++') ||
-      line.startsWith('diff ') ||
-      line.startsWith('index ')
-    ) {
-      continue;
-    }
-
-    if (line.startsWith('-')) {
-      original += line.slice(1) + '\n';
-      deletions++;
-    } else if (line.startsWith('+')) {
-      modified += line.slice(1) + '\n';
-      additions++;
-    } else {
-      // Context line (starts with space or empty)
-      const content = line.startsWith(' ') ? line.slice(1) : line;
-      original += content + '\n';
-      modified += content + '\n';
-    }
-  }
-
-  return { original: original.trim(), modified: modified.trim(), additions, deletions };
-}
-
-// Extract filename from diff content
-function extractFileName(diffContent: string): string {
-  const fileMatch = diffContent.match(/\+\+\+ b\/(.+?)\n/);
-  if (fileMatch) {
-    return fileMatch[1].split('/').pop() || fileMatch[1];
-  }
-  return 'diff';
 }
 
 // Get language from filename
@@ -91,12 +46,69 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({
   maxHeight = '400px',
   className = '',
 }) => {
-  const { original, modified, additions, deletions } = useMemo(
-    () => parseDiff(diffContent),
-    [diffContent],
-  );
+  const { original, modified, additions, deletions, displayFileName } = useMemo(() => {
+    try {
+      // Parse diff using mature library
+      const files = parseDiff(diffContent);
 
-  const displayFileName = fileName || extractFileName(diffContent);
+      if (files.length === 0) {
+        return {
+          original: '',
+          modified: diffContent,
+          additions: 0,
+          deletions: 0,
+          displayFileName: fileName || 'diff',
+        };
+      }
+
+      const file = files[0];
+      const chunks = file.chunks || [];
+
+      const originalLines: string[] = [];
+      const modifiedLines: string[] = [];
+      let addCount = 0;
+      let delCount = 0;
+
+      // Process chunks to reconstruct original and modified content
+      chunks.forEach((chunk) => {
+        chunk.changes.forEach((change) => {
+          switch (change.type) {
+            case 'add':
+              modifiedLines.push(change.content.slice(1)); // Remove '+' prefix
+              addCount++;
+              break;
+            case 'del':
+              originalLines.push(change.content.slice(1)); // Remove '-' prefix
+              delCount++;
+              break;
+            case 'normal':
+              const content = change.content.slice(1); // Remove ' ' prefix
+              originalLines.push(content);
+              modifiedLines.push(content);
+              break;
+          }
+        });
+      });
+
+      return {
+        original: originalLines.join('\n'),
+        modified: modifiedLines.join('\n'),
+        additions: addCount,
+        deletions: delCount,
+        displayFileName: fileName || file.to || file.from || 'diff',
+      };
+    } catch (error) {
+      console.warn('Failed to parse diff, falling back to raw content:', error);
+      return {
+        original: '',
+        modified: diffContent,
+        additions: 0,
+        deletions: 0,
+        displayFileName: fileName || 'diff',
+      };
+    }
+  }, [diffContent, fileName]);
+
   const language = getLanguage(displayFileName);
 
   const handleCopy = () => {
