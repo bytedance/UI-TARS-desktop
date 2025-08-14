@@ -59,9 +59,24 @@ interface WebSearchResult {
   content: string;
 }
 
-interface OmniTarsTextContent {
+export interface OmniTarsTextContent {
   type: 'text';
   text: string;
+}
+
+export function isOmniTarsTextContentArray(
+  content: RawSearchContent,
+): content is OmniTarsTextContent[] {
+  return (
+    Array.isArray(content) &&
+    content.length > 0 &&
+    typeof content[0] === 'object' &&
+    content[0] !== null &&
+    'type' in content[0] &&
+    content[0].type === 'text' &&
+    'text' in content[0] &&
+    typeof content[0].text === 'string'
+  );
 }
 
 interface MCPWrappedContent {
@@ -156,7 +171,7 @@ export class SearchService {
     content: RawSearchContent,
     args: ToolArguments,
   ): NormalizedSearchData[] | RawSearchContent {
-    if (this.isOmniTarsTextContentArray(content)) {
+    if (isOmniTarsTextContentArray(content)) {
       try {
         const textContent = content[0].text;
         const parsedContent: unknown = JSON.parse(textContent);
@@ -256,21 +271,6 @@ export class SearchService {
     relatedSearches?: string[];
   } {
     return typeof part === 'object' && part !== null && ('results' in part || 'query' in part);
-  }
-
-  private static isOmniTarsTextContentArray(
-    content: RawSearchContent,
-  ): content is OmniTarsTextContent[] {
-    return (
-      Array.isArray(content) &&
-      content.length > 0 &&
-      typeof content[0] === 'object' &&
-      content[0] !== null &&
-      'type' in content[0] &&
-      content[0].type === 'text' &&
-      'text' in content[0] &&
-      typeof content[0].text === 'string'
-    );
   }
 
   private static isWebSearchResult(item: unknown): item is WebSearchResult {

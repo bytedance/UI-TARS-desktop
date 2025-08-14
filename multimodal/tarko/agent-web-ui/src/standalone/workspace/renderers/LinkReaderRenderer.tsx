@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { FiExternalLink, FiCopy, FiCheck, FiFileText, FiCode } from 'react-icons/fi';
-import { StandardPanelContent } from '../types/panelContent';
+import { PanelContentSource, StandardPanelContent } from '../types/panelContent';
 import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 import { wrapMarkdown } from '@/common/utils/markdown';
 import { FileDisplayMode } from '../types';
+import { isOmniTarsTextContentArray, OmniTarsTextContent } from '@/common/services/SearchService';
 
 interface LinkReaderRendererProps {
   panelContent: StandardPanelContent;
@@ -141,6 +142,39 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
 
 /**
  * Extract LinkReader data from panelContent
+ *
+ * @example
+ *
+ * {
+ *   "type": "link_reader",
+ *   "source": {
+ *       "content": [
+ *           {
+ *               "type": "text",
+ *               "text": "{ Stringified result of structuredContent }"
+ *           }
+ *       ],
+ *       "structuredContent": {
+ *           "results": [
+ *               {
+ *                   "url": "https://seed-tars.com/1.5",
+ *                   "raw_content": " markdown content ",
+ *                   "images": []
+ *               }
+ *           ],
+ *           "failed_results": [],
+ *           "response_time": 0.01
+ *       },
+ *       "isError": false
+ *   },
+ *   "title": "LinkReader",
+ *   "timestamp": 1755011267563,
+ *   "toolCallId": "call_1755011261618_4nyoiv4z9",
+ *   "arguments": {
+ *       "description": "Summary this link",
+ *       "url": "https://seed-tars.com/1.5"
+ *   }
+ * }
  */
 function extractLinkReaderData(panelContent: StandardPanelContent): {
   results: LinkResult[];
@@ -150,24 +184,28 @@ function extractLinkReaderData(panelContent: StandardPanelContent): {
 
     // Handle different data formats
     if (typeof panelContent.source === 'object' && panelContent.source !== null) {
-      // Try arguments first
-      if (panelContent.arguments && typeof panelContent.arguments === 'object') {
-        const argsObj = panelContent.arguments as any;
-        if (argsObj.data && typeof argsObj.data === 'object') {
-          parsedData = argsObj.data;
-        } else if (argsObj.content && argsObj.structuredContent) {
-          parsedData = argsObj.structuredContent;
-        } else {
-          parsedData = argsObj;
-        }
-      } else {
-        // Try source directly
-        const sourceObj = panelContent.source as any;
-        if (Array.isArray(sourceObj) && sourceObj[0] && typeof sourceObj[0] === 'object' && 'text' in sourceObj[0]) {
-          parsedData = JSON.parse(sourceObj[0].text as string);
-        } else {
-          parsedData = sourceObj;
-        }
+      const sourceObj = panelContent.source as {
+        content: OmniTarsTextContent[];
+        structuredContent: LinkReaderResponse;
+      };
+
+      // First, check if structuredContent exists directly in source
+      if (sourceObj.structuredContent && typeof sourceObj.structuredContent === 'object') {
+        parsedData = sourceObj.structuredContent;
+      }
+
+      // Try content array with text field
+      else if (isOmniTarsTextContentArray(sourceObj.content)) {
+        parsedData = JSON.parse(sourceObj.content[0].text);
+      }
+
+      // Fallback
+      else {
+        parsedData = {
+          results: [],
+          failed_results: [],
+          response_time: 0,
+        };
       }
     } else if (typeof panelContent.source === 'string') {
       try {

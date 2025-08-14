@@ -6,7 +6,10 @@ import { useLocation } from 'react-router-dom';
 import { ChatCompletionContentPart } from '@tarko/agent-interface';
 import { MessageInputField } from './MessageInputField';
 import { MessageAttachments } from './MessageAttachments';
-import { contextualSelectorAtom, clearContextualStateAction } from '@/common/state/atoms/contextualSelector';
+import {
+  contextualSelectorAtom,
+  clearContextualStateAction,
+} from '@/common/state/atoms/contextualSelector';
 
 interface MessageInputProps {
   isDisabled?: boolean;
@@ -28,7 +31,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   const [uploadedImages, setUploadedImages] = useState<ChatCompletionContentPart[]>([]);
   const [contextualState, setContextualState] = useAtom(contextualSelectorAtom);
   const clearContextualState = useSetAtom(clearContextualStateAction);
-  
+
   const location = useLocation();
   const { sendMessage, isProcessing, activeSessionId, checkSessionStatus } = useSession();
 
@@ -38,7 +41,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     const query = searchParams.get('q');
 
     if (query && !isProcessing && activeSessionId && !contextualState.input) {
-      setContextualState(prev => ({
+      setContextualState((prev) => ({
         ...prev,
         input: query,
         contextualItems: [],
@@ -55,7 +58,15 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
       submitQuery();
     }
-  }, [location.search, activeSessionId, isProcessing, sendMessage, contextualState.input, setContextualState, clearContextualState]);
+  }, [
+    location.search,
+    activeSessionId,
+    isProcessing,
+    sendMessage,
+    contextualState.input,
+    setContextualState,
+    clearContextualState,
+  ]);
 
   // Enhanced session status monitoring during active connections
   useEffect(() => {
@@ -75,7 +86,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
     // Prepare message content - server will handle contextual expansion
     const messageToSend = contextualState.input.trim();
-    
+
     // Clear all state
     clearContextualState();
 
@@ -105,12 +116,12 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
   return (
     <div className="relative">
-      <MessageAttachments 
+      <MessageAttachments
         images={uploadedImages}
         contextualItems={contextualState.contextualItems}
         onRemoveImage={handleRemoveImage}
       />
-      
+
       <MessageInputField
         uploadedImages={uploadedImages}
         setUploadedImages={setUploadedImages}
