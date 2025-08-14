@@ -26,7 +26,7 @@ export const Heading: React.FC<HeadingProps> = ({ children, level }) => {
 
   const getHeadingStyles = () => {
     const baseStyles =
-      'group scroll-mt-20 flex items-center font-semibold leading-tight text-gray-900 dark:text-gray-100';
+      'group scroll-mt-20 flex items-center font-semibold leading-tight text-gray-900 dark:text-gray-900';
 
     switch (level) {
       case 1:
@@ -34,11 +34,11 @@ export const Heading: React.FC<HeadingProps> = ({ children, level }) => {
       case 2:
         return `${baseStyles} text-2xl font-bold mt-6 mb-2 pb-2`;
       case 3:
-        return `${baseStyles} text-xl font-semibold mt-8 mb-3 text-gray-800 dark:text-gray-200`;
+        return `${baseStyles} text-xl font-semibold mt-8 mb-3 text-gray-800 dark:text-gray-800`;
       case 4:
-        return `${baseStyles} text-md font-semibold mt-6 mb-2 text-gray-800 dark:text-gray-200`;
+        return `${baseStyles} text-md font-semibold mt-6 mb-2 text-gray-800 dark:text-gray-800`;
       default:
-        return `${baseStyles} text-sm font-medium mt-4 mb-2 text-gray-700 dark:text-gray-300`;
+        return `${baseStyles} text-sm font-medium mt-4 mb-2 text-gray-700 dark:text-gray-800`;
     }
   };
 

@@ -15,7 +15,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ inline, className, childre
 
   if (inline || !match) {
     return (
-      <code className="font-mono text-[#525252] bg-[#1b1f230d] dark:bg-[#333e4ecc] dark:text-gray-200 px-1 py-0.5 mx-0.5 whitespace-nowrap rounded-md">
+      <code className="font-mono text-[#525252] bg-[#1b1f230d] dark:bg-[#333e4ecc] dark:text-gray-800 px-1 py-0.5 mx-0.5 whitespace-nowrap rounded-md">
         {children}
       </code>
     );
@@ -43,7 +43,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ inline, className, childre
         {/* Action buttons */}
         <div className="flex items-center gap-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-md shadow-sm p-1">
           {/* Language badge */}
-          <div className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-0.5 rounded-md font-mono">
+          <div className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-2 py-0.5 rounded-md font-mono">
             {match?.[1] ?? 'text'}
           </div>
 
@@ -90,7 +90,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ inline, className, childre
       </div>
 
       <pre
-        className={`bg-[#f5f5f5] dark:bg-gray-900/50 dark:border-gray-700/50 rounded-xl p-4 text-xs ${
+        className={`bg-[#f5f5f5] dark:bg-[#111111] dark:border-gray-700/50 rounded-xl p-4 text-xs ${
           isWordWrap ? 'whitespace-pre-wrap break-words' : 'overflow-x-auto'
         }`}
       >

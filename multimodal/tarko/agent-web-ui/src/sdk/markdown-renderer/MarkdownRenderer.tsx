@@ -92,7 +92,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
    * Determine theme class and merge with markdown content styles
    */
   const themeClass = forceDarkTheme ? 'dark' : 'light';
-  const markdownContentClass = `${themeClass} markdown-content font-inter leading-relaxed text-gray-800 dark:text-gray-200 ${className}`;
+  const markdownContentClass = `${themeClass} markdown-content font-inter leading-relaxed text-gray-800 dark:text-gray-800 ${className}`;
 
   try {
     return (
