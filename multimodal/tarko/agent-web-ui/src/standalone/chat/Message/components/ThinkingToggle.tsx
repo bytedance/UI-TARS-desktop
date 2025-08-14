@@ -50,7 +50,7 @@ export const ThinkingToggle: React.FC<ThinkingToggleProps> = ({
         <motion.div animate={{ rotate: showThinking ? 90 : 0 }} transition={{ duration: 0.2 }}>
           <FiChevronRight size={14} />
         </motion.div>
-        <span className="font-medium">
+        <span className="font-medium text-[16px]">
           Thought{duration ? ` for ${formatDuration(duration)}` : ''}
         </span>
       </motion.button>
@@ -65,7 +65,7 @@ export const ThinkingToggle: React.FC<ThinkingToggleProps> = ({
             transition={{ duration: 0.3, ease: 'easeInOut' }}
             className="overflow-hidden"
           >
-            <div className="mt-3 ml-6 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+            <div className="mt-3 ml-6 text-[15px] leading-relaxed text-gray-700 dark:text-gray-400">
               <div className="whitespace-pre-wrap">{thinking}</div>
             </div>
           </motion.div>
