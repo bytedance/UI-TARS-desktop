@@ -23,6 +23,7 @@
     "dev": "rslib build --watch",
     "build": "rslib build",
     "test": "vitest",
+    "coverage": "vitest run --coverage",
     "dev:agent": "tarko --agent ./"
   },
   "dependencies": {
@@ -35,6 +36,7 @@
   "devDependencies": {
     "@rslib/core": "0.10.0",
     "@types/node": "22.15.30",
+    "@vitest/coverage-v8": "^1.0.0",
     "typescript": "^5.5.3",
     "vitest": "^1.0.0",
     "openai": "4.93.0",

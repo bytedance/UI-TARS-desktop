@@ -1,9 +1,11 @@
 import React from 'react';
-import { ToolResultContentPart } from '../types';
+import { PanelContentArguments, StandardPanelContent } from '../types/panelContent';
+import { FileDisplayMode } from '../types';
 
 interface CommandResultRendererProps {
-  part: ToolResultContentPart;
-  onAction?: (action: string, data: any) => void;
+  panelContent: StandardPanelContent;
+  onAction?: (action: string, data: unknown) => void;
+  displayMode?: FileDisplayMode;
 }
 
 /**
@@ -91,21 +93,18 @@ const highlightCommand = (command: string) => {
 /**
  * Renders a terminal-like command and output result
  */
-export const CommandResultRenderer: React.FC<CommandResultRendererProps> = ({ part }) => {
-  const { command, stdout, stderr, exitCode } = part;
+export const CommandResultRenderer: React.FC<CommandResultRendererProps> = ({ panelContent }) => {
+  // Extract command data from panelContent
+  const commandData = extractCommandData(panelContent);
 
-  if (!command && !stdout && !stderr) {
+  if (!commandData) {
     return <div className="text-gray-500 italic">Command result is empty</div>;
   }
 
+  const { command, stdout, stderr, exitCode } = commandData;
+
   // Exit code styling
   const isError = exitCode !== 0 && exitCode !== undefined;
-  const exitCodeDisplay =
-    exitCode !== undefined ? (
-      <span className={`ml-2 text-xs ${isError ? 'text-red-500' : 'text-green-500'}`}>
-        (exit code: {exitCode})
-      </span>
-    ) : null;
 
   return (
     <div className="space-y-2">
@@ -155,3 +154,45 @@ export const CommandResultRenderer: React.FC<CommandResultRendererProps> = ({ pa
     </div>
   );
 };
+
+/**
+ * panelContent example:
+ *
+ * {
+ *   "panelContent": {
+ *     "type": "command_result",
+ *     "source": [
+ *       {
+ *         "type": "text",
+ *         "text": "On branch feat/tarko-workspace-path-display\nChanges to be committed:\n  (use \"git restore --staged <file>...\" to unstage)\n\tmodified:   multimodal/tarko/agent-web-ui/src/common/state/actions/eventProcessor.ts\n\tnew file:   multimodal/tarko/agent-web-ui/src/common/state/atoms/rawEvents.ts\n\n",
+ *         "name": "STDOUT"
+ *       }
+ *     ],
+ *     "title": "run_command",
+ *     "timestamp": 1755111391440,
+ *     "toolCallId": "call_1755111391072_htk5vylkv",
+ *     "arguments": {
+ *       "command": "git status"
+ *     }
+ *   }
+ * }
+ * @param panelContent
+ * @returns
+ */
+function extractCommandData(panelContent: StandardPanelContent) {
+  const command = panelContent.arguments?.command;
+  if (Array.isArray(panelContent.source)) {
+    // @ts-expect-error MAKE `panelContent.source` is Array
+    const stdout = panelContent.source?.find((s) => s.name === 'STDOUT')?.text;
+    // @ts-expect-error MAKE `panelContent.source` is Array
+    const stderr = panelContent.source?.find((s) => s.name === 'STDERR')?.text;
+    return { command, stdout, stderr };
+  }
+
+  if (typeof panelContent.source === 'string') {
+    if (panelContent.source.startsWith('Error: ')) {
+      return { command, stderr: panelContent.source };
+    }
+    return { command, stdout: panelContent.source };
+  }
+}

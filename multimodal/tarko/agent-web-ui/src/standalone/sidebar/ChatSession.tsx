@@ -87,8 +87,10 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
 
     return sessions.filter(
       (session) =>
-        session.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        session.tags?.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase())),
+        session.metadata?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        session.metadata?.tags?.some((tag) =>
+          tag.toLowerCase().includes(searchQuery.toLowerCase()),
+        ),
     );
   }, [sessions, searchQuery]);
 

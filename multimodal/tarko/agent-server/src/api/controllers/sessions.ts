@@ -198,10 +198,13 @@ export async function updateSession(req: Request, res: Response) {
       return res.status(404).json({ error: 'Session not found' });
     }
 
+    // Update metadata with new name and tags
     const updatedMetadata = await server.storageProvider.updateSessionMetadata(sessionId, {
-      name,
-      tags,
-      updatedAt: Date.now(),
+      metadata: {
+        ...metadata.metadata,
+        name,
+        tags,
+      },
     });
 
     res.status(200).json({ session: updatedMetadata });

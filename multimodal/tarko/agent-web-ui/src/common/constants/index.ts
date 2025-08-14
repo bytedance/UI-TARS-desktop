@@ -80,5 +80,3 @@ export const CONNECTION_SETTINGS = {
   RECONNECTION_DELAY: 1000,
   RECONNECTION_DELAY_MAX: 5000,
 };
-
-export * from './toolTypes';

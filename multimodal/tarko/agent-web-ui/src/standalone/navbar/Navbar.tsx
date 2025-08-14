@@ -2,12 +2,16 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ShareButton } from '@/standalone/share';
 import { AboutModal } from './AboutModal';
 import { motion } from 'framer-motion';
-import { FiMoon, FiSun, FiInfo, FiCpu, FiFolder } from 'react-icons/fi';
+import { FiMoon, FiSun, FiInfo, FiCpu, FiFolder, FiZap, FiSettings } from 'react-icons/fi';
 import { GoSidebarCollapse, GoSidebarExpand } from 'react-icons/go';
-import { FaBrain } from 'react-icons/fa';
+
+import { Box, Typography, createTheme, ThemeProvider } from '@mui/material';
 import { useLayout } from '@/common/hooks/useLayout';
 import { useSession } from '@/common/hooks/useSession';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
+import { useDarkMode } from '@/common/hooks/useDarkMode';
+import { apiService } from '@/common/services/apiService';
+import { NavbarModelSelector } from './ModelSelector';
 
 import './Navbar.css';
 
@@ -15,8 +19,31 @@ export const Navbar: React.FC = () => {
   const { isSidebarCollapsed, toggleSidebar } = useLayout();
   const { activeSessionId, isProcessing, modelInfo, agentInfo, workspaceInfo } = useSession();
   const { isReplayMode } = useReplayMode();
-  const [isDarkMode, setIsDarkMode] = React.useState(true);
+  const isDarkMode = useDarkMode();
   const [showAboutModal, setShowAboutModal] = React.useState(false);
+
+  // Update HTML title with workspace and agent info
+  useEffect(() => {
+    const updateTitle = () => {
+      const parts = [];
+
+      // Add workspace name if available
+      if (workspaceInfo.name && workspaceInfo.name !== 'Unknown') {
+        parts.push(workspaceInfo.name);
+      }
+
+      // Add agent name if available
+      if (agentInfo.name) {
+        parts.push(agentInfo.name);
+      }
+
+      // Create title with format: "dir | agent" or fallback to "Agent TARS"
+      const title = parts.length > 0 ? parts.join(' | ') : 'Agent TARS';
+      document.title = title;
+    };
+
+    updateTitle();
+  }, [workspaceInfo.name, agentInfo.name]);
 
   // Get configuration from global window object
   const webUIConfig = window.AGENT_WEB_UI_CONFIG;
@@ -31,38 +58,26 @@ export const Navbar: React.FC = () => {
     return logoParam === 'agent-tars' ? 'agent-tars' : 'traffic-lights';
   }, []);
 
-  // Initialize theme based on localStorage or document class
-  useEffect(() => {
-    // Get saved preference from localStorage
-    const savedTheme = localStorage.getItem('agent-tars-theme');
-
-    // Determine initial theme state (preference or document class)
-    const initialIsDark =
-      savedTheme === 'light'
-        ? false
-        : savedTheme === 'dark'
-          ? true
-          : document.documentElement.classList.contains('dark');
-
-    // Update state with initial value
-    setIsDarkMode(initialIsDark);
-
-    // Ensure the document class matches the state
-    document.documentElement.classList.toggle('dark', initialIsDark);
-  }, []);
-
   // Toggle dark mode
   const toggleDarkMode = useCallback(() => {
     const newMode = !isDarkMode;
-    setIsDarkMode(newMode);
     document.documentElement.classList.toggle('dark', newMode);
-
-    // Save preference to localStorage
     localStorage.setItem('agent-tars-theme', newMode ? 'dark' : 'light');
   }, [isDarkMode]);
 
+  // Create MUI theme for consistent styling
+  const muiTheme = React.useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode: isDarkMode ? 'dark' : 'light',
+        },
+      }),
+    [isDarkMode],
+  );
+
   return (
-    <>
+    <ThemeProvider theme={muiTheme}>
       <div className="h-12 backdrop-blur-sm flex items-center px-3 flex-shrink-0">
         {/* Left section with conditional logo rendering */}
         <div className="flex items-center">
@@ -96,11 +111,11 @@ export const Navbar: React.FC = () => {
           </div>
         )}
 
-        {/* Center section - Enhanced Workspace, Agent and Model info display with dynamic sizing */}
+        {/* Center section - Agent and Model info display with dynamic sizing */}
         <DynamicNavbarCenter
-          workspaceInfo={workspaceInfo}
           agentInfo={agentInfo}
           modelInfo={modelInfo}
+          activeSessionId={activeSessionId}
         />
 
         {/* Right section - reordered buttons: About, Dark mode, Share */}
@@ -139,27 +154,28 @@ export const Navbar: React.FC = () => {
         modelInfo={modelInfo}
         agentInfo={agentInfo}
       />
-    </>
+    </ThemeProvider>
   );
 };
 
 // Dynamic Navbar Center Component with space optimization
 interface DynamicNavbarCenterProps {
-  workspaceInfo: { name?: string; path?: string };
   agentInfo: { name?: string };
   modelInfo: { model?: string; provider?: string };
+  activeSessionId?: string;
 }
 
 const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
-  workspaceInfo,
   agentInfo,
   modelInfo,
+  activeSessionId,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [availableWidth, setAvailableWidth] = useState(0);
-  const [workspaceTextWidth, setWorkspaceTextWidth] = useState(0);
+
   const [agentTextWidth, setAgentTextWidth] = useState(0);
   const [modelTextWidth, setModelTextWidth] = useState(0);
+  const isDarkMode = useDarkMode();
 
   // Calculate text widths and available space
   useEffect(() => {
@@ -189,10 +205,6 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
         return width;
       };
 
-      if (workspaceInfo.name && workspaceInfo.name !== 'Unknown') {
-        setWorkspaceTextWidth(measureText(workspaceInfo.name, 'font-medium'));
-      }
-
       if (agentInfo.name) {
         setAgentTextWidth(measureText(agentInfo.name, 'font-medium'));
       }
@@ -212,90 +224,98 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [workspaceInfo.name, agentInfo.name, modelInfo.model, modelInfo.provider]);
+  }, [agentInfo.name, modelInfo.model, modelInfo.provider]);
 
   // Calculate dynamic widths for badges
-  const totalTextWidth = workspaceTextWidth + agentTextWidth + modelTextWidth;
+  const totalTextWidth = agentTextWidth + modelTextWidth;
   const hasSpace = totalTextWidth <= availableWidth;
 
   // If we have space, use natural widths; otherwise, distribute proportionally
-  const workspaceMaxWidth = hasSpace
-    ? 'none'
-    : `${Math.max((workspaceTextWidth / totalTextWidth) * availableWidth * 0.85, 100)}px`;
-
   const agentMaxWidth = hasSpace
     ? 'none'
-    : `${Math.max((agentTextWidth / totalTextWidth) * availableWidth * 0.85, 80)}px`;
+    : `${Math.max((agentTextWidth / totalTextWidth) * availableWidth * 0.85, 120)}px`;
 
   const modelMaxWidth = hasSpace
     ? 'none'
-    : `${Math.max((modelTextWidth / totalTextWidth) * availableWidth * 0.85, 100)}px`;
+    : `${Math.max((modelTextWidth / totalTextWidth) * availableWidth * 0.85, 180)}px`;
 
   return (
-    <div ref={containerRef} className="flex-1 flex justify-center min-w-0">
+    <div ref={containerRef} className="flex-1 flex justify-center min-w-0 mx-[10vw]">
       <div className="flex items-center gap-3 min-w-0" style={{ maxWidth: '100%' }}>
-        {/* Workspace Badge */}
-        {workspaceInfo.name && workspaceInfo.name !== 'Unknown' && (
-          <div
-            className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-green-500/10 to-emerald-500/10 dark:from-green-400/15 dark:to-emerald-400/15 border border-green-200/30 dark:border-green-400/20 rounded-full shadow-sm backdrop-blur-sm min-w-0"
-            style={{ maxWidth: workspaceMaxWidth }}
-          >
-            <FiFolder size={12} className="text-green-600 dark:text-green-400 flex-shrink-0" />
-            <span
-              className={`text-xs font-medium text-green-800 dark:text-green-200 ${!hasSpace ? 'truncate' : ''}`}
-              title={workspaceInfo.path || workspaceInfo.name}
-            >
-              {workspaceInfo.name}
-            </span>
-          </div>
-        )}
-
-        {/* Agent Name Badge */}
+        {/* Agent Name Badge - Enhanced with colorful gradient */}
         {agentInfo.name && (
-          <div
-            className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-blue-500/10 to-purple-500/10 dark:from-blue-400/15 dark:to-purple-400/15 border border-blue-200/30 dark:border-blue-400/20 rounded-full shadow-sm backdrop-blur-sm min-w-0"
-            style={{ maxWidth: agentMaxWidth }}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.75,
+              px: 1.25,
+              py: 0.375,
+              height: '28px',
+              minHeight: '28px',
+
+              // Colorful gradient background for Agent
+              background: isDarkMode
+                ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 50%, rgba(168, 85, 247, 0.15) 100%)'
+                : 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.08) 50%, rgba(168, 85, 247, 0.08) 100%)',
+              backdropFilter: 'blur(8px)',
+              border: isDarkMode
+                ? '1px solid rgba(139, 92, 246, 0.25)'
+                : '1px solid rgba(99, 102, 241, 0.15)',
+              borderRadius: '8px',
+              position: 'relative',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                inset: 0,
+                borderRadius: '8px',
+                background: isDarkMode
+                  ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 50%, rgba(168, 85, 247, 0.05) 100%)'
+                  : 'linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(139, 92, 246, 0.03) 50%, rgba(168, 85, 247, 0.03) 100%)',
+                zIndex: -1,
+              },
+              '&:hover': {
+                background: isDarkMode
+                  ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(139, 92, 246, 0.25) 50%, rgba(168, 85, 247, 0.25) 100%)'
+                  : 'linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(139, 92, 246, 0.12) 50%, rgba(168, 85, 247, 0.12) 100%)',
+                border: isDarkMode
+                  ? '1px solid rgba(139, 92, 246, 0.35)'
+                  : '1px solid rgba(99, 102, 241, 0.25)',
+                boxShadow: isDarkMode
+                  ? '0 2px 8px -1px rgba(99, 102, 241, 0.15)'
+                  : '0 2px 8px -1px rgba(99, 102, 241, 0.08)',
+              },
+            }}
           >
-            <FaBrain size={12} className="text-blue-600 dark:text-blue-400 flex-shrink-0" />
-            <span
-              className={`text-xs font-medium text-blue-800 dark:text-blue-200 ${!hasSpace ? 'truncate' : ''}`}
+            <FiZap size={12} color={isDarkMode ? '#a5b4fc' : '#6366f1'} style={{ flexShrink: 0 }} />
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: 500,
+                fontSize: '12px',
+                color: isDarkMode ? '#e0e7ff' : '#4338ca',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
               title={agentInfo.name}
             >
               {agentInfo.name}
-            </span>
-          </div>
+            </Typography>
+          </Box>
         )}
 
-        {/* Model Info Badge */}
-        {(modelInfo.model || modelInfo.provider) && (
-          <div
-            className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-purple-500/10 to-pink-500/10 dark:from-purple-400/15 dark:to-pink-400/15 border border-purple-200/30 dark:border-purple-400/20 rounded-full shadow-sm backdrop-blur-sm min-w-0"
-            style={{ maxWidth: modelMaxWidth }}
-          >
-            <FiCpu size={12} className="text-purple-600 dark:text-purple-400 flex-shrink-0" />
-            <div className="flex items-center gap-1 text-xs min-w-0">
-              {modelInfo.model && (
-                <span
-                  className={`font-medium text-purple-800 dark:text-purple-200 ${!hasSpace ? 'truncate' : ''}`}
-                  title={modelInfo.model}
-                >
-                  {modelInfo.model}
-                </span>
-              )}
-              {modelInfo.provider && modelInfo.model && (
-                <span className="text-purple-500 dark:text-purple-400 flex-shrink-0">•</span>
-              )}
-              {modelInfo.provider && (
-                <span
-                  className={`text-purple-700 dark:text-purple-300 font-medium ${!hasSpace ? 'truncate' : ''}`}
-                  title={modelInfo.provider}
-                >
-                  {modelInfo.provider}
-                </span>
-              )}
-            </div>
-          </div>
-        )}
+        {/* Model Selector - Interactive dropdown for model selection */}
+        <NavbarModelSelector
+          className="min-w-0"
+          activeSessionId={activeSessionId}
+          modelInfo={modelInfo}
+          isDarkMode={isDarkMode}
+          onLoadModels={() => apiService.getAvailableModels()}
+          onUpdateModel={(sessionId, provider, modelId) =>
+            apiService.updateSessionModel(sessionId, provider, modelId)
+          }
+        />
       </div>
     </div>
   );

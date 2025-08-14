@@ -25,7 +25,7 @@ export interface PlanState {
 /**
  * Default empty plan state
  */
-const DEFAULT_PLAN_STATE: PlanState = {
+export const DEFAULT_PLAN_STATE: PlanState = {
   steps: [],
   isComplete: false,
   summary: null,

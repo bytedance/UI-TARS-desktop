@@ -19,7 +19,7 @@ export class McpManager {
   static McpClientType = {
     Tavily: 'tavily_client',
     Google: 'google_search_client',
-    ShellCI: 'shell_ci_client',
+    AIO: 'aio',
   };
 
   public client: MCPClient;

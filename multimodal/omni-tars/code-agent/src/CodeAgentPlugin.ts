@@ -4,14 +4,12 @@
  */
 
 import { AgentPlugin, CODE_ENVIRONMENT } from '@omni-tars/core';
-import { Tool, LLMRequestHookPayload, LLMResponseHookPayload } from '@tarko/agent';
-
-export interface CodeAgentConfig {
-  // Configuration specific to code execution
-  workingDirectory?: string;
-  allowedFileExtensions?: string[];
-  maxExecutionTime?: number;
-}
+import { LLMRequestHookPayload, LLMResponseHookPayload } from '@tarko/agent';
+import { ExcuteBashProvider } from './tools/ExcuteBash';
+import { JupyterCIProvider } from './tools/JupyterCI';
+import { StrReplaceEditorProvider } from './tools/StrReplaceEditor';
+import { AioClient } from '@omni-tars/core';
+import assert from 'assert';
 
 /**
  * Code Agent Plugin - handles CODE_ENVIRONMENT for bash, file editing, and Jupyter execution
@@ -19,25 +17,25 @@ export interface CodeAgentConfig {
 export class CodeAgentPlugin extends AgentPlugin {
   readonly name = 'code-agent-plugin';
   readonly environmentSection = CODE_ENVIRONMENT;
+  private client: AioClient;
 
-  private config: CodeAgentConfig;
-
-  constructor(config: CodeAgentConfig = {}) {
+  constructor() {
     super();
-    this.config = config;
+
+    assert(process.env.AIO_SANDBOX_URL, 'no AIO_SANDBOX_URL url providered.');
+
+    this.client = new AioClient({
+      baseUrl: process.env.AIO_SANDBOX_URL,
+    });
   }
 
   async initialize(): Promise<void> {
-    // Initialize code execution tools
-    console.log('[CodeAgentPlugin] Initializing code execution capabilities');
-
-    // TODO: Initialize actual code execution tools when available
-    // this.tools = [
-    //   new BashExecutionTool(),
-    //   new FileEditorTool(),
-    //   new JupyterNotebookTool(),
-    //   // etc.
-    // ];
+    // Initialize tools
+    this.tools = [
+      new ExcuteBashProvider(this.client).getTool(),
+      new JupyterCIProvider(this.client).getTool(),
+      new StrReplaceEditorProvider(this.client).getTool(),
+    ];
   }
 
   async onLLMRequest(id: string, payload: LLMRequestHookPayload): Promise<void> {

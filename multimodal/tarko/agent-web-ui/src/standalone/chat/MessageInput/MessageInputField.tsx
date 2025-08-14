@@ -11,7 +11,6 @@ import {
   updateSelectorStateAction,
 } from '@/common/state/atoms/contextualSelector';
 import { ContextualSelector, ContextualItem } from '../ContextualSelector';
-import { ModelSelector } from '../ModelSelector';
 
 interface MessageInputFieldProps {
   uploadedImages: ChatCompletionContentPart[];
@@ -373,8 +372,6 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
               >
                 <FiImage size={18} />
               </motion.button>
-
-              {sessionId && <ModelSelector sessionId={sessionId} />}
 
               <input
                 type="file"

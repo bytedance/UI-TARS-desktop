@@ -1,0 +1,64 @@
+{
+  "name": "@multimodal/seed-gui-agent",
+  "version": "0.3.0-beta.0",
+  "description": "seed GUI Agent",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "rslib build --watch",
+    "dev:agent": "tarko --agent ./ --config ./tarko.bu.config.ts",
+    "dev:agent:browser": "tarko --agent ./ --config ./tarko.bu.config.ts",
+    "dev:agent:computer": "tarko --agent ./ --config ./tarko.cu.config.ts",
+    "dev:agent:android": "tarko --agent ./ --config ./tarko.mu.config.ts",
+    "build": "rslib build",
+    "prepublishOnly": "pnpm run build",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@agent-infra/browser": "0.1.1",
+    "@agent-infra/logger": "0.0.2-beta.2",
+    "@agent-infra/media-utils": "0.1.5",
+    "@clack/prompts": "0.11.0",
+    "@computer-use/nut-js": "^4.2.0",
+    "@gui-agent/action-parser": "workspace:*",
+    "@gui-agent/operator-browser": "workspace:*",
+    "@tarko/agent": "workspace:*",
+    "@tarko/agent-cli": "workspace:*",
+    "@tarko/agent-interface": "workspace:*",
+    "@ui-tars/operator-adb": "1.2.3",
+    "@ui-tars/operator-nut-js": "1.2.3",
+    "@ui-tars/sdk": "1.2.3",
+    "@ui-tars/shared": "1.2.3",
+    "big.js": "^6.2.2",
+    "commander": "^14.0.0",
+    "jimp": "1.6.0",
+    "jsonrepair": "3.12.0",
+    "uuid": "^9.0.0",
+    "zod-to-json-schema": "3.24.3"
+  },
+  "devDependencies": {
+    "@agent-infra/shared": "0.0.2",
+    "@rslib/core": "0.10.0",
+    "@types/node": "22.15.30",
+    "@types/uuid": "^9.0.8",
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.3",
+    "vitest": "3.2.4"
+  }
+}

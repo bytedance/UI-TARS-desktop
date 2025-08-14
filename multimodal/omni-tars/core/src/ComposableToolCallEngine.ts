@@ -54,15 +54,13 @@ export class ComposableToolCallEngine extends ToolCallEngine {
   private selectEngine(context: ToolCallEngineContext): ToolCallEngine {
     for (const engineProvider of this.engines) {
       if (!engineProvider.canHandle || engineProvider.canHandle(context)) {
-        this.logger.debug(
-          `Selected engine: ${engineProvider.name} (priority: ${engineProvider.priority})`,
-        );
+        // this.logger.debug(
+        //   `Selected engine: ${engineProvider.name} (priority: ${engineProvider.priority})`,
+        // );
         return engineProvider.getEngine();
       }
     }
-
-    this.logger.debug(`Using default engine: ${this.defaultEngine.name}`);
-
+    // this.logger.debug(`Using default engine: ${this.defaultEngine.name}`);
     return this.defaultEngine.getEngine();
   }
 

@@ -1,11 +1,11 @@
-import { atom } from 'jotai';
+import { atom, Getter, Setter } from 'jotai';
 import { v4 as uuidv4 } from 'uuid';
 import { apiService } from '../../services/apiService';
 import { sessionsAtom, activeSessionIdAtom } from '../atoms/session';
 import { messagesAtom } from '../atoms/message';
 import { toolResultsAtom, toolCallResultMap } from '../atoms/tool';
 import { isProcessingAtom, activePanelContentAtom, modelInfoAtom } from '../atoms/ui';
-import { processEventAction } from './eventProcessor';
+import { processEventAction } from './eventProcessors';
 import { Message } from '@/common/types';
 import { connectionStatusAtom } from '../atoms/ui';
 import { replayStateAtom } from '../atoms/replay';
@@ -61,7 +61,7 @@ function selectBestFileToDisplay(files: FileItem[]): FileItem | null {
   return sortedFiles[0];
 }
 
-function setWorkspacePanelForFile(set: any, file: FileItem): void {
+function setWorkspacePanelForFile(set: Setter, file: FileItem): void {
   set(activePanelContentAtom, {
     type: 'file',
     source: file.content || '',
@@ -126,13 +126,11 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
       console.log('Exiting replay mode due to session change');
       set(replayStateAtom, {
         isActive: false,
-        isPaused: true,
         events: [],
         currentEventIndex: -1,
         startTimestamp: null,
         endTimestamp: null,
         playbackSpeed: 1,
-        visibleTimeWindow: null,
         processedEvents: {},
         autoPlayCountdown: null,
       });
@@ -406,7 +404,7 @@ export const checkSessionStatusAction = atom(null, async (get, set, sessionId: s
 });
 
 // Backup mechanism for session naming - reduced importance to avoid update failure impact
-async function handleConversationEnd(get: any, set: any, sessionId: string): Promise<void> {
+async function handleConversationEnd(get: Getter, set: Setter, sessionId: string): Promise<void> {
   const allMessages = get(messagesAtom)[sessionId] || [];
 
   const sessions = get(sessionsAtom);
@@ -430,7 +428,7 @@ async function handleConversationEnd(get: any, set: any, sessionId: string): Pro
       if (summary) {
         await apiService.updateSessionMetadata(sessionId, { name: summary });
 
-        set(sessionsAtom, (prev: any[]) =>
+        set(sessionsAtom, (prev) =>
           prev.map((session) =>
             session.id === sessionId ? { ...session, name: summary } : session,
           ),

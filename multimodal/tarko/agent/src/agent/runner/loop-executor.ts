@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentEventStream, ToolCallEngine } from '@tarko/agent-interface';
+import { AgentEventStream, ToolCallEngine, EachAgentLoopEndContext } from '@tarko/agent-interface';
 import { getLogger } from '@tarko/shared-utils';
 import { ResolvedModel } from '@tarko/model-provider';
 import { LLMProcessor } from './llm-processor';
@@ -152,10 +152,13 @@ export class LoopExecutor {
 
         // Check if we've reached a final answer
         const assistantEvents = this.eventStream.getEventsByType(['assistant_message']);
+        let currentAssistantEvent: AgentEventStream.AssistantMessageEvent | undefined;
+
         if (assistantEvents.length > 0) {
           const latestAssistantEvent = assistantEvents[
             assistantEvents.length - 1
           ] as AgentEventStream.AssistantMessageEvent;
+          currentAssistantEvent = latestAssistantEvent;
 
           if (!latestAssistantEvent.toolCalls || latestAssistantEvent.toolCalls.length === 0) {
             finalEvent = latestAssistantEvent;
@@ -163,6 +166,23 @@ export class LoopExecutor {
             this.logger.info(`[LLM] Text response received | Length: ${contentLength} characters`);
             this.logger.info(`[Agent] Final answer received`);
           }
+        }
+
+        // FIXME: Create `iterationEndContext` on demand.
+        // Call the iteration end hook
+        try {
+          const iterationEndContext: EachAgentLoopEndContext = {
+            sessionId,
+            iteration,
+            hasFinalAnswer: finalEvent !== null,
+            willContinue: finalEvent === null && iteration < this.maxIterations - 1,
+            assistantEvent: currentAssistantEvent,
+          };
+
+          await Promise.resolve(this.agent.onEachAgentLoopEnd(iterationEndContext));
+          this.logger.debug(`[Agent] Post-iteration hook executed for iteration ${iteration}`);
+        } catch (error) {
+          this.logger.error(`[Agent] Error in post-iteration hook: ${error}`);
         }
 
         this.logger.info(`[Iteration] ${iteration}/${this.maxIterations} completed`);

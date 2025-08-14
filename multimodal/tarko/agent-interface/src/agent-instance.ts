@@ -164,3 +164,23 @@ export interface PrepareRequestResult {
   /** Modified tools array */
   tools: Tool[];
 }
+
+/**
+ * Context provided to the onEachAgentLoopEnd hook
+ */
+export interface EachAgentLoopEndContext {
+  /** Session identifier for this conversation */
+  sessionId: string;
+
+  /** Current iteration number (1-based) */
+  iteration: number;
+
+  /** Whether this iteration produced a final answer (no more tool calls) */
+  hasFinalAnswer: boolean;
+
+  /** Whether the loop will continue to next iteration */
+  willContinue: boolean;
+
+  /** The assistant message event from this iteration (if any) */
+  assistantEvent?: import('./agent-event-stream').AgentEventStream.AssistantMessageEvent;
+}

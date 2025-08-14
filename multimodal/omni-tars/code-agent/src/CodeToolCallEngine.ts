@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ToolCallEngine, Tool } from '@tarko/agent';
-import { ToolCallEngineProvider, ToolCallEngineContext } from '@omni-tars/core';
+import { parseCodeContent } from '@omni-tars/core';
+import { ToolCallEngine, Tool, getLogger } from '@tarko/agent';
 import {
   ToolCallEnginePrepareRequestContext,
   StreamProcessingState,
@@ -22,30 +22,22 @@ import {
  * Code execution optimized tool call engine
  */
 export class CodeToolCallEngine extends ToolCallEngine {
+  private logger = getLogger('CodeToolCallEngine');
+
   preparePrompt(instructions: string, tools: Tool[]): string {
-    // Add code-specific instructions
-    const codeInstructions = `
-You are a code execution assistant. When executing code or working with files:
-1. Always explain what you're doing before executing
-2. Check for potential security issues
-3. Provide clear output and error handling
-4. Use appropriate tools for the task
-
-${instructions}`;
-
-    return codeInstructions;
+    return instructions;
   }
 
   prepareRequest(context: ToolCallEnginePrepareRequestContext): ChatCompletionCreateParams {
     return {
       model: context.model,
       messages: context.messages,
-      tools: context.tools?.map((tool) => ({
-        type: 'function' as const,
-        function: tool.function,
-      })),
-      temperature: context.temperature || 0.3, // Lower temperature for code tasks
+      temperature: context.temperature || 0.7,
       stream: true,
+      // For OpenAI standard stop sequence API.
+      stop: ['</code_env>', '</mcp_env>'],
+      // @ts-expect-error For non-standard provider, e.g. AWS.
+      stop_sequences: ['</code_env>', '</mcp_env>'],
     };
   }
 
@@ -55,52 +47,42 @@ ${instructions}`;
   ): StreamChunkResult {
     const delta = chunk.choices[0]?.delta;
 
+    // Accumulate content
     if (delta?.content) {
       state.contentBuffer += delta.content;
     }
 
-    if (delta?.tool_calls) {
-      // Handle native tool calls
-      for (const toolCallDelta of delta.tool_calls) {
-        const existingCall = state.toolCalls.find((tc) => tc.id === toolCallDelta.id);
-        if (existingCall) {
-          // Update existing tool call
-          if (toolCallDelta.function?.arguments) {
-            existingCall.function.arguments += toolCallDelta.function.arguments;
-          }
-        } else {
-          // Add new tool call
-          state.toolCalls.push({
-            id: toolCallDelta.id || `call_${Date.now()}`,
-            type: 'function',
-            function: {
-              name: toolCallDelta.function?.name || '',
-              arguments: toolCallDelta.function?.arguments || '',
-            },
-          });
-        }
-      }
-    }
-
+    // Record finish reason
     if (chunk.choices[0]?.finish_reason) {
       state.finishReason = chunk.choices[0].finish_reason;
     }
 
+    // Return incremental content without tool call detection during streaming
     return {
-      content: delta?.content || '',
+      // content: delta?.content || '',
+      content: '',
       reasoningContent: '',
-      hasToolCallUpdate: !!delta?.tool_calls,
-      toolCalls: state.toolCalls,
+      hasToolCallUpdate: false,
+      toolCalls: [],
     };
   }
 
   finalizeStreamProcessing(state: StreamProcessingState): ParsedModelResponse {
+    const fullContent = state.contentBuffer;
+    this.logger.info('finalizeStreamProcessing content \n', fullContent);
+
+    const extracted = parseCodeContent(fullContent);
+
+    this.logger.info('extracted', JSON.stringify(extracted, null, 2));
+
+    const { think, tools, answer } = extracted;
+
     return {
-      content: state.contentBuffer,
-      rawContent: state.contentBuffer,
-      reasoningContent: '',
-      toolCalls: state.toolCalls,
-      finishReason: state.toolCalls.length > 0 ? 'tool_calls' : 'stop',
+      content: answer ?? fullContent,
+      rawContent: fullContent,
+      reasoningContent: think ?? '',
+      toolCalls: tools,
+      finishReason: tools.length > 0 ? 'tool_calls' : 'stop',
     };
   }
 
@@ -118,21 +100,24 @@ ${instructions}`;
   ): ChatCompletionAssistantMessageParam {
     return {
       role: 'assistant',
-      content: currentLoopAssistantEvent.content,
-      tool_calls: currentLoopAssistantEvent.toolCalls,
+      content: currentLoopAssistantEvent.rawContent || currentLoopAssistantEvent.content,
     };
   }
 
   buildHistoricalToolCallResultMessages(
     toolCallResults: MultimodalToolCallResult[],
   ): ChatCompletionMessageParam[] {
-    return toolCallResults.map((result) => ({
-      role: 'tool' as const,
-      tool_call_id: result.toolCallId,
-      content: result.content
+    return toolCallResults.map((result) => {
+      // Extract text content from multimodal result
+      const textContent = result.content
         .filter((part) => part.type === 'text')
         .map((part) => (part as { text: string }).text)
-        .join(''),
-    }));
+        .join('');
+
+      return {
+        role: 'user',
+        content: `Tool "${result.toolName}" result:\n${textContent}`,
+      };
+    });
   }
 }

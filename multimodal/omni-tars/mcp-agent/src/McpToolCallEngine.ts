@@ -15,6 +15,7 @@ import {
   StreamChunkResult,
   StreamProcessingState,
 } from '@tarko/agent-interface';
+import { parseMcpContent } from '@omni-tars/core';
 
 export class McpToolCallEngine extends ToolCallEngine {
   private logger = getLogger('McpToolCallEngine');
@@ -28,6 +29,10 @@ export class McpToolCallEngine extends ToolCallEngine {
       messages: context.messages,
       temperature: context.temperature || 0.7,
       stream: true,
+      // For OpenAI standard stop sequence API.
+      stop: ['</code_env>', '</mcp_env>'],
+      // @ts-expect-error For non-standard provider, e.g. AWS.
+      stop_sequences: ['</code_env>', '</mcp_env>'],
     };
   }
   initStreamProcessingState(): StreamProcessingState {
@@ -57,7 +62,8 @@ export class McpToolCallEngine extends ToolCallEngine {
 
     // Return incremental content without tool call detection during streaming
     return {
-      content: delta?.content || '',
+      // content: delta?.content || '',
+      content: '',
       reasoningContent: '',
       hasToolCallUpdate: false,
       toolCalls: [],
@@ -67,7 +73,8 @@ export class McpToolCallEngine extends ToolCallEngine {
     const fullContent = state.contentBuffer;
     this.logger.info('finalizeStreamProcessing content \n', fullContent);
 
-    const extracted = this.parseContent(fullContent);
+    // const extracted = this.parseContent(fullContent);
+    const extracted = parseMcpContent(fullContent);
 
     this.logger.info('extracted', JSON.stringify(extracted, null, 2));
 
@@ -78,7 +85,7 @@ export class McpToolCallEngine extends ToolCallEngine {
       rawContent: fullContent,
       reasoningContent: think ?? '',
       toolCalls: tools,
-      finishReason: tools.length > 0 ? 'tool_calls' : 'stop',
+      finishReason: (tools || []).length > 0 ? 'tool_calls' : 'stop',
     };
   }
 

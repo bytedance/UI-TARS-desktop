@@ -11,3 +11,4 @@ export * from './agent-implementation';
 export * from './web-ui-implementation';
 export * from './constants';
 export * from './storage-implementation';
+export * from './agent-status';

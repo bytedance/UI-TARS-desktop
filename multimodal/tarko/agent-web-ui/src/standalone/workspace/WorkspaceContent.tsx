@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useSession } from '@/common/hooks/useSession';
 import { usePlan } from '@/common/hooks/usePlan';
@@ -11,6 +11,8 @@ import {
   FiActivity,
   FiFileText,
 } from 'react-icons/fi';
+import { apiService } from '@/common/services/apiService';
+import { normalizeFilePath } from '@/common/utils/pathNormalizer';
 import './Workspace.css';
 
 /**
@@ -24,6 +26,21 @@ import './Workspace.css';
 export const WorkspaceContent: React.FC = () => {
   const { activeSessionId, setActivePanelContent } = useSession();
   const { currentPlan } = usePlan(activeSessionId);
+  const [workspacePath, setWorkspacePath] = useState<string>('');
+
+  useEffect(() => {
+    const fetchWorkspaceInfo = async () => {
+      try {
+        const workspaceInfo = await apiService.getWorkspaceInfo();
+        setWorkspacePath(normalizeFilePath(workspaceInfo.path));
+      } catch (error) {
+        console.error('Failed to fetch workspace info:', error);
+        setWorkspacePath('');
+      }
+    };
+
+    fetchWorkspaceInfo();
+  }, []);
 
   // Animation variants
   const containerVariants = {
@@ -206,7 +223,7 @@ export const WorkspaceContent: React.FC = () => {
         <div>
           <h2 className="font-medium text-gray-900 dark:text-gray-100 text-lg">Workspace</h2>
           <div className="text-xs text-gray-500 dark:text-gray-400">
-            View tool outputs and plan details
+            {workspacePath || 'Loading workspace...'}
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { FileDisplayMode, ToolResultContentPart } from '../../../types';
+import { FileDisplayMode } from '../../../types';
+import { StandardPanelContent } from '../../../types/panelContent';
 import { MessageContent } from './MessageContent';
 import { DisplayMode } from '../types';
 import { MonacoCodeEditor } from '@/sdk/code-editor';
@@ -11,24 +11,25 @@ import { ThrottledHtmlRenderer } from '../../../components/ThrottledHtmlRenderer
 const MAX_HEIGHT_CALC = 'calc(100vh - 215px)';
 
 interface FileResultRendererProps {
-  part: ToolResultContentPart;
-  onAction?: (action: string, data: any) => void;
+  panelContent: StandardPanelContent;
+  onAction?: (action: string, data: unknown) => void;
   displayMode?: FileDisplayMode;
 }
 
 export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
-  part,
+  panelContent,
   onAction,
   displayMode,
 }) => {
-  // If not a file result, don't render
-  if (part.type !== 'file_result') return null;
+  // Extract file content from panelContent
+  const fileContent = getFileContent(panelContent);
+  const filePath = getFilePath(panelContent);
 
   // Use stable content to prevent unnecessary re-renders during streaming
-  const stableContent = useStableCodeContent(part.content || '');
+  const stableContent = useStableCodeContent(fileContent || '');
 
   // File metadata parsing
-  const fileName = part.path ? part.path.split('/').pop() || part.path : '';
+  const fileName = filePath ? filePath.split('/').pop() || filePath : '';
   const fileExtension = fileName ? fileName.split('.').pop()?.toLowerCase() || '' : '';
 
   const fileType = determineFileType(fileExtension);
@@ -38,10 +39,10 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
   const isCodeFile = fileType === 'code';
 
   const approximateSize =
-    typeof part.content === 'string' ? formatBytes(part.content.length) : 'Unknown size';
+    typeof fileContent === 'string' ? formatBytes(fileContent.length) : 'Unknown size';
 
-  // Determine if content is currently streaming (this would need to be passed down from parent)
-  const isStreaming = part.isStreaming || false;
+  // Determine if content is currently streaming
+  const isStreaming = panelContent.isStreaming || false;
 
   // Get language for code highlighting
   const getLanguage = (): string => {
@@ -111,7 +112,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
             <div className="text-center p-4">
               <img
                 src={`data:image/${fileExtension};base64,${stableContent}`}
-                alt={part.path}
+                alt={filePath}
                 className="max-w-full mx-auto border border-gray-200/50 dark:border-gray-700/30 rounded-lg"
               />
             </div>
@@ -121,7 +122,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
                 code={stableContent}
                 language={getLanguage()}
                 fileName={fileName}
-                filePath={part.path}
+                filePath={filePath}
                 fileSize={approximateSize}
                 showLineNumbers={true}
                 maxHeight={MAX_HEIGHT_CALC}
@@ -136,7 +137,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
                   code={stableContent}
                   language="markdown"
                   fileName={fileName}
-                  filePath={part.path}
+                  filePath={filePath}
                   fileSize={approximateSize}
                   showLineNumbers={true}
                   maxHeight={MAX_HEIGHT_CALC}
@@ -159,7 +160,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
                 code={stableContent}
                 language="text"
                 fileName={fileName}
-                filePath={part.path}
+                filePath={filePath}
                 fileSize={approximateSize}
                 showLineNumbers={true}
                 maxHeight={MAX_HEIGHT_CALC}
@@ -172,6 +173,39 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
     </div>
   );
 };
+
+// Helper functions
+function getFileContent(panelContent: StandardPanelContent): string | null {
+  // Try arguments first (for file operations)
+  if (panelContent.arguments?.content && typeof panelContent.arguments.content === 'string') {
+    return panelContent.arguments.content;
+  }
+
+  // Handle source array format
+  if (Array.isArray(panelContent.source)) {
+    return panelContent.source
+      .filter((item) => item.type === 'text')
+      .map((item) => item.text)
+      .join('');
+  }
+
+  // Try source as string (fallback for old format)
+  if (typeof panelContent.source === 'string') {
+    return panelContent.source;
+  }
+
+  return null;
+}
+
+function getFilePath(panelContent: StandardPanelContent): string {
+  // Try arguments first
+  if (panelContent.arguments?.path && typeof panelContent.arguments.path === 'string') {
+    return panelContent.arguments.path;
+  }
+
+  // Fallback to title
+  return panelContent.title || 'Unknown file';
+}
 
 // Helper function for file type determination
 function determineFileType(extension: string): 'code' | 'document' | 'image' | 'other' {

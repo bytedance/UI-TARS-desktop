@@ -5,7 +5,11 @@ import { FiClock } from 'react-icons/fi';
 import { formatTimestamp } from '@/common/utils/formatters';
 import { isMultimodalContent } from '@/common/utils/typeGuards';
 import { MessageTimestamp } from './MessageTimestamp';
-// import { ThinkingAnimation } from './ThinkingAnimation';
+import { ThinkingAnimation } from './ThinkingAnimation';
+import { SkeletonLoader } from './SkeletonLoader';
+import { useAtomValue } from 'jotai';
+import { agentStatusAtom } from '@/common/state/atoms/ui';
+import { AgentProcessingPhase } from '@tarko/interface';
 
 interface MessageGroupProps {
   messages: MessageType[];
@@ -21,6 +25,8 @@ interface MessageGroupProps {
  * - Visual relationships between messages are implemented through styles rather than nesting
  */
 export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking }) => {
+  const agentStatus = useAtomValue(agentStatusAtom);
+  
   // Filter out environment messages
   const filteredMessages = messages.filter((msg) => msg.role !== 'environment');
 
@@ -85,6 +91,32 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
           shouldDisplayTimestamp={index === assistantMessages.length - 1 && !isThinking}
         />
       ))}
+
+      {/* Enhanced thinking animation for TTFT optimization */}
+      {isThinking && (
+        <div className="mt-4 space-y-4">
+          <ThinkingAnimation
+            text={agentStatus.message || 'Agent TARS is running'}
+            phase={agentStatus.phase}
+            estimatedTime={agentStatus.estimatedTime}
+            showProgress={agentStatus.phase === 'initializing' || agentStatus.phase === 'warming_up'}
+            size="medium"
+          />
+          
+          {/* Show skeleton loader during initial phases */}
+          {(agentStatus.phase === 'initializing' || 
+            agentStatus.phase === 'warming_up' || 
+            agentStatus.phase === 'processing') && (
+            <div className="ml-8">
+              <SkeletonLoader 
+                lines={2} 
+                showAvatar={false}
+                className="opacity-50"
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Timestamp and copy functionality */}
       {!isThinking && lastResponseMessage && (

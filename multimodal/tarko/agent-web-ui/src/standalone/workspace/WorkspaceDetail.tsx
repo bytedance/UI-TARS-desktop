@@ -2,15 +2,57 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiCode, FiEye } from 'react-icons/fi';
 import { useSession } from '@/common/hooks/useSession';
-import { ToolResultRenderer } from './renderers/ToolResultRenderer';
 import { ResearchReportRenderer } from './renderers/ResearchReportRenderer';
 import { WorkspaceHeader } from './components/WorkspaceHeader';
 import { ImageModal } from './components/ImageModal';
 import { FullscreenModal } from './components/FullscreenModal';
-import { standardizeContent } from './utils/contentStandardizer';
 import { StandardPanelContent, ZoomedImageData, FullscreenFileData } from './types/panelContent';
 import { FileDisplayMode } from './types';
 import { ToggleSwitchProps } from './renderers/generic/components';
+
+/**
+ * All renderers
+ */
+import { ImageRenderer } from './renderers/ImageRenderer';
+import { LinkRenderer } from './renderers/LinkRenderer';
+import { LinkReaderRenderer } from './renderers/LinkReaderRenderer';
+import { SearchResultRenderer } from './renderers/SearchResultRenderer';
+import { CommandResultRenderer } from './renderers/CommandResultRenderer';
+import { ScriptResultRenderer } from './renderers/ScriptResultRenderer';
+import { BrowserResultRenderer } from './renderers/BrowserResultRenderer';
+import { BrowserControlRenderer } from './renderers/BrowserControlRenderer';
+import { PlanViewerRenderer } from './renderers/PlanViewerRenderer';
+import { GenericResultRenderer } from './renderers/generic/GenericResultRenderer';
+import { DeliverableRenderer } from './renderers/DeliverableRenderer';
+import { DiffRenderer } from './renderers/DiffRenderer';
+
+/**
+ * Registry of content renderers that handle StandardPanelContent directly
+ */
+const CONTENT_RENDERERS: Record<
+  string,
+  React.FC<{
+    panelContent: StandardPanelContent;
+    onAction?: (action: string, data: unknown) => void;
+    displayMode?: FileDisplayMode;
+  }>
+> = {
+  image: ImageRenderer,
+  link: LinkRenderer,
+  link_reader: LinkReaderRenderer,
+  search_result: SearchResultRenderer,
+  command_result: CommandResultRenderer,
+  script_result: ScriptResultRenderer,
+  browser_result: BrowserResultRenderer,
+  browser_vision_control: BrowserControlRenderer,
+  plan: PlanViewerRenderer,
+  research_report: ResearchReportRenderer,
+  json: GenericResultRenderer,
+  deliverable: DeliverableRenderer,
+  file_result: GenericResultRenderer,
+  diff_result: DiffRenderer,
+  file: GenericResultRenderer,
+};
 
 /**
  * WorkspaceDetail Component - Displays details of a single tool result or report
@@ -24,11 +66,8 @@ export const WorkspaceDetail: React.FC = () => {
   const getInitialDisplayMode = (): FileDisplayMode => {
     if (!activePanelContent) return 'rendered';
 
-    const standardizedContent = standardizeContent(activePanelContent as StandardPanelContent);
-    const fileResult = standardizedContent.find((part) => part.type === 'file_result');
-
-    if (fileResult) {
-      const fileName = fileResult.path ? fileResult.path.split('/').pop() || '' : '';
+    if (activePanelContent.type === 'file' && activePanelContent.arguments?.path) {
+      const fileName = activePanelContent.arguments.path.split('/').pop() || '';
       const isHtmlFile =
         fileName.toLowerCase().endsWith('.html') || fileName.toLowerCase().endsWith('.htm');
 
@@ -47,11 +86,8 @@ export const WorkspaceDetail: React.FC = () => {
   useEffect(() => {
     if (!activePanelContent || !activePanelContent.isStreaming) return;
 
-    const standardizedContent = standardizeContent(activePanelContent as StandardPanelContent);
-    const fileResult = standardizedContent.find((part) => part.type === 'file_result');
-
-    if (fileResult) {
-      const fileName = fileResult.path ? fileResult.path.split('/').pop() || '' : '';
+    if (activePanelContent.type === 'file' && activePanelContent.arguments?.path) {
+      const fileName = activePanelContent.arguments.path.split('/').pop() || '';
       const isHtmlFile =
         fileName.toLowerCase().endsWith('.html') || fileName.toLowerCase().endsWith('.htm');
 
@@ -81,16 +117,22 @@ export const WorkspaceDetail: React.FC = () => {
 
   // Handle research reports and deliverables
   if (isResearchReportType(panelContent)) {
+    console.log(
+      '%c🎯 [WorkspaceDetail] Using Renderer: %cResearchReportRenderer',
+      'color: #ff6b6b; font-weight: bold; font-size: 12px;',
+      'color: #4ecdc4; font-weight: bold; background: #1a1a1a; padding: 2px 8px; border-radius: 4px;',
+    );
+
     return (
       <ResearchReportRenderer
-        content={getReportContent(panelContent)}
-        title={panelContent.title || 'Research Report'}
-        isStreaming={panelContent.isStreaming}
+        panelContent={panelContent}
+        onAction={handleContentAction}
+        displayMode={displayMode}
       />
     );
   }
 
-  // Handle tool result content actions
+  // Handle content actions
   const handleContentAction = (action: string, data: unknown) => {
     switch (action) {
       case 'zoom':
@@ -113,22 +155,21 @@ export const WorkspaceDetail: React.FC = () => {
 
   // Handle fullscreen from header
   const handleFullscreen = () => {
-    const standardizedContent = standardizeContent(panelContent);
-    const fileResult = standardizedContent.find((part) => part.type === 'file_result');
-
-    if (fileResult) {
-      const fileName = fileResult.path
-        ? fileResult.path.split('/').pop() || fileResult.path
-        : 'Unknown file';
+    if (
+      panelContent.type === 'file' &&
+      panelContent.arguments?.path &&
+      panelContent.arguments?.content
+    ) {
+      const fileName = panelContent.arguments.path.split('/').pop() || panelContent.arguments.path;
       const isMarkdownFile =
         fileName.toLowerCase().endsWith('.md') || fileName.toLowerCase().endsWith('.markdown');
       const isHtmlFile =
         fileName.toLowerCase().endsWith('.html') || fileName.toLowerCase().endsWith('.htm');
 
       setFullscreenData({
-        content: fileResult.content,
+        content: panelContent.arguments.content,
         fileName,
-        filePath: fileResult.path || 'Unknown path',
+        filePath: panelContent.arguments.path,
         displayMode,
         isMarkdown: isMarkdownFile,
         isHtml: isHtmlFile,
@@ -136,47 +177,42 @@ export const WorkspaceDetail: React.FC = () => {
     }
   };
 
-  // Get standardized content
-  const standardizedContent = standardizeContent(panelContent);
-
   // Check if the toggle button needs to be displayed
   const shouldShowToggle = () => {
-    // Check if there are file results or Markdown content
-    return standardizedContent.some(
-      (part) =>
-        part.type === 'file_result' ||
-        (part.type === 'text' && (part.name?.includes('markdown') || isMarkdownContent(part))),
-    );
+    if (panelContent.type === 'file' && panelContent.arguments?.path) {
+      const fileName = panelContent.arguments.path.split('/').pop() || '';
+      return (
+        fileName.toLowerCase().endsWith('.html') ||
+        fileName.toLowerCase().endsWith('.htm') ||
+        fileName.toLowerCase().endsWith('.md') ||
+        fileName.toLowerCase().endsWith('.markdown')
+      );
+    }
+    return false;
   };
 
   // Check if fullscreen button should be displayed
   const shouldShowFullscreen = () => {
-    return standardizedContent.some((part) => {
-      if (part.type === 'file_result') {
-        const fileName = part.path ? part.path.split('/').pop() || '' : '';
-        const isMarkdownFile =
-          fileName.toLowerCase().endsWith('.md') || fileName.toLowerCase().endsWith('.markdown');
-        const isHtmlFile =
-          fileName.toLowerCase().endsWith('.html') || fileName.toLowerCase().endsWith('.htm');
-        return isMarkdownFile || isHtmlFile;
-      }
-      return false;
-    });
+    if (panelContent.type === 'file' && panelContent.arguments?.path) {
+      const fileName = panelContent.arguments.path.split('/').pop() || '';
+      return (
+        fileName.toLowerCase().endsWith('.html') ||
+        fileName.toLowerCase().endsWith('.htm') ||
+        fileName.toLowerCase().endsWith('.md') ||
+        fileName.toLowerCase().endsWith('.markdown')
+      );
+    }
+    return false;
   };
 
   // Get switch configuration
   const getToggleConfig = (): ToggleSwitchProps<FileDisplayMode> | undefined => {
-    const fileResult = standardizedContent.find((part) => part.type === 'file_result');
-    const markdownContent = standardizedContent.find(
-      (part) =>
-        part.type === 'text' && (part.name?.includes('markdown') || isMarkdownContent(part)),
-    );
-
-    if (fileResult) {
-      // HTML file switch
-      const fileName = fileResult.path ? fileResult.path.split('/').pop() || '' : '';
+    if (panelContent.type === 'file' && panelContent.arguments?.path) {
+      const fileName = panelContent.arguments.path.split('/').pop() || '';
       const isHtmlFile =
         fileName.toLowerCase().endsWith('.html') || fileName.toLowerCase().endsWith('.htm');
+      const isMarkdownFile =
+        fileName.toLowerCase().endsWith('.md') || fileName.toLowerCase().endsWith('.markdown');
 
       if (isHtmlFile) {
         return {
@@ -191,9 +227,6 @@ export const WorkspaceDetail: React.FC = () => {
         };
       }
 
-      // Markdown file switch
-      const isMarkdownFile =
-        fileName.toLowerCase().endsWith('.md') || fileName.toLowerCase().endsWith('.markdown');
       if (isMarkdownFile) {
         return {
           leftLabel: 'Source',
@@ -207,20 +240,19 @@ export const WorkspaceDetail: React.FC = () => {
         };
       }
     }
-
-    if (markdownContent) {
-      return {
-        leftLabel: 'Source',
-        rightLabel: 'Rendered',
-        leftIcon: <FiCode size={12} />,
-        rightIcon: <FiEye size={12} />,
-        value: displayMode,
-        leftValue: 'source',
-        rightValue: 'rendered',
-        onChange: setDisplayMode,
-      };
-    }
   };
+
+  // Find appropriate renderer
+  const RendererComponent = CONTENT_RENDERERS[panelContent.type] || GenericResultRenderer;
+
+  const rendererName = CONTENT_RENDERERS[panelContent.type]
+    ? `${panelContent.type}`
+    : 'GenericResultRenderer';
+  console.log(
+    '%c🎯 [WorkspaceDetail] Using Renderer: %c' + `[${rendererName}]`,
+    'color: #ff6b6b; font-weight: bold; font-size: 12px;',
+    'color: #4ecdc4; font-weight: bold; background: #1a1a1a; padding: 2px 8px; border-radius: 4px;',
+  );
 
   return (
     <>
@@ -239,8 +271,8 @@ export const WorkspaceDetail: React.FC = () => {
           onFullscreen={handleFullscreen}
         />
         <div className="flex-1 overflow-auto p-4 pt-0">
-          <ToolResultRenderer
-            content={standardizedContent}
+          <RendererComponent
+            panelContent={panelContent}
             onAction={handleContentAction}
             displayMode={displayMode}
           />
@@ -262,13 +294,6 @@ function isResearchReportType(content: StandardPanelContent): boolean {
   );
 }
 
-function getReportContent(content: StandardPanelContent): string {
-  if (typeof content.source === 'string') {
-    return content.source;
-  }
-  return JSON.stringify(content.source, null, 2);
-}
-
 function isZoomData(data: unknown): data is { src: string; alt?: string } {
   return data !== null && typeof data === 'object' && 'src' in data && typeof data.src === 'string';
 }
@@ -286,17 +311,4 @@ function isFullscreenData(data: unknown): data is FullscreenFileData {
     typeof (data as FullscreenFileData).fileName === 'string' &&
     typeof (data as FullscreenFileData).filePath === 'string'
   );
-}
-
-function isMarkdownContent(part: any): boolean {
-  if (typeof part.text === 'string') {
-    const markdownPatterns = [
-      /^#+\s+.+$/m, // Headers
-      /\[.+\]\(.+\)/, // Links
-      /\*\*.+\*\*/, // Bold
-      /```[\s\S]*```/, // Code blocks
-    ];
-    return markdownPatterns.some((pattern) => pattern.test(part.text));
-  }
-  return false;
 }

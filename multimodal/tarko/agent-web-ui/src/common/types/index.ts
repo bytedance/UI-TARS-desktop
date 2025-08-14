@@ -4,25 +4,12 @@ import {
   ChatCompletionContentPart,
   ChatCompletionMessageToolCall,
 } from '@tarko/agent-interface';
-import { SanitizedAgentOptions, WorkspaceInfo } from '@tarko/interface';
-import { ToolCategory } from '../constants/toolTypes';
+import { SanitizedAgentOptions, WorkspaceInfo, SessionMetadata } from '@tarko/interface';
 
 export { AgentEventStream };
-export type { SanitizedAgentOptions, WorkspaceInfo };
+export type { SanitizedAgentOptions, WorkspaceInfo, SessionMetadata };
 
 export type { ChatCompletionContentPart, ChatCompletionMessageToolCall };
-
-/**
- * Session metadata information
- */
-export interface SessionMetadata {
-  id: string;
-  createdAt: number;
-  updatedAt: number;
-  name?: string;
-  workspace: string;
-  tags?: string[];
-}
 
 /**
  * Agent information
@@ -41,7 +28,7 @@ export interface ToolResult {
   content: any;
   timestamp: number;
   error?: string;
-  type: ToolCategory;
+  type: string;
   arguments?: any;
   elapsedMs?: number;
   _extra?: { currentScreenshot: string };
@@ -94,7 +81,7 @@ export interface ConnectionStatus {
  * Content to be displayed in the workspace panel
  */
 export interface PanelContent {
-  type: ToolCategory | 'plan' | 'research_report' | 'deliverable';
+  type: string;
   source: string | ChatCompletionContentPart[] | null;
   title: string;
   timestamp: number;
@@ -105,6 +92,9 @@ export interface PanelContent {
   originalContent?: string | ChatCompletionContentPart[];
   _extra?: { currentScreenshot: string };
   isStreaming?: boolean;
+  // FIXME: Consider whether to remove it
+  isDeepResearch?: boolean;
+  messageId?: string;
 }
 
 /**

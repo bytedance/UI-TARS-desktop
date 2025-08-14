@@ -3,25 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentEventStream } from '@tarko/interface';
+import { AgentEventStream, SessionMetadata } from '@tarko/interface';
 
-/**
- * Session metadata interface
- */
-export interface SessionMetadata {
-  id: string;
-  createdAt: number;
-  updatedAt: number;
-  name?: string;
-  workspace: string;
-  tags?: string[];
-  // Session-specific model configuration
-  modelConfig?: {
-    provider: string;
-    modelId: string;
-    configuredAt: number;
-  };
-}
+export type { SessionMetadata, LegacySessionMetadata } from '@tarko/interface';
 
 /**
  * Abstract storage provider interface

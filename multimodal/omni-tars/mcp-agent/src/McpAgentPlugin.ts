@@ -38,15 +38,4 @@ export class McpAgentPlugin extends AgentPlugin {
       new LinkReaderToolProvider(this.mcpManager).getTool(),
     ];
   }
-
-  async onEachAgentLoopStart(): Promise<void> {
-    // MCP-specific loop start handling if needed
-    // const eventStream = this.agent.getEventStream();
-    // const systemEvent = eventStream.createEvent('system', {
-    //   level: 'info',
-    //   message: 'MCP Agent Plugin - Loop Start',
-    //   details: { pluginName: this.name },
-    // });
-    // eventStream.sendEvent(systemEvent);
-  }
 }

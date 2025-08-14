@@ -7,14 +7,9 @@ import { ComposableAgent } from '@omni-tars/core';
 import { CodeAgentPlugin } from './CodeAgentPlugin';
 import { AgentOptions } from '@tarko/agent';
 import { CodeToolCallEngine } from './CodeToolCallEngine';
-
-export { CodeAgentPlugin } from './CodeAgentPlugin';
 export { CodeToolCallEngineProvider } from './CodeToolCallEngineProvider';
 
-export const codePlugin = new CodeAgentPlugin({
-  workingDirectory: '/workspace',
-  maxExecutionTime: 30000,
-});
+export const codePlugin = new CodeAgentPlugin();
 
 export default class CodeAgent extends ComposableAgent {
   static label: 'Seed Code Agent';

@@ -19,9 +19,7 @@ export class GuiToolCallEngineProvider extends ToolCallEngineProvider<GUIAgentTo
   canHandle(context: ToolCallEngineContext): boolean {
     // Check if the latest model output contains <computer_env></computer_env> tags
     if (context.latestAssistantMessage) {
-      const hasComputerEnvTags =
-        context.latestAssistantMessage.includes('<computer_env>') &&
-        context.latestAssistantMessage.includes('</computer_env>');
+      const hasComputerEnvTags = context.latestAssistantMessage.includes('<computer_env>');
       if (hasComputerEnvTags) {
         return true;
       }

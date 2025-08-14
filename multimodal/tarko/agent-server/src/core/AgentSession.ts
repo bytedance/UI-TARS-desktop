@@ -7,12 +7,15 @@
 import path from 'path';
 import {
   AgentEventStream,
+  AgentRunNonStreamingOptions,
   AgentRunStreamingOptions,
   AgentStatus,
   AgioProviderConstructor,
   ChatCompletionContentPart,
   IAgent,
   ModelProviderName,
+  AgentProcessingPhase,
+  AgentStatusInfo,
 } from '@tarko/interface';
 import { AgentSnapshot } from '@tarko/agent-snapshot';
 import { EventStreamBridge } from '../utils/event-stream';
@@ -195,15 +198,26 @@ export class AgentSession {
   async runQuery(query: string | ChatCompletionContentPart[]): Promise<AgentQueryResponse> {
     try {
       // Prepare run options with session-specific model configuration
-      const runOptions: any = {
+      // Emit TTFT initialization status
+      this.eventBridge.emit('agent-status', {
+        isProcessing: true,
+        state: 'initializing',
+        phase: 'query_preparation',
+        message: 'Preparing to process your request...',
+        estimatedTime: '5-15 seconds',
+      } as AgentStatusInfo);
+
+      const runOptions: AgentRunNonStreamingOptions = {
         input: query,
         sessionId: this.id,
       };
 
+      // Run agent to process the query
+
       // Add model configuration if available in session metadata
-      if (this.sessionMetadata?.modelConfig) {
-        runOptions.provider = this.sessionMetadata.modelConfig.provider;
-        runOptions.model = this.sessionMetadata.modelConfig.modelId;
+      if (this.sessionMetadata?.metadata?.modelConfig) {
+        runOptions.provider = this.sessionMetadata.metadata.modelConfig.provider as ModelProviderName;
+        runOptions.model = this.sessionMetadata.metadata.modelConfig.modelId;
         console.log(
           `🎯 [AgentSession] Using session model: ${runOptions.provider}:${runOptions.model}`,
         );
@@ -245,6 +259,15 @@ export class AgentSession {
   ): Promise<AsyncIterable<AgentEventStream.Event>> {
     try {
       // Prepare run options with session-specific model configuration
+      // Emit enhanced TTFT initialization status for streaming
+      this.eventBridge.emit('agent-status', {
+        isProcessing: true,
+        state: 'initializing',
+        phase: 'streaming_preparation',
+        message: 'Preparing streaming response...',
+        estimatedTime: '3-10 seconds for first token',
+      } as AgentStatusInfo);
+
       const runOptions: AgentRunStreamingOptions = {
         input: query,
         stream: true,
@@ -252,9 +275,9 @@ export class AgentSession {
       };
 
       // Add model configuration if available in session metadata
-      if (this.sessionMetadata?.modelConfig) {
-        runOptions.provider = this.sessionMetadata.modelConfig.provider as ModelProviderName;
-        runOptions.model = this.sessionMetadata.modelConfig.modelId;
+      if (this.sessionMetadata?.metadata?.modelConfig) {
+        runOptions.provider = this.sessionMetadata.metadata.modelConfig.provider as ModelProviderName;
+        runOptions.model = this.sessionMetadata.metadata.modelConfig.modelId;
         console.log(
           `🎯 [AgentSession] Using session model for streaming: ${runOptions.provider}:${runOptions.model}`,
         );
@@ -319,7 +342,7 @@ export class AgentSession {
    */
   async updateModelConfig(sessionMetadata: import('../storage').SessionMetadata): Promise<void> {
     console.log(
-      `🔄 [AgentSession] Storing model config for session ${this.id}: ${sessionMetadata.modelConfig?.provider}:${sessionMetadata.modelConfig?.modelId}`,
+      `🔄 [AgentSession] Storing model config for session ${this.id}: ${sessionMetadata.metadata?.modelConfig?.provider}:${sessionMetadata.metadata?.modelConfig?.modelId}`,
     );
 
     // Store the session metadata for use in future queries
@@ -328,7 +351,7 @@ export class AgentSession {
     // Emit model updated event to client
     this.eventBridge.emit('model_updated', {
       sessionId: this.id,
-      modelConfig: sessionMetadata.modelConfig,
+      modelConfig: sessionMetadata.metadata?.modelConfig,
     });
 
     console.log(`✅ [AgentSession] Model config stored for session ${this.id}`);

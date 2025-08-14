@@ -4,7 +4,7 @@ import { replayStateAtom } from '../state/atoms/replay';
 import { activeSessionIdAtom, sessionsAtom } from '../state/atoms/session';
 import { messagesAtom } from '../state/atoms/message';
 import { connectionStatusAtom, activePanelContentAtom } from '../state/atoms/ui';
-import { processEventAction } from '../state/actions/eventProcessor';
+import { processEventAction } from '../state/actions/eventProcessors';
 import { useSetAtom } from 'jotai';
 import { AgentEventStream } from '@/common/types';
 

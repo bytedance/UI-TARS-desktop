@@ -68,8 +68,8 @@ export const MultimodalContent: React.FC<MultimodalContentProps> = ({
 
       {/* Render text content - ensure text is visible in user messages */}
       {textContents.map((part, index) => (
-        <div key={`text-${index}`} className="text-current">
-          <MarkdownRenderer key={`text-${index}`} content={part.text} />
+        <div key={`text-${index}`} className="text-current" style={{ whiteSpace: 'break-spaces' }}>
+          {part.text}
         </div>
       ))}
     </>

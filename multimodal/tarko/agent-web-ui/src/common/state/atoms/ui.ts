@@ -1,4 +1,5 @@
 import { atom } from 'jotai';
+import { AgentProcessingPhase, AgentStatusInfo } from '@tarko/interface';
 import {
   ConnectionStatus,
   ModelInfo,
@@ -65,6 +66,13 @@ export const workspacePanelCollapsedAtom = atom<boolean>(false);
  * Atom for tracking processing status (when agent is running)
  */
 export const isProcessingAtom = atom<boolean>(false);
+
+/**
+ * Enhanced agent status atom for TTFT optimization
+ */
+export const agentStatusAtom = atom<AgentStatusInfo>({ 
+  isProcessing: false 
+});
 
 /**
  * Atom for offline mode state (view-only when disconnected)

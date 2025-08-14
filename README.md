@@ -41,8 +41,8 @@ English | [简体中文](./README.zh-CN.md)
         <br>
         <br>
         It primarily ships a
-        <a href="https://github.com/bytedance/UI-TARS-desktop/blob/docs/new-readme/docs/quick-start.md#get-model-and-run" target="_blank">local</a> and 
-        <a href="https://github.com/bytedance/UI-TARS-desktop/blob/docs/new-readme/docs/quick-start.md#try-out-our-free-remote-operators" target="_blank">remote</a> computer as well as browser operators.
+        <a href="https://github.com/bytedance/UI-TARS-desktop/blob/main/docs/quick-start.md#get-model-and-run-local-operator" target="_blank">local</a> and 
+        <a href="https://github.com/bytedance/UI-TARS-desktop/blob/main/docs/quick-start.md#run-remote-operator" target="_blank">remote</a> computer as well as browser operators.
       </td>
     </tr>
   </tbody>

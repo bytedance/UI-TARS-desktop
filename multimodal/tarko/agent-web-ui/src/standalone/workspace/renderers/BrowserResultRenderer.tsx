@@ -1,37 +1,33 @@
 import React from 'react';
-import { ToolResultContentPart } from '../types';
+import { StandardPanelContent } from '../types/panelContent';
 import { FiMonitor, FiExternalLink, FiGlobe, FiBookmark, FiCopy, FiCheck } from 'react-icons/fi';
 import { BrowserShell } from './BrowserShell';
 import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import { FileDisplayMode } from '../types';
 
 interface BrowserResultRendererProps {
-  part: ToolResultContentPart;
-  onAction?: (action: string, data: any) => void;
+  panelContent: StandardPanelContent;
+  onAction?: (action: string, data: unknown) => void;
+  displayMode?: FileDisplayMode;
 }
 
 /**
  * Renders browser navigation and page content results with improved UI
- *
- * Design improvements:
- * - Enhanced browser shell with realistic browser chrome
- * - Better visual hierarchy and content spacing
- * - Quick action buttons for URL interaction
- * - Proper content formatting with support for different content types
- * - Smooth animations for state changes
  */
-export const BrowserResultRenderer: React.FC<BrowserResultRendererProps> = ({ part }) => {
-  const { url, content, title, contentType, _extra } = part;
+export const BrowserResultRenderer: React.FC<BrowserResultRendererProps> = ({ panelContent }) => {
   const [copied, setCopied] = useState(false);
 
-  const displayTitle = title || url?.split('/').pop() || 'Browser Result';
+  // Extract browser result data from panelContent
+  const browserData = extractBrowserResultData(panelContent);
 
-  const screenshot = _extra?.currentScreenshot || null;
-
-  if (!url && !content && !screenshot) {
+  if (!browserData) {
     return <div className="text-gray-500 italic">Browser result is empty</div>;
   }
+
+  const { url, content, title, contentType, screenshot } = browserData;
+  const displayTitle = title || url?.split('/').pop() || 'Browser Result';
 
   const copyUrl = () => {
     if (url) {
@@ -131,3 +127,53 @@ export const BrowserResultRenderer: React.FC<BrowserResultRendererProps> = ({ pa
     </div>
   );
 };
+
+function extractBrowserResultData(panelContent: StandardPanelContent): {
+  url?: string;
+  content?: string;
+  title?: string;
+  contentType?: string;
+  screenshot?: string;
+} | null {
+  try {
+    // Try arguments first
+    if (panelContent.arguments) {
+      const { url, content, title, contentType } = panelContent.arguments;
+
+      return {
+        url: url ? String(url) : undefined,
+        content: content ? String(content) : undefined,
+        title: title ? String(title) : undefined,
+        contentType: contentType ? String(contentType) : undefined,
+        screenshot: panelContent._extra?.currentScreenshot,
+      };
+    }
+
+    // Try to extract from source
+    if (typeof panelContent.source === 'object' && panelContent.source !== null) {
+      const sourceObj = panelContent.source as any;
+      const { url, content, title, contentType } = sourceObj;
+
+      return {
+        url: url ? String(url) : undefined,
+        content: content ? String(content) : undefined,
+        title: title ? String(title) : undefined,
+        contentType: contentType ? String(contentType) : undefined,
+        screenshot: panelContent._extra?.currentScreenshot,
+      };
+    }
+
+    // If source is a string, treat it as content
+    if (typeof panelContent.source === 'string') {
+      return {
+        content: panelContent.source,
+        screenshot: panelContent._extra?.currentScreenshot,
+      };
+    }
+
+    return null;
+  } catch (error) {
+    console.warn('Failed to extract browser result data:', error);
+    return null;
+  }
+}

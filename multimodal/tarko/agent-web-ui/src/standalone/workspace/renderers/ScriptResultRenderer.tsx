@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { ToolResultContentPart } from '../types';
+import { StandardPanelContent } from '../types/panelContent';
 import { motion } from 'framer-motion';
 import { FiPlay, FiCode, FiTerminal } from 'react-icons/fi';
 import { CodeEditor } from '@/sdk/code-editor';
+import { FileDisplayMode } from '../types';
 
 interface ScriptResultRendererProps {
-  part: ToolResultContentPart;
-  onAction?: (action: string, data: any) => void;
+  panelContent: StandardPanelContent;
+  onAction?: (action: string, data: unknown) => void;
+  displayMode?: FileDisplayMode;
 }
 
 /**
@@ -57,13 +59,17 @@ const getLanguageFromInterpreter = (interpreter: string): string => {
 /**
  * Renders script execution results with professional code editor and terminal output
  */
-export const ScriptResultRenderer: React.FC<ScriptResultRendererProps> = ({ part }) => {
-  const { script, interpreter = 'python', cwd, stdout, stderr, exitCode } = part;
+export const ScriptResultRenderer: React.FC<ScriptResultRendererProps> = ({ panelContent }) => {
   const [displayMode, setDisplayMode] = useState<'both' | 'script' | 'execution'>('both');
 
-  if (!script && !stdout && !stderr) {
+  // Extract script data from panelContent
+  const scriptData = extractScriptData(panelContent);
+
+  if (!scriptData) {
     return <div className="text-gray-500 italic">Script result is empty</div>;
   }
+
+  const { script, interpreter, stdout, stderr, exitCode } = scriptData;
 
   // Exit code styling
   const isError = exitCode !== 0 && exitCode !== undefined;
@@ -212,3 +218,49 @@ export const ScriptResultRenderer: React.FC<ScriptResultRendererProps> = ({ part
     </div>
   );
 };
+
+function extractScriptData(panelContent: StandardPanelContent): {
+  script: string;
+  interpreter: string;
+  stdout?: string;
+  stderr?: string;
+  exitCode?: number;
+} | null {
+  try {
+    // Try arguments first
+    if (panelContent.arguments) {
+      const { script, interpreter = 'python', stdout, stderr, exitCode } = panelContent.arguments;
+
+      if (script && typeof script === 'string') {
+        return {
+          script,
+          interpreter: String(interpreter),
+          stdout: stdout ? String(stdout) : undefined,
+          stderr: stderr ? String(stderr) : undefined,
+          exitCode: typeof exitCode === 'number' ? exitCode : undefined,
+        };
+      }
+    }
+
+    // Try to extract from source
+    if (typeof panelContent.source === 'object' && panelContent.source !== null) {
+      const sourceObj = panelContent.source as any;
+      const { script, interpreter = 'python', stdout, stderr, exitCode } = sourceObj;
+
+      if (script && typeof script === 'string') {
+        return {
+          script,
+          interpreter: String(interpreter),
+          stdout: stdout ? String(stdout) : undefined,
+          stderr: stderr ? String(stderr) : undefined,
+          exitCode: typeof exitCode === 'number' ? exitCode : undefined,
+        };
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.warn('Failed to extract script data:', error);
+    return null;
+  }
+}

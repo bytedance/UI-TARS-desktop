@@ -4,13 +4,14 @@
  */
 
 import { AgentPlugin } from './AgentPlugin';
-import Agent, { LLMRequestHookPayload, LLMResponseHookPayload } from '@tarko/agent';
+import Agent, { getLogger, LLMRequestHookPayload, LLMResponseHookPayload } from '@tarko/agent';
 
 /**
  * Composes multiple agent plugins into a unified system prompt and instruction set
  */
 export class AgentComposer {
   private plugins: AgentPlugin[] = [];
+  private logger = getLogger('AgentComposer');
 
   constructor(option: { plugins: AgentPlugin[] }) {
     this.plugins = option.plugins;
@@ -39,7 +40,11 @@ export class AgentComposer {
    * Generate the composed system prompt from all agent plugins
    */
   generateSystemPrompt(): string {
-    const basePrompt = `You are a general AI agent, a helpful AI assistant that can interact with the following environments to solve tasks: ${this.getAvailableEnvironments()}.
+    const envs = this.getAvailableEnvironments();
+
+    this.logger.info('Available Environments: ', envs);
+
+    const basePrompt = `You are a general AI agent, a helpful AI assistant that can interact with the following environments to solve tasks: ${envs}.
     You should first think about the reasoning process in the mind and then provide the user with the answer. The reasoning process is enclosed within <think_never_used_51bce0c785ca2f68081bfa7d91973934> </think_never_used_51bce0c785ca2f68081bfa7d91973934> tags, i.e. <think_never_used_51bce0c785ca2f68081bfa7d91973934> reasoning process here </think_never_used_51bce0c785ca2f68081bfa7d91973934> answer here
 
 `;

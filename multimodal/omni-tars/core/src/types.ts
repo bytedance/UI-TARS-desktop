@@ -4,35 +4,6 @@
  */
 
 import { ChatCompletionMessageToolCall, Tool, ToolCallEngine } from '@tarko/agent';
-import { AgentPlugin } from './AgentPlugin';
-
-/**
- * Configuration for composing multiple agent plugins
- */
-export interface AgentCompositionConfig {
-  /** Base agent name */
-  name: string;
-
-  /** Agent plugins to compose */
-  plugins: AgentPlugin[];
-
-  /** Tool call engine */
-  toolCallEngine: ToolCallEngine;
-
-  /** Maximum iterations for the composed agent */
-  maxIterations?: number;
-}
-
-/**
- * Interface for environment sections that can be combined
- */
-export interface EnvironmentSection {
-  /** Environment name (e.g., 'CODE_ENVIRONMENT', 'MCP_ENVIRONMENT') */
-  name: string;
-
-  /** The prompt content for this environment */
-  content: string;
-}
 
 /**
  * Abstract base class for tool call engine providers that can be composed

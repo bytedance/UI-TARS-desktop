@@ -88,6 +88,80 @@ export function actionParser(params: {
   };
 }
 
+export function actionStringParser(prediction: string): string[] {
+  const text = prediction.trim();
+
+  let reflection: string | null = null;
+  let thought: string | null = null;
+  let actionStr = '';
+
+  // Parse thought/reflection based on different text patterns
+  if (text.includes('Thought:')) {
+    const thoughtMatch = text.match(/Thought: ([\s\S]+?)(?=\s*Action[:：]|$)/);
+
+    if (thoughtMatch) {
+      thought = thoughtMatch[1].trim();
+    }
+  } else if (text.startsWith('Reflection:')) {
+    const reflectionMatch = text.match(
+      /Reflection: ([\s\S]+?)Action_Summary: ([\s\S]+?)(?=\s*Action[:：]|$)/,
+    );
+    if (reflectionMatch) {
+      thought = reflectionMatch[2].trim();
+      reflection = reflectionMatch[1].trim();
+    }
+  } else if (text.startsWith('Action_Summary:')) {
+    const summaryMatch = text.match(/Action_Summary: (.+?)(?=\s*Action[:：]|$)/);
+    if (summaryMatch) {
+      thought = summaryMatch[1].trim();
+    }
+  }
+
+  if (!['Action:', 'Action：'].some((keyword) => text.includes(keyword))) {
+    //   throw new Error('No Action found in text');
+    actionStr = text;
+  } else {
+    const actionParts = text.split(/Action[:：]/);
+    actionStr = actionParts[actionParts.length - 1];
+  }
+
+  if (actionStr !== '') {
+    return actionStr.split('\n\n').map((str) => str.trim());
+  }
+
+  // Parse o1 format
+  const thoughtMatch = text.match(/<Thought>\s*(.*?)\s*<\/Thought>/);
+  const actionSummaryMatch = text.match(/\nAction_Summary:\s*(.*?)\s*Action:/);
+  const actionMatch = text.match(/\nAction:\s*(.*?)\s*<\/Output>/);
+
+  const thoughtContent = thoughtMatch ? thoughtMatch[1] : null;
+  const actionSummaryContent = actionSummaryMatch ? actionSummaryMatch[1] : null;
+  const actionContent = actionMatch ? actionMatch[1] : null;
+
+  thought = `${thoughtContent}\n<Action_Summary>\n${actionSummaryContent}`;
+  actionStr = actionContent || '';
+  if (actionStr !== '') {
+    return actionStr.split('\n\n');
+  }
+
+  const thinkMatch = text.match(/<think[^>]*>([\s\S]*?)<\/think[^>]*>/i);
+  const computerEnvMatch = text.match(/<computer_env>([\s\S]*?)<\/computer_env>/i);
+  if (thinkMatch && computerEnvMatch) {
+    if (thinkMatch) {
+      thought = thinkMatch[1].trim();
+    }
+    if (computerEnvMatch) {
+      actionStr = computerEnvMatch[1].trim();
+      actionStr = actionStr.replace(/^Action:\s*/i, '');
+    }
+  }
+  if (actionStr !== '') {
+    return actionStr.split('\n\n');
+  }
+
+  return [];
+}
+
 export function parseActionVlm(
   text: string,
   factors: [number, number] = [1000, 1000],
