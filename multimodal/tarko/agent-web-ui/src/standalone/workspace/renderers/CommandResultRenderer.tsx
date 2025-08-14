@@ -180,6 +180,7 @@ export const CommandResultRenderer: React.FC<CommandResultRendererProps> = ({ pa
  * @returns
  */
 function extractCommandData(panelContent: StandardPanelContent) {
+  debugger;
   const command = panelContent.arguments?.command;
 
   if (Array.isArray(panelContent.source)) {
@@ -226,7 +227,18 @@ function extractCommandData(panelContent: StandardPanelContent) {
   }
 
   if (typeof panelContent.source === 'string') {
-    if (panelContent.source.startsWith('Error: ')) {
+    const isError = panelContent.source.includes('Error: ');
+
+    if (panelContent.title === 'str_replace_editor' && panelContent.arguments) {
+      const { command = '', file_text = '', path = '' } = panelContent.arguments;
+      return {
+        command: [command, file_text, path].filter(Boolean).join(' '),
+        stderr: isError ? panelContent.source : '',
+        stdout: isError ? '' : panelContent.source,
+      };
+    }
+
+    if (isError) {
       return { command, stderr: panelContent.source, exitCode: 1 };
     }
     return { command, stdout: panelContent.source, exitCode: 0 };
