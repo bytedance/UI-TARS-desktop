@@ -1,5 +1,5 @@
 import React from 'react';
-import { PanelContentArguments, StandardPanelContent } from '../types/panelContent';
+import { StandardPanelContent } from '../types/panelContent';
 import { FileDisplayMode } from '../types';
 
 interface CommandResultRendererProps {
@@ -181,18 +181,54 @@ export const CommandResultRenderer: React.FC<CommandResultRendererProps> = ({ pa
  */
 function extractCommandData(panelContent: StandardPanelContent) {
   const command = panelContent.arguments?.command;
+
   if (Array.isArray(panelContent.source)) {
     // @ts-expect-error MAKE `panelContent.source` is Array
     const stdout = panelContent.source?.find((s) => s.name === 'STDOUT')?.text;
     // @ts-expect-error MAKE `panelContent.source` is Array
     const stderr = panelContent.source?.find((s) => s.name === 'STDERR')?.text;
-    return { command, stdout, stderr };
+    return { command, stdout, stderr, exitCode: !stderr ? 0 : 1 };
+  }
+
+  /**
+   * {
+   *   "panelContent": {
+   *      "type": "command_result",
+   *      "source": {
+   *          "session_id": "0cec471e-97ae-4a4b-9d55-9f3a3466a9b7",
+   *          "command": "mkdir -p /home/gem/tmp",
+   *          "status": "completed",
+   *          "returncode": 0,
+   *          "output": "\\u001b[?2004hgem@50ddd3ffedb3:~$ > mkdir -p /home/gem/tmp\\nmkdir -p /home/gem/tmp\\r\\n\\u001b[?2004l\\r\\u001b[?2004hgem@50ddd3ffedb3:~$ ",
+   *          "console": [
+   *              {
+   *                  "ps1": "gem@50ddd3ffedb3:~ $",
+   *                  "command": "mkdir -p /home/gem/tmp",
+   *                  "output": "\\u001b[?2004hgem@50ddd3ffedb3:~$ > mkdir -p /home/gem/tmp\\nmkdir -p /home/gem/tmp\\r\\n\\u001b[?2004l\\r\\u001b[?2004hgem@50ddd3ffedb3:~$ "
+   *              }
+   *          ]
+   *      },
+   *      "title": "execute_bash",
+   *      "timestamp": 1755109845677,
+   *      "toolCallId": "call_1755109845259_h5f8zcseg",
+   *      "arguments": {
+   *          "command": "mkdir -p /home/gem/tmp"
+   *      }
+   *  }
+   *}
+   */
+  if (typeof panelContent.source === 'object' && panelContent.type === 'command_result') {
+    return {
+      command: panelContent.arguments?.command,
+      stdout: panelContent.source.output,
+      exitCode: panelContent.source.returncode,
+    };
   }
 
   if (typeof panelContent.source === 'string') {
     if (panelContent.source.startsWith('Error: ')) {
-      return { command, stderr: panelContent.source };
+      return { command, stderr: panelContent.source, exitCode: 1 };
     }
-    return { command, stdout: panelContent.source };
+    return { command, stdout: panelContent.source, exitCode: 0 };
   }
 }
