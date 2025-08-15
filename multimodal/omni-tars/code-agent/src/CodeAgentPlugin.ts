@@ -8,7 +8,7 @@ import { LLMRequestHookPayload, LLMResponseHookPayload } from '@tarko/agent';
 import { ExcuteBashProvider } from './tools/ExcuteBash';
 import { JupyterCIProvider } from './tools/JupyterCI';
 import { StrReplaceEditorProvider } from './tools/StrReplaceEditor';
-import { AioClient } from '@omni-tars/core';
+import { AioClient } from '@agent-infra/sandbox';
 import assert from 'assert';
 
 /**

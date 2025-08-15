@@ -319,6 +319,9 @@ importers:
 
   omni-tars/code-agent:
     dependencies:
+      '@agent-infra/sandbox':
+        specifier: 0.0.1
+        version: 0.0.1
       '@omni-tars/core':
         specifier: workspace:*
         version: link:../core
@@ -1471,6 +1474,10 @@ packages:
 
   '@agent-infra/media-utils@0.1.5':
     resolution: {integrity: sha512-3irZBomzhNOw/HMZg4rmJ7w87BPbXTgYA0LZV0nlgpoE5w3GydmWx/S0EF1MCfPHE1r1QrldFqpqZ38smSGF4Q==}
+
+  '@agent-infra/sandbox@0.0.1':
+    resolution: {integrity: sha512-J0VSY/QFzl/YeE2xe4H99hGJmk8CrbgXvI8zttL5R59O+BXEBBoCq/xHZ4KXhLBVZJTRMzuxawopQqlPAhIc6w==}
+    engines: {node: '>=18.0.0'}
 
   '@agent-infra/search@0.0.5':
     resolution: {integrity: sha512-c+oKOg4kpx7DiXbI4wsnsrbkOvqqU2v5QrHrCJ1I+aGeyg4G46ZCtFhtpLg9kqmazt+EJ8Wy86yqot2fXVk1Ig==}
@@ -11080,6 +11087,10 @@ snapshots:
     dependencies:
       '@agent-infra/logger': 0.0.2-beta.2
       delay: 6.0.0
+
+  '@agent-infra/sandbox@0.0.1':
+    dependencies:
+      '@agent-infra/logger': 0.0.1
 
   '@agent-infra/search@0.0.5':
     dependencies:
