@@ -303,7 +303,7 @@ export class SQLiteStorageProvider implements StorageProvider {
 
       if (!hasWorkspaceColumn) {
         console.log('Adding workspace column...');
-        this.db.exec('ALTER TABLE sessions ADD COLUMN workspace TEXT DEFAULT ""');
+        this.db.exec("ALTER TABLE sessions ADD COLUMN workspace TEXT DEFAULT ''");
       }
 
       if (!hasMetadataColumn) {
@@ -315,7 +315,7 @@ export class SQLiteStorageProvider implements StorageProvider {
       if (!hasWorkspaceColumn && columnNames.includes('workingDirectory')) {
         console.log('Migrating workingDirectory to workspace...');
         this.db.exec(
-          'UPDATE sessions SET workspace = COALESCE(workingDirectory, "") WHERE workspace IS NULL OR workspace = ""',
+          "UPDATE sessions SET workspace = COALESCE(workingDirectory, '') WHERE workspace IS NULL OR workspace = ''",
         );
       }
 
