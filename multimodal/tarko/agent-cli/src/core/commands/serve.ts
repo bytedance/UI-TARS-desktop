@@ -7,6 +7,7 @@ import http from 'http';
 import { LogLevel } from '@tarko/interface';
 import { AgentCLIServeCommandOptions } from '../../types';
 import { AgentServer } from '@tarko/agent-server';
+import { findAvailablePort } from '../../utils';
 import boxen from 'boxen';
 import chalk from 'chalk';
 
@@ -24,6 +25,13 @@ export async function startHeadlessServer(
     appConfig.server = {
       port: 8888,
     };
+  }
+
+  // Find available port
+  const availablePort = await findAvailablePort(appConfig.server.port!);
+  if (availablePort !== appConfig.server.port) {
+    console.log(`Port ${appConfig.server.port} is in use, using port ${availablePort} instead`);
+    appConfig.server.port = availablePort;
   }
 
   // Create and start the server with injected agent

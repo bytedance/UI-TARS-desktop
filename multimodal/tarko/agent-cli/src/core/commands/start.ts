@@ -16,7 +16,7 @@ import { AgentServer, AgentServerOptions, express } from '@tarko/agent-server';
 import boxen from 'boxen';
 import chalk from 'chalk';
 import gradient from 'gradient-string';
-import { logger, toUserFriendlyPath } from '../../utils';
+import { logger, toUserFriendlyPath, findAvailablePort } from '../../utils';
 import { AgentCLIRunInteractiveUICommandOptions } from '../../types';
 
 /**
@@ -34,6 +34,13 @@ export async function startInteractiveWebUI(
     appConfig.server = {
       port: 8888,
     };
+  }
+
+  // Find available port
+  const availablePort = await findAvailablePort(appConfig.server.port!);
+  if (availablePort !== appConfig.server.port) {
+    console.log(`Port ${appConfig.server.port} is in use, using port ${availablePort} instead`);
+    appConfig.server.port = availablePort;
   }
 
   if (isAgentWebUIImplementationType(webui, 'static')) {
