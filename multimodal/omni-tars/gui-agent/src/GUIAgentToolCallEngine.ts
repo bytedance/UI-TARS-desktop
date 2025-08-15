@@ -163,21 +163,45 @@ export class GUIAgentToolCallEngine extends ToolCallEngine {
     }
 
     // TODO: Remove this logic after the new model instruction is followed
-    if (fullContent.includes('</answer>')) {
-      const functionCallBeginMatch = fullContent.match(
-        /<\|(FunctionCallBegin|FCResponseBegin)\|>([\s\S]*?)(?:<\/answer>|$)/,
-      );
-      let extractedContent: string | null = null;
-      if (functionCallBeginMatch) {
-        extractedContent = functionCallBeginMatch[2]; // Use the second capture group, as the first is the tag name
+    let reasoningContentDraft: string | null = null;
+    let finalMessageContentDraft: string | null = null;
+    if (toolCalls.length <= 0) {
+      if (fullContent.includes('</answer>')) {
+        const functionCallBeginMatch = fullContent.match(
+          /<\|(FunctionCallBegin|FCResponseBegin)\|>([\s\S]*?)(?:<\/answer>|$)/,
+        );
+        let extractedContent: string | null = null;
+        if (functionCallBeginMatch) {
+          extractedContent = functionCallBeginMatch[2]; // Use the second capture group, as the first is the tag name
+        }
+        finished = true;
+        finishMessage = extractedContent;
+        console.log('extractedContent', extractedContent);
+      } else {
+        if (fullContent.includes('<think_never_used_') && fullContent.includes('<think>')) {
+          const thinkNeverUsedMatch = fullContent.match(
+            /<think_never_used_[a-f0-9]{32}>([\s\S]*?)<\/think_never_used_[a-f0-9]{32}>/,
+          );
+          if (thinkNeverUsedMatch) {
+            reasoningContentDraft = thinkNeverUsedMatch[1];
+          }
+          const allThinkMatches = [...fullContent.matchAll(/<think>([\s\S]*?)<\/think>/g)];
+          if (allThinkMatches.length > 0) {
+            const lastThinkMatch = allThinkMatches[allThinkMatches.length - 1];
+            finalMessageContentDraft = lastThinkMatch[1];
+          }
+          if (finalMessageContentDraft && reasoningContentDraft) {
+            finished = true;
+            finishMessage = finalMessageContentDraft.trim();
+          }
+        }
+        console.log('finalMessageContentDraft', finalMessageContentDraft);
+        console.log('reasoningContentDraft', reasoningContentDraft);
       }
-      finished = true;
-      finishMessage = extractedContent;
-      console.log('extractedContent', extractedContent);
     }
 
     const content = finishMessage || (toolCalls.length <= 0 || finished ? fullContent : '');
-    const reasoningContent = parsed[0].thought ?? '';
+    const reasoningContent = reasoningContentDraft ?? parsed[0]?.thought ?? '';
     const contentForWebUI = content.replace(/\\n|\n/g, '<br>');
     const reasoningContentForWebUI = reasoningContent.replace(/\\n|\n/g, '<br>');
 
