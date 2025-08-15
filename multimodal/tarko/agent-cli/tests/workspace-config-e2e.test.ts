@@ -12,13 +12,6 @@ import { AgentCLIArguments, AgentAppConfig } from '@tarko/interface';
 
 /**
  * End-to-end tests for workspace configuration feature
- *
- * These tests verify the complete integration of workspace config
- * through the actual configuration building process, testing:
- * 1. Real file system operations for .tarko/instructions.md
- * 2. Workspace config is properly merged with other configs
- * 3. Priority order is correctly maintained
- * 4. Error handling in real scenarios
  */
 describe('workspace-config E2E', () => {
   let tempDir: string;
@@ -28,24 +21,19 @@ describe('workspace-config E2E', () => {
   let originalCwd: string;
 
   beforeEach(() => {
-    // Save original working directory
     originalCwd = process.cwd();
 
-    // Create temporary workspace
     tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'tarko-e2e-'));
     workspacePath = tempDir;
     tarkoDir = path.join(workspacePath, '.tarko');
     instructionsPath = path.join(tarkoDir, 'instructions.md');
 
-    // Change to temp directory to simulate real workspace
     process.chdir(workspacePath);
   });
 
   afterEach(() => {
-    // Restore original working directory
     process.chdir(originalCwd);
 
-    // Clean up temporary directory
     if (fs.existsSync(tempDir)) {
       fs.rmSync(tempDir, { recursive: true, force: true });
     }

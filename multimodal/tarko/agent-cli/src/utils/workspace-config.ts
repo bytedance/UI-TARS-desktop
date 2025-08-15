@@ -17,9 +17,6 @@ export const WORKSPACE_CONFIG_PATHS = {
 
 /**
  * Load workspace configuration from .tarko directory
- *
- * @param workspacePath The workspace directory path
- * @returns Partial configuration to merge with existing config
  */
 export function loadWorkspaceConfig(workspacePath: string): Partial<AgentAppConfig> {
   const config: Partial<AgentAppConfig> = {};
@@ -33,7 +30,6 @@ export function loadWorkspaceConfig(workspacePath: string): Partial<AgentAppConf
         config.instructions = instructions;
       }
     } catch (error) {
-      // Silently ignore read errors to avoid breaking the CLI
       console.warn(
         `Warning: Failed to read ${instructionsPath}: ${error instanceof Error ? error.message : String(error)}`,
       );
@@ -45,9 +41,6 @@ export function loadWorkspaceConfig(workspacePath: string): Partial<AgentAppConf
 
 /**
  * Check if workspace has any .tarko configuration files
- *
- * @param workspacePath The workspace directory path
- * @returns True if any .tarko config files exist
  */
 export function hasWorkspaceConfig(workspacePath: string): boolean {
   const tarkoDir = path.join(workspacePath, '.tarko');
@@ -55,7 +48,6 @@ export function hasWorkspaceConfig(workspacePath: string): boolean {
     return false;
   }
 
-  // Check for instructions.md
   const instructionsPath = path.join(workspacePath, WORKSPACE_CONFIG_PATHS.INSTRUCTIONS);
   return fs.existsSync(instructionsPath);
 }

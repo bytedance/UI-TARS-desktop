@@ -24,15 +24,6 @@ vi.mock('../src/utils', () => ({
 
 /**
  * Test suite for the buildAppConfig function
- *
- * These tests verify:
- * 1. CLI arguments are properly merged with user configuration
- * 2. Nested configuration structures are handled correctly
- * 3. Environment variable resolution works
- * 4. Configuration merging prioritizes CLI over user config
- * 5. CLI shortcuts (debug, quiet, port) work correctly
- * 6. Deprecated options are handled correctly
- * 7. Server storage defaults are applied correctly
  */
 describe('buildAppConfig', () => {
   beforeEach(() => {
@@ -254,10 +245,8 @@ describe('buildAppConfig', () => {
     });
 
     it('should resolve environment variables in model configuration', async () => {
-      // Get the mocked resolveValue function
       const { resolveValue } = await import('../src/utils');
 
-      // Configure the mock to return specific values
       vi.mocked(resolveValue)
         .mockReturnValueOnce('resolved-api-key')
         .mockReturnValueOnce('resolved-base-url');
@@ -699,10 +688,8 @@ describe('buildAppConfig', () => {
 
   describe('workspace configuration integration', () => {
     it('should merge workspace config when workspacePath is provided', async () => {
-      // Get the mocked loadWorkspaceConfig function
       const { loadWorkspaceConfig } = await import('../src/utils');
 
-      // Configure the mock to return workspace config
       vi.mocked(loadWorkspaceConfig).mockReturnValue({
         instructions: 'You are a workspace-specific assistant.',
       });
@@ -747,7 +734,6 @@ describe('buildAppConfig', () => {
     it('should prioritize workspace config over user config', async () => {
       const { loadWorkspaceConfig } = await import('../src/utils');
 
-      // Workspace config should override user config
       vi.mocked(loadWorkspaceConfig).mockReturnValue({
         instructions: 'Workspace instructions',
         model: {
@@ -799,7 +785,6 @@ describe('buildAppConfig', () => {
     it('should handle workspace config with empty return', async () => {
       const { loadWorkspaceConfig } = await import('../src/utils');
 
-      // Empty workspace config should not affect the result
       vi.mocked(loadWorkspaceConfig).mockReturnValue({});
 
       const cliArgs: AgentCLIArguments = {

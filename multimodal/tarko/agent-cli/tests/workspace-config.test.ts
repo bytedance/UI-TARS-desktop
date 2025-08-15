@@ -15,25 +15,17 @@ import {
 
 /**
  * Test suite for workspace configuration utilities
- *
- * These tests verify:
- * 1. loadWorkspaceConfig correctly loads instructions.md
- * 2. hasWorkspaceConfig detects workspace configuration
- * 3. Error handling for file system operations
- * 4. Edge cases with empty files and missing directories
  */
 describe('workspace-config', () => {
   let tempDir: string;
   let workspacePath: string;
 
   beforeEach(() => {
-    // Create a temporary directory for each test
     tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'tarko-test-'));
     workspacePath = tempDir;
   });
 
   afterEach(() => {
-    // Clean up temporary directory
     if (fs.existsSync(tempDir)) {
       fs.rmSync(tempDir, { recursive: true, force: true });
     }
@@ -46,7 +38,6 @@ describe('workspace-config', () => {
     });
 
     it('should return empty config when instructions.md does not exist', () => {
-      // Create .tarko directory but no instructions.md
       const tarkoDir = path.join(workspacePath, '.tarko');
       fs.mkdirSync(tarkoDir);
 
@@ -101,7 +92,6 @@ describe('workspace-config', () => {
       fs.mkdirSync(tarkoDir, { recursive: true });
       fs.writeFileSync(instructionsPath, 'test content');
 
-      // Mock fs.readFileSync to throw an error
       const originalReadFileSync = fs.readFileSync;
       const mockConsoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
@@ -120,7 +110,6 @@ describe('workspace-config', () => {
       );
       expect(mockConsoleWarn).toHaveBeenCalledWith(expect.stringContaining('Permission denied'));
 
-      // Restore mocks
       vi.restoreAllMocks();
       mockConsoleWarn.mockRestore();
     });
@@ -132,7 +121,6 @@ describe('workspace-config', () => {
       fs.mkdirSync(tarkoDir, { recursive: true });
       fs.writeFileSync(instructionsPath, 'test content');
 
-      // Mock fs.readFileSync to throw a non-Error object
       const originalReadFileSync = fs.readFileSync;
       const mockConsoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
@@ -148,7 +136,6 @@ describe('workspace-config', () => {
       expect(result).toEqual({});
       expect(mockConsoleWarn).toHaveBeenCalledWith(expect.stringContaining('String error'));
 
-      // Restore mocks
       vi.restoreAllMocks();
       mockConsoleWarn.mockRestore();
     });
