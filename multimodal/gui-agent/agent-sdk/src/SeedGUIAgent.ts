@@ -104,7 +104,7 @@ export class SeedGUIAgent extends Agent {
         description: 'operator tool',
         parameters: {},
         function: async (input) => {
-          this.logger.log('browser_vision_control input:', input);
+          // this.logger.log('browser_vision_control input:', input);
           const result = await this.operator!.execute({
             parsedPrediction: input.operator_action,
             screenWidth: getScreenInfo().screenWidth ?? 1000,

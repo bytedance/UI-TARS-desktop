@@ -131,9 +131,18 @@ export class SeedGUIAgentToolCallEngine extends ToolCallEngine {
     if (Array.isArray(parsed)) {
       for (const action of parsed) {
         idx = idx + 1;
+
+        const cleanedThought = action.thought.replace(/think_never_used_[a-f0-9]{32}>/g, '');
+        if (cleanedThought) {
+          action.thought = cleanedThought;
+        }
+
         if (action.action_type === 'finished') {
           finished = true;
           finishMessage = action.action_inputs.content ?? null;
+          continue;
+        }
+        if (action.action_type === '') {
           continue;
         }
         const toolCallId = this.generateToolCallId();

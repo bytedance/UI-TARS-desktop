@@ -845,7 +845,7 @@ export class RemoteBrowserOperator extends BrowserOperator {
     showWaterFlow = false,
     isCallUser = false,
     // searchEngine = 'baidu' as SearchEngine,
-  ): Promise<DefaultBrowserOperator> {
+  ): Promise<RemoteBrowserOperator> {
     if (!this.logger) {
       this.logger = new ConsoleLogger('[RemoteBrowserOperator]');
     }
@@ -868,6 +868,10 @@ export class RemoteBrowserOperator extends BrowserOperator {
     this.instance.setHighlightClickableElements(highlight);
 
     return this.instance;
+  }
+
+  public static getRemoteBrowser(): RemoteBrowser | null {
+    return this.browser;
   }
 
   public static async destroyInstance(): Promise<void> {
