@@ -398,7 +398,7 @@ export class SQLiteStorageProvider implements StorageProvider {
 
       // Build dynamic INSERT query based on available columns
       const insertColumns = ['id', 'createdAt', 'updatedAt'];
-      const insertValues = [sessionData.id, sessionData.createdAt, sessionData.updatedAt];
+      const insertValues: (string | number | null)[] = [sessionData.id, sessionData.createdAt, sessionData.updatedAt];
       const placeholders = ['?', '?', '?'];
 
       if (hasWorkspace) {
