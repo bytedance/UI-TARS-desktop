@@ -371,6 +371,15 @@ Provide concise and accurate responses.`;
 
       this.eventStream.sendEvent(userEvent);
 
+      // If input contains expanded context from server, inject as environment_input event
+      if (typeof normalizedOptions.input === 'string' && normalizedOptions.input.includes('Context:')) {
+        const environmentEvent = this.eventStream.createEvent('environment_input', {
+          content: normalizedOptions.input,
+          description: 'Expanded context from contextual references',
+        });
+        this.eventStream.sendEvent(environmentEvent);
+      }
+
       // Inject abort signal into the execution context
       normalizedOptions.abortSignal = abortSignal;
 
