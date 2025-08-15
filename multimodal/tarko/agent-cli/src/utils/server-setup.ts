@@ -17,7 +17,7 @@ export async function ensureServerConfig(appConfig: AgentAppConfig): Promise<voi
   // Find available port
   const availablePort = await findAvailablePort(appConfig.server.port!);
   if (availablePort !== appConfig.server.port) {
-    console.log(`Port ${appConfig.server.port} is in use, using port ${availablePort} instead`);
+    console.log(`🔄 Port ${appConfig.server.port} unavailable, switching to ${availablePort}`);
     appConfig.server.port = availablePort;
   }
 }
