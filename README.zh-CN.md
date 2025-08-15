@@ -40,8 +40,7 @@
         <br>
         <br>
         它主要提供
-        <a href="https://github.com/bytedance/UI-TARS-desktop/blob/docs/new-readme/docs/quick-start.md#get-model-and-run" target="_blank">本地</a>和
-        <a href="https://github.com/bytedance/UI-TARS-desktop/blob/docs/new-readme/docs/quick-start.md#try-out-our-free-remote-operators" target="_blank">远程</a>计算机以及浏览器操作器。
+        <a href="https://github.com/bytedance/UI-TARS-desktop/blob/docs/new-readme/docs/quick-start.md#get-model-and-run" target="_blank">本地</a>计算机以及浏览器操作器。
       </td>
     </tr>
   </tbody>
@@ -238,7 +237,7 @@ agent-tars --provider anthropic --model claude-3-7-sonnet-latest --apiKey your-a
   <img alt="UI-TARS" width="260" src="./apps/ui-tars/resources/icon.png">
 </p>
 
-UI-TARS Desktop 是一个由 [UI-TARS](https://github.com/bytedance/UI-TARS) 和 Seed-1.5-VL/1.6 系列模型驱动的原生 GUI agent，可在你的本地计算机和云端远程 VM 沙箱上使用。
+UI-TARS Desktop 是一个由 [UI-TARS](https://github.com/bytedance/UI-TARS) 和 Seed-1.5-VL/1.6 系列模型驱动的原生 GUI agent，可在你的本地计算机上使用。
 
 <div align="center">
 <p>
@@ -270,7 +269,6 @@ UI-TARS Desktop 是一个由 [UI-TARS](https://github.com/bytedance/UI-TARS) 和
 - 💻 跨平台支持 (Windows/MacOS/Browser)
 - 🔄 实时反馈和状态显示
 - 🔐 私密且安全 - 完全本地处理
-- 🛠️ 轻松设置和直观的远程操作器
 
 ### Quick Start
 
