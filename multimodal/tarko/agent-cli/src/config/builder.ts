@@ -13,7 +13,7 @@ import {
   LogLevel,
   isAgentWebUIImplementationType,
 } from '@tarko/interface';
-import { resolveValue } from '../utils';
+import { resolveValue, loadWorkspaceConfig } from '../utils';
 import { logDeprecatedWarning, logConfigComplete } from './display';
 
 /**
@@ -44,6 +44,7 @@ export function buildAppConfig<
   userConfig: Partial<U>,
   appDefaults?: Partial<U>,
   cliOptionsEnhancer?: CLIOptionsEnhancer<T, U>,
+  workspacePath?: string,
 ): U {
   // Start with app defaults (L5 - lowest priority)
   let config: Partial<U> = appDefaults ? { ...appDefaults } : {};
@@ -51,6 +52,13 @@ export function buildAppConfig<
   // Merge with user config (L4-L1 based on file loading order)
   // @ts-expect-error
   config = deepMerge(config, userConfig);
+
+  // Load and merge workspace config (L1 - high priority)
+  if (workspacePath) {
+    const workspaceConfig = loadWorkspaceConfig(workspacePath);
+    // @ts-expect-error
+    config = deepMerge(config, workspaceConfig);
+  }
 
   // Extract CLI-specific properties that need special handling
   const {

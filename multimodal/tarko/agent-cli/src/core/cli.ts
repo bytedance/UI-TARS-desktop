@@ -338,6 +338,7 @@ export class AgentCLI {
       userConfig,
       this.options.appConfig,
       cliOptionsEnhancer,
+      workspace,
     );
 
     // Update logger level with final config if it differs from CLI arguments
