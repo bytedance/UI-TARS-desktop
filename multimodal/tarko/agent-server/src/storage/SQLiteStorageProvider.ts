@@ -387,18 +387,46 @@ export class SQLiteStorageProvider implements StorageProvider {
     const metadataJson = sessionData.metadata ? JSON.stringify(sessionData.metadata) : null;
 
     try {
-      const stmt = this.db.prepare(`
-        INSERT INTO sessions (id, createdAt, updatedAt, workspace, metadata)
-        VALUES (?, ?, ?, ?, ?)
-      `);
+      // Dynamic insert to handle both old and new schema
+      const tableInfoStmt = this.db.prepare('PRAGMA table_info(sessions)');
+      const columns = tableInfoStmt.all() as Array<{ name: string }>;
+      const columnNames = columns.map((col) => col.name);
 
-      stmt.run(
-        sessionData.id,
-        sessionData.createdAt,
-        sessionData.updatedAt,
-        sessionData.workspace,
-        metadataJson,
-      );
+      const hasWorkspace = columnNames.includes('workspace');
+      const hasWorkingDirectory = columnNames.includes('workingDirectory');
+      const hasMetadata = columnNames.includes('metadata');
+
+      // Build dynamic INSERT query based on available columns
+      const insertColumns = ['id', 'createdAt', 'updatedAt'];
+      const insertValues = [sessionData.id, sessionData.createdAt, sessionData.updatedAt];
+      const placeholders = ['?', '?', '?'];
+
+      if (hasWorkspace) {
+        insertColumns.push('workspace');
+        insertValues.push(sessionData.workspace);
+        placeholders.push('?');
+      }
+
+      if (hasWorkingDirectory) {
+        insertColumns.push('workingDirectory');
+        insertValues.push(sessionData.workspace); // Use workspace value for workingDirectory
+        placeholders.push('?');
+      }
+
+      if (hasMetadata) {
+        insertColumns.push('metadata');
+        insertValues.push(metadataJson);
+        placeholders.push('?');
+      }
+
+      const insertQuery = `
+        INSERT INTO sessions (${insertColumns.join(', ')})
+        VALUES (${placeholders.join(', ')})
+      `;
+
+      const stmt = this.db.prepare(insertQuery);
+      stmt.run(...insertValues);
+      
       return sessionData;
     } catch (error) {
       console.error(`Failed to create session ${sessionData.id}:`, error);
