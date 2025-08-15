@@ -371,18 +371,15 @@ Provide concise and accurate responses.`;
 
       this.eventStream.sendEvent(userEvent);
 
-      // If enableExpandedContextInjection is enabled and input contains expanded context,
-      // inject as environment_input event
-      if (this.options.enableExpandedContextInjection && 
-          typeof normalizedOptions.input === 'string' && 
-          normalizedOptions.input.includes('Context:')) {
+      // Inject environment input if provided in options
+      if (this.options.environmentInput) {
         const environmentEvent = this.eventStream.createEvent('environment_input', {
-          content: normalizedOptions.input,
-          description: 'Expanded context from contextual references',
+          content: this.options.environmentInput.content,
+          description: this.options.environmentInput.description || 'Environment context',
         });
         this.eventStream.sendEvent(environmentEvent);
         
-        this.logger.info('[Agent] Injected expanded context as environment_input event');
+        this.logger.info('[Agent] Injected environment input as environment_input event');
       }
 
       // Inject abort signal into the execution context
