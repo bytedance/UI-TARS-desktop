@@ -197,8 +197,19 @@ For this specific project:
       const result = buildAppConfig({}, {}, undefined, undefined, workspacePath);
 
       expect(result.instructions).toBe(multilineInstructions);
-      expect(result.instructions).toContain('You are a helpful coding assistant.');
-      expect(result.instructions).toContain('React and Node.js development');
+      expect(result.instructions).toMatchInlineSnapshot(`
+        "You are a helpful coding assistant.
+
+        Please follow these guidelines:
+        - Write clean, readable code
+        - Add comprehensive comments
+        - Use TypeScript best practices
+        - Follow the project's coding standards
+
+        For this specific project:
+        - Focus on React and Node.js development
+        - Prioritize performance and maintainability"
+      `);
     });
   });
 
@@ -234,8 +245,9 @@ For this specific project:
 
       const result = buildAppConfig(cliArgs, {}, undefined, undefined, workspacePath);
 
-      expect(result.instructions).toContain('test-project');
-      expect(result.instructions).toContain('TypeScript/Node.js');
+      expect(result.instructions).toMatchInlineSnapshot(`
+        "You are working on the test-project. This is a TypeScript/Node.js project. Please help with code reviews, bug fixes, and feature development."
+      `);
       expect(result.model?.provider).toBe('openai');
       expect(result.model?.id).toBe('gpt-4');
       expect(result.server?.port).toBe(8080);
