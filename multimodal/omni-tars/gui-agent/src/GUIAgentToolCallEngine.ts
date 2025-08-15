@@ -13,7 +13,7 @@ import {
   StreamProcessingState,
   StreamChunkResult,
 } from '@tarko/agent-interface';
-import { actionParser } from '@gui-agent/action-parser';
+import { actionParser, actionStringParser } from '@gui-agent/action-parser';
 import { getScreenInfo } from './shared';
 
 /**
@@ -119,15 +119,30 @@ export class GUIAgentToolCallEngine extends ToolCallEngine {
 
     console.log('parsed', parsed);
 
+    const actionStrList = actionStringParser(fullContent);
+
+    console.log('actionStrList', actionStrList);
+
     const toolCalls: ChatCompletionMessageToolCall[] = [];
 
     let finished = false;
     let finishMessage: string | null = null;
+    let idx = 0;
     if (Array.isArray(parsed)) {
       for (const action of parsed) {
+        idx = idx + 1;
+
+        const cleanedThought = action.thought.replace(/think_never_used_[a-f0-9]{32}>/g, '');
+        if (cleanedThought) {
+          action.thought = cleanedThought;
+        }
+
         if (action.action_type === 'finished') {
           finished = true;
           finishMessage = action.action_inputs.content ?? null;
+          continue;
+        }
+        if (action.action_type === '') {
           continue;
         }
         const toolCallId = this.generateToolCallId();
@@ -135,8 +150,13 @@ export class GUIAgentToolCallEngine extends ToolCallEngine {
           id: toolCallId,
           type: 'function',
           function: {
-            name: 'operator-adaptor-tool',
-            arguments: JSON.stringify(action),
+            name: 'browser_vision_control',
+            arguments: JSON.stringify({
+              action: actionStrList[idx - 1],
+              step: action.thought,
+              thought: action.thought,
+              operator_action: action,
+            }),
           },
         });
       }
@@ -156,10 +176,16 @@ export class GUIAgentToolCallEngine extends ToolCallEngine {
       console.log('extractedContent', extractedContent);
     }
 
+    const content = finishMessage ?? '';
+    const reasoningContent = parsed[0].thought ?? '';
+    const contentForWebUI = content.replace(/\\n|\n/g, '<br>');
+    const reasoningContentForWebUI = reasoningContent.replace(/\\n|\n/g, '<br>');
+
     // No tool calls found - return regular response
     return {
-      content: finishMessage ? finishMessage : (parsed[0].thought ?? fullContent),
+      content: contentForWebUI,
       rawContent: fullContent,
+      reasoningContent: reasoningContentForWebUI,
       toolCalls,
       finishReason: toolCalls.length > 0 && !finished ? 'tool_calls' : 'stop',
     };
