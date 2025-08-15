@@ -32,9 +32,8 @@ import { FilesystemToolsManager } from './filesystem';
 import { applyDefaultOptions } from './shared/config-utils';
 import { MessageHistoryDumper } from './shared/message-history-dumper';
 
-// @ts-expect-error
 // Default esm asset has some issues {@see https://github.com/bytedance/UI-TARS-desktop/issues/672}
-import * as browserModule from '@agent-infra/mcp-server-browser/dist/server.cjs';
+import * as browserModule from '@agent-infra/mcp-server-browser';
 import * as filesystemModule from '@agent-infra/mcp-server-filesystem';
 import * as commandsModule from '@agent-infra/mcp-server-commands';
 
@@ -67,7 +66,6 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   constructor(options: T) {
     // Apply default config using the new utility function
     const tarsOptions = applyDefaultOptions<AgentTARSOptions>(options);
-
     // Validate browser control mode based on model provider
     if (tarsOptions.browser?.control) {
       const modelProvider = tarsOptions.model?.provider || tarsOptions.model?.providers?.[0]?.name;
@@ -237,6 +235,7 @@ Current Working Directory: ${workspace}
         count: this.tarsOptions.search!.count,
         cdpEndpoint: this.tarsOptions.browser!.cdpEndpoint,
         browserSearch: this.tarsOptions.search!.browserSearch,
+        // secretlint-disable-next-line @secretlint/secretlint-rule-pattern
         apiKey: this.tarsOptions.search!.apiKey,
         baseUrl: this.tarsOptions.search!.baseUrl,
         // FIXME: Un-comment it after refine launch state management of `@agent-infra/browser` and
@@ -355,6 +354,7 @@ Current Working Directory: ${workspace}
       // Create servers with appropriate configurations
       this.mcpServers = {
         browser: mcpModules.browser.createServer({
+          // @ts-expect-error
           externalBrowser: sharedBrowser,
           enableAdBlocker: false,
           launchOptions: {
