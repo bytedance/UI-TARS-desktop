@@ -2,7 +2,7 @@ import { LocalBrowser, RemoteBrowser } from '@agent-infra/browser';
 import { BrowserOperator, RemoteBrowserOperator } from '@gui-agent/operator-browser';
 import { Operator } from '@ui-tars/sdk/dist/core';
 
-import { AioClient, CDPVersionResp } from '@omni-tars/core';
+import { AioClient, CDPVersionResp } from '@agent-infra/sandbox';
 
 export class OperatorManager {
   private target: 'local' | 'remote';
