@@ -520,7 +520,7 @@ export class MCPClient<
         },
         undefined,
         {
-          timeout: server?.timeout ? server?.timeout * 1000 : 10000, // default: 10s
+          timeout: server?.timeout ? server?.timeout * 1000 : 60000, // default: 60s
         },
       );
       this.log('info', '[MCP] Call Tool Result:', result);
