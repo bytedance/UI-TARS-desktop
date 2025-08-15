@@ -55,6 +55,15 @@ export interface AgentBaseOptions {
    * @defaultValue `undefined` (uses default prompt: "You are an intelligent assistant...")
    */
   instructions?: string;
+
+  /**
+   * When enabled, automatically converts expanded context input to environment_input events.
+   * This allows Agent Server to pass pre-expanded contextual references directly to the agent,
+   * which will be converted to environment events for proper context injection.
+   *
+   * @defaultValue `false`
+   */
+  enableExpandedContextInjection?: boolean;
 }
 
 /**
