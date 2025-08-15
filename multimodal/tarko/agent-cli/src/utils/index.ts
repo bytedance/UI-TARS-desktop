@@ -9,3 +9,4 @@ export * from './misc';
 export * from './console-interceptor';
 export * from './workspace-path';
 export * from './port';
+export * from './server-setup';
