@@ -19,6 +19,7 @@ vi.mock('../src/config/display', () => ({
 // Mock the utils module
 vi.mock('../src/utils', () => ({
   resolveValue: vi.fn((value: string) => value),
+  loadWorkspaceConfig: vi.fn(() => ({})),
 }));
 
 /**
@@ -693,6 +694,128 @@ describe('buildAppConfig', () => {
       expect(result.server?.storage).toEqual({
         type: 'sqlite',
       });
+    });
+  });
+
+  describe('workspace configuration integration', () => {
+    it('should merge workspace config when workspacePath is provided', async () => {
+      // Get the mocked loadWorkspaceConfig function
+      const { loadWorkspaceConfig } = await import('../src/utils');
+
+      // Configure the mock to return workspace config
+      vi.mocked(loadWorkspaceConfig).mockReturnValue({
+        instructions: 'You are a workspace-specific assistant.',
+      });
+
+      const cliArgs: AgentCLIArguments = {
+        model: {
+          provider: 'openai',
+        },
+      };
+
+      const userConfig: AgentAppConfig = {
+        model: {
+          id: 'gpt-4',
+        },
+      };
+
+      const result = buildAppConfig(cliArgs, userConfig, undefined, undefined, '/workspace/path');
+
+      expect(loadWorkspaceConfig).toHaveBeenCalledWith('/workspace/path');
+      expect(result.instructions).toBe('You are a workspace-specific assistant.');
+      expect(result.model).toEqual({
+        provider: 'openai',
+        id: 'gpt-4',
+      });
+    });
+
+    it('should not call loadWorkspaceConfig when workspacePath is not provided', async () => {
+      const { loadWorkspaceConfig } = await import('../src/utils');
+
+      const cliArgs: AgentCLIArguments = {
+        model: {
+          provider: 'openai',
+        },
+      };
+
+      const result = buildAppConfig(cliArgs, {});
+
+      expect(loadWorkspaceConfig).not.toHaveBeenCalled();
+      expect(result.instructions).toBeUndefined();
+    });
+
+    it('should prioritize workspace config over user config', async () => {
+      const { loadWorkspaceConfig } = await import('../src/utils');
+
+      // Workspace config should override user config
+      vi.mocked(loadWorkspaceConfig).mockReturnValue({
+        instructions: 'Workspace instructions',
+        model: {
+          provider: 'anthropic',
+        },
+      });
+
+      const cliArgs: AgentCLIArguments = {};
+      const userConfig: AgentAppConfig = {
+        instructions: 'User instructions',
+        model: {
+          provider: 'openai',
+          id: 'gpt-4',
+        },
+      };
+
+      const result = buildAppConfig(cliArgs, userConfig, undefined, undefined, '/workspace');
+
+      expect(result.instructions).toBe('Workspace instructions');
+      expect(result.model).toEqual({
+        provider: 'anthropic', // Workspace overrides user
+        id: 'gpt-4', // User config preserved where not overridden
+      });
+    });
+
+    it('should allow CLI args to override workspace config', async () => {
+      const { loadWorkspaceConfig } = await import('../src/utils');
+
+      vi.mocked(loadWorkspaceConfig).mockReturnValue({
+        instructions: 'Workspace instructions',
+        model: {
+          provider: 'anthropic',
+        },
+      });
+
+      const cliArgs: AgentCLIArguments = {
+        model: {
+          provider: 'openai', // CLI should override workspace
+        },
+      };
+      const userConfig: AgentAppConfig = {};
+
+      const result = buildAppConfig(cliArgs, userConfig, undefined, undefined, '/workspace');
+
+      expect(result.instructions).toBe('Workspace instructions');
+      expect(result.model?.provider).toBe('openai'); // CLI overrides workspace
+    });
+
+    it('should handle workspace config with empty return', async () => {
+      const { loadWorkspaceConfig } = await import('../src/utils');
+
+      // Empty workspace config should not affect the result
+      vi.mocked(loadWorkspaceConfig).mockReturnValue({});
+
+      const cliArgs: AgentCLIArguments = {
+        model: {
+          provider: 'openai',
+        },
+      };
+      const userConfig: AgentAppConfig = {
+        instructions: 'User instructions',
+      };
+
+      const result = buildAppConfig(cliArgs, userConfig, undefined, undefined, '/workspace');
+
+      expect(loadWorkspaceConfig).toHaveBeenCalledWith('/workspace');
+      expect(result.instructions).toBe('User instructions'); // User config preserved
+      expect(result.model?.provider).toBe('openai');
     });
   });
 });
