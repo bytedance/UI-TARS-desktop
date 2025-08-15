@@ -215,20 +215,6 @@ const Home = () => {
     }
   };
 
-  const handleRemotePress = async (operator: Operator) => {
-    const isAgree = localStorage.getItem('isAgreeFreeTrialAgreement');
-
-    if (isAgree) {
-      if (operator === Operator.RemoteBrowser) {
-        toRemoteBrowser('free');
-      } else {
-        toRemoteComputer('free');
-      }
-    } else {
-      setRemoteConfig({ open: true, operator: operator });
-    }
-  };
-
   const handleFreeDialogComfirm = async () => {
     if (remoteConfig.operator === Operator.RemoteBrowser) {
       toRemoteBrowser('free');
