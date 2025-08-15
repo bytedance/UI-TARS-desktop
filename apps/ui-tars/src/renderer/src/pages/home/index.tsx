@@ -21,6 +21,11 @@ import {
 //   DropdownMenuTrigger,
 // } from '@renderer/components/ui/dropdown-menu';
 import { Button } from '@renderer/components/ui/button';
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from '@renderer/components/ui/hover-card';
 
 import { Operator } from '@main/store/types';
 import { useSession } from '../../hooks/useSession';
@@ -40,6 +45,17 @@ import { sleep } from '@ui-tars/shared/utils';
 import { FreeTrialDialog } from '../../components/AlertDialog/freeTrialDialog';
 import { DragArea } from '../../components/Common/drag';
 
+const map = {
+  [Operator.RemoteComputer]: {
+    text: 'This feature has been sunset. Please log in to the Volcano Engine FaaS to experience the Online Computer Use Agent.',
+    url: 'https://console.volcengine.com/vefaas/region:vefaas+cn-beijing/application/create?templateId=680b0a890e881f000862d9f0&channel=github&source=ui-tars',
+  },
+  [Operator.RemoteBrowser]: {
+    text: 'This feature has been sunset. Please log in to the Volcano Engine FaaS to experience the Online Browser Use Agent.',
+    url: 'https://console.volcengine.com/vefaas/region:vefaas+cn-beijing/application/create?templateId=67f7b4678af5a6000850556c&channel=github&source=ui-tars',
+  },
+};
+
 const FreeButton = ({
   onClick,
   children,
@@ -47,22 +63,40 @@ const FreeButton = ({
   children: string;
   onClick: () => void;
 }) => {
+  const item = children.includes('Computer')
+    ? map[Operator.RemoteComputer]
+    : map[Operator.RemoteBrowser];
+
   return (
-    <div className="flex-1 relative">
-      <Button className="w-full" onClick={onClick}>
-        {children}
-      </Button>
-      <span
-        className="absolute -top-3 right-0 text-[10px] px-2 py-0.5 font-semibold"
-        style={{
-          color: '#733E0F',
-          borderRadius: '0.5rem 0.25rem 0.5rem 0',
-          background: 'linear-gradient(90deg, #FEF5C4 0%, #F0C573 100%)',
-        }}
-      >
-        Free Trial
-      </span>
-    </div>
+    <HoverCard openDelay={0} closeDelay={100}>
+      <HoverCardTrigger asChild>
+        <div className="flex-1 relative">
+          <Button
+            className="w-full opacity-75 cursor-not-allowed"
+            onClick={onClick}
+            variant="secondary"
+            disabled
+          >
+            {children}
+          </Button>
+        </div>
+      </HoverCardTrigger>
+      <HoverCardContent className="w-80" side="top">
+        <div className="space-y-2">
+          <h4 className="text-sm font-semibold">Service Sunset</h4>
+          <p className="text-sm text-muted-foreground">{item.text}</p>
+          <Button
+            className="w-full"
+            onClick={() => {
+              window.open(item.url, '_blank');
+            }}
+            variant={'outline'}
+          >
+            Learn more
+          </Button>
+        </div>
+      </HoverCardContent>
+    </HoverCard>
   );
 };
 
@@ -289,18 +323,13 @@ const Home = () => {
             </CardContent>
             <CardFooter className="gap-3 px-5 flex justify-between">
               {/* {renderRemoteComputerButton()} */}
-              <FreeButton
-                onClick={() => handleRemotePress(Operator.RemoteComputer)}
-              >
-                Use Remote Computer
-              </FreeButton>
               <Button
                 onClick={() => handleLocalPress(Operator.LocalComputer)}
-                variant="secondary"
                 className="flex-1"
               >
                 Use Local Computer
               </Button>
+              <FreeButton onClick={() => {}}>Use Remote Computer</FreeButton>
             </CardFooter>
           </Card>
           <Card className="w-[400px] py-5">
@@ -320,18 +349,13 @@ const Home = () => {
             </CardContent>
             <CardFooter className="gap-3 px-5 flex justify-between">
               {/* {renderRemoteBrowserButton()} */}
-              <FreeButton
-                onClick={() => handleRemotePress(Operator.RemoteBrowser)}
-              >
-                Use Remote Browser
-              </FreeButton>
               <Button
                 onClick={() => handleLocalPress(Operator.LocalBrowser)}
-                variant="secondary"
                 className="flex-1"
               >
                 Use Local Browser
               </Button>
+              <FreeButton onClick={() => {}}>Use Remote Browser</FreeButton>
             </CardFooter>
           </Card>
         </div>

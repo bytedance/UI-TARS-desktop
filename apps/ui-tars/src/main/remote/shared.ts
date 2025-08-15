@@ -37,6 +37,7 @@ export abstract class BaseRemoteComputer {
     targetX: number,
     targetY: number,
   ): Promise<void>;
+  // secretlint-disable-next-line @secretlint/secretlint-rule-pattern
   abstract pressKey(key: string): Promise<void>;
   abstract typeText(text: string): Promise<void>;
   abstract scroll(
@@ -49,8 +50,7 @@ export abstract class BaseRemoteComputer {
   abstract takeScreenshot(): Promise<string>;
 }
 
-const UI_TARS_PROXY_HOST =
-  'https://sd17rrmnhj5i8uvr67j30.apigateway-cn-beijing.volceapi.com';
+const UI_TARS_PROXY_HOST = '';
 
 const VER = '/api/v1';
 const REGISTER_URL = `${UI_TARS_PROXY_HOST}${VER}/register`;
@@ -59,7 +59,7 @@ const BROWSER_URL = `${UI_TARS_PROXY_HOST}${VER}/browsers`;
 const TIME_URL = `${UI_TARS_PROXY_HOST}${VER}/time-balance`;
 const FREE_MODEL_BASE_URL = `${UI_TARS_PROXY_HOST}${VER}`;
 
-const COMPUTER_USE_HOST = 'https://computer-use.console.volcengine.com';
+const COMPUTER_USE_HOST = '';
 
 export {
   UI_TARS_PROXY_HOST,

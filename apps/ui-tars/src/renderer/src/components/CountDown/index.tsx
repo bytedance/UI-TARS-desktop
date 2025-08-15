@@ -1,4 +1,3 @@
-import CountUp from 'react-countup';
 // import { Gift, CircleArrowUp } from 'lucide-react';
 import { memo, useEffect, useState } from 'react';
 import { RemoteResourceStatus } from '@renderer/hooks/useRemoteResource';
@@ -15,14 +14,6 @@ interface CountDownProps {
   start?: number;
   status: RemoteResourceStatus;
 }
-
-const formatTime = (seconds: number) => {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const remainingSeconds = seconds % 60;
-
-  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
-};
 
 const map = {
   [Operator.RemoteComputer]: {
@@ -68,21 +59,6 @@ export const CountDown = memo(
         className="flex items-center gap-2 rounded-md bg-green-50 px-3 h-8 text-sm cursor-default"
         style={{ '-webkit-app-region': 'no-drag' }}
       >
-        {/* <Gift className="!h-4 !w-4 text-yellow-500" /> */}
-        <span className="text-gray-700">
-          <span className="font-medium">30</span>-minute free credit
-        </span>
-        {status === 'connected' && (
-          <CountUp
-            className="font-mono font-medium"
-            start={start}
-            end={30 * 60}
-            duration={30 * 60}
-            formattingFn={formatTime}
-            useEasing={false}
-          />
-        )}
-        <div className="w-0.5 h-4 bg-gray-200"></div>
         <HoverCard
           open={showUpgrade}
           openDelay={0}
