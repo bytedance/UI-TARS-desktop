@@ -266,6 +266,14 @@ UI-TARS Desktop is a native GUI agent driven by [UI-TARS](https://github.com/byt
 
 ### Features
 
+- 🎨 **Enhanced Message Rendering** - New UserMessageRenderer component for beautiful, consistent markdown rendering in chat messages with support for:
+  - 📝 Rich text formatting (bold, italic, strikethrough)
+  - 📚 Code blocks with syntax highlighting
+  - 🔗 Secure external links
+  - 📋 Lists and blockquotes
+  - 🎨 Dark/light theme support
+  - ♿ Accessibility optimized
+
 - 🤖 Natural language control powered by Vision-Language Model
 - 🖥️ Screenshot and visual recognition support
 - 🎯 Precise mouse and keyboard control
