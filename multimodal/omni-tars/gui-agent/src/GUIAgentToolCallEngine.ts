@@ -176,7 +176,7 @@ export class GUIAgentToolCallEngine extends ToolCallEngine {
       console.log('extractedContent', extractedContent);
     }
 
-    const content = finishMessage ?? '';
+    const content = finishMessage || (toolCalls.length <= 0 || finished ? fullContent : '');
     const reasoningContent = parsed[0].thought ?? '';
     const contentForWebUI = content.replace(/\\n|\n/g, '<br>');
     const reasoningContentForWebUI = reasoningContent.replace(/\\n|\n/g, '<br>');
