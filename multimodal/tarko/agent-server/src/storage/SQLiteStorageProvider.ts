@@ -364,7 +364,11 @@ export class SQLiteStorageProvider implements StorageProvider {
     } catch (error) {
       // Rollback on any error to preserve original data
       console.error('❌ Migration failed, rolling back to preserve data:', error);
-      this.db.exec('ROLLBACK');
+      try {
+        this.db.exec('ROLLBACK');
+      } catch (rollbackError) {
+        console.error('Failed to rollback transaction:', rollbackError);
+      }
       throw new Error(
         `Migration failed and rolled back: ${error instanceof Error ? error.message : String(error)}`,
       );
