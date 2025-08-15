@@ -47,17 +47,17 @@ export async function executeQuery(req: Request, res: Response) {
     const server = req.app.locals.server;
     const workspacePath = server.getCurrentWorkspace();
 
-    // Process contextual references first
-    const processedQuery = await contextReferenceProcessor.processContextualReferences(
+    // Process contextual references and pass as expanded context
+    const expandedContext = await contextReferenceProcessor.processContextualReferences(
       query,
       workspacePath,
     );
 
-    // Compress images in processed query
-    const compressedQuery = await imageProcessor.compressImagesInQuery(processedQuery);
+    // Compress images in expanded context
+    const compressedContext = await imageProcessor.compressImagesInQuery(expandedContext);
 
     // Use enhanced error handling in runQuery
-    const response = await req.session!.runQuery(compressedQuery);
+    const response = await req.session!.runQuery(compressedContext);
 
     if (response.success) {
       res.status(200).json({ result: response.result });
@@ -92,17 +92,17 @@ export async function executeStreamingQuery(req: Request, res: Response) {
     const server = req.app.locals.server;
     const workspacePath = server.getCurrentWorkspace();
 
-    // Process contextual references first
-    const processedQuery = await contextReferenceProcessor.processContextualReferences(
+    // Process contextual references and pass as expanded context
+    const expandedContext = await contextReferenceProcessor.processContextualReferences(
       query,
       workspacePath,
     );
 
-    // Compress images in processed query
-    const compressedQuery = await imageProcessor.compressImagesInQuery(processedQuery);
+    // Compress images in expanded context
+    const compressedContext = await imageProcessor.compressImagesInQuery(expandedContext);
 
     // Get streaming response - any errors will be returned as events
-    const eventStream = await req.session!.runQueryStreaming(compressedQuery);
+    const eventStream = await req.session!.runQueryStreaming(compressedContext);
 
     // Stream events one by one
     for await (const event of eventStream) {
