@@ -44,35 +44,33 @@ const UpgradeCard = memo(({ operator }: { operator: Operator }) => (
   </HoverCardContent>
 ));
 
-export const CountDown = memo(
-  ({ operator, status, start = 0 }: CountDownProps) => {
-    const [showUpgrade, setShowUpgrade] = useState(false);
+export const CountDown = memo(({ operator, start = 0 }: CountDownProps) => {
+  const [showUpgrade, setShowUpgrade] = useState(false);
 
-    useEffect(() => {
-      if (start >= 30 * 60 * 1000) {
-        setShowUpgrade(true);
-      }
-    }, [start]);
+  useEffect(() => {
+    if (start >= 30 * 60 * 1000) {
+      setShowUpgrade(true);
+    }
+  }, [start]);
 
-    return (
-      <div
-        className="flex items-center gap-2 rounded-md bg-green-50 px-3 h-8 text-sm cursor-default"
-        style={{ '-webkit-app-region': 'no-drag' }}
+  return (
+    <div
+      className="flex items-center gap-2 rounded-md bg-green-50 px-3 h-8 text-sm cursor-default"
+      style={{ '-webkit-app-region': 'no-drag' }}
+    >
+      <HoverCard
+        open={showUpgrade}
+        openDelay={0}
+        closeDelay={100}
+        onOpenChange={setShowUpgrade}
       >
-        <HoverCard
-          open={showUpgrade}
-          openDelay={0}
-          closeDelay={100}
-          onOpenChange={setShowUpgrade}
-        >
-          <HoverCardTrigger asChild>
-            <a className="ml-auto text-blue-500 hover:text-blue-600 hover:underline cursor-pointer">
-              Learn more
-            </a>
-          </HoverCardTrigger>
-          <UpgradeCard operator={operator} />
-        </HoverCard>
-      </div>
-    );
-  },
-);
+        <HoverCardTrigger asChild>
+          <a className="ml-auto text-blue-500 hover:text-blue-600 hover:underline cursor-pointer">
+            Learn more
+          </a>
+        </HoverCardTrigger>
+        <UpgradeCard operator={operator} />
+      </HoverCard>
+    </div>
+  );
+});
