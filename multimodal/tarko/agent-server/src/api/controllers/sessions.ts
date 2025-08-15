@@ -45,6 +45,14 @@ export async function createSession(req: Request, res: Response) {
   try {
     const server = req.app.locals.server;
 
+    // Check if server can accept new requests in exclusive mode
+    if (!server.canAcceptNewRequest()) {
+      return res.status(409).json({
+        error: 'Server is in exclusive mode and another session is currently running',
+        runningSessionId: server.getRunningSessionId(),
+      });
+    }
+
     const sessionId = nanoid();
 
     // Get session metadata if it exists (for restored sessions)

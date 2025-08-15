@@ -43,6 +43,15 @@ export async function createAndQuery(req: Request, res: Response) {
 
     // Create new session
     const server = req.app.locals.server;
+
+    // Check if server can accept new requests in exclusive mode
+    if (!server.canAcceptNewRequest()) {
+      return res.status(409).json({
+        error: 'Server is in exclusive mode and another session is currently running',
+        runningSessionId: server.getRunningSessionId(),
+      });
+    }
+
     const sessionId = nanoid();
 
     // Create session with custom AGIO provider if available
@@ -109,6 +118,15 @@ export async function createAndStreamingQuery(req: Request, res: Response) {
 
     // Create new session
     const server = req.app.locals.server;
+
+    // Check if server can accept new requests in exclusive mode
+    if (!server.canAcceptNewRequest()) {
+      return res.status(409).json({
+        error: 'Server is in exclusive mode and another session is currently running',
+        runningSessionId: server.getRunningSessionId(),
+      });
+    }
+
     const sessionId = nanoid();
 
     // Create session with custom AGIO provider if available

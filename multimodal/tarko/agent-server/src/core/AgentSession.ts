@@ -197,6 +197,9 @@ export class AgentSession {
    */
   async runQuery(query: string | ChatCompletionContentPart[]): Promise<AgentQueryResponse> {
     try {
+      // Set running session for exclusive mode
+      this.server.setRunningSession(this.id);
+
       // Prepare run options with session-specific model configuration
       // Emit TTFT initialization status
       this.eventBridge.emit('agent-status', {
@@ -246,6 +249,9 @@ export class AgentSession {
           details: handledError.details,
         },
       };
+    } finally {
+      // Clear running session for exclusive mode
+      this.server.clearRunningSession(this.id);
     }
   }
 
@@ -258,6 +264,9 @@ export class AgentSession {
     query: string | ChatCompletionContentPart[],
   ): Promise<AsyncIterable<AgentEventStream.Event>> {
     try {
+      // Set running session for exclusive mode
+      this.server.setRunningSession(this.id);
+
       // Prepare run options with session-specific model configuration
       // Emit enhanced TTFT initialization status for streaming
       this.eventBridge.emit('agent-status', {
@@ -284,7 +293,10 @@ export class AgentSession {
       }
 
       // Run agent in streaming mode
-      return await this.agent.run(runOptions);
+      const stream = await this.agent.run(runOptions);
+      
+      // Wrap the stream to clear running session when done
+      return this.wrapStreamForExclusiveMode(stream);
     } catch (error) {
       // Emit error event
       this.eventBridge.emit('error', {
@@ -296,6 +308,22 @@ export class AgentSession {
 
       // Create a synthetic event stream that yields just an error event
       return this.createErrorEventStream(handledError);
+    }
+  }
+
+  /**
+   * Wrap a stream to clear running session when done (for exclusive mode)
+   */
+  private async *wrapStreamForExclusiveMode(
+    stream: AsyncIterable<AgentEventStream.Event>,
+  ): AsyncIterable<AgentEventStream.Event> {
+    try {
+      for await (const event of stream) {
+        yield event;
+      }
+    } finally {
+      // Clear running session for exclusive mode when stream ends
+      this.server.clearRunningSession(this.id);
     }
   }
 
@@ -325,6 +353,8 @@ export class AgentSession {
       const aborted = this.agent.abort();
       if (aborted) {
         this.eventBridge.emit('aborted', { sessionId: this.id });
+        // Clear running session for exclusive mode when aborted
+        this.server.clearRunningSession(this.id);
       }
       return aborted;
     } catch (error) {
@@ -358,6 +388,9 @@ export class AgentSession {
   }
 
   async cleanup() {
+    // Clear running session for exclusive mode
+    this.server.clearRunningSession(this.id);
+
     // Unsubscribe from event stream
     if (this.unsubscribe) {
       this.unsubscribe();
