@@ -47,17 +47,23 @@ export async function executeQuery(req: Request, res: Response) {
     const server = req.app.locals.server;
     const workspacePath = server.getCurrentWorkspace();
 
-    // Process contextual references and pass as expanded context
+    // Process contextual references and pass as environment input to agent options
     const expandedContext = await contextReferenceProcessor.processContextualReferences(
       query,
       workspacePath,
     );
 
-    // Compress images in expanded context
-    const compressedContext = await imageProcessor.compressImagesInQuery(expandedContext);
+    // Compress images in user input only
+    const compressedQuery = await imageProcessor.compressImagesInQuery(query);
 
-    // Use enhanced error handling in runQuery
-    const response = await req.session!.runQuery(compressedContext);
+    // Use enhanced error handling in runQuery with environment input
+    const response = await req.session!.runQuery({
+      input: compressedQuery,
+      environmentInput: {
+        content: expandedContext,
+        description: 'Expanded context from contextual references'
+      }
+    });
 
     if (response.success) {
       res.status(200).json({ result: response.result });
@@ -92,17 +98,23 @@ export async function executeStreamingQuery(req: Request, res: Response) {
     const server = req.app.locals.server;
     const workspacePath = server.getCurrentWorkspace();
 
-    // Process contextual references and pass as expanded context
+    // Process contextual references and pass as environment input to agent options
     const expandedContext = await contextReferenceProcessor.processContextualReferences(
       query,
       workspacePath,
     );
 
-    // Compress images in expanded context
-    const compressedContext = await imageProcessor.compressImagesInQuery(expandedContext);
+    // Compress images in user input only
+    const compressedQuery = await imageProcessor.compressImagesInQuery(query);
 
-    // Get streaming response - any errors will be returned as events
-    const eventStream = await req.session!.runQueryStreaming(compressedContext);
+    // Get streaming response with environment input - any errors will be returned as events
+    const eventStream = await req.session!.runQueryStreaming({
+      input: compressedQuery,
+      environmentInput: {
+        content: expandedContext,
+        description: 'Expanded context from contextual references'
+      }
+    });
 
     // Stream events one by one
     for await (const event of eventStream) {

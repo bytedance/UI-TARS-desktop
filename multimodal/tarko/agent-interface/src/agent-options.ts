@@ -6,7 +6,7 @@
 
 import { ToolCallEngineType } from './tool-call-engine';
 import { Tool } from './tool';
-import { ProviderOptions, LLMReasoningOptions } from '@tarko/model-provider/types';
+import { ProviderOptions, LLMReasoningOptions, ChatCompletionContentPart } from '@tarko/model-provider/types';
 import { AgentEventStream } from './agent-event-stream';
 import { LogLevel } from '@agent-infra/logger';
 
@@ -57,13 +57,18 @@ export interface AgentBaseOptions {
   instructions?: string;
 
   /**
-   * When enabled, automatically converts expanded context input to environment_input events.
-   * This allows Agent Server to pass pre-expanded contextual references directly to the agent,
-   * which will be converted to environment events for proper context injection.
+   * Environment input to inject as context before agent execution.
+   * This content will be sent as environment_input events to provide context
+   * without attributing it to user messages.
    *
-   * @defaultValue `false`
+   * @defaultValue `undefined`
    */
-  enableExpandedContextInjection?: boolean;
+  environmentInput?: {
+    /** The environment content (can be multimodal) */
+    content: string | ChatCompletionContentPart[];
+    /** Optional description of the environment input */
+    description?: string;
+  };
 }
 
 /**
