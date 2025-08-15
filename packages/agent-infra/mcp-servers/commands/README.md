@@ -28,7 +28,10 @@ First, install the Commands MCP server with your client. A typical configuration
     "commands": {
       "command": "npx",
       "args": [
-        "@agent-infra/mcp-server-commands@latest"
+        "-y",
+        "@agent-infra/mcp-server-commands@latest",
+        "--cwd",
+        "/tmp"
       ]
     }
   }
@@ -58,6 +61,7 @@ Go to `Cursor Settings` -> `MCP` -> `Add new MCP Server`. Name to your liking, u
     "commands": {
       "command": "npx",
       "args": [
+        "-y",
         "@agent-infra/mcp-server-commands@latest"
       ]
     }
@@ -77,6 +81,7 @@ Follow Windsuff MCP [documentation](https://docs.windsurf.com/windsurf/cascade/m
     "commands": {
       "command": "npx",
       "args": [
+        "-y",
         "@agent-infra/mcp-server-commands@latest"
       ]
     }
@@ -96,6 +101,7 @@ Follow the MCP install [guide](https://modelcontextprotocol.io/quickstart/user),
     "commands": {
       "command": "npx",
       "args": [
+        "-y",
         "@agent-infra/mcp-server-commands@latest"
       ]
     }

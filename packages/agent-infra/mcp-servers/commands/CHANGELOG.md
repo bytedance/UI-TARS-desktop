@@ -1,5 +1,13 @@
 ## 0.4.0 2024-12-10 - add logging
 
+## 1.2.18
+
+### Patch Changes
+
+- feat: add cwd for default
+
+## 1.2.17
+
 ## 1.2.16
 
 ## 1.2.16-beta.0

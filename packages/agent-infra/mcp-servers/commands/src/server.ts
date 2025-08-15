@@ -27,7 +27,7 @@ import {
 // TODO use .promises? in node api
 const execAsync = promisify(exec);
 
-function createServer(): McpServer {
+function createServer(serverConfig: { cwd?: string }): McpServer {
   const server = new McpServer({
     name: 'Run Commands',
     version: process.env.VERSION || '0.0.1',
@@ -41,6 +41,7 @@ function createServer(): McpServer {
       command: z.string().describe('Command with args'),
       cwd: z
         .string()
+        .default(serverConfig.cwd ?? '')
         .optional()
         .describe('Current working directory, leave empty in most cases'),
     },
@@ -60,6 +61,7 @@ function createServer(): McpServer {
       script: z.string().describe('Script to run'),
       cwd: z
         .string()
+        .default(serverConfig.cwd ?? '')
         .optional()
         .describe('Current working directory, leave empty in most cases'),
     },

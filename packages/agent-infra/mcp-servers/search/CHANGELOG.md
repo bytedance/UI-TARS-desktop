@@ -1,5 +1,9 @@
 # @agent-infra/mcp-server-search
 
+## 1.2.18
+
+## 1.2.17
+
 ## 1.2.16
 
 ## 1.2.16-beta.0
