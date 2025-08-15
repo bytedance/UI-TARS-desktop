@@ -5,7 +5,6 @@
 
 import express from 'express';
 import http from 'http';
-import net from 'net';
 import { Server as SocketIOServer } from 'socket.io';
 import { setupAPI } from './api';
 import { LogLevel } from '@tarko/interface';
@@ -250,33 +249,6 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   }
 
   /**
-   * Find an available port starting from the configured port
-   * @param startPort Starting port to check
-   * @returns Promise resolving with available port
-   */
-  private async findAvailablePort(startPort: number): Promise<number> {
-    return new Promise((resolve, reject) => {
-      const server = net.createServer();
-
-      server.listen(startPort, () => {
-        const port = (server.address() as net.AddressInfo)?.port;
-        server.close(() => resolve(port));
-      });
-
-      server.on('error', (err: any) => {
-        if (err.code === 'EADDRINUSE') {
-          // Try next port
-          this.findAvailablePort(startPort + 1)
-            .then(resolve)
-            .catch(reject);
-        } else {
-          reject(err);
-        }
-      });
-    });
-  }
-
-  /**
    * Start the server on the configured port
    * @returns Promise resolving with the server instance
    */
@@ -296,16 +268,8 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
       }
     }
 
-    // Find available port
-    const availablePort = await this.findAvailablePort(this.port);
-    if (availablePort !== this.port) {
-      console.log(`Port ${this.port} is in use, using port ${availablePort} instead`);
-      // Update the port in appConfig so other components can access it
-      this.appConfig.server!.port = availablePort;
-    }
-
     return new Promise((resolve) => {
-      this.server.listen(availablePort, () => {
+      this.server.listen(this.port, () => {
         this.isRunning = true;
         resolve(this.server);
       });
