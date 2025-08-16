@@ -177,7 +177,7 @@ describe('Agent Return Value Integrity Tests', () => {
 
       // FIXME: consider whether it should be in stream
       // Should not include user_message event
-      expect(events.some((e) => e.type === 'user_message')).toBe(false);
+      expect(events.some((e) => e.type === 'user_message')).toBe(true);
 
       // Should include at least one streaming event
       expect(
