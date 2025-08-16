@@ -123,10 +123,10 @@ Current Working Directory: ${workspace}
 
     `;
 
-    // Prepare system instructions by combining default prompt with custom instructions
-    const instructions = options.instructions
-      ? `${systemPrompt}\n\n${options.instructions}`
-      : systemPrompt;
+    // Prepare system instructions with flexible override support
+    // If instructions are provided, use them as the complete system prompt
+    // Otherwise, use the default system prompt with browser rules and environment
+    const instructions = options.instructions || systemPrompt;
 
     super({
       ...tarsOptions,
