@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { AgentSession } from '../core/AgentSession';
-import { AgentServer } from '../server';
+import { AgentSession } from '../src/core/AgentSession';
+import { AgentServer } from '../src/server';
 import { AgentAppConfig, LogLevel } from '@tarko/interface';
 import { MockAgent } from './mocks/MockAgent';
 import { MockAgioProvider } from './mocks/MockAgioProvider';
@@ -13,7 +13,7 @@ import { MockAgioProvider } from './mocks/MockAgioProvider';
 describe('AgentSession Debug Logging', () => {
   let mockServer: Partial<AgentServer>;
   let session: AgentSession;
-  let consoleSpy: any;
+  let consoleSpy: ReturnType<typeof vi.spyOn>;
 
   const createMockServer = (isDebug: boolean): Partial<AgentServer> => ({
     isDebug,
@@ -131,8 +131,7 @@ describe('AgentSession Debug Logging', () => {
 
       // Mock agent to throw an error
       const mockAgent = session.agent as MockAgent;
-      const originalRun = mockAgent.run.bind(mockAgent);
-      mockAgent.run = vi.fn().mockRejectedValue(new Error('Test error'));
+      const runSpy = vi.spyOn(mockAgent, 'run').mockRejectedValue(new Error('Test error'));
 
       await session.runQuery('Failing query');
 
@@ -141,7 +140,7 @@ describe('AgentSession Debug Logging', () => {
       );
 
       // Restore original method
-      mockAgent.run = originalRun;
+      runSpy.mockRestore();
     });
 
     it('should log streaming query failures in debug mode', async () => {
@@ -149,8 +148,7 @@ describe('AgentSession Debug Logging', () => {
 
       // Mock agent to throw an error in streaming mode
       const mockAgent = session.agent as MockAgent;
-      const originalRun = mockAgent.run.bind(mockAgent);
-      mockAgent.run = vi.fn().mockRejectedValue(new Error('Streaming error'));
+      const runSpy = vi.spyOn(mockAgent, 'run').mockRejectedValue(new Error('Streaming error'));
 
       const stream = await session.runQueryStreaming('Failing streaming query');
 
@@ -164,7 +162,7 @@ describe('AgentSession Debug Logging', () => {
       );
 
       // Restore original method
-      mockAgent.run = originalRun;
+      runSpy.mockRestore();
     });
   });
 

@@ -62,9 +62,6 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   // Exclusive mode state
   private runningSessionId: string | null = null;
 
-  // Server status broadcast interval
-  private statusBroadcastInterval?: NodeJS.Timeout;
-
   // Current agent resolution, resolved before server started
   private currentAgentResolution?: AgentResolutionResult;
 
@@ -109,11 +106,6 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
 
     // Make server instance available to request handlers
     this.app.locals.server = this;
-
-    // Setup status broadcasting for exclusive mode
-    if (this.isExclusive) {
-      this.setupStatusBroadcasting();
-    }
   }
 
   /**
@@ -181,15 +173,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    */
   setRunningSession(sessionId: string): void {
     if (this.isExclusive) {
-      const wasRunning = this.runningSessionId !== null;
       this.runningSessionId = sessionId;
-
-      // Only broadcast if status actually changed
-      if (!wasRunning) {
-        this.broadcastServerStatus();
-      }
-
-      // Debug logging for issue #1150
       if (this.isDebug) {
         console.log(`[DEBUG] Session started: ${sessionId}`);
       }
@@ -202,9 +186,6 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   clearRunningSession(sessionId: string): void {
     if (this.isExclusive && this.runningSessionId === sessionId) {
       this.runningSessionId = null;
-      this.broadcastServerStatus();
-
-      // Debug logging for issue #1150
       if (this.isDebug) {
         console.log(`[DEBUG] Session ended: ${sessionId}`);
       }
@@ -216,32 +197,6 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    */
   getRunningSessionId(): string | null {
     return this.runningSessionId;
-  }
-
-  /**
-   * Setup status broadcasting for real-time updates
-   */
-  private setupStatusBroadcasting(): void {
-    // No periodic broadcasting - only broadcast on status changes
-  }
-
-  /**
-   * Broadcast current server status to all connected clients
-   */
-  private broadcastServerStatus(): void {
-    const status = {
-      isExclusive: this.isExclusive,
-      runningSessionId: this.runningSessionId,
-      canAcceptNewRequest: this.canAcceptNewRequest(),
-      timestamp: Date.now(),
-    };
-
-    this.io.emit('server-status-update', status);
-
-    // Debug logging for issue #1150
-    if (this.isDebug) {
-      console.log(`[DEBUG] Server status broadcast:`, JSON.stringify(status, null, 2));
-    }
   }
 
   /**
@@ -382,12 +337,6 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
 
     // Clear sessions
     this.sessions = {};
-
-    // Clear status broadcasting
-    if (this.statusBroadcastInterval) {
-      clearInterval(this.statusBroadcastInterval);
-      this.statusBroadcastInterval = undefined;
-    }
 
     // Close storage provider
     if (this.storageProvider) {

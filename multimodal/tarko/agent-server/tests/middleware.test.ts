@@ -5,8 +5,8 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Request, Response, NextFunction } from 'express';
-import { exclusiveModeMiddleware } from '../api/middleware/exclusive-mode';
-import { AgentServer } from '../server';
+import { exclusiveModeMiddleware } from '../src/api/middleware/exclusive-mode';
+import { AgentServer } from '../src/server';
 
 describe('Exclusive Mode Middleware', () => {
   let mockReq: Partial<Request>;
@@ -35,15 +35,11 @@ describe('Exclusive Mode Middleware', () => {
 
   describe('when server can accept new requests', () => {
     beforeEach(() => {
-      (mockServer.canAcceptNewRequest as any).mockReturnValue(true);
+      vi.mocked(mockServer.canAcceptNewRequest!).mockReturnValue(true);
     });
 
     it('should call next() to continue processing', () => {
-      exclusiveModeMiddleware(
-        mockReq as Request,
-        mockRes as Response,
-        mockNext
-      );
+      exclusiveModeMiddleware(mockReq as Request, mockRes as Response, mockNext);
 
       expect(mockNext).toHaveBeenCalledOnce();
       expect(mockRes.status).not.toHaveBeenCalled();
@@ -53,16 +49,12 @@ describe('Exclusive Mode Middleware', () => {
 
   describe('when server cannot accept new requests (exclusive mode)', () => {
     beforeEach(() => {
-      (mockServer.canAcceptNewRequest as any).mockReturnValue(false);
-      (mockServer.getRunningSessionId as any).mockReturnValue('running-session-123');
+      vi.mocked(mockServer.canAcceptNewRequest!).mockReturnValue(false);
+      vi.mocked(mockServer.getRunningSessionId!).mockReturnValue('running-session-123');
     });
 
     it('should return 409 status with error message', () => {
-      const result = exclusiveModeMiddleware(
-        mockReq as Request,
-        mockRes as Response,
-        mockNext
-      );
+      const result = exclusiveModeMiddleware(mockReq as Request, mockRes as Response, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(409);
       expect(mockRes.json).toHaveBeenCalledWith({
@@ -74,34 +66,26 @@ describe('Exclusive Mode Middleware', () => {
     });
 
     it('should include the running session ID in the response', () => {
-      (mockServer.getRunningSessionId as any).mockReturnValue('specific-session-id');
+      vi.mocked(mockServer.getRunningSessionId!).mockReturnValue('specific-session-id');
 
-      exclusiveModeMiddleware(
-        mockReq as Request,
-        mockRes as Response,
-        mockNext
-      );
+      exclusiveModeMiddleware(mockReq as Request, mockRes as Response, mockNext);
 
       expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
           runningSessionId: 'specific-session-id',
-        })
+        }),
       );
     });
 
     it('should handle null running session ID', () => {
-      (mockServer.getRunningSessionId as any).mockReturnValue(null);
+      vi.mocked(mockServer.getRunningSessionId!).mockReturnValue(null);
 
-      exclusiveModeMiddleware(
-        mockReq as Request,
-        mockRes as Response,
-        mockNext
-      );
+      exclusiveModeMiddleware(mockReq as Request, mockRes as Response, mockNext);
 
       expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
           runningSessionId: null,
-        })
+        }),
       );
     });
   });
@@ -115,25 +99,17 @@ describe('Exclusive Mode Middleware', () => {
       };
 
       expect(() => {
-        exclusiveModeMiddleware(
-          mockReq as Request,
-          mockRes as Response,
-          mockNext
-        );
+        exclusiveModeMiddleware(mockReq as Request, mockRes as Response, mockNext);
       }).toThrow();
     });
 
     it('should handle server method errors gracefully', () => {
-      (mockServer.canAcceptNewRequest as any).mockImplementation(() => {
+      vi.mocked(mockServer.canAcceptNewRequest!).mockImplementation(() => {
         throw new Error('Server error');
       });
 
       expect(() => {
-        exclusiveModeMiddleware(
-          mockReq as Request,
-          mockRes as Response,
-          mockNext
-        );
+        exclusiveModeMiddleware(mockReq as Request, mockRes as Response, mockNext);
       }).toThrow('Server error');
     });
   });
@@ -148,7 +124,7 @@ describe('Exclusive Mode Middleware', () => {
       ];
 
       // Server can accept requests
-      (mockServer.canAcceptNewRequest as any).mockReturnValue(true);
+      vi.mocked(mockServer.canAcceptNewRequest!).mockReturnValue(true);
 
       // Execute first middleware
       middlewareChain[0](mockReq as Request, mockRes as Response, mockNext);
@@ -159,16 +135,12 @@ describe('Exclusive Mode Middleware', () => {
 
     it('should short-circuit middleware chain when blocking requests', () => {
       const secondMiddleware = vi.fn();
-      
-      // Server cannot accept requests
-      (mockServer.canAcceptNewRequest as any).mockReturnValue(false);
-      (mockServer.getRunningSessionId as any).mockReturnValue('blocking-session');
 
-      exclusiveModeMiddleware(
-        mockReq as Request,
-        mockRes as Response,
-        mockNext
-      );
+      // Server cannot accept requests
+      vi.mocked(mockServer.canAcceptNewRequest!).mockReturnValue(false);
+      vi.mocked(mockServer.getRunningSessionId!).mockReturnValue('blocking-session');
+
+      exclusiveModeMiddleware(mockReq as Request, mockRes as Response, mockNext);
 
       // Simulate that next() would call second middleware
       expect(mockNext).not.toHaveBeenCalled();
