@@ -116,6 +116,13 @@ export function addCommonOptions(command: Command): Command {
     .option('--snapshot.enable', 'Enable agent snapshot functionality')
     .option('--snapshot.snapshotPath <path>', 'Path for storing agent snapshots')
 
+    // Server configuration
+    .option('--server', 'Server config')
+    .option(
+      '--server.exclusive',
+      'Enable exclusive mode - reject new requests while an agent is running',
+    )
+
     // Agent selection
     .option(
       '--agent [agent]',

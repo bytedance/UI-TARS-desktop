@@ -74,6 +74,8 @@ export function buildAppConfig<
     tool,
     // Extract MCP server filter options
     mcpServer,
+    // Extract server options
+    server,
     ...cliConfigProps
   } = cliArguments;
 
@@ -91,6 +93,9 @@ export function buildAppConfig<
 
   // Handle MCP server filters
   handleMCPServerFilterOptions(cliConfigProps, { mcpServer });
+
+  // Handle server options
+  handleServerOptions(cliConfigProps, { server });
 
   // Process additional options
   if (cliOptionsEnhancer) {
@@ -165,6 +170,34 @@ function handleCoreDeprecatedOptions(
     if (!config.share.provider) {
       config.share.provider = shareProvider;
     }
+  }
+}
+
+/**
+ * Handle server CLI options
+ */
+function handleServerOptions(
+  config: Partial<AgentAppConfig>,
+  serverOptions: {
+    server?: {
+      exclusive?: boolean;
+    };
+  },
+): void {
+  const { server } = serverOptions;
+
+  if (!server) {
+    return;
+  }
+
+  // Initialize server config if it doesn't exist
+  if (!config.server) {
+    config.server = {};
+  }
+
+  // Handle exclusive mode option
+  if (server.exclusive !== undefined) {
+    config.server.exclusive = server.exclusive;
   }
 }
 
