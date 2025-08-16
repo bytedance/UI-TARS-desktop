@@ -200,6 +200,11 @@ export class AgentSession {
       // Set running session for exclusive mode
       this.server.setRunningSession(this.id);
 
+      // Debug logging for issue #1150
+      if (this.server.isDebug) {
+        console.log(`[DEBUG] Query started - Session: ${this.id}, Query: ${typeof query === 'string' ? query.substring(0, 100) + '...' : '[ContentPart]'}`);
+      }
+
       // Prepare run options with session-specific model configuration
       // Emit TTFT initialization status
       this.eventBridge.emit('agent-status', {
@@ -228,6 +233,12 @@ export class AgentSession {
 
       // Run agent to process the query
       const result = await this.agent.run(runOptions);
+      
+      // Debug logging for issue #1150
+      if (this.server.isDebug) {
+        console.log(`[DEBUG] Query completed successfully - Session: ${this.id}`);
+      }
+      
       return {
         success: true,
         result,
@@ -240,6 +251,11 @@ export class AgentSession {
 
       // Handle error and return structured response
       const handledError = handleAgentError(error, `Session ${this.id}`);
+
+      // Debug logging for issue #1150
+      if (this.server.isDebug) {
+        console.log(`[DEBUG] Query failed - Session: ${this.id}, Error: ${handledError.message}`);
+      }
 
       return {
         success: false,
@@ -266,6 +282,11 @@ export class AgentSession {
     try {
       // Set running session for exclusive mode
       this.server.setRunningSession(this.id);
+
+      // Debug logging for issue #1150
+      if (this.server.isDebug) {
+        console.log(`[DEBUG] Streaming query started - Session: ${this.id}, Query: ${typeof query === 'string' ? query.substring(0, 100) + '...' : '[ContentPart]'}`);
+      }
 
       // Prepare run options with session-specific model configuration
       // Emit enhanced TTFT initialization status for streaming
@@ -306,6 +327,11 @@ export class AgentSession {
       // Handle error and return a synthetic event stream with the error
       const handledError = handleAgentError(error, `Session ${this.id} (streaming)`);
 
+      // Debug logging for issue #1150
+      if (this.server.isDebug) {
+        console.log(`[DEBUG] Streaming query failed - Session: ${this.id}, Error: ${handledError.message}`);
+      }
+
       // Create a synthetic event stream that yields just an error event
       return this.createErrorEventStream(handledError);
     }
@@ -320,6 +346,11 @@ export class AgentSession {
     try {
       for await (const event of stream) {
         yield event;
+      }
+      
+      // Debug logging for issue #1150
+      if (this.server.isDebug) {
+        console.log(`[DEBUG] Streaming query completed - Session: ${this.id}`);
       }
     } finally {
       // Clear running session for exclusive mode when stream ends

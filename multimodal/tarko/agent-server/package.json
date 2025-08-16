@@ -31,6 +31,7 @@
     "express": "4.21.2",
     "http-proxy-middleware": "^2.0.6",
     "socket.io": "^4.7.2",
+    "socket.io-client": "^4.7.2",
     "lowdb": "^6.0.1",
     "nanoid": "^5.0.8",
     "@types/cors": "^2.8.17",
@@ -38,6 +39,8 @@
     "@rslib/core": "0.10.0",
     "@types/node": "22.15.30",
     "typescript": "^5.5.3",
-    "vitest": "3.2.4"
+    "vitest": "3.2.4",
+    "supertest": "^7.0.0",
+    "@types/supertest": "^6.0.2"
   }
 }

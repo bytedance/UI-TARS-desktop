@@ -16,5 +16,9 @@ export function registerOneshotRoutes(app: express.Application): void {
   app.post('/api/v1/oneshot/query', exclusiveModeMiddleware, oneshotController.createAndQuery);
 
   // Create session and send a streaming query
-  app.post('/api/v1/oneshot/query/stream', exclusiveModeMiddleware, oneshotController.createAndStreamingQuery);
+  app.post(
+    '/api/v1/oneshot/query/stream',
+    exclusiveModeMiddleware,
+    oneshotController.createAndStreamingQuery,
+  );
 }
