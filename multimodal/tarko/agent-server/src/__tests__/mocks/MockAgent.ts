@@ -34,7 +34,7 @@ export class MockAgent implements IAgent {
     }
 
     this.currentStatus = AgentStatus.EXECUTING;
-    
+
     // Emit some test events
     this.eventStream.emit('agent-status', {
       isProcessing: true,
@@ -42,7 +42,7 @@ export class MockAgent implements IAgent {
     });
 
     // Simulate some work
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 10));
 
     if (options.stream) {
       return this.createMockStream();

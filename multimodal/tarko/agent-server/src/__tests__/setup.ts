@@ -58,10 +58,18 @@ vi.mock('../utils/agent-resolver', () => ({
     agentConstructor: class MockAgent {
       constructor() {}
       async initialize() {}
-      async run() { return { success: true }; }
-      status() { return 'ready'; }
-      abort() { return false; }
-      getEventStream() { return { subscribe: vi.fn(() => vi.fn()) }; }
+      async run() {
+        return { success: true };
+      }
+      status() {
+        return 'ready';
+      }
+      abort() {
+        return false;
+      }
+      getEventStream() {
+        return { subscribe: vi.fn(() => vi.fn()) };
+      }
       async dispose() {}
     },
     agentName: 'mock-agent',
@@ -113,7 +121,7 @@ vi.mock('http', async () => {
 // Mock Express with proper app.group method
 vi.mock('express', async () => {
   const actual = await vi.importActual('express');
-  
+
   const createMockApp = () => ({
     use: vi.fn(),
     get: vi.fn(),
@@ -135,7 +143,7 @@ vi.mock('express', async () => {
       }
     }),
   });
-  
+
   return {
     ...actual,
     default: vi.fn(() => createMockApp()),

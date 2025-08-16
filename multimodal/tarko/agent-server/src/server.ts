@@ -183,7 +183,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     if (this.isExclusive) {
       this.runningSessionId = sessionId;
       this.broadcastServerStatus();
-      
+
       // Debug logging for issue #1150
       if (this.isDebug) {
         console.log(`[DEBUG] Session started: ${sessionId}`);
@@ -198,7 +198,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     if (this.isExclusive && this.runningSessionId === sessionId) {
       this.runningSessionId = null;
       this.broadcastServerStatus();
-      
+
       // Debug logging for issue #1150
       if (this.isDebug) {
         console.log(`[DEBUG] Session ended: ${sessionId}`);
@@ -232,14 +232,17 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
       runningSessionId: this.runningSessionId,
       canAcceptNewRequest: this.canAcceptNewRequest(),
       activeSessions: Object.keys(this.sessions).length,
-      sessionStatuses: Object.keys(this.sessions).reduce((acc, sessionId) => {
-        const session = this.sessions[sessionId];
-        acc[sessionId] = {
-          isProcessing: session.getProcessingStatus(),
-          state: session.agent.status(),
-        };
-        return acc;
-      }, {} as Record<string, { isProcessing: boolean; state: string }>),
+      sessionStatuses: Object.keys(this.sessions).reduce(
+        (acc, sessionId) => {
+          const session = this.sessions[sessionId];
+          acc[sessionId] = {
+            isProcessing: session.getProcessingStatus(),
+            state: session.agent.status(),
+          };
+          return acc;
+        },
+        {} as Record<string, { isProcessing: boolean; state: string }>,
+      ),
       timestamp: Date.now(),
     };
 
