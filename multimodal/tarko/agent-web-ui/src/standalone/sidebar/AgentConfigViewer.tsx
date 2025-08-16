@@ -22,7 +22,7 @@ interface ConfigItemProps {
 }
 
 const ConfigItem: React.FC<ConfigItemProps> = ({ label, value, level = 0 }) => {
-  const [isExpanded, setIsExpanded] = useState(level < 2);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(async (text: string) => {
@@ -233,7 +233,7 @@ export const AgentConfigViewer: React.FC<AgentConfigViewerProps> = ({ isOpen, on
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-auto p-6">
+          <div className="flex-1 overflow-auto p-6 max-h-[calc(85vh-120px)]">
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <motion.div

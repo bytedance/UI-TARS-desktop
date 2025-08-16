@@ -30,6 +30,17 @@ export function sanitizeAgentOptions(options: AgentAppConfig): SanitizedAgentOpt
       modelConfig.apiKey = sanitizeApiKey(modelConfig.apiKey); // secretlint-disable-line
     }
 
+    // Sanitize providers array if present
+    if (modelConfig.providers && Array.isArray(modelConfig.providers)) {
+      modelConfig.providers = modelConfig.providers.map((provider: any) => {
+        const sanitizedProvider = { ...provider };
+        if (sanitizedProvider.apiKey) {
+          sanitizedProvider.apiKey = sanitizeApiKey(sanitizedProvider.apiKey); // secretlint-disable-line
+        }
+        return sanitizedProvider;
+      });
+    }
+
     sanitized.model = modelConfig;
   }
 
