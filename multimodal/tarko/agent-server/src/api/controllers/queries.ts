@@ -61,8 +61,8 @@ export async function executeQuery(req: Request, res: Response) {
       input: compressedQuery,
       environmentInput: {
         content: expandedContext,
-        description: 'Expanded context from contextual references'
-      }
+        description: 'Expanded context from contextual references',
+      },
     });
 
     if (response.success) {
@@ -112,8 +112,8 @@ export async function executeStreamingQuery(req: Request, res: Response) {
       input: compressedQuery,
       environmentInput: {
         content: expandedContext,
-        description: 'Expanded context from contextual references'
-      }
+        description: 'Expanded context from contextual references',
+      },
     });
 
     // Stream events one by one
@@ -166,7 +166,7 @@ export async function abortQuery(req: Request, res: Response) {
   const { sessionId } = req.body;
 
   try {
-    const aborted = req.session!.abortQuery();
+    const aborted = await req.session!.abortQuery();
     res.status(200).json({ success: aborted });
   } catch (error) {
     console.error(`Error aborting query in session ${sessionId}:`, error);
