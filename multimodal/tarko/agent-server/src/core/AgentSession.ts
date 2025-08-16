@@ -192,10 +192,16 @@ export class AgentSession {
   /**
    * Run a query and return a strongly-typed response
    * This version captures errors and returns structured response objects
-   * @param query The query to process
+   * @param options The query options containing input and optional environment input
    * @returns Structured response with success/error information
    */
-  async runQuery(query: string | ChatCompletionContentPart[]): Promise<AgentQueryResponse> {
+  async runQuery(options: {
+    input: string | ChatCompletionContentPart[];
+    environmentInput?: {
+      content: string | ChatCompletionContentPart[];
+      description?: string;
+    };
+  }): Promise<AgentQueryResponse> {
     try {
       // Set running session for exclusive mode
       this.server.setRunningSession(this.id);
@@ -218,8 +224,9 @@ export class AgentSession {
       } as AgentStatusInfo);
 
       const runOptions: AgentRunNonStreamingOptions = {
-        input: query,
+        input: options.input,
         sessionId: this.id,
+        environmentInput: options.environmentInput,
       };
 
       // Run agent to process the query
@@ -276,12 +283,16 @@ export class AgentSession {
 
   /**
    * Execute a streaming query with robust error handling
-   * @param query The query to process in streaming mode
+   * @param options The query options containing input and optional environment input
    * @returns AsyncIterable of events or error response
    */
-  async runQueryStreaming(
-    query: string | ChatCompletionContentPart[],
-  ): Promise<AsyncIterable<AgentEventStream.Event>> {
+  async runQueryStreaming(options: {
+    input: string | ChatCompletionContentPart[];
+    environmentInput?: {
+      content: string | ChatCompletionContentPart[];
+      description?: string;
+    };
+  }): Promise<AsyncIterable<AgentEventStream.Event>> {
     try {
       // Set running session for exclusive mode
       this.server.setRunningSession(this.id);
@@ -304,9 +315,10 @@ export class AgentSession {
       } as AgentStatusInfo);
 
       const runOptions: AgentRunStreamingOptions = {
-        input: query,
+        input: options.input,
         stream: true,
         sessionId: this.id,
+        environmentInput: options.environmentInput,
       };
 
       // Add model configuration if available in session metadata

@@ -39,6 +39,19 @@ export interface AgentRunBaseOptions {
    */
   toolCallEngine?: ToolCallEngineType;
   /**
+   * Environment input to inject as context before agent execution.
+   * This content will be sent as environment_input events to provide context
+   * without attributing it to user messages.
+   *
+   * @defaultValue `undefined`
+   */
+  environmentInput?: {
+    /** The environment content (can be multimodal) */
+    content: string | ChatCompletionContentPart[];
+    /** Optional description of the environment input */
+    description?: string;
+  };
+  /**
    * Abort signal for canceling the execution
    * @internal This is set internally by the Agent class
    */
