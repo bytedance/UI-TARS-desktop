@@ -309,14 +309,27 @@ describe('Context Injection Integration', () => {
       // Initialize session
       await mockSession.initialize();
 
-      // Execute query
-      const result = await mockSession.runQuery({
-        input: multimodalUserQuery,
-        environmentInput: {
-          content: expandedContext,
-          description: 'Expanded context from contextual references',
+      // Mock Express request/response - 使用 controller 层来测试端到端流程
+      const mockReq = {
+        body: {
+          sessionId: 'test-session-integration',
+          query: multimodalUserQuery,
         },
-      });
+        session: mockSession,
+        app: {
+          locals: {
+            server: mockServer,
+          },
+        },
+      } as any;
+
+      const mockRes = {
+        status: vi.fn().mockReturnThis(),
+        json: vi.fn().mockReturnThis(),
+      } as any;
+
+      // Execute through controller to trigger full flow
+      await executeQuery(mockReq, mockRes);
 
       // Verify user input was processed separately from context
       expect(mockContextProcessor.processContextualReferences).toHaveBeenCalledWith(
@@ -327,15 +340,23 @@ describe('Context Injection Integration', () => {
 
       // Verify agent received both compressed user input and separate context
       expect(capturedRunOptions).toEqual({
-        input: multimodalUserQuery, // User passed the input directly to session
+        input: compressedUserQuery, // Compressed user input from ImageProcessor
         sessionId: 'test-session-integration',
         environmentInput: {
-          content: expandedContext, // Separate context
+          content: expandedContext, // Separate context from ContextProcessor
           description: 'Expanded context from contextual references',
         },
       });
 
-      expect(result.success).toBe(true);
+      // Verify successful response
+      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        result: {
+          type: 'assistant_message',
+          content: 'I can compare the images for you.',
+          timestamp: expect.any(Number),
+        },
+      });
     });
   });
 
