@@ -4,3 +4,4 @@
  */
 
 export { sessionRestoreMiddleware } from './session-restore';
+export { exclusiveModeMiddleware } from './exclusive-mode';
