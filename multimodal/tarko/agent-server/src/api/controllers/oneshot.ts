@@ -76,7 +76,7 @@ export async function createAndQuery(req: Request, res: Response) {
     }
 
     // Execute query on new session
-    const response = await session.runQuery(query);
+    const response = await session.runQuery({ input: query });
 
     if (response.success) {
       res.status(200).json({
@@ -156,7 +156,7 @@ export async function createAndStreamingQuery(req: Request, res: Response) {
     );
 
     // Get streaming response
-    const eventStream = await session.runQueryStreaming(query);
+    const eventStream = await session.runQueryStreaming({ input: query });
 
     // Stream events one by one
     for await (const event of eventStream) {

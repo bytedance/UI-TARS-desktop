@@ -120,7 +120,7 @@ export class SocketHandlers {
     if (server.sessions[sessionId]) {
       try {
         // Use enhanced error handling in runQuery
-        const response = await server.sessions[sessionId].runQuery(query);
+        const response = await server.sessions[sessionId].runQuery({ input: query });
 
         if (!response.success && response.error) {
           socket.emit('error', response.error.message);
