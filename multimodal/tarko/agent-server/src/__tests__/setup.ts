@@ -28,11 +28,51 @@ vi.mock('path', async () => {
   };
 });
 
-// Mock problematic modules
+// Mock problematic modules that cause ES module issues
 vi.mock('@tarko/shared-media-utils', () => ({
-  // Mock any exports that might be needed
   default: {},
 }));
+
+// Mock agent resolver to avoid complex dependency chains
+vi.mock('../utils/agent-resolver', () => ({
+  resolveAgentImplementation: vi.fn().mockResolvedValue({
+    agentConstructor: class MockAgent {
+      constructor() {}
+      async initialize() {}
+      async run() { return { success: true }; }
+      status() { return 'ready'; }
+      abort() { return false; }
+      getEventStream() { return { subscribe: vi.fn(() => vi.fn()) }; }
+      async dispose() {}
+    },
+    agentName: 'mock-agent',
+  }),
+}));
+
+// Mock Express app.group method
+vi.mock('express', async () => {
+  const actual = await vi.importActual('express');
+  const mockApp = {
+    ...actual,
+    group: vi.fn((prefix, ...handlers) => {
+      // Simple mock implementation
+      const callback = handlers[handlers.length - 1];
+      if (typeof callback === 'function') {
+        const mockRouter = {
+          get: vi.fn(),
+          post: vi.fn(),
+          put: vi.fn(),
+          delete: vi.fn(),
+        };
+        callback(mockRouter);
+      }
+    }),
+  };
+  return {
+    ...actual,
+    default: vi.fn(() => mockApp),
+  };
+});
 
 // Increase test timeout for integration tests
 vi.setConfig({ testTimeout: 15000 });
