@@ -277,6 +277,7 @@ const RemoteOperator = () => {
                 // screen shot
                 return (
                   <ScreenshotMessage
+                    // secretlint-disable-next-line @secretlint/secretlint-rule-pattern
                     key={`message-${idx}`}
                     onClick={() => handleImageSelect(idx)}
                   />
@@ -285,6 +286,7 @@ const RemoteOperator = () => {
 
               return (
                 <HumanTextMessage
+                  // secretlint-disable-next-line @secretlint/secretlint-rule-pattern
                   key={`message-${idx}`}
                   text={message?.value}
                 />
@@ -298,6 +300,7 @@ const RemoteOperator = () => {
             const finishedStep = getFinishedContent(predictionParsed);
 
             return (
+              // secretlint-disable-next-line @secretlint/secretlint-rule-pattern
               <div key={idx}>
                 {predictionParsed?.length ? (
                   <ThoughtChain
@@ -351,6 +354,7 @@ const RemoteOperator = () => {
             ></SidebarTrigger>
             <Button
               variant="outline"
+              disabled={true}
               size="sm"
               // className="text-indigo-400 border-indigo-400 hover:bg-indigo-50 hover:text-indigo-500"
               onClick={handleNewChat}
