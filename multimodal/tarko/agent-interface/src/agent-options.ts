@@ -8,7 +8,7 @@ import { ToolCallEngineType } from './tool-call-engine';
 import { Tool } from './tool';
 import { ProviderOptions, LLMReasoningOptions } from '@tarko/model-provider/types';
 import { AgentEventStream } from './agent-event-stream';
-import { LogLevel } from '@agent-infra/logger';
+import { LogLevel, Logger } from '@agent-infra/logger';
 
 /**
  * Filter options interface for include/exclude patterns
@@ -183,6 +183,15 @@ export interface AgentMiscOptions {
    * @defaultValue `LogLevel.INFO` in development, `LogLevel.WARN` in production
    */
   logLevel?: LogLevel;
+
+  /**
+   * Custom logger instance to use instead of the default logger.
+   * When provided, this logger will be used for all agent internal logging,
+   * allowing external systems to capture and process agent logs.
+   *
+   * @defaultValue `undefined` (uses default getLogger('Core'))
+   */
+  logger?: Logger;
 }
 
 /**

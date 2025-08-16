@@ -156,7 +156,10 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   /**
    * Create Agent with session-specific model configuration
    */
-  createAgentWithSessionModel(sessionMetadata?: import('./storage').SessionMetadata): IAgent {
+  createAgentWithSessionModel(
+    sessionMetadata?: import('./storage').SessionMetadata,
+    additionalOptions?: any,
+  ): IAgent {
     let modelConfig = this.getDefaultModelConfig();
 
     // If session has specific model config and it's still valid, use session config
@@ -171,9 +174,10 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
       }
     }
 
-    // Create Agent with specific model configuration
+    // Create Agent with specific model configuration and additional options
     const agentOptions = {
       ...this.appConfig,
+      ...additionalOptions, // Merge additional options (like logger)
       model: {
         ...this.appConfig.model,
         provider: modelConfig.provider,

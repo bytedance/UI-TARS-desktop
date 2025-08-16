@@ -17,6 +17,21 @@ import {
   AgentProcessingPhase,
   AgentStatusInfo,
 } from '@tarko/interface';
+import { getLogger } from '@tarko/shared-utils';
+
+// Logger interface for type safety
+interface Logger {
+  log(...args: any[]): void;
+  debug(...args: any[]): void;
+  info(...args: any[]): void;
+  warn(...args: any[]): void;
+  error(...args: any[]): void;
+  success(message: string): void;
+  infoWithData<T = any>(message: string, data?: T, transformer?: (value: T) => any): void;
+  spawn(subPrefix: string): Logger;
+  setLevel(level: any): void;
+  getLevel(): any;
+}
 import { AgentSnapshot } from '@tarko/agent-snapshot';
 import { EventStreamBridge } from '../utils/event-stream';
 import type { AgentServer } from '../server';
@@ -54,6 +69,23 @@ export interface AgentQueryResponse<T = any> {
 }
 
 /**
+ * Log entry interface for AgentSession log collection
+ */
+export interface LogEntry {
+  timestamp: number;
+  level: 'DEBUG' | 'INFO' | 'WARN' | 'ERROR' | 'SUCCESS';
+  source: 'agent' | 'system';
+  message: string;
+  sessionId: string;
+  metadata?: Record<string, any>;
+}
+
+/**
+ * Log subscription callback type
+ */
+export type LogSubscriptionCallback = (log: LogEntry) => void;
+
+/**
  * AgentSession - Represents a single agent execution context
  *
  * Responsible for:
@@ -71,6 +103,11 @@ export class AgentSession {
   private agioProvider?: AgioEvent.AgioProvider;
   private sessionMetadata?: import('../storage').SessionMetadata;
 
+  // Log collection properties
+  private logBuffer: LogEntry[] = [];
+  private logSubscribers: Set<LogSubscriptionCallback> = new Set();
+  private maxLogBufferSize = 1000; // Configurable log buffer size
+
   constructor(
     private server: AgentServer,
     sessionId: string,
@@ -84,8 +121,13 @@ export class AgentSession {
     // Get agent options from server
     const agentOptions = { ...server.appConfig };
 
+    // Create collecting logger that wraps the original logger
+    const collectingLogger = this.createCollectingLogger();
+
     // Create agent instance using the server's session-aware factory method
-    const agent = server.createAgentWithSessionModel(sessionMetadata);
+    const agent = server.createAgentWithSessionModel(sessionMetadata, {
+      logger: collectingLogger, // Inject our collecting logger
+    });
 
     // Initialize agent snapshot if enabled
     if (agentOptions.snapshot?.enable) {
@@ -196,6 +238,10 @@ export class AgentSession {
    * @returns Structured response with success/error information
    */
   async runQuery(query: string | ChatCompletionContentPart[]): Promise<AgentQueryResponse> {
+    this.addSystemLog('INFO', 'Query execution started', {
+      query: typeof query === 'string' ? query : '[multimodal]',
+    });
+
     try {
       // Prepare run options with session-specific model configuration
       // Emit TTFT initialization status
@@ -221,15 +267,29 @@ export class AgentSession {
         console.log(
           `🎯 [AgentSession] Using session model: ${runOptions.provider}:${runOptions.model}`,
         );
+        this.addSystemLog(
+          'INFO',
+          `Using session model: ${runOptions.provider}:${runOptions.model}`,
+        );
       }
 
       // Run agent to process the query
       const result = await this.agent.run(runOptions);
+      this.addSystemLog('INFO', 'Query execution completed successfully');
+
       return {
         success: true,
         result,
       };
     } catch (error) {
+      this.addSystemLog(
+        'ERROR',
+        `Query execution failed: ${error instanceof Error ? error.message : String(error)}`,
+        {
+          error: error instanceof Error ? error.stack : String(error),
+        },
+      );
+
       // Emit error event but don't throw
       this.eventBridge.emit('error', {
         message: error instanceof Error ? error.message : String(error),
@@ -257,6 +317,10 @@ export class AgentSession {
   async runQueryStreaming(
     query: string | ChatCompletionContentPart[],
   ): Promise<AsyncIterable<AgentEventStream.Event>> {
+    this.addSystemLog('INFO', 'Streaming query execution started', {
+      query: typeof query === 'string' ? query : '[multimodal]',
+    });
+
     try {
       // Prepare run options with session-specific model configuration
       // Emit enhanced TTFT initialization status for streaming
@@ -281,11 +345,26 @@ export class AgentSession {
         console.log(
           `🎯 [AgentSession] Using session model for streaming: ${runOptions.provider}:${runOptions.model}`,
         );
+        this.addSystemLog(
+          'INFO',
+          `Using session model for streaming: ${runOptions.provider}:${runOptions.model}`,
+        );
       }
 
       // Run agent in streaming mode
-      return await this.agent.run(runOptions);
+      const result = await this.agent.run(runOptions);
+      this.addSystemLog('INFO', 'Streaming query execution started successfully');
+
+      return result;
     } catch (error) {
+      this.addSystemLog(
+        'ERROR',
+        `Streaming query execution failed: ${error instanceof Error ? error.message : String(error)}`,
+        {
+          error: error instanceof Error ? error.stack : String(error),
+        },
+      );
+
       // Emit error event
       this.eventBridge.emit('error', {
         message: error instanceof Error ? error.message : String(error),
@@ -321,13 +400,23 @@ export class AgentSession {
    * @returns True if the agent was running and aborted successfully
    */
   async abortQuery(): Promise<boolean> {
+    this.addSystemLog('WARN', 'Query abort requested');
+
     try {
       const aborted = this.agent.abort();
       if (aborted) {
+        this.addSystemLog('INFO', 'Query aborted successfully');
         this.eventBridge.emit('aborted', { sessionId: this.id });
+      } else {
+        this.addSystemLog('WARN', 'Query abort failed or no active query');
       }
       return aborted;
     } catch (error) {
+      this.addSystemLog(
+        'ERROR',
+        `Query abort error: ${error instanceof Error ? error.message : String(error)}`,
+      );
+
       this.eventBridge.emit('error', {
         message: error instanceof Error ? error.message : String(error),
       });
@@ -373,6 +462,313 @@ export class AgentSession {
     }
 
     this.eventBridge.emit('closed', { sessionId: this.id });
+  }
+
+  /**
+   * Create a collecting logger that wraps the original logger
+   * and captures all log entries for this session
+   */
+  private createCollectingLogger(): Logger {
+    const originalLogger = getLogger('Core');
+
+    return {
+      log: (...args: any[]) => {
+        originalLogger.log(...args);
+        this.addLogEntry({
+          timestamp: Date.now(),
+          level: 'INFO',
+          source: 'agent',
+          message: this.formatLogMessage('', args),
+          sessionId: this.id,
+        });
+      },
+
+      debug: (...args: any[]) => {
+        originalLogger.debug(...args);
+        this.addLogEntry({
+          timestamp: Date.now(),
+          level: 'DEBUG',
+          source: 'agent',
+          message: this.formatLogMessage('', args),
+          sessionId: this.id,
+        });
+      },
+
+      info: (...args: any[]) => {
+        originalLogger.info(...args);
+        this.addLogEntry({
+          timestamp: Date.now(),
+          level: 'INFO',
+          source: 'agent',
+          message: this.formatLogMessage('', args),
+          sessionId: this.id,
+        });
+      },
+
+      warn: (...args: any[]) => {
+        originalLogger.warn(...args);
+        this.addLogEntry({
+          timestamp: Date.now(),
+          level: 'WARN',
+          source: 'agent',
+          message: this.formatLogMessage('', args),
+          sessionId: this.id,
+        });
+      },
+
+      error: (...args: any[]) => {
+        originalLogger.error(...args);
+        this.addLogEntry({
+          timestamp: Date.now(),
+          level: 'ERROR',
+          source: 'agent',
+          message: this.formatLogMessage('', args),
+          sessionId: this.id,
+        });
+      },
+
+      success: (message: string) => {
+        originalLogger.success(message);
+        this.addLogEntry({
+          timestamp: Date.now(),
+          level: 'SUCCESS',
+          source: 'agent',
+          message,
+          sessionId: this.id,
+        });
+      },
+
+      infoWithData: <T = any>(message: string, data?: T, transformer?: (value: T) => any) => {
+        originalLogger.infoWithData(message, data, transformer);
+        this.addLogEntry({
+          timestamp: Date.now(),
+          level: 'INFO',
+          source: 'agent',
+          message,
+          sessionId: this.id,
+          metadata: data ? { data: transformer ? transformer(data) : data } : undefined,
+        });
+      },
+
+      spawn: (subPrefix: string): Logger => {
+        const spawnedLogger = originalLogger.spawn(subPrefix);
+        // Return a new collecting logger for the spawned instance
+        return this.createCollectingLoggerWithPrefix(spawnedLogger, subPrefix);
+      },
+
+      setLevel: (level: any) => {
+        originalLogger.setLevel(level);
+      },
+
+      getLevel: () => {
+        return originalLogger.getLevel();
+      },
+    };
+  }
+
+  /**
+   * Create a collecting logger with a specific prefix for spawned loggers
+   */
+  private createCollectingLoggerWithPrefix(baseLogger: Logger, prefix: string): Logger {
+    return {
+      log: (...args: any[]) => {
+        baseLogger.log(...args);
+        this.addLogEntry({
+          timestamp: Date.now(),
+          level: 'INFO',
+          source: 'agent',
+          message: `[${prefix}] ${this.formatLogMessage('', args)}`,
+          sessionId: this.id,
+        });
+      },
+
+      debug: (...args: any[]) => {
+        baseLogger.debug(...args);
+        this.addLogEntry({
+          timestamp: Date.now(),
+          level: 'DEBUG',
+          source: 'agent',
+          message: `[${prefix}] ${this.formatLogMessage('', args)}`,
+          sessionId: this.id,
+        });
+      },
+
+      info: (...args: any[]) => {
+        baseLogger.info(...args);
+        this.addLogEntry({
+          timestamp: Date.now(),
+          level: 'INFO',
+          source: 'agent',
+          message: `[${prefix}] ${this.formatLogMessage('', args)}`,
+          sessionId: this.id,
+        });
+      },
+
+      warn: (...args: any[]) => {
+        baseLogger.warn(...args);
+        this.addLogEntry({
+          timestamp: Date.now(),
+          level: 'WARN',
+          source: 'agent',
+          message: `[${prefix}] ${this.formatLogMessage('', args)}`,
+          sessionId: this.id,
+        });
+      },
+
+      error: (...args: any[]) => {
+        baseLogger.error(...args);
+        this.addLogEntry({
+          timestamp: Date.now(),
+          level: 'ERROR',
+          source: 'agent',
+          message: `[${prefix}] ${this.formatLogMessage('', args)}`,
+          sessionId: this.id,
+        });
+      },
+
+      success: (message: string) => {
+        baseLogger.success(message);
+        this.addLogEntry({
+          timestamp: Date.now(),
+          level: 'SUCCESS',
+          source: 'agent',
+          message: `[${prefix}] ${message}`,
+          sessionId: this.id,
+        });
+      },
+
+      infoWithData: <T = any>(message: string, data?: T, transformer?: (value: T) => any) => {
+        baseLogger.infoWithData(message, data, transformer);
+        this.addLogEntry({
+          timestamp: Date.now(),
+          level: 'INFO',
+          source: 'agent',
+          message: `[${prefix}] ${message}`,
+          sessionId: this.id,
+          metadata: data ? { data: transformer ? transformer(data) : data } : undefined,
+        });
+      },
+
+      spawn: (subPrefix: string): Logger => {
+        return this.createCollectingLoggerWithPrefix(
+          baseLogger.spawn(subPrefix),
+          `${prefix}:${subPrefix}`,
+        );
+      },
+
+      setLevel: (level: any) => {
+        baseLogger.setLevel(level);
+      },
+
+      getLevel: () => {
+        return baseLogger.getLevel();
+      },
+    };
+  }
+
+  /**
+   * Format log message from arguments
+   */
+  private formatLogMessage(message: string, args: any[]): string {
+    if (args.length === 0) return message;
+
+    const formattedArgs = args
+      .map((arg) => {
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch {
+            return String(arg);
+          }
+        }
+        return String(arg);
+      })
+      .join(' ');
+
+    return message ? `${message} ${formattedArgs}` : formattedArgs;
+  }
+
+  /**
+   * Add a log entry to the buffer and notify subscribers
+   */
+  private addLogEntry(log: LogEntry): void {
+    // Add to buffer
+    this.logBuffer.push(log);
+
+    // Limit buffer size
+    if (this.logBuffer.length > this.maxLogBufferSize) {
+      this.logBuffer = this.logBuffer.slice(-this.maxLogBufferSize);
+    }
+
+    // Notify subscribers
+    this.logSubscribers.forEach((callback) => {
+      try {
+        callback(log);
+      } catch (error) {
+        console.error('Error in log subscriber:', error);
+      }
+    });
+  }
+
+  /**
+   * Add a system log entry
+   */
+  private addSystemLog(level: LogEntry['level'], message: string, metadata?: any): void {
+    this.addLogEntry({
+      timestamp: Date.now(),
+      level,
+      source: 'system',
+      message,
+      sessionId: this.id,
+      metadata,
+    });
+  }
+
+  /**
+   * Subscribe to log stream for this session
+   * @param callback Function to call when new logs are added
+   * @returns Unsubscribe function
+   */
+  subscribeToLogs(callback: LogSubscriptionCallback): () => void {
+    this.logSubscribers.add(callback);
+    return () => this.logSubscribers.delete(callback);
+  }
+
+  /**
+   * Get historical logs for this session
+   * @param level Optional minimum log level filter
+   * @returns Array of log entries
+   */
+  getHistoricalLogs(level?: string): LogEntry[] {
+    if (!level) return [...this.logBuffer];
+
+    const levelPriority = { DEBUG: 0, INFO: 1, SUCCESS: 2, WARN: 3, ERROR: 4 };
+    const minPriority = levelPriority[level as keyof typeof levelPriority] ?? 1;
+
+    return this.logBuffer.filter((log) => levelPriority[log.level] >= minPriority);
+  }
+
+  /**
+   * Clear the log buffer for this session
+   */
+  clearLogs(): void {
+    this.logBuffer = [];
+  }
+
+  /**
+   * Get log statistics for this session
+   */
+  getLogStats(): { total: number; byLevel: Record<string, number> } {
+    const byLevel: Record<string, number> = {};
+
+    this.logBuffer.forEach((log) => {
+      byLevel[log.level] = (byLevel[log.level] || 0) + 1;
+    });
+
+    return {
+      total: this.logBuffer.length,
+      byLevel,
+    };
   }
 }
 

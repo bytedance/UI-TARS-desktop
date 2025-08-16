@@ -6,3 +6,6 @@
 export * from './types';
 export * from './console-logger';
 export { colorize, colorLog } from './colorize';
+
+// Explicitly export Logger interface for better IDE support
+export type { Logger } from './types';

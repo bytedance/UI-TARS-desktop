@@ -36,7 +36,7 @@ import {
   RequestOptions,
   ChatCompletionChunk,
 } from '@tarko/model-provider';
-import { getLogger, LogLevel, rootLogger } from '@tarko/shared-utils';
+import { getLogger, LogLevel, rootLogger, Logger } from '@tarko/shared-utils';
 import { AgentExecutionController } from './execution-controller';
 import { getLLMClient } from './llm-client';
 import { getToolCallEngineForProvider } from '../tool-call-engine/engine-selector';
@@ -68,7 +68,7 @@ export class Agent<T extends AgentOptions = AgentOptions>
   private temperature: number;
   private reasoningOptions: LLMReasoningOptions;
   public readonly runner: AgentRunner;
-  public logger = getLogger('Core');
+  public logger: Logger;
   protected executionController: AgentExecutionController;
   private customLLMClient?: OpenAI;
   public initialized = false;
@@ -92,10 +92,13 @@ export class Agent<T extends AgentOptions = AgentOptions>
     this.name = options.name ?? 'Anonymous';
     this.id = options.id ?? '@tarko/agent';
 
+    // Initialize logger - use custom logger if provided, otherwise create default
+    this.logger = options.logger || getLogger('Core');
+
     // console.log(JSON.stringify(options, null, 2));
 
-    // Set the log level if provided in options
-    if (options.logLevel !== undefined) {
+    // Set the log level if provided in options and using default logger
+    if (options.logLevel !== undefined && !options.logger) {
       rootLogger.setLevel(options.logLevel);
       this.logger.debug(`Log level set to: ${LogLevel[options.logLevel]}`);
     }
@@ -223,7 +226,7 @@ export class Agent<T extends AgentOptions = AgentOptions>
   public getTools(): Tool[] {
     const allTools = this.toolManager.getTools();
     const toolFilterOptions = this.options.tool;
-    
+
     return filterTools(allTools, toolFilterOptions);
   }
 
