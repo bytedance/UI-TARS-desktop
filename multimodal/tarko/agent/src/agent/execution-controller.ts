@@ -13,7 +13,7 @@ export class AgentExecutionController {
   private abortController: AbortController | null = null;
   private status: AgentStatus = AgentStatus.IDLE;
   private logger = getLogger('ExecutionController');
-  private cleanupHandlers: (() => Promise<void> | void)[] = [];
+  private cleanupHandlers: Array<() => Promise<void> | void> = [];
 
   /**
    * Get the current execution status

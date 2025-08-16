@@ -37,26 +37,29 @@
     "prepublishOnly": "pnpm run build",
     "test": "vitest run",
     "test:watch": "vitest",
+    "lint": "rslint",
+    "lint:fix": "rslint --fix",
     "agent:snapshot:genreate": "npx tsx snapshot/runner.ts generate all",
     "agent:snapshot:test": "npx vitest snapshot/index.test.ts"
   },
   "dependencies": {
-    "uuid": "^9.0.0",
-    "jsonrepair": "3.12.0",
-    "zod-to-json-schema": "3.24.3",
+    "@tarko/agent-interface": "workspace:*",
     "@tarko/llm-client": "workspace:*",
-    "@tarko/shared-utils": "workspace:*",
     "@tarko/model-provider": "workspace:*",
-    "@tarko/agent-interface": "workspace:*"
+    "@tarko/shared-utils": "workspace:*",
+    "jsonrepair": "3.12.0",
+    "uuid": "^9.0.0",
+    "zod-to-json-schema": "3.24.3"
   },
   "devDependencies": {
-    "@types/uuid": "^9.0.8",
-    "@agent-infra/shared": "0.0.2",
     "@agent-infra/browser": "0.1.1",
     "@agent-infra/browser-search": "0.0.5",
-    "@ui-tars/operator-browser": "1.2.2",
+    "@agent-infra/shared": "0.0.2",
     "@rslib/core": "0.10.0",
+    "@rslint/core": "^0.1.11",
     "@types/node": "22.15.30",
+    "@types/uuid": "^9.0.8",
+    "@ui-tars/operator-browser": "1.2.2",
     "tsx": "^4.19.2",
     "typescript": "^5.5.3",
     "vitest": "3.2.4"

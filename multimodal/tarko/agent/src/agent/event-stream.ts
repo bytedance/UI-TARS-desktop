@@ -22,7 +22,7 @@ const DEFAULT_OPTIONS: AgentEventStream.ProcessorOptions = {
 export class AgentEventStreamProcessor implements AgentEventStream.Processor {
   private events: AgentEventStream.Event[] = [];
   private options: AgentEventStream.ProcessorOptions;
-  private subscribers: ((event: AgentEventStream.Event) => void)[] = [];
+  private subscribers: Array<(event: AgentEventStream.Event) => void> = [];
   private logger = getLogger('EventStream');
 
   constructor(options: AgentEventStream.ProcessorOptions = {}) {
@@ -102,7 +102,7 @@ export class AgentEventStreamProcessor implements AgentEventStream.Processor {
   /**
    * Get tool results since the last assistant message
    */
-  getLatestToolResults(): { toolCallId: string; toolName: string; content: any }[] {
+  getLatestToolResults(): Array<{ toolCallId: string; toolName: string; content: any }> {
     // Find the index of the most recent assistant message
     const assistantEvents = this.getEventsByType(['assistant_message']);
     if (assistantEvents.length === 0) {

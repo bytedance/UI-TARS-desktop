@@ -42,7 +42,7 @@ export class StreamAdapter {
 
     // Create a queue to buffer events
     const queue: AgentEventStream.Event[] = [];
-    let resolveNext: ((value: IteratorResult<AgentEventStream.Event, any>) => void) | null = null;
+    let resolveNext: ((value: IteratorResult<AgentEventStream.Event>) => void) | null = null;
     let isComplete = false;
 
     // Subscribe to all events instead of specific types
@@ -91,7 +91,7 @@ export class StreamAdapter {
     return {
       [Symbol.asyncIterator]() {
         return {
-          async next(): Promise<IteratorResult<AgentEventStream.Event, any>> {
+          async next(): Promise<IteratorResult<AgentEventStream.Event>> {
             // Check if aborted
             if (signal.aborted) {
               return { done: true, value: undefined };
@@ -108,7 +108,7 @@ export class StreamAdapter {
             }
 
             // Otherwise wait for the next item
-            return new Promise<IteratorResult<AgentEventStream.Event, any>>((resolve) => {
+            return new Promise<IteratorResult<AgentEventStream.Event>>((resolve) => {
               resolveNext = resolve;
 
               // Also handle abort while waiting
@@ -144,7 +144,7 @@ export class StreamAdapter {
       [Symbol.asyncIterator]() {
         let sent = false;
         return {
-          async next(): Promise<IteratorResult<AgentEventStream.Event, any>> {
+          async next(): Promise<IteratorResult<AgentEventStream.Event>> {
             if (!sent) {
               sent = true;
               return { done: false, value: abortEvent };

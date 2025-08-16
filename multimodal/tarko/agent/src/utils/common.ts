@@ -19,7 +19,7 @@ function isZodSchema(schema: any): schema is ZodType {
 export const zodToJsonSchema = (schema: ZodType | JSONSchema): JSONSchema => {
   // If it's already a JSON schema, return it directly
   if (!isZodSchema(schema)) {
-    return schema as JSONSchema;
+    return schema  ;
   }
 
   // Otherwise, convert from Zod

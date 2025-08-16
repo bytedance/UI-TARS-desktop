@@ -103,7 +103,7 @@ export class MessageHistory {
         this.processUserMessage(event, eventIndex, imagesToOmit, messages);
       } else if (event.type === 'assistant_message') {
         this.processAssistantMessage(
-          event as AgentEventStream.AssistantMessageEvent,
+          event  ,
           events,
           eventIndex,
           imagesToOmit,

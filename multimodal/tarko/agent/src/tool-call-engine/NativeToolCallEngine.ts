@@ -172,15 +172,15 @@ export class NativeToolCallEngine extends ToolCallEngine {
 
       // Update function name if present
       if (toolCallPart.function?.name) {
-        currentToolCall.function!.name = toolCallPart.function.name;
+        currentToolCall.function.name = toolCallPart.function.name;
         hasUpdate = true;
       }
 
       // Append arguments if present
       if (toolCallPart.function?.arguments) {
         argumentsDelta = toolCallPart.function.arguments;
-        currentToolCall.function!.arguments =
-          (currentToolCall.function!.arguments || '') + argumentsDelta;
+        currentToolCall.function.arguments =
+          (currentToolCall.function.arguments || '') + argumentsDelta;
         hasUpdate = true;
       }
 
@@ -188,7 +188,7 @@ export class NativeToolCallEngine extends ToolCallEngine {
       if (hasUpdate) {
         streamingToolCallUpdates.push({
           toolCallId: currentToolCall.id,
-          toolName: currentToolCall.function!.name || '',
+          toolName: currentToolCall.function.name || '',
           argumentsDelta,
           isComplete: false, // Incremental update, not complete yet
         });
