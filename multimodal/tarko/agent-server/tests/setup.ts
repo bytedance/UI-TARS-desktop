@@ -6,16 +6,27 @@
 import { vi } from 'vitest';
 
 // Mock file system operations for testing
-vi.mock('fs', () => ({
-  existsSync: vi.fn().mockReturnValue(true),
-  statSync: vi.fn().mockReturnValue({
-    isDirectory: () => false,
-    isFile: () => true,
-    size: 1024,
-    mtime: new Date(),
-  }),
-  readdirSync: vi.fn().mockReturnValue([]),
-}));
+vi.mock('fs', async () => {
+  const actual = await vi.importActual('fs');
+  return {
+    ...actual,
+    existsSync: vi.fn().mockReturnValue(true),
+    statSync: vi.fn().mockReturnValue({
+      isDirectory: () => false,
+      isFile: () => true,
+      size: 1024,
+      mtime: new Date(),
+    }),
+    readdirSync: vi.fn().mockReturnValue([]),
+    mkdtempSync: vi.fn().mockImplementation((prefix) => {
+      // Return a mock temp directory path
+      return `/tmp/${prefix}-${Math.random().toString(36).substr(2, 9)}`;
+    }),
+    rmSync: vi.fn().mockImplementation(() => {
+      // Mock implementation for cleanup
+    }),
+  };
+});
 
 // Mock path operations
 vi.mock('path', async () => {

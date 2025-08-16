@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import fs from 'fs';
+import * as fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { DatabaseSync } from 'node:sqlite';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { SQLiteStorageProvider } from '../SQLiteStorageProvider';
-import { SessionMetadata } from '../types';
+import { SQLiteStorageProvider } from '../src/storage/SQLiteStorageProvider';
+import { SessionMetadata } from '../src/types';
 import { AgentEventStream } from '@tarko/interface';
 
 // Mock the interface module
