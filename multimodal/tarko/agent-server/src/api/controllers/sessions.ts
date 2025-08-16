@@ -66,6 +66,14 @@ export async function createSession(req: Request, res: Response) {
 
     server.sessions[sessionId] = session;
 
+    // Emit MCP connecting event via WebSocket for real-time feedback
+    server.io?.emit('session-initialization', {
+      type: 'mcp-connecting',
+      sessionId,
+      message: 'Connecting to MCP servers...',
+      timestamp: Date.now(),
+    });
+
     const { storageUnsubscribe } = await session.initialize();
 
     // Save unsubscribe function for cleanup
@@ -84,6 +92,14 @@ export async function createSession(req: Request, res: Response) {
 
       await server.storageProvider.createSession(metadata);
     }
+
+    // Emit initialization completed event
+    server.io?.emit('session-initialization', {
+      type: 'completed',
+      sessionId,
+      message: 'Agent initialization completed',
+      timestamp: Date.now(),
+    });
 
     res.status(201).json({ sessionId });
   } catch (error) {

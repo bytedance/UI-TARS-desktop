@@ -41,7 +41,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   // Core server components
   private app: express.Application;
   private server: http.Server;
-  private io: SocketIOServer; // Socket.IO server
+  public io: SocketIOServer; // Socket.IO server
 
   // Server state
   private isRunning = false;

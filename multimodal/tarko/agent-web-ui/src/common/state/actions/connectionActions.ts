@@ -76,6 +76,9 @@ export const initConnectionMonitoringAction = atom(null, (get, set) => {
   // Perform initial check
   set(checkConnectionStatusAction);
 
+  // Connect to socket service
+  socketService.connect();
+
   // Set up socket event listeners
   socketService.on(SOCKET_EVENTS.CONNECT, () => {
     set(connectionStatusAtom, (prev) => ({
