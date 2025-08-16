@@ -43,9 +43,10 @@ export interface AgentServerSnapshotOptions {
 
   /**
    * Directory to store agent snapshots
-   * If not specified, snapshots will be stored in the session's working directory
+   * @default "~/.tarko/snapshots"
+   * If not specified, snapshots will be stored in ~/.tarko/snapshots
    */
-  storageDirectory: string;
+  storageDirectory?: string;
 }
 
 /**

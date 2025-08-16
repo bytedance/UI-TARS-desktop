@@ -5,6 +5,7 @@
  */
 
 import path from 'path';
+import os from 'os';
 import {
   AgentEventStream,
   AgentRunNonStreamingOptions,
@@ -90,7 +91,7 @@ export class AgentSession {
     // Initialize agent snapshot if enabled
     if (agentOptions.snapshot?.enable) {
       const snapshotStoragesDirectory =
-        agentOptions.snapshot.storageDirectory ?? server.getCurrentWorkspace();
+        agentOptions.snapshot.storageDirectory ?? path.join(os.homedir(), '.tarko', 'snapshots');
 
       if (snapshotStoragesDirectory) {
         const snapshotPath = path.join(snapshotStoragesDirectory, sessionId);
