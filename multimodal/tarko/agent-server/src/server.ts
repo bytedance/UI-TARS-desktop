@@ -183,7 +183,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     if (this.isExclusive) {
       const wasRunning = this.runningSessionId !== null;
       this.runningSessionId = sessionId;
-      
+
       // Only broadcast if status actually changed
       if (!wasRunning) {
         this.broadcastServerStatus();

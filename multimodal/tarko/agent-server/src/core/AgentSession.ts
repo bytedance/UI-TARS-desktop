@@ -202,7 +202,9 @@ export class AgentSession {
 
       // Debug logging for issue #1150
       if (this.server.isDebug) {
-        console.log(`[DEBUG] Query started - Session: ${this.id}, Query: ${typeof query === 'string' ? query.substring(0, 100) + '...' : '[ContentPart]'}`);
+        console.log(
+          `[DEBUG] Query started - Session: ${this.id}, Query: ${typeof query === 'string' ? query.substring(0, 100) + '...' : '[ContentPart]'}`,
+        );
       }
 
       // Prepare run options with session-specific model configuration
@@ -224,7 +226,8 @@ export class AgentSession {
 
       // Add model configuration if available in session metadata
       if (this.sessionMetadata?.metadata?.modelConfig) {
-        runOptions.provider = this.sessionMetadata.metadata.modelConfig.provider as ModelProviderName;
+        runOptions.provider = this.sessionMetadata.metadata.modelConfig
+          .provider as ModelProviderName;
         runOptions.model = this.sessionMetadata.metadata.modelConfig.modelId;
         console.log(
           `🎯 [AgentSession] Using session model: ${runOptions.provider}:${runOptions.model}`,
@@ -233,12 +236,12 @@ export class AgentSession {
 
       // Run agent to process the query
       const result = await this.agent.run(runOptions);
-      
+
       // Debug logging for issue #1150
       if (this.server.isDebug) {
         console.log(`[DEBUG] Query completed successfully - Session: ${this.id}`);
       }
-      
+
       return {
         success: true,
         result,
@@ -285,7 +288,9 @@ export class AgentSession {
 
       // Debug logging for issue #1150
       if (this.server.isDebug) {
-        console.log(`[DEBUG] Streaming query started - Session: ${this.id}, Query: ${typeof query === 'string' ? query.substring(0, 100) + '...' : '[ContentPart]'}`);
+        console.log(
+          `[DEBUG] Streaming query started - Session: ${this.id}, Query: ${typeof query === 'string' ? query.substring(0, 100) + '...' : '[ContentPart]'}`,
+        );
       }
 
       // Prepare run options with session-specific model configuration
@@ -306,7 +311,8 @@ export class AgentSession {
 
       // Add model configuration if available in session metadata
       if (this.sessionMetadata?.metadata?.modelConfig) {
-        runOptions.provider = this.sessionMetadata.metadata.modelConfig.provider as ModelProviderName;
+        runOptions.provider = this.sessionMetadata.metadata.modelConfig
+          .provider as ModelProviderName;
         runOptions.model = this.sessionMetadata.metadata.modelConfig.modelId;
         console.log(
           `🎯 [AgentSession] Using session model for streaming: ${runOptions.provider}:${runOptions.model}`,
@@ -315,7 +321,7 @@ export class AgentSession {
 
       // Run agent in streaming mode
       const stream = await this.agent.run(runOptions);
-      
+
       // Wrap the stream to clear running session when done
       return this.wrapStreamForExclusiveMode(stream);
     } catch (error) {
@@ -329,7 +335,9 @@ export class AgentSession {
 
       // Debug logging for issue #1150
       if (this.server.isDebug) {
-        console.log(`[DEBUG] Streaming query failed - Session: ${this.id}, Error: ${handledError.message}`);
+        console.log(
+          `[DEBUG] Streaming query failed - Session: ${this.id}, Error: ${handledError.message}`,
+        );
       }
 
       // Create a synthetic event stream that yields just an error event
@@ -347,7 +355,7 @@ export class AgentSession {
       for await (const event of stream) {
         yield event;
       }
-      
+
       // Debug logging for issue #1150
       if (this.server.isDebug) {
         console.log(`[DEBUG] Streaming query completed - Session: ${this.id}`);
