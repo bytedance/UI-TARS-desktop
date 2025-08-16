@@ -181,8 +181,13 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    */
   setRunningSession(sessionId: string): void {
     if (this.isExclusive) {
+      const wasRunning = this.runningSessionId !== null;
       this.runningSessionId = sessionId;
-      this.broadcastServerStatus();
+      
+      // Only broadcast if status actually changed
+      if (!wasRunning) {
+        this.broadcastServerStatus();
+      }
 
       // Debug logging for issue #1150
       if (this.isDebug) {
@@ -217,10 +222,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    * Setup status broadcasting for real-time updates
    */
   private setupStatusBroadcasting(): void {
-    // Broadcast status every 5 seconds when in exclusive mode
-    this.statusBroadcastInterval = setInterval(() => {
-      this.broadcastServerStatus();
-    }, 5000);
+    // No periodic broadcasting - only broadcast on status changes
   }
 
   /**
@@ -231,18 +233,6 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
       isExclusive: this.isExclusive,
       runningSessionId: this.runningSessionId,
       canAcceptNewRequest: this.canAcceptNewRequest(),
-      activeSessions: Object.keys(this.sessions).length,
-      sessionStatuses: Object.keys(this.sessions).reduce(
-        (acc, sessionId) => {
-          const session = this.sessions[sessionId];
-          acc[sessionId] = {
-            isProcessing: session.getProcessingStatus(),
-            state: session.agent.status(),
-          };
-          return acc;
-        },
-        {} as Record<string, { isProcessing: boolean; state: string }>,
-      ),
       timestamp: Date.now(),
     };
 

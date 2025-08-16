@@ -161,15 +161,6 @@ export class SocketHandlers {
       isExclusive: server.isExclusive,
       runningSessionId: server.getRunningSessionId(),
       canAcceptNewRequest: server.canAcceptNewRequest(),
-      activeSessions: Object.keys(server.sessions).length,
-      sessionStatuses: Object.keys(server.sessions).reduce((acc, sessionId) => {
-        const session = server.sessions[sessionId];
-        acc[sessionId] = {
-          isProcessing: session.getProcessingStatus(),
-          state: session.agent.status(),
-        };
-        return acc;
-      }, {} as Record<string, { isProcessing: boolean; state: string }>),
     };
 
     socket.emit('server-status', status);
