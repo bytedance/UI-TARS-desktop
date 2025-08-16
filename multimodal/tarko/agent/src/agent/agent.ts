@@ -371,14 +371,14 @@ Provide concise and accurate responses.`;
 
       this.eventStream.sendEvent(userEvent);
 
-      // Inject environment input if provided in options
-      if (this.options.environmentInput) {
+      // Inject environment input if provided in run options
+      if (normalizedOptions.environmentInput) {
         const environmentEvent = this.eventStream.createEvent('environment_input', {
-          content: this.options.environmentInput.content,
-          description: this.options.environmentInput.description || 'Environment context',
+          content: normalizedOptions.environmentInput.content,
+          description: normalizedOptions.environmentInput.description || 'Environment context',
         });
         this.eventStream.sendEvent(environmentEvent);
-        
+
         this.logger.info('[Agent] Injected environment input as environment_input event');
       }
 
