@@ -60,7 +60,7 @@ export async function createAndQuery(req: Request, res: Response) {
 
     // Store session metadata if storage is available
     if (server.storageProvider) {
-      const metadataContent: any = { version: 1 };
+      const metadataContent: SessionMetadata['metadata'] = { version: 1 };
       if (sessionName) metadataContent.name = sessionName;
       if (sessionTags) metadataContent.tags = sessionTags;
 
@@ -76,7 +76,7 @@ export async function createAndQuery(req: Request, res: Response) {
     }
 
     // Execute query on new session
-    const response = await session.runQuery(query);
+    const response = await session.runQuery({ input: query });
 
     if (response.success) {
       res.status(200).json({
@@ -126,7 +126,7 @@ export async function createAndStreamingQuery(req: Request, res: Response) {
 
     // Store session metadata if storage is available
     if (server.storageProvider) {
-      const metadataContent: any = { version: 1 };
+      const metadataContent: SessionMetadata['metadata'] = { version: 1 };
       if (sessionName) metadataContent.name = sessionName;
       if (sessionTags) metadataContent.tags = sessionTags;
 
@@ -156,7 +156,7 @@ export async function createAndStreamingQuery(req: Request, res: Response) {
     );
 
     // Get streaming response
-    const eventStream = await session.runQueryStreaming(query);
+    const eventStream = await session.runQueryStreaming({ input: query });
 
     // Stream events one by one
     for await (const event of eventStream) {

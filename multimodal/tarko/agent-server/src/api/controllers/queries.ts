@@ -47,17 +47,23 @@ export async function executeQuery(req: Request, res: Response) {
     const server = req.app.locals.server;
     const workspacePath = server.getCurrentWorkspace();
 
-    // Process contextual references first
-    const processedQuery = await contextReferenceProcessor.processContextualReferences(
+    // Process contextual references and pass as environment input to agent options
+    const expandedContext = await contextReferenceProcessor.processContextualReferences(
       query,
       workspacePath,
     );
 
-    // Compress images in processed query
-    const compressedQuery = await imageProcessor.compressImagesInQuery(processedQuery);
+    // Compress images in user input only
+    const compressedQuery = await imageProcessor.compressImagesInQuery(query);
 
-    // Use enhanced error handling in runQuery
-    const response = await req.session!.runQuery(compressedQuery);
+    // Use enhanced error handling in runQuery with environment input
+    const response = await req.session!.runQuery({
+      input: compressedQuery,
+      environmentInput: {
+        content: expandedContext,
+        description: 'Expanded context from contextual references',
+      },
+    });
 
     if (response.success) {
       res.status(200).json({ result: response.result });
@@ -92,17 +98,23 @@ export async function executeStreamingQuery(req: Request, res: Response) {
     const server = req.app.locals.server;
     const workspacePath = server.getCurrentWorkspace();
 
-    // Process contextual references first
-    const processedQuery = await contextReferenceProcessor.processContextualReferences(
+    // Process contextual references and pass as environment input to agent options
+    const expandedContext = await contextReferenceProcessor.processContextualReferences(
       query,
       workspacePath,
     );
 
-    // Compress images in processed query
-    const compressedQuery = await imageProcessor.compressImagesInQuery(processedQuery);
+    // Compress images in user input only
+    const compressedQuery = await imageProcessor.compressImagesInQuery(query);
 
-    // Get streaming response - any errors will be returned as events
-    const eventStream = await req.session!.runQueryStreaming(compressedQuery);
+    // Get streaming response with environment input - any errors will be returned as events
+    const eventStream = await req.session!.runQueryStreaming({
+      input: compressedQuery,
+      environmentInput: {
+        content: expandedContext,
+        description: 'Expanded context from contextual references',
+      },
+    });
 
     // Stream events one by one
     for await (const event of eventStream) {
@@ -154,7 +166,7 @@ export async function abortQuery(req: Request, res: Response) {
   const { sessionId } = req.body;
 
   try {
-    const aborted = req.session!.abortQuery();
+    const aborted = await req.session!.abortQuery();
     res.status(200).json({ success: aborted });
   } catch (error) {
     console.error(`Error aborting query in session ${sessionId}:`, error);
