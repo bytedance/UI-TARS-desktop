@@ -91,7 +91,7 @@ export const ToolBar: React.FC = () => {
               whileTap={{ scale: 0.97 }}
               transition={{ type: 'spring', stiffness: 400, damping: 17 }}
               onClick={() => setIsConfigViewerOpen(true)}
-              className="w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 text-white hover:shadow-lg hover:from-blue-600 hover:to-purple-700 transition-all"
+              className="w-8 h-8 rounded-lg flex items-center justify-center bg-white dark:bg-gray-800 text-black dark:text-white hover:shadow-md"
               title="Agent Configuration"
             >
               <FiSettings size={16} />
