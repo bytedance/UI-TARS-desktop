@@ -123,10 +123,17 @@ Current Working Directory: ${workspace}
 
     `;
 
-    // Prepare system instructions with flexible override support
-    // If instructions are provided, use them as the complete system prompt
-    // Otherwise, use the default system prompt with browser rules and environment
-    const instructions = options.instructions || systemPrompt;
+    // Prepare system instructions with flexible layering support
+    // Custom instructions take precedence and are placed first, followed by core system capabilities
+    const instructions = options.instructions
+      ? `${options.instructions}
+
+---
+
+**Note: The following system capabilities and rules have higher priority and should be followed:**
+
+${systemPrompt}`
+      : systemPrompt;
 
     super({
       ...tarsOptions,
