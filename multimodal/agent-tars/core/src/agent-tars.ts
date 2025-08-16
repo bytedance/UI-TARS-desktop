@@ -123,16 +123,16 @@ Current Working Directory: ${workspace}
 
     `;
 
-    // Prepare system instructions with flexible layering support
-    // Custom instructions take precedence and are placed first, followed by core system capabilities
+    // Prepare system instructions with user instructions taking priority
+    // Core system capabilities provide the foundation, but user instructions override behavior
     const instructions = options.instructions
-      ? `${options.instructions}
+      ? `${systemPrompt}
 
 ---
 
-**Note: The following system capabilities and rules have higher priority and should be followed:**
+**User Instructions (Higher Priority):**
 
-${systemPrompt}`
+${options.instructions}`
       : systemPrompt;
 
     super({
