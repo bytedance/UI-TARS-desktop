@@ -5,13 +5,20 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { Request, Response } from 'express';
-import { executeQuery, executeStreamingQuery, abortQuery } from '../../src/api/controllers/queries';
-import { ContextReferenceProcessor, ImageProcessor } from '@tarko/context-engineer/node';
 
-// Mock the context processors
+// Use vi.hoisted to ensure mock objects are available during module mocking
+const { mockContextProcessor, mockImageProcessor } = vi.hoisted(() => ({
+  mockContextProcessor: {
+    processContextualReferences: vi.fn(),
+  },
+  mockImageProcessor: {
+    compressImagesInQuery: vi.fn(),
+  },
+}));
+
 vi.mock('@tarko/context-engineer/node', () => ({
-  ContextReferenceProcessor: vi.fn(),
-  ImageProcessor: vi.fn(),
+  ContextReferenceProcessor: vi.fn(() => mockContextProcessor),
+  ImageProcessor: vi.fn(() => mockImageProcessor),
 }));
 
 vi.mock('../../src/utils/error-handler', () => ({
@@ -23,9 +30,10 @@ vi.mock('../../src/utils/error-handler', () => ({
   })),
 }));
 
+// Import after mocking
+import { executeQuery, executeStreamingQuery, abortQuery } from '../../src/api/controllers/queries';
+
 describe('Queries Controller', () => {
-  let mockContextProcessor: any;
-  let mockImageProcessor: any;
   let mockReq: Partial<Request>;
   let mockRes: Partial<Response>;
   let mockSession: any;
@@ -33,18 +41,6 @@ describe('Queries Controller', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-
-    // Mock ContextReferenceProcessor
-    mockContextProcessor = {
-      processContextualReferences: vi.fn(),
-    };
-    (ContextReferenceProcessor as any).mockImplementation(() => mockContextProcessor);
-
-    // Mock ImageProcessor
-    mockImageProcessor = {
-      compressImagesInQuery: vi.fn(),
-    };
-    (ImageProcessor as any).mockImplementation(() => mockImageProcessor);
 
     // Mock session
     mockSession = {

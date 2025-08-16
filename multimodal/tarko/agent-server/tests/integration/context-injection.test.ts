@@ -5,13 +5,23 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { AgentSession } from '../../src/core/AgentSession';
-import { executeQuery, executeStreamingQuery } from '../../src/api/controllers/queries';
-import { Request, Response } from 'express';
-import { ContextReferenceProcessor, ImageProcessor } from '@tarko/context-engineer/node';
 import { IAgent, AgentEventStream } from '@tarko/interface';
 
-// Mock dependencies
-vi.mock('@tarko/context-engineer/node');
+// Use vi.hoisted to ensure mock objects are available during module mocking
+const { mockContextProcessor, mockImageProcessor } = vi.hoisted(() => ({
+  mockContextProcessor: {
+    processContextualReferences: vi.fn(),
+  },
+  mockImageProcessor: {
+    compressImagesInQuery: vi.fn(),
+  },
+}));
+
+vi.mock('@tarko/context-engineer/node', () => ({
+  ContextReferenceProcessor: vi.fn(() => mockContextProcessor),
+  ImageProcessor: vi.fn(() => mockImageProcessor),
+}));
+
 vi.mock('../../src/utils/event-stream');
 vi.mock('../../src/utils/error-handler', () => ({
   createErrorResponse: vi.fn((error: any) => ({
@@ -27,9 +37,10 @@ vi.mock('../../src/utils/error-handler', () => ({
   })),
 }));
 
+// Import after mocking
+import { executeQuery, executeStreamingQuery } from '../../src/api/controllers/queries';
+
 describe('Context Injection Integration', () => {
-  let mockContextProcessor: any;
-  let mockImageProcessor: any;
   let mockAgent: Partial<IAgent>;
   let mockSession: AgentSession;
   let mockServer: any;
@@ -38,18 +49,6 @@ describe('Context Injection Integration', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     capturedEvents = [];
-
-    // Mock ContextReferenceProcessor
-    mockContextProcessor = {
-      processContextualReferences: vi.fn(),
-    };
-    (ContextReferenceProcessor as any).mockImplementation(() => mockContextProcessor);
-
-    // Mock ImageProcessor
-    mockImageProcessor = {
-      compressImagesInQuery: vi.fn(),
-    };
-    (ImageProcessor as any).mockImplementation(() => mockImageProcessor);
 
     // Mock Agent with event capture
     mockAgent = {
@@ -328,7 +327,7 @@ describe('Context Injection Integration', () => {
 
       // Verify agent received both compressed user input and separate context
       expect(capturedRunOptions).toEqual({
-        input: compressedUserQuery, // Compressed user input
+        input: multimodalUserQuery, // User passed the input directly to session
         sessionId: 'test-session-integration',
         environmentInput: {
           content: expandedContext, // Separate context
