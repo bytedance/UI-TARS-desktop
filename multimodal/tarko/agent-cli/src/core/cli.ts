@@ -200,8 +200,15 @@ export class AgentCLI {
     configuredCommand.action(
       async (agent: string | undefined, cliArguments: AgentCLIArguments = {}) => {
         // If agent is provided as positional argument, use it
-        if (agent) {
+        if (agent && typeof cliArguments === 'object') {
           cliArguments.agent = agent;
+        }
+
+        // Handle case where cliArguments might be a string (when only one argument is passed)
+        if (typeof cliArguments === 'string') {
+          // This happens when user runs "tarko --agent ./" - the agent parameter becomes cliArguments
+          const actualAgent = agent || cliArguments;
+          cliArguments = { agent: actualAgent } as AgentCLIArguments;
         }
 
         if (cliArguments.headless) {
