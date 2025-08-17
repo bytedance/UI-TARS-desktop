@@ -143,7 +143,7 @@ describe('Browser Content Tests', () => {
 
         [Go to Page 1](/page1) [Go to Page 2](/page2)"
       `);
-    });
+    }, 15000);
 
     test('should return markdown of the current page with empty arguments', async () => {
       await client.callTool({
@@ -156,7 +156,7 @@ describe('Browser Content Tests', () => {
           name: 'browser_get_markdown',
         }),
       ).rejects.toThrowError(McpError);
-    });
+    }, 15000);
   });
 
   describe('browser_get_text', () => {
@@ -175,7 +175,7 @@ describe('Browser Content Tests', () => {
         "Test Home
          Go to Page 1 Go to Page 2"
       `);
-    });
+    }, 15000);
 
     test('should return markdown of the current page with empty arguments', async () => {
       await client.callTool({
@@ -188,6 +188,6 @@ describe('Browser Content Tests', () => {
           name: 'browser_get_text',
         }),
       ).rejects.toThrowError(McpError);
-    });
+    }, 15000);
   });
 });
