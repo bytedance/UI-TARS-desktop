@@ -103,11 +103,10 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
           <ToggleSwitch<WorkspaceDisplayMode>
             value={workspaceDisplayMode}
             onChange={onWorkspaceDisplayModeChange}
-            options={[
-              { value: 'interaction', label: 'UI' },
-              { value: 'raw', label: 'RAW' }
-            ]}
-            size="sm"
+            leftValue="interaction"
+            rightValue="raw"
+            leftLabel="UI"
+            rightLabel="RAW"
           />
         )}
 
