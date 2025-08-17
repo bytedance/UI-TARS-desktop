@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
@@ -204,18 +205,20 @@ export class AgentCLI {
       // - tarko run              -> args = ['run', undefined, cliArguments]
       // - tarko run ./           -> args = ['run', './', cliArguments]
       // - tarko ./               -> args = [undefined, './', cliArguments]
-      
+
       // The last argument is always the parsed CLI options object
       const cliArguments: AgentCLIArguments = args[args.length - 1] || {};
-      
+
       // The second-to-last argument is the agent parameter
       const agent = args[args.length - 2];
-      
+
       // If agent is provided as positional argument, use it
       if (agent && typeof agent === 'string') {
         // Warn if both positional agent and --agent flag are provided
         if (cliArguments.agent && cliArguments.agent !== agent) {
-          console.warn(`Warning: Both positional agent '${agent}' and --agent flag '${cliArguments.agent}' provided. Using positional agent '${agent}'.`);
+          console.warn(
+            `Warning: Both positional agent '${agent}' and --agent flag '${cliArguments.agent}' provided. Using positional agent '${agent}'.`,
+          );
         }
         cliArguments.agent = agent;
       }
