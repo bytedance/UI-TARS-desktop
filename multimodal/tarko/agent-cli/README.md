@@ -57,7 +57,7 @@ export default config;
 # 模型配置
 tarko --model.provider openai --model.id gpt-4 --model.apiKey sk-xxx
 
-# 服务器配置  
+# 服务器配置
 tarko serve --port 3000
 
 # 工作空间
@@ -73,6 +73,7 @@ tarko --agent ./my-agent.js
 ## 核心命令
 
 ### `tarko` / `tarko start`
+
 启动交互式 Web UI，支持实时对话和文件浏览。
 
 ```bash
@@ -80,6 +81,7 @@ tarko start --port 8888 --open
 ```
 
 ### `tarko serve`
+
 启动无头 API 服务器，适合集成到其他系统。
 
 ```bash
@@ -88,6 +90,7 @@ tarko serve --port 8888
 ```
 
 ### `tarko run`
+
 静默模式运行，结果输出到 stdout，适合脚本集成。
 
 ```bash
@@ -102,6 +105,7 @@ tarko run "分析当前目录" --include-logs
 ```
 
 ### `tarko request`
+
 直接向 LLM 发送请求，用于调试和测试。
 
 ```bash
@@ -109,6 +113,7 @@ tarko request --provider openai --model gpt-4 --body '{"messages":[{"role":"user
 ```
 
 ### `tarko workspace`
+
 工作空间管理。
 
 ```bash
@@ -159,13 +164,14 @@ class MyCLI extends TarkoAgentCLI {
       '1.0.0',
       '我的自定义 Agent',
       ['自定义 ASCII 艺术字'],
-      'https://my-agent.com'
+      'https://my-agent.com',
     );
   }
 
   // 添加自定义命令
   protected extendCli(cli: CLIInstance): void {
-    cli.command('analyze', '分析命令')
+    cli
+      .command('analyze', '分析命令')
       .option('--deep', '深度分析')
       .action(async (options) => {
         // 自定义命令逻辑
@@ -249,15 +255,17 @@ export class AgentTARSCLI extends TarkoAgentCLI {
   }
 
   protected configureAgentCommand(command: CLICommand): CLICommand {
-    return command
-      // 浏览器配置
-      .option('--browser.control [mode]', '浏览器控制模式')
-      .option('--browser.cdpEndpoint <endpoint>', 'CDP 端点')
-      // 搜索配置
-      .option('--search.provider [provider]', '搜索提供商')
-      .option('--search.count [count]', '搜索结果数量')
-      // 规划器配置
-      .option('--planner.enable', '启用规划功能');
+    return (
+      command
+        // 浏览器配置
+        .option('--browser.control [mode]', '浏览器控制模式')
+        .option('--browser.cdpEndpoint <endpoint>', 'CDP 端点')
+        // 搜索配置
+        .option('--search.provider [provider]', '搜索提供商')
+        .option('--search.count [count]', '搜索结果数量')
+        // 规划器配置
+        .option('--planner.enable', '启用规划功能')
+    );
   }
 }
 ```
@@ -279,10 +287,21 @@ export class AgentTARSCLI extends TarkoAgentCLI {
 ```bash
 # 使用环境变量
 tarko --model.apiKey OPENAI_API_KEY  # 会读取 process.env.OPENAI_API_KEY
+```
 
-# 或直接设置
-export OPENAI_API_KEY=sk-xxx
-tarko --model.apiKey OPENAI_API_KEY
+环境变量可通过下面两种方式设置：
+
+1. 在根目录下创建 .env.local 或 .env 文件 （.env.local 优先级更高）， tarko-cli 会在启动时加载内容到环境变量
+
+```bash
+# OPENAI_API_KEY
+OPENAI_API_KEY="your-open-api-key"
+```
+
+2. 通过在 terminal 或者 ~/.zshrc 中配置
+
+```
+export OPENAI_API_KEY="your-open-api-key"
 ```
 
 ### 配置合并
@@ -301,17 +320,17 @@ const baseConfig = {
 // 覆盖配置
 const overrideConfig = {
   model: {
-    id: 'gpt-4',  // 新增字段
-    temperature: 0.5,  // 覆盖字段
+    id: 'gpt-4', // 新增字段
+    temperature: 0.5, // 覆盖字段
   },
 };
 
 // 合并结果
 const finalConfig = {
   model: {
-    provider: 'openai',  // 保留
-    id: 'gpt-4',  // 新增
-    temperature: 0.5,  // 覆盖
+    provider: 'openai', // 保留
+    id: 'gpt-4', // 新增
+    temperature: 0.5, // 覆盖
   },
 };
 ```
@@ -349,9 +368,9 @@ const { result, logs } = await ConsoleInterceptor.run(
     return await agent.run('输入');
   },
   {
-    silent: true,  // 静默模式
-    capture: true,  // 捕获日志
-  }
+    silent: true, // 静默模式
+    capture: true, // 捕获日志
+  },
 );
 ```
 
@@ -385,28 +404,31 @@ sudo systemctl start my-agent.service
 ### 常见问题
 
 1. **模型 API 密钥错误**
+
    ```bash
    # 检查环境变量
    echo $OPENAI_API_KEY
-   
+
    # 使用调试模式
    tarko --debug
    ```
 
 2. **端口被占用**
+
    ```bash
    # 使用其他端口
    tarko serve --port 3000
-   
+
    # 检查端口占用
    lsof -i :8888
    ```
 
 3. **工作空间权限问题**
+
    ```bash
    # 检查工作空间权限
    ls -la ./workspace
-   
+
    # 修改权限
    chmod -R 755 ./workspace
    ```
@@ -426,7 +448,7 @@ tarko --debug run "test" --include-logs
 详细的 API 文档请参考 TypeScript 类型定义：
 
 - `@tarko/agent-interface` - Agent 核心接口
-- `@tarko/interface` - 接近应用层的上层接口，如 Server、CLI  
+- `@tarko/interface` - 接近应用层的上层接口，如 Server、CLI
 - `@tarko/agent-cli` - CLI 框架接口
 
 ## 贡献指南

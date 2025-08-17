@@ -5,3 +5,4 @@ results
 .nyc_output
 *.tsbuildinfo
 node_modules
+.env.local

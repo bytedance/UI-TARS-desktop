@@ -8,6 +8,9 @@ import { deepMerge } from '@tarko/shared-utils';
 import { loadConfig } from '@tarko/config-loader';
 import { AgentAppConfig } from '@tarko/interface';
 import fetch from 'node-fetch';
+import dotenv from 'dotenv';
+import * as path from 'path';
+import { existsSync } from 'fs';
 
 import { CONFIG_FILES } from './paths';
 import { logConfigStart, logConfigLoaded, logConfigError, logDebugInfo } from './display';
@@ -54,6 +57,30 @@ async function loadRemoteConfig(url: string, isDebug = false): Promise<AgentAppC
 }
 
 /**
+ * Load environment variables from .env.local and .env files
+ */
+function loadEnv(isDebug = false) {
+  try {
+    // .env.local has higher priority than .env
+    const envPaths = [path.join(process.cwd(), '.env.local'), path.join(process.cwd(), '.env')];
+
+    for (const p of envPaths) {
+      if (existsSync(p)) {
+        dotenv.config({ path: p });
+        logDebugInfo('Environment files loaded', p, isDebug);
+        return;
+      }
+    }
+  } catch (err) {
+    logDebugInfo(
+      'No environment files found',
+      err instanceof Error ? err.message : String(err),
+      isDebug,
+    );
+  }
+}
+
+/**
  * Check if a string is a valid URL
  */
 function isUrl(str: string): boolean {
@@ -73,6 +100,8 @@ export async function loadAgentConfig(
   isDebug = false,
 ): Promise<AgentAppConfig> {
   logConfigStart(isDebug);
+
+  loadEnv(isDebug);
 
   // Handle no config case - try to load from default locations
   if (!configPaths || configPaths.length === 0) {
@@ -134,11 +163,4 @@ export async function loadAgentConfig(
   logDebugInfo(`Final merged config keys`, Object.keys(mergedConfig), isDebug);
 
   return mergedConfig;
-}
-
-/**
- * Check if value is an object
- */
-function isObject(item: any): boolean {
-  return item && typeof item === 'object' && !Array.isArray(item);
 }

@@ -14,6 +14,7 @@
   - 🌐 **Streamable HTTP**: Efficient, stream-based HTTP communication for scalable remote tools.
 - 🛠️ **Unified API**: Interact with all transports using a single, consistent interface.
 - 🧩 **Highly Extensible**: Easily add custom transports or tools as needed.
+- 🔍 **Filtering Support**: Filter tools and prompts using glob patterns with allow/block lists.
 
 ### ⚡ Quick Start
 
@@ -64,6 +65,7 @@ const mcpClient = new MCPClient([
 
 
 await mcpClient.listTools();
+await mcpClient.listPrompts();
 const result = await mcpClient.callTool({
   client: 'FileSystem-sse',
   name: 'list_directory',
@@ -72,6 +74,49 @@ const result = await mcpClient.callTool({
   },
 });
 ```
+
+### 🔍 Filtering Tools and Prompts
+
+You can filter tools and prompts using glob patterns with allow and block lists:
+
+```ts
+const mcpClient = new MCPClient([
+  {
+    type: 'builtin',
+    name: 'FileSystem',
+    description: 'filesystem tool',
+    mcpServer: createFileSystemServer({
+      allowedDirectories: [omegaDir],
+    }),
+    // Filter configuration
+    filters: {
+      tools: {
+        allow: ['list_*', 'read_*'], // Only allow tools starting with 'list_' or 'read_'
+        block: ['delete_*']          // Block any tools starting with 'delete_'
+      },
+      prompts: {
+        allow: ['safe_*'],           // Only allow prompts starting with 'safe_'
+        block: ['admin_*']           // Block prompts starting with 'admin_'
+      }
+    }
+  }
+]);
+
+// List all tools (filtered)
+const tools = await mcpClient.listTools();
+
+// List all prompts (filtered)  
+const prompts = await mcpClient.listPrompts();
+
+// List tools from specific server
+const serverTools = await mcpClient.listTools('FileSystem');
+```
+
+**Filter Rules:**
+- **Allow patterns**: If specified, only items matching these patterns are included
+- **Block patterns**: Items matching these patterns are excluded
+- **Pattern syntax**: Uses [minimatch](https://github.com/isaacs/minimatch) glob patterns (`*`, `**`, `?`, `[...]`, etc.)
+- **Processing order**: Allow filter is applied first, then block filter
 
 ### 🙏 Credits
 

@@ -4,12 +4,24 @@ import { StdioServerParameters } from '@modelcontextprotocol/sdk/client/stdio.js
 // `type` field only save but not used
 export type MCP_SERVER_TYPE = 'stdio' | 'sse' | 'builtin' | 'streamable-http';
 
+export interface MCPFilterConfig {
+  allow?: string[];
+  block?: string[];
+}
+
+export interface MCPFilters {
+  tools?: MCPFilterConfig;
+  prompts?: MCPFilterConfig;
+}
+
 interface BaseMCPServer<ServerNames extends string = string> {
   name: ServerNames;
   status?: 'activate' | 'error' | 'disabled';
   description?: string;
   /** timeout (seconds), default 10s */
   timeout?: number;
+  /** filters for tools and prompts */
+  filters?: MCPFilters;
 }
 
 export type MCPServer<ServerNames extends string = string> =
