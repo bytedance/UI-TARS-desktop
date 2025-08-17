@@ -213,6 +213,10 @@ export class AgentCLI {
       
       // If agent is provided as positional argument, use it
       if (agent && typeof agent === 'string') {
+        // Warn if both positional agent and --agent flag are provided
+        if (cliArguments.agent && cliArguments.agent !== agent) {
+          console.warn(`Warning: Both positional agent '${agent}' and --agent flag '${cliArguments.agent}' provided. Using positional agent '${agent}'.`);
+        }
         cliArguments.agent = agent;
       }
 
