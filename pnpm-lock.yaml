@@ -645,6 +645,12 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ~1.15.1
         version: 1.15.1
+      glob:
+        specifier: ^10.3.10
+        version: 10.4.5
+      minimatch:
+        specifier: ^9.0.0
+        version: 9.0.5
       uuid:
         specifier: ^11.1.0
         version: 11.1.0
