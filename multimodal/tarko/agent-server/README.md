@@ -437,7 +437,3 @@ app.use(express.logger('combined'));
 ## License
 
 Apache-2.0
-
----
-
-**Need help?** Check the [TARKO documentation](../../README.md) or open an issue on GitHub.
