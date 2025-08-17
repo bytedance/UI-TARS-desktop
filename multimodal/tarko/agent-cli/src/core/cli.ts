@@ -116,9 +116,8 @@ export class AgentCLI {
    */
   private registerCoreCommands(cli: CLIInstance): void {
     this.registerServeCommand(cli);
-    this.registerStartCommand(cli);
-    this.registerRequestCommand(cli);
     this.registerRunCommand(cli);
+    this.registerRequestCommand(cli);
     this.registerWorkspaceCommand(cli);
   }
 
@@ -163,31 +162,57 @@ export class AgentCLI {
   }
 
   /**
-   * Register the 'start' command
+   * Register the 'run' command (default command)
    */
-  private registerStartCommand(cli: CLIInstance): void {
-    const startCommand = cli.command('[start]', 'Run Agent in interactive UI');
+  private registerRunCommand(cli: CLIInstance): void {
+    const runCommand = cli.command('[run] [agent]', 'Run Agent in interactive UI or headless mode');
+
+    runCommand
+      .option('--headless', 'Run in headless mode and output results to stdout')
+      .option('--input [...query]', 'Input query to process (for headless mode)')
+      .option(
+        '--format [format]',
+        'Output format: "json" or "text" (default: "text") (for headless mode)',
+        {
+          default: 'text',
+        },
+      )
+      .option(
+        '--include-logs',
+        'Include captured logs in the output (for debugging) (for headless mode)',
+        {
+          default: false,
+        },
+      )
+      .option(
+        '--use-cache [useCache]',
+        'Use cache for headless mode execution (for headless mode)',
+        {
+          default: true,
+        },
+      );
 
     // Apply common options first
-    let configuredCommand = addCommonOptions(startCommand);
+    let configuredCommand = addCommonOptions(runCommand);
 
     // Apply agent-specific configurations for commands that run agents
     configuredCommand = this.configureAgentCommand(configuredCommand);
-    configuredCommand.action(async (_, cliArguments: AgentCLIArguments = {}) => {
-      this.printLogo();
-      try {
-        const { agentServerInitOptions, isDebug } = await this.processCLIArguments(cliArguments);
-        const { startInteractiveWebUI } = await import('./commands/start');
-        await startInteractiveWebUI({
-          agentServerInitOptions,
-          isDebug,
-          open: cliArguments.open,
-        });
-      } catch (err) {
-        console.error('Failed to start server:', err);
-        process.exit(1);
-      }
-    });
+    configuredCommand.action(
+      async (agent: string | undefined, cliArguments: AgentCLIArguments = {}) => {
+        // If agent is provided as positional argument, use it
+        if (agent) {
+          cliArguments.agent = agent;
+        }
+
+        if (cliArguments.headless) {
+          // Headless mode - same as old 'run' command
+          await this.runHeadlessMode(cliArguments);
+        } else {
+          // Interactive UI mode - same as old 'start' command
+          await this.runInteractiveMode(cliArguments);
+        }
+      },
+    );
   }
 
   /**
@@ -218,80 +243,80 @@ export class AgentCLI {
   }
 
   /**
-   * Register the 'run' command
+   * Handle headless mode execution
    */
-  private registerRunCommand(cli: CLIInstance): void {
-    const runCommand = cli.command('run', 'Run Agent in silent mode and output results to stdout');
+  private async runHeadlessMode(cliArguments: AgentCLIArguments): Promise<void> {
+    try {
+      let input: string;
 
-    runCommand
-      .option('--input [...query]', 'Input query to process (can be omitted when using pipe)')
-      .option('--format [format]', 'Output format: "json" or "text" (default: "text")', {
-        default: 'text',
-      })
-      .option('--include-logs', 'Include captured logs in the output (for debugging)', {
-        default: false,
-      })
-      .option('--cache [cache]', 'Cache results in server storage (requires server mode)', {
-        default: true,
+      if (
+        cliArguments.input &&
+        (Array.isArray(cliArguments.input) ? cliArguments.input.length > 0 : true)
+      ) {
+        input = Array.isArray(cliArguments.input)
+          ? cliArguments.input.join(' ')
+          : cliArguments.input;
+      } else {
+        const stdinInput = await readFromStdin();
+
+        if (!stdinInput) {
+          console.error('Error: No input provided. Use --input parameter or pipe content to stdin');
+          process.exit(1);
+        }
+
+        input = stdinInput;
+      }
+
+      const quietMode = cliArguments.debug ? false : true;
+
+      const { agentServerInitOptions, isDebug } = await this.processCLIArguments({
+        ...cliArguments,
+        quiet: quietMode,
       });
 
-    // Apply common options first
-    let configuredCommand = addCommonOptions(runCommand);
+      const useCache = cliArguments.useCache !== false;
 
-    // Apply agent-specific configurations for commands that run agents
-    configuredCommand = this.configureAgentCommand(configuredCommand);
-
-    configuredCommand.action(async (options: AgentCLIArguments = {}) => {
-      try {
-        let input: string;
-
-        if (options.input && (Array.isArray(options.input) ? options.input.length > 0 : true)) {
-          input = Array.isArray(options.input) ? options.input.join(' ') : options.input;
-        } else {
-          const stdinInput = await readFromStdin();
-
-          if (!stdinInput) {
-            console.error(
-              'Error: No input provided. Use --input parameter or pipe content to stdin',
-            );
-            process.exit(1);
-          }
-
-          input = stdinInput;
-        }
-
-        const quietMode = options.debug ? false : true;
-
-        const { agentServerInitOptions, isDebug } = await this.processCLIArguments({
-          ...options,
-          quiet: quietMode,
+      if (useCache) {
+        const { processServerRun } = await import('./commands/run');
+        await processServerRun({
+          agentServerInitOptions,
+          input,
+          format: cliArguments.format as 'json' | 'text',
+          includeLogs: cliArguments.includeLogs || !!cliArguments.debug,
+          isDebug,
         });
-
-        const useCache = options.cache !== false;
-
-        if (useCache) {
-          const { processServerRun } = await import('./commands/run');
-          await processServerRun({
-            agentServerInitOptions,
-            input,
-            format: options.format as 'json' | 'text',
-            includeLogs: options.includeLogs || !!options.debug,
-            isDebug,
-          });
-        } else {
-          const { processSilentRun } = await import('./commands/run');
-          await processSilentRun({
-            agentServerInitOptions,
-            input,
-            format: options.format as 'json' | 'text',
-            includeLogs: options.includeLogs || !!options.debug,
-          });
-        }
-      } catch (err) {
-        console.error('Error:', err instanceof Error ? err.message : String(err));
-        process.exit(1);
+      } else {
+        const { processSilentRun } = await import('./commands/run');
+        await processSilentRun({
+          agentServerInitOptions,
+          input,
+          format: cliArguments.format as 'json' | 'text',
+          includeLogs: cliArguments.includeLogs || !!cliArguments.debug,
+        });
       }
-    });
+    } catch (err) {
+      console.error('Error:', err instanceof Error ? err.message : String(err));
+      process.exit(1);
+    }
+  }
+
+  /**
+   * Handle interactive mode execution
+   */
+  private async runInteractiveMode(cliArguments: AgentCLIArguments): Promise<void> {
+    this.printLogo();
+    try {
+      const { agentServerInitOptions, isDebug } = await this.processCLIArguments(cliArguments);
+      const { startInteractiveWebUI } = await import('./commands/start');
+      await startInteractiveWebUI({
+        agentServerInitOptions,
+        isDebug,
+        open: cliArguments.open,
+      });
+    } catch (err) {
+      console.error('Failed to start server:', err);
+      process.exit(1);
+    }
   }
 
   /**

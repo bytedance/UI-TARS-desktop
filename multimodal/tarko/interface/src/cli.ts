@@ -49,6 +49,21 @@ export type AgentCLIArguments = Pick<
    */
   agent?: string;
 
+  /** Run in headless mode (for run command) */
+  headless?: boolean;
+
+  /** Input query for headless mode */
+  input?: string | string[];
+
+  /** Output format for headless mode */
+  format?: 'json' | 'text';
+
+  /** Include captured logs in output (for headless mode) */
+  includeLogs?: boolean;
+
+  /** Use cache for headless mode execution (for headless mode) */
+  useCache?: boolean;
+
   // Allow additional properties for extensibility
   [key: string]: any;
 };
