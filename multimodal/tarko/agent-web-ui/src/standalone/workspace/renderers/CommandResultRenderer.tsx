@@ -156,33 +156,39 @@ export const CommandResultRenderer: React.FC<CommandResultRendererProps> = ({ pa
 };
 
 /**
- * panelContent example:
+ * Extract command data from panel content
  *
- * {
- *   "panelContent": {
- *     "type": "command_result",
- *     "source": [
- *       {
- *         "type": "text",
- *         "text": "On branch feat/tarko-workspace-path-display\nChanges to be committed:\n  (use \"git restore --staged <file>...\" to unstage)\n\tmodified:   multimodal/tarko/agent-web-ui/src/common/state/actions/eventProcessor.ts\n\tnew file:   multimodal/tarko/agent-web-ui/src/common/state/atoms/rawEvents.ts\n\n",
- *         "name": "STDOUT"
- *       }
- *     ],
- *     "title": "run_command",
- *     "timestamp": 1755111391440,
- *     "toolCallId": "call_1755111391072_htk5vylkv",
- *     "arguments": {
- *       "command": "git status"
- *     }
- *   }
- * }
  * @param panelContent
  * @returns
  */
 function extractCommandData(panelContent: StandardPanelContent) {
-  debugger;
   const command = panelContent.arguments?.command;
 
+  /**
+   * For Agent TARS "run_command" tool.
+   * panelContent example:
+   *
+   * {
+   *   "panelContent": {
+   *     "type": "command_result",
+   *     "source": [
+   *       {
+   *         "type": "text",
+   *         "text": "On branch feat/tarko-workspace-path-display\nChanges to be committed:\n  (use \"git restore --staged <file>...\" to unstage)\n\tmodified:   multimodal/tarko/agent-web-ui/src/common/state/actions/eventProcessor.ts\n\tnew file:   multimodal/tarko/agent-web-ui/src/common/state/atoms/rawEvents.ts\n\n",
+   *         "name": "STDOUT"
+   *       }
+   *     ],
+   *     "title": "run_command",
+   *     "timestamp": 1755111391440,
+   *     "toolCallId": "call_1755111391072_htk5vylkv",
+   *     "arguments": {
+   *       "command": "git status"
+   *     }
+   *   }
+   * }
+   * @param panelContent
+   * @returns
+   */
   if (Array.isArray(panelContent.source)) {
     // @ts-expect-error MAKE `panelContent.source` is Array
     const stdout = panelContent.source?.find((s) => s.name === 'STDOUT')?.text;
@@ -192,38 +198,89 @@ function extractCommandData(panelContent: StandardPanelContent) {
   }
 
   /**
-   * {
-   *   "panelContent": {
-   *      "type": "command_result",
-   *      "source": {
-   *          "session_id": "0cec471e-97ae-4a4b-9d55-9f3a3466a9b7",
-   *          "command": "mkdir -p /home/gem/tmp",
-   *          "status": "completed",
-   *          "returncode": 0,
-   *          "output": "\\u001b[?2004hgem@50ddd3ffedb3:~$ > mkdir -p /home/gem/tmp\\nmkdir -p /home/gem/tmp\\r\\n\\u001b[?2004l\\r\\u001b[?2004hgem@50ddd3ffedb3:~$ ",
-   *          "console": [
-   *              {
-   *                  "ps1": "gem@50ddd3ffedb3:~ $",
-   *                  "command": "mkdir -p /home/gem/tmp",
-   *                  "output": "\\u001b[?2004hgem@50ddd3ffedb3:~$ > mkdir -p /home/gem/tmp\\nmkdir -p /home/gem/tmp\\r\\n\\u001b[?2004l\\r\\u001b[?2004hgem@50ddd3ffedb3:~$ "
-   *              }
-   *          ]
-   *      },
-   *      "title": "execute_bash",
-   *      "timestamp": 1755109845677,
-   *      "toolCallId": "call_1755109845259_h5f8zcseg",
-   *      "arguments": {
-   *          "command": "mkdir -p /home/gem/tmp"
-   *      }
-   *  }
-   *}
+   * FIXME: we need to We should design an extension mechanism so that all compatible logic can be
+   * implemented through external plug-in solutions.
    */
   if (typeof panelContent.source === 'object' && panelContent.type === 'command_result') {
-    return {
-      command: panelContent.arguments?.command,
-      stdout: panelContent.source.output,
-      exitCode: panelContent.source.returncode,
-    };
+    /**
+     * For Omni TARS  "execute_bash" tool.
+     * {
+     *   "panelContent": {
+     *      "type": "command_result",
+     *      "source": {
+     *          "session_id": "0cec471e-97ae-4a4b-9d55-9f3a3466a9b7",
+     *          "command": "mkdir -p /home/gem/tmp",
+     *          "status": "completed",
+     *          "returncode": 0,
+     *          "output": "\\u001b[?2004hgem@50ddd3ffedb3:~$ > mkdir -p /home/gem/tmp\\nmkdir -p /home/gem/tmp\\r\\n\\u001b[?2004l\\r\\u001b[?2004hgem@50ddd3ffedb3:~$ ",
+     *          "console": [
+     *              {
+     *                  "ps1": "gem@50ddd3ffedb3:~ $",
+     *                  "command": "mkdir -p /home/gem/tmp",
+     *                  "output": "\\u001b[?2004hgem@50ddd3ffedb3:~$ > mkdir -p /home/gem/tmp\\nmkdir -p /home/gem/tmp\\r\\n\\u001b[?2004l\\r\\u001b[?2004hgem@50ddd3ffedb3:~$ "
+     *              }
+     *          ]
+     *      },
+     *      "title": "execute_bash",
+     *      "timestamp": 1755109845677,
+     *      "toolCallId": "call_1755109845259_h5f8zcseg",
+     *      "arguments": {
+     *          "command": "mkdir -p /home/gem/tmp"
+     *      }
+     *  }
+     *}
+     */
+    if (panelContent.title === 'execute_bash') {
+      return {
+        command: panelContent.arguments?.command,
+        stdout: panelContent.source.output,
+        exitCode: panelContent.source.returncode,
+      };
+    }
+
+    /**
+     * For Omni TARS  "JupyterCI" tool.
+     *
+     * {
+     *   "panelContent": {
+     *       "type": "command_result",
+     *       "source": {
+     *           "kernel_name": "python3",
+     *           "status": "ok",
+     *           "execution_count": 1,
+     *           "outputs": [
+     *               {
+     *                   "output_type": "stream",
+     *                   "name": "stdout",
+     *                   "text": "The square root of 20250818 is: 4500.090887971041\\n",
+     *                   "data": null,
+     *                   "metadata": null,
+     *                   "execution_count": null,
+     *                   "ename": null,
+     *                   "evalue": null,
+     *                   "traceback": null
+     *               }
+     *           ],
+     *           "code": "\\nimport math\\n\\n# Calculate the square root of 20250818\\nresult = math.sqrt(20250818)\\nprint(f\\",
+     *           "msg_id": "82e5deeb-88fea96549e1f526424799aa_62_2"
+     *       },
+     *       "title": "JupyterCI",
+     *       "timestamp": 1755468609322,
+     *       "toolCallId": "call_1755468607268_81apyi3tw",
+     *       "arguments": {
+     *           "code": "\\nimport math\\n\\n# Calculate the square root of 20250818\\nresult = math.sqrt(20250818)\\nprint(f\\",
+     *       }
+     *   }
+     * }
+     */
+    if (panelContent.title === 'JupyterCI') {
+      return {
+        command: panelContent.arguments?.code,
+        // @ts-expect-error
+        stdout: panelContent.source.outputs[0]?.text,
+        exitCode: panelContent.source.status === 'ok' ? 0 : 1,
+      };
+    }
   }
 
   if (typeof panelContent.source === 'string') {
