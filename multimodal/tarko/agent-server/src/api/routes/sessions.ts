@@ -5,7 +5,7 @@
 
 import express from 'express';
 import * as sessionsController from '../controllers/sessions';
-import { sessionRestoreMiddleware } from '../middleware';
+import { sessionRestoreMiddleware, exclusiveModeMiddleware } from '../middleware';
 
 /**
  * Register session management routes
@@ -16,7 +16,7 @@ export function registerSessionRoutes(app: express.Application): void {
     // Get all sessions
     router.get('/', sessionsController.getAllSessions);
     // Create a new session
-    router.post('/create', sessionsController.createSession);
+    router.post('/create', exclusiveModeMiddleware, sessionsController.createSession);
   });
 
   app.group('/api/v1/sessions', [sessionRestoreMiddleware], (router: express.Router) => {

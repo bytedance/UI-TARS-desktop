@@ -13,7 +13,7 @@ import {
   LogLevel,
   isAgentWebUIImplementationType,
 } from '@tarko/interface';
-import { resolveValue } from '../utils';
+import { resolveValue, loadWorkspaceConfig } from '../utils';
 import { logDeprecatedWarning, logConfigComplete } from './display';
 
 /**
@@ -25,12 +25,11 @@ export type CLIOptionsEnhancer<
 > = (cliArguments: T, appConfig: Partial<U>) => void;
 
 /**
-
  * Build complete application configuration from CLI arguments, user config, and app defaults
- * 
+ *
  * Follows the configuration priority order:
  * L0: CLI Arguments (highest priority)
- * L1: Workspace Config File  
+ * L1: Workspace Config File
  * L2: Global Workspace Config File
  * L3: CLI Config Files
  * L4: CLI Remote Config
@@ -44,15 +43,20 @@ export function buildAppConfig<
   userConfig: Partial<U>,
   appDefaults?: Partial<U>,
   cliOptionsEnhancer?: CLIOptionsEnhancer<T, U>,
+  workspacePath?: string,
 ): U {
-  // Start with app defaults (L5 - lowest priority)
   let config: Partial<U> = appDefaults ? { ...appDefaults } : {};
 
-  // Merge with user config (L4-L1 based on file loading order)
   // @ts-expect-error
   config = deepMerge(config, userConfig);
 
-  // Extract CLI-specific properties that need special handling
+  if (workspacePath) {
+    const workspaceConfig = loadWorkspaceConfig(workspacePath);
+    // @ts-expect-error
+    config = deepMerge(config, workspaceConfig);
+  }
+
+  // Extract CLI-specific properties
   const {
     agent,
     workspace,
@@ -70,10 +74,12 @@ export function buildAppConfig<
     tool,
     // Extract MCP server filter options
     mcpServer,
+    // Extract server options
+    server,
     ...cliConfigProps
   } = cliArguments;
 
-  // Handle core deprecated options
+  // Handle deprecated options
   const deprecatedOptions = { provider, apiKey: apiKey || undefined, baseURL, shareProvider }; // secretlint-disable-line @secretlint/secretlint-rule-pattern
   const deprecatedKeys = Object.entries(deprecatedOptions)
     .filter(([, value]) => value !== undefined)
@@ -82,32 +88,34 @@ export function buildAppConfig<
   logDeprecatedWarning(deprecatedKeys);
   handleCoreDeprecatedOptions(cliConfigProps, deprecatedOptions);
 
-  // Handle tool filter options
+  // Handle tool filters
   handleToolFilterOptions(cliConfigProps, { tool });
 
-  // Handle MCP server filter options
+  // Handle MCP server filters
   handleMCPServerFilterOptions(cliConfigProps, { mcpServer });
 
-  // Allow external handler to process additional options
+  // Handle server options
+  handleServerOptions(cliConfigProps, { server });
+
+  // Process additional options
   if (cliOptionsEnhancer) {
     cliOptionsEnhancer(cliArguments, config);
   }
 
-  // Extract environment variables in CLI model configuration
+  // Resolve model secrets
   resolveModelSecrets(cliConfigProps);
 
-  // Merge CLI configuration properties (L0 - highest priority)
-  // @ts-expect-error TypeScript cannot infer the complex generic relationship
+  // @ts-expect-error
   config = deepMerge(config, cliConfigProps);
 
-  // Apply CLI shortcuts and special handling
+  // Apply CLI shortcuts
   applyLoggingShortcuts(config, { debug, quiet });
   applyServerConfiguration(config, { port });
 
-  // Apply WebUI defaults after all merging is complete
+  // Apply WebUI defaults
   applyWebUIDefaults(config as AgentAppConfig);
 
-  // Log final configuration summary (debug only)
+  // Log configuration
   const isDebug = cliArguments.debug || false;
   logConfigComplete(config as AgentAppConfig, isDebug);
 
@@ -162,6 +170,34 @@ function handleCoreDeprecatedOptions(
     if (!config.share.provider) {
       config.share.provider = shareProvider;
     }
+  }
+}
+
+/**
+ * Handle server CLI options
+ */
+function handleServerOptions(
+  config: Partial<AgentAppConfig>,
+  serverOptions: {
+    server?: {
+      exclusive?: boolean;
+    };
+  },
+): void {
+  const { server } = serverOptions;
+
+  if (!server) {
+    return;
+  }
+
+  // Initialize server config if it doesn't exist
+  if (!config.server) {
+    config.server = {};
+  }
+
+  // Handle exclusive mode option
+  if (server.exclusive !== undefined) {
+    config.server.exclusive = server.exclusive;
   }
 }
 

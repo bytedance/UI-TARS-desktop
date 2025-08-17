@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-const HOME_INSTRUCTION = `- execute_bash, str_replace_editor, and JupyterCI must be executed based on the /home/gem root directory.  For example, if you want to create a hello.py file, you will be given priority to creating it under /home/gem/tmp. For the specific directory name, please be reasonably named according to the content of the task.`;
+const HOME_INSTRUCTION = `- execute_bash, str_replace_editor, and JupyterCI must be executed based on the /home/gem root directory.
+ You should first execute mkdir -p {project_dir} for the project, and then you create a file hello.py under /home/gem/{project_dir}. 
+ For the specific directory name, please be reasonably named according to the content of the task.`;
 
 const STOP_INSTRUCTION = `\n
   ## WARNING:

@@ -9,4 +9,8 @@ export default defineConfig({
     environment: 'node',
     include: ['**/*.test.ts'],
   },
+  define: {
+    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+    __GIT_HASH__: JSON.stringify('test-hash'),
+  },
 });

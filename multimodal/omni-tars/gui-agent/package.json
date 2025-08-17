@@ -31,6 +31,8 @@
     "@tarko/agent-interface": "workspace:*",
     "@ui-tars/sdk": "1.2.3",
     "@agent-infra/browser": "0.1.1",
+    "@agent-infra/media-utils": "0.1.5",
+    "@agent-infra/sandbox": "0.0.1",
     "@gui-agent/operator-browser": "workspace:*",
     "@gui-agent/action-parser": "workspace:*"
   },

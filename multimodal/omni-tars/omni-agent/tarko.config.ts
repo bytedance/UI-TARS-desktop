@@ -7,21 +7,17 @@ import { resolve } from 'node:path';
 
 export default defineConfig({
   model: {
-    // provider: 'openai-non-streaming',
-    // baseURL: process.env.OMNI_TARS_BASE_URL,
-    // apiKey: process.env.OMNI_TARS_API_KEY,
-    // id: process.env.OMNI_TARS_MODEL_ID,
-
-    // id: '{search.nlp.seed_vision}.{hl}.{M8-23B-MoE-250717_m8_agentrlmodel_codeformatv2_0711_google_roll_back-S100}.{gui_23b_rl_s100}',
-    // id: 'aws_claude35_sonnet',
+    /** tars */
+    provider: 'volcengine',
+    id: process.env.OMNI_TARS_MODEL_ID,
+    baseURL: process.env.OMNI_TARS_BASE_URL,
+    apiKey: process.env.OMNI_TARS_API_KEY,
+    /** aws */
+    // provider: 'azure-openai',
     // id: 'aws_sdk_claude4_sonnet',
-    // id: 'gpt-5-2025-08-07	',
-    // id: 'gcp-claude4.1-opus	',
-    // id: 'gemini-2.5-pro-preview-06-05',
-    id: 'aws_sdk_claude4_sonnet',
-    provider: 'azure-openai',
-    apiKey: process.env.ANTHROPIC_AUTH_TOKEN,
-    baseURL: process.env.GPT_I18N_URL,
+    // apiKey: process.env.ANTHROPIC_AUTH_TOKEN,
+    // baseURL: process.env.GPT_I18N_URL,
+    /** seed1.6 */
     // provider: 'volcengine',
     // id: 'ep-20250613182556-7z8pl',
     // apiKey: process.env.ARK_API_KEY,
@@ -43,6 +39,9 @@ export default defineConfig({
       'Write hello world using python',
       'Write a python code to download the paper https://arxiv.org/abs/2505.12370, and convert the pdf to markdown',
     ],
+  },
+  share: {
+    provider: process.env.SHARE_PROVIDER,
   },
   snapshot: { storageDirectory: resolve(__dirname, 'snapshots'), enable: true },
 });

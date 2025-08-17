@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { Tool, z } from '@tarko/agent';
-import { AioClient } from '@omni-tars/core';
+import { AioClient } from '@agent-infra/sandbox';
 
 export class StrReplaceEditorProvider {
   private client: AioClient;

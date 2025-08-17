@@ -28,7 +28,8 @@
   "dependencies": {
     "@tarko/agent": "workspace:*",
     "@omni-tars/core": "workspace:*",
-    "@tarko/agent-interface": "workspace:*"
+    "@tarko/agent-interface": "workspace:*",
+    "@agent-infra/sandbox": "0.0.1"
   },
   "devDependencies": {
     "@rslib/core": "0.10.0",

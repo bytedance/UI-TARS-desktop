@@ -34,12 +34,8 @@ export function formatRelativeDate(timestamp: number): string {
  * Simple one-to-one mapping without intermediate categories
  */
 const TOOL_TO_RENDERER_MAP: Record<string, string> = {
-  // Content tools
-  LinkReader: 'link_reader',
-
   // Search tools
   web_search: 'search_result',
-  Search: 'search_result',
 
   // Browser tools
   browser_vision_control: 'browser_vision_control',
@@ -53,6 +49,12 @@ const TOOL_TO_RENDERER_MAP: Record<string, string> = {
   // Command tools
   run_command: 'command_result',
   run_script: 'script_result',
+
+  // Omni TARS
+  LinkReader: 'link_reader',
+  Search: 'search_result',
+  str_replace_editor: 'command_result',
+  execute_bash: 'command_result',
 };
 
 /**

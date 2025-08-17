@@ -67,6 +67,10 @@ export class SocketHandlers {
       await SocketHandlers.handleAbortQuery(socket, server, sessionId);
     });
 
+    socket.on('get-server-status', () => {
+      SocketHandlers.handleGetServerStatus(socket, server);
+    });
+
     socket.on('disconnect', () => {
       console.log('Client disconnected:', socket.id);
     });
@@ -147,5 +151,18 @@ export class SocketHandlers {
     } else {
       socket.emit('error', 'Session not found');
     }
+  }
+
+  /**
+   * Handle getting server status including exclusive mode information
+   */
+  static handleGetServerStatus(socket: Socket, server: AgentServer) {
+    const status = {
+      isExclusive: server.isExclusive,
+      runningSessionId: server.getRunningSessionId(),
+      canAcceptNewRequest: server.canAcceptNewRequest(),
+    };
+
+    socket.emit('server-status', status);
   }
 }

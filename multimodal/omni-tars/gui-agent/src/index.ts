@@ -17,7 +17,7 @@ export interface GUIAgentConfig<TOperator> {
   model: {
     baseURL: string;
     id: string;
-    apiKey: string;
+    apiKey: string; // @secretlint-disable-line
     uiTarsVersion?:
       | 'ui-tars-1.0'
       | 'ui-tars-1.5'
@@ -32,7 +32,7 @@ export interface GUIAgentConfig<TOperator> {
 }
 
 export const guiPlugin = new GuiAgentPlugin({
-  operatorManager: new OperatorManager(),
+  operatorManager: OperatorManager.createLocal(),
 });
 
 export default class GUIAgent extends ComposableAgent {

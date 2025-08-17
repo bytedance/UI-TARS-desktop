@@ -73,6 +73,11 @@ export interface AgentServerOptions {
      * Server Storage options.
      */
     storage?: AgentStorageImplementation;
+    /**
+     * Enable exclusive mode - reject new requests while an agent is running
+     * @default false
+     */
+    exclusive?: boolean;
   };
   /**
    * Share config

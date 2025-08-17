@@ -43,7 +43,7 @@ export class ComposableAgent extends Agent {
 
     this.logger.info(
       'load plugins success: ',
-      plugins.map((p) => options.name),
+      plugins.map((p) => p.name),
     );
   }
 

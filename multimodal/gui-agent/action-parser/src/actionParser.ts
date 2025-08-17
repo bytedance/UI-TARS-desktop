@@ -95,6 +95,21 @@ export function actionStringParser(prediction: string): string[] {
   let thought: string | null = null;
   let actionStr = '';
 
+  const thinkMatch = text.match(/<think[^>]*>([\s\S]*?)<\/think[^>]*>/i);
+  const computerEnvMatch = text.match(/<computer_env>([\s\S]*?)<\/computer_env>/i);
+  if (thinkMatch && computerEnvMatch) {
+    if (thinkMatch) {
+      thought = thinkMatch[1].trim();
+    }
+    if (computerEnvMatch) {
+      actionStr = computerEnvMatch[1].trim();
+      actionStr = actionStr.replace(/^Action:\s*/i, '');
+    }
+  }
+  if (actionStr !== '') {
+    return actionStr.split('\n\n');
+  }
+
   // Parse thought/reflection based on different text patterns
   if (text.includes('Thought:')) {
     const thoughtMatch = text.match(/Thought: ([\s\S]+?)(?=\s*Action[:：]|$)/);
@@ -117,10 +132,7 @@ export function actionStringParser(prediction: string): string[] {
     }
   }
 
-  if (!['Action:', 'Action：'].some((keyword) => text.includes(keyword))) {
-    //   throw new Error('No Action found in text');
-    actionStr = text;
-  } else {
+  if (['Action:', 'Action：'].some((keyword) => text.includes(keyword))) {
     const actionParts = text.split(/Action[:：]/);
     actionStr = actionParts[actionParts.length - 1];
   }
@@ -140,21 +152,6 @@ export function actionStringParser(prediction: string): string[] {
 
   thought = `${thoughtContent}\n<Action_Summary>\n${actionSummaryContent}`;
   actionStr = actionContent || '';
-  if (actionStr !== '') {
-    return actionStr.split('\n\n');
-  }
-
-  const thinkMatch = text.match(/<think[^>]*>([\s\S]*?)<\/think[^>]*>/i);
-  const computerEnvMatch = text.match(/<computer_env>([\s\S]*?)<\/computer_env>/i);
-  if (thinkMatch && computerEnvMatch) {
-    if (thinkMatch) {
-      thought = thinkMatch[1].trim();
-    }
-    if (computerEnvMatch) {
-      actionStr = computerEnvMatch[1].trim();
-      actionStr = actionStr.replace(/^Action:\s*/i, '');
-    }
-  }
   if (actionStr !== '') {
     return actionStr.split('\n\n');
   }

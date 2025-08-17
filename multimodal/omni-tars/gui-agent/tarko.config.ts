@@ -6,6 +6,10 @@ import { defineConfig, LogLevel } from '@tarko/agent-cli';
 
 export default defineConfig({
   model: {
+    // provider: 'volcengine',
+    // baseURL: process.env.ARK_BASE_URL,
+    // apiKey: process.env.ARK_API_KEY, // secretlint-disable-line
+    // id: process.env.ARK_MODEL,
     provider: 'openai-non-streaming',
     baseURL: process.env.OMNI_TARS_BASE_URL,
     apiKey: process.env.OMNI_TARS_API_KEY, // secretlint-disable-line

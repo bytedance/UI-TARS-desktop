@@ -19,9 +19,6 @@ export const mcpPlugin = new McpAgentPlugin({
       description: 'tavily search tool',
       url: `https://mcp.tavily.com/mcp/?tavilyApiKey=${process.env.TAVILY_API_KEY}`,
       timeout: 60,
-      header: {
-        'x-tavily-api-key': process.env.TAVILY_API_KEY,
-      },
     },
     {
       type: 'streamable-http',

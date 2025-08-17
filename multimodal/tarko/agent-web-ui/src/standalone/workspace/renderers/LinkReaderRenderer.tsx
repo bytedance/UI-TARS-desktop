@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { FiExternalLink, FiCopy, FiCheck, FiFileText, FiCode } from 'react-icons/fi';
+import { FiExternalLink, FiCopy, FiCheck, FiFileText, FiCode, FiEye } from 'react-icons/fi';
 import { StandardPanelContent } from '../types/panelContent';
 import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 import { wrapMarkdown } from '@/common/utils/markdown';
 import { FileDisplayMode } from '../types';
+import { isOmniTarsTextContentArray, OmniTarsTextContent } from '@/common/services/SearchService';
 
 interface LinkReaderRendererProps {
   panelContent: StandardPanelContent;
@@ -34,8 +35,8 @@ interface LinkReaderResponse {
  * Focus on content with simple, elegant design
  */
 export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelContent }) => {
-  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
-  const [showMarkdownSource, setShowMarkdownSource] = useState(false);
+  const [copiedStates, setCopiedStates] = useState<boolean[]>([]);
+  const [showMarkdownSource, setShowMarkdownSource] = useState(true);
 
   const linkData = extractLinkReaderData(panelContent);
 
@@ -46,8 +47,18 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
   const copyContent = async (content: string, index: number) => {
     try {
       await navigator.clipboard.writeText(content);
-      setCopiedIndex(index);
-      setTimeout(() => setCopiedIndex(null), 1500);
+      setCopiedStates((prevStates) => {
+        const newStates = [...prevStates];
+        newStates[index] = true;
+        return newStates;
+      });
+      setTimeout(() => {
+        setCopiedStates((prevStates) => {
+          const newStates = [...prevStates];
+          newStates[index] = false;
+          return newStates;
+        });
+      }, 1500);
     } catch (error) {
       console.error('Copy failed:', error);
     }
@@ -56,81 +67,107 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
   return (
     <div className="space-y-4">
       {linkData.results.map((result, index) => {
-        const isCopied = copiedIndex === index;
+        const isCopied = copiedStates[index];
 
         return (
           <div
             key={`link-${index}`}
-            className="bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm hover:shadow-md transition-shadow duration-200"
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100 dark:border-gray-700"
           >
-            {/* Header with better contrast */}
-            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+            {/* Enhanced Header */}
+            <div className="p-5 pb-0">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
-                  {/* Title with document icon */}
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                      <FiFileText size={16} className="text-blue-600 dark:text-blue-400" />
+                  {/* Enhanced Title with gradient icon */}
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-sm">
+                      <FiFileText size={18} className="text-white" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 leading-tight mb-1">
+
+                    <div className="flex-1 min-w-0 pt-0.5">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 leading-tight mb-1 line-clamp-1">
                         {result.title}
                       </h3>
-                      <a
-                        href={result.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                      >
-                        <span className="truncate">{formatUrl(result.url)}</span>
-                        <FiExternalLink size={12} className="flex-shrink-0" />
-                      </a>
+
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
+                        <a
+                          href={result.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
+                        >
+                          <span className="truncate max-w-xs">{formatUrl(result.url)}</span>
+                          <FiExternalLink
+                            size={12}
+                            className="flex-shrink-0 opacity-70 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-200"
+                          />
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Control buttons */}
-                <div className="flex items-center gap-1">
-                  {/* View mode toggle */}
+                <div className="flex items-center gap-1.5 pt-1">
+                  {/* 视图模式切换按钮 - 只使用 showMarkdownSource 状态 */}
                   <button
                     onClick={() => setShowMarkdownSource(!showMarkdownSource)}
-                    className={`p-2 rounded-md transition-colors ${
+                    className={`relative p-2 rounded-lg transition-all duration-200 group border font-medium ${
                       showMarkdownSource
-                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white border-blue-500 shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/25'
+                        : 'bg-gradient-to-r from-purple-500 to-purple-600 text-white border-purple-500 shadow-md shadow-purple-500/20 hover:shadow-lg hover:shadow-purple-500/25'
                     }`}
-                    title={showMarkdownSource ? 'Show rendered content' : 'Show markdown source'}
+                    title={showMarkdownSource ? 'Switch to rendered view' : 'Switch to source view'}
                   >
-                    {showMarkdownSource ? <FiFileText size={14} /> : <FiCode size={14} />}
+                    <div className="flex items-center gap-1">
+                      {showMarkdownSource ? (
+                        <>
+                          <FiCode
+                            size={14}
+                            className="transition-transform group-hover:scale-110"
+                          />
+                          <span className="text-xs font-semibold tracking-wide">SRC</span>
+                        </>
+                      ) : (
+                        <>
+                          <FiEye size={14} className="transition-transform group-hover:scale-110" />
+                          <span className="text-xs font-semibold tracking-wide">VIEW</span>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="absolute inset-0 rounded-lg bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
                   </button>
 
-                  {/* Copy button */}
+                  {/* 复制按钮 - 只使用 copiedStates[index] 状态 */}
                   <button
                     onClick={() => copyContent(result.content, index)}
-                    className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                    className={`relative p-2 rounded-lg transition-all duration-200 group border font-medium ${
+                      copiedStates[index]
+                        ? 'bg-gradient-to-r from-green-500 to-green-600 text-white border-green-500 shadow-md shadow-green-500/20'
+                        : 'bg-gradient-to-r from-gray-500 to-gray-600 text-white border-gray-500 shadow-md shadow-gray-500/20 hover:from-gray-600 hover:to-gray-700 hover:shadow-lg hover:shadow-gray-500/25'
+                    }`}
                     title="Copy content"
                   >
-                    {isCopied ? (
-                      <FiCheck size={14} className="text-green-600 dark:text-green-400" />
+                    {copiedStates[index] ? (
+                      <FiCheck size={14} className="transition-transform scale-110" />
                     ) : (
-                      <FiCopy size={14} />
+                      <FiCopy size={14} className="transition-transform group-hover:scale-110" />
                     )}
+
+                    <div className="absolute inset-0 rounded-lg bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Content area with better contrast */}
-            <div className="p-4">
-              <div className="bg-gray-50 dark:bg-gray-900/50 rounded-md border border-gray-200 dark:border-gray-700">
-                <div className="p-3">
-                  {showMarkdownSource ? (
-                    <MarkdownRenderer content={wrapMarkdown(result.content)} />
-                  ) : (
-                    <MarkdownRenderer content={result.content} />
-                  )}
-                </div>
-              </div>
+            {/* Content area */}
+            <div className="p-5 pt-2">
+              {showMarkdownSource ? (
+                <MarkdownRenderer content={wrapMarkdown(result.content)} forceDarkTheme />
+              ) : (
+                <MarkdownRenderer content={result.content} forceDarkTheme />
+              )}
             </div>
           </div>
         );
@@ -141,6 +178,39 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
 
 /**
  * Extract LinkReader data from panelContent
+ *
+ * @example
+ *
+ * {
+ *   "type": "link_reader",
+ *   "source": {
+ *       "content": [
+ *           {
+ *               "type": "text",
+ *               "text": "{ Stringified result of structuredContent }"
+ *           }
+ *       ],
+ *       "structuredContent": {
+ *           "results": [
+ *               {
+ *                   "url": "https://seed-tars.com/1.5",
+ *                   "raw_content": " markdown content ",
+ *                   "images": []
+ *               }
+ *           ],
+ *           "failed_results": [],
+ *           "response_time": 0.01
+ *       },
+ *       "isError": false
+ *   },
+ *   "title": "LinkReader",
+ *   "timestamp": 1755011267563,
+ *   "toolCallId": "call_1755011261618_4nyoiv4z9",
+ *   "arguments": {
+ *       "description": "Summary this link",
+ *       "url": "https://seed-tars.com/1.5"
+ *   }
+ * }
  */
 function extractLinkReaderData(panelContent: StandardPanelContent): {
   results: LinkResult[];
@@ -150,24 +220,28 @@ function extractLinkReaderData(panelContent: StandardPanelContent): {
 
     // Handle different data formats
     if (typeof panelContent.source === 'object' && panelContent.source !== null) {
-      // Try arguments first
-      if (panelContent.arguments && typeof panelContent.arguments === 'object') {
-        const argsObj = panelContent.arguments as any;
-        if (argsObj.data && typeof argsObj.data === 'object') {
-          parsedData = argsObj.data;
-        } else if (argsObj.content && argsObj.structuredContent) {
-          parsedData = argsObj.structuredContent;
-        } else {
-          parsedData = argsObj;
-        }
-      } else {
-        // Try source directly
-        const sourceObj = panelContent.source as any;
-        if (Array.isArray(sourceObj) && sourceObj[0] && typeof sourceObj[0] === 'object' && 'text' in sourceObj[0]) {
-          parsedData = JSON.parse(sourceObj[0].text as string);
-        } else {
-          parsedData = sourceObj;
-        }
+      const sourceObj = panelContent.source as {
+        content: OmniTarsTextContent[];
+        structuredContent: LinkReaderResponse;
+      };
+
+      // First, check if structuredContent exists directly in source
+      if (sourceObj.structuredContent && typeof sourceObj.structuredContent === 'object') {
+        parsedData = sourceObj.structuredContent;
+      }
+
+      // Try content array with text field
+      else if (isOmniTarsTextContentArray(sourceObj.content)) {
+        parsedData = JSON.parse(sourceObj.content[0].text);
+      }
+
+      // Fallback
+      else {
+        parsedData = {
+          results: [],
+          failed_results: [],
+          response_time: 0,
+        };
       }
     } else if (typeof panelContent.source === 'string') {
       try {
@@ -185,7 +259,6 @@ function extractLinkReaderData(panelContent: StandardPanelContent): {
 
     const results: LinkResult[] = parsedData.results.map((item) => {
       const title = extractTitleFromContent(item.raw_content) || getHostname(item.url);
-
       return {
         url: item.url,
         title,
@@ -201,6 +274,7 @@ function extractLinkReaderData(panelContent: StandardPanelContent): {
 }
 
 function extractTitleFromContent(content: string): string | null {
+  // Try structured patterns first
   const patterns = [
     /<title[^>]*>([^<]+)<\/title>/i,
     /<h1[^>]*>([^<]+)<\/h1>/i,
@@ -211,25 +285,36 @@ function extractTitleFromContent(content: string): string | null {
   for (const pattern of patterns) {
     const match = content.match(pattern);
     if (match?.[1]) {
-      const title = match[1].trim();
-      if (isValidTitle(title)) {
-        return title;
+      const cleanedTitle = cleanAndValidateTitle(match[1]);
+      if (cleanedTitle) {
+        return cleanedTitle;
       }
     }
   }
 
   // Fallback to first meaningful line
-  const lines = content
+
+  const meaningfulLines = content
     .split('\n')
     .map((line) => line.trim())
-    .filter(Boolean);
-  for (const line of lines.slice(0, 3)) {
-    if (line.length > 10 && line.length <= 100 && isValidTitle(line)) {
-      return line;
+
+    .filter(Boolean)
+    .slice(0, 3)
+    .filter((line) => line.length > 10 && line.length <= 100);
+
+  for (const line of meaningfulLines) {
+    const cleanedTitle = cleanAndValidateTitle(line);
+    if (cleanedTitle) {
+      return cleanedTitle;
     }
   }
 
   return null;
+}
+
+function cleanAndValidateTitle(rawTitle: string): string | null {
+  const cleaned = rawTitle.trim().replace(/^\[\#\]\([^)]*\)\s*/, '');
+  return isValidTitle(cleaned) ? cleaned : null;
 }
 
 function isValidTitle(title: string): boolean {

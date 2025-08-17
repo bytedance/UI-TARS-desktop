@@ -53,10 +53,14 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   // Configuration
   public readonly port: number;
   public readonly isDebug: boolean;
+  public readonly isExclusive: boolean;
   public readonly storageProvider: StorageProvider | null = null;
   public readonly appConfig: T;
   public readonly versionInfo?: AgentServerVersionInfo;
   public readonly directories: Required<GlobalDirectoryOptions>;
+
+  // Exclusive mode state
+  private runningSessionId: string | null = null;
 
   // Current agent resolution, resolved before server started
   private currentAgentResolution?: AgentResolutionResult;
@@ -80,6 +84,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     // Extract server configuration from agent options
     this.port = appConfig.server?.port ?? 3000;
     this.isDebug = appConfig.logLevel === LogLevel.DEBUG;
+    this.isExclusive = appConfig.server?.exclusive ?? false;
 
     // Initialize Express app and HTTP server
     this.app = express();
@@ -151,6 +156,47 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
       provider: this.appConfig.model?.provider || '',
       modelId: this.appConfig.model?.id || '',
     };
+  }
+
+  /**
+   * Check if server can accept new requests in exclusive mode
+   */
+  canAcceptNewRequest(): boolean {
+    if (!this.isExclusive) {
+      return true;
+    }
+    return this.runningSessionId === null;
+  }
+
+  /**
+   * Set running session for exclusive mode
+   */
+  setRunningSession(sessionId: string): void {
+    if (this.isExclusive) {
+      this.runningSessionId = sessionId;
+      if (this.isDebug) {
+        console.log(`[DEBUG] Session started: ${sessionId}`);
+      }
+    }
+  }
+
+  /**
+   * Clear running session for exclusive mode
+   */
+  clearRunningSession(sessionId: string): void {
+    if (this.isExclusive && this.runningSessionId === sessionId) {
+      this.runningSessionId = null;
+      if (this.isDebug) {
+        console.log(`[DEBUG] Session ended: ${sessionId}`);
+      }
+    }
+  }
+
+  /**
+   * Get current running session ID
+   */
+  getRunningSessionId(): string | null {
+    return this.runningSessionId;
   }
 
   /**

@@ -123,9 +123,16 @@ Current Working Directory: ${workspace}
 
     `;
 
-    // Prepare system instructions by combining default prompt with custom instructions
+    // Prepare system instructions with user instructions taking priority
+    // Core system capabilities provide the foundation, but user instructions override behavior
     const instructions = options.instructions
-      ? `${systemPrompt}\n\n${options.instructions}`
+      ? `${systemPrompt}
+
+---
+
+**User Instructions (Higher Priority):**
+
+${options.instructions}`
       : systemPrompt;
 
     super({

@@ -7,6 +7,7 @@ import http from 'http';
 import { LogLevel } from '@tarko/interface';
 import { AgentCLIServeCommandOptions } from '../../types';
 import { AgentServer } from '@tarko/agent-server';
+import { ensureServerConfig } from '../../utils';
 import boxen from 'boxen';
 import chalk from 'chalk';
 
@@ -19,12 +20,7 @@ export async function startHeadlessServer(
   const { agentServerInitOptions } = options;
   const { appConfig } = agentServerInitOptions;
 
-  // Ensure server config exists with defaults
-  if (!appConfig.server) {
-    appConfig.server = {
-      port: 8888,
-    };
-  }
+  await ensureServerConfig(appConfig);
 
   // Create and start the server with injected agent
   const server = new AgentServer(agentServerInitOptions);

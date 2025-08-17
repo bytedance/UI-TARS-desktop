@@ -16,7 +16,7 @@ import { AgentServer, AgentServerOptions, express } from '@tarko/agent-server';
 import boxen from 'boxen';
 import chalk from 'chalk';
 import gradient from 'gradient-string';
-import { logger, toUserFriendlyPath } from '../../utils';
+import { logger, toUserFriendlyPath, ensureServerConfig } from '../../utils';
 import { AgentCLIRunInteractiveUICommandOptions } from '../../types';
 
 /**
@@ -29,12 +29,7 @@ export async function startInteractiveWebUI(
   const { appConfig } = agentServerInitOptions;
   const webui = appConfig.webui!;
 
-  // Ensure server config exists with defaults
-  if (!appConfig.server) {
-    appConfig.server = {
-      port: 8888,
-    };
-  }
+  await ensureServerConfig(appConfig);
 
   if (isAgentWebUIImplementationType(webui, 'static')) {
     // Set up static path if provided

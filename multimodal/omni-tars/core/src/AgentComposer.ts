@@ -45,7 +45,7 @@ export class AgentComposer {
     this.logger.info('Available Environments: ', envs);
 
     const basePrompt = `You are a general AI agent, a helpful AI assistant that can interact with the following environments to solve tasks: ${envs}.
-    You should first think about the reasoning process in the mind and then provide the user with the answer. The reasoning process is enclosed within <think_never_used_51bce0c785ca2f68081bfa7d91973934> </think_never_used_51bce0c785ca2f68081bfa7d91973934> tags, i.e. <think_never_used_51bce0c785ca2f68081bfa7d91973934> reasoning process here </think_never_used_51bce0c785ca2f68081bfa7d91973934> answer here
+    You should first think about the reasoning process in the mind and then provide the user with the answer. The reasoning process is enclosed within <think> </think> tags, i.e. <think> reasoning process here </think> answer here
 
 `;
 
@@ -150,10 +150,10 @@ export class AgentComposer {
     }
 
     return `<IMPORTANT_NOTE>
-- After the reasoning process which ends with </think_never_used_51bce0c785ca2f68081bfa7d91973934>, please start with and be enclosed by <environment_name> and </environment_name> tags, indicating the environment you intend to use for the next action.
+- After the reasoning process which ends with </think>, please start with and be enclosed by <environment_name> and </environment_name> tags, indicating the environment you intend to use for the next action.
 - Within these environment tags, follow the output format specified in the corresponding environment's description. The available environment names are: ${availableEnvs.join(', ')}. For example, to use code:
 
-<think_never_used_51bce0c785ca2f68081bfa7d91973934> Now let's look at the data_processor.py file since that's what's being executed and causing the error. To look at file content, I need to use the code environment. </think_never_used_51bce0c785ca2f68081bfa7d91973934>
+<think> Now let's look at the data_processor.py file since that's what's being executed and causing the error. To look at file content, I need to use the code environment. </think>
 <code_env>
 <function=str_replace_editor>
 <parameter=command>view</parameter>
@@ -165,7 +165,7 @@ ${
   this.hasPlugin('mcp')
     ? `To use mcp functions:
 
-<think_never_used_51bce0c785ca2f68081bfa7d91973934> I need to search information about Season 2015/16 Stats UEFA Champions League top goal scoring teams </think_never_used_51bce0c785ca2f68081bfa7d91973934>
+<think> I need to search information about Season 2015/16 Stats UEFA Champions League top goal scoring teams </think>
 <mcp_env>
 <|FunctionCallBegin|>[{"name":"Search","parameters":{"query":"Season 2015/16 Stats UEFA Champions League top goal scoring teams"}}]<|FunctionCallEnd|>
 </mcp_env>`
@@ -176,7 +176,7 @@ ${
   this.hasPlugin('computer') || this.hasPlugin('gui')
     ? `To use computer:
 
-<think_never_used_51bce0c785ca2f68081bfa7d91973934> To continue, I need to operate the computer to pass the verification process. </think_never_used_51bce0c785ca2f68081bfa7d91973934>
+<think> To continue, I need to operate the computer to pass the verification process. </think>
 <computer_env>
 Action: click(point='<point>100 200</point>')
 </computer_env>`

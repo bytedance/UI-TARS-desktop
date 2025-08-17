@@ -5,12 +5,7 @@
 import { codePlugin, CodeToolCallEngineProvider } from '@omni-tars/code-agent';
 import { mcpPlugin, McpToolCallEngineProvider } from '@omni-tars/mcp-agent';
 import { guiPlugin, GuiToolCallEngineProvider } from '@omni-tars/gui-agent';
-import {
-  SnapshotPlugin,
-  ComposableAgent,
-  createComposableToolCallEngineFactory,
-} from '@omni-tars/core';
-import path from 'path';
+import { ComposableAgent, createComposableToolCallEngineFactory } from '@omni-tars/core';
 import { AgentOptions } from '@tarko/agent';
 
 const toolCallEngine = createComposableToolCallEngineFactory({
@@ -31,10 +26,9 @@ export default class OmniTARSAgent extends ComposableAgent {
         mcpPlugin,
         // guiPlugin,
         codePlugin,
-        // new SnapshotPlugin({ baseDir: path.resolve(__dirname, '../snapshot') }),
       ],
       toolCallEngine,
-      maxTokens: 64000,
+      maxTokens: 32768,
     });
   }
 }

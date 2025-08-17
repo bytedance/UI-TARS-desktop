@@ -44,7 +44,6 @@ export async function getAllSessions(req: Request, res: Response) {
 export async function createSession(req: Request, res: Response) {
   try {
     const server = req.app.locals.server;
-
     const sessionId = nanoid();
 
     // Get session metadata if it exists (for restored sessions)

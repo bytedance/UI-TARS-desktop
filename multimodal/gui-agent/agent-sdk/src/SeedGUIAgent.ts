@@ -96,8 +96,6 @@ export class SeedGUIAgent extends Agent {
   }
 
   async initialize() {
-    await this.initilizeOperator();
-
     this.registerTool(
       new Tool({
         id: 'browser_vision_control',
@@ -105,6 +103,9 @@ export class SeedGUIAgent extends Agent {
         parameters: {},
         function: async (input) => {
           this.logger.log('browser_vision_control input:', input);
+          if (!this.operator) {
+            return { status: 'error', message: 'Operator not initialized' };
+          }
           const result = await this.operator!.execute({
             parsedPrediction: input.operator_action,
             screenWidth: getScreenInfo().screenWidth ?? 1000,
@@ -117,11 +118,6 @@ export class SeedGUIAgent extends Agent {
         },
       }),
     );
-    const eventStream = this.getEventStream();
-    eventStream.subscribe((event) => {
-      const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 19);
-      this.logger.log(`[${timestamp}] 收到事件: ${event.type}`, event);
-    });
     super.initialize();
   }
 
@@ -131,6 +127,7 @@ export class SeedGUIAgent extends Agent {
   }
 
   async onEachAgentLoopStart(sessionId: string) {
+    await this.initilizeOperator();
     const output = await this.operator!.screenshot();
     const base64Tool = new Base64ImageParser(output.base64);
     const base64Uri = base64Tool.getDataUri();
@@ -164,5 +161,16 @@ export class SeedGUIAgent extends Agent {
 
   async onAgentLoopEnd(id: string): Promise<void> {
     // await this.browserOperator.cleanup();
+  }
+
+  async onBeforeToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    args: unknown,
+  ) {
+    if (toolCall.name.includes('browser_vision_control')) {
+      await this.initilizeOperator();
+    }
+    return args;
   }
 }
