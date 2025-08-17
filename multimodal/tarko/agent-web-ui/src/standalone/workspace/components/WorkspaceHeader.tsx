@@ -8,6 +8,7 @@ import { StandardPanelContent } from '../types/panelContent';
 import { ToggleSwitch, ToggleSwitchProps } from '../renderers/generic/components/ToggleSwitch';
 import { ShareButton } from './ShareButton';
 import { FileDisplayMode } from '../types';
+import { WorkspaceDisplayMode } from '@/common/state/atoms/workspace';
 
 interface WorkspaceHeaderProps {
   panelContent: StandardPanelContent;
@@ -16,6 +17,10 @@ interface WorkspaceHeaderProps {
   toggleConfig?: ToggleSwitchProps<FileDisplayMode>;
   showFullscreen?: boolean;
   onFullscreen?: () => void;
+  // New props for workspace display mode
+  workspaceDisplayMode?: WorkspaceDisplayMode;
+  onWorkspaceDisplayModeChange?: (mode: WorkspaceDisplayMode) => void;
+  showWorkspaceToggle?: boolean;
 }
 
 export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
@@ -25,6 +30,9 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
   toggleConfig,
   showFullscreen = false,
   onFullscreen,
+  workspaceDisplayMode = 'interaction',
+  onWorkspaceDisplayModeChange,
+  showWorkspaceToggle = false,
 }) => {
   const { getToolIcon } = useTool();
 
@@ -90,7 +98,20 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
       </div>
 
       <div className="ml-4 flex-shrink-0 flex items-center gap-3">
-        {/* Toggle switch */}
+        {/* Workspace display mode toggle */}
+        {showWorkspaceToggle && onWorkspaceDisplayModeChange && (
+          <ToggleSwitch<WorkspaceDisplayMode>
+            value={workspaceDisplayMode}
+            onChange={onWorkspaceDisplayModeChange}
+            options={[
+              { value: 'interaction', label: 'UI' },
+              { value: 'raw', label: 'RAW' }
+            ]}
+            size="sm"
+          />
+        )}
+
+        {/* File display mode toggle */}
         {showToggle && toggleConfig && <ToggleSwitch<FileDisplayMode> {...toggleConfig} />}
 
         {/* Share button */}

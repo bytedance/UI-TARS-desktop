@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiCode, FiEye } from 'react-icons/fi';
+import { useAtom } from 'jotai';
 import { useSession } from '@/common/hooks/useSession';
 import { ResearchReportRenderer } from './renderers/ResearchReportRenderer';
 import { WorkspaceHeader } from './components/WorkspaceHeader';
+import { RawModeRenderer } from './components/RawModeRenderer';
 import { ImageModal } from './components/ImageModal';
 import { FullscreenModal } from './components/FullscreenModal';
 import { StandardPanelContent, ZoomedImageData, FullscreenFileData } from './types/panelContent';
 import { FileDisplayMode } from './types';
 import { ToggleSwitchProps } from './renderers/generic/components';
+import { workspaceDisplayModeAtom, WorkspaceDisplayMode } from '@/common/state/atoms/workspace';
+import { rawToolMappingAtom } from '@/common/state/atoms/rawEvents';
 
 /**
  * All renderers
@@ -58,7 +62,9 @@ const CONTENT_RENDERERS: Record<
  * WorkspaceDetail Component - Displays details of a single tool result or report
  */
 export const WorkspaceDetail: React.FC = () => {
-  const { activePanelContent, setActivePanelContent } = useSession();
+  const { activePanelContent, setActivePanelContent, activeSessionId } = useSession();
+  const [workspaceDisplayMode, setWorkspaceDisplayMode] = useAtom(workspaceDisplayModeAtom);
+  const [rawToolMapping] = useAtom(rawToolMappingAtom);
   const [zoomedImage, setZoomedImage] = useState<ZoomedImageData | null>(null);
   const [fullscreenData, setFullscreenData] = useState<FullscreenFileData | null>(null);
 
@@ -114,6 +120,13 @@ export const WorkspaceDetail: React.FC = () => {
 
   // Type assertion with runtime validation
   const panelContent = activePanelContent as StandardPanelContent;
+
+  // Get raw tool mapping for current tool call
+  const getCurrentToolMapping = () => {
+    if (!activeSessionId || !panelContent.toolCallId) return null;
+    const sessionMappings = rawToolMapping[activeSessionId];
+    return sessionMappings?.[panelContent.toolCallId] || null;
+  };
 
   // Handle research reports and deliverables
   if (isResearchReportType(panelContent)) {
@@ -179,6 +192,7 @@ export const WorkspaceDetail: React.FC = () => {
 
   // Check if the toggle button needs to be displayed
   const shouldShowToggle = () => {
+    if (workspaceDisplayMode === 'raw') return false; // Hide file toggle in RAW mode
     if (panelContent.type === 'file' && panelContent.arguments?.path) {
       const fileName = panelContent.arguments.path.split('/').pop() || '';
       return (
@@ -193,6 +207,7 @@ export const WorkspaceDetail: React.FC = () => {
 
   // Check if fullscreen button should be displayed
   const shouldShowFullscreen = () => {
+    if (workspaceDisplayMode === 'raw') return false; // Hide fullscreen in RAW mode
     if (panelContent.type === 'file' && panelContent.arguments?.path) {
       const fileName = panelContent.arguments.path.split('/').pop() || '';
       return (
@@ -203,6 +218,11 @@ export const WorkspaceDetail: React.FC = () => {
       );
     }
     return false;
+  };
+
+  // Check if workspace toggle should be displayed
+  const shouldShowWorkspaceToggle = () => {
+    return Boolean(panelContent.toolCallId && getCurrentToolMapping());
   };
 
   // Get switch configuration
@@ -242,17 +262,47 @@ export const WorkspaceDetail: React.FC = () => {
     }
   };
 
-  // Find appropriate renderer
-  const RendererComponent = CONTENT_RENDERERS[panelContent.type] || GenericResultRenderer;
+  // Render content based on workspace display mode
+  const renderContent = () => {
+    if (workspaceDisplayMode === 'raw') {
+      const toolMapping = getCurrentToolMapping();
+      if (toolMapping) {
+        return <RawModeRenderer toolMapping={toolMapping} />;
+      } else {
+        return (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <div className="text-gray-400 mb-2">⚠️</div>
+              <p className="text-gray-600 dark:text-gray-400 font-medium mb-2">No Raw Data Available</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                This content doesn't have associated tool call data.
+              </p>
+            </div>
+          </div>
+        );
+      }
+    }
 
-  const rendererName = CONTENT_RENDERERS[panelContent.type]
-    ? `${panelContent.type}`
-    : 'GenericResultRenderer';
-  console.log(
-    '%c🎯 [WorkspaceDetail] Using Renderer: %c' + `[${rendererName}]`,
-    'color: #ff6b6b; font-weight: bold; font-size: 12px;',
-    'color: #4ecdc4; font-weight: bold; background: #1a1a1a; padding: 2px 8px; border-radius: 4px;',
-  );
+    // Default interaction mode rendering
+    const RendererComponent = CONTENT_RENDERERS[panelContent.type] || GenericResultRenderer;
+    const rendererName = CONTENT_RENDERERS[panelContent.type]
+      ? `${panelContent.type}`
+      : 'GenericResultRenderer';
+    
+    console.log(
+      '%c🎯 [WorkspaceDetail] Using Renderer: %c' + `[${rendererName}]`,
+      'color: #ff6b6b; font-weight: bold; font-size: 12px;',
+      'color: #4ecdc4; font-weight: bold; background: #1a1a1a; padding: 2px 8px; border-radius: 4px;',
+    );
+
+    return (
+      <RendererComponent
+        panelContent={panelContent}
+        onAction={handleContentAction}
+        displayMode={displayMode}
+      />
+    );
+  };
 
   return (
     <>
@@ -269,13 +319,12 @@ export const WorkspaceDetail: React.FC = () => {
           toggleConfig={getToggleConfig()}
           showFullscreen={shouldShowFullscreen()}
           onFullscreen={handleFullscreen}
+          workspaceDisplayMode={workspaceDisplayMode}
+          onWorkspaceDisplayModeChange={setWorkspaceDisplayMode}
+          showWorkspaceToggle={shouldShowWorkspaceToggle()}
         />
         <div className="flex-1 overflow-auto p-4 pt-0">
-          <RendererComponent
-            panelContent={panelContent}
-            onAction={handleContentAction}
-            displayMode={displayMode}
-          />
+          {renderContent()}
         </div>
       </motion.div>
 
