@@ -1,5 +1,12 @@
 # @agent-infra/mcp-client
 
+## 1.2.19
+
+### Patch Changes
+
+- feat(mcp-client): add tools and prompts filtering with comprehensive tests
+  - @agent-infra/mcp-shared@1.2.19
+
 ## 1.2.18
 
 ### Patch Changes
