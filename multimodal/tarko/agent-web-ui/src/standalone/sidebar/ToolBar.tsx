@@ -62,7 +62,7 @@ export const ToolBar: React.FC = () => {
                 connectionStatus.connected && !isCreatingSession
                   ? 'bg-white dark:bg-gray-800 text-black dark:text-white hover:shadow-md'
                   : isCreatingSession
-                    ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-sm'
+                    ? 'bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300'
                     : 'bg-gray-400 text-white cursor-not-allowed opacity-60'
               }`}
               title={isCreatingSession ? 'Creating new task...' : connectionStatus.connected ? 'New Task' : 'Server disconnected'}
