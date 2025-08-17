@@ -58,10 +58,12 @@ export const ToolBar: React.FC = () => {
               transition={{ type: 'spring', stiffness: 400, damping: 17 }}
               onClick={handleNewSession}
               disabled={!connectionStatus.connected || isCreatingSession}
-              className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
                 connectionStatus.connected && !isCreatingSession
                   ? 'bg-white dark:bg-gray-800 text-black dark:text-white hover:shadow-md'
-                  : 'bg-gray-400 text-white cursor-not-allowed opacity-60'
+                  : isCreatingSession
+                    ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-sm'
+                    : 'bg-gray-400 text-white cursor-not-allowed opacity-60'
               }`}
               title={isCreatingSession ? 'Creating new task...' : connectionStatus.connected ? 'New Task' : 'Server disconnected'}
             >
