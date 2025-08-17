@@ -1,8 +1,8 @@
-# TARKO Agent Server
+# Tarko Agent Server
 
-**Production-ready server implementation for deploying TARKO AI Agents as HTTP/WebSocket services.**
+**Standard server implementation for deploying Tarko AI Agents as HTTP/WebSocket services.**
 
-Agent Server transforms any TARKO agent into a scalable web service with session management, real-time streaming, workspace isolation, and persistent storage.
+Agent Server transforms any Tarko agent into a scalable web service with session management, real-time streaming, workspace isolation, and persistent storage.
 
 ## Quick Start
 
