@@ -17,15 +17,24 @@ npm install @tarko/agent-cli
 ```bash
 # 启动交互式 Web UI（默认命令）
 tarko
+# 或
+tarko run
+
+# 使用自定义 Agent 启动交互式 Web UI
+tarko run ./my-agent.js
 
 # 启动无头 API 服务器
 tarko serve
 
 # 静默模式运行（输出到 stdout）
-tarko run "帮我分析当前目录的文件结构"
+tarko run --headless --input "帮我分析当前目录的文件结构"
+# 或简写
+tarko --headless --input "帮我分析当前目录的文件结构"
 
-# 管道输入
-echo "总结这段代码" | tarko run
+# 管道输入（静默模式）
+echo "总结这段代码" | tarko run --headless
+# 或简写
+echo "总结这段代码" | tarko --headless
 ```
 
 ### 配置文件
@@ -66,18 +75,29 @@ tarko --workspace ./my-workspace
 # 调试模式
 tarko --debug
 
-# 使用自定义 Agent
+# 使用自定义 Agent（交互式 UI）
+tarko run ./my-agent.js
+# 或
 tarko --agent ./my-agent.js
+
+# 使用自定义 Agent（静默模式）
+tarko run ./my-agent.js --headless --input "查询内容"
 ```
 
 ## 核心命令
 
-### `tarko` / `tarko start`
+### `tarko` / `tarko run`
 
 启动交互式 Web UI，支持实时对话和文件浏览。
 
 ```bash
-tarko start --port 8888 --open
+# 启动交互式 Web UI
+tarko run --port 8888 --open
+# 或使用默认命令
+tarko --port 8888 --open
+
+# 使用指定 Agent
+tarko run ./my-agent.js --port 8888
 ```
 
 ### `tarko serve`
@@ -89,19 +109,22 @@ tarko serve --port 8888
 # API 端点：http://localhost:8888/api/v1/
 ```
 
-### `tarko run`
+### `tarko run --headless`
 
 静默模式运行，结果输出到 stdout，适合脚本集成。
 
 ```bash
 # 文本输出（默认）
-tarko run "分析当前目录" --format text
+tarko run --headless --input "分析当前目录" --format text
 
 # JSON 输出
-tarko run "分析当前目录" --format json
+tarko run --headless --input "分析当前目录" --format json
 
 # 包含日志输出
-tarko run "分析当前目录" --include-logs
+tarko run --headless --input "分析当前目录" --include-logs
+
+# 使用指定 Agent
+tarko run ./my-agent.js --headless --input "查询内容"
 ```
 
 ### `tarko request`
