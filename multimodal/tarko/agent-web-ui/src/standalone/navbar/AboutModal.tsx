@@ -164,10 +164,10 @@ export const AboutModal: React.FC<AboutModalProps> = ({
                       <div className="flex items-center gap-2 min-w-0">
                         <span
                           className="font-mono text-purple-800 dark:text-purple-200 truncate cursor-pointer hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
-                          title={modelInfo.model}
+                          title={modelInfo.displayName || modelInfo.model}
                           onClick={() => copyModelId(modelInfo.model!)}
                         >
-                          {truncateModel(modelInfo.model)}
+                          {truncateModel(modelInfo.displayName || modelInfo.model)}
                         </span>
                         <motion.button
                           whileHover={{ scale: 1.1 }}

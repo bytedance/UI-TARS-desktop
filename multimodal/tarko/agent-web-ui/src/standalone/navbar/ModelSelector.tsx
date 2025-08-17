@@ -238,9 +238,9 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
                   }}
-                  title={modelInfo.model}
+                  title={modelInfo.displayName || modelInfo.model}
                 >
-                  {modelInfo.model}
+                  {modelInfo.displayName || modelInfo.model}
                 </Typography>
               )}
               {modelInfo.provider && modelInfo.model && (

@@ -3,18 +3,18 @@ import { AgentEventStream } from '@/common/types';
 import { EventHandler, EventHandlerContext } from '../types';
 
 export class AgentRunStartHandler
-  implements EventHandler<AgentEventStream.Event & { provider?: string; model?: string }>
+  implements EventHandler<AgentEventStream.Event & { provider?: string; model?: string; modelDisplayName?: string }>
 {
   canHandle(
     event: AgentEventStream.Event,
-  ): event is AgentEventStream.Event & { provider?: string; model?: string } {
+  ): event is AgentEventStream.Event & { provider?: string; model?: string; modelDisplayName?: string } {
     return event.type === 'agent_run_start';
   }
 
   handle(
     context: EventHandlerContext,
     sessionId: string,
-    event: AgentEventStream.Event & { provider?: string; model?: string },
+    event: AgentEventStream.Event & { provider?: string; model?: string; modelDisplayName?: string },
   ): void {
     const { set } = context;
 
@@ -22,6 +22,7 @@ export class AgentRunStartHandler
       set(modelInfoAtom, {
         provider: event.provider || '',
         model: event.model || '',
+        displayName: event.modelDisplayName,
       });
     }
     set(isProcessingAtom, true);

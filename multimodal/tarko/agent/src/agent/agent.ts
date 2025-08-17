@@ -357,6 +357,7 @@ Provide concise and accurate responses.`;
         runOptions: this.sanitizeRunOptions(normalizedOptions),
         provider: this.currentResolvedModel.provider,
         model: this.currentResolvedModel.id,
+        modelDisplayName: this.currentResolvedModel.displayName,
       });
 
       // Add user message to event stream

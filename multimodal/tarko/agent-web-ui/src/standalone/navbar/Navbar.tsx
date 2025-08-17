@@ -210,7 +210,8 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
       }
 
       if (modelInfo.model || modelInfo.provider) {
-        const modelText = [modelInfo.model, modelInfo.provider].filter(Boolean).join(' • ');
+        const displayModel = modelInfo.displayName || modelInfo.model;
+        const modelText = [displayModel, modelInfo.provider].filter(Boolean).join(' • ');
         setModelTextWidth(measureText(modelText, 'font-medium'));
       }
     };

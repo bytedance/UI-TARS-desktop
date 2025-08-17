@@ -111,4 +111,5 @@ export interface ReplayEventMarker {
 export interface ModelInfo {
   model?: string;
   provider?: string;
+  displayName?: string;
 }

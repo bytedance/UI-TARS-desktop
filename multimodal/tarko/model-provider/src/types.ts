@@ -88,6 +88,10 @@ export interface ResolvedModel {
    */
   id: string;
   /**
+   * Display name for the model (fallback to id if not provided)
+   */
+  displayName?: string;
+  /**
    * Base URL for the provider API
    */
   baseURL?: string;

@@ -297,6 +297,9 @@ export namespace AgentEventStream {
 
     /** Model identifier being used */
     model?: string;
+
+    /** Display name for the model */
+    modelDisplayName?: string;
   }
 
   /**
