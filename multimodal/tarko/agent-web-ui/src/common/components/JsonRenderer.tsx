@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiChevronRight, FiCopy, FiCheck } from 'react-icons/fi';
+import { FiChevronRight, FiCopy, FiCheck, FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 
 /**
  * JsonRenderer - Universal JSON viewer component
@@ -19,6 +19,7 @@ interface JsonItemProps {
 const JsonItem: React.FC<JsonItemProps> = ({ label, value, level = 0, isRoot = false }) => {
   const [isExpanded, setIsExpanded] = useState(level < 2); // Auto-expand first 2 levels
   const [copied, setCopied] = useState(false);
+  const [isStringExpanded, setIsStringExpanded] = useState(false);
 
   const handleCopy = useCallback(async (text: string) => {
     try {
@@ -44,35 +45,67 @@ const JsonItem: React.FC<JsonItemProps> = ({ label, value, level = 0, isRoot = f
       typeof value === 'boolean' ? 'text-purple-600 dark:text-purple-400' :
       'text-gray-500 dark:text-gray-400';
 
+    const isLongString = typeof value === 'string' && displayValue.length > 100;
+    const shouldTruncateValue = !isStringExpanded && isLongString;
+    const truncatedValue = shouldTruncateValue ? displayValue.slice(0, 100) + '...' : displayValue;
+    const formattedValue = typeof value === 'string' ? `"${truncatedValue}"` : truncatedValue;
+
     return (
       <motion.div
         initial={{ opacity: 0, x: -10 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: level * 0.02 }}
-        className={`${indentClass} flex items-center justify-between group py-1.5 px-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors`}
+        className={`${indentClass} group py-1.5 px-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors`}
       >
-        <div className="flex items-center gap-3 min-w-0 flex-1">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
-            {label}
-          </span>
-          <span className="text-xs text-gray-400 dark:text-gray-500">:</span>
-          <span className={`text-sm font-mono ${valueColor} truncate`}>
-            {typeof value === 'string' ? `"${displayValue}"` : displayValue}
-          </span>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3 min-w-0 flex-1">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300 flex-shrink-0">
+              {label}
+            </span>
+            <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0 mt-0.5">:</span>
+            <div className="flex-1 min-w-0">
+              {isStringExpanded ? (
+                <pre className={`text-sm font-mono ${valueColor} whitespace-pre-wrap break-words`}>
+                  {typeof value === 'string' ? `"${displayValue}"` : displayValue}
+                </pre>
+              ) : (
+                <span className={`text-sm font-mono ${valueColor} break-words`}>
+                  {formattedValue}
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+            {isLongString && (
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsStringExpanded(!isStringExpanded)}
+                className="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
+                title={isStringExpanded ? "Collapse" : "Expand"}
+              >
+                {isStringExpanded ? (
+                  <FiMinimize2 size={12} className="text-gray-400" />
+                ) : (
+                  <FiMaximize2 size={12} className="text-gray-400" />
+                )}
+              </motion.button>
+            )}
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => handleCopy(displayValue)}
+              className="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
+              title="Copy value"
+            >
+              {copied ? (
+                <FiCheck size={12} className="text-green-500" />
+              ) : (
+                <FiCopy size={12} className="text-gray-400" />
+              )}
+            </motion.button>
+          </div>
         </div>
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => handleCopy(displayValue)}
-          className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
-          title="Copy value"
-        >
-          {copied ? (
-            <FiCheck size={12} className="text-green-500" />
-          ) : (
-            <FiCopy size={12} className="text-gray-400" />
-          )}
-        </motion.button>
       </motion.div>
     );
   }
