@@ -227,18 +227,58 @@ function extractScriptData(panelContent: StandardPanelContent): {
   exitCode?: number;
 } | null {
   try {
-    // Handle JupyterCI tool specifically
-    if (panelContent.title === 'JupyterCI' && typeof panelContent.source === 'object' && panelContent.source !== null) {
+    /**
+     * Handle JupyterCI tool specifically
+     * 
+     * For Omni TARS "JupyterCI" tool.
+     * 
+     * {
+     *   "panelContent": {
+     *       "type": "script_result",
+     *       "source": {
+     *           "kernel_name": "python3",
+     *           "status": "ok",
+     *           "execution_count": 1,
+     *           "outputs": [
+     *               {
+     *                   "output_type": "stream",
+     *                   "name": "stdout",
+     *                   "text": "The square root of 20250818 is: 4500.090887971041\\n",
+     *                   "data": null,
+     *                   "metadata": null,
+     *                   "execution_count": null,
+     *                   "ename": null,
+     *                   "evalue": null,
+     *                   "traceback": null
+     *               }
+     *           ],
+     *           "code": "\\nimport math\\n\\n# Calculate the square root of 20250818\\nresult = math.sqrt(20250818)\\nprint(f\\",
+     *           "msg_id": "82e5deeb-88fea96549e1f526424799aa_62_2"
+     *       },
+     *       "title": "JupyterCI",
+     *       "timestamp": 1755468609322,
+     *       "toolCallId": "call_1755468607268_81apyi3tw",
+     *       "arguments": {
+     *           "code": "\\nimport math\\n\\n# Calculate the square root of 20250818\\nresult = math.sqrt(20250818)\\nprint(f\\",
+     *       }
+     *   }
+     * }
+     */
+    if (
+      panelContent.title === 'JupyterCI' &&
+      typeof panelContent.source === 'object' &&
+      panelContent.source !== null
+    ) {
       const sourceObj = panelContent.source as any;
       const script = panelContent.arguments?.code || sourceObj.code;
       const kernelName = sourceObj.kernel_name || 'python3';
       const status = sourceObj.status;
       const outputs = sourceObj.outputs || [];
-      
+
       // Extract stdout from outputs
       let stdout = '';
       let stderr = '';
-      
+
       for (const output of outputs) {
         if (output.output_type === 'stream') {
           if (output.name === 'stdout') {
@@ -247,10 +287,10 @@ function extractScriptData(panelContent: StandardPanelContent): {
             stderr += output.text || '';
           }
         } else if (output.output_type === 'error') {
-          stderr += output.traceback ? output.traceback.join('\n') : (output.evalue || '');
+          stderr += output.traceback ? output.traceback.join('\n') : output.evalue || '';
         }
       }
-      
+
       if (script && typeof script === 'string') {
         return {
           script,
