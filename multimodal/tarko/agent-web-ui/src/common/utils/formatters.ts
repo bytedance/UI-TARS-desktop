@@ -55,7 +55,7 @@ const TOOL_TO_RENDERER_MAP: Record<string, string> = {
   Search: 'search_result',
   str_replace_editor: 'command_result',
   execute_bash: 'command_result',
-  JupyterCI: 'command_result',
+  JupyterCI: 'script_result',
 };
 
 /**

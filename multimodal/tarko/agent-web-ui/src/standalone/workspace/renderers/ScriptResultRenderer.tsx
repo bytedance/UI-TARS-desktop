@@ -227,7 +227,42 @@ function extractScriptData(panelContent: StandardPanelContent): {
   exitCode?: number;
 } | null {
   try {
-    // Try arguments first
+    // Handle JupyterCI tool specifically
+    if (panelContent.title === 'JupyterCI' && typeof panelContent.source === 'object' && panelContent.source !== null) {
+      const sourceObj = panelContent.source as any;
+      const script = panelContent.arguments?.code || sourceObj.code;
+      const kernelName = sourceObj.kernel_name || 'python3';
+      const status = sourceObj.status;
+      const outputs = sourceObj.outputs || [];
+      
+      // Extract stdout from outputs
+      let stdout = '';
+      let stderr = '';
+      
+      for (const output of outputs) {
+        if (output.output_type === 'stream') {
+          if (output.name === 'stdout') {
+            stdout += output.text || '';
+          } else if (output.name === 'stderr') {
+            stderr += output.text || '';
+          }
+        } else if (output.output_type === 'error') {
+          stderr += output.traceback ? output.traceback.join('\n') : (output.evalue || '');
+        }
+      }
+      
+      if (script && typeof script === 'string') {
+        return {
+          script,
+          interpreter: kernelName,
+          stdout: stdout || undefined,
+          stderr: stderr || undefined,
+          exitCode: status === 'ok' ? 0 : 1,
+        };
+      }
+    }
+
+    // Try arguments first for other tools
     if (panelContent.arguments) {
       const { script, interpreter = 'python', stdout, stderr, exitCode } = panelContent.arguments;
 
@@ -242,7 +277,7 @@ function extractScriptData(panelContent: StandardPanelContent): {
       }
     }
 
-    // Try to extract from source
+    // Try to extract from source for other tools
     if (typeof panelContent.source === 'object' && panelContent.source !== null) {
       const sourceObj = panelContent.source as any;
       const { script, interpreter = 'python', stdout, stderr, exitCode } = sourceObj;

@@ -238,49 +238,7 @@ function extractCommandData(panelContent: StandardPanelContent) {
       };
     }
 
-    /**
-     * For Omni TARS  "JupyterCI" tool.
-     *
-     * {
-     *   "panelContent": {
-     *       "type": "command_result",
-     *       "source": {
-     *           "kernel_name": "python3",
-     *           "status": "ok",
-     *           "execution_count": 1,
-     *           "outputs": [
-     *               {
-     *                   "output_type": "stream",
-     *                   "name": "stdout",
-     *                   "text": "The square root of 20250818 is: 4500.090887971041\\n",
-     *                   "data": null,
-     *                   "metadata": null,
-     *                   "execution_count": null,
-     *                   "ename": null,
-     *                   "evalue": null,
-     *                   "traceback": null
-     *               }
-     *           ],
-     *           "code": "\\nimport math\\n\\n# Calculate the square root of 20250818\\nresult = math.sqrt(20250818)\\nprint(f\\",
-     *           "msg_id": "82e5deeb-88fea96549e1f526424799aa_62_2"
-     *       },
-     *       "title": "JupyterCI",
-     *       "timestamp": 1755468609322,
-     *       "toolCallId": "call_1755468607268_81apyi3tw",
-     *       "arguments": {
-     *           "code": "\\nimport math\\n\\n# Calculate the square root of 20250818\\nresult = math.sqrt(20250818)\\nprint(f\\",
-     *       }
-     *   }
-     * }
-     */
-    if (panelContent.title === 'JupyterCI') {
-      return {
-        command: panelContent.arguments?.code,
-        // @ts-expect-error
-        stdout: panelContent.source.outputs[0]?.text,
-        exitCode: panelContent.source.status === 'ok' ? 0 : 1,
-      };
-    }
+
   }
 
   if (typeof panelContent.source === 'string') {
