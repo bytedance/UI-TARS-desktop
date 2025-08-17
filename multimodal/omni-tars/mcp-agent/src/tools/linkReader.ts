@@ -25,10 +25,21 @@ export class LinkReaderToolProvider {
           .describe('The target link, which should be a complete URL (starting with http).'),
       }),
       function: async ({ description, url }) => {
+        // Priority use of LinkReaderPrompt mcp
+        if (process.env.LINKREADER_MCP_URL) {
+          return this.mcpManager.client.callTool({
+            client: McpManager.McpClientType.LinkReader,
+            name: 'link_reader_prompt',
+            args: {
+              urls: [url],
+              prompt: description,
+            },
+          });
+        }
+
         return this.mcpManager.client.callTool({
           client: McpManager.McpClientType.Tavily,
           name: 'tavily_extract',
-          // name: 'tavily-extract', // All tools are midscore connections when using stdio
           args: {
             extract_depth: 'basic',
             format: 'markdown',

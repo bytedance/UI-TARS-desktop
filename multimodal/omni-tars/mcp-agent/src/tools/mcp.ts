@@ -17,8 +17,9 @@ export interface McpServerConfig {
 
 export class McpManager {
   static McpClientType = {
-    Tavily: 'tavily_client',
-    Google: 'google_search_client',
+    Tavily: 'tavily-client',
+    Google: 'google-search-client',
+    LinkReader: 'link-reader',
     AIO: 'aio',
   };
 

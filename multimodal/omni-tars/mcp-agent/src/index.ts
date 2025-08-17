@@ -19,6 +19,7 @@ export const mcpPlugin = new McpAgentPlugin({
       description: 'tavily search tool',
       url: `https://mcp.tavily.com/mcp/?tavilyApiKey=${process.env.TAVILY_API_KEY}`,
       timeout: 60,
+      enable: !!process.env.TAVILY_API_KEY,
     },
     {
       type: 'streamable-http',
@@ -28,6 +29,15 @@ export const mcpPlugin = new McpAgentPlugin({
       headers: {
         'x-serper-api-key': process.env.GOOGLE_API_KEY,
       },
+      enable: true,
+    },
+    {
+      type: 'streamable-http',
+      name: McpManager.McpClientType.LinkReader,
+      description: 'Crawl, parse and summarize for web pages',
+      url: process.env.LINKREADER_MCP_URL,
+      timeout: 60,
+      enable: !!process.env.LINKREADER_MCP_URL,
     },
   ],
 });

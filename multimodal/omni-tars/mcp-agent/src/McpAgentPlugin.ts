@@ -25,7 +25,7 @@ export class McpAgentPlugin extends AgentPlugin {
   constructor(option: McpAgentPluginOption) {
     super();
     this.mcpManager = new McpManager({
-      mcpServers: option.mcpServers,
+      mcpServers: option.mcpServers.filter((s) => s.enable),
     });
   }
 
