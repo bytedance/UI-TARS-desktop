@@ -198,17 +198,35 @@ export class AgentCLI {
     // Apply agent-specific configurations for commands that run agents
     configuredCommand = this.configureAgentCommand(configuredCommand);
     configuredCommand.action(
-      async (agent: string | undefined, cliArguments: AgentCLIArguments = {}) => {
-        // If agent is provided as positional argument, use it
-        if (agent && typeof cliArguments === 'object') {
-          cliArguments.agent = agent;
+      async (...args: any[]) => {
+        // Handle dynamic arguments due to optional positional parameters [run] [agent]
+        // CAC passes arguments in different ways depending on what's provided:
+        // - tarko --agent ./        -> args = [cliArguments]
+        // - tarko run              -> args = [undefined, cliArguments] 
+        // - tarko run ./           -> args = ['./'] or args = ['./', cliArguments]
+        // - tarko ./               -> args = ['./'] or args = ['./', cliArguments]
+        
+        let agent: string | undefined;
+        let cliArguments: AgentCLIArguments = {};
+        
+        // The last argument is always the parsed CLI options object
+        const lastArg = args[args.length - 1];
+        if (typeof lastArg === 'object' && lastArg !== null && !Array.isArray(lastArg)) {
+          cliArguments = lastArg;
+          // Remove the options object from args to process positional arguments
+          args = args.slice(0, -1);
         }
-
-        // Handle case where cliArguments might be a string (when only one argument is passed)
-        if (typeof cliArguments === 'string') {
-          // This happens when user runs "tarko --agent ./" - the agent parameter becomes cliArguments
-          const actualAgent = agent || cliArguments;
-          cliArguments = { agent: actualAgent } as AgentCLIArguments;
+        
+        // Process remaining positional arguments
+        // Filter out undefined values and take the last string as agent
+        const positionalArgs = args.filter(arg => arg !== undefined && typeof arg === 'string');
+        if (positionalArgs.length > 0) {
+          agent = positionalArgs[positionalArgs.length - 1];
+        }
+        
+        // If agent is provided as positional argument, use it
+        if (agent) {
+          cliArguments.agent = agent;
         }
 
         if (cliArguments.headless) {
