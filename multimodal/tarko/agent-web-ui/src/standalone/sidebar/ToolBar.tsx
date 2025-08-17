@@ -21,16 +21,22 @@ export const ToolBar: React.FC = () => {
   const { isReplayMode } = useReplayMode();
   const { createSession, connectionStatus } = useSession();
   const [isConfigViewerOpen, setIsConfigViewerOpen] = useState(false);
+  const [isCreatingSession, setIsCreatingSession] = useState(false);
 
   // Create new session
   const handleNewSession = useCallback(async () => {
+    if (isCreatingSession || !connectionStatus.connected) return;
+    
+    setIsCreatingSession(true);
     try {
       const sessionId = await createSession();
       navigate(`/${sessionId}`);
     } catch (error) {
       console.error('Failed to create new session:', error);
+    } finally {
+      setIsCreatingSession(false);
     }
-  }, [createSession, navigate]);
+  }, [createSession, navigate, isCreatingSession, connectionStatus.connected]);
 
   // Navigate to home
   const handleNavigateHome = useCallback(() => {
@@ -51,15 +57,37 @@ export const ToolBar: React.FC = () => {
               whileTap={{ scale: 0.97 }}
               transition={{ type: 'spring', stiffness: 400, damping: 17 }}
               onClick={handleNewSession}
-              disabled={!connectionStatus.connected}
+              disabled={!connectionStatus.connected || isCreatingSession}
               className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                connectionStatus.connected
+                connectionStatus.connected && !isCreatingSession
                   ? 'bg-white dark:bg-gray-800 text-black dark:text-white hover:shadow-md'
                   : 'bg-gray-400 text-white cursor-not-allowed opacity-60'
               }`}
-              title={connectionStatus.connected ? 'New Task' : 'Server disconnected'}
+              title={isCreatingSession ? 'Creating new task...' : connectionStatus.connected ? 'New Task' : 'Server disconnected'}
             >
-              <FiPlus size={16} />
+              {isCreatingSession ? (
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                >
+                  <svg
+                    className="w-4 h-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </motion.div>
+              ) : (
+                <FiPlus size={16} />
+              )}
             </motion.button>
           )}
 

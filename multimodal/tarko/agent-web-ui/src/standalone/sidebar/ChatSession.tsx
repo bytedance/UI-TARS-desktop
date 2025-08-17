@@ -32,6 +32,7 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
   const [editedName, setEditedName] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [loadingSessionId, setLoadingSessionId] = useState<string | null>(null);
+  const [switchingSessionId, setSwitchingSessionId] = useState<string | null>(null);
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
@@ -149,14 +150,15 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
       if (
         sessionActionInProgressRef.current === sessionId ||
         !connectionStatus.connected ||
-        loadingSessionId
+        loadingSessionId ||
+        switchingSessionId
       ) {
         return;
       }
 
       // Use debouncing to avoid rapid clicks
       sessionActionInProgressRef.current = sessionId;
-      setLoadingSessionId(sessionId);
+      setSwitchingSessionId(sessionId);
 
       // Use requestAnimationFrame to defer navigation to next frame, reducing layout thrashing
       requestAnimationFrame(() => {
@@ -164,12 +166,12 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
 
         // Give state changes some time to complete
         setTimeout(() => {
-          setLoadingSessionId(null);
+          setSwitchingSessionId(null);
           sessionActionInProgressRef.current = null;
         }, 100);
       });
     },
-    [connectionStatus.connected, loadingSessionId, navigate],
+    [connectionStatus.connected, loadingSessionId, switchingSessionId, navigate],
   );
 
   // Optimized refresh sessions function
@@ -374,7 +376,7 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
                             key={session.id}
                             session={session}
                             isActive={activeSessionId === session.id}
-                            isLoading={loadingSessionId === session.id}
+                            isLoading={loadingSessionId === session.id || switchingSessionId === session.id}
                             isConnected={connectionStatus.connected}
                             searchQuery={isSearchMode ? searchQuery : ''}
                             onSessionClick={handleSessionClick}

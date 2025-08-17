@@ -37,8 +37,10 @@ const SessionItem: React.FC<SessionItemProps> = React.memo(
     setEditedName,
   }) => {
     const handleClick = useCallback(() => {
-      onSessionClick(session.id);
-    }, [onSessionClick, session.id]);
+      if (!isLoading && isConnected) {
+        onSessionClick(session.id);
+      }
+    }, [onSessionClick, session.id, isLoading, isConnected]);
 
     const handleEdit = useCallback(
       (e: React.MouseEvent) => {
@@ -115,7 +117,7 @@ const SessionItem: React.FC<SessionItemProps> = React.memo(
                 'hover:bg-white/60 dark:hover:bg-gray-800/60 border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/20 backdrop-blur-sm':
                   !isActive,
                 'opacity-60 cursor-not-allowed hover:bg-transparent dark:hover:bg-transparent hover:border-transparent dark:hover:border-transparent':
-                  !isConnected || (isLoading && session.id !== isLoading),
+                  !isConnected || isLoading,
               },
             )}
           >
@@ -126,7 +128,7 @@ const SessionItem: React.FC<SessionItemProps> = React.memo(
                   : 'bg-gray-50/70 text-gray-500 dark:bg-gray-800/50 dark:text-gray-400 border border-gray-100/40 dark:border-gray-700/30'
               }`}
             >
-              {isLoading === session.id ? (
+              {isLoading ? (
                 <FiLoader className="animate-spin" size={16} />
               ) : (
                 <FiMessageSquare size={16} />
@@ -146,7 +148,8 @@ const SessionItem: React.FC<SessionItemProps> = React.memo(
               </div>
             </div>
 
-            <div className="hidden group-hover:flex absolute right-2 gap-1">
+            {!isLoading && (
+              <div className="hidden group-hover:flex absolute right-2 gap-1">
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
@@ -165,7 +168,8 @@ const SessionItem: React.FC<SessionItemProps> = React.memo(
               >
                 <FiTrash2 size={12} />
               </motion.button>
-            </div>
+              </div>
+            )}
           </motion.button>
         )}
 
