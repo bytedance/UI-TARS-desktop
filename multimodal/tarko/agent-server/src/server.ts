@@ -137,15 +137,29 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    * Get currently available model providers
    */
   getAvailableModels(): Array<{ name: string; models: string[]; baseURL?: string }> {
-    return this.appConfig.model?.providers || [];
+    const providers = this.appConfig.model?.providers || [];
+    
+    // Convert new format to legacy format for API compatibility
+    return providers.map(provider => ({
+      name: provider.name,
+      models: provider.models.map(model => 
+        typeof model === 'string' ? model : model.id
+      ),
+      baseURL: provider.baseURL,
+    }));
   }
 
   /**
    * Validate if a model configuration is still valid
    */
   isModelConfigValid(provider: string, modelId: string): boolean {
-    const availableModels = this.getAvailableModels();
-    return availableModels.some((p) => p.name === provider && p.models.includes(modelId));
+    const providers = this.appConfig.model?.providers || [];
+    return providers.some((p) => 
+      p.name === provider && 
+      p.models.some(model => 
+        typeof model === 'string' ? model === modelId : model.id === modelId
+      )
+    );
   }
 
   /**

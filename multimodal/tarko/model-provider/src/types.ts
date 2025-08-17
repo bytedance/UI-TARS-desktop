@@ -49,6 +49,24 @@ export interface ModelDefaultSelection extends ModelProviderServingConfig {
    * Default model identifier
    */
   id?: string;
+  /**
+   * Display name for the default model
+   */
+  displayName?: string;
+}
+
+/**
+ * Model configuration with optional display name
+ */
+export interface ModelConfig {
+  /**
+   * Model identifier
+   */
+  id: string;
+  /**
+   * Display name for the model
+   */
+  displayName?: string;
 }
 
 /**
@@ -60,9 +78,9 @@ export interface ModelProvider extends ModelProviderServingConfig {
    */
   name: ModelProviderName;
   /**
-   * Provider's supported model identifiers
+   * Provider's supported model identifiers (can be strings or objects with displayName)
    */
-  models: string[];
+  models: (string | ModelConfig)[];
 }
 
 /**

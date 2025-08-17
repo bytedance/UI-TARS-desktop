@@ -10,6 +10,7 @@ import {
   ProviderOptions,
   ResolvedModel,
   ActualModelProviderName,
+  ModelConfig,
 } from './types';
 import { MODEL_PROVIDER_CONFIGS } from './constants';
 
@@ -38,23 +39,29 @@ export class ModelResolver {
    */
   private buildDefaultSelection(options: ProviderOptions): ModelDefaultSelection {
     // Explicit selection takes priority
-    if (options.id || options.provider || options.apiKey || options.baseURL) {
+    if (options.id || options.provider || options.apiKey || options.baseURL || options.displayName) {
       return {
         id: options.id,
         provider: options.provider,
         apiKey: options.apiKey,
         baseURL: options.baseURL,
+        displayName: options.displayName,
       };
     }
 
     // Auto-infer from first provider if available
     const firstProvider = this.providers[0];
     if (firstProvider?.models?.length > 0) {
+      const firstModel = firstProvider.models[0];
+      const modelId = typeof firstModel === 'string' ? firstModel : firstModel.id;
+      const displayName = typeof firstModel === 'string' ? undefined : firstModel.displayName;
+      
       return {
         provider: firstProvider.name,
-        id: firstProvider.models[0],
+        id: modelId,
         baseURL: firstProvider.baseURL,
         apiKey: firstProvider.apiKey,
+        displayName: displayName,
       };
     }
 
@@ -72,7 +79,20 @@ export class ModelResolver {
    * Find provider that supports the specified model
    */
   private findProviderByModel(modelName: string): ModelProvider | undefined {
-    return this.providers.find((provider) => provider.models.includes(modelName));
+    return this.providers.find((provider) => 
+      provider.models.some(model => 
+        typeof model === 'string' ? model === modelName : model.id === modelName
+      )
+    );
+  }
+
+  /**
+   * Find model configuration by ID within a provider
+   */
+  private findModelConfig(provider: ModelProvider, modelId: string): ModelConfig | string | undefined {
+    return provider.models.find(model => 
+      typeof model === 'string' ? model === modelId : model.id === modelId
+    );
   }
 
   /**
@@ -103,6 +123,7 @@ export class ModelResolver {
     let model = runModel;
     let baseURL: string | undefined;
     let apiKey: string | undefined;
+    let displayName: string | undefined;
 
     // If no provider specified but we have a model, try to infer from configured providers
     if (!provider && model) {
@@ -127,6 +148,12 @@ export class ModelResolver {
     if (configuredProvider) {
       baseURL = configuredProvider.baseURL;
       apiKey = configuredProvider.apiKey;
+      
+      // Look for model-specific configuration including displayName
+      const modelConfig = this.findModelConfig(configuredProvider, model);
+      if (modelConfig && typeof modelConfig === 'object') {
+        displayName = modelConfig.displayName;
+      }
     }
 
     // Fall back to default selection configuration
@@ -135,6 +162,9 @@ export class ModelResolver {
     }
     if (!apiKey) {
       apiKey = this.defaultSelection.apiKey;
+    }
+    if (!displayName) {
+      displayName = this.defaultSelection.displayName;
     }
 
     // Apply default configuration from constants if still missing
@@ -147,6 +177,7 @@ export class ModelResolver {
     return {
       provider,
       id: model,
+      displayName,
       baseURL,
       apiKey,
       actualProvider: this.getActualProvider(provider),
