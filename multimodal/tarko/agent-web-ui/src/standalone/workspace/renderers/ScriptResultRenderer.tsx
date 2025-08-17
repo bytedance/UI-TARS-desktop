@@ -229,9 +229,9 @@ function extractScriptData(panelContent: StandardPanelContent): {
   try {
     /**
      * Handle JupyterCI tool specifically
-     * 
+     *
      * For Omni TARS "JupyterCI" tool.
-     * 
+     *
      * {
      *   "panelContent": {
      *       "type": "script_result",
