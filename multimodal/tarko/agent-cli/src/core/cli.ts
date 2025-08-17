@@ -185,8 +185,8 @@ export class AgentCLI {
         },
       )
       .option(
-        '--cache [cache]',
-        'Cache results in server storage (requires server mode) (for headless mode)',
+        '--use-cache [useCache]',
+        'Use cache for headless mode execution (for headless mode)',
         {
           default: true,
         },
@@ -274,7 +274,7 @@ export class AgentCLI {
         quiet: quietMode,
       });
 
-      const useCache = cliArguments.cache !== false;
+      const useCache = cliArguments.useCache !== false;
 
       if (useCache) {
         const { processServerRun } = await import('./commands/run');

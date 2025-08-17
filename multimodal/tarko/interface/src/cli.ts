@@ -58,14 +58,11 @@ export type AgentCLIArguments = Pick<
   /** Output format for headless mode */
   format?: 'json' | 'text';
 
-  /** Include captured logs in output */
+  /** Include captured logs in output (for headless mode) */
   includeLogs?: boolean;
 
-  /** Cache results in server storage */
-  cache?: boolean;
-
-  /** Workspace directory path */
-  workspace?: string;
+  /** Use cache for headless mode execution (for headless mode) */
+  useCache?: boolean;
 
   // Allow additional properties for extensibility
   [key: string]: any;
