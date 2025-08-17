@@ -8,6 +8,7 @@
  */
 import { EventEmitter } from 'node:events';
 import { v4 as uuidv4 } from 'uuid';
+import { minimatch } from 'minimatch';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
 import {
@@ -23,6 +24,7 @@ import type {
   BuiltInMCPServer,
   MCPServer,
   StdioMCPServer,
+  MCPFilterConfig,
 } from '@agent-infra/mcp-shared/client';
 import {
   StreamableHTTPClientTransport,
@@ -73,6 +75,32 @@ export class MCPClient<
   private log(level: 'info' | 'error' | 'warn' | 'debug', ...args: any[]) {
     if (!this.isDebug && level !== 'error') return;
     console[level](...args);
+  }
+
+  private filterItems<T extends { name: string }>(
+    items: T[],
+    filterConfig?: MCPFilterConfig,
+  ): T[] {
+    if (!filterConfig) return items;
+
+    let filteredItems = items;
+
+    // Apply allow filter first (allowlist)
+    if (filterConfig.allow && filterConfig.allow.length > 0) {
+      filteredItems = filteredItems.filter((item) =>
+        filterConfig.allow!.some((pattern) => minimatch(item.name, pattern)),
+      );
+    }
+
+    // Apply block filter second (blocklist)
+    if (filterConfig.block && filterConfig.block.length > 0) {
+      filteredItems = filteredItems.filter(
+        (item) =>
+          !filterConfig.block!.some((pattern) => minimatch(item.name, pattern)),
+      );
+    }
+
+    return filteredItems;
   }
 
   private getServersFromStore() {
@@ -197,7 +225,7 @@ export class MCPClient<
         | InMemoryTransport;
 
       if ('url' in server) {
-        const { url, headers = {}, type } = server;
+        const { url, headers = {}, type = 'streamable-http' } = server;
         if (type === 'streamable-http') {
           transport = new StreamableHTTPClientTransport(new URL(url), {
             requestInit: {
@@ -329,7 +357,20 @@ export class MCPClient<
       this.store.set('mcp.servers', servers);
 
       if (server.status === 'activate') {
-        await this.activate(server);
+        try {
+          await this.activate(server);
+        } catch (activationError) {
+          this.log(
+            'error',
+            `Failed to activate server ${server.name}:`,
+            activationError,
+          );
+          this.emit('server-error', {
+            name: server.name,
+            error: activationError,
+          });
+          throw activationError;
+        }
       }
     } catch (error) {
       this.log('error', `Failed to add MCP server: ${error}`);
@@ -458,12 +499,24 @@ export class MCPClient<
           throw new Error(`MCP Client ${serverName} not found`);
         }
         const { tools } = await this.clients[serverName].listTools();
-        return tools.map((tool: Tool) => {
+        const server = this.activeServers.get(serverName)?.server;
+
+        let processedTools = tools.map((tool: Tool) => {
           tool.serverName = serverName;
           tool.id = 'f' + uuidv4().replace(/-/g, '');
           tool.description = tool.description || `${serverName} - ${tool.name}`;
           return tool as MCPTool;
         });
+
+        // Apply filters if configured
+        if (server?.filters?.tools) {
+          processedTools = this.filterItems(
+            processedTools,
+            server.filters.tools,
+          );
+        }
+
+        return processedTools;
       } else {
         let allTools: MCPTool[] = [];
         for (const clientName in this.clients) {
@@ -471,17 +524,28 @@ export class MCPClient<
             this.log('info', `[MCP] Listing tools for ${clientName}`);
 
             const { tools } = await this.clients[clientName]!.listTools();
+            const server = this.activeServers.get(
+              clientName as ServerNames,
+            )?.server;
 
             this.log('info', `[MCP] Tools for ${clientName}:`, tools);
-            allTools = allTools.concat(
-              tools.map((tool: Tool) => {
-                tool.serverName = clientName;
-                tool.id = 'f' + uuidv4().replace(/-/g, '');
-                tool.description =
-                  tool.description || `${clientName} - ${tool.name}`;
-                return tool as MCPTool;
-              }),
-            );
+            let processedTools = tools.map((tool: Tool) => {
+              tool.serverName = clientName;
+              tool.id = 'f' + uuidv4().replace(/-/g, '');
+              tool.description =
+                tool.description || `${clientName} - ${tool.name}`;
+              return tool as MCPTool;
+            });
+
+            // Apply filters if configured
+            if (server?.filters?.tools) {
+              processedTools = this.filterItems(
+                processedTools,
+                server.filters.tools,
+              );
+            }
+
+            allTools = allTools.concat(processedTools);
           } catch (error) {
             this.log(
               'error',
@@ -495,6 +559,75 @@ export class MCPClient<
       }
     } catch (error) {
       this.log('error', '[MCP] Error listing tools:', error);
+      return [];
+    }
+  }
+
+  public async listPrompts(serverName?: ServerNames): Promise<any[]> {
+    await this.ensureInitialized();
+    try {
+      if (serverName) {
+        if (!this.clients[serverName]) {
+          throw new Error(`MCP Client ${serverName} not found`);
+        }
+        const { prompts } = await this.clients[serverName].listPrompts();
+        const server = this.activeServers.get(serverName)?.server;
+
+        let processedPrompts = prompts.map((prompt: any) => ({
+          ...prompt,
+          serverName,
+          id: 'p' + uuidv4().replace(/-/g, ''),
+        }));
+
+        // Apply filters if configured
+        if (server?.filters?.prompts) {
+          processedPrompts = this.filterItems(
+            processedPrompts,
+            server.filters.prompts,
+          );
+        }
+
+        return processedPrompts;
+      } else {
+        let allPrompts: any[] = [];
+        for (const clientName in this.clients) {
+          try {
+            this.log('info', `[MCP] Listing prompts for ${clientName}`);
+
+            const { prompts } = await this.clients[clientName]!.listPrompts();
+            const server = this.activeServers.get(
+              clientName as ServerNames,
+            )?.server;
+
+            this.log('info', `[MCP] Prompts for ${clientName}:`, prompts);
+            let processedPrompts = prompts.map((prompt: any) => ({
+              ...prompt,
+              serverName: clientName,
+              id: 'p' + uuidv4().replace(/-/g, ''),
+            }));
+
+            // Apply filters if configured
+            if (server?.filters?.prompts) {
+              processedPrompts = this.filterItems(
+                processedPrompts,
+                server.filters.prompts,
+              );
+            }
+
+            allPrompts = allPrompts.concat(processedPrompts);
+          } catch (error) {
+            this.log(
+              'error',
+              `[MCP] Error listing prompts for ${clientName}:`,
+              error,
+            );
+          }
+        }
+        this.log('info', `[MCP] Total prompts listed: ${allPrompts.length}`);
+        return allPrompts;
+      }
+    } catch (error) {
+      this.log('error', '[MCP] Error listing prompts:', error);
       return [];
     }
   }

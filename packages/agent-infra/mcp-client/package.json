@@ -33,20 +33,22 @@
     "test:integration": "vitest tests/integration"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "~1.15.1",
     "@agent-infra/mcp-shared": "workspace:*",
-    "zod": "^3.23.8",
-    "uuid": "^11.1.0"
+    "@modelcontextprotocol/sdk": "~1.15.1",
+    "glob": "^10.3.10",
+    "minimatch": "^9.0.0",
+    "uuid": "^11.1.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
-    "tsx": "^4.19.3",
-    "vitest": "^3.0.7",
-    "@types/uuid": "^10.0.0",
-    "@agent-infra/mcp-server-filesystem": "workspace:*",
-    "@agent-infra/mcp-server-commands": "workspace:*",
     "@agent-infra/mcp-server-browser": "workspace:*",
+    "@agent-infra/mcp-server-commands": "workspace:*",
+    "@agent-infra/mcp-server-filesystem": "workspace:*",
     "@types/node": "^20.11.24",
+    "@types/uuid": "^10.0.0",
+    "openai": "^4.86.2",
+    "tsx": "^4.19.3",
     "typescript": "^5.7.3",
-    "openai": "^4.86.2"
+    "vitest": "^3.0.7"
   }
 }
