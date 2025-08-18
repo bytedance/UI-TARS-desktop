@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import SessionItem from './SessionItem';
 import { ConfirmDialog } from '@/sdk/dialog';
 import { SessionSearch } from './SessionSearch';
+import { SessionFilter, SessionFilters } from './SessionFilter';
 
 interface ChatSessionProps {
   isCollapsed: boolean;
@@ -38,6 +39,8 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchMode, setIsSearchMode] = useState(false);
+  const [activeFilters, setActiveFilters] = useState<SessionFilters>({});
+  const [isFilterMode, setIsFilterMode] = useState(false);
 
   // Number of sessions to display per group
   const [visibleSessionsCount, setVisibleSessionsCount] = useState<Record<string, number>>({
@@ -66,6 +69,30 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
     }
   }, []);
 
+  // Handle filters change
+  const handleFiltersChange = useCallback(async (filters: SessionFilters) => {
+    setActiveFilters(filters);
+    const hasActiveFilters = Object.values(filters).some(value => value && value.trim());
+    setIsFilterMode(hasActiveFilters);
+
+    // Reset visible count when filtering
+    if (hasActiveFilters) {
+      setVisibleSessionsCount((prev) => ({
+        ...prev,
+        filteredResults: 10,
+      }));
+    }
+
+    // Reload sessions with filters if connected
+    if (connectionStatus.connected) {
+      try {
+        await loadSessions(hasActiveFilters ? filters : undefined);
+      } catch (error) {
+        console.error('Failed to load filtered sessions:', error);
+      }
+    }
+  }, [connectionStatus.connected, loadSessions]);
+
   // Toggle collapse state
   const toggleSectionCollapse = useCallback((sectionKey: string) => {
     setCollapsedSections((prev) => ({
@@ -82,28 +109,95 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
     }));
   }, []);
 
-  // Filtered sessions
-  const filteredSessions = useMemo(() => {
-    if (!searchQuery) return sessions;
+  // Extract available filter options from sessions
+  const filterOptions = useMemo(() => {
+    const workspaces = new Set<string>();
+    const agents = new Set<string>();
+    const tags = new Set<string>();
 
-    return sessions.filter(
-      (session) =>
-        session.metadata?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        session.metadata?.tags?.some((tag) =>
-          tag.toLowerCase().includes(searchQuery.toLowerCase()),
-        ),
-    );
-  }, [sessions, searchQuery]);
+    sessions.forEach((session) => {
+      if (session.workspace) {
+        workspaces.add(session.workspace);
+      }
+      if (session.metadata?.agentConfig?.agentId) {
+        agents.add(session.metadata.agentConfig.agentId);
+      }
+      if (session.metadata?.tags) {
+        session.metadata.tags.forEach(tag => tags.add(tag));
+      }
+    });
+
+    return {
+      workspaces: Array.from(workspaces).sort(),
+      agents: Array.from(agents).sort(),
+      tags: Array.from(tags).sort(),
+    };
+  }, [sessions]);
+
+  // Filtered sessions (search + filters)
+  const filteredSessions = useMemo(() => {
+    let result = sessions;
+
+    // Apply search filter
+    if (searchQuery) {
+      result = result.filter(
+        (session) =>
+          session.metadata?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          session.metadata?.tags?.some((tag) =>
+            tag.toLowerCase().includes(searchQuery.toLowerCase()),
+          ),
+      );
+    }
+
+    // Apply workspace filter
+    if (activeFilters.workspace) {
+      result = result.filter(session => session.workspace === activeFilters.workspace);
+    }
+
+    // Apply agent filter
+    if (activeFilters.agent) {
+      result = result.filter(session => 
+        session.metadata?.agentConfig?.agentId === activeFilters.agent
+      );
+    }
+
+    // Apply tags filter
+    if (activeFilters.tags) {
+      const tagList = activeFilters.tags.split(',').map(tag => tag.trim()).filter(Boolean);
+      if (tagList.length > 0) {
+        result = result.filter(session => 
+          session.metadata?.tags?.some(sessionTag => 
+            tagList.some(filterTag => 
+              sessionTag.toLowerCase().includes(filterTag.toLowerCase())
+            )
+          )
+        );
+      }
+    }
+
+    return result;
+  }, [sessions, searchQuery, activeFilters]);
 
   // Optimize grouping calculation to reduce unnecessary re-computation
   const groupedSessions = useMemo(() => {
-    // If in search mode, use separate search results group
-    if (isSearchMode) {
+    // If in search mode or filter mode, use separate results group
+    if (isSearchMode || isFilterMode) {
+      const label = isSearchMode && isFilterMode 
+        ? 'Search & Filter Results'
+        : isSearchMode 
+        ? 'Search Results'
+        : 'Filter Results';
+      const key = isSearchMode && isFilterMode 
+        ? 'searchAndFilterResults'
+        : isSearchMode 
+        ? 'searchResults'
+        : 'filteredResults';
+      
       return [
         {
-          label: `Search Results`,
+          label,
           sessions: filteredSessions,
-          key: 'searchResults',
+          key,
         },
       ];
     }
@@ -126,7 +220,7 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
     ];
 
     // Use loop to complete classification at once, avoiding multiple iterations
-    sessions.forEach((session) => {
+    filteredSessions.forEach((session) => {
       const sessionDate = new Date(session.updatedAt || session.createdAt);
 
       if (sessionDate >= today) {
@@ -142,7 +236,7 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
 
     // Optimization: Pre-filter empty groups to avoid condition checks in render loop
     return groups.filter((group) => group.sessions.length > 0);
-  }, [sessions, isSearchMode, filteredSessions]);
+  }, [filteredSessions, isSearchMode, isFilterMode]);
 
   // Optimized session click handler function
   const handleSessionClick = useCallback(
@@ -296,6 +390,14 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
       {/* Search box */}
       <SessionSearch onSearch={handleSearch} />
 
+      {/* Filter box */}
+      <SessionFilter
+        onFiltersChange={handleFiltersChange}
+        availableWorkspaces={filterOptions.workspaces}
+        availableAgents={filterOptions.agents}
+        availableTags={filterOptions.tags}
+      />
+
       {/* Offline mode notification */}
       {!connectionStatus.connected && sessions.length > 0 && (
         <div className="px-3 py-2">
@@ -323,15 +425,19 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
         </div>
       )}
 
-      {/* Empty search results notification */}
-      {isSearchMode && filteredSessions.length === 0 && (
+      {/* Empty results notification */}
+      {(isSearchMode || isFilterMode) && filteredSessions.length === 0 && (
         <div className="p-6 text-center">
           <div className="flex justify-center mb-3 text-gray-400 dark:text-gray-500">
             <FiSearch size={24} />
           </div>
           <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300">No tasks found</h3>
           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            Try a different search term or clear the search
+            {isSearchMode && isFilterMode 
+              ? 'Try different search terms or adjust filters'
+              : isSearchMode 
+              ? 'Try a different search term or clear the search'
+              : 'Try adjusting your filters or clear them'}
           </p>
         </div>
       )}

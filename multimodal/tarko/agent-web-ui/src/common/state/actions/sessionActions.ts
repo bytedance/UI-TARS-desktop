@@ -75,9 +75,13 @@ function setWorkspacePanelForFile(set: Setter, file: FileItem): void {
   });
 }
 
-export const loadSessionsAction = atom(null, async (get, set) => {
+export const loadSessionsAction = atom(null, async (get, set, filters?: {
+  workspace?: string;
+  agent?: string;
+  tags?: string;
+}) => {
   try {
-    const loadedSessions = await apiService.getSessions();
+    const loadedSessions = await apiService.getSessions(filters);
     set(sessionsAtom, loadedSessions);
   } catch (error) {
     console.error('Failed to load sessions:', error);

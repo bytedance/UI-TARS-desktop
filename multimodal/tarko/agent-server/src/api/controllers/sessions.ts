@@ -12,11 +12,12 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 /**
- * Get all sessions
+ * Get all sessions with optional filtering
  */
 export async function getAllSessions(req: Request, res: Response) {
   try {
     const server = req.app.locals.server;
+    const { workspace, agent, tags } = req.query;
 
     if (!server.storageProvider) {
       // If no storage, return only active sessions
@@ -29,7 +30,31 @@ export async function getAllSessions(req: Request, res: Response) {
     }
 
     // Get all sessions from storage
-    const sessions = await server.storageProvider.getAllSessions();
+    let sessions = await server.storageProvider.getAllSessions();
+
+    // Apply filters if provided
+    if (workspace && typeof workspace === 'string') {
+      sessions = sessions.filter(session => session.workspace === workspace);
+    }
+
+    if (agent && typeof agent === 'string') {
+      sessions = sessions.filter(session => 
+        session.metadata?.agentConfig?.agentId === agent
+      );
+    }
+
+    if (tags && typeof tags === 'string') {
+      const tagList = tags.split(',').map(tag => tag.trim()).filter(Boolean);
+      if (tagList.length > 0) {
+        sessions = sessions.filter(session => 
+          session.metadata?.tags?.some(sessionTag => 
+            tagList.some(filterTag => 
+              sessionTag.toLowerCase().includes(filterTag.toLowerCase())
+            )
+          )
+        );
+      }
+    }
 
     res.status(200).json({ sessions });
   } catch (error) {

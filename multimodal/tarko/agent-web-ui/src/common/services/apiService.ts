@@ -95,11 +95,30 @@ class ApiService {
   }
 
   /**
-   * Get all sessions
+   * Get all sessions with optional filtering
    */
-  async getSessions(): Promise<SessionMetadata[]> {
+  async getSessions(filters?: {
+    workspace?: string;
+    agent?: string;
+    tags?: string;
+  }): Promise<SessionMetadata[]> {
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SESSIONS}`, {
+      const params = new URLSearchParams();
+      if (filters?.workspace) {
+        params.append('workspace', filters.workspace);
+      }
+      if (filters?.agent) {
+        params.append('agent', filters.agent);
+      }
+      if (filters?.tags) {
+        params.append('tags', filters.tags);
+      }
+
+      const url = params.toString() 
+        ? `${API_BASE_URL}${API_ENDPOINTS.SESSIONS}?${params.toString()}`
+        : `${API_BASE_URL}${API_ENDPOINTS.SESSIONS}`;
+
+      const response = await fetch(url, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });

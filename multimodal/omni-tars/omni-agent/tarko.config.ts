@@ -12,6 +12,7 @@ export default defineConfig({
     id: process.env.OMNI_TARS_MODEL_ID,
     baseURL: process.env.OMNI_TARS_BASE_URL,
     apiKey: process.env.OMNI_TARS_API_KEY,
+    displayName: 'omni-tars',
     /** aws */
     // provider: 'azure-openai',
     // id: 'aws_sdk_claude4_sonnet',
@@ -21,9 +22,9 @@ export default defineConfig({
     // provider: 'volcengine',
     // id: 'ep-20250613182556-7z8pl',
     // apiKey: process.env.ARK_API_KEY,
-    thinking: {
-      type: 'disabled',
-    },
+    // thinking: {
+    //   type: 'disabled',
+    // },
   },
   logLevel: LogLevel.DEBUG,
   webui: {
