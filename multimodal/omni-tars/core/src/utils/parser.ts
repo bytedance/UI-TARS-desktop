@@ -96,9 +96,11 @@ export function parseCodeContent(c: string): ParsedContent {
 
       // Extract parameters
       const parameters: Record<string, string> = {};
-      const parameterMatches = codeEnvContent.matchAll(/<parameter=([^>]+)>([^<]*)/g);
+      const parameterMatches = codeEnvContent.matchAll(
+        /<parameter=([^>]+)>([\s\S]*?)<\/parameter>/g,
+      );
       for (const match of parameterMatches) {
-        parameters[match[1]] = match[2];
+        parameters[match[1]] = match[2].trim();
       }
 
       tools.push({
