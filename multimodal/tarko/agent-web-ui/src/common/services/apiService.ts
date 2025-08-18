@@ -85,8 +85,8 @@ class ApiService {
         throw new Error(`Failed to create session: ${response.statusText}`);
       }
 
-      const { sessionId } = await response.json();
-      return this.getSessionDetails(sessionId);
+      const { sessionId, session } = await response.json();
+      return session as SessionItemInfo;
     } catch (error) {
       console.error('Error creating session:', error);
       throw error;
@@ -142,6 +142,7 @@ class ApiService {
   }
 
   /**
+   * FIXME: Remove it.
    * Get events for a specific session
    */
   async getSessionEvents(sessionId: string): Promise<AgentEventStream.Event[]> {

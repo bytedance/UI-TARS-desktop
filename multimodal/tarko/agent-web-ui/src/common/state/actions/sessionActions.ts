@@ -102,6 +102,12 @@ export const createSessionAction = atom(null, async (get, set) => {
       [newSession.id]: [],
     }));
 
+    // Update agent info when creating session
+    set(agentInfoAtom, (prev) => ({
+      ...prev,
+      name: newSession.metadata?.agentInfo?.name,
+    }));
+
     set(toolResultsAtom, (prev) => ({
       ...prev,
       [newSession.id]: [],
@@ -142,8 +148,6 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
         autoPlayCountdown: null,
       });
     }
-
-    const sessionDetails = await apiService.getSessionDetails(sessionId);
 
     // Update processing status based on current session state
     try {
