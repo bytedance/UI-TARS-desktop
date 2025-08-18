@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-const HOME_INSTRUCTION = `- execute_bash, str_replace_editor, and JupyterCI must be executed based on the /home/gem root directory.
- You should first execute mkdir -p {project_dir} for the project, and then you create a file hello.py under /home/gem/{project_dir}. 
- For the specific directory name, please be reasonably named according to the content of the task.`;
+const HOME_INSTRUCTION = `- execute_bash, str_replace_editor must be executed based on the /home/gem root directory. 
+If you think that solving the problem requires creating a complete project, then you should first execute mkdir -p {project_dir} for the project, and all the remaining operations must be under /home/gem/{project_dir}. 
+For the specific directory name, please be reasonably named according to the content of the task.`;
 
 const STOP_INSTRUCTION = `\n
   ## WARNING:
