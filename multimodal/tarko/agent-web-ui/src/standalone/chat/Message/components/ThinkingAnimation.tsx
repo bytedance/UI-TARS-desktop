@@ -110,7 +110,7 @@ const getGradientClasses = (phase?: string) => {
 
 export const ThinkingAnimation: React.FC<ThinkingAnimationProps> = ({
   size = 'medium',
-  text = 'Agent TARS is running',
+  text = `${window.AGENT_WEB_UI_CONFIG?.title || 'Agent'} is running`,
   className = '',
   phase,
   estimatedTime,

@@ -96,7 +96,7 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
       {isThinking && (
         <div className="mt-4 space-y-4">
           <ThinkingAnimation
-            text={agentStatus.message || 'Agent TARS is running'}
+            text={agentStatus.message || `${window.AGENT_WEB_UI_CONFIG?.title || 'Agent'} is running`}
             phase={agentStatus.phase}
             estimatedTime={agentStatus.estimatedTime}
             showProgress={

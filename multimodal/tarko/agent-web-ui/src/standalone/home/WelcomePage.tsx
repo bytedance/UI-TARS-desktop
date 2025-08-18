@@ -167,7 +167,7 @@ const WelcomePage: React.FC = () => {
                   value={query}
                   onChange={handleInput}
                   onKeyDown={handleKeyDown}
-                  placeholder="Ask Agent TARS anything..."
+                  placeholder={`Ask ${webUIConfig?.title || 'Agent'} anything...`}
                   className="w-full px-6 py-4 text-lg bg-transparent outline-none text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 resize-none min-h-[100px]"
                   disabled={isLoading || isDirectChatLoading}
                   rows={3}
