@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentEventStream, SessionMetadata } from '@tarko/interface';
+import { AgentEventStream, SessionItemInfo } from '@tarko/interface';
 
-export type { SessionMetadata, LegacySessionMetadata } from '@tarko/interface';
+export type { SessionItemInfo, LegacySessionItemInfo } from '@tarko/interface';
 
 /**
  * Abstract storage provider interface
@@ -26,28 +26,28 @@ export interface StorageProvider {
    * Create a new session with metadata
    * @param metadata Session metadata
    */
-  createSession(metadata: SessionMetadata): Promise<SessionMetadata>;
+  createSession(metadata: SessionItemInfo): Promise<SessionItemInfo>;
 
   /**
    * Update session metadata
    * @param sessionId Session ID
-   * @param metadata Partial metadata to update
+   * @param sessionItemInfo Partial session item info data to update
    */
-  updateSessionMetadata(
+  updateSessionItemInfo(
     sessionId: string,
-    metadata: Partial<Omit<SessionMetadata, 'id'>>,
-  ): Promise<SessionMetadata>;
+    sessionItemInfo: Partial<Omit<SessionItemInfo, 'id'>>,
+  ): Promise<SessionItemInfo>;
 
   /**
    * Get session metadata
    * @param sessionId Session ID
    */
-  getSessionMetadata(sessionId: string): Promise<SessionMetadata | null>;
+  getSessionItemInfo(sessionId: string): Promise<SessionItemInfo | null>;
 
   /**
    * Get all sessions metadata
    */
-  getAllSessions(): Promise<SessionMetadata[]>;
+  getAllSessions(): Promise<SessionItemInfo[]>;
 
   /**
    * Delete a session and all its events

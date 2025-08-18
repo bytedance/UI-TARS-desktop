@@ -87,13 +87,13 @@ POST /api/v1/sessions/create
 ```http
 GET /api/v1/sessions
 ```
-**Response:** `{ sessions: SessionMetadata[] }`
+**Response:** `{ sessions: SessionItemInfo[] }`
 
 #### Session Details
 ```http
 GET /api/v1/sessions/details?sessionId={id}
 ```
-**Response:** `{ session: SessionMetadata & { active: boolean } }`
+**Response:** `{ session: SessionItemInfo & { active: boolean } }`
 
 ### Query Execution
 

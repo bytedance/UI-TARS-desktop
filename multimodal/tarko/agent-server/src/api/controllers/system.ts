@@ -85,15 +85,15 @@ export async function updateSessionModel(req: Request, res: Response) {
     // Update session model configuration
     if (server.storageProvider) {
       // Get current session metadata
-      const currentMetadata = await server.storageProvider.getSessionMetadata(sessionId);
-      if (!currentMetadata) {
+      const currentSessionItemInfo = await server.storageProvider.getSessionItemInfo(sessionId);
+      if (!currentSessionItemInfo) {
         return res.status(404).json({ error: 'Session not found' });
       }
 
       // Update metadata with new model config
-      const updatedMetadata = await server.storageProvider.updateSessionMetadata(sessionId, {
+      const updatedSessionItemInfo = await server.storageProvider.updateSessionItemInfo(sessionId, {
         metadata: {
-          ...currentMetadata.metadata,
+          ...currentSessionItemInfo.metadata,
           modelConfig: {
             provider,
             modelId,
@@ -109,7 +109,7 @@ export async function updateSessionModel(req: Request, res: Response) {
 
         try {
           // Recreate agent with new model configuration
-          await activeSession.updateModelConfig(updatedMetadata);
+          await activeSession.updateModelConfig(updatedSessionItemInfo);
           console.log(`Session ${sessionId} agent recreated with new model config`);
         } catch (error) {
           console.error(`Failed to update agent model config for session ${sessionId}:`, error);
@@ -119,7 +119,7 @@ export async function updateSessionModel(req: Request, res: Response) {
 
       res.status(200).json({
         success: true,
-        sessionMetadata: updatedMetadata,
+        sessionItemInfo: updatedSessionItemInfo,
       });
     } else {
       res.status(400).json({ error: 'Storage not configured' });

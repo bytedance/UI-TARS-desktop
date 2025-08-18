@@ -10,7 +10,7 @@ import os from 'os';
 import { DatabaseSync } from 'node:sqlite';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { SQLiteStorageProvider } from '../src/storage/SQLiteStorageProvider';
-import { SessionMetadata } from '../src/types';
+import { SessionItemInfo } from '../src/types';
 import { AgentEventStream } from '@tarko/interface';
 
 // Mock the interface module
@@ -72,7 +72,7 @@ describe('SQLiteStorageProvider - Complete Migration Testing', () => {
     });
 
     it('should create and retrieve sessions', async () => {
-      const sessionData: SessionMetadata = {
+      const sessionData: SessionItemInfo = {
         id: 'test-session-1',
         workspace: '/test/workspace',
         createdAt: Date.now(),
@@ -89,7 +89,7 @@ describe('SQLiteStorageProvider - Complete Migration Testing', () => {
       expect(created.workspace).toBe(sessionData.workspace);
       expect(created.metadata).toEqual(sessionData.metadata);
 
-      const retrieved = await provider.getSessionMetadata('test-session-1');
+      const retrieved = await provider.getSessionItemInfo('test-session-1');
       expect(retrieved).not.toBeNull();
       expect(retrieved!.id).toBe(sessionData.id);
       expect(retrieved!.workspace).toBe(sessionData.workspace);
@@ -97,7 +97,7 @@ describe('SQLiteStorageProvider - Complete Migration Testing', () => {
     });
 
     it('should update session metadata', async () => {
-      const sessionData: SessionMetadata = {
+      const sessionData: SessionItemInfo = {
         id: 'test-session-update',
         workspace: '/test/workspace',
         createdAt: Date.now(),
@@ -110,7 +110,7 @@ describe('SQLiteStorageProvider - Complete Migration Testing', () => {
       // Wait a bit to ensure timestamp difference
       await new Promise((resolve) => setTimeout(resolve, 10));
 
-      const updated = await provider.updateSessionMetadata('test-session-update', {
+      const updated = await provider.updateSessionItemInfo('test-session-update', {
         workspace: '/updated/workspace',
         metadata: { name: 'Updated Name', tags: ['updated'] },
       });
@@ -122,7 +122,7 @@ describe('SQLiteStorageProvider - Complete Migration Testing', () => {
     });
 
     it('should handle session deletion with events', async () => {
-      const sessionData: SessionMetadata = {
+      const sessionData: SessionItemInfo = {
         id: 'test-session-delete',
         workspace: '/test/workspace',
         createdAt: Date.now(),
@@ -141,7 +141,7 @@ describe('SQLiteStorageProvider - Complete Migration Testing', () => {
       await provider.saveEvent('test-session-delete', event);
 
       // Verify session and events exist
-      const session = await provider.getSessionMetadata('test-session-delete');
+      const session = await provider.getSessionItemInfo('test-session-delete');
       expect(session).not.toBeNull();
 
       const events = await provider.getSessionEvents('test-session-delete');
@@ -152,7 +152,7 @@ describe('SQLiteStorageProvider - Complete Migration Testing', () => {
       expect(deleted).toBe(true);
 
       // Verify session and events are gone
-      const deletedSession = await provider.getSessionMetadata('test-session-delete');
+      const deletedSession = await provider.getSessionItemInfo('test-session-delete');
       expect(deletedSession).toBeNull();
 
       const deletedEvents = await provider.getSessionEvents('test-session-delete');
@@ -231,7 +231,7 @@ describe('SQLiteStorageProvider - Complete Migration Testing', () => {
       await provider.initialize();
 
       // Verify migration worked
-      const session = await provider.getSessionMetadata('legacy-session');
+      const session = await provider.getSessionItemInfo('legacy-session');
       expect(session).not.toBeNull();
       expect(session!.workspace).toBe('/legacy/workspace');
       expect(session!.metadata!.name).toBe('Legacy Session');
@@ -280,7 +280,7 @@ describe('SQLiteStorageProvider - Complete Migration Testing', () => {
       await provider.initialize();
 
       // Verify session migrated
-      const session = await provider.getSessionMetadata('legacy-with-events');
+      const session = await provider.getSessionItemInfo('legacy-with-events');
       expect(session).not.toBeNull();
       expect(session!.workspace).toBe('/legacy/workspace');
 
@@ -350,7 +350,7 @@ describe('SQLiteStorageProvider - Complete Migration Testing', () => {
 
       await provider.initialize();
 
-      const session = await provider.getSessionMetadata('mixed-session');
+      const session = await provider.getSessionItemInfo('mixed-session');
       expect(session).not.toBeNull();
       // The migration logic doesn't update existing workspace columns that are empty
       // It only adds workspace column when it doesn't exist
@@ -433,7 +433,7 @@ describe('SQLiteStorageProvider - Complete Migration Testing', () => {
       await provider.initialize();
 
       // Test that the SQL quote fixes work
-      const sessionData: SessionMetadata = {
+      const sessionData: SessionItemInfo = {
         id: 'quote-test',
         workspace: '/test/workspace',
         createdAt: Date.now(),
@@ -461,7 +461,7 @@ describe('SQLiteStorageProvider - Complete Migration Testing', () => {
       await provider.initialize();
 
       // The dynamic insert logic should handle missing workspace/metadata columns
-      const sessionData: SessionMetadata = {
+      const sessionData: SessionItemInfo = {
         id: 'dynamic-test',
         workspace: '/test/workspace',
         createdAt: Date.now(),
@@ -520,10 +520,10 @@ describe('SQLiteStorageProvider - Complete Migration Testing', () => {
     });
 
     it('should handle session not found errors', async () => {
-      await expect(provider.getSessionMetadata('non-existent')).resolves.toBeNull();
+      await expect(provider.getSessionItemInfo('non-existent')).resolves.toBeNull();
 
       await expect(
-        provider.updateSessionMetadata('non-existent', { workspace: '/new' }),
+        provider.updateSessionItemInfo('non-existent', { workspace: '/new' }),
       ).rejects.toThrow('Session not found: non-existent');
 
       await expect(provider.deleteSession('non-existent')).resolves.toBe(false);

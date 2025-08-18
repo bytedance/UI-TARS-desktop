@@ -11,7 +11,7 @@ import {
   agentInfoAtom,
 } from '../atoms/ui';
 import { processEventAction } from './eventProcessors';
-import { Message, SessionMetadata } from '@/common/types';
+import { Message, SessionItemInfo } from '@/common/types';
 import { connectionStatusAtom } from '../atoms/ui';
 import { replayStateAtom } from '../atoms/replay';
 import { sessionFilesAtom, FileItem } from '../atoms/files';
@@ -289,15 +289,11 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
 
 export const updateSessionAction = atom(
   null,
-  async (
-    get,
-    set,
-    params: { sessionId: string; updates: Partial<SessionMetadata['metadata']> },
-  ) => {
+  async (get, set, params: { sessionId: string; updates: Partial<SessionItemInfo> }) => {
     const { sessionId, updates } = params;
 
     try {
-      const updatedSession = await apiService.updateSessionMetadata(sessionId, updates);
+      const updatedSession = await apiService.updateSessionItemInfo(sessionId, updates);
 
       set(sessionsAtom, (prev) =>
         prev.map((session) =>
@@ -407,7 +403,7 @@ export const sendMessageAction = atom(
           }
         }
 
-        await apiService.updateSessionMetadata(activeSessionId, { name: summary });
+        await apiService.updateSessionItemInfo(activeSessionId, { metadata: { name: summary } });
 
         set(sessionsAtom, (prev) =>
           prev.map((session) =>

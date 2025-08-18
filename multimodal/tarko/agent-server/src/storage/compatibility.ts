@@ -3,19 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SessionMetadata, LegacySessionMetadata } from './types';
+import { SessionItemInfo, LegacySessionItemInfo } from './types';
 
 /**
- * Convert legacy SessionMetadata to new JSON schema format
+ * Convert legacy SessionItemInfo to new JSON schema format
  * Provides backward compatibility during the transition period
  */
-export function migrateLegacyToJsonSchema(legacy: LegacySessionMetadata): SessionMetadata {
-  const metadata: any = { version: 1 };
-  
+export function migrateLegacyToJsonSchema(legacy: LegacySessionItemInfo): SessionItemInfo {
+  const metadata: SessionItemInfo['metadata'] = { version: 1 };
+
   if (legacy.name) metadata.name = legacy.name;
   if (legacy.tags) metadata.tags = legacy.tags;
   if (legacy.modelConfig) metadata.modelConfig = legacy.modelConfig;
-  
+
   return {
     id: legacy.id,
     createdAt: legacy.createdAt,
@@ -29,7 +29,7 @@ export function migrateLegacyToJsonSchema(legacy: LegacySessionMetadata): Sessio
  * Extract legacy fields from JSON schema for backward compatibility
  * This allows existing code to continue working during transition
  */
-export function extractLegacyFields(session: SessionMetadata): LegacySessionMetadata {
+export function extractLegacyFields(session: SessionItemInfo): LegacySessionItemInfo {
   return {
     id: session.id,
     createdAt: session.createdAt,
@@ -55,15 +55,15 @@ export function createJsonSchemaSession(
       modelId: string;
       configuredAt: number;
     };
-  }
-): SessionMetadata {
+  },
+): SessionItemInfo {
   const now = Date.now();
-  const metadata: any = { version: 1 };
-  
+  const metadata: SessionItemInfo['metadata'] = { version: 1 };
+
   if (options?.name) metadata.name = options.name;
   if (options?.tags) metadata.tags = options.tags;
   if (options?.modelConfig) metadata.modelConfig = options.modelConfig;
-  
+
   return {
     id,
     createdAt: now,

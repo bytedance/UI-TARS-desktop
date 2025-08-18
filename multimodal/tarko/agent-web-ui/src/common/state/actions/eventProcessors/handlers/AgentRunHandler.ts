@@ -32,10 +32,12 @@ export class AgentRunStartHandler implements EventHandler<AgentEventStream.Agent
 
       // Store agent info in session metadata for persistence
       try {
-        await apiService.updateSessionMetadata(sessionId, {
-          agentInfo: {
-            name: event.agentName,
-            configuredAt: Date.now(),
+        await apiService.updateSessionItemInfo(sessionId, {
+          metadata: {
+            agentInfo: {
+              name: event.agentName,
+              configuredAt: Date.now(),
+            },
           },
         });
       } catch (error) {

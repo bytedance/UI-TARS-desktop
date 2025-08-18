@@ -12,7 +12,7 @@ import {
   SqliteAgentStorageImplementation,
   TARKO_CONSTANTS,
 } from '@tarko/interface';
-import { StorageProvider, SessionMetadata, LegacySessionMetadata } from './types';
+import { StorageProvider, SessionItemInfo, LegacySessionItemInfo } from './types';
 
 // Define row types for better type safety
 interface SessionRow {
@@ -257,7 +257,7 @@ export class SQLiteStorageProvider implements StorageProvider {
 
       for (const row of legacyRows) {
         // Convert legacy data to JSON metadata format
-        const metadata: any = { version: 1 };
+        const metadata: SessionItemInfo['metadata'] = { version: 1 };
 
         if (row.name) metadata.name = row.name;
         if (row.tags) {
@@ -329,7 +329,7 @@ export class SQLiteStorageProvider implements StorageProvider {
         `);
 
         for (const row of legacyRows) {
-          const metadata: any = { version: 1 };
+          const metadata: SessionItemInfo['metadata'] = { version: 1 };
           if (row.name) metadata.name = row.name;
           if (row.tags) {
             try {
@@ -375,7 +375,7 @@ export class SQLiteStorageProvider implements StorageProvider {
     }
   }
 
-  async createSession(metadata: SessionMetadata): Promise<SessionMetadata> {
+  async createSession(metadata: SessionItemInfo): Promise<SessionItemInfo> {
     await this.ensureInitialized();
 
     const sessionData = {
@@ -398,7 +398,11 @@ export class SQLiteStorageProvider implements StorageProvider {
 
       // Build dynamic INSERT query based on available columns
       const insertColumns = ['id', 'createdAt', 'updatedAt'];
-      const insertValues: (string | number | null)[] = [sessionData.id, sessionData.createdAt, sessionData.updatedAt];
+      const insertValues: (string | number | null)[] = [
+        sessionData.id,
+        sessionData.createdAt,
+        sessionData.updatedAt,
+      ];
       const placeholders = ['?', '?', '?'];
 
       if (hasWorkspace) {
@@ -426,7 +430,7 @@ export class SQLiteStorageProvider implements StorageProvider {
 
       const stmt = this.db.prepare(insertQuery);
       stmt.run(...insertValues);
-      
+
       return sessionData;
     } catch (error) {
       console.error(`Failed to create session ${sessionData.id}:`, error);
@@ -436,21 +440,21 @@ export class SQLiteStorageProvider implements StorageProvider {
     }
   }
 
-  async updateSessionMetadata(
+  async updateSessionItemInfo(
     sessionId: string,
-    metadata: Partial<Omit<SessionMetadata, 'id'>>,
-  ): Promise<SessionMetadata> {
+    sessionItemInfo: Partial<Omit<SessionItemInfo, 'id'>>,
+  ): Promise<SessionItemInfo> {
     await this.ensureInitialized();
 
     // First, get the current session data
-    const session = await this.getSessionMetadata(sessionId);
+    const session = await this.getSessionItemInfo(sessionId);
     if (!session) {
       throw new Error(`Session not found: ${sessionId}`);
     }
 
     const updatedSession = {
       ...session,
-      ...metadata,
+      ...sessionItemInfo,
       updatedAt: Date.now(),
     };
 
@@ -458,14 +462,14 @@ export class SQLiteStorageProvider implements StorageProvider {
       const params: Array<string | number | null> = [];
       const setClauses: string[] = [];
 
-      if (metadata.workspace !== undefined) {
+      if (sessionItemInfo.workspace !== undefined) {
         setClauses.push('workspace = ?');
-        params.push(metadata.workspace);
+        params.push(sessionItemInfo.workspace);
       }
 
-      if (metadata.metadata !== undefined) {
+      if (sessionItemInfo.metadata !== undefined) {
         setClauses.push('metadata = ?');
-        params.push(metadata.metadata ? JSON.stringify(metadata.metadata) : null);
+        params.push(sessionItemInfo.metadata ? JSON.stringify(sessionItemInfo.metadata) : null);
       }
 
       // Always update the timestamp
@@ -498,7 +502,7 @@ export class SQLiteStorageProvider implements StorageProvider {
     }
   }
 
-  async getSessionMetadata(sessionId: string): Promise<SessionMetadata | null> {
+  async getSessionItemInfo(sessionId: string): Promise<SessionItemInfo | null> {
     await this.ensureInitialized();
 
     try {
@@ -543,7 +547,7 @@ export class SQLiteStorageProvider implements StorageProvider {
     }
   }
 
-  async getAllSessions(): Promise<SessionMetadata[]> {
+  async getAllSessions(): Promise<SessionItemInfo[]> {
     await this.ensureInitialized();
 
     try {

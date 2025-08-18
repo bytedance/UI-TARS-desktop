@@ -6,7 +6,7 @@
 import { Request, Response } from 'express';
 import { ChatCompletionContentPart } from '@tarko/interface';
 import { nanoid } from 'nanoid';
-import { SessionMetadata } from '../../storage';
+import { SessionItemInfo } from '../../storage';
 import { AgentSession } from '../../core';
 import { createErrorResponse } from '../../utils/error-handler';
 
@@ -60,11 +60,11 @@ export async function createAndQuery(req: Request, res: Response) {
 
     // Store session metadata if storage is available
     if (server.storageProvider) {
-      const metadataContent: any = { version: 1 };
+      const metadataContent: SessionItemInfo['metadata'] = { version: 1 };
       if (sessionName) metadataContent.name = sessionName;
       if (sessionTags) metadataContent.tags = sessionTags;
 
-      const metadata: SessionMetadata = {
+      const metadata: SessionItemInfo = {
         id: sessionId,
         createdAt: Date.now(),
         updatedAt: Date.now(),
@@ -126,11 +126,11 @@ export async function createAndStreamingQuery(req: Request, res: Response) {
 
     // Store session metadata if storage is available
     if (server.storageProvider) {
-      const metadataContent: any = { version: 1 };
+      const metadataContent: SessionItemInfo['metadata'] = { version: 1 };
       if (sessionName) metadataContent.name = sessionName;
       if (sessionTags) metadataContent.tags = sessionTags;
 
-      const metadata: SessionMetadata = {
+      const metadata: SessionItemInfo = {
         id: sessionId,
         createdAt: Date.now(),
         updatedAt: Date.now(),

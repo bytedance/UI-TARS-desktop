@@ -19,7 +19,7 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
     sessions,
     activeSessionId,
     setActiveSession,
-    updateSessionMetadata,
+    updateSessionItemInfo,
     deleteSession,
     loadSessions,
     connectionStatus,
@@ -205,13 +205,13 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
   const handleSaveEdit = useCallback(
     async (sessionId: string) => {
       try {
-        await updateSessionMetadata({ sessionId, updates: { name: editedName } });
+        await updateSessionItemInfo({ sessionId, updates: { metadata: { name: editedName } } });
         setEditingSessionId(null);
       } catch (error) {
         console.error('Failed to update session name:', error);
       }
     },
-    [updateSessionMetadata, editedName],
+    [updateSessionItemInfo, editedName],
   );
 
   const handleDeleteSession = useCallback(async (sessionId: string, e: React.MouseEvent) => {
@@ -376,7 +376,9 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
                             key={session.id}
                             session={session}
                             isActive={activeSessionId === session.id}
-                            isLoading={loadingSessionId === session.id || switchingSessionId === session.id}
+                            isLoading={
+                              loadingSessionId === session.id || switchingSessionId === session.id
+                            }
                             isConnected={connectionStatus.connected}
                             searchQuery={isSearchMode ? searchQuery : ''}
                             onSessionClick={handleSessionClick}

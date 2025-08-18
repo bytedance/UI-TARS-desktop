@@ -124,7 +124,7 @@ export type AgioProviderConstructor<T extends AgentOptions = AgentOptions> = TCo
 /**
  * Session metadata interface - JSON schema design for extensibility
  */
-export interface SessionMetadata {
+export interface SessionItemInfo {
   id: string;
   createdAt: number;
   updatedAt: number;
@@ -167,9 +167,9 @@ export interface SessionMetadata {
 
 /**
  * Legacy interface for backward compatibility during transition
- * @deprecated Use SessionMetadata.metadata instead
+ * @deprecated Use SessionItemInfo.metadata instead
  */
-export interface LegacySessionMetadata {
+export interface LegacySessionItemInfo {
   id: string;
   createdAt: number;
   updatedAt: number;

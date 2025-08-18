@@ -31,7 +31,7 @@ export async function sessionRestoreMiddleware(
 
     // If the session is not in memory but the storage is available, try to restore the session from storage
     if (!session && server.storageProvider) {
-      const metadata = await server.storageProvider.getSessionMetadata(sessionId);
+      const metadata = await server.storageProvider.getSessionItemInfo(sessionId);
       if (metadata) {
         try {
           // Recover sessions from storage using a custom AGIO provider

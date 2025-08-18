@@ -4,7 +4,7 @@
  */
 
 import { AgentEventStream, AgentStorageImplementation } from '@tarko/interface';
-import { StorageProvider, SessionMetadata } from './types';
+import { StorageProvider, SessionItemInfo } from './types';
 
 /**
  * Abstract database storage provider
@@ -19,13 +19,13 @@ export abstract class DatabaseStorageProvider implements StorageProvider {
   }
 
   abstract initialize(): Promise<void>;
-  abstract createSession(metadata: SessionMetadata): Promise<SessionMetadata>;
-  abstract updateSessionMetadata(
+  abstract createSession(metadata: SessionItemInfo): Promise<SessionItemInfo>;
+  abstract updateSessionItemInfo(
     sessionId: string,
-    metadata: Partial<Omit<SessionMetadata, 'id'>>,
-  ): Promise<SessionMetadata>;
-  abstract getSessionMetadata(sessionId: string): Promise<SessionMetadata | null>;
-  abstract getAllSessions(): Promise<SessionMetadata[]>;
+    sessionItemInfo: Partial<Omit<SessionItemInfo, 'id'>>,
+  ): Promise<SessionItemInfo>;
+  abstract getSessionItemInfo(sessionId: string): Promise<SessionItemInfo | null>;
+  abstract getAllSessions(): Promise<SessionItemInfo[]>;
   abstract deleteSession(sessionId: string): Promise<boolean>;
   abstract saveEvent(sessionId: string, event: AgentEventStream.Event): Promise<void>;
   abstract getSessionEvents(sessionId: string): Promise<AgentEventStream.Event[]>;

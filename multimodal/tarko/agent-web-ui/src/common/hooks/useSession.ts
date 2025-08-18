@@ -64,7 +64,7 @@ export function useSession() {
   const loadSessions = useSetAtom(loadSessionsAction);
   const createSession = useSetAtom(createSessionAction);
   const setActiveSession = useSetAtom(setActiveSessionAction);
-  const updateSessionMetadata = useSetAtom(updateSessionAction);
+  const updateSessionItemInfo = useSetAtom(updateSessionAction);
   const deleteSession = useSetAtom(deleteSessionAction);
   const sendMessage = useSetAtom(sendMessageAction);
   const abortQuery = useSetAtom(abortQueryAction);
@@ -85,7 +85,7 @@ export function useSession() {
     (status: any) => {
       if (status && typeof status.isProcessing === 'boolean' && !isReplayMode) {
         setIsProcessing(status.isProcessing);
-        
+
         // Update enhanced agent status for TTFT optimization
         setAgentStatus({
           isProcessing: status.isProcessing,
@@ -161,7 +161,7 @@ export function useSession() {
       loadSessions,
       createSession,
       setActiveSession,
-      updateSessionMetadata,
+      updateSessionItemInfo,
       deleteSession,
 
       // Message operations
@@ -198,7 +198,7 @@ export function useSession() {
       loadSessions,
       createSession,
       setActiveSession,
-      updateSessionMetadata,
+      updateSessionItemInfo,
       deleteSession,
       sendMessage,
       abortQuery,

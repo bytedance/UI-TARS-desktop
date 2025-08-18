@@ -2,12 +2,12 @@ import React, { useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { FiMessageSquare, FiEdit2, FiTrash2, FiTag, FiClock, FiLoader } from 'react-icons/fi';
 import { formatTimestamp } from '@/common/utils/formatters';
-import { SessionMetadata } from '@/common/types';
+import { SessionItemInfo } from '@/common/types';
 import classNames from 'classnames';
 import { HighlightText } from './HighlightText';
 
 interface SessionItemProps {
-  session: SessionMetadata;
+  session: SessionItemInfo;
   isActive: boolean;
   isLoading: boolean;
   isConnected: boolean;
@@ -150,24 +150,24 @@ const SessionItem: React.FC<SessionItemProps> = React.memo(
 
             {!isLoading && (
               <div className="hidden group-hover:flex absolute right-2 gap-1">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={handleEdit}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-all border border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/30 bg-white/80 dark:bg-gray-800/80"
-                title="Edit task name"
-              >
-                <FiEdit2 size={12} />
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={handleDelete}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-all border border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/30 bg-white/80 dark:bg-gray-800/80"
-                title="Delete task"
-              >
-                <FiTrash2 size={12} />
-              </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleEdit}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-all border border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/30 bg-white/80 dark:bg-gray-800/80"
+                  title="Edit task name"
+                >
+                  <FiEdit2 size={12} />
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleDelete}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-all border border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/30 bg-white/80 dark:bg-gray-800/80"
+                  title="Delete task"
+                >
+                  <FiTrash2 size={12} />
+                </motion.button>
               </div>
             )}
           </motion.button>
