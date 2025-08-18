@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FiCode, FiArrowRight, FiClock } from 'react-icons/fi';
+import { FiCode, FiClock } from 'react-icons/fi';
 import { JsonRenderer } from '@/common/components/JsonRenderer';
 import { RawToolMapping } from '@/common/state/atoms/rawEvents';
 import { formatTimestamp } from '@/common/utils/formatters';
@@ -13,7 +13,7 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
   const { toolCall, toolResult } = toolMapping;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 mt-4">
       {/* Tool Call Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -57,17 +57,7 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
         </div>
       </motion.div>
 
-      {/* Arrow Indicator */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.2 }}
-        className="flex justify-center"
-      >
-        <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-          <FiArrowRight size={16} className="text-gray-500 dark:text-gray-400" />
-        </div>
-      </motion.div>
+
 
       {/* Tool Result Section */}
       <motion.div

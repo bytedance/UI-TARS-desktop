@@ -17,7 +17,7 @@ interface JsonItemProps {
 }
 
 const JsonItem: React.FC<JsonItemProps> = ({ label, value, level = 0, isRoot = false }) => {
-  const [isExpanded, setIsExpanded] = useState(level < 2); // Auto-expand first 2 levels
+  const [isExpanded, setIsExpanded] = useState(false); // Default collapsed
   const [copied, setCopied] = useState(false);
   const [isStringExpanded, setIsStringExpanded] = useState(false);
 
@@ -55,14 +55,14 @@ const JsonItem: React.FC<JsonItemProps> = ({ label, value, level = 0, isRoot = f
         initial={{ opacity: 0, x: -10 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: level * 0.02 }}
-        className={`${indentClass} group py-1.5 px-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors`}
+        className={`${indentClass} group py-2 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-200 border border-transparent hover:border-gray-200 dark:hover:border-gray-600`}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3 min-w-0 flex-1">
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300 flex-shrink-0">
+            <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 flex-shrink-0">
               {label}
             </span>
-            <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0 mt-0.5">:</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 mt-0.5">:</span>
             <div className="flex-1 min-w-0">
               {isStringExpanded ? (
                 <pre className={`text-sm font-mono ${valueColor} whitespace-pre-wrap break-words`}>
@@ -124,7 +124,7 @@ const JsonItem: React.FC<JsonItemProps> = ({ label, value, level = 0, isRoot = f
         whileHover={{ scale: 1.01 }}
         whileTap={{ scale: 0.99 }}
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group"
+        className="w-full flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-200 border border-transparent hover:border-gray-200 dark:hover:border-gray-600 group"
       >
         <motion.div
           animate={{ rotate: isExpanded ? 90 : 0 }}
@@ -132,10 +132,10 @@ const JsonItem: React.FC<JsonItemProps> = ({ label, value, level = 0, isRoot = f
         >
           <FiChevronRight size={14} className="text-gray-400" />
         </motion.div>
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
           {label}
         </span>
-        <span className="text-xs text-gray-400 dark:text-gray-500 font-mono">
+        <span className="text-xs text-gray-500 dark:text-gray-400 font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
           {typeLabel}
         </span>
       </motion.button>
@@ -149,21 +149,21 @@ const JsonItem: React.FC<JsonItemProps> = ({ label, value, level = 0, isRoot = f
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="ml-4 border-l border-gray-200 dark:border-gray-700 pl-2">
+            <div className="ml-6 border-l-2 border-gray-200 dark:border-gray-600 pl-4">
               {isArray ? (
                 value.map((item: any, index: number) => (
                   <JsonItem
-                    key={index}
+                    key={`item-${index}`}
                     label={`[${index}]`}
                     value={item}
                     level={level + 1}
                   />
                 ))
               ) : (
-                Object.entries(value).map(([key, val]) => (
+                Object.entries(value).map(([itemKey, val]) => (
                   <JsonItem
-                    key={key}
-                    label={key}
+                    key={itemKey}
+                    label={itemKey}
                     value={val}
                     level={level + 1}
                   />
@@ -203,14 +203,14 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
   const isRootArray = Array.isArray(data);
 
   return (
-    <div className={`space-y-1 ${className}`}>
+    <div className={`space-y-2 ${className}`}>
       {isRootObject ? (
-        Object.entries(data).map(([key, value]) => (
-          <JsonItem key={key} label={key} value={value} isRoot />
+        Object.entries(data).map(([itemKey, value]) => (
+          <JsonItem key={itemKey} label={itemKey} value={value} isRoot />
         ))
       ) : isRootArray ? (
         data.map((item: any, index: number) => (
-          <JsonItem key={index} label={`[${index}]`} value={item} isRoot />
+          <JsonItem key={`root-${index}`} label={`[${index}]`} value={item} isRoot />
         ))
       ) : (
         <JsonItem label="value" value={data} isRoot />
