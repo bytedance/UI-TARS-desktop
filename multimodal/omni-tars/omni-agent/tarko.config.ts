@@ -12,6 +12,7 @@ export default defineConfig({
     id: process.env.OMNI_TARS_MODEL_ID,
     baseURL: process.env.OMNI_TARS_BASE_URL,
     apiKey: process.env.OMNI_TARS_API_KEY,
+    displayName: 'o-tars',
     /** aws */
     // provider: 'azure-openai',
     // id: 'aws_sdk_claude4_sonnet',
