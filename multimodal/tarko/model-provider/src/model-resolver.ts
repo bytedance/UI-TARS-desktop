@@ -39,7 +39,13 @@ export class ModelResolver {
    */
   private buildDefaultSelection(options: ProviderOptions): ModelDefaultSelection {
     // Explicit selection takes priority
-    if (options.id || options.provider || options.apiKey || options.baseURL || options.displayName) {
+    if (
+      options.id ||
+      options.provider ||
+      options.apiKey ||
+      options.baseURL ||
+      options.displayName
+    ) {
       return {
         id: options.id,
         provider: options.provider,
@@ -55,7 +61,7 @@ export class ModelResolver {
       const firstModel = firstProvider.models[0];
       const modelId = typeof firstModel === 'string' ? firstModel : firstModel.id;
       const displayName = typeof firstModel === 'string' ? undefined : firstModel.displayName;
-      
+
       return {
         provider: firstProvider.name,
         id: modelId,
@@ -79,19 +85,22 @@ export class ModelResolver {
    * Find provider that supports the specified model
    */
   private findProviderByModel(modelName: string): ModelProvider | undefined {
-    return this.providers.find((provider) => 
-      provider.models.some(model => 
-        typeof model === 'string' ? model === modelName : model.id === modelName
-      )
+    return this.providers.find((provider) =>
+      provider.models.some((model) =>
+        typeof model === 'string' ? model === modelName : model.id === modelName,
+      ),
     );
   }
 
   /**
    * Find model configuration by ID within a provider
    */
-  private findModelConfig(provider: ModelProvider, modelId: string): ModelConfig | string | undefined {
-    return provider.models.find(model => 
-      typeof model === 'string' ? model === modelId : model.id === modelId
+  private findModelConfig(
+    provider: ModelProvider,
+    modelId: string,
+  ): ModelConfig | string | undefined {
+    return provider.models.find((model) =>
+      typeof model === 'string' ? model === modelId : model.id === modelId,
     );
   }
 
@@ -148,7 +157,7 @@ export class ModelResolver {
     if (configuredProvider) {
       baseURL = configuredProvider.baseURL;
       apiKey = configuredProvider.apiKey;
-      
+
       // Look for model-specific configuration including displayName
       const modelConfig = this.findModelConfig(configuredProvider, model);
       if (modelConfig && typeof modelConfig === 'object') {
