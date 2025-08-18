@@ -39,14 +39,6 @@ export const checkConnectionStatusAction = atom(null, async (get, set) => {
           path: agentOptions.workspace || '',
         };
         set(workspaceInfoAtom, workspaceInfo);
-
-        // Extract model info from agent options
-        const modelInfo = {
-          model: agentOptions.model?.id || agentOptions.model?.id,
-          provider: agentOptions.model?.provider,
-          displayName: agentOptions.model?.displayName,
-        };
-        set(modelInfoAtom, modelInfo);
       } catch (error) {
         console.warn('Failed to load agent options:', error);
       }
