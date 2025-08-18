@@ -73,19 +73,27 @@ export async function createSession(req: Request, res: Response) {
       server.storageUnsubscribes[sessionId] = storageUnsubscribe;
     }
 
+    let savedSessionItemInfo: SessionItemInfo | undefined;
     // Store session metadata if we have storage
     if (server.storageProvider) {
-      const metadata: SessionItemInfo = {
+      const now = Date.now();
+      const sessionItemInfo: SessionItemInfo = {
         id: sessionId,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
+        createdAt: now,
+        updatedAt: now,
         workspace: server.getCurrentWorkspace(),
+        metadata: {
+          agentInfo: {
+            name: server.getCurrentAgentName()!,
+            configuredAt: now,
+          },
+        },
       };
 
-      await server.storageProvider.createSession(metadata);
+      savedSessionItemInfo = await server.storageProvider.createSession(sessionItemInfo);
     }
 
-    res.status(201).json({ sessionId });
+    res.status(201).json({ sessionId, session: savedSessionItemInfo });
   } catch (error) {
     console.error('Failed to create session:', error);
     res.status(500).json({ error: 'Failed to create session' });
