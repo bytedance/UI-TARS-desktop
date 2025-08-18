@@ -50,6 +50,7 @@ export const checkConnectionStatusAction = atom(null, async (get, set) => {
         const modelInfo = {
           model: agentOptions.model?.id || agentOptions.model?.id,
           provider: agentOptions.model?.provider,
+          displayName: agentOptions.model?.displayName,
         };
         set(modelInfoAtom, modelInfo);
       } catch (error) {

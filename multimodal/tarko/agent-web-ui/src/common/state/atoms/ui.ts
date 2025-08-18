@@ -30,6 +30,7 @@ export const connectionStatusAtom = atom<ConnectionStatus>({
 export const modelInfoAtom = atom<ModelInfo>({
   provider: '',
   model: '',
+  displayName: '',
 });
 
 /**
@@ -70,8 +71,8 @@ export const isProcessingAtom = atom<boolean>(false);
 /**
  * Enhanced agent status atom for TTFT optimization
  */
-export const agentStatusAtom = atom<AgentStatusInfo>({ 
-  isProcessing: false 
+export const agentStatusAtom = atom<AgentStatusInfo>({
+  isProcessing: false,
 });
 
 /**
