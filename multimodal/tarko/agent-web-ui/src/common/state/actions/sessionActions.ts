@@ -170,7 +170,7 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
           modelInfo: {
             provider: runStartEvent.provider || '',
             model: runStartEvent.model || '',
-            displayName: 'modelDisplayName' in runStartEvent ? runStartEvent.modelDisplayName : undefined,
+            displayName: runStartEvent.modelDisplayName ?? '',
           },
         });
       }
@@ -193,7 +193,7 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
             const modelInfo = {
               provider: runStartEvent.provider || '',
               model: runStartEvent.model || '',
-              displayName: 'modelDisplayName' in runStartEvent ? runStartEvent.modelDisplayName : undefined,
+              displayName: runStartEvent.modelDisplayName ?? '',
             };
 
             set(modelInfoAtom, modelInfo);
