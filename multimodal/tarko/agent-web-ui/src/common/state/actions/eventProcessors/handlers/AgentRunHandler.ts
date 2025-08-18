@@ -2,19 +2,15 @@ import { isProcessingAtom, modelInfoAtom } from '@/common/state/atoms/ui';
 import { AgentEventStream } from '@/common/types';
 import { EventHandler, EventHandlerContext } from '../types';
 
-export class AgentRunStartHandler
-  implements EventHandler<AgentEventStream.Event & { provider?: string; model?: string; modelDisplayName?: string }>
-{
-  canHandle(
-    event: AgentEventStream.Event,
-  ): event is AgentEventStream.Event & { provider?: string; model?: string; modelDisplayName?: string } {
+export class AgentRunStartHandler implements EventHandler<AgentEventStream.AgentRunStartEvent> {
+  canHandle(event: AgentEventStream.Event): event is AgentEventStream.AgentRunStartEvent {
     return event.type === 'agent_run_start';
   }
 
   handle(
     context: EventHandlerContext,
     sessionId: string,
-    event: AgentEventStream.Event & { provider?: string; model?: string; modelDisplayName?: string },
+    event: AgentEventStream.AgentRunStartEvent,
   ): void {
     const { set } = context;
 
