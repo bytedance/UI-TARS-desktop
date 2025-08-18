@@ -557,6 +557,10 @@ export class MCPClient<
               `[MCP] Error listing tools for ${clientName}:`,
               error,
             );
+            // Re-throw error for specific server when serverName is provided
+            if (serverName === clientName) {
+              throw error;
+            }
           }
         }
         this.log('info', `[MCP] Total tools listed: ${allTools.length}`);
@@ -564,7 +568,8 @@ export class MCPClient<
       }
     } catch (error) {
       this.log('error', '[MCP] Error listing tools:', error);
-      return [];
+      // Don't return empty array for critical failures, re-throw the error
+      throw error;
     }
   }
 
