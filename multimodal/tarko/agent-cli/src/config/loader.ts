@@ -59,10 +59,10 @@ async function loadRemoteConfig(url: string, isDebug = false): Promise<AgentAppC
 /**
  * Load environment variables from .env.local and .env files
  */
-function loadEnv(isDebug = false) {
+export function loadEnvironmentVars(workspace: string, isDebug = false) {
   try {
     // .env.local has higher priority than .env
-    const envPaths = [path.join(process.cwd(), '.env.local'), path.join(process.cwd(), '.env')];
+    const envPaths = [path.join(workspace, '.env.local'), path.join(workspace, '.env')];
 
     for (const p of envPaths) {
       if (existsSync(p)) {
@@ -100,8 +100,6 @@ export async function loadAgentConfig(
   isDebug = false,
 ): Promise<AgentAppConfig> {
   logConfigStart(isDebug);
-
-  loadEnv(isDebug);
 
   // Handle no config case - try to load from default locations
   if (!configPaths || configPaths.length === 0) {

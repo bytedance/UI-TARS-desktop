@@ -16,7 +16,12 @@ import { addCommonOptions, resolveAgentFromCLIArgument } from './options';
 import { buildConfigPaths } from '../config/paths';
 import { readFromStdin } from './stdin';
 import { deepMerge, logger, printWelcomeLogo, resolveWorkspacePath } from '../utils';
-import { buildAppConfig, CLIOptionsEnhancer, loadAgentConfig } from '../config';
+import {
+  buildAppConfig,
+  CLIOptionsEnhancer,
+  loadAgentConfig,
+  loadEnvironmentVars,
+} from '../config';
 import { GlobalWorkspaceCommand } from './commands';
 import { CLICommand, CLIInstance, AgentCLIInitOptions, AgentServerInitOptions } from '../types';
 
@@ -355,6 +360,10 @@ export class AgentCLI {
     }
 
     const workspace = resolveWorkspacePath(process.cwd(), cliArguments.workspace);
+
+    // Init Environment Variables from .env files
+    loadEnvironmentVars(workspace, isDebug);
+
     const globalWorkspaceCommand = new GlobalWorkspaceCommand(
       this.options.directories?.globalWorkspaceDir,
     );
