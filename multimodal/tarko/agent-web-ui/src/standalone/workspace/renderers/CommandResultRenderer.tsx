@@ -201,55 +201,96 @@ function extractCommandData(panelContent: StandardPanelContent) {
    * FIXME: we need to We should design an extension mechanism so that all compatible logic can be
    * implemented through external plug-in solutions.
    */
-  if (typeof panelContent.source === 'object' && panelContent.type === 'command_result') {
-    /**
-     * For Omni TARS  "execute_bash" tool.
-     * {
-     *   "panelContent": {
-     *      "type": "command_result",
-     *      "source": {
-     *          "session_id": "0cec471e-97ae-4a4b-9d55-9f3a3466a9b7",
-     *          "command": "mkdir -p /home/gem/tmp",
-     *          "status": "completed",
-     *          "returncode": 0,
-     *          "output": "\\u001b[?2004hgem@50ddd3ffedb3:~$ > mkdir -p /home/gem/tmp\\nmkdir -p /home/gem/tmp\\r\\n\\u001b[?2004l\\r\\u001b[?2004hgem@50ddd3ffedb3:~$ ",
-     *          "console": [
-     *              {
-     *                  "ps1": "gem@50ddd3ffedb3:~ $",
-     *                  "command": "mkdir -p /home/gem/tmp",
-     *                  "output": "\\u001b[?2004hgem@50ddd3ffedb3:~$ > mkdir -p /home/gem/tmp\\nmkdir -p /home/gem/tmp\\r\\n\\u001b[?2004l\\r\\u001b[?2004hgem@50ddd3ffedb3:~$ "
-     *              }
-     *          ]
-     *      },
-     *      "title": "execute_bash",
-     *      "timestamp": 1755109845677,
-     *      "toolCallId": "call_1755109845259_h5f8zcseg",
-     *      "arguments": {
-     *          "command": "mkdir -p /home/gem/tmp"
-     *      }
-     *  }
-     *}
-     */
-    if (panelContent.title === 'execute_bash') {
-      return {
-        command: panelContent.arguments?.command,
-        stdout: panelContent.source.output,
-        exitCode: panelContent.source.returncode,
-      };
-    }
+
+  /**
+   * For Omni TARS  "execute_bash" tool.
+   * {
+   *   "panelContent": {
+   *      "type": "command_result",
+   *      "source": {
+   *          "session_id": "0cec471e-97ae-4a4b-9d55-9f3a3466a9b7",
+   *          "command": "mkdir -p /home/gem/tmp",
+   *          "status": "completed",
+   *          "returncode": 0,
+   *          "output": "\\u001b[?2004hgem@50ddd3ffedb3:~$ > mkdir -p /home/gem/tmp\\nmkdir -p /home/gem/tmp\\r\\n\\u001b[?2004l\\r\\u001b[?2004hgem@50ddd3ffedb3:~$ ",
+   *          "console": [
+   *              {
+   *                  "ps1": "gem@50ddd3ffedb3:~ $",
+   *                  "command": "mkdir -p /home/gem/tmp",
+   *                  "output": "\\u001b[?2004hgem@50ddd3ffedb3:~$ > mkdir -p /home/gem/tmp\\nmkdir -p /home/gem/tmp\\r\\n\\u001b[?2004l\\r\\u001b[?2004hgem@50ddd3ffedb3:~$ "
+   *              }
+   *          ]
+   *      },
+   *      "title": "execute_bash",
+   *      "timestamp": 1755109845677,
+   *      "toolCallId": "call_1755109845259_h5f8zcseg",
+   *      "arguments": {
+   *          "command": "mkdir -p /home/gem/tmp"
+   *      }
+   *  }
+   *}
+   */
+  if (panelContent.title === 'execute_bash' && typeof panelContent.source === 'object') {
+    return {
+      command: panelContent.arguments?.command,
+      stdout: panelContent.source.output,
+      exitCode: panelContent.source.returncode,
+    };
   }
 
-  if (typeof panelContent.source === 'string') {
-    const isError = panelContent.source.includes('Error: ');
+  /**
+   * SUCCESS:
+   *
+   * {
+   *    "panelContent": {
+   *        "type": "command_result",
+   *        "source": {
+   *            "output": "File created successfully at: /home/gem/agent-tars-poster/package.json",
+   *            "error": null,
+   *            "path": "/home/gem/agent-tars-poster/package.json",
+   *            "prev_exist": false,
+   *            "old_content": null,
+   *            "new_content": "..."
+   *        },
+   *        "title": "str_replace_editor",
+   *        "timestamp": 1755607726980,
+   *        "toolCallId": "call_1755607726967_iiy3e7x6v",
+   *        "arguments": {
+   *            "command": "create",
+   *            "path": "/home/gem/agent-tars-poster/package.json",
+   *            "file_text": "..."
+   *        }
+   *    }
+   * }
+   */
+  if (panelContent.title === 'str_replace_editor' && panelContent.arguments) {
+    const { command = '', file_text = '', path = '' } = panelContent.arguments;
 
-    if (panelContent.title === 'str_replace_editor' && panelContent.arguments) {
-      const { command = '', file_text = '', path = '' } = panelContent.arguments;
+    const mergedCommand = [command, path, '\n', file_text].filter(Boolean).join(' ');
+    if (typeof panelContent.source === 'object') {
       return {
-        command: [command, file_text, path].filter(Boolean).join(' '),
+        command: mergedCommand,
+        stdout: panelContent.source.output,
+        stderr: panelContent.source.error,
+        exitCode: panelContent.source.error ? 1 : 0,
+      };
+    }
+
+    if (typeof panelContent.source === 'string') {
+      const isError = panelContent.source.includes('Error: ');
+      return {
+        command: mergedCommand,
         stderr: isError ? panelContent.source : '',
         stdout: isError ? '' : panelContent.source,
       };
     }
+  }
+
+  /**
+   * Final fallback
+   */
+  if (typeof panelContent.source === 'string') {
+    const isError = panelContent.source.includes('Error: ');
 
     if (isError) {
       return { command, stderr: panelContent.source, exitCode: 1 };
