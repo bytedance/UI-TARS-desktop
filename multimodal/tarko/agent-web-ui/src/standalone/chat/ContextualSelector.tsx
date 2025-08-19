@@ -55,11 +55,11 @@ export const ContextualSelector: React.FC<ContextualSelectorProps> = ({
       setLoading(true);
       try {
         let results: WorkspaceItem[] = [];
-        
+
         if (query.length === 0) {
           // When no query (just @ entered), show comprehensive default options
           const workspaceFiles = await apiService.searchWorkspaceItems(activeSessionId, '', 'all');
-          
+
           // Create enhanced default entries
           const defaultEntries: WorkspaceItem[] = [
             {
@@ -69,23 +69,21 @@ export const ContextualSelector: React.FC<ContextualSelectorProps> = ({
               relativePath: '.',
             },
           ];
-          
+
           // Add common directories first
           const directories = workspaceFiles
-            .filter(item => item.type === 'directory')
+            .filter((item) => item.type === 'directory')
             .slice(0, 8); // Limit to 8 directories
-          
+
           // Add recent files
-          const files = workspaceFiles
-            .filter(item => item.type === 'file')
-            .slice(0, 10); // Limit to 10 files
-          
+          const files = workspaceFiles.filter((item) => item.type === 'file').slice(0, 10); // Limit to 10 files
+
           results = [...defaultEntries, ...directories, ...files];
         } else {
           // Search with user query
           results = await apiService.searchWorkspaceItems(activeSessionId, query);
         }
-        
+
         setItems(results);
         setSelectedIndex(0);
       } catch (error) {
@@ -177,9 +175,7 @@ export const ContextualSelector: React.FC<ContextualSelectorProps> = ({
         <FiFolder
           size={16}
           className={
-            isSelected
-              ? 'text-accent-500 dark:text-accent-400'
-              : 'text-blue-500 dark:text-blue-400'
+            isSelected ? 'text-accent-500 dark:text-accent-400' : 'text-blue-500 dark:text-blue-400'
           }
         />
       );
@@ -188,9 +184,7 @@ export const ContextualSelector: React.FC<ContextualSelectorProps> = ({
         <FiFile
           size={16}
           className={
-            isSelected
-              ? 'text-accent-500 dark:text-accent-400'
-              : 'text-gray-500 dark:text-gray-400'
+            isSelected ? 'text-accent-500 dark:text-accent-400' : 'text-gray-500 dark:text-gray-400'
           }
         />
       );
@@ -230,21 +224,17 @@ export const ContextualSelector: React.FC<ContextualSelectorProps> = ({
               <FiHome className="mr-2" size={12} />
             )}
             <span>
-              {loading 
-                ? 'Searching...' 
-                : query.length === 0 
+              {loading
+                ? 'Searching...'
+                : query.length === 0
                   ? 'Select workspace context'
-                  : `${items.length} items found`
-              }
+                  : `${items.length} items found`}
             </span>
           </div>
         </div>
 
         {/* Items list */}
-        <div
-          ref={listRef}
-          className="max-h-64 overflow-y-auto py-1"
-        >
+        <div ref={listRef} className="max-h-64 overflow-y-auto py-1">
           {items.length === 0 && !loading ? (
             <div className="px-3 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
               {query.length === 0 ? 'No files found in workspace' : 'No items found'}
@@ -253,7 +243,7 @@ export const ContextualSelector: React.FC<ContextualSelectorProps> = ({
             items.map((item, index) => {
               const isSelected = index === selectedIndex;
               const displayText = getItemDisplayText(item);
-              
+
               return (
                 <motion.button
                   key={`${item.type}-${item.relativePath}`}
@@ -265,16 +255,10 @@ export const ContextualSelector: React.FC<ContextualSelectorProps> = ({
                       : 'hover:bg-gray-50 dark:hover:bg-gray-700/30 text-gray-700 dark:text-gray-300'
                   }`}
                 >
-                  <div className="flex-shrink-0">
-                    {getItemIcon(item, isSelected)}
-                  </div>
+                  <div className="flex-shrink-0">{getItemIcon(item, isSelected)}</div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium truncate">
-                      {displayText.name}
-                    </div>
-                    <div className="text-xs opacity-60 truncate">
-                      {displayText.description}
-                    </div>
+                    <div className="font-medium truncate">{displayText.name}</div>
+                    <div className="text-xs opacity-60 truncate">{displayText.description}</div>
                   </div>
                 </motion.button>
               );

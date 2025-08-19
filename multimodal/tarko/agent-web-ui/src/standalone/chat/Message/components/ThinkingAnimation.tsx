@@ -148,7 +148,12 @@ export const ThinkingAnimation: React.FC<ThinkingAnimationProps> = ({
       <div className="flex-1">
         {/* Main status text with enhanced gradient effect */}
         <div className="flex items-center space-x-2">
-          <GradientText text={text} phase={phase} className={`${textClass} font-semibold`} animationDuration={1.8} />
+          <GradientText
+            text={text}
+            phase={phase}
+            className={`${textClass} font-semibold`}
+            animationDuration={1.8}
+          />
           <motion.span
             className={`${textClass} ${colorClass} inline-block font-bold`}
             animate={{ opacity: [0, 1, 0], scale: [0.8, 1.1, 0.8] }}
@@ -194,29 +199,29 @@ export const ThinkingAnimation: React.FC<ThinkingAnimationProps> = ({
                 ease: 'easeInOut',
               }}
             />
-            
+
             {/* Primary flowing highlight effect */}
-            <motion.div 
+            <motion.div
               className="absolute top-0 h-full w-20 bg-white bg-opacity-30 blur-sm"
               animate={{ left: ['-5%', '105%'] }}
               transition={{
                 duration: 1.0, // Faster for more fluid motion
                 repeat: Infinity,
                 ease: 'linear',
-                repeatDelay: 0.05 // Shorter delay for more continuous flow
+                repeatDelay: 0.05, // Shorter delay for more continuous flow
               }}
               style={{ borderRadius: 'inherit' }}
             />
-            
+
             {/* Secondary flowing highlight effect (offset) */}
-            <motion.div 
+            <motion.div
               className="absolute top-0 h-full w-12 bg-white bg-opacity-20 blur-sm"
               animate={{ left: ['-15%', '110%'] }}
               transition={{
                 duration: 1.3,
                 repeat: Infinity,
                 ease: 'linear',
-                delay: 0.3 // Shorter offset for better flow
+                delay: 0.3, // Shorter offset for better flow
               }}
               style={{ borderRadius: 'inherit' }}
             />

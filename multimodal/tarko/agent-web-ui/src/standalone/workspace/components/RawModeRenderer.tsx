@@ -32,7 +32,9 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
                 <span className="font-medium">{formatTimestamp(toolCall.timestamp, true)}</span>
               </div>
               <div className="w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-500"></div>
-              <span className="font-mono text-xs px-2 py-0.5 bg-slate-200/60 dark:bg-slate-700/60 rounded-md">{toolCall.toolCallId.slice(-8)}</span>
+              <span className="font-mono text-xs px-2 py-0.5 bg-slate-200/60 dark:bg-slate-700/60 rounded-md">
+                {toolCall.toolCallId.slice(-8)}
+              </span>
             </div>
           </div>
         </div>
@@ -49,20 +51,17 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
             </div>
             {toolCall.arguments && (
               <div>
-                <div className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Parameters</div>
+                <div className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
+                  Parameters
+                </div>
                 <div className="bg-white/60 dark:bg-slate-800/60 rounded-xl p-4 border border-slate-200/40 dark:border-slate-700/40">
-                  <JsonRenderer 
-                    data={toolCall.arguments} 
-                    emptyMessage="No parameters provided"
-                  />
+                  <JsonRenderer data={toolCall.arguments} emptyMessage="No parameters provided" />
                 </div>
               </div>
             )}
           </div>
         </div>
       </motion.div>
-
-
 
       {/* Tool Result Section */}
       <motion.div
@@ -71,20 +70,24 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
         transition={{ delay: 0.2 }}
         className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-2xl border border-slate-200/60 dark:border-slate-700/60 shadow-sm overflow-hidden"
       >
-        <div className={`flex items-center gap-4 px-6 py-4 border-b border-slate-200/50 dark:border-slate-700/50 ${
-          toolResult
-            ? toolResult.error
-              ? 'bg-gradient-to-r from-red-500/5 to-rose-500/5 dark:from-red-400/10 dark:to-rose-400/10'
-              : 'bg-gradient-to-r from-emerald-500/5 to-green-500/5 dark:from-emerald-400/10 dark:to-green-400/10'
-            : 'bg-gradient-to-r from-slate-500/5 to-gray-500/5 dark:from-slate-400/10 dark:to-gray-400/10'
-        }`}>
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-lg ${
+        <div
+          className={`flex items-center gap-4 px-6 py-4 border-b border-slate-200/50 dark:border-slate-700/50 ${
             toolResult
               ? toolResult.error
-                ? 'bg-gradient-to-br from-red-500 to-rose-600'
-                : 'bg-gradient-to-br from-emerald-500 to-green-600'
-              : 'bg-gradient-to-br from-slate-400 to-gray-500'
-          }`}>
+                ? 'bg-gradient-to-r from-red-500/5 to-rose-500/5 dark:from-red-400/10 dark:to-rose-400/10'
+                : 'bg-gradient-to-r from-emerald-500/5 to-green-500/5 dark:from-emerald-400/10 dark:to-green-400/10'
+              : 'bg-gradient-to-r from-slate-500/5 to-gray-500/5 dark:from-slate-400/10 dark:to-gray-400/10'
+          }`}
+        >
+          <div
+            className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-lg ${
+              toolResult
+                ? toolResult.error
+                  ? 'bg-gradient-to-br from-red-500 to-rose-600'
+                  : 'bg-gradient-to-br from-emerald-500 to-green-600'
+                : 'bg-gradient-to-br from-slate-400 to-gray-500'
+            }`}
+          >
             {toolResult ? (
               toolResult.error ? (
                 <FiXCircle size={16} className="text-white" />
@@ -96,9 +99,7 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
             )}
           </div>
           <div className="flex-1">
-            <h3 className="font-semibold text-slate-800 dark:text-slate-100 text-lg">
-              Output
-            </h3>
+            <h3 className="font-semibold text-slate-800 dark:text-slate-100 text-lg">Output</h3>
             {toolResult ? (
               <div className="flex items-center gap-3 text-xs text-slate-600 dark:text-slate-400 mt-1">
                 <div className="flex items-center gap-1.5">
@@ -108,14 +109,14 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
                 {toolResult.elapsedMs && (
                   <>
                     <div className="w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-500"></div>
-                    <span className="font-mono text-xs px-2 py-0.5 bg-slate-200/60 dark:bg-slate-700/60 rounded-md">{toolResult.elapsedMs}ms</span>
+                    <span className="font-mono text-xs px-2 py-0.5 bg-slate-200/60 dark:bg-slate-700/60 rounded-md">
+                      {toolResult.elapsedMs}ms
+                    </span>
                   </>
                 )}
               </div>
             ) : (
-              <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Processing...
-              </div>
+              <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">Processing...</div>
             )}
           </div>
         </div>
@@ -134,22 +135,20 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
                 </div>
               )}
               <div>
-                <div className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Response</div>
+                <div className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
+                  Response
+                </div>
                 <div className="bg-white/60 dark:bg-slate-800/60 rounded-xl p-4 border border-slate-200/40 dark:border-slate-700/40">
-                  <JsonRenderer 
-                    data={toolResult.content} 
-                    emptyMessage="No response data"
-                  />
+                  <JsonRenderer data={toolResult.content} emptyMessage="No response data" />
                 </div>
               </div>
               {toolResult._extra && (
                 <div>
-                  <div className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Metadata</div>
+                  <div className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
+                    Metadata
+                  </div>
                   <div className="bg-white/60 dark:bg-slate-800/60 rounded-xl p-4 border border-slate-200/40 dark:border-slate-700/40">
-                    <JsonRenderer 
-                      data={toolResult._extra} 
-                      emptyMessage="No metadata"
-                    />
+                    <JsonRenderer data={toolResult._extra} emptyMessage="No metadata" />
                   </div>
                 </div>
               )}
@@ -158,7 +157,9 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
                 <div className="w-8 h-8 border-2 border-slate-300 dark:border-slate-600 border-t-slate-600 dark:border-t-slate-300 rounded-full animate-spin mx-auto mb-3"></div>
-                <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">Processing request...</p>
+                <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">
+                  Processing request...
+                </p>
               </div>
             </div>
           )}

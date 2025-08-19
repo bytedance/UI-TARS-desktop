@@ -237,8 +237,6 @@ function extractCommandData(panelContent: StandardPanelContent) {
         exitCode: panelContent.source.returncode,
       };
     }
-
-
   }
 
   if (typeof panelContent.source === 'string') {

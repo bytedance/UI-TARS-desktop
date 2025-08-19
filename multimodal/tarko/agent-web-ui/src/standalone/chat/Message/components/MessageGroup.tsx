@@ -26,7 +26,7 @@ interface MessageGroupProps {
  */
 export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking }) => {
   const agentStatus = useAtomValue(agentStatusAtom);
-  
+
   // Filter out environment messages
   const filteredMessages = messages.filter((msg) => msg.role !== 'environment');
 
@@ -99,20 +99,18 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
             text={agentStatus.message || 'Agent TARS is running'}
             phase={agentStatus.phase}
             estimatedTime={agentStatus.estimatedTime}
-            showProgress={agentStatus.phase === 'initializing' || agentStatus.phase === 'warming_up'}
+            showProgress={
+              agentStatus.phase === 'initializing' || agentStatus.phase === 'warming_up'
+            }
             size="medium"
           />
-          
+
           {/* Show skeleton loader during initial phases */}
-          {(agentStatus.phase === 'initializing' || 
-            agentStatus.phase === 'warming_up' || 
+          {(agentStatus.phase === 'initializing' ||
+            agentStatus.phase === 'warming_up' ||
             agentStatus.phase === 'processing') && (
             <div className="ml-8">
-              <SkeletonLoader 
-                lines={2} 
-                showAvatar={false}
-                className="opacity-50"
-              />
+              <SkeletonLoader lines={2} showAvatar={false} className="opacity-50" />
             </div>
           )}
         </div>

@@ -26,7 +26,7 @@ export const ToolBar: React.FC = () => {
   // Create new session
   const handleNewSession = useCallback(async () => {
     if (isCreatingSession || !connectionStatus.connected) return;
-    
+
     setIsCreatingSession(true);
     try {
       const sessionId = await createSession();
@@ -65,7 +65,13 @@ export const ToolBar: React.FC = () => {
                     ? 'bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300'
                     : 'bg-gray-400 text-white cursor-not-allowed opacity-60'
               }`}
-              title={isCreatingSession ? 'Creating new task...' : connectionStatus.connected ? 'New Task' : 'Server disconnected'}
+              title={
+                isCreatingSession
+                  ? 'Creating new task...'
+                  : connectionStatus.connected
+                    ? 'New Task'
+                    : 'Server disconnected'
+              }
             >
               {isCreatingSession ? (
                 <motion.div
@@ -131,10 +137,7 @@ export const ToolBar: React.FC = () => {
       </div>
 
       {/* Agent Config Viewer Modal */}
-      <AgentConfigViewer
-        isOpen={isConfigViewerOpen}
-        onClose={() => setIsConfigViewerOpen(false)}
-      />
+      <AgentConfigViewer isOpen={isConfigViewerOpen} onClose={() => setIsConfigViewerOpen(false)} />
     </>
   );
 };

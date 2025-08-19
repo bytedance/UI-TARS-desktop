@@ -28,7 +28,8 @@ export const MessageAttachments: React.FC<MessageAttachmentsProps> = ({
   // Check if contextual selector is enabled
   const isContextualSelectorEnabled = window.AGENT_WEB_UI_CONFIG?.enableContextualSelector ?? false;
 
-  const hasAttachments = images.length > 0 || (isContextualSelectorEnabled && contextualItems.length > 0);
+  const hasAttachments =
+    images.length > 0 || (isContextualSelectorEnabled && contextualItems.length > 0);
 
   if (!hasAttachments) {
     return null;
@@ -40,17 +41,13 @@ export const MessageAttachments: React.FC<MessageAttachmentsProps> = ({
       {isContextualSelectorEnabled && contextualItems.length > 0 && (
         <ContextualTags items={contextualItems} onRemove={removeContextualItem} />
       )}
-      
+
       {/* Image previews */}
       {images.length > 0 && (
         <div className="mb-3 flex flex-wrap gap-2">
           <AnimatePresence>
             {images.map((image, index) => (
-              <ImagePreview
-                key={index}
-                image={image}
-                onRemove={() => onRemoveImage(index)}
-              />
+              <ImagePreview key={index} image={image} onRemove={() => onRemoveImage(index)} />
             ))}
           </AnimatePresence>
         </div>

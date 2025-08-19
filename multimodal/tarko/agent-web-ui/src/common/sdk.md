@@ -23,7 +23,7 @@ console.log('Hello world!');
   `;
 
   return (
-    <MarkdownRenderer 
+    <MarkdownRenderer
       content={markdownContent}
       className="prose" // Optional: custom class name
       forceDarkTheme={false} // Optional: force dark theme
@@ -34,13 +34,13 @@ console.log('Hello world!');
 
 #### Properties
 
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
-| content | string | Yes | Content in Markdown format |
-| className | string | No | Additional CSS class name |
-| publishDate | string | No | Publication date |
-| author | string | No | Author information |
-| forceDarkTheme | boolean | No | Force dark theme |
+| Property       | Type    | Required | Description                |
+| -------------- | ------- | -------- | -------------------------- |
+| content        | string  | Yes      | Content in Markdown format |
+| className      | string  | No       | Additional CSS class name  |
+| publishDate    | string  | No       | Publication date           |
+| author         | string  | No       | Author information         |
+| forceDarkTheme | boolean | No       | Force dark theme           |
 
 ## Dialogs
 
@@ -62,9 +62,7 @@ function MyComponent() {
 
   return (
     <>
-      <button onClick={() => setIsOpen(true)}>
-        Delete Item
-      </button>
+      <button onClick={() => setIsOpen(true)}>Delete Item</button>
 
       <ConfirmDialog
         isOpen={isOpen}
@@ -84,7 +82,7 @@ function MyComponent() {
 #### Properties
 
 | Property | Type | Required | Description |
-|----------|------|----------|-------------|
+| --- | --- | --- | --- |
 | isOpen | boolean | Yes | Controls whether the dialog is displayed |
 | onClose | () => void | Yes | Callback function when the dialog is closed |
 | onConfirm | () => void | Yes | Callback function when the confirm button is clicked |

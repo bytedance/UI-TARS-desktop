@@ -1,4 +1,3 @@
-
 /* Monaco Editor specific styles */
 .code-editor-monaco-container {
   background: #0d1117;
@@ -34,7 +33,9 @@
 
 /* Fix Monaco editor font rendering */
 .code-editor-monaco-container .monaco-editor {
-  font-feature-settings: "liga" 0, "calt" 0;
+  font-feature-settings:
+    'liga' 0,
+    'calt' 0;
 }
 
 /* Prevent text selection issues */

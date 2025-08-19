@@ -273,7 +273,9 @@ export const WorkspaceDetail: React.FC = () => {
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
               <div className="text-gray-400 mb-2">⚠️</div>
-              <p className="text-gray-600 dark:text-gray-400 font-medium mb-2">No Raw Data Available</p>
+              <p className="text-gray-600 dark:text-gray-400 font-medium mb-2">
+                No Raw Data Available
+              </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 This content doesn't have associated tool call data.
               </p>
@@ -288,7 +290,7 @@ export const WorkspaceDetail: React.FC = () => {
     const rendererName = CONTENT_RENDERERS[panelContent.type]
       ? `${panelContent.type}`
       : 'GenericResultRenderer';
-    
+
     console.log(
       '%c🎯 [WorkspaceDetail] Using Renderer: %c' + `[${rendererName}]`,
       'color: #ff6b6b; font-weight: bold; font-size: 12px;',
@@ -323,9 +325,7 @@ export const WorkspaceDetail: React.FC = () => {
           onWorkspaceDisplayModeChange={setWorkspaceDisplayMode}
           showWorkspaceToggle={shouldShowWorkspaceToggle()}
         />
-        <div className="flex-1 overflow-auto p-4 pt-0">
-          {renderContent()}
-        </div>
+        <div className="flex-1 overflow-auto p-4 pt-0">{renderContent()}</div>
       </motion.div>
 
       <ImageModal imageData={zoomedImage} onClose={() => setZoomedImage(null)} />

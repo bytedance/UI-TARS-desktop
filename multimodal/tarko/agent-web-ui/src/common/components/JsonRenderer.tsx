@@ -4,7 +4,7 @@ import { FiChevronRight, FiCopy, FiCheck, FiMaximize2, FiMinimize2 } from 'react
 
 /**
  * JsonRenderer - Universal JSON viewer component
- * 
+ *
  * Extracted from AgentConfigViewer for reusability across the application.
  * Supports hierarchical tree structure with smooth animations.
  */
@@ -39,11 +39,14 @@ const JsonItem: React.FC<JsonItemProps> = ({ label, value, level = 0, isRoot = f
 
   if (isPrimitive) {
     const displayValue = value === null ? 'null' : String(value);
-    const valueColor = 
-      typeof value === 'string' ? 'text-emerald-600 dark:text-emerald-400' :
-      typeof value === 'number' ? 'text-blue-600 dark:text-blue-400' :
-      typeof value === 'boolean' ? 'text-purple-600 dark:text-purple-400' :
-      'text-gray-500 dark:text-gray-400';
+    const valueColor =
+      typeof value === 'string'
+        ? 'text-emerald-600 dark:text-emerald-400'
+        : typeof value === 'number'
+          ? 'text-blue-600 dark:text-blue-400'
+          : typeof value === 'boolean'
+            ? 'text-purple-600 dark:text-purple-400'
+            : 'text-gray-500 dark:text-gray-400';
 
     const isLongString = typeof value === 'string' && displayValue.length > 100;
     const shouldTruncateValue = !isStringExpanded && isLongString;
@@ -82,7 +85,7 @@ const JsonItem: React.FC<JsonItemProps> = ({ label, value, level = 0, isRoot = f
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsStringExpanded(!isStringExpanded)}
                 className="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
-                title={isStringExpanded ? "Collapse" : "Expand"}
+                title={isStringExpanded ? 'Collapse' : 'Expand'}
               >
                 {isStringExpanded ? (
                   <FiMinimize2 size={12} className="text-gray-400" />
@@ -126,20 +129,15 @@ const JsonItem: React.FC<JsonItemProps> = ({ label, value, level = 0, isRoot = f
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-200 border border-transparent hover:border-gray-200 dark:hover:border-gray-600 group"
       >
-        <motion.div
-          animate={{ rotate: isExpanded ? 90 : 0 }}
-          transition={{ duration: 0.2 }}
-        >
+        <motion.div animate={{ rotate: isExpanded ? 90 : 0 }} transition={{ duration: 0.2 }}>
           <FiChevronRight size={14} className="text-gray-400" />
         </motion.div>
-        <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-          {label}
-        </span>
+        <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">{label}</span>
         <span className="text-xs text-gray-500 dark:text-gray-400 font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
           {typeLabel}
         </span>
       </motion.button>
-      
+
       <AnimatePresence>
         {isExpanded && (
           <motion.div
@@ -150,25 +148,18 @@ const JsonItem: React.FC<JsonItemProps> = ({ label, value, level = 0, isRoot = f
             className="overflow-hidden"
           >
             <div className="ml-6 border-l-2 border-gray-200 dark:border-gray-600 pl-4">
-              {isArray ? (
-                value.map((item: any, index: number) => (
-                  <JsonItem
-                    key={`item-${index}`}
-                    label={`[${index}]`}
-                    value={item}
-                    level={level + 1}
-                  />
-                ))
-              ) : (
-                Object.entries(value).map(([itemKey, val]) => (
-                  <JsonItem
-                    key={itemKey}
-                    label={itemKey}
-                    value={val}
-                    level={level + 1}
-                  />
-                ))
-              )}
+              {isArray
+                ? value.map((item: any, index: number) => (
+                    <JsonItem
+                      key={`item-${index}`}
+                      label={`[${index}]`}
+                      value={item}
+                      level={level + 1}
+                    />
+                  ))
+                : Object.entries(value).map(([itemKey, val]) => (
+                    <JsonItem key={itemKey} label={itemKey} value={val} level={level + 1} />
+                  ))}
             </div>
           </motion.div>
         )}
@@ -183,10 +174,10 @@ interface JsonRendererProps {
   emptyMessage?: string;
 }
 
-export const JsonRenderer: React.FC<JsonRendererProps> = ({ 
-  data, 
+export const JsonRenderer: React.FC<JsonRendererProps> = ({
+  data,
   className = '',
-  emptyMessage = 'No data available'
+  emptyMessage = 'No data available',
 }) => {
   if (!data || (typeof data === 'object' && Object.keys(data).length === 0)) {
     return (

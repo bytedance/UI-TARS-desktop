@@ -1,4 +1,4 @@
-  ·/* Glass card effect */
+·/* Glass card effect */
 .glass-card {
   @apply backdrop-blur-md bg-white/70 dark:bg-gray-800/40 border border-gray-100/30 dark:border-gray-700/20 shadow-md;
 }
@@ -44,7 +44,9 @@
 
 /* Hover effects */
 .hover-lift {
-  transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1), box-shadow 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+  transition:
+    transform 0.3s cubic-bezier(0.19, 1, 0.22, 1),
+    box-shadow 0.3s cubic-bezier(0.19, 1, 0.22, 1);
 }
 
 .hover-lift:hover {
@@ -53,7 +55,9 @@
 }
 
 .hover-scale {
-  transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1), box-shadow 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+  transition:
+    transform 0.3s cubic-bezier(0.19, 1, 0.22, 1),
+    box-shadow 0.3s cubic-bezier(0.19, 1, 0.22, 1);
 }
 
 .hover-scale:hover {
@@ -80,7 +84,9 @@
 
 /* Shadow effects */
 .shadow-subtle {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.03);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.04),
+    0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
 .shadow-glow {
@@ -187,14 +193,18 @@
 
 /* Enhanced research report styling */
 .research-report {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
 }
 
-.research-report h1, 
-.research-report h2, 
-.research-report h3, 
-.research-report h4, 
-.research-report h5, 
+.research-report h1,
+.research-report h2,
+.research-report h3,
+.research-report h4,
+.research-report h5,
 .research-report h6 {
   font-weight: 600;
   color: #111827;
@@ -203,11 +213,11 @@
   margin-bottom: 0.75em;
 }
 
-.dark .research-report h1, 
-.dark .research-report h2, 
-.dark .research-report h3, 
-.dark .research-report h4, 
-.dark .research-report h5, 
+.dark .research-report h1,
+.dark .research-report h2,
+.dark .research-report h3,
+.dark .research-report h4,
+.dark .research-report h5,
 .dark .research-report h6 {
   color: #f3f4f6;
 }
@@ -244,7 +254,7 @@
   font-size: 1.125rem;
 }
 
-.research-report p, 
+.research-report p,
 .research-report li {
   font-size: 1rem;
   line-height: 1.75;
@@ -252,7 +262,7 @@
   color: #374151;
 }
 
-.dark .research-report p, 
+.dark .research-report p,
 .dark .research-report li {
   color: #d1d5db;
 }
@@ -288,7 +298,9 @@
   font-size: 0.9rem;
   line-height: 1.5;
   text-align: left;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07), 0 4px 8px rgba(0, 0, 0, 0.02);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.07),
+    0 4px 8px rgba(0, 0, 0, 0.02);
   border-radius: 0.75rem;
   overflow: hidden;
   border: 1px solid #e5e7eb;
@@ -393,7 +405,7 @@
   color: #e2e8f0;
 }
 
-.research-report ul, 
+.research-report ul,
 .research-report ol {
   padding-left: 1.75rem;
   margin: 1.25rem 0;
@@ -423,12 +435,22 @@
 .research-report hr {
   border: 0;
   height: 1px;
-  background: linear-gradient(to right, rgba(229, 231, 235, 0.1), rgba(229, 231, 235, 1), rgba(229, 231, 235, 0.1));
+  background: linear-gradient(
+    to right,
+    rgba(229, 231, 235, 0.1),
+    rgba(229, 231, 235, 1),
+    rgba(229, 231, 235, 0.1)
+  );
   margin: 2.5rem 0;
 }
 
 .dark .research-report hr {
-  background: linear-gradient(to right, rgba(55, 65, 81, 0.1), rgba(55, 65, 81, 1), rgba(55, 65, 81, 0.1));
+  background: linear-gradient(
+    to right,
+    rgba(55, 65, 81, 0.1),
+    rgba(55, 65, 81, 1),
+    rgba(55, 65, 81, 0.1)
+  );
 }
 
 .research-report img {
@@ -479,8 +501,13 @@
 
 /* New animation for plan view */
 @keyframes pulse-subtle {
-  0%, 100% { opacity: 0.8; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .animate-pulse-subtle {
@@ -523,11 +550,21 @@
 }
 
 .timeline-track {
-  background: linear-gradient(to right, rgba(229, 231, 235, 0.3), rgba(229, 231, 235, 1), rgba(229, 231, 235, 0.3));
+  background: linear-gradient(
+    to right,
+    rgba(229, 231, 235, 0.3),
+    rgba(229, 231, 235, 1),
+    rgba(229, 231, 235, 0.3)
+  );
 }
 
 .dark .timeline-track {
-  background: linear-gradient(to right, rgba(75, 85, 99, 0.3), rgba(75, 85, 99, 1), rgba(75, 85, 99, 0.3));
+  background: linear-gradient(
+    to right,
+    rgba(75, 85, 99, 0.3),
+    rgba(75, 85, 99, 1),
+    rgba(75, 85, 99, 0.3)
+  );
 }
 
 .timeline-progress {

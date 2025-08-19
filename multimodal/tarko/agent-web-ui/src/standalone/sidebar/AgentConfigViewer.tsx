@@ -7,7 +7,7 @@ import { JsonRenderer } from '@/common/components/JsonRenderer';
 
 /**
  * AgentConfigViewer - Premium IDE-style configuration viewer
- * 
+ *
  * Design principles:
  * - Elegant modal overlay with glass morphism
  * - Hierarchical tree structure for nested configurations
@@ -28,10 +28,10 @@ export const AgentConfigViewer: React.FC<AgentConfigViewerProps> = ({ isOpen, on
 
   const loadConfig = useCallback(async () => {
     if (!isOpen) return;
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
       const options = await apiService.getAgentOptions();
       setConfig(options);
@@ -64,7 +64,7 @@ export const AgentConfigViewer: React.FC<AgentConfigViewerProps> = ({ isOpen, on
           exit={{ opacity: 0 }}
           className="absolute inset-0 bg-black/20 backdrop-blur-sm"
         />
-        
+
         {/* Modal */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -108,13 +108,17 @@ export const AgentConfigViewer: React.FC<AgentConfigViewerProps> = ({ isOpen, on
                   transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                   className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full"
                 />
-                <span className="ml-3 text-gray-600 dark:text-gray-400">Loading configuration...</span>
+                <span className="ml-3 text-gray-600 dark:text-gray-400">
+                  Loading configuration...
+                </span>
               </div>
             ) : error ? (
               <div className="flex items-center justify-center py-12">
                 <div className="text-center">
                   <div className="text-red-500 mb-2">⚠️</div>
-                  <p className="text-red-600 dark:text-red-400 font-medium mb-2">Failed to load configuration</p>
+                  <p className="text-red-600 dark:text-red-400 font-medium mb-2">
+                    Failed to load configuration
+                  </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{error}</p>
                   <motion.button
                     whileHover={{ scale: 1.05 }}
@@ -127,16 +131,17 @@ export const AgentConfigViewer: React.FC<AgentConfigViewerProps> = ({ isOpen, on
                 </div>
               </div>
             ) : config && Object.keys(config).length > 0 ? (
-              <JsonRenderer 
-                data={config} 
-                emptyMessage="No configuration available"
-              />
+              <JsonRenderer data={config} emptyMessage="No configuration available" />
             ) : (
               <div className="flex items-center justify-center py-12">
                 <div className="text-center">
                   <div className="text-gray-400 mb-2">📋</div>
-                  <p className="text-gray-600 dark:text-gray-400 font-medium">No configuration available</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">The agent has no exposed configuration options</p>
+                  <p className="text-gray-600 dark:text-gray-400 font-medium">
+                    No configuration available
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    The agent has no exposed configuration options
+                  </p>
                 </div>
               </div>
             )}

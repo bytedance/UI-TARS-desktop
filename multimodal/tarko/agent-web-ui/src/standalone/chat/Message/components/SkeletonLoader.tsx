@@ -27,17 +27,17 @@ export const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
               key={index}
               initial={{ opacity: 0, width: '0%' }}
               animate={{ opacity: 1, width: '100%' }}
-              transition={{ 
+              transition={{
                 delay: index * 0.2,
                 duration: 0.8,
-                ease: 'easeOut'
+                ease: 'easeOut',
               }}
               className="space-y-2"
             >
-              <div 
+              <div
                 className="h-3 bg-gray-200 dark:bg-gray-700 rounded"
                 style={{
-                  width: index === lines - 1 ? '75%' : '100%'
+                  width: index === lines - 1 ? '75%' : '100%',
                 }}
               />
             </motion.div>
@@ -68,8 +68,8 @@ export const TypewriterLoader: React.FC<TypewriterLoaderProps> = ({
   React.useEffect(() => {
     if (currentIndex < text.length) {
       const timeout = setTimeout(() => {
-        setDisplayText(prev => prev + text[currentIndex]);
-        setCurrentIndex(prev => prev + 1);
+        setDisplayText((prev) => prev + text[currentIndex]);
+        setCurrentIndex((prev) => prev + 1);
       }, speed);
 
       return () => clearTimeout(timeout);
