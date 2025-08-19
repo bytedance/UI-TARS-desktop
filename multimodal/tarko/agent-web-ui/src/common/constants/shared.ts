@@ -16,3 +16,10 @@ export function getWebUIConfig() {
 export function getAgentTitle(): string {
   return getWebUIConfig().title || 'Agent';
 }
+
+/**
+ * Check if contextual selector is enabled
+ */
+export function isContextualSelectorEnabled(): boolean {
+  return getWebUIConfig().enableContextualSelector ?? false;
+}

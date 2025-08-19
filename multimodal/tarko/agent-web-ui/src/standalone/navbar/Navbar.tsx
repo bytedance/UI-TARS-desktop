@@ -12,6 +12,7 @@ import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useDarkMode } from '@/common/hooks/useDarkMode';
 import { apiService } from '@/common/services/apiService';
 import { NavbarModelSelector } from './ModelSelector';
+import { getWebUIConfig } from '@/common/constants';
 
 import './Navbar.css';
 
@@ -38,7 +39,7 @@ export const Navbar: React.FC = () => {
       }
 
       // Create title with format: "dir | agent" or fallback to configured title
-      const webUIConfig = window.AGENT_WEB_UI_CONFIG;
+      const webUIConfig = getWebUIConfig();
       const fallbackTitle = webUIConfig?.title || 'Agent';
       const title = parts.length > 0 ? parts.join(' | ') : fallbackTitle;
       document.title = title;
@@ -48,7 +49,7 @@ export const Navbar: React.FC = () => {
   }, [workspaceInfo.name, agentInfo.name]);
 
   // Get configuration from global window object
-  const webUIConfig = window.AGENT_WEB_UI_CONFIG;
+  const webUIConfig = getWebUIConfig();
   const logoUrl =
     webUIConfig?.logo ||
     'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png';
@@ -93,7 +94,11 @@ export const Navbar: React.FC = () => {
           ) : (
             /* Agent TARS logo with configurable URL */
             <a href="http://agent-tars.com" target="blank" className="mr-3">
-              <img src={logoUrl} alt={webUIConfig?.title || 'Agent'} className="w-6 h-6 rounded-lg" />
+              <img
+                src={logoUrl}
+                alt={webUIConfig?.title || 'Agent'}
+                className="w-6 h-6 rounded-lg"
+              />
             </a>
           )}
         </div>

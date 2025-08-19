@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { FiArrowRight, FiArrowUpRight } from 'react-icons/fi';
 import { useSession } from '@/common/hooks/useSession';
+import { getWebUIConfig } from '@/common/constants';
 
 const WelcomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ const WelcomePage: React.FC = () => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // Get configuration from global window object with fallback defaults
-  const webUIConfig = window.AGENT_WEB_UI_CONFIG;
+  const webUIConfig = getWebUIConfig();
   const logoUrl =
     webUIConfig?.logo ||
     'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png';

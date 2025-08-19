@@ -212,7 +212,8 @@ export const ChatPanel: React.FC = () => {
             >
               <FiInfo className="mr-3 text-gray-400 flex-shrink-0" />
               <span>
-                {getAgentTitle()} can help with tasks involving web search, browsing, and file operations.
+                {getAgentTitle()} can help with tasks involving web search, browsing, and file
+                operations.
               </span>
             </motion.div>
           </div>

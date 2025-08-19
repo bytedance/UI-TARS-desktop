@@ -6,6 +6,7 @@ import { FaBrain } from 'react-icons/fa';
 import { apiService } from '@/common/services/apiService';
 import { AgentServerVersionInfo } from '@agent-tars/interface';
 import { ModelInfo, AgentInfo } from '@/common/types';
+import { getWebUIConfig } from '@/common/constants';
 
 interface AboutModalProps {
   isOpen: boolean;
@@ -25,7 +26,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({
   const [copiedAgent, setCopiedAgent] = useState(false);
 
   // Get configuration from global window object
-  const webUIConfig = window.AGENT_WEB_UI_CONFIG;
+  const webUIConfig = getWebUIConfig();
   const logoUrl =
     webUIConfig?.logo ||
     'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png';

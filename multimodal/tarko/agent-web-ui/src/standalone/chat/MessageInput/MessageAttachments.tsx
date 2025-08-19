@@ -6,6 +6,7 @@ import { ImagePreview } from '../ImagePreview';
 import { ContextualTags } from '../ContextualTags';
 import { ContextualItem } from '../ContextualSelector';
 import { removeContextualItemAction } from '@/common/state/atoms/contextualSelector';
+import { isContextualSelectorEnabled } from '@/common/constants';
 
 interface MessageAttachmentsProps {
   images: ChatCompletionContentPart[];
@@ -26,10 +27,9 @@ export const MessageAttachments: React.FC<MessageAttachmentsProps> = ({
   const removeContextualItem = useSetAtom(removeContextualItemAction);
 
   // Check if contextual selector is enabled
-  const isContextualSelectorEnabled = window.AGENT_WEB_UI_CONFIG?.enableContextualSelector ?? false;
+  const contextualSelectorEnabled = isContextualSelectorEnabled();
 
-  const hasAttachments =
-    images.length > 0 || (isContextualSelectorEnabled && contextualItems.length > 0);
+  const hasAttachments = images.length > 0 || (contextualSelectorEnabled && contextualItems.length > 0);
 
   if (!hasAttachments) {
     return null;
@@ -38,7 +38,7 @@ export const MessageAttachments: React.FC<MessageAttachmentsProps> = ({
   return (
     <>
       {/* Contextual tags */}
-      {isContextualSelectorEnabled && contextualItems.length > 0 && (
+      {contextualSelectorEnabled && contextualItems.length > 0 && (
         <ContextualTags items={contextualItems} onRemove={removeContextualItem} />
       )}
 
