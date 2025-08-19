@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { extractAioPort } from '../utils/hepler';
+
 const HOME_INSTRUCTION = `- execute_bash, str_replace_editor must be executed based on the /home/gem root directory. 
 If you think that solving the problem requires creating a complete project, then you should first execute mkdir -p {project_dir} for the project, and all the remaining operations must be under /home/gem/{project_dir}. 
 For the specific directory name, please be reasonably named according to the content of the task.`;
@@ -12,6 +14,8 @@ const STOP_INSTRUCTION = `\n
   - After outputting </code_env>, you MUST STOP immediately and wait for the tool result in the next agent loop. DO NOT generate any additional text.
   - When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
   `;
+
+const PROXY_INSTRUCTION = `- If you start the service on a port, please tell the user that you can access it at http://localhost:${extractAioPort()}/proxy/\${PORT} or http://localhost:${extractAioPort()}/absproxy/\${PORT}, where PORT is the port for the service listening`;
 
 export const CODE_ENVIRONMENT = `<CODE_ENVIRONMENT>
 
@@ -72,4 +76,5 @@ multiple lines
 - Only call one function at a time
 ${HOME_INSTRUCTION}
 ${STOP_INSTRUCTION}
+${PROXY_INSTRUCTION}
 </CODE_ENVIRONMENT>`;
