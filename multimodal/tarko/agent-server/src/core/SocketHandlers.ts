@@ -59,6 +59,10 @@ export class SocketHandlers {
       SocketHandlers.handleJoinSession(socket, server, sessionId);
     });
 
+    socket.on('get-session-initialization', (sessionId) => {
+      SocketHandlers.handleGetSessionInitialization(socket, server, sessionId);
+    });
+
     socket.on('send-query', async ({ sessionId, query }) => {
       await SocketHandlers.handleSendQuery(socket, server, sessionId, query);
     });
@@ -164,5 +168,27 @@ export class SocketHandlers {
     };
 
     socket.emit('server-status', status);
+  }
+
+  /**
+   * Handle getting session initialization status
+   */
+  static handleGetSessionInitialization(socket: Socket, server: AgentServer, sessionId: string) {
+    // Check if session exists and is initialized
+    if (server.sessions[sessionId]) {
+      socket.emit('session-initialization', {
+        type: 'completed',
+        sessionId,
+        message: 'Agent initialization completed',
+        timestamp: Date.now(),
+      });
+    } else {
+      socket.emit('session-initialization', {
+        type: 'not-found',
+        sessionId,
+        message: 'Session not found or still initializing',
+        timestamp: Date.now(),
+      });
+    }
   }
 }

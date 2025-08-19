@@ -47,6 +47,7 @@ export const SOCKET_EVENTS = {
   JOIN_SESSION: 'join-session',
   AGENT_EVENT: 'agent-event',
   AGENT_STATUS: 'agent-status',
+  SESSION_INITIALIZATION: 'session-initialization',
   PING: 'ping',
   SEND_QUERY: 'send-query',
   ABORT_QUERY: 'abort-query',

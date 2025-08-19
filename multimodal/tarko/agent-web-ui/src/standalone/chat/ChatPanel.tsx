@@ -10,6 +10,7 @@ import { groupedMessagesAtom, messagesAtom } from '@/common/state/atoms/message'
 import { replayStateAtom } from '@/common/state/atoms/replay';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useReplay } from '@/common/hooks/useReplay';
+import { SessionInitializationStatusComponent } from './SessionInitializationStatus';
 
 import './ChatPanel.css';
 import { ResearchReportEntry } from './ResearchReportEntry';
@@ -69,7 +70,7 @@ const CountdownCircle: React.FC<{ seconds: number; total: number }> = ({ seconds
  * ChatPanel Component - Main chat interface with simplified replay logic and auto-play countdown
  */
 export const ChatPanel: React.FC = () => {
-  const { activeSessionId, isProcessing, connectionStatus, checkServerStatus } = useSession();
+  const { activeSessionId, isProcessing, connectionStatus, checkServerStatus, sessionInitialization } = useSession();
   const groupedMessages = useAtomValue(groupedMessagesAtom);
   const allMessages = useAtomValue(messagesAtom);
   const replayState = useAtomValue(replayStateAtom);
@@ -223,6 +224,14 @@ export const ChatPanel: React.FC = () => {
             className="flex-1 overflow-y-auto px-5 py-5 overflow-x-hidden min-h-0 chat-scrollbar relative"
           >
             {renderOfflineBanner()}
+
+            {/* Session Initialization Status */}
+            {activeSessionId && sessionInitialization[activeSessionId] && (
+              <SessionInitializationStatusComponent
+                status={sessionInitialization[activeSessionId]}
+                sessionId={activeSessionId}
+              />
+            )}
 
             <AnimatePresence>
               {!connectionStatus.connected && !activeSessionId && (

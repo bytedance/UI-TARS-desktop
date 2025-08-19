@@ -1,7 +1,7 @@
 import { atom, Getter, Setter } from 'jotai';
 import { v4 as uuidv4 } from 'uuid';
 import { apiService } from '../../services/apiService';
-import { sessionsAtom, activeSessionIdAtom } from '../atoms/session';
+import { sessionsAtom, activeSessionIdAtom, sessionInitializationAtom } from '../atoms/session';
 import { messagesAtom } from '../atoms/message';
 import { toolResultsAtom, toolCallResultMap } from '../atoms/tool';
 import {
@@ -107,8 +107,51 @@ export const createSessionAction = atom(null, async (get, set) => {
       [newSession.id]: [],
     }));
 
+    // Set initial initialization status
+    set(sessionInitializationAtom, (prev) => ({
+      ...prev,
+      [newSession.id]: {
+        isInitializing: true,
+        message: 'Agent initialization started',
+        events: [{
+          type: 'started',
+          message: 'Agent initialization started',
+          timestamp: Date.now(),
+        }],
+      },
+    }));
+
+    // Auto-complete initialization after 10 seconds if no WebSocket events received
+    setTimeout(() => {
+      set(sessionInitializationAtom, (prev) => {
+        const current = prev[newSession.id];
+        if (current && current.isInitializing && current.events.length <= 1) {
+          console.log('⏰ [CreateSession] Auto-completing initialization for session:', newSession.id);
+          return {
+            ...prev,
+            [newSession.id]: {
+              ...current,
+              isInitializing: false,
+              message: 'Agent is ready',
+              events: [
+                ...current.events,
+                {
+                  type: 'completed',
+                  message: 'Agent initialization completed',
+                  timestamp: Date.now(),
+                },
+              ],
+            },
+          };
+        }
+        return prev;
+      });
+    }, 10000);
+
     set(activePanelContentAtom, null);
     set(activeSessionIdAtom, newSession.id);
+
+    console.log('🚀 [CreateSession] Session created and initialization status set:', newSession.id);
 
     return newSession.id;
   } catch (error) {
