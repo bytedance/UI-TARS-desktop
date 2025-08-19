@@ -10,7 +10,7 @@ import { groupedMessagesAtom, messagesAtom } from '@/common/state/atoms/message'
 import { replayStateAtom } from '@/common/state/atoms/replay';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useReplay } from '@/common/hooks/useReplay';
-import { AGENT_TITLE } from '@/common/constants';
+import { getAgentTitle } from '@/common/constants';
 
 import './ChatPanel.css';
 import { ResearchReportEntry } from './ResearchReportEntry';
@@ -197,7 +197,7 @@ export const ChatPanel: React.FC = () => {
               variants={itemVariants}
               className="text-xl font-display font-bold mb-3 text-gray-800 dark:text-gray-200"
             >
-              Welcome to {AGENT_TITLE}
+              Welcome to {getAgentTitle()}
             </motion.h2>
             <motion.p
               variants={itemVariants}
@@ -212,7 +212,7 @@ export const ChatPanel: React.FC = () => {
             >
               <FiInfo className="mr-3 text-gray-400 flex-shrink-0" />
               <span>
-                {AGENT_TITLE} can help with tasks involving web search, browsing, and file operations.
+                {getAgentTitle()} can help with tasks involving web search, browsing, and file operations.
               </span>
             </motion.div>
           </div>
@@ -299,7 +299,7 @@ export const ChatPanel: React.FC = () => {
                       <p className="text-gray-600 dark:text-gray-400 text-sm">
                         {isReplayMode && replayState.currentEventIndex === -1
                           ? 'Press play to start the replay or use the timeline to navigate'
-                          : `Ask ${AGENT_TITLE} a question or provide a command to begin.`}
+                          : `Ask ${getAgentTitle()} a question or provide a command to begin.`}
                       </p>
                     </>
                   )}

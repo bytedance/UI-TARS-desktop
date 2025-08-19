@@ -84,4 +84,4 @@ export const CONNECTION_SETTINGS = {
 /**
  * Agent configuration
  */
-export const AGENT_TITLE = window.AGENT_WEB_UI_CONFIG?.title || 'Agent';
+export { getAgentTitle, getWebUIConfig } from './shared';
