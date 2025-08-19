@@ -23,3 +23,10 @@ export function getAgentTitle(): string {
 export function isContextualSelectorEnabled(): boolean {
   return getWebUIConfig().enableContextualSelector ?? false;
 }
+
+/**
+ * Get logo URL from web UI config with fallback
+ */
+export function getLogoUrl(): string {
+  return getWebUIConfig().logo || 'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png';
+}

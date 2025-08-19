@@ -84,4 +84,4 @@ export const CONNECTION_SETTINGS = {
 /**
  * Agent configuration
  */
-export { getAgentTitle, getWebUIConfig, isContextualSelectorEnabled } from './shared';
+export { getAgentTitle, getWebUIConfig, isContextualSelectorEnabled, getLogoUrl } from './shared';

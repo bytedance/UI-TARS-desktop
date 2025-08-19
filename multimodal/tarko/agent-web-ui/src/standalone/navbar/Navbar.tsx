@@ -12,7 +12,7 @@ import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useDarkMode } from '@/common/hooks/useDarkMode';
 import { apiService } from '@/common/services/apiService';
 import { NavbarModelSelector } from './ModelSelector';
-import { getWebUIConfig } from '@/common/constants';
+import { getWebUIConfig, getLogoUrl } from '@/common/constants';
 
 import './Navbar.css';
 
@@ -50,9 +50,7 @@ export const Navbar: React.FC = () => {
 
   // Get configuration from global window object
   const webUIConfig = getWebUIConfig();
-  const logoUrl =
-    webUIConfig?.logo ||
-    'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png';
+  const logoUrl = getLogoUrl();
 
   // Get logo type from URL query parameter
   const logoType = React.useMemo(() => {

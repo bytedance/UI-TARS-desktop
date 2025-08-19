@@ -300,7 +300,7 @@ export const ChatPanel: React.FC = () => {
                       <p className="text-gray-600 dark:text-gray-400 text-sm">
                         {isReplayMode && replayState.currentEventIndex === -1
                           ? 'Press play to start the replay or use the timeline to navigate'
-                          : `Ask ${getAgentTitle()} a question or provide a command to begin.`}
+                          : `Ask ${getAgentTitle()} a question or submit a task.`}
                       </p>
                     </>
                   )}
