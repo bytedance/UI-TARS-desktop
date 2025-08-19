@@ -13,6 +13,7 @@ import {
 } from 'react-icons/fi';
 import { apiService } from '@/common/services/apiService';
 import { normalizeFilePath } from '@/common/utils/pathNormalizer';
+import { AGENT_TITLE } from '@/common/constants';
 import './Workspace.css';
 
 /**
@@ -304,7 +305,7 @@ export const WorkspaceContent: React.FC = () => {
                 variants={itemVariants}
                 className="text-gray-600 dark:text-gray-400 leading-relaxed mb-8 max-w-md mx-auto"
               >
-                Your workspace is active. Start a conversation with {window.AGENT_WEB_UI_CONFIG?.title || 'Agent'} and watch as tool
+                Your workspace is active. Start a conversation with {AGENT_TITLE} and watch as tool
                 results, plans, and detailed information appear here in real-time.
               </motion.p>
 

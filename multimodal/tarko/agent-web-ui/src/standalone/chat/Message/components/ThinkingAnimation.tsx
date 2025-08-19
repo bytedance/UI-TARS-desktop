@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { FiCpu, FiZap, FiLoader, FiPlay } from 'react-icons/fi';
 import { AgentProcessingPhase } from '@tarko/interface';
+import { AGENT_TITLE } from '@/common/constants';
 
 interface ThinkingAnimationProps {
   size?: 'small' | 'medium' | 'large';
@@ -110,7 +111,7 @@ const getGradientClasses = (phase?: string) => {
 
 export const ThinkingAnimation: React.FC<ThinkingAnimationProps> = ({
   size = 'medium',
-  text = `${window.AGENT_WEB_UI_CONFIG?.title || 'Agent'} is running`,
+  text = `${AGENT_TITLE} is running`,
   className = '',
   phase,
   estimatedTime,

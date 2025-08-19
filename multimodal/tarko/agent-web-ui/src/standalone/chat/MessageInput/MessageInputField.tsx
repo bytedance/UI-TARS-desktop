@@ -11,6 +11,7 @@ import {
   updateSelectorStateAction,
 } from '@/common/state/atoms/contextualSelector';
 import { ContextualSelector, ContextualItem } from '../ContextualSelector';
+import { AGENT_TITLE } from '@/common/constants';
 
 interface MessageInputFieldProps {
   uploadedImages: ChatCompletionContentPart[];
@@ -346,10 +347,10 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
                 connectionStatus && !connectionStatus.connected
                   ? 'Server disconnected...'
                   : isProcessing
-                    ? `${window.AGENT_WEB_UI_CONFIG?.title || 'Agent'} is running...`
+                    ? `${AGENT_TITLE} is running...`
                     : isContextualSelectorEnabled
-                      ? `Ask ${window.AGENT_WEB_UI_CONFIG?.title || 'Agent'} something... (Use @ to reference files/folders, Ctrl+Enter to send)`
-                      : `Ask ${window.AGENT_WEB_UI_CONFIG?.title || 'Agent'} something... (Ctrl+Enter to send)`
+                      ? `Ask ${AGENT_TITLE} something... (Use @ to reference files/folders, Ctrl+Enter to send)`
+                      : `Ask ${AGENT_TITLE} something... (Ctrl+Enter to send)`
               }
               disabled={isDisabled}
               className="w-full px-5 pt-5 pb-12 focus:outline-none resize-none min-h-[100px] max-h-[220px] bg-transparent text-sm leading-relaxed rounded-[1.4rem]"

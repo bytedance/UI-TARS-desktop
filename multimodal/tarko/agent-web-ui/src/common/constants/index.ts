@@ -80,3 +80,8 @@ export const CONNECTION_SETTINGS = {
   RECONNECTION_DELAY: 1000,
   RECONNECTION_DELAY_MAX: 5000,
 };
+
+/**
+ * Agent configuration
+ */
+export const AGENT_TITLE = window.AGENT_WEB_UI_CONFIG?.title || 'Agent';
