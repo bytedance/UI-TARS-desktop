@@ -120,6 +120,30 @@ function extractImageData(panelContent: StandardPanelContent): {
       }
     }
 
+    // Handle ChatCompletionContentPart[] array format (for environment_input events)
+    if (Array.isArray(panelContent.source)) {
+      const imageContent = panelContent.source.find(
+        (item): item is { type: 'image_url'; image_url: { url: string } } =>
+          typeof item === 'object' &&
+          item !== null &&
+          'type' in item &&
+          item.type === 'image_url' &&
+          'image_url' in item &&
+          typeof item.image_url === 'object' &&
+          item.image_url !== null &&
+          'url' in item.image_url &&
+          typeof item.image_url.url === 'string',
+      );
+
+      if (imageContent && imageContent.image_url) {
+        return {
+          src: imageContent.image_url.url,
+          mimeType: 'image/jpeg',
+          name: panelContent.title || 'Environment Screenshot',
+        };
+      }
+    }
+
     // Try to extract from source
     if (typeof panelContent.source === 'object' && panelContent.source !== null) {
       const sourceObj = panelContent.source as any;
