@@ -31,16 +31,5 @@ export class McpManager {
 
   async init() {
     await this.client.init();
-
-    const start = Date.now();
-
-    const tools = await this.client.listTools();
-
-    console.log(
-      '[tools]: ',
-      tools.map((t) => t.name),
-      'time: ',
-      Date.now() - start,
-    );
   }
 }
