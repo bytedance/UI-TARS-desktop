@@ -6,7 +6,7 @@ import { FaBrain } from 'react-icons/fa';
 import { apiService } from '@/common/services/apiService';
 import { AgentServerVersionInfo } from '@agent-tars/interface';
 import { ModelInfo, AgentInfo } from '@/common/types';
-import { getWebUIConfig, getLogoUrl } from '@/common/constants';
+import { getWebUIConfig, getLogoUrl, getAgentTitle } from '@/common/constants';
 
 interface AboutModalProps {
   isOpen: boolean;
@@ -28,7 +28,6 @@ export const AboutModal: React.FC<AboutModalProps> = ({
   // Get configuration from global window object
   const webUIConfig = getWebUIConfig();
   const logoUrl = getLogoUrl();
-  const title = webUIConfig?.title;
   const subtitle = webUIConfig?.subtitle;
 
   // Load version info when modal opens
@@ -103,7 +102,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({
               </div>
 
               <h1 className="text-4xl md:text-5xl font-light text-gray-900 dark:text-gray-100 mb-4 tracking-wide">
-                {title ?? 'Tarko'}
+                {getAgentTitle()}
               </h1>
 
               {/* Display subtitle if available */}

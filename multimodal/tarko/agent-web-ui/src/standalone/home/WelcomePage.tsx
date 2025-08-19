@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { FiArrowRight, FiArrowUpRight } from 'react-icons/fi';
 import { useSession } from '@/common/hooks/useSession';
-import { getWebUIConfig, getLogoUrl } from '@/common/constants';
+import { getWebUIConfig, getLogoUrl, getAgentTitle } from '@/common/constants';
 
 const WelcomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -166,7 +166,7 @@ const WelcomePage: React.FC = () => {
                   value={query}
                   onChange={handleInput}
                   onKeyDown={handleKeyDown}
-                  placeholder={`Ask ${webUIConfig?.title || 'Agent'} anything...`}
+                  placeholder={`Ask ${getAgentTitle()} anything...`}
                   className="w-full px-6 py-4 text-lg bg-transparent outline-none text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 resize-none min-h-[100px]"
                   disabled={isLoading || isDirectChatLoading}
                   rows={3}

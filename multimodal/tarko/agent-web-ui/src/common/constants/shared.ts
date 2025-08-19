@@ -28,5 +28,8 @@ export function isContextualSelectorEnabled(): boolean {
  * Get logo URL from web UI config with fallback
  */
 export function getLogoUrl(): string {
-  return getWebUIConfig().logo || 'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png';
+  return (
+    getWebUIConfig().logo ||
+    'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png'
+  );
 }
