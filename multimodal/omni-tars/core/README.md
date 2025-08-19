@@ -83,7 +83,7 @@ const toolCallEngine = createComposableToolCallEngineFactory({
 });
 
 const agent = new ComposableAgent({
-  name: 'Omni TARS Agent',
+  name: 'Omni-TARS Agent',
   plugins: [mcpPlugin, guiPlugin, codePlugin],
   toolCallEngine,
 });

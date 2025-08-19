@@ -29,7 +29,7 @@ export default defineConfig({
   logLevel: LogLevel.DEBUG,
   webui: {
     logo: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png',
-    title: 'Omni TARS Agent',
+    title: 'Omni-TARS Agent',
     subtitle: 'Offering seamless integration with a wide range of real-world tools.',
     welcomTitle: 'An multimodal AI agent',
     welcomePrompts: [
