@@ -239,33 +239,36 @@ function extractCommandData(panelContent: StandardPanelContent) {
   }
 
   /**
-   * SUCCESS:
-   *
-   * {
-   *    "panelContent": {
-   *        "type": "command_result",
-   *        "source": {
-   *            "output": "File created successfully at: /home/gem/agent-tars-poster/package.json",
-   *            "error": null,
-   *            "path": "/home/gem/agent-tars-poster/package.json",
-   *            "prev_exist": false,
-   *            "old_content": null,
-   *            "new_content": "..."
-   *        },
-   *        "title": "str_replace_editor",
-   *        "timestamp": 1755607726980,
-   *        "toolCallId": "call_1755607726967_iiy3e7x6v",
-   *        "arguments": {
-   *            "command": "create",
-   *            "path": "/home/gem/agent-tars-poster/package.json",
-   *            "file_text": "..."
-   *        }
-   *    }
-   * }
+   * For Omni TARS  "execute_bash" tool.
    */
   if (panelContent.title === 'str_replace_editor' && panelContent.arguments) {
     const { command = '', file_text = '', path = '' } = panelContent.arguments;
 
+    /**
+     * Object case (always FAIL for now):
+     *
+     * {
+     *    "panelContent": {
+     *        "type": "command_result",
+     *        "source": {
+     *            "output": "File created successfully at: /home/gem/agent-tars-poster/package.json",
+     *            "error": null,
+     *            "path": "/home/gem/agent-tars-poster/package.json",
+     *            "prev_exist": false,
+     *            "old_content": null,
+     *            "new_content": "..."
+     *        },
+     *        "title": "str_replace_editor",
+     *        "timestamp": 1755607726980,
+     *        "toolCallId": "call_1755607726967_iiy3e7x6v",
+     *        "arguments": {
+     *            "command": "create",
+     *            "path": "/home/gem/agent-tars-poster/package.json",
+     *            "file_text": "..."
+     *        }
+     *    }
+     * }
+     */
     const mergedCommand = [command, path, '\n', file_text].filter(Boolean).join(' ');
     if (typeof panelContent.source === 'object') {
       return {
@@ -276,6 +279,24 @@ function extractCommandData(panelContent: StandardPanelContent) {
       };
     }
 
+    /**
+     * String case (always FAIL for now):
+     * {
+     *   "panelContent": {
+     *      "type": "command_result",
+     *      "source": "Error: Error: HTTP 500: Internal Server Error  [str_replace_editor] error: Ran into [Errno 2] No such file or directory: '/home/gem/agent-tars-poster/src/main.tsx' while trying to write to /home/gem/agent-tars-poster/src/main.tsx",
+     *      "title": "str_replace_editor",
+     *      "timestamp": 1755607307073,
+     *      "toolCallId": "call_1755607306040_p0kmnxprd",
+     *      "error": "Error: HTTP 500: Internal Server Error  [str_replace_editor] error: Ran into [Errno 2] No such file or directory: '/home/gem/agent-tars-poster/src/main.tsx' while trying to write to /home/gem/agent-tars-poster/src/main.tsx",
+     *      "arguments": {
+     *          "command": "create",
+     *          "path": "/home/gem/agent-tars-poster/src/main.tsx",
+     *          "file_text": "import React from 'react';\\nimport ReactDOM from 'react-dom/client';\\nimport App from './App';\\nimport './index.css';\\n\\nReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(\\n  "
+     *      }
+     *   }
+     * }
+     */
     if (typeof panelContent.source === 'string') {
       const isError = panelContent.source.includes('Error: ');
       return {
