@@ -7,6 +7,7 @@ import { AioClient } from '@agent-infra/sandbox';
 
 export class JupyterCIProvider {
   private client: AioClient;
+  private sessionId = '';
 
   constructor(client: AioClient) {
     this.client = client;
@@ -21,13 +22,19 @@ export class JupyterCIProvider {
         timeout: z.number().describe('timeout in seconds').optional(),
       }),
       function: async ({ code, timeout }) => {
-        return (
-          await this.client.jupyterExecute({
-            code,
-            timeout,
-            kernel_name: 'python3',
-          })
-        ).data;
+        const resp = await this.client.jupyterExecute({
+          code,
+          timeout,
+          session_id: this.sessionId,
+          kernel_name: 'python3',
+        });
+
+        // Update session_id. The aio mechanism is that the non-existent session_id will be automatically created.
+        if (resp.data?.session_id !== this.sessionId) {
+          this.sessionId = resp.data?.session_id ?? '';
+        }
+
+        return resp.data;
       },
     });
   }

@@ -27,9 +27,6 @@ export class CodeAgentPlugin extends AgentPlugin {
     this.client = new AioClient({
       baseUrl: process.env.AIO_SANDBOX_URL,
     });
-  }
-
-  async initialize(): Promise<void> {
     // Initialize tools
     this.tools = [
       new ExcuteBashProvider(this.client).getTool(),

@@ -320,8 +320,8 @@ importers:
   omni-tars/code-agent:
     dependencies:
       '@agent-infra/sandbox':
-        specifier: 0.0.2-beta3
-        version: 0.0.2-beta3
+        specifier: 0.0.2-beta5
+        version: 0.0.2-beta5
       '@omni-tars/core':
         specifier: workspace:*
         version: link:../core
@@ -1497,8 +1497,8 @@ packages:
     resolution: {integrity: sha512-J0VSY/QFzl/YeE2xe4H99hGJmk8CrbgXvI8zttL5R59O+BXEBBoCq/xHZ4KXhLBVZJTRMzuxawopQqlPAhIc6w==}
     engines: {node: '>=18.0.0'}
 
-  '@agent-infra/sandbox@0.0.2-beta3':
-    resolution: {integrity: sha512-S35SrXpOAo722xrwFl/CIxGNCTvG9/tWAOUjlFB/53kSt6fBFISyHbpA30bMOzDtHlCvKInO4yojfwyGZXbExw==}
+  '@agent-infra/sandbox@0.0.2-beta5':
+    resolution: {integrity: sha512-p1Lx121/bo9Bxq76mfn7tR8Plfn40YEfFbit1J/QCTz7WmkF8U6sxmiDbOreyqnbKhwPrK9DOkdDui//+WAzWA==}
     engines: {node: '>=18.0.0'}
 
   '@agent-infra/search@0.0.5':
@@ -11173,7 +11173,7 @@ snapshots:
     dependencies:
       '@agent-infra/logger': 0.0.1
 
-  '@agent-infra/sandbox@0.0.2-beta3':
+  '@agent-infra/sandbox@0.0.2-beta5':
     dependencies:
       '@agent-infra/logger': 0.0.1
 
