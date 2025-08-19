@@ -27,12 +27,19 @@ export class CodeAgentPlugin extends AgentPlugin {
     this.client = new AioClient({
       baseUrl: process.env.AIO_SANDBOX_URL,
     });
+
     // Initialize tools
     this.tools = [
       new ExcuteBashProvider(this.client).getTool(),
       new JupyterCIProvider(this.client).getTool(),
       new StrReplaceEditorProvider(this.client).getTool(),
     ];
+
+    this.checkSandbox();
+  }
+
+  async checkSandbox() {
+    await this.client.healthCheck();
   }
 
   async onLLMRequest(id: string, payload: LLMRequestHookPayload): Promise<void> {

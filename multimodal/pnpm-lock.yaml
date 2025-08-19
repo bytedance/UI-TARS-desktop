@@ -320,8 +320,8 @@ importers:
   omni-tars/code-agent:
     dependencies:
       '@agent-infra/sandbox':
-        specifier: 0.0.2-beta5
-        version: 0.0.2-beta5
+        specifier: 0.0.2-beta7
+        version: 0.0.2-beta7
       '@omni-tars/core':
         specifier: workspace:*
         version: link:../core
@@ -400,8 +400,8 @@ importers:
         specifier: 0.1.5
         version: 0.1.5
       '@agent-infra/sandbox':
-        specifier: 0.0.1
-        version: 0.0.1
+        specifier: 0.0.2-beta7
+        version: 0.0.2-beta7
       '@gui-agent/action-parser':
         specifier: workspace:*
         version: link:../../gui-agent/action-parser
@@ -1493,12 +1493,8 @@ packages:
   '@agent-infra/media-utils@0.1.5':
     resolution: {integrity: sha512-3irZBomzhNOw/HMZg4rmJ7w87BPbXTgYA0LZV0nlgpoE5w3GydmWx/S0EF1MCfPHE1r1QrldFqpqZ38smSGF4Q==}
 
-  '@agent-infra/sandbox@0.0.1':
-    resolution: {integrity: sha512-J0VSY/QFzl/YeE2xe4H99hGJmk8CrbgXvI8zttL5R59O+BXEBBoCq/xHZ4KXhLBVZJTRMzuxawopQqlPAhIc6w==}
-    engines: {node: '>=18.0.0'}
-
-  '@agent-infra/sandbox@0.0.2-beta5':
-    resolution: {integrity: sha512-p1Lx121/bo9Bxq76mfn7tR8Plfn40YEfFbit1J/QCTz7WmkF8U6sxmiDbOreyqnbKhwPrK9DOkdDui//+WAzWA==}
+  '@agent-infra/sandbox@0.0.2-beta7':
+    resolution: {integrity: sha512-Ppyy5TM3s7i1xr0amRoOYV3nlFH0is20Ggz1Ru/1VvlPIhGp1txyYEKdK+bZUTjXIpsyzdm04Oo/fRsrvdUfMw==}
     engines: {node: '>=18.0.0'}
 
   '@agent-infra/search@0.0.5':
@@ -11169,11 +11165,7 @@ snapshots:
       '@agent-infra/logger': 0.0.2-beta.2
       delay: 6.0.0
 
-  '@agent-infra/sandbox@0.0.1':
-    dependencies:
-      '@agent-infra/logger': 0.0.1
-
-  '@agent-infra/sandbox@0.0.2-beta5':
+  '@agent-infra/sandbox@0.0.2-beta7':
     dependencies:
       '@agent-infra/logger': 0.0.1
 
