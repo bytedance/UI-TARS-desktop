@@ -203,7 +203,7 @@ export class GUIAgentToolCallEngine extends ToolCallEngine {
     const content = finishMessage || (toolCalls.length <= 0 || finished ? fullContent : '');
     const reasoningContent = reasoningContentDraft ?? parsed[0]?.thought ?? '';
     const contentForWebUI = content.replace(/\\n|\n/g, '<br>');
-    const reasoningContentForWebUI = reasoningContent.replace(/\\n|\n/g, '<br>');
+    const reasoningContentForWebUI = reasoningContent.replace(/\\n|\n/g, '');
 
     // No tool calls found - return regular response
     return {
