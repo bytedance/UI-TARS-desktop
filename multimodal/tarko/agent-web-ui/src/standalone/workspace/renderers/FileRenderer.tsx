@@ -1,7 +1,7 @@
 import React from 'react';
 import { StandardPanelContent } from '../types/panelContent';
 import { FileDisplayMode } from '../types';
-import { FileResultRenderer } from './generic/components/FileResultRenderer';
+import { FileResultRenderer } from './FileResultRenderer';
 
 /**
  * FileRenderer - Dedicated renderer for file content display

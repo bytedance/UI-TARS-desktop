@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { FileDisplayMode } from '../../../types';
-import { StandardPanelContent } from '../../../types/panelContent';
-import { MessageContent } from './MessageContent';
-import { DisplayMode } from '../types';
+import React from 'react';
+import { FileDisplayMode } from '../types';
+import { StandardPanelContent } from '../types/panelContent';
+import { MessageContent } from './generic/components/MessageContent';
+import { DisplayMode } from './generic/types';
 import { MonacoCodeEditor } from '@/sdk/code-editor';
 import { useStableCodeContent } from '@/common/hooks/useStableValue';
-import { ThrottledHtmlRenderer } from '../../../components/ThrottledHtmlRenderer';
+import { ThrottledHtmlRenderer } from '../components/ThrottledHtmlRenderer';
 
 // Constants
 const MAX_HEIGHT_CALC = 'calc(100vh - 215px)';
