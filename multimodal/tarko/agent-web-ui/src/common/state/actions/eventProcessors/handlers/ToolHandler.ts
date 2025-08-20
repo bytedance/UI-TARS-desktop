@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { jsonrepair } from 'jsonrepair';
 import { EventHandler, EventHandlerContext } from '../types';
 import { AgentEventStream, ToolResult, Message } from '@/common/types';
-import { determineToolType } from '@/common/utils/formatters';
+import { determineToolRendererType } from '@/common/utils/tool-renderers';
 import { messagesAtom } from '@/common/state/atoms/message';
 import { toolResultsAtom, toolCallResultMap } from '@/common/state/atoms/tool';
 import { activePanelContentAtom } from '@/common/state/atoms/ui';
@@ -79,7 +79,7 @@ export class ToolResultHandler implements EventHandler<AgentEventStream.ToolResu
       content: normalizedContent,
       timestamp: event.timestamp,
       error: event.error,
-      type: determineToolType(event.name, normalizedContent),
+      type: determineToolRendererType(event.name, normalizedContent),
       arguments: args,
       elapsedMs: event.elapsedMs,
       _extra: event._extra,

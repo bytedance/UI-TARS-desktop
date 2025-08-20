@@ -1,3 +1,10 @@
+import { ToolToRendererCondition } from './types';
+import {
+  strReplaceEditorRendererCondition,
+  generalRendererCondition,
+  imageRendererCondition,
+} from './renderer-conditions';
+
 /**
  * Format a timestamp to a user-friendly date string
  */
@@ -29,24 +36,6 @@ export function formatRelativeDate(timestamp: number): string {
   }
 }
 
-/**
- * Configuration for mapping tools to renderers
- * Each condition is evaluated in order, first match wins
- */
-type ToolToRendererCondition =
-  | StaticToolToRendererCondition
-  | FunctionToolToRendererCondition;
-
-type StaticToolToRendererCondition = {
-  toolName: string;
-  renderer: string;
-};
-
-type FunctionToolToRendererCondition = (
-  toolName: string,
-  toolResponse: any
-) => string | null; // Returns renderer name or null if condition doesn't match
-
 const TOOL_TO_RENDERER_CONFIG: ToolToRendererCondition[] = [
   // Static tool name mappings
   { toolName: 'web_search', renderer: 'search_result' },
@@ -59,61 +48,27 @@ const TOOL_TO_RENDERER_CONFIG: ToolToRendererCondition[] = [
   { toolName: 'run_script', renderer: 'script_result' },
   { toolName: 'LinkReader', renderer: 'link_reader' },
   { toolName: 'Search', renderer: 'search_result' },
-  { toolName: 'str_replace_editor', renderer: 'command_result' },
   { toolName: 'execute_bash', renderer: 'command_result' },
   { toolName: 'JupyterCI', renderer: 'script_result' },
 
+  // str_replace_editor
+  strReplaceEditorRendererCondition,
+
   // Dynamic conditions based on content
-  (toolName: string, content: any): string | null => {
-    if (Array.isArray(content)) {
-      if (
-        content.some(
-          (item) => item.type === 'text' && (item.name === 'RESULTS' || item.name === 'QUERY'),
-        )
-      ) {
-        return 'search_result';
-      }
-
-      if (content.some((item) => item.type === 'text' && item.text?.startsWith('Navigated to'))) {
-        return 'browser_result';
-      }
-
-      if (content.some((item) => item.type === 'image_url')) {
-        return 'image';
-      }
-
-      if (
-        content.some(
-          (item) => item.type === 'text' && (item.name === 'STDOUT' || item.name === 'COMMAND'),
-        )
-      ) {
-        return 'command_result';
-      }
-    }
-    return null;
-  },
+  generalRendererCondition,
 
   // Image content detection
-  (toolName: string, content: any): string | null => {
-    if (
-      content &&
-      ((typeof content === 'object' && content.type === 'image') ||
-        (typeof content === 'string' && content.startsWith('data:image/')))
-    ) {
-      return 'image';
-    }
-    return null;
-  },
+  imageRendererCondition,
 
   // Fallback to JSON renderer
-  (toolName: string, content: any): string => 'json',
+  (): string => 'json',
 ];
 
 /**
  * Determine the renderer type from tool name and content
  * Uses the flexible condition-based configuration system
  */
-export function determineToolType(name: string, content: any): string {
+export function determineToolRendererType(name: string, content: any): string {
   for (const condition of TOOL_TO_RENDERER_CONFIG) {
     if (typeof condition === 'function') {
       const result = condition(name, content);
