@@ -82,7 +82,7 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline gap-2">
             <h2 className="font-medium text-gray-900 dark:text-gray-100 text-base leading-tight truncate">
-              {panelContent.title}
+              {panelContent.title === 'browser_vision_control' ? 'Browser' : panelContent.title}
             </h2>
             <div className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap flex-shrink-0 font-mono">
               {formatTimestamp(panelContent.timestamp, true)}

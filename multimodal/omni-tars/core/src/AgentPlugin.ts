@@ -51,6 +51,11 @@ export class AgentPlugin {
     //logic here
   }
 
+  /** Hook called at the start of each agent loop */
+  async onEachAgentLoopEnd(): Promise<void> {
+    //logic here
+  }
+
   /** Hook called at the end of each agent loop */
   async onAgentLoopEnd(): Promise<void> {
     //logic here

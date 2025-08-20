@@ -10,7 +10,7 @@ import { AgentOptions } from '@tarko/agent';
 
 const toolCallEngine = createComposableToolCallEngineFactory({
   engines: [
-    // new GuiToolCallEngineProvider(),
+    new GuiToolCallEngineProvider(),
     new McpToolCallEngineProvider(),
     new CodeToolCallEngineProvider(),
   ],
@@ -22,11 +22,7 @@ export default class OmniTARSAgent extends ComposableAgent {
   constructor(options: AgentOptions) {
     super({
       ...options,
-      plugins: [
-        mcpPlugin,
-        // guiPlugin,
-        codePlugin,
-      ],
+      plugins: [mcpPlugin, guiPlugin, codePlugin],
       toolCallEngine,
       maxTokens: 32768,
     });

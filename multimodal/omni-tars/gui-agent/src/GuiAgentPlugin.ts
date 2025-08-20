@@ -3,7 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { AgentPlugin, COMPUTER_USE_ENVIRONMENT } from '@omni-tars/core';
-import { Tool, LLMRequestHookPayload, LLMResponseHookPayload } from '@tarko/agent';
+import {
+  Tool,
+  LLMRequestHookPayload,
+  LLMResponseHookPayload,
+  AgentEventStream,
+} from '@tarko/agent';
 import { Base64ImageParser } from '@agent-infra/media-utils';
 import { getScreenInfo, setScreenInfo } from './shared';
 import { OperatorManager } from './OperatorManager';
@@ -53,7 +58,22 @@ export class GuiAgentPlugin extends AgentPlugin {
     // console.log('onLLMRequest', id, payload);
   }
 
-  async onEachAgentLoopStart(): Promise<void> {
+  // async onEachAgentLoopStart(): Promise<void> {
+  // }
+
+  async onEachAgentLoopEnd(): Promise<void> {
+    const events = this.agent.getEventStream().getEvents();
+    const lastToolCallIsComputerUse = this.findLastMatch<AgentEventStream.Event>(
+      events,
+      (item) => item.type === 'tool_call' && item.name === 'browser_vision_control',
+    );
+    if (!lastToolCallIsComputerUse) {
+      this.agent.logger.info('Last tool not GUI action, skipping screenshot');
+      return;
+    }
+
+    this.agent.logger.info('onEachAgentLoopEnd lastToolCall', lastToolCallIsComputerUse);
+
     const operator = await this.operatorManager.getInstance();
     const output = await operator?.screenshot();
     if (!output) {
@@ -87,5 +107,14 @@ export class GuiAgentPlugin extends AgentPlugin {
         screenHeight: dimensions.height,
       });
     }
+  }
+
+  private findLastMatch<T>(array: T[], callback: (item: T) => boolean) {
+    for (let i = array.length - 1; i >= 0; i--) {
+      if (callback(array[i])) {
+        return array[i];
+      }
+    }
+    return undefined;
   }
 }

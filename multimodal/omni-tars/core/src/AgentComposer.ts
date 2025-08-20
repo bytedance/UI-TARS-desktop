@@ -102,6 +102,17 @@ export class AgentComposer {
   }
 
   /**
+   * Execute onEachAgentLoopEnd hooks for all plugins
+   */
+  async executeOnEachAgentLoopEnd(): Promise<void> {
+    for (const plugin of this.plugins) {
+      if (plugin.onEachAgentLoopEnd) {
+        await plugin.onEachAgentLoopEnd();
+      }
+    }
+  }
+
+  /**
    * Execute onAgentLoopEnd hooks for all plugins
    */
   async executeOnAgentLoopEnd(): Promise<void> {

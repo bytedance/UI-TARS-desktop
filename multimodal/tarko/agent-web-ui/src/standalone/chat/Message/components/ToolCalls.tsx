@@ -195,6 +195,8 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
     switch (toolName) {
       case 'browser_navigate':
         return 'Navigate';
+      case 'browser_vision_control':
+        return 'Browser';
       case 'browser_get_markdown':
         return 'Extract Content';
       case 'browser_click':
