@@ -9,22 +9,13 @@ import {
 import { Button } from '@renderer/components/ui/button';
 import { Operator } from '@main/store/types';
 
+import { OPERATOR_URL_MAP } from '../../const';
+
 interface CountDownProps {
   operator: Operator;
   start?: number;
   status: RemoteResourceStatus;
 }
-
-const map = {
-  [Operator.RemoteComputer]: {
-    text: 'If you need to use it for a long-term and stable period, you can log in to the Volcano Engine FaaS to experience the Online Computer Use Agent.',
-    url: 'https://console.volcengine.com/vefaas/region:vefaas+cn-beijing/application/create?templateId=680b0a890e881f000862d9f0&channel=github&source=ui-tars',
-  },
-  [Operator.RemoteBrowser]: {
-    text: 'If you need to use it for a long-term and stable period, you can log in to the Volcano Engine FaaS to experience the Online Browser Use Agent.',
-    url: 'https://console.volcengine.com/vefaas/region:vefaas+cn-beijing/application/create?templateId=67f7b4678af5a6000850556c&channel=github&source=ui-tars',
-  },
-};
 
 const UpgradeCard = memo(({ operator }: { operator: Operator }) => (
   <HoverCardContent className="w-72 p-4" sideOffset={10}>
@@ -33,10 +24,12 @@ const UpgradeCard = memo(({ operator }: { operator: Operator }) => (
       {/* <CircleArrowUp className="h-5 w-5" /> */}
       {/* <h3 className="text-lg font-semibold">Upgrade</h3> */}
       {/* </div> */}
-      <p className="text-sm text-gray-600 mb-4">{map[operator]?.text}</p>
+      <p className="text-sm text-gray-600 mb-4">
+        {OPERATOR_URL_MAP[operator]?.text}
+      </p>
       <Button
         className="w-full"
-        onClick={() => window.open(map[operator]?.url, '_blank')}
+        onClick={() => window.open(OPERATOR_URL_MAP[operator]?.url, '_blank')}
       >
         Learn more
       </Button>

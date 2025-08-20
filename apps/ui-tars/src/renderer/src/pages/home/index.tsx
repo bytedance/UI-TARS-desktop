@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { useState } from 'react';
-// import { ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router';
+import { Info } from 'lucide-react';
 
 import {
   Card,
@@ -14,18 +14,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@renderer/components/ui/card';
-// import {
-//   DropdownMenu,
-//   DropdownMenuContent,
-//   DropdownMenuItem,
-//   DropdownMenuTrigger,
-// } from '@renderer/components/ui/dropdown-menu';
 import { Button } from '@renderer/components/ui/button';
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from '@renderer/components/ui/hover-card';
+import { Alert, AlertDescription } from '@renderer/components/ui/alert';
 
 import { Operator } from '@main/store/types';
 import { useSession } from '../../hooks/useSession';
@@ -33,72 +23,14 @@ import {
   checkVLMSettings,
   LocalSettingsDialog,
 } from '@renderer/components/Settings/local';
-// import {
-//   // checkRemoteBrowser,
-//   // checkRemoteComputer,
-//   RemoteSettingsDialog,
-// } from '@renderer/components/Settings/remote';
 
 import computerUseImg from '@resources/home_img/computer_use.png?url';
 import browserUseImg from '@resources/home_img/browser_use.png?url';
 import { sleep } from '@ui-tars/shared/utils';
+
 import { FreeTrialDialog } from '../../components/AlertDialog/freeTrialDialog';
 import { DragArea } from '../../components/Common/drag';
-
-const map = {
-  [Operator.RemoteComputer]: {
-    text: 'This feature has been sunset. Please log in to the Volcano Engine FaaS to experience the Online Computer Use Agent.',
-    url: 'https://console.volcengine.com/vefaas/region:vefaas+cn-beijing/application/create?templateId=680b0a890e881f000862d9f0&channel=github&source=ui-tars',
-  },
-  [Operator.RemoteBrowser]: {
-    text: 'This feature has been sunset. Please log in to the Volcano Engine FaaS to experience the Online Browser Use Agent.',
-    url: 'https://console.volcengine.com/vefaas/region:vefaas+cn-beijing/application/create?templateId=67f7b4678af5a6000850556c&channel=github&source=ui-tars',
-  },
-};
-
-const FreeButton = ({
-  onClick,
-  children,
-}: {
-  children: string;
-  onClick: () => void;
-}) => {
-  const item = children.includes('Computer')
-    ? map[Operator.RemoteComputer]
-    : map[Operator.RemoteBrowser];
-
-  return (
-    <HoverCard openDelay={0} closeDelay={100}>
-      <HoverCardTrigger asChild>
-        <div className="flex-1 relative">
-          <Button
-            className="w-full opacity-75 cursor-not-allowed"
-            onClick={onClick}
-            variant="secondary"
-            disabled
-          >
-            {children}
-          </Button>
-        </div>
-      </HoverCardTrigger>
-      <HoverCardContent className="w-80" side="top">
-        <div className="space-y-2">
-          <h4 className="text-sm font-semibold">Service Sunset</h4>
-          <p className="text-sm text-muted-foreground">{item.text}</p>
-          <Button
-            className="w-full"
-            onClick={() => {
-              window.open(item.url, '_blank');
-            }}
-            variant={'outline'}
-          >
-            Learn more
-          </Button>
-        </div>
-      </HoverCardContent>
-    </HoverCard>
-  );
-};
+import { OPERATOR_URL_MAP } from '../../const';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -111,10 +43,6 @@ const Home = () => {
     open: false,
     operator: Operator.RemoteComputer,
   });
-  // const [remoteConfig, setRemoteConfig] = useState({
-  //   open: false,
-  //   operator: Operator.RemoteComputer,
-  // });
 
   const toRemoteComputer = async (value: 'free' | 'paid') => {
     console.log('toRemoteComputer', value);
@@ -176,20 +104,6 @@ const Home = () => {
     });
   };
 
-  // const handlePaidRemoteDialog = async (operator: Operator) => {
-  //   setRemoteConfig({ open: true, operator: operator });
-  // };
-
-  // const handleReomteSettingsSubmit = async () => {
-  //   setRemoteConfig({ open: false, operator: remoteConfig.operator });
-  //   await sleep(200);
-  //   // await toLocal(localConfig.operator);
-  // };
-
-  // const handleRemoteSettingsClose = () => {
-  //   setRemoteConfig({ open: false, operator: remoteConfig.operator });
-  // };
-
   /** local click logic start */
   const toLocal = async (operator: Operator) => {
     const session = await createSession('New Session', {
@@ -240,57 +154,49 @@ const Home = () => {
   };
   /** local click logic end */
 
-  // const renderRemoteComputerButton = () => {
-  //   return (
-  //     <DropdownMenu>
-  //       <DropdownMenuTrigger asChild>
-  //         <Button className="flex-1">Use Remote Computer</Button>
-  //       </DropdownMenuTrigger>
-  //       <DropdownMenuContent className="ml-18">
-  //         <DropdownMenuItem onClick={() => toRemoteComputer('free')}>
-  //           Quick free trial
-  //           <ChevronRight className="ml-auto" />
-  //         </DropdownMenuItem>
-  //         <DropdownMenuItem
-  //           onClick={() => handlePaidRemoteDialog(Operator.RemoteComputer)}
-  //         >
-  //           Use your own site to experience
-  //           <ChevronRight className="ml-auto" />
-  //         </DropdownMenuItem>
-  //       </DropdownMenuContent>
-  //     </DropdownMenu>
-  //   );
-  // };
-
-  // const renderRemoteBrowserButton = () => {
-  //   return (
-  //     <DropdownMenu>
-  //       <DropdownMenuTrigger asChild>
-  //         <Button className="flex-1">Use Remote Browser</Button>
-  //       </DropdownMenuTrigger>
-  //       <DropdownMenuContent className="ml-20">
-  //         <DropdownMenuItem onClick={() => toRemoteBrowser('free')}>
-  //           Quick free trial
-  //           <ChevronRight className="ml-auto" />
-  //         </DropdownMenuItem>
-  //         <DropdownMenuItem
-  //           onClick={() => handlePaidRemoteDialog(Operator.RemoteBrowser)}
-  //         >
-  //           Use your own site to experience
-  //           <ChevronRight className="ml-auto" />
-  //         </DropdownMenuItem>
-  //       </DropdownMenuContent>
-  //     </DropdownMenu>
-  //   );
-  // };
-
   return (
     <div className="w-full h-full flex flex-col">
       <DragArea></DragArea>
       <div className="w-full h-full flex flex-col items-center justify-center">
-        <h1 className="text-2xl font-semibold mt-1 mb-12">
+        <h1 className="text-2xl font-semibold mt-1 mb-8">
           Welcome to UI-TARS Desktop
         </h1>
+        <Alert className="mb-4 w-[824px]">
+          <Info className="h-4 w-4 mt-2" />
+          <AlertDescription>
+            <div className="flex items-center">
+              <p className="text-sm text-muted-foreground">
+                You can also experience the remote versions on Volcano
+                Engine:&nbsp;
+              </p>
+              <Button
+                variant="link"
+                className="p-0 text-blue-500 hover:text-blue-600 hover:underline cursor-pointer"
+                onClick={() =>
+                  window.open(
+                    OPERATOR_URL_MAP[Operator.RemoteComputer].url,
+                    '_blank',
+                  )
+                }
+              >
+                Computer Operator
+              </Button>
+              <span>&nbsp;and&nbsp;</span>
+              <Button
+                variant="link"
+                className="p-0 text-blue-500 hover:text-blue-600 hover:underline cursor-pointer"
+                onClick={() =>
+                  window.open(
+                    OPERATOR_URL_MAP[Operator.RemoteBrowser].url,
+                    '_blank',
+                  )
+                }
+              >
+                Browser Operator
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
         <div className="flex gap-6">
           <Card className="w-[400px] py-5">
             <CardHeader className="px-5">
@@ -308,14 +214,12 @@ const Home = () => {
               />
             </CardContent>
             <CardFooter className="gap-3 px-5 flex justify-between">
-              {/* {renderRemoteComputerButton()} */}
               <Button
                 onClick={() => handleLocalPress(Operator.LocalComputer)}
-                className="flex-1"
+                className="w-full"
               >
                 Use Local Computer
               </Button>
-              <FreeButton onClick={() => {}}>Use Remote Computer</FreeButton>
             </CardFooter>
           </Card>
           <Card className="w-[400px] py-5">
@@ -334,14 +238,12 @@ const Home = () => {
               />
             </CardContent>
             <CardFooter className="gap-3 px-5 flex justify-between">
-              {/* {renderRemoteBrowserButton()} */}
               <Button
                 onClick={() => handleLocalPress(Operator.LocalBrowser)}
-                className="flex-1"
+                className="w-full"
               >
                 Use Local Browser
               </Button>
-              <FreeButton onClick={() => {}}>Use Remote Browser</FreeButton>
             </CardFooter>
           </Card>
         </div>
@@ -350,12 +252,6 @@ const Home = () => {
           onSubmit={handleLocalSettingsSubmit}
           onClose={handleLocalSettingsClose}
         />
-        {/* <RemoteSettingsDialog
-          isOpen={remoteConfig.open}
-          operator={remoteConfig.operator}
-          onSubmit={handleReomteSettingsSubmit}
-          onClose={handleRemoteSettingsClose}
-        /> */}
         <FreeTrialDialog
           open={remoteConfig.open}
           onOpenChange={handleRemoteDialogClose}
