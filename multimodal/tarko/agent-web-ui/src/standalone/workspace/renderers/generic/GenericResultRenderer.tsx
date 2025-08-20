@@ -10,7 +10,6 @@ import {
   JsonContent,
   OperationHeader,
   StatusIndicator,
-  FileResultRenderer,
 } from './components';
 import { formatKey, formatValue } from './utils';
 import { FileDisplayMode } from '../../types';
@@ -34,15 +33,9 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({
   onAction,
   displayMode,
 }) => {
-  // Handle file_result type directly
-  if (panelContent.type === 'file_result' || panelContent.type === 'file') {
-    return (
-      <FileResultRenderer
-        panelContent={panelContent}
-        onAction={onAction}
-        displayMode={displayMode}
-      />
-    );
+  // File types should now use dedicated renderers
+  if (panelContent.type === 'file_result' || panelContent.type === 'file' || panelContent.type === 'edit_file') {
+    console.warn(`GenericResultRenderer received file type '${panelContent.type}' - this should use a dedicated file renderer`);
   }
 
   // Extract content from panelContent

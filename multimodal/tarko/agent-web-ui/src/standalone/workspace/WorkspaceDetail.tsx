@@ -29,6 +29,8 @@ import { PlanViewerRenderer } from './renderers/PlanViewerRenderer';
 import { GenericResultRenderer } from './renderers/generic/GenericResultRenderer';
 import { DeliverableRenderer } from './renderers/DeliverableRenderer';
 import { DiffRenderer } from './renderers/DiffRenderer';
+import { FileRenderer } from './renderers/FileRenderer';
+import { EditFileRenderer } from './renderers/EditFileRenderer';
 
 /**
  * Registry of content renderers that handle StandardPanelContent directly
@@ -53,9 +55,10 @@ const CONTENT_RENDERERS: Record<
   research_report: ResearchReportRenderer,
   json: GenericResultRenderer,
   deliverable: DeliverableRenderer,
-  file_result: GenericResultRenderer,
+  file_result: FileRenderer,
   diff_result: DiffRenderer,
-  file: GenericResultRenderer,
+  file: FileRenderer,
+  edit_file: EditFileRenderer,
 };
 
 /**
