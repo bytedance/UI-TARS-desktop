@@ -11,6 +11,8 @@ import { replayStateAtom } from '@/common/state/atoms/replay';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useReplay } from '@/common/hooks/useReplay';
 import { getAgentTitle } from '@/common/constants';
+import { useAutoScroll } from './hooks/useAutoScroll';
+import { ScrollToBottomButton } from './components/ScrollToBottomButton';
 
 import './ChatPanel.css';
 import { ResearchReportEntry } from './ResearchReportEntry';
@@ -76,11 +78,22 @@ export const ChatPanel: React.FC = () => {
   const replayState = useAtomValue(replayStateAtom);
   const { isReplayMode, cancelAutoPlay } = useReplayMode();
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
-
   // Use messages from current session
   const activeMessages = activeSessionId ? groupedMessages[activeSessionId] || [] : [];
+
+  // Auto-scroll functionality
+  const {
+    messagesContainerRef,
+    messagesEndRef,
+    showScrollToBottom,
+    scrollToBottom,
+    isUserScrolling,
+  } = useAutoScroll({
+    threshold: 100,
+    debounceMs: 150,
+    autoScrollDelay: 2000,
+    dependencies: [activeMessages, isProcessing], // Trigger scroll on message changes
+  });
 
   // Animation variants
   const containerVariants = {
@@ -224,6 +237,8 @@ export const ChatPanel: React.FC = () => {
             ref={messagesContainerRef}
             className="flex-1 overflow-y-auto px-5 py-5 overflow-x-hidden min-h-0 chat-scrollbar relative"
           >
+            {/* Scroll to bottom button */}
+            <ScrollToBottomButton show={showScrollToBottom} onClick={scrollToBottom} />
             {renderOfflineBanner()}
 
             <AnimatePresence>
