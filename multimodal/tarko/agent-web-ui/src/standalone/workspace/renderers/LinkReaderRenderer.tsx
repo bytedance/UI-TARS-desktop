@@ -179,7 +179,7 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
 /**
  * Extract LinkReader data from panelContent
  *
- * @example
+ * @example Version 1
  *
  * {
  *   "type": "link_reader",
@@ -211,6 +211,28 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
  *       "url": "https://seed-tars.com/1.5"
  *   }
  * }
+ *
+ *
+ * @example Version 2
+ * {
+ *     "type": "link_reader",
+ *     "source": {
+ *         "content": [
+ *             {
+ *                 "type": "text",
+ *                 "text": "Page url:https://seed-tars.com/1.5/\nPage Summary:\n• Announcement\nIntr ..."
+ *             }
+ *         ],
+ *         "isError": false
+ *     },
+ *     "title": "LinkReader",
+ *     "timestamp": 1755793542304,
+ *     "toolCallId": "call_1755793536036_0vevr8y47",
+ *     "arguments": {
+ *         "description": "Extract and summarize the content of the webpage at https://seed-tars.com/1.5/",
+ *         "url": "https://seed-tars.com/1.5/"
+ *     }
+ * }
  */
 function extractLinkReaderData(panelContent: StandardPanelContent): {
   results: LinkResult[];
@@ -222,19 +244,32 @@ function extractLinkReaderData(panelContent: StandardPanelContent): {
     if (typeof panelContent.source === 'object' && panelContent.source !== null) {
       const sourceObj = panelContent.source as {
         content: OmniTarsTextContent[];
-        structuredContent: LinkReaderResponse;
+        structuredContent?: LinkReaderResponse;
       };
 
-      // First, check if structuredContent exists directly in source
+      // Version 1: Check if structuredContent exists directly in source
       if (sourceObj.structuredContent && typeof sourceObj.structuredContent === 'object') {
         parsedData = sourceObj.structuredContent;
       }
-
-      // Try content array with text field
+      // Version 1: Try content array with JSON text field
       else if (isOmniTarsTextContentArray(sourceObj.content)) {
-        parsedData = JSON.parse(sourceObj.content[0].text);
+        const textContent = sourceObj.content[0].text;
+        
+        // Version 2: Check if it's a Version 2 format (starts with "Page url:")
+        if (textContent.startsWith('Page url:')) {
+          const v2Data = parseVersion2Content(textContent, panelContent.arguments?.url);
+          if (v2Data) {
+            return v2Data;
+          }
+        }
+        
+        // Version 1: Try to parse as JSON
+        try {
+          parsedData = JSON.parse(textContent);
+        } catch {
+          return null;
+        }
       }
-
       // Fallback
       else {
         parsedData = {
@@ -269,6 +304,49 @@ function extractLinkReaderData(panelContent: StandardPanelContent): {
     return { results };
   } catch (error) {
     console.warn('Failed to extract LinkReader data:', error);
+    return null;
+  }
+}
+
+/**
+ * Parse Version 2 content format
+ * Format: "Page url:https://example.com\nPage Summary:\n• content..."
+ */
+function parseVersion2Content(textContent: string, argumentsUrl?: string): { results: LinkResult[] } | null {
+  try {
+    const lines = textContent.split('\n');
+    
+    // Extract URL from first line
+    const urlLine = lines[0];
+    const urlMatch = urlLine.match(/^Page url:(.+)$/);
+    const url = urlMatch?.[1]?.trim() || argumentsUrl || '';
+    
+    if (!url) {
+      return null;
+    }
+    
+    // Extract content after "Page Summary:"
+    const summaryIndex = lines.findIndex(line => line.trim() === 'Page Summary:');
+    const content = summaryIndex >= 0 
+      ? lines.slice(summaryIndex + 1).join('\n').trim()
+      : textContent;
+    
+    if (!content) {
+      return null;
+    }
+    
+    // Extract title from content or use hostname
+    const title = extractTitleFromContent(content) || getHostname(url);
+    
+    return {
+      results: [{
+        url,
+        title,
+        content,
+      }]
+    };
+  } catch (error) {
+    console.warn('Failed to parse Version 2 content:', error);
     return null;
   }
 }
