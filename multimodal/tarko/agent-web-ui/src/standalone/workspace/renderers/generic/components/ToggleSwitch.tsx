@@ -30,28 +30,28 @@ export const ToggleSwitch = <T extends string = string>({
         <button
           type="button"
           onClick={() => onChange(leftValue)}
-          className={`px-3 py-1.5 text-xs font-medium ${
+          className={`px-3 py-1.5 text-xs font-medium transition-all duration-200 shadow-sm ${
             value === leftValue
-              ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
-              : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/30'
-          } rounded-l-lg border border-gray-200 dark:border-gray-600`}
+              ? 'bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 text-slate-700 dark:text-slate-200'
+              : 'bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 text-slate-600 dark:text-slate-300 hover:from-slate-100 hover:to-slate-200 dark:hover:from-slate-700 dark:hover:to-slate-600 hover:text-slate-700 dark:hover:text-slate-200'
+          } rounded-l-lg border border-slate-200/60 dark:border-slate-600/40`}
         >
           <div className="flex items-center">
-            {leftIcon && <span className="mr-1.5">{leftIcon}</span>}
+            {leftIcon && <span className="mr-1.5 opacity-70">{leftIcon}</span>}
             <span>{leftLabel}</span>
           </div>
         </button>
         <button
           type="button"
           onClick={() => onChange(rightValue)}
-          className={`px-3 py-1.5 text-xs font-medium ${
+          className={`px-3 py-1.5 text-xs font-medium transition-all duration-200 shadow-sm ${
             value === rightValue
-              ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
-              : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/30'
-          } rounded-r-lg border border-gray-200 dark:border-gray-600 border-l-0`}
+              ? 'bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 text-slate-700 dark:text-slate-200'
+              : 'bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 text-slate-600 dark:text-slate-300 hover:from-slate-100 hover:to-slate-200 dark:hover:from-slate-700 dark:hover:to-slate-600 hover:text-slate-700 dark:hover:text-slate-200'
+          } rounded-r-lg border border-slate-200/60 dark:border-slate-600/40 border-l-0`}
         >
           <div className="flex items-center">
-            {rightIcon && <span className="mr-1.5">{rightIcon}</span>}
+            {rightIcon && <span className="mr-1.5 opacity-70">{rightIcon}</span>}
             <span>{rightLabel}</span>
           </div>
         </button>
