@@ -504,6 +504,9 @@ importers:
       '@tarko/agent-interface':
         specifier: workspace:*
         version: link:../../tarko/agent-interface
+      '@tarko/interface':
+        specifier: workspace:*
+        version: link:../../tarko/interface
       '@types/node':
         specifier: 22.15.30
         version: 22.15.30
