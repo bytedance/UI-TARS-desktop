@@ -27,6 +27,30 @@ export interface WorkspaceNavItem {
 }
 
 /**
+ * Link item configuration for navbar (e.g., AboutModal)
+ */
+export interface NavbarLinkItem {
+  /**
+   * Link title displayed on the button
+   */
+  title: string;
+  /**
+   * Link URL to open in new tab
+   */
+  url: string;
+  /**
+   * Icon name from react-icons/fi (e.g., 'FiGlobe', 'FiGithub')
+   * @optional
+   */
+  icon?: string;
+  /**
+   * Additional CSS classes for styling
+   * @optional
+   */
+  className?: string;
+}
+
+/**
  * Workspace configuration options
  */
 export interface WorkspaceConfig {
@@ -34,6 +58,16 @@ export interface WorkspaceConfig {
    * Navigation items to display in the workspace header
    */
   navItems?: WorkspaceNavItem[];
+}
+
+/**
+ * Navbar configuration options
+ */
+export interface NavbarConfig {
+  /**
+   * Link items to display in AboutModal
+   */
+  linkItems?: NavbarLinkItem[];
 }
 
 /**
@@ -85,6 +119,10 @@ export interface BaseAgentWebUIImplementation {
    * Workspace configuration
    */
   workspace?: WorkspaceConfig;
+  /**
+   * Navbar configuration
+   */
+  navbar?: NavbarConfig;
 }
 
 /**

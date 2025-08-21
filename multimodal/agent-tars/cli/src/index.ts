@@ -49,6 +49,22 @@ const DEFAULT_OPTIONS: Partial<AgentCLIInitOptions> = {
         'Please book me the earliest flight from Hangzhou to Shenzhen on 10.1',
       ],
       enableContextualSelector: true,
+      navbar: {
+        linkItems: [
+          {
+            title: 'Official Website',
+            url: 'https://agent-tars.com/',
+            icon: 'FiGlobe',
+            className: 'flex items-center gap-3 px-8 py-4 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors group'
+          },
+          {
+            title: 'View on GitHub',
+            url: 'https://github.com/bytedance/UI-TARS-desktop',
+            icon: 'FiGithub',
+            className: 'flex items-center gap-3 px-8 py-4 bg-gray-900 dark:bg-gray-100 hover:bg-gray-800 dark:hover:bg-gray-200 text-white dark:text-gray-900 rounded-lg transition-colors group'
+          }
+        ]
+      },
     },
     server: {
       storage: {
