@@ -169,8 +169,10 @@ function resolveBuiltinAgent(agentName: string): string {
 
   try {
     return require.resolve(agent.modulePath);
-  } catch (error) {
-    throw new Error(`Failed to resolve built-in agent "${agentName}": ${error.message}`);
+  } catch (error: unknown) {
+    throw new Error(
+      `Failed to resolve built-in agent "${agentName}": ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
 }
 
