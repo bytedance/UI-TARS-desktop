@@ -33,7 +33,7 @@ export default class OmniTARSAgent extends ComposableAgent {
   static label = 'Omni-TARS Agent';
 
   static webUIConfig: AgentWebUIImplementation = {
-    logo: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png',
+    logo: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/icon.png',
     title: 'Omni-TARS Agent',
     subtitle: 'Offering seamless integration with a wide range of real-world tools.',
     welcomTitle: 'An multimodal AI agent',
