@@ -38,6 +38,11 @@ export default class OmniTARSAgent extends ComposableAgent {
     ],
     workspace: {
       panels: [
+        // DO NOT DISPLAY CODE SERVER FOR NOW
+        // {
+        //   title: 'Code Server',
+        //   panel: sandboxUrl + '/code-server/',
+        // },
         {
           title: 'VNC',
           panel: sandboxUrl + '/vnc/index.html',
