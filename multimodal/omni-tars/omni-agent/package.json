@@ -23,7 +23,7 @@
     "dev": "rslib build --watch",
     "build": "rslib build",
     "test": "vitest",
-    "dev:agent": "tarko run ./"
+    "dev:agent": "../../tarko/agent-cli/bin/cli.js run ./"
   },
   "dependencies": {
     "@omni-tars/code-agent": "workspace:*",
@@ -34,7 +34,6 @@
   },
   "devDependencies": {
     "@rslib/core": "0.10.0",
-    "@tarko/agent-cli": "workspace:*",
     "@tarko/agent-interface": "workspace:*",
     "@tarko/interface": "workspace:*",
     "@types/node": "22.15.30",
