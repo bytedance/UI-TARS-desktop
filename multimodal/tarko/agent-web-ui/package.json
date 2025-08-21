@@ -25,6 +25,10 @@
     "socket.io-client": "^4.7.2",
     "uuid": "^9.0.0"
   },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
   "devDependencies": {
     "@tarko/agent-interface": "workspace:*",
     "@tarko/interface": "workspace:*",
