@@ -237,8 +237,6 @@ export const ChatPanel: React.FC = () => {
             ref={messagesContainerRef}
             className="flex-1 overflow-y-auto px-5 py-5 overflow-x-hidden min-h-0 chat-scrollbar relative"
           >
-            {/* Scroll to bottom button - positioned within messages area */}
-            <ScrollToBottomButton show={showScrollToBottom} onClick={scrollToBottom} />
             {renderOfflineBanner()}
 
             <AnimatePresence>
@@ -348,7 +346,9 @@ export const ChatPanel: React.FC = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          <div className="p-4">
+          <div className="p-4 relative">
+            {/* Scroll to bottom button - positioned relative to input area */}
+            <ScrollToBottomButton show={showScrollToBottom} onClick={scrollToBottom} />
             {researchReport && !isProcessing && (
               <div className="mb-4">
                 <ResearchReportEntry
