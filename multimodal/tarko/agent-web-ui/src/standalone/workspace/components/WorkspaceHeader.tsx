@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FiArrowLeft, FiBookOpen, FiMaximize, FiExternalLink } from 'react-icons/fi';
+import { FiArrowLeft, FiBookOpen, FiMaximize, FiMonitor } from 'react-icons/fi';
 import { formatTimestamp } from '@/common/utils/formatters';
 import { useTool } from '@/common/hooks/useTool';
 import { normalizeFilePath } from '@/common/utils/pathNormalizer';
@@ -115,10 +115,10 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => handleNavItemClick(navItem.link)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-all duration-200 text-xs font-medium"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 text-slate-600 dark:text-slate-300 rounded-lg border border-slate-200/60 dark:border-slate-600/40 hover:from-slate-100 hover:to-slate-200 dark:hover:from-slate-700 dark:hover:to-slate-600 hover:text-slate-700 dark:hover:text-slate-200 transition-all duration-200 text-xs font-medium shadow-sm"
                 title={`Open ${navItem.title} in new tab`}
               >
-                <FiExternalLink size={12} />
+                <FiMonitor size={12} className="opacity-70" />
                 {navItem.title}
               </motion.button>
             ))}
