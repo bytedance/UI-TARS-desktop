@@ -25,6 +25,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
   const fileContent = getFileContent(panelContent);
   const filePath = getFilePath(panelContent);
 
+  debugger;
   // Use stable content to prevent unnecessary re-renders during streaming
   const stableContent = useStableCodeContent(fileContent || '');
 
@@ -179,6 +180,11 @@ function getFileContent(panelContent: StandardPanelContent): string | null {
   // Try arguments first (for file operations)
   if (panelContent.arguments?.content && typeof panelContent.arguments.content === 'string') {
     return panelContent.arguments.content;
+  }
+
+  // FIXME: For "str_replace_editor".
+  if (panelContent.arguments?.file_text && typeof panelContent.arguments.file_text === 'string') {
+    return panelContent.arguments.file_text;
   }
 
   // Handle source array format
