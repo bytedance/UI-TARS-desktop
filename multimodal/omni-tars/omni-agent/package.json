@@ -36,6 +36,7 @@
     "@rslib/core": "0.10.0",
     "@tarko/agent-cli": "workspace:*",
     "@tarko/agent-interface": "workspace:*",
+    "@tarko/interface": "workspace:*",
     "@types/node": "22.15.30",
     "openai": "4.93.0",
     "typescript": "^5.5.3",
