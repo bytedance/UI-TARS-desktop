@@ -16,6 +16,11 @@ npm install @tarko/agent-cli
 # Start interactive Web UI (default)
 tarko
 
+# Run with built-in agents
+tarko run agent-tars  # Agent TARS
+tarko run omni-tars   # Omni TARS
+tarko run mcp-agent   # MCP Agent
+
 # Run with custom agent
 tarko run ./my-agent.js
 
@@ -29,6 +34,21 @@ tarko --headless --input "Analyze current directory structure"
 echo "Summarize this code" | tarko --headless
 ```
 
+## Built-in Agents
+
+Tarko CLI includes several built-in agents:
+
+- **`agent-tars`** - Agent TARS: Advanced task automation and reasoning system
+- **`omni-tars`** - Omni TARS: Multi-modal agent with comprehensive capabilities
+- **`mcp-agent`** - MCP Agent: Model Context Protocol agent for tool integration
+
+```bash
+# Use built-in agents
+tarko run agent-tars
+tarko run omni-tars
+tarko run mcp-agent
+```
+
 ## Core Commands
 
 ### `tarko` / `tarko run`
@@ -37,6 +57,7 @@ Launches **interactive Web UI** for real-time conversation and file browsing.
 
 ```bash
 tarko run --port 8888 --open
+tarko run agent-tars --port 8888
 tarko run ./my-agent.js --port 8888
 ```
 

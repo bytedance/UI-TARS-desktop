@@ -29,6 +29,9 @@
     "@tarko/agent": "workspace:*",
     "@tarko/agent-server": "workspace:*",
     "@tarko/shared-utils": "workspace:*",
+    "@agent-tars/core": "workspace:*",
+    "@omni-tars/agent": "workspace:*",
+    "@tarko/mcp-agent": "workspace:*",
     "dotenv": "^16.3.1"
   },
   "devDependencies": {

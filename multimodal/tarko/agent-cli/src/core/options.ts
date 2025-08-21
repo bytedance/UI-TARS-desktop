@@ -139,6 +139,24 @@ export function addCommonOptions(command: Command): Command {
 }
 
 /**
+ * Built-in agent mappings
+ */
+const BUILTIN_AGENTS: Record<string, { modulePath: string; label: string }> = {
+  'agent-tars': {
+    modulePath: '@agent-tars/core',
+    label: 'Agent TARS',
+  },
+  'omni-tars': {
+    modulePath: '@omni-tars/agent',
+    label: 'Omni TARS',
+  },
+  'mcp-agent': {
+    modulePath: '@tarko/mcp-agent',
+    label: 'MCP Agent',
+  },
+};
+
+/**
  * FIXME: Support markdown agent.
  *
  * Resolve agent implementation from cli argument
@@ -149,6 +167,19 @@ export async function resolveAgentFromCLIArgument(
 ): Promise<AgentImplementation> {
   // Use default agent if no agent parameter provided
   if (agentParam) {
+    // Check if it's a built-in agent
+    const builtinAgent = BUILTIN_AGENTS[agentParam];
+    if (builtinAgent) {
+      console.log(`Using built-in agent: ${builtinAgent.label}`);
+      return {
+        type: 'modulePath',
+        value: builtinAgent.modulePath,
+        label: builtinAgent.label,
+        agio: AgioProvider,
+      };
+    }
+
+    // Otherwise treat as custom module path
     return {
       type: 'modulePath',
       value: agentParam,
