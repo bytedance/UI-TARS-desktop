@@ -34,8 +34,14 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({
   displayMode,
 }) => {
   // File types should now use dedicated renderers
-  if (panelContent.type === 'file_result' || panelContent.type === 'file' || panelContent.type === 'edit_file') {
-    console.warn(`GenericResultRenderer received file type '${panelContent.type}' - this should use a dedicated file renderer`);
+  if (
+    panelContent.type === 'file_result' ||
+    panelContent.type === 'file' ||
+    panelContent.type === 'edit_file'
+  ) {
+    console.warn(
+      `GenericResultRenderer received file type '${panelContent.type}' - this should use a dedicated file renderer`,
+    );
   }
 
   // Extract content from panelContent

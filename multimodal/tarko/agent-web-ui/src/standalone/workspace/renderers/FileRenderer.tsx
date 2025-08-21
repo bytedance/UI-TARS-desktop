@@ -26,10 +26,6 @@ export const FileRenderer: React.FC<FileRendererProps> = ({
   }
 
   return (
-    <FileResultRenderer
-      panelContent={panelContent}
-      onAction={onAction}
-      displayMode={displayMode}
-    />
+    <FileResultRenderer panelContent={panelContent} onAction={onAction} displayMode={displayMode} />
   );
 };
