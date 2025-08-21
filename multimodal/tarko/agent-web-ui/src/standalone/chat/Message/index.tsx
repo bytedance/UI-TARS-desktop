@@ -182,14 +182,16 @@ export const Message: React.FC<MessageProps> = ({
       return false;
 
     const sessionMessages = allMessages[activeSessionId] || [];
-    // Check if there are environment messages
-    return sessionMessages.some(
-      (msg) =>
-        msg.role === 'environment' &&
-        Array.isArray(msg.content) &&
-        msg.content.some(
-          (item) => item.type === 'image_url' && item.image_url && item.image_url.url,
-        ),
+    if (sessionMessages.length === 0) return false;
+
+    // Check if there is a latest environment image input message
+    const lastMessage = sessionMessages[sessionMessages.length - 1];
+    return (
+      lastMessage.role === 'environment' &&
+      Array.isArray(lastMessage.content) &&
+      lastMessage.content.some(
+        (item) => item.type === 'image_url' && item.image_url && item.image_url.url,
+      )
     );
   }, [activeSessionId, isFinalAssistantResponse, allMessages]);
 
