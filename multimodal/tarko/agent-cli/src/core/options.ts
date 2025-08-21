@@ -6,6 +6,7 @@
 import { Command } from 'cac';
 import { AgentCLIArguments, AgentImplementation } from '@tarko/interface';
 import { AgioProvider } from '../agio/AgioProvider';
+import { resolveAgentFromNPMInput, analyzeAgentInput } from '@tarko/npm-package-manager';
 
 export type { AgentCLIArguments };
 
@@ -128,43 +129,89 @@ export function addCommonOptions(command: Command): Command {
       '--agent [agent]',
       `Agent implementation to use
 
-                            Built-in agents or custom agents can be specified.
-                            Custom agents should provide path to a module that exports an Agent class.
+                            Built-in agents, NPM packages, or custom agents can be specified:
+                            
+                            NPM packages:
+                              --agent @omni-tars/agent
+                              --agent omni-tars (resolves to tarko-omni-tars)
+                              --agent tarko-my-agent
+                            
+                            Local paths:
+                              --agent ./my-agent.js
+                              --agent /path/to/agent
+                            
+                            HTTP URLs:
+                              --agent https://example.com/agent.js
                               
                             The agent must implement the IAgent interface from @tarko/agent-interface
       `,
-    );
+    )
+    .option('--update', 'Update NPM agent packages to latest version')
+    .option('--tag <tag>', 'NPM package tag to install (default: latest)');
 
   return baseCommand;
 }
 
 /**
- * FIXME: Support markdown agent.
- *
- * Resolve agent implementation from cli argument
+ * Resolve agent implementation from cli argument with NPM package support
  */
 export async function resolveAgentFromCLIArgument(
   agentParam: string | undefined,
   defaultAgent?: AgentImplementation,
+  options?: {
+    update?: boolean;
+    tag?: string;
+  },
 ): Promise<AgentImplementation> {
   // Use default agent if no agent parameter provided
-  if (agentParam) {
+  if (!agentParam) {
+    if (defaultAgent) {
+      return defaultAgent;
+    }
+
+    const { Agent } = await import('@tarko/agent');
     return {
-      type: 'modulePath',
-      value: agentParam,
+      type: 'module',
+      label: 'Tarko',
+      constructor: Agent,
       agio: AgioProvider,
     };
   }
 
-  if (defaultAgent) {
-    return defaultAgent;
+  // Analyze the input to determine the best resolution strategy
+  const analysis = analyzeAgentInput(agentParam);
+  
+  // Try NPM package resolution first if it's a candidate
+  if (analysis.isNPMCandidate) {
+    try {
+      const npmAgent = await resolveAgentFromNPMInput(agentParam, {
+        update: options?.update,
+        tag: options?.tag,
+      });
+      
+      if (npmAgent) {
+        return {
+          ...npmAgent,
+          agio: AgioProvider,
+        };
+      }
+    } catch (error) {
+      // If NPM resolution fails, provide helpful error message with suggestions
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      let message = `Failed to resolve NPM agent '${agentParam}': ${errorMessage}`;
+      
+      if (analysis.suggestions && analysis.suggestions.length > 0) {
+        message += `\n\nDid you mean one of these packages?\n${analysis.suggestions.map(s => `  - ${s}`).join('\n')}`;
+      }
+      
+      throw new Error(message);
+    }
   }
 
-  const { Agent } = await import('@tarko/agent');
+  // Fallback to module path resolution for local paths, HTTP URLs, etc.
   return {
-    type: 'module',
-    label: 'Tarko',
-    constructor: Agent,
+    type: 'modulePath',
+    value: agentParam,
     agio: AgioProvider,
   };
 }

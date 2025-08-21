@@ -403,6 +403,10 @@ export class AgentCLI {
     const agentImplementation = await resolveAgentFromCLIArgument(
       cliArguments.agent,
       appConfig.agent ?? this.options.appConfig?.agent,
+      {
+        update: cliArguments.update,
+        tag: cliArguments.tag,
+      },
     );
 
     logger.debug(`Using agent: ${agentImplementation.label ?? cliArguments.agent}`);

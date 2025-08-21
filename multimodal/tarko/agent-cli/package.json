@@ -29,6 +29,7 @@
     "@tarko/agent": "workspace:*",
     "@tarko/agent-server": "workspace:*",
     "@tarko/shared-utils": "workspace:*",
+    "@tarko/npm-package-manager": "workspace:*",
     "dotenv": "^16.3.1"
   },
   "devDependencies": {

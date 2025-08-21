@@ -1,0 +1,44 @@
+{
+  "name": "@tarko/npm-package-manager",
+  "version": "0.1.0",
+  "description": "NPM package manager for dynamic Tarko agent loading",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "rslib build --watch",
+    "build": "rslib build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "pnpm build"
+  },
+  "dependencies": {
+    "@tarko/interface": "workspace:*",
+    "@tarko/shared-utils": "workspace:*",
+    "node-fetch": "^3.3.2",
+    "tar": "^7.4.3",
+    "semver": "^7.6.3"
+  },
+  "devDependencies": {
+    "vitest": "3.2.4",
+    "@rslib/core": "0.10.0",
+    "@types/node": "22.15.30",
+    "@types/tar": "^6.1.13",
+    "@types/semver": "^7.5.8",
+    "typescript": "^5.5.3"
+  }
+}
