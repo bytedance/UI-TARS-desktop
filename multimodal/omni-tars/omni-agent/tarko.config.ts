@@ -5,8 +5,6 @@
 import { defineConfig, LogLevel } from '@tarko/agent-cli';
 import { resolve } from 'node:path';
 
-const sandboxUrl = process.env.AIO_SANDBOX_URL;
-
 export default defineConfig({
   model: {
     /** tars */
@@ -29,31 +27,5 @@ export default defineConfig({
     },
   },
   logLevel: LogLevel.DEBUG,
-  webui: {
-    logo: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png',
-    title: 'Omni-TARS Agent',
-    subtitle: 'Offering seamless integration with a wide range of real-world tools.',
-    welcomTitle: 'An multimodal AI agent',
-    welcomePrompts: [
-      'Search for the latest GUI Agent papers',
-      'Find information about UI TARS',
-      'Tell me the top 5 most popular projects on ProductHunt today',
-      'write a tic-tac-toe program in js',
-      'Write hello world using python',
-      'Use jupyter to calculate who is greater in 9.11 and 9.9',
-      'Write a python code to download the paper https://arxiv.org/abs/2505.12370, and convert the pdf to markdown',
-    ],
-    workspace: {
-      panels: [
-        {
-          title: 'VNC',
-          panel: sandboxUrl + '/vnc/index.html',
-        },
-      ],
-    },
-  },
-  share: {
-    provider: process.env.SHARE_PROVIDER,
-  },
   snapshot: { storageDirectory: resolve(__dirname, 'snapshots'), enable: true },
 });
