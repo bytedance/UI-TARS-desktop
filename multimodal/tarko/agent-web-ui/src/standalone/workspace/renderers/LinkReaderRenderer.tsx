@@ -109,8 +109,8 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
                 </div>
 
                 <div className="flex items-center gap-1.5 pt-1">
-                  {/* 视图模式切换按钮 - 只使用 showMarkdownSource 状态 */}
-                  <button
+                  {/* FIXME: Temporarily commented for now */}
+                  {/* <button
                     onClick={() => setShowMarkdownSource(!showMarkdownSource)}
                     className={`relative p-2 rounded-lg transition-all duration-200 group border font-medium ${
                       showMarkdownSource
@@ -137,7 +137,7 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
                     </div>
 
                     <div className="absolute inset-0 rounded-lg bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-                  </button>
+                  </button> */}
 
                   {/* 复制按钮 - 只使用 copiedStates[index] 状态 */}
                   <button
@@ -254,7 +254,7 @@ function extractLinkReaderData(panelContent: StandardPanelContent): {
       // Version 1: Try content array with JSON text field
       else if (isOmniTarsTextContentArray(sourceObj.content)) {
         const textContent = sourceObj.content[0].text;
-        
+
         // Version 2: Check if it's a Version 2 format (starts with "Page url:")
         if (textContent.startsWith('Page url:')) {
           const v2Data = parseVersion2Content(textContent, panelContent.arguments?.url);
@@ -262,7 +262,7 @@ function extractLinkReaderData(panelContent: StandardPanelContent): {
             return v2Data;
           }
         }
-        
+
         // Version 1: Try to parse as JSON
         try {
           parsedData = JSON.parse(textContent);
@@ -312,38 +312,47 @@ function extractLinkReaderData(panelContent: StandardPanelContent): {
  * Parse Version 2 content format
  * Format: "Page url:https://example.com\nPage Summary:\n• content..."
  */
-function parseVersion2Content(textContent: string, argumentsUrl?: string): { results: LinkResult[] } | null {
+function parseVersion2Content(
+  textContent: string,
+  argumentsUrl?: string,
+): { results: LinkResult[] } | null {
   try {
     const lines = textContent.split('\n');
-    
+
     // Extract URL from first line
     const urlLine = lines[0];
     const urlMatch = urlLine.match(/^Page url:(.+)$/);
     const url = urlMatch?.[1]?.trim() || argumentsUrl || '';
-    
+
     if (!url) {
       return null;
     }
-    
+
     // Extract content after "Page Summary:"
-    const summaryIndex = lines.findIndex(line => line.trim() === 'Page Summary:');
-    const content = summaryIndex >= 0 
-      ? lines.slice(summaryIndex + 1).join('\n').trim()
-      : textContent;
-    
+    const summaryIndex = lines.findIndex((line) => line.trim() === 'Page Summary:');
+    const content =
+      summaryIndex >= 0
+        ? lines
+            .slice(summaryIndex + 1)
+            .join('\n')
+            .trim()
+        : textContent;
+
     if (!content) {
       return null;
     }
-    
+
     // Extract title from content or use hostname
     const title = extractTitleFromContent(content) || getHostname(url);
-    
+
     return {
-      results: [{
-        url,
-        title,
-        content,
-      }]
+      results: [
+        {
+          url,
+          title,
+          content,
+        },
+      ],
     };
   } catch (error) {
     console.warn('Failed to parse Version 2 content:', error);
