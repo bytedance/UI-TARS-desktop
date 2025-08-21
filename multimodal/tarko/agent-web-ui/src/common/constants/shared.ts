@@ -33,3 +33,10 @@ export function getLogoUrl(): string {
     'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png'
   );
 }
+
+/**
+ * Get workspace panels from web UI config
+ */
+export function getWorkspacePanels() {
+  return getWebUIConfig().workspace?.panels || [];
+}

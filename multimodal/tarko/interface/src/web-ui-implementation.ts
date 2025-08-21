@@ -13,6 +13,30 @@
 export type AgentWebUIImplementationType = 'static' | 'remote';
 
 /**
+ * Panel configuration for workspace
+ */
+export interface WorkspacePanel {
+  /**
+   * Panel title displayed on the button
+   */
+  title: string;
+  /**
+   * Panel URL or content to display
+   */
+  panel: string;
+}
+
+/**
+ * Workspace configuration options
+ */
+export interface WorkspaceConfig {
+  /**
+   * Panels to display in the workspace
+   */
+  panels?: WorkspacePanel[];
+}
+
+/**
  * Base agent implementation interface
  */
 export interface BaseAgentWebUIImplementation {
@@ -57,6 +81,10 @@ export interface BaseAgentWebUIImplementation {
    * @defaultValue false
    */
   enableContextualSelector?: boolean;
+  /**
+   * Workspace configuration
+   */
+  workspace?: WorkspaceConfig;
 }
 
 /**

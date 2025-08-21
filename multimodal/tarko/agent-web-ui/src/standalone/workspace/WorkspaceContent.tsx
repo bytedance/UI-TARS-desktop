@@ -13,7 +13,7 @@ import {
 } from 'react-icons/fi';
 import { apiService } from '@/common/services/apiService';
 import { normalizeFilePath } from '@/common/utils/pathNormalizer';
-import { getAgentTitle } from '@/common/constants';
+import { getAgentTitle, getWorkspacePanels } from '@/common/constants';
 import './Workspace.css';
 
 /**
@@ -28,6 +28,7 @@ export const WorkspaceContent: React.FC = () => {
   const { activeSessionId, setActivePanelContent } = useSession();
   const { currentPlan } = usePlan(activeSessionId);
   const [workspacePath, setWorkspacePath] = useState<string>('');
+  const workspacePanels = getWorkspacePanels();
 
   useEffect(() => {
     const fetchWorkspaceInfo = async () => {
@@ -62,6 +63,56 @@ export const WorkspaceContent: React.FC = () => {
       y: 0,
       transition: { duration: 0.6, ease: [0.19, 1, 0.22, 1] },
     },
+  };
+
+  // Render workspace panels buttons
+  const renderPanelsButtons = () => {
+    if (!workspacePanels || workspacePanels.length === 0) return null;
+
+    return (
+      <motion.div variants={itemVariants} className="mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {workspacePanels.map((panel, index) => (
+            <motion.div
+              key={index}
+              whileHover={{
+                y: -2,
+                boxShadow: '0 8px 20px -4px rgba(0, 0, 0, 0.08), 0 4px 8px -4px rgba(0, 0, 0, 0.04)',
+              }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() =>
+                setActivePanelContent({
+                  type: 'iframe',
+                  source: panel.panel,
+                  title: panel.title,
+                  timestamp: Date.now(),
+                })
+              }
+              className="bg-white dark:bg-gray-800/90 rounded-xl border border-[#E5E6EC]/70 dark:border-gray-700/40 overflow-hidden cursor-pointer transition-all duration-300 shadow-sm hover:shadow-md"
+            >
+              <div className="p-4">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 flex items-center justify-center mr-3 text-blue-500 dark:text-blue-400 border border-blue-100/80 dark:border-blue-800/30">
+                    <FiLayout size={18} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium text-gray-900 dark:text-gray-100 text-sm truncate">
+                      {panel.title}
+                    </h4>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      External Panel
+                    </div>
+                  </div>
+                  <div className="flex items-center text-xs">
+                    <FiArrowRight className="text-blue-500 dark:text-blue-400" size={14} />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
+    );
   };
 
   // Plan view button for Pro users
@@ -213,6 +264,7 @@ export const WorkspaceContent: React.FC = () => {
 
   // Enhanced empty state when session exists but no content
   const hasContent = currentPlan && currentPlan.hasGeneratedPlan && currentPlan.steps.length > 0;
+  const hasPanels = workspacePanels && workspacePanels.length > 0;
 
   return (
     <div className="h-full flex flex-col">
@@ -231,13 +283,15 @@ export const WorkspaceContent: React.FC = () => {
 
       {/* Content area with elegant empty state */}
       <div className="flex-1 overflow-y-auto p-6">
-        {hasContent ? (
+        {hasContent || hasPanels ? (
           <motion.div
             variants={containerVariants}
             initial="initial"
             animate="animate"
             className="space-y-8"
           >
+            {/* Workspace panels */}
+            {renderPanelsButtons()}
             {/* Plan view for Pro users */}
             {renderPlanButton()}
           </motion.div>
