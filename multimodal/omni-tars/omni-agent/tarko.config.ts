@@ -5,6 +5,8 @@
 import { defineConfig, LogLevel } from '@tarko/agent-cli';
 import { resolve } from 'node:path';
 
+const sandboxUrl = process.env.AIO_SANDBOX_URL;
+
 export default defineConfig({
   model: {
     /** tars */
@@ -41,6 +43,14 @@ export default defineConfig({
       'Use jupyter to calculate who is greater in 9.11 and 9.9',
       'Write a python code to download the paper https://arxiv.org/abs/2505.12370, and convert the pdf to markdown',
     ],
+    workspace: {
+      panels: [
+        {
+          title: 'VNC',
+          panel: sandboxUrl + '/vnc/index.html',
+        },
+      ],
+    },
   },
   share: {
     provider: process.env.SHARE_PROVIDER,

@@ -65,53 +65,32 @@ export const WorkspaceContent: React.FC = () => {
     },
   };
 
-  // Render workspace panels buttons
-  const renderPanelsButtons = () => {
+  // Render workspace panels buttons in header
+  const renderHeaderPanelsButtons = () => {
     if (!workspacePanels || workspacePanels.length === 0) return null;
 
     return (
-      <motion.div variants={itemVariants} className="mb-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {workspacePanels.map((panel, index) => (
-            <motion.div
-              key={index}
-              whileHover={{
-                y: -2,
-                boxShadow: '0 8px 20px -4px rgba(0, 0, 0, 0.08), 0 4px 8px -4px rgba(0, 0, 0, 0.04)',
-              }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() =>
-                setActivePanelContent({
-                  type: 'iframe',
-                  source: panel.panel,
-                  title: panel.title,
-                  timestamp: Date.now(),
-                })
-              }
-              className="bg-white dark:bg-gray-800/90 rounded-xl border border-[#E5E6EC]/70 dark:border-gray-700/40 overflow-hidden cursor-pointer transition-all duration-300 shadow-sm hover:shadow-md"
-            >
-              <div className="p-4">
-                <div className="flex items-center">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 flex items-center justify-center mr-3 text-blue-500 dark:text-blue-400 border border-blue-100/80 dark:border-blue-800/30">
-                    <FiLayout size={18} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100 text-sm truncate">
-                      {panel.title}
-                    </h4>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                      External Panel
-                    </div>
-                  </div>
-                  <div className="flex items-center text-xs">
-                    <FiArrowRight className="text-blue-500 dark:text-blue-400" size={14} />
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
+      <div className="flex items-center gap-2 ml-4">
+        {workspacePanels.map((panel, index) => (
+          <motion.button
+            key={index}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() =>
+              setActivePanelContent({
+                type: 'iframe',
+                source: panel.panel,
+                title: panel.title,
+                timestamp: Date.now(),
+              })
+            }
+            className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg border border-blue-100 dark:border-blue-800/30 hover:bg-blue-100 dark:hover:bg-blue-800/30 transition-all duration-200 text-sm font-medium"
+          >
+            <FiLayout size={16} />
+            {panel.title}
+          </motion.button>
+        ))}
+      </div>
     );
   };
 
@@ -264,34 +243,35 @@ export const WorkspaceContent: React.FC = () => {
 
   // Enhanced empty state when session exists but no content
   const hasContent = currentPlan && currentPlan.hasGeneratedPlan && currentPlan.steps.length > 0;
-  const hasPanels = workspacePanels && workspacePanels.length > 0;
 
   return (
     <div className="h-full flex flex-col">
       {/* Header with refined styling */}
-      <div className="flex items-center px-6 py-5 border-b border-gray-100/60 dark:border-gray-700/30 bg-white dark:bg-gray-800/90">
-        <div className="w-10 h-10 mr-4 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 border border-gray-200/60 dark:border-gray-700/40 shadow-sm">
-          <FiLayers size={18} />
-        </div>
-        <div>
-          <h2 className="font-medium text-gray-900 dark:text-gray-100 text-lg">Workspace</h2>
-          <div className="text-xs text-gray-500 dark:text-gray-400">
-            {workspacePath || 'Loading workspace...'}
+      <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100/60 dark:border-gray-700/30 bg-white dark:bg-gray-800/90">
+        <div className="flex items-center">
+          <div className="w-10 h-10 mr-4 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 border border-gray-200/60 dark:border-gray-700/40 shadow-sm">
+            <FiLayers size={18} />
+          </div>
+          <div>
+            <h2 className="font-medium text-gray-900 dark:text-gray-100 text-lg">Workspace</h2>
+            <div className="text-xs text-gray-500 dark:text-gray-400">
+              {workspacePath || 'Loading workspace...'}
+            </div>
           </div>
         </div>
+        {/* Workspace panels buttons */}
+        {renderHeaderPanelsButtons()}
       </div>
 
       {/* Content area with elegant empty state */}
       <div className="flex-1 overflow-y-auto p-6">
-        {hasContent || hasPanels ? (
+        {hasContent ? (
           <motion.div
             variants={containerVariants}
             initial="initial"
             animate="animate"
             className="space-y-8"
           >
-            {/* Workspace panels */}
-            {renderPanelsButtons()}
             {/* Plan view for Pro users */}
             {renderPlanButton()}
           </motion.div>
