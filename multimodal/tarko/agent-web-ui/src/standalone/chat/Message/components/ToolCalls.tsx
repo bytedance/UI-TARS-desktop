@@ -109,12 +109,23 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
           : toolCall.function.arguments;
 
       switch (toolCall.function.name) {
+        case 'Search':
         case 'web_search':
           return args.query
             ? `"${args.query}"`
             : status === 'constructing'
               ? 'preparing query...'
               : '';
+        case 'execute_bash':
+          return args.command || (status === 'constructing' ? 'preparing...' : '');
+        case 'str_replace_editor':
+          return args.command && args.path
+            ? args.command + ' ' + args.path
+            : status === 'constructing'
+              ? 'preparing...'
+              : '';
+        case 'LinkReader':
+          return args.url || (status === 'constructing' ? 'preparing...' : '');
         case 'browser_navigate':
           return args.url || (status === 'constructing' ? 'preparing navigation...' : '');
         case 'browser_vision_control':
