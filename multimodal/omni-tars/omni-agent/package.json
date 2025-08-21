@@ -30,9 +30,7 @@
     "@omni-tars/core": "workspace:*",
     "@omni-tars/gui-agent": "workspace:*",
     "@omni-tars/mcp-agent": "workspace:*",
-    "@tarko/agent": "workspace:*",
-    "@tarko/interface": "workspace:*",
-    "@tarko/shared-utils": "workspace:*"
+    "@tarko/agent": "workspace:*"
   },
   "devDependencies": {
     "@rslib/core": "0.10.0",
