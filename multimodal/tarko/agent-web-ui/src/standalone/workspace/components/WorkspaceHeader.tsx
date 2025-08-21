@@ -115,7 +115,7 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => handleNavItemClick(navItem.link)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 text-slate-600 dark:text-slate-300 rounded-lg border border-slate-200/60 dark:border-slate-600/40 hover:from-slate-100 hover:to-slate-200 dark:hover:from-slate-700 dark:hover:to-slate-600 hover:text-slate-700 dark:hover:text-slate-200 transition-all duration-200 text-xs font-medium shadow-sm"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50/80 dark:bg-slate-800/30 text-slate-600 dark:text-slate-300 rounded-lg border border-slate-200/60 dark:border-slate-600/40 hover:bg-slate-100/90 dark:hover:bg-slate-700/80 hover:text-slate-700 dark:hover:text-slate-200 transition-all duration-200 text-xs font-medium backdrop-blur-sm hover:shadow-sm"
                 title={`Open ${navItem.title} in new tab`}
               >
                 <FiMonitor size={12} className="opacity-70" />
