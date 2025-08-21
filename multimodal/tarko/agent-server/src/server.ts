@@ -117,6 +117,14 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   }
 
   /**
+   * Get the Web UI config from Agent Constructor
+   * @returns Web UI config or undefined
+   */
+  getAgentConstructorWebConfig(): Record<string, any> | undefined {
+    return this.currentAgentResolution?.agentConstructor.webUIConfig;
+  }
+
+  /**
    * Get the label of current agent
    */
   getCurrentWorkspace(): string {

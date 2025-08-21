@@ -50,7 +50,9 @@ export async function startInteractiveWebUI(
   // Set up UI if static path is provided
   if (webui.staticPath) {
     const app = server.getApp();
-    setupUI(app, isDebug, webui.staticPath, webui);
+    const agentConstructorWebConfig = server.getAgentConstructorWebConfig();
+    const mergedWebUIConfig = { ...webui, ...agentConstructorWebConfig };
+    setupUI(app, isDebug, webui.staticPath, mergedWebUIConfig);
   }
 
   const port = appConfig.server!.port!;
@@ -113,7 +115,7 @@ function setupUI(
   app: express.Application,
   isDebug = false,
   staticPath: string,
-  webui: AgentWebUIImplementation,
+  webui: AgentWebUIImplementation & Record<string, any>,
 ): void {
   if (isDebug) {
     logger.debug(`Using static files from: ${staticPath}`);

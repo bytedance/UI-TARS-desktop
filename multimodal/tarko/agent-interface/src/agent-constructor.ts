@@ -12,4 +12,7 @@ import { AgentOptions } from './agent-options';
 export type AgentConstructor<
   T extends IAgent = IAgent,
   U extends AgentOptions = AgentOptions,
-> = (new (options: U) => T) & { label?: string };
+> = (new (options: U) => T) & { 
+  label?: string;
+  webUIConfig?: Record<string, any>;
+};
