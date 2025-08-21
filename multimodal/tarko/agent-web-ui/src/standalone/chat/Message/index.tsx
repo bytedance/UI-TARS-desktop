@@ -17,8 +17,7 @@ import { useAtomValue } from 'jotai';
 import { replayStateAtom } from '@/common/state/atoms/replay';
 import { ReportFileEntry } from './components/ReportFileEntry';
 import { messagesAtom } from '@/common/state/atoms/message';
-import { FiMonitor } from 'react-icons/fi';
-import { ActionButton } from './components/ActionButton';
+
 
 interface MessageProps {
   message: MessageType;
@@ -75,33 +74,7 @@ export const Message: React.FC<MessageProps> = ({
     }
   };
 
-  // Handle click on final assistant response to show latest environment state
-  const handleFinalResponseClick = () => {
-    if (!activeSessionId || !isFinalAssistantResponse) return;
 
-    const sessionMessages = allMessages[activeSessionId] || [];
-
-    // Find the most recent environment input
-    for (let i = sessionMessages.length - 1; i >= 0; i--) {
-      const msg = sessionMessages[i];
-      if (msg.role === 'environment' && Array.isArray(msg.content)) {
-        const imageContent = msg.content.find(
-          (item) => item.type === 'image_url' && item.image_url && item.image_url.url,
-        );
-
-        if (imageContent) {
-          setActivePanelContent({
-            type: 'image',
-            source: msg.content,
-            title: msg.description || 'Final Environment State',
-            timestamp: msg.timestamp,
-            environmentId: msg.id,
-          });
-          break;
-        }
-      }
-    }
-  };
 
   // Render content based on type
   const renderContent = () => {
@@ -158,10 +131,7 @@ export const Message: React.FC<MessageProps> = ({
       baseClasses = 'message-assistant';
     }
 
-    // Add smoother click styles
-    if (isFinalAssistantResponse) {
-      baseClasses += ' cursor-pointer';
-    }
+
 
     return baseClasses;
   };
@@ -176,24 +146,7 @@ export const Message: React.FC<MessageProps> = ({
     return imageContents.length > 0 && textContents.length === 0;
   }, [message.content]);
 
-  // Check if there's environment state to display
-  const hasEnvironmentState = React.useMemo(() => {
-    if (!activeSessionId || !isFinalAssistantResponse || !allMessages[activeSessionId])
-      return false;
 
-    const sessionMessages = allMessages[activeSessionId] || [];
-    if (sessionMessages.length === 0) return false;
-
-    // Check if there is a latest environment image input message
-    const lastMessage = sessionMessages[sessionMessages.length - 1];
-    return (
-      lastMessage.role === 'environment' &&
-      Array.isArray(lastMessage.content) &&
-      lastMessage.content.some(
-        (item) => item.type === 'image_url' && item.image_url && item.image_url.url,
-      )
-    );
-  }, [activeSessionId, isFinalAssistantResponse, allMessages]);
 
   // Determine which prose class should be used, based on message type and dark mode
   const getProseClasses = () => {
@@ -232,15 +185,7 @@ export const Message: React.FC<MessageProps> = ({
 
             <div className={getProseClasses()}>{renderContent()}</div>
 
-            {isFinalAssistantResponse && hasEnvironmentState && (
-              <div className="mt-2">
-                <ActionButton
-                  icon={<FiMonitor size={14} />}
-                  label="view final environment state"
-                  onClick={handleFinalResponseClick}
-                />
-              </div>
-            )}
+
 
             {isFinalAnswer && message.title && typeof message.content === 'string' && (
               <ReportFileEntry
