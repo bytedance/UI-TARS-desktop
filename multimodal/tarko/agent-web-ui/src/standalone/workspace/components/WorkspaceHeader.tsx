@@ -115,10 +115,10 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => handleNavItemClick(navItem.link)}
-                className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg border border-blue-100 dark:border-blue-800/30 hover:bg-blue-100 dark:hover:bg-blue-800/30 transition-all duration-200 text-sm font-medium"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-all duration-200 text-xs font-medium"
                 title={`Open ${navItem.title} in new tab`}
               >
-                <FiExternalLink size={14} />
+                <FiExternalLink size={12} />
                 {navItem.title}
               </motion.button>
             ))}
