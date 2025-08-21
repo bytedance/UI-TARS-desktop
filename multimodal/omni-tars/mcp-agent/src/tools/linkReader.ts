@@ -26,28 +26,28 @@ export class LinkReaderToolProvider {
       }),
       function: async ({ description, url }) => {
         // Priority use of LinkReaderPrompt mcp
-        if (process.env.LINKREADER_MCP_URL) {
-          return this.mcpManager.client.callTool({
-            client: McpManager.McpClientType.LinkReader,
-            name: 'link_reader_prompt',
-            args: {
-              urls: [url],
-              prompt: description,
-            },
-          });
-        }
-
+        // if (process.env.LINK_READER_URL) {
         return this.mcpManager.client.callTool({
-          client: McpManager.McpClientType.Tavily,
-          name: 'tavily_extract',
+          client: McpManager.McpClientType.LinkReader,
+          name: 'text_browser_view',
           args: {
-            extract_depth: 'basic',
-            format: 'markdown',
-            include_favicon: false,
-            include_images: false,
-            urls: [url],
+            url,
+            description,
           },
         });
+        // }
+
+        // return this.mcpManager.client.callTool({
+        //   client: McpManager.McpClientType.Tavily,
+        //   name: 'tavily_extract',
+        //   args: {
+        //     extract_depth: 'basic',
+        //     format: 'markdown',
+        //     include_favicon: false,
+        //     include_images: false,
+        //     urls: [url],
+        //   },
+        // });
       },
     });
   }

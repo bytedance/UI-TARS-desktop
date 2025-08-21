@@ -11,11 +11,12 @@ import { AgentOptions } from '@tarko/agent';
 export { McpAgentPlugin } from './McpAgentPlugin';
 export { McpToolCallEngineProvider } from './McpToolCallEngineProvider';
 
-type MCPTarsExtraOption = {
-  tavilyApiKey: string;
+export type MCPTarsExtraOption = {
   googleMcpUrl: string;
   googleApiKey: string;
+  tavilyApiKey?: string;
   linkReaderMcpUrl?: string;
+  linkReaderAK?: string;
 };
 
 type MCPTarsOption = AgentOptions & MCPTarsExtraOption;
@@ -46,6 +47,11 @@ export const mcpPluginBuilder = (option: MCPTarsExtraOption) => {
         name: McpManager.McpClientType.LinkReader,
         description: 'Crawl, parse and summarize for web pages',
         url: option.linkReaderMcpUrl,
+        headers: {
+          'x-text-browser-ak': option.linkReaderAK,
+          'x-text-browser-traffic-id': 'edge_agent_research',
+          'x-text-browser-traffic-group': 'Seed_Edge',
+        },
         timeout: 60,
         enable: !!option.linkReaderMcpUrl,
       },

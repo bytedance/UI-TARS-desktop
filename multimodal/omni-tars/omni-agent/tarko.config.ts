@@ -30,9 +30,11 @@ export default {
     provider: process.env.SHARE_PROVIDER,
   },
   snapshot: { storageDirectory: resolve(__dirname, 'snapshots'), enable: true },
-  tavilyApiKey: process.env.TAVILY_API_KEY,
   googleApiKey: process.env.GOOGLE_API_KEY,
   googleMcpUrl: process.env.GOOGLE_MCP_URL,
   aioSandboxUrl: process.env.AIO_SANDBOX_URL,
+  // tavilyApiKey: process.env.TAVILY_API_KEY,
+  linkReaderMcpUrl: process.env.LINK_READER_URL,
+  linkReaderAK: process.env.LINK_READER_AK,
   ignoreSandboxCheck: true,
 };

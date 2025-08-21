@@ -13,7 +13,7 @@ export const codePluginBuilder = (option: CodeAgentExtraOption) => {
   return new CodeAgentPlugin(option);
 };
 
-interface CodeAgentExtraOption {
+export interface CodeAgentExtraOption {
   aioSandboxUrl: string;
   ignoreSandboxCheck?: boolean;
 }

@@ -2,8 +2,16 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { codePluginBuilder, CodeToolCallEngineProvider } from '@omni-tars/code-agent';
-import { mcpPluginBuilder, McpToolCallEngineProvider } from '@omni-tars/mcp-agent';
+import {
+  codePluginBuilder,
+  CodeToolCallEngineProvider,
+  CodeAgentExtraOption,
+} from '@omni-tars/code-agent';
+import {
+  mcpPluginBuilder,
+  McpToolCallEngineProvider,
+  MCPTarsExtraOption,
+} from '@omni-tars/mcp-agent';
 import { guiPlugin, GuiToolCallEngineProvider } from '@omni-tars/gui-agent';
 import { ComposableAgent, createComposableToolCallEngineFactory } from '@omni-tars/core';
 import { AgentOptions } from '@tarko/agent';
@@ -19,13 +27,7 @@ const toolCallEngine = createComposableToolCallEngineFactory({
 
 const sandboxUrl = process.env.AIO_SANDBOX_URL;
 
-interface OmniTarsOption extends AgentOptions {
-  tavilyApiKey: string;
-  googleMcpUrl: string;
-  googleApiKey: string;
-  aioSandboxUrl: string;
-  ignoreSandboxCheck?: boolean;
-}
+type OmniTarsOption = AgentOptions & MCPTarsExtraOption & CodeAgentExtraOption;
 
 export default class OmniTARSAgent extends ComposableAgent {
   static label = 'Omni-TARS Agent';
@@ -66,12 +68,20 @@ export default class OmniTARSAgent extends ComposableAgent {
       googleMcpUrl,
       aioSandboxUrl,
       ignoreSandboxCheck,
+      linkReaderAK,
+      linkReaderMcpUrl,
       ...restOptions
     } = options;
     super({
       ...restOptions,
       plugins: [
-        mcpPluginBuilder({ tavilyApiKey, googleApiKey, googleMcpUrl }),
+        mcpPluginBuilder({
+          tavilyApiKey,
+          googleApiKey,
+          googleMcpUrl,
+          linkReaderAK,
+          linkReaderMcpUrl,
+        }),
         codePluginBuilder({ aioSandboxUrl, ignoreSandboxCheck }),
         guiPlugin,
       ],
