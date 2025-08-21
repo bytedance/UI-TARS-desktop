@@ -24,7 +24,7 @@
     "build": "rslib build",
     "test": "vitest",
     "coverage": "vitest run --coverage",
-    "dev:agent": "tarko --agent ./"
+    "dev:agent": "../../tarko/agent-cli/bin/cli.js run ./"
   },
   "dependencies": {
     "@tarko/agent": "workspace:*",
@@ -39,7 +39,6 @@
     "@vitest/coverage-v8": "^1.0.0",
     "typescript": "^5.5.3",
     "vitest": "^1.0.0",
-    "openai": "4.93.0",
-    "@tarko/agent-cli": "workspace:*"
+    "openai": "4.93.0"
   }
 }

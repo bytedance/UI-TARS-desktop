@@ -23,7 +23,7 @@
     "dev": "rslib build --watch",
     "build": "rslib build",
     "test": "vitest",
-    "dev:agent": "tarko --agent ./"
+    "dev:agent": "../../tarko/agent-cli/bin/cli.js run ./"
   },
   "dependencies": {
     "@tarko/agent": "workspace:*",
@@ -36,7 +36,6 @@
     "@types/node": "22.15.30",
     "typescript": "^5.5.3",
     "vitest": "^1.0.0",
-    "openai": "4.93.0",
-    "@tarko/agent-cli": "workspace:*"
+    "openai": "4.93.0"
   }
 }
