@@ -85,7 +85,7 @@ export class GUIAgentToolCallEngine extends ToolCallEngine {
 
     // Return incremental content without tool call detection during streaming
     return {
-      content: delta?.content || '',
+      content: '',
       reasoningContent: '',
       hasToolCallUpdate: false,
       toolCalls: [],
