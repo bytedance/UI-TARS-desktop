@@ -33,7 +33,7 @@ export const ToggleSwitch = <T extends string = string>({
           className={`px-3 py-1.5 text-xs font-medium transition-all duration-200 backdrop-blur-sm ${
             value === leftValue
               ? 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 shadow-md'
-              : 'bg-slate-50/80 dark:bg-slate-800/30 text-slate-600 dark:text-slate-300 hover:bg-slate-100/90 dark:hover:bg-slate-700/80 hover:text-slate-700 dark:hover:text-slate-200 hover:shadow-sm'
+              : 'bg-white/80 dark:bg-slate-800/30 text-slate-600 dark:text-slate-300 hover:bg-slate-50/90 dark:hover:bg-slate-700/80 hover:text-slate-700 dark:hover:text-slate-200 hover:shadow-sm'
           } rounded-l-lg border border-slate-200/60 dark:border-slate-600/40`}
         >
           <div className="flex items-center">
@@ -47,7 +47,7 @@ export const ToggleSwitch = <T extends string = string>({
           className={`px-3 py-1.5 text-xs font-medium transition-all duration-200 backdrop-blur-sm ${
             value === rightValue
               ? 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 shadow-md'
-              : 'bg-slate-50/80 dark:bg-slate-800/30 text-slate-600 dark:text-slate-300 hover:bg-slate-100/90 dark:hover:bg-slate-700/80 hover:text-slate-700 dark:hover:text-slate-200 hover:shadow-sm'
+              : 'bg-white/80 dark:bg-slate-800/30 text-slate-600 dark:text-slate-300 hover:bg-slate-50/90 dark:hover:bg-slate-700/80 hover:text-slate-700 dark:hover:text-slate-200 hover:shadow-sm'
           } rounded-r-lg border border-slate-200/60 dark:border-slate-600/40 border-l-0`}
         >
           <div className="flex items-center">
