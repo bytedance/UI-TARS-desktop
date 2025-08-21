@@ -32,7 +32,7 @@ export interface GUIAgentConfig<TOperator> {
 }
 
 export const guiPlugin = new GuiAgentPlugin({
-  operatorManager: OperatorManager.createLocal(),
+  operatorManager: OperatorManager.createRemote(),
 });
 
 export default class GUIAgent extends ComposableAgent {
