@@ -6,7 +6,7 @@ import { FaBrain } from 'react-icons/fa';
 import { apiService } from '@/common/services/apiService';
 import { AgentServerVersionInfo } from '@agent-tars/interface';
 import { ModelInfo, AgentInfo } from '@/common/types';
-import { getWebUIConfig, getLogoUrl, getAgentTitle, getNavbarLinkItems } from '@/common/constants';
+import { getWebUIConfig, getLogoUrl, getAgentTitle } from '@/common/constants';
 
 interface AboutModalProps {
   isOpen: boolean;
@@ -69,42 +69,6 @@ export const AboutModal: React.FC<AboutModalProps> = ({
     if (model.length <= maxLength) return model;
     return `${model.slice(0, maxLength)}...`;
   };
-
-  // Icon mapping for navbar link items
-  const getIconComponent = (iconName?: string) => {
-    switch (iconName) {
-      case 'FiGlobe':
-        return FiGlobe;
-      case 'FiGithub':
-        return FiGithub;
-      case 'FiExternalLink':
-        return FiExternalLink;
-      default:
-        return FiExternalLink;
-    }
-  };
-
-  // Get configured navbar link items with fallback to default
-  const navbarLinkItems = getNavbarLinkItems();
-  const hasConfiguredLinks = navbarLinkItems.length > 0;
-
-  // Default links for fallback
-  const defaultLinks = [
-    {
-      title: 'Official Website',
-      url: 'https://agent-tars.com/',
-      icon: 'FiGlobe',
-      className: 'flex items-center gap-3 px-8 py-4 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors group'
-    },
-    {
-      title: 'View on GitHub',
-      url: 'https://github.com/bytedance/UI-TARS-desktop',
-      icon: 'FiGithub',
-      className: 'flex items-center gap-3 px-8 py-4 bg-gray-900 dark:bg-gray-100 hover:bg-gray-800 dark:hover:bg-gray-200 text-white dark:text-gray-900 rounded-lg transition-colors group'
-    }
-  ];
-
-  const linksToRender = hasConfiguredLinks ? navbarLinkItems : defaultLinks;
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-[9999]">
@@ -275,29 +239,41 @@ export const AboutModal: React.FC<AboutModalProps> = ({
               transition={{ duration: 0.6, delay: 0.3 }}
               className="flex flex-col sm:flex-row gap-6"
             >
-              {linksToRender.map((link, index) => {
-                const IconComponent = getIconComponent(link.icon);
-                return (
-                  <motion.a
-                    key={index}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={link.className || 'flex items-center gap-3 px-8 py-4 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors group'}
-                  >
-                    <IconComponent size={20} className={link.icon === 'FiGithub' ? '' : 'text-gray-600 dark:text-gray-400'} />
-                    <span className={link.icon === 'FiGithub' ? 'font-medium' : 'text-gray-800 dark:text-gray-200 font-medium'}>
-                      {link.title}
-                    </span>
-                    <FiExternalLink
-                      size={16}
-                      className={link.icon === 'FiGithub' ? 'opacity-75 group-hover:opacity-100 transition-opacity' : 'text-gray-500 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors'}
-                    />
-                  </motion.a>
-                );
-              })}
+              {/* Website link */}
+              <motion.a
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                href="https://agent-tars.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 px-8 py-4 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors group"
+              >
+                <FiGlobe size={20} className="text-gray-600 dark:text-gray-400" />
+                <span className="text-gray-800 dark:text-gray-200 font-medium">
+                  Official Website
+                </span>
+                <FiExternalLink
+                  size={16}
+                  className="text-gray-500 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors"
+                />
+              </motion.a>
+
+              {/* GitHub link */}
+              <motion.a
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                href="https://github.com/bytedance/UI-TARS-desktop"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 px-8 py-4 bg-gray-900 dark:bg-gray-100 hover:bg-gray-800 dark:hover:bg-gray-200 text-white dark:text-gray-900 rounded-lg transition-colors group"
+              >
+                <FiGithub size={20} />
+                <span className="font-medium">View on GitHub</span>
+                <FiExternalLink
+                  size={16}
+                  className="opacity-75 group-hover:opacity-100 transition-opacity"
+                />
+              </motion.a>
             </motion.div>
           </div>
         </Dialog.Panel>

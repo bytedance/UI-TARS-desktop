@@ -40,10 +40,3 @@ export function getLogoUrl(): string {
 export function getWorkspaceNavItems() {
   return getWebUIConfig().workspace?.navItems || [];
 }
-
-/**
- * Get navbar link items from web UI config
- */
-export function getNavbarLinkItems() {
-  return getWebUIConfig().navbar?.linkItems || [];
-}
