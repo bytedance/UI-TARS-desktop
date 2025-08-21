@@ -191,7 +191,9 @@ export const ChatPanel: React.FC = () => {
   const showEmptyState = shouldShowEmptyState();
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full relative">
+      {/* Scroll to bottom button */}
+      <ScrollToBottomButton show={showScrollToBottom} onClick={scrollToBottom} />
       {!activeSessionId ? (
         <motion.div
           initial="hidden"
@@ -237,8 +239,6 @@ export const ChatPanel: React.FC = () => {
             ref={messagesContainerRef}
             className="flex-1 overflow-y-auto px-5 py-5 overflow-x-hidden min-h-0 chat-scrollbar relative"
           >
-            {/* Scroll to bottom button */}
-            <ScrollToBottomButton show={showScrollToBottom} onClick={scrollToBottom} />
             {renderOfflineBanner()}
 
             <AnimatePresence>
