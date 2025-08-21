@@ -1,6 +1,6 @@
 {
   "name": "@tarko/mcp-agent",
-  "version": "0.3.0-beta.5",
+  "version": "0.3.0-beta.6",
   "description": "An event-stream driven MCP Agent Framework for building effective multimodal Agents.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

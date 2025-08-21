@@ -1,6 +1,6 @@
 {
   "name": "@tarko/shared-utils",
-  "version": "0.3.0-beta.5",
+  "version": "0.3.0-beta.6",
   "description": "Core and tiny shared utilities for Tarko",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
