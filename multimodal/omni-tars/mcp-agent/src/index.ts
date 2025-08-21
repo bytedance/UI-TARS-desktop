@@ -11,43 +11,56 @@ import { AgentOptions } from '@tarko/agent';
 export { McpAgentPlugin } from './McpAgentPlugin';
 export { McpToolCallEngineProvider } from './McpToolCallEngineProvider';
 
-export const mcpPlugin = new McpAgentPlugin({
-  mcpServers: [
-    {
-      type: 'streamable-http',
-      name: McpManager.McpClientType.Tavily,
-      description: 'tavily search tool',
-      url: `https://mcp.tavily.com/mcp/?tavilyApiKey=${process.env.TAVILY_API_KEY}`,
-      timeout: 60,
-      enable: !!process.env.TAVILY_API_KEY,
-    },
-    {
-      type: 'streamable-http',
-      name: McpManager.McpClientType.Google,
-      description: 'google search tool',
-      url: process.env.GOOGLE_MCP_URL,
-      headers: {
-        'x-serper-api-key': process.env.GOOGLE_API_KEY,
+type MCPTarsExtraOption = {
+  tavilyApiKey: string;
+  googleMcpUrl: string;
+  googleApiKey: string;
+  linkReaderMcpUrl?: string;
+};
+
+type MCPTarsOption = AgentOptions & MCPTarsExtraOption;
+
+export const mcpPluginBuilder = (option: MCPTarsExtraOption) => {
+  return new McpAgentPlugin({
+    mcpServers: [
+      {
+        type: 'streamable-http',
+        name: McpManager.McpClientType.Tavily,
+        description: 'tavily search tool',
+        url: `https://mcp.tavily.com/mcp/?tavilyApiKey=${option.tavilyApiKey}`,
+        timeout: 60,
+        enable: !!option.tavilyApiKey,
       },
-      enable: true,
-    },
-    {
-      type: 'streamable-http',
-      name: McpManager.McpClientType.LinkReader,
-      description: 'Crawl, parse and summarize for web pages',
-      url: process.env.LINKREADER_MCP_URL,
-      timeout: 60,
-      enable: !!process.env.LINKREADER_MCP_URL,
-    },
-  ],
-});
+      {
+        type: 'streamable-http',
+        name: McpManager.McpClientType.Google,
+        description: 'google search tool',
+        url: option.googleMcpUrl,
+        headers: {
+          'x-serper-api-key': option.googleApiKey,
+        },
+        enable: true,
+      },
+      {
+        type: 'streamable-http',
+        name: McpManager.McpClientType.LinkReader,
+        description: 'Crawl, parse and summarize for web pages',
+        url: option.linkReaderMcpUrl,
+        timeout: 60,
+        enable: !!option.linkReaderMcpUrl,
+      },
+    ],
+  });
+};
 
 export default class McpAgent extends ComposableAgent {
   static label: 'Seed MCP Agent';
-  constructor(options: AgentOptions) {
+  constructor(options: MCPTarsOption) {
+    const { tavilyApiKey, googleApiKey, googleMcpUrl, linkReaderMcpUrl, ...restOptions } = options;
+
     super({
-      ...options,
-      plugins: [mcpPlugin],
+      ...restOptions,
+      plugins: [mcpPluginBuilder({ tavilyApiKey, googleMcpUrl, googleApiKey, linkReaderMcpUrl })],
       toolCallEngine: McpToolCallEngine,
     });
   }

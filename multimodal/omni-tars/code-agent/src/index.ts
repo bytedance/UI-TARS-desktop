@@ -9,14 +9,25 @@ import { AgentOptions } from '@tarko/agent';
 import { CodeToolCallEngine } from './CodeToolCallEngine';
 export { CodeToolCallEngineProvider } from './CodeToolCallEngineProvider';
 
-export const codePlugin = new CodeAgentPlugin();
+export const codePluginBuilder = (option: CodeAgentExtraOption) => {
+  return new CodeAgentPlugin(option);
+};
+
+interface CodeAgentExtraOption {
+  aioSandboxUrl: string;
+  ignoreSandboxCheck?: boolean;
+}
+
+type CodeAgentOption = AgentOptions & CodeAgentExtraOption;
 
 export default class CodeAgent extends ComposableAgent {
   static label: 'Seed Code Agent';
-  constructor(options: AgentOptions) {
+  constructor(options: CodeAgentOption) {
+    const { aioSandboxUrl, ignoreSandboxCheck, ...restOptions } = options;
+
     super({
-      ...options,
-      plugins: [codePlugin],
+      ...restOptions,
+      plugins: [codePluginBuilder({ aioSandboxUrl, ignoreSandboxCheck })],
       toolCallEngine: CodeToolCallEngine,
     });
   }

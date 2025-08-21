@@ -24,5 +24,7 @@ export default {
       'Write hello world using python',
     ],
   },
+  aioSandboxUrl: process.env.AIO_SANDBOX_URL,
+  ignoreSandboxCheck: true,
   snapshot: { storageDirectory: resolve(__dirname, 'snapshots'), enable: true },
 };

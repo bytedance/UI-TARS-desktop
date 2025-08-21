@@ -11,6 +11,11 @@ import { StrReplaceEditorProvider } from './tools/StrReplaceEditor';
 import { AioClient } from '@agent-infra/sandbox';
 import assert from 'assert';
 
+interface CodeAgentPluginOption {
+  aioSandboxUrl: string;
+  ignoreSandboxCheck?: boolean;
+}
+
 /**
  * Code Agent Plugin - handles CODE_ENVIRONMENT for bash, file editing, and Jupyter execution
  */
@@ -19,13 +24,13 @@ export class CodeAgentPlugin extends AgentPlugin {
   readonly environmentSection = CODE_ENVIRONMENT;
   private client: AioClient;
 
-  constructor() {
+  constructor(option: CodeAgentPluginOption) {
     super();
 
-    assert(process.env.AIO_SANDBOX_URL, 'no AIO_SANDBOX_URL url providered.');
+    assert(option.aioSandboxUrl, 'no AIO_SANDBOX_URL url providered.');
 
     this.client = new AioClient({
-      baseUrl: process.env.AIO_SANDBOX_URL,
+      baseUrl: option.aioSandboxUrl,
     });
 
     // Initialize tools
@@ -35,10 +40,14 @@ export class CodeAgentPlugin extends AgentPlugin {
       new StrReplaceEditorProvider(this.client).getTool(),
     ];
 
-    this.checkSandbox();
+    this.checkSandbox(option.ignoreSandboxCheck);
   }
 
-  async checkSandbox() {
+  async checkSandbox(ignoreSandboxCheck?: boolean) {
+    if (ignoreSandboxCheck) {
+      return;
+    }
+
     await this.client.healthCheck();
   }
 

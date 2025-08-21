@@ -15,6 +15,9 @@ async function main() {
       baseURL: process.env.GPT_I18N_URL,
     },
     logLevel: LogLevel.INFO,
+    tavilyApiKey: process.env.TAVILY_API_KEY,
+    googleApiKey: process.env.GOOGLE_API_KEY,
+    googleMcpUrl: process.env.GOOGLE_MCP_URL,
   });
 
   await agent.initialize();

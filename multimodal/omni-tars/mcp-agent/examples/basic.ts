@@ -15,6 +15,9 @@ async function main() {
       id: process.env.OMNI_TARS_MODEL_ID,
     },
     logLevel: LogLevel.INFO,
+    tavilyApiKey: process.env.TAVILY_API_KEY,
+    googleApiKey: process.env.GOOGLE_API_KEY,
+    googleMcpUrl: process.env.GOOGLE_MCP_URL,
   });
 
   const ans = await agent.run(Questions.Weather);

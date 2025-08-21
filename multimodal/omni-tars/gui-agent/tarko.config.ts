@@ -2,22 +2,16 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { LogLevel } from '@tarko/interface';
 
 // FIXME: using defineConfig
 export default {
   model: {
-    // provider: 'volcengine',
-    // baseURL: process.env.ARK_BASE_URL,
-    // apiKey: process.env.ARK_API_KEY, // secretlint-disable-line
-    // id: process.env.ARK_MODEL,
     provider: 'openai-non-streaming',
     baseURL: process.env.OMNI_TARS_BASE_URL,
     apiKey: process.env.OMNI_TARS_API_KEY, // secretlint-disable-line
     id: process.env.OMNI_TARS_MODEL_ID,
     uiTarsVersion: 'ui-tars-1.5',
   },
-  logLevel: LogLevel.DEBUG,
   webui: {
     logo: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png',
     subtitle: 'Offering seamless integration with a wide range of real-world tools.',

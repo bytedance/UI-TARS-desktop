@@ -2,8 +2,8 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { codePlugin, CodeToolCallEngineProvider } from '@omni-tars/code-agent';
-import { mcpPlugin, McpToolCallEngineProvider } from '@omni-tars/mcp-agent';
+import { codePluginBuilder, CodeToolCallEngineProvider } from '@omni-tars/code-agent';
+import { mcpPluginBuilder, McpToolCallEngineProvider } from '@omni-tars/mcp-agent';
 import { guiPlugin, GuiToolCallEngineProvider } from '@omni-tars/gui-agent';
 import { ComposableAgent, createComposableToolCallEngineFactory } from '@omni-tars/core';
 import { AgentOptions } from '@tarko/agent';
@@ -18,6 +18,14 @@ const toolCallEngine = createComposableToolCallEngineFactory({
 });
 
 const sandboxUrl = process.env.AIO_SANDBOX_URL;
+
+interface OmniTarsOption extends AgentOptions {
+  tavilyApiKey: string;
+  googleMcpUrl: string;
+  googleApiKey: string;
+  aioSandboxUrl: string;
+  ignoreSandboxCheck?: boolean;
+}
 
 export default class OmniTARSAgent extends ComposableAgent {
   static label = 'Omni-TARS Agent';
@@ -45,16 +53,28 @@ export default class OmniTARSAgent extends ComposableAgent {
         // },
         {
           title: 'VNC',
-          link: sandboxUrl + '/vnc/index.html',
+          link: sandboxUrl ? sandboxUrl + '/vnc/index.html' : './vnc/index.html',
         },
       ],
     },
   };
 
-  constructor(options: AgentOptions) {
+  constructor(options: OmniTarsOption) {
+    const {
+      tavilyApiKey,
+      googleApiKey,
+      googleMcpUrl,
+      aioSandboxUrl,
+      ignoreSandboxCheck,
+      ...restOptions
+    } = options;
     super({
-      ...options,
-      plugins: [mcpPlugin, guiPlugin, codePlugin],
+      ...restOptions,
+      plugins: [
+        mcpPluginBuilder({ tavilyApiKey, googleApiKey, googleMcpUrl }),
+        codePluginBuilder({ aioSandboxUrl, ignoreSandboxCheck }),
+        guiPlugin,
+      ],
       toolCallEngine,
       maxTokens: 32768,
     });

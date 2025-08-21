@@ -23,3 +23,7 @@ export function extractAioPort(str?: string): number {
     return 8080;
   }
 }
+
+export function getAioUrl() {
+  return process.env.AIO_SANDBOX_URL || 'http://localhost:8080';
+}

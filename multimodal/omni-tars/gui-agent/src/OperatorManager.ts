@@ -1,7 +1,7 @@
 import { LocalBrowser, RemoteBrowser } from '@agent-infra/browser';
 import { BrowserOperator, RemoteBrowserOperator } from '@gui-agent/operator-browser';
 import { Operator } from '@ui-tars/sdk/dist/core';
-
+import { getAioUrl } from '@omni-tars/core';
 import { AioClient, CDPVersionResp } from '@agent-infra/sandbox';
 
 export class OperatorManager {
@@ -17,7 +17,7 @@ export class OperatorManager {
     this.target = target;
     if (this.target === 'remote') {
       this.aioClient = new AioClient({
-        baseUrl: process.env.AIO_SANDBOX_URL!,
+        baseUrl: getAioUrl(),
       });
     } else {
       const browser = new LocalBrowser();
