@@ -66,6 +66,9 @@ export const useMarkdownComponents = ({ onImageClick }: UseMarkdownComponentsPro
 
       // Images
       img: ({ src, alt }) => <InteractiveImage src={src} alt={alt} onClick={onImageClick} />,
+
+      // Override strikethrough (del) to render as normal text
+      del: ({ children }) => <span>{children}</span>,
     }),
     [onImageClick],
   );
