@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.3.0-beta.4](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.3.0-beta.1...@agent-tars@0.3.0-beta.4) (2025-08-21)
+
+### Features
+
+* **agent:** move aio client to core package, add unit test for parser ([#1113](https://github.com/bytedance/UI-TARS-desktop/pull/1113)) ([cb7d1f2](https://github.com/bytedance/UI-TARS-desktop/commit/cb7d1f2b)) [@小健](https://github.com/小健)
+* **agent:** add `dispose` api and `onDispose` hook ([#997](https://github.com/bytedance/UI-TARS-desktop/pull/997)) ([ce2df9e](https://github.com/bytedance/UI-TARS-desktop/commit/ce2df9e4)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent:** add  `getTools` type ([#996](https://github.com/bytedance/UI-TARS-desktop/pull/996)) ([af981e1](https://github.com/bytedance/UI-TARS-desktop/commit/af981e11)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-cli:** auto-detect available port to prevent conflicts (close: #1141) (close: [#1141](https://github.com/bytedance/UI-TARS-desktop/issues/1141)) ([#1142](https://github.com/bytedance/UI-TARS-desktop/pull/1142)) ([ce9e10b](https://github.com/bytedance/UI-TARS-desktop/commit/ce9e10b3)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-server:** handle old workspace schema migration ([#1030](https://github.com/bytedance/UI-TARS-desktop/pull/1030)) ([1057f1b](https://github.com/bytedance/UI-TARS-desktop/commit/1057f1bf)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars:** support flexible system prompt override ([#1151](https://github.com/bytedance/UI-TARS-desktop/pull/1151)) ([d975c30](https://github.com/bytedance/UI-TARS-desktop/commit/d975c307)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars:** custom agent ([6799ebd](https://github.com/bytedance/UI-TARS-desktop/commit/6799ebd2)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-server:** session read optimization (close: #750) (close: [#750](https://github.com/bytedance/UI-TARS-desktop/issues/750)) ([#974](https://github.com/bytedance/UI-TARS-desktop/pull/974)) ([68f9805](https://github.com/bytedance/UI-TARS-desktop/commit/68f98054)) [@小健](https://github.com/小健)
+* **agent-tars-web-ui:** simplify replay state ([#989](https://github.com/bytedance/UI-TARS-desktop/pull/989)) ([f865c6d](https://github.com/bytedance/UI-TARS-desktop/commit/f865c6df)) [@ULIVZ](https://github.com/ULIVZ)
+
+### Bug Fixes
+
+* **agent-tars:** `directory_tree` causes context overflow (close: #969) (close: [#969](https://github.com/bytedance/UI-TARS-desktop/issues/969)) ([#1055](https://github.com/bytedance/UI-TARS-desktop/pull/1055)) ([9220b25](https://github.com/bytedance/UI-TARS-desktop/commit/9220b255)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-cli:** sqlite should consider backward compatibility ([#1029](https://github.com/bytedance/UI-TARS-desktop/pull/1029)) ([62f5e05](https://github.com/bytedance/UI-TARS-desktop/commit/62f5e05f)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-web-ui:** replay does not work ([#981](https://github.com/bytedance/UI-TARS-desktop/pull/981)) ([c39deb9](https://github.com/bytedance/UI-TARS-desktop/commit/c39deb9c)) [@ULIVZ](https://github.com/ULIVZ)
+
 ## [0.3.0-beta.1](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.3.0-beta.0...@agent-tars@0.3.0-beta.1) (2025-07-17)
 
 ### Features
