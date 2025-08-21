@@ -9,7 +9,6 @@ import { Tool } from './tool';
 import { ProviderOptions, LLMReasoningOptions } from '@tarko/model-provider/types';
 import { AgentEventStream } from './agent-event-stream';
 import { LogLevel } from '@agent-infra/logger';
-import { AgentWebUIImplementation } from '@agent-tars/interface';
 
 /**
  * Filter options interface for include/exclude patterns
@@ -200,16 +199,6 @@ export interface AgentWorkspaceOptions {
 }
 
 /**
- * Web UI configuration options for Agent
- */
-export interface AgentWebUIOptions {
-  /**
-   * Web UI implementation configuration
-   */
-  webui?: AgentWebUIImplementation;
-}
-
-/**
  * Some setting options used to instantiate an Agent.
  */
 export interface AgentOptions
@@ -219,8 +208,7 @@ export interface AgentOptions
     AgentLoopOptions,
     AgentMemoryOptions,
     AgentMiscOptions,
-    AgentWorkspaceOptions,
-    AgentWebUIOptions {}
+    AgentWorkspaceOptions {}
 
 /**
  * Options for configuring agent context behavior (e.g. message history)
