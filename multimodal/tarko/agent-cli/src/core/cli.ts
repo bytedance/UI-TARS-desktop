@@ -134,7 +134,7 @@ export class AgentCLI {
     printWelcomeLogo(
       this.options.binName || 'Tarko',
       this.getVersionInfo().version,
-      'A atomic Agentic CLI for execute effective Agents',
+      'An atomic Agentic CLI for executing effective Agents',
     );
   }
 
