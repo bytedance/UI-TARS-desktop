@@ -140,6 +140,8 @@ export function addCommonOptions(command: Command): Command {
 
 /**
  * Built-in agent mappings
+ *
+ * Using lazy resolution - resolve module path only when needed
  */
 const BUILTIN_AGENTS: Record<string, { modulePath: string; label: string }> = {
   'agent-tars': {
@@ -155,6 +157,22 @@ const BUILTIN_AGENTS: Record<string, { modulePath: string; label: string }> = {
     label: 'MCP Agent',
   },
 };
+
+/**
+ * Resolve built-in agent module path when needed
+ */
+function resolveBuiltinAgent(agentName: string): string {
+  const agent = BUILTIN_AGENTS[agentName];
+  if (!agent) {
+    throw new Error(`Unknown built-in agent: ${agentName}`);
+  }
+
+  try {
+    return require.resolve(agent.modulePath);
+  } catch (error) {
+    throw new Error(`Failed to resolve built-in agent "${agentName}": ${error.message}`);
+  }
+}
 
 /**
  * FIXME: Support markdown agent.
@@ -173,7 +191,7 @@ export async function resolveAgentFromCLIArgument(
       console.log(`Using built-in agent: ${builtinAgent.label}`);
       return {
         type: 'modulePath',
-        value: builtinAgent.modulePath,
+        value: resolveBuiltinAgent(agentParam),
         label: builtinAgent.label,
         agio: AgioProvider,
       };
