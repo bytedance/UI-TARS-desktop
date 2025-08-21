@@ -1,6 +1,6 @@
 {
   "name": "@omni-tars/code-agent",
-  "version": "0.0.1",
+  "version": "0.3.0-beta.2",
   "description": "",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
