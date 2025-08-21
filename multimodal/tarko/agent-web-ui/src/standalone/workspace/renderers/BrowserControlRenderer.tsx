@@ -71,7 +71,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
     }
   }, [environmentImage]);
 
-  // Smart screenshot association based on tool type
+  // Find the next environment input (screenshot) after this operation
   useEffect(() => {
     // Initialize: clear current screenshot if no direct environment image provided
     if (!environmentImage) {
@@ -91,102 +91,28 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
       return;
     }
 
-    // Get current tool name
-    const currentToolCall = sessionMessages[currentToolCallIndex]?.toolCalls?.find(
-      (tc) => tc.id === toolCallId,
-    );
-    const toolName = currentToolCall?.function?.name;
-
     let foundImage = false;
 
-    // Tool-specific screenshot association strategy
-    const isPostOperationTool = toolName === 'open_computer' || toolName === 'navigate';
+    // Search for screenshots AFTER the current tool call
+    for (let i = currentToolCallIndex + 1; i < sessionMessages.length; i++) {
+      const msg = sessionMessages[i];
+      if (msg.role === 'environment' && Array.isArray(msg.content)) {
+        const imgContent = msg.content.find(
+          (c) => typeof c === 'object' && 'type' in c && c.type === 'image_url',
+        );
 
-    if (isPostOperationTool) {
-      // For tools like open_computer/navigate: search AFTER the operation
-      console.log(`[BrowserControlRenderer] Detected ${toolName}, searching for post-operation screenshot...`);
-      
-      for (let i = currentToolCallIndex + 1; i < sessionMessages.length; i++) {
-        const msg = sessionMessages[i];
-        if (msg.role === 'environment' && Array.isArray(msg.content)) {
-          const imgContent = msg.content.find(
-            (c) => typeof c === 'object' && 'type' in c && c.type === 'image_url',
-          );
-
-          if (imgContent && 'image_url' in imgContent && imgContent.image_url.url) {
-            setRelatedImage(imgContent.image_url.url);
-            foundImage = true;
-            console.log(`[BrowserControlRenderer] Found post-operation screenshot for ${toolName}`);
-            break;
-          }
-        }
-      }
-    } else {
-      // For vision-based tools: search BEFORE the operation (original logic)
-      console.log(`[BrowserControlRenderer] Detected ${toolName || 'browser_vision_control'}, searching for pre-operation screenshot...`);
-      
-      for (let i = currentToolCallIndex - 1; i >= 0; i--) {
-        const msg = sessionMessages[i];
-        if (msg.role === 'environment' && Array.isArray(msg.content)) {
-          const imgContent = msg.content.find(
-            (c) => typeof c === 'object' && 'type' in c && c.type === 'image_url',
-          );
-
-          if (imgContent && 'image_url' in imgContent && imgContent.image_url.url) {
-            setRelatedImage(imgContent.image_url.url);
-            foundImage = true;
-            console.log(`[BrowserControlRenderer] Found pre-operation screenshot for ${toolName || 'browser_vision_control'}`);
-            break;
-          }
+        if (imgContent && 'image_url' in imgContent && imgContent.image_url.url) {
+          setRelatedImage(imgContent.image_url.url);
+          foundImage = true;
+          break;
         }
       }
     }
 
-    // Fallback strategy if primary search fails
-    if (!foundImage && !environmentImage) {
-      console.log(`[BrowserControlRenderer] Primary strategy failed for ${toolName}, trying fallback...`);
-      
-      if (isPostOperationTool) {
-        // Fallback: search before operation
-        for (let i = currentToolCallIndex - 1; i >= 0; i--) {
-          const msg = sessionMessages[i];
-          if (msg.role === 'environment' && Array.isArray(msg.content)) {
-            const imgContent = msg.content.find(
-              (c) => typeof c === 'object' && 'type' in c && c.type === 'image_url',
-            );
-
-            if (imgContent && 'image_url' in imgContent && imgContent.image_url.url) {
-              setRelatedImage(imgContent.image_url.url);
-              foundImage = true;
-              console.log(`[BrowserControlRenderer] Fallback: found pre-operation screenshot for ${toolName}`);
-              break;
-            }
-          }
-        }
-      } else {
-        // Fallback: search after operation
-        for (let i = currentToolCallIndex + 1; i < sessionMessages.length; i++) {
-          const msg = sessionMessages[i];
-          if (msg.role === 'environment' && Array.isArray(msg.content)) {
-            const imgContent = msg.content.find(
-              (c) => typeof c === 'object' && 'type' in c && c.type === 'image_url',
-            );
-
-            if (imgContent && 'image_url' in imgContent && imgContent.image_url.url) {
-              setRelatedImage(imgContent.image_url.url);
-              foundImage = true;
-              console.log(`[BrowserControlRenderer] Fallback: found post-operation screenshot for ${toolName || 'browser_vision_control'}`);
-              break;
-            }
-          }
-        }
-      }
-    }
-
-    // If no valid screenshot found, clear the display
+    // If no valid screenshot found after the tool call, clear the display
     if (!foundImage && !environmentImage) {
       console.warn(
-        `[BrowserControlRenderer] No valid screenshot found for ${toolName || 'unknown tool'} (toolCallId: ${toolCallId})`,
+        `[BrowserControlRenderer] No valid screenshot found after toolCallId: ${toolCallId}. Clearing screenshot display.`,
       );
       setRelatedImage(null);
     }
