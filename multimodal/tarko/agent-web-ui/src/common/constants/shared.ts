@@ -35,8 +35,8 @@ export function getLogoUrl(): string {
 }
 
 /**
- * Get workspace panels from web UI config
+ * Get workspace navigation items from web UI config
  */
-export function getWorkspacePanels() {
-  return getWebUIConfig().workspace?.panels || [];
+export function getWorkspaceNavItems() {
+  return getWebUIConfig().workspace?.navItems || [];
 }

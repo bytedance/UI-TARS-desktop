@@ -13,17 +13,17 @@
 export type AgentWebUIImplementationType = 'static' | 'remote';
 
 /**
- * Panel configuration for workspace
+ * Navigation item configuration for workspace
  */
-export interface WorkspacePanel {
+export interface WorkspaceNavItem {
   /**
-   * Panel title displayed on the button
+   * Navigation item title displayed on the button
    */
   title: string;
   /**
-   * Panel URL or content to display
+   * Link URL to open in new tab
    */
-  panel: string;
+  link: string;
 }
 
 /**
@@ -31,9 +31,9 @@ export interface WorkspacePanel {
  */
 export interface WorkspaceConfig {
   /**
-   * Panels to display in the workspace
+   * Navigation items to display in the workspace header
    */
-  panels?: WorkspacePanel[];
+  navItems?: WorkspaceNavItem[];
 }
 
 /**

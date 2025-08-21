@@ -37,15 +37,10 @@ export default class OmniTARSAgent extends ComposableAgent {
       'Write a python code to download the paper https://arxiv.org/abs/2505.12370, and convert the pdf to markdown',
     ],
     workspace: {
-      panels: [
-        // DO NOT DISPLAY CODE SERVER FOR NOW
-        // {
-        //   title: 'Code Server',
-        //   panel: sandboxUrl + '/code-server/',
-        // },
+      navItems: [
         {
           title: 'VNC',
-          panel: sandboxUrl + '/vnc/index.html',
+          link: sandboxUrl + '/vnc/index.html',
         },
       ],
     },

@@ -13,7 +13,7 @@ import {
 } from 'react-icons/fi';
 import { apiService } from '@/common/services/apiService';
 import { normalizeFilePath } from '@/common/utils/pathNormalizer';
-import { getAgentTitle, getWorkspacePanels } from '@/common/constants';
+import { getAgentTitle } from '@/common/constants';
 import './Workspace.css';
 
 /**
@@ -28,7 +28,6 @@ export const WorkspaceContent: React.FC = () => {
   const { activeSessionId, setActivePanelContent } = useSession();
   const { currentPlan } = usePlan(activeSessionId);
   const [workspacePath, setWorkspacePath] = useState<string>('');
-  const workspacePanels = getWorkspacePanels();
 
   useEffect(() => {
     const fetchWorkspaceInfo = async () => {
@@ -65,34 +64,7 @@ export const WorkspaceContent: React.FC = () => {
     },
   };
 
-  // Render workspace panels buttons in header
-  const renderHeaderPanelsButtons = () => {
-    if (!workspacePanels || workspacePanels.length === 0) return null;
 
-    return (
-      <div className="flex items-center gap-2 ml-4">
-        {workspacePanels.map((panel, index) => (
-          <motion.button
-            key={index}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() =>
-              setActivePanelContent({
-                type: 'iframe',
-                source: panel.panel,
-                title: panel.title,
-                timestamp: Date.now(),
-              })
-            }
-            className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg border border-blue-100 dark:border-blue-800/30 hover:bg-blue-100 dark:hover:bg-blue-800/30 transition-all duration-200 text-sm font-medium"
-          >
-            <FiLayout size={16} />
-            {panel.title}
-          </motion.button>
-        ))}
-      </div>
-    );
-  };
 
   // Plan view button for Pro users
   const renderPlanButton = () => {
@@ -259,8 +231,6 @@ export const WorkspaceContent: React.FC = () => {
             </div>
           </div>
         </div>
-        {/* Workspace panels buttons */}
-        {renderHeaderPanelsButtons()}
       </div>
 
       {/* Content area with elegant empty state */}

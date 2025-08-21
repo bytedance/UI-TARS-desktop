@@ -89,5 +89,5 @@ export {
   getWebUIConfig,
   isContextualSelectorEnabled,
   getLogoUrl,
-  getWorkspacePanels,
+  getWorkspaceNavItems,
 } from './shared';
