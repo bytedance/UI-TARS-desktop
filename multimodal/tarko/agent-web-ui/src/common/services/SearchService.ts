@@ -103,7 +103,7 @@ export class SearchService {
       return content;
     }
 
-    // Handle MCP wrapper format (temporary fix for Omni TARS)
+    // Handle MCP wrapper format (temporary fix for Omni-TARS)
     const unwrappedContent = this.unwrapMCPContent(content);
 
     // Route to specific normalizer
@@ -188,7 +188,7 @@ export class SearchService {
           });
         }
       } catch (error) {
-        console.warn('Failed to parse Omni TARS search result:', error);
+        console.warn('Failed to parse Omni-TARS search result:', error);
       }
     }
 

@@ -150,7 +150,7 @@ const BUILTIN_AGENTS: Record<string, { modulePath: string; label: string }> = {
   },
   'omni-tars': {
     modulePath: '@omni-tars/agent',
-    label: 'Omni TARS',
+    label: 'Omni-TARS Agent',
   },
   'mcp-agent': {
     modulePath: '@tarko/mcp-agent',

@@ -6,6 +6,7 @@ export const strReplaceEditorRendererCondition: FunctionToolToRendererCondition 
 ): string | null => {
   if (toolName === 'str_replace_editor') {
     /**
+     *
      * Object case (always FAIL for now):
      *
      * {
@@ -62,7 +63,7 @@ export const strReplaceEditorRendererCondition: FunctionToolToRendererCondition 
 };
 
 /**
- * For Omni TARS  "execute_bash" tool.
+ * For Omni-TARS  "execute_bash" tool.
  */
 // if (panelContent.title === 'str_replace_editor' && panelContent.arguments) {
 //   const { command = '', file_text = '', path = '' } = panelContent.arguments;

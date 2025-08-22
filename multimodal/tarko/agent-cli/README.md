@@ -18,7 +18,7 @@ tarko
 
 # Run with built-in agents
 tarko run agent-tars  # Agent TARS
-tarko run omni-tars   # Omni TARS
+tarko run omni-tars   # Omni-TARS
 tarko run mcp-agent   # MCP Agent
 
 # Run with custom agent
@@ -39,7 +39,7 @@ echo "Summarize this code" | tarko --headless
 Tarko CLI includes several built-in agents:
 
 - **`agent-tars`** - Agent TARS: Advanced task automation and reasoning system
-- **`omni-tars`** - Omni TARS: Multi-modal agent with comprehensive capabilities
+- **`omni-tars`** - Omni-TARS: Multi-modal agent with comprehensive capabilities
 - **`mcp-agent`** - MCP Agent: Model Context Protocol agent for tool integration
 
 ```bash

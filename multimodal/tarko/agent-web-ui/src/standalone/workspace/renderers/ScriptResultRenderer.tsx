@@ -230,7 +230,7 @@ function extractScriptData(panelContent: StandardPanelContent): {
     /**
      * Handle JupyterCI tool specifically
      *
-     * For Omni TARS "JupyterCI" tool.
+     * For Omni-TARS "JupyterCI" tool.
      *
      * {
      *   "panelContent": {

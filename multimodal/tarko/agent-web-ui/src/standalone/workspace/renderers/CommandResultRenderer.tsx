@@ -203,7 +203,7 @@ function extractCommandData(panelContent: StandardPanelContent) {
    */
 
   /**
-   * For Omni TARS  "execute_bash" tool.
+   * For Omni-TARS  "execute_bash" tool.
    * {
    *   "panelContent": {
    *      "type": "command_result",
