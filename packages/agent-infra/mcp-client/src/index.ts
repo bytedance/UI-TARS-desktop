@@ -33,7 +33,6 @@ import {
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 
 export { type MCPServer };
-export type { MCPClientOptions };
 
 export interface MCPTool extends Tool {
   id: string;
@@ -65,10 +64,7 @@ export class MCPClient<
   private isDebug: boolean;
   private defaultTimeout: number;
 
-  constructor(
-    servers: MCPServer<ServerNames>[],
-    options?: MCPClientOptions,
-  ) {
+  constructor(servers: MCPServer<ServerNames>[], options?: MCPClientOptions) {
     super();
     this.isDebug = options?.isDebug || process.env.DEBUG === 'mcp' || false;
     this.defaultTimeout = options?.defaultTimeout || 60;
