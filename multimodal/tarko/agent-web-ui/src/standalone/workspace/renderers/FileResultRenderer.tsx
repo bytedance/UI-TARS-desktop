@@ -25,7 +25,6 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
   const fileContent = getFileContent(panelContent);
   const filePath = getFilePath(panelContent);
 
-  debugger;
   // Use stable content to prevent unnecessary re-renders during streaming
   const stableContent = useStableCodeContent(fileContent || '');
 
@@ -34,6 +33,8 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
   const fileExtension = fileName ? fileName.split('.').pop()?.toLowerCase() || '' : '';
 
   const fileType = determineFileType(fileExtension);
+  debugger;
+
   const isHtmlFile = fileExtension === 'html' || fileExtension === 'htm';
   const isImageFile = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'bmp'].includes(fileExtension);
   const isMarkdownFile = ['md', 'markdown'].includes(fileExtension);
@@ -107,7 +108,10 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
       <div className="overflow-hidden">
         {/* File content display */}
         <div className="overflow-hidden">
-          {isHtmlFile && displayMode === 'rendered' ? (
+          {isHtmlFile &&
+          displayMode === 'rendered' &&
+          // FIXME: For "str_replace_editor" "create", Found a better solution here,
+          panelContent.arguments?.command !== 'view' ? (
             <ThrottledHtmlRenderer content={stableContent} isStreaming={isStreaming} />
           ) : isImageFile ? (
             <div className="text-center p-4">
@@ -182,17 +186,30 @@ function getFileContent(panelContent: StandardPanelContent): string | null {
     return panelContent.arguments.content;
   }
 
-  // FIXME: For "str_replace_editor".
+  // FIXME: For "str_replace_editor" "create", Found a better solution here,
   if (panelContent.arguments?.file_text && typeof panelContent.arguments.file_text === 'string') {
     return panelContent.arguments.file_text;
   }
 
-  // Handle source array format
-  if (Array.isArray(panelContent.source)) {
-    return panelContent.source
-      .filter((item) => item.type === 'text')
-      .map((item) => item.text)
-      .join('');
+  if (typeof panelContent.source === 'object') {
+    // Handle source array format
+    if (Array.isArray(panelContent.source)) {
+      return panelContent.source
+        .filter((item) => item.type === 'text')
+        .map((item) => item.text)
+        .join('');
+    } else {
+      // FIXME: For "str_replace_editor" "view"
+      if (
+        panelContent.arguments?.command === 'view' &&
+        typeof panelContent.source === 'object' &&
+        typeof panelContent.source.output === 'string'
+      ) {
+        // Here's the result of running `cat -n` on /home/gem/ui-tars-website/index.html:\n     1\t<!DOCTYPE html>\n
+        // return panelContent.source.output.split('\n').slice(1).join('\n');
+        return panelContent.source.output;
+      }
+    }
   }
 
   // Try source as string (fallback for old format)
