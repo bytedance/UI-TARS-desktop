@@ -33,7 +33,6 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
   const fileExtension = fileName ? fileName.split('.').pop()?.toLowerCase() || '' : '';
 
   const fileType = determineFileType(fileExtension);
-  debugger;
 
   const isHtmlFile = fileExtension === 'html' || fileExtension === 'htm';
   const isImageFile = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'bmp'].includes(fileExtension);
