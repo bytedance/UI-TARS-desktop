@@ -203,138 +203,15 @@ stream.on('assistant_message', (event) => {
 
 ## Publishing Agents
 
-<!-- [PLACEHOLDER: Add publishing workflow documentation] -->
-
-### Package Structure
-
-When publishing your agent as an npm package:
-
-```
-my-agent/
-├── src/
-│   ├── index.ts          # Main agent export
-│   ├── tools/            # Custom tools
-│   └── prompts/          # Prompt templates
-├── package.json
-└── README.md
-```
-
-### Example Package
-
-```typescript
-// src/index.ts
-import { Agent, AgentOptions } from '@tarko/agent';
-import { myCustomTool } from './tools';
-
-export class MySpecializedAgent extends Agent {
-  constructor(options: AgentOptions = {}) {
-    super({
-      ...options,
-      instructions: 'I am a specialized agent for...',
-      tools: [myCustomTool, ...(options.tools || [])]
-    });
-  }
-}
-
-export default MySpecializedAgent;
-```
+🚧 **Work in Progress** - Documentation coming soon
 
 ## Deployment
 
-<!-- [PLACEHOLDER: Add deployment guide with Docker, serverless examples] -->
-
-### Docker Deployment
-
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY . .
-EXPOSE 3000
-CMD ["npm", "start"]
-```
-
-### Environment Variables
-
-```bash
-# Required for OpenAI
-OPENAI_API_KEY=your_api_key
-
-# For Anthropic
-ANTHROPIC_API_KEY=your_api_key
-
-# Optional
-LOG_LEVEL=info
-MAX_ITERATIONS=10
-```
+🚧 **Work in Progress** - Documentation coming soon
 
 ## Running Agents
 
-### Development Mode
-
-```bash
-# Install dependencies
-npm install
-
-# Run with hot reload
-npm run dev
-
-# Run tests
-npm test
-```
-
-### Production
-
-```bash
-# Build the project
-npm run build
-
-# Start production server
-npm start
-```
-
-### Integration Examples
-
-#### Express.js Server
-
-```typescript
-import express from 'express';
-import { Agent } from '@tarko/agent';
-
-const app = express();
-const agent = new Agent({ /* config */ });
-
-app.post('/chat', async (req, res) => {
-  try {
-    const response = await agent.run(req.body.message);
-    res.json({ response: response.content });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-```
-
-#### WebSocket Streaming
-
-```typescript
-import WebSocket from 'ws';
-
-const wss = new WebSocket.Server({ port: 8080 });
-
-wss.on('connection', (ws) => {
-  ws.on('message', async (data) => {
-    const { message } = JSON.parse(data.toString());
-    
-    for await (const event of await agent.run({ 
-      input: message, 
-      stream: true 
-    })) {
-      ws.send(JSON.stringify(event));
-    }
-  });
-});
-```
+🚧 **Work in Progress** - Documentation coming soon
 
 ## Advanced Configuration
 
