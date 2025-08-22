@@ -1,19 +1,34 @@
 # @tarko/agent
 
-A powerful, event-stream driven meta agent framework for building effective multimodal AI Agents in the **Tarko** ecosystem.
+An event-stream driven meta agent framework for building effective multimodal Agents.
 
 ## Overview
 
 `@tarko/agent` is the core framework that powers intelligent agents capable of reasoning, tool usage, and multimodal interactions. Built for developers who need reliable, production-ready AI agents with full control over execution flow.
 
-### Key Features
+🎯 **精细 Context Engineering**
 
-- **Multi-turn reasoning** - Intelligent agent loop with customizable iterations
-- **Tool ecosystem** - Register and execute custom tools seamlessly  
-- **Multimodal support** - Handle text, images, and complex inputs
-- **Provider agnostic** - Works with OpenAI, Anthropic, and custom LLM providers
-- **Event streaming** - Real-time tracking of agent execution state
-- **TypeScript first** - Full type safety and excellent DX
+在 Tarko 中，我们针对 Agent Loop 的多模态内容、Run Loop 的上下文压缩、MCP Result 等都进行了大量的优化，这极大地减少了上层开发者的开发负担。
+
+🔗 **多模型兼容的 Tool Call**
+
+Tarko 以 Tool Call 为基础，并提供了开箱即用的 Model Provider、多 Model Provider 等机制，让你能够轻松地切换模型，同时，带来了多种 Tool Call Engine 的支持，即使模型不支持 Tool Call，你也能够实现自定义 Tool Call 解析来完成支持。
+
+📊 **稳定性与观测**
+
+在 Tarko 中，能够在运行时将 Agent 所依赖的环境保存为 Snapshot，接着，可以基于 Snapshot 来回放 Agent，不仅用于调试，也可以保障 Context、与最终的 Response 的确定性。
+
+🚀 **强大的拓展能力**
+
+在 Tarko 中，拥有丰富的 Agent Hooks，让你能够快速地拓展能力，快速实现垂直场景的 Agent，如 DeepResearch Agent、GUI Agent、Coding Agent 等。
+
+💨 **Protocol 驱动**
+
+Tarko 中的 Context、Memory 与 Web UI 完全基于一套标准的协议驱动，因此，通过 Tarko 开发 Agent 将能够享受开箱即用的 Web UI，也支持基于协议自定义实现。
+
+🌟 **开源项目采纳**
+
+Tarko 已经驱动了 Agent TARS、UI-TARS Desktop 等开源项目的建设，这些项目在 Github 上获取了超过 15k 的 Stars。
 
 ## Quick Start
 
@@ -330,7 +345,7 @@ const agent = new Agent({
       {
         name: 'custom-provider',
         baseURL: 'https://api.custom-llm.com/v1',
-        apiKey: process.env.CUSTOM_API_KEY
+        api_key: process.env.CUSTOM_API_KEY
       }
     ],
     provider: 'custom-provider',
@@ -364,19 +379,14 @@ const agent = new Agent({
 
 **Tarko** is a comprehensive framework for building AI applications. `@tarko/agent` integrates seamlessly with other Tarko components:
 
-- **`@tarko/model-provider`** - Multi-provider LLM abstraction
-- **`@tarko/shared-utils`** - Common utilities and logging
-- **`@tarko/agent-interface`** - Type definitions and contracts
-- **`@tarko/llm-client`** - Low-level LLM communication
+- **[@tarko/model-provider](https://www.npmjs.com/package/@tarko/model-provider)** - Multi-provider LLM abstraction
+- **[@tarko/shared-utils](https://www.npmjs.com/package/@tarko/shared-utils)** - Common utilities and logging
+- **[@tarko/agent-interface](https://www.npmjs.com/package/@tarko/agent-interface)** - Type definitions and contracts
+- **[@tarko/llm-client](https://www.npmjs.com/package/@tarko/llm-client)** - Low-level LLM communication
 
 <!-- [PLACEHOLDER: Add links to other Tarko documentation] -->
 
-### Related Documentation
 
-- [Tarko Model Provider Guide](../model-provider/README.md)
-- [Tool Development Guide](./docs/tools.md)
-- [Event System Reference](./docs/events.md)
-- [Deployment Best Practices](./docs/deployment.md)
 
 ## Contributing
 
@@ -384,4 +394,4 @@ Contributions are welcome! Please read our [contributing guidelines](../../CONTR
 
 ## License
 
-Apache-2.0 - see [LICENSE](../../LICENSE) for details.
+Apache-2.0 - see [LICENSE](https://github.com/bytedance/UI-TARS-desktop/blob/main/LICENSE) for details.
