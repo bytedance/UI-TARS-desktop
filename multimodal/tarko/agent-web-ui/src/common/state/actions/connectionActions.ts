@@ -4,10 +4,8 @@ import { apiService } from '@/common/services/apiService';
 import { socketService } from '@/common/services/socketService';
 import {
   connectionStatusAtom,
-  agentInfoAtom,
-  workspaceInfoAtom,
+  sessionMetadataAtom,
   agentOptionsAtom,
-  modelInfoAtom,
 } from '@/common/state/atoms/ui';
 
 /**
@@ -34,11 +32,13 @@ export const checkConnectionStatusAction = atom(null, async (get, set) => {
         set(agentOptionsAtom, agentOptions);
 
         // Extract workspace info from agent options
-        const workspaceInfo = {
-          name: agentOptions.workspaceName || 'Unknown',
-          path: agentOptions.workspace || '',
-        };
-        set(workspaceInfoAtom, workspaceInfo);
+        set(sessionMetadataAtom, (prev) => ({
+          ...prev,
+          workspace: {
+            name: agentOptions.workspaceName || 'Unknown',
+            path: agentOptions.workspace || '',
+          },
+        }));
       } catch (error) {
         console.warn('Failed to load agent options:', error);
       }

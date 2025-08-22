@@ -1,4 +1,4 @@
-import { isProcessingAtom, modelInfoAtom, agentInfoAtom } from '@/common/state/atoms/ui';
+import { isProcessingAtom, sessionMetadataAtom } from '@/common/state/atoms/ui';
 import { AgentEventStream } from '@/common/types';
 import { EventHandler, EventHandlerContext } from '../types';
 import { apiService } from '@/common/services/apiService';
@@ -16,19 +16,23 @@ export class AgentRunStartHandler implements EventHandler<AgentEventStream.Agent
     const { set } = context;
 
     if (event.provider || event.model) {
-      set(modelInfoAtom, {
-        provider: event.provider || '',
-        model: event.model || '',
-        displayName: event.modelDisplayName,
-      });
+      set(sessionMetadataAtom, (prev) => ({
+        ...prev,
+        model: {
+          provider: event.provider || '',
+          model: event.model || '',
+          displayName: event.modelDisplayName,
+        },
+      }));
     }
 
     // FIXME: Migrate these codes to the server, no need to maintain them on the front-end 🤡
     // Capture and persist agent name in session metadata
     if (event.agentName) {
-      set(agentInfoAtom, {
-        name: event.agentName,
-      });
+      set(sessionMetadataAtom, (prev) => ({
+        ...prev,
+        agent: { name: event.agentName },
+      }));
 
       // Store agent info in session metadata for persistence
       try {

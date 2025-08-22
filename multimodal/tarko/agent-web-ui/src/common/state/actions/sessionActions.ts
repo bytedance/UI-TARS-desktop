@@ -7,8 +7,7 @@ import { toolResultsAtom, toolCallResultMap } from '../atoms/tool';
 import {
   isProcessingAtom,
   activePanelContentAtom,
-  modelInfoAtom,
-  agentInfoAtom,
+  sessionMetadataAtom,
 } from '../atoms/ui';
 import { processEventAction } from './eventProcessors';
 import { Message, SessionItemInfo } from '@/common/types';
@@ -94,10 +93,12 @@ export const createSessionAction = atom(null, async (get, set) => {
     }));
 
     // Update agent info when creating session
-    set(agentInfoAtom, (prev) => ({
-      ...prev,
-      name: newSession.metadata?.agentInfo?.name,
-    }));
+    if (newSession.metadata?.agentInfo?.name) {
+      set(sessionMetadataAtom, (prev) => ({
+        ...prev,
+        agent: { name: newSession.metadata.agentInfo.name },
+      }));
+    }
 
     set(toolResultsAtom, (prev) => ({
       ...prev,
@@ -173,9 +174,11 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
 
         // Restore agent info from session metadata
         if (sessionDetails.metadata?.agentInfo?.name) {
-          const agentInfo = { name: sessionDetails.metadata.agentInfo.name };
-          set(agentInfoAtom, agentInfo);
-          console.log(`Restored agent info from session metadata for ${sessionId}:`, agentInfo);
+          set(sessionMetadataAtom, (prev) => ({
+            ...prev,
+            agent: { name: sessionDetails.metadata.agentInfo.name },
+          }));
+          console.log(`Restored agent info from session metadata for ${sessionId}`);
         }
 
         // Load events to get model info from agent_run_start event
@@ -183,13 +186,15 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
         const runStartEvent = events.find((e) => e.type === 'agent_run_start');
 
         if (runStartEvent && ('provider' in runStartEvent || 'model' in runStartEvent)) {
-          const modelInfo = {
-            provider: runStartEvent.provider || '',
-            model: runStartEvent.model || '',
-            displayName: runStartEvent.modelDisplayName ?? '',
-          };
-          set(modelInfoAtom, modelInfo);
-          console.log(`Restored model info for session ${sessionId}:`, modelInfo);
+          set(sessionMetadataAtom, (prev) => ({
+            ...prev,
+            model: {
+              provider: runStartEvent.provider || '',
+              model: runStartEvent.model || '',
+              displayName: runStartEvent.modelDisplayName ?? '',
+            },
+          }));
+          console.log(`Restored model info for session ${sessionId}`);
         }
 
         // Also extract agent info from events if not in metadata
@@ -199,9 +204,11 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
           'agentName' in runStartEvent &&
           runStartEvent.agentName
         ) {
-          const agentInfo = { name: runStartEvent.agentName };
-          set(agentInfoAtom, agentInfo);
-          console.log(`Restored agent info from events for session ${sessionId}:`, agentInfo);
+          set(sessionMetadataAtom, (prev) => ({
+            ...prev,
+            agent: { name: runStartEvent.agentName },
+          }));
+          console.log(`Restored agent info from events for session ${sessionId}`);
         }
       } catch (error) {
         console.warn(`Failed to load session metadata/events for info recovery:`, error);
