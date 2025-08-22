@@ -345,7 +345,7 @@ const agent = new Agent({
       {
         name: 'custom-provider',
         baseURL: 'https://api.custom-llm.com/v1',
-        api_key: process.env.CUSTOM_API_KEY
+        apiKey: process.env.CUSTOM_API_KEY
       }
     ],
     provider: 'custom-provider',
