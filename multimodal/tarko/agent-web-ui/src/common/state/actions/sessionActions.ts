@@ -350,7 +350,15 @@ export const sendMessageAction = atom(
 
         set(sessionsAtom, (prev) =>
           prev.map((session) =>
-            session.id === activeSessionId ? { ...session, name: summary } : session,
+            session.id === activeSessionId
+              ? {
+                  ...session,
+                  metadata: {
+                    ...session.metadata,
+                    name: summary,
+                  },
+                }
+              : session,
           ),
         );
       }
