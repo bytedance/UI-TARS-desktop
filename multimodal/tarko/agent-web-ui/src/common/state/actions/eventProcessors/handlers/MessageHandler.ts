@@ -93,6 +93,7 @@ export class AssistantMessageHandler
             toolCalls: event.toolCalls,
             finishReason: event.finishReason,
             isStreaming: false,
+            elapsedMs: event.elapsedMs,
           };
 
           return {
@@ -114,6 +115,7 @@ export class AssistantMessageHandler
             toolCalls: event.toolCalls,
             finishReason: event.finishReason,
             messageId: messageId,
+            elapsedMs: event.elapsedMs,
           },
         ],
       };

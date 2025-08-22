@@ -46,6 +46,7 @@ export interface Message {
   description?: string; // Added for environment inputs
   isDeepResearch?: boolean; // Added for final answer events
   title?: string; // Added for research report title
+  elapsedMs?: number; // Added for TTFT timing display
 
   // System message specific properties
   level?: 'info' | 'warning' | 'error';

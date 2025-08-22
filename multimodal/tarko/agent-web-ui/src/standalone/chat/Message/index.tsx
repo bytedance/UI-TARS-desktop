@@ -13,6 +13,7 @@ import { MultimodalContent } from './components/MultimodalContent';
 import { ToolCalls } from './components/ToolCalls';
 import { ThinkingToggle } from './components/ThinkingToggle';
 import { MessageTimestamp } from './components/MessageTimestamp';
+import { TTFTDisplay } from './components/TTFTDisplay';
 import { useAtomValue } from 'jotai';
 import { replayStateAtom } from '@/common/state/atoms/replay';
 import { ReportFileEntry } from './components/ReportFileEntry';
@@ -172,6 +173,13 @@ export const Message: React.FC<MessageProps> = ({
           />
         ) : (
           <>
+            {/* TTFT timing display for assistant messages */}
+            {message.role === 'assistant' && message.elapsedMs !== undefined && (
+              <div className="mb-2">
+                <TTFTDisplay elapsedMs={message.elapsedMs} />
+              </div>
+            )}
+
             {/* Enhanced thinking display with duration support */}
             {message.thinking && (
               <ThinkingToggle
