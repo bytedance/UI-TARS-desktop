@@ -620,8 +620,8 @@ describe('MCPClient', () => {
     it('should use server-specific timeout over default timeout', async () => {
       const slowMockServer = new MockMCPServer();
 
-      // Setup a tool that takes 1.5 seconds to complete
-      slowMockServer.setupSlowToolCall('slow-tool', 1500);
+      // Setup a tool that takes 150ms to complete
+      slowMockServer.setupSlowToolCall('slow-tool', 150);
       slowMockServer.setTools([
         {
           name: 'slow-tool',
@@ -634,20 +634,20 @@ describe('MCPClient', () => {
         name: 'short-timeout-server',
         mcpServer: slowMockServer,
         status: 'activate',
-        timeout: 1, // 1 second - should timeout
+        timeout: 0.1, // 100ms - should timeout
       };
 
       const serverWithLongTimeout: BuiltInMCPServer = {
         name: 'long-timeout-server',
         mcpServer: new MockMCPServer(),
         status: 'activate',
-        timeout: 3, // 3 seconds - should succeed
+        timeout: 0.3, // 300ms - should succeed
       };
 
       // Setup the second server with the same slow tool
       (serverWithLongTimeout.mcpServer as MockMCPServer).setupSlowToolCall(
         'slow-tool',
-        1500,
+        150,
       );
       (serverWithLongTimeout.mcpServer as MockMCPServer).setTools([
         {
@@ -658,7 +658,7 @@ describe('MCPClient', () => {
       ]);
 
       client = new MCPClient([serverWithShortTimeout, serverWithLongTimeout], {
-        defaultTimeout: 10,
+        defaultTimeout: 1,
       });
       await client.init();
 
