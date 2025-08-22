@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { MCPClient, MCPTool } from '../src/index';
+import type { MCPServer } from '../src/index';
 import type {
-  MCPServer,
   BuiltInMCPServer,
   StdioMCPServer,
   SSEMCPServer,
   StreamableHTTPMCPServer,
-} from '../src/index';
+} from '@agent-infra/mcp-shared/client';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
