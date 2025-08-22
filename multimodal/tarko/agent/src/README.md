@@ -6,29 +6,31 @@ An event-stream driven meta agent framework for building effective multimodal Ag
 
 `@tarko/agent` is the core framework that powers intelligent agents capable of reasoning, tool usage, and multimodal interactions. Built for developers who need reliable, production-ready AI agents with full control over execution flow.
 
-🎯 **精细 Context Engineering**
+### Key Features
 
-在 Tarko 中，我们针对 Agent Loop 的多模态内容、Run Loop 的上下文压缩、MCP Result 等都进行了大量的优化，这极大地减少了上层开发者的开发负担。
+🎯 **Precise Context Engineering**
 
-🔗 **多模型兼容的 Tool Call**
+In Tarko, we have extensively optimized Agent Loop's multimodal content, Run Loop's context compression, MCP Results, and more, significantly reducing the development burden for developers.
 
-Tarko 以 Tool Call 为基础，并提供了开箱即用的 Model Provider、多 Model Provider 等机制，让你能够轻松地切换模型，同时，带来了多种 Tool Call Engine 的支持，即使模型不支持 Tool Call，你也能够实现自定义 Tool Call 解析来完成支持。
+🔗 **Multi-Model Compatible Tool Calls**
 
-📊 **稳定性与观测**
+Tarko is built on Tool Call foundation and provides out-of-the-box Model Provider and multi-Model Provider mechanisms, allowing you to easily switch models. It also supports various Tool Call Engines - even if a model doesn't support Tool Call, you can implement custom Tool Call parsing for support.
 
-在 Tarko 中，能够在运行时将 Agent 所依赖的环境保存为 Snapshot，接着，可以基于 Snapshot 来回放 Agent，不仅用于调试，也可以保障 Context、与最终的 Response 的确定性。
+📊 **Stability and Observability**
 
-🚀 **强大的拓展能力**
+In Tarko, you can save the Agent's runtime environment as Snapshots, then replay Agents based on these Snapshots - not only for debugging but also ensuring deterministic Context and final Responses.
 
-在 Tarko 中，拥有丰富的 Agent Hooks，让你能够快速地拓展能力，快速实现垂直场景的 Agent，如 DeepResearch Agent、GUI Agent、Coding Agent 等。
+🚀 **Powerful Extensibility**
 
-💨 **Protocol 驱动**
+Tarko provides rich Agent Hooks that enable rapid capability extension and quick implementation of vertical scenario Agents like DeepResearch Agent, GUI Agent, Coding Agent, etc.
 
-Tarko 中的 Context、Memory 与 Web UI 完全基于一套标准的协议驱动，因此，通过 Tarko 开发 Agent 将能够享受开箱即用的 Web UI，也支持基于协议自定义实现。
+💨 **Protocol-Driven**
 
-🌟 **开源项目采纳**
+Tarko's Context, Memory, and Web UI are completely driven by a standard protocol set, so developing Agents through Tarko provides out-of-the-box Web UI and supports custom protocol-based implementations.
 
-Tarko 已经驱动了 Agent TARS、UI-TARS Desktop 等开源项目的建设，这些项目在 Github 上获取了超过 15k 的 Stars。
+🌟 **Open Source Adoption**
+
+Tarko powers the development of open source projects like Agent TARS and UI-TARS Desktop, which have gained over 15k Stars on GitHub.
 
 ## Quick Start
 
