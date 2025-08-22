@@ -596,32 +596,6 @@ describe('MCPClient', () => {
   });
 
   describe('Timeout Configuration', () => {
-    it('should use default timeout when not specified', () => {
-      const servers: MCPServer[] = [
-        {
-          name: 'test-server',
-          mcpServer: mockServer,
-          status: 'activate',
-        },
-      ];
-
-      client = new MCPClient(servers);
-      expect(client).toBeInstanceOf(MCPClient);
-    });
-
-    it('should use custom default timeout from options', () => {
-      const servers: MCPServer[] = [
-        {
-          name: 'test-server',
-          mcpServer: mockServer,
-          status: 'activate',
-        },
-      ];
-
-      client = new MCPClient(servers, { defaultTimeout: 120 });
-      expect(client).toBeInstanceOf(MCPClient);
-    });
-
     it('should use server-specific timeout over default', async () => {
       const mockResult = {
         content: [{ type: 'text', text: 'Tool execution result' }],
@@ -647,12 +621,24 @@ describe('MCPClient', () => {
       client = new MCPClient([server], { defaultTimeout: 120 });
       await client.init();
 
+      // Spy on the underlying client's callTool to verify timeout parameter
+      const callToolSpy = vi.spyOn(
+        client['clients']['timeout-server'],
+        'callTool',
+      );
+
       const result = await client.callTool({
         client: 'timeout-server',
         name: 'timeout-tool',
         args: {},
       });
 
+      // Verify server-specific timeout (30s) is used instead of default (120s)
+      expect(callToolSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'timeout-tool' }),
+        undefined,
+        { timeout: 30000 }, // 30 seconds * 1000
+      );
       expect(result).toEqual(mockResult);
     });
   });
