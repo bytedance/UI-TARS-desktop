@@ -42,15 +42,16 @@ export const EditFileRenderer: React.FC<EditFileRendererProps> = ({
 
   const { oldContent, newContent, path } = diffData;
   const fileName = path ? path.split('/').pop() || path : 'Edited File';
+  const displayPath = getOptimizedPath(path);
 
   return (
     <div className="space-y-4">
       <StrReplaceEditorDiffViewer
-        oldContent={oldContent}
-        newContent={newContent}
-        fileName={fileName}
-        filePath={path}
-        maxHeight="calc(100vh - 215px)"
+      oldContent={oldContent}
+      newContent={newContent}
+      fileName={fileName}
+      filePath={displayPath}
+      maxHeight="calc(100vh - 215px)"
       />
     </div>
   );
@@ -123,6 +124,25 @@ function getLanguage(fileName: string): string {
     bash: 'shell',
   };
   return langMap[ext] || 'plaintext';
+}
+
+// Optimize path display similar to FileResultRenderer
+function getOptimizedPath(filePath?: string): string | undefined {
+  if (!filePath) return undefined;
+  
+  // If path starts with home directory, replace with ~
+  const homePattern = /^\/home\/[^/]+/;
+  if (homePattern.test(filePath)) {
+    return filePath.replace(homePattern, '~');
+  }
+  
+  // If path is very long, show only the last few segments
+  const segments = filePath.split('/');
+  if (segments.length > 4) {
+    return '.../' + segments.slice(-3).join('/');
+  }
+  
+  return filePath;
 }
 
 interface StrReplaceEditorDiffViewerProps {
