@@ -36,6 +36,7 @@ interface AgentRunnerOptions {
   maxIterations: number;
   maxTokens?: number;
   temperature: number;
+  top_p?: number;
   reasoningOptions: LLMReasoningOptions;
   toolCallEngine?: ToolCallEngineType;
   eventStream: AgentEventStreamProcessor;
@@ -56,6 +57,7 @@ export class AgentRunner {
   private maxIterations: number;
   private maxTokens?: number;
   private temperature: number;
+  private top_p?: number;
   private reasoningOptions: LLMReasoningOptions;
   private toolCallEngine?: ToolCallEngine; // lazy init
   private eventStream: AgentEventStreamProcessor;
@@ -76,6 +78,7 @@ export class AgentRunner {
     this.maxIterations = options.maxIterations;
     this.maxTokens = options.maxTokens;
     this.temperature = options.temperature;
+    this.top_p = options.top_p;
     this.reasoningOptions = options.reasoningOptions;
     this.eventStream = options.eventStream;
     this.toolManager = options.toolManager;
@@ -93,6 +96,7 @@ export class AgentRunner {
       this.reasoningOptions,
       this.maxTokens,
       this.temperature,
+      this.top_p,
       this.contextAwarenessOptions,
       this.enableStreamingToolCallEvents,
     );

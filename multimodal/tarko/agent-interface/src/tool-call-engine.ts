@@ -169,6 +169,12 @@ export interface ToolCallEnginePrepareRequestContext {
    * @default 0.7
    */
   temperature?: number;
+  /**
+   * Top-p (nucleus) sampling parameter for LLM text generation.
+   * Controls the cumulative probability threshold for token selection.
+   * Range: 0.0 to 1.0.
+   */
+  top_p?: number;
 }
 
 /**

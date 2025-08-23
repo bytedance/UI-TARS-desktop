@@ -88,6 +88,7 @@ describe('NativeToolCallEngine', () => {
           "model": "gpt-4o",
           "stream": false,
           "temperature": 0.7,
+          "top_p": undefined,
         }
       `);
     });
@@ -143,6 +144,7 @@ describe('NativeToolCallEngine', () => {
               "type": "function",
             },
           ],
+          "top_p": undefined,
         }
       `);
     });
@@ -213,6 +215,7 @@ describe('NativeToolCallEngine', () => {
               "type": "function",
             },
           ],
+          "top_p": undefined,
         }
       `);
     });
@@ -228,6 +231,33 @@ describe('NativeToolCallEngine', () => {
       const result = engine.prepareRequest(context);
 
       expect(result.tools).toBeUndefined();
+    });
+
+    it('should include top_p parameter when provided', () => {
+      const context: ToolCallEnginePrepareRequestContext = {
+        model: 'gpt-4o',
+        messages: [{ role: 'user', content: 'Hello' }],
+        temperature: 0.7,
+        top_p: 0.9,
+      };
+
+      const result = engine.prepareRequest(context);
+
+      expect(result.top_p).toBe(0.9);
+      expect(result.temperature).toBe(0.7);
+    });
+
+    it('should handle undefined top_p parameter', () => {
+      const context: ToolCallEnginePrepareRequestContext = {
+        model: 'gpt-4o',
+        messages: [{ role: 'user', content: 'Hello' }],
+        temperature: 0.7,
+      };
+
+      const result = engine.prepareRequest(context);
+
+      expect(result.top_p).toBeUndefined();
+      expect(result.temperature).toBe(0.7);
     });
   });
 

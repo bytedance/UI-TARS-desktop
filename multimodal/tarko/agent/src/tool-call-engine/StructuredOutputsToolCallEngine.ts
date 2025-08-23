@@ -126,6 +126,7 @@ ${structuredOutputInstructions}`;
       messages: context.messages,
       model: context.model,
       temperature: context.temperature || 0.7,
+      top_p: context.top_p,
       stream: true,
     };
 

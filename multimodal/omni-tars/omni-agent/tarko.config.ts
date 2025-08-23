@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { LogLevel } from '@tarko/interface';
+import { AgentOptions } from '@tarko/interface';
 import { resolve } from 'node:path';
 
 export default {
@@ -29,6 +29,8 @@ export default {
   share: {
     provider: process.env.SHARE_PROVIDER,
   },
+  temperature: 1,
+  top_p: 0.9,
   snapshot: { storageDirectory: resolve(__dirname, 'snapshots'), enable: true },
   googleApiKey: process.env.GOOGLE_API_KEY,
   googleMcpUrl: process.env.GOOGLE_MCP_URL,
@@ -37,4 +39,4 @@ export default {
   linkReaderMcpUrl: process.env.LINK_READER_URL,
   linkReaderAK: process.env.LINK_READER_AK,
   ignoreSandboxCheck: true,
-};
+} as AgentOptions;

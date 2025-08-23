@@ -73,6 +73,10 @@ export abstract class BaseHandler<T extends LLMChatModel> {
       );
     }
 
+    if (typeof body.top_p === 'number' && body.top_p > 1) {
+      throw new InputError(`Expected a top_p less than or equal to 1.0, but got: ${body.top_p}`);
+    }
+
     for (const message of body.messages) {
       if (message.role === 'function') {
         throw new InputError(

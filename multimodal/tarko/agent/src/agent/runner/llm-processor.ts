@@ -47,6 +47,7 @@ export class LLMProcessor {
     private reasoningOptions: LLMReasoningOptions,
     private maxTokens?: number,
     private temperature: number = 0.7,
+    private top_p?: number,
     private contextAwarenessOptions?: AgentContextAwarenessOptions,
     enableStreamingToolCallEvents = false,
   ) {
@@ -198,6 +199,7 @@ export class LLMProcessor {
       messages,
       tools: finalTools,
       temperature: this.temperature,
+      top_p: this.top_p,
     };
 
     // Process the request

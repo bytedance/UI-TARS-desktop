@@ -126,7 +126,7 @@ ${JSON.stringify(schema)}
   }
 
   prepareRequest(context: ToolCallEnginePrepareRequestContext): ChatCompletionCreateParams {
-    const { model, messages, temperature = 0.7 } = context;
+    const { model, messages, temperature = 0.7, top_p } = context;
 
     this.logger.debug(`Preparing request for model: ${model}`);
 
@@ -135,6 +135,7 @@ ${JSON.stringify(schema)}
       model,
       messages,
       temperature,
+      top_p,
       stream: false,
       // For OpenAI standard stop sequence API.
       stop: ['</tool_call>', '</tool_call>\n\n'],

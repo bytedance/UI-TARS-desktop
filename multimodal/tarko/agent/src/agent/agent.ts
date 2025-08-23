@@ -66,6 +66,7 @@ export class Agent<T extends AgentOptions = AgentOptions>
   private toolManager: ToolManager;
   private modelResolver: ModelResolver;
   private temperature: number;
+  private top_p?: number;
   private reasoningOptions: LLMReasoningOptions;
   public readonly runner: AgentRunner;
   public logger = getLogger('Core');
@@ -138,6 +139,7 @@ export class Agent<T extends AgentOptions = AgentOptions>
     }
 
     this.temperature = options.temperature ?? 0.7;
+    this.top_p = options.top_p;
     this.reasoningOptions = options.thinking ?? { type: 'disabled' };
 
     // Initialize the resolved model early if possible
@@ -149,6 +151,7 @@ export class Agent<T extends AgentOptions = AgentOptions>
       maxIterations: this.maxIterations,
       maxTokens: this.maxTokens,
       temperature: this.temperature,
+      top_p: this.top_p,
       reasoningOptions: this.reasoningOptions,
       toolCallEngine: options.toolCallEngine,
       eventStream: this.eventStream,

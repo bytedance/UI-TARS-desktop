@@ -32,7 +32,8 @@ export class CodeToolCallEngine extends ToolCallEngine {
     return {
       model: context.model,
       messages: context.messages,
-      temperature: context.temperature || 0.7,
+      temperature: context.temperature || 1.0,
+      top_p: context.top_p,
       stream: true,
       // For OpenAI standard stop sequence API.
       stop: ['</code_env>', '</mcp_env>'],

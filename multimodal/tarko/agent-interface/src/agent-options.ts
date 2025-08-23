@@ -85,6 +85,17 @@ export interface AgentModelOptions {
   temperature?: number;
 
   /**
+   * Top-p (nucleus) sampling parameter for LLM text generation.
+   * Controls the cumulative probability threshold for token selection.
+   * Lower values (e.g., 0.1) make output more focused and deterministic.
+   * Higher values (e.g., 0.9) allow more diverse and creative outputs.
+   * Range: 0.0 to 1.0.
+   *
+   * @defaultValue `undefined` (uses model's default)
+   */
+  top_p?: number;
+
+  /**
    * Used to control the reasoning content.
    */
   thinking?: LLMReasoningOptions;
