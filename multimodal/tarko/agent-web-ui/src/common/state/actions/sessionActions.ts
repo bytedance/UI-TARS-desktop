@@ -92,12 +92,9 @@ export const createSessionAction = atom(null, async (get, set) => {
       [newSession.id]: [],
     }));
 
-    // Update agent info when creating session
-    if (newSession.metadata?.agentInfo?.name) {
-      set(sessionMetadataAtom, (prev) => ({
-        ...prev,
-        agent: { name: newSession.metadata.agentInfo.name },
-      }));
+    // Update session metadata when creating session
+    if (newSession.metadata) {
+      set(sessionMetadataAtom, newSession.metadata);
     }
 
     set(toolResultsAtom, (prev) => ({
@@ -172,43 +169,38 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
         console.log(`Loading session metadata for ${sessionId}`);
         const sessionDetails = await apiService.getSessionDetails(sessionId);
 
-        // Restore agent info from session metadata
-        if (sessionDetails.metadata?.agentInfo?.name) {
-          set(sessionMetadataAtom, (prev) => ({
-            ...prev,
-            agent: { name: sessionDetails.metadata.agentInfo.name },
-          }));
-          console.log(`Restored agent info from session metadata for ${sessionId}`);
+        // Restore session metadata
+        if (sessionDetails.metadata) {
+          set(sessionMetadataAtom, sessionDetails.metadata);
+          console.log(`Restored session metadata for ${sessionId}`);
         }
 
-        // Load events to get model info from agent_run_start event
+        // Load events to enrich metadata if needed
         const events = await apiService.getSessionEvents(sessionId);
         const runStartEvent = events.find((e) => e.type === 'agent_run_start');
 
-        if (runStartEvent && ('provider' in runStartEvent || 'model' in runStartEvent)) {
-          set(sessionMetadataAtom, (prev) => ({
-            ...prev,
-            model: {
+        if (runStartEvent) {
+          const enrichedMetadata = { ...sessionDetails.metadata };
+          
+          // Enrich with model config if missing
+          if (!enrichedMetadata.modelConfig && ('provider' in runStartEvent || 'model' in runStartEvent)) {
+            enrichedMetadata.modelConfig = {
               provider: runStartEvent.provider || '',
-              model: runStartEvent.model || '',
-              displayName: runStartEvent.modelDisplayName ?? '',
-            },
-          }));
-          console.log(`Restored model info for session ${sessionId}`);
-        }
-
-        // Also extract agent info from events if not in metadata
-        if (
-          !sessionDetails.metadata?.agentInfo?.name &&
-          runStartEvent &&
-          'agentName' in runStartEvent &&
-          runStartEvent.agentName
-        ) {
-          set(sessionMetadataAtom, (prev) => ({
-            ...prev,
-            agent: { name: runStartEvent.agentName },
-          }));
-          console.log(`Restored agent info from events for session ${sessionId}`);
+              modelId: runStartEvent.model || '',
+              configuredAt: Date.now(),
+            };
+          }
+          
+          // Enrich with agent info if missing
+          if (!enrichedMetadata.agentInfo?.name && 'agentName' in runStartEvent && runStartEvent.agentName) {
+            enrichedMetadata.agentInfo = {
+              name: runStartEvent.agentName,
+              configuredAt: Date.now(),
+            };
+          }
+          
+          set(sessionMetadataAtom, enrichedMetadata);
+          console.log(`Enriched session metadata from events for ${sessionId}`);
         }
       } catch (error) {
         console.warn(`Failed to load session metadata/events for info recovery:`, error);

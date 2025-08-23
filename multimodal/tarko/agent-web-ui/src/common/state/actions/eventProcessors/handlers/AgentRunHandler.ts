@@ -15,37 +15,37 @@ export class AgentRunStartHandler implements EventHandler<AgentEventStream.Agent
   ): Promise<void> {
     const { set } = context;
 
+    // Update session metadata with model and agent info from event
+    const metadataUpdates: any = {};
+    
     if (event.provider || event.model) {
-      set(sessionMetadataAtom, (prev) => ({
-        ...prev,
-        model: {
-          provider: event.provider || '',
-          model: event.model || '',
-          displayName: event.modelDisplayName,
-        },
-      }));
+      metadataUpdates.modelConfig = {
+        provider: event.provider || '',
+        modelId: event.model || '',
+        configuredAt: Date.now(),
+      };
     }
 
-    // FIXME: Migrate these codes to the server, no need to maintain them on the front-end 🤡
-    // Capture and persist agent name in session metadata
     if (event.agentName) {
+      metadataUpdates.agentInfo = {
+        name: event.agentName,
+        configuredAt: Date.now(),
+      };
+    }
+
+    if (Object.keys(metadataUpdates).length > 0) {
       set(sessionMetadataAtom, (prev) => ({
         ...prev,
-        agent: { name: event.agentName },
+        ...metadataUpdates,
       }));
 
-      // Store agent info in session metadata for persistence
+      // Persist to server
       try {
         await apiService.updateSessionItemInfo(sessionId, {
-          metadata: {
-            agentInfo: {
-              name: event.agentName,
-              configuredAt: Date.now(),
-            },
-          },
+          metadata: metadataUpdates,
         });
       } catch (error) {
-        console.warn('Failed to persist agent info in session metadata:', error);
+        console.warn('Failed to persist session metadata:', error);
       }
     }
 

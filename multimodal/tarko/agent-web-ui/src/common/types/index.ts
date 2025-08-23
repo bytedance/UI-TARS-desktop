@@ -11,12 +11,7 @@ export type { SanitizedAgentOptions, WorkspaceInfo, SessionItemInfo };
 
 export type { ChatCompletionContentPart, ChatCompletionMessageToolCall };
 
-/**
- * Agent information
- */
-export interface AgentInfo {
-  name: string;
-}
+
 
 /**
  * Tool result type with categorization and timing information
@@ -108,8 +103,4 @@ export interface ReplayEventMarker {
   content?: string | any;
 }
 
-export interface ModelInfo {
-  model?: string;
-  provider?: string;
-  displayName?: string;
-}
+

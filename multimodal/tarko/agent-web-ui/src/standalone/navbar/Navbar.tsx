@@ -18,7 +18,7 @@ import './Navbar.css';
 
 export const Navbar: React.FC = () => {
   const { isSidebarCollapsed, toggleSidebar } = useLayout();
-  const { activeSessionId, isProcessing, modelInfo, agentInfo, workspaceInfo } = useSession();
+  const { activeSessionId, isProcessing, sessionMetadata } = useSession();
   const { isReplayMode } = useReplayMode();
   const isDarkMode = useDarkMode();
   const [showAboutModal, setShowAboutModal] = React.useState(false);
@@ -28,14 +28,9 @@ export const Navbar: React.FC = () => {
     const updateTitle = () => {
       const parts = [];
 
-      // Add workspace name if available
-      if (workspaceInfo.name && workspaceInfo.name !== 'Unknown') {
-        parts.push(workspaceInfo.name);
-      }
-
       // Add agent name if available
-      if (agentInfo.name) {
-        parts.push(agentInfo.name);
+      if (sessionMetadata?.agentInfo?.name) {
+        parts.push(sessionMetadata.agentInfo.name);
       }
 
       // Create title with format: "dir | agent" or fallback to configured title
@@ -44,7 +39,7 @@ export const Navbar: React.FC = () => {
     };
 
     updateTitle();
-  }, [workspaceInfo.name, agentInfo.name]);
+  }, [sessionMetadata?.agentInfo?.name]);
 
   // Get configuration from global window object
   const logoUrl = getLogoUrl();
@@ -111,8 +106,7 @@ export const Navbar: React.FC = () => {
 
         {/* Center section - Agent and Model info display with dynamic sizing */}
         <DynamicNavbarCenter
-          agentInfo={agentInfo}
-          modelInfo={modelInfo}
+          sessionMetadata={sessionMetadata}
           activeSessionId={activeSessionId}
         />
 
@@ -145,12 +139,11 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* About Modal - pass modelInfo and agentInfo */}
+      {/* About Modal - pass sessionMetadata */}
       <AboutModal
         isOpen={showAboutModal}
         onClose={() => setShowAboutModal(false)}
-        modelInfo={modelInfo}
-        agentInfo={agentInfo}
+        sessionMetadata={sessionMetadata}
       />
     </ThemeProvider>
   );
@@ -158,14 +151,16 @@ export const Navbar: React.FC = () => {
 
 // Dynamic Navbar Center Component with space optimization
 interface DynamicNavbarCenterProps {
-  agentInfo: { name?: string };
-  modelInfo: { model?: string; provider?: string };
+  sessionMetadata?: {
+    agentInfo?: { name: string; [key: string]: any };
+    modelConfig?: { provider: string; modelId: string; [key: string]: any };
+    [key: string]: any;
+  };
   activeSessionId?: string;
 }
 
 const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
-  agentInfo,
-  modelInfo,
+  sessionMetadata,
   activeSessionId,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -203,13 +198,12 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
         return width;
       };
 
-      if (agentInfo.name) {
-        setAgentTextWidth(measureText(agentInfo.name, 'font-medium'));
+      if (sessionMetadata?.agentInfo?.name) {
+        setAgentTextWidth(measureText(sessionMetadata.agentInfo.name, 'font-medium'));
       }
 
-      if (modelInfo.model || modelInfo.provider) {
-        const displayModel = modelInfo.displayName || modelInfo.model;
-        const modelText = [displayModel, modelInfo.provider].filter(Boolean).join(' • ');
+      if (sessionMetadata?.modelConfig) {
+        const modelText = [sessionMetadata.modelConfig.modelId, sessionMetadata.modelConfig.provider].filter(Boolean).join(' • ');
         setModelTextWidth(measureText(modelText, 'font-medium'));
       }
     };
@@ -223,7 +217,7 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [agentInfo.name, modelInfo.model, modelInfo.provider]);
+  }, [sessionMetadata?.agentInfo?.name, sessionMetadata?.modelConfig?.modelId, sessionMetadata?.modelConfig?.provider]);
 
   // Calculate dynamic widths for badges
   const totalTextWidth = agentTextWidth + modelTextWidth;
@@ -242,7 +236,7 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
     <div ref={containerRef} className="flex-1 flex justify-center min-w-0 mx-[10vw]">
       <div className="flex items-center gap-3 min-w-0" style={{ maxWidth: '100%' }}>
         {/* Agent Name Badge - Enhanced with colorful gradient */}
-        {agentInfo.name && (
+        {sessionMetadata?.agentInfo?.name && (
           <Box
             sx={{
               display: 'flex',
@@ -297,9 +291,9 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
               }}
-              title={agentInfo.name}
+              title={sessionMetadata.agentInfo.name}
             >
-              {agentInfo.name}
+              {sessionMetadata.agentInfo.name}
             </Typography>
           </Box>
         )}
@@ -308,7 +302,7 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
         <NavbarModelSelector
           className="min-w-0"
           activeSessionId={activeSessionId}
-          modelInfo={modelInfo}
+          sessionMetadata={sessionMetadata}
           isDarkMode={isDarkMode}
           onLoadModels={() => apiService.getAvailableModels()}
           onUpdateModel={(sessionId, provider, modelId) =>

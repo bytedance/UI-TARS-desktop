@@ -5,21 +5,22 @@ import { FiX, FiExternalLink, FiGithub, FiGlobe, FiCpu, FiCopy, FiCheck } from '
 import { FaBrain } from 'react-icons/fa';
 import { apiService } from '@/common/services/apiService';
 import { AgentServerVersionInfo } from '@agent-tars/interface';
-import { ModelInfo, AgentInfo } from '@/common/types';
 import { getWebUIConfig, getLogoUrl, getAgentTitle } from '@/common/constants';
 
 interface AboutModalProps {
   isOpen: boolean;
   onClose: () => void;
-  modelInfo: ModelInfo;
-  agentInfo: AgentInfo;
+  sessionMetadata?: {
+    agentInfo?: { name: string; [key: string]: any };
+    modelConfig?: { provider: string; modelId: string; [key: string]: any };
+    [key: string]: any;
+  };
 }
 
 export const AboutModal: React.FC<AboutModalProps> = ({
   isOpen,
   onClose,
-  modelInfo,
-  agentInfo,
+  sessionMetadata,
 }) => {
   const [versionInfo, setVersionInfo] = useState<AgentServerVersionInfo | null>(null);
   const [copiedModel, setCopiedModel] = useState(false);
@@ -119,7 +120,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({
               className="mb-8 space-y-4"
             >
               {/* Agent Information */}
-              {agentInfo.name && (
+              {sessionMetadata?.agentInfo?.name && (
                 <div className="flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg border border-blue-100 dark:border-blue-800/30 max-w-xl">
                   <FaBrain size={20} className="text-blue-600 dark:text-blue-400 flex-shrink-0" />
                   <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -128,15 +129,15 @@ export const AboutModal: React.FC<AboutModalProps> = ({
                     </span>
                     <span
                       className="font-mono text-blue-800 dark:text-blue-200 truncate cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                      title={agentInfo.name}
-                      onClick={() => copyAgentName(agentInfo.name)}
+                      title={sessionMetadata.agentInfo.name}
+                      onClick={() => copyAgentName(sessionMetadata.agentInfo.name)}
                     >
-                      {agentInfo.name}
+                      {sessionMetadata.agentInfo.name}
                     </span>
                     <motion.button
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
-                      onClick={() => copyAgentName(agentInfo.name)}
+                      onClick={() => copyAgentName(sessionMetadata.agentInfo.name)}
                       className="text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors flex-shrink-0"
                       title="Copy agent name"
                     >
@@ -151,26 +152,26 @@ export const AboutModal: React.FC<AboutModalProps> = ({
               )}
 
               {/* Model Information */}
-              {(modelInfo.model || modelInfo.provider) && (
+              {sessionMetadata?.modelConfig && (
                 <div className="flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg border border-purple-100 dark:border-purple-800/30 max-w-xl">
                   <FiCpu size={20} className="text-purple-600 dark:text-purple-400 flex-shrink-0" />
                   <div className="flex items-center gap-3 min-w-0 flex-1">
                     <span className="text-gray-600 dark:text-gray-300 text-sm font-medium">
                       Model:
                     </span>
-                    {modelInfo.model && (
+                    {sessionMetadata.modelConfig.modelId && (
                       <div className="flex items-center gap-2 min-w-0">
                         <span
                           className="font-mono text-purple-800 dark:text-purple-200 truncate cursor-pointer hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
-                          title={modelInfo.displayName || modelInfo.model}
-                          onClick={() => copyModelId(modelInfo.model!)}
+                          title={sessionMetadata.modelConfig.modelId}
+                          onClick={() => copyModelId(sessionMetadata.modelConfig.modelId)}
                         >
-                          {truncateModel(modelInfo.displayName || modelInfo.model)}
+                          {truncateModel(sessionMetadata.modelConfig.modelId)}
                         </span>
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
-                          onClick={() => copyModelId(modelInfo.model!)}
+                          onClick={() => copyModelId(sessionMetadata.modelConfig.modelId)}
                           className="text-gray-400 hover:text-purple-500 dark:hover:text-purple-400 transition-colors flex-shrink-0"
                           title="Copy model ID"
                         >
@@ -182,13 +183,13 @@ export const AboutModal: React.FC<AboutModalProps> = ({
                         </motion.button>
                       </div>
                     )}
-                    {modelInfo.provider && (
+                    {sessionMetadata.modelConfig.provider && (
                       <>
-                        {modelInfo.model && (
+                        {sessionMetadata.modelConfig.modelId && (
                           <span className="text-gray-400 dark:text-gray-600 flex-shrink-0">•</span>
                         )}
                         <span className="provider-gradient-text font-medium flex-shrink-0">
-                          {modelInfo.provider}
+                          {sessionMetadata.modelConfig.provider}
                         </span>
                       </>
                     )}

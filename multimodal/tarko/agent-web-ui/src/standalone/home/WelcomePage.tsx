@@ -7,7 +7,7 @@ import { getWebUIConfig, getLogoUrl, getAgentTitle } from '@/common/constants';
 
 const WelcomePage: React.FC = () => {
   const navigate = useNavigate();
-  const { createSession, sendMessage, sessions, agentInfo } = useSession();
+  const { createSession, sendMessage, sessions, sessionMetadata } = useSession();
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isDirectChatLoading, setIsDirectChatLoading] = useState(false);
@@ -125,7 +125,7 @@ const WelcomePage: React.FC = () => {
               alt="Logo"
             />
             <span className="text-xl font-display font-bold text-gray-900 dark:text-gray-100">
-              {pageTitle ?? agentInfo.name ?? 'Tarko'}
+              {pageTitle ?? sessionMetadata?.agentInfo?.name ?? 'Tarko'}
             </span>
           </div>
         </div>

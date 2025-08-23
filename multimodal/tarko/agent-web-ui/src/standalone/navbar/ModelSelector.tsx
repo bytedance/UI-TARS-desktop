@@ -25,15 +25,13 @@ interface AvailableModelsResponse {
   hasMultipleProviders: boolean;
 }
 
-interface ModelInfo {
-  model?: string;
-  provider?: string;
-}
-
 interface NavbarModelSelectorProps {
   className?: string;
   activeSessionId?: string;
-  modelInfo?: ModelInfo;
+  sessionMetadata?: {
+    modelConfig?: { provider: string; modelId: string; [key: string]: any };
+    [key: string]: any;
+  };
   isDarkMode?: boolean;
   onLoadModels?: () => Promise<AvailableModelsResponse>;
   onUpdateModel?: (sessionId: string, provider: string, modelId: string) => Promise<boolean>;
@@ -42,7 +40,7 @@ interface NavbarModelSelectorProps {
 export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   className = '',
   activeSessionId,
-  modelInfo = {},
+  sessionMetadata,
   isDarkMode = false,
   onLoadModels,
   onUpdateModel,
@@ -195,7 +193,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   }
 
   if (!availableModels?.hasMultipleProviders || availableModels.models.length === 0) {
-    if (!modelInfo.model && !modelInfo.provider) {
+    if (!sessionMetadata?.modelConfig) {
       return null;
     }
 
@@ -227,7 +225,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
             }}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
-              {modelInfo.model && (
+              {sessionMetadata?.modelConfig?.modelId && (
                 <Typography
                   variant="body2"
                   sx={{
@@ -238,12 +236,12 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
                   }}
-                  title={modelInfo.displayName || modelInfo.model}
+                  title={sessionMetadata.modelConfig.modelId}
                 >
-                  {modelInfo.displayName || modelInfo.model}
+                  {sessionMetadata.modelConfig.modelId}
                 </Typography>
               )}
-              {modelInfo.provider && modelInfo.model && (
+              {sessionMetadata?.modelConfig?.provider && sessionMetadata?.modelConfig?.modelId && (
                 <Typography
                   variant="body2"
                   sx={{
@@ -255,7 +253,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
                   •
                 </Typography>
               )}
-              {modelInfo.provider && (
+              {sessionMetadata?.modelConfig?.provider && (
                 <Typography
                   variant="body2"
                   sx={{
@@ -264,9 +262,9 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
                     color: isDarkMode ? '#d1d5db' : '#6b7280',
                     whiteSpace: 'nowrap',
                   }}
-                  title={modelInfo.provider}
+                  title={sessionMetadata.modelConfig.provider}
                 >
-                  {modelInfo.provider}
+                  {sessionMetadata.modelConfig.provider}
                 </Typography>
               )}
             </Box>

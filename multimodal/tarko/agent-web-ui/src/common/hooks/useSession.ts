@@ -148,9 +148,7 @@ export function useSession() {
       connectionStatus,
       plans,
       replayState,
-      modelInfo: sessionMetadata.model,
-      agentInfo: sessionMetadata.agent,
-      workspaceInfo: sessionMetadata.workspace,
+      sessionMetadata,
       agentOptions,
 
       // Session operations

@@ -1,11 +1,8 @@
 import { atom } from 'jotai';
-import { AgentProcessingPhase, AgentStatusInfo } from '@tarko/interface';
+import { AgentProcessingPhase, AgentStatusInfo, SessionItemInfo } from '@tarko/interface';
 import {
   ConnectionStatus,
-  ModelInfo,
   PanelContent,
-  AgentInfo,
-  WorkspaceInfo,
   SanitizedAgentOptions,
 } from '@/common/types';
 
@@ -25,28 +22,10 @@ export const connectionStatusAtom = atom<ConnectionStatus>({
 });
 
 /**
- * Consolidated session metadata atom combining model, agent, and workspace info
+ * Session metadata atom using server-side SessionItemInfo metadata type
+ * This eliminates type duplication and ensures consistency with persistence layer
  */
-export interface SessionMetadata {
-  model: ModelInfo;
-  agent: AgentInfo;
-  workspace: WorkspaceInfo;
-}
-
-export const sessionMetadataAtom = atom<SessionMetadata>({
-  model: {
-    provider: '',
-    model: '',
-    displayName: '',
-  },
-  agent: {
-    name: 'Unknown Agent',
-  },
-  workspace: {
-    name: 'Unknown',
-    path: '',
-  },
-});
+export const sessionMetadataAtom = atom<SessionItemInfo['metadata']>({});
 
 /**
  * Atom for agent options (sanitized configuration)
