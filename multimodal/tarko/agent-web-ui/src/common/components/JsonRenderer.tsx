@@ -17,7 +17,7 @@ interface JsonItemProps {
 }
 
 const JsonItem: React.FC<JsonItemProps> = ({ label, value, level = 0, isRoot = false }) => {
-  const [isExpanded, setIsExpanded] = useState(level === 0); // Expand only root level
+  const [isExpanded, setIsExpanded] = useState(level <= 1); // Expand root and first level
   const [copied, setCopied] = useState(false);
   const [isStringExpanded, setIsStringExpanded] = useState(false);
 
