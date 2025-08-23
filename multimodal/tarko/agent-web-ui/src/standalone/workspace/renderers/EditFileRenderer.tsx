@@ -48,11 +48,11 @@ export const EditFileRenderer: React.FC<EditFileRendererProps> = ({
   return (
     <div className="space-y-4">
       <StrReplaceEditorDiffViewer
-      oldContent={oldContent}
-      newContent={newContent}
-      fileName={fileName}
-      filePath={displayPath}
-      maxHeight="calc(100vh - 215px)"
+        oldContent={oldContent}
+        newContent={newContent}
+        fileName={fileName}
+        filePath={displayPath}
+        maxHeight="calc(100vh - 215px)"
       />
     </div>
   );
@@ -126,8 +126,6 @@ function getLanguage(fileName: string): string {
   };
   return langMap[ext] || 'plaintext';
 }
-
-
 
 interface StrReplaceEditorDiffViewerProps {
   oldContent: string;
