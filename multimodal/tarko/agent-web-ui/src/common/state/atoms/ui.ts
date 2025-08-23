@@ -49,30 +49,6 @@ export const sessionMetadataAtom = atom<SessionMetadata>({
 });
 
 /**
- * Derived atoms for backward compatibility
- */
-export const modelInfoAtom = atom(
-  (get) => get(sessionMetadataAtom).model,
-  (get, set, update: ModelInfo) => {
-    set(sessionMetadataAtom, (prev) => ({ ...prev, model: update }));
-  }
-);
-
-export const agentInfoAtom = atom(
-  (get) => get(sessionMetadataAtom).agent,
-  (get, set, update: AgentInfo) => {
-    set(sessionMetadataAtom, (prev) => ({ ...prev, agent: update }));
-  }
-);
-
-export const workspaceInfoAtom = atom(
-  (get) => get(sessionMetadataAtom).workspace,
-  (get, set, update: WorkspaceInfo) => {
-    set(sessionMetadataAtom, (prev) => ({ ...prev, workspace: update }));
-  }
-);
-
-/**
  * Atom for agent options (sanitized configuration)
  */
 export const agentOptionsAtom = atom<SanitizedAgentOptions>({});
@@ -102,7 +78,7 @@ export const isProcessingAtom = atom(
   (get) => get(agentStatusAtom).isProcessing,
   (get, set, update: boolean) => {
     set(agentStatusAtom, (prev) => ({ ...prev, isProcessing: update }));
-  }
+  },
 );
 
 /**
