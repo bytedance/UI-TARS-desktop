@@ -3,6 +3,7 @@ import { StandardPanelContent } from '../types/panelContent';
 import { motion } from 'framer-motion';
 import { FiPlay, FiCode, FiTerminal } from 'react-icons/fi';
 import { CodeEditor } from '@/sdk/code-editor';
+import { TerminalOutput } from '../components/TerminalOutput';
 import { FileDisplayMode } from '../types';
 
 interface ScriptResultRendererProps {
@@ -153,66 +154,26 @@ export const ScriptResultRenderer: React.FC<ScriptResultRendererProps> = ({ pane
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: displayMode === 'both' ? 0.1 : 0 }}
         >
-          <div className="rounded-lg overflow-hidden border border-gray-900 shadow-[0_8px_24px_rgba(0,0,0,0.3)]">
-            {/* Terminal title bar */}
-            <div className="bg-[#111111] px-3 py-1.5 border-b border-gray-900 flex items-center">
-              <div className="flex space-x-1.5 mr-3">
-                <div className="w-3 h-3 rounded-full bg-red-500 shadow-sm"></div>
-                <div className="w-3 h-3 rounded-full bg-yellow-500 shadow-sm"></div>
-                <div className="w-3 h-3 rounded-full bg-green-500 shadow-sm"></div>
-              </div>
-              <div className="text-gray-400 text-xs font-medium mx-auto flex items-center gap-2">
+          <TerminalOutput
+            title={(
+              <>
                 <FiPlay size={10} />
                 <span>Script Execution - {interpreter}</span>
-                {exitCode !== undefined && (
-                  <span
-                    className={`ml-2 px-1.5 py-0.5 rounded text-[10px] ${
-                      isError
-                        ? 'bg-red-900/30 text-red-400 border border-red-800/50'
-                        : 'bg-green-900/30 text-green-400 border border-green-800/50'
-                    }`}
-                  >
-                    exit {exitCode}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Terminal content area */}
-            <div className="bg-black p-3 font-mono text-sm terminal-content overflow-auto max-h-[80vh]">
-              <div className="space-y-1">
-                {/* Command section */}
-                <div className="flex items-start">
-                  <span className="select-none text-green-400 mr-2 font-bold">$</span>
-                  <div className="flex-1 text-gray-200">
-                    {highlightCommand(`${interpreter} << 'EOF'`)}
-                  </div>
-                </div>
-
-                {/* Output section */}
-                {stdout && (
-                  <div className="ml-4 mt-2">
-                    <pre className="text-gray-200 whitespace-pre-wrap leading-relaxed">
-                      {stdout}
-                    </pre>
-                  </div>
-                )}
-
-                {/* Error output */}
-                {stderr && (
-                  <div className="ml-4 mt-2">
-                    <pre className="text-red-400 whitespace-pre-wrap leading-relaxed">{stderr}</pre>
-                  </div>
-                )}
-
-                {/* End marker */}
-                <div className="flex items-start mt-2">
-                  <span className="select-none text-green-400 mr-2 font-bold">$</span>
+              </>
+            )}
+            command={(
+              <>
+                {highlightCommand(`${interpreter} << 'EOF'`)}
+                <div className="mt-2">
                   <span className="text-gray-500 text-xs">EOF</span>
                 </div>
-              </div>
-            </div>
-          </div>
+              </>
+            )}
+            stdout={stdout}
+            stderr={stderr}
+            exitCode={exitCode}
+            maxHeight={displayMode === 'both' ? '40vh' : '80vh'}
+          />
         </motion.div>
       )}
     </div>

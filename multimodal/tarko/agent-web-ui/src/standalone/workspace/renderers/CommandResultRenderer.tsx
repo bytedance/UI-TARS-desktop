@@ -1,6 +1,7 @@
 import React from 'react';
 import { StandardPanelContent } from '../types/panelContent';
 import { FileDisplayMode } from '../types';
+import { TerminalOutput } from '../components/TerminalOutput';
 
 interface CommandResultRendererProps {
   panelContent: StandardPanelContent;
@@ -107,50 +108,14 @@ export const CommandResultRenderer: React.FC<CommandResultRendererProps> = ({ pa
   const isError = exitCode !== 0 && exitCode !== undefined;
 
   return (
-    <div className="space-y-2">
-      <div className="mb-2">
-        {/* Terminal interface with aligned styling */}
-        <div className="rounded-lg overflow-hidden border border-gray-900 shadow-[0_8px_24px_rgba(0,0,0,0.3)]">
-          {/* Terminal title bar with aligned control buttons */}
-          <div className="bg-[#111111] px-3 py-1.5 border-b border-gray-900 flex items-center">
-            <div className="flex space-x-1.5 mr-3">
-              <div className="w-3 h-3 rounded-full bg-red-500 shadow-sm"></div>
-              <div className="w-3 h-3 rounded-full bg-yellow-500 shadow-sm"></div>
-              <div className="w-3 h-3 rounded-full bg-green-500 shadow-sm"></div>
-            </div>
-            <div className="text-gray-400 text-xs font-medium mx-auto">user@agent-tars</div>
-          </div>
-
-          {/* Terminal content area - use horizontal scrolling instead of auto-wrapping */}
-          <div className="bg-black px-3 py-2 font-mono text-sm terminal-content overflow-auto max-h-[80vh]">
-            <div className="overflow-x-auto min-w-full">
-              {/* Command section */}
-              {command && (
-                <div className="flex items-start">
-                  <span className="select-none text-green-400 mr-2 font-bold terminal-prompt-symbol">
-                    $
-                  </span>
-                  <div className="flex-1 text-gray-200">{highlightCommand(command)}</div>
-                </div>
-              )}
-
-              {/* Output section - enable line wrapping */}
-              {stdout && (
-                <pre className="whitespace-pre-wrap text-gray-200 mt-3 ml-3">
-                  {stdout}
-                </pre>
-              )}
-
-              {/* Error output */}
-              {stderr && (
-                <pre className="whitespace-pre-wrap text-red-400 my-3 ml-3">
-                  {stderr}
-                </pre>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="space-y-4">
+      <TerminalOutput
+        command={command ? highlightCommand(command) : undefined}
+        stdout={stdout}
+        stderr={stderr}
+        exitCode={exitCode}
+        maxHeight="calc(100vh - 215px)"
+      />
     </div>
   );
 };
