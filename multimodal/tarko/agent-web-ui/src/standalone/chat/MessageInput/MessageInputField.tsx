@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { FiSend, FiX, FiRefreshCw, FiImage, FiLoader } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ConnectionStatus } from '@/common/types';
@@ -55,8 +55,8 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
 
   const { abortQuery } = useSession();
 
-  // Check if contextual selector is enabled
-  const contextualSelectorEnabled = isContextualSelectorEnabled();
+  // Memoize contextual selector enabled state
+  const contextualSelectorEnabled = useMemo(() => isContextualSelectorEnabled(), []);
 
   useEffect(() => {
     if (!isDisabled && inputRef.current) {
@@ -115,8 +115,8 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
     }
   };
 
-  // Parse contextual references from input text
-  const parseContextualReferences = (text: string): ContextualItem[] => {
+  // Memoized contextual references parser
+  const parseContextualReferences = useCallback((text: string): ContextualItem[] => {
     const contextualReferencePattern = /@(file|dir):([^\s]+)/g;
     const workspacePattern = /@workspace/g;
 
@@ -144,7 +144,7 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
     }));
 
     return [...contextualRefs, ...workspaceRefs];
-  };
+  }, []);
 
   const handleContextualSelect = (item: ContextualItem) => {
     addContextualItem(item);
@@ -190,7 +190,7 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     handleSelectorClose();
 
@@ -200,7 +200,7 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
     }
 
     await onSubmit();
-  };
+  }, [onSubmit]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const pressedKey = e.key;
@@ -213,7 +213,7 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
     }
   };
 
-  const handleAbort = async () => {
+  const handleAbort = useCallback(async () => {
     if (!isProcessing) return;
 
     setIsAborting(true);
@@ -224,7 +224,7 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
     } finally {
       setIsAborting(false);
     }
-  };
+  }, [isProcessing, abortQuery]);
 
   const handleFileUpload = () => {
     if (fileInputRef.current) {

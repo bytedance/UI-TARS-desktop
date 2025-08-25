@@ -12,7 +12,6 @@ interface UseAutoScrollReturn {
   messagesEndRef: React.RefObject<HTMLDivElement>;
   showScrollToBottom: boolean;
   scrollToBottom: () => void;
-  isUserScrolling: boolean;
 }
 
 /**
@@ -159,6 +158,5 @@ export const useAutoScroll = ({
     messagesEndRef,
     showScrollToBottom,
     scrollToBottom,
-    isUserScrolling,
   };
 };

@@ -1,15 +1,14 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { useSession } from '@/common/hooks/useSession';
 import { MessageGroup } from './Message/components/MessageGroup';
 import { MessageInput } from './MessageInput';
 import { ActionBar } from './ActionBar';
-import { FiInfo, FiMessageSquare, FiRefreshCw, FiWifiOff, FiPlay, FiX } from 'react-icons/fi';
+import { FiInfo, FiMessageSquare, FiRefreshCw, FiWifiOff, FiX } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAtomValue } from 'jotai';
 import { groupedMessagesAtom, messagesAtom } from '@/common/state/atoms/message';
 import { replayStateAtom } from '@/common/state/atoms/replay';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
-import { useReplay } from '@/common/hooks/useReplay';
 import { getAgentTitle } from '@/common/constants';
 import { useAutoScroll } from './hooks/useAutoScroll';
 import { ScrollToBottomButton } from './components/ScrollToBottomButton';
@@ -78,8 +77,33 @@ export const ChatPanel: React.FC = () => {
   const replayState = useAtomValue(replayStateAtom);
   const { isReplayMode, cancelAutoPlay } = useReplayMode();
 
-  // Use messages from current session
-  const activeMessages = activeSessionId ? groupedMessages[activeSessionId] || [] : [];
+  // Memoize derived state to prevent unnecessary recalculations
+  const activeMessages = useMemo(
+    () => (activeSessionId ? groupedMessages[activeSessionId] || [] : []),
+    [activeSessionId, groupedMessages]
+  );
+
+  const researchReport = useMemo(() => {
+    if (!activeSessionId || !allMessages[activeSessionId]) return null;
+    const sessionMessages = allMessages[activeSessionId];
+    return [...sessionMessages]
+      .reverse()
+      .find(
+        (msg) =>
+          (msg.role === 'final_answer' || msg.role === 'assistant') &&
+          msg.isDeepResearch === true &&
+          msg.title,
+      );
+  }, [activeSessionId, allMessages]);
+
+  const showEmptyState = useMemo(() => {
+    if (!activeSessionId) return true;
+    if (activeMessages.length > 0) return false;
+    if (isReplayMode && replayState.events.length > 0 && replayState.currentEventIndex === -1) {
+      return true;
+    }
+    return true;
+  }, [activeSessionId, activeMessages.length, isReplayMode, replayState.events.length, replayState.currentEventIndex]);
 
   // Auto-scroll functionality
   const {
@@ -87,12 +111,11 @@ export const ChatPanel: React.FC = () => {
     messagesEndRef,
     showScrollToBottom,
     scrollToBottom,
-    isUserScrolling,
   } = useAutoScroll({
     threshold: 100,
     debounceMs: 150,
     autoScrollDelay: 2000,
-    dependencies: [activeMessages, isProcessing], // Trigger scroll on message changes
+    dependencies: [activeMessages, isProcessing],
   });
 
   // Animation variants
@@ -152,43 +175,7 @@ export const ChatPanel: React.FC = () => {
     );
   };
 
-  // Find research report in session
-  const findResearchReport = () => {
-    if (!activeSessionId || !allMessages[activeSessionId]) return null;
 
-    const sessionMessages = allMessages[activeSessionId];
-    const reportMessage = [...sessionMessages]
-      .reverse()
-      .find(
-        (msg) =>
-          (msg.role === 'final_answer' || msg.role === 'assistant') &&
-          msg.isDeepResearch === true &&
-          msg.title,
-      );
-
-    return reportMessage;
-  };
-
-  const researchReport = findResearchReport();
-
-  // Simplified empty state logic
-  const shouldShowEmptyState = () => {
-    // No active session
-    if (!activeSessionId) return true;
-
-    // Has messages - don't show empty state
-    if (activeMessages.length > 0) return false;
-
-    // In replay mode with events but no messages yet (waiting for playback to start)
-    if (isReplayMode && replayState.events.length > 0 && replayState.currentEventIndex === -1) {
-      return true;
-    }
-
-    // Default empty state
-    return true;
-  };
-
-  const showEmptyState = shouldShowEmptyState();
 
   return (
     <div className="flex flex-col h-full">
