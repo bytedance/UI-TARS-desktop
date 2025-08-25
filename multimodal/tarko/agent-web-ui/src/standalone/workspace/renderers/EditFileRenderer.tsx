@@ -173,31 +173,26 @@ const StrReplaceEditorDiffViewer: React.FC<StrReplaceEditorDiffViewerProps> = ({
     <div className="code-editor-container">
       <div className="code-editor-wrapper">
         {/* Header */}
-        <div className="code-editor-header">
-          {/* Left section with controls and file info */}
-          <div className="code-editor-header-left">
-            <div className="code-editor-controls">
-              <div className="code-editor-control-btn code-editor-control-red" />
-              <div className="code-editor-control-btn code-editor-control-yellow" />
-              <div className="code-editor-control-btn code-editor-control-green" />
+        <div className="flex items-center justify-between px-3 py-2 bg-gray-800 border-b border-gray-700">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div className="flex gap-1.5">
+              <div className="w-3 h-3 rounded-full bg-red-500"></div>
+              <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+              <div className="w-3 h-3 rounded-full bg-green-500"></div>
             </div>
-            <div className="code-editor-file-section">
-              <FiGitBranch className="code-editor-branch-icon" size={12} />
-              <span className="code-editor-file-name" title={filePath || fileName}>
-                {fileName}
-              </span>
-            </div>
+            <FiGitBranch className="text-gray-400 flex-shrink-0" size={12} />
+            <span className="text-gray-200 text-sm font-medium truncate" title={filePath || fileName}>
+              {fileName}
+            </span>
           </div>
-          
-          {/* Right section with stats and actions */}
-          <div className="code-editor-header-right">
-            <div className="code-editor-diff-stats">
-              <span className="code-editor-diff-add">+{actualAdditions}</span>
-              <span className="code-editor-diff-del">-{deletions}</span>
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-green-400">+{actualAdditions}</span>
+              <span className="text-red-400">-{deletions}</span>
             </div>
             <button
               onClick={handleCopy}
-              className="code-editor-action-btn"
+              className="p-1.5 text-gray-400 hover:text-gray-200 hover:bg-gray-700 rounded transition-colors"
               title="Copy new content"
             >
               <FiCopy size={14} />
