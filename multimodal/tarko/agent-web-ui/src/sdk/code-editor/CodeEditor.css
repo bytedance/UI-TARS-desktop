@@ -30,6 +30,7 @@
   align-items: center;
   justify-content: space-between;
   min-height: 40px;
+  overflow: hidden;
 }
 
 .code-editor-header-left {
@@ -38,6 +39,14 @@
   gap: 12px;
   min-width: 0;
   flex: 1;
+  overflow: hidden;
+}
+
+.code-editor-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 /* Browser-style control buttons */
@@ -69,16 +78,19 @@
   border: 1px solid #24a134;
 }
 
-/* File info section */
-.code-editor-file-info {
-  position: relative;
-  cursor: default;
-  padding: 4px 2px; /* Add some padding for easier hover */
+/* File section */
+.code-editor-file-section {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
 }
 
-.code-editor-file-info:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
+.code-editor-branch-icon {
+  color: #7d8590;
+  flex-shrink: 0;
 }
 
 .code-editor-file-name {
@@ -89,6 +101,25 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1;
+}
+
+/* Diff stats */
+.code-editor-diff-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.code-editor-diff-add {
+  color: #3fb950;
+}
+
+.code-editor-diff-del {
+  color: #f85149;
 }
 
 /* Language badge */
@@ -104,12 +135,7 @@
   border: 1px solid #30363d;
 }
 
-/* Actions */
-.code-editor-actions {
-  display: flex;
-  gap: 4px;
-  flex-shrink: 0;
-}
+
 
 .code-editor-action-btn {
   padding: 6px;

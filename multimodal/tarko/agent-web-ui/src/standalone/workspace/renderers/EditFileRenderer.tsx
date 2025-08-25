@@ -174,24 +174,27 @@ const StrReplaceEditorDiffViewer: React.FC<StrReplaceEditorDiffViewerProps> = ({
       <div className="code-editor-wrapper">
         {/* Header */}
         <div className="code-editor-header">
+          {/* Left section with controls and file info */}
           <div className="code-editor-header-left">
             <div className="code-editor-controls">
               <div className="code-editor-control-btn code-editor-control-red" />
               <div className="code-editor-control-btn code-editor-control-yellow" />
               <div className="code-editor-control-btn code-editor-control-green" />
             </div>
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center">
-                <FiGitBranch className="mr-1" size={12} />
-                <span className="code-editor-file-name">{fileName}</span>
-              </div>
-              <div className="flex items-center space-x-2 text-xs">
-                <span className="text-green-400">+{actualAdditions}</span>
-                <span className="text-red-400">-{deletions}</span>
-              </div>
+            <div className="code-editor-file-section">
+              <FiGitBranch className="code-editor-branch-icon" size={12} />
+              <span className="code-editor-file-name" title={filePath || fileName}>
+                {fileName}
+              </span>
             </div>
           </div>
-          <div className="code-editor-actions">
+          
+          {/* Right section with stats and actions */}
+          <div className="code-editor-header-right">
+            <div className="code-editor-diff-stats">
+              <span className="code-editor-diff-add">+{actualAdditions}</span>
+              <span className="code-editor-diff-del">-{deletions}</span>
+            </div>
             <button
               onClick={handleCopy}
               className="code-editor-action-btn"
