@@ -16,8 +16,9 @@ import {
   StreamProcessingState,
 } from '@tarko/agent-interface';
 import { parseMcpContent } from '@omni-tars/core';
+import { parseStreamingChunk, OmniStreamProcessingState, createInitState } from './parser';
 
-export class McpToolCallEngine extends ToolCallEngine {
+export class McpToolCallEngine extends ToolCallEngine<OmniStreamProcessingState> {
   private logger = getLogger('McpToolCallEngine');
 
   preparePrompt(instructions: string, tools: Tool[]): string {
@@ -35,24 +36,34 @@ export class McpToolCallEngine extends ToolCallEngine {
       // stop_sequences: ['</code_env>', '</mcp_env>'],
     };
   }
-  initStreamProcessingState(): StreamProcessingState {
-    return {
-      contentBuffer: '',
-      toolCalls: [],
-      reasoningBuffer: '',
-      finishReason: null,
-    };
+  initStreamProcessingState(): OmniStreamProcessingState {
+    return createInitState();
   }
 
   processStreamingChunk(
     chunk: ChatCompletionChunk,
-    state: StreamProcessingState,
+    state: OmniStreamProcessingState,
   ): StreamChunkResult {
     const delta = chunk.choices[0]?.delta;
 
     // Accumulate content
     if (delta?.content) {
       state.contentBuffer += delta.content;
+
+      // Process streaming chunk for think/answer tag content using the utility
+      const { content, reasoningContent } = parseStreamingChunk(delta.content, state);
+
+      // Record finish reason
+      if (chunk.choices[0]?.finish_reason) {
+        state.finishReason = chunk.choices[0].finish_reason;
+      }
+
+      return {
+        content,
+        reasoningContent,
+        hasToolCallUpdate: false,
+        toolCalls: [],
+      };
     }
 
     // Record finish reason
@@ -60,15 +71,15 @@ export class McpToolCallEngine extends ToolCallEngine {
       state.finishReason = chunk.choices[0].finish_reason;
     }
 
-    // Return incremental content without tool call detection during streaming
+    // Return empty content if no delta content
     return {
-      // content: delta?.content || '',
       content: '',
       reasoningContent: '',
       hasToolCallUpdate: false,
       toolCalls: [],
     };
   }
+
   finalizeStreamProcessing(state: StreamProcessingState): ParsedModelResponse {
     const fullContent = state.contentBuffer;
     this.logger.info('finalizeStreamProcessing content \n', fullContent);

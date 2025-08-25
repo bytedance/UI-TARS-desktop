@@ -16,6 +16,7 @@ import {
   StreamProcessingState,
   StreamChunkResult,
   ChatCompletionMessageToolCall,
+  StreamingToolCallUpdate,
 } from '@tarko/agent-interface';
 import { buildToolCallResultMessages } from './utils';
 
@@ -235,11 +236,4 @@ export class NativeToolCallEngine extends ToolCallEngine {
   ): ChatCompletionMessageParam[] {
     return buildToolCallResultMessages(toolCallResults, true);
   }
-}
-
-interface StreamingToolCallUpdate {
-  toolCallId: string;
-  toolName: string;
-  argumentsDelta: string;
-  isComplete: boolean;
 }

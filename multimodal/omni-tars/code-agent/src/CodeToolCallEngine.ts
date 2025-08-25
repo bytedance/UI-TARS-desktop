@@ -57,9 +57,8 @@ export class CodeToolCallEngine extends ToolCallEngine {
       state.finishReason = chunk.choices[0].finish_reason;
     }
 
-    // Return incremental content without tool call detection during streaming
+    // Return empty content if no delta content
     return {
-      // content: delta?.content || '',
       content: '',
       reasoningContent: '',
       hasToolCallUpdate: false,
