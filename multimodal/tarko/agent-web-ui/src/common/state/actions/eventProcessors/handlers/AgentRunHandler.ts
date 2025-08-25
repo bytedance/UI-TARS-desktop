@@ -2,6 +2,7 @@ import { isProcessingAtom, sessionMetadataAtom } from '@/common/state/atoms/ui';
 import { AgentEventStream } from '@/common/types';
 import { EventHandler, EventHandlerContext } from '../types';
 import { apiService } from '@/common/services/apiService';
+import { SessionItemInfo } from '@tarko/interface';
 
 export class AgentRunStartHandler implements EventHandler<AgentEventStream.AgentRunStartEvent> {
   canHandle(event: AgentEventStream.Event): event is AgentEventStream.AgentRunStartEvent {
@@ -16,7 +17,7 @@ export class AgentRunStartHandler implements EventHandler<AgentEventStream.Agent
     const { set } = context;
 
     // Update session metadata with model and agent info from event
-    const metadataUpdates: any = {};
+    const metadataUpdates: Partial<NonNullable<SessionItemInfo['metadata']>> = {};
     
     if (event.provider || event.model) {
       metadataUpdates.modelConfig = {

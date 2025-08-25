@@ -4,17 +4,13 @@ import { motion } from 'framer-motion';
 import { FiX, FiExternalLink, FiGithub, FiGlobe, FiCpu, FiCopy, FiCheck } from 'react-icons/fi';
 import { FaBrain } from 'react-icons/fa';
 import { apiService } from '@/common/services/apiService';
-import { AgentServerVersionInfo } from '@agent-tars/interface';
+import { AgentServerVersionInfo, SessionItemInfo } from '@agent-tars/interface';
 import { getWebUIConfig, getLogoUrl, getAgentTitle } from '@/common/constants';
 
 interface AboutModalProps {
   isOpen: boolean;
   onClose: () => void;
-  sessionMetadata?: {
-    agentInfo?: { name: string; [key: string]: any };
-    modelConfig?: { provider: string; modelId: string; [key: string]: any };
-    [key: string]: any;
-  };
+  sessionMetadata?: SessionItemInfo['metadata'];
 }
 
 export const AboutModal: React.FC<AboutModalProps> = ({

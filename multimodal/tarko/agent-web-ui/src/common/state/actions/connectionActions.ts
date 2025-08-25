@@ -34,9 +34,12 @@ export const checkConnectionStatusAction = atom(null, async (get, set) => {
         // Extract workspace info from agent options
         set(sessionMetadataAtom, (prev) => ({
           ...prev,
-          workspace: {
-            name: agentOptions.workspaceName || 'Unknown',
-            path: agentOptions.workspace || '',
+          metadata: {
+            ...prev.metadata,
+            workspace: {
+              name: agentOptions.workspaceName || 'Unknown',
+              path: agentOptions.workspace || '',
+            },
           },
         }));
       } catch (error) {
