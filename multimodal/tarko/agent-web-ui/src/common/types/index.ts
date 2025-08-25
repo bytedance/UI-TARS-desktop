@@ -45,7 +45,7 @@ export interface Message {
   isDeepResearch?: boolean; // Added for final answer events
   title?: string; // Added for research report title
   ttftMs?: number; // Time to First Token (TTFT) in milliseconds
-  totalResponseTimeMs?: number; // Total response time in milliseconds
+  ttltMs?: number; // Total response time in milliseconds
 
   // System message specific properties
   level?: 'info' | 'warning' | 'error';

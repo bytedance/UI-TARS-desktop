@@ -4,7 +4,7 @@ import { FiZap, FiClock } from 'react-icons/fi';
 
 interface TTFTDisplayProps {
   ttftMs?: number;
-  totalResponseTimeMs?: number;
+  ttltMs?: number;
   className?: string;
 }
 
@@ -12,13 +12,9 @@ interface TTFTDisplayProps {
  * TTFT (Time to First Token) Display Component
  * Shows the response time for assistant messages with appropriate color coding
  */
-export const TTFTDisplay: React.FC<TTFTDisplayProps> = ({
-  ttftMs,
-  totalResponseTimeMs,
-  className = '',
-}) => {
+export const TTFTDisplay: React.FC<TTFTDisplayProps> = ({ ttftMs, ttltMs, className = '' }) => {
   const actualTtftMs = ttftMs;
-  const actualTotalMs = totalResponseTimeMs;
+  const actualTotalMs = ttltMs;
 
   // Early return if no timing data available
   if (actualTtftMs === undefined) {

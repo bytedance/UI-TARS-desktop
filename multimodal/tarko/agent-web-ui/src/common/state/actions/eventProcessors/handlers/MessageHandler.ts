@@ -94,7 +94,7 @@ export class AssistantMessageHandler
             finishReason: event.finishReason,
             isStreaming: false,
             ttftMs: event.ttftMs,
-            totalResponseTimeMs: event.totalResponseTimeMs,
+            ttltMs: event.ttltMs,
           };
 
           return {
@@ -117,7 +117,7 @@ export class AssistantMessageHandler
             finishReason: event.finishReason,
             messageId: messageId,
             ttftMs: event.ttftMs,
-            totalResponseTimeMs: event.totalResponseTimeMs,
+            ttltMs: event.ttltMs,
           },
         ],
       };

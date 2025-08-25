@@ -118,11 +118,17 @@ export namespace AgentEventStream {
     /** How the response was finished */
     finishReason?: string;
 
-    /** Time to First Token (TTFT) in milliseconds - time from request start to first content chunk */
+    /**
+     * Time to First Token (TTFT) in milliseconds - time from request start to first content chunk
+     * @see https://modal.com/llm-almanac/how-to-benchmark
+     */
     ttftMs?: number;
 
-    /** Total response time in milliseconds - time from request start to response completion */
-    totalResponseTimeMs?: number;
+    /**
+     * Time to Last Token (TTLT) in milliseconds - time from request start to response completion
+     * @see https://modal.com/llm-almanac/how-to-benchmark
+     */
+    ttltMs?: number;
 
     /**
      * Unique message identifier that links streaming messages to their final message
