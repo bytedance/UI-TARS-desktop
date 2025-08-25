@@ -1,10 +1,10 @@
 import React from 'react';
 import { DiffEditor } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
-import { FiCopy, FiGitBranch } from 'react-icons/fi';
 import { StandardPanelContent } from '../types/panelContent';
 import { FileDisplayMode } from '../types';
 import { normalizeFilePath } from '@/common/utils/pathNormalizer';
+import { CodeEditorHeader } from '@/sdk/code-editor/CodeEditorHeader';
 import '@/sdk/code-editor/MonacoCodeEditor.css';
 
 /**
@@ -173,43 +173,20 @@ const StrReplaceEditorDiffViewer: React.FC<StrReplaceEditorDiffViewerProps> = ({
     <div className="code-editor-container">
       <div className="code-editor-wrapper">
         {/* Header */}
-        <div className="code-editor-header">
-          <div className="code-editor-header-left">
-            {/* Browser-style control buttons */}
-            <div className="code-editor-controls">
-              <div className="code-editor-control-btn code-editor-control-red" />
-              <div className="code-editor-control-btn code-editor-control-yellow" />
-              <div className="code-editor-control-btn code-editor-control-green" />
-            </div>
-
-            {/* File name with path display */}
-            <div className="code-editor-file-info">
-              <div className="flex items-center space-x-2">
-                <FiGitBranch size={12} />
-                <span className="code-editor-file-name" title={filePath || fileName}>
-                  {fileName}
-                </span>
-              </div>
-            </div>
-
-            {/* Diff stats */}
-            <div className="flex items-center space-x-2 text-xs">
-              <span className="text-green-400">+{actualAdditions}</span>
-              <span className="text-red-400">-{deletions}</span>
-            </div>
+        <CodeEditorHeader
+          fileName={fileName}
+          filePath={filePath}
+          language={language}
+          onCopy={handleCopy}
+          copyButtonTitle="Copy new content"
+          showCopyState={false}
+        >
+          {/* Diff stats */}
+          <div className="flex items-center space-x-2 text-xs">
+            <span className="text-green-400">+{actualAdditions}</span>
+            <span className="text-red-400">-{deletions}</span>
           </div>
-
-          {/* Actions */}
-          <div className="code-editor-actions">
-            <button
-              onClick={handleCopy}
-              className="code-editor-action-btn"
-              title="Copy new content"
-            >
-              <FiCopy size={14} />
-            </button>
-          </div>
-        </div>
+        </CodeEditorHeader>
 
         {/* Diff Editor */}
         <div className="code-editor-monaco-container" style={{ height: maxHeight }}>
