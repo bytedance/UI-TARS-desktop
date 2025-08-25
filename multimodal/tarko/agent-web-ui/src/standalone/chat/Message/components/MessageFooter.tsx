@@ -48,7 +48,11 @@ export const MessageFooter: React.FC<MessageFooterProps> = ({ message, className
           {showTTFT && (
             <div className="flex items-center gap-2">
               {/* TTFT */}
-              <div className="flex items-center" title="Time to First Token (TTFT)">
+              <div 
+                className="flex items-center cursor-help" 
+                title="Time to First Token (TTFT) - Time from request start to first token received"
+                style={{ position: 'relative' }}
+              >
                 <FiZap size={10} className="mr-1 text-gray-500 dark:text-gray-400" />
                 <span className="text-gray-500 dark:text-gray-400">
                   {formatElapsedTime(message.ttftMs!)}
@@ -57,7 +61,11 @@ export const MessageFooter: React.FC<MessageFooterProps> = ({ message, className
               
               {/* TTLT (if different from TTFT) */}
               {message.ttltMs && message.ttltMs !== message.ttftMs && (
-                <div className="flex items-center" title="Time to Last Token (TTLT)">
+                <div 
+                  className="flex items-center cursor-help" 
+                  title="Time to Last Token (TTLT) - Total time from request start to completion"
+                  style={{ position: 'relative' }}
+                >
                   <FiActivity size={10} className="mr-1 text-gray-500 dark:text-gray-400" />
                   <span className="text-gray-500 dark:text-gray-400">
                     {formatElapsedTime(message.ttltMs)}
