@@ -119,13 +119,19 @@ export namespace AgentEventStream {
     finishReason?: string;
 
     /**
-     * Time to First Token (TTFT) in milliseconds - time from request start to first content chunk
+     * Time to First Token (TTFT) in milliseconds - time from request start to first content chunk.
+     * The time it takes for the model to return the first token of the response after it receives the prompt.
+     *
+     * @see https://modal.com/llm-almanac/how-to-benchmark
      * @see https://modal.com/llm-almanac/how-to-benchmark
      */
     ttftMs?: number;
 
     /**
-     * Time to Last Token (TTLT) in milliseconds - time from request start to response completion
+     * Time to Last Token (TTLT) in milliseconds - time from request start to response completion.
+     * The overall time taken by the model to process the prompt and generate the complete response.
+     *
+     * @see https://modal.com/llm-almanac/how-to-benchmark
      * @see https://modal.com/llm-almanac/how-to-benchmark
      */
     ttltMs?: number;
