@@ -179,7 +179,6 @@ const StrReplaceEditorDiffViewer: React.FC<StrReplaceEditorDiffViewerProps> = ({
           language={language}
           onCopy={handleCopy}
           copyButtonTitle="Copy new content"
-          showCopyState={false}
         >
           {/* Diff stats */}
           <div className="flex items-center space-x-2 text-xs">
