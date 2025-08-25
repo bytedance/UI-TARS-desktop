@@ -5,7 +5,6 @@ import { FiZap, FiClock } from 'react-icons/fi';
 interface TTFTDisplayProps {
   ttftMs?: number;
   totalResponseTimeMs?: number;
-  elapsedMs?: number; // @deprecated Use ttftMs instead. Kept for backward compatibility
   className?: string;
 }
 
@@ -16,11 +15,9 @@ interface TTFTDisplayProps {
 export const TTFTDisplay: React.FC<TTFTDisplayProps> = ({
   ttftMs,
   totalResponseTimeMs,
-  elapsedMs, // deprecated fallback
   className = '',
 }) => {
-  // Use new field names with backward compatibility fallback
-  const actualTtftMs = ttftMs ?? elapsedMs;
+  const actualTtftMs = ttftMs;
   const actualTotalMs = totalResponseTimeMs;
 
   // Early return if no timing data available

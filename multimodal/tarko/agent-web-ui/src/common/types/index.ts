@@ -46,7 +46,6 @@ export interface Message {
   title?: string; // Added for research report title
   ttftMs?: number; // Time to First Token (TTFT) in milliseconds
   totalResponseTimeMs?: number; // Total response time in milliseconds
-  elapsedMs?: number; // @deprecated Use ttftMs instead. Kept for backward compatibility
 
   // System message specific properties
   level?: 'info' | 'warning' | 'error';
