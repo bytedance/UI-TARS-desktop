@@ -124,9 +124,6 @@ export namespace AgentEventStream {
     /** Total response time in milliseconds - time from request start to response completion */
     totalResponseTimeMs?: number;
 
-    /** @deprecated Use ttftMs instead. Kept for backward compatibility */
-    elapsedMs?: number;
-
     /**
      * Unique message identifier that links streaming messages to their final message
      * This allows clients to correlate incremental updates with complete messages
