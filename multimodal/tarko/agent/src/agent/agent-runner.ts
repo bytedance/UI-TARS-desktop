@@ -196,6 +196,7 @@ export class AgentRunner {
       return this.eventStream.createEvent('assistant_message', {
         content: 'Request was aborted',
         finishReason: 'abort',
+        ttltMs: 0, // Immediate abort, no processing time
       });
     } else {
       // Handle other types of errors

@@ -12,12 +12,11 @@ import { SystemMessage } from './components/SystemMessage';
 import { MultimodalContent } from './components/MultimodalContent';
 import { ToolCalls } from './components/ToolCalls';
 import { ThinkingToggle } from './components/ThinkingToggle';
-import { MessageTimestamp } from './components/MessageTimestamp';
+
 import { useAtomValue } from 'jotai';
 import { replayStateAtom } from '@/common/state/atoms/replay';
 import { ReportFileEntry } from './components/ReportFileEntry';
 import { messagesAtom } from '@/common/state/atoms/message';
-
 
 interface MessageProps {
   message: MessageType;
@@ -74,8 +73,6 @@ export const Message: React.FC<MessageProps> = ({
     }
   };
 
-
-
   // Render content based on type
   const renderContent = () => {
     if (isMultimodal) {
@@ -131,8 +128,6 @@ export const Message: React.FC<MessageProps> = ({
       baseClasses = 'message-assistant';
     }
 
-
-
     return baseClasses;
   };
 
@@ -145,8 +140,6 @@ export const Message: React.FC<MessageProps> = ({
 
     return imageContents.length > 0 && textContents.length === 0;
   }, [message.content]);
-
-
 
   // Determine which prose class should be used, based on message type and dark mode
   const getProseClasses = () => {
@@ -185,8 +178,6 @@ export const Message: React.FC<MessageProps> = ({
 
             <div className={getProseClasses()}>{renderContent()}</div>
 
-
-
             {isFinalAnswer && message.title && typeof message.content === 'string' && (
               <ReportFileEntry
                 title={message.title || 'Research Report'}
@@ -207,17 +198,7 @@ export const Message: React.FC<MessageProps> = ({
         )}
       </div>
 
-      {/* Timestamp and copy button - only for main messages */}
-      {message.role !== 'system' &&
-        !isInGroup &&
-        shouldDisplayTimestamp &&
-        !replayState.isActive && (
-          <MessageTimestamp
-            timestamp={message.timestamp}
-            content={message.content}
-            role={message.role}
-          />
-        )}
+
     </div>
   );
 };
