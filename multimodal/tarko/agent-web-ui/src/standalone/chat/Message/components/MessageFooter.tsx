@@ -1,6 +1,6 @@
 import React from 'react';
 import { FiClock, FiCheck, FiCopy, FiZap, FiActivity } from 'react-icons/fi';
-import { Tooltip } from '@mui/material';
+import { Tooltip, TooltipProps } from '@mui/material';
 import { formatTimestamp } from '@/common/utils/formatters';
 import { Message as MessageType, ChatCompletionContentPart } from '@/common/types';
 import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
@@ -36,7 +36,7 @@ export const MessageFooter: React.FC<MessageFooterProps> = ({ message, className
   };
 
   // Tooltip styling for consistent appearance
-  const tooltipProps = {
+  const tooltipProps: Partial<TooltipProps> = {
     arrow: true,
     componentsProps: {
       tooltip: {
@@ -51,9 +51,9 @@ export const MessageFooter: React.FC<MessageFooterProps> = ({ message, className
           '.MuiTooltip-arrow': {
             color: '#000000',
           },
-        }
-      }
-    }
+        },
+      },
+    },
   };
 
   return (
