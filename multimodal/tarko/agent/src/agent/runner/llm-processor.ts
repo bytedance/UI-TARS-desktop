@@ -289,6 +289,10 @@ export class LLMProcessor {
     // Generate a unique message ID to correlate streaming messages with final message
     const messageId = `msg_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
 
+    // Track TTFT (Time to First Token)
+    let firstTokenTime: number | null = null;
+    let hasReceivedFirstContent = false;
+
     this.logger.info(`llm stream start`);
 
     // Process each incoming chunk
@@ -303,6 +307,14 @@ export class LLMProcessor {
 
       // Process the chunk using the tool call engine
       const chunkResult = toolCallEngine.processStreamingChunk(chunk, processingState);
+
+      // Track first token time when we receive the first meaningful content
+      if (!hasReceivedFirstContent && (chunkResult.content || chunkResult.reasoningContent)) {
+        firstTokenTime = Date.now();
+        hasReceivedFirstContent = true;
+        const ttft = firstTokenTime - requestStartTime;
+        this.logger.info(`[LLM] First token received | TTFT: ${ttft}ms`);
+      }
 
       // Only send streaming events in streaming mode
       if (streamingMode) {
@@ -360,8 +372,11 @@ export class LLMProcessor {
 
     this.logger.infoWithData('Finalized Response', parsedResponse, JSON.stringify);
 
-    // Calculate elapsed time from request start to response completion
-    const elapsedMs = Date.now() - requestStartTime;
+    // Calculate timing metrics
+    const totalElapsedMs = Date.now() - requestStartTime;
+    const ttftMs = firstTokenTime ? firstTokenTime - requestStartTime : totalElapsedMs;
+
+    this.logger.info(`[LLM] Response timing | TTFT: ${ttftMs}ms | Total: ${totalElapsedMs}ms`);
 
     // Create the final events based on processed content
     this.createFinalEvents(
@@ -371,7 +386,8 @@ export class LLMProcessor {
       parsedResponse.reasoningContent || '',
       parsedResponse.finishReason || 'stop',
       messageId, // Pass the message ID to final events
-      elapsedMs, // Pass the elapsed time to final events
+      ttftMs, // Pass the TTFT (Time to First Token) to final events
+      totalElapsedMs, // Pass the total elapsed time to final events
     );
 
     // Call response hooks with session ID
@@ -428,7 +444,8 @@ export class LLMProcessor {
     reasoningBuffer: string,
     finishReason: string,
     messageId?: string,
-    elapsedMs?: number,
+    ttftMs?: number,
+    totalElapsedMs?: number,
   ): void {
     // If we have complete content, create a consolidated assistant message event
     if (content || currentToolCalls.length > 0) {
@@ -438,7 +455,8 @@ export class LLMProcessor {
         toolCalls: currentToolCalls.length > 0 ? currentToolCalls : undefined,
         finishReason: finishReason,
         messageId: messageId, // Include the message ID in the final message
-        elapsedMs: elapsedMs, // Include the elapsed time for TTFT display
+        elapsedMs: ttftMs, // Include the TTFT (Time to First Token) for display
+        totalElapsedMs: totalElapsedMs, // Include the total response time for analytics
       });
 
       this.eventStream.sendEvent(assistantEvent);

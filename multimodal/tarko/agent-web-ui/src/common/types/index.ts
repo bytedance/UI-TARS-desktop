@@ -11,8 +11,6 @@ export type { SanitizedAgentOptions, WorkspaceInfo, SessionItemInfo };
 
 export type { ChatCompletionContentPart, ChatCompletionMessageToolCall };
 
-
-
 /**
  * Tool result type with categorization and timing information
  */
@@ -47,6 +45,7 @@ export interface Message {
   isDeepResearch?: boolean; // Added for final answer events
   title?: string; // Added for research report title
   elapsedMs?: number; // Added for TTFT timing display
+  totalElapsedMs?: number; // Added for total response time analytics
 
   // System message specific properties
   level?: 'info' | 'warning' | 'error';
@@ -103,5 +102,3 @@ export interface ReplayEventMarker {
   position: number; // 0-1 normalized position on timeline
   content?: string | any;
 }
-
-

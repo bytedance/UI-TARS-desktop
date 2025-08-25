@@ -4,6 +4,7 @@ import { FiZap, FiClock } from 'react-icons/fi';
 
 interface TTFTDisplayProps {
   elapsedMs: number;
+  totalElapsedMs?: number;
   className?: string;
 }
 
@@ -11,7 +12,11 @@ interface TTFTDisplayProps {
  * TTFT (Time to First Token) Display Component
  * Shows the response time for assistant messages with appropriate color coding
  */
-export const TTFTDisplay: React.FC<TTFTDisplayProps> = ({ elapsedMs, className = '' }) => {
+export const TTFTDisplay: React.FC<TTFTDisplayProps> = ({
+  elapsedMs,
+  totalElapsedMs,
+  className = '',
+}) => {
   // Helper function to format elapsed time for display
   const formatElapsedTime = (ms: number): string => {
     if (ms < 1000) {
@@ -64,16 +69,26 @@ export const TTFTDisplay: React.FC<TTFTDisplayProps> = ({ elapsedMs, className =
 
   const timingStyle = getTimingBadgeStyle(elapsedMs);
 
+  const showDetailedTiming = totalElapsedMs && totalElapsedMs !== elapsedMs;
+
   return (
     <motion.div
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ delay: 0.1, type: 'spring', stiffness: 300 }}
       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium ${timingStyle.bg} ${timingStyle.border} ${className}`}
+      title={
+        showDetailedTiming
+          ? `TTFT: ${formatElapsedTime(elapsedMs)} | Total: ${formatElapsedTime(totalElapsedMs)}`
+          : `Response time: ${formatElapsedTime(elapsedMs)}`
+      }
     >
       <FiZap className={`${timingStyle.icon}`} size={12} />
       <span className={`font-mono font-medium whitespace-nowrap ${timingStyle.text}`}>
         {formatElapsedTime(elapsedMs)}
+        {showDetailedTiming && (
+          <span className="opacity-60 ml-1">/ {formatElapsedTime(totalElapsedMs)}</span>
+        )}
       </span>
     </motion.div>
   );

@@ -19,7 +19,6 @@ import { replayStateAtom } from '@/common/state/atoms/replay';
 import { ReportFileEntry } from './components/ReportFileEntry';
 import { messagesAtom } from '@/common/state/atoms/message';
 
-
 interface MessageProps {
   message: MessageType;
   shouldDisplayTimestamp?: boolean;
@@ -74,8 +73,6 @@ export const Message: React.FC<MessageProps> = ({
       }
     }
   };
-
-
 
   // Render content based on type
   const renderContent = () => {
@@ -132,8 +129,6 @@ export const Message: React.FC<MessageProps> = ({
       baseClasses = 'message-assistant';
     }
 
-
-
     return baseClasses;
   };
 
@@ -146,8 +141,6 @@ export const Message: React.FC<MessageProps> = ({
 
     return imageContents.length > 0 && textContents.length === 0;
   }, [message.content]);
-
-
 
   // Determine which prose class should be used, based on message type and dark mode
   const getProseClasses = () => {
@@ -176,7 +169,10 @@ export const Message: React.FC<MessageProps> = ({
             {/* TTFT timing display for assistant messages */}
             {message.role === 'assistant' && message.elapsedMs !== undefined && (
               <div className="mb-2">
-                <TTFTDisplay elapsedMs={message.elapsedMs} />
+                <TTFTDisplay
+                  elapsedMs={message.elapsedMs}
+                  totalElapsedMs={message.totalElapsedMs}
+                />
               </div>
             )}
 
@@ -192,8 +188,6 @@ export const Message: React.FC<MessageProps> = ({
             )}
 
             <div className={getProseClasses()}>{renderContent()}</div>
-
-
 
             {isFinalAnswer && message.title && typeof message.content === 'string' && (
               <ReportFileEntry
