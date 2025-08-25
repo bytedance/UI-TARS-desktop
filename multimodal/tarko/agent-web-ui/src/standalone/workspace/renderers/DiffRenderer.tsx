@@ -1,12 +1,7 @@
 import React from 'react';
-import { DiffEditor } from '@monaco-editor/react';
-import type { editor } from 'monaco-editor';
 import { StandardPanelContent } from '../types/panelContent';
 import { DiffViewer } from '@/sdk/code-editor';
 import { FileDisplayMode } from '../types';
-import { normalizeFilePath } from '@/common/utils/pathNormalizer';
-import { CodeEditorHeader } from '@/sdk/code-editor/CodeEditorHeader';
-import '@/sdk/code-editor/MonacoCodeEditor.css';
 
 interface DiffRendererProps {
   panelContent: StandardPanelContent;
@@ -25,26 +20,40 @@ function extractDiffContent(content: string): string {
   return codeBlockMatch ? codeBlockMatch[1] : content;
 }
 
-// Get language from filename
-function getLanguage(fileName: string): string {
-  const ext = fileName.split('.').pop()?.toLowerCase() || '';
-  const langMap: Record<string, string> = {
-    js: 'javascript',
-    jsx: 'javascript',
-    ts: 'typescript',
-    tsx: 'typescript',
-    py: 'python',
-    html: 'html',
-    css: 'css',
-    json: 'json',
-    md: 'markdown',
-    yaml: 'yaml',
-    yml: 'yaml',
-    sh: 'shell',
-    bash: 'shell',
-  };
-  return langMap[ext] || 'plaintext';
+// Convert old/new content to unified diff format
+function convertToUnifiedDiff(oldContent: string, newContent: string, fileName: string): string {
+  const oldLines = oldContent.split('\n');
+  const newLines = newContent.split('\n');
+  
+  // Simple unified diff header
+  const header = `--- a/${fileName}\n+++ b/${fileName}\n@@ -1,${oldLines.length} +1,${newLines.length} @@`;
+  
+  // Generate diff lines
+  const diffLines = [];
+  const maxLines = Math.max(oldLines.length, newLines.length);
+  
+  for (let i = 0; i < maxLines; i++) {
+    const oldLine = oldLines[i];
+    const newLine = newLines[i];
+    
+    if (oldLine === newLine) {
+      if (oldLine !== undefined) {
+        diffLines.push(` ${oldLine}`);
+      }
+    } else {
+      if (oldLine !== undefined) {
+        diffLines.push(`-${oldLine}`);
+      }
+      if (newLine !== undefined) {
+        diffLines.push(`+${newLine}`);
+      }
+    }
+  }
+  
+  return `${header}\n${diffLines.join('\n')}`;
 }
+
+
 
 export const DiffRenderer: React.FC<DiffRendererProps> = ({ panelContent }) => {
   // First try to extract str_replace_editor diff data (for edit_file type)
@@ -52,17 +61,16 @@ export const DiffRenderer: React.FC<DiffRendererProps> = ({ panelContent }) => {
   
   if (strReplaceData) {
     const { oldContent, newContent, path } = strReplaceData;
-    const fileName = path ? path.split('/').pop() || path : 'Edited File';
-    const displayPath = path ? normalizeFilePath(path) : undefined;
+    const fileName = path || 'Edited File';
+    const diffContent = convertToUnifiedDiff(oldContent, newContent, fileName);
 
     return (
       <div className="space-y-4">
-        <StrReplaceEditorDiffViewer
-          oldContent={oldContent}
-          newContent={newContent}
+        <DiffViewer
+          diffContent={diffContent}
           fileName={fileName}
-          filePath={displayPath}
           maxHeight="calc(100vh - 215px)"
+          className="rounded-none border-0"
         />
       </div>
     );
@@ -186,95 +194,4 @@ function extractDiffData(panelContent: StandardPanelContent): {
   }
 }
 
-interface StrReplaceEditorDiffViewerProps {
-  oldContent: string;
-  newContent: string;
-  fileName?: string;
-  filePath?: string;
-  maxHeight?: string;
-}
 
-const StrReplaceEditorDiffViewer: React.FC<StrReplaceEditorDiffViewerProps> = ({
-  oldContent,
-  newContent,
-  fileName = 'Edited File',
-  filePath,
-  maxHeight = '400px',
-}) => {
-  const language = getLanguage(fileName);
-
-  // Calculate diff stats
-  const oldLines = oldContent.split('\n');
-  const newLines = newContent.split('\n');
-  const additions = newLines.length - oldLines.length;
-  const deletions = Math.max(0, -additions);
-  const actualAdditions = Math.max(0, additions);
-
-  const editorOptions: editor.IStandaloneDiffEditorConstructionOptions = {
-    readOnly: true,
-    minimap: { enabled: false },
-    scrollBeyondLastLine: false,
-    lineNumbers: 'on',
-    renderSideBySide: true,
-    fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-    fontSize: 13,
-    automaticLayout: true,
-    ignoreTrimWhitespace: false,
-    renderWhitespace: 'boundary',
-  };
-
-  const handleCopy = () => {
-    // Copy the new content
-    navigator.clipboard.writeText(newContent);
-  };
-
-  return (
-    <div className="code-editor-container">
-      <div className="code-editor-wrapper">
-        {/* Header */}
-        <CodeEditorHeader
-          fileName={fileName}
-          filePath={filePath}
-          language={language}
-          onCopy={handleCopy}
-          copyButtonTitle="Copy new content"
-        >
-          {/* Diff stats */}
-          <div className="flex items-center space-x-2 text-xs">
-            <span className="text-green-400">+{actualAdditions}</span>
-            <span className="text-red-400">-{deletions}</span>
-          </div>
-        </CodeEditorHeader>
-
-        {/* Diff Editor */}
-        <div className="code-editor-monaco-container" style={{ height: maxHeight }}>
-          <DiffEditor
-            original={oldContent}
-            modified={newContent}
-            language={language}
-            theme="vs-dark"
-            options={editorOptions}
-            loading={
-              <div className="flex items-center justify-center h-full bg-[#0d1117] text-gray-400">
-                <div className="text-sm">Loading diff...</div>
-              </div>
-            }
-          />
-        </div>
-
-        {/* Status Bar */}
-        <div className="code-editor-status-bar">
-          <div className="code-editor-status-left">
-            <span className="code-editor-status-item text-green-400">+{actualAdditions}</span>
-            <span className="code-editor-status-item text-red-400">-{deletions}</span>
-            {filePath && (
-              <span className="code-editor-status-item text-gray-400 code-editor-file-name truncate max-w-md">
-                {filePath}
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
