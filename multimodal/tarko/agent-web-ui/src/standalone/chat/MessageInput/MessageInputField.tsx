@@ -12,6 +12,7 @@ import {
 } from '@/common/state/atoms/contextualSelector';
 import { ContextualSelector, ContextualItem } from '../ContextualSelector';
 import { getAgentTitle, isContextualSelectorEnabled } from '@/common/constants';
+import { standardHoverProps, subtleHoverProps } from '../styles/shared';
 
 interface MessageInputFieldProps {
   uploadedImages: ChatCompletionContentPart[];
@@ -359,8 +360,7 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
 
             <div className="absolute left-3 bottom-3 flex items-center gap-2">
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                {...subtleHoverProps}
                 type="button"
                 onClick={handleFileUpload}
                 disabled={isDisabled || isProcessing}

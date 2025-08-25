@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiChevronDown } from 'react-icons/fi';
+import { standardHoverProps, cardBaseClasses } from '../styles/shared';
 
 interface ScrollToBottomButtonProps {
   show: boolean;
@@ -31,8 +32,7 @@ export const ScrollToBottomButton: React.FC<ScrollToBottomButtonProps> = ({ show
           <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-white/60 to-transparent dark:from-gray-900/80 dark:via-gray-900/60 dark:to-transparent rounded-full blur-sm scale-110" />
           
           <motion.button
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.95 }}
+            {...standardHoverProps}
             onClick={onClick}
             className="relative flex items-center justify-center w-10 h-10 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-full shadow-lg border border-gray-200/50 dark:border-gray-600/50 transition-colors group"
             aria-label="Scroll to bottom"
