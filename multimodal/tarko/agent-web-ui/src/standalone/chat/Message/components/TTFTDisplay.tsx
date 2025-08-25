@@ -3,8 +3,9 @@ import { motion } from 'framer-motion';
 import { FiZap, FiClock } from 'react-icons/fi';
 
 interface TTFTDisplayProps {
-  elapsedMs: number;
-  totalElapsedMs?: number;
+  ttftMs?: number;
+  totalResponseTimeMs?: number;
+  elapsedMs?: number; // @deprecated Use ttftMs instead. Kept for backward compatibility
   className?: string;
 }
 
@@ -13,10 +14,19 @@ interface TTFTDisplayProps {
  * Shows the response time for assistant messages with appropriate color coding
  */
 export const TTFTDisplay: React.FC<TTFTDisplayProps> = ({
-  elapsedMs,
-  totalElapsedMs,
+  ttftMs,
+  totalResponseTimeMs,
+  elapsedMs, // deprecated fallback
   className = '',
 }) => {
+  // Use new field names with backward compatibility fallback
+  const actualTtftMs = ttftMs ?? elapsedMs;
+  const actualTotalMs = totalResponseTimeMs;
+
+  // Early return if no timing data available
+  if (actualTtftMs === undefined) {
+    return null;
+  }
   // Helper function to format elapsed time for display
   const formatElapsedTime = (ms: number): string => {
     if (ms < 1000) {
@@ -67,9 +77,9 @@ export const TTFTDisplay: React.FC<TTFTDisplayProps> = ({
     }
   };
 
-  const timingStyle = getTimingBadgeStyle(elapsedMs);
+  const timingStyle = getTimingBadgeStyle(actualTtftMs);
 
-  const showDetailedTiming = totalElapsedMs && totalElapsedMs !== elapsedMs;
+  const showDetailedTiming = actualTotalMs && actualTotalMs !== actualTtftMs;
 
   return (
     <motion.div
@@ -79,15 +89,15 @@ export const TTFTDisplay: React.FC<TTFTDisplayProps> = ({
       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium ${timingStyle.bg} ${timingStyle.border} ${className}`}
       title={
         showDetailedTiming
-          ? `TTFT: ${formatElapsedTime(elapsedMs)} | Total: ${formatElapsedTime(totalElapsedMs)}`
-          : `Response time: ${formatElapsedTime(elapsedMs)}`
+          ? `TTFT: ${formatElapsedTime(actualTtftMs)} | Total: ${formatElapsedTime(actualTotalMs)}`
+          : `TTFT: ${formatElapsedTime(actualTtftMs)}`
       }
     >
       <FiZap className={`${timingStyle.icon}`} size={12} />
       <span className={`font-mono font-medium whitespace-nowrap ${timingStyle.text}`}>
-        {formatElapsedTime(elapsedMs)}
+        {formatElapsedTime(actualTtftMs)}
         {showDetailedTiming && (
-          <span className="opacity-60 ml-1">/ {formatElapsedTime(totalElapsedMs)}</span>
+          <span className="opacity-60 ml-1">/ {formatElapsedTime(actualTotalMs)}</span>
         )}
       </span>
     </motion.div>

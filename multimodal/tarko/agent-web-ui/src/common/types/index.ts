@@ -44,8 +44,9 @@ export interface Message {
   description?: string; // Added for environment inputs
   isDeepResearch?: boolean; // Added for final answer events
   title?: string; // Added for research report title
-  elapsedMs?: number; // Added for TTFT timing display
-  totalElapsedMs?: number; // Added for total response time analytics
+  ttftMs?: number; // Time to First Token (TTFT) in milliseconds
+  totalResponseTimeMs?: number; // Total response time in milliseconds
+  elapsedMs?: number; // @deprecated Use ttftMs instead. Kept for backward compatibility
 
   // System message specific properties
   level?: 'info' | 'warning' | 'error';
