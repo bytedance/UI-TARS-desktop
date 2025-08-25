@@ -1,5 +1,5 @@
 import React from 'react';
-import { FiClock, FiCheck, FiCopy } from 'react-icons/fi';
+import { FiClock, FiCheck, FiCopy, FiZap, FiActivity } from 'react-icons/fi';
 import { formatTimestamp } from '@/common/utils/formatters';
 import { Message as MessageType, ChatCompletionContentPart } from '@/common/types';
 import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
@@ -29,17 +29,9 @@ export const MessageFooter: React.FC<MessageFooterProps> = ({ message, className
     copyToClipboard(textToCopy);
   };
 
-  // Helper function to format elapsed time for display
+  // Helper function to format elapsed time for display (always in ms for precision)
   const formatElapsedTime = (ms: number): string => {
-    if (ms < 1000) {
-      return `${ms}ms`;
-    } else if (ms < 60000) {
-      return `${(ms / 1000).toFixed(1)}s`;
-    } else {
-      const minutes = Math.floor(ms / 60000);
-      const seconds = Math.floor((ms % 60000) / 1000);
-      return `${minutes}m ${seconds}s`;
-    }
+    return `${ms}ms`;
   };
 
   return (
@@ -52,15 +44,26 @@ export const MessageFooter: React.FC<MessageFooterProps> = ({ message, className
             {formatTimestamp(message.timestamp)}
           </div>
 
-          {/* TTFT Display - simple gray style consistent with timestamp */}
+          {/* TTFT & TTLT Display with icons and consistent styling */}
           {showTTFT && (
-            <div className="flex items-center" title={`TTFT: ${formatElapsedTime(message.ttftMs!)}${message.ttltMs && message.ttltMs !== message.ttftMs ? ` | Total: ${formatElapsedTime(message.ttltMs)}` : ''}`}>
-              <span className="text-gray-500 dark:text-gray-400">
-                {formatElapsedTime(message.ttftMs!)}
-                {message.ttltMs && message.ttltMs !== message.ttftMs && (
-                  <span className="opacity-60"> / {formatElapsedTime(message.ttltMs)}</span>
-                )}
-              </span>
+            <div className="flex items-center gap-2">
+              {/* TTFT */}
+              <div className="flex items-center" title="Time to First Token (TTFT)">
+                <FiZap size={10} className="mr-1 text-gray-500 dark:text-gray-400" />
+                <span className="text-gray-500 dark:text-gray-400">
+                  {formatElapsedTime(message.ttftMs!)}
+                </span>
+              </div>
+              
+              {/* TTLT (if different from TTFT) */}
+              {message.ttltMs && message.ttltMs !== message.ttftMs && (
+                <div className="flex items-center" title="Time to Last Token (TTLT)">
+                  <FiActivity size={10} className="mr-1 text-gray-500 dark:text-gray-400" />
+                  <span className="text-gray-500 dark:text-gray-400">
+                    {formatElapsedTime(message.ttltMs)}
+                  </span>
+                </div>
+              )}
             </div>
           )}
         </div>
