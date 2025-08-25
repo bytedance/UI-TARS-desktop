@@ -406,7 +406,7 @@ export const HomePage = () => {
               transition={{ scale: { duration: 0.2 } }}
             >
               <VideoPanel
-                src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/write-report-with-image.mp4"
+                src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/agent-tars-introduction-v1.mp4"
                 loop
                 autoPlay
                 muted
