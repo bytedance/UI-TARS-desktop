@@ -309,7 +309,8 @@ export class LLMProcessor {
       const chunkResult = toolCallEngine.processStreamingChunk(chunk, processingState);
 
       // Track first token time when we receive the first meaningful content
-      if (!hasReceivedFirstContent && (chunkResult.content || chunkResult.reasoningContent)) {
+      // We don't check chunkResult here because it may be modified by a custom ToolCallEngine.
+      if (!hasReceivedFirstContent /* && (chunkResult.content || chunkResult.reasoningContent) */) {
         firstTokenTime = Date.now();
         hasReceivedFirstContent = true;
         const ttft = firstTokenTime - requestStartTime;
