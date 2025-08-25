@@ -387,7 +387,7 @@ export class LLMProcessor {
       parsedResponse.finishReason || 'stop',
       messageId, // Pass the message ID to final events
       ttftMs, // Pass the TTFT (Time to First Token) to final events
-      totalElapsedMs, // Pass the total elapsed time to final events
+      totalElapsedMs, // Pass the total response time to final events
     );
 
     // Call response hooks with session ID
@@ -445,7 +445,7 @@ export class LLMProcessor {
     finishReason: string,
     messageId?: string,
     ttftMs?: number,
-    totalElapsedMs?: number,
+    totalResponseTimeMs?: number,
   ): void {
     // If we have complete content, create a consolidated assistant message event
     if (content || currentToolCalls.length > 0) {
@@ -455,8 +455,9 @@ export class LLMProcessor {
         toolCalls: currentToolCalls.length > 0 ? currentToolCalls : undefined,
         finishReason: finishReason,
         messageId: messageId, // Include the message ID in the final message
-        elapsedMs: ttftMs, // Include the TTFT (Time to First Token) for display
-        totalElapsedMs: totalElapsedMs, // Include the total response time for analytics
+        ttftMs: ttftMs, // Include the TTFT (Time to First Token) for display
+        totalResponseTimeMs: totalResponseTimeMs, // Include the total response time for analytics
+        elapsedMs: ttftMs, // Backward compatibility - deprecated field
       });
 
       this.eventStream.sendEvent(assistantEvent);

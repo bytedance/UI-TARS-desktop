@@ -95,8 +95,9 @@ export class AssistantMessageHandler
             toolCalls: event.toolCalls,
             finishReason: event.finishReason,
             isStreaming: false,
-            elapsedMs: event.elapsedMs,
-            totalElapsedMs: event.totalElapsedMs,
+            ttftMs: event.ttftMs,
+            totalResponseTimeMs: event.totalResponseTimeMs,
+            elapsedMs: event.elapsedMs || event.ttftMs, // Backward compatibility
           };
 
           return {
@@ -118,8 +119,9 @@ export class AssistantMessageHandler
             toolCalls: event.toolCalls,
             finishReason: event.finishReason,
             messageId: messageId,
-            elapsedMs: event.elapsedMs,
-            totalElapsedMs: event.totalElapsedMs,
+            ttftMs: event.ttftMs,
+            totalResponseTimeMs: event.totalResponseTimeMs,
+            elapsedMs: event.elapsedMs || event.ttftMs, // Backward compatibility
           },
         ],
       };

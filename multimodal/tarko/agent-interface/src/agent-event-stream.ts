@@ -118,11 +118,14 @@ export namespace AgentEventStream {
     /** How the response was finished */
     finishReason?: string;
 
-    /** Time to first token (TTFT) - time from request start to first content chunk */
-    elapsedMs?: number;
+    /** Time to First Token (TTFT) in milliseconds - time from request start to first content chunk */
+    ttftMs?: number;
 
-    /** Total time taken to generate the complete response */
-    totalElapsedMs?: number;
+    /** Total response time in milliseconds - time from request start to response completion */
+    totalResponseTimeMs?: number;
+
+    /** @deprecated Use ttftMs instead. Kept for backward compatibility */
+    elapsedMs?: number;
 
     /**
      * Unique message identifier that links streaming messages to their final message

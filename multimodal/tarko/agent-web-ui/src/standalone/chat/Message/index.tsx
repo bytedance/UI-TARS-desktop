@@ -167,14 +167,16 @@ export const Message: React.FC<MessageProps> = ({
         ) : (
           <>
             {/* TTFT timing display for assistant messages */}
-            {message.role === 'assistant' && message.elapsedMs !== undefined && (
-              <div className="mb-2">
-                <TTFTDisplay
-                  elapsedMs={message.elapsedMs}
-                  totalElapsedMs={message.totalElapsedMs}
-                />
-              </div>
-            )}
+            {message.role === 'assistant' &&
+              (message.ttftMs !== undefined || message.elapsedMs !== undefined) && (
+                <div className="mb-2">
+                  <TTFTDisplay
+                    ttftMs={message.ttftMs}
+                    totalResponseTimeMs={message.totalResponseTimeMs}
+                    elapsedMs={message.elapsedMs} // Backward compatibility
+                  />
+                </div>
+              )}
 
             {/* Enhanced thinking display with duration support */}
             {message.thinking && (
