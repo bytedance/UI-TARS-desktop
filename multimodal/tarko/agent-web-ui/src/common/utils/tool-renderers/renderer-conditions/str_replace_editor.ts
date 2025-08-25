@@ -45,7 +45,7 @@ export const strReplaceEditorRendererCondition: FunctionToolToRendererCondition 
        * }
        */
       if (content.prev_exist && content.new_content && content.old_content) {
-        return 'edit_file';
+        return 'diff_result';
       }
 
       /**

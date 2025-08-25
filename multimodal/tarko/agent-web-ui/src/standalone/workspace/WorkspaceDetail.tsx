@@ -30,7 +30,7 @@ import { GenericResultRenderer } from './renderers/generic/GenericResultRenderer
 import { DeliverableRenderer } from './renderers/DeliverableRenderer';
 import { DiffRenderer } from './renderers/DiffRenderer';
 import { FileRenderer } from './renderers/FileRenderer';
-import { EditFileRenderer } from './renderers/EditFileRenderer';
+
 
 
 /**
@@ -59,7 +59,6 @@ const CONTENT_RENDERERS: Record<
   file_result: FileRenderer,
   diff_result: DiffRenderer,
   file: FileRenderer,
-  edit_file: EditFileRenderer,
 };
 
 /**
