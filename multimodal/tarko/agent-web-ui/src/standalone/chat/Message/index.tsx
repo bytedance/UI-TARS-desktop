@@ -12,7 +12,7 @@ import { SystemMessage } from './components/SystemMessage';
 import { MultimodalContent } from './components/MultimodalContent';
 import { ToolCalls } from './components/ToolCalls';
 import { ThinkingToggle } from './components/ThinkingToggle';
-import { MessageTimestamp } from './components/MessageTimestamp';
+
 import { useAtomValue } from 'jotai';
 import { replayStateAtom } from '@/common/state/atoms/replay';
 import { ReportFileEntry } from './components/ReportFileEntry';
@@ -198,17 +198,7 @@ export const Message: React.FC<MessageProps> = ({
         )}
       </div>
 
-      {/* Timestamp and copy button - only for main messages */}
-      {message.role !== 'system' &&
-        !isInGroup &&
-        shouldDisplayTimestamp &&
-        !replayState.isActive && (
-          <MessageTimestamp
-            timestamp={message.timestamp}
-            content={message.content}
-            role={message.role}
-          />
-        )}
+
     </div>
   );
 };

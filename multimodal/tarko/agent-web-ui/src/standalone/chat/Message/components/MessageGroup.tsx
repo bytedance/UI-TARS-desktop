@@ -1,16 +1,12 @@
 import React from 'react';
 import { Message as MessageType } from '@/common/types';
 import { Message } from '../index';
-import { FiClock } from 'react-icons/fi';
-import { formatTimestamp } from '@/common/utils/formatters';
 import { isMultimodalContent } from '@/common/utils/typeGuards';
-import { MessageTimestamp } from './MessageTimestamp';
 import { MessageFooter } from './MessageFooter';
 import { ThinkingAnimation } from './ThinkingAnimation';
 import { SkeletonLoader } from './SkeletonLoader';
 import { useAtomValue } from 'jotai';
 import { agentStatusAtom } from '@/common/state/atoms/ui';
-import { AgentProcessingPhase } from '@tarko/interface';
 import { getAgentTitle } from '@/common/constants';
 
 interface MessageGroupProps {
@@ -119,9 +115,7 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
       )}
 
       {/* Message footer with timestamp, TTFT, and copy functionality */}
-      {!isThinking && lastResponseMessage && (
-        <MessageFooter message={lastResponseMessage} />
-      )}
+      {!isThinking && lastResponseMessage && <MessageFooter message={lastResponseMessage} />}
     </div>
   );
 };
