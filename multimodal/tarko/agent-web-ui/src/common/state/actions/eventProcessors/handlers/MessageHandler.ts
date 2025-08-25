@@ -95,7 +95,6 @@ export class AssistantMessageHandler
             isStreaming: false,
             ttftMs: event.ttftMs,
             totalResponseTimeMs: event.totalResponseTimeMs,
-            elapsedMs: event.elapsedMs || event.ttftMs, // Backward compatibility
           };
 
           return {
@@ -119,7 +118,6 @@ export class AssistantMessageHandler
             messageId: messageId,
             ttftMs: event.ttftMs,
             totalResponseTimeMs: event.totalResponseTimeMs,
-            elapsedMs: event.elapsedMs || event.ttftMs, // Backward compatibility
           },
         ],
       };
