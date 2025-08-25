@@ -211,6 +211,7 @@ export class LLMProcessor {
       sessionId,
       toolCallEngine,
       streamingMode,
+      startTime,
       abortSignal,
     );
 
@@ -227,6 +228,7 @@ export class LLMProcessor {
     sessionId: string,
     toolCallEngine: ToolCallEngine,
     streamingMode: boolean,
+    requestStartTime: number,
     abortSignal?: AbortSignal,
   ): Promise<void> {
     // Check if operation was aborted
@@ -260,6 +262,7 @@ export class LLMProcessor {
       sessionId,
       toolCallEngine,
       streamingMode,
+      requestStartTime,
       abortSignal,
     );
   }
@@ -274,6 +277,7 @@ export class LLMProcessor {
     sessionId: string,
     toolCallEngine: ToolCallEngine,
     streamingMode: boolean,
+    requestStartTime: number,
     abortSignal?: AbortSignal,
   ): Promise<void> {
     // Collect all chunks for final onLLMResponse call
@@ -356,6 +360,9 @@ export class LLMProcessor {
 
     this.logger.infoWithData('Finalized Response', parsedResponse, JSON.stringify);
 
+    // Calculate elapsed time from request start to response completion
+    const elapsedMs = Date.now() - requestStartTime;
+
     // Create the final events based on processed content
     this.createFinalEvents(
       parsedResponse.content || '',
@@ -364,6 +371,7 @@ export class LLMProcessor {
       parsedResponse.reasoningContent || '',
       parsedResponse.finishReason || 'stop',
       messageId, // Pass the message ID to final events
+      elapsedMs, // Pass the elapsed time to final events
     );
 
     // Call response hooks with session ID
@@ -420,6 +428,7 @@ export class LLMProcessor {
     reasoningBuffer: string,
     finishReason: string,
     messageId?: string,
+    elapsedMs?: number,
   ): void {
     // If we have complete content, create a consolidated assistant message event
     if (content || currentToolCalls.length > 0) {
@@ -429,6 +438,7 @@ export class LLMProcessor {
         toolCalls: currentToolCalls.length > 0 ? currentToolCalls : undefined,
         finishReason: finishReason,
         messageId: messageId, // Include the message ID in the final message
+        elapsedMs: elapsedMs, // Include the elapsed time for TTFT display
       });
 
       this.eventStream.sendEvent(assistantEvent);

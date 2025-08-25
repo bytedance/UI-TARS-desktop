@@ -71,6 +71,7 @@ export class LoopExecutor {
             content: 'Request was aborted',
             finishReason: 'abort',
             messageId: abortMessageId,
+            elapsedMs: 0, // Immediate abort, no processing time
           });
 
           this.eventStream.sendEvent(finalEvent);
@@ -95,6 +96,7 @@ export class LoopExecutor {
             content: 'Aggent TARS is finished',
             finishReason: 'stop',
             messageId: terminationMessageId,
+            elapsedMs: 0, // Immediate termination, no processing time
           });
 
           this.eventStream.sendEvent(finalEvent);
@@ -208,6 +210,7 @@ export class LoopExecutor {
           content: errorMsg,
           finishReason: 'max_iterations',
           messageId: maxIterMessageId,
+          elapsedMs: 0, // Max iterations reached, no specific processing time
         });
 
         this.eventStream.sendEvent(finalEvent);
