@@ -31,6 +31,7 @@ export class CodeAgentPlugin extends AgentPlugin {
 
     this.client = new AioClient({
       baseUrl: option.aioSandboxUrl,
+      retries: 0,
     });
 
     // Initialize tools

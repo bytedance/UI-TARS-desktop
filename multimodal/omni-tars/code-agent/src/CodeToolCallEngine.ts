@@ -36,9 +36,8 @@ export class CodeToolCallEngine extends ToolCallEngine {
       top_p: context.top_p,
       stream: true,
       // For OpenAI standard stop sequence API.
-      stop: ['</code_env>', '</mcp_env>'],
-      // @ts-expect-error For non-standard provider, e.g. AWS.
-      stop_sequences: ['</code_env>', '</mcp_env>'],
+      // stop: ['</code_env>', '</mcp_env>'],
+      // stop_sequences: ['</code_env>', '</mcp_env>'],
     };
   }
 
