@@ -2,7 +2,8 @@ import React, { useMemo } from 'react';
 import { DiffEditor } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
 import parseDiff from 'parse-diff';
-import { FiCopy, FiGitBranch } from 'react-icons/fi';
+import { normalizeFilePath } from '@/common/utils/pathNormalizer';
+import { CodeEditorHeader } from './CodeEditorHeader';
 import './MonacoCodeEditor.css';
 
 interface DiffViewerProps {
@@ -46,19 +47,21 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({
   maxHeight = '400px',
   className = '',
 }) => {
-  const { original, modified, additions, deletions, displayFileName } = useMemo(() => {
+  const { original, modified, additions, deletions, displayFileName, normalizedPath } = useMemo(() => {
     try {
       // Parse diff using mature library
       const files = parseDiff(diffContent);
 
       if (files.length === 0) {
+        const baseFileName = fileName || 'diff';
         return {
-          original: '',
-          modified: diffContent,
-          additions: 0,
-          deletions: 0,
-          displayFileName: fileName || 'diff',
-        };
+        original: '',
+        modified: diffContent,
+        additions: 0,
+        deletions: 0,
+          displayFileName: baseFileName.split('/').pop() || baseFileName,
+        normalizedPath: normalizeFilePath(baseFileName),
+      };
       }
 
       const file = files[0];
@@ -90,21 +93,26 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({
         });
       });
 
+      const fullPath = fileName || file.to || file.from || 'diff';
+      const baseFileName = fullPath.split('/').pop() || fullPath;
       return {
         original: originalLines.join('\n'),
         modified: modifiedLines.join('\n'),
         additions: addCount,
         deletions: delCount,
-        displayFileName: fileName || file.to || file.from || 'diff',
+        displayFileName: baseFileName,
+        normalizedPath: normalizeFilePath(fullPath),
       };
     } catch (error) {
       console.warn('Failed to parse diff, falling back to raw content:', error);
+      const baseFileName = fileName || 'diff';
       return {
         original: '',
         modified: diffContent,
         additions: 0,
         deletions: 0,
-        displayFileName: fileName || 'diff',
+        displayFileName: baseFileName.split('/').pop() || baseFileName,
+        normalizedPath: normalizeFilePath(baseFileName),
       };
     }
   }, [diffContent, fileName]);
@@ -119,30 +127,19 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({
     <div className={`code-editor-container ${className}`}>
       <div className="code-editor-wrapper">
         {/* Header */}
-        <div className="code-editor-header">
-          <div className="code-editor-header-left">
-            <div className="code-editor-controls">
-              <div className="code-editor-control-btn code-editor-control-red" />
-              <div className="code-editor-control-btn code-editor-control-yellow" />
-              <div className="code-editor-control-btn code-editor-control-green" />
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center">
-                <FiGitBranch className="mr-1" size={12} />
-                <span className="code-editor-file-name">{displayFileName}</span>
-              </div>
-              <div className="flex items-center space-x-2 text-xs">
-                <span className="text-green-400">+{additions}</span>
-                <span className="text-red-400">-{deletions}</span>
-              </div>
-            </div>
+        <CodeEditorHeader
+          fileName={displayFileName}
+          filePath={normalizedPath}
+          language={language}
+          onCopy={handleCopy}
+          copyButtonTitle="Copy diff"
+        >
+          {/* Diff stats */}
+          <div className="flex items-center space-x-2 text-xs">
+            <span className="text-green-400">+{additions}</span>
+            <span className="text-red-400">-{deletions}</span>
           </div>
-          <div className="code-editor-actions">
-            <button onClick={handleCopy} className="code-editor-action-btn" title="Copy diff">
-              <FiCopy size={14} />
-            </button>
-          </div>
-        </div>
+        </CodeEditorHeader>
 
         {/* Diff Editor */}
         <div className="code-editor-monaco-container" style={{ height: maxHeight }}>
