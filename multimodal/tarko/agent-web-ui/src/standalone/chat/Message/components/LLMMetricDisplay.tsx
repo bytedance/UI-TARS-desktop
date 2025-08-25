@@ -2,17 +2,20 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { FiZap, FiClock } from 'react-icons/fi';
 
-interface TTFTDisplayProps {
+interface LLMMetricDisplayProps {
   ttftMs?: number;
   ttltMs?: number;
   className?: string;
 }
 
 /**
- * TTFT (Time to First Token) Display Component
- * Shows the response time for assistant messages with appropriate color coding
+ * LLM (Large Language Model) Metric Display Component
  */
-export const TTFTDisplay: React.FC<TTFTDisplayProps> = ({ ttftMs, ttltMs, className = '' }) => {
+export const LLMMetricDisplay: React.FC<LLMMetricDisplayProps> = ({
+  ttftMs,
+  ttltMs,
+  className = '',
+}) => {
   const actualTtftMs = ttftMs;
   const actualTotalMs = ttltMs;
 
@@ -34,38 +37,39 @@ export const TTFTDisplay: React.FC<TTFTDisplayProps> = ({ ttftMs, ttltMs, classN
   };
 
   // Helper function to get timing badge style based on duration
+  // Optimized for footer integration with subtle colors
   const getTimingBadgeStyle = (ms: number) => {
     if (ms < 1000) {
-      // Very fast - green
+      // Very fast - subtle green
       return {
-        bg: 'bg-emerald-50 dark:bg-emerald-900/20',
-        text: 'text-emerald-700 dark:text-emerald-400',
-        border: 'border-emerald-200/50 dark:border-emerald-700/30',
-        icon: 'text-emerald-600 dark:text-emerald-400',
+        bg: 'bg-emerald-50/50 dark:bg-emerald-900/10',
+        text: 'text-emerald-600 dark:text-emerald-400',
+        border: 'border-emerald-200/30 dark:border-emerald-700/20',
+        icon: 'text-emerald-500 dark:text-emerald-400',
       };
     } else if (ms < 3000) {
-      // Fast - blue
+      // Fast - subtle blue
       return {
-        bg: 'bg-blue-50 dark:bg-blue-900/20',
-        text: 'text-blue-700 dark:text-blue-400',
-        border: 'border-blue-200/50 dark:border-blue-700/30',
-        icon: 'text-blue-600 dark:text-blue-400',
+        bg: 'bg-blue-50/50 dark:bg-blue-900/10',
+        text: 'text-blue-600 dark:text-blue-400',
+        border: 'border-blue-200/30 dark:border-blue-700/20',
+        icon: 'text-blue-500 dark:text-blue-400',
       };
     } else if (ms < 8000) {
-      // Medium - amber
+      // Medium - subtle amber
       return {
-        bg: 'bg-amber-50 dark:bg-amber-900/20',
-        text: 'text-amber-700 dark:text-amber-400',
-        border: 'border-amber-200/50 dark:border-amber-700/30',
-        icon: 'text-amber-600 dark:text-amber-400',
+        bg: 'bg-amber-50/50 dark:bg-amber-900/10',
+        text: 'text-amber-600 dark:text-amber-400',
+        border: 'border-amber-200/30 dark:border-amber-700/20',
+        icon: 'text-amber-500 dark:text-amber-400',
       };
     } else {
-      // Slow - red
+      // Slow - subtle red
       return {
-        bg: 'bg-red-50 dark:bg-red-900/20',
-        text: 'text-red-700 dark:text-red-400',
-        border: 'border-red-200/50 dark:border-red-700/30',
-        icon: 'text-red-600 dark:text-red-400',
+        bg: 'bg-red-50/50 dark:bg-red-900/10',
+        text: 'text-red-600 dark:text-red-400',
+        border: 'border-red-200/30 dark:border-red-700/20',
+        icon: 'text-red-500 dark:text-red-400',
       };
     }
   };
@@ -79,14 +83,14 @@ export const TTFTDisplay: React.FC<TTFTDisplayProps> = ({ ttftMs, ttltMs, classN
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ delay: 0.1, type: 'spring', stiffness: 300 }}
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium ${timingStyle.bg} ${timingStyle.border} ${className}`}
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-xs font-medium ${timingStyle.bg} ${timingStyle.border} ${className}`}
       title={
         showDetailedTiming
           ? `TTFT: ${formatElapsedTime(actualTtftMs)} | Total: ${formatElapsedTime(actualTotalMs)}`
           : `TTFT: ${formatElapsedTime(actualTtftMs)}`
       }
     >
-      <FiZap className={`${timingStyle.icon}`} size={12} />
+      <FiZap className={`${timingStyle.icon}`} size={10} />
       <span className={`font-mono font-medium whitespace-nowrap ${timingStyle.text}`}>
         {formatElapsedTime(actualTtftMs)}
         {showDetailedTiming && (
