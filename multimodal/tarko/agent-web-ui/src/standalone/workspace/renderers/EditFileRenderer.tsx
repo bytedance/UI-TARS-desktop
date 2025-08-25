@@ -173,42 +173,37 @@ const StrReplaceEditorDiffViewer: React.FC<StrReplaceEditorDiffViewerProps> = ({
     <div className="code-editor-container">
       <div className="code-editor-wrapper">
         {/* Header */}
-        <div className="flex items-center justify-between px-3 py-2 min-h-[40px]" style={{ background: '#010409', borderBottom: '1px solid #21262d' }}>
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div className="flex gap-1.5">
-              <div className="w-3 h-3 rounded-full" style={{ background: '#ff5f57', border: '1px solid #e0443e', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.4)' }}></div>
-              <div className="w-3 h-3 rounded-full" style={{ background: '#ffbd2e', border: '1px solid #dea123', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.4)' }}></div>
-              <div className="w-3 h-3 rounded-full" style={{ background: '#28ca42', border: '1px solid #24a134', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.4)' }}></div>
+        <div className="code-editor-header">
+          <div className="code-editor-header-left">
+            {/* Browser-style control buttons */}
+            <div className="code-editor-controls">
+              <div className="code-editor-control-btn code-editor-control-red" />
+              <div className="code-editor-control-btn code-editor-control-yellow" />
+              <div className="code-editor-control-btn code-editor-control-green" />
             </div>
-            <FiGitBranch className="flex-shrink-0" style={{ color: '#7d8590' }} size={12} />
-            <span 
-              className="text-sm font-medium truncate min-w-0 flex-1" 
-              style={{ color: '#f0f6fc', fontFamily: "'JetBrains Mono', 'Fira Code', monospace" }}
-              title={filePath || fileName}
-            >
-              {fileName}
-            </span>
+
+            {/* File name with path display */}
+            <div className="code-editor-file-info">
+              <div className="flex items-center space-x-2">
+                <FiGitBranch size={12} />
+                <span className="code-editor-file-name" title={filePath || fileName}>
+                  {fileName}
+                </span>
+              </div>
+            </div>
+
+            {/* Diff stats */}
+            <div className="flex items-center space-x-2 text-xs">
+              <span className="text-green-400">+{actualAdditions}</span>
+              <span className="text-red-400">-{deletions}</span>
+            </div>
           </div>
-          <div className="flex items-center gap-3 flex-shrink-0">
-            <div className="flex items-center gap-2 text-xs font-medium">
-              <span style={{ color: '#3fb950' }}>+{actualAdditions}</span>
-              <span style={{ color: '#f85149' }}>-{deletions}</span>
-            </div>
+
+          {/* Actions */}
+          <div className="code-editor-actions">
             <button
               onClick={handleCopy}
-              className="p-1.5 rounded transition-all duration-200 flex items-center justify-center"
-              style={{ 
-                color: '#7d8590',
-                background: 'transparent'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#21262d';
-                e.currentTarget.style.color = '#f0f6fc';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.color = '#7d8590';
-              }}
+              className="code-editor-action-btn"
               title="Copy new content"
             >
               <FiCopy size={14} />
