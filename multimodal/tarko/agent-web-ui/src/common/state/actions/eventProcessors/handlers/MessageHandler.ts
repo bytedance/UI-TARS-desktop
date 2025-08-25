@@ -84,6 +84,8 @@ export class AssistantMessageHandler
           (msg) => msg.messageId === messageId,
         );
 
+        debugger;
+
         if (existingMessageIndex !== -1) {
           const updatedMessages = [...sessionMessages];
           updatedMessages[existingMessageIndex] = {
