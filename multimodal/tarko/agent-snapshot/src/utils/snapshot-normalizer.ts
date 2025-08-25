@@ -42,6 +42,8 @@ const DEFAULT_CONFIG: AgentNormalizerConfig = {
     { pattern: 'toolCallId', replacement: '<<toolCallId>>' },
     { pattern: 'sessionId', replacement: '<<sessionId>>' },
     { pattern: 'messageId', replacement: '<<messageId>>' },
+    { pattern: 'ttftMs', replacement: '<<messageId>>' },
+    { pattern: 'ttltMs', replacement: '<<messageId>>' },
     { pattern: /Time$/, replacement: '<<TIMESTAMP>>' },
   ],
   fieldsToIgnore: [],
