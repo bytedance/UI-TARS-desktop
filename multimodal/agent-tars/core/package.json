@@ -23,11 +23,11 @@
   },
   "dependencies": {
     "@tarko/shared-utils": "workspace:*",
-    "@tarko/shared-media-utils": "workspace:*"
+    "@tarko/shared-media-utils": "workspace:*",
+    "@tarko/mcp-agent": "workspace:*",
+    "@agent-tars/interface": "workspace:*"
   },
   "devDependencies": {
-    "@tarko/mcp-agent": "workspace:*",
-    "@agent-tars/interface": "workspace:*",
     "@gui-agent/operator-browser": "workspace:*",
     "@agent-infra/mcp-server-browser": "1.1.10",
     "@agent-infra/mcp-server-commands": "1.1.10",
