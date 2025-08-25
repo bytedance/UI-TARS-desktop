@@ -35,6 +35,23 @@ export const MessageFooter: React.FC<MessageFooterProps> = ({ message, className
     return `${ms}ms`;
   };
 
+  // Tooltip styling for consistent appearance
+  const tooltipProps = {
+    componentsProps: {
+      tooltip: {
+        sx: {
+          backgroundColor: '#1f2937',
+          color: '#ffffff',
+          fontSize: '13px',
+          fontWeight: 500,
+          padding: '8px 12px',
+          borderRadius: '6px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+        }
+      }
+    }
+  };
+
   return (
     <div className={`mt-1 mb-2 ${className}`}>
       <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 px-2">
@@ -51,19 +68,7 @@ export const MessageFooter: React.FC<MessageFooterProps> = ({ message, className
               {/* TTFT */}
               <Tooltip
                 title="Time to First Token (TTFT) - Time from request start to first token received"
-                componentsProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: '#1f2937',
-                      color: '#ffffff',
-                      fontSize: '13px',
-                      fontWeight: 500,
-                      padding: '8px 12px',
-                      borderRadius: '6px',
-                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                    }
-                  }
-                }}
+                {...tooltipProps}
               >
                 <div className="flex items-center">
                   <FiZap size={10} className="mr-1 text-gray-500 dark:text-gray-400" />
@@ -77,19 +82,7 @@ export const MessageFooter: React.FC<MessageFooterProps> = ({ message, className
               {message.ttltMs && message.ttltMs !== message.ttftMs && (
                 <Tooltip
                   title="Time to Last Token (TTLT) - Total time from request start to completion"
-                  componentsProps={{
-                    tooltip: {
-                      sx: {
-                        backgroundColor: '#1f2937',
-                        color: '#ffffff',
-                        fontSize: '13px',
-                        fontWeight: 500,
-                        padding: '8px 12px',
-                        borderRadius: '6px',
-                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                      }
-                    }
-                  }}
+                  {...tooltipProps}
                 >
                   <div className="flex items-center">
                     <FiActivity size={10} className="mr-1 text-gray-500 dark:text-gray-400" />
