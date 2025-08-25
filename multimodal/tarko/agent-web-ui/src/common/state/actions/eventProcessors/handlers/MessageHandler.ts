@@ -96,6 +96,7 @@ export class AssistantMessageHandler
             finishReason: event.finishReason,
             isStreaming: false,
             elapsedMs: event.elapsedMs,
+            totalElapsedMs: event.totalElapsedMs,
           };
 
           return {
@@ -118,6 +119,7 @@ export class AssistantMessageHandler
             finishReason: event.finishReason,
             messageId: messageId,
             elapsedMs: event.elapsedMs,
+            totalElapsedMs: event.totalElapsedMs,
           },
         ],
       };
