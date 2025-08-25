@@ -5,6 +5,7 @@ import { FiClock } from 'react-icons/fi';
 import { formatTimestamp } from '@/common/utils/formatters';
 import { isMultimodalContent } from '@/common/utils/typeGuards';
 import { MessageTimestamp } from './MessageTimestamp';
+import { MessageFooter } from './MessageFooter';
 import { ThinkingAnimation } from './ThinkingAnimation';
 import { SkeletonLoader } from './SkeletonLoader';
 import { useAtomValue } from 'jotai';
@@ -117,24 +118,9 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
         </div>
       )}
 
-      {/* Timestamp and copy functionality */}
+      {/* Message footer with timestamp, TTFT, and copy functionality */}
       {!isThinking && lastResponseMessage && (
-        <div className="mt-1 mb-2">
-          <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 px-2">
-            <div className="flex items-center">
-              <FiClock size={10} className="mr-1" />
-              {formatTimestamp(lastResponseMessage.timestamp)}
-            </div>
-
-            {/* Integrated copy function button - now uses the last message */}
-            <MessageTimestamp
-              timestamp={lastResponseMessage.timestamp}
-              content={lastResponseMessage.content}
-              role={lastResponseMessage.role}
-              inlineStyle={true}
-            />
-          </div>
-        </div>
+        <MessageFooter message={lastResponseMessage} />
       )}
     </div>
   );
