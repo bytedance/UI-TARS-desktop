@@ -134,16 +134,16 @@ export const CommandResultRenderer: React.FC<CommandResultRendererProps> = ({ pa
                 </div>
               )}
 
-              {/* Output section - disable auto-wrapping */}
+              {/* Output section - enable line wrapping */}
               {stdout && (
-                <pre className="whitespace-pre overflow-x-visible text-gray-200 mt-3 ml-3">
+                <pre className="whitespace-pre-wrap text-gray-200 mt-3 ml-3">
                   {stdout}
                 </pre>
               )}
 
               {/* Error output */}
               {stderr && (
-                <pre className="whitespace-pre overflow-x-visible text-red-400 my-3 ml-3">
+                <pre className="whitespace-pre-wrap text-red-400 my-3 ml-3">
                   {stderr}
                 </pre>
               )}
