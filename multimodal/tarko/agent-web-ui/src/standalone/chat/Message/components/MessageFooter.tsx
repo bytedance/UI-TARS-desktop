@@ -4,6 +4,7 @@ import { Tooltip } from '@mui/material';
 import { formatTimestamp } from '@/common/utils/formatters';
 import { Message as MessageType, ChatCompletionContentPart } from '@/common/types';
 import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
+import { useDarkMode } from '@/common/hooks/useDarkMode';
 
 interface MessageFooterProps {
   message: MessageType;
@@ -16,6 +17,7 @@ interface MessageFooterProps {
  */
 export const MessageFooter: React.FC<MessageFooterProps> = ({ message, className = '' }) => {
   const { isCopied, copyToClipboard } = useCopyToClipboard();
+  const isDarkMode = useDarkMode();
   const showTTFT = message.role === 'assistant' && message.ttftMs !== undefined;
 
   const handleCopy = () => {
@@ -35,21 +37,23 @@ export const MessageFooter: React.FC<MessageFooterProps> = ({ message, className
     return `${ms}ms`;
   };
 
-  // Tooltip styling for consistent appearance
+  // Tooltip styling for consistent appearance with dark mode support
   const tooltipProps = {
     arrow: true,
     componentsProps: {
       tooltip: {
         sx: {
-          backgroundColor: '#000000',
-          color: '#ffffff',
+          backgroundColor: isDarkMode ? '#ffffff' : '#000000',
+          color: isDarkMode ? '#000000' : '#ffffff',
           fontSize: '13px',
           fontWeight: 500,
           padding: '8px 12px',
           borderRadius: '6px',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+          boxShadow: isDarkMode 
+            ? '0 4px 12px rgba(0, 0, 0, 0.15)' 
+            : '0 4px 12px rgba(0, 0, 0, 0.3)',
           '.MuiTooltip-arrow': {
-            color: '#000000',
+            color: isDarkMode ? '#ffffff' : '#000000',
           },
         }
       }
