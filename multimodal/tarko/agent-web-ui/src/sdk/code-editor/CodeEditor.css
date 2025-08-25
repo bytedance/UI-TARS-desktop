@@ -36,12 +36,15 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
+  flex: 1;
 }
 
 /* Browser-style control buttons */
 .code-editor-controls {
   display: flex;
   gap: 6px;
+  flex-shrink: 0;
 }
 
 .code-editor-control-btn {
@@ -105,6 +108,7 @@
 .code-editor-actions {
   display: flex;
   gap: 4px;
+  flex-shrink: 0;
 }
 
 .code-editor-action-btn {
