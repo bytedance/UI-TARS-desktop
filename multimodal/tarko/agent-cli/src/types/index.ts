@@ -91,6 +91,12 @@ export interface AgentCLIRunCommandOptions extends AgentCLICoreCommandBaseOption
   input: string;
   format?: 'json' | 'text';
   includeLogs?: boolean;
+  /**
+   * Monitor output format for agent state monitoring
+   * - 'json': Emit structured JSON events for monitoring tools
+   * - undefined: Normal output mode
+   */
+  monitorFormat?: 'json';
 }
 
 /**
