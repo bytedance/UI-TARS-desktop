@@ -37,16 +37,20 @@ export const MessageFooter: React.FC<MessageFooterProps> = ({ message, className
 
   // Tooltip styling for consistent appearance
   const tooltipProps = {
+    arrow: true,
     componentsProps: {
       tooltip: {
         sx: {
-          backgroundColor: '#1f2937',
+          backgroundColor: '#000000',
           color: '#ffffff',
           fontSize: '13px',
           fontWeight: 500,
           padding: '8px 12px',
           borderRadius: '6px',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+          '.MuiTooltip-arrow': {
+            color: '#000000',
+          },
         }
       }
     }
