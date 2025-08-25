@@ -42,15 +42,6 @@ const getLanguageFromInterpreter = (interpreter: string): string => {
     nodejs: 'javascript',
     bash: 'bash',
     sh: 'bash',
-    ruby: 'ruby',
-    php: 'php',
-    java: 'java',
-    go: 'go',
-    rust: 'rust',
-    cpp: 'cpp',
-    'c++': 'cpp',
-    gcc: 'c',
-    clang: 'c',
   };
 
   return languageMap[interpreter.toLowerCase()] || 'text';

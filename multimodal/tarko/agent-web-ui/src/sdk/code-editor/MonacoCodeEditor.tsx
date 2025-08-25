@@ -185,13 +185,6 @@ export const MonacoCodeEditor: React.FC<MonacoCodeEditorProps> = ({
       md: 'markdown',
       bash: 'shell',
       sh: 'shell',
-      sql: 'sql',
-      php: 'php',
-      java: 'java',
-      c: 'c',
-      cpp: 'cpp',
-      go: 'go',
-      rust: 'rust',
     };
 
     return languageMap[lang.toLowerCase()] || 'plaintext';

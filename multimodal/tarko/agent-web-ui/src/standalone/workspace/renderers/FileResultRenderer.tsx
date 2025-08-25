@@ -49,12 +49,10 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
   const getLanguage = (): string => {
     const langMap: Record<string, string> = {
       js: 'javascript',
-      jsx: 'jsx',
+      jsx: 'javascript',
       ts: 'typescript',
-      tsx: 'tsx',
+      tsx: 'typescript',
       py: 'python',
-      rb: 'ruby',
-      java: 'java',
       html: 'html',
       css: 'css',
       json: 'json',
@@ -64,19 +62,9 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
       xml: 'xml',
       sh: 'bash',
       bash: 'bash',
-      go: 'go',
-      c: 'c',
-      cpp: 'cpp',
-      rs: 'rust',
-      php: 'php',
-      sql: 'sql',
-      scss: 'scss',
-      less: 'less',
-      vue: 'vue',
-      svelte: 'svelte',
     };
 
-    return langMap[fileExtension] || fileExtension || 'text';
+    return langMap[fileExtension] || 'text';
   };
 
   // Format file size
