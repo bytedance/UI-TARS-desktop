@@ -445,7 +445,7 @@ export class LLMProcessor {
     finishReason: string,
     messageId?: string,
     ttftMs?: number,
-    totalResponseTimeMs?: number,
+    ttltMs?: number,
   ): void {
     // If we have complete content, create a consolidated assistant message event
     if (content || currentToolCalls.length > 0) {
@@ -456,8 +456,7 @@ export class LLMProcessor {
         finishReason: finishReason,
         messageId: messageId, // Include the message ID in the final message
         ttftMs: ttftMs, // Include the TTFT (Time to First Token) for display
-        totalResponseTimeMs: totalResponseTimeMs, // Include the total response time for analytics
-        elapsedMs: ttftMs, // Backward compatibility - deprecated field
+        ttltMs: ttltMs, // Include the total response time for analytics
       });
 
       this.eventStream.sendEvent(assistantEvent);

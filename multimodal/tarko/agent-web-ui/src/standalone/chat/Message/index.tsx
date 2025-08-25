@@ -172,7 +172,7 @@ export const Message: React.FC<MessageProps> = ({
                 <div className="mb-2">
                   <TTFTDisplay
                     ttftMs={message.ttftMs}
-                    totalResponseTimeMs={message.totalResponseTimeMs}
+                    ttltMs={message.ttltMs}
                     elapsedMs={message.elapsedMs} // Backward compatibility
                   />
                 </div>
