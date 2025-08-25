@@ -223,7 +223,11 @@ const StrReplaceEditorDiffViewer: React.FC<StrReplaceEditorDiffViewerProps> = ({
           <div className="code-editor-status-left">
             <span className="code-editor-status-item text-green-400">+{actualAdditions}</span>
             <span className="code-editor-status-item text-red-400">-{deletions}</span>
-            {filePath && <span className="code-editor-status-item text-gray-400">{filePath}</span>}
+            {filePath && (
+              <span className="code-editor-status-item text-gray-400 code-editor-file-name truncate max-w-md">
+                {filePath}
+              </span>
+            )}
           </div>
         </div>
       </div>

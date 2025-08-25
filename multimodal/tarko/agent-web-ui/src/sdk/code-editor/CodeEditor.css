@@ -83,6 +83,9 @@
   font-size: 13px;
   font-weight: 500;
   font-family: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Language badge */
