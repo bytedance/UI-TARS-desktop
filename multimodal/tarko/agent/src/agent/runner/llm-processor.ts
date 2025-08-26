@@ -206,7 +206,7 @@ export class LLMProcessor {
     };
 
     // Process the request
-    const startTime = Date.now();
+    const startTime = this.enableMetrics ? Date.now() : 0;
 
     await this.sendRequest(
       resolvedModel,
@@ -218,8 +218,10 @@ export class LLMProcessor {
       abortSignal,
     );
 
-    const duration = Date.now() - startTime;
-    this.logger.info(`[LLM] Response received | Duration: ${duration}ms`);
+    if (this.enableMetrics) {
+      const duration = Date.now() - startTime;
+      this.logger.info(`[LLM] Response received | Duration: ${duration}ms`);
+    }
   }
 
   /**
@@ -292,7 +294,7 @@ export class LLMProcessor {
     // Generate a unique message ID to correlate streaming messages with final message
     const messageId = `msg_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
 
-    // Track TTFT (Time to First Token)
+    // Track TTFT (Time to First Token) only if metrics are enabled
     let firstTokenTime: number | null = null;
     let hasReceivedFirstContent = false;
 
@@ -311,13 +313,14 @@ export class LLMProcessor {
       // Process the chunk using the tool call engine
       const chunkResult = toolCallEngine.processStreamingChunk(chunk, processingState);
 
-      // Track first token time when we receive the first meaningful content
-      // We don't check chunkResult here because it may be modified by a custom ToolCallEngine.
-      if (!hasReceivedFirstContent /* && (chunkResult.content || chunkResult.reasoningContent) */) {
+      // Track first token time only if metrics are enabled
+      if (this.enableMetrics && !hasReceivedFirstContent /* && (chunkResult.content || chunkResult.reasoningContent) */) {
         firstTokenTime = Date.now();
         hasReceivedFirstContent = true;
-        const ttft = firstTokenTime - requestStartTime;
-        this.logger.info(`[LLM] First token received | TTFT: ${ttft}ms`);
+        if (requestStartTime > 0) { // Only calculate if we have a valid start time
+          const ttft = firstTokenTime - requestStartTime;
+          this.logger.info(`[LLM] First token received | TTFT: ${ttft}ms`);
+        }
       }
 
       // Only send streaming events in streaming mode
@@ -376,11 +379,15 @@ export class LLMProcessor {
 
     this.logger.infoWithData('Finalized Response', parsedResponse, JSON.stringify);
 
-    // Calculate timing metrics
-    const totalElapsedMs = Date.now() - requestStartTime;
-    const ttftMs = firstTokenTime ? firstTokenTime - requestStartTime : totalElapsedMs;
-
-    this.logger.info(`[LLM] Response timing | TTFT: ${ttftMs}ms | Total: ${totalElapsedMs}ms`);
+    // Calculate timing metrics only if enabled
+    let ttftMs: number | undefined;
+    let totalElapsedMs: number | undefined;
+    
+    if (this.enableMetrics && requestStartTime > 0) {
+      totalElapsedMs = Date.now() - requestStartTime;
+      ttftMs = firstTokenTime ? firstTokenTime - requestStartTime : totalElapsedMs;
+      this.logger.info(`[LLM] Response timing | TTFT: ${ttftMs}ms | Total: ${totalElapsedMs}ms`);
+    }
 
     // Create the final events based on processed content
     this.createFinalEvents(
@@ -390,8 +397,8 @@ export class LLMProcessor {
       parsedResponse.reasoningContent || '',
       parsedResponse.finishReason || 'stop',
       messageId, // Pass the message ID to final events
-      this.enableMetrics ? ttftMs : undefined, // Pass the TTFT only if metrics are enabled
-      this.enableMetrics ? totalElapsedMs : undefined, // Pass the total response time only if metrics are enabled
+      ttftMs, // Pass the TTFT only if metrics were calculated
+      totalElapsedMs, // Pass the total response time only if metrics were calculated
     );
 
     // Call response hooks with session ID
