@@ -1,8 +1,8 @@
 [
   {
-    "id": "b3e29689-00ea-4f12-82cd-c77ffabeefa0",
+    "id": "4f79ac00-01c8-443c-b106-c2a05cf2b04d",
     "type": "user_message",
-    "timestamp": 1756136675247,
+    "timestamp": 1755542763332,
     "content": [
       {
         "type": "text",
@@ -11,10 +11,10 @@
     ]
   },
   {
-    "id": "07636533-351d-4966-819f-83e4a1e4bb06",
+    "id": "914584b0-2d55-493a-bda6-a238138b4931",
     "type": "agent_run_start",
-    "timestamp": 1756136675247,
-    "sessionId": "1756136675247-8x0q7um",
+    "timestamp": 1755542763332,
+    "sessionId": "1755542763332-jnh4rv3",
     "runOptions": {
       "input": "[Complex multimodal input]"
     },
@@ -23,9 +23,9 @@
     "agentName": "Anonymous"
   },
   {
-    "id": "5d680ff5-1985-4fdb-8bc5-ebf0cc360f80",
+    "id": "22557550-867f-4f03-83aa-e848616660fa",
     "type": "environment_input",
-    "timestamp": 1756136675248,
+    "timestamp": 1755542763333,
     "description": "Browser Screenshot",
     "content": [
       {
@@ -41,14 +41,14 @@
     ]
   },
   {
-    "id": "71f636a9-a6ee-4e16-a91e-7640d2e08702",
+    "id": "887ce24f-26f6-4ace-8394-3e13fc4257ce",
     "type": "assistant_message",
-    "timestamp": 1756136675258,
+    "timestamp": 1755542763343,
     "content": "Initiating search for 'What is Agent TARS' on Google.",
     "rawContent": "Initiating search for 'What is Agent TARS' on Google.",
     "toolCalls": [
       {
-        "id": "call_1756136675258_9dvfn",
+        "id": "call_1755542763343_yf90m",
         "type": "function",
         "function": {
           "name": "browser_action_tool",
@@ -57,22 +57,20 @@
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "msg_1756136675253_34j1wpu8",
-    "ttftMs": 6,
-    "ttltMs": 10
+    "messageId": "msg_1755542763335_he4gp4p1"
   },
   {
-    "id": "0303a5e5-ca83-4909-b684-67f9c83845e6",
+    "id": "d2323458-e7ce-4989-b9d8-f12a9ce7646e",
     "type": "tool_call",
-    "timestamp": 1756136675259,
-    "toolCallId": "call_1756136675258_9dvfn",
+    "timestamp": 1755542763344,
+    "toolCallId": "call_1755542763343_yf90m",
     "name": "browser_action_tool",
     "arguments": {
       "thought": "To find information about Agent TARS, the next step is to input the query into the Google search bar. The search bar is visible in the center of the page, so I need to type the query there.",
       "step": "Type 'What is Agent TARS' into the Google search bar located in the center of the page.",
       "action": "type(content='What is Agent TARS')"
     },
-    "startTime": 1756136675259,
+    "startTime": 1755542763344,
     "tool": {
       "name": "browser_action_tool",
       "description": "A browser tool to perform the next action to complete the task.\n\n## Action Space\n\nclick(point='<point>x1 y1</point>')\nleft_double(point='<point>x1 y1</point>')\nright_single(point='<point>x1 y1</point>')\ndrag(start_point='<point>x1 y1</point>', end_point='<point>x2 y2</point>')\nhotkey(key='ctrl c') # Split keys with a space and use lowercase. Also, do not use more than 3 keys in one hotkey action.\ntype(content='xxx') # Use escape characters \\', \\\", and \\n in content part to ensure we can parse the content in normal python string format. If you want to submit your input, use \\n at the end of content. \nscroll(point='<point>x1 y1</point>', direction='down or up or right or left') # Show more information on the `direction` side.\nwait() #Sleep for 5s and take a screenshot to check for any changes.\nfinished(content='xxx') # Use escape characters \\', \", and \\n in content part to ensure we can parse the content in normal python string format.\n\n\n## Note\n- Use English in `Thought` part.\n- Describe your detailed thought in `Thought` part.\n- Describe your action in `Step` part.\n\n",
@@ -101,10 +99,10 @@
     }
   },
   {
-    "id": "f8fed10d-70f4-4e43-9aef-1d574e35c0ed",
+    "id": "eb56bea2-e8c0-4ce3-8d19-6e609877921f",
     "type": "tool_result",
-    "timestamp": 1756136675259,
-    "toolCallId": "call_1756136675258_9dvfn",
+    "timestamp": 1755542763345,
+    "toolCallId": "call_1755542763343_yf90m",
     "name": "browser_action_tool",
     "content": {
       "action": "type(content='What is Agent TARS')",
@@ -113,9 +111,9 @@
     "elapsedMs": 0
   },
   {
-    "id": "9699f26f-72c7-46d0-b517-96275374eb15",
+    "id": "500c8219-9de3-4d3c-b269-5eb2314fa44f",
     "type": "environment_input",
-    "timestamp": 1756136675260,
+    "timestamp": 1755542763345,
     "description": "Browser Screenshot",
     "content": [
       {
@@ -131,14 +129,14 @@
     ]
   },
   {
-    "id": "10dd4a1b-4734-4f4f-9cda-047b079e8019",
+    "id": "5d445377-3896-4c12-8aaf-c0ad329dd37a",
     "type": "assistant_message",
-    "timestamp": 1756136675273,
+    "timestamp": 1755542763362,
     "content": "Submitting search query for 'What is Agent TARS'.",
     "rawContent": "Submitting search query for 'What is Agent TARS'.",
     "toolCalls": [
       {
-        "id": "call_1756136675273_svj8k",
+        "id": "call_1755542763362_l3lmi",
         "type": "function",
         "function": {
           "name": "browser_action_tool",
@@ -147,22 +145,20 @@
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "msg_1756136675262_vv6uzoel",
-    "ttftMs": 2,
-    "ttltMs": 13
+    "messageId": "msg_1755542763346_76j8x2ws"
   },
   {
-    "id": "ee656c45-f734-47e2-8600-9c509726c05c",
+    "id": "4b0c9d38-9b50-46f2-85f8-4a22070eb8fd",
     "type": "tool_call",
-    "timestamp": 1756136675273,
-    "toolCallId": "call_1756136675273_svj8k",
+    "timestamp": 1755542763363,
+    "toolCallId": "call_1755542763362_l3lmi",
     "name": "browser_action_tool",
     "arguments": {
       "thought": "The search query 'What is Agent TARS' is already typed into the Google search bar, so the next logical step is to click the 'Google 搜索' button to execute the search and retrieve results.",
       "step": "Click on the 'Google 搜索' button located below the search bar to submit the query and display search results.",
       "action": "click(point='<point>454 525</point>')"
     },
-    "startTime": 1756136675273,
+    "startTime": 1755542763363,
     "tool": {
       "name": "browser_action_tool",
       "description": "A browser tool to perform the next action to complete the task.\n\n## Action Space\n\nclick(point='<point>x1 y1</point>')\nleft_double(point='<point>x1 y1</point>')\nright_single(point='<point>x1 y1</point>')\ndrag(start_point='<point>x1 y1</point>', end_point='<point>x2 y2</point>')\nhotkey(key='ctrl c') # Split keys with a space and use lowercase. Also, do not use more than 3 keys in one hotkey action.\ntype(content='xxx') # Use escape characters \\', \\\", and \\n in content part to ensure we can parse the content in normal python string format. If you want to submit your input, use \\n at the end of content. \nscroll(point='<point>x1 y1</point>', direction='down or up or right or left') # Show more information on the `direction` side.\nwait() #Sleep for 5s and take a screenshot to check for any changes.\nfinished(content='xxx') # Use escape characters \\', \", and \\n in content part to ensure we can parse the content in normal python string format.\n\n\n## Note\n- Use English in `Thought` part.\n- Describe your detailed thought in `Thought` part.\n- Describe your action in `Step` part.\n\n",
@@ -191,10 +187,10 @@
     }
   },
   {
-    "id": "aa686eb4-2461-4b9e-978c-b326b786921d",
+    "id": "266c40c0-52d6-45c6-962c-abf8d397cafe",
     "type": "tool_result",
-    "timestamp": 1756136675274,
-    "toolCallId": "call_1756136675273_svj8k",
+    "timestamp": 1755542763363,
+    "toolCallId": "call_1755542763362_l3lmi",
     "name": "browser_action_tool",
     "content": {
       "action": "click(point='<point>454 525</point>')",
@@ -203,9 +199,9 @@
     "elapsedMs": 0
   },
   {
-    "id": "9fd18441-8485-46e1-9274-06fb700c04fb",
+    "id": "73fc5f96-9697-42a3-9e45-9b583228f479",
     "type": "environment_input",
-    "timestamp": 1756136675274,
+    "timestamp": 1755542763364,
     "description": "Browser Screenshot",
     "content": [
       {
@@ -221,14 +217,14 @@
     ]
   },
   {
-    "id": "1cc74c6c-1117-4d9c-9331-f4640d16dcbd",
+    "id": "94a2e6d1-b979-4263-a755-9ca5b9c55a72",
     "type": "assistant_message",
-    "timestamp": 1756136675281,
+    "timestamp": 1755542763372,
     "content": "",
     "rawContent": "",
     "toolCalls": [
       {
-        "id": "call_1756136675280_jbm6k",
+        "id": "call_1755542763372_2ke3j",
         "type": "function",
         "function": {
           "name": "browser_action_tool",
@@ -237,22 +233,20 @@
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "msg_1756136675275_1ba7cjha",
-    "ttftMs": 7,
-    "ttltMs": 7
+    "messageId": "msg_1755542763365_4rdbihqz"
   },
   {
-    "id": "b508733c-821a-4849-9132-5333c9d979a4",
+    "id": "f000de45-04d5-4dfb-a8cd-e0306df433b2",
     "type": "tool_call",
-    "timestamp": 1756136675282,
-    "toolCallId": "call_1756136675280_jbm6k",
+    "timestamp": 1755542763373,
+    "toolCallId": "call_1755542763372_2ke3j",
     "name": "browser_action_tool",
     "arguments": {
       "thought": "Wait for the page to load completely to view the search results for 'What is Agent TARS'.",
       "step": "Wait for 5 seconds to allow the Google search results page to load.",
       "action": "wait()"
     },
-    "startTime": 1756136675282,
+    "startTime": 1755542763373,
     "tool": {
       "name": "browser_action_tool",
       "description": "A browser tool to perform the next action to complete the task.\n\n## Action Space\n\nclick(point='<point>x1 y1</point>')\nleft_double(point='<point>x1 y1</point>')\nright_single(point='<point>x1 y1</point>')\ndrag(start_point='<point>x1 y1</point>', end_point='<point>x2 y2</point>')\nhotkey(key='ctrl c') # Split keys with a space and use lowercase. Also, do not use more than 3 keys in one hotkey action.\ntype(content='xxx') # Use escape characters \\', \\\", and \\n in content part to ensure we can parse the content in normal python string format. If you want to submit your input, use \\n at the end of content. \nscroll(point='<point>x1 y1</point>', direction='down or up or right or left') # Show more information on the `direction` side.\nwait() #Sleep for 5s and take a screenshot to check for any changes.\nfinished(content='xxx') # Use escape characters \\', \", and \\n in content part to ensure we can parse the content in normal python string format.\n\n\n## Note\n- Use English in `Thought` part.\n- Describe your detailed thought in `Thought` part.\n- Describe your action in `Step` part.\n\n",
@@ -281,10 +275,10 @@
     }
   },
   {
-    "id": "618e0ea8-c154-41f4-b37e-2ae2d271b9e9",
+    "id": "384bfeca-fdc9-41fd-9f3f-89d01e15fc4d",
     "type": "tool_result",
-    "timestamp": 1756136675282,
-    "toolCallId": "call_1756136675280_jbm6k",
+    "timestamp": 1755542763373,
+    "toolCallId": "call_1755542763372_2ke3j",
     "name": "browser_action_tool",
     "content": {
       "action": "wait()",
@@ -293,9 +287,9 @@
     "elapsedMs": 0
   },
   {
-    "id": "dd7905c3-2c5d-4d1d-a7df-9faa1a79e0e4",
+    "id": "29e89bb4-d388-48b2-aa0b-c9e363ac5270",
     "type": "environment_input",
-    "timestamp": 1756136675284,
+    "timestamp": 1755542763373,
     "description": "Browser Screenshot",
     "content": [
       {
@@ -311,14 +305,12 @@
     ]
   },
   {
-    "id": "6212f79f-de15-458f-b401-f1bb1e1b117b",
+    "id": "0c694fd9-91e7-4dc0-b24a-c3c9d2ff227a",
     "type": "assistant_message",
-    "timestamp": 1756136675288,
+    "timestamp": 1755542763377,
     "content": "Agent TARS is Bytedance's new open-source approach for automating complex tasks by visually interpreting web content and interacting with the command line and file system.",
     "rawContent": "Agent TARS is Bytedance's new open-source approach for automating complex tasks by visually interpreting web content and interacting with the command line and file system.",
     "finishReason": "stop",
-    "messageId": "msg_1756136675287_pmjxvvb2",
-    "ttftMs": 3,
-    "ttltMs": 4
+    "messageId": "msg_1755542763374_6dyefl62"
   }
 ]
