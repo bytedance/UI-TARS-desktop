@@ -6,11 +6,7 @@
 
 import { ToolCallEngineType } from './tool-call-engine';
 import { Tool } from './tool';
-import {
-  ProviderOptions,
-  LLMReasoningOptions,
-  ChatCompletionContentPart,
-} from '@tarko/model-provider/types';
+import { ProviderOptions, LLMReasoningOptions } from '@tarko/model-provider/types';
 import { AgentEventStream } from './agent-event-stream';
 import { LogLevel } from '@agent-infra/logger';
 
