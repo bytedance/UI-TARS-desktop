@@ -123,7 +123,7 @@ export namespace AgentEventStream {
      * The time it takes for the model to return the first token of the response after it receives the prompt.
      *
      * @see https://modal.com/llm-almanac/how-to-benchmark
-     * @see https://modal.com/llm-almanac/how-to-benchmark
+     * @see https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompt-best-practices
      */
     ttftMs?: number;
 
@@ -132,7 +132,7 @@ export namespace AgentEventStream {
      * The overall time taken by the model to process the prompt and generate the complete response.
      *
      * @see https://modal.com/llm-almanac/how-to-benchmark
-     * @see https://modal.com/llm-almanac/how-to-benchmark
+     * @see https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompt-best-practices
      */
     ttltMs?: number;
 
