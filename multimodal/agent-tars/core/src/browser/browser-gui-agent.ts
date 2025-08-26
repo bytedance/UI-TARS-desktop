@@ -406,7 +406,7 @@ wait()                                         - Wait 5 seconds and take a scree
         metadata: {
           type: 'screenshot',
           devicePixelRatio: await this.getDevicePixelRatio(),
-        } as AgentEventStream.ScreenshotMetadata,
+        },
       });
 
       eventStream.sendEvent(event);

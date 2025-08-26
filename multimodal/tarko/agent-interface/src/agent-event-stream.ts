@@ -340,21 +340,47 @@ export namespace AgentEventStream {
   }
 
   /**
-   * Metadata for environment input events with strict typing
+   * Base metadata interface for environment input events
    */
-  export interface EnvironmentInputMetadata {
+  export interface BaseEnvironmentInputMetadata {
     /** Type of environment input */
-    type: 'screenshot' | 'codebase' | string;
+    type: string;
   }
 
   /**
-   * Screenshot-specific metadata extending base metadata
+   * Screenshot-specific metadata
    */
-  export interface ScreenshotMetadata extends EnvironmentInputMetadata {
+  export interface ScreenshotMetadata extends BaseEnvironmentInputMetadata {
     type: 'screenshot';
     /** Device pixel ratio for the screenshot */
     devicePixelRatio?: number;
   }
+
+  /**
+   * Text content metadata
+   */
+  export interface TextMetadata extends BaseEnvironmentInputMetadata {
+    type: 'text';
+  }
+
+  /**
+   * Codebase metadata
+   */
+  export interface CodebaseMetadata extends BaseEnvironmentInputMetadata {
+    type: 'codebase';
+  }
+
+  /**
+   * Generic metadata for other types
+   */
+  export interface GenericMetadata extends BaseEnvironmentInputMetadata {
+    type: string;
+  }
+
+  /**
+   * Union type for all environment input metadata types
+   */
+  export type EnvironmentInputMetadata = ScreenshotMetadata | TextMetadata | CodebaseMetadata | GenericMetadata;
 
   /**
    * Environment input event - for injecting contextual information
