@@ -200,6 +200,7 @@ export class AgentSession {
     environmentInput?: {
       content: string | ChatCompletionContentPart[];
       description?: string;
+      metadata?: AgentEventStream.EnvironmentInputMetadata;
     };
   }): Promise<AgentQueryResponse> {
     try {
@@ -291,6 +292,7 @@ export class AgentSession {
     environmentInput?: {
       content: string | ChatCompletionContentPart[];
       description?: string;
+      metadata?: AgentEventStream.EnvironmentInputMetadata;
     };
   }): Promise<AsyncIterable<AgentEventStream.Event>> {
     try {
