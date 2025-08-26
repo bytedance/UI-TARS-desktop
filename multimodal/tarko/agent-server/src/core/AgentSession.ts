@@ -209,7 +209,7 @@ export class AgentSession {
       // Debug logging for issue #1150
       if (this.server.isDebug) {
         console.log(
-          `[DEBUG] Query started - Session: ${this.id}, Query: ${typeof query === 'string' ? query.substring(0, 100) + '...' : '[ContentPart]'}`,
+          `[DEBUG] Query started - Session: ${this.id}, Query: ${typeof options.input === 'string' ? options.input.substring(0, 100) + '...' : '[ContentPart]'}`,
         );
       }
 
@@ -300,7 +300,7 @@ export class AgentSession {
       // Debug logging for issue #1150
       if (this.server.isDebug) {
         console.log(
-          `[DEBUG] Streaming query started - Session: ${this.id}, Query: ${typeof query === 'string' ? query.substring(0, 100) + '...' : '[ContentPart]'}`,
+          `[DEBUG] Streaming query started - Session: ${this.id}, Query: ${typeof options.input === 'string' ? options.input.substring(0, 100) + '...' : '[ContentPart]'}`,
         );
       }
 
