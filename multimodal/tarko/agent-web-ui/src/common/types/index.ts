@@ -50,6 +50,9 @@ export interface Message {
   // System message specific properties
   level?: 'info' | 'warning' | 'error';
   details?: Record<string, any>;
+
+  // Environment message specific properties
+  metadata?: AgentEventStream.EnvironmentInputMetadata;
 }
 
 /**

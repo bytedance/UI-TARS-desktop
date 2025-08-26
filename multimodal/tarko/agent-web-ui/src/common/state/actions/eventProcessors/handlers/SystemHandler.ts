@@ -57,6 +57,7 @@ export class EnvironmentInputHandler
       content: event.content,
       timestamp: event.timestamp,
       description: event.description || 'Environment Input',
+      metadata: event.metadata,
     };
 
     set(messagesAtom, (prev: Record<string, Message[]>) => {

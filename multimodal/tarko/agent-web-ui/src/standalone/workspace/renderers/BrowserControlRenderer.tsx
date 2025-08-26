@@ -116,10 +116,12 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
           foundImage = true;
 
           // Extract devicePixelRatio from environment input metadata if available
-          if (msg.metadata && AgentEventStream.isScreenshotMetadata(msg.metadata)) {
-            if (msg.metadata.devicePixelRatio) {
-              setDevicePixelRatio(msg.metadata.devicePixelRatio);
-            }
+          if (
+            msg.metadata &&
+            AgentEventStream.isScreenshotMetadata(msg.metadata) &&
+            msg.metadata.devicePixelRatio
+          ) {
+            setDevicePixelRatio(msg.metadata.devicePixelRatio);
           }
           break;
         }
