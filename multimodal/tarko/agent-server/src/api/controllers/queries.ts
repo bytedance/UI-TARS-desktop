@@ -62,6 +62,9 @@ export async function executeQuery(req: Request, res: Response) {
       environmentInput: {
         content: expandedContext,
         description: 'Expanded context from contextual references',
+        metadata: {
+          type: 'codebase',
+        },
       },
     });
 
@@ -113,6 +116,9 @@ export async function executeStreamingQuery(req: Request, res: Response) {
       environmentInput: {
         content: expandedContext,
         description: 'Expanded context from contextual references',
+        metadata: {
+          type: 'codebase',
+        },
       },
     });
 
