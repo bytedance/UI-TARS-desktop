@@ -245,6 +245,9 @@ wait()                                         - Wait 5 seconds and take a scree
         const event = this.eventStream.createEvent('environment_input', {
           content: markdown,
           description: 'Page Content After Browser Action',
+          metadata: {
+            type: 'text',
+          },
         });
 
         // Send the event
@@ -339,6 +342,9 @@ wait()                                         - Wait 5 seconds and take a scree
           },
         ],
         description: 'Browser Screenshot',
+        metadata: {
+          type: 'screenshot',
+        },
       });
 
       return eventStream.sendEvent(event);
@@ -397,6 +403,10 @@ wait()                                         - Wait 5 seconds and take a scree
           },
         ],
         description: 'Browser Screenshot',
+        metadata: {
+          type: 'screenshot',
+          devicePixelRatio: await this.getDevicePixelRatio(),
+        },
       });
 
       eventStream.sendEvent(event);
@@ -590,6 +600,20 @@ wait()                                         - Wait 5 seconds and take a scree
     // Ensure dimensions were extracted
     if (!this.screenWidth || !this.screenHeight) {
       this.logger.warn('Unable to extract dimension information from image data');
+    }
+  }
+
+  /**
+   * Get the device pixel ratio from the browser page
+   */
+  private async getDevicePixelRatio(): Promise<number> {
+    try {
+      const page = await this.getPage();
+      const devicePixelRatio = await page.evaluate(() => window.devicePixelRatio);
+      return devicePixelRatio || 1;
+    } catch (error) {
+      this.logger.warn('Failed to get device pixel ratio, defaulting to 1:', error);
+      return 1;
     }
   }
 
