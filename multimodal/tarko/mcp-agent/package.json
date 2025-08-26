@@ -32,7 +32,7 @@
     "@tarko/mcp-agent-interface": "workspace:*",
     "@tarko/shared-utils": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.12.1",
-    "@agent-infra/mcp-client": "1.1.6-beta.3",
+    "@agent-infra/mcp-client": "1.2.20",
     "@agent-infra/logger": "0.0.2-beta.2"
   },
   "devDependencies": {

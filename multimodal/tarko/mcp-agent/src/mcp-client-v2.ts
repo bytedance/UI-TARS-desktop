@@ -33,7 +33,7 @@ export class MCPClientV2 implements IMCPClient {
           status: 'activate',
         },
       ],
-      { isDebug: false },
+      { isDebug: false, defaultTimeout: 180 },
     );
   }
 

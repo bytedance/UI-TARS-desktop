@@ -1041,8 +1041,8 @@ importers:
         specifier: 0.0.2-beta.2
         version: 0.0.2-beta.2
       '@agent-infra/mcp-client':
-        specifier: 1.1.6-beta.3
-        version: 1.1.6-beta.3
+        specifier: 1.2.20
+        version: 1.2.20
       '@modelcontextprotocol/sdk':
         specifier: ^1.12.1
         version: 1.12.1
@@ -1472,6 +1472,9 @@ packages:
   '@agent-infra/mcp-client@1.1.6-beta.3':
     resolution: {integrity: sha512-q3O908racp/KggrPE+hjHuRVASibQlQKDybkE/5UqTSmFNS7MqQmpSwR4BQRnzwHc8iY2b3U37u4cLlMBLBMQQ==}
 
+  '@agent-infra/mcp-client@1.2.20':
+    resolution: {integrity: sha512-YzixJj8/xghitdTv0L4CshMs4MnBq8RLhi7S4P2z0f7A7q6+naOfROK9IIOi5nwWjhOIgPWtK+FPHtd67DkEtQ==}
+
   '@agent-infra/mcp-server-browser@1.1.10':
     resolution: {integrity: sha512-8usWHapya9jO0w9LRrNb4YX4k32D6jf3QvrqRQU0y1MKkAhNXs3go3x6S4CO8YdkFFCZA/R0vc0ZEwBtFgfjSw==}
     hasBin: true
@@ -1486,6 +1489,9 @@ packages:
 
   '@agent-infra/mcp-shared@1.1.6-beta.3':
     resolution: {integrity: sha512-qCmwZ+jMnj9acVGeQDheq41YrbGJQfd8gsHwxxxBaNrREMOQgV5/XzDIEKFdvJUkvAysvxqEUSGyzdJ6Bz/4sQ==}
+
+  '@agent-infra/mcp-shared@1.2.20':
+    resolution: {integrity: sha512-cY/KBUtuMIPEAq0IVPkl7CirZRNSZargM4ficNKkc1/clDo7h8JqR6oEsA03uFx36PM0LFlCxMYFthR1CEnprQ==}
 
   '@agent-infra/media-utils@0.1.5':
     resolution: {integrity: sha512-3irZBomzhNOw/HMZg4rmJ7w87BPbXTgYA0LZV0nlgpoE5w3GydmWx/S0EF1MCfPHE1r1QrldFqpqZ38smSGF4Q==}
@@ -2644,6 +2650,10 @@ packages:
 
   '@modelcontextprotocol/sdk@1.12.1':
     resolution: {integrity: sha512-KG1CZhZfWg+u8pxeM/mByJDScJSrjjxLc8fwQqbsS8xCjBmQfMNEBTotYdNanKekepnfRI85GtgQlctLFpcYPw==}
+    engines: {node: '>=18'}
+
+  '@modelcontextprotocol/sdk@1.15.1':
+    resolution: {integrity: sha512-W/XlN9c528yYn+9MQkVjxiTPgPxoxt+oczfjHBDsJx0+59+O7B75Zhsp0B16Xbwbz8ANISDajh6+V7nIcPMc5w==}
     engines: {node: '>=18'}
 
   '@modelcontextprotocol/sdk@1.16.0':
@@ -11132,6 +11142,17 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@agent-infra/mcp-client@1.2.20':
+    dependencies:
+      '@agent-infra/mcp-shared': 1.2.20
+      '@modelcontextprotocol/sdk': 1.15.1
+      glob: 10.4.5
+      minimatch: 9.0.5
+      uuid: 11.1.0
+      zod: 3.25.36
+    transitivePeerDependencies:
+      - supports-color
+
   '@agent-infra/mcp-server-browser@1.1.10':
     dependencies:
       '@modelcontextprotocol/sdk': 1.12.1
@@ -11161,6 +11182,13 @@ snapshots:
   '@agent-infra/mcp-shared@1.1.6-beta.3':
     dependencies:
       '@modelcontextprotocol/sdk': 1.16.0
+      zod: 3.25.36
+    transitivePeerDependencies:
+      - supports-color
+
+  '@agent-infra/mcp-shared@1.2.20':
+    dependencies:
+      '@modelcontextprotocol/sdk': 1.15.1
       zod: 3.25.36
     transitivePeerDependencies:
       - supports-color
@@ -12609,6 +12637,23 @@ snapshots:
       cors: 2.8.5
       cross-spawn: 7.0.6
       eventsource: 3.0.7
+      express: 5.1.0
+      express-rate-limit: 7.5.0(express@5.1.0)
+      pkce-challenge: 5.0.0
+      raw-body: 3.0.0
+      zod: 3.25.36
+      zod-to-json-schema: 3.24.3(zod@3.25.36)
+    transitivePeerDependencies:
+      - supports-color
+
+  '@modelcontextprotocol/sdk@1.15.1':
+    dependencies:
+      ajv: 6.12.6
+      content-type: 1.0.5
+      cors: 2.8.5
+      cross-spawn: 7.0.6
+      eventsource: 3.0.7
+      eventsource-parser: 3.0.2
       express: 5.1.0
       express-rate-limit: 7.5.0(express@5.1.0)
       pkce-challenge: 5.0.0
