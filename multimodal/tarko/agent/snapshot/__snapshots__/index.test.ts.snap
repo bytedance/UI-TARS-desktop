@@ -66,7 +66,9 @@ exports[`AgentSnapshot tests > should match snapshot for gui-agent/basic 2`] = `
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "<<messageId>>"
+    "messageId": "<<messageId>>",
+    "ttftMs": "<<ttftMs>>",
+    "ttltMs": "<<ttltMs>>"
   },
   {
     "id": "<<ID>>",
@@ -152,7 +154,9 @@ exports[`AgentSnapshot tests > should match snapshot for gui-agent/basic 2`] = `
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "<<messageId>>"
+    "messageId": "<<messageId>>",
+    "ttftMs": "<<ttftMs>>",
+    "ttltMs": "<<ttltMs>>"
   },
   {
     "id": "<<ID>>",
@@ -238,7 +242,9 @@ exports[`AgentSnapshot tests > should match snapshot for gui-agent/basic 2`] = `
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "<<messageId>>"
+    "messageId": "<<messageId>>",
+    "ttftMs": "<<ttftMs>>",
+    "ttltMs": "<<ttltMs>>"
   },
   {
     "id": "<<ID>>",
@@ -314,7 +320,9 @@ exports[`AgentSnapshot tests > should match snapshot for gui-agent/basic 2`] = `
     "content": "Agent TARS is Bytedance's new open-source approach for automating complex tasks by visually interpreting web content and interacting with the command line and file system.",
     "rawContent": "Agent TARS is Bytedance's new open-source approach for automating complex tasks by visually interpreting web content and interacting with the command line and file system.",
     "finishReason": "stop",
-    "messageId": "<<messageId>>"
+    "messageId": "<<messageId>>",
+    "ttftMs": "<<ttftMs>>",
+    "ttltMs": "<<ttltMs>>"
   },
   {
     "id": "<<ID>>",
@@ -336,7 +344,9 @@ exports[`AgentSnapshot tests > should match snapshot for gui-agent/basic 3`] = `
   "content": "Agent TARS is Bytedance's new open-source approach for automating complex tasks by visually interpreting web content and interacting with the command line and file system.",
   "rawContent": "Agent TARS is Bytedance's new open-source approach for automating complex tasks by visually interpreting web content and interacting with the command line and file system.",
   "finishReason": "stop",
-  "messageId": "<<messageId>>"
+  "messageId": "<<messageId>>",
+  "ttftMs": "<<ttftMs>>",
+  "ttltMs": "<<ttltMs>>"
 }
 `;
 
@@ -618,7 +628,9 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls 2`
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "<<messageId>>"
+    "messageId": "<<messageId>>",
+    "ttftMs": "<<ttftMs>>",
+    "ttltMs": "<<ttltMs>>"
   },
   {
     "id": "<<ID>>",
@@ -919,7 +931,9 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls 2`
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "<<messageId>>"
+    "messageId": "<<messageId>>",
+    "ttftMs": "<<ttftMs>>",
+    "ttltMs": "<<ttltMs>>"
   },
   {
     "id": "<<ID>>",
@@ -1851,7 +1865,9 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls 2`
     "content": "The weather information for Boston is now available, so we can directly respond with the details.\\nIn Boston, the weather today is Sunny. The temperature is 70°F (21°C), with a 10% chance of precipitation, 45% humidity, and wind speed of 5 mph.</think>In Boston, the weather today is Sunny. The temperature is 70°F (21°C), with a 10% chance of precipitation, 45% humidity, and wind speed of 5 mph.",
     "rawContent": "",
     "finishReason": "stop",
-    "messageId": "<<messageId>>"
+    "messageId": "<<messageId>>",
+    "ttftMs": "<<ttftMs>>",
+    "ttltMs": "<<ttltMs>>"
   },
   {
     "id": "<<ID>>",
@@ -1943,7 +1959,9 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls-pr
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "<<messageId>>"
+    "messageId": "<<messageId>>",
+    "ttftMs": "<<ttftMs>>",
+    "ttltMs": "<<ttltMs>>"
   },
   {
     "id": "<<ID>>",
@@ -2130,7 +2148,9 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls-pr
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "<<messageId>>"
+    "messageId": "<<messageId>>",
+    "ttftMs": "<<ttftMs>>",
+    "ttltMs": "<<ttltMs>>"
   },
   {
     "id": "<<ID>>",
@@ -2542,7 +2562,9 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls-pr
     "content": "Today in Boston, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind is blowing at 5 mph.",
     "rawContent": "Today in Boston, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind is blowing at 5 mph.",
     "finishReason": "stop",
-    "messageId": "<<messageId>>"
+    "messageId": "<<messageId>>",
+    "ttftMs": "<<ttftMs>>",
+    "ttltMs": "<<ttltMs>>"
   },
   {
     "id": "<<ID>>",
@@ -2628,7 +2650,9 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls-st
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "<<messageId>>"
+    "messageId": "<<messageId>>",
+    "ttftMs": "<<ttftMs>>",
+    "ttltMs": "<<ttltMs>>"
   },
   {
     "id": "<<ID>>",
@@ -2715,7 +2739,9 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls-st
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "<<messageId>>"
+    "messageId": "<<messageId>>",
+    "ttftMs": "<<ttftMs>>",
+    "ttltMs": "<<ttltMs>>"
   },
   {
     "id": "<<ID>>",
@@ -2823,7 +2849,9 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls-st
     "content": "The weather in Boston today is sunny with a temperature of 70°F (21°C). There's low precipitation chance at 10%, humidity is at 45%, and a light wind of 5 mph.",
     "rawContent": "The weather in Boston today is sunny with a temperature of 70°F (21°C). There's low precipitation chance at 10%, humidity is at 45%, and a light wind of 5 mph.",
     "finishReason": "stop",
-    "messageId": "<<messageId>>"
+    "messageId": "<<messageId>>",
+    "ttftMs": "<<ttftMs>>",
+    "ttltMs": "<<ttltMs>>"
   },
   {
     "id": "<<ID>>",
@@ -2885,7 +2913,9 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/basic 2`] = 
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "<<messageId>>"
+    "messageId": "<<messageId>>",
+    "ttftMs": "<<ttftMs>>",
+    "ttltMs": "<<ttltMs>>"
   },
   {
     "id": "<<ID>>",
@@ -2932,7 +2962,9 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/basic 2`] = 
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "<<messageId>>"
+    "messageId": "<<messageId>>",
+    "ttftMs": "<<ttftMs>>",
+    "ttltMs": "<<ttltMs>>"
   },
   {
     "id": "<<ID>>",
@@ -2984,7 +3016,9 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/basic 2`] = 
     "content": "Today in Boston, the weather is Sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.",
     "rawContent": "Today in Boston, the weather is Sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.",
     "finishReason": "stop",
-    "messageId": "<<messageId>>"
+    "messageId": "<<messageId>>",
+    "ttftMs": "<<ttftMs>>",
+    "ttltMs": "<<ttltMs>>"
   },
   {
     "id": "<<ID>>",
@@ -3006,7 +3040,9 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/basic 3`] = 
   "content": "Today in Boston, the weather is Sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.",
   "rawContent": "Today in Boston, the weather is Sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.",
   "finishReason": "stop",
-  "messageId": "<<messageId>>"
+  "messageId": "<<messageId>>",
+  "ttftMs": "<<ttftMs>>",
+  "ttltMs": "<<ttltMs>>"
 }
 `;
 
@@ -3055,7 +3091,9 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/prompt-engin
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "<<messageId>>"
+    "messageId": "<<messageId>>",
+    "ttftMs": "<<ttftMs>>",
+    "ttltMs": "<<ttltMs>>"
   },
   {
     "id": "<<ID>>",
@@ -3102,7 +3140,9 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/prompt-engin
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "<<messageId>>"
+    "messageId": "<<messageId>>",
+    "ttftMs": "<<ttftMs>>",
+    "ttltMs": "<<ttltMs>>"
   },
   {
     "id": "<<ID>>",
@@ -3154,7 +3194,9 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/prompt-engin
     "content": "In Boston today, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind speed is 5 mph.",
     "rawContent": "In Boston today, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind speed is 5 mph.",
     "finishReason": "stop",
-    "messageId": "<<messageId>>"
+    "messageId": "<<messageId>>",
+    "ttftMs": "<<ttftMs>>",
+    "ttltMs": "<<ttltMs>>"
   },
   {
     "id": "<<ID>>",
@@ -3176,7 +3218,9 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/prompt-engin
   "content": "In Boston today, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind speed is 5 mph.",
   "rawContent": "In Boston today, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind speed is 5 mph.",
   "finishReason": "stop",
-  "messageId": "<<messageId>>"
+  "messageId": "<<messageId>>",
+  "ttftMs": "<<ttftMs>>",
+  "ttltMs": "<<ttltMs>>"
 }
 `;
 
@@ -3225,7 +3269,9 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/structured-o
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "<<messageId>>"
+    "messageId": "<<messageId>>",
+    "ttftMs": "<<ttftMs>>",
+    "ttltMs": "<<ttltMs>>"
   },
   {
     "id": "<<ID>>",
@@ -3272,7 +3318,9 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/structured-o
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "<<messageId>>"
+    "messageId": "<<messageId>>",
+    "ttftMs": "<<ttftMs>>",
+    "ttltMs": "<<ttltMs>>"
   },
   {
     "id": "<<ID>>",
@@ -3324,7 +3372,9 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/structured-o
     "content": "Today in Boston, the weather is Sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.",
     "rawContent": "Today in Boston, the weather is Sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.",
     "finishReason": "stop",
-    "messageId": "<<messageId>>"
+    "messageId": "<<messageId>>",
+    "ttftMs": "<<ttftMs>>",
+    "ttltMs": "<<ttltMs>>"
   },
   {
     "id": "<<ID>>",
@@ -3346,7 +3396,9 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/structured-o
   "content": "Today in Boston, the weather is Sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.",
   "rawContent": "Today in Boston, the weather is Sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.",
   "finishReason": "stop",
-  "messageId": "<<messageId>>"
+  "messageId": "<<messageId>>",
+  "ttftMs": "<<ttftMs>>",
+  "ttltMs": "<<ttltMs>>"
 }
 `;
 
@@ -3395,7 +3447,9 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/structured-o
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "<<messageId>>"
+    "messageId": "<<messageId>>",
+    "ttftMs": "<<ttftMs>>",
+    "ttltMs": "<<ttltMs>>"
   },
   {
     "id": "<<ID>>",
@@ -3442,7 +3496,9 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/structured-o
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "<<messageId>>"
+    "messageId": "<<messageId>>",
+    "ttftMs": "<<ttftMs>>",
+    "ttltMs": "<<ttltMs>>"
   },
   {
     "id": "<<ID>>",
@@ -3494,7 +3550,9 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/structured-o
     "content": "Today in Boston, it's 70°F (21°C) and sunny with only a 10% chance of precipitation. The humidity is at 45% with light winds at 5 mph. It's a beautiful day!",
     "rawContent": "Today in Boston, it's 70°F (21°C) and sunny with only a 10% chance of precipitation. The humidity is at 45% with light winds at 5 mph. It's a beautiful day!",
     "finishReason": "stop",
-    "messageId": "<<messageId>>"
+    "messageId": "<<messageId>>",
+    "ttftMs": "<<ttftMs>>",
+    "ttltMs": "<<ttltMs>>"
   },
   {
     "id": "<<ID>>",
@@ -3516,6 +3574,8 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/structured-o
   "content": "Today in Boston, it's 70°F (21°C) and sunny with only a 10% chance of precipitation. The humidity is at 45% with light winds at 5 mph. It's a beautiful day!",
   "rawContent": "Today in Boston, it's 70°F (21°C) and sunny with only a 10% chance of precipitation. The humidity is at 45% with light winds at 5 mph. It's a beautiful day!",
   "finishReason": "stop",
-  "messageId": "<<messageId>>"
+  "messageId": "<<messageId>>",
+  "ttftMs": "<<ttftMs>>",
+  "ttltMs": "<<ttltMs>>"
 }
 `;
