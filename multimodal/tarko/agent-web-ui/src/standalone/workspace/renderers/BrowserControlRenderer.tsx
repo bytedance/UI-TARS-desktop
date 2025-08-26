@@ -13,6 +13,7 @@ import {
 import { useSession } from '@/common/hooks/useSession';
 import { BrowserShell } from './BrowserShell';
 import { FileDisplayMode } from '../types';
+import { AgentEventStream } from '@tarko/agent-interface';
 
 interface BrowserControlRendererProps {
   panelContent: StandardPanelContent;
@@ -115,8 +116,10 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
           foundImage = true;
 
           // Extract devicePixelRatio from environment input metadata if available
-          if (msg.metadata && msg.metadata.type === 'screenshot' && msg.metadata.devicePixelRatio) {
-            setDevicePixelRatio(msg.metadata.devicePixelRatio);
+          if (msg.metadata && AgentEventStream.isScreenshotMetadata(msg.metadata)) {
+            if (msg.metadata.devicePixelRatio) {
+              setDevicePixelRatio(msg.metadata.devicePixelRatio);
+            }
           }
           break;
         }
