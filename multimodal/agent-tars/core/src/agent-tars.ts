@@ -51,7 +51,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   /**
    * Default Web UI configuration for Agent TARS
    */
-  static webui: AgentWebUIImplementation = {
+  static webuiConfig: AgentWebUIImplementation = {
     logo: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png',
     title: 'Agent TARS',
     subtitle: 'Offering seamless integration with a wide range of real-world tools.',
