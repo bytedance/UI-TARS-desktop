@@ -314,10 +314,14 @@ export class LLMProcessor {
       const chunkResult = toolCallEngine.processStreamingChunk(chunk, processingState);
 
       // Track first token time only if metrics are enabled
-      if (this.enableMetrics && !hasReceivedFirstContent /* && (chunkResult.content || chunkResult.reasoningContent) */) {
+      if (
+        this.enableMetrics &&
+        !hasReceivedFirstContent /* && (chunkResult.content || chunkResult.reasoningContent) */
+      ) {
         firstTokenTime = Date.now();
         hasReceivedFirstContent = true;
-        if (requestStartTime > 0) { // Only calculate if we have a valid start time
+        if (requestStartTime > 0) {
+          // Only calculate if we have a valid start time
           const ttft = firstTokenTime - requestStartTime;
           this.logger.info(`[LLM] First token received | TTFT: ${ttft}ms`);
         }
@@ -381,12 +385,12 @@ export class LLMProcessor {
 
     // Calculate timing metrics only if enabled
     let ttftMs: number | undefined;
-    let totalElapsedMs: number | undefined;
-    
+    let ttltMs: number | undefined;
+
     if (this.enableMetrics && requestStartTime > 0) {
-      totalElapsedMs = Date.now() - requestStartTime;
-      ttftMs = firstTokenTime ? firstTokenTime - requestStartTime : totalElapsedMs;
-      this.logger.info(`[LLM] Response timing | TTFT: ${ttftMs}ms | Total: ${totalElapsedMs}ms`);
+      ttltMs = Date.now() - requestStartTime;
+      ttftMs = firstTokenTime ? firstTokenTime - requestStartTime : ttltMs;
+      this.logger.info(`[LLM] Response timing | TTFT: ${ttftMs}ms | Total: ${ttltMs}ms`);
     }
 
     // Create the final events based on processed content
@@ -398,7 +402,7 @@ export class LLMProcessor {
       parsedResponse.finishReason || 'stop',
       messageId, // Pass the message ID to final events
       ttftMs, // Pass the TTFT only if metrics were calculated
-      totalElapsedMs, // Pass the total response time only if metrics were calculated
+      ttltMs, // Pass the TTLT only if metrics were calculated
     );
 
     // Call response hooks with session ID
