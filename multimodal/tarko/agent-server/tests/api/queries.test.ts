@@ -116,6 +116,9 @@ describe('Queries Controller', () => {
         environmentInput: {
           content: expandedContext,
           description: 'Expanded context from contextual references',
+          metadata: {
+            type: 'codebase',
+          },
         },
       });
 
@@ -151,6 +154,9 @@ describe('Queries Controller', () => {
         environmentInput: {
           content: expandedContext,
           description: 'Expanded context from contextual references',
+          metadata: {
+            type: 'codebase',
+          },
         },
       });
     });
@@ -185,6 +191,9 @@ describe('Queries Controller', () => {
         environmentInput: {
           content: expandedContext,
           description: 'Expanded context from contextual references',
+          metadata: {
+            type: 'codebase',
+          },
         },
       });
     });
@@ -271,6 +280,9 @@ describe('Queries Controller', () => {
         environmentInput: {
           content: expandedContext,
           description: 'Expanded context from contextual references',
+          metadata: {
+            type: 'codebase',
+          },
         },
       });
 
