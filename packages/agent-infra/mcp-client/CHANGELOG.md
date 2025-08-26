@@ -1,5 +1,12 @@
 # @agent-infra/mcp-client
 
+## 1.2.20
+
+### Patch Changes
+
+- 3d2a9d2: feat(mcp-client): add configurable timeout
+  - @agent-infra/mcp-shared@1.2.20
+
 ## 1.2.19
 
 ### Patch Changes
