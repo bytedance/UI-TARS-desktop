@@ -380,7 +380,11 @@ export namespace AgentEventStream {
   /**
    * Union type for all environment input metadata types
    */
-  export type EnvironmentInputMetadata = ScreenshotMetadata | TextMetadata | CodebaseMetadata | GenericMetadata;
+  export type EnvironmentInputMetadata =
+    | ScreenshotMetadata
+    | TextMetadata
+    | CodebaseMetadata
+    | GenericMetadata;
 
   /**
    * Environment input event - for injecting contextual information
@@ -394,7 +398,7 @@ export namespace AgentEventStream {
     /** The environment content (can be multimodal) */
     content: string | ChatCompletionContentPart[];
 
-    /** 
+    /**
      * Optional description of the environment input.
      * Description is used in Message History for constructing context,
      * while metadata is not included in the context.
@@ -412,7 +416,9 @@ export namespace AgentEventStream {
   /**
    * Type guard function to check if metadata is screenshot metadata
    */
-  export function isScreenshotMetadata(metadata: EnvironmentInputMetadata): metadata is ScreenshotMetadata {
+  export function isScreenshotMetadata(
+    metadata: EnvironmentInputMetadata,
+  ): metadata is ScreenshotMetadata {
     return metadata.type === 'screenshot';
   }
 
@@ -426,7 +432,9 @@ export namespace AgentEventStream {
   /**
    * Type guard function to check if an environment input event has screenshot metadata
    */
-  export function hasScreenshotMetadata(event: EnvironmentInputEvent): event is EnvironmentInputEvent & { metadata: ScreenshotMetadata } {
+  export function hasScreenshotMetadata(
+    event: EnvironmentInputEvent,
+  ): event is EnvironmentInputEvent & { metadata: ScreenshotMetadata } {
     return event.metadata !== undefined && isScreenshotMetadata(event.metadata);
   }
 
