@@ -44,6 +44,7 @@ interface AgentRunnerOptions {
   agent: Agent;
   contextAwarenessOptions?: AgentContextAwarenessOptions;
   enableStreamingToolCallEvents: boolean;
+  enableMetrics: boolean;
 }
 
 /**
@@ -65,6 +66,7 @@ export class AgentRunner {
   private agent: Agent;
   private contextAwarenessOptions?: AgentContextAwarenessOptions;
   private enableStreamingToolCallEvents: boolean;
+  private enableMetrics: boolean;
   private logger = getLogger('AgentRunner');
 
   // Specialized components
@@ -85,6 +87,7 @@ export class AgentRunner {
     this.agent = options.agent;
     this.contextAwarenessOptions = options.contextAwarenessOptions;
     this.enableStreamingToolCallEvents = options.enableStreamingToolCallEvents;
+    this.enableMetrics = options.enableMetrics;
 
     // Initialize the specialized components
     this.toolProcessor = new ToolProcessor(this.agent, this.toolManager, this.eventStream);
@@ -99,6 +102,7 @@ export class AgentRunner {
       this.top_p,
       this.contextAwarenessOptions,
       this.enableStreamingToolCallEvents,
+      this.enableMetrics,
     );
 
     this.loopExecutor = new LoopExecutor(

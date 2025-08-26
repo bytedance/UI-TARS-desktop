@@ -185,6 +185,19 @@ export interface AgentMemoryOptions {
 }
 
 /**
+ * Metric configuration options for performance monitoring
+ */
+export interface AgentMetricOptions {
+  /**
+   * Whether to enable metric collection (TTFT, TTLT, etc.)
+   * When disabled, timing metrics will not be collected or included in event streams.
+   *
+   * @defaultValue `false`
+   */
+  enable?: boolean;
+}
+
+/**
  * Miscellaneous configuration options for logging and debugging
  */
 export interface AgentMiscOptions {
@@ -194,6 +207,11 @@ export interface AgentMiscOptions {
    * @defaultValue `LogLevel.INFO` in development, `LogLevel.WARN` in production
    */
   logLevel?: LogLevel;
+
+  /**
+   * Metric collection settings
+   */
+  metric?: AgentMetricOptions;
 }
 
 /**

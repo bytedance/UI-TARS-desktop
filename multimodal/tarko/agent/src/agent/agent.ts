@@ -159,6 +159,7 @@ export class Agent<T extends AgentOptions = AgentOptions>
       agent: this,
       contextAwarenessOptions: contextAwarenessOptions,
       enableStreamingToolCallEvents: options.enableStreamingToolCallEvents ?? false,
+      enableMetrics: options.metric?.enable ?? false,
     });
 
     // Initialize execution controller

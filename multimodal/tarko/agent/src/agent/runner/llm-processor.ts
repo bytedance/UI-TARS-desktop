@@ -39,6 +39,7 @@ export class LLMProcessor {
   private messageHistory: MessageHistory;
   private llmClient?: OpenAI;
   private enableStreamingToolCallEvents: boolean;
+  private enableMetrics: boolean;
 
   constructor(
     private agent: Agent,
@@ -50,12 +51,14 @@ export class LLMProcessor {
     private top_p?: number,
     private contextAwarenessOptions?: AgentContextAwarenessOptions,
     enableStreamingToolCallEvents = false,
+    enableMetrics = false,
   ) {
     this.messageHistory = new MessageHistory(
       this.eventStream,
       this.contextAwarenessOptions?.maxImagesCount,
     );
     this.enableStreamingToolCallEvents = enableStreamingToolCallEvents;
+    this.enableMetrics = enableMetrics;
   }
 
   /**
@@ -387,8 +390,8 @@ export class LLMProcessor {
       parsedResponse.reasoningContent || '',
       parsedResponse.finishReason || 'stop',
       messageId, // Pass the message ID to final events
-      ttftMs, // Pass the TTFT (Time to First Token) to final events
-      totalElapsedMs, // Pass the total response time to final events
+      this.enableMetrics ? ttftMs : undefined, // Pass the TTFT only if metrics are enabled
+      this.enableMetrics ? totalElapsedMs : undefined, // Pass the total response time only if metrics are enabled
     );
 
     // Call response hooks with session ID
