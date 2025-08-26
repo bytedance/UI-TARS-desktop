@@ -389,6 +389,7 @@ Provide concise and accurate responses.`;
           const environmentEvent = this.eventStream.createEvent('environment_input', {
             content: normalizedOptions.environmentInput.content,
             description: normalizedOptions.environmentInput.description || 'Environment context',
+            metadata: normalizedOptions.environmentInput.metadata,
           });
           this.eventStream.sendEvent(environmentEvent);
 
@@ -425,6 +426,7 @@ Provide concise and accurate responses.`;
           const environmentEvent = this.eventStream.createEvent('environment_input', {
             content: normalizedOptions.environmentInput.content,
             description: normalizedOptions.environmentInput.description || 'Environment context',
+            metadata: normalizedOptions.environmentInput.metadata,
           });
           this.eventStream.sendEvent(environmentEvent);
 

@@ -6,6 +6,7 @@
 
 import { ChatCompletionContentPart, ModelProviderName } from '@tarko/model-provider/types';
 import { ToolCallEngineType } from './tool-call-engine';
+import { AgentEventStream } from './agent-event-stream';
 
 /**
  * Base options for running an agent without specifying streaming mode
@@ -50,6 +51,8 @@ export interface AgentRunBaseOptions {
     content: string | ChatCompletionContentPart[];
     /** Optional description of the environment input */
     description?: string;
+    /** Optional metadata for the environment input */
+    metadata?: AgentEventStream.EnvironmentInputMetadata;
   };
   /**
    * Abort signal for canceling the execution
