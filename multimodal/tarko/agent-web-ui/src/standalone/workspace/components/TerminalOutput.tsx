@@ -35,10 +35,10 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
           <span>{title}</span>
           {exitCode !== undefined && (
             <span
-              className={`ml-2 px-1.5 py-0.5 rounded text-[10px] ${
+              className={`ml-2 px-1 py-0.5 rounded text-[9px] font-mono ${
                 isError
-                  ? 'bg-red-900/30 text-red-400 border border-red-800/50'
-                  : 'bg-green-900/30 text-green-400 border border-green-800/50'
+                  ? 'bg-red-500/10 text-red-400'
+                  : 'bg-green-500/10 text-green-400'
               }`}
             >
               exit {exitCode}

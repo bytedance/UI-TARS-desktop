@@ -147,10 +147,10 @@ export const ScriptResultRenderer: React.FC<ScriptResultRendererProps> = ({ pane
         >
           <TerminalOutput
             title={(
-              <>
+              <div className="flex items-center gap-1.5 whitespace-nowrap">
                 <FiPlay size={10} />
                 <span>Script Execution - {interpreter}</span>
-              </>
+              </div>
             )}
             command={(
               <>
