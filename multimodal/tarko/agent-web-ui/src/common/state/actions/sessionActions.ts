@@ -313,25 +313,17 @@ export const sendMessageAction = atom(
 
     set(isProcessingAtom, true);
 
-    const userMessage: Message = {
-      id: uuidv4(),
-      role: 'user',
-      content,
-      timestamp: Date.now(),
-    };
-
-    set(messagesAtom, (prev) => {
-      const sessionMessages = prev[activeSessionId] || [];
-      return {
-        ...prev,
-        [activeSessionId]: [...sessionMessages, userMessage],
-      };
-    });
+    // Note: Do NOT add user message to state here in streaming mode
+    // The user_message event will come from the server's event stream
+    // This prevents duplicate user messages in the UI
 
     // Set initial session name from first user query
+    // Note: We check message count before sending since user_message will come from stream
     try {
       const messages = get(messagesAtom)[activeSessionId] || [];
-      if (messages.length <= 2) {
+      const userMessageCount = messages.filter(m => m.role === 'user').length;
+      
+      if (userMessageCount === 0) {
         let summary = '';
         if (typeof content === 'string') {
           summary = content.length > 50 ? content.substring(0, 47) + '...' : content;
