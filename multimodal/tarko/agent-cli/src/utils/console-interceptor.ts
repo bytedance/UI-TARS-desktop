@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { logger } from './misc';
-
 interface ConsoleInterceptorOptions {
   silent?: boolean;
   capture?: boolean;
