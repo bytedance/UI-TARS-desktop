@@ -383,7 +383,21 @@ const ShowcaseDetailPage: React.FC<ShowcaseDetailPageProps> = ({
     );
   }
 
-  return <ShowcaseDetail item={items[0]} onBack={() => navigate('/showcase')} />;
+  const handleBackToShowcase = () => {
+    // 从 referrer 中提取 category 参数
+    const referrer = document.referrer;
+    if (referrer && referrer.includes('/showcase?category=')) {
+      const url = new URL(referrer);
+      const category = url.searchParams.get('category');
+      if (category) {
+        navigate(`/showcase?category=${category}`);
+        return;
+      }
+    }
+    navigate('/showcase');
+  };
+  
+  return <ShowcaseDetail item={items[0]} onBack={handleBackToShowcase} />;
 };
 
 export default Showcase;
