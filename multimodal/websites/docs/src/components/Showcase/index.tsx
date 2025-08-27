@@ -119,7 +119,27 @@ const ShowcaseListPage: React.FC<ShowcaseListPageProps> = ({
   onRetry,
   onNavigateToDetail,
 }) => {
-  const [activeCategory, setActiveCategory] = useState('all');
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  // 从 URL 参数获取 category，默认为 'all'
+  const getCategoryFromUrl = () => {
+    const params = new URLSearchParams(location.search);
+    return params.get('category') || 'all';
+  };
+  
+  const [activeCategory, setActiveCategory] = useState(getCategoryFromUrl);
+  
+  // 当 category 改变时更新 URL
+  const handleCategoryChange = (categoryId: string) => {
+    setActiveCategory(categoryId);
+    const params = new URLSearchParams();
+    if (categoryId !== 'all') {
+      params.set('category', categoryId);
+    }
+    const newPath = params.toString() ? `/showcase?${params.toString()}` : '/showcase';
+    navigate(newPath, { replace: true });
+  };
 
   const filteredItems = useMemo(() => {
     return processedData?.getItemsByCategory(activeCategory) || [];
@@ -180,7 +200,7 @@ const ShowcaseListPage: React.FC<ShowcaseListPageProps> = ({
         <CategoryFilter
           categories={categoriesWithCounts}
           activeCategory={activeCategory}
-          onSelectCategory={setActiveCategory}
+          onSelectCategory={handleCategoryChange}
         />
 
         {isLoading ? (
