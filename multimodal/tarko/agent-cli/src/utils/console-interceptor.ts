@@ -46,7 +46,7 @@ export class ConsoleInterceptor {
 
   start(): void {
     if (this.options.debug) {
-      logger.debug('Starting console output interception');
+      this.originalConsole.error('AgentCLI Starting console output interception');
     }
 
     console.log = this.createInterceptor(this.originalConsole.log);
@@ -64,7 +64,7 @@ export class ConsoleInterceptor {
     console.debug = this.originalConsole.debug;
 
     if (this.options.debug) {
-      logger.debug('Console output interception stopped');
+      this.originalConsole.error('AgentCLI Console output interception stopped');
     }
   }
 
@@ -99,7 +99,7 @@ export class ConsoleInterceptor {
       }
 
       if (this.options.debug) {
-        logger.debug(`[Intercepted]: ${message}`);
+        this.originalConsole.error(`AgentCLI [Intercepted]: ${message}`);
       }
 
       if (!this.options.silent) {
