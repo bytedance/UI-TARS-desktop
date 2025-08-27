@@ -8,7 +8,7 @@
  */
 
 import { LocalBrowser } from '@agent-infra/browser';
-import { BrowserOperator } from '@ui-tars/operator-browser';
+import { BrowserOperator } from '@gui-agent/operator-browser';
 import {
   Agent,
   AgentOptions,
