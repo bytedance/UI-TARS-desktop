@@ -14,6 +14,7 @@ export interface OmniStreamProcessingState extends StreamProcessingState {
   // Additional state for tag parsing
   currentTag?: 'think' | 'answer' | 'code_env' | null;
   insideThink?: boolean;
+  thinkParseCompleted?: boolean; // It means that the current loop has processed think, and the subsequent chunk no longer needs to be parsed.
   insideAnswer?: boolean;
   insideCodeEnv?: boolean;
   thinkBuffer?: string; // separate buffer for think parsing
@@ -30,6 +31,10 @@ export interface OmniStreamProcessingState extends StreamProcessingState {
   insideFunction?: boolean;
   functionBuffer?: string;
   currentToolCallId?: string;
+
+  //For mcp_env and gui_env
+  insideMcp?: boolean; // The current loop needs to handle mcp tasks
+  insideGUI?: boolean; // The loop needs to handle gui tasks
 }
 
 export interface StreamingParseResult {
@@ -51,6 +56,7 @@ export function createInitState(): OmniStreamProcessingState {
     answerBuffer: '',
     currentTag: null,
     insideThink: false,
+    thinkParseCompleted: false,
     insideAnswer: false,
     insideCodeEnv: false,
     codeEnvBuffer: '',
@@ -62,6 +68,8 @@ export function createInitState(): OmniStreamProcessingState {
     insideFunction: false,
     functionBuffer: '',
     currentToolCallId: '',
+    insideMcp: false,
+    insideGUI: false,
   };
 }
 
@@ -154,7 +162,17 @@ function extractCodeEnv(
 
   // No initial tracking needed for streaming mode
 
-  while (state.codeEnvBuffer.length > 0) {
+  while (state.codeEnvBuffer.length > 0 && !state.insideGUI && !state.insideMcp) {
+    if (state.codeEnvBuffer.indexOf('computer_env') > -1) {
+      state.insideGUI = true;
+      break;
+    }
+
+    if (state.codeEnvBuffer.indexOf('mcp_env') > -1) {
+      state.insideMcp = true;
+      break;
+    }
+
     if (!state.insideCodeEnv) {
       // Look for opening code_env tag
       const openMatch = state.codeEnvBuffer.match(/<code_env>/);

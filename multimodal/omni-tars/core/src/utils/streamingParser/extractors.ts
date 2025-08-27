@@ -19,7 +19,8 @@ export function extractThink(content: string, state: OmniStreamProcessingState):
   state.thinkBuffer += content;
   let result = '';
 
-  while (state.thinkBuffer.length > 0) {
+  // If the chunk has content and the think tag has not been processed yet, enter a while loop
+  while (state.thinkBuffer.length > 0 && !state.thinkParseCompleted) {
     if (!state.insideThink) {
       // Look for opening think tag
       const openMatch = state.thinkBuffer.indexOf('<think>');
@@ -51,13 +52,14 @@ export function extractThink(content: string, state: OmniStreamProcessingState):
     } else {
       // Inside think tag, look for closing tag
       const closeMatch = state.thinkBuffer.indexOf('</think>');
-      if (closeMatch !== -1) {
+      if (closeMatch > -1) {
         // Found complete closing tag
         const thinkContent = state.thinkBuffer.substring(0, closeMatch);
         result += thinkContent;
         state.reasoningBuffer += thinkContent;
         state.thinkBuffer = state.thinkBuffer.substring(closeMatch + '</think>'.length);
         state.insideThink = false;
+        state.thinkParseCompleted = true;
         continue;
       } else {
         // Check if buffer ends with partial closing tag
