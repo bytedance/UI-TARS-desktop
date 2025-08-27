@@ -66,16 +66,16 @@ export class McpToolCallEngine extends ToolCallEngine<OmniStreamProcessingState>
       const { think, tools, answer } = extracted;
 
       return {
-        content: answer,
-        rawContent: answer,
-        reasoningContent: think,
+        content: answer ?? fullContent,
+        rawContent: fullContent,
+        reasoningContent: think ?? '',
         toolCalls: tools,
         finishReason: (tools || []).length > 0 ? 'tool_calls' : 'stop',
       };
     }
 
     return {
-      content: state.accumulatedAnswerBuffer || '',
+      content: state.accumulatedAnswerBuffer ?? '',
       rawContent: state.contentBuffer,
       reasoningContent: state.reasoningBuffer ?? '',
       toolCalls: state.toolCalls,

@@ -17,12 +17,11 @@ import { ComposableAgent, createComposableToolCallEngineFactory } from '@omni-ta
 import { AgentOptions } from '@tarko/agent';
 import { AgentWebUIImplementation } from '@tarko/interface';
 
+const mcpToolCallEngine = new McpToolCallEngineProvider();
+
 const toolCallEngine = createComposableToolCallEngineFactory({
-  engines: [
-    new GuiToolCallEngineProvider(),
-    new McpToolCallEngineProvider(),
-    new CodeToolCallEngineProvider(),
-  ],
+  engines: [new GuiToolCallEngineProvider(), mcpToolCallEngine, new CodeToolCallEngineProvider()],
+  defaultEngine: mcpToolCallEngine,
 });
 
 const sandboxBaseUrl = process.env.AIO_SANDBOX_URL ?? '.';
