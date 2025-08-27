@@ -294,6 +294,7 @@ const ShowcaseDetailPage: React.FC<ShowcaseDetailPageProps> = ({
   onRetry,
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Set meta for detail page based on loaded item
   React.useEffect(() => {
