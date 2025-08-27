@@ -24,7 +24,7 @@ describe('processStreamingChunk', () => {
 
       expect(result.content).toBe('');
       expect(result.reasoningContent).toBe('Great! I can see that the search bar is now active');
-      expect(state.contentBuffer).toBe('');
+      expect(state.accumulatedAnswerBuffer).toBe('');
       expect(state.reasoningBuffer).toBe('Great! I can see that the search bar is now active');
     });
 
@@ -40,7 +40,7 @@ describe('processStreamingChunk', () => {
       const result2 = processStreamingChunk(chunk2, state);
       expect(result2.content).toBe('');
       expect(result2.reasoningContent).toBe(' search bar is now');
-      expect(state.contentBuffer).toBe('');
+      expect(state.accumulatedAnswerBuffer).toBe('');
       expect(state.reasoningBuffer).toBe('Great! I can see that the search bar is now');
 
       // Third chunk: closing tag
@@ -48,7 +48,7 @@ describe('processStreamingChunk', () => {
       const result3 = processStreamingChunk(chunk3, state);
       expect(result3.content).toBe('');
       expect(result3.reasoningContent).toBe(' active');
-      expect(state.contentBuffer).toBe('');
+      expect(state.accumulatedAnswerBuffer).toBe('');
       expect(state.reasoningBuffer).toBe('Great! I can see that the search bar is now active');
     });
 
@@ -59,14 +59,14 @@ describe('processStreamingChunk', () => {
       expect(result1.content).toBe('');
       expect(result1.reasoningContent).toBe('');
       expect(state.reasoningBuffer).toBe('');
-      expect(state.contentBuffer).toBe('');
+      expect(state.accumulatedAnswerBuffer).toBe('');
 
       // Second chunk: complete opening tag and content
       const chunk2 = chunker('nk>This is thinking content</think>');
       const result2 = processStreamingChunk(chunk2, state);
       expect(result2.content).toBe('');
       expect(result2.reasoningContent).toBe('This is thinking content');
-      expect(state.contentBuffer).toBe('');
+      expect(state.accumulatedAnswerBuffer).toBe('');
       expect(state.reasoningBuffer).toBe('This is thinking content');
     });
   });
@@ -78,7 +78,7 @@ describe('processStreamingChunk', () => {
 
       expect(result.content).toBe('你好！很高兴见到你。有什么我可以帮助你的吗？');
       expect(result.reasoningContent).toBe('');
-      expect(state.contentBuffer).toBe('你好！很高兴见到你。有什么我可以帮助你的吗？');
+      expect(state.accumulatedAnswerBuffer).toBe('你好！很高兴见到你。有什么我可以帮助你的吗？');
       expect(state.reasoningBuffer).toBe('');
     });
 
@@ -88,7 +88,7 @@ describe('processStreamingChunk', () => {
       const result1 = processStreamingChunk(chunk1, state);
       expect(result1.content).toBe('你好！很高兴');
       expect(result1.reasoningContent).toBe('');
-      expect(state.contentBuffer).toBe('你好！很高兴');
+      expect(state.accumulatedAnswerBuffer).toBe('你好！很高兴');
       expect(state.reasoningBuffer).toBe('');
 
       // Second chunk: more content
@@ -96,7 +96,7 @@ describe('processStreamingChunk', () => {
       const result2 = processStreamingChunk(chunk2, state);
       expect(result2.content).toBe('见到你。有什么我可以');
       expect(result2.reasoningContent).toBe('');
-      expect(state.contentBuffer).toBe('你好！很高兴见到你。有什么我可以');
+      expect(state.accumulatedAnswerBuffer).toBe('你好！很高兴见到你。有什么我可以');
       expect(state.reasoningBuffer).toBe('');
 
       // Third chunk: closing tag
@@ -104,7 +104,7 @@ describe('processStreamingChunk', () => {
       const result3 = processStreamingChunk(chunk3, state);
       expect(result3.content).toBe('帮助你的吗？');
       expect(result3.reasoningContent).toBe('');
-      expect(state.contentBuffer).toBe('你好！很高兴见到你。有什么我可以帮助你的吗？');
+      expect(state.accumulatedAnswerBuffer).toBe('你好！很高兴见到你。有什么我可以帮助你的吗？');
       expect(state.reasoningBuffer).toBe('');
     });
   });
@@ -116,7 +116,7 @@ describe('processStreamingChunk', () => {
       const result1 = processStreamingChunk(chunk1, state);
       expect(result1.content).toBe('');
       expect(result1.reasoningContent).toBe('用户向我打招呼说"你好啊"，');
-      expect(state.contentBuffer).toBe('');
+      expect(state.accumulatedAnswerBuffer).toBe('');
       expect(state.reasoningBuffer).toBe('用户向我打招呼说"你好啊"，');
 
       // chunk2
@@ -124,7 +124,7 @@ describe('processStreamingChunk', () => {
       const result2 = processStreamingChunk(chunk2, state);
       expect(result2.content).toBe('');
       expect(result2.reasoningContent).toBe('这是一个简单的中文问候。');
-      expect(state.contentBuffer).toBe('');
+      expect(state.accumulatedAnswerBuffer).toBe('');
       expect(state.reasoningBuffer).toBe('用户向我打招呼说"你好啊"，这是一个简单的中文问候。');
 
       // chunk3
@@ -132,7 +132,7 @@ describe('processStreamingChunk', () => {
       const result3 = processStreamingChunk(chunk3, state);
       expect(result3.content).toBe('你好！很高兴见到你。');
       expect(result3.reasoningContent).toBe('');
-      expect(state.contentBuffer).toBe('你好！很高兴见到你。');
+      expect(state.accumulatedAnswerBuffer).toBe('你好！很高兴见到你。');
       expect(state.reasoningBuffer).toBe('用户向我打招呼说"你好啊"，这是一个简单的中文问候。');
     });
 
@@ -148,7 +148,7 @@ describe('processStreamingChunk', () => {
       const result2 = processStreamingChunk(chunk2, state);
       expect(result2.content).toBe('Here is my response');
       expect(result2.reasoningContent).toBe('');
-      expect(state.contentBuffer).toBe('Here is my response');
+      expect(state.accumulatedAnswerBuffer).toBe('Here is my response');
       expect(state.reasoningBuffer).toBe('Analyzing the request');
     });
   });
@@ -172,7 +172,7 @@ describe('processStreamingChunk', () => {
       const result1 = processStreamingChunk(chunk1, state);
       expect(result1.content).toBe('');
       expect(result1.reasoningContent).toBe('some content');
-      expect(state.contentBuffer).toBe('');
+      expect(state.accumulatedAnswerBuffer).toBe('');
       expect(state.reasoningBuffer).toBe('some content');
 
       // Complete the closing tag
@@ -180,7 +180,7 @@ describe('processStreamingChunk', () => {
       const result2 = processStreamingChunk(chunk2, state);
       expect(result2.content).toBe('');
       expect(result2.reasoningContent).toBe('');
-      expect(state.contentBuffer).toBe('');
+      expect(state.accumulatedAnswerBuffer).toBe('');
       expect(state.reasoningBuffer).toBe('some content');
     });
   });
@@ -217,33 +217,33 @@ describe('processStreamingChunk', () => {
         if (i === 3) {
           expect(result.content).toBe('');
           expect(result.reasoningContent).toBe('Great');
-          expect(state.contentBuffer).toBe('');
+          expect(state.accumulatedAnswerBuffer).toBe('');
           expect(state.reasoningBuffer).toBe('Great');
         }
 
         if (i === 5) {
           expect(result.content).toBe('');
           expect(result.reasoningContent).toBe(' I');
-          expect(state.contentBuffer).toBe('');
+          expect(state.accumulatedAnswerBuffer).toBe('');
           expect(state.reasoningBuffer).toBe('Great! I');
         }
 
         if (i === 16) {
           expect(result.content).toBe('');
           expect(result.reasoningContent).toBe('');
-          expect(state.contentBuffer).toBe('');
+          expect(state.accumulatedAnswerBuffer).toBe('');
           expect(state.reasoningBuffer).toBe('Great! I can see that the search bar is now active');
         }
 
         if (i === strs.length - 2) {
           expect(result.content).toBe('am i');
           expect(result.reasoningContent).toBe('');
-          expect(state.contentBuffer).toBe('here am i');
+          expect(state.accumulatedAnswerBuffer).toBe('here am i');
           expect(state.reasoningBuffer).toBe('Great! I can see that the search bar is now active');
         }
       }
 
-      expect(state.contentBuffer).toBe('here am i');
+      expect(state.accumulatedAnswerBuffer).toBe('here am i');
       expect(state.reasoningBuffer).toBe('Great! I can see that the search bar is now active');
     });
 
@@ -301,7 +301,9 @@ describe('processStreamingChunk', () => {
         processStreamingChunk(chunker(str), state);
       }
 
-      expect(state.contentBuffer).toBe('\n你好！很高兴见到你。有什么我可以帮助你的吗？\n');
+      expect(state.accumulatedAnswerBuffer).toBe(
+        '\n你好！很高兴见到你。有什么我可以帮助你的吗？\n',
+      );
       expect(state.reasoningBuffer).toBe('用户向我打招呼说"你好啊"，这是一个简单的中文问候。');
     });
   });

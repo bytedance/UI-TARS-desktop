@@ -145,7 +145,7 @@ export function extractAnswer(content: string, state: OmniStreamProcessingState)
         // Found complete closing tag
         const answerContent = state.answerBuffer.substring(0, closeMatch);
         result += answerContent;
-        state.contentBuffer += answerContent;
+        state.accumulatedAnswerBuffer += answerContent;
         state.answerBuffer = state.answerBuffer.substring(closeMatch + '</answer>'.length);
         state.insideAnswer = false;
         continue;
@@ -163,7 +163,7 @@ export function extractAnswer(content: string, state: OmniStreamProcessingState)
             );
             if (beforePartial) {
               result += beforePartial;
-              state.contentBuffer += beforePartial;
+              state.accumulatedAnswerBuffer += beforePartial;
             }
             state.answerBuffer = pattern;
             foundPartial = true;
@@ -174,7 +174,7 @@ export function extractAnswer(content: string, state: OmniStreamProcessingState)
         if (!foundPartial) {
           // All content is answer content
           result += state.answerBuffer;
-          state.contentBuffer += state.answerBuffer;
+          state.accumulatedAnswerBuffer += state.answerBuffer;
           state.answerBuffer = '';
         }
         break;

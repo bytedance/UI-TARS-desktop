@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { AgentOptions } from '@tarko/interface';
+import { AgentOptions, LogLevel } from '@tarko/interface';
 import { resolve } from 'node:path';
 
 export default {
@@ -39,4 +39,5 @@ export default {
   linkReaderMcpUrl: process.env.LINK_READER_URL,
   linkReaderAK: process.env.LINK_READER_AK,
   ignoreSandboxCheck: true,
+  logLevel: LogLevel.DEBUG,
 } as AgentOptions;

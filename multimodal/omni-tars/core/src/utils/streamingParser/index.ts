@@ -18,6 +18,7 @@ export interface OmniStreamProcessingState extends StreamProcessingState {
   insideCodeEnv?: boolean;
   thinkBuffer?: string; // separate buffer for think parsing
   answerBuffer?: string; // separate buffer for answer parsing
+  accumulatedAnswerBuffer?: string; // Accumulation of parsed answer content
 
   // For code_env tool call parsing
   codeEnvBuffer?: string;
@@ -42,6 +43,7 @@ export interface StreamingParseResult {
 export function createInitState(): OmniStreamProcessingState {
   return {
     contentBuffer: '',
+    accumulatedAnswerBuffer: '',
     toolCalls: [],
     reasoningBuffer: '',
     finishReason: null,
@@ -93,6 +95,8 @@ export function processStreamingChunk(
   }
 
   if (delta?.content) {
+    state.contentBuffer += delta.content;
+
     reasoningContent = extractThink(delta.content, state);
     content = extractAnswer(delta.content, state);
     const parsed = extractCodeEnv(delta.content, state);
@@ -481,6 +485,8 @@ function hasPartialTagAtEnd(buffer: string, expectedTags: string[]): boolean {
  * Generate a tool call ID
  */
 function generateToolCallId(): string {
-  return 'random_id';
-  // return `call_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+  if (process.env.TEST) {
+    return 'random_id';
+  }
+  return `call_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 }

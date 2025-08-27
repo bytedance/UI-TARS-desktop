@@ -15,8 +15,12 @@ import {
   StreamChunkResult,
   StreamProcessingState,
 } from '@tarko/agent-interface';
-import { parseMcpContent } from '@omni-tars/core';
-import { parseStreamingChunk, OmniStreamProcessingState, createInitState } from './parser';
+import {
+  parseMcpContent,
+  processStreamingChunk as omniProcessStreamingChunk,
+  OmniStreamProcessingState,
+  createInitState,
+} from '@omni-tars/core';
 
 export class McpToolCallEngine extends ToolCallEngine<OmniStreamProcessingState> {
   private logger = getLogger('McpToolCallEngine');
@@ -36,6 +40,7 @@ export class McpToolCallEngine extends ToolCallEngine<OmniStreamProcessingState>
       // stop_sequences: ['</code_env>', '</mcp_env>'],
     };
   }
+
   initStreamProcessingState(): OmniStreamProcessingState {
     return createInitState();
   }
@@ -44,59 +49,37 @@ export class McpToolCallEngine extends ToolCallEngine<OmniStreamProcessingState>
     chunk: ChatCompletionChunk,
     state: OmniStreamProcessingState,
   ): StreamChunkResult {
-    const delta = chunk.choices[0]?.delta;
+    return omniProcessStreamingChunk(chunk, state);
+  }
 
-    // Accumulate content
-    if (delta?.content) {
-      state.contentBuffer += delta.content;
+  finalizeStreamProcessing(state: OmniStreamProcessingState): ParsedModelResponse {
+    this.logger.info('finalizeStreamProcessing state \n', state);
 
-      // Process streaming chunk for think/answer tag content using the utility
-      const { content, reasoningContent } = parseStreamingChunk(delta.content, state);
+    // omniProcessStreamingChunk does not resolve mcp env tags, so you need to process the complete content yourself
+    if (state.contentBuffer.includes('mcp_env')) {
+      const fullContent = state.contentBuffer;
 
-      // Record finish reason
-      if (chunk.choices[0]?.finish_reason) {
-        state.finishReason = chunk.choices[0].finish_reason;
-      }
+      const extracted = parseMcpContent(fullContent);
+
+      this.logger.info('extracted', JSON.stringify(extracted, null, 2));
+
+      const { think, tools, answer } = extracted;
 
       return {
-        content,
-        reasoningContent,
-        hasToolCallUpdate: false,
-        toolCalls: [],
+        content: answer,
+        rawContent: answer,
+        reasoningContent: think,
+        toolCalls: tools,
+        finishReason: (tools || []).length > 0 ? 'tool_calls' : 'stop',
       };
     }
 
-    // Record finish reason
-    if (chunk.choices[0]?.finish_reason) {
-      state.finishReason = chunk.choices[0].finish_reason;
-    }
-
-    // Return empty content if no delta content
     return {
-      content: '',
-      reasoningContent: '',
-      hasToolCallUpdate: false,
-      toolCalls: [],
-    };
-  }
-
-  finalizeStreamProcessing(state: StreamProcessingState): ParsedModelResponse {
-    const fullContent = state.contentBuffer;
-    this.logger.info('finalizeStreamProcessing content \n', fullContent);
-
-    // const extracted = this.parseContent(fullContent);
-    const extracted = parseMcpContent(fullContent);
-
-    this.logger.info('extracted', JSON.stringify(extracted, null, 2));
-
-    const { think, tools, answer } = extracted;
-
-    return {
-      content: answer ?? fullContent,
-      rawContent: fullContent,
-      reasoningContent: think ?? '',
-      toolCalls: tools,
-      finishReason: (tools || []).length > 0 ? 'tool_calls' : 'stop',
+      content: state.accumulatedAnswerBuffer || '',
+      rawContent: state.contentBuffer,
+      reasoningContent: state.reasoningBuffer ?? '',
+      toolCalls: state.toolCalls,
+      finishReason: (state.toolCalls || []).length > 0 ? 'tool_calls' : 'stop',
     };
   }
 

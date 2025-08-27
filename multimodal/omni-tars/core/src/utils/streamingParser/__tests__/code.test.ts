@@ -50,7 +50,7 @@ describe('processStreamingChunk', () => {
           },
         },
       ]);
-      expect(state.contentBuffer).toBe('');
+      expect(state.accumulatedAnswerBuffer).toBe('');
       expect(state.reasoningBuffer).toBe('');
     });
 
