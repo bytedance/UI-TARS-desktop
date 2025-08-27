@@ -95,7 +95,7 @@ export const Showcase: React.FC = () => {
       isLoading={isLoading}
       error={error}
       onRetry={refetch}
-      onNavigateToDetail={(item) => {
+      onNavigateToDetail={(item, activeCategory) => {
         // Pass current category as state to preserve filter when navigating back
         navigate(`/showcase/${encodeURIComponent(item.id)}`, {
           state: { previousCategory: activeCategory !== 'all' ? activeCategory : null }
@@ -111,7 +111,7 @@ interface ShowcaseListPageProps {
   isLoading: boolean;
   error: string | null;
   onRetry: () => void;
-  onNavigateToDetail: (item: ShowcaseItem) => void;
+  onNavigateToDetail: (item: ShowcaseItem, activeCategory: string) => void;
 }
 
 const ShowcaseListPage: React.FC<ShowcaseListPageProps> = ({
@@ -238,7 +238,7 @@ const ShowcaseListPage: React.FC<ShowcaseListPageProps> = ({
                       key={item.id}
                       item={item}
                       index={index}
-                      onOpenPreview={onNavigateToDetail}
+                      onOpenPreview={(item) => onNavigateToDetail(item, activeCategory)}
                     />
                   ))}
                 </div>
