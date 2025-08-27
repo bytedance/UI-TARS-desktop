@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Spinner, Button } from '@nextui-org/react';
 import { FiRefreshCw, FiAlertCircle } from 'react-icons/fi';
@@ -121,25 +121,30 @@ const ShowcaseListPage: React.FC<ShowcaseListPageProps> = ({
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const searchParams = new URLSearchParams(location.search);
   
-  // 从 URL 参数获取 category，默认为 'all'
-  const getCategoryFromUrl = () => {
-    const params = new URLSearchParams(location.search);
-    return params.get('category') || 'all';
-  };
+  // Get category from URL params, default to 'all'
+  const [activeCategory, setActiveCategory] = useState(searchParams.get('category') || 'all');
   
-  const [activeCategory, setActiveCategory] = useState(getCategoryFromUrl);
-  
-  // 当 category 改变时更新 URL
+  // Update URL when category changes
   const handleCategoryChange = (categoryId: string) => {
     setActiveCategory(categoryId);
-    const params = new URLSearchParams();
-    if (categoryId !== 'all') {
-      params.set('category', categoryId);
+    const newSearchParams = new URLSearchParams(location.search);
+    if (categoryId === 'all') {
+      newSearchParams.delete('category');
+    } else {
+      newSearchParams.set('category', categoryId);
     }
-    const newPath = params.toString() ? `/showcase?${params.toString()}` : '/showcase';
-    navigate(newPath, { replace: true });
+    navigate(`/showcase${newSearchParams.toString() ? `?${newSearchParams.toString()}` : ''}`, { replace: true });
   };
+  
+  // Sync state with URL changes (for browser back/forward)
+  useEffect(() => {
+    const currentCategory = searchParams.get('category') || 'all';
+    if (currentCategory !== activeCategory) {
+      setActiveCategory(currentCategory);
+    }
+  }, [location.search]);
 
   const filteredItems = useMemo(() => {
     return processedData?.getItemsByCategory(activeCategory) || [];
@@ -404,7 +409,7 @@ const ShowcaseDetailPage: React.FC<ShowcaseDetailPageProps> = ({
   }
 
   const handleBackToShowcase = () => {
-    // 从 referrer 中提取 category 参数
+    // Extract category parameter from referrer
     const referrer = document.referrer;
     if (referrer && referrer.includes('/showcase?category=')) {
       const url = new URL(referrer);
