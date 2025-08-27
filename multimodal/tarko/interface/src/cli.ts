@@ -26,6 +26,7 @@ export type AgentCLIArguments = Pick<
   apiKey?: string;
   baseURL?: string;
   shareProvider?: string;
+  thinking?: boolean;
 
   /** Configuration file paths or URLs */
   config?: string[];

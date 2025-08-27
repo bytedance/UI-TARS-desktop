@@ -140,7 +140,17 @@ export class Agent<T extends AgentOptions = AgentOptions>
 
     this.temperature = options.temperature ?? 0.7;
     this.top_p = options.top_p;
-    this.reasoningOptions = options.thinking ?? { type: 'disabled' };
+
+    if (options.thinking) {
+      if (typeof options.thinking !== 'object') {
+        throw new Error(
+          `Invalid thinking option, expected an object, but got ${JSON.stringify(options.thinking)}`,
+        );
+      }
+      this.reasoningOptions = { type: 'disabled' };
+    } else {
+      this.reasoningOptions = { type: 'disabled' };
+    }
 
     // Initialize the resolved model early if possible
     this.initializeEarlyResolvedModel();

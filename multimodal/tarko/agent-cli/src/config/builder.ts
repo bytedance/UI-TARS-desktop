@@ -70,6 +70,7 @@ export function buildAppConfig<
     apiKey,
     baseURL,
     shareProvider,
+    thinking,
     // Extract tool filter options
     tool,
     // Extract MCP server filter options
@@ -80,7 +81,13 @@ export function buildAppConfig<
   } = cliArguments;
 
   // Handle deprecated options
-  const deprecatedOptions = { provider, apiKey: apiKey || undefined, baseURL, shareProvider }; // secretlint-disable-line @secretlint/secretlint-rule-pattern
+  const deprecatedOptions = {
+    provider,
+    apiKey: apiKey || undefined,
+    baseURL,
+    shareProvider,
+    thinking,
+  }; // secretlint-disable-line @secretlint/secretlint-rule-pattern
   const deprecatedKeys = Object.entries(deprecatedOptions)
     .filter(([, value]) => value !== undefined)
     .map(([optionName]) => optionName);
@@ -132,9 +139,10 @@ function handleCoreDeprecatedOptions(
     apiKey?: string;
     baseURL?: string;
     shareProvider?: string;
+    thinking?: boolean;
   },
 ): void {
-  const { provider, apiKey: deprecatedApiKey, baseURL, shareProvider } = deprecated; // secretlint-disable-line @secretlint/secretlint-rule-pattern
+  const { provider, apiKey: deprecatedApiKey, baseURL, shareProvider, thinking } = deprecated; // secretlint-disable-line @secretlint/secretlint-rule-pattern
 
   // Handle deprecated model configuration
   if (provider || deprecatedApiKey || baseURL) {
@@ -169,6 +177,19 @@ function handleCoreDeprecatedOptions(
 
     if (!config.share.provider) {
       config.share.provider = shareProvider;
+    }
+  }
+
+  if (thinking) {
+    if (typeof thinking === 'boolean') {
+      config.thinking = {
+        type: thinking ? 'enabled' : 'disabled',
+      };
+    } else if (typeof thinking === 'object') {
+      config.thinking = {
+        type: 'disabled',
+        ...(config.thinking || {}),
+      };
     }
   }
 }
