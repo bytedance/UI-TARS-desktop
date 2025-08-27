@@ -1,0 +1,562 @@
+# Agent Hooks
+
+Agent hooks provide a powerful way to extend and customize the behavior of your agents throughout their execution lifecycle. The `BaseAgent` class exposes a comprehensive set of hooks that allow you to intercept, modify, and react to various events during agent execution.
+
+## Hook Categories
+
+Agent hooks are organized into several categories based on their purpose:
+
+### Lifecycle Hooks
+
+Control the overall agent lifecycle and execution flow.
+
+### LLM Interaction Hooks
+
+Intercept and modify interactions with language models.
+
+### Tool Execution Hooks
+
+Customize tool calling behavior and handle tool execution events.
+
+### Loop Control Hooks
+
+Manage the agent's reasoning loop and termination conditions.
+
+## Lifecycle Hooks
+
+### `initialize()`
+
+Called during agent initialization to perform setup operations.
+
+```ts
+class CustomAgent extends BaseAgent {
+  async initialize(): Promise<void> {
+    // Perform time-consuming setup operations
+    await this.connectToDatabase();
+    await this.loadConfiguration();
+    console.log('Agent initialized successfully');
+  }
+}
+```
+
+### `onDispose()`
+
+Called during agent disposal to clean up resources.
+
+```ts
+class CustomAgent extends BaseAgent {
+  protected async onDispose(): Promise<void> {
+    // Clean up resources
+    await this.closeConnections();
+    this.clearTimers();
+    console.log('Agent disposed successfully');
+  }
+}
+```
+
+## LLM Interaction Hooks
+
+### `onLLMRequest()`
+
+Triggered before sending a request to the LLM, allowing you to inspect or log the request payload.
+
+```ts
+class CustomAgent extends BaseAgent {
+  async onLLMRequest(id: string, payload: LLMRequestHookPayload): Promise<void> {
+    console.log(`Sending request to LLM for session ${id}`);
+    console.log(`Model: ${payload.model}`);
+    console.log(`Messages: ${payload.messages.length}`);
+    
+    // Log token usage for monitoring
+    this.logTokenUsage(payload);
+  }
+}
+```
+
+### `onLLMResponse()`
+
+Triggered after receiving a response from the LLM, allowing you to process the response.
+
+```ts
+class CustomAgent extends BaseAgent {
+  async onLLMResponse(id: string, payload: LLMResponseHookPayload): Promise<void> {
+    console.log(`Received response for session ${id}`);
+    
+    // Track response metrics
+    this.trackResponseTime(payload.elapsedMs);
+    this.trackTokenUsage(payload.usage);
+    
+    // Custom response processing
+    if (payload.response.choices[0]?.finish_reason === 'length') {
+      console.warn('Response truncated due to length limit');
+    }
+  }
+}
+```
+
+### `onLLMStreamingResponse()`
+
+Triggered for streaming responses from the LLM.
+
+```ts
+class CustomAgent extends BaseAgent {
+  onLLMStreamingResponse(id: string, payload: LLMStreamingResponseHookPayload): void {
+    // Process streaming chunks
+    console.log(`Streaming chunk for session ${id}: ${payload.chunk}`);
+    
+    // Update UI or send real-time updates
+    this.updateStreamingUI(payload.chunk);
+  }
+}
+```
+
+## Tool Execution Hooks
+
+### `onBeforeToolCall()`
+
+Called before executing a tool, allowing you to modify arguments or add validation.
+
+```ts
+class CustomAgent extends BaseAgent {
+  async onBeforeToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    args: any
+  ): Promise<any> {
+    console.log(`Executing tool: ${toolCall.name}`);
+    
+    // Add validation
+    if (toolCall.name === 'fileOperation' && !this.hasFilePermission()) {
+      throw new Error('Insufficient permissions for file operations');
+    }
+    
+    // Modify arguments
+    if (toolCall.name === 'searchWeb') {
+      args.maxResults = Math.min(args.maxResults || 10, 5);
+    }
+    
+    return args;
+  }
+}
+```
+
+### `onAfterToolCall()`
+
+Called after executing a tool, allowing you to modify results or add post-processing.
+
+```ts
+class CustomAgent extends BaseAgent {
+  async onAfterToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    result: any
+  ): Promise<any> {
+    console.log(`Tool ${toolCall.name} completed`);
+    
+    // Post-process results
+    if (toolCall.name === 'imageAnalysis') {
+      result.confidence = this.calculateConfidence(result);
+    }
+    
+    // Log tool usage
+    this.logToolUsage(toolCall.name, result);
+    
+    return result;
+  }
+}
+```
+
+### `onToolCallError()`
+
+Called when a tool execution results in an error, allowing you to handle or transform errors.
+
+```ts
+class CustomAgent extends BaseAgent {
+  async onToolCallError(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    error: any
+  ): Promise<any> {
+    console.error(`Tool ${toolCall.name} failed:`, error);
+    
+    // Provide fallback responses
+    if (toolCall.name === 'weatherAPI') {
+      return 'Weather information is currently unavailable. Please try again later.';
+    }
+    
+    // Transform error messages
+    if (error.code === 'RATE_LIMIT') {
+      return 'Service is temporarily busy. Please wait a moment and try again.';
+    }
+    
+    return `Error: ${error.message || error}`;
+  }
+}
+```
+
+### `onProcessToolCalls()`
+
+Intercepts tool call processing, essential for testing and mocking.
+
+```ts
+class TestAgent extends BaseAgent {
+  onProcessToolCalls(
+    id: string,
+    toolCalls: ChatCompletionMessageToolCall[]
+  ): ToolCallResult[] | undefined {
+    // Mock tool calls for testing
+    if (this.isTestMode) {
+      return toolCalls.map(call => ({
+        toolCallId: call.id,
+        content: this.getMockResult(call.function.name),
+      }));
+    }
+    
+    // Return undefined for normal execution
+    return undefined;
+  }
+}
+```
+
+## Loop Control Hooks
+
+### `onEachAgentLoopStart()`
+
+Called at the beginning of each agent loop iteration.
+
+```ts
+class CustomAgent extends BaseAgent {
+  async onEachAgentLoopStart(sessionId: string): Promise<void> {
+    console.log(`Starting loop iteration ${this.getCurrentLoopIteration()} for session ${sessionId}`);
+    
+    // Inject dynamic context
+    this.updateContextForIteration();
+    
+    // Check resource limits
+    if (this.getCurrentLoopIteration() > this.maxIterations * 0.8) {
+      console.warn('Approaching maximum iteration limit');
+    }
+  }
+}
+```
+
+### `onEachAgentLoopEnd()`
+
+Called at the end of each agent loop iteration.
+
+```ts
+class CustomAgent extends BaseAgent {
+  async onEachAgentLoopEnd(context: EachAgentLoopEndContext): Promise<void> {
+    console.log(`Completed iteration ${context.iteration} for session ${context.sessionId}`);
+    
+    // Log iteration metrics
+    this.logIterationMetrics(context);
+    
+    // Check if we should continue
+    if (this.shouldTerminateEarly(context)) {
+      this.requestLoopTermination();
+    }
+  }
+}
+```
+
+### `onAgentLoopEnd()`
+
+Called when the entire agent loop completes.
+
+```ts
+class CustomAgent extends BaseAgent {
+  async onAgentLoopEnd(id: string): Promise<void> {
+    console.log(`Agent loop completed for session ${id}`);
+    
+    // Cleanup session resources
+    this.cleanupSession(id);
+    
+    // Send completion notifications
+    await this.notifyCompletion(id);
+  }
+}
+```
+
+### `onBeforeLoopTermination()`
+
+Called before the agent loop terminates, allowing you to control termination conditions.
+
+```ts
+class CustomAgent extends BaseAgent {
+  onBeforeLoopTermination(
+    id: string,
+    finalEvent: AgentEventStream.AssistantMessageEvent
+  ): LoopTerminationCheckResult {
+    // Ensure specific tools were called
+    const requiredTools = ['validateResult', 'saveToDatabase'];
+    const calledTools = this.getCalledToolsInSession(id);
+    
+    const allRequiredToolsCalled = requiredTools.every(tool => 
+      calledTools.includes(tool)
+    );
+    
+    if (!allRequiredToolsCalled) {
+      console.log('Required tools not called, continuing loop');
+      return { finished: false };
+    }
+    
+    // Check response quality
+    if (finalEvent.content.length < 50) {
+      console.log('Response too short, requesting more detail');
+      return { finished: false };
+    }
+    
+    return { finished: true };
+  }
+}
+```
+
+## Request Preparation Hooks
+
+### `onPrepareRequest()`
+
+Called before preparing the LLM request, allowing dynamic modification of system prompt and tools.
+
+```ts
+class CustomAgent extends BaseAgent {
+  onPrepareRequest(context: PrepareRequestContext): PrepareRequestResult {
+    let { systemPrompt, tools } = context;
+    
+    // Modify system prompt based on context
+    if (context.iteration > 3) {
+      systemPrompt += '\n\nNote: You are in iteration ' + context.iteration + 
+        '. Please focus on providing a concise final answer.';
+    }
+    
+    // Filter tools based on current state
+    const filteredTools = tools.filter(tool => {
+      // Disable expensive tools in later iterations
+      if (context.iteration > 5 && tool.name.includes('search')) {
+        return false;
+      }
+      return true;
+    });
+    
+    return {
+      systemPrompt,
+      tools: filteredTools,
+    };
+  }
+}
+```
+
+### `onRetrieveTools()` (Deprecated)
+
+> **Note**: This hook is deprecated. Use `onPrepareRequest()` instead for more comprehensive request preparation.
+
+```ts
+class CustomAgent extends BaseAgent {
+  onRetrieveTools(tools: Tool[]): Tool[] {
+    // Filter tools based on agent state
+    return tools.filter(tool => {
+      if (tool.name === 'dangerousOperation' && !this.isAdminMode) {
+        return false;
+      }
+      return true;
+    });
+  }
+}
+```
+
+## Termination Control
+
+### `requestLoopTermination()`
+
+Programmatically request loop termination from within hooks.
+
+```ts
+class CustomAgent extends BaseAgent {
+  async onAfterToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    result: any
+  ): Promise<any> {
+    // Terminate if we found a definitive answer
+    if (toolCall.name === 'factChecker' && result.confidence > 0.95) {
+      console.log('High confidence result found, terminating loop');
+      this.requestLoopTermination();
+    }
+    
+    return result;
+  }
+}
+```
+
+## Complete Example
+
+Here's a complete example demonstrating multiple hooks working together:
+
+```ts
+import { BaseAgent, Agent, Tool, z } from '@tarko/agent';
+
+class MonitoredAgent extends BaseAgent {
+  private sessionMetrics = new Map();
+  private toolUsageCount = new Map();
+  
+  async initialize(): Promise<void> {
+    console.log('🚀 Agent initializing...');
+    await this.setupMonitoring();
+  }
+  
+  async onLLMRequest(id: string, payload: LLMRequestHookPayload): Promise<void> {
+    const metrics = this.getSessionMetrics(id);
+    metrics.llmRequests++;
+    metrics.totalTokensSent += this.estimateTokens(payload.messages);
+  }
+  
+  async onLLMResponse(id: string, payload: LLMResponseHookPayload): Promise<void> {
+    const metrics = this.getSessionMetrics(id);
+    metrics.totalTokensReceived += payload.usage?.total_tokens || 0;
+    metrics.totalCost += this.calculateCost(payload.usage);
+  }
+  
+  async onBeforeToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    args: any
+  ): Promise<any> {
+    // Track tool usage
+    const count = this.toolUsageCount.get(toolCall.name) || 0;
+    this.toolUsageCount.set(toolCall.name, count + 1);
+    
+    // Rate limiting
+    if (count > 10) {
+      throw new Error(`Tool ${toolCall.name} has exceeded usage limit`);
+    }
+    
+    return args;
+  }
+  
+  async onEachAgentLoopEnd(context: EachAgentLoopEndContext): Promise<void> {
+    const metrics = this.getSessionMetrics(context.sessionId);
+    
+    // Auto-terminate if cost exceeds budget
+    if (metrics.totalCost > 1.0) {
+      console.warn('💰 Cost limit exceeded, terminating loop');
+      this.requestLoopTermination();
+    }
+  }
+  
+  onBeforeLoopTermination(
+    id: string,
+    finalEvent: AgentEventStream.AssistantMessageEvent
+  ): LoopTerminationCheckResult {
+    // Ensure response meets quality standards
+    const hasCodeExample = finalEvent.content.includes('```');
+    const hasExplanation = finalEvent.content.length > 100;
+    
+    if (!hasCodeExample || !hasExplanation) {
+      return { finished: false };
+    }
+    
+    return { finished: true };
+  }
+  
+  async onAgentLoopEnd(id: string): Promise<void> {
+    const metrics = this.getSessionMetrics(id);
+    console.log('📊 Session completed:', {
+      sessionId: id,
+      iterations: metrics.iterations,
+      totalCost: metrics.totalCost,
+      toolsUsed: Array.from(this.toolUsageCount.keys()),
+    });
+  }
+  
+  protected async onDispose(): Promise<void> {
+    console.log('🧹 Cleaning up monitoring resources');
+    this.sessionMetrics.clear();
+    this.toolUsageCount.clear();
+  }
+  
+  private getSessionMetrics(sessionId: string) {
+    if (!this.sessionMetrics.has(sessionId)) {
+      this.sessionMetrics.set(sessionId, {
+        llmRequests: 0,
+        totalTokensSent: 0,
+        totalTokensReceived: 0,
+        totalCost: 0,
+        iterations: 0,
+      });
+    }
+    return this.sessionMetrics.get(sessionId);
+  }
+  
+  private async setupMonitoring(): Promise<void> {
+    // Setup monitoring infrastructure
+  }
+  
+  private estimateTokens(messages: any[]): number {
+    // Simple token estimation
+    return JSON.stringify(messages).length / 4;
+  }
+  
+  private calculateCost(usage: any): number {
+    // Calculate cost based on token usage
+    return (usage?.total_tokens || 0) * 0.0001;
+  }
+}
+
+// Usage
+const agent = new Agent({
+  tools: [/* your tools */],
+});
+
+// Apply the monitored agent behavior
+Object.setPrototypeOf(agent, MonitoredAgent.prototype);
+MonitoredAgent.call(agent, agent.getOptions());
+
+// Now your agent has monitoring capabilities
+const response = await agent.run('Explain how to use React hooks');
+```
+
+## Best Practices
+
+### Performance Considerations
+
+- Keep hook implementations lightweight to avoid impacting agent performance
+- Use async hooks only when necessary for I/O operations
+- Avoid heavy computations in frequently called hooks like `onLLMStreamingResponse()`
+
+### Error Handling
+
+- Always handle errors gracefully in hooks to prevent agent crashes
+- Use try-catch blocks for operations that might fail
+- Provide meaningful fallback behavior when hooks encounter errors
+
+### State Management
+
+- Store session-specific data using the session ID as a key
+- Clean up session data in `onAgentLoopEnd()` to prevent memory leaks
+- Use `onDispose()` for final cleanup when the agent is destroyed
+
+### Testing
+
+- Use `onProcessToolCalls()` to mock tool execution in tests
+- Create test-specific agent classes that override hooks for testing scenarios
+- Verify hook behavior with unit tests for custom agent implementations
+
+## Hook Execution Order
+
+Understanding the order of hook execution helps in designing effective agent behavior:
+
+1. `initialize()` - Once during agent setup
+2. `onEachAgentLoopStart()` - Start of each iteration
+3. `onPrepareRequest()` - Before preparing LLM request
+4. `onLLMRequest()` - Before sending to LLM
+5. `onLLMResponse()` / `onLLMStreamingResponse()` - After LLM response
+6. `onProcessToolCalls()` - Before tool execution (if tools are called)
+7. `onBeforeToolCall()` - Before each individual tool
+8. Tool execution
+9. `onAfterToolCall()` / `onToolCallError()` - After each tool
+10. `onEachAgentLoopEnd()` - End of each iteration
+11. `onBeforeLoopTermination()` - Before final termination check
+12. `onAgentLoopEnd()` - When loop completes
+13. `onDispose()` - During agent cleanup
+
+This execution order ensures that you can intercept and modify agent behavior at every critical point in the execution lifecycle.

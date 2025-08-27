@@ -1,0 +1,17 @@
+[
+  {
+    "type": "file",
+    "name": "core",
+    "label": "核心"
+  },
+  {
+    "type": "file",
+    "name": "hooks",
+    "label": "Hooks"
+  },
+  {
+    "type": "file",
+    "name": "snapshot",
+    "label": "快照"
+  }
+]

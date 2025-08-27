@@ -1,0 +1,562 @@
+# Agent Hooks
+
+Agent hooks 提供了一种强大的方式来扩展和自定义 agent 在整个执行生命周期中的行为。`BaseAgent` 类暴露了一套全面的 hooks，允许你拦截、修改和响应 agent 执行过程中的各种事件。
+
+## Hook 分类
+
+Agent hooks 根据其用途分为几个类别：
+
+### 生命周期 Hooks
+
+控制整体的 agent 生命周期和执行流程。
+
+### LLM 交互 Hooks
+
+拦截和修改与语言模型的交互。
+
+### 工具执行 Hooks
+
+自定义工具调用行为并处理工具执行事件。
+
+### 循环控制 Hooks
+
+管理 agent 的推理循环和终止条件。
+
+## 生命周期 Hooks
+
+### `initialize()`
+
+在 agent 初始化期间调用，用于执行设置操作。
+
+```ts
+class CustomAgent extends BaseAgent {
+  async initialize(): Promise<void> {
+    // 执行耗时的设置操作
+    await this.connectToDatabase();
+    await this.loadConfiguration();
+    console.log('Agent 初始化成功');
+  }
+}
+```
+
+### `onDispose()`
+
+在 agent 销毁期间调用，用于清理资源。
+
+```ts
+class CustomAgent extends BaseAgent {
+  protected async onDispose(): Promise<void> {
+    // 清理资源
+    await this.closeConnections();
+    this.clearTimers();
+    console.log('Agent 销毁成功');
+  }
+}
+```
+
+## LLM 交互 Hooks
+
+### `onLLMRequest()`
+
+在向 LLM 发送请求之前触发，允许你检查或记录请求负载。
+
+```ts
+class CustomAgent extends BaseAgent {
+  async onLLMRequest(id: string, payload: LLMRequestHookPayload): Promise<void> {
+    console.log(`向 LLM 发送请求，会话 ${id}`);
+    console.log(`模型: ${payload.model}`);
+    console.log(`消息数: ${payload.messages.length}`);
+    
+    // 记录 token 使用情况以进行监控
+    this.logTokenUsage(payload);
+  }
+}
+```
+
+### `onLLMResponse()`
+
+在从 LLM 接收响应后触发，允许你处理响应。
+
+```ts
+class CustomAgent extends BaseAgent {
+  async onLLMResponse(id: string, payload: LLMResponseHookPayload): Promise<void> {
+    console.log(`收到会话 ${id} 的响应`);
+    
+    // 跟踪响应指标
+    this.trackResponseTime(payload.elapsedMs);
+    this.trackTokenUsage(payload.usage);
+    
+    // 自定义响应处理
+    if (payload.response.choices[0]?.finish_reason === 'length') {
+      console.warn('响应因长度限制被截断');
+    }
+  }
+}
+```
+
+### `onLLMStreamingResponse()`
+
+为来自 LLM 的流式响应触发。
+
+```ts
+class CustomAgent extends BaseAgent {
+  onLLMStreamingResponse(id: string, payload: LLMStreamingResponseHookPayload): void {
+    // 处理流式块
+    console.log(`会话 ${id} 的流式块: ${payload.chunk}`);
+    
+    // 更新 UI 或发送实时更新
+    this.updateStreamingUI(payload.chunk);
+  }
+}
+```
+
+## 工具执行 Hooks
+
+### `onBeforeToolCall()`
+
+在执行工具之前调用，允许你修改参数或添加验证。
+
+```ts
+class CustomAgent extends BaseAgent {
+  async onBeforeToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    args: any
+  ): Promise<any> {
+    console.log(`执行工具: ${toolCall.name}`);
+    
+    // 添加验证
+    if (toolCall.name === 'fileOperation' && !this.hasFilePermission()) {
+      throw new Error('文件操作权限不足');
+    }
+    
+    // 修改参数
+    if (toolCall.name === 'searchWeb') {
+      args.maxResults = Math.min(args.maxResults || 10, 5);
+    }
+    
+    return args;
+  }
+}
+```
+
+### `onAfterToolCall()`
+
+在执行工具之后调用，允许你修改结果或添加后处理。
+
+```ts
+class CustomAgent extends BaseAgent {
+  async onAfterToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    result: any
+  ): Promise<any> {
+    console.log(`工具 ${toolCall.name} 执行完成`);
+    
+    // 后处理结果
+    if (toolCall.name === 'imageAnalysis') {
+      result.confidence = this.calculateConfidence(result);
+    }
+    
+    // 记录工具使用情况
+    this.logToolUsage(toolCall.name, result);
+    
+    return result;
+  }
+}
+```
+
+### `onToolCallError()`
+
+当工具执行导致错误时调用，允许你处理或转换错误。
+
+```ts
+class CustomAgent extends BaseAgent {
+  async onToolCallError(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    error: any
+  ): Promise<any> {
+    console.error(`工具 ${toolCall.name} 执行失败:`, error);
+    
+    // 提供备用响应
+    if (toolCall.name === 'weatherAPI') {
+      return '天气信息当前不可用，请稍后重试。';
+    }
+    
+    // 转换错误消息
+    if (error.code === 'RATE_LIMIT') {
+      return '服务暂时繁忙，请稍等片刻后重试。';
+    }
+    
+    return `错误: ${error.message || error}`;
+  }
+}
+```
+
+### `onProcessToolCalls()`
+
+拦截工具调用处理，对测试和模拟至关重要。
+
+```ts
+class TestAgent extends BaseAgent {
+  onProcessToolCalls(
+    id: string,
+    toolCalls: ChatCompletionMessageToolCall[]
+  ): ToolCallResult[] | undefined {
+    // 为测试模拟工具调用
+    if (this.isTestMode) {
+      return toolCalls.map(call => ({
+        toolCallId: call.id,
+        content: this.getMockResult(call.function.name),
+      }));
+    }
+    
+    // 返回 undefined 进行正常执行
+    return undefined;
+  }
+}
+```
+
+## 循环控制 Hooks
+
+### `onEachAgentLoopStart()`
+
+在每个 agent 循环迭代开始时调用。
+
+```ts
+class CustomAgent extends BaseAgent {
+  async onEachAgentLoopStart(sessionId: string): Promise<void> {
+    console.log(`开始会话 ${sessionId} 的第 ${this.getCurrentLoopIteration()} 次循环迭代`);
+    
+    // 注入动态上下文
+    this.updateContextForIteration();
+    
+    // 检查资源限制
+    if (this.getCurrentLoopIteration() > this.maxIterations * 0.8) {
+      console.warn('接近最大迭代限制');
+    }
+  }
+}
+```
+
+### `onEachAgentLoopEnd()`
+
+在每个 agent 循环迭代结束时调用。
+
+```ts
+class CustomAgent extends BaseAgent {
+  async onEachAgentLoopEnd(context: EachAgentLoopEndContext): Promise<void> {
+    console.log(`完成会话 ${context.sessionId} 的第 ${context.iteration} 次迭代`);
+    
+    // 记录迭代指标
+    this.logIterationMetrics(context);
+    
+    // 检查是否应该继续
+    if (this.shouldTerminateEarly(context)) {
+      this.requestLoopTermination();
+    }
+  }
+}
+```
+
+### `onAgentLoopEnd()`
+
+当整个 agent 循环完成时调用。
+
+```ts
+class CustomAgent extends BaseAgent {
+  async onAgentLoopEnd(id: string): Promise<void> {
+    console.log(`会话 ${id} 的 agent 循环完成`);
+    
+    // 清理会话资源
+    this.cleanupSession(id);
+    
+    // 发送完成通知
+    await this.notifyCompletion(id);
+  }
+}
+```
+
+### `onBeforeLoopTermination()`
+
+在 agent 循环终止之前调用，允许你控制终止条件。
+
+```ts
+class CustomAgent extends BaseAgent {
+  onBeforeLoopTermination(
+    id: string,
+    finalEvent: AgentEventStream.AssistantMessageEvent
+  ): LoopTerminationCheckResult {
+    // 确保调用了特定工具
+    const requiredTools = ['validateResult', 'saveToDatabase'];
+    const calledTools = this.getCalledToolsInSession(id);
+    
+    const allRequiredToolsCalled = requiredTools.every(tool => 
+      calledTools.includes(tool)
+    );
+    
+    if (!allRequiredToolsCalled) {
+      console.log('未调用必需工具，继续循环');
+      return { finished: false };
+    }
+    
+    // 检查响应质量
+    if (finalEvent.content.length < 50) {
+      console.log('响应过短，请求更多详细信息');
+      return { finished: false };
+    }
+    
+    return { finished: true };
+  }
+}
+```
+
+## 请求准备 Hooks
+
+### `onPrepareRequest()`
+
+在准备 LLM 请求之前调用，允许动态修改系统提示和工具。
+
+```ts
+class CustomAgent extends BaseAgent {
+  onPrepareRequest(context: PrepareRequestContext): PrepareRequestResult {
+    let { systemPrompt, tools } = context;
+    
+    // 根据上下文修改系统提示
+    if (context.iteration > 3) {
+      systemPrompt += '\n\n注意：你现在在第 ' + context.iteration + 
+        ' 次迭代中。请专注于提供简洁的最终答案。';
+    }
+    
+    // 根据当前状态过滤工具
+    const filteredTools = tools.filter(tool => {
+      // 在后期迭代中禁用昂贵的工具
+      if (context.iteration > 5 && tool.name.includes('search')) {
+        return false;
+      }
+      return true;
+    });
+    
+    return {
+      systemPrompt,
+      tools: filteredTools,
+    };
+  }
+}
+```
+
+### `onRetrieveTools()` (已弃用)
+
+> **注意**: 此 hook 已弃用。请使用 `onPrepareRequest()` 进行更全面的请求准备。
+
+```ts
+class CustomAgent extends BaseAgent {
+  onRetrieveTools(tools: Tool[]): Tool[] {
+    // 根据 agent 状态过滤工具
+    return tools.filter(tool => {
+      if (tool.name === 'dangerousOperation' && !this.isAdminMode) {
+        return false;
+      }
+      return true;
+    });
+  }
+}
+```
+
+## 终止控制
+
+### `requestLoopTermination()`
+
+从 hooks 内部以编程方式请求循环终止。
+
+```ts
+class CustomAgent extends BaseAgent {
+  async onAfterToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    result: any
+  ): Promise<any> {
+    // 如果找到确定答案则终止
+    if (toolCall.name === 'factChecker' && result.confidence > 0.95) {
+      console.log('找到高置信度结果，终止循环');
+      this.requestLoopTermination();
+    }
+    
+    return result;
+  }
+}
+```
+
+## 完整示例
+
+这是一个演示多个 hooks 协同工作的完整示例：
+
+```ts
+import { BaseAgent, Agent, Tool, z } from '@tarko/agent';
+
+class MonitoredAgent extends BaseAgent {
+  private sessionMetrics = new Map();
+  private toolUsageCount = new Map();
+  
+  async initialize(): Promise<void> {
+    console.log('🚀 Agent 初始化中...');
+    await this.setupMonitoring();
+  }
+  
+  async onLLMRequest(id: string, payload: LLMRequestHookPayload): Promise<void> {
+    const metrics = this.getSessionMetrics(id);
+    metrics.llmRequests++;
+    metrics.totalTokensSent += this.estimateTokens(payload.messages);
+  }
+  
+  async onLLMResponse(id: string, payload: LLMResponseHookPayload): Promise<void> {
+    const metrics = this.getSessionMetrics(id);
+    metrics.totalTokensReceived += payload.usage?.total_tokens || 0;
+    metrics.totalCost += this.calculateCost(payload.usage);
+  }
+  
+  async onBeforeToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    args: any
+  ): Promise<any> {
+    // 跟踪工具使用情况
+    const count = this.toolUsageCount.get(toolCall.name) || 0;
+    this.toolUsageCount.set(toolCall.name, count + 1);
+    
+    // 速率限制
+    if (count > 10) {
+      throw new Error(`工具 ${toolCall.name} 已超过使用限制`);
+    }
+    
+    return args;
+  }
+  
+  async onEachAgentLoopEnd(context: EachAgentLoopEndContext): Promise<void> {
+    const metrics = this.getSessionMetrics(context.sessionId);
+    
+    // 如果成本超过预算则自动终止
+    if (metrics.totalCost > 1.0) {
+      console.warn('💰 成本限制超出，终止循环');
+      this.requestLoopTermination();
+    }
+  }
+  
+  onBeforeLoopTermination(
+    id: string,
+    finalEvent: AgentEventStream.AssistantMessageEvent
+  ): LoopTerminationCheckResult {
+    // 确保响应符合质量标准
+    const hasCodeExample = finalEvent.content.includes('```');
+    const hasExplanation = finalEvent.content.length > 100;
+    
+    if (!hasCodeExample || !hasExplanation) {
+      return { finished: false };
+    }
+    
+    return { finished: true };
+  }
+  
+  async onAgentLoopEnd(id: string): Promise<void> {
+    const metrics = this.getSessionMetrics(id);
+    console.log('📊 会话完成:', {
+      sessionId: id,
+      iterations: metrics.iterations,
+      totalCost: metrics.totalCost,
+      toolsUsed: Array.from(this.toolUsageCount.keys()),
+    });
+  }
+  
+  protected async onDispose(): Promise<void> {
+    console.log('🧹 清理监控资源');
+    this.sessionMetrics.clear();
+    this.toolUsageCount.clear();
+  }
+  
+  private getSessionMetrics(sessionId: string) {
+    if (!this.sessionMetrics.has(sessionId)) {
+      this.sessionMetrics.set(sessionId, {
+        llmRequests: 0,
+        totalTokensSent: 0,
+        totalTokensReceived: 0,
+        totalCost: 0,
+        iterations: 0,
+      });
+    }
+    return this.sessionMetrics.get(sessionId);
+  }
+  
+  private async setupMonitoring(): Promise<void> {
+    // 设置监控基础设施
+  }
+  
+  private estimateTokens(messages: any[]): number {
+    // 简单的 token 估算
+    return JSON.stringify(messages).length / 4;
+  }
+  
+  private calculateCost(usage: any): number {
+    // 根据 token 使用情况计算成本
+    return (usage?.total_tokens || 0) * 0.0001;
+  }
+}
+
+// 使用方法
+const agent = new Agent({
+  tools: [/* 你的工具 */],
+});
+
+// 应用监控 agent 行为
+Object.setPrototypeOf(agent, MonitoredAgent.prototype);
+MonitoredAgent.call(agent, agent.getOptions());
+
+// 现在你的 agent 具有监控能力
+const response = await agent.run('解释如何使用 React hooks');
+```
+
+## 最佳实践
+
+### 性能考虑
+
+- 保持 hook 实现轻量级，避免影响 agent 性能
+- 仅在必要的 I/O 操作时使用异步 hooks
+- 避免在频繁调用的 hooks（如 `onLLMStreamingResponse()`）中进行重计算
+
+### 错误处理
+
+- 在 hooks 中优雅地处理错误，防止 agent 崩溃
+- 为可能失败的操作使用 try-catch 块
+- 当 hooks 遇到错误时提供有意义的备用行为
+
+### 状态管理
+
+- 使用会话 ID 作为键存储特定于会话的数据
+- 在 `onAgentLoopEnd()` 中清理会话数据以防止内存泄漏
+- 使用 `onDispose()` 进行 agent 销毁时的最终清理
+
+### 测试
+
+- 使用 `onProcessToolCalls()` 在测试中模拟工具执行
+- 创建特定于测试的 agent 类，为测试场景重写 hooks
+- 为自定义 agent 实现验证 hook 行为的单元测试
+
+## Hook 执行顺序
+
+了解 hook 执行顺序有助于设计有效的 agent 行为：
+
+1. `initialize()` - agent 设置期间执行一次
+2. `onEachAgentLoopStart()` - 每次迭代开始
+3. `onPrepareRequest()` - 准备 LLM 请求之前
+4. `onLLMRequest()` - 发送到 LLM 之前
+5. `onLLMResponse()` / `onLLMStreamingResponse()` - LLM 响应之后
+6. `onProcessToolCalls()` - 工具执行之前（如果调用了工具）
+7. `onBeforeToolCall()` - 每个单独工具之前
+8. 工具执行
+9. `onAfterToolCall()` / `onToolCallError()` - 每个工具之后
+10. `onEachAgentLoopEnd()` - 每次迭代结束
+11. `onBeforeLoopTermination()` - 最终终止检查之前
+12. `onAgentLoopEnd()` - 循环完成时
+13. `onDispose()` - agent 清理期间
+
+这个执行顺序确保你可以在执行生命周期的每个关键点拦截和修改 agent 行为。
