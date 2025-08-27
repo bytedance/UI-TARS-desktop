@@ -96,7 +96,10 @@ export const Showcase: React.FC = () => {
       error={error}
       onRetry={refetch}
       onNavigateToDetail={(item) => {
-        navigate(`/showcase/${encodeURIComponent(item.id)}`);
+        // Pass current category as state to preserve filter when navigating back
+        navigate(`/showcase/${encodeURIComponent(item.id)}`, {
+          state: { previousCategory: activeCategory !== 'all' ? activeCategory : null }
+        });
       }}
     />
   );
@@ -409,17 +412,13 @@ const ShowcaseDetailPage: React.FC<ShowcaseDetailPageProps> = ({
   }
 
   const handleBackToShowcase = () => {
-    // Extract category parameter from referrer
-    const referrer = document.referrer;
-    if (referrer && referrer.includes('/showcase?category=')) {
-      const url = new URL(referrer);
-      const category = url.searchParams.get('category');
-      if (category) {
-        navigate(`/showcase?category=${category}`);
-        return;
-      }
+    // Use navigation state to preserve category filter
+    const previousCategory = location.state?.previousCategory;
+    if (previousCategory) {
+      navigate(`/showcase?category=${previousCategory}`);
+    } else {
+      navigate('/showcase');
     }
-    navigate('/showcase');
   };
   
   return <ShowcaseDetail item={items[0]} onBack={handleBackToShowcase} />;
