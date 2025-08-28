@@ -302,11 +302,15 @@ export class BrowserOperator extends Operator {
     const startYPercent = startY ? (startY * deviceScaleFactor) / screenHeight : null;
 
     return {
-      // Return percentage coordinates instead of absolute coordinates
-      startX: startXPercent,
-      startY: startYPercent,
+      // Hand it over to the upper layer to avoid redundancy
+      // @ts-expect-error fix type later
+      startX,
+      startY,
+      // Add percentage coordinates for new GUI Agent design
+      startXPercent,
+      startYPercent,
       action_inputs,
-    } as any;
+    };
   }
 
   private async handleClick(x: number, y: number) {

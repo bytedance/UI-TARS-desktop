@@ -55,18 +55,18 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
     const matchingResult = sessionResults.find((result) => result.toolCallId === toolCallId);
 
     if (matchingResult && matchingResult.content && matchingResult.content.result) {
-      const { startX, startY } = matchingResult.content.result;
+      const { startXPercent, startYPercent } = matchingResult.content.result;
 
       // Save previous position before updating
       if (mousePosition) {
         setPreviousMousePosition(mousePosition);
       }
 
-      // Set new position if coordinates are valid (now as percentages)
-      if (typeof startX === 'number' && typeof startY === 'number') {
+      // Set new position if percentage coordinates are valid
+      if (typeof startXPercent === 'number' && typeof startYPercent === 'number') {
         setMousePosition({
-          x: startX * 100, // Convert to percentage
-          y: startY * 100, // Convert to percentage
+          x: startXPercent * 100, // Convert to percentage
+          y: startYPercent * 100, // Convert to percentage
         });
       }
     }

@@ -196,7 +196,6 @@ wait()                                         - Wait 5 seconds and take a scree
           // Get page title
           const title = document.title || 'Untitled Page';
 
-          // Get visible text content
           const getVisibleText = (node: any) => {
             if (node.nodeType === Node.TEXT_NODE) {
               return node.textContent || '';
@@ -213,10 +212,13 @@ wait()                                         - Wait 5 seconds and take a scree
 
             let text = '';
             for (const child of Array.from(node.childNodes)) {
-              if ((child as any).nodeType === Node.ELEMENT_NODE) {
+              // @ts-expect-error
+              if (child.nodeType === Node.ELEMENT_NODE) {
                 text += getVisibleText(child);
-              } else if ((child as any).nodeType === Node.TEXT_NODE) {
-                text += (child as any).textContent || '';
+                // @ts-expect-error
+              } else if (child.nodeType === Node.TEXT_NODE) {
+                // @ts-expect-error
+                text += child.textContent || '';
               }
             }
 
