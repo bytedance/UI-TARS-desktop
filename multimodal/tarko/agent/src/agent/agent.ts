@@ -88,7 +88,7 @@ export class Agent<T extends AgentOptions = AgentOptions>
     super(options as T);
 
     this.instructions = options.instructions || this.getDefaultPrompt();
-    this.maxIterations = options.maxIterations ?? 10;
+    this.maxIterations = options.maxIterations ?? 1000;
     this.maxTokens = options.maxTokens;
     this.name = options.name ?? 'Anonymous';
     this.id = options.id ?? '@tarko/agent';

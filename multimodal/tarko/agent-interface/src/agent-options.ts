@@ -152,8 +152,10 @@ export interface AgentToolOptions {
 export interface AgentLoopOptions {
   /**
    * Maximum number of iterations of the agent.
+   * Modern LLM models have improved agentic loop-horizon task capabilities,
+   * allowing for more complex multi-step reasoning processes.
    *
-   * @defaultValue `50`
+   * @defaultValue `1000`
    */
   maxIterations?: number;
 }

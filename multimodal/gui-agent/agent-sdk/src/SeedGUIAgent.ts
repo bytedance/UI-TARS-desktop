@@ -47,7 +47,7 @@ export class SeedGUIAgent extends Agent {
       tools: [],
       toolCallEngine: SeedGUIAgentToolCallEngine,
       model: model,
-      maxIterations: maxLoopCount ?? 100,
+      ...(maxLoopCount && { maxIterations: maxLoopCount }),
       logLevel: LogLevel.ERROR,
     });
 

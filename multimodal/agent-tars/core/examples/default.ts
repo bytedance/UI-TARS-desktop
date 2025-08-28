@@ -18,7 +18,7 @@ export const DEFUALT_OPTIONS: AgentTARSOptions = {
     apiKey: process.env.ARK_API_KEY,
   },
   toolCallEngine: 'prompt_engineering',
-  maxIterations: 100,
+
   // temperature: 0,
   thinking: {
     type: 'disabled',
