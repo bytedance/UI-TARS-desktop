@@ -451,7 +451,9 @@ export class AgentSession {
     }
 
     // Clean up agent resources
-    await this.agent.dispose();
+    if (this.agent && typeof this.agent.dispose === 'function') {
+      await this.agent.dispose();
+    }
 
     if (this.agioProvider) {
       // This ensures that all buffered analytics events are sent before the session is terminated.
