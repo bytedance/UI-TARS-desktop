@@ -196,9 +196,8 @@ wait()                                         - Wait 5 seconds and take a scree
           // Get page title
           const title = document.title || 'Untitled Page';
 
-          // @ts-expect-error
           // Get visible text content
-          const getVisibleText = (node) => {
+          const getVisibleText = (node: any) => {
             if (node.nodeType === Node.TEXT_NODE) {
               return node.textContent || '';
             }
@@ -214,13 +213,10 @@ wait()                                         - Wait 5 seconds and take a scree
 
             let text = '';
             for (const child of Array.from(node.childNodes)) {
-              // @ts-expect-error
-              if (child.nodeType === Node.ELEMENT_NODE) {
+              if ((child as any).nodeType === Node.ELEMENT_NODE) {
                 text += getVisibleText(child);
-                // @ts-expect-error
-              } else if (child.nodeType === Node.TEXT_NODE) {
-                // @ts-expect-error
-                text += child.textContent || '';
+              } else if ((child as any).nodeType === Node.TEXT_NODE) {
+                text += (child as any).textContent || '';
               }
             }
 
@@ -247,7 +243,7 @@ wait()                                         - Wait 5 seconds and take a scree
           description: 'Page Content After Browser Action',
           metadata: {
             type: 'text',
-          },
+          } as AgentEventStream.TextMetadata,
         });
 
         // Send the event
@@ -344,7 +340,7 @@ wait()                                         - Wait 5 seconds and take a scree
         description: 'Browser Screenshot',
         metadata: {
           type: 'screenshot',
-        },
+        } as AgentEventStream.ScreenshotMetadata,
       });
 
       return eventStream.sendEvent(event);
@@ -405,8 +401,7 @@ wait()                                         - Wait 5 seconds and take a scree
         description: 'Browser Screenshot',
         metadata: {
           type: 'screenshot',
-          devicePixelRatio: await this.getDevicePixelRatio(),
-        },
+        } as AgentEventStream.ScreenshotMetadata,
       });
 
       eventStream.sendEvent(event);
@@ -603,19 +598,7 @@ wait()                                         - Wait 5 seconds and take a scree
     }
   }
 
-  /**
-   * Get the device pixel ratio from the browser page
-   */
-  private async getDevicePixelRatio(): Promise<number> {
-    try {
-      const page = await this.getPage();
-      const devicePixelRatio = await page.evaluate(() => window.devicePixelRatio);
-      return devicePixelRatio || 1;
-    } catch (error) {
-      this.logger.warn('Failed to get device pixel ratio, defaulting to 1:', error);
-      return 1;
-    }
-  }
+
 
   /**
    * Get access to the underlying Puppeteer page
