@@ -411,59 +411,27 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
               ) : isProcessing ? (
                 <motion.button
                   {...{ ['ke' + 'y']: 'abort-btn' }}
-                  initial={{ opacity: 0, scale: 0.3, rotate: -90 }}
-                  animate={{ 
-                    opacity: 1, 
-                    scale: 1, 
-                    rotate: 0,
-                    transition: {
-                      type: "spring",
-                      stiffness: 300,
-                      damping: 20,
-                      duration: 0.6
-                    }
-                  }}
-                  exit={{ 
-                    opacity: 0, 
-                    scale: 0.3, 
-                    rotate: 90,
-                    transition: { duration: 0.2 }
-                  }}
-                  whileTap={{ scale: 0.9, rotate: 5 }}
-                  whileHover={{ 
-                    scale: 1.05,
-                    boxShadow: "0 8px 25px rgba(99, 102, 241, 0.3)",
-                    transition: { duration: 0.2 }
-                  }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: 1.02 }}
                   type="button"
                   onClick={handleAbort}
                   disabled={isAborting}
-                  className={`absolute right-3 bottom-3 w-11 h-11 rounded-full flex items-center justify-center backdrop-blur-sm ${
+                  className={`absolute right-3 bottom-3 w-10 h-10 rounded-full flex items-center justify-center ${
                     isAborting
-                      ? 'bg-gradient-to-br from-indigo-200/80 via-purple-200/80 to-pink-200/80 dark:from-indigo-700/40 dark:via-purple-700/40 dark:to-pink-700/40 text-indigo-500 dark:text-indigo-400 cursor-not-allowed border-2 border-indigo-300/50 dark:border-indigo-600/50'
-                      : 'bg-gradient-to-br from-indigo-100/90 via-purple-100/90 to-pink-100/90 hover:from-indigo-200/95 hover:via-purple-200/95 hover:to-pink-200/95 dark:from-indigo-800/60 dark:via-purple-800/60 dark:to-pink-800/60 dark:hover:from-indigo-700/70 dark:hover:via-purple-700/70 dark:hover:to-pink-700/70 text-indigo-700 dark:text-indigo-300 border-2 border-indigo-300/60 dark:border-indigo-600/60 hover:border-indigo-400/80 dark:hover:border-indigo-500/80'
-                  } transition-all duration-300 shadow-lg hover:shadow-xl bg-[length:200%_200%] animate-border-flow`}
+                      ? 'bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100 dark:from-indigo-800/30 dark:via-purple-800/30 dark:to-pink-800/30 text-indigo-400 dark:text-indigo-500 cursor-not-allowed border border-indigo-200 dark:border-indigo-700/50'
+                      : 'bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 hover:from-indigo-100 hover:via-purple-100 hover:to-pink-100 dark:from-indigo-900/20 dark:via-purple-900/20 dark:to-pink-900/20 dark:hover:from-indigo-900/30 dark:hover:via-purple-900/30 dark:hover:to-pink-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-700/50'
+                  } transition-all duration-200 shadow-sm bg-[length:200%_200%] animate-border-flow`}
                   title="Stop generation"
                 >
-                  <motion.div
-                    animate={isAborting ? { rotate: 360 } : { rotate: 0 }}
-                    transition={isAborting ? { 
-                      duration: 1, 
-                      repeat: Infinity, 
-                      ease: "linear" 
-                    } : { duration: 0.3 }}
-                    className="flex items-center justify-center"
-                  >
-                    {isAborting ? (
-                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <motion.div 
-                        className="w-3.5 h-3.5 bg-current rounded-sm" 
-                        whileHover={{ scale: 1.1, rotate: 5 }}
-                        transition={{ duration: 0.2 }}
-                      />
-                    )}
-                  </motion.div>
+                  {isAborting ? (
+                    <FiLoader className="animate-spin" size={16} />
+                  ) : (
+                    <div className="w-3 h-3 bg-current rounded-sm" />
+                  )}
                 </motion.button>
               ) : (
                 <motion.button
