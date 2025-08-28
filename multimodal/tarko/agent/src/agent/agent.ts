@@ -147,7 +147,7 @@ export class Agent<T extends AgentOptions = AgentOptions>
           `Invalid thinking option, expected an object, but got ${JSON.stringify(options.thinking)}`,
         );
       }
-      this.reasoningOptions = { type: 'disabled' };
+      this.reasoningOptions = options.thinking;
     } else {
       this.reasoningOptions = { type: 'disabled' };
     }
