@@ -421,8 +421,8 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
                   disabled={isAborting}
                   className={`absolute right-3 bottom-3 w-10 h-10 rounded-full flex items-center justify-center ${
                     isAborting
-                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                      : 'bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/50'
+                      ? 'bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-800/30 dark:to-purple-800/30 text-indigo-400 dark:text-indigo-500 cursor-not-allowed border border-indigo-200 dark:border-indigo-700/50'
+                      : 'bg-gradient-to-r from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 dark:from-indigo-900/20 dark:to-purple-900/20 dark:hover:from-indigo-900/30 dark:hover:to-purple-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-700/50'
                   } transition-all duration-200 shadow-sm`}
                   title="Stop generation"
                 >
