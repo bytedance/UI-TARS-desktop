@@ -73,7 +73,6 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
               whileHover={disabled ? {} : { scale: 1.05 }}
               whileTap={disabled ? {} : { scale: 0.95 }}
               onClick={handleOpenModal}
-              disabled={disabled}
               className={`p-2 rounded-full transition-all duration-200 ${
                 disabled
                   ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
@@ -104,7 +103,6 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
             whileHover={disabled ? {} : { scale: 1.05 }}
             whileTap={disabled ? {} : { scale: 0.95 }}
             onClick={handleOpenModal}
-            disabled={disabled}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-3xl text-xs border shadow-sm transition-all duration-200 ${
               disabled
                 ? 'text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 border-gray-200/50 dark:border-gray-600/30 cursor-not-allowed'
