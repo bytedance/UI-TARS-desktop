@@ -70,6 +70,29 @@ function createMessageGroups(messages: Message[]): MessageGroup[] {
 
     // Process assistant and environment messages
     if (message.role === 'assistant' || message.role === 'environment') {
+      // Check if this assistant message has a different messageId from the last assistant message in current group
+      // If so, it should start a new group (different thinking/response cycle)
+      if (message.role === 'assistant' && message.messageId) {
+        const lastAssistantInGroup = currentGroup
+          .slice()
+          .reverse()
+          .find((m) => m.role === 'assistant');
+
+        if (
+          lastAssistantInGroup &&
+          lastAssistantInGroup.messageId &&
+          lastAssistantInGroup.messageId !== message.messageId
+        ) {
+          // Different messageId means this is a new assistant response cycle
+          if (currentGroup.length > 0) {
+            groups.push({ messages: [...currentGroup] });
+          }
+          currentGroup = [message];
+          currentThinkingSequence = null;
+          continue;
+        }
+      }
+
       // Check if this is the start of a thinking sequence
       if (
         message.role === 'assistant' &&
