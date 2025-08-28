@@ -1,6 +1,6 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { sessionsAtom, activeSessionIdAtom } from '../state/atoms/session';
-import { messagesAtom, groupedMessagesAtom } from '../state/atoms/message';
+import { messagesAtom, groupedMessagesAtom, sortedMessagesAtom } from '../state/atoms/message';
 import { toolResultsAtom } from '../state/atoms/tool';
 import { plansAtom, planUIStateAtom } from '../state/atoms/plan';
 import { sessionFilesAtom } from '../state/atoms/files';
@@ -41,6 +41,7 @@ export function useSession() {
   const [activeSessionId, setActiveSessionId] = useAtom(activeSessionIdAtom);
   const messages = useAtomValue(messagesAtom);
   const groupedMessages = useAtomValue(groupedMessagesAtom);
+  const sortedMessages = useAtomValue(sortedMessagesAtom);
   const toolResults = useAtomValue(toolResultsAtom);
   const sessionFiles = useAtomValue(sessionFilesAtom);
   const [isProcessing, setIsProcessing] = useAtom(isProcessingAtom);
@@ -140,6 +141,7 @@ export function useSession() {
       activeSessionId,
       messages,
       groupedMessages,
+      sortedMessages,
       toolResults,
       sessionFiles,
       isProcessing,
@@ -177,6 +179,7 @@ export function useSession() {
       activeSessionId,
       messages,
       groupedMessages,
+      sortedMessages,
       toolResults,
       sessionFiles,
       isProcessing,

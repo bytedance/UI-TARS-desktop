@@ -8,44 +8,52 @@ import { Message, MessageGroup } from '@/common/types';
 export const messagesAtom = atom<Record<string, Message[]>>({});
 
 /**
- * Atom for storing grouped messages for each session
- * Key is the session ID, value is an array of message groups for that session
- * This is derived from messagesAtom but with messages properly grouped
+ * Simplified atom for sorted messages by session
+ * Provides time-sorted messages without complex grouping logic
  */
-export const groupedMessagesAtom = atom<Record<string, MessageGroup[]>>((get) => {
+export const sortedMessagesAtom = atom<Record<string, Message[]>>((get) => {
   const allMessages = get(messagesAtom);
-  const result: Record<string, MessageGroup[]> = {};
+  const result: Record<string, Message[]> = {};
 
-  // Process each session's messages into groups
+  // Sort messages by timestamp for each session
   Object.entries(allMessages).forEach(([sessionId, messages]) => {
-    result[sessionId] = createMessageGroups(messages);
+    result[sessionId] = [...messages].sort((a, b) => a.timestamp - b.timestamp);
   });
 
   return result;
 });
 
 /**
- * Group messages into logical conversation groups
- *
- * The grouping logic creates groups based on:
- * 1. User messages always start a new group
- * 2. System messages are standalone groups
- * 3. Assistant/environment messages that belong together are grouped
- * 4. Thinking/processing sequences are properly maintained
+ * Grouped messages atom with stable grouping logic
+ * Groups messages by conversation flow while maintaining stability
  */
-function createMessageGroups(messages: Message[]): MessageGroup[] {
+export const groupedMessagesAtom = atom<Record<string, MessageGroup[]>>((get) => {
+  const allMessages = get(messagesAtom);
+  const result: Record<string, MessageGroup[]> = {};
+
+  // Process each session's messages into stable groups
+  Object.entries(allMessages).forEach(([sessionId, messages]) => {
+    result[sessionId] = createStableMessageGroups(messages);
+  });
+
+  return result;
+});
+
+/**
+ * Create stable message groups with simplified logic
+ * Focuses on preventing flickering while maintaining logical grouping
+ */
+function createStableMessageGroups(messages: Message[]): MessageGroup[] {
   if (!messages.length) return [];
 
   const groups: MessageGroup[] = [];
   let currentGroup: Message[] = [];
-  let currentThinkingSequence: {
-    startIndex: number;
-    messages: Message[];
-  } | null = null;
 
-  // Process messages in order
-  for (let i = 0; i < messages.length; i++) {
-    const message = messages[i];
+  // Sort messages by timestamp to ensure consistent ordering
+  const sortedMessages = [...messages].sort((a, b) => a.timestamp - b.timestamp);
+
+  for (let i = 0; i < sortedMessages.length; i++) {
+    const message = sortedMessages[i];
 
     // User messages always start a new group
     if (message.role === 'user') {
@@ -53,7 +61,6 @@ function createMessageGroups(messages: Message[]): MessageGroup[] {
         groups.push({ messages: [...currentGroup] });
       }
       currentGroup = [message];
-      currentThinkingSequence = null;
       continue;
     }
 
@@ -64,50 +71,32 @@ function createMessageGroups(messages: Message[]): MessageGroup[] {
       }
       groups.push({ messages: [message] });
       currentGroup = [];
-      currentThinkingSequence = null;
       continue;
     }
 
-    // Process assistant and environment messages
+    // Assistant and environment messages
     if (message.role === 'assistant' || message.role === 'environment') {
-      // Check if this is the start of a thinking sequence
-      if (
-        message.role === 'assistant' &&
-        currentGroup.length > 0 &&
-        currentGroup[currentGroup.length - 1].role === 'user' &&
-        (!message.finishReason || message.finishReason !== 'stop')
-      ) {
-        // Create new thinking sequence
-        currentThinkingSequence = {
-          startIndex: currentGroup.length,
-          messages: [message],
-        };
-        currentGroup.push(message);
-        continue;
-      }
+      // Check if this assistant message should start a new group
+      // This happens when messageId changes (different response cycle)
+      if (message.role === 'assistant' && message.messageId && currentGroup.length > 0) {
+        const lastAssistantInGroup = currentGroup
+          .slice()
+          .reverse()
+          .find((m) => m.role === 'assistant');
 
-      // Continue existing thinking sequence
-      if (currentThinkingSequence && (!message.finishReason || message.finishReason !== 'stop')) {
-        currentThinkingSequence.messages.push(message);
-        currentGroup.push(message);
-        continue;
-      }
-
-      // Handle final answer in a thinking sequence
-      if (message.role === 'assistant' && message.finishReason === 'stop') {
-        if (currentThinkingSequence) {
-          currentThinkingSequence.messages.push(message);
-          currentGroup.push(message);
-          currentThinkingSequence = null;
-          continue;
-        } else {
-          // Standalone final answer
-          currentGroup.push(message);
+        if (
+          lastAssistantInGroup &&
+          lastAssistantInGroup.messageId &&
+          lastAssistantInGroup.messageId !== message.messageId
+        ) {
+          // Different messageId means new response cycle - start new group
+          groups.push({ messages: [...currentGroup] });
+          currentGroup = [message];
           continue;
         }
       }
 
-      // Default: add to current group
+      // Add to current group
       currentGroup.push(message);
     }
   }
