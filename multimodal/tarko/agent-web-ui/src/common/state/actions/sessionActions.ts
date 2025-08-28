@@ -383,9 +383,17 @@ export const abortQueryAction = atom(null, async (get, set) => {
 
   try {
     const success = await apiService.abortQuery(activeSessionId);
+    
+    // Immediately set processing to false on successful abort to prevent flickering
+    if (success) {
+      set(isProcessingAtom, false);
+    }
+    
     return success;
   } catch (error) {
     console.error('Error aborting query:', error);
+    // Also set processing to false on error to ensure UI consistency
+    set(isProcessingAtom, false);
     return false;
   }
 });

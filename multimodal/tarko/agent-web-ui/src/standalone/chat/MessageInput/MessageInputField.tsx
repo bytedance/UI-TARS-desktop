@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FiSend, FiX, FiRefreshCw, FiImage, FiLoader } from 'react-icons/fi';
+import { FiSend, FiX, FiRefreshCw, FiImage, FiLoader, FiSquare } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ConnectionStatus } from '@/common/types';
 import { ChatCompletionContentPart } from '@tarko/agent-interface';
@@ -214,15 +214,19 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
   };
 
   const handleAbort = async () => {
-    if (!isProcessing) return;
+    if (!isProcessing || isAborting) return;
 
     setIsAborting(true);
     try {
-      await abortQuery();
+      const success = await abortQuery();
+      if (!success) {
+        console.warn('Abort request may have failed');
+      }
     } catch (error) {
       console.error('Failed to abort:', error);
     } finally {
-      setIsAborting(false);
+      // Add a small delay to prevent UI flickering
+      setTimeout(() => setIsAborting(false), 100);
     }
   };
 
@@ -410,19 +414,23 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
-                  whileTap={{ scale: 0.9 }}
-                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: 1.02 }}
                   type="button"
                   onClick={handleAbort}
                   disabled={isAborting}
-                  className={`absolute right-3 bottom-3 p-2 rounded-full ${
+                  className={`absolute right-3 bottom-3 w-10 h-10 rounded-lg flex items-center justify-center ${
                     isAborting
-                      ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
-                      : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:text-gray-400'
-                  } transition-all duration-200`}
-                  title="Abort current operation"
+                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                      : 'bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/50'
+                  } transition-all duration-200 shadow-sm`}
+                  title="Stop generation"
                 >
-                  {isAborting ? <FiLoader className="animate-spin" size={20} /> : <FiX size={20} />}
+                  {isAborting ? (
+                    <FiLoader className="animate-spin" size={16} />
+                  ) : (
+                    <div className="w-3 h-3 bg-current rounded-sm" />
+                  )}
                 </motion.button>
               ) : (
                 <motion.button
