@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { FiSend, FiX, FiRefreshCw, FiImage, FiLoader } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ConnectionStatus } from '@/common/types';
@@ -11,7 +11,16 @@ import {
   updateSelectorStateAction,
 } from '@/common/state/atoms/contextualSelector';
 import { ContextualSelector, ContextualItem } from '../ContextualSelector';
-import { getAgentTitle, isContextualSelectorEnabled } from '@/common/constants';
+import { isContextualSelectorEnabled } from '@/common/constants';
+import {
+  getInputActiveState,
+  getInputPlaceholder,
+  getStatusMessage,
+  isSubmitDisabled,
+  getSubmitButtonClasses,
+  getFileButtonClasses,
+  getAbortButtonClasses,
+} from '../utils/conditionalHelpers';
 
 interface MessageInputFieldProps {
   uploadedImages: ChatCompletionContentPart[];
@@ -55,8 +64,20 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
 
   const { abortQuery } = useSession();
 
-  // Check if contextual selector is enabled
-  const contextualSelectorEnabled = isContextualSelectorEnabled();
+  // Memoize derived states
+  const contextualSelectorEnabled = useMemo(() => isContextualSelectorEnabled(), []);
+  
+  const hasInput = Boolean(contextualState.input.trim());
+  const hasImages = uploadedImages.length > 0;
+  const hasContextualItems = contextualState.contextualItems.length > 0;
+  
+  const isInputActive = getInputActiveState(isFocused, hasInput, hasImages, hasContextualItems);
+  const inputPlaceholder = getInputPlaceholder(connectionStatus, isProcessing);
+  const statusMessage = getStatusMessage(connectionStatus, isProcessing);
+  const submitDisabled = isSubmitDisabled(hasInput, hasImages, isDisabled);
+  const submitButtonClasses = getSubmitButtonClasses(hasInput, hasImages, isDisabled);
+  const fileButtonClasses = getFileButtonClasses(isDisabled, isProcessing);
+  const abortButtonClasses = getAbortButtonClasses(isAborting);
 
   useEffect(() => {
     if (!isDisabled && inputRef.current) {
@@ -321,10 +342,7 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
         >
           <div
             className={`absolute inset-0 bg-gradient-to-r ${
-              isFocused ||
-              contextualState.input.trim() ||
-              uploadedImages.length > 0 ||
-              contextualState.contextualItems.length > 0
+              isInputActive
                 ? 'from-indigo-500 via-purple-500 to-pink-500 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 animate-border-flow'
                 : 'from-indigo-400 via-purple-400 to-pink-400 dark:from-indigo-300 dark:via-purple-300 dark:to-pink-300'
             } bg-[length:200%_200%] ${isFocused ? 'opacity-100' : 'opacity-80'}`}
@@ -343,15 +361,7 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               onPaste={handlePaste}
-              placeholder={
-                connectionStatus && !connectionStatus.connected
-                  ? 'Server disconnected...'
-                  : isProcessing
-                    ? `${getAgentTitle()} is running...`
-                    : contextualSelectorEnabled
-                      ? `Ask ${getAgentTitle()} something... (Use @ to reference files/folders, Ctrl+Enter to send)`
-                      : `Ask ${getAgentTitle()} something... (Ctrl+Enter to send)`
-              }
+              placeholder={inputPlaceholder}
               disabled={isDisabled}
               className="w-full px-5 pt-5 pb-12 focus:outline-none resize-none min-h-[100px] max-h-[220px] bg-transparent text-sm leading-relaxed rounded-[1.4rem]"
               rows={2}
@@ -364,11 +374,7 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
                 type="button"
                 onClick={handleFileUpload}
                 disabled={isDisabled || isProcessing}
-                className={`p-2 rounded-full transition-colors ${
-                  isDisabled || isProcessing
-                    ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
-                    : 'text-gray-400 hover:text-accent-500 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:text-gray-400'
-                }`}
+                className={fileButtonClasses}
                 title="Attach image (or paste directly)"
               >
                 <FiImage size={18} />
@@ -415,11 +421,7 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
                   type="button"
                   onClick={handleAbort}
                   disabled={isAborting}
-                  className={`absolute right-3 bottom-3 p-2 rounded-full ${
-                    isAborting
-                      ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
-                      : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:text-gray-400'
-                  } transition-all duration-200`}
+                  className={abortButtonClasses}
                   title="Abort current operation"
                 >
                   {isAborting ? <FiLoader className="animate-spin" size={20} /> : <FiX size={20} />}
@@ -433,14 +435,8 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
                   whileTap={{ scale: 0.9 }}
                   whileHover={{ scale: 1.05 }}
                   type="submit"
-                  disabled={
-                    (!contextualState.input.trim() && uploadedImages.length === 0) || isDisabled
-                  }
-                  className={`absolute right-3 bottom-3 p-3 rounded-full ${
-                    (!contextualState.input.trim() && uploadedImages.length === 0) || isDisabled
-                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 text-white dark:text-gray-900 shadow-sm'
-                  } transition-all duration-200`}
+                  disabled={submitDisabled}
+                  className={submitButtonClasses}
                 >
                   <FiSend size={18} />
                 </motion.button>
@@ -451,45 +447,27 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
       </form>
 
       <div className="flex justify-center mt-2 text-xs">
-        {connectionStatus && !connectionStatus.connected ? (
-          <motion.span
-            initial={{ opacity: 0.7 }}
-            animate={{ opacity: 1 }}
-            className="text-red-500 dark:text-red-400 flex items-center font-medium"
-          >
-            {connectionStatus.reconnecting
-              ? 'Attempting to reconnect...'
-              : 'Server disconnected. Click the button to reconnect.'}
-          </motion.span>
-        ) : isProcessing ? (
-          <motion.span
-            initial={{ opacity: 0.7 }}
-            whileHover={{ opacity: 1 }}
-            className="text-accent-500 dark:text-accent-400 flex items-center"
-          >
+        <motion.span
+          initial={{ opacity: 0.7 }}
+          animate={{ opacity: 1 }}
+          whileHover={{ opacity: 1 }}
+          className={`flex items-center ${
+            statusMessage.type === 'error'
+              ? 'text-red-500 dark:text-red-400 font-medium'
+              : statusMessage.type === 'processing'
+              ? 'text-accent-500 dark:text-accent-400'
+              : 'text-gray-500 dark:text-gray-400 transition-opacity'
+          }`}
+        >
+          {statusMessage.type === 'processing' && (
             <span className="typing-indicator mr-2">
               <span></span>
               <span></span>
               <span></span>
             </span>
-            Agent is processing your request...
-          </motion.span>
-        ) : (
-          <motion.span
-            initial={{ opacity: 0.7 }}
-            whileHover={{ opacity: 1 }}
-            className="text-gray-500 dark:text-gray-400 transition-opacity"
-          >
-            {contextualSelectorEnabled ? (
-              <>
-                Use @ to reference files/folders • Ctrl+Enter to send • You can also paste images
-                directly
-              </>
-            ) : (
-              <>Use Ctrl+Enter to quickly send • You can also paste images directly</>
-            )}
-          </motion.span>
-        )}
+          )}
+          {statusMessage.text}
+        </motion.span>
       </div>
     </>
   );

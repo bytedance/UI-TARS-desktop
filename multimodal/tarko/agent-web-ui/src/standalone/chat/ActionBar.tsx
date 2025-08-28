@@ -1,10 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiCpu } from 'react-icons/fi';
 import { useSession } from '@/common/hooks/useSession';
 import { usePlan } from '@/common/hooks/usePlan';
 import { FilesDisplay } from './FilesDisplay';
-
 import { useAtomValue } from 'jotai';
 import { sessionFilesAtom } from '@/common/state/atoms/files';
 
@@ -27,15 +26,34 @@ export const ActionBar: React.FC<ActionBarProps> = ({ sessionId, className = '' 
   const { currentPlan } = usePlan(sessionId);
   const allFiles = useAtomValue(sessionFilesAtom);
 
-  const shouldShowPlan =
-    currentPlan && currentPlan.hasGeneratedPlan && currentPlan.steps.length > 0;
-
-  const renderPlanButton = () => {
-    if (!shouldShowPlan) return null;
-
+  // Memoize derived states
+  const shouldShowPlan = useMemo(
+    () => currentPlan && currentPlan.hasGeneratedPlan && currentPlan.steps.length > 0,
+    [currentPlan]
+  );
+  
+  const files = useMemo(
+    () => (sessionId && allFiles[sessionId]) ?? [],
+    [sessionId, allFiles]
+  );
+  
+  const shouldShowActionBar = useMemo(
+    () => shouldShowPlan || files.length > 0,
+    [shouldShowPlan, files.length]
+  );
+  
+  const planProgress = useMemo(() => {
+    if (!currentPlan) return null;
     const completedSteps = currentPlan.steps.filter((step) => step.done).length;
     const totalSteps = currentPlan.steps.length;
     const isComplete = currentPlan.isComplete;
+    return { completedSteps, totalSteps, isComplete };
+  }, [currentPlan]);
+
+  const renderPlanButton = () => {
+    if (!shouldShowPlan || !planProgress) return null;
+
+    const { completedSteps, totalSteps, isComplete } = planProgress;
 
     return (
       <motion.button
@@ -81,9 +99,6 @@ export const ActionBar: React.FC<ActionBarProps> = ({ sessionId, className = '' 
       </motion.button>
     );
   };
-
-  const files = (sessionId && allFiles[sessionId]) ?? [];
-  const shouldShowActionBar = shouldShowPlan || files.length > 0;
 
   if (!shouldShowActionBar) {
     return null;
