@@ -419,7 +419,7 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
                   type="button"
                   onClick={handleAbort}
                   disabled={isAborting}
-                  className={`absolute right-3 bottom-3 w-10 h-10 rounded-lg flex items-center justify-center ${
+                  className={`absolute right-3 bottom-3 w-10 h-10 rounded-xl flex items-center justify-center ${
                     isAborting
                       ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
                       : 'bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/50'
