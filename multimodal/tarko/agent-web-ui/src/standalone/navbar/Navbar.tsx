@@ -135,7 +135,7 @@ export const Navbar: React.FC = () => {
           </motion.button>
 
           {/* Share button - moved to last position */}
-          {activeSessionId && !isProcessing && !isReplayMode && <ShareButton variant="navbar" />}
+          {activeSessionId && !isReplayMode && <ShareButton variant="navbar" disabled={isProcessing} />}
         </div>
       </div>
 
