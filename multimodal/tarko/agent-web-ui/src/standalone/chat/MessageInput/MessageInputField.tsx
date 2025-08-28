@@ -422,13 +422,13 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
                   disabled={isAborting}
                   className={`absolute right-3 bottom-3 w-10 h-10 rounded-full flex items-center justify-center ${
                     isAborting
-                      ? 'bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100 dark:from-indigo-800/30 dark:via-purple-800/30 dark:to-pink-800/30 text-indigo-400 dark:text-indigo-500 cursor-not-allowed border border-indigo-200 dark:border-indigo-700/50'
-                      : 'bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 hover:from-indigo-100 hover:via-purple-100 hover:to-pink-100 dark:from-indigo-900/20 dark:via-purple-900/20 dark:to-pink-900/20 dark:hover:from-indigo-900/30 dark:hover:via-purple-900/30 dark:hover:to-pink-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-700/50'
+                      ? 'bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100 dark:from-indigo-800/30 dark:via-purple-800/30 dark:to-pink-800/30 text-indigo-400 dark:text-indigo-500 cursor-not-allowed border-2 border-indigo-200 dark:border-indigo-700/50'
+                      : 'bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 hover:from-indigo-100 hover:via-purple-100 hover:to-pink-100 dark:from-indigo-900/20 dark:via-purple-900/20 dark:to-pink-900/20 dark:hover:from-indigo-900/30 dark:hover:via-purple-900/30 dark:hover:to-pink-900/30 text-indigo-600 dark:text-indigo-400 border-2 border-indigo-200 dark:border-indigo-700/50'
                   } transition-all duration-200 shadow-sm bg-[length:200%_200%] animate-border-flow`}
                   title="Stop generation"
                 >
                   {isAborting ? (
-                    <div className="w-4 h-4 border-[3px] border-current border-t-transparent rounded-full animate-spin" />
+                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
                   ) : (
                     <div className="w-3 h-3 bg-current rounded-sm" />
                   )}
