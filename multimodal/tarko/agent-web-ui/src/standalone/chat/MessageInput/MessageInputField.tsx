@@ -428,7 +428,7 @@ export const MessageInputField: React.FC<MessageInputFieldProps> = ({
                   title="Stop generation"
                 >
                   {isAborting ? (
-                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    <div className="w-4 h-4 border-[3px] border-current border-t-transparent rounded-full animate-spin" />
                   ) : (
                     <div className="w-3 h-3 bg-current rounded-sm" />
                   )}
