@@ -186,10 +186,7 @@ function handleCoreDeprecatedOptions(
         type: thinking ? 'enabled' : 'disabled',
       };
     } else if (typeof thinking === 'object') {
-      config.thinking = {
-        type: 'disabled',
-        ...(config.thinking || {}),
-      };
+      config.thinking = thinking;
     }
   }
 }
