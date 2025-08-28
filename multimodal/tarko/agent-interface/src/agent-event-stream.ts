@@ -154,6 +154,12 @@ export namespace AgentEventStream {
 
     /** Whether the thinking process is complete */
     isComplete?: boolean;
+
+    /**
+     * Unique message identifier that links thinking messages to their session
+     * This allows clients to correlate incremental updates with complete thinking
+     */
+    messageId?: string;
   }
 
   /**
@@ -186,6 +192,12 @@ export namespace AgentEventStream {
 
     /** Whether this is the final reasoning chunk */
     isComplete?: boolean;
+
+    /**
+     * Unique message identifier that links streaming thinking messages to their final thinking
+     * This allows clients to correlate incremental updates with complete thinking
+     */
+    messageId?: string;
   }
 
   /**

@@ -337,6 +337,7 @@ export class LLMProcessor {
             {
               content: chunkResult.reasoningContent,
               isComplete: Boolean(processingState.finishReason),
+              messageId: messageId, // Add the message ID to correlate thinking sessions
             },
           );
           this.eventStream.sendEvent(thinkingEvent);
@@ -482,6 +483,7 @@ export class LLMProcessor {
       const thinkingEvent = this.eventStream.createEvent('assistant_thinking_message', {
         content: reasoningBuffer,
         isComplete: true,
+        messageId: messageId, // Include the message ID to correlate with streaming events
       });
 
       this.eventStream.sendEvent(thinkingEvent);
