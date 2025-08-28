@@ -83,7 +83,11 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
     return (
       <>
         <Tooltip
-          title={disabled ? 'Share unavailable during agent execution' : 'Share this conversation'}
+          title={
+            disabled
+              ? 'Please wait for agent execution to complete before sharing'
+              : 'Share this conversation'
+          }
           {...tooltipProps}
         >
           <span>
@@ -113,7 +117,11 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
   return (
     <>
       <Tooltip
-        title={disabled ? 'Share unavailable during agent execution' : 'Share this conversation'}
+        title={
+          disabled
+            ? 'Please wait for agent execution to complete before sharing'
+            : 'Share this conversation'
+        }
         {...tooltipProps}
       >
         <span>
