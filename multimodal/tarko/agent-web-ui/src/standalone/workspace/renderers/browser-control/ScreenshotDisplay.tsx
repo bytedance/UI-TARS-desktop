@@ -52,9 +52,14 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
       <div className="space-y-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div>
-            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Before Action
-            </h4>
+            <div className="flex items-center justify-center mb-3">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200/60 dark:border-amber-700/40 rounded-full shadow-sm">
+                <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+                <span className="text-xs font-semibold text-amber-700 dark:text-amber-300 tracking-wide">
+                  BEFORE ACTION
+                </span>
+              </div>
+            </div>
             <BrowserShell>
               <div className="relative">
                 <img
@@ -75,9 +80,14 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
             </BrowserShell>
           </div>
           <div>
-            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              After Action
-            </h4>
+            <div className="flex items-center justify-center mb-3">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 border border-emerald-200/60 dark:border-emerald-700/40 rounded-full shadow-sm">
+                <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 tracking-wide">
+                  AFTER ACTION
+                </span>
+              </div>
+            </div>
             <BrowserShell>
               <div className="relative">
                 <img
