@@ -52,27 +52,16 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
     </div>
   );
 
-  // Render hidden image with overlay placeholder
-  const renderHiddenImageWithOverlay = (imageSrc: string, alt: string) => (
-    <div className="relative">
-      <img src={imageSrc} alt={alt} className="w-full h-auto object-contain invisible" />
-      <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="text-center">
-          <div className="text-gray-400 dark:text-gray-500 text-sm">
-            GUI Agent Environment Not Started
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  // Render image or placeholder
-  const renderImageOrPlaceholder = (
+  // Render image with cursor or placeholder
+  const renderImageContent = (
     image: string | null,
     alt: string,
     showCursor = false,
-    isInBothMode = false,
+    referenceImage?: string | null,
   ) => {
+    // Use reference image for consistent sizing when current image is missing
+    const sizeReference = image || referenceImage;
+    
     if (image) {
       return (
         <div className="relative">
@@ -80,7 +69,7 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
             ref={imageRef}
             src={image}
             alt={alt}
-            className={`w-full h-auto object-contain ${!isInBothMode ? 'max-h-[70vh]' : ''}`}
+            className="w-full h-auto object-contain"
           />
           {showCursor && (
             <MouseCursor
@@ -93,12 +82,24 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
       );
     }
 
-    // For both mode, use the other image as layout base
-    if (isInBothMode) {
-      const otherImage = alt.includes('Before') ? afterActionImage : beforeActionImage;
-      if (otherImage) {
-        return renderHiddenImageWithOverlay(otherImage, alt);
-      }
+    // Show placeholder with consistent sizing
+    if (sizeReference) {
+      return (
+        <div className="relative">
+          <img
+            src={sizeReference}
+            alt={alt}
+            className="w-full h-auto object-contain invisible"
+          />
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+            <div className="text-center">
+              <div className="text-gray-400 dark:text-gray-500 text-sm">
+                GUI Agent Environment Not Started
+              </div>
+            </div>
+          </div>
+        </div>
+      );
     }
 
     return renderPlaceholder();
@@ -116,11 +117,11 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
               </span>
             </div>
             <BrowserShell>
-              {renderImageOrPlaceholder(
+              {renderImageContent(
                 beforeActionImage,
                 'Browser Screenshot - Before Action',
                 shouldShowMouseCursor(beforeActionImage, 'before'),
-                true,
+                afterActionImage,
               )}
             </BrowserShell>
           </div>
@@ -131,11 +132,11 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
               </span>
             </div>
             <BrowserShell>
-              {renderImageOrPlaceholder(
+              {renderImageContent(
                 afterActionImage,
                 'Browser Screenshot - After Action',
                 false,
-                true,
+                beforeActionImage,
               )}
             </BrowserShell>
           </div>
@@ -147,7 +148,7 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
   // Show single screenshot
   return (
     <BrowserShell className="mb-4">
-      {renderImageOrPlaceholder(
+      {renderImageContent(
         relatedImage,
         'Browser Screenshot',
         shouldShowMouseCursor(relatedImage, 'single'),
