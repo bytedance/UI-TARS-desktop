@@ -12,6 +12,7 @@ import {
 import { useSession } from '@/common/hooks/useSession';
 import { BrowserShell } from './BrowserShell';
 import { FileDisplayMode } from '../types';
+import { getGUIAgentConfig } from '@/common/constants';
 
 interface BrowserControlRendererProps {
   panelContent: StandardPanelContent;
@@ -28,6 +29,9 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
 }) => {
   const { activeSessionId, messages, toolResults } = useSession();
   const [relatedImage, setRelatedImage] = useState<string | null>(null);
+  const [beforeActionImage, setBeforeActionImage] = useState<string | null>(null);
+  const [afterActionImage, setAfterActionImage] = useState<string | null>(null);
+  const guiAgentConfig = getGUIAgentConfig();
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number } | null>(null);
   const [previousMousePosition, setPreviousMousePosition] = useState<{
     x: number;
@@ -95,11 +99,13 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
     }
   }, [environmentImage]);
 
-  // Find the next environment input (screenshot) after this operation
+  // Find screenshots based on the configured strategy
   useEffect(() => {
-    // Initialize: clear current screenshot if no direct environment image provided
+    // Initialize: clear current screenshots if no direct environment image provided
     if (!environmentImage) {
       setRelatedImage(null);
+      setBeforeActionImage(null);
+      setAfterActionImage(null);
     }
 
     if (!activeSessionId || !toolCallId) return;
@@ -111,50 +117,251 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
 
     if (currentToolCallIndex === -1) {
       console.warn(`[BrowserControlRenderer] Tool call ${toolCallId} not found in messages`);
-      if (!environmentImage) setRelatedImage(null);
+      if (!environmentImage) {
+        setRelatedImage(null);
+        setBeforeActionImage(null);
+        setAfterActionImage(null);
+      }
       return;
     }
 
-    let foundImage = false;
+    let foundBeforeImage = false;
+    let foundAfterImage = false;
 
-    // Search for screenshots AFTER the current tool call
-    for (let i = currentToolCallIndex + 1; i < sessionMessages.length; i++) {
-      const msg = sessionMessages[i];
-      if (msg.role === 'environment' && Array.isArray(msg.content)) {
-        const imgContent = msg.content.find(
-          (c) => typeof c === 'object' && 'type' in c && c.type === 'image_url',
-        );
+    // Search for screenshots BEFORE the current tool call
+    if (guiAgentConfig.screenshotRenderStrategy === 'beforeAction' || guiAgentConfig.screenshotRenderStrategy === 'both') {
+      for (let i = currentToolCallIndex - 1; i >= 0; i--) {
+        const msg = sessionMessages[i];
+        if (msg.role === 'environment' && Array.isArray(msg.content)) {
+          const imgContent = msg.content.find(
+            (c) => typeof c === 'object' && 'type' in c && c.type === 'image_url',
+          );
 
-        if (imgContent && 'image_url' in imgContent && imgContent.image_url.url) {
-          setRelatedImage(imgContent.image_url.url);
-          foundImage = true;
-          break;
+          if (imgContent && 'image_url' in imgContent && imgContent.image_url.url) {
+            setBeforeActionImage(imgContent.image_url.url);
+            if (guiAgentConfig.screenshotRenderStrategy === 'beforeAction') {
+              setRelatedImage(imgContent.image_url.url);
+            }
+            foundBeforeImage = true;
+            break;
+          }
         }
       }
     }
 
-    // If no valid screenshot found after the tool call, clear the display
-    if (!foundImage && !environmentImage) {
-      console.warn(
-        `[BrowserControlRenderer] No valid screenshot found after toolCallId: ${toolCallId}. Clearing screenshot display.`,
-      );
-      setRelatedImage(null);
+    // Search for screenshots AFTER the current tool call
+    if (guiAgentConfig.screenshotRenderStrategy === 'afterAction' || guiAgentConfig.screenshotRenderStrategy === 'both') {
+      for (let i = currentToolCallIndex + 1; i < sessionMessages.length; i++) {
+        const msg = sessionMessages[i];
+        if (msg.role === 'environment' && Array.isArray(msg.content)) {
+          const imgContent = msg.content.find(
+            (c) => typeof c === 'object' && 'type' in c && c.type === 'image_url',
+          );
+
+          if (imgContent && 'image_url' in imgContent && imgContent.image_url.url) {
+            setAfterActionImage(imgContent.image_url.url);
+            if (guiAgentConfig.screenshotRenderStrategy === 'afterAction') {
+              setRelatedImage(imgContent.image_url.url);
+            }
+            foundAfterImage = true;
+            break;
+          }
+        }
+      }
     }
-  }, [activeSessionId, messages, toolCallId, environmentImage]);
+
+    // Handle strategy-specific warnings and fallbacks
+    if (!environmentImage) {
+      if (guiAgentConfig.screenshotRenderStrategy === 'beforeAction' && !foundBeforeImage) {
+        console.warn(
+          `[BrowserControlRenderer] No valid screenshot found before toolCallId: ${toolCallId}. Clearing screenshot display.`,
+        );
+        setRelatedImage(null);
+      } else if (guiAgentConfig.screenshotRenderStrategy === 'afterAction' && !foundAfterImage) {
+        console.warn(
+          `[BrowserControlRenderer] No valid screenshot found after toolCallId: ${toolCallId}. Clearing screenshot display.`,
+        );
+        setRelatedImage(null);
+      } else if (guiAgentConfig.screenshotRenderStrategy === 'both') {
+        // For 'both' strategy, use the after action image as primary if available
+        if (foundAfterImage) {
+          setRelatedImage(afterActionImage);
+        } else if (foundBeforeImage) {
+          setRelatedImage(beforeActionImage);
+        } else {
+          console.warn(
+            `[BrowserControlRenderer] No valid screenshots found for toolCallId: ${toolCallId}. Clearing screenshot display.`,
+          );
+          setRelatedImage(null);
+        }
+      }
+    }
+  }, [activeSessionId, messages, toolCallId, environmentImage, guiAgentConfig.screenshotRenderStrategy, afterActionImage, beforeActionImage]);
 
   return (
     <div className="space-y-6">
       {/* Screenshot section - moved to the top */}
-      {relatedImage ? (
+      {(relatedImage || (guiAgentConfig.screenshotRenderStrategy === 'both' && (beforeActionImage || afterActionImage))) ? (
         <div>
-          <BrowserShell className="mb-4">
-            <div className="relative">
-              <img
-                ref={imageRef}
-                src={relatedImage}
-                alt="Browser Screenshot"
-                className="w-full h-auto object-contain max-h-[70vh]"
-              />
+          {guiAgentConfig.screenshotRenderStrategy === 'both' && beforeActionImage && afterActionImage ? (
+            // Show both screenshots side by side
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Before Action</h4>
+                  <BrowserShell>
+                    <div className="relative">
+                      <img
+                        src={beforeActionImage}
+                        alt="Browser Screenshot - Before Action"
+                        className="w-full h-auto object-contain max-h-[50vh]"
+                      />
+                    </div>
+                  </BrowserShell>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">After Action</h4>
+                  <BrowserShell>
+                    <div className="relative">
+                      <img
+                        ref={imageRef}
+                        src={afterActionImage}
+                        alt="Browser Screenshot - After Action"
+                        className="w-full h-auto object-contain max-h-[50vh]"
+                      />
+                      {/* Mouse cursor overlay only on after action image */}
+                      {mousePosition && (
+                        <motion.div
+                          className="absolute pointer-events-none"
+                          initial={
+                            previousMousePosition
+                              ? {
+                                  left: `${previousMousePosition.x}%`,
+                                  top: `${previousMousePosition.y}%`,
+                                }
+                              : {
+                                  left: `${mousePosition.x}%`,
+                                  top: `${mousePosition.y}%`,
+                                }
+                          }
+                          animate={{
+                            left: `${mousePosition.x}%`,
+                            top: `${mousePosition.y}%`,
+                          }}
+                          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                          style={{
+                            zIndex: 10,
+                          }}
+                        >
+                          <div className="relative">
+                            {/* Enhanced cursor icon with shadow effect */}
+                            <svg
+                              width="36"
+                              height="36"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                              style={{
+                                filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.3))',
+                                transform: 'translate(0px, 2px)',
+                              }}
+                            >
+                              <defs>
+                                <linearGradient id="cursorGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                  <stop offset="0%" stopColor="white" />
+                                  <stop offset="100%" stopColor="#f5f5f5" />
+                                </linearGradient>
+                              </defs>
+                              <path
+                                d="M5 3L19 12L12 13L9 20L5 3Z"
+                                fill="url(#cursorGradient)"
+                                stroke="#000000"
+                                strokeWidth="1.5"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+
+                            {/* Artistic pulse effect for click actions */}
+                            {action && action.includes('click') && (
+                              <>
+                                {/* Multiple layered ripple effects */}
+                                <motion.div
+                                  className="absolute rounded-full"
+                                  initial={{ opacity: 0.8, scale: 0 }}
+                                  animate={{ opacity: 0, scale: 2.5 }}
+                                  transition={{
+                                    duration: 1.5,
+                                    ease: 'easeOut',
+                                    repeat: Infinity,
+                                  }}
+                                  style={{
+                                    top: '-8px',
+                                    left: '-8px',
+                                    width: '24px',
+                                    height: '24px',
+                                    background:
+                                      'radial-gradient(circle, rgba(99,102,241,0.6) 0%, rgba(99,102,241,0) 70%)',
+                                    border: '1px solid rgba(99,102,241,0.3)',
+                                  }}
+                                />
+                                <motion.div
+                                  className="absolute rounded-full"
+                                  initial={{ opacity: 0.9, scale: 0 }}
+                                  animate={{ opacity: 0, scale: 2 }}
+                                  transition={{
+                                    duration: 1.2,
+                                    ease: 'easeOut',
+                                    delay: 0.2,
+                                    repeat: Infinity,
+                                  }}
+                                  style={{
+                                    top: '-6px',
+                                    left: '-6px',
+                                    width: '20px',
+                                    height: '20px',
+                                    background:
+                                      'radial-gradient(circle, rgba(99,102,241,0.8) 0%, rgba(99,102,241,0) 70%)',
+                                    border: '1px solid rgba(99,102,241,0.5)',
+                                  }}
+                                />
+                                {/* Central highlight dot */}
+                                <motion.div
+                                  className="absolute rounded-full bg-white"
+                                  initial={{ opacity: 1, scale: 0.5 }}
+                                  animate={{ opacity: 0.8, scale: 1 }}
+                                  transition={{
+                                    duration: 0.7,
+                                    repeat: Infinity,
+                                    repeatType: 'reverse',
+                                  }}
+                                  style={{
+                                    top: '2px',
+                                    left: '2px',
+                                    width: '4px',
+                                    height: '4px',
+                                    boxShadow: '0 0 10px 2px rgba(255,255,255,0.7)',
+                                  }}
+                                />
+                              </>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </div>
+                  </BrowserShell>
+                </div>
+              </div>
+            </div>
+          ) : (
+            // Show single screenshot
+            <BrowserShell className="mb-4">
+              <div className="relative">
+                <img
+                  ref={imageRef}
+                  src={relatedImage}
+                  alt="Browser Screenshot"
+                  className="w-full h-auto object-contain max-h-[70vh]"
+                />
 
               {/* Enhanced mouse cursor overlay */}
               {mousePosition && (
@@ -276,10 +483,12 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
               )}
             </div>
           </BrowserShell>
+          )}
         </div>
       ) : null}
 
       {/* Optimized Visual operation details card - more compact and elegant */}
+      {guiAgentConfig.renderGUIAction && (
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -391,6 +600,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
           </div>
         </div>
       </motion.div>
+      )}
     </div>
   );
 };

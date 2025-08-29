@@ -40,3 +40,13 @@ export function getLogoUrl(): string {
 export function getWorkspaceNavItems() {
   return getWebUIConfig().workspace?.navItems || [];
 }
+
+/**
+ * Get GUI Agent configuration from web UI config
+ */
+export function getGUIAgentConfig() {
+  return getWebUIConfig().guiAgent || {
+    screenshotRenderStrategy: 'afterAction',
+    renderGUIAction: true,
+  };
+}

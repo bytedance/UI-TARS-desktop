@@ -37,6 +37,28 @@ export interface WorkspaceConfig {
 }
 
 /**
+ * GUI Agent configuration for web UI
+ */
+export interface TarkoWebUIGUIAgentConfig {
+  /**
+   * GUI Agent screenshot rendering strategy
+   *
+   * - `both`: Display both before and after screenshots
+   * - `beforeAction`: Display screenshot taken before the action
+   * - `afterAction`: Display screenshot taken after the action
+   *
+   * @defaultValue 'afterAction'
+   */
+  screenshotRenderStrategy: 'both' | 'beforeAction' | 'afterAction';
+  /**
+   * Whether to enable GUI Agent action rendering
+   *
+   * @defaultValue true
+   */
+  renderGUIAction: boolean;
+}
+
+/**
  * Base agent implementation interface
  */
 export interface BaseAgentWebUIImplementation {
@@ -85,6 +107,10 @@ export interface BaseAgentWebUIImplementation {
    * Workspace configuration
    */
   workspace?: WorkspaceConfig;
+  /**
+   * GUI Agent configuration for web UI
+   */
+  guiAgent?: TarkoWebUIGUIAgentConfig;
 }
 
 /**

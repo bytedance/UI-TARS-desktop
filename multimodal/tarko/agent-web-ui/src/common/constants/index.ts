@@ -90,4 +90,5 @@ export {
   isContextualSelectorEnabled,
   getLogoUrl,
   getWorkspaceNavItems,
+  getGUIAgentConfig,
 } from './shared';
