@@ -46,21 +46,7 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
     <div className="flex items-center justify-center bg-gray-50 dark:bg-gray-900 min-h-[400px]">
       <div className="text-center">
         <div className="text-gray-400 dark:text-gray-500 text-sm">
-          GUI Agent Environment Not Started
-        </div>
-      </div>
-    </div>
-  );
-
-  // Render hidden image with overlay placeholder
-  const renderHiddenImageWithOverlay = (imageSrc: string, alt: string) => (
-    <div className="relative">
-      <img src={imageSrc} alt={alt} className="w-full h-auto object-contain invisible" />
-      <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="text-center">
-          <div className="text-gray-400 dark:text-gray-500 text-sm">
-            GUI Agent Environment Not Started
-          </div>
+          GUI Agent 环境未启动
         </div>
       </div>
     </div>
@@ -71,7 +57,6 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
     image: string | null,
     alt: string,
     showCursor = false,
-    isInBothMode = false,
   ) => {
     if (image) {
       return (
@@ -80,7 +65,7 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
             ref={imageRef}
             src={image}
             alt={alt}
-            className={`w-full h-auto object-contain ${!isInBothMode ? 'max-h-[70vh]' : ''}`}
+            className="w-full h-auto object-contain max-h-[70vh]"
           />
           {showCursor && (
             <MouseCursor
@@ -91,14 +76,6 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
           )}
         </div>
       );
-    }
-
-    // For both mode, use the other image as layout base
-    if (isInBothMode) {
-      const otherImage = alt.includes('Before') ? afterActionImage : beforeActionImage;
-      if (otherImage) {
-        return renderHiddenImageWithOverlay(otherImage, alt);
-      }
     }
 
     return renderPlaceholder();
@@ -120,7 +97,6 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
                 beforeActionImage,
                 'Browser Screenshot - Before Action',
                 shouldShowMouseCursor(beforeActionImage, 'before'),
-                true,
               )}
             </BrowserShell>
           </div>
@@ -135,7 +111,6 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
                 afterActionImage,
                 'Browser Screenshot - After Action',
                 false,
-                true,
               )}
             </BrowserShell>
           </div>
