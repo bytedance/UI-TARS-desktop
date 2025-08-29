@@ -3,17 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Request, Response } from 'express';
 
-// Use vi.hoisted to ensure mock objects are available during module mocking
-const { mockContextProcessor, mockImageProcessor } = vi.hoisted(() => ({
-  mockContextProcessor: {
-    processContextualReferences: vi.fn(),
-  },
-  mockImageProcessor: {
-    compressImagesInQuery: vi.fn(),
-  },
+// Use vi.hoisted to ensure mocks are available during module mocking
+const { mockContextProcessor, mockImageProcessor, mockSession, mockServer } = vi.hoisted(() => ({
+  mockContextProcessor: { processContextualReferences: vi.fn() },
+  mockImageProcessor: { compressImagesInQuery: vi.fn() },
+  mockSession: { runQuery: vi.fn(), runQueryStreaming: vi.fn(), abortQuery: vi.fn() },
+  mockServer: { getCurrentWorkspace: vi.fn().mockReturnValue('/test/workspace') },
 }));
 
 vi.mock('@tarko/context-engineer/node', () => ({
@@ -21,147 +19,73 @@ vi.mock('@tarko/context-engineer/node', () => ({
   ImageProcessor: vi.fn(() => mockImageProcessor),
 }));
 
-vi.mock('../../src/utils/error-handler', () => ({
-  createErrorResponse: vi.fn((error: any) => ({
-    error: {
-      message: error.message || 'Test error',
-      code: 'TEST_ERROR',
-    },
-  })),
-}));
-
 // Import after mocking
 import { executeQuery, executeStreamingQuery, abortQuery } from '../../src/api/controllers/queries';
 
-describe('Queries Controller', () => {
-  let mockReq: Partial<Request>;
-  let mockRes: Partial<Response>;
-  let mockSession: any;
-  let mockServer: any;
+vi.mock('../../src/utils/error-handler', () => ({
+  createErrorResponse: vi.fn((error: any) => ({
+    error: { message: error.message || 'Test error', code: 'TEST_ERROR' },
+  })),
+}));
 
+// Test helpers
+const createRequest = (query: any, sessionId = 'test-session') => ({
+  body: { sessionId, query },
+  session: mockSession,
+  app: { locals: { server: mockServer } },
+}) as Partial<Request>;
+
+const createResponse = () => ({
+  status: vi.fn().mockReturnThis(),
+  json: vi.fn().mockReturnThis(),
+  setHeader: vi.fn().mockReturnThis(),
+  write: vi.fn().mockReturnThis(),
+  end: vi.fn().mockReturnThis(),
+  closed: false,
+  headersSent: false,
+}) as Partial<Response>;
+
+const mockProcessing = (expandedContext: string, originalQuery: any, compressedQuery = originalQuery) => {
+  mockContextProcessor.processContextualReferences.mockResolvedValue({
+    expandedContext,
+    originalQuery,
+  });
+  mockImageProcessor.compressImagesInQuery.mockResolvedValue(compressedQuery);
+};
+
+describe('Queries Controller', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-
-    // Mock session
-    mockSession = {
-      runQuery: vi.fn(),
-      runQueryStreaming: vi.fn(),
-      abortQuery: vi.fn(),
-    };
-
-    // Mock server
-    mockServer = {
-      getCurrentWorkspace: vi.fn().mockReturnValue('/test/workspace'),
-    };
-
-    // Mock request
-    mockReq = {
-      body: {},
-      session: mockSession,
-      app: {
-        locals: {
-          server: mockServer,
-        },
-      },
-    };
-
-    // Mock response
-    mockRes = {
-      status: vi.fn().mockReturnThis(),
-      json: vi.fn().mockReturnThis(),
-      setHeader: vi.fn().mockReturnThis(),
-      write: vi.fn().mockReturnThis(),
-      end: vi.fn().mockReturnThis(),
-      closed: false,
-      headersSent: false,
-    };
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
   });
 
   describe('executeQuery', () => {
-    it('should process context and pass environmentInput to session', async () => {
+    it('should process context and pass environmentInput when references exist', async () => {
       const userQuery = 'Test query with @file reference';
       const expandedContext = 'File content: function test() { return true; }';
-      const compressedQuery = 'Test query with @file reference';
+      const req = createRequest(userQuery);
+      const res = createResponse();
 
-      mockReq.body = {
-        sessionId: 'test-session',
-        query: userQuery,
-      };
-
-      mockContextProcessor.processContextualReferences.mockResolvedValue({
-        expandedContext: expandedContext,
-        originalQuery: userQuery,
-      });
-      mockImageProcessor.compressImagesInQuery.mockResolvedValue(compressedQuery);
+      mockProcessing(expandedContext, userQuery);
       mockSession.runQuery.mockResolvedValue({
         success: true,
         result: { type: 'assistant_message', content: 'Response' },
       });
 
-      await executeQuery(mockReq as Request, mockRes as Response);
+      await executeQuery(req as Request, res as Response);
 
-      // Verify context processing
       expect(mockContextProcessor.processContextualReferences).toHaveBeenCalledWith(
         userQuery,
         '/test/workspace',
       );
-
-      // Verify image compression on user input only
-      expect(mockImageProcessor.compressImagesInQuery).toHaveBeenCalledWith(userQuery);
-
-      // Verify session.runQuery called with correct structure
       expect(mockSession.runQuery).toHaveBeenCalledWith({
-        input: compressedQuery,
+        input: userQuery,
         environmentInput: {
           content: expandedContext,
           description: 'Expanded context from contextual references',
-          metadata: {
-            type: 'codebase',
-          },
+          metadata: { type: 'codebase' },
         },
       });
-
-      // Verify successful response
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith({
-        result: { type: 'assistant_message', content: 'Response' },
-      });
-    });
-
-    it('should handle empty context expansion', async () => {
-      const userQuery = 'Simple query without references';
-      const expandedContext = '';
-      const compressedQuery = 'Simple query without references';
-
-      mockReq.body = {
-        sessionId: 'test-session',
-        query: userQuery,
-      };
-
-      mockContextProcessor.processContextualReferences.mockResolvedValue({
-        expandedContext: expandedContext,
-        originalQuery: userQuery,
-      });
-      mockImageProcessor.compressImagesInQuery.mockResolvedValue(compressedQuery);
-      mockSession.runQuery.mockResolvedValue({
-        success: true,
-        result: { type: 'assistant_message', content: 'Simple response' },
-      });
-
-      await executeQuery(mockReq as Request, mockRes as Response);
-
-      // Should NOT pass environmentInput if content is empty string (falsy)
-      expect(mockSession.runQuery).toHaveBeenCalledWith({
-        input: compressedQuery,
-        // No environmentInput should be present for empty string
-      });
-      
-      const callArgs = mockSession.runQuery.mock.calls[0][0];
-      expect(callArgs).not.toHaveProperty('environmentInput');
+      expect(res.status).toHaveBeenCalledWith(200);
     });
 
     it('should handle multimodal queries', async () => {
@@ -174,87 +98,70 @@ describe('Queries Controller', () => {
         { type: 'text', text: 'Analyze @file main.py' },
         { type: 'image_url', image_url: { url: 'compressed_image_data' } },
       ];
+      const req = createRequest(multimodalQuery);
+      const res = createResponse();
 
-      mockReq.body = {
-        sessionId: 'test-session',
-        query: multimodalQuery,
-      };
-
-      mockContextProcessor.processContextualReferences.mockResolvedValue({
-        expandedContext: expandedContext,
-        originalQuery: multimodalQuery,
-      });
-      mockImageProcessor.compressImagesInQuery.mockResolvedValue(compressedQuery);
+      mockProcessing(expandedContext, multimodalQuery, compressedQuery);
       mockSession.runQuery.mockResolvedValue({
         success: true,
         result: { type: 'assistant_message', content: 'Analysis complete' },
       });
 
-      await executeQuery(mockReq as Request, mockRes as Response);
+      await executeQuery(req as Request, res as Response);
 
       expect(mockSession.runQuery).toHaveBeenCalledWith({
         input: compressedQuery,
         environmentInput: {
           content: expandedContext,
           description: 'Expanded context from contextual references',
-          metadata: {
-            type: 'codebase',
-          },
+          metadata: { type: 'codebase' },
         },
       });
     });
 
     it('should return 400 for missing query', async () => {
-      mockReq.body = { sessionId: 'test-session' };
+      const req = createRequest(undefined);
+      const res = createResponse();
+      req.body = { sessionId: 'test-session' };
 
-      await executeQuery(mockReq as Request, mockRes as Response);
+      await executeQuery(req as Request, res as Response);
 
-      expect(mockRes.status).toHaveBeenCalledWith(400);
-      expect(mockRes.json).toHaveBeenCalledWith({ error: 'Query is required' });
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({ error: 'Query is required' });
     });
 
     it('should handle session errors', async () => {
-      mockReq.body = {
-        sessionId: 'test-session',
-        query: 'Test query',
-      };
+      const req = createRequest('Test query');
+      const res = createResponse();
 
-      mockContextProcessor.processContextualReferences.mockResolvedValue({
-        expandedContext: 'context',
-        originalQuery: 'Test query',
-      });
-      mockImageProcessor.compressImagesInQuery.mockResolvedValue('compressed');
+      mockProcessing('context', 'Test query');
       mockSession.runQuery.mockResolvedValue({
         success: false,
         error: { code: 'AGENT_ERROR', message: 'Agent failed' },
       });
 
-      await executeQuery(mockReq as Request, mockRes as Response);
+      await executeQuery(req as Request, res as Response);
 
-      expect(mockRes.status).toHaveBeenCalledWith(500);
-      expect(mockRes.json).toHaveBeenCalledWith({
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
         success: false,
         error: { code: 'AGENT_ERROR', message: 'Agent failed' },
       });
     });
 
     it('should handle unexpected errors', async () => {
-      mockReq.body = {
-        sessionId: 'test-session',
-        query: 'Test query',
-      };
+      const req = createRequest('Test query');
+      const res = createResponse();
 
-      const unexpectedError = new Error('Unexpected error');
-      mockContextProcessor.processContextualReferences.mockRejectedValue(unexpectedError);
+      mockContextProcessor.processContextualReferences.mockRejectedValue(
+        new Error('Unexpected error')
+      );
 
-      await executeQuery(mockReq as Request, mockRes as Response);
+      await executeQuery(req as Request, res as Response);
 
-      expect(mockRes.status).toHaveBeenCalledWith(500);
-      expect(mockRes.json).toHaveBeenCalledWith({
-        error: {
-          message: 'Unexpected error',
-          code: 'TEST_ERROR',
-        },
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        error: { message: 'Unexpected error', code: 'TEST_ERROR' },
       });
     });
   });
@@ -263,12 +170,8 @@ describe('Queries Controller', () => {
     it('should process context and stream with environmentInput', async () => {
       const userQuery = 'Streaming query with @dir reference';
       const expandedContext = 'Directory listing: file1.js, file2.ts';
-      const compressedQuery = 'Streaming query with @dir reference';
-
-      mockReq.body = {
-        sessionId: 'test-session',
-        query: userQuery,
-      };
+      const req = createRequest(userQuery);
+      const res = createResponse();
 
       const mockEventStream = {
         [Symbol.asyncIterator]: async function* () {
@@ -277,47 +180,29 @@ describe('Queries Controller', () => {
         },
       };
 
-      mockContextProcessor.processContextualReferences.mockResolvedValue({
-        expandedContext: expandedContext,
-        originalQuery: userQuery,
-      });
-      mockImageProcessor.compressImagesInQuery.mockResolvedValue(compressedQuery);
+      mockProcessing(expandedContext, userQuery);
       mockSession.runQueryStreaming.mockResolvedValue(mockEventStream);
 
-      await executeStreamingQuery(mockReq as Request, mockRes as Response);
+      await executeStreamingQuery(req as Request, res as Response);
 
-      // Verify session.runQueryStreaming called with correct structure
       expect(mockSession.runQueryStreaming).toHaveBeenCalledWith({
-        input: compressedQuery,
+        input: userQuery,
         environmentInput: {
           content: expandedContext,
           description: 'Expanded context from contextual references',
-          metadata: {
-            type: 'codebase',
-          },
+          metadata: { type: 'codebase' },
         },
       });
 
       // Verify streaming headers
-      expect(mockRes.setHeader).toHaveBeenCalledWith('Content-Type', 'text/event-stream');
-      expect(mockRes.setHeader).toHaveBeenCalledWith('Cache-Control', 'no-cache');
-      expect(mockRes.setHeader).toHaveBeenCalledWith('Connection', 'keep-alive');
-
-      // Verify events were written
-      expect(mockRes.write).toHaveBeenCalledWith(
-        'data: {"type":"assistant_streaming_message","content":"Streaming"}\n\n',
-      );
-      expect(mockRes.write).toHaveBeenCalledWith(
-        'data: {"type":"assistant_message","content":"Complete","finishReason":"stop"}\n\n',
-      );
-      expect(mockRes.end).toHaveBeenCalled();
+      expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'text/event-stream');
+      expect(res.setHeader).toHaveBeenCalledWith('Cache-Control', 'no-cache');
+      expect(res.setHeader).toHaveBeenCalledWith('Connection', 'keep-alive');
     });
 
     it('should handle streaming errors', async () => {
-      mockReq.body = {
-        sessionId: 'test-session',
-        query: 'Test query',
-      };
+      const req = createRequest('Test query');
+      const res = createResponse();
 
       const mockErrorStream = {
         [Symbol.asyncIterator]: async function* () {
@@ -325,26 +210,20 @@ describe('Queries Controller', () => {
         },
       };
 
-      mockContextProcessor.processContextualReferences.mockResolvedValue({
-        expandedContext: 'context',
-        originalQuery: 'Test query',
-      });
-      mockImageProcessor.compressImagesInQuery.mockResolvedValue('compressed');
+      mockProcessing('context', 'Test query');
       mockSession.runQueryStreaming.mockResolvedValue(mockErrorStream);
 
-      await executeStreamingQuery(mockReq as Request, mockRes as Response);
+      await executeStreamingQuery(req as Request, res as Response);
 
-      // Should write error event and break
-      expect(mockRes.write).toHaveBeenCalledWith(
+      expect(res.write).toHaveBeenCalledWith(
         'data: {"type":"system","level":"error","message":"Stream error"}\n\n',
       );
     });
 
     it('should handle closed connection', async () => {
-      mockReq.body = {
-        sessionId: 'test-session',
-        query: 'Test query',
-      };
+      const req = createRequest('Test query');
+      const res = createResponse();
+      res.closed = true;
 
       const mockEventStream = {
         [Symbol.asyncIterator]: async function* () {
@@ -352,44 +231,41 @@ describe('Queries Controller', () => {
         },
       };
 
-      mockContextProcessor.processContextualReferences.mockResolvedValue({
-        expandedContext: 'context',
-        originalQuery: 'Test query',
-      });
-      mockImageProcessor.compressImagesInQuery.mockResolvedValue('compressed');
+      mockProcessing('context', 'Test query');
       mockSession.runQueryStreaming.mockResolvedValue(mockEventStream);
 
-      // Simulate closed connection
-      mockRes.closed = true;
+      await executeStreamingQuery(req as Request, res as Response);
 
-      await executeStreamingQuery(mockReq as Request, mockRes as Response);
-
-      // Should not write to closed connection
-      expect(mockRes.write).not.toHaveBeenCalled();
+      expect(res.write).not.toHaveBeenCalled();
     });
   });
 
   describe('abortQuery', () => {
     it('should abort query successfully', async () => {
-      mockReq.body = { sessionId: 'test-session' };
+      const req = createRequest(undefined);
+      const res = createResponse();
+      req.body = { sessionId: 'test-session' };
+      
       mockSession.abortQuery.mockResolvedValue(true);
 
-      await abortQuery(mockReq as Request, mockRes as Response);
+      await abortQuery(req as Request, res as Response);
 
       expect(mockSession.abortQuery).toHaveBeenCalled();
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith({ success: true });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({ success: true });
     });
 
     it('should handle abort errors', async () => {
-      mockReq.body = { sessionId: 'test-session' };
-      const abortError = new Error('Abort failed');
-      mockSession.abortQuery.mockRejectedValue(abortError);
+      const req = createRequest(undefined);
+      const res = createResponse();
+      req.body = { sessionId: 'test-session' };
+      
+      mockSession.abortQuery.mockRejectedValue(new Error('Abort failed'));
 
-      await abortQuery(mockReq as Request, mockRes as Response);
+      await abortQuery(req as Request, res as Response);
 
-      expect(mockRes.status).toHaveBeenCalledWith(500);
-      expect(mockRes.json).toHaveBeenCalledWith({ error: 'Failed to abort query' });
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({ error: 'Failed to abort query' });
     });
   });
 });

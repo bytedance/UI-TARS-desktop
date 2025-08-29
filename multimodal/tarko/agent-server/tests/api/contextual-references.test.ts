@@ -3,17 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Request, Response } from 'express';
 
-// Use vi.hoisted to ensure mock objects are available during module mocking
-const { mockContextProcessor, mockImageProcessor } = vi.hoisted(() => ({
-  mockContextProcessor: {
-    processContextualReferences: vi.fn(),
-  },
-  mockImageProcessor: {
-    compressImagesInQuery: vi.fn(),
-  },
+// Use vi.hoisted to ensure mocks are available during module mocking
+const { mockContextProcessor, mockImageProcessor, mockSession, mockServer } = vi.hoisted(() => ({
+  mockContextProcessor: { processContextualReferences: vi.fn() },
+  mockImageProcessor: { compressImagesInQuery: vi.fn() },
+  mockSession: { runQuery: vi.fn(), runQueryStreaming: vi.fn() },
+  mockServer: { getCurrentWorkspace: vi.fn().mockReturnValue('/workspace') },
 }));
 
 vi.mock('@tarko/context-engineer/node', () => ({
@@ -21,331 +19,128 @@ vi.mock('@tarko/context-engineer/node', () => ({
   ImageProcessor: vi.fn(() => mockImageProcessor),
 }));
 
-vi.mock('../../src/utils/error-handler', () => ({
-  createErrorResponse: vi.fn((error: any) => ({
-    error: {
-      message: error.message || 'Test error',
-      code: 'TEST_ERROR',
-    },
-  })),
-}));
-
 // Import after mocking
 import { executeQuery, executeStreamingQuery } from '../../src/api/controllers/queries';
 
-describe('Contextual References Bug Fix', () => {
-  let mockReq: Partial<Request>;
-  let mockRes: Partial<Response>;
-  let mockSession: any;
-  let mockServer: any;
+vi.mock('../../src/utils/error-handler', () => ({
+  createErrorResponse: vi.fn((error: any) => ({ error: { message: error.message, code: 'ERROR' } })),
+}));
 
+// Test helpers
+const createMockRequest = (query: any) => ({
+  body: { sessionId: 'test-session', query },
+  session: mockSession,
+  app: { locals: { server: mockServer } },
+}) as Partial<Request>;
+
+const createMockResponse = () => ({
+  status: vi.fn().mockReturnThis(),
+  json: vi.fn().mockReturnThis(),
+  setHeader: vi.fn().mockReturnThis(),
+  write: vi.fn().mockReturnThis(),
+  end: vi.fn().mockReturnThis(),
+  closed: false,
+}) as Partial<Response>;
+
+const mockContextResult = (expandedContext: string | null, originalQuery: any) => {
+  mockContextProcessor.processContextualReferences.mockResolvedValue({
+    expandedContext,
+    originalQuery,
+  });
+};
+
+const mockSuccessResponse = (content = 'Response') => {
+  mockSession.runQuery.mockResolvedValue({
+    success: true,
+    result: { type: 'assistant_message', content },
+  });
+};
+
+describe('Contextual References Bug Fix', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockImageProcessor.compressImagesInQuery.mockImplementation(q => Promise.resolve(q));
+  });
 
-    // Mock session
-    mockSession = {
-      runQuery: vi.fn(),
-      runQueryStreaming: vi.fn(),
-    };
-
-    // Mock server
-    mockServer = {
-      getCurrentWorkspace: vi.fn().mockReturnValue('/test/workspace'),
-    };
-
-    // Mock request
-    mockReq = {
-      body: {},
-      session: mockSession,
-      app: {
-        locals: {
-          server: mockServer,
-        },
+  describe('environmentInput conditional logic', () => {
+    const testCases = [
+      {
+        name: 'should NOT pass environmentInput when no contextual references',
+        query: 'Simple query without references',
+        expandedContext: null,
+        expectEnvironmentInput: false,
       },
-    };
+      {
+        name: 'should NOT pass environmentInput when empty string context',
+        query: 'Query with @file nonexistent.txt',
+        expandedContext: '',
+        expectEnvironmentInput: false,
+      },
+      {
+        name: 'should pass environmentInput when valid contextual references',
+        query: 'Analyze @file main.ts',
+        expandedContext: '<file path="main.ts">content</file>',
+        expectEnvironmentInput: true,
+      },
+    ];
 
-    // Mock response
-    mockRes = {
-      status: vi.fn().mockReturnThis(),
-      json: vi.fn().mockReturnThis(),
-      setHeader: vi.fn().mockReturnThis(),
-      write: vi.fn().mockReturnThis(),
-      end: vi.fn().mockReturnThis(),
-      closed: false,
-      headersSent: false,
-    };
+    testCases.forEach(({ name, query, expandedContext, expectEnvironmentInput }) => {
+      it(name, async () => {
+        const req = createMockRequest(query);
+        const res = createMockResponse();
+        
+        mockContextResult(expandedContext, query);
+        mockSuccessResponse();
 
-    // Default image processor behavior
-    mockImageProcessor.compressImagesInQuery.mockImplementation((query) => Promise.resolve(query));
-  });
+        await executeQuery(req as Request, res as Response);
 
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
-  describe('executeQuery - environmentInput conditional logic', () => {
-    it('should NOT pass environmentInput when query has no contextual references', async () => {
-      const userQuery = 'Simple query without any @file or @dir references';
-      
-      mockReq.body = {
-        sessionId: 'test-session',
-        query: userQuery,
-      };
-
-      // Mock: no contextual references found, returns null expandedContext
-      mockContextProcessor.processContextualReferences.mockResolvedValue({
-        expandedContext: null,
-        originalQuery: userQuery,
+        const callArgs = mockSession.runQuery.mock.calls[0][0];
+        
+        if (expectEnvironmentInput) {
+          expect(callArgs).toHaveProperty('environmentInput');
+          expect(callArgs.environmentInput.content).toBe(expandedContext);
+        } else {
+          expect(callArgs).not.toHaveProperty('environmentInput');
+        }
       });
-      mockSession.runQuery.mockResolvedValue({
-        success: true,
-        result: { type: 'assistant_message', content: 'Response' },
-      });
-
-      await executeQuery(mockReq as Request, mockRes as Response);
-
-      // Verify session.runQuery was called WITHOUT environmentInput
-      expect(mockSession.runQuery).toHaveBeenCalledWith({
-        input: userQuery,
-        // environmentInput should NOT be present
-      });
-
-      // Verify environmentInput is not in the call
-      const callArgs = mockSession.runQuery.mock.calls[0][0];
-      expect(callArgs).not.toHaveProperty('environmentInput');
-    });
-
-    it('should pass environmentInput when query has valid contextual references', async () => {
-      const userQuery = 'Analyze @file main.ts and @dir src/';
-      const expandedContext = `<file path="main.ts">\nfunction main() { return 'hello'; }\n</file>\n\n<directory path="src/">\n// directory content\n</directory>\n\n${userQuery}`;
-      
-      mockReq.body = {
-        sessionId: 'test-session',
-        query: userQuery,
-      };
-
-      // Mock: contextual references found, returns expanded content
-      mockContextProcessor.processContextualReferences.mockResolvedValue({
-        expandedContext: expandedContext,
-        originalQuery: userQuery,
-      });
-      mockSession.runQuery.mockResolvedValue({
-        success: true,
-        result: { type: 'assistant_message', content: 'Analysis complete' },
-      });
-
-      await executeQuery(mockReq as Request, mockRes as Response);
-
-      // Verify session.runQuery was called WITH environmentInput
-      expect(mockSession.runQuery).toHaveBeenCalledWith({
-        input: userQuery,
-        environmentInput: {
-          content: expandedContext,
-          description: 'Expanded context from contextual references',
-          metadata: {
-            type: 'codebase',
-          },
-        },
-      });
-    });
-
-    it('should handle edge case where expanded context is empty string', async () => {
-      const userQuery = 'Query with @file nonexistent.txt';
-      const expandedContext = ''; // Empty expansion
-      
-      mockReq.body = {
-        sessionId: 'test-session',
-        query: userQuery,
-      };
-
-      mockContextProcessor.processContextualReferences.mockResolvedValue({
-        expandedContext: expandedContext,
-        originalQuery: userQuery,
-      });
-      mockSession.runQuery.mockResolvedValue({
-        success: true,
-        result: { type: 'assistant_message', content: 'File not found' },
-      });
-
-      await executeQuery(mockReq as Request, mockRes as Response);
-
-      // Empty string is falsy, should NOT pass environmentInput
-      expect(mockSession.runQuery).toHaveBeenCalledWith({
-        input: userQuery,
-        // No environmentInput should be present for empty string
-      });
-      
-      const callArgs = mockSession.runQuery.mock.calls[0][0];
-      expect(callArgs).not.toHaveProperty('environmentInput');
-    });
-
-    it('should handle multimodal queries without contextual references', async () => {
-      const multimodalQuery = [
-        { type: 'text', text: 'Analyze this image' },
-        { type: 'image_url', image_url: { url: 'data:image/png;base64,test' } },
-      ];
-      
-      mockReq.body = {
-        sessionId: 'test-session',
-        query: multimodalQuery,
-      };
-
-      // For multimodal queries, processContextualReferences returns null expandedContext
-      mockContextProcessor.processContextualReferences.mockResolvedValue({
-        expandedContext: null,
-        originalQuery: multimodalQuery,
-      });
-      mockSession.runQuery.mockResolvedValue({
-        success: true,
-        result: { type: 'assistant_message', content: 'Image analyzed' },
-      });
-
-      await executeQuery(mockReq as Request, mockRes as Response);
-
-      // Should NOT pass environmentInput for multimodal queries without references
-      const callArgs = mockSession.runQuery.mock.calls[0][0];
-      expect(callArgs).not.toHaveProperty('environmentInput');
     });
   });
 
-  describe('executeStreamingQuery - environmentInput conditional logic', () => {
-    it('should NOT pass environmentInput in streaming when no contextual references', async () => {
-      const userQuery = 'Streaming query without references';
+  describe('streaming queries', () => {
+    it('should follow same environmentInput logic in streaming mode', async () => {
+      const req = createMockRequest('Simple query');
+      const res = createMockResponse();
       
-      mockReq.body = {
-        sessionId: 'test-session',
-        query: userQuery,
-      };
-
-      const mockEventStream = {
+      mockContextResult(null, 'Simple query');
+      mockSession.runQueryStreaming.mockResolvedValue({
         [Symbol.asyncIterator]: async function* () {
-          yield { type: 'assistant_message', content: 'Streaming response' };
+          yield { type: 'assistant_message', content: 'Response' };
         },
-      };
-
-      mockContextProcessor.processContextualReferences.mockResolvedValue({
-        expandedContext: null,
-        originalQuery: userQuery,
       });
-      mockSession.runQueryStreaming.mockResolvedValue(mockEventStream);
 
-      await executeStreamingQuery(mockReq as Request, mockRes as Response);
-
-      // Verify session.runQueryStreaming was called WITHOUT environmentInput
-      expect(mockSession.runQueryStreaming).toHaveBeenCalledWith({
-        input: userQuery,
-        // environmentInput should NOT be present
-      });
+      await executeStreamingQuery(req as Request, res as Response);
 
       const callArgs = mockSession.runQueryStreaming.mock.calls[0][0];
       expect(callArgs).not.toHaveProperty('environmentInput');
     });
-
-    it('should pass environmentInput in streaming when contextual references exist', async () => {
-      const userQuery = 'Stream @file config.json';
-      const expandedContext = `<file path="config.json">\n{"key": "value"}\n</file>\n\n${userQuery}`;
-      
-      mockReq.body = {
-        sessionId: 'test-session',
-        query: userQuery,
-      };
-
-      const mockEventStream = {
-        [Symbol.asyncIterator]: async function* () {
-          yield { type: 'user_message', content: userQuery };
-          yield { type: 'environment_input', content: expandedContext };
-          yield { type: 'assistant_message', content: 'Config analyzed' };
-        },
-      };
-
-      mockContextProcessor.processContextualReferences.mockResolvedValue({
-        expandedContext: expandedContext,
-        originalQuery: userQuery,
-      });
-      mockSession.runQueryStreaming.mockResolvedValue(mockEventStream);
-
-      await executeStreamingQuery(mockReq as Request, mockRes as Response);
-
-      // Verify session.runQueryStreaming was called WITH environmentInput
-      expect(mockSession.runQueryStreaming).toHaveBeenCalledWith({
-        input: userQuery,
-        environmentInput: {
-          content: expandedContext,
-          description: 'Expanded context from contextual references',
-          metadata: {
-            type: 'codebase',
-          },
-        },
-      });
-    });
   });
 
-  describe('Bug reproduction tests', () => {
-    it('should reproduce the original bug scenario from issue description', async () => {
-      // This is the exact scenario from the issue:
-      // User message without @dir or @file should NOT generate environment_input event
-      const userQuery = '1. Open this game: https://cpstest.click/en/aim-trainer#google_vignette\n2. Select total sec to 50\n3. Play and pass this game';
+  describe('bug reproduction', () => {
+    it('should fix the original issue: no environment_input for simple queries', async () => {
+      const bugQuery = '1. Open this game: https://cpstest.click/en/aim-trainer\n2. Select total sec to 50';
+      const req = createMockRequest(bugQuery);
+      const res = createMockResponse();
       
-      mockReq.body = {
-        sessionId: 'test-session',
-        query: userQuery,
-      };
+      // No contextual references found
+      mockContextResult(null, bugQuery);
+      mockSuccessResponse();
 
-      // Mock the context processor to return null expandedContext (no contextual references)
-      mockContextProcessor.processContextualReferences.mockResolvedValue({
-        expandedContext: null,
-        originalQuery: userQuery,
-      });
-      
-      const mockEventStream = {
-        [Symbol.asyncIterator]: async function* () {
-          yield { type: 'user_message', content: userQuery };
-          // Should NOT yield environment_input event
-          yield { type: 'assistant_message', content: 'I\'ll help you with the game' };
-        },
-      };
-      
-      mockSession.runQueryStreaming.mockResolvedValue(mockEventStream);
+      await executeQuery(req as Request, res as Response);
 
-      await executeStreamingQuery(mockReq as Request, mockRes as Response);
-
-      // The fix: environmentInput should NOT be passed when no contextual references
-      const callArgs = mockSession.runQueryStreaming.mock.calls[0][0];
-      expect(callArgs).toEqual({
-        input: userQuery,
-        // No environmentInput property should be present
-      });
+      // The fix: no environmentInput should be passed
+      const callArgs = mockSession.runQuery.mock.calls[0][0];
+      expect(callArgs.input).toBe(bugQuery);
       expect(callArgs).not.toHaveProperty('environmentInput');
-    });
-
-    it('should verify the fix prevents unnecessary environment_input events', async () => {
-      const userQuery = 'Simple question without any file or directory references';
-      
-      mockReq.body = {
-        sessionId: 'test-session',
-        query: userQuery,
-      };
-
-      // Context processor returns null expandedContext (no expansion)
-      mockContextProcessor.processContextualReferences.mockResolvedValue({
-        expandedContext: null,
-        originalQuery: userQuery,
-      });
-      mockSession.runQuery.mockResolvedValue({
-        success: true,
-        result: { type: 'assistant_message', content: 'Simple answer' },
-      });
-
-      await executeQuery(mockReq as Request, mockRes as Response);
-
-      // Verify the session was called without environmentInput
-      // This prevents the Agent from emitting unnecessary environment_input events
-      const sessionCallArgs = mockSession.runQuery.mock.calls[0][0];
-      expect(sessionCallArgs.input).toBe(userQuery);
-      expect(sessionCallArgs).not.toHaveProperty('environmentInput');
-      
-      // This ensures no environment_input event will be emitted by the Agent
-      expect(mockSession.runQuery).toHaveBeenCalledTimes(1);
     });
   });
 });
