@@ -66,6 +66,9 @@ importers:
       '@agent-tars/interface':
         specifier: workspace:*
         version: link:../interface
+      '@tarko/agent-interface':
+        specifier: workspace:*
+        version: link:../../tarko/agent-interface
       '@tarko/mcp-agent':
         specifier: workspace:*
         version: link:../../tarko/mcp-agent

@@ -23,13 +23,9 @@ import {
   WaitAction,
   NavigateAction,
   NavigateBackAction,
-} from './gui-agent-types';
+} from '@tarko/agent-interface';
 
-/**
- * Coordinate type definition
- * @deprecated Use percentage coordinates in GUIAction types instead
- */
-export type Coords = [number, number] | [];
+
 
 function sleep(time: number) {
   return new Promise(function (resolve) {
@@ -37,8 +33,7 @@ function sleep(time: number) {
   });
 }
 
-// Re-export types for backward compatibility
-export type { ActionInputs, PredictionParsed, GUIAction, GUIAgentToolResponse };
+// Note: Types are now available from @tarko/agent-interface
 
 /**
  * Browser initialization options
