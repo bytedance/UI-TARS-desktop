@@ -6,14 +6,12 @@ import {
   FiMousePointer,
   FiType,
   FiChevronsRight,
-  FiImage,
   FiCheckCircle,
   FiXCircle,
 } from 'react-icons/fi';
 import { useSession } from '@/common/hooks/useSession';
 import { BrowserShell } from './BrowserShell';
 import { FileDisplayMode } from '../types';
-import { AgentEventStream } from '@tarko/agent-interface';
 
 interface BrowserControlRendererProps {
   panelContent: StandardPanelContent;
@@ -125,8 +123,6 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
       setRelatedImage(null);
     }
   }, [activeSessionId, messages, toolCallId, environmentImage]);
-
-
 
   return (
     <div className="space-y-6">

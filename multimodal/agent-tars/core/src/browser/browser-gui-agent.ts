@@ -245,7 +245,7 @@ wait()                                         - Wait 5 seconds and take a scree
           description: 'Page Content After Browser Action',
           metadata: {
             type: 'text',
-          } as AgentEventStream.TextMetadata,
+          },
         });
 
         // Send the event
@@ -342,7 +342,7 @@ wait()                                         - Wait 5 seconds and take a scree
         description: 'Browser Screenshot',
         metadata: {
           type: 'screenshot',
-        } as AgentEventStream.ScreenshotMetadata,
+        },
       });
 
       return eventStream.sendEvent(event);
@@ -403,7 +403,7 @@ wait()                                         - Wait 5 seconds and take a scree
         description: 'Browser Screenshot',
         metadata: {
           type: 'screenshot',
-        } as AgentEventStream.ScreenshotMetadata,
+        },
       });
 
       eventStream.sendEvent(event);
@@ -599,8 +599,6 @@ wait()                                         - Wait 5 seconds and take a scree
       this.logger.warn('Unable to extract dimension information from image data');
     }
   }
-
-
 
   /**
    * Get access to the underlying Puppeteer page
