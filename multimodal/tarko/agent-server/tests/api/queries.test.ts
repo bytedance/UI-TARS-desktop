@@ -92,7 +92,10 @@ describe('Queries Controller', () => {
         query: userQuery,
       };
 
-      mockContextProcessor.processContextualReferences.mockResolvedValue(expandedContext);
+      mockContextProcessor.processContextualReferences.mockResolvedValue({
+        expandedContext: expandedContext,
+        originalQuery: userQuery,
+      });
       mockImageProcessor.compressImagesInQuery.mockResolvedValue(compressedQuery);
       mockSession.runQuery.mockResolvedValue({
         success: true,
@@ -139,7 +142,10 @@ describe('Queries Controller', () => {
         query: userQuery,
       };
 
-      mockContextProcessor.processContextualReferences.mockResolvedValue(expandedContext);
+      mockContextProcessor.processContextualReferences.mockResolvedValue({
+        expandedContext: expandedContext,
+        originalQuery: userQuery,
+      });
       mockImageProcessor.compressImagesInQuery.mockResolvedValue(compressedQuery);
       mockSession.runQuery.mockResolvedValue({
         success: true,
@@ -148,17 +154,14 @@ describe('Queries Controller', () => {
 
       await executeQuery(mockReq as Request, mockRes as Response);
 
-      // Should still pass environmentInput even if content is empty
+      // Should NOT pass environmentInput if content is empty string (falsy)
       expect(mockSession.runQuery).toHaveBeenCalledWith({
         input: compressedQuery,
-        environmentInput: {
-          content: expandedContext,
-          description: 'Expanded context from contextual references',
-          metadata: {
-            type: 'codebase',
-          },
-        },
+        // No environmentInput should be present for empty string
       });
+      
+      const callArgs = mockSession.runQuery.mock.calls[0][0];
+      expect(callArgs).not.toHaveProperty('environmentInput');
     });
 
     it('should handle multimodal queries', async () => {
@@ -177,7 +180,10 @@ describe('Queries Controller', () => {
         query: multimodalQuery,
       };
 
-      mockContextProcessor.processContextualReferences.mockResolvedValue(expandedContext);
+      mockContextProcessor.processContextualReferences.mockResolvedValue({
+        expandedContext: expandedContext,
+        originalQuery: multimodalQuery,
+      });
       mockImageProcessor.compressImagesInQuery.mockResolvedValue(compressedQuery);
       mockSession.runQuery.mockResolvedValue({
         success: true,
@@ -213,7 +219,10 @@ describe('Queries Controller', () => {
         query: 'Test query',
       };
 
-      mockContextProcessor.processContextualReferences.mockResolvedValue('context');
+      mockContextProcessor.processContextualReferences.mockResolvedValue({
+        expandedContext: 'context',
+        originalQuery: 'Test query',
+      });
       mockImageProcessor.compressImagesInQuery.mockResolvedValue('compressed');
       mockSession.runQuery.mockResolvedValue({
         success: false,
@@ -268,7 +277,10 @@ describe('Queries Controller', () => {
         },
       };
 
-      mockContextProcessor.processContextualReferences.mockResolvedValue(expandedContext);
+      mockContextProcessor.processContextualReferences.mockResolvedValue({
+        expandedContext: expandedContext,
+        originalQuery: userQuery,
+      });
       mockImageProcessor.compressImagesInQuery.mockResolvedValue(compressedQuery);
       mockSession.runQueryStreaming.mockResolvedValue(mockEventStream);
 
@@ -313,7 +325,10 @@ describe('Queries Controller', () => {
         },
       };
 
-      mockContextProcessor.processContextualReferences.mockResolvedValue('context');
+      mockContextProcessor.processContextualReferences.mockResolvedValue({
+        expandedContext: 'context',
+        originalQuery: 'Test query',
+      });
       mockImageProcessor.compressImagesInQuery.mockResolvedValue('compressed');
       mockSession.runQueryStreaming.mockResolvedValue(mockErrorStream);
 
@@ -337,7 +352,10 @@ describe('Queries Controller', () => {
         },
       };
 
-      mockContextProcessor.processContextualReferences.mockResolvedValue('context');
+      mockContextProcessor.processContextualReferences.mockResolvedValue({
+        expandedContext: 'context',
+        originalQuery: 'Test query',
+      });
       mockImageProcessor.compressImagesInQuery.mockResolvedValue('compressed');
       mockSession.runQueryStreaming.mockResolvedValue(mockEventStream);
 

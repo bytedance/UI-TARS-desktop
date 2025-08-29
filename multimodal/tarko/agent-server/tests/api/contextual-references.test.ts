@@ -92,8 +92,11 @@ describe('Contextual References Bug Fix', () => {
         query: userQuery,
       };
 
-      // Mock: no contextual references found, returns original query
-      mockContextProcessor.processContextualReferences.mockResolvedValue(userQuery);
+      // Mock: no contextual references found, returns null expandedContext
+      mockContextProcessor.processContextualReferences.mockResolvedValue({
+        expandedContext: null,
+        originalQuery: userQuery,
+      });
       mockSession.runQuery.mockResolvedValue({
         success: true,
         result: { type: 'assistant_message', content: 'Response' },
@@ -122,7 +125,10 @@ describe('Contextual References Bug Fix', () => {
       };
 
       // Mock: contextual references found, returns expanded content
-      mockContextProcessor.processContextualReferences.mockResolvedValue(expandedContext);
+      mockContextProcessor.processContextualReferences.mockResolvedValue({
+        expandedContext: expandedContext,
+        originalQuery: userQuery,
+      });
       mockSession.runQuery.mockResolvedValue({
         success: true,
         result: { type: 'assistant_message', content: 'Analysis complete' },
@@ -152,7 +158,10 @@ describe('Contextual References Bug Fix', () => {
         query: userQuery,
       };
 
-      mockContextProcessor.processContextualReferences.mockResolvedValue(expandedContext);
+      mockContextProcessor.processContextualReferences.mockResolvedValue({
+        expandedContext: expandedContext,
+        originalQuery: userQuery,
+      });
       mockSession.runQuery.mockResolvedValue({
         success: true,
         result: { type: 'assistant_message', content: 'File not found' },
@@ -160,17 +169,14 @@ describe('Contextual References Bug Fix', () => {
 
       await executeQuery(mockReq as Request, mockRes as Response);
 
-      // Even with empty string, if it's different from original query, should pass environmentInput
+      // Empty string is falsy, should NOT pass environmentInput
       expect(mockSession.runQuery).toHaveBeenCalledWith({
         input: userQuery,
-        environmentInput: {
-          content: expandedContext,
-          description: 'Expanded context from contextual references',
-          metadata: {
-            type: 'codebase',
-          },
-        },
+        // No environmentInput should be present for empty string
       });
+      
+      const callArgs = mockSession.runQuery.mock.calls[0][0];
+      expect(callArgs).not.toHaveProperty('environmentInput');
     });
 
     it('should handle multimodal queries without contextual references', async () => {
@@ -184,8 +190,11 @@ describe('Contextual References Bug Fix', () => {
         query: multimodalQuery,
       };
 
-      // For multimodal queries, processContextualReferences returns the original query
-      mockContextProcessor.processContextualReferences.mockResolvedValue(multimodalQuery);
+      // For multimodal queries, processContextualReferences returns null expandedContext
+      mockContextProcessor.processContextualReferences.mockResolvedValue({
+        expandedContext: null,
+        originalQuery: multimodalQuery,
+      });
       mockSession.runQuery.mockResolvedValue({
         success: true,
         result: { type: 'assistant_message', content: 'Image analyzed' },
@@ -214,7 +223,10 @@ describe('Contextual References Bug Fix', () => {
         },
       };
 
-      mockContextProcessor.processContextualReferences.mockResolvedValue(userQuery);
+      mockContextProcessor.processContextualReferences.mockResolvedValue({
+        expandedContext: null,
+        originalQuery: userQuery,
+      });
       mockSession.runQueryStreaming.mockResolvedValue(mockEventStream);
 
       await executeStreamingQuery(mockReq as Request, mockRes as Response);
@@ -246,7 +258,10 @@ describe('Contextual References Bug Fix', () => {
         },
       };
 
-      mockContextProcessor.processContextualReferences.mockResolvedValue(expandedContext);
+      mockContextProcessor.processContextualReferences.mockResolvedValue({
+        expandedContext: expandedContext,
+        originalQuery: userQuery,
+      });
       mockSession.runQueryStreaming.mockResolvedValue(mockEventStream);
 
       await executeStreamingQuery(mockReq as Request, mockRes as Response);
@@ -276,8 +291,11 @@ describe('Contextual References Bug Fix', () => {
         query: userQuery,
       };
 
-      // Mock the context processor to return the original query (no contextual references)
-      mockContextProcessor.processContextualReferences.mockResolvedValue(userQuery);
+      // Mock the context processor to return null expandedContext (no contextual references)
+      mockContextProcessor.processContextualReferences.mockResolvedValue({
+        expandedContext: null,
+        originalQuery: userQuery,
+      });
       
       const mockEventStream = {
         [Symbol.asyncIterator]: async function* () {
@@ -308,8 +326,11 @@ describe('Contextual References Bug Fix', () => {
         query: userQuery,
       };
 
-      // Context processor returns original query (no expansion)
-      mockContextProcessor.processContextualReferences.mockResolvedValue(userQuery);
+      // Context processor returns null expandedContext (no expansion)
+      mockContextProcessor.processContextualReferences.mockResolvedValue({
+        expandedContext: null,
+        originalQuery: userQuery,
+      });
       mockSession.runQuery.mockResolvedValue({
         success: true,
         result: { type: 'assistant_message', content: 'Simple answer' },

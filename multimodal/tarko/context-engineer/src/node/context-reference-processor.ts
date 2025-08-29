@@ -60,18 +60,24 @@ export class ContextReferenceProcessor {
 
   /**
    * Process contextual references in query content
-   * Expands @file: and @dir: references to actual content and prepends to original query
+   * Expands @file: and @dir: references to actual content
    * @param query - The query content that may contain contextual references
    * @param workspacePath - Base workspace path for security validation and path resolution
-   * @returns Processed query with expanded contextual content prepended
+   * @returns Object containing expanded context and original query
    */
   async processContextualReferences(
     query: string | ChatCompletionContentPart[],
     workspacePath: string,
-  ): Promise<string | ChatCompletionContentPart[]> {
+  ): Promise<{
+    expandedContext: string | ChatCompletionContentPart[] | null;
+    originalQuery: string | ChatCompletionContentPart[];
+  }> {
     // Only process string queries for now
     if (typeof query !== 'string') {
-      return query;
+      return {
+        expandedContext: null,
+        originalQuery: query,
+      };
     }
 
     // Find all contextual references
@@ -79,7 +85,10 @@ export class ContextReferenceProcessor {
     const matches = Array.from(query.matchAll(contextualReferencePattern));
 
     if (matches.length === 0) {
-      return query;
+      return {
+        expandedContext: null,
+        originalQuery: query,
+      };
     }
 
     // Separate file and directory references
@@ -192,11 +201,17 @@ export class ContextReferenceProcessor {
       }
     }
 
-    // Combine expanded content with original query
+    // Return separated context and original query
     if (expandedContents.length > 0) {
-      return `${expandedContents.join('\n\n')}\n\n${query}`;
+      return {
+        expandedContext: expandedContents.join('\n\n'),
+        originalQuery: query,
+      };
     }
 
-    return query;
+    return {
+      expandedContext: null,
+      originalQuery: query,
+    };
   }
 }

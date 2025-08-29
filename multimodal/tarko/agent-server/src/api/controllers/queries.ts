@@ -48,19 +48,18 @@ export async function executeQuery(req: Request, res: Response) {
     const workspacePath = server.getCurrentWorkspace();
 
     // Process contextual references and pass as environment input to agent options
-    const expandedContext = await contextReferenceProcessor.processContextualReferences(
+    const { expandedContext, originalQuery } = await contextReferenceProcessor.processContextualReferences(
       query,
       workspacePath,
     );
 
     // Compress images in user input only
-    const compressedQuery = await imageProcessor.compressImagesInQuery(query);
+    const compressedQuery = await imageProcessor.compressImagesInQuery(originalQuery);
 
     // Only pass environmentInput if there are actual contextual references
-    const hasContextualReferences = expandedContext !== query;
     const runOptions = {
       input: compressedQuery,
-      ...(hasContextualReferences && {
+      ...(expandedContext && {
         environmentInput: {
           content: expandedContext,
           description: 'Expanded context from contextual references',
@@ -108,19 +107,18 @@ export async function executeStreamingQuery(req: Request, res: Response) {
     const workspacePath = server.getCurrentWorkspace();
 
     // Process contextual references and pass as environment input to agent options
-    const expandedContext = await contextReferenceProcessor.processContextualReferences(
+    const { expandedContext, originalQuery } = await contextReferenceProcessor.processContextualReferences(
       query,
       workspacePath,
     );
 
     // Compress images in user input only
-    const compressedQuery = await imageProcessor.compressImagesInQuery(query);
+    const compressedQuery = await imageProcessor.compressImagesInQuery(originalQuery);
 
     // Only pass environmentInput if there are actual contextual references
-    const hasContextualReferences = expandedContext !== query;
     const runOptions = {
       input: compressedQuery,
-      ...(hasContextualReferences && {
+      ...(expandedContext && {
         environmentInput: {
           content: expandedContext,
           description: 'Expanded context from contextual references',
