@@ -12,7 +12,10 @@ export namespace GUIAgent {
    * Base interface for all GUI Agent action types
    * Defines the fundamental structure that all actions must follow
    */
-  export interface BaseAction<T extends string = string, I extends Record<string, any> = Record<string, any>> {
+  export interface BaseAction<
+    T extends string = string,
+    I extends Record<string, any> = Record<string, any>,
+  > {
     type: T;
     inputs: I;
   }
@@ -20,59 +23,80 @@ export namespace GUIAgent {
   /**
    * Click action with coordinates
    */
-  export type ClickAction = BaseAction<'click', {
-    startX: number; // Percentage coordinates (0-1)
-    startY: number; // Percentage coordinates (0-1)
-  }>;
+  export type ClickAction = BaseAction<
+    'click',
+    {
+      startX: number; // Percentage coordinates (0-1)
+      startY: number; // Percentage coordinates (0-1)
+    }
+  >;
 
   /**
    * Double click action with coordinates
    */
-  export type DoubleClickAction = BaseAction<'double_click' | 'left_double', {
-    startX: number; // Percentage coordinates (0-1)
-    startY: number; // Percentage coordinates (0-1)
-  }>;
+  export type DoubleClickAction = BaseAction<
+    'double_click' | 'left_double',
+    {
+      startX: number; // Percentage coordinates (0-1)
+      startY: number; // Percentage coordinates (0-1)
+    }
+  >;
 
   /**
    * Right click action with coordinates
    */
-  export type RightClickAction = BaseAction<'right_click' | 'right_single', {
-    startX: number; // Percentage coordinates (0-1)
-    startY: number; // Percentage coordinates (0-1)
-  }>;
+  export type RightClickAction = BaseAction<
+    'right_click' | 'right_single',
+    {
+      startX: number; // Percentage coordinates (0-1)
+      startY: number; // Percentage coordinates (0-1)
+    }
+  >;
 
   /**
    * Drag action with start and end coordinates
    */
-  export type DragAction = BaseAction<'drag', {
-    startX: number; // Percentage coordinates (0-1)
-    startY: number; // Percentage coordinates (0-1)
-    endX: number; // Percentage coordinates (0-1)
-    endY: number; // Percentage coordinates (0-1)
-  }>;
+  export type DragAction = BaseAction<
+    'drag',
+    {
+      startX: number; // Percentage coordinates (0-1)
+      startY: number; // Percentage coordinates (0-1)
+      endX: number; // Percentage coordinates (0-1)
+      endY: number; // Percentage coordinates (0-1)
+    }
+  >;
 
   /**
    * Type action with text content
    */
-  export type TypeAction = BaseAction<'type', {
-    content: string;
-  }>;
+  export type TypeAction = BaseAction<
+    'type',
+    {
+      content: string;
+    }
+  >;
 
   /**
    * Hotkey action with key combination
    */
-  export type HotkeyAction = BaseAction<'hotkey', {
-    key: string;
-  }>;
+  export type HotkeyAction = BaseAction<
+    'hotkey',
+    {
+      key: string;
+    }
+  >;
 
   /**
    * Scroll action with coordinates and direction
    */
-  export type ScrollAction = BaseAction<'scroll', {
-    startX: number; // Percentage coordinates (0-1)
-    startY: number; // Percentage coordinates (0-1)
-    direction: 'up' | 'down' | 'left' | 'right';
-  }>;
+  export type ScrollAction = BaseAction<
+    'scroll',
+    {
+      startX: number; // Percentage coordinates (0-1)
+      startY: number; // Percentage coordinates (0-1)
+      direction: 'up' | 'down' | 'left' | 'right';
+    }
+  >;
 
   /**
    * Wait action with no inputs
@@ -82,9 +106,12 @@ export namespace GUIAgent {
   /**
    * Navigate action with URL
    */
-  export type NavigateAction = BaseAction<'navigate', {
-    url: string;
-  }>;
+  export type NavigateAction = BaseAction<
+    'navigate',
+    {
+      url: string;
+    }
+  >;
 
   /**
    * Navigate back action
