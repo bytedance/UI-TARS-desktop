@@ -25,6 +25,17 @@ import {
   NavigateBackAction,
 } from '@tarko/agent-interface';
 
+/**
+ * Browser operator execute result with strict typing
+ */
+interface BrowserExecuteResult {
+  startX?: number | null;
+  startY?: number | null;
+  startXPercent?: number | null;
+  startYPercent?: number | null;
+  action_inputs: ActionInputs;
+}
+
 
 
 function sleep(time: number) {
@@ -426,7 +437,7 @@ wait()                                         - Wait 5 seconds and take a scree
   private convertToGUIResponse(
     actionStr: string,
     parsed: PredictionParsed,
-    result: any,
+    result: BrowserExecuteResult,
   ): GUIAgentToolResponse {
     const normalizedAction = this.convertToNormalizedAction(parsed, result);
     
@@ -441,43 +452,49 @@ wait()                                         - Wait 5 seconds and take a scree
   /**
    * Convert parsed prediction to normalized GUI action with percentage coordinates
    */
-  private convertToNormalizedAction(parsed: PredictionParsed, result: any): GUIAction {
+  private convertToNormalizedAction(parsed: PredictionParsed, result: BrowserExecuteResult): GUIAction {
     const { action_type, action_inputs } = parsed;
     const { startXPercent, startYPercent } = result;
 
     switch (action_type) {
       case 'click':
       case 'left_click':
-      case 'left_single':
-        return {
+      case 'left_single': {
+        const clickAction: ClickAction = {
           type: 'click',
           inputs: {
             startX: startXPercent || 0,
             startY: startYPercent || 0,
           },
-        } as ClickAction;
+        };
+        return clickAction;
+      }
 
       case 'double_click':
-      case 'left_double':
-        return {
+      case 'left_double': {
+        const doubleClickAction: DoubleClickAction = {
           type: 'double_click',
           inputs: {
             startX: startXPercent || 0,
             startY: startYPercent || 0,
           },
-        } as DoubleClickAction;
+        };
+        return doubleClickAction;
+      }
 
       case 'right_click':
-      case 'right_single':
-        return {
+      case 'right_single': {
+        const rightClickAction: RightClickAction = {
           type: 'right_click',
           inputs: {
             startX: startXPercent || 0,
             startY: startYPercent || 0,
           },
-        } as RightClickAction;
+        };
+        return rightClickAction;
+      }
 
-      case 'drag':
+      case 'drag': {
         // Parse end coordinates from action_inputs.end_box
         const endBox = action_inputs.end_box;
         let endXPercent = 0;
@@ -493,7 +510,7 @@ wait()                                         - Wait 5 seconds and take a scree
             this.logger.warn('Failed to parse end_box coordinates:', endBox);
           }
         }
-        return {
+        const dragAction: DragAction = {
           type: 'drag',
           inputs: {
             startX: startXPercent || 0,
@@ -501,64 +518,80 @@ wait()                                         - Wait 5 seconds and take a scree
             endX: endXPercent,
             endY: endYPercent,
           },
-        } as DragAction;
+        };
+        return dragAction;
+      }
 
-      case 'type':
-        return {
+      case 'type': {
+        const typeAction: TypeAction = {
           type: 'type',
           inputs: {
             content: action_inputs.content || '',
           },
-        } as TypeAction;
+        };
+        return typeAction;
+      }
 
-      case 'hotkey':
-        return {
+      case 'hotkey': {
+        const hotkeyAction: HotkeyAction = {
           type: 'hotkey',
           inputs: {
             key: action_inputs.key || action_inputs.hotkey || '',
           },
-        } as HotkeyAction;
+        };
+        return hotkeyAction;
+      }
 
-      case 'scroll':
-        return {
+      case 'scroll': {
+        const scrollAction: ScrollAction = {
           type: 'scroll',
           inputs: {
             startX: startXPercent || 0,
             startY: startYPercent || 0,
-            direction: (action_inputs.direction as any) || 'down',
+            direction: (action_inputs.direction as 'up' | 'down' | 'left' | 'right') || 'down',
           },
-        } as ScrollAction;
+        };
+        return scrollAction;
+      }
 
-      case 'wait':
-        return {
+      case 'wait': {
+        const waitAction: WaitAction = {
           type: 'wait',
           inputs: {},
-        } as WaitAction;
+        };
+        return waitAction;
+      }
 
-      case 'navigate':
-        return {
+      case 'navigate': {
+        const navigateAction: NavigateAction = {
           type: 'navigate',
           inputs: {
             url: action_inputs.content || '',
           },
-        } as NavigateAction;
+        };
+        return navigateAction;
+      }
 
-      case 'navigate_back':
-        return {
+      case 'navigate_back': {
+        const navigateBackAction: NavigateBackAction = {
           type: 'navigate_back',
           inputs: {},
-        } as NavigateBackAction;
+        };
+        return navigateBackAction;
+      }
 
-      default:
+      default: {
         // Fallback to a generic click action for unknown types
         this.logger.warn(`Unknown action type: ${action_type}, falling back to click`);
-        return {
+        const fallbackAction: ClickAction = {
           type: 'click',
           inputs: {
             startX: startXPercent || 0,
             startY: startYPercent || 0,
           },
-        } as ClickAction;
+        };
+        return fallbackAction;
+      }
     }
   }
 
@@ -566,10 +599,11 @@ wait()                                         - Wait 5 seconds and take a scree
    * Create a default error action for failed operations
    */
   private createErrorAction(): GUIAction {
-    return {
+    const errorAction: WaitAction = {
       type: 'wait',
       inputs: {},
-    } as WaitAction;
+    };
+    return errorAction;
   }
 
   /**

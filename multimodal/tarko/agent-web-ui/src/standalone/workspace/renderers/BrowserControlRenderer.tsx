@@ -52,8 +52,21 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
     const sessionResults = toolResults[activeSessionId] || [];
     const matchingResult = sessionResults.find((result) => result.toolCallId === toolCallId);
 
-    if (matchingResult && matchingResult.content && matchingResult.content.result) {
-      const { startXPercent, startYPercent } = matchingResult.content.result;
+    if (matchingResult && matchingResult.content) {
+      // Support both legacy and new GUI Agent response formats
+      let startXPercent: number | undefined;
+      let startYPercent: number | undefined;
+      
+      // New format: check for GUIAgentToolResponse structure
+      if (matchingResult.content.action && matchingResult.content.action.inputs) {
+        startXPercent = matchingResult.content.action.inputs.startX;
+        startYPercent = matchingResult.content.action.inputs.startY;
+      }
+      // Legacy format: check for result structure
+      else if (matchingResult.content.result) {
+        startXPercent = matchingResult.content.result.startXPercent;
+        startYPercent = matchingResult.content.result.startYPercent;
+      }
 
       // Save previous position before updating
       if (mousePosition) {
