@@ -1,0 +1,73 @@
+## 前置说明
+
+### 模型的输出内容
+新的输出内容可能是以下几种情况:
+1. think + answer
+`
+<think_never_used_51bce0c785ca2f68081bfa7d91973934> reasoning process </think_never_used_51bce0c785ca2f68081bfa7d91973934>
+final anser here
+`
+
+2. think + single function
+`
+<think_never_used_51bce0c785ca2f68081bfa7d91973934> reasoning process </think_never_used_51bce0c785ca2f68081bfa7d91973934>
+<seed:tool_call>
+    <function=example_function_name>
+        <parameter=example_parameter_1>value_1</parameter>
+        <parameter=example_parameter_2>
+        This is the value for the second parameter
+        that can span
+        multiple lines
+        </parameter>
+    </function>
+</seed:tool_call>
+`
+
+3. think + multiple function
+`
+<seed:tool_call>
+    <function=example_function_1>
+        <parameter=example_parameter_1>value_1</parameter>
+        <parameter=example_parameter_2>
+        This is the value for the second parameter
+        that can span
+        multiple lines
+        </parameter>
+    </function>
+    <function=example_function_2>
+        <parameter=example_parameter_3>value_4</parameter>
+    </function>
+</seed:tool_call>
+`
+
+
+4. think + chat content + tool
+`
+<think_never_used_51bce0c785ca2f68081bfa7d91973934> reasoning process </think_never_used_51bce0c785ca2f68081bfa7d91973934>
+chat content here
+<seed:tool_call>
+    <function=example_function_name>
+        <parameter=example_parameter_1>value_1</parameter>
+        <parameter=example_parameter_2>
+        This is the value for the second parameter
+        that can span
+        multiple lines
+        </parameter>
+    </function>
+</seed:tool_call>
+`
+
+### Notes
+1. 模型以流式输出， 每个 chunk 包含上述输出内容的任何一个字符串片段
+2. 你可以阅读当前 @src/utils/streamingParser 的实现，确认基本用法、背景、实现思路
+
+
+## 你的任务
+
+1. 实现一个新的流式解析器 streamingParserT5，  核心方法 processStreamingChunk 的作用、出参、入参和 @src/utils/streamingParser/index.ts 中的 processStreamingChunk 一致
+2. 对 think、 answer、 chat content、 tool 的解析需要按照前面说明的输出格式
+3. 我觉得 tool 的解析可以复用 extractCodeEnv，只是 code_env 标签换成了 seed:tool_call 标签， 另外需要支持多个 function 的情况
+4. think 的解析可以复用 extractThink ，只是 think 标签换成了  think_never_used_51bce0c785ca2f68081bfa7d91973934 标签， 或许在字符匹配时使用更通用的方法，防止以后该标签还会更改
+5. 新增加对 chat content， 赋值给 processStreamingChunk 的返回值 content， 它可以视作和 answer 一样的地位， 且它和 answer 不会同时出现
+6. 新的代码都放在 streamingParserT5 目录下
+7. 请先完成单元测试的编写， 让我确认方法的视线思路是否符合预期； 单元测试可以复用或者参考 @src/utils/streamingParser/__tests__ 中的测试用例

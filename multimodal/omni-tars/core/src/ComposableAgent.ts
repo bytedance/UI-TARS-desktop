@@ -12,6 +12,7 @@ import {
 } from '@tarko/agent';
 import { AgentComposer } from './AgentComposer';
 import { AgentPlugin } from './AgentPlugin';
+import { SYSTEM_PROMPT } from './environments/prompt_t5';
 
 export interface ComposableAgentOptions extends AgentOptions {
   /** Agent plugins to compose */
@@ -30,8 +31,8 @@ export class ComposableAgent extends Agent {
     const composer = new AgentComposer({ plugins });
 
     super({
-      // instructions: SYSTEM_PROMPT,
-      instructions: composer.generateSystemPrompt(),
+      instructions: SYSTEM_PROMPT,
+      // instructions: composer.generateSystemPrompt(),
       //Remove plugins to prevent circular reference from reporting errors
       ...optionsWithoutPlugins,
     });
