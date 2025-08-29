@@ -5,7 +5,7 @@ import { FiX, FiExternalLink, FiGithub, FiGlobe, FiCpu, FiCopy, FiCheck } from '
 import { FaBrain } from 'react-icons/fa';
 import { apiService } from '@/common/services/apiService';
 import { AgentServerVersionInfo, SessionItemInfo } from '@agent-tars/interface';
-import { getWebUIConfig, getLogoUrl, getAgentTitle } from '@/common/constants';
+import { getWebUIConfig, getLogoUrl, getAgentTitle } from '@/config/web-ui-config';
 
 interface AboutModalProps {
   isOpen: boolean;

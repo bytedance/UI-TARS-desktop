@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { FiArrowRight, FiArrowUpRight } from 'react-icons/fi';
 import { useSession } from '@/common/hooks/useSession';
-import { getWebUIConfig, getLogoUrl, getAgentTitle } from '@/common/constants';
+import { getWebUIConfig, getLogoUrl, getAgentTitle } from '@/config/web-ui-config';
 
 const WelcomePage: React.FC = () => {
   const navigate = useNavigate();

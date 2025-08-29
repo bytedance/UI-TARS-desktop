@@ -1,5 +1,5 @@
 import React from 'react';
-import { getAgentTitle } from '@/common/constants';
+import { getAgentTitle } from '@/config/web-ui-config';
 
 interface TerminalOutputProps {
   title?: React.ReactNode;

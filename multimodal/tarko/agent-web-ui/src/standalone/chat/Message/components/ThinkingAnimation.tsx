@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { FiCpu, FiZap, FiLoader, FiPlay } from 'react-icons/fi';
 import { AgentProcessingPhase } from '@tarko/interface';
-import { getAgentTitle } from '@/common/constants';
+import { getAgentTitle } from '@/config/web-ui-config';
 
 interface ThinkingAnimationProps {
   size?: 'small' | 'medium' | 'large';

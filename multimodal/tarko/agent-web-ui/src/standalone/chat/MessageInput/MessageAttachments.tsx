@@ -6,7 +6,7 @@ import { ImagePreview } from '../ImagePreview';
 import { ContextualTags } from '../ContextualTags';
 import { ContextualItem } from '../ContextualSelector';
 import { removeContextualItemAction } from '@/common/state/atoms/contextualSelector';
-import { isContextualSelectorEnabled } from '@/common/constants';
+import { isContextualSelectorEnabled } from '@/config/web-ui-config';
 
 interface MessageAttachmentsProps {
   images: ChatCompletionContentPart[];

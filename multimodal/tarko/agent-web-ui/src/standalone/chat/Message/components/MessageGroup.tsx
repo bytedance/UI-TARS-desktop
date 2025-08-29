@@ -7,7 +7,7 @@ import { ThinkingAnimation } from './ThinkingAnimation';
 import { SkeletonLoader } from './SkeletonLoader';
 import { useAtomValue } from 'jotai';
 import { agentStatusAtom } from '@/common/state/atoms/ui';
-import { getAgentTitle } from '@/common/constants';
+import { getAgentTitle } from '@/config/web-ui-config';
 
 interface MessageGroupProps {
   messages: MessageType[];

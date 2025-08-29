@@ -5,7 +5,7 @@ import { FiPlus, FiHome, FiSettings } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/common/hooks/useSession';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
-import { isLayoutSwitchButtonEnabled } from '@/common/constants/shared';
+import { isLayoutSwitchButtonEnabled } from '@/config/web-ui-config';
 import { AgentConfigViewer } from './AgentConfigViewer';
 import { LayoutSwitchButton } from './LayoutSwitchButton';
 

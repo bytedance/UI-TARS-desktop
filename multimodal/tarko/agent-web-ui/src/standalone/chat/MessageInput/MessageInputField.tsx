@@ -11,7 +11,7 @@ import {
   updateSelectorStateAction,
 } from '@/common/state/atoms/contextualSelector';
 import { ContextualSelector, ContextualItem } from '../ContextualSelector';
-import { getAgentTitle, isContextualSelectorEnabled } from '@/common/constants';
+import { getAgentTitle, isContextualSelectorEnabled } from '@/config/web-ui-config';
 
 interface MessageInputFieldProps {
   uploadedImages: ChatCompletionContentPart[];

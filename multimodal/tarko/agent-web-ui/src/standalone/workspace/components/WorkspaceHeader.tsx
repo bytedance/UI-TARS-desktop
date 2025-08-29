@@ -9,7 +9,7 @@ import { ToggleSwitch, ToggleSwitchProps } from '../renderers/generic/components
 import { ShareButton } from './ShareButton';
 import { FileDisplayMode } from '../types';
 import { WorkspaceDisplayMode } from '@/common/state/atoms/workspace';
-import { getWorkspaceNavItems } from '@/common/constants';
+import { getWorkspaceNavItems } from '@/config/web-ui-config';
 
 interface WorkspaceHeaderProps {
   panelContent: StandardPanelContent;

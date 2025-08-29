@@ -13,7 +13,7 @@ import {
 } from 'react-icons/fi';
 import { apiService } from '@/common/services/apiService';
 import { normalizeFilePath } from '@/common/utils/pathNormalizer';
-import { getAgentTitle } from '@/common/constants';
+import { getAgentTitle } from '@/config/web-ui-config';
 import './Workspace.css';
 
 /**

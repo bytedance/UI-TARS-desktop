@@ -12,7 +12,7 @@ import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useDarkMode } from '@/common/hooks/useDarkMode';
 import { apiService } from '@/common/services/apiService';
 import { NavbarModelSelector } from './ModelSelector';
-import { getLogoUrl, getAgentTitle } from '@/common/constants';
+import { getLogoUrl, getAgentTitle } from '@/config/web-ui-config';
 
 import './Navbar.css';
 

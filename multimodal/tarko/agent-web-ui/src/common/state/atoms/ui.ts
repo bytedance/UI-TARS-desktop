@@ -1,6 +1,6 @@
 import { atom } from 'jotai';
 import { AgentProcessingPhase, AgentStatusInfo, SessionItemInfo, LayoutMode } from '@tarko/interface';
-import { getDefaultLayoutMode } from '@/common/constants/shared';
+import { getDefaultLayoutMode } from '@/config/web-ui-config';
 import {
   ConnectionStatus,
   PanelContent,

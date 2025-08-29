@@ -10,7 +10,7 @@ import { groupedMessagesAtom, messagesAtom } from '@/common/state/atoms/message'
 import { replayStateAtom } from '@/common/state/atoms/replay';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useReplay } from '@/common/hooks/useReplay';
-import { getAgentTitle } from '@/common/constants';
+import { getAgentTitle } from '@/config/web-ui-config';
 import { useAutoScroll } from './hooks/useAutoScroll';
 import { ScrollToBottomButton } from './components/ScrollToBottomButton';
 

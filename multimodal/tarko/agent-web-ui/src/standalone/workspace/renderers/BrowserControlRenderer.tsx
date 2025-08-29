@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { StandardPanelContent } from '../types/panelContent';
 import { useSession } from '@/common/hooks/useSession';
 import { FileDisplayMode } from '../types';
-import { getGUIAgentConfig } from '@/common/constants';
+import { getGUIAgentConfig } from '@/config/web-ui-config';
 import {
   StrategySwitch,
   ScreenshotDisplay,
