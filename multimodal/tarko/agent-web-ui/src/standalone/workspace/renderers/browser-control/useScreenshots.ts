@@ -131,8 +131,6 @@ export const useScreenshots = ({
     toolCallId,
     environmentImage,
     currentStrategy,
-    afterActionImage,
-    beforeActionImage,
   ]);
 
   return {

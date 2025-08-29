@@ -58,7 +58,7 @@ export const useMousePosition = ({
         );
       }
     }
-  }, [activeSessionId, toolCallId, toolResults, mousePosition]);
+  }, [activeSessionId, toolCallId, toolResults]);
 
   return { mousePosition, previousMousePosition };
 };
