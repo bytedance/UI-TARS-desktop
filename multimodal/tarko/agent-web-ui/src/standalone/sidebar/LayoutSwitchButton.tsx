@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAtom } from 'jotai';
 import { FiColumns, FiSidebar } from 'react-icons/fi';
 import { layoutModeAtom } from '@/common/state/atoms/ui';
@@ -34,7 +34,17 @@ export const LayoutSwitchButton: React.FC = () => {
       className="w-8 h-8 rounded-lg flex items-center justify-center bg-white dark:bg-gray-800 text-black dark:text-white hover:shadow-md"
       title={isNarrowChat ? 'Switch to Equal Layout' : 'Switch to Narrow Chat Layout'}
     >
-      {isNarrowChat ? <FiColumns size={16} /> : <FiSidebar size={16} />}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={layoutMode}
+          initial={{ opacity: 0, rotate: -90 }}
+          animate={{ opacity: 1, rotate: 0 }}
+          exit={{ opacity: 0, rotate: 90 }}
+          transition={{ duration: 0.2, ease: 'easeInOut' }}
+        >
+          {isNarrowChat ? <FiColumns size={16} /> : <FiSidebar size={16} />}
+        </motion.div>
+      </AnimatePresence>
     </motion.button>
   );
 };
