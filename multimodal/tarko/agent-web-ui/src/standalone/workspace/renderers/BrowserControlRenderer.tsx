@@ -8,6 +8,9 @@ import {
   FiChevronsRight,
   FiCheckCircle,
   FiXCircle,
+  FiRewind,
+  FiFastForward,
+  FiShuffle,
 } from 'react-icons/fi';
 import { useSession } from '@/common/hooks/useSession';
 import { BrowserShell } from './BrowserShell';
