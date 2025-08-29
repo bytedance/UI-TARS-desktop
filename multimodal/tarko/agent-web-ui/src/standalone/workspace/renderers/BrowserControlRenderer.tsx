@@ -1,21 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { StandardPanelContent } from '../types/panelContent';
-import { motion } from 'framer-motion';
-import {
-  FiEye,
-  FiMousePointer,
-  FiType,
-  FiChevronsRight,
-  FiCheckCircle,
-  FiXCircle,
-  FiRewind,
-  FiFastForward,
-  FiShuffle,
-} from 'react-icons/fi';
 import { useSession } from '@/common/hooks/useSession';
-import { BrowserShell } from './BrowserShell';
 import { FileDisplayMode } from '../types';
 import { getGUIAgentConfig } from '@/common/constants';
+import {
+  StrategySwitch,
+  ScreenshotDisplay,
+  OperationDetailsCard,
+  useMousePosition,
+  useScreenshots,
+  extractBrowserControlData,
+} from './browser-control';
 
 interface BrowserControlRendererProps {
   panelContent: StandardPanelContent;
@@ -31,19 +26,10 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
   onAction,
 }) => {
   const { activeSessionId, messages, toolResults } = useSession();
-  const [relatedImage, setRelatedImage] = useState<string | null>(null);
-  const [beforeActionImage, setBeforeActionImage] = useState<string | null>(null);
-  const [afterActionImage, setAfterActionImage] = useState<string | null>(null);
   const guiAgentConfig = getGUIAgentConfig();
   const [currentStrategy, setCurrentStrategy] = useState<'both' | 'beforeAction' | 'afterAction'>(
     guiAgentConfig.defaultScreenshotRenderStrategy
   );
-  const [mousePosition, setMousePosition] = useState<{ x: number; y: number } | null>(null);
-  const [previousMousePosition, setPreviousMousePosition] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
-  const imageRef = useRef<HTMLImageElement>(null);
 
   // Extract the visual operation details from panelContent
   const operationData = extractBrowserControlData(panelContent);
@@ -54,638 +40,52 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
 
   const { thought, step, action, status, toolCallId, environmentImage } = operationData;
 
-  // Get coordinates directly from tool result instead of parsing action string
-  useEffect(() => {
-    if (!activeSessionId || !toolCallId) return;
+  // Get mouse position from custom hook
+  const { mousePosition, previousMousePosition } = useMousePosition({
+    activeSessionId,
+    toolCallId,
+    toolResults,
+  });
 
-    // Find the matching tool result for this tool call
-    const sessionResults = toolResults[activeSessionId] || [];
-    const matchingResult = sessionResults.find((result) => result.toolCallId === toolCallId);
-
-    if (matchingResult?.content?.normalizedAction?.inputs) {
-      const { normalizedAction } = matchingResult.content;
-      const { startX, startY } = normalizedAction.inputs;
-
-      // Check if action type supports coordinate display
-      const coordinateBasedActions = [
-        'click',
-        'double_click',
-        'left_double',
-        'right_click',
-        'right_single',
-        'drag',
-        'scroll',
-      ];
-
-      if (coordinateBasedActions.includes(normalizedAction.type)) {
-        // Save previous position before updating
-        if (mousePosition) {
-          setPreviousMousePosition(mousePosition);
-        }
-
-        // Set new position if percentage coordinates are valid
-        if (typeof startX === 'number' && typeof startY === 'number') {
-          setMousePosition({
-            x: startX * 100, // Convert to percentage
-            y: startY * 100, // Convert to percentage
-          });
-        }
-      } else {
-        console.log(
-          `[BrowserControlRenderer] Action type '${normalizedAction.type}' does not support coordinate display`,
-        );
-      }
-    }
-  }, [activeSessionId, toolCallId, toolResults]);
-
-  // If environment image is provided, use it directly
-  useEffect(() => {
-    if (environmentImage) {
-      setRelatedImage(environmentImage);
-    }
-  }, [environmentImage]);
-
-  // Find screenshots based on the configured strategy
-  // Note: Mouse cursor should only be rendered on beforeAction images or single screenshots
-  // that represent the state before the action is performed, as it shows where the action will occur
-  useEffect(() => {
-    // Initialize: clear current screenshots if no direct environment image provided
-    if (!environmentImage) {
-      setRelatedImage(null);
-      setBeforeActionImage(null);
-      setAfterActionImage(null);
-    }
-
-    if (!activeSessionId || !toolCallId) return;
-
-    const sessionMessages = messages[activeSessionId] || [];
-    const currentToolCallIndex = sessionMessages.findIndex((msg) =>
-      msg.toolCalls?.some((tc) => tc.id === toolCallId),
-    );
-
-    if (currentToolCallIndex === -1) {
-      console.warn(`[BrowserControlRenderer] Tool call ${toolCallId} not found in messages`);
-      if (!environmentImage) {
-        setRelatedImage(null);
-        setBeforeActionImage(null);
-        setAfterActionImage(null);
-      }
-      return;
-    }
-
-    let foundBeforeImage = false;
-    let foundAfterImage = false;
-
-    // Search for screenshots BEFORE the current tool call
-    if (currentStrategy === 'beforeAction' || currentStrategy === 'both') {
-      for (let i = currentToolCallIndex - 1; i >= 0; i--) {
-        const msg = sessionMessages[i];
-        if (msg.role === 'environment' && Array.isArray(msg.content)) {
-          const imgContent = msg.content.find(
-            (c) => typeof c === 'object' && 'type' in c && c.type === 'image_url',
-          );
-
-          if (imgContent && 'image_url' in imgContent && imgContent.image_url.url) {
-            setBeforeActionImage(imgContent.image_url.url);
-            if (currentStrategy === 'beforeAction') {
-              setRelatedImage(imgContent.image_url.url);
-            }
-            foundBeforeImage = true;
-            break;
-          }
-        }
-      }
-    }
-
-    // Search for screenshots AFTER the current tool call
-    if (currentStrategy === 'afterAction' || currentStrategy === 'both') {
-      for (let i = currentToolCallIndex + 1; i < sessionMessages.length; i++) {
-        const msg = sessionMessages[i];
-        if (msg.role === 'environment' && Array.isArray(msg.content)) {
-          const imgContent = msg.content.find(
-            (c) => typeof c === 'object' && 'type' in c && c.type === 'image_url',
-          );
-
-          if (imgContent && 'image_url' in imgContent && imgContent.image_url.url) {
-            setAfterActionImage(imgContent.image_url.url);
-            if (currentStrategy === 'afterAction') {
-              setRelatedImage(imgContent.image_url.url);
-            }
-            foundAfterImage = true;
-            break;
-          }
-        }
-      }
-    }
-
-    // Handle strategy-specific warnings and fallbacks
-    if (!environmentImage) {
-      if (currentStrategy === 'beforeAction' && !foundBeforeImage) {
-        console.warn(
-          `[BrowserControlRenderer] No valid screenshot found before toolCallId: ${toolCallId}. Clearing screenshot display.`,
-        );
-        setRelatedImage(null);
-      } else if (currentStrategy === 'afterAction' && !foundAfterImage) {
-        console.warn(
-          `[BrowserControlRenderer] No valid screenshot found after toolCallId: ${toolCallId}. Clearing screenshot display.`,
-        );
-        setRelatedImage(null);
-      } else if (currentStrategy === 'both') {
-        // For 'both' strategy, use the after action image as primary if available
-        if (foundAfterImage) {
-          setRelatedImage(afterActionImage);
-        } else if (foundBeforeImage) {
-          setRelatedImage(beforeActionImage);
-        } else {
-          console.warn(
-            `[BrowserControlRenderer] No valid screenshots found for toolCallId: ${toolCallId}. Clearing screenshot display.`,
-          );
-          setRelatedImage(null);
-        }
-      }
-    }
-  }, [activeSessionId, messages, toolCallId, environmentImage, currentStrategy, afterActionImage, beforeActionImage]);
+  // Get screenshots from custom hook
+  const { relatedImage, beforeActionImage, afterActionImage } = useScreenshots({
+    activeSessionId,
+    toolCallId,
+    messages,
+    environmentImage,
+    currentStrategy,
+  });
 
   return (
     <div className="space-y-6">
       {/* Strategy Switch Controls */}
       {guiAgentConfig.enableScreenshotRenderStrategySwitch && (
-        <div className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 shadow-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-            <span className="text-sm font-medium text-gray-800 dark:text-gray-200">Display Mode</span>
-          </div>
-          <div className="flex items-center bg-white dark:bg-gray-900 rounded-lg p-1 shadow-inner border border-gray-200 dark:border-gray-600">
-            {(['beforeAction', 'afterAction', 'both'] as const).map((strategy) => (
-              <button
-                key={strategy}
-                onClick={() => setCurrentStrategy(strategy)}
-                className={`relative px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
-                  currentStrategy === strategy
-                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md transform scale-105'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'
-                }`}
-              >
-                {strategy === 'beforeAction' ? 'Before' : strategy === 'afterAction' ? 'After' : 'Both'}
-                {currentStrategy === strategy && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-blue-500 rounded-md opacity-20 animate-pulse"></div>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
+        <StrategySwitch
+          currentStrategy={currentStrategy}
+          onStrategyChange={setCurrentStrategy}
+        />
       )}
       
       {/* Screenshot section - moved to the top */}
-      {(relatedImage || (currentStrategy === 'both' && (beforeActionImage || afterActionImage))) ? (
-        <div>
-          {currentStrategy === 'both' && beforeActionImage && afterActionImage ? (
-            // Show both screenshots side by side
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Before Action</h4>
-                  <BrowserShell>
-                    <div className="relative">
-                      <img
-                        ref={imageRef}
-                        src={beforeActionImage}
-                        alt="Browser Screenshot - Before Action"
-                        className="w-full h-auto object-contain max-h-[50vh]"
-                      />
-                      {/* Mouse cursor overlay only on before action image - shows where the action will be performed */}
-                      {mousePosition && (
-                        <motion.div
-                          className="absolute pointer-events-none"
-                          initial={
-                            previousMousePosition
-                              ? {
-                                  left: `${previousMousePosition.x}%`,
-                                  top: `${previousMousePosition.y}%`,
-                                }
-                              : {
-                                  left: `${mousePosition.x}%`,
-                                  top: `${mousePosition.y}%`,
-                                }
-                          }
-                          animate={{
-                            left: `${mousePosition.x}%`,
-                            top: `${mousePosition.y}%`,
-                          }}
-                          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                          style={{
-                            zIndex: 10,
-                          }}
-                        >
-                          <div className="relative">
-                            {/* Enhanced cursor icon with shadow effect */}
-                            <svg
-                              width="36"
-                              height="36"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                              style={{
-                                filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.3))',
-                                transform: 'translate(0px, 2px)',
-                              }}
-                            >
-                              <defs>
-                                <linearGradient id="cursorGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                  <stop offset="0%" stopColor="white" />
-                                  <stop offset="100%" stopColor="#f5f5f5" />
-                                </linearGradient>
-                              </defs>
-                              <path
-                                d="M5 3L19 12L12 13L9 20L5 3Z"
-                                fill="url(#cursorGradient)"
-                                stroke="#000000"
-                                strokeWidth="1.5"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
+      <ScreenshotDisplay
+        strategy={currentStrategy}
+        relatedImage={relatedImage}
+        beforeActionImage={beforeActionImage}
+        afterActionImage={afterActionImage}
+        mousePosition={mousePosition}
+        previousMousePosition={previousMousePosition}
+        action={action}
+      />
 
-                            {/* Artistic pulse effect for click actions */}
-                            {action && action.includes('click') && (
-                              <>
-                                {/* Multiple layered ripple effects */}
-                                <motion.div
-                                  className="absolute rounded-full"
-                                  initial={{ opacity: 0.8, scale: 0 }}
-                                  animate={{ opacity: 0, scale: 2.5 }}
-                                  transition={{
-                                    duration: 1.5,
-                                    ease: 'easeOut',
-                                    repeat: Infinity,
-                                  }}
-                                  style={{
-                                    top: '-8px',
-                                    left: '-8px',
-                                    width: '24px',
-                                    height: '24px',
-                                    background:
-                                      'radial-gradient(circle, rgba(99,102,241,0.6) 0%, rgba(99,102,241,0) 70%)',
-                                    border: '1px solid rgba(99,102,241,0.3)',
-                                  }}
-                                />
-                                <motion.div
-                                  className="absolute rounded-full"
-                                  initial={{ opacity: 0.9, scale: 0 }}
-                                  animate={{ opacity: 0, scale: 2 }}
-                                  transition={{
-                                    duration: 1.2,
-                                    ease: 'easeOut',
-                                    delay: 0.2,
-                                    repeat: Infinity,
-                                  }}
-                                  style={{
-                                    top: '-6px',
-                                    left: '-6px',
-                                    width: '20px',
-                                    height: '20px',
-                                    background:
-                                      'radial-gradient(circle, rgba(99,102,241,0.8) 0%, rgba(99,102,241,0) 70%)',
-                                    border: '1px solid rgba(99,102,241,0.5)',
-                                  }}
-                                />
-                                {/* Central highlight dot */}
-                                <motion.div
-                                  className="absolute rounded-full bg-white"
-                                  initial={{ opacity: 1, scale: 0.5 }}
-                                  animate={{ opacity: 0.8, scale: 1 }}
-                                  transition={{
-                                    duration: 0.7,
-                                    repeat: Infinity,
-                                    repeatType: 'reverse',
-                                  }}
-                                  style={{
-                                    top: '2px',
-                                    left: '2px',
-                                    width: '4px',
-                                    height: '4px',
-                                    boxShadow: '0 0 10px 2px rgba(255,255,255,0.7)',
-                                  }}
-                                />
-                              </>
-                            )}
-                          </div>
-                        </motion.div>
-                      )}
-                    </div>
-                  </BrowserShell>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">After Action</h4>
-                  <BrowserShell>
-                    <div className="relative">
-                      <img
-                        src={afterActionImage}
-                        alt="Browser Screenshot - After Action"
-                        className="w-full h-auto object-contain max-h-[50vh]"
-                      />
-                      {/* No cursor overlay on after action image - shows the result of the action */}
-                    </div>
-                  </BrowserShell>
-                </div>
-              </div>
-            </div>
-          ) : (
-            // Show single screenshot
-            <BrowserShell className="mb-4">
-              <div className="relative">
-                <img
-                  ref={imageRef}
-                  src={relatedImage}
-                  alt="Browser Screenshot"
-                  className="w-full h-auto object-contain max-h-[70vh]"
-                />
-
-              {/* Enhanced mouse cursor overlay - shows action position */}
-              {mousePosition && (currentStrategy === 'beforeAction' || (currentStrategy === 'both' && relatedImage === beforeActionImage)) && (
-                <motion.div
-                  className="absolute pointer-events-none"
-                  initial={
-                    previousMousePosition
-                      ? {
-                          left: `${previousMousePosition.x}%`,
-                          top: `${previousMousePosition.y}%`,
-                        }
-                      : {
-                          left: `${mousePosition.x}%`,
-                          top: `${mousePosition.y}%`,
-                        }
-                  }
-                  animate={{
-                    left: `${mousePosition.x}%`,
-                    top: `${mousePosition.y}%`,
-                  }}
-                  transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                  style={{
-                    zIndex: 10,
-                  }}
-                >
-                  <div className="relative">
-                    {/* Enhanced cursor icon with shadow effect */}
-                    <svg
-                      width="36"
-                      height="36"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      style={{
-                        filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.3))',
-                        transform: 'translate(0px, 2px)',
-                      }}
-                    >
-                      <defs>
-                        <linearGradient id="cursorGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="white" />
-                          <stop offset="100%" stopColor="#f5f5f5" />
-                        </linearGradient>
-                      </defs>
-                      <path
-                        d="M5 3L19 12L12 13L9 20L5 3Z"
-                        fill="url(#cursorGradient)"
-                        stroke="#000000"
-                        strokeWidth="1.5"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-
-                    {/* Artistic pulse effect for click actions */}
-                    {action && action.includes('click') && (
-                      <>
-                        {/* Multiple layered ripple effects */}
-                        <motion.div
-                          className="absolute rounded-full"
-                          initial={{ opacity: 0.8, scale: 0 }}
-                          animate={{ opacity: 0, scale: 2.5 }}
-                          transition={{
-                            duration: 1.5,
-                            ease: 'easeOut',
-                            repeat: Infinity,
-                          }}
-                          style={{
-                            top: '-8px',
-                            left: '-8px',
-                            width: '24px',
-                            height: '24px',
-                            background:
-                              'radial-gradient(circle, rgba(99,102,241,0.6) 0%, rgba(99,102,241,0) 70%)',
-                            border: '1px solid rgba(99,102,241,0.3)',
-                          }}
-                        />
-                        <motion.div
-                          className="absolute rounded-full"
-                          initial={{ opacity: 0.9, scale: 0 }}
-                          animate={{ opacity: 0, scale: 2 }}
-                          transition={{
-                            duration: 1.2,
-                            ease: 'easeOut',
-                            delay: 0.2,
-                            repeat: Infinity,
-                          }}
-                          style={{
-                            top: '-6px',
-                            left: '-6px',
-                            width: '20px',
-                            height: '20px',
-                            background:
-                              'radial-gradient(circle, rgba(99,102,241,0.8) 0%, rgba(99,102,241,0) 70%)',
-                            border: '1px solid rgba(99,102,241,0.5)',
-                          }}
-                        />
-                        {/* Central highlight dot */}
-                        <motion.div
-                          className="absolute rounded-full bg-white"
-                          initial={{ opacity: 1, scale: 0.5 }}
-                          animate={{ opacity: 0.8, scale: 1 }}
-                          transition={{
-                            duration: 0.7,
-                            repeat: Infinity,
-                            repeatType: 'reverse',
-                          }}
-                          style={{
-                            top: '2px',
-                            left: '2px',
-                            width: '4px',
-                            height: '4px',
-                            boxShadow: '0 0 10px 2px rgba(255,255,255,0.7)',
-                          }}
-                        />
-                      </>
-                    )}
-                  </div>
-                </motion.div>
-              )}
-            </div>
-          </BrowserShell>
-          )}
-        </div>
-      ) : null}
-
-      {/* Optimized Visual operation details card - more compact and elegant */}
+      {/* Visual operation details card */}
       {guiAgentConfig.renderGUIAction && (
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-        className="relative"
-      >
-        <div className="bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-800 dark:to-gray-900/50 rounded-xl border border-gray-200/60 dark:border-gray-700/40 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden backdrop-blur-sm">
-          {/* Compact header with refined spacing */}
-          <div className="relative px-5 py-3 bg-gradient-to-r from-gray-50/80 via-white/50 to-gray-50/80 dark:from-gray-800/60 dark:via-gray-800/40 dark:to-gray-800/60 border-b border-gray-100/60 dark:border-gray-700/40">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="relative">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-100 to-slate-200/80 dark:from-slate-700 dark:to-slate-800/80 flex items-center justify-center shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-600/30">
-                    <FiMousePointer className="text-slate-600 dark:text-slate-300" size={14} />
-                  </div>
-                  {status && (
-                    <div
-                      className={`absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center ${
-                        status === 'success'
-                          ? 'bg-emerald-500 dark:bg-emerald-400'
-                          : 'bg-rose-500 dark:bg-rose-400'
-                      } shadow-sm`}
-                    >
-                      {status === 'success' ? (
-                        <FiCheckCircle className="text-white" size={9} />
-                      ) : (
-                        <FiXCircle className="text-white" size={9} />
-                      )}
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <h3 className="font-medium text-slate-800 dark:text-slate-100 text-sm leading-tight">
-                    GUI Operation
-                  </h3>
-                </div>
-              </div>
-
-              {status && (
-                <div
-                  className={`px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-sm transition-all duration-200 ${
-                    status === 'success'
-                      ? 'bg-emerald-50/80 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-800/50'
-                      : 'bg-rose-50/80 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300 border border-rose-200/50 dark:border-rose-800/50'
-                  }`}
-                >
-                  {status === 'success' ? 'Completed' : 'Failed'}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Compact content area with refined spacing */}
-          <div className="p-5 space-y-4">
-            {/* Thought process with compact styling */}
-            {thought && (
-              <div className="group">
-                <div className="flex items-center mb-2">
-                  <div className="w-5 h-5 rounded-md bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center mr-2.5 ring-1 ring-blue-200/50 dark:ring-blue-800/50">
-                    <FiEye className="text-blue-600 dark:text-blue-400" size={11} />
-                  </div>
-                  <h4 className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    Thought
-                  </h4>
-                </div>
-                <div className="ml-7.5 p-3 bg-blue-50/30 dark:bg-blue-900/10 rounded-lg border border-blue-100/50 dark:border-blue-800/30 transition-colors group-hover:bg-blue-50/50 dark:group-hover:bg-blue-900/20">
-                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                    {thought}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Step with compact styling */}
-            {step && step !== thought && (
-              <div className="group">
-                <div className="flex items-center mb-2">
-                  <div className="w-5 h-5 rounded-md bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center mr-2.5 ring-1 ring-indigo-200/50 dark:ring-indigo-800/50">
-                    <FiChevronsRight className="text-indigo-600 dark:text-indigo-400" size={11} />
-                  </div>
-                  <h4 className="text-xs font-semibold text-slate-700 dark:text-slate-300">Step</h4>
-                </div>
-                <div className="ml-7.5 p-3 bg-indigo-50/30 dark:bg-indigo-900/10 rounded-lg border border-indigo-100/50 dark:border-indigo-800/30 transition-colors group-hover:bg-indigo-50/50 dark:group-hover:bg-indigo-900/20">
-                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                    {step}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Action command with compact code styling */}
-            {action && (
-              <div className="group">
-                <div className="flex items-center mb-2">
-                  <div className="w-5 h-5 rounded-md bg-slate-50 dark:bg-slate-800 flex items-center justify-center mr-2.5 ring-1 ring-slate-200/50 dark:ring-slate-600/50">
-                    <FiType className="text-slate-600 dark:text-slate-400" size={11} />
-                  </div>
-                  <h4 className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    Action
-                  </h4>
-                </div>
-                <div className="ml-7.5">
-                  <div className="relative p-3 bg-slate-50/80 dark:bg-slate-800/60 rounded-lg border border-slate-200/60 dark:border-slate-700/40 font-mono text-xs transition-colors group-hover:bg-slate-100/80 dark:group-hover:bg-slate-800/80 overflow-x-auto">
-                    <code className="text-slate-700 dark:text-slate-300 break-all">{action}</code>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </motion.div>
+        <OperationDetailsCard
+          thought={thought}
+          step={step}
+          action={action}
+          status={status}
+        />
       )}
     </div>
   );
 };
-
-function extractBrowserControlData(panelContent: StandardPanelContent): {
-  thought?: string;
-  step?: string;
-  action?: string;
-  status?: string;
-  toolCallId?: string;
-  environmentImage?: string;
-} | null {
-  try {
-    // Try arguments first
-    if (panelContent.arguments) {
-      const { thought, step, action, status } = panelContent.arguments;
-
-      return {
-        thought: thought ? String(thought) : undefined,
-        step: step ? String(step) : undefined,
-        action: action ? String(action) : undefined,
-        status: status ? String(status) : undefined,
-        toolCallId: panelContent.toolCallId,
-        environmentImage: panelContent._extra?.currentScreenshot,
-      };
-    }
-
-    // Try to extract from source
-    if (typeof panelContent.source === 'object' && panelContent.source !== null) {
-      const sourceObj = panelContent.source as any;
-      const { thought, step, action, status } = sourceObj;
-
-      return {
-        thought: thought ? String(thought) : undefined,
-        step: step ? String(step) : undefined,
-        action: action ? String(action) : undefined,
-        status: status ? String(status) : undefined,
-        toolCallId: panelContent.toolCallId,
-        environmentImage: panelContent._extra?.currentScreenshot,
-      };
-    }
-
-    return {
-      toolCallId: panelContent.toolCallId,
-      environmentImage: panelContent._extra?.currentScreenshot,
-    };
-  } catch (error) {
-    console.warn('Failed to extract browser control data:', error);
-    return null;
-  }
-}
