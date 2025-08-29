@@ -94,7 +94,7 @@ export const StrategySwitch: React.FC<StrategySwitchProps> = ({
                   isFirst ? 'rounded-l-md' : isLast ? 'rounded-r-md border-l-0' : 'border-l-0'
                 } border border-slate-200 dark:border-slate-600`}
               >
-                <div className="flex flex-col items-center justify-center gap-1">
+                <div className="flex items-center justify-center gap-1.5">
                   <span
                     className={`transition-opacity duration-200 ${
                       isActive ? 'opacity-100' : 'opacity-70 group-hover:opacity-90'
@@ -102,7 +102,7 @@ export const StrategySwitch: React.FC<StrategySwitchProps> = ({
                   >
                     {config.icon}
                   </span>
-                  <span className="text-[10px] font-medium leading-none">{config.label}</span>
+                  <span className="text-xs font-medium">{config.label}</span>
                 </div>
               </button>
             </Tooltip>
