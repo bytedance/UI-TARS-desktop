@@ -27,6 +27,27 @@ export interface WorkspaceNavItem {
 }
 
 /**
+ * Layout mode configuration
+ */
+export type LayoutMode = 'default' | 'narrow-chat';
+
+/**
+ * Layout configuration options
+ */
+export interface LayoutConfig {
+  /**
+   * Default layout mode
+   * @defaultValue 'default'
+   */
+  defaultLayout?: LayoutMode;
+  /**
+   * Enable layout switch button in toolbar
+   * @defaultValue false
+   */
+  enableLayoutSwitchButton?: boolean;
+}
+
+/**
  * Workspace configuration options
  */
 export interface WorkspaceConfig {
@@ -85,6 +106,10 @@ export interface BaseAgentWebUIImplementation {
    * Workspace configuration
    */
   workspace?: WorkspaceConfig;
+  /**
+   * Layout configuration
+   */
+  layout?: LayoutConfig;
 }
 
 /**

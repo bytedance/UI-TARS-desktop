@@ -1,11 +1,14 @@
 import React, { useCallback, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useAtomValue } from 'jotai';
 
 import { FiPlus, FiHome, FiSettings } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/common/hooks/useSession';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
+import { agentOptionsAtom } from '@/common/state/atoms/ui';
 import { AgentConfigViewer } from './AgentConfigViewer';
+import { LayoutSwitchButton } from './LayoutSwitchButton';
 
 /**
  * ToolBar Component - Vertical toolbar inspired by modern IDE designs
@@ -20,8 +23,11 @@ export const ToolBar: React.FC = () => {
   const navigate = useNavigate();
   const { isReplayMode } = useReplayMode();
   const { createSession, connectionStatus } = useSession();
+  const agentOptions = useAtomValue(agentOptionsAtom);
   const [isConfigViewerOpen, setIsConfigViewerOpen] = useState(false);
   const [isCreatingSession, setIsCreatingSession] = useState(false);
+
+  const enableLayoutSwitchButton = agentOptions.webui?.layout?.enableLayoutSwitchButton ?? false;
 
   // Create new session
   const handleNewSession = useCallback(async () => {
@@ -118,6 +124,9 @@ export const ToolBar: React.FC = () => {
 
         {/* Bottom tool buttons */}
         <div className="flex flex-col items-center gap-4 pb-4">
+          {/* Layout switch button */}
+          {!isReplayMode && enableLayoutSwitchButton && <LayoutSwitchButton />}
+          
           {/* Agent config button */}
           {!isReplayMode && (
             <motion.button

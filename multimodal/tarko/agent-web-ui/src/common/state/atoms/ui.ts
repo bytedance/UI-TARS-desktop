@@ -1,5 +1,5 @@
 import { atom } from 'jotai';
-import { AgentProcessingPhase, AgentStatusInfo, SessionItemInfo } from '@tarko/interface';
+import { AgentProcessingPhase, AgentStatusInfo, SessionItemInfo, LayoutMode } from '@tarko/interface';
 import {
   ConnectionStatus,
   PanelContent,
@@ -64,3 +64,40 @@ export const isProcessingAtom = atom(
  * Atom for offline mode state (view-only when disconnected)
  */
 export const offlineModeAtom = atom<boolean>(false);
+
+/**
+ * Atom for layout mode with localStorage persistence
+ */
+export const layoutModeAtom = atom<LayoutMode>(
+  'default',
+  (get, set, newValue: LayoutMode) => {
+    set(layoutModeAtom, newValue);
+    // Persist to localStorage
+    try {
+      localStorage.setItem('tarko-layout-mode', newValue);
+    } catch (error) {
+      console.warn('Failed to save layout mode to localStorage:', error);
+    }
+  },
+);
+
+/**
+ * Initialize layout mode from localStorage or agent config
+ */
+export const initializeLayoutModeAtom = atom(null, (get, set) => {
+  try {
+    const agentOptions = get(agentOptionsAtom);
+    const defaultLayout = agentOptions.webui?.layout?.defaultLayout || 'default';
+    
+    // Try to get from localStorage first
+    const savedLayout = localStorage.getItem('tarko-layout-mode') as LayoutMode;
+    if (savedLayout && (savedLayout === 'default' || savedLayout === 'narrow-chat')) {
+      set(layoutModeAtom, savedLayout);
+    } else {
+      set(layoutModeAtom, defaultLayout);
+    }
+  } catch (error) {
+    console.warn('Failed to initialize layout mode:', error);
+    set(layoutModeAtom, 'default');
+  }
+});
