@@ -52,7 +52,19 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
     </div>
   );
 
-
+  // Render hidden image with overlay placeholder
+  const renderHiddenImageWithOverlay = (imageSrc: string, alt: string) => (
+    <div className="relative">
+      <img src={imageSrc} alt={alt} className="w-full h-auto object-contain invisible" />
+      <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="text-center">
+          <div className="text-gray-400 dark:text-gray-500 text-sm">
+            GUI Agent Environment Not Started
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   // Render image or placeholder
   const renderImageOrPlaceholder = (
@@ -81,22 +93,11 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
       );
     }
 
-    // For both mode, use the other image as invisible layout base to maintain consistent height
+    // For both mode, use the other image as layout base
     if (isInBothMode) {
       const otherImage = alt.includes('Before') ? afterActionImage : beforeActionImage;
       if (otherImage) {
-        return (
-          <div className="relative">
-            <img src={otherImage} alt={alt} className="w-full h-auto object-contain opacity-0" />
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-              <div className="text-center">
-                <div className="text-gray-400 dark:text-gray-500 text-sm">
-                  GUI Agent 环境未启动
-                </div>
-              </div>
-            </div>
-          </div>
-        );
+        return renderHiddenImageWithOverlay(otherImage, alt);
       }
     }
 
