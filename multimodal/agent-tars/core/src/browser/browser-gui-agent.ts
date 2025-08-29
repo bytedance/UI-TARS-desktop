@@ -8,25 +8,28 @@ import { LocalBrowser, Page, RemoteBrowser } from '@agent-infra/browser';
 import { BrowserOperator } from '@gui-agent/operator-browser';
 import { ConsoleLogger, AgentEventStream, Tool, z } from '@tarko/mcp-agent';
 import { ImageCompressor, formatBytes } from '@tarko/shared-media-utils';
+import {
+  GUIAction,
+  GUIAgentToolResponse,
+  ActionInputs,
+  PredictionParsed,
+  ClickAction,
+  DoubleClickAction,
+  RightClickAction,
+  DragAction,
+  TypeAction,
+  HotkeyAction,
+  ScrollAction,
+  WaitAction,
+  NavigateAction,
+  NavigateBackAction,
+} from './gui-agent-types';
 
 /**
  * Coordinate type definition
+ * @deprecated Use percentage coordinates in GUIAction types instead
  */
 export type Coords = [number, number] | [];
-
-/**
- * Action input parameters for browser actions
- */
-export interface ActionInputs {
-  content?: string;
-  start_box?: string;
-  end_box?: string;
-  key?: string;
-  hotkey?: string;
-  direction?: string;
-  start_coords?: Coords;
-  end_coords?: Coords;
-}
 
 function sleep(time: number) {
   return new Promise(function (resolve) {
@@ -34,17 +37,8 @@ function sleep(time: number) {
   });
 }
 
-/**
- * Parsed prediction from GUI agent
- */
-export interface PredictionParsed {
-  /** Action inputs parsed from action_type(action_inputs) */
-  action_inputs: ActionInputs;
-  /** Action type parsed from action_type(action_inputs) */
-  action_type: string;
-  /** Thinking content */
-  thought?: string;
-}
+// Re-export types for backward compatibility
+export type { ActionInputs, PredictionParsed, GUIAction, GUIAgentToolResponse };
 
 /**
  * Browser initialization options
@@ -163,16 +157,22 @@ wait()                                         - Wait 5 seconds and take a scree
           // Automatically get page content after browser interaction
           // await this.capturePageContentAsEnvironmentInfo();
 
-          return { action, status: 'success', result, pageData };
+          // Convert to new GUI Agent tool response format
+          const guiResponse = this.convertToGUIResponse(action, parsed, result);
+          return guiResponse;
         } catch (error) {
           this.logger.error(
             `Browser action failed: ${error instanceof Error ? error.message : String(error)}`,
           );
-          return {
-            action,
-            status: 'fail',
+          
+          // Return error response in new format
+          const errorResponse: GUIAgentToolResponse = {
+            success: false,
+            actionStr: action,
+            action: this.createErrorAction(),
             error: error instanceof Error ? error.message : String(error),
           };
+          return errorResponse;
         }
       },
     });
@@ -423,6 +423,158 @@ wait()                                         - Wait 5 seconds and take a scree
   private addBase64ImagePrefix(base64: string): string {
     if (!base64) return '';
     return base64.startsWith('data:') ? base64 : `data:image/jpeg;base64,${base64}`;
+  }
+
+  /**
+   * Convert legacy result to new GUI Agent response format
+   */
+  private convertToGUIResponse(
+    actionStr: string,
+    parsed: PredictionParsed,
+    result: any,
+  ): GUIAgentToolResponse {
+    const normalizedAction = this.convertToNormalizedAction(parsed, result);
+    
+    return {
+      success: true,
+      actionStr,
+      action: normalizedAction,
+      observation: undefined, // Reserved for future implementation
+    };
+  }
+
+  /**
+   * Convert parsed prediction to normalized GUI action with percentage coordinates
+   */
+  private convertToNormalizedAction(parsed: PredictionParsed, result: any): GUIAction {
+    const { action_type, action_inputs } = parsed;
+    const { startXPercent, startYPercent } = result;
+
+    switch (action_type) {
+      case 'click':
+      case 'left_click':
+      case 'left_single':
+        return {
+          type: 'click',
+          inputs: {
+            startX: startXPercent || 0,
+            startY: startYPercent || 0,
+          },
+        } as ClickAction;
+
+      case 'double_click':
+      case 'left_double':
+        return {
+          type: 'double_click',
+          inputs: {
+            startX: startXPercent || 0,
+            startY: startYPercent || 0,
+          },
+        } as DoubleClickAction;
+
+      case 'right_click':
+      case 'right_single':
+        return {
+          type: 'right_click',
+          inputs: {
+            startX: startXPercent || 0,
+            startY: startYPercent || 0,
+          },
+        } as RightClickAction;
+
+      case 'drag':
+        // Parse end coordinates from action_inputs.end_box
+        const endBox = action_inputs.end_box;
+        let endXPercent = 0;
+        let endYPercent = 0;
+        if (endBox) {
+          try {
+            const coords = JSON.parse(endBox);
+            if (Array.isArray(coords) && coords.length >= 2) {
+              endXPercent = coords[0];
+              endYPercent = coords[1];
+            }
+          } catch (e) {
+            this.logger.warn('Failed to parse end_box coordinates:', endBox);
+          }
+        }
+        return {
+          type: 'drag',
+          inputs: {
+            startX: startXPercent || 0,
+            startY: startYPercent || 0,
+            endX: endXPercent,
+            endY: endYPercent,
+          },
+        } as DragAction;
+
+      case 'type':
+        return {
+          type: 'type',
+          inputs: {
+            content: action_inputs.content || '',
+          },
+        } as TypeAction;
+
+      case 'hotkey':
+        return {
+          type: 'hotkey',
+          inputs: {
+            key: action_inputs.key || action_inputs.hotkey || '',
+          },
+        } as HotkeyAction;
+
+      case 'scroll':
+        return {
+          type: 'scroll',
+          inputs: {
+            startX: startXPercent || 0,
+            startY: startYPercent || 0,
+            direction: (action_inputs.direction as any) || 'down',
+          },
+        } as ScrollAction;
+
+      case 'wait':
+        return {
+          type: 'wait',
+          inputs: {},
+        } as WaitAction;
+
+      case 'navigate':
+        return {
+          type: 'navigate',
+          inputs: {
+            url: action_inputs.content || '',
+          },
+        } as NavigateAction;
+
+      case 'navigate_back':
+        return {
+          type: 'navigate_back',
+          inputs: {},
+        } as NavigateBackAction;
+
+      default:
+        // Fallback to a generic click action for unknown types
+        this.logger.warn(`Unknown action type: ${action_type}, falling back to click`);
+        return {
+          type: 'click',
+          inputs: {
+            startX: startXPercent || 0,
+            startY: startYPercent || 0,
+          },
+        } as ClickAction;
+    }
+  }
+
+  /**
+   * Create a default error action for failed operations
+   */
+  private createErrorAction(): GUIAction {
+    return {
+      type: 'wait',
+      inputs: {},
+    } as WaitAction;
   }
 
   /**
