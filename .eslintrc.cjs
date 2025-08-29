@@ -37,5 +37,6 @@ module.exports = {
     'no-case-declarations': 'off',
     'no-await-in-loop': 'off',
     'react/prop-types': 'off',
+    '@typescript-eslint/no-namespace': 'off',
   },
 };
