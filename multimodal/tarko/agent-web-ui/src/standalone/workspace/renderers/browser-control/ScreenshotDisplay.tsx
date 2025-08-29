@@ -32,15 +32,16 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
 
   const shouldShowMouseCursor = (
     currentImage: string | null | undefined,
-    imageType: 'before' | 'after' | 'single'
+    imageType: 'before' | 'after' | 'single',
   ) => {
     if (!mousePosition) return false;
-    
+
     if (imageType === 'before') return true;
     if (imageType === 'after') return false;
     if (imageType === 'single') {
-      return strategy === 'beforeAction' || 
-             (strategy === 'both' && currentImage === beforeActionImage);
+      return (
+        strategy === 'beforeAction' || (strategy === 'both' && currentImage === beforeActionImage)
+      );
     }
     return false;
   };
@@ -51,7 +52,9 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
       <div className="space-y-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div>
-            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Before Action</h4>
+            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Before Action
+            </h4>
             <BrowserShell>
               <div className="relative">
                 <img
@@ -72,7 +75,9 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
             </BrowserShell>
           </div>
           <div>
-            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">After Action</h4>
+            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              After Action
+            </h4>
             <BrowserShell>
               <div className="relative">
                 <img

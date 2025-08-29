@@ -28,7 +28,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
   const { activeSessionId, messages, toolResults } = useSession();
   const guiAgentConfig = getGUIAgentConfig();
   const [currentStrategy, setCurrentStrategy] = useState<'both' | 'beforeAction' | 'afterAction'>(
-    guiAgentConfig.defaultScreenshotRenderStrategy
+    guiAgentConfig.defaultScreenshotRenderStrategy,
   );
 
   // Extract the visual operation details from panelContent
@@ -60,12 +60,9 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
     <div className="space-y-6">
       {/* Strategy Switch Controls */}
       {guiAgentConfig.enableScreenshotRenderStrategySwitch && (
-        <StrategySwitch
-          currentStrategy={currentStrategy}
-          onStrategyChange={setCurrentStrategy}
-        />
+        <StrategySwitch currentStrategy={currentStrategy} onStrategyChange={setCurrentStrategy} />
       )}
-      
+
       {/* Screenshot section - moved to the top */}
       <ScreenshotDisplay
         strategy={currentStrategy}
@@ -79,12 +76,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
 
       {/* Visual operation details card */}
       {guiAgentConfig.renderGUIAction && (
-        <OperationDetailsCard
-          thought={thought}
-          step={step}
-          action={action}
-          status={status}
-        />
+        <OperationDetailsCard thought={thought} step={step} action={action} status={status} />
       )}
     </div>
   );

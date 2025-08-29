@@ -125,7 +125,15 @@ export const useScreenshots = ({
         }
       }
     }
-  }, [activeSessionId, messages, toolCallId, environmentImage, currentStrategy, afterActionImage, beforeActionImage]);
+  }, [
+    activeSessionId,
+    messages,
+    toolCallId,
+    environmentImage,
+    currentStrategy,
+    afterActionImage,
+    beforeActionImage,
+  ]);
 
   return {
     relatedImage,

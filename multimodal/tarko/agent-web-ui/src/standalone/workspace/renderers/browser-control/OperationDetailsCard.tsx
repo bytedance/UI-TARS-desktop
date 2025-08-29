@@ -106,9 +106,7 @@ export const OperationDetailsCard: React.FC<OperationDetailsCardProps> = ({
                 <h4 className="text-xs font-semibold text-slate-700 dark:text-slate-300">Step</h4>
               </div>
               <div className="ml-7.5 p-3 bg-indigo-50/30 dark:bg-indigo-900/10 rounded-lg border border-indigo-100/50 dark:border-indigo-800/30 transition-colors group-hover:bg-indigo-50/50 dark:group-hover:bg-indigo-900/20">
-                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                  {step}
-                </p>
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{step}</p>
               </div>
             </div>
           )}
@@ -120,9 +118,7 @@ export const OperationDetailsCard: React.FC<OperationDetailsCardProps> = ({
                 <div className="w-5 h-5 rounded-md bg-slate-50 dark:bg-slate-800 flex items-center justify-center mr-2.5 ring-1 ring-slate-200/50 dark:ring-slate-600/50">
                   <FiType className="text-slate-600 dark:text-slate-400" size={11} />
                 </div>
-                <h4 className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  Action
-                </h4>
+                <h4 className="text-xs font-semibold text-slate-700 dark:text-slate-300">Action</h4>
               </div>
               <div className="ml-7.5">
                 <div className="relative p-3 bg-slate-50/80 dark:bg-slate-800/60 rounded-lg border border-slate-200/60 dark:border-slate-700/40 font-mono text-xs transition-colors group-hover:bg-slate-100/80 dark:group-hover:bg-slate-800/80 overflow-x-auto">

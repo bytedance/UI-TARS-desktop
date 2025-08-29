@@ -9,7 +9,9 @@ export interface BrowserControlData {
   environmentImage?: string;
 }
 
-export function extractBrowserControlData(panelContent: StandardPanelContent): BrowserControlData | null {
+export function extractBrowserControlData(
+  panelContent: StandardPanelContent,
+): BrowserControlData | null {
   try {
     // Try arguments first
     if (panelContent.arguments) {

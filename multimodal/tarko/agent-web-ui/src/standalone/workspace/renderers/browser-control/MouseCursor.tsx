@@ -7,11 +7,7 @@ interface MouseCursorProps {
   action?: string;
 }
 
-export const MouseCursor: React.FC<MouseCursorProps> = ({
-  position,
-  previousPosition,
-  action,
-}) => {
+export const MouseCursor: React.FC<MouseCursorProps> = ({ position, previousPosition, action }) => {
   const isClickAction = action && action.includes('click');
 
   return (
