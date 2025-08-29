@@ -24,6 +24,10 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
   action,
 }) => {
   const imageRef = useRef<HTMLImageElement>(null);
+  const [imageDimensions, setImageDimensions] = React.useState<{
+    width: number;
+    height: number;
+  } | null>(null);
 
   const shouldShowMouseCursor = (
     currentImage: string | null | undefined,
@@ -54,6 +58,35 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
     </div>
   );
 
+  // Component to render placeholder with matching aspect ratio
+  const PlaceholderWithAspectRatio: React.FC<{ otherImageSrc: string }> = ({ otherImageSrc }) => {
+    const [aspectRatio, setAspectRatio] = React.useState<number | null>(null);
+
+    React.useEffect(() => {
+      const img = new Image();
+      img.onload = () => {
+        setAspectRatio(img.naturalWidth / img.naturalHeight);
+      };
+      img.onerror = () => {
+        setAspectRatio(16 / 9); // fallback
+      };
+      img.src = otherImageSrc;
+    }, [otherImageSrc]);
+
+    return (
+      <div
+        className="flex items-center justify-center bg-gray-50 dark:bg-gray-900 w-full"
+        style={{ aspectRatio: aspectRatio ? aspectRatio.toString() : '16/9' }}
+      >
+        <div className="text-center">
+          <div className="text-gray-400 dark:text-gray-500 text-sm">
+            GUI Agent Environment Not Started
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Render image or placeholder
   const renderImageOrPlaceholder = (
     image: string | null,
@@ -81,23 +114,13 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
       );
     }
 
-    // For both mode, we need to match the height of the other image if it exists
+    // For both mode, match the aspect ratio of the other image
     if (isInBothMode) {
       const otherImage = alt.includes('Before') ? afterActionImage : beforeActionImage;
       if (otherImage) {
-        // Create a temporary image to get dimensions and match height
         return (
           <div className="relative">
-            <div
-              className="flex items-center justify-center bg-gray-50 dark:bg-gray-900"
-              style={{ aspectRatio: '16/9', minHeight: '200px' }}
-            >
-              <div className="text-center">
-                <div className="text-gray-400 dark:text-gray-500 text-sm">
-                  GUI Agent Environment Not Started
-                </div>
-              </div>
-            </div>
+            <PlaceholderWithAspectRatio otherImageSrc={otherImage} />
           </div>
         );
       }
