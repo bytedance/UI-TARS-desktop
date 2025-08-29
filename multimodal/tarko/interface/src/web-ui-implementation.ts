@@ -41,17 +41,23 @@ export interface WorkspaceConfig {
  */
 export interface TarkoWebUIGUIAgentConfig {
   /**
-   * GUI Agent screenshot rendering strategy
+   * GUI Agent 截图呈现策略
    *
-   * - `both`: Display both before and after screenshots
-   * - `beforeAction`: Display screenshot taken before the action
-   * - `afterAction`: Display screenshot taken after the action
+   * - `both`: 同时展示执行前后的截图，便于对比动作效果
+   * - `beforeAction`: 展示动作执行前的截图，适用于在 onEachAgentLoopStart 时截图的 Agent（如 Agent-TARS）
+   * - `afterAction`: 展示动作执行后的截图，适用于在 onEachAgentLoopEnd 时截图的 Agent（如 Omni-TARS）
+   *
+   * 注意：鼠标光标（Cursor）只会渲染在 beforeAction 截图上，因为它指示动作将要执行的位置
    *
    * @defaultValue 'afterAction'
    */
   screenshotRenderStrategy: 'both' | 'beforeAction' | 'afterAction';
   /**
-   * Whether to enable GUI Agent action rendering
+   * 是否开启 GUI Agent Action 的渲染
+   *
+   * 由于 Action 是 GUI Agent 模型基于 beforeActionImage 来输出的，因此
+   * 在设计上，GUIAction 只应该渲染在 BeforeActionImage 上。
+   * 当设置为 false 时，将隐藏 GUI 操作详情卡片（思考过程、步骤、动作命令等）
    *
    * @defaultValue true
    */
