@@ -100,6 +100,8 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
   }, [environmentImage]);
 
   // Find screenshots based on the configured strategy
+  // Note: Mouse cursor should only be rendered on beforeAction images or single screenshots
+  // that represent the state before the action is performed, as it shows where the action will occur
   useEffect(() => {
     // Initialize: clear current screenshots if no direct environment image provided
     if (!environmentImage) {
@@ -212,24 +214,12 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
                   <BrowserShell>
                     <div className="relative">
                       <img
+                        ref={imageRef}
                         src={beforeActionImage}
                         alt="Browser Screenshot - Before Action"
                         className="w-full h-auto object-contain max-h-[50vh]"
                       />
-                    </div>
-                  </BrowserShell>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">After Action</h4>
-                  <BrowserShell>
-                    <div className="relative">
-                      <img
-                        ref={imageRef}
-                        src={afterActionImage}
-                        alt="Browser Screenshot - After Action"
-                        className="w-full h-auto object-contain max-h-[50vh]"
-                      />
-                      {/* Mouse cursor overlay only on after action image */}
+                      {/* Mouse cursor overlay only on before action image - shows where the action will be performed */}
                       {mousePosition && (
                         <motion.div
                           className="absolute pointer-events-none"
@@ -350,6 +340,19 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
                     </div>
                   </BrowserShell>
                 </div>
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">After Action</h4>
+                  <BrowserShell>
+                    <div className="relative">
+                      <img
+                        src={afterActionImage}
+                        alt="Browser Screenshot - After Action"
+                        className="w-full h-auto object-contain max-h-[50vh]"
+                      />
+                      {/* No cursor overlay on after action image - shows the result of the action */}
+                    </div>
+                  </BrowserShell>
+                </div>
               </div>
             </div>
           ) : (
@@ -363,7 +366,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
                   className="w-full h-auto object-contain max-h-[70vh]"
                 />
 
-              {/* Enhanced mouse cursor overlay */}
+              {/* Enhanced mouse cursor overlay - shows action position */}
               {mousePosition && (
                 <motion.div
                   className="absolute pointer-events-none"
