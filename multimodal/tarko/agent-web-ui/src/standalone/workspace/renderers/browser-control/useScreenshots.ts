@@ -3,8 +3,8 @@ import { useState, useEffect } from 'react';
 type ScreenshotStrategy = 'both' | 'beforeAction' | 'afterAction';
 
 interface UseScreenshotsProps {
-  activeSessionId?: string;
-  toolCallId?: string;
+  activeSessionId?: string | null;
+  toolCallId?: string | null;
   messages: Record<string, any[]>;
   environmentImage?: string;
   currentStrategy: ScreenshotStrategy;

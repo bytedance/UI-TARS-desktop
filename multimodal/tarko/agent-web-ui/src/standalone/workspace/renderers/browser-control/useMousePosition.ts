@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 
 interface UseMousePositionProps {
-  activeSessionId?: string;
-  toolCallId?: string;
+  activeSessionId?: string | null;
+  toolCallId?: string | null;
   toolResults: Record<string, any[]>;
 }
 
