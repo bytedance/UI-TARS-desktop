@@ -5,7 +5,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createT5InitState, processStreamingChunk, T5StreamProcessingState } from '../index';
 import { ChatCompletionChunk, StreamingToolCallUpdate } from '@tarko/agent-interface';
-import { realStreamingChunks } from '../../streamingParser/data/testData';
+import { realStreamingChunks } from '../data/testData';
 
 export function createChunk(content: string, finish_reason = ''): ChatCompletionChunk {
   return { choices: [{ delta: { content }, finish_reason }] } as unknown as ChatCompletionChunk;
@@ -48,7 +48,7 @@ describe('processStreamingChunk', () => {
           function: {
             name: 'str_replace_editor',
             arguments:
-              '{"command": "create", "path": "/home/gem/fibonacci/fibonacci_function.py", "file_text": "xxx\\n" }',
+              '{"command": "create", "path": "/home/gem/fibonacci/fibonacci_function.py", "file_text": "xxx\\n"}',
           },
         },
       ]);
@@ -102,12 +102,12 @@ describe('processStreamingChunk', () => {
       expect(completedUpdates.length).toBeGreaterThan(0);
     });
 
-    it('should handle code_env parameter with complex content across chunks', () => {
+    it('should handle seed:tool_call parameter with complex content across chunks', () => {
       // Test handling of file content parameter that spans multiple chunks
       const chunks = [
-        '<code_env>\n<function=str_replace_editor>\n<parameter=command>create</parameter>\n<parameter=path>/test.py</parameter>\n<parameter=file_text>def fib',
+        '<seed:tool_call>\n<function=str_replace_editor>\n<parameter=command>create</parameter>\n<parameter=path>/test.py</parameter>\n<parameter=file_text>def fib',
         'onacci(n):\n    return [0, 1]',
-        '</parameter>\n</function>\n</code_env>',
+        '</parameter>\n</function>\n</seed:tool_call>',
       ];
 
       for (const chunk of chunks) {
@@ -136,15 +136,15 @@ describe('processStreamingChunk', () => {
       const chunks = [
         '<think>我需要创建Pyth',
         'on文件</t',
-        'hink>\n<co',
-        'de_env>\n<fun',
+        'hink>\n<seed:t',
+        'ool_call>\n<fun',
         'ction=',
         'str_replace_editor',
         '>\n<parameter=command>create</parameter>',
         '\n<parameter=pat',
         'h>/test.py</paramete',
         'r>\n<parameter=file_tex',
-        't>print("Hello")</parameter>\n</function>\n</code_env>',
+        't>print("Hello")</parameter>\n</function>\n</seed:tool_call>',
       ];
 
       for (const chunk of chunks) {
@@ -170,11 +170,11 @@ describe('processStreamingChunk', () => {
 
       // Simulate streaming chunks that build up arguments incrementally
       const chunks = [
-        '<code_env>\\n<function=str_replace_editor>\\n<parameter=command>',
+        '<seed:tool_call>\\n<function=str_replace_editor>\\n<parameter=command>',
         'create</parameter>\\n<parameter=path>/test',
         '.py</parameter>\\n<parameter=file_text>def ',
         'hello():\\n    print("Hello")',
-        '</parameter>\\n</function>\\n</code_env>',
+        '</parameter>\\n</function>\\n</seed:tool_call>',
       ];
 
       for (const chunk of chunks) {
@@ -209,7 +209,7 @@ describe('processStreamingChunk', () => {
 
       // Verify the final arguments are complete
       expect(deltaUpdates.map((u) => u.argumentsDelta).join('')).toBe(
-        '{"command": "create", "path": "/test.py", "file_text": "def hello():\\\\n    print(\\"Hello\\")" }',
+        '{"command": "create", "path": "/test.py", "file_text": "def hello():\\\\n    print(\\"Hello\\")"}',
       );
 
       const finalArgs = JSON.parse(state.toolCalls[0].function.arguments);
@@ -285,7 +285,7 @@ describe('processStreamingChunk', () => {
 
       // Verify completion update
       const completionUpdate = allUpdates.find(
-        (u) => u.argumentsDelta === ' }' && u.isComplete === true,
+        (u) => u.argumentsDelta === '}' && u.isComplete === true,
       );
       expect(completionUpdate).toBeDefined();
 
