@@ -123,11 +123,11 @@ wait()                                         - Wait 5 seconds and take a scree
             },
           });
 
-          const operatorResult = (await this.browserOperator.execute({
+          const operatorResult: GUIExecuteResult = await this.browserOperator.execute({
             parsedPrediction: parsed,
             screenWidth: this.screenWidth || 1920,
             screenHeight: this.screenHeight || 1080,
-          })) as unknown as GUIExecuteResult;
+          });
 
           await sleep(500);
 

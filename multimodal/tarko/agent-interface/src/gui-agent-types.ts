@@ -10,9 +10,11 @@
 export namespace GUIAgent {
   /**
    * Base interface for all GUI Agent action types
+   * Defines the fundamental structure that all actions must follow
    */
   export interface BaseAction {
     type: string;
+    inputs: Record<string, any>;
   }
 
   /**
