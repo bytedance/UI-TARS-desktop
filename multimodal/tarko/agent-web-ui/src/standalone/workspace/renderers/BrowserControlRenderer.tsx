@@ -58,12 +58,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
 
   return (
     <div className="space-y-3">
-      {/* Strategy Switch Controls */}
-      {guiAgentConfig.enableScreenshotRenderStrategySwitch && (
-        <StrategySwitch currentStrategy={currentStrategy} onStrategyChange={setCurrentStrategy} />
-      )}
-
-      {/* Screenshot section - moved to the top */}
+      {/* Screenshot section */}
       <ScreenshotDisplay
         strategy={currentStrategy}
         relatedImage={relatedImage}
@@ -73,6 +68,11 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
         previousMousePosition={previousMousePosition}
         action={action}
       />
+
+      {/* Strategy Switch Controls - moved below screenshot */}
+      {guiAgentConfig.enableScreenshotRenderStrategySwitch && (
+        <StrategySwitch currentStrategy={currentStrategy} onStrategyChange={setCurrentStrategy} />
+      )}
 
       {/* Visual operation details card */}
       {guiAgentConfig.renderGUIAction && (

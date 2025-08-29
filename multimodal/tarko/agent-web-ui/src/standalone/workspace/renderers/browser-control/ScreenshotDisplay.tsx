@@ -25,10 +25,9 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
 }) => {
   const imageRef = useRef<HTMLImageElement>(null);
 
-  // Don't render if no images available
-  if (!relatedImage && !(strategy === 'both' && (beforeActionImage || afterActionImage))) {
-    return null;
-  }
+  // Check if any images are available
+  const hasImages =
+    relatedImage || (strategy === 'both' && (beforeActionImage || afterActionImage));
 
   const shouldShowMouseCursor = (
     currentImage: string | null | undefined,
@@ -45,6 +44,19 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
     }
     return false;
   };
+
+  // If no images available, show placeholder with message
+  if (!hasImages) {
+    return (
+      <BrowserShell className="mb-4">
+        <div className="flex items-center justify-center h-64 bg-gray-50 dark:bg-gray-900">
+          <div className="text-center">
+            <div className="text-gray-400 dark:text-gray-500 text-sm">GUI Agent 环境未启动</div>
+          </div>
+        </div>
+      </BrowserShell>
+    );
+  }
 
   if (strategy === 'both' && beforeActionImage && afterActionImage) {
     // Show both screenshots side by side
