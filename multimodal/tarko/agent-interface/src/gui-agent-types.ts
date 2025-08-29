@@ -145,12 +145,12 @@ export namespace GUIAgent {
     /**
      * Raw action string as received from the model
      */
-    actionStr: string;
+    action: string;
 
     /**
      * Parsed and normalized action with strict typing
      */
-    action: T;
+    normalizedAction: T;
 
     /**
      * Optional observation after the action (reserved for future implementation)

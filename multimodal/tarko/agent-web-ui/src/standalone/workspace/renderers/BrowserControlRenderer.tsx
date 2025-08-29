@@ -58,9 +58,9 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
       let startYPercent: number | undefined;
 
       // New format: check for GUIAgentToolResponse structure
-      if (matchingResult.content.action && matchingResult.content.action.inputs) {
-        startXPercent = matchingResult.content.action.inputs.startX;
-        startYPercent = matchingResult.content.action.inputs.startY;
+      if (matchingResult.content.normalizedAction && matchingResult.content.normalizedAction.inputs) {
+        startXPercent = matchingResult.content.normalizedAction.inputs.startX;
+        startYPercent = matchingResult.content.normalizedAction.inputs.startY;
       }
 
       // Save previous position before updating

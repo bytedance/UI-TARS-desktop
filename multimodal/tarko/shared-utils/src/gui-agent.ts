@@ -34,8 +34,8 @@ export function convertToGUIResponse(
 
   return {
     success: true,
-    actionStr,
-    action: normalizedAction,
+    action: actionStr,
+    normalizedAction,
     observation: undefined, // Reserved for future implementation
   };
 }
@@ -216,8 +216,8 @@ export function createErrorAction(): GUIAgent.Action {
 export function createGUIErrorResponse(actionStr: string, error: unknown): GUIAgent.ToolResponse {
   return {
     success: false,
-    actionStr,
-    action: createErrorAction(),
+    action: actionStr,
+    normalizedAction: createErrorAction(),
     error: error instanceof Error ? error.message : String(error),
   };
 }
