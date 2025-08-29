@@ -58,42 +58,25 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
     </div>
   );
 
-  // Component to render placeholder with matching height
-  const PlaceholderWithMatchingHeight: React.FC<{ otherImageSrc: string }> = ({
-    otherImageSrc,
-  }) => {
-    const [containerHeight, setContainerHeight] = React.useState<number | null>(null);
-    const placeholderRef = React.useRef<HTMLDivElement>(null);
+  // Component to render placeholder with matching aspect ratio
+  const PlaceholderWithAspectRatio: React.FC<{ otherImageSrc: string }> = ({ otherImageSrc }) => {
+    const [aspectRatio, setAspectRatio] = React.useState<number | null>(null);
 
     React.useEffect(() => {
-      // Create a temporary image to calculate the display height
       const img = new Image();
       img.onload = () => {
-        const aspectRatio = img.naturalWidth / img.naturalHeight;
-        const containerWidth = placeholderRef.current?.offsetWidth || 400;
-
-        // Calculate height based on container width and aspect ratio
-        let calculatedHeight = containerWidth / aspectRatio;
-
-        // Apply the same max-height constraint as the actual image (50vh)
-        const maxHeight = window.innerHeight * 0.5;
-        if (calculatedHeight > maxHeight) {
-          calculatedHeight = maxHeight;
-        }
-
-        setContainerHeight(calculatedHeight);
+        setAspectRatio(img.naturalWidth / img.naturalHeight);
       };
       img.onerror = () => {
-        setContainerHeight(300); // fallback height
+        setAspectRatio(16 / 9); // fallback
       };
       img.src = otherImageSrc;
     }, [otherImageSrc]);
 
     return (
       <div
-        ref={placeholderRef}
-        className="flex items-center justify-center bg-gray-50 dark:bg-gray-900 w-full"
-        style={{ height: containerHeight ? `${containerHeight}px` : '300px' }}
+        className="flex items-center justify-center bg-gray-50 dark:bg-gray-900 w-full object-contain max-h-[50vh]"
+        style={{ aspectRatio: aspectRatio ? aspectRatio.toString() : '16/9' }}
       >
         <div className="text-center">
           <div className="text-gray-400 dark:text-gray-500 text-sm">
@@ -137,7 +120,7 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
       if (otherImage) {
         return (
           <div className="relative">
-            <PlaceholderWithMatchingHeight otherImageSrc={otherImage} />
+            <PlaceholderWithAspectRatio otherImageSrc={otherImage} />
           </div>
         );
       }
