@@ -25,7 +25,6 @@
     "@tarko/shared-utils": "workspace:*",
     "@tarko/shared-media-utils": "workspace:*",
     "@tarko/mcp-agent": "workspace:*",
-    "@tarko/agent-interface": "workspace:*",
     "@agent-tars/interface": "workspace:*"
   },
   "devDependencies": {
