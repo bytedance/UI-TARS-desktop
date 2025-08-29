@@ -179,26 +179,14 @@ export function convertToNormalizedAction(
       return navigateBackAction;
     }
 
-    case 'open_computer': {
-      // open_computer() is an initialization action, treat as wait
-      const openComputerAction: GUIAgent.WaitAction = {
-        type: 'wait',
+    default: {
+      // For unknown action types, return the raw type with empty inputs
+      console.warn(`Unknown action type: ${action_type}, returning raw type`);
+      const fallbackAction: GUIAgent.BaseAction = {
+        type: action_type as any,
         inputs: {},
       };
-      return openComputerAction;
-    }
-
-    default: {
-      // Fallback to a generic click action for unknown types
-      console.warn(`Unknown action type: ${action_type}, falling back to click`);
-      const fallbackAction: GUIAgent.ClickAction = {
-        type: 'click',
-        inputs: {
-          startX: startXPercent || 0,
-          startY: startYPercent || 0,
-        },
-      };
-      return fallbackAction;
+      return fallbackAction as GUIAgent.Action;
     }
   }
 }
