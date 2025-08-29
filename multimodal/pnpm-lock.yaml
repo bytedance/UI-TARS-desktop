@@ -320,8 +320,8 @@ importers:
   omni-tars/code-agent:
     dependencies:
       '@agent-infra/sandbox':
-        specifier: 0.0.2
-        version: 0.0.2
+        specifier: 0.0.3
+        version: 0.0.3
       '@omni-tars/core':
         specifier: workspace:*
         version: link:../core
@@ -1496,12 +1496,12 @@ packages:
   '@agent-infra/media-utils@0.1.5':
     resolution: {integrity: sha512-3irZBomzhNOw/HMZg4rmJ7w87BPbXTgYA0LZV0nlgpoE5w3GydmWx/S0EF1MCfPHE1r1QrldFqpqZ38smSGF4Q==}
 
-  '@agent-infra/sandbox@0.0.2':
-    resolution: {integrity: sha512-8ETmp3uKzlYp/jtCr05zssNXpvcemFZHuVTSVjAXLrRv5YYDtLAl268fE5afCtRP9lXESdMd5HELecc498/kWQ==}
-    engines: {node: '>=18.0.0'}
-
   '@agent-infra/sandbox@0.0.2-beta7':
     resolution: {integrity: sha512-Ppyy5TM3s7i1xr0amRoOYV3nlFH0is20Ggz1Ru/1VvlPIhGp1txyYEKdK+bZUTjXIpsyzdm04Oo/fRsrvdUfMw==}
+    engines: {node: '>=18.0.0'}
+
+  '@agent-infra/sandbox@0.0.3':
+    resolution: {integrity: sha512-4BEgGjR0TyTbusWpmeRqsL4k/NlnAQVu6CxCcNjvdUoCVSyV8ytfX+csrW2koZZex8mXpFRyPAwAxHPuA8nvpw==}
     engines: {node: '>=18.0.0'}
 
   '@agent-infra/search@0.0.5':
@@ -1777,19 +1777,16 @@ packages:
   '@computer-use/libnut-darwin@2.7.1':
     resolution: {integrity: sha512-7B/aPcIYS4a4S7D3IYIHSpZ4B4m8Z3CjlYq0efTr+/JYmEu+LlO67ZhPvisLKifhagxf7goqEfnphg1F4jq5jw==}
     engines: {node: '>=10.15.3'}
-    cpu: [x64, arm64]
     os: [darwin, linux, win32]
 
   '@computer-use/libnut-linux@2.7.1':
     resolution: {integrity: sha512-QJD5URTFJ/2+JwBwRyajRF2BB+3eXpd4+t5btGeRVeiRQLKQ4lgorbMHySo6IrfAbSfnU1OVOrxAUygGxj0cFg==}
     engines: {node: '>=10.15.3'}
-    cpu: [x64, arm64]
     os: [darwin, linux, win32]
 
   '@computer-use/libnut-win32@2.7.1':
     resolution: {integrity: sha512-nDvH5kP1zoO2cBtFYWV0om9xtTu523cc1LIk8r/wizqPrIAm0wCizTU+odF3Fi42zcKJWT6J+Pguy8fKrZyIuA==}
     engines: {node: '>=10.15.3'}
-    cpu: [x64, arm64]
     os: [darwin, linux, win32]
 
   '@computer-use/libnut@4.2.0':
@@ -1809,7 +1806,6 @@ packages:
   '@computer-use/nut-js@4.2.0':
     resolution: {integrity: sha512-Xyq5ixrAEdy6qu/mtX021XfU0Y//YFgL0CW1xF6L05KUCbJcZZqViiEeSPulhKfLdvXuhIjnhf+exMb2T6jQIg==}
     engines: {node: '>=16'}
-    cpu: [x64, arm64]
     os: [linux, darwin, win32]
 
   '@computer-use/provider-interfaces@4.2.0':
@@ -11174,13 +11170,13 @@ snapshots:
       '@agent-infra/logger': 0.0.2-beta.2
       delay: 6.0.0
 
-  '@agent-infra/sandbox@0.0.2':
-    dependencies:
-      '@agent-infra/logger': 0.0.2-beta.2
-
   '@agent-infra/sandbox@0.0.2-beta7':
     dependencies:
       '@agent-infra/logger': 0.0.1
+
+  '@agent-infra/sandbox@0.0.3':
+    dependencies:
+      '@agent-infra/logger': 0.0.2-beta.2
 
   '@agent-infra/search@0.0.5':
     dependencies:

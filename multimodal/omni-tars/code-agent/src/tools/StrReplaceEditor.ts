@@ -39,11 +39,19 @@ export class StrReplaceEditorProvider {
           )
           .optional(),
         view_range: z
-          .string()
+          .array(z.number())
           .describe('Optional parameter of `view` command when `path` points to a file. ')
           .optional(),
       }),
       function: async (args) => {
+        if (typeof args.view_range === 'string') {
+          try {
+            args.view_range = JSON.parse(args.view_range);
+          } catch (e) {
+            throw new Error(`str_replace_editor view_range parameter invalid: ${args.view_range}`);
+          }
+        }
+
         return (await this.client.fileEditor(args)).data;
       },
     });

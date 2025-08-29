@@ -15,6 +15,7 @@ import {
 } from '@tarko/agent-interface';
 import { actionParser, actionStringParser } from '@gui-agent/action-parser';
 import { getScreenInfo } from './shared';
+import { processStreamingChunk as omniProcessStreamingChunk } from '@omni-tars/core';
 
 /**
  * SimpleKorToolCallEngine - Minimal prompt engineering tool call engine
@@ -72,25 +73,7 @@ export class GUIAgentToolCallEngine extends ToolCallEngine {
     chunk: ChatCompletionChunk,
     state: StreamProcessingState,
   ): StreamChunkResult {
-    const delta = chunk.choices[0]?.delta;
-
-    // Accumulate content
-    if (delta?.content) {
-      state.contentBuffer += delta.content;
-    }
-
-    // Record finish reason
-    if (chunk.choices[0]?.finish_reason) {
-      state.finishReason = chunk.choices[0].finish_reason;
-    }
-
-    // Return empty content if no delta content
-    return {
-      content: '',
-      reasoningContent: '',
-      hasToolCallUpdate: false,
-      toolCalls: [],
-    };
+    return omniProcessStreamingChunk(chunk, state);
   }
 
   /**

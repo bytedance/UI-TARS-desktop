@@ -29,7 +29,7 @@
     "@tarko/agent": "workspace:*",
     "@omni-tars/core": "workspace:*",
     "@tarko/agent-interface": "workspace:*",
-    "@agent-infra/sandbox": "0.0.2"
+    "@agent-infra/sandbox": "0.0.3"
   },
   "devDependencies": {
     "@rslib/core": "0.10.0",

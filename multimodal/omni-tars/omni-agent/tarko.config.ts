@@ -22,9 +22,6 @@ export default {
     // provider: 'volcengine',
     // id: 'ep-20250613182556-7z8pl',
     // apiKey: process.env.ARK_API_KEY,
-    thinking: {
-      type: 'disabled',
-    },
   },
   share: {
     provider: process.env.SHARE_PROVIDER,
