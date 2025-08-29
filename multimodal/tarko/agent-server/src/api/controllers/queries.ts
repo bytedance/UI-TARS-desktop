@@ -56,17 +56,23 @@ export async function executeQuery(req: Request, res: Response) {
     // Compress images in user input only
     const compressedQuery = await imageProcessor.compressImagesInQuery(query);
 
-    // Use enhanced error handling in runQuery with environment input
-    const response = await req.session!.runQuery({
+    // Only pass environmentInput if there are actual contextual references
+    const hasContextualReferences = expandedContext !== query;
+    const runOptions = {
       input: compressedQuery,
-      environmentInput: {
-        content: expandedContext,
-        description: 'Expanded context from contextual references',
-        metadata: {
-          type: 'codebase' as const,
+      ...(hasContextualReferences && {
+        environmentInput: {
+          content: expandedContext,
+          description: 'Expanded context from contextual references',
+          metadata: {
+            type: 'codebase' as const,
+          },
         },
-      },
-    });
+      }),
+    };
+
+    // Use enhanced error handling in runQuery with environment input
+    const response = await req.session!.runQuery(runOptions);
 
     if (response.success) {
       res.status(200).json({ result: response.result });
@@ -110,17 +116,23 @@ export async function executeStreamingQuery(req: Request, res: Response) {
     // Compress images in user input only
     const compressedQuery = await imageProcessor.compressImagesInQuery(query);
 
-    // Get streaming response with environment input - any errors will be returned as events
-    const eventStream = await req.session!.runQueryStreaming({
+    // Only pass environmentInput if there are actual contextual references
+    const hasContextualReferences = expandedContext !== query;
+    const runOptions = {
       input: compressedQuery,
-      environmentInput: {
-        content: expandedContext,
-        description: 'Expanded context from contextual references',
-        metadata: {
-          type: 'codebase' as const,
+      ...(hasContextualReferences && {
+        environmentInput: {
+          content: expandedContext,
+          description: 'Expanded context from contextual references',
+          metadata: {
+            type: 'codebase' as const,
+          },
         },
-      },
-    });
+      }),
+    };
+
+    // Get streaming response with environment input - any errors will be returned as events
+    const eventStream = await req.session!.runQueryStreaming(runOptions);
 
     // Stream events one by one
     for await (const event of eventStream) {
