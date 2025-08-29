@@ -196,17 +196,17 @@ interface JsonRendererProps {
   emptyMessage?: string;
 }
 
-export const JsonRenderer: React.FC<JsonRendererProps> = ({
-  data,
-  className = '',
-  emptyMessage = 'No data available',
-}) => {
-  const { copied, handleCopy } = useCopy();
+export interface JsonRendererRef {
+  copyAll: () => string;
+}
 
-  const handleCopyAll = useCallback(() => {
-    const jsonString = JSON.stringify(data, null, 2);
-    handleCopy(jsonString);
-  }, [data, handleCopy]);
+export const JsonRenderer = React.forwardRef<JsonRendererRef, JsonRendererProps>((
+  { data, className = '', emptyMessage = 'No data available' },
+  ref
+) => {
+  React.useImperativeHandle(ref, () => ({
+    copyAll: () => JSON.stringify(data, null, 2)
+  }), [data]);
 
   if (!data || (typeof data === 'object' && Object.keys(data).length === 0)) {
     return (
@@ -223,31 +223,18 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
   const isRootArray = Array.isArray(data);
 
   return (
-    <div className={`group ${className}`}>
-      <div className="flex items-center justify-between mb-2">
-        <div className="text-xs text-gray-500 dark:text-gray-400 font-mono">JSON</div>
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-          <CopyButton
-            onCopy={handleCopyAll}
-            copied={copied}
-            title="Copy raw JSON"
-            size={14}
-          />
-        </div>
-      </div>
-      <div className="space-y-2">
-        {isRootObject ? (
-          Object.entries(data).map(([itemKey, value]) => (
-            <JsonItem key={itemKey} label={itemKey} value={value} isRoot />
-          ))
-        ) : isRootArray ? (
-          data.map((item: any, index: number) => (
-            <JsonItem key={`root-${index}`} label={`[${index}]`} value={item} isRoot />
-          ))
-        ) : (
-          <JsonItem label="value" value={data} isRoot />
-        )}
-      </div>
+    <div className={`space-y-2 ${className}`}>
+      {isRootObject ? (
+        Object.entries(data).map(([itemKey, value]) => (
+          <JsonItem key={itemKey} label={itemKey} value={value} isRoot />
+        ))
+      ) : isRootArray ? (
+        data.map((item: any, index: number) => (
+          <JsonItem key={`root-${index}`} label={`[${index}]`} value={item} isRoot />
+        ))
+      ) : (
+        <JsonItem label="value" value={data} isRoot />
+      )}
     </div>
   );
-};
+});
