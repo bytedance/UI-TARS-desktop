@@ -179,6 +179,15 @@ export function convertToNormalizedAction(
       return navigateBackAction;
     }
 
+    case 'open_computer': {
+      // open_computer() is an initialization action, treat as wait
+      const openComputerAction: GUIAgent.WaitAction = {
+        type: 'wait',
+        inputs: {},
+      };
+      return openComputerAction;
+    }
+
     default: {
       // Fallback to a generic click action for unknown types
       console.warn(`Unknown action type: ${action_type}, falling back to click`);
