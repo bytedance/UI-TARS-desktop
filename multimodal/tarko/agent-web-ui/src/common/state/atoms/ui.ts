@@ -1,5 +1,6 @@
 import { atom } from 'jotai';
 import { AgentProcessingPhase, AgentStatusInfo, SessionItemInfo, LayoutMode } from '@tarko/interface';
+import { getDefaultLayoutMode } from '@/common/constants/shared';
 import {
   ConnectionStatus,
   PanelContent,
@@ -82,12 +83,11 @@ export const layoutModeAtom = atom<LayoutMode>(
 );
 
 /**
- * Initialize layout mode from localStorage or agent config
+ * Initialize layout mode from localStorage or web UI config
  */
 export const initializeLayoutModeAtom = atom(null, (get, set) => {
   try {
-    const agentOptions = get(agentOptionsAtom);
-    const defaultLayout = agentOptions.webui?.layout?.defaultLayout || 'default';
+    const defaultLayout = getDefaultLayoutMode();
     
     // Try to get from localStorage first
     const savedLayout = localStorage.getItem('tarko-layout-mode') as LayoutMode;

@@ -61,6 +61,10 @@ export default class OmniTARSAgent extends ComposableAgent {
       enableScreenshotRenderStrategySwitch: true,
       renderGUIAction: true,
     },
+    layout: {
+      defaultLayout: 'narrow-chat',
+      enableLayoutSwitchButton: true,
+    },
   };
 
   constructor(options: OmniTarsOption) {

@@ -45,9 +45,37 @@ export function getWorkspaceNavItems() {
  * Get GUI Agent configuration from web UI config
  */
 export function getGUIAgentConfig() {
-  return getWebUIConfig().guiAgent || {
-    defaultScreenshotRenderStrategy: 'afterAction',
-    enableScreenshotRenderStrategySwitch: false,
-    renderGUIAction: true,
-  };
+  return (
+    getWebUIConfig().guiAgent || {
+      defaultScreenshotRenderStrategy: 'afterAction',
+      enableScreenshotRenderStrategySwitch: false,
+      renderGUIAction: true,
+    }
+  );
+}
+
+/**
+ * Get layout configuration from web UI config
+ */
+export function getLayoutConfig() {
+  return (
+    getWebUIConfig().layout || {
+      defaultLayout: 'default',
+      enableLayoutSwitchButton: false,
+    }
+  );
+}
+
+/**
+ * Check if layout switch button is enabled
+ */
+export function isLayoutSwitchButtonEnabled(): boolean {
+  return getLayoutConfig().enableLayoutSwitchButton ?? false;
+}
+
+/**
+ * Get default layout mode from web UI config
+ */
+export function getDefaultLayoutMode() {
+  return getLayoutConfig().defaultLayout || 'default';
 }
