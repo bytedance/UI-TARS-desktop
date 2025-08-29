@@ -8,7 +8,7 @@ import { LocalBrowser, Page, RemoteBrowser } from '@agent-infra/browser';
 import { BrowserOperator } from '@gui-agent/operator-browser';
 import { ConsoleLogger, AgentEventStream, Tool, z } from '@tarko/mcp-agent';
 import { ImageCompressor, formatBytes } from '@tarko/shared-media-utils';
-import { GUIAgent, ActionInputs, PredictionParsed } from '@tarko/agent-interface';
+import { ActionInputs, PredictionParsed } from '@tarko/agent-interface';
 import {
   convertToGUIResponse,
   createGUIErrorResponse,

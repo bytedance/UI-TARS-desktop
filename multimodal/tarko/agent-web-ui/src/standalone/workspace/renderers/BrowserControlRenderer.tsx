@@ -26,7 +26,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
   panelContent,
   onAction,
 }) => {
-  const { activeSessionId, messages, toolResults, replayState } = useSession();
+  const { activeSessionId, messages, toolResults } = useSession();
   const [relatedImage, setRelatedImage] = useState<string | null>(null);
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number } | null>(null);
   const [previousMousePosition, setPreviousMousePosition] = useState<{
@@ -61,11 +61,6 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
       if (matchingResult.content.action && matchingResult.content.action.inputs) {
         startXPercent = matchingResult.content.action.inputs.startX;
         startYPercent = matchingResult.content.action.inputs.startY;
-      }
-      // Legacy format: check for result structure
-      else if (matchingResult.content.result) {
-        startXPercent = matchingResult.content.result.startXPercent;
-        startYPercent = matchingResult.content.result.startYPercent;
       }
 
       // Save previous position before updating
