@@ -11,5 +11,5 @@ export * from './agent-constructor';
 export * from './tool';
 export * from './tool-call-engine';
 export * from './agent-event-stream';
-export * from './gui-agent-types';
+export * from './gui-agent';
 export * from '@tarko/model-provider/types';

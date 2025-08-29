@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
 
 /**
+ * FIXME: migrate to GUI-Agent package
+ *
  * GUI Agent types for Tarko Agent Web UI display.
  * These types are specifically designed for UI rendering and are not part of the internal GUIAgent protocol.
  */

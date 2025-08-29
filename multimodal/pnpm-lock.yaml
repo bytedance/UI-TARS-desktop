@@ -144,6 +144,19 @@ importers:
         specifier: ^5.5.3
         version: 5.8.3
 
+  agent-tars/test-workspace:
+    dependencies:
+      '@agent-tars/interface':
+        specifier: workspace:*
+        version: link:../interface
+    devDependencies:
+      '@types/node':
+        specifier: 22.15.30
+        version: 22.15.30
+      typescript:
+        specifier: ^5.5.3
+        version: 5.8.3
+
   benchmark/content-extraction:
     dependencies:
       '@agent-infra/browser':

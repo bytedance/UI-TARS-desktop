@@ -7,6 +7,7 @@ import { GUIAgent, ActionInputs, PredictionParsed } from '@tarko/agent-interface
 
 /**
  * Execute result interface for GUI operations
+ * FIXME: migrate to GUI-Agent package
  */
 export interface GUIExecuteResult {
   startX?: number | null;
