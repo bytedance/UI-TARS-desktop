@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useRef, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { FiTerminal, FiClock, FiPlay, FiCheckCircle, FiXCircle } from 'react-icons/fi';
-import { JsonRenderer } from '@/common/components/JsonRenderer';
+import { FiTerminal, FiClock, FiPlay, FiCheckCircle, FiXCircle, FiCopy, FiCheck } from 'react-icons/fi';
+import { JsonRenderer, JsonRendererRef } from '@/common/components/JsonRenderer';
 import { RawToolMapping } from '@/common/state/atoms/rawEvents';
 import { formatTimestamp } from '@/common/utils/formatters';
 
@@ -9,8 +9,50 @@ interface RawModeRendererProps {
   toolMapping: RawToolMapping;
 }
 
+// Copy button component
+const CopyButton: React.FC<{
+  jsonRef: React.RefObject<JsonRendererRef>;
+  title: string;
+}> = ({ jsonRef, title }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = useCallback(async () => {
+    try {
+      const jsonString = jsonRef.current?.copyAll();
+      if (jsonString) {
+        await navigator.clipboard.writeText(jsonString);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      }
+    } catch (error) {
+      console.error('Failed to copy JSON:', error);
+    }
+  }, [jsonRef]);
+
+  return (
+    <motion.button
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      onClick={handleCopy}
+      className="p-1.5 rounded-md hover:bg-slate-200 dark:hover:bg-slate-700 transition-all opacity-0 group-hover:opacity-100"
+      title={title}
+    >
+      {copied ? (
+        <FiCheck size={12} className="text-green-500" />
+      ) : (
+        <FiCopy size={12} className="text-slate-400" />
+      )}
+    </motion.button>
+  );
+};
+
 export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping }) => {
   const { toolCall, toolResult } = toolMapping;
+  
+  // Refs for JsonRenderer components
+  const parametersRef = useRef<JsonRendererRef>(null);
+  const responseRef = useRef<JsonRendererRef>(null);
+  const metadataRef = useRef<JsonRendererRef>(null);
 
   return (
     <div className="space-y-3 mt-3">
@@ -50,12 +92,13 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
               </div>
             </div>
             {toolCall.arguments && (
-              <div>
-                <div className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                  Parameters
+              <div className="group">
+                <div className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 flex items-center justify-between">
+                  <span>Parameters</span>
+                  <CopyButton jsonRef={parametersRef} title="Copy parameters JSON" />
                 </div>
                 <div className="bg-white/60 dark:bg-slate-800/60 rounded-lg p-3 border border-slate-200/40 dark:border-slate-700/40">
-                  <JsonRenderer data={toolCall.arguments} emptyMessage="No parameters provided" />
+                  <JsonRenderer ref={parametersRef} data={toolCall.arguments} emptyMessage="No parameters provided" />
                 </div>
               </div>
             )}
@@ -134,21 +177,23 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
                   </div>
                 </div>
               )}
-              <div>
-                <div className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                  Response
+              <div className="group">
+                <div className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 flex items-center justify-between">
+                  <span>Response</span>
+                  <CopyButton jsonRef={responseRef} title="Copy response JSON" />
                 </div>
                 <div className="bg-white/60 dark:bg-slate-800/60 rounded-lg p-3 border border-slate-200/40 dark:border-slate-700/40">
-                  <JsonRenderer data={toolResult.content} emptyMessage="No response data" />
+                  <JsonRenderer ref={responseRef} data={toolResult.content} emptyMessage="No response data" />
                 </div>
               </div>
               {toolResult._extra && (
-                <div>
-                  <div className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                    Metadata
+                <div className="group">
+                  <div className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 flex items-center justify-between">
+                    <span>Metadata</span>
+                    <CopyButton jsonRef={metadataRef} title="Copy metadata JSON" />
                   </div>
                   <div className="bg-white/60 dark:bg-slate-800/60 rounded-lg p-3 border border-slate-200/40 dark:border-slate-700/40">
-                    <JsonRenderer data={toolResult._extra} emptyMessage="No metadata" />
+                    <JsonRenderer ref={metadataRef} data={toolResult._extra} emptyMessage="No metadata" />
                   </div>
                 </div>
               )}
