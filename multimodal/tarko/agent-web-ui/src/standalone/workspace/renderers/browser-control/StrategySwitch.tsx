@@ -1,5 +1,5 @@
 import React from 'react';
-import { FiRewind, FiFastForward, FiShuffle } from 'react-icons/fi';
+import { FiClock, FiCheckCircle, FiShuffle } from 'react-icons/fi';
 import { Tooltip, TooltipProps } from '@mui/material';
 
 type ScreenshotStrategy = 'both' | 'beforeAction' | 'afterAction';
@@ -12,12 +12,12 @@ interface StrategySwitchProps {
 const strategyConfig = {
   beforeAction: {
     label: 'Before',
-    icon: <FiRewind size={12} />,
+    icon: <FiClock size={12} />,
     tooltip: 'Show screenshot before action execution',
   },
   afterAction: {
     label: 'After',
-    icon: <FiFastForward size={12} />,
+    icon: <FiCheckCircle size={12} />,
     tooltip: 'Show screenshot after action execution',
   },
   both: {
