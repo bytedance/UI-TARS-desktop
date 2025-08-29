@@ -25,10 +25,6 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
 }) => {
   const imageRef = useRef<HTMLImageElement>(null);
 
-  // Check if any images are available
-  const hasImages =
-    relatedImage || (strategy === 'both' && (beforeActionImage || afterActionImage));
-
   const shouldShowMouseCursor = (
     currentImage: string | null | undefined,
     imageType: 'before' | 'after' | 'single',
@@ -45,20 +41,43 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
     return false;
   };
 
-  // If no images available, show placeholder with message
-  if (!hasImages) {
-    return (
-      <BrowserShell className="mb-4">
-        <div className="flex items-center justify-center h-64 bg-gray-50 dark:bg-gray-900">
-          <div className="text-center">
-            <div className="text-gray-400 dark:text-gray-500 text-sm">GUI Agent Environment Not Started</div>
-          </div>
+  // Render placeholder when no image available
+  const renderPlaceholder = () => (
+    <div className="flex items-center justify-center h-[50vh] bg-gray-50 dark:bg-gray-900">
+      <div className="text-center">
+        <div className="text-gray-400 dark:text-gray-500 text-sm">
+          GUI Agent Environment Not Started
         </div>
-      </BrowserShell>
-    );
-  }
+      </div>
+    </div>
+  );
 
-  if (strategy === 'both' && beforeActionImage && afterActionImage) {
+  // Render image or placeholder
+  const renderImageOrPlaceholder = (image: string | null, alt: string, showCursor = false) => (
+    <div className="relative">
+      {image ? (
+        <>
+          <img
+            ref={imageRef}
+            src={image}
+            alt={alt}
+            className="w-full h-auto object-contain max-h-[50vh]"
+          />
+          {showCursor && (
+            <MouseCursor
+              position={mousePosition!}
+              previousPosition={previousMousePosition}
+              action={action}
+            />
+          )}
+        </>
+      ) : (
+        renderPlaceholder()
+      )}
+    </div>
+  );
+
+  if (strategy === 'both') {
     // Show both screenshots side by side
     return (
       <div className="space-y-4">
@@ -70,22 +89,11 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
               </span>
             </div>
             <BrowserShell>
-              <div className="relative">
-                <img
-                  ref={imageRef}
-                  src={beforeActionImage}
-                  alt="Browser Screenshot - Before Action"
-                  className="w-full h-auto object-contain max-h-[50vh]"
-                />
-                {/* Mouse cursor overlay only on before action image - shows where the action will be performed */}
-                {shouldShowMouseCursor(beforeActionImage, 'before') && (
-                  <MouseCursor
-                    position={mousePosition!}
-                    previousPosition={previousMousePosition}
-                    action={action}
-                  />
-                )}
-              </div>
+              {renderImageOrPlaceholder(
+                beforeActionImage,
+                'Browser Screenshot - Before Action',
+                shouldShowMouseCursor(beforeActionImage, 'before'),
+              )}
             </BrowserShell>
           </div>
           <div>
@@ -95,14 +103,7 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
               </span>
             </div>
             <BrowserShell>
-              <div className="relative">
-                <img
-                  src={afterActionImage}
-                  alt="Browser Screenshot - After Action"
-                  className="w-full h-auto object-contain max-h-[50vh]"
-                />
-                {/* No cursor overlay on after action image - shows the result of the action */}
-              </div>
+              {renderImageOrPlaceholder(afterActionImage, 'Browser Screenshot - After Action')}
             </BrowserShell>
           </div>
         </div>
@@ -113,23 +114,11 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
   // Show single screenshot
   return (
     <BrowserShell className="mb-4">
-      <div className="relative">
-        <img
-          ref={imageRef}
-          src={relatedImage!}
-          alt="Browser Screenshot"
-          className="w-full h-auto object-contain max-h-[70vh]"
-        />
-
-        {/* Enhanced mouse cursor overlay - shows action position */}
-        {shouldShowMouseCursor(relatedImage, 'single') && (
-          <MouseCursor
-            position={mousePosition!}
-            previousPosition={previousMousePosition}
-            action={action}
-          />
-        )}
-      </div>
+      {renderImageOrPlaceholder(
+        relatedImage,
+        'Browser Screenshot',
+        shouldShowMouseCursor(relatedImage, 'single'),
+      )}
     </BrowserShell>
   );
 };
