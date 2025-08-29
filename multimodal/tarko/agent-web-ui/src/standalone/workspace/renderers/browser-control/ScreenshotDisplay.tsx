@@ -75,7 +75,7 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
 
     return (
       <div
-        className="flex items-center justify-center bg-gray-50 dark:bg-gray-900 w-full object-contain max-h-[50vh]"
+        className="flex items-center justify-center bg-gray-50 dark:bg-gray-900 w-full object-contain"
         style={{ aspectRatio: aspectRatio ? aspectRatio.toString() : '16/9' }}
       >
         <div className="text-center">
@@ -97,12 +97,7 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
     if (image) {
       return (
         <div className="relative">
-          <img
-            ref={imageRef}
-            src={image}
-            alt={alt}
-            className="w-full h-auto object-contain max-h-[50vh]"
-          />
+          <img ref={imageRef} src={image} alt={alt} className="w-full h-auto object-contain" />
           {showCursor && (
             <MouseCursor
               position={mousePosition!}
