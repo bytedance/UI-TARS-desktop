@@ -12,114 +12,84 @@ export namespace GUIAgent {
    * Base interface for all GUI Agent action types
    * Defines the fundamental structure that all actions must follow
    */
-  export interface BaseAction {
-    type: string;
-    inputs: Record<string, any>;
+  export interface BaseAction<T extends string = string, I extends Record<string, any> = Record<string, any>> {
+    type: T;
+    inputs: I;
   }
 
   /**
    * Click action with coordinates
    */
-  export interface ClickAction extends BaseAction {
-    type: 'click';
-    inputs: {
-      startX: number; // Percentage coordinates (0-1)
-      startY: number; // Percentage coordinates (0-1)
-    };
-  }
+  export type ClickAction = BaseAction<'click', {
+    startX: number; // Percentage coordinates (0-1)
+    startY: number; // Percentage coordinates (0-1)
+  }>;
 
   /**
    * Double click action with coordinates
    */
-  export interface DoubleClickAction extends BaseAction {
-    type: 'double_click' | 'left_double';
-    inputs: {
-      startX: number; // Percentage coordinates (0-1)
-      startY: number; // Percentage coordinates (0-1)
-    };
-  }
+  export type DoubleClickAction = BaseAction<'double_click' | 'left_double', {
+    startX: number; // Percentage coordinates (0-1)
+    startY: number; // Percentage coordinates (0-1)
+  }>;
 
   /**
    * Right click action with coordinates
    */
-  export interface RightClickAction extends BaseAction {
-    type: 'right_click' | 'right_single';
-    inputs: {
-      startX: number; // Percentage coordinates (0-1)
-      startY: number; // Percentage coordinates (0-1)
-    };
-  }
+  export type RightClickAction = BaseAction<'right_click' | 'right_single', {
+    startX: number; // Percentage coordinates (0-1)
+    startY: number; // Percentage coordinates (0-1)
+  }>;
 
   /**
    * Drag action with start and end coordinates
    */
-  export interface DragAction extends BaseAction {
-    type: 'drag';
-    inputs: {
-      startX: number; // Percentage coordinates (0-1)
-      startY: number; // Percentage coordinates (0-1)
-      endX: number; // Percentage coordinates (0-1)
-      endY: number; // Percentage coordinates (0-1)
-    };
-  }
+  export type DragAction = BaseAction<'drag', {
+    startX: number; // Percentage coordinates (0-1)
+    startY: number; // Percentage coordinates (0-1)
+    endX: number; // Percentage coordinates (0-1)
+    endY: number; // Percentage coordinates (0-1)
+  }>;
 
   /**
    * Type action with text content
    */
-  export interface TypeAction extends BaseAction {
-    type: 'type';
-    inputs: {
-      content: string;
-    };
-  }
+  export type TypeAction = BaseAction<'type', {
+    content: string;
+  }>;
 
   /**
    * Hotkey action with key combination
    */
-  export interface HotkeyAction extends BaseAction {
-    type: 'hotkey';
-    inputs: {
-      key: string;
-    };
-  }
+  export type HotkeyAction = BaseAction<'hotkey', {
+    key: string;
+  }>;
 
   /**
    * Scroll action with coordinates and direction
    */
-  export interface ScrollAction extends BaseAction {
-    type: 'scroll';
-    inputs: {
-      startX: number; // Percentage coordinates (0-1)
-      startY: number; // Percentage coordinates (0-1)
-      direction: 'up' | 'down' | 'left' | 'right';
-    };
-  }
+  export type ScrollAction = BaseAction<'scroll', {
+    startX: number; // Percentage coordinates (0-1)
+    startY: number; // Percentage coordinates (0-1)
+    direction: 'up' | 'down' | 'left' | 'right';
+  }>;
 
   /**
    * Wait action with no inputs
    */
-  export interface WaitAction extends BaseAction {
-    type: 'wait';
-    inputs: Record<string, never>; // Empty object
-  }
+  export type WaitAction = BaseAction<'wait', Record<string, never>>;
 
   /**
    * Navigate action with URL
    */
-  export interface NavigateAction extends BaseAction {
-    type: 'navigate';
-    inputs: {
-      url: string;
-    };
-  }
+  export type NavigateAction = BaseAction<'navigate', {
+    url: string;
+  }>;
 
   /**
    * Navigate back action
    */
-  export interface NavigateBackAction extends BaseAction {
-    type: 'navigate_back';
-    inputs: Record<string, never>; // Empty object
-  }
+  export type NavigateBackAction = BaseAction<'navigate_back', Record<string, never>>;
 
   /**
    * Union type of all possible GUI actions
