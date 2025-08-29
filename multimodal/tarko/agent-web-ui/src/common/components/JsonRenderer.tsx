@@ -179,6 +179,19 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
   className = '',
   emptyMessage = 'No data available',
 }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyAll = useCallback(async () => {
+    try {
+      const jsonString = JSON.stringify(data, null, 2);
+      await navigator.clipboard.writeText(jsonString);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch (error) {
+      console.error('Failed to copy JSON:', error);
+    }
+  }, [data]);
+
   if (!data || (typeof data === 'object' && Object.keys(data).length === 0)) {
     return (
       <div className={`flex items-center justify-center py-8 ${className}`}>
@@ -194,18 +207,33 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
   const isRootArray = Array.isArray(data);
 
   return (
-    <div className={`space-y-2 ${className}`}>
-      {isRootObject ? (
-        Object.entries(data).map(([itemKey, value]) => (
-          <JsonItem key={itemKey} label={itemKey} value={value} isRoot />
-        ))
-      ) : isRootArray ? (
-        data.map((item: any, index: number) => (
-          <JsonItem key={`root-${index}`} label={`[${index}]`} value={item} isRoot />
-        ))
-      ) : (
-        <JsonItem label="value" value={data} isRoot />
-      )}
+    <div className={`relative group ${className}`}>
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={handleCopyAll}
+        className="absolute top-2 right-2 z-10 p-2 rounded-md bg-white/90 dark:bg-gray-700/90 hover:bg-white dark:hover:bg-gray-700 transition-all opacity-0 group-hover:opacity-100 shadow-sm border border-gray-200 dark:border-gray-600"
+        title="Copy raw JSON"
+      >
+        {copied ? (
+          <FiCheck size={14} className="text-green-500" />
+        ) : (
+          <FiCopy size={14} className="text-gray-500 dark:text-gray-400" />
+        )}
+      </motion.button>
+      <div className="space-y-2">
+        {isRootObject ? (
+          Object.entries(data).map(([itemKey, value]) => (
+            <JsonItem key={itemKey} label={itemKey} value={value} isRoot />
+          ))
+        ) : isRootArray ? (
+          data.map((item: any, index: number) => (
+            <JsonItem key={`root-${index}`} label={`[${index}]`} value={item} isRoot />
+          ))
+        ) : (
+          <JsonItem label="value" value={data} isRoot />
+        )}
+      </div>
     </div>
   );
 };
