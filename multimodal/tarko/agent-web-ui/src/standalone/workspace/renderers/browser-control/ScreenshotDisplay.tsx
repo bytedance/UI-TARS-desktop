@@ -24,10 +24,6 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
   action,
 }) => {
   const imageRef = useRef<HTMLImageElement>(null);
-  const [imageDimensions, setImageDimensions] = React.useState<{
-    width: number;
-    height: number;
-  } | null>(null);
 
   const shouldShowMouseCursor = (
     currentImage: string | null | undefined,
@@ -46,10 +42,8 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
   };
 
   // Render placeholder when no image available
-  const renderPlaceholder = (height = 'auto') => (
-    <div
-      className={`flex items-center justify-center bg-gray-50 dark:bg-gray-900 ${height === 'auto' ? 'min-h-[400px]' : 'h-full'}`}
-    >
+  const renderPlaceholder = () => (
+    <div className="flex items-center justify-center bg-gray-50 dark:bg-gray-900 min-h-[400px]">
       <div className="text-center">
         <div className="text-gray-400 dark:text-gray-500 text-sm">
           GUI Agent Environment Not Started
@@ -58,52 +52,19 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
     </div>
   );
 
-  // Component to render placeholder with matching height of the other image
-  const PlaceholderWithMatchingHeight: React.FC<{ otherImageSrc: string }> = ({
-    otherImageSrc,
-  }) => {
-    const containerRef = React.useRef<HTMLDivElement>(null);
-    const [placeholderHeight, setPlaceholderHeight] = React.useState<number | null>(null);
-
-    React.useEffect(() => {
-      // Create a temporary image element to measure actual display size
-      const tempImg = document.createElement('img');
-      tempImg.src = otherImageSrc;
-      tempImg.className = 'w-full h-auto object-contain';
-      tempImg.style.visibility = 'hidden';
-      tempImg.style.position = 'absolute';
-      tempImg.style.top = '-9999px';
-
-      // Get container width to calculate actual display height
-      const containerWidth = containerRef.current?.offsetWidth || 400;
-      tempImg.style.width = containerWidth + 'px';
-
-      tempImg.onload = () => {
-        document.body.appendChild(tempImg);
-        const displayHeight = tempImg.offsetHeight;
-        setPlaceholderHeight(displayHeight);
-        document.body.removeChild(tempImg);
-      };
-
-      tempImg.onerror = () => {
-        setPlaceholderHeight(300); // fallback
-      };
-    }, [otherImageSrc]);
-
-    return (
-      <div
-        ref={containerRef}
-        className="flex items-center justify-center bg-gray-50 dark:bg-gray-900 w-full"
-        style={{ height: placeholderHeight ? `${placeholderHeight}px` : '300px' }}
-      >
+  // Render hidden image with overlay placeholder
+  const renderHiddenImageWithOverlay = (imageSrc: string, alt: string) => (
+    <div className="relative">
+      <img src={imageSrc} alt={alt} className="w-full h-auto object-contain invisible" />
+      <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
           <div className="text-gray-400 dark:text-gray-500 text-sm">
             GUI Agent Environment Not Started
           </div>
         </div>
       </div>
-    );
-  };
+    </div>
+  );
 
   // Render image or placeholder
   const renderImageOrPlaceholder = (
@@ -127,19 +88,15 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
       );
     }
 
-    // For both mode, match the aspect ratio of the other image
+    // For both mode, use the other image as layout base
     if (isInBothMode) {
       const otherImage = alt.includes('Before') ? afterActionImage : beforeActionImage;
       if (otherImage) {
-        return (
-          <div className="relative">
-            <PlaceholderWithMatchingHeight otherImageSrc={otherImage} />
-          </div>
-        );
+        return renderHiddenImageWithOverlay(otherImage, alt);
       }
     }
 
-    return <div className="relative">{renderPlaceholder()}</div>;
+    return renderPlaceholder();
   };
 
   if (strategy === 'both') {
