@@ -1,4 +1,5 @@
 import React from 'react';
+import { getAgentTitle } from '@/common/constants';
 
 interface TerminalOutputProps {
   title?: React.ReactNode;
@@ -13,7 +14,7 @@ interface TerminalOutputProps {
  * Shared terminal UI component for command and script execution output
  */
 export const TerminalOutput: React.FC<TerminalOutputProps> = ({
-  title = 'user@agent-tars',
+  title = `user@${getAgentTitle().toLowerCase().replace(/\s+/g, '-')}`,
   command,
   stdout,
   stderr,
@@ -36,9 +37,7 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
           {exitCode !== undefined && (
             <span
               className={`ml-2 px-1 py-0.5 rounded text-[9px] font-mono ${
-                isError
-                  ? 'bg-red-500/10 text-red-400'
-                  : 'bg-green-500/10 text-green-400'
+                isError ? 'bg-red-500/10 text-red-400' : 'bg-green-500/10 text-green-400'
               }`}
             >
               exit {exitCode}
@@ -48,7 +47,10 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
       </div>
 
       {/* Terminal content area */}
-      <div className="bg-black p-3 font-mono text-sm terminal-content overflow-auto" style={{ maxHeight }}>
+      <div
+        className="bg-black p-3 font-mono text-sm terminal-content overflow-auto"
+        style={{ maxHeight }}
+      >
         <div className="overflow-x-auto min-w-full">
           {/* Command section */}
           {command && (
