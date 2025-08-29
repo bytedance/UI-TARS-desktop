@@ -42,11 +42,8 @@ const createMockResponse = () => ({
   closed: false,
 }) as Partial<Response>;
 
-const mockContextResult = (expandedContext: string | null, originalQuery: any) => {
-  mockContextProcessor.processContextualReferences.mockResolvedValue({
-    expandedContext,
-    originalQuery,
-  });
+const mockContextResult = (expandedContext: string | null) => {
+  mockContextProcessor.processContextualReferences.mockResolvedValue(expandedContext);
 };
 
 const mockSuccessResponse = (content = 'Response') => {
@@ -89,7 +86,7 @@ describe('Contextual References Bug Fix', () => {
         const req = createMockRequest(query);
         const res = createMockResponse();
         
-        mockContextResult(expandedContext, query);
+        mockContextResult(expandedContext);
         mockSuccessResponse();
 
         await executeQuery(req as Request, res as Response);
@@ -111,7 +108,7 @@ describe('Contextual References Bug Fix', () => {
       const req = createMockRequest('Simple query');
       const res = createMockResponse();
       
-      mockContextResult(null, 'Simple query');
+      mockContextResult(null);
       mockSession.runQueryStreaming.mockResolvedValue({
         [Symbol.asyncIterator]: async function* () {
           yield { type: 'assistant_message', content: 'Response' };
@@ -132,7 +129,7 @@ describe('Contextual References Bug Fix', () => {
       const res = createMockResponse();
       
       // No contextual references found
-      mockContextResult(null, bugQuery);
+      mockContextResult(null);
       mockSuccessResponse();
 
       await executeQuery(req as Request, res as Response);

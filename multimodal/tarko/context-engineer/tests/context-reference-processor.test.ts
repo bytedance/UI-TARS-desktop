@@ -46,31 +46,16 @@ describe('ContextReferenceProcessor', () => {
   });
 
   describe('processContextualReferences', () => {
-    it('should return non-string queries unchanged', async () => {
+    it('should return null for non-string queries', async () => {
       const arrayQuery: ChatCompletionContentPart[] = [{ type: 'text', text: 'hello' }];
       const result = await processor.processContextualReferences(arrayQuery, testWorkspace);
-      expect(result).toMatchInlineSnapshot(`
-        {
-          "expandedContext": null,
-          "originalQuery": [
-            {
-              "text": "hello",
-              "type": "text",
-            },
-          ],
-        }
-      `);
+      expect(result).toBeNull();
     });
 
-    it('should return queries without references unchanged', async () => {
+    it('should return null for queries without references', async () => {
       const query = 'This is a simple query without references';
       const result = await processor.processContextualReferences(query, testWorkspace);
-      expect(result).toMatchInlineSnapshot(`
-        {
-          "expandedContext": null,
-          "originalQuery": "This is a simple query without references",
-        }
-      `);
+      expect(result).toBeNull();
     });
 
     it('should process @file: references successfully', async () => {
@@ -87,13 +72,10 @@ describe('ContextReferenceProcessor', () => {
 
       expect(result).toMatchInlineSnapshot(
         `
-        {
-          "expandedContext": "<file path=\"test1.txt\">
+        "<file path="test1.txt">
         Hello from test1.txt
-        </file>",
-          "originalQuery": "Please check @file:test1.txt for content",
-        }
-      `,
+        </file>"
+      `
       );
     });
 
@@ -119,17 +101,14 @@ describe('ContextReferenceProcessor', () => {
 
       expect(result).toMatchInlineSnapshot(
         `
-        {
-          "expandedContext": "<file path=\"test1.txt\">
+        "<file path="test1.txt">
         Hello from test1.txt
         </file>
 
-        <file path=\"test-dir/test2.js\">
-        const test = \"Hello from test2.js\";
-        </file>",
-          "originalQuery": "Check @file:test1.txt and @file:test-dir/test2.js",
-        }
-      `,
+        <file path="test-dir/test2.js">
+        const test = "Hello from test2.js";
+        </file>"
+      `
       );
     });
 
@@ -153,9 +132,8 @@ const test = "Hello from test2.js";
       const query = 'Analyze @dir:test-dir directory';
       const result = await processor.processContextualReferences(query, testWorkspace);
 
-      expect(result.expandedContext).toContain('<directory path="test-dir">');
-      expect(result.expandedContext).toContain('Workspace Content Summary');
-      expect(result.originalQuery).toBe('Analyze @dir:test-dir directory');
+      expect(result).toContain('<directory path="test-dir">');
+      expect(result).toContain('Workspace Content Summary');
     });
 
     it('should handle non-existent file references gracefully', async () => {
@@ -169,13 +147,10 @@ const test = "Hello from test2.js";
 
       expect(result).toMatchInlineSnapshot(
         `
-        {
-          "expandedContext": "<file path=\"non-existent.txt\">
+        "<file path="non-existent.txt">
         Error: File not found
-        </file>",
-          "originalQuery": "Check @file:non-existent.txt",
-        }
-      `,
+        </file>"
+      `
       );
       expect(consoleSpy).toHaveBeenCalledWith('File reference not found: non-existent.txt');
 
@@ -190,13 +165,10 @@ const test = "Hello from test2.js";
 
       expect(result).toMatchInlineSnapshot(
         `
-        {
-          "expandedContext": "<file path=\"../../../etc/passwd\">
+        "<file path="../../../etc/passwd">
         Error: File reference outside workspace
-        </file>",
-          "originalQuery": "Check @file:../../../etc/passwd",
-        }
-      `,
+        </file>"
+      `
       );
       expect(consoleSpy).toHaveBeenCalledWith(
         'File reference outside workspace: ../../../etc/passwd',
@@ -211,12 +183,7 @@ const test = "Hello from test2.js";
       const query = 'Analyze @dir:../../../etc';
       const result = await processor.processContextualReferences(query, testWorkspace);
 
-      expect(result).toMatchInlineSnapshot(`
-        {
-          "expandedContext": null,
-          "originalQuery": "Analyze @dir:../../../etc",
-        }
-      `);
+      expect(result).toBeNull();
       expect(consoleSpy).toHaveBeenCalledWith(
         'Directory reference outside workspace: ../../../etc',
       );
@@ -242,13 +209,10 @@ const test = "Hello from test2.js";
 
       expect(result).toMatchInlineSnapshot(
         `
-        {
-          "expandedContext": "<file path=\"restricted.txt\">
+        "<file path="restricted.txt">
         Error: Failed to read file
-        </file>",
-          "originalQuery": "Check @file:restricted.txt",
-        }
-      `,
+        </file>"
+      `
       );
       expect(consoleSpy).toHaveBeenCalledWith(
         'Failed to read file restricted.txt:',
@@ -271,13 +235,10 @@ const test = "Hello from test2.js";
 
       expect(result).toMatchInlineSnapshot(
         `
-        {
-          "expandedContext": "<directory path=\"test-dir\">
+        "<directory path="test-dir">
         Error: Failed to pack directory
-        </directory>",
-          "originalQuery": "Analyze @dir:test-dir",
-        }
-      `,
+        </directory>"
+      `
       );
       expect(consoleSpy).toHaveBeenCalledWith('Failed to pack workspace paths:', expect.any(Error));
 
@@ -306,9 +267,8 @@ const test = "Hello from test2.js";
       const query = 'Check @file:test1.txt and analyze @dir:test-dir';
       const result = await processor.processContextualReferences(query, testWorkspace);
 
-      expect(result.expandedContext).toContain('Hello from test1.txt');
-      expect(result.expandedContext).toContain('Directory content here');
-      expect(result.originalQuery).toBe('Check @file:test1.txt and analyze @dir:test-dir');
+      expect(result).toContain('Hello from test1.txt');
+      expect(result).toContain('Directory content here');
     });
 
     it('should handle references with special regex characters', async () => {
@@ -325,13 +285,10 @@ const test = "Hello from test2.js";
 
       expect(result).toMatchInlineSnapshot(
         `
-        {
-          "expandedContext": "<file path=\"test[special].txt\">
+        "<file path="test[special].txt">
         special content
-        </file>",
-          "originalQuery": "Check @file:test[special].txt",
-        }
-      `,
+        </file>"
+      `
       );
     });
   });

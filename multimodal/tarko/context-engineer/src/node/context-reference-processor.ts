@@ -63,21 +63,15 @@ export class ContextReferenceProcessor {
    * Expands @file: and @dir: references to actual content
    * @param query - The query content that may contain contextual references
    * @param workspacePath - Base workspace path for security validation and path resolution
-   * @returns Object containing expanded context and original query
+   * @returns Expanded context content, or null if no references found
    */
   async processContextualReferences(
     query: string | ChatCompletionContentPart[],
     workspacePath: string,
-  ): Promise<{
-    expandedContext: string | ChatCompletionContentPart[] | null;
-    originalQuery: string | ChatCompletionContentPart[];
-  }> {
+  ): Promise<string | null> {
     // Only process string queries for now
     if (typeof query !== 'string') {
-      return {
-        expandedContext: null,
-        originalQuery: query,
-      };
+      return null;
     }
 
     // Find all contextual references
@@ -85,10 +79,7 @@ export class ContextReferenceProcessor {
     const matches = Array.from(query.matchAll(contextualReferencePattern));
 
     if (matches.length === 0) {
-      return {
-        expandedContext: null,
-        originalQuery: query,
-      };
+      return null;
     }
 
     // Separate file and directory references
@@ -201,17 +192,11 @@ export class ContextReferenceProcessor {
       }
     }
 
-    // Return separated context and original query
+    // Return expanded context if any
     if (expandedContents.length > 0) {
-      return {
-        expandedContext: expandedContents.join('\n\n'),
-        originalQuery: query,
-      };
+      return expandedContents.join('\n\n');
     }
 
-    return {
-      expandedContext: null,
-      originalQuery: query,
-    };
+    return null;
   }
 }

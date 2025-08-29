@@ -45,11 +45,8 @@ const createResponse = () => ({
   headersSent: false,
 }) as Partial<Response>;
 
-const mockProcessing = (expandedContext: string, originalQuery: any, compressedQuery = originalQuery) => {
-  mockContextProcessor.processContextualReferences.mockResolvedValue({
-    expandedContext,
-    originalQuery,
-  });
+const mockProcessing = (expandedContext: string | null, compressedQuery: any = null) => {
+  mockContextProcessor.processContextualReferences.mockResolvedValue(expandedContext);
   mockImageProcessor.compressImagesInQuery.mockResolvedValue(compressedQuery);
 };
 
@@ -101,7 +98,7 @@ describe('Queries Controller', () => {
       const req = createRequest(multimodalQuery);
       const res = createResponse();
 
-      mockProcessing(expandedContext, multimodalQuery, compressedQuery);
+      mockProcessing(expandedContext, compressedQuery);
       mockSession.runQuery.mockResolvedValue({
         success: true,
         result: { type: 'assistant_message', content: 'Analysis complete' },
