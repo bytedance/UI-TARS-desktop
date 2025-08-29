@@ -30,9 +30,8 @@ export const StrategySwitch: React.FC<StrategySwitchProps> = ({
   const strategies: ScreenshotStrategy[] = ['beforeAction', 'afterAction', 'both'];
 
   return (
-    <div className="flex items-center justify-end gap-3">
+    <div className="flex items-center justify-end gap-3 mt-2">
       <div className="flex items-center gap-2">
-        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full opacity-80"></div>
         <span className="text-xs font-medium text-slate-700 dark:text-slate-300">Display Mode</span>
       </div>
 
