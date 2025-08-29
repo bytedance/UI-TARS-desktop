@@ -13,6 +13,13 @@ import { useReplay } from '@/common/hooks/useReplay';
 import { getAgentTitle } from '@/common/constants';
 import { useAutoScroll } from './hooks/useAutoScroll';
 import { ScrollToBottomButton } from './components/ScrollToBottomButton';
+import {
+  containerStaggerVariants,
+  itemSlideUpVariants,
+  fadeInUpVariants,
+  subtleHoverProps,
+  cardBaseClasses,
+} from './styles/shared';
 
 import './ChatPanel.css';
 import { ResearchReportEntry } from './ResearchReportEntry';
@@ -95,26 +102,7 @@ export const ChatPanel: React.FC = () => {
     dependencies: [activeMessages, isProcessing], // Trigger scroll on message changes
   });
 
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        duration: 0.4,
-        staggerChildren: 0.1,
-      },
-    },
-  };
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.4 },
-    },
-  };
 
   const renderOfflineBanner = () => {
     if (connectionStatus.connected || !activeSessionId || isReplayMode) return null;
@@ -196,32 +184,32 @@ export const ChatPanel: React.FC = () => {
         <motion.div
           initial="hidden"
           animate="visible"
-          variants={containerVariants}
+          variants={containerStaggerVariants}
           className="flex items-center justify-center flex-1"
         >
           <div className="text-center p-6 max-w-md">
             <motion.div
-              variants={itemVariants}
+              variants={itemSlideUpVariants}
               className="w-16 h-16 bg-white dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-6 text-gray-500 dark:text-gray-400 border border-gray-100/50 dark:border-gray-700/20"
             >
               <FiMessageSquare size={24} />
             </motion.div>
             <motion.h2
-              variants={itemVariants}
+              variants={itemSlideUpVariants}
               className="text-xl font-display font-bold mb-3 text-gray-800 dark:text-gray-200"
             >
               Welcome to {getAgentTitle()}
             </motion.h2>
             <motion.p
-              variants={itemVariants}
+              variants={itemSlideUpVariants}
               className="text-gray-600 dark:text-gray-400 mb-5 text-sm leading-relaxed"
             >
               Create a new chat session to get started with the AI assistant.
             </motion.p>
             <motion.div
-              variants={itemVariants}
+              variants={itemSlideUpVariants}
               whileHover={{ y: -2 }}
-              className="flex items-center p-4 bg-white dark:bg-gray-800 rounded-2xl mb-3 text-gray-600 dark:text-gray-400 text-sm border border-gray-100/40 dark:border-gray-700/20"
+              className={`flex items-center p-4 ${cardBaseClasses} mb-3 text-gray-600 dark:text-gray-400 text-sm`}
             >
               <FiInfo className="mr-3 text-gray-400 flex-shrink-0" />
               <span>
@@ -293,8 +281,7 @@ export const ChatPanel: React.FC = () => {
 
                         {/* Enhanced cancel button */}
                         <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
+                          {...subtleHoverProps}
                           onClick={cancelAutoPlay}
                           className="inline-flex items-center px-4 py-2 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors border border-gray-200/50 dark:border-gray-600/50 shadow-sm"
                         >
