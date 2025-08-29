@@ -110,7 +110,6 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
           <div className="flex items-center gap-2">
             {workspaceNavItems.map((navItem) => (
               <motion.button
-                // eslint-disable-next-line @secretlint/secretlint-rule-pattern
                 key={navItem.title}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
