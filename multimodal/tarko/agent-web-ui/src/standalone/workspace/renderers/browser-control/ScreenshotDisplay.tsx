@@ -25,11 +25,6 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
 }) => {
   const imageRef = useRef<HTMLImageElement>(null);
 
-  // Don't render if no images available
-  if (!relatedImage && !(strategy === 'both' && (beforeActionImage || afterActionImage))) {
-    return null;
-  }
-
   const shouldShowMouseCursor = (
     currentImage: string | null | undefined,
     imageType: 'before' | 'after' | 'single',
