@@ -13,7 +13,6 @@ import {
   MultimodalToolCallResult,
   ParsedModelResponse,
   StreamChunkResult,
-  StreamProcessingState,
 } from '@tarko/agent-interface';
 import {
   parseMcpContent,
@@ -54,32 +53,24 @@ export class McpToolCallEngine extends ToolCallEngine<OmniStreamProcessingState>
 
   finalizeStreamProcessing(state: OmniStreamProcessingState): ParsedModelResponse {
     this.logger.info('finalizeStreamProcessing state \n', state);
+    let tools = state.toolCalls;
+    const fullContent = state.contentBuffer;
 
     // omniProcessStreamingChunk does not resolve mcp env tags, so you need to process the complete content yourself
     if (state.contentBuffer.includes('mcp_env')) {
-      const fullContent = state.contentBuffer;
-
       const extracted = parseMcpContent(fullContent);
 
       this.logger.info('extracted', JSON.stringify(extracted, null, 2));
 
-      const { think, tools, answer } = extracted;
-
-      return {
-        content: answer ?? fullContent,
-        rawContent: fullContent,
-        reasoningContent: think ?? '',
-        toolCalls: tools,
-        finishReason: (tools || []).length > 0 ? 'tool_calls' : 'stop',
-      };
+      tools = extracted.tools;
     }
 
     return {
-      content: state.accumulatedAnswerBuffer ?? '',
-      rawContent: state.contentBuffer,
+      content: state.accumulatedAnswerBuffer ?? fullContent,
+      rawContent: fullContent,
       reasoningContent: state.reasoningBuffer ?? '',
-      toolCalls: state.toolCalls,
-      finishReason: (state.toolCalls || []).length > 0 ? 'tool_calls' : 'stop',
+      toolCalls: tools,
+      finishReason: (tools || []).length > 0 ? 'tool_calls' : 'stop',
     };
   }
 

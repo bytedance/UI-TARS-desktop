@@ -16,11 +16,15 @@ export function extractThink(content: string, state: OmniStreamProcessingState):
     state.thinkBuffer = '';
   }
 
+  if (state.thinkParseCompleted) {
+    return '';
+  }
+
   state.thinkBuffer += content;
   let result = '';
 
   // If the chunk has content and the think tag has not been processed yet, enter a while loop
-  while (state.thinkBuffer.length > 0 && !state.thinkParseCompleted) {
+  while (state.thinkBuffer.length > 0) {
     if (!state.insideThink) {
       // Look for opening think tag
       const openMatch = state.thinkBuffer.indexOf('<think>');

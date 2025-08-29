@@ -66,21 +66,12 @@ export class GUIAgentToolCallEngine extends ToolCallEngine {
 
   /**
    * Process streaming chunks - simply accumulate content
-   *
-   * FIXME: make it optional
    */
   processStreamingChunk(
     chunk: ChatCompletionChunk,
     state: StreamProcessingState,
   ): StreamChunkResult {
     return omniProcessStreamingChunk(chunk, state);
-  }
-
-  /**
-   * Generate a tool call ID
-   */
-  private generateToolCallId(): string {
-    return `call_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 
   /**
@@ -242,5 +233,12 @@ export class GUIAgentToolCallEngine extends ToolCallEngine {
         content: `Tool "${result.toolName}" result:\n${textContent}`,
       };
     });
+  }
+
+  /**
+   * Generate a tool call ID
+   */
+  private generateToolCallId(): string {
+    return `call_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 }

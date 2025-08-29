@@ -15,7 +15,7 @@ const STOP_INSTRUCTION = `\n
   - When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
   `;
 
-const PROXY_INSTRUCTION = `- If you start the service on a port, please tell the user that you can access it at http://${getAioUrl()}/proxy/\${PORT}, where PORT is the port for the service listening`;
+const PROXY_INSTRUCTION = `- If you start the service on a port, Do not use port 8080; finally tell the user that you can access it at http://${getAioUrl()}/proxy/\${PORT}, where PORT is the port for the service listening`;
 
 export const CODE_ENVIRONMENT = `<CODE_ENVIRONMENT>
 

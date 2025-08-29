@@ -58,23 +58,6 @@ export class CodeToolCallEngine extends ToolCallEngine<OmniStreamProcessingState
   }
 
   finalizeStreamProcessing(state: OmniStreamProcessingState): ParsedModelResponse {
-    // const fullContent = state.contentBuffer;
-    // this.logger.info('finalizeStreamProcessing content \n', fullContent);
-
-    // const extracted = parseCodeContent(fullContent);
-
-    // this.logger.info('extracted', JSON.stringify(extracted, null, 2));
-
-    // const { think, tools, answer } = extracted;
-
-    // return {
-    //   content: answer ?? fullContent,
-    //   rawContent: fullContent,
-    //   reasoningContent: think ?? '',
-    //   toolCalls: tools,
-    //   finishReason: tools.length > 0 ? 'tool_calls' : 'stop',
-    // };
-
     this.logger.info('finalizeStreamProcessing state \n', state);
 
     return {

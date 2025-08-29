@@ -141,5 +141,3 @@ export function processStreamingChunk(
     streamingToolCallUpdates,
   };
 }
-
-function deafult() {}

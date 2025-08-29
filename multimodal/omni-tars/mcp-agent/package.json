@@ -22,7 +22,7 @@
   "scripts": {
     "dev": "rslib build --watch",
     "build": "rslib build",
-    "test": "vitest run ./src/parser.test.ts",
+    "test": "vitest",
     "dev:agent": "../../tarko/agent-cli/bin/cli.js run ./"
   },
   "dependencies": {
