@@ -6,9 +6,9 @@ type ScreenshotStrategy = 'both' | 'beforeAction' | 'afterAction';
 
 interface ScreenshotDisplayProps {
   strategy: ScreenshotStrategy;
-  relatedImage?: string | null;
-  beforeActionImage?: string | null;
-  afterActionImage?: string | null;
+  relatedImage: string | null;
+  beforeActionImage: string | null;
+  afterActionImage: string | null;
   mousePosition?: { x: number; y: number } | null;
   previousMousePosition?: { x: number; y: number } | null;
   action?: string;
@@ -61,16 +61,11 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
   ) => {
     // Use reference image for consistent sizing when current image is missing
     const sizeReference = image || referenceImage;
-    
+
     if (image) {
       return (
         <div className="relative">
-          <img
-            ref={imageRef}
-            src={image}
-            alt={alt}
-            className="w-full h-auto object-contain"
-          />
+          <img ref={imageRef} src={image} alt={alt} className="w-full h-auto object-contain" />
           {showCursor && (
             <MouseCursor
               position={mousePosition!}
@@ -86,11 +81,7 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
     if (sizeReference) {
       return (
         <div className="relative">
-          <img
-            src={sizeReference}
-            alt={alt}
-            className="w-full h-auto object-contain invisible"
-          />
+          <img src={sizeReference} alt={alt} className="w-full h-auto object-contain invisible" />
           <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
             <div className="text-center">
               <div className="text-gray-400 dark:text-gray-500 text-sm">
