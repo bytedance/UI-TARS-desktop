@@ -51,7 +51,7 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
       <BrowserShell className="mb-4">
         <div className="flex items-center justify-center h-64 bg-gray-50 dark:bg-gray-900">
           <div className="text-center">
-            <div className="text-gray-400 dark:text-gray-500 text-sm">GUI Agent 环境未启动</div>
+            <div className="text-gray-400 dark:text-gray-500 text-sm">GUI Agent Environment Not Started</div>
           </div>
         </div>
       </BrowserShell>
