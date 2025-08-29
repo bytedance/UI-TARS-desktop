@@ -131,9 +131,6 @@ wait()                                         - Wait 5 seconds and take a scree
 
           await sleep(500);
 
-          // Automatically get page content after browser interaction
-          // await this.capturePageContentAsEnvironmentInfo();
-
           const guiResponse = convertToGUIResponse(action, parsed, operatorResult);
           return guiResponse;
         } catch (error) {
@@ -146,88 +143,6 @@ wait()                                         - Wait 5 seconds and take a scree
         }
       },
     });
-  }
-
-  /**
-   * Capture page content and add it to event stream as environment info
-   * This is called automatically after each browser_vision_control action
-   */
-  private async capturePageContentAsEnvironmentInfo(): Promise<void> {
-    // Only proceed if eventStream is provided
-    if (!this.eventStream) return;
-
-    try {
-      const page = await this.getPage();
-
-      // Get page content as markdown
-      const markdown = await page.evaluate(() => {
-        // Simple function to extract page content as markdown
-        const extractMarkdown = () => {
-          // Get page title
-          const title = document.title || 'Untitled Page';
-
-          const getVisibleText = (node: any) => {
-            if (node.nodeType === Node.TEXT_NODE) {
-              return node.textContent || '';
-            }
-
-            const style = window.getComputedStyle(node);
-            if (
-              style.display === 'none' ||
-              style.visibility === 'hidden' ||
-              style.opacity === '0'
-            ) {
-              return '';
-            }
-
-            let text = '';
-            for (const child of Array.from(node.childNodes)) {
-              // @ts-expect-error
-              if (child.nodeType === Node.ELEMENT_NODE) {
-                text += getVisibleText(child);
-                // @ts-expect-error
-              } else if (child.nodeType === Node.TEXT_NODE) {
-                // @ts-expect-error
-                text += child.textContent || '';
-              }
-            }
-
-            return text.trim();
-          };
-
-          // Get main content, prefer article or main elements
-          const mainContent =
-            document.querySelector('article, main, #content, .content') || document.body;
-          const content = getVisibleText(mainContent);
-
-          // Format as markdown
-          return `# ${title}\n\n${content}`;
-        };
-
-        return extractMarkdown();
-      });
-
-      // If content is available, add it to event stream
-      if (markdown && markdown.trim()) {
-        // Create an environment input event with the markdown content
-        const event = this.eventStream.createEvent('environment_input', {
-          content: markdown,
-          description: 'Page Content After Browser Action',
-          metadata: {
-            type: 'text',
-          },
-        });
-
-        // Send the event
-        this.eventStream.sendEvent(event);
-        this.logger.debug('Added page content to event stream as environment info');
-      }
-    } catch (error) {
-      // Log error but don't fail the main operation
-      this.logger.warn(
-        `Failed to capture page content: ${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
   }
 
   /**
