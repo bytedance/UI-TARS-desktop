@@ -56,7 +56,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
       // Support both legacy and new GUI Agent response formats
       let startXPercent: number | undefined;
       let startYPercent: number | undefined;
-      
+
       // New format: check for GUIAgentToolResponse structure
       if (matchingResult.content.action && matchingResult.content.action.inputs) {
         startXPercent = matchingResult.content.action.inputs.startX;

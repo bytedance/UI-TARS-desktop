@@ -8,11 +8,7 @@ import { LocalBrowser, Page, RemoteBrowser } from '@agent-infra/browser';
 import { BrowserOperator } from '@gui-agent/operator-browser';
 import { ConsoleLogger, AgentEventStream, Tool, z } from '@tarko/mcp-agent';
 import { ImageCompressor, formatBytes } from '@tarko/shared-media-utils';
-import {
-  GUIAgent,
-  ActionInputs,
-  PredictionParsed,
-} from '@tarko/agent-interface';
+import { GUIAgent, ActionInputs, PredictionParsed } from '@tarko/agent-interface';
 
 /**
  * Browser operator execute result with strict typing
@@ -24,8 +20,6 @@ interface BrowserExecuteResult {
   startYPercent?: number | null;
   action_inputs: ActionInputs;
 }
-
-
 
 function sleep(time: number) {
   return new Promise(function (resolve) {
@@ -159,7 +153,7 @@ wait()                                         - Wait 5 seconds and take a scree
           this.logger.error(
             `Browser action failed: ${error instanceof Error ? error.message : String(error)}`,
           );
-          
+
           // Return error response in new format
           const errorResponse: GUIAgent.ToolResponse = {
             success: false,
@@ -429,7 +423,7 @@ wait()                                         - Wait 5 seconds and take a scree
     result: BrowserExecuteResult,
   ): GUIAgent.ToolResponse {
     const normalizedAction = this.convertToNormalizedAction(parsed, result);
-    
+
     return {
       success: true,
       actionStr,
@@ -441,7 +435,10 @@ wait()                                         - Wait 5 seconds and take a scree
   /**
    * Convert parsed prediction to normalized GUI action with percentage coordinates
    */
-  private convertToNormalizedAction(parsed: PredictionParsed, result: BrowserExecuteResult): GUIAgent.Action {
+  private convertToNormalizedAction(
+    parsed: PredictionParsed,
+    result: BrowserExecuteResult,
+  ): GUIAgent.Action {
     const { action_type, action_inputs } = parsed;
     const { startXPercent, startYPercent } = result;
 

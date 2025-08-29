@@ -142,22 +142,22 @@ export namespace GUIAgent {
      * Whether the operation was successful
      */
     success: boolean;
-    
+
     /**
      * Raw action string as received from the model
      */
     actionStr: string;
-    
+
     /**
      * Parsed and normalized action with strict typing
      */
     action: T;
-    
+
     /**
      * Optional observation after the action (reserved for future implementation)
      */
     observation?: string;
-    
+
     /**
      * Error message if the operation failed
      */
@@ -206,5 +206,3 @@ export interface PredictionParsed {
   /** Thinking content */
   thought?: string;
 }
-
-
