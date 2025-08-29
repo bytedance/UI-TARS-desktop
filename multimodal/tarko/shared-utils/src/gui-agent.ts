@@ -19,7 +19,7 @@ export interface GUIExecuteResult {
 /**
  * Convert legacy prediction result to new GUI Agent response format
  * This utility allows any Agent to easily adopt the new GUI Agent type system
- * 
+ *
  * @param actionStr - Raw action string as received from the model
  * @param parsed - Parsed prediction with action type and inputs
  * @param result - Execute result with coordinates and action inputs
@@ -31,7 +31,7 @@ export function convertToGUIResponse(
   result: GUIExecuteResult,
 ): GUIAgent.ToolResponse {
   const normalizedAction = convertToNormalizedAction(parsed, result);
-  
+
   return {
     success: true,
     actionStr,
@@ -42,7 +42,7 @@ export function convertToGUIResponse(
 
 /**
  * Convert parsed prediction to normalized GUI action with percentage coordinates
- * 
+ *
  * @param parsed - Parsed prediction with action type and inputs
  * @param result - Execute result with coordinates
  * @returns Normalized GUI action with strict typing
@@ -195,7 +195,7 @@ export function convertToNormalizedAction(
 
 /**
  * Create a default error action for failed operations
- * 
+ *
  * @returns Default wait action for error scenarios
  */
 export function createErrorAction(): GUIAgent.Action {
@@ -208,15 +208,12 @@ export function createErrorAction(): GUIAgent.Action {
 
 /**
  * Create an error response for failed GUI operations
- * 
+ *
  * @param actionStr - Raw action string that failed
  * @param error - Error that occurred
  * @returns Error response in GUI Agent format
  */
-export function createGUIErrorResponse(
-  actionStr: string,
-  error: unknown,
-): GUIAgent.ToolResponse {
+export function createGUIErrorResponse(actionStr: string, error: unknown): GUIAgent.ToolResponse {
   return {
     success: false,
     actionStr,

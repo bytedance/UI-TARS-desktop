@@ -15,15 +15,11 @@ import {
   GUIExecuteResult,
 } from '@tarko/shared-utils';
 
-
-
 function sleep(time: number) {
   return new Promise(function (resolve) {
     setTimeout(resolve, time);
   });
 }
-
-// Note: Types are now available from @tarko/agent-interface
 
 /**
  * Browser initialization options
@@ -110,12 +106,8 @@ wait()                                         - Wait 5 seconds and take a scree
           .string()
           .describe('Finally summarize the next action (with its target element) in one sentence'),
         action: z.string().describe('Some action in action space like click or press'),
-        // pageData: z
-        //   .array(z.object({}))
-        //   .describe("The information you see and extract from the page based on the user's query")
-        //   .optional(),
       }),
-      function: async ({ thought, step, action, pageData }) => {
+      function: async ({ thought, step, action }) => {
         try {
           const parsed = this.parseAction(action);
           parsed.thought = thought;
@@ -131,29 +123,18 @@ wait()                                         - Wait 5 seconds and take a scree
             },
           });
 
-          const operatorResult = await this.browserOperator.execute({
+          const operatorResult = (await this.browserOperator.execute({
             parsedPrediction: parsed,
             screenWidth: this.screenWidth || 1920,
             screenHeight: this.screenHeight || 1080,
-          });
+          })) as unknown as GUIExecuteResult;
 
           await sleep(500);
 
           // Automatically get page content after browser interaction
           // await this.capturePageContentAsEnvironmentInfo();
 
-          // Convert operator result to GUI execute result format
-          const coords = operatorResult.coords;
-          const guiResult: GUIExecuteResult = {
-            startX: coords?.x || null,
-            startY: coords?.y || null,
-            startXPercent: coords?.x && coords?.screenWidth ? coords.x / coords.screenWidth : null,
-            startYPercent: coords?.y && coords?.screenHeight ? coords.y / coords.screenHeight : null,
-            action_inputs: parsed.action_inputs,
-          };
-
-          // Convert to new GUI Agent tool response format
-          const guiResponse = convertToGUIResponse(action, parsed, guiResult);
+          const guiResponse = convertToGUIResponse(action, parsed, operatorResult);
           return guiResponse;
         } catch (error) {
           this.logger.error(
@@ -413,8 +394,6 @@ wait()                                         - Wait 5 seconds and take a scree
     if (!base64) return '';
     return base64.startsWith('data:') ? base64 : `data:image/jpeg;base64,${base64}`;
   }
-
-
 
   /**
    * Parse operation string into a structured operation object
