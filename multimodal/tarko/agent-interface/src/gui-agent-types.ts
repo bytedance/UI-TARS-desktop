@@ -207,16 +207,4 @@ export interface PredictionParsed {
   thought?: string;
 }
 
-// Legacy exports for backward compatibility
-export type GUIAction = GUIAgent.Action;
-export type GUIAgentToolResponse<T extends GUIAction = GUIAction> = GUIAgent.ToolResponse<T>;
-export type ClickAction = GUIAgent.ClickAction;
-export type DoubleClickAction = GUIAgent.DoubleClickAction;
-export type RightClickAction = GUIAgent.RightClickAction;
-export type DragAction = GUIAgent.DragAction;
-export type TypeAction = GUIAgent.TypeAction;
-export type HotkeyAction = GUIAgent.HotkeyAction;
-export type ScrollAction = GUIAgent.ScrollAction;
-export type WaitAction = GUIAgent.WaitAction;
-export type NavigateAction = GUIAgent.NavigateAction;
-export type NavigateBackAction = GUIAgent.NavigateBackAction;
+

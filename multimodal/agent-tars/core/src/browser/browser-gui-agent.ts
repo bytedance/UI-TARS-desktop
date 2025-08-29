@@ -9,20 +9,9 @@ import { BrowserOperator } from '@gui-agent/operator-browser';
 import { ConsoleLogger, AgentEventStream, Tool, z } from '@tarko/mcp-agent';
 import { ImageCompressor, formatBytes } from '@tarko/shared-media-utils';
 import {
-  GUIAction,
-  GUIAgentToolResponse,
+  GUIAgent,
   ActionInputs,
   PredictionParsed,
-  ClickAction,
-  DoubleClickAction,
-  RightClickAction,
-  DragAction,
-  TypeAction,
-  HotkeyAction,
-  ScrollAction,
-  WaitAction,
-  NavigateAction,
-  NavigateBackAction,
 } from '@tarko/agent-interface';
 
 /**
@@ -172,7 +161,7 @@ wait()                                         - Wait 5 seconds and take a scree
           );
           
           // Return error response in new format
-          const errorResponse: GUIAgentToolResponse = {
+          const errorResponse: GUIAgent.ToolResponse = {
             success: false,
             actionStr: action,
             action: this.createErrorAction(),
@@ -438,7 +427,7 @@ wait()                                         - Wait 5 seconds and take a scree
     actionStr: string,
     parsed: PredictionParsed,
     result: BrowserExecuteResult,
-  ): GUIAgentToolResponse {
+  ): GUIAgent.ToolResponse {
     const normalizedAction = this.convertToNormalizedAction(parsed, result);
     
     return {
@@ -452,7 +441,7 @@ wait()                                         - Wait 5 seconds and take a scree
   /**
    * Convert parsed prediction to normalized GUI action with percentage coordinates
    */
-  private convertToNormalizedAction(parsed: PredictionParsed, result: BrowserExecuteResult): GUIAction {
+  private convertToNormalizedAction(parsed: PredictionParsed, result: BrowserExecuteResult): GUIAgent.Action {
     const { action_type, action_inputs } = parsed;
     const { startXPercent, startYPercent } = result;
 
@@ -460,7 +449,7 @@ wait()                                         - Wait 5 seconds and take a scree
       case 'click':
       case 'left_click':
       case 'left_single': {
-        const clickAction: ClickAction = {
+        const clickAction: GUIAgent.ClickAction = {
           type: 'click',
           inputs: {
             startX: startXPercent || 0,
@@ -472,7 +461,7 @@ wait()                                         - Wait 5 seconds and take a scree
 
       case 'double_click':
       case 'left_double': {
-        const doubleClickAction: DoubleClickAction = {
+        const doubleClickAction: GUIAgent.DoubleClickAction = {
           type: 'double_click',
           inputs: {
             startX: startXPercent || 0,
@@ -484,7 +473,7 @@ wait()                                         - Wait 5 seconds and take a scree
 
       case 'right_click':
       case 'right_single': {
-        const rightClickAction: RightClickAction = {
+        const rightClickAction: GUIAgent.RightClickAction = {
           type: 'right_click',
           inputs: {
             startX: startXPercent || 0,
@@ -510,7 +499,7 @@ wait()                                         - Wait 5 seconds and take a scree
             this.logger.warn('Failed to parse end_box coordinates:', endBox);
           }
         }
-        const dragAction: DragAction = {
+        const dragAction: GUIAgent.DragAction = {
           type: 'drag',
           inputs: {
             startX: startXPercent || 0,
@@ -523,7 +512,7 @@ wait()                                         - Wait 5 seconds and take a scree
       }
 
       case 'type': {
-        const typeAction: TypeAction = {
+        const typeAction: GUIAgent.TypeAction = {
           type: 'type',
           inputs: {
             content: action_inputs.content || '',
@@ -533,7 +522,7 @@ wait()                                         - Wait 5 seconds and take a scree
       }
 
       case 'hotkey': {
-        const hotkeyAction: HotkeyAction = {
+        const hotkeyAction: GUIAgent.HotkeyAction = {
           type: 'hotkey',
           inputs: {
             key: action_inputs.key || action_inputs.hotkey || '',
@@ -543,7 +532,7 @@ wait()                                         - Wait 5 seconds and take a scree
       }
 
       case 'scroll': {
-        const scrollAction: ScrollAction = {
+        const scrollAction: GUIAgent.ScrollAction = {
           type: 'scroll',
           inputs: {
             startX: startXPercent || 0,
@@ -555,7 +544,7 @@ wait()                                         - Wait 5 seconds and take a scree
       }
 
       case 'wait': {
-        const waitAction: WaitAction = {
+        const waitAction: GUIAgent.WaitAction = {
           type: 'wait',
           inputs: {},
         };
@@ -563,7 +552,7 @@ wait()                                         - Wait 5 seconds and take a scree
       }
 
       case 'navigate': {
-        const navigateAction: NavigateAction = {
+        const navigateAction: GUIAgent.NavigateAction = {
           type: 'navigate',
           inputs: {
             url: action_inputs.content || '',
@@ -573,7 +562,7 @@ wait()                                         - Wait 5 seconds and take a scree
       }
 
       case 'navigate_back': {
-        const navigateBackAction: NavigateBackAction = {
+        const navigateBackAction: GUIAgent.NavigateBackAction = {
           type: 'navigate_back',
           inputs: {},
         };
@@ -583,7 +572,7 @@ wait()                                         - Wait 5 seconds and take a scree
       default: {
         // Fallback to a generic click action for unknown types
         this.logger.warn(`Unknown action type: ${action_type}, falling back to click`);
-        const fallbackAction: ClickAction = {
+        const fallbackAction: GUIAgent.ClickAction = {
           type: 'click',
           inputs: {
             startX: startXPercent || 0,
@@ -598,8 +587,8 @@ wait()                                         - Wait 5 seconds and take a scree
   /**
    * Create a default error action for failed operations
    */
-  private createErrorAction(): GUIAction {
-    const errorAction: WaitAction = {
+  private createErrorAction(): GUIAgent.Action {
+    const errorAction: GUIAgent.WaitAction = {
       type: 'wait',
       inputs: {},
     };
