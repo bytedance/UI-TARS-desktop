@@ -223,14 +223,17 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
   const isRootArray = Array.isArray(data);
 
   return (
-    <div className={`relative group ${className}`}>
-      <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-        <CopyButton
-          onCopy={handleCopyAll}
-          copied={copied}
-          title="Copy raw JSON"
-          className="bg-white/90 dark:bg-gray-700/90 hover:bg-white dark:hover:bg-gray-700 shadow-sm border border-gray-200 dark:border-gray-600"
-        />
+    <div className={`group ${className}`}>
+      <div className="flex items-center justify-between mb-2">
+        <div className="text-xs text-gray-500 dark:text-gray-400 font-mono">JSON</div>
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+          <CopyButton
+            onCopy={handleCopyAll}
+            copied={copied}
+            title="Copy raw JSON"
+            size={14}
+          />
+        </div>
       </div>
       <div className="space-y-2">
         {isRootObject ? (
