@@ -9,17 +9,13 @@ import { BrowserOperator } from '@gui-agent/operator-browser';
 import { ConsoleLogger, AgentEventStream, Tool, z } from '@tarko/mcp-agent';
 import { ImageCompressor, formatBytes } from '@tarko/shared-media-utils';
 import { GUIAgent, ActionInputs, PredictionParsed } from '@tarko/agent-interface';
+import {
+  convertToGUIResponse,
+  createGUIErrorResponse,
+  GUIExecuteResult,
+} from '@tarko/shared-utils';
 
-/**
- * Browser operator execute result with strict typing
- */
-interface BrowserExecuteResult {
-  startX?: number | null;
-  startY?: number | null;
-  startXPercent?: number | null;
-  startYPercent?: number | null;
-  action_inputs: ActionInputs;
-}
+
 
 function sleep(time: number) {
   return new Promise(function (resolve) {
@@ -135,7 +131,7 @@ wait()                                         - Wait 5 seconds and take a scree
             },
           });
 
-          const result = await this.browserOperator.execute({
+          const operatorResult = await this.browserOperator.execute({
             parsedPrediction: parsed,
             screenWidth: this.screenWidth || 1920,
             screenHeight: this.screenHeight || 1080,
@@ -146,8 +142,18 @@ wait()                                         - Wait 5 seconds and take a scree
           // Automatically get page content after browser interaction
           // await this.capturePageContentAsEnvironmentInfo();
 
+          // Convert operator result to GUI execute result format
+          const coords = operatorResult.coords;
+          const guiResult: GUIExecuteResult = {
+            startX: coords?.x || null,
+            startY: coords?.y || null,
+            startXPercent: coords?.x && coords?.screenWidth ? coords.x / coords.screenWidth : null,
+            startYPercent: coords?.y && coords?.screenHeight ? coords.y / coords.screenHeight : null,
+            action_inputs: parsed.action_inputs,
+          };
+
           // Convert to new GUI Agent tool response format
-          const guiResponse = this.convertToGUIResponse(action, parsed, result);
+          const guiResponse = convertToGUIResponse(action, parsed, guiResult);
           return guiResponse;
         } catch (error) {
           this.logger.error(
@@ -155,13 +161,7 @@ wait()                                         - Wait 5 seconds and take a scree
           );
 
           // Return error response in new format
-          const errorResponse: GUIAgent.ToolResponse = {
-            success: false,
-            actionStr: action,
-            action: this.createErrorAction(),
-            error: error instanceof Error ? error.message : String(error),
-          };
-          return errorResponse;
+          return createGUIErrorResponse(action, error);
         }
       },
     });
@@ -414,183 +414,7 @@ wait()                                         - Wait 5 seconds and take a scree
     return base64.startsWith('data:') ? base64 : `data:image/jpeg;base64,${base64}`;
   }
 
-  /**
-   * Convert legacy result to new GUI Agent response format
-   */
-  private convertToGUIResponse(
-    actionStr: string,
-    parsed: PredictionParsed,
-    result: BrowserExecuteResult,
-  ): GUIAgent.ToolResponse {
-    const normalizedAction = this.convertToNormalizedAction(parsed, result);
 
-    return {
-      success: true,
-      actionStr,
-      action: normalizedAction,
-      observation: undefined, // Reserved for future implementation
-    };
-  }
-
-  /**
-   * Convert parsed prediction to normalized GUI action with percentage coordinates
-   */
-  private convertToNormalizedAction(
-    parsed: PredictionParsed,
-    result: BrowserExecuteResult,
-  ): GUIAgent.Action {
-    const { action_type, action_inputs } = parsed;
-    const { startXPercent, startYPercent } = result;
-
-    switch (action_type) {
-      case 'click':
-      case 'left_click':
-      case 'left_single': {
-        const clickAction: GUIAgent.ClickAction = {
-          type: 'click',
-          inputs: {
-            startX: startXPercent || 0,
-            startY: startYPercent || 0,
-          },
-        };
-        return clickAction;
-      }
-
-      case 'double_click':
-      case 'left_double': {
-        const doubleClickAction: GUIAgent.DoubleClickAction = {
-          type: 'double_click',
-          inputs: {
-            startX: startXPercent || 0,
-            startY: startYPercent || 0,
-          },
-        };
-        return doubleClickAction;
-      }
-
-      case 'right_click':
-      case 'right_single': {
-        const rightClickAction: GUIAgent.RightClickAction = {
-          type: 'right_click',
-          inputs: {
-            startX: startXPercent || 0,
-            startY: startYPercent || 0,
-          },
-        };
-        return rightClickAction;
-      }
-
-      case 'drag': {
-        // Parse end coordinates from action_inputs.end_box
-        const endBox = action_inputs.end_box;
-        let endXPercent = 0;
-        let endYPercent = 0;
-        if (endBox) {
-          try {
-            const coords = JSON.parse(endBox);
-            if (Array.isArray(coords) && coords.length >= 2) {
-              endXPercent = coords[0];
-              endYPercent = coords[1];
-            }
-          } catch (e) {
-            this.logger.warn('Failed to parse end_box coordinates:', endBox);
-          }
-        }
-        const dragAction: GUIAgent.DragAction = {
-          type: 'drag',
-          inputs: {
-            startX: startXPercent || 0,
-            startY: startYPercent || 0,
-            endX: endXPercent,
-            endY: endYPercent,
-          },
-        };
-        return dragAction;
-      }
-
-      case 'type': {
-        const typeAction: GUIAgent.TypeAction = {
-          type: 'type',
-          inputs: {
-            content: action_inputs.content || '',
-          },
-        };
-        return typeAction;
-      }
-
-      case 'hotkey': {
-        const hotkeyAction: GUIAgent.HotkeyAction = {
-          type: 'hotkey',
-          inputs: {
-            key: action_inputs.key || action_inputs.hotkey || '',
-          },
-        };
-        return hotkeyAction;
-      }
-
-      case 'scroll': {
-        const scrollAction: GUIAgent.ScrollAction = {
-          type: 'scroll',
-          inputs: {
-            startX: startXPercent || 0,
-            startY: startYPercent || 0,
-            direction: (action_inputs.direction as 'up' | 'down' | 'left' | 'right') || 'down',
-          },
-        };
-        return scrollAction;
-      }
-
-      case 'wait': {
-        const waitAction: GUIAgent.WaitAction = {
-          type: 'wait',
-          inputs: {},
-        };
-        return waitAction;
-      }
-
-      case 'navigate': {
-        const navigateAction: GUIAgent.NavigateAction = {
-          type: 'navigate',
-          inputs: {
-            url: action_inputs.content || '',
-          },
-        };
-        return navigateAction;
-      }
-
-      case 'navigate_back': {
-        const navigateBackAction: GUIAgent.NavigateBackAction = {
-          type: 'navigate_back',
-          inputs: {},
-        };
-        return navigateBackAction;
-      }
-
-      default: {
-        // Fallback to a generic click action for unknown types
-        this.logger.warn(`Unknown action type: ${action_type}, falling back to click`);
-        const fallbackAction: GUIAgent.ClickAction = {
-          type: 'click',
-          inputs: {
-            startX: startXPercent || 0,
-            startY: startYPercent || 0,
-          },
-        };
-        return fallbackAction;
-      }
-    }
-  }
-
-  /**
-   * Create a default error action for failed operations
-   */
-  private createErrorAction(): GUIAgent.Action {
-    const errorAction: GUIAgent.WaitAction = {
-      type: 'wait',
-      inputs: {},
-    };
-    return errorAction;
-  }
 
   /**
    * Parse operation string into a structured operation object
