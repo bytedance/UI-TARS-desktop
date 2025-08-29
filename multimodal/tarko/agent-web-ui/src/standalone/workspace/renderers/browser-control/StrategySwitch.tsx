@@ -86,7 +86,7 @@ export const StrategySwitch: React.FC<StrategySwitchProps> = ({
               <button
                 type="button"
                 onClick={() => onStrategyChange(strategy)}
-                className={`group px-4 py-2 text-xs font-medium transition-all duration-300 backdrop-blur-sm shadow-sm ${
+                className={`group px-3 py-2 text-xs font-medium transition-all duration-300 backdrop-blur-sm shadow-sm ${
                   isActive
                     ? 'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 text-blue-700 dark:text-blue-300 border-blue-200/80 dark:border-blue-500/60 shadow-blue-100/50 dark:shadow-blue-900/30'
                     : 'bg-gradient-to-br from-white/90 to-slate-50/80 dark:from-slate-800/40 dark:to-slate-700/30 text-slate-600 dark:text-slate-300 hover:from-slate-50/95 hover:to-slate-100/90 dark:hover:from-slate-700/60 dark:hover:to-slate-600/50 hover:text-slate-700 dark:hover:text-slate-200 hover:shadow-md hover:scale-[1.02]'
@@ -94,9 +94,9 @@ export const StrategySwitch: React.FC<StrategySwitchProps> = ({
                   isFirst ? 'rounded-l-lg' : isLast ? 'rounded-r-lg border-l-0' : 'border-l-0'
                 } border border-slate-200/60 dark:border-slate-600/40`}
               >
-                <div className="flex items-center">
+                <div className="flex flex-col items-center justify-center gap-1">
                   <span
-                    className={`mr-2 transition-all duration-200 ${
+                    className={`transition-all duration-200 ${
                       isActive
                         ? 'opacity-100 text-blue-600 dark:text-blue-400 transform scale-110'
                         : 'opacity-75 group-hover:opacity-90 group-hover:scale-105'
@@ -105,7 +105,7 @@ export const StrategySwitch: React.FC<StrategySwitchProps> = ({
                     {config.icon}
                   </span>
                   <span
-                    className={`font-medium ${
+                    className={`text-[10px] font-medium leading-none ${
                       isActive
                         ? 'text-blue-700 dark:text-blue-300'
                         : 'text-slate-600 dark:text-slate-300'
