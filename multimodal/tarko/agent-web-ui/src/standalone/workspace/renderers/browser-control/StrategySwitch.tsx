@@ -1,6 +1,7 @@
 import React from 'react';
 import { FiClock, FiCheckCircle, FiShuffle } from 'react-icons/fi';
-import { Tooltip, TooltipProps } from '@mui/material';
+import { Tooltip } from '@mui/material';
+import { getTooltipProps } from '@/common/components/TooltipConfig';
 
 type ScreenshotStrategy = 'both' | 'beforeAction' | 'afterAction';
 
@@ -33,44 +34,7 @@ export const StrategySwitch: React.FC<StrategySwitchProps> = ({
 }) => {
   const strategies: ScreenshotStrategy[] = ['beforeAction', 'afterAction', 'both'];
 
-  // Tooltip styling for consistent appearance
-  const tooltipProps: Partial<TooltipProps> = {
-    arrow: true,
-    placement: 'bottom',
-    componentsProps: {
-      tooltip: {
-        sx: {
-          backgroundColor: '#000000',
-          color: '#ffffff',
-          fontSize: '13px',
-          fontWeight: 500,
-          padding: '8px 12px',
-          borderRadius: '6px',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-          margin: '8px !important',
-          '.MuiTooltip-arrow': {
-            color: '#000000',
-          },
-        },
-      },
-      popper: {
-        sx: {
-          '&[data-popper-placement*="bottom"] .MuiTooltip-tooltip': {
-            marginTop: '8px',
-          },
-          '&[data-popper-placement*="top"] .MuiTooltip-tooltip': {
-            marginBottom: '8px',
-          },
-          '&[data-popper-placement*="right"] .MuiTooltip-tooltip': {
-            marginLeft: '8px',
-          },
-          '&[data-popper-placement*="left"] .MuiTooltip-tooltip': {
-            marginRight: '8px',
-          },
-        },
-      },
-    },
-  };
+  const tooltipProps = getTooltipProps('bottom');
 
   return (
     <div className="flex items-center justify-center mt-4">

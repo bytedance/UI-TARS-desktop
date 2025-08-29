@@ -1,9 +1,10 @@
 import React from 'react';
 import { FiClock, FiCheck, FiCopy, FiZap, FiActivity } from 'react-icons/fi';
-import { Tooltip, TooltipProps } from '@mui/material';
+import { Tooltip } from '@mui/material';
 import { formatTimestamp } from '@/common/utils/formatters';
 import { Message as MessageType, ChatCompletionContentPart } from '@/common/types';
 import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
+import { getTooltipProps } from '@/common/components/TooltipConfig';
 
 interface MessageFooterProps {
   message: MessageType;
@@ -35,26 +36,7 @@ export const MessageFooter: React.FC<MessageFooterProps> = ({ message, className
     return `${ms}ms`;
   };
 
-  // Tooltip styling for consistent appearance
-  const tooltipProps: Partial<TooltipProps> = {
-    arrow: true,
-    componentsProps: {
-      tooltip: {
-        sx: {
-          backgroundColor: '#000000',
-          color: '#ffffff',
-          fontSize: '13px',
-          fontWeight: 500,
-          padding: '8px 12px',
-          borderRadius: '6px',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-          '.MuiTooltip-arrow': {
-            color: '#000000',
-          },
-        },
-      },
-    },
-  };
+  const tooltipProps = getTooltipProps();
 
   return (
     <div className={`mt-1 mb-2 ${className}`}>
