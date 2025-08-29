@@ -32,6 +32,9 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
   const [beforeActionImage, setBeforeActionImage] = useState<string | null>(null);
   const [afterActionImage, setAfterActionImage] = useState<string | null>(null);
   const guiAgentConfig = getGUIAgentConfig();
+  const [currentStrategy, setCurrentStrategy] = useState<'both' | 'beforeAction' | 'afterAction'>(
+    guiAgentConfig.defaultScreenshotRenderStrategy
+  );
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number } | null>(null);
   const [previousMousePosition, setPreviousMousePosition] = useState<{
     x: number;
@@ -131,7 +134,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
     let foundAfterImage = false;
 
     // Search for screenshots BEFORE the current tool call
-    if (guiAgentConfig.screenshotRenderStrategy === 'beforeAction' || guiAgentConfig.screenshotRenderStrategy === 'both') {
+    if (currentStrategy === 'beforeAction' || currentStrategy === 'both') {
       for (let i = currentToolCallIndex - 1; i >= 0; i--) {
         const msg = sessionMessages[i];
         if (msg.role === 'environment' && Array.isArray(msg.content)) {
@@ -141,7 +144,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
 
           if (imgContent && 'image_url' in imgContent && imgContent.image_url.url) {
             setBeforeActionImage(imgContent.image_url.url);
-            if (guiAgentConfig.screenshotRenderStrategy === 'beforeAction') {
+            if (currentStrategy === 'beforeAction') {
               setRelatedImage(imgContent.image_url.url);
             }
             foundBeforeImage = true;
@@ -152,7 +155,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
     }
 
     // Search for screenshots AFTER the current tool call
-    if (guiAgentConfig.screenshotRenderStrategy === 'afterAction' || guiAgentConfig.screenshotRenderStrategy === 'both') {
+    if (currentStrategy === 'afterAction' || currentStrategy === 'both') {
       for (let i = currentToolCallIndex + 1; i < sessionMessages.length; i++) {
         const msg = sessionMessages[i];
         if (msg.role === 'environment' && Array.isArray(msg.content)) {
@@ -162,7 +165,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
 
           if (imgContent && 'image_url' in imgContent && imgContent.image_url.url) {
             setAfterActionImage(imgContent.image_url.url);
-            if (guiAgentConfig.screenshotRenderStrategy === 'afterAction') {
+            if (currentStrategy === 'afterAction') {
               setRelatedImage(imgContent.image_url.url);
             }
             foundAfterImage = true;
@@ -174,17 +177,17 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
 
     // Handle strategy-specific warnings and fallbacks
     if (!environmentImage) {
-      if (guiAgentConfig.screenshotRenderStrategy === 'beforeAction' && !foundBeforeImage) {
+      if (currentStrategy === 'beforeAction' && !foundBeforeImage) {
         console.warn(
           `[BrowserControlRenderer] No valid screenshot found before toolCallId: ${toolCallId}. Clearing screenshot display.`,
         );
         setRelatedImage(null);
-      } else if (guiAgentConfig.screenshotRenderStrategy === 'afterAction' && !foundAfterImage) {
+      } else if (currentStrategy === 'afterAction' && !foundAfterImage) {
         console.warn(
           `[BrowserControlRenderer] No valid screenshot found after toolCallId: ${toolCallId}. Clearing screenshot display.`,
         );
         setRelatedImage(null);
-      } else if (guiAgentConfig.screenshotRenderStrategy === 'both') {
+      } else if (currentStrategy === 'both') {
         // For 'both' strategy, use the after action image as primary if available
         if (foundAfterImage) {
           setRelatedImage(afterActionImage);
@@ -198,14 +201,36 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
         }
       }
     }
-  }, [activeSessionId, messages, toolCallId, environmentImage, guiAgentConfig.screenshotRenderStrategy, afterActionImage, beforeActionImage]);
+  }, [activeSessionId, messages, toolCallId, environmentImage, currentStrategy, afterActionImage, beforeActionImage]);
 
   return (
     <div className="space-y-6">
+      {/* Strategy Switch Controls */}
+      {guiAgentConfig.enableScreenshotRenderStrategySwitch && (
+        <div className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border">
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Screenshot Display:</span>
+          <div className="flex gap-2">
+            {(['beforeAction', 'afterAction', 'both'] as const).map((strategy) => (
+              <button
+                key={strategy}
+                onClick={() => setCurrentStrategy(strategy)}
+                className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                  currentStrategy === strategy
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+                }`}
+              >
+                {strategy === 'beforeAction' ? 'Before' : strategy === 'afterAction' ? 'After' : 'Both'}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      
       {/* Screenshot section - moved to the top */}
-      {(relatedImage || (guiAgentConfig.screenshotRenderStrategy === 'both' && (beforeActionImage || afterActionImage))) ? (
+      {(relatedImage || (currentStrategy === 'both' && (beforeActionImage || afterActionImage))) ? (
         <div>
-          {guiAgentConfig.screenshotRenderStrategy === 'both' && beforeActionImage && afterActionImage ? (
+          {currentStrategy === 'both' && beforeActionImage && afterActionImage ? (
             // Show both screenshots side by side
             <div className="space-y-4">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

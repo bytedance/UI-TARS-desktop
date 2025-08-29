@@ -57,7 +57,8 @@ export default class OmniTARSAgent extends ComposableAgent {
       ],
     },
     guiAgent: {
-      screenshotRenderStrategy: 'afterAction',
+      defaultScreenshotRenderStrategy: 'afterAction',
+      enableScreenshotRenderStrategySwitch: true,
       renderGUIAction: true,
     },
   };

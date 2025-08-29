@@ -46,7 +46,8 @@ export function getWorkspaceNavItems() {
  */
 export function getGUIAgentConfig() {
   return getWebUIConfig().guiAgent || {
-    screenshotRenderStrategy: 'afterAction',
+    defaultScreenshotRenderStrategy: 'afterAction',
+    enableScreenshotRenderStrategySwitch: false,
     renderGUIAction: true,
   };
 }

@@ -64,7 +64,8 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
     ],
     enableContextualSelector: true,
     guiAgent: {
-      screenshotRenderStrategy: 'beforeAction',
+      defaultScreenshotRenderStrategy: 'beforeAction',
+      enableScreenshotRenderStrategySwitch: true,
       renderGUIAction: true,
     },
   };

@@ -41,17 +41,26 @@ export interface WorkspaceConfig {
  */
 export interface TarkoWebUIGUIAgentConfig {
   /**
-   * GUI Agent screenshot rendering strategy
+   * Default GUI Agent screenshot rendering strategy
    *
-   * - `both`: Display both before and after screenshots for action comparison
-   * - `beforeAction`: Display screenshot taken before the action, suitable for agents that take screenshots in onEachAgentLoopStart (e.g., Agent-TARS)
-   * - `afterAction`: Display screenshot taken after the action, suitable for agents that take screenshots in onEachAgentLoopEnd (e.g., Omni-TARS)
+   * - `both`: Default to display both before and after screenshots for action comparison
+   * - `beforeAction`: Default to display only beforeAction screenshot, suitable for agents that take screenshots in onEachAgentLoopStart (e.g., Agent-TARS)
+   * - `afterAction`: Default to display only afterAction screenshot, suitable for agents that take screenshots in onEachAgentLoopEnd (e.g., Omni-TARS)
    *
    * Note: Mouse cursor overlay is only rendered on beforeAction screenshots as it indicates where the action will be performed
    *
    * @defaultValue 'afterAction'
    */
-  screenshotRenderStrategy: 'both' | 'beforeAction' | 'afterAction';
+  defaultScreenshotRenderStrategy: 'both' | 'beforeAction' | 'afterAction';
+  /**
+   * Whether to enable runtime screenshot rendering strategy switch
+   *
+   * When enabled, users can dynamically switch between different screenshot display modes (both/beforeAction/afterAction)
+   * during runtime through UI controls. When disabled, only the default strategy is used.
+   *
+   * @defaultValue false
+   */
+  enableScreenshotRenderStrategySwitch: boolean;
   /**
    * Whether to enable GUI Agent action rendering
    *
