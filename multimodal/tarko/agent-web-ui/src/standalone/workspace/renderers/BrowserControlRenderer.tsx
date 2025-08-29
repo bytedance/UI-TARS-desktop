@@ -57,7 +57,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Strategy Switch Controls */}
       {guiAgentConfig.enableScreenshotRenderStrategySwitch && (
         <StrategySwitch currentStrategy={currentStrategy} onStrategyChange={setCurrentStrategy} />
