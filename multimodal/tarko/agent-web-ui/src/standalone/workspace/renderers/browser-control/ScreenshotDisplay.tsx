@@ -25,6 +25,11 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
 }) => {
   const imageRef = useRef<HTMLImageElement>(null);
 
+  // Don't render if no images available
+  if (!relatedImage && !(strategy === 'both' && (beforeActionImage || afterActionImage))) {
+    return null;
+  }
+
   const shouldShowMouseCursor = (
     currentImage: string | null | undefined,
     imageType: 'before' | 'after' | 'single',
@@ -76,7 +81,12 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
     if (image) {
       return (
         <div className="relative">
-          <img ref={imageRef} src={image} alt={alt} className="w-full h-auto object-contain" />
+          <img
+            ref={imageRef}
+            src={image}
+            alt={alt}
+            className={`w-full h-auto object-contain ${!isInBothMode ? 'max-h-[70vh]' : ''}`}
+          />
           {showCursor && (
             <MouseCursor
               position={mousePosition!}
