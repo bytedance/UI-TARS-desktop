@@ -13,14 +13,17 @@ const strategyConfig = {
   beforeAction: {
     label: 'Before',
     icon: <FiRewind size={12} />,
+    tooltip: 'Show screenshot before action execution',
   },
   afterAction: {
     label: 'After',
     icon: <FiFastForward size={12} />,
+    tooltip: 'Show screenshot after action execution',
   },
   both: {
     label: 'Both',
     icon: <FiShuffle size={12} />,
+    tooltip: 'Show screenshots before and after action execution',
   },
 } as const;
 
@@ -71,17 +74,16 @@ export const StrategySwitch: React.FC<StrategySwitchProps> = ({
 
   return (
     <div className="flex items-center justify-end mt-2">
-      <Tooltip title="Screenshot display mode" {...tooltipProps}>
-        <div className="inline-flex rounded-md" role="group">
-          {strategies.map((strategy, index) => {
-            const config = strategyConfig[strategy];
-            const isActive = currentStrategy === strategy;
-            const isFirst = index === 0;
-            const isLast = index === strategies.length - 1;
+      <div className="inline-flex rounded-md" role="group">
+        {strategies.map((strategy, index) => {
+          const config = strategyConfig[strategy];
+          const isActive = currentStrategy === strategy;
+          const isFirst = index === 0;
+          const isLast = index === strategies.length - 1;
 
-            return (
+          return (
+            <Tooltip key={strategy} title={config.tooltip} {...tooltipProps}>
               <button
-                key={strategy}
                 type="button"
                 onClick={() => onStrategyChange(strategy)}
                 className={`px-3 py-1.5 text-xs font-medium transition-all duration-200 backdrop-blur-sm ${
@@ -99,10 +101,10 @@ export const StrategySwitch: React.FC<StrategySwitchProps> = ({
                   <span>{config.label}</span>
                 </div>
               </button>
-            );
-          })}
-        </div>
-      </Tooltip>
+            </Tooltip>
+          );
+        })}
+      </div>
     </div>
   );
 };
