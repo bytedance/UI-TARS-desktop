@@ -42,8 +42,10 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
   };
 
   // Render placeholder when no image available
-  const renderPlaceholder = () => (
-    <div className="flex items-center justify-center h-[50vh] bg-gray-50 dark:bg-gray-900">
+  const renderPlaceholder = (height = 'auto') => (
+    <div
+      className={`flex items-center justify-center bg-gray-50 dark:bg-gray-900 ${height === 'auto' ? 'min-h-[400px]' : 'h-full'}`}
+    >
       <div className="text-center">
         <div className="text-gray-400 dark:text-gray-500 text-sm">
           GUI Agent Environment Not Started
@@ -53,10 +55,15 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
   );
 
   // Render image or placeholder
-  const renderImageOrPlaceholder = (image: string | null, alt: string, showCursor = false) => (
-    <div className="relative">
-      {image ? (
-        <>
+  const renderImageOrPlaceholder = (
+    image: string | null,
+    alt: string,
+    showCursor = false,
+    isInBothMode = false,
+  ) => {
+    if (image) {
+      return (
+        <div className="relative">
           <img
             ref={imageRef}
             src={image}
@@ -70,12 +77,34 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
               action={action}
             />
           )}
-        </>
-      ) : (
-        renderPlaceholder()
-      )}
-    </div>
-  );
+        </div>
+      );
+    }
+
+    // For both mode, we need to match the height of the other image if it exists
+    if (isInBothMode) {
+      const otherImage = alt.includes('Before') ? afterActionImage : beforeActionImage;
+      if (otherImage) {
+        // Create a temporary image to get dimensions and match height
+        return (
+          <div className="relative">
+            <div
+              className="flex items-center justify-center bg-gray-50 dark:bg-gray-900"
+              style={{ aspectRatio: '16/9', minHeight: '200px' }}
+            >
+              <div className="text-center">
+                <div className="text-gray-400 dark:text-gray-500 text-sm">
+                  GUI Agent Environment Not Started
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+    }
+
+    return <div className="relative">{renderPlaceholder()}</div>;
+  };
 
   if (strategy === 'both') {
     // Show both screenshots side by side
@@ -93,6 +122,7 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
                 beforeActionImage,
                 'Browser Screenshot - Before Action',
                 shouldShowMouseCursor(beforeActionImage, 'before'),
+                true,
               )}
             </BrowserShell>
           </div>
@@ -103,7 +133,12 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
               </span>
             </div>
             <BrowserShell>
-              {renderImageOrPlaceholder(afterActionImage, 'Browser Screenshot - After Action')}
+              {renderImageOrPlaceholder(
+                afterActionImage,
+                'Browser Screenshot - After Action',
+                false,
+                true,
+              )}
             </BrowserShell>
           </div>
         </div>
