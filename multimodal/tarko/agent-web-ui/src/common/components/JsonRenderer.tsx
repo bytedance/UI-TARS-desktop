@@ -9,18 +9,10 @@ import { FiChevronRight, FiCopy, FiCheck, FiMaximize2, FiMinimize2 } from 'react
  * Supports hierarchical tree structure with smooth animations.
  */
 
-interface JsonItemProps {
-  label: string;
-  value: any;
-  level?: number;
-  isRoot?: boolean;
-}
-
-const JsonItem: React.FC<JsonItemProps> = ({ label, value, level = 0, isRoot = false }) => {
-  const [isExpanded, setIsExpanded] = useState(level <= 1); // Expand root and first level
+// Shared copy hook
+const useCopy = () => {
   const [copied, setCopied] = useState(false);
-  const [isStringExpanded, setIsStringExpanded] = useState(false);
-
+  
   const handleCopy = useCallback(async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -30,6 +22,44 @@ const JsonItem: React.FC<JsonItemProps> = ({ label, value, level = 0, isRoot = f
       console.error('Failed to copy:', error);
     }
   }, []);
+  
+  return { copied, handleCopy };
+};
+
+// Shared copy button component
+const CopyButton: React.FC<{
+  onCopy: () => void;
+  copied: boolean;
+  title?: string;
+  size?: number;
+  className?: string;
+}> = ({ onCopy, copied, title = 'Copy', size = 12, className = '' }) => (
+  <motion.button
+    whileHover={{ scale: 1.1 }}
+    whileTap={{ scale: 0.95 }}
+    onClick={onCopy}
+    className={`p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-all ${className}`}
+    title={title}
+  >
+    {copied ? (
+      <FiCheck size={size} className="text-green-500" />
+    ) : (
+      <FiCopy size={size} className="text-gray-400" />
+    )}
+  </motion.button>
+);
+
+interface JsonItemProps {
+  label: string;
+  value: any;
+  level?: number;
+  isRoot?: boolean;
+}
+
+const JsonItem: React.FC<JsonItemProps> = ({ label, value, level = 0, isRoot = false }) => {
+  const [isExpanded, setIsExpanded] = useState(level <= 1); // Expand root and first level
+  const [isStringExpanded, setIsStringExpanded] = useState(false);
+  const { copied, handleCopy } = useCopy();
 
   const isObject = value && typeof value === 'object' && !Array.isArray(value);
   const isArray = Array.isArray(value);
@@ -94,19 +124,11 @@ const JsonItem: React.FC<JsonItemProps> = ({ label, value, level = 0, isRoot = f
                 )}
               </motion.button>
             )}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => handleCopy(displayValue)}
-              className="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
+            <CopyButton
+              onCopy={() => handleCopy(displayValue)}
+              copied={copied}
               title="Copy value"
-            >
-              {copied ? (
-                <FiCheck size={12} className="text-green-500" />
-              ) : (
-                <FiCopy size={12} className="text-gray-400" />
-              )}
-            </motion.button>
+            />
           </div>
         </div>
       </motion.div>
@@ -179,18 +201,12 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
   className = '',
   emptyMessage = 'No data available',
 }) => {
-  const [copied, setCopied] = useState(false);
+  const { copied, handleCopy } = useCopy();
 
-  const handleCopyAll = useCallback(async () => {
-    try {
-      const jsonString = JSON.stringify(data, null, 2);
-      await navigator.clipboard.writeText(jsonString);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    } catch (error) {
-      console.error('Failed to copy JSON:', error);
-    }
-  }, [data]);
+  const handleCopyAll = useCallback(() => {
+    const jsonString = JSON.stringify(data, null, 2);
+    handleCopy(jsonString);
+  }, [data, handleCopy]);
 
   if (!data || (typeof data === 'object' && Object.keys(data).length === 0)) {
     return (
@@ -208,19 +224,14 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
 
   return (
     <div className={`relative group ${className}`}>
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={handleCopyAll}
-        className="absolute top-2 right-2 z-10 p-2 rounded-md bg-white/90 dark:bg-gray-700/90 hover:bg-white dark:hover:bg-gray-700 transition-all opacity-0 group-hover:opacity-100 shadow-sm border border-gray-200 dark:border-gray-600"
-        title="Copy raw JSON"
-      >
-        {copied ? (
-          <FiCheck size={14} className="text-green-500" />
-        ) : (
-          <FiCopy size={14} className="text-gray-500 dark:text-gray-400" />
-        )}
-      </motion.button>
+      <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+        <CopyButton
+          onCopy={handleCopyAll}
+          copied={copied}
+          title="Copy raw JSON"
+          className="bg-white/90 dark:bg-gray-700/90 hover:bg-white dark:hover:bg-gray-700 shadow-sm border border-gray-200 dark:border-gray-600"
+        />
+      </div>
       <div className="space-y-2">
         {isRootObject ? (
           Object.entries(data).map(([itemKey, value]) => (
