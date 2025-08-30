@@ -4,9 +4,13 @@
  */
 import { ChatCompletionChunk } from '@tarko/agent-interface';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { createT5InitState, processStreamingChunk, T5StreamProcessingState } from '../index';
+import {
+  createT5InitState,
+  processT5StreamingChunk as processStreamingChunk,
+  T5StreamProcessingState,
+} from '../index';
 
-function chunker(content: string, finish_reason = '') {
+function createChunk(content: string, finish_reason = '') {
   return { choices: [{ delta: { content }, finish_reason }] } as unknown as ChatCompletionChunk;
 }
 
@@ -19,7 +23,9 @@ describe('T5 processStreamingChunk', () => {
 
   describe('T5 think tag parsing', () => {
     it('should parse complete T5 think tag in single chunk', () => {
-      const chunk = chunker('<think>Great! I can see that the search bar is now active</think>');
+      const chunk = createChunk(
+        '<think>Great! I can see that the search bar is now active</think>',
+      );
       const result = processStreamingChunk(chunk, state);
 
       expect(result.content).toBe('');
@@ -30,13 +36,13 @@ describe('T5 processStreamingChunk', () => {
 
     it('should parse partial T5 think tag across multiple chunks', () => {
       // First chunk: opening tag and partial content
-      const chunk1 = chunker('<think>Great! I can see that the');
+      const chunk1 = createChunk('<think>Great! I can see that the');
       const result1 = processStreamingChunk(chunk1, state);
       expect(result1.content).toBe('');
       expect(result1.reasoningContent).toBe('Great! I can see that the');
 
       // Second chunk: more content
-      const chunk2 = chunker(' search bar is now');
+      const chunk2 = createChunk(' search bar is now');
       const result2 = processStreamingChunk(chunk2, state);
       expect(result2.content).toBe('');
       expect(result2.reasoningContent).toBe(' search bar is now');
@@ -44,7 +50,7 @@ describe('T5 processStreamingChunk', () => {
       expect(state.reasoningBuffer).toBe('Great! I can see that the search bar is now');
 
       // Third chunk: closing tag
-      const chunk3 = chunker(' active</think>');
+      const chunk3 = createChunk(' active</think>');
       const result3 = processStreamingChunk(chunk3, state);
       expect(result3.content).toBe('');
       expect(result3.reasoningContent).toBe(' active');
@@ -54,7 +60,7 @@ describe('T5 processStreamingChunk', () => {
 
     it('should handle partial T5 think opening tag', () => {
       // First chunk: partial opening tag
-      const chunk1 = chunker('<think');
+      const chunk1 = createChunk('<think');
       const result1 = processStreamingChunk(chunk1, state);
       expect(result1.content).toBe('');
       expect(result1.reasoningContent).toBe('');
@@ -62,7 +68,7 @@ describe('T5 processStreamingChunk', () => {
       expect(state.accumulatedChatContentBuffer).toBe('');
 
       // Second chunk: complete opening tag and content
-      const chunk2 = chunker('>This is thinking content</think>');
+      const chunk2 = createChunk('>This is thinking content</think>');
       const result2 = processStreamingChunk(chunk2, state);
       expect(result2.content).toBe('');
       expect(result2.reasoningContent).toBe('This is thinking content');
@@ -73,7 +79,7 @@ describe('T5 processStreamingChunk', () => {
 
   describe('T5 chat content parsing', () => {
     it('should parse chat content outside of tags', () => {
-      const chunk = chunker('你好！很高兴见到你。有什么我可以帮助你的吗？');
+      const chunk = createChunk('你好！很高兴见到你。有什么我可以帮助你的吗？');
       const result = processStreamingChunk(chunk, state);
 
       expect(result.content).toBe('你好！很高兴见到你。有什么我可以帮助你的吗？');
@@ -86,13 +92,13 @@ describe('T5 processStreamingChunk', () => {
 
     it('should parse chat content after think tag', () => {
       // First chunk: think tag
-      const chunk1 = chunker('<think>thinking</think>');
+      const chunk1 = createChunk('<think>thinking</think>');
       const result1 = processStreamingChunk(chunk1, state);
       expect(result1.reasoningContent).toBe('thinking');
       expect(result1.content).toBe('');
 
       // Second chunk: chat content
-      const chunk2 = chunker('Hello world!');
+      const chunk2 = createChunk('Hello world!');
       const result2 = processStreamingChunk(chunk2, state);
       expect(result2.content).toBe('Hello world!');
       expect(result2.reasoningContent).toBe('');
@@ -102,7 +108,7 @@ describe('T5 processStreamingChunk', () => {
 
     it('should parse chat content across multiple chunks', () => {
       // First chunk: opening tag and partial content
-      const chunk1 = chunker('<think>thinking</think>你好！很高兴');
+      const chunk1 = createChunk('<think>thinking</think>你好！很高兴');
       const result1 = processStreamingChunk(chunk1, state);
       expect(result1.content).toBe('你好！很高兴');
       expect(result1.reasoningContent).toBe('thinking');
@@ -110,7 +116,7 @@ describe('T5 processStreamingChunk', () => {
       expect(state.reasoningBuffer).toBe('thinking');
 
       // Second chunk: more content
-      const chunk2 = chunker('见到你。有什么我可以');
+      const chunk2 = createChunk('见到你。有什么我可以');
       const result2 = processStreamingChunk(chunk2, state);
       expect(result2.content).toBe('见到你。有什么我可以');
       expect(result2.reasoningContent).toBe('');
@@ -118,7 +124,7 @@ describe('T5 processStreamingChunk', () => {
       expect(state.reasoningBuffer).toBe('thinking');
 
       // Third chunk: closing tag
-      const chunk3 = chunker('帮助你的吗？');
+      const chunk3 = createChunk('帮助你的吗？');
       const result3 = processStreamingChunk(chunk3, state);
       expect(result3.content).toBe('帮助你的吗？');
       expect(result3.reasoningContent).toBe('');
@@ -130,7 +136,7 @@ describe('T5 processStreamingChunk', () => {
 
     it('should parse think followed by answer', () => {
       // chunk1
-      const chunk1 = chunker('<think>用户向我打招呼说"你好啊"，');
+      const chunk1 = createChunk('<think>用户向我打招呼说"你好啊"，');
       const result1 = processStreamingChunk(chunk1, state);
       expect(result1.content).toBe('');
       expect(result1.reasoningContent).toBe('用户向我打招呼说"你好啊"，');
@@ -138,7 +144,7 @@ describe('T5 processStreamingChunk', () => {
       expect(state.reasoningBuffer).toBe('用户向我打招呼说"你好啊"，');
 
       // chunk2
-      const chunk2 = chunker('这是一个简单的中文问候。</th');
+      const chunk2 = createChunk('这是一个简单的中文问候。</th');
       const result2 = processStreamingChunk(chunk2, state);
       expect(result2.content).toBe('');
       expect(result2.reasoningContent).toBe('这是一个简单的中文问候。');
@@ -146,7 +152,7 @@ describe('T5 processStreamingChunk', () => {
       expect(state.reasoningBuffer).toBe('用户向我打招呼说"你好啊"，这是一个简单的中文问候。');
 
       // chunk3
-      const chunk3 = chunker('ink>');
+      const chunk3 = createChunk('ink>');
       const result3 = processStreamingChunk(chunk3, state);
       expect(result3.content).toBe('');
       expect(result3.reasoningContent).toBe('');
@@ -154,7 +160,7 @@ describe('T5 processStreamingChunk', () => {
       expect(state.reasoningBuffer).toBe('用户向我打招呼说"你好啊"，这是一个简单的中文问候。');
 
       // chunk4
-      const chunk4 = chunker('你好！很高');
+      const chunk4 = createChunk('你好！很高');
       const result4 = processStreamingChunk(chunk4, state);
       expect(result4.content).toBe('你好！很高');
       expect(result4.reasoningContent).toBe('');
@@ -162,7 +168,7 @@ describe('T5 processStreamingChunk', () => {
       expect(state.reasoningBuffer).toBe('用户向我打招呼说"你好啊"，这是一个简单的中文问候。');
 
       // chunk5
-      const chunk5 = chunker('兴见到你。');
+      const chunk5 = createChunk('兴见到你。');
       const result5 = processStreamingChunk(chunk5, state);
       expect(result5.content).toBe('兴见到你。');
       expect(result5.reasoningContent).toBe('');
@@ -197,7 +203,7 @@ describe('T5 processStreamingChunk', () => {
       ];
 
       for (let i = 0; i < strs.length; i++) {
-        const result = processStreamingChunk(chunker(strs[i]), state);
+        const result = processStreamingChunk(createChunk(strs[i]), state);
         if (i === 3) {
           expect(result.content).toBe('');
           expect(result.reasoningContent).toBe('Great');
@@ -277,7 +283,7 @@ describe('T5 processStreamingChunk', () => {
       ];
 
       for (const str of strs) {
-        processStreamingChunk(chunker(str), state);
+        processStreamingChunk(createChunk(str), state);
       }
 
       expect(state.accumulatedChatContentBuffer).toBe(
@@ -289,7 +295,7 @@ describe('T5 processStreamingChunk', () => {
 
   describe('T5 mixed content scenarios', () => {
     it('should parse think + chat content', () => {
-      const chunk = chunker(
+      const chunk = createChunk(
         '<think>User is asking for help</think>\nHello! How can I assist you today?',
       );
       const result = processStreamingChunk(chunk, state);
@@ -308,7 +314,7 @@ describe('T5 processStreamingChunk', () => {
     </function>
 </seed:tool_call>`;
 
-      const chunk = chunker(content);
+      const chunk = createChunk(content);
       const result = processStreamingChunk(chunk, state);
 
       expect(result.reasoningContent).toBe('I need to call a function');
@@ -328,7 +334,7 @@ I'd be happy to help you!
     </function>
 </seed:tool_call>`;
 
-      const chunk = chunker(content);
+      const chunk = createChunk(content);
       const result = processStreamingChunk(chunk, state);
 
       expect(result.reasoningContent).toBe(
@@ -350,7 +356,7 @@ I'd be happy to help you!
       // Stream character by character
       for (let i = 0; i < content.length; i++) {
         const char = content[i];
-        const result = processStreamingChunk(chunker(char), state);
+        const result = processStreamingChunk(createChunk(char), state);
 
         // Check some key points
         if (i === content.indexOf('thinking') + 7) {
@@ -366,26 +372,26 @@ I'd be happy to help you!
 
     it('should handle partial tag scenarios correctly', () => {
       // Partial think tag
-      let result = processStreamingChunk(chunker('<th'), state);
+      let result = processStreamingChunk(createChunk('<th'), state);
       expect(result.content).toBe('');
       expect(result.reasoningContent).toBe('');
 
       // add content
-      result = processStreamingChunk(chunker('in'), state);
+      result = processStreamingChunk(createChunk('in'), state);
       expect(result.content).toBe('');
       expect(result.reasoningContent).toBe('');
 
-      result = processStreamingChunk(chunker('k>content'), state);
+      result = processStreamingChunk(createChunk('k>content'), state);
       expect(result.content).toBe('');
       expect(result.reasoningContent).toBe('content');
 
       // Partial closing tag
-      result = processStreamingChunk(chunker('</thin'), state);
+      result = processStreamingChunk(createChunk('</thin'), state);
       expect(result.content).toBe('');
       expect(result.reasoningContent).toBe('');
 
       // Complete closing tag
-      result = processStreamingChunk(chunker('k>'), state);
+      result = processStreamingChunk(createChunk('k>'), state);
       expect(result.content).toBe('');
       expect(result.reasoningContent).toBe('');
       expect(state.reasoningBuffer).toBe('content');
@@ -395,7 +401,7 @@ I'd be happy to help you!
 
   describe('T5 edge cases', () => {
     it('should handle empty chunks', () => {
-      const result = processStreamingChunk(chunker(''), state);
+      const result = processStreamingChunk(createChunk(''), state);
       expect(result.content).toBe('');
       expect(result.reasoningContent).toBe('');
       expect(result.hasToolCallUpdate).toBe(false);
