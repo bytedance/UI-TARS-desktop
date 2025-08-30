@@ -15,4 +15,6 @@ export { SnapshotPlugin } from './plugins/snapshot';
 export { AgentPlugin } from './AgentPlugin';
 export { parseCodeContent, parseComputerContent, parseMcpContent } from './utils/parser';
 export * from './utils/streamingParser';
+export * from './utils/streamingParserT5';
+export { SYSTEM_PROMPT_GROUP, think_token } from './environments/prompt_t5';
 export { getAioUrl, extractAioPort } from './utils/hepler';

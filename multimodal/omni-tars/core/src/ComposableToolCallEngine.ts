@@ -64,7 +64,7 @@ export class ComposableToolCallEngine extends ToolCallEngine {
     return this.defaultEngine.getEngine();
   }
 
-  preparePrompt(instructions: string, tools: Tool[]): string {
+  preparePrompt(instructions: string, tools: Tool[]) {
     return this.selectEngine({ tools }).preparePrompt(instructions, tools);
   }
 

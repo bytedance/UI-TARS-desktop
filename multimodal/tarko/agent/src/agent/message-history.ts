@@ -67,9 +67,12 @@ export class MessageHistory {
     const baseSystemPrompt = this.getSystemPromptWithTime(customSystemPrompt);
     // Start with the enhanced system message
     const enhancedSystemPrompt = toolCallEngine.preparePrompt(baseSystemPrompt, tools);
-    const messages: ChatCompletionMessageParam[] = [
-      { role: 'system', content: enhancedSystemPrompt },
-    ];
+    const messages: ChatCompletionMessageParam[] = Array.isArray(enhancedSystemPrompt)
+      ? enhancedSystemPrompt.map((sp) => ({
+          role: 'system',
+          content: sp,
+        }))
+      : [{ role: 'system', content: enhancedSystemPrompt }];
 
     this.logger.debug(
       `Created system message with prompt ${enhancedSystemPrompt.length} chars long`,

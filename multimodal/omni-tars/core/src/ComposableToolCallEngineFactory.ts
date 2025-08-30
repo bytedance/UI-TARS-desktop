@@ -30,7 +30,7 @@ export class ComposableToolCallEngineFactory extends ToolCallEngine {
     this.composableEngine = new ComposableToolCallEngine(config);
   }
 
-  preparePrompt(instructions: string, tools: Tool[]): string {
+  preparePrompt(instructions: string, tools: Tool[]) {
     return this.composableEngine.preparePrompt(instructions, tools);
   }
 

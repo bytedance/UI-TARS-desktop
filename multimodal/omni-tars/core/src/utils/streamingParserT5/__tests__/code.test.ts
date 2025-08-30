@@ -45,17 +45,13 @@ describe('processStreamingChunk', () => {
       const lastUpdate =
         result.streamingToolCallUpdates?.[result.streamingToolCallUpdates.length - 1];
       expect(lastUpdate?.isComplete).toBe(true);
-      expect(result.toolCalls).toEqual([
-        {
-          id: 'random_id',
-          type: 'function',
-          function: {
-            name: 'str_replace_editor',
-            arguments:
-              '{"command": "create", "path": "/home/gem/fibonacci/fibonacci_function.py", "file_text": "xxx\\n"}',
-          },
-        },
-      ]);
+      expect(result.toolCalls).toHaveLength(1);
+      expect(result.toolCalls[0].id).toMatch(/^random_id_\d+$/);
+      expect(result.toolCalls[0].type).toBe('function');
+      expect(result.toolCalls[0].function.name).toBe('str_replace_editor');
+      expect(result.toolCalls[0].function.arguments).toBe(
+        '{"command": "create", "path": "/home/gem/fibonacci/fibonacci_function.py", "file_text": "xxx\\n"}'
+      );
       expect(state.accumulatedChatContentBuffer).toBe('');
       expect(state.reasoningBuffer).toBe('');
     });

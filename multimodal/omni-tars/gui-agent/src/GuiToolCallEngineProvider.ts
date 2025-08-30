@@ -27,18 +27,21 @@ export class GuiToolCallEngineProvider extends ToolCallEngineProvider<GUIAgentTo
 
     // Fallback: Check if any tools are GUI/computer use related
     const guiToolNames = [
-      'screenshot',
+      'call_user',
       'click',
-      'type',
+      'drag',
+      'finished',
+      'hotkey',
+      'left_double',
+      'mouse_down',
+      'mouse_up',
+      'move_to',
+      'press',
+      'release',
+      'right_single',
       'scroll',
-      'computer_use',
-      'gui',
-      'mouse',
-      'keyboard',
-      'window',
-      'screen',
-      'capture',
-      'browser',
+      'type',
+      'wait',
     ];
 
     const hasGuiTools = context?.toolCalls?.some((tool) =>

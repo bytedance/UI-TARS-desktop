@@ -50,7 +50,7 @@ export class AgentEventStreamProcessor implements AgentEventStream.Processor {
    */
   sendEvent(event: AgentEventStream.Event): void {
     this.events.push(event);
-    this.logger.debug(`Event added: ${event.type} (${event.id})`);
+    // this.logger.debug(`Event added: ${event.type} (${event.id})`);
 
     // Notify subscribers
     this.subscribers.forEach((callback) => {
@@ -69,7 +69,7 @@ export class AgentEventStreamProcessor implements AgentEventStream.Processor {
     ) {
       const overflow = this.events.length - this.options.maxEvents;
       this.events = this.events.slice(overflow);
-      this.logger.debug(`Auto-trimmed ${overflow} events`);
+      // this.logger.debug(`Auto-trimmed ${overflow} events`);
     }
   }
 
