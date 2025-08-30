@@ -29,6 +29,7 @@
     "@tarko/agent": "workspace:*",
     "@omni-tars/core": "workspace:*",
     "@tarko/agent-interface": "workspace:*",
+    "@tarko/shared-utils": "workspace:*",
     "@ui-tars/sdk": "1.2.3",
     "@agent-infra/browser": "0.1.1",
     "@agent-infra/media-utils": "0.1.5",

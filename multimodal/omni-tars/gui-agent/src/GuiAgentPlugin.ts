@@ -10,6 +10,11 @@ import {
   AgentEventStream,
 } from '@tarko/agent';
 import { Base64ImageParser } from '@agent-infra/media-utils';
+import {
+  GUIExecuteResult,
+  convertToGUIResponse,
+  createGUIErrorResponse,
+} from '@tarko/shared-utils';
 import { getScreenInfo, setScreenInfo } from './shared';
 import { OperatorManager } from './OperatorManager';
 
@@ -38,17 +43,25 @@ export class GuiAgentPlugin extends AgentPlugin {
         description: 'operator tool',
         parameters: {},
         function: async (input) => {
-          console.log(input);
-          const op = await this.operatorManager.getInstance();
-          const result = await op?.execute({
-            parsedPrediction: input.operator_action,
-            screenWidth: getScreenInfo().screenWidth ?? 1000,
-            screenHeight: getScreenInfo().screenHeight ?? 1000,
-            prediction: input.operator_action,
-            scaleFactor: 1000,
-            factors: [1, 1],
-          });
-          return { action: input.action, status: 'success', result };
+          try {
+            console.log(input);
+            const op = await this.operatorManager.getInstance();
+            const result = (await op?.execute({
+              parsedPrediction: input.operator_action,
+              screenWidth: getScreenInfo().screenWidth ?? 1000,
+              screenHeight: getScreenInfo().screenHeight ?? 1000,
+              prediction: input.operator_action,
+              scaleFactor: 1000,
+              factors: [1, 1],
+            })) as unknown as GUIExecuteResult;
+
+            // Convert to GUI Agent protocol format
+            const guiResponse = convertToGUIResponse(input.action, input.operator_action, result);
+            return guiResponse;
+          } catch (error) {
+            // Return error response in GUI Agent format
+            return createGUIErrorResponse(input.action, error);
+          }
         },
       }),
     );
