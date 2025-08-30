@@ -47,7 +47,7 @@ describe('processStreamingChunk', () => {
     });
 
     it('should parse think + chat content + multiple tool call', () => {
-      const content = `<think>User needs assistance, I should help and call a function</think>
+      const content = `<thinkt>User needs assistance, I should help and call a function</thinkt>
 I'd be happy to help you!
 <seed:tool_call>
     <function=function_1>
