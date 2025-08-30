@@ -85,7 +85,7 @@ export function createT5InitState(): T5StreamProcessingState {
  * @param state The current tag state to maintain across chunks
  * @returns Object containing content and reasoningContent for this chunk
  */
-export function processStreamingChunk(
+export function processT5StreamingChunk(
   chunk: ChatCompletionChunk,
   state: T5StreamProcessingState,
 ): StreamChunkResult {
