@@ -18,10 +18,10 @@ export default defineConfig({
   },
   route: {
     exclude: [
-      'en/sdk/**',
+      // 'en/sdk/**',
       'en/api/**',
       'en/api/runtime/**',
-      'zh/sdk/**',
+      // 'zh/sdk/**',
       'zh/api/**',
       'zh/api/runtime/**',
       isProd ? 'en/banner' : '',

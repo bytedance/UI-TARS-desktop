@@ -1,0 +1,17 @@
+[
+  {
+    "type": "file",
+    "name": "core",
+    "label": "Core"
+  },
+  {
+    "type": "file",
+    "name": "hooks",
+    "label": "Hooks"
+  },
+  {
+    "type": "file",
+    "name": "snapshot",
+    "label": "Snapshot"
+  }
+]
