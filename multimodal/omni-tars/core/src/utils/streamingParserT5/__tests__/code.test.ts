@@ -3,7 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { describe, it, expect, beforeEach } from 'vitest';
-import { createT5InitState, processStreamingChunk, T5StreamProcessingState } from '../index';
+import {
+  createT5InitState,
+  processT5StreamingChunk as processStreamingChunk,
+  T5StreamProcessingState,
+} from '../index';
 import { ChatCompletionChunk, StreamingToolCallUpdate } from '@tarko/agent-interface';
 import { realStreamingChunks } from '../data/testData';
 
@@ -18,7 +22,7 @@ describe('processStreamingChunk', () => {
     state = createT5InitState();
   });
 
-  describe('T5 tool call parsing', () => {
+  describe('Single tool call parsing', () => {
     it('should parse complete single function tool call', () => {
       const chunk = createChunk(`<seed:tool_call>
     <function=str_replace_editor>
@@ -56,9 +60,34 @@ describe('processStreamingChunk', () => {
       expect(state.reasoningBuffer).toBe('');
     });
 
+    it('should parse tool call with multiline parameter values', () => {
+      const toolCallChunk = `<seed:tool_call>
+    <function=example_function_name>
+        <parameter=example_parameter_1>value_1</parameter>
+        <parameter=example_parameter_2>
+        This is the value for the second parameter
+        that can span
+        multiple lines
+        </parameter>
+    </function>
+</seed:tool_call>`;
+
+      const chunk = createChunk(toolCallChunk);
+      const result = processStreamingChunk(chunk, state);
+
+      expect(result.hasToolCallUpdate).toBe(true);
+      expect(state.toolCalls).toHaveLength(1);
+      const args = JSON.parse(state.toolCalls[0].function.arguments);
+      expect(args['example_parameter_1']).toBe('value_1');
+      expect(args['example_parameter_2']).toBe(`
+        This is the value for the second parameter
+        that can span
+        multiple lines
+        `);
+    });
+
     it('should parse real-world streaming data with complete file content', () => {
       // Use actual streaming chunks from the code.jsonl file to test real-world scenarios
-      // This includes complete streaming data with full tool call execution
       const allUpdates: StreamingToolCallUpdate[] = [];
       for (const chunk of realStreamingChunks) {
         const result = processStreamingChunk(createChunk(chunk), state);
@@ -79,6 +108,7 @@ describe('processStreamingChunk', () => {
       expect(toolCall.function.name).toBe('str_replace_editor');
 
       const args = JSON.parse(toolCall.function.arguments);
+
       expect(args.command).toBe('create');
       expect(args.path).toBe('/home/gem/fibonacci/fibonacci_function.py');
       expect(args.file_text).toContain('def fibonacci(n):');
@@ -119,13 +149,15 @@ describe('processStreamingChunk', () => {
       expect(state.toolCalls[0].function.name).toBe('str_replace_editor');
 
       const args = JSON.parse(state.toolCalls[0].function.arguments);
-      expect(args.command).toBe('create');
-      expect(args.path).toBe('/test.py');
-      expect(args.file_text).toContain('def fibonacci(n):');
-      expect(args.file_text).toContain('return [0, 1]');
+
+      expect(args).toEqual({
+        command: 'create',
+        path: '/test.py',
+        file_text: `def fibonacci(n):\n    return [0, 1]`,
+      });
     });
 
-    it('should handle mixed think and code_env tags correctly', () => {
+    it('should handle mixed think and tool_call tags correctly', () => {
       // Test scenario with both think and code_env tags in sequence
       // const chunk = createChunk(
       //   '<think>我需要创建Python文件</think>\n<code_env>\n<function=str_replace_editor>\n<parameter=command>create</parameter>\n<parameter=path>/test.py</parameter>\n<parameter=file_text>print("Hello")</parameter>\n</function>\n</code_env>',
@@ -159,9 +191,12 @@ describe('processStreamingChunk', () => {
       expect(state.toolCalls[0].function.name).toBe('str_replace_editor');
 
       const args = JSON.parse(state.toolCalls[0].function.arguments);
-      expect(args.command).toBe('create');
-      expect(args.path).toBe('/test.py');
-      expect(args.file_text).toBe('print("Hello")');
+
+      expect(args).toEqual({
+        command: 'create',
+        path: '/test.py',
+        file_text: 'print("Hello")',
+      });
     });
 
     it('should track argumentsDelta in streamingToolCallUpdates for intermediate states', () => {
@@ -213,6 +248,7 @@ describe('processStreamingChunk', () => {
       );
 
       const finalArgs = JSON.parse(state.toolCalls[0].function.arguments);
+
       expect(finalArgs.command).toBe('create');
       expect(finalArgs.path).toBe('/test.py');
       expect(finalArgs.file_text).toContain('def hello()');
@@ -311,10 +347,52 @@ describe('processStreamingChunk', () => {
 
       // Final state verification
       expect(state.toolCalls.length).toBe(1);
+
       const finalArgs = JSON.parse(state.toolCalls[0].function.arguments);
+
       expect(finalArgs.command).toBe('create');
       expect(finalArgs.path).toBe('/home/gem/fibonacci/fibonacci_function.py');
       expect(finalArgs.file_text).toContain('def fibonacci(n):');
+      expect(finalArgs).toEqual({
+        command: 'create',
+        path: '/home/gem/fibonacci/fibonacci_function.py',
+        file_text:
+          'def fibonacci(n):\n' +
+          '     """生成斐波那契数列的函数\n' +
+          '    \n' +
+          '     参数:\n' +
+          '     n --  数列长度，即要生成的数字个数\n' +
+          '    \n' +
+          '     返回:\n' +
+          '     list --  包含n个数字的斐波那契数列\n' +
+          '     """\n' +
+          '     if n <= 0:\n' +
+          '         return []\n' +
+          '     elif n == 1:\n' +
+          '         return [0]\n' +
+          '     elif n == 2:\n' +
+          '         return [0, 1]\n' +
+          '    \n' +
+          '     # 初始化斐波那契数列\n' +
+          '     fib_sequence = [0, 1]\n' +
+          '    \n' +
+          '     # 生成后续的数字\n' +
+          '     for i in range(2, n):\n' +
+          '         next_number = fib_sequence[i-1] + fib_sequence[i-2]\n' +
+          '         fib_sequence.append(next_number)\n' +
+          '    \n' +
+          '     return fib_sequence\n' +
+          '\n' +
+          '# 测试代码\n' +
+          'if __name__ == "__main__":\n' +
+          '     # 生成前10个斐波那契数\n' +
+          '     result = fibonacci(10)\n' +
+          '     print(f"前10个斐波那契数: {result}")\n' +
+          '    \n' +
+          '     # 生成前20个斐波那契数\n' +
+          '     result = fibonacci(20)\n' +
+          '     print(f"前20个斐波那契数: {result}")\n',
+      });
     });
 
     it('should maintain tool call state consistency across chunks', () => {
@@ -500,52 +578,3 @@ describe('processStreamingChunk', () => {
     });
   });
 });
-
-// it('should parse multiple functions in single tool call', () => {
-//   const toolCallChunk = `<seed:tool_call>
-//     <function=function_1>
-//         <parameter=param_1>value_1</parameter>
-//     </function>
-//     <function=function_2>
-//         <parameter=param_2>value_2</parameter>
-//     </function>
-// </seed:tool_call>`;
-
-//   const chunk = chunker(toolCallChunk);
-//   const result = processStreamingChunk(chunk, state);
-
-//   expect(result.hasToolCallUpdate).toBe(true);
-//   expect(result.content).toBe('');
-//   expect(result.reasoningContent).toBe('');
-//   expect(state.toolCalls).toHaveLength(2);
-//   expect(state.toolCalls[0].function.name).toBe('function_1');
-//   expect(state.toolCalls[1].function.name).toBe('function_2');
-//   expect(JSON.parse(state.toolCalls[0].function.arguments)).toEqual({ param_1: 'value_1' });
-//   expect(JSON.parse(state.toolCalls[1].function.arguments)).toEqual({ param_2: 'value_2' });
-// });
-
-// it('should parse tool call with multiline parameter values', () => {
-//   const toolCallChunk = `<seed:tool_call>
-//     <function=example_function_name>
-//         <parameter=example_parameter_1>value_1</parameter>
-//         <parameter=example_parameter_2>
-//         This is the value for the second parameter
-//         that can span
-//         multiple lines
-//         </parameter>
-//     </function>
-// </seed:tool_call>`;
-
-//   const chunk = chunker(toolCallChunk);
-//   const result = processStreamingChunk(chunk, state);
-
-//   expect(result.hasToolCallUpdate).toBe(true);
-//   expect(state.toolCalls).toHaveLength(1);
-//   const args = JSON.parse(state.toolCalls[0].function.arguments);
-//   expect(args['example_parameter_1']).toBe('value_1');
-//   expect(args['example_parameter_2']).toBe(`
-//         This is the value for the second parameter
-//         that can span
-//         multiple lines
-//         `);
-// });
