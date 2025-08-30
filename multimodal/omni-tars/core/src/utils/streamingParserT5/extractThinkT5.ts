@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { think_token } from '../../environments/prompt_t5';
 import { T5StreamProcessingState } from './index';
 
 /**
@@ -27,7 +28,7 @@ export function extractThinkT5(content: string, state: T5StreamProcessingState):
   let result = '';
 
   // Match the specific T5 think tag and also be flexible for future changes
-  const T5_THINK_TAG = 'think';
+  const T5_THINK_TAG = think_token;
   const THINK_OPEN_TAG = `<${T5_THINK_TAG}>`;
   const THINK_CLOSE_TAG = `</${T5_THINK_TAG}>`;
 
@@ -44,7 +45,7 @@ export function extractThinkT5(content: string, state: T5StreamProcessingState):
       } else {
         // Check if buffer ends with partial opening tag
         // Be more generous with partial matching for think tags
-        const patterns = ['<', '<t', '<th', '<thi', '<thin', '<think'];
+        const patterns = ['<', '<t', '<th', '<thi', '<thin', '<think', '<thinkt'];
         let foundPartial = false;
 
         for (const pattern of patterns) {
@@ -86,7 +87,7 @@ export function extractThinkT5(content: string, state: T5StreamProcessingState):
         continue;
       } else {
         // Check if buffer ends with partial closing tag
-        const patterns = ['<', '</', '</t', '</th', '</thi', '</thin', '</think'];
+        const patterns = ['<', '</', '</t', '</th', '</thi', '</thin', '</think', '<thinkt'];
         let foundPartial = false;
 
         for (const pattern of patterns) {

@@ -8,7 +8,7 @@ import { ChatCompletionChunk } from '@tarko/agent-interface';
 // Extracted from code.jsonl - real streaming data for testing
 export const realStreamingChunks = [
   '<',
-  'think',
+  'thinkt',
   '>',
   '项目',
   '目录',
@@ -76,7 +76,7 @@ export const realStreamingChunks = [
   '长度',
   '。',
   '</',
-  'think',
+  'thinkt',
   '>',
   '\n',
   '<seed:to',

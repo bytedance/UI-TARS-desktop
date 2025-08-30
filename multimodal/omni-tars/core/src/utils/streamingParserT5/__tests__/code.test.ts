@@ -50,7 +50,7 @@ describe('processStreamingChunk', () => {
       expect(result.toolCalls[0].type).toBe('function');
       expect(result.toolCalls[0].function.name).toBe('str_replace_editor');
       expect(result.toolCalls[0].function.arguments).toBe(
-        '{"command": "create", "path": "/home/gem/fibonacci/fibonacci_function.py", "file_text": "xxx\\n"}'
+        '{"command": "create", "path": "/home/gem/fibonacci/fibonacci_function.py", "file_text": "xxx\\n"}',
       );
       expect(state.accumulatedChatContentBuffer).toBe('');
       expect(state.reasoningBuffer).toBe('');
@@ -162,9 +162,9 @@ describe('processStreamingChunk', () => {
       // const result = processStreamingChunk(chunk, state);
 
       const chunks = [
-        '<think>我需要创建Pyth',
+        '<thinkt>我需要创建Pyth',
         'on文件</t',
-        'hink>\n<seed:t',
+        'hinkt>\n<seed:t',
         'ool_call>\n<fun',
         'ction=',
         'str_replace_editor',

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { think_token } from '../../environments/prompt_t5';
 import { T5StreamProcessingState } from './index';
 
 /**
@@ -24,8 +25,9 @@ export function extractChatContentT5(content: string, state: T5StreamProcessingS
   let result = '';
 
   // Check if buffer contains any think or tool call tags and extract content before and after them
-  const T5_THINK_TAG = '<think>';
-  const T5_THINK_CLOSE_TAG = '</think>';
+  const T5_THINK_TAG = think_token;
+  const T5_THINK_OEPN_TAG = `<${T5_THINK_TAG}>`;
+  const T5_THINK_CLOSE_TAG = `</${T5_THINK_TAG}>`;
   const TOOL_CALL_TAG = '<seed:tool_call>';
 
   // Look for think close tag to extract content after it
@@ -118,7 +120,7 @@ export function extractChatContentT5(content: string, state: T5StreamProcessingS
     return result;
   }
 
-  const thinkOpenIndex = state.contentBuffer.indexOf(T5_THINK_TAG);
+  const thinkOpenIndex = state.contentBuffer.indexOf(T5_THINK_OEPN_TAG);
   const toolCallIndex = state.contentBuffer.indexOf(TOOL_CALL_TAG);
 
   // Find the earliest tag index (excluding think close since we handled it above)
@@ -144,8 +146,10 @@ export function extractChatContentT5(content: string, state: T5StreamProcessingS
   // Check for partial tags at the end of the buffer that might be completed in future chunks
   // Order by length descending to match the longest possible partial tag first
   const partialTags = [
-    '<think',
+    '</thinkt',
     '</think',
+    '<thinkt',
+    '<think',
     '<thin',
     '<thi',
     '<th',
