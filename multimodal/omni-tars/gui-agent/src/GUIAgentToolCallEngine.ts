@@ -15,7 +15,12 @@ import {
 } from '@tarko/agent-interface';
 import { actionParser, actionStringParser } from '@gui-agent/action-parser';
 import { getScreenInfo } from './shared';
-import { processStreamingChunk as omniProcessStreamingChunk } from '@omni-tars/core';
+import {
+  processT5StreamingChunk as omniProcessStreamingChunk,
+  T5StreamProcessingState as OmniStreamProcessingState,
+  createT5InitState as createInitState,
+  SYSTEM_PROMPT_GROUP,
+} from '@omni-tars/core';
 
 /**
  * SimpleKorToolCallEngine - Minimal prompt engineering tool call engine
@@ -31,8 +36,8 @@ export class GUIAgentToolCallEngine extends ToolCallEngine {
   /**
    * Prepare system prompt with tool information and instructions
    */
-  preparePrompt(instructions: string, tools: Tool[]): string {
-    return instructions;
+  preparePrompt(instructions: string, tools: Tool[]) {
+    return SYSTEM_PROMPT_GROUP;
   }
 
   /**

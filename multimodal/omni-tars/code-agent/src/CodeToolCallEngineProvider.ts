@@ -27,18 +27,7 @@ export class CodeToolCallEngineProvider extends ToolCallEngineProvider<CodeToolC
     }
 
     // Fallback: Check if any tools are code-related
-    const codeToolNames = [
-      'execute_code',
-      'run_bash',
-      'edit_file',
-      'create_file',
-      'read_file',
-      'jupyter',
-      'python',
-      'node',
-      'npm',
-      'git',
-    ];
+    const codeToolNames = ['str_replace_editor', 'execute_bash'];
 
     const hasCodeTools = context?.toolCalls?.some((tool) =>
       codeToolNames.some((codeName) =>
