@@ -46,6 +46,12 @@ export class MCPClientV2 implements IMCPClient {
       this.logger.info(`Initializing MCP client v2 for ${this.serverName}`);
       await this.v2Client.init();
       this.tools = await this.v2Client.listTools(this.serverName as string);
+      
+      // Validate that we got tools - if 0 tools, this likely indicates a connection failure
+      if (this.tools.length === 0) {
+        throw new Error(`MCP server ${this.serverName} connection failed: no tools available`);
+      }
+      
       this.isInitialized = true;
       this.logger.success(
         `MCP client v2 initialized successfully for ${this.serverName}, found ${this.tools.length} tools`,
