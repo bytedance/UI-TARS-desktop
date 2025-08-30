@@ -30,7 +30,7 @@ export class McpToolCallEngineProvider extends ToolCallEngineProvider<McpToolCal
     }
 
     // Fallback: Check if any of the available tools are MCP-related
-    const mcpToolNames = ['search', 'link_reader', 'tavily_search', 'google_search'];
+    const mcpToolNames = ['Search', 'LinkReader'];
     const hasMcpTools = context?.toolCalls?.some((tool) =>
       mcpToolNames.some((mcpName) =>
         tool.function.name.toLowerCase().includes(mcpName.toLowerCase()),

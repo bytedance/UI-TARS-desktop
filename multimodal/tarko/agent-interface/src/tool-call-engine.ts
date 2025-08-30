@@ -193,7 +193,7 @@ export abstract class ToolCallEngine<T extends StreamProcessingState = StreamPro
    * @param instructions System Prompt built into Agent Kernel
    * @param tools The tools currently activated by the Agent
    */
-  abstract preparePrompt(instructions: string, tools: Tool[]): string;
+  abstract preparePrompt(instructions: string, tools: Tool[]): string | string[];
 
   /**
    * Prepare a Chat Completion Request based on the current context

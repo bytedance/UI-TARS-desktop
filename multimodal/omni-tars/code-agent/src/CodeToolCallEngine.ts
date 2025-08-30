@@ -5,9 +5,10 @@
 
 import {
   parseCodeContent,
-  processStreamingChunk as omniProcessStreamingChunk,
-  OmniStreamProcessingState,
-  createInitState,
+  processT5StreamingChunk as omniProcessStreamingChunk,
+  T5StreamProcessingState as OmniStreamProcessingState,
+  createT5InitState as createInitState,
+  SYSTEM_PROMPT_GROUP,
 } from '@omni-tars/core';
 import { ToolCallEngine, Tool, getLogger } from '@tarko/agent';
 import {
@@ -29,8 +30,8 @@ import {
 export class CodeToolCallEngine extends ToolCallEngine<OmniStreamProcessingState> {
   private logger = getLogger('CodeToolCallEngine');
 
-  preparePrompt(instructions: string, tools: Tool[]): string {
-    return instructions;
+  preparePrompt(instructions: string, tools: Tool[]) {
+    return SYSTEM_PROMPT_GROUP;
   }
 
   prepareRequest(context: ToolCallEnginePrepareRequestContext): ChatCompletionCreateParams {
@@ -61,7 +62,7 @@ export class CodeToolCallEngine extends ToolCallEngine<OmniStreamProcessingState
     this.logger.info('finalizeStreamProcessing state \n', state);
 
     return {
-      content: state.accumulatedAnswerBuffer || '',
+      content: state.accumulatedChatContentBuffer || '',
       rawContent: state.contentBuffer,
       reasoningContent: state.reasoningBuffer ?? '',
       toolCalls: state.toolCalls,

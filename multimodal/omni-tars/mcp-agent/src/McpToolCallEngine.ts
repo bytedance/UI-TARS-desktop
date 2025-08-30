@@ -16,17 +16,19 @@ import {
 } from '@tarko/agent-interface';
 import {
   parseMcpContent,
-  processStreamingChunk as omniProcessStreamingChunk,
-  OmniStreamProcessingState,
-  createInitState,
+  processT5StreamingChunk as omniProcessStreamingChunk,
+  T5StreamProcessingState as OmniStreamProcessingState,
+  createT5InitState as createInitState,
+  SYSTEM_PROMPT_GROUP,
 } from '@omni-tars/core';
 
 export class McpToolCallEngine extends ToolCallEngine<OmniStreamProcessingState> {
   private logger = getLogger('McpToolCallEngine');
 
-  preparePrompt(instructions: string, tools: Tool[]): string {
-    return instructions;
+  preparePrompt(instructions: string, tools: Tool[]) {
+    return SYSTEM_PROMPT_GROUP;
   }
+
   prepareRequest(context: ToolCallEnginePrepareRequestContext): ChatCompletionCreateParams {
     return {
       model: context.model,
@@ -66,7 +68,7 @@ export class McpToolCallEngine extends ToolCallEngine<OmniStreamProcessingState>
     }
 
     return {
-      content: state.accumulatedAnswerBuffer ?? fullContent,
+      content: state.accumulatedChatContentBuffer ?? fullContent,
       rawContent: fullContent,
       reasoningContent: state.reasoningBuffer ?? '',
       toolCalls: tools,
