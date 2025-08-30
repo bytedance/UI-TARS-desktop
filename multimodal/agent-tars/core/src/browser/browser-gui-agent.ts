@@ -189,11 +189,21 @@ wait()                                         - Wait 5 seconds and take a scree
     // Convert compressed buffer to base64
     const compressedBase64 = `data:image/webp;base64,${compressedBuffer.toString('base64')}`;
 
+    // Get current page URL
+    let currentUrl: string | undefined;
+    try {
+      const page = await this.getPage();
+      currentUrl = page.url();
+    } catch (error) {
+      this.logger.warn('Failed to get current page URL for screenshot metadata:', error);
+    }
+
     return {
       originalSize,
       screenshotTime,
       compressedSize,
       compressedBase64,
+      currentUrl,
     };
   }
 
@@ -239,7 +249,7 @@ wait()                                         - Wait 5 seconds and take a scree
         this.logger.info('Browser not launched yet, skipping screenshot');
         return;
       }
-      const { originalSize, screenshotTime, compressedSize, compressedBase64 } =
+      const { originalSize, screenshotTime, compressedSize, compressedBase64, currentUrl } =
         await this.screenshot();
 
       this.currentScreenshot = compressedBase64;
@@ -257,6 +267,7 @@ wait()                                         - Wait 5 seconds and take a scree
         format: 'webp',
         quality: 20,
         time: `${screenshotTime} ms`,
+        url: currentUrl,
       });
 
       // Calculate image size
@@ -268,6 +279,7 @@ wait()                                         - Wait 5 seconds and take a scree
         height: this.screenHeight,
         size: `${sizeInKB} KB`,
         time: `${screenshotTime} ms`,
+        url: currentUrl,
         compression: `${
           originalSize / 1024 > 1024
             ? (originalSize / 1024 / 1024).toFixed(2) + ' MB'
@@ -288,6 +300,7 @@ wait()                                         - Wait 5 seconds and take a scree
         description: 'Browser Screenshot',
         metadata: {
           type: 'screenshot',
+          url: currentUrl,
         },
       });
 

@@ -48,7 +48,14 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
   });
 
   // Get screenshots from custom hook
-  const { relatedImage, beforeActionImage, afterActionImage } = useScreenshots({
+  const {
+    relatedImage,
+    beforeActionImage,
+    afterActionImage,
+    relatedImageUrl,
+    beforeActionImageUrl,
+    afterActionImageUrl,
+  } = useScreenshots({
     activeSessionId,
     toolCallId,
     messages,
@@ -69,6 +76,9 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
         relatedImage={relatedImage}
         beforeActionImage={beforeActionImage}
         afterActionImage={afterActionImage}
+        relatedImageUrl={relatedImageUrl}
+        beforeActionImageUrl={beforeActionImageUrl}
+        afterActionImageUrl={afterActionImageUrl}
         mousePosition={mousePosition}
         previousMousePosition={previousMousePosition}
         action={action}
