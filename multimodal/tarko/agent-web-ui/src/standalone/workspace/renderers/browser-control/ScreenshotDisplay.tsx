@@ -9,6 +9,9 @@ interface ScreenshotDisplayProps {
   relatedImage: string | null;
   beforeActionImage: string | null;
   afterActionImage: string | null;
+  relatedImageUrl?: string | null;
+  beforeActionImageUrl?: string | null;
+  afterActionImageUrl?: string | null;
   mousePosition?: { x: number; y: number } | null;
   previousMousePosition?: { x: number; y: number } | null;
   action?: string;
@@ -19,6 +22,9 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
   relatedImage,
   beforeActionImage,
   afterActionImage,
+  relatedImageUrl,
+  beforeActionImageUrl,
+  afterActionImageUrl,
   mousePosition,
   previousMousePosition,
   action,
@@ -107,7 +113,7 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
                 Before Action
               </span>
             </div>
-            <BrowserShell>
+            <BrowserShell url={beforeActionImageUrl || undefined}>
               {renderImageContent(
                 beforeActionImage,
                 'Browser Screenshot - Before Action',
@@ -122,7 +128,7 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
                 After Action
               </span>
             </div>
-            <BrowserShell>
+            <BrowserShell url={afterActionImageUrl || undefined}>
               {renderImageContent(
                 afterActionImage,
                 'Browser Screenshot - After Action',
@@ -138,7 +144,7 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
 
   // Show single screenshot
   return (
-    <BrowserShell className="mb-4">
+    <BrowserShell className="mb-4" url={relatedImageUrl || undefined}>
       {renderImageContent(
         relatedImage,
         'Browser Screenshot',
