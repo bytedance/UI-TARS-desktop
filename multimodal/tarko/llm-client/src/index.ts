@@ -11,8 +11,10 @@ import { LLMChat, LLMProvider } from './chat/index.js';
 import { InputError } from './handlers/types.js';
 import { models } from './models.js';
 import { ConfigOptions } from './userTypes/index.js';
+import { initializeDefaultConfigs } from './config/index.js';
 export * from './models.js';
 export * from './userTypes/index.js';
+export * from './config/index.js';
 
 // Extract the public interface from OpenAI, including both properties and methods
 // type PublicInterface<T> = {
@@ -64,6 +66,9 @@ export class TokenJS implements TokenJSInterface {
 
   constructor({ ...opts }: ConfigOptions = {}) {
     this.opts = opts;
+
+    // Initialize default header configurations
+    initializeDefaultConfigs();
 
     // We pass a reference to the LLM instance to the LLMChat instance so that the completions object can access the opts
     this.chat = new LLMChat(opts);
