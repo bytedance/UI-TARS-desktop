@@ -150,16 +150,11 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
         case 'run_command':
           return args.command || (status === 'constructing' ? 'preparing command...' : '');
         case 'read_file':
-          if (args.path) {
-            const normalizedPath = normalizeFilePath(args.path);
-            return `reading: ${normalizedPath}`;
-          }
-          return status === 'constructing' ? 'preparing file operation...' : '';
         case 'write_file':
         case 'edit_file':
           if (args.path) {
             const normalizedPath = normalizeFilePath(args.path);
-            return `${toolCall.function.name === 'write_file' ? 'writing' : 'editing'}: ${normalizedPath}`;
+            return normalizedPath;
           }
           return status === 'constructing' ? 'preparing file operation...' : '';
         default:
