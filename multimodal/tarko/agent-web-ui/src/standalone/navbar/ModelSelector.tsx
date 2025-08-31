@@ -236,9 +236,11 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
                   }}
-                  title={sessionMetadata.modelConfig.modelId}
+                  title={
+                    sessionMetadata.modelConfig.displayName || sessionMetadata.modelConfig.modelId
+                  }
                 >
-                  {sessionMetadata.modelConfig.modelId}
+                  {sessionMetadata.modelConfig.displayName || sessionMetadata.modelConfig.modelId}
                 </Typography>
               )}
               {sessionMetadata?.modelConfig?.provider && sessionMetadata?.modelConfig?.modelId && (

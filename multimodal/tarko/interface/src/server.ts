@@ -151,6 +151,7 @@ export interface SessionItemInfo {
     modelConfig?: {
       provider: string;
       modelId: string;
+      displayName?: string;
       configuredAt: number;
     };
     /**

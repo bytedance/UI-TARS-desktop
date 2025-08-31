@@ -155,15 +155,31 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, session
                       <div className="flex items-center gap-2 min-w-0">
                         <span
                           className="font-mono text-purple-800 dark:text-purple-200 truncate cursor-pointer hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
-                          title={sessionMetadata.modelConfig.modelId}
-                          onClick={() => copyModelId(sessionMetadata.modelConfig.modelId)}
+                          title={
+                            sessionMetadata.modelConfig.displayName ||
+                            sessionMetadata.modelConfig.modelId
+                          }
+                          onClick={() =>
+                            copyModelId(
+                              sessionMetadata.modelConfig.displayName ||
+                                sessionMetadata.modelConfig.modelId,
+                            )
+                          }
                         >
-                          {truncateModel(sessionMetadata.modelConfig.modelId)}
+                          {truncateModel(
+                            sessionMetadata.modelConfig.displayName ||
+                              sessionMetadata.modelConfig.modelId,
+                          )}
                         </span>
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
-                          onClick={() => copyModelId(sessionMetadata.modelConfig.modelId)}
+                          onClick={() =>
+                            copyModelId(
+                              sessionMetadata.modelConfig.displayName ||
+                                sessionMetadata.modelConfig.modelId,
+                            )
+                          }
                           className="text-gray-400 hover:text-purple-500 dark:hover:text-purple-400 transition-colors flex-shrink-0"
                           title="Copy model ID"
                         >
