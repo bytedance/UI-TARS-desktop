@@ -1,13 +1,15 @@
 # Agent Hooks
 
-Agent hooks 提供了一种强大的方式来扩展和自定义 agent 在整个执行生命周期中的行为。`BaseAgent` 类暴露了一套全面的 hooks，允许你拦截、修改和响应 agent 执行过程中的各种事件。
+## 介绍
 
-## Hooks API
+Agent Hooks 提供了一种强大的方式来扩展和自定义 Agent 在整个执行生命周期中的行为。`BaseAgent` 类暴露了一套全面的 hooks，允许你拦截、修改和响应 Agent 执行过程中的各种事件。
+
+## 概览
 
 | Hook | 描述 |
 |------|------|
-| [`initialize()`](#initialize) | agent 初始化期间调用 |
-| [`onDispose()`](#ondispose) | agent 销毁期间调用 |
+| [`initialize()`](#initialize) | Agent 初始化期间调用 |
+| [`onDispose()`](#ondispose) | Agent 销毁期间调用 |
 | [`onPrepareRequest()`](#onpreparerequest) | 准备 LLM 请求之前 |
 | [`onLLMRequest()`](#onllmrequest) | 向 LLM 发送请求之前 |
 | [`onLLMResponse()`](#onllmresponse) | 从 LLM 接收响应之后 |
@@ -16,14 +18,16 @@ Agent hooks 提供了一种强大的方式来扩展和自定义 agent 在整个�
 | [`onBeforeToolCall()`](#onbeforetoolcall) | 执行 Tool 之前 |
 | [`onAfterToolCall()`](#onaftertoolcall) | 执行 Tool 之后 |
 | [`onToolCallError()`](#ontooolcallerror) | Tool 执行失败时 |
-| [`onEachAgentLoopStart()`](#oneachagentloopstart) | 每个 agent 循环迭代开始 |
-| [`onEachAgentLoopEnd()`](#oneachagentloopend) | 每个 agent 循环迭代结束 |
-| [`onBeforeLoopTermination()`](#onbeforelooptermination) | agent 循环终止之前 |
-| [`onAgentLoopEnd()`](#onagentloopend) | 整个 agent 循环完成时 |
+| [`onEachAgentLoopStart()`](#oneachagentloopstart) | 每个 Agent 循环迭代开始 |
+| [`onEachAgentLoopEnd()`](#oneachagentloopend) | 每个 Agent 循环迭代结束 |
+| [`onBeforeLoopTermination()`](#onbeforelooptermination) | Agent 循环终止之前 |
+| [`onAgentLoopEnd()`](#onagentloopend) | 整个 Agent 循环完成时 |
+
+## Hooks API
 
 ### `initialize()`
 
-在 agent 初始化期间调用，用于执行设置操作。
+在 Agent 初始化期间调用，用于执行设置操作。
 
 ```ts
 class CustomAgent extends BaseAgent {
@@ -38,7 +42,7 @@ class CustomAgent extends BaseAgent {
 
 ### `onDispose()`
 
-在 agent 销毁期间调用，用于清理资源。
+在 Agent 销毁期间调用，用于清理资源。
 
 ```ts
 class CustomAgent extends BaseAgent {
@@ -245,7 +249,7 @@ class CustomAgent extends BaseAgent {
 
 ### `onEachAgentLoopStart()`
 
-在每个 agent 循环迭代开始时调用。
+在每个 Agent 循环迭代开始时调用。
 
 ```ts
 class CustomAgent extends BaseAgent {
@@ -265,7 +269,7 @@ class CustomAgent extends BaseAgent {
 
 ### `onEachAgentLoopEnd()`
 
-在每个 agent 循环迭代结束时调用。
+在每个 Agent 循环迭代结束时调用。
 
 ```ts
 class CustomAgent extends BaseAgent {
@@ -285,7 +289,7 @@ class CustomAgent extends BaseAgent {
 
 ### `onBeforeLoopTermination()`
 
-在 agent 循环终止之前调用，允许你控制终止条件。
+在 Agent 循环终止之前调用，允许你控制终止条件。
 
 ```ts
 class CustomAgent extends BaseAgent {
@@ -319,12 +323,12 @@ class CustomAgent extends BaseAgent {
 
 ### `onAgentLoopEnd()`
 
-当整个 agent 循环完成时调用。
+当整个 Agent 循环完成时调用。
 
 ```ts
 class CustomAgent extends BaseAgent {
   async onAgentLoopEnd(id: string): Promise<void> {
-    console.log(`会话 ${id} 的 agent 循环完成`);
+    console.log(`会话 ${id} 的 Agent 循环完成`);
     
     // 清理会话资源
     this.cleanupSession(id);

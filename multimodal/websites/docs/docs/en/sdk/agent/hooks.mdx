@@ -1,13 +1,15 @@
 # Agent Hooks
 
-Agent hooks provide a powerful way to extend and customize the behavior of your agents throughout their execution lifecycle. The `BaseAgent` class exposes a comprehensive set of hooks that allow you to intercept, modify, and react to various events during agent execution.
+## Introduction
 
-## Hooks API
+Agent Hooks provide a powerful way to extend and customize the behavior of your Agents throughout their execution lifecycle. The `BaseAgent` class exposes a comprehensive set of hooks that allow you to intercept, modify, and react to various events during Agent execution.
+
+## Overview
 
 | Hook | Description |
 |------|-------------|
-| [`initialize()`](#initialize) | Called during agent initialization |
-| [`onDispose()`](#ondispose) | Called during agent disposal |
+| [`initialize()`](#initialize) | Called during Agent initialization |
+| [`onDispose()`](#ondispose) | Called during Agent disposal |
 | [`onPrepareRequest()`](#onpreparerequest) | Before preparing LLM request |
 | [`onLLMRequest()`](#onllmrequest) | Before sending request to LLM |
 | [`onLLMResponse()`](#onllmresponse) | After receiving response from LLM |
@@ -16,14 +18,16 @@ Agent hooks provide a powerful way to extend and customize the behavior of your 
 | [`onBeforeToolCall()`](#onbeforetoolcall) | Before executing a tool |
 | [`onAfterToolCall()`](#onaftertoolcall) | After executing a tool |
 | [`onToolCallError()`](#ontooolcallerror) | When tool execution fails |
-| [`onEachAgentLoopStart()`](#oneachagentloopstart) | Start of each agent loop iteration |
-| [`onEachAgentLoopEnd()`](#oneachagentloopend) | End of each agent loop iteration |
-| [`onBeforeLoopTermination()`](#onbeforelooptermination) | Before agent loop terminates |
-| [`onAgentLoopEnd()`](#onagentloopend) | When entire agent loop completes |
+| [`onEachAgentLoopStart()`](#oneachagentloopstart) | Start of each Agent loop iteration |
+| [`onEachAgentLoopEnd()`](#oneachagentloopend) | End of each Agent loop iteration |
+| [`onBeforeLoopTermination()`](#onbeforelooptermination) | Before Agent loop terminates |
+| [`onAgentLoopEnd()`](#onagentloopend) | When entire Agent loop completes |
+
+## Hooks API
 
 ### `initialize()`
 
-Called during agent initialization to perform setup operations.
+Called during Agent initialization to perform setup operations.
 
 ```ts
 class CustomAgent extends BaseAgent {
@@ -38,7 +42,7 @@ class CustomAgent extends BaseAgent {
 
 ### `onDispose()`
 
-Called during agent disposal to clean up resources.
+Called during Agent disposal to clean up resources.
 
 ```ts
 class CustomAgent extends BaseAgent {
@@ -245,7 +249,7 @@ class CustomAgent extends BaseAgent {
 
 ### `onEachAgentLoopStart()`
 
-Called at the beginning of each agent loop iteration.
+Called at the beginning of each Agent loop iteration.
 
 ```ts
 class CustomAgent extends BaseAgent {
@@ -265,7 +269,7 @@ class CustomAgent extends BaseAgent {
 
 ### `onEachAgentLoopEnd()`
 
-Called at the end of each agent loop iteration.
+Called at the end of each Agent loop iteration.
 
 ```ts
 class CustomAgent extends BaseAgent {
@@ -285,7 +289,7 @@ class CustomAgent extends BaseAgent {
 
 ### `onBeforeLoopTermination()`
 
-Called before the agent loop terminates, allowing you to control termination conditions.
+Called before the Agent loop terminates, allowing you to control termination conditions.
 
 ```ts
 class CustomAgent extends BaseAgent {
@@ -319,7 +323,7 @@ class CustomAgent extends BaseAgent {
 
 ### `onAgentLoopEnd()`
 
-Called when the entire agent loop completes.
+Called when the entire Agent loop completes.
 
 ```ts
 class CustomAgent extends BaseAgent {
