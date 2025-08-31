@@ -59,14 +59,12 @@ export const BrowserShell: React.FC<BrowserShellProps> = ({
           {/* URL bar with secure indicator */}
           <div className="flex-1 bg-white dark:bg-gray-700 rounded-md flex items-center px-3 py-1.5 text-xs text-gray-700 dark:text-gray-200 border border-gray-300/30 dark:border-gray-600/40 group hover:border-gray-400/30 dark:hover:border-gray-500/30 transition-colors shadow-inner">
             <div className="flex items-center w-full">
-              <div className="flex items-center mr-2">
-                {isSecure ? (
-                  <FiLock className="mr-1.5 text-green-500 dark:text-green-400" size={12} />
-                ) : (
-                  <FiGlobe className="mr-1.5 text-gray-400 dark:text-gray-500" size={12} />
-                )}
-              </div>
-              <span className="truncate font-mono flex-1">{displayUrl}</span>
+              {isSecure ? (
+                <FiLock className="mr-1.5 text-green-500 dark:text-green-400" size={12} />
+              ) : (
+                <FiGlobe className="mr-1.5 text-gray-400 dark:text-gray-500" size={12} />
+              )}
+              <span className="truncate flex-1">{displayUrl}</span>
             </div>
           </div>
         </div>
