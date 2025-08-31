@@ -2,26 +2,24 @@
 
 Agent hooks 提供了一种强大的方式来扩展和自定义 agent 在整个执行生命周期中的行为。`BaseAgent` 类暴露了一套全面的 hooks，允许你拦截、修改和响应 agent 执行过程中的各种事件。
 
-## Overview
+## Hooks API
 
-| Hook | 分类 | 描述 |
-|------|------|------|
-| [`initialize()`](#initialize) | 生命周期 | agent 初始化期间调用 |
-| [`onDispose()`](#ondispose) | 生命周期 | agent 销毁期间调用 |
-| [`onLLMRequest()`](#onllmrequest) | LLM 交互 | 向 LLM 发送请求之前 |
-| [`onLLMResponse()`](#onllmresponse) | LLM 交互 | 从 LLM 接收响应之后 |
-| [`onLLMStreamingResponse()`](#onllmstreamingresponse) | LLM 交互 | LLM 流式响应 |
-| [`onBeforeToolCall()`](#onbeforetoolcall) | Tool 执行 | 执行 Tool 之前 |
-| [`onAfterToolCall()`](#onaftertoolcall) | Tool 执行 | 执行 Tool 之后 |
-| [`onToolCallError()`](#ontooolcallerror) | Tool 执行 | Tool 执行失败时 |
-| [`onProcessToolCalls()`](#onprocesstoolcalls) | Tool 执行 | 拦截 Tool 调用处理 |
-| [`onEachAgentLoopStart()`](#oneachagentloopstart) | 循环控制 | 每个 agent 循环迭代开始 |
-| [`onEachAgentLoopEnd()`](#oneachagentloopend) | 循环控制 | 每个 agent 循环迭代结束 |
-| [`onAgentLoopEnd()`](#onagentloopend) | 循环控制 | 整个 agent 循环完成时 |
-| [`onBeforeLoopTermination()`](#onbeforelooptermination) | 循环控制 | agent 循环终止之前 |
-| [`onPrepareRequest()`](#onpreparerequest) | 请求准备 | 准备 LLM 请求之前 |
-
-## 生命周期 Hooks
+| Hook | 描述 |
+|------|------|
+| [`initialize()`](#initialize) | agent 初始化期间调用 |
+| [`onDispose()`](#ondispose) | agent 销毁期间调用 |
+| [`onPrepareRequest()`](#onpreparerequest) | 准备 LLM 请求之前 |
+| [`onLLMRequest()`](#onllmrequest) | 向 LLM 发送请求之前 |
+| [`onLLMResponse()`](#onllmresponse) | 从 LLM 接收响应之后 |
+| [`onLLMStreamingResponse()`](#onllmstreamingresponse) | LLM 流式响应 |
+| [`onProcessToolCalls()`](#onprocesstoolcalls) | 拦截 Tool 调用处理 |
+| [`onBeforeToolCall()`](#onbeforetoolcall) | 执行 Tool 之前 |
+| [`onAfterToolCall()`](#onaftertoolcall) | 执行 Tool 之后 |
+| [`onToolCallError()`](#ontooolcallerror) | Tool 执行失败时 |
+| [`onEachAgentLoopStart()`](#oneachagentloopstart) | 每个 agent 循环迭代开始 |
+| [`onEachAgentLoopEnd()`](#oneachagentloopend) | 每个 agent 循环迭代结束 |
+| [`onBeforeLoopTermination()`](#onbeforelooptermination) | agent 循环终止之前 |
+| [`onAgentLoopEnd()`](#onagentloopend) | 整个 agent 循环完成时 |
 
 ### `initialize()`
 
@@ -53,7 +51,37 @@ class CustomAgent extends BaseAgent {
 }
 ```
 
-## LLM 交互 Hooks
+### `onPrepareRequest()`
+
+在准备 LLM 请求之前调用，允许动态修改系统提示和 Tool。
+
+```ts
+class CustomAgent extends BaseAgent {
+  onPrepareRequest(context: PrepareRequestContext): PrepareRequestResult {
+    let { systemPrompt, tools } = context;
+    
+    // 根据上下文修改系统提示
+    if (context.iteration > 3) {
+      systemPrompt += '\n\n注意：你现在在第 ' + context.iteration + 
+        ' 次迭代中。请专注于提供简洁的最终答案。';
+    }
+    
+    // 根据当前状态过滤 Tool
+    const filteredTools = tools.filter(tool => {
+      // 在后期迭代中禁用昂贵的 Tool
+      if (context.iteration > 5 && tool.name.includes('search')) {
+        return false;
+      }
+      return true;
+    });
+    
+    return {
+      systemPrompt,
+      tools: filteredTools,
+    };
+  }
+}
+```
 
 ### `onLLMRequest()`
 
@@ -109,7 +137,29 @@ class CustomAgent extends BaseAgent {
 }
 ```
 
-## Tool 执行 Hooks
+### `onProcessToolCalls()`
+
+拦截 Tool 调用处理，对测试和模拟至关重要。
+
+```ts
+class TestAgent extends BaseAgent {
+  onProcessToolCalls(
+    id: string,
+    toolCalls: ChatCompletionMessageToolCall[]
+  ): ToolCallResult[] | undefined {
+    // 为测试模拟 Tool 调用
+    if (this.isTestMode) {
+      return toolCalls.map(call => ({
+        toolCallId: call.id,
+        content: this.getMockResult(call.function.name),
+      }));
+    }
+    
+    // 返回 undefined 进行正常执行
+    return undefined;
+  }
+}
+```
 
 ### `onBeforeToolCall()`
 
@@ -193,32 +243,6 @@ class CustomAgent extends BaseAgent {
 }
 ```
 
-### `onProcessToolCalls()`
-
-拦截 Tool 调用处理，对测试和模拟至关重要。
-
-```ts
-class TestAgent extends BaseAgent {
-  onProcessToolCalls(
-    id: string,
-    toolCalls: ChatCompletionMessageToolCall[]
-  ): ToolCallResult[] | undefined {
-    // 为测试模拟 Tool 调用
-    if (this.isTestMode) {
-      return toolCalls.map(call => ({
-        toolCallId: call.id,
-        content: this.getMockResult(call.function.name),
-      }));
-    }
-    
-    // 返回 undefined 进行正常执行
-    return undefined;
-  }
-}
-```
-
-## 循环控制 Hooks
-
 ### `onEachAgentLoopStart()`
 
 在每个 agent 循环迭代开始时调用。
@@ -259,24 +283,6 @@ class CustomAgent extends BaseAgent {
 }
 ```
 
-### `onAgentLoopEnd()`
-
-当整个 agent 循环完成时调用。
-
-```ts
-class CustomAgent extends BaseAgent {
-  async onAgentLoopEnd(id: string): Promise<void> {
-    console.log(`会话 ${id} 的 agent 循环完成`);
-    
-    // 清理会话资源
-    this.cleanupSession(id);
-    
-    // 发送完成通知
-    await this.notifyCompletion(id);
-  }
-}
-```
-
 ### `onBeforeLoopTermination()`
 
 在 agent 循环终止之前调用，允许你控制终止条件。
@@ -311,76 +317,52 @@ class CustomAgent extends BaseAgent {
 }
 ```
 
-## 请求准备 Hooks
+### `onAgentLoopEnd()`
 
-### `onPrepareRequest()`
-
-在准备 LLM 请求之前调用，允许动态修改系统提示和 Tool。
+当整个 agent 循环完成时调用。
 
 ```ts
 class CustomAgent extends BaseAgent {
-  onPrepareRequest(context: PrepareRequestContext): PrepareRequestResult {
-    let { systemPrompt, tools } = context;
+  async onAgentLoopEnd(id: string): Promise<void> {
+    console.log(`会话 ${id} 的 agent 循环完成`);
     
-    // 根据上下文修改系统提示
-    if (context.iteration > 3) {
-      systemPrompt += '\n\n注意：你现在在第 ' + context.iteration + 
-        ' 次迭代中。请专注于提供简洁的最终答案。';
-    }
+    // 清理会话资源
+    this.cleanupSession(id);
     
-    // 根据当前状态过滤 Tool
-    const filteredTools = tools.filter(tool => {
-      // 在后期迭代中禁用昂贵的 Tool
-      if (context.iteration > 5 && tool.name.includes('search')) {
-        return false;
-      }
-      return true;
-    });
-    
-    return {
-      systemPrompt,
-      tools: filteredTools,
-    };
+    // 发送完成通知
+    await this.notifyCompletion(id);
   }
 }
 ```
-
-
-
-
-
-
-
-
 
 ## Hook 执行顺序
 
 ```mermaid
 flowchart TD
-    A[Agent 开始] --> B[initialize()]
+    A[Agent 开始] --> B[initialize]
     B --> C[Agent 循环开始]
-    C --> D[onEachAgentLoopStart()]
-    D --> E[onPrepareRequest()]
-    E --> F[onLLMRequest()]
+    C --> D[onEachAgentLoopStart]
+    D --> E[onPrepareRequest]
+    E --> F[onLLMRequest]
     F --> G[LLM 调用]
-    G --> H[onLLMResponse() / onLLMStreamingResponse()]
+    G --> H[onLLMResponse / onLLMStreamingResponse]
     H --> I{调用了 Tool?}
-    I -->|是| J[onProcessToolCalls()]
-    J --> K[onBeforeToolCall()]
+    I -->|是| J[onProcessToolCalls]
+    J --> K[onBeforeToolCall]
     K --> L[Tool 执行]
     L --> M{Tool 成功?}
-    M -->|是| N[onAfterToolCall()]
-    M -->|否| O[onToolCallError()]
-    N --> P[onEachAgentLoopEnd()]
+    M -->|是| N[onAfterToolCall]
+    M -->|否| O[onToolCallError]
+    N --> P[onEachAgentLoopEnd]
     O --> P
     I -->|否| P
     P --> Q{继续循环?}
     Q -->|是| D
-    Q -->|否| R[onBeforeLoopTermination()]
+    Q -->|否| R[onBeforeLoopTermination]
     R --> S{应该终止?}
-    S -->|是| T[onAgentLoopEnd()]
+    S -->|是| T[onAgentLoopEnd]
     S -->|否| D
     T --> U[Agent 结束]
-    U --> V[onDispose()]
+    U --> V[onDispose]
     V --> W[完成]
 ```

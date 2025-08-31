@@ -2,26 +2,24 @@
 
 Agent hooks provide a powerful way to extend and customize the behavior of your agents throughout their execution lifecycle. The `BaseAgent` class exposes a comprehensive set of hooks that allow you to intercept, modify, and react to various events during agent execution.
 
-## Overview
+## Hooks API
 
-| Hook | Category | Description |
-|------|----------|-------------|
-| [`initialize()`](#initialize) | Lifecycle | Called during agent initialization |
-| [`onDispose()`](#ondispose) | Lifecycle | Called during agent disposal |
-| [`onLLMRequest()`](#onllmrequest) | LLM Interaction | Before sending request to LLM |
-| [`onLLMResponse()`](#onllmresponse) | LLM Interaction | After receiving response from LLM |
-| [`onLLMStreamingResponse()`](#onllmstreamingresponse) | LLM Interaction | For streaming responses from LLM |
-| [`onBeforeToolCall()`](#onbeforetoolcall) | Tool Execution | Before executing a tool |
-| [`onAfterToolCall()`](#onaftertoolcall) | Tool Execution | After executing a tool |
-| [`onToolCallError()`](#ontooolcallerror) | Tool Execution | When tool execution fails |
-| [`onProcessToolCalls()`](#onprocesstoolcalls) | Tool Execution | Intercept tool call processing |
-| [`onEachAgentLoopStart()`](#oneachagentloopstart) | Loop Control | Start of each agent loop iteration |
-| [`onEachAgentLoopEnd()`](#oneachagentloopend) | Loop Control | End of each agent loop iteration |
-| [`onAgentLoopEnd()`](#onagentloopend) | Loop Control | When entire agent loop completes |
-| [`onBeforeLoopTermination()`](#onbeforelooptermination) | Loop Control | Before agent loop terminates |
-| [`onPrepareRequest()`](#onpreparerequest) | Request Preparation | Before preparing LLM request |
-
-## Lifecycle Hooks
+| Hook | Description |
+|------|-------------|
+| [`initialize()`](#initialize) | Called during agent initialization |
+| [`onDispose()`](#ondispose) | Called during agent disposal |
+| [`onPrepareRequest()`](#onpreparerequest) | Before preparing LLM request |
+| [`onLLMRequest()`](#onllmrequest) | Before sending request to LLM |
+| [`onLLMResponse()`](#onllmresponse) | After receiving response from LLM |
+| [`onLLMStreamingResponse()`](#onllmstreamingresponse) | For streaming responses from LLM |
+| [`onProcessToolCalls()`](#onprocesstoolcalls) | Intercept tool call processing |
+| [`onBeforeToolCall()`](#onbeforetoolcall) | Before executing a tool |
+| [`onAfterToolCall()`](#onaftertoolcall) | After executing a tool |
+| [`onToolCallError()`](#ontooolcallerror) | When tool execution fails |
+| [`onEachAgentLoopStart()`](#oneachagentloopstart) | Start of each agent loop iteration |
+| [`onEachAgentLoopEnd()`](#oneachagentloopend) | End of each agent loop iteration |
+| [`onBeforeLoopTermination()`](#onbeforelooptermination) | Before agent loop terminates |
+| [`onAgentLoopEnd()`](#onagentloopend) | When entire agent loop completes |
 
 ### `initialize()`
 
@@ -53,7 +51,37 @@ class CustomAgent extends BaseAgent {
 }
 ```
 
-## LLM Interaction Hooks
+### `onPrepareRequest()`
+
+Called before preparing the LLM request, allowing dynamic modification of system prompt and tools.
+
+```ts
+class CustomAgent extends BaseAgent {
+  onPrepareRequest(context: PrepareRequestContext): PrepareRequestResult {
+    let { systemPrompt, tools } = context;
+    
+    // Modify system prompt based on context
+    if (context.iteration > 3) {
+      systemPrompt += '\n\nNote: You are in iteration ' + context.iteration + 
+        '. Please focus on providing a concise final answer.';
+    }
+    
+    // Filter tools based on current state
+    const filteredTools = tools.filter(tool => {
+      // Disable expensive tools in later iterations
+      if (context.iteration > 5 && tool.name.includes('search')) {
+        return false;
+      }
+      return true;
+    });
+    
+    return {
+      systemPrompt,
+      tools: filteredTools,
+    };
+  }
+}
+```
 
 ### `onLLMRequest()`
 
@@ -109,7 +137,29 @@ class CustomAgent extends BaseAgent {
 }
 ```
 
-## Tool Execution Hooks
+### `onProcessToolCalls()`
+
+Intercepts tool call processing, essential for testing and mocking.
+
+```ts
+class TestAgent extends BaseAgent {
+  onProcessToolCalls(
+    id: string,
+    toolCalls: ChatCompletionMessageToolCall[]
+  ): ToolCallResult[] | undefined {
+    // Mock tool calls for testing
+    if (this.isTestMode) {
+      return toolCalls.map(call => ({
+        toolCallId: call.id,
+        content: this.getMockResult(call.function.name),
+      }));
+    }
+    
+    // Return undefined for normal execution
+    return undefined;
+  }
+}
+```
 
 ### `onBeforeToolCall()`
 
@@ -193,32 +243,6 @@ class CustomAgent extends BaseAgent {
 }
 ```
 
-### `onProcessToolCalls()`
-
-Intercepts tool call processing, essential for testing and mocking.
-
-```ts
-class TestAgent extends BaseAgent {
-  onProcessToolCalls(
-    id: string,
-    toolCalls: ChatCompletionMessageToolCall[]
-  ): ToolCallResult[] | undefined {
-    // Mock tool calls for testing
-    if (this.isTestMode) {
-      return toolCalls.map(call => ({
-        toolCallId: call.id,
-        content: this.getMockResult(call.function.name),
-      }));
-    }
-    
-    // Return undefined for normal execution
-    return undefined;
-  }
-}
-```
-
-## Loop Control Hooks
-
 ### `onEachAgentLoopStart()`
 
 Called at the beginning of each agent loop iteration.
@@ -259,24 +283,6 @@ class CustomAgent extends BaseAgent {
 }
 ```
 
-### `onAgentLoopEnd()`
-
-Called when the entire agent loop completes.
-
-```ts
-class CustomAgent extends BaseAgent {
-  async onAgentLoopEnd(id: string): Promise<void> {
-    console.log(`Agent loop completed for session ${id}`);
-    
-    // Cleanup session resources
-    this.cleanupSession(id);
-    
-    // Send completion notifications
-    await this.notifyCompletion(id);
-  }
-}
-```
-
 ### `onBeforeLoopTermination()`
 
 Called before the agent loop terminates, allowing you to control termination conditions.
@@ -311,74 +317,52 @@ class CustomAgent extends BaseAgent {
 }
 ```
 
-## Request Preparation Hooks
+### `onAgentLoopEnd()`
 
-### `onPrepareRequest()`
-
-Called before preparing the LLM request, allowing dynamic modification of system prompt and tools.
+Called when the entire agent loop completes.
 
 ```ts
 class CustomAgent extends BaseAgent {
-  onPrepareRequest(context: PrepareRequestContext): PrepareRequestResult {
-    let { systemPrompt, tools } = context;
+  async onAgentLoopEnd(id: string): Promise<void> {
+    console.log(`Agent loop completed for session ${id}`);
     
-    // Modify system prompt based on context
-    if (context.iteration > 3) {
-      systemPrompt += '\n\nNote: You are in iteration ' + context.iteration + 
-        '. Please focus on providing a concise final answer.';
-    }
+    // Cleanup session resources
+    this.cleanupSession(id);
     
-    // Filter tools based on current state
-    const filteredTools = tools.filter(tool => {
-      // Disable expensive tools in later iterations
-      if (context.iteration > 5 && tool.name.includes('search')) {
-        return false;
-      }
-      return true;
-    });
-    
-    return {
-      systemPrompt,
-      tools: filteredTools,
-    };
+    // Send completion notifications
+    await this.notifyCompletion(id);
   }
 }
 ```
-
-
-
-
-
-
 
 ## Hook Execution Order
 
 ```mermaid
 flowchart TD
-    A[Agent Start] --> B[initialize()]
+    A[Agent Start] --> B[initialize]
     B --> C[Agent Loop Start]
-    C --> D[onEachAgentLoopStart()]
-    D --> E[onPrepareRequest()]
-    E --> F[onLLMRequest()]
+    C --> D[onEachAgentLoopStart]
+    D --> E[onPrepareRequest]
+    E --> F[onLLMRequest]
     F --> G[LLM Call]
-    G --> H[onLLMResponse() / onLLMStreamingResponse()]
+    G --> H[onLLMResponse / onLLMStreamingResponse]
     H --> I{Tools Called?}
-    I -->|Yes| J[onProcessToolCalls()]
-    J --> K[onBeforeToolCall()]
+    I -->|Yes| J[onProcessToolCalls]
+    J --> K[onBeforeToolCall]
     K --> L[Tool Execution]
     L --> M{Tool Success?}
-    M -->|Yes| N[onAfterToolCall()]
-    M -->|No| O[onToolCallError()]
-    N --> P[onEachAgentLoopEnd()]
+    M -->|Yes| N[onAfterToolCall]
+    M -->|No| O[onToolCallError]
+    N --> P[onEachAgentLoopEnd]
     O --> P
     I -->|No| P
     P --> Q{Continue Loop?}
     Q -->|Yes| D
-    Q -->|No| R[onBeforeLoopTermination()]
+    Q -->|No| R[onBeforeLoopTermination]
     R --> S{Should Terminate?}
-    S -->|Yes| T[onAgentLoopEnd()]
+    S -->|Yes| T[onAgentLoopEnd]
     S -->|No| D
     T --> U[Agent End]
-    U --> V[onDispose()]
+    U --> V[onDispose]
     V --> W[Complete]
 ```
