@@ -123,7 +123,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
 
           {/* Description */}
           {description && (
-            <span className="font-[400] text-xs opacity-70 truncate block sm:inline">
+            <span className="font-[400] text-xs opacity-70 block sm:inline overflow-hidden whitespace-nowrap" style={{ direction: 'rtl', textAlign: 'left' }}>
               {description}
             </span>
           )}
