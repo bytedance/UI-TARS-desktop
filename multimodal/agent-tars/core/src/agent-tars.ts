@@ -68,6 +68,10 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
       enableScreenshotRenderStrategySwitch: true,
       renderGUIAction: true,
     },
+    layout: {
+      defaultLayout: 'narrow-chat',
+      enableLayoutSwitchButton: true,
+    },
   };
   private workspace: string;
   // FIXME: remove it since options is strict type already
