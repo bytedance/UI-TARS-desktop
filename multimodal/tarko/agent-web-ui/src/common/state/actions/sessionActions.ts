@@ -11,6 +11,7 @@ import { connectionStatusAtom } from '../atoms/ui';
 import { replayStateAtom } from '../atoms/replay';
 import { sessionFilesAtom, FileItem } from '../atoms/files';
 import { ChatCompletionContentPart, AgentEventStream } from '@tarko/agent-interface';
+import { createModelConfigFromEvent, createAgentInfoFromEvent } from '../../utils/metadataUtils';
 
 // Priority-based file selection for workspace display: HTML > Markdown > Others
 function selectBestFileToDisplay(files: FileItem[]): FileItem | null {
@@ -179,29 +180,19 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
           const enrichedMetadata = { ...sessionDetails.metadata };
 
           // Enrich with model config if missing
-          if (
-            !enrichedMetadata.modelConfig &&
-            ('provider' in runStartEvent || 'model' in runStartEvent)
-          ) {
-            enrichedMetadata.modelConfig = {
-              provider: runStartEvent.provider || '',
-              modelId: runStartEvent.model || '',
-              displayName:
-                'modelDisplayName' in runStartEvent ? runStartEvent.modelDisplayName : undefined,
-              configuredAt: Date.now(),
-            };
+          if (!enrichedMetadata.modelConfig) {
+            const modelConfig = createModelConfigFromEvent(runStartEvent);
+            if (modelConfig) {
+              enrichedMetadata.modelConfig = modelConfig;
+            }
           }
 
           // Enrich with agent info if missing
-          if (
-            !enrichedMetadata.agentInfo?.name &&
-            'agentName' in runStartEvent &&
-            runStartEvent.agentName
-          ) {
-            enrichedMetadata.agentInfo = {
-              name: runStartEvent.agentName,
-              configuredAt: Date.now(),
-            };
+          if (!enrichedMetadata.agentInfo?.name) {
+            const agentInfo = createAgentInfoFromEvent(runStartEvent);
+            if (agentInfo) {
+              enrichedMetadata.agentInfo = agentInfo;
+            }
           }
 
           set(sessionMetadataAtom, enrichedMetadata);

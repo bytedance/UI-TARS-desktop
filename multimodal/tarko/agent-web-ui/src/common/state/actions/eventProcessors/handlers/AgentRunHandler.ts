@@ -3,6 +3,7 @@ import { AgentEventStream } from '@/common/types';
 import { EventHandler, EventHandlerContext } from '../types';
 import { apiService } from '@/common/services/apiService';
 import { SessionItemInfo } from '@tarko/interface';
+import { createModelConfigFromEvent, createAgentInfoFromEvent } from '@/common/utils/metadataUtils';
 
 export class AgentRunStartHandler implements EventHandler<AgentEventStream.AgentRunStartEvent> {
   canHandle(event: AgentEventStream.Event): event is AgentEventStream.AgentRunStartEvent {
@@ -19,20 +20,14 @@ export class AgentRunStartHandler implements EventHandler<AgentEventStream.Agent
     // Update session metadata with model and agent info from event
     const metadataUpdates: Partial<NonNullable<SessionItemInfo['metadata']>> = {};
 
-    if (event.provider || event.model) {
-      metadataUpdates.modelConfig = {
-        provider: event.provider || '',
-        modelId: event.model || '',
-        displayName: event.modelDisplayName,
-        configuredAt: Date.now(),
-      };
+    const modelConfig = createModelConfigFromEvent(event);
+    if (modelConfig) {
+      metadataUpdates.modelConfig = modelConfig;
     }
 
-    if (event.agentName) {
-      metadataUpdates.agentInfo = {
-        name: event.agentName,
-        configuredAt: Date.now(),
-      };
+    const agentInfo = createAgentInfoFromEvent(event);
+    if (agentInfo) {
+      metadataUpdates.agentInfo = agentInfo;
     }
 
     if (Object.keys(metadataUpdates).length > 0) {
