@@ -4,7 +4,7 @@ import React from 'react';
  * Table component styles
  */
 const TABLE_STYLES = {
-  wrapper: 'overflow-x-auto my-6 w-full',
+  wrapper: 'overflow-x-auto my-6',
   table:
     'min-w-full border-collapse border border-gray-300 dark:border-gray-600 text-sm w-full my-6',
   thead: 'bg-gray-100 dark:bg-gray-800',

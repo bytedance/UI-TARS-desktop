@@ -24,15 +24,8 @@
 }
 
 .markdown-content table {
-  max-width: 100%;
-  overflow-x: auto;
-  display: block;
-  white-space: nowrap;
-}
-
-.markdown-content table tbody {
-  display: table;
   width: 100%;
+  table-layout: fixed;
 }
 
 /* Table styling - nth-child and complex selectors */
