@@ -284,10 +284,16 @@ export class ThinkingMessageHandler
 
         if (event.type === 'assistant_streaming_thinking_message') {
           // For streaming thinking messages, append to existing thinking content
-          newThinking = (message.thinking || '') + event.content.replace(/^\n+/, '');
+          // Only trim leading newlines if this is the first chunk (thinking is empty)
+          const contentToAdd = (message.thinking || '').length === 0 && event.content.startsWith('\n')
+            ? event.content.replace(/^\n+/, '')
+            : event.content;
+          newThinking = (message.thinking || '') + contentToAdd;
         } else {
-          // For final thinking messages, always replace the content
-          newThinking = event.content.replace(/^\n+/, '');
+          // For final thinking messages, only trim if content starts with newline
+          newThinking = event.content.startsWith('\n')
+            ? event.content.replace(/^\n+/, '')
+            : event.content;
         }
 
         return {
@@ -305,7 +311,9 @@ export class ThinkingMessageHandler
           role: 'assistant',
           content: '',
           timestamp: event.timestamp,
-          thinking: event.content.replace(/^\n+/, ''),
+          thinking: event.content.startsWith('\n')
+            ? event.content.replace(/^\n+/, '')
+            : event.content,
           messageId: eventMessageId,
           isStreaming: event.type === 'assistant_streaming_thinking_message' && !event.isComplete,
         };
