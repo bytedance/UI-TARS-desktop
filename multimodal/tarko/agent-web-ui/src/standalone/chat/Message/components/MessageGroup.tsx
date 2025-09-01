@@ -39,9 +39,10 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
     (msg) => msg.role === 'assistant' || msg.role === 'final_answer' || msg.role === 'system',
   );
 
-  // Get the last assistant message (for timestamp and copy functionality)
-  const lastResponseMessage =
-    assistantMessages.length > 0 ? assistantMessages[assistantMessages.length - 1] : null;
+  // Get the final assistant message (only completed responses, not intermediate tool calls)
+  const finalResponseMessage = assistantMessages.find(
+    (msg) => msg.finishReason === 'stop'
+  ) || null;
 
   return (
     <div>
@@ -115,7 +116,7 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
       )}
 
       {/* Message footer with timestamp, TTFT, and copy functionality */}
-      {!isThinking && lastResponseMessage && <MessageFooter message={lastResponseMessage} />}
+      {!isThinking && finalResponseMessage && <MessageFooter message={finalResponseMessage} />}
     </div>
   );
 };
