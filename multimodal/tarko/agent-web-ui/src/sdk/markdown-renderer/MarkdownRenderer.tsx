@@ -8,7 +8,7 @@ import { useMarkdownComponents } from './hooks/useMarkdownComponents';
 import { ImageModal } from './components/ImageModal';
 import { resetFirstH1Flag } from './components/Headings';
 import { scrollToElement } from './utils';
-import { useDarkMode } from '@/common/hooks/useDarkMode';
+import { MarkdownThemeProvider, useMarkdownStyles } from './context/MarkdownThemeContext';
 import 'remark-github-blockquote-alert/alert.css';
 import './syntax-highlight.css';
 import './markdown.css';
@@ -25,7 +25,19 @@ interface MarkdownRendererProps {
  * MarkdownRenderer component
  * Renders markdown content with custom styling and enhanced functionality
  */
-export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
+export const MarkdownRenderer: React.FC<MarkdownRendererProps> = (props) => {
+  return (
+    <MarkdownThemeProvider>
+      <MarkdownRendererContent {...props} />
+    </MarkdownThemeProvider>
+  );
+};
+
+/**
+ * Internal component that uses the theme context
+ * Separated to ensure theme provider is available
+ */
+const MarkdownRendererContent: React.FC<MarkdownRendererProps> = ({
   content,
   publishDate,
   author,
@@ -34,7 +46,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
 }) => {
   const [openImage, setOpenImage] = useState<string | null>(null);
   const [renderError, setRenderError] = useState<Error | null>(null);
-  const isDarkMode = useDarkMode();
+  const { themeClass, colors } = useMarkdownStyles();
 
   /**
    * Handle image click for modal preview
@@ -93,8 +105,8 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   /**
    * Determine theme class and merge with markdown content styles
    */
-  const themeClass = forceDarkTheme || isDarkMode ? 'dark' : 'light';
-  const markdownContentClass = `${themeClass} markdown-content font-inter leading-relaxed text-gray-800 dark:text-gray-200 ${className}`;
+  const finalThemeClass = forceDarkTheme ? 'dark' : themeClass;
+  const markdownContentClass = `${finalThemeClass} markdown-content font-inter leading-relaxed ${colors.text.primary} ${className}`;
 
   try {
     return (

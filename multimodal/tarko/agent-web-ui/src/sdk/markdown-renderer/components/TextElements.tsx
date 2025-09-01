@@ -1,54 +1,37 @@
 import React from 'react';
+import { useTextStyles } from '../context/MarkdownThemeContext';
 
 /**
- * Text element styles - Updated with merged tailwind classes
+ * Optimized text components using shared theme context
+ * All components access the same pre-computed styles for better performance
  */
-const TEXT_STYLES = {
-  paragraph: 'my-2 text-gray-800 dark:text-gray-200 leading-relaxed text-base',
-  unorderedList: 'my-2 list-disc pl-6 text-gray-800 dark:text-gray-200 text-base',
-  orderedList: 'my-2 list-decimal pl-6 text-gray-800 dark:text-gray-200 text-base',
-  listItem: 'my-1 text-base',
-  blockquote:
-    'border-l-4 border-gray-200 dark:border-slate-600 pl-4 my-5 italic text-slate-600 dark:text-slate-400',
-  horizontalRule: 'my-8 border-t border-gray-200 dark:border-gray-700',
+
+export const Paragraph: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const styles = useTextStyles();
+  return <p className={styles.paragraph}>{children}</p>;
 };
 
-/**
- * Paragraph component
- */
-export const Paragraph: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <p className={TEXT_STYLES.paragraph}>{children}</p>
-);
+export const UnorderedList: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const styles = useTextStyles();
+  return <ul className={styles.unorderedList}>{children}</ul>;
+};
 
-/**
- * Unordered list component
- */
-export const UnorderedList: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <ul className={TEXT_STYLES.unorderedList}>{children}</ul>
-);
+export const OrderedList: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const styles = useTextStyles();
+  return <ol className={styles.orderedList}>{children}</ol>;
+};
 
-/**
- * Ordered list component
- */
-export const OrderedList: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <ol className={TEXT_STYLES.orderedList}>{children}</ol>
-);
+export const ListItem: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const styles = useTextStyles();
+  return <li className={styles.listItem}>{children}</li>;
+};
 
-/**
- * List item component
- */
-export const ListItem: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <li className={TEXT_STYLES.listItem}>{children}</li>
-);
+export const Blockquote: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const styles = useTextStyles();
+  return <blockquote className={styles.blockquote}>{children}</blockquote>;
+};
 
-/**
- * Blockquote component
- */
-export const Blockquote: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <blockquote className={TEXT_STYLES.blockquote}>{children}</blockquote>
-);
-
-/**
- * Horizontal rule component
- */
-export const HorizontalRule: React.FC = () => <hr className={TEXT_STYLES.horizontalRule} />;
+export const HorizontalRule: React.FC = () => {
+  const styles = useTextStyles();
+  return <hr className={styles.horizontalRule} />;
+};

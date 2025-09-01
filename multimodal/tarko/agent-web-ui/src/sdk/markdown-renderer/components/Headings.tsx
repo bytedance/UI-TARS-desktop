@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { generateId } from '../utils';
+import { useHeadingStyles } from '../context/MarkdownThemeContext';
 
 interface HeadingProps {
   children: React.ReactNode;
@@ -23,29 +24,27 @@ export const resetFirstH1Flag = (): void => {
  */
 export const Heading: React.FC<HeadingProps> = ({ children, level }) => {
   const id = generateId(children?.toString());
-
-  const getHeadingStyles = () => {
-    const baseStyles =
-      'group scroll-mt-20 flex items-center font-semibold leading-tight text-gray-900 dark:text-gray-100';
-
+  const headingStyles = useHeadingStyles();
+  
+  const getHeadingClassName = () => {
     switch (level) {
       case 1:
-        return `${baseStyles} text-3xl font-bold mt-6 mb-2 pb-2 border-b border-gray-200 dark:border-gray-700`;
+        return headingStyles.h1;
       case 2:
-        return `${baseStyles} text-2xl font-bold mt-6 mb-2 pb-2`;
+        return headingStyles.h2;
       case 3:
-        return `${baseStyles} text-xl font-semibold mt-8 mb-3 text-gray-800 dark:text-gray-200`;
+        return headingStyles.h3;
       case 4:
-        return `${baseStyles} text-md font-semibold mt-6 mb-2 text-gray-800 dark:text-gray-200`;
+        return headingStyles.h4;
       default:
-        return `${baseStyles} text-sm font-medium mt-4 mb-2 text-gray-700 dark:text-gray-300`;
+        return headingStyles.h5h6;
     }
   };
 
   const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
 
   return (
-    <HeadingTag id={id} className={getHeadingStyles()}>
+    <HeadingTag id={id} className={getHeadingClassName()}>
       {children}
     </HeadingTag>
   );
