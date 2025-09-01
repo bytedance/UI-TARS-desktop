@@ -145,15 +145,27 @@ export function extractChatContentT5(content: string, state: T5StreamProcessingS
 
   // Check for partial tags at the end of the buffer that might be completed in future chunks
   // Order by length descending to match the longest possible partial tag first
-  const partialTags = [
-    '</thinkt',
-    '</think',
-    '<thinkt',
-    '<think',
-    '<thin',
-    '<thi',
-    '<th',
-    '<t',
+  // Generate partial think tags dynamically based on think_token
+  const generatePartialThinkTags = (token: string): string[] => {
+    const tags = [];
+    const openTag = `<${token}`;
+    const closeTag = `</${token}`;
+
+    // Add partial close tags (from longest to shortest)
+    for (let i = closeTag.length - 1; i >= 1; i--) {
+      tags.push(closeTag.substring(0, i));
+    }
+
+    // Add partial open tags (from longest to shortest, including the complete openTag without >)
+    for (let i = openTag.length; i >= 1; i--) {
+      tags.push(openTag.substring(0, i));
+    }
+
+    return tags;
+  };
+
+  const partialThinkTags = generatePartialThinkTags(T5_THINK_TAG);
+  const partialToolCallTags = [
     '<seed:tool_call',
     '<seed:tool_cal',
     '<seed:tool_ca',
@@ -170,6 +182,11 @@ export function extractChatContentT5(content: string, state: T5StreamProcessingS
     '<s',
     '<',
   ];
+
+  // Combine and sort by length descending
+  const partialTags = [...partialThinkTags, ...partialToolCallTags].sort(
+    (a, b) => b.length - a.length,
+  );
 
   let hasPartialTag = false;
   let partialTagIndex = -1;

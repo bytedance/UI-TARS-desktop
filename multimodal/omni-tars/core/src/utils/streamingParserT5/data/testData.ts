@@ -4,11 +4,12 @@
  */
 
 import { ChatCompletionChunk } from '@tarko/agent-interface';
+import { think_token } from '../../../environments/prompt_t5';
 
 // Extracted from code.jsonl - real streaming data for testing
 export const realStreamingChunks = [
   '<',
-  'thinkt',
+  `${think_token}`,
   '>',
   '项目',
   '目录',
@@ -76,7 +77,7 @@ export const realStreamingChunks = [
   '长度',
   '。',
   '</',
-  'thinkt',
+  `${think_token}`,
   '>',
   '\n',
   '<seed:to',
