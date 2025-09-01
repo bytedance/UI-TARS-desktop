@@ -17,7 +17,36 @@ export class GuiToolCallEngineProvider extends ToolCallEngineProvider<GUIAgentTo
   }
 
   canHandle(context: ToolCallEngineContext): boolean {
-    // Check if the latest model output contains <computer_env></computer_env> tags
+    //Check if any tools are GUI/computer use related
+    if (context.toolCalls) {
+      const guiToolNames = [
+        'call_user',
+        'click',
+        'drag',
+        'finished',
+        'hotkey',
+        'left_double',
+        'mouse_down',
+        'mouse_up',
+        'move_to',
+        'press',
+        'release',
+        'right_single',
+        'scroll',
+        'type',
+        'wait',
+      ];
+
+      const hasGuiTools = context?.toolCalls?.some((tool) =>
+        guiToolNames.some((guiName) =>
+          tool.function.name.toLowerCase().includes(guiName.toLowerCase()),
+        ),
+      );
+
+      return !!hasGuiTools;
+    }
+
+    // Fallback: Check if the latest model output contains <computer_env></computer_env> tags
     if (context.latestAssistantMessage) {
       const hasComputerEnvTags = context.latestAssistantMessage.includes('<computer_env>');
       if (hasComputerEnvTags) {
@@ -25,31 +54,6 @@ export class GuiToolCallEngineProvider extends ToolCallEngineProvider<GUIAgentTo
       }
     }
 
-    // Fallback: Check if any tools are GUI/computer use related
-    const guiToolNames = [
-      'call_user',
-      'click',
-      'drag',
-      'finished',
-      'hotkey',
-      'left_double',
-      'mouse_down',
-      'mouse_up',
-      'move_to',
-      'press',
-      'release',
-      'right_single',
-      'scroll',
-      'type',
-      'wait',
-    ];
-
-    const hasGuiTools = context?.toolCalls?.some((tool) =>
-      guiToolNames.some((guiName) =>
-        tool.function.name.toLowerCase().includes(guiName.toLowerCase()),
-      ),
-    );
-
-    return !!hasGuiTools;
+    return false;
   }
 }

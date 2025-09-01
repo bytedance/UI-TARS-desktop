@@ -21,6 +21,7 @@ import {
   createT5InitState as createInitState,
   SYSTEM_PROMPT_GROUP,
 } from '@omni-tars/core';
+import { getLogger } from '@tarko/agent';
 
 /**
  * SimpleKorToolCallEngine - Minimal prompt engineering tool call engine
@@ -33,6 +34,8 @@ import {
  * Format used: <tool_call>{"name": "tool_name", "arguments": {...}}</tool_call>
  */
 export class GUIAgentToolCallEngine extends ToolCallEngine {
+  private logger = getLogger('GUIAgentToolCallEngine');
+
   /**
    * Prepare system prompt with tool information and instructions
    */
@@ -78,6 +81,8 @@ export class GUIAgentToolCallEngine extends ToolCallEngine {
    * Extract tool calls from complete response text
    */
   finalizeStreamProcessing(state: OmniStreamProcessingState): ParsedModelResponse {
+    this.logger.info('finalizeStreamProcessing state \n', state);
+
     console.log('getScreenInfo()', getScreenInfo());
 
     const fullContent = state.contentBuffer;
