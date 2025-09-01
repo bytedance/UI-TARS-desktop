@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FiX, FiShare2, FiLink, FiDownload, FiCheck, FiLoader } from 'react-icons/fi';
+import { FiX, FiShare2, FiLink, FiDownload, FiCheck } from 'react-icons/fi';
 import { shareService, ShareConfig, ShareResult } from './shareService';
 import { Dialog } from '@headlessui/react';
+import { LoadingSpinner } from '@/common/components/LoadingSpinner';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -10,15 +11,6 @@ interface ShareModalProps {
   sessionId: string;
 }
 
-/**
- * Share Modal Component
- *
- * Design Principles:
- * - Clean and elegant black-white-gray style, consistent with overall design language
- * - Large border radius and refined borders for sophisticated visual effects
- * - Dynamic transitions and subtle animations to enhance user experience
- * - Clear status feedback including loading, success and error states
- */
 export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, sessionId }) => {
   const [shareConfig, setShareConfig] = useState<ShareConfig | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -41,7 +33,6 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
     }
   }, [isOpen]);
 
-  // Reset state when modal closes to allow re-sharing
   useEffect(() => {
     if (!isOpen) {
       setShareResult(null);
@@ -102,7 +93,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-[9999]">
-      <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-md" aria-hidden="true" />
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-md" aria-hidden="true" />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <Dialog.Panel className="w-full max-w-md p-6 bg-white dark:bg-gray-800 rounded-3xl border border-[#E5E6EC] dark:border-gray-700/30 shadow-lg">
@@ -124,12 +115,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
           {!shareConfig && (
             <div className="flex items-center justify-center py-8">
               <div className="flex items-center space-x-2 text-gray-500 dark:text-gray-400">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                >
-                  <FiLoader size={20} />
-                </motion.div>
+                <LoadingSpinner size={5} className="border-gray-400 border-t-transparent" />
                 <span>Loading share options...</span>
               </div>
             </div>
@@ -142,7 +128,6 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
               </p>
 
               <div className="space-y-4">
-                {/* Only show when share provider is configured */}
                 {shareConfig.hasShareProvider && (
                   <motion.button
                     whileHover={{ y: -2 }}
@@ -169,7 +154,6 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
                   </motion.button>
                 )}
 
-                {/* Always available option */}
                 <motion.button
                   whileHover={{ y: -2 }}
                   whileTap={{ scale: 0.98 }}
@@ -203,11 +187,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
 
           {isLoading && (
             <div className="flex flex-col items-center justify-center py-10">
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-                className="w-12 h-12 rounded-full border-2 border-gray-200 dark:border-gray-700 border-t-gray-600 dark:border-t-gray-300 mb-4"
-              />
+              <LoadingSpinner size={12} className="border-gray-200 dark:border-gray-700 border-t-gray-600 dark:border-t-gray-300 mb-4" />
               <p className="text-gray-700 dark:text-gray-300 text-center">
                 Preparing your conversation for sharing...
               </p>

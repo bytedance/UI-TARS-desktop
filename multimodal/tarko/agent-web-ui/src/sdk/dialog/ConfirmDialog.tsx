@@ -54,10 +54,8 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-[9999]">
-      {/* Backdrop */}
-      <div className="fixed inset-0 bg-black bg-opacity-25 backdrop-blur-sm" aria-hidden="true" />
+      <div className="fixed inset-0 bg-black/25 backdrop-blur-sm" aria-hidden="true" />
 
-      {/* Dialog position */}
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <Dialog.Panel className="w-full max-w-md rounded-xl bg-white dark:bg-gray-800 p-6 shadow-xl border border-gray-200/50 dark:border-gray-700/30">
           <div className="flex items-start">
