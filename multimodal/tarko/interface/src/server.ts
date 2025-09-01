@@ -122,48 +122,53 @@ export type AgioProviderConstructor<T extends AgentOptions = AgentOptions> = TCo
 >;
 
 /**
- * Session metadata interface - JSON schema design for extensibility
+ * Session item metadata interface - JSON schema design for extensibility
+ */
+export interface SessionItemMetadata {
+  /**
+   * Reserved version interface for backward compatibility
+   */
+  version?: number;
+  /**
+   * Session name
+   */
+  name?: string;
+  /**
+   * Session tags
+   */
+  tags?: string[];
+  /**
+   * Current using model configuration
+   */
+  modelConfig?: {
+    provider: string;
+    modelId: string;
+    displayName?: string;
+    configuredAt: number;
+  };
+  /**
+   * Current using agent configuration
+   */
+  agentInfo?: {
+    name: string;
+    configuredAt: number;
+    [key: string]: any; // Future agent info fields
+  };
+  /**
+   * Future extensible fields
+   */
+  [key: string]: any;
+}
+
+/**
+ * Session item interface
  */
 export interface SessionItemInfo {
   id: string;
   createdAt: number;
   updatedAt: number;
   workspace: string;
-  /**
-   * All extensible metadata in JSON format - no more schema migrations needed
-   */
-  metadata?: {
-    /**
-     * Reserved version interface for backward compatibility
-     */
-    version?: number;
-    /**
-     * Session name
-     */
-    name?: string;
-    /**
-     * Session tags
-     */
-    tags?: string[];
-    /**
-     * Current using model configuration
-     */
-    modelConfig?: {
-      provider: string;
-      modelId: string;
-      displayName?: string;
-      configuredAt: number;
-    };
-    /**
-     * Current using agent configuration
-     */
-    agentInfo?: {
-      name: string;
-      configuredAt: number;
-      [key: string]: any; // Future agent info fields
-    };
-    [key: string]: any; // Future extensible fields
-  };
+  metadata?: SessionItemMetadata;
 }
 
 /**

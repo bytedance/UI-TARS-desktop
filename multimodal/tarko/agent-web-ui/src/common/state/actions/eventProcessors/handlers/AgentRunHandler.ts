@@ -19,7 +19,6 @@ export class AgentRunStartHandler implements EventHandler<AgentEventStream.Agent
 
     // Update session metadata with model and agent info from event
     const metadataUpdates: Partial<NonNullable<SessionItemInfo['metadata']>> = {};
-
     const modelConfig = createModelConfigFromEvent(event);
     if (modelConfig) {
       metadataUpdates.modelConfig = modelConfig;

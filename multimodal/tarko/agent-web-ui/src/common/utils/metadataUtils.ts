@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SessionItemInfo } from '@tarko/interface';
+import { SessionItemMetadata } from '@tarko/interface';
 import { AgentEventStream } from '@/common/types';
 
 /**
@@ -14,7 +14,7 @@ import { AgentEventStream } from '@/common/types';
  */
 export function createModelConfigFromEvent(
   event: AgentEventStream.AgentRunStartEvent,
-): SessionItemInfo['metadata']['modelConfig'] | null {
+): SessionItemMetadata['modelConfig'] | null {
   if (!event.provider && !event.model) {
     return null;
   }
@@ -35,7 +35,7 @@ export function createModelConfigFromEvent(
  */
 export function createAgentInfoFromEvent(
   event: AgentEventStream.AgentRunStartEvent,
-): SessionItemInfo['metadata']['agentInfo'] | null {
+): SessionItemMetadata['agentInfo'] | null {
   if (!event.agentName) {
     return null;
   }
