@@ -17,7 +17,20 @@ export class CodeToolCallEngineProvider extends ToolCallEngineProvider<CodeToolC
   }
 
   canHandle(context: ToolCallEngineContext): boolean {
-    // Check if the latest model output contains <code_env></code_env> tags
+    // Check if any tools are code-related
+    if (context.toolCalls) {
+      const codeToolNames = ['str_replace_editor', 'execute_bash'];
+
+      const hasCodeTools = context?.toolCalls?.some((tool) =>
+        codeToolNames.some((codeName) =>
+          tool.function.name.toLowerCase().includes(codeName.toLowerCase()),
+        ),
+      );
+
+      return !!hasCodeTools;
+    }
+
+    // Fallback： Check if the latest model output contains <code_env></code_env> tags
     if (context.latestAssistantMessage) {
       const hasCodeEnvTags = context.latestAssistantMessage.includes('<code_env>');
 
@@ -26,15 +39,6 @@ export class CodeToolCallEngineProvider extends ToolCallEngineProvider<CodeToolC
       }
     }
 
-    // Fallback: Check if any tools are code-related
-    const codeToolNames = ['str_replace_editor', 'execute_bash'];
-
-    const hasCodeTools = context?.toolCalls?.some((tool) =>
-      codeToolNames.some((codeName) =>
-        tool.function.name.toLowerCase().includes(codeName.toLowerCase()),
-      ),
-    );
-
-    return !!hasCodeTools;
+    return false;
   }
 }

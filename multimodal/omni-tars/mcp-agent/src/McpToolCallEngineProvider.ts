@@ -21,7 +21,19 @@ export class McpToolCallEngineProvider extends ToolCallEngineProvider<McpToolCal
   }
 
   canHandle(context: ToolCallEngineContext): boolean {
-    // Check if the latest model output contains <mcp_env></mcp_env> tags
+    // Check if any of the available tools are MCP-related
+    if (context.toolCalls) {
+      const mcpToolNames = ['Search', 'LinkReader'];
+      const hasMcpTools = context?.toolCalls?.some((tool) =>
+        mcpToolNames.some((mcpName) =>
+          tool.function.name.toLowerCase().includes(mcpName.toLowerCase()),
+        ),
+      );
+
+      return !!hasMcpTools;
+    }
+
+    // Fallback: Check if the latest model output contains <mcp_env></mcp_env> tags
     if (context.latestAssistantMessage) {
       const hasMcpEnvTags = context.latestAssistantMessage.includes('<mcp_env>');
       if (hasMcpEnvTags) {
@@ -29,14 +41,6 @@ export class McpToolCallEngineProvider extends ToolCallEngineProvider<McpToolCal
       }
     }
 
-    // Fallback: Check if any of the available tools are MCP-related
-    const mcpToolNames = ['Search', 'LinkReader'];
-    const hasMcpTools = context?.toolCalls?.some((tool) =>
-      mcpToolNames.some((mcpName) =>
-        tool.function.name.toLowerCase().includes(mcpName.toLowerCase()),
-      ),
-    );
-
-    return !!hasMcpTools;
+    return false;
   }
 }
