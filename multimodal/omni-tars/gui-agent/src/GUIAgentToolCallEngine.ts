@@ -22,6 +22,7 @@ import {
   SYSTEM_PROMPT_GROUP,
 } from '@omni-tars/core';
 import { getLogger } from '@tarko/agent';
+import { GUIAgentT5Adapter } from './GUIAgentT5Adapter';
 
 /**
  * SimpleKorToolCallEngine - Minimal prompt engineering tool call engine
@@ -35,6 +36,7 @@ import { getLogger } from '@tarko/agent';
  */
 export class GUIAgentToolCallEngine extends ToolCallEngine {
   private logger = getLogger('GUIAgentToolCallEngine');
+  private t5Adapter = new GUIAgentT5Adapter(this.logger);
 
   /**
    * Prepare system prompt with tool information and instructions
@@ -81,126 +83,22 @@ export class GUIAgentToolCallEngine extends ToolCallEngine {
    * Extract tool calls from complete response text
    */
   finalizeStreamProcessing(state: OmniStreamProcessingState): ParsedModelResponse {
-    this.logger.info('finalizeStreamProcessing state \n', state);
-
-    console.log('getScreenInfo()', getScreenInfo());
-
     const fullContent = state.contentBuffer;
-    console.log('fullContent', fullContent);
+    this.logger.debug('finalizeStreamProcessing fullContent:', fullContent);
 
-    //TODO: transform state.toolCalls to 'parsed'
     const toolCalls = state.toolCalls;
+    this.logger.debug('finalizeStreamProcessing toolCalls:', toolCalls);
 
-    // const { parsed } = actionParser({
-    //   prediction: fullContent,
-    //   factor: [1000, 1000] as [number, number],
-    //   screenContext: {
-    //     width: getScreenInfo().screenWidth!,
-    //     height: getScreenInfo().screenHeight!,
-    //   },
-    // });
+    const convertedToolCalls = this.t5Adapter.convertToolsToOperatorActions(
+      toolCalls,
+      state.reasoningBuffer ?? '',
+    );
 
-    // console.log('parsed', parsed);
-
-    // const actionStrList = actionStringParser(fullContent);
-
-    // console.log('actionStrList', actionStrList);
-
-    // const toolCalls: ChatCompletionMessageToolCall[] = [];
-
-    // let finished = false;
-    // let finishMessage: string | null = null;
-    // let idx = 0;
-    // if (Array.isArray(parsed)) {
-    //   for (const action of parsed) {
-    //     idx = idx + 1;
-
-    //     const cleanedThought = action.thought.replace(/think_never_used_[a-f0-9]{32}>/g, '');
-    //     if (cleanedThought) {
-    //       action.thought = cleanedThought;
-    //     }
-
-    //     if (action.action_type === 'finished') {
-    //       finished = true;
-    //       finishMessage = action.action_inputs.content ?? null;
-    //       continue;
-    //     }
-    //     if (action.action_type === '') {
-    //       continue;
-    //     }
-    //     const toolCallId = this.generateToolCallId();
-    //     toolCalls.push({
-    //       id: toolCallId,
-    //       type: 'function',
-    //       function: {
-    //         name: 'browser_vision_control',
-    //         arguments: JSON.stringify({
-    //           action: actionStrList[idx - 1],
-    //           step: action.thought,
-    //           thought: action.thought,
-    //           operator_action: action,
-    //         }),
-    //       },
-    //     });
-    //   }
-    // }
-
-    // // TODO: Remove this logic after the new model instruction is followed
-    // let reasoningContentDraft: string | null = null;
-    // let finalMessageContentDraft: string | null = null;
-    // if (toolCalls.length <= 0) {
-    //   if (fullContent.includes('</answer>')) {
-    //     // First try to match the simple answer format
-    //     const simpleAnswerMatch = fullContent.match(/<answer>([\s\S]*?)<\/answer>/);
-    //     let extractedContent: string | null = null;
-    //     if (simpleAnswerMatch) {
-    //       extractedContent = simpleAnswerMatch[1].trim();
-    //     } else {
-    //       // If no simple format, try the complex format (contains FunctionCallBegin or FCResponseBegin)
-    //       const functionCallBeginMatch = fullContent.match(
-    //         /<\|(FunctionCallBegin|FCResponseBegin)\|>([\s\S]*?)(?:<\/answer>|$)/,
-    //       );
-    //       if (functionCallBeginMatch) {
-    //         extractedContent = functionCallBeginMatch[2]; // Use the second capture group, as the first is the tag name
-    //       }
-    //     }
-    //     finished = true;
-    //     finishMessage = extractedContent;
-    //     console.log('extractedContent', extractedContent);
-    //   } else {
-    //     if (fullContent.includes('<think_never_used_') && fullContent.includes('<think>')) {
-    //       const thinkNeverUsedMatch = fullContent.match(
-    //         /<think_never_used_[a-f0-9]{32}>([\s\S]*?)<\/think_never_used_[a-f0-9]{32}>/,
-    //       );
-    //       if (thinkNeverUsedMatch) {
-    //         reasoningContentDraft = thinkNeverUsedMatch[1];
-    //       }
-    //       const allThinkMatches = [...fullContent.matchAll(/<think>([\s\S]*?)<\/think>/g)];
-    //       if (allThinkMatches.length > 0) {
-    //         const lastThinkMatch = allThinkMatches[allThinkMatches.length - 1];
-    //         finalMessageContentDraft = lastThinkMatch[1];
-    //       }
-    //       if (finalMessageContentDraft && reasoningContentDraft) {
-    //         finished = true;
-    //         finishMessage = finalMessageContentDraft.trim();
-    //       }
-    //     }
-    //     console.log('finalMessageContentDraft', finalMessageContentDraft);
-    //     console.log('reasoningContentDraft', reasoningContentDraft);
-    //   }
-    // }
-
-    // const content = finishMessage || (toolCalls.length <= 0 || finished ? fullContent : '');
-    // const reasoningContent = reasoningContentDraft ?? parsed[0]?.thought ?? '';
-    // const contentForWebUI = content.replace(/\\n|\n/g, '<br>');
-    // const reasoningContentForWebUI = reasoningContent.replace(/\\n|\n/g, '');
-
-    // No tool calls found - return regular response
     return {
       content: state.accumulatedChatContentBuffer ?? fullContent,
       rawContent: fullContent,
       reasoningContent: state.reasoningBuffer ?? '',
-      toolCalls,
+      toolCalls: convertedToolCalls,
       finishReason: (toolCalls || []).length > 0 ? 'tool_calls' : 'stop',
     };
   }
