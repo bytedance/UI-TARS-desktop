@@ -40,7 +40,7 @@ async function requestModel(prompt: string, options: RequestOptions = {}): Promi
       },
     ] as Array<ChatCompletionMessageParam>;
 
-    await logContent(JSON.stringify(messages, null, 2), 'message.txt');
+    // await logContent(JSON.stringify(messages, null, 2), 'message.txt');
 
     //@ts-ignore
     const response = await openAI.chat.completions.create({
@@ -70,7 +70,7 @@ export async function run(prompt: string): Promise<void> {
 
     console.log('resp: ', JSON.stringify(response, null, 2));
 
-    await logContent(response.choices[0]?.message.content, 'seed.txt');
+    // await logContent(response.choices[0]?.message.content, 'seed.txt');
   } catch (error) {
     console.error('Main execution error:', error);
   }
@@ -91,8 +91,3 @@ async function logContent(content: string | null, path: string) {
 
 run('write quick sort in python');
 // run('hi');
-
-// {
-//   role: 'user',
-//   content: '[Environment: Expanded context from contextual references] 你好',
-// },
