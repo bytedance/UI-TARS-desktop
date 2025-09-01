@@ -284,12 +284,7 @@ export class ThinkingMessageHandler
 
         if (event.type === 'assistant_streaming_thinking_message') {
           // For streaming thinking messages, append to existing thinking content
-          // Trim leading newlines only for the first chunk (when thinking is empty)
-          const contentToAdd =
-            (message.thinking || '').length === 0
-              ? event.content.replace(/^\n+/, '')
-              : event.content;
-          newThinking = (message.thinking || '') + contentToAdd;
+          newThinking = (message.thinking || '') + event.content.replace(/^\n+/, '');
         } else {
           // For final thinking messages, always replace the content
           newThinking = event.content.replace(/^\n+/, '');
