@@ -37,7 +37,7 @@ export const StrategySwitch: React.FC<StrategySwitchProps> = ({
   const tooltipProps = getTooltipProps('bottom');
 
   return (
-    <div className="flex items-center justify-center mt-4">
+    <div className="flex items-center justify-center">
       <div className="inline-flex rounded-md" role="group">
         {strategies.map((strategy, index) => {
           const config = strategyConfig[strategy];
