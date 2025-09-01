@@ -32,8 +32,6 @@ import { DeliverableRenderer } from './renderers/DeliverableRenderer';
 import { DiffRenderer } from './renderers/DiffRenderer';
 import { FileResultRenderer } from './renderers/FileResultRenderer';
 
-
-
 /**
  * Registry of content renderers that handle StandardPanelContent directly
  */
@@ -74,18 +72,29 @@ export const WorkspaceDetail: React.FC = () => {
 
   // Determine initial display mode based on content type and streaming state
   const getInitialDisplayMode = (): FileDisplayMode => {
-    if (!activePanelContent || activePanelContent.type !== 'file' || !activePanelContent.arguments?.path) {
+    if (
+      !activePanelContent ||
+      activePanelContent.type !== 'file' ||
+      !activePanelContent.arguments?.path
+    ) {
       return 'rendered';
     }
 
-    return getDefaultDisplayMode(activePanelContent.arguments.path, Boolean(activePanelContent.isStreaming));
+    return getDefaultDisplayMode(
+      activePanelContent.arguments.path,
+      Boolean(activePanelContent.isStreaming),
+    );
   };
 
   const [displayMode, setDisplayMode] = useState<FileDisplayMode>(getInitialDisplayMode());
 
   // Auto-switch HTML files from source to rendered when streaming completes
   useEffect(() => {
-    if (!activePanelContent || activePanelContent.type !== 'file' || !activePanelContent.arguments?.path) {
+    if (
+      !activePanelContent ||
+      activePanelContent.type !== 'file' ||
+      !activePanelContent.arguments?.path
+    ) {
       return;
     }
 
@@ -282,7 +291,7 @@ export const WorkspaceDetail: React.FC = () => {
           onWorkspaceDisplayModeChange={setWorkspaceDisplayMode}
           showWorkspaceToggle={shouldShowWorkspaceToggle()}
         />
-        <div className="flex-1 overflow-auto p-4 pt-0">{renderContent()}</div>
+        <div className="flex-1 overflow-auto p-4 pt-2">{renderContent()}</div>
       </motion.div>
 
       <ImageModal imageData={zoomedImage} onClose={() => setZoomedImage(null)} />

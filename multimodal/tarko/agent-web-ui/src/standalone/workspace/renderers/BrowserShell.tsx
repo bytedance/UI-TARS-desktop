@@ -35,7 +35,7 @@ export const BrowserShell: React.FC<BrowserShellProps> = ({
         const domain = new URL(url).hostname;
         return domain || title;
       }
-    } catch (e) {}
+    } catch (e) { }
     return title;
   };
 
@@ -57,7 +57,7 @@ export const BrowserShell: React.FC<BrowserShellProps> = ({
           </div>
 
           {/* URL bar with secure indicator */}
-          <div className="flex-1 bg-white dark:bg-gray-700 rounded-md flex items-center px-3 py-1.5 text-xs text-gray-700 dark:text-gray-200 border border-gray-300/30 dark:border-gray-600/40 group hover:border-gray-400/30 dark:hover:border-gray-500/30 transition-colors shadow-inner">
+          <div className="flex-1 overflow-hidden bg-white dark:bg-gray-700 rounded-md flex items-center px-3 py-1.5 text-xs text-gray-700 dark:text-gray-200 border border-gray-300/30 dark:border-gray-600/40 group hover:border-gray-400/30 dark:hover:border-gray-500/30 transition-colors shadow-inner">
             <div className="flex items-center w-full">
               {isSecure ? (
                 <FiLock className="mr-1.5 text-green-500 dark:text-green-400" size={12} />
