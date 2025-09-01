@@ -28,14 +28,7 @@
   table-layout: fixed;
 }
 
-/* Table styling - nth-child and complex selectors */
-.markdown-content table tr:nth-child(even) {
-  background-color: #f8fafc;
-}
-
-.dark .markdown-content table tr:nth-child(even) {
-  background-color: #1e293b;
-}
+/* Table styling - nth-child and complex selectors removed */
 
 /* Table cell content spacing - ensuring proper margin handling */
 .markdown-content table td > * {
