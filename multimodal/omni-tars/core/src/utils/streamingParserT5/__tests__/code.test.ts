@@ -10,6 +10,7 @@ import {
 } from '../index';
 import { ChatCompletionChunk, StreamingToolCallUpdate } from '@tarko/agent-interface';
 import { realStreamingChunks } from '../data/testData';
+import { think_token } from '../../../environments/prompt_t5';
 
 export function createChunk(content: string, finish_reason = ''): ChatCompletionChunk {
   return { choices: [{ delta: { content }, finish_reason }] } as unknown as ChatCompletionChunk;
@@ -162,9 +163,9 @@ describe('processStreamingChunk', () => {
       // const result = processStreamingChunk(chunk, state);
 
       const chunks = [
-        '<thinkt>我需要创建Pyth',
-        'on文件</t',
-        'hinkt>\n<seed:t',
+        `<${think_token}>我需要创建Pyth`,
+        `on文件</${think_token.substring(0, 1)}`,
+        `${think_token.substring(1)}>\n<seed:t`,
         'ool_call>\n<fun',
         'ction=',
         'str_replace_editor',

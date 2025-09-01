@@ -5,7 +5,6 @@
 
 import { HOME_INSTRUCTION, PROXY_INSTRUCTION } from './code';
 
-// const think_token = 'think_never_used_51bce0c785ca2f68081bfa7d91973934';
 export const think_token = 'thinkt';
 const think_budget = '\n\n';
 const task_description = `You are capable of leveraging a wide range of tools and resources to efficiently solve tasks and fulfill user requests. Your goal is to analyze the user's instructions, select the most appropriate tools, and execute actions to achieve the desired outcomes with precision and reliability.`;

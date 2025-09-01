@@ -7,6 +7,47 @@ import { think_token } from '../../environments/prompt_t5';
 import { T5StreamProcessingState } from './index';
 
 /**
+ * Generate partial patterns for a given tag dynamically
+ * @param tag The tag name (e.g., 'think_never_used_...')
+ * @returns Array of partial patterns for matching incomplete tags
+ */
+function generatePartialPatterns(tag: string): string[] {
+  const patterns: string[] = [];
+  const openTag = `<${tag}`;
+  
+  // Generate all possible partial patterns
+  for (let i = 1; i <= openTag.length; i++) {
+    patterns.push(openTag.substring(0, i));
+  }
+  
+  return patterns;
+}
+
+/**
+ * Generate partial closing patterns for a given tag dynamically
+ * @param tag The tag name (e.g., 'think_never_used_...')
+ * @returns Array of partial patterns for matching incomplete closing tags
+ */
+function generatePartialClosingPatterns(tag: string): string[] {
+  const patterns: string[] = [];
+  const closeTag = `</${tag}`;
+  
+  // Generate basic closing patterns
+  const basicPatterns = ['<', '</', '</t', '</th', '</thi', '</thin', '</think'];
+  patterns.push(...basicPatterns);
+  
+  // Generate all possible partial patterns for the specific tag
+  for (let i = 1; i <= closeTag.length; i++) {
+    const partial = closeTag.substring(0, i);
+    if (!patterns.includes(partial)) {
+      patterns.push(partial);
+    }
+  }
+  
+  return patterns;
+}
+
+/**
  * Extract think content from T5 format with dynamic tag matching
  * Based on extractThink from streamingParser but adapted for T5's think_never_used_51bce0c785ca2f68081bfa7d91973934 tag
  * Uses a more flexible pattern matching to handle potential tag changes
@@ -44,8 +85,8 @@ export function extractThinkT5(content: string, state: T5StreamProcessingState):
         continue;
       } else {
         // Check if buffer ends with partial opening tag
-        // Be more generous with partial matching for think tags
-        const patterns = ['<', '<t', '<th', '<thi', '<thin', '<think', '<thinkt'];
+        // Generate patterns dynamically based on current think_token
+        const patterns = generatePartialPatterns(T5_THINK_TAG);
         let foundPartial = false;
 
         for (const pattern of patterns) {
@@ -68,7 +109,8 @@ export function extractThinkT5(content: string, state: T5StreamProcessingState):
         }
 
         if (!foundPartial) {
-          // No partial tag found, clear buffer
+          // No partial tag found, this content should be treated as regular content
+          // Clear the buffer and let the system handle it as chat content
           state.thinkBuffer = '';
         }
         break;
@@ -87,7 +129,7 @@ export function extractThinkT5(content: string, state: T5StreamProcessingState):
         continue;
       } else {
         // Check if buffer ends with partial closing tag
-        const patterns = ['<', '</', '</t', '</th', '</thi', '</thin', '</think', '<thinkt'];
+        const patterns = generatePartialClosingPatterns(T5_THINK_TAG);
         let foundPartial = false;
 
         for (const pattern of patterns) {

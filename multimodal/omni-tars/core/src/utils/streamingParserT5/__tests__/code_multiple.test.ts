@@ -10,6 +10,7 @@ import {
 } from '../index';
 import { ChatCompletionChunk, StreamingToolCallUpdate } from '@tarko/agent-interface';
 import { realStreamingChunks } from '../data/testData';
+import { think_token } from '../../../environments/prompt_t5';
 
 export function createChunk(content: string, finish_reason = ''): ChatCompletionChunk {
   return { choices: [{ delta: { content }, finish_reason }] } as unknown as ChatCompletionChunk;
@@ -47,7 +48,7 @@ describe('processStreamingChunk', () => {
     });
 
     it('should parse think + chat content + multiple tool call', () => {
-      const content = `<thinkt>User needs assistance, I should help and call a function</thinkt>
+      const content = `<${think_token}>User needs assistance, I should help and call a function</${think_token}>
 I'd be happy to help you!
 <seed:tool_call>
     <function=function_1>
