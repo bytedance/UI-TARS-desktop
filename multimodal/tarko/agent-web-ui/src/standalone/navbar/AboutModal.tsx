@@ -64,8 +64,6 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, session
     return `${model.slice(0, maxLength)}...`;
   };
 
-  debugger;
-
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-[9999]">
       {/* Full screen backdrop */}
