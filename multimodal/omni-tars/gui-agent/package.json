@@ -44,6 +44,7 @@
     "@types/node": "22.15.30",
     "typescript": "^5.5.3",
     "vitest": "^1.0.0",
-    "openai": "4.93.0"
+    "openai": "4.93.0",
+    "@types/lodash.isnumber": "3.0.3"
   }
 }
