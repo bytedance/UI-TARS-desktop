@@ -45,7 +45,7 @@ async function requestModel(prompt: string, options: RequestOptions = {}): Promi
     //@ts-ignore
     const response = await openAI.chat.completions.create({
       model: 'ep-20250830114613-nvhqh', //T5
-      //   model: 'ep-20250813205932-v7bmd', //旧版
+      //   model: 'ep-20250813205932-v7bmd',
       messages,
       max_tokens: options.maxTokens || 32768,
       temperature: options.temperature || 1,

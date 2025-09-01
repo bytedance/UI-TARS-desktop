@@ -60,13 +60,8 @@ export class GUIAgentToolCallEngine extends ToolCallEngine {
    *
    * FIXME: move to base tool call engine.
    */
-  initStreamProcessingState(): StreamProcessingState {
-    return {
-      contentBuffer: '',
-      toolCalls: [],
-      reasoningBuffer: '',
-      finishReason: null,
-    };
+  initStreamProcessingState(): OmniStreamProcessingState {
+    return createInitState();
   }
 
   /**
@@ -74,7 +69,7 @@ export class GUIAgentToolCallEngine extends ToolCallEngine {
    */
   processStreamingChunk(
     chunk: ChatCompletionChunk,
-    state: StreamProcessingState,
+    state: OmniStreamProcessingState,
   ): StreamChunkResult {
     return omniProcessStreamingChunk(chunk, state);
   }
@@ -82,123 +77,126 @@ export class GUIAgentToolCallEngine extends ToolCallEngine {
   /**
    * Extract tool calls from complete response text
    */
-  finalizeStreamProcessing(state: StreamProcessingState): ParsedModelResponse {
+  finalizeStreamProcessing(state: OmniStreamProcessingState): ParsedModelResponse {
     console.log('getScreenInfo()', getScreenInfo());
 
     const fullContent = state.contentBuffer;
     console.log('fullContent', fullContent);
 
-    const { parsed } = actionParser({
-      prediction: fullContent,
-      factor: [1000, 1000] as [number, number],
-      screenContext: {
-        width: getScreenInfo().screenWidth!,
-        height: getScreenInfo().screenHeight!,
-      },
-    });
+    //TODO: transform state.toolCalls to 'parsed'
+    const toolCalls = state.toolCalls;
 
-    console.log('parsed', parsed);
+    // const { parsed } = actionParser({
+    //   prediction: fullContent,
+    //   factor: [1000, 1000] as [number, number],
+    //   screenContext: {
+    //     width: getScreenInfo().screenWidth!,
+    //     height: getScreenInfo().screenHeight!,
+    //   },
+    // });
 
-    const actionStrList = actionStringParser(fullContent);
+    // console.log('parsed', parsed);
 
-    console.log('actionStrList', actionStrList);
+    // const actionStrList = actionStringParser(fullContent);
 
-    const toolCalls: ChatCompletionMessageToolCall[] = [];
+    // console.log('actionStrList', actionStrList);
 
-    let finished = false;
-    let finishMessage: string | null = null;
-    let idx = 0;
-    if (Array.isArray(parsed)) {
-      for (const action of parsed) {
-        idx = idx + 1;
+    // const toolCalls: ChatCompletionMessageToolCall[] = [];
 
-        const cleanedThought = action.thought.replace(/think_never_used_[a-f0-9]{32}>/g, '');
-        if (cleanedThought) {
-          action.thought = cleanedThought;
-        }
+    // let finished = false;
+    // let finishMessage: string | null = null;
+    // let idx = 0;
+    // if (Array.isArray(parsed)) {
+    //   for (const action of parsed) {
+    //     idx = idx + 1;
 
-        if (action.action_type === 'finished') {
-          finished = true;
-          finishMessage = action.action_inputs.content ?? null;
-          continue;
-        }
-        if (action.action_type === '') {
-          continue;
-        }
-        const toolCallId = this.generateToolCallId();
-        toolCalls.push({
-          id: toolCallId,
-          type: 'function',
-          function: {
-            name: 'browser_vision_control',
-            arguments: JSON.stringify({
-              action: actionStrList[idx - 1],
-              step: action.thought,
-              thought: action.thought,
-              operator_action: action,
-            }),
-          },
-        });
-      }
-    }
+    //     const cleanedThought = action.thought.replace(/think_never_used_[a-f0-9]{32}>/g, '');
+    //     if (cleanedThought) {
+    //       action.thought = cleanedThought;
+    //     }
 
-    // TODO: Remove this logic after the new model instruction is followed
-    let reasoningContentDraft: string | null = null;
-    let finalMessageContentDraft: string | null = null;
-    if (toolCalls.length <= 0) {
-      if (fullContent.includes('</answer>')) {
-        // First try to match the simple answer format
-        const simpleAnswerMatch = fullContent.match(/<answer>([\s\S]*?)<\/answer>/);
-        let extractedContent: string | null = null;
-        if (simpleAnswerMatch) {
-          extractedContent = simpleAnswerMatch[1].trim();
-        } else {
-          // If no simple format, try the complex format (contains FunctionCallBegin or FCResponseBegin)
-          const functionCallBeginMatch = fullContent.match(
-            /<\|(FunctionCallBegin|FCResponseBegin)\|>([\s\S]*?)(?:<\/answer>|$)/,
-          );
-          if (functionCallBeginMatch) {
-            extractedContent = functionCallBeginMatch[2]; // Use the second capture group, as the first is the tag name
-          }
-        }
-        finished = true;
-        finishMessage = extractedContent;
-        console.log('extractedContent', extractedContent);
-      } else {
-        if (fullContent.includes('<think_never_used_') && fullContent.includes('<think>')) {
-          const thinkNeverUsedMatch = fullContent.match(
-            /<think_never_used_[a-f0-9]{32}>([\s\S]*?)<\/think_never_used_[a-f0-9]{32}>/,
-          );
-          if (thinkNeverUsedMatch) {
-            reasoningContentDraft = thinkNeverUsedMatch[1];
-          }
-          const allThinkMatches = [...fullContent.matchAll(/<think>([\s\S]*?)<\/think>/g)];
-          if (allThinkMatches.length > 0) {
-            const lastThinkMatch = allThinkMatches[allThinkMatches.length - 1];
-            finalMessageContentDraft = lastThinkMatch[1];
-          }
-          if (finalMessageContentDraft && reasoningContentDraft) {
-            finished = true;
-            finishMessage = finalMessageContentDraft.trim();
-          }
-        }
-        console.log('finalMessageContentDraft', finalMessageContentDraft);
-        console.log('reasoningContentDraft', reasoningContentDraft);
-      }
-    }
+    //     if (action.action_type === 'finished') {
+    //       finished = true;
+    //       finishMessage = action.action_inputs.content ?? null;
+    //       continue;
+    //     }
+    //     if (action.action_type === '') {
+    //       continue;
+    //     }
+    //     const toolCallId = this.generateToolCallId();
+    //     toolCalls.push({
+    //       id: toolCallId,
+    //       type: 'function',
+    //       function: {
+    //         name: 'browser_vision_control',
+    //         arguments: JSON.stringify({
+    //           action: actionStrList[idx - 1],
+    //           step: action.thought,
+    //           thought: action.thought,
+    //           operator_action: action,
+    //         }),
+    //       },
+    //     });
+    //   }
+    // }
 
-    const content = finishMessage || (toolCalls.length <= 0 || finished ? fullContent : '');
-    const reasoningContent = reasoningContentDraft ?? parsed[0]?.thought ?? '';
-    const contentForWebUI = content.replace(/\\n|\n/g, '<br>');
-    const reasoningContentForWebUI = reasoningContent.replace(/\\n|\n/g, '');
+    // // TODO: Remove this logic after the new model instruction is followed
+    // let reasoningContentDraft: string | null = null;
+    // let finalMessageContentDraft: string | null = null;
+    // if (toolCalls.length <= 0) {
+    //   if (fullContent.includes('</answer>')) {
+    //     // First try to match the simple answer format
+    //     const simpleAnswerMatch = fullContent.match(/<answer>([\s\S]*?)<\/answer>/);
+    //     let extractedContent: string | null = null;
+    //     if (simpleAnswerMatch) {
+    //       extractedContent = simpleAnswerMatch[1].trim();
+    //     } else {
+    //       // If no simple format, try the complex format (contains FunctionCallBegin or FCResponseBegin)
+    //       const functionCallBeginMatch = fullContent.match(
+    //         /<\|(FunctionCallBegin|FCResponseBegin)\|>([\s\S]*?)(?:<\/answer>|$)/,
+    //       );
+    //       if (functionCallBeginMatch) {
+    //         extractedContent = functionCallBeginMatch[2]; // Use the second capture group, as the first is the tag name
+    //       }
+    //     }
+    //     finished = true;
+    //     finishMessage = extractedContent;
+    //     console.log('extractedContent', extractedContent);
+    //   } else {
+    //     if (fullContent.includes('<think_never_used_') && fullContent.includes('<think>')) {
+    //       const thinkNeverUsedMatch = fullContent.match(
+    //         /<think_never_used_[a-f0-9]{32}>([\s\S]*?)<\/think_never_used_[a-f0-9]{32}>/,
+    //       );
+    //       if (thinkNeverUsedMatch) {
+    //         reasoningContentDraft = thinkNeverUsedMatch[1];
+    //       }
+    //       const allThinkMatches = [...fullContent.matchAll(/<think>([\s\S]*?)<\/think>/g)];
+    //       if (allThinkMatches.length > 0) {
+    //         const lastThinkMatch = allThinkMatches[allThinkMatches.length - 1];
+    //         finalMessageContentDraft = lastThinkMatch[1];
+    //       }
+    //       if (finalMessageContentDraft && reasoningContentDraft) {
+    //         finished = true;
+    //         finishMessage = finalMessageContentDraft.trim();
+    //       }
+    //     }
+    //     console.log('finalMessageContentDraft', finalMessageContentDraft);
+    //     console.log('reasoningContentDraft', reasoningContentDraft);
+    //   }
+    // }
+
+    // const content = finishMessage || (toolCalls.length <= 0 || finished ? fullContent : '');
+    // const reasoningContent = reasoningContentDraft ?? parsed[0]?.thought ?? '';
+    // const contentForWebUI = content.replace(/\\n|\n/g, '<br>');
+    // const reasoningContentForWebUI = reasoningContent.replace(/\\n|\n/g, '');
 
     // No tool calls found - return regular response
     return {
-      content: contentForWebUI,
+      content: state.accumulatedChatContentBuffer ?? fullContent,
       rawContent: fullContent,
-      reasoningContent: reasoningContentForWebUI,
+      reasoningContent: state.reasoningBuffer ?? '',
       toolCalls,
-      finishReason: toolCalls.length > 0 && !finished ? 'tool_calls' : 'stop',
+      finishReason: (toolCalls || []).length > 0 ? 'tool_calls' : 'stop',
     };
   }
 
