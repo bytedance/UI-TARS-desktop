@@ -31,8 +31,7 @@ import { GenericResultRenderer } from './renderers/generic/GenericResultRenderer
 import { DeliverableRenderer } from './renderers/DeliverableRenderer';
 import { DiffRenderer } from './renderers/DiffRenderer';
 import { FileResultRenderer } from './renderers/FileResultRenderer';
-
-
+import { BrowserMarkdownRenderer } from './renderers/BrowserMarkdownRenderer';
 
 /**
  * Registry of content renderers that handle StandardPanelContent directly
@@ -53,6 +52,7 @@ const CONTENT_RENDERERS: Record<
   script_result: ScriptResultRenderer,
   browser_result: BrowserResultRenderer,
   browser_vision_control: BrowserControlRenderer,
+  browser_markdown: BrowserMarkdownRenderer,
   plan: PlanViewerRenderer,
   research_report: ResearchReportRenderer,
   json: GenericResultRenderer,
@@ -74,18 +74,29 @@ export const WorkspaceDetail: React.FC = () => {
 
   // Determine initial display mode based on content type and streaming state
   const getInitialDisplayMode = (): FileDisplayMode => {
-    if (!activePanelContent || activePanelContent.type !== 'file' || !activePanelContent.arguments?.path) {
+    if (
+      !activePanelContent ||
+      activePanelContent.type !== 'file' ||
+      !activePanelContent.arguments?.path
+    ) {
       return 'rendered';
     }
 
-    return getDefaultDisplayMode(activePanelContent.arguments.path, Boolean(activePanelContent.isStreaming));
+    return getDefaultDisplayMode(
+      activePanelContent.arguments.path,
+      Boolean(activePanelContent.isStreaming),
+    );
   };
 
   const [displayMode, setDisplayMode] = useState<FileDisplayMode>(getInitialDisplayMode());
 
   // Auto-switch HTML files from source to rendered when streaming completes
   useEffect(() => {
-    if (!activePanelContent || activePanelContent.type !== 'file' || !activePanelContent.arguments?.path) {
+    if (
+      !activePanelContent ||
+      activePanelContent.type !== 'file' ||
+      !activePanelContent.arguments?.path
+    ) {
       return;
     }
 
@@ -169,6 +180,21 @@ export const WorkspaceDetail: React.FC = () => {
         isMarkdown,
         isHtml,
       });
+    } else if (panelContent.type === 'browser_markdown') {
+      // Extract content for browser markdown
+      const content = getMarkdownContentForFullscreen(panelContent);
+      const url = getBrowserMarkdownUrl(panelContent);
+
+      if (content) {
+        setFullscreenData({
+          content,
+          fileName: `${getPageTitleFromUrl(url)}.md`,
+          filePath: url || 'Browser Content',
+          displayMode,
+          isMarkdown: true,
+          isHtml: false,
+        });
+      }
     }
   };
 
@@ -178,6 +204,9 @@ export const WorkspaceDetail: React.FC = () => {
     if (panelContent.type === 'file' && panelContent.arguments?.path) {
       return getFileTypeInfo(panelContent.arguments.path).isRenderableFile;
     }
+    if (panelContent.type === 'browser_markdown') {
+      return true;
+    }
     return false;
   };
 
@@ -186,6 +215,9 @@ export const WorkspaceDetail: React.FC = () => {
     if (workspaceDisplayMode === 'raw') return false;
     if (panelContent.type === 'file' && panelContent.arguments?.path) {
       return getFileTypeInfo(panelContent.arguments.path).isRenderableFile;
+    }
+    if (panelContent.type === 'browser_markdown') {
+      return true;
     }
     return false;
   };
@@ -225,6 +257,19 @@ export const WorkspaceDetail: React.FC = () => {
           onChange: setDisplayMode,
         };
       }
+    }
+
+    if (panelContent.type === 'browser_markdown') {
+      return {
+        leftLabel: 'Raw',
+        rightLabel: 'Rendered',
+        leftIcon: <FiCode size={12} />,
+        rightIcon: <FiEye size={12} />,
+        value: displayMode,
+        leftValue: 'source',
+        rightValue: 'rendered',
+        onChange: setDisplayMode,
+      };
     }
   };
 
@@ -317,4 +362,58 @@ function isFullscreenData(data: unknown): data is FullscreenFileData {
     typeof (data as FullscreenFileData).fileName === 'string' &&
     typeof (data as FullscreenFileData).filePath === 'string'
   );
+}
+
+function getMarkdownContentForFullscreen(panelContent: StandardPanelContent): string | null {
+  if (typeof panelContent.source === 'string') {
+    return panelContent.source;
+  }
+
+  if (Array.isArray(panelContent.source)) {
+    return panelContent.source
+      .filter((item) => item.type === 'text')
+      .map((item) => item.text)
+      .join('');
+  }
+
+  if (typeof panelContent.source === 'object' && panelContent.source !== null) {
+    if ('content' in panelContent.source && typeof panelContent.source.content === 'string') {
+      return panelContent.source.content;
+    }
+    if ('text' in panelContent.source && typeof panelContent.source.text === 'string') {
+      return panelContent.source.text;
+    }
+    if ('markdown' in panelContent.source && typeof panelContent.source.markdown === 'string') {
+      return panelContent.source.markdown;
+    }
+  }
+
+  return null;
+}
+
+function getBrowserMarkdownUrl(panelContent: StandardPanelContent): string | null {
+  if (panelContent.arguments?.url && typeof panelContent.arguments.url === 'string') {
+    return panelContent.arguments.url;
+  }
+
+  if (typeof panelContent.source === 'object' && panelContent.source !== null) {
+    if ('url' in panelContent.source && typeof panelContent.source.url === 'string') {
+      return panelContent.source.url;
+    }
+  }
+
+  return null;
+}
+
+function getPageTitleFromUrl(url: string | null): string {
+  if (!url) return 'page-content';
+
+  try {
+    const urlObj = new URL(url);
+    const hostname = urlObj.hostname.replace(/^www\./, '');
+    const path = urlObj.pathname.replace(/\/$/, '').replace(/\//g, '-');
+    return `${hostname}${path}` || hostname;
+  } catch {
+    return 'page-content';
+  }
 }
