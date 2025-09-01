@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { getModelDisplayName } from '@/common/utils/modelUtils';
 import {
   Select,
   MenuItem,
@@ -236,11 +237,9 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
                   }}
-                  title={
-                    sessionMetadata.modelConfig.displayName || sessionMetadata.modelConfig.modelId
-                  }
+                  title={getModelDisplayName(sessionMetadata.modelConfig)}
                 >
-                  {sessionMetadata.modelConfig.displayName || sessionMetadata.modelConfig.modelId}
+                  {getModelDisplayName(sessionMetadata.modelConfig)}
                 </Typography>
               )}
               {sessionMetadata?.modelConfig?.provider && sessionMetadata?.modelConfig?.modelId && (

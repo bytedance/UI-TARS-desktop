@@ -13,6 +13,7 @@ import { useDarkMode } from '@/common/hooks/useDarkMode';
 import { apiService } from '@/common/services/apiService';
 import { NavbarModelSelector } from './ModelSelector';
 import { getLogoUrl, getAgentTitle } from '@/config/web-ui-config';
+import { getModelDisplayName } from '@/common/utils/modelUtils';
 
 import './Navbar.css';
 
@@ -203,7 +204,7 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
 
       if (sessionMetadata?.modelConfig) {
         const modelText = [
-          sessionMetadata.modelConfig.displayName || sessionMetadata.modelConfig.modelId,
+          getModelDisplayName(sessionMetadata.modelConfig),
           sessionMetadata.modelConfig.provider,
         ]
           .filter(Boolean)
