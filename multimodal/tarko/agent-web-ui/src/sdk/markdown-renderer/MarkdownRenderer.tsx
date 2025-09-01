@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
 import rehypeRaw from 'rehype-raw';
+import rehypeKatex from 'rehype-katex';
 import { remarkAlert } from 'remark-github-blockquote-alert';
 import rehypeHighlight from 'rehype-highlight';
 import { useMarkdownComponents } from './hooks/useMarkdownComponents';
@@ -9,6 +11,7 @@ import { ImageModal } from './components/ImageModal';
 import { resetFirstH1Flag } from './components/Headings';
 import { scrollToElement } from './utils';
 import { MarkdownThemeProvider, useMarkdownStyles } from './context/MarkdownThemeContext';
+import 'katex/dist/katex.min.css';
 import 'remark-github-blockquote-alert/alert.css';
 import './syntax-highlight.css';
 import './markdown.css';
@@ -113,9 +116,13 @@ const MarkdownRendererContent: React.FC<MarkdownRendererProps> = ({
       <div className={markdownContentClass}>
         <ReactMarkdown
           // @ts-expect-error FIXME: find the root cause of type issue
-          remarkPlugins={[remarkGfm, remarkAlert]}
+          remarkPlugins={[remarkGfm, remarkMath, remarkAlert]}
           // @ts-expect-error FIXME: find the root cause of type issue
-          rehypePlugins={[rehypeRaw, [rehypeHighlight, { detect: true, ignoreMissing: true }]]}
+          rehypePlugins={[
+            rehypeRaw,
+            rehypeKatex,
+            [rehypeHighlight, { detect: true, ignoreMissing: true }],
+          ]}
           components={components}
         >
           {content}
