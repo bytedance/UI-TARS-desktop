@@ -25,7 +25,8 @@
 
 .markdown-content table {
   width: 100%;
-  table-layout: fixed;
+  min-width: max-content;
+  table-layout: auto;
 }
 
 /* Table styling - nth-child and complex selectors removed */
