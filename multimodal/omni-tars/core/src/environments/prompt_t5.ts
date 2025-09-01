@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { HOME_INSTRUCTION, PROXY_INSTRUCTION } from './code';
+
 // const think_token = 'think_never_used_51bce0c785ca2f68081bfa7d91973934';
 export const think_token = 'thinkt';
 const think_budget = '\n\n';
@@ -72,6 +74,10 @@ multiple lines
 - All required parameters must be explicitly provided.
 
 ## Additional Notes
-${additional_notes}`;
+${additional_notes}
+
+${HOME_INSTRUCTION}
+${PROXY_INSTRUCTION}
+`;
 
 export const SYSTEM_PROMPT_GROUP = [PROMPT1, PROMPT2, PROMPT3];
