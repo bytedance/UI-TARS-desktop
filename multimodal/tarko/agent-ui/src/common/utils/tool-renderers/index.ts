@@ -10,6 +10,7 @@ const TOOL_TO_RENDERER_CONFIG: ToolToRendererCondition[] = [
   { toolName: 'web_search', renderer: 'search_result' },
   { toolName: 'browser_vision_control', renderer: 'browser_vision_control' },
   { toolName: 'browser_screenshot', renderer: 'image' },
+  { toolName: 'browser_get_markdown', renderer: 'browser_markdown' },
   { toolName: 'write_file', renderer: 'file_result' },
   { toolName: 'read_file', renderer: 'file_result' },
   { toolName: 'edit_file', renderer: 'diff_result' },
