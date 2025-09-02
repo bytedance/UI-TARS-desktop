@@ -91,6 +91,7 @@ export const useScreenshots = ({
     }
 
     // Search for screenshots AFTER the current tool call
+    // Always search for after action image as it may be needed for afterAction or both strategies
     if (currentStrategy === 'afterAction' || currentStrategy === 'both') {
       for (let i = currentToolCallIndex + 1; i < sessionMessages.length; i++) {
         const msg = sessionMessages[i];
