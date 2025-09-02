@@ -1,5 +1,7 @@
 # Changelog
 
+## [0.3.0-beta.7](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.3.0-beta.5...@agent-tars@0.3.0-beta.7) (2025-09-02)
+
 ## [0.3.0-beta.6](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.3.0-beta.5...@agent-tars@0.3.0-beta.6) (2025-08-21)
 
 ## [0.3.0-beta.4](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.3.0-beta.1...@agent-tars@0.3.0-beta.4) (2025-08-21)

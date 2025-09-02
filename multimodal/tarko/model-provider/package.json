@@ -1,6 +1,6 @@
 {
   "name": "@tarko/model-provider",
-  "version": "0.3.0-beta.6",
+  "version": "0.3.0-beta.7",
   "description": "A high-level TypeScript SDK to configure multiple OpenAI-compatible providers and select one to run",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
