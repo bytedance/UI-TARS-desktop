@@ -11,6 +11,7 @@ import { SlugGenerator } from '../utils/slug-generator';
 import fs from 'fs';
 import path from 'path';
 import { ensureHttps } from '../utils';
+import { mergeWebUIConfig } from '../utils/webui';
 import type { AgentServerVersionInfo, IAgent, AgentAppConfig } from '../types';
 import type { AgentServer } from '../server';
 
@@ -353,9 +354,8 @@ export class ShareService {
         throw new Error('Cannot found static path.');
       }
 
-      // Merge web UI config with agent constructor config (same as start.ts)
-      const agentConstructorWebConfig = this.server?.getAgentConstructorWebConfig();
-      const mergedWebUIConfig = { ...this.appConfig.webui, ...agentConstructorWebConfig };
+      // Merge web UI config with agent constructor config
+      const mergedWebUIConfig = mergeWebUIConfig(this.appConfig.webui, this.server);
 
       return ShareUtils.generateShareHtml(
         events,

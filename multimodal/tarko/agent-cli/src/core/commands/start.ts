@@ -12,7 +12,7 @@ import {
   isAgentWebUIImplementationType,
   AgentWebUIImplementation,
 } from '@tarko/interface';
-import { AgentServer, AgentServerOptions, express } from '@tarko/agent-server';
+import { AgentServer, AgentServerOptions, express, mergeWebUIConfig } from '@tarko/agent-server';
 import boxen from 'boxen';
 import chalk from 'chalk';
 import gradient from 'gradient-string';
@@ -50,8 +50,7 @@ export async function startInteractiveWebUI(
   // Set up UI if static path is provided
   if (webui.staticPath) {
     const app = server.getApp();
-    const agentConstructorWebConfig = server.getAgentConstructorWebConfig();
-    const mergedWebUIConfig = { ...webui, ...agentConstructorWebConfig };
+    const mergedWebUIConfig = mergeWebUIConfig(webui, server);
     setupUI(app, isDebug, webui.staticPath, mergedWebUIConfig);
   }
 
