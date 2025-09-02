@@ -89,7 +89,7 @@ export class EnvironmentInputHandler
           set(activePanelContentAtom, {
             ...currentPanel,
             type: 'browser_vision_control',
-            title: `${currentPanel.title} · Screenshot Update`,
+            title: currentPanel.title,
             timestamp: event.timestamp,
             originalContent: event.content,
             environmentId: event.id,
