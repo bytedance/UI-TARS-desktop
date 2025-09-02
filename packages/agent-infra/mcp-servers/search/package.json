@@ -38,7 +38,7 @@
     "@agent-infra/shared": "workspace:*",
     "@agent-infra/browser": "workspace:*",
     "tsx": "^4.19.3",
-    "@rslib/core": "0.5.3",
+    "@rslib/core": "0.10.0",
     "shx": "^0.3.4",
     "vitest": "^3.0.7",
     "@types/node": "^20.11.24",

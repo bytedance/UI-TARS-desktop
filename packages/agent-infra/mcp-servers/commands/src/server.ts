@@ -34,46 +34,55 @@ function createServer(serverConfig?: { cwd?: string }): McpServer {
   });
 
   // === Tools ===
-  server.tool(
+  // @ts-ignore
+  server.registerTool(
     'run_command',
-    'Run a command on this ' + os.platform() + ' machine',
     {
-      command: z.string().describe('Command with args'),
-      cwd: z
-        .string()
-        .default(serverConfig?.cwd ?? '')
-        .optional()
-        .describe('Current working directory, leave empty in most cases'),
+      description: 'Run a command on this ' + os.platform() + ' machine',
+      inputSchema: {
+        command: z.string().describe('Command with args'),
+        cwd: z
+          .string()
+          .default(serverConfig?.cwd ?? '')
+          .optional()
+          .describe('Current working directory, leave empty in most cases'),
+      },
     },
     async (args) => await runCommand(args),
   );
 
-  server.tool(
+  server.registerTool(
     'run_script',
-    'Run a script on this ' + os.platform() + ' machine',
     {
-      interpreter: z
-        .string()
-        .optional()
-        .describe(
-          'Command with arguments. Script will be piped to stdin. Examples: bash, fish, zsh, python, or: bash --norc',
-        ),
-      script: z.string().describe('Script to run'),
-      cwd: z
-        .string()
-        .default(serverConfig?.cwd ?? '')
-        .optional()
-        .describe('Current working directory, leave empty in most cases'),
+      description: 'Run a script on this ' + os.platform() + ' machine',
+      inputSchema: {
+        interpreter: z
+          .string()
+          .optional()
+          .describe(
+            'Command with arguments. Script will be piped to stdin. Examples: bash, fish, zsh, python, or: bash --norc',
+          ),
+        script: z.string().describe('Script to run'),
+        cwd: z
+          .string()
+          .default(serverConfig?.cwd ?? '')
+          .optional()
+          .describe('Current working directory, leave empty in most cases'),
+      },
     },
     async (args) => await runScript(args),
   );
 
   // ==== Prompts ====
-  server.prompt(
+  server.registerPrompt(
     'run_command',
-    'Include command output in the prompt. Instead of a tool call, the user decides what commands are relevant.',
     {
-      command: z.string().describe('Command with args'),
+      title: 'Run Command',
+      description:
+        'Include command output in the prompt. Instead of a tool call, the user decides what commands are relevant.',
+      argsSchema: {
+        command: z.string().describe('Command with args'),
+      },
     },
     async ({ command }) => {
       const { stdout, stderr } = await execAsync(command);
