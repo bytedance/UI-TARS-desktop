@@ -49,6 +49,8 @@ export interface BrowserVisionControlCall extends ChatCompletionMessageToolCall 
 export class GUIAgentT5Adapter {
   private logger: ConsoleLogger;
   private readonly actionTypeMap: Record<string, string> = {
+    navigate: 'navigate',
+    navigate_back: 'navigate_back',
     call_user: 'call_user',
     click: 'click',
     drag: 'drag',
@@ -137,6 +139,18 @@ export class GUIAgentT5Adapter {
     try {
       const args = JSON.parse(argsStr);
       switch (actionType) {
+        case 'navigate':
+          if (args.content) {
+            action_string = `navigate(content='${args.content}')`;
+            action_inputs = {
+              content: args.content,
+            };
+          }
+          break;
+        case 'navigate_back':
+          action_string = `navigate_back()`;
+          // action_inputs = {};
+          break;
         case 'wait':
           // TODO: Add wait's parameters
           action_string = `wait()`;
@@ -203,6 +217,8 @@ export class GUIAgentT5Adapter {
       }
     } catch (error) {
       this.logger.error(`[convertArgsStrToActionInput]: Failed to parse '${argsStr}': ${error}`);
+      action_string = `${actionType}()`;
+      // action_inputs = {};
     }
 
     const result = {

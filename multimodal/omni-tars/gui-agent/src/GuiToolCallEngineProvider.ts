@@ -20,6 +20,8 @@ export class GuiToolCallEngineProvider extends ToolCallEngineProvider<GUIAgentTo
     //Check if any tools are GUI/computer use related
     if (context.toolCalls) {
       const guiToolNames = [
+        'navigate',
+        'navigate_back',
         'call_user',
         'click',
         'drag',

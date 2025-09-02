@@ -22,6 +22,8 @@ const code_functions = `
 {"type": "function", "name": "JupyterCI", "parameters": {"type": "object", "properties": {"code": {"type": "string", "description": "code"}, "timeout": {"type": "integer", "description": "timeout in seconds"}}, "required": ["code"]}, "description": " JupyterCI 一个保留状态的代码沙盒工具。你可以在此工具中运行python代码"}
 `;
 const gui_functions = `
+{"type": "function", "name": "navigate", "parameters": {"type": "object", "properties": {"content": {"type": "string", "description": "The url to navigate to."}}, "required": ["content"]}, "description": "Navigate to a url."}
+{"type": "function", "name": "navigate_back", "parameters": {"type": "object", "properties": {}, "required": []}, "description": "Navigate back to the previous page."}
 {"type": "function", "name": "click", "parameters": {"type": "object", "properties": {"point": {"type": "string", "description": "Click coordinates. The format is: <point>x y</point>"}}, "required": ["point"]}, "description": "Mouse left single click action."}
 {"type": "function", "name": "drag", "parameters": {"type": "object", "properties": {"start_point": {"type": "string", "description": "Drag start point. The format is: <point>x y</point>"}, "end_point": {"type": "string", "description": "Drag end point. The format is: <point>x y</point>"}}, "required": ["start_point", "end_point"]}, "description": "Mouse left button drag action."}
 {"type": "function", "name": "hotkey", "parameters": {"type": "object", "properties": {"key": {"type": "string", "description": "Hotkeys you want to press. Split keys with a space and use lowercase."}}, "required": ["key"]}, "description": "Press hotkey."}
