@@ -67,28 +67,25 @@ export const useScreenshots = ({
     let foundAfterImage = false;
 
     // Search for screenshots BEFORE the current tool call
-    if (currentStrategy === 'beforeAction' || currentStrategy === 'both') {
-      for (let i = currentToolCallIndex - 1; i >= 0; i--) {
-        const msg = sessionMessages[i];
-        if (msg.role === 'environment' && Array.isArray(msg.content)) {
-          const imgContent = msg.content.find(
-            (c) => typeof c === 'object' && 'type' in c && c.type === 'image_url',
-          );
+    // Always search for before action image as it may be used as fallback
+    for (let i = currentToolCallIndex - 1; i >= 0; i--) {
+      const msg = sessionMessages[i];
+      if (msg.role === 'environment' && Array.isArray(msg.content)) {
+        const imgContent = msg.content.find(
+          (c) => typeof c === 'object' && 'type' in c && c.type === 'image_url',
+        );
 
-          if (imgContent && 'image_url' in imgContent && imgContent.image_url.url) {
-            const url =
-              msg.metadata?.type === 'screenshot' && 'url' in msg.metadata
-                ? msg.metadata.url
-                : null;
-            setBeforeActionImage(imgContent.image_url.url);
-            setBeforeActionImageUrl(url || null);
-            if (currentStrategy === 'beforeAction') {
-              setRelatedImage(imgContent.image_url.url);
-              setRelatedImageUrl(url || null);
-            }
-            foundBeforeImage = true;
-            break;
+        if (imgContent && 'image_url' in imgContent && imgContent.image_url.url) {
+          const url =
+            msg.metadata?.type === 'screenshot' && 'url' in msg.metadata ? msg.metadata.url : null;
+          setBeforeActionImage(imgContent.image_url.url);
+          setBeforeActionImageUrl(url || null);
+          if (currentStrategy === 'beforeAction') {
+            setRelatedImage(imgContent.image_url.url);
+            setRelatedImageUrl(url || null);
           }
+          foundBeforeImage = true;
+          break;
         }
       }
     }
@@ -128,12 +125,25 @@ export const useScreenshots = ({
         );
         setRelatedImage(null);
         setRelatedImageUrl(null);
-      } else if (currentStrategy === 'afterAction' && !foundAfterImage) {
-        console.warn(
-          `[BrowserControlRenderer] No valid screenshot found after toolCallId: ${toolCallId}. Clearing screenshot display.`,
-        );
-        setRelatedImage(null);
-        setRelatedImageUrl(null);
+      } else if (currentStrategy === 'afterAction') {
+        if (foundAfterImage) {
+          // Use after action image when available
+          setRelatedImage(afterActionImage);
+          setRelatedImageUrl(afterActionImageUrl);
+        } else if (foundBeforeImage) {
+          // Fallback to before action image to prevent flickering
+          console.warn(
+            `[BrowserControlRenderer] No valid screenshot found after toolCallId: ${toolCallId}. Falling back to before action image.`,
+          );
+          setRelatedImage(beforeActionImage);
+          setRelatedImageUrl(beforeActionImageUrl);
+        } else {
+          console.warn(
+            `[BrowserControlRenderer] No valid screenshots found for toolCallId: ${toolCallId}. Clearing screenshot display.`,
+          );
+          setRelatedImage(null);
+          setRelatedImageUrl(null);
+        }
       } else if (currentStrategy === 'both') {
         // For 'both' strategy, use the after action image as primary if available
         if (foundAfterImage) {
