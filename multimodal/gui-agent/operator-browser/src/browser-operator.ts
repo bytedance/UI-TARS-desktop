@@ -473,7 +473,7 @@ export class BrowserOperator extends Operator {
       // @ts-ignore
       await (await this.getHotkeyExecutor()).down(page as unknown as Page, keyStr);
     } catch (error) {
-      this.logger.error('Hotkey execution failed:', error);
+      this.logger.error('Press execution failed:', error);
     }
 
     this.logger.info('Press operation completed');
@@ -494,7 +494,7 @@ export class BrowserOperator extends Operator {
       // @ts-ignore
       await (await this.getHotkeyExecutor()).up(page as unknown as Page, keyStr);
     } catch (error) {
-      this.logger.error('Hotkey execution failed:', error);
+      this.logger.error('Release execution failed:', error);
     }
 
     this.logger.info('Release operation completed');
