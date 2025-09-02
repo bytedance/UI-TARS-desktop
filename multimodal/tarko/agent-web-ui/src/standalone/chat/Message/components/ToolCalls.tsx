@@ -38,7 +38,7 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
         JSON.parse(toolCall.function.arguments);
       } catch (error) {
         // Arguments are incomplete, still constructing
-        return 'constructing';
+        return 'pending';
       }
     }
 
