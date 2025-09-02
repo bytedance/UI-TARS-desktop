@@ -235,6 +235,18 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
     }
   };
 
+  // Helper function to determine if a tool is file-related
+  const isFileRelatedTool = (toolName: string) => {
+    const fileTools = [
+      'read_file',
+      'write_file',
+      'edit_file',
+      'list_directory',
+      'str_replace_editor',
+    ];
+    return fileTools.includes(toolName);
+  };
+
   return (
     <div className="mt-2 space-y-1.5">
       {toolCalls.map((toolCall) => {
@@ -258,6 +270,7 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
             statusIcon={getStatusIcon(status, toolCall.function.name)}
             description={description || browserInfo || undefined}
             elapsedMs={elapsedMs} // Pass elapsed time to ActionButton
+            isFileRelated={isFileRelatedTool(toolCall.function.name)}
           />
         );
       })}
