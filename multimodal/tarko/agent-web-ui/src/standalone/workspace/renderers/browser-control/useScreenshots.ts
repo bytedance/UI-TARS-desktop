@@ -65,6 +65,8 @@ export const useScreenshots = ({
 
     let foundBeforeImage = false;
     let foundAfterImage = false;
+    let beforeImageData: { url: string; pageUrl: string | null } | null = null;
+    let afterImageData: { url: string; pageUrl: string | null } | null = null;
 
     // Search for screenshots BEFORE the current tool call
     // Always search for before action image as it may be used as fallback
@@ -78,12 +80,9 @@ export const useScreenshots = ({
         if (imgContent && 'image_url' in imgContent && imgContent.image_url.url) {
           const url =
             msg.metadata?.type === 'screenshot' && 'url' in msg.metadata ? msg.metadata.url : null;
+          beforeImageData = { url: imgContent.image_url.url, pageUrl: url };
           setBeforeActionImage(imgContent.image_url.url);
           setBeforeActionImageUrl(url || null);
-          if (currentStrategy === 'beforeAction') {
-            setRelatedImage(imgContent.image_url.url);
-            setRelatedImageUrl(url || null);
-          }
           foundBeforeImage = true;
           break;
         }
@@ -105,12 +104,9 @@ export const useScreenshots = ({
               msg.metadata?.type === 'screenshot' && 'url' in msg.metadata
                 ? msg.metadata.url
                 : null;
+            afterImageData = { url: imgContent.image_url.url, pageUrl: url };
             setAfterActionImage(imgContent.image_url.url);
             setAfterActionImageUrl(url || null);
-            if (currentStrategy === 'afterAction') {
-              setRelatedImage(imgContent.image_url.url);
-              setRelatedImageUrl(url || null);
-            }
             foundAfterImage = true;
             break;
           }
@@ -118,26 +114,31 @@ export const useScreenshots = ({
       }
     }
 
-    // Handle strategy-specific warnings and fallbacks
+    // Handle strategy-specific logic and fallbacks
     if (!environmentImage) {
-      if (currentStrategy === 'beforeAction' && !foundBeforeImage) {
-        console.warn(
-          `[BrowserControlRenderer] No valid screenshot found before toolCallId: ${toolCallId}. Clearing screenshot display.`,
-        );
-        setRelatedImage(null);
-        setRelatedImageUrl(null);
+      if (currentStrategy === 'beforeAction') {
+        if (beforeImageData) {
+          setRelatedImage(beforeImageData.url);
+          setRelatedImageUrl(beforeImageData.pageUrl);
+        } else {
+          console.warn(
+            `[BrowserControlRenderer] No valid screenshot found before toolCallId: ${toolCallId}. Clearing screenshot display.`,
+          );
+          setRelatedImage(null);
+          setRelatedImageUrl(null);
+        }
       } else if (currentStrategy === 'afterAction') {
-        if (foundAfterImage) {
+        if (afterImageData) {
           // Use after action image when available
-          setRelatedImage(afterActionImage);
-          setRelatedImageUrl(afterActionImageUrl);
-        } else if (foundBeforeImage) {
+          setRelatedImage(afterImageData.url);
+          setRelatedImageUrl(afterImageData.pageUrl);
+        } else if (beforeImageData) {
           // Fallback to before action image to prevent flickering
           console.warn(
             `[BrowserControlRenderer] No valid screenshot found after toolCallId: ${toolCallId}. Falling back to before action image.`,
           );
-          setRelatedImage(beforeActionImage);
-          setRelatedImageUrl(beforeActionImageUrl);
+          setRelatedImage(beforeImageData.url);
+          setRelatedImageUrl(beforeImageData.pageUrl);
         } else {
           console.warn(
             `[BrowserControlRenderer] No valid screenshots found for toolCallId: ${toolCallId}. Clearing screenshot display.`,
@@ -147,12 +148,12 @@ export const useScreenshots = ({
         }
       } else if (currentStrategy === 'both') {
         // For 'both' strategy, use the after action image as primary if available
-        if (foundAfterImage) {
-          setRelatedImage(afterActionImage);
-          setRelatedImageUrl(afterActionImageUrl);
-        } else if (foundBeforeImage) {
-          setRelatedImage(beforeActionImage);
-          setRelatedImageUrl(beforeActionImageUrl);
+        if (afterImageData) {
+          setRelatedImage(afterImageData.url);
+          setRelatedImageUrl(afterImageData.pageUrl);
+        } else if (beforeImageData) {
+          setRelatedImage(beforeImageData.url);
+          setRelatedImageUrl(beforeImageData.pageUrl);
         } else {
           console.warn(
             `[BrowserControlRenderer] No valid screenshots found for toolCallId: ${toolCallId}. Clearing screenshot display.`,
