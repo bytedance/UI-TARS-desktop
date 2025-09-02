@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { FiCode, FiEye } from 'react-icons/fi';
 import { useAtom } from 'jotai';
 import { useSession } from '@/common/hooks/useSession';
+import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { ResearchReportRenderer } from './renderers/ResearchReportRenderer';
 import { WorkspaceHeader } from './components/WorkspaceHeader';
 import { RawModeRenderer } from './components/RawModeRenderer';
@@ -65,6 +66,7 @@ const CONTENT_RENDERERS: Record<
  */
 export const WorkspaceDetail: React.FC = () => {
   const { activePanelContent, setActivePanelContent, activeSessionId } = useSession();
+  const { isReplayMode } = useReplayMode();
   const [workspaceDisplayMode, setWorkspaceDisplayMode] = useAtom(workspaceDisplayModeAtom);
   const [rawToolMapping] = useAtom(rawToolMappingAtom);
   const [zoomedImage, setZoomedImage] = useState<ZoomedImageData | null>(null);
@@ -290,6 +292,7 @@ export const WorkspaceDetail: React.FC = () => {
           workspaceDisplayMode={workspaceDisplayMode}
           onWorkspaceDisplayModeChange={setWorkspaceDisplayMode}
           showWorkspaceToggle={shouldShowWorkspaceToggle()}
+          isReplayMode={isReplayMode}
         />
         <div className="flex-1 overflow-auto p-4 pt-2">{renderContent()}</div>
       </motion.div>

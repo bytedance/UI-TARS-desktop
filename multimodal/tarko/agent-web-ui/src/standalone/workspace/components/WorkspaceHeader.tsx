@@ -22,6 +22,7 @@ interface WorkspaceHeaderProps {
   workspaceDisplayMode?: WorkspaceDisplayMode;
   onWorkspaceDisplayModeChange?: (mode: WorkspaceDisplayMode) => void;
   showWorkspaceToggle?: boolean;
+  isReplayMode?: boolean;
 }
 
 export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
@@ -34,6 +35,7 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
   workspaceDisplayMode = 'interaction',
   onWorkspaceDisplayModeChange,
   showWorkspaceToggle = false,
+  isReplayMode = false,
 }) => {
   const { getToolIcon } = useTool();
   const workspaceNavItems = getWorkspaceNavItems();
@@ -106,7 +108,7 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
 
       <div className="ml-4 flex-shrink-0 flex items-center gap-3">
         {/* Workspace navigation items */}
-        {workspaceNavItems.length > 0 && (
+        {!isReplayMode && workspaceNavItems.length > 0 && (
           <div className="flex items-center gap-2">
             {workspaceNavItems.map((navItem) => (
               <motion.button
