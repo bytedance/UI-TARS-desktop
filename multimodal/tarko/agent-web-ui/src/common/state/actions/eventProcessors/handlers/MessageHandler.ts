@@ -128,33 +128,40 @@ export class AssistantMessageHandler
     });
 
     if (event.finishReason !== 'tool_calls' && shouldUpdatePanelContent(get, sessionId)) {
-      // Auto-associate with recent environment input for final browser state display
-      const currentMessages = get(messagesAtom)[sessionId] || [];
+      // Skip auto-association with environment input for GUI Agent tasks
+      // BrowserControlRenderer should handle browser screenshots through tool results
+      const currentPanel = get(activePanelContentAtom);
+      
+      // Only auto-associate environment input if there's already a browser_vision_control panel
+      // This prevents creating standalone Browser Screenshot states
+      if (currentPanel && currentPanel.type === 'browser_vision_control') {
+        const currentMessages = get(messagesAtom)[sessionId] || [];
 
-      for (let i = currentMessages.length - 1; i >= 0; i--) {
-        const msg = currentMessages[i];
-        if (msg.role === 'environment' && Array.isArray(msg.content)) {
-          const imageContent = msg.content.find(
-            (item): item is ChatCompletionContentPartImage =>
-              typeof item === 'object' &&
-              item !== null &&
-              'type' in item &&
-              item.type === 'image_url' &&
-              'image_url' in item &&
-              typeof item.image_url === 'object' &&
-              item.image_url !== null &&
-              'url' in item.image_url,
-          );
+        for (let i = currentMessages.length - 1; i >= 0; i--) {
+          const msg = currentMessages[i];
+          if (msg.role === 'environment' && Array.isArray(msg.content)) {
+            const imageContent = msg.content.find(
+              (item): item is ChatCompletionContentPartImage =>
+                typeof item === 'object' &&
+                item !== null &&
+                'type' in item &&
+                item.type === 'image_url' &&
+                'image_url' in item &&
+                typeof item.image_url === 'object' &&
+                item.image_url !== null &&
+                'url' in item.image_url,
+            );
 
-          if (imageContent && imageContent.image_url) {
-            set(activePanelContentAtom, {
-              type: 'image',
-              source: msg.content,
-              title: msg.description || 'Final Browser State',
-              timestamp: msg.timestamp,
-              environmentId: msg.id,
-            });
-            break;
+            if (imageContent && imageContent.image_url) {
+              // Update existing browser_vision_control panel with final state
+              set(activePanelContentAtom, {
+                ...currentPanel,
+                title: `${currentPanel.title} · Final State`,
+                timestamp: msg.timestamp,
+                environmentId: msg.id,
+              });
+              break;
+            }
           }
         }
       }

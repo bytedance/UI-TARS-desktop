@@ -81,7 +81,6 @@ export const Message: React.FC<MessageProps> = ({
           content={message.content as ChatCompletionContentPart[]}
           timestamp={message.timestamp}
           setActivePanelContent={setActivePanelContent}
-          messageRole={message.role}
         />
       );
     }
