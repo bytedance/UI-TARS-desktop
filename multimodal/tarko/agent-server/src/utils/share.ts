@@ -24,6 +24,7 @@ export class ShareUtils {
    * @param metadata Session metadata
    * @param staticPath Path to static web UI files
    * @param serverInfo Optional server version info
+   * @param webUIConfig Optional web UI configuration to inject
    * @returns Generated HTML content
    */
   static generateShareHtml(
@@ -31,6 +32,7 @@ export class ShareUtils {
     metadata: SessionItemInfo,
     staticPath: string,
     serverInfo?: AgentServerVersionInfo,
+    webUIConfig?: Record<string, any>,
   ): string {
     if (!staticPath) {
       throw new Error('Cannot found static path.');
@@ -48,7 +50,8 @@ export class ShareUtils {
       const safeMetadataJson = this.safeJsonStringify(metadata);
       const safeVersionJson = serverInfo ? this.safeJsonStringify(serverInfo) : null;
 
-      // Inject session data, event stream, and version info
+      // Inject session data, event stream, version info, and web UI config
+      const safeWebUIConfigJson = webUIConfig ? this.safeJsonStringify(webUIConfig) : null;
       const scriptTag = `<script>
         window.AGENT_REPLAY_MODE = true;
         window.AGENT_SESSION_DATA = ${safeMetadataJson};
@@ -56,6 +59,11 @@ export class ShareUtils {
           safeVersionJson
             ? `
         window.AGENT_VERSION_INFO = ${safeVersionJson};`
+            : ''
+        }${
+          safeWebUIConfigJson
+            ? `
+        window.AGENT_WEB_UI_CONFIG = ${safeWebUIConfigJson};`
             : ''
         }
       </script>

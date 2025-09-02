@@ -327,7 +327,7 @@ export async function shareSession(req: Request, res: Response) {
 
   try {
     const server = req.app.locals.server;
-    const shareService = new ShareService(server.appConfig, server.storageProvider);
+    const shareService = new ShareService(server.appConfig, server.storageProvider, server);
 
     // Get agent instance if session is active (for slug generation)
     const agent = server.sessions[sessionId]?.agent;
