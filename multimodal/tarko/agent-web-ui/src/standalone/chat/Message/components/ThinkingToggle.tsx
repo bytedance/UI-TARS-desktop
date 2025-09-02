@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiChevronDown, FiChevronRight } from 'react-icons/fi';
+import { FiChevronRight } from 'react-icons/fi';
+import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 
 interface ThinkingToggleProps {
   thinking: string;
@@ -65,8 +66,8 @@ export const ThinkingToggle: React.FC<ThinkingToggleProps> = ({
             transition={{ duration: 0.3, ease: 'easeInOut' }}
             className="overflow-hidden"
           >
-            <div className="mt-3 ml-6 text-[15px] leading-relaxed text-gray-700 dark:text-gray-400">
-              <div className="whitespace-pre-wrap">{thinking}</div>
+            <div className="mt-3 ml-6 prose dark:prose-invert prose-sm max-w-none text-xs">
+              <MarkdownRenderer content={thinking} />
             </div>
           </motion.div>
         )}
