@@ -9,6 +9,11 @@ import {
   LLMResponseHookPayload,
   AgentEventStream,
 } from '@tarko/agent';
+import {
+  GUIExecuteResult,
+  convertToGUIResponse,
+  createGUIErrorResponse,
+} from '@tarko/shared-utils';
 import { Base64ImageParser } from '@agent-infra/media-utils';
 import { getScreenInfo, setScreenInfo } from './shared';
 import { OperatorManager } from './OperatorManager';
@@ -38,17 +43,26 @@ export class GuiAgentPlugin extends AgentPlugin {
         description: 'operator tool',
         parameters: {},
         function: async (input) => {
-          console.log(input);
-          const op = await this.operatorManager.getInstance();
-          const result = await op?.execute({
-            parsedPrediction: input.operator_action,
-            screenWidth: getScreenInfo().screenWidth ?? 1000,
-            screenHeight: getScreenInfo().screenHeight ?? 1000,
-            prediction: input.operator_action,
-            scaleFactor: 1000,
-            factors: [1, 1],
-          });
-          return { action: input.action, status: 'success', result };
+          try {
+            this.agent.logger.info('browser_vision_control', input);
+            const op = await this.operatorManager.getInstance();
+            const rawResult = await op?.execute({
+              parsedPrediction: input.operator_action,
+              screenWidth: getScreenInfo().screenWidth ?? 1000,
+              screenHeight: getScreenInfo().screenHeight ?? 1000,
+              prediction: input.operator_action,
+              scaleFactor: 1000,
+              factors: [1, 1],
+            });
+            const result = rawResult as unknown as GUIExecuteResult;
+
+            // Convert to GUI Agent protocol format
+            const guiResponse = convertToGUIResponse(input.action, input.operator_action, result);
+            return guiResponse;
+          } catch (error) {
+            // Return error response in GUI Agent format
+            return createGUIErrorResponse(input.action, error);
+          }
         },
       }),
     );
@@ -97,6 +111,9 @@ export class GuiAgentPlugin extends AgentPlugin {
           },
         },
       ],
+      metadata: {
+        type: 'screenshot',
+      },
     });
     eventStream.sendEvent(event);
     // Extract image dimensions from screenshot
