@@ -92,6 +92,7 @@ export default class OmniTARSAgent extends ComposableAgent {
       ],
       toolCallEngine,
       maxTokens: 32768,
+      enableStreamingToolCallEvents: true,
     });
   }
 }
