@@ -4,7 +4,6 @@ import { AgentEventStream, Message } from '@/common/types';
 import { messagesAtom } from '@/common/state/atoms/message';
 import { activePanelContentAtom, isProcessingAtom } from '@/common/state/atoms/ui';
 import { shouldUpdatePanelContent } from '../utils/panelContentUpdater';
-import { ChatCompletionContentPartImage } from '@tarko/agent-interface';
 
 // Constants for thinking message newline trimming performance
 const LEADING_NEWLINES_REGEX = /^\n+/;
@@ -126,46 +125,6 @@ export class AssistantMessageHandler
         ],
       };
     });
-
-    if (event.finishReason !== 'tool_calls' && shouldUpdatePanelContent(get, sessionId)) {
-      // Skip auto-association with environment input for GUI Agent tasks
-      // BrowserControlRenderer should handle browser screenshots through tool results
-      const currentPanel = get(activePanelContentAtom);
-      
-      // Only auto-associate environment input if there's already a browser_vision_control panel
-      // This prevents creating standalone Browser Screenshot states
-      if (currentPanel && currentPanel.type === 'browser_vision_control') {
-        const currentMessages = get(messagesAtom)[sessionId] || [];
-
-        for (let i = currentMessages.length - 1; i >= 0; i--) {
-          const msg = currentMessages[i];
-          if (msg.role === 'environment' && Array.isArray(msg.content)) {
-            const imageContent = msg.content.find(
-              (item): item is ChatCompletionContentPartImage =>
-                typeof item === 'object' &&
-                item !== null &&
-                'type' in item &&
-                item.type === 'image_url' &&
-                'image_url' in item &&
-                typeof item.image_url === 'object' &&
-                item.image_url !== null &&
-                'url' in item.image_url,
-            );
-
-            if (imageContent && imageContent.image_url) {
-              // Update existing browser_vision_control panel with final state
-              set(activePanelContentAtom, {
-                ...currentPanel,
-                title: `${currentPanel.title} · Final State`,
-                timestamp: msg.timestamp,
-                environmentId: msg.id,
-              });
-              break;
-            }
-          }
-        }
-      }
-    }
 
     set(isProcessingAtom, false);
   }
@@ -296,9 +255,10 @@ export class ThinkingMessageHandler
         if (event.type === 'assistant_streaming_thinking_message') {
           // For streaming thinking messages, append to existing thinking content
           // Only trim leading newlines if this is the first chunk (thinking is empty)
-          const contentToAdd = (message.thinking || '').length === 0 && event.content.startsWith(NEWLINE_CHAR)
-            ? event.content.replace(LEADING_NEWLINES_REGEX, '')
-            : event.content;
+          const contentToAdd =
+            (message.thinking || '').length === 0 && event.content.startsWith(NEWLINE_CHAR)
+              ? event.content.replace(LEADING_NEWLINES_REGEX, '')
+              : event.content;
           newThinking = (message.thinking || '') + contentToAdd;
         } else {
           // For final thinking messages, only trim if content starts with newline
