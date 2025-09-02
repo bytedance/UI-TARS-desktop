@@ -8,6 +8,7 @@ import {
   LLMRequestHookPayload,
   LLMResponseHookPayload,
   AgentEventStream,
+  ChatCompletionContentPart,
 } from '@tarko/agent';
 import {
   GUIExecuteResult,
@@ -17,6 +18,7 @@ import {
 import { Base64ImageParser } from '@agent-infra/media-utils';
 import { getScreenInfo, setScreenInfo } from './shared';
 import { OperatorManager } from './OperatorManager';
+import { BrowserOperator } from '@gui-agent/operator-browser';
 
 interface GuiAgentPluginOption {
   operatorManager: OperatorManager;
@@ -100,19 +102,31 @@ export class GuiAgentPlugin extends AgentPlugin {
       console.error('Failed to get base64 image uri');
       return;
     }
+
+    const meta = operator instanceof BrowserOperator ? await operator.getMeta() : null;
+    const content: ChatCompletionContentPart[] = [
+      {
+        type: 'image_url',
+        image_url: {
+          url: base64Uri,
+        },
+      },
+    ];
+
+    if (meta?.url) {
+      content.push({
+        type: 'text',
+        text: `The current page's url: ${meta?.url}`,
+      });
+    }
+
     const eventStream = this.agent.getEventStream();
     const event = eventStream.createEvent('environment_input', {
       description: 'Browser Screenshot',
-      content: [
-        {
-          type: 'image_url',
-          image_url: {
-            url: base64Uri,
-          },
-        },
-      ],
+      content,
       metadata: {
         type: 'screenshot',
+        url: meta?.url,
       },
     });
     eventStream.sendEvent(event);

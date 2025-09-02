@@ -313,6 +313,20 @@ export class BrowserOperator extends Operator {
     };
   }
 
+  public async getMeta(): Promise<{ url: string }> {
+    try {
+      const page = await this.getActivePage();
+      return {
+        url: page.url(),
+      };
+    } catch (error) {
+      this.logger.error('Failed to get page meta:', error);
+    }
+    return {
+      url: '',
+    };
+  }
+
   private async handleClick(x: number, y: number) {
     this.logger.info(`Clicking at (${x}, ${y})`);
     const page = await this.getActivePage();
