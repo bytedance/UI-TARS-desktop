@@ -7,6 +7,7 @@ interface MultimodalContentProps {
   content: ChatCompletionContentPart[];
   timestamp: number;
   setActivePanelContent: any;
+  messageRole?: string;
 }
 
 /**
@@ -21,6 +22,7 @@ export const MultimodalContent: React.FC<MultimodalContentProps> = ({
   content,
   timestamp,
   setActivePanelContent,
+  messageRole,
 }) => {
   // Filter out image and text content
   const imageContents = content.filter((part) => part.type === 'image_url');
@@ -28,6 +30,9 @@ export const MultimodalContent: React.FC<MultimodalContentProps> = ({
 
   // Image-only case - optimize layout
   const isImageOnly = imageContents.length > 0 && textContents.length === 0;
+  
+  // Don't make environment images clickable - they should only be handled by BrowserControlRenderer
+  const isEnvironmentMessage = messageRole === 'environment';
 
   return (
     <>
@@ -39,16 +44,16 @@ export const MultimodalContent: React.FC<MultimodalContentProps> = ({
           {imageContents.map((part, index) => (
             <motion.div
               key={`image-${index}`}
-              whileHover={{ scale: 1.02 }}
-              onClick={() =>
+              whileHover={!isEnvironmentMessage ? { scale: 1.02 } : {}}
+              onClick={!isEnvironmentMessage ? () =>
                 setActivePanelContent({
                   type: 'image',
                   source: part.image_url.url,
                   title: 'Image',
                   timestamp,
-                })
+                }) : undefined
               }
-              className="relative group cursor-pointer inline-block"
+              className={`relative group inline-block ${!isEnvironmentMessage ? 'cursor-pointer' : ''}`}
             >
               {/* Render the actual image thumbnail */}
               <img
