@@ -6,6 +6,10 @@ import { activePanelContentAtom, isProcessingAtom } from '@/common/state/atoms/u
 import { shouldUpdatePanelContent } from '../utils/panelContentUpdater';
 import { ChatCompletionContentPartImage } from '@tarko/agent-interface';
 
+// Constants for thinking message newline trimming performance
+const LEADING_NEWLINES_REGEX = /^\n+/;
+const NEWLINE_CHAR = '\n';
+
 export class UserMessageHandler implements EventHandler<AgentEventStream.UserMessageEvent> {
   canHandle(event: AgentEventStream.Event): event is AgentEventStream.UserMessageEvent {
     return event.type === 'user_message';
@@ -284,10 +288,16 @@ export class ThinkingMessageHandler
 
         if (event.type === 'assistant_streaming_thinking_message') {
           // For streaming thinking messages, append to existing thinking content
-          newThinking = (message.thinking || '') + event.content;
+          // Only trim leading newlines if this is the first chunk (thinking is empty)
+          const contentToAdd = (message.thinking || '').length === 0 && event.content.startsWith(NEWLINE_CHAR)
+            ? event.content.replace(LEADING_NEWLINES_REGEX, '')
+            : event.content;
+          newThinking = (message.thinking || '') + contentToAdd;
         } else {
-          // For final thinking messages, always replace the content
-          newThinking = event.content;
+          // For final thinking messages, only trim if content starts with newline
+          newThinking = event.content.startsWith(NEWLINE_CHAR)
+            ? event.content.replace(LEADING_NEWLINES_REGEX, '')
+            : event.content;
         }
 
         return {
@@ -305,7 +315,9 @@ export class ThinkingMessageHandler
           role: 'assistant',
           content: '',
           timestamp: event.timestamp,
-          thinking: event.content,
+          thinking: event.content.startsWith(NEWLINE_CHAR)
+            ? event.content.replace(LEADING_NEWLINES_REGEX, '')
+            : event.content,
           messageId: eventMessageId,
           isStreaming: event.type === 'assistant_streaming_thinking_message' && !event.isComplete,
         };

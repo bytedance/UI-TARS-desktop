@@ -10,6 +10,7 @@ interface ActionButtonProps {
   statusIcon?: React.ReactNode;
   description?: string;
   elapsedMs?: number;
+  isFileRelated?: boolean;
 }
 
 /**
@@ -23,6 +24,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
   statusIcon,
   description,
   elapsedMs,
+  isFileRelated = false,
 }) => {
   // Helper function to format elapsed time for display
   const formatElapsedTime = (ms: number): string => {
@@ -123,7 +125,9 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
 
           {/* Description */}
           {description && (
-            <span className="font-[400] text-xs opacity-70 block sm:inline overflow-hidden whitespace-nowrap text-ellipsis [direction:rtl] [text-align:left]">
+            <span
+              className={`font-[400] text-xs opacity-70 block sm:inline overflow-hidden whitespace-nowrap text-ellipsis ${isFileRelated ? '[direction:rtl] [text-align:left]' : ''}`}
+            >
               {description}
             </span>
           )}
