@@ -29,11 +29,11 @@ const sandboxBaseUrl = process.env.AIO_SANDBOX_URL ?? '.';
 type OmniTarsOption = AgentOptions & MCPTarsExtraOption & CodeAgentExtraOption;
 
 export default class OmniTARSAgent extends ComposableAgent {
-  static label = 'Omni-TARS Agent';
+  static label = 'Omni Agent';
 
   static webuiConfig: AgentWebUIImplementation = {
     logo: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/icon.png',
-    title: 'Omni-TARS Agent',
+    title: 'Omni Agent',
     subtitle: 'Offering seamless integration with a wide range of real-world tools.',
     welcomTitle: 'An multimodal AI agent',
     welcomePrompts: [
