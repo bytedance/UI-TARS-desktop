@@ -1,5 +1,11 @@
 ## 0.4.0 2024-12-10 - add logging
 
+## 1.2.21
+
+### Patch Changes
+
+- 9e1a390: fix(browser): server declares logging capability but doesn't implement method logging/setLevel
+
 ## 1.2.20
 
 ## 1.2.19

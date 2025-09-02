@@ -1,5 +1,7 @@
 # @agent-infra/mcp-shared
 
+## 1.2.21
+
 ## 1.2.20
 
 ## 1.2.19
