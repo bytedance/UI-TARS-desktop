@@ -6,14 +6,15 @@
 import { HOME_INSTRUCTION, PROXY_INSTRUCTION } from './code';
 
 export const think_token = 'thinkt';
-const use_native_thingking = process.env.NATIVE_THINKING === 'true';
-//FIXME:Not dynamic judgment based on process.env.NATIVE_THINKING for the time being
+const use_native_thinking = process.env.NATIVE_THINKING === 'true';
+//FIXME: Not dynamic judgment based on process.env.NATIVE_THINKING for the time being
 // const use_native_thinking = false;
 
 const think_budget = '\n\n';
 const task_description = `You are capable of leveraging a wide range of tools and resources to efficiently solve tasks and fulfill user requests. Your goal is to analyze the user's instructions, select the most appropriate tools, and execute actions to achieve the desired outcomes with precision and reliability.`;
-//纯GUI 用单独的 Additional Notes, 其他混合场景都用当前的 Additional Notes
+//Mixed scenarios use this additional_notes
 const additional_notes = '- Use english in your reasoning process.';
+//Pure GUI scenarios use this additional_notes_gui
 const additional_notes_gui = `- You can execute multiple actions within a single tool call. For example:\n<seed:tool_call>\n<function=example_function_1>\n<parameter=example_parameter_1>value_1</parameter>\n<parameter=example_parameter_2>\nThis is the value for the second parameter\nthat can span\nmultiple lines\n</parameter>\n</function>\n\n<function=example_function_2>\n<parameter=example_parameter_3>value_4</parameter>\n</function>\n</seed:tool_call>`;
 
 const mcp_functions = `
