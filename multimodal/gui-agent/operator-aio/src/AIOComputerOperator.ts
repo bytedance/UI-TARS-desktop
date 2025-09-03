@@ -1,0 +1,227 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+import {
+  type ScreenshotOutput,
+  type ExecuteParams,
+  type ExecuteOutput,
+  Operator,
+  parseBoxToScreenCoords,
+  StatusEnum,
+} from '@ui-tars/sdk/core';
+import { ConsoleLogger } from '@agent-infra/logger';
+import { sleep } from '@ui-tars/shared/utils';
+import { AIOComputer } from './AIOComputer';
+import type { AIOComputerOptions } from './types';
+
+const logger = new ConsoleLogger('AioComputerOperator');
+
+export class AIOComputerOperator extends Operator {
+  static MANUAL = {
+    ACTION_SPACES: [
+      `click(start_box='[x1, y1, x2, y2]')`,
+      `left_double(start_box='[x1, y1, x2, y2]')`,
+      `right_single(start_box='[x1, y1, x2, y2]')`,
+      `drag(start_box='[x1, y1, x2, y2]', end_box='[x3, y3, x4, y4]')`,
+      `hotkey(key='')`,
+      `type(content='') #If you want to submit your input, use "\\n" at the end of \`content\`.`,
+      `scroll(start_box='[x1, y1, x2, y2]', direction='down or up or right or left')`,
+      `wait() #Sleep for 5s and take a screenshot to check for any changes.`,
+      `finished()`,
+      `call_user() # Submit the task and call the user when the task is unsolvable, or when you need the user's help.`,
+    ],
+  };
+
+  private static currentInstance: AIOComputerOperator | null = null;
+  private aioComputer: AIOComputer;
+
+  public static async create(options: AIOComputerOptions): Promise<AIOComputerOperator> {
+    logger.info('[AioComputerOperator] 创建实例', options.baseURL);
+    this.currentInstance = new AIOComputerOperator(options);
+    return this.currentInstance;
+  }
+
+  private constructor(options: AIOComputerOptions) {
+    super();
+    this.aioComputer = new AIOComputer(options);
+  }
+
+  public async screenshot(): Promise<ScreenshotOutput> {
+    logger.info('[AioComputerOperator] Taking screenshot');
+
+    try {
+      const result = await this.aioComputer.screenshot();
+
+      if (!result.success) {
+        throw new Error(result.message || 'Screenshot failed');
+      }
+
+      // Convert the response to ScreenshotOutput format expected by the SDK
+      if (result.data?.base64) {
+        return {
+          base64: result.data.base64,
+          scaleFactor: result.data.scaleFactor || 1,
+        };
+      } else {
+        throw new Error('No base64 image data received from screenshot API');
+      }
+    } catch (error) {
+      logger.error('[AioComputerOperator] Screenshot failed:', error);
+      throw error;
+    }
+  }
+
+  async execute(params: ExecuteParams): Promise<ExecuteOutput> {
+    const { parsedPrediction, screenWidth, screenHeight, scaleFactor } = params;
+    const { action_type, action_inputs } = parsedPrediction;
+    const startBoxStr = action_inputs?.start_box || '';
+
+    logger.info('[AioComputerOperator] Executing action', action_type, action_inputs);
+
+    const { x: rawX, y: rawY } = parseBoxToScreenCoords({
+      boxStr: startBoxStr,
+      screenWidth,
+      screenHeight,
+    });
+
+    const startX = rawX !== null ? Math.round(rawX) : null;
+    const startY = rawY !== null ? Math.round(rawY) : null;
+
+    logger.info(`[AioComputerOperator] Action position: (${startX}, ${startY})`);
+
+    try {
+      switch (action_type) {
+        case 'wait':
+          logger.info('[AioComputerOperator] Waiting for 5 seconds');
+          await sleep(5000);
+          break;
+
+        case 'mouse_move':
+        case 'hover':
+          if (startX !== null && startY !== null) {
+            await this.aioComputer.moveTo(startX, startY);
+          }
+          break;
+
+        case 'click':
+        case 'left_click':
+        case 'left_single':
+          if (startX !== null && startY !== null) {
+            await this.aioComputer.click(startX, startY);
+          }
+          break;
+
+        case 'left_double':
+        case 'double_click':
+          if (startX !== null && startY !== null) {
+            await this.aioComputer.doubleClick(startX, startY);
+          }
+          break;
+
+        case 'right_click':
+        case 'right_single':
+          if (startX !== null && startY !== null) {
+            await this.aioComputer.rightClick(startX, startY);
+          }
+          break;
+
+        case 'middle_click':
+          if (startX !== null && startY !== null) {
+            await this.aioComputer.click(startX, startY, 'middle');
+          }
+          break;
+
+        case 'left_click_drag':
+        case 'drag':
+        case 'select': {
+          if (action_inputs?.end_box) {
+            const { x: rawEndX, y: rawEndY } = parseBoxToScreenCoords({
+              boxStr: action_inputs.end_box,
+              screenWidth,
+              screenHeight,
+            });
+            const endX = rawEndX !== null ? Math.round(rawEndX) : null;
+            const endY = rawEndY !== null ? Math.round(rawEndY) : null;
+
+            if (startX && startY && endX && endY) {
+              // Move to start position, press mouse, drag to end position, release mouse
+              await this.aioComputer.moveTo(startX, startY);
+              await this.aioComputer.mouseDown();
+              await this.aioComputer.dragTo(endX, endY);
+              await this.aioComputer.mouseUp();
+            }
+          }
+          break;
+        }
+
+        case 'type': {
+          const content = action_inputs.content?.trim();
+          if (content) {
+            const stripContent = content.replace(/\\n$/, '').replace(/\n$/, '');
+            await this.aioComputer.type(stripContent);
+          }
+          break;
+        }
+
+        case 'hotkey':
+        case 'press': {
+          const keyStr = action_inputs?.key || action_inputs?.hotkey;
+          if (keyStr) {
+            // 处理组合键
+            const keys = keyStr.split(/[\s+]/).filter((k) => k.length > 0);
+            if (keys.length > 1) {
+              await this.aioComputer.hotkey(keys);
+            } else {
+              await this.aioComputer.press(keyStr);
+            }
+          }
+          break;
+        }
+
+        case 'scroll': {
+          const { direction } = action_inputs;
+          if (startX !== null && startY !== null && direction) {
+            const normalizedDirection = direction.toLowerCase();
+            let dx = 0,
+              dy = 0;
+
+            switch (normalizedDirection) {
+              case 'up':
+                dy = -500;
+                break;
+              case 'down':
+                dy = 500;
+                break;
+              case 'left':
+                dx = -500;
+                break;
+              case 'right':
+                dx = 500;
+                break;
+            }
+
+            if (dx !== 0 || dy !== 0) {
+              await this.aioComputer.scroll(dx, dy);
+            }
+          }
+          break;
+        }
+
+        case 'error_env':
+        case 'call_user':
+        case 'finished':
+        case 'user_stop':
+          return { status: StatusEnum.END };
+
+        default:
+          logger.warn(`Unsupported action type: ${action_type}`);
+      }
+
+      return { status: StatusEnum.INIT };
+    } catch (error) {
+      logger.error('[AioComputerOperator] 执行失败:', error);
+      return { status: StatusEnum.ERROR };
+    }
+  }
+}
