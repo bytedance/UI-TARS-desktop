@@ -14,7 +14,7 @@ export default {
     logo: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png',
     title: 'Seed MCP Agent',
     subtitle: 'Offering seamless integration with a wide range of real-world tools.',
-    welcomTitle: 'An multimodal AI agent',
+    welcomTitle: 'A multimodal AI agent',
     welcomePrompts: [
       'Search for the latest GUI Agent papers',
       'Find information about UI TARS',

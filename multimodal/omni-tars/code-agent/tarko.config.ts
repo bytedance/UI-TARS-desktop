@@ -17,7 +17,7 @@ export default {
   webui: {
     logo: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png',
     subtitle: 'Offering seamless integration with a wide range of real-world tools.',
-    welcomTitle: 'An multimodal AI agent',
+    welcomTitle: 'A multimodal AI agent',
     welcomePrompts: [
       'Search for the latest GUI Agent papers',
       'Excute ls -al',
