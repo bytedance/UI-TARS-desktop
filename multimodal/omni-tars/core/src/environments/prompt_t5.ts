@@ -6,6 +6,10 @@
 import { HOME_INSTRUCTION, PROXY_INSTRUCTION } from './code';
 
 export const think_token = 'thinkt';
+const use_native_thingking = process.env.NATIVE_THINKING === 'true';
+//FIXME:Not dynamic judgment based on process.env.NATIVE_THINKING for the time being
+// const use_native_thinking = false;
+
 const think_budget = '\n\n';
 const task_description = `You are capable of leveraging a wide range of tools and resources to efficiently solve tasks and fulfill user requests. Your goal is to analyze the user's instructions, select the most appropriate tools, and execute actions to achieve the desired outcomes with precision and reliability.`;
 //纯GUI 用单独的 Additional Notes, 其他混合场景都用当前的 Additional Notes
@@ -40,7 +44,9 @@ const gui_functions = `
 `;
 
 /** 3.1 Think Prompt */
-const PROMPT1 = `You should first think about the reasoning process in the mind and then provide the user with the answer. The reasoning process is enclosed within <${think_token}> </${think_token}> tags, i.e. <${think_token}> reasoning process here </${think_token}> answer here`;
+const PROMPT1 = use_native_thinking
+  ? `You should first think about the reasoning process in the mind and then provide the user with the answer.`
+  : `You should first think about the reasoning process in the mind and then provide the user with the answer. The reasoning process is enclosed within <${think_token}> </${think_token}> tags, i.e. <${think_token}> reasoning process here </${think_token}> answer here`;
 
 /** 3.2 Role/Task Prompt */
 const PROMPT2 = `You are an agent designed to accomplish tasks.
@@ -57,7 +63,7 @@ ${[mcp_functions, code_functions, gui_functions].join('')}
 
 - To call a function, use the following structure without any suffix:
 
-<${think_token}> reasoning process </${think_token}>
+${use_native_thinking ? '' : `<${think_token}> reasoning process </${think_token}>`}
 <seed:tool_call>
 <function=example_function_name>
 <parameter=example_parameter_1>value_1</parameter>

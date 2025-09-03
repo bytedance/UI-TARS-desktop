@@ -26,7 +26,7 @@ export default {
   share: {
     provider: process.env.SHARE_PROVIDER,
   },
-  temperature: 1,
+  temperature: 0.7,
   top_p: 0.9,
   snapshot: { storageDirectory: resolve(__dirname, 'snapshots'), enable: true },
   googleApiKey: process.env.GOOGLE_API_KEY,
@@ -37,4 +37,7 @@ export default {
   linkReaderAK: process.env.LINK_READER_AK,
   ignoreSandboxCheck: true,
   logLevel: LogLevel.DEBUG,
+  thinking: {
+    type: process.env.NATIVE_THINKING === 'true' ? 'enabled' : 'disabled',
+  },
 } as AgentOptions;
