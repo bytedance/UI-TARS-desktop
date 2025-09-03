@@ -6,11 +6,33 @@ import {
   PanelContent,
   SanitizedAgentOptions,
 } from '@/common/types';
+import { activeSessionIdAtom } from './session';
 
 /**
- * Atom for the content currently displayed in the panel
+ * Session-specific panel content storage
  */
-export const activePanelContentAtom = atom<PanelContent | null>(null);
+export const sessionPanelContentAtom = atom<Record<string, PanelContent | null>>({});
+
+/**
+ * Derived atom for the content currently displayed in the panel
+ * Automatically isolates content by active session
+ */
+export const activePanelContentAtom = atom(
+  (get) => {
+    const activeSessionId = get(activeSessionIdAtom);
+    const sessionPanelContent = get(sessionPanelContentAtom);
+    return activeSessionId ? sessionPanelContent[activeSessionId] || null : null;
+  },
+  (get, set, update: PanelContent | null) => {
+    const activeSessionId = get(activeSessionIdAtom);
+    if (activeSessionId) {
+      set(sessionPanelContentAtom, (prev) => ({
+        ...prev,
+        [activeSessionId]: update,
+      }));
+    }
+  },
+);
 
 /**
  * Atom for server connection status
@@ -44,15 +66,38 @@ export const sidebarCollapsedAtom = atom<boolean>(true);
 export const workspacePanelCollapsedAtom = atom<boolean>(false);
 
 /**
- * Enhanced agent status atom for TTFT optimization
- * Replaces the redundant isProcessingAtom
+ * Session-specific agent status storage
  */
-export const agentStatusAtom = atom<AgentStatusInfo>({
-  isProcessing: false,
-});
+export const sessionAgentStatusAtom = atom<Record<string, AgentStatusInfo>>({});
 
 /**
- * Derived atom for backward compatibility
+ * Enhanced agent status atom for TTFT optimization with session isolation
+ */
+export const agentStatusAtom = atom(
+  (get) => {
+    const activeSessionId = get(activeSessionIdAtom);
+    const sessionAgentStatus = get(sessionAgentStatusAtom);
+    return activeSessionId 
+      ? sessionAgentStatus[activeSessionId] || { isProcessing: false }
+      : { isProcessing: false };
+  },
+  (get, set, update: AgentStatusInfo | ((prev: AgentStatusInfo) => AgentStatusInfo)) => {
+    const activeSessionId = get(activeSessionIdAtom);
+    if (activeSessionId) {
+      set(sessionAgentStatusAtom, (prev) => {
+        const currentStatus = prev[activeSessionId] || { isProcessing: false };
+        const newStatus = typeof update === 'function' ? update(currentStatus) : update;
+        return {
+          ...prev,
+          [activeSessionId]: newStatus,
+        };
+      });
+    }
+  },
+);
+
+/**
+ * Derived atom for backward compatibility with session isolation
  */
 export const isProcessingAtom = atom(
   (get) => get(agentStatusAtom).isProcessing,

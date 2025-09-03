@@ -1,9 +1,10 @@
-import { isProcessingAtom, sessionMetadataAtom } from '@/common/state/atoms/ui';
+import { sessionAgentStatusAtom, sessionMetadataAtom } from '@/common/state/atoms/ui';
 import { AgentEventStream } from '@/common/types';
 import { EventHandler, EventHandlerContext } from '../types';
 import { apiService } from '@/common/services/apiService';
 import { SessionItemInfo } from '@tarko/interface';
 import { createModelConfigFromEvent, createAgentInfoFromEvent } from '@/common/utils/metadataUtils';
+import { shouldUpdateProcessingState } from '../utils/panelContentUpdater';
 
 export class AgentRunStartHandler implements EventHandler<AgentEventStream.AgentRunStartEvent> {
   canHandle(event: AgentEventStream.Event): event is AgentEventStream.AgentRunStartEvent {
@@ -45,7 +46,16 @@ export class AgentRunStartHandler implements EventHandler<AgentEventStream.Agent
       }
     }
 
-    set(isProcessingAtom, true);
+    // Update processing state for the specific session
+    if (shouldUpdateProcessingState(sessionId)) {
+      set(sessionAgentStatusAtom, (prev) => ({
+        ...prev,
+        [sessionId]: {
+          ...(prev[sessionId] || {}),
+          isProcessing: true,
+        },
+      }));
+    }
   }
 }
 
@@ -56,6 +66,16 @@ export class AgentRunEndHandler implements EventHandler<AgentEventStream.Event> 
 
   handle(context: EventHandlerContext, sessionId: string, event: AgentEventStream.Event): void {
     const { set } = context;
-    set(isProcessingAtom, false);
+    
+    // Update processing state for the specific session
+    if (shouldUpdateProcessingState(sessionId)) {
+      set(sessionAgentStatusAtom, (prev) => ({
+        ...prev,
+        [sessionId]: {
+          ...(prev[sessionId] || {}),
+          isProcessing: false,
+        },
+      }));
+    }
   }
 }

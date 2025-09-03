@@ -5,7 +5,7 @@ import { AgentEventStream, ToolResult, Message } from '@/common/types';
 import { determineToolRendererType } from '@/common/utils/tool-renderers';
 import { messagesAtom } from '@/common/state/atoms/message';
 import { toolResultsAtom, toolCallResultMap } from '@/common/state/atoms/tool';
-import { activePanelContentAtom } from '@/common/state/atoms/ui';
+import { sessionPanelContentAtom } from '@/common/state/atoms/ui';
 import { rawToolMappingAtom } from '@/common/state/atoms/rawEvents';
 import { toolCallArgumentsCache, streamingToolCallCache } from '../utils/cacheManager';
 import { collectFileInfo } from '../utils/fileCollector';
@@ -128,46 +128,56 @@ export class ToolResultHandler implements EventHandler<AgentEventStream.ToolResu
     if (shouldUpdatePanelContent(get, sessionId)) {
       // Special handling for browser vision control to preserve environment context
       if (result.type === 'browser_vision_control') {
-        set(activePanelContentAtom, (prev) => {
-          if (prev && prev.type === 'image' && prev.environmentId) {
-            const environmentId = prev.environmentId;
+        set(sessionPanelContentAtom, (prev) => {
+          const currentContent = prev[sessionId];
+          if (currentContent && currentContent.type === 'image' && currentContent.environmentId) {
+            const environmentId = currentContent.environmentId;
 
             return {
               ...prev,
-              type: 'browser_vision_control',
-              source: event.content,
-              title: prev.title,
-              timestamp: event.timestamp,
-              toolCallId: event.toolCallId,
-              error: event.error,
-              arguments: args,
-              originalContent: prev.source,
-              environmentId: environmentId,
-              processedEnvironmentIds: [environmentId], // Track processed environment IDs
+              [sessionId]: {
+                ...currentContent,
+                type: 'browser_vision_control',
+                source: event.content,
+                title: currentContent.title,
+                timestamp: event.timestamp,
+                toolCallId: event.toolCallId,
+                error: event.error,
+                arguments: args,
+                originalContent: currentContent.source,
+                environmentId: environmentId,
+                processedEnvironmentIds: [environmentId], // Track processed environment IDs
+              },
             };
           } else {
             return {
-              type: result.type,
-              source: result.content,
-              title: result.name,
-              timestamp: result.timestamp,
-              toolCallId: result.toolCallId,
-              error: result.error,
-              arguments: args,
+              ...prev,
+              [sessionId]: {
+                type: result.type,
+                source: result.content,
+                title: result.name,
+                timestamp: result.timestamp,
+                toolCallId: result.toolCallId,
+                error: result.error,
+                arguments: args,
+              },
             };
           }
         });
       } else {
-        set(activePanelContentAtom, {
-          type: result.type,
-          source: result.content,
-          title: result.name,
-          timestamp: result.timestamp,
-          toolCallId: result.toolCallId,
-          error: result.error,
-          arguments: args,
-          _extra: result._extra,
-        });
+        set(sessionPanelContentAtom, (prev) => ({
+          ...prev,
+          [sessionId]: {
+            type: result.type,
+            source: result.content,
+            title: result.name,
+            timestamp: result.timestamp,
+            toolCallId: result.toolCallId,
+            error: result.error,
+            arguments: args,
+            _extra: result._extra,
+          },
+        }));
       }
     }
 
@@ -334,15 +344,18 @@ export class StreamingToolCallHandler
       const content = 'content' in parsedArgs ? parsedArgs.content : '';
 
       if (typeof path === 'string') {
-        set(activePanelContentAtom, {
-          type: 'file',
-          source: typeof content === 'string' ? content : '',
-          title: `Writing: ${path.split('/').pop()}`,
-          timestamp: event.timestamp,
-          toolCallId,
-          arguments: parsedArgs,
-          isStreaming: !isComplete,
-        });
+        set(sessionPanelContentAtom, (prev) => ({
+          ...prev,
+          [sessionId]: {
+            type: 'file',
+            source: typeof content === 'string' ? content : '',
+            title: `Writing: ${path.split('/').pop()}`,
+            timestamp: event.timestamp,
+            toolCallId,
+            arguments: parsedArgs,
+            isStreaming: !isComplete,
+          },
+        }));
       }
     }
 

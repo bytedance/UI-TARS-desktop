@@ -4,7 +4,7 @@ import { apiService } from '../../services/apiService';
 import { sessionsAtom, activeSessionIdAtom } from '../atoms/session';
 import { messagesAtom } from '../atoms/message';
 import { toolResultsAtom, toolCallResultMap } from '../atoms/tool';
-import { isProcessingAtom, activePanelContentAtom, sessionMetadataAtom } from '../atoms/ui';
+import { sessionAgentStatusAtom, sessionPanelContentAtom, sessionMetadataAtom } from '../atoms/ui';
 import { processEventAction } from './eventProcessors';
 import { Message, SessionItemInfo } from '@/common/types';
 import { connectionStatusAtom } from '../atoms/ui';
@@ -54,18 +54,21 @@ function selectBestFileToDisplay(files: FileItem[]): FileItem | null {
   return sortedFiles[0];
 }
 
-function setWorkspacePanelForFile(set: Setter, file: FileItem): void {
-  set(activePanelContentAtom, {
-    type: 'file',
-    source: file.content || '',
-    title: file.name,
-    timestamp: file.timestamp,
-    toolCallId: file.toolCallId,
-    arguments: {
-      path: file.path,
-      content: file.content,
+function setWorkspacePanelForFile(set: Setter, sessionId: string, file: FileItem): void {
+  set(sessionPanelContentAtom, (prev) => ({
+    ...prev,
+    [sessionId]: {
+      type: 'file',
+      source: file.content || '',
+      title: file.name,
+      timestamp: file.timestamp,
+      toolCallId: file.toolCallId,
+      arguments: {
+        path: file.path,
+        content: file.content,
+      },
     },
-  });
+  }));
 }
 
 export const loadSessionsAction = atom(null, async (get, set) => {
@@ -99,7 +102,11 @@ export const createSessionAction = atom(null, async (get, set) => {
       [newSession.id]: [],
     }));
 
-    set(activePanelContentAtom, null);
+    // Clear panel content for new session
+    set(sessionPanelContentAtom, (prev) => ({
+      ...prev,
+      [newSession.id]: null,
+    }));
     set(activeSessionIdAtom, newSession.id);
 
     return newSession.id;
@@ -137,10 +144,24 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
     // Update processing status based on current session state
     try {
       const status = await apiService.getSessionStatus(sessionId);
-      set(isProcessingAtom, status.isProcessing);
+      set(sessionAgentStatusAtom, (prev) => ({
+        ...prev,
+        [sessionId]: {
+          isProcessing: status.isProcessing,
+          state: status.state,
+          phase: status.phase,
+          message: status.message,
+          estimatedTime: status.estimatedTime,
+        },
+      }));
     } catch (error) {
       console.warn('Failed to get session status:', error);
-      set(isProcessingAtom, false);
+      set(sessionAgentStatusAtom, (prev) => ({
+        ...prev,
+        [sessionId]: {
+          isProcessing: false,
+        },
+      }));
     }
 
     toolCallResultMap.clear();
@@ -212,9 +233,13 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
 
     if (bestFile) {
       console.log(`Auto-selecting file for workspace: ${bestFile.name} (${bestFile.path})`);
-      setWorkspacePanelForFile(set, bestFile);
+      setWorkspacePanelForFile(set, sessionId, bestFile);
     } else {
-      set(activePanelContentAtom, null);
+      // Clear panel content for this session
+      set(sessionPanelContentAtom, (prev) => ({
+        ...prev,
+        [sessionId]: null,
+      }));
     }
   } catch (error) {
     console.error('Failed to set active session:', error);
@@ -289,6 +314,19 @@ export const deleteSessionAction = atom(null, async (get, set, sessionId: string
         delete newResults[sessionId];
         return newResults;
       });
+      
+      // Clean up session-specific UI state
+      set(sessionPanelContentAtom, (prev) => {
+        const newPanelContent = { ...prev };
+        delete newPanelContent[sessionId];
+        return newPanelContent;
+      });
+      
+      set(sessionAgentStatusAtom, (prev) => {
+        const newAgentStatus = { ...prev };
+        delete newAgentStatus[sessionId];
+        return newAgentStatus;
+      });
     }
 
     return success;
@@ -307,7 +345,14 @@ export const sendMessageAction = atom(
       throw new Error('No active session');
     }
 
-    set(isProcessingAtom, true);
+    // Update processing state for active session
+    set(sessionAgentStatusAtom, (prev) => ({
+      ...prev,
+      [activeSessionId]: {
+        ...(prev[activeSessionId] || {}),
+        isProcessing: true,
+      },
+    }));
 
     // Note: Do NOT add user message to state here in streaming mode
     // The user_message event will come from the server's event stream
@@ -359,12 +404,25 @@ export const sendMessageAction = atom(
 
         // Maintain processing state until explicit end
         if (event.type !== 'agent_run_end' && event.type !== 'assistant_message') {
-          set(isProcessingAtom, true);
+          set(sessionAgentStatusAtom, (prev) => ({
+            ...prev,
+            [activeSessionId]: {
+              ...(prev[activeSessionId] || {}),
+              isProcessing: true,
+            },
+          }));
         }
       });
     } catch (error) {
       console.error('Error sending message:', error);
-      set(isProcessingAtom, false);
+      // Set processing to false for this session on error
+      set(sessionAgentStatusAtom, (prev) => ({
+        ...prev,
+        [activeSessionId]: {
+          ...(prev[activeSessionId] || {}),
+          isProcessing: false,
+        },
+      }));
       throw error;
     }
   },
@@ -382,14 +440,26 @@ export const abortQueryAction = atom(null, async (get, set) => {
 
     // Immediately set processing to false on successful abort to prevent flickering
     if (success) {
-      set(isProcessingAtom, false);
+      set(sessionAgentStatusAtom, (prev) => ({
+        ...prev,
+        [activeSessionId]: {
+          ...(prev[activeSessionId] || {}),
+          isProcessing: false,
+        },
+      }));
     }
 
     return success;
   } catch (error) {
     console.error('Error aborting query:', error);
     // Also set processing to false on error to ensure UI consistency
-    set(isProcessingAtom, false);
+    set(sessionAgentStatusAtom, (prev) => ({
+      ...prev,
+      [activeSessionId]: {
+        ...(prev[activeSessionId] || {}),
+        isProcessing: false,
+      },
+    }));
     return false;
   }
 });
@@ -399,7 +469,16 @@ export const checkSessionStatusAction = atom(null, async (get, set, sessionId: s
 
   try {
     const status = await apiService.getSessionStatus(sessionId);
-    set(isProcessingAtom, status.isProcessing);
+    set(sessionAgentStatusAtom, (prev) => ({
+      ...prev,
+      [sessionId]: {
+        isProcessing: status.isProcessing,
+        state: status.state,
+        phase: status.phase,
+        message: status.message,
+        estimatedTime: status.estimatedTime,
+      },
+    }));
 
     return status;
   } catch (error) {

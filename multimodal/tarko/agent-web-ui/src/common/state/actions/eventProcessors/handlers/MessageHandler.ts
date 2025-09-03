@@ -2,8 +2,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { EventHandler, EventHandlerContext } from '../types';
 import { AgentEventStream, Message } from '@/common/types';
 import { messagesAtom } from '@/common/state/atoms/message';
-import { activePanelContentAtom, isProcessingAtom } from '@/common/state/atoms/ui';
-import { shouldUpdatePanelContent } from '../utils/panelContentUpdater';
+import { sessionPanelContentAtom, sessionAgentStatusAtom } from '@/common/state/atoms/ui';
+import { shouldUpdatePanelContent, shouldUpdateProcessingState } from '../utils/panelContentUpdater';
 
 // Constants for thinking message newline trimming performance
 const LEADING_NEWLINES_REGEX = /^\n+/;
@@ -52,12 +52,15 @@ export class UserMessageHandler implements EventHandler<AgentEventStream.UserMes
       );
 
       if (images.length > 0) {
-        set(activePanelContentAtom, {
-          type: 'image',
-          source: images[0].image_url.url,
-          title: 'User Upload',
-          timestamp: Date.now(),
-        });
+        set(sessionPanelContentAtom, (prev) => ({
+          ...prev,
+          [sessionId]: {
+            type: 'image',
+            source: images[0].image_url.url,
+            title: 'User Upload',
+            timestamp: Date.now(),
+          },
+        }));
       }
     }
   }
@@ -126,7 +129,16 @@ export class AssistantMessageHandler
       };
     });
 
-    set(isProcessingAtom, false);
+    // Update processing state for the specific session
+    if (shouldUpdateProcessingState(sessionId)) {
+      set(sessionAgentStatusAtom, (prev) => ({
+        ...prev,
+        [sessionId]: {
+          ...(prev[sessionId] || {}),
+          isProcessing: false,
+        },
+      }));
+    }
   }
 }
 
@@ -202,8 +214,14 @@ export class StreamingMessageHandler
       };
     });
 
-    if (event.isComplete) {
-      set(isProcessingAtom, false);
+    if (event.isComplete && shouldUpdateProcessingState(sessionId)) {
+      set(sessionAgentStatusAtom, (prev) => ({
+        ...prev,
+        [sessionId]: {
+          ...(prev[sessionId] || {}),
+          isProcessing: false,
+        },
+      }));
     }
   }
 }
