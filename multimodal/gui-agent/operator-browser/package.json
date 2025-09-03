@@ -1,7 +1,7 @@
 {
   "name": "@gui-agent/operator-browser",
   "description": "Native-browser operator for GUI Agent",
-  "version": "0.3.0-beta.7",
+  "version": "0.3.0-beta.8",
   "repository": {
     "type": "git",
     "url": "https://github.com/bytedance/UI-TARS-desktop"

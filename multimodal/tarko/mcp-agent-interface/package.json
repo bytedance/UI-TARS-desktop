@@ -1,6 +1,6 @@
 {
   "name": "@tarko/mcp-agent-interface",
-  "version": "0.3.0-beta.7",
+  "version": "0.3.0-beta.8",
   "description": "Standard protocol, types design, api design for `@tarko/mcp-agent`.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
