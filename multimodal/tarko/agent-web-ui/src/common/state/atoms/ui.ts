@@ -67,12 +67,17 @@ export const isProcessingAtom = atom(
 export const offlineModeAtom = atom<boolean>(false);
 
 /**
+ * Base atom for layout mode
+ */
+const baseLayoutModeAtom = atom<LayoutMode>('default');
+
+/**
  * Atom for layout mode with localStorage persistence
  */
-export const layoutModeAtom = atom<LayoutMode>(
-  'default',
+export const layoutModeAtom = atom(
+  (get) => get(baseLayoutModeAtom),
   (get, set, newValue: LayoutMode) => {
-    set(layoutModeAtom, newValue);
+    set(baseLayoutModeAtom, newValue);
     // Persist to localStorage
     try {
       localStorage.setItem('tarko-layout-mode', newValue);
@@ -92,12 +97,12 @@ export const initializeLayoutModeAtom = atom(null, (get, set) => {
     // Try to get from localStorage first
     const savedLayout = localStorage.getItem('tarko-layout-mode') as LayoutMode;
     if (savedLayout && (savedLayout === 'default' || savedLayout === 'narrow-chat')) {
-      set(layoutModeAtom, savedLayout);
+      set(baseLayoutModeAtom, savedLayout);
     } else {
-      set(layoutModeAtom, defaultLayout);
+      set(baseLayoutModeAtom, defaultLayout);
     }
   } catch (error) {
     console.warn('Failed to initialize layout mode:', error);
-    set(layoutModeAtom, 'default');
+    set(baseLayoutModeAtom, 'default');
   }
 });
