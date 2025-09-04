@@ -16,8 +16,8 @@
   },
   "include": [
     "src/**/*",
-    "test/**/*",
-    "examples/**/*"
+    // "test/**/*", // Test files are excluded from dist
+    // "examples/**/*" // Example files are excluded from dist, the index.d.ts will save on dist/index.d.ts instead of dist/src/index.d.ts
   ],
   "exclude": [
     "node_modules",

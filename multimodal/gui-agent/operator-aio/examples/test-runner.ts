@@ -5,6 +5,8 @@
 
 import { AIOHybridOperator } from '../src/AIOHybridOperator';
 import { StatusEnum } from '@ui-tars/sdk';
+// @ts-ignore - Module resolution issue: TypeScript cannot resolve this module with current 'Bundler' moduleResolution setting
+// The type exists at '/node_modules/@ui-tars/sdk/dist/core.d.ts' but requires 'node16', 'nodenext', or 'bundler' moduleResolution
 import type { ExecuteParams } from '@ui-tars/sdk/core';
 import * as fs from 'fs';
 import * as path from 'path';
