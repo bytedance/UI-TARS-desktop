@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useSession } from '@/common/hooks/useSession';
 import { MessageGroup } from './Message/components/MessageGroup';
 import { ChatInput } from './MessageInput';
@@ -80,27 +80,15 @@ export const ChatPanel: React.FC = () => {
   const replayState = useAtomValue(replayStateAtom);
   const { isReplayMode, cancelAutoPlay } = useReplayMode();
   const location = useLocation();
-  const [initialMessageSent, setInitialMessageSent] = useState(false);
-  const [lastSessionId, setLastSessionId] = useState<string | null>(null);
-
-  // Reset initial message sent flag when session changes
-  useEffect(() => {
-    if (activeSessionId !== lastSessionId) {
-      setInitialMessageSent(false);
-      setLastSessionId(activeSessionId);
-    }
-  }, [activeSessionId, lastSessionId]);
 
   // Use messages from current session
   const activeMessages = activeSessionId ? groupedMessages[activeSessionId] || [] : [];
 
-  // Handle initial message from welcome page (only once per session)
+  // Handle initial message from welcome page
   useEffect(() => {
-    if (initialMessageSent || !activeSessionId) return;
-    
     const locationState = location.state as { initialMessage?: string | ChatCompletionContentPart[]; fromWelcome?: boolean } | null;
     
-    if (locationState?.initialMessage && locationState.fromWelcome) {
+    if (locationState?.initialMessage && locationState.fromWelcome && activeSessionId && !isProcessing) {
       // Check if this session has no messages yet (avoid duplicate sends)
       const sessionMessages = allMessages[activeSessionId] || [];
       const userMessages = sessionMessages.filter(msg => msg.role === 'user');
@@ -111,14 +99,11 @@ export const ChatPanel: React.FC = () => {
           console.error('Failed to send initial message:', error);
         });
         
-        // Mark as sent to prevent future sends
-        setInitialMessageSent(true);
+        // Clear the location state to prevent re-sending
+        window.history.replaceState({}, '', location.pathname);
       }
-      
-      // Clear the location state immediately
-      window.history.replaceState({}, '', location.pathname);
     }
-  }, [activeSessionId, initialMessageSent, allMessages, sendMessage, location.state]);
+  }, [activeSessionId, location.state, allMessages, sendMessage, isProcessing]);
 
   // Auto-scroll functionality
   const {
