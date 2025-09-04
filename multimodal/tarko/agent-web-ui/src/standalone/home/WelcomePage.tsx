@@ -26,18 +26,23 @@ const WelcomePage: React.FC = () => {
 
     setIsLoading(true);
 
+    // Navigate immediately to special "creating" state
+    navigate('/creating');
+    
     try {
-      // Create session first - this should be fast
+      // Create session in background
       const sessionId = await createSession();
       
-      // Navigate immediately after session is created
-      navigate(`/${sessionId}`);
+      // Replace with real session ID
+      navigate(`/${sessionId}`, { replace: true });
       
-      // Send message right after navigation
+      // Send message
       sendMessage(content).catch(console.error);
       
     } catch (error) {
       console.error('Failed to create session:', error);
+      // Navigate back to home on error
+      navigate('/', { replace: true });
       setIsLoading(false);
     }
   };

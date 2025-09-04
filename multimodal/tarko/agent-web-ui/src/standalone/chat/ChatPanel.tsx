@@ -193,7 +193,7 @@ export const ChatPanel: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      {!activeSessionId ? (
+      {!activeSessionId || activeSessionId === 'creating' ? (
         <motion.div
           initial="hidden"
           animate="visible"
@@ -205,19 +205,30 @@ export const ChatPanel: React.FC = () => {
               variants={itemVariants}
               className="w-16 h-16 bg-white dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-6 text-gray-500 dark:text-gray-400 border border-gray-100/50 dark:border-gray-700/20"
             >
-              <FiMessageSquare size={24} />
+              {activeSessionId === 'creating' ? (
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                >
+                  <FiRefreshCw size={24} />
+                </motion.div>
+              ) : (
+                <FiMessageSquare size={24} />
+              )}
             </motion.div>
             <motion.h2
               variants={itemVariants}
               className="text-xl font-display font-bold mb-3 text-gray-800 dark:text-gray-200"
             >
-              Welcome to {getAgentTitle()}
+              {activeSessionId === 'creating' ? 'Creating session...' : `Welcome to ${getAgentTitle()}`}
             </motion.h2>
             <motion.p
               variants={itemVariants}
               className="text-gray-600 dark:text-gray-400 mb-5 text-sm leading-relaxed"
             >
-              Create a new chat session to get started with the AI assistant.
+              {activeSessionId === 'creating' 
+                ? 'Please wait while we set up your chat session.'
+                : 'Create a new chat session to get started with the AI assistant.'}
             </motion.p>
             <motion.div
               variants={itemVariants}

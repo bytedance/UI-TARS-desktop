@@ -66,7 +66,8 @@ export const SessionRouter: React.FC<SessionRouterProps> = ({ children }) => {
   }
 
   // For normal mode, redirect if session doesn't exist
-  if (!sessionExists && sessions.length > 0 && sessionId) {
+  // BUT allow special "creating" session ID to pass through
+  if (!sessionExists && sessions.length > 0 && sessionId && sessionId !== 'creating') {
     return <Navigate to="/" replace />;
   }
 
