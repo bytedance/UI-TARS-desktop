@@ -24,27 +24,24 @@ const WelcomePage: React.FC = () => {
   const handleChatSubmit = async (content: string | ChatCompletionContentPart[]) => {
     if (isLoading) return;
 
-    setIsLoading(true);
-
     try {
       // Create a new session
       const sessionId = await createSession();
       
-      // Navigate to chat page immediately
+      // Navigate to chat page immediately - no loading state needed
       navigate(`/${sessionId}`);
       
-      // Send message immediately after navigation
-      // The chat interface will handle the loading state
+      // Send message after navigation
+      // Use a very small delay to ensure the chat interface is ready
       setTimeout(() => {
         sendMessage(content).catch((error) => {
           console.error('Failed to send initial message:', error);
         });
-      }, 50); // Minimal delay to ensure navigation completes
+      }, 100);
       
-      // Reset loading state immediately after navigation
-      setIsLoading(false);
     } catch (error) {
       console.error('Failed to create session:', error);
+      // Only show loading state if there's an error
       setIsLoading(false);
     }
   };
