@@ -29,7 +29,8 @@ export const MessageAttachments: React.FC<MessageAttachmentsProps> = ({
   // Check if contextual selector is enabled
   const contextualSelectorEnabled = isContextualSelectorEnabled();
 
-  const hasAttachments = images.length > 0 || (contextualSelectorEnabled && contextualItems.length > 0);
+  const hasAttachments =
+    images.length > 0 || (contextualSelectorEnabled && contextualItems.length > 0);
 
   if (!hasAttachments) {
     return null;
