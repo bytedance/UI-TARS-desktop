@@ -35,7 +35,7 @@ export const ImagePreviewInline: React.FC<ImagePreviewInlineProps> = ({
               exit={{ opacity: 0, scale: 0.8 }}
               className="relative group cursor-pointer"
             >
-              <div className="relative w-16 h-16 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-400 transition-all duration-200">
+              <div className="relative w-16 h-16 rounded-lg bg-gray-100 dark:bg-gray-700 transition-all duration-200">
                 <img
                   src={image.type === 'image_url' ? image.image_url?.url : ''}
                   alt="Preview"
@@ -46,7 +46,7 @@ export const ImagePreviewInline: React.FC<ImagePreviewInlineProps> = ({
                     e.stopPropagation();
                     onRemoveImage(index);
                   }}
-                  className="absolute -top-1 -right-1 w-5 h-5 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-md border border-gray-200 dark:border-gray-600 z-10"
+                  className="absolute -top-1 -right-1 w-5 h-5 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 border border-gray-200 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-400 z-10"
                   title="Remove image"
                 >
                   <FiX size={12} />
