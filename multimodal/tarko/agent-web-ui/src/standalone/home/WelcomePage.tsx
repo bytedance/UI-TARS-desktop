@@ -33,15 +33,16 @@ const WelcomePage: React.FC = () => {
       // Create session in background
       const sessionId = await createSession();
 
-      // Replace with real session ID
+      // Navigate directly to session and send message immediately
       navigate(`/${sessionId}`, { replace: true });
 
-      // Send message
-      sendMessage(content).catch(console.error);
+      // Send message immediately after navigation
+      await sendMessage(content);
     } catch (error) {
       console.error('Failed to create session:', error);
       // Navigate back to home on error
       navigate('/', { replace: true });
+    } finally {
       setIsLoading(false);
     }
   };
