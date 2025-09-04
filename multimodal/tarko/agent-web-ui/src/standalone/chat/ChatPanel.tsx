@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { useSession } from '@/common/hooks/useSession';
 import { MessageGroup } from './Message/components/MessageGroup';
-import { MessageInput } from './MessageInput';
+import { ChatInput } from './MessageInput';
 import { ActionBar } from './ActionBar';
 import { FiInfo, FiMessageSquare, FiRefreshCw, FiWifiOff, FiPlay, FiX } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -72,7 +72,7 @@ const CountdownCircle: React.FC<{ seconds: number; total: number }> = ({ seconds
  * ChatPanel Component - Main chat interface with simplified replay logic and auto-play countdown
  */
 export const ChatPanel: React.FC = () => {
-  const { activeSessionId, isProcessing, connectionStatus, checkServerStatus } = useSession();
+  const { activeSessionId, isProcessing, connectionStatus, checkServerStatus, sendMessage } = useSession();
   const groupedMessages = useAtomValue(groupedMessagesAtom);
   const allMessages = useAtomValue(messagesAtom);
   const replayState = useAtomValue(replayStateAtom);
@@ -360,12 +360,18 @@ export const ChatPanel: React.FC = () => {
             )}
             <ActionBar sessionId={activeSessionId} />
             {!isReplayMode && (
-              <MessageInput
+              <ChatInput
+                onSubmit={sendMessage}
                 isDisabled={
                   !activeSessionId || isProcessing || !connectionStatus.connected || isReplayMode
                 }
-                onReconnect={checkServerStatus}
+                isProcessing={isProcessing}
                 connectionStatus={connectionStatus}
+                onReconnect={checkServerStatus}
+                sessionId={activeSessionId}
+                showAttachments={true}
+                showContextualSelector={true}
+                autoFocus={false}
               />
             )}
           </div>
