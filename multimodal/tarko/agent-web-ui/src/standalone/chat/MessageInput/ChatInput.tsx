@@ -67,6 +67,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const prevProcessingRef = useRef(isProcessing);
 
   const { abortQuery } = useSession();
 
@@ -84,11 +85,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     }
   }, [initialValue, contextualState.input, setContextualState]);
 
-  // Clear images when processing starts (Agent begins responding)
+  // Clear images only when processing completes (not when it starts)
+  // This prevents images from disappearing during the waiting period
   useEffect(() => {
-    if (isProcessing && uploadedImages.length > 0) {
+    // Only clear images when processing goes from true to false (processing completed)
+    // and we have images to clear
+    if (prevProcessingRef.current && !isProcessing && uploadedImages.length > 0) {
       setUploadedImages([]);
     }
+    prevProcessingRef.current = isProcessing;
   }, [isProcessing, uploadedImages.length]);
 
   useEffect(() => {
