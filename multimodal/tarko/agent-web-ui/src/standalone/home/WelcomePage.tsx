@@ -24,24 +24,22 @@ const WelcomePage: React.FC = () => {
   const handleChatSubmit = async (content: string | ChatCompletionContentPart[]) => {
     if (isLoading) return;
 
-    // Navigate immediately with a temporary ID to show instant response
-    const tempSessionId = 'new';
-    navigate(`/${tempSessionId}`);
-    
-    // Create session and send message in background
-    createSession().then(sessionId => {
-      // Replace the temporary URL with real session ID
-      navigate(`/${sessionId}`, { replace: true });
+    setIsLoading(true);
+
+    try {
+      // Create session first - this should be fast
+      const sessionId = await createSession();
       
-      // Send the message
-      sendMessage(content).catch((error) => {
-        console.error('Failed to send initial message:', error);
-      });
-    }).catch(error => {
+      // Navigate immediately after session is created
+      navigate(`/${sessionId}`);
+      
+      // Send message right after navigation
+      sendMessage(content).catch(console.error);
+      
+    } catch (error) {
       console.error('Failed to create session:', error);
-      // Navigate back to home on error
-      navigate('/', { replace: true });
-    });
+      setIsLoading(false);
+    }
   };
 
   // Function to handle direct chat without entering a query
