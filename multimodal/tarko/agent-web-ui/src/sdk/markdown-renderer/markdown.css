@@ -57,22 +57,3 @@
   background-color: rgba(30, 41, 59, 0.7);
   color: #e2e8f0;
 }
-
-/* KaTeX popup z-index fix */
-.katex-display,
-.katex-display .katex,
-.katex-display .katex .katex-html,
-.katex-display .katex .katex-html .tag {
-  position: relative;
-  z-index: 10000 !important;
-}
-
-/* KaTeX popup close button fix */
-.katex-display .close,
-.katex-display .katex-close,
-.katex-display [class*="close"],
-.katex-display [class*="Close"] {
-  position: relative;
-  z-index: 10001 !important;
-  pointer-events: auto !important;
-}
