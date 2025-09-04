@@ -116,11 +116,14 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
   return (
     <div className="relative">
-      <MessageAttachments
-        images={uploadedImages}
-        contextualItems={contextualState.contextualItems}
-        onRemoveImage={handleRemoveImage}
-      />
+      {/* Only show contextual items outside, images are now inside input */}
+      {contextualState.contextualItems.length > 0 && (
+        <MessageAttachments
+          images={[]}
+          contextualItems={contextualState.contextualItems}
+          onRemoveImage={handleRemoveImage}
+        />
+      )}
 
       <MessageInputField
         uploadedImages={uploadedImages}
