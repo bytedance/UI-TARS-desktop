@@ -48,10 +48,10 @@ export const ImagePreviewInline: React.FC<ImagePreviewInlineProps> = ({
                     e.stopPropagation();
                     onRemoveImage(index);
                   }}
-                  className="absolute -top-1 -right-1 w-5 h-5 bg-gray-600 hover:bg-gray-700 dark:bg-gray-400 dark:hover:bg-gray-300 text-white dark:text-gray-800 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-sm z-10"
+                  className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-lg border-2 border-white dark:border-gray-800 z-10"
                   title="Remove image"
                 >
-                  <FiX size={10} />
+                  <FiX size={12} />
                 </motion.button>
               </div>
             </motion.div>
