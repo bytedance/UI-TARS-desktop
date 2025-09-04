@@ -40,7 +40,7 @@ export async function gitPushTag(
  */
 export async function gitCommit(message: string, cwd = process.cwd()): Promise<void> {
   await execa.execa('git', ['add', '-A'], { cwd, stdio: 'inherit' });
-  await execa.execa('git', ['commit', '-m', message], { cwd, stdio: 'inherit' });
+  await execa.execa('git', ['commit', '-m', message, '--no-verify'], { cwd, stdio: 'inherit' });
 }
 
 /**
