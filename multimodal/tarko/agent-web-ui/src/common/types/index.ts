@@ -46,6 +46,7 @@ export interface Message {
   title?: string; // Added for research report title
   ttftMs?: number; // Time to First Token (TTFT) in milliseconds
   ttltMs?: number; // Total response time in milliseconds
+  isTemporary?: boolean; // Mark temporary messages for deduplication
 
   // System message specific properties
   level?: 'info' | 'warning' | 'error';
