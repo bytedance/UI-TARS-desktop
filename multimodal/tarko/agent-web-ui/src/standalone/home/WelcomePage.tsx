@@ -27,16 +27,23 @@ const WelcomePage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Create a new session
-      const sessionId = await createNewSession();
+      // Create a new session and navigate
+      const sessionId = await createSession();
       navigate(`/${sessionId}`);
 
-      // After navigation, send the message
-      setTimeout(() => {
+      // Send message after navigation with proper async handling
+      // Use requestIdleCallback for better performance, fallback to setTimeout
+      const sendInitialMessage = () => {
         sendMessage(content).catch((error) => {
           console.error('Failed to send initial message:', error);
         });
-      }, 500);
+      };
+
+      if (window.requestIdleCallback) {
+        window.requestIdleCallback(sendInitialMessage, { timeout: 1000 });
+      } else {
+        setTimeout(sendInitialMessage, 100);
+      }
     } catch (error) {
       console.error('Failed to create session:', error);
       setIsLoading(false);
@@ -67,10 +74,7 @@ const WelcomePage: React.FC = () => {
     }
   };
 
-  const createNewSession = async () => {
-    const sessionId = await createSession();
-    return sessionId;
-  };
+
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">

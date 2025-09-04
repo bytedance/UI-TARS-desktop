@@ -15,6 +15,7 @@ import { ContextualSelector, ContextualItem } from '../ContextualSelector';
 import { MessageAttachments } from './MessageAttachments';
 import { ImagePreviewInline } from './ImagePreviewInline';
 import { getAgentTitle, isContextualSelectorEnabled } from '@/config/web-ui-config';
+import { composeMessageContent, isMessageEmpty } from './utils';
 
 interface ChatInputProps {
   onSubmit: (content: string | ChatCompletionContentPart[]) => Promise<void>;
@@ -230,7 +231,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if ((!contextualState.input.trim() && uploadedImages.length === 0) || isDisabled) return;
+    if (isMessageEmpty(contextualState.input, uploadedImages) || isDisabled) return;
 
     handleSelectorClose();
 
@@ -239,19 +240,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       inputRef.current.style.height = 'auto';
     }
 
-    // Prepare message content
-    const messageToSend = contextualState.input.trim();
-
-    // Compose multimodal content when images are present
-    const messageContent =
-      uploadedImages.length > 0
-        ? [
-            ...uploadedImages,
-            ...(messageToSend
-              ? [{ type: 'text', text: messageToSend } as ChatCompletionContentPart]
-              : []),
-          ]
-        : messageToSend;
+    // Compose message content using utility function
+    const messageContent = composeMessageContent(contextualState.input, uploadedImages);
 
     // Only clear text input immediately, keep images until processing starts
     clearContextualState();
@@ -531,11 +521,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   whileTap={{ scale: 0.9 }}
                   whileHover={{ scale: 1.05 }}
                   type="submit"
-                  disabled={
-                    (!contextualState.input.trim() && uploadedImages.length === 0) || isDisabled
-                  }
+                  disabled={isMessageEmpty(contextualState.input, uploadedImages) || isDisabled}
                   className={`absolute right-3 bottom-3 p-3 rounded-full ${
-                    (!contextualState.input.trim() && uploadedImages.length === 0) || isDisabled
+                    isMessageEmpty(contextualState.input, uploadedImages) || isDisabled
                       ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
                       : 'bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 text-white dark:text-gray-900 shadow-sm'
                   } transition-all duration-200`}
