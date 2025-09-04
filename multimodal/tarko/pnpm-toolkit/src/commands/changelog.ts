@@ -411,13 +411,23 @@ export async function changelog(options: ChangelogOptions = {}): Promise<void> {
     const currentTag = `${tagPrefix}${version}`;
     const previousTag = await getPreviousTag(version, tagPrefix, cwd);
 
-    logger.info(`Generating changelog from ${previousTag || 'initial commit'} to ${currentTag}`);
+    // Check if current tag exists
+    let currentRef = currentTag;
+    try {
+      await execa('git', ['rev-parse', '--verify', currentTag], { cwd });
+    } catch {
+      // Tag doesn't exist, use HEAD instead
+      currentRef = 'HEAD';
+      logger.info(`Tag ${currentTag} doesn't exist, using HEAD instead`);
+    }
+
+    logger.info(`Generating changelog from ${previousTag || 'initial commit'} to ${currentRef}`);
 
     // Dynamically import tiny-conventional-commits-parser
     const { getRecentCommits } = await import('tiny-conventional-commits-parser');
 
-    // Get commits between tags
-    const commits = getRecentCommits(previousTag, currentTag);
+    // Get commits between tags/refs
+    const commits = getRecentCommits(previousTag, currentRef);
     const filteredCommits = filterCommits(commits, filterTypes, filterScopes);
 
     if (filteredCommits.length === 0) {
