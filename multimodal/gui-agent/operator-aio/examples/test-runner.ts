@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AIOComputerOperator } from '../src/AIOComputerOperator';
+import { AIOHybridOperator } from '../src/AIOHybridOperator';
 import { StatusEnum } from '@ui-tars/sdk';
 import type { ExecuteParams } from '@ui-tars/sdk/core';
 import * as fs from 'fs';
@@ -18,14 +18,14 @@ const CONFIG = {
   timeout: 10000,
 };
 
-async function testAIOComputerOperator() {
-  console.log('🚀 开始测试 AIOComputerOperator...');
+async function testAIOHybridOperator() {
+  console.log('🚀 开始测试 AIOHybridOperator...');
   console.log('配置:', CONFIG);
 
   try {
     // 1. 创建操作器实例
-    console.log('\n📦 创建 AIOComputerOperator 实例...');
-    const operator = await AIOComputerOperator.create(CONFIG);
+    console.log('\n📦 创建 AIOHybridOperator 实例...');
+    const operator = await AIOHybridOperator.create(CONFIG);
     console.log('✅ 实例创建成功');
 
     // 2. 测试截图功能
@@ -177,7 +177,7 @@ async function testAIOComputerOperator() {
 
     // 4. 验证动作空间定义
     console.log('\n📋 验证动作空间定义...');
-    const actionSpaces = AIOComputerOperator.MANUAL.ACTION_SPACES;
+    const actionSpaces = AIOHybridOperator.MANUAL.ACTION_SPACES;
     console.log('动作空间数量:', actionSpaces.length);
     console.log('动作空间列表:');
     actionSpaces.forEach((action, index) => {
@@ -196,7 +196,7 @@ async function testAIOComputerOperator() {
 
 // 运行测试
 if (require.main === module) {
-  testAIOComputerOperator()
+  testAIOHybridOperator()
     .then(() => {
       console.log('\n✨ 测试脚本执行完成');
       process.exit(0);
@@ -207,4 +207,4 @@ if (require.main === module) {
     });
 }
 
-export { testAIOComputerOperator };
+export { testAIOHybridOperator };

@@ -13,11 +13,11 @@ import {
 import { ConsoleLogger } from '@agent-infra/logger';
 import { sleep } from '@ui-tars/shared/utils';
 import { AIOComputer } from './AIOComputer';
-import type { AIOComputerOptions } from './types';
+import type { AIOHybridOptions } from './types';
 
-const logger = new ConsoleLogger('AioComputerOperator');
+const logger = new ConsoleLogger('AioHybridOperator');
 
-export class AIOComputerOperator extends Operator {
+export class AIOHybridOperator extends Operator {
   static MANUAL = {
     ACTION_SPACES: [
       `click(start_box='[x1, y1, x2, y2]')`,
@@ -33,22 +33,22 @@ export class AIOComputerOperator extends Operator {
     ],
   };
 
-  private static currentInstance: AIOComputerOperator | null = null;
+  private static currentInstance: AIOHybridOperator | null = null;
   private aioComputer: AIOComputer;
 
-  public static async create(options: AIOComputerOptions): Promise<AIOComputerOperator> {
-    logger.info('[AioComputerOperator] 创建实例', options.baseURL);
-    this.currentInstance = new AIOComputerOperator(options);
+  public static async create(options: AIOHybridOptions): Promise<AIOHybridOperator> {
+    logger.info('[AioHybridOperator] 创建实例', options.baseURL);
+    this.currentInstance = new AIOHybridOperator(options);
     return this.currentInstance;
   }
 
-  private constructor(options: AIOComputerOptions) {
+  private constructor(options: AIOHybridOptions) {
     super();
     this.aioComputer = new AIOComputer(options);
   }
 
   public async screenshot(): Promise<ScreenshotOutput> {
-    logger.info('[AioComputerOperator] Taking screenshot');
+    logger.info('[AioHybridOperator] Taking screenshot');
 
     try {
       const result = await this.aioComputer.screenshot();
@@ -67,7 +67,7 @@ export class AIOComputerOperator extends Operator {
         throw new Error('No base64 image data received from screenshot API');
       }
     } catch (error) {
-      logger.error('[AioComputerOperator] Screenshot failed:', error);
+      logger.error('[AioHybridOperator] Screenshot failed:', error);
       throw error;
     }
   }
@@ -77,7 +77,7 @@ export class AIOComputerOperator extends Operator {
     const { action_type, action_inputs } = parsedPrediction;
     const startBoxStr = action_inputs?.start_box || '';
 
-    logger.info('[AioComputerOperator] Executing action', action_type, action_inputs);
+    logger.info('[AioHybridOperator] Executing action', action_type, action_inputs);
 
     const { x: rawX, y: rawY } = parseBoxToScreenCoords({
       boxStr: startBoxStr,
@@ -88,12 +88,12 @@ export class AIOComputerOperator extends Operator {
     const startX = rawX !== null ? Math.round(rawX) : null;
     const startY = rawY !== null ? Math.round(rawY) : null;
 
-    logger.info(`[AioComputerOperator] Action position: (${startX}, ${startY})`);
+    logger.info(`[AioHybridOperator] Action position: (${startX}, ${startY})`);
 
     try {
       switch (action_type) {
         case 'wait':
-          logger.info('[AioComputerOperator] Waiting for 5 seconds');
+          logger.info('[AioHybridOperator] Waiting for 5 seconds');
           await sleep(5000);
           break;
 
@@ -220,7 +220,7 @@ export class AIOComputerOperator extends Operator {
 
       return { status: StatusEnum.INIT };
     } catch (error) {
-      logger.error('[AioComputerOperator] 执行失败:', error);
+      logger.error('[AioHybridOperator] 执行失败:', error);
       return { status: StatusEnum.ERROR };
     }
   }

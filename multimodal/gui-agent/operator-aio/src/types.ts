@@ -120,7 +120,7 @@ export interface ScreenshotResponse {
   };
 }
 
-export interface AIOComputerOptions {
+export interface AIOHybridOptions {
   baseURL: string;
   timeout?: number;
   headers?: Record<string, string>;

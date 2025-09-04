@@ -3,5 +3,5 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 export { AIOComputer } from './AIOComputer';
-export { AIOComputerOperator } from './AIOComputerOperator';
+export { AIOHybridOperator } from './AIOHybridOperator';
 export * from './types';

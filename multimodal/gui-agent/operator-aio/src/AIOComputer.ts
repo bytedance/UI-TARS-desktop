@@ -7,7 +7,7 @@ import type {
   AIOAction,
   ActionResponse,
   ScreenshotResponse,
-  AIOComputerOptions,
+  AIOHybridOptions,
   MoveToAction,
   ClickAction,
   MouseDownAction,
@@ -30,7 +30,7 @@ export class AIOComputer {
   private timeout: number;
   private headers: Record<string, string>;
 
-  constructor(options: AIOComputerOptions) {
+  constructor(options: AIOHybridOptions) {
     this.baseURL = options.baseURL.replace(/\/$/, ''); // Remove trailing slash
     this.timeout = options.timeout || 30000; // Default 30 seconds timeout
     this.headers = {

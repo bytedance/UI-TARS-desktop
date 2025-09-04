@@ -5,7 +5,7 @@
 import 'dotenv/config';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { AIOComputer } from '../src/AIOComputer';
-import type { AIOAction, AIOComputerOptions } from '../src/types';
+import type { AIOAction, AIOHybridOptions } from '../src/types';
 
 // 使用环境变量
 const testConfig = {
@@ -24,7 +24,7 @@ vi.stubGlobal('AbortSignal', {
 
 describe('AIOComputer', () => {
   let aioComputer: AIOComputer;
-  const mockOptions: AIOComputerOptions = {
+  const mockOptions: AIOHybridOptions = {
     baseURL: testConfig.baseURL,
     timeout: testConfig.timeout,
     headers: {
