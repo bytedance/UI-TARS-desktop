@@ -13,6 +13,7 @@ import {
 } from '@/common/state/atoms/contextualSelector';
 import { ContextualSelector, ContextualItem } from '../ContextualSelector';
 import { MessageAttachments } from './MessageAttachments';
+import { ImagePreviewInline } from './ImagePreviewInline';
 import { getAgentTitle, isContextualSelectorEnabled } from '@/config/web-ui-config';
 
 interface ChatInputProps {
@@ -229,9 +230,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     // Prepare message content
     const messageToSend = contextualState.input.trim();
 
-    // Clear all state
-    clearContextualState();
-
     // Compose multimodal content when images are present
     const messageContent =
       uploadedImages.length > 0
@@ -243,6 +241,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           ]
         : messageToSend;
 
+    // Clear all state AFTER preparing the content
+    clearContextualState();
     setUploadedImages([]);
 
     try {
@@ -412,42 +412,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             }`}
           >
             {/* Image previews inside input */}
-            {showAttachments && uploadedImages.length > 0 && (
-              <div className="px-5 pt-3 pb-2">
-                <AnimatePresence>
-                  <div className="flex flex-wrap gap-2">
-                    {uploadedImages.map((image, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        className="relative group cursor-pointer"
-                      >
-                        <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-500 transition-all duration-200">
-                          <img
-                            src={image.type === 'image_url' ? image.image_url?.url : ''}
-                            alt="Preview"
-                            className="w-full h-full object-cover"
-                          />
-                          <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleRemoveImage(index);
-                            }}
-                            className="absolute -top-1 -right-1 w-5 h-5 bg-gray-600 hover:bg-gray-700 dark:bg-gray-400 dark:hover:bg-gray-300 text-white dark:text-gray-800 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-sm"
-                            title="Remove image"
-                          >
-                            <FiX size={10} />
-                          </motion.button>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </AnimatePresence>
-              </div>
+            {showAttachments && (
+              <ImagePreviewInline
+                images={uploadedImages}
+                onRemoveImage={handleRemoveImage}
+              />
             )}
 
             <textarea
