@@ -158,13 +158,25 @@ function extractImageData(panelContent: StandardPanelContent): {
       }
     }
 
-    // Check if source is a direct URL
-    if (typeof panelContent.source === 'string' && panelContent.source.startsWith('http')) {
-      return {
-        src: panelContent.source,
-        mimeType: 'image/png',
-        name: panelContent.title || 'Image',
-      };
+    // Check if source is a data URL or direct URL
+    if (typeof panelContent.source === 'string') {
+      if (panelContent.source.startsWith('data:')) {
+        // Extract MIME type from data URL
+        const mimeTypeMatch = panelContent.source.match(/^data:([^;]+);/);
+        const mimeType = mimeTypeMatch ? mimeTypeMatch[1] : 'image/png';
+        
+        return {
+          src: panelContent.source,
+          mimeType,
+          name: panelContent.title || 'Image',
+        };
+      } else if (panelContent.source.startsWith('http')) {
+        return {
+          src: panelContent.source,
+          mimeType: 'image/png',
+          name: panelContent.title || 'Image',
+        };
+      }
     }
 
     return null;
