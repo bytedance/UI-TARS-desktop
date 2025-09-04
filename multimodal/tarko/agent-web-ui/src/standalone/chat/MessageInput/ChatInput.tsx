@@ -86,16 +86,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     }
   }, [initialValue, contextualState.input, setContextualState]);
 
-  // Clear images only when processing completes (not when it starts)
-  // This prevents images from disappearing during the waiting period
+  // Remove the automatic image clearing effect since we now handle it in handleSubmit
+  // Keep prevProcessingRef for potential future use
   useEffect(() => {
-    // Only clear images when processing goes from true to false (processing completed)
-    // and we have images to clear
-    if (prevProcessingRef.current && !isProcessing && uploadedImages.length > 0) {
-      setUploadedImages([]);
-    }
     prevProcessingRef.current = isProcessing;
-  }, [isProcessing, uploadedImages.length]);
+  }, [isProcessing]);
 
   useEffect(() => {
     if (!isDisabled && autoFocus && inputRef.current) {
@@ -243,14 +238,18 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     // Compose message content using utility function
     const messageContent = composeMessageContent(contextualState.input, uploadedImages);
 
-    // Only clear text input immediately, keep images until processing starts
+    // Clear both text input and images immediately after composing message
     clearContextualState();
+    setUploadedImages([]);
 
     try {
       await onSubmit(messageContent);
     } catch (error) {
       console.error('Failed to send message:', error);
-      // If submission failed, don't clear images
+      // If submission failed, restore the images
+      if (uploadedImages.length > 0) {
+        setUploadedImages(uploadedImages);
+      }
       return;
     }
   };
