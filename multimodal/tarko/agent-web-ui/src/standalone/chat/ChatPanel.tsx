@@ -13,8 +13,6 @@ import { useReplay } from '@/common/hooks/useReplay';
 import { getAgentTitle } from '@/config/web-ui-config';
 import { useAutoScroll } from './hooks/useAutoScroll';
 import { ScrollToBottomButton } from './components/ScrollToBottomButton';
-import { useLocation } from 'react-router-dom';
-import { ChatCompletionContentPart } from '@tarko/agent-interface';
 
 import './ChatPanel.css';
 import { ResearchReportEntry } from './ResearchReportEntry';
@@ -79,31 +77,9 @@ export const ChatPanel: React.FC = () => {
   const allMessages = useAtomValue(messagesAtom);
   const replayState = useAtomValue(replayStateAtom);
   const { isReplayMode, cancelAutoPlay } = useReplayMode();
-  const location = useLocation();
 
   // Use messages from current session
   const activeMessages = activeSessionId ? groupedMessages[activeSessionId] || [] : [];
-
-  // Handle initial message from welcome page
-  useEffect(() => {
-    const locationState = location.state as { initialMessage?: string | ChatCompletionContentPart[]; fromWelcome?: boolean } | null;
-    
-    if (locationState?.initialMessage && locationState.fromWelcome && activeSessionId && !isProcessing) {
-      // Check if this session has no messages yet (avoid duplicate sends)
-      const sessionMessages = allMessages[activeSessionId] || [];
-      const userMessages = sessionMessages.filter(msg => msg.role === 'user');
-      
-      if (userMessages.length === 0) {
-        // Send the initial message
-        sendMessage(locationState.initialMessage).catch((error) => {
-          console.error('Failed to send initial message:', error);
-        });
-        
-        // Clear the location state to prevent re-sending
-        window.history.replaceState({}, '', location.pathname);
-      }
-    }
-  }, [activeSessionId, location.state, allMessages, sendMessage, isProcessing]);
 
   // Auto-scroll functionality
   const {
