@@ -7,11 +7,12 @@ import {
   type ExecuteParams,
   type ExecuteOutput,
   Operator,
-  parseBoxToScreenCoords,
   StatusEnum,
 } from '@ui-tars/sdk/core';
 import { ConsoleLogger } from '@agent-infra/logger';
+import { Base64ImageParser } from '@agent-infra/media-utils';
 import { sleep } from '@ui-tars/shared/utils';
+import { parseBoxToScreenCoords } from './utils';
 import { AIOComputer } from './AIOComputer';
 import type { AIOHybridOptions } from './types';
 
@@ -36,8 +37,11 @@ export class AIOHybridOperator extends Operator {
   private static currentInstance: AIOHybridOperator | null = null;
   private aioComputer: AIOComputer;
 
+  private screenshotWidth = 0;
+  private screenshotHeight = 0;
+
   public static async create(options: AIOHybridOptions): Promise<AIOHybridOperator> {
-    logger.info('[AioHybridOperator] 创建实例', options.baseURL);
+    logger.info('[AioHybridOperator] construct:', options.baseURL);
     this.currentInstance = new AIOHybridOperator(options);
     return this.currentInstance;
   }
@@ -59,6 +63,13 @@ export class AIOHybridOperator extends Operator {
 
       // Convert the response to ScreenshotOutput format expected by the SDK
       if (result.data?.base64) {
+        const base64Tool = new Base64ImageParser(result.data?.base64);
+        const dimensions = base64Tool.getDimensions();
+        if (dimensions) {
+          this.screenshotWidth = dimensions?.width;
+          this.screenshotHeight = dimensions?.height;
+        }
+        logger.info('[AioHybridOperator] screenshot dimensions:', JSON.stringify(dimensions));
         return {
           base64: result.data.base64,
           scaleFactor: result.data.scaleFactor || 1,
@@ -81,8 +92,9 @@ export class AIOHybridOperator extends Operator {
 
     const { x: rawX, y: rawY } = parseBoxToScreenCoords({
       boxStr: startBoxStr,
-      screenWidth,
-      screenHeight,
+      screenWidth: this.screenshotWidth,
+      screenHeight: this.screenshotHeight,
+      factors: [1000, 1000],
     });
 
     const startX = rawX !== null ? Math.round(rawX) : null;

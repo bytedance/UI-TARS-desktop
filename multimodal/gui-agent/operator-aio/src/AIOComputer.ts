@@ -279,9 +279,11 @@ export class AIOComputer {
    * Hotkey combination
    */
   async hotkey(keys: string[]): Promise<ActionResponse> {
+    // Convert all keys to lowercase
+    const lowercaseKeys = keys.map((key: string) => key.toLowerCase());
     const action: HotkeyAction = {
       action_type: 'HOTKEY',
-      keys,
+      keys: lowercaseKeys,
     };
     return this.request(action);
   }

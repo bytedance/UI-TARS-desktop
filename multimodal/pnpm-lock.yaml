@@ -297,6 +297,9 @@ importers:
       '@agent-infra/logger':
         specifier: 0.0.2-beta.2
         version: 0.0.2-beta.2
+      '@agent-infra/media-utils':
+        specifier: 0.1.5
+        version: 0.1.5
       '@ui-tars/sdk':
         specifier: 1.2.3
         version: 1.2.3(ws@8.18.3)(zod@3.25.36)

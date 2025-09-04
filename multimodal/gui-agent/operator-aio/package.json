@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "@agent-infra/logger": "0.0.2-beta.2",
+    "@agent-infra/media-utils": "0.1.5",
     "@ui-tars/sdk": "1.2.3",
     "@ui-tars/shared": "1.2.3"
   },
