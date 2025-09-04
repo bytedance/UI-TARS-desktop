@@ -27,23 +27,22 @@ const WelcomePage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Create a new session and navigate
+      // Create a new session
       const sessionId = await createSession();
+      
+      // Navigate to chat page immediately
       navigate(`/${sessionId}`);
-
-      // Send message after navigation with proper async handling
-      // Use requestIdleCallback for better performance, fallback to setTimeout
-      const sendInitialMessage = () => {
+      
+      // Send message immediately after navigation
+      // The chat interface will handle the loading state
+      setTimeout(() => {
         sendMessage(content).catch((error) => {
           console.error('Failed to send initial message:', error);
         });
-      };
-
-      if (window.requestIdleCallback) {
-        window.requestIdleCallback(sendInitialMessage, { timeout: 1000 });
-      } else {
-        setTimeout(sendInitialMessage, 100);
-      }
+      }, 50); // Minimal delay to ensure navigation completes
+      
+      // Reset loading state immediately after navigation
+      setIsLoading(false);
     } catch (error) {
       console.error('Failed to create session:', error);
       setIsLoading(false);
