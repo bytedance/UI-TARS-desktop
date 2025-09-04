@@ -15,17 +15,17 @@ interface EmptyStateProps {
  */
 const CountdownCircle: React.FC<{ seconds: number; total: number }> = ({ seconds, total }) => {
   const progress = ((total - seconds) / total) * 100;
-  const circumference = 2 * Math.PI * 20; // radius = 20
+  const circumference = 2 * Math.PI * 18; // radius = 18
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
   return (
-    <div className="relative w-20 h-20">
-      <svg className="w-20 h-20 transform -rotate-90" viewBox="0 0 44 44">
+    <div className="relative w-16 h-16">
+      <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 40 40">
         {/* Background circle */}
         <circle
-          cx="22"
-          cy="22"
-          r="20"
+          cx="20"
+          cy="20"
+          r="18"
           fill="none"
           stroke="currentColor"
           strokeWidth="2"
@@ -33,26 +33,26 @@ const CountdownCircle: React.FC<{ seconds: number; total: number }> = ({ seconds
         />
         {/* Progress circle */}
         <circle
-          cx="22"
-          cy="22"
-          r="20"
+          cx="20"
+          cy="20"
+          r="18"
           fill="none"
           stroke="currentColor"
           strokeWidth="2"
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}
-          className="text-blue-500 dark:text-blue-400 transition-all duration-1000 ease-linear"
+          className="text-accent-500 dark:text-accent-400 transition-all duration-1000 ease-linear"
         />
       </svg>
       {/* Center content */}
       <div className="absolute inset-0 flex items-center justify-center">
         <motion.span
           key={seconds}
-          initial={{ scale: 1.3, opacity: 0.5 }}
+          initial={{ scale: 1.2, opacity: 0.7 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.3, ease: 'easeOut' }}
-          className="text-2xl font-bold text-gray-700 dark:text-gray-300"
+          transition={{ duration: 0.2 }}
+          className="text-xl font-bold text-gray-700 dark:text-gray-300"
         >
           {seconds}
         </motion.span>

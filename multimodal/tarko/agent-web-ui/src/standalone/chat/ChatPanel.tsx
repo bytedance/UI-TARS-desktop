@@ -99,23 +99,7 @@ export const ChatPanel: React.FC = () => {
           onReconnect={checkServerStatus}
         />
 
-        <AnimatePresence>
-          {!connectionStatus.connected && !activeSessionId && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="mb-4 px-4 py-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm rounded-3xl border border-gray-100/40 dark:border-gray-700/20"
-            >
-              <div className="font-medium">Server disconnected</div>
-              <div className="text-sm mt-1">
-                {connectionStatus.reconnecting
-                  ? 'Attempting to reconnect...'
-                  : 'Please check your connection and try again.'}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+
 
         {showEmptyState ? (
           <EmptyState replayState={replayState} isReplayMode={isReplayMode} />
@@ -154,7 +138,7 @@ export const ChatPanel: React.FC = () => {
             />
           </div>
         )}
-        <ActionBar sessionId={currentSessionId} />
+        <ActionBar sessionId={currentSessionId === 'creating' ? null : currentSessionId} />
         {!isReplayMode && (
           <ChatInput
             onSubmit={sendMessage}
@@ -168,7 +152,7 @@ export const ChatPanel: React.FC = () => {
             isProcessing={isProcessing}
             connectionStatus={connectionStatus}
             onReconnect={checkServerStatus}
-            sessionId={currentSessionId}
+            sessionId={currentSessionId === 'creating' ? null : currentSessionId}
             showAttachments={true}
             showContextualSelector={true}
             autoFocus={false}
