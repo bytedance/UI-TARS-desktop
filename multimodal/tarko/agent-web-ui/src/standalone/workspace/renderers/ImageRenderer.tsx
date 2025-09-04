@@ -15,6 +15,7 @@ interface ImageRendererProps {
  * Renders image content with zoom and download actions
  */
 export const ImageRenderer: React.FC<ImageRendererProps> = ({ panelContent, onAction }) => {
+  debugger;
   // Extract image data from panelContent
   const imageData = extractImageData(panelContent);
 
