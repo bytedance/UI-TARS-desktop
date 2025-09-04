@@ -314,12 +314,6 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
           activeSessionId={activeSessionId}
           sessionMetadata={sessionMetadata}
           isDarkMode={isDarkMode}
-          onLoadModels={useCallback(() => apiService.getAvailableModels(), [])}
-          onUpdateModel={useCallback(
-            (sessionId, provider, modelId) =>
-              apiService.updateSessionModel(sessionId, provider, modelId),
-            [],
-          )}
         />
       </div>
     </div>
