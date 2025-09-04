@@ -5,10 +5,8 @@
 
 import { HOME_INSTRUCTION, PROXY_INSTRUCTION } from './code';
 
-export const think_token = 'thinkt';
+export const think_token = process.env.THINK_TOKEN || 'thinkt';
 const use_native_thinking = process.env.NATIVE_THINKING === 'true';
-//FIXME: Not dynamic judgment based on process.env.NATIVE_THINKING for the time being
-// const use_native_thinking = false;
 
 const think_budget = '\n\n';
 const task_description = `You are capable of leveraging a wide range of tools and resources to efficiently solve tasks and fulfill user requests. Your goal is to analyze the user's instructions, select the most appropriate tools, and execute actions to achieve the desired outcomes with precision and reliability.`;
