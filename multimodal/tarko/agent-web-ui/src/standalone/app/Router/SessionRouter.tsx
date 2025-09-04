@@ -46,6 +46,15 @@ export const SessionRouter: React.FC<SessionRouterProps> = ({ children }) => {
       return;
     }
 
+    // Special handling for 'creating' session - clear active session immediately
+    if (sessionId === 'creating') {
+      if (activeSessionId) {
+        console.log('SessionRouter: Clearing active session for creating state');
+        setActiveSession(null).catch(console.error);
+      }
+      return;
+    }
+
     // Only set active session if:
     // 1. We have a session ID from URL
     // 2. It exists in our sessions list
@@ -57,7 +66,7 @@ export const SessionRouter: React.FC<SessionRouterProps> = ({ children }) => {
         console.error(`Failed to load session ${sessionId}:`, error);
       });
     }
-  }, [sessionId, sessionExists, connectionStatus.connected, setActiveSession, isReplayMode]);
+  }, [sessionId, sessionExists, connectionStatus.connected, setActiveSession, isReplayMode, activeSessionId]);
 
   // In replay mode, always show content regardless of session existence
   if (isReplayMode) {
