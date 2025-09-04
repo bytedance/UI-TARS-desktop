@@ -121,7 +121,7 @@ const WelcomePage: React.FC = () => {
           <ChatInput
             onSubmit={handleChatSubmit}
             isDisabled={isLoading || isDirectChatLoading}
-            isProcessing={isLoading}
+            isProcessing={false}
             placeholder={`Ask ${getAgentTitle()} anything...`}
             showAttachments={true}
             showContextualSelector={true}
