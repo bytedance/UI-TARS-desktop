@@ -29,18 +29,20 @@ const WelcomePage: React.FC = () => {
     try {
       // Create a new session
       const sessionId = await createNewSession();
-      navigate(`/${sessionId}`);
-
-      // After navigation, send the message
-      setTimeout(() => {
-        sendMessage(content).catch((error) => {
-          console.error('Failed to send initial message:', error);
-        });
-      }, 500);
+      
+      // Navigate with message content as state, avoid setting processing state prematurely
+      navigate(`/${sessionId}`, { 
+        state: { 
+          initialMessage: content,
+          fromWelcome: true 
+        } 
+      });
+      
     } catch (error) {
       console.error('Failed to create session:', error);
       setIsLoading(false);
     }
+    // Note: Don't clear loading here as component will unmount after navigation
   };
 
   // Function to handle direct chat without entering a query
