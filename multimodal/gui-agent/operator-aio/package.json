@@ -24,7 +24,8 @@
     "dev": "rslib build --watch",
     "build": "rslib build",
     "build:watch": "rslib build --watch",
-    "test": "vitest"
+    "test": "vitest",
+    "example": "npx tsx examples/test-runner.ts"
   },
   "license": "Apache-2.0",
   "files": [
@@ -41,8 +42,10 @@
   },
   "devDependencies": {
     "@rslib/core": "0.10.0",
+    "dotenv": "^16.3.1",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.2",
     "typescript": "^5.7.2",
-    "vitest": "^3.0.2",
-    "ts-node": "^10.9.2"
+    "vitest": "^3.0.2"
   }
 }

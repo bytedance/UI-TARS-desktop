@@ -307,9 +307,15 @@ importers:
       '@rslib/core':
         specifier: 0.10.0
         version: 0.10.0(typescript@5.8.3)
+      dotenv:
+        specifier: ^16.3.1
+        version: 16.6.1
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@22.15.30)(typescript@5.8.3)
+      tsx:
+        specifier: ^4.19.2
+        version: 4.19.4
       typescript:
         specifier: ^5.7.2
         version: 5.8.3

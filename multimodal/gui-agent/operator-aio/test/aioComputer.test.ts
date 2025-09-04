@@ -2,9 +2,16 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
+import 'dotenv/config';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { AIOComputer } from '../src/AIOComputer';
 import type { AIOAction, AIOComputerOptions } from '../src/types';
+
+// 使用环境变量
+const testConfig = {
+  baseURL: process.env.AIO_BASE_URL || 'http://localhost:8080',
+  timeout: parseInt(process.env.AIO_TIMEOUT || '5000'),
+};
 
 // Mock fetch globally
 const mockFetch = vi.fn();
@@ -18,8 +25,8 @@ vi.stubGlobal('AbortSignal', {
 describe('AIOComputer', () => {
   let aioComputer: AIOComputer;
   const mockOptions: AIOComputerOptions = {
-    baseURL: 'http://localhost:8080',
-    timeout: 5000,
+    baseURL: testConfig.baseURL,
+    timeout: testConfig.timeout,
     headers: {
       Authorization: 'Bearer test-token',
     },

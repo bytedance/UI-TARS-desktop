@@ -102,6 +102,7 @@ export class AIOComputer {
         const base64 = Buffer.from(arrayBuffer).toString('base64');
 
         logger.info('[AIOComputer] Screenshot taken successfully');
+
         return {
           success: true,
           data: {

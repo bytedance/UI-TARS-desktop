@@ -6,8 +6,13 @@
 import { AIOComputerOperator } from '../src/AIOComputerOperator';
 import { StatusEnum } from '@ui-tars/sdk';
 import type { ExecuteParams } from '@ui-tars/sdk/core';
+import * as fs from 'fs';
+import * as path from 'path';
 
 // 配置真实的baseURL
+// 在文件顶部添加
+import 'dotenv/config';
+
 const CONFIG = {
   baseURL: process.env.AIO_BASE_URL || 'http://localhost:8080', // 您的真实URL
   timeout: 10000,
@@ -26,6 +31,27 @@ async function testAIOComputerOperator() {
     // 2. 测试截图功能
     console.log('\n📸 测试截图功能...');
     const screenshot = await operator.screenshot();
+
+    // 创建dumps目录
+    const dumpsDir = path.join(__dirname, 'dumps');
+    if (!fs.existsSync(dumpsDir)) {
+      fs.mkdirSync(dumpsDir, { recursive: true });
+    }
+
+    // 保存截图
+    if (screenshot.base64) {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const filename = `screenshot-${timestamp}.png`;
+      const filepath = path.join(dumpsDir, filename);
+
+      // 将base64转换为buffer并保存
+      const base64Data = screenshot.base64.replace(/^data:image\/png;base64,/, '');
+      const buffer = Buffer.from(base64Data, 'base64');
+      fs.writeFileSync(filepath, buffer);
+
+      console.log('截图已保存:', filepath);
+    }
+
     console.log('截图结果:', {
       base64Length: screenshot.base64?.length || 0,
       scaleFactor: screenshot.scaleFactor,
