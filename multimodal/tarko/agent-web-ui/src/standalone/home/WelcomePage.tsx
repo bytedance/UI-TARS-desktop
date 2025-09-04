@@ -74,8 +74,6 @@ const WelcomePage: React.FC = () => {
     }
   };
 
-
-
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       {/* Subtle background gradient */}
@@ -132,58 +130,58 @@ const WelcomePage: React.FC = () => {
             autoFocus={true}
           />
 
-            {/* Direct chat button */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.4 }}
-              className="flex justify-end mt-3 mr-1"
+          {/* Direct chat button */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.4 }}
+            className="flex justify-end mt-3 mr-1"
+          >
+            <motion.button
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleDirectChat}
+              disabled={isLoading || isDirectChatLoading}
+              className={`flex items-center gap-1.5 py-1.5 px-2 text-sm text-gray-500 dark:text-gray-400 relative group transition-colors duration-300 ${
+                isLoading || isDirectChatLoading
+                  ? 'opacity-60 cursor-not-allowed'
+                  : 'cursor-pointer group-hover:text-gray-900 dark:group-hover:text-gray-100'
+              }`}
+              type="button"
             >
-              <motion.button
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleDirectChat}
-                disabled={isLoading || isDirectChatLoading}
-                className={`flex items-center gap-1.5 py-1.5 px-2 text-sm text-gray-500 dark:text-gray-400 relative group transition-colors duration-300 ${
-                  isLoading || isDirectChatLoading
-                    ? 'opacity-60 cursor-not-allowed'
-                    : 'cursor-pointer group-hover:text-gray-900 dark:group-hover:text-gray-100'
-                }`}
-                type="button"
-              >
-                <span className="group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors duration-300">
-                  Go to task history
-                </span>
-                {isDirectChatLoading ? (
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                    className="w-4 h-4"
+              <span className="group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors duration-300">
+                Go to task history
+              </span>
+              {isDirectChatLoading ? (
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                  className="w-4 h-4"
+                >
+                  <svg
+                    className="w-4 h-4 text-gray-500 dark:text-gray-400"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
-                    <svg
-                      className="w-4 h-4 text-gray-500 dark:text-gray-400"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </motion.div>
-                ) : (
-                  <FiArrowUpRight
-                    className="text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors duration-300"
-                    size={14}
-                  />
-                )}
-                <span className="absolute bottom-0 left-0 w-0 h-[1px] bg-gray-500 dark:bg-gray-400 group-hover:w-full group-hover:bg-gray-900 dark:group-hover:bg-gray-100 transition-all duration-300"></span>
-              </motion.button>
-            </motion.div>
+                    <path
+                      d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </motion.div>
+              ) : (
+                <FiArrowUpRight
+                  className="text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors duration-300"
+                  size={14}
+                />
+              )}
+              <span className="absolute bottom-0 left-0 w-0 h-[1px] bg-gray-500 dark:bg-gray-400 group-hover:w-full group-hover:bg-gray-900 dark:group-hover:bg-gray-100 transition-all duration-300"></span>
+            </motion.button>
+          </motion.div>
 
           {/* Example prompts - Use configuration with fallback */}
           {examplePrompts.length > 0 && (

@@ -416,10 +416,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           >
             {/* Image previews inside input */}
             {showAttachments && (
-              <ImagePreviewInline
-                images={uploadedImages}
-                onRemoveImage={handleRemoveImage}
-              />
+              <ImagePreviewInline images={uploadedImages} onRemoveImage={handleRemoveImage} />
             )}
 
             <textarea

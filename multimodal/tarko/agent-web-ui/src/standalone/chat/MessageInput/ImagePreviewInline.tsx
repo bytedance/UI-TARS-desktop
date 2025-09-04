@@ -11,7 +11,7 @@ interface ImagePreviewInlineProps {
 
 /**
  * ImagePreviewInline - Shared inline image preview component
- * 
+ *
  * Used by both ChatInput and MessageInputField for consistent image preview behavior
  */
 export const ImagePreviewInline: React.FC<ImagePreviewInlineProps> = ({

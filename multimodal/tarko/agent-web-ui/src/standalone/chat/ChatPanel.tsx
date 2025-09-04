@@ -72,7 +72,8 @@ const CountdownCircle: React.FC<{ seconds: number; total: number }> = ({ seconds
  * ChatPanel Component - Main chat interface with simplified replay logic and auto-play countdown
  */
 export const ChatPanel: React.FC = () => {
-  const { activeSessionId, isProcessing, connectionStatus, checkServerStatus, sendMessage } = useSession();
+  const { activeSessionId, isProcessing, connectionStatus, checkServerStatus, sendMessage } =
+    useSession();
   const groupedMessages = useAtomValue(groupedMessagesAtom);
   const allMessages = useAtomValue(messagesAtom);
   const replayState = useAtomValue(replayStateAtom);
