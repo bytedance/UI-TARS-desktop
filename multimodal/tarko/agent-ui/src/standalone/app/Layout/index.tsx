@@ -11,6 +11,9 @@ import {
   closeMobileBottomSheetAtom,
   toggleMobileBottomSheetFullscreenAtom,
 } from '@/common/state/atoms/ui';
+import { eventStreamModalOpenAtom } from '@/common/state/atoms/eventStreamModal';
+import { EventStreamModal } from '@/standalone/modals/EventStreamModal';
+import { isEventStreamViewerEnabled } from '@/config/web-ui-config';
 import { Shell } from './Shell';
 import { MobileBottomSheet } from './MobileBottomSheet';
 import './Layout.css';
@@ -27,6 +30,8 @@ export const Layout: React.FC<LayoutProps> = ({ isReplayMode: propIsReplayMode }
   const mobileBottomSheet = useAtomValue(mobileBottomSheetAtom);
   const closeMobileBottomSheet = useSetAtom(closeMobileBottomSheetAtom);
   const toggleMobileBottomSheetFullscreen = useSetAtom(toggleMobileBottomSheetFullscreenAtom);
+  const [isEventStreamModalOpen, setIsEventStreamModalOpen] = useAtom(eventStreamModalOpenAtom);
+  const enableEventStreamViewer = isEventStreamViewerEnabled();
 
   const isReplayMode = propIsReplayMode !== undefined ? propIsReplayMode : contextIsReplayMode;
 
@@ -82,6 +87,14 @@ export const Layout: React.FC<LayoutProps> = ({ isReplayMode: propIsReplayMode }
         onClose={closeMobileBottomSheet}
         onToggleFullscreen={toggleMobileBottomSheetFullscreen}
       />
+
+      {/* Event Stream Modal */}
+      {enableEventStreamViewer && (
+        <EventStreamModal
+          isOpen={isEventStreamModalOpen}
+          onClose={() => setIsEventStreamModalOpen(false)}
+        />
+      )}
     </div>
   );
 };
