@@ -1,4 +1,4 @@
 export { MessageAttachments } from './MessageAttachments';
 export { ChatInput } from './ChatInput';
 export { ImagePreviewInline } from './ImagePreviewInline';
-export { composeMessageContent, isMessageEmpty } from './utils';
+export { composeMessageContent, isMessageEmpty, parseContextualReferences } from './utils';

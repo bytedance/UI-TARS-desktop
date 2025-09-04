@@ -10,12 +10,13 @@ import {
   addContextualItemAction,
   updateSelectorStateAction,
   clearContextualStateAction,
+  ContextualItem,
 } from '@/common/state/atoms/contextualSelector';
-import { ContextualSelector, ContextualItem } from '../ContextualSelector';
+import { ContextualSelector } from '../ContextualSelector';
 import { MessageAttachments } from './MessageAttachments';
 import { ImagePreviewInline } from './ImagePreviewInline';
 import { getAgentTitle, isContextualSelectorEnabled } from '@/config/web-ui-config';
-import { composeMessageContent, isMessageEmpty } from './utils';
+import { composeMessageContent, isMessageEmpty, parseContextualReferences } from './utils';
 
 interface ChatInputProps {
   onSubmit: (content: string | ChatCompletionContentPart[]) => Promise<void>;
@@ -85,9 +86,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     }
   }, [initialValue, contextualState.input, setContextualState]);
 
-  // Remove the effect that keeps images during processing
-  // Images should be cleared immediately after sending
-
   useEffect(() => {
     if (!isDisabled && autoFocus && inputRef.current) {
       inputRef.current.focus();
@@ -146,35 +144,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   // Parse contextual references from input text
-  const parseContextualReferences = (text: string): ContextualItem[] => {
-    const contextualReferencePattern = /@(file|dir):([^\s]+)/g;
-    const workspacePattern = /@workspace/g;
 
-    const contextualRefs = Array.from(text.matchAll(contextualReferencePattern)).map(
-      (match, index) => {
-        const [fullMatch, type, relativePath] = match;
-        const name = relativePath.split(/[/\\]/).pop() || relativePath;
-
-        return {
-          id: `${type}-${relativePath}-${index}`,
-          type: type as 'file' | 'directory',
-          name,
-          path: relativePath,
-          relativePath,
-        };
-      },
-    );
-
-    const workspaceRefs = Array.from(text.matchAll(workspacePattern)).map((match, index) => ({
-      id: `workspace-${index}`,
-      type: 'workspace' as const,
-      name: 'workspace',
-      path: '/',
-      relativePath: '.',
-    }));
-
-    return [...contextualRefs, ...workspaceRefs];
-  };
 
   const handleContextualSelect = (item: ContextualItem) => {
     addContextualItem(item);
