@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { useSession } from '@/common/hooks/useSession';
 import { MessageGroup } from './Message/components/MessageGroup';
 import { ChatInput } from './MessageInput';
@@ -72,15 +73,19 @@ const CountdownCircle: React.FC<{ seconds: number; total: number }> = ({ seconds
  * ChatPanel Component - Main chat interface with simplified replay logic and auto-play countdown
  */
 export const ChatPanel: React.FC = () => {
+  const { sessionId: urlSessionId } = useParams<{ sessionId: string }>();
   const { activeSessionId, isProcessing, connectionStatus, checkServerStatus, sendMessage } =
     useSession();
+  
+  // Use URL sessionId if available, fallback to activeSessionId
+  const currentSessionId = urlSessionId || activeSessionId;
   const groupedMessages = useAtomValue(groupedMessagesAtom);
   const allMessages = useAtomValue(messagesAtom);
   const replayState = useAtomValue(replayStateAtom);
   const { isReplayMode, cancelAutoPlay } = useReplayMode();
 
   // Use messages from current session
-  const activeMessages = activeSessionId ? groupedMessages[activeSessionId] || [] : [];
+  const activeMessages = currentSessionId && currentSessionId !== 'creating' ? groupedMessages[currentSessionId] || [] : [];
 
   // Auto-scroll functionality
   const {
@@ -118,7 +123,7 @@ export const ChatPanel: React.FC = () => {
   };
 
   const renderOfflineBanner = () => {
-    if (connectionStatus.connected || !activeSessionId || isReplayMode) return null;
+    if (connectionStatus.connected || !currentSessionId || currentSessionId === 'creating' || isReplayMode) return null;
 
     return (
       <motion.div
@@ -155,9 +160,9 @@ export const ChatPanel: React.FC = () => {
 
   // Find research report in session
   const findResearchReport = () => {
-    if (!activeSessionId || !allMessages[activeSessionId]) return null;
+    if (!currentSessionId || currentSessionId === 'creating' || !allMessages[currentSessionId]) return null;
 
-    const sessionMessages = allMessages[activeSessionId];
+    const sessionMessages = allMessages[currentSessionId];
     const reportMessage = [...sessionMessages]
       .reverse()
       .find(
@@ -174,8 +179,8 @@ export const ChatPanel: React.FC = () => {
 
   // Simplified empty state logic
   const shouldShowEmptyState = () => {
-    // No active session
-    if (!activeSessionId) return true;
+    // No current session or creating state
+    if (!currentSessionId || currentSessionId === 'creating') return true;
 
     // Has messages - don't show empty state
     if (activeMessages.length > 0) return false;
@@ -193,7 +198,7 @@ export const ChatPanel: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      {!activeSessionId || activeSessionId === 'creating' ? (
+      {!currentSessionId || currentSessionId === 'creating' ? (
         <motion.div
           initial="hidden"
           animate="visible"
@@ -205,7 +210,7 @@ export const ChatPanel: React.FC = () => {
               variants={itemVariants}
               className="w-16 h-16 bg-white dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-6 text-gray-500 dark:text-gray-400 border border-gray-100/50 dark:border-gray-700/20"
             >
-              {activeSessionId === 'creating' ? (
+              {currentSessionId === 'creating' ? (
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
@@ -220,13 +225,13 @@ export const ChatPanel: React.FC = () => {
               variants={itemVariants}
               className="text-xl font-display font-bold mb-3 text-gray-800 dark:text-gray-200"
             >
-              {activeSessionId === 'creating' ? 'Creating session...' : `Welcome to ${getAgentTitle()}`}
+              {currentSessionId === 'creating' ? 'Creating session...' : `Welcome to ${getAgentTitle()}`}
             </motion.h2>
             <motion.p
               variants={itemVariants}
               className="text-gray-600 dark:text-gray-400 mb-5 text-sm leading-relaxed"
             >
-              {activeSessionId === 'creating' 
+              {currentSessionId === 'creating' 
                 ? 'Please wait while we set up your chat session.'
                 : 'Create a new chat session to get started with the AI assistant.'}
             </motion.p>
@@ -370,17 +375,17 @@ export const ChatPanel: React.FC = () => {
                 />
               </div>
             )}
-            <ActionBar sessionId={activeSessionId} />
+            <ActionBar sessionId={currentSessionId === 'creating' ? null : currentSessionId} />
             {!isReplayMode && (
               <ChatInput
                 onSubmit={sendMessage}
                 isDisabled={
-                  !activeSessionId || isProcessing || !connectionStatus.connected || isReplayMode
+                  !currentSessionId || currentSessionId === 'creating' || isProcessing || !connectionStatus.connected || isReplayMode
                 }
                 isProcessing={isProcessing}
                 connectionStatus={connectionStatus}
                 onReconnect={checkServerStatus}
-                sessionId={activeSessionId}
+                sessionId={currentSessionId === 'creating' ? null : currentSessionId}
                 showAttachments={true}
                 showContextualSelector={true}
                 autoFocus={false}
