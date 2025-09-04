@@ -35,7 +35,7 @@ export const ImagePreviewInline: React.FC<ImagePreviewInlineProps> = ({
               exit={{ opacity: 0, scale: 0.8 }}
               className="relative group cursor-pointer"
             >
-              <div className="relative w-16 h-16 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-500 transition-all duration-200">
+              <div className="relative w-16 h-16 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-400 transition-all duration-200">
                 <img
                   src={image.type === 'image_url' ? image.image_url?.url : ''}
                   alt="Preview"
