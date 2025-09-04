@@ -13,7 +13,7 @@ export default defineConfig({
   source: {
     entry: {
       index: ['src/**'],
-      examples: ['examples/**'],
+      // examples: ['examples/**'], // Prevent static files in examples/dumps from being bundled into dist, so this line is commented out
     },
   },
   lib: [
