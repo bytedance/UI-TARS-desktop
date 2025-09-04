@@ -84,6 +84,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     }
   }, [initialValue, contextualState.input, setContextualState]);
 
+  // Clear images when processing starts (Agent begins responding)
+  useEffect(() => {
+    if (isProcessing && uploadedImages.length > 0) {
+      setUploadedImages([]);
+    }
+  }, [isProcessing, uploadedImages.length]);
+
   useEffect(() => {
     if (!isDisabled && autoFocus && inputRef.current) {
       inputRef.current.focus();
@@ -241,14 +248,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           ]
         : messageToSend;
 
-    // Clear all state AFTER preparing the content
+    // Only clear text input immediately, keep images until processing starts
     clearContextualState();
-    setUploadedImages([]);
 
     try {
       await onSubmit(messageContent);
     } catch (error) {
       console.error('Failed to send message:', error);
+      // If submission failed, don't clear images
+      return;
     }
   };
 
