@@ -105,3 +105,15 @@ export interface ReplayEventMarker {
   position: number; // 0-1 normalized position on timeline
   content?: string | any;
 }
+
+/**
+ * Tarko multimodal clipboard protocol for cross-application data exchange
+ */
+export interface TarkoMultimodalClipboardProtocol {
+  protocol: 'tarko://webui/clipboard/v1';
+  text: string;
+  images: {
+    data: string; // base64 data without data URL prefix
+    mime: string; // MIME type like 'image/png', 'image/jpeg'
+  }[];
+}

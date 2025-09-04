@@ -17,6 +17,7 @@ import { MessageAttachments } from './MessageAttachments';
 import { ImagePreviewInline } from './ImagePreviewInline';
 import { getAgentTitle, isContextualSelectorEnabled } from '@/config/web-ui-config';
 import { composeMessageContent, isMessageEmpty, parseContextualReferences } from './utils';
+import { handleMultimodalPaste } from '@/common/utils/clipboard';
 
 interface ChatInputProps {
   onSubmit: (content: string | ChatCompletionContentPart[]) => Promise<void>;
@@ -144,7 +145,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   // Parse contextual references from input text
-
 
   const handleContextualSelect = (item: ContextualItem) => {
     addContextualItem(item);
@@ -279,42 +279,85 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     }
   };
 
-  const handlePaste = (e: React.ClipboardEvent) => {
-    if (isDisabled || isProcessing || !showAttachments) return;
+  const handlePaste = async (e: React.ClipboardEvent) => {
+    if (isDisabled || isProcessing) return;
 
-    const items = e.clipboardData?.items;
-    if (!items) return;
+    // Prevent default paste behavior to handle it ourselves
+    e.preventDefault();
 
-    let hasProcessedImage = false;
+    const handled = await handleMultimodalPaste(e.nativeEvent, {
+      onTextPaste: (text: string) => {
+        // For regular text, let the default textarea paste behavior handle it
+        // by inserting at cursor position
+        const textarea = inputRef.current;
+        if (!textarea) return;
 
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const currentValue = contextualState.input;
+        const newValue = currentValue.slice(0, start) + text + currentValue.slice(end);
+        const newCursorPos = start + text.length;
 
-      if (item.type.indexOf('image') !== -1) {
-        hasProcessedImage = true;
+        setContextualState((prev) => ({
+          ...prev,
+          input: newValue,
+          cursorPosition: newCursorPos,
+          contextualItems: parseContextualReferences(newValue),
+        }));
 
-        const blob = item.getAsFile();
-        if (!blob) continue;
-
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          if (event.target?.result) {
-            const newImage: ChatCompletionContentPart = {
-              type: 'image_url',
-              image_url: {
-                url: event.target.result as string,
-                detail: 'auto',
-              },
-            };
-            setUploadedImages((prev) => [...prev, newImage]);
+        // Set cursor position after state update
+        setTimeout(() => {
+          if (textarea) {
+            textarea.setSelectionRange(newCursorPos, newCursorPos);
           }
-        };
-        reader.readAsDataURL(blob);
-      }
-    }
+        }, 0);
+      },
+      onImagePaste: showAttachments
+        ? (images: ChatCompletionContentPart[]) => {
+            setUploadedImages((prev) => [...prev, ...images]);
+            console.log('Processed pasted image(s)');
+          }
+        : undefined,
+      onMultimodalPaste: showAttachments
+        ? (text: string, images: ChatCompletionContentPart[]) => {
+            // Handle Tarko multimodal protocol paste
+            const textarea = inputRef.current;
+            if (!textarea) return;
 
-    if (hasProcessedImage) {
-      console.log('Processed pasted image(s)');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const currentValue = contextualState.input;
+            const newValue = currentValue.slice(0, start) + text + currentValue.slice(end);
+            const newCursorPos = start + text.length;
+
+            setContextualState((prev) => ({
+              ...prev,
+              input: newValue,
+              cursorPosition: newCursorPos,
+              contextualItems: parseContextualReferences(newValue),
+            }));
+
+            setUploadedImages((prev) => [...prev, ...images]);
+
+            // Set cursor position after state update
+            setTimeout(() => {
+              if (textarea) {
+                textarea.setSelectionRange(newCursorPos, newCursorPos);
+              }
+            }, 0);
+
+            console.log('Processed Tarko multimodal clipboard data:', {
+              text,
+              imageCount: images.length,
+            });
+          }
+        : undefined,
+    });
+
+    if (!handled) {
+      // If our handler didn't process anything, fall back to default behavior
+      // This shouldn't happen often since we handle most cases
+      console.log('Paste not handled by multimodal clipboard');
     }
   };
 
