@@ -389,7 +389,7 @@ export async function release(options: ReleaseOptions = {}): Promise<void> {
           logger.warn(`Tag ${tagName} already exists, skipping tag creation`);
         } else {
           // Commit changes
-          await gitCommit(`chore(agent-tars): release ${version}`, cwd);
+          await gitCommit(`chore(tars-stack): release ${version}`, cwd);
 
           // Create tag
           await gitCreateTag(tagName, `Release ${version}`, cwd);
