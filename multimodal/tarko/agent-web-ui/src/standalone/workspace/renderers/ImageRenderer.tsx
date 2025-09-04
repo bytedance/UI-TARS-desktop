@@ -158,8 +158,16 @@ function extractImageData(panelContent: StandardPanelContent): {
       }
     }
 
-    // Check if source is a data URL or direct URL
-    // Handle cases like: { "type": "image", "source": "data:image/webp;base64,UklGRvgpAA...", "title": "Image", "timestamp": 1756996184111 }
+    /**
+     * Check if source is a data URL or direct URL
+     * Handle cases like:
+     * {
+     *   "type": "image",
+     *   "source": "data:image/webp;base64,UklGRvgpAA...",
+     *   "title": "Image",
+     *   "timestamp": 1756996184111
+     * }
+     */
     if (typeof panelContent.source === 'string') {
       if (panelContent.source.startsWith('data:')) {
         // Extract MIME type from data URL
