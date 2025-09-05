@@ -53,6 +53,9 @@ export interface Message {
 
   // Environment message specific properties
   metadata?: AgentEventStream.EnvironmentInputMetadata;
+
+  // UI state properties
+  isLocalMessage?: boolean; // Marks messages added locally before server confirmation
 }
 
 /**

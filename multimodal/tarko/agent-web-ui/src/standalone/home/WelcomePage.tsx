@@ -26,17 +26,14 @@ const WelcomePage: React.FC = () => {
 
     setIsLoading(true);
 
-    // Navigate immediately to special "creating" state
-    navigate('/creating');
-
     try {
-      // Create session in background
+      // Create session first
       const sessionId = await createSession();
 
-      // Navigate directly to session and send message immediately
+      // Navigate to session immediately - user message will be shown instantly
       navigate(`/${sessionId}`, { replace: true });
 
-      // Send message immediately after navigation
+      // Send message - this will now immediately show the user message
       await sendMessage(content);
     } catch (error) {
       console.error('Failed to create session:', error);

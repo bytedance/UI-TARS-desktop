@@ -21,15 +21,43 @@ export class UserMessageHandler implements EventHandler<AgentEventStream.UserMes
   ): void {
     const { get, set } = context;
 
-    const userMessage: Message = {
-      id: event.id,
-      role: 'user',
-      content: event.content,
-      timestamp: event.timestamp,
-    };
-
     set(messagesAtom, (prev: Record<string, Message[]>) => {
       const sessionMessages = prev[sessionId] || [];
+      
+      // Check for existing local user message to avoid duplication
+      const hasLocalUserMessage = sessionMessages.some(
+        msg => msg.role === 'user' && msg.isLocalMessage
+      );
+      
+      // If we have a local user message, replace it with the server version
+      if (hasLocalUserMessage) {
+        const updatedMessages = sessionMessages.map(msg => {
+          if (msg.role === 'user' && msg.isLocalMessage) {
+            return {
+              id: event.id,
+              role: 'user' as const,
+              content: event.content,
+              timestamp: event.timestamp,
+              // Remove isLocalMessage flag as this is now the server version
+            };
+          }
+          return msg;
+        });
+        
+        return {
+          ...prev,
+          [sessionId]: updatedMessages,
+        };
+      }
+      
+      // No local message found, add the server message normally
+      const userMessage: Message = {
+        id: event.id,
+        role: 'user',
+        content: event.content,
+        timestamp: event.timestamp,
+      };
+      
       return {
         ...prev,
         [sessionId]: [...sessionMessages, userMessage],

@@ -354,17 +354,28 @@ export const sendMessageAction = atom(
       },
     }));
 
-    // Note: Do NOT add user message to state here in streaming mode
-    // The user_message event will come from the server's event stream
-    // This prevents duplicate user messages in the UI
+    // Immediately add user message to UI for better UX
+    // Server-side user_message events will be deduplicated in the handler
+    const userMessage: Message = {
+      id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      role: 'user',
+      content,
+      timestamp: Date.now(),
+      isLocalMessage: true, // Mark as locally added for deduplication
+    };
+
+    set(messagesAtom, (prev) => ({
+      ...prev,
+      [activeSessionId]: [...(prev[activeSessionId] || []), userMessage],
+    }));
 
     // Set initial session name from first user query
-    // Note: We check message count before sending since user_message will come from stream
+    // Check if this is the first user message (excluding the one we just added)
     try {
       const messages = get(messagesAtom)[activeSessionId] || [];
       const userMessageCount = messages.filter((m) => m.role === 'user').length;
 
-      if (userMessageCount === 0) {
+      if (userMessageCount === 1) { // Now we check for 1 since we just added the message
         let summary = '';
         if (typeof content === 'string') {
           summary = content.length > 50 ? content.substring(0, 47) + '...' : content;
