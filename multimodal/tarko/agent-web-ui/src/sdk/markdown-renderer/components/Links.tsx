@@ -2,25 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { isExternalUrl, isHashLink, isInternalPath, scrollToElement } from '../utils';
 
-/**
- * Fix URL text that incorrectly includes Chinese characters
- * This addresses the remark-gfm parsing issue with Chinese text
- */
-function fixUrlWithChinese(href: string, children: React.ReactNode): [string, React.ReactNode, React.ReactNode] {
-  // Only process if children is a single text node that matches the href
-  if (typeof children === 'string' && children === href) {
-    const chineseRegex = /^(https?:\/\/[^\s\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]+)([\u4e00-\u9fff\u3000-\u303f\uff00-\uffef].*)$/;
-    const match = children.match(chineseRegex);
-    
-    if (match) {
-      const [, cleanUrl, chineseText] = match;
-      return [cleanUrl, cleanUrl, chineseText];
-    }
-  }
-  
-  return [href, children, null];
-}
-
 interface LinkProps {
   href?: string;
   children: React.ReactNode;
@@ -40,48 +21,36 @@ export const SmartLink: React.FC<LinkProps> = ({ href, children, ...props }) => 
     return <span {...props}>{children}</span>;
   }
 
-  // Fix URL parsing issues with Chinese text
-  const [fixedHref, fixedChildren, chineseText] = fixUrlWithChinese(href, children);
-
   // Hash links - smooth scrolling to anchors
-  if (isHashLink(fixedHref)) {
+  if (isHashLink(href)) {
     return (
-      <>
-        <a
-          href={fixedHref}
-          className={LINK_STYLES}
-          onClick={(e) => {
-            e.preventDefault();
-            scrollToElement(fixedHref.substring(1));
-          }}
-          {...props}
-        >
-          {fixedChildren}
-        </a>
-        {chineseText && <span>{chineseText}</span>}
-      </>
+      <a
+        href={href}
+        className={LINK_STYLES}
+        onClick={(e) => {
+          e.preventDefault();
+          scrollToElement(href.substring(1));
+        }}
+        {...props}
+      >
+        {children}
+      </a>
     );
   }
 
   // Internal path links - use React Router
-  if (isInternalPath(fixedHref)) {
+  if (isInternalPath(href)) {
     return (
-      <>
-        <Link to={fixedHref} className={LINK_STYLES} {...props}>
-          {fixedChildren}
-        </Link>
-        {chineseText && <span>{chineseText}</span>}
-      </>
+      <Link to={href} className={LINK_STYLES} {...props}>
+        {children}
+      </Link>
     );
   }
 
   // External links - open in new tab
   return (
-    <>
-      <a href={fixedHref} className={LINK_STYLES} target="_blank" rel="noopener noreferrer" {...props}>
-        {fixedChildren}
-      </a>
-      {chineseText && <span>{chineseText}</span>}
-    </>
+    <a href={href} className={LINK_STYLES} target="_blank" rel="noopener noreferrer" {...props}>
+      {children}
+    </a>
   );
 };

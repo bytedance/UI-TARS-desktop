@@ -2,6 +2,8 @@
  * Utility functions for markdown rendering
  */
 
+export * from './linkPreprocessor';
+
 /**
  * Generate a URL-friendly ID from text content
  */
