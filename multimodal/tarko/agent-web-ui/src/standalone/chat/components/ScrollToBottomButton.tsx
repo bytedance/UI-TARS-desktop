@@ -40,11 +40,12 @@ export const ScrollToBottomButton: React.FC<ScrollToBottomButtonProps> = ({ show
             className="
               relative flex items-center justify-center 
               w-10 h-10 
-              bg-white/80 dark:bg-gray-800/80
-              hover:bg-white/90 dark:hover:bg-gray-700/90
+              bg-white/90 dark:bg-gray-800/90
+              hover:bg-white dark:hover:bg-gray-700
               rounded-full 
               shadow-lg hover:shadow-xl
-              border border-gray-200/60 dark:border-gray-600/60
+              border-2 border-gray-300 dark:border-gray-500
+              hover:border-gray-400 dark:hover:border-gray-400
               backdrop-blur-md
               transition-all duration-200
               group
@@ -52,7 +53,7 @@ export const ScrollToBottomButton: React.FC<ScrollToBottomButtonProps> = ({ show
             aria-label="Scroll to bottom"
           >
             {/* Subtle glass effect */}
-            <div className="absolute inset-0 rounded-full bg-gradient-to-t from-transparent via-white/5 to-white/10 dark:via-white/2 dark:to-white/5" />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-t from-transparent via-white/8 to-white/15 dark:via-white/3 dark:to-white/8" />
             
             {/* Icon with gentle animation */}
             <motion.div
@@ -67,15 +68,15 @@ export const ScrollToBottomButton: React.FC<ScrollToBottomButtonProps> = ({ show
             >
               <FiChevronDown 
                 size={16} 
-                className="text-gray-600 dark:text-gray-300 group-hover:text-gray-800 dark:group-hover:text-gray-100 transition-colors" 
+                className="text-gray-700 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" 
               />
             </motion.div>
             
             {/* Subtle hover glow */}
             <motion.div
               initial={{ opacity: 0 }}
-              whileHover={{ opacity: 0.1 }}
-              className="absolute inset-0 rounded-full bg-blue-500 dark:bg-blue-400"
+              whileHover={{ opacity: 0.08 }}
+              className="absolute inset-0 rounded-full bg-gray-900 dark:bg-gray-100"
             />
           </motion.button>
         </motion.div>
