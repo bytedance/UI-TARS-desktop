@@ -14,6 +14,7 @@ import 'katex/dist/katex.min.css';
 import 'remark-github-blockquote-alert/alert.css';
 import './syntax-highlight.css';
 import './markdown.css';
+import './animate-text.css';
 
 interface StreamingMarkdownRendererProps {
   content: string;

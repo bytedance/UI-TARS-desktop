@@ -57,26 +57,3 @@
   background-color: rgba(30, 41, 59, 0.7);
   color: #e2e8f0;
 }
-
-/* Streaming content animation */
-.streaming-content {
-  transition: opacity 0.3s ease-in-out;
-}
-
-.streaming-content.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 0.7;
-  }
-  50% {
-    opacity: 0.9;
-  }
-}
-
-/* Smooth transitions for content changes */
-.markdown-content {
-  transition: all 0.2s ease-in-out;
-}
