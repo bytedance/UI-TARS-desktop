@@ -344,17 +344,6 @@ function handleStreamingEvents(
   event: AgentEventStream.Event,
 ) {
   set(processEventAction, { sessionId: activeSessionId, event });
-
-  // Maintain processing state until explicit end
-  if (event.type !== 'agent_run_end' && event.type !== 'assistant_message') {
-    set(sessionAgentStatusAtom, (prev) => ({
-      ...prev,
-      [activeSessionId]: {
-        ...(prev[activeSessionId] || {}),
-        isProcessing: true,
-      },
-    }));
-  }
 }
 
 export const sendMessageAction = atom(
