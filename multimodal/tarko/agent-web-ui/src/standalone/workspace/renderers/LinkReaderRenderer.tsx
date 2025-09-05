@@ -76,15 +76,7 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
         return (
           <div
             key={`link-${index}`}
-            className="group relative rounded-xl backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
-            style={{
-              background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.08) 50%, rgba(168, 85, 247, 0.08) 100%)',
-              border: '1px solid rgba(99, 102, 241, 0.15)',
-              ...(document.documentElement.classList.contains('dark') && {
-                background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 50%, rgba(168, 85, 247, 0.15) 100%)',
-                border: '1px solid rgba(139, 92, 246, 0.25)'
-              })
-            }}
+            className="group relative bg-black rounded-xl border border-gray-800 transition-all duration-300 hover:border-gray-700 hover:shadow-lg hover:shadow-gray-900/20"
           >
             {/* Floating copy button */}
             <button
