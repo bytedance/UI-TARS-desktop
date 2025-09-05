@@ -32,6 +32,8 @@ interface ChatInputProps {
   showContextualSelector?: boolean;
   initialValue?: string;
   autoFocus?: boolean;
+  showHelpText?: boolean;
+  variant?: 'default' | 'home';
 }
 
 /**
@@ -58,6 +60,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   showContextualSelector = true,
   initialValue = '',
   autoFocus = true,
+  showHelpText = true,
+  variant = 'default',
 }) => {
   const [uploadedImages, setUploadedImages] = useState<ChatCompletionContentPart[]>([]);
   const [isAborting, setIsAborting] = useState(false);
@@ -434,7 +438,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               onPaste={handlePaste}
               placeholder={placeholder || defaultPlaceholder}
               disabled={isDisabled}
-              className={`w-full px-5 ${uploadedImages.length > 0 ? 'pt-2' : 'pt-5'} pb-12 focus:outline-none resize-none ${uploadedImages.length > 0 ? 'min-h-[80px]' : 'min-h-[100px]'} max-h-[220px] bg-transparent text-sm leading-relaxed rounded-[1.4rem]`}
+              className={`w-full px-5 ${uploadedImages.length > 0 ? 'pt-2' : 'pt-5'} pb-12 focus:outline-none resize-none ${uploadedImages.length > 0 ? (variant === 'home' ? 'min-h-[100px]' : 'min-h-[80px]') : variant === 'home' ? 'min-h-[120px]' : 'min-h-[100px]'} max-h-[220px] bg-transparent text-sm leading-relaxed rounded-[1.4rem]`}
               rows={2}
             />
 
@@ -539,47 +543,49 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       </form>
 
       {/* Status text */}
-      <div className="flex justify-center mt-2 text-xs">
-        {connectionStatus && !connectionStatus.connected ? (
-          <motion.span
-            initial={{ opacity: 0.7 }}
-            animate={{ opacity: 1 }}
-            className="text-red-500 dark:text-red-400 flex items-center font-medium"
-          >
-            {connectionStatus.reconnecting
-              ? 'Attempting to reconnect...'
-              : 'Server disconnected. Click the button to reconnect.'}
-          </motion.span>
-        ) : isProcessing ? (
-          <motion.span
-            initial={{ opacity: 0.7 }}
-            whileHover={{ opacity: 1 }}
-            className="text-accent-500 dark:text-accent-400 flex items-center"
-          >
-            <span className="typing-indicator mr-2">
-              <span></span>
-              <span></span>
-              <span></span>
-            </span>
-            Agent is processing your request...
-          </motion.span>
-        ) : (
-          <motion.span
-            initial={{ opacity: 0.7 }}
-            whileHover={{ opacity: 1 }}
-            className="text-gray-500 dark:text-gray-400 transition-opacity"
-          >
-            {contextualSelectorEnabled ? (
-              <>
-                Use @ to reference files/folders • Ctrl+Enter to send • You can also paste images
-                directly
-              </>
-            ) : (
-              <>Use Ctrl+Enter to quickly send • You can also paste images directly</>
-            )}
-          </motion.span>
-        )}
-      </div>
+      {showHelpText && (
+        <div className="flex justify-center mt-2 text-xs">
+          {connectionStatus && !connectionStatus.connected ? (
+            <motion.span
+              initial={{ opacity: 0.7 }}
+              animate={{ opacity: 1 }}
+              className="text-red-500 dark:text-red-400 flex items-center font-medium"
+            >
+              {connectionStatus.reconnecting
+                ? 'Attempting to reconnect...'
+                : 'Server disconnected. Click the button to reconnect.'}
+            </motion.span>
+          ) : isProcessing ? (
+            <motion.span
+              initial={{ opacity: 0.7 }}
+              whileHover={{ opacity: 1 }}
+              className="text-accent-500 dark:text-accent-400 flex items-center"
+            >
+              <span className="typing-indicator mr-2">
+                <span></span>
+                <span></span>
+                <span></span>
+              </span>
+              Agent is processing your request...
+            </motion.span>
+          ) : (
+            <motion.span
+              initial={{ opacity: 0.7 }}
+              whileHover={{ opacity: 1 }}
+              className="text-gray-500 dark:text-gray-400 transition-opacity"
+            >
+              {contextualSelectorEnabled ? (
+                <>
+                  Use @ to reference files/folders • Ctrl+Enter to send • You can also paste images
+                  directly
+                </>
+              ) : (
+                <>Use Ctrl+Enter to quickly send • You can also paste images directly</>
+              )}
+            </motion.span>
+          )}
+        </div>
+      )}
     </div>
   );
 };

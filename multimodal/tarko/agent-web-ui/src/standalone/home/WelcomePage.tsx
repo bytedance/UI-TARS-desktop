@@ -125,6 +125,8 @@ const WelcomePage: React.FC = () => {
             showAttachments={true}
             showContextualSelector={true}
             autoFocus={true}
+            showHelpText={false}
+            variant="home"
           />
 
           {/* Direct chat button */}

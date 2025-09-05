@@ -98,8 +98,6 @@ export const ChatPanel: React.FC = () => {
           onReconnect={checkServerStatus}
         />
 
-
-
         {showEmptyState ? (
           <EmptyState replayState={replayState} isReplayMode={isReplayMode} />
         ) : (
@@ -155,6 +153,7 @@ export const ChatPanel: React.FC = () => {
             showAttachments={true}
             showContextualSelector={true}
             autoFocus={false}
+            showHelpText={true}
           />
         )}
       </div>
