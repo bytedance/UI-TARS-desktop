@@ -16,6 +16,7 @@ import { parseBoxToScreenCoords } from './utils';
 import { AIOComputer } from './AIOComputer';
 import type { AIOHybridOptions } from './types';
 import { AIOBrowser } from './AIOBrowser';
+import { log } from 'console';
 
 const logger = new ConsoleLogger('AioHybridOperator');
 
@@ -60,8 +61,12 @@ export class AIOHybridOperator extends Operator {
       baseURl: options.baseURL,
       logger: logger,
     });
+    await this.aioBrowser?.launch({
+      timeout: 1000,
+      defaultViewport: { width: 1280, height: 1024 },
+    });
+    logger.info('[AioHybridOperator] AIOBrowser launched successfully');
     logger.info('[AioHybridOperator] AIOBrowser initialized successfully');
-    this.aioBrowser?.launch();
   }
 
   public async getMeta(): Promise<{ url: string }> {
@@ -150,6 +155,14 @@ export class AIOHybridOperator extends Operator {
 
     try {
       switch (action_type) {
+        case 'navigate':
+          logger.info('[AioHybridOperator] Navigating to', action_inputs?.content);
+          await this.aioBrowser?.handleNavigate({ url: action_inputs?.content || '' });
+          break;
+        case 'navigate_back':
+          logger.info('[AioHybridOperator] Navigating back');
+          await this.aioBrowser?.handleNavigateBack();
+          break;
         case 'wait':
           logger.info('[AioHybridOperator] Waiting for 5 seconds');
           await sleep(5000);

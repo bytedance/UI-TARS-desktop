@@ -101,6 +101,28 @@ export class AIOBrowser {
     }
   }
 
+  public async handleNavigate(inputs: Record<string, string>): Promise<void> {
+    const page = await this.getActivePage();
+    let { url } = inputs;
+    // If the url does not start with http:// or If the url does not start with http:// or URL_ADDRESS automatically add https://
+    if (!/^https?:\/\//i.test(url)) {
+      url = 'https://' + url;
+    }
+
+    this.logger.info(`Navigating to: ${url}`);
+    await page.goto(url, {
+      waitUntil: [], // Wait for no event
+    });
+    this.logger.info('Navigation completed');
+  }
+
+  public async handleNavigateBack(): Promise<void> {
+    const page = await this.getActivePage();
+    this.logger.info(`handleNavigateBack`);
+    await page.goBack();
+    this.logger.info('handleNavigateBack completed');
+  }
+
   /**
    * Gets the URL of the currently active page
    * @returns {Promise<string>} Promise resolving to the URL of the active page
@@ -118,7 +140,7 @@ export class AIOBrowser {
             return document.visibilityState === 'visible';
           },
           {
-            timeout: 1000,
+            timeout: 3000,
           },
         );
         if (isVisible) {
@@ -138,10 +160,25 @@ export class AIOBrowser {
    */
   async getActivePage(): Promise<Page> {
     this.logger.info('Getting active page');
+    const pages = await this.browser.getBrowser().pages();
     try {
-      const page = await this.browser.getActivePage();
-      this.logger.success('Active page retrieved successfully');
-      return page;
+      for (const page of pages) {
+        // Check if the page is visible
+        const isVisible = await page.waitForFunction(
+          () => {
+            return document.visibilityState === 'visible';
+          },
+          {
+            timeout: 3000,
+          },
+        );
+        if (isVisible) {
+          this.logger.success('Active visible page retrieved successfully');
+          return page;
+        }
+      }
+      this.logger.success('Active original page retrieved successfully');
+      return this.browser.getActivePage();
     } catch (error) {
       this.logger.error('Failed to get active page:', error);
       throw error;
