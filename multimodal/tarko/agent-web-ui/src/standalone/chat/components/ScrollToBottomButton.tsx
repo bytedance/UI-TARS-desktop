@@ -9,7 +9,7 @@ interface ScrollToBottomButtonProps {
 
 /**
  * ScrollToBottomButton Component - Modern gradient button matching ChatInput style
- * 
+ *
  * Features:
  * - Gradient border design matching ChatInput aesthetic
  * - Glass morphism background effect
@@ -21,20 +21,19 @@ export const ScrollToBottomButton: React.FC<ScrollToBottomButtonProps> = ({ show
     <AnimatePresence>
       {show && (
         <motion.div
-          initial={{ opacity: 0, y: 10, scale: 0.9 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
+          initial={{ opacity: 0, x: -16, y: 10, scale: 0.9 }}
+          animate={{ opacity: 1, x: -16, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 10, scale: 0.9 }}
-          transition={{ 
+          transition={{
             duration: 0.3,
-            ease: 'easeOut'
+            ease: 'easeOut',
           }}
           className="absolute -top-10 left-1/2 z-50"
-          style={{ transform: 'translateX(calc(-50% - 1rem))' }}
         >
           <motion.button
-            whileHover={{ 
-              scale: 1.02, 
-              y: -1
+            whileHover={{
+              scale: 1.02,
+              y: -1,
             }}
             whileTap={{ scale: 0.98 }}
             onClick={onClick}
@@ -53,24 +52,24 @@ export const ScrollToBottomButton: React.FC<ScrollToBottomButtonProps> = ({ show
           >
             {/* Subtle glass effect */}
             <div className="absolute inset-0 rounded-full bg-gradient-to-t from-transparent via-white/3 to-white/6 dark:via-white/1 dark:to-white/3" />
-            
+
             {/* Icon with minimal animation */}
             <motion.div
               animate={{ y: [0, 0.5, 0] }}
-              transition={{ 
-                duration: 3, 
-                repeat: Infinity, 
+              transition={{
+                duration: 3,
+                repeat: Infinity,
                 ease: 'easeInOut',
-                repeatDelay: 3
+                repeatDelay: 3,
               }}
               className="relative z-10"
             >
-              <FiChevronDown 
-                size={14} 
-                className="text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-all duration-200" 
+              <FiChevronDown
+                size={14}
+                className="text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-all duration-200"
               />
             </motion.div>
-            
+
             {/* Subtle hover effect */}
             <motion.div
               initial={{ opacity: 0 }}
