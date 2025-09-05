@@ -47,7 +47,7 @@ const gui_functions = `
 
 /** 3.1 Think Prompt */
 const PROMPT1 = use_native_thinking
-  ? `You should first think about the reasoning process in the mind and then provide the user with the answer.`
+  ? ``
   : `You should first think about the reasoning process in the mind and then provide the user with the answer. The reasoning process is enclosed within <${think_token}> </${think_token}> tags, i.e. <${think_token}> reasoning process here </${think_token}> answer here`;
 
 /** 3.2 Role/Task Prompt */
@@ -63,7 +63,7 @@ ${[mcp_functions, code_functions, gui_functions].join('')}
 
 - To call a function, use the following structure without any suffix:
 
-${use_native_thinking ? '' : `<${think_token}> reasoning process </${think_token}>`}
+<${think_token}> reasoning process </${think_token}>
 <seed:tool_call>
 <function=example_function_name>
 <parameter=example_parameter_1>value_1</parameter>
@@ -86,4 +86,4 @@ ${HOME_INSTRUCTION}
 ${PROXY_INSTRUCTION}
 `;
 
-export const SYSTEM_PROMPT_GROUP = [PROMPT1, PROMPT2, PROMPT3];
+export const SYSTEM_PROMPT_GROUP = [PROMPT1, PROMPT2, PROMPT3].filter(Boolean);

@@ -26,7 +26,7 @@ export default {
   share: {
     provider: process.env.SHARE_PROVIDER,
   },
-  temperature: 0.7,
+  temperature: 1,
   top_p: 0.9,
   snapshot: { storageDirectory: resolve(__dirname, 'snapshots'), enable: true },
   googleApiKey: process.env.GOOGLE_API_KEY,
