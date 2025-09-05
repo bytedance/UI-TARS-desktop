@@ -355,7 +355,7 @@ describe('AIOComputer', () => {
         expect.objectContaining({
           body: JSON.stringify({
             action_type: 'HOTKEY',
-            keys: ['Ctrl', 'C'],
+            keys: ['ctrl', 'c'],
           }),
         }),
       );

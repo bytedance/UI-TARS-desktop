@@ -113,6 +113,8 @@ describe('parseBoxToScreenCoords', () => {
     expect(result).toEqual({
       x: 759.04,
       y: 17.408,
+      percentX: 0.593,
+      percentY: 0.017,
     });
   });
 
@@ -124,8 +126,10 @@ describe('parseBoxToScreenCoords', () => {
     });
 
     expect(result).toEqual({
-      x: 759.04,
-      y: 17.408,
+      x: 686.08,
+      y: 76.8,
+      percentX: 0.536,
+      percentY: 0.075,
     });
   });
 });
