@@ -28,7 +28,7 @@ export const ScrollToBottomButton: React.FC<ScrollToBottomButtonProps> = ({ show
             duration: 0.3,
             ease: 'easeOut'
           }}
-          className="absolute -top-10 left-1/2 transform -translate-x-1/2 z-50"
+          className="absolute -top-10 left-1/2 transform -translate-x-1/2 -translate-x-4 z-50"
         >
           <motion.button
             whileHover={{ 
