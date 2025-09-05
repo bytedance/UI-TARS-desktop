@@ -43,6 +43,7 @@ export const ChatPanel: React.FC = () => {
   const { messagesContainerRef, messagesEndRef, showScrollToBottom, scrollToBottom } =
     useScrollToBottom({
       threshold: 100,
+      dependencies: [activeMessages],
     });
 
   // Find research report in session

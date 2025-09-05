@@ -2,6 +2,7 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 
 interface UseScrollToBottomOptions {
   threshold?: number; // Distance from bottom to consider "at bottom"
+  dependencies?: any[]; // Dependencies to trigger re-check (e.g., messages)
 }
 
 interface UseScrollToBottomReturn {
@@ -21,6 +22,7 @@ interface UseScrollToBottomReturn {
  */
 export const useScrollToBottom = ({
   threshold = 100,
+  dependencies = [],
 }: UseScrollToBottomOptions = {}): UseScrollToBottomReturn => {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -52,7 +54,10 @@ export const useScrollToBottom = ({
     if (!container) return;
     
     const atBottom = checkIsAtBottom();
-    setShowScrollToBottom(!atBottom);
+    const shouldShow = !atBottom;
+    
+    // Only update if state actually changed
+    setShowScrollToBottom(prev => prev !== shouldShow ? shouldShow : prev);
   }, [checkIsAtBottom]);
 
   // Set up scroll event listener
@@ -62,13 +67,25 @@ export const useScrollToBottom = ({
     
     container.addEventListener('scroll', handleScroll, { passive: true });
     
-    // Initial check
-    handleScroll();
+    // Initial check after a small delay to ensure DOM is ready
+    const timer = setTimeout(() => {
+      handleScroll();
+    }, 100);
     
     return () => {
       container.removeEventListener('scroll', handleScroll);
+      clearTimeout(timer);
     };
   }, [handleScroll]);
+
+  // Also check when content changes (messages update)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      handleScroll();
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, [handleScroll, ...dependencies]);
 
   return {
     messagesContainerRef,
