@@ -54,6 +54,9 @@ export const useScrollToBottom = ({
     const container = messagesContainerRef.current;
     if (!container) return;
     
+    // Don't update state during programmatic scrolling to prevent flickering
+    if (isScrollingRef.current) return;
+    
     const { scrollTop, scrollHeight, clientHeight } = container;
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
     const atBottom = distanceFromBottom <= Math.max(threshold, 1);
@@ -61,9 +64,8 @@ export const useScrollToBottom = ({
     // Only show button when:
     // 1. NOT at bottom
     // 2. There's scrollable content (scrollHeight > clientHeight)
-    // 3. Not currently programmatically scrolling
     const hasScrollableContent = scrollHeight > clientHeight + 10; // Add small buffer
-    const shouldShow = !atBottom && hasScrollableContent && !isScrollingRef.current;
+    const shouldShow = !atBottom && hasScrollableContent;
     
     setShowScrollToBottom(shouldShow);
   }, [threshold]);
@@ -80,22 +82,11 @@ export const useScrollToBottom = ({
       behavior: 'smooth'
     });
     
-    // Reset scrolling flag after animation completes
+    // Reset scrolling flag after animation completes and hide button
     setTimeout(() => {
       isScrollingRef.current = false;
-      // Force a scroll check after animation to ensure correct state
-      setTimeout(() => {
-        const container = messagesContainerRef.current;
-        if (!container) return;
-        
-        const { scrollTop, scrollHeight, clientHeight } = container;
-        const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-        const atBottom = distanceFromBottom <= Math.max(threshold, 1);
-        const hasScrollableContent = scrollHeight > clientHeight + 10;
-        const shouldShow = !atBottom && hasScrollableContent && !isScrollingRef.current;
-        
-        setShowScrollToBottom(shouldShow);
-      }, SCROLL_CHECK_DELAY);
+      // Hide button immediately when reaching bottom after scroll
+      setShowScrollToBottom(false);
     }, SCROLL_ANIMATION_DELAY);
   }, [threshold]);
 
