@@ -5,7 +5,7 @@ import { replayStateAtom } from '@/common/state/atoms/replay';
 // Constants
 const SCROLL_CHECK_DELAY = 100; // ms - delay for DOM updates
 const SCROLL_ANIMATION_DELAY = 300; // ms - delay to account for smooth scroll animation
-const REPLAY_AUTO_SCROLL_DELAY = 200; // ms - delay for auto-scroll in replay mode
+const REPLAY_AUTO_SCROLL_DELAY = 50; // ms - delay for auto-scroll in replay mode
 
 interface UseScrollToBottomOptions {
   threshold?: number; // Distance from bottom to consider "at bottom"
