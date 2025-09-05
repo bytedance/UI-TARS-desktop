@@ -19,6 +19,7 @@ import { Base64ImageParser } from '@agent-infra/media-utils';
 import { getScreenInfo, setScreenInfo } from './shared';
 import { OperatorManager } from './OperatorManager';
 import { BrowserOperator } from '@gui-agent/operator-browser';
+import { AIOHybridOperator } from '@gui-agent/operator-aio';
 
 interface GuiAgentPluginOption {
   operatorManager: OperatorManager;
@@ -103,7 +104,10 @@ export class GuiAgentPlugin extends AgentPlugin {
       return;
     }
 
-    const meta = operator instanceof BrowserOperator ? await operator.getMeta() : null;
+    const meta =
+      operator instanceof BrowserOperator || operator instanceof AIOHybridOperator
+        ? await operator.getMeta()
+        : null;
     const content: ChatCompletionContentPart[] = [
       {
         type: 'image_url',
