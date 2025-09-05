@@ -85,6 +85,11 @@ export const ThrottledHtmlRenderer: React.FC<ThrottledHtmlRendererProps> = ({
         iframeDoc.write(stableContent);
         iframeDoc.close();
 
+        // Ensure white background for HTML content
+        if (iframeDoc.body) {
+          iframeDoc.body.style.backgroundColor = 'white';
+        }
+
         setLastRenderedContent(stableContent);
       } catch (error) {
         console.warn('Failed to update iframe content:', error);
@@ -121,7 +126,7 @@ export const ThrottledHtmlRenderer: React.FC<ThrottledHtmlRendererProps> = ({
 
   return (
     <div
-      className={`border border-gray-200/50 dark:border-gray-700/30 rounded-lg overflow-hidden bg-white dark:bg-gray-900/30 ${className}`}
+      className={`border border-gray-200/50 dark:border-gray-700/30 rounded-lg overflow-hidden bg-white ${className}`}
     >
       <iframe
         ref={iframeRef}

@@ -81,12 +81,13 @@ export const FullscreenModal: React.FC<FullscreenModalProps> = ({ data, onClose 
         {/* Content */}
         <div className="flex-1 overflow-auto">
           {isHtmlFile && data.displayMode === 'rendered' ? (
-            <div className="h-full">
+            <div className="h-full bg-white">
               <iframe
                 srcDoc={data.content}
                 className="w-full h-full border-0"
                 title="HTML Preview"
                 sandbox="allow-scripts allow-same-origin"
+                style={{ backgroundColor: 'white' }}
               />
             </div>
           ) : (
