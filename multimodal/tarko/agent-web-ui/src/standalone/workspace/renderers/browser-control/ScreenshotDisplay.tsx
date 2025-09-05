@@ -33,20 +33,11 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
 }) => {
   const imageRef = useRef<HTMLImageElement>(null);
 
-  const shouldShowMouseCursor = (
-    currentImage: string | null | undefined,
-    imageType: 'before' | 'after' | 'single',
-  ) => {
+  const shouldShowMouseCursor = (imageType: 'before' | 'after' | 'single') => {
     if (!mousePosition || !showCoordinates) return false;
 
-    if (imageType === 'before') return true;
-    if (imageType === 'after') return false;
-    if (imageType === 'single') {
-      return (
-        strategy === 'beforeAction' || (strategy === 'both' && currentImage === beforeActionImage)
-      );
-    }
-    return false;
+    // Only show cursor on before action images or single images in beforeAction strategy
+    return imageType === 'before' || (imageType === 'single' && strategy === 'beforeAction');
   };
 
   // Render placeholder when no image available
@@ -60,23 +51,19 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
     </div>
   );
 
-  // Render image with cursor or placeholder
   const renderImageContent = (
     image: string | null,
     alt: string,
     showCursor = false,
     referenceImage?: string | null,
   ) => {
-    // Use reference image for consistent sizing when current image is missing
-    const sizeReference = image || referenceImage;
-
     if (image) {
       return (
         <div className="relative">
           <img ref={imageRef} src={image} alt={alt} className="w-full h-auto object-contain" />
-          {showCursor && (
+          {showCursor && mousePosition && (
             <MouseCursor
-              position={mousePosition!}
+              position={mousePosition}
               previousPosition={previousMousePosition}
               action={action}
             />
@@ -85,11 +72,11 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
       );
     }
 
-    // Show placeholder with consistent sizing
-    if (sizeReference) {
+    // Show placeholder with consistent sizing using reference image
+    if (referenceImage) {
       return (
         <div className="relative">
-          <img src={sizeReference} alt={alt} className="w-full h-auto object-contain invisible" />
+          <img src={referenceImage} alt={alt} className="w-full h-auto object-contain invisible" />
           <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
             <div className="text-center">
               <div className="text-gray-400 dark:text-gray-500 text-sm">
@@ -119,7 +106,7 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
               {renderImageContent(
                 beforeActionImage,
                 'Browser Screenshot - Before Action',
-                shouldShowMouseCursor(beforeActionImage, 'before'),
+                shouldShowMouseCursor('before'),
                 afterActionImage,
               )}
             </BrowserShell>
@@ -134,7 +121,7 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
               {renderImageContent(
                 afterActionImage,
                 'Browser Screenshot - After Action',
-                false,
+                shouldShowMouseCursor('after'),
                 beforeActionImage,
               )}
             </BrowserShell>
@@ -147,11 +134,7 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
   // Show single screenshot
   return (
     <BrowserShell className="mb-4" url={relatedImageUrl || undefined}>
-      {renderImageContent(
-        relatedImage,
-        'Browser Screenshot',
-        shouldShowMouseCursor(relatedImage, 'single'),
-      )}
+      {renderImageContent(relatedImage, 'Browser Screenshot', shouldShowMouseCursor('single'))}
     </BrowserShell>
   );
 };

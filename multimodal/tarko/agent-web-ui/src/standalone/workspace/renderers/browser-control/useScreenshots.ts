@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 
 type ScreenshotStrategy = 'both' | 'beforeAction' | 'afterAction';
 
@@ -10,6 +10,11 @@ interface UseScreenshotsProps {
   currentStrategy: ScreenshotStrategy;
 }
 
+interface ScreenshotData {
+  url: string;
+  pageUrl: string | null;
+}
+
 export const useScreenshots = ({
   activeSessionId,
   toolCallId,
@@ -17,33 +22,29 @@ export const useScreenshots = ({
   environmentImage,
   currentStrategy,
 }: UseScreenshotsProps) => {
-  const [relatedImage, setRelatedImage] = useState<string | null>(null);
-  const [beforeActionImage, setBeforeActionImage] = useState<string | null>(null);
-  const [afterActionImage, setAfterActionImage] = useState<string | null>(null);
-  const [relatedImageUrl, setRelatedImageUrl] = useState<string | null>(null);
-  const [beforeActionImageUrl, setBeforeActionImageUrl] = useState<string | null>(null);
-  const [afterActionImageUrl, setAfterActionImageUrl] = useState<string | null>(null);
-
-  // If environment image is provided, use it directly
-  useEffect(() => {
+  return useMemo(() => {
+    // If environment image is provided, use it directly
     if (environmentImage) {
-      setRelatedImage(environmentImage);
-    }
-  }, [environmentImage]);
-
-  // Find screenshots based on the configured strategy
-  useEffect(() => {
-    // Initialize: clear current screenshots if no direct environment image provided
-    if (!environmentImage) {
-      setRelatedImage(null);
-      setBeforeActionImage(null);
-      setAfterActionImage(null);
-      setRelatedImageUrl(null);
-      setBeforeActionImageUrl(null);
-      setAfterActionImageUrl(null);
+      return {
+        relatedImage: environmentImage,
+        beforeActionImage: null,
+        afterActionImage: null,
+        relatedImageUrl: null,
+        beforeActionImageUrl: null,
+        afterActionImageUrl: null,
+      };
     }
 
-    if (!activeSessionId || !toolCallId) return;
+    if (!activeSessionId || !toolCallId) {
+      return {
+        relatedImage: null,
+        beforeActionImage: null,
+        afterActionImage: null,
+        relatedImageUrl: null,
+        beforeActionImageUrl: null,
+        afterActionImageUrl: null,
+      };
+    }
 
     const sessionMessages = messages[activeSessionId] || [];
     const currentToolCallIndex = sessionMessages.findIndex((msg) =>
@@ -51,126 +52,96 @@ export const useScreenshots = ({
     );
 
     if (currentToolCallIndex === -1) {
-      console.warn(`[BrowserControlRenderer] Tool call ${toolCallId} not found in messages`);
-      if (!environmentImage) {
-        setRelatedImage(null);
-        setBeforeActionImage(null);
-        setAfterActionImage(null);
-        setRelatedImageUrl(null);
-        setBeforeActionImageUrl(null);
-        setAfterActionImageUrl(null);
-      }
-      return;
+      console.warn(`[useScreenshots] Tool call ${toolCallId} not found in messages`);
+      return {
+        relatedImage: null,
+        beforeActionImage: null,
+        afterActionImage: null,
+        relatedImageUrl: null,
+        beforeActionImageUrl: null,
+        afterActionImageUrl: null,
+      };
     }
 
-    let foundBeforeImage = false;
-    let foundAfterImage = false;
-    let beforeImageData: { url: string; pageUrl: string | null } | null = null;
-    let afterImageData: { url: string; pageUrl: string | null } | null = null;
+    // Helper function to extract screenshot data from message
+    const extractScreenshotData = (msg: any): ScreenshotData | null => {
+      if (msg.role !== 'environment' || !Array.isArray(msg.content)) return null;
 
-    // Search for screenshots BEFORE the current tool call
-    // Always search for before action image as it may be used as fallback
+      const imgContent = msg.content.find(
+        (c) => typeof c === 'object' && 'type' in c && c.type === 'image_url',
+      );
+
+      if (!imgContent || !('image_url' in imgContent) || !imgContent.image_url.url) return null;
+
+      const pageUrl =
+        msg.metadata?.type === 'screenshot' && 'url' in msg.metadata ? msg.metadata.url : null;
+
+      return {
+        url: imgContent.image_url.url,
+        pageUrl,
+      };
+    };
+
+    // Find before action screenshot
+    let beforeImageData: ScreenshotData | null = null;
     for (let i = currentToolCallIndex - 1; i >= 0; i--) {
-      const msg = sessionMessages[i];
-      if (msg.role === 'environment' && Array.isArray(msg.content)) {
-        const imgContent = msg.content.find(
-          (c) => typeof c === 'object' && 'type' in c && c.type === 'image_url',
-        );
-
-        if (imgContent && 'image_url' in imgContent && imgContent.image_url.url) {
-          const url =
-            msg.metadata?.type === 'screenshot' && 'url' in msg.metadata ? msg.metadata.url : null;
-          beforeImageData = { url: imgContent.image_url.url, pageUrl: url };
-          setBeforeActionImage(imgContent.image_url.url);
-          setBeforeActionImageUrl(url || null);
-          foundBeforeImage = true;
-          break;
-        }
-      }
+      beforeImageData = extractScreenshotData(sessionMessages[i]);
+      if (beforeImageData) break;
     }
 
-    // Search for screenshots AFTER the current tool call
-    // Always search for after action image as it may be needed for afterAction or both strategies
-    if (currentStrategy === 'afterAction' || currentStrategy === 'both') {
-      for (let i = currentToolCallIndex + 1; i < sessionMessages.length; i++) {
-        const msg = sessionMessages[i];
-        if (msg.role === 'environment' && Array.isArray(msg.content)) {
-          const imgContent = msg.content.find(
-            (c) => typeof c === 'object' && 'type' in c && c.type === 'image_url',
-          );
-
-          if (imgContent && 'image_url' in imgContent && imgContent.image_url.url) {
-            const url =
-              msg.metadata?.type === 'screenshot' && 'url' in msg.metadata
-                ? msg.metadata.url
-                : null;
-            afterImageData = { url: imgContent.image_url.url, pageUrl: url };
-            setAfterActionImage(imgContent.image_url.url);
-            setAfterActionImageUrl(url || null);
-            foundAfterImage = true;
-            break;
-          }
-        }
-      }
+    // Find after action screenshot
+    let afterImageData: ScreenshotData | null = null;
+    for (let i = currentToolCallIndex + 1; i < sessionMessages.length; i++) {
+      afterImageData = extractScreenshotData(sessionMessages[i]);
+      if (afterImageData) break;
     }
 
-    // Handle strategy-specific logic and fallbacks
-    if (!environmentImage) {
-      if (currentStrategy === 'beforeAction') {
+    // Determine related image based on strategy with fallback logic
+    let relatedImage: string | null = null;
+    let relatedImageUrl: string | null = null;
+
+    switch (currentStrategy) {
+      case 'beforeAction':
         if (beforeImageData) {
-          setRelatedImage(beforeImageData.url);
-          setRelatedImageUrl(beforeImageData.pageUrl);
-        } else {
-          console.warn(
-            `[BrowserControlRenderer] No valid screenshot found before toolCallId: ${toolCallId}. Clearing screenshot display.`,
-          );
-          setRelatedImage(null);
-          setRelatedImageUrl(null);
+          relatedImage = beforeImageData.url;
+          relatedImageUrl = beforeImageData.pageUrl;
         }
-      } else if (currentStrategy === 'afterAction') {
-        if (afterImageData) {
-          // Use after action image when available
-          setRelatedImage(afterImageData.url);
-          setRelatedImageUrl(afterImageData.pageUrl);
-        } else if (beforeImageData) {
-          // Fallback to before action image to prevent flickering
-          console.warn(
-            `[BrowserControlRenderer] No valid screenshot found after toolCallId: ${toolCallId}. Falling back to before action image.`,
-          );
-          setRelatedImage(beforeImageData.url);
-          setRelatedImageUrl(beforeImageData.pageUrl);
-        } else {
-          console.warn(
-            `[BrowserControlRenderer] No valid screenshots found for toolCallId: ${toolCallId}. Clearing screenshot display.`,
-          );
-          setRelatedImage(null);
-          setRelatedImageUrl(null);
-        }
-      } else if (currentStrategy === 'both') {
-        // For 'both' strategy, use the after action image as primary if available
-        if (afterImageData) {
-          setRelatedImage(afterImageData.url);
-          setRelatedImageUrl(afterImageData.pageUrl);
-        } else if (beforeImageData) {
-          setRelatedImage(beforeImageData.url);
-          setRelatedImageUrl(beforeImageData.pageUrl);
-        } else {
-          console.warn(
-            `[BrowserControlRenderer] No valid screenshots found for toolCallId: ${toolCallId}. Clearing screenshot display.`,
-          );
-          setRelatedImage(null);
-          setRelatedImageUrl(null);
-        }
-      }
-    }
-  }, [activeSessionId, messages, toolCallId, environmentImage, currentStrategy]);
+        break;
 
-  return {
-    relatedImage,
-    beforeActionImage,
-    afterActionImage,
-    relatedImageUrl,
-    beforeActionImageUrl,
-    afterActionImageUrl,
-  };
+      case 'afterAction':
+        // Primary: use after action image
+        // Fallback: use before action image if after action is not available
+        if (afterImageData) {
+          relatedImage = afterImageData.url;
+          relatedImageUrl = afterImageData.pageUrl;
+        } else if (beforeImageData) {
+          console.warn(
+            `[useScreenshots] No after action screenshot found for toolCallId: ${toolCallId}. Using before action as fallback.`,
+          );
+          relatedImage = beforeImageData.url;
+          relatedImageUrl = beforeImageData.pageUrl;
+        }
+        break;
+
+      case 'both':
+        // For both strategy, prefer after action image as primary display
+        if (afterImageData) {
+          relatedImage = afterImageData.url;
+          relatedImageUrl = afterImageData.pageUrl;
+        } else if (beforeImageData) {
+          relatedImage = beforeImageData.url;
+          relatedImageUrl = beforeImageData.pageUrl;
+        }
+        break;
+    }
+
+    return {
+      relatedImage,
+      beforeActionImage: beforeImageData?.url || null,
+      afterActionImage: afterImageData?.url || null,
+      relatedImageUrl,
+      beforeActionImageUrl: beforeImageData?.pageUrl || null,
+      afterActionImageUrl: afterImageData?.pageUrl || null,
+    };
+  }, [activeSessionId, messages, toolCallId, environmentImage, currentStrategy]);
 };
