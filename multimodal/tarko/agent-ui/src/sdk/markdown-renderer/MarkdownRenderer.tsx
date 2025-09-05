@@ -1,5 +1,5 @@
 import React from 'react';
-import { TypewriterMarkdownRenderer } from './TypewriterMarkdownRenderer';
+import { StreamingMarkdownRenderer } from './StreamingMarkdownRenderer';
 
 interface MarkdownRendererProps {
   content: string;
@@ -11,8 +11,8 @@ interface MarkdownRendererProps {
 
 /**
  * MarkdownRenderer component
- * Now uses TypewriterMarkdownRenderer for smooth typewriter effect
+ * Now uses StreamingMarkdownRenderer for smooth streaming experience
  */
 export const MarkdownRenderer: React.FC<MarkdownRendererProps> = (props) => {
-  return <TypewriterMarkdownRenderer {...props} />;
+  return <StreamingMarkdownRenderer {...props} />;
 };
