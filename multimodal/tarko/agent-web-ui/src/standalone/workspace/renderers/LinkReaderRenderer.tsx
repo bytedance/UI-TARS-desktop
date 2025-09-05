@@ -76,7 +76,7 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
         return (
           <div
             key={`link-${index}`}
-            className="group relative bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50 rounded-xl border border-gray-200/40 dark:border-gray-700/40 backdrop-blur-sm transition-all duration-300 hover:border-gray-300/60 dark:hover:border-gray-600/60 hover:shadow-lg hover:shadow-gray-200/20 dark:hover:shadow-gray-900/20 hover:-translate-y-0.5"
+            className="group relative bg-gradient-to-br from-blue-50/50 via-white to-purple-50/30 dark:from-gray-900 dark:via-gray-900/95 dark:to-blue-900/10 rounded-xl border border-blue-200/30 dark:border-gray-700/50 backdrop-blur-sm transition-all duration-300 hover:border-blue-300/50 dark:hover:border-blue-600/30 hover:shadow-lg hover:shadow-blue-200/10 dark:hover:shadow-blue-900/10 hover:-translate-y-0.5"
           >
             {/* Floating copy button */}
             <button
@@ -99,8 +99,8 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
             <div className="p-4">
               {/* Elegant header */}
               <div className="flex items-start gap-3 mb-3">
-                <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-500/10 to-purple-500/10 dark:from-blue-400/10 dark:to-purple-400/10 rounded-lg flex items-center justify-center border border-blue-200/30 dark:border-blue-700/30">
-                  <FiGlobe size={16} className="text-blue-600 dark:text-blue-400" />
+                <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-500/15 to-purple-500/15 dark:from-blue-400/20 dark:to-purple-400/20 rounded-lg flex items-center justify-center border border-blue-300/40 dark:border-blue-600/40 shadow-sm">
+                  <FiGlobe size={16} className="text-blue-700 dark:text-blue-300" />
                 </div>
 
                 <div className="flex-1 min-w-0">
@@ -112,7 +112,7 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
                     href={result.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group/link font-medium"
+                    className="inline-flex items-center gap-1.5 text-sm text-blue-600/80 dark:text-blue-400/80 hover:text-blue-700 dark:hover:text-blue-300 transition-colors group/link font-medium"
                   >
                     <span className="truncate max-w-sm">{formatUrl(result.url)}</span>
                     <FiExternalLink
