@@ -40,12 +40,12 @@ export const ScrollToBottomButton: React.FC<ScrollToBottomButtonProps> = ({ show
             className="
               relative flex items-center justify-center 
               w-10 h-10 
-              bg-white/80 dark:bg-gray-800/80
-              hover:bg-white/95 dark:hover:bg-gray-700/95
+              bg-white/90 dark:bg-gray-800/90
+              hover:bg-white dark:hover:bg-gray-700
               rounded-full 
               shadow-md hover:shadow-lg
-              border border-gray-300/50 dark:border-gray-600/50
-              hover:border-gray-400/70 dark:hover:border-gray-500/70
+              border border-indigo-200/60 dark:border-indigo-400/30
+              hover:border-indigo-300/80 dark:hover:border-indigo-400/50
               backdrop-blur-sm
               transition-all duration-200
               group
@@ -68,7 +68,7 @@ export const ScrollToBottomButton: React.FC<ScrollToBottomButtonProps> = ({ show
             >
               <FiChevronDown 
                 size={16} 
-                className="text-gray-600 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" 
+                className="text-indigo-600 dark:text-indigo-400 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors" 
               />
             </motion.div>
             
