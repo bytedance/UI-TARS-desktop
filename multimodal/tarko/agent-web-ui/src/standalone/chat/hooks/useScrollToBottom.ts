@@ -49,28 +49,6 @@ export const useScrollToBottom = ({
     return distanceFromBottom <= Math.max(threshold, 1);
   }, [threshold]);
 
-  // Smooth scroll to bottom
-  const scrollToBottom = useCallback(() => {
-    const container = messagesContainerRef.current;
-    if (!container) return;
-    
-    isScrollingRef.current = true;
-    
-    container.scrollTo({
-      top: container.scrollHeight,
-      behavior: 'smooth'
-    });
-    
-    // Reset scrolling flag after animation completes
-    setTimeout(() => {
-      isScrollingRef.current = false;
-      // Force a scroll check after animation to ensure correct state
-      setTimeout(() => {
-        handleScroll();
-      }, SCROLL_CHECK_DELAY);
-    }, SCROLL_ANIMATION_DELAY);
-  }, [handleScroll]);
-
   // Handle scroll events
   const handleScroll = useCallback(() => {
     const container = messagesContainerRef.current;
@@ -88,6 +66,37 @@ export const useScrollToBottom = ({
     const shouldShow = !atBottom && hasScrollableContent && !isScrollingRef.current;
     
     setShowScrollToBottom(shouldShow);
+  }, [threshold]);
+
+  // Smooth scroll to bottom
+  const scrollToBottom = useCallback(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+    
+    isScrollingRef.current = true;
+    
+    container.scrollTo({
+      top: container.scrollHeight,
+      behavior: 'smooth'
+    });
+    
+    // Reset scrolling flag after animation completes
+    setTimeout(() => {
+      isScrollingRef.current = false;
+      // Force a scroll check after animation to ensure correct state
+      setTimeout(() => {
+        const container = messagesContainerRef.current;
+        if (!container) return;
+        
+        const { scrollTop, scrollHeight, clientHeight } = container;
+        const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+        const atBottom = distanceFromBottom <= Math.max(threshold, 1);
+        const hasScrollableContent = scrollHeight > clientHeight + 10;
+        const shouldShow = !atBottom && hasScrollableContent && !isScrollingRef.current;
+        
+        setShowScrollToBottom(shouldShow);
+      }, SCROLL_CHECK_DELAY);
+    }, SCROLL_ANIMATION_DELAY);
   }, [threshold]);
 
   // Delayed scroll check helper
