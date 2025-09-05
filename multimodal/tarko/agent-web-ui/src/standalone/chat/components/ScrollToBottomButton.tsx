@@ -68,15 +68,15 @@ export const ScrollToBottomButton: React.FC<ScrollToBottomButtonProps> = ({ show
             >
               <FiChevronDown 
                 size={16} 
-                className="text-gray-600 dark:text-gray-300 group-hover:text-gray-800 dark:group-hover:text-gray-100 transition-colors" 
+                className="text-gray-600 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" 
               />
             </motion.div>
             
             {/* Gentle hover hint */}
             <motion.div
               initial={{ opacity: 0 }}
-              whileHover={{ opacity: 0.08 }}
-              className="absolute inset-0 rounded-full bg-gray-900 dark:bg-gray-100"
+              whileHover={{ opacity: 0.1 }}
+              className="absolute inset-0 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
             />
           </motion.button>
         </motion.div>
