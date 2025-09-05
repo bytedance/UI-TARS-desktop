@@ -69,64 +69,51 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {linkData.results.map((result, index) => {
         const isCopied = copiedStates[index];
 
         return (
           <div
             key={`link-${index}`}
-            className="group relative bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50 rounded-xl border border-gray-200/40 dark:border-gray-700/40 backdrop-blur-sm transition-all duration-300 hover:border-gray-300/60 dark:hover:border-gray-600/60 hover:shadow-lg hover:shadow-gray-200/20 dark:hover:shadow-gray-900/20 hover:-translate-y-0.5"
+            className="group relative bg-white dark:bg-gray-900/95 rounded-2xl border border-gray-200 dark:border-gray-700 transition-all duration-200 hover:shadow-xl hover:shadow-gray-900/5 dark:hover:shadow-black/20 hover:border-gray-300 dark:hover:border-gray-600"
           >
-            {/* Floating copy button */}
-            <button
-              onClick={() => copyContent(result.content, index)}
-              className={`absolute top-3 right-3 z-10 p-2 rounded-lg backdrop-blur-md transition-all duration-200 opacity-0 group-hover:opacity-100 ${
-                isCopied
-                  ? 'bg-green-100/80 dark:bg-green-900/40 text-green-600 dark:text-green-400 border border-green-200/50 dark:border-green-700/50'
-                  : 'bg-white/80 dark:bg-gray-800/80 text-gray-500 dark:text-gray-400 border border-gray-200/50 dark:border-gray-600/50 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300'
-              }`}
-              title="Copy content"
-            >
-              {isCopied ? (
-                <FiCheck size={14} className="transition-transform scale-110" />
-              ) : (
-                <FiCopy size={14} />
-              )}
-            </button>
-
-            {/* Content container */}
-            <div className="p-4">
-              {/* Elegant header */}
-              <div className="flex items-start gap-3 mb-3">
-                <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-500/10 to-purple-500/10 dark:from-blue-400/10 dark:to-purple-400/10 rounded-lg flex items-center justify-center border border-blue-200/30 dark:border-blue-700/30">
-                  <FiGlobe size={16} className="text-blue-600 dark:text-blue-400" />
-                </div>
-
+            {/* Clean header with inline copy */}
+            <div className="flex items-center justify-between p-6 pb-4">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 leading-snug mb-1 line-clamp-2">
+                  <h3 className="font-medium text-gray-900 dark:text-gray-100 text-base leading-tight mb-1 line-clamp-2">
                     {result.title}
                   </h3>
-
                   <a
                     href={result.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group/link font-medium"
+                    className="inline-flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
                   >
-                    <span className="truncate max-w-sm">{formatUrl(result.url)}</span>
-                    <FiExternalLink
-                      size={12}
-                      className="flex-shrink-0 opacity-70 group-hover/link:opacity-100 group-hover/link:translate-x-0.5 transition-all duration-200"
-                    />
+                    <span className="truncate">{formatUrl(result.url)}</span>
+                    <FiExternalLink size={12} className="flex-shrink-0" />
                   </a>
                 </div>
               </div>
+              
+              <button
+                onClick={() => copyContent(result.content, index)}
+                className={`p-2 rounded-lg transition-all duration-200 ${
+                  isCopied
+                    ? 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400'
+                    : 'bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300'
+                }`}
+                title="Copy content"
+              >
+                {isCopied ? <FiCheck size={16} /> : <FiCopy size={16} />}
+              </button>
+            </div>
 
-              {/* Content area */}
-              <div>
-                <MarkdownRenderer content={wrapMarkdown(result.content)} forceDarkTheme />
-              </div>
+            {/* Content */}
+            <div className="px-6 pb-6">
+              <MarkdownRenderer content={wrapMarkdown(result.content)} forceDarkTheme />
             </div>
           </div>
         );
