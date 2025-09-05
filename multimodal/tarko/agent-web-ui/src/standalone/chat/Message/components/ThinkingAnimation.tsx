@@ -29,7 +29,7 @@ const GradientText: React.FC<GradientTextProps> = ({ text, className = '' }) => 
 
       {/* Animated gradient overlay */}
       <motion.span
-        className="absolute inset-0 font-medium bg-gradient-to-r from-gray-400 from-20% via-gray-900 via-50% to-gray-400 to-80% dark:from-gray-500 dark:from-20% dark:via-gray-100 dark:via-50% dark:to-gray-500 dark:to-80% bg-clip-text text-transparent"
+        className="absolute inset-0 font-medium bg-gradient-to-r from-gray-400 from-35% via-gray-900 via-50% to-gray-400 to-65% dark:from-gray-500 dark:from-35% dark:via-gray-100 dark:via-50% dark:to-gray-500 dark:to-65% bg-clip-text text-transparent"
         style={{
           backgroundSize: '300% 100%',
         }}
