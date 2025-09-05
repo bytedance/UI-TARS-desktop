@@ -9,7 +9,7 @@ import { useAtomValue } from 'jotai';
 import { groupedMessagesAtom, messagesAtom } from '@/common/state/atoms/message';
 import { replayStateAtom } from '@/common/state/atoms/replay';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
-import { useAutoScroll } from './hooks/useAutoScroll';
+import { useScrollToBottom } from './hooks/useScrollToBottom';
 import { ScrollToBottomButton } from './components/ScrollToBottomButton';
 import { ResearchReportEntry } from './ResearchReportEntry';
 import { EmptyState } from './components/EmptyState';
@@ -39,13 +39,10 @@ export const ChatPanel: React.FC = () => {
       ? groupedMessages[currentSessionId] || []
       : [];
 
-  // Auto-scroll functionality
+  // Scroll-to-bottom functionality
   const { messagesContainerRef, messagesEndRef, showScrollToBottom, scrollToBottom } =
-    useAutoScroll({
+    useScrollToBottom({
       threshold: 100,
-      debounceMs: 150,
-      autoScrollDelay: 2000,
-      dependencies: [activeMessages, isProcessing],
     });
 
   // Find research report in session
