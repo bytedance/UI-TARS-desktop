@@ -354,10 +354,6 @@ export const sendMessageAction = atom(
       },
     }));
 
-    // Note: Do NOT add user message to state here in streaming mode
-    // The user_message event will come from the server's event stream
-    // This prevents duplicate user messages in the UI
-
     // Set initial session name from first user query
     // Note: We check message count before sending since user_message will come from stream
     try {

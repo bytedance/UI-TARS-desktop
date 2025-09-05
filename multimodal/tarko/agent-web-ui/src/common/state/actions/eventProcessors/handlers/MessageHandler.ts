@@ -3,7 +3,10 @@ import { EventHandler, EventHandlerContext } from '../types';
 import { AgentEventStream, Message } from '@/common/types';
 import { messagesAtom } from '@/common/state/atoms/message';
 import { sessionPanelContentAtom, sessionAgentStatusAtom } from '@/common/state/atoms/ui';
-import { shouldUpdatePanelContent, shouldUpdateProcessingState } from '../utils/panelContentUpdater';
+import {
+  shouldUpdatePanelContent,
+  shouldUpdateProcessingState,
+} from '../utils/panelContentUpdater';
 
 // Constants for thinking message newline trimming performance
 const LEADING_NEWLINES_REGEX = /^\n+/;
@@ -29,10 +32,9 @@ export class UserMessageHandler implements EventHandler<AgentEventStream.UserMes
     };
 
     set(messagesAtom, (prev: Record<string, Message[]>) => {
-      const sessionMessages = prev[sessionId] || [];
       return {
         ...prev,
-        [sessionId]: [...sessionMessages, userMessage],
+        [sessionId]: [...(prev[sessionId] || []), userMessage],
       };
     });
 
