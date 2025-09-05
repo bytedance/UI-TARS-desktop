@@ -63,17 +63,6 @@ export const useScrollToBottom = ({
     // Show button when NOT at bottom and there's content to scroll
     const shouldShow = !atBottom && scrollHeight > clientHeight;
     setShowScrollToBottom(shouldShow);
-    
-    // Debug log
-    console.log('Scroll check:', {
-      scrollTop,
-      scrollHeight,
-      clientHeight,
-      distanceFromBottom,
-      threshold,
-      atBottom,
-      shouldShow
-    });
   }, [threshold]);
 
   // Delayed scroll check helper
