@@ -21,14 +21,14 @@ export const ScrollToBottomButton: React.FC<ScrollToBottomButtonProps> = ({ show
     <AnimatePresence>
       {show && (
         <motion.div
-          initial={{ opacity: 0, x: -16, y: 10, scale: 0.9 }}
-          animate={{ opacity: 1, x: -16, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 10, scale: 0.9 }}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
           transition={{
-            duration: 0.3,
+            duration: 0.2,
             ease: 'easeOut',
           }}
-          className="absolute -top-10 left-1/2 z-50"
+          className="absolute -top-10 left-1/2 -translate-x-4 z-50"
         >
           <motion.button
             whileHover={{
