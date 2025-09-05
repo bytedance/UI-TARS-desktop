@@ -17,14 +17,10 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ inline, className, childre
     );
   }
 
-
-
   return (
     <div className="my-2">
-      <pre className="bg-[#f5f5f5] dark:bg-[#111111] dark:border-gray-700/50 rounded-xl p-4 text-xs overflow-x-auto">
-        <code className={`${className} text-gray-800 dark:text-gray-200`}>
-          {children}
-        </code>
+      <pre className="bg-[#f5f5f5] dark:bg-[#111111] dark:border-gray-700/50 rounded-xl m-4 text-xs overflow-x-auto">
+        <code className={`${className} text-gray-800 dark:text-gray-200`}>{children}</code>
       </pre>
     </div>
   );

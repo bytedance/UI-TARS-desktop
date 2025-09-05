@@ -82,7 +82,7 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
             {/* Floating copy button */}
             <button
               onClick={() => copyContent(result.content, index)}
-              className={`absolute top-3 right-3 z-10 p-2 rounded-lg backdrop-blur-md transition-all duration-200 opacity-0 group-hover:opacity-100 ${isCopied
+              className={`absolute top-6 right-6 z-10 p-2 rounded-lg backdrop-blur-md transition-all duration-200 opacity-0 group-hover:opacity-100 ${isCopied
                   ? 'bg-green-900/40 text-green-400 border border-green-700/50'
                   : 'bg-gray-800/80 text-gray-400 border border-gray-600/50 hover:bg-gray-700 hover:text-gray-300'
                 }`}
@@ -96,9 +96,9 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
             </button>
 
             {/* Content container */}
-            <div className="p-4">
+            <div className="p-2">
               {/* Elegant header */}
-              <div className="flex items-start gap-3 mb-3">
+              <div className="flex items-start gap-3 m-4 mb-0">
                 <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-purple-400/20 to-violet-400/20 rounded-lg flex items-center justify-center border border-purple-600/40 shadow-sm">
                   <FiGlobe size={16} className="text-purple-300" />
                 </div>
