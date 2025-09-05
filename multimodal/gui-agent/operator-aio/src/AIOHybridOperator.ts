@@ -12,7 +12,7 @@ import {
 import { ConsoleLogger } from '@agent-infra/logger';
 import { Base64ImageParser } from '@agent-infra/media-utils';
 import { sleep } from '@ui-tars/shared/utils';
-import { parseBoxToScreenCoords } from './utils';
+import { parseBoxToScreenCoords, parseBoxToScreenCoordsPercent } from './utils';
 import { AIOComputer } from './AIOComputer';
 import type { AIOHybridOptions } from './types';
 
@@ -37,8 +37,8 @@ export class AIOHybridOperator extends Operator {
   private static currentInstance: AIOHybridOperator | null = null;
   private aioComputer: AIOComputer;
 
-  private screenshotWidth = 0;
-  private screenshotHeight = 0;
+  private screenshotWidth = 1280;
+  private screenshotHeight = 2014;
 
   public static async create(options: AIOHybridOptions): Promise<AIOHybridOperator> {
     logger.info('[AioHybridOperator] construct:', options.baseURL);
@@ -88,7 +88,14 @@ export class AIOHybridOperator extends Operator {
     const { action_type, action_inputs } = parsedPrediction;
     const startBoxStr = action_inputs?.start_box || '';
 
-    logger.info('[AioHybridOperator] Executing action', action_type, action_inputs);
+    logger.info(
+      '[AioHybridOperator] Executing action',
+      action_type,
+      action_inputs,
+      ', screen context',
+      this.screenshotWidth,
+      this.screenshotHeight,
+    );
 
     const { x: rawX, y: rawY } = parseBoxToScreenCoords({
       boxStr: startBoxStr,
@@ -224,13 +231,32 @@ export class AIOHybridOperator extends Operator {
         case 'call_user':
         case 'finished':
         case 'user_stop':
-          return { status: StatusEnum.END };
+          break;
 
         default:
           logger.warn(`Unsupported action type: ${action_type}`);
       }
 
-      return { status: StatusEnum.INIT };
+      const { startXPercent, startYPercent } = parseBoxToScreenCoordsPercent({
+        startX,
+        startY,
+        screenWidth,
+        screenHeight,
+        deviceScaleFactor: scaleFactor,
+      });
+      logger.info(`[AioHybridOperator] position percent: (${startXPercent}, ${startYPercent})`);
+
+      // return { status: StatusEnum.INIT };
+      return {
+        // Hand it over to the upper layer to avoid redundancy
+        // @ts-expect-error fix type later
+        startX,
+        startY,
+        // Add percentage coordinates for new GUI Agent design
+        startXPercent,
+        startYPercent,
+        action_inputs,
+      };
     } catch (error) {
       logger.error('[AioHybridOperator] 执行失败:', error);
       return { status: StatusEnum.ERROR };

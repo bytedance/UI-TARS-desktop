@@ -8,7 +8,7 @@ export const parseBoxToScreenCoords = ({
   screenHeight,
   factors = [1000, 1000],
 }: {
-  boxStr: string;
+  boxStr: string; // the box string has been normalized, the value is the percentage of the actual width and height
   screenWidth: number;
   screenHeight: number;
   factors?: [number, number];
@@ -29,7 +29,32 @@ export const parseBoxToScreenCoords = ({
   // console.log('parseBoxToScreenCoords widthFactor, heightFactor:', widthFactor, heightFactor);
 
   return {
-    x: Math.round((((x1 + x2) / 2) * screenWidth) / widthFactor),
-    y: Math.round((((y1 + y2) / 2) * screenHeight) / heightFactor),
+    x: Math.round(((x1 + x2) / 2) * screenWidth * widthFactor) / widthFactor,
+    y: Math.round(((y1 + y2) / 2) * screenHeight * heightFactor) / heightFactor,
+  };
+};
+
+export const parseBoxToScreenCoordsPercent = ({
+  startX,
+  startY,
+  screenWidth,
+  screenHeight,
+  deviceScaleFactor = 1,
+  factors = [1000, 1000],
+}: {
+  startX: number | null;
+  startY: number | null;
+  screenWidth: number;
+  screenHeight: number;
+  deviceScaleFactor: number;
+  factors?: [number, number];
+}) => {
+  // Calculate percentage coordinates for GUI Agent
+  const startXPercent = startX ? (startX * deviceScaleFactor) / screenWidth : null;
+  const startYPercent = startY ? (startY * deviceScaleFactor) / screenHeight : null;
+
+  return {
+    startXPercent,
+    startYPercent,
   };
 };
