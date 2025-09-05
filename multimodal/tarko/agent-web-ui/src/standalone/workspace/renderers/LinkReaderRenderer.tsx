@@ -76,7 +76,8 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
         return (
           <div
             key={`link-${index}`}
-            className="group relative bg-black rounded-xl border border-gray-800 transition-all duration-300 hover:border-gray-700 hover:shadow-lg hover:shadow-gray-900/20"
+            className="group relative rounded-xl border border-gray-800 transition-all duration-300 hover:border-gray-700 hover:shadow-lg hover:shadow-gray-900/20"
+            style={{ backgroundColor: '#111111' }}
           >
             {/* Floating copy button */}
             <button
