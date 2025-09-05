@@ -15,6 +15,7 @@ import { sleep } from '@ui-tars/shared/utils';
 import { parseBoxToScreenCoords, parseBoxToScreenCoordsPercent } from './utils';
 import { AIOComputer } from './AIOComputer';
 import type { AIOHybridOptions } from './types';
+import { AIOBrowser } from './AIOBrowser';
 
 const logger = new ConsoleLogger('AioHybridOperator');
 
@@ -35,6 +36,7 @@ export class AIOHybridOperator extends Operator {
   };
 
   private static currentInstance: AIOHybridOperator | null = null;
+  private aioBrowser: AIOBrowser | null = null;
   private aioComputer: AIOComputer;
 
   private screenshotWidth = 1280;
@@ -42,13 +44,39 @@ export class AIOHybridOperator extends Operator {
 
   public static async create(options: AIOHybridOptions): Promise<AIOHybridOperator> {
     logger.info('[AioHybridOperator] construct:', options.baseURL);
-    this.currentInstance = new AIOHybridOperator(options);
-    return this.currentInstance;
+    const instance = new AIOHybridOperator(options);
+    await instance.initialize(options);
+    this.currentInstance = instance;
+    return instance;
   }
 
   private constructor(options: AIOHybridOptions) {
     super();
     this.aioComputer = new AIOComputer(options);
+  }
+
+  private async initialize(options: AIOHybridOptions): Promise<void> {
+    this.aioBrowser = await AIOBrowser.create({
+      baseURl: options.baseURL,
+      logger: logger,
+    });
+    logger.info('[AioHybridOperator] AIOBrowser initialized successfully');
+    this.aioBrowser?.launch();
+  }
+
+  public async getMeta(): Promise<{ url: string }> {
+    let url = '';
+    try {
+      const retUrl = await this.aioBrowser?.getActiveUrl();
+      if (retUrl) {
+        url = retUrl;
+      }
+    } catch (error) {
+      logger.error('Failed to get page meta:', error);
+    }
+    return {
+      url,
+    };
   }
 
   public async screenshot(): Promise<ScreenshotOutput> {

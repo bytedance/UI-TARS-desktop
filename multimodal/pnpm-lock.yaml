@@ -294,12 +294,18 @@ importers:
 
   gui-agent/operator-aio:
     dependencies:
+      '@agent-infra/browser':
+        specifier: 0.1.1
+        version: 0.1.1
       '@agent-infra/logger':
         specifier: 0.0.2-beta.2
         version: 0.0.2-beta.2
       '@agent-infra/media-utils':
         specifier: 0.1.5
         version: 0.1.5
+      '@agent-infra/sandbox':
+        specifier: 0.0.2-beta7
+        version: 0.0.2-beta7
       '@ui-tars/sdk':
         specifier: 1.2.3
         version: 1.2.3(ws@8.18.3)(zod@3.25.36)
@@ -10245,9 +10251,6 @@ packages:
     resolution: {integrity: sha512-Re10+NauLTMCudc7T5WLFLAwDhQ0JWdrMK+9B2M8zR5hRExKmsRDCBA7/aV/pNJFltmBFO5BAMlQFi/vq3nKOg==}
     engines: {node: '>=6'}
 
-  tar-fs@3.0.9:
-    resolution: {integrity: sha512-XF4w9Xp+ZQgifKakjZYmFdkLoSWd34VGKcsTCwlNWM7QG3ZbaxnTsaBwnjFZqHRf/rROxaR8rXnbtwdvaDI+lA==}
-
   tar-fs@3.1.0:
     resolution: {integrity: sha512-5Mty5y/sOF1YWj1J6GiBodjlDc05CUR8PKXrsnFAiSG0xA+GHeWLovaZPYUDXkH/1iKRf2+M5+OrRgzC7O9b7w==}
 
@@ -15276,7 +15279,7 @@ snapshots:
       progress: 2.0.3
       proxy-agent: 6.5.0
       semver: 7.7.2
-      tar-fs: 3.0.9
+      tar-fs: 3.1.0
       yargs: 17.7.2
     transitivePeerDependencies:
       - bare-buffer
@@ -23713,7 +23716,7 @@ snapshots:
       debug: 4.4.1
       devtools-protocol: 0.0.1425554
       typed-query-selector: 2.12.0
-      ws: 8.18.2
+      ws: 8.18.3
     transitivePeerDependencies:
       - bare-buffer
       - bufferutil
@@ -25179,16 +25182,6 @@ snapshots:
       - ts-node
 
   tapable@2.2.2: {}
-
-  tar-fs@3.0.9:
-    dependencies:
-      pump: 3.0.2
-      tar-stream: 3.1.7
-    optionalDependencies:
-      bare-fs: 4.1.5
-      bare-path: 3.0.0
-    transitivePeerDependencies:
-      - bare-buffer
 
   tar-fs@3.1.0:
     dependencies:
