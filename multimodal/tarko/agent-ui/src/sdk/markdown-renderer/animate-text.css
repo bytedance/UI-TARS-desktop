@@ -1,0 +1,57 @@
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Optimized animated text spans with reduced visual strain */
+.animate-fade-in {
+  display: inline-block;
+  opacity: 0;
+  animation: fadeIn 0.4s ease-out forwards;
+  will-change: opacity;
+}
+
+/* Disable animation when not needed */
+.animate-fade-in.no-animation {
+  opacity: 1 !important;
+  animation: none !important;
+}
+
+/* Code block animation */
+@keyframes fadeInCode {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-code {
+  animation: fadeInCode 0.3s ease-out forwards;
+  will-change: opacity;
+}
+
+/* Global animation disable */
+.markdown-content.no-animation .animate-fade-in {
+  opacity: 1 !important;
+  animation: none !important;
+  transform: none !important;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+  
+  .animate-code {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+}

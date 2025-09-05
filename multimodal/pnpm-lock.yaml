@@ -909,6 +909,9 @@ importers:
       rehype-katex:
         specifier: ^7.0.1
         version: 7.0.1
+      rehype-raw:
+        specifier: ^7.0.0
+        version: 7.0.0
       remark-gfm:
         specifier: 4.0.1
         version: 4.0.1
@@ -921,6 +924,9 @@ importers:
       socket.io-client:
         specifier: ^4.7.2
         version: 4.8.1
+      unist-util-visit:
+        specifier: ^5.0.0
+        version: 5.0.0
       uuid:
         specifier: ^9.0.0
         version: 9.0.1
@@ -940,6 +946,9 @@ importers:
       '@tarko/interface':
         specifier: workspace:*
         version: link:../interface
+      '@types/hast':
+        specifier: ^3.0.3
+        version: 3.0.4
       '@types/react':
         specifier: ^18.2.75
         version: 18.3.23
