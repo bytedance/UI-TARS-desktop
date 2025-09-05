@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiExternalLink, FiCopy, FiCheck, FiFileText, FiCode, FiEye } from 'react-icons/fi';
+import { FiExternalLink, FiCopy, FiCheck, FiGlobe } from 'react-icons/fi';
 import { StandardPanelContent } from '../types/panelContent';
 import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 import { wrapMarkdown } from '@/common/utils/markdown';
@@ -31,8 +31,8 @@ interface LinkReaderResponse {
 }
 
 /**
- * Clean and minimal LinkReader renderer
- * Focus on content with simple, elegant design
+ * Elegant and minimal LinkReader renderer
+ * Clean design with subtle interactions and refined typography
  */
 export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelContent }) => {
   const [copiedStates, setCopiedStates] = useState<boolean[]>([]);
@@ -41,7 +41,11 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
   const linkData = extractLinkReaderData(panelContent);
 
   if (!linkData?.results?.length) {
-    return <div className="text-gray-500 dark:text-gray-400 text-sm p-3">No content available</div>;
+    return (
+      <div className="flex items-center justify-center py-8 text-gray-500 dark:text-gray-400 text-sm">
+        No content available
+      </div>
+    );
   }
 
   const copyContent = async (content: string, index: number) => {
@@ -65,109 +69,66 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {linkData.results.map((result, index) => {
         const isCopied = copiedStates[index];
 
         return (
           <div
             key={`link-${index}`}
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100 dark:border-gray-700"
+            className="group bg-white dark:bg-gray-900 rounded-2xl border border-gray-200/60 dark:border-gray-700/60 overflow-hidden transition-all duration-300 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-lg hover:shadow-gray-100/50 dark:hover:shadow-gray-900/50"
           >
-            {/* Enhanced Header */}
-            <div className="p-5 pb-0">
+            {/* Refined Header */}
+            <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-800">
               <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  {/* Enhanced Title with gradient icon */}
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-sm">
-                      <FiFileText size={18} className="text-white" />
-                    </div>
+                <div className="flex items-start gap-4 flex-1 min-w-0">
+                  {/* Subtle icon */}
+                  <div className="flex-shrink-0 w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                    <FiGlobe size={16} className="text-gray-600 dark:text-gray-400" />
+                  </div>
 
-                    <div className="flex-1 min-w-0 pt-0.5">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 leading-tight mb-1 line-clamp-1">
-                        {result.title}
-                      </h3>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base font-medium text-gray-900 dark:text-gray-100 leading-snug mb-2 line-clamp-2">
+                      {result.title}
+                    </h3>
 
-                      <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
-                        <a
-                          href={result.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
-                        >
-                          <span className="truncate max-w-xs">{formatUrl(result.url)}</span>
-                          <FiExternalLink
-                            size={12}
-                            className="flex-shrink-0 opacity-70 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-200"
-                          />
-                        </a>
-                      </div>
-                    </div>
+                    <a
+                      href={result.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors group/link"
+                    >
+                      <span className="truncate max-w-sm">{formatUrl(result.url)}</span>
+                      <FiExternalLink
+                        size={12}
+                        className="flex-shrink-0 opacity-60 group-hover/link:opacity-100 transition-opacity"
+                      />
+                    </a>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 pt-1">
-                  {/* FIXME: Temporarily commented for now */}
-                  {/* <button
-                    onClick={() => setShowMarkdownSource(!showMarkdownSource)}
-                    className={`relative p-2 rounded-lg transition-all duration-200 group border font-medium ${
-                      showMarkdownSource
-                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white border-blue-500 shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/25'
-                        : 'bg-gradient-to-r from-purple-500 to-purple-600 text-white border-purple-500 shadow-md shadow-purple-500/20 hover:shadow-lg hover:shadow-purple-500/25'
-                    }`}
-                    title={showMarkdownSource ? 'Switch to rendered view' : 'Switch to source view'}
-                  >
-                    <div className="flex items-center gap-1">
-                      {showMarkdownSource ? (
-                        <>
-                          <FiCode
-                            size={14}
-                            className="transition-transform group-hover:scale-110"
-                          />
-                          <span className="text-xs font-semibold tracking-wide">SRC</span>
-                        </>
-                      ) : (
-                        <>
-                          <FiEye size={14} className="transition-transform group-hover:scale-110" />
-                          <span className="text-xs font-semibold tracking-wide">VIEW</span>
-                        </>
-                      )}
-                    </div>
-
-                    <div className="absolute inset-0 rounded-lg bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-                  </button> */}
-
-                  {/* 复制按钮 - 只使用 copiedStates[index] 状态 */}
-                  <button
-                    onClick={() => copyContent(result.content, index)}
-                    className={`relative p-2 rounded-lg transition-all duration-200 group border font-medium ${
-                      copiedStates[index]
-                        ? 'bg-gradient-to-r from-green-500 to-green-600 text-white border-green-500 shadow-md shadow-green-500/20'
-                        : 'bg-gradient-to-r from-gray-500 to-gray-600 text-white border-gray-500 shadow-md shadow-gray-500/20 hover:from-gray-600 hover:to-gray-700 hover:shadow-lg hover:shadow-gray-500/25'
-                    }`}
-                    title="Copy content"
-                  >
-                    {copiedStates[index] ? (
-                      <FiCheck size={14} className="transition-transform scale-110" />
-                    ) : (
-                      <FiCopy size={14} className="transition-transform group-hover:scale-110" />
-                    )}
-
-                    <div className="absolute inset-0 rounded-lg bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-                  </button>
-                </div>
+                {/* Refined copy button */}
+                <button
+                  onClick={() => copyContent(result.content, index)}
+                  className={`flex-shrink-0 p-2.5 rounded-lg transition-all duration-200 ${
+                    isCopied
+                      ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400'
+                      : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}
+                  title="Copy content"
+                >
+                  {isCopied ? (
+                    <FiCheck size={16} className="transition-transform scale-110" />
+                  ) : (
+                    <FiCopy size={16} />
+                  )}
+                </button>
               </div>
             </div>
 
             {/* Content area */}
-            <div className="p-5 pt-2">
-              {showMarkdownSource ? (
-                <MarkdownRenderer content={wrapMarkdown(result.content)} forceDarkTheme />
-              ) : (
-                <MarkdownRenderer content={result.content} forceDarkTheme />
-              )}
+            <div className="px-6 py-5">
+              <MarkdownRenderer content={wrapMarkdown(result.content)} forceDarkTheme />
             </div>
           </div>
         );
