@@ -137,7 +137,7 @@ export class GUIAgentT5Adapter {
     let action_string = '';
 
     try {
-      const args = JSON.parse(argsStr);
+      const args = argsStr.length > 0 ? JSON.parse(argsStr) : {};
       switch (actionType) {
         case 'navigate':
           if (args.content) {
@@ -216,7 +216,7 @@ export class GUIAgentT5Adapter {
           this.logger.warn(`Unknown action type: ${actionType}`);
       }
     } catch (error) {
-      this.logger.error(`[convertArgsStrToActionInput]: Failed to parse '${argsStr}': ${error}`);
+      this.logger.warn(`[convertArgsStrToActionInput]: Failed to parse '${argsStr}': ${error}`);
       action_string = `${actionType}()`;
       // action_inputs = {};
     }
