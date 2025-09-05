@@ -207,16 +207,16 @@ export class AIOHybridOperator extends Operator {
 
             switch (normalizedDirection) {
               case 'up':
-                dy = -500;
+                dy = 10;
                 break;
               case 'down':
-                dy = 500;
+                dy = -10;
                 break;
               case 'left':
-                dx = -500;
+                dx = 10;
                 break;
               case 'right':
-                dx = 500;
+                dx = -10;
                 break;
             }
 
