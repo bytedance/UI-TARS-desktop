@@ -40,13 +40,11 @@ export const ScrollToBottomButton: React.FC<ScrollToBottomButtonProps> = ({ show
             className="
               relative flex items-center justify-center 
               w-8 h-8 
-              bg-white dark:bg-gray-800
-              hover:bg-gray-50 dark:hover:bg-gray-700
+              bg-white/70 dark:bg-gray-900/70
+              hover:bg-white/80 dark:hover:bg-gray-900/80
               rounded-full 
-              shadow-md hover:shadow-lg
-              border border-gray-300 dark:border-gray-600
-              hover:border-gray-400 dark:hover:border-gray-500
-              backdrop-blur-sm
+              shadow-lg hover:shadow-xl
+              backdrop-blur-md
               transition-all duration-200 ease-out
               group
             "
