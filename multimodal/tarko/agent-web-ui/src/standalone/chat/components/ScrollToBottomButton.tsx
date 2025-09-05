@@ -8,12 +8,12 @@ interface ScrollToBottomButtonProps {
 }
 
 /**
- * ScrollToBottomButton Component - Elegant pure black button matching message-user style
+ * ScrollToBottomButton Component - Modern gradient button matching ChatInput style
  * 
  * Features:
- * - Pure black design (#141414) matching message-user aesthetic
- * - Refined typography and spacing
- * - Sophisticated hover interactions
+ * - Gradient border design matching ChatInput aesthetic
+ * - Glass morphism background effect
+ * - Smooth animations and micro-interactions
  * - Positioned above the input area
  */
 export const ScrollToBottomButton: React.FC<ScrollToBottomButtonProps> = ({ show, onClick }) => {
@@ -21,84 +21,69 @@ export const ScrollToBottomButton: React.FC<ScrollToBottomButtonProps> = ({ show
     <AnimatePresence>
       {show && (
         <motion.div
-          initial={{ opacity: 0, y: 12, scale: 0.9 }}
+          initial={{ opacity: 0, y: 10, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 12, scale: 0.9 }}
+          exit={{ opacity: 0, y: 10, scale: 0.9 }}
           transition={{ 
-            duration: 0.4,
-            ease: [0.25, 0.46, 0.45, 0.94] // Custom cubic-bezier for elegance
+            duration: 0.3,
+            ease: 'easeOut'
           }}
           className="absolute -top-16 right-4 z-50"
         >
-          <motion.button
+          <motion.div
             whileHover={{ 
-              scale: 1.08, 
-              y: -3,
-              transition: { duration: 0.2 }
+              scale: 1.05, 
+              y: -2
             }}
-            whileTap={{ 
-              scale: 0.96,
-              transition: { duration: 0.1 }
-            }}
-            onClick={onClick}
-            className="
-              relative flex items-center justify-center 
-              w-11 h-11 
-              bg-[#141414] dark:bg-gray-900
-              hover:bg-[#1a1a1a] dark:hover:bg-gray-800
-              rounded-2xl
-              shadow-lg hover:shadow-2xl
-              border border-gray-800/50 dark:border-gray-700/50
-              hover:border-gray-700/70 dark:hover:border-gray-600/70
-              transition-all duration-300 ease-out
-              group
-            "
-            aria-label="Scroll to bottom"
+            whileTap={{ scale: 0.95 }}
+            className="relative overflow-hidden rounded-full transition-all duration-300 shadow-lg hover:shadow-xl"
           >
-            {/* Subtle inner highlight */}
-            <div className="absolute inset-[1px] rounded-[15px] bg-gradient-to-t from-transparent via-white/[0.02] to-white/[0.06] dark:via-white/[0.01] dark:to-white/[0.03]" />
+            {/* Gradient border - matching ChatInput */}
+            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 rounded-full animate-border-flow bg-[length:200%_200%]" />
             
-            {/* Icon with sophisticated animation */}
-            <motion.div
-              animate={{ 
-                y: [0, -1, 0],
-                transition: { 
-                  duration: 3, 
+            <motion.button
+              onClick={onClick}
+              className="
+                relative flex items-center justify-center 
+                w-10 h-10 
+                m-[2px] 
+                bg-white/90 dark:bg-gray-800/90
+                hover:bg-white dark:hover:bg-gray-700/90
+                rounded-full 
+                backdrop-blur-sm
+                transition-all duration-200
+                group
+              "
+              aria-label="Scroll to bottom"
+            >
+              {/* Glass effect overlay */}
+              <div className="absolute inset-0 rounded-full bg-gradient-to-t from-transparent via-white/5 to-white/10 dark:via-white/2 dark:to-white/5" />
+              
+              {/* Icon with gentle animation */}
+              <motion.div
+                animate={{ y: [0, 1, 0] }}
+                transition={{ 
+                  duration: 2.5, 
                   repeat: Infinity, 
                   ease: 'easeInOut',
                   repeatDelay: 2
-                }
-              }}
-              className="relative z-10"
-            >
-              <FiChevronDown 
-                size={18} 
-                className="text-white/90 group-hover:text-white transition-all duration-200 drop-shadow-sm" 
-                strokeWidth={2.5}
+                }}
+                className="relative z-10"
+              >
+                <FiChevronDown 
+                  size={16} 
+                  className="text-gray-600 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" 
+                />
+              </motion.div>
+              
+              {/* Subtle hover accent */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileHover={{ opacity: 0.1 }}
+                className="absolute inset-0 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
               />
-            </motion.div>
-            
-            {/* Elegant hover glow */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileHover={{ 
-                opacity: 0.06, 
-                scale: 1,
-                transition: { duration: 0.3 }
-              }}
-              className="absolute inset-0 rounded-2xl bg-white"
-            />
-            
-            {/* Outer glow on hover */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileHover={{ 
-                opacity: 0.4,
-                transition: { duration: 0.3 }
-              }}
-              className="absolute -inset-1 rounded-2xl bg-gradient-to-t from-black/20 to-transparent blur-sm -z-10"
-            />
-          </motion.button>
+            </motion.button>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
