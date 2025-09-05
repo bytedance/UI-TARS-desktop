@@ -37,6 +37,7 @@
     "@agent-infra/media-utils": "0.1.5",
     "@agent-infra/sandbox": "0.0.2-beta7",
     "@gui-agent/operator-browser": "workspace:*",
+    "@gui-agent/operator-aio": "workspace:*",
     "@gui-agent/action-parser": "workspace:*",
     "lodash.isnumber": "3.0.3"
   },

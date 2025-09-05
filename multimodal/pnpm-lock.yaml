@@ -439,6 +439,9 @@ importers:
       '@gui-agent/action-parser':
         specifier: workspace:*
         version: link:../../gui-agent/action-parser
+      '@gui-agent/operator-aio':
+        specifier: workspace:*
+        version: link:../../gui-agent/operator-aio
       '@gui-agent/operator-browser':
         specifier: workspace:*
         version: link:../../gui-agent/operator-browser
