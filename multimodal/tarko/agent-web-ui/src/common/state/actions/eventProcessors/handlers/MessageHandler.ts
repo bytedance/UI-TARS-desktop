@@ -24,27 +24,14 @@ export class UserMessageHandler implements EventHandler<AgentEventStream.UserMes
     set(messagesAtom, (prev: Record<string, Message[]>) => {
       const sessionMessages = prev[sessionId] || [];
       
-      // Find the most recent local user message
-      const lastLocalUserMessageIndex = sessionMessages
-        .map((msg, index) => ({ msg, index }))
-        .reverse()
-        .find(({ msg }) => msg.role === 'user' && msg.isLocalMessage)?.index;
+      // Check if we have any local user messages - if so, skip this server event entirely
+      const hasLocalUserMessage = sessionMessages.some(
+        msg => msg.role === 'user' && msg.isLocalMessage
+      );
       
-      // If we have a local user message, update it in place to avoid flicker
-      if (lastLocalUserMessageIndex !== undefined) {
-        const updatedMessages = [...sessionMessages];
-        updatedMessages[lastLocalUserMessageIndex] = {
-          ...updatedMessages[lastLocalUserMessageIndex],
-          id: event.id,
-          timestamp: event.timestamp,
-          content: event.content,
-          isLocalMessage: undefined, // Remove the flag
-        };
-        
-        return {
-          ...prev,
-          [sessionId]: updatedMessages,
-        };
+      // If we have a local user message, ignore the server event to prevent flicker
+      if (hasLocalUserMessage) {
+        return prev; // Return unchanged state
       }
       
       // No local message found, add the server message normally
