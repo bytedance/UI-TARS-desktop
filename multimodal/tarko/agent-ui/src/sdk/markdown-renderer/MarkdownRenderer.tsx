@@ -1,12 +1,10 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
-import rehypeRaw from 'rehype-raw';
 import rehypeKatex from 'rehype-katex';
 import { remarkAlert } from 'remark-github-blockquote-alert';
 import rehypeHighlight from 'rehype-highlight';
-import { rehypeSplitWordsIntoSpans } from './plugins/rehype-animate-text';
 import { useMarkdownComponents } from './hooks/useMarkdownComponents';
 import { ImageModal } from './components/ImageModal';
 import { resetFirstH1Flag } from './components/Headings';
@@ -16,7 +14,6 @@ import 'katex/dist/katex.min.css';
 import 'remark-github-blockquote-alert/alert.css';
 import './syntax-highlight.css';
 import './markdown.css';
-import './animate-text.css';
 
 interface MarkdownRendererProps {
   content: string;
@@ -51,12 +48,7 @@ const MarkdownRendererContent: React.FC<MarkdownRendererProps> = ({
 }) => {
   const [openImage, setOpenImage] = useState<string | null>(null);
   const [renderError, setRenderError] = useState<Error | null>(null);
-  const [shouldAnimate, setShouldAnimate] = useState(false);
   const { themeClass, colors } = useMarkdownStyles();
-  const markdownRef = useRef<HTMLDivElement>(null);
-  const prevContentRef = useRef<string>('');
-  const isInitialMount = useRef(true);
-  const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   /**
    * Handle image click for modal preview
@@ -72,87 +64,7 @@ const MarkdownRendererContent: React.FC<MarkdownRendererProps> = ({
     setOpenImage(null);
   };
 
-  /**
-   * Improved animation detection - only animate on significant incremental changes
-   */
-  useEffect(() => {
-    const currentContent = content.trim();
-    const previousContent = prevContentRef.current.trim();
-    const currentLength = currentContent.length;
-    const previousLength = previousContent.length;
-    
-    // Skip animation on initial mount
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      prevContentRef.current = content;
-      setShouldAnimate(false);
-      return;
-    }
 
-    // Only animate if content is significantly longer (streaming scenario)
-    const lengthDiff = currentLength - previousLength;
-    const isStreaming = lengthDiff > 10 && previousLength > 0; // At least 10 chars added
-    const isNewContent = currentContent.startsWith(previousContent); // Content is appended, not replaced
-    
-    // Clear existing timeout
-    if (animationTimeoutRef.current) {
-      clearTimeout(animationTimeoutRef.current);
-    }
-
-    if (isStreaming && isNewContent) {
-      setShouldAnimate(true);
-      
-      // Auto-disable after animation completes
-      animationTimeoutRef.current = setTimeout(() => {
-        setShouldAnimate(false);
-      }, 2000);
-    } else {
-      setShouldAnimate(false);
-    }
-
-    prevContentRef.current = content;
-
-    return () => {
-      if (animationTimeoutRef.current) {
-        clearTimeout(animationTimeoutRef.current);
-      }
-    };
-  }, [content]);
-
-  /**
-   * Apply animation delays only for new content
-   */
-  useEffect(() => {
-    if (shouldAnimate && markdownRef.current) {
-      const container = markdownRef.current;
-      
-      // Use requestAnimationFrame to ensure DOM is ready
-      requestAnimationFrame(() => {
-        const animatedSpans = container.querySelectorAll('.animate-fade-in');
-        const spanCount = animatedSpans.length;
-
-        if (spanCount === 0) return;
-
-        // Only animate the last portion of content (newly added)
-        const animateFromIndex = Math.max(0, spanCount - 50); // Only last 50 spans
-        const baseDelay = 20;
-        
-        animatedSpans.forEach((span, index) => {
-          const element = span as HTMLElement;
-          
-          if (index >= animateFromIndex) {
-            const relativeIndex = index - animateFromIndex;
-            const delay = relativeIndex * baseDelay;
-            element.style.animationDelay = `${delay}ms`;
-          } else {
-            // Older content should be immediately visible
-            element.style.opacity = '1';
-            element.style.animation = 'none';
-          }
-        });
-      });
-    }
-  }, [shouldAnimate, content]);
 
   /**
    * Handle hash navigation on page load
@@ -207,36 +119,22 @@ const MarkdownRendererContent: React.FC<MarkdownRendererProps> = ({
   }, [content]);
 
   /**
-   * Determine rehype plugins based on animation state
-   */
-  const rehypePlugins = useMemo(() => {
-    const basePlugins = [
-      rehypeRaw,
-      rehypeKatex,
-      [rehypeHighlight, { detect: true, ignoreMissing: true }],
-    ];
-
-    if (shouldAnimate) {
-      return [...basePlugins, rehypeSplitWordsIntoSpans];
-    }
-
-    return basePlugins;
-  }, [shouldAnimate]);
-
-  /**
    * Determine theme class and merge with markdown content styles
    */
   const finalThemeClass = forceDarkTheme ? 'dark' : themeClass;
-  const markdownContentClass = `${finalThemeClass} markdown-content font-inter leading-relaxed ${colors.text.primary} ${className} ${!shouldAnimate ? 'no-animation' : ''}`;
+  const markdownContentClass = `${finalThemeClass} markdown-content font-inter leading-relaxed ${colors.text.primary} ${className}`;
 
   try {
     return (
-      <div ref={markdownRef} className={markdownContentClass}>
+      <div className={markdownContentClass}>
         <ReactMarkdown
           // @ts-expect-error FIXME: find the root cause of type issue
           remarkPlugins={[remarkGfm, remarkMath, remarkAlert]}
           // @ts-expect-error FIXME: find the root cause of type issue
-          rehypePlugins={rehypePlugins}
+          rehypePlugins={[
+            rehypeKatex,
+            [rehypeHighlight, { detect: true, ignoreMissing: true }],
+          ]}
           components={components}
         >
           {processedContent}
