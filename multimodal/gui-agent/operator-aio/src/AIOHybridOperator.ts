@@ -12,7 +12,7 @@ import {
 import { ConsoleLogger } from '@agent-infra/logger';
 import { Base64ImageParser } from '@agent-infra/media-utils';
 import { sleep } from '@ui-tars/shared/utils';
-import { parseBoxToScreenCoords, parseBoxToScreenCoordsPercent } from './utils';
+import { parseBoxToScreenCoords } from './utils';
 import { AIOComputer } from './AIOComputer';
 import type { AIOHybridOptions } from './types';
 import { AIOBrowser } from './AIOBrowser';
@@ -40,7 +40,7 @@ export class AIOHybridOperator extends Operator {
   private aioComputer: AIOComputer;
 
   private screenshotWidth = 1280;
-  private screenshotHeight = 2014;
+  private screenshotHeight = 1024;
 
   public static async create(options: AIOHybridOptions): Promise<AIOHybridOperator> {
     logger.info('[AioHybridOperator] construct:', options.baseURL);
@@ -125,7 +125,12 @@ export class AIOHybridOperator extends Operator {
       this.screenshotHeight,
     );
 
-    const { x: rawX, y: rawY } = parseBoxToScreenCoords({
+    const {
+      x: rawX,
+      y: rawY,
+      percentX: rawPercentX,
+      percentY: rawPercentY,
+    } = parseBoxToScreenCoords({
       boxStr: startBoxStr,
       screenWidth: this.screenshotWidth,
       screenHeight: this.screenshotHeight,
@@ -136,6 +141,12 @@ export class AIOHybridOperator extends Operator {
     const startY = rawY !== null ? Math.round(rawY) : null;
 
     logger.info(`[AioHybridOperator] Action position: (${startX}, ${startY})`);
+    logger.info(
+      `[AioHybridOperator] Action position percent raw: (${rawPercentX}, ${rawPercentY})`,
+    );
+
+    let startXPercent = null,
+      startYPercent = null;
 
     try {
       switch (action_type) {
@@ -148,6 +159,8 @@ export class AIOHybridOperator extends Operator {
         case 'hover':
           if (startX !== null && startY !== null) {
             await this.aioComputer.moveTo(startX, startY);
+            startXPercent = rawPercentX;
+            startYPercent = rawPercentY;
           }
           break;
 
@@ -156,6 +169,8 @@ export class AIOHybridOperator extends Operator {
         case 'left_single':
           if (startX !== null && startY !== null) {
             await this.aioComputer.click(startX, startY);
+            startXPercent = rawPercentX;
+            startYPercent = rawPercentY;
           }
           break;
 
@@ -163,6 +178,8 @@ export class AIOHybridOperator extends Operator {
         case 'double_click':
           if (startX !== null && startY !== null) {
             await this.aioComputer.doubleClick(startX, startY);
+            startXPercent = rawPercentX;
+            startYPercent = rawPercentY;
           }
           break;
 
@@ -170,12 +187,16 @@ export class AIOHybridOperator extends Operator {
         case 'right_single':
           if (startX !== null && startY !== null) {
             await this.aioComputer.rightClick(startX, startY);
+            startXPercent = rawPercentX;
+            startYPercent = rawPercentY;
           }
           break;
 
         case 'middle_click':
           if (startX !== null && startY !== null) {
             await this.aioComputer.click(startX, startY, 'middle');
+            startXPercent = rawPercentX;
+            startYPercent = rawPercentY;
           }
           break;
 
@@ -265,14 +286,16 @@ export class AIOHybridOperator extends Operator {
           logger.warn(`Unsupported action type: ${action_type}`);
       }
 
-      const { startXPercent, startYPercent } = parseBoxToScreenCoordsPercent({
-        startX,
-        startY,
-        screenWidth,
-        screenHeight,
-        deviceScaleFactor: scaleFactor,
-      });
-      logger.info(`[AioHybridOperator] position percent: (${startXPercent}, ${startYPercent})`);
+      // const { startXPercent, startYPercent } = parseBoxToScreenCoordsPercent({
+      //   startX,
+      //   startY,
+      //   screenWidth,
+      //   screenHeight,
+      //   deviceScaleFactor: scaleFactor,
+      // });
+      logger.info(
+        `[AioHybridOperator] position percent return: (${startXPercent}, ${startYPercent})`,
+      );
 
       // return { status: StatusEnum.INIT };
       return {

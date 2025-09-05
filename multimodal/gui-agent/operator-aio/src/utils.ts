@@ -31,30 +31,7 @@ export const parseBoxToScreenCoords = ({
   return {
     x: Math.round(((x1 + x2) / 2) * screenWidth * widthFactor) / widthFactor,
     y: Math.round(((y1 + y2) / 2) * screenHeight * heightFactor) / heightFactor,
-  };
-};
-
-export const parseBoxToScreenCoordsPercent = ({
-  startX,
-  startY,
-  screenWidth,
-  screenHeight,
-  deviceScaleFactor = 1,
-  factors = [1000, 1000],
-}: {
-  startX: number | null;
-  startY: number | null;
-  screenWidth: number;
-  screenHeight: number;
-  deviceScaleFactor: number;
-  factors?: [number, number];
-}) => {
-  // Calculate percentage coordinates for GUI Agent
-  const startXPercent = startX ? (startX * deviceScaleFactor) / screenWidth : null;
-  const startYPercent = startY ? (startY * deviceScaleFactor) / screenHeight : null;
-
-  return {
-    startXPercent,
-    startYPercent,
+    percentX: x1,
+    percentY: y1,
   };
 };
