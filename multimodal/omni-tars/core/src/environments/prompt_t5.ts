@@ -7,7 +7,8 @@ import { getTimeString } from '../utils/hepler';
 import { HOME_INSTRUCTION, PROXY_INSTRUCTION } from './code';
 
 export const think_token = process.env.THINK_TOKEN || 'thinkt';
-const use_native_thinking = process.env.NATIVE_THINKING === 'true';
+export const use_native_thinking = process.env.NATIVE_THINKING === 'true';
+export const bypass_native_thinking = process.env.NATIVE_THINKING === 'bypass';
 
 const think_budget = '\n';
 const task_description = `\nCurrent time is: ${getTimeString()}\n

@@ -26,6 +26,7 @@ import {
   ToolCallEngineCompositionConfig,
 } from './types';
 import { assert } from 'console';
+import { bypass_native_thinking } from './environments/prompt_t5';
 
 /**
  * Composable Tool Call Engine that orchestrates multiple tool call engines
@@ -74,6 +75,14 @@ export class ComposableToolCallEngine extends ToolCallEngine {
   }
 
   prepareRequest(context: ToolCallEnginePrepareRequestContext): ChatCompletionCreateParams {
+    // FIXME temporary plan, use this way to avoid model service auto reasoning
+    if (bypass_native_thinking) {
+      context.messages.push({
+        role: 'assistant',
+        content: '',
+      });
+    }
+
     return this.selectEngine({
       tools: context.tools || [],
       messageHistory: context.messages,
