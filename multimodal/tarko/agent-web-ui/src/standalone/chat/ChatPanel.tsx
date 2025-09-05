@@ -69,8 +69,18 @@ export const ChatPanel: React.FC = () => {
 
   const researchReport = findResearchReport();
 
-  // Simplified state logic - only show empty state when there are no messages
-  const showEmptyState = currentSessionId && currentSessionId !== 'creating' && activeMessages.length === 0;
+  // Determine UI state - prevent empty state when processing
+  const shouldShowEmptyState = () => {
+    if (!currentSessionId || currentSessionId === 'creating') return false;
+    if (activeMessages.length > 0) return false;
+    if (isProcessing) return false; // Don't show empty state when processing
+    if (isReplayMode && replayState.events.length > 0 && replayState.currentEventIndex === -1) {
+      return true;
+    }
+    return true;
+  };
+
+  const showEmptyState = shouldShowEmptyState();
   const isCreatingSession = !currentSessionId || currentSessionId === 'creating';
 
   // Render session creating state only for the initial 'creating' state
