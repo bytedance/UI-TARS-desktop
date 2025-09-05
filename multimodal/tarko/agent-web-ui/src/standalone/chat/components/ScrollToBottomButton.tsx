@@ -39,15 +39,14 @@ export const ScrollToBottomButton: React.FC<ScrollToBottomButtonProps> = ({ show
             onClick={onClick}
             className="
               relative flex items-center justify-center 
-              w-8 h-8 
-              bg-white/90 dark:bg-gray-800/90
-              hover:bg-white dark:hover:bg-gray-700
+              w-9 h-9 
+              bg-gradient-to-br from-indigo-500 to-purple-600
+              hover:from-indigo-600 hover:to-purple-700
               rounded-full 
-              shadow-md hover:shadow-lg
-              border border-indigo-200/60 dark:border-indigo-400/30
-              hover:border-indigo-300/80 dark:hover:border-indigo-400/50
+              shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/40
+              border-0
               backdrop-blur-sm
-              transition-all duration-200
+              transition-all duration-300 ease-out
               group
             "
             aria-label="Scroll to bottom"
@@ -67,16 +66,16 @@ export const ScrollToBottomButton: React.FC<ScrollToBottomButtonProps> = ({ show
               className="relative z-10"
             >
               <FiChevronDown 
-                size={14} 
-                className="text-indigo-600 dark:text-indigo-400 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors" 
+                size={16} 
+                className="text-white drop-shadow-sm group-hover:scale-110 transition-transform duration-200" 
               />
             </motion.div>
             
-            {/* Gentle hover hint */}
+            {/* Subtle glow effect */}
             <motion.div
               initial={{ opacity: 0 }}
-              whileHover={{ opacity: 0.1 }}
-              className="absolute inset-0 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
+              whileHover={{ opacity: 1 }}
+              className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 blur-sm scale-110"
             />
           </motion.button>
         </motion.div>
