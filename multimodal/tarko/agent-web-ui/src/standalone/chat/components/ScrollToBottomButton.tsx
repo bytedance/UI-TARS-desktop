@@ -39,13 +39,13 @@ export const ScrollToBottomButton: React.FC<ScrollToBottomButtonProps> = ({ show
             onClick={onClick}
             className="
               relative flex items-center justify-center 
-              w-9 h-9 
-              bg-white/70 dark:bg-gray-800/70
-              hover:bg-white/85 dark:hover:bg-gray-700/85
+              w-10 h-10 
+              bg-white/80 dark:bg-gray-800/80
+              hover:bg-white/95 dark:hover:bg-gray-700/95
               rounded-full 
-              shadow-sm hover:shadow-md
-              border border-gray-200/40 dark:border-gray-600/40
-              hover:border-gray-300/60 dark:hover:border-gray-500/60
+              shadow-md hover:shadow-lg
+              border border-gray-300/50 dark:border-gray-600/50
+              hover:border-gray-400/70 dark:hover:border-gray-500/70
               backdrop-blur-sm
               transition-all duration-200
               group
@@ -67,15 +67,15 @@ export const ScrollToBottomButton: React.FC<ScrollToBottomButtonProps> = ({ show
               className="relative z-10"
             >
               <FiChevronDown 
-                size={14} 
-                className="text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors" 
+                size={16} 
+                className="text-gray-600 dark:text-gray-300 group-hover:text-gray-800 dark:group-hover:text-gray-100 transition-colors" 
               />
             </motion.div>
             
-            {/* Very subtle hover hint */}
+            {/* Gentle hover hint */}
             <motion.div
               initial={{ opacity: 0 }}
-              whileHover={{ opacity: 0.05 }}
+              whileHover={{ opacity: 0.08 }}
               className="absolute inset-0 rounded-full bg-gray-900 dark:bg-gray-100"
             />
           </motion.button>
