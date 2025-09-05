@@ -123,12 +123,9 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
                 </div>
               </div>
 
-              {/* Content with subtle separator */}
-              <div className="relative">
-                <div className="absolute left-0 top-0 w-1 h-full bg-gradient-to-b from-blue-500/20 to-purple-500/20 dark:from-blue-400/20 dark:to-purple-400/20 rounded-full"></div>
-                <div className="pl-4">
-                  <MarkdownRenderer content={wrapMarkdown(result.content)} forceDarkTheme />
-                </div>
+              {/* Content area */}
+              <div>
+                <MarkdownRenderer content={wrapMarkdown(result.content)} forceDarkTheme />
               </div>
             </div>
           </div>
