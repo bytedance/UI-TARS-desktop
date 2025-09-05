@@ -37,7 +37,7 @@ const GradientText: React.FC<GradientTextProps> = ({ text, className = '' }) => 
           backgroundPosition: ['200% 50%', '-100% 50%'],
         }}
         transition={{
-          duration: 0.6,
+          duration: 1.0,
           repeat: Infinity,
           ease: 'linear',
         }}
