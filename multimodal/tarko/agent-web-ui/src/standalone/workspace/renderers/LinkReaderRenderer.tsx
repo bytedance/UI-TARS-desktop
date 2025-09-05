@@ -69,26 +69,26 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {linkData.results.map((result, index) => {
         const isCopied = copiedStates[index];
 
         return (
           <div
             key={`link-${index}`}
-            className="group bg-white dark:bg-gray-900 rounded-2xl border border-gray-200/60 dark:border-gray-700/60 overflow-hidden transition-all duration-300 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-lg hover:shadow-gray-100/50 dark:hover:shadow-gray-900/50"
+            className="group bg-white dark:bg-gray-900 rounded-xl border border-gray-200/60 dark:border-gray-700/60 overflow-hidden transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-md hover:shadow-gray-100/30 dark:hover:shadow-gray-900/30"
           >
-            {/* Refined Header */}
-            <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-800">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-4 flex-1 min-w-0">
-                  {/* Subtle icon */}
-                  <div className="flex-shrink-0 w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-                    <FiGlobe size={16} className="text-gray-600 dark:text-gray-400" />
+            {/* Compact Header */}
+            <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  {/* Minimal icon */}
+                  <div className="flex-shrink-0 w-6 h-6 bg-gray-100 dark:bg-gray-800 rounded-md flex items-center justify-center">
+                    <FiGlobe size={14} className="text-gray-500 dark:text-gray-400" />
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-base font-medium text-gray-900 dark:text-gray-100 leading-snug mb-2 line-clamp-2">
+                    <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 leading-tight mb-1 line-clamp-1">
                       {result.title}
                     </h3>
 
@@ -96,38 +96,38 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
                       href={result.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors group/link"
+                      className="inline-flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors group/link"
                     >
-                      <span className="truncate max-w-sm">{formatUrl(result.url)}</span>
+                      <span className="truncate max-w-xs">{formatUrl(result.url)}</span>
                       <FiExternalLink
-                        size={12}
+                        size={10}
                         className="flex-shrink-0 opacity-60 group-hover/link:opacity-100 transition-opacity"
                       />
                     </a>
                   </div>
                 </div>
 
-                {/* Refined copy button */}
+                {/* Compact copy button */}
                 <button
                   onClick={() => copyContent(result.content, index)}
-                  className={`flex-shrink-0 p-2.5 rounded-lg transition-all duration-200 ${
+                  className={`flex-shrink-0 p-1.5 rounded-md transition-all duration-200 ${
                     isCopied
                       ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400'
-                      : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300'
+                      : 'bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300'
                   }`}
                   title="Copy content"
                 >
                   {isCopied ? (
-                    <FiCheck size={16} className="transition-transform scale-110" />
+                    <FiCheck size={14} className="transition-transform scale-110" />
                   ) : (
-                    <FiCopy size={16} />
+                    <FiCopy size={14} />
                   )}
                 </button>
               </div>
             </div>
 
             {/* Content area */}
-            <div className="px-6 py-5">
+            <div className="px-4 py-3">
               <MarkdownRenderer content={wrapMarkdown(result.content)} forceDarkTheme />
             </div>
           </div>
