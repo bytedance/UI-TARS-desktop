@@ -140,7 +140,7 @@ export class AIOBrowser {
             return document.visibilityState === 'visible';
           },
           {
-            timeout: 3000,
+            timeout: 1000,
           },
         );
         if (isVisible) {
@@ -169,7 +169,7 @@ export class AIOBrowser {
             return document.visibilityState === 'visible';
           },
           {
-            timeout: 3000,
+            timeout: 1000,
           },
         );
         if (isVisible) {
