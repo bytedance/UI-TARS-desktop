@@ -58,25 +58,24 @@
   color: #e2e8f0;
 }
 
-/* Streaming content animation */
+/* Streaming content smooth animation */
 .streaming-content {
-  transition: opacity 0.3s ease-in-out;
+  animation: fadeInSlide 0.4s ease-out;
+  transform-origin: left top;
 }
 
-.streaming-content.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 0.7;
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
   }
-  50% {
-    opacity: 0.9;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
 /* Smooth transitions for content changes */
 .markdown-content {
-  transition: all 0.2s ease-in-out;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
