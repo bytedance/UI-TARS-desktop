@@ -1,13 +1,16 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 
+// Constants
+const SCROLL_CHECK_DELAY = 100; // ms - delay for DOM updates
+
 interface UseScrollToBottomOptions {
   threshold?: number; // Distance from bottom to consider "at bottom"
-  dependencies?: any[]; // Dependencies to trigger re-check (e.g., messages)
+  dependencies?: React.DependencyList; // Dependencies to trigger re-check (e.g., messages)
 }
 
 interface UseScrollToBottomReturn {
   messagesContainerRef: React.RefObject<HTMLDivElement>;
-  messagesEndRef: React.RefObject<HTMLDivElement>;
+  messagesEndRef: React.RefObject<HTMLDivElement>; // Keep for compatibility
   showScrollToBottom: boolean;
   scrollToBottom: () => void;
 }
@@ -54,11 +57,16 @@ export const useScrollToBottom = ({
     if (!container) return;
     
     const atBottom = checkIsAtBottom();
-    const shouldShow = !atBottom;
-    
-    // Only update if state actually changed
-    setShowScrollToBottom(prev => prev !== shouldShow ? shouldShow : prev);
+    setShowScrollToBottom(!atBottom);
   }, [checkIsAtBottom]);
+
+  // Delayed scroll check helper
+  const scheduleScrollCheck = useCallback(() => {
+    const timer = setTimeout(() => {
+      handleScroll();
+    }, SCROLL_CHECK_DELAY);
+    return timer;
+  }, [handleScroll]);
 
   // Set up scroll event listener
   useEffect(() => {
@@ -67,25 +75,20 @@ export const useScrollToBottom = ({
     
     container.addEventListener('scroll', handleScroll, { passive: true });
     
-    // Initial check after a small delay to ensure DOM is ready
-    const timer = setTimeout(() => {
-      handleScroll();
-    }, 100);
+    // Initial check
+    const timer = scheduleScrollCheck();
     
     return () => {
       container.removeEventListener('scroll', handleScroll);
       clearTimeout(timer);
     };
-  }, [handleScroll]);
+  }, [handleScroll, scheduleScrollCheck]);
 
-  // Also check when content changes (messages update)
+  // Check when content changes (messages update)
   useEffect(() => {
-    const timer = setTimeout(() => {
-      handleScroll();
-    }, 100);
-    
+    const timer = scheduleScrollCheck();
     return () => clearTimeout(timer);
-  }, [handleScroll, ...dependencies]);
+  }, [scheduleScrollCheck, ...dependencies]);
 
   return {
     messagesContainerRef,
