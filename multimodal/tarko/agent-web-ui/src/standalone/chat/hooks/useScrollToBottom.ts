@@ -161,15 +161,16 @@ export const useScrollToBottom = ({
     return () => clearTimeout(timer);
   }, [scheduleScrollCheck, ...dependencies]);
 
-  // Auto-scroll in replay mode when new events are processed
+  // Auto-scroll in replay mode when event index changes (including jumps)
   useEffect(() => {
     if (!isReplayMode || !replayState.isActive) {
       lastEventIndexRef.current = -1;
       return;
     }
 
-    // Only auto-scroll when a new event is processed (index increases)
-    if (replayState.currentEventIndex > lastEventIndexRef.current) {
+    // Auto-scroll whenever the event index changes in replay mode
+    // This covers both sequential playback and manual jumps/seeks
+    if (replayState.currentEventIndex !== lastEventIndexRef.current) {
       lastEventIndexRef.current = replayState.currentEventIndex;
       
       // Schedule auto-scroll after DOM updates
