@@ -27,3 +27,13 @@ export function extractAioPort(str?: string): number {
 export function getAioUrl() {
   return process.env.AIO_SANDBOX_URL || 'http://localhost:8080';
 }
+
+export function getTimeString() {
+  return new Date().toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}

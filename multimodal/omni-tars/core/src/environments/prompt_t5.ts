@@ -3,13 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { getTimeString } from '../utils/hepler';
 import { HOME_INSTRUCTION, PROXY_INSTRUCTION } from './code';
 
 export const think_token = process.env.THINK_TOKEN || 'thinkt';
 const use_native_thinking = process.env.NATIVE_THINKING === 'true';
 
-const think_budget = '\n\n';
-const task_description = `You are capable of leveraging a wide range of tools and resources to efficiently solve tasks and fulfill user requests. Your goal is to analyze the user's instructions, select the most appropriate tools, and execute actions to achieve the desired outcomes with precision and reliability.`;
+const think_budget = '\n';
+const task_description = `\nCurrent time is: ${getTimeString()}\n
+As a professional personal assistant (Doubao) capable of solving various user problems, you will first reason through a user's problem to devise a solution, flexibly using a series of tools in combination with your thinking to accomplish the task and provide an accurate, reliable answer. While thinking and using tools, you may continuously and flexibly adjust your solution approach based on the results of tool calls. \n`;
+
 //Mixed scenarios use this additional_notes
 const additional_notes = '- Use english in your reasoning process.';
 //Pure GUI scenarios use this additional_notes_gui
@@ -49,9 +52,7 @@ const PROMPT1 = use_native_thinking
 
 /** 3.2 Role/Task Prompt */
 const PROMPT2 = `You are an agent designed to accomplish tasks.
-
 ${task_description}
-
 <seed:cot_budget_reflect>${think_budget}</seed:cot_budget_reflect>`;
 
 /** 3.3 Action/Function Definition Prompt (如果没有functions则不需要这段prompt) */
