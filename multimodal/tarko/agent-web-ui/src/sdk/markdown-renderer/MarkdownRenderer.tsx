@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -107,8 +107,15 @@ const MarkdownRendererContent: React.FC<MarkdownRendererProps> = ({
 
   /**
    * Preprocess content to fix URL parsing issues with Chinese text
+   * Memoized to avoid unnecessary regex operations on every render
    */
-  const processedContent = preprocessMarkdownLinks(content);
+  const processedContent = useMemo(() => {
+    // Quick check: only process if content contains URLs that might need fixing
+    if (!content.includes('http')) {
+      return content;
+    }
+    return preprocessMarkdownLinks(content);
+  }, [content]);
 
   /**
    * Determine theme class and merge with markdown content styles
