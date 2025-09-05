@@ -314,14 +314,14 @@ export const deleteSessionAction = atom(null, async (get, set, sessionId: string
         delete newResults[sessionId];
         return newResults;
       });
-      
+
       // Clean up session-specific UI state
       set(sessionPanelContentAtom, (prev) => {
         const newPanelContent = { ...prev };
         delete newPanelContent[sessionId];
         return newPanelContent;
       });
-      
+
       set(sessionAgentStatusAtom, (prev) => {
         const newAgentStatus = { ...prev };
         delete newAgentStatus[sessionId];
@@ -335,6 +335,27 @@ export const deleteSessionAction = atom(null, async (get, set, sessionId: string
     throw error;
   }
 });
+
+// Handle streaming events with proper state management
+function handleStreamingEvents(
+  get: Getter,
+  set: Setter,
+  activeSessionId: string,
+  event: AgentEventStream.Event,
+) {
+  set(processEventAction, { sessionId: activeSessionId, event });
+
+  // Maintain processing state until explicit end
+  if (event.type !== 'agent_run_end' && event.type !== 'assistant_message') {
+    set(sessionAgentStatusAtom, (prev) => ({
+      ...prev,
+      [activeSessionId]: {
+        ...(prev[activeSessionId] || {}),
+        isProcessing: true,
+      },
+    }));
+  }
+}
 
 export const sendMessageAction = atom(
   null,
@@ -400,18 +421,7 @@ export const sendMessageAction = atom(
 
     try {
       await apiService.sendStreamingQuery(activeSessionId, content, (event) => {
-        set(processEventAction, { sessionId: activeSessionId, event });
-
-        // Maintain processing state until explicit end
-        if (event.type !== 'agent_run_end' && event.type !== 'assistant_message') {
-          set(sessionAgentStatusAtom, (prev) => ({
-            ...prev,
-            [activeSessionId]: {
-              ...(prev[activeSessionId] || {}),
-              isProcessing: true,
-            },
-          }));
-        }
+        handleStreamingEvents(get, set, activeSessionId, event);
       });
     } catch (error) {
       console.error('Error sending message:', error);
