@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
-import rehypeRaw from 'rehype-raw';
+
 import rehypeKatex from 'rehype-katex';
 import { remarkAlert } from 'remark-github-blockquote-alert';
 import rehypeHighlight from 'rehype-highlight';
@@ -131,7 +131,6 @@ const MarkdownRendererContent: React.FC<MarkdownRendererProps> = ({
           remarkPlugins={[remarkGfm, remarkMath, remarkAlert]}
           // @ts-expect-error FIXME: find the root cause of type issue
           rehypePlugins={[
-            rehypeRaw,
             rehypeKatex,
             [rehypeHighlight, { detect: true, ignoreMissing: true }],
           ]}
