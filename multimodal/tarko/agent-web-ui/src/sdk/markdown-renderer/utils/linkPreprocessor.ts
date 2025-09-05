@@ -11,13 +11,16 @@
  * Regular expression to match URLs that are not already in markdown link format
  * Matches http/https URLs that are:
  * 1. Not preceded by ]( (to avoid double-processing existing markdown links)
- * 2. Not already wrapped in markdown link syntax
- * 3. Followed by word boundary, Chinese characters, or other non-URL characters
+ * 2. Not preceded by < or ` (to avoid processing HTML links or code blocks)
+ * 3. Not preceded by [ (to avoid creating nested brackets)
+ * 4. Not already wrapped in markdown link syntax
+ * 5. Followed by Chinese characters or other non-URL characters
+ * 6. Excludes trailing punctuation that shouldn't be part of URLs
  * 
- * Updated to be more precise and avoid false positives
+ * Updated to handle more edge cases and avoid false positives
  */
 const URL_REGEX =
-  /(?<!\]\()\b(https?:\/\/[^\s\u4e00-\u9fff\u3000-\u303f\uff00-\uffef\)\]]+)(?=[\s\u4e00-\u9fff\u3000-\u303f\uff00-\uffef\)\]]|$)/g;
+  /(?<!\]\(|<|`|\[)\b(https?:\/\/[^\s\u4e00-\u9fff\u3000-\u303f\uff00-\uffef\)\]<>`]+?)(?:[.,;:!?](?=[\s\u4e00-\u9fff\u3000-\u303f\uff00-\uffef])|(?=[\s\u4e00-\u9fff\u3000-\u303f\uff00-\uffef\)\]])|$)/g;
 
 /**
  * Preprocess markdown content to fix URL parsing issues
@@ -30,8 +33,33 @@ export function preprocessMarkdownLinks(content: string): string {
     return content;
   }
   
-  // Replace bare URLs with markdown link format [url](url)
-  return content.replace(URL_REGEX, '[$1]($1)');
+  // Split content by code blocks to avoid processing URLs inside them
+  const codeBlockRegex = /```[\s\S]*?```|`[^`]*`/g;
+  const parts: Array<{ text: string; isCodeBlock: boolean }> = [];
+  let lastIndex = 0;
+  let match;
+  
+  while ((match = codeBlockRegex.exec(content)) !== null) {
+    // Add text before code block
+    if (match.index > lastIndex) {
+      parts.push({ text: content.slice(lastIndex, match.index), isCodeBlock: false });
+    }
+    // Add code block
+    parts.push({ text: match[0], isCodeBlock: true });
+    lastIndex = match.index + match[0].length;
+  }
+  
+  // Add remaining text
+  if (lastIndex < content.length) {
+    parts.push({ text: content.slice(lastIndex), isCodeBlock: false });
+  }
+  
+  // Process only non-code-block parts
+  return parts
+    .map(part => 
+      part.isCodeBlock ? part.text : part.text.replace(URL_REGEX, '[$1]($1)')
+    )
+    .join('');
 }
 
 /**
