@@ -399,24 +399,17 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
       <form onSubmit={handleSubmit}>
         <div
-          className={`relative overflow-hidden rounded-3xl transition-all duration-300 ${
-            isFocused ? 'shadow-md' : ''
+          className={`relative overflow-hidden rounded-2xl transition-all duration-200 ${
+            isFocused ? 'shadow-lg shadow-black/10 dark:shadow-white/5' : 'shadow-md shadow-black/5'
           }`}
         >
           <div
-            className={`absolute inset-0 bg-gradient-to-r ${
-              isFocused ||
-              contextualState.input.trim() ||
-              uploadedImages.length > 0 ||
-              contextualState.contextualItems.length > 0
-                ? 'from-indigo-500 via-purple-500 to-pink-500 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 animate-border-flow'
-                : 'from-indigo-400 via-purple-400 to-pink-400 dark:from-indigo-300 dark:via-purple-300 dark:to-pink-300'
-            } bg-[length:200%_200%] ${isFocused ? 'opacity-100' : 'opacity-80'}`}
-          ></div>
-
-          <div
-            className={`relative m-[2px] rounded-[1.4rem] bg-white dark:bg-gray-800 backdrop-blur-sm ${
-              isDisabled ? 'opacity-90' : ''
+            className={`relative bg-white dark:bg-gray-900 border-2 transition-all duration-200 ${
+              isFocused
+                ? 'border-black dark:border-white'
+                : 'border-gray-300 dark:border-gray-600'
+            } rounded-2xl ${
+              isDisabled ? 'opacity-60' : ''
             }`}
           >
             {/* Image previews inside input */}
@@ -434,7 +427,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               onPaste={handlePaste}
               placeholder={placeholder || defaultPlaceholder}
               disabled={isDisabled}
-              className={`w-full px-5 ${uploadedImages.length > 0 ? 'pt-2' : 'pt-5'} pb-12 focus:outline-none resize-none ${uploadedImages.length > 0 ? 'min-h-[80px]' : 'min-h-[100px]'} max-h-[220px] bg-transparent text-sm leading-relaxed rounded-[1.4rem]`}
+              className={`w-full px-5 ${uploadedImages.length > 0 ? 'pt-2' : 'pt-5'} pb-12 focus:outline-none resize-none ${uploadedImages.length > 0 ? 'min-h-[80px]' : 'min-h-[100px]'} max-h-[220px] bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 text-sm leading-relaxed rounded-2xl`}
               rows={2}
             />
 
@@ -447,10 +440,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   type="button"
                   onClick={handleFileUpload}
                   disabled={isDisabled || isProcessing}
-                  className={`p-2 rounded-full transition-colors ${
+                  className={`p-2 rounded-full transition-all duration-200 ${
                     isDisabled || isProcessing
-                      ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
-                      : 'text-gray-400 hover:text-accent-500 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:text-gray-400'
+                      ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800'
                   }`}
                   title="Attach image (or paste directly)"
                 >
@@ -481,11 +474,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   whileHover={{ scale: 1.05 }}
                   type="button"
                   onClick={onReconnect}
-                  className="absolute right-3 bottom-3 p-2 rounded-full text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:text-gray-400 transition-all duration-200"
+                  className="absolute right-3 bottom-3 p-3 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white transition-all duration-200 shadow-sm"
                   title="Try to reconnect"
                 >
                   <FiRefreshCw
-                    size={20}
+                    size={18}
                     className={connectionStatus.reconnecting ? 'animate-spin' : ''}
                   />
                 </motion.button>
@@ -501,17 +494,17 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   type="button"
                   onClick={handleAbort}
                   disabled={isAborting}
-                  className={`absolute right-3 bottom-3 w-10 h-10 rounded-full flex items-center justify-center ${
+                  className={`absolute right-3 bottom-3 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm ${
                     isAborting
-                      ? 'bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100 dark:from-indigo-800/30 dark:via-purple-800/30 dark:to-pink-800/30 text-indigo-400 dark:text-indigo-500 cursor-not-allowed border-2 border-indigo-200 dark:border-indigo-700/50'
-                      : 'bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 hover:from-indigo-100 hover:via-purple-100 hover:to-pink-100 dark:from-indigo-900/20 dark:via-purple-900/20 dark:to-pink-900/20 dark:hover:from-indigo-900/30 dark:hover:via-purple-900/30 dark:hover:to-pink-900/30 text-indigo-600 dark:text-indigo-400 border-2 border-indigo-200 dark:border-indigo-700/50'
-                  } transition-all duration-200 shadow-sm bg-[length:200%_200%] animate-border-flow`}
+                      ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                      : 'bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 hover:bg-black dark:hover:bg-white'
+                  }`}
                   title="Stop generation"
                 >
                   {isAborting ? (
                     <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
                   ) : (
-                    <div className="w-3 h-3 bg-current rounded-sm" />
+                    <FiSquare size={14} />
                   )}
                 </motion.button>
               ) : (
@@ -524,11 +517,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   whileHover={{ scale: 1.05 }}
                   type="submit"
                   disabled={isMessageEmpty(contextualState.input, uploadedImages) || isDisabled}
-                  className={`absolute right-3 bottom-3 p-3 rounded-full ${
+                  className={`absolute right-3 bottom-3 p-3 rounded-full transition-all duration-200 shadow-sm ${
                     isMessageEmpty(contextualState.input, uploadedImages) || isDisabled
-                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 text-white dark:text-gray-900 shadow-sm'
-                  } transition-all duration-200`}
+                      ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                      : 'bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-100'
+                  }`}
                 >
                   <FiSend size={18} />
                 </motion.button>
@@ -554,7 +547,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           <motion.span
             initial={{ opacity: 0.7 }}
             whileHover={{ opacity: 1 }}
-            className="text-accent-500 dark:text-accent-400 flex items-center"
+            className="text-gray-700 dark:text-gray-300 flex items-center"
           >
             <span className="typing-indicator mr-2">
               <span></span>
