@@ -78,9 +78,9 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
             key={`link-${index}`}
             className="group bg-white dark:bg-gray-900 rounded-lg border border-gray-200/60 dark:border-gray-700/60 overflow-hidden transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-sm hover:shadow-gray-100/30 dark:hover:shadow-gray-900/30"
           >
-            {/* Ultra-compact Header */}
-            <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-800">
-              <div className="flex items-center justify-between gap-2">
+            {/* Seamless Header */}
+            <div className="px-3 py-2">
+              <div className="flex items-center justify-between gap-2 mb-2">
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   {/* Tiny icon */}
                   <div className="flex-shrink-0 w-5 h-5 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center">
@@ -124,11 +124,11 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
                   )}
                 </button>
               </div>
-            </div>
 
-            {/* Content area */}
-            <div className="px-3 py-2">
-              <MarkdownRenderer content={wrapMarkdown(result.content)} forceDarkTheme />
+              {/* Content area - seamlessly integrated */}
+              <div>
+                <MarkdownRenderer content={wrapMarkdown(result.content)} forceDarkTheme />
+              </div>
             </div>
           </div>
         );
