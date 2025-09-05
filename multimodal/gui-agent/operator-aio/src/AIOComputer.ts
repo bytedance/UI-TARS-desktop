@@ -76,13 +76,18 @@ export class AIOComputer {
   }
 
   /**
-   * Take screenshot
+   * Take screenshot with optional delay
+   * @param delay Optional delay in milliseconds before taking screenshot
    */
-  async screenshot(): Promise<ScreenshotResponse> {
+  async screenshot(delay = 1000): Promise<ScreenshotResponse> {
     const url = `${this.baseURL}/v1/browser/screenshot`;
 
     try {
-      logger.info('[AIOComputer] Taking screenshot');
+      logger.info('[AIOComputer] Taking screenshot' + (delay ? ` with ${delay}ms delay` : ''));
+
+      if (delay > 0) {
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
 
       const response = await fetch(url, {
         method: 'GET',
