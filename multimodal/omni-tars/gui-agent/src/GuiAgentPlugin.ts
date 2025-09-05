@@ -19,6 +19,7 @@ import { Base64ImageParser } from '@agent-infra/media-utils';
 import { getScreenInfo, setScreenInfo } from './shared';
 import { OperatorManager } from './OperatorManager';
 import { BrowserOperator } from '@gui-agent/operator-browser';
+import { log } from 'console';
 
 interface GuiAgentPluginOption {
   operatorManager: OperatorManager;
@@ -77,18 +78,18 @@ export class GuiAgentPlugin extends AgentPlugin {
   // async onEachAgentLoopStart(): Promise<void> {
   // }
 
-  async onEachAgentLoopEnd(): Promise<void> {
-    const events = this.agent.getEventStream().getEvents();
-    const lastToolCallIsComputerUse = this.findLastMatch<AgentEventStream.Event>(
-      events,
-      (item) => item.type === 'tool_call' && item.name === 'browser_vision_control',
-    );
-    if (!lastToolCallIsComputerUse) {
-      this.agent.logger.info('Last tool not GUI action, skipping screenshot');
+  // async onEachAgentLoopEnd(): Promise<void> {
+  // }
+
+  async onAfterToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    result: unknown,
+  ): Promise<void> {
+    if (toolCall.name !== 'browser_vision_control') {
+      this.agent.logger.info('[GuiAgentPlugin] onAfterToolCall not gui tool, skipping screenshot');
       return;
     }
-
-    this.agent.logger.info('onEachAgentLoopEnd lastToolCall', lastToolCallIsComputerUse);
 
     const operator = await this.operatorManager.getInstance();
     const output = await operator?.screenshot();
@@ -103,7 +104,18 @@ export class GuiAgentPlugin extends AgentPlugin {
       return;
     }
 
+    this.agent.logger.info(
+      '[GuiAgentPlugin] onAfterToolCall screenshot base64Uri',
+      base64Uri.length > 20 ? base64Uri.substring(0, 20) + '...' : base64Uri,
+    );
+
     const meta = operator instanceof BrowserOperator ? await operator.getMeta() : null;
+
+    this.agent.logger.info(
+      '[GuiAgentPlugin] onAfterToolCall screenshot meta',
+      JSON.stringify(meta),
+    );
+
     const content: ChatCompletionContentPart[] = [
       {
         type: 'image_url',
@@ -121,6 +133,10 @@ export class GuiAgentPlugin extends AgentPlugin {
     }
 
     const eventStream = this.agent.getEventStream();
+
+    const events = eventStream.getEvents();
+    this.agent.logger.info('[GuiAgentPlugin] onAfterToolCall events len:', events.length);
+
     const event = eventStream.createEvent('environment_input', {
       description: 'Browser Screenshot',
       content,
