@@ -95,7 +95,7 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
         setStreamingContent(currentContent.substring(splitPoint));
       }
 
-      // After a shorter delay, move streaming content to stable
+      // After a delay, move streaming content to stable
       if (streamingTimeoutRef.current) {
         clearTimeout(streamingTimeoutRef.current);
       }
@@ -103,7 +103,7 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
       streamingTimeoutRef.current = setTimeout(() => {
         setStableContent(currentContent);
         setStreamingContent('');
-      }, 500);
+      }, 1000);
     }
 
     prevContentRef.current = currentContent;
@@ -190,7 +190,7 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
    */
   const finalThemeClass = forceDarkTheme ? 'dark' : themeClass;
   const markdownContentClass = `${finalThemeClass} markdown-content font-inter leading-relaxed ${colors.text.primary} ${className}`;
-  const streamingClass = 'streaming-content opacity-75';
+  const streamingClass = 'streaming-content opacity-70 animate-pulse';
 
   try {
     return (
