@@ -31,10 +31,10 @@ const GradientText: React.FC<GradientTextProps> = ({ text, className = '' }) => 
       <motion.span
         className="absolute inset-0 font-medium bg-gradient-to-r from-gray-700 from-35% via-gray-300 via-50% to-gray-700 to-65% dark:from-gray-300 dark:from-35% dark:via-gray-600 dark:via-50% dark:to-gray-300 dark:to-65% bg-clip-text text-transparent"
         style={{
-          backgroundSize: '300% 100%',
+          backgroundSize: '200% 100%',
         }}
         animate={{
-          backgroundPosition: ['200% 50%', '-100% 50%'],
+          backgroundPosition: ['100% 50%', '0% 50%'],
         }}
         transition={{
           duration: 1.5,
