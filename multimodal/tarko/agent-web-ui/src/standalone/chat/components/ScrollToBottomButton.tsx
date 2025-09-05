@@ -30,60 +30,55 @@ export const ScrollToBottomButton: React.FC<ScrollToBottomButtonProps> = ({ show
           }}
           className="absolute -top-16 right-4 z-50"
         >
-          <motion.div
+          <motion.button
             whileHover={{ 
-              scale: 1.05, 
-              y: -2
+              scale: 1.02, 
+              y: -1
             }}
-            whileTap={{ scale: 0.95 }}
-            className="relative overflow-hidden rounded-full transition-all duration-300 shadow-lg hover:shadow-xl"
+            whileTap={{ scale: 0.98 }}
+            onClick={onClick}
+            className="
+              relative flex items-center justify-center 
+              w-9 h-9 
+              bg-white/70 dark:bg-gray-800/70
+              hover:bg-white/85 dark:hover:bg-gray-700/85
+              rounded-full 
+              shadow-sm hover:shadow-md
+              border border-gray-200/40 dark:border-gray-600/40
+              hover:border-gray-300/60 dark:hover:border-gray-500/60
+              backdrop-blur-sm
+              transition-all duration-200
+              group
+            "
+            aria-label="Scroll to bottom"
           >
-            {/* Gradient border - matching ChatInput */}
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 rounded-full animate-border-flow bg-[length:200%_200%]" />
+            {/* Subtle glass effect */}
+            <div className="absolute inset-0 rounded-full bg-gradient-to-t from-transparent via-white/3 to-white/6 dark:via-white/1 dark:to-white/3" />
             
-            <motion.button
-              onClick={onClick}
-              className="
-                relative flex items-center justify-center 
-                w-10 h-10 
-                m-[2px] 
-                bg-white/90 dark:bg-gray-800/90
-                hover:bg-white dark:hover:bg-gray-700/90
-                rounded-full 
-                backdrop-blur-sm
-                transition-all duration-200
-                group
-              "
-              aria-label="Scroll to bottom"
+            {/* Icon with minimal animation */}
+            <motion.div
+              animate={{ y: [0, 0.5, 0] }}
+              transition={{ 
+                duration: 3, 
+                repeat: Infinity, 
+                ease: 'easeInOut',
+                repeatDelay: 3
+              }}
+              className="relative z-10"
             >
-              {/* Glass effect overlay */}
-              <div className="absolute inset-0 rounded-full bg-gradient-to-t from-transparent via-white/5 to-white/10 dark:via-white/2 dark:to-white/5" />
-              
-              {/* Icon with gentle animation */}
-              <motion.div
-                animate={{ y: [0, 1, 0] }}
-                transition={{ 
-                  duration: 2.5, 
-                  repeat: Infinity, 
-                  ease: 'easeInOut',
-                  repeatDelay: 2
-                }}
-                className="relative z-10"
-              >
-                <FiChevronDown 
-                  size={16} 
-                  className="text-gray-600 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" 
-                />
-              </motion.div>
-              
-              {/* Subtle hover accent */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                whileHover={{ opacity: 0.1 }}
-                className="absolute inset-0 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
+              <FiChevronDown 
+                size={14} 
+                className="text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors" 
               />
-            </motion.button>
-          </motion.div>
+            </motion.div>
+            
+            {/* Very subtle hover hint */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileHover={{ opacity: 0.05 }}
+              className="absolute inset-0 rounded-full bg-gray-900 dark:bg-gray-100"
+            />
+          </motion.button>
         </motion.div>
       )}
     </AnimatePresence>
