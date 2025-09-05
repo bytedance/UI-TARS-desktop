@@ -76,16 +76,15 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
         return (
           <div
             key={`link-${index}`}
-            className="group relative bg-gradient-to-br from-blue-50/50 via-white to-purple-50/30 dark:from-gray-900 dark:via-gray-900/95 dark:to-blue-900/10 rounded-xl border border-blue-200/30 dark:border-gray-700/50 backdrop-blur-sm transition-all duration-300 hover:border-blue-300/50 dark:hover:border-blue-600/30 hover:shadow-lg hover:shadow-blue-200/10 dark:hover:shadow-blue-900/10 hover:-translate-y-0.5"
+            className="group relative bg-gradient-to-br from-purple-50/60 via-white to-violet-50/40 dark:from-gray-900 dark:via-gray-900/95 dark:to-purple-900/15 rounded-xl border border-purple-200/40 dark:border-gray-700/50 backdrop-blur-sm transition-all duration-300 hover:border-purple-300/60 dark:hover:border-purple-600/40 hover:shadow-lg hover:shadow-purple-200/15 dark:hover:shadow-purple-900/15 hover:-translate-y-0.5"
           >
             {/* Floating copy button */}
             <button
               onClick={() => copyContent(result.content, index)}
-              className={`absolute top-3 right-3 z-10 p-2 rounded-lg backdrop-blur-md transition-all duration-200 opacity-0 group-hover:opacity-100 ${
-                isCopied
+              className={`absolute top-3 right-3 z-10 p-2 rounded-lg backdrop-blur-md transition-all duration-200 opacity-0 group-hover:opacity-100 ${isCopied
                   ? 'bg-green-100/80 dark:bg-green-900/40 text-green-600 dark:text-green-400 border border-green-200/50 dark:border-green-700/50'
                   : 'bg-white/80 dark:bg-gray-800/80 text-gray-500 dark:text-gray-400 border border-gray-200/50 dark:border-gray-600/50 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300'
-              }`}
+                }`}
               title="Copy content"
             >
               {isCopied ? (
@@ -99,8 +98,8 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
             <div className="p-4">
               {/* Elegant header */}
               <div className="flex items-start gap-3 mb-3">
-                <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-500/15 to-purple-500/15 dark:from-blue-400/20 dark:to-purple-400/20 rounded-lg flex items-center justify-center border border-blue-300/40 dark:border-blue-600/40 shadow-sm">
-                  <FiGlobe size={16} className="text-blue-700 dark:text-blue-300" />
+                <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-purple-500/15 to-violet-500/15 dark:from-purple-400/20 dark:to-violet-400/20 rounded-lg flex items-center justify-center border border-purple-300/40 dark:border-purple-600/40 shadow-sm">
+                  <FiGlobe size={16} className="text-purple-700 dark:text-purple-300" />
                 </div>
 
                 <div className="flex-1 min-w-0">
@@ -112,7 +111,7 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
                     href={result.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-sm text-blue-600/80 dark:text-blue-400/80 hover:text-blue-700 dark:hover:text-blue-300 transition-colors group/link font-medium"
+                    className="inline-flex items-center gap-1 text-xs text-purple-600/80 dark:text-purple-400/80 hover:text-purple-700 dark:hover:text-purple-300 transition-colors group/link font-medium"
                   >
                     <span className="truncate max-w-sm">{formatUrl(result.url)}</span>
                     <FiExternalLink
@@ -292,9 +291,9 @@ function parseVersion2Content(
     const content =
       summaryIndex >= 0
         ? lines
-            .slice(summaryIndex + 1)
-            .join('\n')
-            .trim()
+          .slice(summaryIndex + 1)
+          .join('\n')
+          .trim()
         : textContent;
 
     if (!content) {
