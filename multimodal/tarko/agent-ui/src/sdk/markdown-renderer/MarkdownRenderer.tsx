@@ -73,44 +73,44 @@ const MarkdownRendererContent: React.FC<MarkdownRendererProps> = ({
   };
 
   /**
-   * Improved animation detection with debouncing
+   * Improved animation detection - only animate on significant incremental changes
    */
   useEffect(() => {
-    const currentLength = content.trim().length;
-    const previousLength = prevContentRef.current.trim().length;
-    const isIncremental = currentLength > previousLength && previousLength > 0;
-    const hasContentChanged = prevContentRef.current.trim() !== content.trim();
-
-    // Skip animation on initial mount with existing content
+    const currentContent = content.trim();
+    const previousContent = prevContentRef.current.trim();
+    const currentLength = currentContent.length;
+    const previousLength = previousContent.length;
+    
+    // Skip animation on initial mount
     if (isInitialMount.current) {
       isInitialMount.current = false;
-      if (content.trim()) {
-        prevContentRef.current = content;
-        setShouldAnimate(false);
-        return;
-      }
+      prevContentRef.current = content;
+      setShouldAnimate(false);
+      return;
     }
 
-    // Clear existing animation timeout
+    // Only animate if content is significantly longer (streaming scenario)
+    const lengthDiff = currentLength - previousLength;
+    const isStreaming = lengthDiff > 10 && previousLength > 0; // At least 10 chars added
+    const isNewContent = currentContent.startsWith(previousContent); // Content is appended, not replaced
+    
+    // Clear existing timeout
     if (animationTimeoutRef.current) {
       clearTimeout(animationTimeoutRef.current);
     }
 
-    // Enable animation for incremental changes with debouncing
-    if (hasContentChanged && isIncremental) {
+    if (isStreaming && isNewContent) {
       setShouldAnimate(true);
-
-      // Auto-disable animation after a reasonable duration
+      
+      // Auto-disable after animation completes
       animationTimeoutRef.current = setTimeout(() => {
         setShouldAnimate(false);
-      }, 1000); // Increased timeout for smoother experience
-
-      prevContentRef.current = content;
+      }, 2000);
     } else {
-      // No animation needed
-      prevContentRef.current = content;
       setShouldAnimate(false);
     }
+
+    prevContentRef.current = content;
 
     return () => {
       if (animationTimeoutRef.current) {
@@ -120,34 +120,36 @@ const MarkdownRendererContent: React.FC<MarkdownRendererProps> = ({
   }, [content]);
 
   /**
-   * Optimized animation delay application
+   * Apply animation delays only for new content
    */
   useEffect(() => {
     if (shouldAnimate && markdownRef.current) {
       const container = markdownRef.current;
-      const animatedSpans = container.querySelectorAll('.animate-fade-in');
-      const spanCount = animatedSpans.length;
+      
+      // Use requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        const animatedSpans = container.querySelectorAll('.animate-fade-in');
+        const spanCount = animatedSpans.length;
 
-      if (spanCount === 0) return;
+        if (spanCount === 0) return;
 
-      // Improved delay calculation to prevent overwhelming animations
-      const baseDelay = 30; // Minimum delay between animations
-      const maxTotalDelay = 800; // Maximum total animation duration
-      const delayPerSpan = Math.min(baseDelay, maxTotalDelay / spanCount);
-
-      animatedSpans.forEach((span, index) => {
-        const element = span as HTMLElement;
-
-        // Reset animation state
-        element.classList.remove('no-animation');
-        element.style.opacity = '0';
-
-        // Apply staggered delay with better distribution
-        const delay = Math.min(index * delayPerSpan, maxTotalDelay);
-        element.style.animationDelay = `${delay}ms`;
-
-        // Force reflow to ensure animation starts properly
-        element.offsetHeight;
+        // Only animate the last portion of content (newly added)
+        const animateFromIndex = Math.max(0, spanCount - 50); // Only last 50 spans
+        const baseDelay = 20;
+        
+        animatedSpans.forEach((span, index) => {
+          const element = span as HTMLElement;
+          
+          if (index >= animateFromIndex) {
+            const relativeIndex = index - animateFromIndex;
+            const delay = relativeIndex * baseDelay;
+            element.style.animationDelay = `${delay}ms`;
+          } else {
+            // Older content should be immediately visible
+            element.style.opacity = '1';
+            element.style.animation = 'none';
+          }
+        });
       });
     }
   }, [shouldAnimate, content]);
