@@ -42,7 +42,7 @@ export const ChatPanel: React.FC = () => {
   // Scroll-to-bottom functionality
   const { messagesContainerRef, messagesEndRef, showScrollToBottom, scrollToBottom } =
     useScrollToBottom({
-      threshold: 100,
+      threshold: 50,
       dependencies: [activeMessages],
     });
 
