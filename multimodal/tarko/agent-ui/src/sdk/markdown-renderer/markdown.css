@@ -58,18 +58,17 @@
   color: #e2e8f0;
 }
 
-/* Streaming content animation */
-.streaming-content {
-  background-color: rgba(59, 130, 246, 0.05);
-  border-radius: 2px;
-  transition: background-color 0.2s ease-out;
-}
-
-.dark .streaming-content {
-  background-color: rgba(59, 130, 246, 0.08);
-}
-
 /* Smooth transitions for content changes */
 .markdown-content {
   transition: all 0.1s ease-out;
+}
+
+/* Typewriter cursor animation */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.typewriter-cursor {
+  animation: blink 1s infinite;
 }
