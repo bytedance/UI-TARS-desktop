@@ -39,12 +39,13 @@ export const ScrollToBottomButton: React.FC<ScrollToBottomButtonProps> = ({ show
             onClick={onClick}
             className="
               relative flex items-center justify-center 
-              w-9 h-9 
-              bg-black dark:bg-gray-900
-              hover:bg-gray-900 dark:hover:bg-black
+              w-8 h-8 
+              bg-white/80 dark:bg-gray-800/80
+              hover:bg-white dark:hover:bg-gray-700
               rounded-full 
-              shadow-lg hover:shadow-xl
-              border-0
+              shadow-sm hover:shadow-md
+              border border-gray-200/60 dark:border-gray-600/60
+              hover:border-gray-300 dark:hover:border-gray-500
               backdrop-blur-sm
               transition-all duration-200 ease-out
               group
@@ -66,16 +67,16 @@ export const ScrollToBottomButton: React.FC<ScrollToBottomButtonProps> = ({ show
               className="relative z-10"
             >
               <FiChevronDown 
-                size={16} 
-                className="text-white drop-shadow-sm group-hover:scale-110 transition-transform duration-200" 
+                size={14} 
+                className="text-gray-600 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-all duration-200" 
               />
             </motion.div>
             
             {/* Subtle hover effect */}
             <motion.div
               initial={{ opacity: 0 }}
-              whileHover={{ opacity: 0.1 }}
-              className="absolute inset-0 rounded-full bg-white dark:bg-gray-300"
+              whileHover={{ opacity: 0.05 }}
+              className="absolute inset-0 rounded-full bg-gray-500"
             />
           </motion.button>
         </motion.div>
