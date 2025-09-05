@@ -15,6 +15,7 @@ interface ScreenshotDisplayProps {
   mousePosition?: { x: number; y: number } | null;
   previousMousePosition?: { x: number; y: number } | null;
   action?: string;
+  showCoordinates?: boolean;
 }
 
 export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
@@ -28,6 +29,7 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
   mousePosition,
   previousMousePosition,
   action,
+  showCoordinates = true,
 }) => {
   const imageRef = useRef<HTMLImageElement>(null);
 
@@ -35,7 +37,7 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
     currentImage: string | null | undefined,
     imageType: 'before' | 'after' | 'single',
   ) => {
-    if (!mousePosition) return false;
+    if (!mousePosition || !showCoordinates) return false;
 
     if (imageType === 'before') return true;
     if (imageType === 'after') return false;

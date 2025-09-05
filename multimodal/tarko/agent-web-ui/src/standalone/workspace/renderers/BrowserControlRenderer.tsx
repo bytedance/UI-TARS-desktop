@@ -77,6 +77,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
         mousePosition={mousePosition}
         previousMousePosition={previousMousePosition}
         action={action}
+        showCoordinates={guiAgentConfig.renderGUIAction}
       />
 
       {/* Strategy Switch Controls */}
@@ -85,9 +86,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
       )}
 
       {/* Visual operation details card */}
-      {guiAgentConfig.renderGUIAction && (
-        <OperationDetailsCard thought={thought} step={step} action={action} status={status} />
-      )}
+      <OperationDetailsCard thought={thought} step={step} action={action} status={status} />
     </div>
   );
 };
