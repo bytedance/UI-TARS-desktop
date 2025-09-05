@@ -48,8 +48,7 @@ export class FinalAnswerHandler implements EventHandler<AgentEventStream.FinalAn
       };
     });
 
-    // Note: Do not update isProcessing here - let AgentRunEndHandler manage it
-    // Final answer doesn't guarantee agent execution is finished
+
   }
 }
 
@@ -213,7 +212,6 @@ export class FinalAnswerStreamingHandler
       });
     }
 
-    // Note: Do not update isProcessing here - let AgentRunEndHandler manage it
-    // Final answer completion doesn't guarantee agent execution is finished
+
   }
 }

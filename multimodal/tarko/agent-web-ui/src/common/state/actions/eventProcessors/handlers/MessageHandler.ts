@@ -129,8 +129,7 @@ export class AssistantMessageHandler
       };
     });
 
-    // Note: Do not update isProcessing here - let AgentRunEndHandler manage it
-    // Assistant messages can occur during ongoing agent execution
+
   }
 }
 
@@ -206,8 +205,7 @@ export class StreamingMessageHandler
       };
     });
 
-    // Note: Do not update isProcessing here - let AgentRunEndHandler manage it
-    // Streaming completion doesn't mean agent execution is finished
+
   }
 }
 
