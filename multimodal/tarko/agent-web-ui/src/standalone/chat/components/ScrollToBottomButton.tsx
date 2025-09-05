@@ -40,13 +40,13 @@ export const ScrollToBottomButton: React.FC<ScrollToBottomButtonProps> = ({ show
             className="
               relative flex items-center justify-center 
               w-9 h-9 
-              bg-gradient-to-br from-indigo-500 to-purple-600
-              hover:from-indigo-600 hover:to-purple-700
+              bg-black dark:bg-gray-900
+              hover:bg-gray-900 dark:hover:bg-black
               rounded-full 
-              shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/40
+              shadow-lg hover:shadow-xl
               border-0
               backdrop-blur-sm
-              transition-all duration-300 ease-out
+              transition-all duration-200 ease-out
               group
             "
             aria-label="Scroll to bottom"
@@ -71,11 +71,11 @@ export const ScrollToBottomButton: React.FC<ScrollToBottomButtonProps> = ({ show
               />
             </motion.div>
             
-            {/* Subtle glow effect */}
+            {/* Subtle hover effect */}
             <motion.div
               initial={{ opacity: 0 }}
-              whileHover={{ opacity: 1 }}
-              className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 blur-sm scale-110"
+              whileHover={{ opacity: 0.1 }}
+              className="absolute inset-0 rounded-full bg-white dark:bg-gray-300"
             />
           </motion.button>
         </motion.div>
