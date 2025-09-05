@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.0-beta.9](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.3.0-beta.5...@agent-tars@0.3.0-beta.9) (2025-09-05)
+
+### Features
+
+* **agent-tars:** strict-typed gui agent procotol ([#1295](https://github.com/bytedance/UI-TARS-desktop/pull/1295)) ([4aa9d78](https://github.com/bytedance/UI-TARS-desktop/commit/4aa9d7866)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars:** add static webui config to core ([#1266](https://github.com/bytedance/UI-TARS-desktop/pull/1266)) ([5ba0564](https://github.com/bytedance/UI-TARS-desktop/commit/5ba0564e5)) [@ULIVZ](https://github.com/ULIVZ)
+
+### Bug Fixes
+
+* **agent-server:** add safety check for agent.dispose in session cleanup ([#1291](https://github.com/bytedance/UI-TARS-desktop/pull/1291)) ([97ef7ad](https://github.com/bytedance/UI-TARS-desktop/commit/97ef7adb5)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars:** correct webui property name to webuiConfig ([#1267](https://github.com/bytedance/UI-TARS-desktop/pull/1267)) ([4a5f2fc](https://github.com/bytedance/UI-TARS-desktop/commit/4a5f2fc4f)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars:** move required deps from devDependencies to dependencies ([#1255](https://github.com/bytedance/UI-TARS-desktop/pull/1255)) ([24e6acf](https://github.com/bytedance/UI-TARS-desktop/commit/24e6acff5)) [@ULIVZ](https://github.com/ULIVZ)
+
 ## [0.3.0-beta.8](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.3.0-beta.5...@agent-tars@0.3.0-beta.8) (2025-09-04)
 
 ### Features
