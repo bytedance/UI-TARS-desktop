@@ -25,11 +25,11 @@ const GradientText: React.FC<GradientTextProps> = ({ text, className = '' }) => 
   return (
     <span className={`relative inline-block ${className}`}>
       {/* Base text */}
-      <span className="font-medium text-gray-400 dark:text-gray-500">{text}</span>
+      <span className="font-medium text-gray-700 dark:text-gray-300">{text}</span>
 
       {/* Animated gradient overlay */}
       <motion.span
-        className="absolute inset-0 font-medium bg-gradient-to-r from-gray-400 from-35% via-gray-900 via-50% to-gray-400 to-65% dark:from-gray-500 dark:from-35% dark:via-gray-100 dark:via-50% dark:to-gray-500 dark:to-65% bg-clip-text text-transparent"
+        className="absolute inset-0 font-medium bg-gradient-to-r from-gray-700 from-35% via-gray-300 via-50% to-gray-700 to-65% dark:from-gray-300 dark:from-35% dark:via-gray-600 dark:via-50% dark:to-gray-300 dark:to-65% bg-clip-text text-transparent"
         style={{
           backgroundSize: '300% 100%',
         }}
