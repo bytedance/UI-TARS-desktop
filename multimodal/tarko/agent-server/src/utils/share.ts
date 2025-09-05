@@ -209,9 +209,11 @@ export class ShareUtils {
 
       const responseData = await response.json();
 
-      // Return share URL
+      // Return share URL with replay parameter
       if (responseData && responseData.url) {
-        return responseData.url;
+        const url = new URL(responseData.url);
+        url.searchParams.set('replay', '1');
+        return url.toString();
       }
 
       throw new Error('Invalid response from share provider');
