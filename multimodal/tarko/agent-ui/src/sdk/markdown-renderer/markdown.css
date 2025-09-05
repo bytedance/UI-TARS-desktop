@@ -58,13 +58,7 @@
   color: #e2e8f0;
 }
 
-/* Streaming content - minimal styling for maximum performance */
-.streaming-content {
-  opacity: 0.95;
-  will-change: auto;
-}
-
 /* Smooth transitions for content changes */
 .markdown-content {
-  will-change: auto;
+  transition: opacity 0.15s ease-out;
 }
