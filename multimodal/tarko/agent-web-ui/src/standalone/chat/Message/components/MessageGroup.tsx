@@ -40,9 +40,7 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
   );
 
   // Get the final assistant message (only completed responses, not intermediate tool calls)
-  const finalResponseMessage = assistantMessages.find(
-    (msg) => msg.finishReason === 'stop'
-  ) || null;
+  const finalResponseMessage = assistantMessages.find((msg) => msg.finishReason === 'stop') || null;
 
   return (
     <div>
@@ -108,10 +106,10 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
           {(agentStatus.phase === 'initializing' ||
             agentStatus.phase === 'warming_up' ||
             agentStatus.phase === 'processing') && (
-            <div className="ml-8">
-              <SkeletonLoader lines={2} showAvatar={false} className="opacity-50" />
-            </div>
-          )}
+              <div className="ml-8">
+                <SkeletonLoader lines={2} showAvatar={false} className="opacity-50" />
+              </div>
+            )}
         </div>
       )}
 
