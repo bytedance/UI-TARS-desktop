@@ -1,13 +1,17 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
+import { useAtomValue } from 'jotai';
+import { replayStateAtom } from '@/common/state/atoms/replay';
 
 // Constants
 const SCROLL_CHECK_DELAY = 100; // ms - delay for DOM updates
 const SCROLL_ANIMATION_DELAY = 300; // ms - delay to account for smooth scroll animation
+const REPLAY_AUTO_SCROLL_DELAY = 200; // ms - delay for auto-scroll in replay mode
 
 interface UseScrollToBottomOptions {
   threshold?: number; // Distance from bottom to consider "at bottom"
   dependencies?: React.DependencyList; // Dependencies to trigger re-check (e.g., messages)
   sessionId?: string; // Session ID to reset state on session change
+  isReplayMode?: boolean; // Whether we're in replay mode
 }
 
 interface UseScrollToBottomReturn {
@@ -24,18 +28,21 @@ interface UseScrollToBottomReturn {
  * - Shows scroll-to-bottom indicator when user has scrolled up
  * - Manual scroll to bottom functionality
  * - Properly handles session switching
- * - No automatic scrolling behavior
+ * - Auto-scroll behavior ONLY in replay mode
  */
 export const useScrollToBottom = ({
   threshold = 100,
   dependencies = [],
   sessionId,
+  isReplayMode = false,
 }: UseScrollToBottomOptions = {}): UseScrollToBottomReturn => {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const isScrollingRef = useRef(false);
   const lastSessionIdRef = useRef<string | undefined>(sessionId);
+  const replayState = useAtomValue(replayStateAtom);
+  const lastEventIndexRef = useRef<number>(-1);
 
   // Check if container is at bottom
   const checkIsAtBottom = useCallback(() => {
@@ -88,7 +95,25 @@ export const useScrollToBottom = ({
       // Hide button immediately when reaching bottom after scroll
       setShowScrollToBottom(false);
     }, SCROLL_ANIMATION_DELAY);
-  }, [threshold]);
+  }, []);
+
+  // Auto-scroll to bottom for replay mode
+  const autoScrollToBottom = useCallback(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+    
+    isScrollingRef.current = true;
+    
+    container.scrollTo({
+      top: container.scrollHeight,
+      behavior: 'smooth'
+    });
+    
+    // Reset scrolling flag after animation completes
+    setTimeout(() => {
+      isScrollingRef.current = false;
+    }, SCROLL_ANIMATION_DELAY);
+  }, []);
 
   // Delayed scroll check helper
   const scheduleScrollCheck = useCallback(() => {
@@ -135,6 +160,26 @@ export const useScrollToBottom = ({
     const timer = scheduleScrollCheck();
     return () => clearTimeout(timer);
   }, [scheduleScrollCheck, ...dependencies]);
+
+  // Auto-scroll in replay mode when new events are processed
+  useEffect(() => {
+    if (!isReplayMode || !replayState.isActive) {
+      lastEventIndexRef.current = -1;
+      return;
+    }
+
+    // Only auto-scroll when a new event is processed (index increases)
+    if (replayState.currentEventIndex > lastEventIndexRef.current) {
+      lastEventIndexRef.current = replayState.currentEventIndex;
+      
+      // Schedule auto-scroll after DOM updates
+      const timer = setTimeout(() => {
+        autoScrollToBottom();
+      }, REPLAY_AUTO_SCROLL_DELAY);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isReplayMode, replayState.isActive, replayState.currentEventIndex, autoScrollToBottom]);
 
   return {
     messagesContainerRef,

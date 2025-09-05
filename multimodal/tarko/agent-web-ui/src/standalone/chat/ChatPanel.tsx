@@ -45,6 +45,7 @@ export const ChatPanel: React.FC = () => {
       threshold: 50,
       dependencies: [activeMessages],
       sessionId: currentSessionId,
+      isReplayMode,
     });
 
   // Find research report in session
