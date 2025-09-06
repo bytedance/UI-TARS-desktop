@@ -51,20 +51,28 @@ export class ShareService {
     sessionId: string;
     error?: string;
   }> {
+    console.log(`[ShareService] Starting shareSession for sessionId: ${sessionId}, upload: ${upload}`);
     try {
       // Verify storage is available
       if (!this.storageProvider) {
+        console.error('[ShareService] Storage not configured');
         throw new Error('Storage not configured, cannot share session');
       }
 
       // Get session metadata
       const metadata = await this.storageProvider.getSessionItemInfo(sessionId);
       if (!metadata) {
+        console.error(`[ShareService] Session not found: ${sessionId}`);
         throw new Error('Session not found');
       }
+      console.log(`[ShareService] Session metadata retrieved for ${sessionId}:`, {
+        name: metadata.metadata?.name,
+        workspace: metadata.workspace
+      });
 
       // Get session events
       const events = await this.storageProvider.getSessionEvents(sessionId);
+      console.log(`[ShareService] Retrieved ${events.length} events for session ${sessionId}`);
 
       // Filter key frame events, exclude streaming messages
       const keyFrameEvents = events.filter(
@@ -73,20 +81,26 @@ export class ShareService {
           event.type !== 'assistant_streaming_thinking_message' &&
           event.type !== 'final_answer_streaming',
       );
+      console.log(`[ShareService] Filtered to ${keyFrameEvents.length} key frame events`);
 
       // Generate HTML content with server options
       let processedEvents = keyFrameEvents;
       if (upload && this.appConfig.share?.provider) {
+        console.log(`[ShareService] Processing workspace images for upload`);
         // @ts-expect-error
         processedEvents = await this.processWorkspaceImages(keyFrameEvents, metadata.workspace);
       }
 
       // Generate HTML content
+      console.log(`[ShareService] Generating share HTML`);
       const shareHtml = this.generateShareHtml(keyFrameEvents, metadata, serverInfo);
+      console.log(`[ShareService] Generated HTML of length: ${shareHtml.length}`);
 
       // Upload if requested and provider is configured
       if (upload && this.appConfig.share?.provider) {
+        console.log(`[ShareService] Uploading to share provider: ${this.appConfig.share.provider}`);
         const shareUrl = await this.uploadShareHtml(shareHtml, sessionId, metadata, agent);
+        console.log(`[ShareService] Upload successful, URL: ${shareUrl}`);
         return {
           success: true,
           url: shareUrl,
@@ -95,12 +109,14 @@ export class ShareService {
       }
 
       // Return HTML content if not uploading
+      console.log(`[ShareService] Returning HTML content without upload`);
       return {
         success: true,
         html: shareHtml,
         sessionId,
       };
     } catch (error) {
+      console.error(`[ShareService] Error in shareSession for ${sessionId}:`, error);
       return {
         success: false,
         sessionId,
@@ -379,7 +395,9 @@ export class ShareService {
     sessionItemInfo: SessionItemInfo,
     agent?: IAgent,
   ): Promise<string> {
+    console.log(`[ShareService.uploadShareHtml] Starting upload for sessionId: ${sessionId}`);
     if (!this.appConfig.share?.provider) {
+      console.error('[ShareService.uploadShareHtml] Share provider not configured');
       throw new Error('Share provider not configured');
     }
 
@@ -388,38 +406,58 @@ export class ShareService {
     let originalQuery = '';
 
     if (this.storageProvider && agent) {
+      console.log('[ShareService.uploadShareHtml] Attempting slug generation with agent');
       try {
         const events = await this.storageProvider.getSessionEvents(sessionId);
         const firstUserMessage = events.find((e) => e.type === 'user_message');
+        console.log(`[ShareService.uploadShareHtml] Found first user message:`, {
+          hasMessage: !!firstUserMessage,
+          messageType: firstUserMessage?.type,
+          contentType: typeof firstUserMessage?.content
+        });
 
         if (firstUserMessage && firstUserMessage.content) {
           originalQuery =
             typeof firstUserMessage.content === 'string'
               ? firstUserMessage.content
               : firstUserMessage.content.find((c) => c.type === 'text')?.text || '';
+          
+          console.log(`[ShareService.uploadShareHtml] Extracted originalQuery: "${originalQuery}"`);
 
           if (originalQuery) {
+            console.log('[ShareService.uploadShareHtml] Calling SlugGenerator.generateSlug');
             const slugGenerator = new SlugGenerator(agent);
             normalizedSlug = await slugGenerator.generateSlug(originalQuery);
+            console.log(`[ShareService.uploadShareHtml] Generated slug: "${normalizedSlug}"`);
 
             // Additional safety check to ensure slug is URL-safe
+            const beforeSanitization = normalizedSlug;
             normalizedSlug = normalizedSlug.replace(/[^\x00-\x7F]+/g, '').replace(/[^\w-]/g, '');
+            if (beforeSanitization !== normalizedSlug) {
+              console.log(`[ShareService.uploadShareHtml] Slug sanitized from "${beforeSanitization}" to "${normalizedSlug}"`);
+            }
           }
         }
       } catch (error) {
-        console.warn('Failed to extract query for normalized slug:', error);
+        console.error('[ShareService.uploadShareHtml] Failed to extract query for normalized slug:', error);
       }
+    } else {
+      console.log(`[ShareService.uploadShareHtml] Skipping slug generation - storageProvider: ${!!this.storageProvider}, agent: ${!!agent}`);
     }
 
     if (normalizedSlug) {
       // Generate 6-digit hash from sessionId to avoid conflicts
       const sessionHash = await this.generateSessionHash(sessionId);
-      normalizedSlug = `${normalizedSlug}-${sessionHash}`;
+      const finalSlug = `${normalizedSlug}-${sessionHash}`;
+      console.log(`[ShareService.uploadShareHtml] Final slug with hash: "${finalSlug}"`);
+      normalizedSlug = finalSlug;
     } else {
       // fallback to sessionId
+      console.log(`[ShareService.uploadShareHtml] No slug generated, falling back to sessionId: "${sessionId}"`);
       normalizedSlug = sessionId;
     }
 
+    console.log(`[ShareService.uploadShareHtml] Calling ShareUtils.uploadShareHtml with slug: "${normalizedSlug}"`);
     return ShareUtils.uploadShareHtml(html, sessionId, this.appConfig.share?.provider as string, {
       sessionItemInfo,
       slug: normalizedSlug,

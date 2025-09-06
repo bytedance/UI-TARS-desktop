@@ -143,7 +143,15 @@ export class ShareUtils {
       query?: string;
     },
   ): Promise<string> {
+    console.log(`[ShareUtils.uploadShareHtml] Starting upload - sessionId: ${sessionId}, provider: ${shareProviderUrl}`);
+    console.log(`[ShareUtils.uploadShareHtml] Options:`, {
+      hasSessionInfo: !!options?.sessionItemInfo,
+      slug: options?.slug,
+      query: options?.query?.substring(0, 100) + (options?.query && options.query.length > 100 ? '...' : '')
+    });
+    
     if (!shareProviderUrl) {
+      console.error('[ShareUtils.uploadShareHtml] Share provider not configured');
       throw new Error('Share provider not configured');
     }
 
@@ -153,12 +161,15 @@ export class ShareUtils {
       if (!fs.existsSync(tempDir)) {
         fs.mkdirSync(tempDir, { recursive: true });
       }
+      console.log(`[ShareUtils.uploadShareHtml] Created temp directory: ${tempDir}`);
 
       const fileName = `agent-tars-${sessionId}-${Date.now()}.html`;
       const filePath = path.join(tempDir, fileName);
+      console.log(`[ShareUtils.uploadShareHtml] Generated filename: ${fileName}`);
 
       // Write HTML content to temporary file
       fs.writeFileSync(filePath, html);
+      console.log(`[ShareUtils.uploadShareHtml] Written HTML to temp file (${html.length} bytes)`);
 
       // Create form data using native FormData
       const formData = new FormData();
@@ -168,57 +179,73 @@ export class ShareUtils {
       formData.append('file', file);
       formData.append('sessionId', sessionId);
       formData.append('type', 'html'); // Specify this is HTML content
+      console.log(`[ShareUtils.uploadShareHtml] Created FormData with basic fields`);
 
       // Add additional metadata fields if provided
       if (options) {
         // Add normalized slug for semantic URLs
         if (options.slug) {
           formData.append('slug', options.slug);
+          console.log(`[ShareUtils.uploadShareHtml] Added slug to FormData: "${options.slug}"`);
         }
 
         // Add original query
         if (options.query) {
           formData.append('query', options.query);
+          console.log(`[ShareUtils.uploadShareHtml] Added query to FormData`);
         }
 
         // Add session metadata fields
         if (options.sessionItemInfo) {
-          formData.append('name', options.sessionItemInfo.metadata?.name || '');
+          const sessionName = options.sessionItemInfo.metadata?.name || '';
+          formData.append('name', sessionName);
+          console.log(`[ShareUtils.uploadShareHtml] Added session name: "${sessionName}"`);
           // Add tags if available
           if (
             options.sessionItemInfo.metadata?.tags &&
             options.sessionItemInfo.metadata.tags.length > 0
           ) {
-            formData.append('tags', JSON.stringify(options.sessionItemInfo.metadata.tags));
+            const tagsJson = JSON.stringify(options.sessionItemInfo.metadata.tags);
+            formData.append('tags', tagsJson);
+            console.log(`[ShareUtils.uploadShareHtml] Added tags: ${tagsJson}`);
           }
         }
       }
 
       // Send request to share provider using fetch
+      console.log(`[ShareUtils.uploadShareHtml] Sending POST request to: ${shareProviderUrl}`);
       const response = await fetch(shareProviderUrl, {
         method: 'POST',
         body: formData,
       });
+      console.log(`[ShareUtils.uploadShareHtml] Received response - status: ${response.status}, ok: ${response.ok}`);
 
       // Clean up temporary file
       fs.unlinkSync(filePath);
+      console.log(`[ShareUtils.uploadShareHtml] Cleaned up temp file: ${filePath}`);
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`[ShareUtils.uploadShareHtml] HTTP error ${response.status}:`, errorText);
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const responseData = await response.json();
+      console.log(`[ShareUtils.uploadShareHtml] Response data:`, responseData);
 
       // Return share URL with replay parameter
       if (responseData && responseData.url) {
         const url = new URL(responseData.url);
         url.searchParams.set('replay', '1');
-        return url.toString();
+        const finalUrl = url.toString();
+        console.log(`[ShareUtils.uploadShareHtml] Final share URL: ${finalUrl}`);
+        return finalUrl;
       }
 
+      console.error('[ShareUtils.uploadShareHtml] Invalid response - no URL found in response');
       throw new Error('Invalid response from share provider');
     } catch (error) {
-      console.error('Failed to upload share HTML:', error);
+      console.error('[ShareUtils.uploadShareHtml] Failed to upload share HTML:', error);
       throw error;
     }
   }
