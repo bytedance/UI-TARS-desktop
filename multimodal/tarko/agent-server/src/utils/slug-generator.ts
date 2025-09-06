@@ -4,6 +4,7 @@
  */
 
 import { IAgent } from '@tarko/interface';
+import { transliterate } from 'transliteration';
 
 /**
  * Response schema for LLM-generated slug
@@ -194,55 +195,55 @@ Return only a JSON object with a "slug" field.`,
   }
 
   /**
-   * Simple transliteration for common non-ASCII characters
+   * Transliterate non-ASCII characters using transliteration library
    */
   private simpleTransliterate(text: string): string {
-    // Common Chinese words to English mapping
-    const chineseToEnglish: Record<string, string> = {
-      '写': 'write', '代码': 'code', '文件': 'file', '下载': 'download',
-      '生成': 'generate', '创建': 'create', '删除': 'delete', '修改': 'modify',
-      '查找': 'search', '分析': 'analyze', '处理': 'process', '转换': 'convert',
-      '打开': 'open', '关闭': 'close', '保存': 'save', '读取': 'read',
-      '运行': 'run', '执行': 'execute', '测试': 'test', '调试': 'debug',
-      '安装': 'install', '配置': 'config', '设置': 'setup', '帮助': 'help',
-      '什么': 'what', '哪里': 'where', '怎么': 'how', '为什么': 'why',
-      '这是': 'this-is', '在哪': 'where-is', '如何': 'how-to'
-    };
-    
-    let result = text;
-    
-    // Replace common Chinese words
-    for (const [chinese, english] of Object.entries(chineseToEnglish)) {
-      result = result.replace(new RegExp(chinese, 'g'), english);
-    }
-    
-    // If still contains Chinese characters, try basic pinyin approximation
-    if (/[\u4e00-\u9fff]/.test(result)) {
-      // Simple character-by-character mapping for common characters
-      const pinyinMap: Record<string, string> = {
-        '的': 'de', '是': 'shi', '在': 'zai', '了': 'le', '和': 'he',
-        '有': 'you', '我': 'wo', '他': 'ta', '她': 'ta', '它': 'ta',
-        '你': 'ni', '们': 'men', '个': 'ge', '中': 'zhong', '上': 'shang',
-        '下': 'xia', '来': 'lai', '去': 'qu', '出': 'chu', '会': 'hui',
-        '能': 'neng', '要': 'yao', '用': 'yong', '做': 'zuo', '说': 'shuo',
-        '看': 'kan', '知': 'zhi', '道': 'dao', '想': 'xiang', '得': 'de',
-        '儿': 'er', '里': 'li', '哪': 'na', '这': 'zhe', '那': 'na'
-      };
+    try {
+      // Use transliteration library for proper conversion
+      const transliterated = transliterate(text, {
+        unknown: '', // Remove unknown characters
+        replace: {
+          // Common technical terms mapping
+          '代码': 'code',
+          '文件': 'file',
+          '下载': 'download',
+          '生成': 'generate',
+          '创建': 'create',
+          '删除': 'delete',
+          '修改': 'modify',
+          '查找': 'search',
+          '分析': 'analyze',
+          '处理': 'process',
+          '转换': 'convert',
+          '打开': 'open',
+          '关闭': 'close',
+          '保存': 'save',
+          '读取': 'read',
+          '运行': 'run',
+          '执行': 'execute',
+          '测试': 'test',
+          '调试': 'debug',
+          '安装': 'install',
+          '配置': 'config',
+          '设置': 'setup',
+          '帮助': 'help'
+        }
+      });
       
-      for (const [char, pinyin] of Object.entries(pinyinMap)) {
-        result = result.replace(new RegExp(char, 'g'), pinyin);
-      }
+      // Clean up and normalize
+      const result = transliterated
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, ' ') // Replace non-alphanumeric with spaces
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/-+/g, '-') // Remove consecutive hyphens
+        .replace(/^-+|-+$/g, '') // Remove leading/trailing hyphens
+        .substring(0, 60); // Limit length
+      
+      return result;
+    } catch (error) {
+      console.error('[SlugGenerator.simpleTransliterate] Transliteration failed:', error);
+      return '';
     }
-    
-    // Clean up and normalize
-    result = result
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, ' ') // Replace non-alphanumeric with spaces
-      .replace(/\s+/g, '-') // Replace spaces with hyphens
-      .replace(/-+/g, '-') // Remove consecutive hyphens
-      .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
-    
-    return result;
   }
 
   /**
