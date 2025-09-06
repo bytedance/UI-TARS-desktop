@@ -204,7 +204,7 @@ export async function release(options: ReleaseOptions = {}): Promise<void> {
     ignoreScripts = false,
     build = false,
     pushTag = false,
-    tagPrefix = '@agent-tars@',
+    tagPrefix = 'v',
     useAi = false,
   } = options;
 

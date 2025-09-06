@@ -91,7 +91,7 @@ export function bootstrapCli() {
       default: false,
     })
     .option('--tag-prefix <prefix>', 'Prefix for git tags', {
-      default: '@agent-tars@',
+      default: 'v',
     })
     .option('--use-ai', 'Use AI to generate changelog', {
       default: false,
@@ -101,7 +101,7 @@ export function bootstrapCli() {
     .option('--apiKey, --api-key <apiKey>', 'Custom API key for LLM')
     .option('--baseURL, --base-url <baseURL>', 'Custom base URL for LLM')
     .option('--filter-scopes <scopes>', 'Comma-separated list of scopes to include in changelog', {
-      default: 'tars,agent,tarko,browser,infra,mcp,all',
+      default: 'tars,agent,tarko,o-agent,tars-stack,browser,infra,mcp,all',
     })
     .option(
       '--filter-types <types>',
@@ -142,7 +142,7 @@ export function bootstrapCli() {
       // There is no default value here, because the default is read from package.json
     })
     .option('--tag-prefix <prefix>', 'Prefix for git tags', {
-      default: '@agent-tars@',
+      default: 'v',
     })
     .option('--beautify', 'Beautify changelog or not', {
       default: false,
@@ -167,7 +167,7 @@ export function bootstrapCli() {
     .option('--apiKey, --api-key <apiKey>', 'Custom API key for LLM')
     .option('--baseURL, --base-url <baseURL>', 'Custom base URL for LLM')
     .option('--filter-scopes <scopes>', 'Comma-separated list of scopes to include in changelog', {
-      default: 'tars,agent,tarko,browser,infra,mcp,all',
+      default: 'tars,agent,tarko,o-agent,tars-stack,browser,infra,mcp,all',
     })
     .option(
       '--filter-types <types>',

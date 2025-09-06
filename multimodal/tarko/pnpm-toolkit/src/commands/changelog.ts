@@ -358,7 +358,7 @@ export async function changelog(options: ChangelogOptions = {}): Promise<void> {
     apiKey,
     baseURL,
     provider,
-    tagPrefix = '@agent-tars@',
+    tagPrefix = 'v',
     dryRun = false,
     filterScopes = [],
     filterTypes = [], // Default to showing all commit types
