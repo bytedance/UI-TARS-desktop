@@ -24,6 +24,7 @@ const WelcomePage: React.FC = () => {
   // State for managing displayed prompts
   const [displayedPrompts, setDisplayedPrompts] = useState<string[]>([]);
   const [usedPrompts, setUsedPrompts] = useState<Set<string>>(new Set());
+  const [isShuffling, setIsShuffling] = useState(false);
   
   // Constants for prompt management
   const MAX_DISPLAYED_PROMPTS = 3;
@@ -58,16 +59,23 @@ const WelcomePage: React.FC = () => {
   
   // Function to shuffle prompts
   const handleShuffle = () => {
-    const newPrompts = getRandomPrompts(MAX_DISPLAYED_PROMPTS);
-    setDisplayedPrompts(newPrompts);
+    setIsShuffling(true);
     
-    // Update used prompts, reset if we've used most of them
-    const newUsedPrompts = new Set([...usedPrompts, ...newPrompts]);
-    if (newUsedPrompts.size >= allPrompts.length - 1) {
-      setUsedPrompts(new Set(newPrompts));
-    } else {
-      setUsedPrompts(newUsedPrompts);
-    }
+    // Add a small delay to show animation
+    setTimeout(() => {
+      const newPrompts = getRandomPrompts(MAX_DISPLAYED_PROMPTS);
+      setDisplayedPrompts(newPrompts);
+      
+      // Update used prompts, reset if we've used most of them
+      const newUsedPrompts = new Set([...usedPrompts, ...newPrompts]);
+      if (newUsedPrompts.size >= allPrompts.length - 1) {
+        setUsedPrompts(new Set(newPrompts));
+      } else {
+        setUsedPrompts(newUsedPrompts);
+      }
+      
+      setIsShuffling(false);
+    }, 200);
   };
 
   const handleChatSubmit = async (content: string | ChatCompletionContentPart[]) => {
@@ -250,16 +258,22 @@ const WelcomePage: React.FC = () => {
               ))}
               {shouldShowShuffle && (
                 <motion.button
+                  key={`shuffle-${displayedPrompts.join('-')}`}
                   initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.4 + displayedPrompts.length * 0.1 }}
+                  animate={{ opacity: isShuffling ? 0.5 : 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: isShuffling ? 0 : 0.4 + displayedPrompts.length * 0.1 }}
                   type="button"
                   onClick={handleShuffle}
                   className="text-sm px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/30 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300 transition-colors flex items-center gap-1.5"
-                  disabled={isLoading || isDirectChatLoading}
+                  disabled={isLoading || isDirectChatLoading || isShuffling}
                   title="Shuffle"
                 >
-                  <FiRefreshCw size={14} />
+                  <motion.div
+                    animate={{ rotate: isShuffling ? 360 : 0 }}
+                    transition={{ duration: 0.2, ease: "easeInOut" }}
+                  >
+                    <FiRefreshCw size={14} />
+                  </motion.div>
                   <span>Shuffle</span>
                 </motion.button>
               )}
