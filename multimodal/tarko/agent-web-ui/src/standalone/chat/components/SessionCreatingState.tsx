@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FiMessageSquare } from 'react-icons/fi';
+import { FiMessageSquare, FiZap } from 'react-icons/fi';
 
 interface SessionCreatingStateProps {
   isCreating: boolean;
@@ -58,7 +58,16 @@ export const SessionCreatingState: React.FC<SessionCreatingStateProps> = ({ isCr
     },
   };
 
-
+  const shimmerVariants = {
+    shimmer: {
+      x: ['-100%', '100%'],
+      transition: {
+        duration: 2,
+        repeat: Infinity,
+        ease: 'easeInOut',
+      },
+    },
+  };
 
   const floatingDots = {
     float: {
@@ -80,7 +89,7 @@ export const SessionCreatingState: React.FC<SessionCreatingStateProps> = ({ isCr
       initial="hidden"
       animate="visible"
       variants={containerVariants}
-      className="flex items-center justify-center h-full"
+      className="flex items-center justify-center h-full bg-gradient-to-br from-gray-50/30 via-white/20 to-blue-50/30 dark:from-gray-900/30 dark:via-gray-800/20 dark:to-blue-900/30"
     >
       <div className="text-center max-w-sm mx-auto px-6">
         {/* Enhanced icon with modern design */}
@@ -101,10 +110,16 @@ export const SessionCreatingState: React.FC<SessionCreatingStateProps> = ({ isCr
 
           {/* Main icon container */}
           <motion.div
-            className="relative w-20 h-20 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto shadow-lg border border-gray-200/50 dark:border-gray-700/50"
+            className="relative w-20 h-20 bg-gradient-to-br from-white via-gray-50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-3xl flex items-center justify-center mx-auto shadow-lg border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-sm"
             variants={pulseVariants}
             animate="pulse"
           >
+            {/* Shimmer effect */}
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent dark:via-white/10 rounded-3xl overflow-hidden"
+              variants={shimmerVariants}
+              animate="shimmer"
+            />
 
             {/* Icon */}
             <div className="relative z-10">
@@ -126,10 +141,10 @@ export const SessionCreatingState: React.FC<SessionCreatingStateProps> = ({ isCr
 
             {/* Accent dot */}
             <motion.div
-              className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-500 dark:bg-blue-400 rounded-full"
+              className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
               animate={{
-                scale: [0.8, 1.1, 0.8],
-                opacity: [0.6, 1, 0.6],
+                scale: [0.8, 1.2, 0.8],
+                opacity: [0.7, 1, 0.7],
               }}
               transition={{
                 duration: 2,
@@ -153,10 +168,10 @@ export const SessionCreatingState: React.FC<SessionCreatingStateProps> = ({ isCr
           />
         </motion.div>
 
-        {/* Clean title */}
+        {/* Enhanced title with gradient */}
         <motion.h2
           variants={itemVariants}
-          className="text-2xl font-semibold mb-3 text-gray-900 dark:text-gray-100 tracking-tight"
+          className="text-2xl font-semibold mb-3 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-gray-100 dark:via-white dark:to-gray-100 text-transparent bg-clip-text tracking-tight"
         >
           Preparing your session
         </motion.h2>
@@ -169,26 +184,35 @@ export const SessionCreatingState: React.FC<SessionCreatingStateProps> = ({ isCr
           Setting up your Agent workspace with care
         </motion.p>
 
-        {/* Clean progress indicator */}
-        <motion.div variants={itemVariants} className="flex items-center justify-center">
-          <div className="flex space-x-2">
+        {/* Modern progress indicator */}
+        <motion.div variants={itemVariants} className="flex items-center justify-center space-x-2">
+          <div className="flex space-x-1.5">
             {[0, 1, 2].map((i) => (
               <motion.div
                 key={i}
-                className="w-1.5 h-1.5 bg-blue-500 dark:bg-blue-400 rounded-full"
+                className="w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
                 animate={{
-                  scale: [0.7, 1.2, 0.7],
-                  opacity: [0.4, 0.8, 0.4],
+                  scale: [0.8, 1.3, 0.8],
+                  opacity: [0.4, 1, 0.4],
                 }}
                 transition={{
-                  duration: 2,
+                  duration: 1.5,
                   repeat: Infinity,
-                  delay: i * 0.3,
+                  delay: i * 0.2,
                   ease: 'easeInOut',
                 }}
               />
             ))}
           </div>
+
+          {/* Subtle accent */}
+          <motion.div
+            className="ml-4 text-blue-500/60 dark:text-blue-400/60"
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            <FiZap size={14} />
+          </motion.div>
         </motion.div>
       </div>
     </motion.div>
