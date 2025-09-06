@@ -131,7 +131,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ replayState, isReplayMod
       initial="hidden"
       animate="visible"
       variants={containerVariants}
-      className="flex items-center justify-center h-full min-h-[400px] bg-gradient-to-br from-gray-50/30 via-white/20 to-blue-50/30 dark:from-gray-900/30 dark:via-gray-800/20 dark:to-blue-900/30"
+      className="flex items-center justify-center h-full min-h-[400px]"
     >
       <div className="text-center p-8 max-w-lg">
         {/* Auto-play countdown state */}

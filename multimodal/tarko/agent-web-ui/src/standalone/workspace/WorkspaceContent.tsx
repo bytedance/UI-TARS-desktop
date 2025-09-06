@@ -291,7 +291,7 @@ export const WorkspaceContent: React.FC = () => {
             variants={containerVariants}
             initial="initial"
             animate="animate"
-            className="flex items-center justify-center h-full text-center bg-gradient-to-br from-gray-50/30 via-white/20 to-blue-50/30 dark:from-gray-900/30 dark:via-gray-800/20 dark:to-blue-900/30"
+            className="flex items-center justify-center h-full text-center"
           >
             <div className="max-w-md mx-auto px-6">
               {/* Enhanced icon with modern design - matching SessionCreatingState */}
