@@ -27,6 +27,12 @@ const WelcomePage: React.FC = () => {
   const [displayedPrompts, setDisplayedPrompts] = useState<string[]>([]);
   const [usedPrompts, setUsedPrompts] = useState<Set<string>>(new Set());
   const [isShuffling, setIsShuffling] = useState(false);
+  const [truncatedPrompts, setTruncatedPrompts] = useState<Set<string>>(new Set());
+  
+  // Function to check if text is truncated
+  const checkTextTruncation = (element: HTMLElement) => {
+    return element.scrollWidth > element.clientWidth;
+  };
   
   // Constants for prompt management
   const MAX_DISPLAYED_PROMPTS = 3;
@@ -244,13 +250,25 @@ const WelcomePage: React.FC = () => {
           {/* Example prompts - Use configuration with fallback */}
           {displayedPrompts.length > 0 && (
             <div className="mt-6 flex flex-wrap justify-center gap-2">
-              {displayedPrompts.map((prompt, index) => (
-                <Tooltip
-                  key={`${prompt}-${index}`}
-                  title={prompt}
-                  {...getTooltipProps('top')}
-                >
+              {displayedPrompts.map((prompt, index) => {
+                const isTruncated = truncatedPrompts.has(prompt);
+                
+                const buttonElement = (
                   <motion.button
+                    ref={(el) => {
+                      if (el) {
+                        const isTextTruncated = checkTextTruncation(el);
+                        setTruncatedPrompts(prev => {
+                          const newSet = new Set(prev);
+                          if (isTextTruncated) {
+                            newSet.add(prompt);
+                          } else {
+                            newSet.delete(prompt);
+                          }
+                          return newSet;
+                        });
+                      }
+                    }}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: 0.4 + index * 0.1 }}
@@ -261,8 +279,22 @@ const WelcomePage: React.FC = () => {
                   >
                     {prompt}
                   </motion.button>
-                </Tooltip>
-              ))}
+                );
+                
+                return isTruncated ? (
+                  <Tooltip
+                    key={`${prompt}-${index}`}
+                    title={prompt}
+                    {...getTooltipProps('top')}
+                  >
+                    {buttonElement}
+                  </Tooltip>
+                ) : (
+                  <div key={`${prompt}-${index}`}>
+                    {buttonElement}
+                  </div>
+                );
+              })}
               {shouldShowShuffle && (
                 <motion.button
                   key={`shuffle-${displayedPrompts.join('-')}`}
