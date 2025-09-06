@@ -1,13 +1,15 @@
 import React, { useCallback, useState } from 'react';
 import { motion } from 'framer-motion';
 
-import { FiPlus, FiHome, FiSettings } from 'react-icons/fi';
+import { FiPlus, FiHome, FiSettings, FiActivity } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/common/hooks/useSession';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { isLayoutSwitchButtonEnabled } from '@/config/web-ui-config';
 import { AgentConfigViewer } from './AgentConfigViewer';
 import { LayoutSwitchButton } from './LayoutSwitchButton';
+import { useAtom } from 'jotai';
+import { workspaceDisplayModeAtom } from '@/common/state/atoms/workspace';
 
 /**
  * ToolBar Component - Vertical toolbar inspired by modern IDE designs
@@ -24,6 +26,7 @@ export const ToolBar: React.FC = () => {
   const { createSession, connectionStatus } = useSession();
   const [isConfigViewerOpen, setIsConfigViewerOpen] = useState(false);
   const [isCreatingSession, setIsCreatingSession] = useState(false);
+  const [workspaceDisplayMode, setWorkspaceDisplayMode] = useAtom(workspaceDisplayModeAtom);
 
   const enableLayoutSwitchButton = isLayoutSwitchButtonEnabled();
 
@@ -46,6 +49,11 @@ export const ToolBar: React.FC = () => {
   const handleNavigateHome = useCallback(() => {
     navigate('/');
   }, [navigate]);
+
+  // Toggle event stream viewer
+  const handleToggleEventStream = useCallback(() => {
+    setWorkspaceDisplayMode(workspaceDisplayMode === 'events' ? 'interaction' : 'events');
+  }, [workspaceDisplayMode, setWorkspaceDisplayMode]);
 
   return (
     <>
@@ -122,9 +130,29 @@ export const ToolBar: React.FC = () => {
 
         {/* Bottom tool buttons */}
         <div className="flex flex-col items-center gap-4 pb-4">
+          {/* Event stream viewer button */}
+          {!isReplayMode && (
+            <motion.button
+              whileHover={{
+                scale: 1.08,
+              }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+              onClick={handleToggleEventStream}
+              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
+                workspaceDisplayMode === 'events'
+                  ? 'bg-blue-500 text-white shadow-md'
+                  : 'bg-white dark:bg-gray-800 text-black dark:text-white hover:shadow-md'
+              }`}
+              title="Event Stream Viewer"
+            >
+              <FiActivity size={16} />
+            </motion.button>
+          )}
+
           {/* Layout switch button */}
           {!isReplayMode && enableLayoutSwitchButton && <LayoutSwitchButton />}
-          
+
           {/* Agent config button */}
           {!isReplayMode && (
             <motion.button

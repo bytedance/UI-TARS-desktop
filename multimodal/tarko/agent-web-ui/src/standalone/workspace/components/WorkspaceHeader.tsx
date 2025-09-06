@@ -1,12 +1,21 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FiArrowLeft, FiBookOpen, FiMaximize, FiMonitor, FiEye, FiCode } from 'react-icons/fi';
+import {
+  FiArrowLeft,
+  FiBookOpen,
+  FiMaximize,
+  FiMonitor,
+  FiEye,
+  FiCode,
+  FiActivity,
+} from 'react-icons/fi';
 import { formatTimestamp } from '@/common/utils/formatters';
 import { useTool } from '@/common/hooks/useTool';
 import { normalizeFilePath } from '@/common/utils/pathNormalizer';
 import { StandardPanelContent } from '../types/panelContent';
 import { ToggleSwitch, ToggleSwitchProps } from '../renderers/generic/components/ToggleSwitch';
 import { ShareButton } from './ShareButton';
+import { WorkspaceDisplayModeToggle } from './WorkspaceDisplayModeToggle';
 import { FileDisplayMode } from '../types';
 import { WorkspaceDisplayMode } from '@/common/state/atoms/workspace';
 import { getWorkspaceNavItems } from '@/config/web-ui-config';
@@ -129,15 +138,9 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
 
         {/* Workspace display mode toggle */}
         {showWorkspaceToggle && onWorkspaceDisplayModeChange && (
-          <ToggleSwitch<WorkspaceDisplayMode>
+          <WorkspaceDisplayModeToggle
             value={workspaceDisplayMode}
             onChange={onWorkspaceDisplayModeChange}
-            leftValue="interaction"
-            rightValue="raw"
-            leftLabel="UI"
-            rightLabel="RAW"
-            leftIcon={<FiEye size={12} />}
-            rightIcon={<FiCode size={12} />}
           />
         )}
 

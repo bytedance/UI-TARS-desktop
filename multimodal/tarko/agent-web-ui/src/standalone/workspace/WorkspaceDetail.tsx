@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FiCode, FiEye } from 'react-icons/fi';
+import { FiCode, FiEye, FiActivity } from 'react-icons/fi';
 import { useAtom } from 'jotai';
 import { useSession } from '@/common/hooks/useSession';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { ResearchReportRenderer } from './renderers/ResearchReportRenderer';
 import { WorkspaceHeader } from './components/WorkspaceHeader';
 import { RawModeRenderer } from './components/RawModeRenderer';
+import { EventStreamRenderer } from './components/EventStreamRenderer';
+import { WorkspaceDisplayModeToggle } from './components/WorkspaceDisplayModeToggle';
 import { ImageModal } from './components/ImageModal';
 import { FullscreenModal } from './components/FullscreenModal';
 import { StandardPanelContent, ZoomedImageData, FullscreenFileData } from './types/panelContent';
@@ -117,6 +119,32 @@ export const WorkspaceDetail: React.FC = () => {
     setDisplayMode(getInitialDisplayMode());
   }, [activePanelContent?.toolCallId, activePanelContent?.timestamp]);
 
+  // Show event stream viewer even without panel content
+  if (!activePanelContent && workspaceDisplayMode === 'events') {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="h-full flex flex-col bg-white dark:bg-gray-900/20"
+      >
+        <div className="flex items-center justify-between px-4 py-3 workspace-control-panel border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-2">
+            <FiActivity className="text-gray-500" size={16} />
+            <h3 className="font-medium text-gray-900 dark:text-gray-100">Event Stream Viewer</h3>
+          </div>
+          <WorkspaceDisplayModeToggle
+            value={workspaceDisplayMode}
+            onChange={setWorkspaceDisplayMode}
+          />
+        </div>
+        <div className="flex-1 overflow-auto">
+          <EventStreamRenderer />
+        </div>
+      </motion.div>
+    );
+  }
+
   if (!activePanelContent) {
     return null;
   }
@@ -203,7 +231,11 @@ export const WorkspaceDetail: React.FC = () => {
 
   // Check if workspace toggle should be displayed
   const shouldShowWorkspaceToggle = () => {
-    return Boolean(panelContent.toolCallId && getCurrentToolMapping());
+    // Always show toggle in events mode, or when there's tool mapping data
+    return (
+      workspaceDisplayMode === 'events' ||
+      Boolean(panelContent.toolCallId && getCurrentToolMapping())
+    );
   };
 
   // Get switch configuration
@@ -241,6 +273,10 @@ export const WorkspaceDetail: React.FC = () => {
 
   // Render content based on workspace display mode
   const renderContent = () => {
+    if (workspaceDisplayMode === 'events') {
+      return <EventStreamRenderer />;
+    }
+
     if (workspaceDisplayMode === 'raw') {
       const toolMapping = getCurrentToolMapping();
       if (toolMapping) {
