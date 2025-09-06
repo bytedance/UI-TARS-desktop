@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { getModelDisplayName } from '@/common/utils/modelUtils';
 import {
@@ -13,6 +13,7 @@ import {
   Tooltip,
 } from '@mui/material';
 import { getTooltipProps } from '@/common/components/TooltipConfig';
+import { apiService } from '@/common/services/apiService';
 
 interface ModelConfig {
   provider: string;
@@ -36,8 +37,6 @@ interface NavbarModelSelectorProps {
     [key: string]: any;
   };
   isDarkMode?: boolean;
-  onLoadModels?: () => Promise<AvailableModelsResponse>;
-  onUpdateModel?: (sessionId: string, provider: string, modelId: string) => Promise<boolean>;
 }
 
 export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
@@ -45,8 +44,6 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   activeSessionId,
   sessionMetadata,
   isDarkMode = false,
-  onLoadModels,
-  onUpdateModel,
 }) => {
   const [availableModels, setAvailableModels] = useState<AvailableModelsResponse | null>(null);
   const [currentModel, setCurrentModel] = useState<string>('');
@@ -166,30 +163,25 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     [isDarkMode],
   );
 
+  const loadModels = useCallback(async () => {
+    try {
+      const models = await apiService.getAvailableModels();
+      setAvailableModels(models);
+
+      if (models.defaultModel) {
+        const modelKey = `${models.defaultModel.provider}:${models.defaultModel.modelId}`;
+        setCurrentModel(modelKey);
+      }
+    } catch (error) {
+      console.error('Failed to load available models:', error);
+    } finally {
+      setIsInitialLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    const loadModels = async () => {
-      if (!onLoadModels) {
-        setIsInitialLoading(false);
-        return;
-      }
-
-      try {
-        const models = await onLoadModels();
-        setAvailableModels(models);
-
-        if (models.defaultModel) {
-          const modelKey = `${models.defaultModel.provider}:${models.defaultModel.modelId}`;
-          setCurrentModel(modelKey);
-        }
-      } catch (error) {
-        console.error('Failed to load available models:', error);
-      } finally {
-        setIsInitialLoading(false);
-      }
-    };
-
     loadModels();
-  }, [onLoadModels]);
+  }, [loadModels]);
 
   if (!activeSessionId || isInitialLoading) {
     return null;
@@ -286,7 +278,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     );
   }
 
-  const handleModelChange = async (selectedValue: string) => {
+  const handleModelChange = useCallback(async (selectedValue: string) => {
     console.log('🎛️ [NavbarModelSelector] Model change initiated:', {
       selectedValue,
       sessionId: activeSessionId,
@@ -294,10 +286,9 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
       currentModel,
     });
 
-    if (!activeSessionId || !onUpdateModel || isLoading || !selectedValue) {
+    if (!activeSessionId || isLoading || !selectedValue) {
       console.warn('⚠️ [NavbarModelSelector] Model change blocked:', {
         hasSessionId: !!activeSessionId,
-        hasUpdateHandler: !!onUpdateModel,
         isLoading,
         hasSelectedValue: !!selectedValue,
       });
@@ -317,7 +308,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
 
     try {
       console.log('📞 [NavbarModelSelector] Calling update handler...');
-      const success = await onUpdateModel(activeSessionId, provider, modelId);
+      const success = await apiService.updateSessionModel(activeSessionId, provider, modelId);
 
       console.log('📋 [NavbarModelSelector] Update response:', { success });
 
@@ -335,7 +326,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
       console.log('🏁 [NavbarModelSelector] Model change completed');
       setIsLoading(false);
     }
-  };
+  }, [activeSessionId, isLoading, currentModel]);
 
   const allModelOptions = availableModels.models.flatMap((config) =>
     config.models.map((modelId) => ({
