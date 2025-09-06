@@ -37,11 +37,7 @@ function filterCommits(
     // Filter by scope if scopes filter is provided
     if (filterScopes.length > 0) {
       if (!commit.scope) return false;
-
-      // Check if any of the filter scopes directly match the commit scope
-      return filterScopes.some((filterScope) => 
-        commit.scope?.includes(filterScope)
-      );
+      return filterScopes.some((filterScope) => commit.scope?.includes(filterScope));
     }
 
     return true;
@@ -363,7 +359,7 @@ export async function changelog(options: ChangelogOptions = {}): Promise<void> {
     tagPrefix = 'v',
     dryRun = false,
     filterScopes = [],
-    filterTypes = [], // Default to showing all commit types
+    filterTypes = ['feat', 'fix'], // Default to showing only features and fixes
   } = options;
 
   let { version } = options;
