@@ -107,7 +107,7 @@ export function bootstrapCli() {
       '--filter-types <types>',
       'Comma-separated list of commit types to include in changelog',
       {
-        default: '',
+        default: 'feat,fix',
       },
     )
     .alias('release')
@@ -178,7 +178,7 @@ export function bootstrapCli() {
       '--filter-types <types>',
       'Comma-separated list of commit types to include in changelog',
       {
-        default: '',
+        default: 'feat,fix',
       },
     )
     .action((opts) => {
