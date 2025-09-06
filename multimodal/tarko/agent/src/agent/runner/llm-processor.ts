@@ -404,6 +404,7 @@ export class LLMProcessor {
       messageId, // Pass the message ID to final events
       ttftMs, // Pass the TTFT only if metrics were calculated
       ttltMs, // Pass the TTLT only if metrics were calculated
+      abortSignal, // Pass the abort signal to handle aborted requests
     );
 
     // Call response hooks with session ID
@@ -462,11 +463,18 @@ export class LLMProcessor {
     messageId?: string,
     ttftMs?: number,
     ttltMs?: number,
+    abortSignal?: AbortSignal,
   ): void {
+    // Provide default content for aborted requests to prevent empty assistant messages
+    let finalContent = content;
+    if (!content && abortSignal?.aborted) {
+      finalContent = '[Request was aborted by user]';
+    }
+
     // If we have complete content, create a consolidated assistant message event
-    if (content || currentToolCalls.length > 0) {
+    if (finalContent || currentToolCalls.length > 0) {
       const assistantEvent = this.eventStream.createEvent('assistant_message', {
-        content: content,
+        content: finalContent,
         rawContent: rawContent,
         toolCalls: currentToolCalls.length > 0 ? currentToolCalls : undefined,
         finishReason: finishReason,
