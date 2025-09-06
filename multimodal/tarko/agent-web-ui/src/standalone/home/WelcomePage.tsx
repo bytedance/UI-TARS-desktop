@@ -274,7 +274,7 @@ const WelcomePage: React.FC = () => {
                     transition={{ duration: 0.3, delay: 0.4 + index * 0.1 }}
                     type="button"
                     onClick={() => handleChatSubmit(prompt)}
-                    className="text-sm px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/30 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300 transition-colors max-w-xs whitespace-nowrap overflow-hidden text-ellipsis"
+                    className="text-sm px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/30 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300 transition-colors max-w-sm whitespace-nowrap overflow-hidden text-ellipsis"
                     disabled={isLoading || isDirectChatLoading}
                   >
                     {prompt}
