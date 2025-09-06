@@ -49,9 +49,9 @@ export const SessionCreatingState: React.FC<SessionCreatingStateProps> = ({ isCr
 
   const pulseVariants = {
     pulse: {
-      scale: [1, 1.08, 1],
+      scale: [1, 1.05, 1],
       transition: {
-        duration: 2,
+        duration: 2.5,
         repeat: Infinity,
         ease: 'easeInOut',
       },
@@ -70,23 +70,36 @@ export const SessionCreatingState: React.FC<SessionCreatingStateProps> = ({ isCr
       className="flex items-center justify-center h-full"
     >
       <div className="text-center max-w-sm mx-auto px-6">
-        {/* Enhanced loading icon with clean spinner */}
+        {/* Enhanced loading icon with refined glow */}
         <motion.div variants={iconContainerVariants} className="relative mb-8">
-          {/* Enhanced background glow for loading state */}
+          {/* Refined background glow - multiple layers for elegance */}
           <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-blue-500/30 via-purple-500/30 to-blue-500/30 rounded-full blur-xl"
+            className="absolute inset-0 w-32 h-32 mx-auto rounded-full bg-blue-500/10 blur-2xl"
             animate={{
-              scale: [0.8, 1.3, 0.8],
-              opacity: [0.4, 0.8, 0.4],
+              scale: [0.9, 1.1, 0.9],
+              opacity: [0.3, 0.5, 0.3],
             }}
             transition={{
-              duration: 2,
+              duration: 3,
               repeat: Infinity,
               ease: 'easeInOut',
             }}
           />
+          <motion.div
+            className="absolute inset-2 w-28 h-28 mx-auto rounded-full bg-blue-400/15 blur-xl"
+            animate={{
+              scale: [1.1, 0.9, 1.1],
+              opacity: [0.2, 0.4, 0.2],
+            }}
+            transition={{
+              duration: 2.5,
+              repeat: Infinity,
+              ease: 'easeInOut',
+              delay: 0.5,
+            }}
+          />
 
-          {/* Main loading container with enhanced pulse */}
+          {/* Main loading container with subtle pulse */}
           <motion.div
             className="relative w-24 h-24 bg-gradient-to-br from-white via-gray-50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-3xl flex items-center justify-center mx-auto shadow-xl border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-sm"
             variants={pulseVariants}
