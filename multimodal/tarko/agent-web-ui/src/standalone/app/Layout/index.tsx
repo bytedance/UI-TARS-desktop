@@ -71,17 +71,11 @@ export const Layout: React.FC<LayoutProps> = ({ isReplayMode: propIsReplayMode }
             </div>
           </div>
 
-          {/* Mobile layout: vertical split */}
+          {/* Mobile layout: chat only */}
           <div className="md:hidden flex flex-col gap-3 flex-1 min-h-0">
             <div className="flex-1 flex flex-col overflow-hidden min-h-0">
               <Shell className="h-full rounded-xl shadow-lg shadow-gray-200/50 dark:shadow-gray-950/20">
                 <ChatPanel />
-              </Shell>
-            </div>
-
-            <div className="flex-1 flex flex-col overflow-hidden min-h-0">
-              <Shell className="h-full rounded-xl shadow-lg shadow-gray-200/50 dark:shadow-gray-950/20">
-                <WorkspacePanel />
               </Shell>
             </div>
           </div>
