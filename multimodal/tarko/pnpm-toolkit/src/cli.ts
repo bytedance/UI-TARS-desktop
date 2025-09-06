@@ -106,6 +106,9 @@ export function bootstrapCli() {
     .option(
       '--filter-types <types>',
       'Comma-separated list of commit types to include in changelog',
+      {
+        default: '',
+      },
     )
     .alias('release')
     .action((opts) => {
@@ -113,8 +116,10 @@ export function bootstrapCli() {
       if (opts.filterScopes) {
         opts.filterScopes = opts.filterScopes.split(',').map((s: string) => s.trim());
       }
-      if (opts.filterTypes) {
+      if (opts.filterTypes && opts.filterTypes.trim()) {
         opts.filterTypes = opts.filterTypes.split(',').map((s: string) => s.trim());
+      } else {
+        opts.filterTypes = [];
       }
       return wrapCommand(release, opts);
     });
@@ -172,14 +177,19 @@ export function bootstrapCli() {
     .option(
       '--filter-types <types>',
       'Comma-separated list of commit types to include in changelog',
+      {
+        default: '',
+      },
     )
     .action((opts) => {
       // Process filter options
       if (opts.filterScopes) {
         opts.filterScopes = opts.filterScopes.split(',').map((s: string) => s.trim());
       }
-      if (opts.filterTypes) {
+      if (opts.filterTypes && opts.filterTypes.trim()) {
         opts.filterTypes = opts.filterTypes.split(',').map((s: string) => s.trim());
+      } else {
+        opts.filterTypes = [];
       }
       return wrapCommand(changelog, opts);
     });
