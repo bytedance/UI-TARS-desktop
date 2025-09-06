@@ -6,8 +6,41 @@ export const strReplaceEditorRendererCondition: FunctionToolToRendererCondition 
 ): string | null => {
   if (toolName === 'str_replace_editor') {
     /**
-     *
-     * Object case (always FAIL for now):
+     * NEW: panelContent.content structure (current format):
+     * {
+     *   "output": "File created successfully at: /home/gem/lynx_cross_platform_framework_report.md",
+     *   "error": null,
+     *   "path": "/home/gem/lynx_cross_platform_framework_report.md",
+     *   "prev_exist": false,
+     *   "old_content": null,
+     *   "new_content": "...markdown text..."
+     * }
+     */
+    if (typeof content === 'object' && content !== null) {
+      // Handle new panelContent.content structure
+      if ('output' in content && 'path' in content && 'prev_exist' in content) {
+        // File edit operation (has both old and new content)
+        if (content.prev_exist && content.old_content && content.new_content) {
+          return 'diff_result';
+        }
+
+        // File creation operation (has new content but no old content)
+        if (content.new_content) {
+          return 'file_result';
+        }
+
+        // Error case or other operations
+        if (content.error) {
+          return 'command_result';
+        }
+
+        // Default to command result for other cases
+        return 'command_result';
+      }
+    }
+
+    /**
+     * LEGACY: Object case (wrapped in panelContent):
      *
      * {
      *    "panelContent": {
