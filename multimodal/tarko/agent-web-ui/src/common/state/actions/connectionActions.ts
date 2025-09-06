@@ -13,6 +13,7 @@ import {
  */
 export const checkConnectionStatusAction = atom(null, async (get, set) => {
   const currentStatus = get(connectionStatusAtom);
+  const wasConnected = currentStatus.connected;
 
   try {
     const isConnected = await apiService.checkServerHealth();
@@ -24,24 +25,30 @@ export const checkConnectionStatusAction = atom(null, async (get, set) => {
       lastError: isConnected ? null : currentStatus.lastError,
     });
 
-    // Load workspace info when connection is successful
-    // Agent info will be loaded from session metadata when a session is active
-    if (isConnected) {
+    // Only load agent options when connection is newly established or first time
+    // This prevents unnecessary API calls on periodic health checks
+    if (isConnected && (!wasConnected || Object.keys(get(agentOptionsAtom)).length === 0)) {
       try {
         const agentOptions = await apiService.getAgentOptions();
-        set(agentOptionsAtom, agentOptions);
+        const currentAgentOptions = get(agentOptionsAtom);
+        
+        // Only update if options have actually changed to prevent unnecessary re-renders
+        const hasChanged = JSON.stringify(currentAgentOptions) !== JSON.stringify(agentOptions);
+        if (hasChanged) {
+          set(agentOptionsAtom, agentOptions);
 
-        // Extract workspace info from agent options
-        set(sessionMetadataAtom, (prev) => ({
-          ...prev,
-          metadata: {
-            ...prev.metadata,
-            workspace: {
-              name: agentOptions.workspaceName || 'Unknown',
-              path: agentOptions.workspace || '',
+          // Extract workspace info from agent options
+          set(sessionMetadataAtom, (prev) => ({
+            ...prev,
+            metadata: {
+              ...prev.metadata,
+              workspace: {
+                name: agentOptions.workspaceName || 'Unknown',
+                path: agentOptions.workspace || '',
+              },
             },
-          },
-        }));
+          }));
+        }
       } catch (error) {
         console.warn('Failed to load agent options:', error);
       }
