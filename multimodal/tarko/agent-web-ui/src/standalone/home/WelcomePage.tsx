@@ -30,14 +30,7 @@ const WelcomePage: React.FC = () => {
   
   // Constants for prompt management
   const MAX_DISPLAYED_PROMPTS = 3;
-  const MAX_PROMPT_LENGTH = 70;
   const shouldShowShuffle = allPrompts.length > MAX_DISPLAYED_PROMPTS;
-  
-  // Function to truncate prompt text
-  const truncatePrompt = (prompt: string): string => {
-    if (prompt.length <= MAX_PROMPT_LENGTH) return prompt;
-    return prompt.slice(0, MAX_PROMPT_LENGTH) + '...';
-  };
   
   // Function to get random prompts, avoiding recently used ones when possible
   const getRandomPrompts = (count: number): string[] => {
@@ -251,13 +244,13 @@ const WelcomePage: React.FC = () => {
           {/* Example prompts - Use configuration with fallback */}
           {displayedPrompts.length > 0 && (
             <div className="mt-6 flex flex-wrap justify-center gap-2">
-              {displayedPrompts.map((prompt, index) => {
-                const truncatedPrompt = truncatePrompt(prompt);
-                const needsTooltip = prompt.length > MAX_PROMPT_LENGTH;
-                
-                const buttonElement = (
+              {displayedPrompts.map((prompt, index) => (
+                <Tooltip
+                  key={`${prompt}-${index}`}
+                  title={prompt}
+                  {...getTooltipProps('top')}
+                >
                   <motion.button
-                    key={`${prompt}-${index}`}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: 0.4 + index * 0.1 }}
@@ -266,22 +259,10 @@ const WelcomePage: React.FC = () => {
                     className="text-sm px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/30 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300 transition-colors max-w-xs whitespace-nowrap overflow-hidden text-ellipsis"
                     disabled={isLoading || isDirectChatLoading}
                   >
-                    {truncatedPrompt}
+                    {prompt}
                   </motion.button>
-                );
-                
-                return needsTooltip ? (
-                  <Tooltip
-                    key={`${prompt}-${index}`}
-                    title={prompt}
-                    {...getTooltipProps('top')}
-                  >
-                    {buttonElement}
-                  </Tooltip>
-                ) : (
-                  buttonElement
-                );
-              })}
+                </Tooltip>
+              ))}
               {shouldShowShuffle && (
                 <motion.button
                   key={`shuffle-${displayedPrompts.join('-')}`}
