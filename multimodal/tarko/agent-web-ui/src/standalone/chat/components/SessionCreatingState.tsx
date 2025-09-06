@@ -70,7 +70,7 @@ export const SessionCreatingState: React.FC<SessionCreatingStateProps> = ({ isCr
       className="flex items-center justify-center h-full"
     >
       <div className="text-center max-w-sm mx-auto px-6">
-        {/* Enhanced loading icon with more prominent spinner */}
+        {/* Enhanced loading icon with clean spinner */}
         <motion.div variants={iconContainerVariants} className="relative mb-8">
           {/* Enhanced background glow for loading state */}
           <motion.div
@@ -92,14 +92,14 @@ export const SessionCreatingState: React.FC<SessionCreatingStateProps> = ({ isCr
             variants={pulseVariants}
             animate="pulse"
           >
-            {/* Prominent loading spinner */}
+            {/* Clean loading spinner */}
             <div className="relative z-10">
               <motion.div
                 animate={{
                   rotate: 360,
                 }}
                 transition={{
-                  duration: 1.5,
+                  duration: 2,
                   repeat: Infinity,
                   ease: 'linear',
                 }}
@@ -108,19 +108,6 @@ export const SessionCreatingState: React.FC<SessionCreatingStateProps> = ({ isCr
                 <FiLoader size={32} strokeWidth={2.5} />
               </motion.div>
             </div>
-
-            {/* Loading indicator ring */}
-            <motion.div
-              className="absolute inset-2 border-2 border-transparent border-t-blue-500/40 dark:border-t-blue-400/40 rounded-full"
-              animate={{
-                rotate: 360,
-              }}
-              transition={{
-                duration: 2.5,
-                repeat: Infinity,
-                ease: 'linear',
-              }}
-            />
           </motion.div>
         </motion.div>
 
