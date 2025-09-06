@@ -3,10 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiCpu } from 'react-icons/fi';
 import { useSession } from '@/common/hooks/useSession';
 import { usePlan } from '@/common/hooks/usePlan';
-import { FilesDisplay } from './FilesDisplay';
-
-import { useAtomValue } from 'jotai';
-import { sessionFilesAtom } from '@/common/state/atoms/files';
 
 interface ActionBarProps {
   sessionId: string | null;
@@ -14,18 +10,19 @@ interface ActionBarProps {
 }
 
 /**
- * ActionBar Component - Manages Generated Files and View Plan functionality
+ * ActionBar Component - Manages View Plan functionality
  *
  * Design principles:
  * - Decoupled from MessageInput for better modularity
  * - Independent control over UI presentation
  * - Maintains original functionality and styling
  * - Enhanced visual separation with background styling
+ * 
+ * Note: Generated Files functionality has been moved to WorkspaceContent
  */
 export const ActionBar: React.FC<ActionBarProps> = ({ sessionId, className = '' }) => {
   const { setActivePanelContent } = useSession();
   const { currentPlan } = usePlan(sessionId);
-  const allFiles = useAtomValue(sessionFilesAtom);
 
   const shouldShowPlan =
     currentPlan && currentPlan.hasGeneratedPlan && currentPlan.steps.length > 0;
@@ -82,10 +79,7 @@ export const ActionBar: React.FC<ActionBarProps> = ({ sessionId, className = '' 
     );
   };
 
-  const files = (sessionId && allFiles[sessionId]) ?? [];
-  const shouldShowActionBar = shouldShowPlan || files.length > 0;
-
-  if (!shouldShowActionBar) {
+  if (!shouldShowPlan) {
     return null;
   }
 
@@ -95,16 +89,9 @@ export const ActionBar: React.FC<ActionBarProps> = ({ sessionId, className = '' 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 10 }}
-        className={`mx-0 mb-3 p-3 bg-[#f9fafb] dark:bg-slate-800/60 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-gray-700/50 ${className}`}
+        className={`mx-0 mb-3 flex justify-center ${className}`}
       >
-        <div className="flex justify-between items-start gap-4">
-          <div className="flex-1 min-w-0">
-            {sessionId && files.length > 0 && (
-              <FilesDisplay files={allFiles[sessionId]} sessionId={sessionId} compact={true} />
-            )}
-          </div>
-          {shouldShowPlan && <div className="flex-shrink-0">{renderPlanButton()}</div>}
-        </div>
+        {renderPlanButton()}
       </motion.div>
     </AnimatePresence>
   );

@@ -14,6 +14,9 @@ import {
 import { apiService } from '@/common/services/apiService';
 import { normalizeFilePath } from '@/common/utils/pathNormalizer';
 import { getAgentTitle } from '@/config/web-ui-config';
+import { useAtomValue } from 'jotai';
+import { sessionFilesAtom } from '@/common/state/atoms/files';
+import { WorkspaceFileManager } from './components/WorkspaceFileManager';
 import './Workspace.css';
 
 /**
@@ -28,6 +31,7 @@ export const WorkspaceContent: React.FC = () => {
   const { activeSessionId, setActivePanelContent } = useSession();
   const { currentPlan } = usePlan(activeSessionId);
   const [workspacePath, setWorkspacePath] = useState<string>('');
+  const allFiles = useAtomValue(sessionFilesAtom);
 
   useEffect(() => {
     const fetchWorkspaceInfo = async () => {
@@ -229,7 +233,10 @@ export const WorkspaceContent: React.FC = () => {
   }
 
   // Enhanced empty state when session exists but no content
-  const hasContent = currentPlan && currentPlan.hasGeneratedPlan && currentPlan.steps.length > 0;
+  const hasPlan = currentPlan && currentPlan.hasGeneratedPlan && currentPlan.steps.length > 0;
+  const files = (activeSessionId && allFiles[activeSessionId]) ?? [];
+  const hasFiles = files.length > 0;
+  const hasContent = hasPlan || hasFiles;
 
   return (
     <div className="h-full flex flex-col">
@@ -255,10 +262,17 @@ export const WorkspaceContent: React.FC = () => {
             variants={containerVariants}
             initial="initial"
             animate="animate"
-            className="space-y-8"
+            className="space-y-6"
           >
+            {/* Generated Files */}
+            {hasFiles && activeSessionId && (
+              <motion.div variants={itemVariants}>
+                <WorkspaceFileManager files={files} sessionId={activeSessionId} />
+              </motion.div>
+            )}
+            
             {/* Plan view for Pro users */}
-            {renderPlanButton()}
+            {hasPlan && renderPlanButton()}
           </motion.div>
         ) : (
           /* Modern Ready for Action state with unified design */
