@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FiX, FiPlay } from 'react-icons/fi';
+import { FiX, FiPlay, FiMessageSquare, FiZap } from 'react-icons/fi';
 import { getAgentTitle } from '@/config/web-ui-config';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { ReplayState } from '@/common/state/atoms/replay';
@@ -62,7 +62,7 @@ const CountdownCircle: React.FC<{ seconds: number; total: number }> = ({ seconds
 };
 
 /**
- * EmptyState Component - Elegant empty state with auto-play countdown
+ * EmptyState Component - Modern, elegant empty state with premium design
  */
 export const EmptyState: React.FC<EmptyStateProps> = ({ replayState, isReplayMode }) => {
   const { cancelAutoPlay } = useReplayMode();
@@ -72,18 +72,57 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ replayState, isReplayMod
     visible: {
       opacity: 1,
       transition: {
-        duration: 0.5,
-        staggerChildren: 0.1,
+        duration: 0.6,
+        staggerChildren: 0.15,
+        ease: [0.25, 0.46, 0.45, 0.94],
       },
     },
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 24, scale: 0.95 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5, ease: 'easeOut' },
+      scale: 1,
+      transition: {
+        duration: 0.6,
+        ease: [0.25, 0.46, 0.45, 0.94],
+      },
+    },
+  };
+
+  const iconContainerVariants = {
+    hidden: { scale: 0.8, opacity: 0 },
+    visible: {
+      scale: 1,
+      opacity: 1,
+      transition: {
+        duration: 0.7,
+        ease: [0.25, 0.46, 0.45, 0.94],
+      },
+    },
+  };
+
+  const shimmerVariants = {
+    shimmer: {
+      x: ['-100%', '100%'],
+      transition: {
+        duration: 2.5,
+        repeat: Infinity,
+        ease: 'easeInOut',
+      },
+    },
+  };
+
+  const floatingDots = {
+    float: {
+      y: [-6, 6, -6],
+      transition: {
+        duration: 3,
+        repeat: Infinity,
+        ease: 'easeInOut',
+      },
     },
   };
 
@@ -92,7 +131,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ replayState, isReplayMod
       initial="hidden"
       animate="visible"
       variants={containerVariants}
-      className="flex items-center justify-center h-full min-h-[400px]"
+      className="flex items-center justify-center h-full min-h-[400px] bg-gradient-to-br from-gray-50/30 via-white/20 to-blue-50/30 dark:from-gray-900/30 dark:via-gray-800/20 dark:to-blue-900/30"
     >
       <div className="text-center p-8 max-w-lg">
         {/* Auto-play countdown state */}
@@ -163,35 +202,152 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ replayState, isReplayMod
             </div>
           </motion.div>
         ) : (
-          /* Standard empty state */
-          <motion.div variants={containerVariants}>
-            {/* Icon */}
-            <motion.div
-              variants={itemVariants}
-              className="w-16 h-16 bg-gradient-to-br from-gray-100 to-white dark:from-gray-800 dark:to-gray-700 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-gray-200/50 dark:border-gray-600/50 shadow-sm"
-            >
-              <FiPlay size={24} className="text-gray-500 dark:text-gray-400 ml-1" />
+          /* Modern standard empty state */
+          <motion.div variants={containerVariants} className="max-w-md mx-auto">
+            {/* Enhanced icon with modern design */}
+            <motion.div variants={iconContainerVariants} className="relative mb-8">
+              {/* Background glow */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-blue-500/15 via-purple-500/15 to-green-500/15 rounded-full blur-xl"
+                animate={{
+                  scale: [0.8, 1.1, 0.8],
+                  opacity: [0.2, 0.4, 0.2],
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
+              />
+              
+              {/* Main icon container */}
+              <motion.div
+                className="relative w-20 h-20 bg-gradient-to-br from-white via-gray-50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-3xl flex items-center justify-center mx-auto shadow-lg border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-sm"
+                whileHover={{ scale: 1.05, y: -2 }}
+                transition={{ duration: 0.2 }}
+              >
+                {/* Shimmer effect */}
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent dark:via-white/10 rounded-3xl overflow-hidden"
+                  variants={shimmerVariants}
+                  animate="shimmer"
+                />
+                
+                {/* Icon */}
+                <div className="relative z-10">
+                  {isReplayMode && replayState.currentEventIndex === -1 ? (
+                    <motion.div
+                      animate={{
+                        scale: [1, 1.1, 1],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                      }}
+                      className="text-green-600 dark:text-green-400"
+                    >
+                      <FiPlay size={28} className="ml-1" />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      animate={{
+                        rotate: [0, 5, -5, 0],
+                      }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                      }}
+                      className="text-blue-600 dark:text-blue-400"
+                    >
+                      <FiMessageSquare size={28} />
+                    </motion.div>
+                  )}
+                </div>
+                
+                {/* Accent dot */}
+                <motion.div
+                  className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
+                  animate={{
+                    scale: [0.8, 1.2, 0.8],
+                    opacity: [0.6, 1, 0.6],
+                  }}
+                  transition={{
+                    duration: 2.5,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                  }}
+                />
+              </motion.div>
+              
+              {/* Floating decorative elements */}
+              <motion.div
+                className="absolute -top-2 -left-2 w-2 h-2 bg-blue-400/50 rounded-full"
+                variants={floatingDots}
+                animate="float"
+              />
+              <motion.div
+                className="absolute -bottom-2 -right-2 w-1.5 h-1.5 bg-purple-400/50 rounded-full"
+                variants={floatingDots}
+                animate="float"
+                transition={{ delay: 1.5 }}
+              />
             </motion.div>
 
-            {/* Title */}
+            {/* Enhanced title with gradient */}
             <motion.h3
               variants={itemVariants}
-              className="text-xl font-display font-semibold mb-3 text-gray-900 dark:text-gray-100"
+              className="text-2xl font-semibold mb-4 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-gray-100 dark:via-white dark:to-gray-100 text-transparent bg-clip-text tracking-tight"
             >
               {isReplayMode && replayState.currentEventIndex === -1
                 ? 'Ready to replay'
                 : 'Start a conversation'}
             </motion.h3>
 
-            {/* Description */}
+            {/* Elegant description */}
             <motion.p
               variants={itemVariants}
-              className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed max-w-sm mx-auto"
+              className="text-gray-600 dark:text-gray-400 leading-relaxed mb-6 max-w-sm mx-auto"
             >
               {isReplayMode && replayState.currentEventIndex === -1
                 ? 'Press play to start the replay or use the timeline to navigate through the session.'
                 : `Ask ${getAgentTitle()} a question or submit a task to begin your conversation.`}
             </motion.p>
+            
+            {/* Modern accent indicator */}
+            <motion.div
+              variants={itemVariants}
+              className="flex items-center justify-center space-x-3"
+            >
+              <div className="flex space-x-1.5">
+                {[0, 1, 2].map((i) => (
+                  <motion.div
+                    key={i}
+                    className="w-1.5 h-1.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
+                    animate={{
+                      scale: [0.8, 1.2, 0.8],
+                      opacity: [0.3, 0.8, 0.3],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      delay: i * 0.3,
+                      ease: 'easeInOut',
+                    }}
+                  />
+                ))}
+              </div>
+              
+              {/* Subtle accent */}
+              <motion.div
+                className="text-blue-500/50 dark:text-blue-400/50"
+                animate={{ opacity: [0.3, 0.7, 0.3] }}
+                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                <FiZap size={12} />
+              </motion.div>
+            </motion.div>
           </motion.div>
         )}
       </div>
