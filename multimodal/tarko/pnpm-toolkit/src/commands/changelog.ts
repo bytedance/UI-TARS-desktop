@@ -39,7 +39,10 @@ function filterCommits(
       if (!commit.scope) return false;
 
       // Check if any of the filter scopes match the commit scope
-      return filterScopes.some((filterScope) => commit.scope?.startsWith(filterScope));
+      // Support both prefix matching (tars -> tars-stack) and suffix matching (agent -> o-agent)
+      return filterScopes.some((filterScope) => 
+        commit.scope?.startsWith(filterScope) || commit.scope?.endsWith(filterScope)
+      );
     }
 
     return true;
