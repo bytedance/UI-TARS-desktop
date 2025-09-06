@@ -181,7 +181,7 @@ export const SessionCreatingState: React.FC<SessionCreatingStateProps> = ({ isCr
           variants={itemVariants}
           className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed"
         >
-          Setting up your AI workspace with care
+          Setting up your Agent workspace with care
         </motion.p>
 
         {/* Modern progress indicator */}
