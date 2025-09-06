@@ -53,7 +53,7 @@ export const useScrollToBottom = ({
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
     
     // Account for sub-pixel differences and rounding errors
-    return distanceFromBottom <= Math.max(threshold, 1);
+    return distanceFromBottom <= Math.max(threshold, 3);
   }, [threshold]);
 
   // Handle scroll events
@@ -66,13 +66,17 @@ export const useScrollToBottom = ({
     
     const { scrollTop, scrollHeight, clientHeight } = container;
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-    const atBottom = distanceFromBottom <= Math.max(threshold, 1);
+    
+    // More robust bottom detection with better tolerance for rounding errors
+    const atBottom = distanceFromBottom <= Math.max(threshold, 3);
     
     // Only show button when:
     // 1. NOT at bottom
     // 2. There's scrollable content (scrollHeight > clientHeight)
-    const hasScrollableContent = scrollHeight > clientHeight + 10; // Add small buffer
-    const shouldShow = !atBottom && hasScrollableContent;
+    // 3. User has actually scrolled up (not just a minor difference)
+    const hasScrollableContent = scrollHeight > clientHeight + 5;
+    const hasScrolledUp = distanceFromBottom > 10; // Must be meaningfully away from bottom
+    const shouldShow = !atBottom && hasScrollableContent && hasScrolledUp;
     
     setShowScrollToBottom(shouldShow);
   }, [threshold]);
@@ -89,11 +93,11 @@ export const useScrollToBottom = ({
       behavior: 'smooth'
     });
     
-    // Reset scrolling flag after animation completes and hide button
+    // Reset scrolling flag after animation completes and force check scroll position
     setTimeout(() => {
       isScrollingRef.current = false;
-      // Hide button immediately when reaching bottom after scroll
-      setShowScrollToBottom(false);
+      // Force check scroll position to ensure button hides when at bottom
+      handleScroll();
     }, SCROLL_ANIMATION_DELAY);
   }, []);
 
