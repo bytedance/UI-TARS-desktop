@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FiX, FiPlay, FiMessageSquare, FiZap } from 'react-icons/fi';
+import { FiX, FiPlay, FiMessageSquare } from 'react-icons/fi';
 import { getAgentTitle } from '@/config/web-ui-config';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { ReplayState } from '@/common/state/atoms/replay';
@@ -100,19 +100,6 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ replayState, isReplayMod
       transition: {
         duration: 0.7,
         ease: [0.25, 0.46, 0.45, 0.94],
-      },
-    },
-  };
-
-
-
-  const floatingDots = {
-    float: {
-      y: [-6, 6, -6],
-      transition: {
-        duration: 3,
-        repeat: Infinity,
-        ease: 'easeInOut',
       },
     },
   };
@@ -217,8 +204,6 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ replayState, isReplayMod
                 whileHover={{ scale: 1.05, y: -2 }}
                 transition={{ duration: 0.2 }}
               >
-
-                
                 {/* Icon */}
                 <div className="relative z-10">
                   {isReplayMode && replayState.currentEventIndex === -1 ? (
@@ -251,34 +236,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ replayState, isReplayMod
                     </motion.div>
                   )}
                 </div>
-                
-                {/* Accent dot */}
-                <motion.div
-                  className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
-                  animate={{
-                    scale: [0.8, 1.2, 0.8],
-                    opacity: [0.6, 1, 0.6],
-                  }}
-                  transition={{
-                    duration: 2.5,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                  }}
-                />
               </motion.div>
-              
-              {/* Floating decorative elements */}
-              <motion.div
-                className="absolute -top-2 -left-2 w-2 h-2 bg-blue-400/50 rounded-full"
-                variants={floatingDots}
-                animate="float"
-              />
-              <motion.div
-                className="absolute -bottom-2 -right-2 w-1.5 h-1.5 bg-purple-400/50 rounded-full"
-                variants={floatingDots}
-                animate="float"
-                transition={{ delay: 1.5 }}
-              />
             </motion.div>
 
             {/* Enhanced title with gradient */}
@@ -300,40 +258,6 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ replayState, isReplayMod
                 ? 'Press play to start the replay or use the timeline to navigate through the session.'
                 : `Ask ${getAgentTitle()} a question or submit a task to begin your conversation.`}
             </motion.p>
-            
-            {/* Modern accent indicator */}
-            <motion.div
-              variants={itemVariants}
-              className="flex items-center justify-center space-x-3"
-            >
-              <div className="flex space-x-1.5">
-                {[0, 1, 2].map((i) => (
-                  <motion.div
-                    key={i}
-                    className="w-1.5 h-1.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
-                    animate={{
-                      scale: [0.8, 1.2, 0.8],
-                      opacity: [0.3, 0.8, 0.3],
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      delay: i * 0.3,
-                      ease: 'easeInOut',
-                    }}
-                  />
-                ))}
-              </div>
-              
-              {/* Subtle accent */}
-              <motion.div
-                className="text-blue-500/50 dark:text-blue-400/50"
-                animate={{ opacity: [0.3, 0.7, 0.3] }}
-                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-              >
-                <FiZap size={12} />
-              </motion.div>
-            </motion.div>
           </motion.div>
         )}
       </div>

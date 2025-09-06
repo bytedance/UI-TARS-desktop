@@ -10,7 +10,6 @@ import {
   FiLayers,
   FiActivity,
   FiFileText,
-  FiMessageSquare,
 } from 'react-icons/fi';
 import { apiService } from '@/common/services/apiService';
 import { normalizeFilePath } from '@/common/utils/pathNormalizer';
@@ -81,21 +80,6 @@ export const WorkspaceContent: React.FC = () => {
       },
     },
   };
-
-
-
-  const floatingDots = {
-    float: {
-      y: [-6, 6, -6],
-      transition: {
-        duration: 3,
-        repeat: Infinity,
-        ease: 'easeInOut',
-      },
-    },
-  };
-
-
 
   // Plan view button for Pro users
   const renderPlanButton = () => {
@@ -307,8 +291,6 @@ export const WorkspaceContent: React.FC = () => {
                   whileHover={{ scale: 1.05, y: -2 }}
                   transition={{ duration: 0.2 }}
                 >
-
-                  
                   {/* Icon */}
                   <div className="relative z-10">
                     <motion.div
@@ -326,34 +308,7 @@ export const WorkspaceContent: React.FC = () => {
                       <FiActivity size={28} />
                     </motion.div>
                   </div>
-                  
-                  {/* Accent dot */}
-                  <motion.div
-                    className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
-                    animate={{
-                      scale: [0.8, 1.2, 0.8],
-                      opacity: [0.6, 1, 0.6],
-                    }}
-                    transition={{
-                      duration: 2.5,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                    }}
-                  />
                 </motion.div>
-                
-                {/* Floating decorative elements */}
-                <motion.div
-                  className="absolute -top-2 -left-2 w-2 h-2 bg-blue-400/50 rounded-full"
-                  variants={floatingDots}
-                  animate="float"
-                />
-                <motion.div
-                  className="absolute -bottom-2 -right-2 w-1.5 h-1.5 bg-purple-400/50 rounded-full"
-                  variants={floatingDots}
-                  animate="float"
-                  transition={{ delay: 1.5 }}
-                />
               </motion.div>
 
               {/* Enhanced title with gradient */}
@@ -372,40 +327,6 @@ export const WorkspaceContent: React.FC = () => {
                 Your workspace is active. Start a conversation with {getAgentTitle()} and watch as tool
                 results, plans, and detailed information appear here in real-time.
               </motion.p>
-              
-              {/* Modern accent indicator */}
-              <motion.div
-                variants={itemVariants}
-                className="flex items-center justify-center space-x-3 mb-8"
-              >
-                <div className="flex space-x-1.5">
-                  {[0, 1, 2].map((i) => (
-                    <motion.div
-                      key={i}
-                      className="w-1.5 h-1.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
-                      animate={{
-                        scale: [0.8, 1.2, 0.8],
-                        opacity: [0.3, 0.8, 0.3],
-                      }}
-                      transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                        delay: i * 0.3,
-                        ease: 'easeInOut',
-                      }}
-                    />
-                  ))}
-                </div>
-                
-                {/* Subtle accent */}
-                <motion.div
-                  className="text-blue-500/50 dark:text-blue-400/50"
-                  animate={{ opacity: [0.3, 0.7, 0.3] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                >
-                  <FiZap size={12} />
-                </motion.div>
-              </motion.div>
 
               {/* Enhanced feature cards with modern design */}
               <motion.div
@@ -421,8 +342,6 @@ export const WorkspaceContent: React.FC = () => {
                   }}
                   className="flex flex-col items-center p-4 bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-2xl border border-gray-200/60 dark:border-gray-700/60 shadow-lg backdrop-blur-sm relative overflow-hidden"
                 >
-
-                  
                   <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/20 flex items-center justify-center mb-3 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-700/40 shadow-sm">
                     <motion.div
                       animate={{ rotate: [0, 5, -5, 0] }}
@@ -450,8 +369,6 @@ export const WorkspaceContent: React.FC = () => {
                   }}
                   className="flex flex-col items-center p-4 bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-2xl border border-gray-200/60 dark:border-gray-700/60 shadow-lg backdrop-blur-sm relative overflow-hidden"
                 >
-
-                  
                   <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/20 flex items-center justify-center mb-3 text-green-600 dark:text-green-400 border border-green-200/60 dark:border-green-700/40 shadow-sm">
                     <motion.div
                       animate={{ 
@@ -482,8 +399,6 @@ export const WorkspaceContent: React.FC = () => {
                   }}
                   className="flex flex-col items-center p-4 bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-2xl border border-gray-200/60 dark:border-gray-700/60 shadow-lg backdrop-blur-sm relative overflow-hidden"
                 >
-
-                  
                   <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/20 flex items-center justify-center mb-3 text-amber-600 dark:text-amber-400 border border-amber-200/60 dark:border-amber-700/40 shadow-sm">
                     <motion.div
                       animate={{ 
