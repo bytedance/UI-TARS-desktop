@@ -26,6 +26,10 @@ export type ConfigOptions = Pick<ClientOptions, 'apiKey' | 'baseURL'> & {
     apiVersion?: string;
     azureADTokenProvider?: any;
   };
+  /** Custom headers to be added to requests */
+  headers?: Record<string, string>;
+  /** Enable automatic provider-specific headers (default: true) */
+  autoHeaders?: boolean;
 };
 
 export type ChatCompletionChoice = Omit<ChatCompletion.Choice, 'finish_reason'> & {
