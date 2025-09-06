@@ -46,6 +46,7 @@ export const ChatPanel: React.FC = () => {
       dependencies: [activeMessages],
       sessionId: currentSessionId,
       isReplayMode,
+      autoScrollOnUserMessage: !isReplayMode, // Enable auto-scroll for user messages in normal mode
     });
 
   // Find research report in session
