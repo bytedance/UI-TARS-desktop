@@ -257,10 +257,10 @@ const WelcomePage: React.FC = () => {
                   onClick={handleShuffle}
                   className="text-sm px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/30 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300 transition-colors flex items-center gap-1.5"
                   disabled={isLoading || isDirectChatLoading}
-                  title="随机换一换"
+                  title="Shuffle"
                 >
                   <FiRefreshCw size={14} />
-                  <span>随机换一换</span>
+                  <span>Shuffle</span>
                 </motion.button>
               )}
             </div>
