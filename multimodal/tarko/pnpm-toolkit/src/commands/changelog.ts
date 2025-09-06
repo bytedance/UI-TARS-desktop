@@ -358,10 +358,10 @@ export async function changelog(options: ChangelogOptions = {}): Promise<void> {
     apiKey,
     baseURL,
     provider,
-    tagPrefix = 'v',
+    tagPrefix = '@agent-tars@',
     dryRun = false,
     filterScopes = [],
-    filterTypes = ['feat', 'fix'], // Default to showing only features and fixes
+    filterTypes = [], // Default to showing all commit types
   } = options;
 
   let { version } = options;

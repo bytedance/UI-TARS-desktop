@@ -1,5 +1,36 @@
 # Changelog
 
+## [0.3.0-beta.10](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.3.0-beta.9...@agent-tars@0.3.0-beta.10) (2025-09-06)
+
+### Features
+
+* **tarko:** limit welcome prompts to 3 with shuffle ([#1416](https://github.com/bytedance/UI-TARS-desktop/pull/1416)) ([c6d6791](https://github.com/bytedance/UI-TARS-desktop/commit/c6d679183)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** refine all empty state ([#1408](https://github.com/bytedance/UI-TARS-desktop/pull/1408)) ([18dc008](https://github.com/bytedance/UI-TARS-desktop/commit/18dc00803)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** add user message auto-scroll in normal mode ([#1412](https://github.com/bytedance/UI-TARS-desktop/pull/1412)) ([2c7f55d](https://github.com/bytedance/UI-TARS-desktop/commit/2c7f55dae)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** enhance slug generation with multilingual support ([#1410](https://github.com/bytedance/UI-TARS-desktop/pull/1410)) ([915c7c5](https://github.com/bytedance/UI-TARS-desktop/commit/915c7c576)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** auto-scroll for replay ([#1407](https://github.com/bytedance/UI-TARS-desktop/pull/1407)) ([da22a39](https://github.com/bytedance/UI-TARS-desktop/commit/da22a3985)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** improve ChatInput UX with conditional help text and home variant ([#1406](https://github.com/bytedance/UI-TARS-desktop/pull/1406)) ([8c38bfc](https://github.com/bytedance/UI-TARS-desktop/commit/8c38bfc17)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** refine thinking animation ([#1404](https://github.com/bytedance/UI-TARS-desktop/pull/1404)) ([bae4951](https://github.com/bytedance/UI-TARS-desktop/commit/bae4951db)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** refine scroll-to-bottom indicator ([#1402](https://github.com/bytedance/UI-TARS-desktop/pull/1402)) ([3a7d239](https://github.com/bytedance/UI-TARS-desktop/commit/3a7d23972)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** defaults background to white for html renderer ([#1397](https://github.com/bytedance/UI-TARS-desktop/pull/1397)) ([c583e7e](https://github.com/bytedance/UI-TARS-desktop/commit/c583e7eb3)) [@ULIVZ](https://github.com/ULIVZ)
+
+### Bug Fixes
+
+* **tarko:** prevent auto-scroll on refresh for historical user messages ([#1415](https://github.com/bytedance/UI-TARS-desktop/pull/1415)) ([62df723](https://github.com/bytedance/UI-TARS-desktop/commit/62df7230a)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** improve scroll-to-bottom indicator detection ([#1411](https://github.com/bytedance/UI-TARS-desktop/pull/1411)) ([556e3a0](https://github.com/bytedance/UI-TARS-desktop/commit/556e3a051)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** improve session UI state management ([#1409](https://github.com/bytedance/UI-TARS-desktop/pull/1409)) ([0391c11](https://github.com/bytedance/UI-TARS-desktop/commit/0391c1101)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** scroll-to-bottom indicator session switching and edge cases ([#1405](https://github.com/bytedance/UI-TARS-desktop/pull/1405)) ([442dab8](https://github.com/bytedance/UI-TARS-desktop/commit/442dab890)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** improve markdown link parsing edge cases ([#1398](https://github.com/bytedance/UI-TARS-desktop/pull/1398)) ([24fdf31](https://github.com/bytedance/UI-TARS-desktop/commit/24fdf3155)) [@ULIVZ](https://github.com/ULIVZ)
+
+### Code Refactoring
+
+* **tarko:** remove excessive dots from empty states ([#1414](https://github.com/bytedance/UI-TARS-desktop/pull/1414)) ([074559e](https://github.com/bytedance/UI-TARS-desktop/commit/074559e55)) [@ULIVZ](https://github.com/ULIVZ)
+
+### Chores
+
+* **o-agent:** update example prompts ([#1417](https://github.com/bytedance/UI-TARS-desktop/pull/1417)) ([3b28c9b](https://github.com/bytedance/UI-TARS-desktop/commit/3b28c9b27)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** enhance code block spacing ([#1400](https://github.com/bytedance/UI-TARS-desktop/pull/1400)) ([1752459](https://github.com/bytedance/UI-TARS-desktop/commit/17524599a)) [@ULIVZ](https://github.com/ULIVZ)
+
 ## [0.3.0-beta.9](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.3.0-beta.5...@agent-tars@0.3.0-beta.9) (2025-09-05)
 
 ### Features

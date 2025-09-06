@@ -91,7 +91,7 @@ export function bootstrapCli() {
       default: false,
     })
     .option('--tag-prefix <prefix>', 'Prefix for git tags', {
-      default: 'v',
+      default: '@agent-tars@',
     })
     .option('--use-ai', 'Use AI to generate changelog', {
       default: false,
@@ -142,7 +142,7 @@ export function bootstrapCli() {
       // There is no default value here, because the default is read from package.json
     })
     .option('--tag-prefix <prefix>', 'Prefix for git tags', {
-      default: 'v',
+      default: '@agent-tars@',
     })
     .option('--beautify', 'Beautify changelog or not', {
       default: false,
