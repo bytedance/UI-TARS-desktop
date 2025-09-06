@@ -6,12 +6,44 @@
 
 * **agent-tars:** strict-typed gui agent procotol ([#1295](https://github.com/bytedance/UI-TARS-desktop/pull/1295)) ([4aa9d78](https://github.com/bytedance/UI-TARS-desktop/commit/4aa9d7866)) [@ULIVZ](https://github.com/ULIVZ)
 * **agent-tars:** add static webui config to core ([#1266](https://github.com/bytedance/UI-TARS-desktop/pull/1266)) ([5ba0564](https://github.com/bytedance/UI-TARS-desktop/commit/5ba0564e5)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** limit welcome prompts to 3 with shuffle ([#1416](https://github.com/bytedance/UI-TARS-desktop/pull/1416)) ([c6d6791](https://github.com/bytedance/UI-TARS-desktop/commit/c6d679183)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** refine all empty state ([#1408](https://github.com/bytedance/UI-TARS-desktop/pull/1408)) ([18dc008](https://github.com/bytedance/UI-TARS-desktop/commit/18dc00803)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** add user message auto-scroll in normal mode ([#1412](https://github.com/bytedance/UI-TARS-desktop/pull/1412)) ([2c7f55d](https://github.com/bytedance/UI-TARS-desktop/commit/2c7f55dae)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** enhance slug generation with multilingual support ([#1410](https://github.com/bytedance/UI-TARS-desktop/pull/1410)) ([915c7c5](https://github.com/bytedance/UI-TARS-desktop/commit/915c7c576)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** auto-scroll for replay ([#1407](https://github.com/bytedance/UI-TARS-desktop/pull/1407)) ([da22a39](https://github.com/bytedance/UI-TARS-desktop/commit/da22a3985)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** improve ChatInput UX with conditional help text and home variant ([#1406](https://github.com/bytedance/UI-TARS-desktop/pull/1406)) ([8c38bfc](https://github.com/bytedance/UI-TARS-desktop/commit/8c38bfc17)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** refine thinking animation ([#1404](https://github.com/bytedance/UI-TARS-desktop/pull/1404)) ([bae4951](https://github.com/bytedance/UI-TARS-desktop/commit/bae4951db)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** refine scroll-to-bottom indicator ([#1402](https://github.com/bytedance/UI-TARS-desktop/pull/1402)) ([3a7d239](https://github.com/bytedance/UI-TARS-desktop/commit/3a7d23972)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** defaults background to white for html renderer ([#1397](https://github.com/bytedance/UI-TARS-desktop/pull/1397)) ([c583e7e](https://github.com/bytedance/UI-TARS-desktop/commit/c583e7eb3)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** refine LinkReaderRenderer ([#1393](https://github.com/bytedance/UI-TARS-desktop/pull/1393)) ([c9855426a](https://github.com/bytedance/UI-TARS-desktop/commit/c9855426a)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** auto-append `replay=1` to share URLs ([#1394](https://github.com/bytedance/UI-TARS-desktop/pull/1394)) ([6a8533248](https://github.com/bytedance/UI-TARS-desktop/commit/6a8533248)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** disable html rendering in markdown renderer ([#1391](https://github.com/bytedance/UI-TARS-desktop/pull/1391)) ([057a4669f](https://github.com/bytedance/UI-TARS-desktop/commit/057a4669f)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** refine behavior of `guiAgent.renderGUIAction` ([#1386](https://github.com/bytedance/UI-TARS-desktop/pull/1386)) ([94b4c32ad](https://github.com/bytedance/UI-TARS-desktop/commit/94b4c32ad)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** add multimodal clipboard paste support ([#1379](https://github.com/bytedance/UI-TARS-desktop/pull/1379)) ([2b40a7cbd](https://github.com/bytedance/UI-TARS-desktop/commit/2b40a7cbd)) [@ULIVZ](https://github.com/ULIVZ)
+* **o-agent:** temp hack for model thinking ([#1395](https://github.com/bytedance/UI-TARS-desktop/pull/1395)) ([605bf84d3](https://github.com/bytedance/UI-TARS-desktop/commit/605bf84d3)) [@ULIVZ](https://github.com/ULIVZ)
+* **o-agent:** system prompt update ([#1392](https://github.com/bytedance/UI-TARS-desktop/pull/1392)) ([b19f9ef4e](https://github.com/bytedance/UI-TARS-desktop/commit/b19f9ef4e)) [@ULIVZ](https://github.com/ULIVZ)
+* **o-agent:** update time and proxy instruction in sp ([#1384](https://github.com/bytedance/UI-TARS-desktop/pull/1384)) ([1906ec697](https://github.com/bytedance/UI-TARS-desktop/commit/1906ec697)) [@ULIVZ](https://github.com/ULIVZ)
+* **gui-agent:** delay 1s before screenshot on aio hybried operator ([#1388](https://github.com/bytedance/UI-TARS-desktop/pull/1388)) ([79e835ad2](https://github.com/bytedance/UI-TARS-desktop/commit/79e835ad2)) [@ULIVZ](https://github.com/ULIVZ)
+* **o-gui-agent:** support ChromeUI gui operation on AIO sandbox ([#1383](https://github.com/bytedance/UI-TARS-desktop/pull/1383)) ([a0343697b](https://github.com/bytedance/UI-TARS-desktop/commit/a0343697b)) [@ULIVZ](https://github.com/ULIVZ)
 
 ### Bug Fixes
 
 * **agent-server:** add safety check for agent.dispose in session cleanup ([#1291](https://github.com/bytedance/UI-TARS-desktop/pull/1291)) ([97ef7ad](https://github.com/bytedance/UI-TARS-desktop/commit/97ef7adb5)) [@ULIVZ](https://github.com/ULIVZ)
 * **agent-tars:** correct webui property name to webuiConfig ([#1267](https://github.com/bytedance/UI-TARS-desktop/pull/1267)) ([4a5f2fc](https://github.com/bytedance/UI-TARS-desktop/commit/4a5f2fc4f)) [@ULIVZ](https://github.com/ULIVZ)
 * **agent-tars:** move required deps from devDependencies to dependencies ([#1255](https://github.com/bytedance/UI-TARS-desktop/pull/1255)) ([24e6acf](https://github.com/bytedance/UI-TARS-desktop/commit/24e6acff5)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** prevent auto-scroll on refresh for historical user messages ([#1415](https://github.com/bytedance/UI-TARS-desktop/pull/1415)) ([62df7230a](https://github.com/bytedance/UI-TARS-desktop/commit/62df7230a)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** improve scroll-to-bottom indicator detection ([#1411](https://github.com/bytedance/UI-TARS-desktop/pull/1411)) ([556e3a051](https://github.com/bytedance/UI-TARS-desktop/commit/556e3a051)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** improve session UI state management ([#1409](https://github.com/bytedance/UI-TARS-desktop/pull/1409)) ([0391c1101](https://github.com/bytedance/UI-TARS-desktop/commit/0391c1101)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** scroll-to-bottom indicator session switching and edge cases ([#1405](https://github.com/bytedance/UI-TARS-desktop/pull/1405)) ([442dab890](https://github.com/bytedance/UI-TARS-desktop/commit/442dab890)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** improve markdown link parsing edge cases ([#1398](https://github.com/bytedance/UI-TARS-desktop/pull/1398)) ([24fdf3155](https://github.com/bytedance/UI-TARS-desktop/commit/24fdf3155)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** correct isProcessing state management during agent execution ([#1387](https://github.com/bytedance/UI-TARS-desktop/pull/1387)) ([9d0df702a](https://github.com/bytedance/UI-TARS-desktop/commit/9d0df702a)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** fix markdown link parsing with chinese text ([#1358](https://github.com/bytedance/UI-TARS-desktop/pull/1358)) ([73ca0ca7c](https://github.com/bytedance/UI-TARS-desktop/commit/73ca0ca7c)) [@ULIVZ](https://github.com/ULIVZ)
+
+### Chore
+
+* **o-agent:** update example prompts ([#1417](https://github.com/bytedance/UI-TARS-desktop/pull/1417)) ([3b28c9b27](https://github.com/bytedance/UI-TARS-desktop/commit/3b28c9b27)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** enhance code block spacing ([#1400](https://github.com/bytedance/UI-TARS-desktop/pull/1400)) ([17524599a](https://github.com/bytedance/UI-TARS-desktop/commit/17524599a)) [@ULIVZ](https://github.com/ULIVZ)
+* **o-agent:** disable gui agent screenshot switch and render ([#1385](https://github.com/bytedance/UI-TARS-desktop/pull/1385)) ([2a92348b2](https://github.com/bytedance/UI-TARS-desktop/commit/2a92348b2)) [@ULIVZ](https://github.com/ULIVZ)
 
 ## [0.3.0-beta.8](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.3.0-beta.5...@agent-tars@0.3.0-beta.8) (2025-09-04)
 
