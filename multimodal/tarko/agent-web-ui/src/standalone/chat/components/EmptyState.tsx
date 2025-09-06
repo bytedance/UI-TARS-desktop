@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FiX, FiPlay, FiMessageSquare, FiZap } from 'react-icons/fi';
+import { FiX, FiPlay, FiMessageSquare } from 'react-icons/fi';
 import { getAgentTitle } from '@/config/web-ui-config';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { ReplayState } from '@/common/state/atoms/replay';
@@ -28,7 +28,7 @@ const CountdownCircle: React.FC<{ seconds: number; total: number }> = ({ seconds
           r="18"
           fill="none"
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth="1.5"
           className="text-gray-200 dark:text-gray-700"
         />
         {/* Progress circle */}
@@ -38,21 +38,21 @@ const CountdownCircle: React.FC<{ seconds: number; total: number }> = ({ seconds
           r="18"
           fill="none"
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth="1.5"
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}
-          className="text-accent-500 dark:text-accent-400 transition-all duration-1000 ease-linear"
+          className="text-blue-500 dark:text-blue-400 transition-all duration-1000 ease-out"
         />
       </svg>
       {/* Center content */}
       <div className="absolute inset-0 flex items-center justify-center">
         <motion.span
           key={seconds}
-          initial={{ scale: 1.2, opacity: 0.7 }}
+          initial={{ scale: 1.1, opacity: 0.8 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.2 }}
-          className="text-xl font-bold text-gray-700 dark:text-gray-300"
+          transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+          className="text-lg font-medium text-gray-700 dark:text-gray-300"
         >
           {seconds}
         </motion.span>
@@ -62,57 +62,44 @@ const CountdownCircle: React.FC<{ seconds: number; total: number }> = ({ seconds
 };
 
 /**
- * EmptyState Component - Modern, elegant empty state with premium design
+ * EmptyState Component - Refined, sophisticated design with subtle elegance
  */
 export const EmptyState: React.FC<EmptyStateProps> = ({ replayState, isReplayMode }) => {
   const { cancelAutoPlay } = useReplayMode();
 
+  // Refined animation system - elegant and purposeful
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        duration: 0.6,
-        staggerChildren: 0.15,
-        ease: [0.25, 0.46, 0.45, 0.94],
+        duration: 0.8,
+        staggerChildren: 0.08,
+        ease: [0.23, 1, 0.32, 1], // Sophisticated easing
       },
     },
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 24, scale: 0.95 },
+    hidden: { opacity: 0, y: 12 },
     visible: {
       opacity: 1,
       y: 0,
-      scale: 1,
       transition: {
-        duration: 0.6,
-        ease: [0.25, 0.46, 0.45, 0.94],
+        duration: 0.7,
+        ease: [0.23, 1, 0.32, 1],
       },
     },
   };
 
-  const iconContainerVariants = {
-    hidden: { scale: 0.8, opacity: 0 },
+  const iconVariants = {
+    hidden: { scale: 0.95, opacity: 0 },
     visible: {
       scale: 1,
       opacity: 1,
       transition: {
-        duration: 0.7,
-        ease: [0.25, 0.46, 0.45, 0.94],
-      },
-    },
-  };
-
-
-
-  const floatingDots = {
-    float: {
-      y: [-6, 6, -6],
-      transition: {
-        duration: 3,
-        repeat: Infinity,
-        ease: 'easeInOut',
+        duration: 0.8,
+        ease: [0.23, 1, 0.32, 1],
       },
     },
   };
@@ -124,85 +111,69 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ replayState, isReplayMod
       variants={containerVariants}
       className="flex items-center justify-center h-full min-h-[400px]"
     >
-      <div className="text-center p-8 max-w-lg">
+      <div className="text-center p-8 max-w-md">
         {/* Auto-play countdown state */}
         {isReplayMode && replayState.autoPlayCountdown !== null ? (
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4 }}
+            transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
             className="relative"
           >
-            {/* Enhanced background card */}
-            <div className="bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-800 dark:to-gray-800/80 backdrop-blur-sm rounded-3xl p-10 shadow-xl border border-gray-100/60 dark:border-gray-700/40">
-              {/* Countdown circle with improved design */}
+            {/* Minimalist card with subtle depth */}
+            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl p-8 shadow-sm border border-gray-100/50 dark:border-gray-700/30">
+              {/* Countdown circle */}
               <motion.div
-                className="flex justify-center mb-8"
-                initial={{ scale: 0.8, opacity: 0 }}
+                className="flex justify-center mb-6"
+                initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
+                transition={{ duration: 0.6, delay: 0.1, ease: [0.23, 1, 0.32, 1] }}
               >
-                <div className="relative">
-                  <CountdownCircle seconds={replayState.autoPlayCountdown} total={3} />
-                  {/* Subtle glow effect */}
-                  <motion.div
-                    className="absolute inset-0 bg-blue-500/20 dark:bg-blue-400/20 rounded-full -z-10"
-                    animate={{
-                      scale: [1, 1.2, 1],
-                      opacity: [0, 0.3, 0],
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                    }}
-                  />
-                </div>
+                <CountdownCircle seconds={replayState.autoPlayCountdown} total={3} />
               </motion.div>
 
-              {/* Enhanced title and description */}
+              {/* Clean typography */}
               <motion.h3
-                className="text-xl font-display font-semibold mb-3 text-gray-900 dark:text-gray-100"
+                className="text-lg font-medium mb-2 text-gray-900 dark:text-gray-100"
                 variants={itemVariants}
               >
                 Auto-play starting
               </motion.h3>
               <motion.p
-                className="text-gray-600 dark:text-gray-400 text-sm mb-8 leading-relaxed max-w-sm mx-auto"
+                className="text-gray-600 dark:text-gray-400 text-sm mb-6 leading-relaxed"
                 variants={itemVariants}
               >
-                Replay will begin in{' '}
+                Replay begins in{' '}
                 <span className="font-medium text-gray-800 dark:text-gray-200">
-                  {replayState.autoPlayCountdown} second
-                  {replayState.autoPlayCountdown !== 1 ? 's' : ''}
+                  {replayState.autoPlayCountdown}
                 </span>
-                . You can cancel or wait for automatic playback.
+                {' '}second{replayState.autoPlayCountdown !== 1 ? 's' : ''}
               </motion.p>
 
-              {/* Enhanced cancel button */}
+              {/* Refined cancel button */}
               <motion.button
                 variants={itemVariants}
-                whileHover={{ scale: 1.02, y: -1 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: 1.01, y: -0.5 }}
+                whileTap={{ scale: 0.99 }}
                 onClick={cancelAutoPlay}
-                className="inline-flex items-center px-6 py-3 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-2xl text-sm font-medium text-gray-700 dark:text-gray-300 transition-all duration-200 border border-gray-200/80 dark:border-gray-600/80 shadow-sm hover:shadow-md"
+                className="inline-flex items-center px-4 py-2 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 transition-all duration-200 border border-gray-200/60 dark:border-gray-600/40"
               >
-                <FiX size={16} className="mr-2" />
-                Cancel Auto-play
+                <FiX size={14} className="mr-1.5" />
+                Cancel
               </motion.button>
             </div>
           </motion.div>
         ) : (
-          /* Modern standard empty state */
-          <motion.div variants={containerVariants} className="max-w-md mx-auto">
-            {/* Enhanced icon with modern design */}
-            <motion.div variants={iconContainerVariants} className="relative mb-8">
-              {/* Background glow */}
+          /* Sophisticated standard empty state */
+          <motion.div variants={containerVariants}>
+            {/* Refined icon design */}
+            <motion.div variants={iconVariants} className="relative mb-8">
+              {/* Subtle ambient glow */}
               <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-blue-500/15 via-purple-500/15 to-green-500/15 rounded-full blur-xl"
+                className="absolute inset-0 w-16 h-16 mx-auto bg-blue-500/8 dark:bg-blue-400/6 rounded-full blur-xl"
                 animate={{
-                  scale: [0.8, 1.1, 0.8],
-                  opacity: [0.2, 0.4, 0.2],
+                  scale: [1, 1.1, 1],
+                  opacity: [0.6, 0.8, 0.6],
                 }}
                 transition={{
                   duration: 4,
@@ -211,80 +182,68 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ replayState, isReplayMod
                 }}
               />
               
-              {/* Main icon container */}
+              {/* Main icon container - refined materials */}
               <motion.div
-                className="relative w-20 h-20 bg-gradient-to-br from-white via-gray-50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-3xl flex items-center justify-center mx-auto shadow-lg border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-sm"
-                whileHover={{ scale: 1.05, y: -2 }}
-                transition={{ duration: 0.2 }}
+                className="relative w-16 h-16 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto shadow-sm border border-gray-200/40 dark:border-gray-700/40"
+                whileHover={{ 
+                  scale: 1.02, 
+                  y: -1,
+                  boxShadow: '0 8px 25px -8px rgba(0,0,0,0.1)'
+                }}
+                transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
               >
-
-                
-                {/* Icon */}
-                <div className="relative z-10">
+                {/* Icon with subtle animation */}
+                <div className="relative">
                   {isReplayMode && replayState.currentEventIndex === -1 ? (
                     <motion.div
                       animate={{
-                        scale: [1, 1.1, 1],
-                      }}
-                      transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                        ease: 'easeInOut',
-                      }}
-                      className="text-green-600 dark:text-green-400"
-                    >
-                      <FiPlay size={28} className="ml-1" />
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      animate={{
-                        rotate: [0, 5, -5, 0],
+                        scale: [1, 1.05, 1],
                       }}
                       transition={{
                         duration: 3,
                         repeat: Infinity,
                         ease: 'easeInOut',
                       }}
+                      className="text-green-600 dark:text-green-400"
+                    >
+                      <FiPlay size={20} className="ml-0.5" />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      animate={{
+                        rotate: [0, 2, -2, 0],
+                      }}
+                      transition={{
+                        duration: 6,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                      }}
                       className="text-blue-600 dark:text-blue-400"
                     >
-                      <FiMessageSquare size={28} />
+                      <FiMessageSquare size={20} />
                     </motion.div>
                   )}
                 </div>
                 
-                {/* Accent dot */}
+                {/* Minimal status indicator */}
                 <motion.div
-                  className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
+                  className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full"
                   animate={{
-                    scale: [0.8, 1.2, 0.8],
-                    opacity: [0.6, 1, 0.6],
+                    opacity: [0.7, 1, 0.7],
                   }}
                   transition={{
-                    duration: 2.5,
+                    duration: 2,
                     repeat: Infinity,
                     ease: 'easeInOut',
                   }}
                 />
               </motion.div>
-              
-              {/* Floating decorative elements */}
-              <motion.div
-                className="absolute -top-2 -left-2 w-2 h-2 bg-blue-400/50 rounded-full"
-                variants={floatingDots}
-                animate="float"
-              />
-              <motion.div
-                className="absolute -bottom-2 -right-2 w-1.5 h-1.5 bg-purple-400/50 rounded-full"
-                variants={floatingDots}
-                animate="float"
-                transition={{ delay: 1.5 }}
-              />
             </motion.div>
 
-            {/* Enhanced title with gradient */}
+            {/* Typography with refined hierarchy */}
             <motion.h3
               variants={itemVariants}
-              className="text-2xl font-semibold mb-4 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-gray-100 dark:via-white dark:to-gray-100 text-transparent bg-clip-text tracking-tight"
+              className="text-xl font-medium mb-3 text-gray-900 dark:text-gray-100 tracking-tight"
             >
               {isReplayMode && replayState.currentEventIndex === -1
                 ? 'Ready to replay'
@@ -294,45 +253,35 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ replayState, isReplayMod
             {/* Elegant description */}
             <motion.p
               variants={itemVariants}
-              className="text-gray-600 dark:text-gray-400 leading-relaxed mb-6 max-w-sm mx-auto"
+              className="text-gray-600 dark:text-gray-400 leading-relaxed text-sm max-w-xs mx-auto"
             >
               {isReplayMode && replayState.currentEventIndex === -1
-                ? 'Press play to start the replay or use the timeline to navigate through the session.'
-                : `Ask ${getAgentTitle()} a question or submit a task to begin your conversation.`}
+                ? 'Press play to start the replay or navigate using the timeline.'
+                : `Ask ${getAgentTitle()} a question or submit a task to begin.`}
             </motion.p>
             
-            {/* Modern accent indicator */}
+            {/* Minimal progress indicator */}
             <motion.div
               variants={itemVariants}
-              className="flex items-center justify-center space-x-3"
+              className="flex items-center justify-center mt-6"
             >
-              <div className="flex space-x-1.5">
+              <div className="flex space-x-1">
                 {[0, 1, 2].map((i) => (
                   <motion.div
                     key={i}
-                    className="w-1.5 h-1.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
+                    className="w-1 h-1 bg-gray-400/60 dark:bg-gray-500/60 rounded-full"
                     animate={{
-                      scale: [0.8, 1.2, 0.8],
-                      opacity: [0.3, 0.8, 0.3],
+                      opacity: [0.3, 0.7, 0.3],
                     }}
                     transition={{
                       duration: 2,
                       repeat: Infinity,
-                      delay: i * 0.3,
+                      delay: i * 0.2,
                       ease: 'easeInOut',
                     }}
                   />
                 ))}
               </div>
-              
-              {/* Subtle accent */}
-              <motion.div
-                className="text-blue-500/50 dark:text-blue-400/50"
-                animate={{ opacity: [0.3, 0.7, 0.3] }}
-                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-              >
-                <FiZap size={12} />
-              </motion.div>
             </motion.div>
           </motion.div>
         )}
