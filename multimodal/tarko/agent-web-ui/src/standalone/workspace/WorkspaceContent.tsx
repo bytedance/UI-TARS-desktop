@@ -272,56 +272,55 @@ export const WorkspaceContent: React.FC = () => {
             animate="animate"
             className="flex items-center justify-center h-full text-center"
           >
-            <div className="max-w-md mx-auto px-6">
-              {/* Sophisticated icon design with visual interest */}
+            <div className="max-w-sm mx-auto px-6">
+              {/* Refined icon design with sophisticated materials */}
               <motion.div variants={iconVariants} className="relative mb-8">
-                {/* Elegant ambient glow */}
+                {/* Subtle ambient effect */}
                 <motion.div
-                  className="absolute inset-0 w-20 h-20 mx-auto bg-gradient-to-r from-blue-500/12 via-purple-500/8 to-blue-500/12 rounded-full blur-2xl"
+                  className="absolute inset-0 w-16 h-16 mx-auto bg-blue-500/6 dark:bg-blue-400/4 rounded-full blur-xl"
                   animate={{
-                    scale: [0.9, 1.1, 0.9],
-                    opacity: [0.4, 0.7, 0.4],
+                    scale: [1, 1.08, 1],
+                    opacity: [0.4, 0.6, 0.4],
                   }}
                   transition={{
-                    duration: 4,
+                    duration: 5,
                     repeat: Infinity,
                     ease: 'easeInOut',
                   }}
                 />
                 
-                {/* Premium icon container with depth */}
+                {/* Main icon container - premium materials */}
                 <motion.div
-                  className="relative w-20 h-20 bg-gradient-to-br from-white via-gray-50/80 to-white dark:from-gray-800 dark:via-gray-750/90 dark:to-gray-800 backdrop-blur-md rounded-2xl flex items-center justify-center mx-auto shadow-lg border border-gray-200/50 dark:border-gray-700/50"
+                  className="relative w-16 h-16 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto shadow-sm border border-gray-200/40 dark:border-gray-700/40"
                   whileHover={{ 
-                    scale: 1.05, 
-                    y: -3,
-                    boxShadow: '0 12px 32px -8px rgba(0,0,0,0.15)'
+                    scale: 1.02, 
+                    y: -1,
+                    boxShadow: '0 8px 25px -8px rgba(0,0,0,0.1)'
                   }}
                   transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
                 >
-                  {/* Icon with engaging animation */}
+                  {/* Icon with refined animation */}
                   <div className="relative">
                     <motion.div
                       animate={{
-                        rotate: [0, 3, -3, 0],
+                        rotate: [0, 2, -2, 0],
                       }}
                       transition={{
-                        duration: 4,
+                        duration: 6,
                         repeat: Infinity,
                         ease: 'easeInOut',
                       }}
                       className="text-blue-600 dark:text-blue-400"
                     >
-                      <FiActivity size={24} />
+                      <FiActivity size={20} />
                     </motion.div>
                   </div>
                   
-                  {/* Sophisticated status indicator */}
+                  {/* Minimal status indicator */}
                   <motion.div
-                    className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full shadow-sm"
+                    className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full"
                     animate={{
-                      scale: [0.8, 1.1, 0.8],
-                      opacity: [0.6, 1, 0.6],
+                      opacity: [0.7, 1, 0.7],
                     }}
                     transition={{
                       duration: 2,
@@ -330,70 +329,42 @@ export const WorkspaceContent: React.FC = () => {
                     }}
                   />
                 </motion.div>
-                
-                {/* Subtle floating accents */}
-                <motion.div
-                  className="absolute -top-2 -left-3 w-1.5 h-1.5 bg-blue-400/40 rounded-full"
-                  animate={{
-                    y: [-4, 4, -4],
-                    opacity: [0.3, 0.6, 0.3],
-                  }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                  }}
-                />
-                <motion.div
-                  className="absolute -bottom-1 -right-3 w-1 h-1 bg-purple-400/40 rounded-full"
-                  animate={{
-                    y: [3, -3, 3],
-                    opacity: [0.4, 0.7, 0.4],
-                  }}
-                  transition={{
-                    duration: 3.5,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                    delay: 1,
-                  }}
-                />
               </motion.div>
 
-              {/* Elegant typography with subtle gradient */}
+              {/* Refined typography with elegant hierarchy */}
               <motion.h3
                 variants={itemVariants}
-                className="text-2xl font-semibold mb-4 bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 dark:from-gray-100 dark:via-gray-200 dark:to-gray-100 text-transparent bg-clip-text tracking-tight"
+                className="text-xl font-medium mb-3 text-gray-900 dark:text-gray-100 tracking-tight"
               >
                 Ready for Action
               </motion.h3>
 
-              {/* Refined description with better spacing */}
+              {/* Clean, focused description */}
               <motion.p
                 variants={itemVariants}
-                className="text-gray-600 dark:text-gray-400 leading-relaxed mb-6 max-w-sm mx-auto"
+                className="text-gray-600 dark:text-gray-400 leading-relaxed text-sm max-w-xs mx-auto mb-6"
               >
                 Your workspace is active. Start a conversation with {getAgentTitle()} and watch as tool
                 results, plans, and detailed information appear here in real-time.
               </motion.p>
               
-              {/* Sophisticated progress indicator */}
+              {/* Minimal progress indicator */}
               <motion.div
                 variants={itemVariants}
                 className="flex items-center justify-center mb-8"
               >
-                <div className="flex space-x-2">
+                <div className="flex space-x-1">
                   {[0, 1, 2].map((i) => (
                     <motion.div
                       key={i}
-                      className="w-1.5 h-1.5 bg-gradient-to-r from-blue-500/60 to-purple-500/60 rounded-full"
+                      className="w-1 h-1 bg-gray-400/60 dark:bg-gray-500/60 rounded-full"
                       animate={{
-                        scale: [0.7, 1.2, 0.7],
-                        opacity: [0.4, 0.8, 0.4],
+                        opacity: [0.3, 0.7, 0.3],
                       }}
                       transition={{
                         duration: 2,
                         repeat: Infinity,
-                        delay: i * 0.3,
+                        delay: i * 0.2,
                         ease: 'easeInOut',
                       }}
                     />
@@ -401,35 +372,34 @@ export const WorkspaceContent: React.FC = () => {
                 </div>
               </motion.div>
 
-              {/* Enhanced feature cards with balanced sophistication */}
+              {/* Refined feature cards with sophisticated design */}
               <motion.div
                 variants={containerVariants}
-                className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-lg mx-auto"
+                className="grid grid-cols-3 gap-3 max-w-xs mx-auto"
               >
                 <motion.div
                   variants={itemVariants}
                   whileHover={{ 
-                    y: -4, 
-                    scale: 1.02,
-                    boxShadow: '0 8px 25px -8px rgba(0,0,0,0.1)'
+                    y: -2, 
+                    scale: 1.01
                   }}
-                  transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-                  className="flex flex-col items-center p-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-xl border border-gray-200/40 dark:border-gray-700/40 shadow-sm"
+                  transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+                  className="flex flex-col items-center p-3 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl border border-gray-200/30 dark:border-gray-700/30"
                 >
-                  <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/80 dark:from-blue-900/30 dark:to-blue-800/20 flex items-center justify-center mb-3 text-blue-600 dark:text-blue-400 border border-blue-200/40 dark:border-blue-700/30">
+                  <div className="w-8 h-8 rounded-lg bg-blue-50/80 dark:bg-blue-900/20 flex items-center justify-center mb-2 text-blue-600 dark:text-blue-400">
                     <motion.div
-                      animate={{ rotate: [0, 2, -2, 0] }}
-                      transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                      animate={{ rotate: [0, 1, -1, 0] }}
+                      transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
                     >
-                      <FiLayout size={16} />
+                      <FiLayout size={14} />
                     </motion.div>
                   </div>
                   <div className="text-center">
-                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
+                    <div className="text-xs font-medium text-gray-900 dark:text-gray-100 mb-0.5">
                       Tool Results
                     </div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400">
-                      Comprehensive outputs
+                    <div className="text-[10px] text-gray-500 dark:text-gray-500">
+                      Comprehensive
                     </div>
                   </div>
                 </motion.div>
@@ -437,29 +407,28 @@ export const WorkspaceContent: React.FC = () => {
                 <motion.div
                   variants={itemVariants}
                   whileHover={{ 
-                    y: -4, 
-                    scale: 1.02,
-                    boxShadow: '0 8px 25px -8px rgba(0,0,0,0.1)'
+                    y: -2, 
+                    scale: 1.01
                   }}
-                  transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-                  className="flex flex-col items-center p-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-xl border border-gray-200/40 dark:border-gray-700/40 shadow-sm"
+                  transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+                  className="flex flex-col items-center p-3 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl border border-gray-200/30 dark:border-gray-700/30"
                 >
-                  <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-green-50 to-green-100/80 dark:from-green-900/30 dark:to-green-800/20 flex items-center justify-center mb-3 text-green-600 dark:text-green-400 border border-green-200/40 dark:border-green-700/30">
+                  <div className="w-8 h-8 rounded-lg bg-green-50/80 dark:bg-green-900/20 flex items-center justify-center mb-2 text-green-600 dark:text-green-400">
                     <motion.div
                       animate={{ 
                         scale: [1, 1.1, 1]
                       }}
                       transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
                     >
-                      <FiZap size={16} />
+                      <FiZap size={14} />
                     </motion.div>
                   </div>
                   <div className="text-center">
-                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
+                    <div className="text-xs font-medium text-gray-900 dark:text-gray-100 mb-0.5">
                       Live Updates
                     </div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400">
-                      Real-time results
+                    <div className="text-[10px] text-gray-500 dark:text-gray-500">
+                      Real-time
                     </div>
                   </div>
                 </motion.div>
@@ -467,29 +436,27 @@ export const WorkspaceContent: React.FC = () => {
                 <motion.div
                   variants={itemVariants}
                   whileHover={{ 
-                    y: -4, 
-                    scale: 1.02,
-                    boxShadow: '0 8px 25px -8px rgba(0,0,0,0.1)'
+                    y: -2, 
+                    scale: 1.01
                   }}
-                  transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-                  className="flex flex-col items-center p-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-xl border border-gray-200/40 dark:border-gray-700/40 shadow-sm"
+                  transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+                  className="flex flex-col items-center p-3 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl border border-gray-200/30 dark:border-gray-700/30"
                 >
-                  <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-amber-50 to-amber-100/80 dark:from-amber-900/30 dark:to-amber-800/20 flex items-center justify-center mb-3 text-amber-600 dark:text-amber-400 border border-amber-200/40 dark:border-amber-700/30">
+                  <div className="w-8 h-8 rounded-lg bg-amber-50/80 dark:bg-amber-900/20 flex items-center justify-center mb-2 text-amber-600 dark:text-amber-400">
                     <motion.div
                       animate={{ 
-                        y: [-1, 1, -1],
-                        rotate: [0, 1, -1, 0]
+                        y: [-1, 1, -1]
                       }}
                       transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
                     >
-                      <FiFileText size={16} />
+                      <FiFileText size={14} />
                     </motion.div>
                   </div>
                   <div className="text-center">
-                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
+                    <div className="text-xs font-medium text-gray-900 dark:text-gray-100 mb-0.5">
                       Deliverables
                     </div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                    <div className="text-[10px] text-gray-500 dark:text-gray-500">
                       Reports & Code
                     </div>
                   </div>
