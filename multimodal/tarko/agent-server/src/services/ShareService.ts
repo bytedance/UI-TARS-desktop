@@ -29,7 +29,7 @@ export class ShareService {
     private appConfig: AgentAppConfig,
     private storageProvider: StorageProvider | null,
     private server?: AgentServer,
-  ) {}
+  ) { }
 
   /**
    * Share a session
@@ -51,7 +51,9 @@ export class ShareService {
     sessionId: string;
     error?: string;
   }> {
-    console.log(`[ShareService] Starting shareSession for sessionId: ${sessionId}, upload: ${upload}`);
+    console.log(
+      `[ShareService] Starting shareSession for sessionId: ${sessionId}, upload: ${upload}`,
+    );
     try {
       // Verify storage is available
       if (!this.storageProvider) {
@@ -67,7 +69,7 @@ export class ShareService {
       }
       console.log(`[ShareService] Session metadata retrieved for ${sessionId}:`, {
         name: metadata.metadata?.name,
-        workspace: metadata.workspace
+        workspace: metadata.workspace,
       });
 
       // Get session events
@@ -413,7 +415,7 @@ export class ShareService {
         console.log(`[ShareService.uploadShareHtml] Found first user message:`, {
           hasMessage: !!firstUserMessage,
           messageType: firstUserMessage?.type,
-          contentType: typeof firstUserMessage?.content
+          contentType: typeof firstUserMessage?.content,
         });
 
         if (firstUserMessage && firstUserMessage.content) {
@@ -421,7 +423,7 @@ export class ShareService {
             typeof firstUserMessage.content === 'string'
               ? firstUserMessage.content
               : firstUserMessage.content.find((c) => c.type === 'text')?.text || '';
-          
+
           console.log(`[ShareService.uploadShareHtml] Extracted originalQuery: "${originalQuery}"`);
 
           if (originalQuery) {
@@ -434,15 +436,22 @@ export class ShareService {
             const beforeSanitization = normalizedSlug;
             normalizedSlug = normalizedSlug.replace(/[^\x00-\x7F]+/g, '').replace(/[^\w-]/g, '');
             if (beforeSanitization !== normalizedSlug) {
-              console.log(`[ShareService.uploadShareHtml] Slug sanitized from "${beforeSanitization}" to "${normalizedSlug}"`);
+              console.log(
+                `[ShareService.uploadShareHtml] Slug sanitized from "${beforeSanitization}" to "${normalizedSlug}"`,
+              );
             }
           }
         }
       } catch (error) {
-        console.error('[ShareService.uploadShareHtml] Failed to extract query for normalized slug:', error);
+        console.error(
+          '[ShareService.uploadShareHtml] Failed to extract query for normalized slug:',
+          error,
+        );
       }
     } else {
-      console.log(`[ShareService.uploadShareHtml] Skipping slug generation - storageProvider: ${!!this.storageProvider}, agent: ${!!agent}`);
+      console.log(
+        `[ShareService.uploadShareHtml] Skipping slug generation - storageProvider: ${!!this.storageProvider}, agent: ${!!agent}`,
+      );
     }
 
     if (normalizedSlug) {
@@ -453,11 +462,15 @@ export class ShareService {
       normalizedSlug = finalSlug;
     } else {
       // fallback to sessionId
-      console.log(`[ShareService.uploadShareHtml] No slug generated, falling back to sessionId: "${sessionId}"`);
+      console.log(
+        `[ShareService.uploadShareHtml] No slug generated, falling back to sessionId: "${sessionId}"`,
+      );
       normalizedSlug = sessionId;
     }
 
-    console.log(`[ShareService.uploadShareHtml] Calling ShareUtils.uploadShareHtml with slug: "${normalizedSlug}"`);
+    console.log(
+      `[ShareService.uploadShareHtml] Calling ShareUtils.uploadShareHtml with slug: "${normalizedSlug}"`,
+    );
     return ShareUtils.uploadShareHtml(html, sessionId, this.appConfig.share?.provider as string, {
       sessionItemInfo,
       slug: normalizedSlug,

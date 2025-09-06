@@ -134,12 +134,40 @@ Return only a JSON object with a "slug" field.`,
   private manualNormalization(text: string): string {
     console.log(`[SlugGenerator.manualNormalization] Input text: "${text}"`);
     
-    // First, attempt to transliterate non-ASCII characters
-    // Then apply standard normalization
-    const normalized = text
-      .toLowerCase()
-      // First, remove all non-ASCII characters completely
-      .replace(/[^\x00-\x7F]+/g, '-')
+    // Enhanced normalization to handle Chinese and other non-ASCII characters better
+    let normalized = text.toLowerCase();
+    
+    // First, try to extract meaningful English words if any exist
+    const englishWords = normalized.match(/[a-z0-9]+/g) || [];
+    console.log(`[SlugGenerator.manualNormalization] Extracted English words:`, englishWords);
+    
+    if (englishWords.length > 0) {
+      // Use English words if available
+      normalized = englishWords.join('-');
+    } else {
+      // For non-English text, create a semantic fallback
+      // Replace all non-ASCII with descriptive terms based on content type
+      if (/[\u4e00-\u9fff]/.test(text)) {
+        // Chinese characters detected
+        normalized = 'chinese-query';
+        console.log('[SlugGenerator.manualNormalization] Chinese text detected, using "chinese-query"');
+      } else if (/[\u3040-\u309f\u30a0-\u30ff]/.test(text)) {
+        // Japanese characters detected
+        normalized = 'japanese-query';
+        console.log('[SlugGenerator.manualNormalization] Japanese text detected, using "japanese-query"');
+      } else if (/[\u0400-\u04ff]/.test(text)) {
+        // Cyrillic characters detected
+        normalized = 'cyrillic-query';
+        console.log('[SlugGenerator.manualNormalization] Cyrillic text detected, using "cyrillic-query"');
+      } else {
+        // Other non-ASCII characters
+        normalized = 'international-query';
+        console.log('[SlugGenerator.manualNormalization] Other non-ASCII text detected, using "international-query"');
+      }
+    }
+    
+    // Apply final cleanup
+    normalized = normalized
       .replace(/[^\w\s-]/g, '') // Remove remaining special characters
       .replace(/\s+/g, '-') // Replace spaces with hyphens
       .replace(/-+/g, '-') // Remove consecutive hyphens
