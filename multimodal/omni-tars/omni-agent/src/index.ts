@@ -67,6 +67,7 @@ export default class OmniTARSAgent extends ComposableAgent {
       defaultScreenshotRenderStrategy: 'afterAction',
       enableScreenshotRenderStrategySwitch: true,
       renderGUIAction: true,
+      renderBrowserShell: false,
     },
     layout: {
       enableLayoutSwitchButton: true,

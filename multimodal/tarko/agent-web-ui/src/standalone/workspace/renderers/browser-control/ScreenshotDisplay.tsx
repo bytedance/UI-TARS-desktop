@@ -54,15 +54,21 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
   };
 
   // Render placeholder when no image available
-  const renderPlaceholder = () => (
-    <div className="flex items-center justify-center bg-gray-50 dark:bg-gray-900 min-h-[400px]">
-      <div className="text-center">
-        <div className="text-gray-400 dark:text-gray-500 text-sm">
-          GUI Agent Environment Not Started
+  const renderPlaceholder = () => {
+    const placeholderClassName = renderBrowserShell
+      ? 'flex items-center justify-center bg-gray-50 dark:bg-gray-900 min-h-[400px]'
+      : 'flex items-center justify-center bg-gray-50 dark:bg-gray-900 min-h-[400px] rounded-xl';
+
+    return (
+      <div className={placeholderClassName}>
+        <div className="text-center">
+          <div className="text-gray-400 dark:text-gray-500 text-sm">
+            GUI Agent Environment Not Started
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderImageContent = (
     image: string | null,
@@ -71,9 +77,13 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
     referenceImage?: string | null,
   ) => {
     if (image) {
+      const imageClassName = renderBrowserShell
+        ? 'w-full h-auto object-contain'
+        : 'w-full h-auto object-contain rounded-xl';
+
       return (
         <div className="relative">
-          <img ref={imageRef} src={image} alt={alt} className="w-full h-auto object-contain" />
+          <img ref={imageRef} src={image} alt={alt} className={imageClassName} />
           {showCursor && mousePosition && (
             <MouseCursor
               position={mousePosition}
@@ -87,10 +97,17 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
 
     // Show placeholder with consistent sizing using reference image
     if (referenceImage) {
+      const imageClassName = renderBrowserShell
+        ? 'w-full h-auto object-contain invisible'
+        : 'w-full h-auto object-contain invisible rounded-xl';
+      const overlayClassName = renderBrowserShell
+        ? 'absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900'
+        : 'absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900 rounded-xl';
+
       return (
         <div className="relative">
-          <img src={referenceImage} alt={alt} className="w-full h-auto object-contain invisible" />
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+          <img src={referenceImage} alt={alt} className={imageClassName} />
+          <div className={overlayClassName}>
             <div className="text-center">
               <div className="text-gray-400 dark:text-gray-500 text-sm">
                 GUI Agent Environment Not Started
