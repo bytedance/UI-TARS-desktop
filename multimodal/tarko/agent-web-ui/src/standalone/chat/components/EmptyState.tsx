@@ -104,16 +104,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ replayState, isReplayMod
     },
   };
 
-  const shimmerVariants = {
-    shimmer: {
-      x: ['-100%', '100%'],
-      transition: {
-        duration: 2.5,
-        repeat: Infinity,
-        ease: 'easeInOut',
-      },
-    },
-  };
+
 
   const floatingDots = {
     float: {
@@ -226,12 +217,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ replayState, isReplayMod
                 whileHover={{ scale: 1.05, y: -2 }}
                 transition={{ duration: 0.2 }}
               >
-                {/* Shimmer effect */}
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent dark:via-white/10 rounded-3xl overflow-hidden"
-                  variants={shimmerVariants}
-                  animate="shimmer"
-                />
+
                 
                 {/* Icon */}
                 <div className="relative z-10">

@@ -82,16 +82,7 @@ export const WorkspaceContent: React.FC = () => {
     },
   };
 
-  const shimmerVariants = {
-    shimmer: {
-      x: ['-100%', '100%'],
-      transition: {
-        duration: 2.5,
-        repeat: Infinity,
-        ease: 'easeInOut',
-      },
-    },
-  };
+
 
   const floatingDots = {
     float: {
@@ -316,12 +307,7 @@ export const WorkspaceContent: React.FC = () => {
                   whileHover={{ scale: 1.05, y: -2 }}
                   transition={{ duration: 0.2 }}
                 >
-                  {/* Shimmer effect */}
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent dark:via-white/10 rounded-3xl overflow-hidden"
-                    variants={shimmerVariants}
-                    animate="shimmer"
-                  />
+
                   
                   {/* Icon */}
                   <div className="relative z-10">
@@ -435,19 +421,7 @@ export const WorkspaceContent: React.FC = () => {
                   }}
                   className="flex flex-col items-center p-4 bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-2xl border border-gray-200/60 dark:border-gray-700/60 shadow-lg backdrop-blur-sm relative overflow-hidden"
                 >
-                  {/* Shimmer effect */}
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent dark:via-white/5 rounded-2xl"
-                    animate={{
-                      x: ['-100%', '100%'],
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                      delay: 0,
-                    }}
-                  />
+
                   
                   <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/20 flex items-center justify-center mb-3 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-700/40 shadow-sm">
                     <motion.div
@@ -476,19 +450,7 @@ export const WorkspaceContent: React.FC = () => {
                   }}
                   className="flex flex-col items-center p-4 bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-2xl border border-gray-200/60 dark:border-gray-700/60 shadow-lg backdrop-blur-sm relative overflow-hidden"
                 >
-                  {/* Shimmer effect */}
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent dark:via-white/5 rounded-2xl"
-                    animate={{
-                      x: ['-100%', '100%'],
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                      delay: 0.5,
-                    }}
-                  />
+
                   
                   <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/20 flex items-center justify-center mb-3 text-green-600 dark:text-green-400 border border-green-200/60 dark:border-green-700/40 shadow-sm">
                     <motion.div
@@ -520,19 +482,7 @@ export const WorkspaceContent: React.FC = () => {
                   }}
                   className="flex flex-col items-center p-4 bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-2xl border border-gray-200/60 dark:border-gray-700/60 shadow-lg backdrop-blur-sm relative overflow-hidden"
                 >
-                  {/* Shimmer effect */}
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent dark:via-white/5 rounded-2xl"
-                    animate={{
-                      x: ['-100%', '100%'],
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                      delay: 1,
-                    }}
-                  />
+
                   
                   <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/20 flex items-center justify-center mb-3 text-amber-600 dark:text-amber-400 border border-amber-200/60 dark:border-amber-700/40 shadow-sm">
                     <motion.div
