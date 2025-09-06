@@ -86,27 +86,7 @@ export const useScrollToBottom = ({
   }, [threshold]);
 
   // Smooth scroll to bottom
-  const scrollToBottom = useCallback(() => {
-    const container = messagesContainerRef.current;
-    if (!container) return;
-    
-    isScrollingRef.current = true;
-    
-    container.scrollTo({
-      top: container.scrollHeight,
-      behavior: 'smooth'
-    });
-    
-    // Reset scrolling flag after animation completes and force check scroll position
-    setTimeout(() => {
-      isScrollingRef.current = false;
-      // Force check scroll position to ensure button hides when at bottom
-      handleScroll();
-    }, SCROLL_ANIMATION_DELAY);
-  }, []);
-
-  // Auto-scroll to bottom for replay mode
-  const autoScrollToBottom = useCallback(() => {
+  const scrollToBottom = useCallback((forceCheck = true) => {
     const container = messagesContainerRef.current;
     if (!container) return;
     
@@ -120,8 +100,13 @@ export const useScrollToBottom = ({
     // Reset scrolling flag after animation completes
     setTimeout(() => {
       isScrollingRef.current = false;
+      // Force check scroll position to ensure button hides when at bottom
+      if (forceCheck) handleScroll();
     }, SCROLL_ANIMATION_DELAY);
-  }, []);
+  }, [handleScroll]);
+
+  // Auto-scroll to bottom (reuse scrollToBottom without force check)
+  const autoScrollToBottom = useCallback(() => scrollToBottom(false), [scrollToBottom]);
 
   // Delayed scroll check helper
   const scheduleScrollCheck = useCallback(() => {
@@ -199,33 +184,25 @@ export const useScrollToBottom = ({
     const messages = dependencies[0] as any[];
     const currentMessageCount = messages.length;
     
-    // Check if a new user message was added
-    if (currentMessageCount > lastMessageCountRef.current) {
-      const newMessages = messages.slice(lastMessageCountRef.current);
-      const hasNewUserMessage = newMessages.some((msg: any) => 
-        msg?.messages?.some?.((m: any) => m.role === 'user') ||
-        (msg.role === 'user')
-      );
+    // Only check for new user messages when message count increases
+    if (currentMessageCount <= lastMessageCountRef.current) {
+      lastMessageCountRef.current = currentMessageCount;
+      return;
+    }
+
+    // Get all user messages and check if we have a new one
+    const allUserMessages = messages
+      .flatMap((group: any) => group?.messages || [group])
+      .filter((msg: any) => msg?.role === 'user');
+    
+    const latestUserMessage = allUserMessages[allUserMessages.length - 1];
+    
+    // Auto-scroll if we have a new user message
+    if (latestUserMessage?.id && latestUserMessage.id !== lastUserMessageIdRef.current) {
+      lastUserMessageIdRef.current = latestUserMessage.id;
       
-      if (hasNewUserMessage) {
-        // Find the latest user message
-        const latestUserMessage = messages
-          .flatMap((group: any) => group?.messages || [group])
-          .filter((msg: any) => msg.role === 'user')
-          .pop();
-          
-        // Only auto-scroll if this is a new user message
-        if (latestUserMessage && latestUserMessage.id !== lastUserMessageIdRef.current) {
-          lastUserMessageIdRef.current = latestUserMessage.id;
-          
-          // Schedule auto-scroll after DOM updates
-          const timer = setTimeout(() => {
-            autoScrollToBottom();
-          }, SCROLL_CHECK_DELAY);
-          
-          return () => clearTimeout(timer);
-        }
-      }
+      const timer = setTimeout(autoScrollToBottom, SCROLL_CHECK_DELAY);
+      return () => clearTimeout(timer);
     }
     
     lastMessageCountRef.current = currentMessageCount;
@@ -235,6 +212,6 @@ export const useScrollToBottom = ({
     messagesContainerRef,
     messagesEndRef,
     showScrollToBottom,
-    scrollToBottom,
+    scrollToBottom: () => scrollToBottom(),
   };
 };
