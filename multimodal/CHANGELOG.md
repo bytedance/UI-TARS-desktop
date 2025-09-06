@@ -51,18 +51,101 @@
 
 * **agent-tars:** strict-typed gui agent procotol ([#1295](https://github.com/bytedance/UI-TARS-desktop/pull/1295)) ([4aa9d78](https://github.com/bytedance/UI-TARS-desktop/commit/4aa9d786)) [@ULIVZ](https://github.com/ULIVZ)
 * **agent-tars:** add static webui config to core ([#1266](https://github.com/bytedance/UI-TARS-desktop/pull/1266)) ([5ba0564](https://github.com/bytedance/UI-TARS-desktop/commit/5ba0564e)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** refactor chat panel ui ([#1375](https://github.com/bytedance/UI-TARS-desktop/pull/1375)) ([70c28fa](https://github.com/bytedance/UI-TARS-desktop/commit/70c28fac3)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** reuse chat input in home page ([#1313](https://github.com/bytedance/UI-TARS-desktop/pull/1313)) ([350364d](https://github.com/bytedance/UI-TARS-desktop/commit/350364d0f)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** add model id tooltip to navbar ([#1370](https://github.com/bytedance/UI-TARS-desktop/pull/1370)) ([4da9abb](https://github.com/bytedance/UI-TARS-desktop/commit/4da9abb0c)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** implement session state isolation ([#1357](https://github.com/bytedance/UI-TARS-desktop/pull/1357)) ([6f15635](https://github.com/bytedance/UI-TARS-desktop/commit/6f15635d2)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** unify think rendering with markdown renderer ([#1353](https://github.com/bytedance/UI-TARS-desktop/pull/1353)) ([3a1d53c](https://github.com/bytedance/UI-TARS-desktop/commit/3a1d53c1e)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** remove independent environment input rendering in final state ([#1346](https://github.com/bytedance/UI-TARS-desktop/pull/1346)) ([db2515d](https://github.com/bytedance/UI-TARS-desktop/commit/db2515d28)) [@ULIVZ](https://github.com/ULIVZ)
+* **o-agent:** native think ([#1371](https://github.com/bytedance/UI-TARS-desktop/pull/1371)) ([195c875](https://github.com/bytedance/UI-TARS-desktop/commit/195c8750b)) [@ULIVZ](https://github.com/ULIVZ)
 
 ### Bug Fixes
 
 * **agent-server:** add safety check for agent.dispose in session cleanup ([#1291](https://github.com/bytedance/UI-TARS-desktop/pull/1291)) ([97ef7ad](https://github.com/bytedance/UI-TARS-desktop/commit/97ef7adb)) [@ULIVZ](https://github.com/ULIVZ)
 * **agent-tars:** correct webui property name to webuiConfig ([#1267](https://github.com/bytedance/UI-TARS-desktop/pull/1267)) ([4a5f2fc](https://github.com/bytedance/UI-TARS-desktop/commit/4a5f2fc4)) [@ULIVZ](https://github.com/ULIVZ)
 * **agent-tars:** move required deps from devDependencies to dependencies ([#1255](https://github.com/bytedance/UI-TARS-desktop/pull/1255)) ([24e6acf](https://github.com/bytedance/UI-TARS-desktop/commit/24e6acff)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** image data missing in workspace ([#1373](https://github.com/bytedance/UI-TARS-desktop/pull/1373)) ([2a79e1d](https://github.com/bytedance/UI-TARS-desktop/commit/2a79e1db4)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** resolve infinite recursion in layoutModeAtom ([#1356](https://github.com/bytedance/UI-TARS-desktop/pull/1356)) ([91e4016](https://github.com/bytedance/UI-TARS-desktop/commit/91e40169d)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** downgrade react-router-dom to v6 for compatibility ([#1355](https://github.com/bytedance/UI-TARS-desktop/pull/1355)) ([5c5887f](https://github.com/bytedance/UI-TARS-desktop/commit/5c5887f07)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** fallback to beforeActionImage in afterAction strategy to prevent flickering ([#1352](https://github.com/bytedance/UI-TARS-desktop/pull/1352)) ([6190fea](https://github.com/bytedance/UI-TARS-desktop/commit/6190feae0)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** hide workspace navigation items in replay mode ([#1350](https://github.com/bytedance/UI-TARS-desktop/pull/1350)) ([ccb2262](https://github.com/bytedance/UI-TARS-desktop/commit/ccb226208)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** persist agent web ui config in share ([#1347](https://github.com/bytedance/UI-TARS-desktop/pull/1347)) ([c190d00](https://github.com/bytedance/UI-TARS-desktop/commit/c190d0096)) [@ULIVZ](https://github.com/ULIVZ)
+
+### Chore
+
+* **ptk:** add `--no-verify` to release commits ([#1369](https://github.com/bytedance/UI-TARS-desktop/pull/1369)) ([e19a0f2](https://github.com/bytedance/UI-TARS-desktop/commit/e19a0f264)) [@ULIVZ](https://github.com/ULIVZ)
+* **ptk:** update release commit scope from agent-tars to tars-stack ([#1368](https://github.com/bytedance/UI-TARS-desktop/pull/1368)) ([25001c7](https://github.com/bytedance/UI-TARS-desktop/commit/25001c743)) [@ULIVZ](https://github.com/ULIVZ)
+* **all:** fix grammar typo ([#1367](https://github.com/bytedance/UI-TARS-desktop/pull/1367)) ([48e40ab](https://github.com/bytedance/UI-TARS-desktop/commit/48e40aba3)) [@ULIVZ](https://github.com/ULIVZ)
+* **o-agent:** update display texts ([#1351](https://github.com/bytedance/UI-TARS-desktop/pull/1351)) ([8c0f42a](https://github.com/bytedance/UI-TARS-desktop/commit/8c0f42a6c)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** remove codeblock action buttons ([#1344](https://github.com/bytedance/UI-TARS-desktop/pull/1344)) ([0f55ce9](https://github.com/bytedance/UI-TARS-desktop/commit/0f55ce9b6)) [@ULIVZ](https://github.com/ULIVZ)
 
 ## [0.3.0-beta.8](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.3.0-beta.5...@agent-tars@0.3.0-beta.8) (2025-09-03)
 
 ## [0.3.0-beta.7](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.3.0-beta.5...@agent-tars@0.3.0-beta.7) (2025-09-02)
 
+### Features
+
+* **browser-operator:** use agent-infra's Hotkey to execute hotkeys ([#1343](https://github.com/bytedance/UI-TARS-desktop/pull/1343)) ([0e758f5](https://github.com/bytedance/UI-TARS-desktop/commit/0e758f5b4)) [@ULIVZ](https://github.com/ULIVZ)
+* **o-gui-agent:** temporary solution for getting metadata when screenshot ([#1341](https://github.com/bytedance/UI-TARS-desktop/pull/1341)) ([a56a6c3](https://github.com/bytedance/UI-TARS-desktop/commit/a56a6c374)) [@ULIVZ](https://github.com/ULIVZ)
+* **o-agent:** enable `enableStreamingToolCallEvents` ([#1340](https://github.com/bytedance/UI-TARS-desktop/pull/1340)) ([97c937f](https://github.com/bytedance/UI-TARS-desktop/commit/97c937f2a)) [@ULIVZ](https://github.com/ULIVZ)
+* **o-gui-agent:** support navigate action for new model ([#1339](https://github.com/bytedance/UI-TARS-desktop/pull/1339)) ([3927337](https://github.com/bytedance/UI-TARS-desktop/commit/3927337e3)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** apply RTL only to file-related tools in tool blocks ([#1337](https://github.com/bytedance/UI-TARS-desktop/pull/1337)) ([19bf806](https://github.com/bytedance/UI-TARS-desktop/commit/19bf80607)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** trim leading newlines from thinking message content ([#1333](https://github.com/bytedance/UI-TARS-desktop/pull/1333)) ([1e7a553](https://github.com/bytedance/UI-TARS-desktop/commit/1e7a5534b)) [@ULIVZ](https://github.com/ULIVZ)
+* **omni-gui-agent:** adapt tarko's screenshot rendering protocol ([#1335](https://github.com/bytedance/UI-TARS-desktop/pull/1335)) ([cd84f2f](https://github.com/bytedance/UI-TARS-desktop/commit/cd84f2f0b)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** only show MessageFooter on final assistant response ([#1331](https://github.com/bytedance/UI-TARS-desktop/pull/1331)) ([da3196e](https://github.com/bytedance/UI-TARS-desktop/commit/da3196e98)) [@ULIVZ](https://github.com/ULIVZ)
+* **o-agent:** xml parser for agent model ([#1330](https://github.com/bytedance/UI-TARS-desktop/pull/1330)) ([80af8c7](https://github.com/bytedance/UI-TARS-desktop/commit/80af8c7ae)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** add math formula rendering support to markdown renderer ([#1329](https://github.com/bytedance/UI-TARS-desktop/pull/1329)) ([1239065](https://github.com/bytedance/UI-TARS-desktop/commit/123906556)) [@ULIVZ](https://github.com/ULIVZ)
+
+### Bug Fixes
+
+* **browser:** server declares logging capability but doesn't implement method logging/setLevel ([#1334](https://github.com/bytedance/UI-TARS-desktop/pull/1334)) ([6f537a3](https://github.com/bytedance/UI-TARS-desktop/commit/6f537a323)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** browser shell url bar takes full width without spacing ([#1327](https://github.com/bytedance/UI-TARS-desktop/pull/1327)) ([32f71a6](https://github.com/bytedance/UI-TARS-desktop/commit/32f71a6ef)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** unexpected markdown render in generic renderer dark mode ([#1324](https://github.com/bytedance/UI-TARS-desktop/pull/1324)) ([282e306](https://github.com/bytedance/UI-TARS-desktop/commit/282e30655)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** table dark mode styling ([#1323](https://github.com/bytedance/UI-TARS-desktop/pull/1323)) ([173a110](https://github.com/bytedance/UI-TARS-desktop/commit/173a110ea)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** move StrategySwitch after ScreenshotDisplay to prevent flicker ([#1321](https://github.com/bytedance/UI-TARS-desktop/pull/1321)) ([91b6053](https://github.com/bytedance/UI-TARS-desktop/commit/91b6053ac)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** model displayName regression issue ([#1315](https://github.com/bytedance/UI-TARS-desktop/pull/1315)) ([18f34fa](https://github.com/bytedance/UI-TARS-desktop/commit/18f34fa9a)) [@ULIVZ](https://github.com/ULIVZ)
+
 ## [0.3.0-beta.6](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.3.0-beta.5...@agent-tars@0.3.0-beta.6) (2025-08-21)
+
+### Features
+
+* **tarko:** show `edit_file` path in tool call block ([#1309](https://github.com/bytedance/UI-TARS-desktop/pull/1309)) ([28d58d3](https://github.com/bytedance/UI-TARS-desktop/commit/28d58d348)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** add url field to screenshot metadata and display in browser shell ([#1308](https://github.com/bytedance/UI-TARS-desktop/pull/1308)) ([4ca0fd9](https://github.com/bytedance/UI-TARS-desktop/commit/4ca0fd925)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** one-click copy raw tool data ([#1304](https://github.com/bytedance/UI-TARS-desktop/pull/1304)) ([df001c6](https://github.com/bytedance/UI-TARS-desktop/commit/df001c616)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-web-ui:** narrow chat mode ([#1298](https://github.com/bytedance/UI-TARS-desktop/pull/1298)) ([f4510f9](https://github.com/bytedance/UI-TARS-desktop/commit/f4510f945)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** add gui agent screenshot render strategy config ([#1296](https://github.com/bytedance/UI-TARS-desktop/pull/1296)) ([3730cf6](https://github.com/bytedance/UI-TARS-desktop/commit/3730cf66a)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** switch gui agent to percentage coordinates ([#1292](https://github.com/bytedance/UI-TARS-desktop/pull/1292)) ([f56f6fc](https://github.com/bytedance/UI-TARS-desktop/commit/f56f6fcc6)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** improve abort button styling ([#1290](https://github.com/bytedance/UI-TARS-desktop/pull/1290)) ([68437e6](https://github.com/bytedance/UI-TARS-desktop/commit/68437e64f)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** adjust maxIterations default to 1000 ([#1289](https://github.com/bytedance/UI-TARS-desktop/pull/1289)) ([94e890b](https://github.com/bytedance/UI-TARS-desktop/commit/94e890b6c)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-web-ui:** streaming thinking rendering support ([#1284](https://github.com/bytedance/UI-TARS-desktop/pull/1284)) ([ae83d3d](https://github.com/bytedance/UI-TARS-desktop/commit/ae83d3db8)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent:** add messageId to thinking events for proper session correlation ([#1282](https://github.com/bytedance/UI-TARS-desktop/pull/1282)) ([1fcba4c](https://github.com/bytedance/UI-TARS-desktop/commit/1fcba4cb8)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** add codebase metadata to contextual references ([#1274](https://github.com/bytedance/UI-TARS-desktop/pull/1274)) ([6920d83](https://github.com/bytedance/UI-TARS-desktop/commit/6920d834e)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** adapt devicePixelRatio from metadata in web ui ([#1275](https://github.com/bytedance/UI-TARS-desktop/pull/1275)) ([a728915](https://github.com/bytedance/UI-TARS-desktop/commit/a72891590)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** add metadata field to EnvironmentInputEvent ([#1272](https://github.com/bytedance/UI-TARS-desktop/pull/1272)) ([97ad8aa](https://github.com/bytedance/UI-TARS-desktop/commit/97ad8aafb)) [@ULIVZ](https://github.com/ULIVZ)
+* **mcp-agent:** upgrade mcp-client to 1.2.20 and set 180s timeout ([#1271](https://github.com/bytedance/UI-TARS-desktop/pull/1271)) ([23d73a5](https://github.com/bytedance/UI-TARS-desktop/commit/23d73a560)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** support TTFT and TTLT metric ([#1232](https://github.com/bytedance/UI-TARS-desktop/pull/1232)) ([bfa2879](https://github.com/bytedance/UI-TARS-desktop/commit/bfa2879ef)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent:** refine contextual selector ([#1134](https://github.com/bytedance/UI-TARS-desktop/pull/1134)) ([aee4bf8](https://github.com/bytedance/UI-TARS-desktop/commit/aee4bf88d)) [@ULIVZ](https://github.com/ULIVZ)
+* **o-agent:** add custom timeout for execute_bash tool; remove stop_sequences config ([#1256](https://github.com/bytedance/UI-TARS-desktop/pull/1256)) ([5728e0b](https://github.com/bytedance/UI-TARS-desktop/commit/5728e0b65)) [@ULIVZ](https://github.com/ULIVZ)
+
+### Bug Fixes
+
+* **tarko:** replace hardcoded agent name with dynamic config in TerminalOutput ([#1306](https://github.com/bytedance/UI-TARS-desktop/pull/1306)) ([f27942e](https://github.com/bytedance/UI-TARS-desktop/commit/f27942eed)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** handle open_computer action normalization ([#1305](https://github.com/bytedance/UI-TARS-desktop/pull/1305)) ([871ea58](https://github.com/bytedance/UI-TARS-desktop/commit/871ea5894)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** resolve infinite re-render in BrowserControlRenderer hooks ([#1303](https://github.com/bytedance/UI-TARS-desktop/pull/1303)) ([7278561](https://github.com/bytedance/UI-TARS-desktop/commit/72785617b)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** prevent unnecessary `environment_input` events without contextual references ([#1301](https://github.com/bytedance/UI-TARS-desktop/pull/1301)) ([e394343](https://github.com/bytedance/UI-TARS-desktop/commit/e39434399)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** disable share button during agent execution ([#1288](https://github.com/bytedance/UI-TARS-desktop/pull/1288)) ([ba4509b](https://github.com/bytedance/UI-TARS-desktop/commit/ba4509b0b)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-cli:** `--thinking` does not work ([#1283](https://github.com/bytedance/UI-TARS-desktop/pull/1283)) ([03b1d21](https://github.com/bytedance/UI-TARS-desktop/commit/03b1d2196)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-cli:** prevent console interceptor recursion in debug mode ([#1279](https://github.com/bytedance/UI-TARS-desktop/pull/1279)) ([7bcff07](https://github.com/bytedance/UI-TARS-desktop/commit/7bcff0746)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** improve script execution ui layout and styling ([#1268](https://github.com/bytedance/UI-TARS-desktop/pull/1268)) ([fc7a80d](https://github.com/bytedance/UI-TARS-desktop/commit/fc7a80d68)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** optimize EditFile title path display ([#1246](https://github.com/bytedance/UI-TARS-desktop/pull/1246)) ([83f8b85](https://github.com/bytedance/UI-TARS-desktop/commit/83f8b85df)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** enable line wrapping for command stdout/stderr ([#1249](https://github.com/bytedance/UI-TARS-desktop/pull/1249)) ([cda0324](https://github.com/bytedance/UI-TARS-desktop/commit/cda0324a9)) [@ULIVZ](https://github.com/ULIVZ)
+
+### Chore
+
+* **tarko:** improve gui agent screenshot ui layout and placeholder ([#1302](https://github.com/bytedance/UI-TARS-desktop/pull/1302)) ([e083c72](https://github.com/bytedance/UI-TARS-desktop/commit/e083c723d)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko:** replace @ui-tars/operator-browser with local @gui-agent/operator-browser ([#1278](https://github.com/bytedance/UI-TARS-desktop/pull/1278)) ([2c13c04](https://github.com/bytedance/UI-TARS-desktop/commit/2c13c0469)) [@ULIVZ](https://github.com/ULIVZ)
+* **mcp-client:** release 1.2.20 ([#1270](https://github.com/bytedance/UI-TARS-desktop/pull/1270)) ([5a7200d](https://github.com/bytedance/UI-TARS-desktop/commit/5a7200d42)) [@ULIVZ](https://github.com/ULIVZ)
+* **all:** unify naming case of webui config ([#1269](https://github.com/bytedance/UI-TARS-desktop/pull/1269)) ([55bb023](https://github.com/bytedance/UI-TARS-desktop/commit/55bb02309)) [@ULIVZ](https://github.com/ULIVZ)
 
 ## [0.3.0-beta.4](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.3.0-beta.1...@agent-tars@0.3.0-beta.4) (2025-08-21)
 
