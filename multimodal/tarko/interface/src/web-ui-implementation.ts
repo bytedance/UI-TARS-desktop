@@ -92,6 +92,15 @@ export interface TarkoWebUIGUIAgentConfig {
    * @defaultValue true
    */
   renderGUIAction: boolean;
+  /**
+   * Whether to render browser shell around screenshots
+   *
+   * - `true`: Display screenshots wrapped in browser shell UI
+   * - `false`: Display screenshots directly without browser shell, suitable for screenshots that already contain browser chrome or computer use scenarios
+   *
+   * @defaultValue true
+   */
+  renderBrowserShell: boolean;
 }
 
 /**

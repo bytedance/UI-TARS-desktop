@@ -16,6 +16,7 @@ interface ScreenshotDisplayProps {
   previousMousePosition?: { x: number; y: number } | null;
   action?: string;
   showCoordinates?: boolean;
+  renderBrowserShell?: boolean;
 }
 
 export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
@@ -30,6 +31,7 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
   previousMousePosition,
   action,
   showCoordinates = true,
+  renderBrowserShell = true,
 }) => {
   const imageRef = useRef<HTMLImageElement>(null);
 
@@ -38,6 +40,17 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
 
     // Only show cursor on before action images or single images in beforeAction strategy
     return imageType === 'before' || (imageType === 'single' && strategy === 'beforeAction');
+  };
+
+  const wrapWithBrowserShell = (content: React.ReactNode, url?: string, className?: string) => {
+    if (renderBrowserShell) {
+      return (
+        <BrowserShell url={url} className={className}>
+          {content}
+        </BrowserShell>
+      );
+    }
+    return content;
   };
 
   // Render placeholder when no image available
@@ -102,14 +115,15 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
                 Before Action
               </span>
             </div>
-            <BrowserShell url={beforeActionImageUrl || undefined}>
-              {renderImageContent(
+            {wrapWithBrowserShell(
+              renderImageContent(
                 beforeActionImage,
                 'Browser Screenshot - Before Action',
                 shouldShowMouseCursor('before'),
                 afterActionImage,
-              )}
-            </BrowserShell>
+              ),
+              beforeActionImageUrl || undefined,
+            )}
           </div>
           <div>
             <div className="flex items-center justify-center mb-2">
@@ -117,14 +131,15 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
                 After Action
               </span>
             </div>
-            <BrowserShell url={afterActionImageUrl || undefined}>
-              {renderImageContent(
+            {wrapWithBrowserShell(
+              renderImageContent(
                 afterActionImage,
                 'Browser Screenshot - After Action',
                 shouldShowMouseCursor('after'),
                 beforeActionImage,
-              )}
-            </BrowserShell>
+              ),
+              afterActionImageUrl || undefined,
+            )}
           </div>
         </div>
       </div>
@@ -132,9 +147,9 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
   }
 
   // Show single screenshot
-  return (
-    <BrowserShell className="mb-4" url={relatedImageUrl || undefined}>
-      {renderImageContent(relatedImage, 'Browser Screenshot', shouldShowMouseCursor('single'))}
-    </BrowserShell>
+  return wrapWithBrowserShell(
+    renderImageContent(relatedImage, 'Browser Screenshot', shouldShowMouseCursor('single')),
+    relatedImageUrl || undefined,
+    'mb-4',
   );
 };

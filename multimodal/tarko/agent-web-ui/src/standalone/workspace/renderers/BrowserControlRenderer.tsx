@@ -78,6 +78,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
         previousMousePosition={previousMousePosition}
         action={action}
         showCoordinates={guiAgentConfig.renderGUIAction}
+        renderBrowserShell={guiAgentConfig.renderBrowserShell}
       />
 
       {/* Strategy Switch Controls */}

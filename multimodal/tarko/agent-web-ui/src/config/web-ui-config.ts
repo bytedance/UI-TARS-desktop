@@ -50,6 +50,7 @@ export function getGUIAgentConfig() {
       defaultScreenshotRenderStrategy: 'afterAction',
       enableScreenshotRenderStrategySwitch: false,
       renderGUIAction: true,
+      renderBrowserShell: true,
     }
   );
 }
