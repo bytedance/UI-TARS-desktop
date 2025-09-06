@@ -58,17 +58,6 @@ export const SessionCreatingState: React.FC<SessionCreatingStateProps> = ({ isCr
     },
   };
 
-  const shimmerVariants = {
-    shimmer: {
-      x: ['-100%', '100%'],
-      transition: {
-        duration: 2,
-        repeat: Infinity,
-        ease: 'easeInOut',
-      },
-    },
-  };
-
   const floatingDots = {
     float: {
       y: [-8, 8, -8],
@@ -89,7 +78,7 @@ export const SessionCreatingState: React.FC<SessionCreatingStateProps> = ({ isCr
       initial="hidden"
       animate="visible"
       variants={containerVariants}
-      className="flex items-center justify-center h-full bg-gradient-to-br from-gray-50/30 via-white/20 to-blue-50/30 dark:from-gray-900/30 dark:via-gray-800/20 dark:to-blue-900/30"
+      className="flex items-center justify-center h-full"
     >
       <div className="text-center max-w-sm mx-auto px-6">
         {/* Enhanced icon with modern design */}
@@ -114,13 +103,6 @@ export const SessionCreatingState: React.FC<SessionCreatingStateProps> = ({ isCr
             variants={pulseVariants}
             animate="pulse"
           >
-            {/* Shimmer effect */}
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent dark:via-white/10 rounded-3xl overflow-hidden"
-              variants={shimmerVariants}
-              animate="shimmer"
-            />
-
             {/* Icon */}
             <div className="relative z-10">
               <motion.div
