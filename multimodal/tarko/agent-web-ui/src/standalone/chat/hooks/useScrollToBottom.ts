@@ -197,8 +197,13 @@ export const useScrollToBottom = ({
     
     const latestUserMessage = allUserMessages[allUserMessages.length - 1];
     
-    // Auto-scroll if we have a new user message
-    if (latestUserMessage?.id && latestUserMessage.id !== lastUserMessageIdRef.current) {
+    // Auto-scroll ONLY if:
+    // 1. We have a new user message
+    // 2. It's the LAST user message (most recent one)
+    // 3. It has the isLocalMessage flag (indicating it was just sent by user)
+    if (latestUserMessage?.id && 
+        latestUserMessage.id !== lastUserMessageIdRef.current &&
+        latestUserMessage.isLocalMessage) {
       lastUserMessageIdRef.current = latestUserMessage.id;
       
       const timer = setTimeout(autoScrollToBottom, SCROLL_CHECK_DELAY);
