@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { FiArrowUpRight, FiRefreshCw } from 'react-icons/fi';
+import { Tooltip } from '@mui/material';
 import { useSession } from '@/common/hooks/useSession';
 import { getWebUIConfig, getLogoUrl, getAgentTitle } from '@/config/web-ui-config';
 import { ChatInput } from '@/standalone/chat/MessageInput';
 import { ChatCompletionContentPart } from '@tarko/agent-interface';
+import { getTooltipProps } from '@/common/components/TooltipConfig';
 
 const WelcomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -28,7 +30,14 @@ const WelcomePage: React.FC = () => {
   
   // Constants for prompt management
   const MAX_DISPLAYED_PROMPTS = 3;
+  const MAX_PROMPT_LENGTH = 70;
   const shouldShowShuffle = allPrompts.length > MAX_DISPLAYED_PROMPTS;
+  
+  // Function to truncate prompt text
+  const truncatePrompt = (prompt: string): string => {
+    if (prompt.length <= MAX_PROMPT_LENGTH) return prompt;
+    return prompt.slice(0, MAX_PROMPT_LENGTH) + '...';
+  };
   
   // Function to get random prompts, avoiding recently used ones when possible
   const getRandomPrompts = (count: number): string[] => {
@@ -242,20 +251,37 @@ const WelcomePage: React.FC = () => {
           {/* Example prompts - Use configuration with fallback */}
           {displayedPrompts.length > 0 && (
             <div className="mt-6 flex flex-wrap justify-center gap-2">
-              {displayedPrompts.map((prompt, index) => (
-                <motion.button
-                  key={`${prompt}-${index}`}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.4 + index * 0.1 }}
-                  type="button"
-                  onClick={() => handleChatSubmit(prompt)}
-                  className="text-sm px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/30 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300 transition-colors"
-                  disabled={isLoading || isDirectChatLoading}
-                >
-                  {prompt}
-                </motion.button>
-              ))}
+              {displayedPrompts.map((prompt, index) => {
+                const truncatedPrompt = truncatePrompt(prompt);
+                const needsTooltip = prompt.length > MAX_PROMPT_LENGTH;
+                
+                const buttonElement = (
+                  <motion.button
+                    key={`${prompt}-${index}`}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 0.4 + index * 0.1 }}
+                    type="button"
+                    onClick={() => handleChatSubmit(prompt)}
+                    className="text-sm px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/30 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300 transition-colors max-w-xs"
+                    disabled={isLoading || isDirectChatLoading}
+                  >
+                    {truncatedPrompt}
+                  </motion.button>
+                );
+                
+                return needsTooltip ? (
+                  <Tooltip
+                    key={`${prompt}-${index}`}
+                    title={prompt}
+                    {...getTooltipProps('top')}
+                  >
+                    {buttonElement}
+                  </Tooltip>
+                ) : (
+                  buttonElement
+                );
+              })}
               {shouldShowShuffle && (
                 <motion.button
                   key={`shuffle-${displayedPrompts.join('-')}`}
