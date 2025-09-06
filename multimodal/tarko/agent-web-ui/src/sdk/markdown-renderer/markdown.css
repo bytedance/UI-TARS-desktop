@@ -57,3 +57,8 @@
   background-color: rgba(30, 41, 59, 0.7);
   color: #e2e8f0;
 }
+
+/* Smooth transitions for content changes */
+.markdown-content {
+  transition: opacity 0.15s ease-out;
+}
