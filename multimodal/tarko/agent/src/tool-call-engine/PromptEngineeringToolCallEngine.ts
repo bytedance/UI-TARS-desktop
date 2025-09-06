@@ -543,7 +543,15 @@ ${JSON.stringify(schema)}
    */
   private completeToolCall(state: ExtendedStreamProcessingState): StreamingToolCallUpdate | null {
     try {
-      const toolCallContent = state.currentToolCallBuffer.trim();
+      let toolCallContent = state.currentToolCallBuffer.trim();
+
+      // Extract only the JSON portion if there's trailing content
+      // This handles cases where the model generates extra content after the JSON
+      const jsonMatch = toolCallContent.match(/^\s*\{[\s\S]*?\}(?=\s*(?:\}|\n|$))/);
+      if (jsonMatch) {
+        toolCallContent = jsonMatch[0].trim();
+      }
+
       const toolCallData = JSON.parse(toolCallContent);
 
       if (toolCallData && toolCallData.name) {
@@ -596,6 +604,12 @@ ${JSON.stringify(schema)}
         // Try to parse the incomplete tool call buffer
         // Add closing brace if it seems like valid JSON that was truncated
         let toolCallContent = extendedState.currentToolCallBuffer.trim();
+
+        // Extract only the JSON portion if there's trailing content
+        const jsonMatch = toolCallContent.match(/^\s*\{[\s\S]*?\}(?=\s*(?:\}|\n|$))/);
+        if (jsonMatch) {
+          toolCallContent = jsonMatch[0].trim();
+        }
 
         // Attempt to repair incomplete JSON
         if (toolCallContent && !toolCallContent.endsWith('}')) {
@@ -682,7 +696,13 @@ ${JSON.stringify(schema)}
     let cleanedContent = content;
 
     while ((match = toolCallRegex.exec(content)) !== null) {
-      const toolCallContent = match[1].trim();
+      let toolCallContent = match[1].trim();
+
+      // Extract only the JSON portion if there's trailing content
+      const jsonMatch = toolCallContent.match(/^\s*\{[\s\S]*?\}(?=\s*(?:\}|\n|$))/);
+      if (jsonMatch) {
+        toolCallContent = jsonMatch[0].trim();
+      }
 
       try {
         const toolCallData = JSON.parse(toolCallContent);
