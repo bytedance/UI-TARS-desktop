@@ -9,6 +9,7 @@ import {
   getLogger,
   LLMRequestHookPayload,
   LLMResponseHookPayload,
+  EachAgentLoopEndContext,
 } from '@tarko/agent';
 import { AgentComposer } from './AgentComposer';
 import { AgentPlugin } from './AgentPlugin';
@@ -73,9 +74,9 @@ export class ComposableAgent extends Agent {
     await this.composer.executeOnEachAgentLoopStart();
   }
 
-  async onEachAgentLoopEnd(): Promise<void> {
+  async onEachAgentLoopEnd(context: EachAgentLoopEndContext): Promise<void> {
     // Execute hooks for all plugins
-    await this.composer.executeOnEachAgentLoopEnd();
+    await this.composer.executeOnEachAgentLoopEnd(context);
   }
 
   async onAgentLoopEnd(id: string): Promise<void> {

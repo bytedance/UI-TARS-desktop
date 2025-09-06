@@ -28,7 +28,7 @@ export default {
   },
   temperature: 1,
   top_p: 0.9,
-  snapshot: { storageDirectory: resolve(__dirname, 'snapshots'), enable: true },
+  // snapshot: { storageDirectory: resolve(__dirname, 'snapshots'), enable: true },
   googleApiKey: process.env.GOOGLE_API_KEY,
   googleMcpUrl: process.env.GOOGLE_MCP_URL,
   aioSandboxUrl: process.env.AIO_SANDBOX_URL,

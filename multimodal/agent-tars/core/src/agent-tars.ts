@@ -588,6 +588,11 @@ ${options.instructions}`
    * This is called at the start of each agent iteration
    */
   override async onEachAgentLoopStart(sessionId: string): Promise<void> {
+    const eventStream = this.getEventStream();
+    const events = eventStream.getEvents();
+    this.logger.info('Event Stream Length at loop start', events.length);
+    this.logger.info('Event Stream instance', eventStream.constructor.name);
+
     // If GUI Agent is enabled and the browser is launched,
     // take a screenshot and send it to the event stream
     if (
@@ -597,6 +602,7 @@ ${options.instructions}`
     ) {
       // Ensure GUI Agent has access to the current event stream
       if (this.browserGUIAgent.setEventStream) {
+        this.logger.info('Setting event stream for GUI Agent, current events:', this.eventStream.getEvents().length);
         this.browserGUIAgent.setEventStream(this.eventStream);
       }
 

@@ -14,6 +14,7 @@ import {
   ChatCompletionChunk,
   ToolCallResult,
   ChatCompletionMessageToolCall,
+  EachAgentLoopEndContext,
 } from '@tarko/agent-interface';
 import { logger } from './utils/logger';
 import { SnapshotManager } from './snapshot-manager';
@@ -30,6 +31,7 @@ export abstract class AgentHookBase {
   protected originalResponseHook: Agent['onLLMResponse'] | null = null;
   protected originalLoopEndHook: Agent['onAgentLoopEnd'] | null = null;
   protected originalEachLoopStartHook: Agent['onEachAgentLoopStart'] | null = null;
+  protected originalEachLoopEndHook: Agent['onEachAgentLoopEnd'] | null = null;
   protected originalStreamingResponseHook: Agent['onLLMStreamingResponse'] | null = null;
   protected originalBeforeToolCallHook: Agent['onBeforeToolCall'] | null = null;
   protected originalAfterToolCallHook: Agent['onAfterToolCall'] | null = null;
@@ -76,29 +78,48 @@ export abstract class AgentHookBase {
     this.originalStreamingResponseHook = this.agent.onLLMStreamingResponse;
     this.originalLoopEndHook = this.agent.onAgentLoopEnd;
     this.originalEachLoopStartHook = this.agent.onEachAgentLoopStart;
+    this.originalEachLoopEndHook = this.agent.onEachAgentLoopEnd;
     this.originalBeforeToolCallHook = this.agent.onBeforeToolCall;
     this.originalAfterToolCallHook = this.agent.onAfterToolCall;
     this.originalToolCallErrorHook = this.agent.onToolCallError;
     this.originalProcessToolCallsHook = this.agent.onProcessToolCalls;
 
-    // Replace with our hooks
-    this.agent.onLLMRequest = (id, payload) =>
-      this.safeExecuteHook(() => this.onLLMRequest(id, payload));
-    this.agent.onLLMResponse = (id, payload) =>
-      this.safeExecuteHook(() => this.onLLMResponse(id, payload));
-    this.agent.onLLMStreamingResponse = (id, payload) =>
+    // Replace with our hooks that properly chain with original hooks
+    this.agent.onLLMRequest = async (id, payload) => {
+      await this.safeExecuteHook(() => this.onLLMRequest(id, payload));
+    };
+    this.agent.onLLMResponse = async (id, payload) => {
+      await this.safeExecuteHook(() => this.onLLMResponse(id, payload));
+    };
+    this.agent.onLLMStreamingResponse = (id, payload) => {
       this.safeExecuteHook(() => this.onLLMStreamingResponse(id, payload));
-    this.agent.onAgentLoopEnd = (id) => this.safeExecuteHook(() => this.onAgentLoopEnd(id));
-    this.agent.onEachAgentLoopStart = (id) =>
-      this.safeExecuteHook(() => this.onEachAgentLoopStart(id));
-    this.agent.onBeforeToolCall = (id, toolCall, args) =>
-      this.safeExecuteHook(() => this.onBeforeToolCall(id, toolCall, args));
-    this.agent.onAfterToolCall = (id, toolCall, result) =>
-      this.safeExecuteHook(() => this.onAfterToolCall(id, toolCall, result));
-    this.agent.onToolCallError = (id, toolCall, error) =>
-      this.safeExecuteHook(() => this.onToolCallError(id, toolCall, error));
-    this.agent.onProcessToolCalls = (id, toolCalls) =>
-      this.safeExecuteHook(() => this.onProcessToolCalls(id, toolCalls));
+    };
+    this.agent.onAgentLoopEnd = async (id) => {
+      await this.safeExecuteHook(() => this.onAgentLoopEnd(id));
+    };
+    this.agent.onEachAgentLoopStart = async (id) => {
+      await this.safeExecuteHook(() => this.onEachAgentLoopStart(id));
+    };
+    this.agent.onEachAgentLoopEnd = async (context: EachAgentLoopEndContext) => {
+      // First execute original hook to ensure plugins work correctly
+      if (this.originalEachLoopEndHook) {
+        await this.originalEachLoopEndHook.call(this.agent, context);
+      }
+      // Then execute our hook if needed
+      await this.safeExecuteHook(() => this.onEachAgentLoopEnd(context));
+    };
+    this.agent.onBeforeToolCall = async (id, toolCall, args) => {
+      return await this.safeExecuteHook(() => this.onBeforeToolCall(id, toolCall, args));
+    };
+    this.agent.onAfterToolCall = async (id, toolCall, result) => {
+      return await this.safeExecuteHook(() => this.onAfterToolCall(id, toolCall, result));
+    };
+    this.agent.onToolCallError = async (id, toolCall, error) => {
+      return await this.safeExecuteHook(() => this.onToolCallError(id, toolCall, error));
+    };
+    this.agent.onProcessToolCalls = async (id, toolCalls) => {
+      return await this.safeExecuteHook(() => this.onProcessToolCalls(id, toolCalls));
+    };
 
     this.isHooked = true;
     logger.info(`Hooked into agent: ${this.snapshotName}`);
@@ -131,6 +152,10 @@ export abstract class AgentHookBase {
 
     if (this.originalEachLoopStartHook) {
       this.agent.onEachAgentLoopStart = this.originalEachLoopStartHook;
+    }
+
+    if (this.originalEachLoopEndHook) {
+      this.agent.onEachAgentLoopEnd = this.originalEachLoopEndHook;
     }
 
     if (this.originalBeforeToolCallHook) {
@@ -234,6 +259,7 @@ export abstract class AgentHookBase {
   ): void;
   protected abstract onAgentLoopEnd(id: string): void | Promise<void>;
   protected abstract onEachAgentLoopStart(id: string): void | Promise<void>;
+  protected abstract onEachAgentLoopEnd(context: EachAgentLoopEndContext): void | Promise<void>;
   protected abstract onBeforeToolCall(
     id: string,
     toolCall: { toolCallId: string; name: string },
