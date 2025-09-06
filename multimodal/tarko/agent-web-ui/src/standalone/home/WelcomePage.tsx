@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { FiArrowUpRight } from 'react-icons/fi';
+import { FiArrowUpRight, FiRefreshCw } from 'react-icons/fi';
 import { useSession } from '@/common/hooks/useSession';
 import { getWebUIConfig, getLogoUrl, getAgentTitle } from '@/config/web-ui-config';
 import { ChatInput } from '@/standalone/chat/MessageInput';
@@ -19,7 +19,56 @@ const WelcomePage: React.FC = () => {
   const pageTitle = webuiConfig?.title;
   const pageSubtitle = webuiConfig?.subtitle;
   const webclomeTitle = webuiConfig?.welcomTitle ?? webuiConfig?.title;
-  const examplePrompts = webuiConfig?.welcomePrompts ?? [];
+  const allPrompts = webuiConfig?.welcomePrompts ?? [];
+  
+  // State for managing displayed prompts
+  const [displayedPrompts, setDisplayedPrompts] = useState<string[]>([]);
+  const [usedPrompts, setUsedPrompts] = useState<Set<string>>(new Set());
+  
+  // Constants for prompt management
+  const MAX_DISPLAYED_PROMPTS = 3;
+  const shouldShowShuffle = allPrompts.length > MAX_DISPLAYED_PROMPTS;
+  
+  // Function to get random prompts, avoiding recently used ones when possible
+  const getRandomPrompts = (count: number): string[] => {
+    if (allPrompts.length === 0) return [];
+    
+    // Get unused prompts first
+    const unusedPrompts = allPrompts.filter(prompt => !usedPrompts.has(prompt));
+    
+    // If we have enough unused prompts, use them
+    if (unusedPrompts.length >= count) {
+      const shuffled = [...unusedPrompts].sort(() => Math.random() - 0.5);
+      return shuffled.slice(0, count);
+    }
+    
+    // If not enough unused prompts, reset used prompts and use all
+    const shuffled = [...allPrompts].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, count);
+  };
+  
+  // Initialize displayed prompts on component mount
+  useEffect(() => {
+    if (allPrompts.length > 0) {
+      const initialPrompts = getRandomPrompts(Math.min(MAX_DISPLAYED_PROMPTS, allPrompts.length));
+      setDisplayedPrompts(initialPrompts);
+      setUsedPrompts(new Set(initialPrompts));
+    }
+  }, [allPrompts.length]);
+  
+  // Function to shuffle prompts
+  const handleShuffle = () => {
+    const newPrompts = getRandomPrompts(MAX_DISPLAYED_PROMPTS);
+    setDisplayedPrompts(newPrompts);
+    
+    // Update used prompts, reset if we've used most of them
+    const newUsedPrompts = new Set([...usedPrompts, ...newPrompts]);
+    if (newUsedPrompts.size >= allPrompts.length - 1) {
+      setUsedPrompts(new Set(newPrompts));
+    } else {
+      setUsedPrompts(newUsedPrompts);
+    }
+  };
 
   const handleChatSubmit = async (content: string | ChatCompletionContentPart[]) => {
     if (isLoading) return;
@@ -183,11 +232,11 @@ const WelcomePage: React.FC = () => {
           </motion.div>
 
           {/* Example prompts - Use configuration with fallback */}
-          {examplePrompts.length > 0 && (
+          {displayedPrompts.length > 0 && (
             <div className="mt-6 flex flex-wrap justify-center gap-2">
-              {examplePrompts.map((prompt, index) => (
+              {displayedPrompts.map((prompt, index) => (
                 <motion.button
-                  key={index}
+                  key={`${prompt}-${index}`}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: 0.4 + index * 0.1 }}
@@ -199,6 +248,21 @@ const WelcomePage: React.FC = () => {
                   {prompt}
                 </motion.button>
               ))}
+              {shouldShowShuffle && (
+                <motion.button
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.4 + displayedPrompts.length * 0.1 }}
+                  type="button"
+                  onClick={handleShuffle}
+                  className="text-sm px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/30 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300 transition-colors flex items-center gap-1.5"
+                  disabled={isLoading || isDirectChatLoading}
+                  title="随机换一换"
+                >
+                  <FiRefreshCw size={14} />
+                  <span>随机换一换</span>
+                </motion.button>
+              )}
             </div>
           )}
         </motion.div>
