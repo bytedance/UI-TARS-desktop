@@ -22,15 +22,6 @@
 * **tarko:** scroll-to-bottom indicator session switching and edge cases ([#1405](https://github.com/bytedance/UI-TARS-desktop/pull/1405)) ([442dab8](https://github.com/bytedance/UI-TARS-desktop/commit/442dab890)) [@ULIVZ](https://github.com/ULIVZ)
 * **tarko:** improve markdown link parsing edge cases ([#1398](https://github.com/bytedance/UI-TARS-desktop/pull/1398)) ([24fdf31](https://github.com/bytedance/UI-TARS-desktop/commit/24fdf3155)) [@ULIVZ](https://github.com/ULIVZ)
 
-### Code Refactoring
-
-* **tarko:** remove excessive dots from empty states ([#1414](https://github.com/bytedance/UI-TARS-desktop/pull/1414)) ([074559e](https://github.com/bytedance/UI-TARS-desktop/commit/074559e55)) [@ULIVZ](https://github.com/ULIVZ)
-
-### Chores
-
-* **o-agent:** update example prompts ([#1417](https://github.com/bytedance/UI-TARS-desktop/pull/1417)) ([3b28c9b](https://github.com/bytedance/UI-TARS-desktop/commit/3b28c9b27)) [@ULIVZ](https://github.com/ULIVZ)
-* **tarko:** enhance code block spacing ([#1400](https://github.com/bytedance/UI-TARS-desktop/pull/1400)) ([1752459](https://github.com/bytedance/UI-TARS-desktop/commit/17524599a)) [@ULIVZ](https://github.com/ULIVZ)
-
 ## [0.3.0-beta.9](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.3.0-beta.5...@agent-tars@0.3.0-beta.9) (2025-09-05)
 
 ### Features
@@ -70,11 +61,6 @@
 * **tarko:** correct isProcessing state management during agent execution ([#1387](https://github.com/bytedance/UI-TARS-desktop/pull/1387)) ([9d0df702a](https://github.com/bytedance/UI-TARS-desktop/commit/9d0df702a)) [@ULIVZ](https://github.com/ULIVZ)
 * **tarko:** fix markdown link parsing with chinese text ([#1358](https://github.com/bytedance/UI-TARS-desktop/pull/1358)) ([73ca0ca7c](https://github.com/bytedance/UI-TARS-desktop/commit/73ca0ca7c)) [@ULIVZ](https://github.com/ULIVZ)
 
-### Chore
-
-* **o-agent:** update example prompts ([#1417](https://github.com/bytedance/UI-TARS-desktop/pull/1417)) ([3b28c9b27](https://github.com/bytedance/UI-TARS-desktop/commit/3b28c9b27)) [@ULIVZ](https://github.com/ULIVZ)
-* **tarko:** enhance code block spacing ([#1400](https://github.com/bytedance/UI-TARS-desktop/pull/1400)) ([17524599a](https://github.com/bytedance/UI-TARS-desktop/commit/17524599a)) [@ULIVZ](https://github.com/ULIVZ)
-* **o-agent:** disable gui agent screenshot switch and render ([#1385](https://github.com/bytedance/UI-TARS-desktop/pull/1385)) ([2a92348b2](https://github.com/bytedance/UI-TARS-desktop/commit/2a92348b2)) [@ULIVZ](https://github.com/ULIVZ)
 
 ## [0.3.0-beta.8](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.3.0-beta.5...@agent-tars@0.3.0-beta.8) (2025-09-04)
 
@@ -102,13 +88,6 @@
 * **tarko:** hide workspace navigation items in replay mode ([#1350](https://github.com/bytedance/UI-TARS-desktop/pull/1350)) ([ccb2262](https://github.com/bytedance/UI-TARS-desktop/commit/ccb226208)) [@ULIVZ](https://github.com/ULIVZ)
 * **tarko:** persist agent web ui config in share ([#1347](https://github.com/bytedance/UI-TARS-desktop/pull/1347)) ([c190d00](https://github.com/bytedance/UI-TARS-desktop/commit/c190d0096)) [@ULIVZ](https://github.com/ULIVZ)
 
-### Chore
-
-* **ptk:** add `--no-verify` to release commits ([#1369](https://github.com/bytedance/UI-TARS-desktop/pull/1369)) ([e19a0f2](https://github.com/bytedance/UI-TARS-desktop/commit/e19a0f264)) [@ULIVZ](https://github.com/ULIVZ)
-* **ptk:** update release commit scope from agent-tars to tars-stack ([#1368](https://github.com/bytedance/UI-TARS-desktop/pull/1368)) ([25001c7](https://github.com/bytedance/UI-TARS-desktop/commit/25001c743)) [@ULIVZ](https://github.com/ULIVZ)
-* **all:** fix grammar typo ([#1367](https://github.com/bytedance/UI-TARS-desktop/pull/1367)) ([48e40ab](https://github.com/bytedance/UI-TARS-desktop/commit/48e40aba3)) [@ULIVZ](https://github.com/ULIVZ)
-* **o-agent:** update display texts ([#1351](https://github.com/bytedance/UI-TARS-desktop/pull/1351)) ([8c0f42a](https://github.com/bytedance/UI-TARS-desktop/commit/8c0f42a6c)) [@ULIVZ](https://github.com/ULIVZ)
-* **tarko:** remove codeblock action buttons ([#1344](https://github.com/bytedance/UI-TARS-desktop/pull/1344)) ([0f55ce9](https://github.com/bytedance/UI-TARS-desktop/commit/0f55ce9b6)) [@ULIVZ](https://github.com/ULIVZ)
 
 ## [0.3.0-beta.7](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.3.0-beta.5...@agent-tars@0.3.0-beta.7) (2025-09-02)
 
@@ -169,13 +148,6 @@
 * **tarko:** optimize EditFile title path display ([#1246](https://github.com/bytedance/UI-TARS-desktop/pull/1246)) ([83f8b85](https://github.com/bytedance/UI-TARS-desktop/commit/83f8b85df)) [@ULIVZ](https://github.com/ULIVZ)
 * **tarko:** enable line wrapping for command stdout/stderr ([#1249](https://github.com/bytedance/UI-TARS-desktop/pull/1249)) ([cda0324](https://github.com/bytedance/UI-TARS-desktop/commit/cda0324a9)) [@ULIVZ](https://github.com/ULIVZ)
 
-### Chore
-
-* **tarko:** improve gui agent screenshot ui layout and placeholder ([#1302](https://github.com/bytedance/UI-TARS-desktop/pull/1302)) ([e083c72](https://github.com/bytedance/UI-TARS-desktop/commit/e083c723d)) [@ULIVZ](https://github.com/ULIVZ)
-* **tarko:** replace @ui-tars/operator-browser with local @gui-agent/operator-browser ([#1278](https://github.com/bytedance/UI-TARS-desktop/pull/1278)) ([2c13c04](https://github.com/bytedance/UI-TARS-desktop/commit/2c13c0469)) [@ULIVZ](https://github.com/ULIVZ)
-* **mcp-client:** release 1.2.20 ([#1270](https://github.com/bytedance/UI-TARS-desktop/pull/1270)) ([5a7200d](https://github.com/bytedance/UI-TARS-desktop/commit/5a7200d42)) [@ULIVZ](https://github.com/ULIVZ)
-* **all:** unify naming case of webui config ([#1269](https://github.com/bytedance/UI-TARS-desktop/pull/1269)) ([55bb023](https://github.com/bytedance/UI-TARS-desktop/commit/55bb02309)) [@ULIVZ](https://github.com/ULIVZ)
-
 ## [0.3.0-beta.5](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.3.0-beta.4...@agent-tars@0.3.0-beta.5) (2025-08-21)
 
 ### Features
@@ -198,12 +170,6 @@
 * **tarko:** update session title in correct metadata structure ([#1233](https://github.com/bytedance/UI-TARS-desktop/pull/1233)) ([94278e5](https://github.com/bytedance/UI-TARS-desktop/commit/94278e540)) [@ULIVZ](https://github.com/ULIVZ)
 * **tarko:** home page title is truncated ([#1222](https://github.com/bytedance/UI-TARS-desktop/pull/1222)) ([ff2d740](https://github.com/bytedance/UI-TARS-desktop/commit/ff2d740a7)) [@ULIVZ](https://github.com/ULIVZ)
 
-### Chore
-
-* **all:** standardize the written terminology of Omni-TARS ([#1235](https://github.com/bytedance/UI-TARS-desktop/pull/1235)) ([923785a](https://github.com/bytedance/UI-TARS-desktop/commit/923785ab3)) [@ULIVZ](https://github.com/ULIVZ)
-* **o-tars:** using sync mode for `execute_bash` ([#1228](https://github.com/bytedance/UI-TARS-desktop/pull/1228)) ([06fa5bf](https://github.com/bytedance/UI-TARS-desktop/commit/06fa5bf20)) [@ULIVZ](https://github.com/ULIVZ)
-* **tarko:** override strikethrough (del) to render as normal text ([#1219](https://github.com/bytedance/UI-TARS-desktop/pull/1219)) ([1b47f03](https://github.com/bytedance/UI-TARS-desktop/commit/1b47f038d)) [@ULIVZ](https://github.com/ULIVZ)
-* **omni-tars:** remove unused prompt ([#1221](https://github.com/bytedance/UI-TARS-desktop/pull/1221)) ([507ffc2](https://github.com/bytedance/UI-TARS-desktop/commit/507ffc222)) [@ULIVZ](https://github.com/ULIVZ)
 
 ## [0.3.0-beta.4](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.3.0-beta.1...@agent-tars@0.3.0-beta.4) (2025-08-21)
 
@@ -246,12 +212,6 @@
 
 * **tarko:** allow workspace panel updates in replay mode ([#1202](https://github.com/bytedance/UI-TARS-desktop/pull/1202)) ([898914f](https://github.com/bytedance/UI-TARS-desktop/commit/898914f1a)) [@ULIVZ](https://github.com/ULIVZ)
 
-### Chore
-
-* **tarko:** fix which final environment is shown after non-screensh… ([#1209](https://github.com/bytedance/UI-TARS-desktop/pull/1209)) ([845cbd0](https://github.com/bytedance/UI-TARS-desktop/commit/845cbd0ce)) [@heh](https://github.com/heh)
-* **gui-agent:** fix the missing final screenshot ([#1190](https://github.com/bytedance/UI-TARS-desktop/pull/1190)) ([0ee8730](https://github.com/bytedance/UI-TARS-desktop/commit/0ee87301a)) [@heh](https://github.com/heh)
-* **tarko:** remove fallback when no screenshot is available ([34ad81f](https://github.com/bytedance/UI-TARS-desktop/commit/34ad81f9e)) [@chenhaoli](https://github.com/chenhaoli)
-* **omni-tars:** fix dev:agent launch issue ([b99db7b](https://github.com/bytedance/UI-TARS-desktop/commit/b99db7bc3)) [@chenhaoli](https://github.com/chenhaoli)
 
 ## [0.3.0-beta.2](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.3.0-beta.1...@agent-tars@0.3.0-beta.2) (2025-08-19)
 
@@ -284,10 +244,6 @@
 * **tarko:** add rollback error handling in sqlite migration ([#1147](https://github.com/bytedance/UI-TARS-desktop/pull/1147)) ([9a49826](https://github.com/bytedance/UI-TARS-desktop/commit/9a49826e1)) [@ULIVZ](https://github.com/ULIVZ)
 * **tarko:** inline code dark mode text color ([#1143](https://github.com/bytedance/UI-TARS-desktop/pull/1143)) ([b37ec25](https://github.com/bytedance/UI-TARS-desktop/commit/b37ec2553)) [@ULIVZ](https://github.com/ULIVZ)
 
-### Chore
-
-* **docs:** correct workspace default path in English and Chinese guides ([#1124](https://github.com/bytedance/UI-TARS-desktop/pull/1124)) ([a437116](https://github.com/bytedance/UI-TARS-desktop/commit/a43711677)) [@Jacob](https://github.com/Jacob)
-* **mcp-browser:** _meta add screen coords & fix console in stdio mode ([#984](https://github.com/bytedance/UI-TARS-desktop/pull/984)) ([06243d4](https://github.com/bytedance/UI-TARS-desktop/commit/06243d44e)) [@Charles](https://github.com/Charles)
 
 ## [0.3.0-beta.1](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.3.0-beta.0...@agent-tars@0.3.0-beta.1) (2025-07-17)
 
