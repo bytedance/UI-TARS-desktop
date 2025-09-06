@@ -145,35 +145,30 @@ Return only a JSON object with a "slug" field.`,
       // Use English words if available
       normalized = englishWords.join('-');
     } else {
-      // Try simple transliteration first
+      // Try transliteration for non-English text
       const transliterated = this.simpleTransliterate(text);
-      if (transliterated && transliterated !== text) {
-        normalized = transliterated;
+      if (transliterated && transliterated.length > 0) {
         console.log(`[SlugGenerator.manualNormalization] Transliterated: "${transliterated}"`);
+        return transliterated; // simpleTransliterate already handles all cleanup
       } else {
-        // For non-English text, create a semantic fallback
-        // Replace all non-ASCII with descriptive terms based on content type
+        // For non-translatable text, create a semantic fallback
         if (/[\u4e00-\u9fff]/.test(text)) {
-          // Chinese characters detected
           normalized = 'chinese-query';
           console.log('[SlugGenerator.manualNormalization] Chinese text detected, using "chinese-query"');
         } else if (/[\u3040-\u309f\u30a0-\u30ff]/.test(text)) {
-          // Japanese characters detected
           normalized = 'japanese-query';
           console.log('[SlugGenerator.manualNormalization] Japanese text detected, using "japanese-query"');
         } else if (/[\u0400-\u04ff]/.test(text)) {
-          // Cyrillic characters detected
           normalized = 'cyrillic-query';
           console.log('[SlugGenerator.manualNormalization] Cyrillic text detected, using "cyrillic-query"');
         } else {
-          // Other non-ASCII characters
           normalized = 'international-query';
           console.log('[SlugGenerator.manualNormalization] Other non-ASCII text detected, using "international-query"');
         }
       }
     }
     
-    // Apply final cleanup
+    // Apply final cleanup (only for English words and language fallbacks)
     normalized = normalized
       .replace(/[^\w\s-]/g, '') // Remove remaining special characters
       .replace(/\s+/g, '-') // Replace spaces with hyphens
