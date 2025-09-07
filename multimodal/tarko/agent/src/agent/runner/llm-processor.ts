@@ -435,12 +435,10 @@ export class LLMProcessor {
       parsedResponse.content || '',
       parsedResponse.rawContent ?? '',
       parsedResponse.toolCalls || [],
-      parsedResponse.reasoningContent || '',
       parsedResponse.finishReason || 'stop',
       messageId, // Pass the message ID to final events
       ttftMs, // Pass the TTFT only if metrics were calculated
       ttltMs, // Pass the TTLT only if metrics were calculated
-      streamingMode, // Pass streaming mode to determine if we need to send thinking events
     );
 
     // Call response hooks with session ID
@@ -494,12 +492,10 @@ export class LLMProcessor {
     content: string,
     rawContent: string,
     currentToolCalls: ChatCompletionMessageToolCall[],
-    reasoningBuffer: string,
     finishReason: string,
     messageId?: string,
     ttftMs?: number,
     ttltMs?: number,
-    streamingMode?: boolean,
   ): void {
     // If we have complete content, create a consolidated assistant message event
     if (content || currentToolCalls.length > 0) {
@@ -516,23 +512,7 @@ export class LLMProcessor {
       this.eventStream.sendEvent(assistantEvent);
     }
 
-    // If we have complete reasoning content and not in streaming mode, create a consolidated thinking message event
-    if (reasoningBuffer && !streamingMode) {
-      let thinkingDurationMs: number | undefined;
-      if (messageId && this.thinkingStartTimes.has(messageId)) {
-        const startTime = this.thinkingStartTimes.get(messageId)!;
-        thinkingDurationMs = Date.now() - startTime;
-        this.thinkingStartTimes.delete(messageId);
-      }
-
-      const thinkingEvent = this.eventStream.createEvent('assistant_thinking_message', {
-        content: reasoningBuffer,
-        isComplete: true,
-        messageId: messageId,
-        thinkingDurationMs: thinkingDurationMs,
-      });
-
-      this.eventStream.sendEvent(thinkingEvent);
-    }
+    // Note: thinking events are only meaningful in streaming mode where users can see real-time AI reasoning
+    // In non-streaming mode, thinking content has no value since it's not visible until the response is complete
   }
 }
