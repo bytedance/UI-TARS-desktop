@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { 
-  FiFile, 
-  FiImage, 
-  FiEye, 
-  FiChevronDown, 
-  FiChevronUp, 
+import {
+  FiFile,
+  FiImage,
+  FiEye,
+  FiChevronDown,
+  FiChevronUp,
   FiClock,
   FiCode,
-  FiFileText
+  FiFileText,
 } from 'react-icons/fi';
 import { FileItem } from '@/common/state/atoms/files';
 import { useSession } from '@/common/hooks/useSession';
@@ -21,7 +21,7 @@ interface WorkspaceFileManagerProps {
 
 /**
  * WorkspaceFileManager - Minimalist file management interface
- * 
+ *
  * Features:
  * - Compact list-based design with subtle elegance
  * - Clean typography and refined spacing
@@ -29,10 +29,7 @@ interface WorkspaceFileManagerProps {
  * - Efficient space utilization
  * - Professional aesthetic
  */
-export const WorkspaceFileManager: React.FC<WorkspaceFileManagerProps> = ({
-  files,
-  sessionId,
-}) => {
+export const WorkspaceFileManager: React.FC<WorkspaceFileManagerProps> = ({ files, sessionId }) => {
   const { setActivePanelContent } = useSession();
   const [isExpanded, setIsExpanded] = useState(true);
   const [selectedFileType, setSelectedFileType] = useState<string>('all');
@@ -46,8 +43,8 @@ export const WorkspaceFileManager: React.FC<WorkspaceFileManagerProps> = ({
   // Categorize files by type
   const fileTypes = {
     all: files,
-    file: files.filter(f => f.type === 'file'),
-    image: files.filter(f => f.type === 'screenshot' || f.type === 'image'),
+    file: files.filter((f) => f.type === 'file'),
+    image: files.filter((f) => f.type === 'screenshot' || f.type === 'image'),
   };
 
   const displayFiles = fileTypes[selectedFileType as keyof typeof fileTypes] || files;
@@ -78,7 +75,7 @@ export const WorkspaceFileManager: React.FC<WorkspaceFileManagerProps> = ({
     if (type === 'screenshot' || type === 'image') {
       return <FiImage size={14} className="text-emerald-600 dark:text-emerald-400" />;
     }
-    
+
     // Determine icon by file extension
     const ext = fileName.split('.').pop()?.toLowerCase();
     switch (ext) {
@@ -99,25 +96,51 @@ export const WorkspaceFileManager: React.FC<WorkspaceFileManagerProps> = ({
     const ext = fileName.split('.').pop()?.toLowerCase();
     switch (ext) {
       case 'tsx':
-        return <span className="px-1.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">TSX</span>;
+        return (
+          <span className="px-1.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
+            TSX
+          </span>
+        );
       case 'ts':
-        return <span className="px-1.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">TS</span>;
+        return (
+          <span className="px-1.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
+            TS
+          </span>
+        );
       case 'jsx':
-        return <span className="px-1.5 py-0.5 text-xs font-medium bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 rounded">JSX</span>;
+        return (
+          <span className="px-1.5 py-0.5 text-xs font-medium bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 rounded">
+            JSX
+          </span>
+        );
       case 'js':
-        return <span className="px-1.5 py-0.5 text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded">JS</span>;
+        return (
+          <span className="px-1.5 py-0.5 text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded">
+            JS
+          </span>
+        );
       case 'md':
-        return <span className="px-1.5 py-0.5 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">MD</span>;
+        return (
+          <span className="px-1.5 py-0.5 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">
+            MD
+          </span>
+        );
       case 'png':
       case 'jpg':
       case 'jpeg':
-        return <span className="px-1.5 py-0.5 text-xs font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded">IMG</span>;
+        return (
+          <span className="px-1.5 py-0.5 text-xs font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded">
+            IMG
+          </span>
+        );
       default:
-        return <span className="px-1.5 py-0.5 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded">{ext?.toUpperCase() || 'FILE'}</span>;
+        return (
+          <span className="px-1.5 py-0.5 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded">
+            {ext?.toUpperCase() || 'FILE'}
+          </span>
+        );
     }
   };
-
-
 
   // Animation variants removed for performance
 
@@ -151,7 +174,7 @@ export const WorkspaceFileManager: React.FC<WorkspaceFileManagerProps> = ({
               Images
             </button>
           )}
-          
+
           {/* Collapse Toggle */}
           <button
             onClick={() => setIsExpanded(!isExpanded)}
@@ -178,10 +201,8 @@ export const WorkspaceFileManager: React.FC<WorkspaceFileManagerProps> = ({
                   className="group flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer transition-colors duration-150"
                 >
                   {/* File Icon */}
-                  <div className="flex-shrink-0">
-                    {getFileIcon(file.type, file.name)}
-                  </div>
-                  
+                  <div className="flex-shrink-0">{getFileIcon(file.type, file.name)}</div>
+
                   {/* File Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
@@ -190,25 +211,25 @@ export const WorkspaceFileManager: React.FC<WorkspaceFileManagerProps> = ({
                       </span>
                       {getFileTypeBadge(file.name)}
                     </div>
-                    
+
                     <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                       <FiClock size={10} />
                       <span>{formatTimestamp(file.timestamp)}</span>
                       {file.path && (
                         <>
                           <span>•</span>
-                          <span 
-                            className="inline-block max-w-32 overflow-hidden whitespace-nowrap" 
+                          <span
+                            className="inline-block overflow-hidden whitespace-nowrap"
                             title={normalizeFilePath(file.path)}
                             style={{ textOverflow: 'ellipsis' }}
                           >
-                            .../{normalizeFilePath(file.path).split('/').slice(-2).join('/')}
+                            {normalizeFilePath(file.path)}
                           </span>
                         </>
                       )}
                     </div>
                   </div>
-                  
+
                   {/* View Action */}
                   <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
                     <FiEye size={14} className="text-gray-400" />
