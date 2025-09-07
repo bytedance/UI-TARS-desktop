@@ -150,11 +150,11 @@ describe.skip('LLMProcessor Thinking Events', () => {
 
       agent.getEventStream().subscribe((event) => {
         events.push(event);
-        
+
         if (event.type === 'assistant_streaming_thinking_message' && !firstThinkingTime) {
           firstThinkingTime = event.timestamp;
         }
-        
+
         if (event.type === 'assistant_thinking_message') {
           finalThinkingTime = event.timestamp;
         }
@@ -173,10 +173,10 @@ describe.skip('LLMProcessor Thinking Events', () => {
 
       expect(finalThinkingEvents.length).toBe(1);
       const finalEvent = finalThinkingEvents[0];
-      
+
       // Duration should be reasonable (at least the sleep delays we added)
       expect(finalEvent.thinkingDurationMs).toBeGreaterThan(20); // At least 3 * 10ms delays
-      
+
       // Duration should match approximately the time difference
       if (firstThinkingTime && finalThinkingTime) {
         const expectedDuration = finalThinkingTime - firstThinkingTime;
@@ -207,9 +207,7 @@ describe.skip('LLMProcessor Thinking Events', () => {
       );
 
       // Should have exactly one final thinking event (not duplicated)
-      const finalThinkingEvents = events.filter(
-        (e) => e.type === 'assistant_thinking_message',
-      );
+      const finalThinkingEvents = events.filter((e) => e.type === 'assistant_thinking_message');
 
       expect(streamingThinkingEvents.length).toBeGreaterThan(0);
       expect(finalThinkingEvents.length).toBe(1); // No duplicates
@@ -265,7 +263,7 @@ describe.skip('LLMProcessor Thinking Events', () => {
 
       expect(finalThinkingEvents.length).toBe(1);
       const finalEvent = finalThinkingEvents[0];
-      
+
       // Should contain all reasoning content
       expect(finalEvent.content).toContain('Let me think about this step by step.');
       expect(finalEvent.content).toContain('First, I need to understand the problem.');
@@ -326,17 +324,13 @@ describe.skip('LLMProcessor Thinking Events', () => {
       const streamingThinkingEvents = events.filter(
         (e) => e.type === 'assistant_streaming_thinking_message',
       );
-      const finalThinkingEvents = events.filter(
-        (e) => e.type === 'assistant_thinking_message',
-      );
+      const finalThinkingEvents = events.filter((e) => e.type === 'assistant_thinking_message');
 
       expect(streamingThinkingEvents.length).toBe(0);
       expect(finalThinkingEvents.length).toBe(0);
 
       // Should still have regular assistant message
-      const assistantMessages = events.filter(
-        (e) => e.type === 'assistant_message',
-      );
+      const assistantMessages = events.filter((e) => e.type === 'assistant_message');
       expect(assistantMessages.length).toBeGreaterThan(0);
     });
 
@@ -406,13 +400,11 @@ describe.skip('LLMProcessor Thinking Events', () => {
       const streamingThinkingEvents = events.filter(
         (e) => e.type === 'assistant_streaming_thinking_message',
       );
-      const finalThinkingEvents = events.filter(
-        (e) => e.type === 'assistant_thinking_message',
-      );
+      const finalThinkingEvents = events.filter((e) => e.type === 'assistant_thinking_message');
 
       expect(streamingThinkingEvents.length).toBeGreaterThan(0);
       expect(finalThinkingEvents.length).toBe(1);
-      
+
       const finalEvent = finalThinkingEvents[0] as AgentEventStream.AssistantThinkingMessageEvent;
       expect(finalEvent.content).toContain('Starting to think...');
       expect(finalEvent.thinkingDurationMs).toBeDefined();

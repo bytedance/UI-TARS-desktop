@@ -56,7 +56,9 @@ describe('LLMProcessor Thinking Events - Simple', () => {
 
     // Should not have thinking events when no reasoning
     const thinkingEvents = events.filter(
-      (e) => e.type === 'assistant_thinking_message' || e.type === 'assistant_streaming_thinking_message'
+      (e) =>
+        e.type === 'assistant_thinking_message' ||
+        e.type === 'assistant_streaming_thinking_message',
     );
     expect(thinkingEvents.length).toBe(0);
 
@@ -121,7 +123,7 @@ describe('LLMProcessor Thinking Events - Simple', () => {
     });
 
     const stream = await agent.run({ input: 'Test reasoning', stream: true });
-    
+
     // Consume stream
     for await (const event of stream) {
       // Process events
@@ -129,11 +131,9 @@ describe('LLMProcessor Thinking Events - Simple', () => {
 
     // Should have thinking events when reasoning present
     const streamingThinkingEvents = events.filter(
-      (e) => e.type === 'assistant_streaming_thinking_message'
+      (e) => e.type === 'assistant_streaming_thinking_message',
     );
-    const finalThinkingEvents = events.filter(
-      (e) => e.type === 'assistant_thinking_message'
-    );
+    const finalThinkingEvents = events.filter((e) => e.type === 'assistant_thinking_message');
 
     // At minimum, should have some thinking events
     expect(streamingThinkingEvents.length + finalThinkingEvents.length).toBeGreaterThan(0);
