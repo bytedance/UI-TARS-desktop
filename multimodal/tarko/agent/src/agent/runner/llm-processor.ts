@@ -418,23 +418,7 @@ export class LLMProcessor {
 
     this.logger.infoWithData('Finalized Response', parsedResponse, JSON.stringify);
 
-    // Send final thinking message with duration if we have reasoning content and haven't sent it yet
-    if (parsedResponse.reasoningContent && streamingMode && !reasoningCompleted) {
-      let thinkingDurationMs: number | undefined;
-      if (messageId && this.thinkingStartTimes.has(messageId)) {
-        const startTime = this.thinkingStartTimes.get(messageId)!;
-        thinkingDurationMs = Date.now() - startTime;
-        this.thinkingStartTimes.delete(messageId);
-      }
 
-      const finalThinkingEvent = this.eventStream.createEvent('assistant_thinking_message', {
-        content: parsedResponse.reasoningContent,
-        isComplete: true,
-        messageId: messageId,
-        thinkingDurationMs: thinkingDurationMs,
-      });
-      this.eventStream.sendEvent(finalThinkingEvent);
-    }
 
     // Calculate timing metrics only if enabled
     let ttftMs: number | undefined;
