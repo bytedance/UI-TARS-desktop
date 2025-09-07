@@ -1,11 +1,6 @@
 /**
  * Code Editor Dark IDE Theme Styles
- * 
- * IMPORTANT: These styles are scoped specifically for the CodeEditor component
- * and should NOT affect MarkdownRenderer or any other components. All styles
- * use the .code-editor- prefix to ensure proper isolation.
- * 
- * This component uses a deep dark IDE theme for a more professional appearance.
+ * Scoped with .code-editor- prefix for component isolation
  */
 
 .code-editor-container {
@@ -21,7 +16,6 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
-/* IDE-style header with deeper dark theme */
 .code-editor-header {
   background: #010409;
   border-bottom: 1px solid #21262d;
@@ -38,7 +32,6 @@
   gap: 12px;
 }
 
-/* Browser-style control buttons */
 .code-editor-controls {
   display: flex;
   gap: 6px;
@@ -66,11 +59,10 @@
   border: 1px solid #24a134;
 }
 
-/* File info section */
 .code-editor-file-info {
   position: relative;
   cursor: default;
-  padding: 4px 2px; /* Add some padding for easier hover */
+  padding: 4px 2px;
 }
 
 .code-editor-file-info:hover {
@@ -89,7 +81,6 @@
   max-width: 300px;
 }
 
-/* Language badge */
 .code-editor-language-badge {
   background: #21262d;
   color: #7d8590;
@@ -102,7 +93,6 @@
   border: 1px solid #30363d;
 }
 
-/* Actions */
 .code-editor-actions {
   display: flex;
   gap: 4px;
@@ -126,12 +116,11 @@
   color: #f0f6fc;
 }
 
-/* Tooltip styles */
 .code-editor-tooltip {
   position: absolute;
   top: 100%;
   left: 0;
-  margin-top: 12px; /* Increased gap for easier mouse movement */
+  margin-top: 8px;
   z-index: 50;
   background: #161b22;
   color: #f0f6fc;
@@ -141,19 +130,6 @@
   border: 1px solid #30363d;
   min-width: max-content;
   max-width: 300px;
-  /* Add invisible bridge area for easier mouse movement */
-  padding-top: 8px;
-}
-
-.code-editor-tooltip::before {
-  content: '';
-  position: absolute;
-  top: -12px;
-  left: 0;
-  right: 0;
-  height: 12px;
-  background: transparent;
-  /* Invisible interaction bridge */
 }
 
 .code-editor-tooltip-content {
@@ -161,7 +137,6 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-top: -8px; /* Compensate for the padding-top */
 }
 
 .code-editor-tooltip-section {
@@ -229,7 +204,6 @@
   transform: rotate(45deg);
 }
 
-/* Code content area */
 .code-editor-content {
   background: #0d1117;
   overflow: auto;
@@ -240,15 +214,11 @@
   min-height: 100%;
 }
 
-/* Line numbers */
 .code-editor-line-numbers {
   background: #010409;
   border-right: 1px solid #21262d;
   flex-shrink: 0;
   user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
 }
 
 .code-editor-line-numbers-inner {
@@ -267,7 +237,6 @@
   justify-content: flex-end;
 }
 
-/* Code area */
 .code-editor-code-area {
   flex: 1;
   overflow: auto;
@@ -282,8 +251,6 @@
   line-height: 1.5;
   overflow: visible;
   tab-size: 2;
-  -moz-tab-size: 2;
-  -o-tab-size: 2;
 }
 
 .code-editor-code {
@@ -294,7 +261,6 @@
   line-height: inherit;
 }
 
-/* Status bar */
 .code-editor-status-bar {
   background: #010409;
   border-top: 1px solid #21262d;
@@ -317,7 +283,6 @@
   color: #7d8590;
 }
 
-/* Scrollbar styling for deeper dark theme */
 .code-editor-container ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -337,17 +302,15 @@
   background: #6e7681;
 }
 
-/* Selection styling */
 .code-editor-container ::selection {
   background-color: rgba(99, 102, 241, 0.25);
 }
 
-/* Focus styles */
 .code-editor-container:focus-within {
   outline: none;
 }
 
-/* Enhanced dark theme syntax highlighting */
+/* Syntax highlighting */
 .code-editor-code .hljs {
   background: transparent !important;
   color: #f0f6fc !important;
@@ -409,7 +372,6 @@
   color: #d2a8ff !important;
 }
 
-/* Additional highlight.js styles for better coverage */
 .code-editor-code .hljs-strong {
   color: #f0f6fc !important;
   font-weight: bold;
