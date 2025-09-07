@@ -440,6 +440,7 @@ export class LLMProcessor {
       messageId, // Pass the message ID to final events
       ttftMs, // Pass the TTFT only if metrics were calculated
       ttltMs, // Pass the TTLT only if metrics were calculated
+      streamingMode, // Pass streaming mode to determine if we need to send thinking events
     );
 
     // Call response hooks with session ID
@@ -498,6 +499,7 @@ export class LLMProcessor {
     messageId?: string,
     ttftMs?: number,
     ttltMs?: number,
+    streamingMode?: boolean,
   ): void {
     // If we have complete content, create a consolidated assistant message event
     if (content || currentToolCalls.length > 0) {
