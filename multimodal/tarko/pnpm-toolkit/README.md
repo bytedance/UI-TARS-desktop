@@ -14,6 +14,7 @@
 - 🚀 **Release Management**: Automated version bumping and publishing
 - 🔧 **Patch System**: Repair failed package publications
 - 📝 **Changelog Generation**: Automatic, customizable changelog creation
+- 🏷️ **GitHub Release**: Automatic GitHub release creation with changelog extraction
 
 ## Install
 
@@ -68,6 +69,7 @@ Options:
 - `--build`: Execute custom build script before release
 - `--ignore-scripts`: Ignore npm scripts during release
 - `--push-tag`: Automatically push git tag to remote
+- `--create-github-release`: Create GitHub release after successful release
 
 ### Patching Failed Releases
 
@@ -85,6 +87,42 @@ Create customized changelogs:
 ptk changelog --version 1.0.0 --beautify --commit
 ```
 
+### Creating GitHub Releases
+
+Automatically create GitHub releases with extracted changelog content:
+
+```bash
+# Create GitHub release during package release
+ptk release --create-github-release
+
+# Preview what would be created (dry run)
+ptk release --create-github-release --dry-run
+```
+
+**Prerequisites**:
+- GitHub CLI (`gh`) must be installed and authenticated
+- Repository must be hosted on GitHub
+- `CHANGELOG.md` file should exist with proper version sections
+
+**Features**:
+- Automatically extracts release notes from `CHANGELOG.md`
+- Detects prerelease versions (containing `-`) and marks them appropriately
+- Uses project's tag prefix (e.g., `@agent-tars@1.0.0`)
+- Graceful failure - main release succeeds even if GitHub release fails
+
+**Changelog Format Expected**:
+```markdown
+## [1.0.0](compare-link) (2025-01-01)
+
+### Features
+
+* **scope:** description ([#123](pr-link)) ([commit](commit-link)) [@author](author-link)
+
+### Bug Fixes
+
+* **scope:** fix description ([#124](pr-link)) ([commit](commit-link)) [@author](author-link)
+```
+
 ## Advanced Guide
 
 ### Integration with package.json
@@ -95,7 +133,8 @@ Add these scripts to your root package.json:
 {
   "scripts": {
     "dev": "ptk dev",
-    "release": "ptk release",
+    "release": "ptk release --push-tag --create-github-release",
+    "release:dry": "ptk release --dry-run --create-github-release",
     "changelog": "ptk changelog"
   }
 }
