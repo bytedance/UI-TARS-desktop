@@ -197,8 +197,12 @@ export const WorkspaceFileManager: React.FC<WorkspaceFileManagerProps> = ({
                       {file.path && (
                         <>
                           <span>•</span>
-                          <span title={normalizeFilePath(file.path)} style={{direction: 'rtl', textAlign: 'left'}}>
-                            {normalizeFilePath(file.path)}
+                          <span 
+                            className="inline-block max-w-32 overflow-hidden whitespace-nowrap" 
+                            title={normalizeFilePath(file.path)}
+                            style={{ textOverflow: 'ellipsis' }}
+                          >
+                            .../{normalizeFilePath(file.path).split('/').slice(-2).join('/')}
                           </span>
                         </>
                       )}
