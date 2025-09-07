@@ -540,89 +540,28 @@ ${JSON.stringify(schema)}
 
   /**
    * Extract clean JSON content from potentially malformed tool call content
-   * Uses a robust multi-strategy approach for maximum compatibility
    */
   private extractCleanJsonContent(content: string): string {
     const trimmed = content.trim();
     
-    // Fast path: try parsing as-is (handles 90% of cases)
-    if (this.tryParseJson(trimmed)) {
-      return trimmed;
-    }
-    
-    // Progressive truncation: find the longest valid JSON prefix
-    return this.findValidJsonPrefix(trimmed) || trimmed;
-  }
-  
-  /**
-   * Safe JSON parsing without throwing
-   */
-  private tryParseJson(content: string): boolean {
-    try {
-      JSON.parse(content);
-      return true;
-    } catch {
-      return false;
-    }
-  }
-  
-  /**
-   * Find the longest valid JSON prefix using binary search approach
-   */
-  private findValidJsonPrefix(content: string): string | null {
-    // Quick heuristic: look for obvious trailing garbage patterns
+    // Try common cleanup patterns first
     const patterns = [
-      /^(.+?)\s*\}\s*\}\s*$/,  // Extra closing brace
-      /^(.+?)\s*\}\s*\n+.*$/,  // Newlines after JSON
-      /^(.+?)\s*\}\s*[^}\s].*$/,  // Non-JSON content after
+      trimmed,  // Original
+      trimmed.replace(/\}\s*\}\s*$/, '}'),  // Remove extra closing brace
+      trimmed.replace(/\}\s*\n.*$/, '}'),   // Remove content after }
+      trimmed.match(/^\{[^]*?\}/)?.[0] || trimmed  // First complete JSON object
     ];
     
-    for (const pattern of patterns) {
-      const match = content.match(pattern);
-      if (match && this.tryParseJson(match[1] + '}')) {
-        return match[1] + '}';
+    for (const candidate of patterns) {
+      try {
+        JSON.parse(candidate);
+        return candidate;
+      } catch {
+        continue;
       }
     }
     
-    // Fallback: find first complete JSON object
-    let depth = 0;
-    let inString = false;
-    let escaped = false;
-    
-    for (let i = 0; i < content.length; i++) {
-      const char = content[i];
-      
-      if (escaped) {
-        escaped = false;
-        continue;
-      }
-      
-      if (char === '\\' && inString) {
-        escaped = true;
-        continue;
-      }
-      
-      if (char === '"') {
-        inString = !inString;
-        continue;
-      }
-      
-      if (!inString) {
-        if (char === '{') {
-          depth++;
-        } else if (char === '}') {
-          depth--;
-          if (depth === 0) {
-            const candidate = content.substring(0, i + 1);
-            if (this.tryParseJson(candidate)) {
-              return candidate;
-            }
-          }
-        }
-      }
-    }
-    
-    return null;
+    return trimmed;
   }
 
   /**
