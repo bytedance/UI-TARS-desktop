@@ -11,8 +11,8 @@ import { logger } from './logger';
 
 // Username mapping for commit authors to correct GitHub usernames
 const USERNAME_MAP: Record<string, string> = {
-  'chenhaoli': 'ulivz',
-  '小健': 'cjraft',
+  chenhaoli: 'ulivz',
+  小健: 'cjraft',
 };
 
 /**
@@ -272,7 +272,7 @@ export async function createGitHubRelease(options: GitHubReleaseOptions): Promis
       } else {
         logger.info(`  Generate notes from: repository start`);
       }
-      
+
       // Generate and show release notes preview
       logger.info(`\n[dry-run] Release notes preview:`);
       logger.info(`${'='.repeat(50)}`);
