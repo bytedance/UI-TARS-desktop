@@ -341,7 +341,7 @@ export class LLMProcessor {
 
           // Update reasoning content length tracking
           const currentReasoningLength = (processingState.reasoningBuffer || '').length;
-          
+
           // Create thinking streaming event
           const thinkingEvent = this.eventStream.createEvent(
             'assistant_streaming_thinking_message',
@@ -352,20 +352,24 @@ export class LLMProcessor {
             },
           );
           this.eventStream.sendEvent(thinkingEvent);
-          
+
           lastReasoningContentLength = currentReasoningLength;
         }
-        
+
         // Check if reasoning has completed (no new reasoning content in this chunk but we had it before)
-        if (!chunkResult.reasoningContent && lastReasoningContentLength > 0 && !reasoningCompleted) {
+        if (
+          !chunkResult.reasoningContent &&
+          lastReasoningContentLength > 0 &&
+          !reasoningCompleted
+        ) {
           reasoningCompleted = true;
-          
+
           // Calculate and send final thinking duration immediately when reasoning ends
           if (this.thinkingStartTimes.has(messageId)) {
             const startTime = this.thinkingStartTimes.get(messageId)!;
             const thinkingDurationMs = Date.now() - startTime;
             this.thinkingStartTimes.delete(messageId);
-            
+
             // Send final thinking message with duration
             const finalThinkingEvent = this.eventStream.createEvent('assistant_thinking_message', {
               content: processingState.reasoningBuffer || '',
@@ -417,8 +421,6 @@ export class LLMProcessor {
     const parsedResponse = toolCallEngine.finalizeStreamProcessing(processingState);
 
     this.logger.infoWithData('Finalized Response', parsedResponse, JSON.stringify);
-
-
 
     // Calculate timing metrics only if enabled
     let ttftMs: number | undefined;
