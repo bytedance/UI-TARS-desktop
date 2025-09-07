@@ -197,7 +197,7 @@ export const WorkspaceFileManager: React.FC<WorkspaceFileManagerProps> = ({
                       {file.path && (
                         <>
                           <span>•</span>
-                          <span className="truncate max-w-40 text-right" title={normalizeFilePath(file.path)} style={{direction: 'rtl', textAlign: 'left'}}>
+                          <span title={normalizeFilePath(file.path)} style={{direction: 'rtl', textAlign: 'left'}}>
                             {normalizeFilePath(file.path)}
                           </span>
                         </>
