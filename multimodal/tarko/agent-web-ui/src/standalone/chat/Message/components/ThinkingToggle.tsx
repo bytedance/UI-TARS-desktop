@@ -2,22 +2,17 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiChevronRight } from 'react-icons/fi';
 import { MarkdownRenderer } from '@/sdk/markdown-renderer';
+import { formatDuration } from '@/common/utils/duration';
 
 interface ThinkingToggleProps {
   thinking: string;
   showThinking: boolean;
   setShowThinking: (show: boolean) => void;
-  duration?: number; // Add optional duration prop
+  duration?: number;
 }
 
 /**
- * Component for showing/hiding the agent's reasoning process
- *
- * Design principles:
- * - Clean, readable text format without code block styling
- * - Proper typography with readable font size
- * - Smooth animations for state transitions
- * - Gray text for secondary information hierarchy
+ * Component for showing/hiding the agent's reasoning process with clean typography and smooth animations
  */
 export const ThinkingToggle: React.FC<ThinkingToggleProps> = ({
   thinking,
@@ -25,24 +20,11 @@ export const ThinkingToggle: React.FC<ThinkingToggleProps> = ({
   setShowThinking,
   duration,
 }) => {
-  // Format duration display
-  const formatDuration = (ms?: number) => {
-    if (!ms) return '';
-
-    if (ms < 1000) {
-      return `${ms}ms`;
-    } else if (ms < 60000) {
-      return `${(ms / 1000).toFixed(1)}s`;
-    } else {
-      const minutes = Math.floor(ms / 60000);
-      const seconds = ((ms % 60000) / 1000).toFixed(1);
-      return `${minutes}m ${seconds}s`;
-    }
-  };
+  const durationText = duration ? ` for ${formatDuration(duration)}` : '';
 
   return (
     <div className="mb-3">
-      {/* Toggle header */}
+
       <motion.button
         onClick={() => setShowThinking(!showThinking)}
         className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors group"
@@ -52,11 +34,11 @@ export const ThinkingToggle: React.FC<ThinkingToggleProps> = ({
           <FiChevronRight size={14} />
         </motion.div>
         <span className="font-medium text-[16px]">
-          Thought{duration ? ` for ${formatDuration(duration)}` : ''}
+          Thought{durationText}
         </span>
       </motion.button>
 
-      {/* Thinking content */}
+
       <AnimatePresence>
         {showThinking && (
           <motion.div

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiChevronRight, FiLoader } from 'react-icons/fi';
 import { MarkdownRenderer } from '@/sdk/markdown-renderer';
+import { formatDuration } from '@/common/utils/duration';
 
 interface ModernThinkingToggleProps {
   thinking: string;
@@ -12,10 +13,7 @@ interface ModernThinkingToggleProps {
 }
 
 /**
- * Modern thinking component with streaming states
- * 
- * Shows "Thinking" with animation during streaming
- * Shows "Thought for {x}s" after completion
+ * Modern thinking component with streaming states and real-time duration tracking
  */
 export const ModernThinkingToggle: React.FC<ModernThinkingToggleProps> = ({
   thinking,
@@ -27,7 +25,6 @@ export const ModernThinkingToggle: React.FC<ModernThinkingToggleProps> = ({
   const [localDuration, setLocalDuration] = useState(0);
   const [startTime] = useState(Date.now());
 
-  // Update local duration during streaming
   useEffect(() => {
     if (isStreaming && !duration) {
       const interval = setInterval(() => {
@@ -37,25 +34,12 @@ export const ModernThinkingToggle: React.FC<ModernThinkingToggleProps> = ({
     }
   }, [isStreaming, duration, startTime]);
 
-  // Format duration display
-  const formatDuration = (ms: number) => {
-    if (ms < 1000) {
-      return `${Math.round(ms)}ms`;
-    } else if (ms < 60000) {
-      return `${(ms / 1000).toFixed(1)}s`;
-    } else {
-      const minutes = Math.floor(ms / 60000);
-      const seconds = ((ms % 60000) / 1000).toFixed(1);
-      return `${minutes}m ${seconds}s`;
-    }
-  };
-
   const displayDuration = duration || localDuration;
   const isThinking = isStreaming && !duration;
 
   return (
     <div className="mb-3">
-      {/* Toggle header */}
+
       <motion.button
         onClick={() => setShowThinking(!showThinking)}
         className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors group"
@@ -95,7 +79,7 @@ export const ModernThinkingToggle: React.FC<ModernThinkingToggleProps> = ({
         </div>
       </motion.button>
 
-      {/* Thinking content */}
+
       <AnimatePresence>
         {showThinking && (
           <motion.div

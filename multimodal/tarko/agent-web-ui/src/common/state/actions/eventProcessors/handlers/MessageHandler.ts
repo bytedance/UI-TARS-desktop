@@ -228,7 +228,6 @@ export class ThinkingMessageHandler
       | AgentEventStream.AssistantStreamingThinkingMessageEvent
     >
 {
-
   canHandle(
     event: AgentEventStream.Event,
   ): event is
@@ -254,33 +253,27 @@ export class ThinkingMessageHandler
       const sessionMessages = prev[sessionId] || [];
       let existingMessageIndex = -1;
 
-      // Only try to find by messageId if available - no fallback to last assistant message
       if (eventMessageId) {
         existingMessageIndex = sessionMessages.findIndex(
           (msg) => msg.messageId === eventMessageId && msg.role === 'assistant',
         );
       }
 
-      // Get thinking duration from backend event (only for final thinking messages)
       const thinkingDuration = event.type === 'assistant_thinking_message' 
         ? (event as AgentEventStream.AssistantThinkingMessageEvent).thinkingDurationMs
         : undefined;
 
       if (existingMessageIndex !== -1) {
-        // Update existing assistant message
         const message = sessionMessages[existingMessageIndex];
         let newThinking: string;
 
         if (event.type === 'assistant_streaming_thinking_message') {
-          // For streaming thinking messages, append to existing thinking content
-          // Only trim leading newlines if this is the first chunk (thinking is empty)
           const contentToAdd =
             (message.thinking || '').length === 0 && event.content.startsWith(NEWLINE_CHAR)
               ? event.content.replace(LEADING_NEWLINES_REGEX, '')
               : event.content;
           newThinking = (message.thinking || '') + contentToAdd;
         } else {
-          // For final thinking messages, only trim if content starts with newline
           newThinking = event.content.startsWith(NEWLINE_CHAR)
             ? event.content.replace(LEADING_NEWLINES_REGEX, '')
             : event.content;
@@ -293,7 +286,6 @@ export class ThinkingMessageHandler
           isStreaming: event.type === 'assistant_streaming_thinking_message' && !event.isComplete,
         };
 
-        // Add thinking duration when thinking is complete
         if (thinkingDuration !== undefined) {
           updatedMessage.thinkingDuration = thinkingDuration;
         }
@@ -307,7 +299,6 @@ export class ThinkingMessageHandler
           ],
         };
       } else {
-        // No existing assistant message found, create a new one with thinking content
         const newMessage: Message = {
           id: event.id || uuidv4(),
           role: 'assistant',
@@ -320,7 +311,6 @@ export class ThinkingMessageHandler
           isStreaming: event.type === 'assistant_streaming_thinking_message' && !event.isComplete,
         };
 
-        // Add thinking duration when thinking is complete
         if (thinkingDuration !== undefined) {
           newMessage.thinkingDuration = thinkingDuration;
         }
