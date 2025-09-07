@@ -50,6 +50,7 @@ export async function generateReleaseNotes(
   tagName: string,
   previousTag: string | null,
   cwd: string,
+  repoInfo?: { owner: string; repo: string },
 ): Promise<string> {
   try {
     // Get commits between tags
@@ -154,6 +155,15 @@ export async function generateReleaseNotes(
         const description = match ? match[3] : commit.subject;
         releaseNotes += `* ${type}${scope}: ${description} by @${commit.author.toLowerCase()} in ${commit.hash.substring(0, 7)}\n`;
       });
+    }
+
+    // Add Full Changelog link if repository info is available
+    if (repoInfo) {
+      if (previousTag) {
+        releaseNotes += `\n**Full Changelog**: https://github.com/${repoInfo.owner}/${repoInfo.repo}/compare/${previousTag}...${tagName}`;
+      } else {
+        releaseNotes += `\n**Full Changelog**: https://github.com/${repoInfo.owner}/${repoInfo.repo}/commits/${tagName}`;
+      }
     }
 
     return releaseNotes;
@@ -261,7 +271,7 @@ export async function createGitHubRelease(options: GitHubReleaseOptions): Promis
     }
 
     // Generate beautiful release notes
-    const releaseNotes = await generateReleaseNotes(tagName, previousTag, cwd);
+    const releaseNotes = await generateReleaseNotes(tagName, previousTag, cwd, repoInfo);
 
     // Create the release with custom formatted notes
 
