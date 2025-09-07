@@ -61,12 +61,12 @@ export const useScrollToBottom = ({
   }, [threshold]);
 
   // Handle scroll events
-  const handleScroll = useCallback(() => {
+  const handleScroll = useCallback((allowDuringProgrammaticScroll = false) => {
     const container = messagesContainerRef.current;
     if (!container) return;
     
-    // Don't update state during programmatic scrolling to prevent flickering
-    if (isScrollingRef.current) return;
+    // Skip state updates during programmatic scrolling unless explicitly allowed
+    if (isScrollingRef.current && !allowDuringProgrammaticScroll) return;
     
     const { scrollTop, scrollHeight, clientHeight } = container;
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
@@ -86,10 +86,11 @@ export const useScrollToBottom = ({
   }, [threshold]);
 
   // Smooth scroll to bottom
-  const scrollToBottom = useCallback((forceCheck = true) => {
+  const scrollToBottom = useCallback(() => {
     const container = messagesContainerRef.current;
     if (!container) return;
     
+    // Set flag to prevent state updates during programmatic scroll
     isScrollingRef.current = true;
     
     container.scrollTo({
@@ -97,16 +98,30 @@ export const useScrollToBottom = ({
       behavior: 'smooth'
     });
     
-    // Reset scrolling flag after animation completes
+    // Reset scrolling flag and check final position after animation
     setTimeout(() => {
       isScrollingRef.current = false;
-      // Force check scroll position to ensure button hides when at bottom
-      if (forceCheck) handleScroll();
+      // Always perform a final check to ensure correct state
+      handleScroll(true); // Allow check during programmatic scroll completion
     }, SCROLL_ANIMATION_DELAY);
   }, [handleScroll]);
 
-  // Auto-scroll to bottom (reuse scrollToBottom without force check)
-  const autoScrollToBottom = useCallback(() => scrollToBottom(false), [scrollToBottom]);
+  // Auto-scroll to bottom (immediate scroll without animation delays)
+  const autoScrollToBottom = useCallback(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+    
+    container.scrollTo({
+      top: container.scrollHeight,
+      behavior: 'smooth'
+    });
+    
+    // For auto-scroll, don't set the scrolling flag to avoid blocking user scroll events
+    // Just schedule a delayed check to update button state
+    setTimeout(() => {
+      handleScroll();
+    }, SCROLL_ANIMATION_DELAY);
+  }, [handleScroll]);
 
   // Delayed scroll check helper
   const scheduleScrollCheck = useCallback(() => {
@@ -214,9 +229,9 @@ export const useScrollToBottom = ({
   }, [autoScrollOnUserMessage, isReplayMode, autoScrollToBottom, ...dependencies]);
 
   return {
-    messagesContainerRef,
-    messagesEndRef,
-    showScrollToBottom,
-    scrollToBottom: () => scrollToBottom(),
+  messagesContainerRef,
+  messagesEndRef,
+  showScrollToBottom,
+  scrollToBottom,
   };
 };
