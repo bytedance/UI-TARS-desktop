@@ -76,19 +76,6 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
-  // Handle file download
-  const handleDownload = () => {
-    const blob = new Blob([stableContent], { type: isHtmlFile ? 'text/html' : 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName || 'download';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
   return (
     <div className="space-y-4">
       {/* Content preview area */}
@@ -119,7 +106,6 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
                 showLineNumbers={true}
                 maxHeight={MAX_HEIGHT_CALC}
                 className="rounded-none border-0"
-                onCopy={handleDownload}
               />
             </div>
           ) : isMarkdownFile ? (
