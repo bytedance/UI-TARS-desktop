@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiChevronRight, FiLoader } from 'react-icons/fi';
+import { FiLoader } from 'react-icons/fi';
+import { HiOutlineLightBulb } from 'react-icons/hi';
 import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 import { formatDuration } from '@/common/utils/duration';
 
@@ -45,18 +46,25 @@ export const ModernThinkingToggle: React.FC<ModernThinkingToggleProps> = ({
         className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors group"
         whileHover={{ x: 2 }}
       >
-        <motion.div animate={{ rotate: showThinking ? 90 : 0 }} transition={{ duration: 0.2 }}>
-          <FiChevronRight size={14} />
-        </motion.div>
-        
         <div className="flex items-center gap-2">
-          {isThinking && (
+          {isThinking ? (
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-              className="text-gray-500 dark:text-gray-400"
+              className="text-amber-500 dark:text-amber-400"
             >
-              <FiLoader size={12} />
+              <FiLoader size={14} />
+            </motion.div>
+          ) : (
+            <motion.div
+              animate={{ 
+                scale: showThinking ? 1.1 : 1,
+                rotate: showThinking ? 5 : 0 
+              }}
+              transition={{ duration: 0.2 }}
+              className="text-amber-500 dark:text-amber-400"
+            >
+              <HiOutlineLightBulb size={14} />
             </motion.div>
           )}
           
@@ -89,7 +97,7 @@ export const ModernThinkingToggle: React.FC<ModernThinkingToggleProps> = ({
             transition={{ duration: 0.3, ease: 'easeInOut' }}
             className="overflow-hidden"
           >
-            <div className="mt-3 ml-6 prose dark:prose-invert prose-sm max-w-none text-xs">
+            <div className="mt-3 prose dark:prose-invert prose-sm max-w-none text-xs">
               <MarkdownRenderer content={thinking} />
             </div>
           </motion.div>
