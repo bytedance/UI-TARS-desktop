@@ -298,6 +298,8 @@ export class LLMProcessor {
     // Track TTFT (Time to First Token) only if metrics are enabled
     let firstTokenTime: number | null = null;
     let hasReceivedFirstContent = false;
+    let lastReasoningContentLength = 0;
+    let reasoningCompleted = false;
 
     this.logger.info(`llm stream start`);
 
@@ -337,6 +339,9 @@ export class LLMProcessor {
             this.thinkingStartTimes.set(messageId, Date.now());
           }
 
+          // Update reasoning content length tracking
+          const currentReasoningLength = (processingState.reasoningBuffer || '').length;
+          
           // Create thinking streaming event
           const thinkingEvent = this.eventStream.createEvent(
             'assistant_streaming_thinking_message',
@@ -347,6 +352,29 @@ export class LLMProcessor {
             },
           );
           this.eventStream.sendEvent(thinkingEvent);
+          
+          lastReasoningContentLength = currentReasoningLength;
+        }
+        
+        // Check if reasoning has completed (no new reasoning content in this chunk but we had it before)
+        if (!chunkResult.reasoningContent && lastReasoningContentLength > 0 && !reasoningCompleted) {
+          reasoningCompleted = true;
+          
+          // Calculate and send final thinking duration immediately when reasoning ends
+          if (this.thinkingStartTimes.has(messageId)) {
+            const startTime = this.thinkingStartTimes.get(messageId)!;
+            const thinkingDurationMs = Date.now() - startTime;
+            this.thinkingStartTimes.delete(messageId);
+            
+            // Send final thinking message with duration
+            const finalThinkingEvent = this.eventStream.createEvent('assistant_thinking_message', {
+              content: processingState.reasoningBuffer || '',
+              isComplete: true,
+              messageId: messageId,
+              thinkingDurationMs: thinkingDurationMs,
+            });
+            this.eventStream.sendEvent(finalThinkingEvent);
+          }
         }
 
         // Only send content chunk if it contains actual content
@@ -389,6 +417,24 @@ export class LLMProcessor {
     const parsedResponse = toolCallEngine.finalizeStreamProcessing(processingState);
 
     this.logger.infoWithData('Finalized Response', parsedResponse, JSON.stringify);
+
+    // Send final thinking message with duration if we have reasoning content and haven't sent it yet
+    if (parsedResponse.reasoningContent && streamingMode && !reasoningCompleted) {
+      let thinkingDurationMs: number | undefined;
+      if (messageId && this.thinkingStartTimes.has(messageId)) {
+        const startTime = this.thinkingStartTimes.get(messageId)!;
+        thinkingDurationMs = Date.now() - startTime;
+        this.thinkingStartTimes.delete(messageId);
+      }
+
+      const finalThinkingEvent = this.eventStream.createEvent('assistant_thinking_message', {
+        content: parsedResponse.reasoningContent,
+        isComplete: true,
+        messageId: messageId,
+        thinkingDurationMs: thinkingDurationMs,
+      });
+      this.eventStream.sendEvent(finalThinkingEvent);
+    }
 
     // Calculate timing metrics only if enabled
     let ttftMs: number | undefined;
@@ -484,14 +530,13 @@ export class LLMProcessor {
       this.eventStream.sendEvent(assistantEvent);
     }
 
-    // If we have complete reasoning content, create a consolidated thinking message event
-    if (reasoningBuffer) {
-      // Calculate thinking duration if we have a start time
+    // If we have complete reasoning content and not in streaming mode, create a consolidated thinking message event
+    if (reasoningBuffer && !streamingMode) {
       let thinkingDurationMs: number | undefined;
       if (messageId && this.thinkingStartTimes.has(messageId)) {
         const startTime = this.thinkingStartTimes.get(messageId)!;
         thinkingDurationMs = Date.now() - startTime;
-        this.thinkingStartTimes.delete(messageId); // Clean up
+        this.thinkingStartTimes.delete(messageId);
       }
 
       const thinkingEvent = this.eventStream.createEvent('assistant_thinking_message', {

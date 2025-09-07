@@ -104,7 +104,7 @@ export const ChatPanel: React.FC = () => {
         {showEmptyState ? (
           <EmptyState replayState={replayState} isReplayMode={isReplayMode} />
         ) : (
-          <div className="space-y-1 pb-2">
+          <div className="space-y-4 pb-2">
             {activeMessages.map((group, index) => (
               <AnimatePresence mode="popLayout" key={`group-${index}-${group.messages[0].id}`}>
                 <motion.div
