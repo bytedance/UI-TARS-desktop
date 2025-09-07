@@ -44,6 +44,120 @@ export async function getPreviousTag(tagName: string, cwd: string): Promise<stri
 }
 
 /**
+ * Generates beautiful release notes using conventional-changelog format
+ */
+export async function generateReleaseNotes(
+  tagName: string,
+  previousTag: string | null,
+  cwd: string,
+): Promise<string> {
+  try {
+    // Get commits between tags
+    const gitRange = previousTag ? `${previousTag}..${tagName}` : tagName;
+    const { stdout } = await execa(
+      'git',
+      ['log', gitRange, '--pretty=format:%H|%s|%an|%ae', '--no-merges'],
+      { cwd },
+    );
+
+    if (!stdout.trim()) {
+      return `## What's Changed\n\nNo changes found.`;
+    }
+
+    const commits = stdout
+      .trim()
+      .split('\n')
+      .map((line) => {
+        const [hash, subject, author, email] = line.split('|');
+        return { hash, subject, author, email };
+      });
+
+    // Group commits by type
+    const groups = {
+      feat: [] as typeof commits,
+      fix: [] as typeof commits,
+      docs: [] as typeof commits,
+      style: [] as typeof commits,
+      refactor: [] as typeof commits,
+      test: [] as typeof commits,
+      chore: [] as typeof commits,
+      other: [] as typeof commits,
+    };
+
+    commits.forEach((commit) => {
+      const match = commit.subject.match(/^(\w+)(\([^)]+\))?:\s*(.+)$/);
+      if (match) {
+        const [, type] = match;
+        if (type in groups) {
+          groups[type as keyof typeof groups].push(commit);
+        } else {
+          groups.other.push(commit);
+        }
+      } else {
+        groups.other.push(commit);
+      }
+    });
+
+    // Generate release notes
+    let releaseNotes = '## What\'s Changed\n\n';
+
+    // New Features
+    if (groups.feat.length > 0) {
+      releaseNotes += '### New Features 🎉\n\n';
+      groups.feat.forEach((commit) => {
+        const match = commit.subject.match(/^feat(\([^)]+\))?:\s*(.+)$/);
+        const description = match ? match[2] : commit.subject;
+        const scope = match?.[1] || '';
+        releaseNotes += `* ${scope ? `${scope}: ` : ''}${description} by @${commit.author.toLowerCase()} in ${commit.hash.substring(0, 7)}\n`;
+      });
+      releaseNotes += '\n';
+    }
+
+    // Bug Fixes
+    if (groups.fix.length > 0) {
+      releaseNotes += '### Bug Fixes 🐛\n\n';
+      groups.fix.forEach((commit) => {
+        const match = commit.subject.match(/^fix(\([^)]+\))?:\s*(.+)$/);
+        const description = match ? match[2] : commit.subject;
+        const scope = match?.[1] || '';
+        releaseNotes += `* ${scope ? `${scope}: ` : ''}${description} by @${commit.author.toLowerCase()} in ${commit.hash.substring(0, 7)}\n`;
+      });
+      releaseNotes += '\n';
+    }
+
+    // Documentation
+    if (groups.docs.length > 0) {
+      releaseNotes += '### Documentation 📚\n\n';
+      groups.docs.forEach((commit) => {
+        const match = commit.subject.match(/^docs(\([^)]+\))?:\s*(.+)$/);
+        const description = match ? match[2] : commit.subject;
+        const scope = match?.[1] || '';
+        releaseNotes += `* ${scope ? `${scope}: ` : ''}${description} by @${commit.author.toLowerCase()} in ${commit.hash.substring(0, 7)}\n`;
+      });
+      releaseNotes += '\n';
+    }
+
+    // Other Changes
+    const otherCommits = [...groups.style, ...groups.refactor, ...groups.test, ...groups.chore, ...groups.other];
+    if (otherCommits.length > 0) {
+      releaseNotes += '### Other Changes\n\n';
+      otherCommits.forEach((commit) => {
+        const match = commit.subject.match(/^(\w+)(\([^)]+\))?:\s*(.+)$/);
+        const type = match?.[1] || '';
+        const scope = match?.[2] || '';
+        const description = match ? match[3] : commit.subject;
+        releaseNotes += `* ${type}${scope}: ${description} by @${commit.author.toLowerCase()} in ${commit.hash.substring(0, 7)}\n`;
+      });
+    }
+
+    return releaseNotes;
+  } catch (error) {
+    logger.warn(`Failed to generate release notes: ${(error as Error).message}`);
+    return `## What's Changed\n\nRelease ${tagName}`;
+  }
+}
+
+/**
  * Gets repository URL from git remote
  */
 export async function getRepositoryInfo(
@@ -133,7 +247,10 @@ export async function createGitHubRelease(options: GitHubReleaseOptions): Promis
       // Release doesn't exist, proceed with creation
     }
 
-    // Create the release using GitHub's native release notes generation
+    // Generate beautiful release notes
+    const releaseNotes = await generateReleaseNotes(tagName, previousTag, cwd);
+
+    // Create the release with custom formatted notes
     const releaseArgs = [
       'release',
       'create',
@@ -142,13 +259,9 @@ export async function createGitHubRelease(options: GitHubReleaseOptions): Promis
       `${repoInfo.owner}/${repoInfo.repo}`,
       '--title',
       tagName,
-      '--generate-notes',
+      '--notes',
+      releaseNotes,
     ];
-
-    // Add previous tag for better release notes if available
-    if (previousTag) {
-      releaseArgs.push('--notes-start-tag', previousTag);
-    }
 
     if (isPrerelease) {
       releaseArgs.push('--prerelease');
