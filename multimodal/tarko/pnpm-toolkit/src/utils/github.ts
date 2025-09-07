@@ -22,18 +22,76 @@ export interface GitHubReleaseOptions {
 }
 
 /**
+ * Finds CHANGELOG.md file in the current directory or parent directories
+ */
+function findChangelogPath(cwd: string): string | null {
+  const fs = require('fs');
+  const path = require('path');
+  
+  let currentDir = cwd;
+  
+  // First try current directory
+  let changelogPath = path.join(currentDir, 'CHANGELOG.md');
+  if (fs.existsSync(changelogPath)) {
+    return changelogPath;
+  }
+  
+  // Then try common subdirectories where changelog might be
+  const commonDirs = ['multimodal', 'packages', 'apps'];
+  for (const dir of commonDirs) {
+    changelogPath = path.join(currentDir, dir, 'CHANGELOG.md');
+    if (fs.existsSync(changelogPath)) {
+      return changelogPath;
+    }
+  }
+  
+  // Finally try parent directories (up to 3 levels)
+  for (let i = 0; i < 3; i++) {
+    const parentDir = path.dirname(currentDir);
+    if (parentDir === currentDir) break; // Reached root
+    
+    currentDir = parentDir;
+    changelogPath = path.join(currentDir, 'CHANGELOG.md');
+    if (fs.existsSync(changelogPath)) {
+      return changelogPath;
+    }
+    
+    // Also check common subdirectories in parent
+    for (const dir of commonDirs) {
+      changelogPath = path.join(currentDir, dir, 'CHANGELOG.md');
+      if (fs.existsSync(changelogPath)) {
+        return changelogPath;
+      }
+    }
+  }
+  
+  return null;
+}
+
+/**
  * Extracts release notes for a specific version from CHANGELOG.md
  */
-export function extractReleaseNotes(version: string, changelogPath: string): string {
+export function extractReleaseNotes(version: string, cwd: string): string {
   try {
+    const changelogPath = findChangelogPath(cwd);
+    
+    if (!changelogPath) {
+      logger.warn('CHANGELOG.md not found in current directory or common locations');
+      return `Release ${version}`;
+    }
+    
+    logger.info(`Reading changelog from: ${changelogPath}`);
     const changelogContent = readFileSync(changelogPath, 'utf-8');
     
     // Find the section for this version
     // Pattern: ## [version](link) (date) or ## version (date)
+    const escapedVersion = version.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const versionPattern = new RegExp(
-      `## \\[?${version.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\]?[^\n]*\n([\s\S]*?)(?=\n## |$)`,
+      `## \\[${escapedVersion}\\][^\n]*\n([\\s\\S]*?)(?=\n## |$)`,
       'i'
     );
+    
+    logger.info(`Looking for version pattern: ## [${version}]`);
     
     const match = changelogContent.match(versionPattern);
     
@@ -113,8 +171,7 @@ export async function createGitHubRelease(options: GitHubReleaseOptions): Promis
     }
     
     // Extract release notes from changelog
-    const changelogPath = join(cwd, 'CHANGELOG.md');
-    const releaseNotes = extractReleaseNotes(version, changelogPath);
+    const releaseNotes = extractReleaseNotes(version, cwd);
     
     // Determine if this is a prerelease
     const isPrerelease = version.includes('-');
@@ -134,7 +191,7 @@ export async function createGitHubRelease(options: GitHubReleaseOptions): Promis
     
     // Check if release already exists
     try {
-      await execa('gh', ['release', 'view', tagName], { cwd });
+      await execa('gh', ['release', 'view', tagName, '--repo', `${repoInfo.owner}/${repoInfo.repo}`], { cwd });
       logger.warn(`GitHub release for tag ${tagName} already exists, skipping creation`);
       return;
     } catch {
@@ -146,6 +203,7 @@ export async function createGitHubRelease(options: GitHubReleaseOptions): Promis
       'release',
       'create',
       tagName,
+      '--repo', `${repoInfo.owner}/${repoInfo.repo}`,
       '--title', `Release ${version}`,
       '--notes', releaseNotes,
     ];
@@ -161,7 +219,7 @@ export async function createGitHubRelease(options: GitHubReleaseOptions): Promis
     
     // Get the release URL
     try {
-      const { stdout } = await execa('gh', ['release', 'view', tagName, '--json', 'url', '--jq', '.url'], { cwd });
+      const { stdout } = await execa('gh', ['release', 'view', tagName, '--repo', `${repoInfo.owner}/${repoInfo.repo}`, '--json', 'url', '--jq', '.url'], { cwd });
       logger.info(`🔗 Release URL: ${stdout.trim()}`);
     } catch {
       // Ignore if we can't get the URL
