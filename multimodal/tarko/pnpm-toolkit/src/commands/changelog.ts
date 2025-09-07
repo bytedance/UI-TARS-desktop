@@ -73,15 +73,17 @@ async function getPreviousTag(
 ): Promise<string | undefined> {
   try {
     logger.info(`🔍 Looking for previous tag with prefix: ${tagPrefix}`);
-    
+
     // Get all tags
     const { stdout: tagsOutput } = await execa('git', ['tag', '-l'], { cwd });
     const allTagsRaw = tagsOutput.split('\n').filter(Boolean);
     logger.info(`📋 Found ${allTagsRaw.length} total git tags`);
-    
+
     const prefixedTags = allTagsRaw.filter((tag) => tag.startsWith(tagPrefix));
-    logger.info(`🏷️  Found ${prefixedTags.length} tags with prefix '${tagPrefix}': [${prefixedTags.join(', ')}]`);
-    
+    logger.info(
+      `🏷️  Found ${prefixedTags.length} tags with prefix '${tagPrefix}': [${prefixedTags.join(', ')}]`,
+    );
+
     const allTags = prefixedTags
       .map((tag) => ({
         original: tag,
@@ -96,7 +98,7 @@ async function getPreviousTag(
       });
 
     logger.info(`✅ Found ${allTags.length} valid semver tags`);
-    
+
     if (allTags.length === 0) {
       logger.warn(`❌ No valid tags found with prefix '${tagPrefix}'`);
       return undefined;
@@ -104,19 +106,26 @@ async function getPreviousTag(
 
     // Sort by semver, highest first
     allTags.sort((a, b) => semver.compare(b.version, a.version));
-    logger.info(`📊 Sorted tags by version (highest first): [${allTags.map(t => t.original).join(', ')}]`);
+    logger.info(
+      `📊 Sorted tags by version (highest first): [${allTags.map((t) => t.original).join(', ')}]`,
+    );
 
     const currentPrerelease = semver.prerelease(version);
-    logger.info(`🔬 Current version ${version} prerelease info: ${currentPrerelease ? JSON.stringify(currentPrerelease) : 'stable'}`);
+    logger.info(
+      `🔬 Current version ${version} prerelease info: ${currentPrerelease ? JSON.stringify(currentPrerelease) : 'stable'}`,
+    );
 
     // Different logic for prerelease versions
     if (currentPrerelease) {
       // Find previous version in the same prerelease series
       const samePrereleaseTags = allTags.filter((tag) => {
         const pre = semver.prerelease(tag.version);
-        const isSameSeries = pre && pre[0] === currentPrerelease[0] && semver.lt(tag.version, version);
+        const isSameSeries =
+          pre && pre[0] === currentPrerelease[0] && semver.lt(tag.version, version);
         if (pre) {
-          logger.info(`🔍 Checking ${tag.original}: prerelease=${JSON.stringify(pre)}, same series=${!!isSameSeries}`);
+          logger.info(
+            `🔍 Checking ${tag.original}: prerelease=${JSON.stringify(pre)}, same series=${!!isSameSeries}`,
+          );
         }
         return isSameSeries;
       });
@@ -129,8 +138,10 @@ async function getPreviousTag(
 
       // If no previous in same prerelease series, get the latest stable version
       const stableTags = allTags.filter((tag) => !semver.prerelease(tag.version));
-      logger.info(`🔍 Found ${stableTags.length} stable tags: [${stableTags.map(t => t.original).join(', ')}]`);
-      
+      logger.info(
+        `🔍 Found ${stableTags.length} stable tags: [${stableTags.map((t) => t.original).join(', ')}]`,
+      );
+
       if (stableTags.length > 0) {
         const selected = stableTags[0].original;
         logger.info(`✅ Using latest stable tag: ${selected}`);
@@ -139,8 +150,10 @@ async function getPreviousTag(
 
       // If still no match, return the highest lower version
       const lowerTags = allTags.filter((tag) => semver.lt(tag.version, version));
-      logger.info(`🔍 Found ${lowerTags.length} lower version tags: [${lowerTags.map(t => t.original).join(', ')}]`);
-      
+      logger.info(
+        `🔍 Found ${lowerTags.length} lower version tags: [${lowerTags.map((t) => t.original).join(', ')}]`,
+      );
+
       if (lowerTags.length > 0) {
         const selected = lowerTags[0].original;
         logger.info(`✅ Using highest lower version: ${selected}`);
@@ -151,7 +164,9 @@ async function getPreviousTag(
       const stableTags = allTags.filter(
         (tag) => !semver.prerelease(tag.version) && semver.lt(tag.version, version),
       );
-      logger.info(`🔍 Found ${stableTags.length} previous stable tags: [${stableTags.map(t => t.original).join(', ')}]`);
+      logger.info(
+        `🔍 Found ${stableTags.length} previous stable tags: [${stableTags.map((t) => t.original).join(', ')}]`,
+      );
 
       if (stableTags.length > 0) {
         const selected = stableTags[0].original;
@@ -475,21 +490,27 @@ export async function changelog(options: ChangelogOptions = {}): Promise<void> {
     const { getRecentCommits } = await import('tiny-conventional-commits-parser');
 
     // Get commits between tags/refs
-    logger.info(`🔍 Getting commits between ${previousTag || 'initial commit'} and ${currentRef}...`);
+    logger.info(
+      `🔍 Getting commits between ${previousTag || 'initial commit'} and ${currentRef}...`,
+    );
     const commits = getRecentCommits(previousTag, currentRef);
     logger.info(`📊 Found ${commits.length} total commits`);
-    
+
     if (commits.length > 0) {
       logger.info(`📋 Sample commits found:`);
       commits.slice(0, 3).forEach((commit, i) => {
-        logger.info(`  ${i + 1}. ${commit.type}(${commit.scope || 'no-scope'}): ${commit.description} [${commit.shortHash}]`);
+        logger.info(
+          `  ${i + 1}. ${commit.type}(${commit.scope || 'no-scope'}): ${commit.description} [${commit.shortHash}]`,
+        );
       });
       if (commits.length > 3) {
         logger.info(`  ... and ${commits.length - 3} more commits`);
       }
     }
-    
-    logger.info(`🔧 Applying filters - types: [${filterTypes.join(', ')}], scopes: [${filterScopes.join(', ')}]`);
+
+    logger.info(
+      `🔧 Applying filters - types: [${filterTypes.join(', ')}], scopes: [${filterScopes.join(', ')}]`,
+    );
     const filteredCommits = filterCommits(commits, filterTypes, filterScopes);
     logger.info(`📊 After filtering: ${filteredCommits.length} commits remain`);
 
@@ -497,8 +518,8 @@ export async function changelog(options: ChangelogOptions = {}): Promise<void> {
       logger.warn('⚠️  No commits found that match the filter criteria');
       if (commits.length > 0) {
         logger.info('💡 Available commit types in range:');
-        const types = [...new Set(commits.map(c => c.type))].sort();
-        const scopes = [...new Set(commits.map(c => c.scope).filter(Boolean))].sort();
+        const types = [...new Set(commits.map((c) => c.type))].sort();
+        const scopes = [...new Set(commits.map((c) => c.scope).filter(Boolean))].sort();
         logger.info(`   Types: [${types.join(', ')}]`);
         logger.info(`   Scopes: [${scopes.join(', ')}]`);
       }

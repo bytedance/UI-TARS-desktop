@@ -17,12 +17,7 @@ import type { GitHubReleaseOptions } from '../types';
  * GitHub Release command implementation
  */
 export async function githubRelease(options: GitHubReleaseOptions = {}): Promise<void> {
-  const {
-    cwd = process.cwd(),
-    version,
-    tagPrefix = 'v',
-    dryRun = false,
-  } = options;
+  const { cwd = process.cwd(), version, tagPrefix = 'v', dryRun = false } = options;
 
   if (dryRun) {
     logger.info('Dry run mode enabled - no actual GitHub release will be created');
@@ -34,9 +29,11 @@ export async function githubRelease(options: GitHubReleaseOptions = {}): Promise
     if (!releaseVersion) {
       const config = resolveWorkspaceConfig(cwd);
       releaseVersion = config.rootPackageJson.version;
-      
+
       if (!releaseVersion) {
-        throw new Error('Version is required. Provide --version or ensure package.json has a version field.');
+        throw new Error(
+          'Version is required. Provide --version or ensure package.json has a version field.',
+        );
       }
     }
 
