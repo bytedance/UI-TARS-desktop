@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiLoader } from 'react-icons/fi';
-import { HiOutlineLightBulb } from 'react-icons/hi';
+import { PiBrain } from 'react-icons/pi';
 import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 import { formatDuration } from '@/common/utils/duration';
 
@@ -62,9 +62,9 @@ export const ModernThinkingToggle: React.FC<ModernThinkingToggleProps> = ({
                 rotate: showThinking ? 5 : 0 
               }}
               transition={{ duration: 0.2 }}
-              className="text-amber-500 dark:text-amber-400"
+              className="text-purple-500 dark:text-purple-400"
             >
-              <HiOutlineLightBulb size={14} />
+              <PiBrain size={14} />
             </motion.div>
           )}
           

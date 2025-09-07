@@ -23,17 +23,17 @@ export class UserMessageHandler implements EventHandler<AgentEventStream.UserMes
 
     set(messagesAtom, (prev: Record<string, Message[]>) => {
       const sessionMessages = prev[sessionId] || [];
-      
+
       // Check if we have any local user messages - if so, skip this server event entirely
       const hasLocalUserMessage = sessionMessages.some(
-        msg => msg.role === 'user' && msg.isLocalMessage
+        (msg) => msg.role === 'user' && msg.isLocalMessage,
       );
-      
+
       // If we have a local user message, ignore the server event to prevent flicker
       if (hasLocalUserMessage) {
         return prev; // Return unchanged state
       }
-      
+
       // No local message found, add the server message normally
       const userMessage: Message = {
         id: event.id,
@@ -41,7 +41,7 @@ export class UserMessageHandler implements EventHandler<AgentEventStream.UserMes
         content: event.content,
         timestamp: event.timestamp,
       };
-      
+
       return {
         ...prev,
         [sessionId]: [...sessionMessages, userMessage],
@@ -140,8 +140,6 @@ export class AssistantMessageHandler
         ],
       };
     });
-
-
   }
 }
 
@@ -216,8 +214,6 @@ export class StreamingMessageHandler
         [sessionId]: [...sessionMessages, newMessage],
       };
     });
-
-
   }
 }
 
@@ -259,9 +255,10 @@ export class ThinkingMessageHandler
         );
       }
 
-      const thinkingDuration = event.type === 'assistant_thinking_message' 
-        ? (event as AgentEventStream.AssistantThinkingMessageEvent).thinkingDurationMs
-        : undefined;
+      const thinkingDuration =
+        event.type === 'assistant_thinking_message'
+          ? (event as AgentEventStream.AssistantThinkingMessageEvent).thinkingDurationMs
+          : undefined;
 
       if (existingMessageIndex !== -1) {
         const message = sessionMessages[existingMessageIndex];
