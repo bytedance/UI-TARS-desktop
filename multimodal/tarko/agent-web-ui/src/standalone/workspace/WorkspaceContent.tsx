@@ -46,7 +46,7 @@ export const WorkspaceContent: React.FC = () => {
     fetchWorkspaceInfo();
   }, []);
 
-  // Animation variants removed for performance
+
 
   // Plan view button for Pro users
   const renderPlanButton = () => {

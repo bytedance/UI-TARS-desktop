@@ -34,7 +34,7 @@ export const WorkspaceFileManager: React.FC<WorkspaceFileManagerProps> = ({ file
   const [isExpanded, setIsExpanded] = useState(true);
   const [selectedFileType, setSelectedFileType] = useState<string>('all');
 
-  // Note: Removed auto-show logic to prevent conflicts with back navigation
+
 
   if (files.length === 0) {
     return null;
@@ -142,7 +142,7 @@ export const WorkspaceFileManager: React.FC<WorkspaceFileManagerProps> = ({ file
     }
   };
 
-  // Animation variants removed for performance
+
 
   return (
     <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700/50 overflow-hidden">
