@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState } from 'react';
 import { 
   FiFile, 
   FiImage, 
@@ -97,40 +96,10 @@ export const WorkspaceFileManager: React.FC<WorkspaceFileManagerProps> = ({
     }
   };
 
-  // Animation variants
-  const containerVariants = {
-    initial: { opacity: 0, y: 20 },
-    animate: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-        staggerChildren: 0.1,
-        ease: [0.25, 0.46, 0.45, 0.94],
-      },
-    },
-  };
-
-  const itemVariants = {
-    initial: { opacity: 0, y: 20, scale: 0.95 },
-    animate: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: {
-        duration: 0.4,
-        ease: [0.25, 0.46, 0.45, 0.94],
-      },
-    },
-  };
+  // Animation variants removed for performance
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="initial"
-      animate="animate"
-      className="bg-white dark:bg-gray-800/90 rounded-2xl border border-gray-200/60 dark:border-gray-700/40 overflow-hidden shadow-sm backdrop-blur-sm"
-    >
+    <div className="bg-white dark:bg-gray-800/90 rounded-2xl border border-gray-200/60 dark:border-gray-700/40 overflow-hidden shadow-sm backdrop-blur-sm">
       {/* Header */}
       <div className="flex items-center justify-between p-6 border-b border-gray-100/60 dark:border-gray-700/30">
         <div className="flex items-center gap-3">
@@ -171,50 +140,31 @@ export const WorkspaceFileManager: React.FC<WorkspaceFileManagerProps> = ({
           </div>
 
           {/* Expand/Collapse */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <button
             onClick={() => setIsExpanded(!isExpanded)}
             className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/60 rounded-lg transition-all duration-200"
           >
             {isExpanded ? <FiChevronUp size={16} /> : <FiChevronDown size={16} />}
-          </motion.button>
+          </button>
         </div>
       </div>
 
       {/* Files Grid */}
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="overflow-hidden"
-          >
+      {isExpanded && (
+        <div className="overflow-hidden">
             <div className="p-6 pt-0">
               {displayFiles.length === 0 ? (
-                <motion.div
-                  variants={itemVariants}
-                  className="text-center py-8 text-gray-500 dark:text-gray-400"
-                >
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                   <FiFile size={32} className="mx-auto mb-3 opacity-50" />
                   <p className="text-sm">No {selectedFileType === 'all' ? '' : selectedFileType} files found</p>
-                </motion.div>
+                </div>
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
                   {displayFiles.map((file, index) => (
-                    <motion.div
+                    <div
                       key={file.id}
-                      variants={itemVariants}
-                      whileHover={{ 
-                        y: -4, 
-                        scale: 1.02,
-                        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
-                      }}
-                      whileTap={{ scale: 0.98 }}
                       onClick={() => handleFileClick(file)}
-                      className="group cursor-pointer bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-xl border border-gray-200/60 dark:border-gray-700/60 p-4 transition-all duration-300 hover:border-gray-300/80 dark:hover:border-gray-600/80 shadow-sm hover:shadow-md backdrop-blur-sm relative overflow-hidden"
+                      className="group cursor-pointer bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-xl border border-gray-200/60 dark:border-gray-700/60 p-4 transition-all duration-200 hover:border-gray-300/80 dark:hover:border-gray-600/80 shadow-sm hover:shadow-md backdrop-blur-sm relative overflow-hidden"
                     >
                       {/* File icon and type indicator */}
                       <div className="flex items-start justify-between mb-3">
@@ -223,19 +173,13 @@ export const WorkspaceFileManager: React.FC<WorkspaceFileManagerProps> = ({
                         </div>
                         
                         <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                          <motion.div
-                            whileHover={{ scale: 1.1 }}
-                            className="w-8 h-8 rounded-lg bg-white/80 dark:bg-gray-700/80 flex items-center justify-center shadow-sm border border-gray-200/60 dark:border-gray-600/60 backdrop-blur-sm"
-                          >
+                          <div className="w-8 h-8 rounded-lg bg-white/80 dark:bg-gray-700/80 flex items-center justify-center shadow-sm border border-gray-200/60 dark:border-gray-600/60 backdrop-blur-sm hover:scale-110 transition-transform duration-200">
                             <FiEye size={14} className="text-gray-600 dark:text-gray-400" />
-                          </motion.div>
+                          </div>
                           
-                          <motion.div
-                            whileHover={{ scale: 1.1 }}
-                            className="w-8 h-8 rounded-lg bg-white/80 dark:bg-gray-700/80 flex items-center justify-center shadow-sm border border-gray-200/60 dark:border-gray-600/60 backdrop-blur-sm"
-                          >
+                          <div className="w-8 h-8 rounded-lg bg-white/80 dark:bg-gray-700/80 flex items-center justify-center shadow-sm border border-gray-200/60 dark:border-gray-600/60 backdrop-blur-sm hover:scale-110 transition-transform duration-200">
                             <FiExternalLink size={14} className="text-gray-600 dark:text-gray-400" />
-                          </motion.div>
+                          </div>
                         </div>
                       </div>
 
@@ -264,15 +208,14 @@ export const WorkspaceFileManager: React.FC<WorkspaceFileManagerProps> = ({
                       </div>
 
                       {/* Subtle gradient overlay for depth */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-gray-50/20 dark:to-gray-900/20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
-                    </motion.div>
+                      <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-gray-50/20 dark:to-gray-900/20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-xl" />
+                    </div>
                   ))}
                 </div>
               )}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+        </div>
+      )}
+    </div>
   );
 };

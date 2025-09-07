@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { useSession } from '@/common/hooks/useSession';
 import { usePlan } from '@/common/hooks/usePlan';
 import {
@@ -47,43 +46,7 @@ export const WorkspaceContent: React.FC = () => {
     fetchWorkspaceInfo();
   }, []);
 
-  // Modern animation variants - consistent with new design
-  const containerVariants = {
-    initial: { opacity: 0 },
-    animate: {
-      opacity: 1,
-      transition: {
-        duration: 0.6,
-        staggerChildren: 0.15,
-        ease: [0.25, 0.46, 0.45, 0.94],
-      },
-    },
-  };
-
-  const itemVariants = {
-    initial: { opacity: 0, y: 24, scale: 0.95 },
-    animate: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: {
-        duration: 0.6,
-        ease: [0.25, 0.46, 0.45, 0.94],
-      },
-    },
-  };
-
-  const iconContainerVariants = {
-    initial: { scale: 0.8, opacity: 0 },
-    animate: {
-      scale: 1,
-      opacity: 1,
-      transition: {
-        duration: 0.7,
-        ease: [0.25, 0.46, 0.45, 0.94],
-      },
-    },
-  };
+  // Animation variants removed for performance
 
   // Plan view button for Pro users
   const renderPlanButton = () => {
@@ -95,13 +58,8 @@ export const WorkspaceContent: React.FC = () => {
     const isComplete = currentPlan.isComplete;
 
     return (
-      <motion.div variants={itemVariants} className="mb-6">
-        <motion.div
-          whileHover={{
-            y: -4,
-            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02)',
-          }}
-          whileTap={{ scale: 0.98 }}
+      <div className="mb-6">
+        <div
           onClick={() =>
             setActivePanelContent({
               type: 'plan',
@@ -110,7 +68,7 @@ export const WorkspaceContent: React.FC = () => {
               timestamp: Date.now(),
             })
           }
-          className="bg-white dark:bg-gray-800/90 rounded-2xl border border-[#E5E6EC]/70 dark:border-gray-700/40 overflow-hidden cursor-pointer transition-all duration-300 shadow-sm hover:shadow-md"
+          className="bg-white dark:bg-gray-800/90 rounded-2xl border border-[#E5E6EC]/70 dark:border-gray-700/40 overflow-hidden cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md"
         >
           <div className="p-5">
             <div className="flex items-start">
@@ -121,16 +79,7 @@ export const WorkspaceContent: React.FC = () => {
                     : 'bg-gradient-to-br from-accent-50 to-accent-100 dark:from-accent-900/20 dark:to-accent-800/20 text-accent-500 dark:text-accent-400 border border-accent-100/50 dark:border-accent-800/30'
                 }`}
               >
-                {isComplete ? (
-                  <FiCpu size={24} />
-                ) : (
-                  <motion.div
-                    animate={{ scale: [1, 1.08, 1] }}
-                    transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-                  >
-                    <FiCpu size={24} />
-                  </motion.div>
-                )}
+                <FiCpu size={24} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between">
@@ -188,22 +137,17 @@ export const WorkspaceContent: React.FC = () => {
               <FiArrowRight className="text-accent-500 dark:text-accent-400" size={16} />
             </div>
           </div>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     );
   };
 
   // Enhanced empty state when no session
   if (!activeSessionId) {
     return (
-      <motion.div
-        variants={containerVariants}
-        initial="initial"
-        animate="animate"
-        className="flex items-center justify-center h-full text-center py-12"
-      >
+      <div className="flex items-center justify-center h-full text-center py-12">
         <div className="max-w-md mx-auto px-6">
-          <motion.div variants={itemVariants} className="relative mx-auto mb-8">
+          <div className="relative mx-auto mb-8">
             {/* Gradient background glow effect */}
             <div className="absolute inset-0 w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-gray-200/50 to-gray-100/30 dark:from-gray-700/30 dark:to-gray-800/20 blur-xl"></div>
 
@@ -211,24 +155,18 @@ export const WorkspaceContent: React.FC = () => {
             <div className="relative w-24 h-24 mx-auto rounded-3xl bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center border border-gray-200/60 dark:border-gray-700/40 shadow-lg">
               <FiLayout size={40} className="text-gray-500 dark:text-gray-400" />
             </div>
-          </motion.div>
+          </div>
 
-          <motion.h3
-            variants={itemVariants}
-            className="text-2xl font-medium mb-3 text-gray-800 dark:text-gray-200"
-          >
+          <h3 className="text-2xl font-medium mb-3 text-gray-800 dark:text-gray-200">
             No Active Session
-          </motion.h3>
+          </h3>
 
-          <motion.p
-            variants={itemVariants}
-            className="text-gray-600 dark:text-gray-400 leading-relaxed"
-          >
+          <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
             Create or select a session to start working. Tool results and detailed information will
             be displayed here automatically.
-          </motion.p>
+          </p>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
@@ -258,111 +196,53 @@ export const WorkspaceContent: React.FC = () => {
       {/* Content area with elegant empty state */}
       <div className="flex-1 overflow-y-auto p-6">
         {hasContent ? (
-          <motion.div
-            variants={containerVariants}
-            initial="initial"
-            animate="animate"
-            className="space-y-6"
-          >
+          <div className="space-y-6">
             {/* Generated Files */}
             {hasFiles && activeSessionId && (
-              <motion.div variants={itemVariants}>
+              <div>
                 <WorkspaceFileManager files={files} sessionId={activeSessionId} />
-              </motion.div>
+              </div>
             )}
             
             {/* Plan view for Pro users */}
             {hasPlan && renderPlanButton()}
-          </motion.div>
+          </div>
         ) : (
           /* Modern Ready for Action state with unified design */
-          <motion.div
-            variants={containerVariants}
-            initial="initial"
-            animate="animate"
-            className="flex items-center justify-center h-full text-center"
-          >
+          <div className="flex items-center justify-center h-full text-center">
             <div className="max-w-md mx-auto px-6">
               {/* Enhanced icon with modern design - matching SessionCreatingState */}
-              <motion.div variants={iconContainerVariants} className="relative mb-8">
+              <div className="relative mb-8">
                 {/* Background glow */}
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-blue-500/15 via-purple-500/15 to-green-500/15 rounded-full blur-xl"
-                  animate={{
-                    scale: [0.8, 1.1, 0.8],
-                    opacity: [0.2, 0.4, 0.2],
-                  }}
-                  transition={{
-                    duration: 4,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                  }}
-                />
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/15 via-purple-500/15 to-green-500/15 rounded-full blur-xl" />
                 
                 {/* Main icon container */}
-                <motion.div
-                  className="relative w-20 h-20 bg-gradient-to-br from-white via-gray-50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-3xl flex items-center justify-center mx-auto shadow-lg border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-sm"
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  transition={{ duration: 0.2 }}
-                >
+                <div className="relative w-20 h-20 bg-gradient-to-br from-white via-gray-50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-3xl flex items-center justify-center mx-auto shadow-lg border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-sm">
                   {/* Icon */}
                   <div className="relative z-10">
-                    <motion.div
-                      animate={{
-                        scale: [1, 1.1, 1],
-                        rotate: [0, 5, -5, 0],
-                      }}
-                      transition={{
-                        duration: 3,
-                        repeat: Infinity,
-                        ease: 'easeInOut',
-                      }}
-                      className="text-blue-600 dark:text-blue-400"
-                    >
+                    <div className="text-blue-600 dark:text-blue-400">
                       <FiActivity size={28} />
-                    </motion.div>
+                    </div>
                   </div>
-                </motion.div>
-              </motion.div>
+                </div>
+              </div>
 
               {/* Enhanced title with gradient */}
-              <motion.h3
-                variants={itemVariants}
-                className="text-2xl font-semibold mb-4 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-gray-100 dark:via-white dark:to-gray-100 text-transparent bg-clip-text tracking-tight"
-              >
+              <h3 className="text-2xl font-semibold mb-4 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-gray-100 dark:via-white dark:to-gray-100 text-transparent bg-clip-text tracking-tight">
                 Ready for Action
-              </motion.h3>
+              </h3>
 
               {/* Elegant description */}
-              <motion.p
-                variants={itemVariants}
-                className="text-gray-600 dark:text-gray-400 leading-relaxed mb-6 max-w-sm mx-auto"
-              >
+              <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-6 max-w-sm mx-auto">
                 Your workspace is active. Start a conversation with {getAgentTitle()} and watch as tool
                 results, plans, and detailed information appear here in real-time.
-              </motion.p>
+              </p>
 
               {/* Enhanced feature cards with modern design */}
-              <motion.div
-                variants={containerVariants}
-                className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-lg mx-auto"
-              >
-                <motion.div
-                  variants={itemVariants}
-                  whileHover={{ 
-                    y: -6, 
-                    scale: 1.02,
-                    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
-                  }}
-                  className="flex flex-col items-center p-4 bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-2xl border border-gray-200/60 dark:border-gray-700/60 shadow-lg backdrop-blur-sm relative overflow-hidden"
-                >
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-lg mx-auto">
+                <div className="flex flex-col items-center p-4 bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-2xl border border-gray-200/60 dark:border-gray-700/60 shadow-lg backdrop-blur-sm relative overflow-hidden">
                   <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/20 flex items-center justify-center mb-3 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-700/40 shadow-sm">
-                    <motion.div
-                      animate={{ rotate: [0, 5, -5, 0] }}
-                      transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                    >
-                      <FiLayout size={20} />
-                    </motion.div>
+                    <FiLayout size={20} />
                   </div>
                   <div className="text-center relative z-10">
                     <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
@@ -372,27 +252,11 @@ export const WorkspaceContent: React.FC = () => {
                       Comprehensive outputs
                     </div>
                   </div>
-                </motion.div>
+                </div>
 
-                <motion.div
-                  variants={itemVariants}
-                  whileHover={{ 
-                    y: -6, 
-                    scale: 1.02,
-                    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
-                  }}
-                  className="flex flex-col items-center p-4 bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-2xl border border-gray-200/60 dark:border-gray-700/60 shadow-lg backdrop-blur-sm relative overflow-hidden"
-                >
+                <div className="flex flex-col items-center p-4 bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-2xl border border-gray-200/60 dark:border-gray-700/60 shadow-lg backdrop-blur-sm relative overflow-hidden">
                   <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/20 flex items-center justify-center mb-3 text-green-600 dark:text-green-400 border border-green-200/60 dark:border-green-700/40 shadow-sm">
-                    <motion.div
-                      animate={{ 
-                        scale: [1, 1.2, 1],
-                        rotate: [0, 180, 360]
-                      }}
-                      transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                    >
-                      <FiZap size={20} />
-                    </motion.div>
+                    <FiZap size={20} />
                   </div>
                   <div className="text-center relative z-10">
                     <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
@@ -402,27 +266,11 @@ export const WorkspaceContent: React.FC = () => {
                       Real-time results
                     </div>
                   </div>
-                </motion.div>
+                </div>
 
-                <motion.div
-                  variants={itemVariants}
-                  whileHover={{ 
-                    y: -6, 
-                    scale: 1.02,
-                    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
-                  }}
-                  className="flex flex-col items-center p-4 bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-2xl border border-gray-200/60 dark:border-gray-700/60 shadow-lg backdrop-blur-sm relative overflow-hidden"
-                >
+                <div className="flex flex-col items-center p-4 bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-2xl border border-gray-200/60 dark:border-gray-700/60 shadow-lg backdrop-blur-sm relative overflow-hidden">
                   <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/20 flex items-center justify-center mb-3 text-amber-600 dark:text-amber-400 border border-amber-200/60 dark:border-amber-700/40 shadow-sm">
-                    <motion.div
-                      animate={{ 
-                        y: [-2, 2, -2],
-                        rotate: [0, 10, -10, 0]
-                      }}
-                      transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-                    >
-                      <FiFileText size={20} />
-                    </motion.div>
+                    <FiFileText size={20} />
                   </div>
                   <div className="text-center relative z-10">
                     <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
@@ -432,10 +280,10 @@ export const WorkspaceContent: React.FC = () => {
                       Reports & Code
                     </div>
                   </div>
-                </motion.div>
-              </motion.div>
+                </div>
+              </div>
             </div>
-          </motion.div>
+          </div>
         )}
       </div>
     </div>
