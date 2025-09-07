@@ -7,8 +7,6 @@
  * GitHub utilities for creating releases
  */
 import { execa } from 'execa';
-import { readFileSync } from 'fs';
-import { join } from 'path';
 import { logger } from './logger';
 
 /**
@@ -22,98 +20,26 @@ export interface GitHubReleaseOptions {
 }
 
 /**
- * Finds CHANGELOG.md file in the current directory or parent directories
+ * Gets the previous tag for generating release notes
  */
-function findChangelogPath(cwd: string): string | null {
-  const fs = require('fs');
-  const path = require('path');
-
-  let currentDir = cwd;
-
-  // First try current directory
-  let changelogPath = path.join(currentDir, 'CHANGELOG.md');
-  if (fs.existsSync(changelogPath)) {
-    return changelogPath;
-  }
-
-  // Then try common subdirectories where changelog might be
-  const commonDirs = ['multimodal', 'packages', 'apps'];
-  for (const dir of commonDirs) {
-    changelogPath = path.join(currentDir, dir, 'CHANGELOG.md');
-    if (fs.existsSync(changelogPath)) {
-      return changelogPath;
-    }
-  }
-
-  // Finally try parent directories (up to 3 levels)
-  for (let i = 0; i < 3; i++) {
-    const parentDir = path.dirname(currentDir);
-    if (parentDir === currentDir) break; // Reached root
-
-    currentDir = parentDir;
-    changelogPath = path.join(currentDir, 'CHANGELOG.md');
-    if (fs.existsSync(changelogPath)) {
-      return changelogPath;
-    }
-
-    // Also check common subdirectories in parent
-    for (const dir of commonDirs) {
-      changelogPath = path.join(currentDir, dir, 'CHANGELOG.md');
-      if (fs.existsSync(changelogPath)) {
-        return changelogPath;
-      }
-    }
-  }
-
-  return null;
-}
-
-/**
- * Extracts release notes for a specific version from CHANGELOG.md
- */
-export function extractReleaseNotes(version: string, cwd: string): string {
+export async function getPreviousTag(tagName: string, cwd: string): Promise<string | null> {
   try {
-    const changelogPath = findChangelogPath(cwd);
-
-    if (!changelogPath) {
-      logger.warn('CHANGELOG.md not found in current directory or common locations');
-      return `Release ${version}`;
+    // Get all tags sorted by version
+    const { stdout } = await execa('git', ['tag', '--sort=-version:refname'], { cwd });
+    const tags = stdout.trim().split('\n').filter(Boolean);
+    
+    // Find the current tag index
+    const currentIndex = tags.indexOf(tagName);
+    
+    // Return the next tag (previous in chronological order)
+    if (currentIndex >= 0 && currentIndex < tags.length - 1) {
+      return tags[currentIndex + 1];
     }
-
-    logger.info(`Reading changelog from: ${changelogPath}`);
-    const changelogContent = readFileSync(changelogPath, 'utf-8');
-
-    // Find the section for this version
-    // Pattern: ## [version](link) (date) or ## version (date)
-    const escapedVersion = version.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const versionPattern = new RegExp(
-      `## \\[${escapedVersion}\\][^\n]*\n([\\s\\S]*?)(?=\n## |$)`,
-      'i',
-    );
-
-    logger.info(`Looking for version pattern: ## [${version}]`);
-
-    const match = changelogContent.match(versionPattern);
-
-    if (!match || !match[1]) {
-      logger.warn(`No release notes found for version ${version} in changelog`);
-      return `Release ${version}`;
-    }
-
-    // Clean up the extracted content
-    let releaseNotes = match[1].trim();
-
-    // Remove any trailing newlines and empty sections
-    releaseNotes = releaseNotes.replace(/\n\s*\n\s*$/, '');
-
-    if (!releaseNotes) {
-      return `Release ${version}`;
-    }
-
-    return releaseNotes;
+    
+    return null;
   } catch (error) {
-    logger.warn(`Failed to extract release notes: ${(error as Error).message}`);
-    return `Release ${version}`;
+    logger.warn(`Failed to get previous tag: ${(error as Error).message}`);
+    return null;
   }
 }
 
@@ -146,7 +72,7 @@ export async function getRepositoryInfo(
 }
 
 /**
- * Creates a GitHub release using GitHub CLI
+ * Creates a GitHub release using GitHub CLI with native release notes generation
  */
 export async function createGitHubRelease(options: GitHubReleaseOptions): Promise<void> {
   const { version, tagName, cwd, dryRun = false } = options;
@@ -174,22 +100,23 @@ export async function createGitHubRelease(options: GitHubReleaseOptions): Promis
       throw new Error('Could not determine GitHub repository information');
     }
 
-    // Extract release notes from changelog
-    const releaseNotes = extractReleaseNotes(version, cwd);
-
     // Determine if this is a prerelease
     const isPrerelease = version.includes('-');
+
+    // Get previous tag for generating release notes
+    const previousTag = await getPreviousTag(tagName, cwd);
 
     if (dryRun) {
       logger.info(`[dry-run] Would create GitHub release:`);
       logger.info(`  Repository: ${repoInfo.owner}/${repoInfo.repo}`);
       logger.info(`  Tag: ${tagName}`);
-      logger.info(`  Title: Release ${version}`);
+      logger.info(`  Title: ${tagName}`);
       logger.info(`  Prerelease: ${isPrerelease}`);
-      logger.info(`  Release notes preview:`);
-      console.log('\n--- Release Notes Preview ---\n');
-      console.log(releaseNotes);
-      console.log('\n--- End of Preview ---\n');
+      if (previousTag) {
+        logger.info(`  Generate notes from: ${previousTag}`);
+      } else {
+        logger.info(`  Generate notes from: repository start`);
+      }
       return;
     }
 
@@ -206,7 +133,7 @@ export async function createGitHubRelease(options: GitHubReleaseOptions): Promis
       // Release doesn't exist, proceed with creation
     }
 
-    // Create the release
+    // Create the release using GitHub's native release notes generation
     const releaseArgs = [
       'release',
       'create',
@@ -214,10 +141,14 @@ export async function createGitHubRelease(options: GitHubReleaseOptions): Promis
       '--repo',
       `${repoInfo.owner}/${repoInfo.repo}`,
       '--title',
-      `Release ${version}`,
-      '--notes',
-      releaseNotes,
+      tagName,
+      '--generate-notes',
     ];
+
+    // Add previous tag for better release notes if available
+    if (previousTag) {
+      releaseArgs.push('--notes-start-tag', previousTag);
+    }
 
     if (isPrerelease) {
       releaseArgs.push('--prerelease');
