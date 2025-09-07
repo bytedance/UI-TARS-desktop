@@ -228,6 +228,8 @@ export class ThinkingMessageHandler
       | AgentEventStream.AssistantStreamingThinkingMessageEvent
     >
 {
+  private thinkingStartTimes = new Map<string, number>();
+
   canHandle(
     event: AgentEventStream.Event,
   ): event is
@@ -247,10 +249,15 @@ export class ThinkingMessageHandler
       | AgentEventStream.AssistantStreamingThinkingMessageEvent,
   ): void {
     const { set } = context;
+    const eventMessageId = event.messageId || `${sessionId}-thinking`;
+
+    // Track thinking start time for duration calculation
+    if (event.type === 'assistant_streaming_thinking_message' && !this.thinkingStartTimes.has(eventMessageId)) {
+      this.thinkingStartTimes.set(eventMessageId, event.timestamp);
+    }
 
     set(messagesAtom, (prev: Record<string, Message[]>) => {
       const sessionMessages = prev[sessionId] || [];
-      const eventMessageId = event.messageId;
       let existingMessageIndex = -1;
 
       // Only try to find by messageId if available - no fallback to last assistant message
@@ -258,6 +265,16 @@ export class ThinkingMessageHandler
         existingMessageIndex = sessionMessages.findIndex(
           (msg) => msg.messageId === eventMessageId && msg.role === 'assistant',
         );
+      }
+
+      // Calculate thinking duration
+      let thinkingDuration: number | undefined;
+      if (event.type === 'assistant_thinking_message' || event.isComplete) {
+        const startTime = this.thinkingStartTimes.get(eventMessageId);
+        if (startTime) {
+          thinkingDuration = event.timestamp - startTime;
+          this.thinkingStartTimes.delete(eventMessageId); // Clean up
+        }
       }
 
       if (existingMessageIndex !== -1) {
@@ -280,11 +297,23 @@ export class ThinkingMessageHandler
             : event.content;
         }
 
+        const updatedMessage = {
+          ...message,
+          thinking: newThinking,
+          messageId: eventMessageId || message.messageId,
+          isStreaming: event.type === 'assistant_streaming_thinking_message' && !event.isComplete,
+        };
+
+        // Add thinking duration when thinking is complete
+        if (thinkingDuration !== undefined) {
+          updatedMessage.thinkingDuration = thinkingDuration;
+        }
+
         return {
           ...prev,
           [sessionId]: [
             ...sessionMessages.slice(0, existingMessageIndex),
-            { ...message, thinking: newThinking, messageId: eventMessageId || message.messageId },
+            updatedMessage,
             ...sessionMessages.slice(existingMessageIndex + 1),
           ],
         };
@@ -301,6 +330,11 @@ export class ThinkingMessageHandler
           messageId: eventMessageId,
           isStreaming: event.type === 'assistant_streaming_thinking_message' && !event.isComplete,
         };
+
+        // Add thinking duration when thinking is complete
+        if (thinkingDuration !== undefined) {
+          newMessage.thinkingDuration = thinkingDuration;
+        }
 
         return {
           ...prev,

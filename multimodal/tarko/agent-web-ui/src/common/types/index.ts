@@ -46,6 +46,7 @@ export interface Message {
   title?: string; // Added for research report title
   ttftMs?: number; // Time to First Token (TTFT) in milliseconds
   ttltMs?: number; // Total response time in milliseconds
+  thinkingDuration?: number; // Thinking duration in milliseconds
 
   // System message specific properties
   level?: 'info' | 'warning' | 'error';

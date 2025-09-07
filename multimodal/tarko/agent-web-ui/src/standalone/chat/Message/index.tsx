@@ -11,7 +11,7 @@ import './Message.css';
 import { SystemMessage } from './components/SystemMessage';
 import { MultimodalContent } from './components/MultimodalContent';
 import { ToolCalls } from './components/ToolCalls';
-import { ThinkingToggle } from './components/ThinkingToggle';
+import { ModernThinkingToggle } from './components/ModernThinkingToggle';
 
 import { useAtomValue } from 'jotai';
 import { replayStateAtom } from '@/common/state/atoms/replay';
@@ -167,12 +167,12 @@ export const Message: React.FC<MessageProps> = ({
           <>
             {/* Enhanced thinking display with duration support */}
             {message.thinking && (
-              <ThinkingToggle
+              <ModernThinkingToggle
                 thinking={message.thinking}
                 showThinking={showThinking}
                 setShowThinking={setShowThinking}
-                // @ts-expect-error support it later
-                duration={message.thinkingDuration} // Pass thinking duration if available
+                duration={message.thinkingDuration}
+                isStreaming={message.isStreaming}
               />
             )}
 
