@@ -50,14 +50,15 @@ export const SessionRouter: React.FC<SessionRouterProps> = ({ children }) => {
     // 1. We have a session ID from URL
     // 2. It exists in our sessions list
     // 3. We're connected
-    if (sessionId && sessionExists && connectionStatus.connected) {
-      console.log(`SessionRouter: Loading session ${sessionId} from URL`);
+    // 4. It's not already the active session (prevent duplicate calls)
+    if (sessionId && sessionExists && connectionStatus.connected && activeSessionId !== sessionId) {
+      console.log(`SessionRouter: Loading session ${sessionId} from URL (current active: ${activeSessionId})`);
 
       setActiveSession(sessionId).catch((error) => {
         console.error(`Failed to load session ${sessionId}:`, error);
       });
     }
-  }, [sessionId, sessionExists, connectionStatus.connected, setActiveSession, isReplayMode]);
+  }, [sessionId, sessionExists, connectionStatus.connected, activeSessionId, setActiveSession, isReplayMode]);
 
   // In replay mode, always show content regardless of session existence
   if (isReplayMode) {
