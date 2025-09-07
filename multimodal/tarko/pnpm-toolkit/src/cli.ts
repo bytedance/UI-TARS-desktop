@@ -210,7 +210,10 @@ export function bootstrapCli() {
   // GitHub Release command
   cli
     .command('github-release', 'Create GitHub release from changelog')
-    .option('--release-version <version>', 'Version to release (reads from package.json if not provided)')
+    .option(
+      '--release-version <version>',
+      'Version to release (reads from package.json if not provided)',
+    )
     .option('--tag-prefix <prefix>', 'Prefix for git tags', {
       default: 'v',
     })

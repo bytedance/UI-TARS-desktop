@@ -27,15 +27,15 @@ export async function getPreviousTag(tagName: string, cwd: string): Promise<stri
     // Get all tags sorted by version
     const { stdout } = await execa('git', ['tag', '--sort=-version:refname'], { cwd });
     const tags = stdout.trim().split('\n').filter(Boolean);
-    
+
     // Find the current tag index
     const currentIndex = tags.indexOf(tagName);
-    
+
     // Return the next tag (previous in chronological order)
     if (currentIndex >= 0 && currentIndex < tags.length - 1) {
       return tags[currentIndex + 1];
     }
-    
+
     return null;
   } catch (error) {
     logger.warn(`Failed to get previous tag: ${(error as Error).message}`);
@@ -99,7 +99,7 @@ export async function generateReleaseNotes(
     });
 
     // Generate release notes
-    let releaseNotes = '## What\'s Changed\n\n';
+    let releaseNotes = "## What's Changed\n\n";
 
     // New Features
     if (groups.feat.length > 0) {
@@ -138,7 +138,13 @@ export async function generateReleaseNotes(
     }
 
     // Other Changes
-    const otherCommits = [...groups.style, ...groups.refactor, ...groups.test, ...groups.chore, ...groups.other];
+    const otherCommits = [
+      ...groups.style,
+      ...groups.refactor,
+      ...groups.test,
+      ...groups.chore,
+      ...groups.other,
+    ];
     if (otherCommits.length > 0) {
       releaseNotes += '### Other Changes\n\n';
       otherCommits.forEach((commit) => {
@@ -221,10 +227,10 @@ export async function createGitHubRelease(options: GitHubReleaseOptions): Promis
     const previousTag = await getPreviousTag(tagName, cwd);
 
     // Extract version from tag name for display purposes
-    const releaseTitle = tagName.startsWith('@') 
-      ? `v${tagName.split('@').pop()}` 
-      : tagName.startsWith('v') 
-        ? tagName 
+    const releaseTitle = tagName.startsWith('@')
+      ? `v${tagName.split('@').pop()}`
+      : tagName.startsWith('v')
+        ? tagName
         : `v${tagName}`;
 
     if (dryRun) {
