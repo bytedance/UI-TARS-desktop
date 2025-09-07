@@ -60,14 +60,8 @@
 }
 
 .code-editor-file-info {
-  position: relative;
   cursor: default;
   padding: 4px 2px;
-}
-
-.code-editor-file-info:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
 }
 
 .code-editor-file-name {
@@ -116,93 +110,7 @@
   color: #f0f6fc;
 }
 
-.code-editor-tooltip {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  margin-top: 8px;
-  z-index: 50;
-  background: #161b22;
-  color: #f0f6fc;
-  font-size: 12px;
-  border-radius: 6px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  border: 1px solid #30363d;
-  min-width: max-content;
-  max-width: 300px;
-}
 
-.code-editor-tooltip-content {
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.code-editor-tooltip-section {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-}
-
-.code-editor-tooltip-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding-top: 8px;
-  border-top: 1px solid #30363d;
-}
-
-.code-editor-tooltip-icon {
-  color: #7d8590;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.code-editor-tooltip-label {
-  color: #7d8590;
-  font-weight: 500;
-  margin-bottom: 4px;
-}
-
-.code-editor-tooltip-value {
-  color: #f0f6fc;
-  font-family: inherit;
-  word-break: break-all;
-  line-height: 1.4;
-}
-
-.code-editor-tooltip-btn {
-  margin-top: 8px;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  background: #21262d;
-  color: #f0f6fc;
-  border: 1px solid #30363d;
-  border-radius: 4px;
-  font-size: 10px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.code-editor-tooltip-btn:hover {
-  background: #30363d;
-  color: #fff;
-}
-
-.code-editor-tooltip-arrow {
-  position: absolute;
-  top: -4px;
-  left: 16px;
-  width: 8px;
-  height: 8px;
-  background: #161b22;
-  border-left: 1px solid #30363d;
-  border-top: 1px solid #30363d;
-  transform: rotate(45deg);
-}
 
 .code-editor-content {
   background: #0d1117;
