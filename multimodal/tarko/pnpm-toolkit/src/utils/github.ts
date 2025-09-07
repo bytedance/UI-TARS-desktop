@@ -220,11 +220,18 @@ export async function createGitHubRelease(options: GitHubReleaseOptions): Promis
     // Get previous tag for generating release notes
     const previousTag = await getPreviousTag(tagName, cwd);
 
+    // Extract version from tag name for display purposes
+    const releaseTitle = tagName.startsWith('@') 
+      ? `v${tagName.split('@').pop()}` 
+      : tagName.startsWith('v') 
+        ? tagName 
+        : `v${tagName}`;
+
     if (dryRun) {
       logger.info(`[dry-run] Would create GitHub release:`);
       logger.info(`  Repository: ${repoInfo.owner}/${repoInfo.repo}`);
       logger.info(`  Tag: ${tagName}`);
-      logger.info(`  Title: ${tagName}`);
+      logger.info(`  Title: ${releaseTitle}`);
       logger.info(`  Prerelease: ${isPrerelease}`);
       if (previousTag) {
         logger.info(`  Generate notes from: ${previousTag}`);
@@ -251,6 +258,7 @@ export async function createGitHubRelease(options: GitHubReleaseOptions): Promis
     const releaseNotes = await generateReleaseNotes(tagName, previousTag, cwd);
 
     // Create the release with custom formatted notes
+
     const releaseArgs = [
       'release',
       'create',
@@ -258,7 +266,7 @@ export async function createGitHubRelease(options: GitHubReleaseOptions): Promis
       '--repo',
       `${repoInfo.owner}/${repoInfo.repo}`,
       '--title',
-      tagName,
+      releaseTitle,
       '--notes',
       releaseNotes,
     ];
