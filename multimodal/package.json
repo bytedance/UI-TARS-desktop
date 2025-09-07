@@ -19,8 +19,11 @@
     "coverage": "vitest run --coverage",
     "format": "pnpm prettier --write .",
     "release": "ptk release --push-tag --build --ignore-scripts --tag-prefix '@agent-tars@'",
+    "release:full": "ptk release --push-tag --build --ignore-scripts --tag-prefix '@agent-tars@' --create-github-release",
     "release:ai": "ptk release --push-tag --build --ignore-scripts --tag-prefix '@agent-tars@' --use-ai --provider=azure-openai --model=aws_sdk_claude37_sonnet --baseURL=AWS_CLAUDE_API_BASE_URL",
+    "release:ai:full": "ptk release --push-tag --build --ignore-scripts --tag-prefix '@agent-tars@' --use-ai --provider=azure-openai --model=aws_sdk_claude37_sonnet --baseURL=AWS_CLAUDE_API_BASE_URL --create-github-release",
     "release:ai:dryrun": "ptk release --push-tag --build --ignore-scripts --tag-prefix '@agent-tars@' --use-ai --provider=azure-openai --model=aws_sdk_claude37_sonnet --baseURL=AWS_CLAUDE_API_BASE_URL --dry-run",
+    "github-release": "ptk github-release --tag-prefix '@agent-tars@'",
     "changelog": "ptk changelog --tag-prefix '@agent-tars@' --use-ai --provider=azure-openai --model=aws_sdk_claude37_sonnet --baseURL=AWS_CLAUDE_API_BASE_URL",
     "patch": "ptk patch"
   },
