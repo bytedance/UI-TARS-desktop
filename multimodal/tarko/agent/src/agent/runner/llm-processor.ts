@@ -516,22 +516,14 @@ export class LLMProcessor {
       this.eventStream.sendEvent(assistantEvent);
     }
 
-    // If we have complete reasoning content, create a consolidated thinking message event
-    if (reasoningBuffer) {
-      let thinkingDurationMs: number | undefined;
-      
-      // Only calculate duration in streaming mode where it's meaningful
-      if (streamingMode && messageId && this.thinkingStartTimes.has(messageId)) {
-        const startTime = this.thinkingStartTimes.get(messageId)!;
-        thinkingDurationMs = Date.now() - startTime;
-        this.thinkingStartTimes.delete(messageId);
-      }
-
+    // If we have complete reasoning content and NOT in streaming mode, create a consolidated thinking message event
+    // (In streaming mode, final thinking event is already sent when reasoning ends)
+    if (reasoningBuffer && !streamingMode) {
       const thinkingEvent = this.eventStream.createEvent('assistant_thinking_message', {
         content: reasoningBuffer,
         isComplete: true,
         messageId: messageId,
-        thinkingDurationMs: thinkingDurationMs, // Only set in streaming mode
+        // No thinkingDurationMs in non-streaming mode as it's not meaningful
       });
 
       this.eventStream.sendEvent(thinkingEvent);
