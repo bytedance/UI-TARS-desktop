@@ -160,9 +160,10 @@ export async function generateReleaseNotes(
     // Add Full Changelog link if repository info is available
     if (repoInfo) {
       if (previousTag) {
-        releaseNotes += `\n**Full Changelog**: https://github.com/${repoInfo.owner}/${repoInfo.repo}/compare/${previousTag}...${tagName}`;
+        const changelogText = `${previousTag}...${tagName}`;
+        releaseNotes += `\n**Full Changelog**: [${changelogText}](https://github.com/${repoInfo.owner}/${repoInfo.repo}/compare/${previousTag}...${tagName})`;
       } else {
-        releaseNotes += `\n**Full Changelog**: https://github.com/${repoInfo.owner}/${repoInfo.repo}/commits/${tagName}`;
+        releaseNotes += `\n**Full Changelog**: [${tagName}](https://github.com/${repoInfo.owner}/${repoInfo.repo}/commits/${tagName})`;
       }
     }
 
