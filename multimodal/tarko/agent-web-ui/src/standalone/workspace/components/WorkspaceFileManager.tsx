@@ -40,22 +40,7 @@ export const WorkspaceFileManager: React.FC<WorkspaceFileManagerProps> = ({
   const [isExpanded, setIsExpanded] = useState(true);
   const [selectedFileType, setSelectedFileType] = useState<string>('all');
 
-  // Auto-show the latest file in workspace panel
-  useEffect(() => {
-    if (files.length > 0) {
-      const latestFile = files[files.length - 1];
-      setActivePanelContent({
-        type: latestFile.type === 'screenshot' || latestFile.type === 'image' ? 'image' : 'file',
-        source: latestFile.content || '',
-        title: latestFile.name,
-        timestamp: latestFile.timestamp,
-        arguments: latestFile.type === 'file' ? {
-          path: latestFile.path,
-          content: latestFile.content,
-        } : undefined,
-      });
-    }
-  }, [files.length, setActivePanelContent]);
+  // Note: Removed auto-show logic to prevent conflicts with back navigation
 
   if (files.length === 0) {
     return null;
