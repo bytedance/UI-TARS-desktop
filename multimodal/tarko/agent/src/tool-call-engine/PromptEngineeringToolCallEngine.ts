@@ -539,19 +539,22 @@ ${JSON.stringify(schema)}
   }
 
   /**
+   * Extract clean JSON content from potentially malformed tool call content
+   */
+  private extractCleanJsonContent(content: string): string {
+    const trimmed = content.trim();
+    // Extract only the JSON portion if there's trailing content
+    // This handles cases where the model generates extra content after the JSON
+    const jsonMatch = trimmed.match(/^\s*\{[\s\S]*?\}(?=\s*(?:\}|\n|$))/);
+    return jsonMatch ? jsonMatch[0].trim() : trimmed;
+  }
+
+  /**
    * Complete a tool call when closing tag is found
    */
   private completeToolCall(state: ExtendedStreamProcessingState): StreamingToolCallUpdate | null {
     try {
-      let toolCallContent = state.currentToolCallBuffer.trim();
-
-      // Extract only the JSON portion if there's trailing content
-      // This handles cases where the model generates extra content after the JSON
-      const jsonMatch = toolCallContent.match(/^\s*\{[\s\S]*?\}(?=\s*(?:\}|\n|$))/);
-      if (jsonMatch) {
-        toolCallContent = jsonMatch[0].trim();
-      }
-
+      const toolCallContent = this.extractCleanJsonContent(state.currentToolCallBuffer);
       const toolCallData = JSON.parse(toolCallContent);
 
       if (toolCallData && toolCallData.name) {
@@ -603,13 +606,7 @@ ${JSON.stringify(schema)}
       try {
         // Try to parse the incomplete tool call buffer
         // Add closing brace if it seems like valid JSON that was truncated
-        let toolCallContent = extendedState.currentToolCallBuffer.trim();
-
-        // Extract only the JSON portion if there's trailing content
-        const jsonMatch = toolCallContent.match(/^\s*\{[\s\S]*?\}(?=\s*(?:\}|\n|$))/);
-        if (jsonMatch) {
-          toolCallContent = jsonMatch[0].trim();
-        }
+        let toolCallContent = this.extractCleanJsonContent(extendedState.currentToolCallBuffer);
 
         // Attempt to repair incomplete JSON
         if (toolCallContent && !toolCallContent.endsWith('}')) {
@@ -696,13 +693,7 @@ ${JSON.stringify(schema)}
     let cleanedContent = content;
 
     while ((match = toolCallRegex.exec(content)) !== null) {
-      let toolCallContent = match[1].trim();
-
-      // Extract only the JSON portion if there's trailing content
-      const jsonMatch = toolCallContent.match(/^\s*\{[\s\S]*?\}(?=\s*(?:\}|\n|$))/);
-      if (jsonMatch) {
-        toolCallContent = jsonMatch[0].trim();
-      }
+      const toolCallContent = this.extractCleanJsonContent(match[1]);
 
       try {
         const toolCallData = JSON.parse(toolCallContent);
