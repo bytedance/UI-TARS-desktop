@@ -117,6 +117,31 @@ export const WorkspaceFileManager: React.FC<WorkspaceFileManagerProps> = ({
     }
   };
 
+  // Smart path display - show meaningful parts of the path
+  const getSmartPath = (fullPath: string) => {
+    const normalized = normalizeFilePath(fullPath);
+    const parts = normalized.split('/');
+    
+    // If path is short enough, show it all
+    if (normalized.length <= 35) {
+      return normalized;
+    }
+    
+    // For long paths, show: first-part/.../last-two-parts
+    if (parts.length > 3) {
+      const first = parts[0];
+      const lastTwo = parts.slice(-2).join('/');
+      return `${first}/.../${lastTwo}`;
+    }
+    
+    // For medium paths, show last meaningful parts
+    if (parts.length > 1) {
+      return parts.slice(-2).join('/');
+    }
+    
+    return normalized;
+  };
+
   // Animation variants removed for performance
 
   return (
@@ -195,8 +220,8 @@ export const WorkspaceFileManager: React.FC<WorkspaceFileManagerProps> = ({
                       {file.path && (
                         <>
                           <span>•</span>
-                          <span className="truncate max-w-32" title={normalizeFilePath(file.path)}>
-                            {normalizeFilePath(file.path)}
+                          <span className="truncate max-w-40" title={normalizeFilePath(file.path)}>
+                            {getSmartPath(file.path)}
                           </span>
                         </>
                       )}
