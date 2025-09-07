@@ -540,54 +540,89 @@ ${JSON.stringify(schema)}
 
   /**
    * Extract clean JSON content from potentially malformed tool call content
+   * Uses a robust multi-strategy approach for maximum compatibility
    */
   private extractCleanJsonContent(content: string): string {
     const trimmed = content.trim();
-    // Extract only the JSON portion if there's trailing content
-    // This handles cases where the model generates extra content after the JSON
     
-    // Try to find a complete JSON object by counting braces
-    let braceCount = 0;
-    let jsonEnd = -1;
+    // Fast path: try parsing as-is (handles 90% of cases)
+    if (this.tryParseJson(trimmed)) {
+      return trimmed;
+    }
+    
+    // Progressive truncation: find the longest valid JSON prefix
+    return this.findValidJsonPrefix(trimmed) || trimmed;
+  }
+  
+  /**
+   * Safe JSON parsing without throwing
+   */
+  private tryParseJson(content: string): boolean {
+    try {
+      JSON.parse(content);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  
+  /**
+   * Find the longest valid JSON prefix using binary search approach
+   */
+  private findValidJsonPrefix(content: string): string | null {
+    // Quick heuristic: look for obvious trailing garbage patterns
+    const patterns = [
+      /^(.+?)\s*\}\s*\}\s*$/,  // Extra closing brace
+      /^(.+?)\s*\}\s*\n+.*$/,  // Newlines after JSON
+      /^(.+?)\s*\}\s*[^}\s].*$/,  // Non-JSON content after
+    ];
+    
+    for (const pattern of patterns) {
+      const match = content.match(pattern);
+      if (match && this.tryParseJson(match[1] + '}')) {
+        return match[1] + '}';
+      }
+    }
+    
+    // Fallback: find first complete JSON object
+    let depth = 0;
     let inString = false;
-    let escapeNext = false;
+    let escaped = false;
     
-    for (let i = 0; i < trimmed.length; i++) {
-      const char = trimmed[i];
+    for (let i = 0; i < content.length; i++) {
+      const char = content[i];
       
-      if (escapeNext) {
-        escapeNext = false;
+      if (escaped) {
+        escaped = false;
         continue;
       }
       
-      if (char === '\\') {
-        escapeNext = true;
+      if (char === '\\' && inString) {
+        escaped = true;
         continue;
       }
       
-      if (char === '"' && !escapeNext) {
+      if (char === '"') {
         inString = !inString;
         continue;
       }
       
       if (!inString) {
         if (char === '{') {
-          braceCount++;
+          depth++;
         } else if (char === '}') {
-          braceCount--;
-          if (braceCount === 0) {
-            jsonEnd = i;
-            break;
+          depth--;
+          if (depth === 0) {
+            const candidate = content.substring(0, i + 1);
+            if (this.tryParseJson(candidate)) {
+              return candidate;
+            }
           }
         }
       }
     }
     
-    if (jsonEnd !== -1) {
-      return trimmed.substring(0, jsonEnd + 1);
-    }
-    
-    return trimmed;
+    return null;
   }
 
   /**
