@@ -108,7 +108,7 @@ export async function generateReleaseNotes(
         const match = commit.subject.match(/^feat(\([^)]+\))?:\s*(.+)$/);
         const description = match ? match[2] : commit.subject;
         const scope = match?.[1] || '';
-        releaseNotes += `* ${scope ? `${scope}: ` : ''}${description} by @${commit.author.toLowerCase()} in ${commit.hash.substring(0, 7)}\n`;
+        releaseNotes += `* feat${scope}: ${description} by @${commit.author.toLowerCase()} in ${commit.hash.substring(0, 7)}\n`;
       });
       releaseNotes += '\n';
     }
@@ -120,7 +120,7 @@ export async function generateReleaseNotes(
         const match = commit.subject.match(/^fix(\([^)]+\))?:\s*(.+)$/);
         const description = match ? match[2] : commit.subject;
         const scope = match?.[1] || '';
-        releaseNotes += `* ${scope ? `${scope}: ` : ''}${description} by @${commit.author.toLowerCase()} in ${commit.hash.substring(0, 7)}\n`;
+        releaseNotes += `* fix${scope}: ${description} by @${commit.author.toLowerCase()} in ${commit.hash.substring(0, 7)}\n`;
       });
       releaseNotes += '\n';
     }
@@ -132,7 +132,7 @@ export async function generateReleaseNotes(
         const match = commit.subject.match(/^docs(\([^)]+\))?:\s*(.+)$/);
         const description = match ? match[2] : commit.subject;
         const scope = match?.[1] || '';
-        releaseNotes += `* ${scope ? `${scope}: ` : ''}${description} by @${commit.author.toLowerCase()} in ${commit.hash.substring(0, 7)}\n`;
+        releaseNotes += `* docs${scope}: ${description} by @${commit.author.toLowerCase()} in ${commit.hash.substring(0, 7)}\n`;
       });
       releaseNotes += '\n';
     }
