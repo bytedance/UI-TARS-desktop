@@ -110,6 +110,9 @@ export function bootstrapCli() {
         default: 'feat,fix',
       },
     )
+    .option('--create-github-release', 'Create GitHub release after successful release', {
+      default: false,
+    })
     .alias('release')
     .action((opts) => {
       // Process filter options

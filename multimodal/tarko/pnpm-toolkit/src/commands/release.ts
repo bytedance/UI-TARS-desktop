@@ -18,6 +18,7 @@ import { loadWorkspacePackages, resolveWorkspaceConfig } from '../utils/workspac
 import { gitCommit, gitCreateTag, gitPushTag } from '../utils/git';
 import { publishPackage } from '../utils/npm';
 import { logger } from '../utils/logger';
+import { createGitHubRelease } from '../utils/github';
 import { patch } from './patch';
 import { changelog } from './changelog';
 
@@ -206,6 +207,7 @@ export async function release(options: ReleaseOptions = {}): Promise<void> {
     pushTag = false,
     tagPrefix = 'v',
     useAi = false,
+    createGithubRelease = false,
   } = options;
 
   if (dryRun) {
@@ -464,6 +466,22 @@ export async function release(options: ReleaseOptions = {}): Promise<void> {
           logger.info(`Running AI changelog generation even in dry-run mode for testing purposes`);
         }
         await changelog(changelogOptions);
+      }
+    }
+
+    // Create GitHub release if requested
+    if (createGithubRelease) {
+      try {
+        await createGitHubRelease({
+          version,
+          tagName,
+          cwd,
+          dryRun,
+        });
+      } catch (error) {
+        logger.error(`Failed to create GitHub release: ${(error as Error).message}`);
+        logger.warn('Release was successful but GitHub release creation failed');
+        // Don't throw here as the main release was successful
       }
     }
 

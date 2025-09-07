@@ -68,6 +68,7 @@ export interface ReleaseOptions extends CommandOptions {
   provider?: string;
   filterScopes?: string[];
   filterTypes?: string[];
+  createGithubRelease?: boolean;
 }
 
 // Patch command options
