@@ -110,3 +110,10 @@ export interface ChangelogSection {
   title: string;
   commits: import('tiny-conventional-commits-parser').GitCommit[];
 }
+
+// GitHub Release command options
+export interface GitHubReleaseOptions extends CommandOptions {
+  version?: string;
+  tagPrefix?: string;
+  dryRun?: boolean;
+}

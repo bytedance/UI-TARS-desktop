@@ -7,7 +7,7 @@
  * CLI entry point for PTK
  */
 import { cac } from 'cac';
-import { dev, release, patch, changelog } from './index';
+import { dev, release, patch, changelog, githubRelease } from './index';
 import { logger } from './utils/logger';
 
 /**
@@ -195,6 +195,21 @@ export function bootstrapCli() {
         opts.filterTypes = [];
       }
       return wrapCommand(changelog, opts);
+    });
+
+  // GitHub Release command
+  cli
+    .command('github-release', 'Create GitHub release from changelog')
+    .option('--version <version>', 'Version to release (reads from package.json if not provided)')
+    .option('--tag-prefix <prefix>', 'Prefix for git tags', {
+      default: 'v',
+    })
+    .option('--dry-run', 'Preview execution without creating actual release', {
+      default: false,
+    })
+    .alias('gh-release')
+    .action((opts) => {
+      return wrapCommand(githubRelease, opts);
     });
 
   cli.version(pkg.version);
