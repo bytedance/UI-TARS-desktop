@@ -254,6 +254,13 @@ export async function createGitHubRelease(options: GitHubReleaseOptions): Promis
       } else {
         logger.info(`  Generate notes from: repository start`);
       }
+      
+      // Generate and show release notes preview
+      logger.info(`\n[dry-run] Release notes preview:`);
+      logger.info(`${'='.repeat(50)}`);
+      const releaseNotes = await generateReleaseNotes(tagName, previousTag, cwd, repoInfo);
+      console.log(releaseNotes);
+      logger.info(`${'='.repeat(50)}`);
       return;
     }
 
