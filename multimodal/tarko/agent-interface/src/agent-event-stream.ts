@@ -155,6 +155,9 @@ export namespace AgentEventStream {
     /** Whether the thinking process is complete */
     isComplete?: boolean;
 
+    /** Duration of the thinking process in milliseconds */
+    thinkingDurationMs?: number;
+
     /**
      * Unique message identifier that links thinking messages to their session
      * This allows clients to correlate incremental updates with complete thinking

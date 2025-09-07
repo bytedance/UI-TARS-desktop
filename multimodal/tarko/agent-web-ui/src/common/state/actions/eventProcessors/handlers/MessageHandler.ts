@@ -228,7 +228,6 @@ export class ThinkingMessageHandler
       | AgentEventStream.AssistantStreamingThinkingMessageEvent
     >
 {
-  private thinkingStartTimes = new Map<string, number>();
 
   canHandle(
     event: AgentEventStream.Event,
@@ -251,11 +250,6 @@ export class ThinkingMessageHandler
     const { set } = context;
     const eventMessageId = event.messageId || `${sessionId}-thinking`;
 
-    // Track thinking start time for duration calculation
-    if (event.type === 'assistant_streaming_thinking_message' && !this.thinkingStartTimes.has(eventMessageId)) {
-      this.thinkingStartTimes.set(eventMessageId, event.timestamp);
-    }
-
     set(messagesAtom, (prev: Record<string, Message[]>) => {
       const sessionMessages = prev[sessionId] || [];
       let existingMessageIndex = -1;
@@ -267,15 +261,10 @@ export class ThinkingMessageHandler
         );
       }
 
-      // Calculate thinking duration
-      let thinkingDuration: number | undefined;
-      if (event.type === 'assistant_thinking_message' || event.isComplete) {
-        const startTime = this.thinkingStartTimes.get(eventMessageId);
-        if (startTime) {
-          thinkingDuration = event.timestamp - startTime;
-          this.thinkingStartTimes.delete(eventMessageId); // Clean up
-        }
-      }
+      // Get thinking duration from backend event (only for final thinking messages)
+      const thinkingDuration = event.type === 'assistant_thinking_message' 
+        ? (event as AgentEventStream.AssistantThinkingMessageEvent).thinkingDurationMs
+        : undefined;
 
       if (existingMessageIndex !== -1) {
         // Update existing assistant message

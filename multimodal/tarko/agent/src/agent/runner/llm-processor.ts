@@ -40,6 +40,7 @@ export class LLMProcessor {
   private llmClient?: OpenAI;
   private enableStreamingToolCallEvents: boolean;
   private enableMetrics: boolean;
+  private thinkingStartTimes = new Map<string, number>();
 
   constructor(
     private agent: Agent,
@@ -331,6 +332,11 @@ export class LLMProcessor {
       if (streamingMode) {
         // Send reasoning content if any
         if (chunkResult.reasoningContent) {
+          // Track thinking start time for the first reasoning chunk
+          if (!this.thinkingStartTimes.has(messageId)) {
+            this.thinkingStartTimes.set(messageId, Date.now());
+          }
+
           // Create thinking streaming event
           const thinkingEvent = this.eventStream.createEvent(
             'assistant_streaming_thinking_message',
@@ -480,10 +486,19 @@ export class LLMProcessor {
 
     // If we have complete reasoning content, create a consolidated thinking message event
     if (reasoningBuffer) {
+      // Calculate thinking duration if we have a start time
+      let thinkingDurationMs: number | undefined;
+      if (messageId && this.thinkingStartTimes.has(messageId)) {
+        const startTime = this.thinkingStartTimes.get(messageId)!;
+        thinkingDurationMs = Date.now() - startTime;
+        this.thinkingStartTimes.delete(messageId); // Clean up
+      }
+
       const thinkingEvent = this.eventStream.createEvent('assistant_thinking_message', {
         content: reasoningBuffer,
         isComplete: true,
         messageId: messageId,
+        thinkingDurationMs: thinkingDurationMs,
       });
 
       this.eventStream.sendEvent(thinkingEvent);
