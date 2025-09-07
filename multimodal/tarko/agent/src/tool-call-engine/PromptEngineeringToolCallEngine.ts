@@ -545,8 +545,49 @@ ${JSON.stringify(schema)}
     const trimmed = content.trim();
     // Extract only the JSON portion if there's trailing content
     // This handles cases where the model generates extra content after the JSON
-    const jsonMatch = trimmed.match(/^\s*\{[\s\S]*?\}(?=\s*(?:\}|\n|$))/);
-    return jsonMatch ? jsonMatch[0].trim() : trimmed;
+    
+    // Try to find a complete JSON object by counting braces
+    let braceCount = 0;
+    let jsonEnd = -1;
+    let inString = false;
+    let escapeNext = false;
+    
+    for (let i = 0; i < trimmed.length; i++) {
+      const char = trimmed[i];
+      
+      if (escapeNext) {
+        escapeNext = false;
+        continue;
+      }
+      
+      if (char === '\\') {
+        escapeNext = true;
+        continue;
+      }
+      
+      if (char === '"' && !escapeNext) {
+        inString = !inString;
+        continue;
+      }
+      
+      if (!inString) {
+        if (char === '{') {
+          braceCount++;
+        } else if (char === '}') {
+          braceCount--;
+          if (braceCount === 0) {
+            jsonEnd = i;
+            break;
+          }
+        }
+      }
+    }
+    
+    if (jsonEnd !== -1) {
+      return trimmed.substring(0, jsonEnd + 1);
+    }
+    
+    return trimmed;
   }
 
   /**
