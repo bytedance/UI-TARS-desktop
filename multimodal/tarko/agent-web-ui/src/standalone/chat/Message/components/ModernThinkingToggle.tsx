@@ -97,7 +97,7 @@ export const ModernThinkingToggle: React.FC<ModernThinkingToggleProps> = ({
             transition={{ duration: 0.3, ease: 'easeInOut' }}
             className="overflow-hidden"
           >
-            <div className="mt-3 prose dark:prose-invert prose-sm max-w-none text-xs">
+            <div className="mt-3 ml-6 prose dark:prose-invert prose-sm max-w-none text-xs">
               <MarkdownRenderer content={thinking} />
             </div>
           </motion.div>
