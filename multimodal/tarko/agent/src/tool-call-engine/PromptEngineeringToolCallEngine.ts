@@ -544,20 +544,15 @@ ${JSON.stringify(schema)}
   private extractCleanJsonContent(content: string): string {
     const trimmed = content.trim();
     
-    // Try common cleanup patterns first
-    const patterns = [
-      trimmed,  // Original
-      trimmed.replace(/\}\s*\}\s*$/, '}'),  // Remove extra closing brace
-      trimmed.replace(/\}\s*\n.*$/, '}'),   // Remove content after }
-      trimmed.match(/^\{[^]*?\}/)?.[0] || trimmed  // First complete JSON object
-    ];
-    
-    for (const candidate of patterns) {
+    // Extract first complete JSON object using regex
+    const jsonMatch = trimmed.match(/^\s*\{[\s\S]*?\}(?=\s*(?:\}|\n|$))/);
+    if (jsonMatch) {
+      const candidate = jsonMatch[0].trim();
       try {
         JSON.parse(candidate);
         return candidate;
       } catch {
-        continue;
+        // Fall through to original content
       }
     }
     
