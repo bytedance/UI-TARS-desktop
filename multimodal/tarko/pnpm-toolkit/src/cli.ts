@@ -130,7 +130,7 @@ export function bootstrapCli() {
   // Patch command
   cli
     .command('p', 'Patch the failure of release process')
-    .option('--version <version>', 'Version (e.g. 1.0.0, 2.0.0-alpha.9)', {
+    .option('--patch-version <version>', 'Version (e.g. 1.0.0, 2.0.0-alpha.9)', {
       // There is no default value here, because the default is read from package.json
     })
     .option('--tag <tag>', 'Tag (e.g. latest, next, beta)')
@@ -141,12 +141,18 @@ export function bootstrapCli() {
       default: false,
     })
     .alias('patch')
-    .action((opts) => wrapCommand(patch, opts));
+    .action((opts) => {
+      // Map patch-version to version for compatibility
+      if (opts.patchVersion) {
+        opts.version = opts.patchVersion;
+      }
+      return wrapCommand(patch, opts);
+    });
 
   // Changelog command
   cli
     .command('changelog', 'Create changelog')
-    .option('--version <version>', 'Version', {
+    .option('--changelog-version <version>', 'Version', {
       // There is no default value here, because the default is read from package.json
     })
     .option('--tag-prefix <prefix>', 'Prefix for git tags', {
@@ -185,6 +191,10 @@ export function bootstrapCli() {
       },
     )
     .action((opts) => {
+      // Map changelog-version to version for compatibility
+      if (opts.changelogVersion) {
+        opts.version = opts.changelogVersion;
+      }
       // Process filter options
       if (opts.filterScopes) {
         opts.filterScopes = opts.filterScopes.split(',').map((s: string) => s.trim());
