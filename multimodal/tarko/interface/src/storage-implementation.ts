@@ -11,8 +11,9 @@
  * - `file`: File-based storage implementation, stores data in local files.
  * - `sqlite`: SQLite database storage implementation.
  * - `database`: External database storage implementation.
+ * - `mongodb`: MongoDB database storage implementation.
  */
-export type AgentStorageImplementationType = 'memory' | 'file' | 'sqlite' | 'database';
+export type AgentStorageImplementationType = 'memory' | 'file' | 'sqlite' | 'database' | 'mongodb';
 
 /**
  * Base agent storage implementation interface
@@ -85,13 +86,45 @@ export interface DatabaseAgentStorageImplementation extends BaseAgentStorageImpl
 }
 
 /**
+ * MongoDB-based storage implementation
+ */
+export interface MongoDBAgentStorageImplementation extends BaseAgentStorageImplementation {
+  type: 'mongodb';
+  /**
+   * MongoDB connection string
+   *
+   * Examples:
+   * - Local: mongodb://localhost:27017/tarko
+   * - Atlas: mongodb+srv://user:pass@cluster.mongodb.net/tarko
+   */
+  connectionString: string;
+  /**
+   * Database name (optional, can be specified in connection string)
+   *
+   * @defaultValue 'tarko'
+   */
+  dbName?: string;
+  /**
+   * Additional MongoDB connection options
+   */
+  options?: {
+    maxPoolSize?: number;
+    serverSelectionTimeoutMS?: number;
+    socketTimeoutMS?: number;
+    // bufferMaxEntries?: number;
+    [key: string]: any;
+  };
+}
+
+/**
  * Union type for all agent storage implementations
  */
 export type AgentStorageImplementation =
   | MemoryAgentStorageImplementation
   | FileAgentStorageImplementation
   | SqliteAgentStorageImplementation
-  | DatabaseAgentStorageImplementation;
+  | DatabaseAgentStorageImplementation
+  | MongoDBAgentStorageImplementation;
 
 /**
  * Utility type to extract implementation by type
@@ -105,7 +138,9 @@ export type AgentStorageImplementationByType<T extends AgentStorageImplementatio
         ? SqliteAgentStorageImplementation
         : T extends 'database'
           ? DatabaseAgentStorageImplementation
-          : never;
+          : T extends 'mongodb'
+            ? MongoDBAgentStorageImplementation
+            : never;
 
 /**
  * Type guard to check if implementation is of specific type

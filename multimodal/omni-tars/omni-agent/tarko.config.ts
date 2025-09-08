@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { AgentOptions, LogLevel } from '@tarko/interface';
+import { AgentOptions, LogLevel, AgentAppConfig } from '@tarko/interface';
 import { resolve } from 'node:path';
 
 export default {
@@ -40,4 +40,10 @@ export default {
   thinking: {
     type: process.env.NATIVE_THINKING === 'true' ? 'enabled' : 'disabled',
   },
-} as AgentOptions;
+  server: {
+    storage: {
+      type: 'mongodb',
+      connectionString: 'mongodb://localhost:27017/tarko',
+    },
+  },
+} as AgentAppConfig;

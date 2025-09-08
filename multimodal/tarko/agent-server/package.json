@@ -21,6 +21,7 @@
   "dependencies": {
     "@tarko/agent-ui-builder": "workspace:*",
     "@tarko/context-engineer": "workspace:*",
+    "mongoose": "^8.8.4",
     "transliteration": "^2.3.5"
   },
   "devDependencies": {
