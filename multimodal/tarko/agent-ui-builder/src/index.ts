@@ -6,3 +6,4 @@
 export * from './types';
 export * from './builder';
 export * from './utils';
+export * from './static-path';

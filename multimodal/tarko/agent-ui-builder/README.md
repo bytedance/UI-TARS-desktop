@@ -7,6 +7,8 @@ Agent UI builder for generating replay HTML files from agent session data.
 - **Multiple Output Destinations**: In-memory, file system, or custom post-processing
 - **Type Safety**: Strict TypeScript interfaces for all options
 - **Code Reuse**: Shared implementation with Agent CLI and Agent Server
+- **Built-in Static Files**: Includes pre-built agent UI static files
+- **Smart Path Resolution**: Automatic static path detection with fallbacks
 - **Extensible**: Support for custom post-processors and upload providers
 - **Isomorphic Design**: Prepared for Python SDK compatibility
 
@@ -21,13 +23,13 @@ pnpm add @tarko/agent-ui-builder
 ### Basic Usage
 
 ```typescript
-import { AgentUIBuilder, buildHTMLInMemory } from '@tarko/agent-ui-builder';
+import { AgentUIBuilder, buildHTMLInMemory, getStaticPath } from '@tarko/agent-ui-builder';
 
-// Build HTML in memory
+// Build HTML in memory with automatic static path resolution
 const result = await buildHTMLInMemory({
   events: sessionEvents,
   metadata: sessionMetadata,
-  staticPath: '/path/to/web-ui/static',
+  staticPath: getStaticPath(), // Automatically resolves to built-in static files
   serverInfo: versionInfo,
   webUIConfig: uiConfig,
 });
@@ -114,6 +116,9 @@ const result = await AgentUIBuilder.build({
 - `buildHTMLWithProcessor()`: Generate HTML with custom post-processing
 - `generateDefaultFilePath()`: Generate default output file path
 - `createShareProviderProcessor()`: Create share provider upload processor
+- `getStaticPath()`: Get static path with automatic fallback resolution
+- `getDefaultStaticPath()`: Get the default built-in static path
+- `isDefaultStaticPathValid()`: Check if default static path is valid
 
 ## Python SDK Compatibility
 

@@ -5,6 +5,7 @@
 
 import path from 'path';
 import { deepMerge, isTest } from '@tarko/shared-utils';
+import { getStaticPath } from '@tarko/agent-ui-builder';
 import {
   CommonFilterOptions,
   AgentCLIArguments,
@@ -305,7 +306,7 @@ function applyWebUIDefaults(config: AgentAppConfig): void {
   }
 
   if (isAgentWebUIImplementationType(config.webui, 'static') && !config.webui.staticPath) {
-    config.webui.staticPath = isTest() ? '/path/to/web-ui' : path.resolve(__dirname, '../static');
+    config.webui.staticPath = isTest() ? '/path/to/web-ui' : getStaticPath();
   }
 
   if (!config.webui.title) {

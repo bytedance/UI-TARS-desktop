@@ -17,7 +17,8 @@
     "registry": "https://registry.npmjs.org"
   },
   "files": [
-    "dist"
+    "dist",
+    "static"
   ],
   "scripts": {
     "dev": "rslib build --watch",
