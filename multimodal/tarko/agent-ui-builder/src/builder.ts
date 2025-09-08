@@ -13,7 +13,7 @@ import {
   PostProcessor,
 } from './types';
 import { getStaticPath } from './static-path';
-import type { SessionItemInfo } from '@tarko/interface';
+import type { SessionInfo } from '@tarko/interface';
 
 /**
  * Agent UI Builder - Core class for generating replay HTML files

@@ -1,5 +1,5 @@
 import { atom } from 'jotai';
-import { AgentProcessingPhase, AgentStatusInfo, SessionItemInfo, LayoutMode } from '@tarko/interface';
+import { AgentProcessingPhase, AgentStatusInfo, SessionInfo, LayoutMode } from '@tarko/interface';
 import { getDefaultLayoutMode } from '@/config/web-ui-config';
 import {
   ConnectionStatus,
@@ -45,10 +45,10 @@ export const connectionStatusAtom = atom<ConnectionStatus>({
 });
 
 /**
- * Session metadata atom using server-side SessionItemInfo metadata type
+ * Session metadata atom using server-side SessionInfo metadata type
  * This eliminates type duplication and ensures consistency with persistence layer
  */
-export const sessionMetadataAtom = atom<SessionItemInfo['metadata']>({});
+export const sessionMetadataAtom = atom<SessionInfo['metadata']>({});
 
 /**
  * Atom for agent options (sanitized configuration)

@@ -8,7 +8,7 @@ import path from 'path';
 import os from 'os';
 import { AgentEventStream, AgentServerVersionInfo } from '@tarko/interface';
 import { AgentUIBuilder, createShareProviderProcessor } from '@tarko/agent-ui-builder';
-import { SessionItemInfo } from '../storage';
+import { SessionInfo } from '../storage';
 
 /**
  * ShareUtils - Utility functions for sharing session data
@@ -19,6 +19,30 @@ import { SessionItemInfo } from '../storage';
  * - Uploading individual files to share providers
  */
 export class ShareUtils {
+  /**
+   * Generate shareable HTML content for a session
+   * @param events Session events to include
+   * @param metadata Session metadata
+   * @param staticPath Path to static web UI files
+   * @param serverInfo Optional server version info
+   * @param webUIConfig Optional web UI configuration to inject
+   * @returns Generated HTML content
+   */
+  static generateShareHtml(
+    events: AgentEventStream.Event[],
+    metadata: SessionInfo,
+    staticPath: string,
+    serverInfo?: AgentServerVersionInfo,
+    webUIConfig?: Record<string, any>,
+  ): string {
+    return new AgentUIBuilder({
+      events,
+      sessionInfo: metadata,
+      staticPath,
+      serverInfo,
+      uiConfig: webUIConfig,
+    }).generateHTML();
+  }
 
 
   /**
@@ -37,7 +61,7 @@ export class ShareUtils {
       /**
        * Session metadata containing additional session information
        */
-      sessionItemInfo?: SessionItemInfo;
+      sessionInfo?: SessionInfo;
 
       /**
        * Normalized slug for semantic URLs, derived from user query
@@ -67,7 +91,7 @@ export class ShareUtils {
     // Execute the processor with the HTML and metadata
     const result = await processor(
       html,
-      options?.sessionItemInfo || {
+      options?.sessionInfo || {
         id: sessionId,
         createdAt: Date.now(),
         updatedAt: Date.now(),

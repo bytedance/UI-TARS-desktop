@@ -6,6 +6,7 @@ import { DisplayMode } from './generic/types';
 import { MonacoCodeEditor } from '@/sdk/code-editor';
 import { useStableCodeContent } from '@/common/hooks/useStableValue';
 import { ThrottledHtmlRenderer } from '../components/ThrottledHtmlRenderer';
+import { getLanguageFromExtension, formatBytes } from '../utils/codeUtils';
 
 // Constants
 const MAX_HEIGHT_CALC = 'calc(100vh - 215px)';
@@ -46,35 +47,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
   const isStreaming = panelContent.isStreaming || false;
 
   // Get language for code highlighting
-  const getLanguage = (): string => {
-    const langMap: Record<string, string> = {
-      js: 'javascript',
-      jsx: 'javascript',
-      ts: 'typescript',
-      tsx: 'typescript',
-      py: 'python',
-      html: 'html',
-      css: 'css',
-      json: 'json',
-      yaml: 'yaml',
-      yml: 'yaml',
-      md: 'markdown',
-      xml: 'xml',
-      sh: 'bash',
-      bash: 'bash',
-    };
-
-    return langMap[fileExtension] || 'text';
-  };
-
-  // Format file size
-  function formatBytes(bytes: number): string {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  }
+  const language = getLanguageFromExtension(fileExtension);
 
   return (
     <div className="space-y-4">
@@ -99,7 +72,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
             <div className="p-0">
               <MonacoCodeEditor
                 code={stableContent}
-                language={getLanguage()}
+                language={language}
                 fileName={fileName}
                 filePath={filePath}
                 fileSize={approximateSize}

@@ -12,7 +12,7 @@ import {
   SqliteAgentStorageImplementation,
   TARKO_CONSTANTS,
 } from '@tarko/interface';
-import { StorageProvider, SessionItemInfo, LegacySessionItemInfo } from './types';
+import { StorageProvider, SessionInfo, LegacySessionItemInfo } from './types';
 
 // Define row types for better type safety
 interface SessionRow {
@@ -257,7 +257,7 @@ export class SQLiteStorageProvider implements StorageProvider {
 
       for (const row of legacyRows) {
         // Convert legacy data to JSON metadata format
-        const metadata: SessionItemInfo['metadata'] = { version: 1 };
+        const metadata: SessionInfo['metadata'] = { version: 1 };
 
         if (row.name) metadata.name = row.name;
         if (row.tags) {
@@ -329,7 +329,7 @@ export class SQLiteStorageProvider implements StorageProvider {
         `);
 
         for (const row of legacyRows) {
-          const metadata: SessionItemInfo['metadata'] = { version: 1 };
+          const metadata: SessionInfo['metadata'] = { version: 1 };
           if (row.name) metadata.name = row.name;
           if (row.tags) {
             try {
@@ -375,7 +375,7 @@ export class SQLiteStorageProvider implements StorageProvider {
     }
   }
 
-  async createSession(metadata: SessionItemInfo): Promise<SessionItemInfo> {
+  async createSession(metadata: SessionInfo): Promise<SessionInfo> {
     await this.ensureInitialized();
 
     const sessionData = {
@@ -440,21 +440,21 @@ export class SQLiteStorageProvider implements StorageProvider {
     }
   }
 
-  async updateSessionItemInfo(
+  async updateSessionInfo(
     sessionId: string,
-    sessionItemInfo: Partial<Omit<SessionItemInfo, 'id'>>,
-  ): Promise<SessionItemInfo> {
+    sessionInfo: Partial<Omit<SessionInfo, 'id'>>,
+  ): Promise<SessionInfo> {
     await this.ensureInitialized();
 
     // First, get the current session data
-    const session = await this.getSessionItemInfo(sessionId);
+    const session = await this.getSessionInfo(sessionId);
     if (!session) {
       throw new Error(`Session not found: ${sessionId}`);
     }
 
     const updatedSession = {
       ...session,
-      ...sessionItemInfo,
+      ...sessionInfo,
       updatedAt: Date.now(),
     };
 
@@ -462,14 +462,14 @@ export class SQLiteStorageProvider implements StorageProvider {
       const params: Array<string | number | null> = [];
       const setClauses: string[] = [];
 
-      if (sessionItemInfo.workspace !== undefined) {
+      if (sessionInfo.workspace !== undefined) {
         setClauses.push('workspace = ?');
-        params.push(sessionItemInfo.workspace);
+        params.push(sessionInfo.workspace);
       }
 
-      if (sessionItemInfo.metadata !== undefined) {
+      if (sessionInfo.metadata !== undefined) {
         setClauses.push('metadata = ?');
-        params.push(sessionItemInfo.metadata ? JSON.stringify(sessionItemInfo.metadata) : null);
+        params.push(sessionInfo.metadata ? JSON.stringify(sessionInfo.metadata) : null);
       }
 
       // Always update the timestamp
@@ -502,7 +502,7 @@ export class SQLiteStorageProvider implements StorageProvider {
     }
   }
 
-  async getSessionItemInfo(sessionId: string): Promise<SessionItemInfo | null> {
+  async getSessionInfo(sessionId: string): Promise<SessionInfo | null> {
     await this.ensureInitialized();
 
     try {
@@ -547,7 +547,7 @@ export class SQLiteStorageProvider implements StorageProvider {
     }
   }
 
-  async getAllSessions(): Promise<SessionItemInfo[]> {
+  async getAllSessions(): Promise<SessionInfo[]> {
     await this.ensureInitialized();
 
     try {

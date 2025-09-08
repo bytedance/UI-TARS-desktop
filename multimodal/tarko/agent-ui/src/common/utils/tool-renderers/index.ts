@@ -3,6 +3,7 @@ import {
   strReplaceEditorRendererCondition,
   generalRendererCondition,
   imageRendererCondition,
+  readMultipleFilesRendererCondition,
 } from './renderer-conditions';
 
 const TOOL_TO_RENDERER_CONFIG: ToolToRendererCondition[] = [
@@ -22,6 +23,9 @@ const TOOL_TO_RENDERER_CONFIG: ToolToRendererCondition[] = [
 
   // str_replace_editor
   strReplaceEditorRendererCondition,
+
+  // read_multiple_files detection
+  readMultipleFilesRendererCondition,
 
   // Dynamic conditions based on content
   generalRendererCondition,

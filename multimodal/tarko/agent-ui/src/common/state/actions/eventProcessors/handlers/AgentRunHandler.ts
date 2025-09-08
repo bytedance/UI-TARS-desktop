@@ -2,7 +2,7 @@ import { sessionAgentStatusAtom, sessionMetadataAtom } from '@/common/state/atom
 import { AgentEventStream } from '@/common/types';
 import { EventHandler, EventHandlerContext } from '../types';
 import { apiService } from '@/common/services/apiService';
-import { SessionItemInfo } from '@tarko/interface';
+import { SessionInfo } from '@tarko/interface';
 import { createModelConfigFromEvent, createAgentInfoFromEvent } from '@/common/utils/metadataUtils';
 import { shouldUpdateProcessingState } from '../utils/panelContentUpdater';
 
@@ -19,7 +19,7 @@ export class AgentRunStartHandler implements EventHandler<AgentEventStream.Agent
     const { set } = context;
 
     // Update session metadata with model and agent info from event
-    const metadataUpdates: Partial<NonNullable<SessionItemInfo['metadata']>> = {};
+    const metadataUpdates: Partial<NonNullable<SessionInfo['metadata']>> = {};
     const modelConfig = createModelConfigFromEvent(event);
     if (modelConfig) {
       metadataUpdates.modelConfig = modelConfig;
@@ -38,7 +38,7 @@ export class AgentRunStartHandler implements EventHandler<AgentEventStream.Agent
 
       // Persist to server
       try {
-        await apiService.updateSessionItemInfo(sessionId, {
+        await apiService.updateSessionInfo(sessionId, {
           metadata: metadataUpdates,
         });
       } catch (error) {

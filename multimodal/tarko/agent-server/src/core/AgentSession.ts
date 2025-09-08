@@ -69,23 +69,23 @@ export class AgentSession {
   eventBridge: EventStreamBridge;
   private unsubscribe: (() => void) | null = null;
   private agioProvider?: AgioEvent.AgioProvider;
-  private sessionItemInfo?: import('../storage').SessionItemInfo;
+  private sessionInfo?: import('../storage').SessionInfo;
 
   constructor(
     private server: AgentServer,
     sessionId: string,
     agioProviderImpl?: AgioProviderConstructor,
-    sessionItemInfo?: import('../storage').SessionItemInfo,
+    sessionInfo?: import('../storage').SessionInfo,
   ) {
     this.id = sessionId;
     this.eventBridge = new EventStreamBridge();
-    this.sessionItemInfo = sessionItemInfo;
+    this.sessionInfo = sessionInfo;
 
     // Get agent options from server
     const agentOptions = { ...server.appConfig };
 
     // Create agent instance using the server's session-aware factory method
-    const agent = server.createAgentWithSessionModel(sessionItemInfo);
+    const agent = server.createAgentWithSessionModel(sessionInfo);
 
     // Initialize agent snapshot if enabled
     if (agentOptions.snapshot?.enable) {
@@ -233,10 +233,10 @@ export class AgentSession {
       // Run agent to process the query
 
       // Add model configuration if available in session metadata
-      if (this.sessionItemInfo?.metadata?.modelConfig) {
-        runOptions.provider = this.sessionItemInfo.metadata.modelConfig
+      if (this.sessionInfo?.metadata?.modelConfig) {
+        runOptions.provider = this.sessionInfo.metadata.modelConfig
           .provider as ModelProviderName;
-        runOptions.model = this.sessionItemInfo.metadata.modelConfig.modelId;
+        runOptions.model = this.sessionInfo.metadata.modelConfig.modelId;
         console.log(
           `🎯 [AgentSession] Using session model: ${runOptions.provider}:${runOptions.model}`,
         );
@@ -324,10 +324,10 @@ export class AgentSession {
       };
 
       // Add model configuration if available in session metadata
-      if (this.sessionItemInfo?.metadata?.modelConfig) {
-        runOptions.provider = this.sessionItemInfo.metadata.modelConfig
+      if (this.sessionInfo?.metadata?.modelConfig) {
+        runOptions.provider = this.sessionInfo.metadata.modelConfig
           .provider as ModelProviderName;
-        runOptions.model = this.sessionItemInfo.metadata.modelConfig.modelId;
+        runOptions.model = this.sessionInfo.metadata.modelConfig.modelId;
         console.log(
           `🎯 [AgentSession] Using session model for streaming: ${runOptions.provider}:${runOptions.model}`,
         );
@@ -421,20 +421,20 @@ export class AgentSession {
   /**
    * Store the updated model configuration for this session
    * The model will be used in subsequent queries via Agent.run() parameters
-   * @param sessionItemInfo Updated session metadata with new model config
+   * @param sessionInfo Updated session metadata with new model config
    */
-  async updateModelConfig(sessionItemInfo: import('../storage').SessionItemInfo): Promise<void> {
+  async updateModelConfig(sessionInfo: import('../storage').SessionInfo): Promise<void> {
     console.log(
-      `🔄 [AgentSession] Storing model config for session ${this.id}: ${sessionItemInfo.metadata?.modelConfig?.provider}:${sessionItemInfo.metadata?.modelConfig?.modelId}`,
+      `🔄 [AgentSession] Storing model config for session ${this.id}: ${sessionInfo.metadata?.modelConfig?.provider}:${sessionInfo.metadata?.modelConfig?.modelId}`,
     );
 
     // Store the session metadata for use in future queries
-    this.sessionItemInfo = sessionItemInfo;
+    this.sessionInfo = sessionInfo;
 
     // Emit model updated event to client
     this.eventBridge.emit('model_updated', {
       sessionId: this.id,
-      modelConfig: sessionItemInfo.metadata?.modelConfig,
+      modelConfig: sessionInfo.metadata?.modelConfig,
     });
 
     console.log(`✅ [AgentSession] Model config stored for session ${this.id}`);

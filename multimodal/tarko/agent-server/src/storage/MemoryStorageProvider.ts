@@ -4,7 +4,7 @@
  */
 
 import { AgentEventStream } from '@tarko/interface';
-import { StorageProvider, SessionItemInfo } from './types';
+import { StorageProvider, SessionInfo } from './types';
 
 /**
  * In-memory storage provider
@@ -13,14 +13,14 @@ import { StorageProvider, SessionItemInfo } from './types';
  * Note: Data will be lost when the server restarts
  */
 export class MemoryStorageProvider implements StorageProvider {
-  private sessions: Map<string, SessionItemInfo> = new Map();
+  private sessions: Map<string, SessionInfo> = new Map();
   private events: Map<string, AgentEventStream.Event[]> = new Map();
 
   async initialize(): Promise<void> {
     // No initialization needed for memory storage
   }
 
-  async createSession(metadata: SessionItemInfo): Promise<SessionItemInfo> {
+  async createSession(metadata: SessionInfo): Promise<SessionInfo> {
     this.sessions.set(metadata.id, {
       ...metadata,
       createdAt: metadata.createdAt || Date.now(),
@@ -30,10 +30,10 @@ export class MemoryStorageProvider implements StorageProvider {
     return this.sessions.get(metadata.id)!;
   }
 
-  async updateSessionItemInfo(
+  async updateSessionInfo(
     sessionId: string,
-    metadata: Partial<Omit<SessionItemInfo, 'id'>>,
-  ): Promise<SessionItemInfo> {
+    metadata: Partial<Omit<SessionInfo, 'id'>>,
+  ): Promise<SessionInfo> {
     const session = this.sessions.get(sessionId);
     if (!session) {
       throw new Error(`Session not found: ${sessionId}`);
@@ -49,11 +49,11 @@ export class MemoryStorageProvider implements StorageProvider {
     return updatedSession;
   }
 
-  async getSessionItemInfo(sessionId: string): Promise<SessionItemInfo | null> {
+  async getSessionInfo(sessionId: string): Promise<SessionInfo | null> {
     return this.sessions.get(sessionId) || null;
   }
 
-  async getAllSessions(): Promise<SessionItemInfo[]> {
+  async getAllSessions(): Promise<SessionInfo[]> {
     return Array.from(this.sessions.values());
   }
 
@@ -73,7 +73,7 @@ export class MemoryStorageProvider implements StorageProvider {
     this.events.set(sessionId, sessionEvents);
 
     // Update the session's updatedAt timestamp
-    await this.updateSessionItemInfo(sessionId, { updatedAt: Date.now() });
+    await this.updateSessionInfo(sessionId, { updatedAt: Date.now() });
   }
 
   async getSessionEvents(sessionId: string): Promise<AgentEventStream.Event[]> {

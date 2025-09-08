@@ -6,7 +6,7 @@
 import {
   AgentEventStream,
   AgentServerVersionInfo,
-  SessionItemInfo,
+  SessionInfo,
   AgentWebUIImplementation,
 } from '@tarko/interface';
 
@@ -18,7 +18,7 @@ export interface AgentUIBuilderInputOptions {
   events: AgentEventStream.Event[];
 
   /** Session information */
-  sessionInfo: SessionItemInfo;
+  sessionInfo: SessionInfo;
 
   /** Path to static web UI files (optional, will use built-in static files if not provided) */
   staticPath?: string;
@@ -49,7 +49,7 @@ export interface FileSystemOutputOptions {
 /**
  * Custom post-processor function type
  */
-export type PostProcessor = (html: string, metadata: SessionItemInfo) => Promise<string | void>;
+export type PostProcessor = (html: string, metadata: SessionInfo) => Promise<string | void>;
 
 /**
  * Output options for the generated HTML

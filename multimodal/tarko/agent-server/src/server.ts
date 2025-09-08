@@ -223,17 +223,17 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   /**
    * Create Agent with session-specific model configuration
    */
-  createAgentWithSessionModel(sessionItemInfo?: import('./storage').SessionItemInfo): IAgent {
+  createAgentWithSessionModel(sessionInfo?: import('./storage').SessionInfo): IAgent {
     let modelConfig = this.getDefaultModelConfig();
 
     // If session has specific model config and it's still valid, use session config
-    if (sessionItemInfo?.metadata?.modelConfig) {
-      const { provider, modelId } = sessionItemInfo.metadata.modelConfig;
+    if (sessionInfo?.metadata?.modelConfig) {
+      const { provider, modelId } = sessionInfo.metadata.modelConfig;
       if (this.isModelConfigValid(provider, modelId)) {
         modelConfig = { provider, modelId };
       } else {
         console.warn(
-          `Session ${sessionItemInfo.id} model config is invalid, falling back to default`,
+          `Session ${sessionInfo.id} model config is invalid, falling back to default`,
         );
       }
     }

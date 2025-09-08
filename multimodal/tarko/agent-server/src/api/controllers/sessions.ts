@@ -5,7 +5,7 @@
 
 import { Request, Response } from 'express';
 import { nanoid } from 'nanoid';
-import { SessionItemInfo } from '../../storage';
+import { SessionInfo } from '../../storage';
 import { AgentSession } from '../../core';
 import { ShareService } from '../../services';
 import * as path from 'path';
@@ -47,10 +47,10 @@ export async function createSession(req: Request, res: Response) {
     const sessionId = nanoid();
 
     // Get session metadata if it exists (for restored sessions)
-    let sessionItemInfo = null;
+    let sessionInfo = null;
     if (server.storageProvider) {
       try {
-        sessionItemInfo = await server.storageProvider.getSessionItemInfo(sessionId);
+        sessionInfo = await server.storageProvider.getSessionInfo(sessionId);
       } catch (error) {
         // Session doesn't exist yet, will be created below
       }
@@ -61,7 +61,7 @@ export async function createSession(req: Request, res: Response) {
       server,
       sessionId,
       server.getCustomAgioProvider(),
-      sessionItemInfo || undefined,
+      sessionInfo || undefined,
     );
 
     server.sessions[sessionId] = session;
@@ -73,11 +73,11 @@ export async function createSession(req: Request, res: Response) {
       server.storageUnsubscribes[sessionId] = storageUnsubscribe;
     }
 
-    let savedSessionItemInfo: SessionItemInfo | undefined;
+    let savedSessionInfo: SessionInfo | undefined;
     // Store session metadata if we have storage
     if (server.storageProvider) {
       const now = Date.now();
-      const sessionItemInfo: SessionItemInfo = {
+      const sessionInfo: SessionInfo = {
         id: sessionId,
         createdAt: now,
         updatedAt: now,
@@ -90,10 +90,10 @@ export async function createSession(req: Request, res: Response) {
         },
       };
 
-      savedSessionItemInfo = await server.storageProvider.createSession(sessionItemInfo);
+      savedSessionInfo = await server.storageProvider.createSession(sessionInfo);
     }
 
-    res.status(201).json({ sessionId, session: savedSessionItemInfo });
+    res.status(201).json({ sessionId, session: savedSessionInfo });
   } catch (error) {
     console.error('Failed to create session:', error);
     res.status(500).json({ error: 'Failed to create session' });
@@ -115,7 +115,7 @@ export async function getSessionDetails(req: Request, res: Response) {
 
     // Check storage first
     if (server.storageProvider) {
-      const metadata = await server.storageProvider.getSessionItemInfo(sessionId);
+      const metadata = await server.storageProvider.getSessionInfo(sessionId);
       if (metadata) {
         return res.status(200).json({
           session: metadata,
@@ -189,7 +189,7 @@ export async function getSessionStatus(req: Request, res: Response) {
 export async function updateSession(req: Request, res: Response) {
   const { sessionId, metadata: metadataUpdates } = req.body as {
     sessionId: string;
-    metadata: Partial<SessionItemInfo['metadata']>;
+    metadata: Partial<SessionInfo['metadata']>;
   };
 
   if (!sessionId) {
@@ -203,14 +203,14 @@ export async function updateSession(req: Request, res: Response) {
       return res.status(404).json({ error: 'Storage not configured, cannot update session' });
     }
 
-    const sessionItemInfo = await server.storageProvider.getSessionItemInfo(sessionId);
-    if (!sessionItemInfo) {
+    const sessionInfo = await server.storageProvider.getSessionInfo(sessionId);
+    if (!sessionInfo) {
       return res.status(404).json({ error: 'Session not found' });
     }
 
-    const updatedMetadata = await server.storageProvider.updateSessionItemInfo(sessionId, {
+    const updatedMetadata = await server.storageProvider.updateSessionInfo(sessionId, {
       metadata: {
-        ...sessionItemInfo.metadata,
+        ...sessionInfo.metadata,
         ...metadataUpdates,
       },
     });
@@ -375,7 +375,7 @@ export async function getLatestSessionEvents(req: Request, res: Response) {
 
     res.status(200).json({
       sessionId: latestSession.id,
-      sessionItemInfo: latestSession,
+      sessionInfo: latestSession,
       events,
     });
   } catch (error) {
@@ -401,7 +401,7 @@ export async function getSessionWorkspaceFiles(req: Request, res: Response) {
 
     // Check if session exists (active or stored)
     if (!session && server.storageProvider) {
-      const metadata = await server.storageProvider.getSessionItemInfo(sessionId);
+      const metadata = await server.storageProvider.getSessionInfo(sessionId);
       if (!metadata) {
         return res.status(404).json({ error: 'Session not found' });
       }

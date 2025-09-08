@@ -2,12 +2,12 @@ import React, { useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { FiMessageSquare, FiEdit2, FiTrash2, FiTag, FiClock, FiLoader } from 'react-icons/fi';
 import { formatTimestamp } from '@/common/utils/formatters';
-import { SessionItemInfo } from '@/common/types';
+import { SessionInfo } from '@/common/types';
 import classNames from 'classnames';
 import { HighlightText } from './HighlightText';
 
 interface SessionItemProps {
-  session: SessionItemInfo;
+  session: SessionInfo;
   isActive: boolean;
   isLoading: boolean;
   isConnected: boolean;
