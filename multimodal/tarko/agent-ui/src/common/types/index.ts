@@ -4,10 +4,10 @@ import {
   ChatCompletionContentPart,
   ChatCompletionMessageToolCall,
 } from '@tarko/agent-interface';
-import { SanitizedAgentOptions, WorkspaceInfo, SessionItemInfo } from '@tarko/interface';
+import { SanitizedAgentOptions, WorkspaceInfo, SessionInfo } from '@tarko/interface';
 
 export { AgentEventStream };
-export type { SanitizedAgentOptions, WorkspaceInfo, SessionItemInfo };
+export type { SanitizedAgentOptions, WorkspaceInfo, SessionInfo };
 
 export type { ChatCompletionContentPart, ChatCompletionMessageToolCall };
 

@@ -1,7 +1,7 @@
 import { API_BASE_URL, API_ENDPOINTS } from '@/common/constants';
 import {
   AgentEventStream,
-  SessionItemInfo,
+  SessionInfo,
   SanitizedAgentOptions,
   WorkspaceInfo,
 } from '@/common/types';
@@ -74,7 +74,7 @@ class ApiService {
   /**
    * Create a new session
    */
-  async createSession(): Promise<SessionItemInfo> {
+  async createSession(): Promise<SessionInfo> {
     try {
       const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.CREATE_SESSION}`, {
         method: 'POST',
@@ -86,7 +86,7 @@ class ApiService {
       }
 
       const { sessionId, session } = await response.json();
-      return session as SessionItemInfo;
+      return session as SessionInfo;
     } catch (error) {
       console.error('Error creating session:', error);
       throw error;
@@ -96,7 +96,7 @@ class ApiService {
   /**
    * Get all sessions
    */
-  async getSessions(): Promise<SessionItemInfo[]> {
+  async getSessions(): Promise<SessionInfo[]> {
     try {
       const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SESSIONS}`, {
         method: 'GET',
@@ -118,7 +118,7 @@ class ApiService {
   /**
    * Get details for a specific session
    */
-  async getSessionDetails(sessionId: string): Promise<SessionItemInfo> {
+  async getSessionDetails(sessionId: string): Promise<SessionInfo> {
     try {
       const response = await fetch(
         `${API_BASE_URL}${API_ENDPOINTS.SESSION_DETAILS}?sessionId=${sessionId}`,
@@ -197,10 +197,10 @@ class ApiService {
   /**
    * Update session metadata
    */
-  async updateSessionItemInfo(
+  async updateSessionInfo(
     sessionId: string,
-    updates: Partial<SessionItemInfo>,
-  ): Promise<SessionItemInfo> {
+    updates: Partial<SessionInfo>,
+  ): Promise<SessionInfo> {
     try {
       const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.UPDATE_SESSION}`, {
         method: 'POST',

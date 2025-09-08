@@ -5,7 +5,7 @@
 
 import crypto from 'crypto';
 import { AgentEventStream, isAgentWebUIImplementationType } from '@tarko/interface';
-import { SessionItemInfo, StorageProvider } from '../storage';
+import { SessionInfo, StorageProvider } from '../storage';
 import { ShareUtils } from '../utils/share';
 import { SlugGenerator } from '../utils/slug-generator';
 import fs from 'fs';
@@ -58,7 +58,7 @@ export class ShareService {
       }
 
       // Get session metadata
-      const metadata = await this.storageProvider.getSessionItemInfo(sessionId);
+      const metadata = await this.storageProvider.getSessionInfo(sessionId);
       if (!metadata) {
         throw new Error('Session not found');
       }
@@ -346,7 +346,7 @@ export class ShareService {
 
   private generateShareHtml(
     events: AgentEventStream.Event[],
-    metadata: SessionItemInfo,
+    metadata: SessionInfo,
     versionInfo?: AgentServerVersionInfo,
   ): string {
     if (isAgentWebUIImplementationType(this.appConfig.webui!, 'static')) {
@@ -376,7 +376,7 @@ export class ShareService {
   private async uploadShareHtml(
     html: string,
     sessionId: string,
-    sessionItemInfo: SessionItemInfo,
+    sessionInfo: SessionInfo,
     agent?: IAgent,
   ): Promise<string> {
     if (!this.appConfig.share?.provider) {

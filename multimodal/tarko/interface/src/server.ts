@@ -161,9 +161,9 @@ export interface SessionItemMetadata {
 }
 
 /**
- * Session item interface
+ * Session interface
  */
-export interface SessionItemInfo {
+export interface SessionInfo {
   id: string;
   createdAt: number;
   updatedAt: number;
@@ -173,7 +173,7 @@ export interface SessionItemInfo {
 
 /**
  * Legacy interface for backward compatibility during transition
- * @deprecated Use SessionItemInfo.metadata instead
+ * @deprecated Use SessionInfo.metadata instead
  */
 export interface LegacySessionItemInfo {
   id: string;

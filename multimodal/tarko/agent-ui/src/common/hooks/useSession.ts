@@ -62,7 +62,7 @@ export function useSession() {
   const loadSessions = useSetAtom(loadSessionsAction);
   const createSession = useSetAtom(createSessionAction);
   const setActiveSession = useSetAtom(setActiveSessionAction);
-  const updateSessionItemInfo = useSetAtom(updateSessionAction);
+  const updateSessionInfo = useSetAtom(updateSessionAction);
   const deleteSession = useSetAtom(deleteSessionAction);
   const sendMessage = useSetAtom(sendMessageAction);
   const abortQuery = useSetAtom(abortQueryAction);
@@ -158,7 +158,7 @@ export function useSession() {
       loadSessions,
       createSession,
       setActiveSession,
-      updateSessionItemInfo,
+      updateSessionInfo,
       deleteSession,
 
       // Message operations
@@ -193,7 +193,7 @@ export function useSession() {
       loadSessions,
       createSession,
       setActiveSession,
-      updateSessionItemInfo,
+      updateSessionInfo,
       deleteSession,
       sendMessage,
       abortQuery,

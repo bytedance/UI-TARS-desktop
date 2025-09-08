@@ -7,7 +7,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { AgentEventStream, AgentServerVersionInfo } from '@tarko/interface';
-import { SessionItemInfo } from '../storage';
+import { SessionInfo } from '../storage';
 
 /**
  * ShareUtils - Utility functions for sharing session data
@@ -29,7 +29,7 @@ export class ShareUtils {
    */
   static generateShareHtml(
     events: AgentEventStream.Event[],
-    metadata: SessionItemInfo,
+    metadata: SessionInfo,
     staticPath: string,
     serverInfo?: AgentServerVersionInfo,
     webUIConfig?: Record<string, any>,
@@ -130,7 +130,7 @@ export class ShareUtils {
       /**
        * Session metadata containing additional session information
        */
-      sessionItemInfo?: SessionItemInfo;
+      sessionInfo?: SessionInfo;
 
       /**
        * Normalized slug for semantic URLs, derived from user query
@@ -182,15 +182,15 @@ export class ShareUtils {
         }
 
         // Add session metadata fields
-        if (options.sessionItemInfo) {
-          const sessionName = options.sessionItemInfo.metadata?.name || '';
+        if (options.sessionInfo) {
+          const sessionName = options.sessionInfo.metadata?.name || '';
           formData.append('name', sessionName);
           // Add tags if available
           if (
-            options.sessionItemInfo.metadata?.tags &&
-            options.sessionItemInfo.metadata.tags.length > 0
+            options.sessionInfo.metadata?.tags &&
+            options.sessionInfo.metadata.tags.length > 0
           ) {
-            const tagsJson = JSON.stringify(options.sessionItemInfo.metadata.tags);
+            const tagsJson = JSON.stringify(options.sessionInfo.metadata.tags);
             formData.append('tags', tagsJson);
           }
         }

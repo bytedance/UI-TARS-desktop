@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SessionItemInfo } from '@tarko/interface';
+import { SessionInfo } from '@tarko/interface';
 
 /**
  * Get the display name for a model configuration.
@@ -13,7 +13,7 @@ import { SessionItemInfo } from '@tarko/interface';
  * @returns The display name or model ID
  */
 export function getModelDisplayName(
-  modelConfig?: SessionItemInfo['metadata']['modelConfig'],
+  modelConfig?: SessionInfo['metadata']['modelConfig'],
 ): string {
   if (!modelConfig?.modelId) {
     return '';
@@ -30,7 +30,7 @@ export function getModelDisplayName(
  * @returns The display name or model ID
  */
 export function getModelDisplayNameFromSession(
-  sessionMetadata?: SessionItemInfo['metadata'],
+  sessionMetadata?: SessionInfo['metadata'],
 ): string {
   return getModelDisplayName(sessionMetadata?.modelConfig);
 }
