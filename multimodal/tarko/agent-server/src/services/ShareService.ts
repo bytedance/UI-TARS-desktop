@@ -421,7 +421,7 @@ export class ShareService {
     }
 
     return ShareUtils.uploadShareHtml(html, sessionId, this.appConfig.share?.provider as string, {
-      sessionItemInfo,
+      sessionInfo,
       slug: normalizedSlug,
       query: originalQuery,
     });
