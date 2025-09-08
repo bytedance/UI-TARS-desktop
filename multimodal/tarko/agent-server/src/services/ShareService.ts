@@ -6,8 +6,8 @@
 import crypto from 'crypto';
 import { AgentEventStream, isAgentWebUIImplementationType } from '@tarko/interface';
 import { SessionInfo, StorageProvider } from '../storage';
-import { ShareUtils } from '../utils/share';
-import { AgentUIBuilder } from '@tarko/agent-ui-builder';
+
+import { AgentUIBuilder, createShareProviderProcessor } from '@tarko/agent-ui-builder';
 import { SlugGenerator } from '../utils/slug-generator';
 import fs from 'fs';
 import path from 'path';
@@ -420,11 +420,24 @@ export class ShareService {
       normalizedSlug = sessionId;
     }
 
-    return ShareUtils.uploadShareHtml(html, sessionId, this.appConfig.share?.provider as string, {
-      sessionInfo,
+    if (!this.appConfig.share?.provider) {
+      throw new Error('Share provider not configured');
+    }
+
+    // Use the share provider processor from agent-ui-builder
+    const processor = createShareProviderProcessor(this.appConfig.share.provider, sessionId, {
       slug: normalizedSlug,
       query: originalQuery,
     });
+
+    // Execute the processor with the HTML and metadata
+    const result = await processor(html, sessionInfo);
+
+    if (!result) {
+      throw new Error('Failed to upload to share provider');
+    }
+
+    return result;
   }
 
   /**

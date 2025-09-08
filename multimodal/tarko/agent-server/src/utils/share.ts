@@ -19,87 +19,9 @@ import { SessionInfo } from '../storage';
  * - Uploading individual files to share providers
  */
 export class ShareUtils {
-  /**
-   * Generate shareable HTML content for a session
-   * @param events Session events to include
-   * @param metadata Session metadata
-   * @param staticPath Path to static web UI files
-   * @param serverInfo Optional server version info
-   * @param webUIConfig Optional web UI configuration to inject
-   * @returns Generated HTML content
-   */
-  static generateShareHtml(
-    events: AgentEventStream.Event[],
-    metadata: SessionInfo,
-    staticPath: string,
-    serverInfo?: AgentServerVersionInfo,
-    webUIConfig?: Record<string, any>,
-  ): string {
-    return new AgentUIBuilder({
-      events,
-      sessionInfo: metadata,
-      staticPath,
-      serverInfo,
-      uiConfig: webUIConfig,
-    }).generateHTML();
-  }
 
-  /**
-   * Upload HTML to a share provider
-   * @param html HTML content to upload
-   * @param sessionId Session ID
-   * @param shareProviderUrl URL of the share provider
-   * @param options Additional share metadata options
-   * @returns URL of the shared content
-   */
-  static async uploadShareHtml(
-    html: string,
-    sessionId: string,
-    shareProviderUrl: string,
-    options?: {
-      /**
-       * Session metadata containing additional session information
-       */
-      sessionInfo?: SessionInfo;
 
-      /**
-       * Normalized slug for semantic URLs, derived from user query
-       */
-      slug?: string;
 
-      /**
-       * Original query that initiated the conversation
-       */
-      query?: string;
-    },
-  ): Promise<string> {
-    if (!shareProviderUrl) {
-      throw new Error('Share provider not configured');
-    }
-
-    // Use the share provider processor from agent-ui-builder
-    const processor = createShareProviderProcessor(shareProviderUrl, sessionId, {
-      slug: options?.slug,
-      query: options?.query,
-    });
-
-    // Execute the processor with the HTML and metadata
-    const result = await processor(
-      html,
-      options?.sessionInfo || {
-        id: sessionId,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-        workspace: '',
-      },
-    );
-
-    if (!result) {
-      throw new Error('Failed to upload to share provider');
-    }
-
-    return result;
-  }
 
   /**
    * Upload a file to share provider
