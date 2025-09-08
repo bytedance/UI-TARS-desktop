@@ -6,8 +6,7 @@
 import crypto from 'crypto';
 import { AgentEventStream, isAgentWebUIImplementationType } from '@tarko/interface';
 import { SessionInfo, StorageProvider } from '../storage';
-
-import { AgentUIBuilder, createShareProviderProcessor } from '@tarko/agent-ui-builder';
+import { AgentUIBuilder } from '@tarko/agent-ui-builder';
 import { SlugGenerator } from '../utils/slug-generator';
 import fs from 'fs';
 import path from 'path';
@@ -93,13 +92,14 @@ export class ShareService {
 
       // Merge web UI config with agent constructor config
       const mergedWebUIConfig = mergeWebUIConfig(this.appConfig.webui, this.server);
-      const shareHtml = new AgentUIBuilder({
+      const builder = new AgentUIBuilder({
         events: keyFrameEvents,
         sessionInfo: metadata,
         staticPath: this.appConfig.webui.staticPath,
         serverInfo,
         uiConfig: mergedWebUIConfig,
-      }).generateHTML();
+      });
+      const shareHtml = builder.generateHTML();
 
       // Upload if requested and provider is configured
       if (upload && this.appConfig.share?.provider) {
@@ -356,8 +356,6 @@ export class ShareService {
     return mimeTypes[ext] || 'application/octet-stream';
   }
 
-
-
   /**
    * Upload share HTML to provider
    */
@@ -413,7 +411,7 @@ export class ShareService {
     }
 
     // Use the share provider processor from agent-ui-builder
-    const processor = createShareProviderProcessor(this.appConfig.share.provider, sessionId, {
+    const processor = AgentUIBuilder.createShareProviderProcessor(this.appConfig.share.provider, sessionId, {
       slug: normalizedSlug,
       query: originalQuery,
     });

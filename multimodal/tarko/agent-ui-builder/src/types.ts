@@ -33,18 +33,7 @@ export interface AgentUIBuilderInputOptions {
 /**
  * Output destination types
  */
-export type OutputDestination = 'memory' | 'file' | 'custom';
-
-/**
- * File system output options
- */
-export interface FileSystemOutputOptions {
-  /** Output file path */
-  filePath: string;
-
-  /** Whether to overwrite existing files */
-  overwrite?: boolean;
-}
+export type OutputDestination = 'memory' | 'file';
 
 /**
  * Custom post-processor function type
@@ -56,13 +45,13 @@ export type PostProcessor = (html: string, metadata: SessionInfo) => Promise<str
  */
 export interface AgentUIBuilderOutputOptions {
   /** Output destination type */
-  destination: OutputDestination;
+  destType?: OutputDestination;
 
-  /** File system options (required when destination is 'file') */
-  fileSystem?: FileSystemOutputOptions;
+  /** File path (required when destType is 'file') */
+  filePath?: string;
 
-  /** Custom post-processor function (used when destination is 'custom') */
-  postProcessor?: PostProcessor;
+  /** Custom post-processor function (used when destination is undefined) */
+  post?: PostProcessor;
 }
 
 /**

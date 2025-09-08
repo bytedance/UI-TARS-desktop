@@ -31,7 +31,7 @@ export class AgentUIBuilder {
    * Generate shareable HTML content for a session
    * Based on ShareUtils.generateShareHtml but extracted for reuse
    */
-  generateHTML(): string {
+  public generateHTML(): string {
     const { events, sessionInfo, staticPath: customStaticPath, serverInfo, uiConfig } = this.input;
 
     // Use provided static path or fallback to built-in static files
@@ -89,14 +89,7 @@ export class AgentUIBuilder {
    * Build HTML with specified output options
    * This is the main API for generating agent UI replay HTML
    */
-  async build(output?: AgentUIBuilderOutputOptions): Promise<AgentUIBuilderResult> {
-    // Default to memory output if no output specified
-    const defaultOutput: AgentUIBuilderOutputOptions = {
-      destination: 'memory',
-    };
-
-    const finalOutput = output || defaultOutput;
-
+  public async build(output?: AgentUIBuilderOutputOptions): Promise<AgentUIBuilderResult> {
     // Generate HTML content
     const html = this.generateHTML();
     const timestamp = Date.now();
@@ -112,48 +105,48 @@ export class AgentUIBuilder {
       },
     };
 
-    // Handle different output destinations
-    switch (finalOutput.destination) {
+    // If no output options specified, return memory result
+    if (!output) {
+      return result;
+    }
+
+    // Handle post-processor first (when destType is undefined)
+    if (!output.destType && output.post) {
+      const customResult = await output.post(html, this.input.sessionInfo);
+      if (customResult !== undefined) {
+        result.customResult = customResult;
+      }
+      return result;
+    }
+
+    // Handle destination types
+    switch (output.destType) {
       case 'memory':
         // HTML is already in result, nothing more to do
         break;
 
       case 'file':
-        if (!finalOutput.fileSystem) {
-          throw new Error('File system options are required when destination is "file"');
-        }
-
-        const { filePath, overwrite = false } = finalOutput.fileSystem;
-
-        // Check if file exists and overwrite is false
-        if (!overwrite && fs.existsSync(filePath)) {
-          throw new Error(`File already exists: ${filePath}. Set overwrite to true to replace it.`);
+        if (!output.filePath) {
+          throw new Error('File path is required when destType is "file"');
         }
 
         // Ensure directory exists
-        const dir = path.dirname(filePath);
+        const dir = path.dirname(output.filePath);
         if (!fs.existsSync(dir)) {
           fs.mkdirSync(dir, { recursive: true });
         }
 
         // Write HTML to file
-        fs.writeFileSync(filePath, html, 'utf8');
-        result.filePath = filePath;
+        fs.writeFileSync(output.filePath, html, 'utf8');
+        result.filePath = output.filePath;
         break;
 
-      case 'custom':
-        if (!finalOutput.postProcessor) {
-          throw new Error('Post-processor function is required when destination is "custom"');
-        }
-
-        const customResult = await finalOutput.postProcessor(html, this.input.sessionInfo);
-        if (customResult !== undefined) {
-          result.customResult = customResult;
-        }
+      case undefined:
+        // Default to memory when destType is undefined and no post processor
         break;
 
       default:
-        throw new Error(`Unsupported output destination: ${(finalOutput as any).destination}`);
+        throw new Error(`Unsupported output destination: ${output.destType}`);
     }
 
     return result;
