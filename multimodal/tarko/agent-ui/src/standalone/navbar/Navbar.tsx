@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ShareButton } from '@/standalone/share';
 import { AboutModal } from './AboutModal';
 import { motion } from 'framer-motion';
-import { FiMoon, FiSun, FiInfo, FiCpu, FiFolder, FiZap, FiSettings, FiMonitor, FiCode } from 'react-icons/fi';
+import { FiMoon, FiSun, FiInfo, FiCpu, FiFolder, FiZap, FiSettings, FiMonitor, FiCode, FiMoreHorizontal } from 'react-icons/fi';
 import { GoSidebarCollapse, GoSidebarExpand } from 'react-icons/go';
 
 import { Box, Typography, createTheme, ThemeProvider } from '@mui/material';
@@ -23,7 +23,9 @@ export const Navbar: React.FC = () => {
   const { isReplayMode } = useReplayMode();
   const isDarkMode = useDarkMode();
   const [showAboutModal, setShowAboutModal] = React.useState(false);
+  const [showMobileDropdown, setShowMobileDropdown] = React.useState(false);
   const workspaceNavItems = getWorkspaceNavItems();
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Update HTML title with workspace and agent info
   useEffect(() => {
@@ -42,6 +44,20 @@ export const Navbar: React.FC = () => {
 
     updateTitle();
   }, [sessionMetadata?.agentInfo?.name]);
+
+  // Close mobile dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowMobileDropdown(false);
+      }
+    };
+
+    if (showMobileDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showMobileDropdown]);
 
   // Get configuration from global window object
   const logoUrl = getLogoUrl();
@@ -135,55 +151,136 @@ export const Navbar: React.FC = () => {
         </div>
 
         {/* Right section - workspace nav items, then About, Dark mode, Share */}
-        <div className="flex items-center space-x-1 md:space-x-2 ml-auto">
-          {/* Workspace navigation items */}
-          {!isReplayMode && workspaceNavItems.length > 0 && (
-            <div className="flex items-center gap-2 mr-2">
-              {workspaceNavItems.map((navItem) => {
-                const { icon: IconComponent, className } = getNavItemStyle(navItem.title);
-                return (
-                  <motion.button
-                    // eslint-disable-next-line @secretlint/secretlint-rule-pattern
-                    key={navItem.title}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => handleNavItemClick(navItem.link)}
-                    className={className}
-                    title={`Open ${navItem.title} in new tab`}
-                  >
-                    <IconComponent size={12} className="opacity-70" />
-                    {navItem.title}
-                  </motion.button>
-                );
-              })}
-            </div>
-          )}
-          {/* About button - moved to first position */}
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setShowAboutModal(true)}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100/40 dark:hover:bg-gray-800/40 transition-colors"
-            title={`About ${getAgentTitle()}`}
-          >
-            <FiInfo size={16} />
-          </motion.button>
+        <div className="flex items-center ml-auto relative">
+          {/* Desktop view - show all buttons */}
+          <div className="hidden md:flex items-center space-x-2">
+            {/* Workspace navigation items */}
+            {!isReplayMode && workspaceNavItems.length > 0 && (
+              <div className="flex items-center gap-2 mr-2">
+                {workspaceNavItems.map((navItem) => {
+                  const { icon: IconComponent, className } = getNavItemStyle(navItem.title);
+                  return (
+                    <motion.button
+                      // eslint-disable-next-line @secretlint/secretlint-rule-pattern
+                      key={navItem.title}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => handleNavItemClick(navItem.link)}
+                      className={className}
+                      title={`Open ${navItem.title} in new tab`}
+                    >
+                      <IconComponent size={12} className="opacity-70" />
+                      {navItem.title}
+                    </motion.button>
+                  );
+                })}
+              </div>
+            )}
+            {/* About button */}
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowAboutModal(true)}
+              className="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100/40 dark:hover:bg-gray-800/40 transition-colors"
+              title={`About ${getAgentTitle()}`}
+            >
+              <FiInfo size={16} />
+            </motion.button>
 
-          {/* Dark mode toggle - moved to second position */}
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={toggleDarkMode}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100/40 dark:hover:bg-gray-800/40 transition-colors"
-            title={isDarkMode ? 'Light Mode' : 'Dark Mode'}
-          >
-            {isDarkMode ? <FiSun size={16} /> : <FiMoon size={16} />}
-          </motion.button>
+            {/* Dark mode toggle */}
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={toggleDarkMode}
+              className="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100/40 dark:hover:bg-gray-800/40 transition-colors"
+              title={isDarkMode ? 'Light Mode' : 'Dark Mode'}
+            >
+              {isDarkMode ? <FiSun size={16} /> : <FiMoon size={16} />}
+            </motion.button>
 
-          {/* Share button - moved to last position */}
-          {activeSessionId && !isReplayMode && (
-            <ShareButton variant="navbar" disabled={isProcessing} />
-          )}
+            {/* Share button */}
+            {activeSessionId && !isReplayMode && (
+              <ShareButton variant="navbar" disabled={isProcessing} />
+            )}
+          </div>
+
+          {/* Mobile view - dropdown menu */}
+          <div className="md:hidden" ref={dropdownRef}>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowMobileDropdown(!showMobileDropdown)}
+              className="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100/40 dark:hover:bg-gray-800/40 transition-colors"
+              title="More options"
+            >
+              <FiMoreHorizontal size={16} />
+            </motion.button>
+
+            {/* Mobile dropdown menu */}
+            {showMobileDropdown && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50"
+              >
+                {/* Workspace navigation items in dropdown */}
+                {!isReplayMode && workspaceNavItems.length > 0 && (
+                  <>
+                    {workspaceNavItems.map((navItem) => {
+                      const { icon: IconComponent } = getNavItemStyle(navItem.title);
+                      return (
+                        <button
+                          // eslint-disable-next-line @secretlint/secretlint-rule-pattern
+                          key={navItem.title}
+                          onClick={() => {
+                            handleNavItemClick(navItem.link);
+                            setShowMobileDropdown(false);
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        >
+                          <IconComponent size={16} className="opacity-70" />
+                          {navItem.title}
+                        </button>
+                      );
+                    })}
+                    <div className="border-t border-gray-200 dark:border-gray-600 my-1" />
+                  </>
+                )}
+
+                {/* About option */}
+                <button
+                  onClick={() => {
+                    setShowAboutModal(true);
+                    setShowMobileDropdown(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <FiInfo size={16} className="opacity-70" />
+                  About {getAgentTitle()}
+                </button>
+
+                {/* Dark mode toggle option */}
+                <button
+                  onClick={() => {
+                    toggleDarkMode();
+                    setShowMobileDropdown(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  {isDarkMode ? <FiSun size={16} className="opacity-70" /> : <FiMoon size={16} className="opacity-70" />}
+                  {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+                </button>
+
+                {/* Share option */}
+                {activeSessionId && !isReplayMode && (
+                  <div className="px-4 py-2">
+                    <ShareButton variant="dropdown" disabled={isProcessing} />
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </div>
         </div>
       </div>
 
