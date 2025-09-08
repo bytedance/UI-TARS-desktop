@@ -7,7 +7,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { AgentUIBuilder, buildHTMLInMemory, buildHTMLToFile } from '../src';
+import { AgentUIBuilder } from '../src';
 import type { AgentEventStream, SessionItemInfo } from '@tarko/interface';
 
 describe('AgentUIBuilder', () => {
@@ -136,9 +136,9 @@ describe('AgentUIBuilder', () => {
     });
   });
 
-  describe('buildHTMLInMemory', () => {
+  describe('buildInMemory', () => {
     it('should build HTML in memory', async () => {
-      const result = await buildHTMLInMemory({
+      const result = await AgentUIBuilder.buildInMemory({
         events: mockEvents,
         sessionInfo: mockMetadata,
         staticPath: mockStaticPath,
@@ -152,11 +152,11 @@ describe('AgentUIBuilder', () => {
     });
   });
 
-  describe('buildHTMLToFile', () => {
+  describe('buildToFile', () => {
     it('should write HTML to file', async () => {
       const outputPath = path.join(tempDir, 'output.html');
 
-      const result = await buildHTMLToFile(
+      const result = await AgentUIBuilder.buildToFile(
         {
           events: mockEvents,
           sessionInfo: mockMetadata,
@@ -175,7 +175,7 @@ describe('AgentUIBuilder', () => {
     it('should create directory if it does not exist', async () => {
       const nestedPath = path.join(tempDir, 'nested', 'dir', 'output.html');
 
-      await buildHTMLToFile(
+      await AgentUIBuilder.buildToFile(
         {
           events: mockEvents,
           sessionInfo: mockMetadata,
@@ -192,7 +192,7 @@ describe('AgentUIBuilder', () => {
       fs.writeFileSync(outputPath, 'existing content');
 
       await expect(
-        buildHTMLToFile(
+        AgentUIBuilder.buildToFile(
           {
             events: mockEvents,
             sessionInfo: mockMetadata,

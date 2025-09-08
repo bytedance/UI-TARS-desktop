@@ -5,5 +5,14 @@
 
 export * from './types';
 export * from './builder';
-export * from './utils';
 export * from './static-path';
+
+// Import for convenience exports
+import { AgentUIBuilder } from './builder';
+
+// Convenience exports for backward compatibility
+export const buildHTMLInMemory = AgentUIBuilder.buildInMemory;
+export const buildHTMLToFile = AgentUIBuilder.buildToFile;
+export const buildHTMLWithProcessor = AgentUIBuilder.buildWithProcessor;
+export const generateDefaultFilePath = AgentUIBuilder.generateDefaultFilePath;
+export const createShareProviderProcessor = AgentUIBuilder.createShareProviderProcessor;

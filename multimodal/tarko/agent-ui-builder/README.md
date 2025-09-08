@@ -23,10 +23,10 @@ pnpm add @tarko/agent-ui-builder
 ### Basic Usage
 
 ```typescript
-import { AgentUIBuilder, buildHTMLInMemory, getStaticPath } from '@tarko/agent-ui-builder';
+import { AgentUIBuilder } from '@tarko/agent-ui-builder';
 
 // Build HTML in memory with automatic static path resolution
-const result = await buildHTMLInMemory({
+const result = await AgentUIBuilder.buildInMemory({
   events: sessionEvents,
   sessionInfo: sessionMetadata,
   // staticPath is now optional - will use built-in static files if not provided
@@ -35,7 +35,7 @@ const result = await buildHTMLInMemory({
 });
 
 // Or explicitly provide a custom static path
-const resultWithCustomPath = await buildHTMLInMemory({
+const resultWithCustomPath = await AgentUIBuilder.buildInMemory({
   events: sessionEvents,
   sessionInfo: sessionMetadata,
   staticPath: '/custom/path/to/static/files',
@@ -50,9 +50,9 @@ console.log('Size:', result.metadata.size, 'bytes');
 ### Write to File
 
 ```typescript
-import { buildHTMLToFile } from '@tarko/agent-ui-builder';
+import { AgentUIBuilder } from '@tarko/agent-ui-builder';
 
-const result = await buildHTMLToFile(
+const result = await AgentUIBuilder.buildToFile(
   {
     events: sessionEvents,
     sessionInfo: sessionMetadata,
@@ -68,16 +68,16 @@ console.log('File written to:', result.filePath);
 ### Custom Post-Processing
 
 ```typescript
-import { buildHTMLWithProcessor, createShareProviderProcessor } from '@tarko/agent-ui-builder';
+import { AgentUIBuilder } from '@tarko/agent-ui-builder';
 
 // Upload to share provider
-const shareProcessor = createShareProviderProcessor(
+const shareProcessor = AgentUIBuilder.createShareProviderProcessor(
   'https://share-provider.example.com/upload',
   sessionId,
   { slug: 'my-session', query: 'original query' }
 );
 
-const result = await buildHTMLWithProcessor(input, shareProcessor);
+const result = await AgentUIBuilder.buildWithProcessor(input, shareProcessor);
 console.log('Share URL:', result.customResult);
 ```
 
@@ -118,16 +118,25 @@ const result = await AgentUIBuilder.build({
 
 - `AgentUIBuilder`: Main builder class with static methods
 
-### Utility Functions
+### AgentUIBuilder Methods
 
-- `buildHTMLInMemory()`: Generate HTML in memory
-- `buildHTMLToFile()`: Generate HTML and write to file
-- `buildHTMLWithProcessor()`: Generate HTML with custom post-processing
-- `generateDefaultFilePath()`: Generate default output file path
-- `createShareProviderProcessor()`: Create share provider upload processor
+- `AgentUIBuilder.buildInMemory()`: Generate HTML in memory
+- `AgentUIBuilder.buildToFile()`: Generate HTML and write to file
+- `AgentUIBuilder.buildWithProcessor()`: Generate HTML with custom post-processing
+- `AgentUIBuilder.generateDefaultFilePath()`: Generate default output file path
+- `AgentUIBuilder.createShareProviderProcessor()`: Create share provider upload processor
 - `getStaticPath()`: Get static path with automatic fallback resolution
 - `getDefaultStaticPath()`: Get the default built-in static path
 - `isDefaultStaticPathValid()`: Check if default static path is valid
+
+### Backward Compatibility
+
+For convenience, the following functions are also exported as standalone functions:
+- `buildHTMLInMemory` → `AgentUIBuilder.buildInMemory`
+- `buildHTMLToFile` → `AgentUIBuilder.buildToFile`
+- `buildHTMLWithProcessor` → `AgentUIBuilder.buildWithProcessor`
+- `generateDefaultFilePath` → `AgentUIBuilder.generateDefaultFilePath`
+- `createShareProviderProcessor` → `AgentUIBuilder.createShareProviderProcessor`
 
 ## Python SDK Compatibility
 
