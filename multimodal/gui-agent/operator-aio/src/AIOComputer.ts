@@ -22,6 +22,7 @@ import type {
   KeyUpAction,
   HotkeyAction,
 } from './types';
+import { AioClient } from '@agent-infra/sandbox';
 
 const logger = new ConsoleLogger('AIOComputer');
 
@@ -29,10 +30,12 @@ export class AIOComputer {
   private baseURL: string;
   private timeout: number;
   private headers: Record<string, string>;
+  private aioClient: AioClient;
 
   constructor(options: AIOHybridOptions) {
     this.baseURL = options.baseURL.replace(/\/$/, ''); // Remove trailing slash
     this.timeout = options.timeout || 30000; // Default 30 seconds timeout
+    this.aioClient = new AioClient({ baseUrl: this.baseURL });
     this.headers = {
       'Content-Type': 'application/json',
       ...options.headers,
@@ -43,23 +46,14 @@ export class AIOComputer {
    * Execute HTTP request
    */
   private async request(action: AIOAction): Promise<ActionResponse> {
-    const url = `${this.baseURL}/v1/browser/actions`;
-
     try {
       logger.info('[AIOComputer] Executing action:', action.action_type, action);
 
-      const response = await fetch(url, {
-        method: 'POST',
+      const result = await this.aioClient.browserActions(action, {
+        timeout: this.timeout,
         headers: this.headers,
-        body: JSON.stringify(action),
-        signal: AbortSignal.timeout(this.timeout),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const result = await response.json();
       logger.info('[AIOComputer] Action result:', result);
 
       return {
@@ -80,8 +74,6 @@ export class AIOComputer {
    * @param delay Optional delay in milliseconds before taking screenshot
    */
   async screenshot(delay = 1000): Promise<ScreenshotResponse> {
-    const url = `${this.baseURL}/v1/browser/screenshot`;
-
     try {
       logger.info('[AIOComputer] Taking screenshot' + (delay ? ` with ${delay}ms delay` : ''));
 
@@ -89,15 +81,10 @@ export class AIOComputer {
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
 
-      const response = await fetch(url, {
-        method: 'GET',
+      const response = await this.aioClient.browserScreenshot({
+        timeout: this.timeout,
         headers: this.headers,
-        signal: AbortSignal.timeout(this.timeout),
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
 
       // Check if response is image data
       const contentType = response.headers.get('content-type');
