@@ -19,50 +19,7 @@ import { SessionItemInfo } from '../storage';
  * - Uploading individual files to share providers
  */
 export class ShareUtils {
-  /**
-   * Generate shareable HTML content for a session
-   * @param events Session events to include
-   * @param metadata Session metadata
-   * @param staticPath Path to static web UI files
-   * @param serverInfo Optional server version info
-   * @param webUIConfig Optional web UI configuration to inject
-   * @returns Generated HTML content
-   */
-  static generateShareHtml(
-    events: AgentEventStream.Event[],
-    metadata: SessionItemInfo,
-    staticPath: string,
-    serverInfo?: AgentServerVersionInfo,
-    webUIConfig?: Record<string, any>,
-  ): string {
-    return AgentUIBuilder.generateHTML({
-      events,
-      metadata,
-      staticPath,
-      serverInfo,
-      webUIConfig,
-    });
-  }
 
-  /**
-   * Safely stringify JSON data containing HTML content
-   * This ensures HTML in the data won't break the embedding script
-   * @param data The data to stringify
-   * @returns Safe JSON string
-   */
-  private static safeJsonStringify(data: object): string {
-    let jsonString = JSON.stringify(data);
-
-    // Escape all characters that may destroy the HTML structure
-    // 1. Escape all angle brackets to prevent any HTML tags from being parsed by the browser
-    jsonString = jsonString.replace(/</g, '\\u003C');
-    jsonString = jsonString.replace(/>/g, '\\u003E');
-
-    // 2. Escape other potentially dangerous characters
-    jsonString = jsonString.replace(/\//g, '\\/'); // Escape slashes to prevent closing tags such as </script>
-
-    return jsonString;
-  }
 
   /**
    * Upload HTML to a share provider
