@@ -68,7 +68,22 @@ describe('AgentUIBuilder', () => {
   });
 
   describe('generateHTML', () => {
-    it('should generate HTML with injected data', () => {
+    it('should generate HTML with injected data (instance method)', () => {
+      const builder = new AgentUIBuilder({
+        events: mockEvents,
+        sessionInfo: mockMetadata,
+        staticPath: mockStaticPath,
+      });
+      
+      const html = builder.generateHTML();
+
+      expect(html).toContain('window.AGENT_REPLAY_MODE = true');
+      expect(html).toContain('window.AGENT_SESSION_DATA');
+      expect(html).toContain('window.AGENT_EVENT_STREAM');
+      expect(html).toContain('<div id="root"></div>');
+    });
+
+    it('should generate HTML with injected data (static method)', () => {
       const html = AgentUIBuilder.generateHTML({
         events: mockEvents,
         sessionInfo: mockMetadata,
@@ -136,8 +151,40 @@ describe('AgentUIBuilder', () => {
     });
   });
 
-  describe('buildHTML', () => {
-    it('should build HTML in memory by default', async () => {
+  describe('build', () => {
+    it('should build HTML in memory by default (instance method)', async () => {
+      const builder = new AgentUIBuilder({
+        events: mockEvents,
+        sessionInfo: mockMetadata,
+        staticPath: mockStaticPath,
+      });
+      
+      const result = await builder.build();
+
+      expect(result.html).toContain('window.AGENT_REPLAY_MODE = true');
+      expect(result.metadata.eventCount).toBe(2);
+      expect(result.metadata.size).toBeGreaterThan(0);
+      expect(result.filePath).toBeUndefined();
+      expect(result.customResult).toBeUndefined();
+    });
+
+    it('should build HTML in memory with explicit output option', async () => {
+      const builder = new AgentUIBuilder({
+        events: mockEvents,
+        sessionInfo: mockMetadata,
+        staticPath: mockStaticPath,
+      });
+      
+      const result = await builder.build({ destination: 'memory' });
+
+      expect(result.html).toContain('window.AGENT_REPLAY_MODE = true');
+      expect(result.metadata.eventCount).toBe(2);
+      expect(result.metadata.size).toBeGreaterThan(0);
+      expect(result.filePath).toBeUndefined();
+      expect(result.customResult).toBeUndefined();
+    });
+
+    it('should build HTML in memory (static method)', async () => {
       const result = await AgentUIBuilder.buildHTML({
         events: mockEvents,
         sessionInfo: mockMetadata,
@@ -150,42 +197,23 @@ describe('AgentUIBuilder', () => {
       expect(result.filePath).toBeUndefined();
       expect(result.customResult).toBeUndefined();
     });
-
-    it('should build HTML in memory with explicit output option', async () => {
-      const result = await AgentUIBuilder.buildHTML(
-        {
-          events: mockEvents,
-          sessionInfo: mockMetadata,
-          staticPath: mockStaticPath,
-        },
-        { destination: 'memory' },
-      );
-
-      expect(result.html).toContain('window.AGENT_REPLAY_MODE = true');
-      expect(result.metadata.eventCount).toBe(2);
-      expect(result.metadata.size).toBeGreaterThan(0);
-      expect(result.filePath).toBeUndefined();
-      expect(result.customResult).toBeUndefined();
-    });
   });
 
-  describe('buildHTML with file output', () => {
-    it('should write HTML to file', async () => {
+  describe('build with file output', () => {
+    it('should write HTML to file (instance method)', async () => {
       const outputPath = path.join(tempDir, 'output.html');
+      const builder = new AgentUIBuilder({
+        events: mockEvents,
+        sessionInfo: mockMetadata,
+        staticPath: mockStaticPath,
+      });
 
-      const result = await AgentUIBuilder.buildHTML(
-        {
-          events: mockEvents,
-          sessionInfo: mockMetadata,
-          staticPath: mockStaticPath,
+      const result = await builder.build({
+        destination: 'file',
+        fileSystem: {
+          filePath: outputPath,
         },
-        {
-          destination: 'file',
-          fileSystem: {
-            filePath: outputPath,
-          },
-        },
-      );
+      });
 
       expect(result.filePath).toBe(outputPath);
       expect(fs.existsSync(outputPath)).toBe(true);
@@ -196,20 +224,18 @@ describe('AgentUIBuilder', () => {
 
     it('should create directory if it does not exist', async () => {
       const nestedPath = path.join(tempDir, 'nested', 'dir', 'output.html');
+      const builder = new AgentUIBuilder({
+        events: mockEvents,
+        sessionInfo: mockMetadata,
+        staticPath: mockStaticPath,
+      });
 
-      await AgentUIBuilder.buildHTML(
-        {
-          events: mockEvents,
-          sessionInfo: mockMetadata,
-          staticPath: mockStaticPath,
+      await builder.build({
+        destination: 'file',
+        fileSystem: {
+          filePath: nestedPath,
         },
-        {
-          destination: 'file',
-          fileSystem: {
-            filePath: nestedPath,
-          },
-        },
-      );
+      });
 
       expect(fs.existsSync(nestedPath)).toBe(true);
     });
@@ -217,22 +243,20 @@ describe('AgentUIBuilder', () => {
     it('should throw error if file exists and overwrite is false', async () => {
       const outputPath = path.join(tempDir, 'existing.html');
       fs.writeFileSync(outputPath, 'existing content');
+      const builder = new AgentUIBuilder({
+        events: mockEvents,
+        sessionInfo: mockMetadata,
+        staticPath: mockStaticPath,
+      });
 
       await expect(
-        AgentUIBuilder.buildHTML(
-          {
-            events: mockEvents,
-            sessionInfo: mockMetadata,
-            staticPath: mockStaticPath,
+        builder.build({
+          destination: 'file',
+          fileSystem: {
+            filePath: outputPath,
+            overwrite: false,
           },
-          {
-            destination: 'file',
-            fileSystem: {
-              filePath: outputPath,
-              overwrite: false,
-            },
-          },
-        ),
+        }),
       ).rejects.toThrow('File already exists');
     });
 
@@ -240,18 +264,16 @@ describe('AgentUIBuilder', () => {
       const mockProcessor = async (html: string) => {
         return `processed:${html.length}`;
       };
+      const builder = new AgentUIBuilder({
+        events: mockEvents,
+        sessionInfo: mockMetadata,
+        staticPath: mockStaticPath,
+      });
 
-      const result = await AgentUIBuilder.buildHTML(
-        {
-          events: mockEvents,
-          sessionInfo: mockMetadata,
-          staticPath: mockStaticPath,
-        },
-        {
-          destination: 'custom',
-          postProcessor: mockProcessor,
-        },
-      );
+      const result = await builder.build({
+        destination: 'custom',
+        postProcessor: mockProcessor,
+      });
 
       expect(result.customResult).toMatch(/^processed:\d+$/);
       expect(result.html).toContain('window.AGENT_REPLAY_MODE = true');

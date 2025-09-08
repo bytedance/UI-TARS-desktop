@@ -13,14 +13,14 @@ import type { AgentUIBuilderInputOptions, AgentUIBuilderResult, PostProcessor } 
 
 // Convenience exports for backward compatibility
 export const buildHTMLInMemory = (input: AgentUIBuilderInputOptions): Promise<AgentUIBuilderResult> =>
-  AgentUIBuilder.buildHTML(input, { destination: 'memory' });
+  new AgentUIBuilder(input).build({ destination: 'memory' });
 
 export const buildHTMLToFile = (
   input: AgentUIBuilderInputOptions,
   filePath: string,
   overwrite = false,
 ): Promise<AgentUIBuilderResult> =>
-  AgentUIBuilder.buildHTML(input, {
+  new AgentUIBuilder(input).build({
     destination: 'file',
     fileSystem: { filePath, overwrite },
   });
@@ -29,7 +29,7 @@ export const buildHTMLWithProcessor = (
   input: AgentUIBuilderInputOptions,
   postProcessor: PostProcessor,
 ): Promise<AgentUIBuilderResult> =>
-  AgentUIBuilder.buildHTML(input, {
+  new AgentUIBuilder(input).build({
     destination: 'custom',
     postProcessor,
   });

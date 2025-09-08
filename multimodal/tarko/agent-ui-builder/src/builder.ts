@@ -22,12 +22,17 @@ import type { SessionItemInfo } from '@tarko/interface';
  * with support for multiple output destinations and post-processing.
  */
 export class AgentUIBuilder {
+  private input: AgentUIBuilderInputOptions;
+
+  constructor(input: AgentUIBuilderInputOptions) {
+    this.input = input;
+  }
   /**
    * Generate shareable HTML content for a session
    * Based on ShareUtils.generateShareHtml but extracted for reuse
    */
-  static generateHTML(input: AgentUIBuilderInputOptions): string {
-    const { events, sessionInfo, staticPath: customStaticPath, serverInfo, uiConfig } = input;
+  generateHTML(): string {
+    const { events, sessionInfo, staticPath: customStaticPath, serverInfo, uiConfig } = this.input;
 
     // Use provided static path or fallback to built-in static files
     const staticPath = customStaticPath || getStaticPath();
@@ -40,10 +45,10 @@ export class AgentUIBuilder {
     try {
       let htmlContent = fs.readFileSync(indexPath, 'utf8');
 
-      const safeEventJson = this.safeJsonStringify(events);
-      const safeSessionInfoJson = this.safeJsonStringify(sessionInfo);
-      const safeVersionJson = serverInfo ? this.safeJsonStringify(serverInfo) : null;
-      const safeUIConfigJson = uiConfig ? this.safeJsonStringify(uiConfig) : null;
+      const safeEventJson = AgentUIBuilder.safeJsonStringify(events);
+      const safeSessionInfoJson = AgentUIBuilder.safeJsonStringify(sessionInfo);
+      const safeVersionJson = serverInfo ? AgentUIBuilder.safeJsonStringify(serverInfo) : null;
+      const safeUIConfigJson = uiConfig ? AgentUIBuilder.safeJsonStringify(uiConfig) : null;
 
       // Inject session data, event stream, version info, and web UI config
       const scriptTag = `<script>
@@ -81,13 +86,10 @@ export class AgentUIBuilder {
   }
 
   /**
-   * Build HTML with specified input and output options
+   * Build HTML with specified output options
    * This is the main API for generating agent UI replay HTML
    */
-  static async buildHTML(
-    input: AgentUIBuilderInputOptions,
-    output?: AgentUIBuilderOutputOptions,
-  ): Promise<AgentUIBuilderResult> {
+  async build(output?: AgentUIBuilderOutputOptions): Promise<AgentUIBuilderResult> {
     // Default to memory output if no output specified
     const defaultOutput: AgentUIBuilderOutputOptions = {
       destination: 'memory',
@@ -96,10 +98,10 @@ export class AgentUIBuilder {
     const finalOutput = output || defaultOutput;
 
     // Generate HTML content
-    const html = this.generateHTML(input);
+    const html = this.generateHTML();
     const timestamp = Date.now();
     const size = Buffer.byteLength(html, 'utf8');
-    const eventCount = input.events.length;
+    const eventCount = this.input.events.length;
 
     const result: AgentUIBuilderResult = {
       html,
@@ -144,7 +146,7 @@ export class AgentUIBuilder {
           throw new Error('Post-processor function is required when destination is "custom"');
         }
 
-        const customResult = await finalOutput.postProcessor(html, input.sessionInfo);
+        const customResult = await finalOutput.postProcessor(html, this.input.sessionInfo);
         if (customResult !== undefined) {
           result.customResult = customResult;
         }
@@ -155,6 +157,25 @@ export class AgentUIBuilder {
     }
 
     return result;
+  }
+
+  /**
+   * Static factory method for convenient one-off builds
+   */
+  static async buildHTML(
+    input: AgentUIBuilderInputOptions,
+    output?: AgentUIBuilderOutputOptions,
+  ): Promise<AgentUIBuilderResult> {
+    const builder = new AgentUIBuilder(input);
+    return builder.build(output);
+  }
+
+  /**
+   * Static method to generate HTML string only
+   */
+  static generateHTML(input: AgentUIBuilderInputOptions): string {
+    const builder = new AgentUIBuilder(input);
+    return builder.generateHTML();
   }
 
   /**

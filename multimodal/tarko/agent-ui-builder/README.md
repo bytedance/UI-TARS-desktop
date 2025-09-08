@@ -25,8 +25,8 @@ pnpm add @tarko/agent-ui-builder
 ```typescript
 import { AgentUIBuilder } from '@tarko/agent-ui-builder';
 
-// Build HTML in memory (default behavior)
-const result = await AgentUIBuilder.buildHTML({
+// Object-oriented approach (recommended)
+const builder = new AgentUIBuilder({
   events: sessionEvents,
   sessionInfo: sessionMetadata,
   // staticPath is optional - will use built-in static files if not provided
@@ -34,17 +34,17 @@ const result = await AgentUIBuilder.buildHTML({
   uiConfig: uiConfig,
 });
 
+// Build HTML in memory (default behavior)
+const result = await builder.build();
+
 // Or explicitly specify memory output
-const resultInMemory = await AgentUIBuilder.buildHTML(
-  {
-    events: sessionEvents,
-    sessionInfo: sessionMetadata,
-    staticPath: '/custom/path/to/static/files',
-    serverInfo: versionInfo,
-    uiConfig: uiConfig,
-  },
-  { destination: 'memory' },
-);
+const resultInMemory = await builder.build({ destination: 'memory' });
+
+// Static method for one-off builds
+const quickResult = await AgentUIBuilder.buildHTML({
+  events: sessionEvents,
+  sessionInfo: sessionMetadata,
+});
 
 console.log('Generated HTML:', result.html);
 console.log('Size:', result.metadata.size, 'bytes');
@@ -55,18 +55,27 @@ console.log('Size:', result.metadata.size, 'bytes');
 ```typescript
 import { AgentUIBuilder } from '@tarko/agent-ui-builder';
 
-const result = await AgentUIBuilder.buildHTML(
-  {
-    events: sessionEvents,
-    sessionInfo: sessionMetadata,
-    // staticPath is optional - will use built-in static files if not provided
+// Object-oriented approach
+const builder = new AgentUIBuilder({
+  events: sessionEvents,
+  sessionInfo: sessionMetadata,
+  // staticPath is optional - will use built-in static files if not provided
+});
+
+const result = await builder.build({
+  destination: 'file',
+  fileSystem: {
+    filePath: '/output/replay.html',
+    overwrite: true, // overwrite if exists
   },
+});
+
+// Or use static method for one-off builds
+const quickResult = await AgentUIBuilder.buildHTML(
+  { events: sessionEvents, sessionInfo: sessionMetadata },
   {
     destination: 'file',
-    fileSystem: {
-      filePath: '/output/replay.html',
-      overwrite: true, // overwrite if exists
-    },
+    fileSystem: { filePath: '/output/replay.html', overwrite: true },
   },
 );
 
@@ -78,6 +87,12 @@ console.log('File written to:', result.filePath);
 ```typescript
 import { AgentUIBuilder } from '@tarko/agent-ui-builder';
 
+// Object-oriented approach
+const builder = new AgentUIBuilder({
+  events: sessionEvents,
+  sessionInfo: sessionMetadata,
+});
+
 // Upload to share provider
 const shareProcessor = AgentUIBuilder.createShareProviderProcessor(
   'https://share-provider.example.com/upload',
@@ -85,15 +100,15 @@ const shareProcessor = AgentUIBuilder.createShareProviderProcessor(
   { slug: 'my-session', query: 'original query' }
 );
 
-const result = await AgentUIBuilder.buildHTML(
-  {
-    events: sessionEvents,
-    sessionInfo: sessionMetadata,
-  },
-  {
-    destination: 'custom',
-    postProcessor: shareProcessor,
-  },
+const result = await builder.build({
+  destination: 'custom',
+  postProcessor: shareProcessor,
+});
+
+// Or use static method
+const quickResult = await AgentUIBuilder.buildHTML(
+  { events: sessionEvents, sessionInfo: sessionMetadata },
+  { destination: 'custom', postProcessor: shareProcessor },
 );
 console.log('Share URL:', result.customResult);
 ```
@@ -135,12 +150,20 @@ const result = await AgentUIBuilder.build({
 
 - `AgentUIBuilder`: Main builder class with static methods
 
-### AgentUIBuilder Methods
+### AgentUIBuilder API
 
-- `AgentUIBuilder.buildHTML()`: **Main API** - Generate HTML with configurable output options
-- `AgentUIBuilder.generateHTML()`: Generate HTML string only (low-level)
+**Instance Methods (Recommended)**:
+- `new AgentUIBuilder(input)`: Create builder instance with session data
+- `builder.build(output?)`: Build HTML with specified output options
+- `builder.generateHTML()`: Generate HTML string only
+
+**Static Methods (Convenience)**:
+- `AgentUIBuilder.buildHTML(input, output?)`: One-off build with static method
+- `AgentUIBuilder.generateHTML(input)`: Generate HTML string only (static)
 - `AgentUIBuilder.generateDefaultFilePath()`: Generate default output file path
 - `AgentUIBuilder.createShareProviderProcessor()`: Create share provider upload processor
+
+**Utility Functions**:
 - `getStaticPath()`: Get static path with automatic fallback resolution
 - `getDefaultStaticPath()`: Get the default built-in static path
 - `isDefaultStaticPathValid()`: Check if default static path is valid
@@ -156,11 +179,19 @@ The unified `buildHTML()` method supports three output destinations:
 ### Backward Compatibility
 
 For convenience, the following functions are also exported as standalone functions:
-- `buildHTMLInMemory` → `AgentUIBuilder.buildHTML(input, { destination: 'memory' })`
-- `buildHTMLToFile` → `AgentUIBuilder.buildHTML(input, { destination: 'file', ... })`
-- `buildHTMLWithProcessor` → `AgentUIBuilder.buildHTML(input, { destination: 'custom', ... })`
+- `buildHTMLInMemory` → `new AgentUIBuilder(input).build({ destination: 'memory' })`
+- `buildHTMLToFile` → `new AgentUIBuilder(input).build({ destination: 'file', ... })`
+- `buildHTMLWithProcessor` → `new AgentUIBuilder(input).build({ destination: 'custom', ... })`
 - `generateDefaultFilePath` → `AgentUIBuilder.generateDefaultFilePath`
 - `createShareProviderProcessor` → `AgentUIBuilder.createShareProviderProcessor`
+
+### Design Philosophy
+
+**Object-Oriented Design**: The main API uses proper OOP patterns where you create an instance with your session data, then call methods on it. This is more intuitive and allows for better state management.
+
+**Static Methods for Convenience**: For quick one-off operations, static methods are available that internally create instances.
+
+**Flexible Output Options**: The same input can be processed to different outputs (memory, file, custom) without duplicating the HTML generation logic.
 
 ## Python SDK Compatibility
 
