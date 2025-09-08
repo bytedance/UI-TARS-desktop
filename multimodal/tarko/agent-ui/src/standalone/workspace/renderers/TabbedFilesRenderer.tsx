@@ -24,19 +24,24 @@ const parseReadMultipleFilesContent = (content: any): FileContent[] => {
   }
 
   const files: FileContent[] = [];
-  
-  content.forEach(item => {
-    if (!item || typeof item !== 'object' || item.type !== 'text' || typeof item.text !== 'string') {
+
+  content.forEach((item) => {
+    if (
+      !item ||
+      typeof item !== 'object' ||
+      item.type !== 'text' ||
+      typeof item.text !== 'string'
+    ) {
       return;
     }
 
     const text = item.text;
     const lines = text.split('\n');
-    
+
     // Parse each file from the text
     let currentFile: FileContent | null = null;
     let currentContent: string[] = [];
-    
+
     for (const line of lines) {
       // Check if this line starts a new file (format: "path:")
       const filePathMatch = line.match(/^([^:]+):\s*$/);
@@ -46,7 +51,7 @@ const parseReadMultipleFilesContent = (content: any): FileContent[] => {
           currentFile.content = currentContent.join('\n');
           files.push(currentFile);
         }
-        
+
         // Start new file
         currentFile = {
           path: filePathMatch[1].trim(),
@@ -68,14 +73,14 @@ const parseReadMultipleFilesContent = (content: any): FileContent[] => {
         currentContent.push(line);
       }
     }
-    
+
     // Save last file
     if (currentFile) {
       currentFile.content = currentContent.join('\n');
       files.push(currentFile);
     }
   });
-  
+
   return files;
 };
 
@@ -111,8 +116,8 @@ export const TabbedFilesRenderer: React.FC<TabbedFilesRendererProps> = ({
   const [activeTab, setActiveTab] = useState(0);
 
   const files = useMemo(() => {
-    return parseReadMultipleFilesContent(panelContent.content);
-  }, [panelContent.content]);
+    return parseReadMultipleFilesContent(panelContent.source);
+  }, [panelContent.source]);
 
   if (files.length === 0) {
     return (
@@ -137,15 +142,15 @@ export const TabbedFilesRenderer: React.FC<TabbedFilesRendererProps> = ({
           {files.map((file, index) => {
             const { fileName: tabFileName } = getFileTypeInfo(file.path);
             const isActive = index === activeTab;
-            
+
             return (
               <button
                 key={index}
                 onClick={() => setActiveTab(index)}
                 className={`
                   flex-shrink-0 px-4 py-3 text-sm font-medium border-b-2 transition-colors
-                  ${isActive 
-                    ? 'border-blue-500 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20' 
+                  ${isActive
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
                     : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'
                   }
                 `}
@@ -199,9 +204,7 @@ export const TabbedFilesRenderer: React.FC<TabbedFilesRendererProps> = ({
                 <FiAlertCircle size={16} />
                 <span className="font-medium">Error reading file</span>
               </div>
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                {activeFile.error}
-              </p>
+              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{activeFile.error}</p>
             </div>
           ) : (
             <div className="h-full">

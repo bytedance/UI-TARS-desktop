@@ -14,8 +14,16 @@ export const readMultipleFilesRendererCondition: FunctionToolToRendererCondition
   }
 
   // Check for content structure that matches read_multiple_files output
-  if (Array.isArray(content)) {
-    const isReadMultipleFiles = content.every(item => 
+  // Content can be in different formats, check both direct array and nested structure
+  let contentToCheck = content;
+  
+  // If content is an object with source property, use that
+  if (content && typeof content === 'object' && !Array.isArray(content) && content.source) {
+    contentToCheck = content.source;
+  }
+  
+  if (Array.isArray(contentToCheck)) {
+    const isReadMultipleFiles = contentToCheck.every(item => 
       item && 
       typeof item === 'object' && 
       item.type === 'text' && 
@@ -24,7 +32,7 @@ export const readMultipleFilesRendererCondition: FunctionToolToRendererCondition
       /^[^:\n]+:\s*\n/.test(item.text)
     );
 
-    if (isReadMultipleFiles && content.length > 0) {
+    if (isReadMultipleFiles && contentToCheck.length > 0) {
       return 'tabbed_files';
     }
   }
