@@ -179,6 +179,54 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     }
   }, []);
 
+  const handleModelChange = useCallback(async (selectedValue: string) => {
+    console.log('🎛️ [NavbarModelSelector] Model change initiated:', {
+      selectedValue,
+      sessionId: activeSessionId,
+    });
+
+    if (!activeSessionId || isLoading || !selectedValue) {
+      console.warn('⚠️ [NavbarModelSelector] Model change blocked:', {
+        hasSessionId: !!activeSessionId,
+        isLoading,
+        hasSelectedValue: !!selectedValue,
+      });
+      return;
+    }
+
+    const [provider, modelId] = selectedValue.split(':');
+    console.log('🔍 [NavbarModelSelector] Parsed model selection:', { provider, modelId });
+
+    if (!provider || !modelId) {
+      console.error('❌ [NavbarModelSelector] Invalid model format:', selectedValue);
+      return;
+    }
+
+    console.log('⏳ [NavbarModelSelector] Starting model update...');
+    setIsLoading(true);
+
+    try {
+      console.log('📞 [NavbarModelSelector] Calling update handler...');
+      const success = await apiService.updateSessionModel(activeSessionId, provider, modelId);
+
+      console.log('📋 [NavbarModelSelector] Update response:', { success });
+
+      if (success) {
+        console.log('✅ [NavbarModelSelector] Model updated successfully, updating UI state');
+        setCurrentModel(selectedValue);
+      } else {
+        console.error('❌ [NavbarModelSelector] Update handler returned success=false');
+        // Keep current model on failure - no need to access currentModel from closure
+      }
+    } catch (error) {
+      console.error('💥 [NavbarModelSelector] Failed to update session model:', error);
+      // Keep current model on error - no need to access currentModel from closure
+    } finally {
+      console.log('🏁 [NavbarModelSelector] Model change completed');
+      setIsLoading(false);
+    }
+  }, [activeSessionId, isLoading]);
+
   useEffect(() => {
     loadModels();
   }, [loadModels]);
@@ -278,53 +326,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     );
   }
 
-  const handleModelChange = useCallback(async (selectedValue: string) => {
-    console.log('🎛️ [NavbarModelSelector] Model change initiated:', {
-      selectedValue,
-      sessionId: activeSessionId,
-    });
 
-    if (!activeSessionId || isLoading || !selectedValue) {
-      console.warn('⚠️ [NavbarModelSelector] Model change blocked:', {
-        hasSessionId: !!activeSessionId,
-        isLoading,
-        hasSelectedValue: !!selectedValue,
-      });
-      return;
-    }
-
-    const [provider, modelId] = selectedValue.split(':');
-    console.log('🔍 [NavbarModelSelector] Parsed model selection:', { provider, modelId });
-
-    if (!provider || !modelId) {
-      console.error('❌ [NavbarModelSelector] Invalid model format:', selectedValue);
-      return;
-    }
-
-    console.log('⏳ [NavbarModelSelector] Starting model update...');
-    setIsLoading(true);
-
-    try {
-      console.log('📞 [NavbarModelSelector] Calling update handler...');
-      const success = await apiService.updateSessionModel(activeSessionId, provider, modelId);
-
-      console.log('📋 [NavbarModelSelector] Update response:', { success });
-
-      if (success) {
-        console.log('✅ [NavbarModelSelector] Model updated successfully, updating UI state');
-        setCurrentModel(selectedValue);
-      } else {
-        console.error('❌ [NavbarModelSelector] Update handler returned success=false');
-        // Keep current model on failure - no need to access currentModel from closure
-      }
-    } catch (error) {
-      console.error('💥 [NavbarModelSelector] Failed to update session model:', error);
-      // Keep current model on error - no need to access currentModel from closure
-    } finally {
-      console.log('🏁 [NavbarModelSelector] Model change completed');
-      setIsLoading(false);
-    }
-  }, [activeSessionId]);
 
   const allModelOptions = availableModels.models.flatMap((config) =>
     config.models.map((modelId) => ({

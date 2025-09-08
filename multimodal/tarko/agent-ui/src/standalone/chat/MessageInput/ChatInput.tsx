@@ -477,7 +477,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             <AnimatePresence mode="wait">
               {connectionStatus && !connectionStatus.connected ? (
                 <motion.button
-                  {...{ ['ke' + 'y']: 'reconnect-btn' }}
+                  key="reconnect-btn"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
@@ -495,7 +495,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 </motion.button>
               ) : isProcessing ? (
                 <motion.button
-                  {...{ ['ke' + 'y']: 'abort-btn' }}
+                  key="abort-btn"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -520,7 +520,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 </motion.button>
               ) : (
                 <motion.button
-                  {...{ ['ke' + 'y']: 'send-btn' }}
+                  key="send-btn"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
