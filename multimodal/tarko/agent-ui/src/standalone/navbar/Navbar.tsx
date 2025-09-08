@@ -96,7 +96,7 @@ export const Navbar: React.FC = () => {
 
   return (
     <ThemeProvider theme={muiTheme}>
-      <div className="h-12 backdrop-blur-sm flex items-center px-3 flex-shrink-0">
+      <div className="h-12 backdrop-blur-sm flex items-center px-3 flex-shrink-0 relative">
         {/* Left section with conditional logo rendering */}
         <div className="flex items-center">
           {logoType === 'traffic-lights' ? (
@@ -129,13 +129,13 @@ export const Navbar: React.FC = () => {
           </div>
         )}
 
-        {/* Center section - Agent and Model info display with dynamic sizing */}
-        <div className="flex-1 flex justify-center">
+        {/* Center section - Agent and Model info display - absolutely positioned for true centering */}
+        <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
           <DynamicNavbarCenter sessionMetadata={sessionMetadata} activeSessionId={activeSessionId} />
         </div>
 
         {/* Right section - workspace nav items, then About, Dark mode, Share */}
-        <div className="flex items-center space-x-1 md:space-x-2">
+        <div className="flex items-center space-x-1 md:space-x-2 ml-auto">
           {/* Workspace navigation items */}
           {!isReplayMode && workspaceNavItems.length > 0 && (
             <div className="flex items-center gap-2 mr-2">
