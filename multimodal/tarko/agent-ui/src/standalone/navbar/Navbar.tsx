@@ -76,7 +76,7 @@ export const Navbar: React.FC = () => {
   const logoType = React.useMemo(() => {
     const params = new URLSearchParams(window.location.search);
     const logoParam = params.get('logo');
-    
+
     // Support three modes: logo (default), traffic-lights, space
     if (logoParam === 'traffic-lights') {
       return 'traffic-lights';
@@ -86,6 +86,9 @@ export const Navbar: React.FC = () => {
       return 'logo'; // Default to logo
     }
   }, []);
+
+  debugger;
+  debugger;
 
   // Toggle dark mode
   const toggleDarkMode = useCallback(() => {
@@ -392,8 +395,8 @@ export const Navbar: React.FC = () => {
 // Dynamic Navbar Center Component with space optimization
 interface DynamicNavbarCenterProps {
   sessionMetadata?: {
-    agentInfo?: { name: string; [key: string]: any };
-    modelConfig?: { provider: string; modelId: string; [key: string]: any };
+    agentInfo?: { name: string;[key: string]: any };
+    modelConfig?: { provider: string; modelId: string;[key: string]: any };
     [key: string]: any;
   };
   activeSessionId?: string;
