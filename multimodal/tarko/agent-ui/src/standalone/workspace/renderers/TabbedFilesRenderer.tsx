@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { StandardPanelContent } from '../types/panelContent';
 import { FiFile, FiAlertCircle } from 'react-icons/fi';
 import { CodeBlock } from '../components/CodeBlock';
+import { getFileTypeInfo } from '../utils/fileTypeUtils';
 
 interface FileContent {
   path: string;
@@ -79,70 +80,28 @@ const parseReadMultipleFilesContent = (content: any): FileContent[] => {
 };
 
 /**
- * Get file extension for syntax highlighting
- */
-const getFileExtension = (path: string): string => {
-  const parts = path.split('.');
-  return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : '';
-};
-
-/**
- * Get display name from file path
- */
-const getFileName = (path: string): string => {
-  const parts = path.split('/');
-  return parts[parts.length - 1] || path;
-};
-
-/**
  * Get language for syntax highlighting based on file extension
+ * Simplified version similar to FileResultRenderer
  */
-const getLanguageFromExtension = (extension: string): string => {
-  const languageMap: Record<string, string> = {
-    'ts': 'typescript',
-    'tsx': 'typescript',
-    'js': 'javascript',
-    'jsx': 'javascript',
-    'json': 'json',
-    'py': 'python',
-    'rb': 'ruby',
-    'go': 'go',
-    'rs': 'rust',
-    'java': 'java',
-    'c': 'c',
-    'cpp': 'cpp',
-    'h': 'c',
-    'hpp': 'cpp',
-    'css': 'css',
-    'scss': 'scss',
-    'less': 'less',
-    'html': 'html',
-    'xml': 'xml',
-    'md': 'markdown',
-    'yml': 'yaml',
-    'yaml': 'yaml',
-    'sh': 'bash',
-    'bash': 'bash',
-    'zsh': 'bash',
-    'fish': 'bash',
-    'ps1': 'powershell',
-    'sql': 'sql',
-    'php': 'php',
-    'swift': 'swift',
-    'kt': 'kotlin',
-    'scala': 'scala',
-    'clj': 'clojure',
-    'hs': 'haskell',
-    'elm': 'elm',
-    'dart': 'dart',
-    'r': 'r',
-    'lua': 'lua',
-    'vim': 'vim',
-    'dockerfile': 'dockerfile',
-    'makefile': 'makefile',
+const getLanguage = (extension: string): string => {
+  const langMap: Record<string, string> = {
+    js: 'javascript',
+    jsx: 'javascript',
+    ts: 'typescript',
+    tsx: 'typescript',
+    py: 'python',
+    html: 'html',
+    css: 'css',
+    json: 'json',
+    yaml: 'yaml',
+    yml: 'yaml',
+    md: 'markdown',
+    xml: 'xml',
+    sh: 'bash',
+    bash: 'bash',
   };
-  
-  return languageMap[extension] || 'text';
+
+  return langMap[extension] || 'text';
 };
 
 export const TabbedFilesRenderer: React.FC<TabbedFilesRendererProps> = ({
@@ -167,9 +126,8 @@ export const TabbedFilesRenderer: React.FC<TabbedFilesRendererProps> = ({
   }
 
   const activeFile = files[activeTab];
-  const fileName = getFileName(activeFile.path);
-  const extension = getFileExtension(activeFile.path);
-  const language = getLanguageFromExtension(extension);
+  const { fileName, extension } = getFileTypeInfo(activeFile.path);
+  const language = getLanguage(extension);
 
   return (
     <div className="h-full flex flex-col bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
@@ -177,7 +135,7 @@ export const TabbedFilesRenderer: React.FC<TabbedFilesRendererProps> = ({
       <div className="flex-shrink-0 border-b border-gray-200 dark:border-gray-700">
         <div className="flex overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
           {files.map((file, index) => {
-            const tabFileName = getFileName(file.path);
+            const { fileName: tabFileName } = getFileTypeInfo(file.path);
             const isActive = index === activeTab;
             
             return (
