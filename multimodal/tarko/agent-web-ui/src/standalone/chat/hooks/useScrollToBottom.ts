@@ -24,7 +24,7 @@ interface UseScrollToBottomReturn {
 
 /**
  * Custom hook for managing scroll-to-bottom indicator in chat
- * 
+ *
  * Features:
  * - Shows scroll-to-bottom indicator when user has scrolled up
  * - Manual scroll to bottom functionality
@@ -52,10 +52,10 @@ export const useScrollToBottom = ({
   const checkIsAtBottom = useCallback(() => {
     const container = messagesContainerRef.current;
     if (!container) return false;
-    
+
     const { scrollTop, scrollHeight, clientHeight } = container;
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-    
+
     // Account for sub-pixel differences and rounding errors
     return distanceFromBottom <= Math.max(threshold, 3);
   }, [threshold]);
@@ -64,14 +64,14 @@ export const useScrollToBottom = ({
   const handleScroll = useCallback(() => {
     const container = messagesContainerRef.current;
     if (!container) return;
-    
+
     const { scrollTop, scrollHeight, clientHeight } = container;
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-    
+
     // Simple, robust bottom detection
     const atBottom = distanceFromBottom <= threshold;
     const hasScrollableContent = scrollHeight > clientHeight + 10;
-    
+
     setShowScrollToBottom(!atBottom && hasScrollableContent);
   }, [threshold]);
 
@@ -79,10 +79,10 @@ export const useScrollToBottom = ({
   const scrollToBottom = useCallback(() => {
     const container = messagesContainerRef.current;
     if (!container) return;
-    
+
     container.scrollTo({
       top: container.scrollHeight,
-      behavior: 'smooth'
+      behavior: 'smooth',
     });
   }, []);
 
@@ -90,10 +90,10 @@ export const useScrollToBottom = ({
   const autoScrollToBottom = useCallback(() => {
     const container = messagesContainerRef.current;
     if (!container) return;
-    
+
     container.scrollTo({
       top: container.scrollHeight,
-      behavior: 'smooth'
+      behavior: 'smooth',
     });
   }, []);
 
@@ -111,12 +111,12 @@ export const useScrollToBottom = ({
       lastSessionIdRef.current = sessionId;
       setShowScrollToBottom(false);
       isScrollingRef.current = false;
-      
+
       // Schedule a check after session content loads
       const timer = setTimeout(() => {
         handleScroll();
       }, SCROLL_CHECK_DELAY * 2);
-      
+
       return () => clearTimeout(timer);
     }
   }, [sessionId, handleScroll]);
@@ -125,12 +125,12 @@ export const useScrollToBottom = ({
   useEffect(() => {
     const container = messagesContainerRef.current;
     if (!container) return;
-    
+
     container.addEventListener('scroll', handleScroll, { passive: true });
-    
+
     // Initial check
     const timer = scheduleScrollCheck();
-    
+
     return () => {
       container.removeEventListener('scroll', handleScroll);
       clearTimeout(timer);
@@ -154,12 +154,12 @@ export const useScrollToBottom = ({
     // This covers both sequential playback and manual jumps/seeks
     if (replayState.currentEventIndex !== lastEventIndexRef.current) {
       lastEventIndexRef.current = replayState.currentEventIndex;
-      
+
       // Schedule auto-scroll after DOM updates
       const timer = setTimeout(() => {
         autoScrollToBottom();
       }, REPLAY_AUTO_SCROLL_DELAY);
-      
+
       return () => clearTimeout(timer);
     }
   }, [isReplayMode, replayState.isActive, replayState.currentEventIndex, autoScrollToBottom]);
@@ -172,7 +172,7 @@ export const useScrollToBottom = ({
 
     const messages = dependencies[0] as any[];
     const currentMessageCount = messages.length;
-    
+
     // Only check for new user messages when message count increases
     if (currentMessageCount <= lastMessageCountRef.current) {
       lastMessageCountRef.current = currentMessageCount;
@@ -183,29 +183,31 @@ export const useScrollToBottom = ({
     const allUserMessages = messages
       .flatMap((group: any) => group?.messages || [group])
       .filter((msg: any) => msg?.role === 'user');
-    
+
     const latestUserMessage = allUserMessages[allUserMessages.length - 1];
-    
+
     // Auto-scroll ONLY if:
     // 1. We have a new user message
     // 2. It's the LAST user message (most recent one)
     // 3. It has the isLocalMessage flag (indicating it was just sent by user)
-    if (latestUserMessage?.id && 
-        latestUserMessage.id !== lastUserMessageIdRef.current &&
-        latestUserMessage.isLocalMessage) {
+    if (
+      latestUserMessage?.id &&
+      latestUserMessage.id !== lastUserMessageIdRef.current &&
+      latestUserMessage.isLocalMessage
+    ) {
       lastUserMessageIdRef.current = latestUserMessage.id;
-      
+
       const timer = setTimeout(autoScrollToBottom, SCROLL_CHECK_DELAY);
       return () => clearTimeout(timer);
     }
-    
+
     lastMessageCountRef.current = currentMessageCount;
   }, [autoScrollOnUserMessage, isReplayMode, autoScrollToBottom, ...dependencies]);
 
   return {
-  messagesContainerRef,
-  messagesEndRef,
-  showScrollToBottom,
-  scrollToBottom,
+    messagesContainerRef,
+    messagesEndRef,
+    showScrollToBottom,
+    scrollToBottom,
   };
 };
