@@ -13,6 +13,11 @@
 export type AgentWebUIImplementationType = 'static' | 'remote';
 
 /**
+ * Navigation item icon type
+ */
+export type WorkspaceNavItemIcon = 'code' | 'monitor' | 'terminal' | 'browser' | 'desktop' | 'default';
+
+/**
  * Navigation item configuration for workspace
  */
 export interface WorkspaceNavItem {
@@ -24,6 +29,11 @@ export interface WorkspaceNavItem {
    * Link URL to open in new tab
    */
   link: string;
+  /**
+   * Icon type for the navigation item
+   * @defaultValue 'default'
+   */
+  icon?: WorkspaceNavItemIcon;
 }
 
 /**

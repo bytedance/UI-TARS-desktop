@@ -56,10 +56,12 @@ export default class OmniTARSAgent extends ComposableAgent {
         {
           title: 'Code Server',
           link: sandboxBaseUrl + '/code-server/',
+          icon: 'code',
         },
         {
           title: 'VNC',
           link: sandboxBaseUrl + '/vnc/index.html?autoconnect=true',
+          icon: 'monitor',
         },
       ],
     },
