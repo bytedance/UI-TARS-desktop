@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ShareButton } from '@/standalone/share';
 import { AboutModal } from './AboutModal';
 import { motion } from 'framer-motion';
-import { FiMoon, FiSun, FiInfo, FiCpu, FiFolder, FiZap, FiSettings, FiMonitor } from 'react-icons/fi';
+import { FiMoon, FiSun, FiInfo, FiCpu, FiFolder, FiZap, FiSettings, FiMonitor, FiCode } from 'react-icons/fi';
 import { GoSidebarCollapse, GoSidebarExpand } from 'react-icons/go';
 
 import { Box, Typography, createTheme, ThemeProvider } from '@mui/material';
@@ -65,6 +65,24 @@ export const Navbar: React.FC = () => {
     window.open(link, '_blank', 'noopener,noreferrer');
   };
 
+  // Get icon and styling for nav item based on title
+  const getNavItemStyle = (title: string) => {
+    const lowerTitle = title.toLowerCase();
+    
+    if (lowerTitle.includes('code server')) {
+      return {
+        icon: FiCode,
+        className: "flex items-center gap-1.5 px-3 py-1.5 bg-green-50/80 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-lg border border-green-200/60 dark:border-green-800/40 hover:bg-green-100/90 dark:hover:bg-green-800/30 hover:text-green-700 dark:hover:text-green-300 transition-all duration-200 text-xs font-medium backdrop-blur-sm hover:shadow-sm"
+      };
+    }
+    
+    // Default styling for other items (VNC, etc.)
+    return {
+      icon: FiMonitor,
+      className: "flex items-center gap-1.5 px-3 py-1.5 bg-blue-50/80 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg border border-blue-200/60 dark:border-blue-800/40 hover:bg-blue-100/90 dark:hover:bg-blue-800/30 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-200 text-xs font-medium backdrop-blur-sm hover:shadow-sm"
+    };
+  };
+
   // Create MUI theme for consistent styling
   const muiTheme = React.useMemo(
     () =>
@@ -119,20 +137,23 @@ export const Navbar: React.FC = () => {
           {/* Workspace navigation items */}
           {!isReplayMode && workspaceNavItems.length > 0 && (
             <div className="flex items-center gap-2 mr-2">
-              {workspaceNavItems.map((navItem) => (
-                <motion.button
-                  // eslint-disable-next-line @secretlint/secretlint-rule-pattern
-                  key={navItem.title}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => handleNavItemClick(navItem.link)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50/80 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg border border-blue-200/60 dark:border-blue-800/40 hover:bg-blue-100/90 dark:hover:bg-blue-800/30 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-200 text-xs font-medium backdrop-blur-sm hover:shadow-sm"
-                  title={`Open ${navItem.title} in new tab`}
-                >
-                  <FiMonitor size={12} className="opacity-70" />
-                  {navItem.title}
-                </motion.button>
-              ))}
+              {workspaceNavItems.map((navItem) => {
+                const { icon: IconComponent, className } = getNavItemStyle(navItem.title);
+                return (
+                  <motion.button
+                    // eslint-disable-next-line @secretlint/secretlint-rule-pattern
+                    key={navItem.title}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleNavItemClick(navItem.link)}
+                    className={className}
+                    title={`Open ${navItem.title} in new tab`}
+                  >
+                    <IconComponent size={12} className="opacity-70" />
+                    {navItem.title}
+                  </motion.button>
+                );
+              })}
             </div>
           )}
           {/* About button - moved to first position */}
