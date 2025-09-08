@@ -3,6 +3,7 @@ import { StandardPanelContent } from '../types/panelContent';
 import { FiFile, FiAlertCircle } from 'react-icons/fi';
 import { CodeEditor } from '@/sdk/code-editor';
 import { getFileTypeInfo } from '../utils/fileTypeUtils';
+import { getLanguageFromExtension, formatBytes } from '../utils/codeUtils';
 
 interface FileContent {
   path: string;
@@ -85,41 +86,7 @@ const parseReadMultipleFilesContent = (content: any): FileContent[] => {
   return files;
 };
 
-/**
- * Get language for syntax highlighting based on file extension
- * Simplified version similar to FileResultRenderer
- */
-const getLanguage = (extension: string): string => {
-  const langMap: Record<string, string> = {
-    js: 'javascript',
-    jsx: 'javascript',
-    ts: 'typescript',
-    tsx: 'typescript',
-    py: 'python',
-    html: 'html',
-    css: 'css',
-    json: 'json',
-    yaml: 'yaml',
-    yml: 'yaml',
-    md: 'markdown',
-    xml: 'xml',
-    sh: 'bash',
-    bash: 'bash',
-  };
 
-  return langMap[extension] || 'text';
-};
-
-/**
- * Format file size in bytes
- */
-const formatBytes = (bytes: number): string => {
-  if (bytes === 0) return '0 Bytes';
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-};
 
 export const TabbedFilesRenderer: React.FC<TabbedFilesRendererProps> = ({
   panelContent,
@@ -144,7 +111,7 @@ export const TabbedFilesRenderer: React.FC<TabbedFilesRendererProps> = ({
 
   const activeFile = files[activeTab];
   const { fileName, extension } = getFileTypeInfo(activeFile.path);
-  const language = getLanguage(extension);
+  const language = getLanguageFromExtension(extension);
 
   return (
     <div className="space-y-2">
