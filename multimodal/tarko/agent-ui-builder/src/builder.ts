@@ -5,20 +5,14 @@
 
 import fs from 'fs';
 import path from 'path';
-import os from 'os';
-import {
-  AgentUIBuilderResult,
+import type {
   AgentUIBuilderInputOptions,
-  AgentUIBuilderOutputOptions,
-  PostProcessor,
+  UploadOptions,
 } from './types';
 import { getStaticPath } from './static-path';
 
 /**
- * Agent UI Builder - Core class for generating replay HTML files
- *
- * Provides functionality to build HTML files from agent session data
- * with support for multiple output destinations and post-processing.
+ * Agent UI Builder - Simple class for generating and uploading replay HTML
  */
 export class AgentUIBuilder {
   private input: AgentUIBuilderInputOptions;
@@ -28,17 +22,10 @@ export class AgentUIBuilder {
   }
 
   /**
-   * Get session ID from input
+   * Build HTML content from session data
+   * @returns Generated HTML string
    */
-  public getSessionId(): string {
-    return this.input.sessionInfo.sessionId;
-  }
-
-  /**
-   * Generate shareable HTML content for a session
-   * Based on ShareUtils.generateShareHtml but extracted for reuse
-   */
-  public generateHTML(): string {
+  public build(): string {
     const { events, sessionInfo, staticPath: customStaticPath, serverInfo, uiConfig } = this.input;
 
     // Use provided static path or fallback to built-in static files
@@ -93,204 +80,91 @@ export class AgentUIBuilder {
   }
 
   /**
-   * Build HTML with specified output options
-   * This is the main API for generating agent UI replay HTML
+   * Save HTML to file
+   * @param html HTML content to save
+   * @param filePath Path to save the file
    */
-  public async build(output?: AgentUIBuilderOutputOptions): Promise<AgentUIBuilderResult> {
-    // Generate HTML content
-    const html = this.generateHTML();
-    const timestamp = Date.now();
-    const size = Buffer.byteLength(html, 'utf8');
-    const eventCount = this.input.events.length;
-
-    const result: AgentUIBuilderResult = {
-      html,
-      metadata: {
-        size,
-        timestamp,
-        eventCount,
-      },
-    };
-
-    // If no output options specified, return memory result
-    if (!output) {
-      return result;
+  public saveToFile(html: string, filePath: string): void {
+    // Ensure directory exists
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
     }
 
-    // Handle file output
-    if (output.filePath) {
-      // Ensure directory exists
-      const dir = path.dirname(output.filePath);
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
-
-      // Write HTML to file
-      fs.writeFileSync(output.filePath, html, 'utf8');
-      result.filePath = output.filePath;
-    }
-
-    // Handle post-processor
-    if (output.post) {
-      const url = await output.post(html, this.input.sessionInfo);
-      if (url !== undefined) {
-        result.url = url;
-      }
-    }
-
-    return result;
+    // Write HTML to file
+    fs.writeFileSync(filePath, html, 'utf8');
   }
 
   /**
-   * Generate a default file path for HTML output
+   * Upload HTML to share provider
+   * @param html HTML content to upload
+   * @param shareProviderUrl URL of the share provider
+   * @param options Upload options
+   * @returns Share URL
    */
-  static generateDefaultFilePath(sessionId: string, prefix = 'agent-replay'): string {
-    const timestamp = Date.now();
-    const fileName = `${prefix}-${sessionId}-${timestamp}.html`;
-    return path.join(os.tmpdir(), 'agent-ui-builder', fileName);
-  }
-
-  /**
-   * Create a post-processor that uploads to a share provider
-   * This is an instance method that has access to session context
-   */
-  public createShareProviderProcessor(
+  public async upload(
+    html: string,
     shareProviderUrl: string,
-    options?: {
-      slug?: string;
-      query?: string;
-    },
-  ): PostProcessor {
-    const sessionId = this.getSessionId();
+    options?: UploadOptions,
+  ): Promise<string> {
+    const sessionId = this.input.sessionInfo.sessionId;
     
-    return async (html, sessionInfo) => {
-      // Create form data using native FormData
-      const formData = new FormData();
+    // Create form data using native FormData
+    const formData = new FormData();
 
-      // Create a File object from the HTML content
-      const fileName = `agent-replay-${sessionId}-${Date.now()}.html`;
-      const file = new File([html], fileName, { type: 'text/html' });
+    // Create a File object from the HTML content
+    const fileName = `agent-replay-${sessionId}-${Date.now()}.html`;
+    const file = new File([html], fileName, { type: 'text/html' });
 
-      formData.append('file', file);
-      formData.append('sessionId', sessionId);
-      formData.append('type', 'html');
+    formData.append('file', file);
+    formData.append('sessionId', sessionId);
+    formData.append('type', 'html');
 
-      // Add additional metadata fields if provided
-      if (options?.slug) {
-        formData.append('slug', options.slug);
+    // Add additional metadata fields if provided
+    if (options?.slug) {
+      formData.append('slug', options.slug);
+    }
+
+    if (options?.query) {
+      formData.append('query', options.query);
+    }
+
+    // Add session metadata fields
+    const sessionInfo = this.input.sessionInfo;
+    if (sessionInfo.metadata?.name) {
+      formData.append('name', sessionInfo.metadata.name);
+    }
+
+    if (sessionInfo.metadata?.tags && sessionInfo.metadata.tags.length > 0) {
+      const tagsJson = JSON.stringify(sessionInfo.metadata.tags);
+      formData.append('tags', tagsJson);
+    }
+
+    try {
+      // Send request to share provider using fetch
+      const response = await fetch(shareProviderUrl, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      if (options?.query) {
-        formData.append('query', options.query);
+      const responseData = await response.json();
+
+      // Return share URL with replay parameter
+      if (responseData && responseData.url) {
+        const url = new URL(responseData.url);
+        url.searchParams.set('replay', '1');
+        return url.toString();
       }
 
-      // Add session metadata fields
-      if (sessionInfo.metadata?.name) {
-        formData.append('name', sessionInfo.metadata.name);
-      }
-
-      if (sessionInfo.metadata?.tags && sessionInfo.metadata.tags.length > 0) {
-        const tagsJson = JSON.stringify(sessionInfo.metadata.tags);
-        formData.append('tags', tagsJson);
-      }
-
-      try {
-        // Send request to share provider using fetch
-        const response = await fetch(shareProviderUrl, {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const responseData = await response.json();
-
-        // Return share URL with replay parameter
-        if (responseData && responseData.url) {
-          const url = new URL(responseData.url);
-          url.searchParams.set('replay', '1');
-          return url.toString();
-        }
-
-        throw new Error('Invalid response from share provider');
-      } catch (error) {
-        console.error('Failed to upload to share provider:', error);
-        throw error;
-      }
-    };
-  }
-
-  /**
-   * Create a post-processor that uploads to a share provider
-   * @deprecated Use instance method createShareProviderProcessor() instead
-   */
-  static createShareProviderProcessor(
-    shareProviderUrl: string,
-    sessionId: string,
-    options?: {
-      slug?: string;
-      query?: string;
-    },
-  ): PostProcessor {
-    return async (html, sessionInfo) => {
-      // Create form data using native FormData
-      const formData = new FormData();
-
-      // Create a File object from the HTML content
-      const fileName = `agent-replay-${sessionId}-${Date.now()}.html`;
-      const file = new File([html], fileName, { type: 'text/html' });
-
-      formData.append('file', file);
-      formData.append('sessionId', sessionId);
-      formData.append('type', 'html');
-
-      // Add additional metadata fields if provided
-      if (options?.slug) {
-        formData.append('slug', options.slug);
-      }
-
-      if (options?.query) {
-        formData.append('query', options.query);
-      }
-
-      // Add session metadata fields
-      if (sessionInfo.metadata?.name) {
-        formData.append('name', sessionInfo.metadata.name);
-      }
-
-      if (sessionInfo.metadata?.tags && sessionInfo.metadata.tags.length > 0) {
-        const tagsJson = JSON.stringify(sessionInfo.metadata.tags);
-        formData.append('tags', tagsJson);
-      }
-
-      try {
-        // Send request to share provider using fetch
-        const response = await fetch(shareProviderUrl, {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const responseData = await response.json();
-
-        // Return share URL with replay parameter
-        if (responseData && responseData.url) {
-          const url = new URL(responseData.url);
-          url.searchParams.set('replay', '1');
-          return url.toString();
-        }
-
-        throw new Error('Invalid response from share provider');
-      } catch (error) {
-        console.error('Failed to upload to share provider:', error);
-        throw error;
-      }
-    };
+      throw new Error('Invalid response from share provider');
+    } catch (error) {
+      console.error('Failed to upload to share provider:', error);
+      throw error;
+    }
   }
 
   /**

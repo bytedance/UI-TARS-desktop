@@ -100,6 +100,9 @@ export class ShareService {
         uiConfig: mergedWebUIConfig,
       });
 
+      // Build HTML
+      const html = builder.build();
+
       // Upload if requested and provider is configured
       if (upload && this.appConfig.share?.provider) {
         // Generate normalized slug if agent is available
@@ -139,31 +142,23 @@ export class ShareService {
           normalizedSlug = sessionId;
         }
 
-        // Use the unified build API with post-processor
-        const postProcessor = builder.createShareProviderProcessor(
-          this.appConfig.share.provider,
-          {
-            slug: normalizedSlug,
-            query: originalQuery,
-          },
-        );
-
-        const result = await builder.build({
-          post: postProcessor,
+        // Upload HTML and get share URL
+        const shareUrl = await builder.upload(html, this.appConfig.share.provider, {
+          slug: normalizedSlug,
+          query: originalQuery,
         });
 
         return {
           success: true,
-          url: result.url!,
+          url: shareUrl,
           sessionId,
         };
       }
 
-      // Return HTML content if not uploading - use memory destination
-      const result = await builder.build();
+      // Return HTML content if not uploading
       return {
         success: true,
-        html: result.html,
+        html,
         sessionId,
       };
     } catch (error) {
