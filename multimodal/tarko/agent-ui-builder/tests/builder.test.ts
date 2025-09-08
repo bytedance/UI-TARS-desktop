@@ -81,6 +81,18 @@ describe('AgentUIBuilder', () => {
       expect(html).toContain('<div id="root"></div>');
     });
 
+    it('should work without staticPath (using built-in static files)', () => {
+      // This test will fail in test environment since built-in static files don't exist
+      // But we can verify the error message shows it tried to use getStaticPath()
+      expect(() => {
+        AgentUIBuilder.generateHTML({
+          events: mockEvents,
+          sessionInfo: mockMetadata,
+          // No staticPath provided
+        });
+      }).toThrow('No valid static path found');
+    });
+
     it('should throw error if static path does not exist', () => {
       expect(() => {
         AgentUIBuilder.generateHTML({

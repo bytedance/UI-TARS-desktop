@@ -20,8 +20,8 @@ export interface AgentUIBuilderInputOptions {
   /** Session information */
   sessionInfo: SessionItemInfo;
 
-  /** Path to static web UI files */
-  staticPath: string;
+  /** Path to static web UI files (optional, will use built-in static files if not provided) */
+  staticPath?: string;
 
   /** Optional server version info */
   serverInfo?: AgentServerVersionInfo;

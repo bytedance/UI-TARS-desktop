@@ -29,7 +29,16 @@ import { AgentUIBuilder, buildHTMLInMemory, getStaticPath } from '@tarko/agent-u
 const result = await buildHTMLInMemory({
   events: sessionEvents,
   sessionInfo: sessionMetadata,
-  staticPath: getStaticPath(), // Automatically resolves to built-in static files
+  // staticPath is now optional - will use built-in static files if not provided
+  serverInfo: versionInfo,
+  uiConfig: uiConfig,
+});
+
+// Or explicitly provide a custom static path
+const resultWithCustomPath = await buildHTMLInMemory({
+  events: sessionEvents,
+  sessionInfo: sessionMetadata,
+  staticPath: '/custom/path/to/static/files',
   serverInfo: versionInfo,
   uiConfig: uiConfig,
 });
@@ -47,7 +56,7 @@ const result = await buildHTMLToFile(
   {
     events: sessionEvents,
     sessionInfo: sessionMetadata,
-    staticPath: '/path/to/web-ui/static',
+    // staticPath is optional - will use built-in static files if not provided
   },
   '/output/replay.html',
   true // overwrite if exists
@@ -81,7 +90,7 @@ const result = await AgentUIBuilder.build({
   input: {
     events: sessionEvents,
     sessionInfo: sessionMetadata,
-    staticPath: '/path/to/web-ui/static',
+    // staticPath is optional - will use built-in static files if not provided
     serverInfo: versionInfo,
     uiConfig: uiConfig,
   },

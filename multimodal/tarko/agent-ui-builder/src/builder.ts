@@ -11,6 +11,7 @@ import {
   AgentUIBuilderInputOptions,
   AgentUIBuilderOutputOptions,
 } from './types';
+import { getStaticPath } from './static-path';
 
 /**
  * Agent UI Builder - Core class for generating replay HTML files
@@ -24,11 +25,10 @@ export class AgentUIBuilder {
    * Based on ShareUtils.generateShareHtml but extracted for reuse
    */
   static generateHTML(input: AgentUIBuilderInputOptions): string {
-    const { events, sessionInfo, staticPath, serverInfo, uiConfig } = input;
+    const { events, sessionInfo, staticPath: customStaticPath, serverInfo, uiConfig } = input;
 
-    if (!staticPath) {
-      throw new Error('Static path is required for HTML generation');
-    }
+    // Use provided static path or fallback to built-in static files
+    const staticPath = customStaticPath || getStaticPath();
 
     const indexPath = path.join(staticPath, 'index.html');
     if (!fs.existsSync(indexPath)) {
