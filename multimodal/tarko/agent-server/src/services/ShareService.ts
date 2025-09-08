@@ -140,9 +140,8 @@ export class ShareService {
         }
 
         // Use the unified build API with post-processor
-        const postProcessor = AgentUIBuilder.createShareProviderProcessor(
+        const postProcessor = builder.createShareProviderProcessor(
           this.appConfig.share.provider,
-          sessionId,
           {
             slug: normalizedSlug,
             query: originalQuery,

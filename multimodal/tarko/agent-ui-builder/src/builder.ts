@@ -28,6 +28,13 @@ export class AgentUIBuilder {
   }
 
   /**
+   * Get session ID from input
+   */
+  public getSessionId(): string {
+    return this.input.sessionInfo.sessionId;
+  }
+
+  /**
    * Generate shareable HTML content for a session
    * Based on ShareUtils.generateShareHtml but extracted for reuse
    */
@@ -163,7 +170,79 @@ export class AgentUIBuilder {
 
   /**
    * Create a post-processor that uploads to a share provider
-   * This is compatible with the existing ShareUtils.uploadShareHtml pattern
+   * This is an instance method that has access to session context
+   */
+  public createShareProviderProcessor(
+    shareProviderUrl: string,
+    options?: {
+      slug?: string;
+      query?: string;
+    },
+  ): PostProcessor {
+    const sessionId = this.getSessionId();
+    
+    return async (html, sessionInfo) => {
+      // Create form data using native FormData
+      const formData = new FormData();
+
+      // Create a File object from the HTML content
+      const fileName = `agent-replay-${sessionId}-${Date.now()}.html`;
+      const file = new File([html], fileName, { type: 'text/html' });
+
+      formData.append('file', file);
+      formData.append('sessionId', sessionId);
+      formData.append('type', 'html');
+
+      // Add additional metadata fields if provided
+      if (options?.slug) {
+        formData.append('slug', options.slug);
+      }
+
+      if (options?.query) {
+        formData.append('query', options.query);
+      }
+
+      // Add session metadata fields
+      if (sessionInfo.metadata?.name) {
+        formData.append('name', sessionInfo.metadata.name);
+      }
+
+      if (sessionInfo.metadata?.tags && sessionInfo.metadata.tags.length > 0) {
+        const tagsJson = JSON.stringify(sessionInfo.metadata.tags);
+        formData.append('tags', tagsJson);
+      }
+
+      try {
+        // Send request to share provider using fetch
+        const response = await fetch(shareProviderUrl, {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const responseData = await response.json();
+
+        // Return share URL with replay parameter
+        if (responseData && responseData.url) {
+          const url = new URL(responseData.url);
+          url.searchParams.set('replay', '1');
+          return url.toString();
+        }
+
+        throw new Error('Invalid response from share provider');
+      } catch (error) {
+        console.error('Failed to upload to share provider:', error);
+        throw error;
+      }
+    };
+  }
+
+  /**
+   * Create a post-processor that uploads to a share provider
+   * @deprecated Use instance method createShareProviderProcessor() instead
    */
   static createShareProviderProcessor(
     shareProviderUrl: string,
