@@ -48,17 +48,7 @@ export const useScrollToBottom = ({
   const lastMessageCountRef = useRef<number>(0);
   const lastUserMessageIdRef = useRef<string | null>(null);
 
-  // Check if container is at bottom
-  const checkIsAtBottom = useCallback(() => {
-    const container = messagesContainerRef.current;
-    if (!container) return false;
 
-    const { scrollTop, scrollHeight, clientHeight } = container;
-    const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-
-    // Account for sub-pixel differences and rounding errors
-    return distanceFromBottom <= Math.max(threshold, 3);
-  }, [threshold]);
 
   // Handle scroll events
   const handleScroll = useCallback(() => {
