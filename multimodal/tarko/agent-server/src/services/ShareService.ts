@@ -7,6 +7,7 @@ import crypto from 'crypto';
 import { AgentEventStream, isAgentWebUIImplementationType } from '@tarko/interface';
 import { SessionItemInfo, StorageProvider } from '../storage';
 import { ShareUtils } from '../utils/share';
+import { AgentUIBuilder } from '@tarko/agent-ui-builder';
 import { SlugGenerator } from '../utils/slug-generator';
 import fs from 'fs';
 import path from 'path';
@@ -357,13 +358,13 @@ export class ShareService {
       // Merge web UI config with agent constructor config
       const mergedWebUIConfig = mergeWebUIConfig(this.appConfig.webui, this.server);
 
-      return ShareUtils.generateShareHtml(
+      return AgentUIBuilder.generateHTML({
         events,
         metadata,
-        this.appConfig.webui.staticPath,
-        versionInfo,
-        mergedWebUIConfig,
-      );
+        staticPath: this.appConfig.webui.staticPath,
+        serverInfo: versionInfo,
+        webUIConfig: mergedWebUIConfig,
+      });
     }
 
     // TODO: implement remote web ui
