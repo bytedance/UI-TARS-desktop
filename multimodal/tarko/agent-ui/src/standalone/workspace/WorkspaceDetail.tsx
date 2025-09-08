@@ -32,6 +32,7 @@ import { GenericResultRenderer } from './renderers/generic/GenericResultRenderer
 import { DeliverableRenderer } from './renderers/DeliverableRenderer';
 import { DiffRenderer } from './renderers/DiffRenderer';
 import { FileResultRenderer } from './renderers/FileResultRenderer';
+import { TabbedFilesRenderer } from './renderers/TabbedFilesRenderer';
 
 /**
  * Registry of content renderers that handle StandardPanelContent directly
@@ -59,6 +60,7 @@ const CONTENT_RENDERERS: Record<
   file_result: FileResultRenderer,
   diff_result: DiffRenderer,
   file: FileResultRenderer,
+  tabbed_files: TabbedFilesRenderer,
 };
 
 /**
