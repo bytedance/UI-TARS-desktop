@@ -5,10 +5,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import type {
-  AgentUIBuilderInputOptions,
-  UploadOptions,
-} from './types';
+import type { AgentUIBuilderInputOptions, UploadOptions } from './types';
 import { getStaticPath } from './static-path';
 
 /**
@@ -107,8 +104,8 @@ export class AgentUIBuilder {
     shareProviderUrl: string,
     options?: UploadOptions,
   ): Promise<string> {
-    const sessionId = this.input.sessionInfo.sessionId;
-    
+    const sessionId = this.input.sessionInfo.id;
+
     // Create form data using native FormData
     const formData = new FormData();
 
