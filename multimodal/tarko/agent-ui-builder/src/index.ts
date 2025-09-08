@@ -9,7 +9,7 @@ export * from './static-path';
 
 // Import for convenience exports
 import { AgentUIBuilder } from './builder';
-import type { AgentUIBuilderInputOptions, AgentUIBuilderResult, PostProcessor } from './types';
+import type { AgentUIBuilderInputOptions, AgentUIBuilderOutputOptions, AgentUIBuilderResult, PostProcessor } from './types';
 
 // Convenience exports for backward compatibility
 export const buildHTMLInMemory = (input: AgentUIBuilderInputOptions): Promise<AgentUIBuilderResult> =>
