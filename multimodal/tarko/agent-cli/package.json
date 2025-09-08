@@ -37,7 +37,7 @@
   "devDependencies": {
     "@tarko/agent-interface": "workspace:*",
     "@tarko/interface": "workspace:*",
-    "@tarko/web-ui": "workspace:*",
+    "@tarko/agent-ui": "workspace:*",
     "@tarko/agio": "workspace:*",
     "@tarko/config-loader": "workspace:*",
     "@clack/prompts": "0.11.0",

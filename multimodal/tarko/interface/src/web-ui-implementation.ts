@@ -168,7 +168,7 @@ export interface BaseAgentWebUIImplementation {
 export interface StaticAgentWebUIImplementation extends BaseAgentWebUIImplementation {
   type?: 'static';
   /**
-   * Web UI Static Path, example implementation: `@tarko/web-ui`.
+   * Web UI Static Path, example implementation: `@tarko/agent-ui`.
    */
   staticPath: string;
 }
