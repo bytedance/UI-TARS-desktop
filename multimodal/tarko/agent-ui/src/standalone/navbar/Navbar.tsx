@@ -76,7 +76,15 @@ export const Navbar: React.FC = () => {
   const logoType = React.useMemo(() => {
     const params = new URLSearchParams(window.location.search);
     const logoParam = params.get('logo');
-    return logoParam === 'agent-tars' ? 'agent-tars' : 'traffic-lights';
+    
+    // Support three modes: logo (default), traffic-lights, space
+    if (logoParam === 'traffic-lights') {
+      return 'traffic-lights';
+    } else if (logoParam === 'space') {
+      return 'space';
+    } else {
+      return 'logo'; // Default to logo (previously agent-tars)
+    }
   }, []);
 
   // Toggle dark mode
@@ -167,8 +175,11 @@ export const Navbar: React.FC = () => {
               <div className="traffic-light traffic-light-yellow" />
               <div className="traffic-light traffic-light-green" />
             </div>
+          ) : logoType === 'space' ? (
+            /* Space for traffic lights - just the margin without content */
+            <div className="mr-3" style={{ width: '54px' }} />
           ) : (
-            /* Agent TARS logo with configurable URL */
+            /* Logo (default) */
             <a href="http://agent-tars.com" target="blank" className="mr-3">
               <img src={logoUrl} alt={getAgentTitle()} className="w-6 h-6 rounded-lg" />
             </a>
