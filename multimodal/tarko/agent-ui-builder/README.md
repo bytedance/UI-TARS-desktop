@@ -25,23 +25,26 @@ pnpm add @tarko/agent-ui-builder
 ```typescript
 import { AgentUIBuilder } from '@tarko/agent-ui-builder';
 
-// Build HTML in memory with automatic static path resolution
-const result = await AgentUIBuilder.buildInMemory({
+// Build HTML in memory (default behavior)
+const result = await AgentUIBuilder.buildHTML({
   events: sessionEvents,
   sessionInfo: sessionMetadata,
-  // staticPath is now optional - will use built-in static files if not provided
+  // staticPath is optional - will use built-in static files if not provided
   serverInfo: versionInfo,
   uiConfig: uiConfig,
 });
 
-// Or explicitly provide a custom static path
-const resultWithCustomPath = await AgentUIBuilder.buildInMemory({
-  events: sessionEvents,
-  sessionInfo: sessionMetadata,
-  staticPath: '/custom/path/to/static/files',
-  serverInfo: versionInfo,
-  uiConfig: uiConfig,
-});
+// Or explicitly specify memory output
+const resultInMemory = await AgentUIBuilder.buildHTML(
+  {
+    events: sessionEvents,
+    sessionInfo: sessionMetadata,
+    staticPath: '/custom/path/to/static/files',
+    serverInfo: versionInfo,
+    uiConfig: uiConfig,
+  },
+  { destination: 'memory' },
+);
 
 console.log('Generated HTML:', result.html);
 console.log('Size:', result.metadata.size, 'bytes');
@@ -52,14 +55,19 @@ console.log('Size:', result.metadata.size, 'bytes');
 ```typescript
 import { AgentUIBuilder } from '@tarko/agent-ui-builder';
 
-const result = await AgentUIBuilder.buildToFile(
+const result = await AgentUIBuilder.buildHTML(
   {
     events: sessionEvents,
     sessionInfo: sessionMetadata,
     // staticPath is optional - will use built-in static files if not provided
   },
-  '/output/replay.html',
-  true // overwrite if exists
+  {
+    destination: 'file',
+    fileSystem: {
+      filePath: '/output/replay.html',
+      overwrite: true, // overwrite if exists
+    },
+  },
 );
 
 console.log('File written to:', result.filePath);
@@ -77,7 +85,16 @@ const shareProcessor = AgentUIBuilder.createShareProviderProcessor(
   { slug: 'my-session', query: 'original query' }
 );
 
-const result = await AgentUIBuilder.buildWithProcessor(input, shareProcessor);
+const result = await AgentUIBuilder.buildHTML(
+  {
+    events: sessionEvents,
+    sessionInfo: sessionMetadata,
+  },
+  {
+    destination: 'custom',
+    postProcessor: shareProcessor,
+  },
+);
 console.log('Share URL:', result.customResult);
 ```
 
@@ -120,21 +137,29 @@ const result = await AgentUIBuilder.build({
 
 ### AgentUIBuilder Methods
 
-- `AgentUIBuilder.buildInMemory()`: Generate HTML in memory
-- `AgentUIBuilder.buildToFile()`: Generate HTML and write to file
-- `AgentUIBuilder.buildWithProcessor()`: Generate HTML with custom post-processing
+- `AgentUIBuilder.buildHTML()`: **Unified API** - Generate HTML with configurable output options
+- `AgentUIBuilder.build()`: Low-level API for advanced use cases
+- `AgentUIBuilder.generateHTML()`: Generate HTML string only
 - `AgentUIBuilder.generateDefaultFilePath()`: Generate default output file path
 - `AgentUIBuilder.createShareProviderProcessor()`: Create share provider upload processor
 - `getStaticPath()`: Get static path with automatic fallback resolution
 - `getDefaultStaticPath()`: Get the default built-in static path
 - `isDefaultStaticPathValid()`: Check if default static path is valid
 
+### Output Destinations
+
+The unified `buildHTML()` method supports three output destinations:
+
+1. **Memory** (default): `{ destination: 'memory' }`
+2. **File**: `{ destination: 'file', fileSystem: { filePath, overwrite? } }`
+3. **Custom**: `{ destination: 'custom', postProcessor: (html, sessionInfo) => any }`
+
 ### Backward Compatibility
 
 For convenience, the following functions are also exported as standalone functions:
-- `buildHTMLInMemory` → `AgentUIBuilder.buildInMemory`
-- `buildHTMLToFile` → `AgentUIBuilder.buildToFile`
-- `buildHTMLWithProcessor` → `AgentUIBuilder.buildWithProcessor`
+- `buildHTMLInMemory` → `AgentUIBuilder.buildHTML(input, { destination: 'memory' })`
+- `buildHTMLToFile` → `AgentUIBuilder.buildHTML(input, { destination: 'file', ... })`
+- `buildHTMLWithProcessor` → `AgentUIBuilder.buildHTML(input, { destination: 'custom', ... })`
 - `generateDefaultFilePath` → `AgentUIBuilder.generateDefaultFilePath`
 - `createShareProviderProcessor` → `AgentUIBuilder.createShareProviderProcessor`
 

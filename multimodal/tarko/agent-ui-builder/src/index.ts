@@ -9,10 +9,30 @@ export * from './static-path';
 
 // Import for convenience exports
 import { AgentUIBuilder } from './builder';
+import type { AgentUIBuilderInputOptions, AgentUIBuilderResult, PostProcessor } from './types';
 
 // Convenience exports for backward compatibility
-export const buildHTMLInMemory = AgentUIBuilder.buildInMemory;
-export const buildHTMLToFile = AgentUIBuilder.buildToFile;
-export const buildHTMLWithProcessor = AgentUIBuilder.buildWithProcessor;
+export const buildHTMLInMemory = (input: AgentUIBuilderInputOptions): Promise<AgentUIBuilderResult> =>
+  AgentUIBuilder.buildHTML(input, { destination: 'memory' });
+
+export const buildHTMLToFile = (
+  input: AgentUIBuilderInputOptions,
+  filePath: string,
+  overwrite = false,
+): Promise<AgentUIBuilderResult> =>
+  AgentUIBuilder.buildHTML(input, {
+    destination: 'file',
+    fileSystem: { filePath, overwrite },
+  });
+
+export const buildHTMLWithProcessor = (
+  input: AgentUIBuilderInputOptions,
+  postProcessor: PostProcessor,
+): Promise<AgentUIBuilderResult> =>
+  AgentUIBuilder.buildHTML(input, {
+    destination: 'custom',
+    postProcessor,
+  });
+
 export const generateDefaultFilePath = AgentUIBuilder.generateDefaultFilePath;
 export const createShareProviderProcessor = AgentUIBuilder.createShareProviderProcessor;

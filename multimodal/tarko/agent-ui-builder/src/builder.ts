@@ -150,50 +150,21 @@ export class AgentUIBuilder {
   }
 
   /**
-   * Convenience method to build HTML and return it in memory
+   * Build HTML with specified input and output options
+   * This is the unified API that replaces buildInMemory, buildToFile, and buildWithProcessor
    */
-  static async buildInMemory(input: AgentUIBuilderInputOptions): Promise<AgentUIBuilderResult> {
-    return this.build({
-      input,
-      output: {
-        destination: 'memory',
-      },
-    });
-  }
-
-  /**
-   * Convenience method to build HTML and write it to a file
-   */
-  static async buildToFile(
+  static async buildHTML(
     input: AgentUIBuilderInputOptions,
-    filePath: string,
-    overwrite = false,
+    output?: AgentUIBuilderOutputOptions,
   ): Promise<AgentUIBuilderResult> {
-    return this.build({
-      input,
-      output: {
-        destination: 'file',
-        fileSystem: {
-          filePath,
-          overwrite,
-        },
-      },
-    });
-  }
+    // Default to memory output if no output specified
+    const defaultOutput: AgentUIBuilderOutputOptions = {
+      destination: 'memory',
+    };
 
-  /**
-   * Convenience method to build HTML with a custom post-processor
-   */
-  static async buildWithProcessor(
-    input: AgentUIBuilderInputOptions,
-    postProcessor: PostProcessor,
-  ): Promise<AgentUIBuilderResult> {
     return this.build({
       input,
-      output: {
-        destination: 'custom',
-        postProcessor,
-      },
+      output: output || defaultOutput,
     });
   }
 
