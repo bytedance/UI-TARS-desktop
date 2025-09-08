@@ -2,11 +2,34 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ShareButton } from '@/standalone/share';
 import { AboutModal } from './AboutModal';
 import { motion } from 'framer-motion';
-import { FiMoon, FiSun, FiInfo, FiCpu, FiFolder, FiZap, FiSettings, FiMonitor, FiCode, FiMoreHorizontal, FiShare, FiTerminal, FiGlobe } from 'react-icons/fi';
+import {
+  FiMoon,
+  FiSun,
+  FiInfo,
+  FiCpu,
+  FiFolder,
+  FiZap,
+  FiSettings,
+  FiMonitor,
+  FiCode,
+  FiMoreHorizontal,
+  FiShare,
+  FiTerminal,
+  FiGlobe,
+} from 'react-icons/fi';
 import { MdDesktopWindows } from 'react-icons/md';
 import { GoSidebarCollapse, GoSidebarExpand } from 'react-icons/go';
 
-import { Box, Typography, createTheme, ThemeProvider, Menu, MenuItem, Divider, IconButton } from '@mui/material';
+import {
+  Box,
+  Typography,
+  createTheme,
+  ThemeProvider,
+  Menu,
+  MenuItem,
+  Divider,
+  IconButton,
+} from '@mui/material';
 import { useLayout } from '@/common/hooks/useLayout';
 import { useSession } from '@/common/hooks/useSession';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
@@ -94,22 +117,28 @@ export const Navbar: React.FC = () => {
   const getNavItemStyle = (iconType: WorkspaceNavItemIcon = 'default') => {
     const styleMap = {
       code: {
-        className: "flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50/80 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-lg border border-emerald-200/60 dark:border-emerald-700/50 hover:bg-emerald-100/90 dark:hover:bg-emerald-800/40 hover:text-emerald-800 dark:hover:text-emerald-200 transition-all duration-200 text-xs font-medium backdrop-blur-sm hover:shadow-sm"
+        className:
+          'flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50/80 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-lg border border-emerald-200/60 dark:border-emerald-700/50 hover:bg-emerald-100/90 dark:hover:bg-emerald-800/40 hover:text-emerald-800 dark:hover:text-emerald-200 transition-all duration-200 text-xs font-medium backdrop-blur-sm hover:shadow-sm',
       },
       monitor: {
-        className: "flex items-center gap-1.5 px-3 py-1.5 bg-blue-50/80 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg border border-blue-200/60 dark:border-blue-700/50 hover:bg-blue-100/90 dark:hover:bg-blue-800/40 hover:text-blue-800 dark:hover:text-blue-200 transition-all duration-200 text-xs font-medium backdrop-blur-sm hover:shadow-sm"
+        className:
+          'flex items-center gap-1.5 px-3 py-1.5 bg-blue-50/80 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg border border-blue-200/60 dark:border-blue-700/50 hover:bg-blue-100/90 dark:hover:bg-blue-800/40 hover:text-blue-800 dark:hover:text-blue-200 transition-all duration-200 text-xs font-medium backdrop-blur-sm hover:shadow-sm',
       },
       terminal: {
-        className: "flex items-center gap-1.5 px-3 py-1.5 bg-purple-50/80 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg border border-purple-200/60 dark:border-purple-700/50 hover:bg-purple-100/90 dark:hover:bg-purple-800/40 hover:text-purple-800 dark:hover:text-purple-200 transition-all duration-200 text-xs font-medium backdrop-blur-sm hover:shadow-sm"
+        className:
+          'flex items-center gap-1.5 px-3 py-1.5 bg-purple-50/80 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg border border-purple-200/60 dark:border-purple-700/50 hover:bg-purple-100/90 dark:hover:bg-purple-800/40 hover:text-purple-800 dark:hover:text-purple-200 transition-all duration-200 text-xs font-medium backdrop-blur-sm hover:shadow-sm',
       },
       browser: {
-        className: "flex items-center gap-1.5 px-3 py-1.5 bg-cyan-50/80 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 rounded-lg border border-cyan-200/60 dark:border-cyan-700/50 hover:bg-cyan-100/90 dark:hover:bg-cyan-800/40 hover:text-cyan-800 dark:hover:text-cyan-200 transition-all duration-200 text-xs font-medium backdrop-blur-sm hover:shadow-sm"
+        className:
+          'flex items-center gap-1.5 px-3 py-1.5 bg-cyan-50/80 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 rounded-lg border border-cyan-200/60 dark:border-cyan-700/50 hover:bg-cyan-100/90 dark:hover:bg-cyan-800/40 hover:text-cyan-800 dark:hover:text-cyan-200 transition-all duration-200 text-xs font-medium backdrop-blur-sm hover:shadow-sm',
       },
       desktop: {
-        className: "flex items-center gap-1.5 px-3 py-1.5 bg-orange-50/80 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-lg border border-orange-200/60 dark:border-orange-700/50 hover:bg-orange-100/90 dark:hover:bg-orange-800/40 hover:text-orange-800 dark:hover:text-orange-200 transition-all duration-200 text-xs font-medium backdrop-blur-sm hover:shadow-sm"
+        className:
+          'flex items-center gap-1.5 px-3 py-1.5 bg-orange-50/80 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-lg border border-orange-200/60 dark:border-orange-700/50 hover:bg-orange-100/90 dark:hover:bg-orange-800/40 hover:text-orange-800 dark:hover:text-orange-200 transition-all duration-200 text-xs font-medium backdrop-blur-sm hover:shadow-sm',
       },
       default: {
-        className: "flex items-center gap-1.5 px-3 py-1.5 bg-slate-50/80 dark:bg-slate-800/30 text-slate-700 dark:text-slate-300 rounded-lg border border-slate-200/60 dark:border-slate-700/50 hover:bg-slate-100/90 dark:hover:bg-slate-700/40 hover:text-slate-800 dark:hover:text-slate-200 transition-all duration-200 text-xs font-medium backdrop-blur-sm hover:shadow-sm"
+        className:
+          'flex items-center gap-1.5 px-3 py-1.5 bg-slate-50/80 dark:bg-slate-800/30 text-slate-700 dark:text-slate-300 rounded-lg border border-slate-200/60 dark:border-slate-700/50 hover:bg-slate-100/90 dark:hover:bg-slate-700/40 hover:text-slate-800 dark:hover:text-slate-200 transition-all duration-200 text-xs font-medium backdrop-blur-sm hover:shadow-sm',
       },
     };
     return styleMap[iconType];
@@ -163,7 +192,10 @@ export const Navbar: React.FC = () => {
 
         {/* Center section - Agent and Model info display - absolutely positioned for true centering */}
         <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <DynamicNavbarCenter sessionMetadata={sessionMetadata} activeSessionId={activeSessionId} />
+          <DynamicNavbarCenter
+            sessionMetadata={sessionMetadata}
+            activeSessionId={activeSessionId}
+          />
         </div>
 
         {/* Right section - workspace nav items, then About, Dark mode, Share */}
@@ -242,18 +274,24 @@ export const Navbar: React.FC = () => {
                 '& .MuiPaper-root': {
                   minWidth: 200,
                   mt: 1,
-                  backgroundColor: isDarkMode ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                  backgroundColor: isDarkMode
+                    ? 'rgba(30, 41, 59, 0.95)'
+                    : 'rgba(255, 255, 255, 0.95)',
                   backdropFilter: 'blur(12px)',
-                  border: isDarkMode ? '1px solid rgba(71, 85, 105, 0.3)' : '1px solid rgba(226, 232, 240, 0.8)',
+                  border: isDarkMode
+                    ? '1px solid rgba(71, 85, 105, 0.3)'
+                    : '1px solid rgba(226, 232, 240, 0.8)',
                   borderRadius: '12px',
-                  boxShadow: isDarkMode 
+                  boxShadow: isDarkMode
                     ? '0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2)'
                     : '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
                 },
                 '& .MuiMenuItem-root': {
                   color: isDarkMode ? 'rgba(226, 232, 240, 0.9)' : 'rgba(51, 65, 85, 0.9)',
                   '&:hover': {
-                    backgroundColor: isDarkMode ? 'rgba(71, 85, 105, 0.3)' : 'rgba(241, 245, 249, 0.8)',
+                    backgroundColor: isDarkMode
+                      ? 'rgba(71, 85, 105, 0.3)'
+                      : 'rgba(241, 245, 249, 0.8)',
                   },
                 },
                 '& .MuiDivider-root': {
@@ -262,26 +300,27 @@ export const Navbar: React.FC = () => {
               }}
             >
               {/* Workspace navigation items in dropdown */}
-              {!isReplayMode && workspaceNavItems.length > 0 && [
-                ...workspaceNavItems.map((navItem) => {
-                  const IconComponent = getNavItemIcon(navItem.icon);
-                  return (
-                    <MenuItem
-                      // eslint-disable-next-line @secretlint/secretlint-rule-pattern
-                      key={navItem.title}
-                      onClick={() => {
-                        handleNavItemClick(navItem.link);
-                        handleMobileMenuClose();
-                      }}
-                      sx={{ gap: 1.5 }}
-                    >
-                      <IconComponent size={16} style={{ opacity: 0.7 }} />
-                      {navItem.title}
-                    </MenuItem>
-                  );
-                }),
-                <Divider key="divider" />,
-              ]}
+              {!isReplayMode &&
+                workspaceNavItems.length > 0 && [
+                  ...workspaceNavItems.map((navItem) => {
+                    const IconComponent = getNavItemIcon(navItem.icon);
+                    return (
+                      <MenuItem
+                        // eslint-disable-next-line @secretlint/secretlint-rule-pattern
+                        key={navItem.title}
+                        onClick={() => {
+                          handleNavItemClick(navItem.link);
+                          handleMobileMenuClose();
+                        }}
+                        sx={{ gap: 1.5 }}
+                      >
+                        <IconComponent size={16} style={{ opacity: 0.7 }} />
+                        {navItem.title}
+                      </MenuItem>
+                    );
+                  }),
+                  <Divider key="divider" />,
+                ]}
 
               {/* About option */}
               <MenuItem
@@ -303,7 +342,11 @@ export const Navbar: React.FC = () => {
                 }}
                 sx={{ gap: 1.5 }}
               >
-                {isDarkMode ? <FiSun size={16} style={{ opacity: 0.7 }} /> : <FiMoon size={16} style={{ opacity: 0.7 }} />}
+                {isDarkMode ? (
+                  <FiSun size={16} style={{ opacity: 0.7 }} />
+                ) : (
+                  <FiMoon size={16} style={{ opacity: 0.7 }} />
+                )}
                 {isDarkMode ? 'Light Mode' : 'Dark Mode'}
               </MenuItem>
 
@@ -429,77 +472,81 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
     : `${Math.max((modelTextWidth / totalTextWidth) * availableWidth * 0.85, 180)}px`;
 
   return (
-    <div ref={containerRef} className="flex items-center gap-3 min-w-0" style={{ maxWidth: '100%' }}>
-        {/* Agent Name Badge - Enhanced with colorful gradient */}
-        {sessionMetadata?.agentInfo?.name && (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 0.75,
-              px: 1.25,
-              py: 0.375,
-              height: '28px',
-              minHeight: '28px',
+    <div
+      ref={containerRef}
+      className="flex items-center gap-3 min-w-0"
+      style={{ maxWidth: '100%' }}
+    >
+      {/* Agent Name Badge - Enhanced with colorful gradient */}
+      {sessionMetadata?.agentInfo?.name && (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 0.75,
+            px: 1.25,
+            py: 0.375,
+            height: '28px',
+            minHeight: '28px',
 
-              // Colorful gradient background for Agent
-              background: isDarkMode
-                ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 50%, rgba(168, 85, 247, 0.15) 100%)'
-                : 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.08) 50%, rgba(168, 85, 247, 0.08) 100%)',
-              backdropFilter: 'blur(8px)',
-              border: isDarkMode
-                ? '1px solid rgba(139, 92, 246, 0.25)'
-                : '1px solid rgba(99, 102, 241, 0.15)',
+            // Colorful gradient background for Agent
+            background: isDarkMode
+              ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 50%, rgba(168, 85, 247, 0.15) 100%)'
+              : 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.08) 50%, rgba(168, 85, 247, 0.08) 100%)',
+            backdropFilter: 'blur(8px)',
+            border: isDarkMode
+              ? '1px solid rgba(139, 92, 246, 0.25)'
+              : '1px solid rgba(99, 102, 241, 0.15)',
+            borderRadius: '8px',
+            position: 'relative',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              inset: 0,
               borderRadius: '8px',
-              position: 'relative',
-              '&::before': {
-                content: '""',
-                position: 'absolute',
-                inset: 0,
-                borderRadius: '8px',
-                background: isDarkMode
-                  ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 50%, rgba(168, 85, 247, 0.05) 100%)'
-                  : 'linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(139, 92, 246, 0.03) 50%, rgba(168, 85, 247, 0.03) 100%)',
-                zIndex: -1,
-              },
-              '&:hover': {
-                background: isDarkMode
-                  ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(139, 92, 246, 0.25) 50%, rgba(168, 85, 247, 0.25) 100%)'
-                  : 'linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(139, 92, 246, 0.12) 50%, rgba(168, 85, 247, 0.12) 100%)',
-                border: isDarkMode
-                  ? '1px solid rgba(139, 92, 246, 0.35)'
-                  : '1px solid rgba(99, 102, 241, 0.25)',
-                boxShadow: isDarkMode
-                  ? '0 2px 8px -1px rgba(99, 102, 241, 0.15)'
-                  : '0 2px 8px -1px rgba(99, 102, 241, 0.08)',
-              },
+              background: isDarkMode
+                ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 50%, rgba(168, 85, 247, 0.05) 100%)'
+                : 'linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(139, 92, 246, 0.03) 50%, rgba(168, 85, 247, 0.03) 100%)',
+              zIndex: -1,
+            },
+            '&:hover': {
+              background: isDarkMode
+                ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(139, 92, 246, 0.25) 50%, rgba(168, 85, 247, 0.25) 100%)'
+                : 'linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(139, 92, 246, 0.12) 50%, rgba(168, 85, 247, 0.12) 100%)',
+              border: isDarkMode
+                ? '1px solid rgba(139, 92, 246, 0.35)'
+                : '1px solid rgba(99, 102, 241, 0.25)',
+              boxShadow: isDarkMode
+                ? '0 2px 8px -1px rgba(99, 102, 241, 0.15)'
+                : '0 2px 8px -1px rgba(99, 102, 241, 0.08)',
+            },
+          }}
+        >
+          <FiZap size={12} color={isDarkMode ? '#a5b4fc' : '#6366f1'} style={{ flexShrink: 0 }} />
+          <Typography
+            variant="body2"
+            sx={{
+              fontWeight: 500,
+              fontSize: '12px',
+              color: isDarkMode ? '#e0e7ff' : '#4338ca',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
             }}
+            title={sessionMetadata.agentInfo.name}
           >
-            <FiZap size={12} color={isDarkMode ? '#a5b4fc' : '#6366f1'} style={{ flexShrink: 0 }} />
-            <Typography
-              variant="body2"
-              sx={{
-                fontWeight: 500,
-                fontSize: '12px',
-                color: isDarkMode ? '#e0e7ff' : '#4338ca',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-              title={sessionMetadata.agentInfo.name}
-            >
-              {sessionMetadata.agentInfo.name}
-            </Typography>
-          </Box>
-        )}
+            {sessionMetadata.agentInfo.name}
+          </Typography>
+        </Box>
+      )}
 
-        {/* Model Selector - Interactive dropdown for model selection */}
-        <NavbarModelSelector
-          className="min-w-0"
-          activeSessionId={activeSessionId}
-          sessionMetadata={sessionMetadata}
-          isDarkMode={isDarkMode}
-        />
+      {/* Model Selector - Interactive dropdown for model selection */}
+      <NavbarModelSelector
+        className="min-w-0"
+        activeSessionId={activeSessionId}
+        sessionMetadata={sessionMetadata}
+        isDarkMode={isDarkMode}
+      />
     </div>
   );
 };
