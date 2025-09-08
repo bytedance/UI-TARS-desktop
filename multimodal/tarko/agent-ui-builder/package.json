@@ -1,5 +1,5 @@
 {
-  "name": "@tarko/shared-utils",
+  "name": "@tarko/agent-ui-builder",
   "version": "0.3.0-beta.10",
   "description": "Core and tiny shared utilities for Tarko",
   "main": "dist/index.js",
