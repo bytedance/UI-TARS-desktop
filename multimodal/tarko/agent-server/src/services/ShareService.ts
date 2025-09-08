@@ -30,7 +30,7 @@ export class ShareService {
     private appConfig: AgentAppConfig,
     private storageProvider: StorageProvider | null,
     private server?: AgentServer,
-  ) { }
+  ) {}
 
   /**
    * Share a session
@@ -146,7 +146,6 @@ export class ShareService {
     workspace: string,
     imageCache: Map<string, string>,
   ): Promise<AgentEventStream.Event> {
-
     let content = '';
 
     // Extract content based on event type
@@ -360,10 +359,10 @@ export class ShareService {
 
       return AgentUIBuilder.generateHTML({
         events,
-        metadata,
+        sessionInfo: metadata,
         staticPath: this.appConfig.webui.staticPath,
         serverInfo: versionInfo,
-        webUIConfig: mergedWebUIConfig,
+        uiConfig: mergedWebUIConfig,
       });
     }
 

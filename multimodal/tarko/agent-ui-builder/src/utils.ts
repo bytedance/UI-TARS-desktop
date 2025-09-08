@@ -79,7 +79,7 @@ export function createShareProviderProcessor(
     query?: string;
   },
 ): PostProcessor {
-  return async (html, metadata) => {
+  return async (html, sessionInfo) => {
     // Create form data using native FormData
     const formData = new FormData();
 
@@ -101,12 +101,12 @@ export function createShareProviderProcessor(
     }
 
     // Add session metadata fields
-    if (metadata.metadata?.name) {
-      formData.append('name', metadata.metadata.name);
+    if (sessionInfo.metadata?.name) {
+      formData.append('name', sessionInfo.metadata.name);
     }
 
-    if (metadata.metadata?.tags && metadata.metadata.tags.length > 0) {
-      const tagsJson = JSON.stringify(metadata.metadata.tags);
+    if (sessionInfo.metadata?.tags && sessionInfo.metadata.tags.length > 0) {
+      const tagsJson = JSON.stringify(sessionInfo.metadata.tags);
       formData.append('tags', tagsJson);
     }
 

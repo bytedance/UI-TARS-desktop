@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentEventStream, AgentServerVersionInfo, SessionItemInfo } from '@tarko/interface';
+import { AgentEventStream, AgentServerVersionInfo, SessionItemInfo, AgentWebUIImplementation } from '@tarko/interface';
 
 /**
  * Input options for building agent UI replay HTML
@@ -12,8 +12,8 @@ export interface AgentUIBuilderInputOptions {
   /** Session events to include in the replay */
   events: AgentEventStream.Event[];
 
-  /** Session metadata */
-  metadata: SessionItemInfo;
+  /** Session information */
+  sessionInfo: SessionItemInfo;
 
   /** Path to static web UI files */
   staticPath: string;
@@ -22,7 +22,7 @@ export interface AgentUIBuilderInputOptions {
   serverInfo?: AgentServerVersionInfo;
 
   /** Optional web UI configuration to inject */
-  webUIConfig?: Record<string, any>;
+  uiConfig?: AgentWebUIImplementation;
 }
 
 /**

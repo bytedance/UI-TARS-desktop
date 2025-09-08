@@ -71,7 +71,7 @@ describe('AgentUIBuilder', () => {
     it('should generate HTML with injected data', () => {
       const html = AgentUIBuilder.generateHTML({
         events: mockEvents,
-        metadata: mockMetadata,
+        sessionInfo: mockMetadata,
         staticPath: mockStaticPath,
       });
 
@@ -85,7 +85,7 @@ describe('AgentUIBuilder', () => {
       expect(() => {
         AgentUIBuilder.generateHTML({
           events: mockEvents,
-          metadata: mockMetadata,
+          sessionInfo: mockMetadata,
           staticPath: '/nonexistent/path',
         });
       }).toThrow('Static web UI not found');
@@ -100,7 +100,7 @@ describe('AgentUIBuilder', () => {
 
       const html = AgentUIBuilder.generateHTML({
         events: mockEvents,
-        metadata: mockMetadata,
+        sessionInfo: mockMetadata,
         staticPath: mockStaticPath,
         serverInfo,
       });
@@ -110,13 +110,13 @@ describe('AgentUIBuilder', () => {
     });
 
     it('should include web UI config when provided', () => {
-      const webUIConfig = { theme: 'dark', debug: true };
+      const uiConfig = { type: 'static', staticPath: mockStaticPath, theme: 'dark' } as any;
 
       const html = AgentUIBuilder.generateHTML({
         events: mockEvents,
-        metadata: mockMetadata,
+        sessionInfo: mockMetadata,
         staticPath: mockStaticPath,
-        webUIConfig,
+        uiConfig,
       });
 
       expect(html).toContain('window.AGENT_WEB_UI_CONFIG');
@@ -128,7 +128,7 @@ describe('AgentUIBuilder', () => {
     it('should build HTML in memory', async () => {
       const result = await buildHTMLInMemory({
         events: mockEvents,
-        metadata: mockMetadata,
+        sessionInfo: mockMetadata,
         staticPath: mockStaticPath,
       });
 
@@ -147,7 +147,7 @@ describe('AgentUIBuilder', () => {
       const result = await buildHTMLToFile(
         {
           events: mockEvents,
-          metadata: mockMetadata,
+          sessionInfo: mockMetadata,
           staticPath: mockStaticPath,
         },
         outputPath,
@@ -166,7 +166,7 @@ describe('AgentUIBuilder', () => {
       await buildHTMLToFile(
         {
           events: mockEvents,
-          metadata: mockMetadata,
+          sessionInfo: mockMetadata,
           staticPath: mockStaticPath,
         },
         nestedPath,
@@ -183,7 +183,7 @@ describe('AgentUIBuilder', () => {
         buildHTMLToFile(
           {
             events: mockEvents,
-            metadata: mockMetadata,
+            sessionInfo: mockMetadata,
             staticPath: mockStaticPath,
           },
           outputPath,

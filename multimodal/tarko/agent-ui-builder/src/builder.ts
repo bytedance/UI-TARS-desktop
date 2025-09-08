@@ -24,7 +24,7 @@ export class AgentUIBuilder {
    * Based on ShareUtils.generateShareHtml but extracted for reuse
    */
   static generateHTML(input: AgentUIBuilderInputOptions): string {
-    const { events, metadata, staticPath, serverInfo, webUIConfig } = input;
+    const { events, sessionInfo, staticPath, serverInfo, uiConfig } = input;
 
     if (!staticPath) {
       throw new Error('Static path is required for HTML generation');
@@ -39,21 +39,17 @@ export class AgentUIBuilder {
       let htmlContent = fs.readFileSync(indexPath, 'utf8');
 
       const safeEventJson = this.safeJsonStringify(events);
-      const safeMetadataJson = this.safeJsonStringify(metadata);
+      const safeSessionInfoJson = this.safeJsonStringify(sessionInfo);
       const safeVersionJson = serverInfo ? this.safeJsonStringify(serverInfo) : null;
-      const safeWebUIConfigJson = webUIConfig ? this.safeJsonStringify(webUIConfig) : null;
+      const safeUIConfigJson = uiConfig ? this.safeJsonStringify(uiConfig) : null;
 
       // Inject session data, event stream, version info, and web UI config
       const scriptTag = `<script>
         window.AGENT_REPLAY_MODE = true;
-        window.AGENT_SESSION_DATA = ${safeMetadataJson};
+        window.AGENT_SESSION_DATA = ${safeSessionInfoJson};
         window.AGENT_EVENT_STREAM = ${safeEventJson};${
           safeVersionJson ? `\n        window.AGENT_VERSION_INFO = ${safeVersionJson};` : ''
-        }${
-          safeWebUIConfigJson
-            ? `\n        window.AGENT_WEB_UI_CONFIG = ${safeWebUIConfigJson};`
-            : ''
-        }
+        }${safeUIConfigJson ? `\n        window.AGENT_WEB_UI_CONFIG = ${safeUIConfigJson};` : ''}
       </script>
       <script>
         // Add a fallback mechanism for when routes don't match in shared HTML files
@@ -137,7 +133,7 @@ export class AgentUIBuilder {
           throw new Error('Post-processor function is required when destination is "custom"');
         }
 
-        const customResult = await output.postProcessor(html, input.metadata);
+        const customResult = await output.postProcessor(html, input.sessionInfo);
         if (customResult !== undefined) {
           result.customResult = customResult;
         }
