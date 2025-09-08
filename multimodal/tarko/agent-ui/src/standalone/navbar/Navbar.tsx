@@ -130,7 +130,9 @@ export const Navbar: React.FC = () => {
         )}
 
         {/* Center section - Agent and Model info display with dynamic sizing */}
-        <DynamicNavbarCenter sessionMetadata={sessionMetadata} activeSessionId={activeSessionId} />
+        <div className="flex-1 flex justify-center">
+          <DynamicNavbarCenter sessionMetadata={sessionMetadata} activeSessionId={activeSessionId} />
+        </div>
 
         {/* Right section - workspace nav items, then About, Dark mode, Share */}
         <div className="flex items-center space-x-1 md:space-x-2">
@@ -289,8 +291,7 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
     : `${Math.max((modelTextWidth / totalTextWidth) * availableWidth * 0.85, 180)}px`;
 
   return (
-    <div ref={containerRef} className="flex-1 flex justify-center min-w-0 mx-[10vw]">
-      <div className="flex items-center gap-3 min-w-0" style={{ maxWidth: '100%' }}>
+    <div ref={containerRef} className="flex items-center gap-3 min-w-0" style={{ maxWidth: '100%' }}>
         {/* Agent Name Badge - Enhanced with colorful gradient */}
         {sessionMetadata?.agentInfo?.name && (
           <Box
@@ -361,7 +362,6 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
           sessionMetadata={sessionMetadata}
           isDarkMode={isDarkMode}
         />
-      </div>
     </div>
   );
 };
