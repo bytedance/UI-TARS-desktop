@@ -65,16 +65,7 @@ export interface AgentUIBuilderOutputOptions {
   postProcessor?: PostProcessor;
 }
 
-/**
- * Complete builder options
- */
-export interface AgentUIBuilderOptions {
-  /** Input configuration */
-  input: AgentUIBuilderInputOptions;
 
-  /** Output configuration */
-  output: AgentUIBuilderOutputOptions;
-}
 
 /**
  * Result of the build operation

@@ -137,9 +137,8 @@ const result = await AgentUIBuilder.build({
 
 ### AgentUIBuilder Methods
 
-- `AgentUIBuilder.buildHTML()`: **Unified API** - Generate HTML with configurable output options
-- `AgentUIBuilder.build()`: Low-level API for advanced use cases
-- `AgentUIBuilder.generateHTML()`: Generate HTML string only
+- `AgentUIBuilder.buildHTML()`: **Main API** - Generate HTML with configurable output options
+- `AgentUIBuilder.generateHTML()`: Generate HTML string only (low-level)
 - `AgentUIBuilder.generateDefaultFilePath()`: Generate default output file path
 - `AgentUIBuilder.createShareProviderProcessor()`: Create share provider upload processor
 - `getStaticPath()`: Get static path with automatic fallback resolution

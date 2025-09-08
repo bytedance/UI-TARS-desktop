@@ -7,7 +7,6 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import {
-  AgentUIBuilderOptions,
   AgentUIBuilderResult,
   AgentUIBuilderInputOptions,
   AgentUIBuilderOutputOptions,
@@ -82,10 +81,19 @@ export class AgentUIBuilder {
   }
 
   /**
-   * Build agent UI replay HTML with specified options
+   * Build HTML with specified input and output options
+   * This is the main API for generating agent UI replay HTML
    */
-  static async build(options: AgentUIBuilderOptions): Promise<AgentUIBuilderResult> {
-    const { input, output } = options;
+  static async buildHTML(
+    input: AgentUIBuilderInputOptions,
+    output?: AgentUIBuilderOutputOptions,
+  ): Promise<AgentUIBuilderResult> {
+    // Default to memory output if no output specified
+    const defaultOutput: AgentUIBuilderOutputOptions = {
+      destination: 'memory',
+    };
+    
+    const finalOutput = output || defaultOutput;
 
     // Generate HTML content
     const html = this.generateHTML(input);
@@ -103,17 +111,17 @@ export class AgentUIBuilder {
     };
 
     // Handle different output destinations
-    switch (output.destination) {
+    switch (finalOutput.destination) {
       case 'memory':
         // HTML is already in result, nothing more to do
         break;
 
       case 'file':
-        if (!output.fileSystem) {
+        if (!finalOutput.fileSystem) {
           throw new Error('File system options are required when destination is "file"');
         }
 
-        const { filePath, overwrite = false } = output.fileSystem;
+        const { filePath, overwrite = false } = finalOutput.fileSystem;
 
         // Check if file exists and overwrite is false
         if (!overwrite && fs.existsSync(filePath)) {
@@ -132,40 +140,21 @@ export class AgentUIBuilder {
         break;
 
       case 'custom':
-        if (!output.postProcessor) {
+        if (!finalOutput.postProcessor) {
           throw new Error('Post-processor function is required when destination is "custom"');
         }
 
-        const customResult = await output.postProcessor(html, input.sessionInfo);
+        const customResult = await finalOutput.postProcessor(html, input.sessionInfo);
         if (customResult !== undefined) {
           result.customResult = customResult;
         }
         break;
 
       default:
-        throw new Error(`Unsupported output destination: ${(output as any).destination}`);
+        throw new Error(`Unsupported output destination: ${(finalOutput as any).destination}`);
     }
 
     return result;
-  }
-
-  /**
-   * Build HTML with specified input and output options
-   * This is the unified API that replaces buildInMemory, buildToFile, and buildWithProcessor
-   */
-  static async buildHTML(
-    input: AgentUIBuilderInputOptions,
-    output?: AgentUIBuilderOutputOptions,
-  ): Promise<AgentUIBuilderResult> {
-    // Default to memory output if no output specified
-    const defaultOutput: AgentUIBuilderOutputOptions = {
-      destination: 'memory',
-    };
-
-    return this.build({
-      input,
-      output: output || defaultOutput,
-    });
   }
 
   /**
