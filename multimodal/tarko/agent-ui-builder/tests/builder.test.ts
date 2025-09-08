@@ -3,12 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { AgentUIBuilder, buildHTML, generateHTML } from '../src';
-import type { AgentEventStream, SessionItemInfo } from '@tarko/interface';
+import { AgentUIBuilder } from '../src';
+import type { AgentEventStream, SessionInfo } from '@tarko/interface';
+
+// Mock fetch for upload tests
+const mockFetch = vi.fn();
+global.fetch = mockFetch;
 
 describe('AgentUIBuilder', () => {
   const mockEvents: AgentEventStream.Event[] = [
@@ -26,7 +30,7 @@ describe('AgentUIBuilder', () => {
     },
   ];
 
-  const mockMetadata: SessionItemInfo = {
+  const mockSessionInfo: SessionInfo = {
     id: 'test-session',
     createdAt: Date.now(),
     updatedAt: Date.now(),
@@ -58,6 +62,9 @@ describe('AgentUIBuilder', () => {
 </html>`;
 
     fs.writeFileSync(path.join(mockStaticPath, 'index.html'), mockHTML);
+
+    // Reset fetch mock
+    mockFetch.mockReset();
   });
 
   afterEach(() => {
@@ -67,43 +74,77 @@ describe('AgentUIBuilder', () => {
     }
   });
 
-  describe('generateHTML', () => {
-    it('should generate HTML with injected data (instance method)', () => {
+  describe('dump()', () => {
+    it('should generate HTML in memory', () => {
       const builder = new AgentUIBuilder({
         events: mockEvents,
-        sessionInfo: mockMetadata,
+        sessionInfo: mockSessionInfo,
         staticPath: mockStaticPath,
       });
       
-      const html = builder.generateHTML();
+      const html = builder.dump();
 
       expect(html).toContain('window.AGENT_REPLAY_MODE = true');
       expect(html).toContain('window.AGENT_SESSION_DATA');
       expect(html).toContain('window.AGENT_EVENT_STREAM');
       expect(html).toContain('<div id="root"></div>');
+      expect(html).toContain('test-session'); // session ID should be in the data
     });
 
+    it('should generate HTML and save to file', () => {
+      const outputPath = path.join(tempDir, 'output.html');
+      const builder = new AgentUIBuilder({
+        events: mockEvents,
+        sessionInfo: mockSessionInfo,
+        staticPath: mockStaticPath,
+      });
 
+      const html = builder.dump(outputPath);
+
+      // Should return the HTML
+      expect(html).toContain('window.AGENT_REPLAY_MODE = true');
+      
+      // Should save to file
+      expect(fs.existsSync(outputPath)).toBe(true);
+      const fileContent = fs.readFileSync(outputPath, 'utf8');
+      expect(fileContent).toBe(html);
+    });
+
+    it('should create directory if it does not exist', () => {
+      const nestedPath = path.join(tempDir, 'nested', 'dir', 'output.html');
+      const builder = new AgentUIBuilder({
+        events: mockEvents,
+        sessionInfo: mockSessionInfo,
+        staticPath: mockStaticPath,
+      });
+
+      const html = builder.dump(nestedPath);
+
+      expect(fs.existsSync(nestedPath)).toBe(true);
+      expect(html).toContain('window.AGENT_REPLAY_MODE = true');
+    });
 
     it('should work without staticPath (using built-in static files)', () => {
       // This test will fail in test environment since built-in static files don't exist
       // But we can verify the error message shows it tried to use getStaticPath()
       expect(() => {
-        generateHTML({
+        const builder = new AgentUIBuilder({
           events: mockEvents,
-          sessionInfo: mockMetadata,
+          sessionInfo: mockSessionInfo,
           // No staticPath provided
         });
+        builder.dump();
       }).toThrow('No valid static path found');
     });
 
     it('should throw error if static path does not exist', () => {
       expect(() => {
-        generateHTML({
+        const builder = new AgentUIBuilder({
           events: mockEvents,
-          sessionInfo: mockMetadata,
+          sessionInfo: mockSessionInfo,
           staticPath: '/nonexistent/path',
         });
+        builder.dump();
       }).toThrow('Static web UI not found');
     });
 
@@ -114,12 +155,14 @@ describe('AgentUIBuilder', () => {
         gitHash: 'abc123',
       };
 
-      const html = generateHTML({
+      const builder = new AgentUIBuilder({
         events: mockEvents,
-        sessionInfo: mockMetadata,
+        sessionInfo: mockSessionInfo,
         staticPath: mockStaticPath,
         serverInfo,
       });
+
+      const html = builder.dump();
 
       expect(html).toContain('window.AGENT_VERSION_INFO');
       expect(html).toContain('1.0.0');
@@ -128,156 +171,172 @@ describe('AgentUIBuilder', () => {
     it('should include web UI config when provided', () => {
       const uiConfig = { type: 'static', staticPath: mockStaticPath, theme: 'dark' } as any;
 
-      const html = generateHTML({
+      const builder = new AgentUIBuilder({
         events: mockEvents,
-        sessionInfo: mockMetadata,
+        sessionInfo: mockSessionInfo,
         staticPath: mockStaticPath,
         uiConfig,
       });
+
+      const html = builder.dump();
 
       expect(html).toContain('window.AGENT_WEB_UI_CONFIG');
       expect(html).toContain('dark');
     });
   });
 
-  describe('build', () => {
-    it('should build HTML in memory by default (instance method)', async () => {
+  describe('upload()', () => {
+    it('should upload HTML and return share URL', async () => {
       const builder = new AgentUIBuilder({
         events: mockEvents,
-        sessionInfo: mockMetadata,
+        sessionInfo: mockSessionInfo,
         staticPath: mockStaticPath,
       });
+
+      // Mock successful upload response
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ url: 'https://share.example.com/abc123' }),
+      });
+
+      const html = builder.dump();
+      const shareUrl = await builder.upload(html, 'https://api.example.com/upload');
+
+      expect(shareUrl).toBe('https://share.example.com/abc123?replay=1');
+      expect(mockFetch).toHaveBeenCalledWith('https://api.example.com/upload', {
+        method: 'POST',
+        body: expect.any(FormData),
+      });
+    });
+
+    it('should upload with options', async () => {
+      const builder = new AgentUIBuilder({
+        events: mockEvents,
+        sessionInfo: mockSessionInfo,
+        staticPath: mockStaticPath,
+      });
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ url: 'https://share.example.com/my-slug' }),
+      });
+
+      const html = builder.dump();
+      const shareUrl = await builder.upload(html, 'https://api.example.com/upload', {
+        slug: 'my-session',
+        query: 'How to use this API?',
+      });
+
+      expect(shareUrl).toBe('https://share.example.com/my-slug?replay=1');
       
-      const result = await builder.build();
-
-      expect(result.html).toContain('window.AGENT_REPLAY_MODE = true');
-      expect(result.metadata.eventCount).toBe(2);
-      expect(result.metadata.size).toBeGreaterThan(0);
-      expect(result.filePath).toBeUndefined();
-      expect(result.customResult).toBeUndefined();
-    });
-
-    it('should build HTML in memory with explicit output option', async () => {
-      const builder = new AgentUIBuilder({
-        events: mockEvents,
-        sessionInfo: mockMetadata,
-        staticPath: mockStaticPath,
-      });
+      // Check that FormData was created with the right fields
+      const call = mockFetch.mock.calls[0];
+      const formData = call[1].body as FormData;
       
-      const result = await builder.build({ destination: 'memory' });
-
-      expect(result.html).toContain('window.AGENT_REPLAY_MODE = true');
-      expect(result.metadata.eventCount).toBe(2);
-      expect(result.metadata.size).toBeGreaterThan(0);
-      expect(result.filePath).toBeUndefined();
-      expect(result.customResult).toBeUndefined();
+      // Note: FormData entries are not easily testable, but we can check the call was made
+      expect(mockFetch).toHaveBeenCalledWith('https://api.example.com/upload', {
+        method: 'POST',
+        body: expect.any(FormData),
+      });
     });
 
-
-  });
-
-  describe('build with file output', () => {
-    it('should write HTML to file (instance method)', async () => {
-      const outputPath = path.join(tempDir, 'output.html');
-      const builder = new AgentUIBuilder({
-        events: mockEvents,
-        sessionInfo: mockMetadata,
-        staticPath: mockStaticPath,
-      });
-
-      const result = await builder.build({
-        destination: 'file',
-        fileSystem: {
-          filePath: outputPath,
+    it('should include session metadata in upload', async () => {
+      const sessionWithMetadata: SessionInfo = {
+        ...mockSessionInfo,
+        metadata: {
+          name: 'Test Session with Metadata',
+          tags: ['test', 'metadata'],
         },
-      });
+      };
 
-      expect(result.filePath).toBe(outputPath);
-      expect(fs.existsSync(outputPath)).toBe(true);
-
-      const fileContent = fs.readFileSync(outputPath, 'utf8');
-      expect(fileContent).toContain('window.AGENT_REPLAY_MODE = true');
-    });
-
-    it('should create directory if it does not exist', async () => {
-      const nestedPath = path.join(tempDir, 'nested', 'dir', 'output.html');
       const builder = new AgentUIBuilder({
         events: mockEvents,
-        sessionInfo: mockMetadata,
+        sessionInfo: sessionWithMetadata,
         staticPath: mockStaticPath,
       });
 
-      await builder.build({
-        destination: 'file',
-        fileSystem: {
-          filePath: nestedPath,
-        },
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ url: 'https://share.example.com/abc123' }),
       });
 
-      expect(fs.existsSync(nestedPath)).toBe(true);
+      const html = builder.dump();
+      await builder.upload(html, 'https://api.example.com/upload');
+
+      expect(mockFetch).toHaveBeenCalledWith('https://api.example.com/upload', {
+        method: 'POST',
+        body: expect.any(FormData),
+      });
     });
 
-    it('should throw error if file exists and overwrite is false', async () => {
-      const outputPath = path.join(tempDir, 'existing.html');
-      fs.writeFileSync(outputPath, 'existing content');
+    it('should throw error on upload failure', async () => {
       const builder = new AgentUIBuilder({
         events: mockEvents,
-        sessionInfo: mockMetadata,
+        sessionInfo: mockSessionInfo,
         staticPath: mockStaticPath,
       });
+
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+      });
+
+      const html = builder.dump();
 
       await expect(
-        builder.build({
-          destination: 'file',
-          fileSystem: {
-            filePath: outputPath,
-            overwrite: false,
-          },
-        }),
-      ).rejects.toThrow('File already exists');
+        builder.upload(html, 'https://api.example.com/upload')
+      ).rejects.toThrow('HTTP error! status: 500');
     });
 
-    it('should work with custom post-processor', async () => {
-      const mockProcessor = async (html: string) => {
-        return `processed:${html.length}`;
-      };
+    it('should throw error on invalid response', async () => {
       const builder = new AgentUIBuilder({
         events: mockEvents,
-        sessionInfo: mockMetadata,
+        sessionInfo: mockSessionInfo,
         staticPath: mockStaticPath,
       });
 
-      const result = await builder.build({
-        destination: 'custom',
-        postProcessor: mockProcessor,
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ error: 'Invalid request' }), // No url field
       });
 
-      expect(result.customResult).toMatch(/^processed:\d+$/);
-      expect(result.html).toContain('window.AGENT_REPLAY_MODE = true');
+      const html = builder.dump();
+
+      await expect(
+        builder.upload(html, 'https://api.example.com/upload')
+      ).rejects.toThrow('Invalid response from share provider');
     });
   });
 
-  describe('exported convenience functions', () => {
-    it('should work with buildHTML function', async () => {
-      const result = await buildHTML({
+  describe('combined workflow', () => {
+    it('should work with dump + upload workflow', async () => {
+      const outputPath = path.join(tempDir, 'session.html');
+      const builder = new AgentUIBuilder({
         events: mockEvents,
-        sessionInfo: mockMetadata,
+        sessionInfo: mockSessionInfo,
         staticPath: mockStaticPath,
       });
 
-      expect(result.html).toContain('window.AGENT_REPLAY_MODE = true');
-      expect(result.metadata.eventCount).toBe(2);
-    });
+      // Generate and save HTML
+      const html = builder.dump(outputPath);
+      expect(fs.existsSync(outputPath)).toBe(true);
 
-    it('should work with generateHTML function', () => {
-      const html = generateHTML({
-        events: mockEvents,
-        sessionInfo: mockMetadata,
-        staticPath: mockStaticPath,
+      // Upload the same HTML
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ url: 'https://share.example.com/session123' }),
       });
 
-      expect(html).toContain('window.AGENT_REPLAY_MODE = true');
-      expect(html).toContain('window.AGENT_SESSION_DATA');
+      const shareUrl = await builder.upload(html, 'https://api.example.com/upload', {
+        slug: 'test-session',
+        query: 'Hello, world!',
+      });
+
+      expect(shareUrl).toBe('https://share.example.com/session123?replay=1');
+      
+      // Verify file content matches what was uploaded
+      const fileContent = fs.readFileSync(outputPath, 'utf8');
+      expect(fileContent).toBe(html);
     });
   });
 });

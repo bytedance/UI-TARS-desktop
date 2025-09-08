@@ -1,15 +1,14 @@
 # @tarko/agent-ui-builder
 
-Agent UI builder for generating replay HTML files from agent session data.
+Simple and clean agent UI builder for generating replay HTML files from agent session data.
 
 ## Features
 
-- **Multiple Output Destinations**: In-memory, file system, or custom post-processing
-- **Type Safety**: Strict TypeScript interfaces for all options
-- **Code Reuse**: Shared implementation with Agent CLI and Agent Server
+- **Simple API**: Just two methods - `dump()` and `upload()`
+- **Type Safety**: Strict TypeScript interfaces
 - **Built-in Static Files**: Includes pre-built agent UI static files
 - **Smart Path Resolution**: Automatic static path detection with fallbacks
-- **Extensible**: Support for custom post-processors and upload providers
+- **Share Provider Support**: Built-in upload functionality for sharing
 - **Isomorphic Design**: Prepared for Python SDK compatibility
 
 ## Installation
@@ -23,9 +22,8 @@ pnpm add @tarko/agent-ui-builder
 ### Basic Usage
 
 ```typescript
-import { AgentUIBuilder, buildHTML } from '@tarko/agent-ui-builder';
+import { AgentUIBuilder } from '@tarko/agent-ui-builder';
 
-// Object-oriented approach (recommended)
 const builder = new AgentUIBuilder({
   events: sessionEvents,
   sessionInfo: sessionMetadata,
@@ -34,166 +32,164 @@ const builder = new AgentUIBuilder({
   uiConfig: uiConfig,
 });
 
-// Build HTML in memory (default behavior)
-const result = await builder.build();
-
-// Or explicitly specify memory output
-const resultInMemory = await builder.build({ destination: 'memory' });
-
-// Convenience function for one-off builds
-const quickResult = await buildHTML({
-  events: sessionEvents,
-  sessionInfo: sessionMetadata,
-});
-
-console.log('Generated HTML:', result.html);
-console.log('Size:', result.metadata.size, 'bytes');
+// Generate HTML in memory
+const html = builder.dump();
+console.log('Generated HTML:', html);
 ```
 
-### Write to File
+### Save to File
 
 ```typescript
 import { AgentUIBuilder } from '@tarko/agent-ui-builder';
 
-// Object-oriented approach
 const builder = new AgentUIBuilder({
   events: sessionEvents,
   sessionInfo: sessionMetadata,
-  // staticPath is optional - will use built-in static files if not provided
 });
 
-const result = await builder.build({
-  destination: 'file',
-  fileSystem: {
-    filePath: '/output/replay.html',
-    overwrite: true, // overwrite if exists
-  },
-});
-
-// Or use convenience function for one-off builds
-const quickResult = await buildHTML(
-  { events: sessionEvents, sessionInfo: sessionMetadata },
-  {
-    destination: 'file',
-    fileSystem: { filePath: '/output/replay.html', overwrite: true },
-  },
-);
-
-console.log('File written to:', result.filePath);
+// Generate HTML and save to file
+const html = builder.dump('/path/to/output/replay.html');
+console.log('HTML saved to file and returned:', html);
 ```
 
-### Custom Post-Processing
+### Upload to Share Provider
 
 ```typescript
 import { AgentUIBuilder } from '@tarko/agent-ui-builder';
 
-// Object-oriented approach
 const builder = new AgentUIBuilder({
   events: sessionEvents,
   sessionInfo: sessionMetadata,
 });
+
+// Generate HTML
+const html = builder.dump();
 
 // Upload to share provider
-const shareProcessor = AgentUIBuilder.createShareProviderProcessor(
-  'https://share-provider.example.com/upload',
-  sessionId,
-  { slug: 'my-session', query: 'original query' }
-);
-
-const result = await builder.build({
-  destination: 'custom',
-  postProcessor: shareProcessor,
+const shareUrl = await builder.upload(html, 'https://share-provider.example.com/upload', {
+  slug: 'my-session',
+  query: 'original user query'
 });
 
-// Or use convenience function
-const quickResult = await buildHTML(
-  { events: sessionEvents, sessionInfo: sessionMetadata },
-  { destination: 'custom', postProcessor: shareProcessor },
-);
-console.log('Share URL:', result.customResult);
+console.log('Share URL:', shareUrl);
 ```
 
-### Advanced Usage
+### Combined Workflow
 
 ```typescript
 import { AgentUIBuilder } from '@tarko/agent-ui-builder';
 
-const result = await AgentUIBuilder.build({
-  input: {
-    events: sessionEvents,
-    sessionInfo: sessionMetadata,
-    // staticPath is optional - will use built-in static files if not provided
-    serverInfo: versionInfo,
-    uiConfig: uiConfig,
-  },
-  output: {
-    destination: 'custom',
-    postProcessor: async (html, metadata) => {
-      // Custom processing logic
-      const processedHtml = await processHTML(html);
-      return await uploadToCustomProvider(processedHtml);
-    },
-  },
+const builder = new AgentUIBuilder({
+  events: sessionEvents,
+  sessionInfo: sessionMetadata,
 });
+
+// Generate and save HTML
+const html = builder.dump('/local/backup/replay.html');
+
+// Upload the same HTML for sharing
+const shareUrl = await builder.upload(html, shareProviderUrl, {
+  slug: 'user-session-backup',
+  query: 'How to build a web app?'
+});
+
+console.log('Local file saved and share URL:', shareUrl);
 ```
 
 ## API Reference
 
+### AgentUIBuilder
+
+#### Constructor
+
+```typescript
+new AgentUIBuilder(input: AgentUIBuilderInputOptions)
+```
+
+**Parameters:**
+- `input.events`: Array of agent events
+- `input.sessionInfo`: Session metadata
+- `input.staticPath?`: Optional path to static web UI files
+- `input.serverInfo?`: Optional server version info
+- `input.uiConfig?`: Optional web UI configuration
+
+#### Methods
+
+##### `dump(filePath?: string): string`
+
+Generates HTML from session data and optionally saves to file.
+
+**Parameters:**
+- `filePath?`: Optional file path to save HTML
+
+**Returns:** Generated HTML string
+
+**Example:**
+```typescript
+// Generate HTML only
+const html = builder.dump();
+
+// Generate HTML and save to file
+const html = builder.dump('/path/to/file.html');
+```
+
+##### `upload(html: string, shareProviderUrl: string, options?: UploadOptions): Promise<string>`
+
+Uploads HTML to a share provider and returns the share URL.
+
+**Parameters:**
+- `html`: HTML content to upload
+- `shareProviderUrl`: URL of the share provider endpoint
+- `options?`: Upload options
+  - `slug?`: Custom slug for the share URL
+  - `query?`: Original user query for metadata
+
+**Returns:** Promise resolving to share URL with replay parameter
+
+**Example:**
+```typescript
+const shareUrl = await builder.upload(html, 'https://api.example.com/share', {
+  slug: 'my-session',
+  query: 'How to use the API?'
+});
+```
+
 ### Types
 
-- `AgentUIBuilderInputOptions`: Input configuration for HTML generation
-- `AgentUIBuilderOutputOptions`: Output destination and processing options
-- `AgentUIBuilderResult`: Result of the build operation
-- `PostProcessor`: Function type for custom post-processing
+#### `AgentUIBuilderInputOptions`
 
-### Classes
+```typescript
+interface AgentUIBuilderInputOptions {
+  events: AgentEventStream.Event[];
+  sessionInfo: SessionInfo;
+  staticPath?: string;
+  serverInfo?: AgentServerVersionInfo;
+  uiConfig?: AgentWebUIImplementation;
+}
+```
 
-- `AgentUIBuilder`: Main builder class with static methods
+#### `UploadOptions`
 
-### AgentUIBuilder API
+```typescript
+interface UploadOptions {
+  slug?: string;  // Custom slug for the share URL
+  query?: string; // Original user query for metadata
+}
+```
 
-**Instance Methods (Recommended)**:
-- `new AgentUIBuilder(input)`: Create builder instance with session data
-- `builder.build(output?)`: Build HTML with specified output options
-- `builder.generateHTML()`: Generate HTML string only
+## Design Philosophy
 
-**Static Utilities**:
-- `AgentUIBuilder.generateDefaultFilePath()`: Generate default output file path
-- `AgentUIBuilder.createShareProviderProcessor()`: Create share provider upload processor
+This package follows a simple and clean design:
 
-**Convenience Functions** (exported from index):
-- `buildHTML(input, output?)`: One-off build function
-- `generateHTML(input)`: Generate HTML string only
+1. **Two Core Methods**: 
+   - `dump()` for generating (and optionally saving) HTML
+   - `upload()` for sharing HTML content
 
-**Utility Functions**:
-- `getStaticPath()`: Get static path with automatic fallback resolution
-- `getDefaultStaticPath()`: Get the default built-in static path
-- `isDefaultStaticPathValid()`: Check if default static path is valid
+2. **No Complex Configurations**: Simple parameters, clear responsibilities
 
-### Output Destinations
+3. **Flexible Workflow**: Generate once, use multiple times (save locally + upload for sharing)
 
-The unified `buildHTML()` method supports three output destinations:
-
-1. **Memory** (default): `{ destination: 'memory' }`
-2. **File**: `{ destination: 'file', fileSystem: { filePath, overwrite? } }`
-3. **Custom**: `{ destination: 'custom', postProcessor: (html, sessionInfo) => any }`
-
-### Backward Compatibility
-
-For convenience, the following functions are also exported as standalone functions:
-- `buildHTMLInMemory` → `new AgentUIBuilder(input).build({ destination: 'memory' })`
-- `buildHTMLToFile` → `new AgentUIBuilder(input).build({ destination: 'file', ... })`
-- `buildHTMLWithProcessor` → `new AgentUIBuilder(input).build({ destination: 'custom', ... })`
-- `generateDefaultFilePath` → `AgentUIBuilder.generateDefaultFilePath`
-- `createShareProviderProcessor` → `AgentUIBuilder.createShareProviderProcessor`
-
-### Design Philosophy
-
-**Object-Oriented Design**: The main API uses proper OOP patterns where you create an instance with your session data, then call methods on it. This is more intuitive and allows for better state management.
-
-**Static Methods for Convenience**: For quick one-off operations, static methods are available that internally create instances.
-
-**Flexible Output Options**: The same input can be processed to different outputs (memory, file, custom) without duplicating the HTML generation logic.
+4. **Type Safety**: Full TypeScript support with clear interfaces
 
 ## Python SDK Compatibility
 
@@ -201,12 +197,24 @@ This package is designed with isomorphic principles to enable a Python SDK with 
 
 ```python
 # Future Python SDK (same API design)
-from tarko_agent_ui_builder import AgentUIBuilder, build_html_in_memory
+from tarko_agent_ui_builder import AgentUIBuilder
 
-result = await build_html_in_memory({
+builder = AgentUIBuilder({
     'events': session_events,
-    'metadata': session_metadata,
+    'session_info': session_metadata,
     'static_path': '/path/to/web-ui/static',
+})
+
+# Generate HTML
+html = builder.dump()
+
+# Save to file
+html = builder.dump('/path/to/file.html')
+
+# Upload for sharing
+share_url = await builder.upload(html, provider_url, {
+    'slug': 'my-session',
+    'query': 'user query'
 })
 ```
 
