@@ -56,7 +56,7 @@ describe('static-path', () => {
 
     it('should throw error when custom path is invalid', () => {
       const invalidPath = path.join(tempDir, 'nonexistent');
-      
+
       expect(() => {
         getStaticPath(invalidPath);
       }).toThrow('Custom static path invalid');

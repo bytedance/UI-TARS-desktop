@@ -45,7 +45,7 @@ describe('AgentUIBuilder', () => {
     tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-ui-builder-test-'));
     mockStaticPath = path.join(tempDir, 'static');
     fs.mkdirSync(mockStaticPath, { recursive: true });
-    
+
     // Create mock index.html
     const mockHTML = `<!DOCTYPE html>
 <html>
@@ -56,7 +56,7 @@ describe('AgentUIBuilder', () => {
   <div id="root"></div>
 </body>
 </html>`;
-    
+
     fs.writeFileSync(path.join(mockStaticPath, 'index.html'), mockHTML);
   });
 
@@ -143,33 +143,33 @@ describe('AgentUIBuilder', () => {
   describe('buildHTMLToFile', () => {
     it('should write HTML to file', async () => {
       const outputPath = path.join(tempDir, 'output.html');
-      
+
       const result = await buildHTMLToFile(
         {
           events: mockEvents,
           metadata: mockMetadata,
           staticPath: mockStaticPath,
         },
-        outputPath
+        outputPath,
       );
 
       expect(result.filePath).toBe(outputPath);
       expect(fs.existsSync(outputPath)).toBe(true);
-      
+
       const fileContent = fs.readFileSync(outputPath, 'utf8');
       expect(fileContent).toContain('window.AGENT_REPLAY_MODE = true');
     });
 
     it('should create directory if it does not exist', async () => {
       const nestedPath = path.join(tempDir, 'nested', 'dir', 'output.html');
-      
+
       await buildHTMLToFile(
         {
           events: mockEvents,
           metadata: mockMetadata,
           staticPath: mockStaticPath,
         },
-        nestedPath
+        nestedPath,
       );
 
       expect(fs.existsSync(nestedPath)).toBe(true);
@@ -178,7 +178,7 @@ describe('AgentUIBuilder', () => {
     it('should throw error if file exists and overwrite is false', async () => {
       const outputPath = path.join(tempDir, 'existing.html');
       fs.writeFileSync(outputPath, 'existing content');
-      
+
       await expect(
         buildHTMLToFile(
           {
@@ -187,8 +187,8 @@ describe('AgentUIBuilder', () => {
             staticPath: mockStaticPath,
           },
           outputPath,
-          false
-        )
+          false,
+        ),
       ).rejects.toThrow('File already exists');
     });
   });

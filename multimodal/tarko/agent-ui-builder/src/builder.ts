@@ -14,7 +14,7 @@ import {
 
 /**
  * Agent UI Builder - Core class for generating replay HTML files
- * 
+ *
  * Provides functionality to build HTML files from agent session data
  * with support for multiple output destinations and post-processing.
  */
@@ -25,7 +25,7 @@ export class AgentUIBuilder {
    */
   static generateHTML(input: AgentUIBuilderInputOptions): string {
     const { events, metadata, staticPath, serverInfo, webUIConfig } = input;
-    
+
     if (!staticPath) {
       throw new Error('Static path is required for HTML generation');
     }
@@ -48,9 +48,7 @@ export class AgentUIBuilder {
         window.AGENT_REPLAY_MODE = true;
         window.AGENT_SESSION_DATA = ${safeMetadataJson};
         window.AGENT_EVENT_STREAM = ${safeEventJson};${
-          safeVersionJson
-            ? `\n        window.AGENT_VERSION_INFO = ${safeVersionJson};`
-            : ''
+          safeVersionJson ? `\n        window.AGENT_VERSION_INFO = ${safeVersionJson};` : ''
         }${
           safeWebUIConfigJson
             ? `\n        window.AGENT_WEB_UI_CONFIG = ${safeWebUIConfigJson};`
@@ -89,13 +87,13 @@ export class AgentUIBuilder {
    */
   static async build(options: AgentUIBuilderOptions): Promise<AgentUIBuilderResult> {
     const { input, output } = options;
-    
+
     // Generate HTML content
     const html = this.generateHTML(input);
     const timestamp = Date.now();
     const size = Buffer.byteLength(html, 'utf8');
     const eventCount = input.events.length;
-    
+
     const result: AgentUIBuilderResult = {
       html,
       metadata: {
@@ -110,41 +108,41 @@ export class AgentUIBuilder {
       case 'memory':
         // HTML is already in result, nothing more to do
         break;
-        
+
       case 'file':
         if (!output.fileSystem) {
           throw new Error('File system options are required when destination is "file"');
         }
-        
+
         const { filePath, overwrite = false } = output.fileSystem;
-        
+
         // Check if file exists and overwrite is false
         if (!overwrite && fs.existsSync(filePath)) {
           throw new Error(`File already exists: ${filePath}. Set overwrite to true to replace it.`);
         }
-        
+
         // Ensure directory exists
         const dir = path.dirname(filePath);
         if (!fs.existsSync(dir)) {
           fs.mkdirSync(dir, { recursive: true });
         }
-        
+
         // Write HTML to file
         fs.writeFileSync(filePath, html, 'utf8');
         result.filePath = filePath;
         break;
-        
+
       case 'custom':
         if (!output.postProcessor) {
           throw new Error('Post-processor function is required when destination is "custom"');
         }
-        
+
         const customResult = await output.postProcessor(html, input.metadata);
         if (customResult !== undefined) {
           result.customResult = customResult;
         }
         break;
-        
+
       default:
         throw new Error(`Unsupported output destination: ${(output as any).destination}`);
     }

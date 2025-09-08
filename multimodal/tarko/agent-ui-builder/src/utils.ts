@@ -6,11 +6,7 @@
 import path from 'path';
 import os from 'os';
 import { AgentUIBuilder } from './builder';
-import {
-  AgentUIBuilderInputOptions,
-  AgentUIBuilderResult,
-  PostProcessor,
-} from './types';
+import { AgentUIBuilderInputOptions, AgentUIBuilderResult, PostProcessor } from './types';
 
 /**
  * Convenience function to build HTML and return it in memory
@@ -86,54 +82,54 @@ export function createShareProviderProcessor(
   return async (html, metadata) => {
     // Create form data using native FormData
     const formData = new FormData();
-    
+
     // Create a File object from the HTML content
     const fileName = `agent-replay-${sessionId}-${Date.now()}.html`;
     const file = new File([html], fileName, { type: 'text/html' });
-    
+
     formData.append('file', file);
     formData.append('sessionId', sessionId);
     formData.append('type', 'html');
-    
+
     // Add additional metadata fields if provided
     if (options?.slug) {
       formData.append('slug', options.slug);
     }
-    
+
     if (options?.query) {
       formData.append('query', options.query);
     }
-    
+
     // Add session metadata fields
     if (metadata.metadata?.name) {
       formData.append('name', metadata.metadata.name);
     }
-    
+
     if (metadata.metadata?.tags && metadata.metadata.tags.length > 0) {
       const tagsJson = JSON.stringify(metadata.metadata.tags);
       formData.append('tags', tagsJson);
     }
-    
+
     try {
       // Send request to share provider using fetch
       const response = await fetch(shareProviderUrl, {
         method: 'POST',
         body: formData,
       });
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const responseData = await response.json();
-      
+
       // Return share URL with replay parameter
       if (responseData && responseData.url) {
         const url = new URL(responseData.url);
         url.searchParams.set('replay', '1');
         return url.toString();
       }
-      
+
       throw new Error('Invalid response from share provider');
     } catch (error) {
       console.error('Failed to upload to share provider:', error);
