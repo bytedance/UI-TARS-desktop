@@ -99,22 +99,72 @@ export class ShareService {
         serverInfo,
         uiConfig: mergedWebUIConfig,
       });
-      const shareHtml = builder.generateHTML();
 
       // Upload if requested and provider is configured
       if (upload && this.appConfig.share?.provider) {
-        const shareUrl = await this.uploadShareHtml(shareHtml, sessionId, metadata, agent);
+        // Generate normalized slug if agent is available
+        let normalizedSlug = '';
+        let originalQuery = '';
+
+        if (this.storageProvider && agent) {
+          try {
+            const events = await this.storageProvider.getSessionEvents(sessionId);
+            const firstUserMessage = events.find((e) => e.type === 'user_message');
+
+            if (firstUserMessage && firstUserMessage.content) {
+              originalQuery =
+                typeof firstUserMessage.content === 'string'
+                  ? firstUserMessage.content
+                  : firstUserMessage.content.find((c) => c.type === 'text')?.text || '';
+
+              if (originalQuery) {
+                const slugGenerator = new SlugGenerator(agent);
+                normalizedSlug = await slugGenerator.generateSlug(originalQuery);
+
+                // Additional safety check to ensure slug is URL-safe
+                normalizedSlug = normalizedSlug.replace(/[^\x00-\x7F]+/g, '').replace(/[^\w-]/g, '');
+              }
+            }
+          } catch (error) {
+            console.error('Failed to extract query for normalized slug:', error);
+          }
+        }
+
+        if (normalizedSlug) {
+          // Generate 6-digit hash from sessionId to avoid conflicts
+          const sessionHash = await this.generateSessionHash(sessionId);
+          normalizedSlug = `${normalizedSlug}-${sessionHash}`;
+        } else {
+          // fallback to sessionId
+          normalizedSlug = sessionId;
+        }
+
+        // Use the unified build API with post-processor
+        const postProcessor = AgentUIBuilder.createShareProviderProcessor(
+          this.appConfig.share.provider,
+          sessionId,
+          {
+            slug: normalizedSlug,
+            query: originalQuery,
+          },
+        );
+
+        const result = await builder.build({
+          post: postProcessor,
+        });
+
         return {
           success: true,
-          url: shareUrl,
+          url: result.customResult!,
           sessionId,
         };
       }
 
-      // Return HTML content if not uploading
+      // Return HTML content if not uploading - use memory destination
+      const result = await builder.build();
       return {
         success: true,
-        html: shareHtml,
+        html: result.html,
         sessionId,
       };
     } catch (error) {
@@ -356,75 +406,7 @@ export class ShareService {
     return mimeTypes[ext] || 'application/octet-stream';
   }
 
-  /**
-   * Upload share HTML to provider
-   */
-  private async uploadShareHtml(
-    html: string,
-    sessionId: string,
-    sessionInfo: SessionInfo,
-    agent?: IAgent,
-  ): Promise<string> {
-    if (!this.appConfig.share?.provider) {
-      throw new Error('Share provider not configured');
-    }
 
-    // Generate normalized slug if agent is available
-    let normalizedSlug = '';
-    let originalQuery = '';
-
-    if (this.storageProvider && agent) {
-      try {
-        const events = await this.storageProvider.getSessionEvents(sessionId);
-        const firstUserMessage = events.find((e) => e.type === 'user_message');
-
-        if (firstUserMessage && firstUserMessage.content) {
-          originalQuery =
-            typeof firstUserMessage.content === 'string'
-              ? firstUserMessage.content
-              : firstUserMessage.content.find((c) => c.type === 'text')?.text || '';
-
-          if (originalQuery) {
-            const slugGenerator = new SlugGenerator(agent);
-            normalizedSlug = await slugGenerator.generateSlug(originalQuery);
-
-            // Additional safety check to ensure slug is URL-safe
-            normalizedSlug = normalizedSlug.replace(/[^\x00-\x7F]+/g, '').replace(/[^\w-]/g, '');
-          }
-        }
-      } catch (error) {
-        console.error('Failed to extract query for normalized slug:', error);
-      }
-    }
-
-    if (normalizedSlug) {
-      // Generate 6-digit hash from sessionId to avoid conflicts
-      const sessionHash = await this.generateSessionHash(sessionId);
-      normalizedSlug = `${normalizedSlug}-${sessionHash}`;
-    } else {
-      // fallback to sessionId
-      normalizedSlug = sessionId;
-    }
-
-    if (!this.appConfig.share?.provider) {
-      throw new Error('Share provider not configured');
-    }
-
-    // Use the share provider processor from agent-ui-builder
-    const processor = AgentUIBuilder.createShareProviderProcessor(this.appConfig.share.provider, sessionId, {
-      slug: normalizedSlug,
-      query: originalQuery,
-    });
-
-    // Execute the processor with the HTML and metadata
-    const result = await processor(html, sessionInfo);
-
-    if (!result) {
-      throw new Error('Failed to upload to share provider');
-    }
-
-    return result;
-  }
 
   /**
    * Generate 6-digit hash from sessionId (Cloudflare Worker compatible)
