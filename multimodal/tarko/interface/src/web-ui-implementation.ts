@@ -192,10 +192,10 @@ export type AgentWebUIImplementation =
  */
 export type AgentWebUIImplementationByType<T extends AgentWebUIImplementationType> =
   T extends 'static'
-  ? StaticAgentWebUIImplementation
-  : T extends 'remote'
-  ? RemoteAgentWebUIImplementation
-  : never;
+    ? StaticAgentWebUIImplementation
+    : T extends 'remote'
+      ? RemoteAgentWebUIImplementation
+      : never;
 
 /**
  * Type guard to check if implementation is of specific type
