@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { StandardPanelContent } from '../types/panelContent';
 import { FiFile, FiAlertCircle } from 'react-icons/fi';
-import { CodeBlock } from '../components/CodeBlock';
+import { CodeEditor } from '@/sdk/code-editor';
 import { getFileTypeInfo } from '../utils/fileTypeUtils';
 
 interface FileContent {
@@ -24,24 +24,19 @@ const parseReadMultipleFilesContent = (content: any): FileContent[] => {
   }
 
   const files: FileContent[] = [];
-
-  content.forEach((item) => {
-    if (
-      !item ||
-      typeof item !== 'object' ||
-      item.type !== 'text' ||
-      typeof item.text !== 'string'
-    ) {
+  
+  content.forEach(item => {
+    if (!item || typeof item !== 'object' || item.type !== 'text' || typeof item.text !== 'string') {
       return;
     }
 
     const text = item.text;
     const lines = text.split('\n');
-
+    
     // Parse each file from the text
     let currentFile: FileContent | null = null;
     let currentContent: string[] = [];
-
+    
     for (const line of lines) {
       // Check if this line starts a new file (format: "path:")
       const filePathMatch = line.match(/^([^:]+):\s*$/);
@@ -51,7 +46,7 @@ const parseReadMultipleFilesContent = (content: any): FileContent[] => {
           currentFile.content = currentContent.join('\n');
           files.push(currentFile);
         }
-
+        
         // Start new file
         currentFile = {
           path: filePathMatch[1].trim(),
@@ -73,14 +68,14 @@ const parseReadMultipleFilesContent = (content: any): FileContent[] => {
         currentContent.push(line);
       }
     }
-
+    
     // Save last file
     if (currentFile) {
       currentFile.content = currentContent.join('\n');
       files.push(currentFile);
     }
   });
-
+  
   return files;
 };
 
@@ -109,6 +104,17 @@ const getLanguage = (extension: string): string => {
   return langMap[extension] || 'text';
 };
 
+/**
+ * Format file size in bytes
+ */
+const formatBytes = (bytes: number): string => {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
 export const TabbedFilesRenderer: React.FC<TabbedFilesRendererProps> = ({
   panelContent,
   onAction,
@@ -135,88 +141,64 @@ export const TabbedFilesRenderer: React.FC<TabbedFilesRendererProps> = ({
   const language = getLanguage(extension);
 
   return (
-    <div className="h-full flex flex-col bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
-      {/* Tab Bar */}
-      <div className="flex-shrink-0 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
-          {files.map((file, index) => {
-            const { fileName: tabFileName } = getFileTypeInfo(file.path);
-            const isActive = index === activeTab;
-
-            return (
-              <button
-                key={index}
-                onClick={() => setActiveTab(index)}
-                className={`
-                  flex-shrink-0 px-4 py-3 text-sm font-medium border-b-2 transition-colors
-                  ${isActive
-                    ? 'border-blue-500 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
-                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'
-                  }
-                `}
-              >
-                <div className="flex items-center space-x-2">
-                  {file.error ? (
-                    <FiAlertCircle className="text-red-500" size={14} />
-                  ) : (
-                    <FiFile size={14} />
-                  )}
-                  <span className="truncate max-w-32">{tabFileName}</span>
-                </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate max-w-48">
-                  {file.path}
-                </div>
-              </button>
-            );
-          })}
-        </div>
+    <div className="space-y-4">
+      {/* Compact Tab Bar */}
+      <div className="flex overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 border-b border-gray-200 dark:border-gray-700">
+        {files.map((file, index) => {
+          const { fileName: tabFileName } = getFileTypeInfo(file.path);
+          const isActive = index === activeTab;
+          
+          return (
+            <button
+              key={index}
+              onClick={() => setActiveTab(index)}
+              className={`
+                flex-shrink-0 px-3 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap
+                ${isActive 
+                  ? 'border-blue-500 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20' 
+                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'
+                }
+              `}
+            >
+              <div className="flex items-center space-x-1.5">
+                {file.error ? (
+                  <FiAlertCircle className="text-red-500" size={12} />
+                ) : (
+                  <FiFile size={12} />
+                )}
+                <span className="truncate max-w-24">{tabFileName}</span>
+              </div>
+            </button>
+          );
+        })}
       </div>
 
-      {/* File Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* File Header */}
-        <div className="flex-shrink-0 px-4 py-2 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              {activeFile.error ? (
-                <FiAlertCircle className="text-red-500" size={16} />
-              ) : (
-                <FiFile className="text-gray-500 dark:text-gray-400" size={16} />
-              )}
-              <span className="font-medium text-gray-900 dark:text-gray-100">{fileName}</span>
-              {extension && (
-                <span className="text-xs px-2 py-1 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded">
-                  {extension.toUpperCase()}
-                </span>
-              )}
+      {/* File Content with CodeEditor */}
+      <div className="overflow-hidden">
+        {activeFile.error ? (
+          <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <div className="flex items-center space-x-2 text-red-600 dark:text-red-400">
+              <FiAlertCircle size={16} />
+              <span className="font-medium">Error reading file</span>
             </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 font-mono">
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+              {activeFile.error}
+            </p>
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-500 font-mono">
               {activeFile.path}
-            </div>
+            </p>
           </div>
-        </div>
-
-        {/* File Content Area */}
-        <div className="flex-1 overflow-auto">
-          {activeFile.error ? (
-            <div className="p-4">
-              <div className="flex items-center space-x-2 text-red-600 dark:text-red-400">
-                <FiAlertCircle size={16} />
-                <span className="font-medium">Error reading file</span>
-              </div>
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{activeFile.error}</p>
-            </div>
-          ) : (
-            <div className="h-full">
-              <CodeBlock
-                code={activeFile.content}
-                language={language}
-                showLineNumbers
-                className="h-full"
-              />
-            </div>
-          )}
-        </div>
+        ) : (
+          <CodeEditor
+            code={activeFile.content}
+            language={language}
+            fileName={fileName}
+            filePath={activeFile.path}
+            fileSize={formatBytes(activeFile.content.length)}
+            showLineNumbers={true}
+            maxHeight="calc(100vh - 300px)"
+          />
+        )}
       </div>
     </div>
   );
