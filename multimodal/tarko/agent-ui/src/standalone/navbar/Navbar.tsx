@@ -198,82 +198,83 @@ export const Navbar: React.FC = () => {
             )}
           </div>
 
-          {/* Mobile view - dropdown menu */}
-          <div className="md:hidden" ref={dropdownRef}>
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowMobileDropdown(!showMobileDropdown)}
-              className="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100/40 dark:hover:bg-gray-800/40 transition-colors"
+          {/* Mobile view - MUI dropdown menu */}
+          <div className="md:hidden">
+            <IconButton
+              onClick={handleMobileMenuOpen}
+              size="small"
+              sx={{ color: 'text.secondary' }}
               title="More options"
             >
               <FiMoreHorizontal size={16} />
-            </motion.button>
+            </IconButton>
 
-            {/* Mobile dropdown menu */}
-            {showMobileDropdown && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50"
+            <Menu
+              anchorEl={mobileMenuAnchor}
+              open={Boolean(mobileMenuAnchor)}
+              onClose={handleMobileMenuClose}
+              transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+              sx={{
+                '& .MuiPaper-root': {
+                  minWidth: 200,
+                  mt: 1,
+                },
+              }}
+            >
+              {/* Workspace navigation items in dropdown */}
+              {!isReplayMode && workspaceNavItems.length > 0 && [
+                ...workspaceNavItems.map((navItem) => {
+                  const { icon: IconComponent } = getNavItemStyle(navItem.title);
+                  return (
+                    <MenuItem
+                      // eslint-disable-next-line @secretlint/secretlint-rule-pattern
+                      key={navItem.title}
+                      onClick={() => {
+                        handleNavItemClick(navItem.link);
+                        handleMobileMenuClose();
+                      }}
+                      sx={{ gap: 1.5 }}
+                    >
+                      <IconComponent size={16} style={{ opacity: 0.7 }} />
+                      {navItem.title}
+                    </MenuItem>
+                  );
+                }),
+                <Divider key="divider" />,
+              ]}
+
+              {/* About option */}
+              <MenuItem
+                onClick={() => {
+                  setShowAboutModal(true);
+                  handleMobileMenuClose();
+                }}
+                sx={{ gap: 1.5 }}
               >
-                {/* Workspace navigation items in dropdown */}
-                {!isReplayMode && workspaceNavItems.length > 0 && (
-                  <>
-                    {workspaceNavItems.map((navItem) => {
-                      const { icon: IconComponent } = getNavItemStyle(navItem.title);
-                      return (
-                        <button
-                          // eslint-disable-next-line @secretlint/secretlint-rule-pattern
-                          key={navItem.title}
-                          onClick={() => {
-                            handleNavItemClick(navItem.link);
-                            setShowMobileDropdown(false);
-                          }}
-                          className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                        >
-                          <IconComponent size={16} className="opacity-70" />
-                          {navItem.title}
-                        </button>
-                      );
-                    })}
-                    <div className="border-t border-gray-200 dark:border-gray-600 my-1" />
-                  </>
-                )}
+                <FiInfo size={16} style={{ opacity: 0.7 }} />
+                About {getAgentTitle()}
+              </MenuItem>
 
-                {/* About option */}
-                <button
-                  onClick={() => {
-                    setShowAboutModal(true);
-                    setShowMobileDropdown(false);
-                  }}
-                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                >
-                  <FiInfo size={16} className="opacity-70" />
-                  About {getAgentTitle()}
-                </button>
+              {/* Dark mode toggle option */}
+              <MenuItem
+                onClick={() => {
+                  toggleDarkMode();
+                  handleMobileMenuClose();
+                }}
+                sx={{ gap: 1.5 }}
+              >
+                {isDarkMode ? <FiSun size={16} style={{ opacity: 0.7 }} /> : <FiMoon size={16} style={{ opacity: 0.7 }} />}
+                {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+              </MenuItem>
 
-                {/* Dark mode toggle option */}
-                <button
-                  onClick={() => {
-                    toggleDarkMode();
-                    setShowMobileDropdown(false);
-                  }}
-                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                >
-                  {isDarkMode ? <FiSun size={16} className="opacity-70" /> : <FiMoon size={16} className="opacity-70" />}
-                  {isDarkMode ? 'Light Mode' : 'Dark Mode'}
-                </button>
-
-                {/* Share option */}
-                {activeSessionId && !isReplayMode && (
-                  <div className="px-4 py-2">
-                    <ShareButton variant="dropdown" disabled={isProcessing} />
-                  </div>
-                )}
-              </motion.div>
-            )}
+              {/* Share option */}
+              {activeSessionId && !isReplayMode && (
+                <MenuItem sx={{ p: 0 }}>
+                  <ShareButton variant="dropdown" disabled={isProcessing} onClose={handleMobileMenuClose} />
+                </MenuItem>
+              )}
+            </Menu>
           </div>
         </div>
       </div>
