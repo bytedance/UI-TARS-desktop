@@ -7,7 +7,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { AgentUIBuilder } from '../src';
+import { AgentUIBuilder, buildHTML, generateHTML } from '../src';
 import type { AgentEventStream, SessionItemInfo } from '@tarko/interface';
 
 describe('AgentUIBuilder', () => {
@@ -83,24 +83,13 @@ describe('AgentUIBuilder', () => {
       expect(html).toContain('<div id="root"></div>');
     });
 
-    it('should generate HTML with injected data (static method)', () => {
-      const html = AgentUIBuilder.generateHTML({
-        events: mockEvents,
-        sessionInfo: mockMetadata,
-        staticPath: mockStaticPath,
-      });
 
-      expect(html).toContain('window.AGENT_REPLAY_MODE = true');
-      expect(html).toContain('window.AGENT_SESSION_DATA');
-      expect(html).toContain('window.AGENT_EVENT_STREAM');
-      expect(html).toContain('<div id="root"></div>');
-    });
 
     it('should work without staticPath (using built-in static files)', () => {
       // This test will fail in test environment since built-in static files don't exist
       // But we can verify the error message shows it tried to use getStaticPath()
       expect(() => {
-        AgentUIBuilder.generateHTML({
+        generateHTML({
           events: mockEvents,
           sessionInfo: mockMetadata,
           // No staticPath provided
@@ -110,7 +99,7 @@ describe('AgentUIBuilder', () => {
 
     it('should throw error if static path does not exist', () => {
       expect(() => {
-        AgentUIBuilder.generateHTML({
+        generateHTML({
           events: mockEvents,
           sessionInfo: mockMetadata,
           staticPath: '/nonexistent/path',
@@ -125,7 +114,7 @@ describe('AgentUIBuilder', () => {
         gitHash: 'abc123',
       };
 
-      const html = AgentUIBuilder.generateHTML({
+      const html = generateHTML({
         events: mockEvents,
         sessionInfo: mockMetadata,
         staticPath: mockStaticPath,
@@ -139,7 +128,7 @@ describe('AgentUIBuilder', () => {
     it('should include web UI config when provided', () => {
       const uiConfig = { type: 'static', staticPath: mockStaticPath, theme: 'dark' } as any;
 
-      const html = AgentUIBuilder.generateHTML({
+      const html = generateHTML({
         events: mockEvents,
         sessionInfo: mockMetadata,
         staticPath: mockStaticPath,
@@ -184,19 +173,7 @@ describe('AgentUIBuilder', () => {
       expect(result.customResult).toBeUndefined();
     });
 
-    it('should build HTML in memory (static method)', async () => {
-      const result = await AgentUIBuilder.buildHTML({
-        events: mockEvents,
-        sessionInfo: mockMetadata,
-        staticPath: mockStaticPath,
-      });
 
-      expect(result.html).toContain('window.AGENT_REPLAY_MODE = true');
-      expect(result.metadata.eventCount).toBe(2);
-      expect(result.metadata.size).toBeGreaterThan(0);
-      expect(result.filePath).toBeUndefined();
-      expect(result.customResult).toBeUndefined();
-    });
   });
 
   describe('build with file output', () => {
@@ -277,6 +254,30 @@ describe('AgentUIBuilder', () => {
 
       expect(result.customResult).toMatch(/^processed:\d+$/);
       expect(result.html).toContain('window.AGENT_REPLAY_MODE = true');
+    });
+  });
+
+  describe('exported convenience functions', () => {
+    it('should work with buildHTML function', async () => {
+      const result = await buildHTML({
+        events: mockEvents,
+        sessionInfo: mockMetadata,
+        staticPath: mockStaticPath,
+      });
+
+      expect(result.html).toContain('window.AGENT_REPLAY_MODE = true');
+      expect(result.metadata.eventCount).toBe(2);
+    });
+
+    it('should work with generateHTML function', () => {
+      const html = generateHTML({
+        events: mockEvents,
+        sessionInfo: mockMetadata,
+        staticPath: mockStaticPath,
+      });
+
+      expect(html).toContain('window.AGENT_REPLAY_MODE = true');
+      expect(html).toContain('window.AGENT_SESSION_DATA');
     });
   });
 });

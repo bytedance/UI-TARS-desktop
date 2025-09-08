@@ -23,7 +23,7 @@ pnpm add @tarko/agent-ui-builder
 ### Basic Usage
 
 ```typescript
-import { AgentUIBuilder } from '@tarko/agent-ui-builder';
+import { AgentUIBuilder, buildHTML } from '@tarko/agent-ui-builder';
 
 // Object-oriented approach (recommended)
 const builder = new AgentUIBuilder({
@@ -40,8 +40,8 @@ const result = await builder.build();
 // Or explicitly specify memory output
 const resultInMemory = await builder.build({ destination: 'memory' });
 
-// Static method for one-off builds
-const quickResult = await AgentUIBuilder.buildHTML({
+// Convenience function for one-off builds
+const quickResult = await buildHTML({
   events: sessionEvents,
   sessionInfo: sessionMetadata,
 });
@@ -70,8 +70,8 @@ const result = await builder.build({
   },
 });
 
-// Or use static method for one-off builds
-const quickResult = await AgentUIBuilder.buildHTML(
+// Or use convenience function for one-off builds
+const quickResult = await buildHTML(
   { events: sessionEvents, sessionInfo: sessionMetadata },
   {
     destination: 'file',
@@ -105,8 +105,8 @@ const result = await builder.build({
   postProcessor: shareProcessor,
 });
 
-// Or use static method
-const quickResult = await AgentUIBuilder.buildHTML(
+// Or use convenience function
+const quickResult = await buildHTML(
   { events: sessionEvents, sessionInfo: sessionMetadata },
   { destination: 'custom', postProcessor: shareProcessor },
 );
@@ -157,11 +157,13 @@ const result = await AgentUIBuilder.build({
 - `builder.build(output?)`: Build HTML with specified output options
 - `builder.generateHTML()`: Generate HTML string only
 
-**Static Methods (Convenience)**:
-- `AgentUIBuilder.buildHTML(input, output?)`: One-off build with static method
-- `AgentUIBuilder.generateHTML(input)`: Generate HTML string only (static)
+**Static Utilities**:
 - `AgentUIBuilder.generateDefaultFilePath()`: Generate default output file path
 - `AgentUIBuilder.createShareProviderProcessor()`: Create share provider upload processor
+
+**Convenience Functions** (exported from index):
+- `buildHTML(input, output?)`: One-off build function
+- `generateHTML(input)`: Generate HTML string only
 
 **Utility Functions**:
 - `getStaticPath()`: Get static path with automatic fallback resolution

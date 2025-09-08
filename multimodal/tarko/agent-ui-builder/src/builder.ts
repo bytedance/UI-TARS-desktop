@@ -159,24 +159,7 @@ export class AgentUIBuilder {
     return result;
   }
 
-  /**
-   * Static factory method for convenient one-off builds
-   */
-  static async buildHTML(
-    input: AgentUIBuilderInputOptions,
-    output?: AgentUIBuilderOutputOptions,
-  ): Promise<AgentUIBuilderResult> {
-    const builder = new AgentUIBuilder(input);
-    return builder.build(output);
-  }
 
-  /**
-   * Static method to generate HTML string only
-   */
-  static generateHTML(input: AgentUIBuilderInputOptions): string {
-    const builder = new AgentUIBuilder(input);
-    return builder.generateHTML();
-  }
 
   /**
    * Generate a default file path for HTML output

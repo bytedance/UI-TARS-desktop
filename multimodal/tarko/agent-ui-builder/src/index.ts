@@ -34,5 +34,14 @@ export const buildHTMLWithProcessor = (
     postProcessor,
   });
 
+// Static utility functions
 export const generateDefaultFilePath = AgentUIBuilder.generateDefaultFilePath;
 export const createShareProviderProcessor = AgentUIBuilder.createShareProviderProcessor;
+
+// Static convenience method for one-off builds
+export const buildHTML = (input: AgentUIBuilderInputOptions, output?: AgentUIBuilderOutputOptions): Promise<AgentUIBuilderResult> =>
+  new AgentUIBuilder(input).build(output);
+
+// Static convenience method for HTML generation only
+export const generateHTML = (input: AgentUIBuilderInputOptions): string =>
+  new AgentUIBuilder(input).generateHTML();
