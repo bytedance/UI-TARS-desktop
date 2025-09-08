@@ -83,7 +83,23 @@ export class ShareService {
       }
 
       // Generate HTML content
-      const shareHtml = this.generateShareHtml(keyFrameEvents, metadata, serverInfo);
+      if (!isAgentWebUIImplementationType(this.appConfig.webui!, 'static')) {
+        throw new Error(`Unsupported web ui type: ${this.appConfig.webui!.type}`);
+      }
+
+      if (!this.appConfig.webui?.staticPath) {
+        throw new Error('Cannot found static path.');
+      }
+
+      // Merge web UI config with agent constructor config
+      const mergedWebUIConfig = mergeWebUIConfig(this.appConfig.webui, this.server);
+      const shareHtml = new AgentUIBuilder({
+        events: keyFrameEvents,
+        sessionInfo: metadata,
+        staticPath: this.appConfig.webui.staticPath,
+        serverInfo,
+        uiConfig: mergedWebUIConfig,
+      }).generateHTML();
 
       // Upload if requested and provider is configured
       if (upload && this.appConfig.share?.provider) {
@@ -340,35 +356,7 @@ export class ShareService {
     return mimeTypes[ext] || 'application/octet-stream';
   }
 
-  /**
-   * Generate shareable HTML content
-   */
 
-  private generateShareHtml(
-    events: AgentEventStream.Event[],
-    sessionInfo: SessionInfo,
-    versionInfo?: AgentServerVersionInfo,
-  ): string {
-    if (isAgentWebUIImplementationType(this.appConfig.webui!, 'static')) {
-      if (!this.appConfig.webui?.staticPath) {
-        throw new Error('Cannot found static path.');
-      }
-
-      // Merge web UI config with agent constructor config
-      const mergedWebUIConfig = mergeWebUIConfig(this.appConfig.webui, this.server);
-      const builder = new AgentUIBuilder({
-        events,
-        sessionInfo,
-        staticPath: this.appConfig.webui.staticPath,
-        serverInfo: versionInfo,
-        uiConfig: mergedWebUIConfig,
-      });
-      return builder.generateHTML();
-    }
-
-    // TODO: implement remote web ui
-    throw new Error(`Unsupported web ui type: ${this.appConfig.webui!.type}`);
-  }
 
   /**
    * Upload share HTML to provider
