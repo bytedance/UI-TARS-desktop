@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ShareButton } from '@/standalone/share';
 import { AboutModal } from './AboutModal';
 import { motion } from 'framer-motion';
-import { FiMoon, FiSun, FiInfo, FiCpu, FiFolder, FiZap, FiSettings, FiMonitor, FiCode, FiMoreHorizontal } from 'react-icons/fi';
+import { FiMoon, FiSun, FiInfo, FiCpu, FiFolder, FiZap, FiSettings, FiMonitor, FiCode, FiMoreHorizontal, FiShare } from 'react-icons/fi';
 import { GoSidebarCollapse, GoSidebarExpand } from 'react-icons/go';
 
 import { Box, Typography, createTheme, ThemeProvider, Menu, MenuItem, Divider, IconButton } from '@mui/material';
@@ -82,14 +82,14 @@ export const Navbar: React.FC = () => {
     if (lowerTitle.includes('code server')) {
       return {
         icon: FiCode,
-        className: "flex items-center gap-1.5 px-3 py-1.5 bg-green-50/80 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-lg border border-green-200/60 dark:border-green-800/40 hover:bg-green-100/90 dark:hover:bg-green-800/30 hover:text-green-700 dark:hover:text-green-300 transition-all duration-200 text-xs font-medium backdrop-blur-sm hover:shadow-sm"
+        className: "flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50/80 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-lg border border-emerald-200/60 dark:border-emerald-700/50 hover:bg-emerald-100/90 dark:hover:bg-emerald-800/40 hover:text-emerald-800 dark:hover:text-emerald-200 transition-all duration-200 text-xs font-medium backdrop-blur-sm hover:shadow-sm"
       };
     }
     
     // Default styling for other items (VNC, etc.)
     return {
       icon: FiMonitor,
-      className: "flex items-center gap-1.5 px-3 py-1.5 bg-blue-50/80 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg border border-blue-200/60 dark:border-blue-800/40 hover:bg-blue-100/90 dark:hover:bg-blue-800/30 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-200 text-xs font-medium backdrop-blur-sm hover:shadow-sm"
+      className: "flex items-center gap-1.5 px-3 py-1.5 bg-slate-50/80 dark:bg-slate-800/30 text-slate-700 dark:text-slate-300 rounded-lg border border-slate-200/60 dark:border-slate-700/50 hover:bg-slate-100/90 dark:hover:bg-slate-700/40 hover:text-slate-800 dark:hover:text-slate-200 transition-all duration-200 text-xs font-medium backdrop-blur-sm hover:shadow-sm"
     };
   };
 
@@ -270,8 +270,15 @@ export const Navbar: React.FC = () => {
 
               {/* Share option */}
               {activeSessionId && !isReplayMode && (
-                <MenuItem sx={{ p: 0 }}>
-                  <ShareButton variant="dropdown" disabled={isProcessing} onClose={handleMobileMenuClose} />
+                <MenuItem
+                  onClick={() => {
+                    // Handle share functionality here
+                    handleMobileMenuClose();
+                  }}
+                  sx={{ gap: 1.5 }}
+                >
+                  <FiShare size={16} style={{ opacity: 0.7 }} />
+                  Share
                 </MenuItem>
               )}
             </Menu>
