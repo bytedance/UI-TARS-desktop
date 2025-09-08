@@ -86,8 +86,6 @@ const parseReadMultipleFilesContent = (content: any): FileContent[] => {
   return files;
 };
 
-
-
 export const TabbedFilesRenderer: React.FC<TabbedFilesRendererProps> = ({
   panelContent,
   onAction,
@@ -168,7 +166,7 @@ export const TabbedFilesRenderer: React.FC<TabbedFilesRendererProps> = ({
             filePath={activeFile.path}
             fileSize={formatBytes(activeFile.content.length)}
             showLineNumbers={true}
-            maxHeight="calc(100vh - 300px)"
+            maxHeight={'80vh'}
           />
         )}
       </div>
