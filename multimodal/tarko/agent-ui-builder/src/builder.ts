@@ -19,10 +19,11 @@ export class AgentUIBuilder {
   }
 
   /**
-   * Build HTML content from session data
+   * Generate HTML and optionally save to file
+   * @param filePath Optional file path to save HTML
    * @returns Generated HTML string
    */
-  public build(): string {
+  public dump(filePath?: string): string {
     const { events, sessionInfo, staticPath: customStaticPath, serverInfo, uiConfig } = this.input;
 
     // Use provided static path or fallback to built-in static files
@@ -67,6 +68,18 @@ export class AgentUIBuilder {
       // Insert script before the head end tag
       htmlContent = htmlContent.replace('</head>', `${scriptTag}\n</head>`);
 
+      // Save to file if path provided
+      if (filePath) {
+        // Ensure directory exists
+        const dir = path.dirname(filePath);
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
+
+        // Write HTML to file
+        fs.writeFileSync(filePath, htmlContent, 'utf8');
+      }
+
       return htmlContent;
     } catch (error) {
       console.error('Failed to generate HTML:', error);
@@ -74,22 +87,6 @@ export class AgentUIBuilder {
         `Failed to generate HTML: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
-  }
-
-  /**
-   * Save HTML to file
-   * @param html HTML content to save
-   * @param filePath Path to save the file
-   */
-  public saveToFile(html: string, filePath: string): void {
-    // Ensure directory exists
-    const dir = path.dirname(filePath);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-
-    // Write HTML to file
-    fs.writeFileSync(filePath, html, 'utf8');
   }
 
   /**

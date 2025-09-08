@@ -100,8 +100,8 @@ export class ShareService {
         uiConfig: mergedWebUIConfig,
       });
 
-      // Build HTML
-      const html = builder.build();
+      // Generate HTML
+      const html = builder.dump();
 
       // Upload if requested and provider is configured
       if (upload && this.appConfig.share?.provider) {
@@ -125,7 +125,9 @@ export class ShareService {
                 normalizedSlug = await slugGenerator.generateSlug(originalQuery);
 
                 // Additional safety check to ensure slug is URL-safe
-                normalizedSlug = normalizedSlug.replace(/[^\x00-\x7F]+/g, '').replace(/[^\w-]/g, '');
+                normalizedSlug = normalizedSlug
+                  .replace(/[^\x00-\x7F]+/g, '')
+                  .replace(/[^\w-]/g, '');
               }
             }
           } catch (error) {
@@ -399,8 +401,6 @@ export class ShareService {
 
     return mimeTypes[ext] || 'application/octet-stream';
   }
-
-
 
   /**
    * Generate 6-digit hash from sessionId (Cloudflare Worker compatible)
