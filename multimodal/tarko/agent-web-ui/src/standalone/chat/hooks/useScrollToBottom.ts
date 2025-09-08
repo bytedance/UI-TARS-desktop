@@ -4,7 +4,6 @@ import { replayStateAtom } from '@/common/state/atoms/replay';
 
 // Constants
 const SCROLL_CHECK_DELAY = 100; // ms - delay for DOM updates
-const SCROLL_ANIMATION_DELAY = 300; // ms - delay to account for smooth scroll animation
 const REPLAY_AUTO_SCROLL_DELAY = 50; // ms - delay for auto-scroll in replay mode
 
 interface UseScrollToBottomOptions {
@@ -41,14 +40,11 @@ export const useScrollToBottom = ({
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
-  const isScrollingRef = useRef(false);
   const lastSessionIdRef = useRef<string | undefined>(sessionId);
   const replayState = useAtomValue(replayStateAtom);
   const lastEventIndexRef = useRef<number>(-1);
   const lastMessageCountRef = useRef<number>(0);
   const lastUserMessageIdRef = useRef<string | null>(null);
-
-
 
   // Handle scroll events
   const handleScroll = useCallback(() => {
@@ -65,19 +61,8 @@ export const useScrollToBottom = ({
     setShowScrollToBottom(!atBottom && hasScrollableContent);
   }, [threshold]);
 
-  // Smooth scroll to bottom
+  // Scroll to bottom
   const scrollToBottom = useCallback(() => {
-    const container = messagesContainerRef.current;
-    if (!container) return;
-
-    container.scrollTo({
-      top: container.scrollHeight,
-      behavior: 'smooth',
-    });
-  }, []);
-
-  // Auto-scroll to bottom
-  const autoScrollToBottom = useCallback(() => {
     const container = messagesContainerRef.current;
     if (!container) return;
 
@@ -100,7 +85,6 @@ export const useScrollToBottom = ({
     if (sessionId !== lastSessionIdRef.current) {
       lastSessionIdRef.current = sessionId;
       setShowScrollToBottom(false);
-      isScrollingRef.current = false;
 
       // Schedule a check after session content loads
       const timer = setTimeout(() => {
@@ -147,12 +131,12 @@ export const useScrollToBottom = ({
 
       // Schedule auto-scroll after DOM updates
       const timer = setTimeout(() => {
-        autoScrollToBottom();
+        scrollToBottom();
       }, REPLAY_AUTO_SCROLL_DELAY);
 
       return () => clearTimeout(timer);
     }
-  }, [isReplayMode, replayState.isActive, replayState.currentEventIndex, autoScrollToBottom]);
+  }, [isReplayMode, replayState.isActive, replayState.currentEventIndex, scrollToBottom]);
 
   // Auto-scroll for user messages in normal mode
   useEffect(() => {
@@ -187,12 +171,12 @@ export const useScrollToBottom = ({
     ) {
       lastUserMessageIdRef.current = latestUserMessage.id;
 
-      const timer = setTimeout(autoScrollToBottom, SCROLL_CHECK_DELAY);
+      const timer = setTimeout(scrollToBottom, SCROLL_CHECK_DELAY);
       return () => clearTimeout(timer);
     }
 
     lastMessageCountRef.current = currentMessageCount;
-  }, [autoScrollOnUserMessage, isReplayMode, autoScrollToBottom, ...dependencies]);
+  }, [autoScrollOnUserMessage, isReplayMode, scrollToBottom, ...dependencies]);
 
   return {
     messagesContainerRef,
