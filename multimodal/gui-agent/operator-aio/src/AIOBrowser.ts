@@ -152,8 +152,13 @@ export class AIOBrowser {
       // First try to find a visible page without waiting
       for (const page of pages) {
         try {
-          // Check visibility state directly without waiting
-          const visibilityState = await page.evaluate(() => document.visibilityState);
+          // Check visibility state directly without waiting with timeout
+          const visibilityState = await Promise.race([
+            page.evaluate(() => document.visibilityState),
+            new Promise<string>((_, reject) => {
+              setTimeout(() => reject(new Error('Visibility check timed out after 3s')), 3000);
+            }),
+          ]);
           if (visibilityState === 'visible') {
             this.logger.success('Active visible page retrieved successfully (direct check)');
             return page;
