@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { FiMoon, FiSun, FiInfo, FiCpu, FiFolder, FiZap, FiSettings, FiMonitor, FiCode, FiMoreHorizontal } from 'react-icons/fi';
 import { GoSidebarCollapse, GoSidebarExpand } from 'react-icons/go';
 
-import { Box, Typography, createTheme, ThemeProvider } from '@mui/material';
+import { Box, Typography, createTheme, ThemeProvider, Menu, MenuItem, Divider, IconButton } from '@mui/material';
 import { useLayout } from '@/common/hooks/useLayout';
 import { useSession } from '@/common/hooks/useSession';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
@@ -23,9 +23,8 @@ export const Navbar: React.FC = () => {
   const { isReplayMode } = useReplayMode();
   const isDarkMode = useDarkMode();
   const [showAboutModal, setShowAboutModal] = React.useState(false);
-  const [showMobileDropdown, setShowMobileDropdown] = React.useState(false);
+  const [mobileMenuAnchor, setMobileMenuAnchor] = React.useState<null | HTMLElement>(null);
   const workspaceNavItems = getWorkspaceNavItems();
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Update HTML title with workspace and agent info
   useEffect(() => {
@@ -44,20 +43,6 @@ export const Navbar: React.FC = () => {
 
     updateTitle();
   }, [sessionMetadata?.agentInfo?.name]);
-
-  // Close mobile dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowMobileDropdown(false);
-      }
-    };
-
-    if (showMobileDropdown) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [showMobileDropdown]);
 
   // Get configuration from global window object
   const logoUrl = getLogoUrl();
@@ -79,6 +64,15 @@ export const Navbar: React.FC = () => {
   // Handle navigation item click
   const handleNavItemClick = (link: string) => {
     window.open(link, '_blank', 'noopener,noreferrer');
+  };
+
+  // Handle mobile menu
+  const handleMobileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setMobileMenuAnchor(event.currentTarget);
+  };
+
+  const handleMobileMenuClose = () => {
+    setMobileMenuAnchor(null);
   };
 
   // Get icon and styling for nav item based on title
