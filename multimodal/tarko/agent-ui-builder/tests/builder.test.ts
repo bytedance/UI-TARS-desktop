@@ -8,6 +8,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { AgentUIBuilder } from '../src';
+import { isDefaultStaticPathValid } from '../src/static-path';
 import type { AgentEventStream, SessionInfo } from '@tarko/interface';
 
 // Mock fetch for upload tests
@@ -125,16 +126,26 @@ describe('AgentUIBuilder', () => {
     });
 
     it('should work without staticPath (using built-in static files)', () => {
-      // This test will fail in test environment since built-in static files don't exist
-      // But we can verify the error message shows it tried to use getStaticPath()
-      expect(() => {
+      if (isDefaultStaticPathValid()) {
+        // If built-in static files exist, it should work
         const builder = new AgentUIBuilder({
           events: mockEvents,
           sessionInfo: mockSessionInfo,
           // No staticPath provided
         });
-        builder.dump();
-      }).toThrow('No valid static path found');
+        const html = builder.dump();
+        expect(html).toContain('window.AGENT_REPLAY_MODE = true');
+      } else {
+        // If built-in static files don't exist, it should throw an error
+        expect(() => {
+          const builder = new AgentUIBuilder({
+            events: mockEvents,
+            sessionInfo: mockSessionInfo,
+            // No staticPath provided
+          });
+          builder.dump();
+        }).toThrow('No valid static path found');
+      }
     });
 
     it('should throw error if static path does not exist', () => {
