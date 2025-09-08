@@ -129,29 +129,16 @@ export class AIOBrowser {
    */
   async getActiveUrl(): Promise<string> {
     this.logger.info('Getting active page URL');
-
-    const pages = await this.browser.getBrowser().pages();
-
     try {
-      for (const page of pages) {
-        // Check if the page is visible
-        const isVisible = await page.waitForFunction(
-          () => {
-            return document.visibilityState === 'visible';
-          },
-          {
-            timeout: 1000,
-          },
-        );
-        if (isVisible) {
-          return page.url();
-        }
-      }
+      // Reuse getActivePage logic to find the active page
+      const activePage = await this.getActivePage();
+      const url = activePage.url();
+      this.logger.success(`Retrieved URL from active page: ${url}`);
+      return url;
     } catch (error) {
       this.logger.error('Failed to get active page URL:', error);
       return '';
     }
-    return '';
   }
 
   /**
@@ -162,19 +149,42 @@ export class AIOBrowser {
     this.logger.info('Getting active page');
     const pages = await this.browser.getBrowser().pages();
     try {
+      // First try to find a visible page without waiting
       for (const page of pages) {
-        // Check if the page is visible
-        const isVisible = await page.waitForFunction(
-          () => {
-            return document.visibilityState === 'visible';
-          },
-          {
-            timeout: 1000,
-          },
-        );
-        if (isVisible) {
-          this.logger.success('Active visible page retrieved successfully');
-          return page;
+        try {
+          // Check visibility state directly without waiting
+          const visibilityState = await page.evaluate(() => document.visibilityState);
+          if (visibilityState === 'visible') {
+            this.logger.success('Active visible page retrieved successfully (direct check)');
+            return page;
+          }
+        } catch (evalError) {
+          this.logger.warn('Warning: checking page visibility directly:', evalError);
+          // Continue to next page if direct check fails
+          continue;
+        }
+      }
+
+      // If no visible page found with direct check, try with waitForFunction but increased timeout
+      for (const page of pages) {
+        try {
+          // Check if the page is visible with increased timeout
+          const isVisible = await page.waitForFunction(
+            () => {
+              return document.visibilityState === 'visible';
+            },
+            {
+              timeout: 3000, // Increased from 1000ms to 3000ms
+            },
+          );
+          if (isVisible) {
+            this.logger.success('Active visible page retrieved successfully');
+            return page;
+          }
+        } catch (waitError) {
+          this.logger.warn(`Visibility check timed out for page: ${page.url()}`);
+          // Continue to next page if this one times out
+          continue;
         }
       }
       this.logger.success('Active original page retrieved successfully');
