@@ -143,8 +143,8 @@ export const TabbedFilesRenderer: React.FC<TabbedFilesRendererProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* Compact Tab Bar */}
-      <div className="flex overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 border-b border-gray-200 dark:border-gray-700">
+      {/* Modern Tab Bar */}
+      <div className="flex gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 pb-1">
         {files.map((file, index) => {
           const { fileName: tabFileName } = getFileTypeInfo(file.path);
           const isActive = index === activeTab;
@@ -154,10 +154,10 @@ export const TabbedFilesRenderer: React.FC<TabbedFilesRendererProps> = ({
               key={index}
               onClick={() => setActiveTab(index)}
               className={`
-                flex-shrink-0 px-3 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap
+                flex-shrink-0 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 whitespace-nowrap border
                 ${isActive 
-                  ? 'border-blue-500 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20' 
-                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'
+                  ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-200/70 dark:border-gray-700/40 shadow-sm' 
+                  : 'bg-gray-50/80 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 border-gray-200/50 dark:border-gray-700/30 hover:bg-gray-100/80 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-200'
                 }
               `}
             >
