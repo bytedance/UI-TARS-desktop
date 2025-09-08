@@ -4,7 +4,7 @@ import { useSession } from '@/common/hooks/useSession';
 import { MessageGroup } from './Message/components/MessageGroup';
 import { ChatInput } from './MessageInput';
 import { ActionBar } from './ActionBar';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import { useAtomValue } from 'jotai';
 import { groupedMessagesAtom, messagesAtom } from '@/common/state/atoms/message';
 import { replayStateAtom } from '@/common/state/atoms/replay';
@@ -106,20 +106,14 @@ export const ChatPanel: React.FC = () => {
         ) : (
           <div className="space-y-4 pb-2">
             {activeMessages.map((group, index) => (
-              <AnimatePresence mode="popLayout" key={`group-${index}-${group.messages[0].id}`}>
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <MessageGroup
-                    messages={group.messages}
-                    isThinking={
-                      isProcessing && !replayState.isActive && index === activeMessages.length - 1
-                    }
-                  />
-                </motion.div>
-              </AnimatePresence>
+              <div key={`group-${index}-${group.messages[0].id}`}>
+                <MessageGroup
+                  messages={group.messages}
+                  isThinking={
+                    isProcessing && !replayState.isActive && index === activeMessages.length - 1
+                  }
+                />
+              </div>
             ))}
           </div>
         )}

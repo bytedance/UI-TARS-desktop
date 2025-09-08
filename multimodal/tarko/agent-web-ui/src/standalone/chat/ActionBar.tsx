@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { FiCpu } from 'react-icons/fi';
 import { useSession } from '@/common/hooks/useSession';
 import { usePlan } from '@/common/hooks/usePlan';
@@ -84,15 +84,8 @@ export const ActionBar: React.FC<ActionBarProps> = ({ sessionId, className = '' 
   }
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 10 }}
-        className={`mx-0 mb-3 flex justify-center ${className}`}
-      >
-        {renderPlanButton()}
-      </motion.div>
-    </AnimatePresence>
+    <div className={`mx-0 mb-3 flex justify-center ${className}`}>
+      {renderPlanButton()}
+    </div>
   );
 };

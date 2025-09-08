@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+
 import { FiFileText, FiBookOpen, FiClock } from 'react-icons/fi';
 import { useSession } from '@/common/hooks/useSession';
 import { formatTimestamp } from '@/common/utils/formatters';
@@ -36,13 +36,9 @@ export const ResearchReportEntry: React.FC<ResearchReportEntryProps> = ({
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -2, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
-      whileTap={{ scale: 0.98 }}
+    <div
       onClick={handleOpenReport}
-      className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-accent-100/40 dark:border-accent-700/20 cursor-pointer group"
+      className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-accent-100/40 dark:border-accent-700/20 cursor-pointer group hover:shadow-md transition-shadow duration-200"
     >
       <div className="flex items-center">
         <div className="w-10 h-10 rounded-xl bg-accent-50 dark:bg-accent-900/20 flex items-center justify-center mr-3 border border-accent-100/40 dark:border-accent-800/30 text-accent-500 dark:text-accent-400">
@@ -63,20 +59,10 @@ export const ResearchReportEntry: React.FC<ResearchReportEntryProps> = ({
           </div>
         </div>
 
-        <motion.div
-          className="ml-2 w-8 h-8 rounded-full flex items-center justify-center bg-gray-50 dark:bg-gray-700 text-gray-400 dark:text-gray-500 group-hover:bg-accent-50 dark:group-hover:bg-accent-900/20 group-hover:text-accent-500 dark:group-hover:text-accent-400 transition-all duration-200 border border-gray-100/40 dark:border-gray-700/30"
-          animate={{ x: [0, 3, 0] }}
-          transition={{
-            duration: 1.5,
-            repeat: Infinity,
-            repeatType: 'loop',
-            ease: 'easeInOut',
-            repeatDelay: 2,
-          }}
-        >
+        <div className="ml-2 w-8 h-8 rounded-full flex items-center justify-center bg-gray-50 dark:bg-gray-700 text-gray-400 dark:text-gray-500 group-hover:bg-accent-50 dark:group-hover:bg-accent-900/20 group-hover:text-accent-500 dark:group-hover:text-accent-400 transition-all duration-200 border border-gray-100/40 dark:border-gray-700/30">
           <FiFileText size={16} />
-        </motion.div>
+        </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
