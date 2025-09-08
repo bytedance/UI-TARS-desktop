@@ -97,9 +97,9 @@ export const ModernThinkingToggle: React.FC<ModernThinkingToggleProps> = ({
       <AnimatePresence>
         {showThinking && (
           <motion.div
-            initial={isInitialRender ? { height: 'auto', opacity: 1 } : { height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
+            initial={isInitialRender ? { height: 'auto' } : { height: 0 }}
+            animate={{ height: 'auto' }}
+            exit={{ height: 0 }}
             transition={isInitialRender ? { duration: 0 } : { duration: 0.3, ease: 'easeInOut' }}
             className="overflow-hidden"
           >

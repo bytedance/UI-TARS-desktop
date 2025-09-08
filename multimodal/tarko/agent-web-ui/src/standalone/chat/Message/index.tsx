@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import { isMultimodalContent } from '@/common/utils/typeGuards';
 import { ChatCompletionContentPart, Message as MessageType } from '@/common/types';
 import { useSession } from '@/common/hooks/useSession';
@@ -197,8 +196,6 @@ export const Message: React.FC<MessageProps> = ({
           </>
         )}
       </div>
-
-
     </div>
   );
 };
