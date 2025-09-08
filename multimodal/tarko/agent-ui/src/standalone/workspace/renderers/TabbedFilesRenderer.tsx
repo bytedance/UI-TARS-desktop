@@ -25,27 +25,32 @@ const parseReadMultipleFilesContent = (content: any): FileContent[] => {
   }
 
   const files: FileContent[] = [];
-  
-  content.forEach(item => {
-    if (!item || typeof item !== 'object' || item.type !== 'text' || typeof item.text !== 'string') {
+
+  content.forEach((item) => {
+    if (
+      !item ||
+      typeof item !== 'object' ||
+      item.type !== 'text' ||
+      typeof item.text !== 'string'
+    ) {
       return;
     }
 
     const text = item.text;
-    
+
     // Split by '---' delimiter to get file sections
     const sections = text.split(/\n---\s*\n/);
-    
+
     sections.forEach((section, index) => {
       if (!section.trim()) return;
-      
+
       const lines = section.split('\n');
-      
+
       // First line should contain the file path
       if (lines.length === 0) return;
-      
+
       const firstLine = lines[0].trim();
-      
+
       // Check for error format: "path: Error - message"
       const errorMatch = firstLine.match(/^(.+?):\s*Error\s*-\s*(.+)$/);
       if (errorMatch) {
@@ -56,13 +61,13 @@ const parseReadMultipleFilesContent = (content: any): FileContent[] => {
         });
         return;
       }
-      
+
       // Check for normal file format: "path:"
       const filePathMatch = firstLine.match(/^(.+?):\s*$/);
       if (filePathMatch) {
         const path = filePathMatch[1].trim();
         const content = lines.slice(1).join('\n');
-        
+
         files.push({
           path,
           content,
@@ -76,7 +81,7 @@ const parseReadMultipleFilesContent = (content: any): FileContent[] => {
       }
     });
   });
-  
+
   return files;
 };
 
@@ -142,22 +147,23 @@ export const TabbedFilesRenderer: React.FC<TabbedFilesRendererProps> = ({
   const language = getLanguage(extension);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       {/* Modern Tab Bar */}
-      <div className="flex gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 pb-1">
+      <div className="flex gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
         {files.map((file, index) => {
           const { fileName: tabFileName } = getFileTypeInfo(file.path);
           const isActive = index === activeTab;
-          
+
           return (
             <button
               key={index}
               onClick={() => setActiveTab(index)}
               className={`
                 flex-shrink-0 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 whitespace-nowrap border
-                ${isActive 
-                  ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-200/70 dark:border-gray-700/40 shadow-sm' 
-                  : 'bg-gray-50/80 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 border-gray-200/50 dark:border-gray-700/30 hover:bg-gray-100/80 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-200'
+                ${
+                  isActive
+                    ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-200/70 dark:border-gray-700/40 shadow-sm'
+                    : 'bg-gray-50/80 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 border-gray-200/50 dark:border-gray-700/30 hover:bg-gray-100/80 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-200'
                 }
               `}
             >
@@ -182,9 +188,7 @@ export const TabbedFilesRenderer: React.FC<TabbedFilesRendererProps> = ({
               <FiAlertCircle size={16} />
               <span className="font-medium">Error reading file</span>
             </div>
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              {activeFile.error}
-            </p>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{activeFile.error}</p>
             <p className="mt-1 text-xs text-gray-500 dark:text-gray-500 font-mono">
               {activeFile.path}
             </p>
