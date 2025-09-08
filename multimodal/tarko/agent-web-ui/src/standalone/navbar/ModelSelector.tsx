@@ -282,8 +282,6 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     console.log('🎛️ [NavbarModelSelector] Model change initiated:', {
       selectedValue,
       sessionId: activeSessionId,
-      isLoading,
-      currentModel,
     });
 
     if (!activeSessionId || isLoading || !selectedValue) {
@@ -317,16 +315,16 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
         setCurrentModel(selectedValue);
       } else {
         console.error('❌ [NavbarModelSelector] Update handler returned success=false');
-        setCurrentModel(currentModel);
+        // Keep current model on failure - no need to access currentModel from closure
       }
     } catch (error) {
       console.error('💥 [NavbarModelSelector] Failed to update session model:', error);
-      setCurrentModel(currentModel);
+      // Keep current model on error - no need to access currentModel from closure
     } finally {
       console.log('🏁 [NavbarModelSelector] Model change completed');
       setIsLoading(false);
     }
-  }, [activeSessionId, isLoading, currentModel]);
+  }, [activeSessionId]);
 
   const allModelOptions = availableModels.models.flatMap((config) =>
     config.models.map((modelId) => ({
