@@ -17,6 +17,7 @@ interface TabbedFilesRendererProps {
 
 /**
  * Parse read_multiple_files tool result content
+ * Files are separated by '---' delimiter with file paths
  */
 const parseReadMultipleFilesContent = (content: any): FileContent[] => {
   if (!content || !Array.isArray(content)) {
@@ -31,49 +32,49 @@ const parseReadMultipleFilesContent = (content: any): FileContent[] => {
     }
 
     const text = item.text;
-    const lines = text.split('\n');
     
-    // Parse each file from the text
-    let currentFile: FileContent | null = null;
-    let currentContent: string[] = [];
+    // Split by '---' delimiter to get file sections
+    const sections = text.split(/\n---\s*\n/);
     
-    for (const line of lines) {
-      // Check if this line starts a new file (format: "path:")
-      const filePathMatch = line.match(/^([^:]+):\s*$/);
-      if (filePathMatch) {
-        // Save previous file if exists
-        if (currentFile) {
-          currentFile.content = currentContent.join('\n');
-          files.push(currentFile);
-        }
-        
-        // Start new file
-        currentFile = {
-          path: filePathMatch[1].trim(),
+    sections.forEach((section, index) => {
+      if (!section.trim()) return;
+      
+      const lines = section.split('\n');
+      
+      // First line should contain the file path
+      if (lines.length === 0) return;
+      
+      const firstLine = lines[0].trim();
+      
+      // Check for error format: "path: Error - message"
+      const errorMatch = firstLine.match(/^(.+?):\s*Error\s*-\s*(.+)$/);
+      if (errorMatch) {
+        files.push({
+          path: errorMatch[1].trim(),
           content: '',
-        };
-        currentContent = [];
-      } else if (line.includes('Error -')) {
-        // Handle error case
-        const errorMatch = line.match(/^([^:]+):\s*Error\s*-\s*(.+)$/);
-        if (errorMatch && !currentFile) {
-          files.push({
-            path: errorMatch[1].trim(),
-            content: '',
-            error: errorMatch[2].trim(),
-          });
-        }
-      } else if (currentFile) {
-        // Add content line
-        currentContent.push(line);
+          error: errorMatch[2].trim(),
+        });
+        return;
       }
-    }
-    
-    // Save last file
-    if (currentFile) {
-      currentFile.content = currentContent.join('\n');
-      files.push(currentFile);
-    }
+      
+      // Check for normal file format: "path:"
+      const filePathMatch = firstLine.match(/^(.+?):\s*$/);
+      if (filePathMatch) {
+        const path = filePathMatch[1].trim();
+        const content = lines.slice(1).join('\n');
+        
+        files.push({
+          path,
+          content,
+        });
+      } else {
+        // If no path match, treat the whole section as content with index as path
+        files.push({
+          path: `file_${index + 1}`,
+          content: section,
+        });
+      }
+    });
   });
   
   return files;
