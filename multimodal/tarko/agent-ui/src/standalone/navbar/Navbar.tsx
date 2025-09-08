@@ -83,7 +83,7 @@ export const Navbar: React.FC = () => {
     } else if (logoParam === 'space') {
       return 'space';
     } else {
-      return 'logo'; // Default to logo (previously agent-tars)
+      return 'logo'; // Default to logo
     }
   }, []);
 
