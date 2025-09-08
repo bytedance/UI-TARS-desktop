@@ -25,6 +25,7 @@ export const ModernThinkingToggle: React.FC<ModernThinkingToggleProps> = ({
 }) => {
   const [localDuration, setLocalDuration] = useState(0);
   const [startTime] = useState(Date.now());
+  const [isInitialRender, setIsInitialRender] = useState(true);
 
   useEffect(() => {
     if (isStreaming && !duration) {
@@ -34,6 +35,11 @@ export const ModernThinkingToggle: React.FC<ModernThinkingToggleProps> = ({
       return () => clearInterval(interval);
     }
   }, [isStreaming, duration, startTime]);
+
+  useEffect(() => {
+    // Mark initial render as complete after first render
+    setIsInitialRender(false);
+  }, []);
 
   const displayDuration = duration || localDuration;
   const isThinking = isStreaming && !duration;
@@ -91,10 +97,10 @@ export const ModernThinkingToggle: React.FC<ModernThinkingToggleProps> = ({
       <AnimatePresence>
         {showThinking && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
+            initial={isInitialRender ? { height: 'auto', opacity: 1 } : { height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            transition={isInitialRender ? { duration: 0 } : { duration: 0.3, ease: 'easeInOut' }}
             className="overflow-hidden"
           >
             <div className="mt-3 ml-6 prose dark:prose-invert prose-sm max-w-none text-xs">
