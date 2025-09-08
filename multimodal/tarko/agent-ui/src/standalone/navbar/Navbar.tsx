@@ -87,9 +87,6 @@ export const Navbar: React.FC = () => {
     }
   }, []);
 
-  debugger;
-  debugger;
-
   // Toggle dark mode
   const toggleDarkMode = useCallback(() => {
     const newMode = !isDarkMode;

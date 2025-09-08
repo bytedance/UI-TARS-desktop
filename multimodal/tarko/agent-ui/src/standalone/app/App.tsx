@@ -48,7 +48,6 @@ export const App: React.FC = () => {
 
   // Special handling for replay mode - bypass normal routing
   if (isReplayMode) {
-    debugger;
     console.log('[ReplayMode] Rendering replay layout directly');
     return <Layout isReplayMode={true} />;
   }
