@@ -81,7 +81,7 @@ describe('AgentUIBuilder', () => {
         sessionInfo: mockSessionInfo,
         staticPath: mockStaticPath,
       });
-      
+
       const html = builder.dump();
 
       expect(html).toContain('window.AGENT_REPLAY_MODE = true');
@@ -103,7 +103,7 @@ describe('AgentUIBuilder', () => {
 
       // Should return the HTML
       expect(html).toContain('window.AGENT_REPLAY_MODE = true');
-      
+
       // Should save to file
       expect(fs.existsSync(outputPath)).toBe(true);
       const fileContent = fs.readFileSync(outputPath, 'utf8');
@@ -228,11 +228,11 @@ describe('AgentUIBuilder', () => {
       });
 
       expect(shareUrl).toBe('https://share.example.com/my-slug?replay=1');
-      
+
       // Check that FormData was created with the right fields
       const call = mockFetch.mock.calls[0];
       const formData = call[1].body as FormData;
-      
+
       // Note: FormData entries are not easily testable, but we can check the call was made
       expect(mockFetch).toHaveBeenCalledWith('https://api.example.com/upload', {
         method: 'POST',
@@ -283,9 +283,9 @@ describe('AgentUIBuilder', () => {
 
       const html = builder.dump();
 
-      await expect(
-        builder.upload(html, 'https://api.example.com/upload')
-      ).rejects.toThrow('HTTP error! status: 500');
+      await expect(builder.upload(html, 'https://api.example.com/upload')).rejects.toThrow(
+        'HTTP error! status: 500',
+      );
     });
 
     it('should throw error on invalid response', async () => {
@@ -302,9 +302,9 @@ describe('AgentUIBuilder', () => {
 
       const html = builder.dump();
 
-      await expect(
-        builder.upload(html, 'https://api.example.com/upload')
-      ).rejects.toThrow('Invalid response from share provider');
+      await expect(builder.upload(html, 'https://api.example.com/upload')).rejects.toThrow(
+        'Invalid response from share provider',
+      );
     });
   });
 
@@ -333,7 +333,7 @@ describe('AgentUIBuilder', () => {
       });
 
       expect(shareUrl).toBe('https://share.example.com/session123?replay=1');
-      
+
       // Verify file content matches what was uploaded
       const fileContent = fs.readFileSync(outputPath, 'utf8');
       expect(fileContent).toBe(html);
