@@ -28,6 +28,7 @@
   "dependencies": {
     "@tarko/agent": "workspace:*",
     "@tarko/agent-server": "workspace:*",
+    "@tarko/agent-ui-builder": "workspace:*",
     "@tarko/shared-utils": "workspace:*",
     "@agent-tars/core": "workspace:*",
     "@omni-tars/agent": "workspace:*",

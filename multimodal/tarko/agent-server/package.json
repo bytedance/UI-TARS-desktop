@@ -19,6 +19,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@tarko/agent-ui-builder": "workspace:*",
     "@tarko/context-engineer": "workspace:*",
     "transliteration": "^2.3.5"
   },

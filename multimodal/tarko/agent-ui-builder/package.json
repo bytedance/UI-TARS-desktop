@@ -1,0 +1,40 @@
+{
+  "name": "@tarko/shared-utils",
+  "version": "0.3.0-beta.10",
+  "description": "Core and tiny shared utilities for Tarko",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "rslib build --watch",
+    "build": "rslib build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "pnpm build"
+  },
+  "dependencies": {
+    "@tarko/agent-interface": "workspace:*",
+    "@agent-infra/logger": "0.0.2-beta.2"
+  },
+  "devDependencies": {
+    "vitest": "3.2.4",
+    "@rslib/core": "0.10.0",
+    "@types/js-yaml": "4.0.9",
+    "@types/node": "22.15.30",
+    "typescript": "^5.5.3"
+  }
+}

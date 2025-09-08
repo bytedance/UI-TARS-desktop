@@ -7,6 +7,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { AgentEventStream, AgentServerVersionInfo } from '@tarko/interface';
+import { AgentUIBuilder, createShareProviderProcessor } from '@tarko/agent-ui-builder';
 import { SessionItemInfo } from '../storage';
 
 /**
@@ -34,64 +35,13 @@ export class ShareUtils {
     serverInfo?: AgentServerVersionInfo,
     webUIConfig?: Record<string, any>,
   ): string {
-    if (!staticPath) {
-      throw new Error('Cannot found static path.');
-    }
-
-    const indexPath = path.join(staticPath, 'index.html');
-    if (!fs.existsSync(indexPath)) {
-      throw new Error('Static web ui not found.');
-    }
-
-    try {
-      let htmlContent = fs.readFileSync(indexPath, 'utf8');
-
-      const safeEventJson = this.safeJsonStringify(events);
-      const safeMetadataJson = this.safeJsonStringify(metadata);
-      const safeVersionJson = serverInfo ? this.safeJsonStringify(serverInfo) : null;
-
-      // Inject session data, event stream, version info, and web UI config
-      const safeWebUIConfigJson = webUIConfig ? this.safeJsonStringify(webUIConfig) : null;
-      const scriptTag = `<script>
-        window.AGENT_REPLAY_MODE = true;
-        window.AGENT_SESSION_DATA = ${safeMetadataJson};
-        window.AGENT_EVENT_STREAM = ${safeEventJson};${
-          safeVersionJson
-            ? `
-        window.AGENT_VERSION_INFO = ${safeVersionJson};`
-            : ''
-        }${
-          safeWebUIConfigJson
-            ? `
-        window.AGENT_WEB_UI_CONFIG = ${safeWebUIConfigJson};`
-            : ''
-        }
-      </script>
-      <script>
-        // Add a fallback mechanism for when routes don't match in shared HTML files
-        window.addEventListener('DOMContentLoaded', function() {
-          // Give React time to attempt normal routing
-          setTimeout(function() {
-            const root = document.getElementById('root');
-            if (root && (!root.children || root.children.length === 0)) {
-              console.log('[ReplayMode] No content rendered, applying fallback');
-              // Try to force the app to re-render if no content is displayed
-              window.dispatchEvent(new Event('resize'));
-            }
-          }, 1000);
-        });
-      </script>`;
-
-      // Insert script before the head end tag
-      htmlContent = htmlContent.replace('</head>', `${scriptTag}\n</head>`);
-
-      return htmlContent;
-    } catch (error) {
-      console.error('Failed to generate share HTML:', error);
-      throw new Error(
-        `Failed to generate share HTML: ${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
+    return AgentUIBuilder.generateHTML({
+      events,
+      metadata,
+      staticPath,
+      serverInfo,
+      webUIConfig,
+    });
   }
 
   /**
@@ -147,83 +97,32 @@ export class ShareUtils {
       throw new Error('Share provider not configured');
     }
 
-    try {
-      // Create temporary directory
-      const tempDir = path.join(os.tmpdir(), 'agent-tars-share');
-      if (!fs.existsSync(tempDir)) {
-        fs.mkdirSync(tempDir, { recursive: true });
-      }
+    // Use the share provider processor from agent-ui-builder
+    const processor = createShareProviderProcessor(
+      shareProviderUrl,
+      sessionId,
+      {
+        slug: options?.slug,
+        query: options?.query,
+      },
+    );
 
-      const fileName = `agent-tars-${sessionId}-${Date.now()}.html`;
-      const filePath = path.join(tempDir, fileName);
+    // Execute the processor with the HTML and metadata
+    const result = await processor(
+      html,
+      options?.sessionItemInfo || {
+        id: sessionId,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        workspace: '',
+      },
+    );
 
-      // Write HTML content to temporary file
-      fs.writeFileSync(filePath, html);
-
-      // Create form data using native FormData
-      const formData = new FormData();
-
-      // Create a File object from the HTML content
-      const file = new File([html], fileName, { type: 'text/html' });
-      formData.append('file', file);
-      formData.append('sessionId', sessionId);
-      formData.append('type', 'html'); // Specify this is HTML content
-
-      // Add additional metadata fields if provided
-      if (options) {
-        // Add normalized slug for semantic URLs
-        if (options.slug) {
-          formData.append('slug', options.slug);
-        }
-
-        // Add original query
-        if (options.query) {
-          formData.append('query', options.query);
-        }
-
-        // Add session metadata fields
-        if (options.sessionItemInfo) {
-          const sessionName = options.sessionItemInfo.metadata?.name || '';
-          formData.append('name', sessionName);
-          // Add tags if available
-          if (
-            options.sessionItemInfo.metadata?.tags &&
-            options.sessionItemInfo.metadata.tags.length > 0
-          ) {
-            const tagsJson = JSON.stringify(options.sessionItemInfo.metadata.tags);
-            formData.append('tags', tagsJson);
-          }
-        }
-      }
-
-      // Send request to share provider using fetch
-      const response = await fetch(shareProviderUrl, {
-        method: 'POST',
-        body: formData,
-      });
-
-      // Clean up temporary file
-      fs.unlinkSync(filePath);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const responseData = await response.json();
-
-      // Return share URL with replay parameter
-      if (responseData && responseData.url) {
-        const url = new URL(responseData.url);
-        url.searchParams.set('replay', '1');
-        return url.toString();
-      }
-
-      throw new Error('Invalid response from share provider');
-    } catch (error) {
-      console.error('Failed to upload share HTML:', error);
-      throw error;
+    if (!result) {
+      throw new Error('Failed to upload to share provider');
     }
+
+    return result;
   }
 
   /**
