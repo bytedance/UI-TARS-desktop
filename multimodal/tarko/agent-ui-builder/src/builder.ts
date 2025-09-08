@@ -117,43 +117,25 @@ export class AgentUIBuilder {
       return result;
     }
 
-    // Handle post-processor first (when destType is undefined)
-    if (!output.destType && output.post) {
-      const customResult = await output.post(html, this.input.sessionInfo);
-      if (customResult !== undefined) {
-        result.customResult = customResult;
+    // Handle file output
+    if (output.filePath) {
+      // Ensure directory exists
+      const dir = path.dirname(output.filePath);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
       }
-      return result;
+
+      // Write HTML to file
+      fs.writeFileSync(output.filePath, html, 'utf8');
+      result.filePath = output.filePath;
     }
 
-    // Handle destination types
-    switch (output.destType) {
-      case 'memory':
-        // HTML is already in result, nothing more to do
-        break;
-
-      case 'file':
-        if (!output.filePath) {
-          throw new Error('File path is required when destType is "file"');
-        }
-
-        // Ensure directory exists
-        const dir = path.dirname(output.filePath);
-        if (!fs.existsSync(dir)) {
-          fs.mkdirSync(dir, { recursive: true });
-        }
-
-        // Write HTML to file
-        fs.writeFileSync(output.filePath, html, 'utf8');
-        result.filePath = output.filePath;
-        break;
-
-      case undefined:
-        // Default to memory when destType is undefined and no post processor
-        break;
-
-      default:
-        throw new Error(`Unsupported output destination: ${output.destType}`);
+    // Handle post-processor
+    if (output.post) {
+      const url = await output.post(html, this.input.sessionInfo);
+      if (url !== undefined) {
+        result.url = url;
+      }
     }
 
     return result;

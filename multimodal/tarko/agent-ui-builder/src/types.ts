@@ -31,12 +31,7 @@ export interface AgentUIBuilderInputOptions {
 }
 
 /**
- * Output destination types
- */
-export type OutputDestination = 'memory' | 'file';
-
-/**
- * Custom post-processor function type
+ * Post-processor function type that can return a URL
  */
 export type PostProcessor = (html: string, metadata: SessionInfo) => Promise<string | void>;
 
@@ -44,13 +39,10 @@ export type PostProcessor = (html: string, metadata: SessionInfo) => Promise<str
  * Output options for the generated HTML
  */
 export interface AgentUIBuilderOutputOptions {
-  /** Output destination type */
-  destType?: OutputDestination;
-
-  /** File path (required when destType is 'file') */
+  /** File path to save HTML (optional) */
   filePath?: string;
 
-  /** Custom post-processor function (used when destination is undefined) */
+  /** Post-processor function to handle the generated HTML (optional) */
   post?: PostProcessor;
 }
 
@@ -64,8 +56,8 @@ export interface AgentUIBuilderResult {
   /** File path (available when destination is 'file') */
   filePath?: string;
 
-  /** Custom result from post-processor (available when destination is 'custom') */
-  customResult?: string;
+  /** URL returned from post-processor (available when post-processor is used) */
+  url?: string;
 
   /** Build metadata */
   metadata: {

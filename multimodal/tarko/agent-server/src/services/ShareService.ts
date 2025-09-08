@@ -154,7 +154,7 @@ export class ShareService {
 
         return {
           success: true,
-          url: result.customResult!,
+          url: result.url!,
           sessionId,
         };
       }
