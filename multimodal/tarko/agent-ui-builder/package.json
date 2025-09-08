@@ -1,7 +1,7 @@
 {
   "name": "@tarko/agent-ui-builder",
   "version": "0.3.0-beta.10",
-  "description": "Core and tiny shared utilities for Tarko",
+  "description": "Agent UI builder for generating replay HTML files",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -27,13 +27,11 @@
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
-    "@tarko/agent-interface": "workspace:*",
-    "@agent-infra/logger": "0.0.2-beta.2"
+    "@tarko/interface": "workspace:*"
   },
   "devDependencies": {
     "vitest": "3.2.4",
     "@rslib/core": "0.10.0",
-    "@types/js-yaml": "4.0.9",
     "@types/node": "22.15.30",
     "typescript": "^5.5.3"
   }
