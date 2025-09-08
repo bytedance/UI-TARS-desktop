@@ -219,6 +219,22 @@ export const Navbar: React.FC = () => {
                 '& .MuiPaper-root': {
                   minWidth: 200,
                   mt: 1,
+                  backgroundColor: isDarkMode ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                  backdropFilter: 'blur(12px)',
+                  border: isDarkMode ? '1px solid rgba(71, 85, 105, 0.3)' : '1px solid rgba(226, 232, 240, 0.8)',
+                  borderRadius: '12px',
+                  boxShadow: isDarkMode 
+                    ? '0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2)'
+                    : '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                },
+                '& .MuiMenuItem-root': {
+                  color: isDarkMode ? 'rgba(226, 232, 240, 0.9)' : 'rgba(51, 65, 85, 0.9)',
+                  '&:hover': {
+                    backgroundColor: isDarkMode ? 'rgba(71, 85, 105, 0.3)' : 'rgba(241, 245, 249, 0.8)',
+                  },
+                },
+                '& .MuiDivider-root': {
+                  borderColor: isDarkMode ? 'rgba(71, 85, 105, 0.3)' : 'rgba(226, 232, 240, 0.6)',
                 },
               }}
             >
