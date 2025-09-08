@@ -88,11 +88,11 @@ class UnifiedBCFormatParser implements FormatParser {
   parse(text: string): { thought: string | null; actionStr: string } {
     this.logger.debug('[UnifiedBCFormatParser] start parsing...');
 
-    // 解析思考内容 - 这部分保持不变
+    // Parse thought content - this part remains unchanged
     const thoughtMatch = text.match(/Thought:\s*([\s\S]+?)(?=\s*Action[：:]|$)/);
     const thought = thoughtMatch ? thoughtMatch[1].trim() : null;
 
-    // 解析动作内容
+    // Parse action content
     let actionStr = '';
     if (text.includes('Action:') || text.includes('Action：')) {
       const actionParts = text.split(/Action[：:]/);
@@ -216,7 +216,7 @@ export class FallbackFormatParser implements FormatParser {
   constructor(private logger: ConsoleLogger) {}
 
   canParse(text: string): boolean {
-    // 作为兜底解析器，总是返回 true
+    // As a fallback parser, always return true
     this.logger.debug('[FallbackFormatParser] canParse: always true');
     return true;
   }
@@ -224,48 +224,48 @@ export class FallbackFormatParser implements FormatParser {
   parse(text: string): { thought: string | null; reflection: string | null; actionStr: string } {
     this.logger.debug('[FallbackFormatParser] start parsing...');
 
-    // 解析思考内容
+    // Parse thought content
     const thoughtMatch = text.match(/Thought:\s*([\s\S]+?)(?=\s*Action[：:]|$)/);
     const thought = thoughtMatch ? thoughtMatch[1].trim() : null;
 
-    // 检查特殊情况
+    // Check special cases
     const hasChineseColon = text.includes('Action：');
     const hasEnglishColon = text.includes('Action:');
     const hasEmptyAction = /Action[：:]\s*$/.test(text.trim());
     const isDirectFunctionCall =
       /^\w+\([^)]*\)/.test(text.trim()) && !hasChineseColon && !hasEnglishColon;
 
-    this.logger.debug('[FallbackFormatParser] 检测到的格式:', {
+    this.logger.debug('[FallbackFormatParser] Detected format:', {
       hasChineseColon,
       hasEnglishColon,
       hasEmptyAction,
       isDirectFunctionCall,
     });
 
-    // 解析动作内容
+    // Parse action content
     let actionStr = '';
 
     if (hasEmptyAction) {
-      // 处理空动作输入，保持 actionStr 为空字符串
-      this.logger.debug('[FallbackFormatParser] 处理空动作输入');
+      // Handle empty action input, keep actionStr as empty string
+      this.logger.debug('[FallbackFormatParser] Handling empty action input');
     } else if (isDirectFunctionCall) {
-      // 如果是直接的函数调用，整个文本就是动作字符串
+      // If it's a direct function call, the entire text is the action string
       actionStr = text.trim();
-      this.logger.debug('[FallbackFormatParser] 处理直接函数调用格式');
+      this.logger.debug('[FallbackFormatParser] Handling direct function call format');
     } else if (hasChineseColon) {
-      // 处理中文冒号
+      // Handle Chinese colon
       const actionParts = text.split('Action：');
       actionStr = actionParts[actionParts.length - 1].trim();
-      this.logger.debug('[FallbackFormatParser] 处理中文冒号格式');
+      this.logger.debug('[FallbackFormatParser] Handling Chinese colon format');
     } else if (hasEnglishColon) {
-      // 处理英文冒号
+      // Handle English colon
       const actionParts = text.split('Action:');
       actionStr = actionParts[actionParts.length - 1].trim();
-      this.logger.debug('[FallbackFormatParser] 处理英文冒号格式');
+      this.logger.debug('[FallbackFormatParser] Handling English colon format');
     } else {
-      // 兜底处理：使用整个文本作为动作字符串
+      // Fallback handling: use the entire text as action string
       actionStr = text.trim();
-      this.logger.debug('[FallbackFormatParser] 使用兜底处理');
+      this.logger.debug('[FallbackFormatParser] Using fallback handling');
     }
 
     this.logger.debug('[FallbackFormatParser] parse result:', {
@@ -274,7 +274,7 @@ export class FallbackFormatParser implements FormatParser {
     });
 
     return {
-      thought: thought || (isDirectFunctionCall ? '' : null), // 对于直接函数调用，如果没有思考内容，返回空字符串
+      thought: thought || (isDirectFunctionCall ? '' : null), // For direct function calls, if there's no thought content, return empty string
       reflection: null,
       actionStr,
     };
