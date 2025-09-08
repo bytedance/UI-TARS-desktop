@@ -228,22 +228,25 @@ export class MongoDBStorageProvider implements StorageProvider {
       const SessionModel = this.connection!.model<SessionDocument>('Session');
       const EventModel = this.connection!.model<EventDocument>('Event');
 
-      // Use a transaction to ensure data consistency
-      const session = await this.connection!.startSession();
+      // Check if the session exists before attempting deletion
+      const sessionExists = await SessionModel.exists({ _id: sessionId });
+      if (!sessionExists) {
+        logger.debug(`Session not found: ${sessionId}`);
+        return false;
+      }
 
-      try {
-        await session.withTransaction(async () => {
-          // Delete all events for this session
-          await EventModel.deleteMany({ sessionId }).session(session);
+      // Delete all events for this session first
+      await EventModel.deleteMany({ sessionId });
 
-          // Delete the session
-          await SessionModel.findByIdAndDelete(sessionId).session(session);
-        });
+      // Delete the session
+      const deleteResult = await SessionModel.findByIdAndDelete(sessionId);
 
+      if (deleteResult) {
         logger.debug(`Session deleted successfully: ${sessionId}`);
         return true;
-      } finally {
-        await session.endSession();
+      } else {
+        logger.debug(`Session not found during deletion: ${sessionId}`);
+        return false;
       }
     } catch (error) {
       logger.error(`Failed to delete session ${sessionId}:`, error);
