@@ -94,7 +94,7 @@ export class AgentUIBuilder {
     const defaultOutput: AgentUIBuilderOutputOptions = {
       destination: 'memory',
     };
-    
+
     const finalOutput = output || defaultOutput;
 
     // Generate HTML content
@@ -158,8 +158,6 @@ export class AgentUIBuilder {
 
     return result;
   }
-
-
 
   /**
    * Generate a default file path for HTML output

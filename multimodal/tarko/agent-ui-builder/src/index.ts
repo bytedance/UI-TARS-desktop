@@ -9,11 +9,17 @@ export * from './static-path';
 
 // Import for convenience exports
 import { AgentUIBuilder } from './builder';
-import type { AgentUIBuilderInputOptions, AgentUIBuilderOutputOptions, AgentUIBuilderResult, PostProcessor } from './types';
+import type {
+  AgentUIBuilderInputOptions,
+  AgentUIBuilderOutputOptions,
+  AgentUIBuilderResult,
+  PostProcessor,
+} from './types';
 
 // Convenience exports for backward compatibility
-export const buildHTMLInMemory = (input: AgentUIBuilderInputOptions): Promise<AgentUIBuilderResult> =>
-  new AgentUIBuilder(input).build({ destination: 'memory' });
+export const buildHTMLInMemory = (
+  input: AgentUIBuilderInputOptions,
+): Promise<AgentUIBuilderResult> => new AgentUIBuilder(input).build({ destination: 'memory' });
 
 export const buildHTMLToFile = (
   input: AgentUIBuilderInputOptions,
@@ -39,8 +45,10 @@ export const generateDefaultFilePath = AgentUIBuilder.generateDefaultFilePath;
 export const createShareProviderProcessor = AgentUIBuilder.createShareProviderProcessor;
 
 // Static convenience method for one-off builds
-export const buildHTML = (input: AgentUIBuilderInputOptions, output?: AgentUIBuilderOutputOptions): Promise<AgentUIBuilderResult> =>
-  new AgentUIBuilder(input).build(output);
+export const buildHTML = (
+  input: AgentUIBuilderInputOptions,
+  output?: AgentUIBuilderOutputOptions,
+): Promise<AgentUIBuilderResult> => new AgentUIBuilder(input).build(output);
 
 // Static convenience method for HTML generation only
 export const generateHTML = (input: AgentUIBuilderInputOptions): string =>
