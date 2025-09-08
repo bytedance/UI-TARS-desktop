@@ -13,7 +13,6 @@ import {
   PostProcessor,
 } from './types';
 import { getStaticPath } from './static-path';
-import type { SessionInfo } from '@tarko/interface';
 
 /**
  * Agent UI Builder - Core class for generating replay HTML files
@@ -27,6 +26,7 @@ export class AgentUIBuilder {
   constructor(input: AgentUIBuilderInputOptions) {
     this.input = input;
   }
+
   /**
    * Generate shareable HTML content for a session
    * Based on ShareUtils.generateShareHtml but extracted for reuse

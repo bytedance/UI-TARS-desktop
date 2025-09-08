@@ -44,7 +44,6 @@ export class ShareUtils {
     }).generateHTML();
   }
 
-
   /**
    * Upload HTML to a share provider
    * @param html HTML content to upload
@@ -79,14 +78,10 @@ export class ShareUtils {
     }
 
     // Use the share provider processor from agent-ui-builder
-    const processor = createShareProviderProcessor(
-      shareProviderUrl,
-      sessionId,
-      {
-        slug: options?.slug,
-        query: options?.query,
-      },
-    );
+    const processor = createShareProviderProcessor(shareProviderUrl, sessionId, {
+      slug: options?.slug,
+      query: options?.query,
+    });
 
     // Execute the processor with the HTML and metadata
     const result = await processor(

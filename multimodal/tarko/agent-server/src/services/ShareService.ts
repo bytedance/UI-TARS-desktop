@@ -346,7 +346,7 @@ export class ShareService {
 
   private generateShareHtml(
     events: AgentEventStream.Event[],
-    metadata: SessionInfo,
+    sessionInfo: SessionInfo,
     versionInfo?: AgentServerVersionInfo,
   ): string {
     if (isAgentWebUIImplementationType(this.appConfig.webui!, 'static')) {
@@ -356,14 +356,14 @@ export class ShareService {
 
       // Merge web UI config with agent constructor config
       const mergedWebUIConfig = mergeWebUIConfig(this.appConfig.webui, this.server);
-
-      return AgentUIBuilder.generateHTML({
+      const builder = new AgentUIBuilder({
         events,
-        sessionInfo: metadata,
+        sessionInfo,
         staticPath: this.appConfig.webui.staticPath,
         serverInfo: versionInfo,
         uiConfig: mergedWebUIConfig,
       });
+      return builder.generateHTML();
     }
 
     // TODO: implement remote web ui
