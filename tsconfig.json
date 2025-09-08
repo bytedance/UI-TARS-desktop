@@ -3,7 +3,13 @@
   "compilerOptions": {
     "target": "ES2022",
     "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitOverride": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true
   },
-  "exclude": ["apps", "packages"]
+  "exclude": [
+    "apps",
+    "packages"
+  ]
 }
