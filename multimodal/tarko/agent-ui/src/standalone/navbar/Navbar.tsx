@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ShareButton } from '@/standalone/share';
 import { AboutModal } from './AboutModal';
 import { motion } from 'framer-motion';
-import { FiMoon, FiSun, FiInfo, FiCpu, FiFolder, FiZap, FiSettings } from 'react-icons/fi';
+import { FiMoon, FiSun, FiInfo, FiCpu, FiFolder, FiZap, FiSettings, FiMonitor } from 'react-icons/fi';
 import { GoSidebarCollapse, GoSidebarExpand } from 'react-icons/go';
 
 import { Box, Typography, createTheme, ThemeProvider } from '@mui/material';
@@ -12,7 +12,7 @@ import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useDarkMode } from '@/common/hooks/useDarkMode';
 import { apiService } from '@/common/services/apiService';
 import { NavbarModelSelector } from './ModelSelector';
-import { getLogoUrl, getAgentTitle } from '@/config/web-ui-config';
+import { getLogoUrl, getAgentTitle, getWorkspaceNavItems } from '@/config/web-ui-config';
 import { getModelDisplayName } from '@/common/utils/modelUtils';
 
 import './Navbar.css';
@@ -23,6 +23,7 @@ export const Navbar: React.FC = () => {
   const { isReplayMode } = useReplayMode();
   const isDarkMode = useDarkMode();
   const [showAboutModal, setShowAboutModal] = React.useState(false);
+  const workspaceNavItems = getWorkspaceNavItems();
 
   // Update HTML title with workspace and agent info
   useEffect(() => {
@@ -58,6 +59,11 @@ export const Navbar: React.FC = () => {
     document.documentElement.classList.toggle('dark', newMode);
     localStorage.setItem('agent-tars-theme', newMode ? 'dark' : 'light');
   }, [isDarkMode]);
+
+  // Handle navigation item click
+  const handleNavItemClick = (link: string) => {
+    window.open(link, '_blank', 'noopener,noreferrer');
+  };
 
   // Create MUI theme for consistent styling
   const muiTheme = React.useMemo(
@@ -108,8 +114,27 @@ export const Navbar: React.FC = () => {
         {/* Center section - Agent and Model info display with dynamic sizing */}
         <DynamicNavbarCenter sessionMetadata={sessionMetadata} activeSessionId={activeSessionId} />
 
-        {/* Right section - reordered buttons: About, Dark mode, Share */}
+        {/* Right section - workspace nav items, then About, Dark mode, Share */}
         <div className="flex items-center space-x-1 md:space-x-2">
+          {/* Workspace navigation items */}
+          {!isReplayMode && workspaceNavItems.length > 0 && (
+            <div className="flex items-center gap-2 mr-2">
+              {workspaceNavItems.map((navItem) => (
+                <motion.button
+                  // eslint-disable-next-line @secretlint/secretlint-rule-pattern
+                  key={navItem.title}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleNavItemClick(navItem.link)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50/80 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg border border-blue-200/60 dark:border-blue-800/40 hover:bg-blue-100/90 dark:hover:bg-blue-800/30 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-200 text-xs font-medium backdrop-blur-sm hover:shadow-sm"
+                  title={`Open ${navItem.title} in new tab`}
+                >
+                  <FiMonitor size={12} className="opacity-70" />
+                  {navItem.title}
+                </motion.button>
+              ))}
+            </div>
+          )}
           {/* About button - moved to first position */}
           <motion.button
             whileHover={{ scale: 1.1 }}

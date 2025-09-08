@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FiArrowLeft, FiBookOpen, FiMaximize, FiMonitor, FiEye, FiCode } from 'react-icons/fi';
+import { FiArrowLeft, FiBookOpen, FiMaximize, FiEye, FiCode } from 'react-icons/fi';
 import { formatTimestamp } from '@/common/utils/formatters';
 import { useTool } from '@/common/hooks/useTool';
 import { normalizeFilePath } from '@/common/utils/pathNormalizer';
@@ -9,7 +9,7 @@ import { ToggleSwitch, ToggleSwitchProps } from '../renderers/generic/components
 import { ShareButton } from './ShareButton';
 import { FileDisplayMode } from '../types';
 import { WorkspaceDisplayMode } from '@/common/state/atoms/workspace';
-import { getWorkspaceNavItems } from '@/config/web-ui-config';
+
 
 interface WorkspaceHeaderProps {
   panelContent: StandardPanelContent;
@@ -38,7 +38,6 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
   isReplayMode = false,
 }) => {
   const { getToolIcon } = useTool();
-  const workspaceNavItems = getWorkspaceNavItems();
 
   const isResearchReport = panelContent.toolCallId?.startsWith('final-answer');
 
@@ -49,11 +48,6 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
       return normalizedPath.split(/[/\\]/).pop() || normalizedPath;
     }
     return panelContent.title;
-  };
-
-  // Handle navigation item click
-  const handleNavItemClick = (link: string) => {
-    window.open(link, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -107,25 +101,6 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
       </div>
 
       <div className="ml-4 flex-shrink-0 flex items-center gap-3">
-        {/* Workspace navigation items */}
-        {!isReplayMode && workspaceNavItems.length > 0 && (
-          <div className="flex items-center gap-2">
-            {workspaceNavItems.map((navItem) => (
-              <motion.button
-                // eslint-disable-next-line @secretlint/secretlint-rule-pattern
-                key={navItem.title}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => handleNavItemClick(navItem.link)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50/80 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg border border-blue-200/60 dark:border-blue-800/40 hover:bg-blue-100/90 dark:hover:bg-blue-800/30 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-200 text-xs font-medium backdrop-blur-sm hover:shadow-sm"
-                title={`Open ${navItem.title} in new tab`}
-              >
-                <FiMonitor size={12} className="opacity-70" />
-                {navItem.title}
-              </motion.button>
-            ))}
-          </div>
-        )}
 
         {/* Workspace display mode toggle */}
         {showWorkspaceToggle && onWorkspaceDisplayModeChange && (
