@@ -39,7 +39,7 @@ export default defineTransformer<CustomLogFormat>((input) => {
     if (log.type === 'user_input') {
       // Reset tool calls for new user input
       currentLoopToolCalls = [];
-      
+
       events.push({
         id: `event-${eventIdCounter++}`,
         type: 'user_message',
@@ -54,12 +54,13 @@ export default defineTransformer<CustomLogFormat>((input) => {
         content: log.message || '',
         rawContent: log.message,
         toolCalls: currentLoopToolCalls.length > 0 ? currentLoopToolCalls : undefined,
-        finishReason: log.parameters?.finishReason || (currentLoopToolCalls.length > 0 ? 'tool_calls' : 'stop'),
+        finishReason:
+          log.parameters?.finishReason || (currentLoopToolCalls.length > 0 ? 'tool_calls' : 'stop'),
         ttftMs: log.parameters?.ttftMs,
         ttltMs: log.parameters?.ttltMs,
         messageId: log.parameters?.messageId || `msg-${eventIdCounter}`,
       } as AgentEventStream.AssistantMessageEvent);
-      
+
       // Reset tool calls after agent response
       currentLoopToolCalls = [];
     } else if (log.type === 'agent_thinking') {
