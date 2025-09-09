@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export default {
+import { defineConfig } from '@tarko/agent-ui-cli';
+
+export default defineConfig({
   /**
    * Session Information
    */
@@ -45,4 +47,4 @@ export default {
       renderBrowserShell: false,
     },
   },
-};
+});

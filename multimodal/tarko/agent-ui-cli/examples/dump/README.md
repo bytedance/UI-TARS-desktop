@@ -10,8 +10,8 @@ This directory contains examples for testing the `agui` CLI dump functionality.
 - `custom-format.json` - Custom log format for transformer demo
 
 ### Configuration
-- `agui.config.ts` - Example configuration with custom session info and UI settings
-- `transformer.ts` - Example transformer for converting custom log format
+- `agui.config.ts` - Example configuration with custom session info and UI settings (uses `defineConfig` for type safety)
+- `transformer.ts` - Example transformer for converting custom log format (uses `defineTransformer` for type safety)
 
 ## Usage Examples
 
@@ -78,4 +78,44 @@ agui custom-format.json --transformer transformer.ts --out test-transformer.html
 
 # Test with full configuration
 agui trace.json --config agui.config.ts --out test-config.html
+```
+
+## Type Safety Helpers
+
+AGUI CLI provides helper functions for better TypeScript support:
+
+### defineConfig
+Use `defineConfig` in your config files for type safety and IntelliSense:
+
+```typescript
+import { defineConfig } from '@tarko/agent-ui-cli';
+
+export default defineConfig({
+  sessionInfo: {
+    id: 'my-session',
+    // Full type checking and autocomplete
+  },
+  uiConfig: {
+    title: 'My Agent UI',
+    // All config options with type safety
+  },
+});
+```
+
+### defineTransformer
+Use `defineTransformer` for type-safe transformers:
+
+```typescript
+import { defineTransformer } from '@tarko/agent-ui-cli';
+
+interface MyLogFormat {
+  entries: LogEntry[];
+}
+
+export default defineTransformer<MyLogFormat>((input) => {
+  // Full type checking for input parameter
+  return {
+    events: input.entries.map(/* transform logic */)
+  };
+});
 ```

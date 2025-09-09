@@ -4,12 +4,31 @@
  */
 
 import { AgentEventStream } from '@tarko/interface';
+import { defineTransformer } from '@tarko/agent-ui-cli';
+
+/**
+ * Custom log format interfaces
+ */
+interface CustomLogEntry {
+  type: 'user_input' | 'tool_execution' | 'agent_response';
+  timestamp: string;
+  message?: string;
+  tool_name?: string;
+  parameters?: Record<string, any>;
+  result?: Record<string, any>;
+}
+
+interface CustomLogFormat {
+  logs: CustomLogEntry[];
+}
 
 /**
  * Example transformer that converts a custom log format to Agent Event Stream
  * This demonstrates how to transform non-standard trace formats
  */
-export default function transformer(input: any): { events: AgentEventStream.Event[] } {
+export default defineTransformer<
+  CustomLogFormat | AgentEventStream.Event[] | { events: AgentEventStream.Event[] }
+>((input) => {
   // Handle custom log format
   if (input.logs && Array.isArray(input.logs)) {
     const events: AgentEventStream.Event[] = [];
@@ -70,4 +89,4 @@ export default function transformer(input: any): { events: AgentEventStream.Even
   }
 
   throw new Error('Unsupported input format for transformer');
-}
+});

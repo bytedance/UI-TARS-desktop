@@ -36,3 +36,19 @@ export interface TraceData {
  * AGUI configuration type
  */
 export type AguiConfig = Partial<AgentUIBuilderInputOptions>;
+
+/**
+ * Helper function to define transformer with type safety
+ */
+export function defineTransformer<T = unknown>(
+  transformer: TraceTransformer<T>,
+): TraceTransformer<T> {
+  return transformer;
+}
+
+/**
+ * Helper function to define config with type safety
+ */
+export function defineConfig(config: AguiConfig): AguiConfig {
+  return config;
+}
