@@ -1,0 +1,101 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { AgentUIBuilder, AgentUIBuilderInputOptions } from '@tarko/agent-ui-builder';
+import { AgentEventStream } from '@tarko/interface';
+import { AguiCLIOptions, TraceData } from './types';
+import { loadTraceFile, loadTransformer, validateTraceData, resolveOutputPath } from './utils';
+import { loadAguiConfig, normalizeSessionInfo } from './config';
+
+/**
+ * Core AGUI CLI functionality
+ */
+export class AguiCore {
+  /**
+   * Process the dump command
+   */
+  static async dump(tracePath: string, options: AguiCLIOptions): Promise<string> {
+    try {
+      // Load trace file
+      let traceData = await loadTraceFile(tracePath);
+      
+      // Apply transformer if specified
+      if (options.transformer) {
+        const transformer = await loadTransformer(options.transformer);
+        traceData = transformer(traceData);
+      }
+      
+      // Validate trace data format
+      const validatedTraceData = validateTraceData(traceData);
+      
+      // Load configuration
+      const config = await loadAguiConfig(options.config);
+      
+      // Prepare builder input options
+      const builderOptions: AgentUIBuilderInputOptions = {
+        events: validatedTraceData.events,
+        sessionInfo: normalizeSessionInfo(config.sessionInfo || {}),
+        serverInfo: config.serverInfo,
+        uiConfig: config.uiConfig,
+        staticPath: config.staticPath,
+      };
+      
+      // Create builder and generate HTML
+      const builder = new AgentUIBuilder(builderOptions);
+      
+      // Resolve output path
+      const outputPath = resolveOutputPath(options.out);
+      
+      // Generate and save HTML
+      const html = builder.dump(outputPath);
+      
+      return outputPath;
+    } catch (error) {
+      throw new Error(`Failed to generate HTML: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  
+  /**
+   * Process the upload command
+   */
+  static async upload(tracePath: string, uploadUrl: string, options: AguiCLIOptions): Promise<string> {
+    try {
+      // Load trace file
+      let traceData = await loadTraceFile(tracePath);
+      
+      // Apply transformer if specified
+      if (options.transformer) {
+        const transformer = await loadTransformer(options.transformer);
+        traceData = transformer(traceData);
+      }
+      
+      // Validate trace data format
+      const validatedTraceData = validateTraceData(traceData);
+      
+      // Load configuration
+      const config = await loadAguiConfig(options.config);
+      
+      // Prepare builder input options
+      const builderOptions: AgentUIBuilderInputOptions = {
+        events: validatedTraceData.events,
+        sessionInfo: normalizeSessionInfo(config.sessionInfo || {}),
+        serverInfo: config.serverInfo,
+        uiConfig: config.uiConfig,
+        staticPath: config.staticPath,
+      };
+      
+      // Create builder and generate HTML
+      const builder = new AgentUIBuilder(builderOptions);
+      const html = builder.dump(); // Generate HTML without saving to file
+      
+      // Upload HTML
+      const shareUrl = await builder.upload(html, uploadUrl);
+      
+      return shareUrl;
+    } catch (error) {
+      throw new Error(`Failed to upload HTML: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+}

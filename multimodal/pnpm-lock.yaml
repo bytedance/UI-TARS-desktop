@@ -1003,6 +1003,34 @@ importers:
         specifier: ^5.5.3
         version: 5.8.3
 
+  tarko/agui-cli:
+    dependencies:
+      '@tarko/agent-ui-builder':
+        specifier: workspace:*
+        version: link:../agent-ui-builder
+      '@tarko/config-loader':
+        specifier: workspace:*
+        version: link:../config-loader
+      '@tarko/interface':
+        specifier: workspace:*
+        version: link:../interface
+      cac:
+        specifier: 6.7.14
+        version: 6.7.14
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.10.0
+        version: 0.10.0(typescript@5.8.3)
+      '@types/node':
+        specifier: 22.15.30
+        version: 22.15.30
+      typescript:
+        specifier: ^5.5.3
+        version: 5.8.3
+      vitest:
+        specifier: 3.2.4
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
+
   tarko/config-loader:
     dependencies:
       jiti:
