@@ -9,8 +9,6 @@ export default {
    */
   sessionInfo: {
     id: 'example-session-001',
-    createdAt: Date.now() - 60000, // 1 minute ago
-    updatedAt: Date.now(),
     workspace: '~/workspace/agent-examples',
     metadata: {
       name: 'Calculator and Weather Demo',
@@ -19,11 +17,9 @@ export default {
         provider: 'openai',
         modelId: 'gpt-4',
         displayName: 'GPT-4',
-        configuredAt: Date.now() - 3600000, // 1 hour ago
       },
       agentInfo: {
         name: 'Demo Agent',
-        configuredAt: Date.now() - 3600000,
       },
     },
   },
@@ -32,7 +28,6 @@ export default {
    */
   serverInfo: {
     version: '1.0.0-demo',
-    buildTime: Date.now() - 86400000, // 1 day ago
     gitHash: 'abc123def456',
   },
   /**
