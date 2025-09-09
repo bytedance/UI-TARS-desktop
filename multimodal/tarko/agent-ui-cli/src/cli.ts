@@ -17,6 +17,7 @@ cli
   .option('--transformer <path>', 'Path to transformer file')
   .option('--config <path>', 'Path to config file')
   .option('--upload <url>', 'Upload URL for sharing')
+  .option('--dump-transformed', 'Dump transformed JSON to file')
   .action(async (tracePath: string, options: AguiCLIOptions) => {
     try {
       if (options.upload) {
@@ -44,6 +45,7 @@ cli.help(() => {
     agui ./trace.json --transformer ./transformer.ts
     agui ./trace.json --config ./config.json
     agui ./trace.json --upload http://share.example.com
+    agui ./trace.json --transformer ./transformer.ts --dump-transformed
   `);
 });
 

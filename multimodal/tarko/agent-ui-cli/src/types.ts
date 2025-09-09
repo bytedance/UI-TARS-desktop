@@ -25,6 +25,8 @@ export interface AguiCLIOptions {
   config?: string;
   /** Upload URL for sharing */
   upload?: string;
+  /** Dump transformed JSON to file */
+  dumpTransformed?: boolean;
 }
 
 /**

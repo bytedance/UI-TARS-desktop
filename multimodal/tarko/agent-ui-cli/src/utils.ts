@@ -120,3 +120,26 @@ export function resolveOutputPath(outputOption?: string): string {
 
   return path.resolve(generateDefaultOutputFilename());
 }
+
+/**
+ * Generate transformed JSON output path
+ */
+export function generateTransformedOutputPath(tracePath: string): string {
+  const ext = path.extname(tracePath);
+  const baseName = path.basename(tracePath, ext);
+  const dirName = path.dirname(tracePath);
+  return path.join(dirName, `${baseName}-transformed.json`);
+}
+
+/**
+ * Write transformed data to file
+ */
+export function writeTransformedData(data: TraceData, outputPath: string): void {
+  try {
+    fs.writeFileSync(outputPath, JSON.stringify(data, null, 2), 'utf8');
+  } catch (error) {
+    throw new Error(
+      `Failed to write transformed data: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+}

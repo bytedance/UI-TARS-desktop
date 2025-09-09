@@ -355,27 +355,52 @@ export default defineTransformer<AgentTraceFormat>((input) => {
     // Mark span as processed to prevent duplicate events
     span.processed = true;
 
-    // Find corresponding tool call
-    const toolCall = Array.from(toolCallsMap.values()).find(
-      (tc) =>
-        tc.toolName === span.name ||
-        (span.name === 'portal.run_action' && tc.resultSpanId === span.spanId),
-    );
+    // Find corresponding tool call by matching tool names
+    // The tool call name from parse_tool_calls should match the execution span name
+    const toolCall = Array.from(toolCallsMap.values()).find((tc) => {
+      // Direct name match
+      if (tc.toolName === span.name) return true;
 
-    if (!toolCall && span.name !== 'portal.run_action') {
-      return;
+      // Handle special cases where names might differ
+      if (span.name === 'portal.run_action' && tc.resultSpanId === span.spanId) return true;
+
+      // Handle cases where tool call might have been created with different naming
+      if (span.name === 'execute_bash' && tc.toolName === 'execute_bash') return true;
+      if (span.name === 'str_replace_editor' && tc.toolName === 'str_replace_editor') return true;
+      if (span.name === 'think' && tc.toolName === 'think') return true;
+
+      return false;
+    });
+
+    // If no tool call found, try to find the most recent unmatched tool call
+    let finalToolCall = toolCall;
+    if (!finalToolCall) {
+      const unmatchedToolCalls = Array.from(toolCallsMap.values()).filter((tc) => !tc.resultSpanId);
+
+      // Find by name similarity or take the most recent one
+      finalToolCall =
+        unmatchedToolCalls.find((tc) => tc.toolName === span.name) ||
+        unmatchedToolCalls[unmatchedToolCalls.length - 1];
     }
 
-    const toolCallId = toolCall?.toolCallId || `tool-call-${eventIdCounter}`;
+    const toolCallId = finalToolCall?.toolCallId || `tool-call-${span.spanId}`;
     const timestamp = Math.floor(event.time_unix_nano / 1000000);
-    const startTime = toolCall?.startTime ? Math.floor(toolCall.startTime / 1000000) : timestamp;
+    const startTime = finalToolCall?.startTime
+      ? Math.floor(finalToolCall.startTime / 1000000)
+      : timestamp;
     const elapsedMs = timestamp - startTime;
 
-    // Extract result content
+    // Extract result content based on the output structure
     let content: any;
     let error: string | undefined;
 
-    if (outputs.result) {
+    if (outputs.output) {
+      // Standard tool output format
+      content = outputs.output;
+      if (outputs.meta) {
+        content = { output: outputs.output, meta: outputs.meta };
+      }
+    } else if (outputs.result) {
       content = outputs.result;
     } else if (outputs.data) {
       content = outputs.data;
@@ -392,7 +417,7 @@ export default defineTransformer<AgentTraceFormat>((input) => {
       type: 'tool_result',
       timestamp,
       toolCallId,
-      name: toolCall?.toolName || span.name || 'unknown',
+      name: finalToolCall?.toolName || span.name || 'unknown',
       content,
       elapsedMs,
       error,
@@ -401,8 +426,8 @@ export default defineTransformer<AgentTraceFormat>((input) => {
     events.push(toolResultEvent);
 
     // Mark tool call as having a result
-    if (toolCall) {
-      toolCall.resultSpanId = span.spanId;
+    if (finalToolCall) {
+      finalToolCall.resultSpanId = span.spanId;
     }
   }
 

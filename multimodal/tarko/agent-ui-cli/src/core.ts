@@ -5,7 +5,14 @@
 
 import { AgentUIBuilder, AgentUIBuilderInputOptions } from '@tarko/agent-ui-builder';
 import { AguiCLIOptions, TraceData } from './types';
-import { loadTraceFile, loadTransformer, validateTraceData, resolveOutputPath } from './utils';
+import {
+  loadTraceFile,
+  loadTransformer,
+  validateTraceData,
+  resolveOutputPath,
+  generateTransformedOutputPath,
+  writeTransformedData,
+} from './utils';
 import { loadAguiConfig, normalizeSessionInfo } from './config';
 
 /**
@@ -25,6 +32,14 @@ export class AguiCore {
       }
 
       const validatedTraceData = validateTraceData(traceData);
+
+      // Dump transformed data if requested
+      if (options.dumpTransformed && options.transformer) {
+        const transformedOutputPath = generateTransformedOutputPath(tracePath);
+        writeTransformedData(validatedTraceData, transformedOutputPath);
+        console.log(`✅ Transformed data saved: ${transformedOutputPath}`);
+      }
+
       const config = await loadAguiConfig(options.config);
 
       const builderOptions: AgentUIBuilderInputOptions = {
@@ -64,6 +79,14 @@ export class AguiCore {
       }
 
       const validatedTraceData = validateTraceData(traceData);
+
+      // Dump transformed data if requested
+      if (options.dumpTransformed && options.transformer) {
+        const transformedOutputPath = generateTransformedOutputPath(tracePath);
+        writeTransformedData(validatedTraceData, transformedOutputPath);
+        console.log(`✅ Transformed data saved: ${transformedOutputPath}`);
+      }
+
       const config = await loadAguiConfig(options.config);
 
       const builderOptions: AgentUIBuilderInputOptions = {
