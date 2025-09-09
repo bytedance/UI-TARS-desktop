@@ -1,5 +1,11 @@
 # @agent-infra/mcp-server-browser
 
+## 1.2.23
+
+### Patch Changes
+
+- chore: rename mcpName
+
 ## 1.2.22
 
 ### Patch Changes
