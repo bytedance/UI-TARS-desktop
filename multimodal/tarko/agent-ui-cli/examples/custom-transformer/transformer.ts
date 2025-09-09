@@ -30,71 +30,128 @@ interface CustomLogFormat {
 export default defineTransformer<CustomLogFormat>((input) => {
   const events: AgentEventStream.Event[] = [];
   let eventIdCounter = 1;
-  let currentLoopToolCalls: ChatCompletionMessageToolCall[] = [];
 
-  for (let i = 0; i < input.logs.length; i++) {
-    const log = input.logs[i];
-    const timestamp = new Date(log.timestamp).getTime();
+  // Group events by conversation turns
+  const conversationTurns: { user: CustomLogEntry; responses: CustomLogEntry[] }[] = [];
+  let currentTurn: { user: CustomLogEntry; responses: CustomLogEntry[] } | null = null;
 
+  // First step: group events into conversation turns
+  for (const log of input.logs) {
     if (log.type === 'user_input') {
-      // Reset tool calls for new user input
-      currentLoopToolCalls = [];
+      if (currentTurn) {
+        conversationTurns.push(currentTurn);
+      }
+      currentTurn = { user: log, responses: [] };
+    } else if (currentTurn) {
+      currentTurn.responses.push(log);
+    }
+  }
+  if (currentTurn) {
+    conversationTurns.push(currentTurn);
+  }
 
-      events.push({
-        id: `event-${eventIdCounter++}`,
-        type: 'user_message',
-        timestamp,
-        content: log.message || '',
-      } as AgentEventStream.UserMessageEvent);
-    } else if (log.type === 'agent_response') {
-      events.push({
-        id: `event-${eventIdCounter++}`,
-        type: 'assistant_message',
-        timestamp,
-        content: log.message || '',
-        rawContent: log.message,
-        toolCalls: currentLoopToolCalls.length > 0 ? currentLoopToolCalls : undefined,
-        finishReason:
-          log.parameters?.finishReason || (currentLoopToolCalls.length > 0 ? 'tool_calls' : 'stop'),
-        ttftMs: log.parameters?.ttftMs,
-        ttltMs: log.parameters?.ttltMs,
-        messageId: log.parameters?.messageId || `msg-${eventIdCounter}`,
-      } as AgentEventStream.AssistantMessageEvent);
+  // Add agent run start event
+  events.push({
+    id: `event-${eventIdCounter++}`,
+    type: 'agent_run_start',
+    timestamp: new Date(input.logs[0]?.timestamp || Date.now()).getTime(),
+    sessionId: 'custom-session-001',
+    runOptions: {
+      input: input.logs.find((l) => l.type === 'user_input')?.message || '',
+      stream: false,
+    },
+    provider: 'custom',
+    model: 'custom-model',
+    modelDisplayName: 'Custom Agent',
+    agentName: 'Custom Agent',
+  } as AgentEventStream.AgentRunStartEvent);
 
-      // Reset tool calls after agent response
-      currentLoopToolCalls = [];
-    } else if (log.type === 'agent_thinking') {
+  // Process each conversation turn
+  for (const turn of conversationTurns) {
+    // User message
+    events.push({
+      id: `event-${eventIdCounter++}`,
+      type: 'user_message',
+      timestamp: new Date(turn.user.timestamp).getTime(),
+      content: turn.user.message || '',
+    } as AgentEventStream.UserMessageEvent);
+
+    // Collect tool calls for this turn
+    const toolExecutions = turn.responses.filter((r) => r.type === 'tool_execution');
+    const toolCalls: ChatCompletionMessageToolCall[] = [];
+
+    // Process thinking first (if any)
+    const thinkingLogs = turn.responses.filter((r) => r.type === 'agent_thinking');
+    for (const thinking of thinkingLogs) {
       events.push({
         id: `event-${eventIdCounter++}`,
         type: 'assistant_thinking_message',
-        timestamp,
-        content: log.message || '',
-        isComplete: log.parameters?.isComplete ?? true,
-        thinkingDurationMs: log.parameters?.thinkingDurationMs,
-        messageId: log.parameters?.messageId || `thinking-${eventIdCounter}`,
+        timestamp: new Date(thinking.timestamp).getTime(),
+        content: thinking.message || '',
+        isComplete: thinking.parameters?.isComplete ?? true,
+        thinkingDurationMs: thinking.parameters?.thinkingDurationMs,
+        messageId: thinking.parameters?.messageId || `thinking-${eventIdCounter}`,
       } as AgentEventStream.AssistantThinkingMessageEvent);
-    } else if (log.type === 'tool_execution') {
-      const toolCallId = `tool-call-${eventIdCounter++}`; // 生成唯一 ID
-      const toolName = log.tool_name || 'unknown_tool';
+    }
+
+    // Generate tool call IDs and collect for assistant message
+    const toolCallIds: string[] = [];
+    for (const toolLog of toolExecutions) {
+      const toolCallId = `tool-call-${eventIdCounter++}`;
+      toolCallIds.push(toolCallId);
+      const toolName = toolLog.tool_name || 'unknown_tool';
 
       // Collect tool call for assistant message
-      currentLoopToolCalls.push({
+      toolCalls.push({
         id: toolCallId,
         type: 'function',
         function: {
           name: toolName,
-          arguments: JSON.stringify(log.parameters || {}),
+          arguments: JSON.stringify(toolLog.parameters || {}),
         },
       });
+    }
+
+    // Assistant message with tool calls (if any)
+    const responseLogs = turn.responses.filter((r) => r.type === 'agent_response');
+    for (const responseLog of responseLogs) {
+      const hasToolCalls = toolCalls.length > 0;
+
+      events.push({
+        id: `event-${eventIdCounter++}`,
+        type: 'assistant_message',
+        timestamp: new Date(responseLog.timestamp).getTime(),
+        content: responseLog.message || '',
+        rawContent: responseLog.message,
+        toolCalls: hasToolCalls ? [...toolCalls] : undefined,
+        finishReason:
+          responseLog.parameters?.finishReason || (hasToolCalls ? 'tool_calls' : 'stop'),
+        ttftMs: responseLog.parameters?.ttftMs,
+        ttltMs: responseLog.parameters?.ttltMs,
+        messageId: responseLog.parameters?.messageId || `msg-${eventIdCounter}`,
+      } as AgentEventStream.AssistantMessageEvent);
+
+      // Clear tool calls after first response that uses them
+      if (hasToolCalls) {
+        toolCalls.length = 0;
+      }
+    }
+
+    // Add tool call and result events after assistant message
+    for (let i = 0; i < toolExecutions.length; i++) {
+      const toolLog = toolExecutions[i];
+      const toolCallId = toolCallIds[i]; // Use pre-generated ID
+      const toolName = toolLog.tool_name || 'unknown_tool';
+      const timestamp = new Date(toolLog.timestamp).getTime();
 
       // Tool call event
       events.push({
         id: `event-${eventIdCounter++}`,
         type: 'tool_call',
         timestamp,
-        toolCallId, // 使用相同的 toolCallId
+        toolCallId,
         name: toolName,
-        arguments: log.parameters || {},
+        arguments: toolLog.parameters || {},
         startTime: timestamp,
         tool: {
           name: toolName,
@@ -104,19 +161,34 @@ export default defineTransformer<CustomLogFormat>((input) => {
       } as AgentEventStream.ToolCallEvent);
 
       // Tool result event (if result exists)
-      if (log.result) {
+      if (toolLog.result) {
         events.push({
           id: `event-${eventIdCounter++}`,
           type: 'tool_result',
           timestamp: timestamp + 100,
-          toolCallId, // 使用相同的 toolCallId
+          toolCallId,
           name: toolName,
-          content: log.result,
-          elapsedMs: log.parameters?.elapsed_ms || 100,
+          content: toolLog.result,
+          elapsedMs: toolLog.parameters?.elapsed_ms || 100,
         } as AgentEventStream.ToolResultEvent);
       }
     }
   }
+
+  // Add agent run end event
+  const lastTimestamp = new Date(
+    input.logs[input.logs.length - 1]?.timestamp || Date.now(),
+  ).getTime();
+  const firstTimestamp = new Date(input.logs[0]?.timestamp || Date.now()).getTime();
+  events.push({
+    id: `event-${eventIdCounter++}`,
+    type: 'agent_run_end',
+    timestamp: lastTimestamp + 100,
+    sessionId: 'custom-session-001',
+    iterations: conversationTurns.length,
+    elapsedMs: lastTimestamp - firstTimestamp,
+    status: 'completed',
+  } as AgentEventStream.AgentRunEndEvent);
 
   return { events };
 });
