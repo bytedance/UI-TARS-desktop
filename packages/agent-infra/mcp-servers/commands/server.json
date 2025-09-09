@@ -5,7 +5,8 @@
   "status": "active",
   "repository": {
     "url": "https://github.com/bytedance/UI-TARS-desktop",
-    "source": "github"
+    "source": "github",
+    "subfolder": "packages/agent-infra/mcp-servers/commands"
   },
   "version": "1.0.0",
   "packages": [
