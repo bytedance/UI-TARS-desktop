@@ -54,7 +54,7 @@ export default defineTransformer<CustomLogFormat>((input) => {
         content: log.message || '',
         rawContent: log.message,
         toolCalls: currentLoopToolCalls.length > 0 ? currentLoopToolCalls : undefined,
-        finishReason: log.parameters?.finishReason || 'stop',
+        finishReason: log.parameters?.finishReason || (currentLoopToolCalls.length > 0 ? 'tool_calls' : 'stop'),
         ttftMs: log.parameters?.ttftMs,
         ttltMs: log.parameters?.ttltMs,
         messageId: log.parameters?.messageId || `msg-${eventIdCounter}`,
@@ -73,7 +73,7 @@ export default defineTransformer<CustomLogFormat>((input) => {
         messageId: log.parameters?.messageId || `thinking-${eventIdCounter}`,
       } as AgentEventStream.AssistantThinkingMessageEvent);
     } else if (log.type === 'tool_execution') {
-      const toolCallId = `tool-call-${eventIdCounter}`;
+      const toolCallId = `tool-call-${eventIdCounter++}`; // 生成唯一 ID
       const toolName = log.tool_name || 'unknown_tool';
 
       // Collect tool call for assistant message
@@ -91,7 +91,7 @@ export default defineTransformer<CustomLogFormat>((input) => {
         id: `event-${eventIdCounter++}`,
         type: 'tool_call',
         timestamp,
-        toolCallId,
+        toolCallId, // 使用相同的 toolCallId
         name: toolName,
         arguments: log.parameters || {},
         startTime: timestamp,
@@ -108,10 +108,10 @@ export default defineTransformer<CustomLogFormat>((input) => {
           id: `event-${eventIdCounter++}`,
           type: 'tool_result',
           timestamp: timestamp + 100,
-          toolCallId,
+          toolCallId, // 使用相同的 toolCallId
           name: toolName,
           content: log.result,
-          elapsedMs: 100,
+          elapsedMs: log.parameters?.elapsed_ms || 100,
         } as AgentEventStream.ToolResultEvent);
       }
     }

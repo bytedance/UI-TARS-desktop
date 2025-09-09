@@ -142,6 +142,26 @@ if (log.type === 'agent_response') {
 
 This ensures that `AssistantMessageEvent.toolCalls` contains all tools that were called before the assistant's response, matching the actual conversation flow.
 
+#### Critical Tool Call Requirements
+
+For proper UI rendering, ensure these requirements are met:
+
+1. **Matching Tool Call IDs**: `toolCall.id` must match `toolResult.toolCallId`
+```typescript
+const toolCallId = `tool-call-${eventIdCounter++}`; // Generate once
+
+// Use same ID in both events
+toolCall: { toolCallId },
+toolResult: { toolCallId }
+```
+
+2. **Correct finishReason**: Set `"tool_calls"` when assistant makes tool calls
+```typescript
+finishReason: currentLoopToolCalls.length > 0 ? 'tool_calls' : 'stop'
+```
+
+Without these, tool call blocks will show as "executing" indefinitely and side panels won't update.
+
 ### defineTransformer
 Use `defineTransformer` for type-safe transformers that convert custom log formats to AgentEventStream events:
 

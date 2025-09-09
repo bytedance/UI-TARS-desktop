@@ -34,6 +34,17 @@
       }
     },
     {
+      "type": "agent_response",
+      "timestamp": "2024-01-01T10:00:04.000Z",
+      "message": "For an $85 dinner bill with an 18% tip:\n\n• Tip amount: **$15.30**\n• Total amount: **$100.30**\n\nThe calculation: $85.00 × 18% = $15.30 tip, so your total will be $85.00 + $15.30 = $100.30.",
+      "parameters": {
+        "finishReason": "stop",
+        "ttftMs": 95,
+        "ttltMs": 800,
+        "messageId": "msg-001-final"
+      }
+    },
+    {
       "type": "agent_thinking",
       "timestamp": "2024-01-01T10:00:02.500Z",
       "message": "I need to calculate 18% tip on $85. Let me use the calculator tool for accuracy.",
@@ -46,9 +57,8 @@
     {
       "type": "agent_response",
       "timestamp": "2024-01-01T10:00:03.000Z",
-      "message": "For an $85 dinner bill with an 18% tip:\n\n• Tip amount: **$15.30**\n• Total amount: **$100.30**\n\nThe calculation: $85.00 × 18% = $15.30 tip, so your total will be $85.00 + $15.30 = $100.30.",
+      "message": "I'll calculate the tip for you using the calculator.",
       "parameters": {
-        "finishReason": "stop",
         "ttftMs": 120,
         "ttltMs": 1200,
         "messageId": "msg-001"
