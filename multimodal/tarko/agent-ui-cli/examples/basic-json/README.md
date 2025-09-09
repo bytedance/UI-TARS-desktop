@@ -7,7 +7,7 @@ Standard JSON format processing with calculator agent.
 ```bash
 ./run.sh
 # or
-agui trace.json
+node ../../dist/cli.js trace.json
 ```
 
 ## Format

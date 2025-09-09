@@ -7,7 +7,7 @@ Custom log format processing with transformer and configuration.
 ```bash
 ./run.sh
 # or
-agui custom-format.json --transformer transformer.ts --config agui.config.ts --dump-transformed
+node ../../dist/cli.js custom-format.json --transformer transformer.ts --config agui.config.ts --dump-transformed
 ```
 
 ## Files

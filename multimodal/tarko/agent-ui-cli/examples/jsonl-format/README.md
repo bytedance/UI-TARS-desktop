@@ -7,7 +7,7 @@ JSON Lines format with auto-detection (one event per line).
 ```bash
 ./run.sh
 # or
-agui trace.jsonl
+node ../../dist/cli.js trace.jsonl
 ```
 
 ## Format

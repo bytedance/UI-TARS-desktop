@@ -14,4 +14,6 @@ cd jsonl-format && ./run.sh
 cd custom-transformer && ./run.sh
 ```
 
+**Note**: Examples use `node ../../dist/cli.js` to run the local CLI build.
+
 Each example includes `run.sh` script and README with details.

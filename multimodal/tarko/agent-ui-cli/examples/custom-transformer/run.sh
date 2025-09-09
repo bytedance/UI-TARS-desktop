@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Running custom transformer example..."
-agui custom-format.json \
+node ../../dist/cli.js custom-format.json \
   --transformer transformer.ts \
   --config agui.config.ts \
   --out custom-transformer-demo.html \
