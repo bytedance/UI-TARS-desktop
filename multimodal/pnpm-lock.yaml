@@ -981,29 +981,7 @@ importers:
         specifier: 3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
 
-  tarko/agio:
-    dependencies:
-      '@tarko/agent-interface':
-        specifier: workspace:*
-        version: link:../agent-interface
-    devDependencies:
-      '@rslib/core':
-        specifier: 0.10.0
-        version: 0.10.0(typescript@5.8.3)
-      '@types/js-yaml':
-        specifier: 4.0.9
-        version: 4.0.9
-      '@types/node':
-        specifier: 22.15.30
-        version: 22.15.30
-      ts-json-schema-generator:
-        specifier: ^2.4.0
-        version: 2.4.0
-      typescript:
-        specifier: ^5.5.3
-        version: 5.8.3
-
-  tarko/agui-cli:
+  tarko/agent-ui-cli:
     dependencies:
       '@tarko/agent-ui-builder':
         specifier: workspace:*
@@ -1030,6 +1008,28 @@ importers:
       vitest:
         specifier: 3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
+
+  tarko/agio:
+    dependencies:
+      '@tarko/agent-interface':
+        specifier: workspace:*
+        version: link:../agent-interface
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.10.0
+        version: 0.10.0(typescript@5.8.3)
+      '@types/js-yaml':
+        specifier: 4.0.9
+        version: 4.0.9
+      '@types/node':
+        specifier: 22.15.30
+        version: 22.15.30
+      ts-json-schema-generator:
+        specifier: ^2.4.0
+        version: 2.4.0
+      typescript:
+        specifier: ^5.5.3
+        version: 5.8.3
 
   tarko/config-loader:
     dependencies:
