@@ -143,8 +143,38 @@ export default defineTransformer<CustomLogFormat>((input) => {
         timestamp,
         content: log.message || '',
       } as AgentEventStream.UserMessageEvent);
+    } else if (log.type === 'tool_execution') {
+      const toolCallId = `tool-call-${eventIdCounter}`;
+      
+      // Tool call event
+      events.push({
+        id: `event-${eventIdCounter++}`,
+        type: 'tool_call',
+        timestamp,
+        toolCallId,
+        name: log.tool_name || 'unknown_tool',
+        arguments: log.parameters || {},
+        startTime: timestamp,
+        tool: {
+          name: log.tool_name || 'unknown_tool',
+          description: `Tool: ${log.tool_name}`,
+          schema: {},
+        },
+      } as AgentEventStream.ToolCallEvent);
+      
+      // Tool result event
+      if (log.result) {
+        events.push({
+          id: `event-${eventIdCounter++}`,
+          type: 'tool_result',
+          timestamp: timestamp + 100,
+          toolCallId,
+          name: log.tool_name || 'unknown_tool',
+          content: log.result,
+          elapsedMs: 100,
+        } as AgentEventStream.ToolResultEvent);
+      }
     }
-    // ... more transformation logic
   }
 
   return { events };

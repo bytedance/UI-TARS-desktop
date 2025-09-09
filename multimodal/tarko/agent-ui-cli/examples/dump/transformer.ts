@@ -26,77 +26,60 @@ interface CustomLogFormat {
  * Example transformer that converts a custom log format to Agent Event Stream
  * This demonstrates how to transform non-standard trace formats
  */
-export default defineTransformer<
-  CustomLogFormat | AgentEventStream.Event[] | { events: AgentEventStream.Event[] }
->((input) => {
-  // Handle custom log format
-  if (input.logs && Array.isArray(input.logs)) {
-    const events: AgentEventStream.Event[] = [];
-    let eventIdCounter = 1;
+export default defineTransformer<CustomLogFormat>((input) => {
+  const events: AgentEventStream.Event[] = [];
+  let eventIdCounter = 1;
 
-    for (const log of input.logs) {
-      const timestamp = new Date(log.timestamp).getTime();
+  for (const log of input.logs) {
+    const timestamp = new Date(log.timestamp).getTime();
 
-      if (log.type === 'user_input') {
+    if (log.type === 'user_input') {
+      events.push({
+        id: `event-${eventIdCounter++}`,
+        type: 'user_message',
+        timestamp,
+        content: log.message || '',
+      } as AgentEventStream.UserMessageEvent);
+    } else if (log.type === 'agent_response') {
+      events.push({
+        id: `event-${eventIdCounter++}`,
+        type: 'assistant_message',
+        timestamp,
+        content: log.message || '',
+      } as AgentEventStream.AssistantMessageEvent);
+    } else if (log.type === 'tool_execution') {
+      const toolCallId = `tool-call-${eventIdCounter}`;
+
+      // Tool call event
+      events.push({
+        id: `event-${eventIdCounter++}`,
+        type: 'tool_call',
+        timestamp,
+        toolCallId,
+        name: log.tool_name || 'unknown_tool',
+        arguments: log.parameters || {},
+        startTime: timestamp,
+        tool: {
+          name: log.tool_name || 'unknown_tool',
+          description: `Tool: ${log.tool_name}`,
+          schema: {},
+        },
+      } as AgentEventStream.ToolCallEvent);
+
+      // Tool result event (if result exists)
+      if (log.result) {
         events.push({
           id: `event-${eventIdCounter++}`,
-          type: 'user_message',
-          timestamp,
-          content: log.message || '',
-        } as AgentEventStream.UserMessageEvent);
-      } else if (log.type === 'agent_response') {
-        events.push({
-          id: `event-${eventIdCounter++}`,
-          type: 'assistant_message',
-          timestamp,
-          content: log.message || '',
-        } as AgentEventStream.AssistantMessageEvent);
-      } else if (log.type === 'tool_execution') {
-        const toolCallId = `tool-call-${eventIdCounter}`;
-
-        // Tool call event
-        events.push({
-          id: `event-${eventIdCounter++}`,
-          type: 'tool_call',
-          timestamp,
+          type: 'tool_result',
+          timestamp: timestamp + 100,
           toolCallId,
           name: log.tool_name || 'unknown_tool',
-          arguments: log.parameters || {},
-          startTime: timestamp,
-          tool: {
-            name: log.tool_name || 'unknown_tool',
-            description: `Tool: ${log.tool_name}`,
-            schema: {},
-          },
-        } as AgentEventStream.ToolCallEvent);
-
-        // Tool result event (if result exists)
-        if (log.result) {
-          events.push({
-            id: `event-${eventIdCounter++}`,
-            type: 'tool_result',
-            timestamp: timestamp + 100,
-            toolCallId,
-            name: log.tool_name || 'unknown_tool',
-            content: log.result,
-            elapsedMs: 100,
-          } as AgentEventStream.ToolResultEvent);
-        }
+          content: log.result,
+          elapsedMs: 100,
+        } as AgentEventStream.ToolResultEvent);
       }
     }
-
-    return { events };
   }
 
-  // Handle simple array format
-  if (Array.isArray(input)) {
-    return { events: input };
-  }
-
-  // Handle object with events array
-  if (input.events && Array.isArray(input.events)) {
-    return input;
-  }
-
-  throw new Error('Unsupported input format for transformer');
+  return { events };
 });
