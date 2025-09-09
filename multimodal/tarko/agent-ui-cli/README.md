@@ -353,6 +353,27 @@ Use `--dump-transformed` to inspect the final event structure before HTML genera
 ## Examples
 
 See the `examples/` directory for complete working examples:
-- `examples/dump/` - Basic usage examples with sample trace files
-- `examples/test/` - Advanced transformer examples and test data
+
+### 🚀 Quick Start Examples
+
+- **`examples/basic-json/`** - Standard JSON format processing
+- **`examples/jsonl-format/`** - JSONL format with auto-detection
+- **`examples/custom-transformer/`** - Custom formats with transformers
+
+Each example includes:
+- One-click `run.sh` script
+- Detailed README with explanations
+- Sample trace files
+- Expected output descriptions
+
+### Running Examples
+
+```bash
+# Run any example with one command
+cd examples/basic-json && ./run.sh
+cd examples/jsonl-format && ./run.sh
+cd examples/custom-transformer && ./run.sh
+```
+
+For detailed documentation, see [examples/README.md](examples/README.md).
 ```
