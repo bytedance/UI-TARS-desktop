@@ -110,7 +110,7 @@ export default defineConfig({
 ```
 
 ### defineTransformer
-Use `defineTransformer` for type-safe transformers that convert custom log formats to AgentEventStream events. The transformer supports all AgentEventStream event types:
+Use `defineTransformer` for type-safe transformers that convert custom log formats to AgentEventStream events:
 
 ```typescript
 import { AgentEventStream } from '@tarko/interface';
@@ -179,57 +179,4 @@ export default defineTransformer<CustomLogFormat>((input) => {
 
   return { events };
 });
-```
-
-#### Supported Event Types
-
-The transformer supports all AgentEventStream event types:
-
-- **Conversation Events**: `user_input` → `user_message`, `agent_response` → `assistant_message`
-- **Thinking Events**: `agent_thinking` → `assistant_thinking_message`
-- **Tool Events**: `tool_execution` → `tool_call` + `tool_result`
-- **System Events**: `system_message` → `system`
-- **Session Events**: `session_start` → `agent_run_start`, `session_end` → `agent_run_end`
-- **Planning Events**: `plan_start` → `plan_start`, `plan_update` → `plan_update`, `plan_finish` → `plan_finish`
-- **Environment Events**: `environment_input` → `environment_input`
-- **Final Answer Events**: `final_answer` → `final_answer`
-
-#### Example Custom Log Format
-
-```json
-{
-  "logs": [
-    {
-      "type": "session_start",
-      "timestamp": "2024-01-01T10:00:00.000Z",
-      "session_id": "session-001"
-    },
-    {
-      "type": "user_input",
-      "timestamp": "2024-01-01T10:00:01.000Z",
-      "message": "Help me plan a dinner party"
-    },
-    {
-      "type": "agent_thinking",
-      "timestamp": "2024-01-01T10:00:02.000Z",
-      "message": "Let me break this down into steps...",
-      "thinking_duration_ms": 1500
-    },
-    {
-      "type": "tool_execution",
-      "timestamp": "2024-01-01T10:00:03.000Z",
-      "tool_name": "calculator",
-      "parameters": { "expression": "8 * 25" },
-      "result": { "result": 200 },
-      "elapsed_ms": 150
-    },
-    {
-      "type": "final_answer",
-      "timestamp": "2024-01-01T10:00:04.000Z",
-      "message": "Here's your dinner party plan...",
-      "is_deep_research": false,
-      "answer_format": "markdown"
-    }
-  ]
-}
 ```
