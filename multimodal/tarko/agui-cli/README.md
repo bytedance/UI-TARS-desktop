@@ -1,11 +1,11 @@
-# @tarko/agui-cli
+# @tarko/agent-ui-cli
 
 CLI for Agent UI Builder - generate and share agent replay HTML files.
 
 ## Installation
 
 ```bash
-npm install @tarko/agui-cli
+npm install @tarko/agent-ui-cli
 ```
 
 ## Usage

@@ -1,5 +1,5 @@
 {
-  "name": "@tarko/agui-cli",
+  "name": "@tarko/agent-ui-cli",
   "version": "0.3.0-beta.10",
   "description": "CLI for Agent UI Builder - generate and share agent replay HTML files",
   "main": "dist/index.js",
