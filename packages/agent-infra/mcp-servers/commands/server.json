@@ -1,6 +1,6 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
-  "name": "io.github.agent-infra/mcp-server-commands",
+  "name": "io.github.bytedance/mcp-server-commands",
   "description": "An MCP server to run arbitrary commands",
   "status": "active",
   "repository": {

@@ -1,6 +1,6 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
-  "name": "io.github.agent-infra/mcp-server-filesystem",
+  "name": "io.github.bytedance/mcp-server-filesystem",
   "description": "MCP server for filesystem access",
   "status": "active",
   "repository": {

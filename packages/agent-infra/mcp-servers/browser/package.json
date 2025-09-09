@@ -1,7 +1,7 @@
 {
   "name": "@agent-infra/mcp-server-browser",
   "version": "1.2.22",
-  "mcpName": "io.github.agent-infra/mcp-server-browser",
+  "mcpName": "io.github.bytedance/mcp-server-browser",
   "description": "MCP server for browser use access",
   "license": "MIT",
   "homepage": "https://github.com/bytedance/UI-TARS-desktop",
