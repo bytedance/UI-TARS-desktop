@@ -33,8 +33,7 @@
     }
   },
   "files": [
-    "dist",
-    "server.json"
+    "dist"
   ],
   "scripts": {
     "build": "shx rm -rf dist && rslib build && shx chmod +x dist/*.{js,cjs}",

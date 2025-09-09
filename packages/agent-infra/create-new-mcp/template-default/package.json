@@ -17,8 +17,7 @@
     "mcp-server-{{name}}": "./dist/index.cjs"
   },
   "files": [
-    "dist",
-    "server.json"
+    "dist"
   ],
   "scripts": {
     "clean": "shx rm -rf build",
