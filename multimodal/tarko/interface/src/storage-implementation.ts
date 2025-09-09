@@ -92,9 +92,6 @@ export interface MongoDBAgentStorageImplementation extends BaseAgentStorageImple
   type: 'mongodb';
   /**
    * MongoDB connection uri string
-   *
-   * Examples:
-   * - Local: mongodb://localhost:27017/tarko
    */
   uri: string;
 
@@ -102,11 +99,6 @@ export interface MongoDBAgentStorageImplementation extends BaseAgentStorageImple
    * Additional MongoDB connection options
    */
   options?: {
-    /**
-     * Database name (optional, can be specified in connection string)
-     *
-     * @defaultValue 'tarko'
-     */
     dbName?: string;
     user?: string;
     pass?: string;

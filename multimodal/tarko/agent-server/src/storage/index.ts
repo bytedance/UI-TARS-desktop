@@ -7,11 +7,10 @@ import { StorageProvider } from './types';
 import { MemoryStorageProvider } from './MemoryStorageProvider';
 import { FileStorageProvider } from './FileStorageProvider';
 import { SQLiteStorageProvider } from './SQLiteStorageProvider';
-import { MongoDBStorageProvider } from './MongoDBStorageProvider';
+import { MongoDBStorageProvider } from './MongoDBStorageProvider/index';
 import { AgentStorageImplementation, TARKO_CONSTANTS } from '@tarko/interface';
 
 export * from './types';
-export { MongoDBStorageProvider } from './MongoDBStorageProvider';
 
 /**
  * Creates and returns a storage provider based on the options

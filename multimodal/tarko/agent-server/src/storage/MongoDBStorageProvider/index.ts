@@ -3,14 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import mongoose, { Connection } from 'mongoose';
-import {
-  AgentEventStream,
-  MongoDBAgentStorageImplementation,
-  TARKO_CONSTANTS,
-} from '@tarko/interface';
+import mongoose, { Connection, ConnectOptions } from 'mongoose';
+import { AgentEventStream, MongoDBAgentStorageImplementation } from '@tarko/interface';
 import { getLogger } from '@tarko/shared-utils';
-import { StorageProvider, SessionInfo } from './types';
+import { StorageProvider, SessionInfo } from '../types';
 import { SessionModel, EventModel, SessionDocument, EventDocument } from './MongoDBSchemas';
 
 const logger = getLogger('MongoDBStorageProvider');
@@ -37,10 +33,10 @@ export class MongoDBStorageProvider implements StorageProvider {
     }
 
     try {
-      logger.debug('Initializing MongoDB connection...');
+      logger.info('Initializing MongoDB connection...');
 
       // Prepare connection options with defaults
-      const defaultOptions = {
+      const defaultOptions: ConnectOptions = {
         maxPoolSize: 10,
         serverSelectionTimeoutMS: 5000,
         socketTimeoutMS: 45000,
@@ -52,16 +48,6 @@ export class MongoDBStorageProvider implements StorageProvider {
         ...this.config.options,
       };
 
-      // Extract database name from connection string or use config/default
-      let dbName = this.config.dbName;
-      if (!dbName) {
-        const urlParts = this.config.uri.split('/');
-        dbName =
-          urlParts[urlParts.length - 1]?.split('?')[0] ||
-          TARKO_CONSTANTS.SESSION_DATA_DB_NAME.replace('.db', '');
-      }
-
-      // Connect to MongoDB
       this.connection = await mongoose
         .createConnection(this.config.uri, connectionOptions)
         .asPromise();
@@ -70,12 +56,12 @@ export class MongoDBStorageProvider implements StorageProvider {
       this.connection.model('Session', SessionModel.schema);
       this.connection.model('Event', EventModel.schema);
 
-      logger.debug(`MongoDB connected successfully to database: ${dbName}`);
+      logger.info(`MongoDB connected successfully to database: ${connectionOptions.dbName}`);
 
       // Test the connection with a simple operation
       if (this.connection?.db) {
         await this.connection.db.admin().ping();
-        logger.debug('MongoDB ping successful');
+        logger.info('MongoDB ping successful');
       }
 
       this.initialized = true;

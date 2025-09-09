@@ -42,8 +42,11 @@ export default {
   },
   server: {
     storage: {
-      type: 'mongodb',
-      uri: 'mongodb://localhost:27017/tarko',
+      type: process.env.STORAGE_TYPE,
+      uri: process.env.MONGO_URI,
+      options: {
+        dbName: process.env.MONGO_DB_NAME,
+      },
     },
   },
 } as AgentAppConfig;

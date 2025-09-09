@@ -37,4 +37,17 @@ export default defineConfig({
     cleanDistPath: true,
     sourceMap: true,
   },
+  tools: {
+    rspack: {
+      ignoreWarnings: [
+        /Module not found.*zstd\.node/,
+        /Module not found.*kerberos\.node/,
+        /Module not found.*aws4/,
+        /Module not found.*mongodb-client-encryption/,
+        /Module not found.*snappy.*\.node/,
+        /Module not found.*snappy.*\.cjs/,
+        /Module not found.*@napi-rs\/snappy/,
+      ],
+    },
+  },
 });
