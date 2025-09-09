@@ -5,13 +5,8 @@
 
 import fs from 'fs';
 import path from 'path';
-import { loadConfig, LoadConfigResult } from '@tarko/config-loader';
-import {
-  AgentEventStream,
-  SessionInfo,
-  AgentServerVersionInfo,
-  AgentWebUIImplementation,
-} from '@tarko/interface';
+import { loadConfig } from '@tarko/config-loader';
+import { SessionInfo } from '@tarko/interface';
 import { AguiConfig } from './types';
 
 /**

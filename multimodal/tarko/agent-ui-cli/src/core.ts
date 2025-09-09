@@ -4,7 +4,6 @@
  */
 
 import { AgentUIBuilder, AgentUIBuilderInputOptions } from '@tarko/agent-ui-builder';
-import { AgentEventStream } from '@tarko/interface';
 import { AguiCLIOptions, TraceData } from './types';
 import { loadTraceFile, loadTransformer, validateTraceData, resolveOutputPath } from './utils';
 import { loadAguiConfig, normalizeSessionInfo } from './config';
