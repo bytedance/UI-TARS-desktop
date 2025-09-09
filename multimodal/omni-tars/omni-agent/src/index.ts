@@ -41,7 +41,7 @@ export default class OmniTARSAgent extends ComposableAgent {
       'Find information about UI TARS',
       'Tell me the top 5 most popular projects on ProductHunt today',
       'Write hello world using python',
-      'Use jupyter to calculate who is greater in 9.11 and 9.9',
+      'Use jupyter to calculate which is greater in 9.11 and 9.9',
       'Write code to reproduce seed-tars.com',
       'Summary seed-tars.com/1.5',
       'Write a python code to download the paper https://arxiv.org/abs/2505.12370, and convert the pdf to markdown',
