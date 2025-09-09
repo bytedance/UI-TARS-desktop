@@ -1,0 +1,70 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
+  "name": "io.github.username/mcp-server-{{name}}",
+  "description": "MCP server for browser use access",
+  "status": "active",
+  "repository": {
+    "url": "https://github.com/username/mcp-server-{{name}}",
+    "source": "github"
+  },
+  "version": "1.0.0",
+  "packages": [
+    {
+      "registry_type": "npm",
+      "registry_base_url": "https://registry.npmjs.org",
+      "identifier": "mcp-server-{{name}}",
+      "version": "latest",
+      "transport": {
+        "type": "stdio"
+      },
+      "package_arguments": [],
+      "environment_variables": []
+    },
+    {
+      "registry_type": "npm",
+      "registry_base_url": "https://registry.npmjs.org",
+      "identifier": "mcp-server-{{name}}",
+      "version": "latest",
+      "runtime_hint": "npx",
+      "transport": {
+        "type": "sse",
+        "url": "http://127.0.0.1:{port}/sse"
+      },
+      "runtime_arguments": [],
+      "package_arguments": [
+        {
+          "type": "named",
+          "name": "port",
+          "description": "Server port number",
+          "format": "number",
+          "is_required": true,
+          "default": "8089"
+        }
+      ],
+      "environment_variables": []
+    },
+    {
+      "registry_type": "npm",
+      "registry_base_url": "https://registry.npmjs.org",
+      "identifier": "mcp-server-{{name}}",
+      "version": "latest",
+      "runtime_hint": "npx",
+      "transport": {
+        "type": "streamable-http",
+        "url": "http://127.0.0.1:{port}/mcp"
+      },
+      "runtime_arguments": [],
+      "package_arguments": [
+        {
+          "type": "named",
+          "name": "port",
+          "description": "Server port number",
+          "format": "number",
+          "is_required": true,
+          "default": "8089"
+        }
+      ],
+      "environment_variables": []
+    }
+  ]
+}

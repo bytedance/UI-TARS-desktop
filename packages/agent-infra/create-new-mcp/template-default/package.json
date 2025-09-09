@@ -1,6 +1,7 @@
 {
   "name": "mcp-server-{{name}}",
   "version": "1.0.0",
+  "mcpName": "io.github.username/mcp-server-{{name}}",
   "description": "An MCP server for {{name}}",
   "type": "module",
   "main": "./dist/server.cjs",
@@ -16,7 +17,8 @@
     "mcp-server-{{name}}": "./dist/index.cjs"
   },
   "files": [
-    "dist"
+    "dist",
+    "server.json"
   ],
   "scripts": {
     "clean": "shx rm -rf build",
