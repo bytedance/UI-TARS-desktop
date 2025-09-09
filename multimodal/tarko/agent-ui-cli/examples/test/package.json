@@ -1,0 +1,29 @@
+{
+  "name": "agent-trace-transformer",
+  "version": "1.0.0",
+  "description": "Transform agent trace JSONL to AgentEventStream format",
+  "main": "transformer.ts",
+  "scripts": {
+    "test": "ts-node test-transformer.ts",
+    "dump": "ts-node dump-html.ts",
+    "analyze": "node analyze_patterns.js",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/uuid": "^9.0.0",
+    "@types/node": "^18.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.0"
+  },
+  "keywords": [
+    "agent",
+    "trace",
+    "transformer",
+    "event-stream"
+  ],
+  "author": "Bytedance",
+  "license": "Apache-2.0"
+}
