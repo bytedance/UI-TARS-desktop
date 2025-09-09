@@ -199,7 +199,7 @@
       "sessionId": "custom-session-001",
       "iterations": 2,
       "elapsedMs": 62000,
-      "status": "completed"
+      "status": "idle"
     }
   ]
 }

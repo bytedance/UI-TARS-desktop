@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentEventStream } from '@tarko/interface';
+import { AgentEventStream, AgentStatus } from '@tarko/interface';
 import { defineTransformer } from '@tarko/agent-ui-cli';
 import type { ChatCompletionMessageToolCall } from '@tarko/model-provider/types';
 
@@ -197,7 +197,7 @@ export default defineTransformer<CustomLogFormat>((input) => {
     sessionId: 'custom-session-001',
     iterations: conversationTurns.length,
     elapsedMs: lastTimestamp - firstTimestamp,
-    status: 'completed',
+    status: AgentStatus.IDLE,
   } as AgentEventStream.AgentRunEndEvent);
 
   return { events };
