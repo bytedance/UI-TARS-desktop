@@ -24,7 +24,8 @@
     "directory": "packages/agent-infra/mcp-servers/commands"
   },
   "files": [
-    "dist"
+    "dist",
+    "server.json"
   ],
   "scripts": {
     "clean": "shx rm -rf build",

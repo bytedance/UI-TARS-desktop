@@ -17,7 +17,8 @@
     "mcp-server-search": "./dist/index.cjs"
   },
   "files": [
-    "dist"
+    "dist",
+    "server.json"
   ],
   "scripts": {
     "clean": "shx rm -rf dist",

@@ -25,7 +25,8 @@
     "mcp-server-filesystem": "dist/index.cjs"
   },
   "files": [
-    "dist"
+    "dist",
+    "server.json"
   ],
   "scripts": {
     "build": "shx rm -rf dist && rslib build && shx chmod +x dist/*.js",
