@@ -13,7 +13,7 @@ export default function transformer(input: any): { events: AgentEventStream.Even
   // Handle custom log format
   if (input.logs && Array.isArray(input.logs)) {
     const events: AgentEventStream.Event[] = [];
-    
+
     for (const log of input.logs) {
       if (log.type === 'user_input') {
         events.push({
@@ -21,8 +21,8 @@ export default function transformer(input: any): { events: AgentEventStream.Even
           timestamp: new Date(log.timestamp).getTime(),
           data: {
             content: log.message,
-            role: 'user'
-          }
+            role: 'user',
+          },
         });
       } else if (log.type === 'agent_response') {
         events.push({
@@ -30,8 +30,8 @@ export default function transformer(input: any): { events: AgentEventStream.Even
           timestamp: new Date(log.timestamp).getTime(),
           data: {
             content: log.message,
-            role: 'assistant'
-          }
+            role: 'assistant',
+          },
         });
       } else if (log.type === 'tool_execution') {
         events.push({
@@ -39,35 +39,35 @@ export default function transformer(input: any): { events: AgentEventStream.Even
           timestamp: new Date(log.timestamp).getTime(),
           data: {
             toolName: log.tool_name,
-            parameters: log.parameters
-          }
+            parameters: log.parameters,
+          },
         });
-        
+
         if (log.result) {
           events.push({
             type: 'tool-result',
             timestamp: new Date(log.timestamp).getTime() + 100,
             data: {
               toolName: log.tool_name,
-              result: log.result
-            }
+              result: log.result,
+            },
           });
         }
       }
     }
-    
+
     return { events };
   }
-  
+
   // Handle simple array format
   if (Array.isArray(input)) {
     return { events: input };
   }
-  
+
   // Handle object with events array
   if (input.events && Array.isArray(input.events)) {
     return input;
   }
-  
+
   throw new Error('Unsupported input format for transformer');
 }

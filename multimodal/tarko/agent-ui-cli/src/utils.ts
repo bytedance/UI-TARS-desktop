@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import fs from 'fs';
-import path from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
 import { AgentEventStream } from '@tarko/interface';
 import { TraceData, TraceTransformer } from './types';
 
@@ -22,7 +22,7 @@ export async function loadTraceFile(filePath: string): Promise<unknown> {
   if (ext === '.jsonl') {
     const lines = content.trim().split('\n');
     const events: AgentEventStream.Event[] = [];
-    
+
     for (const line of lines) {
       if (line.trim()) {
         try {
@@ -32,7 +32,7 @@ export async function loadTraceFile(filePath: string): Promise<unknown> {
         }
       }
     }
-    
+
     return { events };
   } else {
     try {
@@ -48,7 +48,7 @@ export async function loadTraceFile(filePath: string): Promise<unknown> {
  */
 export async function loadTransformer(transformerPath: string): Promise<TraceTransformer> {
   const absolutePath = path.resolve(transformerPath);
-  
+
   if (!fs.existsSync(absolutePath)) {
     throw new Error(`Transformer file not found: ${transformerPath}`);
   }
@@ -56,7 +56,7 @@ export async function loadTransformer(transformerPath: string): Promise<TraceTra
   try {
     let module: any;
     const ext = path.extname(absolutePath).toLowerCase();
-    
+
     if (ext === '.ts') {
       // Use jiti to load TypeScript files
       const { createJiti } = await import('jiti');
@@ -70,16 +70,18 @@ export async function loadTransformer(transformerPath: string): Promise<TraceTra
       const fileUrl = `file://${absolutePath}?t=${Date.now()}`;
       module = await import(fileUrl);
     }
-    
+
     const transformer = module.default || module.transformer || module;
-    
+
     if (typeof transformer !== 'function') {
       throw new Error('Transformer must export a function');
     }
-    
+
     return transformer as TraceTransformer;
   } catch (error) {
-    throw new Error(`Failed to load transformer: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(
+      `Failed to load transformer: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
 }
 
@@ -92,7 +94,7 @@ export function validateTraceData(data: unknown): TraceData {
   }
 
   const traceData = data as Record<string, unknown>;
-  
+
   if (!traceData.events || !Array.isArray(traceData.events)) {
     throw new Error('Trace data must contain an "events" array');
   }
@@ -115,6 +117,6 @@ export function resolveOutputPath(outputOption?: string): string {
   if (outputOption) {
     return path.resolve(outputOption);
   }
-  
+
   return path.resolve(generateDefaultOutputFilename());
 }

@@ -6,7 +6,12 @@
 import fs from 'fs';
 import path from 'path';
 import { loadConfig, LoadConfigResult } from '@tarko/config-loader';
-import { AgentEventStream, SessionInfo, AgentServerVersionInfo, AgentWebUIImplementation } from '@tarko/interface';
+import {
+  AgentEventStream,
+  SessionInfo,
+  AgentServerVersionInfo,
+  AgentWebUIImplementation,
+} from '@tarko/interface';
 import { AguiConfig } from './types';
 
 /**
@@ -57,26 +62,24 @@ const DEFAULT_CONFIG: Partial<AguiConfig> = {
  */
 export async function loadAguiConfig(configPath?: string): Promise<AguiConfig> {
   let userConfig: Partial<AguiConfig> = {};
-  
+
   if (configPath) {
     const absolutePath = path.resolve(configPath);
     if (!fs.existsSync(absolutePath)) {
       throw new Error(`Config file not found: ${configPath}`);
     }
-    
+
     try {
       const result = await loadConfig<AguiConfig>({ path: absolutePath });
       userConfig = result.content;
     } catch (error) {
-      throw new Error(`Failed to load config: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Failed to load config: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   } else {
-    const defaultConfigPaths = [
-      'agui.config.ts',
-      'agui.config.js',
-      'agui.config.json',
-    ];
-    
+    const defaultConfigPaths = ['agui.config.ts', 'agui.config.js', 'agui.config.json'];
+
     for (const defaultPath of defaultConfigPaths) {
       const absolutePath = path.resolve(defaultPath);
       if (fs.existsSync(absolutePath)) {
@@ -85,28 +88,34 @@ export async function loadAguiConfig(configPath?: string): Promise<AguiConfig> {
           userConfig = result.content;
           break;
         } catch (error) {
-          console.warn(`Failed to load ${defaultPath}:`, error instanceof Error ? error.message : String(error));
+          console.warn(
+            `Failed to load ${defaultPath}:`,
+            error instanceof Error ? error.message : String(error),
+          );
         }
       }
     }
   }
-  
+
   return mergeConfig(DEFAULT_CONFIG, userConfig);
 }
 
 /**
  * Deep merge configuration objects
  */
-function mergeConfig(defaultConfig: Partial<AguiConfig>, userConfig: Partial<AguiConfig>): AguiConfig {
+function mergeConfig(
+  defaultConfig: Partial<AguiConfig>,
+  userConfig: Partial<AguiConfig>,
+): AguiConfig {
   const merged = { ...defaultConfig };
-  
+
   for (const [key, value] of Object.entries(userConfig)) {
     if (value !== undefined) {
       if (key === 'events') {
         merged[key as keyof AguiConfig] = value as any;
       } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
         merged[key as keyof AguiConfig] = {
-          ...(merged[key as keyof AguiConfig] as object || {}),
+          ...((merged[key as keyof AguiConfig] as object) || {}),
           ...value,
         } as any;
       } else {
@@ -114,7 +123,7 @@ function mergeConfig(defaultConfig: Partial<AguiConfig>, userConfig: Partial<Agu
       }
     }
   }
-  
+
   return merged as AguiConfig;
 }
 
@@ -123,7 +132,7 @@ function mergeConfig(defaultConfig: Partial<AguiConfig>, userConfig: Partial<Agu
  */
 export function normalizeSessionInfo(sessionInfo: Partial<SessionInfo>): SessionInfo {
   const now = Date.now();
-  
+
   return {
     id: sessionInfo.id || `cli-session-${now}`,
     createdAt: sessionInfo.createdAt || now,
