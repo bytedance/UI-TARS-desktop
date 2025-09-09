@@ -11,8 +11,7 @@ This directory contains examples for testing the `agui` CLI dump functionality.
 
 ### Configuration
 - `agui.config.ts` - Example configuration with custom session info and UI settings
-- `transformer.ts` - Example transformer for converting custom log format (TypeScript)
-- `transformer.js` - Example transformer for converting custom log format (JavaScript)
+- `transformer.ts` - Example transformer for converting custom log format
 
 ## Usage Examples
 
@@ -39,11 +38,8 @@ agui trace.json --config agui.config.ts
 
 ### With Transformer
 ```bash
-# Convert custom format using transformer (TypeScript - recommended)
+# Convert custom format using transformer
 agui custom-format.json --transformer transformer.ts
-
-# Convert custom format using transformer (JavaScript)
-agui custom-format.json --transformer transformer.js
 
 # With both transformer and config
 agui custom-format.json --transformer transformer.ts --config agui.config.ts
@@ -77,11 +73,8 @@ agui trace.json --out test-json.html
 # Test JSONL format
 agui trace.jsonl --out test-jsonl.html
 
-# Test TypeScript transformer
-agui custom-format.json --transformer transformer.ts --out test-ts-transformer.html
-
-# Test JavaScript transformer
-agui custom-format.json --transformer transformer.js --out test-js-transformer.html
+# Test transformer
+agui custom-format.json --transformer transformer.ts --out test-transformer.html
 
 # Test with full configuration
 agui trace.json --config agui.config.ts --out test-config.html
