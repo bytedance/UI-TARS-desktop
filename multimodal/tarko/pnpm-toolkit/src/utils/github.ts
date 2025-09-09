@@ -34,19 +34,30 @@ export interface GitHubReleaseOptions {
 
 /**
  * Gets the previous tag for generating release notes
+ * Handles mixed tag formats (v1.0.0 and @agent-tars@1.0.0)
  */
 export async function getPreviousTag(tagName: string, cwd: string): Promise<string | null> {
   try {
-    // Get all tags sorted by version
-    const { stdout } = await execa('git', ['tag', '--sort=-version:refname'], { cwd });
-    const tags = stdout.trim().split('\n').filter(Boolean);
+    // Get all tags sorted by creation date (chronological order, newest first)
+    const { stdout } = await execa('git', ['tag', '--sort=-creatordate'], { cwd });
+    const allTags = stdout.trim().split('\n').filter(Boolean);
 
-    // Find the current tag index
-    const currentIndex = tags.indexOf(tagName);
+    if (allTags.length === 0) {
+      return null;
+    }
+
+    // Find the current tag in the list
+    const currentIndex = allTags.findIndex((tag) => tag === tagName);
+
+    if (currentIndex === -1) {
+      // If current tag not found, it might be a new tag
+      // Return the most recent tag (first in the list)
+      return allTags[0] || null;
+    }
 
     // Return the next tag (previous in chronological order)
-    if (currentIndex >= 0 && currentIndex < tags.length - 1) {
-      return tags[currentIndex + 1];
+    if (currentIndex < allTags.length - 1) {
+      return allTags[currentIndex + 1];
     }
 
     return null;
@@ -174,12 +185,24 @@ export async function generateReleaseNotes(
     if (repoInfo) {
       if (previousTag) {
         // Extract version from tag (ensure v prefix for display)
-        const previousVersion = previousTag.startsWith('v') ? previousTag : `v${previousTag}`;
-        const currentVersion = tagName.startsWith('v') ? tagName : `v${tagName}`;
+        const previousVersion = previousTag.startsWith('v')
+          ? previousTag
+          : previousTag.startsWith('@')
+            ? previousTag
+            : `v${previousTag}`;
+        const currentVersion = tagName.startsWith('v')
+          ? tagName
+          : tagName.startsWith('@')
+            ? tagName
+            : `v${tagName}`;
         const changelogText = `${previousVersion}...${currentVersion}`;
         releaseNotes += `\n**Full Changelog**: [${changelogText}](https://github.com/${repoInfo.owner}/${repoInfo.repo}/compare/${previousTag}...${tagName})`;
       } else {
-        const currentVersion = tagName.startsWith('v') ? tagName : `v${tagName}`;
+        const currentVersion = tagName.startsWith('v')
+          ? tagName
+          : tagName.startsWith('@')
+            ? tagName
+            : `v${tagName}`;
         releaseNotes += `\n**Full Changelog**: [${currentVersion}](https://github.com/${repoInfo.owner}/${repoInfo.repo}/commits/${tagName})`;
       }
     }
