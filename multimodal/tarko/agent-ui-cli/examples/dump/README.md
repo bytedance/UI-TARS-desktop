@@ -109,6 +109,39 @@ export default defineConfig({
 });
 ```
 
+#### Tool Call Collection
+
+The transformer automatically collects tool calls within each agent loop cycle:
+
+```typescript
+// Track tool calls in the current agent loop
+let currentLoopToolCalls: ChatCompletionMessageToolCall[] = [];
+
+// When processing tool_execution events
+if (log.type === 'tool_execution') {
+  // Collect tool call for the assistant message
+  currentLoopToolCalls.push({
+    id: toolCallId,
+    type: 'function',
+    function: {
+      name: toolName,
+      arguments: JSON.stringify(log.parameters || {}),
+    },
+  });
+}
+
+// When processing agent_response events
+if (log.type === 'agent_response') {
+  // Include all collected tool calls
+  toolCalls: currentLoopToolCalls.length > 0 ? currentLoopToolCalls : undefined,
+  
+  // Reset for next loop
+  currentLoopToolCalls = [];
+}
+```
+
+This ensures that `AssistantMessageEvent.toolCalls` contains all tools that were called before the assistant's response, matching the actual conversation flow.
+
 ### defineTransformer
 Use `defineTransformer` for type-safe transformers that convert custom log formats to AgentEventStream events:
 
@@ -132,8 +165,10 @@ interface CustomLogFormat {
 export default defineTransformer<CustomLogFormat>((input) => {
   const events: AgentEventStream.Event[] = [];
   let eventIdCounter = 1;
+  let currentLoopToolCalls: ChatCompletionMessageToolCall[] = [];
 
-  for (const log of input.logs) {
+  for (let i = 0; i < input.logs.length; i++) {
+    const log = input.logs[i];
     const timestamp = new Date(log.timestamp).getTime();
     
     if (log.type === 'user_input') {
@@ -150,7 +185,7 @@ export default defineTransformer<CustomLogFormat>((input) => {
         timestamp,
         content: log.message || '',
         rawContent: log.message,
-        toolCalls: log.parameters?.toolCalls,
+        toolCalls: currentLoopToolCalls.length > 0 ? currentLoopToolCalls : undefined,
         finishReason: log.parameters?.finishReason || 'stop',
         ttftMs: log.parameters?.ttftMs,
         ttltMs: log.parameters?.ttltMs,

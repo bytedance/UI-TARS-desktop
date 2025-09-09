@@ -5,6 +5,7 @@
 
 import { AgentEventStream } from '@tarko/interface';
 import { defineTransformer } from '@tarko/agent-ui-cli';
+import type { ChatCompletionMessageToolCall } from '@tarko/model-provider/types';
 
 /**
  * Custom log format interfaces
@@ -29,11 +30,16 @@ interface CustomLogFormat {
 export default defineTransformer<CustomLogFormat>((input) => {
   const events: AgentEventStream.Event[] = [];
   let eventIdCounter = 1;
+  let currentLoopToolCalls: ChatCompletionMessageToolCall[] = [];
 
-  for (const log of input.logs) {
+  for (let i = 0; i < input.logs.length; i++) {
+    const log = input.logs[i];
     const timestamp = new Date(log.timestamp).getTime();
 
     if (log.type === 'user_input') {
+      // Reset tool calls for new user input
+      currentLoopToolCalls = [];
+      
       events.push({
         id: `event-${eventIdCounter++}`,
         type: 'user_message',
@@ -47,12 +53,15 @@ export default defineTransformer<CustomLogFormat>((input) => {
         timestamp,
         content: log.message || '',
         rawContent: log.message,
-        toolCalls: log.parameters?.toolCalls,
+        toolCalls: currentLoopToolCalls.length > 0 ? currentLoopToolCalls : undefined,
         finishReason: log.parameters?.finishReason || 'stop',
         ttftMs: log.parameters?.ttftMs,
         ttltMs: log.parameters?.ttltMs,
         messageId: log.parameters?.messageId || `msg-${eventIdCounter}`,
       } as AgentEventStream.AssistantMessageEvent);
+      
+      // Reset tool calls after agent response
+      currentLoopToolCalls = [];
     } else if (log.type === 'agent_thinking') {
       events.push({
         id: `event-${eventIdCounter++}`,
@@ -65,6 +74,17 @@ export default defineTransformer<CustomLogFormat>((input) => {
       } as AgentEventStream.AssistantThinkingMessageEvent);
     } else if (log.type === 'tool_execution') {
       const toolCallId = `tool-call-${eventIdCounter}`;
+      const toolName = log.tool_name || 'unknown_tool';
+
+      // Collect tool call for assistant message
+      currentLoopToolCalls.push({
+        id: toolCallId,
+        type: 'function',
+        function: {
+          name: toolName,
+          arguments: JSON.stringify(log.parameters || {}),
+        },
+      });
 
       // Tool call event
       events.push({
@@ -72,12 +92,12 @@ export default defineTransformer<CustomLogFormat>((input) => {
         type: 'tool_call',
         timestamp,
         toolCallId,
-        name: log.tool_name || 'unknown_tool',
+        name: toolName,
         arguments: log.parameters || {},
         startTime: timestamp,
         tool: {
-          name: log.tool_name || 'unknown_tool',
-          description: `Tool: ${log.tool_name}`,
+          name: toolName,
+          description: `Tool: ${toolName}`,
           schema: {},
         },
       } as AgentEventStream.ToolCallEvent);
@@ -89,7 +109,7 @@ export default defineTransformer<CustomLogFormat>((input) => {
           type: 'tool_result',
           timestamp: timestamp + 100,
           toolCallId,
-          name: log.tool_name || 'unknown_tool',
+          name: toolName,
           content: log.result,
           elapsedMs: 100,
         } as AgentEventStream.ToolResultEvent);
