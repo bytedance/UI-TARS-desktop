@@ -10,7 +10,7 @@ import { defineTransformer } from '@tarko/agent-ui-cli';
  * Custom log format interfaces
  */
 interface CustomLogEntry {
-  type: 'user_input' | 'tool_execution' | 'agent_response';
+  type: 'user_input' | 'tool_execution' | 'agent_response' | 'agent_thinking';
   timestamp: string;
   message?: string;
   tool_name?: string;
@@ -46,7 +46,23 @@ export default defineTransformer<CustomLogFormat>((input) => {
         type: 'assistant_message',
         timestamp,
         content: log.message || '',
+        rawContent: log.message,
+        toolCalls: log.parameters?.toolCalls,
+        finishReason: log.parameters?.finishReason || 'stop',
+        ttftMs: log.parameters?.ttftMs,
+        ttltMs: log.parameters?.ttltMs,
+        messageId: log.parameters?.messageId || `msg-${eventIdCounter}`,
       } as AgentEventStream.AssistantMessageEvent);
+    } else if (log.type === 'agent_thinking') {
+      events.push({
+        id: `event-${eventIdCounter++}`,
+        type: 'assistant_thinking_message',
+        timestamp,
+        content: log.message || '',
+        isComplete: log.parameters?.isComplete ?? true,
+        thinkingDurationMs: log.parameters?.thinkingDurationMs,
+        messageId: log.parameters?.messageId || `thinking-${eventIdCounter}`,
+      } as AgentEventStream.AssistantThinkingMessageEvent);
     } else if (log.type === 'tool_execution') {
       const toolCallId = `tool-call-${eventIdCounter}`;
 

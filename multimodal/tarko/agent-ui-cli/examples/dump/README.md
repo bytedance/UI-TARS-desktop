@@ -143,6 +143,29 @@ export default defineTransformer<CustomLogFormat>((input) => {
         timestamp,
         content: log.message || '',
       } as AgentEventStream.UserMessageEvent);
+    } else if (log.type === 'agent_response') {
+      events.push({
+        id: `event-${eventIdCounter++}`,
+        type: 'assistant_message',
+        timestamp,
+        content: log.message || '',
+        rawContent: log.message,
+        toolCalls: log.parameters?.toolCalls,
+        finishReason: log.parameters?.finishReason || 'stop',
+        ttftMs: log.parameters?.ttftMs,
+        ttltMs: log.parameters?.ttltMs,
+        messageId: log.parameters?.messageId || `msg-${eventIdCounter}`,
+      } as AgentEventStream.AssistantMessageEvent);
+    } else if (log.type === 'agent_thinking') {
+      events.push({
+        id: `event-${eventIdCounter++}`,
+        type: 'assistant_thinking_message',
+        timestamp,
+        content: log.message || '',
+        isComplete: log.parameters?.isComplete ?? true,
+        thinkingDurationMs: log.parameters?.thinkingDurationMs,
+        messageId: log.parameters?.messageId || `thinking-${eventIdCounter}`,
+      } as AgentEventStream.AssistantThinkingMessageEvent);
     } else if (log.type === 'tool_execution') {
       const toolCallId = `tool-call-${eventIdCounter}`;
       

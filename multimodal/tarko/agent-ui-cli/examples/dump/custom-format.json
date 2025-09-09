@@ -34,9 +34,25 @@
       }
     },
     {
+      "type": "agent_thinking",
+      "timestamp": "2024-01-01T10:00:02.500Z",
+      "message": "I need to calculate 18% tip on $85. Let me use the calculator tool for accuracy.",
+      "parameters": {
+        "isComplete": true,
+        "thinkingDurationMs": 800,
+        "messageId": "thinking-001"
+      }
+    },
+    {
       "type": "agent_response",
       "timestamp": "2024-01-01T10:00:03.000Z",
-      "message": "For an $85 dinner bill with an 18% tip:\n\n• Tip amount: **$15.30**\n• Total amount: **$100.30**\n\nThe calculation: $85.00 × 18% = $15.30 tip, so your total will be $85.00 + $15.30 = $100.30."
+      "message": "For an $85 dinner bill with an 18% tip:\n\n• Tip amount: **$15.30**\n• Total amount: **$100.30**\n\nThe calculation: $85.00 × 18% = $15.30 tip, so your total will be $85.00 + $15.30 = $100.30.",
+      "parameters": {
+        "finishReason": "stop",
+        "ttftMs": 120,
+        "ttltMs": 1200,
+        "messageId": "msg-001"
+      }
     },
     {
       "type": "user_input",
@@ -66,7 +82,13 @@
     {
       "type": "agent_response",
       "timestamp": "2024-01-01T10:01:02.000Z",
-      "message": "The weather in San Francisco today is quite pleasant:\n\n🌤️ **Partly Cloudy**\n🌡️ **68°F**\n💨 **12 mph NW winds**\n💧 **72% humidity**\n👁️ **10 miles visibility**\n☀️ **UV Index: 6**\n\nIt's a nice day with mild temperatures and light northwest winds. Perfect weather for outdoor activities!"
+      "message": "The weather in San Francisco today is quite pleasant:\n\n🌤️ **Partly Cloudy**\n🌡️ **68°F**\n💨 **12 mph NW winds**\n💧 **72% humidity**\n👁️ **10 miles visibility**\n☀️ **UV Index: 6**\n\nIt's a nice day with mild temperatures and light northwest winds. Perfect weather for outdoor activities!",
+      "parameters": {
+        "finishReason": "stop",
+        "ttftMs": 95,
+        "ttltMs": 980,
+        "messageId": "msg-002"
+      }
     }
   ]
 }
