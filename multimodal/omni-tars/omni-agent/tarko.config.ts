@@ -43,7 +43,7 @@ export default {
   server: {
     storage: {
       type: 'mongodb',
-      connectionString: 'mongodb://localhost:27017/tarko',
+      uri: 'mongodb://localhost:27017/tarko',
     },
   },
 } as AgentAppConfig;

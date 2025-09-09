@@ -91,13 +91,13 @@ export interface DatabaseAgentStorageImplementation extends BaseAgentStorageImpl
 export interface MongoDBAgentStorageImplementation extends BaseAgentStorageImplementation {
   type: 'mongodb';
   /**
-   * MongoDB connection string
+   * MongoDB connection uri string
    *
    * Examples:
    * - Local: mongodb://localhost:27017/tarko
    * - Atlas: mongodb+srv://user:pass@cluster.mongodb.net/tarko
    */
-  connectionString: string;
+  uri: string;
   /**
    * Database name (optional, can be specified in connection string)
    *
@@ -111,7 +111,6 @@ export interface MongoDBAgentStorageImplementation extends BaseAgentStorageImple
     maxPoolSize?: number;
     serverSelectionTimeoutMS?: number;
     socketTimeoutMS?: number;
-    // bufferMaxEntries?: number;
     [key: string]: any;
   };
 }

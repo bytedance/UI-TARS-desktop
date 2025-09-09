@@ -24,11 +24,11 @@ export class MongoDBStorageProvider implements StorageProvider {
   private connection: Connection | null = null;
   private initialized = false;
   private config: MongoDBAgentStorageImplementation;
-  public readonly dbPath?: string;
+  public readonly uri?: string;
 
   constructor(config: MongoDBAgentStorageImplementation) {
     this.config = config;
-    this.dbPath = config.connectionString; // For interface compatibility
+    this.uri = config.uri;
   }
 
   async initialize(): Promise<void> {
@@ -44,7 +44,6 @@ export class MongoDBStorageProvider implements StorageProvider {
         maxPoolSize: 10,
         serverSelectionTimeoutMS: 5000,
         socketTimeoutMS: 45000,
-        // bufferMaxEntries: 0, // Disable mongoose buffering
         bufferCommands: false, // Disable mongoose buffering
       };
 
@@ -56,7 +55,7 @@ export class MongoDBStorageProvider implements StorageProvider {
       // Extract database name from connection string or use config/default
       let dbName = this.config.dbName;
       if (!dbName) {
-        const urlParts = this.config.connectionString.split('/');
+        const urlParts = this.config.uri.split('/');
         dbName =
           urlParts[urlParts.length - 1]?.split('?')[0] ||
           TARKO_CONSTANTS.SESSION_DATA_DB_NAME.replace('.db', '');
@@ -64,7 +63,7 @@ export class MongoDBStorageProvider implements StorageProvider {
 
       // Connect to MongoDB
       this.connection = await mongoose
-        .createConnection(this.config.connectionString, connectionOptions)
+        .createConnection(this.config.uri, connectionOptions)
         .asPromise();
 
       // Bind models to this connection

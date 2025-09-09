@@ -68,27 +68,7 @@ export function logConfigComplete(config: AgentAppConfig, isDebug = false) {
 
   if (config.server?.port) {
     const storage = config.server.storage?.type || 'sqlite';
-    let storageInfo = `storage ${storage}`;
-
-    // Add MongoDB-specific validation and info
-    if (storage === 'mongodb' && config.server.storage?.type === 'mongodb') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mongoConfig = config.server.storage as any;
-      if (mongoConfig.connectionString) {
-        // Extract database name for display (hide credentials)
-        try {
-          const url = new URL(mongoConfig.connectionString);
-          const dbName = mongoConfig.dbName || url.pathname.slice(1) || 'tarko';
-          storageInfo += ` (db: ${dbName})`;
-        } catch {
-          storageInfo += ` (configured)`;
-        }
-      } else {
-        logger.warn('MongoDB storage selected but no connectionString provided');
-      }
-    }
-
-    logger.debug(`Server: port ${config.server.port}, ${storageInfo}`);
+    logger.debug(`Server: port ${config.server.port}, storage ${storage}`);
   }
 
   if (config.logLevel) {
@@ -107,8 +87,7 @@ export function logConfigComplete(config: AgentAppConfig, isDebug = false) {
 /**
  * Log debug information (debug only)
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function logDebugInfo(label: string, data: any, isDebug = false) {
+export function logDebugInfo(label: string, data: unknown, isDebug = false) {
   if (!isDebug) return;
 
   if (Array.isArray(data)) {

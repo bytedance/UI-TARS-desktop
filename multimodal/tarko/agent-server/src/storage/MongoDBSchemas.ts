@@ -28,7 +28,6 @@ export interface EventDocument extends Document {
 
 /**
  * Session schema definition
- * Mirrors the SQLite sessions table structure
  */
 const sessionSchema = new Schema<SessionDocument>(
   {
@@ -60,12 +59,11 @@ const sessionSchema = new Schema<SessionDocument>(
     _id: false, // Disable automatic _id generation since we provide our own
     versionKey: false, // Disable __v version key
     collection: 'sessions',
-  }
+  },
 );
 
 /**
  * Event schema definition
- * Mirrors the SQLite events table structure
  */
 const eventSchema = new Schema<EventDocument>(
   {
@@ -88,7 +86,7 @@ const eventSchema = new Schema<EventDocument>(
   {
     versionKey: false, // Disable __v version key
     collection: 'events',
-  }
+  },
 );
 
 // Compound index for efficient event queries
