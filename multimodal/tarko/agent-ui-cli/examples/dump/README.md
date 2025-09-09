@@ -110,19 +110,43 @@ export default defineConfig({
 ```
 
 ### defineTransformer
-Use `defineTransformer` for type-safe transformers:
+Use `defineTransformer` for type-safe transformers that convert custom log formats to AgentEventStream events:
 
 ```typescript
+import { AgentEventStream } from '@tarko/interface';
 import { defineTransformer } from '@tarko/agent-ui-cli';
 
-interface MyLogFormat {
-  entries: LogEntry[];
+interface CustomLogEntry {
+  type: 'user_input' | 'tool_execution' | 'agent_response';
+  timestamp: string;
+  message?: string;
+  tool_name?: string;
+  parameters?: Record<string, any>;
+  result?: Record<string, any>;
 }
 
-export default defineTransformer<MyLogFormat>((input) => {
-  // Full type checking for input parameter
-  return {
-    events: input.entries.map(/* transform logic */)
-  };
+interface CustomLogFormat {
+  logs: CustomLogEntry[];
+}
+
+export default defineTransformer<CustomLogFormat>((input) => {
+  const events: AgentEventStream.Event[] = [];
+  let eventIdCounter = 1;
+
+  for (const log of input.logs) {
+    const timestamp = new Date(log.timestamp).getTime();
+    
+    if (log.type === 'user_input') {
+      events.push({
+        id: `event-${eventIdCounter++}`,
+        type: 'user_message',
+        timestamp,
+        content: log.message || '',
+      } as AgentEventStream.UserMessageEvent);
+    }
+    // ... more transformation logic
+  }
+
+  return { events };
 });
 ```

@@ -32,45 +32,55 @@ export default defineTransformer<
   // Handle custom log format
   if (input.logs && Array.isArray(input.logs)) {
     const events: AgentEventStream.Event[] = [];
+    let eventIdCounter = 1;
 
     for (const log of input.logs) {
+      const timestamp = new Date(log.timestamp).getTime();
+
       if (log.type === 'user_input') {
         events.push({
-          type: 'user-message',
-          timestamp: new Date(log.timestamp).getTime(),
-          data: {
-            content: log.message,
-            role: 'user',
-          },
-        });
+          id: `event-${eventIdCounter++}`,
+          type: 'user_message',
+          timestamp,
+          content: log.message || '',
+        } as AgentEventStream.UserMessageEvent);
       } else if (log.type === 'agent_response') {
         events.push({
-          type: 'agent-message',
-          timestamp: new Date(log.timestamp).getTime(),
-          data: {
-            content: log.message,
-            role: 'assistant',
-          },
-        });
+          id: `event-${eventIdCounter++}`,
+          type: 'assistant_message',
+          timestamp,
+          content: log.message || '',
+        } as AgentEventStream.AssistantMessageEvent);
       } else if (log.type === 'tool_execution') {
-        events.push({
-          type: 'tool-call',
-          timestamp: new Date(log.timestamp).getTime(),
-          data: {
-            toolName: log.tool_name,
-            parameters: log.parameters,
-          },
-        });
+        const toolCallId = `tool-call-${eventIdCounter}`;
 
+        // Tool call event
+        events.push({
+          id: `event-${eventIdCounter++}`,
+          type: 'tool_call',
+          timestamp,
+          toolCallId,
+          name: log.tool_name || 'unknown_tool',
+          arguments: log.parameters || {},
+          startTime: timestamp,
+          tool: {
+            name: log.tool_name || 'unknown_tool',
+            description: `Tool: ${log.tool_name}`,
+            schema: {},
+          },
+        } as AgentEventStream.ToolCallEvent);
+
+        // Tool result event (if result exists)
         if (log.result) {
           events.push({
-            type: 'tool-result',
-            timestamp: new Date(log.timestamp).getTime() + 100,
-            data: {
-              toolName: log.tool_name,
-              result: log.result,
-            },
-          });
+            id: `event-${eventIdCounter++}`,
+            type: 'tool_result',
+            timestamp: timestamp + 100,
+            toolCallId,
+            name: log.tool_name || 'unknown_tool',
+            content: log.result,
+            elapsedMs: 100,
+          } as AgentEventStream.ToolResultEvent);
         }
       }
     }
