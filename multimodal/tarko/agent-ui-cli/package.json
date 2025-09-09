@@ -33,6 +33,7 @@
     "@tarko/agent-ui-builder": "workspace:*",
     "@tarko/config-loader": "workspace:*",
     "@tarko/interface": "workspace:*",
+    "jiti": "2.5.1",
     "cac": "6.7.14"
   },
   "devDependencies": {
