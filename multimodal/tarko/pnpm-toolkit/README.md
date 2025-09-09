@@ -116,7 +116,7 @@ ptk gh-release --version 1.0.0
 **Features**:
 - Automatically extracts release notes from `CHANGELOG.md`
 - Detects prerelease versions (containing `-`) and marks them appropriately
-- Uses project's tag prefix (e.g., `@agent-tars@1.0.0`)
+- Uses standard semantic version tags (e.g., `v1.0.0`)
 - Graceful failure - main release succeeds even if GitHub release fails
 
 **Changelog Format Expected**:

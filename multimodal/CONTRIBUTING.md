@@ -48,7 +48,7 @@ pnpm run github-release --release-version 0.3.0-beta.9
 This will:
 - Create a GitHub release for the specified version
 - Generate beautiful release notes with conventional commit format
-- Use the correct tag format (`@agent-tars@0.3.0-beta.9`)
+- Use the correct tag format (`v0.3.0-beta.9`)
 - Display as clean version title (`v0.3.0-beta.9`)
 
 ### 2.3 Starting the Dev Server

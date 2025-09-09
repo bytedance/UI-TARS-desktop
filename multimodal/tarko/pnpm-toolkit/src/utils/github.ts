@@ -173,13 +173,13 @@ export async function generateReleaseNotes(
     // Add Full Changelog link if repository info is available
     if (repoInfo) {
       if (previousTag) {
-        // Extract version from tag (remove prefix like @agent-tars@)
-        const previousVersion = previousTag.replace(/^.*@/, 'v');
-        const currentVersion = tagName.replace(/^.*@/, 'v');
+        // Extract version from tag (ensure v prefix for display)
+        const previousVersion = previousTag.startsWith('v') ? previousTag : `v${previousTag}`;
+        const currentVersion = tagName.startsWith('v') ? tagName : `v${tagName}`;
         const changelogText = `${previousVersion}...${currentVersion}`;
         releaseNotes += `\n**Full Changelog**: [${changelogText}](https://github.com/${repoInfo.owner}/${repoInfo.repo}/compare/${previousTag}...${tagName})`;
       } else {
-        const currentVersion = tagName.replace(/^.*@/, 'v');
+        const currentVersion = tagName.startsWith('v') ? tagName : `v${tagName}`;
         releaseNotes += `\n**Full Changelog**: [${currentVersion}](https://github.com/${repoInfo.owner}/${repoInfo.repo}/commits/${tagName})`;
       }
     }
