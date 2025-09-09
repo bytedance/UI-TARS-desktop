@@ -20,7 +20,6 @@ export async function loadTraceFile(filePath: string): Promise<unknown> {
   const ext = path.extname(filePath).toLowerCase();
 
   if (ext === '.jsonl') {
-    // Parse JSONL format
     const lines = content.trim().split('\n');
     const events: AgentEventStream.Event[] = [];
     
@@ -36,7 +35,6 @@ export async function loadTraceFile(filePath: string): Promise<unknown> {
     
     return { events };
   } else {
-    // Parse JSON format
     try {
       return JSON.parse(content);
     } catch (error) {
@@ -56,10 +54,7 @@ export async function loadTransformer(transformerPath: string): Promise<TraceTra
   }
 
   try {
-    // Use dynamic import to load the transformer
     const module = await import(absolutePath);
-    
-    // Support both default export and named export
     const transformer = module.default || module.transformer || module;
     
     if (typeof transformer !== 'function') {

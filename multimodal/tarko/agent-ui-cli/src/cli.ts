@@ -10,10 +10,7 @@ import { AguiCLIOptions } from './types';
 
 const cli = cac('agui');
 
-// Version from package.json
 cli.version('0.3.0-beta.10');
-
-// Main dump command
 cli
   .command('<trace>', 'Generate agent UI HTML from trace file')
   .option('--out <path>', 'Output file path')
@@ -23,11 +20,9 @@ cli
   .action(async (tracePath: string, options: AguiCLIOptions) => {
     try {
       if (options.upload) {
-        // Upload mode
         const shareUrl = await AguiCore.upload(tracePath, options.upload, options);
         console.log(`✅ Uploaded successfully: ${shareUrl}`);
       } else {
-        // Dump mode
         const outputPath = await AguiCore.dump(tracePath, options);
         console.log(`✅ Generated HTML: ${outputPath}`);
       }
@@ -37,7 +32,6 @@ cli
     }
   });
 
-// Help command
 cli.help(() => {
   console.log(`
   AGUI CLI - Agent UI Builder Command Line Interface
@@ -53,5 +47,4 @@ cli.help(() => {
   `);
 });
 
-// Parse CLI arguments
 cli.parse();
