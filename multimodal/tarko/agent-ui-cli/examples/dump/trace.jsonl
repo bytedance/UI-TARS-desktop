@@ -1,0 +1,5 @@
+{"type": "user-message", "timestamp": 1641024000000, "data": {"content": "What's the weather like today?", "role": "user"}}
+{"type": "agent-thinking", "timestamp": 1641024001000, "data": {"content": "I need to check the current weather information for the user."}}
+{"type": "tool-call", "timestamp": 1641024002000, "data": {"toolName": "weather", "parameters": {"location": "current"}}}
+{"type": "tool-result", "timestamp": 1641024003000, "data": {"toolName": "weather", "result": {"temperature": "22°C", "condition": "sunny", "humidity": "45%", "location": "San Francisco"}}}
+{"type": "agent-message", "timestamp": 1641024004000, "data": {"content": "The weather today in San Francisco is sunny with a temperature of 22°C and humidity at 45%. It's a beautiful day!", "role": "assistant"}}

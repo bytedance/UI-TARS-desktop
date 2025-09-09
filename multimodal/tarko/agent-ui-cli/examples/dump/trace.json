@@ -1,0 +1,92 @@
+{
+  "events": [
+    {
+      "type": "user-message",
+      "timestamp": 1641024000000,
+      "data": {
+        "content": "Calculate the sum of 123 and 456",
+        "role": "user"
+      }
+    },
+    {
+      "type": "agent-thinking",
+      "timestamp": 1641024001000,
+      "data": {
+        "content": "I need to calculate 123 + 456. This is a simple arithmetic operation."
+      }
+    },
+    {
+      "type": "tool-call",
+      "timestamp": 1641024002000,
+      "data": {
+        "toolName": "calculator",
+        "parameters": {
+          "expression": "123 + 456"
+        }
+      }
+    },
+    {
+      "type": "tool-result",
+      "timestamp": 1641024003000,
+      "data": {
+        "toolName": "calculator",
+        "result": {
+          "value": 579,
+          "expression": "123 + 456"
+        }
+      }
+    },
+    {
+      "type": "agent-message",
+      "timestamp": 1641024004000,
+      "data": {
+        "content": "The sum of 123 and 456 is **579**.",
+        "role": "assistant"
+      }
+    },
+    {
+      "type": "user-message",
+      "timestamp": 1641024010000,
+      "data": {
+        "content": "Now multiply that result by 2",
+        "role": "user"
+      }
+    },
+    {
+      "type": "agent-thinking",
+      "timestamp": 1641024011000,
+      "data": {
+        "content": "The user wants me to multiply the previous result (579) by 2."
+      }
+    },
+    {
+      "type": "tool-call",
+      "timestamp": 1641024012000,
+      "data": {
+        "toolName": "calculator",
+        "parameters": {
+          "expression": "579 * 2"
+        }
+      }
+    },
+    {
+      "type": "tool-result",
+      "timestamp": 1641024013000,
+      "data": {
+        "toolName": "calculator",
+        "result": {
+          "value": 1158,
+          "expression": "579 * 2"
+        }
+      }
+    },
+    {
+      "type": "agent-message",
+      "timestamp": 1641024014000,
+      "data": {
+        "content": "579 multiplied by 2 equals **1158**.",
+        "role": "assistant"
+      }
+    }
+  ]
+}
