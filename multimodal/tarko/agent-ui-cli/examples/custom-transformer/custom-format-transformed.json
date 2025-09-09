@@ -27,7 +27,7 @@
       "content": "I need to calculate 18% tip on $85. Let me use the calculator tool for accuracy.",
       "isComplete": true,
       "thinkingDurationMs": 800,
-      "messageId": "thinking-001"
+      "messageId": "msg-001-final"
     },
     {
       "id": "event-6",

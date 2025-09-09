@@ -67,7 +67,12 @@ export default defineTransformer<CustomLogFormat>((input) => {
   } as AgentEventStream.AgentRunStartEvent);
 
   // Process each conversation turn
-  for (const turn of conversationTurns) {
+  for (let turnIndex = 0; turnIndex < conversationTurns.length; turnIndex++) {
+    const turn = conversationTurns[turnIndex];
+
+    // Generate shared message ID for this turn
+    const turnMessageId = `msg-turn-${turnIndex + 1}`;
+
     // User message
     events.push({
       id: `event-${eventIdCounter++}`,
@@ -80,6 +85,12 @@ export default defineTransformer<CustomLogFormat>((input) => {
     const toolExecutions = turn.responses.filter((r) => r.type === 'tool_execution');
     const toolCalls: ChatCompletionMessageToolCall[] = [];
 
+    // Find the primary assistant response (usually the one with tool calls or the final response)
+    const responseLogs = turn.responses.filter((r) => r.type === 'agent_response');
+    const primaryResponse =
+      responseLogs.find((r) => r.parameters?.messageId?.includes('final')) || responseLogs[0];
+    const primaryMessageId = primaryResponse?.parameters?.messageId || turnMessageId;
+
     // Process thinking first (if any)
     const thinkingLogs = turn.responses.filter((r) => r.type === 'agent_thinking');
     for (const thinking of thinkingLogs) {
@@ -90,7 +101,7 @@ export default defineTransformer<CustomLogFormat>((input) => {
         content: thinking.message || '',
         isComplete: thinking.parameters?.isComplete ?? true,
         thinkingDurationMs: thinking.parameters?.thinkingDurationMs,
-        messageId: thinking.parameters?.messageId || `thinking-${eventIdCounter}`,
+        messageId: primaryMessageId, // Use the same messageId as the primary response
       } as AgentEventStream.AssistantThinkingMessageEvent);
     }
 
@@ -113,7 +124,6 @@ export default defineTransformer<CustomLogFormat>((input) => {
     }
 
     // Assistant message with tool calls (if any)
-    const responseLogs = turn.responses.filter((r) => r.type === 'agent_response');
     for (const responseLog of responseLogs) {
       const hasToolCalls = toolCalls.length > 0;
 
@@ -128,7 +138,7 @@ export default defineTransformer<CustomLogFormat>((input) => {
           responseLog.parameters?.finishReason || (hasToolCalls ? 'tool_calls' : 'stop'),
         ttftMs: responseLog.parameters?.ttftMs,
         ttltMs: responseLog.parameters?.ttltMs,
-        messageId: responseLog.parameters?.messageId || `msg-${eventIdCounter}`,
+        messageId: responseLog.parameters?.messageId || turnMessageId,
       } as AgentEventStream.AssistantMessageEvent);
 
       // Clear tool calls after first response that uses them
