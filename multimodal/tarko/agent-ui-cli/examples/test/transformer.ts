@@ -1,108 +1,11 @@
-/**
- * Transformer for converting agent trace JSONL to AgentEventStream events
- *
- * This transformer converts OpenTelemetry-style span events from agent_trace.jsonl
- * into the AgentEventStream protocol format for visualization.
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
  */
 
-// Import types - these would normally come from the actual packages
-// For this example, we'll define the types inline
-
-// Simplified types for the example
-interface ChatCompletionMessageToolCall {
-  id: string;
-  type: 'function';
-  function: {
-    name: string;
-    arguments: string;
-  };
-}
-
-// Simplified AgentEventStream namespace
-namespace AgentEventStream {
-  export interface BaseEvent {
-    id: string;
-    type: string;
-    timestamp: number;
-  }
-
-  export interface UserMessageEvent extends BaseEvent {
-    type: 'user_message';
-    content: string | any[];
-  }
-
-  export interface AssistantMessageEvent extends BaseEvent {
-    type: 'assistant_message';
-    content: string;
-    rawContent?: string;
-    toolCalls?: ChatCompletionMessageToolCall[];
-    finishReason?: string;
-    ttftMs?: number;
-    ttltMs?: number;
-    messageId?: string;
-  }
-
-  export interface AssistantThinkingMessageEvent extends BaseEvent {
-    type: 'assistant_thinking_message';
-    content: string;
-    isComplete?: boolean;
-    thinkingDurationMs?: number;
-    messageId?: string;
-  }
-
-  export interface ToolCallEvent extends BaseEvent {
-    type: 'tool_call';
-    toolCallId: string;
-    name: string;
-    arguments: Record<string, any>;
-    startTime: number;
-    tool: {
-      name: string;
-      description: string;
-      schema: any;
-    };
-  }
-
-  export interface ToolResultEvent extends BaseEvent {
-    type: 'tool_result';
-    toolCallId: string;
-    name: string;
-    content: any;
-    elapsedMs: number;
-    error?: string;
-  }
-
-  export interface AgentRunStartEvent extends BaseEvent {
-    type: 'agent_run_start';
-    sessionId: string;
-    runOptions: {
-      maxIterations?: number;
-      timeoutMs?: number;
-    };
-    provider?: string;
-    model?: string;
-    modelDisplayName?: string;
-    agentName?: string;
-  }
-
-  export interface AgentRunEndEvent extends BaseEvent {
-    type: 'agent_run_end';
-    sessionId: string;
-    iterations: number;
-    elapsedMs: number;
-    status: string;
-  }
-
-  export type Event =
-    | UserMessageEvent
-    | AssistantMessageEvent
-    | AssistantThinkingMessageEvent
-    | ToolCallEvent
-    | ToolResultEvent
-    | AgentRunStartEvent
-    | AgentRunEndEvent;
-}
-import { v4 as uuidv4 } from 'uuid';
+import { AgentEventStream } from '@tarko/interface';
+import { defineTransformer } from '@tarko/agent-ui-cli';
+import type { ChatCompletionMessageToolCall } from '@tarko/model-provider/types';
 
 /**
  * Source event structure from agent_trace.jsonl
@@ -138,6 +41,13 @@ interface SourceEvent {
 }
 
 /**
+ * Input format: array of source events from JSONL
+ */
+interface AgentTraceFormat {
+  events: SourceEvent[];
+}
+
+/**
  * Span state for tracking multi-event spans
  */
 interface SpanState {
@@ -150,6 +60,7 @@ interface SpanState {
   outputs?: any;
   inputs?: any;
   status?: any;
+  processed?: boolean; // Flag to prevent duplicate processing
 }
 
 /**
@@ -184,7 +95,7 @@ class FunctionCallParser {
     while ((match = this.FUNCTION_CALL_REGEX.exec(content)) !== null) {
       const toolName = match[1];
       const parameterBlock = match[2];
-      const toolCallId = uuidv4();
+      const toolCallId = `tool-call-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
       // Parse parameters
       const parameters: Record<string, any> = {};
@@ -215,44 +126,35 @@ class FunctionCallParser {
 }
 
 /**
- * Main transformer class
+ * Agent trace transformer that converts OpenTelemetry-style span events
+ * from agent_trace.jsonl into AgentEventStream format
  */
-export class AgentTraceTransformer {
-  private spans = new Map<string, SpanState>();
-  private toolCalls = new Map<string, ToolCallState>();
-  private events: AgentEventStream.Event[] = [];
-  private sessionId = uuidv4();
-  private messageIdCounter = 0;
+export default defineTransformer<AgentTraceFormat>((input) => {
+  const events: AgentEventStream.Event[] = [];
+  const spans = new Map<string, SpanState>();
+  const toolCallsMap = new Map<string, ToolCallState>();
+  let eventIdCounter = 1;
+  let messageIdCounter = 0;
+  const sessionId = `session-${Date.now()}`;
+  let currentLoopToolCalls: ChatCompletionMessageToolCall[] = [];
 
-  /**
-   * Transform a line of JSONL data
-   */
-  transformLine(line: string): void {
-    if (!line.trim()) return;
+  // Helper function to generate unique IDs
+  const generateId = () => `event-${eventIdCounter++}`;
+  const generateMessageId = () => `msg-${++messageIdCounter}`;
 
-    try {
-      const event: SourceEvent = JSON.parse(line);
-      this.processSourceEvent(event);
-    } catch (error) {
-      console.error('Error parsing line:', error);
-    }
-  }
-
-  /**
-   * Process a single source event
-   */
-  private processSourceEvent(event: SourceEvent): void {
-    const { type, span_id, name } = event;
+  // Process each source event
+  for (const sourceEvent of input.events) {
+    const { type, span_id, name } = sourceEvent;
 
     switch (type) {
       case 'START':
-        this.handleStart(event);
+        handleStart(sourceEvent);
         break;
       case 'UPDATE':
-        this.handleUpdate(event);
+        handleUpdate(sourceEvent);
         break;
       case 'END':
-        this.handleEnd(event);
+        handleEnd(sourceEvent);
         break;
     }
   }
@@ -260,7 +162,7 @@ export class AgentTraceTransformer {
   /**
    * Handle START events
    */
-  private handleStart(event: SourceEvent): void {
+  function handleStart(event: SourceEvent): void {
     const span: SpanState = {
       spanId: event.span_id,
       name: event.name,
@@ -269,19 +171,19 @@ export class AgentTraceTransformer {
       attributes: event.attributes,
     };
 
-    this.spans.set(event.span_id, span);
+    spans.set(event.span_id, span);
 
     // Handle agent_step start as agent_run_start
     if (event.name === 'agent_step' && event.attributes?.step === 1) {
-      this.createAgentRunStartEvent(event);
+      createAgentRunStartEvent(event);
     }
   }
 
   /**
    * Handle UPDATE events - these contain the actual data
    */
-  private handleUpdate(event: SourceEvent): void {
-    const span = this.spans.get(event.span_id);
+  function handleUpdate(event: SourceEvent): void {
+    const span = spans.get(event.span_id);
     if (!span) return;
 
     // Update span with outputs
@@ -295,16 +197,16 @@ export class AgentTraceTransformer {
     // Process based on span name
     switch (span.name) {
       case 'llm':
-        this.handleLLMUpdate(event, span);
+        handleLLMUpdate(event, span);
         break;
       case 'parse_tool_calls':
-        this.handleToolCallParse(event, span);
+        handleToolCallParse(event, span);
         break;
       case 'portal.run_action':
       case 'execute_bash':
       case 'str_replace_editor':
       case 'think':
-        this.handleToolResult(event, span);
+        handleToolResult(event, span);
         break;
     }
   }
@@ -312,27 +214,30 @@ export class AgentTraceTransformer {
   /**
    * Handle END events
    */
-  private handleEnd(event: SourceEvent): void {
-    const span = this.spans.get(event.span_id);
+  function handleEnd(event: SourceEvent): void {
+    const span = spans.get(event.span_id);
     if (!span) return;
 
     span.endTime = event.time_unix_nano;
 
     // Handle agent_step end as agent_run_end
     if (span.name === 'agent_step' && !span.parentSpanId) {
-      this.createAgentRunEndEvent(event, span);
+      createAgentRunEndEvent(event, span);
     }
   }
 
   /**
    * Handle LLM output updates
    */
-  private handleLLMUpdate(event: SourceEvent, span: SpanState): void {
+  function handleLLMUpdate(event: SourceEvent, span: SpanState): void {
     const outputs = span.outputs;
-    if (!outputs?.content) return;
+    if (!outputs?.content || span.processed) return;
+
+    // Mark span as processed to prevent duplicate events
+    span.processed = true;
 
     const content = outputs.content;
-    const messageId = this.generateMessageId();
+    const messageId = generateMessageId();
     const timestamp = Math.floor(event.time_unix_nano / 1000000);
 
     // Check if this is a thinking message (from 'think' tool)
@@ -347,43 +252,42 @@ export class AgentTraceTransformer {
         const thinkingArgs = JSON.parse(toolCalls[0].function.arguments);
         const thinkingContent = thinkingArgs.content || cleanContent;
 
-        this.events.push({
-          id: uuidv4(),
+        events.push({
+          id: generateId(),
           type: 'assistant_thinking_message',
           timestamp,
           content: thinkingContent,
           isComplete: true,
           messageId,
-        });
+        } as AgentEventStream.AssistantThinkingMessageEvent);
       }
     } else {
       // Parse function calls from content
       const { cleanContent, toolCalls } = FunctionCallParser.parseContent(content);
 
+      // Collect tool calls for current loop
+      currentLoopToolCalls = [...toolCalls];
+
       // Create assistant message event
       const assistantEvent: AgentEventStream.AssistantMessageEvent = {
-        id: uuidv4(),
+        id: generateId(),
         type: 'assistant_message',
         timestamp,
         content: cleanContent,
         rawContent: content,
         toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
-        finishReason: outputs.openai?.choices?.[0]?.finish_reason,
+        finishReason:
+          toolCalls.length > 0
+            ? 'tool_calls'
+            : outputs.openai?.choices?.[0]?.finish_reason || 'stop',
         messageId,
       };
 
-      // Add usage info if available
-      if (outputs.openai?.usage) {
-        const usage = outputs.openai.usage;
-        assistantEvent.ttftMs = undefined; // Not available in source data
-        assistantEvent.ttltMs = undefined; // Not available in source data
-      }
-
-      this.events.push(assistantEvent);
+      events.push(assistantEvent);
 
       // Store tool calls for later correlation
       toolCalls.forEach((toolCall) => {
-        this.toolCalls.set(toolCall.id, {
+        toolCallsMap.set(toolCall.id, {
           toolCallId: toolCall.id,
           toolName: toolCall.function.name,
           arguments: JSON.parse(toolCall.function.arguments),
@@ -396,19 +300,27 @@ export class AgentTraceTransformer {
   /**
    * Handle tool call parsing updates
    */
-  private handleToolCallParse(event: SourceEvent, span: SpanState): void {
+  function handleToolCallParse(event: SourceEvent, span: SpanState): void {
     const outputs = span.outputs;
-    if (!Array.isArray(outputs) || outputs.length === 0) return;
+    if (!Array.isArray(outputs) || outputs.length === 0 || span.processed) return;
+
+    // Mark span as processed to prevent duplicate events
+    span.processed = true;
 
     const toolCallData = outputs[0];
     if (!toolCallData.tool?.name) return;
 
-    const toolCallId = uuidv4();
+    // Find matching tool call from current loop
+    const matchingToolCall = currentLoopToolCalls.find(
+      (tc) => tc.function.name === toolCallData.tool.name,
+    );
+
+    const toolCallId = matchingToolCall?.id || `tool-call-${eventIdCounter}`;
     const timestamp = Math.floor(event.time_unix_nano / 1000000);
 
     // Create tool call event
     const toolCallEvent: AgentEventStream.ToolCallEvent = {
-      id: uuidv4(),
+      id: generateId(),
       type: 'tool_call',
       timestamp,
       toolCallId,
@@ -422,10 +334,10 @@ export class AgentTraceTransformer {
       },
     };
 
-    this.events.push(toolCallEvent);
+    events.push(toolCallEvent);
 
     // Store for result correlation
-    this.toolCalls.set(toolCallId, {
+    toolCallsMap.set(toolCallId, {
       toolCallId,
       toolName: toolCallData.tool.name,
       arguments: toolCallData.params || {},
@@ -436,23 +348,25 @@ export class AgentTraceTransformer {
   /**
    * Handle tool execution result updates
    */
-  private handleToolResult(event: SourceEvent, span: SpanState): void {
+  function handleToolResult(event: SourceEvent, span: SpanState): void {
     const outputs = span.outputs;
-    if (!outputs) return;
+    if (!outputs || span.processed) return;
+
+    // Mark span as processed to prevent duplicate events
+    span.processed = true;
 
     // Find corresponding tool call
-    const toolCall = Array.from(this.toolCalls.values()).find(
+    const toolCall = Array.from(toolCallsMap.values()).find(
       (tc) =>
         tc.toolName === span.name ||
         (span.name === 'portal.run_action' && tc.resultSpanId === span.spanId),
     );
 
     if (!toolCall && span.name !== 'portal.run_action') {
-      // For portal.run_action, we might not have a direct match, so create a generic one
       return;
     }
 
-    const toolCallId = toolCall?.toolCallId || uuidv4();
+    const toolCallId = toolCall?.toolCallId || `tool-call-${eventIdCounter}`;
     const timestamp = Math.floor(event.time_unix_nano / 1000000);
     const startTime = toolCall?.startTime ? Math.floor(toolCall.startTime / 1000000) : timestamp;
     const elapsedMs = timestamp - startTime;
@@ -474,7 +388,7 @@ export class AgentTraceTransformer {
 
     // Create tool result event
     const toolResultEvent: AgentEventStream.ToolResultEvent = {
-      id: uuidv4(),
+      id: generateId(),
       type: 'tool_result',
       timestamp,
       toolCallId,
@@ -484,7 +398,7 @@ export class AgentTraceTransformer {
       error,
     };
 
-    this.events.push(toolResultEvent);
+    events.push(toolResultEvent);
 
     // Mark tool call as having a result
     if (toolCall) {
@@ -495,14 +409,14 @@ export class AgentTraceTransformer {
   /**
    * Create agent run start event
    */
-  private createAgentRunStartEvent(event: SourceEvent): void {
+  function createAgentRunStartEvent(event: SourceEvent): void {
     const timestamp = Math.floor(event.time_unix_nano / 1000000);
 
     const agentRunStartEvent: AgentEventStream.AgentRunStartEvent = {
-      id: uuidv4(),
+      id: generateId(),
       type: 'agent_run_start',
       timestamp,
-      sessionId: this.sessionId,
+      sessionId: sessionId,
       runOptions: {
         maxIterations: 100,
         timeoutMs: 300000,
@@ -513,78 +427,32 @@ export class AgentTraceTransformer {
       agentName: 'Agent',
     };
 
-    this.events.push(agentRunStartEvent);
+    events.push(agentRunStartEvent);
   }
 
   /**
    * Create agent run end event
    */
-  private createAgentRunEndEvent(event: SourceEvent, span: SpanState): void {
+  function createAgentRunEndEvent(event: SourceEvent, span: SpanState): void {
     const timestamp = Math.floor(event.time_unix_nano / 1000000);
     const startTime = Math.floor(span.startTime / 1000000);
     const elapsedMs = timestamp - startTime;
 
     const agentRunEndEvent: AgentEventStream.AgentRunEndEvent = {
-      id: uuidv4(),
+      id: generateId(),
       type: 'agent_run_end',
       timestamp,
-      sessionId: this.sessionId,
+      sessionId: sessionId,
       iterations: 1,
       elapsedMs,
       status: 'completed',
     };
 
-    this.events.push(agentRunEndEvent);
+    events.push(agentRunEndEvent);
   }
 
-  /**
-   * Generate unique message ID
-   */
-  private generateMessageId(): string {
-    return `msg_${++this.messageIdCounter}`;
-  }
-
-  /**
-   * Get all transformed events
-   */
-  getEvents(): AgentEventStream.Event[] {
-    return this.events.sort((a, b) => a.timestamp - b.timestamp);
-  }
-
-  /**
-   * Clear all state
-   */
-  reset(): void {
-    this.spans.clear();
-    this.toolCalls.clear();
-    this.events = [];
-    this.sessionId = uuidv4();
-    this.messageIdCounter = 0;
-  }
-}
-
-/**
- * Transform agent trace JSONL file to AgentEventStream events
- */
-export function transformAgentTrace(jsonlContent: string): AgentEventStream.Event[] {
-  const transformer = new AgentTraceTransformer();
-
-  const lines = jsonlContent.split('\n');
-  for (const line of lines) {
-    transformer.transformLine(line);
-  }
-
-  return transformer.getEvents();
-}
-
-/**
- * Transform agent trace JSONL file to AgentEventStream events (async)
- */
-export async function transformAgentTraceAsync(
-  jsonlContent: string,
-): Promise<AgentEventStream.Event[]> {
-  return transformAgentTrace(jsonlContent);
-}
-
-// Export the AgentEventStream namespace for use in other files
-export { AgentEventStream };
+  // Sort events by timestamp and return
+  return {
+    events: events.sort((a, b) => a.timestamp - b.timestamp),
+  };
+});

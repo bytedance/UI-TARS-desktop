@@ -230,3 +230,33 @@ export type CoreEventType =
 3. **时间转换**: 纳秒到毫秒的时间戳转换
 4. **ID 生成**: 为目标事件生成唯一标识符
 5. **错误处理**: 处理不完整或异常的 span 数据
+
+## 实际使用
+
+### 使用 AGUI CLI 转换
+
+```bash
+# 构建 CLI
+cd multimodal/tarko/agent-ui-cli
+npm run build
+
+# 转换 JSONL 到 HTML
+cd examples/test
+node ../../dist/cli.js agent_trace.jsonl --transformer transformer.ts --out agent_trace.html
+```
+
+### 关键优势
+
+1. **原生 JSONL 支持**: AGUI CLI 自动识别和解析 JSONL 格式
+2. **TypeScript Transformer**: 支持类型安全的转换逻辑
+3. **实时转换**: 无需预处理，直接从 JSONL 生成 HTML
+4. **完整映射**: 保留所有关键信息和时序关系
+
+### 转换结果
+
+转换后的 HTML 文件包含：
+- 交互式时间线视图
+- 完整的工具调用链
+- LLM 对话历史
+- 思考过程可视化
+- 性能指标和统计信息
