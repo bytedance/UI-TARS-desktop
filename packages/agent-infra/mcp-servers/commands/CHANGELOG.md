@@ -1,5 +1,11 @@
 ## 0.4.0 2024-12-10 - add logging
 
+## 1.2.22
+
+### Patch Changes
+
+- 910105e: feat(mcp-servers): support mcp offical registry
+
 ## 1.2.21
 
 ### Patch Changes

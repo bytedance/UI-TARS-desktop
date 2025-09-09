@@ -1,5 +1,11 @@
 # @agent-infra/mcp-server-search
 
+## 1.2.22
+
+### Patch Changes
+
+- 910105e: feat(mcp-servers): support mcp offical registry
+
 ## 1.2.21
 
 ### Patch Changes

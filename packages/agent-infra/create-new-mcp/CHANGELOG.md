@@ -1,5 +1,11 @@
 # create-new-mcp
 
+## 1.1.3
+
+### Patch Changes
+
+- 910105e: feat(mcp-servers): support mcp offical registry
+
 ## 1.1.2
 
 ### Patch Changes
