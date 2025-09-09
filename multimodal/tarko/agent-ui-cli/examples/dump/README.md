@@ -39,21 +39,21 @@ agui trace.json --config agui.config.ts
 
 ### With Transformer
 ```bash
+# Convert custom format using transformer (TypeScript - recommended)
+agui custom-format.json --transformer transformer.ts
+
 # Convert custom format using transformer (JavaScript)
 agui custom-format.json --transformer transformer.js
 
-# Convert custom format using transformer (TypeScript)
-agui custom-format.json --transformer transformer.ts
-
 # With both transformer and config
-agui custom-format.json --transformer transformer.js --config agui.config.ts
+agui custom-format.json --transformer transformer.ts --config agui.config.ts
 ```
 
 ### Combined Examples
 ```bash
 # Full example with all options
 agui custom-format.json \
-  --transformer transformer.js \
+  --transformer transformer.ts \
   --config agui.config.ts \
   --out currency-converter-demo.html
 ```
@@ -77,8 +77,11 @@ agui trace.json --out test-json.html
 # Test JSONL format
 agui trace.jsonl --out test-jsonl.html
 
-# Test transformer
-agui custom-format.json --transformer transformer.js --out test-transformer.html
+# Test TypeScript transformer
+agui custom-format.json --transformer transformer.ts --out test-ts-transformer.html
+
+# Test JavaScript transformer
+agui custom-format.json --transformer transformer.js --out test-js-transformer.html
 
 # Test with full configuration
 agui trace.json --config agui.config.ts --out test-config.html

@@ -54,7 +54,23 @@ export async function loadTransformer(transformerPath: string): Promise<TraceTra
   }
 
   try {
-    const module = await import(absolutePath);
+    let module: any;
+    const ext = path.extname(absolutePath).toLowerCase();
+    
+    if (ext === '.ts') {
+      // Use jiti to load TypeScript files
+      const { createJiti } = await import('jiti');
+      const jiti = createJiti(__filename, {
+        moduleCache: false,
+        interopDefault: true,
+      });
+      module = await jiti.import(absolutePath, { default: true });
+    } else {
+      // Use native import for JavaScript files
+      const fileUrl = `file://${absolutePath}?t=${Date.now()}`;
+      module = await import(fileUrl);
+    }
+    
     const transformer = module.default || module.transformer || module;
     
     if (typeof transformer !== 'function') {
