@@ -1,51 +1,65 @@
 {
   "logs": [
     {
+      "type": "session_start",
+      "timestamp": "2024-01-01T09:59:59.000Z",
+      "session_id": "session-001",
+      "message": "Starting new agent session"
+    },
+    {
+      "type": "system_message",
+      "timestamp": "2024-01-01T10:00:00.000Z",
+      "level": "info",
+      "message": "Agent initialized successfully",
+      "parameters": {
+        "model": "gpt-4",
+        "temperature": 0.7
+      }
+    },
+    {
       "type": "user_input",
       "timestamp": "2024-01-01T10:00:00.000Z",
-      "message": "Help me calculate the tip for a $85 dinner bill. I want to tip 18%."
+      "message": "Help me plan a dinner party for 8 people. I need to calculate costs and check the weather."
     },
     {
-      "type": "tool_execution",
+      "type": "plan_start",
       "timestamp": "2024-01-01T10:00:01.000Z",
-      "tool_name": "calculator",
-      "parameters": {
-        "expression": "85 * 0.18",
-        "operation": "percentage_calculation"
-      },
-      "result": {
-        "result": 15.3,
-        "formatted": "$15.30",
-        "calculation": "$85.00 × 18% = $15.30"
-      }
+      "session_id": "session-001"
     },
     {
-      "type": "tool_execution",
+      "type": "plan_update",
       "timestamp": "2024-01-01T10:00:02.000Z",
-      "tool_name": "calculator",
-      "parameters": {
-        "expression": "85 + 15.3",
-        "operation": "addition"
-      },
-      "result": {
-        "result": 100.3,
-        "formatted": "$100.30",
-        "calculation": "$85.00 + $15.30 = $100.30"
-      }
+      "session_id": "session-001",
+      "plan_steps": [
+        { "content": "Calculate dinner costs for 8 people", "done": false },
+        { "content": "Check weather forecast for the event date", "done": false },
+        { "content": "Provide final recommendations", "done": false }
+      ]
     },
     {
-      "type": "agent_response",
+      "type": "agent_thinking",
       "timestamp": "2024-01-01T10:00:03.000Z",
-      "message": "For an $85 dinner bill with an 18% tip:\n\n• Tip amount: **$15.30**\n• Total amount: **$100.30**\n\nThe calculation: $85.00 × 18% = $15.30 tip, so your total will be $85.00 + $15.30 = $100.30."
-    },
-    {
-      "type": "user_input",
-      "timestamp": "2024-01-01T10:01:00.000Z",
-      "message": "What's the weather like in San Francisco today?"
+      "message": "I need to help plan a dinner party. Let me break this down: first calculate costs assuming $25 per person for a nice dinner, then check the weather.",
+      "thinking_duration_ms": 1500
     },
     {
       "type": "tool_execution",
-      "timestamp": "2024-01-01T10:01:01.000Z",
+      "timestamp": "2024-01-01T10:00:04.000Z",
+      "tool_name": "calculator",
+      "parameters": {
+        "expression": "8 * 25",
+        "operation": "multiplication"
+      },
+      "result": {
+        "result": 200,
+        "formatted": "$200.00",
+        "calculation": "8 people × $25 per person = $200.00"
+      },
+      "elapsed_ms": 150
+    },
+    {
+      "type": "tool_execution",
+      "timestamp": "2024-01-01T10:00:05.000Z",
       "tool_name": "weather_api",
       "parameters": {
         "location": "San Francisco, CA",
@@ -60,13 +74,48 @@
         "wind_direction": "NW",
         "visibility": 10,
         "uv_index": 6,
-        "description": "Partly cloudy with mild temperatures and light northwest winds"
-      }
+        "description": "Perfect weather for outdoor dining"
+      },
+      "elapsed_ms": 800
     },
     {
-      "type": "agent_response",
-      "timestamp": "2024-01-01T10:01:02.000Z",
-      "message": "The weather in San Francisco today is quite pleasant:\n\n🌤️ **Partly Cloudy**\n🌡️ **68°F**\n💨 **12 mph NW winds**\n💧 **72% humidity**\n👁️ **10 miles visibility**\n☀️ **UV Index: 6**\n\nIt's a nice day with mild temperatures and light northwest winds. Perfect weather for outdoor activities!"
+      "type": "plan_update",
+      "timestamp": "2024-01-01T10:00:06.000Z",
+      "session_id": "session-001",
+      "plan_steps": [
+        { "content": "Calculate dinner costs for 8 people", "done": true },
+        { "content": "Check weather forecast for the event date", "done": true },
+        { "content": "Provide final recommendations", "done": false }
+      ]
+    },
+    {
+      "type": "environment_input",
+      "timestamp": "2024-01-01T10:00:07.000Z",
+      "message": "User's location detected as San Francisco Bay Area",
+      "environment_type": "location",
+      "environment_description": "Geographic location context for weather and restaurant recommendations"
+    },
+    {
+      "type": "final_answer",
+      "timestamp": "2024-01-01T10:00:08.000Z",
+      "message": "## Dinner Party Plan for 8 People\n\n### 💰 Cost Estimate\n- **Budget**: $200 ($25 per person)\n- This covers a nice dinner with appetizers, main course, and dessert\n\n### 🌤️ Weather Forecast\n- **Condition**: Partly Cloudy, 68°F\n- **Perfect for**: Outdoor dining or patio seating\n- **Wind**: Light 12 mph NW winds\n\n### 📋 Recommendations\n1. Consider outdoor seating given the pleasant weather\n2. Budget allows for quality ingredients and wine\n3. Plan for 6-8 PM to enjoy the nice evening weather\n\nEverything looks great for your dinner party!",
+      "is_deep_research": false,
+      "answer_title": "Dinner Party Planning Summary",
+      "answer_format": "markdown"
+    },
+    {
+      "type": "plan_finish",
+      "timestamp": "2024-01-01T10:00:09.000Z",
+      "session_id": "session-001",
+      "plan_summary": "Successfully calculated dinner costs ($200 for 8 people) and confirmed favorable weather conditions for the event."
+    },
+    {
+      "type": "session_end",
+      "timestamp": "2024-01-01T10:00:10.000Z",
+      "session_id": "session-001",
+      "iterations": 3,
+      "elapsed_ms": 11000,
+      "status": "completed"
     }
   ]
 }
