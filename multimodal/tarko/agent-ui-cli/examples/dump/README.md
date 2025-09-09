@@ -13,6 +13,16 @@ This directory contains examples for testing the `agui` CLI dump functionality.
 - `agui.config.ts` - Example configuration with custom session info and UI settings (uses `defineConfig` for type safety)
 - `transformer.ts` - Example transformer for converting custom log format (uses `defineTransformer` for type safety)
 
+## CLI Options
+
+The `agui` CLI supports the following options:
+
+- `--out <path>` - Output file path for the generated HTML
+- `--transformer <path>` - Path to transformer file (TypeScript or JavaScript)
+- `--config <path>` - Path to config file
+- `--upload <url>` - Upload URL for sharing (generates and uploads HTML)
+- `--dump-transformed` - Dump transformed JSON to file (requires `--transformer`)
+
 ## Usage Examples
 
 ### Basic Usage
@@ -20,7 +30,7 @@ This directory contains examples for testing the `agui` CLI dump functionality.
 # Generate HTML from JSON trace
 agui trace.json
 
-# Generate HTML from JSONL trace
+# Generate HTML from JSONL trace (auto-detected format)
 agui trace.jsonl
 
 # Specify output path
@@ -43,6 +53,18 @@ agui custom-format.json --transformer transformer.ts
 
 # With both transformer and config
 agui custom-format.json --transformer transformer.ts --config agui.config.ts
+
+# Debug transformer output by saving transformed JSON
+agui custom-format.json --transformer transformer.ts --dump-transformed
+```
+
+### Upload and Sharing
+```bash
+# Upload to sharing service
+agui trace.json --upload http://share.example.com
+
+# Upload with transformer
+agui custom-format.json --transformer transformer.ts --upload http://share.example.com
 ```
 
 ### Combined Examples
@@ -51,16 +73,52 @@ agui custom-format.json --transformer transformer.ts --config agui.config.ts
 agui custom-format.json \
   --transformer transformer.ts \
   --config agui.config.ts \
-  --out currency-converter-demo.html
+  --out currency-converter-demo.html \
+  --dump-transformed
 ```
+
+## File Format Support
+
+### JSON Format
+Standard JSON files with an `events` array containing `AgentEventStream.Event[]`:
+```json
+{
+  "events": [
+    {
+      "id": "event-1",
+      "type": "user_message",
+      "timestamp": 1640995200000,
+      "content": "Hello"
+    }
+  ]
+}
+```
+
+### JSONL Format
+JSON Lines format where each line is a separate event (auto-detected by `.jsonl` extension):
+```jsonl
+{"id": "event-1", "type": "user_message", "timestamp": 1640995200000, "content": "Hello"}
+{"id": "event-2", "type": "assistant_message", "timestamp": 1640995201000, "content": "Hi there!"}
+```
+
+### Custom Formats
+Any format can be supported using transformers that convert to `AgentEventStream.Event[]`.
 
 ## Expected Output
 
+### HTML Generation
 All commands will generate HTML files that can be opened in a browser to view the agent execution replay with:
 - Interactive event timeline
 - Tool call details
 - Agent thinking process
 - Custom UI configuration (title, logo, etc.)
+
+### Transformed JSON Output
+When using `--dump-transformed`, a JSON file will be created alongside the HTML:
+- Input: `custom-format.json` → Output: `custom-format-transformed.json`
+- Input: `trace.jsonl` → Output: `trace-transformed.json`
+- Contains the standardized `AgentEventStream.Event[]` format
+- Useful for debugging transformer logic
 
 ## Testing the Examples
 
@@ -73,11 +131,14 @@ agui trace.json --out test-json.html
 # Test JSONL format
 agui trace.jsonl --out test-jsonl.html
 
-# Test transformer
-agui custom-format.json --transformer transformer.ts --out test-transformer.html
+# Test transformer with debug output
+agui custom-format.json --transformer transformer.ts --out test-transformer.html --dump-transformed
 
 # Test with full configuration
 agui trace.json --config agui.config.ts --out test-config.html
+
+# Test upload functionality (requires valid upload URL)
+# agui trace.json --upload http://your-share-service.com
 ```
 
 ## Type Safety Helpers
@@ -106,6 +167,48 @@ export default defineConfig({
       renderGUIAction: false, // Partial nested configuration
     },
   },
+});
+```
+
+### defineTransformer
+Use `defineTransformer` for type-safe transformers that convert custom log formats to AgentEventStream events. The CLI supports both TypeScript (`.ts`) and JavaScript (`.js`) transformer files:
+
+```typescript
+import { AgentEventStream } from '@tarko/interface';
+import { defineTransformer } from '@tarko/agent-ui-cli';
+
+interface CustomLogEntry {
+  type: 'user_input' | 'tool_execution' | 'agent_response';
+  timestamp: string;
+  message?: string;
+  tool_name?: string;
+  parameters?: Record<string, any>;
+  result?: Record<string, any>;
+}
+
+interface CustomLogFormat {
+  logs: CustomLogEntry[];
+}
+
+export default defineTransformer<CustomLogFormat>((input) => {
+  const events: AgentEventStream.Event[] = [];
+  let eventIdCounter = 1;
+
+  for (const log of input.logs) {
+    const timestamp = new Date(log.timestamp).getTime();
+    
+    if (log.type === 'user_input') {
+      events.push({
+        id: `event-${eventIdCounter++}`,
+        type: 'user_message',
+        timestamp,
+        content: log.message || '',
+      } as AgentEventStream.UserMessageEvent);
+    }
+    // Add more event type conversions...
+  }
+
+  return { events };
 });
 ```
 
@@ -162,99 +265,40 @@ finishReason: currentLoopToolCalls.length > 0 ? 'tool_calls' : 'stop'
 
 Without these, tool call blocks will show as "executing" indefinitely and side panels won't update.
 
-### defineTransformer
-Use `defineTransformer` for type-safe transformers that convert custom log formats to AgentEventStream events:
+## Debugging and Troubleshooting
 
-```typescript
-import { AgentEventStream } from '@tarko/interface';
-import { defineTransformer } from '@tarko/agent-ui-cli';
+### Using --dump-transformed for Debugging
+The `--dump-transformed` flag is invaluable for debugging transformer logic:
 
-interface CustomLogEntry {
-  type: 'user_input' | 'tool_execution' | 'agent_response';
-  timestamp: string;
-  message?: string;
-  tool_name?: string;
-  parameters?: Record<string, any>;
-  result?: Record<string, any>;
-}
+```bash
+# Debug your transformer output
+agui custom-format.json --transformer transformer.ts --dump-transformed
 
-interface CustomLogFormat {
-  logs: CustomLogEntry[];
-}
-
-export default defineTransformer<CustomLogFormat>((input) => {
-  const events: AgentEventStream.Event[] = [];
-  let eventIdCounter = 1;
-  let currentLoopToolCalls: ChatCompletionMessageToolCall[] = [];
-
-  for (let i = 0; i < input.logs.length; i++) {
-    const log = input.logs[i];
-    const timestamp = new Date(log.timestamp).getTime();
-    
-    if (log.type === 'user_input') {
-      events.push({
-        id: `event-${eventIdCounter++}`,
-        type: 'user_message',
-        timestamp,
-        content: log.message || '',
-      } as AgentEventStream.UserMessageEvent);
-    } else if (log.type === 'agent_response') {
-      events.push({
-        id: `event-${eventIdCounter++}`,
-        type: 'assistant_message',
-        timestamp,
-        content: log.message || '',
-        rawContent: log.message,
-        toolCalls: currentLoopToolCalls.length > 0 ? currentLoopToolCalls : undefined,
-        finishReason: log.parameters?.finishReason || 'stop',
-        ttftMs: log.parameters?.ttftMs,
-        ttltMs: log.parameters?.ttltMs,
-        messageId: log.parameters?.messageId || `msg-${eventIdCounter}`,
-      } as AgentEventStream.AssistantMessageEvent);
-    } else if (log.type === 'agent_thinking') {
-      events.push({
-        id: `event-${eventIdCounter++}`,
-        type: 'assistant_thinking_message',
-        timestamp,
-        content: log.message || '',
-        isComplete: log.parameters?.isComplete ?? true,
-        thinkingDurationMs: log.parameters?.thinkingDurationMs,
-        messageId: log.parameters?.messageId || `thinking-${eventIdCounter}`,
-      } as AgentEventStream.AssistantThinkingMessageEvent);
-    } else if (log.type === 'tool_execution') {
-      const toolCallId = `tool-call-${eventIdCounter}`;
-      
-      // Tool call event
-      events.push({
-        id: `event-${eventIdCounter++}`,
-        type: 'tool_call',
-        timestamp,
-        toolCallId,
-        name: log.tool_name || 'unknown_tool',
-        arguments: log.parameters || {},
-        startTime: timestamp,
-        tool: {
-          name: log.tool_name || 'unknown_tool',
-          description: `Tool: ${log.tool_name}`,
-          schema: {},
-        },
-      } as AgentEventStream.ToolCallEvent);
-      
-      // Tool result event
-      if (log.result) {
-        events.push({
-          id: `event-${eventIdCounter++}`,
-          type: 'tool_result',
-          timestamp: timestamp + 100,
-          toolCallId,
-          name: log.tool_name || 'unknown_tool',
-          content: log.result,
-          elapsedMs: 100,
-        } as AgentEventStream.ToolResultEvent);
-      }
-    }
-  }
-
-  return { events };
-});
+# This creates custom-format-transformed.json with the standardized events
+# Compare this with your expected output to debug transformation issues
 ```
+
+### Common Issues
+
+1. **Tool calls show as "executing" forever**
+   - Ensure `toolCall.id` matches `toolResult.toolCallId`
+   - Set `finishReason: 'tool_calls'` when assistant makes tool calls
+
+2. **JSONL files not loading**
+   - Ensure file has `.jsonl` extension for auto-detection
+   - Check that each line contains valid JSON
+
+3. **Transformer not found**
+   - Verify the transformer file path is correct
+   - Ensure the transformer exports a default function
+
+4. **TypeScript transformer compilation errors**
+   - The CLI uses `jiti` to load TypeScript files automatically
+   - No need to compile `.ts` files manually
+
+### Validation
+The CLI automatically validates that transformed data contains:
+- An `events` array
+- Valid `AgentEventStream.Event[]` structure
+
+Use `--dump-transformed` to inspect the final event structure before HTML generation.
