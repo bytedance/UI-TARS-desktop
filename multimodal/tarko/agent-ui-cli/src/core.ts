@@ -30,8 +30,8 @@ export class AguiCore {
       const builderOptions: AgentUIBuilderInputOptions = {
         events: validatedTraceData.events,
         sessionInfo: normalizeSessionInfo(config.sessionInfo || {}),
-        serverInfo: config.serverInfo,
-        uiConfig: config.uiConfig,
+        serverInfo: config.serverInfo as any,
+        uiConfig: config.uiConfig as any,
         staticPath: config.staticPath,
       };
 
@@ -69,8 +69,8 @@ export class AguiCore {
       const builderOptions: AgentUIBuilderInputOptions = {
         events: validatedTraceData.events,
         sessionInfo: normalizeSessionInfo(config.sessionInfo || {}),
-        serverInfo: config.serverInfo,
-        uiConfig: config.uiConfig,
+        serverInfo: config.serverInfo as any,
+        uiConfig: config.uiConfig as any,
         staticPath: config.staticPath,
       };
 

@@ -85,19 +85,26 @@ agui trace.json --config agui.config.ts --out test-config.html
 AGUI CLI provides helper functions for better TypeScript support:
 
 ### defineConfig
-Use `defineConfig` in your config files for type safety and IntelliSense:
+Use `defineConfig` in your config files for type safety and IntelliSense. All configuration properties support deep partial types, so you only need to specify the fields you want to override:
 
 ```typescript
 import { defineConfig } from '@tarko/agent-ui-cli';
 
 export default defineConfig({
   sessionInfo: {
-    id: 'my-session',
-    // Full type checking and autocomplete
+    metadata: {
+      name: 'My Custom Agent',
+      // Only specify the fields you want to override
+      modelConfig: {
+        provider: 'openai', // Other fields will use defaults
+      },
+    },
   },
   uiConfig: {
     title: 'My Agent UI',
-    // All config options with type safety
+    guiAgent: {
+      renderGUIAction: false, // Partial nested configuration
+    },
   },
 });
 ```

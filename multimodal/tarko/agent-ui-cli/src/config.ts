@@ -125,7 +125,7 @@ function mergeConfig(
 /**
  * Validate and normalize session info
  */
-export function normalizeSessionInfo(sessionInfo: Partial<SessionInfo>): SessionInfo {
+export function normalizeSessionInfo(sessionInfo: any): SessionInfo {
   const now = Date.now();
 
   return {

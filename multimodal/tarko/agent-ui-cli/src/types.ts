@@ -7,6 +7,13 @@ import { AgentEventStream } from '@tarko/interface';
 import { AgentUIBuilderInputOptions } from '@tarko/agent-ui-builder';
 
 /**
+ * Deep partial utility type
+ */
+type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
+};
+
+/**
  * CLI options for the agui command
  */
 export interface AguiCLIOptions {
@@ -33,9 +40,9 @@ export interface TraceData {
 }
 
 /**
- * AGUI configuration type
+ * AGUI configuration type - allows deep partial configuration
  */
-export type AguiConfig = Partial<AgentUIBuilderInputOptions>;
+export type AguiConfig = DeepPartial<AgentUIBuilderInputOptions>;
 
 /**
  * Helper function to define transformer with type safety
