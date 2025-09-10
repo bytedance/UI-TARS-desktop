@@ -5,7 +5,6 @@ import './CodeEditor.css';
 
 interface CodeEditorProps {
   code: string;
-  language: string;
   fileName?: string;
   filePath?: string;
   fileSize?: string;
@@ -18,7 +17,6 @@ interface CodeEditorProps {
 
 export const CodeEditor: React.FC<CodeEditorProps> = ({
   code,
-  language,
   fileName,
   filePath,
   fileSize,
@@ -34,6 +32,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   const codeRef = useRef<HTMLElement>(null);
 
+  const displayFileName = fileName || 'script';
+  const fileExtension = displayFileName.split('.').pop()?.toLowerCase() || '';
+  const language = fileExtension || 'text';
+
   useEffect(() => {
     if (codeRef.current) {
       codeRef.current.removeAttribute('data-highlighted');
@@ -48,7 +50,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   const lines = code.split('\n');
   const lineCount = lines.length;
-  const displayFileName = fileName || `script.${language}`;
 
   return (
     <div className={`code-editor-container ${className}`}>
@@ -57,7 +58,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           fileName={displayFileName}
           filePath={filePath}
           fileSize={fileSize}
-          language={language}
           onCopy={handleCopy}
         />
 

@@ -3,7 +3,7 @@ import { StandardPanelContent } from '../types/panelContent';
 import { FiFile, FiAlertCircle } from 'react-icons/fi';
 import { CodeEditor } from '@/sdk/code-editor';
 import { getFileTypeInfo } from '../utils/fileTypeUtils';
-import { getLanguageFromExtension, formatBytes } from '../utils/codeUtils';
+import { formatBytes } from '../utils/codeUtils';
 
 interface FileContent {
   path: string;
@@ -108,8 +108,7 @@ export const TabbedFilesRenderer: React.FC<TabbedFilesRendererProps> = ({
   }
 
   const activeFile = files[activeTab];
-  const { fileName, extension } = getFileTypeInfo(activeFile.path);
-  const language = getLanguageFromExtension(extension);
+  const { fileName } = getFileTypeInfo(activeFile.path);
 
   return (
     <div className="space-y-2">
@@ -161,7 +160,6 @@ export const TabbedFilesRenderer: React.FC<TabbedFilesRendererProps> = ({
         ) : (
           <CodeEditor
             code={activeFile.content}
-            language={language}
             fileName={fileName}
             filePath={activeFile.path}
             fileSize={formatBytes(activeFile.content.length)}

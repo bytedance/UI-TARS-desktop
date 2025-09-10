@@ -67,8 +67,7 @@ export const ScriptResultRenderer: React.FC<ScriptResultRendererProps> = ({ pane
   const isError = exitCode !== 0 && exitCode !== undefined;
   const hasOutput = stdout || stderr;
 
-  // Get language for syntax highlighting
-  const language = getLanguageFromInterpreter(interpreter);
+
 
   return (
     <div className="space-y-4">
@@ -130,8 +129,7 @@ export const ScriptResultRenderer: React.FC<ScriptResultRendererProps> = ({ pane
           {/* Professional code editor */}
           <CodeEditor
             code={script || ''}
-            language={language}
-            fileName={`script.${LANGUAGE_EXTENSIONS[language]}`}
+            fileName={`script.${LANGUAGE_EXTENSIONS[getLanguageFromInterpreter(interpreter)]}`}
             showLineNumbers={true}
             maxHeight={displayMode === 'both' ? '40vh' : '80vh'}
           />

@@ -6,7 +6,7 @@ import { DisplayMode } from './generic/types';
 import { MonacoCodeEditor } from '@/sdk/code-editor';
 import { useStableCodeContent } from '@/common/hooks/useStableValue';
 import { ThrottledHtmlRenderer } from '../components/ThrottledHtmlRenderer';
-import { getLanguageFromExtension, formatBytes } from '../utils/codeUtils';
+import { formatBytes } from '../utils/codeUtils';
 
 // Constants
 const MAX_HEIGHT_CALC = 'calc(100vh - 215px)';
@@ -46,9 +46,6 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
   // Determine if content is currently streaming
   const isStreaming = panelContent.isStreaming || false;
 
-  // Get language for code highlighting
-  const language = getLanguageFromExtension(fileExtension);
-
   return (
     <div className="space-y-4">
       {/* Content preview area */}
@@ -72,7 +69,6 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
             <div className="p-0">
               <MonacoCodeEditor
                 code={stableContent}
-                language={language}
                 fileName={fileName}
                 filePath={filePath}
                 fileSize={approximateSize}
@@ -86,7 +82,6 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
               <div className="p-0">
                 <MonacoCodeEditor
                   code={stableContent}
-                  language="markdown"
                   fileName={fileName}
                   filePath={filePath}
                   fileSize={approximateSize}
@@ -109,7 +104,6 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
             <div className="p-0">
               <MonacoCodeEditor
                 code={stableContent}
-                language="text"
                 fileName={fileName}
                 filePath={filePath}
                 fileSize={approximateSize}

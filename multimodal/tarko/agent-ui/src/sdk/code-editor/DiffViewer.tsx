@@ -130,7 +130,6 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({
         <CodeEditorHeader
           fileName={displayFileName}
           filePath={normalizedPath}
-          language={language}
           onCopy={handleCopy}
           copyButtonTitle="Copy diff"
         >

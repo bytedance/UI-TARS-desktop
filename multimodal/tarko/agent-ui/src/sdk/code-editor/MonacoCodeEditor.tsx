@@ -6,7 +6,6 @@ import './MonacoCodeEditor.css';
 
 interface MonacoCodeEditorProps {
   code: string;
-  language: string;
   fileName?: string;
   filePath?: string;
   fileSize?: string;
@@ -20,7 +19,6 @@ interface MonacoCodeEditorProps {
 
 export const MonacoCodeEditor: React.FC<MonacoCodeEditorProps> = ({
   code,
-  language,
   fileName,
   filePath,
   fileSize,
@@ -104,8 +102,9 @@ export const MonacoCodeEditor: React.FC<MonacoCodeEditorProps> = ({
     return languageMap[lang.toLowerCase()] || 'plaintext';
   }, []);
 
-  const displayFileName = fileName || `script.${language}`;
-  const monacoLanguage = getMonacoLanguage(language);
+  const displayFileName = fileName || 'script';
+  const fileExtension = displayFileName.split('.').pop()?.toLowerCase() || '';
+  const monacoLanguage = getMonacoLanguage(fileExtension);
 
   return (
     <div className={`code-editor-container ${className}`}>
@@ -114,7 +113,6 @@ export const MonacoCodeEditor: React.FC<MonacoCodeEditorProps> = ({
           fileName={displayFileName}
           filePath={filePath}
           fileSize={fileSize}
-          language={language}
           onCopy={handleCopy}
         />
 
