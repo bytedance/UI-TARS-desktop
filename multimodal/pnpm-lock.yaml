@@ -352,6 +352,12 @@ importers:
       '@agent-infra/logger':
         specifier: 0.0.2-beta.2
         version: 0.0.2-beta.2
+      '@tarko/agent':
+        specifier: workspace:*
+        version: link:../../tarko/agent
+      '@tarko/agent-interface':
+        specifier: workspace:*
+        version: link:../../tarko/agent-interface
     devDependencies:
       '@rslib/core':
         specifier: 0.10.0

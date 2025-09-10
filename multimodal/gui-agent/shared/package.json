@@ -14,6 +14,11 @@
       "import": "./dist/types/index.mjs",
       "require": "./dist/types/index.js",
       "types": "./dist/types/index.d.ts"
+    },
+    "./base": {
+      "import": "./dist/base/index.mjs",
+      "require": "./dist/base/index.js",
+      "types": "./dist/base/index.d.ts"
     }
   },
   "typesVersions": {
@@ -42,7 +47,9 @@
     "src"
   ],
   "dependencies": {
-    "@agent-infra/logger": "0.0.2-beta.2"
+    "@agent-infra/logger": "0.0.2-beta.2",
+    "@tarko/agent": "workspace:*",
+    "@tarko/agent-interface": "workspace:*"
   },
   "devDependencies": {
     "@rslib/core": "0.10.0",
