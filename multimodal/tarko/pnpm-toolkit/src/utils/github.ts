@@ -133,7 +133,7 @@ export async function generateReleaseNotes(
         const match = commit.subject.match(/^feat(\([^)]+\))?:\s*(.+)$/);
         const description = match ? match[2] : commit.subject;
         const scope = match?.[1] || '';
-        releaseNotes += `* feat${scope}: ${description} by @${mapUsername(commit.author).toLowerCase()} in ${commit.hash.substring(0, 7)}\n`;
+        releaseNotes += `* feat${scope}: ${description} by @${mapUsername(commit.author)} in ${commit.hash.substring(0, 7)}\n`;
       });
       releaseNotes += '\n';
     }
@@ -145,7 +145,7 @@ export async function generateReleaseNotes(
         const match = commit.subject.match(/^fix(\([^)]+\))?:\s*(.+)$/);
         const description = match ? match[2] : commit.subject;
         const scope = match?.[1] || '';
-        releaseNotes += `* fix${scope}: ${description} by @${mapUsername(commit.author).toLowerCase()} in ${commit.hash.substring(0, 7)}\n`;
+        releaseNotes += `* fix${scope}: ${description} by @${mapUsername(commit.author)} in ${commit.hash.substring(0, 7)}\n`;
       });
       releaseNotes += '\n';
     }
@@ -157,7 +157,7 @@ export async function generateReleaseNotes(
         const match = commit.subject.match(/^docs(\([^)]+\))?:\s*(.+)$/);
         const description = match ? match[2] : commit.subject;
         const scope = match?.[1] || '';
-        releaseNotes += `* docs${scope}: ${description} by @${mapUsername(commit.author).toLowerCase()} in ${commit.hash.substring(0, 7)}\n`;
+        releaseNotes += `* docs${scope}: ${description} by @${mapUsername(commit.author)} in ${commit.hash.substring(0, 7)}\n`;
       });
       releaseNotes += '\n';
     }
@@ -177,7 +177,7 @@ export async function generateReleaseNotes(
         const type = match?.[1] || '';
         const scope = match?.[2] || '';
         const description = match ? match[3] : commit.subject;
-        releaseNotes += `* ${type}${scope}: ${description} by @${mapUsername(commit.author).toLowerCase()} in ${commit.hash.substring(0, 7)}\n`;
+        releaseNotes += `* ${type}${scope}: ${description} by @${mapUsername(commit.author)} in ${commit.hash.substring(0, 7)}\n`;
       });
     }
 
