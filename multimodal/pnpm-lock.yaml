@@ -794,6 +794,61 @@ importers:
         specifier: 3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.5.1)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
 
+  tarko/agent-server-next:
+    dependencies:
+      '@hono/node-server':
+        specifier: ^1.13.7
+        version: 1.19.2(hono@4.9.6)
+      '@tarko/agent-ui-builder':
+        specifier: workspace:*
+        version: link:../agent-ui-builder
+      '@tarko/context-engineer':
+        specifier: workspace:*
+        version: link:../context-engineer
+      hono:
+        specifier: ^4.6.10
+        version: 4.9.6
+      mongoose:
+        specifier: ^8.8.4
+        version: 8.18.0(@aws-sdk/credential-providers@3.883.0)(@mongodb-js/zstd@2.0.1)(kerberos@2.2.2)(snappy@7.3.2)(socks@2.8.4)
+      transliteration:
+        specifier: ^2.3.5
+        version: 2.3.5
+    devDependencies:
+      '@agent-infra/shared':
+        specifier: 0.0.2
+        version: 0.0.2
+      '@rslib/core':
+        specifier: 0.10.0
+        version: 0.10.0(typescript@5.8.3)
+      '@tarko/agent-snapshot':
+        specifier: workspace:*
+        version: link:../agent-snapshot
+      '@tarko/agio':
+        specifier: workspace:*
+        version: link:../agio
+      '@tarko/interface':
+        specifier: workspace:*
+        version: link:../interface
+      '@tarko/shared-utils':
+        specifier: workspace:*
+        version: link:../shared-utils
+      '@types/node':
+        specifier: 22.15.30
+        version: 22.15.30
+      lowdb:
+        specifier: ^6.0.1
+        version: 6.1.1
+      nanoid:
+        specifier: ^5.0.8
+        version: 5.1.5
+      typescript:
+        specifier: ^5.5.3
+        version: 5.8.3
+      vitest:
+        specifier: 3.2.4
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.5.1)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
+
   tarko/agent-snapshot:
     dependencies:
       '@agent-infra/logger':
@@ -7736,6 +7791,10 @@ packages:
 
   hoist-non-react-statics@3.3.2:
     resolution: {integrity: sha512-/gGivxi8JPKWNm/W0jSmzcMPpfpPLc3dY/6GxhX2hQ9iGj3aDfklV4ET7NjKpSinLpJ5vafa9iiGIEZg10SfBw==}
+
+  hono@4.9.6:
+    resolution: {integrity: sha512-doVjXhSFvYZ7y0dNokjwwSahcrAfdz+/BCLvAMa/vHLzjj8+CFyV5xteThGUsKdkaasgN+gF2mUxao+SGLpUeA==}
+    engines: {node: '>=16.9.0'}
 
   hookable@5.5.3:
     resolution: {integrity: sha512-Yc+BQe8SvoXH1643Qez1zqLRmbA5rCL+sSmk6TVos0LWVfNIB7PGncdlId77WzLGSIB5KaWgTaNTs2lNVEI6VQ==}
@@ -22709,6 +22768,8 @@ snapshots:
   hoist-non-react-statics@3.3.2:
     dependencies:
       react-is: 16.13.1
+
+  hono@4.9.6: {}
 
   hookable@5.5.3: {}
 

@@ -1,0 +1,42 @@
+{
+  "name": "@tarko/agent-server-next",
+  "version": "0.3.0-beta.11",
+  "description": "Next-generation server for Multimodal Agent using Hono framework.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "rslib build --watch",
+    "build": "rslib build",
+    "prepublishOnly": "pnpm run build",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "hono": "^4.6.10",
+    "@hono/node-server": "^1.13.7",
+    "@tarko/agent-ui-builder": "workspace:*",
+    "@tarko/context-engineer": "workspace:*",
+    "mongoose": "^8.8.4",
+    "transliteration": "^2.3.5"
+  },
+  "devDependencies": {
+    "@agent-infra/shared": "0.0.2",
+    "@rslib/core": "0.10.0",
+    "@tarko/agent-snapshot": "workspace:*",
+    "@tarko/agio": "workspace:*",
+    "@tarko/interface": "workspace:*",
+    "@tarko/shared-utils": "workspace:*",
+    "@types/node": "22.15.30",
+    "lowdb": "^6.0.1",
+    "nanoid": "^5.0.8",
+    "typescript": "^5.5.3",
+    "vitest": "3.2.4"
+  }
+}
