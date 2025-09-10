@@ -9,7 +9,7 @@ export const ENV_CONFIG = {
   IS_DEVELOPMENT: process.env.ENV === 'development',
 } as const;
 
-export const API_BASE_URL = (() => {
+function getApiBaseUrl(): string {
   if (typeof window !== 'undefined' && window.AGENT_BASE_URL) {
     return window.AGENT_BASE_URL;
   }
@@ -23,7 +23,9 @@ export const API_BASE_URL = (() => {
   }
 
   return 'http://localhost:3000';
-})();
+}
+
+export const API_BASE_URL = getApiBaseUrl();
 
 /**
  * Default API endpoints
