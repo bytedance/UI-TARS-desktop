@@ -187,6 +187,9 @@ importers:
 
   gui-agent/action-parser:
     dependencies:
+      '@agent-infra/logger':
+        specifier: 0.0.2-beta.2
+        version: 0.0.2-beta.2
       '@ui-tars/shared':
         specifier: 1.2.3
         version: 1.2.3
