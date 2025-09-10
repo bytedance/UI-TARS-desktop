@@ -16,10 +16,17 @@ const USERNAME_MAP: Record<string, string> = {
 };
 
 /**
- * Map commit author to correct GitHub username
+ * Extract GitHub username from noreply email or apply manual mapping
  */
-function mapUsername(username: string): string {
-  return USERNAME_MAP[username] || username;
+function resolveGitHubUsername(authorName: string, authorEmail: string): string {
+  // Extract from GitHub noreply email pattern: {id}+{username}@users.noreply.github.com
+  const emailMatch = authorEmail.match(/^\d+\+([^@]+)@users\.noreply\.github\.com$/);
+  if (emailMatch) {
+    return emailMatch[1];
+  }
+  
+  // Fallback to manual mapping
+  return USERNAME_MAP[authorName] || authorName;
 }
 
 /**
@@ -133,7 +140,7 @@ export async function generateReleaseNotes(
         const match = commit.subject.match(/^feat(\([^)]+\))?:\s*(.+)$/);
         const description = match ? match[2] : commit.subject;
         const scope = match?.[1] || '';
-        releaseNotes += `* feat${scope}: ${description} by @${mapUsername(commit.author)} in ${commit.hash.substring(0, 7)}\n`;
+        releaseNotes += `* feat${scope}: ${description} by @${resolveGitHubUsername(commit.author, commit.email)} in ${commit.hash.substring(0, 7)}\n`;
       });
       releaseNotes += '\n';
     }
@@ -145,7 +152,7 @@ export async function generateReleaseNotes(
         const match = commit.subject.match(/^fix(\([^)]+\))?:\s*(.+)$/);
         const description = match ? match[2] : commit.subject;
         const scope = match?.[1] || '';
-        releaseNotes += `* fix${scope}: ${description} by @${mapUsername(commit.author)} in ${commit.hash.substring(0, 7)}\n`;
+        releaseNotes += `* fix${scope}: ${description} by @${resolveGitHubUsername(commit.author, commit.email)} in ${commit.hash.substring(0, 7)}\n`;
       });
       releaseNotes += '\n';
     }
@@ -157,7 +164,7 @@ export async function generateReleaseNotes(
         const match = commit.subject.match(/^docs(\([^)]+\))?:\s*(.+)$/);
         const description = match ? match[2] : commit.subject;
         const scope = match?.[1] || '';
-        releaseNotes += `* docs${scope}: ${description} by @${mapUsername(commit.author)} in ${commit.hash.substring(0, 7)}\n`;
+        releaseNotes += `* docs${scope}: ${description} by @${resolveGitHubUsername(commit.author, commit.email)} in ${commit.hash.substring(0, 7)}\n`;
       });
       releaseNotes += '\n';
     }
@@ -177,7 +184,7 @@ export async function generateReleaseNotes(
         const type = match?.[1] || '';
         const scope = match?.[2] || '';
         const description = match ? match[3] : commit.subject;
-        releaseNotes += `* ${type}${scope}: ${description} by @${mapUsername(commit.author)} in ${commit.hash.substring(0, 7)}\n`;
+        releaseNotes += `* ${type}${scope}: ${description} by @${resolveGitHubUsername(commit.author, commit.email)} in ${commit.hash.substring(0, 7)}\n`;
       });
     }
 
