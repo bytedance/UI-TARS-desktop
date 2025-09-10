@@ -25,7 +25,187 @@ const agent = new Agent({
 **Parameters:**
 - `options` (`AgentOptions`): Configuration options for the agent
 
-## Core Methods
+## Methods
+
+### `abort()`
+
+Aborts the currently running agent task.
+
+```typescript
+const isAborted = agent.abort();
+if (isAborted) {
+  console.log('Agent execution aborted');
+}
+```
+
+**Returns:** `boolean` - True if execution was aborted, false otherwise
+
+### `callLLM(params, options?)`
+
+Convenient method to call the current selected LLM directly.
+
+```typescript
+// Non-streaming call
+const response = await agent.callLLM({
+  messages: [{ role: 'user', content: 'Hello' }],
+  temperature: 0.7
+});
+
+// Streaming call
+const stream = await agent.callLLM({
+  messages: [{ role: 'user', content: 'Hello' }],
+  stream: true
+});
+
+for await (const chunk of stream) {
+  console.log(chunk.choices[0]?.delta?.content);
+}
+```
+
+**Overloads:**
+- `callLLM(params: Omit<ChatCompletionCreateParams, 'model'> & { stream?: false }, options?: RequestOptions): Promise<ChatCompletion>`
+- `callLLM(params: Omit<ChatCompletionCreateParams, 'model'> & { stream: true }, options?: RequestOptions): Promise<AsyncIterable<ChatCompletionChunk>>`
+
+**Parameters:**
+- `params` (`Omit<ChatCompletionCreateParams, 'model'>`): Chat completion parameters
+- `options` (`RequestOptions`): Optional request options
+
+**Returns:** `Promise<ChatCompletion | AsyncIterable<ChatCompletionChunk>>`
+
+### `dispose()`
+
+Disposes the agent and releases all resources.
+
+```typescript
+// Clean up when done
+await agent.dispose();
+console.log('Agent disposed successfully');
+```
+
+**Returns:** `Promise<void>`
+
+### `generateSummary(request)`
+
+Generates a summary of conversation messages.
+
+```typescript
+const summary = await agent.generateSummary({
+  messages: [
+    { role: 'user', content: 'What is machine learning?' },
+    { role: 'assistant', content: 'Machine learning is...' }
+  ]
+});
+
+console.log(`Summary: ${summary.summary}`);
+```
+
+**Parameters:**
+- `request` (`SummaryRequest`): Summary request with messages and options
+
+**Returns:** `Promise<SummaryResponse>` - Generated summary
+
+### `getAvailableTools()`
+
+Returns all available tools after applying filters and hooks.
+
+```typescript
+const availableTools = await agent.getAvailableTools();
+console.log(`${availableTools.length} tools available for execution`);
+```
+
+**Returns:** `Promise<Tool[]>` - Array of available tools
+
+### `getCurrentLoopIteration()`
+
+Gets the current iteration number of the agent's reasoning process.
+
+```typescript
+const iteration = agent.getCurrentLoopIteration();
+console.log(`Currently on iteration ${iteration}`);
+```
+
+**Returns:** `number` - Current loop iteration (1-based, 0 if not running)
+
+### `getCurrentResolvedModel()`
+
+Gets the current resolved model configuration.
+
+```typescript
+const model = agent.getCurrentResolvedModel();
+if (model) {
+  console.log(`Using ${model.provider}/${model.id}`);
+}
+```
+
+**Returns:** `ResolvedModel | undefined` - Current resolved model
+
+### `getEventStream()`
+
+Returns the event stream manager for monitoring agent execution.
+
+```typescript
+const eventStream = agent.getEventStream();
+eventStream.on('assistant_message', (event) => {
+  console.log('Assistant:', event.content);
+});
+```
+
+**Returns:** `AgentEventStreamProcessor` - Event stream instance
+
+### `getLLMClient()`
+
+Gets the configured LLM client for making direct requests.
+
+```typescript
+const llmClient = agent.getLLMClient();
+if (llmClient) {
+  const response = await llmClient.chat.completions.create({
+    messages: [{ role: 'user', content: 'Hello' }]
+  });
+}
+```
+
+**Returns:** `OpenAI | undefined` - The LLM client instance
+
+### `getTools()`
+
+Returns all registered tools, filtered by tool filter options.
+
+```typescript
+const tools = agent.getTools();
+console.log(`Agent has ${tools.length} tools available`);
+```
+
+**Returns:** `Tool[]` - Array of available tool definitions
+
+### `registerTool(tool)`
+
+Registers a tool that the agent can use during execution.
+
+```typescript
+import { Tool } from '@tarko/agent';
+
+const weatherTool: Tool = {
+  name: 'get_weather',
+  description: 'Get current weather for a location',
+  schema: {
+    type: 'object',
+    properties: {
+      location: { type: 'string', description: 'City name' }
+    },
+    required: ['location']
+  },
+  function: async (args) => {
+    const { location } = args as { location: string };
+    return `Weather in ${location}: Sunny, 25°C`;
+  }
+};
+
+agent.registerTool(weatherTool);
+```
+
+**Parameters:**
+- `tool` (`Tool`): Tool definition to register
 
 ### `run(input)` / `run(options)`
 
@@ -61,72 +241,6 @@ for await (const event of stream) {
 - `input` (`string`): Simple text input
 - `options` (`AgentRunOptions`): Configuration for this execution
 
-### `registerTool(tool)`
-
-Registers a tool that the agent can use during execution.
-
-```typescript
-import { Tool } from '@tarko/agent';
-
-const weatherTool: Tool = {
-  name: 'get_weather',
-  description: 'Get current weather for a location',
-  schema: {
-    type: 'object',
-    properties: {
-      location: { type: 'string', description: 'City name' }
-    },
-    required: ['location']
-  },
-  function: async (args) => {
-    const { location } = args as { location: string };
-    return `Weather in ${location}: Sunny, 25°C`;
-  }
-};
-
-agent.registerTool(weatherTool);
-```
-
-**Parameters:**
-- `tool` (`Tool`): Tool definition to register
-
-### `getTools()`
-
-Returns all registered tools, filtered by tool filter options.
-
-```typescript
-const tools = agent.getTools();
-console.log(`Agent has ${tools.length} tools available`);
-```
-
-**Returns:** `Tool[]` - Array of available tool definitions
-
-### `abort()`
-
-Aborts the currently running agent task.
-
-```typescript
-const isAborted = agent.abort();
-if (isAborted) {
-  console.log('Agent execution aborted');
-}
-```
-
-**Returns:** `boolean` - True if execution was aborted, false otherwise
-
-### `status()`
-
-Returns the current execution status of the agent.
-
-```typescript
-const currentStatus = agent.status();
-console.log(`Agent status: ${currentStatus}`);
-```
-
-**Returns:** `AgentStatus` - Current execution status
-
-## LLM Integration
-
 ### `setCustomLLMClient(client)`
 
 Sets a custom LLM client for testing or custom implementations.
@@ -145,134 +259,16 @@ agent.setCustomLLMClient(customClient);
 **Parameters:**
 - `client` (`OpenAI`): OpenAI-compatible LLM client
 
-### `getLLMClient()`
+### `status()`
 
-Gets the configured LLM client for making direct requests.
-
-```typescript
-const llmClient = agent.getLLMClient();
-if (llmClient) {
-  const response = await llmClient.chat.completions.create({
-    messages: [{ role: 'user', content: 'Hello' }]
-  });
-}
-```
-
-**Returns:** `OpenAI | undefined` - The LLM client instance
-
-### `callLLM(params, options?)`
-
-Convenient method to call the current selected LLM directly.
+Returns the current execution status of the agent.
 
 ```typescript
-// Non-streaming call
-const response = await agent.callLLM({
-  messages: [{ role: 'user', content: 'Hello' }],
-  temperature: 0.7
-});
-
-// Streaming call
-const stream = await agent.callLLM({
-  messages: [{ role: 'user', content: 'Hello' }],
-  stream: true
-});
-
-for await (const chunk of stream) {
-  console.log(chunk.choices[0]?.delta?.content);
-}
+const currentStatus = agent.status();
+console.log(`Agent status: ${currentStatus}`);
 ```
 
-**Parameters:**
-- `params` (`Omit<ChatCompletionCreateParams, 'model'>`): Chat completion parameters
-- `options` (`RequestOptions`): Optional request options
-
-**Returns:** `Promise<ChatCompletion | AsyncIterable<ChatCompletionChunk>>`
-
-## Utility Methods
-
-### `getCurrentLoopIteration()`
-
-Gets the current iteration number of the agent's reasoning process.
-
-```typescript
-const iteration = agent.getCurrentLoopIteration();
-console.log(`Currently on iteration ${iteration}`);
-```
-
-**Returns:** `number` - Current loop iteration (1-based, 0 if not running)
-
-### `getCurrentResolvedModel()`
-
-Gets the current resolved model configuration.
-
-```typescript
-const model = agent.getCurrentResolvedModel();
-if (model) {
-  console.log(`Using ${model.provider}/${model.id}`);
-}
-```
-
-**Returns:** `ResolvedModel | undefined` - Current resolved model
-
-### `getAvailableTools()`
-
-Returns all available tools after applying filters and hooks.
-
-```typescript
-const availableTools = await agent.getAvailableTools();
-console.log(`${availableTools.length} tools available for execution`);
-```
-
-**Returns:** `Promise<Tool[]>` - Array of available tools
-
-### `getEventStream()`
-
-Returns the event stream manager for monitoring agent execution.
-
-```typescript
-const eventStream = agent.getEventStream();
-eventStream.on('assistant_message', (event) => {
-  console.log('Assistant:', event.content);
-});
-```
-
-**Returns:** `AgentEventStreamProcessor` - Event stream instance
-
-## Summary Generation
-
-### `generateSummary(request)`
-
-Generates a summary of conversation messages.
-
-```typescript
-const summary = await agent.generateSummary({
-  messages: [
-    { role: 'user', content: 'What is machine learning?' },
-    { role: 'assistant', content: 'Machine learning is...' }
-  ]
-});
-
-console.log(`Summary: ${summary.summary}`);
-```
-
-**Parameters:**
-- `request` (`SummaryRequest`): Summary request with messages and options
-
-**Returns:** `Promise<SummaryResponse>` - Generated summary
-
-## Resource Management
-
-### `dispose()`
-
-Disposes the agent and releases all resources.
-
-```typescript
-// Clean up when done
-await agent.dispose();
-console.log('Agent disposed successfully');
-```
-
-**Returns:** `Promise<void>`
+**Returns:** `AgentStatus` - Current execution status
 
 ## Configuration Options
 
