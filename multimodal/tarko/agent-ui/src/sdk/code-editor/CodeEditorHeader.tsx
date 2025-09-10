@@ -5,7 +5,6 @@ interface CodeEditorHeaderProps {
   fileName?: string;
   filePath?: string;
   fileSize?: string;
-  language?: string;
   onCopy?: () => void;
   copyButtonTitle?: string;
   children?: React.ReactNode;
@@ -15,7 +14,6 @@ export const CodeEditorHeader: React.FC<CodeEditorHeaderProps> = ({
   fileName,
   filePath,
   fileSize,
-  language,
   onCopy,
   copyButtonTitle = 'Copy code',
   children,
@@ -53,8 +51,6 @@ export const CodeEditorHeader: React.FC<CodeEditorHeaderProps> = ({
         </div>
 
         {children}
-
-        {language && <div className="code-editor-language-badge">{language}</div>}
       </div>
 
       <div className="code-editor-actions">
