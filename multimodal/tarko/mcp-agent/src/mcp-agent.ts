@@ -69,9 +69,10 @@ export class MCPAgent<T extends MCPAgentOptions = MCPAgentOptions> extends Agent
 
         // Create appropriate client based on clientVersion
         let mcpClient: IMCPClient;
+        const defaultTimeout = this.options.defaultConnectionTimeout ?? 180;
 
         if (this.clientVersion === 'v2') {
-          mcpClient = new MCPClientV2(serverName, config, this.logger);
+          mcpClient = new MCPClientV2(serverName, config, this.logger, defaultTimeout);
         } else {
           // Default to v1
           mcpClient = new MCPClient(serverName, config, this.logger);

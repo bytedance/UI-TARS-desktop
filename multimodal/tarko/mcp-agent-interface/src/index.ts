@@ -35,6 +35,13 @@ export interface MCPAgentOptions extends AgentOptions {
    * @defaultValue `'v2'`
    */
   mcpClientVersion?: 'v1' | 'v2';
+
+  /**
+   * Default timeout for MCP client connections in seconds.
+   *
+   * @defaultValue 180
+   */
+  defaultConnectionTimeout?: number;
 }
 
 export interface MCPServerConfig {

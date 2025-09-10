@@ -21,6 +21,7 @@ export class MCPClientV2 implements IMCPClient {
     serverName: string,
     config: MCPServerConfig,
     private logger: Logger,
+    defaultTimeout = 180,
   ) {
     this.serverName = serverName;
 
@@ -33,7 +34,7 @@ export class MCPClientV2 implements IMCPClient {
           status: 'activate',
         },
       ],
-      { isDebug: false, defaultTimeout: 180 },
+      { isDebug: false, defaultTimeout },
     );
   }
 
