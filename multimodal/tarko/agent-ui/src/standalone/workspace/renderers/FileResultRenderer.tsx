@@ -7,6 +7,7 @@ import { MonacoCodeEditor } from '@/sdk/code-editor';
 import { useStableCodeContent } from '@/common/hooks/useStableValue';
 import { ThrottledHtmlRenderer } from '../components/ThrottledHtmlRenderer';
 import { getLanguageFromExtension, formatBytes } from '../utils/codeUtils';
+import { ChatCompletionContentPart } from '@tarko/agent-interface';
 
 // Constants
 const MAX_HEIGHT_CALC = 'calc(100vh - 215px)';
@@ -137,23 +138,27 @@ function getFileContent(panelContent: StandardPanelContent): string | null {
     return panelContent.arguments.file_text;
   }
 
-  if (typeof panelContent.source === 'object') {
-    // Handle source array format
+  if (typeof panelContent.source === 'object' && panelContent.source !== null) {
+    // Handle source array format (ChatCompletionContentPart[])
     if (Array.isArray(panelContent.source)) {
-      return panelContent.source
-        .filter((item) => item.type === 'text')
-        .map((item) => item.text)
+      const contentParts = panelContent.source as ChatCompletionContentPart[];
+      return contentParts
+        .filter((item): item is Extract<ChatCompletionContentPart, { type: 'text' }> => 
+          item && typeof item === 'object' && item.type === 'text'
+        )
+        .map(item => item.text)
         .join('');
     } else {
       // FIXME: For "str_replace_editor" "view"
+      const sourceObj = panelContent.source as Record<string, unknown>;
       if (
         panelContent.arguments?.command === 'view' &&
-        typeof panelContent.source === 'object' &&
-        typeof panelContent.source.output === 'string'
+        'output' in sourceObj &&
+        typeof sourceObj.output === 'string'
       ) {
         // Here's the result of running `cat -n` on /home/gem/ui-tars-website/index.html:\n     1\t<!DOCTYPE html>\n
-        // return panelContent.source.output.split('\n').slice(1).join('\n');
-        return panelContent.source.output;
+        // return sourceObj.output.split('\n').slice(1).join('\n');
+        return sourceObj.output;
       }
     }
   }
