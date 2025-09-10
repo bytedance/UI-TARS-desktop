@@ -1,0 +1,51 @@
+{
+  "name": "@gui-agent/shared",
+  "version": "0.3.0-beta.6",
+  "description": "Shared types for GUI-Agent",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bytedance/UI-TARS-desktop"
+  },
+  "bugs": {
+    "url": "https://github.com/bytedance/UI-TARS-desktop/issues"
+  },
+  "exports": {
+    "./types": {
+      "import": "./dist/types/index.mjs",
+      "require": "./dist/types/index.js",
+      "types": "./dist/types/index.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./src/*/index.ts"
+      ]
+    }
+  },
+  "scripts": {
+    "prepare": "npm run build",
+    "dev": "rslib build --watch",
+    "build": "rslib build",
+    "build:watch": "rslib build --watch"
+  },
+  "keywords": [
+    "UI-TARS"
+  ],
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "dependencies": {
+    "@agent-infra/logger": "0.0.2-beta.2"
+  },
+  "devDependencies": {
+    "@rslib/core": "0.10.0",
+    "typescript": "^5.7.2"
+  }
+}
