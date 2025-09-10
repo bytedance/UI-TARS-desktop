@@ -191,6 +191,38 @@ export type NavigateAction = BaseAction<
  */
 export type NavigateBackAction = BaseAction<'navigate_back', Record<string, never>>;
 
+// ---------- App Actions ----------
+
+/**
+ * Long press action with coordinates
+ */
+export type LongPressAction = BaseAction<
+  'long_press',
+  {
+    point: Coordinates;
+  }
+>;
+
+/**
+ * Home action
+ */
+export type HomeAction = BaseAction<'home' | 'press_home', Record<string, never>>;
+
+/**
+ * Back action
+ */
+export type BackAction = BaseAction<'back' | 'press_back', Record<string, never>>;
+
+/**
+ * Open app action
+ */
+export type OpenAppAction = BaseAction<
+  'open_app',
+  {
+    name: string;
+  }
+>;
+
 // ---------- Wait Actions ----------
 
 /**
@@ -242,6 +274,10 @@ export type GUIAction =
   | ReleaseAction
   | NavigateAction
   | NavigateBackAction
+  | LongPressAction
+  | HomeAction
+  | BackAction
+  | OpenAppAction
   | WaitAction
   | FinishAction
   | CallUserAction;
