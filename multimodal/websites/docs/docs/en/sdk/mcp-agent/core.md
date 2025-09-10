@@ -2,16 +2,11 @@
 
 ## Introduction
 
-`@tarko/mcp-agent` is an intelligent agent framework based on the **Model Context Protocol (MCP)** that allows you to easily connect and manage multiple MCP servers, integrating their tools into your AI agents.
+`@tarko/mcp-agent` is an agent framework based on Model Context Protocol (MCP) for connecting MCP servers and integrating their tools.
 
 ## When to use?
 
-`@tarko/mcp-agent` is ideal when you need to build an AI agent that can interact with multiple external services and tools:
-
-- **Multi-service Integration**: Connect to multiple MCP servers like filesystems, databases, API services
-- **Unified Tool Management**: Centrally manage and invoke tools from different servers
-- **Dynamic Service Discovery**: Discover and register new MCP servers and tools at runtime
-- **Enterprise Applications**: Build intelligent assistants that need access to various enterprise systems
+Use when connecting MCP servers.
 
 ## Install
 
@@ -21,12 +16,11 @@ npm install @tarko/mcp-agent
 
 ## Core Features
 
-- [x] **Multi-server Support**: Connect and manage multiple MCP servers simultaneously
-- [x] **Automatic Tool Discovery**: Automatically discover and register tools provided by MCP servers
-- [x] **Flexible Client Versions**: Support both v1 and v2 MCP client implementations
-- [x] **Server Filtering**: Support include/exclude patterns to filter specific servers
-- [x] **Error Handling**: Comprehensive error handling and logging
-- [x] **Resource Management**: Automatic connection lifecycle and resource cleanup management
+- Multi-server connections
+- Automatic tool discovery and registration
+- v1/v2 client support
+- Server filtering (include/exclude)
+- Connection lifecycle management
 
 ## Quick Start
 
@@ -73,46 +67,26 @@ main();
 
 ### Server Filtering
 
-You can use `include` and `exclude` patterns to filter specific MCP servers:
-
 ```ts
+// Only enable specified servers
 const agent = new MCPAgent({
-  mcpServers: {
-    filesystem: { /* ... */ },
-    github: { /* ... */ },
-    database: { /* ... */ },
-  },
-  // Only enable filesystem and GitHub servers
-  mcpServer: {
-    include: ['filesystem', 'github'],
-  },
+  mcpServers: { filesystem: {/*...*/}, github: {/*...*/} },
+  mcpServer: { include: ['filesystem'] },
+});
+
+// Exclude specified servers
+const agent = new MCPAgent({
+  mcpServers: { filesystem: {/*...*/}, github: {/*...*/} },
+  mcpServer: { exclude: ['github'] },
 });
 ```
 
-Or exclude specific servers:
+### Client Version
 
 ```ts
 const agent = new MCPAgent({
-  mcpServers: {
-    filesystem: { /* ... */ },
-    github: { /* ... */ },
-    database: { /* ... */ },
-  },
-  // Exclude database server
-  mcpServer: {
-    exclude: ['database'],
-  },
-});
-```
-
-### Client Version Selection
-
-By default, v2 client is used. You can also choose v1 client:
-
-```ts
-const agent = new MCPAgent({
-  mcpServers: { /* ... */ },
-  mcpClientVersion: 'v1', // or 'v2'
+  mcpServers: { /*...*/ },
+  mcpClientVersion: 'v1', // default 'v2'
 });
 ```
 
@@ -243,87 +217,7 @@ const agent = new MCPAgent({
 });
 ```
 
-## Advanced Usage
 
-### Dynamic Server Management
-
-```ts
-import { MCPAgent } from '@tarko/mcp-agent';
-
-class DynamicMCPAgent extends MCPAgent {
-  async addServer(name: string, config: MCPServerConfig) {
-    // Dynamically add new MCP server
-    // Note: This requires re-initializing the agent
-    this.mcpServerConfig[name] = config;
-    await this.initialize();
-  }
-}
-```
-
-### Custom Tool Adapter
-
-```ts
-import { MCPToolAdapter } from '@tarko/mcp-agent';
-
-class CustomToolAdapter extends MCPToolAdapter {
-  createTools() {
-    const tools = super.createTools();
-    
-    // Custom tool processing logic
-    return tools.map(tool => ({
-      ...tool,
-      description: `[Custom] ${tool.description}`,
-    }));
-  }
-}
-```
-
-## Troubleshooting
-
-### Common Issues
-
-**Q: Failed to connect to MCP server**
-
-A: Check the following:
-- Ensure MCP server package is properly installed
-- Verify command path and arguments are correct
-- Check if environment variables are set correctly
-- Review detailed error information in log output
-
-**Q: Tool invocation failed**
-
-A: Possible causes:
-- Incorrect tool parameter format
-- Internal MCP server error
-- Insufficient permissions (e.g., filesystem access)
-
-**Q: Performance issues**
-
-A: Optimization suggestions:
-- Use server filtering to reduce unnecessary connections
-- Choose appropriate client version (v2 typically has better performance)
-- Configure reasonable timeout values
-
-### Debug Mode
-
-Enable verbose logging for more debugging information:
-
-```ts
-const agent = new MCPAgent({
-  logger: {
-    level: 'debug',
-  },
-  mcpServers: { /* ... */ },
-});
-```
-
-## Best Practices
-
-1. **Resource Management**: Always call `cleanup()` method when application ends
-2. **Error Handling**: Wrap MCP operations with try-catch blocks
-3. **Server Filtering**: Only enable needed servers to improve performance
-4. **Environment Variables**: Store sensitive information (like API keys) in environment variables
-5. **Version Selection**: Prefer v2 client for better performance and stability
 
 ## Related Links
 
