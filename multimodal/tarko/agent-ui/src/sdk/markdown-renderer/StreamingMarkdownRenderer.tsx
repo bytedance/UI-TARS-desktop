@@ -5,6 +5,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import { remarkAlert } from 'remark-github-blockquote-alert';
 import rehypeHighlight from 'rehype-highlight';
+import { rehypeSplitWordsIntoSpans } from './plugins/rehype-animate-text';
 import { useMarkdownComponents } from './hooks/useMarkdownComponents';
 import { ImageModal } from './components/ImageModal';
 import { resetFirstH1Flag } from './components/Headings';
@@ -24,10 +25,6 @@ interface StreamingMarkdownRendererProps {
   forceDarkTheme?: boolean;
 }
 
-/**
- * StreamingMarkdownRenderer component
- * Renders markdown content with smooth streaming animation
- */
 export const StreamingMarkdownRenderer: React.FC<StreamingMarkdownRendererProps> = (props) => {
   return (
     <MarkdownThemeProvider>
@@ -36,9 +33,6 @@ export const StreamingMarkdownRenderer: React.FC<StreamingMarkdownRendererProps>
   );
 };
 
-/**
- * Internal component that uses the theme context
- */
 const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps> = ({
   content,
   publishDate,
@@ -49,26 +43,48 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
   const [openImage, setOpenImage] = useState<string | null>(null);
   const [renderError, setRenderError] = useState<Error | null>(null);
   const { themeClass, colors } = useMarkdownStyles();
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const prevContentRef = useRef<string>('');
+  const prevSpanCountRef = useRef<number>(0);
 
+  const reducedMotion =
+    typeof window !== 'undefined' &&
+    'matchMedia' in window &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // Stagger new words only; keep existing words static to avoid flicker
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
 
-  /**
-   * Handle image click for modal preview
-   */
-  const handleImageClick = (src: string) => {
-    setOpenImage(src);
-  };
+    const spans = container.querySelectorAll<HTMLSpanElement>('.animate-fade-in');
+    const total = spans.length;
+    if (!total) return;
 
-  /**
-   * Close image modal
-   */
-  const handleCloseModal = () => {
-    setOpenImage(null);
-  };
+    const prev = prevSpanCountRef.current;
+    const incremental = content.startsWith(prevContentRef.current) && content.length > prevContentRef.current.length;
 
-  /**
-   * Handle hash navigation on page load
-   */
+    const startIndex = incremental ? prev : 0;
+    const maxTotal = 700;
+    const per = Math.max(10, Math.floor(maxTotal / Math.max(1, total - startIndex)));
+
+    spans.forEach((el, idx) => {
+      if (idx < startIndex || reducedMotion) {
+        el.classList.add('no-animation');
+        el.style.animationDelay = '0ms';
+      } else {
+        el.classList.remove('no-animation');
+        el.style.animationDelay = `${Math.min((idx - startIndex) * per, maxTotal)}ms`;
+      }
+    });
+
+    prevSpanCountRef.current = total;
+    prevContentRef.current = content;
+  }, [content, reducedMotion]);
+
+  const handleImageClick = (src: string) => setOpenImage(src);
+  const handleCloseModal = () => setOpenImage(null);
+
   useEffect(() => {
     if (window.location.hash) {
       const id = window.location.hash.substring(1);
@@ -78,24 +94,13 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
     }
   }, [content]);
 
-  /**
-   * Reset states when content changes
-   */
   useEffect(() => {
     resetFirstH1Flag();
     setRenderError(null);
   }, [content]);
 
-  /**
-   * Get markdown components configuration
-   */
-  const components = useMarkdownComponents({
-    onImageClick: handleImageClick,
-  });
+  const components = useMarkdownComponents({ onImageClick: handleImageClick });
 
-  /**
-   * Render error fallback
-   */
   if (renderError) {
     return (
       <div className="p-3 border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/30 rounded-md text-amber-800 dark:text-amber-200">
@@ -105,33 +110,29 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
     );
   }
 
-  /**
-   * Preprocess content to fix URL parsing issues
-   */
   const processedContent = useMemo(() => {
-    if (!content.includes('http')) {
-      return content;
-    }
+    if (!content.includes('http')) return content;
     return preprocessMarkdownLinks(content);
   }, [content]);
 
-  /**
-   * Determine theme class and merge with markdown content styles
-   */
   const finalThemeClass = forceDarkTheme ? 'dark' : themeClass;
   const markdownContentClass = `${finalThemeClass} markdown-content font-inter leading-relaxed ${colors.text.primary} ${className}`;
 
+  // Only enable word-splitting during incremental streaming
+  const rehypePlugins = useMemo(() => {
+    const base: any[] = [rehypeKatex, [rehypeHighlight, { detect: true, ignoreMissing: true }]];
+    const incremental = content.startsWith(prevContentRef.current) && content.length > prevContentRef.current.length;
+    return incremental ? [...base, rehypeSplitWordsIntoSpans] : base;
+  }, [content]);
+
   try {
     return (
-      <div className={markdownContentClass}>
+      <div ref={containerRef} className={markdownContentClass} data-reduced-motion={reducedMotion}>
         <ReactMarkdown
-          // @ts-expect-error FIXME: find the root cause of type issue
+          // @ts-expect-error FIXME types
           remarkPlugins={[remarkGfm, remarkMath, remarkAlert]}
-          // @ts-expect-error FIXME: find the root cause of type issue
-          rehypePlugins={[
-            rehypeKatex,
-            [rehypeHighlight, { detect: true, ignoreMissing: true }],
-          ]}
+          // @ts-expect-error FIXME types
+          rehypePlugins={rehypePlugins}
           components={components}
         >
           {processedContent}
@@ -143,9 +144,6 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
   } catch (error) {
     console.error('Error rendering markdown:', error);
     setRenderError(error instanceof Error ? error : new Error(String(error)));
-
-    return (
-      <pre className="p-3 text-sm border border-gray-200 rounded-md overflow-auto">{content}</pre>
-    );
+    return <pre className="p-3 text-sm border border-gray-200 rounded-md overflow-auto">{content}</pre>;
   }
 };
