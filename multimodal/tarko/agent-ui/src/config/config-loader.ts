@@ -60,8 +60,7 @@ function loadRuntimeConfig(): BaseAgentWebUIImplementation | null {
 function loadEnvConfig(): BaseAgentWebUIImplementation | null {
   try {
     // Access build-time environment variable
-    const envConfig = (import.meta as { env?: Record<string, string> }).env
-      ?.VITE_AGENT_WEBUI_CONFIG;
+    const envConfig = (import.meta as { env?: Record<string, string> }).env?.AGENT_WEBUI_CONFIG;
     if (envConfig) {
       const parsed = JSON.parse(envConfig);
       if (validateConfig(parsed)) {
