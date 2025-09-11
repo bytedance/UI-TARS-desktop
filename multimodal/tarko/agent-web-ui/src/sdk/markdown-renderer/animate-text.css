@@ -10,6 +10,13 @@
   will-change: opacity;
 }
 
+/* disable animation for existing tokens */
+.animate-fade-in.no-animation {
+  opacity: 1 !important;
+  animation: none !important;
+}
+
+/* respect reduced motion */
 .markdown-content[data-reduced-motion="true"] .animate-fade-in {
   animation: none !important;
   opacity: 1 !important;
