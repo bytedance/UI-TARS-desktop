@@ -1,6 +1,6 @@
 [
   {
-    "toolCallId": "call_1755542762631_fsj0d",
+    "toolCallId": "call_1757568733499_vc1q3",
     "name": "getWeather",
     "args": {
       "location": "Boston"
@@ -13,6 +13,6 @@
       "humidity": "45%",
       "wind": "5 mph"
     },
-    "executionTime": 0
+    "executionTime": 1
   }
 ]
