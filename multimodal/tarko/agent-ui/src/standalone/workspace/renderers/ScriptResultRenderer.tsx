@@ -24,6 +24,18 @@ const highlightCommand = (command: string) => {
 };
 
 /**
+ * Language to file extension mapping
+ */
+const LANGUAGE_EXTENSIONS: Record<string, string> = {
+  javascript: 'js',
+  typescript: 'ts',
+  python: 'py',
+  bash: 'sh',
+  sh: 'sh',
+  text: 'txt',
+};
+
+/**
  * Get language identifier for syntax highlighting
  */
 const getLanguageFromInterpreter = (interpreter: string): string => {
@@ -115,7 +127,7 @@ export const ScriptResultRenderer: React.FC<ScriptResultRendererProps> = ({ pane
           {/* Professional code editor */}
           <CodeEditor
             code={script || ''}
-            fileName={`${getLanguageFromInterpreter(interpreter)} script`}
+            fileName={`script.${LANGUAGE_EXTENSIONS[getLanguageFromInterpreter(interpreter)] || 'txt'}`}
             showLineNumbers={true}
             maxHeight={displayMode === 'both' ? '40vh' : '80vh'}
           />
