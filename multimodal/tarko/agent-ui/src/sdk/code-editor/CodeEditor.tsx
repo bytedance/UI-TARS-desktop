@@ -33,7 +33,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const codeRef = useRef<HTMLElement>(null);
 
   const displayFileName = fileName || 'script';
-  const fileExtension = displayFileName.split('.').pop()?.toLowerCase() || '';
+  const fileExtension = fileName ? displayFileName.split('.').pop()?.toLowerCase() || '' : '';
   const language = fileExtension || 'text';
 
   useEffect(() => {

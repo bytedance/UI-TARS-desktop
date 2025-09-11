@@ -103,7 +103,7 @@ export const MonacoCodeEditor: React.FC<MonacoCodeEditorProps> = ({
   }, []);
 
   const displayFileName = fileName || 'script';
-  const fileExtension = displayFileName.split('.').pop()?.toLowerCase() || '';
+  const fileExtension = fileName ? displayFileName.split('.').pop()?.toLowerCase() || '' : '';
   const monacoLanguage = getMonacoLanguage(fileExtension);
 
   return (
