@@ -34,6 +34,7 @@ import { useLayout } from '@/common/hooks/useLayout';
 import { useSession } from '@/common/hooks/useSession';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useDarkMode } from '@/common/hooks/useDarkMode';
+import { useLogoType } from '@/common/hooks/useLogoType';
 import { apiService } from '@/common/services/apiService';
 import { NavbarModelSelector } from './ModelSelector';
 import { getLogoUrl, getAgentTitle, getWorkspaceNavItems } from '@/config/web-ui-config';
@@ -72,20 +73,8 @@ export const Navbar: React.FC = () => {
   // Get configuration from global window object
   const logoUrl = getLogoUrl();
 
-  // Get logo type from URL query parameter
-  const logoType = React.useMemo(() => {
-    const params = new URLSearchParams(window.location.search);
-    const logoParam = params.get('logo');
-
-    // Support three modes: logo (default), traffic-lights, space
-    if (logoParam === 'traffic-lights') {
-      return 'traffic-lights';
-    } else if (logoParam === 'space') {
-      return 'space';
-    } else {
-      return 'logo'; // Default to logo
-    }
-  }, []);
+  // Get logo type with automatic URL parameter persistence
+  const logoType = useLogoType();
 
   // Toggle dark mode
   const toggleDarkMode = useCallback(() => {
