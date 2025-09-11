@@ -39,6 +39,7 @@ export async function sessionRestoreMiddleware(
           // Recover sessions from storage using a custom AGIO provider
           session = new AgentSession(server, sessionId, server.getCustomAgioProvider(), metadata);
 
+          //FIXME: All sessions are mounted globally, resulting in memory leaks
           server.sessions[sessionId] = session;
 
           const { storageUnsubscribe } = await session.initialize();
@@ -52,13 +53,16 @@ export async function sessionRestoreMiddleware(
         } catch (error) {
           logger.error(`Failed to restore session ${sessionId}:`, error);
 
-          return c.json({
-            sessionId,
-            status: {
-              isProcessing: false,
-              state: 'stored', // Special state, indicating that the session exists in storage but is not activated
+          return c.json(
+            {
+              sessionId,
+              status: {
+                isProcessing: false,
+                state: 'stored', // Special state, indicating that the session exists in storage but is not activated
+              },
             },
-          }, 200);
+            200,
+          );
         }
       }
     }
@@ -84,17 +88,17 @@ export async function sessionRestoreMiddleware(
 async function getSessionIdFromBody(c: Context): Promise<string | undefined> {
   try {
     const contentType = c.req.header('content-type') || '';
-    
+
     if (contentType.includes('application/json')) {
       const body = await c.req.json();
       return body?.sessionId;
     }
-    
+
     if (contentType.includes('application/x-www-form-urlencoded')) {
       const body = await c.req.parseBody();
       return body?.sessionId as string;
     }
-    
+
     return undefined;
   } catch {
     // If parsing fails, return undefined

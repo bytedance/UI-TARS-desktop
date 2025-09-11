@@ -19,16 +19,9 @@ export async function getAllSessions(c: HonoContext) {
     const server = c.get('server');
 
     if (!server.storageProvider) {
-      // If no storage, return only active sessions
-      const activeSessions = Object.keys(server.sessions).map((id) => ({
-        id,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      }));
-      return c.json({ sessions: activeSessions }, 200);
+      throw new Error('no storage provider!');
     }
 
-    // Get all sessions from storage
     const sessions = await server.storageProvider.getAllSessions();
 
     return c.json({ sessions }, 200);
