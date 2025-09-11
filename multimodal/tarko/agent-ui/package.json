@@ -37,12 +37,11 @@
     "@agent-tars/interface": "workspace:*",
     "@rsbuild/core": "1.3.18",
     "@rsbuild/plugin-react": "1.1.1",
-<<<<<<< HEAD:multimodal/tarko/agent-ui/package.json
+
     "@tarko/agent-interface": "workspace:*",
     "@tarko/interface": "workspace:*",
-    "@types/hast": "^3.0.3",
-=======
->>>>>>> 4271fd15 (revert(tarko): remove streaming animation to fix flickering):multimodal/tarko/agent-web-ui/package.json
+    "@types/hast": "^3.0.4",
+
     "@types/react": "^18.2.75",
     "@types/react-dom": "^18.2.24",
     "@types/react-syntax-highlighter": "^15.5.11",
