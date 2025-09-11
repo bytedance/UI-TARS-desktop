@@ -5,6 +5,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { Tool, z } from '../../src';
+import { AgentEventStream } from '@tarko/agent-interface';
 import {
   createTestAgent,
   setupAgentTest,
@@ -17,7 +18,7 @@ describe('Tool Execution Timing Bug Fix', () => {
 
   it('should track elapsed time for tool execution errors', async () => {
     const agent = createTestAgent({}, testContext);
-    
+
     const failingTool = new Tool({
       id: 'failing-tool',
       description: 'A tool that fails after execution time',
@@ -30,11 +31,13 @@ describe('Tool Execution Timing Bug Fix', () => {
 
     agent.registerTool(failingTool);
 
-    const toolResultEvents: any[] = [];
-    const originalSendEvent = agent.getEventStream().sendEvent.bind(agent.getEventStream());
-    agent.getEventStream().sendEvent = (event: any) => {
+    const toolResultEvents: AgentEventStream.ToolResultEvent[] = [];
+    const eventStream = agent.getEventStream();
+    const originalSendEvent = eventStream.sendEvent.bind(eventStream);
+
+    eventStream.sendEvent = (event: AgentEventStream.Event) => {
       if (event.type === 'tool_result') {
-        toolResultEvents.push(event);
+        toolResultEvents.push(event as AgentEventStream.ToolResultEvent);
       }
       return originalSendEvent(event);
     };
@@ -43,10 +46,10 @@ describe('Tool Execution Timing Bug Fix', () => {
     const mockToolCalls = [createMockToolCall('failing-tool', {}, 'test-tool-call')];
 
     await agentInternals.runner.toolProcessor.processToolCalls(mockToolCalls, 'test-session');
-    
+
     expect(toolResultEvents).toHaveLength(1);
     const toolResultEvent = toolResultEvents[0];
-    
+
     expect(toolResultEvent.toolCallId).toBe('test-tool-call');
     expect(toolResultEvent.name).toBe('failing-tool');
     expect(toolResultEvent.error).toContain('Tool execution failed');
