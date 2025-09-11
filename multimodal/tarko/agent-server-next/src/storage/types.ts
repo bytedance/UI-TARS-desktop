@@ -3,68 +3,35 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentEventStream } from '@tarko/interface';
+import { AgentEventStream, SessionInfo } from '@tarko/interface';
+
+export type { SessionInfo, LegacySessionItemInfo } from '@tarko/interface';
 
 /**
- * Session metadata interface
- */
-export interface SessionMetadata {
-  version?: number;
-  name?: string;
-  tags?: string[];
-  modelConfig?: {
-    provider: string;
-    modelId: string;
-  };
-  [key: string]: any; // Allow additional metadata fields
-}
-
-/**
- * Session information interface
- */
-export interface SessionInfo {
-  id: string;
-  createdAt: number;
-  updatedAt: number;
-  workspace?: string;
-  modelProvider?: string;
-  modelId?: string;
-  metadata?: SessionMetadata;
-}
-
-/**
- * Legacy session item info for backward compatibility
- */
-export interface LegacySessionItemInfo {
-  id: string;
-  createdAt: number;
-  updatedAt: number;
-  name?: string;
-  workspace?: string;
-  workingDirectory?: string;
-  tags?: string[];
-  modelConfig?: {
-    provider: string;
-    modelId: string;
-  };
-}
-
-/**
- * Storage provider interface
+ * Abstract storage provider interface
+ * Provides methods for storing and retrieving session data
  */
 export interface StorageProvider {
+  /**
+   * DB path.
+   */
+  dbPath?: string;
+
   /**
    * Initialize the storage provider
    */
   initialize(): Promise<void>;
 
   /**
-   * Create a new session
+   * Create a new session with metadata
+   * @param metadata Session metadata
    */
   createSession(metadata: SessionInfo): Promise<SessionInfo>;
 
   /**
-   * Update session information
+   * Update session metadata
+   * @param sessionId Session ID
+   * @param sessionInfo Partial session info data to update
    */
   updateSessionInfo(
     sessionId: string,
@@ -72,34 +39,34 @@ export interface StorageProvider {
   ): Promise<SessionInfo>;
 
   /**
-   * Get session information by ID
+   * Get session metadata
+   * @param sessionId Session ID
    */
   getSessionInfo(sessionId: string): Promise<SessionInfo | null>;
 
   /**
-   * Get all sessions
+   * Get all sessions metadata
    */
   getAllSessions(): Promise<SessionInfo[]>;
 
   /**
    * Delete a session and all its events
+   * @param sessionId Session ID
    */
   deleteSession(sessionId: string): Promise<boolean>;
 
   /**
-   * Save an event for a session
+   * Save an event to a session
+   * @param sessionId Session ID
+   * @param event Event to save
    */
   saveEvent(sessionId: string, event: AgentEventStream.Event): Promise<void>;
 
   /**
    * Get all events for a session
+   * @param sessionId Session ID
    */
   getSessionEvents(sessionId: string): Promise<AgentEventStream.Event[]>;
-
-  /**
-   * Health check for storage provider
-   */
-  healthCheck?(): Promise<{ healthy: boolean; message?: string; [key: string]: any }>;
 
   /**
    * Close the storage provider
