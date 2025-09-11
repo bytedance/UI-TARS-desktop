@@ -107,7 +107,7 @@ export async function createSession(c: HonoContext) {
     );
   } catch (error) {
     console.error('Failed to create session:', error);
-    return c.json(createErrorResponse(error), 500);
+    return c.json({ error: 'Failed to create session' }, 500);
   }
 }
 
@@ -115,35 +115,32 @@ export async function createSession(c: HonoContext) {
  * Get session details
  */
 export async function getSessionDetails(c: HonoContext) {
-  try {
-    const server = c.get('server');
-    const session = c.get('session');
-    const sessionId = c.req.query('sessionId');
+  const server = c.get('server');
+  const session = c.get('session');
+  const sessionId = c.req.query('sessionId');
 
+  try {
     if (!session) {
       return c.json({ error: 'Session not found' }, 404);
     }
 
-    let sessionInfo: SessionInfo | undefined;
     if (server.storageProvider && sessionId) {
-      try {
-        sessionInfo = (await server.storageProvider.getSessionInfo(sessionId)) || undefined;
-      } catch (error) {
-        console.warn(`Failed to get session info for ${sessionId}:`, error);
+      const sessionInfo = await server.storageProvider.getSessionInfo(sessionId);
+
+      if (sessionInfo) {
+        return c.json(
+          {
+            session: sessionInfo,
+          },
+          200,
+        );
       }
     }
 
-    return c.json(
-      {
-        sessionId: session.id,
-        status: session.getStatus(),
-        sessionInfo,
-      },
-      200,
-    );
+    return c.json({ error: 'Session not found' }, 404);
   } catch (error) {
-    console.error('Failed to get session details:', error);
-    return c.json(createErrorResponse(error), 500);
+    console.error(`Error getting session details for ${sessionId}:`, error);
+    return c.json({ error: 'Failed to get session details' }, 500);
   }
 }
 
@@ -151,10 +148,10 @@ export async function getSessionDetails(c: HonoContext) {
  * Get session events
  */
 export async function getSessionEvents(c: HonoContext) {
-  try {
-    const server = c.get('server');
-    const sessionId = c.req.query('sessionId');
+  const server = c.get('server');
+  const sessionId = c.req.query('sessionId');
 
+  try {
     if (!sessionId) {
       return c.json({ error: 'Session ID is required' }, 400);
     }
@@ -167,8 +164,8 @@ export async function getSessionEvents(c: HonoContext) {
 
     return c.json({ events }, 200);
   } catch (error) {
-    console.error('Failed to get session events:', error);
-    return c.json(createErrorResponse(error), 500);
+    console.error(`Error getting events for session ${sessionId}:`, error);
+    return c.json({ error: 'Failed to get session events' }, 500);
   }
 }
 
@@ -193,7 +190,7 @@ export async function getLatestSessionEvents(c: HonoContext) {
     return c.json({ events }, 200);
   } catch (error) {
     console.error('Failed to get latest session events:', error);
-    return c.json(createErrorResponse(error), 500);
+    return c.json({ error: 'Failed to get latest session events' }, 500);
   }
 }
 
@@ -217,7 +214,7 @@ export async function getSessionStatus(c: HonoContext) {
     );
   } catch (error) {
     console.error('Failed to get session status:', error);
-    return c.json(createErrorResponse(error), 500);
+    return c.json({ error: 'Failed to get session status' }, 500);
   }
 }
 
@@ -225,16 +222,16 @@ export async function getSessionStatus(c: HonoContext) {
  * Update session metadata
  */
 export async function updateSession(c: HonoContext) {
+  const server = c.get('server');
+  const session = c.get('session');
+  const body = await c.req.json();
+
+  const { sessionId, metadata: metadataUpdates } = body as {
+    sessionId: string;
+    metadata: Partial<SessionInfo['metadata']>;
+  };
+
   try {
-    const server = c.get('server');
-    const session = c.get('session');
-    const body = await c.req.json();
-
-    const { sessionId, metadata: metadataUpdates } = body as {
-      sessionId: string;
-      metadata: Partial<SessionInfo['metadata']>;
-    };
-
     if (!session) {
       return c.json({ error: 'Session not found' }, 404);
     }
@@ -257,8 +254,8 @@ export async function updateSession(c: HonoContext) {
 
     c.json({ session: updatedMetadata }, 200);
   } catch (error) {
-    console.error('Failed to update session:', error);
-    return c.json(createErrorResponse(error), 500);
+    console.error(`Error updating session ${sessionId}:`, error);
+    return c.json({ error: 'Failed to update session' }, 500);
   }
 }
 
@@ -266,16 +263,16 @@ export async function updateSession(c: HonoContext) {
  * Delete a session
  */
 export async function deleteSession(c: HonoContext) {
+  const server = c.get('server');
+  const session = c.get('session');
+
+  if (!session) {
+    return c.json({ error: 'Session not found' }, 404);
+  }
+
+  const sessionId = session.id;
+
   try {
-    const server = c.get('server');
-    const session = c.get('session');
-
-    if (!session) {
-      return c.json({ error: 'Session not found' }, 404);
-    }
-
-    const sessionId = session.id;
-
     // Clean up the session
     await session.cleanup();
 
@@ -299,8 +296,8 @@ export async function deleteSession(c: HonoContext) {
 
     return c.json({ success: true, message: 'Session deleted successfully' }, 200);
   } catch (error) {
-    console.error('Failed to delete session:', error);
-    return c.json(createErrorResponse(error), 500);
+    console.error(`Error deleting session ${sessionId}:`, error);
+    return c.json({ error: 'Failed to delete session' }, 500);
   }
 }
 
@@ -346,215 +343,5 @@ export async function generateSummary(c: HonoContext) {
       },
       500,
     );
-  }
-}
-/**
- * Share a session
- */
-export async function shareSession(c: HonoContext) {
-  try {
-    const server = c.get('server');
-    const session = c.get('session');
-
-    if (!session) {
-      return c.json({ error: 'Session not found' }, 404);
-    }
-
-    // For now, return a simple share URL
-    // This could be enhanced with proper sharing service integration
-    const shareUrl = `${c.req.url.split('/api')[0]}/share/${session.id}`;
-
-    return c.json(
-      {
-        shareUrl,
-        sessionId: session.id,
-        expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
-      },
-      200,
-    );
-  } catch (error) {
-    console.error('Failed to share session:', error);
-    return c.json(createErrorResponse(error), 500);
-  }
-}
-
-/**
- * Get session workspace files
- */
-export async function getSessionWorkspaceFiles(c: HonoContext) {
-  try {
-    const server = c.get('server');
-    const session = c.get('session');
-
-    if (!session) {
-      return c.json({ error: 'Session not found' }, 404);
-    }
-
-    const workspacePath = server.getCurrentWorkspace();
-    const maxDepth = parseInt(c.req.query('maxDepth') || '3');
-
-    // Simple file listing implementation
-    const getFiles = (dirPath: string, currentDepth = 0): any[] => {
-      if (currentDepth >= maxDepth) return [];
-
-      try {
-        const items = fs.readdirSync(dirPath);
-        const files: any[] = [];
-
-        for (const item of items) {
-          const fullPath = path.join(dirPath, item);
-          const stats = fs.statSync(fullPath);
-          const relativePath = path.relative(workspacePath, fullPath);
-
-          if (stats.isDirectory() && !item.startsWith('.') && item !== 'node_modules') {
-            files.push({
-              name: item,
-              path: relativePath,
-              type: 'directory',
-              children: getFiles(fullPath, currentDepth + 1),
-            });
-          } else if (stats.isFile()) {
-            files.push({
-              name: item,
-              path: relativePath,
-              type: 'file',
-              size: stats.size,
-              lastModified: stats.mtime.getTime(),
-            });
-          }
-        }
-
-        return files;
-      } catch (error) {
-        console.warn(`Failed to read directory ${dirPath}:`, error);
-        return [];
-      }
-    };
-
-    const files = getFiles(workspacePath);
-
-    return c.json({ files, workspacePath }, 200);
-  } catch (error) {
-    console.error('Failed to get workspace files:', error);
-    return c.json(createErrorResponse(error), 500);
-  }
-}
-
-/**
- * Search workspace items for contextual selector
- */
-export async function searchWorkspaceItems(c: HonoContext) {
-  try {
-    const server = c.get('server');
-    const session = c.get('session');
-    const query = c.req.query('q') || '';
-
-    if (!session) {
-      return c.json({ error: 'Session not found' }, 404);
-    }
-
-    if (!query) {
-      return c.json({ items: [] }, 200);
-    }
-
-    const workspacePath = server.getCurrentWorkspace();
-
-    // Simple search implementation
-    const searchFiles = (dirPath: string, searchQuery: string): any[] => {
-      try {
-        const items = fs.readdirSync(dirPath);
-        const results: any[] = [];
-
-        for (const item of items) {
-          if (item.startsWith('.') || item === 'node_modules') continue;
-
-          const fullPath = path.join(dirPath, item);
-          const stats = fs.statSync(fullPath);
-          const relativePath = path.relative(workspacePath, fullPath);
-
-          if (item.toLowerCase().includes(searchQuery.toLowerCase())) {
-            results.push({
-              name: item,
-              path: relativePath,
-              type: stats.isDirectory() ? 'directory' : 'file',
-              size: stats.isFile() ? stats.size : undefined,
-            });
-          }
-
-          // Recursively search subdirectories (limited depth)
-          if (stats.isDirectory() && results.length < 50) {
-            results.push(...searchFiles(fullPath, searchQuery));
-          }
-        }
-
-        return results;
-      } catch (error) {
-        return [];
-      }
-    };
-
-    const items = searchFiles(workspacePath, query);
-
-    return c.json({ items: items.slice(0, 20) }, 200); // Limit to 20 results
-  } catch (error) {
-    console.error('Failed to search workspace items:', error);
-    return c.json(createErrorResponse(error), 500);
-  }
-}
-
-/**
- * Validate workspace paths
- */
-export async function validateWorkspacePaths(c: HonoContext) {
-  try {
-    const server = c.get('server');
-    const session = c.get('session');
-    const body = await c.req.json();
-    const { paths } = body;
-
-    if (!session) {
-      return c.json({ error: 'Session not found' }, 404);
-    }
-
-    if (!Array.isArray(paths)) {
-      return c.json({ error: 'Paths must be an array' }, 400);
-    }
-
-    const workspacePath = server.getCurrentWorkspace();
-    const results = paths.map((relativePath: string) => {
-      try {
-        const fullPath = path.resolve(workspacePath, relativePath);
-
-        // Security check: ensure path is within workspace
-        if (!fullPath.startsWith(workspacePath)) {
-          return {
-            path: relativePath,
-            valid: false,
-            error: 'Path is outside workspace',
-          };
-        }
-
-        const stats = fs.statSync(fullPath);
-        return {
-          path: relativePath,
-          valid: true,
-          exists: true,
-          type: stats.isDirectory() ? 'directory' : 'file',
-          size: stats.isFile() ? stats.size : undefined,
-        };
-      } catch (error) {
-        return {
-          path: relativePath,
-          valid: false,
-          exists: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-        };
-      }
-    });
-
-    return c.json({ results }, 200);
-  } catch (error) {
-    console.error('Failed to validate workspace paths:', error);
-    return c.json(createErrorResponse(error), 500);
   }
 }

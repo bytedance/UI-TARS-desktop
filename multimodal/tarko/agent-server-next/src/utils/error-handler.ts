@@ -21,6 +21,14 @@ export interface ErrorResponse {
 }
 
 /**
+ * Error response structure for agent errors
+ */
+export interface AgentErrorResponse {
+  success: false;
+  error: ErrorResponse;
+}
+
+/**
  * Handle agent errors and convert them to standardized error responses
  * @param error The error to handle
  * @returns Standardized error response
@@ -61,6 +69,6 @@ export function handleAgentError(error: any): ErrorResponse {
  * @param error The error to convert
  * @returns Error response object
  */
-export function createErrorResponse(error: any): { error: ErrorResponse } {
-  return { error: handleAgentError(error) };
+export function createErrorResponse(error: any): AgentErrorResponse {
+  return { success: false, error: handleAgentError(error) };
 }

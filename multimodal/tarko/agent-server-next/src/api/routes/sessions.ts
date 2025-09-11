@@ -37,12 +37,6 @@ export function createSessionRoutes(): Hono<{ Variables: ContextVariables }> {
   router.post('/api/v1/sessions/update', sessionsController.updateSession);
   router.post('/api/v1/sessions/delete', sessionsController.deleteSession);
   router.post('/api/v1/sessions/generate-summary', sessionsController.generateSummary);
-  router.post('/api/v1/sessions/share', sessionsController.shareSession);
-
-  // Workspace-related routes
-  router.get('/api/v1/sessions/workspace/files', sessionsController.getSessionWorkspaceFiles);
-  router.get('/api/v1/sessions/workspace/search', sessionsController.searchWorkspaceItems);
-  router.post('/api/v1/sessions/workspace/validate', sessionsController.validateWorkspacePaths);
 
   return router;
 }
