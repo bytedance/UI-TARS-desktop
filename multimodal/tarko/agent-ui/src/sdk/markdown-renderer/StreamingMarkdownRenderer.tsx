@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -8,7 +8,7 @@ import rehypeHighlight from 'rehype-highlight';
 import { useMarkdownComponents } from './hooks/useMarkdownComponents';
 import { ImageModal } from './components/ImageModal';
 import { resetFirstH1Flag } from './components/Headings';
-import { scrollToElement, preprocessMarkdownLinks } from './utils';
+import { preprocessMarkdownLinks, scrollToElement } from './utils';
 import { MarkdownThemeProvider, useMarkdownStyles } from './context/MarkdownThemeContext';
 import 'katex/dist/katex.min.css';
 import 'remark-github-blockquote-alert/alert.css';
@@ -42,9 +42,8 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
   const [renderError, setRenderError] = useState<Error | null>(null);
   const { themeClass, colors } = useMarkdownStyles();
 
-  // Stable parsed markdown + streaming buffer
+  // Stable parsed markdown + small input buffer
   const [stable, setStable] = useState('');
-  const containerRef = useRef<HTMLDivElement | null>(null);
   const lastContentRef = useRef('');
   const bufferRef = useRef('');
   const flushTimerRef = useRef<number | null>(null);
@@ -54,66 +53,54 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
     'matchMedia' in window &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // Compute safe flush index for current buffer
+  // Close common incomplete markdown constructs so ReactMarkdown can render progressively
+  const makeRenderable = (src: string): string => {
+    let out = src;
+    const fences = (out.match(/```/g) || []).length;
+    if (fences % 2 === 1) out += '\n```';
+    const dollars = (out.match(/\$\$/g) || []).length;
+    if (dollars % 2 === 1) out += '\n$$';
+    const ticks = (out.match(/(?<!`)`(?!`)/g) || []).length; // single backticks
+    if (ticks % 2 === 1) out += '`';
+    return out;
+  };
+
+  // Find a safe boundary to flush buffer into stable
   const findSafeIndex = (str: string): number => {
     let idx = -1;
-    // Paragraph boundary
     const para = str.lastIndexOf('\n\n');
     if (para !== -1) idx = Math.max(idx, para + 2);
-
-    // Punctuation + space/newline boundary (includes CJK)
     const re = /([\.!?。！？，、；;：:])(?:\s|$)/g;
     let m: RegExpExecArray | null;
-    while ((m = re.exec(str))) {
-      idx = Math.max(idx, re.lastIndex);
-    }
-
-    // Fenced code block closed
+    while ((m = re.exec(str))) idx = Math.max(idx, re.lastIndex);
     const fences = (str.match(/```/g) || []).length;
     if (fences > 0 && fences % 2 === 0) idx = Math.max(idx, str.length);
-
     return idx;
   };
 
-
-
-  // Flush buffer (move safe part to stable)
   const flushBuffer = (aggressive = false) => {
     const buf = bufferRef.current;
     if (!buf) return;
-
     let cut = findSafeIndex(buf);
-
-    // Aggressive fallback: large buffer with whitespace ending
-    if (aggressive && cut < 0) {
-      if (buf.length > 160 && /\s$/.test(buf)) cut = buf.length;
-    }
-
+    if (aggressive && cut < 0 && buf.length > 180 && /\s$/.test(buf)) cut = buf.length;
     if (cut > 0) {
       const safe = buf.slice(0, cut);
       const rest = buf.slice(cut);
       setStable((prev) => prev + safe);
       bufferRef.current = rest;
-      // Rebuild overlay text with residual buffer only and sync styles
-      const overlay = overlayRef.current;
-      if (overlay) overlay.textContent = rest;
-      syncOverlayTypography();
     }
   };
 
-
-
-  // On content stream update
+  // Stream updates
   useEffect(() => {
     const cur = content;
     const prev = lastContentRef.current;
 
-    // Non-monotonic or reset: commit everything to stable to prevent deletions
+    // Reset or non-monotonic
     if (!cur.startsWith(prev) || cur.length < prev.length) {
       setStable(cur);
       bufferRef.current = '';
       lastContentRef.current = cur;
-      const overlay = overlayRef.current; if (overlay) overlay.textContent = '';
       return;
     }
 
@@ -122,19 +109,14 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
       bufferRef.current += delta;
       lastContentRef.current = cur;
       if (flushTimerRef.current) window.clearTimeout(flushTimerRef.current);
-      flushTimerRef.current = window.setTimeout(() => flushBuffer(true), 250);
+      flushTimerRef.current = window.setTimeout(() => flushBuffer(true), 220);
     }
   }, [content]);
-
-  const handleImageClick = (src: string) => setOpenImage(src);
-  const handleCloseModal = () => setOpenImage(null);
 
   useEffect(() => {
     if (window.location.hash) {
       const id = window.location.hash.substring(1);
-      setTimeout(() => {
-        scrollToElement(id);
-      }, 100);
+      setTimeout(() => scrollToElement(id), 100);
     }
   }, [stable]);
 
@@ -146,8 +128,7 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
     };
   }, [content]);
 
-  const components = useMarkdownComponents({ onImageClick: handleImageClick });
-
+  const components = useMarkdownComponents({ onImageClick: (src) => setOpenImage(src) });
 
   if (renderError) {
     return (
@@ -159,8 +140,8 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
   }
 
   const processedStable = useMemo(() => {
-    if (!stable.includes('http')) return stable;
-    return preprocessMarkdownLinks(stable);
+    const s = makeRenderable(stable);
+    return s.includes('http') ? preprocessMarkdownLinks(s) : s;
   }, [stable]);
 
   const finalThemeClass = forceDarkTheme ? 'dark' : themeClass;
@@ -168,9 +149,8 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
 
   try {
     return (
-      <div ref={containerRef} className={markdownContentClass} data-reduced-motion={reducedMotion}>
-        {/* Stable parsed markdown */}
-        {stable && (
+      <div className={markdownContentClass} data-reduced-motion={reducedMotion}>
+        {processedStable && (
           <ReactMarkdown
             // @ts-expect-error FIXME types
             remarkPlugins={[remarkGfm, remarkMath, remarkAlert]}
@@ -182,8 +162,7 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
           </ReactMarkdown>
         )}
 
-
-        <ImageModal isOpen={!!openImage} imageSrc={openImage} onClose={handleCloseModal} />
+        <ImageModal isOpen={!!openImage} imageSrc={openImage} onClose={() => setOpenImage(null)} />
       </div>
     );
   } catch (error) {
