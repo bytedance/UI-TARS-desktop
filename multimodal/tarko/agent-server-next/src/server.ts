@@ -24,6 +24,12 @@ import {
   loggingMiddleware,
   errorHandlingMiddleware,
 } from './middlewares';
+import {
+  createQueryRoutes,
+  createSessionRoutes,
+  createShareRoutes,
+  createSystemRoutes,
+} from './api/routes';
 
 /**
  * AgentServer - Generic server class for any Agent implementation using Hono
@@ -113,6 +119,27 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     this.app.use('*', async (c, next) => {
       c.set('server', this);
       await next();
+    });
+  }
+
+  /**
+   * Setup API routes
+   */
+  private setupRoutes(): void {
+    // Register all API routes
+    this.app.route('/', createQueryRoutes());
+    this.app.route('/', createSessionRoutes());
+    this.app.route('/', createShareRoutes());
+    this.app.route('/', createSystemRoutes());
+
+    // Add a catch-all route for undefined endpoints
+    this.app.notFound((c) => {
+      return c.json({
+        error: 'Not Found',
+        message: 'The requested endpoint was not found',
+        path: c.req.path,
+        method: c.req.method,
+      }, 404);
     });
   }
 
@@ -308,13 +335,6 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     };
   }
 
-  /**
-   * Setup API routes - should be called after server initialization
-   */
-  setupRoutes(): void {
-    // Import and setup routes here
-    // This will be implemented when we create the route handlers
-  }
 
   /**
    * Start the server on the configured port

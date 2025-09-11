@@ -304,6 +304,145 @@ export class MongoDBStorageProvider implements StorageProvider {
     }
   }
 
+  async getEvents(sessionId: string, options?: {
+    limit?: number;
+    offset?: number;
+    since?: Date;
+  }): Promise<AgentEventStream.Event[]> {
+    await this.ensureInitialized();
+
+    try {
+      const EventModel = this.connection!.model<EventDocument>('Event');
+
+      let query: any = { sessionId };
+      
+      if (options?.since) {
+        query.timestamp = { $gte: options.since.getTime() };
+      }
+
+      let eventQuery = EventModel.find(query).sort({ timestamp: 1, _id: 1 });
+
+      if (options?.offset) {
+        eventQuery = eventQuery.skip(options.offset);
+      }
+
+      if (options?.limit) {
+        eventQuery = eventQuery.limit(options.limit);
+      }
+
+      const events = await eventQuery.lean();
+
+      return events.map((event: EventDocument) => {
+        try {
+          return event.eventData as AgentEventStream.Event;
+        } catch (error) {
+          logger.warn(`Failed to parse event for session ${sessionId}:`, error);
+          return {
+            type: 'system' as const,
+            level: 'error' as const,
+            id: '',
+            message: 'Failed to parse event',
+            timestamp: event.timestamp,
+          };
+        }
+      });
+    } catch (error) {
+      logger.error(`Failed to get events for session ${sessionId}:`, error);
+      return [];
+    }
+  }
+
+  async saveSessionInfo(sessionInfo: SessionInfo): Promise<SessionInfo> {
+    await this.ensureInitialized();
+
+    try {
+      const SessionModel = this.connection!.model<SessionDocument>('Session');
+
+      const existingSession = await SessionModel.findById(sessionInfo.id).lean();
+
+      if (existingSession) {
+        // Update existing session
+        const updatedSession = await SessionModel.findByIdAndUpdate(
+          sessionInfo.id,
+          {
+            ...sessionInfo,
+            updatedAt: Date.now(),
+          },
+          { new: true, runValidators: true }
+        ).lean();
+
+        if (!updatedSession) {
+          throw new Error(`Failed to update session: ${sessionInfo.id}`);
+        }
+
+        return {
+          id: updatedSession._id,
+          createdAt: updatedSession.createdAt,
+          updatedAt: updatedSession.updatedAt,
+          workspace: updatedSession.workspace,
+          modelProvider: updatedSession.metadata?.modelConfig?.provider,
+          modelId: updatedSession.metadata?.modelConfig?.modelId,
+          metadata: updatedSession.metadata,
+        };
+      } else {
+        // Create new session
+        const sessionDoc = new SessionModel({
+          _id: sessionInfo.id,
+          createdAt: sessionInfo.createdAt || Date.now(),
+          updatedAt: sessionInfo.updatedAt || Date.now(),
+          workspace: sessionInfo.workspace,
+          metadata: {
+            ...sessionInfo.metadata,
+            modelConfig: sessionInfo.modelProvider && sessionInfo.modelId ? {
+              provider: sessionInfo.modelProvider,
+              modelId: sessionInfo.modelId,
+            } : sessionInfo.metadata?.modelConfig,
+          },
+        });
+
+        const savedSession = await sessionDoc.save();
+
+        return {
+          id: savedSession._id,
+          createdAt: savedSession.createdAt,
+          updatedAt: savedSession.updatedAt,
+          workspace: savedSession.workspace,
+          modelProvider: savedSession.metadata?.modelConfig?.provider,
+          modelId: savedSession.metadata?.modelConfig?.modelId,
+          metadata: savedSession.metadata,
+        };
+      }
+    } catch (error) {
+      logger.error(`Failed to save session info for ${sessionInfo.id}:`, error);
+      throw new Error(
+        `Failed to save session info: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+
+  async healthCheck(): Promise<{ healthy: boolean; message?: string; [key: string]: any }> {
+    try {
+      if (!this.connection) {
+        return { healthy: false, message: 'Not connected to MongoDB' };
+      }
+
+      // Simple ping to test connection
+      await this.connection!.db?.admin().ping();
+
+      return {
+        healthy: true,
+        message: 'MongoDB connection is healthy',
+        database: this.connection!.db?.databaseName,
+        readyState: this.connection!.readyState,
+      };
+    } catch (error) {
+      return {
+        healthy: false,
+        message: `MongoDB health check failed: ${error instanceof Error ? error.message : String(error)}`,
+      };
+    }
+  }
+
   async close(): Promise<void> {
     if (this.connection) {
       try {
