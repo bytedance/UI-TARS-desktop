@@ -416,7 +416,7 @@ Provide concise and accurate responses.`;
             sessionId,
             iterations: this.runner.getCurrentIteration(),
             elapsedMs: Date.now() - this.executionStartTime,
-            status: this.executionController.getStatus(),
+            status: AgentStatus.IDLE,
           });
           this.eventStream.sendEvent(endEvent);
         });
