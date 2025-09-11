@@ -43,14 +43,15 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
   const [renderError, setRenderError] = useState<Error | null>(null);
   const { themeClass, colors } = useMarkdownStyles();
 
-  // Stable parsed markdown and streaming buffer chunks
+  // Stable parsed markdown + streaming buffer
   const [stable, setStable] = useState('');
-  const [chunks, setChunks] = useState<string[]>([]);
-
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const overlayRef = useRef<HTMLSpanElement | null>(null);
   const lastContentRef = useRef('');
   const bufferRef = useRef('');
   const flushTimerRef = useRef<number | null>(null);
+  const queueRef = useRef<string[]>([]);
+  const rafRef = useRef<number | null>(null);
 
   const reducedMotion =
     typeof window !== 'undefined' &&
@@ -99,6 +100,45 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
     }
   };
 
+  // Tokenizer for smooth appends
+  const tokenize = (text: string): string[] => {
+    try {
+      // Prefer grapheme segmentation for CJK/emoji
+      // @ts-ignore
+      if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+        // @ts-ignore
+        const seg = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+        return Array.from(seg.segment(text), (s: any) => s.segment);
+      }
+    } catch {}
+    // Fallback: words + spaces
+    return text.match(/\S+|\s+/g) || [text];
+  };
+
+  // Append loop using RAF to avoid jank
+  const ensureAppendLoop = () => {
+    if (rafRef.current != null) return;
+    const step = () => {
+      const overlay = overlayRef.current;
+      if (!overlay) { rafRef.current = null; return; }
+      let budget = 24; // tokens per frame
+      while (budget-- > 0 && queueRef.current.length) {
+        const tok = queueRef.current.shift() as string;
+        const span = document.createElement('span');
+        if (!reducedMotion) span.className = 'animate-fade-in';
+        span.textContent = tok;
+        overlay.appendChild(span);
+        bufferRef.current += tok;
+      }
+      if (queueRef.current.length) {
+        rafRef.current = window.requestAnimationFrame(step);
+      } else {
+        rafRef.current = null;
+      }
+    };
+    rafRef.current = window.requestAnimationFrame(step);
+  };
+
   // On content stream update
   useEffect(() => {
     const cur = content;
@@ -108,39 +148,23 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
     if (!cur.startsWith(prev) || cur.length < prev.length) {
       setStable(cur);
       bufferRef.current = '';
-      setChunks([]);
       lastContentRef.current = cur;
+      const overlay = overlayRef.current; if (overlay) overlay.textContent = '';
       return;
     }
 
     if (cur.length > prev.length) {
       const delta = cur.slice(prev.length);
-      bufferRef.current += delta;
-      setChunks((old) => (old.length ? [...old, delta] : [delta]));
+      const tokens = tokenize(delta);
+      queueRef.current.push(...tokens);
+      ensureAppendLoop();
       lastContentRef.current = cur;
 
       // Debounced flush for safe boundaries
       if (flushTimerRef.current) window.clearTimeout(flushTimerRef.current);
-      flushTimerRef.current = window.setTimeout(() => flushBuffer(true), 700);
+      flushTimerRef.current = window.setTimeout(() => flushBuffer(true), 300);
     }
   }, [content]);
-
-  // Animate only the newest chunk
-  const renderStreamingChunks = () => {
-    if (!chunks.length) return null;
-    return (
-      <span className="whitespace-pre-wrap">
-        {chunks.map((c, i) => (
-          <span
-            key={`${stable.length}-${i}`}
-            className={`$${i === chunks.length - 1 && !reducedMotion ? 'animate-fade-in' : 'no-animation'}`}
-          >
-            {c}
-          </span>
-        ))}
-      </span>
-    );
-  };
 
   const handleImageClick = (src: string) => setOpenImage(src);
   const handleCloseModal = () => setOpenImage(null);
@@ -163,6 +187,15 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
   }, [content]);
 
   const components = useMarkdownComponents({ onImageClick: handleImageClick });
+
+  // After flush, rebuild overlay from residual buffer without animation
+  useEffect(() => {
+    // This effect runs when stable changes due to flushBuffer
+    const overlay = overlayRef.current;
+    if (!overlay) return;
+    // Keep only residual buffer text
+    overlay.textContent = bufferRef.current;
+  }, [stable]);
 
   if (renderError) {
     return (
@@ -198,7 +231,7 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
         )}
 
         {/* Streaming overlay (plain text, minimal DOM churn) */}
-        {renderStreamingChunks()}
+        <span ref={overlayRef} className="streaming-container" />
 
         <ImageModal isOpen={!!openImage} imageSrc={openImage} onClose={handleCloseModal} />
       </div>
