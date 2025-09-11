@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { BaseAgentWebUIImplementation, WorkspaceNavItem } from '@tarko/interface';
+import type { BaseAgentWebUIImplementation } from '@tarko/interface';
+
+const sandboxBaseUrl = location.host.includes('localhost') ? 'http://localhost:8080' : '';
 
 /**
  * Default Web UI configuration for standalone deployment
@@ -23,12 +25,12 @@ export const DEFAULT_WEBUI_CONFIG: BaseAgentWebUIImplementation = {
     navItems: [
       {
         title: 'Code Server',
-        link: './code-server/',
+        link: sandboxBaseUrl + '/code-server/',
         icon: 'code',
       },
       {
         title: 'VNC',
-        link: './vnc/index.html?autoconnect=true',
+        link: sandboxBaseUrl + '/vnc/index.html?autoconnect=true',
         icon: 'monitor',
       },
     ],
