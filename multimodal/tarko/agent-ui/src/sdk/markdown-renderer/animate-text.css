@@ -1,10 +1,11 @@
 @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
-.animate-fade-in { display: inline; opacity: 0; animation: fadeIn 0.35s ease-out forwards; will-change: opacity; }
+/* keep inline to avoid block layout shift and inherit text metrics */
+.animate-fade-in { display: inline; opacity: 0; animation: fadeIn 0.35s ease-out forwards; will-change: opacity; font-size: inherit; line-height: inherit; letter-spacing: inherit; }
 .animate-fade-in.no-animation { opacity: 1 !important; animation: none !important; }
 .markdown-content[data-reduced-motion="true"] .animate-fade-in { animation: none !important; opacity: 1 !important; }
 @media (prefers-reduced-motion: reduce) { .animate-fade-in { animation: none !important; opacity: 1 !important; } }
 /* overlay container merges layout with stable render */
-.streaming-container { display: inline; white-space: pre-wrap; }
+.streaming-container { display: inline; white-space: pre-wrap; font: inherit; line-height: inherit; letter-spacing: inherit; }
 /* constrain overlay to single line flow within block */
 .stream-inline { display: inline; }
 
