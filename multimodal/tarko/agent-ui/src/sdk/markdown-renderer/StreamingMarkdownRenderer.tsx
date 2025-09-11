@@ -14,7 +14,6 @@ import 'katex/dist/katex.min.css';
 import 'remark-github-blockquote-alert/alert.css';
 import './syntax-highlight.css';
 import './markdown.css';
-import './animate-text.css';
 
 interface StreamingMarkdownRendererProps {
   content: string;
@@ -46,12 +45,9 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
   // Stable parsed markdown + streaming buffer
   const [stable, setStable] = useState('');
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const overlayRef = useRef<HTMLSpanElement | null>(null);
   const lastContentRef = useRef('');
   const bufferRef = useRef('');
   const flushTimerRef = useRef<number | null>(null);
-  const queueRef = useRef<string[]>([]);
-  const rafRef = useRef<number | null>(null);
 
   const reducedMotion =
     typeof window !== 'undefined' &&
@@ -79,21 +75,7 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
     return idx;
   };
 
-  // Sync overlay typography to the last text block to avoid size jumps
-  const syncOverlayTypography = () => {
-    const overlay = overlayRef.current;
-    const root = containerRef.current;
-    if (!overlay || !root) return;
-    const blocks = root.querySelectorAll('p, li, h1, h2, h3, h4, h5, h6, blockquote');
-    const parent = (blocks.length ? (blocks[blocks.length - 1] as HTMLElement) : root) as HTMLElement;
-    const cs = window.getComputedStyle(parent);
-    overlay.style.fontSize = cs.fontSize;
-    overlay.style.lineHeight = cs.lineHeight;
-    overlay.style.fontFamily = cs.fontFamily;
-    overlay.style.fontWeight = cs.fontWeight as any;
-    overlay.style.letterSpacing = cs.letterSpacing;
-    overlay.style.color = cs.color;
-  };
+
 
   // Flush buffer (move safe part to stable)
   const flushBuffer = (aggressive = false) => {
@@ -119,48 +101,7 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
     }
   };
 
-  // Tokenizer for smooth appends
-  const isMarkdownSyntax = (t: string) => /^(\*\*|\*|__|_|#{1,6}\s|`{1,3}|\-|\+|\d+\.|>|\[|\]|\(|\)|!\[|\]|\\)$/.test(t);
 
-  const tokenize = (text: string): string[] => {
-    try {
-      // Prefer grapheme segmentation for CJK/emoji
-      // @ts-ignore
-      if (typeof Intl !== 'undefined' && Intl.Segmenter) {
-        // @ts-ignore
-        const seg = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
-        return Array.from(seg.segment(text), (s: any) => s.segment);
-      }
-    } catch {}
-    // Fallback: words + spaces
-    return text.match(/\S+|\s+/g) || [text];
-  };
-
-  // Append loop using RAF to avoid jank
-  const ensureAppendLoop = () => {
-    if (rafRef.current != null) return;
-    const step = () => {
-      const overlay = overlayRef.current;
-      if (!overlay) { rafRef.current = null; return; }
-      let budget = 24; // tokens per frame
-      while (budget-- > 0 && queueRef.current.length) {
-        const tok = queueRef.current.shift() as string;
-        const span = document.createElement('span');
-        if (!reducedMotion) span.className = 'animate-fade-in';
-        // hide plain markdown syntax tokens to avoid blink before parsed
-        if (isMarkdownSyntax(tok)) span.classList.add('md-syntax-hidden');
-        span.textContent = tok;
-        overlay.appendChild(span);
-        bufferRef.current += tok;
-      }
-      if (queueRef.current.length) {
-        rafRef.current = window.requestAnimationFrame(step);
-      } else {
-        rafRef.current = null;
-      }
-    };
-    rafRef.current = window.requestAnimationFrame(step);
-  };
 
   // On content stream update
   useEffect(() => {
@@ -178,17 +119,10 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
 
     if (cur.length > prev.length) {
       const delta = cur.slice(prev.length);
-      const tokens = tokenize(delta);
-      queueRef.current.push(...tokens);
-      ensureAppendLoop();
+      bufferRef.current += delta;
       lastContentRef.current = cur;
-
-      // Keep overlay typography in sync with the current last block
-      syncOverlayTypography();
-
-      // Debounced flush for safe boundaries
       if (flushTimerRef.current) window.clearTimeout(flushTimerRef.current);
-      flushTimerRef.current = window.setTimeout(() => flushBuffer(true), 300);
+      flushTimerRef.current = window.setTimeout(() => flushBuffer(true), 250);
     }
   }, [content]);
 
@@ -214,13 +148,6 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
 
   const components = useMarkdownComponents({ onImageClick: handleImageClick });
 
-  // After flush, rebuild overlay from residual buffer without animation and sync typography
-  useEffect(() => {
-    const overlay = overlayRef.current;
-    if (!overlay) return;
-    overlay.textContent = bufferRef.current;
-    syncOverlayTypography();
-  }, [stable]);
 
   if (renderError) {
     return (
@@ -255,8 +182,6 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
           </ReactMarkdown>
         )}
 
-        {/* Streaming overlay (plain text, minimal DOM churn) */}
-        <span ref={overlayRef} className="streaming-container" />
 
         <ImageModal isOpen={!!openImage} imageSrc={openImage} onClose={handleCloseModal} />
       </div>
