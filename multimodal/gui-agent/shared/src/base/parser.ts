@@ -3,10 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BaseAction, PredictionParsed } from '../types';
+import { BaseAction, ParsedGUIResponse } from '../types';
 
 export abstract class BaseActionParser {
-  abstract parseActionString(input: string): { thought?: string; actions?: string[] };
-  abstract parseActionObject(actionString: string): BaseAction | null;
-  abstract parsePrediction(input: string): PredictionParsed | null;
+  abstract extractActionStrings(input: string): {
+    reasoningContent?: string;
+    rawActionStrings?: string[];
+  };
+  abstract parseActionFromString(actionString: string): BaseAction | null;
+  abstract parsePrediction(input: string): ParsedGUIResponse | null;
 }

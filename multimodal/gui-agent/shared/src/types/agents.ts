@@ -9,11 +9,18 @@ import { ConsoleLogger } from '@agent-infra/logger';
 import { AgentOptions } from '@tarko/agent-interface';
 import { Factors, BaseAction, Coordinates } from './actions';
 
-export interface PredictionParsed {
+/**
+ * Type definition for parsed GUI response structure
+ * Represents the components extracted from a model's output string
+ * Aligned with tarko's web UI design
+ */
+export interface ParsedGUIResponse {
   /** raw prediction string */
-  prediction: string;
+  rawContent: string;
   /** parsed from Thought: `<thought>` */
-  thought: string;
+  reasoningContent: string;
+  /** parsed from Action: action(params=`action`) */
+  rawActionStrings: string[];
   /** parsed from Action: action(params=`action`) */
   actions: BaseAction[];
 }
@@ -35,7 +42,7 @@ export type NormalizeCoordinates = (
  * @param prediction - The raw output from the model to be parsed
  * @returns PredictionParsed object if parsing is successful, null otherwise
  */
-export type ParsePrediction = (prediction: string) => PredictionParsed | null;
+export type ParsePrediction = (prediction: string) => ParsedGUIResponse | null;
 
 /**
  * Type definition for a function that converts BaseAction array to string representation
@@ -51,7 +58,7 @@ export type SerializeActions = (
   >,
 ) => string;
 
-export interface ExecuteParams extends PredictionParsed {
+export interface ExecuteParams extends ParsedGUIResponse {
   context?: Record<string, unknown>;
 }
 
