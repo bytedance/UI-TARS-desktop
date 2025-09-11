@@ -33,14 +33,10 @@ describe('Tool Execution Timing Bug Fix', () => {
 
     const toolResultEvents: AgentEventStream.ToolResultEvent[] = [];
     const eventStream = agent.getEventStream();
-    const originalSendEvent = eventStream.sendEvent.bind(eventStream);
 
-    eventStream.sendEvent = (event: AgentEventStream.Event) => {
-      if (event.type === 'tool_result') {
-        toolResultEvents.push(event as AgentEventStream.ToolResultEvent);
-      }
-      return originalSendEvent(event);
-    };
+    const unsubscribe = eventStream.subscribeToTypes(['tool_result'], (event) => {
+      toolResultEvents.push(event as AgentEventStream.ToolResultEvent);
+    });
 
     const agentInternals = getAgentInternals(agent);
     const mockToolCalls = [createMockToolCall('failing-tool', {}, 'test-tool-call')];
@@ -56,5 +52,7 @@ describe('Tool Execution Timing Bug Fix', () => {
     expect(toolResultEvent.elapsedMs).toBeGreaterThan(15);
     expect(toolResultEvent.elapsedMs).toBeLessThan(50);
     expect(toolResultEvent.elapsedMs).not.toBe(0);
+
+    unsubscribe();
   });
 });
