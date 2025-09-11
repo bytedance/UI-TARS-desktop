@@ -19,31 +19,31 @@ export async function errorHandlingMiddleware(c: HonoContext, next: Next) {
     await next();
   } catch (error) {
     const requestId = c.get('requestId') || 'unknown';
-    
+
     // Handle HTTPException from Hono
     if (error instanceof HTTPException) {
       logger.warn(`[${requestId}] HTTP Exception: ${error.status} - ${error.message}`);
       return c.json(
-        { 
+        {
           error: error.message,
           requestId,
-          status: error.status 
+          status: error.status,
         },
-        error.status
+        error.status,
       );
     }
-    
+
     // Handle generic errors
     logger.error(`[${requestId}] Unhandled error:`, error);
-    
+
     return c.json(
       {
         error: 'Internal Server Error',
         message: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined,
         requestId,
-        status: 500
+        status: 500,
       },
-      500
+      500,
     );
   }
 }
