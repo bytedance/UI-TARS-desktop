@@ -1,6 +1,59 @@
 import React from 'react';
 import { getAgentTitle } from '@/config/web-ui-config';
-import { AnsiRenderer } from './AnsiRenderer';
+
+/**
+ * Convert basic ANSI color codes to HTML spans with inline styles
+ * Handles the most common terminal colors for better readability
+ */
+function formatTerminalOutput(text: string): string {
+  // Basic ANSI color code mapping
+  const colorMap: Record<string, string> = {
+    '31': '#ef4444', // red
+    '32': '#22c55e', // green
+    '33': '#eab308', // yellow
+    '34': '#3b82f6', // blue
+    '35': '#a855f7', // purple
+    '36': '#06b6d4', // cyan
+    '37': '#d1d5db', // gray
+    '91': '#fca5a5', // bright red
+    '92': '#86efac', // bright green
+    '93': '#fde047', // bright yellow
+    '94': '#93c5fd', // bright blue
+    '95': '#c4b5fd', // bright purple
+    '96': '#67e8f9', // bright cyan
+  };
+
+  let result = text;
+  let openSpans = 0;
+
+  // Replace ANSI color codes with HTML spans
+  result = result.replace(/\u001b\[(\d+)m/g, (match, code) => {
+    if (code === '0') {
+      // Reset - close all open spans
+      const closeSpans = '</span>'.repeat(openSpans);
+      openSpans = 0;
+      return closeSpans;
+    } else if (colorMap[code]) {
+      // Color code - open new span
+      openSpans++;
+      return `<span style="color: ${colorMap[code]}">`;
+    }
+    return ''; // Remove unhandled codes
+  });
+
+  // Close any remaining open spans
+  result += '</span>'.repeat(openSpans);
+
+  // Escape HTML to prevent XSS, but preserve our spans
+  result = result
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/&lt;span style="color: ([^"]+)"&gt;/g, '<span style="color: $1">')
+    .replace(/&lt;\/span&gt;/g, '</span>');
+
+  return result;
+}
 
 interface TerminalOutputProps {
   title?: React.ReactNode;
@@ -65,15 +118,17 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
           {(stdout || stderr) && (
             <div className={command ? 'mt-3' : ''}>
               {stdout && (
-                <pre className="whitespace-pre-wrap text-gray-200 ml-3 leading-relaxed">
-                  <AnsiRenderer>{stdout}</AnsiRenderer>
-                </pre>
+                <pre 
+                  className="whitespace-pre-wrap text-gray-200 ml-3 leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: formatTerminalOutput(stdout) }}
+                />
               )}
 
               {stderr && (
-                <pre className="whitespace-pre-wrap text-red-400 ml-3 leading-relaxed">
-                  <AnsiRenderer>{stderr}</AnsiRenderer>
-                </pre>
+                <pre 
+                  className="whitespace-pre-wrap text-red-400 ml-3 leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: formatTerminalOutput(stderr) }}
+                />
               )}
             </div>
           )}
