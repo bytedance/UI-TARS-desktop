@@ -197,10 +197,7 @@ class ApiService {
   /**
    * Update session metadata
    */
-  async updateSessionInfo(
-    sessionId: string,
-    updates: Partial<SessionInfo>,
-  ): Promise<SessionInfo> {
+  async updateSessionInfo(sessionId: string, updates: Partial<SessionInfo>): Promise<SessionInfo> {
     try {
       const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.UPDATE_SESSION}`, {
         method: 'POST',
