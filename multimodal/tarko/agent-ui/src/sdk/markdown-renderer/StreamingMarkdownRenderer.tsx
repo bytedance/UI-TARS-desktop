@@ -120,6 +120,8 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
   };
 
   // Tokenizer for smooth appends
+  const isMarkdownSyntax = (t: string) => /^(\*\*|\*|__|_|#{1,6}\s|`{1,3}|\-|\+|\d+\.|>|\[|\]|\(|\)|!\[|\]|\\)$/.test(t);
+
   const tokenize = (text: string): string[] => {
     try {
       // Prefer grapheme segmentation for CJK/emoji
@@ -145,6 +147,8 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
         const tok = queueRef.current.shift() as string;
         const span = document.createElement('span');
         if (!reducedMotion) span.className = 'animate-fade-in';
+        // hide plain markdown syntax tokens to avoid blink before parsed
+        if (isMarkdownSyntax(tok)) span.classList.add('md-syntax-hidden');
         span.textContent = tok;
         overlay.appendChild(span);
         bufferRef.current += tok;

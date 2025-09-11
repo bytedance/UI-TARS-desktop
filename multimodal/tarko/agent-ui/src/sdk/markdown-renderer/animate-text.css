@@ -8,4 +8,6 @@
 .streaming-container { display: inline; white-space: pre-wrap; font: inherit; line-height: inherit; letter-spacing: inherit; }
 /* constrain overlay to single line flow within block */
 .stream-inline { display: inline; }
+/* hide markdown syntax chars during overlay to reduce jumps */
+.md-syntax-hidden { display:inline-block; width:0; opacity:0; overflow:hidden; pointer-events:none; }
 
