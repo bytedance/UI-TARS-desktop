@@ -4,4 +4,7 @@
 .markdown-content[data-reduced-motion="true"] .animate-fade-in { animation: none !important; opacity: 1 !important; }
 @media (prefers-reduced-motion: reduce) { .animate-fade-in { animation: none !important; opacity: 1 !important; } }
 /* overlay container merges layout with stable render */
-.streaming-container { display: contents; }
+.streaming-container { display: inline; white-space: pre-wrap; }
+/* constrain overlay to single line flow within block */
+.stream-inline { display: inline; }
+
