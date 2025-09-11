@@ -109,11 +109,11 @@ export class ToolProcessor {
       };
     }
 
+    const startTime = Date.now();
     try {
       this.logger.info(`[Tool] Executing: "${toolName}" | ToolCallId: ${toolCallId}`);
       this.logger.debug(`[Tool] Arguments: ${JSON.stringify(args)}`);
 
-      const startTime = Date.now();
       const result = await tool.function(args);
       const executionTime = Date.now() - startTime;
 
@@ -129,14 +129,15 @@ export class ToolProcessor {
         executionTime,
       };
     } catch (error) {
+      const executionTime = Date.now() - startTime;
       const errorMessage = String(error);
       this.logger.error(
-        `[Tool] Execution failed: "${toolName}" | Error: ${errorMessage} | ToolCallId: ${toolCallId}`,
+        `[Tool] Execution failed: "${toolName}" | Error: ${errorMessage} | Duration: ${executionTime}ms | ToolCallId: ${toolCallId}`,
       );
 
       return {
         result: `Error: ${errorMessage}`,
-        executionTime: 0,
+        executionTime,
         error: errorMessage,
       };
     }
@@ -252,6 +253,7 @@ export class ToolProcessor {
 
       const toolName = toolCall.function.name;
       const toolCallId = toolCall.id;
+      const startTime = Date.now();
 
       try {
         // Parse arguments
@@ -268,7 +270,7 @@ export class ToolProcessor {
           toolCallId: toolCall.id,
           name: toolName,
           arguments: args,
-          startTime: Date.now(),
+          startTime,
           tool: {
             name: toolName,
             description: this.findTool(toolName)?.description || 'Unknown tool',
@@ -280,13 +282,14 @@ export class ToolProcessor {
         // Check again for abort before executing the tool
         if (abortSignal?.aborted) {
           this.logger.info(`[Tool] Tool execution aborted before execution: ${toolName}`);
+          const elapsedMs = Date.now() - startTime;
 
           // Create abort result event
           const abortResultEvent = this.eventStream.createEvent('tool_result', {
             toolCallId: toolCall.id,
             name: toolName,
             content: `Tool execution aborted`,
-            elapsedMs: 0,
+            elapsedMs,
             error: 'aborted',
           });
           this.eventStream.sendEvent(abortResultEvent);
@@ -333,6 +336,8 @@ export class ToolProcessor {
           content: result,
         });
       } catch (error) {
+        const elapsedMs = Date.now() - startTime;
+        
         // Don't log aborted requests as errors
         if (abortSignal?.aborted) {
           this.logger.info(`[Tool] Tool execution aborted: ${toolName}`);
@@ -357,7 +362,7 @@ export class ToolProcessor {
           toolCallId: toolCall.id,
           name: toolName,
           content: `Error: ${error}`,
-          elapsedMs: 0,
+          elapsedMs,
           error: String(error),
         });
         this.eventStream.sendEvent(toolResultEvent);
