@@ -281,3 +281,6 @@ export type GUIAction =
   | WaitAction
   | FinishAction
   | CallUserAction;
+
+export type ExtractActionType<T> = T extends BaseAction<infer U, any> ? U : never;
+export type SupportedActionType = ExtractActionType<GUIAction>;
