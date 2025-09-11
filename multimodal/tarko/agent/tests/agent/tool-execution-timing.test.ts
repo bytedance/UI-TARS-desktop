@@ -4,9 +4,16 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { ToolProcessor } from '../../src/agent/runner/tool-processor';
 import { Tool, z } from '../../src';
 import { createTestAgent, setupAgentTest, createMockToolCall } from './kernel/utils/testUtils';
+
+interface AgentWithInternals {
+  runner: {
+    toolProcessor: {
+      processToolCalls: (toolCalls: any[], sessionId: string) => Promise<void>;
+    };
+  };
+}
 
 describe('Tool Execution Timing Bug Fix', () => {
   const testContext = setupAgentTest();
@@ -35,10 +42,10 @@ describe('Tool Execution Timing Bug Fix', () => {
       return originalSendEvent(event);
     };
 
-    const toolProcessor = (agent as any).runner.toolProcessor;
+    const agentWithInternals = agent as unknown as AgentWithInternals;
     const mockToolCalls = [createMockToolCall('failing-tool', {}, 'test-tool-call')];
 
-    await toolProcessor.processToolCalls(mockToolCalls, 'test-session');
+    await agentWithInternals.runner.toolProcessor.processToolCalls(mockToolCalls, 'test-session');
     
     expect(toolResultEvents).toHaveLength(1);
     const toolResultEvent = toolResultEvents[0];
