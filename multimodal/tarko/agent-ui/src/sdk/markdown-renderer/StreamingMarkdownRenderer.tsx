@@ -96,7 +96,9 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
       const rest = buf.slice(cut);
       setStable((prev) => prev + safe);
       bufferRef.current = rest;
-      setChunks(rest ? [rest] : []);
+      // Rebuild overlay text with residual buffer only
+      const overlay = overlayRef.current;
+      if (overlay) overlay.textContent = rest;
     }
   };
 
@@ -188,15 +190,10 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
 
   const components = useMarkdownComponents({ onImageClick: handleImageClick });
 
-  // After flush, rebuild overlay from residual buffer without animation and ensure parent is last block
+  // After flush, rebuild overlay from residual buffer without animation
   useEffect(() => {
     const overlay = overlayRef.current;
-    const root = containerRef.current;
-    if (!overlay || !root) return;
-    // Move overlay into the last text block to avoid layout jumps
-    const blocks = root.querySelectorAll('p, li, h1, h2, h3, h4, h5, h6, blockquote');
-    const parent = blocks.length ? (blocks[blocks.length - 1] as HTMLElement) : root;
-    if (overlay.parentElement !== parent) parent.appendChild(overlay);
+    if (!overlay) return;
     overlay.textContent = bufferRef.current;
   }, [stable]);
 
