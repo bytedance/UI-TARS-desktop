@@ -15,7 +15,9 @@ export function createQueryRoutes(): Hono<{ Variables: ContextVariables }> {
   const router = new Hono<{ Variables: ContextVariables }>();
 
   // All query routes require session restore middleware
-  router.use('/api/v1/sessions/*', sessionRestoreMiddleware);
+  router.use('/api/v1/sessions/query', sessionRestoreMiddleware);
+  router.use('/api/v1/sessions/query/*', sessionRestoreMiddleware);
+  router.use('/api/v1/sessions/abort', sessionRestoreMiddleware);
 
   // Send a query (non-streaming)
   router.post('/api/v1/sessions/query', queriesController.executeQuery);

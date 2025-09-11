@@ -68,7 +68,7 @@ export interface StorageProvider {
    */
   updateSessionInfo(
     sessionId: string,
-    sessionInfo: Partial<Omit<SessionInfo, 'id'>>
+    sessionInfo: Partial<Omit<SessionInfo, 'id'>>,
   ): Promise<SessionInfo>;
 
   /**
@@ -95,20 +95,6 @@ export interface StorageProvider {
    * Get all events for a session
    */
   getSessionEvents(sessionId: string): Promise<AgentEventStream.Event[]>;
-
-  /**
-   * Get events for a session with filtering options
-   */
-  getEvents(sessionId: string, options?: {
-    limit?: number;
-    offset?: number;
-    since?: Date;
-  }): Promise<AgentEventStream.Event[]>;
-
-  /**
-   * Save session information (upsert)
-   */
-  saveSessionInfo(sessionInfo: SessionInfo): Promise<SessionInfo>;
 
   /**
    * Health check for storage provider

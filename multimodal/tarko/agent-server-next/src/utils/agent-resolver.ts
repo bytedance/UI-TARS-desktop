@@ -48,10 +48,10 @@ export async function resolveAgentImplementation(
 
       // Dynamic import the module
       const module = await import(agentModulePathIdentifier);
-      
+
       // Extract the agent constructor from the module
       const agentConstructor: AgentConstructor = module.default || module.Agent;
-      
+
       if (!agentConstructor) {
         throw new Error(`No agent constructor found in module: ${agentModulePathIdentifier}`);
       }
