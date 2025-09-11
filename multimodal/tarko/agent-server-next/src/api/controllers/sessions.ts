@@ -252,7 +252,7 @@ export async function updateSession(c: HonoContext) {
       },
     });
 
-    c.json({ session: updatedMetadata }, 200);
+    return c.json({ session: updatedMetadata }, 200);
   } catch (error) {
     console.error(`Error updating session ${sessionId}:`, error);
     return c.json({ error: 'Failed to update session' }, 500);
