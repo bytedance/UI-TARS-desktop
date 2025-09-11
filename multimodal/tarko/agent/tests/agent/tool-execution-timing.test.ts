@@ -3,62 +3,80 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
+import { ToolProcessor } from '../../src/agent/runner/tool-processor';
+import { ToolManager } from '../../src/agent/tool-manager';
+import { AgentEventStreamProcessor } from '../../src/agent/event-stream';
 import { Tool, z } from '../../src';
-import { createTestAgent, setupAgentTest } from './kernel/utils/testUtils';
-import { AgentEventStream } from '@tarko/agent-interface';
+import { getLogger } from '@tarko/shared-utils';
 
 describe('Tool Execution Timing Bug Fix', () => {
-  const testContext = setupAgentTest();
-
-  it('should display actual elapsed time instead of 0ms for MCP timeout errors', async () => {
-    // This test verifies the fix for: MCP 执行超时，前端展示 0ms
-    // Previously: MCP timeouts showed 0ms in the UI
-    // After fix: MCP timeouts show actual elapsed time before timeout
+  it('should track elapsed time correctly for tool execution errors', async () => {
+    // This test verifies the fix for: tool 执行错误时 elapsedMs 显示 0ms
+    // The bug was in tool-processor.ts where elapsedMs was hardcoded to 0 for errors
+    // After fix: Tool execution errors show actual elapsed time
     
-    const agent = createTestAgent({}, testContext);
+    // Create the components needed for testing
+    const logger = getLogger('Test');
+    const toolManager = new ToolManager(logger);
+    const eventStream = new AgentEventStreamProcessor();
+    
+    // Create a mock agent for the tool processor
+    const mockAgent = {
+      onBeforeToolCall: async (sessionId: string, tool: any, args: any) => args,
+      onAfterToolCall: async (sessionId: string, tool: any, result: any) => result,
+      onToolCallError: async (sessionId: string, tool: any, error: any) => `Error: ${error}`,
+      onProcessToolCalls: async () => null,
+    };
+    
+    const toolProcessor = new ToolProcessor(mockAgent as any, toolManager, eventStream);
 
-    // Create a tool that simulates MCP timeout after some execution time
-    const mcpTimeoutTool = new Tool({
-      id: 'mcp-timeout-tool',
-      description: 'Simulates MCP timeout error',
+    // Create a tool that fails after some execution time
+    const failingTool = new Tool({
+      id: 'failing-tool',
+      description: 'A tool that fails after execution time',
       parameters: z.object({}),
       function: async () => {
-        // Simulate some work before timeout occurs
+        // Simulate some work before error occurs
         await new Promise((resolve) => setTimeout(resolve, 20));
-        throw new Error('McpError: MCP error -32001: Request timed out');
+        throw new Error('Tool execution failed');
       },
     });
 
-    agent.registerTool(mcpTimeoutTool);
+    toolManager.registerTool(failingTool);
 
-    // Capture events from the event stream
-    const events: AgentEventStream.Event[] = [];
-    const originalSendEvent = agent.getEventStream().sendEvent.bind(agent.getEventStream());
-    vi.spyOn(agent.getEventStream(), 'sendEvent').mockImplementation((event) => {
-      events.push(event);
+    // Capture tool result events
+    const toolResultEvents: any[] = [];
+    const originalSendEvent = eventStream.sendEvent.bind(eventStream);
+    eventStream.sendEvent = (event: any) => {
+      if (event.type === 'tool_result') {
+        toolResultEvents.push(event);
+      }
       return originalSendEvent(event);
-    });
+    };
 
-    // Execute the tool that will timeout
-    const toolProcessor = (agent as any).runner.toolProcessor;
-    const toolCalls = [
+    // Test the actual tool processor with the failing tool
+    const mockToolCalls = [
       {
-        id: 'mcp-timeout-test',
+        id: 'test-tool-call',
         type: 'function' as const,
         function: {
-          name: 'mcp-timeout-tool',
+          name: 'failing-tool',
           arguments: '{}',
         },
       },
     ];
 
-    await toolProcessor.processToolCalls(toolCalls, 'test-session');
-
-    // Verify the fix: elapsedMs should show actual time, not 0
-    const toolResultEvent = events.find((e) => e.type === 'tool_result') as AgentEventStream.ToolResultEvent;
-    expect(toolResultEvent).toBeDefined();
-    expect(toolResultEvent.error).toContain('MCP error -32001: Request timed out');
+    // Execute the tool calls through the processor
+    await toolProcessor.processToolCalls(mockToolCalls, 'test-session');
+    
+    // Verify that the tool result event was generated with correct timing
+    expect(toolResultEvents).toHaveLength(1);
+    const toolResultEvent = toolResultEvents[0];
+    
+    expect(toolResultEvent.toolCallId).toBe('test-tool-call');
+    expect(toolResultEvent.name).toBe('failing-tool');
+    expect(toolResultEvent.error).toContain('Tool execution failed');
     
     // Key assertion: Before the fix, this would be 0. After the fix, it shows actual elapsed time.
     expect(toolResultEvent.elapsedMs).toBeGreaterThan(15); // Should be around 20ms
