@@ -1,0 +1,20 @@
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.animate-fade-in {
+  display: inline-block;
+  opacity: 0;
+  animation: fadeIn 0.35s ease-out forwards;
+  will-change: opacity;
+}
+
+.markdown-content[data-reduced-motion="true"] .animate-fade-in {
+  animation: none !important;
+  opacity: 1 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in { animation: none !important; opacity: 1 !important; }
+}
