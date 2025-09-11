@@ -129,7 +129,7 @@ export const ScriptResultRenderer: React.FC<ScriptResultRendererProps> = ({ pane
           {/* Professional code editor */}
           <CodeEditor
             code={script || ''}
-            fileName={`script.${LANGUAGE_EXTENSIONS[getLanguageFromInterpreter(interpreter)]}`}
+            fileName={`script.${LANGUAGE_EXTENSIONS[getLanguageFromInterpreter(interpreter)] || 'txt'}`}
             showLineNumbers={true}
             maxHeight={displayMode === 'both' ? '40vh' : '80vh'}
           />
