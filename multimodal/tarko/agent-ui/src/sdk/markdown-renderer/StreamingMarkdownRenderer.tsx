@@ -5,7 +5,6 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import { remarkAlert } from 'remark-github-blockquote-alert';
 import rehypeHighlight from 'rehype-highlight';
-import { rehypeSplitWordsIntoSpans } from './plugins/rehype-animate-text';
 import { useMarkdownComponents } from './hooks/useMarkdownComponents';
 import { ImageModal } from './components/ImageModal';
 import { resetFirstH1Flag } from './components/Headings';
@@ -43,44 +42,105 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
   const [openImage, setOpenImage] = useState<string | null>(null);
   const [renderError, setRenderError] = useState<Error | null>(null);
   const { themeClass, colors } = useMarkdownStyles();
+
+  // Stable parsed markdown and streaming buffer chunks
+  const [stable, setStable] = useState('');
+  const [chunks, setChunks] = useState<string[]>([]);
+
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const prevContentRef = useRef<string>('');
-  const prevSpanCountRef = useRef<number>(0);
+  const lastContentRef = useRef('');
+  const bufferRef = useRef('');
+  const flushTimerRef = useRef<number | null>(null);
 
   const reducedMotion =
     typeof window !== 'undefined' &&
     'matchMedia' in window &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // Stagger new words only; keep existing words static to avoid flicker/deletions
+  // Compute safe flush index for current buffer
+  const findSafeIndex = (str: string): number => {
+    let idx = -1;
+    // Paragraph boundary
+    const para = str.lastIndexOf('\n\n');
+    if (para !== -1) idx = Math.max(idx, para + 2);
+
+    // Punctuation + space/newline boundary (includes CJK)
+    const re = /([\.!?。！？，、；;：:])(?:\s|$)/g;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(str))) {
+      idx = Math.max(idx, re.lastIndex);
+    }
+
+    // Fenced code block closed
+    const fences = (str.match(/```/g) || []).length;
+    if (fences > 0 && fences % 2 === 0) idx = Math.max(idx, str.length);
+
+    return idx;
+  };
+
+  // Flush buffer (move safe part to stable)
+  const flushBuffer = (aggressive = false) => {
+    const buf = bufferRef.current;
+    if (!buf) return;
+
+    let cut = findSafeIndex(buf);
+
+    // Aggressive fallback: large buffer with whitespace ending
+    if (aggressive && cut < 0) {
+      if (buf.length > 160 && /\s$/.test(buf)) cut = buf.length;
+    }
+
+    if (cut > 0) {
+      const safe = buf.slice(0, cut);
+      const rest = buf.slice(cut);
+      setStable((prev) => prev + safe);
+      bufferRef.current = rest;
+      setChunks(rest ? [rest] : []);
+    }
+  };
+
+  // On content stream update
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    const cur = content;
+    const prev = lastContentRef.current;
 
-    const spans = container.querySelectorAll<HTMLSpanElement>('.animate-fade-in');
-    const total = spans.length;
-    if (!total) return;
+    // Non-monotonic or reset: commit everything to stable to prevent deletions
+    if (!cur.startsWith(prev) || cur.length < prev.length) {
+      setStable(cur);
+      bufferRef.current = '';
+      setChunks([]);
+      lastContentRef.current = cur;
+      return;
+    }
 
-    const prev = prevSpanCountRef.current;
-    const incremental = content.startsWith(prevContentRef.current) && content.length > prevContentRef.current.length;
+    if (cur.length > prev.length) {
+      const delta = cur.slice(prev.length);
+      bufferRef.current += delta;
+      setChunks((old) => (old.length ? [...old, delta] : [delta]));
+      lastContentRef.current = cur;
 
-    const startIndex = incremental ? prev : 0;
-    const maxTotal = 700;
-    const per = Math.max(10, Math.floor(maxTotal / Math.max(1, total - startIndex)));
+      // Debounced flush for safe boundaries
+      if (flushTimerRef.current) window.clearTimeout(flushTimerRef.current);
+      flushTimerRef.current = window.setTimeout(() => flushBuffer(true), 700);
+    }
+  }, [content]);
 
-    spans.forEach((el, idx) => {
-      if (idx < startIndex || reducedMotion) {
-        el.classList.add('no-animation');
-        el.style.animationDelay = '0ms';
-      } else {
-        el.classList.remove('no-animation');
-        el.style.animationDelay = `${Math.min((idx - startIndex) * per, maxTotal)}ms`;
-      }
-    });
-
-    prevSpanCountRef.current = total;
-    prevContentRef.current = content;
-  }, [content, reducedMotion]);
+  // Animate only the newest chunk
+  const renderStreamingChunks = () => {
+    if (!chunks.length) return null;
+    return (
+      <span className="whitespace-pre-wrap">
+        {chunks.map((c, i) => (
+          <span
+            key={`${stable.length}-${i}`}
+            className={`$${i === chunks.length - 1 && !reducedMotion ? 'animate-fade-in' : 'no-animation'}`}
+          >
+            {c}
+          </span>
+        ))}
+      </span>
+    );
+  };
 
   const handleImageClick = (src: string) => setOpenImage(src);
   const handleCloseModal = () => setOpenImage(null);
@@ -92,11 +152,14 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
         scrollToElement(id);
       }, 100);
     }
-  }, [content]);
+  }, [stable]);
 
   useEffect(() => {
     resetFirstH1Flag();
     setRenderError(null);
+    return () => {
+      if (flushTimerRef.current) window.clearTimeout(flushTimerRef.current);
+    };
   }, [content]);
 
   const components = useMarkdownComponents({ onImageClick: handleImageClick });
@@ -110,33 +173,32 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
     );
   }
 
-  const processedContent = useMemo(() => {
-    if (!content.includes('http')) return content;
-    return preprocessMarkdownLinks(content);
-  }, [content]);
+  const processedStable = useMemo(() => {
+    if (!stable.includes('http')) return stable;
+    return preprocessMarkdownLinks(stable);
+  }, [stable]);
 
   const finalThemeClass = forceDarkTheme ? 'dark' : themeClass;
   const markdownContentClass = `${finalThemeClass} markdown-content font-inter leading-relaxed ${colors.text.primary} ${className}`;
 
-  // Only enable word-splitting during incremental streaming to keep DOM stable
-  const rehypePlugins = useMemo(() => {
-    const base: any[] = [rehypeKatex, [rehypeHighlight, { detect: true, ignoreMissing: true }]];
-    const incremental = content.startsWith(prevContentRef.current) && content.length > prevContentRef.current.length;
-    return incremental ? [...base, rehypeSplitWordsIntoSpans] : base;
-  }, [content]);
-
   try {
     return (
       <div ref={containerRef} className={markdownContentClass} data-reduced-motion={reducedMotion}>
-        <ReactMarkdown
-          // @ts-expect-error FIXME types
-          remarkPlugins={[remarkGfm, remarkMath, remarkAlert]}
-          // @ts-expect-error FIXME types
-          rehypePlugins={rehypePlugins}
-          components={components}
-        >
-          {processedContent}
-        </ReactMarkdown>
+        {/* Stable parsed markdown */}
+        {stable && (
+          <ReactMarkdown
+            // @ts-expect-error FIXME types
+            remarkPlugins={[remarkGfm, remarkMath, remarkAlert]}
+            // @ts-expect-error FIXME types
+            rehypePlugins={[rehypeKatex, [rehypeHighlight, { detect: true, ignoreMissing: true }]]}
+            components={components}
+          >
+            {processedStable}
+          </ReactMarkdown>
+        )}
+
+        {/* Streaming overlay (plain text, minimal DOM churn) */}
+        {renderStreamingChunks()}
 
         <ImageModal isOpen={!!openImage} imageSrc={openImage} onClose={handleCloseModal} />
       </div>
