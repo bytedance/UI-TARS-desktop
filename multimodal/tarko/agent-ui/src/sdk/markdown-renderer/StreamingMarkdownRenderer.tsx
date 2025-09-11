@@ -52,7 +52,7 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
     'matchMedia' in window &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // Stagger new words only; keep existing words static to avoid flicker
+  // Stagger new words only; keep existing words static to avoid flicker/deletions
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -118,7 +118,7 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
   const finalThemeClass = forceDarkTheme ? 'dark' : themeClass;
   const markdownContentClass = `${finalThemeClass} markdown-content font-inter leading-relaxed ${colors.text.primary} ${className}`;
 
-  // Only enable word-splitting during incremental streaming
+  // Only enable word-splitting during incremental streaming to keep DOM stable
   const rehypePlugins = useMemo(() => {
     const base: any[] = [rehypeKatex, [rehypeHighlight, { detect: true, ignoreMissing: true }]];
     const incremental = content.startsWith(prevContentRef.current) && content.length > prevContentRef.current.length;
