@@ -79,6 +79,22 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
     return idx;
   };
 
+  // Sync overlay typography to the last text block to avoid size jumps
+  const syncOverlayTypography = () => {
+    const overlay = overlayRef.current;
+    const root = containerRef.current;
+    if (!overlay || !root) return;
+    const blocks = root.querySelectorAll('p, li, h1, h2, h3, h4, h5, h6, blockquote');
+    const parent = (blocks.length ? (blocks[blocks.length - 1] as HTMLElement) : root) as HTMLElement;
+    const cs = window.getComputedStyle(parent);
+    overlay.style.fontSize = cs.fontSize;
+    overlay.style.lineHeight = cs.lineHeight;
+    overlay.style.fontFamily = cs.fontFamily;
+    overlay.style.fontWeight = cs.fontWeight as any;
+    overlay.style.letterSpacing = cs.letterSpacing;
+    overlay.style.color = cs.color;
+  };
+
   // Flush buffer (move safe part to stable)
   const flushBuffer = (aggressive = false) => {
     const buf = bufferRef.current;
@@ -96,9 +112,10 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
       const rest = buf.slice(cut);
       setStable((prev) => prev + safe);
       bufferRef.current = rest;
-      // Rebuild overlay text with residual buffer only
+      // Rebuild overlay text with residual buffer only and sync styles
       const overlay = overlayRef.current;
       if (overlay) overlay.textContent = rest;
+      syncOverlayTypography();
     }
   };
 
@@ -162,6 +179,9 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
       ensureAppendLoop();
       lastContentRef.current = cur;
 
+      // Keep overlay typography in sync with the current last block
+      syncOverlayTypography();
+
       // Debounced flush for safe boundaries
       if (flushTimerRef.current) window.clearTimeout(flushTimerRef.current);
       flushTimerRef.current = window.setTimeout(() => flushBuffer(true), 300);
@@ -190,11 +210,12 @@ const StreamingMarkdownRendererContent: React.FC<StreamingMarkdownRendererProps>
 
   const components = useMarkdownComponents({ onImageClick: handleImageClick });
 
-  // After flush, rebuild overlay from residual buffer without animation
+  // After flush, rebuild overlay from residual buffer without animation and sync typography
   useEffect(() => {
     const overlay = overlayRef.current;
     if (!overlay) return;
     overlay.textContent = bufferRef.current;
+    syncOverlayTypography();
   }, [stable]);
 
   if (renderError) {
