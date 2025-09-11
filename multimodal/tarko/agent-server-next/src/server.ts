@@ -5,6 +5,7 @@
 
 import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
+import { cors } from 'hono/cors';
 import { LogLevel } from '@tarko/interface';
 import { StorageProvider, createStorageProvider } from './storage';
 import type { AgentSession } from './core';
@@ -19,11 +20,7 @@ import type {
   ContextVariables,
 } from './types';
 import { TARKO_CONSTANTS, GlobalDirectoryOptions } from '@tarko/interface';
-import {
-  requestIdMiddleware,
-  loggingMiddleware,
-  errorHandlingMiddleware,
-} from './middlewares';
+import { requestIdMiddleware, loggingMiddleware, errorHandlingMiddleware } from './middlewares';
 import {
   createQueryRoutes,
   createSessionRoutes,
@@ -106,16 +103,27 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    * Setup Hono middlewares in correct order
    */
   private setupMiddlewares(): void {
-    // 1. Error handling middleware (should be first to catch all errors)
+    // 1. CORS middleware (should be early to handle preflight requests)
+    this.app.use(
+      '*',
+      cors({
+        origin: process.env.ACCESS_ALLOW_ORIGIN || '*',
+        allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+        credentials: true,
+      }),
+    );
+
+    // 2. Error handling middleware (after CORS to catch all errors)
     this.app.use('*', errorHandlingMiddleware);
 
-    // 2. Request ID middleware (early for logging)
+    // 3. Request ID middleware (early for logging)
     this.app.use('*', requestIdMiddleware);
 
-    // 3. Logging middleware (after request ID)
+    // 4. Logging middleware (after request ID)
     this.app.use('*', loggingMiddleware);
 
-    // 4. Server instance injection middleware
+    // 5. Server instance injection middleware
     this.app.use('*', async (c, next) => {
       c.set('server', this);
       await next();
@@ -134,12 +142,15 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
 
     // Add a catch-all route for undefined endpoints
     this.app.notFound((c) => {
-      return c.json({
-        error: 'Not Found',
-        message: 'The requested endpoint was not found',
-        path: c.req.path,
-        method: c.req.method,
-      }, 404);
+      return c.json(
+        {
+          error: 'Not Found',
+          message: 'The requested endpoint was not found',
+          path: c.req.path,
+          method: c.req.method,
+        },
+        404,
+      );
     });
   }
 
@@ -267,9 +278,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
       if (this.isModelConfigValid(provider, modelId)) {
         modelConfig = { provider, modelId };
       } else {
-        console.warn(
-          `Session ${sessionInfo.id} model config is invalid, falling back to default`,
-        );
+        console.warn(`Session ${sessionInfo.id} model config is invalid, falling back to default`);
       }
     }
 
@@ -334,7 +343,6 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
       type: this.storageProvider.constructor.name.replace('StorageProvider', '').toLowerCase(),
     };
   }
-
 
   /**
    * Start the server on the configured port

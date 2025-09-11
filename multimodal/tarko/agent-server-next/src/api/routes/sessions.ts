@@ -20,7 +20,8 @@ export function createSessionRoutes(): Hono<{ Variables: ContextVariables }> {
 
   // Routes that require session restore middleware
   router.use('/api/v1/sessions/details', sessionRestoreMiddleware);
-  router.use('/api/v1/sessions/events*', sessionRestoreMiddleware);
+  router.use('/api/v1/sessions/events', sessionRestoreMiddleware);
+  router.use('/api/v1/sessions/events/*', sessionRestoreMiddleware);
   router.use('/api/v1/sessions/status', sessionRestoreMiddleware);
   router.use('/api/v1/sessions/update', sessionRestoreMiddleware);
   router.use('/api/v1/sessions/delete', sessionRestoreMiddleware);

@@ -128,7 +128,7 @@ export class SQLiteStorageProvider implements StorageProvider {
         sessionData.createdAt,
         sessionData.updatedAt,
         sessionData.workspace || '',
-        metadataJson
+        metadataJson,
       );
 
       return sessionData;
@@ -354,135 +354,6 @@ export class SQLiteStorageProvider implements StorageProvider {
       console.error(`Failed to get events for session ${sessionId}:`, error);
       // Return empty array instead of throwing error to allow sessions to load
       return [];
-    }
-  }
-
-  async getEvents(sessionId: string, options?: {
-    limit?: number;
-    offset?: number;
-    since?: Date;
-  }): Promise<AgentEventStream.Event[]> {
-    await this.ensureInitialized();
-
-    try {
-      let query = `
-        SELECT eventData
-        FROM events
-        WHERE sessionId = ?
-      `;
-      const params: any[] = [sessionId];
-
-      if (options?.since) {
-        query += ` AND timestamp >= ?`;
-        params.push(options.since.getTime());
-      }
-
-      query += ` ORDER BY timestamp ASC, id ASC`;
-
-      if (options?.limit) {
-        query += ` LIMIT ?`;
-        params.push(options.limit);
-      }
-
-      if (options?.offset) {
-        query += ` OFFSET ?`;
-        params.push(options.offset);
-      }
-
-      const stmt = this.db.prepare(query);
-      const rows = stmt.all(...params) as unknown as EventRow[];
-
-      return rows.map((row: EventRow) => {
-        try {
-          return JSON.parse(row.eventData) as AgentEventStream.Event;
-        } catch (error) {
-          console.warn(`Failed to parse event for session ${sessionId}:`, error);
-          return {
-            type: 'system' as const,
-            message: 'Failed to parse event',
-            timestamp: Date.now(),
-          } as AgentEventStream.Event;
-        }
-      });
-    } catch (error) {
-      console.error(`Failed to get events for session ${sessionId}:`, error);
-      return [];
-    }
-  }
-
-  async saveSessionInfo(sessionInfo: SessionInfo): Promise<SessionInfo> {
-    await this.ensureInitialized();
-
-    try {
-      // Check if session exists
-      const existsStmt = this.db.prepare(`
-        SELECT 1 as existsFlag FROM sessions WHERE id = ?
-      `);
-      const exists = existsStmt.get(sessionInfo.id) as ExistsResult | undefined;
-
-      const now = Date.now();
-      const metadata = JSON.stringify({
-        ...sessionInfo.metadata,
-        modelConfig: sessionInfo.modelProvider && sessionInfo.modelId ? {
-          provider: sessionInfo.modelProvider,
-          modelId: sessionInfo.modelId,
-        } : sessionInfo.metadata?.modelConfig,
-      });
-
-      if (exists && exists.existsFlag) {
-        // Update existing session
-        const updateStmt = this.db.prepare(`
-          UPDATE sessions 
-          SET updatedAt = ?, workspace = ?, metadata = ?
-          WHERE id = ?
-        `);
-        updateStmt.run(
-          sessionInfo.updatedAt || now,
-          sessionInfo.workspace || '',
-          metadata,
-          sessionInfo.id
-        );
-      } else {
-        // Create new session
-        const insertStmt = this.db.prepare(`
-          INSERT INTO sessions (id, createdAt, updatedAt, workspace, metadata)
-          VALUES (?, ?, ?, ?, ?)
-        `);
-        insertStmt.run(
-          sessionInfo.id,
-          sessionInfo.createdAt || now,
-          sessionInfo.updatedAt || now,
-          sessionInfo.workspace || '',
-          metadata
-        );
-      }
-
-      // Return the saved session info
-      const selectStmt = this.db.prepare(`
-        SELECT * FROM sessions WHERE id = ?
-      `);
-      const savedSession = selectStmt.get(sessionInfo.id) as unknown as SessionRow;
-
-      if (!savedSession) {
-        throw new Error(`Failed to retrieve saved session: ${sessionInfo.id}`);
-      }
-
-      const parsedMetadata = savedSession.metadata ? JSON.parse(savedSession.metadata) : {};
-
-      return {
-        id: savedSession.id,
-        createdAt: savedSession.createdAt,
-        updatedAt: savedSession.updatedAt,
-        workspace: savedSession.workspace,
-        modelProvider: parsedMetadata.modelConfig?.provider,
-        modelId: parsedMetadata.modelConfig?.modelId,
-        metadata: parsedMetadata,
-      };
-    } catch (error) {
-      console.error(`Failed to save session info for ${sessionInfo.id}:`, error);
-      throw new Error(
-        `Failed to save session info: ${error instanceof Error ? error.message : String(error)}`,
-      );
     }
   }
 

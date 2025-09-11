@@ -13,18 +13,21 @@
   ],
   "scripts": {
     "dev": "rslib build --watch",
+    "dev:server": "nodemon --watch src --watch bootstrap.ts --ext ts,js,json --exec \"tsx bootstrap.ts\"",
     "build": "rslib build",
     "prepublishOnly": "pnpm run build",
     "test": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
-    "hono": "^4.6.10",
     "@hono/node-server": "^1.13.7",
     "@tarko/agent-ui-builder": "workspace:*",
     "@tarko/context-engineer": "workspace:*",
+    "@omni-tars/agent": "workspace:*",
+    "hono": "^4.6.10",
     "mongoose": "^8.8.4",
-    "transliteration": "^2.3.5"
+    "transliteration": "^2.3.5",
+    "dotenv": "17.2.2"
   },
   "devDependencies": {
     "@agent-infra/shared": "0.0.2",
@@ -36,6 +39,8 @@
     "@types/node": "22.15.30",
     "lowdb": "^6.0.1",
     "nanoid": "^5.0.8",
+    "nodemon": "^3.1.10",
+    "tsx": "^4.19.2",
     "typescript": "^5.5.3",
     "vitest": "3.2.4"
   }

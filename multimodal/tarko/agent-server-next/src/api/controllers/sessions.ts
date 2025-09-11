@@ -50,7 +50,7 @@ export async function createSession(c: HonoContext) {
     let sessionInfo = null;
     if (server.storageProvider) {
       try {
-        sessionInfo = await server.storageProvider.getSessionInfo(sessionId) || undefined;
+        sessionInfo = (await server.storageProvider.getSessionInfo(sessionId)) || undefined;
       } catch (error) {
         // Session doesn't exist yet, will be created below
       }
@@ -64,6 +64,7 @@ export async function createSession(c: HonoContext) {
       sessionInfo || undefined,
     );
 
+    //FIXME: All sessions are mounted globally, resulting in memory leaks
     server.sessions[sessionId] = session;
 
     const { storageUnsubscribe } = await session.initialize();
@@ -81,26 +82,29 @@ export async function createSession(c: HonoContext) {
         id: sessionId,
         createdAt: now,
         updatedAt: now,
-        modelProvider: server.appConfig.model?.provider || 'openai',
-        modelId: (server.appConfig.model as any)?.modelId || 'gpt-4',
+        workspace: server.getCurrentWorkspace(),
         metadata: {
-          userAgent: c.req.header('user-agent') || 'unknown',
-          ipAddress: c.req.header('x-forwarded-for') || c.req.header('cf-connecting-ip') || 'unknown',
+          agentInfo: {
+            name: server.getCurrentAgentName()!,
+            configuredAt: now,
+          },
         },
       };
 
       try {
-        savedSessionInfo = await server.storageProvider.saveSessionInfo(sessionInfo);
+        savedSessionInfo = await server.storageProvider.createSession(sessionInfo);
       } catch (error) {
         console.warn(`Failed to save session info for ${sessionId}:`, error);
       }
     }
 
-    return c.json({
-      sessionId,
-      status: session.getStatus(),
-      sessionInfo: savedSessionInfo,
-    }, 201);
+    return c.json(
+      {
+        sessionId,
+        session: savedSessionInfo,
+      },
+      201,
+    );
   } catch (error) {
     console.error('Failed to create session:', error);
     return c.json(createErrorResponse(error), 500);
@@ -123,17 +127,20 @@ export async function getSessionDetails(c: HonoContext) {
     let sessionInfo: SessionInfo | undefined;
     if (server.storageProvider && sessionId) {
       try {
-        sessionInfo = await server.storageProvider.getSessionInfo(sessionId) || undefined;
+        sessionInfo = (await server.storageProvider.getSessionInfo(sessionId)) || undefined;
       } catch (error) {
         console.warn(`Failed to get session info for ${sessionId}:`, error);
       }
     }
 
-    return c.json({
-      sessionId: session.id,
-      status: session.getStatus(),
-      sessionInfo,
-    }, 200);
+    return c.json(
+      {
+        sessionId: session.id,
+        status: session.getStatus(),
+        sessionInfo,
+      },
+      200,
+    );
   } catch (error) {
     console.error('Failed to get session details:', error);
     return c.json(createErrorResponse(error), 500);
@@ -156,10 +163,7 @@ export async function getSessionEvents(c: HonoContext) {
       return c.json({ error: 'Storage not configured' }, 503);
     }
 
-    const limit = parseInt(c.req.query('limit') || '100');
-    const offset = parseInt(c.req.query('offset') || '0');
-
-    const events = await server.storageProvider.getEvents(sessionId, { limit, offset });
+    const events = await server.storageProvider.getSessionEvents(sessionId);
 
     return c.json({ events }, 200);
   } catch (error) {
@@ -184,13 +188,7 @@ export async function getLatestSessionEvents(c: HonoContext) {
       return c.json({ error: 'Storage not configured' }, 503);
     }
 
-    const since = parseInt(c.req.query('since') || '0');
-    const limit = parseInt(c.req.query('limit') || '50');
-
-    const events = await server.storageProvider.getEvents(sessionId, { 
-      limit,
-      since: since > 0 ? new Date(since) : undefined 
-    });
+    const events = await server.storageProvider.getSessionEvents(sessionId);
 
     return c.json({ events }, 200);
   } catch (error) {
@@ -210,10 +208,13 @@ export async function getSessionStatus(c: HonoContext) {
       return c.json({ error: 'Session not found' }, 404);
     }
 
-    return c.json({
-      sessionId: session.id,
-      status: session.getStatus(),
-    }, 200);
+    return c.json(
+      {
+        sessionId: session.id,
+        status: session.getStatus(),
+      },
+      200,
+    );
   } catch (error) {
     console.error('Failed to get session status:', error);
     return c.json(createErrorResponse(error), 500);
@@ -228,7 +229,11 @@ export async function updateSession(c: HonoContext) {
     const server = c.get('server');
     const session = c.get('session');
     const body = await c.req.json();
-    const { metadata } = body;
+
+    const { sessionId, metadata: metadataUpdates } = body as {
+      sessionId: string;
+      metadata: Partial<SessionInfo['metadata']>;
+    };
 
     if (!session) {
       return c.json({ error: 'Session not found' }, 404);
@@ -238,20 +243,19 @@ export async function updateSession(c: HonoContext) {
       return c.json({ error: 'Storage not configured' }, 503);
     }
 
-    // Update session metadata in storage
-    const sessionInfo = await server.storageProvider.getSessionInfo(session.id);
-    if (sessionInfo) {
-      const updatedSessionInfo = {
-        ...sessionInfo,
-        metadata: { ...sessionInfo.metadata, ...metadata },
-        updatedAt: Date.now(),
-      };
-
-      await server.storageProvider.saveSessionInfo(updatedSessionInfo);
-      return c.json({ success: true, sessionInfo: updatedSessionInfo }, 200);
-    } else {
-      return c.json({ error: 'Session info not found' }, 404);
+    const sessionInfo = await server.storageProvider.getSessionInfo(sessionId);
+    if (!sessionInfo) {
+      return c.json({ error: 'Session not found' }, 404);
     }
+
+    const updatedMetadata = await server.storageProvider.updateSessionInfo(sessionId, {
+      metadata: {
+        ...sessionInfo.metadata,
+        ...metadataUpdates,
+      },
+    });
+
+    c.json({ session: updatedMetadata }, 200);
   } catch (error) {
     console.error('Failed to update session:', error);
     return c.json(createErrorResponse(error), 500);
@@ -304,6 +308,17 @@ export async function deleteSession(c: HonoContext) {
  * Generate summary for a session
  */
 export async function generateSummary(c: HonoContext) {
+  const body = await c.req.json();
+  const { sessionId, messages, model, provider } = body;
+
+  if (!sessionId) {
+    return c.json({ error: 'Session ID is required' }, 400);
+  }
+
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return c.json({ error: 'Messages are required' }, 400);
+  }
+
   try {
     const server = c.get('server');
     const session = c.get('session');
@@ -312,47 +327,27 @@ export async function generateSummary(c: HonoContext) {
       return c.json({ error: 'Session not found' }, 404);
     }
 
-    if (!server.storageProvider) {
-      return c.json({ error: 'Storage not configured' }, 503);
-    }
+    // FIXME: Use smaller messages to generate summaries
+    // Generate summary using the agent's method
+    const summaryResponse = await session.agent.generateSummary({
+      messages,
+      model,
+      provider,
+    });
 
-    // Get session events for summary generation
-    const events = await server.storageProvider.getEvents(session.id, { limit: 1000 });
-
-    // Filter relevant events for summary (user messages and assistant responses)
-    const relevantEvents = events.filter((event: any) => 
-      ['user_message', 'assistant_message'].includes(event.type)
-    );
-
-    if (relevantEvents.length === 0) {
-      return c.json({ error: 'No conversation data available for summary' }, 400);
-    }
-
-    // Create summary using the agent's generateSummary method
-    const messages = relevantEvents.map((event: any) => ({
-      role: event.type === 'user_message' ? 'user' as const : 'assistant' as const,
-      content: event.content || event.message || '',
-    }));
-
-    const summaryRequest = {
-      messages: messages as any, // Type assertion for compatibility
-      maxTokens: 200,
-      temperature: 0.3,
-    };
-
-    const summaryResponse = await session.agent.generateSummary(summaryRequest);
-
-    return c.json({
-      summary: summaryResponse.summary,
-      messageCount: messages.length,
-      generatedAt: Date.now(),
-    }, 200);
+    // Return the summary
+    c.json(summaryResponse, 200);
   } catch (error) {
-    console.error('Failed to generate summary:', error);
-    return c.json(createErrorResponse(error), 500);
+    console.error(`Error generating summary for session ${sessionId}:`, error);
+    c.json(
+      {
+        error: 'Failed to generate summary',
+        message: error instanceof Error ? error.message : String(error),
+      },
+      500,
+    );
   }
 }
-
 /**
  * Share a session
  */
@@ -369,11 +364,14 @@ export async function shareSession(c: HonoContext) {
     // This could be enhanced with proper sharing service integration
     const shareUrl = `${c.req.url.split('/api')[0]}/share/${session.id}`;
 
-    return c.json({
-      shareUrl,
-      sessionId: session.id,
-      expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
-    }, 200);
+    return c.json(
+      {
+        shareUrl,
+        sessionId: session.id,
+        expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
+      },
+      200,
+    );
   } catch (error) {
     console.error('Failed to share session:', error);
     return c.json(createErrorResponse(error), 500);
@@ -526,7 +524,7 @@ export async function validateWorkspacePaths(c: HonoContext) {
     const results = paths.map((relativePath: string) => {
       try {
         const fullPath = path.resolve(workspacePath, relativePath);
-        
+
         // Security check: ensure path is within workspace
         if (!fullPath.startsWith(workspacePath)) {
           return {
