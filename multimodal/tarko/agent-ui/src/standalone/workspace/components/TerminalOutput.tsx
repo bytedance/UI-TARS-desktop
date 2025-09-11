@@ -1,5 +1,6 @@
 import React from 'react';
 import { getAgentTitle } from '@/config/web-ui-config';
+import { AnsiRenderer } from './AnsiRenderer';
 
 interface TerminalOutputProps {
   title?: React.ReactNode;
@@ -65,13 +66,13 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
             <div className={command ? 'mt-3' : ''}>
               {stdout && (
                 <pre className="whitespace-pre-wrap text-gray-200 ml-3 leading-relaxed">
-                  {stdout}
+                  <AnsiRenderer>{stdout}</AnsiRenderer>
                 </pre>
               )}
 
               {stderr && (
                 <pre className="whitespace-pre-wrap text-red-400 ml-3 leading-relaxed">
-                  {stderr}
+                  <AnsiRenderer>{stderr}</AnsiRenderer>
                 </pre>
               )}
             </div>
