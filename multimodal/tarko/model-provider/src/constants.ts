@@ -9,7 +9,7 @@ import { ProviderConfig } from './types';
  * Default configurations for extended model providers
  * These providers are mapped to OpenAI-compatible interfaces
  */
-export const HIGH_LELVEL_MODEL_PROVIDER_CONFIGS: readonly ProviderConfig[] = [
+export const HIGH_LEVEL_MODEL_PROVIDER_CONFIGS: readonly ProviderConfig[] = [
   {
     name: 'ollama',
     extends: 'openai',

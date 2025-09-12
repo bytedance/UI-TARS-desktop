@@ -4,13 +4,13 @@
  */
 
 import { AgentModel, ModelProviderName, BaseModelProviderName } from './types';
-import { HIGH_LELVEL_MODEL_PROVIDER_CONFIGS } from './constants';
+import { HIGH_LEVEL_MODEL_PROVIDER_CONFIGS } from './constants';
 
 /**
  * Get the actual provider implementation name
  */
 function getActualProvider(providerName: ModelProviderName): BaseModelProviderName {
-  const config = HIGH_LELVEL_MODEL_PROVIDER_CONFIGS.find((c) => c.name === providerName);
+  const config = HIGH_LEVEL_MODEL_PROVIDER_CONFIGS.find((c) => c.name === providerName);
   return (config?.extends || providerName) as BaseModelProviderName;
 }
 
@@ -18,7 +18,7 @@ function getActualProvider(providerName: ModelProviderName): BaseModelProviderNa
  * Get default configuration for a provider
  */
 function getDefaultConfig(providerName: ModelProviderName) {
-  return HIGH_LELVEL_MODEL_PROVIDER_CONFIGS.find((c) => c.name === providerName);
+  return HIGH_LEVEL_MODEL_PROVIDER_CONFIGS.find((c) => c.name === providerName);
 }
 
 /**

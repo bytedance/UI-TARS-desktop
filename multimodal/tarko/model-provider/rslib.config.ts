@@ -12,7 +12,12 @@ const BANNER = `/**
 export default defineConfig({
   source: {
     entry: {
-      index: ['./src/**', '!./src/**/*.test.ts'],
+      index: './src/index.ts',
+      types: './src/types.ts',
+      'model-resolver': './src/model-resolver.ts',
+      'llm-client': './src/llm-client.ts',
+      constants: './src/constants.ts',
+      'third-party': './src/third-party.ts',
     },
   },
   lib: [

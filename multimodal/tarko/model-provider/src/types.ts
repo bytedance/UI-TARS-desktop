@@ -106,9 +106,24 @@ export interface LLMReasoningOptions {
 /**
  * Extended LLM request with reasoning parameters
  */
-export type LLMRequest = ChatCompletionMessageParam & {
+export interface LLMRequest {
+  /**
+   * Chat completion messages
+   */
+  messages: ChatCompletionMessageParam[];
+  
+  /**
+   * Model identifier
+   */
+  model: string;
+  
   /**
    * Agent reasoning options
    */
   thinking?: LLMReasoningOptions;
-};
+  
+  /**
+   * Additional OpenAI chat completion parameters
+   */
+  [key: string]: unknown;
+}
