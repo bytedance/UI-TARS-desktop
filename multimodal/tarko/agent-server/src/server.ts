@@ -411,6 +411,15 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
           );
         }
       }
+    } else {
+      // No session model config, use default if available
+      const defaultModel = this.getDefaultModel();
+      if (defaultModel) {
+        agentOptions = {
+          ...agentOptions,
+          model: defaultModel,
+        };
+      }
     }
     
     return new this.currentAgentResolution.agentConstructor(agentOptions);
