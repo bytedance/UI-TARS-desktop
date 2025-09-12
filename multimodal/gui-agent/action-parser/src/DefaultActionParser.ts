@@ -21,14 +21,14 @@ export class DefaultActionParser extends BaseActionParser {
 
   extractActionStrings(input: string): { reasoningContent?: string; rawActionStrings?: string[] } {
     const parserChain = new FormatParserChain(this.logger);
-    const { thought, actionStr } = parserChain.parse(input);
+    const { reasoningContent, actionStr } = parserChain.parse(input);
     this.logger.debug('[extractActionStrings] result of chains:', {
-      thought,
+      reasoningContent,
       actionStr,
     });
 
     return {
-      reasoningContent: thought || undefined,
+      reasoningContent: reasoningContent || undefined,
       rawActionStrings: actionStr.split('\n\n').filter((action) => action.trim() !== ''),
     };
   }
