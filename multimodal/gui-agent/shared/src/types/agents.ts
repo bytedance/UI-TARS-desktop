@@ -18,11 +18,13 @@ export interface ParsedGUIResponse {
   /** raw prediction string */
   rawContent: string;
   /** parsed from Thought: `<thought>` */
-  reasoningContent: string;
+  reasoningContent?: string;
   /** parsed from Action: action(params=`action`) */
   rawActionStrings: string[];
   /** parsed from Action: action(params=`action`) */
   actions: BaseAction[];
+  /** error message to feedback to LLM */
+  errorMessage?: string;
 }
 
 /**
