@@ -10,7 +10,6 @@
 
 import { Agent, AgentRunStreamingOptions, AgentStatus, LogLevel, Tool, z } from '../../src';
 
-// Create a tool that simulates a time-consuming operation
 const delayTool = new Tool({
   id: 'delay',
   description: 'Perform a delay operation for a specified duration',
@@ -44,30 +43,24 @@ async function main() {
       'You are an assistant who can use the delay tool to demonstrate time-consuming operations.',
   });
 
-  // Define streaming options
   const runOptions: AgentRunStreamingOptions = {
     input: 'Please perform a task that takes 10 seconds to complete, then write a short poem',
     stream: true,
   };
 
-  // Start a streaming task
   console.log('Starting streaming task...');
   const stream = await agent.run(runOptions);
 
-  // Set up a counter to track stream events
   let eventCount = 0;
 
-  // Abort after a specific number of events
   const abortAfterEvents = 5;
 
-  // Consume the stream
   console.log('Receiving stream events:');
   try {
     for await (const event of stream) {
       eventCount++;
       console.log(`Event ${eventCount}:`, JSON.stringify(event));
 
-      // Abort execution after receiving a specific number of events
       if (eventCount >= abortAfterEvents) {
         console.log(`\nReceived ${eventCount} events, aborting execution...`);
         agent.abort();
@@ -81,10 +74,8 @@ async function main() {
 
   console.log(`Final Agent status: ${agent.status()}`);
 
-  // Wait a moment for cleanup to complete
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  // Verify Agent is still usable after abortion
   console.log('\nVerifying Agent is still usable after abortion...');
   try {
     const answer = await agent.run('Hello, what is your name?');

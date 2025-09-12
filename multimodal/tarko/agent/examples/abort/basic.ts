@@ -6,10 +6,8 @@
 /**
  * Simple example: How to abort a running Agent task
  */
-
 import { Agent, AgentStatus, LogLevel, Tool, z } from '../../src';
 
-// Create a tool that simulates a time-consuming operation
 const delayTool = new Tool({
   id: 'delay',
   description: 'Perform a delay operation for a specified duration',
@@ -36,7 +34,6 @@ const delayTool = new Tool({
 });
 
 async function main() {
-  // Create Agent instance
   const agent = new Agent({
     tools: [delayTool],
     logLevel: LogLevel.INFO,
@@ -69,7 +66,6 @@ async function main() {
     console.log(`Agent status after abort: ${agent.status()}`);
   }
 
-  // Try to get the result
   try {
     const result = await resultPromise;
     console.log('Task completion result:', result);
@@ -78,8 +74,6 @@ async function main() {
   }
 
   console.log(`Final Agent status: ${agent.status()}`);
-
-  // Demonstrate that Agent can still be used after abortion
   console.log('\nDemonstrating Agent is still usable after abortion...');
   try {
     const answer = await agent.run('Hello, what time is it now?');
