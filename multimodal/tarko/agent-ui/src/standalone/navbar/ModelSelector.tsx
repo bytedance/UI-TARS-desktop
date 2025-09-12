@@ -12,6 +12,8 @@ import {
   ThemeProvider,
 } from '@mui/material';
 import { apiService } from '@/common/services/apiService';
+import { useSetAtom } from 'jotai';
+import { sessionMetadataAtom } from '@/common/state/atoms/ui';
 
 interface ModelConfig {
   provider: string;
@@ -45,6 +47,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   const [currentModel, setCurrentModel] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const setSessionMetadata = useSetAtom(sessionMetadataAtom);
 
   const muiTheme = React.useMemo(
     () =>
@@ -203,20 +206,24 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
 
       try {
         console.log('📞 [NavbarModelSelector] Calling update handler...');
-        const success = await apiService.updateSessionModel(activeSessionId, provider, modelId);
+        const response = await apiService.updateSessionModel(activeSessionId, provider, modelId);
 
-        console.log('📋 [NavbarModelSelector] Update response:', { success });
+        console.log('📋 [NavbarModelSelector] Update response:', response);
 
-        if (success) {
+        if (response.success) {
           console.log('✅ [NavbarModelSelector] Model updated successfully, updating UI state');
           setCurrentModel(selectedValue);
+          
+          // Update sessionMetadata immediately with the new model config
+          if (response.sessionInfo?.metadata) {
+            setSessionMetadata(response.sessionInfo.metadata);
+            console.log('✅ [NavbarModelSelector] Updated sessionMetadata:', response.sessionInfo.metadata);
+          }
         } else {
           console.error('❌ [NavbarModelSelector] Update handler returned success=false');
-          // Keep current model on failure - no need to access currentModel from closure
         }
       } catch (error) {
         console.error('💥 [NavbarModelSelector] Failed to update session model:', error);
-        // Keep current model on error - no need to access currentModel from closure
       } finally {
         console.log('🏁 [NavbarModelSelector] Model change completed');
         setIsLoading(false);
