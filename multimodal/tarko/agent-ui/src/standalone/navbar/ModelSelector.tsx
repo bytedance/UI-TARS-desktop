@@ -25,7 +25,8 @@ interface AvailableModelsResponse {
   defaultModel: {
     provider: string;
     modelId: string;
-  };
+    displayName?: string;
+  } | null;
   hasMultipleProviders: boolean;
 }
 
@@ -230,6 +231,27 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   useEffect(() => {
     loadModels();
   }, [loadModels]);
+
+  // Update current model when session metadata changes
+  useEffect(() => {
+    if (sessionMetadata?.modelConfig && availableModels) {
+      const { provider, modelId } = sessionMetadata.modelConfig;
+      const modelKey = `${provider}:${modelId}`;
+      
+      // Check if the session's model is still available
+      const isModelAvailable = availableModels.models.some(config => 
+        config.models.includes(modelId) && config.provider === provider
+      );
+      
+      if (isModelAvailable) {
+        setCurrentModel(modelKey);
+      } else if (availableModels.defaultModel) {
+        // Fall back to default model if session model is no longer available
+        const defaultKey = `${availableModels.defaultModel.provider}:${availableModels.defaultModel.modelId}`;
+        setCurrentModel(defaultKey);
+      }
+    }
+  }, [sessionMetadata, availableModels]);
 
   if (!activeSessionId || isInitialLoading) {
     return null;
