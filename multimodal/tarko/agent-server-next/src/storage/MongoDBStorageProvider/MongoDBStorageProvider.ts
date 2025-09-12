@@ -4,9 +4,9 @@
  */
 
 import mongoose, { Connection, ConnectOptions } from 'mongoose';
-import { AgentEventStream, MongoDBAgentStorageImplementation } from '@tarko/interface';
+import { AgentEventStream, MongoDBAgentStorageImplementation, SessionInfo } from '@tarko/interface';
 import { getLogger } from '@tarko/shared-utils';
-import { StorageProvider, SessionInfo } from '../types';
+import { StorageProvider } from '../types';
 import { SessionModel, EventModel, SessionDocument, EventDocument } from './MongoDBSchemas';
 
 const logger = getLogger('MongoDBStorageProvider');

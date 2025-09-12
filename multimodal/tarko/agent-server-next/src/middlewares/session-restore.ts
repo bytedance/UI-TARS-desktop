@@ -20,50 +20,28 @@ export async function sessionRestoreMiddleware(
   next: Next,
 ): Promise<void | Response> {
   const server = c.get('server');
+  const sessionManager = server.getSessionManager();
 
   try {
-    // Get sessionId from query params or request body
     const sessionId = c.req.query('sessionId') || (await getSessionIdFromBody(c));
 
     if (!sessionId) {
       return c.json({ error: 'Session ID is required' }, 400);
     }
 
-    let session = server.sessions[sessionId];
+    let session = sessionManager.get(sessionId);
 
-    // If the session is not in memory but the storage is available, try to restore the session from storage
-    if (!session && server.storageProvider) {
-      const metadata = await server.storageProvider.getSessionInfo(sessionId);
-      if (metadata) {
-        try {
-          // Recover sessions from storage using a custom AGIO provider
-          session = new AgentSession(server, sessionId, server.getCustomAgioProvider(), metadata);
+    if (!session) {
+      const restored = await server.getSessionFactory().restoreSession(sessionId);
 
-          //FIXME: All sessions are mounted globally, resulting in memory leaks
-          server.sessions[sessionId] = session;
+      if (restored?.session) {
+        logger.debug(`Session ${sessionId} restored from storage`);
 
-          const { storageUnsubscribe } = await session.initialize();
+        session = restored?.session;
+        sessionManager.set(sessionId, session);
 
-          // Save unsubscribe function for cleaning
-          if (storageUnsubscribe) {
-            server.storageUnsubscribes[sessionId] = storageUnsubscribe;
-          }
-
-          logger.debug(`Session ${sessionId} restored from storage`);
-        } catch (error) {
-          logger.error(`Failed to restore session ${sessionId}:`, error);
-
-          return c.json(
-            {
-              sessionId,
-              status: {
-                isProcessing: false,
-                state: 'stored', // Special state, indicating that the session exists in storage but is not activated
-              },
-            },
-            200,
-          );
-        }
+        restored.storageUnsubscribe &&
+          (server.storageUnsubscribes[sessionId] = restored.storageUnsubscribe);
       }
     }
 
@@ -71,7 +49,7 @@ export async function sessionRestoreMiddleware(
       return c.json({ error: 'Session not found' }, 404);
     }
 
-    // Store session in Hono context for subsequent reading
+    // [Important] Store session in Hono context for subsequent reading
     c.set('session', session);
 
     await next();
@@ -101,7 +79,6 @@ async function getSessionIdFromBody(c: Context): Promise<string | undefined> {
 
     return undefined;
   } catch {
-    // If parsing fails, return undefined
     return undefined;
   }
 }

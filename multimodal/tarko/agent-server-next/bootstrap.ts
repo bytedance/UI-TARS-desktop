@@ -36,7 +36,6 @@ const server = new AgentServer({
     googleApiKey: process.env.GOOGLE_API_KEY,
     googleMcpUrl: process.env.GOOGLE_MCP_URL,
     aioSandboxUrl: process.env.AIO_SANDBOX_URL,
-    // tavilyApiKey: process.env.TAVILY_API_KEY,
     linkReaderMcpUrl: process.env.LINK_READER_URL,
     linkReaderAK: process.env.LINK_READER_AK,
     ignoreSandboxCheck: true,
@@ -50,6 +49,25 @@ const server = new AgentServer({
         uri: process.env.MONGO_URI,
         options: {
           dbName: process.env.MONGO_DB_NAME,
+        },
+      },
+      tenant: {
+        mode: 'multi',
+        auth: true,
+      },
+      sandbox: {
+        baseUrl: process.env.SANDBOX_BASE_URL,
+        getJwtToken: async () => {
+          const res = await fetch(process.env.SANDBOX_JWT_URL, {
+            method: 'GET',
+            headers: {
+              Authorization: process.env.SANDBOX_JWT_TOKEN,
+            },
+          });
+
+          const token = res.headers.get('x-jwt-token');
+
+          return token;
         },
       },
     },

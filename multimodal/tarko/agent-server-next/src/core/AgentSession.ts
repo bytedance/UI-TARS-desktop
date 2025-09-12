@@ -16,6 +16,7 @@ import {
   ModelProviderName,
   AgentProcessingPhase,
   AgentStatusInfo,
+  SessionInfo,
 } from '@tarko/interface';
 import { AgentSnapshot } from '@tarko/agent-snapshot';
 import { EventStreamBridge } from '../utils/event-stream';
@@ -69,13 +70,13 @@ export class AgentSession {
   eventBridge: EventStreamBridge;
   private unsubscribe: (() => void) | null = null;
   private agioProvider?: AgioEvent.AgioProvider;
-  private sessionInfo?: import('../storage').SessionInfo;
+  private sessionInfo?: SessionInfo;
 
   constructor(
     private server: AgentServer,
     sessionId: string,
     agioProviderImpl?: AgioProviderConstructor,
-    sessionInfo?: import('../storage').SessionInfo,
+    sessionInfo?: SessionInfo,
   ) {
     this.id = sessionId;
     this.eventBridge = new EventStreamBridge();
@@ -142,7 +143,15 @@ export class AgentSession {
   }
 
   async initialize() {
+    const initStartTime = Date.now();
+
+    const agentInitStartTime = Date.now();
     await this.agent.initialize();
+    const agentInitDuration = Date.now() - agentInitStartTime;
+
+    console.log(
+      `[AgentSession] agent.initialize() took ${agentInitDuration}ms for session ${this.id}`,
+    );
 
     // Send agent initialization event to AGIO if configured
     if (this.agioProvider) {
@@ -151,6 +160,20 @@ export class AgentSession {
       } catch (error) {
         console.error('Failed to send AGIO initialization event:', error);
       }
+    }
+
+    const totalInitDuration = Date.now() - initStartTime;
+    console.log(
+      `[AgentSession] Total initialization took ${totalInitDuration}ms for session ${this.id}`,
+    );
+
+    // Log to agent if it has a logger
+    if ('logger' in this.agent) {
+      (this.agent as any).logger.info('Session initialization completed', {
+        sessionId: this.id,
+        agentInitDuration,
+        totalInitDuration,
+      });
     }
 
     // Connect to agent's event stream manager
@@ -309,6 +332,28 @@ export class AgentSession {
       sessionId: this.id,
       agentInfo,
     };
+  }
+
+  /**
+   * Store the updated model configuration for this session
+   * The model will be used in subsequent queries via Agent.run() parameters
+   * @param sessionInfo Updated session metadata with new model config
+   */
+  async updateModelConfig(sessionInfo: SessionInfo): Promise<void> {
+    console.log(
+      `🔄 [AgentSession] Storing model config for session ${this.id}: ${sessionInfo.metadata?.modelConfig?.provider}:${sessionInfo.metadata?.modelConfig?.modelId}`,
+    );
+
+    // Store the session metadata for use in future queries
+    this.sessionInfo = sessionInfo;
+
+    // Emit model updated event to client
+    this.eventBridge.emit('model_updated', {
+      sessionId: this.id,
+      modelConfig: sessionInfo.metadata?.modelConfig,
+    });
+
+    console.log(`✅ [AgentSession] Model config updated for session ${this.id}`);
   }
 
   /**

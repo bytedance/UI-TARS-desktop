@@ -49,6 +49,45 @@ export interface AgentServerSnapshotOptions {
 }
 
 /**
+ * Sandbox configuration for agent execution environments
+ *
+ * Defines the connection and authentication settings for sandbox instance management
+ * where agents execute their tasks in isolated environments.
+ */
+export interface SandboxConfig {
+  /**
+   * Base URL of the sandbox manager service endpoint
+   */
+  baseUrl: string;
+
+  /**
+   * Static JWT token for sandbox manager authentication
+   */
+  jwtToken?: string;
+
+  /**
+   * Dynamic JWT token provider function
+   * Use this for scenarios requiring token refresh or dynamic token generation
+   * @returns Promise that resolves to a valid JWT token
+   */
+  getJwtToken?: () => Promise<string>;
+
+  /**
+   * Default time-to-live for sandbox instances in minutes
+   */
+  defaultTtlMinutes?: number;
+}
+
+/**
+ * Tenant mode
+ * @type {('multi' | 'single')}
+ */
+export interface TenantConfig {
+  mode: 'multi' | 'single';
+  auth: boolean;
+}
+
+/**
  * Options implemented by Agent Server
  *
  * Defines all customizable aspects of the server including:
@@ -83,6 +122,15 @@ export interface AgentServerOptions {
      * These models will be merged with AgentOptions.model and made available for selection in the UI
      */
     models?: AgentModel[];
+    /*
+     * Sandbox config
+    */
+    sandbox?: SandboxConfig;
+
+    /**
+     * Tenant mode, default to single tenant, no auth required
+     */
+    tenant?: TenantConfig;
   };
   /**
    * Share config
@@ -154,6 +202,8 @@ export interface SessionItemMetadata {
     configuredAt: number;
     [key: string]: any; // Future agent info fields
   };
+  /** The sandbox associated with the current session */
+  sandboxUrl?: string;
   /**
    * Future extensible fields
    */
@@ -169,6 +219,7 @@ export interface SessionInfo {
   updatedAt: number;
   workspace: string;
   metadata?: SessionItemMetadata;
+  userId?: string;
 }
 
 /**

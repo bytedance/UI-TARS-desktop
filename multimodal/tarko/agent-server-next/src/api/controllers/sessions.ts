@@ -3,16 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { nanoid } from 'nanoid';
-import { SessionInfo } from '../../storage';
-import { AgentSession } from '../../core';
-import { createErrorResponse } from '../../utils/error-handler';
 import type { HonoContext } from '../../types';
-import * as path from 'path';
-import * as fs from 'fs';
+import { getCurrentUserId } from '../../middlewares/auth';
+import { SessionInfo } from '@tarko/interface';
 
 /**
- * Get all sessions
+ * Get all sessions (with multi-tenant support)
  */
 export async function getAllSessions(c: HonoContext) {
   try {
@@ -22,7 +18,27 @@ export async function getAllSessions(c: HonoContext) {
       throw new Error('no storage provider!');
     }
 
-    const sessions = await server.storageProvider.getAllSessions();
+    let sessions: SessionInfo[];
+
+    // In multi-tenant mode, only get user's sessions
+    if (server.isMultiTenant()) {
+      const userId = getCurrentUserId(c);
+      if (!userId) {
+        return c.json({ error: 'Authentication required' }, 401);
+      }
+
+      //FIXME: mongo andd sqllite provider have't incomplete this method
+      if (server.storageProvider.getUserSessions) {
+        sessions = await server.storageProvider.getUserSessions(userId);
+      } else {
+        // Fallback: get all sessions and filter (less efficient)
+        const allSessions = await server.storageProvider.getAllSessions();
+        sessions = allSessions.filter((session) => (session as any).userId === userId);
+      }
+    } else {
+      // Single tenant mode: get all sessions
+      sessions = await server.storageProvider.getAllSessions();
+    }
 
     return c.json({ sessions }, 200);
   } catch (error) {
@@ -32,69 +48,27 @@ export async function getAllSessions(c: HonoContext) {
 }
 
 /**
- * Create a new session
+ * Create a new session (using SessionFactory)
  */
 export async function createSession(c: HonoContext) {
   try {
     const server = c.get('server');
-    const sessionId = nanoid();
+    const sessionFactory = server.getSessionFactory();
+    const sessionManager = server.getSessionManager();
 
-    // Get session metadata if it exists (for restored sessions)
-    let sessionInfo = null;
-    if (server.storageProvider) {
-      try {
-        sessionInfo = (await server.storageProvider.getSessionInfo(sessionId)) || undefined;
-      } catch (error) {
-        // Session doesn't exist yet, will be created below
-      }
-    }
+    const { session, sessionInfo, storageUnsubscribe } = await sessionFactory.createSession(c);
 
-    // Pass custom AGIO provider and session metadata if available
-    const session = new AgentSession(
-      server,
-      sessionId,
-      server.getCustomAgioProvider(),
-      sessionInfo || undefined,
-    );
-
-    //FIXME: All sessions are mounted globally, resulting in memory leaks
-    server.sessions[sessionId] = session;
-
-    const { storageUnsubscribe } = await session.initialize();
+    sessionManager.set(session.id, session);
 
     // Save unsubscribe function for cleanup
     if (storageUnsubscribe) {
-      server.storageUnsubscribes[sessionId] = storageUnsubscribe;
-    }
-
-    let savedSessionInfo: SessionInfo | undefined;
-    // Store session metadata if we have storage
-    if (server.storageProvider) {
-      const now = Date.now();
-      const sessionInfo: SessionInfo = {
-        id: sessionId,
-        createdAt: now,
-        updatedAt: now,
-        workspace: server.getCurrentWorkspace(),
-        metadata: {
-          agentInfo: {
-            name: server.getCurrentAgentName()!,
-            configuredAt: now,
-          },
-        },
-      };
-
-      try {
-        savedSessionInfo = await server.storageProvider.createSession(sessionInfo);
-      } catch (error) {
-        console.warn(`Failed to save session info for ${sessionId}:`, error);
-      }
+      server.storageUnsubscribes[session.id] = storageUnsubscribe;
     }
 
     return c.json(
       {
-        sessionId,
-        session: savedSessionInfo,
+        sessionId: session.id,
+        session: sessionInfo,
       },
       201,
     );
@@ -266,11 +240,10 @@ export async function deleteSession(c: HonoContext) {
   const sessionId = session.id;
 
   try {
-    // Clean up the session
-    await session.cleanup();
+    const sessionManager = server.getSessionManager();
 
-    // Remove from server sessions
-    delete server.sessions[sessionId];
+    // Remove from session manager (handles cleanup)
+    await sessionManager.delete(sessionId);
 
     // Clean up storage unsubscribe function
     if (server.storageUnsubscribes[sessionId]) {

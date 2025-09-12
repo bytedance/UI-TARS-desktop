@@ -4,16 +4,17 @@
  */
 
 import type { Context } from 'hono';
-import type { 
+import type {
   AgentAppConfig,
   AgentServerVersionInfo,
   AgentResolutionResult,
   AgioProviderConstructor,
   IAgent,
-  GlobalDirectoryOptions
+  GlobalDirectoryOptions,
+  TenantConfig,
 } from '@tarko/interface';
 import type { StorageProvider } from './storage';
-import type { AgentSession } from './core';
+import type { AgentSession, AgentSessionFactory, SessionManager } from './core';
 
 /**
  * AgentServer initialization options
@@ -34,6 +35,14 @@ export interface AgentServerContext extends Context {
   set(key: 'session', value: AgentSession): void;
 }
 
+export interface UserInfo {
+  userId: string;
+  email: string;
+  name?: string;
+  organization?: string;
+  [key: string]: any;
+}
+
 /**
  * Variables that can be stored in Hono context
  */
@@ -42,6 +51,7 @@ export interface ContextVariables {
   session?: AgentSession;
   requestId?: string;
   startTime?: number;
+  user?: UserInfo;
 }
 
 /**
@@ -57,14 +67,21 @@ export interface AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   readonly port: number;
   readonly isDebug: boolean;
   readonly isExclusive: boolean;
-  readonly storageProvider: StorageProvider | null;
+  readonly storageProvider: StorageProvider;
   readonly appConfig: T;
   readonly versionInfo?: AgentServerVersionInfo;
   readonly directories: Required<GlobalDirectoryOptions>;
+  readonly tenantConfig: TenantConfig;
 
   // Session management
   sessions: Record<string, AgentSession>;
   storageUnsubscribes: Record<string, () => void>;
+
+  // New session management methods
+  getSessionManager(): SessionManager;
+  getSessionFactory(): AgentSessionFactory;
+  isMultiTenant(): boolean;
+  getMemoryStats(): any;
 
   // Server lifecycle
   start(): Promise<void>;
@@ -103,5 +120,5 @@ export type {
   AgentResolutionResult,
   AgioProviderConstructor,
   IAgent,
-  GlobalDirectoryOptions
+  GlobalDirectoryOptions,
 };

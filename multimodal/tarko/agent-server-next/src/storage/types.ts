@@ -5,7 +5,20 @@
 
 import { AgentEventStream, SessionInfo } from '@tarko/interface';
 
-export type { SessionInfo, LegacySessionItemInfo } from '@tarko/interface';
+/**
+ * Extended SessionInfo for multi-tenant support
+ */
+export interface ExtendedSessionInfo extends SessionInfo {
+  userId?: string;
+  metadata?: SessionInfo['metadata'] & {
+    sandboxUrl?: string;
+    user?: {
+      userId: string;
+      email: string;
+      name?: string;
+    };
+  };
+}
 
 /**
  * Abstract storage provider interface
@@ -48,6 +61,12 @@ export interface StorageProvider {
    * Get all sessions metadata
    */
   getAllSessions(): Promise<SessionInfo[]>;
+
+  /**
+   * Get all sessions for a specific user (multi-tenant)
+   * @param userId User ID
+   */
+  getUserSessions?(userId: string): Promise<SessionInfo[]>;
 
   /**
    * Delete a session and all its events
