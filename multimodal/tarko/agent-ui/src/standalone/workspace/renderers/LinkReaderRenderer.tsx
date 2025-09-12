@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { FiExternalLink, FiCopy, FiCheck, FiGlobe } from 'react-icons/fi';
 import { StandardPanelContent } from '../types/panelContent';
 import { MarkdownRenderer } from '@/sdk/markdown-renderer';
-import { wrapMarkdown } from '@/common/utils/markdown';
 import { FileDisplayMode } from '../types';
 import { isOmniTarsTextContentArray, OmniTarsTextContent } from '@/common/services/SearchService';
 
@@ -125,7 +124,7 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
 
               {/* Content area */}
               <div>
-                <MarkdownRenderer content={wrapMarkdown(result.content)} forceDarkTheme />
+                <MarkdownRenderer content={result.content} forceDarkTheme />
               </div>
             </div>
           </div>
