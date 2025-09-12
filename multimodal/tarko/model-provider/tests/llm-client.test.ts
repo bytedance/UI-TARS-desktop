@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createLLMClient } from './llm-client';
-import { AgentModel } from './types';
+import { createLLMClient } from '../src/llm-client';
+import { AgentModel } from '../src/types';
 import { TokenJS } from '@tarko/llm-client';
 
 // Mock TokenJS

@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { resolveModel, createLLMClient, HIGH_LEVEL_MODEL_PROVIDER_CONFIGS } from './index';
-import { AgentModel, ModelProviderName } from './types';
+import { resolveModel, createLLMClient, HIGH_LEVEL_MODEL_PROVIDER_CONFIGS } from '../src/index';
+import { AgentModel, ModelProviderName } from '../src/types';
 
 describe('Integration Tests', () => {
   describe('resolveModel + createLLMClient workflow', () => {

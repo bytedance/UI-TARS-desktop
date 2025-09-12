@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { resolveModel } from './model-resolver';
-import { AgentModel } from './types';
+import { resolveModel } from '../src/model-resolver';
+import { AgentModel } from '../src/types';
 
 describe('resolveModel', () => {
   it('should use default values when no parameters provided', () => {
