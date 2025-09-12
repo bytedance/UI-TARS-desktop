@@ -532,7 +532,7 @@ class ApiService {
   /**
    * Update session model configuration
    */
-  async updateSessionModel(sessionId: string, provider: string, modelId: string): Promise<boolean> {
+  async updateSessionModel(sessionId: string, provider: string, modelId: string): Promise<{ success: boolean; sessionInfo?: SessionInfo }> {
     try {
       console.log('🔄 [ModelSelector] Updating session model:', {
         sessionId,
@@ -561,13 +561,13 @@ class ApiService {
       const responseData = await response.json();
       console.log('✅ [ModelSelector] Response data:', responseData);
 
-      const { success } = responseData;
-      console.log('🎯 [ModelSelector] Update result:', success ? 'SUCCESS' : 'FAILED');
-
-      return success;
+      return {
+        success: responseData.success,
+        sessionInfo: responseData.sessionInfo,
+      };
     } catch (error) {
       console.error('💥 [ModelSelector] Error updating session model:', error);
-      return false;
+      return { success: false };
     }
   }
 }
