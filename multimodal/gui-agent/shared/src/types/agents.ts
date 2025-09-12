@@ -40,18 +40,18 @@ export type NormalizeCoordinates = (
 ) => { normalized: Coordinates };
 
 /**
- * Type definition for handler function to parse model output into PredictionParsed object
+ * Type definition for handler function to parse model output into ParsedGUIResponse object
  * @param prediction - The raw output from the model to be parsed
- * @returns PredictionParsed object if parsing is successful, null otherwise
+ * @returns ParsedGUIResponse object if parsing is successful, null otherwise
  */
-export type ParsePrediction = (prediction: string) => ParsedGUIResponse | null;
+export type CustomActionParser = (prediction: string) => ParsedGUIResponse | null;
 
 /**
  * Type definition for a function that converts BaseAction array to string representation
  * @param actions - Array of BaseAction objects to be converted to string
  * @returns String representation of the actions
  */
-export type SerializeActions = (
+export type SerializeSupportedActions = (
   actions: Array<
     Pick<BaseAction, 'type' | 'inputs'> & {
       description: string;
@@ -94,7 +94,7 @@ export interface SystemPromptTemplate {
    * Function to convert BaseAction array to string representation for the action space
    * This will be used to fill the action space placeholder in the template
    */
-  actionsToString?: SerializeActions;
+  actionsToString?: SerializeSupportedActions;
 
   /**
    * Optional map of additional placeholder values to be replaced in the template
@@ -116,7 +116,7 @@ export interface GUIAgentConfig<TOperator> extends AgentOptions {
    */
   systemPrompt?: string | SystemPromptTemplate;
   /** The handler function to parse model output into PredictionParsed object */
-  parseHandler?: ParsePrediction;
+  customeActionParser?: CustomActionParser;
   /** The function to normalize raw coordinates */
   normalizeCoordinates?: NormalizeCoordinates;
   /** Maximum number of turns for Agent to execute, @default 100 */
