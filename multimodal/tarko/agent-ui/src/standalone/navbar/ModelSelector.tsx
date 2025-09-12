@@ -476,9 +476,9 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
                   style: {
                     maxHeight: 360,
                     marginTop: 8,
-                    zIndex: 10000, // Increased z-index to avoid conflicts
                   },
                   sx: {
+                    zIndex: 10000,
                     '@keyframes menuSlideIn': {
                       '0%': {
                         opacity: 0,
@@ -499,12 +499,9 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
                   vertical: 'top',
                   horizontal: 'left',
                 },
-                disablePortal: true, // Use portal to avoid z-index conflicts
-                TransitionProps: {
-                  timeout: 200,
-                },
               }}
               sx={{
+                minWidth: 200,
                 maxWidth: 360,
               }}
             >
