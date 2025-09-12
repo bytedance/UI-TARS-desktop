@@ -124,8 +124,8 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
               </div>
 
               {/* Content area */}
-              <div>
-                <MarkdownRenderer content={wrapMarkdown(result.content.replace(/\n/g, '  \n'), 'text')} forceDarkTheme />
+              <div style={{ whiteSpace: 'pre-wrap' }}>
+                <MarkdownRenderer content={wrapMarkdown(result.content)} forceDarkTheme />
               </div>
             </div>
           </div>
