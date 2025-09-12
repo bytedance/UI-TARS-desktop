@@ -66,7 +66,7 @@ export interface StorageProvider {
    * Get all sessions for a specific user (multi-tenant)
    * @param userId User ID
    */
-  getUserSessions?(userId: string): Promise<SessionInfo[]>;
+  getUserSessions(userId: string): Promise<SessionInfo[]>;
 
   /**
    * Delete a session and all its events

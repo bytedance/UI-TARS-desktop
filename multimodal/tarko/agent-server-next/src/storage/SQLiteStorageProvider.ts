@@ -21,15 +21,10 @@ interface SessionRow {
   createdAt: number;
   updatedAt: number;
   workspace: string;
+  userId?: string;
   metadata: string | null; // JSON string containing all extensible metadata
 }
 
-interface EventRow {
-  id: number;
-  sessionId: string;
-  timestamp: number;
-  eventData: string;
-}
 
 interface ExistsResult {
   existsFlag: number;
@@ -75,6 +70,7 @@ export class SQLiteStorageProvider implements StorageProvider {
             createdAt INTEGER NOT NULL,
             updatedAt INTEGER NOT NULL,
             workspace TEXT NOT NULL,
+            userId TEXT,
             metadata TEXT -- JSON string for all extensible metadata
           )
         `);
@@ -98,6 +94,13 @@ export class SQLiteStorageProvider implements StorageProvider {
         // Enable foreign keys
         this.db.exec('PRAGMA foreign_keys = ON');
 
+        // Add userId column if it doesn't exist (migration)
+        try {
+          this.db.exec('ALTER TABLE sessions ADD COLUMN userId TEXT');
+        } catch (error) {
+          // Column may already exist, ignore error
+        }
+
         this.initialized = true;
       } catch (error) {
         console.error('Failed to initialize SQLite database:', error);
@@ -119,8 +122,8 @@ export class SQLiteStorageProvider implements StorageProvider {
 
     try {
       const insertQuery = `
-        INSERT INTO sessions (id, createdAt, updatedAt, workspace, metadata)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO sessions (id, createdAt, updatedAt, workspace, userId, metadata)
+        VALUES (?, ?, ?, ?, ?, ?)
       `;
 
       const stmt = this.db.prepare(insertQuery);
@@ -129,6 +132,7 @@ export class SQLiteStorageProvider implements StorageProvider {
         sessionData.createdAt,
         sessionData.updatedAt,
         sessionData.workspace || '',
+        (sessionData as any).userId || null,
         metadataJson,
       );
 
@@ -173,6 +177,11 @@ export class SQLiteStorageProvider implements StorageProvider {
         params.push(sessionInfo.metadata ? JSON.stringify(sessionInfo.metadata) : null);
       }
 
+      if ((sessionInfo as any).userId !== undefined) {
+        setClauses.push('userId = ?');
+        params.push((sessionInfo as any).userId);
+      }
+
       // Always update the timestamp
       setClauses.push('updatedAt = ?');
       params.push(updatedSession.updatedAt);
@@ -208,7 +217,7 @@ export class SQLiteStorageProvider implements StorageProvider {
 
     try {
       const stmt = this.db.prepare(`
-        SELECT id, createdAt, updatedAt, workspace, metadata
+        SELECT id, createdAt, updatedAt, workspace, userId, metadata
         FROM sessions
         WHERE id = ?
       `);
@@ -225,7 +234,8 @@ export class SQLiteStorageProvider implements StorageProvider {
         updatedAt: row.updatedAt,
         workspace: row.workspace || '',
         metadata: row.metadata ? JSON.parse(row.metadata) : undefined,
-      };
+        ...(row.userId && { userId: row.userId }),
+      } as SessionInfo;
     } catch (error) {
       console.error(`Failed to get session ${sessionId}:`, error);
       throw new Error(
@@ -239,7 +249,7 @@ export class SQLiteStorageProvider implements StorageProvider {
 
     try {
       const stmt = this.db.prepare(`
-        SELECT id, createdAt, updatedAt, workspace, metadata
+        SELECT id, createdAt, updatedAt, workspace, userId, metadata
         FROM sessions
         ORDER BY updatedAt DESC
       `);
@@ -252,11 +262,41 @@ export class SQLiteStorageProvider implements StorageProvider {
         updatedAt: row.updatedAt,
         workspace: row.workspace || '',
         metadata: row.metadata ? JSON.parse(row.metadata) : undefined,
-      }));
+        ...(row.userId && { userId: row.userId }),
+      } as SessionInfo));
     } catch (error) {
       console.error('Failed to get all sessions:', error);
       throw new Error(
         `Failed to get all sessions: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+
+  async getUserSessions(userId: string): Promise<SessionInfo[]> {
+    await this.ensureInitialized();
+
+    try {
+      const stmt = this.db.prepare(`
+        SELECT id, createdAt, updatedAt, workspace, userId, metadata
+        FROM sessions
+        WHERE userId = ?
+        ORDER BY updatedAt DESC
+      `);
+
+      const rows = stmt.all(userId) as unknown as SessionRow[];
+
+      return rows.map((row) => ({
+        id: row.id,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+        workspace: row.workspace || '',
+        metadata: row.metadata ? JSON.parse(row.metadata) : undefined,
+        userId: row.userId,
+      } as SessionInfo));
+    } catch (error) {
+      console.error(`Failed to get user sessions for ${userId}:`, error);
+      throw new Error(
+        `Failed to get user sessions: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }
