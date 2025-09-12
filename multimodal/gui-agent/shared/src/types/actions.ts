@@ -15,7 +15,8 @@ export type Factors = [number, number];
 export interface Coordinates {
   raw?: { x: number; y: number }; // Raw pixels
   normalized?: { x: number; y: number }; // Normalized coordinates (0–1)
-  reference?: 'screen' | 'window' | 'browserPage' | string; // Coordinate reference system
+  referenceBox?: { x1: number; y1: number; x2: number; y2: number };
+  referenceSystem?: 'screen' | 'window' | 'browserPage' | string; // Coordinate reference system
 }
 
 /**
