@@ -169,53 +169,56 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     }
   }, []);
 
-  const handleModelChange = useCallback(async (selectedValue: string) => {
-    console.log('🎛️ [NavbarModelSelector] Model change initiated:', {
-      selectedValue,
-      sessionId: activeSessionId,
-    });
-
-    if (!activeSessionId || isLoading || !selectedValue) {
-      console.warn('⚠️ [NavbarModelSelector] Model change blocked:', {
-        hasSessionId: !!activeSessionId,
-        isLoading,
-        hasSelectedValue: !!selectedValue,
+  const handleModelChange = useCallback(
+    async (selectedValue: string) => {
+      console.log('🎛️ [NavbarModelSelector] Model change initiated:', {
+        selectedValue,
+        sessionId: activeSessionId,
       });
-      return;
-    }
 
-    const [provider, modelId] = selectedValue.split(':');
-    console.log('🔍 [NavbarModelSelector] Parsed model selection:', { provider, modelId });
-
-    if (!provider || !modelId) {
-      console.error('❌ [NavbarModelSelector] Invalid model format:', selectedValue);
-      return;
-    }
-
-    console.log('⏳ [NavbarModelSelector] Starting model update...');
-    setIsLoading(true);
-
-    try {
-      console.log('📞 [NavbarModelSelector] Calling update handler...');
-      const success = await apiService.updateSessionModel(activeSessionId, provider, modelId);
-
-      console.log('📋 [NavbarModelSelector] Update response:', { success });
-
-      if (success) {
-        console.log('✅ [NavbarModelSelector] Model updated successfully, updating UI state');
-        setCurrentModel(selectedValue);
-      } else {
-        console.error('❌ [NavbarModelSelector] Update handler returned success=false');
-        // Keep current model on failure - no need to access currentModel from closure
+      if (!activeSessionId || isLoading || !selectedValue) {
+        console.warn('⚠️ [NavbarModelSelector] Model change blocked:', {
+          hasSessionId: !!activeSessionId,
+          isLoading,
+          hasSelectedValue: !!selectedValue,
+        });
+        return;
       }
-    } catch (error) {
-      console.error('💥 [NavbarModelSelector] Failed to update session model:', error);
-      // Keep current model on error - no need to access currentModel from closure
-    } finally {
-      console.log('🏁 [NavbarModelSelector] Model change completed');
-      setIsLoading(false);
-    }
-  }, [activeSessionId, isLoading]);
+
+      const [provider, modelId] = selectedValue.split(':');
+      console.log('🔍 [NavbarModelSelector] Parsed model selection:', { provider, modelId });
+
+      if (!provider || !modelId) {
+        console.error('❌ [NavbarModelSelector] Invalid model format:', selectedValue);
+        return;
+      }
+
+      console.log('⏳ [NavbarModelSelector] Starting model update...');
+      setIsLoading(true);
+
+      try {
+        console.log('📞 [NavbarModelSelector] Calling update handler...');
+        const success = await apiService.updateSessionModel(activeSessionId, provider, modelId);
+
+        console.log('📋 [NavbarModelSelector] Update response:', { success });
+
+        if (success) {
+          console.log('✅ [NavbarModelSelector] Model updated successfully, updating UI state');
+          setCurrentModel(selectedValue);
+        } else {
+          console.error('❌ [NavbarModelSelector] Update handler returned success=false');
+          // Keep current model on failure - no need to access currentModel from closure
+        }
+      } catch (error) {
+        console.error('💥 [NavbarModelSelector] Failed to update session model:', error);
+        // Keep current model on error - no need to access currentModel from closure
+      } finally {
+        console.log('🏁 [NavbarModelSelector] Model change completed');
+        setIsLoading(false);
+      }
+    },
+    [activeSessionId, isLoading],
+  );
 
   useEffect(() => {
     loadModels();
@@ -226,12 +229,12 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     if (sessionMetadata?.modelConfig && availableModels) {
       const { provider, modelId } = sessionMetadata.modelConfig;
       const modelKey = `${provider}:${modelId}`;
-      
+
       // Check if the session's model is still available
-      const isModelAvailable = availableModels.models.some(config => 
-        config.models.includes(modelId) && config.provider === provider
+      const isModelAvailable = availableModels.models.some(
+        (config) => config.models.includes(modelId) && config.provider === provider,
       );
-      
+
       if (isModelAvailable) {
         setCurrentModel(modelKey);
       } else if (availableModels.models.length > 0) {
@@ -251,7 +254,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
 
   // Check if there are multiple providers (calculate on frontend)
   const hasMultipleProviders = availableModels ? availableModels.models.length > 1 : false;
-  
+
   if (!hasMultipleProviders || availableModels.models.length === 0) {
     if (!sessionMetadata?.modelConfig) {
       return null;
@@ -342,8 +345,6 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
       </ThemeProvider>
     );
   }
-
-
 
   const allModelOptions = availableModels.models.flatMap((config) =>
     config.models.map((modelId) => ({

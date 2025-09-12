@@ -143,8 +143,6 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     return this.currentAgentResolution?.agentName;
   }
 
-
-
   /**
    * Check if server can accept new requests in exclusive mode
    */
@@ -320,17 +318,17 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    */
   getAvailableModels(): AgentModel[] {
     const models: AgentModel[] = [];
-    
+
     // Add AgentOptions.model if it exists
     if (this.appConfig.model) {
       models.push(this.appConfig.model);
     }
-    
+
     // Add server.models if they exist
     if (this.appConfig.server?.models) {
       models.push(...this.appConfig.server.models);
     }
-    
+
     return models;
   }
 
@@ -343,12 +341,12 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     if (this.appConfig.model) {
       return this.appConfig.model;
     }
-    
+
     // Fall back to first server.models
     if (this.appConfig.server?.models && this.appConfig.server.models.length > 0) {
       return this.appConfig.server.models[0];
     }
-    
+
     return undefined;
   }
 
@@ -360,9 +358,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    */
   isModelConfigValid(provider: string, modelId: string): boolean {
     const availableModels = this.getAvailableModels();
-    return availableModels.some(model => 
-      model.provider === provider && model.id === modelId
-    );
+    return availableModels.some((model) => model.provider === provider && model.id === modelId);
   }
 
   /**
@@ -374,20 +370,20 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     if (!this.currentAgentResolution) {
       throw new Error('Cannot found availble resolved agent');
     }
-    
+
     let agentOptions: T = {
       ...this.appConfig,
       name: this.getCurrentAgentName(),
     };
-    
+
     // Override model config from session if available and valid
     if (sessionInfo?.metadata?.modelConfig) {
       const { provider, modelId } = sessionInfo.metadata.modelConfig;
       const availableModels = this.getAvailableModels();
-      const selectedModel = availableModels.find(model => 
-        model.provider === provider && model.id === modelId
+      const selectedModel = availableModels.find(
+        (model) => model.provider === provider && model.id === modelId,
       );
-      
+
       if (selectedModel) {
         // Use the session's selected model if it's still available
         agentOptions = {
@@ -403,11 +399,11 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
             model: defaultModel,
           };
         }
-        
+
         // Log a warning about the fallback
         if (this.isDebug) {
           console.warn(
-            `[AgentServer] Session model ${provider}:${modelId} not found in available models, falling back to default model`
+            `[AgentServer] Session model ${provider}:${modelId} not found in available models, falling back to default model`,
           );
         }
       }
@@ -421,7 +417,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
         };
       }
     }
-    
+
     return new this.currentAgentResolution.agentConstructor(agentOptions);
   }
 }
