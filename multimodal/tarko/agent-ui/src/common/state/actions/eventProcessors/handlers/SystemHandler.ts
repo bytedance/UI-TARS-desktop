@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { EventHandler, EventHandlerContext } from '../types';
 import { AgentEventStream, Message } from '@/common/types';
 import { messagesAtom } from '@/common/state/atoms/message';
-import { activePanelContentAtom } from '@/common/state/atoms/ui';
+import { activePanelContentAtom, sessionMetadataAtom } from '@/common/state/atoms/ui';
 import { shouldUpdatePanelContent } from '../utils/panelContentUpdater';
 import { ChatCompletionContentPartImage } from '@tarko/agent-interface';
 
@@ -97,6 +97,28 @@ export class EnvironmentInputHandler
         }
         // Skip update for other panel types to avoid duplicate Browser Screenshot rendering
       }
+    }
+  }
+}
+
+export class ModelUpdatedHandler implements EventHandler<any> {
+  canHandle(event: any): event is any {
+    return event.type === 'model_updated';
+  }
+
+  handle(context: EventHandlerContext, sessionId: string, event: any): void {
+    const { set } = context;
+
+    console.log('🔄 [ModelUpdatedHandler] Processing model_updated event:', event);
+
+    // Update session metadata with new model config
+    if (event.modelConfig) {
+      set(sessionMetadataAtom, (prev) => ({
+        ...prev,
+        modelConfig: event.modelConfig,
+      }));
+
+      console.log('✅ [ModelUpdatedHandler] Updated sessionMetadata with new model config:', event.modelConfig);
     }
   }
 }

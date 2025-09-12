@@ -10,9 +10,7 @@ import {
   CircularProgress,
   createTheme,
   ThemeProvider,
-  Tooltip,
 } from '@mui/material';
-import { getTooltipProps } from '@/common/components/TooltipConfig';
 import { apiService } from '@/common/services/apiService';
 
 interface ModelConfig {
@@ -297,21 +295,9 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
       return null;
     }
 
-    const tooltipContent = sessionMetadata?.modelConfig?.modelId
-      ? `Model ID: ${sessionMetadata.modelConfig.modelId}`
-      : '';
-
     return (
       <ThemeProvider theme={muiTheme}>
-        <Tooltip
-          {...getTooltipProps('bottom')}
-          title={tooltipContent}
-          disableHoverListener={!tooltipContent}
-          PopperProps={{
-            style: { zIndex: 9999 }, // Consistent z-index for tooltips
-          }}
-        >
-          <motion.div whileHover={{ scale: 1.02 }} className={className}>
+        <motion.div whileHover={{ scale: 1.02 }} className={className}>
             <Box
               sx={{
                 display: 'flex',
@@ -380,8 +366,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
                 )}
               </Box>
             </Box>
-          </motion.div>
-        </Tooltip>
+        </motion.div>
       </ThemeProvider>
     );
   }
@@ -449,20 +434,9 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     );
   };
 
-  const currentOption = allModelOptions.find((opt) => opt.value === currentModel);
-  const dropdownTooltipContent = currentOption?.modelId ? `Model ID: ${currentOption.modelId}` : '';
-
   return (
     <ThemeProvider theme={muiTheme}>
-      <Tooltip
-        {...getTooltipProps('bottom')}
-        title={dropdownTooltipContent}
-        disableHoverListener={!dropdownTooltipContent}
-        PopperProps={{
-          style: { zIndex: 9999 }, // Lower z-index than dropdown menu
-        }}
-      >
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className={className}>
+      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className={className}>
           <FormControl size="small">
             <Select
               value={currentModel}
@@ -576,7 +550,6 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
             </Select>
           </FormControl>
         </motion.div>
-      </Tooltip>
     </ThemeProvider>
   );
 };
