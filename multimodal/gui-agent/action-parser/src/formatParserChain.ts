@@ -5,8 +5,7 @@
 import { ConsoleLogger } from '@agent-infra/logger';
 
 export interface FormatParser {
-  canParse(text: string): boolean;
-  parse(text: string): { thought: string | null; actionStr: string };
+  parse(text: string): { reasoningContent: string | null; actionStr: string } | null;
 }
 
 /**
@@ -32,10 +31,14 @@ export class OmniFormatParser implements FormatParser {
     return canParse;
   }
 
-  parse(text: string): { thought: string | null; actionStr: string } {
+  parse(text: string): { reasoningContent: string | null; actionStr: string } | null {
+    if (!this.canParse(text)) {
+      return null;
+    }
+
     // this.logger.debug('[OmniFormatParser] start...');
     const thinkMatch = text.match(/<think[^>]*>([\s\S]*?)<\/think[^>]*>/i);
-    const thought = thinkMatch ? thinkMatch[1].trim() : null;
+    const reasoningContent = thinkMatch ? thinkMatch[1].trim() : null;
 
     let actionStr = '';
     const computerEnvMatch = text.match(/<computer_env>([\s\S]*?)<\/computer_env>/i);
@@ -49,7 +52,7 @@ export class OmniFormatParser implements FormatParser {
     }
 
     const result = {
-      thought,
+      reasoningContent,
       actionStr,
     };
     return result;
@@ -85,12 +88,16 @@ class UnifiedBCFormatParser implements FormatParser {
     return hasBasicStructure;
   }
 
-  parse(text: string): { thought: string | null; actionStr: string } {
+  parse(text: string): { reasoningContent: string | null; actionStr: string } | null {
+    if (!this.canParse(text)) {
+      return null;
+    }
+
     // this.logger.debug('[UnifiedBCFormatParser] start parsing...');
 
     // Parse thought content - this part remains unchanged
     const thoughtMatch = text.match(/Thought:\s*([\s\S]+?)(?=\s*Action[：:]|$)/);
-    const thought = thoughtMatch ? thoughtMatch[1].trim() : null;
+    const reasoningContent = thoughtMatch ? thoughtMatch[1].trim() : null;
 
     // Parse action content
     let actionStr = '';
@@ -107,7 +114,7 @@ class UnifiedBCFormatParser implements FormatParser {
     // });
 
     return {
-      thought,
+      reasoningContent,
       actionStr,
     };
   }
@@ -131,8 +138,11 @@ class BCComplexFormatParser implements FormatParser {
     return canParse;
   }
 
-  parse(text: string): { thought: string | null; actionStr: string } {
-    // this.logger.debug('[BCComplexFormatParser] start...');
+  parse(text: string): { reasoningContent: string | null; actionStr: string } | null {
+    if (!this.canParse(text)) {
+      return null;
+    }
+
     let thought: string | null = null;
     let reflection: string | null = null;
     let actionStr = '';
@@ -160,7 +170,8 @@ class BCComplexFormatParser implements FormatParser {
     }
 
     return {
-      thought: reflection && thought ? `${reflection}, ${thought}` : (thought ?? reflection),
+      reasoningContent:
+        reflection && thought ? `${reflection}, ${thought}` : (thought ?? reflection),
       actionStr,
     };
   }
@@ -183,8 +194,12 @@ class O1FormatParser implements FormatParser {
     return canParse;
   }
 
-  parse(text: string): { thought: string | null; reflection: string | null; actionStr: string } {
+  parse(text: string): { reasoningContent: string | null; actionStr: string } | null {
     // this.logger.debug('[O1FormatParser] start...');
+    if (!this.canParse(text)) {
+      return null;
+    }
+
     const thoughtMatch = text.match(/<Thought>\s*([\s\S]*?)\s*<\/Thought>/s);
     const actionSummaryMatch = text.match(/Action_Summary:\s*([\s\S]*?)\s*Action:/s);
     const actionMatch = text.match(/Action:\s*([\s\S]*?)\s*<\/Output>/s);
@@ -202,8 +217,7 @@ class O1FormatParser implements FormatParser {
       : thoughtContent;
 
     return {
-      thought,
-      reflection: null,
+      reasoningContent: thought,
       actionStr: actionContent,
     };
   }
@@ -225,8 +239,11 @@ export class FallbackFormatParser implements FormatParser {
     return true;
   }
 
-  parse(text: string): { thought: string | null; reflection: string | null; actionStr: string } {
+  parse(text: string): { reasoningContent: string | null; actionStr: string } | null {
     // this.logger.debug('[FallbackFormatParser] start parsing...');
+    if (!this.canParse(text)) {
+      return null;
+    }
 
     // Parse thought content
     const thoughtMatch = text.match(/Thought:\s*([\s\S]+?)(?=\s*Action[：:]|$)/);
@@ -278,8 +295,7 @@ export class FallbackFormatParser implements FormatParser {
     });
 
     return {
-      thought: thought || (isDirectFunctionCall ? '' : null), // For direct function calls, if there's no thought content, return empty string
-      reflection: null,
+      reasoningContent: thought || (isDirectFunctionCall ? '' : null), // For direct function calls, if there's no thought content, return empty string
       actionStr,
     };
   }
@@ -298,27 +314,18 @@ export class FormatParserChain {
     ];
   }
 
-  parse(text: string): { thought: string | null; actionStr: string } {
+  parse(text: string): { reasoningContent: string | null; actionStr: string } {
     this.logger.debug('[FormatParserChain] start...');
 
     for (const parser of this.parsers) {
-      const parserName = parser.constructor.name;
-      // this.logger.debug(`[FormatParserChain] try parser: ${parserName}`);
-
-      if (parser.canParse(text)) {
-        const result = parser.parse(text);
-        // this.logger.debug(`[FormatParserChain] ${parserName} result:`, {
-        //   thought: result.thought?.substring(0, 100),
-        //   actionStr: result.actionStr,
-        // });
-        return result;
-      }
+      const result = parser.parse(text);
+      if (result) return result;
     }
 
     // Theoretically, this should not be reached, as the DefaultFormatParser always returns true.
     this.logger.warn('[FormatParserChain]', 'No appropriate parser found, return default value.');
     return {
-      thought: null,
+      reasoningContent: null,
       actionStr: text.trim(),
     };
   }
