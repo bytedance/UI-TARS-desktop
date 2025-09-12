@@ -275,7 +275,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   // Check if there are multiple providers (calculate on frontend)
   const hasMultipleProviders = availableModels ? availableModels.models.length > 1 : false;
 
-  if (!hasMultipleProviders || availableModels.models.length === 0) {
+  if (!hasMultipleProviders || !availableModels || availableModels.models.length === 0) {
     if (!sessionMetadata?.modelConfig) {
       return null;
     }
