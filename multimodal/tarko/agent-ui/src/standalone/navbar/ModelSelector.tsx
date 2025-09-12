@@ -17,7 +17,10 @@ import { apiService } from '@/common/services/apiService';
 
 interface ModelConfig {
   provider: string;
-  models: string[];
+  models: Array<{
+    id: string;
+    displayName?: string;
+  }>;
 }
 
 interface AvailableModelsResponse {
@@ -186,7 +189,11 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
       }
 
       const [provider, modelId] = selectedValue.split(':');
-      console.log('🔍 [NavbarModelSelector] Parsed model selection:', { provider, modelId, selectedValue });
+      console.log('🔍 [NavbarModelSelector] Parsed model selection:', {
+        provider,
+        modelId,
+        selectedValue,
+      });
 
       if (!provider || !modelId) {
         console.error('❌ [NavbarModelSelector] Invalid model format:', selectedValue);
@@ -239,11 +246,14 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
 
       // Check if the session's model is still available
       const isModelAvailable = availableModels.models.some(
-        (config) => config.models.includes(modelId) && config.provider === provider,
+        (config) => config.provider === provider && config.models.some(model => model.id === modelId),
       );
 
       if (isModelAvailable) {
-        console.log('✅ [ModelSelector] Session model is available, setting current model:', modelKey);
+        console.log(
+          '✅ [ModelSelector] Session model is available, setting current model:',
+          modelKey,
+        );
         setCurrentModel(modelKey);
       } else {
         console.warn('⚠️ [ModelSelector] Session model not available:', { provider, modelId });
@@ -251,18 +261,25 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
           // Fall back to first available model if session model is no longer available
           const firstModel = availableModels.models[0];
           if (firstModel.models.length > 0) {
-            const fallbackKey = `${firstModel.provider}:${firstModel.models[0]}`;
+            const fallbackKey = `${firstModel.provider}:${firstModel.models[0].id}`;
             console.log('🔄 [ModelSelector] Falling back to first available model:', fallbackKey);
             setCurrentModel(fallbackKey);
           }
         }
       }
-    } else if (availableModels && availableModels.models.length > 0 && !sessionMetadata?.modelConfig) {
+    } else if (
+      availableModels &&
+      availableModels.models.length > 0 &&
+      !sessionMetadata?.modelConfig
+    ) {
       // No session model config, use first available model
       const firstModel = availableModels.models[0];
       if (firstModel.models.length > 0) {
-        const fallbackKey = `${firstModel.provider}:${firstModel.models[0]}`;
-        console.log('🆕 [ModelSelector] No session model config, using first available:', fallbackKey);
+        const fallbackKey = `${firstModel.provider}:${firstModel.models[0].id}`;
+        console.log(
+          '🆕 [ModelSelector] No session model config, using first available:',
+          fallbackKey,
+        );
         setCurrentModel(fallbackKey);
       }
     }
@@ -370,11 +387,12 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   }
 
   const allModelOptions = availableModels.models.flatMap((config) =>
-    config.models.map((modelId) => ({
-      value: `${config.provider}:${modelId}`,
+    config.models.map((model) => ({
+      value: `${config.provider}:${model.id}`,
       provider: config.provider,
-      modelId,
-      label: `${modelId} (${config.provider})`,
+      modelId: model.id,
+      displayName: model.displayName || model.id,
+      label: `${model.displayName || model.id} (${config.provider})`,
     })),
   );
 
@@ -395,9 +413,9 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
             }}
-            title={option.modelId}
+            title={option.displayName}
           >
-            {option.modelId}
+            {option.displayName}
           </Typography>
           <Typography
             variant="body2"
@@ -521,7 +539,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
                             whiteSpace: 'nowrap',
                           }}
                         >
-                          {option.modelId}
+                          {option.displayName}
                         </Typography>
                         <Typography
                           variant="body2"

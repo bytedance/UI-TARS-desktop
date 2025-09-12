@@ -25,7 +25,10 @@ export interface WorkspaceItem {
 export interface AvailableModelsResponse {
   models: Array<{
     provider: string;
-    models: string[];
+    models: Array<{
+      id: string;
+      displayName?: string;
+    }>;
   }>;
 }
 
