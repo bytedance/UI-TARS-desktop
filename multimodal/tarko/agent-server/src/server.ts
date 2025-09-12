@@ -19,6 +19,8 @@ import type {
   AgentResolutionResult,
   AgioProviderConstructor,
   IAgent,
+  SessionInfo,
+  AgentModel,
 } from './types';
 import { TARKO_CONSTANTS, GlobalDirectoryOptions } from '@tarko/interface';
 
@@ -141,15 +143,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     return this.currentAgentResolution?.agentName;
   }
 
-  /**
-   * Validate if a model configuration is still valid
-   * @deprecated With simplified model configuration, all provider/model combinations are considered valid
-   */
-  isModelConfigValid(provider: string, modelId: string): boolean {
-    // With simplified model configuration, we accept any provider/model combination
-    // The actual validation happens during model resolution
-    return true;
-  }
+
 
   /**
    * Check if server can accept new requests in exclusive mode
@@ -321,17 +315,104 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   }
 
   /**
+   * Get available models by merging AgentOptions.model with server.models
+   * @returns Array of available models
+   */
+  getAvailableModels(): AgentModel[] {
+    const models: AgentModel[] = [];
+    
+    // Add AgentOptions.model if it exists
+    if (this.appConfig.model) {
+      models.push(this.appConfig.model);
+    }
+    
+    // Add server.models if they exist
+    if (this.appConfig.server?.models) {
+      models.push(...this.appConfig.server.models);
+    }
+    
+    return models;
+  }
+
+  /**
+   * Get the default model
+   * @returns Default model (AgentOptions.model or first server.models)
+   */
+  getDefaultModel(): AgentModel | undefined {
+    // Prefer AgentOptions.model if it exists
+    if (this.appConfig.model) {
+      return this.appConfig.model;
+    }
+    
+    // Fall back to first server.models
+    if (this.appConfig.server?.models && this.appConfig.server.models.length > 0) {
+      return this.appConfig.server.models[0];
+    }
+    
+    return undefined;
+  }
+
+  /**
+   * Check if a model configuration is valid
+   * @param provider Model provider
+   * @param modelId Model ID
+   * @returns True if model is valid
+   */
+  isModelConfigValid(provider: string, modelId: string): boolean {
+    const availableModels = this.getAvailableModels();
+    return availableModels.some(model => 
+      model.provider === provider && model.id === modelId
+    );
+  }
+
+  /**
    * Create a new Agent instance using the injected constructor
+   * @param sessionInfo Optional session info to override model config
    * @returns New Agent instance
    */
-  createAgent(): IAgent {
+  createAgent(sessionInfo?: SessionInfo): IAgent {
     if (!this.currentAgentResolution) {
       throw new Error('Cannot found availble resolved agent');
     }
-    const agentOptions: T = {
+    
+    let agentOptions: T = {
       ...this.appConfig,
       name: this.getCurrentAgentName(),
     };
+    
+    // Override model config from session if available and valid
+    if (sessionInfo?.metadata?.modelConfig) {
+      const { provider, modelId } = sessionInfo.metadata.modelConfig;
+      const availableModels = this.getAvailableModels();
+      const selectedModel = availableModels.find(model => 
+        model.provider === provider && model.id === modelId
+      );
+      
+      if (selectedModel) {
+        // Use the session's selected model if it's still available
+        agentOptions = {
+          ...agentOptions,
+          model: selectedModel,
+        };
+      } else {
+        // Session model is no longer available, fall back to default
+        const defaultModel = this.getDefaultModel();
+        if (defaultModel) {
+          agentOptions = {
+            ...agentOptions,
+            model: defaultModel,
+          };
+        }
+        
+        // Log a warning about the fallback
+        if (this.isDebug) {
+          console.warn(
+            `[AgentServer] Session model ${provider}:${modelId} not found in available models, falling back to default model`
+          );
+        }
+      }
+    }
+    
     return new this.currentAgentResolution.agentConstructor(agentOptions);
   }
 }

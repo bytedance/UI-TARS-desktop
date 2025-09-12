@@ -30,7 +30,8 @@ export interface AvailableModelsResponse {
   defaultModel: {
     provider: string;
     modelId: string;
-  };
+    displayName?: string;
+  } | null;
   hasMultipleProviders: boolean;
 }
 
