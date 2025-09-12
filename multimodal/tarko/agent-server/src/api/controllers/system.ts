@@ -95,6 +95,12 @@ export async function updateSessionModel(req: Request, res: Response) {
         return res.status(404).json({ error: 'Session not found' });
       }
 
+      // Find the model to get its displayName
+      const availableModels = server.getAvailableModels();
+      const selectedModel = availableModels.find(
+        (model) => model.provider === provider && model.id === modelId,
+      );
+
       // Update metadata with new model config
       const updatedSessionInfo = await server.storageProvider.updateSessionInfo(sessionId, {
         metadata: {
@@ -102,6 +108,7 @@ export async function updateSessionModel(req: Request, res: Response) {
           modelConfig: {
             provider,
             modelId,
+            displayName: selectedModel?.displayName, // Include displayName if available
             configuredAt: Date.now(),
           },
         },

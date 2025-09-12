@@ -95,6 +95,11 @@ export const createSessionAction = atom(null, async (get, set) => {
     // Update session metadata when creating session
     if (newSession.metadata) {
       set(sessionMetadataAtom, newSession.metadata);
+      console.log(`Set metadata for new session ${newSession.id}:`, newSession.metadata);
+    } else {
+      // Clear metadata for new session
+      set(sessionMetadataAtom, {});
+      console.log(`Cleared metadata for new session ${newSession.id}`);
     }
 
     set(toolResultsAtom, (prev) => ({
@@ -190,7 +195,11 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
         // Restore session metadata
         if (sessionDetails.metadata) {
           set(sessionMetadataAtom, sessionDetails.metadata);
-          console.log(`Restored session metadata for ${sessionId}`);
+          console.log(`Restored session metadata for ${sessionId}:`, sessionDetails.metadata);
+        } else {
+          // Clear metadata if no metadata exists for this session
+          set(sessionMetadataAtom, {});
+          console.log(`No metadata found for session ${sessionId}, cleared metadata`);
         }
 
         // Load events to enrich metadata if needed

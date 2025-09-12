@@ -19,7 +19,12 @@ export function getModelDisplayName(
     return '';
   }
 
-  return modelConfig.displayName || modelConfig.modelId;
+  // Check for displayName first, then fall back to modelId
+  if (modelConfig.displayName && modelConfig.displayName.trim()) {
+    return modelConfig.displayName;
+  }
+
+  return modelConfig.modelId;
 }
 
 /**
