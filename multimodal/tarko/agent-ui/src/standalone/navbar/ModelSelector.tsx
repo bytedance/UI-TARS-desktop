@@ -186,7 +186,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
       }
 
       const [provider, modelId] = selectedValue.split(':');
-      console.log('🔍 [NavbarModelSelector] Parsed model selection:', { provider, modelId });
+      console.log('🔍 [NavbarModelSelector] Parsed model selection:', { provider, modelId, selectedValue });
 
       if (!provider || !modelId) {
         console.error('❌ [NavbarModelSelector] Invalid model format:', selectedValue);

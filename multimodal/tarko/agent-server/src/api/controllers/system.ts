@@ -44,19 +44,20 @@ export function getAvailableModels(req: Request, res: Response) {
   const server = req.app.locals.server;
   const availableModels = server.getAvailableModels();
 
-  // Group models by provider
   const modelsByProvider = availableModels.reduce(
     (acc, model) => {
       if (!acc[model.provider]) {
         acc[model.provider] = [];
       }
-      acc[model.provider].push(model.id);
+      // Deduplication configuration
+      if (!acc[model.provider].includes(model.id)) {
+        acc[model.provider].push(model.id);
+      }
       return acc;
     },
     {} as Record<string, string[]>,
   );
 
-  // Convert to expected format
   const models = Object.entries(modelsByProvider).map(([provider, modelIds]) => ({
     provider,
     models: modelIds,

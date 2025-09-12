@@ -318,17 +318,12 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    */
   getAvailableModels(): AgentModel[] {
     const models: AgentModel[] = [];
-
-    // Add AgentOptions.model if it exists
     if (this.appConfig.model) {
       models.push(this.appConfig.model);
     }
-
-    // Add server.models if they exist
     if (this.appConfig.server?.models) {
       models.push(...this.appConfig.server.models);
     }
-
     return models;
   }
 
