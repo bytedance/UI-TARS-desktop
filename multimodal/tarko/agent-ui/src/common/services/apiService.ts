@@ -27,12 +27,6 @@ export interface AvailableModelsResponse {
     provider: string;
     models: string[];
   }>;
-  defaultModel: {
-    provider: string;
-    modelId: string;
-    displayName?: string;
-  } | null;
-  hasMultipleProviders: boolean;
 }
 
 /**
@@ -528,8 +522,6 @@ class ApiService {
       console.error('Error getting available models:', error);
       return {
         models: [],
-        defaultModel: { provider: '', modelId: '' },
-        hasMultipleProviders: false,
       };
     }
   }

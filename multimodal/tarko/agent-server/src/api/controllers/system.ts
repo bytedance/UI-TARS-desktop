@@ -43,7 +43,6 @@ export function getAgentOptions(req: Request, res: Response) {
 export function getAvailableModels(req: Request, res: Response) {
   const server = req.app.locals.server;
   const availableModels = server.getAvailableModels();
-  const defaultModel = server.getDefaultModel();
   
   // Group models by provider
   const modelsByProvider = availableModels.reduce((acc, model) => {
@@ -60,17 +59,8 @@ export function getAvailableModels(req: Request, res: Response) {
     models: modelIds,
   }));
   
-  // Check if there are multiple providers
-  const hasMultipleProviders = Object.keys(modelsByProvider).length > 1;
-  
   res.status(200).json({
     models,
-    defaultModel: defaultModel ? {
-      provider: defaultModel.provider,
-      modelId: defaultModel.id,
-      displayName: defaultModel.displayName,
-    } : null,
-    hasMultipleProviders,
   });
 }
 

@@ -22,12 +22,6 @@ interface ModelConfig {
 
 interface AvailableModelsResponse {
   models: ModelConfig[];
-  defaultModel: {
-    provider: string;
-    modelId: string;
-    displayName?: string;
-  } | null;
-  hasMultipleProviders: boolean;
 }
 
 interface NavbarModelSelectorProps {
@@ -168,11 +162,6 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     try {
       const models = await apiService.getAvailableModels();
       setAvailableModels(models);
-
-      if (models.defaultModel) {
-        const modelKey = `${models.defaultModel.provider}:${models.defaultModel.modelId}`;
-        setCurrentModel(modelKey);
-      }
     } catch (error) {
       console.error('Failed to load available models:', error);
     } finally {
@@ -245,10 +234,13 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
       
       if (isModelAvailable) {
         setCurrentModel(modelKey);
-      } else if (availableModels.defaultModel) {
-        // Fall back to default model if session model is no longer available
-        const defaultKey = `${availableModels.defaultModel.provider}:${availableModels.defaultModel.modelId}`;
-        setCurrentModel(defaultKey);
+      } else if (availableModels.models.length > 0) {
+        // Fall back to first available model if session model is no longer available
+        const firstModel = availableModels.models[0];
+        if (firstModel.models.length > 0) {
+          const fallbackKey = `${firstModel.provider}:${firstModel.models[0]}`;
+          setCurrentModel(fallbackKey);
+        }
       }
     }
   }, [sessionMetadata, availableModels]);
@@ -257,7 +249,10 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     return null;
   }
 
-  if (!availableModels?.hasMultipleProviders || availableModels.models.length === 0) {
+  // Check if there are multiple providers (calculate on frontend)
+  const hasMultipleProviders = availableModels ? availableModels.models.length > 1 : false;
+  
+  if (!hasMultipleProviders || availableModels.models.length === 0) {
     if (!sessionMetadata?.modelConfig) {
       return null;
     }
