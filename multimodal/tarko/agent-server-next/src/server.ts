@@ -25,7 +25,7 @@ import { SandboxScheduler } from './core/sandbox/SandboxScheduler';
 import { UserConfigService } from './services/UserConfigService';
 import { authMiddleware } from './middlewares/auth';
 import { TARKO_CONSTANTS, GlobalDirectoryOptions } from '@tarko/interface';
-import { requestIdMiddleware, loggingMiddleware, errorHandlingMiddleware } from './middlewares';
+import { requestIdMiddleware, accessLogMiddleware, errorHandlingMiddleware } from './middlewares';
 import {
   createQueryRoutes,
   createSessionRoutes,
@@ -141,7 +141,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     this.app.use('*', requestIdMiddleware);
 
     // 4. Logging middleware (after request ID)
-    this.app.use('*', loggingMiddleware);
+    this.app.use('*', accessLogMiddleware);
 
     // 5. Authentication middleware (for multi-tenant mode)
     this.app.use('*', authMiddleware);
