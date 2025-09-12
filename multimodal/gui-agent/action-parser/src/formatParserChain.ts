@@ -5,7 +5,9 @@
 import { ConsoleLogger } from '@agent-infra/logger';
 
 export interface FormatParser {
-  parse(text: string): { reasoningContent: string | null; actionStr: string } | null;
+  parse(
+    text: string,
+  ): { reasoningContent: string | null; actionStr: string; errorMessage?: string } | null;
 }
 
 /**
@@ -80,7 +82,9 @@ class UnifiedBCFormatParser implements FormatParser {
   canParse(text: string): boolean {
     const hasBasicStructure =
       text.includes('Thought:') &&
-      (text.includes('Action:') || text.includes('Action：')) &&
+      // (text.includes('Action:') || text.includes('Action：')) &&
+      // The Chinese character '：' is not supported as it's often a result of LLM hallucination
+      text.includes('Action:') &&
       !text.includes('Reflection:') &&
       !text.includes('Action_Summary:');
 
@@ -96,13 +100,16 @@ class UnifiedBCFormatParser implements FormatParser {
     // this.logger.debug('[UnifiedBCFormatParser] start parsing...');
 
     // Parse thought content - this part remains unchanged
-    const thoughtMatch = text.match(/Thought:\s*([\s\S]+?)(?=\s*Action[：:]|$)/);
+    // const thoughtMatch = text.match(/Thought:\s*([\s\S]+?)(?=\s*Action[：:]|$)/);
+    const thoughtMatch = text.match(/Thought:\s*([\s\S]+?)(?=\s*Action:|$)/);
     const reasoningContent = thoughtMatch ? thoughtMatch[1].trim() : null;
 
     // Parse action content
     let actionStr = '';
-    if (text.includes('Action:') || text.includes('Action：')) {
-      const actionParts = text.split(/Action[：:]/);
+    // if (text.includes('Action:') || text.includes('Action：')) {
+    if (text.includes('Action:')) {
+      // const actionParts = text.split(/Action[：:]/);
+      const actionParts = text.split(/Action:/);
       actionStr = actionParts[actionParts.length - 1].trim();
     } else {
       actionStr = text;
@@ -233,69 +240,39 @@ class O1FormatParser implements FormatParser {
 export class FallbackFormatParser implements FormatParser {
   constructor(private logger: ConsoleLogger) {}
 
-  canParse(text: string): boolean {
-    // As a fallback parser, always return true
-    this.logger.debug('[FallbackFormatParser] canParse: always true');
-    return true;
-  }
-
   parse(text: string): { reasoningContent: string | null; actionStr: string } | null {
-    // this.logger.debug('[FallbackFormatParser] start parsing...');
-    if (!this.canParse(text)) {
-      return null;
+    this.logger.debug('[FallbackFormatParser] canParse: always true');
+
+    // Try to parse the action string with function call format
+    // const actionMatch = text.match(/Action[：:]?\s*([\s\S]*?)(?=\s*<\/Output>|$)/s);
+    const regex = /\w+\((?:[^()"']|"[^"]*"|'[^']*'|\([^()]*\))*\)/;
+    const actionMatch = text.match(regex);
+
+    if (!actionMatch) {
+      this.logger.error('[FallbackFormatParser] there is no function call format in the text');
+      throw Error('No valid GUI action string was detected');
     }
+
+    const actionStr = actionMatch[0].trim();
 
     // Parse thought content
     const thoughtMatch = text.match(/Thought:\s*([\s\S]+?)(?=\s*Action[：:]|$)/);
-    const thought = thoughtMatch ? thoughtMatch[1].trim() : null;
+    const thoughtStr = thoughtMatch ? thoughtMatch[1].trim() : null;
 
     // Check special cases
-    const hasChineseColon = text.includes('Action：');
-    const hasEnglishColon = text.includes('Action:');
-    const hasEmptyAction = /Action[：:]\s*$/.test(text.trim());
-    const isDirectFunctionCall =
-      /^\w+\([^)]*\)/.test(text.trim()) && !hasChineseColon && !hasEnglishColon;
+    // const hasChineseColon = text.includes('Action：');
+    // const hasEnglishColon = text.includes('Action:');
+    // const hasEmptyAction = /Action[：:]\s*$/.test(text.trim());
+    // const isDirectFunctionCall =
+    //   /^\w+\([^)]*\)/.test(text.trim()) && !hasChineseColon && !hasEnglishColon;
 
-    this.logger.debug('[FallbackFormatParser] Detected format:', {
-      hasChineseColon,
-      hasEnglishColon,
-      hasEmptyAction,
-      isDirectFunctionCall,
-    });
-
-    // Parse action content
-    let actionStr = '';
-
-    if (hasEmptyAction) {
-      // Handle empty action input, keep actionStr as empty string
-      this.logger.debug('[FallbackFormatParser] Handling empty action input');
-    } else if (isDirectFunctionCall) {
-      // If it's a direct function call, the entire text is the action string
-      actionStr = text.trim();
-      this.logger.debug('[FallbackFormatParser] Handling direct function call format');
-    } else if (hasChineseColon) {
-      // Handle Chinese colon
-      const actionParts = text.split('Action：');
-      actionStr = actionParts[actionParts.length - 1].trim();
-      this.logger.debug('[FallbackFormatParser] Handling Chinese colon format');
-    } else if (hasEnglishColon) {
-      // Handle English colon
-      const actionParts = text.split('Action:');
-      actionStr = actionParts[actionParts.length - 1].trim();
-      this.logger.debug('[FallbackFormatParser] Handling English colon format');
-    } else {
-      // Fallback handling: use the entire text as action string
-      actionStr = text.trim();
-      this.logger.debug('[FallbackFormatParser] Using fallback handling');
-    }
-
-    this.logger.debug('[FallbackFormatParser] parse result:', {
-      thought: thought?.substring(0, 100),
-      actionStr: actionStr.substring(0, 100),
-    });
+    // this.logger.debug('[FallbackFormatParser] parse result:', {
+    //   thought: thought?.substring(0, 100),
+    //   actionStr: actionStr.substring(0, 100),
+    // });
 
     return {
-      reasoningContent: thought || (isDirectFunctionCall ? '' : null), // For direct function calls, if there's no thought content, return empty string
+      reasoningContent: thoughtStr,
       actionStr,
     };
   }
@@ -323,10 +300,7 @@ export class FormatParserChain {
     }
 
     // Theoretically, this should not be reached, as the DefaultFormatParser always returns true.
-    this.logger.warn('[FormatParserChain]', 'No appropriate parser found, return default value.');
-    return {
-      reasoningContent: null,
-      actionStr: text.trim(),
-    };
+    this.logger.warn('[FormatParserChain]', 'No appropriate parser found');
+    throw Error('No valid GUI action string was detected');
   }
 }

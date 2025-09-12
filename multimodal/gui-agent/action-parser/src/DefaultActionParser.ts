@@ -49,13 +49,27 @@ export class DefaultActionParser extends BaseActionParser {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const actionInputs: Record<string, any> = {};
 
-    actionType = actionInstance.function;
-    const params = actionInstance.args;
+    actionType = actionInstance.action_type;
+    const params: Record<string, string> = actionInstance.action_params;
 
-    for (const [paramName, param] of Object.entries(params)) {
-      if (!param) continue;
+    for (const [paramName, paramStr] of Object.entries(params)) {
+      // TODO: handle paramStr is empty when start_box/end_box/...
+      if (!paramStr) {
+        this.logger.debug(`[parseActionFromString] paramStr of ${paramName} is empty, skipping`);
+        if (
+          paramName.includes('start_box') ||
+          paramName.includes('end_box') ||
+          paramName.includes('point') ||
+          paramName.includes('key')
+        ) {
+          throw new SyntaxError(
+            `The required parameters of ${paramName} of ${actionType} action is empty`,
+          );
+        }
+        continue;
+      }
 
-      const trimmedParam = (param as string).trim();
+      const trimmedParam = (paramStr as string).trim();
       this.logger.debug(`[parseActionFromString] Processing parameter ${paramName}:`, trimmedParam);
 
       if (
@@ -78,12 +92,9 @@ export class DefaultActionParser extends BaseActionParser {
         } else if (boxKey.includes('end')) {
           boxKey = 'end';
         }
+        this.logger.debug(`[parseActionFromString] determined ${paramName} -> ${boxKey}`);
 
-        this.logger.debug(
-          `[parseActionFromString] Determined boxKey: ${boxKey} from paramName: ${paramName}`,
-        );
         actionInputs[boxKey] = coords;
-
         continue;
       }
 
@@ -108,41 +119,59 @@ export class DefaultActionParser extends BaseActionParser {
       '[parsePrediction] starting:',
       input.length <= 30 ? input : input.substring(0, 30) + '...',
     );
+    const originInput = input;
 
     input = input.trim();
 
-    const { reasoningContent, rawActionStrings } = this.extractActionStrings(input);
+    let reasoningContent = null;
+    let rawActionStrings = null;
+    try {
+      ({ reasoningContent, rawActionStrings } = this.extractActionStrings(input));
+    } catch (error) {
+      return {
+        errorMessage: (error as Error).message,
+        rawContent: originInput,
+        rawActionStrings: [],
+        actions: [],
+      };
+    }
+
     if (!rawActionStrings || rawActionStrings.length <= 0) {
       return {
-        rawContent: input,
-        reasoningContent: reasoningContent ?? '',
+        errorMessage: 'There is no GUI action detected',
+        rawContent: originInput,
+        reasoningContent,
         rawActionStrings: [],
         actions: [],
       };
     }
 
     const actions: BaseAction[] = [];
-    for (const actionString of rawActionStrings) {
-      const action = this.parseActionFromString(actionString);
-      if (action) {
-        actions.push(action);
+    try {
+      for (const actionString of rawActionStrings) {
+        const action = this.parseActionFromString(actionString);
+        if (action) actions.push(action);
       }
+    } catch (error) {
+      return {
+        errorMessage: (error as Error).message,
+        rawContent: originInput,
+        reasoningContent,
+        rawActionStrings,
+        actions: [],
+      };
     }
 
     this.logger.debug(
       '[parsePrediction] final result: reasoningContent:',
-      reasoningContent === null || reasoningContent === undefined
-        ? reasoningContent
-        : reasoningContent.length <= 30
-          ? reasoningContent
-          : reasoningContent.substring(0, 30) + '...',
-      ', action lenght:',
+      reasoningContent,
+      ', actions lenth:',
       actions.length,
     );
 
     return {
-      rawContent: input,
-      reasoningContent: reasoningContent ?? '',
+      rawContent: originInput,
+      reasoningContent,
       rawActionStrings,
       actions,
     };
@@ -151,9 +180,13 @@ export class DefaultActionParser extends BaseActionParser {
   /**
    * Parses an action string into a structured object
    * @param {string} actionStr - The action string to parse (e.g. "click(start_box='(279,81)')")
-   * @returns {Object|null} Parsed action object or null if parsing fails
+   * @returns {Object} Parsed action object
+   * @throws {Error} If action string is invalid
    */
-  private parseAction(actionStr: string) {
+  private parseAction(actionStr: string): {
+    action_type: string;
+    action_params: Record<string, string>;
+  } {
     // this.logger.debug('[parseAction] raw:', actionStr);
 
     try {
@@ -189,21 +222,21 @@ export class DefaultActionParser extends BaseActionParser {
       this.logger.debug('[parseAction] extract param string:', argsStr);
 
       // Parse keyword arguments
-      const kwargs = {};
+      const kwargs: Record<string, string> = {};
 
       if (argsStr.trim()) {
         // Split on commas that aren't inside quotes or parentheses
 
         // const argPairs = argsStr.match(/([^,']|'[^']*')+/g) || [];
         // Support format: click(start_box="(100,200)")
-        const argPairs = argsStr.match(/([^,'"]|'[^']*'|"[^"]*")+/g) || [];
-        this.logger.debug('[parseAction] split param pairs:', argPairs);
+        const keyValueRawStrList = argsStr.match(/([^,'"]|'[^']*'|"[^"]*")+/g) || [];
+        this.logger.debug('[parseAction] split param pairs:', keyValueRawStrList);
 
-        for (let i = 0; i < argPairs.length; i++) {
-          const pair = argPairs[i];
-          this.logger.debug(`[parseAction] handle param pair ${i + 1}:`, pair);
+        for (let i = 0; i < keyValueRawStrList.length; i++) {
+          const keyValueRawStr = keyValueRawStrList[i];
+          this.logger.debug(`[parseAction] handle param pair ${i + 1}:`, keyValueRawStr);
 
-          const [key, ...valueParts] = pair.split('=');
+          const [key, ...valueParts] = keyValueRawStr.split('=');
           if (!key) {
             this.logger.debug(`[parseAction] param pair ${i + 1} invalid, skip`);
             continue;
@@ -231,36 +264,43 @@ export class DefaultActionParser extends BaseActionParser {
             this.logger.debug(`[parseAction] Converting point format: ${beforePoint} -> ${value}`);
           }
 
-          //@ts-ignore
           kwargs[key.trim()] = value;
         }
       }
 
       const result = {
-        function: functionName,
-        args: kwargs,
+        action_type: functionName,
+        action_params: kwargs,
       };
       this.logger.debug('[parseAction] parse success:', result);
       return result;
     } catch (e) {
       console.error(`[parseAction] parse failed '${actionStr}': ${e}`);
-      return null;
+      throw new Error(
+        `Failed to parse GUI action: "${actionStr}", detail: ${(e as Error).message}`,
+      );
     }
   }
 
-  private parseCoordinates(params: string): Coordinates | null {
+  /**
+   * Parses coordinate string into structured coordinates
+   * @param {string} params - The coordinate string to parse (e.g. "(100,200)")
+   * @returns {Coordinates} Parsed coordinates object
+   * @throws {Error} If coordinate string is invalid
+   */
+  private parseCoordinates(params: string): Coordinates {
     const oriBox = params.trim();
     this.logger.debug(`[parseCoordinates] processing trimmed params:`, oriBox);
 
     if (!oriBox || oriBox.length === 0) {
       this.logger.warn('[parseCoordinates] empty coordinate string');
-      return null;
+      throw new Error('Coordinate string is empty');
     }
 
     const hasValidBrackets = /[[\]()]+/.test(oriBox);
     if (!hasValidBrackets) {
       this.logger.warn('[parseCoordinates] invalid bracket format');
-      return null;
+      throw new Error('Invalid coordinate format');
     }
 
     // Remove parentheses and split
@@ -273,7 +313,7 @@ export class DefaultActionParser extends BaseActionParser {
 
     if (numbers.length < 2) {
       this.logger.warn('[parseCoordinates] no valid numbers found');
-      return null;
+      throw new Error('Insufficient coordinate, at least 2 numbers required');
     }
 
     // Convert to float with validation
@@ -289,7 +329,7 @@ export class DefaultActionParser extends BaseActionParser {
 
     if (floatNumbers.length < 2) {
       this.logger.warn('[parseCoordinates] insufficient coordinate values');
-      return null;
+      throw new Error('Insufficient coordinate, at least 2 numbers are required');
     }
 
     const [x1, y1, x2 = x1, y2 = y1] = floatNumbers;
@@ -297,7 +337,7 @@ export class DefaultActionParser extends BaseActionParser {
     const validCoordinates = [x1, y1, x2, y2].every((coord) => isNumber(coord) && isFinite(coord));
     if (!validCoordinates) {
       this.logger.warn('[parseCoordinates] invalid coordinate values detected');
-      return null;
+      throw new Error('Invalid coordinate values detected');
     }
 
     // Calculate the center point
@@ -306,7 +346,7 @@ export class DefaultActionParser extends BaseActionParser {
     const validCenter = isFinite(centerX) && isFinite(centerY);
     if (!validCenter) {
       this.logger.warn('[parseCoordinates] invalid center point');
-      return null;
+      throw new Error('Failed to calculate valid center point from the provided coordinates');
     }
 
     // Construct the coordinates object
@@ -316,8 +356,8 @@ export class DefaultActionParser extends BaseActionParser {
         y: centerY,
       },
       referenceBox: {
-        x1: Math.min(x1, x2), // 确保x1 <= x2
-        y1: Math.min(y1, y2), // 确保y1 <= y2
+        x1: Math.min(x1, x2),
+        y1: Math.min(y1, y2),
         x2: Math.max(x1, x2),
         y2: Math.max(y1, y2),
       },
