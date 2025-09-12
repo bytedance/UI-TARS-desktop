@@ -74,11 +74,9 @@ export class LLMRequester {
     const client = getLLMClient(currentModel, { type: options.thinking ? 'enabled' : 'disabled' });
 
     try {
-      // @ts-expect-error
       // Add stream option to request
       requestBody.stream = requestBody.stream ?? stream;
 
-      // @ts-expect-error
       // Send request
       const response = await client.chat.completions.create(requestBody);
 
