@@ -190,6 +190,9 @@ importers:
       '@agent-infra/logger':
         specifier: 0.0.2-beta.2
         version: 0.0.2-beta.2
+      '@gui-agent/shared':
+        specifier: workspace:*
+        version: link:../shared
       '@ui-tars/shared':
         specifier: 1.2.3
         version: 1.2.3

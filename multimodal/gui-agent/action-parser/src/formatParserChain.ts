@@ -33,7 +33,7 @@ export class OmniFormatParser implements FormatParser {
   }
 
   parse(text: string): { thought: string | null; actionStr: string } {
-    this.logger.debug('[OmniFormatParser] start...');
+    // this.logger.debug('[OmniFormatParser] start...');
     const thinkMatch = text.match(/<think[^>]*>([\s\S]*?)<\/think[^>]*>/i);
     const thought = thinkMatch ? thinkMatch[1].trim() : null;
 
@@ -86,7 +86,7 @@ class UnifiedBCFormatParser implements FormatParser {
   }
 
   parse(text: string): { thought: string | null; actionStr: string } {
-    this.logger.debug('[UnifiedBCFormatParser] start parsing...');
+    // this.logger.debug('[UnifiedBCFormatParser] start parsing...');
 
     // Parse thought content - this part remains unchanged
     const thoughtMatch = text.match(/Thought:\s*([\s\S]+?)(?=\s*Action[：:]|$)/);
@@ -101,10 +101,10 @@ class UnifiedBCFormatParser implements FormatParser {
       actionStr = text;
     }
 
-    this.logger.debug('[UnifiedBCFormatParser] parse result:', {
-      thought: thought?.substring(0, 100),
-      actionStr: actionStr.substring(0, 100),
-    });
+    // this.logger.debug('[UnifiedBCFormatParser] parse result:', {
+    //   thought: thought?.substring(0, 100),
+    //   actionStr: actionStr.substring(0, 100),
+    // });
 
     return {
       thought,
@@ -132,7 +132,7 @@ class BCComplexFormatParser implements FormatParser {
   }
 
   parse(text: string): { thought: string | null; actionStr: string } {
-    this.logger.debug('[BCComplexFormatParser] start...');
+    // this.logger.debug('[BCComplexFormatParser] start...');
     let thought: string | null = null;
     let reflection: string | null = null;
     let actionStr = '';
@@ -184,7 +184,7 @@ class O1FormatParser implements FormatParser {
   }
 
   parse(text: string): { thought: string | null; reflection: string | null; actionStr: string } {
-    this.logger.debug('[O1FormatParser] start...');
+    // this.logger.debug('[O1FormatParser] start...');
     const thoughtMatch = text.match(/<Thought>\s*([\s\S]*?)\s*<\/Thought>/s);
     const actionSummaryMatch = text.match(/Action_Summary:\s*([\s\S]*?)\s*Action:/s);
     const actionMatch = text.match(/Action:\s*([\s\S]*?)\s*<\/Output>/s);
@@ -193,8 +193,12 @@ class O1FormatParser implements FormatParser {
     const actionSummaryContent = actionSummaryMatch ? actionSummaryMatch[1].trim() : null;
     const actionContent = actionMatch ? actionMatch[1].trim() : '';
 
+    // const thought = actionSummaryContent
+    //   ? `${thoughtContent}\n<Action_Summary>\n${actionSummaryContent}`
+    //   : thoughtContent;
+
     const thought = actionSummaryContent
-      ? `${thoughtContent}\n<Action_Summary>\n${actionSummaryContent}`
+      ? `${thoughtContent}, ${actionSummaryContent}`
       : thoughtContent;
 
     return {
@@ -222,7 +226,7 @@ export class FallbackFormatParser implements FormatParser {
   }
 
   parse(text: string): { thought: string | null; reflection: string | null; actionStr: string } {
-    this.logger.debug('[FallbackFormatParser] start parsing...');
+    // this.logger.debug('[FallbackFormatParser] start parsing...');
 
     // Parse thought content
     const thoughtMatch = text.match(/Thought:\s*([\s\S]+?)(?=\s*Action[：:]|$)/);
@@ -299,14 +303,14 @@ export class FormatParserChain {
 
     for (const parser of this.parsers) {
       const parserName = parser.constructor.name;
-      this.logger.debug(`[FormatParserChain] try parser: ${parserName}`);
+      // this.logger.debug(`[FormatParserChain] try parser: ${parserName}`);
 
       if (parser.canParse(text)) {
         const result = parser.parse(text);
-        this.logger.debug(`[FormatParserChain] ${parserName} result:`, {
-          thought: result.thought?.substring(0, 100),
-          actionStr: result.actionStr,
-        });
+        // this.logger.debug(`[FormatParserChain] ${parserName} result:`, {
+        //   thought: result.thought?.substring(0, 100),
+        //   actionStr: result.actionStr,
+        // });
         return result;
       }
     }
