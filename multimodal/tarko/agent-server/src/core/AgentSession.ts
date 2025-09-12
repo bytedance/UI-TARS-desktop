@@ -419,7 +419,7 @@ export class AgentSession {
 
       // Create new agent with updated session info
       const newAgent = this.server.createAgent(sessionInfo);
-      
+
       // Handle snapshot if enabled
       const agentOptions = { ...this.server.appConfig };
       if (agentOptions.snapshot?.enable) {
