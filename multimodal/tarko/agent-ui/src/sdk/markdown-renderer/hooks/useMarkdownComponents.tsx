@@ -24,12 +24,13 @@ import {
 
 interface UseMarkdownComponentsProps {
   onImageClick: (src: string) => void;
+  preserveWhitespace?: boolean;
 }
 
 /**
  * Custom hook that provides markdown components configuration
  */
-export const useMarkdownComponents = ({ onImageClick }: UseMarkdownComponentsProps): Components => {
+export const useMarkdownComponents = ({ onImageClick, preserveWhitespace = false }: UseMarkdownComponentsProps): Components => {
   return React.useMemo(
     () => ({
       // Headings
@@ -51,7 +52,7 @@ export const useMarkdownComponents = ({ onImageClick }: UseMarkdownComponentsPro
 
       // Code
       code: ({ className, children, ...props }) => (
-        <CodeBlock className={className} {...props}>
+        <CodeBlock className={className} preserveWhitespace={preserveWhitespace} {...props}>
           {children}
         </CodeBlock>
       ),
@@ -70,6 +71,6 @@ export const useMarkdownComponents = ({ onImageClick }: UseMarkdownComponentsPro
       // Override strikethrough (del) to render as normal text
       del: ({ children }) => <span>{children}</span>,
     }),
-    [onImageClick],
+    [onImageClick, preserveWhitespace],
   );
 };
