@@ -5,3 +5,12 @@
 
 export { AgentSession } from './AgentSession';
 export type { AgentQueryResponse } from './AgentSession';
+
+// Session management
+export { SessionManager } from './session/SessionManager';
+export { AgentSessionFactory } from './session/AgentSessionFactory';
+
+// Sandbox management
+export { SandboxManager } from './sandbox/SandboxManager';
+export { SandboxScheduler } from './sandbox/SandboxScheduler';
+export type * from './sandbox/types';

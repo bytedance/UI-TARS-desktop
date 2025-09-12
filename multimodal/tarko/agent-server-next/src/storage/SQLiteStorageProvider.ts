@@ -9,10 +9,11 @@ import { DatabaseSync } from 'node:sqlite';
 import {
   AgentEventStream,
   getGlobalStorageDirectory,
+  SessionInfo,
   SqliteAgentStorageImplementation,
   TARKO_CONSTANTS,
 } from '@tarko/interface';
-import { StorageProvider, SessionInfo, LegacySessionItemInfo } from './types';
+import { StorageProvider } from './types';
 
 // Define row types for better type safety
 interface SessionRow {

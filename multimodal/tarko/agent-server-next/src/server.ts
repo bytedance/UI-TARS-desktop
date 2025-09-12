@@ -6,9 +6,9 @@
 import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
 import { cors } from 'hono/cors';
-import { LogLevel } from '@tarko/interface';
+import { LogLevel, SessionInfo, TenantConfig } from '@tarko/interface';
 import { StorageProvider, createStorageProvider } from './storage';
-import type { AgentSession } from './core';
+import type { AgentSession, SandboxManager } from './core';
 import { resolveAgentImplementation } from './utils/agent-resolver';
 import type {
   AgentServerVersionInfo,
@@ -19,6 +19,11 @@ import type {
   IAgent,
   ContextVariables,
 } from './types';
+import { SessionManager } from './core/session/SessionManager';
+import { AgentSessionFactory } from './core/session/AgentSessionFactory';
+import { SandboxScheduler } from './core/sandbox/SandboxScheduler';
+import { UserConfigService } from './services/UserConfigService';
+import { authMiddleware } from './middlewares/auth';
 import { TARKO_CONSTANTS, GlobalDirectoryOptions } from '@tarko/interface';
 import { requestIdMiddleware, loggingMiddleware, errorHandlingMiddleware } from './middlewares';
 import {
@@ -27,6 +32,7 @@ import {
   createShareRoutes,
   createSystemRoutes,
 } from './api/routes';
+import { createUserConfigRoutes } from './api/routes/user';
 
 /**
  * AgentServer - Generic server class for any Agent implementation using Hono
@@ -50,15 +56,20 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   // Session management
   public sessions: Record<string, AgentSession> = {};
   public storageUnsubscribes: Record<string, () => void> = {};
+  private sessionManager: SessionManager;
+  private sessionFactory: AgentSessionFactory;
+  private sandboxScheduler?: SandboxScheduler;
+  private userConfigService?: UserConfigService;
 
   // Configuration
   public readonly port: number;
   public readonly isDebug: boolean;
   public readonly isExclusive: boolean;
-  public readonly storageProvider: StorageProvider | null = null;
+  public readonly storageProvider: StorageProvider;
   public readonly appConfig: T;
   public readonly versionInfo?: AgentServerVersionInfo;
   public readonly directories: Required<GlobalDirectoryOptions>;
+  public readonly tenantConfig: TenantConfig;
 
   // Exclusive mode state
   private runningSessionId: string | null = null;
@@ -84,14 +95,23 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     this.port = appConfig.server?.port ?? 3000;
     this.isDebug = appConfig.logLevel === LogLevel.DEBUG;
     this.isExclusive = appConfig.server?.exclusive ?? false;
+    this.tenantConfig = appConfig.server?.tenant || { mode: 'single', auth: false };
 
     // Initialize Hono app
     this.app = new Hono<{ Variables: ContextVariables }>();
 
-    // Initialize storage if provided
-    if (appConfig.server?.storage) {
-      this.storageProvider = createStorageProvider(appConfig.server.storage);
-    }
+    // Initialize storage
+    this.storageProvider = createStorageProvider(appConfig.server?.storage || { type: 'sqlite' });
+
+    // Initialize session management
+    this.sessionManager = new SessionManager({
+      maxSessions: (appConfig.server as any)?.maxSessions,
+      memoryLimitMB: (appConfig.server as any)?.memoryLimitMB,
+      checkIntervalMs: (appConfig.server as any)?.checkIntervalMs,
+    });
+
+    // Initialize session factory
+    this.sessionFactory = new AgentSessionFactory(this);
 
     // Setup middlewares in correct order
     this.setupMiddlewares();
@@ -123,7 +143,10 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     // 4. Logging middleware (after request ID)
     this.app.use('*', loggingMiddleware);
 
-    // 5. Server instance injection middleware
+    // 5. Authentication middleware (for multi-tenant mode)
+    this.app.use('*', authMiddleware);
+
+    // 6. Server instance injection middleware
     this.app.use('*', async (c, next) => {
       c.set('server', this);
       await next();
@@ -139,6 +162,11 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     this.app.route('/', createSessionRoutes());
     this.app.route('/', createShareRoutes());
     this.app.route('/', createSystemRoutes());
+
+    // Register user config routes for multi-tenant mode
+    if (this.isMultiTenant()) {
+      this.app.route('/', createUserConfigRoutes());
+    }
 
     // Add a catch-all route for undefined endpoints
     this.app.notFound((c) => {
@@ -269,7 +297,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   /**
    * Create Agent with session-specific model configuration
    */
-  createAgentWithSessionModel(sessionInfo?: import('./storage').SessionInfo): IAgent {
+  createAgentWithSessionModel(sessionInfo?: SessionInfo): IAgent {
     let modelConfig = this.getDefaultModelConfig();
 
     // If session has specific model config and it's still valid, use session config
@@ -364,6 +392,11 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
       }
     }
 
+    // Initialize multi-tenant services if in multi-tenant mode
+    if (this.isMultiTenant()) {
+      await this.initializeMultiTenantServices();
+    }
+
     // Setup API routes
     this.setupRoutes();
 
@@ -378,10 +411,38 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   }
 
   /**
+   * Initialize multi-tenant services
+   */
+  private async initializeMultiTenantServices(): Promise<void> {
+    if (!this.appConfig.server?.sandbox) {
+      throw new Error('Sandbox config must be specified in multi-tenant mode');
+    }
+
+    try {
+      this.userConfigService = new UserConfigService();
+
+      this.sandboxScheduler = new SandboxScheduler({
+        sandboxConfig: this.appConfig.server.sandbox,
+        userConfigService: this.userConfigService,
+      });
+
+      // Update session factory with sandbox scheduler
+      this.sessionFactory.setSandboxScheduler(this.sandboxScheduler);
+
+      console.log('Multi-tenant services initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize multi-tenant services:', error);
+    }
+  }
+
+  /**
    * Stop the server and clean up all resources
    * @returns Promise resolving when server is stopped
    */
   async stop(): Promise<void> {
+    // Clean up session manager
+    await this.sessionManager.cleanup();
+
     // Clean up all active sessions
     const sessionCleanup = Object.values(this.sessions).map((session) => session.cleanup());
     await Promise.all(sessionCleanup);
@@ -419,5 +480,33 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
       name: this.getCurrentAgentName(),
     };
     return new this.currentAgentResolution.agentConstructor(agentOptions);
+  }
+
+  /**
+   * Get session manager instance
+   */
+  getSessionManager(): SessionManager {
+    return this.sessionManager;
+  }
+
+  /**
+   * Get session factory instance
+   */
+  getSessionFactory(): AgentSessionFactory {
+    return this.sessionFactory;
+  }
+
+  /**
+   * Check if server is in multi-tenant mode
+   */
+  isMultiTenant(): boolean {
+    return this.tenantConfig.mode === 'multi';
+  }
+
+  /**
+   * Get memory statistics from session manager
+   */
+  getMemoryStats() {
+    return this.sessionManager.getMemoryStats();
   }
 }

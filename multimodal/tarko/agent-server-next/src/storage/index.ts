@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { 
+import type {
   AgentStorageImplementation,
   MongoDBAgentStorageImplementation,
-  SqliteAgentStorageImplementation
+  SqliteAgentStorageImplementation,
 } from '@tarko/interface';
 import { StorageProvider } from './types';
 import { MongoDBStorageProvider } from './MongoDBStorageProvider';
@@ -27,6 +27,6 @@ export function createStorageProvider(config: AgentStorageImplementation): Stora
 }
 
 // Re-export types and classes
-export type { StorageProvider, SessionInfo, SessionMetadata, LegacySessionItemInfo } from './types';
+export type { StorageProvider } from './types';
 export { MongoDBStorageProvider } from './MongoDBStorageProvider';
 export { SQLiteStorageProvider } from './SQLiteStorageProvider';
