@@ -90,6 +90,7 @@ export class MongoDBStorageProvider implements StorageProvider {
         createdAt: sessionData.createdAt,
         updatedAt: sessionData.updatedAt,
         workspace: sessionData.workspace,
+        userId: sessionData.userId,
         metadata: sessionData.metadata,
       });
 
@@ -173,6 +174,7 @@ export class MongoDBStorageProvider implements StorageProvider {
         createdAt: session.createdAt,
         updatedAt: session.updatedAt,
         workspace: session.workspace || '',
+        userId: session.userId,
         metadata: session.metadata,
       };
     } catch (error) {
@@ -202,6 +204,34 @@ export class MongoDBStorageProvider implements StorageProvider {
       logger.error('Failed to get all sessions:', error);
       throw new Error(
         `Failed to get all sessions: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+
+  async getUserSessions(userId: string): Promise<SessionInfo[]> {
+    await this.ensureInitialized();
+
+    try {
+      const SessionModel = this.connection!.model<SessionDocument>('Session');
+
+      const sessions = await SessionModel.find({
+        userId,
+      })
+        .sort({ updatedAt: -1 })
+        .lean();
+
+      return sessions.map((session: SessionDocument) => ({
+        id: session._id,
+        createdAt: session.createdAt,
+        updatedAt: session.updatedAt,
+        workspace: session.workspace || '',
+        metadata: session.metadata,
+        userId: session.userId,
+      }));
+    } catch (error) {
+      logger.error(`Failed to get user sessions for ${userId}:`, error);
+      throw new Error(
+        `Failed to get user sessions: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }

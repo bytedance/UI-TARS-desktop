@@ -27,14 +27,7 @@ export async function getAllSessions(c: HonoContext) {
         return c.json({ error: 'Authentication required' }, 401);
       }
 
-      //FIXME: mongo andd sqllite provider have't incomplete this method
-      if (server.storageProvider.getUserSessions) {
-        sessions = await server.storageProvider.getUserSessions(userId);
-      } else {
-        // Fallback: get all sessions and filter (less efficient)
-        const allSessions = await server.storageProvider.getAllSessions();
-        sessions = allSessions.filter((session) => (session as any).userId === userId);
-      }
+      sessions = await server.storageProvider.getUserSessions(userId);
     } else {
       // Single tenant mode: get all sessions
       sessions = await server.storageProvider.getAllSessions();
