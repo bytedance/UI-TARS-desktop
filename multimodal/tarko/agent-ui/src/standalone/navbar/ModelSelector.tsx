@@ -230,20 +230,40 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
       const { provider, modelId } = sessionMetadata.modelConfig;
       const modelKey = `${provider}:${modelId}`;
 
+      console.log('🔄 [ModelSelector] Updating current model from session metadata:', {
+        provider,
+        modelId,
+        modelKey,
+        sessionMetadata: sessionMetadata.modelConfig,
+      });
+
       // Check if the session's model is still available
       const isModelAvailable = availableModels.models.some(
         (config) => config.models.includes(modelId) && config.provider === provider,
       );
 
       if (isModelAvailable) {
+        console.log('✅ [ModelSelector] Session model is available, setting current model:', modelKey);
         setCurrentModel(modelKey);
-      } else if (availableModels.models.length > 0) {
-        // Fall back to first available model if session model is no longer available
-        const firstModel = availableModels.models[0];
-        if (firstModel.models.length > 0) {
-          const fallbackKey = `${firstModel.provider}:${firstModel.models[0]}`;
-          setCurrentModel(fallbackKey);
+      } else {
+        console.warn('⚠️ [ModelSelector] Session model not available:', { provider, modelId });
+        if (availableModels.models.length > 0) {
+          // Fall back to first available model if session model is no longer available
+          const firstModel = availableModels.models[0];
+          if (firstModel.models.length > 0) {
+            const fallbackKey = `${firstModel.provider}:${firstModel.models[0]}`;
+            console.log('🔄 [ModelSelector] Falling back to first available model:', fallbackKey);
+            setCurrentModel(fallbackKey);
+          }
         }
+      }
+    } else if (availableModels && availableModels.models.length > 0 && !sessionMetadata?.modelConfig) {
+      // No session model config, use first available model
+      const firstModel = availableModels.models[0];
+      if (firstModel.models.length > 0) {
+        const fallbackKey = `${firstModel.provider}:${firstModel.models[0]}`;
+        console.log('🆕 [ModelSelector] No session model config, using first available:', fallbackKey);
+        setCurrentModel(fallbackKey);
       }
     }
   }, [sessionMetadata, availableModels]);
@@ -270,6 +290,9 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
           {...getTooltipProps('bottom')}
           title={tooltipContent}
           disableHoverListener={!tooltipContent}
+          PopperProps={{
+            style: { zIndex: 9999 }, // Consistent z-index for tooltips
+          }}
         >
           <motion.div whileHover={{ scale: 1.02 }} className={className}>
             <Box
@@ -417,6 +440,9 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
         {...getTooltipProps('bottom')}
         title={dropdownTooltipContent}
         disableHoverListener={!dropdownTooltipContent}
+        PopperProps={{
+          style: { zIndex: 9999 }, // Lower z-index than dropdown menu
+        }}
       >
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className={className}>
           <FormControl size="small">
@@ -432,7 +458,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
                   style: {
                     maxHeight: 360,
                     marginTop: 8,
-                    zIndex: 9999,
+                    zIndex: 10000, // Increased z-index to avoid conflicts
                   },
                   sx: {
                     '@keyframes menuSlideIn': {
@@ -455,7 +481,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
                   vertical: 'top',
                   horizontal: 'left',
                 },
-                disablePortal: false,
+                disablePortal: true, // Use portal to avoid z-index conflicts
                 TransitionProps: {
                   timeout: 200,
                 },
