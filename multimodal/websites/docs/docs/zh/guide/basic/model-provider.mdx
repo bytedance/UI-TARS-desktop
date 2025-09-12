@@ -1,5 +1,264 @@
-# Model Provider
+# 模型提供者配置
 
-import { UnderConstructionLayout } from '@components/UnderConstructionLayout'
+Tarko Agent Server 支持灵活的多模型配置，允许在同一应用中使用不同的 AI 模型，并在运行时动态切换。
 
-<UnderConstructionLayout />
+## 配置概览
+
+模型配置系统支持两种主要方式：
+
+1. **Agent 级别配置**：通过 `AgentOptions.model`
+2. **Server 级别配置**：通过 `server.models`
+
+这些配置在运行时合并，提供统一的模型选择界面。
+
+## 配置场景
+
+### 单模型配置
+
+通过 `AgentOptions.model` 配置单个模型：
+
+```typescript
+const agentOptions = {
+  model: {
+    id: "gpt-4",
+    provider: "openai",
+    displayName: "GPT-4"
+  },
+  workspace: "/path/to/workspace"
+}
+```
+
+**行为特征：**
+- UI 显示静态模型信息：`GPT-4 • openai`
+- 不显示模型选择器下拉菜单
+- 所有会话使用配置的模型
+
+### 多模型配置
+
+通过 `server.models` 配置多个模型：
+
+```typescript
+const serverOptions = {
+  workspace: "/path/to/workspace",
+  server: {
+    models: [
+      { id: "gpt-4", provider: "openai", displayName: "GPT-4" },
+      { id: "claude-3-opus", provider: "anthropic", displayName: "Claude 3 Opus" },
+      { id: "gemini-pro", provider: "google", displayName: "Gemini Pro" }
+    ]
+  }
+}
+```
+
+**行为特征：**
+- UI 显示模型选择器下拉菜单
+- 默认选择：`server.models` 中的第一个模型
+- 用户可以在可用模型间切换
+- 每个会话独立记住选择的模型
+
+### 混合配置（推荐）
+
+结合两种方式以获得最大灵活性：
+
+```typescript
+const config = {
+  model: { 
+    id: "gpt-3.5-turbo", 
+    provider: "openai", 
+    displayName: "GPT-3.5 Turbo" 
+  },
+  workspace: "/path/to/workspace",
+  server: {
+    models: [
+      { id: "gpt-4", provider: "openai", displayName: "GPT-4" },
+      { id: "claude-3-sonnet", provider: "anthropic", displayName: "Claude 3 Sonnet" }
+    ]
+  }
+}
+```
+
+**行为特征：**
+- 可用模型：`[gpt-3.5-turbo, gpt-4, claude-3-sonnet]`（合并并去重）
+- 默认模型：`gpt-3.5-turbo`（`AgentOptions.model` 优先级更高）
+- UI 显示包含所有可用模型的选择器
+
+## 技术实现
+
+### 模型解析逻辑
+
+```typescript
+// 服务端模型解析
+getAvailableModels(): AgentModel[] {
+  const models: AgentModel[] = [];
+  
+  // 添加 AgentOptions.model（如果存在）
+  if (this.appConfig.model) {
+    models.push(this.appConfig.model);
+  }
+  
+  // 添加 server.models（如果存在）
+  if (this.appConfig.server?.models) {
+    models.push(...this.appConfig.server.models);
+  }
+  
+  return models;
+}
+
+getDefaultModel(): AgentModel | undefined {
+  // 优先使用 AgentOptions.model
+  if (this.appConfig.model) {
+    return this.appConfig.model;
+  }
+  
+  // 回退到 server.models 的第一个
+  if (this.appConfig.server?.models?.length > 0) {
+    return this.appConfig.server.models[0];
+  }
+  
+  return undefined;
+}
+```
+
+### 会话模型管理
+
+创建新 Agent 实例时，服务器应用以下逻辑：
+
+```typescript
+createAgent(sessionInfo?: SessionInfo): IAgent {
+  let agentOptions = { ...this.appConfig };
+  
+  if (sessionInfo?.metadata?.modelConfig) {
+    const { provider, modelId } = sessionInfo.metadata.modelConfig;
+    const selectedModel = this.getAvailableModels().find(
+      model => model.provider === provider && model.id === modelId
+    );
+    
+    if (selectedModel) {
+      // 如果会话选择的模型仍然可用，则使用它
+      agentOptions.model = selectedModel;
+    } else {
+      // 如果会话模型不可用，回退到默认模型
+      agentOptions.model = this.getDefaultModel();
+      console.warn(`会话模型 ${provider}:${modelId} 不可用，使用默认模型`);
+    }
+  } else {
+    // 新会话使用默认模型
+    agentOptions.model = this.getDefaultModel();
+  }
+  
+  return new this.agentConstructor(agentOptions);
+}
+```
+
+### 运行时模型切换
+
+模型切换包含以下步骤：
+
+1. **验证**：检查新模型是否在可用模型列表中
+2. **会话更新**：使用新模型配置更新会话元数据
+3. **Agent 重建**：销毁旧 agent 并使用更新的模型创建新 agent
+4. **UI 更新**：在界面中反映变化
+
+```typescript
+// API 端点：PUT /api/v1/sessions/model
+async updateSessionModel(req: Request, res: Response) {
+  const { sessionId, provider, modelId } = req.body;
+  
+  // 验证模型配置
+  if (!server.isModelConfigValid(provider, modelId)) {
+    return res.status(400).json({ error: 'Invalid model configuration' });
+  }
+  
+  // 更新会话元数据
+  const updatedSessionInfo = await server.storageProvider.updateSessionInfo(sessionId, {
+    metadata: {
+      modelConfig: { provider, modelId, configuredAt: Date.now() }
+    }
+  });
+  
+  // 如果会话正在运行，重建活跃的 agent
+  const activeSession = server.sessions[sessionId];
+  if (activeSession) {
+    await activeSession.updateModelConfig(updatedSessionInfo);
+  }
+}
+```
+
+### 前端集成
+
+UI 自动检测多个提供者并渲染相应组件：
+
+```typescript
+// 判断是否应该显示模型选择器
+const hasMultipleProviders = availableModels.models.length > 1;
+
+if (!hasMultipleProviders) {
+  // 渲染静态模型信息
+  return <StaticModelDisplay />;
+} else {
+  // 渲染交互式模型选择器
+  return <ModelSelector />;
+}
+```
+
+## API 参考
+
+### 获取可用模型
+
+```http
+GET /api/v1/models
+```
+
+**响应：**
+```json
+{
+  "models": [
+    {
+      "provider": "openai",
+      "models": ["gpt-4", "gpt-3.5-turbo"]
+    },
+    {
+      "provider": "anthropic", 
+      "models": ["claude-3-opus"]
+    }
+  ]
+}
+```
+
+### 更新会话模型
+
+```http
+POST /api/v1/sessions/model
+Content-Type: application/json
+
+{
+  "sessionId": "session-123",
+  "provider": "anthropic",
+  "modelId": "claude-3-opus"
+}
+```
+
+**响应：**
+```json
+{
+  "success": true,
+  "sessionInfo": {
+    "id": "session-123",
+    "metadata": {
+      "modelConfig": {
+        "provider": "anthropic",
+        "modelId": "claude-3-opus",
+        "configuredAt": 1640995200000
+      }
+    }
+  }
+}
+```
+
+## 最佳实践
+
+1. **使用混合配置**：在生产部署中提供默认模型和备选模型
+2. **验证模型可用性**：在部署配置更改前验证模型可用性
+3. **监控模型使用情况**：通过会话元数据了解用户偏好
+4. **优雅处理回退**：当配置的模型不可用时优雅处理
+5. **缓存模型列表**：在前端缓存模型列表以减少模型切换时的 API 调用

@@ -1,31 +1,264 @@
-# Model Provider
+# Model Provider Configuration
 
-Main body.
+Tarko Agent Server supports flexible multi-model configuration, allowing you to use different AI models within the same application and switch between them dynamically at runtime.
 
+## Configuration Overview
 
+The model configuration system supports two primary approaches:
 
+1. **Agent-level configuration** via `AgentOptions.model`
+2. **Server-level configuration** via `server.models`
 
-### Other model providers
+These configurations are merged at runtime to provide a unified model selection interface.
 
-You can also obtain officially supported models through the following channels:
+## Configuration Scenarios
 
-| Model Provider | Model                     | Text | Vision | Tool Call & MCP | GUI Grounding |
-| -------------- | ------------------------- | ---- | ------ | --------------- | ------------- |
-| `azure-openai` | `aws_sdk_claude37_sonnet` | ✔️   | ✔️     | ✔️              | 🚧            |
-| `azure-openai` | `gpt-4o-2024-11-20`       | ✔️   | ✔️     | ✔️              | 🚧            |
+### Single Model Configuration
 
-<br />
+Configure a single model through `AgentOptions.model`:
 
-下述是那些社区有需求，但由于缺乏多模态支持，或 FC 调用不稳定，导致在 Agent TARS
-无法运作的模型，请谨慎使用：
+```typescript
+const agentOptions = {
+  model: {
+    id: "gpt-4",
+    provider: "openai",
+    displayName: "GPT-4"
+  },
+  workspace: "/path/to/workspace"
+}
+```
 
-| Model Provider | Model           | Text | Vision | Tool Call & MCP | GUI Grounding |
-| -------------- | --------------- | ---- | ------ | --------------- | ------------- |
-| `deepseek`     | `deepseek-chat` | ✔️   | ❌     | ✔️              | ❌            |
-| `ollama`       | `*`             | ✔️   | ⚠️     | ⚠️              | ⚠️            |
+**Behavior:**
+- UI displays static model information: `GPT-4 • openai`
+- No model selector dropdown
+- All sessions use the configured model
 
-::: warning
+### Multiple Models Configuration
 
-提供 Ollama Provider 仅用于学术测试，Ollama 在模型的 Tool Call 与 Vision 的支持上有非常多诸多的 Issues，兼容 Ollama 不在 Agent TARS 核心团队的目标内，但我们欢迎社区开发者给我们贡献相关实践。
+Configure multiple models through `server.models`:
 
-:::
+```typescript
+const serverOptions = {
+  workspace: "/path/to/workspace",
+  server: {
+    models: [
+      { id: "gpt-4", provider: "openai", displayName: "GPT-4" },
+      { id: "claude-3-opus", provider: "anthropic", displayName: "Claude 3 Opus" },
+      { id: "gemini-pro", provider: "google", displayName: "Gemini Pro" }
+    ]
+  }
+}
+```
+
+**Behavior:**
+- UI displays model selector dropdown
+- Default selection: first model in `server.models`
+- Users can switch between available models
+- Each session remembers its selected model
+
+### Hybrid Configuration (Recommended)
+
+Combine both approaches for maximum flexibility:
+
+```typescript
+const config = {
+  model: { 
+    id: "gpt-3.5-turbo", 
+    provider: "openai", 
+    displayName: "GPT-3.5 Turbo" 
+  },
+  workspace: "/path/to/workspace",
+  server: {
+    models: [
+      { id: "gpt-4", provider: "openai", displayName: "GPT-4" },
+      { id: "claude-3-sonnet", provider: "anthropic", displayName: "Claude 3 Sonnet" }
+    ]
+  }
+}
+```
+
+**Behavior:**
+- Available models: `[gpt-3.5-turbo, gpt-4, claude-3-sonnet]` (merged and deduplicated)
+- Default model: `gpt-3.5-turbo` (`AgentOptions.model` takes priority)
+- UI displays selector with all available models
+
+## Technical Implementation
+
+### Model Resolution Logic
+
+```typescript
+// Server-side model resolution
+getAvailableModels(): AgentModel[] {
+  const models: AgentModel[] = [];
+  
+  // Add AgentOptions.model if exists
+  if (this.appConfig.model) {
+    models.push(this.appConfig.model);
+  }
+  
+  // Add server.models if they exist
+  if (this.appConfig.server?.models) {
+    models.push(...this.appConfig.server.models);
+  }
+  
+  return models;
+}
+
+getDefaultModel(): AgentModel | undefined {
+  // Prefer AgentOptions.model
+  if (this.appConfig.model) {
+    return this.appConfig.model;
+  }
+  
+  // Fall back to first server.models
+  if (this.appConfig.server?.models?.length > 0) {
+    return this.appConfig.server.models[0];
+  }
+  
+  return undefined;
+}
+```
+
+### Session Model Management
+
+When creating a new Agent instance, the server applies the following logic:
+
+```typescript
+createAgent(sessionInfo?: SessionInfo): IAgent {
+  let agentOptions = { ...this.appConfig };
+  
+  if (sessionInfo?.metadata?.modelConfig) {
+    const { provider, modelId } = sessionInfo.metadata.modelConfig;
+    const selectedModel = this.getAvailableModels().find(
+      model => model.provider === provider && model.id === modelId
+    );
+    
+    if (selectedModel) {
+      // Use session's selected model if still available
+      agentOptions.model = selectedModel;
+    } else {
+      // Fall back to default if session model is unavailable
+      agentOptions.model = this.getDefaultModel();
+      console.warn(`Session model ${provider}:${modelId} not available, using default`);
+    }
+  } else {
+    // Use default model for new sessions
+    agentOptions.model = this.getDefaultModel();
+  }
+  
+  return new this.agentConstructor(agentOptions);
+}
+```
+
+### Runtime Model Switching
+
+Model switching involves:
+
+1. **Validation**: Check if the new model is in available models list
+2. **Session Update**: Update session metadata with new model configuration
+3. **Agent Recreation**: Dispose old agent and create new one with updated model
+4. **UI Update**: Reflect changes in the interface
+
+```typescript
+// API endpoint: PUT /api/v1/sessions/model
+async updateSessionModel(req: Request, res: Response) {
+  const { sessionId, provider, modelId } = req.body;
+  
+  // Validate model configuration
+  if (!server.isModelConfigValid(provider, modelId)) {
+    return res.status(400).json({ error: 'Invalid model configuration' });
+  }
+  
+  // Update session metadata
+  const updatedSessionInfo = await server.storageProvider.updateSessionInfo(sessionId, {
+    metadata: {
+      modelConfig: { provider, modelId, configuredAt: Date.now() }
+    }
+  });
+  
+  // Recreate active agent if session is running
+  const activeSession = server.sessions[sessionId];
+  if (activeSession) {
+    await activeSession.updateModelConfig(updatedSessionInfo);
+  }
+}
+```
+
+### Frontend Integration
+
+The UI automatically detects multiple providers and renders appropriate components:
+
+```typescript
+// Determine if model selector should be shown
+const hasMultipleProviders = availableModels.models.length > 1;
+
+if (!hasMultipleProviders) {
+  // Render static model info
+  return <StaticModelDisplay />;
+} else {
+  // Render interactive model selector
+  return <ModelSelector />;
+}
+```
+
+## API Reference
+
+### Get Available Models
+
+```http
+GET /api/v1/models
+```
+
+**Response:**
+```json
+{
+  "models": [
+    {
+      "provider": "openai",
+      "models": ["gpt-4", "gpt-3.5-turbo"]
+    },
+    {
+      "provider": "anthropic", 
+      "models": ["claude-3-opus"]
+    }
+  ]
+}
+```
+
+### Update Session Model
+
+```http
+POST /api/v1/sessions/model
+Content-Type: application/json
+
+{
+  "sessionId": "session-123",
+  "provider": "anthropic",
+  "modelId": "claude-3-opus"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "sessionInfo": {
+    "id": "session-123",
+    "metadata": {
+      "modelConfig": {
+        "provider": "anthropic",
+        "modelId": "claude-3-opus",
+        "configuredAt": 1640995200000
+      }
+    }
+  }
+}
+```
+
+## Best Practices
+
+1. **Use hybrid configuration** for production deployments to provide both default and alternative models
+2. **Validate model availability** before deploying configuration changes
+3. **Monitor model usage** through session metadata to understand user preferences
+4. **Handle fallbacks gracefully** when configured models become unavailable
+5. **Cache model lists** on the frontend to reduce API calls during model switching
