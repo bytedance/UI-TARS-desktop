@@ -4,4 +4,4 @@
  */
 export { type FormatParser } from './formatParserChain';
 export { actionParser, actionStringParser } from './actionParser';
-export { actionParserNew, actionStringParserNew } from './actionParserNew';
+export { DefaultActionParser } from './DefaultActionParser';
