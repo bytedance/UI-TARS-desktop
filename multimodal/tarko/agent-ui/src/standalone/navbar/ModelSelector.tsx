@@ -12,17 +12,14 @@ import {
   ThemeProvider,
 } from '@mui/material';
 import { apiService, AvailableModelsResponse } from '@/common/services/apiService';
-import { AgentModel } from '@tarko/agent-interface';
 import { useSetAtom } from 'jotai';
 import { sessionMetadataAtom } from '@/common/state/atoms/ui';
+import { SessionItemMetadata } from '@tarko/interface';
 
 interface NavbarModelSelectorProps {
   className?: string;
   activeSessionId?: string;
-  sessionMetadata?: {
-    modelConfig?: { provider: string; modelId: string; [key: string]: any };
-    [key: string]: any;
-  };
+  sessionMetadata?: SessionItemMetadata;
   isDarkMode?: boolean;
 }
 
