@@ -25,13 +25,4 @@ export function getModelDisplayName(modelConfig?: SessionItemMetadata['modelConf
   return modelConfig.id;
 }
 
-/**
- * Get the display name for a model from session metadata.
- * Convenience function that extracts modelConfig from session metadata.
- *
- * @param sessionMetadata - The session metadata object
- * @returns The display name or model ID
- */
-export function getModelDisplayNameFromSession(sessionMetadata?: SessionItemMetadata): string {
-  return getModelDisplayName(sessionMetadata?.modelConfig);
-}
+

@@ -10,16 +10,10 @@ import {
   isModelConfigValid,
 } from '../../utils/model-utils';
 
-/**
- * Health check endpoint
- */
 export function healthCheck(req: Request, res: Response) {
   res.status(200).json({ status: 'ok' });
 }
 
-/**
- * Get version information including git hash
- */
 export function getVersion(req: Request, res: Response) {
   const server = req.app.locals.server;
   res.status(200).json({
@@ -29,28 +23,18 @@ export function getVersion(req: Request, res: Response) {
   });
 }
 
-/**
- * Get current agent options (sanitized)
- */
 export function getAgentOptions(req: Request, res: Response) {
   const server = req.app.locals.server;
-  const sanitizedOptions = sanitizeAgentOptions(server.appConfig);
-
   res.status(200).json({
-    options: sanitizedOptions,
+    options: sanitizeAgentOptions(server.appConfig),
   });
 }
 
-/**
- * Get available model providers and configurations
- */
 export function getAvailableModels(req: Request, res: Response) {
   const server = req.app.locals.server;
   const models = getAvailableModelsUtil(server.appConfig);
 
-  res.status(200).json({
-    models,
-  });
+  res.status(200).json({ models });
 }
 
 /**

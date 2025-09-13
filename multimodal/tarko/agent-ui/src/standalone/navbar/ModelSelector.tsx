@@ -204,28 +204,17 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
 
   // Update current model when session metadata changes
   useEffect(() => {
-    if (sessionMetadata?.modelConfig && availableModels) {
-      const { provider, id: modelId } = sessionMetadata.modelConfig;
+    if (!availableModels?.models.length) return;
 
-      // Find the session's model in available models
-      const sessionModel = availableModels.models.find(
-        (model) => model.provider === provider && model.id === modelId,
-      );
+    const sessionModel = sessionMetadata?.modelConfig
+      ? availableModels.models.find(
+          (model) => 
+            model.provider === sessionMetadata.modelConfig?.provider && 
+            model.id === sessionMetadata.modelConfig?.id
+        )
+      : null;
 
-      if (sessionModel) {
-        setCurrentModel(sessionModel);
-      } else if (availableModels.models.length > 0) {
-        // Fall back to first available model if session model is no longer available
-        setCurrentModel(availableModels.models[0]);
-      }
-    } else if (
-      availableModels &&
-      availableModels.models.length > 0 &&
-      !sessionMetadata?.modelConfig
-    ) {
-      // No session model config, use first available model
-      setCurrentModel(availableModels.models[0]);
-    }
+    setCurrentModel(sessionModel || availableModels.models[0]);
   }, [sessionMetadata, availableModels]);
 
   if (!activeSessionId || isInitialLoading) {
