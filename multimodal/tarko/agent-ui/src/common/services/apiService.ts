@@ -494,9 +494,6 @@ class ApiService {
     }
   }
 
-  /**
-   * Get available model providers and configurations
-   */
   async getAvailableModels(): Promise<{ models: AgentModel[] }> {
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/models`, {
@@ -512,15 +509,10 @@ class ApiService {
       return await response.json();
     } catch (error) {
       console.error('Error getting available models:', error);
-      return {
-        models: [],
-      };
+      return { models: [] };
     }
   }
 
-  /**
-   * Update session model configuration
-   */
   async updateSessionModel(
     sessionId: string,
     model: AgentModel,
