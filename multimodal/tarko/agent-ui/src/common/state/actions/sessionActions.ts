@@ -197,9 +197,8 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
           set(sessionMetadataAtom, sessionDetails.metadata);
           console.log(`Restored session metadata for ${sessionId}:`, sessionDetails.metadata);
         } else {
-          // Clear metadata if no metadata exists for this session
-          set(sessionMetadataAtom, {});
-          console.log(`No metadata found for session ${sessionId}, cleared metadata`);
+          // Don't clear existing metadata - preserve current state or enrich from events
+          console.log(`No stored metadata for session ${sessionId}, will enrich from events`);
         }
 
         // Load events to enrich metadata if needed
@@ -207,7 +206,8 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
         const runStartEvent = events.find((e) => e.type === 'agent_run_start');
 
         if (runStartEvent) {
-          const enrichedMetadata = { ...sessionDetails.metadata };
+          const currentMetadata = get(sessionMetadataAtom);
+          const enrichedMetadata = { ...sessionDetails.metadata, ...currentMetadata };
 
           // Enrich with model config if missing
           if (!enrichedMetadata.modelConfig) {
@@ -226,7 +226,11 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
           }
 
           set(sessionMetadataAtom, enrichedMetadata);
-          console.log(`Enriched session metadata from events for ${sessionId}`);
+          console.log(`Enriched session metadata from events for ${sessionId}:`, enrichedMetadata);
+        } else if (!sessionDetails.metadata) {
+          // If no events and no stored metadata, clear the state
+          set(sessionMetadataAtom, {});
+          console.log(`No metadata or events found for session ${sessionId}, cleared metadata`);
         }
       } catch (error) {
         console.warn(`Failed to load session metadata/events for info recovery:`, error);
