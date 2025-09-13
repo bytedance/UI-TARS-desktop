@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Spinner, Button } from '@nextui-org/react';
 import { FiRefreshCw, FiAlertCircle } from 'react-icons/fi';
-import { useLocation, useNavigate } from '@rspress/core/runtime';
+import { useLocation, useNavigate } from '@rspress/runtime';
 import { ShowcaseCard } from './components/ShowcaseCard';
 import { CategoryFilter } from './components/CategoryFilter';
 import { ShowcaseHeader } from './components/ShowcaseHeader';

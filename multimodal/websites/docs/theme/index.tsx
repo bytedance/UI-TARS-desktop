@@ -1,9 +1,9 @@
 import { CursorProvider } from '@components/CursorContext';
-import { Layout as BasicLayout } from '@rspress/core/theme';
+import { Layout as BasicLayout } from '@rspress/theme-default';
 import { NotFoundLayout } from '../src/components';
 import { Showcase } from '../src/components/Showcase';
 import { Replay } from '../src/components/Replay';
-import { useLocation } from '@rspress/core/runtime';
+import { useLocation } from '@rspress/runtime';
 import { Nav } from '@rspress/theme-default';
 import { DYNAMIC_ROUTE } from '../src/shared/types';
 
@@ -37,4 +37,4 @@ const Layout = () => {
 
 export { Layout };
 
-export * from '@rspress/core/theme';
+export * from '@rspress/theme-default';

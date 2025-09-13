@@ -1,4 +1,4 @@
-import { useLocation } from '@rspress/core/runtime';
+import { useLocation } from '@rspress/runtime';
 
 export function useLocaledPath() {
   const location = useLocation();
