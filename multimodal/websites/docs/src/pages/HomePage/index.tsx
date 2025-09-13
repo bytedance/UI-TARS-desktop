@@ -5,7 +5,7 @@ import { FaGithub, FaCopy, FaCheck } from 'react-icons/fa';
 import CustomCursor from '@components/CustomCursor';
 import { Link } from '@components/Link';
 import { VideoPanel } from '@components/VideoPanel';
-import { useCursor } from '@components/CursorContext';
+import { CursorProvider, useCursor } from '@components/CursorContext';
 import { usePageMeta, generatePageTitle, optimizeDescription } from '@components/hooks';
 import './index.css';
 
@@ -20,7 +20,7 @@ const SEO_CONFIG = {
   keywords: ['AI agent', 'browser control', 'multimodal', 'open-source', 'natural language'],
 };
 
-export const HomePage = () => {
+const HomePageContent = () => {
   // Set SEO meta tags for home page with enhanced options
   usePageMeta({
     title: generatePageTitle(), // Will generate "Agent TARS" as the main title
@@ -488,5 +488,13 @@ export const HomePage = () => {
         </div>
       </main>
     </div>
+  );
+};
+
+export const HomePage = () => {
+  return (
+    <CursorProvider>
+      <HomePageContent />
+    </CursorProvider>
   );
 };
