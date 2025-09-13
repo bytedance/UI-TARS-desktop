@@ -17,7 +17,7 @@ import {
 
 import { PlanStartHandler, PlanUpdateHandler, PlanFinishHandler } from './handlers/PlanHandler';
 
-import { SystemMessageHandler, EnvironmentInputHandler, ModelUpdatedHandler } from './handlers/SystemHandler';
+import { SystemMessageHandler, EnvironmentInputHandler } from './handlers/SystemHandler';
 
 import { FinalAnswerHandler, FinalAnswerStreamingHandler } from './handlers/FinalAnswerHandler';
 
@@ -56,7 +56,6 @@ export class EventHandlerRegistry {
     // System handlers
     this.register(new SystemMessageHandler());
     this.register(new EnvironmentInputHandler());
-    this.register(new ModelUpdatedHandler());
 
     // Final answer handlers
     this.register(new FinalAnswerHandler());

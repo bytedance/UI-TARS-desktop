@@ -449,12 +449,6 @@ export class AgentSession {
       throw error;
     }
 
-    // Emit model updated event to client
-    this.eventBridge.emit('model_updated', {
-      sessionId: this.id,
-      modelConfig: sessionInfo.metadata?.modelConfig,
-    });
-
     console.log(`✅ [AgentSession] Model config stored for session ${this.id}`);
   }
 

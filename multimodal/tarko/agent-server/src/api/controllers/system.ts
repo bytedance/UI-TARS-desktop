@@ -51,7 +51,7 @@ export function getAvailableModels(req: Request, res: Response) {
         acc[model.provider] = [];
       }
       // Deduplication by model ID
-      const existingModel = acc[model.provider].find(m => m.id === model.id);
+      const existingModel = acc[model.provider].find((m) => m.id === model.id);
       if (!existingModel) {
         acc[model.provider].push({
           id: model.id,

@@ -326,7 +326,6 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     }
     return models;
   }
-
   /**
    * Get the default model
    * @returns Default model (AgentOptions.model or first server.models)
