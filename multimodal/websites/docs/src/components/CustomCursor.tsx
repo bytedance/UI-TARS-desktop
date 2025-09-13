@@ -13,7 +13,7 @@ const CustomCursor: React.FC<CustomCursorProps> = ({ className }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const cursorRef = useRef<HTMLDivElement>(null);
 
-  // 使用本地状态管理 hover 效果
+  // Use local state to manage hover effect
   const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
