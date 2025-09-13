@@ -20,16 +20,22 @@ export interface WorkspaceItem {
 }
 
 /**
+ * Agent model interface matching backend AgentModel type
+ */
+export interface AgentModel {
+  id: string;
+  provider: string;
+  displayName?: string;
+  apiKey?: string;
+  baseURL?: string;
+  baseProvider?: string;
+}
+
+/**
  * Available models response interface
  */
 export interface AvailableModelsResponse {
-  models: Array<{
-    provider: string;
-    models: Array<{
-      id: string;
-      displayName?: string;
-    }>;
-  }>;
+  models: AgentModel[];
 }
 
 /**
