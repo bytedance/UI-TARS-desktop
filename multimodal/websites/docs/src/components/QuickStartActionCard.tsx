@@ -1,4 +1,4 @@
-import { useI18n } from 'rspress/runtime';
+import { useI18n } from '@rspress/core/runtime';
 import { ActionCard } from './ActionCard';
 import { ActionCardContainer } from './ActionCardContainer';
 import { useLocaledPath } from './hooks';

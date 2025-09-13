@@ -8,11 +8,10 @@
     "preview": "rspress preview"
   },
   "dependencies": {
-    "@rspress/runtime": "2.0.0-beta.16",
-    "@rspress/theme-default": "2.0.0-beta.16",
+    "@rspress/core": "2.0.0-beta.31",
+    "@rspress/theme-default": "2.0.0-beta.31",
     "react-icons": "5.5.0",
     "framer-motion": "12.19.2",
-    "rspress": "2.0.0-beta.16",
     "tailwindcss": "^3.4.17",
     "clsx": "2.1.1",
     "@emotion/styled": "^11.11.0",
@@ -26,7 +25,7 @@
     "@types/react": "^18.2.75",
     "@types/react-dom": "^18.2.24",
     "@tarko/agent": "workspace:*",
-    "@rspress/plugin-client-redirects": "2.0.0-beta.16",
+    "@rspress/plugin-client-redirects": "2.0.0-beta.31",
     "@types/node": "^18.11.17",
     "rspress-plugin-mermaid": "^0.3.0"
   }

@@ -1,10 +1,10 @@
-import { useI18n } from 'rspress/runtime';
+import { useI18n } from '@rspress/core/runtime';
 import { isInSSR } from '../shared/env';
 import { ActionCard } from './ActionCard';
 
 export function NotFoundLayout() {
   const t = useI18n<typeof import('i18n')>();
-  
+
   if (isInSSR()) {
     return null;
   }
