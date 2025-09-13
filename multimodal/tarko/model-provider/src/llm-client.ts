@@ -33,7 +33,7 @@ export function createLLMClient(
   const client = new TokenJS({
     apiKey,
     baseURL,
-    headers,
+    defaultHeaders: headers,
   });
 
   // Add extended model support for non-native providers
