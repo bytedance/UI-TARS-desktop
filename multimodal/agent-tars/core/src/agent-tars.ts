@@ -34,7 +34,7 @@ import { ToolLogger, ResourceCleaner } from './utils';
 
 /**
  * AgentTARS - A multimodal AI agent with browser, filesystem, and search capabilities
- * 
+ *
  * This class provides a comprehensive AI agent built on the Tarko framework,
  * offering seamless integration with browsers, file systems, and search providers.
  */
@@ -93,7 +93,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   constructor(options: T) {
     // Apply defaults and validate configuration
     const processedOptions = applyDefaultOptions<AgentTARSOptions>(options);
-    
+
     // Validate and adjust browser control mode
     if (processedOptions.browser?.control) {
       processedOptions.browser.control = validateBrowserControlMode(
@@ -105,7 +105,11 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
 
     const workspace = processedOptions.workspace ?? process.cwd();
     const mcpServers = AgentTARS.buildMCPServerRegistry(options, workspace);
-    const instructions = AgentTARS.buildInstructions(processedOptions, workspace, options.instructions);
+    const instructions = AgentTARS.buildInstructions(
+      processedOptions,
+      workspace,
+      options.instructions,
+    );
 
     // Initialize parent class
     super({
@@ -130,7 +134,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
       headless: this.tarsOptions.browser?.headless,
       cdpEndpoint: this.tarsOptions.browser?.cdpEndpoint,
     };
-    
+
     this.workspacePathResolver = new WorkspacePathResolver({ workspace });
     this.toolLogger = new ToolLogger(this.logger);
     this.resourceCleaner = new ResourceCleaner(this.logger);
@@ -440,7 +444,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
           name: 'browser_screenshot',
           arguments: { highlight: true },
         });
-        
+
         if (Array.isArray(response?.content)) {
           const { data, type, mimeType } = response.content[1];
           if (type === 'image') {

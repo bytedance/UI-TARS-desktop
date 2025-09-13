@@ -3,18 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  InMemoryTransport,
-  Client,
-  Tool,
-  JSONSchema7,
-  ConsoleLogger,
-} from '@tarko/mcp-agent';
-import {
-  AgentTARSOptions,
-  BuiltInMCPServers,
-  BuiltInMCPServerName,
-} from '../types';
+import { InMemoryTransport, Client, Tool, JSONSchema7, ConsoleLogger } from '@tarko/mcp-agent';
+import { AgentTARSOptions, BuiltInMCPServers, BuiltInMCPServerName } from '../types';
 import { BrowserGUIAgent, BrowserManager, BrowserToolsManager } from '../browser';
 import { SearchToolProvider } from '../search';
 import { FilesystemToolsManager } from '../filesystem';
@@ -27,7 +17,7 @@ import * as commandsModule from '@agent-infra/mcp-server-commands';
 
 /**
  * AgentTARSInitializer - Handles complex initialization logic for AgentTARS
- * 
+ *
  * This class separates the initialization concerns from the main AgentTARS class,
  * making the code more maintainable and testable.
  */
@@ -152,13 +142,13 @@ export class AgentTARSInitializer {
 
     // Create MCP servers
     await this.createMCPServers();
-    
+
     // Create and connect MCP clients
     await this.createMCPClients();
-    
+
     // Configure tool managers with clients
     this.configureMCPClients();
-    
+
     // Register tools from managers and clients
     await this.registerMCPTools(registerToolFn);
 
@@ -170,7 +160,7 @@ export class AgentTARSInitializer {
    */
   private async createMCPServers(): Promise<void> {
     const sharedBrowser = this.browserManager.getBrowser();
-    
+
     this.mcpServers = {
       browser: browserModule.createServer({
         externalBrowser: sharedBrowser,
@@ -209,10 +199,7 @@ export class AgentTARSInitializer {
           },
         );
 
-        await Promise.all([
-          client.connect(clientTransport),
-          server.connect(serverTransport),
-        ]);
+        await Promise.all([client.connect(clientTransport), server.connect(serverTransport)]);
 
         this.mcpClients[name as BuiltInMCPServerName] = client;
         this.logger.info(`✅ Connected to ${name} MCP server`);
