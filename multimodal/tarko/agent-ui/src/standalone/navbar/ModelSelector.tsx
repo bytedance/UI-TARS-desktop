@@ -202,11 +202,14 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
         if (response.success) {
           console.log('✅ [NavbarModelSelector] Model updated successfully, updating UI state');
           setCurrentModel(selectedValue);
-          
+
           // Update sessionMetadata immediately with the new model config
           if (response.sessionInfo?.metadata) {
             setSessionMetadata(response.sessionInfo.metadata);
-            console.log('✅ [NavbarModelSelector] Updated sessionMetadata:', response.sessionInfo.metadata);
+            console.log(
+              '✅ [NavbarModelSelector] Updated sessionMetadata:',
+              response.sessionInfo.metadata,
+            );
           }
         } else {
           console.error('❌ [NavbarModelSelector] Update handler returned success=false');
@@ -280,8 +283,8 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   }
 
   // Check if there are multiple providers (calculate on frontend)
-  const uniqueProviders = availableModels 
-    ? new Set(availableModels.models.map(model => model.provider))
+  const uniqueProviders = availableModels
+    ? new Set(availableModels.models.map((model) => model.provider))
     : new Set();
   const hasMultipleProviders = uniqueProviders.size > 1;
 
@@ -293,74 +296,73 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     return (
       <ThemeProvider theme={muiTheme}>
         <motion.div whileHover={{ scale: 1.02 }} className={className}>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 0.75,
-                px: 1.25,
-                py: 0.375,
-                height: '28px',
-                minHeight: '28px',
-                background: isDarkMode ? 'rgba(55, 65, 81, 0.3)' : 'rgba(248, 250, 252, 0.8)',
-                backdropFilter: 'blur(8px)',
-                border: isDarkMode
-                  ? '1px solid rgba(75, 85, 99, 0.3)'
-                  : '1px solid rgba(203, 213, 225, 0.6)',
-                borderRadius: '8px',
-                // maxWidth: '220px',
-                '&:hover': {
-                  background: isDarkMode ? 'rgba(55, 65, 81, 0.8)' : 'rgba(241, 245, 249, 0.9)',
-                  boxShadow: isDarkMode
-                    ? '0 2px 4px -1px rgba(0, 0, 0, 0.2)'
-                    : '0 2px 4px -1px rgba(0, 0, 0, 0.05)',
-                },
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
-                {sessionMetadata?.modelConfig?.modelId && (
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontWeight: 500,
-                      fontSize: '12px',
-                      color: isDarkMode ? '#f3f4f6' : '#374151',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {getModelDisplayName(sessionMetadata.modelConfig)}
-                  </Typography>
-                )}
-                {sessionMetadata?.modelConfig?.provider &&
-                  sessionMetadata?.modelConfig?.modelId && (
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: isDarkMode ? '#9ca3af' : '#6b7280',
-                        fontSize: '12px',
-                        flexShrink: 0,
-                      }}
-                    >
-                      •
-                    </Typography>
-                  )}
-                {sessionMetadata?.modelConfig?.provider && (
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontWeight: 500,
-                      fontSize: '12px',
-                      color: isDarkMode ? '#d1d5db' : '#6b7280',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {sessionMetadata.modelConfig.provider}
-                  </Typography>
-                )}
-              </Box>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.75,
+              px: 1.25,
+              py: 0.375,
+              height: '28px',
+              minHeight: '28px',
+              background: isDarkMode ? 'rgba(55, 65, 81, 0.3)' : 'rgba(248, 250, 252, 0.8)',
+              backdropFilter: 'blur(8px)',
+              border: isDarkMode
+                ? '1px solid rgba(75, 85, 99, 0.3)'
+                : '1px solid rgba(203, 213, 225, 0.6)',
+              borderRadius: '8px',
+              // maxWidth: '220px',
+              '&:hover': {
+                background: isDarkMode ? 'rgba(55, 65, 81, 0.8)' : 'rgba(241, 245, 249, 0.9)',
+                boxShadow: isDarkMode
+                  ? '0 2px 4px -1px rgba(0, 0, 0, 0.2)'
+                  : '0 2px 4px -1px rgba(0, 0, 0, 0.05)',
+              },
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
+              {sessionMetadata?.modelConfig?.modelId && (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 500,
+                    fontSize: '12px',
+                    color: isDarkMode ? '#f3f4f6' : '#374151',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {getModelDisplayName(sessionMetadata.modelConfig)}
+                </Typography>
+              )}
+              {sessionMetadata?.modelConfig?.provider && sessionMetadata?.modelConfig?.modelId && (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: isDarkMode ? '#9ca3af' : '#6b7280',
+                    fontSize: '12px',
+                    flexShrink: 0,
+                  }}
+                >
+                  •
+                </Typography>
+              )}
+              {sessionMetadata?.modelConfig?.provider && (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 500,
+                    fontSize: '12px',
+                    color: isDarkMode ? '#d1d5db' : '#6b7280',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {sessionMetadata.modelConfig.provider}
+                </Typography>
+              )}
             </Box>
+          </Box>
         </motion.div>
       </ThemeProvider>
     );
@@ -430,119 +432,119 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   return (
     <ThemeProvider theme={muiTheme}>
       <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className={className}>
-          <FormControl size="small">
-            <Select
-              value={currentModel}
-              onChange={(event) => handleModelChange(event.target.value)}
-              disabled={isLoading}
-              displayEmpty
-              renderValue={renderValue}
-              size="small"
-              MenuProps={{
-                PaperProps: {
-                  style: {
-                    maxHeight: 360,
-                    marginTop: 8,
-                  },
-                  sx: {
-                    zIndex: 10000,
-                    '@keyframes menuSlideIn': {
-                      '0%': {
-                        opacity: 0,
-                        transform: 'translateY(-8px) scale(0.95)',
-                      },
-                      '100%': {
-                        opacity: 1,
-                        transform: 'translateY(0) scale(1)',
-                      },
+        <FormControl size="small">
+          <Select
+            value={currentModel}
+            onChange={(event) => handleModelChange(event.target.value)}
+            disabled={isLoading}
+            displayEmpty
+            renderValue={renderValue}
+            size="small"
+            MenuProps={{
+              PaperProps: {
+                style: {
+                  maxHeight: 360,
+                  marginTop: 8,
+                },
+                sx: {
+                  zIndex: 10000,
+                  '@keyframes menuSlideIn': {
+                    '0%': {
+                      opacity: 0,
+                      transform: 'translateY(-8px) scale(0.95)',
+                    },
+                    '100%': {
+                      opacity: 1,
+                      transform: 'translateY(0) scale(1)',
                     },
                   },
                 },
-                anchorOrigin: {
-                  vertical: 'bottom',
-                  horizontal: 'left',
-                },
-                transformOrigin: {
-                  vertical: 'top',
-                  horizontal: 'left',
-                },
-              }}
-              sx={{
-                minWidth: 200,
-                maxWidth: 360,
-              }}
-            >
-              {allModelOptions.map((option, idx) => {
-                return (
-                  <MenuItem key={`model-${idx}`} value={option.value}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
-                      <Box
+              },
+              anchorOrigin: {
+                vertical: 'bottom',
+                horizontal: 'left',
+              },
+              transformOrigin: {
+                vertical: 'top',
+                horizontal: 'left',
+              },
+            }}
+            sx={{
+              minWidth: 200,
+              maxWidth: 360,
+            }}
+          >
+            {allModelOptions.map((option, idx) => {
+              return (
+                <MenuItem key={`model-${idx}`} value={option.value}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 0.5,
+                        minWidth: 0,
+                        flex: 1,
+                      }}
+                    >
+                      <Typography
+                        variant="body2"
                         sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 0.5,
-                          minWidth: 0,
-                          flex: 1,
+                          fontWeight: currentModel === option.value ? 600 : 500,
+                          fontSize: '14px',
+                          color:
+                            currentModel === option.value
+                              ? isDarkMode
+                                ? '#a5b4fc'
+                                : '#6366f1'
+                              : isDarkMode
+                                ? '#f3f4f6'
+                                : '#374151',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
                         }}
                       >
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontWeight: currentModel === option.value ? 600 : 500,
-                            fontSize: '14px',
-                            color:
-                              currentModel === option.value
-                                ? isDarkMode
-                                  ? '#a5b4fc'
-                                  : '#6366f1'
-                                : isDarkMode
-                                  ? '#f3f4f6'
-                                  : '#374151',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
-                          {option.displayName}
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            color: isDarkMode ? '#9ca3af' : '#6b7280',
-                            fontSize: '14px',
-                            flexShrink: 0,
-                          }}
-                        >
-                          •
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontWeight: currentModel === option.value ? 600 : 500,
-                            fontSize: '13px',
-                            color:
-                              currentModel === option.value
-                                ? isDarkMode
-                                  ? '#a5b4fc'
-                                  : '#6366f1'
-                                : isDarkMode
-                                  ? '#d1d5db'
-                                  : '#6b7280',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
-                          {option.provider}
-                        </Typography>
-                      </Box>
+                        {option.displayName}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: isDarkMode ? '#9ca3af' : '#6b7280',
+                          fontSize: '14px',
+                          flexShrink: 0,
+                        }}
+                      >
+                        •
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: currentModel === option.value ? 600 : 500,
+                          fontSize: '13px',
+                          color:
+                            currentModel === option.value
+                              ? isDarkMode
+                                ? '#a5b4fc'
+                                : '#6366f1'
+                              : isDarkMode
+                                ? '#d1d5db'
+                                : '#6b7280',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {option.provider}
+                      </Typography>
                     </Box>
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </FormControl>
-        </motion.div>
+                  </Box>
+                </MenuItem>
+              );
+            })}
+          </Select>
+        </FormControl>
+      </motion.div>
     </ThemeProvider>
   );
 };
