@@ -313,31 +313,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     return Promise.resolve();
   }
 
-  /**
-   * Get available models by merging AgentOptions.model with server.models
-   * @returns Array of available models
-   */
-  getAvailableModels(): AgentModel[] {
-    return getAvailableModels(this.appConfig);
-  }
 
-  /**
-   * Get the default model
-   * @returns Default model (AgentOptions.model or first server.models)
-   */
-  getDefaultModel(): AgentModel | undefined {
-    return getDefaultModel(this.appConfig);
-  }
-
-  /**
-   * Check if a model configuration is valid
-   * @param provider Model provider
-   * @param modelId Model ID
-   * @returns True if model is valid
-   */
-  isModelConfigValid(provider: string, modelId: string): boolean {
-    return isModelConfigValid(this.appConfig, provider, modelId);
-  }
 
   /**
    * Create a new Agent instance using the injected constructor
@@ -357,7 +333,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     // Override model config from session if available and valid
     if (sessionInfo?.metadata?.modelConfig) {
       const { provider, modelId } = sessionInfo.metadata.modelConfig;
-      const availableModels = this.getAvailableModels();
+      const availableModels = getAvailableModels(this.appConfig);
       const selectedModel = availableModels.find(
         (model) => model.provider === provider && model.id === modelId,
       );
@@ -370,7 +346,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
         };
       } else {
         // Session model is no longer available, fall back to default
-        const defaultModel = this.getDefaultModel();
+        const defaultModel = getDefaultModel(this.appConfig);
         if (defaultModel) {
           agentOptions = {
             ...agentOptions,
@@ -387,7 +363,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
       }
     } else {
       // No session model config, use default if available
-      const defaultModel = this.getDefaultModel();
+      const defaultModel = getDefaultModel(this.appConfig);
       if (defaultModel) {
         agentOptions = {
           ...agentOptions,
