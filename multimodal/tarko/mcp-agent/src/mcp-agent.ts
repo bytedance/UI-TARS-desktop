@@ -4,7 +4,6 @@
  */
 import { Agent, Tool } from '@tarko/agent';
 import { MCPAgentOptions, IMCPClient, MCPServerRegistry } from './mcp-types';
-import { MCPClient } from './mcp-client';
 import { MCPClientV2 } from './mcp-client-v2';
 import { MCPToolAdapter } from './mcp-tool-adapter';
 import { filterItems } from '@tarko/shared-utils';
@@ -13,14 +12,12 @@ export class MCPAgent<T extends MCPAgentOptions = MCPAgentOptions> extends Agent
   static label = '@tarko/mcp-agent';
   private mcpClients: Map<string, IMCPClient> = new Map();
   private mcpServerConfig: MCPServerRegistry;
-  private clientVersion: 'v1' | 'v2';
 
   constructor(options: MCPAgentOptions) {
     // Create a new agent with the base options
     super(options);
 
     this.mcpServerConfig = options.mcpServers ?? {};
-    this.clientVersion = options.mcpClientVersion ?? 'v2';
   }
 
   /**
@@ -67,16 +64,9 @@ export class MCPAgent<T extends MCPAgentOptions = MCPAgentOptions> extends Agent
       try {
         this.logger.info(`🔌 Connecting to MCP server: ${serverName}`);
 
-        // Create appropriate client based on clientVersion
-        let mcpClient: IMCPClient;
+        // Create MCP client using v2
         const defaultTimeout = this.options.defaultConnectionTimeout ?? 60;
-
-        if (this.clientVersion === 'v2') {
-          mcpClient = new MCPClientV2(serverName, config, this.logger, defaultTimeout);
-        } else {
-          // Default to v1
-          mcpClient = new MCPClient(serverName, config, this.logger);
-        }
+        const mcpClient = new MCPClientV2(serverName, config, this.logger, defaultTimeout);
 
         // Initialize the client and get tools
         await mcpClient.initialize();

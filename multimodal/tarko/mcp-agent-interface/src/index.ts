@@ -25,16 +25,7 @@ export interface MCPAgentOptions extends AgentOptions {
    */
   mcpServer?: MCPServerFilterOptions;
 
-  /**
-   * Version of MCP client to use.
-   * This is a config for test ONLY, DO NOT depends on it.
-   *
-   * - 'v1': Use the built-in MCP client (default)
-   * - 'v2': Use @agent-infra/mcp-client package
-   *
-   * @defaultValue `'v2'`
-   */
-  mcpClientVersion?: 'v1' | 'v2';
+
 
   /**
    * Default timeout for MCP client connections in seconds.

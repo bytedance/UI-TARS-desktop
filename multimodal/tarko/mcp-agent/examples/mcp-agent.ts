@@ -14,7 +14,11 @@ async function main() {
         args: ['@playwright/mcp@latest'],
       },
     },
-    model: {},
+    model: {
+      provider: 'azure-openai',
+      model: 'aws_sdk_claude37_sonnet',
+    },
+    toolCallEngine: 'prompt_engineering',
   });
 
   try {

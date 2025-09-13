@@ -18,7 +18,7 @@ npm install @tarko/mcp-agent
 
 - Multi-server connections
 - Automatic tool discovery and registration
-- v1/v2 client support
+
 - Server filtering (include/exclude)
 - Connection lifecycle management
 
@@ -81,14 +81,7 @@ const agent = new MCPAgent({
 });
 ```
 
-### Client Version
 
-```ts
-const agent = new MCPAgent({
-  mcpServers: { /*...*/ },
-  mcpClientVersion: 'v1', // default 'v2'
-});
-```
 
 ## API Reference
 
@@ -113,8 +106,7 @@ interface MCPAgentOptions extends AgentOptions {
     exclude?: string[];
   };
   
-  /** MCP client version */
-  mcpClientVersion?: 'v1' | 'v2';
+
 }
 ```
 

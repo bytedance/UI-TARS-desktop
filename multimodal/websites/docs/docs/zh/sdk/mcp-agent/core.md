@@ -18,7 +18,7 @@ npm install @tarko/mcp-agent
 
 - 多服务器连接
 - 自动工具发现和注册
-- v1/v2 客户端支持
+
 - 服务器过滤 (include/exclude)
 - 连接生命周期管理
 
@@ -81,14 +81,7 @@ const agent = new MCPAgent({
 });
 ```
 
-### 客户端版本
 
-```ts
-const agent = new MCPAgent({
-  mcpServers: { /*...*/ },
-  mcpClientVersion: 'v1', // 默认 'v2'
-});
-```
 
 ## API 参考
 
@@ -113,8 +106,7 @@ interface MCPAgentOptions extends AgentOptions {
     exclude?: string[];
   };
   
-  /** MCP 客户端版本 */
-  mcpClientVersion?: 'v1' | 'v2';
+
 }
 ```
 
