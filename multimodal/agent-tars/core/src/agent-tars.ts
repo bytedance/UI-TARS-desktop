@@ -1,15 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
 
 import {
-  InMemoryTransport,
   Client,
   AgentEventStream,
-  Tool,
-  JSONSchema7,
   MCPAgent,
   MCPServerRegistry,
   LLMRequestHookPayload,
@@ -31,19 +27,16 @@ import { SearchToolProvider } from './search';
 import { FilesystemToolsManager } from './filesystem';
 import { applyDefaultOptions } from './shared/config-utils';
 import { MessageHistoryDumper } from './shared/message-history-dumper';
-
-// @ts-expect-error
-// Default esm asset has some issues {@see https://github.com/bytedance/UI-TARS-desktop/issues/672}
-import * as browserModule from '@agent-infra/mcp-server-browser/dist/server.cjs';
-import * as filesystemModule from '@agent-infra/mcp-server-filesystem';
-import * as commandsModule from '@agent-infra/mcp-server-commands';
-
 import { WorkspacePathResolver } from './shared/workspace-path-resolver';
 import { AgentWebUIImplementation } from '@agent-tars/interface';
+import { AgentTARSInitializer } from './initializers/agent-tars-initializer';
+import { ToolLogger, ResourceCleaner } from './utils';
 
 /**
- * A Agent TARS that uses in-memory MCP tool call
- * for built-in MCP Servers.
+ * AgentTARS - A multimodal AI agent with browser, filesystem, and search capabilities
+ * 
+ * This class provides a comprehensive AI agent built on the Tarko framework,
+ * offering seamless integration with browsers, file systems, and search providers.
  */
 export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MCPAgent<T> {
   static label = '@agent-tars/core';
@@ -73,176 +66,111 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
       enableLayoutSwitchButton: true,
     },
   };
-  private workspace: string;
-  // FIXME: remove it since options is strict type already
-  private tarsOptions: AgentTARSOptions;
-  private mcpServers: BuiltInMCPServers = {};
-  private inMemoryMCPClients: Partial<Record<BuiltInMCPServerName, Client>> = {};
-  private browserGUIAgent?: BrowserGUIAgent;
-  private browserManager: BrowserManager;
+
+  // Core configuration
+  private readonly workspace: string;
+  private readonly tarsOptions: AgentTARSOptions;
+
+  // Component managers
+  private readonly browserManager: BrowserManager;
+  private readonly workspacePathResolver: WorkspacePathResolver;
+  private readonly toolLogger: ToolLogger;
+  private readonly resourceCleaner: ResourceCleaner;
+  private readonly initializer: AgentTARSInitializer;
+
+  // Component instances (initialized during setup)
   private browserToolsManager?: BrowserToolsManager;
   private filesystemToolsManager?: FilesystemToolsManager;
   private searchToolProvider?: SearchToolProvider;
-  private browserState: BrowserState = {};
+  private browserGUIAgent?: BrowserGUIAgent;
+  private inMemoryMCPClients: Partial<Record<BuiltInMCPServerName, Client>> = {};
+  private mcpServers: BuiltInMCPServers = {};
 
-  // Message history dumper for experimental dump feature
+  // State and utilities
+  private browserState: BrowserState = {};
   private messageHistoryDumper?: MessageHistoryDumper;
 
-  // Add workspace path resolver
-  private workspacePathResolver: WorkspacePathResolver;
-
   constructor(options: T) {
-    // Apply default config using the new utility function
-    const tarsOptions = applyDefaultOptions<AgentTARSOptions>(options);
-
-    // Validate browser control mode based on model provider
-    if (tarsOptions.browser?.control) {
-      const modelProvider = tarsOptions.model?.provider;
-      tarsOptions.browser.control = validateBrowserControlMode(
-        modelProvider,
-        tarsOptions.browser.control,
+    // Apply defaults and validate configuration
+    const processedOptions = applyDefaultOptions<AgentTARSOptions>(options);
+    
+    // Validate and adjust browser control mode
+    if (processedOptions.browser?.control) {
+      processedOptions.browser.control = validateBrowserControlMode(
+        processedOptions.model?.provider,
+        processedOptions.browser.control,
         new ConsoleLogger(options.id || 'AgentTARS'),
       );
     }
 
-    const workspace = tarsOptions.workspace ?? process.cwd();
+    const workspace = processedOptions.workspace ?? process.cwd();
+    const mcpServers = AgentTARS.buildMCPServerRegistry(options, workspace);
+    const instructions = AgentTARS.buildInstructions(processedOptions, workspace, options.instructions);
 
-    // Under the 'in-memory' implementation, the built-in mcp server will be implemented independently
-    // Note that the usage of the attached mcp server will be the same as the implementation,
-    // because we cannot determine whether it supports same-process calls.
-    const mcpServers: MCPServerRegistry = {
-      ...(options.mcpImpl === 'stdio'
-        ? {
-            browser: {
-              command: 'npx',
-              args: ['-y', '@agent-infra/mcp-server-browser'],
-            },
-            filesystem: {
-              command: 'npx',
-              args: ['-y', '@agent-infra/mcp-server-filesystem', workspace],
-            },
-            commands: {
-              command: 'npx',
-              args: ['-y', '@agent-infra/mcp-server-commands'],
-            },
-          }
-        : {}),
-      ...(options.mcpServers || {}),
-    };
-
-    // Initialize planner options if enabled
-    const plannerOptions: AgentTARSPlannerOptions | undefined =
-      typeof tarsOptions.planner === 'boolean'
-        ? tarsOptions.planner
-          ? { enable: true }
-          : undefined
-        : tarsOptions.planner;
-
-    // Generate browser rules based on control solution
-    const browserRules = generateBrowserRulesPrompt(tarsOptions.browser?.control);
-
-    const systemPrompt = `${DEFAULT_SYSTEM_PROMPT}
-${browserRules}
-
-<envirnoment>
-Current Working Directory: ${workspace}
-</envirnoment>
-
-    `;
-
-    // Prepare system instructions with user instructions taking priority
-    // Core system capabilities provide the foundation, but user instructions override behavior
-    const instructions = options.instructions
-      ? `${systemPrompt}
-
----
-
-**User Instructions (Higher Priority):**
-
-${options.instructions}`
-      : systemPrompt;
-
+    // Initialize parent class
     super({
-      ...tarsOptions,
+      ...processedOptions,
       name: options.name ?? 'AgentTARS',
       instructions,
       mcpServers,
-      maxTokens: tarsOptions.maxTokens, // Ensure maxTokens is passed to the parent class
+      maxTokens: processedOptions.maxTokens,
     });
 
-    this.logger = this.logger.spawn('AgentTARS');
-    this.tarsOptions = tarsOptions;
+    // Store configuration
+    this.tarsOptions = processedOptions;
     this.workspace = workspace;
+
+    // Initialize logger
+    this.logger = this.logger.spawn('AgentTARS');
     this.logger.info(`🤖 AgentTARS initialized | Working directory: ${workspace}`);
 
-    // Initialize browser manager instead of direct browser instance
+    // Initialize managers and utilities
     this.browserManager = BrowserManager.getInstance(this.logger);
     this.browserManager.lastLaunchOptions = {
       headless: this.tarsOptions.browser?.headless,
       cdpEndpoint: this.tarsOptions.browser?.cdpEndpoint,
     };
-    if (plannerOptions?.enable) {
-      // Wait for impl
-    }
+    
+    this.workspacePathResolver = new WorkspacePathResolver({ workspace });
+    this.toolLogger = new ToolLogger(this.logger);
+    this.resourceCleaner = new ResourceCleaner(this.logger);
+    this.initializer = new AgentTARSInitializer(
+      this.tarsOptions,
+      this.workspace,
+      this.browserManager,
+      this.logger,
+    );
 
-    // Initialize message history dumper if experimental feature is enabled
-    if (options.experimental?.dumpMessageHistory) {
-      this.messageHistoryDumper = new MessageHistoryDumper({
-        workspace: this.workspace,
-        agentId: this.id,
-        agentName: this.name,
-        logger: this.logger,
-      });
-      this.logger.info('📝 Message history dump enabled');
-    }
-
-    this.eventStream.subscribe((event) => {
-      if (event.type === 'tool_result' && event.name === 'browser_navigate') {
-        event._extra = this.browserState;
-      }
-    });
-
-    // Initialize workspace path resolver
-    this.workspacePathResolver = new WorkspacePathResolver({
-      workspace: this.workspace,
-    });
+    // Initialize optional features
+    this.initializeOptionalFeatures();
+    this.setupEventHandlers();
   }
 
   /**
-   * Initialize in-memory MCP modules and register tools
+   * Initialize the agent and all its components
    */
   async initialize(): Promise<void> {
-    this.logger.info('Initializing AgentTARS ...');
+    this.logger.info('🚀 Initializing AgentTARS...');
 
     try {
-      // Initialize browser components based on control solution
-      const control = this.tarsOptions.browser?.control || 'hybrid';
+      // Initialize all components through the initializer
+      const components = await this.initializer.initialize(
+        (tool) => this.registerTool(tool),
+        this.eventStream,
+      );
 
-      // Always initialize browser tools manager regardless of control mode
-      this.browserToolsManager = new BrowserToolsManager(this.logger, control);
-      this.browserToolsManager.setBrowserManager(this.browserManager);
+      // Store component references
+      this.browserToolsManager = components.browserToolsManager;
+      this.filesystemToolsManager = components.filesystemToolsManager;
+      this.searchToolProvider = components.searchToolProvider;
+      this.browserGUIAgent = components.browserGUIAgent;
+      this.inMemoryMCPClients = components.mcpClients;
+      this.mcpServers = this.initializer.getMCPServers();
 
-      // Initialize filesystem tools manager
-      this.filesystemToolsManager = new FilesystemToolsManager(this.logger, {
-        workspace: this.workspace,
-      });
-
-      // First initialize GUI Agent if needed
-      if (control !== 'dom') {
-        await this.initializeGUIAgent();
-      }
-
-      // Initialize search tools using direct integration with agent-infra/search
-      await this.initializeSearchTools();
-
-      // Then initialize MCP servers and register tools
-      if (this.tarsOptions.mcpImpl === 'in-memory') {
-        await this.initializeInMemoryMCPForBuiltInMCPServers();
-      }
+      // Log registered tools
+      this.toolLogger.logRegisteredTools(this.getTools());
 
       this.logger.info('✅ AgentTARS initialization complete');
-      // Log all registered tools in a beautiful format
-      this.logRegisteredTools();
     } catch (error) {
       this.logger.error('❌ Failed to initialize AgentTARS:', error);
       await this.cleanup();
@@ -253,328 +181,19 @@ ${options.instructions}`
   }
 
   /**
-   * Initialize search tools using direct integration with agent-infra/search
-   */
-  private async initializeSearchTools(): Promise<void> {
-    try {
-      this.logger.info('🔍 Initializing search tools with direct integration');
-
-      // Get browser instance from manager for browser_search provider if needed
-      // const sharedBrowser =
-      //   this.tarsOptions.search?.provider === 'browser_search'
-      //     ? this.browserManager.getBrowser()
-      //     : undefined;
-
-      // Create search tool provider with configuration from options
-      this.searchToolProvider = new SearchToolProvider(this.logger, {
-        provider: this.tarsOptions.search!.provider,
-        count: this.tarsOptions.search!.count,
-        cdpEndpoint: this.tarsOptions.browser!.cdpEndpoint,
-        browserSearch: this.tarsOptions.search!.browserSearch,
-        apiKey: this.tarsOptions.search!.apiKey,
-        baseUrl: this.tarsOptions.search!.baseUrl,
-        // FIXME: Un-comment it after refine launch state management of `@agent-infra/browser` and
-        // externalBrowser: sharedBrowser,
-      });
-
-      // Create and register search tool
-      const searchTool = this.searchToolProvider.createSearchTool();
-      this.registerTool(searchTool);
-
-      this.logger.info('✅ Search tools initialized successfully');
-    } catch (error) {
-      this.logger.error('❌ Failed to initialize search tools:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Log all registered tools in a beautiful format
-   */
-  private logRegisteredTools(): void {
-    try {
-      // Get all tools from parent class
-      const tools = this.getTools();
-
-      if (!tools || tools.length === 0) {
-        this.logger.info('🧰 No tools registered');
-        return;
-      }
-
-      const toolCount = tools.length;
-
-      // Create a beautiful header for the tools log
-      const header = `🧰 ${toolCount} Tools Registered 🧰`;
-      const separator = '═'.repeat(header.length);
-
-      this.logger.info('\n');
-      this.logger.info(separator);
-      this.logger.info(header);
-      this.logger.info(separator);
-
-      // Group tools by their module/category (derived from description)
-      const toolsByCategory: Record<string, string[]> = {};
-
-      tools.forEach((tool) => {
-        // Extract category from description [category] format if available
-        const categoryMatch = tool.description?.match(/^\[(.*?)\]/);
-        const category = categoryMatch ? categoryMatch[1] : 'general';
-
-        if (!toolsByCategory[category]) {
-          toolsByCategory[category] = [];
-        }
-
-        toolsByCategory[category].push(tool.name);
-      });
-
-      // Print tools by category
-      Object.entries(toolsByCategory).forEach(([category, toolNames]) => {
-        this.logger.info(`\n📦 ${category} (${toolNames.length}):`);
-        toolNames.sort().forEach((name) => {
-          this.logger.info(`  • ${name}`);
-        });
-      });
-
-      this.logger.info('\n' + separator);
-      this.logger.info(`✨ Total: ${toolCount} tools ready to use`);
-      this.logger.info(separator + '\n');
-    } catch (error) {
-      this.logger.error('❌ Failed to log registered tools:', error);
-    }
-  }
-  /**
-   * Initialize GUI Agent for visual browser control
-   */
-  private async initializeGUIAgent(): Promise<void> {
-    try {
-      this.logger.info('🖥️ Initializing GUI Agent for visual browser control');
-
-      // Create GUI Agent instance with browser from manager
-      this.browserGUIAgent = new BrowserGUIAgent({
-        logger: this.logger,
-        headless: this.tarsOptions.browser?.headless,
-        browser: this.browserManager.getBrowser(), // Get browser from manager
-        eventStream: this.eventStream, // Pass the event stream
-      });
-
-      // Set GUI Agent in browser tools manager
-      if (this.browserToolsManager) {
-        this.browserToolsManager.setBrowserGUIAgent(this.browserGUIAgent);
-      }
-
-      this.logger.info('✅ GUI Agent initialized successfully');
-    } catch (error) {
-      this.logger.error(`❌ Failed to initialize GUI Agent: ${error}`);
-      throw error;
-    }
-  }
-
-  /**
-   * Initialize in-memory mcp for built-in mcp servers using the new architecture
-   * with direct server creation and configuration
-   */
-  private async initializeInMemoryMCPForBuiltInMCPServers(): Promise<void> {
-    try {
-      // Get browser instance from manager for reuse
-      const sharedBrowser = this.browserManager.getBrowser();
-      this.logger.info('Using shared browser instance for MCP servers');
-
-      // Use static imports instead of dynamic imports
-      const mcpModules = {
-        browser: browserModule,
-        filesystem: filesystemModule,
-        commands: commandsModule,
-      };
-
-      // Create servers with appropriate configurations
-      this.mcpServers = {
-        browser: mcpModules.browser.createServer({
-          externalBrowser: sharedBrowser,
-          enableAdBlocker: false,
-          launchOptions: {
-            headless: this.tarsOptions.browser?.headless,
-          },
-        }),
-        filesystem: mcpModules.filesystem.createServer({
-          allowedDirectories: [this.workspace],
-        }),
-        commands: mcpModules.commands.createServer(),
-      };
-
-      // Create in-memory clients for each server
-      await Promise.all(
-        Object.entries(this.mcpServers)
-          .filter(([_, server]) => server !== null) // Skip null servers
-          .map(async ([name, server]) => {
-            const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
-
-            // Create a client for this server
-            const client = new Client(
-              {
-                name: `${name}-client`,
-                version: '1.0',
-              },
-              {
-                capabilities: {
-                  roots: {
-                    listChanged: true,
-                  },
-                },
-              },
-            );
-
-            // Connect the client and server
-            await Promise.all([client.connect(clientTransport), server.connect(serverTransport)]);
-
-            // Store the client for later use
-            this.inMemoryMCPClients[name as BuiltInMCPServerName] = client;
-            // FIXME: check if global logger level is working.
-            this.logger.info(`✅ Connected to ${name} MCP server`);
-          }),
-      );
-
-      // If browser tools manager exists, set the browser client
-      if (this.browserToolsManager && this.inMemoryMCPClients.browser) {
-        this.browserToolsManager.setBrowserClient(this.inMemoryMCPClients.browser);
-      }
-
-      // If filesystem tools manager exists, set the filesystem client
-      if (this.filesystemToolsManager && this.inMemoryMCPClients.filesystem) {
-        this.filesystemToolsManager.setFilesystemClient(this.inMemoryMCPClients.filesystem);
-      }
-
-      // Register browser tools using the strategy if available
-      if (this.browserToolsManager) {
-        const registeredTools = await this.browserToolsManager.registerTools((tool) =>
-          this.registerTool(tool),
-        );
-
-        this.logger.info(
-          `✅ Registered ${registeredTools.length} browser tools using '${this.tarsOptions.browser?.control || 'default'}' strategy`,
-        );
-      }
-
-      // Register filesystem tools using the manager if available
-      if (this.filesystemToolsManager) {
-        const registeredTools = await this.filesystemToolsManager.registerTools((tool) =>
-          this.registerTool(tool),
-        );
-
-        this.logger.info(
-          `✅ Registered ${registeredTools.length} filesystem tools with safe filtering`,
-        );
-      }
-
-      // Register remaining non-browser and non-filesystem tools
-      await Promise.all(
-        Object.entries(this.inMemoryMCPClients).map(async ([name, client]) => {
-          if (
-            (name !== 'browser' || !this.browserToolsManager) &&
-            (name !== 'filesystem' || !this.filesystemToolsManager)
-          ) {
-            await this.registerToolsFromClient(name as BuiltInMCPServerName, client!);
-          }
-        }),
-      );
-
-      this.logger.info('✅ In-memory MCP initialization complete');
-    } catch (error) {
-      this.logger.error('❌ Failed to initialize in-memory MCP:', error);
-      throw new Error(
-        `Failed to initialize in-memory MCP: ${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
-  }
-
-  /**
-   * Register tools from a specific MCP client
-   */
-  private async registerToolsFromClient(
-    moduleName: BuiltInMCPServerName,
-    client: Client,
-  ): Promise<void> {
-    try {
-      // Get tools from the client
-      const tools = await client.listTools();
-
-      if (!tools || !Array.isArray(tools.tools)) {
-        this.logger.warn(`⚠️ No tools returned from '${moduleName}' module`);
-        return;
-      }
-
-      // Register each tool with the agent
-      for (const tool of tools.tools) {
-        const toolDefinition = new Tool({
-          id: tool.name,
-          description: `[${moduleName}] ${tool.description}`,
-          parameters: (tool.inputSchema || { type: 'object', properties: {} }) as JSONSchema7,
-          function: async (args: Record<string, unknown>) => {
-            try {
-              const result = await client.callTool({
-                name: tool.name,
-                arguments: args,
-              });
-              return result.content;
-            } catch (error) {
-              this.logger.error(`❌ Error executing tool '${tool.name}':`, error);
-              throw error;
-            }
-          },
-        });
-
-        this.registerTool(toolDefinition);
-        this.logger.info(`Registered tool: ${toolDefinition.name}`);
-      }
-
-      this.logger.info(`Registered ${tools.tools.length} MCP tools from '${moduleName}'`);
-    } catch (error) {
-      this.logger.error(`❌ Failed to register tools from '${moduleName}' module:`, error);
-      throw error;
-    }
-  }
-
-  /**
-   * Lazy browser initialization using on-demand pattern
-   *
-   * This hook intercepts tool calls and lazily initializes the browser only when
-
-   * it's first needed by a browser-related tool. It also resolves workspace paths
-   * for tools that work with file system operations.
+   * Handle tool call preprocessing (lazy browser launch and path resolution)
    */
   override async onBeforeToolCall(
     id: string,
     toolCall: { toolCallId: string; name: string },
     args: any,
-  ) {
+  ): Promise<any> {
+    // Handle browser tool calls with lazy initialization
     if (toolCall.name.startsWith('browser')) {
-      // Check if browser is already launching
-      if (!this.browserManager.isLaunchingComplete()) {
-        if (this.isReplaySnapshot) {
-          // Skip actual browser launch in replay mode
-        } else {
-          await this.browserManager.launchBrowser({
-            headless: this.tarsOptions.browser?.headless,
-            cdpEndpoint: this.tarsOptions.browser?.cdpEndpoint,
-          });
-        }
-      } else {
-        // Check if browser is still alive, and recover if needed
-        const isAlive = await this.browserManager.isBrowserAlive(true);
-
-        if (!isAlive && !this.isReplaySnapshot) {
-          // Browser is not alive and auto-recovery failed
-          // Try one more explicit recovery attempt
-          this.logger.warn('Browser appears to be terminated, attempting explicit recovery...');
-          const recovered = await this.browserManager.recoverBrowser();
-
-          if (!recovered) {
-            this.logger.error('Browser recovery failed - tool call may not work correctly');
-          }
-        }
-      }
+      await this.ensureBrowserReady();
     }
 
-    // Resolve workspace paths for all tools that have path parameters
+    // Resolve workspace paths for filesystem operations
     if (this.workspacePathResolver.hasPathParameters(toolCall.name)) {
       return this.workspacePathResolver.resolveToolPaths(toolCall.name, args);
     }
@@ -583,30 +202,48 @@ ${options.instructions}`
   }
 
   /**
-   * Override the onEachAgentLoopStart method to handle GUI Agent initialization
-   * and planner lifecycle
-   * This is called at the start of each agent iteration
+   * Handle agent loop start (GUI Agent screenshot if needed)
    */
   override async onEachAgentLoopStart(sessionId: string): Promise<void> {
-    // If GUI Agent is enabled and the browser is launched,
-    // take a screenshot and send it to the event stream
     if (
       this.tarsOptions.browser?.control !== 'dom' &&
       this.browserGUIAgent &&
       this.browserManager.isLaunchingComplete()
     ) {
-      // Ensure GUI Agent has access to the current event stream
       if (this.browserGUIAgent.setEventStream) {
         this.browserGUIAgent.setEventStream(this.eventStream);
       }
-
-      await this.browserGUIAgent?.onEachAgentLoopStart(this.eventStream, this.isReplaySnapshot);
+      await this.browserGUIAgent.onEachAgentLoopStart(this.eventStream, this.isReplaySnapshot);
     }
 
-    // Call any super implementation if it exists
     await super.onEachAgentLoopStart(sessionId);
   }
 
+  /**
+   * Handle post-tool call processing (browser state updates)
+   */
+  override async onAfterToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    result: any,
+  ): Promise<any> {
+    const processedResult = await super.onAfterToolCall(id, toolCall, result);
+
+    // Update browser state after navigation
+    if (
+      toolCall.name === 'browser_navigate' &&
+      this.browserManager.isLaunchingComplete() &&
+      (await this.browserManager.isBrowserAlive())
+    ) {
+      await this.updateBrowserState();
+    }
+
+    return processedResult;
+  }
+
+  /**
+   * Handle loop termination
+   */
   override async onBeforeLoopTermination(
     id: string,
     finalEvent: AgentEventStream.AssistantMessageEvent,
@@ -614,13 +251,38 @@ ${options.instructions}`
     return { finished: true };
   }
 
-  override async onAgentLoopEnd(id: string): Promise<void> {
-    await super.onAgentLoopEnd(id);
+  /**
+   * Handle session disposal
+   */
+  override async onDispose(): Promise<void> {
+    if (this.browserManager?.isLaunchingComplete()) {
+      this.logger.info('🧹 Closing browser pages before session disposal');
+      await this.browserManager.closeAllPages();
+    }
+    await super.onDispose();
   }
 
   /**
-   * Get information about the current browser control setup
-   * @returns Object containing mode and registered tools
+   * Clean up all resources
+   */
+  async cleanup(): Promise<void> {
+    await this.resourceCleaner.cleanup(
+      this.inMemoryMCPClients,
+      this.mcpServers,
+      this.browserManager,
+      this.messageHistoryDumper,
+    );
+
+    // Clear references
+    this.inMemoryMCPClients = {};
+    this.mcpServers = {};
+    this.browserGUIAgent = undefined;
+  }
+
+  // Public API methods
+
+  /**
+   * Get browser control information
    */
   public getBrowserControlInfo(): { mode: string; tools: string[] } {
     if (this.browserToolsManager) {
@@ -629,7 +291,6 @@ ${options.instructions}`
         tools: this.browserToolsManager.getRegisteredTools(),
       };
     }
-
     return {
       mode: this.tarsOptions.browser?.control || 'default',
       tools: [],
@@ -637,93 +298,21 @@ ${options.instructions}`
   }
 
   /**
-   * Clean up resources when done
-   */
-  async cleanup(): Promise<void> {
-    this.logger.info('Cleaning up resources...');
-
-    const cleanupPromises: Promise<void>[] = [];
-
-    // Close each MCP client connection
-    for (const [name, client] of Object.entries(this.inMemoryMCPClients)) {
-      cleanupPromises.push(
-        client.close().catch((error) => {
-          this.logger.warn(`⚠️ Error while closing ${name} client: ${error}`);
-        }),
-      );
-    }
-
-    // Close each MCP server
-    for (const [name, server] of Object.entries(this.mcpServers)) {
-      if (server?.close) {
-        cleanupPromises.push(
-          server.close().catch((error) => {
-            this.logger.warn(`⚠️ Error while closing ${name} server: ${error}`);
-          }),
-        );
-      }
-    }
-
-    // Close the shared browser instance through the manager
-    cleanupPromises.push(
-      this.browserManager.closeBrowser().catch((error) => {
-        this.logger.warn(`⚠️ Error while closing shared browser: ${error}`);
-      }),
-    );
-
-    // Wait for all cleanup operations to complete
-    await Promise.allSettled(cleanupPromises);
-
-    // Clear references
-    this.inMemoryMCPClients = {};
-    this.mcpServers = {};
-    this.browserGUIAgent = undefined;
-
-    // Clear message history traces if dumper exists
-    if (this.messageHistoryDumper) {
-      this.messageHistoryDumper.clearTraces();
-    }
-
-    this.logger.info('✅ Cleanup complete');
-  }
-
-  /**
-   * Get the current working directory for filesystem operations
+   * Get the current working directory
    */
   public getWorkingDirectory(): string {
     return this.workspace;
   }
 
   /**
-   * Get the logger instance used by this agent
+   * Get the logger instance
    */
   public getLogger(): ConsoleLogger {
     return this.logger;
   }
 
   /**
-   * Override onLLMRequest hook to capture requests for message history dump
-   */
-  override onLLMRequest(id: string, payload: LLMRequestHookPayload): void {
-    // Add to message history if dumper is available
-    if (this.messageHistoryDumper) {
-      this.messageHistoryDumper.addRequestTrace(id, payload);
-    }
-  }
-
-  /**
-   * Override onLLMResponse hook to capture responses for message history dump
-   */
-  override onLLMResponse(id: string, payload: LLMResponseHookPayload): void {
-    // Add to message history if dumper is available
-    if (this.messageHistoryDumper) {
-      this.messageHistoryDumper.addResponseTrace(id, payload);
-    }
-  }
-
-  /**
-   * Get the current abort signal if available
-   * This allows other components to hook into the abort mechanism
+   * Get the current abort signal
    */
   public getAbortSignal(): AbortSignal | undefined {
     return this.executionController.getAbortSignal();
@@ -731,39 +320,127 @@ ${options.instructions}`
 
   /**
    * Get the browser manager instance
-   * This allows external components to access browser functionality
    */
-  getBrowserManager(): BrowserManager | undefined {
+  public getBrowserManager(): BrowserManager {
     return this.browserManager;
   }
 
-  /**
-   * Override onAfterToolCall to update browser state after tool calls
-   * This ensures we have the latest URL and screenshot after each browser operation
-   */
-  override async onAfterToolCall(
-    id: string,
-    toolCall: { toolCallId: string; name: string },
-    result: any,
-  ): Promise<any> {
-    // Call super method first
-    const processedResult = await super.onAfterToolCall(id, toolCall, result);
+  // Message history hooks for experimental features
 
-    // Update browser state if tool is browser-related and state manager exists
-    if (
-      toolCall.name === 'browser_navigate' &&
-      this.browserManager.isLaunchingComplete() &&
-      (await this.browserManager.isBrowserAlive())
-    ) {
-      if (this.tarsOptions.browser?.control === 'dom') {
-        // console.time('browser_screenshot');
-        const response = await this.inMemoryMCPClients['browser']?.callTool({
-          name: 'browser_screenshot',
-          arguments: {
-            highlight: true,
-          },
+  override onLLMRequest(id: string, payload: LLMRequestHookPayload): void {
+    this.messageHistoryDumper?.addRequestTrace(id, payload);
+  }
+
+  override onLLMResponse(id: string, payload: LLMResponseHookPayload): void {
+    this.messageHistoryDumper?.addResponseTrace(id, payload);
+  }
+
+  // Private helper methods
+
+  /**
+   * Build MCP server registry based on implementation type
+   */
+  private static buildMCPServerRegistry(
+    options: AgentTARSOptions,
+    workspace: string,
+  ): MCPServerRegistry {
+    if (options.mcpImpl === 'stdio') {
+      return {
+        browser: {
+          command: 'npx',
+          args: ['-y', '@agent-infra/mcp-server-browser'],
+        },
+        filesystem: {
+          command: 'npx',
+          args: ['-y', '@agent-infra/mcp-server-filesystem', workspace],
+        },
+        commands: {
+          command: 'npx',
+          args: ['-y', '@agent-infra/mcp-server-commands'],
+        },
+        ...(options.mcpServers || {}),
+      };
+    }
+    return options.mcpServers || {};
+  }
+
+  /**
+   * Build system instructions
+   */
+  private static buildInstructions(
+    options: AgentTARSOptions,
+    workspace: string,
+    userInstructions?: string,
+  ): string {
+    const browserRules = generateBrowserRulesPrompt(options.browser?.control);
+    const systemPrompt = `${DEFAULT_SYSTEM_PROMPT}\n${browserRules}\n\n<environment>\nCurrent Working Directory: ${workspace}\n</environment>\n`;
+
+    return userInstructions
+      ? `${systemPrompt}\n\n---\n\n**User Instructions (Higher Priority):**\n\n${userInstructions}`
+      : systemPrompt;
+  }
+
+  /**
+   * Initialize optional features
+   */
+  private initializeOptionalFeatures(): void {
+    // Initialize message history dumper if experimental feature is enabled
+    if (this.tarsOptions.experimental?.dumpMessageHistory) {
+      this.messageHistoryDumper = new MessageHistoryDumper({
+        workspace: this.workspace,
+        agentId: this.id,
+        agentName: this.name,
+        logger: this.logger,
+      });
+      this.logger.info('📝 Message history dump enabled');
+    }
+  }
+
+  /**
+   * Setup event stream handlers
+   */
+  private setupEventHandlers(): void {
+    this.eventStream.subscribe((event) => {
+      if (event.type === 'tool_result' && event.name === 'browser_navigate') {
+        event._extra = this.browserState;
+      }
+    });
+  }
+
+  /**
+   * Ensure browser is ready for tool calls
+   */
+  private async ensureBrowserReady(): Promise<void> {
+    if (!this.browserManager.isLaunchingComplete()) {
+      if (!this.isReplaySnapshot) {
+        await this.browserManager.launchBrowser({
+          headless: this.tarsOptions.browser?.headless,
+          cdpEndpoint: this.tarsOptions.browser?.cdpEndpoint,
         });
-        // console.timeEnd('browser_screenshot');
+      }
+    } else {
+      const isAlive = await this.browserManager.isBrowserAlive(true);
+      if (!isAlive && !this.isReplaySnapshot) {
+        this.logger.warn('🔄 Browser recovery needed, attempting explicit recovery...');
+        const recovered = await this.browserManager.recoverBrowser();
+        if (!recovered) {
+          this.logger.error('❌ Browser recovery failed - tool call may not work correctly');
+        }
+      }
+    }
+  }
+
+  /**
+   * Update browser state after navigation
+   */
+  private async updateBrowserState(): Promise<void> {
+    try {
+      if (this.tarsOptions.browser?.control === 'dom') {
+        const response = await this.inMemoryMCPClients.browser?.callTool({
+          name: 'browser_screenshot',
+          arguments: { highlight: true },
+        });
+        
         if (Array.isArray(response?.content)) {
           const { data, type, mimeType } = response.content[1];
           if (type === 'image') {
@@ -774,17 +451,8 @@ ${options.instructions}`
         const { compressedBase64 } = await this.browserGUIAgent.screenshot();
         this.browserState.currentScreenshot = compressedBase64;
       }
+    } catch (error) {
+      this.logger.warn('⚠️ Failed to update browser state:', error);
     }
-
-    return processedResult;
-  }
-
-  override async onDispose(): Promise<void> {
-    const browserManager = this.getBrowserManager();
-    if (browserManager && browserManager.isLaunchingComplete()) {
-      console.log(`Closing browser pages for session before creating new session`);
-      await browserManager.closeAllPages();
-    }
-    await super.onDispose();
   }
 }

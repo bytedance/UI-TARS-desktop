@@ -15,7 +15,10 @@ export type BuiltInMCPServerName = 'browser' | 'filesystem' | 'commands' | 'sear
 export type BuiltInMCPServers = Partial<Record<BuiltInMCPServerName, McpServer>>;
 
 /**
- * FIXME: move to impl based on event stream.
+ * Browser state information for tracking current page status
+ * 
+ * This interface tracks the current browser state including URL and screenshot
+ * for use in tool results and event streams.
  */
 export interface BrowserState {
   currentUrl?: string;
