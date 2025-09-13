@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { isClaudeModel, getClaudeHeaders, addClaudeHeadersIfNeeded } from '../claude-headers';
+import { isClaudeModel, getClaudeHeaders, addClaudeHeadersIfNeeded } from '../src/claude-headers';
 
 describe('claude-headers', () => {
   describe('isClaudeModel', () => {
