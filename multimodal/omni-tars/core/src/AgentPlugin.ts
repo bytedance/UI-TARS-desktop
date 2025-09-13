@@ -3,7 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import Agent, { LLMRequestHookPayload, LLMResponseHookPayload, Tool } from '@tarko/agent';
+import Agent, {
+  LLMRequestHookPayload,
+  LLMResponseHookPayload,
+  Tool,
+  EachAgentLoopEndContext,
+} from '@tarko/agent';
 
 /**
  * Base class that all agent plugins must extends
@@ -51,8 +56,8 @@ export class AgentPlugin {
     //logic here
   }
 
-  /** Hook called at the start of each agent loop */
-  async onEachAgentLoopEnd(): Promise<void> {
+  /** Hook called at the end of each agent loop */
+  async onEachAgentLoopEnd(context: EachAgentLoopEndContext): Promise<void> {
     //logic here
   }
 

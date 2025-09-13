@@ -12,6 +12,7 @@ import {
   LLMStreamingResponseHookPayload,
   ChatCompletionMessageToolCall,
   ToolCallResult,
+  EachAgentLoopEndContext,
 } from '@tarko/agent-interface';
 import { logger } from './utils/logger';
 import { AgentHookBase } from './agent-hook-base';
@@ -63,6 +64,15 @@ export class AgentGenerateSnapshotHook extends AgentHookBase {
     if (this.originalEachLoopStartHook) {
       return this.originalEachLoopStartHook.call(this.agent, id);
     }
+  }
+
+  /**
+   * Hook called at the end of each agent loop
+   */
+  protected onEachAgentLoopEnd(context: EachAgentLoopEndContext): void | Promise<void> {
+    logger.info(`Ending agent loop ${context.iteration}`);
+    // No specific logic needed for snapshot generation at loop end
+    // The original hook (ComposableAgent's onEachAgentLoopEnd) will be called first
   }
 
   /**
