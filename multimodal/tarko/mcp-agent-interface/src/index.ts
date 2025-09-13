@@ -39,7 +39,7 @@ export interface MCPAgentOptions extends AgentOptions {
   /**
    * Default timeout for MCP client connections in seconds.
    *
-   * @defaultValue 180
+   * @defaultValue 60
    */
   defaultConnectionTimeout?: number;
 }
