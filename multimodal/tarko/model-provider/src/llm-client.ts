@@ -6,7 +6,7 @@
 import { TokenJS } from '@tarko/llm-client';
 import { OpenAI } from 'openai';
 import { LLMRequest, AgentModel } from './types';
-import type { ChatCompletionCreateParamsBase } from 'openai/resources/chat/completions';
+import type { ChatCompletionCreateParamsBase } from './third-party';
 
 // Providers that should not be added to extended model list
 const NATIVE_PROVIDERS = new Set([
