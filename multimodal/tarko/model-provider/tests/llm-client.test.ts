@@ -75,7 +75,7 @@ describe('createLLMClient', () => {
         json: true,
         toolCalls: true,
         images: true,
-      }
+      },
     );
   });
 
@@ -158,7 +158,7 @@ describe('createLLMClient', () => {
         provider: 'openai',
         model: 'gpt-4o',
       },
-      'https://api.openai.com/v1'
+      'https://api.openai.com/v1',
     );
 
     expect(mockTokenJSInstance.chat.completions.create).toHaveBeenCalledWith({

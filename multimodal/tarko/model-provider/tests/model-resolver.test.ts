@@ -10,7 +10,7 @@ import { AgentModel } from '../src/types';
 describe('resolveModel', () => {
   it('should use default values when no parameters provided', () => {
     const result = resolveModel();
-    
+
     expect(result).toEqual({
       provider: 'openai',
       id: 'gpt-4o',
@@ -31,7 +31,7 @@ describe('resolveModel', () => {
     };
 
     const result = resolveModel(agentModel);
-    
+
     expect(result).toEqual({
       provider: 'anthropic',
       id: 'claude-3-5-sonnet-20241022',
@@ -50,7 +50,7 @@ describe('resolveModel', () => {
     };
 
     const result = resolveModel(agentModel, 'gpt-4o-mini', 'anthropic');
-    
+
     expect(result).toEqual({
       provider: 'anthropic',
       id: 'gpt-4o-mini',
@@ -63,7 +63,7 @@ describe('resolveModel', () => {
 
   it('should apply default configuration for extended providers', () => {
     const result = resolveModel(undefined, 'llama3.2', 'ollama');
-    
+
     expect(result).toEqual({
       provider: 'ollama',
       id: 'llama3.2',
@@ -83,7 +83,7 @@ describe('resolveModel', () => {
     };
 
     const result = resolveModel(agentModel);
-    
+
     expect(result).toEqual({
       provider: 'ollama',
       id: 'custom-model',
@@ -96,7 +96,7 @@ describe('resolveModel', () => {
 
   it('should handle volcengine provider correctly', () => {
     const result = resolveModel(undefined, 'doubao-pro-4k', 'volcengine');
-    
+
     expect(result).toEqual({
       provider: 'volcengine',
       id: 'doubao-pro-4k',
@@ -115,7 +115,7 @@ describe('resolveModel', () => {
     };
 
     const result = resolveModel(agentModel);
-    
+
     expect(result).toEqual({
       provider: 'deepseek',
       id: 'deepseek-chat',
