@@ -532,7 +532,11 @@ class ApiService {
   /**
    * Update session model configuration
    */
-  async updateSessionModel(sessionId: string, provider: string, modelId: string): Promise<{ success: boolean; sessionInfo?: SessionInfo }> {
+  async updateSessionModel(
+    sessionId: string,
+    provider: string,
+    modelId: string,
+  ): Promise<{ success: boolean; sessionInfo?: SessionInfo }> {
     try {
       console.log('🔄 [ModelSelector] Updating session model:', {
         sessionId,
