@@ -384,7 +384,8 @@ export const sendMessageAction = atom(
       const messages = get(messagesAtom)[activeSessionId] || [];
       const userMessageCount = messages.filter((m) => m.role === 'user').length;
 
-      if (userMessageCount === 1) { // Now we check for 1 since we just added the message
+      if (userMessageCount === 1) {
+        // Now we check for 1 since we just added the message
         let summary = '';
         if (typeof content === 'string') {
           summary = content.length > 50 ? content.substring(0, 47) + '...' : content;
