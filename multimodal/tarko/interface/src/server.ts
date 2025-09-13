@@ -5,7 +5,7 @@
  */
 
 import { AgioEvent } from '@tarko/agio';
-import { IAgent, TConstructor, AgentOptions } from '@tarko/agent-interface';
+import { IAgent, TConstructor, AgentOptions, AgentModel } from '@tarko/agent-interface';
 import { AgentImplementation } from './agent-implementation';
 import { AgentWebUIImplementation } from './web-ui-implementation';
 import { AgentStorageImplementation } from './storage-implementation';
@@ -78,6 +78,11 @@ export interface AgentServerOptions {
      * @default false
      */
     exclusive?: boolean;
+    /**
+     * Available models for the agent server
+     * These models will be merged with AgentOptions.model and made available for selection in the UI
+     */
+    models?: AgentModel[];
   };
   /**
    * Share config
@@ -140,12 +145,7 @@ export interface SessionItemMetadata {
   /**
    * Current using model configuration
    */
-  modelConfig?: {
-    provider: string;
-    modelId: string;
-    displayName?: string;
-    configuredAt: number;
-  };
+  modelConfig?: AgentModel;
   /**
    * Current using agent configuration
    */
@@ -184,7 +184,6 @@ export interface LegacySessionItemInfo {
   tags?: string[];
   modelConfig?: {
     provider: string;
-    modelId: string;
-    configuredAt: number;
+    id: string;
   };
 }

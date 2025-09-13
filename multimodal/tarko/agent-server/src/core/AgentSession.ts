@@ -5,6 +5,7 @@
  */
 
 import path from 'path';
+
 import {
   AgentEventStream,
   AgentRunNonStreamingOptions,
@@ -85,7 +86,7 @@ export class AgentSession {
     const agentOptions = { ...server.appConfig };
 
     // Create agent instance using the server's session-aware factory method
-    const agent = server.createAgent();
+    const agent = server.createAgent(sessionInfo);
 
     // Initialize agent snapshot if enabled
     if (agentOptions.snapshot?.enable) {
@@ -402,20 +403,45 @@ export class AgentSession {
    * @param sessionInfo Updated session metadata with new model config
    */
   async updateModelConfig(sessionInfo: import('../storage').SessionInfo): Promise<void> {
-    console.log(
-      `🔄 [AgentSession] Storing model config for session ${this.id}: ${sessionInfo.metadata?.modelConfig?.provider}:${sessionInfo.metadata?.modelConfig?.modelId}`,
-    );
-
     // Store the session metadata for use in future queries
     this.sessionInfo = sessionInfo;
 
-    // Emit model updated event to client
-    this.eventBridge.emit('model_updated', {
-      sessionId: this.id,
-      modelConfig: sessionInfo.metadata?.modelConfig,
-    });
+    // Recreate agent with new model configuration
+    try {
+      // Clean up current agent
+      if (this.agent && typeof this.agent.dispose === 'function') {
+        await this.agent.dispose();
+      }
 
-    console.log(`✅ [AgentSession] Model config stored for session ${this.id}`);
+      // Create new agent with updated session info
+      const newAgent = this.server.createAgent(sessionInfo);
+
+      // Handle snapshot if enabled
+      const agentOptions = { ...this.server.appConfig };
+      if (agentOptions.snapshot?.enable) {
+        const snapshotStoragesDirectory =
+          agentOptions.snapshot.storageDirectory ?? this.server.getCurrentWorkspace();
+
+        if (snapshotStoragesDirectory) {
+          const snapshotPath = path.join(snapshotStoragesDirectory, this.id);
+          // @ts-expect-error
+          this.agent = new AgentSnapshot(newAgent, {
+            snapshotPath,
+            snapshotName: this.id,
+          }) as unknown as IAgent;
+        } else {
+          this.agent = newAgent;
+        }
+      } else {
+        this.agent = newAgent;
+      }
+
+      // Re-initialize the new agent
+      await this.agent.initialize();
+    } catch (error) {
+      console.error(`Failed to recreate agent for session ${this.id}:`, error);
+      throw error;
+    }
   }
 
   async cleanup() {

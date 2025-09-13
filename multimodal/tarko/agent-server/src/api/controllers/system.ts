@@ -5,17 +5,15 @@
 
 import { Request, Response } from 'express';
 import { sanitizeAgentOptions } from '../../utils/config-sanitizer';
+import {
+  getAvailableModels as getAvailableModelsUtil,
+  isModelConfigValid,
+} from '../../utils/model-utils';
 
-/**
- * Health check endpoint
- */
 export function healthCheck(req: Request, res: Response) {
   res.status(200).json({ status: 'ok' });
 }
 
-/**
- * Get version information including git hash
- */
 export function getVersion(req: Request, res: Response) {
   const server = req.app.locals.server;
   res.status(200).json({
@@ -25,45 +23,35 @@ export function getVersion(req: Request, res: Response) {
   });
 }
 
-/**
- * Get current agent options (sanitized)
- */
 export function getAgentOptions(req: Request, res: Response) {
   const server = req.app.locals.server;
-  const sanitizedOptions = sanitizeAgentOptions(server.appConfig);
-
   res.status(200).json({
-    options: sanitizedOptions,
+    options: sanitizeAgentOptions(server.appConfig),
   });
 }
 
-/**
- * FIXME: implement it.
- * Get available model providers and configurations
- */
 export function getAvailableModels(req: Request, res: Response) {
-  res.status(200).json({
-    models: [],
-    defaultModel: {},
-    hasMultipleProviders: false,
-  });
+  const server = req.app.locals.server;
+  const models = getAvailableModelsUtil(server.appConfig);
+
+  res.status(200).json({ models });
 }
 
 /**
  * Update session model configuration
  */
 export async function updateSessionModel(req: Request, res: Response) {
-  const { sessionId, provider, modelId } = req.body;
+  const { sessionId, model } = req.body;
   const server = req.app.locals.server;
 
-  if (!sessionId || !provider || !modelId) {
+  if (!sessionId || !model || !model.provider || !model.id) {
     return res
       .status(400)
-      .json({ error: 'Missing required parameters: sessionId, provider, modelId' });
+      .json({ error: 'Missing required parameters: sessionId, model (with provider and id)' });
   }
 
   // Validate model configuration
-  if (!server.isModelConfigValid(provider, modelId)) {
+  if (!isModelConfigValid(server.appConfig, model.provider, model.id)) {
     return res.status(400).json({ error: 'Invalid model configuration' });
   }
 
@@ -80,18 +68,14 @@ export async function updateSessionModel(req: Request, res: Response) {
       const updatedSessionInfo = await server.storageProvider.updateSessionInfo(sessionId, {
         metadata: {
           ...currentSessionInfo.metadata,
-          modelConfig: {
-            provider,
-            modelId,
-            configuredAt: Date.now(),
-          },
+          modelConfig: model,
         },
       });
 
       // If session is currently active, recreate the agent with new model config
       const activeSession = server.sessions[sessionId];
       if (activeSession) {
-        console.log(`Session ${sessionId} model updated to ${provider}:${modelId}`);
+        console.log(`Session ${sessionId} model updated to ${model.provider}:${model.id}`);
 
         try {
           // Recreate agent with new model configuration
