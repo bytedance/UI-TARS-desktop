@@ -1,6 +1,6 @@
 # @tarko/mcp-agent
 
-MCP (Model Context Protocol) Agent implementation for Tarko framework.
+An event-stream driven MCP Agent Framework for building effective multimodal Agents.
 
 ## Installation
 
