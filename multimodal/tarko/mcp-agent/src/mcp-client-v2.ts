@@ -5,7 +5,7 @@
 
 import { MCPClient as V2Client } from '@agent-infra/mcp-client';
 import { Tool } from '@modelcontextprotocol/sdk/types.js';
-import { IMCPClient, MCPClientResult, MCPServerConfig } from './mcp-types';
+import { IMCPClient, MCPServerConfig } from './mcp-types';
 import type { Logger } from '@agent-infra/logger';
 
 /**
@@ -58,7 +58,7 @@ export class MCPClientV2 implements IMCPClient {
     }
   }
 
-  async callTool(toolName: string, args: unknown): Promise<MCPClientResult> {
+  async callTool(toolName: string, args: unknown): Promise<unknown> {
     if (!this.isInitialized) {
       this.logger.info(`Client not initialized, initializing before tool call: ${toolName}`);
       await this.initialize();
@@ -72,13 +72,10 @@ export class MCPClientV2 implements IMCPClient {
         args,
       });
 
-      // Convert the v2 result format to v1 format
-      return { content: result.content };
+      return result.content;
     } catch (error) {
       this.logger.error(`Error calling MCP tool ${toolName}:`, error);
-      return {
-        content: `Error: Failed to execute tool ${toolName}: ${error}`,
-      };
+      throw new Error(`Failed to execute tool ${toolName}: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 

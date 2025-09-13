@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { Agent, Tool } from '@tarko/agent';
+import type { JSONSchema7 } from '@tarko/agent';
 import { MCPAgentOptions, IMCPClient, MCPServerRegistry } from './mcp-types';
 import { MCPClientV2 } from './mcp-client-v2';
-import { MCPToolAdapter } from './mcp-tool-adapter';
 import { filterItems } from '@tarko/shared-utils';
 
 export class MCPAgent<T extends MCPAgentOptions = MCPAgentOptions> extends Agent<T> {
@@ -20,9 +20,6 @@ export class MCPAgent<T extends MCPAgentOptions = MCPAgentOptions> extends Agent
     this.mcpServerConfig = options.mcpServers ?? {};
   }
 
-  /**
-   * Filter MCP servers based on include/exclude patterns
-   */
   private filterMCPServers(
     mcpServerConfig: MCPServerRegistry,
     filterOptions?: MCPAgentOptions['mcpServer'],
@@ -49,9 +46,6 @@ export class MCPAgent<T extends MCPAgentOptions = MCPAgentOptions> extends Agent
     return filteredRegistry;
   }
 
-  /**
-   * Initialize the MCP Agent and connect to MCP servers
-   */
   async initialize(): Promise<void> {
     // Apply MCP server filtering
     const filteredMcpServerConfig = this.filterMCPServers(
@@ -74,16 +68,26 @@ export class MCPAgent<T extends MCPAgentOptions = MCPAgentOptions> extends Agent
         // Store the client for later use
         this.mcpClients.set(serverName, mcpClient);
 
-        // Create and register tool adapters
-        const toolAdapter = new MCPToolAdapter(mcpClient, serverName);
-        const tools = toolAdapter.createTools();
-
-        // Register each tool with the agent
-        for (const tool of tools) {
+        // Create and register tools directly
+        const mcpTools = mcpClient.getTools();
+        for (const mcpTool of mcpTools) {
+          const tool = new Tool({
+            id: mcpTool.name,
+            description: `[${serverName}] ${mcpTool.description}`,
+            parameters: (mcpTool.inputSchema || {
+              type: 'object',
+              properties: {},
+            }) as JSONSchema7,
+            function: async (args: Record<string, unknown>) => {
+              return await mcpClient.callTool(mcpTool.name, args);
+            },
+          });
           this.registerTool(tool as unknown as Tool);
         }
 
-        this.logger.success(`✅ Connected to MCP server ${serverName} with ${tools.length} tools`);
+        const toolCount = mcpTools.length;
+
+        this.logger.success(`✅ Connected to MCP server ${serverName} with ${toolCount} tools`);
       } catch (error) {
         this.logger.error(
           `❌ Failed to connect to MCP server ${serverName}: ${error instanceof Error ? error.message : JSON.stringify(error)}`,
@@ -94,15 +98,11 @@ export class MCPAgent<T extends MCPAgentOptions = MCPAgentOptions> extends Agent
       }
     }
 
-    // Call it to update the initialization state.
     super.initialize();
   }
 
-  /**
-   * Clean up resources when done
-   */
   async cleanup(): Promise<void> {
-    for (const [serverName, client] of this.mcpClients.entries()) {
+    for (const [serverName, client] of Array.from(this.mcpClients.entries())) {
       try {
         await client.close();
         this.logger.info(`✅ Closed connection to MCP server: ${serverName}`);

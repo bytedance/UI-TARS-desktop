@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
@@ -15,31 +14,12 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 export { InMemoryTransport, Client, McpServer };
 
-export interface MCPClientResult {
-  content: any;
-}
-
 /**
  * Common interface for MCP clients
  */
 export interface IMCPClient {
-  /**
-   * Initialize the client and return available tools
-   */
   initialize(): Promise<Tool[]>;
-
-  /**
-   * Call a tool with the given arguments
-   */
-  callTool(toolName: string, args: unknown): Promise<MCPClientResult>;
-
-  /**
-   * Close the connection to the server
-   */
+  callTool(toolName: string, args: unknown): Promise<unknown>;
   close(): Promise<void>;
-
-  /**
-   * Get the list of available tools
-   */
   getTools(): Tool[];
 }
