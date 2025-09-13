@@ -21,7 +21,7 @@ export function createModelConfigFromEvent(
 
   return {
     provider: event.provider || '',
-    modelId: event.model || '',
+    id: event.model || '',
     displayName: event.modelDisplayName,
     configuredAt: Date.now(),
   };

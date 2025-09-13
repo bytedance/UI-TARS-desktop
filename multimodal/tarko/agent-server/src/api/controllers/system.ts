@@ -91,9 +91,10 @@ export async function updateSessionModel(req: Request, res: Response) {
         metadata: {
           ...currentSessionInfo.metadata,
           modelConfig: {
+            ...selectedModel,
+            id: modelId,
             provider,
-            modelId,
-            displayName: selectedModel?.displayName, // Include displayName if available
+            ...(selectedModel?.displayName && { displayName: selectedModel.displayName }),
             configuredAt: Date.now(),
           },
         },

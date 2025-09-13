@@ -229,7 +229,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   // Update current model when session metadata changes
   useEffect(() => {
     if (sessionMetadata?.modelConfig && availableModels) {
-      const { provider, modelId } = sessionMetadata.modelConfig;
+      const { provider, id: modelId } = sessionMetadata.modelConfig;
       const modelKey = `${provider}:${modelId}`;
 
       console.log('🔄 [ModelSelector] Updating current model from session metadata:', {
@@ -319,7 +319,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
             }}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
-              {sessionMetadata?.modelConfig?.modelId && (
+              {sessionMetadata?.modelConfig?.id && (
                 <Typography
                   variant="body2"
                   sx={{
@@ -334,7 +334,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
                   {getModelDisplayName(sessionMetadata.modelConfig)}
                 </Typography>
               )}
-              {sessionMetadata?.modelConfig?.provider && sessionMetadata?.modelConfig?.modelId && (
+              {sessionMetadata?.modelConfig?.provider && sessionMetadata?.modelConfig?.id && (
                 <Typography
                   variant="body2"
                   sx={{

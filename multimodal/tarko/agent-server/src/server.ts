@@ -332,7 +332,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
 
     // Override model config from session if available and valid
     if (sessionInfo?.metadata?.modelConfig) {
-      const { provider, modelId } = sessionInfo.metadata.modelConfig;
+      const { provider, id: modelId } = sessionInfo.metadata.modelConfig;
       const availableModels = getAvailableModels(this.appConfig);
       const selectedModel = availableModels.find(
         (model) => model.provider === provider && model.id === modelId,

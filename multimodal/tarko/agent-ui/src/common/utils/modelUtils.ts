@@ -13,16 +13,16 @@ import { SessionItemMetadata } from '@tarko/interface';
  * @returns The display name or model ID
  */
 export function getModelDisplayName(modelConfig?: SessionItemMetadata['modelConfig']): string {
-  if (!modelConfig?.modelId) {
+  if (!modelConfig?.id) {
     return '';
   }
 
-  // Check for displayName first, then fall back to modelId
+  // Check for displayName first, then fall back to id
   if (modelConfig.displayName && modelConfig.displayName.trim()) {
     return modelConfig.displayName;
   }
 
-  return modelConfig.modelId;
+  return modelConfig.id;
 }
 
 /**
