@@ -7,7 +7,6 @@ import { Request, Response } from 'express';
 import { sanitizeAgentOptions } from '../../utils/config-sanitizer';
 import {
   getAvailableModels as getAvailableModelsUtil,
-  getModelsGroupedByProvider,
   isModelConfigValid,
 } from '../../utils/model-utils';
 
@@ -47,7 +46,7 @@ export function getAgentOptions(req: Request, res: Response) {
  */
 export function getAvailableModels(req: Request, res: Response) {
   const server = req.app.locals.server;
-  const models = getModelsGroupedByProvider(server.appConfig);
+  const models = getAvailableModelsUtil(server.appConfig);
 
   res.status(200).json({
     models,

@@ -56,35 +56,4 @@ export function isModelConfigValid(
   return availableModels.some((model) => model.provider === provider && model.id === modelId);
 }
 
-/**
- * Transform available models into grouped format for API response
- * @param appConfig The agent application configuration
- * @returns Models grouped by provider with deduplication
- */
-export function getModelsGroupedByProvider(appConfig: AgentAppConfig) {
-  const availableModels = getAvailableModels(appConfig);
 
-  // Group models by provider while preserving full model information
-  const modelsByProvider = availableModels.reduce(
-    (acc, model) => {
-      if (!acc[model.provider]) {
-        acc[model.provider] = [];
-      }
-      // Deduplication by model ID
-      const existingModel = acc[model.provider].find((m) => m.id === model.id);
-      if (!existingModel) {
-        acc[model.provider].push({
-          id: model.id,
-          displayName: model.displayName,
-        });
-      }
-      return acc;
-    },
-    {} as Record<string, Array<{ id: string; displayName?: string }>>,
-  );
-
-  return Object.entries(modelsByProvider).map(([provider, modelList]) => ({
-    provider,
-    models: modelList,
-  }));
-}
