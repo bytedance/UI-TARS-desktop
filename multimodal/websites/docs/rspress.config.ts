@@ -79,6 +79,9 @@ export default defineConfig({
         fontSize: 16,
       },
     }),
+    pluginClientRedirects({
+      redirects: [],
+    }),
   ],
   themeConfig: {
     darkMode: false,
