@@ -21,11 +21,6 @@
   },
   {
     "type": "dir",
-    "name": "agent",
-    "label": "Agent SDK"
-  },
-  {
-    "type": "dir",
     "name": "ui",
     "label": "UI SDK"
   }

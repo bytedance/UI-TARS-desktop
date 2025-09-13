@@ -1,20 +1,202 @@
 ---
 title: Agent API
-description: Tarko Agent 的完整 API 参考
+description: Complete API reference for @tarko/agent
 ---
 
-# Agent API
+# @tarko/agent
 
-Tarko Agent 类的完整 API 参考。
+## 简介
+
+`@tarko/agent` 是一个事件流驱动的元 Agent 框架，用于构建高效的多模态 Agent。
+
+## 何时使用？
+
+此 Agent SDK 提供了低级别的编程 API，适用于从头构建 AI Agent，例如：
+
+- **MCP Agent**: 连接到 MCP 客户端
+- **GUI Agent**: 构建图形界面 Agent
+- **自定义 Agent**: 为特定领域构建专门的 Agent
+
+## 安装
+
+```bash
+npm install @tarko/agent
+```
+
+## 特性
+
+- [x] **工具集成**: 在 Agent 响应中轻松创建和调用工具
+- [x] **事件流驱动**: 标准事件流协议驱动，更高效地构建上下文和 UI
+- [x] **原生流式**: 原生流式传输让您实时了解 Agent 的输出
+- [x] **多模态分析**: 自动分析多模态工具结果，让您专注于构建 Agent
+- [x] **强大的扩展能力**: 丰富的生命周期设计允许您实现更高级的 Agent
+- [x] **多模型提供商**: 支持多种模型，支持高级配置和运行时选择
+- [x] **多工具调用引擎**: 多工具调用引擎让您更容易访问工具调用能力
+
+## 快速开始
+
+创建 `index.ts`：
+
+```ts
+import { Agent, Tool, z } from '@tarko/agent';
+
+const locationTool = new Tool({
+  id: 'getCurrentLocation',
+  description: "获取用户当前位置",
+  parameters: z.object({}),
+  function: async () => {
+    return { location: 'Boston' };
+  },
+});
+
+const weatherTool = new Tool({
+  id: 'getWeather',
+  description: '获取指定位置的天气信息',
+  parameters: z.object({
+    location: z.string().describe('位置名称，如城市名'),
+  }),
+  function: async (input) => {
+    const { location } = input;
+    return {
+      location,
+      temperature: '70°F (21°C)',
+      condition: 'Sunny',
+      precipitation: '10%',
+      humidity: '45%',
+      wind: '5 mph',
+    };
+  },
+});
+
+const agent = new Agent({
+  tools: [locationTool, weatherTool],
+});
+
+async function main() {
+  const response = await agent.run({
+    input: "今天天气怎么样？",
+  });
+  console.log(response);
+}
+
+main();
+```
+
+执行：
+
+```bash
+npx tsx index.ts
+```
+
+## API
+
+### Agent
+
+定义 `Agent` 实例：
+
+```ts
+const agent = new Agent({
+  /* AgentOptions */
+});
+```
+
+#### Agent 选项
+
+- `tools`: Agent 可用的工具数组
+- `systemPrompt`: Agent 的系统提示
+- `modelProvider`: LLM 提供商的配置
+- `stream`: 启用流式响应（默认: false）
+- `maxIterations`: 最大迭代次数（默认: 10）
+
+### Tool
+
+定义 `Tool` 实例：
+
+```ts
+import { Tool, z } from '@tarko/agent';
+
+const locationTool = new Tool({
+  id: 'getCurrentLocation',
+  description: "获取用户当前位置",
+  parameters: z.object({}),
+  function: async () => {
+    return { location: 'Boston' };
+  },
+});
+```
+
+#### Tool 选项
+
+- `id`: 工具的唯一标识符
+- `description`: 工具功能描述
+- `parameters`: 工具参数的 Zod 模式
+- `function`: 实现工具逻辑的异步函数
+
+## 指南
+
+### 流式模式
+
+启用 `stream: true`：
+
+```ts
+async function main() {
+  const stream = await agent.run({
+    input: "今天天气怎么样？",
+    stream: true,
+  });
+
+  for await (const chunk of stream) {
+    console.log(JSON.stringify(chunk));
+  }
+}
+```
+
+您将获得包含不同事件类型的流式输出：
+
+- `assistant_message`: 完整的助手消息
+- `tool_call`: 工具执行事件
+- `tool_result`: 工具执行结果
+- `assistant_streaming_message`: 流式消息块
+
+### 错误处理
+
+```ts
+try {
+  const response = await agent.run({
+    input: "今天天气怎么样？",
+  });
+} catch (error) {
+  console.error('Agent 执行失败:', error);
+}
+```
+
+### 高级配置
+
+```ts
+const agent = new Agent({
+  tools: [weatherTool, locationTool],
+  systemPrompt: '你是一个有用的天气助手。',
+  modelProvider: {
+    apiKey: process.env.OPENAI_API_KEY,
+    baseURL: 'https://api.openai.com/v1',
+    model: 'gpt-4',
+    temperature: 0.7,
+    maxTokens: 1000,
+  },
+  maxIterations: 5,
+  stream: true,
+});
+```
+
+更多高级使用模式，请参阅 [Agent Hooks 文档](/api/hooks)。
 
 ## 即将推出
 
-此部分正在开发中，敬请期待详细的 API 文档，包括：
+详细的 API 文档正在完善中，敬请期待：
 
-- Agent 构造函数选项
-- 方法签名
-- 事件类型
-- 配置接口
-- 类型定义
+- 完整的事件类型定义
+- 高级配置选项
+- 错误处理最佳实践
+- 性能优化指南
 
-目前请参考 [英文版 Agent API 文档](/api/agent) 了解详细信息。
+目前请参考 [英文版 Agent API 文档](/api/agent) 了解完整信息。

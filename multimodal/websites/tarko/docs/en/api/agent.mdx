@@ -1,20 +1,262 @@
 ---
 title: Agent API
-description: Complete API reference for Tarko Agent
+description: Complete API reference for @tarko/agent
 ---
 
-# Agent API
+# @tarko/agent
 
-Complete API reference for the Tarko Agent class.
+## Introduction
 
-## Coming Soon
+`@tarko/agent` is an event-stream driven meta agent framework for building effective multimodal Agents.
 
-This section is under development. Check back soon for detailed API documentation including:
+## When to use?
 
-- Agent constructor options
-- Method signatures
-- Event types
-- Configuration interfaces
-- Type definitions
+This Agent SDK provides a low-level programmatic API, useful when you want to build an AI agent from scratch, e.g.
 
-For now, see [Quick Start Guide](/guide/quick-start) for basic usage examples.
+- **MCP Agent**: Connect to mcp client
+- **GUI Agent**: Build a gui agent
+- **Custom Agents**: Build specialized agents for specific domains
+
+## Install
+
+```bash
+npm install @tarko/agent
+```
+
+## Features
+
+- [x] **Tool Integration**: Effortlessly create and call tools within agent responses.
+- [x] **Event-stream driven**: Standard Event Stream protocol driver to build Context and UI more efficiently.
+- [x] **Native Streaming**: Native streaming allows you to understand the Agent's output in real time.
+- [x] **Multimodal analysis**: Automatically analysis multimodal tool result allowing you to focus more on building Agents.
+- [x] **Strong extension capabilities**: Rich lifecycle design allows you to implement more high-level Agents.
+- [x] **Multiple model providers**: Supports multiple models, and supports advance configuration and runtime selection.
+- [x] **Multiple tool call engines**: The multiple tool call engine allows you to more easily access tool calling capabilities
+
+## Quick Start
+
+Create a `index.ts`:
+
+```ts
+import { Agent, Tool, z } from '@tarko/agent';
+
+const locationTool = new Tool({
+  id: 'getCurrentLocation',
+  description: "Get user's current location",
+  parameters: z.object({}),
+  function: async () => {
+    return { location: 'Boston' };
+  },
+});
+
+const weatherTool = new Tool({
+  id: 'getWeather',
+  description: 'Get weather information for a specified location',
+  parameters: z.object({
+    location: z.string().describe('Location name, such as city name'),
+  }),
+  function: async (input) => {
+    const { location } = input;
+    return {
+      location,
+      temperature: '70°F (21°C)',
+      condition: 'Sunny',
+      precipitation: '10%',
+      humidity: '45%',
+      wind: '5 mph',
+    };
+  },
+});
+
+const agent = new Agent({
+  tools: [locationTool, weatherTool],
+});
+
+async function main() {
+  const response = await agent.run({
+    input: "How's the weather today?",
+  });
+  console.log(response);
+}
+
+main();
+```
+
+Execute it:
+
+```bash
+npx tsx index.ts
+```
+
+Output:
+
+```json
+{
+  "id": "5c38c0a1-ccbe-48f0-8b97-ae78a4d9407e",
+  "type": "assistant_message",
+  "timestamp": 1750188571248,
+  "content": "The weather in Boston today is sunny with a temperature of 70°F (21°C). There's a 10% chance of precipitation, humidity is at 45%, and the wind is blowing at 5 mph.",
+  "finishReason": "stop",
+  "messageId": "msg_1750188570877_ics24k3x"
+}
+```
+
+## API
+
+### Agent
+
+Define a `Agent` instance:
+
+```ts
+const agent = new Agent({
+  /* AgentOptions */
+});
+```
+
+#### Agent Options
+
+- `tools`: Array of tools available to the agent
+- `systemPrompt`: System prompt for the agent
+- `modelProvider`: Configuration for the LLM provider
+- `stream`: Enable streaming responses (default: false)
+- `maxIterations`: Maximum number of iterations (default: 10)
+
+### Tool
+
+Define a `Tool` instance:
+
+```ts
+import { Tool, z } from '@tarko/agent';
+
+const locationTool = new Tool({
+  id: 'getCurrentLocation',
+  description: "Get user's current location",
+  parameters: z.object({}),
+  function: async () => {
+    return { location: 'Boston' };
+  },
+});
+```
+
+#### Tool Options
+
+- `id`: Unique identifier for the tool
+- `description`: Description of what the tool does
+- `parameters`: Zod schema for tool parameters
+- `function`: Async function that implements the tool logic
+
+## Guide
+
+### Streaming Mode
+
+In above basic example, if you enable `stream: true`:
+
+```ts
+async function main() {
+  const stream = await agent.run({
+    input: "How's the weather today?",
+    stream: true,
+  });
+
+  for await (const chunk of stream) {
+    console.log(JSON.stringify(chunk));
+  }
+}
+```
+
+You will get streaming outputs with different event types:
+
+- `assistant_message`: Complete assistant messages
+- `tool_call`: Tool execution events
+- `tool_result`: Tool execution results
+- `assistant_streaming_message`: Streaming message chunks
+
+### Event Types
+
+#### AssistantMessage
+
+```ts
+interface AssistantMessage {
+  id: string;
+  type: 'assistant_message';
+  timestamp: number;
+  content: string;
+  toolCalls?: ToolCall[];
+  finishReason: 'stop' | 'tool_calls' | 'length';
+  messageId: string;
+}
+```
+
+#### ToolCall
+
+```ts
+interface ToolCallEvent {
+  id: string;
+  type: 'tool_call';
+  timestamp: number;
+  toolCallId: string;
+  name: string;
+  arguments: any;
+  startTime: number;
+  tool: ToolDefinition;
+}
+```
+
+#### ToolResult
+
+```ts
+interface ToolResult {
+  id: string;
+  type: 'tool_result';
+  timestamp: number;
+  toolCallId: string;
+  name: string;
+  content: any;
+  elapsedMs: number;
+}
+```
+
+#### StreamingMessage
+
+```ts
+interface StreamingMessage {
+  id: string;
+  type: 'assistant_streaming_message';
+  timestamp: number;
+  content: string;
+  isComplete: boolean;
+  messageId: string;
+}
+```
+
+### Error Handling
+
+```ts
+try {
+  const response = await agent.run({
+    input: "How's the weather today?",
+  });
+} catch (error) {
+  console.error('Agent execution failed:', error);
+}
+```
+
+### Advanced Configuration
+
+```ts
+const agent = new Agent({
+  tools: [weatherTool, locationTool],
+  systemPrompt: 'You are a helpful weather assistant.',
+  modelProvider: {
+    apiKey: process.env.OPENAI_API_KEY,
+    baseURL: 'https://api.openai.com/v1',
+    model: 'gpt-4',
+    temperature: 0.7,
+    maxTokens: 1000,
+  },
+  maxIterations: 5,
+  stream: true,
+});
+```
+
+For more advanced usage patterns, see the [Agent Hooks documentation](/api/hooks).
