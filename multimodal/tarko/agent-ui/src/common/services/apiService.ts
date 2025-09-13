@@ -526,38 +526,23 @@ class ApiService {
     model: AgentModel,
   ): Promise<{ success: boolean; sessionInfo?: SessionInfo }> {
     try {
-      console.log('🔄 [ModelSelector] Updating session model:', {
-        sessionId,
-        model,
-        endpoint: `${API_BASE_URL}/api/v1/sessions/model`,
-      });
-
-      const requestBody = { sessionId, model };
-      console.log('📤 [ModelSelector] Request payload:', requestBody);
-
       const response = await fetch(`${API_BASE_URL}/api/v1/sessions/model`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify({ sessionId, model }),
       });
 
-      console.log('📥 [ModelSelector] Response status:', response.status, response.statusText);
-
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('❌ [ModelSelector] Server error response:', errorText);
         throw new Error(`Failed to update session model: ${response.statusText}`);
       }
 
       const responseData = await response.json();
-      console.log('✅ [ModelSelector] Response data:', responseData);
-
       return {
         success: responseData.success,
         sessionInfo: responseData.sessionInfo,
       };
     } catch (error) {
-      console.error('💥 [ModelSelector] Error updating session model:', error);
+      console.error('Error updating session model:', error);
       return { success: false };
     }
   }

@@ -24,14 +24,15 @@ interface NavbarModelSelectorProps {
   isDarkMode?: boolean;
 }
 
-// Helper function to compare models
+// Helper functions for model operations
 const isSameModel = (a: AgentModel | null, b: AgentModel | null): boolean => {
   if (!a || !b) return false;
   return a.provider === b.provider && a.id === b.id;
 };
 
-// Helper function to create a unique key for model
 const getModelKey = (model: AgentModel): string => `${model.provider}:${model.id}`;
+
+const getModelDisplayText = (model: AgentModel) => model.displayName || model.id;
 
 export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   className = '',
@@ -231,13 +232,10 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     return null;
   }
 
-  // Check if there are multiple providers (calculate on frontend)
-  const uniqueProviders = availableModels
-    ? new Set(availableModels.models.map((model) => model.provider))
-    : new Set();
-  const hasMultipleProviders = uniqueProviders.size > 1;
+  // Show selector only if there are multiple models available
+  const hasMultipleModels = availableModels && availableModels.models.length > 1;
 
-  if (!hasMultipleProviders || !availableModels || availableModels.models.length === 0) {
+  if (!hasMultipleModels || !availableModels || availableModels.models.length === 0) {
     if (!sessionMetadata?.modelConfig) {
       return null;
     }
@@ -319,7 +317,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   const renderValue = (selected: AgentModel | null) => {
     if (!selected) return 'Select Model';
 
-    const displayName = selected.displayName || selected.id;
+    const displayText = getModelDisplayText(selected);
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
@@ -333,9 +331,9 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
             }}
-            title={displayName}
+            title={displayText}
           >
-            {displayName}
+            {displayText}
           </Typography>
           <Typography
             variant="body2"
@@ -425,7 +423,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
             {availableModels.models.map((model) => {
               const modelKey = getModelKey(model);
               const isSelected = isSameModel(currentModel, model);
-              const displayName = model.displayName || model.id;
+              const displayText = getModelDisplayText(model);
 
               return (
                 <MenuItem key={modelKey} value={modelKey}>
@@ -456,7 +454,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
                           whiteSpace: 'nowrap',
                         }}
                       >
-                        {displayName}
+                        {displayText}
                       </Typography>
                       <Typography
                         variant="body2"

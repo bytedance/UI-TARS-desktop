@@ -403,10 +403,6 @@ export class AgentSession {
    * @param sessionInfo Updated session metadata with new model config
    */
   async updateModelConfig(sessionInfo: import('../storage').SessionInfo): Promise<void> {
-    console.log(
-      `🔄 [AgentSession] Storing model config for session ${this.id}: ${sessionInfo.metadata?.modelConfig?.provider}:${sessionInfo.metadata?.modelConfig?.id}`,
-    );
-
     // Store the session metadata for use in future queries
     this.sessionInfo = sessionInfo;
 
@@ -442,14 +438,10 @@ export class AgentSession {
 
       // Re-initialize the new agent
       await this.agent.initialize();
-
-      console.log(`✅ [AgentSession] Agent recreated with new model config for session ${this.id}`);
     } catch (error) {
-      console.error(`❌ [AgentSession] Failed to recreate agent for session ${this.id}:`, error);
+      console.error(`Failed to recreate agent for session ${this.id}:`, error);
       throw error;
     }
-
-    console.log(`✅ [AgentSession] Model config stored for session ${this.id}`);
   }
 
   async cleanup() {

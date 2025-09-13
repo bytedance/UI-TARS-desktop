@@ -322,56 +322,45 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    */
   createAgent(sessionInfo?: SessionInfo): IAgent {
     if (!this.currentAgentResolution) {
-      throw new Error('Cannot found availble resolved agent');
+      throw new Error('Cannot found available resolved agent');
     }
 
-    let agentOptions: T = {
+    const agentOptions: T = {
       ...this.appConfig,
       name: this.getCurrentAgentName(),
+      model: this.resolveModelConfig(sessionInfo),
     };
 
-    // Override model config from session if available and valid
+    return new this.currentAgentResolution.agentConstructor(agentOptions);
+  }
+
+  /**
+   * Resolve model configuration for agent creation
+   * @param sessionInfo Optional session info containing model preferences
+   * @returns Resolved model configuration
+   */
+  private resolveModelConfig(sessionInfo?: SessionInfo): AgentModel | undefined {
+    // Try to use session-specific model first
     if (sessionInfo?.metadata?.modelConfig) {
       const { provider, id: modelId } = sessionInfo.metadata.modelConfig;
       const availableModels = getAvailableModels(this.appConfig);
-      const selectedModel = availableModels.find(
+      const sessionModel = availableModels.find(
         (model) => model.provider === provider && model.id === modelId,
       );
 
-      if (selectedModel) {
-        // Use the session's selected model if it's still available
-        agentOptions = {
-          ...agentOptions,
-          model: selectedModel,
-        };
-      } else {
-        // Session model is no longer available, fall back to default
-        const defaultModel = getDefaultModel(this.appConfig);
-        if (defaultModel) {
-          agentOptions = {
-            ...agentOptions,
-            model: defaultModel,
-          };
-        }
-
-        // Log a warning about the fallback
-        if (this.isDebug) {
-          console.warn(
-            `[AgentServer] Session model ${provider}:${modelId} not found in available models, falling back to default model`,
-          );
-        }
+      if (sessionModel) {
+        return sessionModel;
       }
-    } else {
-      // No session model config, use default if available
-      const defaultModel = getDefaultModel(this.appConfig);
-      if (defaultModel) {
-        agentOptions = {
-          ...agentOptions,
-          model: defaultModel,
-        };
+
+      // Log fallback warning if session model is not available
+      if (this.isDebug) {
+        console.warn(
+          `Session model ${provider}:${modelId} not found, falling back to default`,
+        );
       }
     }
 
-    return new this.currentAgentResolution.agentConstructor(agentOptions);
+    // Fall back to default model
+    return getDefaultModel(this.appConfig);
   }
 }
