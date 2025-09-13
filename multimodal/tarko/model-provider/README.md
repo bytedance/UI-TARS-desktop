@@ -14,6 +14,7 @@ npm install @tarko/model-provider
 - 🎯 **Unified Interface**: Single API for all providers with OpenAI-compatible interface
 - ⚙️ **Smart Resolution**: Automatic model configuration resolution with fallbacks
 - 🔧 **Extensible**: Easy to add new providers through configuration
+- 🤖 **Smart Headers**: Automatic Claude beta headers for enhanced features
 - 📦 **Type Safe**: Full TypeScript support with strict typing
 
 ## Quick Start
@@ -80,6 +81,42 @@ const resolvedModel = resolveModel(
 );
 ```
 
+### Custom Headers Support
+
+Add custom headers to any model, with automatic Claude beta headers:
+
+```typescript
+// Custom headers for any provider
+const modelWithHeaders = resolveModel({
+  provider: 'openai',
+  id: 'gpt-4',
+  headers: {
+    'X-Custom-Header': 'value',
+    'Authorization': 'Bearer token'
+  }
+});
+
+// Claude models automatically get beta headers
+const claudeModel = resolveModel({
+  provider: 'anthropic',
+  id: 'claude-3-5-sonnet-20241022',
+  apiKey: 'your-anthropic-key'
+});
+// Automatically includes anthropic-beta headers for enhanced features
+
+// Custom headers merge with automatic ones
+const customClaudeModel = resolveModel({
+  provider: 'anthropic',
+  id: 'claude-3-haiku',
+  headers: {
+    'X-Request-ID': 'req-123'
+  }
+});
+// Results in both custom and automatic headers
+```
+
+Claude models (matching `claude-*` or `anthropic/*` patterns) automatically receive beta headers for tool streaming and efficiency features.
+
 ## API Reference
 
 ### Types
@@ -93,6 +130,7 @@ interface AgentModel {
   baseProvider?: BaseModelProviderName; // Base implementation
   apiKey?: string;                      // API key
   baseURL?: string;                     // Base URL
+  headers?: Record<string, string>;     // Custom headers (auto-merged with provider defaults)
 }
 ```
 

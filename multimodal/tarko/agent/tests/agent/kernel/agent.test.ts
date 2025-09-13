@@ -151,6 +151,7 @@ describe('Agent', () => {
           "baseProvider": "openai",
           "baseURL": undefined,
           "displayName": undefined,
+          "headers": {},
           "id": "gpt-4o",
           "provider": "openai",
         }
