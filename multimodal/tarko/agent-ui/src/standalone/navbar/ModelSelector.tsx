@@ -11,7 +11,8 @@ import {
   createTheme,
   ThemeProvider,
 } from '@mui/material';
-import { apiService, AgentModel, AvailableModelsResponse } from '@/common/services/apiService';
+import { apiService, AvailableModelsResponse } from '@/common/services/apiService';
+import { AgentModel } from '@tarko/model-provider';
 import { useSetAtom } from 'jotai';
 import { sessionMetadataAtom } from '@/common/state/atoms/ui';
 

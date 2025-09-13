@@ -8,6 +8,7 @@ import {
 import { socketService } from './socketService';
 import { ChatCompletionContentPart } from '@tarko/agent-interface';
 import { AgentServerVersionInfo } from '@agent-tars/interface';
+import { AgentModel } from '@tarko/model-provider';
 
 /**
  * Workspace item interface for contextual selector
@@ -17,18 +18,6 @@ export interface WorkspaceItem {
   path: string;
   type: 'file' | 'directory';
   relativePath: string;
-}
-
-/**
- * Agent model interface matching backend AgentModel type
- */
-export interface AgentModel {
-  id: string;
-  provider: string;
-  displayName?: string;
-  apiKey?: string;
-  baseURL?: string;
-  baseProvider?: string;
 }
 
 /**
