@@ -5,7 +5,11 @@
 
 import { Request, Response } from 'express';
 import { sanitizeAgentOptions } from '../../utils/config-sanitizer';
-import { getAvailableModels, isModelConfigValid } from '../../utils/model-utils';
+import {
+  getAvailableModels as getAvailableModelsUtil,
+  getModelsGroupedByProvider,
+  isModelConfigValid,
+} from '../../utils/model-utils';
 
 /**
  * Health check endpoint
@@ -43,31 +47,7 @@ export function getAgentOptions(req: Request, res: Response) {
  */
 export function getAvailableModels(req: Request, res: Response) {
   const server = req.app.locals.server;
-  const availableModels = getAvailableModels(server.appConfig);
-
-  // Group models by provider while preserving full model information
-  const modelsByProvider = availableModels.reduce(
-    (acc, model) => {
-      if (!acc[model.provider]) {
-        acc[model.provider] = [];
-      }
-      // Deduplication by model ID
-      const existingModel = acc[model.provider].find((m) => m.id === model.id);
-      if (!existingModel) {
-        acc[model.provider].push({
-          id: model.id,
-          displayName: model.displayName,
-        });
-      }
-      return acc;
-    },
-    {} as Record<string, Array<{ id: string; displayName?: string }>>,
-  );
-
-  const models = Object.entries(modelsByProvider).map(([provider, modelList]) => ({
-    provider,
-    models: modelList,
-  }));
+  const models = getModelsGroupedByProvider(server.appConfig);
 
   res.status(200).json({
     models,
@@ -102,7 +82,7 @@ export async function updateSessionModel(req: Request, res: Response) {
       }
 
       // Find the model to get its displayName
-      const availableModels = getAvailableModels(server.appConfig);
+      const availableModels = getAvailableModelsUtil(server.appConfig);
       const selectedModel = availableModels.find(
         (model) => model.provider === provider && model.id === modelId,
       );
