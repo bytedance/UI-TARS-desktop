@@ -19,12 +19,7 @@ export interface WorkspaceItem {
   relativePath: string;
 }
 
-/**
- * Available models response interface
- */
-export interface AvailableModelsResponse {
-  models: AgentModel[];
-}
+
 
 /**
  * API Service - Handles HTTP requests to the Agent TARS Server
@@ -502,7 +497,7 @@ class ApiService {
   /**
    * Get available model providers and configurations
    */
-  async getAvailableModels(): Promise<AvailableModelsResponse> {
+  async getAvailableModels(): Promise<{ models: AgentModel[] }> {
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/models`, {
         method: 'GET',
