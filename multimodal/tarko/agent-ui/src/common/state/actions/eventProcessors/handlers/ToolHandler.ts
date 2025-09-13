@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { jsonrepair } from 'jsonrepair';
 import { EventHandler, EventHandlerContext } from '../types';
 import { AgentEventStream, ToolResult, Message } from '@/common/types';
-import { determineToolRendererType } from '@/common/utils/tool-renderers';
+import { createStandardToolResult, determineToolRendererType } from '@/common/utils/tool-renderers';
 import { messagesAtom } from '@/common/state/atoms/message';
 import { toolResultsAtom, toolCallResultMap } from '@/common/state/atoms/tool';
 import { sessionPanelContentAtom } from '@/common/state/atoms/ui';
@@ -72,6 +72,21 @@ export class ToolResultHandler implements EventHandler<AgentEventStream.ToolResu
     // Normalize content for search results
     const normalizedContent = normalizeSearchResult(event.name, event.content, args);
 
+    // Create standardized tool result
+    const standardResult = createStandardToolResult(
+      event.name,
+      normalizedContent,
+      args,
+      {
+        toolCallId: event.toolCallId,
+        timestamp: event.timestamp,
+        title: event.name,
+        error: event.error,
+        elapsedMs: event.elapsedMs,
+        _extra: event._extra,
+      },
+    );
+
     const result: ToolResult = {
       id: uuidv4(),
       toolCallId: event.toolCallId,
@@ -79,10 +94,11 @@ export class ToolResultHandler implements EventHandler<AgentEventStream.ToolResu
       content: normalizedContent,
       timestamp: event.timestamp,
       error: event.error,
-      type: determineToolRendererType(event.name, normalizedContent),
+      type: standardResult.type,
       arguments: args,
       elapsedMs: event.elapsedMs,
       _extra: event._extra,
+      standardResult, // Add the standardized result
     };
 
     // Update both message and tool result atoms for immediate UI response
@@ -176,6 +192,7 @@ export class ToolResultHandler implements EventHandler<AgentEventStream.ToolResu
             error: result.error,
             arguments: args,
             _extra: result._extra,
+            standardResult, // Include standardized result for new renderers
           },
         }));
       }

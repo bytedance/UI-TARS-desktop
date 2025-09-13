@@ -1,58 +1,43 @@
-import { ToolToRendererCondition } from './types';
-import {
-  strReplaceEditorRendererCondition,
-  generalRendererCondition,
-  imageRendererCondition,
-  readMultipleFilesRendererCondition,
-} from './renderer-conditions';
-
-const TOOL_TO_RENDERER_CONFIG: ToolToRendererCondition[] = [
-  // Static tool name mappings
-  { toolName: 'web_search', renderer: 'search_result' },
-  { toolName: 'browser_vision_control', renderer: 'browser_vision_control' },
-  { toolName: 'browser_screenshot', renderer: 'image' },
-  { toolName: 'write_file', renderer: 'file_result' },
-  { toolName: 'read_file', renderer: 'file_result' },
-  { toolName: 'edit_file', renderer: 'diff_result' },
-  { toolName: 'run_command', renderer: 'command_result' },
-  { toolName: 'run_script', renderer: 'script_result' },
-  { toolName: 'LinkReader', renderer: 'link_reader' },
-  { toolName: 'Search', renderer: 'search_result' },
-  { toolName: 'execute_bash', renderer: 'command_result' },
-  { toolName: 'JupyterCI', renderer: 'script_result' },
-
-  // str_replace_editor
-  strReplaceEditorRendererCondition,
-
-  // read_multiple_files detection
-  readMultipleFilesRendererCondition,
-
-  // Dynamic conditions based on content
-  generalRendererCondition,
-
-  // Image content detection
-  imageRendererCondition,
-
-  // Fallback to JSON renderer
-  (): string => 'json',
-];
+import { StandardToolResult, RendererType, ToolMetadata } from './types';
+import { transformToolResult } from './transformers';
 
 /**
- * Determine the renderer type from tool name and content
- * Uses the flexible condition-based configuration system
+ * Main API for the new tool renderer system
+ * Transforms raw tool results into standardized format with type safety
+ */
+export function createStandardToolResult(
+  toolName: string,
+  content: unknown,
+  args?: unknown,
+  metadata?: Partial<ToolMetadata>,
+): StandardToolResult {
+  return transformToolResult(toolName, content, args, metadata);
+}
+
+/**
+ * Legacy API compatibility - returns just the renderer type
+ * @deprecated Use createStandardToolResult for new code
  */
 export function determineToolRendererType(name: string, content: any): string {
-  for (const condition of TOOL_TO_RENDERER_CONFIG) {
-    if (typeof condition === 'function') {
-      const result = condition(name, content);
-      if (result) {
-        return result;
-      }
-    } else if (condition.toolName === name) {
-      return condition.renderer;
-    }
-  }
-
-  // This should never be reached due to the fallback function, but kept for safety
-  return 'json';
+  const result = transformToolResult(name, content);
+  return result.type;
 }
+
+// Re-export types for external use
+export type {
+  StandardToolResult,
+  RendererType,
+  ToolMetadata,
+  RendererData,
+  ImageData,
+  FileData,
+  DiffData,
+  CommandData,
+  SearchData,
+  BrowserData,
+  TabbedFilesData,
+  JsonData,
+} from './types';
+
+// Re-export transformers for advanced use cases
+export { transformToolResult } from './transformers';
