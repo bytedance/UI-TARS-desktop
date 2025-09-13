@@ -109,16 +109,12 @@ describe('createLLMClient', () => {
 
     createLLMClient(model);
 
-    expect(mockTokenJSInstance.extendModelList).toHaveBeenCalledWith(
-      'anthropic',
-      'custom-claude',
-      {
-        streaming: true,
-        json: true,
-        toolCalls: true,
-        images: true,
-      },
-    );
+    expect(mockTokenJSInstance.extendModelList).toHaveBeenCalledWith('anthropic', 'custom-claude', {
+      streaming: true,
+      json: true,
+      toolCalls: true,
+      images: true,
+    });
   });
 
   it('should handle missing extendModelList method gracefully', () => {
