@@ -9,6 +9,23 @@ import { shouldUpdatePanelContent } from '../utils/panelContentUpdater';
 const LEADING_NEWLINES_REGEX = /^\n+/;
 const NEWLINE_CHAR = '\n';
 
+// Performance optimization: debounce rapid state updates
+const updateDebounceMap = new Map<string, NodeJS.Timeout>();
+
+function debounceStateUpdate(key: string, updateFn: () => void, delay: number = 32): void {
+  const existing = updateDebounceMap.get(key);
+  if (existing) {
+    clearTimeout(existing);
+  }
+
+  const timeout = setTimeout(() => {
+    updateFn();
+    updateDebounceMap.delete(key);
+  }, delay);
+
+  updateDebounceMap.set(key, timeout);
+}
+
 export class UserMessageHandler implements EventHandler<AgentEventStream.UserMessageEvent> {
   canHandle(event: AgentEventStream.Event): event is AgentEventStream.UserMessageEvent {
     return event.type === 'user_message';
@@ -159,60 +176,65 @@ export class StreamingMessageHandler
   ): void {
     const { set } = context;
 
-    set(messagesAtom, (prev: Record<string, Message[]>) => {
-      const sessionMessages = prev[sessionId] || [];
-      const messageIdToFind = event.messageId;
-      let existingMessageIndex = -1;
+    // Debounce rapid streaming updates to improve performance
+    const debounceKey = `streaming-${sessionId}-${event.messageId || 'default'}`;
 
-      // Find by messageId first, fallback to last streaming message
-      if (messageIdToFind) {
-        existingMessageIndex = sessionMessages.findIndex(
-          (msg) => msg.messageId === messageIdToFind,
-        );
-      } else if (sessionMessages.length > 0) {
-        const lastMessageIndex = sessionMessages.length - 1;
-        const lastMessage = sessionMessages[lastMessageIndex];
-        if (lastMessage && lastMessage.role === 'assistant' && lastMessage.isStreaming) {
-          existingMessageIndex = lastMessageIndex;
+    debounceStateUpdate(debounceKey, () => {
+      set(messagesAtom, (prev: Record<string, Message[]>) => {
+        const sessionMessages = prev[sessionId] || [];
+        const messageIdToFind = event.messageId;
+        let existingMessageIndex = -1;
+
+        // Find by messageId first, fallback to last streaming message
+        if (messageIdToFind) {
+          existingMessageIndex = sessionMessages.findIndex(
+            (msg) => msg.messageId === messageIdToFind,
+          );
+        } else if (sessionMessages.length > 0) {
+          const lastMessageIndex = sessionMessages.length - 1;
+          const lastMessage = sessionMessages[lastMessageIndex];
+          if (lastMessage && lastMessage.role === 'assistant' && lastMessage.isStreaming) {
+            existingMessageIndex = lastMessageIndex;
+          }
         }
-      }
 
-      if (existingMessageIndex !== -1) {
-        const existingMessage = sessionMessages[existingMessageIndex];
-        const updatedMessage = {
-          ...existingMessage,
-          content:
-            typeof existingMessage.content === 'string'
-              ? existingMessage.content + event.content
-              : event.content,
+        if (existingMessageIndex !== -1) {
+          const existingMessage = sessionMessages[existingMessageIndex];
+          const updatedMessage = {
+            ...existingMessage,
+            content:
+              typeof existingMessage.content === 'string'
+                ? existingMessage.content + event.content
+                : event.content,
+            isStreaming: !event.isComplete,
+            toolCalls: event.toolCalls || existingMessage.toolCalls,
+          };
+
+          return {
+            ...prev,
+            [sessionId]: [
+              ...sessionMessages.slice(0, existingMessageIndex),
+              updatedMessage,
+              ...sessionMessages.slice(existingMessageIndex + 1),
+            ],
+          };
+        }
+
+        const newMessage: Message = {
+          id: event.id || uuidv4(),
+          role: 'assistant',
+          content: event.content,
+          timestamp: event.timestamp,
           isStreaming: !event.isComplete,
-          toolCalls: event.toolCalls || existingMessage.toolCalls,
+          toolCalls: event.toolCalls,
+          messageId: event.messageId,
         };
 
         return {
           ...prev,
-          [sessionId]: [
-            ...sessionMessages.slice(0, existingMessageIndex),
-            updatedMessage,
-            ...sessionMessages.slice(existingMessageIndex + 1),
-          ],
+          [sessionId]: [...sessionMessages, newMessage],
         };
-      }
-
-      const newMessage: Message = {
-        id: event.id || uuidv4(),
-        role: 'assistant',
-        content: event.content,
-        timestamp: event.timestamp,
-        isStreaming: !event.isComplete,
-        toolCalls: event.toolCalls,
-        messageId: event.messageId,
-      };
-
-      return {
-        ...prev,
-        [sessionId]: [...sessionMessages, newMessage],
-      };
+      });
     });
   }
 }
