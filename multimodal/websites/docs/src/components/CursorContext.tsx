@@ -18,13 +18,9 @@ export function CursorProvider({ children }: { children: ReactNode }) {
 export function useCursor() {
   const context = useContext(CursorContext);
 
-  // For SSR compatibility, return a default context if undefined
+  // Always return a safe default if context is undefined
+  // This handles both SSR and cases where CursorProvider is not available
   if (context === undefined) {
-    // Check if we're in a browser environment
-    if (typeof window !== 'undefined') {
-      throw new Error('useCursor must be used within a CursorProvider');
-    }
-    // Return default values for SSR
     return {
       isHovered: false,
       setIsHovered: () => {}
