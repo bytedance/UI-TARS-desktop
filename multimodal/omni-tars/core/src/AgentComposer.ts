@@ -4,7 +4,12 @@
  */
 
 import { AgentPlugin } from './AgentPlugin';
-import Agent, { getLogger, LLMRequestHookPayload, LLMResponseHookPayload } from '@tarko/agent';
+import Agent, {
+  getLogger,
+  LLMRequestHookPayload,
+  LLMResponseHookPayload,
+  EachAgentLoopEndContext,
+} from '@tarko/agent';
 
 /**
  * Composes multiple agent plugins into a unified system prompt and instruction set
@@ -104,10 +109,15 @@ export class AgentComposer {
   /**
    * Execute onEachAgentLoopEnd hooks for all plugins
    */
-  async executeOnEachAgentLoopEnd(): Promise<void> {
+  async executeOnEachAgentLoopEnd(context: EachAgentLoopEndContext): Promise<void> {
     for (const plugin of this.plugins) {
       if (plugin.onEachAgentLoopEnd) {
-        await plugin.onEachAgentLoopEnd();
+        this.logger.info(`Executing onEachAgentLoopEnd for plugin: ${plugin.name}`);
+        const eventCount = plugin.agent?.getEventStream().getEvents().length;
+        this.logger.info(`Events before ${plugin.name}: ${eventCount}`);
+        await plugin.onEachAgentLoopEnd(context);
+        const eventCountAfter = plugin.agent?.getEventStream().getEvents().length;
+        this.logger.info(`Events after ${plugin.name}: ${eventCountAfter}`);
       }
     }
   }

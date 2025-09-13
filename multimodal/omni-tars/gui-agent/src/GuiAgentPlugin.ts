@@ -9,6 +9,7 @@ import {
   LLMResponseHookPayload,
   AgentEventStream,
   ChatCompletionContentPart,
+  EachAgentLoopEndContext,
 } from '@tarko/agent';
 import {
   GUIExecuteResult,
@@ -75,22 +76,61 @@ export class GuiAgentPlugin extends AgentPlugin {
     // console.log('onLLMRequest', id, payload);
   }
 
-  // async onEachAgentLoopStart(): Promise<void> {
-  // }
+  private lastProcessedEventCount = 0;
+  private cachedEvents: any[] = []; // Cache events to avoid race condition issues
 
-  async onEachAgentLoopEnd(): Promise<void> {
-    const events = this.agent.getEventStream().getEvents();
-    const lastToolCallIsComputerUse = this.findLastMatch<AgentEventStream.Event>(
-      events,
-      (item) => item.type === 'tool_call' && item.name === 'browser_vision_control',
+  async onEachAgentLoopStart(): Promise<void> {
+    // This method is kept for potential future use
+    this.agent.logger.info('[Omni-TARS] onEachAgentLoopStart called');
+  }
+
+  async onEachAgentLoopEnd(context: EachAgentLoopEndContext): Promise<void> {
+    // Check events at the end of each loop - now fixed to work properly with AgentSnapshot
+    const eventStream = this.agent.getEventStream();
+    const events = eventStream.getEvents();
+
+    this.agent.logger.info(
+      `[Omni-TARS] onEachAgentLoopEnd - Iteration: ${context.iteration}, Event count: ${events.length}`,
     );
-    if (!lastToolCallIsComputerUse) {
-      this.agent.logger.info('Last tool not GUI action, skipping screenshot');
+
+    // Update cached events - merge with current events to handle race conditions
+    if (events.length > 0) {
+      // If we have events, update our cache
+      this.cachedEvents = [...events];
+      this.agent.logger.info(`[Omni-TARS] Updated cached events: ${this.cachedEvents.length}`);
+    } else if (this.cachedEvents.length > 0) {
+      // If current events are empty but we have cached events, use cached
+      this.agent.logger.warn(`[Omni-TARS] Event stream is empty, using cached events: ${this.cachedEvents.length}`);
+      console.trace('Event stream empty, using cache');
+    } else {
+      // Both current and cached are empty
+      this.agent.logger.warn('[Omni-TARS] Both current and cached events are empty');
+      console.trace('No events available');
       return;
     }
 
-    this.agent.logger.info('onEachAgentLoopEnd lastToolCall', lastToolCallIsComputerUse);
+    const eventsToProcess = events.length > 0 ? events : this.cachedEvents;
 
+    // Only process if we have new events since last check
+    if (eventsToProcess.length > this.lastProcessedEventCount) {
+      const newEvents = eventsToProcess.slice(this.lastProcessedEventCount);
+      this.agent.logger.info('[Omni-TARS] New events since last check:', newEvents.length);
+
+      // Check if any new events are browser_vision_control tool calls
+      const hasNewBrowserAction = newEvents.some(
+        (event) => event.type === 'tool_call' && event.name === 'browser_vision_control',
+      );
+
+      if (hasNewBrowserAction) {
+        this.agent.logger.info('[Omni-TARS] New browser action detected, will take screenshot');
+        await this.takeScreenshot(eventStream);
+      }
+
+      this.lastProcessedEventCount = eventsToProcess.length;
+    }
+  }
+
+  private async takeScreenshot(eventStream: any): Promise<void> {
     const operator = await this.operatorManager.getInstance();
     const output = await operator?.screenshot();
     if (!output) {
@@ -124,7 +164,8 @@ export class GuiAgentPlugin extends AgentPlugin {
       });
     }
 
-    const eventStream = this.agent.getEventStream();
+    this.agent.logger.info('[Omni-TARS] Browser Screenshot Captured');
+
     const event = eventStream.createEvent('environment_input', {
       description: 'Browser Screenshot',
       content,
@@ -134,6 +175,8 @@ export class GuiAgentPlugin extends AgentPlugin {
       },
     });
     eventStream.sendEvent(event);
+    this.agent.logger.info('[Omni-TARS] Screenshot event sent');
+
     // Extract image dimensions from screenshot
     const dimensions = base64Tool.getDimensions();
     if (dimensions) {

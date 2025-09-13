@@ -207,6 +207,7 @@ export class ToolProcessor {
             },
           });
           this.eventStream.sendEvent(toolCallEvent);
+          this.logger.debug(`Tool call event sent: ${toolName}, total events now: ${this.eventStream.getEvents().length}`);
 
           // Trigger onAfterToolCall hook
           let content = result.content;
@@ -278,6 +279,7 @@ export class ToolProcessor {
           },
         });
         this.eventStream.sendEvent(toolCallEvent);
+        this.logger.debug(`Tool call event sent: ${toolName}, total events now: ${this.eventStream.getEvents().length}`);
 
         // Check again for abort before executing the tool
         if (abortSignal?.aborted) {

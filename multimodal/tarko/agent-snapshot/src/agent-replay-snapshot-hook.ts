@@ -17,6 +17,7 @@ import {
   ToolCallResult,
   ChatCompletionMessageToolCall,
   OpenAI,
+  EachAgentLoopEndContext,
 } from '@tarko/agent-interface';
 import { AgentHookBase } from './agent-hook-base';
 import { AgentNormalizerConfig } from './utils/snapshot-normalizer';
@@ -272,6 +273,15 @@ export class AgentReplaySnapshotHook extends AgentHookBase {
     if (this.originalEachLoopStartHook) {
       return this.originalEachLoopStartHook.call(this.agent, id);
     }
+  }
+
+  /**
+   * Hook implementation for agent loop end
+   */
+  protected onEachAgentLoopEnd(context: EachAgentLoopEndContext): void | Promise<void> {
+    logger.info(`Ending agent loop ${context.iteration}`);
+    // No specific logic needed for replay at loop end
+    // The original hook (ComposableAgent's onEachAgentLoopEnd) will be called first
   }
 
   /**
