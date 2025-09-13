@@ -242,6 +242,64 @@ export interface AgentOptions
     AgentWorkspaceOptions {}
 
 /**
+ * Context compression configuration options
+ */
+export interface AgentContextCompressionOptions {
+  /**
+   * Whether context compression is enabled
+   * 
+   * @defaultValue `true`
+   */
+  enabled?: boolean;
+
+  /**
+   * Compression strategy to use
+   * 
+   * Built-in strategies:
+   * - 'sliding_window': Keeps recent messages (Gemini CLI approach)
+   * - 'structured_summary': Creates structured summaries (Claude Code approach)
+   * - 'tool_response_compression': Compresses large tool responses (Manus approach)
+   * - 'smart_truncation': Intelligent message selection
+   * 
+   * @defaultValue `'sliding_window'`
+   */
+  strategy?: string;
+
+  /**
+   * Threshold for triggering compression (0-1, percentage of context window)
+   * 
+   * @defaultValue `0.7` (70%)
+   */
+  compressionThreshold?: number;
+
+  /**
+   * Target size after compression (0-1, percentage of original size)
+   * 
+   * @defaultValue `0.3` (30%)
+   */
+  targetCompressionRatio?: number;
+
+  /**
+   * Minimum number of messages to preserve
+   * 
+   * @defaultValue `5`
+   */
+  minMessagesToKeep?: number;
+
+  /**
+   * Maximum number of compression attempts per session
+   * 
+   * @defaultValue `10`
+   */
+  maxCompressionAttempts?: number;
+
+  /**
+   * Custom configuration for specific strategies
+   */
+  strategyConfig?: Record<string, any>;
+}
+
+/**
  * Options for configuring agent context behavior (e.g. message history)
  */
 export interface AgentContextAwarenessOptions {
@@ -255,4 +313,13 @@ export interface AgentContextAwarenessOptions {
    * This helps optimize token usage while preserving important conversation context.
    */
   maxImagesCount?: number;
+
+  /**
+   * Context compression configuration
+   * 
+   * Controls how the agent manages context window limits through compression strategies.
+   * When enabled, the agent will automatically compress older conversation history
+   * when approaching context window limits.
+   */
+  compression?: AgentContextCompressionOptions;
 }
