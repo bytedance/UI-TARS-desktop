@@ -38,6 +38,10 @@ export interface Model {
    * Provider's base URL
    */
   baseURL?: string;
+  /**
+   * Additional headers to include in requests
+   */
+  headers?: Record<string, string>;
 }
 
 /**

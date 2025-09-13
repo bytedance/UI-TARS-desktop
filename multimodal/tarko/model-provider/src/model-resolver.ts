@@ -5,6 +5,7 @@
 
 import { AgentModel, ModelProviderName, BaseModelProviderName } from './types';
 import { HIGH_LEVEL_MODEL_PROVIDER_CONFIGS } from './constants';
+import { addClaudeHeadersIfNeeded } from './claude-headers';
 
 /**
  * Get the actual provider implementation name
@@ -50,12 +51,16 @@ export function resolveModel(
     apiKey = apiKey || defaultConfig.apiKey;
   }
 
+  // Automatically add Claude headers if it's a Claude model
+  const headers = addClaudeHeadersIfNeeded(model, agentModel?.headers);
+
   return {
     provider,
     id: model,
     displayName,
     baseURL,
     apiKey,
+    headers,
     baseProvider: getActualProvider(provider),
   };
 }

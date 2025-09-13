@@ -8,6 +8,7 @@ export * from './model-resolver';
 export * from './llm-client';
 export * from './third-party';
 export * from './constants';
+export * from './claude-headers';
 
 // Re-export OpenAI for convenience
 export { OpenAI } from 'openai';

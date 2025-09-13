@@ -28,11 +28,12 @@ export function createLLMClient(
   agentModel: AgentModel,
   requestInterceptor?: LLMRequestInterceptor,
 ): OpenAI {
-  const { provider, id, baseProvider, baseURL, apiKey } = agentModel;
+  const { provider, id, baseProvider, baseURL, apiKey, headers } = agentModel;
 
   const client = new TokenJS({
     apiKey,
     baseURL,
+    headers,
   });
 
   // Add extended model support for non-native providers
