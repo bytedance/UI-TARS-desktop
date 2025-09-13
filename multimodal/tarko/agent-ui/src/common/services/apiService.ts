@@ -6,9 +6,8 @@ import {
   WorkspaceInfo,
 } from '@/common/types';
 import { socketService } from './socketService';
-import { ChatCompletionContentPart } from '@tarko/agent-interface';
+import { ChatCompletionContentPart, AgentModel } from '@tarko/agent-interface';
 import { AgentServerVersionInfo } from '@agent-tars/interface';
-import { AgentModel } from '@tarko/model-provider';
 
 /**
  * Workspace item interface for contextual selector

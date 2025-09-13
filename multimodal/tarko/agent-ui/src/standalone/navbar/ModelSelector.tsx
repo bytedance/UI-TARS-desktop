@@ -12,7 +12,7 @@ import {
   ThemeProvider,
 } from '@mui/material';
 import { apiService, AvailableModelsResponse } from '@/common/services/apiService';
-import { AgentModel } from '@tarko/model-provider';
+import { AgentModel } from '@tarko/agent-interface';
 import { useSetAtom } from 'jotai';
 import { sessionMetadataAtom } from '@/common/state/atoms/ui';
 
