@@ -1,0 +1,477 @@
+---
+title: Tool Call Engine
+description: Build custom tools and parsers with Tarko's unified Tool Call Engine
+---
+
+# Tool Call Engine
+
+Tarko's **Tool Call Engine** provides a unified interface for tool integration that works across different LLM providers, regardless of their native tool support capabilities.
+
+## Overview
+
+The Tool Call Engine solves several key challenges:
+
+- **Provider Compatibility**: Works with models that don't support native Function Calling
+- **Custom Parsers**: Implement custom parsing logic for specialized use cases
+- **Unified Interface**: Consistent tool interface following OpenAI Function Call protocol
+- **Flexible Execution**: Support for sync/async tools, streaming, and error handling
+
+## Basic Tool Creation
+
+### Simple Tool
+
+```typescript
+import { createTool } from '@tarko/agent';
+
+const weatherTool = createTool({
+  name: 'get_weather',
+  description: 'Get current weather for a location',
+  parameters: {
+    type: 'object',
+    properties: {
+      location: {
+        type: 'string',
+        description: 'The city and state, e.g. San Francisco, CA'
+      },
+      unit: {
+        type: 'string',
+        enum: ['celsius', 'fahrenheit'],
+        default: 'fahrenheit'
+      }
+    },
+    required: ['location']
+  },
+  handler: async ({ location, unit = 'fahrenheit' }) => {
+    // Implement weather API call
+    const response = await fetch(`https://api.weather.com/v1/current?location=${location}&unit=${unit}`);
+    const data = await response.json();
+    return `Weather in ${location}: ${data.condition}, ${data.temperature}°${unit.charAt(0).toUpperCase()}`;
+  }
+});
+```
+
+### Tool with Validation
+
+```typescript
+const calculatorTool = createTool({
+  name: 'calculate',
+  description: 'Perform mathematical calculations',
+  parameters: {
+    type: 'object',
+    properties: {
+      expression: {
+        type: 'string',
+        description: 'Mathematical expression to evaluate'
+      }
+    },
+    required: ['expression']
+  },
+  validate: ({ expression }) => {
+    // Validate expression safety
+    if (/[^0-9+\-*/().\s]/.test(expression)) {
+      throw new Error('Invalid characters in expression');
+    }
+    return true;
+  },
+  handler: async ({ expression }) => {
+    try {
+      const result = eval(expression); // In production, use a safe math evaluator
+      return `${expression} = ${result}`;
+    } catch (error) {
+      return `Error calculating ${expression}: ${error.message}`;
+    }
+  }
+});
+```
+
+## Tool Call Engines
+
+Tarko supports multiple Tool Call Engine implementations:
+
+### 1. Native Function Call Engine
+
+For models that support OpenAI-compatible function calling:
+
+```typescript
+import { Agent, NativeFunctionCallEngine } from '@tarko/agent';
+
+const agent = new Agent({
+  toolCallEngine: new NativeFunctionCallEngine({
+    parallel: true, // Enable parallel tool calls
+    maxCalls: 5,    // Maximum calls per turn
+    timeout: 30000  // 30 second timeout
+  }),
+  tools: [weatherTool, calculatorTool]
+});
+```
+
+### 2. Prompt Engineering Engine
+
+For models without native function call support:
+
+```typescript
+import { PromptEngineeringToolCallEngine } from '@tarko/agent';
+
+const agent = new Agent({
+  toolCallEngine: new PromptEngineeringToolCallEngine({
+    parser: 'json',     // 'json' | 'xml' | 'yaml' | 'custom'
+    format: 'openai',   // Output format
+    retries: 3,         // Parse retry attempts
+    fallback: 'text'    // Fallback when parsing fails
+  }),
+  tools: [weatherTool]
+});
+```
+
+### 3. Custom Tool Call Engine
+
+Implement your own parsing logic:
+
+```typescript
+import { BaseToolCallEngine } from '@tarko/agent';
+
+class CustomToolCallEngine extends BaseToolCallEngine {
+  async parseToolCalls(response: string): Promise<ToolCall[]> {
+    // Custom parsing logic
+    const matches = response.match(/\[TOOL:(\w+)\]\[ARGS:(.+?)\]/g);
+    
+    return matches?.map(match => {
+      const [, name, argsStr] = match.match(/\[TOOL:(\w+)\]\[ARGS:(.+?)\]/)!;
+      return {
+        id: generateId(),
+        type: 'function',
+        function: {
+          name,
+          arguments: argsStr
+        }
+      };
+    }) || [];
+  }
+  
+  formatToolsForPrompt(tools: Tool[]): string {
+    // Custom tool formatting for prompt
+    return tools.map(tool => 
+      `[TOOL:${tool.name}] ${tool.description}\nParameters: ${JSON.stringify(tool.parameters)}`
+    ).join('\n\n');
+  }
+}
+
+const agent = new Agent({
+  toolCallEngine: new CustomToolCallEngine(),
+  tools: [weatherTool]
+});
+```
+
+## Advanced Tool Features
+
+### Streaming Tools
+
+For tools that return large amounts of data:
+
+```typescript
+const searchTool = createTool({
+  name: 'web_search',
+  description: 'Search the web for information',
+  parameters: {
+    type: 'object',
+    properties: {
+      query: { type: 'string' },
+      limit: { type: 'number', default: 5 }
+    },
+    required: ['query']
+  },
+  streaming: true,
+  handler: async function* ({ query, limit = 5 }) {
+    yield `Searching for: ${query}...`;
+    
+    const results = await searchAPI(query, limit);
+    
+    for (const result of results) {
+      yield `Found: ${result.title} - ${result.url}`;
+      await new Promise(resolve => setTimeout(resolve, 100)); // Simulate processing
+    }
+    
+    return `Search completed. Found ${results.length} results.`;
+  }
+});
+```
+
+### Tool with Context Access
+
+Access agent context and session data:
+
+```typescript
+const contextTool = createTool({
+  name: 'analyze_conversation',
+  description: 'Analyze the current conversation',
+  parameters: {
+    type: 'object',
+    properties: {
+      aspect: {
+        type: 'string',
+        enum: ['sentiment', 'topics', 'summary']
+      }
+    },
+    required: ['aspect']
+  },
+  handler: async ({ aspect }, context) => {
+    const { messages, sessionId, agentState } = context;
+    
+    switch (aspect) {
+      case 'sentiment':
+        const userMessages = messages.filter(m => m.role === 'user');
+        return `Analyzed ${userMessages.length} user messages. Overall sentiment: positive`;
+      
+      case 'topics':
+        const topics = extractTopics(messages);
+        return `Main topics discussed: ${topics.join(', ')}`;
+      
+      case 'summary':
+        return `Session ${sessionId}: ${messages.length} messages exchanged`;
+    }
+  }
+});
+```
+
+### Tool Dependencies
+
+Define tools that depend on other tools:
+
+```typescript
+const fileReadTool = createTool({
+  name: 'read_file',
+  description: 'Read contents of a file',
+  parameters: {
+    type: 'object',
+    properties: {
+      path: { type: 'string' }
+    },
+    required: ['path']
+  },
+  handler: async ({ path }) => {
+    const fs = await import('fs/promises');
+    return await fs.readFile(path, 'utf-8');
+  }
+});
+
+const analyzeCodeTool = createTool({
+  name: 'analyze_code',
+  description: 'Analyze code from a file',
+  parameters: {
+    type: 'object',
+    properties: {
+      filePath: { type: 'string' },
+      analysisType: { 
+        type: 'string',
+        enum: ['complexity', 'security', 'performance']
+      }
+    },
+    required: ['filePath', 'analysisType']
+  },
+  dependencies: [fileReadTool],
+  handler: async ({ filePath, analysisType }, context) => {
+    // Use the file read tool
+    const fileContent = await context.callTool('read_file', { path: filePath });
+    
+    // Analyze the code
+    switch (analysisType) {
+      case 'complexity':
+        return analyzeComplexity(fileContent);
+      case 'security':
+        return analyzeSecurity(fileContent);
+      case 'performance':
+        return analyzePerformance(fileContent);
+    }
+  }
+});
+```
+
+## Tool Configuration
+
+### Tool Groups
+
+Organize tools into logical groups:
+
+```typescript
+import { createToolGroup } from '@tarko/agent';
+
+const fileSystemTools = createToolGroup({
+  name: 'filesystem',
+  description: 'File system operations',
+  tools: [
+    createTool({ name: 'read_file', /* ... */ }),
+    createTool({ name: 'write_file', /* ... */ }),
+    createTool({ name: 'list_directory', /* ... */ })
+  ],
+  permissions: ['read', 'write'],
+  rateLimit: {
+    maxCalls: 10,
+    window: 60000 // 1 minute
+  }
+});
+
+const agent = new Agent({
+  toolGroups: [fileSystemTools]
+});
+```
+
+### Conditional Tools
+
+Enable tools based on conditions:
+
+```typescript
+const conditionalTool = createTool({
+  name: 'admin_action',
+  description: 'Perform administrative action',
+  parameters: { /* ... */ },
+  condition: (context) => {
+    return context.user?.role === 'admin';
+  },
+  handler: async (params, context) => {
+    // Admin-only functionality
+  }
+});
+```
+
+## Error Handling
+
+### Tool Error Handling
+
+```typescript
+const robustTool = createTool({
+  name: 'api_call',
+  description: 'Make an API call with retry logic',
+  parameters: {
+    type: 'object',
+    properties: {
+      url: { type: 'string' },
+      method: { type: 'string', default: 'GET' }
+    },
+    required: ['url']
+  },
+  retries: 3,
+  timeout: 10000,
+  errorHandler: (error, attempt, maxAttempts) => {
+    console.log(`Tool call failed (attempt ${attempt}/${maxAttempts}):`, error.message);
+    
+    if (attempt < maxAttempts) {
+      return { retry: true, delay: 1000 * attempt }; // Exponential backoff
+    }
+    
+    return { 
+      retry: false, 
+      fallbackResult: `API call failed after ${maxAttempts} attempts: ${error.message}`
+    };
+  },
+  handler: async ({ url, method }) => {
+    const response = await fetch(url, { method });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    return await response.text();
+  }
+});
+```
+
+### Global Error Handling
+
+```typescript
+const agent = new Agent({
+  toolCallEngine: new NativeFunctionCallEngine({
+    errorHandler: (error, toolCall, context) => {
+      // Log error
+      console.error(`Tool ${toolCall.function.name} failed:`, error);
+      
+      // Return user-friendly error message
+      return `I encountered an error while using the ${toolCall.function.name} tool. Please try again or rephrase your request.`;
+    }
+  })
+});
+```
+
+## Testing Tools
+
+### Unit Testing
+
+```typescript
+import { createTool, testTool } from '@tarko/agent';
+
+describe('Weather Tool', () => {
+  const weatherTool = createTool({
+    name: 'get_weather',
+    // ... tool definition
+  });
+  
+  it('should return weather information', async () => {
+    const result = await testTool(weatherTool, {
+      location: 'San Francisco, CA'
+    });
+    
+    expect(result).toContain('San Francisco');
+    expect(result).toMatch(/\d+°[CF]/);
+  });
+  
+  it('should handle invalid locations', async () => {
+    await expect(testTool(weatherTool, {
+      location: 'Invalid Location'
+    })).rejects.toThrow('Location not found');
+  });
+});
+```
+
+### Integration Testing
+
+```typescript
+import { Agent, createMockAgent } from '@tarko/agent';
+
+describe('Agent with Tools', () => {
+  let agent: Agent;
+  
+  beforeEach(() => {
+    agent = createMockAgent({
+      tools: [weatherTool, calculatorTool]
+    });
+  });
+  
+  it('should use tools correctly', async () => {
+    const response = await agent.query('What\'s the weather in NYC and what\'s 2+2?');
+    
+    expect(response.toolCalls).toHaveLength(2);
+    expect(response.toolCalls[0].function.name).toBe('get_weather');
+    expect(response.toolCalls[1].function.name).toBe('calculate');
+  });
+});
+```
+
+## Best Practices
+
+### 1. Tool Design
+- Keep tools focused on single responsibilities
+- Use descriptive names and clear descriptions
+- Validate inputs thoroughly
+- Handle errors gracefully
+- Provide meaningful error messages
+
+### 2. Performance
+- Implement timeouts for external API calls
+- Use caching for expensive operations
+- Consider streaming for large responses
+- Implement rate limiting for external services
+
+### 3. Security
+- Validate and sanitize all inputs
+- Implement proper authentication for sensitive tools
+- Use least privilege principle
+- Audit tool usage and access patterns
+
+### 4. Debugging
+- Add comprehensive logging
+- Use structured error messages
+- Implement tool call tracing
+- Test tools in isolation
+
+## Next Steps
+
+- [Agent Protocol](/guide/agent-protocol) - Understand tool call events
+- [Agent Hooks](/guide/agent-hooks) - Extend tool behavior
+- [Examples](/examples/custom-tools) - See real-world tool implementations

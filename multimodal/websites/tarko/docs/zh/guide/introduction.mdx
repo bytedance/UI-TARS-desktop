@@ -1,0 +1,54 @@
+---
+title: 介绍
+description: 了解 Tarko，一个工具增强的 Agent 运行时内核
+---
+
+# 介绍
+
+**Tarko** *(Tool-augmented Agent Runtime Kernel, Open-source)*，发音是 **`/ˈtɑːrkoʊ/`**，是一个以 "Tool Call" 和 "事件流" 驱动的 Agent 运行时框架，内置了强大的 **Context Engineering** 能力。
+
+## 什么是 Tarko？
+
+Tarko 提供以下核心能力：
+
+- **Context Engineering**: 构建支持长程运行的 Agent 核心能力
+- **Tool Call Engine**: 支持多种 LLM Provider 的统一工具调用接口
+- **Event Stream Processing**: 原生流式处理和 Agent Protocol 支持
+- **Agent Hooks**: 强大的扩展能力
+- **Agent Protocol**: Agent 生命周期的标准格式定义
+
+## 核心特性
+
+### 🔧 Tool Call Engine
+支持多种 Tool Call 引擎，包括原生 Function Call、自定义解析器，以及不支持原生 Function Tool 的模型。
+
+### 🌊 Event Stream
+内置事件流处理，支持原生流式传输和标准化的 Agent Protocol。
+
+### 🧠 Context Engineering
+先进的上下文管理，支持长程运行的 Agent 操作和自动上下文优化。
+
+### 🔌 Agent Hooks
+可扩展的钩子系统，允许在执行的每个阶段自定义 Agent 行为。
+
+## 架构概览
+
+Tarko 采用三层架构设计：
+
+1. **工程层**: CLI、Server 和 UI 组件
+2. **应用层**: 基于 Tarko 的 Agent 实现
+3. **内核层**: 包含 Context Engineering 和 Agent Protocol 的核心运行时
+
+## 谁在使用 Tarko？
+
+Tarko 驱动了多个生产系统：
+
+- **[UI-TARS-2](https://seed-tars.com/showcase/ui-tars-2/)**: 先进的 UI 自动化
+- **[UI-TARS-desktop](https://github.com/bytedance/UI-TARS-desktop)**: 桌面自动化
+- **[Agent TARS](https://agent-tars.com/)**: 通用多模态 Agent
+
+## 下一步
+
+- [快速开始](/guide/quick-start) - 创建你的第一个 Tarko Agent
+- [架构设计](/guide/architecture) - 了解 Tarko 的设计原理
+- [示例](/examples/getting-started) - 探索实用示例

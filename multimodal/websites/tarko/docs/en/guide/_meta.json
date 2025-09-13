@@ -1,0 +1,42 @@
+[
+  {
+    "type": "file",
+    "name": "introduction",
+    "label": "Introduction"
+  },
+  {
+    "type": "file",
+    "name": "quick-start",
+    "label": "Quick Start"
+  },
+  {
+    "type": "file",
+    "name": "architecture",
+    "label": "Architecture"
+  },
+  {
+    "type": "file",
+    "name": "context-engineering",
+    "label": "Context Engineering"
+  },
+  {
+    "type": "file",
+    "name": "tool-call-engine",
+    "label": "Tool Call Engine"
+  },
+  {
+    "type": "file",
+    "name": "agent-protocol",
+    "label": "Agent Protocol"
+  },
+  {
+    "type": "file",
+    "name": "agent-hooks",
+    "label": "Agent Hooks"
+  },
+  {
+    "type": "file",
+    "name": "server",
+    "label": "Server"
+  }
+]

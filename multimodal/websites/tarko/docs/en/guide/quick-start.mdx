@@ -1,0 +1,147 @@
+---
+title: Quick Start
+description: Get started with Tarko in minutes
+---
+
+# Quick Start
+
+Get up and running with Tarko in just a few minutes.
+
+## Prerequisites
+
+- Node.js 18+ 
+- npm or pnpm
+
+## Installation
+
+### Create a New Agent
+
+The fastest way to get started is using the Tarko CLI:
+
+```bash
+npm create tarko
+```
+
+Or use the agent starter template:
+
+```bash
+git clone https://github.com/agent-infra/agent-starter
+cd agent-starter
+npm install
+```
+
+### Install Tarko Packages
+
+For manual setup, install the core packages:
+
+```bash
+npm install @tarko/agent @tarko/agent-cli
+```
+
+## Basic Usage
+
+### 1. Define Your Agent
+
+Create an `agent.ts` file:
+
+```typescript
+import { Agent } from '@tarko/agent';
+
+const agent = new Agent({
+  name: 'MyAgent',
+  description: 'A helpful assistant agent',
+  systemPrompt: 'You are a helpful assistant.',
+  tools: [
+    // Add your tools here
+  ],
+  modelProvider: {
+    apiKey: process.env.OPENAI_API_KEY,
+    baseURL: 'https://api.openai.com/v1',
+    model: 'gpt-4'
+  }
+});
+
+export default agent;
+```
+
+### 2. Run Your Agent
+
+Start your agent with the CLI:
+
+```bash
+npx tarko run agent.ts
+```
+
+This will start a local server with web UI at `http://localhost:3000`.
+
+### 3. Add Tools
+
+Extend your agent with tools:
+
+```typescript
+import { Agent, createTool } from '@tarko/agent';
+
+const weatherTool = createTool({
+  name: 'get_weather',
+  description: 'Get current weather for a location',
+  parameters: {
+    type: 'object',
+    properties: {
+      location: {
+        type: 'string',
+        description: 'The city and state, e.g. San Francisco, CA'
+      }
+    },
+    required: ['location']
+  },
+  handler: async ({ location }) => {
+    // Implement weather API call
+    return `Weather in ${location}: Sunny, 72°F`;
+  }
+});
+
+const agent = new Agent({
+  // ... other config
+  tools: [weatherTool]
+});
+```
+
+## Development Mode
+
+For development with hot reload:
+
+```bash
+npx tarko dev agent.ts
+```
+
+## Environment Variables
+
+Create a `.env` file:
+
+```bash
+# .env file
+OPENAI_API_KEY=your-api-key
+MODEL_PROVIDER=openai
+MODEL_NAME=gpt-4
+```
+
+## Next Steps
+
+- [Architecture](/guide/architecture) - Learn about Tarko's design
+- [Context Engineering](/guide/context-engineering) - Master long-running agents
+- [Tool Call Engine](/guide/tool-call-engine) - Build custom tools
+- [Examples](/examples/getting-started) - Explore real-world examples
+
+## Common Issues
+
+### Port Already in Use
+
+Specify a different port:
+
+```bash
+npx tarko run agent.ts --port 3001
+```
+
+### Missing API Keys
+
+Ensure your `.env` file contains the required API keys for your model provider.

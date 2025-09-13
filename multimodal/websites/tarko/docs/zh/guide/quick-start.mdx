@@ -1,0 +1,80 @@
+---
+title: 快速开始
+description: 几分钟内开始使用 Tarko
+---
+
+# 快速开始
+
+几分钟内开始使用 Tarko。
+
+## 前置要求
+
+- Node.js 18+ 
+- npm 或 pnpm
+
+## 安装
+
+### 创建新的 Agent
+
+使用 Tarko CLI 的最快方式：
+
+```bash
+npm create tarko
+```
+
+或使用 agent starter 模板：
+
+```bash
+git clone https://github.com/agent-infra/agent-starter
+cd agent-starter
+npm install
+```
+
+### 手动安装 Tarko 包
+
+```bash
+npm install @tarko/agent @tarko/agent-cli
+```
+
+## 基本使用
+
+### 1. 定义你的 Agent
+
+创建 `agent.ts` 文件：
+
+```typescript
+import { Agent } from '@tarko/agent';
+
+const agent = new Agent({
+  name: 'MyAgent',
+  description: '一个有用的助手 Agent',
+  systemPrompt: '你是一个有用的助手。',
+  tools: [
+    // 在这里添加你的工具
+  ],
+  modelProvider: {
+    apiKey: process.env.OPENAI_API_KEY,
+    baseURL: 'https://api.openai.com/v1',
+    model: 'gpt-4'
+  }
+});
+
+export default agent;
+```
+
+### 2. 运行你的 Agent
+
+使用 CLI 启动你的 Agent：
+
+```bash
+npx tarko run agent.ts
+```
+
+这将在 `http://localhost:3000` 启动一个本地服务器和 Web UI。
+
+## 下一步
+
+- [架构设计](/guide/architecture) - 了解 Tarko 的设计
+- [Context Engineering](/guide/context-engineering) - 掌握长程运行的 Agent
+- [Tool Call Engine](/guide/tool-call-engine) - 构建自定义工具
+- [示例](/examples/getting-started) - 探索实际案例

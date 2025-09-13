@@ -1,0 +1,358 @@
+---
+title: Context Engineering
+description: Master long-running agent operations with advanced context management
+---
+
+# Context Engineering
+
+**Context Engineering** is Tarko's core capability for building agents capable of long-running operations. It automatically manages context windows, optimizes memory usage, and maintains agent state across extended sessions.
+
+## What is Context Engineering?
+
+Traditional agents struggle with long-running tasks due to context window limitations. Context Engineering solves this by:
+
+- **Automatic Context Compression**: Intelligently summarizes and compresses conversation history
+- **Context Windowing**: Maintains relevant context while discarding outdated information
+- **State Persistence**: Preserves important agent state across sessions
+- **Memory Optimization**: Efficiently manages memory usage for extended operations
+
+## Key Features
+
+### 1. Intelligent Context Compression
+
+When context approaches the model's limit, Tarko automatically compresses older messages while preserving critical information.
+
+```typescript
+import { Agent } from '@tarko/agent';
+
+const agent = new Agent({
+  contextEngineering: {
+    enabled: true,
+    compressionStrategy: 'intelligent', // 'intelligent' | 'sliding' | 'custom'
+    maxContextLength: 8000,
+    compressionRatio: 0.3 // Compress to 30% of original size
+  }
+});
+```
+
+### 2. Context Windowing Strategies
+
+#### Sliding Window
+Maintains a fixed-size window of recent messages:
+
+```typescript
+contextEngineering: {
+  strategy: 'sliding',
+  windowSize: 50 // Keep last 50 messages
+}
+```
+
+#### Intelligent Window
+Dynamically adjusts window based on content importance:
+
+```typescript
+contextEngineering: {
+  strategy: 'intelligent',
+  importanceThreshold: 0.7, // Keep messages above this importance score
+  maxRetention: 100 // Maximum messages to retain
+}
+```
+
+#### Custom Strategy
+Implement your own windowing logic:
+
+```typescript
+contextEngineering: {
+  strategy: 'custom',
+  windowFunction: (messages, currentLength, maxLength) => {
+    // Custom logic to determine which messages to keep
+    return filteredMessages;
+  }
+}
+```
+
+### 3. State Persistence
+
+Maintain important agent state across sessions:
+
+```typescript
+const agent = new Agent({
+  contextEngineering: {
+    persistence: {
+      enabled: true,
+      storage: 'file', // 'file' | 'memory' | 'redis' | 'custom'
+      sessionId: 'user-123',
+      retentionPolicy: {
+        maxAge: '7d', // Keep state for 7 days
+        maxSize: '10MB' // Maximum state size
+      }
+    }
+  }
+});
+```
+
+### 4. Memory Optimization
+
+Optimize memory usage for long-running agents:
+
+```typescript
+contextEngineering: {
+  memoryOptimization: {
+    enabled: true,
+    gcInterval: 300000, // Garbage collect every 5 minutes
+    maxMemoryUsage: '512MB',
+    compressionLevel: 'balanced' // 'fast' | 'balanced' | 'maximum'
+  }
+}
+```
+
+## Configuration Options
+
+### Basic Configuration
+
+```typescript
+interface ContextEngineeringConfig {
+  enabled: boolean;
+  maxContextLength: number;
+  compressionStrategy: 'intelligent' | 'sliding' | 'custom';
+  compressionRatio: number;
+}
+```
+
+### Advanced Configuration
+
+```typescript
+interface AdvancedContextConfig {
+  // Windowing
+  windowStrategy: WindowStrategy;
+  importanceScoring: ImportanceScoringConfig;
+  
+  // Persistence
+  persistence: PersistenceConfig;
+  
+  // Memory Management
+  memoryOptimization: MemoryOptimizationConfig;
+  
+  // Custom Hooks
+  hooks: ContextHooks;
+}
+```
+
+## Best Practices
+
+### 1. Choose the Right Strategy
+
+**Use Sliding Window when**:
+- Simple use cases with uniform message importance
+- Predictable conversation patterns
+- Performance is critical
+
+**Use Intelligent Window when**:
+- Complex, long-running tasks
+- Variable message importance
+- Need to preserve critical context
+
+### 2. Configure Compression Appropriately
+
+```typescript
+// For code generation tasks
+contextEngineering: {
+  compressionStrategy: 'intelligent',
+  compressionRatio: 0.5, // Preserve more detail
+  preservePatterns: ['```', 'TODO:', 'FIXME:']
+}
+
+// For general conversation
+contextEngineering: {
+  compressionStrategy: 'sliding',
+  compressionRatio: 0.3, // More aggressive compression
+  windowSize: 30
+}
+```
+
+### 3. Monitor Context Usage
+
+```typescript
+agent.on('contextCompressed', (event) => {
+  console.log(`Compressed ${event.originalLength} to ${event.compressedLength}`);
+});
+
+agent.on('contextLimitApproached', (event) => {
+  console.log(`Context at ${event.percentage}% of limit`);
+});
+```
+
+## Custom Context Engineering
+
+### Custom Compression Function
+
+```typescript
+const customCompressor = (messages: Message[], targetLength: number) => {
+  // Implement custom compression logic
+  const important = messages.filter(msg => 
+    msg.role === 'system' || 
+    msg.content.includes('IMPORTANT')
+  );
+  
+  const recent = messages.slice(-10); // Last 10 messages
+  
+  return [...important, ...recent].slice(0, targetLength);
+};
+
+const agent = new Agent({
+  contextEngineering: {
+    strategy: 'custom',
+    compressor: customCompressor
+  }
+});
+```
+
+### Custom Importance Scoring
+
+```typescript
+const importanceScorer = (message: Message) => {
+  let score = 0.5; // Base score
+  
+  // System messages are always important
+  if (message.role === 'system') score = 1.0;
+  
+  // Tool calls and results are important
+  if (message.tool_calls || message.tool_call_id) score = 0.9;
+  
+  // Error messages are important
+  if (message.content.toLowerCase().includes('error')) score = 0.8;
+  
+  return score;
+};
+
+const agent = new Agent({
+  contextEngineering: {
+    importanceScoring: {
+      enabled: true,
+      scorer: importanceScorer,
+      threshold: 0.6
+    }
+  }
+});
+```
+
+## Integration with Agent Hooks
+
+Context Engineering integrates with Agent Hooks for custom behavior:
+
+```typescript
+const agent = new Agent({
+  hooks: {
+    beforeContextCompression: async (context) => {
+      // Log context state before compression
+      console.log('Compressing context:', context.length);
+    },
+    
+    afterContextCompression: async (originalContext, compressedContext) => {
+      // Analyze compression results
+      const ratio = compressedContext.length / originalContext.length;
+      console.log(`Compression ratio: ${ratio}`);
+    },
+    
+    onContextLimitReached: async (context) => {
+      // Handle context limit scenarios
+      await saveContextToStorage(context);
+    }
+  }
+});
+```
+
+## Performance Considerations
+
+### Memory Usage
+
+- Monitor memory usage with `memoryOptimization.maxMemoryUsage`
+- Use compression for memory-constrained environments
+- Consider external storage for large contexts
+
+### Processing Speed
+
+- Sliding window is fastest
+- Intelligent compression adds processing overhead
+- Custom strategies should be optimized for your use case
+
+### Storage Costs
+
+- File storage is cheapest for persistence
+- Redis provides better performance for shared contexts
+- Consider compression for storage cost optimization
+
+## Debugging Context Issues
+
+### Enable Debug Logging
+
+```typescript
+const agent = new Agent({
+  contextEngineering: {
+    debug: true,
+    logLevel: 'verbose'
+  }
+});
+```
+
+### Context Inspection
+
+```typescript
+// Get current context state
+const contextState = agent.getContextState();
+console.log('Current context length:', contextState.length);
+console.log('Compression ratio:', contextState.compressionRatio);
+
+// Export context for analysis
+const contextDump = agent.exportContext();
+fs.writeFileSync('context-dump.json', JSON.stringify(contextDump, null, 2));
+```
+
+## Real-World Examples
+
+### Long-Running Code Assistant
+
+```typescript
+const codeAssistant = new Agent({
+  contextEngineering: {
+    strategy: 'intelligent',
+    maxContextLength: 12000,
+    compressionRatio: 0.4,
+    preservePatterns: [
+      /```[\s\S]*?```/g, // Code blocks
+      /TODO:|FIXME:|NOTE:/g, // Important comments
+      /class\s+\w+/g, // Class definitions
+      /function\s+\w+/g // Function definitions
+    ],
+    persistence: {
+      enabled: true,
+      sessionId: 'code-session-123'
+    }
+  }
+});
+```
+
+### Customer Support Agent
+
+```typescript
+const supportAgent = new Agent({
+  contextEngineering: {
+    strategy: 'sliding',
+    windowSize: 50,
+    persistence: {
+      enabled: true,
+      storage: 'redis',
+      sessionId: (context) => context.userId,
+      retentionPolicy: {
+        maxAge: '30d' // Keep support history for 30 days
+      }
+    }
+  }
+});
+```
+
+## Next Steps
+
+- [Tool Call Engine](/guide/tool-call-engine) - Learn about tool integration
+- [Agent Protocol](/guide/agent-protocol) - Understand communication standards
+- [Agent Hooks](/guide/agent-hooks) - Extend agent behavior

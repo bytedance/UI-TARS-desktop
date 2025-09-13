@@ -1,0 +1,17 @@
+[
+  {
+    "text": "Guide",
+    "link": "/guide/introduction",
+    "activeMatch": "/guide/"
+  },
+  {
+    "text": "API",
+    "link": "/api/agent",
+    "activeMatch": "/api/"
+  },
+  {
+    "text": "Examples",
+    "link": "/examples/getting-started",
+    "activeMatch": "/examples/"
+  }
+]
