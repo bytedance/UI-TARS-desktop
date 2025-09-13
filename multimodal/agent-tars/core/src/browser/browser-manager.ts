@@ -7,6 +7,8 @@ import { LocalBrowser, RemoteBrowser } from '@agent-infra/browser';
 import { ConsoleLogger } from '@tarko/mcp-agent';
 
 /**
+ * FIXME: remove `lastLaunchOptions`
+ *
  * BrowserManager - Singleton manager for Local Browser instance
  *
  * This class implements the Singleton pattern to ensure only one browser instance
@@ -19,6 +21,7 @@ import { ConsoleLogger } from '@tarko/mcp-agent';
 export class BrowserManager {
   private static instance: BrowserManager | null = null;
   private browser: RemoteBrowser | LocalBrowser | null = null;
+  // FIXME: move to `@agent-infra/browser`.
   private isLaunched = false;
   private logger: ConsoleLogger;
   public lastLaunchOptions: { headless?: boolean; cdpEndpoint?: string } = {};
@@ -77,7 +80,12 @@ export class BrowserManager {
       this.logger.info('🌐 Launching browser instance...');
       const browser = this.getBrowser();
       await browser.launch(options);
-      // Browser is now ready for use
+      // FIXME: Create new page here to avoid the mcp server browser createing
+      // another browser instance, we need a better solution here.
+      // const openingPage = await browser.createPage();
+      // await openingPage.goto('about:blank', {
+      //   waitUntil: 'networkidle2',
+      // });
       this.isLaunched = true;
       this.logger.success('✅ Browser instance launched successfully');
     } catch (error) {
