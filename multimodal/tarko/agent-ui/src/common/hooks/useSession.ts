@@ -70,19 +70,15 @@ export function useSession() {
   const checkServerStatus = useSetAtom(checkConnectionStatusAction);
   const checkSessionStatus = useSetAtom(checkSessionStatusAction);
 
-  // Periodic status checking for active session - do not check status in replay mode
+
+
+  // Set up socket event handlers when active session changes - do not set up socket event handling in replay mode
   useEffect(() => {
-    if (!activeSessionId || !connectionStatus.connected || isReplayMode) return;
+    if (!activeSessionId || !socketService.isConnected() || isReplayMode) return;
 
-    // Initial status check when session becomes active
-    checkSessionStatus(activeSessionId);
-  }, [activeSessionId, connectionStatus.connected, checkSessionStatus, isReplayMode]);
-
-  // Enhanced socket handler for session status sync - do not update state in replay mode
-  const handleSessionStatusUpdate = useCallback(
-    (status: any) => {
+    // Create stable status update handler
+    const statusUpdateHandler = (status: any) => {
       if (status && typeof status.isProcessing === 'boolean' && !isReplayMode && activeSessionId) {
-        // Update session-specific agent status
         setSessionAgentStatus((prev) => ({
           ...prev,
           [activeSessionId]: {
@@ -94,13 +90,7 @@ export function useSession() {
           },
         }));
       }
-    },
-    [activeSessionId, isReplayMode, setSessionAgentStatus],
-  );
-
-  // Set up socket event handlers when active session changes - do not set up socket event handling in replay mode
-  useEffect(() => {
-    if (!activeSessionId || !socketService.isConnected() || isReplayMode) return;
+    };
 
     // Join session and listen for status updates
     socketService.joinSession(
@@ -108,17 +98,14 @@ export function useSession() {
       () => {
         /* existing event handling */
       },
-      handleSessionStatusUpdate,
+      statusUpdateHandler,
     );
 
-    // Register global status handler
-    socketService.on('agent-status', handleSessionStatusUpdate);
-
+    // No need for additional global handler - joinSession already handles status updates
     return () => {
-      // Clean up handlers
-      socketService.off('agent-status', handleSessionStatusUpdate);
+      // Cleanup is handled by joinSession's internal logic
     };
-  }, [activeSessionId, handleSessionStatusUpdate, isReplayMode]);
+  }, [activeSessionId, isReplayMode]);
 
   // Auto-show plan when it's first created - do not automatically show plan in replay mode
   useEffect(() => {

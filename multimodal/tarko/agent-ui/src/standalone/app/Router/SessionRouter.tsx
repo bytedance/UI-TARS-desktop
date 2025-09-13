@@ -65,7 +65,6 @@ export const SessionRouter: React.FC<SessionRouterProps> = ({ children }) => {
     sessionExists,
     connectionStatus.connected,
     activeSessionId,
-    setActiveSession,
     isReplayMode,
   ]);
 

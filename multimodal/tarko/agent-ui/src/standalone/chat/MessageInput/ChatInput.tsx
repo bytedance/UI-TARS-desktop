@@ -66,6 +66,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const [uploadedImages, setUploadedImages] = useState<ChatCompletionContentPart[]>([]);
   const [isAborting, setIsAborting] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
 
   const [contextualState, setContextualState] = useAtom(contextualSelectorAtom);
   const addContextualItem = useSetAtom(addContextualItemAction);
@@ -199,6 +200,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     if (isMessageEmpty(contextualState.input, uploadedImages) || isDisabled) return;
 
     handleSelectorClose();
+    setSendError(null); // Clear any previous errors
 
     // Reset textarea height
     if (inputRef.current) {
@@ -208,6 +210,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     // Compose message content using utility function
     const messageContent = composeMessageContent(contextualState.input, uploadedImages);
 
+    // Store content in case we need to restore on error
+    const originalInput = contextualState.input;
+    const originalImages = [...uploadedImages];
+
     // Clear both text input and images immediately after sending
     clearContextualState();
     setUploadedImages([]);
@@ -216,7 +222,21 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       await onSubmit(messageContent);
     } catch (error) {
       console.error('Failed to send message:', error);
-      // Note: We don't restore content on failure to keep UX simple
+      
+      // Set error message for display
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send message';
+      setSendError(errorMessage);
+      
+      // Restore content on network errors
+      if (error instanceof TypeError || errorMessage.includes('fetch') || errorMessage.includes('network')) {
+        setContextualState((prev) => ({
+          ...prev,
+          input: originalInput,
+          contextualItems: parseContextualReferences(originalInput),
+        }));
+        setUploadedImages(originalImages);
+      }
+      
       return;
     }
   };
@@ -545,7 +565,21 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       {/* Status text */}
       {showHelpText && (
         <div className="flex justify-center mt-2 text-xs">
-          {connectionStatus && !connectionStatus.connected ? (
+          {sendError ? (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-red-500 dark:text-red-400 flex items-center font-medium bg-red-50 dark:bg-red-900/20 px-3 py-1 rounded-full border border-red-200 dark:border-red-800/50"
+            >
+              <FiX 
+                size={14} 
+                className="mr-1 cursor-pointer hover:bg-red-100 dark:hover:bg-red-800/30 rounded-full p-0.5" 
+                onClick={() => setSendError(null)}
+                title="Dismiss error"
+              />
+              {sendError}
+            </motion.div>
+          ) : connectionStatus && !connectionStatus.connected ? (
             <motion.span
               initial={{ opacity: 0.7 }}
               animate={{ opacity: 1 }}

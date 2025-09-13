@@ -11,6 +11,10 @@ class SocketService {
   private missedHeartbeats = 0;
   private reconnectAttempts = 0;
   private eventHandlers: Record<string, Array<(...args: any[]) => void>> = {};
+  private currentSessionHandlers: {
+    eventHandler?: (...args: any[]) => void;
+    statusHandler?: (...args: any[]) => void;
+  } = {};
 
   /**
    * Connect to the WebSocket server
@@ -72,28 +76,36 @@ class SocketService {
     console.log(`Joining session: ${sessionId}`);
     this.socket.emit(SOCKET_EVENTS.JOIN_SESSION, sessionId);
 
-    // Clean up existing listeners
-    this.socket.off(SOCKET_EVENTS.AGENT_EVENT);
-    this.socket.off(SOCKET_EVENTS.AGENT_STATUS);
+    // Clean up existing session-specific listeners
+    if (this.currentSessionHandlers.eventHandler) {
+      this.socket.off(SOCKET_EVENTS.AGENT_EVENT, this.currentSessionHandlers.eventHandler);
+    }
+    if (this.currentSessionHandlers.statusHandler) {
+      this.socket.off(SOCKET_EVENTS.AGENT_STATUS, this.currentSessionHandlers.statusHandler);
+    }
 
-    // Set up event listeners
-    this.socket.on(SOCKET_EVENTS.AGENT_EVENT, ({ type, data }) => {
+    // Create new handlers
+    const eventHandler = ({ type, data }: any) => {
       if (data) {
         onEvent(data);
       }
-    });
+    };
 
-    // Enhanced status update handling
-    this.socket.on(SOCKET_EVENTS.AGENT_STATUS, (status) => {
+    const statusHandler = (status: any) => {
       console.log('Received agent status:', status);
       onStatusUpdate(status);
-
-      // Trigger global event to synchronize all components in the application
+      // Also notify global handlers for other components
       this.notifyEventHandlers(SOCKET_EVENTS.AGENT_STATUS, status);
-    });
+    };
 
-    // Immediately request current status
-    this.socket.emit('request-status', { sessionId });
+    // Store handlers for cleanup
+    this.currentSessionHandlers = { eventHandler, statusHandler };
+
+    // Set up new listeners
+    this.socket.on(SOCKET_EVENTS.AGENT_EVENT, eventHandler);
+    this.socket.on(SOCKET_EVENTS.AGENT_STATUS, statusHandler);
+
+    // Status will be provided through normal socket events - no need to request immediately
   }
 
   /**

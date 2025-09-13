@@ -17,12 +17,15 @@ export const checkConnectionStatusAction = atom(null, async (get, set) => {
   try {
     const isConnected = await apiService.checkServerHealth();
 
-    set(connectionStatusAtom, {
-      ...currentStatus,
-      connected: isConnected,
-      lastConnected: isConnected ? Date.now() : currentStatus.lastConnected,
-      lastError: isConnected ? null : currentStatus.lastError,
-    });
+    // Only update atom if connection status actually changed
+    if (currentStatus.connected !== isConnected) {
+      set(connectionStatusAtom, {
+        ...currentStatus,
+        connected: isConnected,
+        lastConnected: isConnected ? Date.now() : currentStatus.lastConnected,
+        lastError: isConnected ? null : currentStatus.lastError,
+      });
+    }
 
     // Load workspace info when connection is successful
     // Agent info will be loaded from session metadata when a session is active
@@ -49,11 +52,14 @@ export const checkConnectionStatusAction = atom(null, async (get, set) => {
 
     return isConnected;
   } catch (error) {
-    set(connectionStatusAtom, {
-      ...currentStatus,
-      connected: false,
-      lastError: error instanceof Error ? error.message : String(error),
-    });
+    // Only update atom if connection status actually changed
+    if (currentStatus.connected !== false) {
+      set(connectionStatusAtom, {
+        ...currentStatus,
+        connected: false,
+        lastError: error instanceof Error ? error.message : String(error),
+      });
+    }
 
     return false;
   }
