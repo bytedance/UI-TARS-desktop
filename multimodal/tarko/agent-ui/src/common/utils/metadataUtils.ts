@@ -23,7 +23,6 @@ export function createModelConfigFromEvent(
     provider: event.provider || '',
     id: event.model || '',
     displayName: event.modelDisplayName,
-    configuredAt: Date.now(),
   };
 }
 

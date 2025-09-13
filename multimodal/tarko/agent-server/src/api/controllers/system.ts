@@ -95,7 +95,6 @@ export async function updateSessionModel(req: Request, res: Response) {
             id: modelId,
             provider,
             ...(selectedModel?.displayName && { displayName: selectedModel.displayName }),
-            configuredAt: Date.now(),
           },
         },
       });
