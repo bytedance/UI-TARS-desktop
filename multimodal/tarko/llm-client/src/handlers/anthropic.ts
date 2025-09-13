@@ -30,7 +30,6 @@ import {
   StreamCompletionResponse,
 } from '../userTypes/index.js';
 import { BaseHandler } from './base.js';
-import { HeaderConfigRegistry } from '../config/index.js';
 import { InputError, InvariantError } from './types.js';
 import {
   consoleWarn,
@@ -545,20 +544,9 @@ export class AnthropicHandler extends BaseHandler<AnthropicModel> {
     const stream = typeof body.stream === 'boolean' ? body.stream : undefined;
     const maxTokens = body.max_tokens ?? getDefaultMaxTokens(body.model);
     
-    // Generate provider-specific headers
-    const providerHeaders = this.opts.autoHeaders !== false 
-      ? HeaderConfigRegistry.generateHeaders('anthropic', body.model, body)
-      : {};
-    
-    // Merge with user-defined headers
-    const headers = {
-      ...providerHeaders,
-      ...this.opts.headers,
-    };
-    
     const client = new Anthropic({ 
       apiKey: getApiKey(this.opts.apiKey)!,
-      defaultHeaders: headers,
+      defaultHeaders: this.opts.headers,
     });
     const stopSequences = convertStopSequences(body.stop);
     const topP = typeof body.top_p === 'number' ? body.top_p : undefined;
