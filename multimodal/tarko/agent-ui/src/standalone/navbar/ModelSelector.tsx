@@ -11,21 +11,9 @@ import {
   createTheme,
   ThemeProvider,
 } from '@mui/material';
-import { apiService } from '@/common/services/apiService';
+import { apiService, AgentModel, AvailableModelsResponse } from '@/common/services/apiService';
 import { useSetAtom } from 'jotai';
 import { sessionMetadataAtom } from '@/common/state/atoms/ui';
-
-interface ModelConfig {
-  provider: string;
-  models: Array<{
-    id: string;
-    displayName?: string;
-  }>;
-}
-
-interface AvailableModelsResponse {
-  models: ModelConfig[];
-}
 
 interface NavbarModelSelectorProps {
   className?: string;
@@ -251,7 +239,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
 
       // Check if the session's model is still available
       const isModelAvailable = availableModels.models.some(
-        (config) => config.provider === provider && config.models.some(model => model.id === modelId),
+        (model) => model.provider === provider && model.id === modelId,
       );
 
       if (isModelAvailable) {
@@ -265,11 +253,9 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
         if (availableModels.models.length > 0) {
           // Fall back to first available model if session model is no longer available
           const firstModel = availableModels.models[0];
-          if (firstModel.models.length > 0) {
-            const fallbackKey = `${firstModel.provider}:${firstModel.models[0].id}`;
-            console.log('🔄 [ModelSelector] Falling back to first available model:', fallbackKey);
-            setCurrentModel(fallbackKey);
-          }
+          const fallbackKey = `${firstModel.provider}:${firstModel.id}`;
+          console.log('🔄 [ModelSelector] Falling back to first available model:', fallbackKey);
+          setCurrentModel(fallbackKey);
         }
       }
     } else if (
@@ -279,14 +265,12 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     ) {
       // No session model config, use first available model
       const firstModel = availableModels.models[0];
-      if (firstModel.models.length > 0) {
-        const fallbackKey = `${firstModel.provider}:${firstModel.models[0].id}`;
-        console.log(
-          '🆕 [ModelSelector] No session model config, using first available:',
-          fallbackKey,
-        );
-        setCurrentModel(fallbackKey);
-      }
+      const fallbackKey = `${firstModel.provider}:${firstModel.id}`;
+      console.log(
+        '🆕 [ModelSelector] No session model config, using first available:',
+        fallbackKey,
+      );
+      setCurrentModel(fallbackKey);
     }
   }, [sessionMetadata, availableModels]);
 
@@ -295,7 +279,10 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   }
 
   // Check if there are multiple providers (calculate on frontend)
-  const hasMultipleProviders = availableModels ? availableModels.models.length > 1 : false;
+  const uniqueProviders = availableModels 
+    ? new Set(availableModels.models.map(model => model.provider))
+    : new Set();
+  const hasMultipleProviders = uniqueProviders.size > 1;
 
   if (!hasMultipleProviders || !availableModels || availableModels.models.length === 0) {
     if (!sessionMetadata?.modelConfig) {
@@ -378,15 +365,13 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     );
   }
 
-  const allModelOptions = availableModels.models.flatMap((config) =>
-    config.models.map((model) => ({
-      value: `${config.provider}:${model.id}`,
-      provider: config.provider,
-      modelId: model.id,
-      displayName: model.displayName || model.id,
-      label: `${model.displayName || model.id} (${config.provider})`,
-    })),
-  );
+  const allModelOptions = availableModels.models.map((model) => ({
+    value: `${model.provider}:${model.id}`,
+    provider: model.provider,
+    modelId: model.id,
+    displayName: model.displayName || model.id,
+    label: `${model.displayName || model.id} (${model.provider})`,
+  }));
 
   const renderValue = (selected: string) => {
     const option = allModelOptions.find((opt) => opt.value === selected);
