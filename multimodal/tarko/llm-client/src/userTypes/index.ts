@@ -21,6 +21,7 @@ import {
 } from 'openai/resources/index';
 
 export type ConfigOptions = Pick<ClientOptions, 'apiKey' | 'baseURL'> & {
+  defaultHeaders?: Record<string, string>;
   azure?: {
     endpoint?: string;
     apiVersion?: string;
