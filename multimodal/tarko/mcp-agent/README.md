@@ -76,6 +76,7 @@ const agent = new MCPAgent({
 
 ## Available MCP Servers
 
-- `@agent-infra/mcp-server-filesystem` - File operations
-- `@agent-infra/mcp-server-browser` - Web automation
-- `@agent-infra/mcp-server-commands` - Command execution
+- [`@agent-infra/mcp-server-filesystem`](https://www.npmjs.com/package/@agent-infra/mcp-server-filesystem) - File operations
+- [`@agent-infra/mcp-server-browser`](https://www.npmjs.com/package/@agent-infra/mcp-server-browser) - Web automation
+- [`@agent-infra/mcp-server-commands`](https://www.npmjs.com/package/@agent-infra/mcp-server-commands) - Command execution
+- [`@agent-infra/search`](https://www.npmjs.com/package/@agent-infra/search) - Search operations
