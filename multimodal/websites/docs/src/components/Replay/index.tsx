@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation, useNavigate } from '@rspress/runtime';
+import { useLocation, useNavigate } from '@rspress/core/runtime';
 import { ShowcaseDetail } from '../Showcase/components/ShowcaseDetail';
 import { useShowcaseData } from '../../hooks/useShowcaseData';
 import { extractIdFromPath } from '../../shared/urlUtils';
