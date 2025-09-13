@@ -53,7 +53,6 @@ export function createJsonSchemaSession(
     modelConfig?: {
       provider: string;
       id: string;
-      configuredAt: number;
     };
   },
 ): SessionInfo {

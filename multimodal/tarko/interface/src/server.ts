@@ -145,9 +145,7 @@ export interface SessionItemMetadata {
   /**
    * Current using model configuration
    */
-  modelConfig?: AgentModel & {
-    configuredAt: number;
-  };
+  modelConfig?: AgentModel;
   /**
    * Current using agent configuration
    */
@@ -187,6 +185,5 @@ export interface LegacySessionItemInfo {
   modelConfig?: {
     provider: string;
     id: string;
-    configuredAt: number;
   };
 }
