@@ -1,8 +1,9 @@
 # @agent-tars/core
 
+<b>Agent TARS</b> is a general multimodal AI Agent stack, it brings the power of GUI Agent and Vision into your terminal, computer, browser and product. <br>
+
 ![image](https://github.com/user-attachments/assets/4f75a67e-624b-4e0f-a986-927d7fbbc73d)
 
-<b>Agent TARS</b> is a general multimodal AI Agent stack, it brings the power of GUI Agent and Vision into your terminal, computer, browser and product. <br>
 It primarily ships with a <a href="https://agent-tars.com/guide/basic/cli.html" target="_blank">CLI</a> and <a href="https://agent-tars.com/guide/basic/web-ui.html" target="_blank">Web UI</a> for usage. It aims to provide a workflow that is closer to human-like task completion through cutting-edge multimodal LLMs and seamless integration with various real-world <a href="https://agent-tars.com/guide/basic/mcp.html" target="_blank">MCP</a> tools.
 
 📣 **Just released**: Agent TARS Beta - check out our [announcement blog post](https://agent-tars.com/beta)!
@@ -66,30 +67,6 @@ agent-tars --provider anthropic --model claude-3-7-sonnet-latest --apiKey your-a
 ```
 
 Visit the comprehensive [Quick Start](https://agent-tars.com/guide/get-started/quick-start.html) guide for detailed setup instructions.
-
-## 📚 Resources
-
-![agent-tars-banner](https://github.com/user-attachments/assets/1b07e0a7-b5ea-4f06-90a1-234afe659568)
-
-- 📄 [Blog Post](https://agent-tars.com/beta)
-- 🐦 [Release Announcement on Twitter](https://x.com/_ulivz/status/1938009759413899384)
-- 🐦 [Official Twitter](https://x.com/agent_tars)
-- 💬 [Discord Community](https://discord.gg/HnKcSBgTVx)
-- 💬 [飞书交流群](https://applink.larkoffice.com/client/chat/chatter/add_by_link?link_token=279h3365-b0fa-407f-89f3-0f96f36cd4d8)
-- 🚀 [Quick Start](https://agent-tars.com/quick-start)
-- 💻 [CLI Documentation](https://agent-tars.com/guide/basic/cli.html)
-- 🖥️ [Web UI Guide](https://agent-tars.com/guide/basic/web-ui.html)
-- 📁 [Workspace Documentation](https://agent-tars.com/guide/basic/workspace.html)
-- 🔌 [MCP Documentation](https://agent-tars.com/guide/basic/mcp.html)
-
-## Features
-
-- 🌐 **Advanced Browser Control**: Multiple control strategies (DOM, Visual, Hybrid)
-- 📁 **Safe Filesystem Operations**: Workspace-scoped file management
-- 🔍 **Intelligent Search**: Integration with multiple search providers
-- 🔧 **MCP Integration**: Built-in Model Context Protocol support
-- 📸 **Visual Understanding**: Screenshot-based browser interaction
-- 🛡️ **Safety First**: Path validation and workspace isolation
 
 ## Quick Start
 
@@ -239,20 +216,6 @@ console.log(`Working in: ${workspace}`);
 const result = await agent.run('Create a summary.md file with today\'s findings');
 ```
 
-## Web UI Integration
-
-```typescript
-// Get Web UI configuration
-const config = AgentTARS.webuiConfig;
-
-// Customize for your application
-config.title = 'My Custom Agent';
-config.welcomePrompts = [
-  'Analyze this document',
-  'Search for recent news',
-];
-```
-
 ## Error Handling
 
 ```typescript
@@ -266,14 +229,6 @@ try {
   await agent.cleanup();
 }
 ```
-
-## Best Practices
-
-1. **Always call `cleanup()`** when done to release resources
-2. **Use workspace-relative paths** for file operations
-3. **Choose appropriate browser control mode** based on your use case
-4. **Handle browser recovery** for long-running applications
-5. **Monitor browser state** in production environments
 
 ## API Reference
 
@@ -298,28 +253,30 @@ agent.eventStream.subscribe((event) => {
 });
 ```
 
-## Troubleshooting
+## Resources
 
-### Common Issues
+![agent-tars-banner](https://github.com/user-attachments/assets/1b07e0a7-b5ea-4f06-90a1-234afe659568)
 
-**Browser not launching:**
-```typescript
-// Check browser manager status
-const manager = agent.getBrowserManager();
-if (manager && !manager.isLaunchingComplete()) {
-  await manager.launchBrowser({ headless: false });
-}
-```
+- 📄 [Blog Post](https://agent-tars.com/beta)
+- 🐦 [Release Announcement on Twitter](https://x.com/_ulivz/status/1938009759413899384)
+- 🐦 [Official Twitter](https://x.com/agent_tars)
+- 💬 [Discord Community](https://discord.gg/HnKcSBgTVx)
+- 💬 [飞书交流群](https://applink.larkoffice.com/client/chat/chatter/add_by_link?link_token=279h3365-b0fa-407f-89f3-0f96f36cd4d8)
+- 🚀 [Quick Start](https://agent-tars.com/quick-start)
+- 💻 [CLI Documentation](https://agent-tars.com/guide/basic/cli.html)
+- 🖥️ [Web UI Guide](https://agent-tars.com/guide/basic/web-ui.html)
+- 📁 [Workspace Documentation](https://agent-tars.com/guide/basic/workspace.html)
+- 🔌 [MCP Documentation](https://agent-tars.com/guide/basic/mcp.html)
 
-**File access errors:**
-- Ensure all file paths are within the workspace
-- Check workspace permissions
-- Use relative paths when possible
+## Features
 
-**Search not working:**
-- Verify API keys are set correctly
-- Check network connectivity
-- Try different search providers
+- 🌐 **Advanced Browser Control**: Multiple control strategies (DOM, Visual, Hybrid)
+- 📁 **Safe Filesystem Operations**: Workspace-scoped file management
+- 🔍 **Intelligent Search**: Integration with multiple search providers
+- 🔧 **MCP Integration**: Built-in Model Context Protocol support
+- 📸 **Visual Understanding**: Screenshot-based browser interaction
+- 🛡️ **Safety First**: Path validation and workspace isolation
+
 
 ## What's Changed
 
