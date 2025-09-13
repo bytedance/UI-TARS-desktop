@@ -48,9 +48,9 @@ describe('createLLMClient', () => {
 
   it('should not extend model list for native providers', () => {
     const model: AgentModel = {
-      provider: 'openai',
+      provider: 'openrouter',
       id: 'gpt-4o',
-      baseProvider: 'openai',
+      baseProvider: 'openrouter',
     };
 
     createLLMClient(model);
@@ -60,16 +60,58 @@ describe('createLLMClient', () => {
 
   it('should extend model list for non-native providers', () => {
     const model: AgentModel = {
-      provider: 'ollama',
-      id: 'llama3.2',
-      baseProvider: 'custom-provider' as any, // Use a non-native provider
+      provider: 'volcengine',
+      id: 'ep-20250613182556-7z8pl',
+      baseProvider: 'openai',
     };
 
     createLLMClient(model);
 
     expect(mockTokenJSInstance.extendModelList).toHaveBeenCalledWith(
-      'custom-provider',
-      'llama3.2',
+      'openai',
+      'ep-20250613182556-7z8pl',
+      {
+        streaming: true,
+        json: true,
+        toolCalls: true,
+        images: true,
+      },
+    );
+  });
+
+  it('should extend model list for openai-based providers like volcengine', () => {
+    const model: AgentModel = {
+      provider: 'volcengine',
+      id: 'ep-20250613182556-7z8pl',
+      baseProvider: 'openai',
+    };
+
+    createLLMClient(model);
+
+    expect(mockTokenJSInstance.extendModelList).toHaveBeenCalledWith(
+      'openai',
+      'ep-20250613182556-7z8pl',
+      {
+        streaming: true,
+        json: true,
+        toolCalls: true,
+        images: true,
+      },
+    );
+  });
+
+  it('should extend model list for anthropic-based providers', () => {
+    const model: AgentModel = {
+      provider: 'custom-anthropic',
+      id: 'custom-claude',
+      baseProvider: 'anthropic',
+    };
+
+    createLLMClient(model);
+
+    expect(mockTokenJSInstance.extendModelList).toHaveBeenCalledWith(
+      'anthropic',
+      'custom-claude',
       {
         streaming: true,
         json: true,

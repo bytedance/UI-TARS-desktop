@@ -9,13 +9,7 @@ import { LLMRequest, AgentModel } from './types';
 import type { ChatCompletionCreateParamsBase } from './third-party';
 
 // Providers that should not be added to extended model list
-const NATIVE_PROVIDERS = new Set([
-  'openai',
-  'anthropic',
-  'openrouter',
-  'openai-compatible',
-  'azure-openai',
-]);
+const NATIVE_PROVIDERS = new Set(['openrouter', 'openai-compatible', 'azure-openai']);
 
 export type LLMRequestInterceptor = (
   provider: string,
