@@ -55,5 +55,3 @@ export function isModelConfigValid(
   const availableModels = getAvailableModels(appConfig);
   return availableModels.some((model) => model.provider === provider && model.id === modelId);
 }
-
-
