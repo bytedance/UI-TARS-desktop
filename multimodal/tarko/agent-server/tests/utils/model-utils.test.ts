@@ -8,7 +8,6 @@ import {
   getAvailableModels,
   getDefaultModel,
   isModelConfigValid,
-  getModelsGroupedByProvider,
 } from '../../src/utils/model-utils';
 import type { AgentAppConfig, AgentModel } from '../../src/types';
 
@@ -159,81 +158,6 @@ describe('model-utils', () => {
       const result2 = isModelConfigValid(config, 'openai', 'GPT-4');
       expect(result1).toBe(false);
       expect(result2).toBe(false);
-    });
-  });
-
-  describe('getModelsGroupedByProvider', () => {
-    it('should return empty array when no models configured', () => {
-      const config: AgentAppConfig = {};
-      const result = getModelsGroupedByProvider(config);
-      expect(result).toEqual([]);
-    });
-
-    it('should group models by provider', () => {
-      const config: AgentAppConfig = {
-        model: mockModel1,
-        server: {
-          models: [mockModel2, mockModel3],
-        },
-      };
-      const result = getModelsGroupedByProvider(config);
-      expect(result).toEqual([
-        {
-          provider: 'openai',
-          models: [
-            { id: 'gpt-4', displayName: 'GPT-4' },
-            { id: 'gpt-3.5-turbo', displayName: 'GPT-3.5 Turbo' },
-          ],
-        },
-        {
-          provider: 'anthropic',
-          models: [{ id: 'claude-3', displayName: 'Claude 3' }],
-        },
-      ]);
-    });
-
-    it('should deduplicate models with same ID within provider', () => {
-      const duplicateModel: AgentModel = {
-        provider: 'openai',
-        id: 'gpt-4',
-        displayName: 'GPT-4 Duplicate',
-      };
-      const config: AgentAppConfig = {
-        model: mockModel1,
-        server: {
-          models: [duplicateModel, mockModel2],
-        },
-      };
-      const result = getModelsGroupedByProvider(config);
-      expect(result).toEqual([
-        {
-          provider: 'openai',
-          models: [{ id: 'gpt-4', displayName: 'GPT-4' }],
-        },
-        {
-          provider: 'anthropic',
-          models: [{ id: 'claude-3', displayName: 'Claude 3' }],
-        },
-      ]);
-    });
-
-    it('should handle models without displayName', () => {
-      const modelWithoutDisplayName: AgentModel = {
-        provider: 'custom',
-        id: 'custom-model',
-      };
-      const config: AgentAppConfig = {
-        server: {
-          models: [modelWithoutDisplayName],
-        },
-      };
-      const result = getModelsGroupedByProvider(config);
-      expect(result).toEqual([
-        {
-          provider: 'custom',
-          models: [{ id: 'custom-model', displayName: undefined }],
-        },
-      ]);
     });
   });
 });
