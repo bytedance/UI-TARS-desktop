@@ -7,7 +7,7 @@ import { BaseAction, Coordinates, ParsedGUIResponse } from '@gui-agent/shared/ty
 import { BaseActionParser } from '@gui-agent/shared/base';
 import { ConsoleLogger, LogLevel } from '@agent-infra/logger';
 import isNumber from 'lodash.isnumber';
-import { FormatParserChain } from './formatParserChain';
+import { FormatParserChain } from './FormatParserChain';
 
 const defaultLogger = new ConsoleLogger(undefined, LogLevel.DEBUG);
 
