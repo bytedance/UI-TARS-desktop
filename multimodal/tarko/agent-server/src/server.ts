@@ -12,6 +12,7 @@ import { StorageProvider, createStorageProvider } from './storage';
 import { setupSocketIO } from './core/SocketHandlers';
 import type { AgentSession } from './core';
 import { resolveAgentImplementation } from './utils/agent-resolver';
+import { getAvailableModels, getDefaultModel, isModelConfigValid } from './utils/model-utils';
 import type {
   AgentServerVersionInfo,
   AgentServerInitOptions,
@@ -317,14 +318,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    * @returns Array of available models
    */
   getAvailableModels(): AgentModel[] {
-    const models: AgentModel[] = [];
-    if (this.appConfig.model) {
-      models.push(this.appConfig.model);
-    }
-    if (this.appConfig.server?.models) {
-      models.push(...this.appConfig.server.models);
-    }
-    return models;
+    return getAvailableModels(this.appConfig);
   }
 
   /**
@@ -332,17 +326,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    * @returns Default model (AgentOptions.model or first server.models)
    */
   getDefaultModel(): AgentModel | undefined {
-    // Prefer AgentOptions.model if it exists
-    if (this.appConfig.model) {
-      return this.appConfig.model;
-    }
-
-    // Fall back to first server.models
-    if (this.appConfig.server?.models && this.appConfig.server.models.length > 0) {
-      return this.appConfig.server.models[0];
-    }
-
-    return undefined;
+    return getDefaultModel(this.appConfig);
   }
 
   /**
@@ -352,8 +336,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    * @returns True if model is valid
    */
   isModelConfigValid(provider: string, modelId: string): boolean {
-    const availableModels = this.getAvailableModels();
-    return availableModels.some((model) => model.provider === provider && model.id === modelId);
+    return isModelConfigValid(this.appConfig, provider, modelId);
   }
 
   /**
