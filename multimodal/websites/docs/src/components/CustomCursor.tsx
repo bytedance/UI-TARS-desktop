@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
-import { useCursor } from './CursorContext';
+
 
 interface CustomCursorProps {
   className?: string;
@@ -13,8 +13,8 @@ const CustomCursor: React.FC<CustomCursorProps> = ({ className }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const cursorRef = useRef<HTMLDivElement>(null);
 
-  // 使用上下文中的状态而不是本地状态
-  const { isHovered } = useCursor();
+  // 使用本地状态管理 hover 效果
+  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
