@@ -108,12 +108,7 @@ export interface LLMReasoningOptions {
  * Extended LLM request with reasoning parameters
  * Extends OpenAI's ChatCompletionCreateParamsBase for full type safety
  */
-export interface LLMRequest extends Omit<ChatCompletionCreateParamsBase, 'model'> {
-  /**
-   * Model identifier
-   */
-  model: string;
-  
+export interface LLMRequest extends ChatCompletionCreateParamsBase {
   /**
    * Agent reasoning options
    */
