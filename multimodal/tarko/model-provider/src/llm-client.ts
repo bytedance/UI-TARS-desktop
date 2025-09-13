@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
@@ -10,7 +9,13 @@ import { LLMRequest, AgentModel } from './types';
 import type { ChatCompletionCreateParamsBase } from 'openai/resources/chat/completions';
 
 // Providers that should not be added to extended model list
-const NATIVE_PROVIDERS = new Set(['openai', 'anthropic', 'openrouter', 'openai-compatible', 'azure-openai']);
+const NATIVE_PROVIDERS = new Set([
+  'openai',
+  'anthropic',
+  'openrouter',
+  'openai-compatible',
+  'azure-openai',
+]);
 
 export type LLMRequestInterceptor = (
   provider: string,
@@ -40,9 +45,13 @@ export function createLLMClient(
   if (baseProvider && !NATIVE_PROVIDERS.has(baseProvider)) {
     // Safely extend model list with type assertion
     const extendableClient = client as unknown as {
-      extendModelList: (provider: string, model: string, capabilities: Record<string, boolean>) => void;
+      extendModelList: (
+        provider: string,
+        model: string,
+        capabilities: Record<string, boolean>,
+      ) => void;
     };
-    
+
     if (typeof extendableClient.extendModelList === 'function') {
       extendableClient.extendModelList(baseProvider, id, {
         streaming: true,
