@@ -81,37 +81,41 @@ const resolvedModel = resolveModel(
 );
 ```
 
-### Automatic Claude Headers
+### Custom Headers Support
 
-The library automatically adds required beta headers for Claude models to enable advanced features:
+Add custom headers to any model, with automatic Claude beta headers:
 
 ```typescript
+// Custom headers for any provider
+const modelWithHeaders = resolveModel({
+  provider: 'openai',
+  id: 'gpt-4',
+  headers: {
+    'X-Custom-Header': 'value',
+    'Authorization': 'Bearer token'
+  }
+});
+
 // Claude models automatically get beta headers
 const claudeModel = resolveModel({
   provider: 'anthropic',
   id: 'claude-3-5-sonnet-20241022',
   apiKey: 'your-anthropic-key'
 });
+// Automatically includes anthropic-beta headers for enhanced features
 
-// Automatically includes:
-// headers: {
-//   'anthropic-beta': 'fine-grained-tool-streaming-2025-05-14,token-efficient-tools-2025-02-19'
-// }
-
-// Custom headers are preserved and merged
+// Custom headers merge with automatic ones
 const customClaudeModel = resolveModel({
   provider: 'anthropic',
   id: 'claude-3-haiku',
   headers: {
-    'X-Custom': 'value'
+    'X-Request-ID': 'req-123'
   }
 });
 // Results in both custom and automatic headers
 ```
 
-Supported Claude model patterns:
-- `claude-*` (e.g., `claude-3-sonnet`, `claude-3-5-sonnet-20241022`)
-- `anthropic/*` (e.g., `anthropic/claude-3-haiku`)
+Claude models (matching `claude-*` or `anthropic/*` patterns) automatically receive beta headers for tool streaming and efficiency features.
 
 ## API Reference
 
