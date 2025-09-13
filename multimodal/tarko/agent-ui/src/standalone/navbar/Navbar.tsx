@@ -382,7 +382,7 @@ export const Navbar: React.FC = () => {
 interface DynamicNavbarCenterProps {
   sessionMetadata?: {
     agentInfo?: { name: string;[key: string]: any };
-    modelConfig?: { provider: string; modelId: string;[key: string]: any };
+    modelConfig?: { provider: string; id: string;[key: string]: any };
     [key: string]: any;
   };
   activeSessionId?: string;
@@ -453,7 +453,7 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, [
     sessionMetadata?.agentInfo?.name,
-    sessionMetadata?.modelConfig?.modelId,
+    sessionMetadata?.modelConfig?.id,
     sessionMetadata?.modelConfig?.displayName,
     sessionMetadata?.modelConfig?.provider,
   ]);

@@ -52,7 +52,7 @@ export function createJsonSchemaSession(
     tags?: string[];
     modelConfig?: {
       provider: string;
-      modelId: string;
+      id: string;
       configuredAt: number;
     };
   },

@@ -152,7 +152,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, session
                     <span className="text-gray-600 dark:text-gray-300 text-sm font-medium">
                       Model:
                     </span>
-                    {sessionMetadata.modelConfig.modelId && (
+                    {sessionMetadata.modelConfig.id && (
                       <div className="flex items-center gap-2 min-w-0">
                         <span
                           className="font-mono text-purple-800 dark:text-purple-200 truncate cursor-pointer hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
@@ -182,7 +182,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, session
                     )}
                     {sessionMetadata.modelConfig.provider && (
                       <>
-                        {sessionMetadata.modelConfig.modelId && (
+                        {sessionMetadata.modelConfig.id && (
                           <span className="text-gray-400 dark:text-gray-600 flex-shrink-0">•</span>
                         )}
                         <span className="provider-gradient-text font-medium flex-shrink-0">
