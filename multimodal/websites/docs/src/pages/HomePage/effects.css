@@ -267,33 +267,3 @@
   height: 100%;
 }
 
-/* 自定义光标样式 */
-.custom-cursor {
-  position: fixed;
-  pointer-events: none;
-  z-index: 9999;
-  will-change: transform;
-  transform-origin: 0 0;
-  transition: transform 0.05s ease-out;
-  margin-left: -5px;
-  margin-top: -5px;
-}
-
-.cursor-pointer {
-  transition: transform 0.2s;
-}
-
-.cursor-hover .cursor-pointer {
-  transform: scale(1.2);
-  filter: drop-shadow(0 0 5px var(--primary));
-}
-
-.cursor-clicking .cursor-pointer {
-  transform: scale(0.9);
-  filter: drop-shadow(0 0 6px var(--accent-alt));
-}
-
-/* 全局光标隐藏 - 当自定义光标可见时 */
-.cursor-hidden * {
-  cursor: none !important;
-}
