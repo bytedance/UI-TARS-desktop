@@ -57,17 +57,17 @@ export function getAvailableModels(req: Request, res: Response) {
  * Update session model configuration
  */
 export async function updateSessionModel(req: Request, res: Response) {
-  const { sessionId, provider, modelId } = req.body;
+  const { sessionId, model } = req.body;
   const server = req.app.locals.server;
 
-  if (!sessionId || !provider || !modelId) {
+  if (!sessionId || !model || !model.provider || !model.id) {
     return res
       .status(400)
-      .json({ error: 'Missing required parameters: sessionId, provider, modelId' });
+      .json({ error: 'Missing required parameters: sessionId, model (with provider and id)' });
   }
 
   // Validate model configuration
-  if (!isModelConfigValid(server.appConfig, provider, modelId)) {
+  if (!isModelConfigValid(server.appConfig, model.provider, model.id)) {
     return res.status(400).json({ error: 'Invalid model configuration' });
   }
 
@@ -80,29 +80,18 @@ export async function updateSessionModel(req: Request, res: Response) {
         return res.status(404).json({ error: 'Session not found' });
       }
 
-      // Find the model to get its displayName
-      const availableModels = getAvailableModelsUtil(server.appConfig);
-      const selectedModel = availableModels.find(
-        (model) => model.provider === provider && model.id === modelId,
-      );
-
       // Update metadata with new model config
       const updatedSessionInfo = await server.storageProvider.updateSessionInfo(sessionId, {
         metadata: {
           ...currentSessionInfo.metadata,
-          modelConfig: {
-            ...selectedModel,
-            id: modelId,
-            provider,
-            ...(selectedModel?.displayName && { displayName: selectedModel.displayName }),
-          },
+          modelConfig: model,
         },
       });
 
       // If session is currently active, recreate the agent with new model config
       const activeSession = server.sessions[sessionId];
       if (activeSession) {
-        console.log(`Session ${sessionId} model updated to ${provider}:${modelId}`);
+        console.log(`Session ${sessionId} model updated to ${model.provider}:${model.id}`);
 
         try {
           // Recreate agent with new model configuration

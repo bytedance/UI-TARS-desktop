@@ -523,18 +523,16 @@ class ApiService {
    */
   async updateSessionModel(
     sessionId: string,
-    provider: string,
-    modelId: string,
+    model: AgentModel,
   ): Promise<{ success: boolean; sessionInfo?: SessionInfo }> {
     try {
       console.log('🔄 [ModelSelector] Updating session model:', {
         sessionId,
-        provider,
-        modelId,
+        model,
         endpoint: `${API_BASE_URL}/api/v1/sessions/model`,
       });
 
-      const requestBody = { sessionId, provider, modelId };
+      const requestBody = { sessionId, model };
       console.log('📤 [ModelSelector] Request payload:', requestBody);
 
       const response = await fetch(`${API_BASE_URL}/api/v1/sessions/model`, {

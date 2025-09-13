@@ -188,12 +188,22 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
         return;
       }
 
+      // Find the selected model from available models
+      const selectedModel = availableModels?.models.find(
+        (model) => model.provider === provider && model.id === modelId,
+      );
+
+      if (!selectedModel) {
+        console.error('❌ [NavbarModelSelector] Selected model not found in available models');
+        return;
+      }
+
       console.log('⏳ [NavbarModelSelector] Starting model update...');
       setIsLoading(true);
 
       try {
         console.log('📞 [NavbarModelSelector] Calling update handler...');
-        const response = await apiService.updateSessionModel(activeSessionId, provider, modelId);
+        const response = await apiService.updateSessionModel(activeSessionId, selectedModel);
 
         console.log('📋 [NavbarModelSelector] Update response:', response);
 
