@@ -3,7 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { Operator } from '@ui-tars/sdk/core';
-import { Agent, AgentOptions, LLMRequestHookPayload, LogLevel, Tool } from '@tarko/agent';
+import {
+  Agent,
+  AgentOptions,
+  AgentEventStream,
+  EachAgentLoopEndContext,
+  LLMRequestHookPayload,
+  LogLevel,
+  Tool,
+} from '@tarko/agent';
 import { SeedGUIAgentToolCallEngine } from './SeedGUIAgentToolCallEngine';
 import { SYSTEM_PROMPT } from './constants';
 import { getScreenInfo, setScreenInfo } from './shared';
@@ -27,6 +35,8 @@ export interface GUIAgentConfig extends AgentOptions {
   maxLoopCount?: number;
   // loopIntervalInMs?: number;
 }
+
+const TOOL_ADAPTER_NAME = 'browser_vision_control';
 
 export class SeedGUIAgent extends Agent {
   static label = 'Seed GUI Agent';
@@ -98,11 +108,11 @@ export class SeedGUIAgent extends Agent {
   async initialize() {
     this.registerTool(
       new Tool({
-        id: 'browser_vision_control',
+        id: TOOL_ADAPTER_NAME,
         description: 'operator tool',
         parameters: {},
         function: async (input) => {
-          this.logger.log('browser_vision_control input:', input);
+          this.logger.log(`${TOOL_ADAPTER_NAME} input:`, input);
           if (!this.operator) {
             return { status: 'error', message: 'Operator not initialized' };
           }
@@ -126,17 +136,35 @@ export class SeedGUIAgent extends Agent {
     // await ImageSaver.saveImagesFromPayload(id, payload);
   }
 
-  async onEachAgentLoopStart(sessionId: string) {
-    await this.initilizeOperator();
-    const output = await this.operator!.screenshot();
-    const base64Tool = new Base64ImageParser(output.base64);
-    const base64Uri = base64Tool.getDataUri();
-    if (!base64Uri) {
-      this.logger.error('Failed to get base64 image uri');
+  // async onEachAgentLoopStart(sessionId: string) {
+  // }
+
+  async onEachAgentLoopEnd(context: EachAgentLoopEndContext): Promise<void> {
+    const events = this.getEventStream().getEvents();
+    const lastToolCallIsComputerUse = this.findLastMatch<AgentEventStream.Event>(
+      events,
+      (item) => item.type === 'tool_call' && item.name === TOOL_ADAPTER_NAME,
+    );
+    if (!lastToolCallIsComputerUse) {
+      this.logger.info('Last tool not GUI action, skipping screenshot');
       return;
     }
 
-    const event = this.eventStream.createEvent('environment_input', {
+    this.logger.info('onEachAgentLoopEnd lastToolCall', lastToolCallIsComputerUse);
+
+    const output = await this.operator?.screenshot();
+    if (!output) {
+      console.error('Failed to get screenshot');
+      return;
+    }
+    const base64Tool = new Base64ImageParser(output.base64);
+    const base64Uri = base64Tool.getDataUri();
+    if (!base64Uri) {
+      console.error('Failed to get base64 image uri');
+      return;
+    }
+    const eventStream = this.getEventStream();
+    const event = eventStream.createEvent('environment_input', {
       description: 'Browser Screenshot',
       content: [
         {
@@ -147,7 +175,7 @@ export class SeedGUIAgent extends Agent {
         },
       ],
     });
-
+    eventStream.sendEvent(event);
     // Extract image dimensions from screenshot
     const dimensions = base64Tool.getDimensions();
     if (dimensions) {
@@ -156,7 +184,6 @@ export class SeedGUIAgent extends Agent {
         screenHeight: dimensions.height,
       });
     }
-    this.eventStream.sendEvent(event);
   }
 
   async onAgentLoopEnd(id: string): Promise<void> {
@@ -168,9 +195,18 @@ export class SeedGUIAgent extends Agent {
     toolCall: { toolCallId: string; name: string },
     args: unknown,
   ) {
-    if (toolCall.name.includes('browser_vision_control')) {
+    if (toolCall.name.includes(TOOL_ADAPTER_NAME)) {
       await this.initilizeOperator();
     }
     return args;
+  }
+
+  private findLastMatch<T>(array: T[], callback: (item: T) => boolean) {
+    for (let i = array.length - 1; i >= 0; i--) {
+      if (callback(array[i])) {
+        return array[i];
+      }
+    }
+    return undefined;
   }
 }
