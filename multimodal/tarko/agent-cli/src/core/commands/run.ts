@@ -7,12 +7,13 @@ import { LogLevel } from '@tarko/interface';
 import { AgentServer, resolveAgentImplementation } from '@tarko/agent-server';
 import { ConsoleInterceptor } from '../../utils';
 import { AgentCLIRunCommandOptions } from '../../types';
+import { generateReplayOutput } from '../../utils/replay-output';
 
 /**
  * Process a query in silent mode and output results to stdout
  */
 export async function processSilentRun(options: AgentCLIRunCommandOptions): Promise<void> {
-  const { input, format = 'text', includeLogs = false, agentServerInitOptions } = options;
+  const { input, format = 'text', includeLogs = false, agentServerInitOptions, output } = options;
 
   const { appConfig } = agentServerInitOptions;
 
@@ -57,6 +58,11 @@ export async function processSilentRun(options: AgentCLIRunCommandOptions): Prom
       process.stdout.write(logs.join('\n'));
     }
   }
+
+  // Note: Silent mode doesn't support replay output as it doesn't use server storage
+  if (output?.replay) {
+    console.warn('\nWarning: Replay output is not supported in silent mode (--use-cache=false). Use server mode for replay functionality.');
+  }
 }
 
 /**
@@ -69,6 +75,7 @@ export async function processServerRun(options: AgentCLIRunCommandOptions): Prom
     includeLogs = false,
     isDebug = false,
     agentServerInitOptions,
+    output,
   } = options;
 
   const { appConfig } = agentServerInitOptions;
@@ -81,6 +88,8 @@ export async function processServerRun(options: AgentCLIRunCommandOptions): Prom
   const { result, logs } = await ConsoleInterceptor.run(
     async () => {
       let server: AgentServer | undefined;
+      let sessionId: string | undefined;
+      
       try {
         server = new AgentServer(agentServerInitOptions);
 
@@ -105,7 +114,26 @@ export async function processServerRun(options: AgentCLIRunCommandOptions): Prom
           throw new Error(`Server request failed: ${response.statusText}`);
         }
 
-        return await response.json();
+        const responseData = await response.json();
+        sessionId = responseData.sessionId;
+
+        // Generate replay output if requested
+        if (output?.replay && sessionId && server) {
+          const replayResult = await generateReplayOutput(server, sessionId, output);
+          
+          if (replayResult.success) {
+            if (replayResult.filePath) {
+              console.error(`\nReplay HTML saved to: ${replayResult.filePath}`);
+            }
+            if (replayResult.shareUrl) {
+              console.error(`\nReplay shared at: ${replayResult.shareUrl}`);
+            }
+          } else {
+            console.error(`\nWarning: Failed to generate replay output: ${replayResult.error}`);
+          }
+        }
+
+        return responseData;
       } finally {
         if (server) {
           try {

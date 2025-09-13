@@ -196,6 +196,20 @@ export class AgentCLI {
         {
           default: true,
         },
+      )
+      .option(
+        '--replay [mode]',
+        'Generate replay HTML: "local" saves to disk, "upload" uploads to share provider, true defaults to "local"',
+        {
+          default: false,
+        },
+      )
+      .option(
+        '--output-dir [dir]',
+        'Output directory for generated files (default: current directory)',
+        {
+          default: process.cwd(),
+        },
       );
 
     // Apply common options first
@@ -299,6 +313,21 @@ export class AgentCLI {
 
       const useCache = cliArguments.useCache !== false;
 
+      // Process output options
+      let replayMode: boolean | string = false;
+      if (cliArguments.replay === true || cliArguments.replay === 'true') {
+        replayMode = 'local'; // Default to local mode
+      } else if (typeof cliArguments.replay === 'string') {
+        replayMode = cliArguments.replay;
+      } else if (cliArguments.replay) {
+        replayMode = 'local';
+      }
+
+      const outputOptions = {
+        replay: replayMode,
+        outputDir: cliArguments.outputDir || process.cwd(),
+      };
+
       if (useCache) {
         const { processServerRun } = await import('./commands/run');
         await processServerRun({
@@ -307,6 +336,7 @@ export class AgentCLI {
           format: cliArguments.format as 'json' | 'text',
           includeLogs: cliArguments.includeLogs || !!cliArguments.debug,
           isDebug,
+          output: outputOptions,
         });
       } else {
         const { processSilentRun } = await import('./commands/run');
@@ -315,6 +345,7 @@ export class AgentCLI {
           input,
           format: cliArguments.format as 'json' | 'text',
           includeLogs: cliArguments.includeLogs || !!cliArguments.debug,
+          output: outputOptions,
         });
       }
     } catch (err) {

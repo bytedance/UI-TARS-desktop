@@ -65,6 +65,12 @@ export type AgentCLIArguments = Pick<
   /** Use cache for headless mode execution (for headless mode) */
   useCache?: boolean;
 
+  /** Generate replay HTML output in headless mode */
+  replay?: boolean | string;
+
+  /** Output directory for generated files in headless mode */
+  outputDir?: string;
+
   // Allow additional properties for extensibility
   [key: string]: any;
 };

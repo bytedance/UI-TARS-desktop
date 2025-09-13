@@ -85,12 +85,23 @@ export interface AgentCLICoreCommandBaseOptions {
 }
 
 /**
+ * Output options for headless mode
+ */
+export interface HeadlessOutputOptions {
+  /** Generate replay HTML */
+  replay?: boolean | string;
+  /** Output directory for generated files */
+  outputDir?: string;
+}
+
+/**
  * Run options for `run` command
  */
 export interface AgentCLIRunCommandOptions extends AgentCLICoreCommandBaseOptions {
   input: string;
   format?: 'json' | 'text';
   includeLogs?: boolean;
+  output?: HeadlessOutputOptions;
 }
 
 /**
