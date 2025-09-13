@@ -8,6 +8,7 @@ import { ToolCallEngineType } from './tool-call-engine';
 import { Tool } from './tool';
 import { AgentModel, LLMReasoningOptions } from '@tarko/model-provider/types';
 import { AgentEventStream } from './agent-event-stream';
+import { ContextCompressionOptions } from './context-compression';
 import { LogLevel } from '@agent-infra/logger';
 
 /**
@@ -253,6 +254,19 @@ export interface AgentContextAwarenessOptions {
    * will be replaced with text placeholders that retain context information.
    *
    * This helps optimize token usage while preserving important conversation context.
+   * 
+   * @deprecated Use contextCompression.maxImages instead
    */
   maxImagesCount?: number;
+  
+  /**
+   * Context compression configuration for advanced memory management
+   * 
+   * Enables sophisticated context compression strategies including:
+   * - Sliding window compression
+   * - Tool result compression  
+   * - Intelligent content summarization
+   * - Multi-level memory hierarchy
+   */
+  contextCompression?: ContextCompressionOptions;
 }
