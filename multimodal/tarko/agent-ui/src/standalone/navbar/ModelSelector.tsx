@@ -11,10 +11,11 @@ import {
   createTheme,
   ThemeProvider,
 } from '@mui/material';
-import { apiService, AvailableModelsResponse } from '@/common/services/apiService';
+import { apiService } from '@/common/services/apiService';
 import { useSetAtom } from 'jotai';
 import { sessionMetadataAtom } from '@/common/state/atoms/ui';
 import { SessionItemMetadata } from '@tarko/interface';
+import { AgentModel } from '@tarko/agent-interface';
 
 interface NavbarModelSelectorProps {
   className?: string;
@@ -29,7 +30,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   sessionMetadata,
   isDarkMode = false,
 }) => {
-  const [availableModels, setAvailableModels] = useState<AvailableModelsResponse | null>(null);
+  const [availableModels, setAvailableModels] = useState<{ models: AgentModel[] } | null>(null);
   const [currentModel, setCurrentModel] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
