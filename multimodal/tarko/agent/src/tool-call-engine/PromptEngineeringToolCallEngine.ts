@@ -544,7 +544,7 @@ ${JSON.stringify(schema)}
   private extractCleanJsonContent(content: string): string {
     const trimmed = content.trim();
     
-    // Extract first complete JSON object using regex
+    // Try to find a complete JSON object first
     const jsonMatch = trimmed.match(/^\s*\{[\s\S]*?\}(?=\s*(?:\}|\n|$))/);
     if (jsonMatch) {
       const candidate = jsonMatch[0].trim();
@@ -552,11 +552,91 @@ ${JSON.stringify(schema)}
         JSON.parse(candidate);
         return candidate;
       } catch {
-        // Fall through to original content
+        // Fall through to repair logic
       }
     }
     
     return trimmed;
+  }
+
+  /**
+   * Repair incomplete JSON with robust error handling
+   */
+  private repairIncompleteJson(content: string): string {
+    if (!content || !content.trim()) {
+      return '{}';
+    }
+
+    let repairedContent = content.trim();
+
+    try {
+      // First try to parse as-is
+      JSON.parse(repairedContent);
+      return repairedContent;
+    } catch (error) {
+      this.logger.debug(`Initial JSON parse failed: ${error}, attempting repair`);
+    }
+
+    // Handle common incomplete JSON patterns
+    try {
+      // Remove any trailing commas that might cause issues
+      repairedContent = repairedContent.replace(/,\s*([}\]])/g, '$1');
+      
+      // If the JSON starts with { but doesn't end properly, try to close it
+      if (repairedContent.startsWith('{')) {
+        // Count braces and brackets to determine what needs closing
+        const openBraces = (repairedContent.match(/\{/g) || []).length;
+        const closeBraces = (repairedContent.match(/\}/g) || []).length;
+        const openBrackets = (repairedContent.match(/\[/g) || []).length;
+        const closeBrackets = (repairedContent.match(/\]/g) || []).length;
+
+        // Handle incomplete string values (common when truncated mid-stream)
+        if (repairedContent.includes('"') && !repairedContent.match(/"[^"]*"$/)) {
+          // Find the last quote and see if it's part of an incomplete string
+          const lastQuoteIndex = repairedContent.lastIndexOf('"');
+          if (lastQuoteIndex !== -1) {
+            const beforeQuote = repairedContent.substring(0, lastQuoteIndex);
+            const afterQuote = repairedContent.substring(lastQuoteIndex + 1);
+            
+            // If there's content after the quote that looks like an incomplete string
+            if (afterQuote && !afterQuote.includes('"') && !afterQuote.includes('}') && !afterQuote.includes(']')) {
+              // Close the string
+              repairedContent = beforeQuote + '"' + afterQuote + '"';
+            }
+          }
+        }
+
+        // Close any open arrays first
+        const missingCloseBrackets = openBrackets - closeBrackets;
+        if (missingCloseBrackets > 0) {
+          repairedContent += ']'.repeat(missingCloseBrackets);
+        }
+
+        // Close any open objects
+        const missingCloseBraces = openBraces - closeBraces;
+        if (missingCloseBraces > 0) {
+          repairedContent += '}'.repeat(missingCloseBraces);
+        }
+      }
+
+      // Try to parse the repaired content
+      JSON.parse(repairedContent);
+      this.logger.debug('Successfully repaired incomplete JSON');
+      return repairedContent;
+    } catch (repairError) {
+      this.logger.warn(`Failed to repair JSON: ${repairError}`);
+      
+      // Last resort: try to extract just the tool name if possible
+      const nameMatch = content.match(/"name"\s*:\s*"([^"]+)"/);
+      if (nameMatch) {
+        const toolName = nameMatch[1];
+        this.logger.debug(`Extracted tool name from incomplete JSON: ${toolName}`);
+        return `{"name": "${toolName}", "parameters": {}}`;
+      }
+      
+      // If all else fails, return empty tool call
+      return '{}';
+    }
   }
 
   /**
@@ -615,21 +695,10 @@ ${JSON.stringify(schema)}
 
       try {
         // Try to parse the incomplete tool call buffer
-        // Add closing brace if it seems like valid JSON that was truncated
         let toolCallContent = this.extractCleanJsonContent(extendedState.currentToolCallBuffer);
-
-        // Attempt to repair incomplete JSON
-        if (toolCallContent && !toolCallContent.endsWith('}')) {
-          // Simple heuristic: if it looks like JSON and has opening braces, try to close them
-          const openBraces = (toolCallContent.match(/\{/g) || []).length;
-          const closeBraces = (toolCallContent.match(/\}/g) || []).length;
-          const missingBraces = openBraces - closeBraces;
-
-          if (missingBraces > 0) {
-            toolCallContent += '}'.repeat(missingBraces);
-            this.logger.debug(`Added ${missingBraces} closing braces to complete JSON`);
-          }
-        }
+        
+        // Attempt to repair incomplete JSON with more robust logic
+        toolCallContent = this.repairIncompleteJson(toolCallContent);
 
         const toolCallData = JSON.parse(toolCallContent);
 
