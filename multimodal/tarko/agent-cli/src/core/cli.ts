@@ -196,6 +196,10 @@ export class AgentCLI {
         {
           default: true,
         },
+      )
+      .option(
+        '--monitor-format [monitorFormat]',
+        'Monitor output format: "json" for structured monitoring events (for headless mode)',
       );
 
     // Apply common options first
@@ -307,6 +311,7 @@ export class AgentCLI {
           format: cliArguments.format as 'json' | 'text',
           includeLogs: cliArguments.includeLogs || !!cliArguments.debug,
           isDebug,
+          monitorFormat: cliArguments.monitorFormat as 'json' | undefined,
         });
       } else {
         const { processSilentRun } = await import('./commands/run');
@@ -315,6 +320,7 @@ export class AgentCLI {
           input,
           format: cliArguments.format as 'json' | 'text',
           includeLogs: cliArguments.includeLogs || !!cliArguments.debug,
+          monitorFormat: cliArguments.monitorFormat as 'json' | undefined,
         });
       }
     } catch (err) {
