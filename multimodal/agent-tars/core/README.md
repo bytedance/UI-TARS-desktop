@@ -23,6 +23,38 @@
 npm install @agent-tars/core
 ```
 
+### Running Agent TARS
+
+Agent TARS can be started in multiple ways:
+
+#### Option 1: Using @agent-tars/cli (Recommended)
+
+```bash
+# Install globally
+npm install -g @agent-tars/cli
+
+# Run Agent TARS
+agent-tars
+
+# Or use directly via npx
+npx @agent-tars/cli
+```
+
+#### Option 2: Using @tarko/agent-cli
+
+```bash
+# Install globally
+npm install -g @tarko/agent-cli
+
+# Run Agent TARS through tarko CLI
+tarko run agent-tars
+
+# Or use directly via npx
+npx @tarko/agent-cli run agent-tars
+```
+
+#### Option 3: Programmatic Usage
+
 ### Basic Usage
 
 ```typescript
