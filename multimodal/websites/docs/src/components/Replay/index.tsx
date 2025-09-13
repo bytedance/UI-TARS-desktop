@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation, useNavigate } from 'rspress/runtime';
+import { useLocation, useNavigate } from '@rspress/core/runtime';
 import { ShowcaseDetail } from '../Showcase/components/ShowcaseDetail';
 import { useShowcaseData } from '../../hooks/useShowcaseData';
 import { extractIdFromPath } from '../../shared/urlUtils';
@@ -12,7 +12,7 @@ const NotFoundPage: React.FC = () => {
   // Set meta for 404 page
   usePageMeta({
     title: generatePageTitle('Replay Not Found'),
-    description: 'The replay you\'re looking for doesn\'t exist or has been moved.',
+    description: "The replay you're looking for doesn't exist or has been moved.",
   });
 
   return (
@@ -53,20 +53,20 @@ export const Replay: React.FC = () => {
       const item = items[0];
       const title = generatePageTitle(`${item.title} - Replay`);
       const description = optimizeDescription(
-        `${item.description} - Watch this Agent TARS replay demonstrating ${item.category} capabilities.`
+        `${item.description} - Watch this Agent TARS replay demonstrating ${item.category} capabilities.`,
       );
-      
+
       // Update meta tags dynamically
       if (typeof document !== 'undefined') {
         document.title = title;
-        
+
         const setMetaContent = (selector: string, content: string) => {
           const meta = document.querySelector(selector);
           if (meta) {
             meta.setAttribute('content', content);
           }
         };
-        
+
         setMetaContent('meta[name="description"]', description);
         setMetaContent('meta[property="og:title"]', title);
         setMetaContent('meta[property="og:description"]', description);
@@ -79,8 +79,8 @@ export const Replay: React.FC = () => {
   // Set loading state meta
   usePageMeta({
     title: generatePageTitle(isLoading ? 'Loading Replay...' : 'Replay'),
-    description: isLoading 
-      ? 'Loading Agent TARS replay content...' 
+    description: isLoading
+      ? 'Loading Agent TARS replay content...'
       : 'Watch Agent TARS demonstration replays and learn from real-world usage examples.',
   });
 

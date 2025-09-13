@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'rspress/runtime';
+import { useNavigate } from '@rspress/core/runtime';
 import { motion, HTMLMotionProps } from 'framer-motion';
 import { useCursor } from './CursorContext';
 

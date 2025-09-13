@@ -1,5 +1,5 @@
 import React from 'react';
-import { useI18n, useLang, usePageData } from 'rspress/runtime';
+import { useI18n, useLang, usePageData } from '@rspress/core/runtime';
 import { ActionCard } from './ActionCard';
 import { ActionCardContainer } from './ActionCardContainer';
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useI18n } from 'rspress/runtime';
+import { useI18n } from '@rspress/core/runtime';
 import { FaGithub, FaTwitter } from 'react-icons/fa';
 import { ActionCard } from './ActionCard';
 import { ActionCardContainer } from './ActionCardContainer';

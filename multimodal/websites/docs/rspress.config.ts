@@ -1,5 +1,5 @@
 import * as path from 'node:path';
-import { defineConfig } from 'rspress/config';
+import { defineConfig } from '@rspress/core';
 import mermaid from 'rspress-plugin-mermaid';
 import { pluginClientRedirects } from '@rspress/plugin-client-redirects';
 import { SEO_CONFIG } from './src/shared/seoConfig';
