@@ -1,7 +1,27 @@
 [
   {
     "type": "file",
-    "name": "server",
-    "label": "Server"
+    "name": "agent-snapshot",
+    "label": "Agent Snapshot"
+  },
+  {
+    "type": "file",
+    "name": "agent-trace",
+    "label": "Agent Trace"
+  },
+  {
+    "type": "file",
+    "name": "benchmark",
+    "label": "Benchmark"
+  },
+  {
+    "type": "file",
+    "name": "context",
+    "label": "Context"
+  },
+  {
+    "type": "file",
+    "name": "fc-engine",
+    "label": "FC Engine"
   }
 ]
