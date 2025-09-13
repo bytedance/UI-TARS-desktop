@@ -5,6 +5,7 @@
 
 import { Request, Response } from 'express';
 import { sanitizeAgentOptions } from '../../utils/config-sanitizer';
+import { getAvailableModels, isModelConfigValid } from '../../utils/model-utils';
 
 /**
  * Health check endpoint
@@ -42,7 +43,7 @@ export function getAgentOptions(req: Request, res: Response) {
  */
 export function getAvailableModels(req: Request, res: Response) {
   const server = req.app.locals.server;
-  const availableModels = server.getAvailableModels();
+  const availableModels = getAvailableModels(server.appConfig);
 
   // Group models by provider while preserving full model information
   const modelsByProvider = availableModels.reduce(
@@ -87,7 +88,7 @@ export async function updateSessionModel(req: Request, res: Response) {
   }
 
   // Validate model configuration
-  if (!server.isModelConfigValid(provider, modelId)) {
+  if (!isModelConfigValid(server.appConfig, provider, modelId)) {
     return res.status(400).json({ error: 'Invalid model configuration' });
   }
 
@@ -101,7 +102,7 @@ export async function updateSessionModel(req: Request, res: Response) {
       }
 
       // Find the model to get its displayName
-      const availableModels = server.getAvailableModels();
+      const availableModels = getAvailableModels(server.appConfig);
       const selectedModel = availableModels.find(
         (model) => model.provider === provider && model.id === modelId,
       );
