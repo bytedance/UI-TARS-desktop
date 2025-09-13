@@ -24,6 +24,15 @@ interface NavbarModelSelectorProps {
   isDarkMode?: boolean;
 }
 
+// Helper function to compare models
+const isSameModel = (a: AgentModel | null, b: AgentModel | null): boolean => {
+  if (!a || !b) return false;
+  return a.provider === b.provider && a.id === b.id;
+};
+
+// Helper function to create a unique key for model
+const getModelKey = (model: AgentModel): string => `${model.provider}:${model.id}`;
+
 export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   className = '',
   activeSessionId,
@@ -31,7 +40,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   isDarkMode = false,
 }) => {
   const [availableModels, setAvailableModels] = useState<{ models: AgentModel[] } | null>(null);
-  const [currentModel, setCurrentModel] = useState<string>('');
+  const [currentModel, setCurrentModel] = useState<AgentModel | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const setSessionMetadata = useSetAtom(sessionMetadataAtom);
@@ -161,75 +170,31 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   }, []);
 
   const handleModelChange = useCallback(
-    async (selectedValue: string) => {
-      console.log('🎛️ [NavbarModelSelector] Model change initiated:', {
-        selectedValue,
-        sessionId: activeSessionId,
-      });
-
-      if (!activeSessionId || isLoading || !selectedValue) {
-        console.warn('⚠️ [NavbarModelSelector] Model change blocked:', {
-          hasSessionId: !!activeSessionId,
-          isLoading,
-          hasSelectedValue: !!selectedValue,
-        });
+    async (selectedModel: AgentModel) => {
+      if (!activeSessionId || isLoading || !selectedModel) {
         return;
       }
 
-      const [provider, modelId] = selectedValue.split(':');
-      console.log('🔍 [NavbarModelSelector] Parsed model selection:', {
-        provider,
-        modelId,
-        selectedValue,
-      });
-
-      if (!provider || !modelId) {
-        console.error('❌ [NavbarModelSelector] Invalid model format:', selectedValue);
-        return;
-      }
-
-      // Find the selected model from available models
-      const selectedModel = availableModels?.models.find(
-        (model) => model.provider === provider && model.id === modelId,
-      );
-
-      if (!selectedModel) {
-        console.error('❌ [NavbarModelSelector] Selected model not found in available models');
-        return;
-      }
-
-      console.log('⏳ [NavbarModelSelector] Starting model update...');
       setIsLoading(true);
 
       try {
-        console.log('📞 [NavbarModelSelector] Calling update handler...');
         const response = await apiService.updateSessionModel(activeSessionId, selectedModel);
 
-        console.log('📋 [NavbarModelSelector] Update response:', response);
-
         if (response.success) {
-          console.log('✅ [NavbarModelSelector] Model updated successfully, updating UI state');
-          setCurrentModel(selectedValue);
+          setCurrentModel(selectedModel);
 
           // Update sessionMetadata immediately with the new model config
           if (response.sessionInfo?.metadata) {
             setSessionMetadata(response.sessionInfo.metadata);
-            console.log(
-              '✅ [NavbarModelSelector] Updated sessionMetadata:',
-              response.sessionInfo.metadata,
-            );
           }
-        } else {
-          console.error('❌ [NavbarModelSelector] Update handler returned success=false');
         }
       } catch (error) {
-        console.error('💥 [NavbarModelSelector] Failed to update session model:', error);
+        console.error('Failed to update session model:', error);
       } finally {
-        console.log('🏁 [NavbarModelSelector] Model change completed');
         setIsLoading(false);
       }
     },
-    [activeSessionId, isLoading],
+    [activeSessionId, isLoading, setSessionMetadata],
   );
 
   useEffect(() => {
@@ -240,35 +205,17 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   useEffect(() => {
     if (sessionMetadata?.modelConfig && availableModels) {
       const { provider, id: modelId } = sessionMetadata.modelConfig;
-      const modelKey = `${provider}:${modelId}`;
 
-      console.log('🔄 [ModelSelector] Updating current model from session metadata:', {
-        provider,
-        modelId,
-        modelKey,
-        sessionMetadata: sessionMetadata.modelConfig,
-      });
-
-      // Check if the session's model is still available
-      const isModelAvailable = availableModels.models.some(
+      // Find the session's model in available models
+      const sessionModel = availableModels.models.find(
         (model) => model.provider === provider && model.id === modelId,
       );
 
-      if (isModelAvailable) {
-        console.log(
-          '✅ [ModelSelector] Session model is available, setting current model:',
-          modelKey,
-        );
-        setCurrentModel(modelKey);
-      } else {
-        console.warn('⚠️ [ModelSelector] Session model not available:', { provider, modelId });
-        if (availableModels.models.length > 0) {
-          // Fall back to first available model if session model is no longer available
-          const firstModel = availableModels.models[0];
-          const fallbackKey = `${firstModel.provider}:${firstModel.id}`;
-          console.log('🔄 [ModelSelector] Falling back to first available model:', fallbackKey);
-          setCurrentModel(fallbackKey);
-        }
+      if (sessionModel) {
+        setCurrentModel(sessionModel);
+      } else if (availableModels.models.length > 0) {
+        // Fall back to first available model if session model is no longer available
+        setCurrentModel(availableModels.models[0]);
       }
     } else if (
       availableModels &&
@@ -276,13 +223,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
       !sessionMetadata?.modelConfig
     ) {
       // No session model config, use first available model
-      const firstModel = availableModels.models[0];
-      const fallbackKey = `${firstModel.provider}:${firstModel.id}`;
-      console.log(
-        '🆕 [ModelSelector] No session model config, using first available:',
-        fallbackKey,
-      );
-      setCurrentModel(fallbackKey);
+      setCurrentModel(availableModels.models[0]);
     }
   }, [sessionMetadata, availableModels]);
 
@@ -319,7 +260,6 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
                 ? '1px solid rgba(75, 85, 99, 0.3)'
                 : '1px solid rgba(203, 213, 225, 0.6)',
               borderRadius: '8px',
-              // maxWidth: '220px',
               '&:hover': {
                 background: isDarkMode ? 'rgba(55, 65, 81, 0.8)' : 'rgba(241, 245, 249, 0.9)',
                 boxShadow: isDarkMode
@@ -376,18 +316,10 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     );
   }
 
-  const allModelOptions = availableModels.models.map((model) => ({
-    value: `${model.provider}:${model.id}`,
-    provider: model.provider,
-    modelId: model.id,
-    displayName: model.displayName || model.id,
-    label: `${model.displayName || model.id} (${model.provider})`,
-  }));
+  const renderValue = (selected: AgentModel | null) => {
+    if (!selected) return 'Select Model';
 
-  const renderValue = (selected: string) => {
-    const option = allModelOptions.find((opt) => opt.value === selected);
-    if (!option) return 'Select Model';
-
+    const displayName = selected.displayName || selected.id;
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
@@ -401,9 +333,9 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
             }}
-            title={option.displayName}
+            title={displayName}
           >
-            {option.displayName}
+            {displayName}
           </Typography>
           <Typography
             variant="body2"
@@ -425,9 +357,9 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
             }}
-            title={option.provider}
+            title={selected.provider}
           >
-            {option.provider}
+            {selected.provider}
           </Typography>
         </Box>
         {isLoading && (
@@ -442,11 +374,19 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
       <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className={className}>
         <FormControl size="small">
           <Select
-            value={currentModel}
-            onChange={(event) => handleModelChange(event.target.value)}
+            value={currentModel ? getModelKey(currentModel) : ''}
+            onChange={(event) => {
+              const selectedKey = event.target.value as string;
+              const selectedModel = availableModels?.models.find(
+                (model) => getModelKey(model) === selectedKey,
+              );
+              if (selectedModel) {
+                handleModelChange(selectedModel);
+              }
+            }}
             disabled={isLoading}
             displayEmpty
-            renderValue={renderValue}
+            renderValue={() => renderValue(currentModel)}
             size="small"
             MenuProps={{
               PaperProps: {
@@ -482,9 +422,13 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
               maxWidth: 360,
             }}
           >
-            {allModelOptions.map((option, idx) => {
+            {availableModels.models.map((model) => {
+              const modelKey = getModelKey(model);
+              const isSelected = isSameModel(currentModel, model);
+              const displayName = model.displayName || model.id;
+
               return (
-                <MenuItem key={`model-${idx}`} value={option.value}>
+                <MenuItem key={modelKey} value={modelKey}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
                     <Box
                       sx={{
@@ -498,22 +442,21 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
                       <Typography
                         variant="body2"
                         sx={{
-                          fontWeight: currentModel === option.value ? 600 : 500,
+                          fontWeight: isSelected ? 600 : 500,
                           fontSize: '14px',
-                          color:
-                            currentModel === option.value
-                              ? isDarkMode
-                                ? '#a5b4fc'
-                                : '#6366f1'
-                              : isDarkMode
-                                ? '#f3f4f6'
-                                : '#374151',
+                          color: isSelected
+                            ? isDarkMode
+                              ? '#a5b4fc'
+                              : '#6366f1'
+                            : isDarkMode
+                              ? '#f3f4f6'
+                              : '#374151',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
                           whiteSpace: 'nowrap',
                         }}
                       >
-                        {option.displayName}
+                        {displayName}
                       </Typography>
                       <Typography
                         variant="body2"
@@ -528,22 +471,21 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
                       <Typography
                         variant="body2"
                         sx={{
-                          fontWeight: currentModel === option.value ? 600 : 500,
+                          fontWeight: isSelected ? 600 : 500,
                           fontSize: '13px',
-                          color:
-                            currentModel === option.value
-                              ? isDarkMode
-                                ? '#a5b4fc'
-                                : '#6366f1'
-                              : isDarkMode
-                                ? '#d1d5db'
-                                : '#6b7280',
+                          color: isSelected
+                            ? isDarkMode
+                              ? '#a5b4fc'
+                              : '#6366f1'
+                            : isDarkMode
+                              ? '#d1d5db'
+                              : '#6b7280',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
                           whiteSpace: 'nowrap',
                         }}
                       >
-                        {option.provider}
+                        {model.provider}
                       </Typography>
                     </Box>
                   </Box>
