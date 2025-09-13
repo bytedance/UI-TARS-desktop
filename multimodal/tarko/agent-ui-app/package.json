@@ -1,0 +1,1 @@
+{"name":"@tarko/agent-ui-app","version":"0.0.1","main":"dist/index.js","types":"dist/index.d.ts","scripts":{"build":"tsc","test":"vitest"},"dependencies":{"@tarko/agent-ui":"^0.0.1","react":"^18.0.0","react-dom":"^18.0.0"},"devDependencies":{"typescript":"^5.0.0","vitest":"^1.0.0"}}

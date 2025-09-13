@@ -1,0 +1,1 @@
+{"compilerOptions":{"target":"ESNext","module":"ESNext","moduleResolution":"Node","strict":true,"esModuleInterop":true,"skipLibCheck":true,"forceConsistentCasingInFileNames":true,"jsx":"react-jsx","paths":{"@tarko/agent-ui":["../agent-ui/dist/index.js"]}},"include":["src/**/*"],"exclude":["node_modules","dist"]}
