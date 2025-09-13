@@ -31,18 +31,58 @@ export class AgentRunStartHandler implements EventHandler<AgentEventStream.Agent
     }
 
     if (Object.keys(metadataUpdates).length > 0) {
-      set(sessionMetadataAtom, (prev) => ({
-        ...prev,
-        ...metadataUpdates,
-      }));
+      // Only update local state with metadata from events
+      // Don't overwrite existing user selections in the atom
+      set(sessionMetadataAtom, (prev) => {
+        const updated = { ...prev };
+        
+        // Only set modelConfig if no existing modelConfig in state
+        // This preserves user's model selection
+        if (!prev.modelConfig && metadataUpdates.modelConfig) {
+          updated.modelConfig = metadataUpdates.modelConfig;
+        }
+        
+        // Always update agentInfo as it's session-specific
+        if (metadataUpdates.agentInfo) {
+          updated.agentInfo = metadataUpdates.agentInfo;
+        }
+        
+        return updated;
+      });
 
-      // Persist to server
-      try {
-        await apiService.updateSessionInfo(sessionId, {
-          metadata: metadataUpdates,
-        });
-      } catch (error) {
-        console.warn('Failed to persist session metadata:', error);
+      // Only persist to server for real-time events (within last 10 seconds)
+      // Don't persist historical events during session restoration
+      const isRealtimeEvent = Date.now() - event.timestamp < 10000;
+      
+      if (isRealtimeEvent) {
+        try {
+          // Get current session details to merge with existing metadata
+          const sessionDetails = await apiService.getSessionDetails(sessionId);
+          const existingMetadata = sessionDetails.metadata || {};
+          
+          // Only update fields that don't already exist in storage
+          const mergedMetadata = { ...existingMetadata };
+          
+          // Don't overwrite existing modelConfig - user's choice takes precedence
+          if (!existingMetadata.modelConfig && metadataUpdates.modelConfig) {
+            mergedMetadata.modelConfig = metadataUpdates.modelConfig;
+          }
+          
+          // Always update agentInfo for new runs
+          if (metadataUpdates.agentInfo) {
+            mergedMetadata.agentInfo = metadataUpdates.agentInfo;
+          }
+          
+          await apiService.updateSessionInfo(sessionId, {
+            metadata: mergedMetadata,
+          });
+          
+          console.log('Persisted realtime session metadata:', mergedMetadata);
+        } catch (error) {
+          console.warn('Failed to persist session metadata:', error);
+        }
+      } else {
+        console.log('Skipped persisting historical event metadata (preserving user choices):', metadataUpdates);
       }
     }
 

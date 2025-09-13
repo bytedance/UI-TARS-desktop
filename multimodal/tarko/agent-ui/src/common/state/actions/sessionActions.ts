@@ -185,55 +185,25 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
         await set(processEventAction, { sessionId, event });
       }
     } else {
-      console.log(`Session ${sessionId} already has messages, skipping event loading`);
+      console.log(`Session ${sessionId} already has messages, loading stored metadata only`);
 
-      // Load session metadata and events to restore model/agent info
+      // Load and restore ONLY stored metadata - don't enrich from events
+      // This preserves user's model selection and prevents event data from overriding it
       try {
-        console.log(`Loading session metadata for ${sessionId}`);
+        console.log(`Loading stored session metadata for ${sessionId}`);
         const sessionDetails = await apiService.getSessionDetails(sessionId);
 
-        // Restore session metadata
         if (sessionDetails.metadata) {
           set(sessionMetadataAtom, sessionDetails.metadata);
-          console.log(`Restored session metadata for ${sessionId}:`, sessionDetails.metadata);
+          console.log(`Restored stored metadata for ${sessionId}:`, sessionDetails.metadata);
         } else {
-          // Don't clear existing metadata - preserve current state or enrich from events
-          console.log(`No stored metadata for session ${sessionId}, will enrich from events`);
-        }
-
-        // Load events to enrich metadata if needed
-        const events = await apiService.getSessionEvents(sessionId);
-        const runStartEvent = events.find((e) => e.type === 'agent_run_start');
-
-        if (runStartEvent) {
-          const currentMetadata = get(sessionMetadataAtom);
-          const enrichedMetadata = { ...sessionDetails.metadata, ...currentMetadata };
-
-          // Enrich with model config if missing
-          if (!enrichedMetadata.modelConfig) {
-            const modelConfig = createModelConfigFromEvent(runStartEvent);
-            if (modelConfig) {
-              enrichedMetadata.modelConfig = modelConfig;
-            }
-          }
-
-          // Enrich with agent info if missing
-          if (!enrichedMetadata.agentInfo?.name) {
-            const agentInfo = createAgentInfoFromEvent(runStartEvent);
-            if (agentInfo) {
-              enrichedMetadata.agentInfo = agentInfo;
-            }
-          }
-
-          set(sessionMetadataAtom, enrichedMetadata);
-          console.log(`Enriched session metadata from events for ${sessionId}:`, enrichedMetadata);
-        } else if (!sessionDetails.metadata) {
-          // If no events and no stored metadata, clear the state
+          // Only clear metadata if no stored data exists
           set(sessionMetadataAtom, {});
-          console.log(`No metadata or events found for session ${sessionId}, cleared metadata`);
+          console.log(`No stored metadata for session ${sessionId}, cleared state`);
         }
       } catch (error) {
-        console.warn(`Failed to load session metadata/events for info recovery:`, error);
+        console.warn(`Failed to load session metadata:`, error);
+        // Keep current state on error
       }
     }
 
