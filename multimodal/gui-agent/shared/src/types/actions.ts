@@ -285,3 +285,58 @@ export type GUIAction =
 
 export type ExtractActionType<T> = T extends BaseAction<infer U, any> ? U : never;
 export type SupportedActionType = ExtractActionType<GUIAction>;
+
+/**
+ * Type guard function to check if a string is a valid action type
+ * @param type - The string to check
+ * @returns Whether the string is a valid SupportedActionType
+ */
+export function isSupportedActionType(type: string): type is SupportedActionType {
+  const supportedTypes = [
+    // Screenshot action
+    'screenshot',
+
+    // Mouse actions
+    'click',
+    'left_click',
+    'right_click',
+    'right_single',
+    'double_click',
+    'left_double',
+    'mouse_down',
+    'mouse_up',
+    'move',
+    'move_to',
+    'drag',
+    'scroll',
+
+    // Keyboard actions
+    'type',
+    'hotkey',
+    'press',
+    'release',
+
+    // Browser actions
+    'navigate',
+    'navigate_back',
+
+    // App actions
+    'long_press',
+    'home',
+    'press_home',
+    'back',
+    'press_back',
+    'open_app',
+
+    // Wait actions
+    'wait',
+
+    // Finish actions
+    'finished',
+
+    // Call user actions
+    'call_user',
+  ];
+
+  return supportedTypes.includes(type);
+}
