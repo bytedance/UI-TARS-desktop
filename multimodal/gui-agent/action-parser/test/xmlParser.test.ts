@@ -5,7 +5,7 @@
 import { describe, it, expect } from 'vitest';
 import { ConsoleLogger, LogLevel } from '@agent-infra/logger';
 import { XMLParser, XMLBuilder } from 'fast-xml-parser';
-import { XMLFormatParser } from '../src/FormatParserChain';
+import { XMLFormatParser } from '../src/FomatParsers';
 
 const logger = new ConsoleLogger('[XML]', LogLevel.DEBUG);
 
