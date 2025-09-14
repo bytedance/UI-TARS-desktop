@@ -6,7 +6,7 @@
 import { BaseAction, ParsedGUIResponse } from '@gui-agent/shared/types';
 import { BaseActionParser } from '@gui-agent/shared/base';
 import { ConsoleLogger, LogLevel } from '@agent-infra/logger';
-import { FormatParserChain } from './FormatParserChain';
+import { FormatParserChain } from './FomatParsers';
 import { ActionParserHelper } from './ActionParserHelper';
 
 const defaultLogger = new ConsoleLogger(undefined, LogLevel.DEBUG);
