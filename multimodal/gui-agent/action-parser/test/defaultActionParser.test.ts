@@ -881,4 +881,87 @@ Action: click(point='<point>400 435</point>')
       });
     });
   });
+
+  describe('XML format', () => {
+    it('(19)', () => {
+      const input = `<thinkt>需要模拟向上滚动的动作，使用scroll工具，direction设为up，point可以随便选一个页面内的坐标，比如<point>500 500</point>。这样就能完成向上滚动的操作了。</thinkt>
+<seed:tool_call>
+<function=scroll>
+<parameter=direction>up</parameter>
+<parameter=point><point>500 500</point></parameter>
+</function>
+<function=type>
+<parameter=content>hello</parameter>
+<parameter=point><point>200 126</point></parameter>
+</function>
+<function=wait>
+</function>
+</seed:tool_call>`;
+      const result = actionParser.parsePrediction(input);
+      expect(result).toEqual({
+        actions: [
+          {
+            inputs: {
+              direction: 'up',
+              point: {
+                raw: {
+                  x: 500,
+                  y: 500,
+                },
+                referenceBox: {
+                  x1: 500,
+                  x2: 500,
+                  y1: 500,
+                  y2: 500,
+                },
+              },
+            },
+            type: 'scroll',
+          },
+          {
+            inputs: {
+              content: 'hello',
+              point: {
+                raw: {
+                  x: 200,
+                  y: 126,
+                },
+                referenceBox: {
+                  x1: 200,
+                  x2: 200,
+                  y1: 126,
+                  y2: 126,
+                },
+              },
+            },
+            type: 'type',
+          },
+          {
+            inputs: {},
+            type: 'wait',
+          },
+        ],
+        rawActionStrings: [
+          "scroll(point='(500, 500)', direction='up')",
+          "type(content='hello')",
+          'wait()',
+        ],
+        rawContent: `<thinkt>需要模拟向上滚动的动作，使用scroll工具，direction设为up，point可以随便选一个页面内的坐标，比如<point>500 500</point>。这样就能完成向上滚动的操作了。</thinkt>
+<seed:tool_call>
+<function=scroll>
+<parameter=direction>up</parameter>
+<parameter=point><point>500 500</point></parameter>
+</function>
+<function=type>
+<parameter=content>hello</parameter>
+<parameter=point><point>200 126</point></parameter>
+</function>
+<function=wait>
+</function>
+</seed:tool_call>`,
+        reasoningContent:
+          '<point>500 500</point>需要模拟向上滚动的动作，使用scroll工具，direction设为up，point可以随便选一个页面内的坐标，比如。这样就能完成向上滚动的操作了。',
+      });
+    });
+  });
 });

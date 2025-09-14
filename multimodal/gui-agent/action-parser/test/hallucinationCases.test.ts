@@ -4,7 +4,6 @@
  */
 import { describe, it, expect } from 'vitest';
 import { DefaultActionParser } from '../src/DefaultActionParser';
-import { readPackageJson } from 'pnpm-toolkit/dist/utils/workspace';
 
 const actionParser = new DefaultActionParser();
 
