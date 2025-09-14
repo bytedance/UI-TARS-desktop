@@ -35,6 +35,9 @@
   },
   "dependencies": {
     "@ui-tars/shared": "1.2.3",
+    "@gui-agent/shared": "workspace:*",
+    "@agent-infra/logger": "0.0.2-beta.2",
+    "fast-xml-parser": "^4.3.2",
     "lodash.isnumber": "3.0.3"
   },
   "devDependencies": {
