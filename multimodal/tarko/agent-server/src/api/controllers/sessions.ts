@@ -8,6 +8,7 @@ import { nanoid } from 'nanoid';
 import { SessionInfo } from '../../storage';
 import { AgentSession } from '../../core';
 import { ShareService } from '../../services';
+import { getDefaultModel } from '../../utils/model-utils';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -79,7 +80,6 @@ export async function createSession(req: Request, res: Response) {
       const now = Date.now();
       
       // Get the default model config that will be used by the session
-      const { getDefaultModel } = await import('../../utils/model-utils');
       const defaultModel = getDefaultModel(server.appConfig);
       
       const sessionInfo: SessionInfo = {
