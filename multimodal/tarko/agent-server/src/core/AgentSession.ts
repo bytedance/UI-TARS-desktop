@@ -118,16 +118,13 @@ export class AgentSession {
     private server: AgentServer,
     sessionId: string,
     agioProviderImpl?: AgioProviderConstructor,
-    sessionInfo?: import('../storage').SessionInfo,
+    sessionInfo?: SessionInfo,
   ) {
     this.id = sessionId;
     this.eventBridge = new EventStreamBridge();
     this.sessionInfo = sessionInfo;
 
-    // Get agent options from server
     const agentOptions = { ...server.appConfig };
-
-    // Create agent instance using the server's session-aware factory method
     const agent = server.createAgent(sessionInfo);
 
     // Initialize agent snapshot if enabled
@@ -403,7 +400,7 @@ export class AgentSession {
    * The model will be used in subsequent queries via Agent.run() parameters
    * @param sessionInfo Updated session metadata with new model config
    */
-  async updateModelConfig(sessionInfo: import('../storage').SessionInfo): Promise<void> {
+  async updateModelConfig(sessionInfo: SessionInfo): Promise<void> {
     // Store the session metadata for use in future queries
     this.sessionInfo = sessionInfo;
 

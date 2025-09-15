@@ -313,8 +313,6 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     return Promise.resolve();
   }
 
-
-
   /**
    * Create a new Agent instance using the injected constructor
    * @param sessionInfo Optional session info to override model config
@@ -354,9 +352,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
 
       // Log fallback warning if session model is not available
       if (this.isDebug) {
-        console.warn(
-          `Session model ${provider}:${modelId} not found, falling back to default`,
-        );
+        console.warn(`Session model ${provider}:${modelId} not found, falling back to default`);
       }
     }
 
