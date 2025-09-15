@@ -4,6 +4,7 @@
  */
 
 import { AgentEventStream, SessionInfo } from '@tarko/interface';
+import { IDAOFactory } from '../dao/interfaces/IDAOFactory';
 
 /**
  * Extended SessionInfo for multi-tenant support
@@ -91,4 +92,10 @@ export interface StorageProvider {
    * Close the storage provider
    */
   close(): Promise<void>;
+
+  /**
+   * Get the DAO factory for direct DAO access
+   * This is the preferred way to access data operations
+   */
+  getDAOFactory(): IDAOFactory;
 }

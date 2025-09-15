@@ -8,7 +8,6 @@ import { serve } from '@hono/node-server';
 import { cors } from 'hono/cors';
 import { LogLevel, SessionInfo, TenantConfig } from '@tarko/interface';
 import { StorageProvider, createStorageProvider } from './storage';
-import type { AgentSession } from './core';
 import { resolveAgentImplementation } from './utils/agent-resolver';
 import type {
   AgentServerVersionInfo,
@@ -19,7 +18,7 @@ import type {
   IAgent,
   ContextVariables,
 } from './types';
-import { AgentSessionManager } from './core/session/AgentSessionManager';
+import { AgentSessionPool } from './core/session/AgentSessionPool';
 import { AgentSessionFactory } from './core/session/AgentSessionFactory';
 import { SandboxScheduler } from './core/sandbox/SandboxScheduler';
 import { UserConfigService } from './services/UserConfigService';
@@ -57,9 +56,8 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   private isRunning = false;
 
   // Session management
-  public sessions: Record<string, AgentSession> = {};
   public storageUnsubscribes: Record<string, () => void> = {};
-  private sessionManager: AgentSessionManager;
+  private sessionPool: AgentSessionPool;
   private sessionFactory: AgentSessionFactory;
   private sandboxScheduler?: SandboxScheduler;
   public userConfigService?: UserConfigService;
@@ -107,7 +105,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     this.storageProvider = createStorageProvider(appConfig.server?.storage || { type: 'sqlite' });
 
     // Initialize session management
-    this.sessionManager = new AgentSessionManager({
+    this.sessionPool = new AgentSessionPool({
       maxSessions: (appConfig.server as any)?.maxSessions,
       memoryLimitMB: (appConfig.server as any)?.memoryLimitMB,
       checkIntervalMs: (appConfig.server as any)?.checkIntervalMs,
@@ -429,7 +427,6 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
 
       this.sandboxScheduler = new SandboxScheduler({
         sandboxConfig: this.appConfig.server.sandbox,
-        userConfigService: this.userConfigService,
         storageProvider: this.storageProvider,
       });
 
@@ -447,19 +444,12 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    * @returns Promise resolving when server is stopped
    */
   async stop(): Promise<void> {
-    // Clean up session manager
-    await this.sessionManager.cleanup();
-
-    // Clean up all active sessions
-    const sessionCleanup = Object.values(this.sessions).map((session) => session.cleanup());
-    await Promise.all(sessionCleanup);
+    // Clean up session pool
+    await this.sessionPool.cleanup();
 
     // Clean up all storage unsubscribes
     Object.values(this.storageUnsubscribes).forEach((unsubscribe) => unsubscribe());
     this.storageUnsubscribes = {};
-
-    // Clear sessions
-    this.sessions = {};
 
     // Close storage provider
     if (this.storageProvider) {
@@ -492,8 +482,8 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   /**
    * Get session manager instance
    */
-  getSessionManager(): AgentSessionManager {
-    return this.sessionManager;
+  getSessionPool(): AgentSessionPool {
+    return this.sessionPool;
   }
 
   /**
@@ -514,6 +504,6 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    * Get memory statistics from session manager
    */
   getMemoryStats() {
-    return this.sessionManager.getMemoryStats();
+    return this.sessionPool.getMemoryStats();
   }
 }

@@ -153,7 +153,7 @@ export async function updateSessionModel(c: HonoContext) {
     });
 
     // If session is currently active, recreate the agent with new model config
-    const activeSession = server.getSessionManager().get(sessionId);
+    const activeSession = server.getSessionPool().get(sessionId);
 
     if (activeSession) {
       console.log(`Session ${sessionId} model updated to ${provider}:${modelId}`);

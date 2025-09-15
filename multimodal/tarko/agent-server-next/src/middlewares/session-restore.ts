@@ -5,8 +5,6 @@
 
 import { Context, Next } from 'hono';
 import { getLogger } from '@tarko/shared-utils';
-import { AgentServer } from '../server';
-import { AgentSession } from '../core';
 import type { HonoContext } from '../types';
 
 const logger = getLogger('SessionRestoreMiddleware');
@@ -20,7 +18,7 @@ export async function sessionRestoreMiddleware(
   next: Next,
 ): Promise<void | Response> {
   const server = c.get('server');
-  const sessionManager = server.getSessionManager();
+  const sessionPool = server.getSessionPool();
 
   try {
     const sessionId = c.req.query('sessionId') || (await getSessionIdFromBody(c));
@@ -29,8 +27,10 @@ export async function sessionRestoreMiddleware(
       return c.json({ error: 'Session ID is required' }, 400);
     }
 
-    let session = sessionManager.get(sessionId);
+    //Getting an AgentSession instance from memory
+    let session = sessionPool.get(sessionId);
 
+    // If not exist, restored the AgentSession instance based on the database data.
     if (!session) {
       const restored = await server.getSessionFactory().restoreSession(sessionId);
 
@@ -38,7 +38,7 @@ export async function sessionRestoreMiddleware(
         logger.debug(`Session ${sessionId} restored from storage`);
 
         session = restored?.session;
-        sessionManager.set(sessionId, session);
+        sessionPool.set(sessionId, session);
 
         restored.storageUnsubscribe &&
           (server.storageUnsubscribes[sessionId] = restored.storageUnsubscribe);

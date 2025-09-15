@@ -8,9 +8,4 @@ export { AgentServer } from './server';
 export * from './utils';
 export * from './storage';
 export * from './types';
-
-// Export services
-export { UserConfigService } from './services/UserConfigService';
-
-// Export middleware
 export { authMiddleware, getCurrentUser, requireAuth, getCurrentUserId } from './middlewares/auth';

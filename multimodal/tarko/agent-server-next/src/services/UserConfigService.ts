@@ -3,109 +3,34 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { UserConfigDocument } from '../storage/MongoDBStorageProvider/MongoDBSchemas';
-import { MongoDBStorageProvider } from '../storage/MongoDBStorageProvider/MongoDBStorageProvider';
-import { Model } from 'mongoose';
+import { IUserConfigDAO, UserConfig, UserConfigInfo } from '../dao/interfaces/IUserConfigDAO';
+import { StorageProvider } from '../storage/types';
 
-export interface UserConfig {
-  sandboxAllocationStrategy: 'Shared-Pool' | 'User-Exclusive' | 'Session-Exclusive';
-  sandboxPoolQuota: number;
-  sharedLinks: string[];
-  customSpFragments: string[];
-  modelProviders: Array<{
-    name: string;
-    models: string[];
-    displayName?: string;
-    apiKey?: string;
-    baseURL?: string;
-  }>;
-}
-
-export interface UserConfigInfo {
-  userId: string;
-  createdAt: number;
-  updatedAt: number;
-  config: UserConfig;
-}
+// Re-export types for backward compatibility
+export type { UserConfig, UserConfigInfo };
 
 /**
  * Service for managing user configurations
+ * Now uses DAO pattern for clean separation of concerns
  */
 export class UserConfigService {
-  private storageProvider: MongoDBStorageProvider;
+  private userConfigDAO: IUserConfigDAO;
 
-  constructor(storageProvider: MongoDBStorageProvider) {
-    this.storageProvider = storageProvider;
-  }
-
-  private getUserConfigModel(): Model<UserConfigDocument> {
-    return this.storageProvider.getUserConfigModel();
+  constructor(storageProvider: StorageProvider) {
+    this.userConfigDAO = storageProvider.getDAOFactory().getUserConfigDAO();
   }
   /**
    * Get user configuration by user ID
    */
   async getUserConfig(userId: string): Promise<UserConfigInfo | null> {
-    try {
-      const UserConfigModel = this.getUserConfigModel();
-      const userConfig = await UserConfigModel.findOne({ userId }).lean();
-      if (!userConfig) {
-        return null;
-      }
-
-      return {
-        userId: userConfig.userId,
-        createdAt: userConfig.createdAt,
-        updatedAt: userConfig.updatedAt,
-        config: userConfig.config,
-      };
-    } catch (error) {
-      console.error('Failed to get user config:', error);
-      throw new Error('Failed to retrieve user configuration');
-    }
+    return this.userConfigDAO.getUserConfig(userId);
   }
 
   /**
    * Create user configuration with defaults
    */
   async createUserConfig(userId: string, config?: Partial<UserConfig>): Promise<UserConfigInfo> {
-    try {
-      const UserConfigModel = this.getUserConfigModel();
-      const now = Date.now();
-      const defaultConfig: UserConfig = {
-        sandboxAllocationStrategy: 'Shared-Pool',
-        sandboxPoolQuota: 5,
-        sharedLinks: [],
-        customSpFragments: [],
-        modelProviders: [],
-      };
-
-      const finalConfig: UserConfig = {
-        ...defaultConfig,
-        ...config,
-      };
-
-      const userConfig = new UserConfigModel({
-        userId,
-        createdAt: now,
-        updatedAt: now,
-        config: finalConfig,
-      });
-
-      const saved = await userConfig.save();
-
-      return {
-        userId: saved.userId,
-        createdAt: saved.createdAt,
-        updatedAt: saved.updatedAt,
-        config: saved.config,
-      };
-    } catch (error) {
-      console.error('Failed to create user config:', error);
-      if ((error as any).code === 11000) {
-        throw new Error('User configuration already exists');
-      }
-      throw new Error('Failed to create user configuration');
-    }
+    return this.userConfigDAO.createUserConfig(userId, config);
   }
 
   /**
@@ -115,64 +40,21 @@ export class UserConfigService {
     userId: string,
     configUpdates: Partial<UserConfig>,
   ): Promise<UserConfigInfo | null> {
-    try {
-      const UserConfigModel = this.getUserConfigModel();
-      const now = Date.now();
-
-      const updated = await UserConfigModel.findOneAndUpdate(
-        { userId },
-        {
-          $set: {
-            updatedAt: now,
-            ...Object.fromEntries(
-              Object.entries(configUpdates).map(([key, value]) => [`config.${key}`, value]),
-            ),
-          },
-        },
-        { new: true, lean: true },
-      );
-
-      if (!updated) {
-        return null;
-      }
-
-      return {
-        userId: updated.userId,
-        createdAt: updated.createdAt,
-        updatedAt: updated.updatedAt,
-        config: updated.config,
-      };
-    } catch (error) {
-      console.error('Failed to update user config:', error);
-      throw new Error('Failed to update user configuration');
-    }
+    return this.userConfigDAO.updateUserConfig(userId, configUpdates);
   }
 
   /**
    * Get or create user configuration (ensures config exists)
    */
   async getOrCreateUserConfig(userId: string): Promise<UserConfigInfo> {
-    let userConfig = await this.getUserConfig(userId);
-
-    if (!userConfig) {
-      userConfig = await this.createUserConfig(userId);
-    }
-
-    return userConfig;
+    return this.userConfigDAO.getOrCreateUserConfig(userId);
   }
 
   /**
    * Delete user configuration
    */
   async deleteUserConfig(userId: string): Promise<boolean> {
-    try {
-      const UserConfigModel = this.getUserConfigModel();
-      const result = await UserConfigModel.deleteOne({ userId });
-      return result.deletedCount > 0;
-    } catch (error) {
-      console.error('Failed to delete user config:', error);
-      throw new Error('Failed to delete user configuration');
-    }
+    return this.userConfigDAO.deleteUserConfig(userId);
   }
 
   /**
@@ -181,76 +63,42 @@ export class UserConfigService {
   async getSandboxAllocationStrategy(
     userId: string,
   ): Promise<'Shared-Pool' | 'User-Exclusive' | 'Session-Exclusive'> {
-    const config = await this.getOrCreateUserConfig(userId);
-    return config.config.sandboxAllocationStrategy;
+    return this.userConfigDAO.getSandboxAllocationStrategy(userId);
   }
 
   /**
    * Get sandbox pool quota for user
    */
   async getSandboxPoolQuota(userId: string): Promise<number> {
-    const config = await this.getOrCreateUserConfig(userId);
-    return config.config.sandboxPoolQuota;
+    return this.userConfigDAO.getSandboxPoolQuota(userId);
   }
 
   /**
    * Add shared link for user
    */
   async addSharedLink(userId: string, sharedLink: string): Promise<UserConfigInfo | null> {
-    const userConfig = await this.getUserConfig(userId);
-    if (!userConfig) {
-      return null;
-    }
-
-    const updatedLinks = [...userConfig.config.sharedLinks];
-    if (!updatedLinks.includes(sharedLink)) {
-      updatedLinks.push(sharedLink);
-    }
-
-    return this.updateUserConfig(userId, { sharedLinks: updatedLinks });
+    return this.userConfigDAO.addSharedLink(userId, sharedLink);
   }
 
   /**
    * Remove shared link for user
    */
   async removeSharedLink(userId: string, sharedLink: string): Promise<UserConfigInfo | null> {
-    const userConfig = await this.getUserConfig(userId);
-    if (!userConfig) {
-      return null;
-    }
-
-    const updatedLinks = userConfig.config.sharedLinks.filter((link) => link !== sharedLink);
-    return this.updateUserConfig(userId, { sharedLinks: updatedLinks });
+    return this.userConfigDAO.removeSharedLink(userId, sharedLink);
   }
 
   /**
    * Add custom SP fragment for user
    */
   async addCustomSpFragment(userId: string, fragment: string): Promise<UserConfigInfo | null> {
-    const userConfig = await this.getUserConfig(userId);
-    if (!userConfig) {
-      return null;
-    }
-
-    const updatedFragments = [...userConfig.config.customSpFragments];
-    if (!updatedFragments.includes(fragment)) {
-      updatedFragments.push(fragment);
-    }
-
-    return this.updateUserConfig(userId, { customSpFragments: updatedFragments });
+    return this.userConfigDAO.addCustomSpFragment(userId, fragment);
   }
 
   /**
    * Remove custom SP fragment for user
    */
   async removeCustomSpFragment(userId: string, fragment: string): Promise<UserConfigInfo | null> {
-    const userConfig = await this.getUserConfig(userId);
-    if (!userConfig) {
-      return null;
-    }
-
-    const updatedFragments = userConfig.config.customSpFragments.filter((f) => f !== fragment);
-    return this.updateUserConfig(userId, { customSpFragments: updatedFragments });
+    return this.userConfigDAO.removeCustomSpFragment(userId, fragment);
   }
 
   /**
@@ -260,6 +108,6 @@ export class UserConfigService {
     userId: string,
     providers: UserConfig['modelProviders'],
   ): Promise<UserConfigInfo | null> {
-    return this.updateUserConfig(userId, { modelProviders: providers });
+    return this.userConfigDAO.updateModelProviders(userId, providers);
   }
 }

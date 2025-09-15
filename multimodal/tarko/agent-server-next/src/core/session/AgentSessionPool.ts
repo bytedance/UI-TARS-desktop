@@ -5,7 +5,7 @@
 
 import { AgentSession } from './AgentSession';
 
-export interface SessionManagerConfig {
+export interface SessionPoolConfig {
   maxSessions?: number;
   memoryLimitMB?: number;
   checkIntervalMs?: number;
@@ -18,17 +18,17 @@ interface SessionEntry {
 }
 
 /**
- * LRU Session Manager with memory-based eviction
+ * LRU Session Pool with memory-based eviction
  * Manages AgentSession instances with automatic cleanup to prevent memory leaks
  */
-export class AgentSessionManager {
+export class AgentSessionPool {
   private sessions = new Map<string, SessionEntry>();
   private readonly maxSessions: number;
   private readonly memoryLimitMB: number;
   private readonly checkIntervalMs: number;
   private memoryCheckTimer?: NodeJS.Timeout;
 
-  constructor(config: SessionManagerConfig = {}) {
+  constructor(config: SessionPoolConfig = {}) {
     this.maxSessions = config.maxSessions ?? 100;
     this.memoryLimitMB = config.memoryLimitMB ?? 512;
     this.checkIntervalMs = config.checkIntervalMs ?? 30000; // 30 seconds
@@ -38,7 +38,7 @@ export class AgentSessionManager {
   }
 
   /**
-   * Add a session to the manager
+   * Add a session to the pool
    */
   set(sessionId: string, session: AgentSession): void {
     const now = Date.now();
@@ -50,7 +50,6 @@ export class AgentSessionManager {
       return;
     }
 
-    // Add new session
     this.sessions.set(sessionId, {
       session,
       lastAccessed: now,
@@ -81,7 +80,7 @@ export class AgentSessionManager {
   }
 
   /**
-   * Remove a session from the manager
+   * Remove a session from the pool
    */
   async delete(sessionId: string): Promise<boolean> {
     const entry = this.sessions.get(sessionId);
@@ -187,9 +186,9 @@ export class AgentSessionManager {
       try {
         await this.cleanupSession(entry.session);
         this.sessions.delete(sessionId);
-        console.log(`[SessionManager] Evicted session ${sessionId} (LRU)`);
+        console.log(`[SessionPool] Evicted session ${sessionId} (LRU)`);
       } catch (error) {
-        console.error(`[SessionManager] Failed to evict session ${sessionId}:`, error);
+        console.error(`[SessionPool] Failed to evict session ${sessionId}:`, error);
       }
     }
   }

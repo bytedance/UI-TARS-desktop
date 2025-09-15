@@ -47,7 +47,7 @@ export async function createSession(c: HonoContext) {
   try {
     const server = c.get('server');
     const sessionFactory = server.getSessionFactory();
-    const sessionManager = server.getSessionManager();
+    const sessionManager = server.getSessionPool();
 
     const { session, sessionInfo, storageUnsubscribe } = await sessionFactory.createSession(c);
 
@@ -233,10 +233,10 @@ export async function deleteSession(c: HonoContext) {
   const sessionId = session.id;
 
   try {
-    const sessionManager = server.getSessionManager();
+    const sessionPool = server.getSessionPool();
 
-    // Remove from session manager (handles cleanup)
-    await sessionManager.delete(sessionId);
+    // Remove from session pool (handles cleanup)
+    await sessionPool.delete(sessionId);
 
     // Clean up storage unsubscribe function
     if (server.storageUnsubscribes[sessionId]) {

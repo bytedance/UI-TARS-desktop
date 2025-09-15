@@ -14,7 +14,7 @@ import type {
   TenantConfig,
 } from '@tarko/interface';
 import type { StorageProvider } from './storage';
-import type { AgentSession, AgentSessionFactory, AgentSessionManager } from './core';
+import type { AgentSession, AgentSessionFactory, AgentSessionPool } from './core/session/index';
 import type { UserConfigService } from './services/UserConfigService';
 
 /**
@@ -75,12 +75,11 @@ export interface AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   readonly tenantConfig: TenantConfig;
 
   // Session management
-  sessions: Record<string, AgentSession>;
   storageUnsubscribes: Record<string, () => void>;
   userConfigService?: UserConfigService;
 
   // New session management methods
-  getSessionManager(): AgentSessionManager;
+  getSessionPool(): AgentSessionPool;
   getSessionFactory(): AgentSessionFactory;
   isMultiTenant(): boolean;
   getMemoryStats(): any;

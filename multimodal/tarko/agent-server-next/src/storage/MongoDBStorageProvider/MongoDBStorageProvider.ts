@@ -3,20 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import mongoose, { Connection, ConnectOptions } from 'mongoose';
+import { Model } from 'mongoose';
 import { AgentEventStream, MongoDBAgentStorageImplementation, SessionInfo } from '@tarko/interface';
 import { getLogger } from '@tarko/shared-utils';
 import { StorageProvider } from '../types';
-import {
-  SessionModel,
-  EventModel,
-  SessionDocument,
-  EventDocument,
-  UserConfigDocument,
-  SandboxAllocationDocument,
-  UserConfigModel,
-  SandboxAllocationModel,
-} from './MongoDBSchemas';
+import { UserConfigDocument, SandboxAllocationDocument } from './MongoDBSchemas';
+import { MongoDAOFactory } from '../../dao/mongodb/MongoDAOFactory';
+import { IDAOFactory } from '../../dao/interfaces/IDAOFactory';
 
 const logger = getLogger('MongoDBStorageProvider');
 
@@ -24,16 +17,16 @@ const logger = getLogger('MongoDBStorageProvider');
  * MongoDB-based storage provider using Mongoose
  * Provides scalable, document-based storage with clustering support
  * Optimized for handling large amounts of event data with proper indexing
+ *
  */
 export class MongoDBStorageProvider implements StorageProvider {
-  private connection: Connection | null = null;
+  private daoFactory: MongoDAOFactory;
   private initialized = false;
-  private config: MongoDBAgentStorageImplementation;
   public readonly uri?: string;
 
   constructor(config: MongoDBAgentStorageImplementation) {
-    this.config = config;
     this.uri = config.uri;
+    this.daoFactory = new MongoDAOFactory(config);
   }
 
   async initialize(): Promise<void> {
@@ -42,83 +35,24 @@ export class MongoDBStorageProvider implements StorageProvider {
     }
 
     try {
-      logger.info('Initializing MongoDB connection... ');
+      logger.info('Initializing MongoDB StorageProvider with DAO factory...');
 
-      // Prepare connection options with defaults
-      const defaultOptions: ConnectOptions = {
-        maxPoolSize: 10,
-        serverSelectionTimeoutMS: 5000,
-        socketTimeoutMS: 45000,
-        bufferCommands: false, // Disable mongoose buffering
-      };
-
-      const connectionOptions = {
-        ...defaultOptions,
-        ...this.config.options,
-      };
-
-      this.connection = await mongoose
-        .createConnection(this.config.uri, connectionOptions)
-        .asPromise();
-
-      // Bind models to this connection
-      this.connection.model('Session', SessionModel.schema);
-      this.connection.model('Event', EventModel.schema);
-      this.connection.model('UserConfig', UserConfigModel.schema);
-      this.connection.model('SandboxAllocation', SandboxAllocationModel.schema);
-
-      logger.info(`MongoDB connected successfully to database: ${connectionOptions.dbName}`);
-
-      // Test the connection with a simple operation
-      if (this.connection?.db) {
-        await this.connection.db.admin().ping();
-        logger.info('MongoDB ping successful');
-      }
+      // Initialize the DAO factory, which handles all connection setup
+      await this.daoFactory.initialize();
 
       this.initialized = true;
+      logger.info('MongoDB StorageProvider initialized successfully');
     } catch (error) {
-      logger.error('Failed to initialize MongoDB connection:', error);
+      logger.error('Failed to initialize MongoDB StorageProvider:', error);
       throw new Error(
-        `MongoDB initialization failed: ${error instanceof Error ? error.message : String(error)}`,
+        `MongoDB StorageProvider initialization failed: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }
 
   async createSession(metadata: SessionInfo): Promise<SessionInfo> {
     await this.ensureInitialized();
-
-    const sessionData = {
-      ...metadata,
-      createdAt: metadata.createdAt || Date.now(),
-      updatedAt: metadata.updatedAt || Date.now(),
-    };
-
-    try {
-      const SessionModel = this.connection!.model<SessionDocument>('Session');
-
-      const session = new SessionModel({
-        _id: sessionData.id,
-        createdAt: sessionData.createdAt,
-        updatedAt: sessionData.updatedAt,
-        workspace: sessionData.workspace,
-        userId: sessionData.userId,
-        metadata: sessionData.metadata,
-      });
-
-      await session.save();
-
-      logger.debug(`Session created successfully: ${sessionData.id}`);
-      return sessionData;
-    } catch (error) {
-      if ((error as any).code === 11000) {
-        // Duplicate key error
-        throw new Error(`Session with ID ${sessionData.id} already exists`);
-      }
-      logger.error(`Failed to create session ${sessionData.id}:`, error);
-      throw new Error(
-        `Failed to create session: ${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
+    return this.daoFactory.getSessionDAO().createSession(metadata);
   }
 
   async updateSessionInfo(
@@ -126,277 +60,73 @@ export class MongoDBStorageProvider implements StorageProvider {
     sessionInfo: Partial<Omit<SessionInfo, 'id'>>,
   ): Promise<SessionInfo> {
     await this.ensureInitialized();
-
-    try {
-      const SessionModel = this.connection!.model<SessionDocument>('Session');
-
-      const updateData: any = {
-        updatedAt: Date.now(),
-      };
-
-      if (sessionInfo.workspace !== undefined) {
-        updateData.workspace = sessionInfo.workspace;
-      }
-
-      if (sessionInfo.metadata !== undefined) {
-        updateData.metadata = sessionInfo.metadata;
-      }
-
-      const updatedSession = await SessionModel.findByIdAndUpdate(sessionId, updateData, {
-        new: true,
-        runValidators: true,
-      }).lean();
-
-      if (!updatedSession) {
-        throw new Error(`Session not found: ${sessionId}`);
-      }
-
-      logger.debug(`Session updated successfully: ${sessionId}`);
-
-      return {
-        id: updatedSession._id,
-        createdAt: updatedSession.createdAt,
-        updatedAt: updatedSession.updatedAt,
-        workspace: updatedSession.workspace,
-        metadata: updatedSession.metadata,
-      };
-    } catch (error) {
-      logger.error(`Failed to update session ${sessionId}:`, error);
-      throw new Error(
-        `Failed to update session: ${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
+    return this.daoFactory.getSessionDAO().updateSessionInfo(sessionId, sessionInfo);
   }
 
   async getSessionInfo(sessionId: string): Promise<SessionInfo | null> {
     await this.ensureInitialized();
-
-    try {
-      const SessionModel = this.connection!.model<SessionDocument>('Session');
-
-      const session = await SessionModel.findById(sessionId).lean();
-
-      if (!session) {
-        return null;
-      }
-
-      return {
-        id: session._id,
-        createdAt: session.createdAt,
-        updatedAt: session.updatedAt,
-        workspace: session.workspace || '',
-        userId: session.userId,
-        metadata: session.metadata,
-      };
-    } catch (error) {
-      logger.error(`Failed to get session ${sessionId}:`, error);
-      throw new Error(
-        `Failed to get session: ${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
+    return this.daoFactory.getSessionDAO().getSessionInfo(sessionId);
   }
 
   async getAllSessions(): Promise<SessionInfo[]> {
     await this.ensureInitialized();
-
-    try {
-      const SessionModel = this.connection!.model<SessionDocument>('Session');
-
-      const sessions = await SessionModel.find({}).sort({ updatedAt: -1 }).lean();
-
-      return sessions.map((session: SessionDocument) => ({
-        id: session._id,
-        createdAt: session.createdAt,
-        updatedAt: session.updatedAt,
-        workspace: session.workspace || '',
-        metadata: session.metadata,
-      }));
-    } catch (error) {
-      logger.error('Failed to get all sessions:', error);
-      throw new Error(
-        `Failed to get all sessions: ${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
+    return this.daoFactory.getSessionDAO().getAllSessions();
   }
 
   async getUserSessions(userId: string): Promise<SessionInfo[]> {
     await this.ensureInitialized();
-
-    try {
-      const SessionModel = this.connection!.model<SessionDocument>('Session');
-
-      const sessions = await SessionModel.find({
-        userId,
-      })
-        .sort({ updatedAt: -1 })
-        .lean();
-
-      return sessions.map((session: SessionDocument) => ({
-        id: session._id,
-        createdAt: session.createdAt,
-        updatedAt: session.updatedAt,
-        workspace: session.workspace || '',
-        metadata: session.metadata,
-        userId: session.userId,
-      }));
-    } catch (error) {
-      logger.error(`Failed to get user sessions for ${userId}:`, error);
-      throw new Error(
-        `Failed to get user sessions: ${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
+    return this.daoFactory.getSessionDAO().getUserSessions(userId);
   }
 
   async deleteSession(sessionId: string): Promise<boolean> {
     await this.ensureInitialized();
 
-    try {
-      const SessionModel = this.connection!.model<SessionDocument>('Session');
-      const EventModel = this.connection!.model<EventDocument>('Event');
-
-      // Check if the session exists before attempting deletion
-      const sessionExists = await SessionModel.exists({ _id: sessionId });
-      if (!sessionExists) {
-        logger.debug(`Session not found: ${sessionId}`);
-        return false;
-      }
-
-      // Delete all events for this session first
-      await EventModel.deleteMany({ sessionId });
-
-      // Delete the session
-      const deleteResult = await SessionModel.findByIdAndDelete(sessionId);
-
-      if (deleteResult) {
-        logger.debug(`Session deleted successfully: ${sessionId}`);
-        return true;
-      } else {
-        logger.debug(`Session not found during deletion: ${sessionId}`);
-        return false;
-      }
-    } catch (error) {
-      logger.error(`Failed to delete session ${sessionId}:`, error);
-      throw new Error(
-        `Failed to delete session: ${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
+    // Delete events first, then session
+    await this.daoFactory.getEventDAO().deleteSessionEvents(sessionId);
+    return this.daoFactory.getSessionDAO().deleteSession(sessionId);
   }
 
   async saveEvent(sessionId: string, event: AgentEventStream.Event): Promise<void> {
     await this.ensureInitialized();
 
-    try {
-      const SessionModel = this.connection!.model<SessionDocument>('Session');
-      const EventModel = this.connection!.model<EventDocument>('Event');
-
-      // Check if session exists
-      const sessionExists = await SessionModel.exists({ _id: sessionId });
-      if (!sessionExists) {
-        throw new Error(`Session not found: ${sessionId}`);
-      }
-
-      const timestamp = Date.now();
-
-      // Save the event
-      const eventDoc = new EventModel({
-        sessionId,
-        timestamp,
-        eventData: event,
-      });
-
-      await eventDoc.save();
-
-      // Update session's updatedAt timestamp
-      await SessionModel.findByIdAndUpdate(sessionId, { updatedAt: timestamp });
-
-      logger.debug(`Event saved for session: ${sessionId}`);
-    } catch (error) {
-      logger.error(`Failed to save event for session ${sessionId}:`, error);
-      throw new Error(
-        `Failed to save event: ${error instanceof Error ? error.message : String(error)}`,
-      );
+    // Check if session exists first
+    const sessionExists = await this.daoFactory.getSessionDAO().sessionExists(sessionId);
+    if (!sessionExists) {
+      throw new Error(`Session not found: ${sessionId}`);
     }
+
+    // Save the event
+    await this.daoFactory.getEventDAO().saveEvent(sessionId, event);
+
+    // Update session timestamp
+    await this.daoFactory.getSessionDAO().updateSessionTimestamp(sessionId);
   }
 
   async getSessionEvents(sessionId: string): Promise<AgentEventStream.Event[]> {
     await this.ensureInitialized();
-
-    try {
-      const EventModel = this.connection!.model<EventDocument>('Event');
-
-      const events = await EventModel.find({ sessionId }).sort({ timestamp: 1, _id: 1 }).lean();
-
-      return events.map((event: EventDocument) => {
-        try {
-          return event.eventData;
-        } catch (error) {
-          logger.error(`Failed to parse event data: ${JSON.stringify(event.eventData)}`);
-          return {
-            type: 'system',
-            message: 'Failed to parse event data',
-            timestamp: Date.now(),
-          } as AgentEventStream.Event;
-        }
-      });
-    } catch (error) {
-      logger.error(`Failed to get events for session ${sessionId}:`, error);
-      // Return empty array instead of throwing error to allow sessions to load
-      return [];
-    }
+    return this.daoFactory.getEventDAO().getSessionEvents(sessionId);
   }
 
   async healthCheck(): Promise<{ healthy: boolean; message?: string; [key: string]: any }> {
-    try {
-      if (!this.connection) {
-        return { healthy: false, message: 'Not connected to MongoDB' };
-      }
-
-      // Simple ping to test connection
-      await this.connection!.db?.admin().ping();
-
-      return {
-        healthy: true,
-        message: 'MongoDB connection is healthy',
-        database: this.connection!.db?.databaseName,
-        readyState: this.connection!.readyState,
-      };
-    } catch (error) {
-      return {
-        healthy: false,
-        message: `MongoDB health check failed: ${error instanceof Error ? error.message : String(error)}`,
-      };
-    }
+    return this.daoFactory.healthCheck();
   }
 
   /**
-   * Get UserConfig model bound to this connection
+   * Get the DAO factory for direct DAO access
+   * This is the preferred way to access data operations
    */
-  getUserConfigModel() {
-    if (!this.connection) {
-      throw new Error('MongoDB connection not initialized');
-    }
-    return this.connection.model<UserConfigDocument>('UserConfig');
-  }
-
-  /**
-   * Get SandboxAllocation model bound to this connection
-   */
-  getSandboxAllocationModel() {
-    if (!this.connection) {
-      throw new Error('MongoDB connection not initialized');
-    }
-    return this.connection.model<SandboxAllocationDocument>('SandboxAllocation');
+  getDAOFactory(): IDAOFactory {
+    return this.daoFactory;
   }
 
   async close(): Promise<void> {
-    if (this.connection) {
+    if (this.daoFactory) {
       try {
-        await this.connection.close();
-        logger.debug('MongoDB connection closed successfully');
+        await this.daoFactory.close();
+        logger.debug('MongoDB DAO Factory closed successfully');
       } catch (error) {
-        logger.error('Error closing MongoDB connection:', error);
+        logger.error('Error closing MongoDB DAO Factory:', error);
       } finally {
-        this.connection = null;
         this.initialized = false;
       }
     }
