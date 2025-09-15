@@ -64,6 +64,11 @@ export interface AgentModel extends Model {
    * Base provider name
    */
   baseProvider?: BaseModelProviderName;
+  /**
+   * Experimental parameters passed directly through request body
+   * @warning Use with caution - these parameters bypass validation
+   */
+  params?: Record<string, any>;
 }
 
 /**

@@ -18,6 +18,7 @@ describe('resolveModel', () => {
       baseURL: undefined,
       apiKey: undefined,
       headers: {},
+      params: undefined,
       baseProvider: 'openai',
     });
   });
@@ -42,6 +43,7 @@ describe('resolveModel', () => {
       headers: {
         'anthropic-beta': 'fine-grained-tool-streaming-2025-05-14,token-efficient-tools-2025-02-19',
       },
+      params: undefined,
       baseProvider: 'anthropic',
     });
   });
@@ -62,6 +64,7 @@ describe('resolveModel', () => {
       baseURL: undefined,
       apiKey: 'original-key',
       headers: {},
+      params: undefined,
       baseProvider: 'anthropic',
     });
   });
@@ -76,6 +79,7 @@ describe('resolveModel', () => {
       baseURL: 'http://127.0.0.1:11434/v1',
       apiKey: 'ollama',
       headers: {},
+      params: undefined,
       baseProvider: 'openai',
     });
   });
@@ -97,6 +101,7 @@ describe('resolveModel', () => {
       baseURL: 'http://custom-host:8080/v1',
       apiKey: 'custom-key',
       headers: {},
+      params: undefined,
       baseProvider: 'openai',
     });
   });
@@ -111,6 +116,7 @@ describe('resolveModel', () => {
       baseURL: 'https://ark.cn-beijing.volces.com/api/v3',
       apiKey: undefined,
       headers: {},
+      params: undefined,
       baseProvider: 'openai',
     });
   });
@@ -131,7 +137,33 @@ describe('resolveModel', () => {
       baseURL: 'https://api.deepseek.com/v1',
       apiKey: 'deepseek-key',
       headers: {},
+      params: undefined,
       baseProvider: 'openai',
+    });
+  });
+
+  it('should add anthropic_beta params for azure-openai provider with gcp-claude4-sonnet model', () => {
+    const agentModel: AgentModel = {
+      provider: 'azure-openai',
+      id: 'gcp-claude4-sonnet',
+      apiKey: 'azure-key',
+    };
+
+    const result = resolveModel(agentModel);
+
+    expect(result).toEqual({
+      provider: 'azure-openai',
+      id: 'gcp-claude4-sonnet',
+      displayName: undefined,
+      baseURL: undefined,
+      apiKey: 'azure-key',
+      headers: {
+        'anthropic-beta': 'fine-grained-tool-streaming-2025-05-14,token-efficient-tools-2025-02-19',
+      },
+      params: {
+        anthropic_beta: ['fine-grained-tool-streaming-2025-05-14'],
+      },
+      baseProvider: 'azure-openai',
     });
   });
 });
