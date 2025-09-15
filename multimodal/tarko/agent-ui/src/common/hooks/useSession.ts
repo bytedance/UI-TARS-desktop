@@ -74,16 +74,11 @@ export function useSession() {
   const checkServerStatus = useSetAtom(checkConnectionStatusAction);
   const checkSessionStatus = useSetAtom(checkSessionStatusAction);
 
-  // Track last checked session to avoid redundant calls
-  const lastCheckedSessionRef = useRef<string | null>(null);
+  // Debounced status checking for active session - do not check status in replay mode
   const statusCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Debounced status checking for active session - do not check status in replay mode
   useEffect(() => {
     if (!activeSessionId || !connectionStatus.connected || isReplayMode) return;
-
-    // Skip if we already checked this session recently
-    if (lastCheckedSessionRef.current === activeSessionId) return;
 
     // Clear any pending timeout
     if (statusCheckTimeoutRef.current) {
@@ -94,9 +89,8 @@ export function useSession() {
     statusCheckTimeoutRef.current = setTimeout(() => {
       if (activeSessionId && connectionStatus.connected && !isReplayMode) {
         checkSessionStatus(activeSessionId);
-        lastCheckedSessionRef.current = activeSessionId;
       }
-    }, 100); // 100ms debounce
+    }, 200); // 200ms debounce to allow for quick session switches
 
     return () => {
       if (statusCheckTimeoutRef.current) {
