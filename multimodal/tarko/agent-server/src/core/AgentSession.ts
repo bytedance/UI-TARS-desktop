@@ -436,8 +436,39 @@ export class AgentSession {
         this.agent = newAgent;
       }
 
-      // Re-initialize the new agent
+      // Re-initialize the new agent and reconnect event streams
       await this.agent.initialize();
+      
+      // Reconnect event stream for storage and AGIO
+      const agentEventStream = this.agent.getEventStream();
+      
+      // Create event handler for storage and AGIO
+      const handleEvent = async (event: AgentEventStream.Event) => {
+        if (this.server.storageProvider && shouldStoreEvent(event)) {
+          try {
+            await this.server.storageProvider.saveEvent(this.id, event);
+          } catch (error) {
+            console.error(`Failed to save event to storage: ${error}`);
+          }
+        }
+        
+        if (this.agioProvider) {
+          try {
+            await this.agioProvider.processAgentEvent(event);
+          } catch (error) {
+            console.error('Failed to process AGIO event:', error);
+          }
+        }
+      };
+      
+      // Subscribe to new agent's events
+      agentEventStream.subscribe(handleEvent);
+      
+      // Reconnect to event bridge
+      if (this.unsubscribe) {
+        this.unsubscribe();
+      }
+      this.unsubscribe = this.eventBridge.connectToAgentEventStream(agentEventStream);
     } catch (error) {
       console.error(`Failed to recreate agent for session ${this.id}:`, error);
       throw error;
