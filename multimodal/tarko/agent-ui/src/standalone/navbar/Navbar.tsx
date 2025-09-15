@@ -190,8 +190,8 @@ export const Navbar: React.FC = () => {
           </div>
         )}
 
-        {/* Center section - Agent and Model info display - absolutely positioned for true centering */}
-        <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+        {/* Center section - Agent and Model info display - responsive positioning */}
+        <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 max-[968px]:relative max-[968px]:left-auto max-[968px]:top-auto max-[968px]:transform-none max-[968px]:flex-1 max-[968px]:mx-3">
           <DynamicNavbarCenter
             sessionMetadata={sessionMetadata}
             activeSessionId={activeSessionId}
