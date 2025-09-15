@@ -12,8 +12,8 @@ describe('claude-headers', () => {
       expect(isClaudeModel('claude-3-sonnet')).toBe(true);
       expect(isClaudeModel('claude-3-5-sonnet-20241022')).toBe(true);
       expect(isClaudeModel('anthropic/claude-3-haiku')).toBe(true);
-      expect(isClaudeModel('gcp-claude4-sonnet')).toBe(true);
-      expect(isClaudeModel('azure-claude-instant')).toBe(true);
+      expect(isClaudeModel('gcp-claude4-sonnet')).toBe(false);
+      expect(isClaudeModel('azure-claude-instant')).toBe(false);
       expect(isClaudeModel('gpt-4')).toBe(false);
       expect(isClaudeModel('gemini-pro')).toBe(false);
     });

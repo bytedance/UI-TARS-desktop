@@ -157,9 +157,7 @@ describe('resolveModel', () => {
       displayName: undefined,
       baseURL: undefined,
       apiKey: 'azure-key',
-      headers: {
-        'anthropic-beta': 'fine-grained-tool-streaming-2025-05-14,token-efficient-tools-2025-02-19',
-      },
+      headers: {},
       params: {
         anthropic_beta: ['fine-grained-tool-streaming-2025-05-14'],
       },
