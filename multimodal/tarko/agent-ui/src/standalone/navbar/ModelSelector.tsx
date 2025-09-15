@@ -16,6 +16,7 @@ import { updateSessionMetadataAction } from '@/common/state/actions/sessionActio
 import { apiService } from '@/common/services/apiService';
 import { SessionItemMetadata } from '@tarko/interface';
 import { AgentModel } from '@tarko/agent-interface';
+import { useReplayMode } from '@/common/hooks/useReplayMode';
 
 interface NavbarModelSelectorProps {
   className?: string;
@@ -128,6 +129,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   const [models, setModels] = useState<AgentModel[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const updateSessionMetadata = useSetAtom(updateSessionMetadataAction);
+  const { isReplayMode } = useReplayMode();
 
   // Get current model from session metadata - fix race condition
   const currentModel = React.useMemo(() => {
@@ -307,8 +309,8 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     loadModels();
   }, [models.length]);
 
-  // In share mode (no activeSessionId), show static display if we have model config
-  if (!activeSessionId) {
+  // In replay mode or share mode (no activeSessionId), show static display if we have model config
+  if (!activeSessionId || isReplayMode) {
     return (
       <StaticModelDisplay
         sessionMetadata={sessionMetadata}
