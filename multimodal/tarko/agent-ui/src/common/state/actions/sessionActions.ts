@@ -139,28 +139,14 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
       });
     }
 
-    // Update processing status based on current session state
-    try {
-      const status = await apiService.getSessionStatus(sessionId);
-      set(sessionAgentStatusAtom, (prev) => ({
-        ...prev,
-        [sessionId]: {
-          isProcessing: status.isProcessing,
-          state: status.state,
-          phase: status.phase,
-          message: status.message,
-          estimatedTime: status.estimatedTime,
-        },
-      }));
-    } catch (error) {
-      console.warn('Failed to get session status:', error);
-      set(sessionAgentStatusAtom, (prev) => ({
-        ...prev,
-        [sessionId]: {
-          isProcessing: false,
-        },
-      }));
-    }
+    // Initialize session status without API call - let useSession hook handle status checking
+    // This avoids duplicate API calls since useSession will check status when session becomes active
+    set(sessionAgentStatusAtom, (prev) => ({
+      ...prev,
+      [sessionId]: {
+        isProcessing: false, // Default to false, will be updated by useSession hook
+      },
+    }));
 
     toolCallResultMap.clear();
 
@@ -466,11 +452,35 @@ export const abortQueryAction = atom(null, async (get, set) => {
   }
 });
 
+// Cache to prevent frequent status checks for the same session
+const statusCheckCache = new Map<string, { timestamp: number; promise?: Promise<any> }>();
+const STATUS_CACHE_TTL = 2000; // 2 seconds cache
+
 export const checkSessionStatusAction = atom(null, async (get, set, sessionId: string) => {
   if (!sessionId) return;
 
+  const now = Date.now();
+  const cached = statusCheckCache.get(sessionId);
+  
+  // If we have a recent check or an ongoing request, skip
+  if (cached) {
+    if (cached.promise) {
+      // There's already an ongoing request for this session
+      return cached.promise;
+    }
+    if (now - cached.timestamp < STATUS_CACHE_TTL) {
+      // Recent check, skip
+      return;
+    }
+  }
+
   try {
-    const status = await apiService.getSessionStatus(sessionId);
+    // Mark that we're making a request
+    const promise = apiService.getSessionStatus(sessionId);
+    statusCheckCache.set(sessionId, { timestamp: now, promise });
+    
+    const status = await promise;
+    
     set(sessionAgentStatusAtom, (prev) => ({
       ...prev,
       [sessionId]: {
@@ -482,8 +492,13 @@ export const checkSessionStatusAction = atom(null, async (get, set, sessionId: s
       },
     }));
 
+    // Clear the promise and update timestamp
+    statusCheckCache.set(sessionId, { timestamp: now });
+    
     return status;
   } catch (error) {
     console.error('Failed to check session status:', error);
+    // Clear the failed request
+    statusCheckCache.delete(sessionId);
   }
 });

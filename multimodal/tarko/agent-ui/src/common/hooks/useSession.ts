@@ -29,7 +29,7 @@ import {
 } from '../state/actions/connectionActions';
 import { socketService } from '../services/socketService';
 
-import { useEffect, useCallback, useMemo } from 'react';
+import { useEffect, useCallback, useMemo, useRef } from 'react';
 import { useReplayMode } from '../hooks/useReplayMode';
 
 /**
@@ -54,7 +54,7 @@ export function useSession() {
   // Derive sessionMetadata from sessions instead of separate atom
   const sessionMetadata = useMemo(() => {
     if (!activeSessionId || !sessions.length) return {};
-    const currentSession = sessions.find(s => s.id === activeSessionId);
+    const currentSession = sessions.find((s) => s.id === activeSessionId);
     return currentSession?.metadata || {};
   }, [activeSessionId, sessions]);
 
@@ -74,12 +74,35 @@ export function useSession() {
   const checkServerStatus = useSetAtom(checkConnectionStatusAction);
   const checkSessionStatus = useSetAtom(checkSessionStatusAction);
 
-  // Periodic status checking for active session - do not check status in replay mode
+  // Track last checked session to avoid redundant calls
+  const lastCheckedSessionRef = useRef<string | null>(null);
+  const statusCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Debounced status checking for active session - do not check status in replay mode
   useEffect(() => {
     if (!activeSessionId || !connectionStatus.connected || isReplayMode) return;
 
-    // Initial status check when session becomes active
-    checkSessionStatus(activeSessionId);
+    // Skip if we already checked this session recently
+    if (lastCheckedSessionRef.current === activeSessionId) return;
+
+    // Clear any pending timeout
+    if (statusCheckTimeoutRef.current) {
+      clearTimeout(statusCheckTimeoutRef.current);
+    }
+
+    // Debounce status check to avoid rapid calls
+    statusCheckTimeoutRef.current = setTimeout(() => {
+      if (activeSessionId && connectionStatus.connected && !isReplayMode) {
+        checkSessionStatus(activeSessionId);
+        lastCheckedSessionRef.current = activeSessionId;
+      }
+    }, 100); // 100ms debounce
+
+    return () => {
+      if (statusCheckTimeoutRef.current) {
+        clearTimeout(statusCheckTimeoutRef.current);
+      }
+    };
   }, [activeSessionId, connectionStatus.connected, checkSessionStatus, isReplayMode]);
 
   // Enhanced socket handler for session status sync - do not update state in replay mode
