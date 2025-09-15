@@ -71,13 +71,6 @@ export class AgentSession {
   private sessionInfo?: SessionInfo;
 
   /**
-   * Type guard to check if agent has logger
-   */
-  private hasLogger(agent: IAgent): agent is IAgent & { logger: { debug: (msg: string) => void; info: (title: string, content: string) => void } } {
-    return 'logger' in agent && typeof (agent as unknown as Record<string, unknown>).logger === 'object';
-  }
-
-  /**
    * Create event handler for storage and AGIO processing
    */
   private createEventHandler() {
@@ -138,10 +131,8 @@ export class AgentSession {
           snapshotName: sessionId,
         }) as unknown as IAgent;
 
-        // Log snapshot initialization if agent has logger
-        if (this.hasLogger(baseAgent)) {
-          baseAgent.logger.debug(`AgentSnapshot initialized with path: ${snapshotPath}`);
-        }
+        // Log snapshot initialization
+        console.debug(`AgentSnapshot initialized with path: ${snapshotPath}`);
         
         return wrappedAgent;
       }
@@ -172,16 +163,12 @@ export class AgentSession {
       const impl = agioProviderImpl;
       this.agioProvider = new impl(agentOptions.agio.provider, agentOptions, sessionId, this.agent);
       
-      // Log AGIO initialization if agent has logger
-      if (this.hasLogger(this.agent)) {
-        this.agent.logger.debug(`AGIO collector initialized with provider: ${agentOptions.agio.provider}`);
-      }
+      // Log AGIO initialization
+      console.debug(`AGIO collector initialized with provider: ${agentOptions.agio.provider}`);
     }
 
-    // Log agent configuration if agent has logger
-    if (this.hasLogger(this.agent)) {
-      this.agent.logger.info('Agent Config', JSON.stringify((this.agent as any).getOptions?.(), null, 2));
-    }
+    // Log agent configuration
+    console.info('Agent Config', JSON.stringify((this.agent as any).getOptions?.(), null, 2));
   }
 
   /**
