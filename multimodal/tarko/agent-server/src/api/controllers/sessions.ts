@@ -94,11 +94,7 @@ export async function createSession(req: Request, res: Response) {
           },
           // Include default model config so frontend doesn't need to update it later
           ...(defaultModel && {
-            modelConfig: {
-              provider: defaultModel.provider,
-              id: defaultModel.id,
-              displayName: defaultModel.displayName,
-            },
+            modelConfig: defaultModel,
           }),
         },
       };
