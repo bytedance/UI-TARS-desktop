@@ -1,5 +1,5 @@
 import { sessionAgentStatusAtom } from '@/common/state/atoms/ui';
-import { updateSessionMetadataAction } from '../../../sessionActions';
+import { updateSessionMetadataAction } from '../../sessionActions';
 import { AgentEventStream } from '@/common/types';
 import { EventHandler, EventHandlerContext } from '../types';
 import { createAgentInfoFromEvent } from '@/common/utils/metadataUtils';
