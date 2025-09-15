@@ -5,7 +5,6 @@
  */
 
 import path from 'path';
-
 import {
   AgentEventStream,
   AgentRunNonStreamingOptions,
@@ -14,8 +13,6 @@ import {
   AgioProviderConstructor,
   ChatCompletionContentPart,
   IAgent,
-  ModelProviderName,
-  AgentProcessingPhase,
   AgentStatusInfo,
 } from '@tarko/interface';
 import { AgentSnapshot } from '@tarko/agent-snapshot';
@@ -23,6 +20,7 @@ import { EventStreamBridge } from '../utils/event-stream';
 import type { AgentServer } from '../server';
 import { AgioEvent } from '@tarko/agio';
 import { handleAgentError, ErrorWithCode } from '../utils/error-handler';
+import { SessionInfo } from '../storage';
 
 /**
  * Check if an event should be stored in persistent storage
@@ -70,16 +68,7 @@ export class AgentSession {
   eventBridge: EventStreamBridge;
   private unsubscribe: (() => void) | null = null;
   private agioProvider?: AgioEvent.AgioProvider;
-  private sessionInfo?: import('../storage').SessionInfo;
-
-  /**
-   * Type guard to check if agent has logger
-   */
-  private hasLogger(agent: IAgent): agent is IAgent & { logger: { debug: (msg: string) => void; info: (title: string, content: string) => void } } {
-    return 'logger' in agent && typeof (agent as unknown as Record<string, unknown>).logger === 'object';
-  }
-
-
+  private sessionInfo?: SessionInfo;
 
   /**
    * Create event handler for storage and AGIO processing
@@ -148,15 +137,14 @@ export class AgentSession {
 
       if (snapshotStoragesDirectory) {
         const snapshotPath = path.join(snapshotStoragesDirectory, sessionId);
-        this.agent = new AgentSnapshot(agent as any, {
+        // @ts-expect-error
+        this.agent = new AgentSnapshot(agent, {
           snapshotPath,
           snapshotName: sessionId,
         }) as unknown as IAgent;
 
         // Log snapshot initialization if agent has logger
-        if (this.hasLogger(agent)) {
-          agent.logger.debug(`AgentSnapshot initialized with path: ${snapshotPath}`);
-        }
+        console.log(`AgentSnapshot initialized with path: ${snapshotPath}`);
       } else {
         this.agent = agent;
       }
@@ -168,22 +156,10 @@ export class AgentSession {
     if (agentOptions.agio?.provider && agioProviderImpl) {
       const impl = agioProviderImpl;
       this.agioProvider = new impl(agentOptions.agio.provider, agentOptions, sessionId, this.agent);
-
-      // Log AGIO initialization if agent has logger
-      if (this.hasLogger(this.agent)) {
-        this.agent.logger.debug(
-          `AGIO collector initialized with provider: ${agentOptions.agio.provider}`,
-        );
-      }
+      console.debug(`AGIO collector initialized with provider: ${agentOptions.agio.provider}`);
     }
 
-    // Log agent configuration if agent has logger
-    if (this.hasLogger(this.agent)) {
-      this.agent.logger.info(
-        'Agent Config',
-        JSON.stringify((this.agent as any).getOptions?.(), null, 2),
-      );
-    }
+    console.info('Agent Config', JSON.stringify(this.agent.getOptions?.(), null, 2));
   }
 
   /**
@@ -462,7 +438,7 @@ export class AgentSession {
 
       // Re-initialize the new agent and reconnect event streams
       await this.agent.initialize();
-      
+
       // Reconnect event streams
       this.setupEventStreams();
     } catch (error) {
