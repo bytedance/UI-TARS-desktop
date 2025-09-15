@@ -125,48 +125,21 @@ export class NutJSOperator extends Operator {
       case 'click':
       case 'left_click':
       case 'left_single': {
-        const { point } = actionInputs;
-        if (!point) {
-          throw new Error('point is required when click');
-        }
-        const { realX, realY } = await this.calculateRealCoords(point);
-        await this.moveStraightTo(realX, realY);
-        await sleep(100);
-        await mouse.click(Button.LEFT);
+        await this.handleClick(actionInputs, Button.LEFT);
         break;
       }
       case 'left_double':
       case 'double_click': {
-        const { point } = actionInputs;
-        if (!point) {
-          throw new Error('point is required when click');
-        }
-        const { realX, realY } = await this.calculateRealCoords(point);
-        await this.moveStraightTo(realX, realY);
-        await sleep(100);
-        await mouse.doubleClick(Button.LEFT);
+        await this.handleClick(actionInputs, Button.LEFT, 2);
         break;
       }
       case 'right_click':
       case 'right_single': {
-        const { point } = actionInputs;
-        if (!point) {
-          throw new Error('point is required when click');
-        }
-        const { realX, realY } = await this.calculateRealCoords(point);
-        await this.moveStraightTo(realX, realY);
-        await sleep(100);
-        await mouse.click(Button.RIGHT);
+        await this.handleClick(actionInputs, Button.RIGHT);
         break;
       }
       case 'middle_click': {
-        const { point } = actionInputs;
-        if (!point) {
-          throw new Error('point is required when click');
-        }
-        const { realX, realY } = await this.calculateRealCoords(point);
-        await this.moveStraightTo(realX, realY);
-        await mouse.click(Button.MIDDLE);
+        await this.handleClick(actionInputs, Button.MIDDLE);
         break;
       }
       case 'left_click_drag':
@@ -349,6 +322,25 @@ export class NutJSOperator extends Operator {
     } else {
       this.logger.error('hotkey error: ', `${keyStr} is not a valid key`);
       throw new Error(`Error: ${keyStr} is not a valid key`);
+    }
+  }
+
+  private async handleClick(
+    actionInputs: Record<string, unknown>,
+    button: Button,
+    clickNum: 1 | 2 = 1,
+  ) {
+    const { point } = actionInputs;
+    if (!point) {
+      throw new Error('point is required when click');
+    }
+    const { realX, realY } = await this.calculateRealCoords(point);
+    await this.moveStraightTo(realX, realY);
+    await sleep(100);
+    if (clickNum === 2) {
+      await mouse.doubleClick(button);
+    } else {
+      await mouse.click(button);
     }
   }
 }
