@@ -499,7 +499,7 @@
   background: rgba(255, 255, 255, 0.15);
 }
 
-/* New animation for plan view */
+/* Animation utilities */
 @keyframes pulse-subtle {
   0%,
   100% {

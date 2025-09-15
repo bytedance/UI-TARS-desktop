@@ -2,7 +2,7 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { sessionsAtom, activeSessionIdAtom } from '../state/atoms/session';
 import { messagesAtom, groupedMessagesAtom } from '../state/atoms/message';
 import { toolResultsAtom } from '../state/atoms/tool';
-import { plansAtom, planUIStateAtom } from '../state/atoms/plan';
+
 import { sessionFilesAtom } from '../state/atoms/files';
 import {
   isProcessingAtom,
@@ -48,8 +48,7 @@ export function useSession() {
   const setSessionAgentStatus = useSetAtom(sessionAgentStatusAtom);
   const [activePanelContent, setActivePanelContent] = useAtom(activePanelContentAtom);
   const [connectionStatus, setConnectionStatus] = useAtom(connectionStatusAtom);
-  const [plans, setPlans] = useAtom(plansAtom);
-  const setPlanUIState = useSetAtom(planUIStateAtom);
+
   const [replayState, setReplayState] = useAtom(replayStateAtom);
   // Derive sessionMetadata from sessions instead of separate atom
   const sessionMetadata = useMemo(() => {
@@ -141,20 +140,7 @@ export function useSession() {
     };
   }, [activeSessionId, handleSessionStatusUpdate, isReplayMode]);
 
-  // Auto-show plan when it's first created - do not automatically show plan in replay mode
-  useEffect(() => {
-    if (activeSessionId && plans[activeSessionId]?.hasGeneratedPlan && !isReplayMode) {
-      const currentPlan = plans[activeSessionId];
 
-      // If this is a newly generated plan, automatically show it
-      if (currentPlan.steps.length > 0 && currentPlan.steps.every((step) => !step.done)) {
-        setPlanUIState((prev) => ({
-          ...prev,
-          isVisible: true,
-        }));
-      }
-    }
-  }, [activeSessionId, plans, setPlanUIState, isReplayMode]);
 
   // Memoize the session state object to avoid unnecessary re-renders
   const sessionState = useMemo(
@@ -170,7 +156,7 @@ export function useSession() {
       agentStatus,
       activePanelContent,
       connectionStatus,
-      plans,
+
       replayState,
       sessionMetadata,
 
@@ -207,7 +193,6 @@ export function useSession() {
       agentStatus,
       activePanelContent,
       connectionStatus,
-      plans,
       replayState,
       sessionMetadata,
       loadSessions,

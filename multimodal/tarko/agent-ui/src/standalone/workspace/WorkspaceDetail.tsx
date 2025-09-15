@@ -27,7 +27,7 @@ import { CommandResultRenderer } from './renderers/CommandResultRenderer';
 import { ScriptResultRenderer } from './renderers/ScriptResultRenderer';
 import { BrowserResultRenderer } from './renderers/BrowserResultRenderer';
 import { BrowserControlRenderer } from './renderers/BrowserControlRenderer';
-import { PlanViewerRenderer } from './renderers/PlanViewerRenderer';
+
 import { GenericResultRenderer } from './renderers/generic/GenericResultRenderer';
 import { DeliverableRenderer } from './renderers/DeliverableRenderer';
 import { DiffRenderer } from './renderers/DiffRenderer';
@@ -53,7 +53,7 @@ const CONTENT_RENDERERS: Record<
   script_result: ScriptResultRenderer,
   browser_result: BrowserResultRenderer,
   browser_vision_control: BrowserControlRenderer,
-  plan: PlanViewerRenderer,
+
   research_report: ResearchReportRenderer,
   json: GenericResultRenderer,
   deliverable: DeliverableRenderer,

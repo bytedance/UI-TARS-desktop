@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useSession } from '@/common/hooks/useSession';
 import { WorkspaceContent } from './WorkspaceContent';
 import { WorkspaceDetail } from './WorkspaceDetail';
-import { PlanView } from './PlanView';
+
 import { useReplay } from '@/common/hooks/useReplay';
 import { ReplayControlPanel } from '@/standalone/replay/ReplayControlPanel';
 import { FullscreenModal } from './components/FullscreenModal';
@@ -36,7 +36,7 @@ export const WorkspacePanel: React.FC = () => {
   // Track whether focus parameter has already been processed once
   const [focusProcessed, setFocusProcessed] = React.useState(false);
 
-  const isViewingPlan = activePanelContent?.type === 'plan';
+
   const isReplayActive = replayState.isActive;
   const focusParam = getFocusParam();
 
@@ -120,9 +120,7 @@ export const WorkspacePanel: React.FC = () => {
     <>
       <div className="flex flex-col h-full">
         <div className="flex-1 overflow-hidden">
-          {isViewingPlan ? (
-            <PlanView onBack={() => setActivePanelContent(null)} />
-          ) : activePanelContent ? (
+          {activePanelContent ? (
             <WorkspaceDetail />
           ) : (
             <WorkspaceContent />

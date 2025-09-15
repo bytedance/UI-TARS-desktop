@@ -15,7 +15,7 @@ import {
   StreamingToolCallHandler,
 } from './handlers/ToolHandler';
 
-import { PlanStartHandler, PlanUpdateHandler, PlanFinishHandler } from './handlers/PlanHandler';
+
 
 import { SystemMessageHandler, EnvironmentInputHandler } from './handlers/SystemHandler';
 
@@ -48,10 +48,7 @@ export class EventHandlerRegistry {
     this.register(new ToolResultHandler());
     this.register(new StreamingToolCallHandler());
 
-    // Plan handlers
-    this.register(new PlanStartHandler());
-    this.register(new PlanUpdateHandler());
-    this.register(new PlanFinishHandler());
+
 
     // System handlers
     this.register(new SystemMessageHandler());
