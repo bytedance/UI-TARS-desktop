@@ -141,24 +141,25 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
       });
     }
 
-    // Update processing status based on current session state
+    // Check real session status on activation (page refresh/session switch)
     try {
       const status = await apiService.getSessionStatus(sessionId);
       set(sessionAgentStatusAtom, (prev) => ({
         ...prev,
         [sessionId]: {
+          ...(prev[sessionId] || {}), // Preserve existing fields
           isProcessing: status.isProcessing,
           state: status.state,
-          phase: status.phase,
-          message: status.message,
-          estimatedTime: status.estimatedTime,
         },
       }));
+      console.log(`Retrieved real session status for ${sessionId}:`, status);
     } catch (error) {
-      console.warn('Failed to get session status:', error);
+      console.warn('Failed to get session status on activation:', error);
+      // Fallback to not processing if status check fails
       set(sessionAgentStatusAtom, (prev) => ({
         ...prev,
         [sessionId]: {
+          ...(prev[sessionId] || {}),
           isProcessing: false,
         },
       }));
@@ -415,14 +416,27 @@ export const sendMessageAction = atom(
       });
     } catch (error) {
       console.error('Error sending message:', error);
-      // Set processing to false for this session on error
+      
+      // Set processing to false and add error state
       set(sessionAgentStatusAtom, (prev) => ({
         ...prev,
         [activeSessionId]: {
           ...(prev[activeSessionId] || {}),
           isProcessing: false,
+          state: 'error',
+          message: error instanceof Error ? error.message : 'Network error occurred',
         },
       }));
+      
+      // Also update connection status if it's a network error
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        set(connectionStatusAtom, (prev) => ({
+          ...prev,
+          connected: false,
+          lastError: 'Server connection lost',
+        }));
+      }
+      
       throw error;
     }
   },
@@ -472,16 +486,18 @@ export const checkSessionStatusAction = atom(null, async (get, set, sessionId: s
     set(sessionAgentStatusAtom, (prev) => ({
       ...prev,
       [sessionId]: {
+        ...(prev[sessionId] || {}), // Preserve existing fields
         isProcessing: status.isProcessing,
         state: status.state,
-        phase: status.phase,
-        message: status.message,
-        estimatedTime: status.estimatedTime,
       },
     }));
 
     return status;
   } catch (error) {
     console.error('Failed to check session status:', error);
+    return null;
   }
 });
+
+// Session status is primarily managed through socket events,
+// but manual checking is still needed for page refresh/session activation

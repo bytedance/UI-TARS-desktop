@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Routes, Route, Navigate, useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Layout } from './Layout';
 import { useSession } from '@/common/hooks/useSession';
@@ -13,6 +13,7 @@ export const App: React.FC = () => {
   const { initConnectionMonitoring, loadSessions, connectionStatus, activeSessionId } =
     useSession();
   const { isReplayMode } = useReplayMode();
+  const initializedRef = useRef(false);
 
   // Initialize connection monitoring and load sessions on mount - but not in replay mode
   useEffect(() => {
@@ -21,6 +22,12 @@ export const App: React.FC = () => {
       console.log('[ReplayMode] Skipping connection initialization in replay mode');
       return;
     }
+
+    // Only initialize once
+    if (initializedRef.current) {
+      return;
+    }
+    initializedRef.current = true;
 
     const initialize = async () => {
       // Initialize connection monitoring
@@ -44,7 +51,16 @@ export const App: React.FC = () => {
         }
       });
     };
-  }, [initConnectionMonitoring, loadSessions, connectionStatus.connected, isReplayMode]);
+  }, [isReplayMode]);
+
+  // Load sessions when connection is established
+  useEffect(() => {
+    if (!isReplayMode && connectionStatus.connected && initializedRef.current) {
+      loadSessions().catch((error) => {
+        console.error('Failed to load sessions:', error);
+      });
+    }
+  }, [connectionStatus.connected, isReplayMode]);
 
   // Special handling for replay mode - bypass normal routing
   if (isReplayMode) {
