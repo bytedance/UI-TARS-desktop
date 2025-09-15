@@ -13,7 +13,10 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.11.0",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "@bytecloud/common-lib": "7.47.1",
+    "byted-tea-sdk": "5.3.8",
+    "react-toastify": "11.0.5"
   },
   "publishConfig": {
     "access": "public",
@@ -36,6 +39,7 @@
   },
   "scripts": {
     "dev": "rsbuild dev",
+    "dev:w": "AGENT_BASE_URL=http://localhost:3000 ENV=development pnpm dev",
     "prepublishOnly": "npm run build",
     "build": "rsbuild build",
     "preview": "rsbuild preview"
