@@ -1,8 +1,6 @@
 import { sessionAgentStatusAtom } from '@/common/state/atoms/ui';
-import { updateSessionMetadataAction } from '../../sessionActions';
 import { AgentEventStream } from '@/common/types';
 import { EventHandler, EventHandlerContext } from '../types';
-import { createAgentInfoFromEvent } from '@/common/utils/metadataUtils';
 import { shouldUpdateProcessingState } from '../utils/panelContentUpdater';
 
 export class AgentRunStartHandler implements EventHandler<AgentEventStream.AgentRunStartEvent> {
@@ -17,18 +15,8 @@ export class AgentRunStartHandler implements EventHandler<AgentEventStream.Agent
   ): void {
     const { set } = context;
 
-    // Extract agent info from event (agentInfo is always safe to update)
-    const agentInfo = createAgentInfoFromEvent(event);
-    
-    if (agentInfo) {
-      // Update agentInfo using utility action
-      set(updateSessionMetadataAction, {
-        sessionId,
-        metadata: { agentInfo }
-      });
-    }
-
     // Update processing state for the specific session
+    // Note: agentInfo and modelConfig are now set during session creation on server side
     if (shouldUpdateProcessingState(sessionId)) {
       set(sessionAgentStatusAtom, (prev) => ({
         ...prev,
@@ -48,7 +36,7 @@ export class AgentRunEndHandler implements EventHandler<AgentEventStream.Event> 
 
   handle(context: EventHandlerContext, sessionId: string, event: AgentEventStream.Event): void {
     const { set } = context;
-    
+
     // Update processing state for the specific session
     if (shouldUpdateProcessingState(sessionId)) {
       set(sessionAgentStatusAtom, (prev) => ({

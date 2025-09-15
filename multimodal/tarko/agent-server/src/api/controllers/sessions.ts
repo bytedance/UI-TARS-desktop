@@ -77,6 +77,11 @@ export async function createSession(req: Request, res: Response) {
     // Store session metadata if we have storage
     if (server.storageProvider) {
       const now = Date.now();
+      
+      // Get the default model config that will be used by the session
+      const { getDefaultModel } = await import('../../utils/model-utils');
+      const defaultModel = getDefaultModel(server.appConfig);
+      
       const sessionInfo: SessionInfo = {
         id: sessionId,
         createdAt: now,
@@ -87,6 +92,14 @@ export async function createSession(req: Request, res: Response) {
             name: server.getCurrentAgentName()!,
             configuredAt: now,
           },
+          // Include default model config so frontend doesn't need to update it later
+          ...(defaultModel && {
+            modelConfig: {
+              provider: defaultModel.provider,
+              id: defaultModel.id,
+              displayName: defaultModel.displayName,
+            },
+          }),
         },
       };
 
