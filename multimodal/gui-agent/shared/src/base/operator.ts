@@ -37,8 +37,13 @@ export abstract class BaseOperator {
  *     EXAMPLES: []
  *   };
  *
+ *   async initialize(): Promise<void> {
+ *     // Implementation for initializing the operator
+ *     // e.g., validate connections, setup resources
+ *     // ...
+ *   }
  *
- *   supportedActions(): Array<SupportedActionType> {
+ *   get supportedActions(): Array<SupportedActionType> {
  *     return [
  *       'click',
  *       'double_click',
@@ -69,6 +74,16 @@ export abstract class Operator extends BaseOperator {
     ACTION_SPACES: [],
     EXAMPLES: [],
   };
+
+  /**
+   * Initializes the operator
+   * @description Performs initialization operations for the operator, such as validating connections,
+   * setting up resources, and preparing the operation environment. Implementations should handle
+   * all necessary setup to ensure the operator is ready for use.
+   * @returns Promise that resolves when initialization is complete
+   * @throws Error if initialization fails
+   */
+  abstract initialize(): Promise<void>;
 
   /**
    * Returns an array of supported action types
