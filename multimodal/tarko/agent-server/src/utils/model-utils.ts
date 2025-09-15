@@ -5,6 +5,17 @@
 
 import type { AgentModel, AgentAppConfig } from '../types';
 
+/**
+ * Public model information safe for frontend consumption
+ * Excludes sensitive information like apiKey, baseURL, headers
+ */
+export interface PublicModelInfo {
+  id: string;
+  provider: string;
+  displayName?: string;
+  baseProvider?: string;
+}
+
 export function getAvailableModels(appConfig: AgentAppConfig): AgentModel[] {
   const allModels = [
     ...(appConfig.model ? [appConfig.model] : []),
@@ -17,6 +28,18 @@ export function getAvailableModels(appConfig: AgentAppConfig): AgentModel[] {
   );
 
   return uniqueModels;
+}
+
+/**
+ * Get available models with only public information safe for frontend
+ */
+export function getPublicAvailableModels(appConfig: AgentAppConfig): PublicModelInfo[] {
+  return getAvailableModels(appConfig).map((model) => ({
+    id: model.id,
+    provider: model.provider,
+    displayName: model.displayName,
+    baseProvider: model.baseProvider,
+  }));
 }
 
 export function getDefaultModel(appConfig: AgentAppConfig): AgentModel | undefined {
