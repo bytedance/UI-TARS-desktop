@@ -170,8 +170,17 @@ export abstract class Operator extends BaseOperator {
    * @returns Promise that resolves to the screenshot output
    */
   async doScreenshot(): Promise<ScreenshotOutput> {
-    await this.ensureInitialized();
-    return await this.screenshot();
+    try {
+      await this.ensureInitialized();
+      return await this.screenshot();
+    } catch (error) {
+      console.error('Error in doScreenshot:', error);
+      return {
+        base64: '',
+        status: 'failed',
+        errorMessage: (error as Error).message,
+      };
+    }
   }
 
   /**
@@ -186,8 +195,16 @@ export abstract class Operator extends BaseOperator {
    * @returns Promise that resolves to the execution output
    */
   async doExecute(params: ExecuteParams): Promise<ExecuteOutput> {
-    await this.ensureInitialized();
-    return await this.execute(params);
+    try {
+      await this.ensureInitialized();
+      return await this.execute(params);
+    } catch (error) {
+      console.error('Error in doExecute:', error);
+      return {
+        status: 'failed',
+        errorMessage: (error as Error).message,
+      };
+    }
   }
 
   /**
