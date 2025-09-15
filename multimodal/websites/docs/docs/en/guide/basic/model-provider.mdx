@@ -6,8 +6,8 @@ Tarko Agent Server supports flexible multi-model configuration, allowing you to 
 
 The model configuration system supports two primary approaches:
 
-1. **Agent-level configuration** via `AgentOptions.model`
-2. **Server-level configuration** via `server.models`
+1. **Agent-level configuration** via `AgentOptions.model` - supports single model configuration
+2. **Server-level configuration** via `server.models` - supports multiple model configurations
 
 These configurations are merged at runtime to provide a unified model selection interface.
 
@@ -82,124 +82,7 @@ const config = {
 - Default model: `gpt-3.5-turbo` (`AgentOptions.model` takes priority)
 - UI displays selector with all available models
 
-## Technical Implementation
 
-### Model Resolution Logic
-
-```typescript
-// Server-side model resolution
-getAvailableModels(): AgentModel[] {
-  const models: AgentModel[] = [];
-  
-  // Add AgentOptions.model if exists
-  if (this.appConfig.model) {
-    models.push(this.appConfig.model);
-  }
-  
-  // Add server.models if they exist
-  if (this.appConfig.server?.models) {
-    models.push(...this.appConfig.server.models);
-  }
-  
-  return models;
-}
-
-getDefaultModel(): AgentModel | undefined {
-  // Prefer AgentOptions.model
-  if (this.appConfig.model) {
-    return this.appConfig.model;
-  }
-  
-  // Fall back to first server.models
-  if (this.appConfig.server?.models?.length > 0) {
-    return this.appConfig.server.models[0];
-  }
-  
-  return undefined;
-}
-```
-
-### Session Model Management
-
-When creating a new Agent instance, the server applies the following logic:
-
-```typescript
-createAgent(sessionInfo?: SessionInfo): IAgent {
-  let agentOptions = { ...this.appConfig };
-  
-  if (sessionInfo?.metadata?.modelConfig) {
-    const { provider, modelId } = sessionInfo.metadata.modelConfig;
-    const selectedModel = this.getAvailableModels().find(
-      model => model.provider === provider && model.id === modelId
-    );
-    
-    if (selectedModel) {
-      // Use session's selected model if still available
-      agentOptions.model = selectedModel;
-    } else {
-      // Fall back to default if session model is unavailable
-      agentOptions.model = this.getDefaultModel();
-      console.warn(`Session model ${provider}:${modelId} not available, using default`);
-    }
-  } else {
-    // Use default model for new sessions
-    agentOptions.model = this.getDefaultModel();
-  }
-  
-  return new this.agentConstructor(agentOptions);
-}
-```
-
-### Runtime Model Switching
-
-Model switching involves:
-
-1. **Validation**: Check if the new model is in available models list
-2. **Session Update**: Update session metadata with new model configuration
-3. **Agent Recreation**: Dispose old agent and create new one with updated model
-4. **UI Update**: Reflect changes in the interface
-
-```typescript
-// API endpoint: PUT /api/v1/sessions/model
-async updateSessionModel(req: Request, res: Response) {
-  const { sessionId, provider, modelId } = req.body;
-  
-  // Validate model configuration
-  if (!server.isModelConfigValid(provider, modelId)) {
-    return res.status(400).json({ error: 'Invalid model configuration' });
-  }
-  
-  // Update session metadata
-  const updatedSessionInfo = await server.storageProvider.updateSessionInfo(sessionId, {
-    metadata: {
-      modelConfig: { provider, modelId, configuredAt: Date.now() }
-    }
-  });
-  
-  // Recreate active agent if session is running
-  const activeSession = server.sessions[sessionId];
-  if (activeSession) {
-    await activeSession.updateModelConfig(updatedSessionInfo);
-  }
-}
-```
-
-### Frontend Integration
-
-The UI automatically detects multiple providers and renders appropriate components:
-
-```typescript
-// Determine if model selector should be shown
-const hasMultipleProviders = availableModels.models.length > 1;
-
-if (!hasMultipleProviders) {
-  // Render static model info
-  return <StaticModelDisplay />;
-} else {
-  // Render interactive model selector
-  return <ModelSelector />;
-}
-```
 
 ## API Reference
 

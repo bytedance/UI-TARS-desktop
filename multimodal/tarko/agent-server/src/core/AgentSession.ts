@@ -159,7 +159,7 @@ export class AgentSession {
       }
 
       // Log AGIO initialization
-      console.debug(`AGIO collector initialized with provider: ${agentOptions.agio.provider}`);
+      console.debug('AGIO collector initialized', { provider: agentOptions.agio.provider });
     }
 
     // Log agent configuration
@@ -186,7 +186,7 @@ export class AgentSession {
 
       // Log fallback warning if session model is not available
       if (this.server.isDebug) {
-        console.warn(`Session model ${provider}:${modelId} not found, falling back to default`);
+        console.warn('Session model not found, falling back to default', { provider, modelId });
       }
     }
 
@@ -212,7 +212,7 @@ export class AgentSession {
         }) as unknown as IAgent;
 
         // Log snapshot initialization
-        console.debug(`AgentSnapshot initialized with path: ${snapshotPath}`);
+        console.debug('AgentSnapshot initialized', { snapshotPath });
 
         return wrappedAgent;
       }
@@ -277,9 +277,11 @@ export class AgentSession {
 
       // Debug logging for issue #1150
       if (this.server.isDebug) {
-        console.log(
-          `[DEBUG] Query started - Session: ${this.id}, Query: ${typeof options.input === 'string' ? options.input.substring(0, 100) + '...' : '[ContentPart]'}`,
-        );
+        console.log('[DEBUG] Query started', {
+          sessionId: this.id,
+          queryType: typeof options.input === 'string' ? 'string' : 'ContentPart',
+          queryPreview: typeof options.input === 'string' ? options.input.substring(0, 100) + '...' : '[ContentPart]'
+        });
       }
 
       // Prepare run options with session-specific model configuration
@@ -303,7 +305,7 @@ export class AgentSession {
 
       // Debug logging for issue #1150
       if (this.server.isDebug) {
-        console.log(`[DEBUG] Query completed successfully - Session: ${this.id}`);
+        console.log('[DEBUG] Query completed successfully', { sessionId: this.id });
       }
 
       return {
@@ -321,7 +323,7 @@ export class AgentSession {
 
       // Debug logging for issue #1150
       if (this.server.isDebug) {
-        console.log(`[DEBUG] Query failed - Session: ${this.id}, Error: ${handledError.message}`);
+        console.log('[DEBUG] Query failed', { sessionId: this.id, error: handledError.message });
       }
 
       return {
@@ -357,9 +359,11 @@ export class AgentSession {
 
       // Debug logging for issue #1150
       if (this.server.isDebug) {
-        console.log(
-          `[DEBUG] Streaming query started - Session: ${this.id}, Query: ${typeof options.input === 'string' ? options.input.substring(0, 100) + '...' : '[ContentPart]'}`,
-        );
+        console.log('[DEBUG] Streaming query started', {
+          sessionId: this.id,
+          queryType: typeof options.input === 'string' ? 'string' : 'ContentPart',
+          queryPreview: typeof options.input === 'string' ? options.input.substring(0, 100) + '...' : '[ContentPart]'
+        });
       }
 
       // Prepare run options with session-specific model configuration
@@ -395,9 +399,7 @@ export class AgentSession {
 
       // Debug logging for issue #1150
       if (this.server.isDebug) {
-        console.log(
-          `[DEBUG] Streaming query failed - Session: ${this.id}, Error: ${handledError.message}`,
-        );
+        console.log('[DEBUG] Streaming query failed', { sessionId: this.id, error: handledError.message });
       }
 
       // Create a synthetic event stream that yields just an error event
@@ -418,7 +420,7 @@ export class AgentSession {
 
       // Debug logging for issue #1150
       if (this.server.isDebug) {
-        console.log(`[DEBUG] Streaming query completed - Session: ${this.id}`);
+        console.log('[DEBUG] Streaming query completed', { sessionId: this.id });
       }
     } finally {
       // Clear running session for exclusive mode when stream ends
@@ -489,7 +491,7 @@ export class AgentSession {
       // Reconnect event streams
       this.setupEventStreams();
     } catch (error) {
-      console.error(`Failed to recreate agent for session ${this.id}:`, error);
+      console.error('Failed to recreate agent for session', { sessionId: this.id, error });
       throw error;
     }
   }
