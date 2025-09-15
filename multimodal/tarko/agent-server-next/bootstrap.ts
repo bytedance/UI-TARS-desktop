@@ -28,7 +28,9 @@ const server = new AgentServer({
     temperature: 0.7,
     top_p: 0.9,
     workspace,
-    snapshot: { storageDirectory: resolve(workspace, 'snapshots'), enable: true },
+    snapshot: process.env.AGENT_DEBUG
+      ? { storageDirectory: resolve(workspace, 'snapshots'), enable: true }
+      : undefined,
     googleApiKey: process.env.GOOGLE_API_KEY,
     googleMcpUrl: process.env.GOOGLE_MCP_URL,
     sandboxUrl: process.env.AIO_SANDBOX_URL,
