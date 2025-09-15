@@ -161,6 +161,7 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
     if (!hasExistingMessages) {
       console.log(`Loading events for session ${sessionId}`);
       const events = await apiService.getSessionEvents(sessionId);
+      console.log(`Loading events for session ${sessionId} successed..`);
 
       const processedEvents = preprocessStreamingEvents(events);
 
