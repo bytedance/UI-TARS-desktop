@@ -11,18 +11,66 @@ export const messagesAtom = atom<Record<string, Message[]>>({});
  * Atom for storing grouped messages for each session
  * Key is the session ID, value is an array of message groups for that session
  * This is derived from messagesAtom but with messages properly grouped
+ * Uses memoization to avoid unnecessary re-computation
  */
+const messageGroupCache = new Map<string, { messages: Message[]; groups: MessageGroup[] }>();
+
 export const groupedMessagesAtom = atom<Record<string, MessageGroup[]>>((get) => {
   const allMessages = get(messagesAtom);
   const result: Record<string, MessageGroup[]> = {};
 
-  // Process each session's messages into groups
+  // Process each session's messages into groups with caching
   Object.entries(allMessages).forEach(([sessionId, messages]) => {
-    result[sessionId] = createMessageGroups(messages);
+    const cached = messageGroupCache.get(sessionId);
+
+    // Check if we can reuse cached groups
+    if (cached && arraysEqual(cached.messages, messages)) {
+      result[sessionId] = cached.groups;
+    } else {
+      // Compute new groups and cache them
+      const groups = createMessageGroups(messages);
+      messageGroupCache.set(sessionId, { messages: [...messages], groups });
+      result[sessionId] = groups;
+    }
   });
+
+  // Clean up cache for sessions that no longer exist
+  const existingSessionIds = new Set(Object.keys(allMessages));
+  for (const cachedSessionId of Array.from(messageGroupCache.keys())) {
+    if (!existingSessionIds.has(cachedSessionId)) {
+      messageGroupCache.delete(cachedSessionId);
+    }
+  }
 
   return result;
 });
+
+/**
+ * Efficient array equality check for messages
+ * Uses hash-based comparison for better cache hit detection
+ */
+function arraysEqual(a: Message[], b: Message[]): boolean {
+  if (a.length !== b.length) return false;
+  if (a.length === 0) return true;
+
+  // Compare first and last messages for quick inequality detection
+  const first = a[0], last = a[a.length - 1];
+  const bFirst = b[0], bLast = b[b.length - 1];
+  
+  if (first.id !== bFirst.id || first.timestamp !== bFirst.timestamp ||
+      last.id !== bLast.id || last.timestamp !== bLast.timestamp) {
+    return false;
+  }
+
+  // For arrays > 10, use sampling instead of full comparison
+  if (a.length > 10) {
+    const sampleIndices = [Math.floor(a.length / 4), Math.floor(a.length / 2), Math.floor(3 * a.length / 4)];
+    return sampleIndices.every(i => a[i].id === b[i].id && a[i].timestamp === b[i].timestamp);
+  }
+
+  // Full comparison for smaller arrays
+  return a.every((msg, i) => msg.id === b[i].id && msg.timestamp === b[i].timestamp);
+}
 
 /**
  * Group messages into logical conversation groups
