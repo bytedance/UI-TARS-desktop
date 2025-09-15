@@ -22,10 +22,9 @@ const DEFAULT_CONFIG: Partial<AguiConfig> = {
       name: 'AGUI CLI Generated Report',
       tags: [],
       modelConfig: {
-        provider: 'unknown',
-        modelId: 'unknown',
+        provider: 'openai',
+        id: 'unknown',
         displayName: 'Unknown Model',
-        configuredAt: Date.now(),
       },
       agentInfo: {
         name: 'Agent',
@@ -138,9 +137,8 @@ export function normalizeSessionInfo(sessionInfo: any): SessionInfo {
       tags: sessionInfo.metadata?.tags || [],
       modelConfig: {
         provider: sessionInfo.metadata?.modelConfig?.provider || 'unknown',
-        modelId: sessionInfo.metadata?.modelConfig?.modelId || 'unknown',
+        id: sessionInfo.metadata?.modelConfig?.modelId || 'unknown',
         displayName: sessionInfo.metadata?.modelConfig?.displayName || 'Unknown Model',
-        configuredAt: sessionInfo.metadata?.modelConfig?.configuredAt || now,
       },
       agentInfo: {
         name: sessionInfo.metadata?.agentInfo?.name || 'Agent',
