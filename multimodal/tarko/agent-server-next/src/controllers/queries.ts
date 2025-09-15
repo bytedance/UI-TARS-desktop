@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Context } from 'hono';
-import { createErrorResponse } from '../../utils/error-handler';
-import type { HonoContext } from '../../types';
+import { createErrorResponse } from '../utils/error-handler';
+import type { HonoContext } from '../types';
 
 // Import context processing from @tarko/context-engineer if available
 // Note: Fallback implementation if package is not available
@@ -14,7 +13,7 @@ let contextReferenceProcessor: any = null;
 
 try {
   const { ImageProcessor, ContextReferenceProcessor } = require('@tarko/context-engineer/node');
-  
+
   imageProcessor = new ImageProcessor({
     quality: 5,
     format: 'webp',
@@ -23,14 +22,26 @@ try {
   contextReferenceProcessor = new ContextReferenceProcessor({
     maxFileSize: 2 * 1024 * 1024, // 2MB limit for LLM context
     ignoreExtensions: [
-      '.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.pdf', 
-      '.zip', '.tar', '.gz', '.exe', '.dll',
+      '.jpg',
+      '.jpeg',
+      '.png',
+      '.gif',
+      '.webp',
+      '.svg',
+      '.pdf',
+      '.zip',
+      '.tar',
+      '.gz',
+      '.exe',
+      '.dll',
     ],
     ignoreDirs: ['node_modules', '.git', '.next', 'dist', 'build', 'coverage', '.vscode', '.idea'],
     maxDepth: 8,
   });
 } catch (error) {
-  console.warn('Context engineer not available, contextual references will be passed through as-is');
+  console.warn(
+    'Context engineer not available, contextual references will be passed through as-is',
+  );
 }
 
 /**
@@ -206,7 +217,7 @@ export async function executeStreamingQuery(c: HonoContext): Promise<Response> {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
+        Connection: 'keep-alive',
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Cache-Control',
       },
@@ -230,10 +241,13 @@ export async function abortQuery(c: HonoContext) {
 
     const success = await session.abortQuery();
 
-    return c.json({ 
-      success,
-      message: success ? 'Query aborted successfully' : 'No running query to abort'
-    }, 200);
+    return c.json(
+      {
+        success,
+        message: success ? 'Query aborted successfully' : 'No running query to abort',
+      },
+      200,
+    );
   } catch (error) {
     console.error('Error aborting query:', error);
     return c.json(createErrorResponse(error), 500);

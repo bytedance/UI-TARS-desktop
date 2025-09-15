@@ -18,10 +18,9 @@ import type {
   IAgent,
   ContextVariables,
 } from './types';
-import { AgentSessionPool } from './core/session/AgentSessionPool';
-import { AgentSessionFactory } from './core/session/AgentSessionFactory';
-import { SandboxScheduler } from './core/sandbox/SandboxScheduler';
-import { UserConfigService } from './services/UserConfigService';
+import { AgentSessionPool, AgentSessionFactory } from './services/session';
+import { SandboxScheduler } from './services/sandbox';
+import { UserConfigService } from './services/user';
 import { MongoDBStorageProvider } from './storage/MongoDBStorageProvider';
 import { authMiddleware } from './middlewares/auth';
 import { TARKO_CONSTANTS, GlobalDirectoryOptions } from '@tarko/interface';
@@ -31,8 +30,8 @@ import {
   createSessionRoutes,
   createShareRoutes,
   createSystemRoutes,
-} from './api/routes';
-import { createUserConfigRoutes } from './api/routes/user';
+} from './routes';
+import { createUserConfigRoutes } from './routes/user';
 import { config } from 'dotenv';
 
 config();

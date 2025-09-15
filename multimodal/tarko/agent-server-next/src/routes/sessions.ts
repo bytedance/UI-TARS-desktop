@@ -5,8 +5,8 @@
 
 import { Hono } from 'hono';
 import * as sessionsController from '../controllers/sessions';
-import { sessionRestoreMiddleware, exclusiveModeMiddleware } from '../../middlewares';
-import type { ContextVariables } from '../../types';
+import { sessionRestoreMiddleware, exclusiveModeMiddleware } from '../middlewares';
+import type { ContextVariables } from '../types';
 
 /**
  * Create session management routes

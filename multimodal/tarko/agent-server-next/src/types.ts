@@ -14,8 +14,8 @@ import type {
   TenantConfig,
 } from '@tarko/interface';
 import type { StorageProvider } from './storage';
-import type { AgentSession, AgentSessionFactory, AgentSessionPool } from './core/session/index';
-import type { UserConfigService } from './services/UserConfigService';
+import type { AgentSession, AgentSessionFactory, AgentSessionPool } from './services/session';
+import type { UserConfigService } from './services/user';
 
 /**
  * AgentServer initialization options

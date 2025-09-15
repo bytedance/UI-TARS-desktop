@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IUserConfigDAO, UserConfig, UserConfigInfo } from '../dao/interfaces/IUserConfigDAO';
-import { StorageProvider } from '../storage/types';
+import { IUserConfigDAO, UserConfig, UserConfigInfo } from '../../dao/interfaces/IUserConfigDAO';
+import { StorageProvider } from '../../storage/types';
 
 // Re-export types for backward compatibility
 export type { UserConfig, UserConfigInfo };

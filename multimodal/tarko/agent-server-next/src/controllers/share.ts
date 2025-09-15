@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createErrorResponse } from '../../utils/error-handler';
-import type { HonoContext } from '../../types';
+import { createErrorResponse } from '../utils/error-handler';
+import type { HonoContext } from '../types';
 
 /**
  * Get share configuration
@@ -12,7 +12,7 @@ import type { HonoContext } from '../../types';
 export async function getShareConfig(c: HonoContext) {
   try {
     const server = c.get('server');
-    
+
     // Basic share configuration
     const shareConfig: any = {
       enabled: true,
@@ -47,10 +47,13 @@ export async function getShareConfig(c: HonoContext) {
       shareConfig.features.publicSharing = false; // Disable public sharing without persistent storage
     }
 
-    return c.json({
-      shareConfig,
-      timestamp: Date.now(),
-    }, 200);
+    return c.json(
+      {
+        shareConfig,
+        timestamp: Date.now(),
+      },
+      200,
+    );
   } catch (error) {
     console.error('Failed to get share config:', error);
     return c.json(createErrorResponse(error), 500);

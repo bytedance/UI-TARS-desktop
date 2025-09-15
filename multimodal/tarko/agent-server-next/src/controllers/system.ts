@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createErrorResponse } from '../../utils/error-handler';
-import type { HonoContext } from '../../types';
+import { createErrorResponse } from '../utils/error-handler';
+import type { HonoContext } from '../types';
 
 /**
  * Health check endpoint

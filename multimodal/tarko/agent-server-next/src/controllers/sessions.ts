@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { HonoContext } from '../../types';
-import { getCurrentUserId } from '../../middlewares/auth';
+import type { HonoContext } from '../types';
+import { getCurrentUserId } from '../middlewares/auth';
 import { SessionInfo } from '@tarko/interface';
 
 /**

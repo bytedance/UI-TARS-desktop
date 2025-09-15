@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { HonoContext } from '../../types';
-import { type UserConfig } from '../../services/UserConfigService';
-import { requireAuth } from '../../middlewares/auth';
+import type { HonoContext } from '../types';
+import { type UserConfig } from '../services/user';
+import { requireAuth } from '../middlewares/auth';
 
 /**
  * Get user config service from server context

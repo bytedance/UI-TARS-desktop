@@ -5,8 +5,8 @@
 
 import { Hono } from 'hono';
 import * as queriesController from '../controllers/queries';
-import { sessionRestoreMiddleware } from '../../middlewares';
-import type { ContextVariables } from '../../types';
+import { sessionRestoreMiddleware } from '../middlewares';
+import type { ContextVariables } from '../types';
 
 /**
  * Create query execution routes

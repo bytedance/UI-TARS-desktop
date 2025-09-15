@@ -5,7 +5,7 @@
 
 import { Hono } from 'hono';
 import * as shareController from '../controllers/share';
-import type { ContextVariables } from '../../types';
+import type { ContextVariables } from '../types';
 
 /**
  * Create sharing-related routes
