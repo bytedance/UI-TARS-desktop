@@ -79,12 +79,7 @@ export class AgentSession {
     return 'logger' in agent && typeof (agent as unknown as Record<string, unknown>).logger === 'object';
   }
 
-  /**
-   * Type guard to check if agent has getOptions method
-   */
-  private hasGetOptions(agent: IAgent): agent is IAgent & { getOptions: () => unknown } {
-    return 'getOptions' in agent && typeof (agent as unknown as Record<string, unknown>).getOptions === 'function';
-  }
+
 
   /**
    * Create event handler for storage and AGIO processing
@@ -153,7 +148,7 @@ export class AgentSession {
 
       if (snapshotStoragesDirectory) {
         const snapshotPath = path.join(snapshotStoragesDirectory, sessionId);
-        this.agent = new AgentSnapshot(agent, {
+        this.agent = new AgentSnapshot(agent as any, {
           snapshotPath,
           snapshotName: sessionId,
         }) as unknown as IAgent;
@@ -182,11 +177,11 @@ export class AgentSession {
       }
     }
 
-    // Log agent configuration if agent has logger and getOptions method
-    if (this.hasLogger(this.agent) && this.hasGetOptions(this.agent)) {
+    // Log agent configuration if agent has logger
+    if (this.hasLogger(this.agent)) {
       this.agent.logger.info(
         'Agent Config',
-        JSON.stringify(this.agent.getOptions(), null, 2),
+        JSON.stringify((this.agent as any).getOptions?.(), null, 2),
       );
     }
   }
@@ -454,7 +449,7 @@ export class AgentSession {
 
         if (snapshotStoragesDirectory) {
           const snapshotPath = path.join(snapshotStoragesDirectory, this.id);
-          this.agent = new AgentSnapshot(newAgent, {
+          this.agent = new AgentSnapshot(newAgent as any, {
             snapshotPath,
             snapshotName: this.id,
           }) as unknown as IAgent;
