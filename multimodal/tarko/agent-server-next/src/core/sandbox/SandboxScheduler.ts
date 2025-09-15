@@ -5,14 +5,17 @@
 
 import { SandboxManager } from './SandboxManager';
 import { UserConfigService } from '../../services/UserConfigService';
-import { SandboxAllocationModel } from '../../storage/MongoDBStorageProvider/MongoDBSchemas';
+import { SandboxAllocationDocument } from '../../storage/MongoDBStorageProvider/MongoDBSchemas';
+import { MongoDBStorageProvider } from '../../storage/MongoDBStorageProvider/MongoDBStorageProvider';
 import type { SandboxAllocationStrategy, SandboxAllocation } from './types';
 import { SandboxConfig } from '@tarko/interface';
 import { ConsoleLogger, getLogger } from '@tarko/shared-utils';
+import { Model } from 'mongoose';
 
 export interface SandboxSchedulerOptions {
   sandboxConfig: SandboxConfig;
   userConfigService: UserConfigService;
+  storageProvider: MongoDBStorageProvider;
 }
 
 /**
@@ -22,12 +25,18 @@ export interface SandboxSchedulerOptions {
 export class SandboxScheduler {
   private sandboxManager: SandboxManager;
   private userConfigService: UserConfigService;
+  private storageProvider: MongoDBStorageProvider;
   private logger: ConsoleLogger;
 
   constructor(options: SandboxSchedulerOptions) {
     this.sandboxManager = new SandboxManager(options.sandboxConfig);
     this.userConfigService = options.userConfigService;
+    this.storageProvider = options.storageProvider;
     this.logger = getLogger('SandboxScheduler');
+  }
+
+  private getSandboxAllocationModel(): Model<SandboxAllocationDocument> {
+    return this.storageProvider.getSandboxAllocationModel();
   }
 
   /**
@@ -39,15 +48,13 @@ export class SandboxScheduler {
     strategy?: SandboxAllocationStrategy;
   }): Promise<string> {
     const { userId, sessionId } = options;
+
     let strategy = options.strategy;
-
-    // Get user's allocation strategy if not provided
-    if (!strategy && userId) {
-      strategy = await this.userConfigService.getSandboxAllocationStrategy(userId);
-    }
-
-    // Default to Shared-Pool if no strategy found
-    strategy = strategy || 'Shared-Pool';
+    //TODO: Here is a temporary comment, do not query the user's strategy from db, and use session exclusively
+    // if (!strategy && userId) {
+    //   strategy = await this.userConfigService.getSandboxAllocationStrategy(userId);
+    // }
+    strategy = strategy || 'Session-Exclusive';
 
     this.logger.info('Getting sandbox URL', { userId, sessionId, strategy });
 
@@ -55,6 +62,7 @@ export class SandboxScheduler {
     const existingSandbox = await this.findExistingSandbox({ userId, sessionId, strategy });
     if (existingSandbox) {
       // Update last used time
+      this.logger.info('use existing sandbox: ', existingSandbox.sandboxId);
       await this.updateSandboxLastUsed(existingSandbox.sandboxId);
       return existingSandbox.sandboxUrl;
     }
@@ -69,6 +77,8 @@ export class SandboxScheduler {
 
     // Create new sandbox
     const sandbox = await this.createNewSandbox({ userId, sessionId, strategy });
+
+    this.logger.info('create new sandbox: ', sandbox.sandboxId);
     return sandbox.sandboxUrl;
   }
 
@@ -107,6 +117,7 @@ export class SandboxScheduler {
           break;
       }
 
+      const SandboxAllocationModel = this.getSandboxAllocationModel();
       const allocation = await SandboxAllocationModel.findOne(query)
         .sort({ lastUsedAt: -1 })
         .lean();
@@ -172,6 +183,32 @@ export class SandboxScheduler {
         allocationStrategy: strategy,
       });
 
+      // Check if sandbox allocation already exists (handle race conditions)
+      const SandboxAllocationModel = this.getSandboxAllocationModel();
+      const existingAllocation = await SandboxAllocationModel.findOne({
+        sandboxId: instance.id,
+      }).lean();
+
+      if (existingAllocation) {
+        this.logger.info('Sandbox allocation already exists, returning existing', {
+          sandboxId: instance.id,
+          strategy,
+          userId,
+          sessionId,
+        });
+
+        return {
+          sandboxId: existingAllocation.sandboxId,
+          sandboxUrl: existingAllocation.sandboxUrl,
+          userId: existingAllocation.userId,
+          sessionId: existingAllocation.sessionId,
+          allocationStrategy: existingAllocation.allocationStrategy,
+          createdAt: existingAllocation.createdAt,
+          lastUsedAt: existingAllocation.lastUsedAt,
+          isActive: existingAllocation.isActive,
+        };
+      }
+
       // Record allocation in database
       const allocation = new SandboxAllocationModel({
         sandboxId: instance.id,
@@ -184,7 +221,35 @@ export class SandboxScheduler {
         isActive: true,
       });
 
-      await allocation.save();
+      try {
+        await allocation.save();
+      } catch (saveError: any) {
+        // Handle duplicate key error (race condition)
+        if (saveError.code === 11000) {
+          this.logger.info('Duplicate key error caught, fetching existing allocation', {
+            sandboxId: instance.id,
+            error: saveError.message,
+          });
+
+          const existingAllocation = await SandboxAllocationModel.findOne({
+            sandboxId: instance.id,
+          }).lean();
+
+          if (existingAllocation) {
+            return {
+              sandboxId: existingAllocation.sandboxId,
+              sandboxUrl: existingAllocation.sandboxUrl,
+              userId: existingAllocation.userId,
+              sessionId: existingAllocation.sessionId,
+              allocationStrategy: existingAllocation.allocationStrategy,
+              createdAt: existingAllocation.createdAt,
+              lastUsedAt: existingAllocation.lastUsedAt,
+              isActive: existingAllocation.isActive,
+            };
+          }
+        }
+        throw saveError;
+      }
 
       this.logger.info('New sandbox created and allocated', {
         sandboxId: instance.id,
@@ -217,6 +282,7 @@ export class SandboxScheduler {
       const quota = await this.userConfigService.getSandboxPoolQuota(userId);
 
       // Count active session-exclusive sandboxes for user
+      const SandboxAllocationModel = this.getSandboxAllocationModel();
       const activeCount = await SandboxAllocationModel.countDocuments({
         userId,
         allocationStrategy: 'Session-Exclusive',
@@ -254,6 +320,7 @@ export class SandboxScheduler {
    */
   private async updateSandboxLastUsed(sandboxId: string): Promise<void> {
     try {
+      const SandboxAllocationModel = this.getSandboxAllocationModel();
       await SandboxAllocationModel.updateOne(
         { sandboxId, isActive: true },
         { lastUsedAt: Date.now() },
@@ -269,6 +336,7 @@ export class SandboxScheduler {
   async releaseSandbox(sandboxId: string): Promise<void> {
     try {
       // Mark allocation as inactive
+      const SandboxAllocationModel = this.getSandboxAllocationModel();
       await SandboxAllocationModel.updateOne({ sandboxId }, { isActive: false });
 
       // Delete the actual sandbox instance
@@ -289,6 +357,7 @@ export class SandboxScheduler {
    */
   async getUserSandboxes(userId: string): Promise<SandboxAllocation[]> {
     try {
+      const SandboxAllocationModel = this.getSandboxAllocationModel();
       const allocations = await SandboxAllocationModel.find({
         userId,
         isActive: true,
@@ -318,6 +387,7 @@ export class SandboxScheduler {
   async cleanupInactiveSandboxes(): Promise<void> {
     try {
       // Find sandboxes marked as inactive
+      const SandboxAllocationModel = this.getSandboxAllocationModel();
       const inactiveAllocations = await SandboxAllocationModel.find({
         isActive: false,
       }).lean();

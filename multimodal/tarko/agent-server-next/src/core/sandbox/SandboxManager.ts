@@ -82,40 +82,62 @@ export class SandboxManager {
     });
 
     try {
-      const response = await fetch(`https://${this.config.baseUrl}/v1/ping`, {
-        method: 'POST',
-        headers: {
-          'X-Faas-Create-Sandbox': 'true',
-          'X-Faas-Sandbox-TTL-Minutes': String(ttlMinutes),
-          'Content-Type': 'application/json',
-        },
-      });
+      //FIXME: Irregular url splicing method, temporary solution
+      // const response = await fetch(`https://tars.${this.config.baseUrl}/v1/ping`, {
+      //   method: 'POST',
+      //   headers: {
+      //     'X-Faas-Create-Sandbox': 'true',
+      //     'X-Faas-Sandbox-TTL-Minutes': String(ttlMinutes),
+      //     'Content-Type': 'application/json',
+      //   },
+      // });
 
-      if (!response.ok) {
-        throw new Error(`Failed to create sandbox: ${response.status} ${response.statusText}`);
-      }
+      // if (!response.ok) {
+      //   throw new Error(`Failed to create sandbox: ${response.status} ${response.statusText}`);
+      // }
 
-      const instanceName = response.headers.get('x-faas-instance-name');
-      if (!instanceName) {
-        throw new Error('Failed to get instance name from response headers');
-      }
+      // const instanceName = response.headers.get('x-faas-instance-name');
+      // if (!instanceName) {
+      //   throw new Error('Failed to get instance name from response headers');
+      // }
 
-      const instance: SandboxInstance = {
-        id: instanceName,
-        url: this.getInstanceUrl(instanceName),
+      // const instance: SandboxInstance = {
+      //   id: instanceName,
+      //   url: this.getInstanceUrl(instanceName),
+      //   createdAt: Date.now(),
+      //   lastUsedAt: Date.now(),
+      //   ttlMinutes,
+      //   isActive: true,
+      // };
+      // console.log('***** Sandbox instance created successfully', {
+      //   instanceId: instanceName,
+      //   url: instance.url,
+      //   ttlMinutes,
+      // });
+      // this.logger.info('Sandbox instance created successfully', {
+      //   instanceId: instanceName,
+      //   url: instance.url,
+      //   ttlMinutes,
+      // });
+      // this.logger.info('Sandbox instance created successfully', {
+      //   instanceId: instanceName,
+      //   url: instance.url,
+      //   ttlMinutes,
+      // });
+
+      // Generate unique sandbox ID to avoid duplicates
+      const timestamp = Date.now().toString(36);
+      const random = Math.random().toString(36).substring(2, 15);
+      const uniqueId = `ondemand-${timestamp}-${random}`;
+
+      return {
+        id: uniqueId,
+        url: 'https://ondemand-t7osqboc-7nakuwjyfj-b9vnr.omni.bytedance.net',
         createdAt: Date.now(),
         lastUsedAt: Date.now(),
         ttlMinutes,
         isActive: true,
       };
-
-      this.logger.info('Sandbox instance created successfully', {
-        instanceId: instanceName,
-        url: instance.url,
-        ttlMinutes,
-      });
-
-      return instance;
     } catch (error) {
       this.logger.error('Failed to create sandbox instance:', error);
       throw error;

@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { UserConfigModel } from '../storage/MongoDBStorageProvider/MongoDBSchemas';
+import { UserConfigDocument } from '../storage/MongoDBStorageProvider/MongoDBSchemas';
+import { MongoDBStorageProvider } from '../storage/MongoDBStorageProvider/MongoDBStorageProvider';
+import { Model } from 'mongoose';
 
 export interface UserConfig {
   sandboxAllocationStrategy: 'Shared-Pool' | 'User-Exclusive' | 'Session-Exclusive';
@@ -30,11 +32,21 @@ export interface UserConfigInfo {
  * Service for managing user configurations
  */
 export class UserConfigService {
+  private storageProvider: MongoDBStorageProvider;
+
+  constructor(storageProvider: MongoDBStorageProvider) {
+    this.storageProvider = storageProvider;
+  }
+
+  private getUserConfigModel(): Model<UserConfigDocument> {
+    return this.storageProvider.getUserConfigModel();
+  }
   /**
    * Get user configuration by user ID
    */
   async getUserConfig(userId: string): Promise<UserConfigInfo | null> {
     try {
+      const UserConfigModel = this.getUserConfigModel();
       const userConfig = await UserConfigModel.findOne({ userId }).lean();
       if (!userConfig) {
         return null;
@@ -57,6 +69,7 @@ export class UserConfigService {
    */
   async createUserConfig(userId: string, config?: Partial<UserConfig>): Promise<UserConfigInfo> {
     try {
+      const UserConfigModel = this.getUserConfigModel();
       const now = Date.now();
       const defaultConfig: UserConfig = {
         sandboxAllocationStrategy: 'Shared-Pool',
@@ -103,6 +116,7 @@ export class UserConfigService {
     configUpdates: Partial<UserConfig>,
   ): Promise<UserConfigInfo | null> {
     try {
+      const UserConfigModel = this.getUserConfigModel();
       const now = Date.now();
 
       const updated = await UserConfigModel.findOneAndUpdate(
@@ -152,6 +166,7 @@ export class UserConfigService {
    */
   async deleteUserConfig(userId: string): Promise<boolean> {
     try {
+      const UserConfigModel = this.getUserConfigModel();
       const result = await UserConfigModel.deleteOne({ userId });
       return result.deletedCount > 0;
     } catch (error) {

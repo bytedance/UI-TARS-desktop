@@ -23,9 +23,10 @@ import { SessionManager } from './core/session/SessionManager';
 import { AgentSessionFactory } from './core/session/AgentSessionFactory';
 import { SandboxScheduler } from './core/sandbox/SandboxScheduler';
 import { UserConfigService } from './services/UserConfigService';
+import { MongoDBStorageProvider } from './storage/MongoDBStorageProvider';
 import { authMiddleware } from './middlewares/auth';
 import { TARKO_CONSTANTS, GlobalDirectoryOptions } from '@tarko/interface';
-import { requestIdMiddleware, loggingMiddleware, errorHandlingMiddleware } from './middlewares';
+import { requestIdMiddleware, accessLogMiddleware, errorHandlingMiddleware } from './middlewares';
 import {
   createQueryRoutes,
   createSessionRoutes,
@@ -59,7 +60,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   private sessionManager: SessionManager;
   private sessionFactory: AgentSessionFactory;
   private sandboxScheduler?: SandboxScheduler;
-  private userConfigService?: UserConfigService;
+  public userConfigService?: UserConfigService;
 
   // Configuration
   public readonly port: number;
@@ -115,15 +116,13 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
 
     // Setup middlewares in correct order
     this.setupMiddlewares();
-
-    // Setup API routes will be called after initialization
   }
 
   /**
    * Setup Hono middlewares in correct order
    */
   private setupMiddlewares(): void {
-    // 1. CORS middleware (should be early to handle preflight requests)
+    // CORS middleware (should be early to handle preflight requests)
     this.app.use(
       '*',
       cors({
@@ -134,23 +133,23 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
       }),
     );
 
-    // 2. Error handling middleware (after CORS to catch all errors)
-    this.app.use('*', errorHandlingMiddleware);
-
-    // 3. Request ID middleware (early for logging)
-    this.app.use('*', requestIdMiddleware);
-
-    // 4. Logging middleware (after request ID)
-    this.app.use('*', loggingMiddleware);
-
-    // 5. Authentication middleware (for multi-tenant mode)
-    this.app.use('*', authMiddleware);
-
-    // 6. Server instance injection middleware
+    // Server instance injection middleware
     this.app.use('*', async (c, next) => {
       c.set('server', this);
       await next();
     });
+
+    // Error handling middleware (after CORS to catch all errors)
+    this.app.use('*', errorHandlingMiddleware);
+
+    // Request ID middleware (early for logging)
+    this.app.use('*', requestIdMiddleware);
+
+    // Logging middleware (after request ID)
+    this.app.use('*', accessLogMiddleware);
+
+    // Authentication middleware (for multi-tenant mode)
+    this.app.use('*', authMiddleware);
   }
 
   /**
@@ -419,11 +418,17 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     }
 
     try {
-      this.userConfigService = new UserConfigService();
+      // Ensure we have MongoDB storage for multi-tenant mode
+      if (!(this.storageProvider instanceof MongoDBStorageProvider)) {
+        throw new Error('Multi-tenant mode requires MongoDB storage provider');
+      }
+
+      this.userConfigService = new UserConfigService(this.storageProvider);
 
       this.sandboxScheduler = new SandboxScheduler({
         sandboxConfig: this.appConfig.server.sandbox,
         userConfigService: this.userConfigService,
+        storageProvider: this.storageProvider,
       });
 
       // Update session factory with sandbox scheduler

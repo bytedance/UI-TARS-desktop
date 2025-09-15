@@ -4,10 +4,19 @@
  */
 
 import type { HonoContext } from '../../types';
-import { UserConfigService, type UserConfig } from '../../services/UserConfigService';
+import { type UserConfig } from '../../services/UserConfigService';
 import { requireAuth } from '../../middlewares/auth';
 
-const userConfigService = new UserConfigService();
+/**
+ * Get user config service from server context
+ */
+function getUserConfigService(c: HonoContext) {
+  const server = c.get('server');
+  if (!server.userConfigService) {
+    throw new Error('UserConfigService not available - multi-tenant mode required');
+  }
+  return server.userConfigService;
+}
 
 /**
  * Get current user's configuration
@@ -15,6 +24,7 @@ const userConfigService = new UserConfigService();
 export async function getUserConfig(c: HonoContext) {
   try {
     const user = requireAuth(c);
+    const userConfigService = getUserConfigService(c);
     const config = await userConfigService.getUserConfig(user.userId);
 
     if (!config) {
@@ -36,6 +46,7 @@ export async function createUserConfig(c: HonoContext) {
     const user = requireAuth(c);
     const body = await c.req.json();
     const { config } = body as { config?: Partial<UserConfig> };
+    const userConfigService = getUserConfigService(c);
 
     const userConfig = await userConfigService.createUserConfig(user.userId, config);
 
@@ -60,6 +71,7 @@ export async function updateUserConfig(c: HonoContext) {
     const user = requireAuth(c);
     const body = await c.req.json();
     const { config } = body as { config: Partial<UserConfig> };
+    const userConfigService = getUserConfigService(c);
 
     if (!config || Object.keys(config).length === 0) {
       return c.json({ error: 'Configuration updates are required' }, 400);
@@ -84,6 +96,7 @@ export async function updateUserConfig(c: HonoContext) {
 export async function getOrCreateUserConfig(c: HonoContext) {
   try {
     const user = requireAuth(c);
+    const userConfigService = getUserConfigService(c);
     const config = await userConfigService.getOrCreateUserConfig(user.userId);
 
     return c.json({ config }, 200);
@@ -99,6 +112,7 @@ export async function getOrCreateUserConfig(c: HonoContext) {
 export async function deleteUserConfig(c: HonoContext) {
   try {
     const user = requireAuth(c);
+    const userConfigService = getUserConfigService(c);
     const deleted = await userConfigService.deleteUserConfig(user.userId);
 
     if (!deleted) {
@@ -120,6 +134,7 @@ export async function addSharedLink(c: HonoContext) {
     const user = requireAuth(c);
     const body = await c.req.json();
     const { sharedLink } = body as { sharedLink: string };
+    const userConfigService = getUserConfigService(c);
 
     if (!sharedLink) {
       return c.json({ error: 'Shared link is required' }, 400);
@@ -146,6 +161,7 @@ export async function removeSharedLink(c: HonoContext) {
     const user = requireAuth(c);
     const body = await c.req.json();
     const { sharedLink } = body as { sharedLink: string };
+    const userConfigService = getUserConfigService(c);
 
     if (!sharedLink) {
       return c.json({ error: 'Shared link is required' }, 400);
@@ -172,6 +188,7 @@ export async function addCustomSpFragment(c: HonoContext) {
     const user = requireAuth(c);
     const body = await c.req.json();
     const { fragment } = body as { fragment: string };
+    const userConfigService = getUserConfigService(c);
 
     if (!fragment) {
       return c.json({ error: 'Fragment is required' }, 400);
@@ -198,6 +215,7 @@ export async function removeCustomSpFragment(c: HonoContext) {
     const user = requireAuth(c);
     const body = await c.req.json();
     const { fragment } = body as { fragment: string };
+    const userConfigService = getUserConfigService(c);
 
     if (!fragment) {
       return c.json({ error: 'Fragment is required' }, 400);
@@ -224,6 +242,7 @@ export async function updateModelProviders(c: HonoContext) {
     const user = requireAuth(c);
     const body = await c.req.json();
     const { providers } = body as { providers: UserConfig['modelProviders'] };
+    const userConfigService = getUserConfigService(c);
 
     if (!Array.isArray(providers)) {
       return c.json({ error: 'Providers must be an array' }, 400);

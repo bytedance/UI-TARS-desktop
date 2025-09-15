@@ -6,6 +6,9 @@
 import type { Context, Next } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import type { UserInfo, ContextVariables } from '../types';
+import { getLogger } from '@tarko/shared-utils';
+
+const logger = getLogger('AuthMiddleware');
 
 /**
  * Decode user information from header
@@ -13,40 +16,6 @@ import type { UserInfo, ContextVariables } from '../types';
 function decodeUserInfo(encodedUser: string): UserInfo | null {
   try {
     return JSON.parse(decodeURIComponent(encodedUser));
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Extract user info from JWT token (simplified version)
- * In production, you should use a proper JWT library for validation
- */
-function extractUserInfoFromJWT(token: string): UserInfo | null {
-  try {
-    // Remove 'Bearer ' prefix if present
-    const cleanToken = token.replace(/^Bearer\s+/, '');
-
-    // In a real implementation, you would:
-    // 1. Verify the JWT signature
-    // 2. Check expiration
-    // 3. Validate issuer
-    // For now, we'll do a simple base64 decode of the payload
-    const parts = cleanToken.split('.');
-    if (parts.length !== 3) {
-      return null;
-    }
-
-    const payload = JSON.parse(atob(parts[1]));
-
-    // Extract user information from JWT payload
-    return {
-      userId: payload.sub || payload.userId || payload.user_id,
-      email: payload.email,
-      name: payload.name,
-      organization: payload.org || payload.organization,
-      ...payload, // Include any additional claims
-    };
   } catch {
     return null;
   }
@@ -73,48 +42,19 @@ export async function authMiddleware(c: Context<{ Variables: ContextVariables }>
     userInfo = decodeUserInfo(userInfoHeader);
   }
 
-  // If no user info from header, try JWT token
   if (!userInfo) {
-    const authHeader = c.req.header('Authorization');
-    if (authHeader) {
-      userInfo = extractUserInfoFromJWT(authHeader);
-    }
-  }
-
-  // If still no user info, check for API key or other auth methods
-  if (!userInfo) {
-    const apiKey = c.req.header('X-API-Key');
-    if (apiKey) {
-      // In a real implementation, you would validate the API key
-      // and retrieve associated user information
-      // For now, we'll create a basic user info
-      userInfo = {
-        userId: `api-key-${apiKey.substring(0, 8)}`,
-        email: `api-user-${apiKey.substring(0, 8)}@api.local`,
-        name: 'API User',
-      };
-    }
-  }
-
-  if (!userInfo || !userInfo.userId) {
     throw new HTTPException(401, {
       message: 'Authentication required. Please provide valid credentials.',
     });
   }
 
-  // Validate required user information
-  if (!userInfo.email) {
-    throw new HTTPException(400, {
-      message: 'Invalid user information: email is required',
-    });
-  }
+  c.set('user', {
+    ...userInfo,
+    userId: userInfo.userId || userInfo.email,
+  });
 
-  // Add user information to context
-  c.set('user', userInfo);
-
-  // Log successful authentication if in debug mode
   if (server.isDebug) {
-    console.log(`[Auth] User authenticated: ${userInfo.userId} (${userInfo.email})`);
+    logger.debug(`[Auth] User authenticated: ${userInfo.userId} (${userInfo.email})`);
   }
 
   await next();

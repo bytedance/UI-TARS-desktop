@@ -39,7 +39,6 @@ const server = new AgentServer({
     linkReaderMcpUrl: process.env.LINK_READER_URL,
     linkReaderAK: process.env.LINK_READER_AK,
     ignoreSandboxCheck: true,
-    logLevel: Number(process.env.LOGLEVEL) as unknown as LogLevel.DEBUG,
     thinking: {
       type: process.env.NATIVE_THINKING === 'true' ? 'enabled' : 'disabled',
     },

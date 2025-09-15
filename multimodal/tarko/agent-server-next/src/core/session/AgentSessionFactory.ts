@@ -10,6 +10,7 @@ import { UserConfigService } from '../../services/UserConfigService';
 import { getCurrentUser } from '../../middlewares/auth';
 import type { AgentServer, UserInfo, HonoContext } from '../../types';
 import type { AgioProviderConstructor, SessionInfo } from '@tarko/interface';
+import { ConsoleLogger, getLogger } from '@tarko/shared-utils';
 
 export interface CreateSessionOptions {
   sessionId?: string;
@@ -27,10 +28,12 @@ export interface CreateSessionOptions {
 export class AgentSessionFactory {
   private server: AgentServer;
   private sandboxScheduler?: SandboxScheduler;
+  private logger: ConsoleLogger;
 
   constructor(server: AgentServer, sandboxScheduler?: SandboxScheduler) {
     this.server = server;
     this.sandboxScheduler = sandboxScheduler;
+    this.logger = getLogger('AgentSessionFactory');
   }
 
   /**
@@ -61,29 +64,27 @@ export class AgentSessionFactory {
     // Create session info for storage
     let savedSessionInfo: SessionInfo | undefined;
 
-    if (this.server.storageProvider) {
-      const now = Date.now();
+    const now = Date.now();
 
-      const newSessionInfo: SessionInfo = {
-        id: sessionId,
-        createdAt: now,
-        updatedAt: now,
-        workspace: this.server.getCurrentWorkspace(),
-        userId: user?.userId,
-        metadata: {
-          agentInfo: {
-            name: this.server.getCurrentAgentName()!,
-            configuredAt: now,
-          },
-          sandboxUrl,
+    const newSessionInfo: SessionInfo = {
+      id: sessionId,
+      createdAt: now,
+      updatedAt: now,
+      workspace: this.server.getCurrentWorkspace(),
+      userId: user?.userId,
+      metadata: {
+        agentInfo: {
+          name: this.server.getCurrentAgentName()!,
+          configuredAt: now,
         },
-      };
+        sandboxUrl,
+      },
+    };
 
-      try {
-        savedSessionInfo = await this.server.storageProvider.createSession(newSessionInfo);
-      } catch (error) {
-        console.error(`Failed to save session info for ${sessionId}:`, error);
-      }
+    try {
+      savedSessionInfo = await this.server.storageProvider.createSession(newSessionInfo);
+    } catch (error) {
+      this.logger.error(`Failed to save session info for ${sessionId}:`, error);
     }
 
     // Create AgentSession with sandbox URL

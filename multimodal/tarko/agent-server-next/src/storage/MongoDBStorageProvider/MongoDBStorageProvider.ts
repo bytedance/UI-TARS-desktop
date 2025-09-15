@@ -7,7 +7,16 @@ import mongoose, { Connection, ConnectOptions } from 'mongoose';
 import { AgentEventStream, MongoDBAgentStorageImplementation, SessionInfo } from '@tarko/interface';
 import { getLogger } from '@tarko/shared-utils';
 import { StorageProvider } from '../types';
-import { SessionModel, EventModel, SessionDocument, EventDocument } from './MongoDBSchemas';
+import {
+  SessionModel,
+  EventModel,
+  SessionDocument,
+  EventDocument,
+  UserConfigDocument,
+  SandboxAllocationDocument,
+  UserConfigModel,
+  SandboxAllocationModel,
+} from './MongoDBSchemas';
 
 const logger = getLogger('MongoDBStorageProvider');
 
@@ -33,7 +42,7 @@ export class MongoDBStorageProvider implements StorageProvider {
     }
 
     try {
-      logger.info('Initializing MongoDB connection...');
+      logger.info('Initializing MongoDB connection... ');
 
       // Prepare connection options with defaults
       const defaultOptions: ConnectOptions = {
@@ -55,6 +64,8 @@ export class MongoDBStorageProvider implements StorageProvider {
       // Bind models to this connection
       this.connection.model('Session', SessionModel.schema);
       this.connection.model('Event', EventModel.schema);
+      this.connection.model('UserConfig', UserConfigModel.schema);
+      this.connection.model('SandboxAllocation', SandboxAllocationModel.schema);
 
       logger.info(`MongoDB connected successfully to database: ${connectionOptions.dbName}`);
 
@@ -355,6 +366,26 @@ export class MongoDBStorageProvider implements StorageProvider {
         message: `MongoDB health check failed: ${error instanceof Error ? error.message : String(error)}`,
       };
     }
+  }
+
+  /**
+   * Get UserConfig model bound to this connection
+   */
+  getUserConfigModel() {
+    if (!this.connection) {
+      throw new Error('MongoDB connection not initialized');
+    }
+    return this.connection.model<UserConfigDocument>('UserConfig');
+  }
+
+  /**
+   * Get SandboxAllocation model bound to this connection
+   */
+  getSandboxAllocationModel() {
+    if (!this.connection) {
+      throw new Error('MongoDB connection not initialized');
+    }
+    return this.connection.model<SandboxAllocationDocument>('SandboxAllocation');
   }
 
   async close(): Promise<void> {
