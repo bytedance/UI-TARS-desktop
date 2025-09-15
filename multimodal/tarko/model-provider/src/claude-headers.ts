@@ -14,6 +14,7 @@ export function isClaudeModel(model: string): boolean {
   const claudePatterns = [
     /^claude-/i,
     /^anthropic\//i,
+    /claude/i, // Matches any model containing 'claude' (e.g., gcp-claude4-sonnet)
   ];
   return claudePatterns.some(pattern => pattern.test(model));
 }
