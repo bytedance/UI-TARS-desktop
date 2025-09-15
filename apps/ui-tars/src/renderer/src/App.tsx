@@ -5,6 +5,7 @@
 import { Route, HashRouter, Routes } from 'react-router';
 import { lazy, Suspense } from 'react';
 import { Toaster } from 'sonner';
+
 import { MainLayout } from './layouts/MainLayout';
 
 import './styles/globals.css';
