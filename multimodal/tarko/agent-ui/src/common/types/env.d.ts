@@ -1,18 +1,5 @@
 import { AgentEventStream } from '@tarko/agent-interface';
-import type { AgentServerVersionInfo, AgentWebUIImplementation } from '@agent-tars/interface';
-
-/**
- * Session metadata interface
- * Forked from server, we need move to interface later.
- */
-export interface SessionInfo {
-  id: string;
-  createdAt: number;
-  updatedAt: number;
-  name?: string;
-  workspace: string;
-  tags?: string[];
-}
+import type { AgentServerVersionInfo, AgentWebUIImplementation, SessionInfo } from '@tarko/interface';
 
 /**
  * FIXME: move to Agent Server.
