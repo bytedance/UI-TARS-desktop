@@ -29,7 +29,7 @@ import {
 } from '../state/actions/connectionActions';
 import { socketService } from '../services/socketService';
 
-import { useEffect, useCallback, useMemo, useRef } from 'react';
+import { useEffect, useCallback, useMemo } from 'react';
 import { useReplayMode } from '../hooks/useReplayMode';
 
 /**
@@ -74,29 +74,12 @@ export function useSession() {
   const checkServerStatus = useSetAtom(checkConnectionStatusAction);
   const checkSessionStatus = useSetAtom(checkSessionStatusAction);
 
-  // Debounced status checking for active session - do not check status in replay mode
-  const statusCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
+  // Simple status checking for active session - do not check status in replay mode
   useEffect(() => {
     if (!activeSessionId || !connectionStatus.connected || isReplayMode) return;
-
-    // Clear any pending timeout
-    if (statusCheckTimeoutRef.current) {
-      clearTimeout(statusCheckTimeoutRef.current);
-    }
-
-    // Debounce status check to avoid rapid calls
-    statusCheckTimeoutRef.current = setTimeout(() => {
-      if (activeSessionId && connectionStatus.connected && !isReplayMode) {
-        checkSessionStatus(activeSessionId);
-      }
-    }, 200); // 200ms debounce to allow for quick session switches
-
-    return () => {
-      if (statusCheckTimeoutRef.current) {
-        clearTimeout(statusCheckTimeoutRef.current);
-      }
-    };
+    
+    // Simple status check when session becomes active
+    checkSessionStatus(activeSessionId);
   }, [activeSessionId, connectionStatus.connected, checkSessionStatus, isReplayMode]);
 
   // Enhanced socket handler for session status sync - do not update state in replay mode
