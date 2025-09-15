@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentSession } from '../AgentSession';
+import { AgentSession } from './AgentSession';
 
 export interface SessionManagerConfig {
   maxSessions?: number;
@@ -21,7 +21,7 @@ interface SessionEntry {
  * LRU Session Manager with memory-based eviction
  * Manages AgentSession instances with automatic cleanup to prevent memory leaks
  */
-export class SessionManager {
+export class AgentSessionManager {
   private sessions = new Map<string, SessionEntry>();
   private readonly maxSessions: number;
   private readonly memoryLimitMB: number;
@@ -42,7 +42,7 @@ export class SessionManager {
    */
   set(sessionId: string, session: AgentSession): void {
     const now = Date.now();
-    
+
     // If session already exists, update access time
     if (this.sessions.has(sessionId)) {
       const entry = this.sessions.get(sessionId)!;
@@ -160,12 +160,12 @@ export class SessionManager {
   private async evictIfNeeded(): Promise<void> {
     const estimatedMemory = this.getEstimatedMemoryUsage();
     const memoryThreshold = this.memoryLimitMB * 0.8; // 80% of limit
-    
+
     // Check memory usage or session count limits
     if (estimatedMemory > memoryThreshold || this.sessions.size > this.maxSessions) {
       const targetEvictions = Math.max(
         Math.ceil(this.sessions.size * 0.1), // Evict at least 10%
-        this.sessions.size > this.maxSessions ? this.sessions.size - this.maxSessions : 0
+        this.sessions.size > this.maxSessions ? this.sessions.size - this.maxSessions : 0,
       );
 
       await this.evictOldestSessions(targetEvictions);
@@ -178,11 +178,11 @@ export class SessionManager {
   private async evictOldestSessions(count: number): Promise<void> {
     // Sort sessions by last accessed time (oldest first)
     const sortedEntries = Array.from(this.sessions.entries()).sort(
-      ([, a], [, b]) => a.lastAccessed - b.lastAccessed
+      ([, a], [, b]) => a.lastAccessed - b.lastAccessed,
     );
 
     const toEvict = sortedEntries.slice(0, count);
-    
+
     for (const [sessionId, entry] of toEvict) {
       try {
         await this.cleanupSession(entry.session);
@@ -219,11 +219,11 @@ export class SessionManager {
    */
   async cleanup(): Promise<void> {
     await this.stopMemoryMonitoring();
-    
-    const cleanupPromises = Array.from(this.sessions.values()).map(entry =>
-      this.cleanupSession(entry.session)
+
+    const cleanupPromises = Array.from(this.sessions.values()).map((entry) =>
+      this.cleanupSession(entry.session),
     );
-    
+
     await Promise.all(cleanupPromises);
     this.sessions.clear();
   }

@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { AgentSession } from './AgentSession';
-export type { AgentQueryResponse } from './AgentSession';
+export { AgentSession } from './session/AgentSession';
+export type { AgentQueryResponse } from './session/AgentSession';
 
 // Session management
-export { SessionManager } from './session/SessionManager';
+export { AgentSessionManager } from './session/AgentSessionManager';
 export { AgentSessionFactory } from './session/AgentSessionFactory';
 
 // Sandbox management

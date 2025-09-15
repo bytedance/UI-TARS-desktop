@@ -232,10 +232,11 @@ export class SandboxManager {
   /**
    * Check if instance exists by testing domain response
    */
-  async checkInstanceNotExist(instanceId: string): Promise<boolean> {
+  async checkInstanceNotExist(sandboxURL: string): Promise<boolean> {
+    // const domainUrl = this.getInstanceUrl(instanceId);
+
     try {
-      const domainUrl = this.getInstanceUrl(instanceId);
-      const response = await fetch(domainUrl, {
+      const response = await fetch(sandboxURL, {
         method: 'GET',
       });
 
@@ -248,7 +249,7 @@ export class SandboxManager {
 
       return false;
     } catch (error) {
-      this.logger.error('Error checking instance existence:', error);
+      this.logger.error(`Error checking instance existence for ${sandboxURL}:`, error);
       return false;
     }
   }

@@ -124,7 +124,7 @@ export class SandboxScheduler {
 
       if (allocation) {
         // Verify sandbox still exists
-        const exists = this.checkInstanceExist(allocation.sandboxId);
+        const exists = this.checkInstanceExist(allocation.sandboxUrl);
         if (!exists) {
           // Mark as inactive and return null to create new one
           await SandboxAllocationModel.updateOne({ _id: allocation._id }, { isActive: false });
@@ -153,12 +153,12 @@ export class SandboxScheduler {
   /**
    * if sandboxId is null or health check failed , then return false
    */
-  async checkInstanceExist(sandboxId: string | undefined) {
-    if (!sandboxId) {
+  async checkInstanceExist(sandboxURL: string | undefined) {
+    if (!sandboxURL) {
       return false;
     }
     try {
-      return !(await this.sandboxManager.checkInstanceNotExist(sandboxId));
+      return !(await this.sandboxManager.checkInstanceNotExist(sandboxURL));
     } catch (e) {
       this.logger.error('Failed to check sandbox instance status: ', e);
       return false;

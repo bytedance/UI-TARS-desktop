@@ -3,12 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LogLevel } from '@tarko/interface';
 import { AgentServer } from './src/server';
 import { resolve } from 'path';
-import { config } from 'dotenv';
-
-config();
 
 const workspace = resolve(__dirname, './tmp');
 

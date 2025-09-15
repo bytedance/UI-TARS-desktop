@@ -4,9 +4,8 @@
  */
 
 import { nanoid } from 'nanoid';
-import { AgentSession } from '../AgentSession';
+import { AgentSession } from './AgentSession';
 import { SandboxScheduler } from '../sandbox/SandboxScheduler';
-import { UserConfigService } from '../../services/UserConfigService';
 import { getCurrentUser } from '../../middlewares/auth';
 import type { AgentServer, UserInfo, HonoContext } from '../../types';
 import type { AgioProviderConstructor, SessionInfo } from '@tarko/interface';

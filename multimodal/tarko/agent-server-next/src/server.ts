@@ -8,7 +8,7 @@ import { serve } from '@hono/node-server';
 import { cors } from 'hono/cors';
 import { LogLevel, SessionInfo, TenantConfig } from '@tarko/interface';
 import { StorageProvider, createStorageProvider } from './storage';
-import type { AgentSession, SandboxManager } from './core';
+import type { AgentSession } from './core';
 import { resolveAgentImplementation } from './utils/agent-resolver';
 import type {
   AgentServerVersionInfo,
@@ -19,7 +19,7 @@ import type {
   IAgent,
   ContextVariables,
 } from './types';
-import { SessionManager } from './core/session/SessionManager';
+import { AgentSessionManager } from './core/session/AgentSessionManager';
 import { AgentSessionFactory } from './core/session/AgentSessionFactory';
 import { SandboxScheduler } from './core/sandbox/SandboxScheduler';
 import { UserConfigService } from './services/UserConfigService';
@@ -34,7 +34,9 @@ import {
   createSystemRoutes,
 } from './api/routes';
 import { createUserConfigRoutes } from './api/routes/user';
+import { config } from 'dotenv';
 
+config();
 /**
  * AgentServer - Generic server class for any Agent implementation using Hono
  *
@@ -57,7 +59,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   // Session management
   public sessions: Record<string, AgentSession> = {};
   public storageUnsubscribes: Record<string, () => void> = {};
-  private sessionManager: SessionManager;
+  private sessionManager: AgentSessionManager;
   private sessionFactory: AgentSessionFactory;
   private sandboxScheduler?: SandboxScheduler;
   public userConfigService?: UserConfigService;
@@ -105,7 +107,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     this.storageProvider = createStorageProvider(appConfig.server?.storage || { type: 'sqlite' });
 
     // Initialize session management
-    this.sessionManager = new SessionManager({
+    this.sessionManager = new AgentSessionManager({
       maxSessions: (appConfig.server as any)?.maxSessions,
       memoryLimitMB: (appConfig.server as any)?.memoryLimitMB,
       checkIntervalMs: (appConfig.server as any)?.checkIntervalMs,
@@ -490,7 +492,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   /**
    * Get session manager instance
    */
-  getSessionManager(): SessionManager {
+  getSessionManager(): AgentSessionManager {
     return this.sessionManager;
   }
 
