@@ -72,6 +72,64 @@ export class AgentSession {
   private agioProvider?: AgioEvent.AgioProvider;
   private sessionInfo?: import('../storage').SessionInfo;
 
+  /**
+   * Type guard to check if agent has logger
+   */
+  private hasLogger(agent: IAgent): agent is IAgent & { logger: { debug: (msg: string) => void; info: (title: string, content: string) => void } } {
+    return 'logger' in agent && typeof (agent as unknown as Record<string, unknown>).logger === 'object';
+  }
+
+  /**
+   * Type guard to check if agent has getOptions method
+   */
+  private hasGetOptions(agent: IAgent): agent is IAgent & { getOptions: () => unknown } {
+    return 'getOptions' in agent && typeof (agent as unknown as Record<string, unknown>).getOptions === 'function';
+  }
+
+  /**
+   * Create event handler for storage and AGIO processing
+   */
+  private createEventHandler() {
+    return async (event: AgentEventStream.Event) => {
+      // Save to storage if available and event should be stored
+      if (this.server.storageProvider && shouldStoreEvent(event)) {
+        try {
+          await this.server.storageProvider.saveEvent(this.id, event);
+        } catch (error) {
+          console.error(`Failed to save event to storage: ${error}`);
+        }
+      }
+
+      // Process AGIO events if collector is configured
+      if (this.agioProvider) {
+        try {
+          await this.agioProvider.processAgentEvent(event);
+        } catch (error) {
+          console.error('Failed to process AGIO event:', error);
+        }
+      }
+    };
+  }
+
+  /**
+   * Setup event stream connections for storage and client communication
+   */
+  private setupEventStreams() {
+    const agentEventStream = this.agent.getEventStream();
+    const handleEvent = this.createEventHandler();
+
+    // Subscribe to events for storage and AGIO processing
+    const storageUnsubscribe = agentEventStream.subscribe(handleEvent);
+
+    // Connect to event bridge for client communication
+    if (this.unsubscribe) {
+      this.unsubscribe();
+    }
+    this.unsubscribe = this.eventBridge.connectToAgentEventStream(agentEventStream);
+
+    return { storageUnsubscribe };
+  }
+
   constructor(
     private server: AgentServer,
     sessionId: string,
@@ -95,15 +153,14 @@ export class AgentSession {
 
       if (snapshotStoragesDirectory) {
         const snapshotPath = path.join(snapshotStoragesDirectory, sessionId);
-        // @ts-expect-error
         this.agent = new AgentSnapshot(agent, {
           snapshotPath,
           snapshotName: sessionId,
         }) as unknown as IAgent;
 
         // Log snapshot initialization if agent has logger
-        if ('logger' in agent) {
-          (agent as any).logger.debug(`AgentSnapshot initialized with path: ${snapshotPath}`);
+        if (this.hasLogger(agent)) {
+          agent.logger.debug(`AgentSnapshot initialized with path: ${snapshotPath}`);
         }
       } else {
         this.agent = agent;
@@ -118,18 +175,18 @@ export class AgentSession {
       this.agioProvider = new impl(agentOptions.agio.provider, agentOptions, sessionId, this.agent);
 
       // Log AGIO initialization if agent has logger
-      if ('logger' in this.agent) {
-        (this.agent as any).logger.debug(
+      if (this.hasLogger(this.agent)) {
+        this.agent.logger.debug(
           `AGIO collector initialized with provider: ${agentOptions.agio.provider}`,
         );
       }
     }
 
     // Log agent configuration if agent has logger and getOptions method
-    if ('logger' in this.agent && 'getOptions' in this.agent) {
-      (this.agent as any).logger.info(
+    if (this.hasLogger(this.agent) && this.hasGetOptions(this.agent)) {
+      this.agent.logger.info(
         'Agent Config',
-        JSON.stringify((this.agent as any).getOptions(), null, 2),
+        JSON.stringify(this.agent.getOptions(), null, 2),
       );
     }
   }
@@ -154,35 +211,8 @@ export class AgentSession {
       }
     }
 
-    // Connect to agent's event stream manager
-    const agentEventStream = this.agent.getEventStream();
-
-    // Create an event handler that saves events to storage and processes AGIO events
-    const handleEvent = async (event: AgentEventStream.Event) => {
-      // If we have storage, save the event (filtered for performance)
-      if (this.server.storageProvider && shouldStoreEvent(event)) {
-        try {
-          await this.server.storageProvider.saveEvent(this.id, event);
-        } catch (error) {
-          console.error(`Failed to save event to storage: ${error}`);
-        }
-      }
-
-      // Process AGIO events if collector is configured
-      if (this.agioProvider) {
-        try {
-          await this.agioProvider.processAgentEvent(event);
-        } catch (error) {
-          console.error('Failed to process AGIO event:', error);
-        }
-      }
-    };
-
-    // Subscribe to events for storage and AGIO processing
-    const storageUnsubscribe = agentEventStream.subscribe(handleEvent);
-
-    // Connect to event bridge for client communication
-    this.unsubscribe = this.eventBridge.connectToAgentEventStream(agentEventStream);
+    // Setup event stream connections
+    const { storageUnsubscribe } = this.setupEventStreams();
 
     // Notify client that session is ready
     this.eventBridge.emit('ready', { sessionId: this.id });
@@ -424,7 +454,6 @@ export class AgentSession {
 
         if (snapshotStoragesDirectory) {
           const snapshotPath = path.join(snapshotStoragesDirectory, this.id);
-          // @ts-expect-error
           this.agent = new AgentSnapshot(newAgent, {
             snapshotPath,
             snapshotName: this.id,
@@ -439,36 +468,8 @@ export class AgentSession {
       // Re-initialize the new agent and reconnect event streams
       await this.agent.initialize();
       
-      // Reconnect event stream for storage and AGIO
-      const agentEventStream = this.agent.getEventStream();
-      
-      // Create event handler for storage and AGIO
-      const handleEvent = async (event: AgentEventStream.Event) => {
-        if (this.server.storageProvider && shouldStoreEvent(event)) {
-          try {
-            await this.server.storageProvider.saveEvent(this.id, event);
-          } catch (error) {
-            console.error(`Failed to save event to storage: ${error}`);
-          }
-        }
-        
-        if (this.agioProvider) {
-          try {
-            await this.agioProvider.processAgentEvent(event);
-          } catch (error) {
-            console.error('Failed to process AGIO event:', error);
-          }
-        }
-      };
-      
-      // Subscribe to new agent's events
-      agentEventStream.subscribe(handleEvent);
-      
-      // Reconnect to event bridge
-      if (this.unsubscribe) {
-        this.unsubscribe();
-      }
-      this.unsubscribe = this.eventBridge.connectToAgentEventStream(agentEventStream);
+      // Reconnect event streams
+      this.setupEventStreams();
     } catch (error) {
       console.error(`Failed to recreate agent for session ${this.id}:`, error);
       throw error;
