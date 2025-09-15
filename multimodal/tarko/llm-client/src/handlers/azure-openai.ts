@@ -42,6 +42,14 @@ export class AzureOpenAIHandler extends BaseHandler<AzureOpenAIModel> {
       );
     }
 
+    console.log({
+      apiKey,
+      azureADTokenProvider,
+      apiVersion,
+      endpoint,
+      defaultHeaders: this.opts.defaultHeaders,
+    });
+
     const azureOpenAI = new AzureOpenAI({
       apiKey,
       azureADTokenProvider,
