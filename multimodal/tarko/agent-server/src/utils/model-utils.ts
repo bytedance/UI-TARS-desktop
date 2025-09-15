@@ -6,13 +6,16 @@
 import type { AgentModel, AgentAppConfig } from '../types';
 
 export function getAvailableModels(appConfig: AgentAppConfig): AgentModel[] {
-  const allModels = [...(appConfig.model ? [appConfig.model] : []), ...(appConfig.server?.models || [])];
-  
+  const allModels = [
+    ...(appConfig.model ? [appConfig.model] : []),
+    ...(appConfig.server?.models || []),
+  ];
+
   // Deduplicate by model.id, keeping the first occurrence
-  const uniqueModels = allModels.filter((model, index, arr) => 
-    arr.findIndex(m => m.id === model.id) === index
+  const uniqueModels = allModels.filter(
+    (model, index, arr) => arr.findIndex((m) => m.id === model.id) === index,
   );
-  
+
   return uniqueModels;
 }
 
