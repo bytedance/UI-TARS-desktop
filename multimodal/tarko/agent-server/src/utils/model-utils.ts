@@ -6,10 +6,7 @@
 import type { AgentModel, AgentAppConfig } from '../types';
 
 export function getAvailableModels(appConfig: AgentAppConfig): AgentModel[] {
-  return [
-    ...(appConfig.model ? [appConfig.model] : []),
-    ...(appConfig.server?.models || []),
-  ];
+  return [...(appConfig.model ? [appConfig.model] : []), ...(appConfig.server?.models || [])];
 }
 
 export function getDefaultModel(appConfig: AgentAppConfig): AgentModel | undefined {
@@ -22,6 +19,6 @@ export function isModelConfigValid(
   modelId: string,
 ): boolean {
   return getAvailableModels(appConfig).some(
-    (model) => model.provider === provider && model.id === modelId
+    (model) => model.provider === provider && model.id === modelId,
   );
 }

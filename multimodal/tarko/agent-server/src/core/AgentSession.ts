@@ -21,6 +21,7 @@ import type { AgentServer } from '../server';
 import { AgioEvent } from '@tarko/agio';
 import { handleAgentError, ErrorWithCode } from '../utils/error-handler';
 import { SessionInfo } from '../storage';
+import { getAvailableModels, getDefaultModel } from '../utils';
 
 /**
  * Check if an event should be stored in persistent storage
@@ -115,11 +116,55 @@ export class AgentSession {
   }
 
   /**
+   * Create agent instance with proper configuration
+   */
+  private createAgent(sessionInfo?: SessionInfo): IAgent {
+    const agentResolution = this.server['currentAgentResolution'];
+    if (!agentResolution) {
+      throw new Error('Cannot found available resolved agent');
+    }
+
+    const agentOptions = {
+      ...this.server.appConfig,
+      name: this.server.getCurrentAgentName(),
+      model: this.resolveModelConfig(sessionInfo),
+    };
+
+    return new agentResolution.agentConstructor(agentOptions);
+  }
+
+  /**
+   * Resolve model configuration for agent creation
+   */
+  private resolveModelConfig(sessionInfo?: SessionInfo) {
+    // Try to use session-specific model first
+    if (sessionInfo?.metadata?.modelConfig) {
+      const { provider, id: modelId } = sessionInfo.metadata.modelConfig;
+      const availableModels = getAvailableModels(this.server.appConfig);
+      const sessionModel = availableModels.find(
+        (model) => model.provider === provider && model.id === modelId,
+      );
+
+      if (sessionModel) {
+        return sessionModel;
+      }
+
+      // Log fallback warning if session model is not available
+      if (this.server.isDebug) {
+        console.warn(`Session model ${provider}:${modelId} not found, falling back to default`);
+      }
+    }
+
+    // Fall back to default model
+    return getDefaultModel(this.server.appConfig);
+  }
+
+  /**
    * Create agent with snapshot support if enabled
    */
   private createAgentWithSnapshot(baseAgent: IAgent, sessionId: string): IAgent {
     const agentOptions = { ...this.server.appConfig };
-    
+
     if (agentOptions.snapshot?.enable) {
       const snapshotStoragesDirectory =
         agentOptions.snapshot.storageDirectory ?? this.server.getCurrentWorkspace();
@@ -133,11 +178,11 @@ export class AgentSession {
 
         // Log snapshot initialization
         console.debug(`AgentSnapshot initialized with path: ${snapshotPath}`);
-        
+
         return wrappedAgent;
       }
     }
-    
+
     return baseAgent;
   }
 
@@ -151,9 +196,9 @@ export class AgentSession {
     this.eventBridge = new EventStreamBridge();
     this.sessionInfo = sessionInfo;
 
-    // Create agent instance using the server's session-aware factory method
-    const agent = server.createAgent(sessionInfo);
-    
+    // Create agent instance with session-aware configuration
+    const agent = this.createAgent(sessionInfo);
+
     // Apply snapshot wrapper if enabled
     this.agent = this.createAgentWithSnapshot(agent, sessionId);
 
@@ -162,7 +207,7 @@ export class AgentSession {
     if (agentOptions.agio?.provider && agioProviderImpl) {
       const impl = agioProviderImpl;
       this.agioProvider = new impl(agentOptions.agio.provider, agentOptions, sessionId, this.agent);
-      
+
       // Log AGIO initialization
       console.debug(`AGIO collector initialized with provider: ${agentOptions.agio.provider}`);
     }
@@ -424,8 +469,8 @@ export class AgentSession {
       }
 
       // Create new agent with updated session info
-      const newAgent = this.server.createAgent(sessionInfo);
-      
+      const newAgent = this.createAgent(sessionInfo);
+
       // Apply snapshot wrapper if enabled
       this.agent = this.createAgentWithSnapshot(newAgent, this.id);
 

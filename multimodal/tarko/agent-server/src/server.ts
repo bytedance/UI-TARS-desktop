@@ -12,16 +12,12 @@ import { StorageProvider, createStorageProvider } from './storage';
 import { setupSocketIO } from './core/SocketHandlers';
 import type { AgentSession } from './core';
 import { resolveAgentImplementation } from './utils/agent-resolver';
-import { getAvailableModels, getDefaultModel, isModelConfigValid } from './utils/model-utils';
 import type {
   AgentServerVersionInfo,
   AgentServerInitOptions,
   AgentAppConfig,
   AgentResolutionResult,
   AgioProviderConstructor,
-  IAgent,
-  SessionInfo,
-  AgentModel,
 } from './types';
 import { TARKO_CONSTANTS, GlobalDirectoryOptions } from '@tarko/interface';
 
@@ -313,50 +309,5 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     return Promise.resolve();
   }
 
-  /**
-   * Create a new Agent instance using the injected constructor
-   * @param sessionInfo Optional session info to override model config
-   * @returns New Agent instance
-   */
-  createAgent(sessionInfo?: SessionInfo): IAgent {
-    if (!this.currentAgentResolution) {
-      throw new Error('Cannot found available resolved agent');
-    }
 
-    const agentOptions: T = {
-      ...this.appConfig,
-      name: this.getCurrentAgentName(),
-      model: this.resolveModelConfig(sessionInfo),
-    };
-
-    return new this.currentAgentResolution.agentConstructor(agentOptions);
-  }
-
-  /**
-   * Resolve model configuration for agent creation
-   * @param sessionInfo Optional session info containing model preferences
-   * @returns Resolved model configuration
-   */
-  private resolveModelConfig(sessionInfo?: SessionInfo): AgentModel | undefined {
-    // Try to use session-specific model first
-    if (sessionInfo?.metadata?.modelConfig) {
-      const { provider, id: modelId } = sessionInfo.metadata.modelConfig;
-      const availableModels = getAvailableModels(this.appConfig);
-      const sessionModel = availableModels.find(
-        (model) => model.provider === provider && model.id === modelId,
-      );
-
-      if (sessionModel) {
-        return sessionModel;
-      }
-
-      // Log fallback warning if session model is not available
-      if (this.isDebug) {
-        console.warn(`Session model ${provider}:${modelId} not found, falling back to default`);
-      }
-    }
-
-    // Fall back to default model
-    return getDefaultModel(this.appConfig);
-  }
 }
