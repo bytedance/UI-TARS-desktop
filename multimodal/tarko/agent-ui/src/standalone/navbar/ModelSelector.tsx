@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { getModelDisplayName } from '@/common/utils/modelUtils';
 import {
@@ -11,9 +11,14 @@ import {
   createTheme,
   ThemeProvider,
 } from '@mui/material';
-import { apiService } from '@/common/services/apiService';
-import { useSetAtom } from 'jotai';
-import { sessionMetadataAtom } from '@/common/state/atoms/ui';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { 
+  availableModelsAtom, 
+  modelsLoadingAtom, 
+  loadModelsAtom, 
+  currentModelAtom, 
+  updateSessionModelAtom 
+} from '@/common/state/atoms/ui';
 import { SessionItemMetadata } from '@tarko/interface';
 import { AgentModel } from '@tarko/agent-interface';
 
@@ -40,11 +45,12 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   sessionMetadata,
   isDarkMode = false,
 }) => {
-  const [availableModels, setAvailableModels] = useState<{ models: AgentModel[] } | null>(null);
-  const [currentModel, setCurrentModel] = useState<AgentModel | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const setSessionMetadata = useSetAtom(sessionMetadataAtom);
+  const availableModels = useAtomValue(availableModelsAtom);
+  const currentModel = useAtomValue(currentModelAtom);
+  const isLoading = useAtomValue(modelsLoadingAtom);
+  const loadModels = useSetAtom(loadModelsAtom);
+  const updateSessionModel = useSetAtom(updateSessionModelAtom);
+  const [isUpdating, setIsUpdating] = React.useState(false);
 
   const muiTheme = React.useMemo(
     () =>
@@ -159,72 +165,33 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     [isDarkMode],
   );
 
-  const loadModels = useCallback(async () => {
-    try {
-      const models = await apiService.getAvailableModels();
-      setAvailableModels(models);
-    } catch (error) {
-      console.error('Failed to load available models:', error);
-    } finally {
-      setIsInitialLoading(false);
+  const handleModelChange = async (selectedModel: AgentModel) => {
+    if (!activeSessionId || isUpdating || !selectedModel) {
+      return;
     }
-  }, []);
 
-  const handleModelChange = useCallback(
-    async (selectedModel: AgentModel) => {
-      if (!activeSessionId || isLoading || !selectedModel) {
-        return;
-      }
-
-      setIsLoading(true);
-
-      try {
-        const response = await apiService.updateSessionModel(activeSessionId, selectedModel);
-
-        if (response.success) {
-          setCurrentModel(selectedModel);
-
-          // Update sessionMetadata immediately with the new model config
-          if (response.sessionInfo?.metadata) {
-            setSessionMetadata(response.sessionInfo.metadata);
-          }
-        }
-      } catch (error) {
-        console.error('Failed to update session model:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [activeSessionId, isLoading, setSessionMetadata],
-  );
+    setIsUpdating(true);
+    try {
+      await updateSessionModel(selectedModel);
+    } catch (error) {
+      console.error('Failed to update session model:', error);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   useEffect(() => {
     loadModels();
   }, [loadModels]);
 
-  // Update current model when session metadata changes
-  useEffect(() => {
-    if (!availableModels?.models.length) return;
-
-    const sessionModel = sessionMetadata?.modelConfig
-      ? availableModels.models.find(
-          (model) => 
-            model.provider === sessionMetadata.modelConfig?.provider && 
-            model.id === sessionMetadata.modelConfig?.id
-        )
-      : null;
-
-    setCurrentModel(sessionModel || availableModels.models[0]);
-  }, [sessionMetadata, availableModels]);
-
-  if (!activeSessionId || isInitialLoading) {
+  if (!activeSessionId || isLoading) {
     return null;
   }
 
   // Show selector only if there are multiple models available
-  const hasMultipleModels = availableModels && availableModels.models.length > 1;
+  const hasMultipleModels = availableModels.length > 1;
 
-  if (!hasMultipleModels || !availableModels || availableModels.models.length === 0) {
+  if (!hasMultipleModels || availableModels.length === 0) {
     if (!sessionMetadata?.modelConfig) {
       return null;
     }
@@ -349,7 +316,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
             {selected.provider}
           </Typography>
         </Box>
-        {isLoading && (
+        {isUpdating && (
           <CircularProgress size={12} thickness={4} sx={{ color: '#6366f1', marginLeft: 'auto' }} />
         )}
       </Box>
@@ -364,14 +331,14 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
             value={currentModel ? getModelKey(currentModel) : ''}
             onChange={(event) => {
               const selectedKey = event.target.value as string;
-              const selectedModel = availableModels?.models.find(
+              const selectedModel = availableModels.find(
                 (model) => getModelKey(model) === selectedKey,
               );
               if (selectedModel) {
                 handleModelChange(selectedModel);
               }
             }}
-            disabled={isLoading}
+            disabled={isUpdating}
             displayEmpty
             renderValue={() => renderValue(currentModel)}
             size="small"
@@ -409,7 +376,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
               maxWidth: 360,
             }}
           >
-            {availableModels.models.map((model) => {
+            {availableModels.map((model) => {
               const modelKey = getModelKey(model);
               const isSelected = isSameModel(currentModel, model);
               const displayText = getModelDisplayText(model);

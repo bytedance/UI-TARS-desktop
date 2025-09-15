@@ -5,6 +5,8 @@ import { useSession } from '@/common/hooks/useSession';
 import HomePage from '@/standalone/home/HomePage';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { SessionRouter } from './Router/SessionRouter';
+import { useSetAtom } from 'jotai';
+import { loadModelsAtom } from '@/common/state/atoms/ui';
 
 /**
  * App Component - Main application container with routing
@@ -13,6 +15,7 @@ export const App: React.FC = () => {
   const { initConnectionMonitoring, loadSessions, connectionStatus, activeSessionId } =
     useSession();
   const { isReplayMode } = useReplayMode();
+  const loadModels = useSetAtom(loadModelsAtom);
 
   // Initialize connection monitoring and load sessions on mount - but not in replay mode
   useEffect(() => {
@@ -26,9 +29,10 @@ export const App: React.FC = () => {
       // Initialize connection monitoring
       const cleanup = initConnectionMonitoring();
 
-      // Load sessions if connected
+      // Load sessions and models if connected
       if (connectionStatus.connected) {
         await loadSessions();
+        loadModels(); // Load available models
       }
 
       return cleanup;

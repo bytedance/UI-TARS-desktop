@@ -19,8 +19,6 @@ export interface WorkspaceItem {
   relativePath: string;
 }
 
-
-
 /**
  * API Service - Handles HTTP requests to the Agent TARS Server
  *
