@@ -71,6 +71,13 @@ export class AgentSession {
   private sessionInfo?: SessionInfo;
 
   /**
+   * Type guard to check if agent has logger
+   */
+  private hasLogger(agent: IAgent): agent is IAgent & { logger: { debug: (msg: string) => void; info: (title: string, content: string) => void } } {
+    return 'logger' in agent && typeof (agent as unknown as Record<string, unknown>).logger === 'object';
+  }
+
+  /**
    * Create event handler for storage and AGIO processing
    */
   private createEventHandler() {
@@ -114,6 +121,35 @@ export class AgentSession {
     return { storageUnsubscribe };
   }
 
+  /**
+   * Create agent with snapshot support if enabled
+   */
+  private createAgentWithSnapshot(baseAgent: IAgent, sessionId: string): IAgent {
+    const agentOptions = { ...this.server.appConfig };
+    
+    if (agentOptions.snapshot?.enable) {
+      const snapshotStoragesDirectory =
+        agentOptions.snapshot.storageDirectory ?? this.server.getCurrentWorkspace();
+
+      if (snapshotStoragesDirectory) {
+        const snapshotPath = path.join(snapshotStoragesDirectory, sessionId);
+        const wrappedAgent = new AgentSnapshot(baseAgent as any, {
+          snapshotPath,
+          snapshotName: sessionId,
+        }) as unknown as IAgent;
+
+        // Log snapshot initialization if agent has logger
+        if (this.hasLogger(baseAgent)) {
+          baseAgent.logger.debug(`AgentSnapshot initialized with path: ${snapshotPath}`);
+        }
+        
+        return wrappedAgent;
+      }
+    }
+    
+    return baseAgent;
+  }
+
   constructor(
     private server: AgentServer,
     sessionId: string,
@@ -124,39 +160,28 @@ export class AgentSession {
     this.eventBridge = new EventStreamBridge();
     this.sessionInfo = sessionInfo;
 
-    const agentOptions = { ...server.appConfig };
+    // Create agent instance using the server's session-aware factory method
     const agent = server.createAgent(sessionInfo);
-
-    // Initialize agent snapshot if enabled
-    if (agentOptions.snapshot?.enable) {
-      const snapshotStoragesDirectory =
-        agentOptions.snapshot.storageDirectory ?? server.getCurrentWorkspace();
-
-      if (snapshotStoragesDirectory) {
-        const snapshotPath = path.join(snapshotStoragesDirectory, sessionId);
-        // @ts-expect-error
-        this.agent = new AgentSnapshot(agent, {
-          snapshotPath,
-          snapshotName: sessionId,
-        }) as unknown as IAgent;
-
-        // Log snapshot initialization if agent has logger
-        console.log(`AgentSnapshot initialized with path: ${snapshotPath}`);
-      } else {
-        this.agent = agent;
-      }
-    } else {
-      this.agent = agent;
-    }
+    
+    // Apply snapshot wrapper if enabled
+    this.agent = this.createAgentWithSnapshot(agent, sessionId);
 
     // Initialize AGIO collector if provider URL is configured
+    const agentOptions = { ...server.appConfig };
     if (agentOptions.agio?.provider && agioProviderImpl) {
       const impl = agioProviderImpl;
       this.agioProvider = new impl(agentOptions.agio.provider, agentOptions, sessionId, this.agent);
-      console.debug(`AGIO collector initialized with provider: ${agentOptions.agio.provider}`);
+      
+      // Log AGIO initialization if agent has logger
+      if (this.hasLogger(this.agent)) {
+        this.agent.logger.debug(`AGIO collector initialized with provider: ${agentOptions.agio.provider}`);
+      }
     }
 
-    console.info('Agent Config', JSON.stringify(this.agent.getOptions?.(), null, 2));
+    // Log agent configuration if agent has logger
+    if (this.hasLogger(this.agent)) {
+      this.agent.logger.info('Agent Config', JSON.stringify((this.agent as any).getOptions?.(), null, 2));
+    }
   }
 
   /**
@@ -413,25 +438,9 @@ export class AgentSession {
 
       // Create new agent with updated session info
       const newAgent = this.server.createAgent(sessionInfo);
-
-      // Handle snapshot if enabled
-      const agentOptions = { ...this.server.appConfig };
-      if (agentOptions.snapshot?.enable) {
-        const snapshotStoragesDirectory =
-          agentOptions.snapshot.storageDirectory ?? this.server.getCurrentWorkspace();
-
-        if (snapshotStoragesDirectory) {
-          const snapshotPath = path.join(snapshotStoragesDirectory, this.id);
-          this.agent = new AgentSnapshot(newAgent as any, {
-            snapshotPath,
-            snapshotName: this.id,
-          }) as unknown as IAgent;
-        } else {
-          this.agent = newAgent;
-        }
-      } else {
-        this.agent = newAgent;
-      }
+      
+      // Apply snapshot wrapper if enabled
+      this.agent = this.createAgentWithSnapshot(newAgent, this.id);
 
       // Re-initialize the new agent and reconnect event streams
       await this.agent.initialize();
