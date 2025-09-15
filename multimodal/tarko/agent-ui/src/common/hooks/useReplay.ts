@@ -7,7 +7,6 @@ import { toolResultsAtom } from '../state/atoms/tool';
 import { processEventAction } from '../state/actions/eventProcessors';
 import { useSetAtom } from 'jotai';
 
-
 /**
  * Base interval for playback speed calculation (in milliseconds)
  */
@@ -73,8 +72,6 @@ export function useReplay() {
         ...prev,
         [activeSessionId]: [],
       }));
-
-
 
       // Process events from 0 to targetIndex
       for (let i = 0; i <= targetIndex; i++) {

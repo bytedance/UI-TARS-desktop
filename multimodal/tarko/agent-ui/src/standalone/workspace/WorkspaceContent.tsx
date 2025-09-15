@@ -1,15 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSession } from '@/common/hooks/useSession';
-
-import {
-  FiLayout,
-
-  FiZap,
-  FiArrowRight,
-  FiLayers,
-  FiActivity,
-  FiFileText,
-} from 'react-icons/fi';
+import { FiLayout, FiZap, FiLayers, FiActivity, FiFileText } from 'react-icons/fi';
 import { apiService } from '@/common/services/apiService';
 import { normalizeFilePath } from '@/common/utils/pathNormalizer';
 import { getAgentTitle } from '@/config/web-ui-config';
@@ -44,10 +35,6 @@ export const WorkspaceContent: React.FC = () => {
 
     fetchWorkspaceInfo();
   }, []);
-
-
-
-
 
   // Enhanced empty state when no session
   if (!activeSessionId) {
@@ -118,7 +105,7 @@ export const WorkspaceContent: React.FC = () => {
               <div className="relative mb-8">
                 {/* Background glow */}
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500/15 via-purple-500/15 to-green-500/15 rounded-full blur-xl" />
-                
+
                 {/* Main icon container */}
                 <div className="relative w-20 h-20 bg-gradient-to-br from-white via-gray-50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-3xl flex items-center justify-center mx-auto shadow-lg border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-sm">
                   {/* Icon */}
@@ -137,8 +124,8 @@ export const WorkspaceContent: React.FC = () => {
 
               {/* Elegant description */}
               <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-6 max-w-sm mx-auto">
-                Your workspace is active. Start a conversation with {getAgentTitle()} and watch as tool
-                results and detailed information appear here in real-time.
+                Your workspace is active. Start a conversation with {getAgentTitle()} and watch as
+                tool results and detailed information appear here in real-time.
               </p>
 
               {/* Enhanced feature cards with modern design */}
@@ -179,9 +166,7 @@ export const WorkspaceContent: React.FC = () => {
                     <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
                       Deliverables
                     </div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400">
-                      Reports & Code
-                    </div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">Reports & Code</div>
                   </div>
                 </div>
               </div>

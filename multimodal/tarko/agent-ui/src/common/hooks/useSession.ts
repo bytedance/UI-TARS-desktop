@@ -140,8 +140,6 @@ export function useSession() {
     };
   }, [activeSessionId, handleSessionStatusUpdate, isReplayMode]);
 
-
-
   // Memoize the session state object to avoid unnecessary re-renders
   const sessionState = useMemo(
     () => ({

@@ -1,7 +1,5 @@
 import { EventHandler } from './types';
 import { AgentEventStream } from '@/common/types';
-
-// Import all handlers
 import {
   UserMessageHandler,
   AssistantMessageHandler,
@@ -14,8 +12,6 @@ import {
   ToolResultHandler,
   StreamingToolCallHandler,
 } from './handlers/ToolHandler';
-
-
 
 import { SystemMessageHandler, EnvironmentInputHandler } from './handlers/SystemHandler';
 
@@ -47,8 +43,6 @@ export class EventHandlerRegistry {
     this.register(new ToolCallHandler());
     this.register(new ToolResultHandler());
     this.register(new StreamingToolCallHandler());
-
-
 
     // System handlers
     this.register(new SystemMessageHandler());
