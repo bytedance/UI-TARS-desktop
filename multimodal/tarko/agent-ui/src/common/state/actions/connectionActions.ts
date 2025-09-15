@@ -5,7 +5,6 @@ import { socketService } from '@/common/services/socketService';
 import {
   connectionStatusAtom,
   sessionMetadataAtom,
-  agentOptionsAtom,
 } from '@/common/state/atoms/ui';
 
 /**
@@ -24,28 +23,7 @@ export const checkConnectionStatusAction = atom(null, async (get, set) => {
       lastError: isConnected ? null : currentStatus.lastError,
     });
 
-    // Load workspace info when connection is successful
-    // Agent info will be loaded from session metadata when a session is active
-    if (isConnected) {
-      try {
-        const agentOptions = await apiService.getAgentOptions();
-        set(agentOptionsAtom, agentOptions);
-
-        // Extract workspace info from agent options
-        set(sessionMetadataAtom, (prev) => ({
-          ...prev,
-          metadata: {
-            ...prev.metadata,
-            workspace: {
-              name: agentOptions.workspaceName || 'Unknown',
-              path: agentOptions.workspace || '',
-            },
-          },
-        }));
-      } catch (error) {
-        console.warn('Failed to load agent options:', error);
-      }
-    }
+    // Connection successful - workspace info will be loaded from session metadata when needed
 
     return isConnected;
   } catch (error) {

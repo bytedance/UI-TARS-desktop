@@ -43,21 +43,22 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   const [models, setModels] = useState<AgentModel[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const setSessionMetadata = useSetAtom(sessionMetadataAtom);
-  
+
   // Get current model from session metadata - fix race condition
   const currentModel = React.useMemo(() => {
     // Wait for both models and sessionMetadata to be loaded
     if (models.length === 0) return null;
-    
+
     // If we have session metadata with model config, use it
     if (sessionMetadata?.modelConfig) {
-      const foundModel = models.find(m => 
-        m.provider === sessionMetadata.modelConfig?.provider && 
-        m.id === sessionMetadata.modelConfig?.id
+      const foundModel = models.find(
+        (m) =>
+          m.provider === sessionMetadata.modelConfig?.provider &&
+          m.id === sessionMetadata.modelConfig?.id,
       );
       return foundModel || models[0]; // fallback to first model if not found
     }
-    
+
     // Only fallback to first model if we have confirmed no session metadata
     // This prevents showing default model during initial loading
     return models[0];
@@ -178,7 +179,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
 
   const handleModelChange = async (selectedModel: AgentModel) => {
     if (!activeSessionId || isLoading || !selectedModel) return;
-    
+
     setIsLoading(true);
     try {
       const response = await apiService.updateSessionModel(activeSessionId, selectedModel);
@@ -195,7 +196,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   useEffect(() => {
     const loadModels = async () => {
       if (models.length > 0) return; // Only load once
-      
+
       try {
         const response = await apiService.getAvailableModels();
         setModels(response.models);
@@ -203,7 +204,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
         console.error('Failed to load models:', error);
       }
     };
-    
+
     loadModels();
   }, [models.length]);
 
@@ -352,9 +353,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
             value={currentModel ? getModelKey(currentModel) : ''}
             onChange={(event) => {
               const selectedKey = event.target.value as string;
-              const selectedModel = models.find(
-                (model) => getModelKey(model) === selectedKey,
-              );
+              const selectedModel = models.find((model) => getModelKey(model) === selectedKey);
               if (selectedModel) {
                 handleModelChange(selectedModel);
               }

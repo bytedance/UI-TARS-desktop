@@ -33,17 +33,9 @@ export const WorkspaceContent: React.FC = () => {
   const allFiles = useAtomValue(sessionFilesAtom);
 
   useEffect(() => {
-    const fetchWorkspaceInfo = async () => {
-      try {
-        const workspaceInfo = await apiService.getWorkspaceInfo();
-        setWorkspacePath(normalizeFilePath(workspaceInfo.path));
-      } catch (error) {
-        console.error('Failed to fetch workspace info:', error);
-        setWorkspacePath('');
-      }
-    };
-
-    fetchWorkspaceInfo();
+    // Workspace path is no longer available from agent options
+    // This will be handled through session-specific metadata if needed
+    setWorkspacePath('Workspace');
   }, []);
 
 

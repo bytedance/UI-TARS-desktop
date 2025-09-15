@@ -1,7 +1,7 @@
 import { atom } from 'jotai';
 import { SessionItemMetadata, AgentStatusInfo, LayoutMode } from '@tarko/interface';
 import { getDefaultLayoutMode } from '@/config/web-ui-config';
-import { ConnectionStatus, PanelContent, SanitizedAgentOptions } from '@/common/types';
+import { ConnectionStatus, PanelContent } from '@/common/types';
 import { activeSessionIdAtom } from './session';
 
 /**
@@ -46,10 +46,7 @@ export const connectionStatusAtom = atom<ConnectionStatus>({
  */
 export const sessionMetadataAtom = atom<SessionItemMetadata>({});
 
-/**
- * Atom for agent options (sanitized configuration)
- */
-export const agentOptionsAtom = atom<SanitizedAgentOptions>({});
+
 
 /**
  * Atom for sidebar collapsed state
