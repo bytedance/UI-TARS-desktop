@@ -1,19 +1,14 @@
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 import { resolve } from 'path';
+import config from './examples/webui-config.json';
 
 export default defineConfig({
   plugins: [pluginReact()],
   source: {
     define: {
       'process.env.AGENT_BASE_URL': JSON.stringify(process.env.AGENT_BASE_URL || ''),
-      'process.env.AGENT_WEBUI_CONFIG': JSON.stringify(
-        process.env.AGENT_WEBUI_CONFIG,
-        // ||
-        // {
-        //   basePath: '/[a-zA-Z0-9]+',
-        // },
-      ),
+      'process.env.AGENT_WEBUI_CONFIG': JSON.stringify(process.env.AGENT_WEBUI_CONFIG || config)
     },
     entry: {
       index: './src/entry.tsx',
@@ -22,9 +17,19 @@ export default defineConfig({
   dev: {
     writeToDisk: true,
   },
-  // server: {
-  //   base: '/p9fgsSryzeO5JtefS1bMfsa7G11S6pGKY',
-  // },
+  server: {
+    port: 3001,
+    proxy: {
+      '/api': {
+        target: process.env.AGENT_BASE_URL || 'http://localhost:3000',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/api': '/api',
+        },
+      },
+    },
+    // base: '/p9fgsSryzeO5JtefS1bMfsa7G11S6pGKY',
+  },
   output: {
     cleanDistPath: true,
     inlineScripts: true,

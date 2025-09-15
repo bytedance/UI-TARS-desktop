@@ -1,9 +1,14 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import React from 'react';
 import { Dialog, DialogPanel, DialogTitle } from './Dialog';
 import { FiAlertTriangle, FiX } from 'react-icons/fi';
 
 interface ConfirmDialogProps {
   isOpen: boolean;
+  deleteConfirmLoading: boolean;
   onClose: () => void;
   onConfirm: () => void;
   title: string;
@@ -17,6 +22,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   isOpen,
   onClose,
   onConfirm,
+  deleteConfirmLoading,
   title,
   message,
   confirmText = 'Confirm',
@@ -85,10 +91,22 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             {cancelText}
           </button>
           <button
-            onClick={onConfirm}
-            className={`px-4 py-2 ${typeStyles.confirmButton} rounded-lg text-sm font-medium transition-all hover:scale-105 active:scale-95`}
+            onClick={deleteConfirmLoading ? undefined : onConfirm}
+            disabled={deleteConfirmLoading}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              deleteConfirmLoading
+                ? 'bg-gray-400 cursor-not-allowed opacity-60'
+                : `${typeStyles.confirmButton} hover:scale-105 active:scale-95`
+            }`}
           >
-            {confirmText}
+            {deleteConfirmLoading ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                Loading...
+              </div>
+            ) : (
+              confirmText
+            )}
           </button>
         </div>
       </DialogPanel>

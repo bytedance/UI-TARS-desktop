@@ -32,6 +32,7 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
   const [switchingSessionId, setSwitchingSessionId] = useState<string | null>(null);
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteConfirmLoading, setDeleteConfirmLoading] = useState(false);
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchMode, setIsSearchMode] = useState(false);
@@ -202,6 +203,7 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
     if (!sessionToDelete) return;
 
     try {
+      setDeleteConfirmLoading(true);
       if (sessionToDelete === activeSessionId && sessions.length > 1) {
         const nextSession = sessions.find((s) => s.id !== sessionToDelete);
         if (nextSession) {
@@ -215,6 +217,7 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
     } catch (error) {
       console.error('Failed to delete session:', error);
     } finally {
+      setDeleteConfirmLoading(false);
       setDeleteConfirmOpen(false);
       setSessionToDelete(null);
     }
@@ -378,6 +381,7 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
         isOpen={deleteConfirmOpen}
         onClose={() => setDeleteConfirmOpen(false)}
         onConfirm={confirmDeleteSession}
+        deleteConfirmLoading={deleteConfirmLoading}
         title="Delete Task"
         message="Are you sure you want to delete this task? This action cannot be undone."
         confirmText="Delete"

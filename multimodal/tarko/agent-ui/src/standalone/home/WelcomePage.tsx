@@ -101,6 +101,8 @@ const WelcomePage: React.FC = () => {
       });
     } catch (error) {
       console.error('Failed to navigate to creating:', error);
+      // navigate('/', { replace: true });
+    } finally {
       setIsLoading(false);
     }
   };

@@ -9,6 +9,7 @@ import {
 import { ChatCompletionContentPart, AgentModel } from '@tarko/agent-interface';
 import { AgentServerVersionInfo } from '@agent-tars/interface';
 import { API_BASE_URL } from '@/config/web-ui-config';
+import { handleErrorNotification, getRespErrorMessage } from '../utils/notification';
 
 /**
  * Workspace item interface for contextual selector
@@ -44,11 +45,20 @@ class ApiService {
         signal: AbortSignal.timeout(3000),
       });
 
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+
       return response.ok;
     } catch (error) {
       console.error('Error checking server health:', error);
+      handleErrorNotification(error);
       return false;
     }
+  }
+
+  async sleep(wait: number) {
+    return new Promise((resolve) => setTimeout(resolve, wait));
   }
 
   /**
@@ -59,6 +69,8 @@ class ApiService {
     agentOptions?: Record<string, any>,
   ): Promise<{ session: SessionInfo; events: AgentEventStream.Event[] }> {
     try {
+      // await this.sleep(1000);
+      // throw new Error('test a error');
       const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.CREATE_SESSION}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -66,13 +78,15 @@ class ApiService {
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to create session: ${response.statusText}`);
+        const msg = await getRespErrorMessage(response);
+        throw new Error(msg);
       }
 
       const { sessionId, session, events } = await response.json();
       return { session: session as SessionInfo, events: events || [] };
     } catch (error) {
       console.error('Error creating session:', error);
+      handleErrorNotification(error);
       throw error;
     }
   }
@@ -95,6 +109,7 @@ class ApiService {
       return sessions;
     } catch (error) {
       console.error('Error getting sessions:', error);
+      handleErrorNotification(error);
       throw error;
     }
   }
@@ -121,6 +136,7 @@ class ApiService {
       return session;
     } catch (error) {
       console.error(`Error getting session details (${sessionId}):`, error);
+      handleErrorNotification(error);
       throw error;
     }
   }
@@ -136,7 +152,7 @@ class ApiService {
         {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
-          signal: AbortSignal.timeout(5000), // Add 5 second timeout
+          signal: AbortSignal.timeout(60000), // Add 5 second timeout
         },
       );
 
@@ -148,6 +164,7 @@ class ApiService {
       return events;
     } catch (error) {
       console.error(`Error getting session events (${sessionId}):`, error);
+      handleErrorNotification(error);
       throw error;
     }
   }
@@ -162,7 +179,7 @@ class ApiService {
         {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
-          signal: AbortSignal.timeout(3000), // 3 second timeout
+          signal: AbortSignal.timeout(5000), // 3 second timeout
         },
       );
 
@@ -197,6 +214,7 @@ class ApiService {
       return session;
     } catch (error) {
       console.error(`Error updating session (${sessionId}):`, error);
+      handleErrorNotification(error);
       throw error;
     }
   }
@@ -220,6 +238,7 @@ class ApiService {
       return success;
     } catch (error) {
       console.error(`Error deleting session (${sessionId}):`, error);
+      handleErrorNotification(error);
       throw error;
     }
   }
@@ -277,6 +296,7 @@ class ApiService {
       }
     } catch (error) {
       console.error('Error in streaming query:', error);
+      handleErrorNotification(error);
       throw error;
     }
   }
@@ -300,6 +320,7 @@ class ApiService {
       return data.result;
     } catch (error) {
       console.error('Error sending query:', error);
+      handleErrorNotification(error);
       throw error;
     }
   }
@@ -323,6 +344,7 @@ class ApiService {
       return data.success;
     } catch (error) {
       console.error('Error aborting query:', error);
+      handleErrorNotification(error);
       throw error;
     }
   }
@@ -346,6 +368,7 @@ class ApiService {
       return summary;
     } catch (error) {
       console.error('Error generating summary:', error);
+      handleErrorNotification(error);
       return 'Untitled Conversation';
     }
   }
@@ -383,6 +406,7 @@ class ApiService {
       };
     } catch (error) {
       console.error('Error getting version info:', error);
+      handleErrorNotification(error);
       return { version: '0.0.0', buildTime: Date.now() };
     }
   }
@@ -406,6 +430,7 @@ class ApiService {
       return options;
     } catch (error) {
       console.error('Error getting agent options:', error);
+      handleErrorNotification(error);
       return {};
     }
   }
@@ -422,6 +447,7 @@ class ApiService {
       };
     } catch (error) {
       console.error('Error getting workspace info:', error);
+      handleErrorNotification(error);
       return { name: 'Unknown', path: '' };
     }
   }
