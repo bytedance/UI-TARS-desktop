@@ -17,6 +17,8 @@ import { apiService } from '@/common/services/apiService';
 import { SessionItemMetadata } from '@tarko/interface';
 import { AgentModel } from '@tarko/agent-interface';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
+import { useAtomValue } from 'jotai';
+import { isProcessingAtom } from '@/common/state/atoms/ui';
 
 interface NavbarModelSelectorProps {
   className?: string;
@@ -133,6 +135,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const updateSessionMetadata = useSetAtom(updateSessionMetadataAction);
   const { isReplayMode } = useReplayMode();
+  const isProcessing = useAtomValue(isProcessingAtom);
 
   // Get current model from session metadata - simplified since server always provides modelConfig
   const currentModel = React.useMemo(() => {
@@ -152,8 +155,6 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     // If sessionMetadata is still loading, don't show any model yet
     return null;
   }, [models, sessionMetadata]);
-
-
 
   const muiTheme = React.useMemo(
     () =>
@@ -278,7 +279,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
         // Update session metadata using utility action
         updateSessionMetadata({
           sessionId: activeSessionId,
-          metadata: response.sessionInfo.metadata
+          metadata: response.sessionInfo.metadata,
         });
       }
     } catch (error) {
@@ -303,8 +304,8 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     loadModels();
   }, [models.length]);
 
-  // In replay mode or share mode (no activeSessionId), show static display if we have model config
-  if (!activeSessionId || isReplayMode) {
+  // In replay mode, share mode (no activeSessionId), or agent processing mode, show static display if we have model config
+  if (!activeSessionId || isReplayMode || isProcessing) {
     return (
       <StaticModelDisplay
         sessionMetadata={sessionMetadata}
@@ -319,8 +320,8 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     return null;
   }
 
-  // Show selector only if there are multiple models available
-  if (models.length <= 1) {
+  // Show selector only if there are multiple models available and agent is not processing
+  if (models.length <= 1 || isProcessing) {
     return (
       <StaticModelDisplay
         sessionMetadata={sessionMetadata}
