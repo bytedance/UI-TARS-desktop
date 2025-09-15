@@ -543,7 +543,10 @@ export class AnthropicHandler extends BaseHandler<AnthropicModel> {
 
     const stream = typeof body.stream === 'boolean' ? body.stream : undefined;
     const maxTokens = body.max_tokens ?? getDefaultMaxTokens(body.model);
-    const client = new Anthropic({ apiKey: getApiKey(this.opts.apiKey)! });
+    const client = new Anthropic({ 
+      apiKey: getApiKey(this.opts.apiKey)!,
+      defaultHeaders: this.opts.defaultHeaders,
+    });
     const stopSequences = convertStopSequences(body.stop);
     const topP = typeof body.top_p === 'number' ? body.top_p : undefined;
     const temperature =
