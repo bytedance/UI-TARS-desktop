@@ -116,8 +116,11 @@ Content-Type: application/json
 
 {
   "sessionId": "session-123",
-  "provider": "anthropic",
-  "modelId": "claude-3-opus"
+  "model": {
+    "id": "claude-3-opus",
+    "provider": "anthropic",
+    "displayName": "Claude 3 Opus"
+  }
 }
 ```
 
@@ -129,9 +132,9 @@ Content-Type: application/json
     "id": "session-123",
     "metadata": {
       "modelConfig": {
+        "id": "claude-3-opus",
         "provider": "anthropic",
-        "modelId": "claude-3-opus",
-        "configuredAt": 1640995200000
+        "displayName": "Claude 3 Opus"
       }
     }
   }
