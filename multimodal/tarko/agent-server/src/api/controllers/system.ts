@@ -5,10 +5,7 @@
 
 import { Request, Response } from 'express';
 import { sanitizeAgentOptions } from '../../utils/config-sanitizer';
-import {
-  getPublicAvailableModels,
-  isModelConfigValid,
-} from '../../utils/model-utils';
+import { getPublicAvailableModels, isModelConfigValid } from '../../utils/model-utils';
 
 export function healthCheck(req: Request, res: Response) {
   res.status(200).json({ status: 'ok' });
@@ -75,7 +72,11 @@ export async function updateSessionModel(req: Request, res: Response) {
       // If session is currently active, recreate the agent with new model config
       const activeSession = server.sessions[sessionId];
       if (activeSession) {
-        console.log('Session model updated', { sessionId, provider: model.provider, modelId: model.id });
+        console.log('Session model updated', {
+          sessionId,
+          provider: model.provider,
+          modelId: model.id,
+        });
 
         try {
           // Recreate agent with new model configuration

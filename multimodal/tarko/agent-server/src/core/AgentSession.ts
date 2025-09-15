@@ -280,7 +280,10 @@ export class AgentSession {
         console.log('[DEBUG] Query started', {
           sessionId: this.id,
           queryType: typeof options.input === 'string' ? 'string' : 'ContentPart',
-          queryPreview: typeof options.input === 'string' ? options.input.substring(0, 100) + '...' : '[ContentPart]'
+          queryPreview:
+            typeof options.input === 'string'
+              ? options.input.substring(0, 100) + '...'
+              : '[ContentPart]',
         });
       }
 
@@ -362,7 +365,10 @@ export class AgentSession {
         console.log('[DEBUG] Streaming query started', {
           sessionId: this.id,
           queryType: typeof options.input === 'string' ? 'string' : 'ContentPart',
-          queryPreview: typeof options.input === 'string' ? options.input.substring(0, 100) + '...' : '[ContentPart]'
+          queryPreview:
+            typeof options.input === 'string'
+              ? options.input.substring(0, 100) + '...'
+              : '[ContentPart]',
         });
       }
 
@@ -399,7 +405,10 @@ export class AgentSession {
 
       // Debug logging for issue #1150
       if (this.server.isDebug) {
-        console.log('[DEBUG] Streaming query failed', { sessionId: this.id, error: handledError.message });
+        console.log('[DEBUG] Streaming query failed', {
+          sessionId: this.id,
+          error: handledError.message,
+        });
       }
 
       // Create a synthetic event stream that yields just an error event
