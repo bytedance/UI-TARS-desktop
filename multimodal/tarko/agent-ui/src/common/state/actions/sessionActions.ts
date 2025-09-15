@@ -11,6 +11,7 @@ import { connectionStatusAtom } from '../atoms/ui';
 import { replayStateAtom } from '../atoms/replay';
 import { sessionFilesAtom, FileItem } from '../atoms/files';
 import { ChatCompletionContentPart, AgentEventStream } from '@tarko/agent-interface';
+import { SessionItemMetadata } from '@tarko/interface';
 import { createModelConfigFromEvent, createAgentInfoFromEvent } from '../../utils/metadataUtils';
 
 // Priority-based file selection for workspace display: HTML > Markdown > Others
