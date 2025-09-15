@@ -4,7 +4,7 @@ import { apiService } from '../../services/apiService';
 import { sessionsAtom, activeSessionIdAtom } from '../atoms/session';
 import { messagesAtom } from '../atoms/message';
 import { toolResultsAtom, toolCallResultMap } from '../atoms/tool';
-import { sessionAgentStatusAtom, sessionPanelContentAtom, sessionMetadataAtom } from '../atoms/ui';
+import { sessionAgentStatusAtom, sessionPanelContentAtom } from '../atoms/ui';
 import { processEventAction } from './eventProcessors';
 import { Message, SessionInfo } from '@/common/types';
 import { connectionStatusAtom } from '../atoms/ui';
@@ -92,15 +92,8 @@ export const createSessionAction = atom(null, async (get, set) => {
       [newSession.id]: [],
     }));
 
-    // Update session metadata when creating session
-    if (newSession.metadata) {
-      set(sessionMetadataAtom, newSession.metadata);
-      console.log(`Set metadata for new session ${newSession.id}:`, newSession.metadata);
-    } else {
-      // Clear metadata for new session
-      set(sessionMetadataAtom, {});
-      console.log(`Cleared metadata for new session ${newSession.id}`);
-    }
+    // Session metadata is now stored in sessions array, no separate atom needed
+    console.log(`Created session ${newSession.id} with metadata:`, newSession.metadata);
 
     set(toolResultsAtom, (prev) => ({
       ...prev,
@@ -193,13 +186,18 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
         console.log(`Loading stored session metadata for ${sessionId}`);
         const sessionDetails = await apiService.getSessionDetails(sessionId);
 
+        // Update the session in sessions array with loaded metadata
         if (sessionDetails.metadata) {
-          set(sessionMetadataAtom, sessionDetails.metadata);
+          set(sessionsAtom, (prev) => 
+            prev.map(session => 
+              session.id === sessionId 
+                ? { ...session, metadata: sessionDetails.metadata }
+                : session
+            )
+          );
           console.log(`Restored stored metadata for ${sessionId}:`, sessionDetails.metadata);
         } else {
-          // Only clear metadata if no stored data exists
-          set(sessionMetadataAtom, {});
-          console.log(`No stored metadata for session ${sessionId}, cleared state`);
+          console.log(`No stored metadata for session ${sessionId}`);
         }
       } catch (error) {
         console.warn(`Failed to load session metadata:`, error);

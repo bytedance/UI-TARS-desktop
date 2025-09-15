@@ -4,7 +4,6 @@ import { apiService } from '@/common/services/apiService';
 import { socketService } from '@/common/services/socketService';
 import {
   connectionStatusAtom,
-  sessionMetadataAtom,
 } from '@/common/state/atoms/ui';
 
 /**

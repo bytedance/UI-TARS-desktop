@@ -40,13 +40,6 @@ export const connectionStatusAtom = atom<ConnectionStatus>({
   reconnecting: false,
 });
 
-/**
- * Session metadata atom using server-side SessionInfo metadata type
- * This eliminates type duplication and ensures consistency with persistence layer
- */
-export const sessionMetadataAtom = atom<SessionItemMetadata>({});
-
-
 
 /**
  * Atom for sidebar collapsed state

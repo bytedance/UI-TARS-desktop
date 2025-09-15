@@ -8,7 +8,6 @@ import {
   isProcessingAtom,
   activePanelContentAtom,
   connectionStatusAtom,
-  sessionMetadataAtom,
   agentStatusAtom,
   sessionAgentStatusAtom,
 } from '../state/atoms/ui';
@@ -51,7 +50,12 @@ export function useSession() {
   const [plans, setPlans] = useAtom(plansAtom);
   const setPlanUIState = useSetAtom(planUIStateAtom);
   const [replayState, setReplayState] = useAtom(replayStateAtom);
-  const sessionMetadata = useAtomValue(sessionMetadataAtom);
+  // Derive sessionMetadata from sessions instead of separate atom
+  const sessionMetadata = useMemo(() => {
+    if (!activeSessionId || !sessions.length) return {};
+    const currentSession = sessions.find(s => s.id === activeSessionId);
+    return currentSession?.metadata || {};
+  }, [activeSessionId, sessions]);
 
   // Check if we're in replay mode using the context hook
   const { isReplayMode } = useReplayMode();

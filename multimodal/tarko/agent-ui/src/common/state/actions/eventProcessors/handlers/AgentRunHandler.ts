@@ -1,4 +1,5 @@
-import { sessionAgentStatusAtom, sessionMetadataAtom } from '@/common/state/atoms/ui';
+import { sessionAgentStatusAtom } from '@/common/state/atoms/ui';
+import { sessionsAtom } from '@/common/state/atoms/session';
 import { AgentEventStream } from '@/common/types';
 import { EventHandler, EventHandlerContext } from '../types';
 import { createAgentInfoFromEvent } from '@/common/utils/metadataUtils';
@@ -20,14 +21,22 @@ export class AgentRunStartHandler implements EventHandler<AgentEventStream.Agent
     const agentInfo = createAgentInfoFromEvent(event);
     
     if (agentInfo) {
-      // Only update local state - NO persistence from event handlers
-      // Event handlers should be pure state updaters, not data persisters
-      set(sessionMetadataAtom, (prev) => ({
-        ...prev,
-        agentInfo,
-      }));
+      // Update agentInfo in the sessions array instead of separate atom
+      set(sessionsAtom, (prev) => 
+        prev.map(session => 
+          session.id === sessionId 
+            ? { 
+                ...session, 
+                metadata: {
+                  ...session.metadata,
+                  agentInfo,
+                }
+              }
+            : session
+        )
+      );
       
-      console.log('Updated agentInfo from event (local state only):', { agentInfo });
+      console.log('Updated agentInfo from event (sessions array):', { agentInfo });
     }
 
     // Update processing state for the specific session
