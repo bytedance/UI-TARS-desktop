@@ -105,7 +105,7 @@ export type MouseUpAction = BaseAction<
  * Mouse move action
  */
 export type MouseMoveAction = BaseAction<
-  'move' | 'move_to',
+  'move' | 'move_to' | 'mouse_move' | 'hover',
   {
     point: Coordinates; // Target coordinates
   }
@@ -115,7 +115,7 @@ export type MouseMoveAction = BaseAction<
  * Drag action with start and end coordinates
  */
 export type DragAction = BaseAction<
-  'drag',
+  'drag' | 'left_click_drag' | 'select',
   {
     start: Coordinates;
     end: Coordinates;
