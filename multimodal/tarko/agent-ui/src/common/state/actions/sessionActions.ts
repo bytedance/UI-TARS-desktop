@@ -165,17 +165,26 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
         await set(processEventAction, { sessionId, event });
       }
     } else {
-      // Session already has messages, just load metadata if needed
+      console.log(`Session ${sessionId} already has messages, loading stored metadata only`);
+
+      // Load and restore ONLY stored metadata - don't enrich from events
+      // This preserves user's model selection and prevents event data from overriding it
       try {
+        console.log(`Loading stored session metadata for ${sessionId}`);
         const sessionDetails = await apiService.getSessionDetails(sessionId);
+
+        // Update the session metadata using the utility action
         if (sessionDetails.metadata) {
           set(updateSessionMetadataAction, {
             sessionId,
             metadata: sessionDetails.metadata,
           });
+        } else {
+          console.log(`No stored metadata for session ${sessionId}`);
         }
       } catch (error) {
         console.warn(`Failed to load session metadata:`, error);
+        // Keep current state on error
       }
     }
 
@@ -246,17 +255,27 @@ function preprocessStreamingEvents(events: AgentEventStream.Event[]): AgentEvent
   return events;
 }
 
-// Simplified session metadata update
+// Utility action to update session metadata without duplication
 export const updateSessionMetadataAction = atom(
   null,
   (get, set, params: { sessionId: string; metadata: Partial<SessionItemMetadata> }) => {
+    const { sessionId, metadata } = params;
+
     set(sessionsAtom, (prev) =>
       prev.map((session) =>
-        session.id === params.sessionId
-          ? { ...session, metadata: { ...session.metadata, ...params.metadata } }
+        session.id === sessionId
+          ? {
+              ...session,
+              metadata: {
+                ...session.metadata,
+                ...metadata,
+              },
+            }
           : session,
       ),
     );
+
+    console.log(`Updated metadata for session ${sessionId}:`, metadata);
   },
 );
 
@@ -434,12 +453,35 @@ export const abortQueryAction = atom(null, async (get, set) => {
   }
 });
 
-// Simplified status check without complex caching
+// Cache to prevent frequent status checks for the same session
+const statusCheckCache = new Map<string, { timestamp: number; promise?: Promise<any> }>();
+const STATUS_CACHE_TTL = 2000; // 2 seconds cache
+
 export const checkSessionStatusAction = atom(null, async (get, set, sessionId: string) => {
   if (!sessionId) return;
 
+  const now = Date.now();
+  const cached = statusCheckCache.get(sessionId);
+
+  // If we have a recent check or an ongoing request, skip
+  if (cached) {
+    if (cached.promise) {
+      // There's already an ongoing request for this session
+      return cached.promise;
+    }
+    if (now - cached.timestamp < STATUS_CACHE_TTL) {
+      // Recent check, skip
+      return;
+    }
+  }
+
   try {
-    const status = await apiService.getSessionStatus(sessionId);
+    // Mark that we're making a request
+    const promise = apiService.getSessionStatus(sessionId);
+    statusCheckCache.set(sessionId, { timestamp: now, promise });
+
+    const status = await promise;
+
     set(sessionAgentStatusAtom, (prev) => ({
       ...prev,
       [sessionId]: {
@@ -450,8 +492,14 @@ export const checkSessionStatusAction = atom(null, async (get, set, sessionId: s
         estimatedTime: status.estimatedTime,
       },
     }));
+
+    // Clear the promise and update timestamp
+    statusCheckCache.set(sessionId, { timestamp: now });
+
     return status;
   } catch (error) {
     console.error('Failed to check session status:', error);
+    // Clear the failed request
+    statusCheckCache.delete(sessionId);
   }
 });
