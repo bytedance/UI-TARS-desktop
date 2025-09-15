@@ -2,6 +2,8 @@ import { API_BASE_URL, API_ENDPOINTS } from '@/common/constants';
 import {
   AgentEventStream,
   SessionInfo,
+  SanitizedAgentOptions,
+  WorkspaceInfo,
 } from '@/common/types';
 import { socketService } from './socketService';
 import { ChatCompletionContentPart, AgentModel } from '@tarko/agent-interface';
@@ -386,7 +388,44 @@ class ApiService {
     }
   }
 
+  /**
+   * Get current agent options (sanitized)
+   */
+  async getAgentOptions(): Promise<SanitizedAgentOptions> {
+    try {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.AGENT_OPTIONS}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(3000),
+      });
 
+      if (!response.ok) {
+        throw new Error(`Failed to get agent options: ${response.statusText}`);
+      }
+
+      const { options } = await response.json();
+      return options;
+    } catch (error) {
+      console.error('Error getting agent options:', error);
+      return {};
+    }
+  }
+
+  /**
+   * Get workspace info from agent options
+   */
+  async getWorkspaceInfo(): Promise<WorkspaceInfo> {
+    try {
+      const options = await this.getAgentOptions();
+      return {
+        name: options.workspaceName || 'Unknown',
+        path: options.workspace || '',
+      };
+    } catch (error) {
+      console.error('Error getting workspace info:', error);
+      return { name: 'Unknown', path: '' };
+    }
+  }
 
   /**
    * Search workspace files and directories for contextual selector

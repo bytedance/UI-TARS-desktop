@@ -39,6 +39,8 @@ export const API_ENDPOINTS = {
   // System endpoints
   VERSION: '/api/v1/version',
 
+  AGENT_OPTIONS: '/api/v1/agent/options',
+
   // Workspace endpoints
   WORKSPACE_SEARCH: '/api/v1/sessions/workspace/search',
   WORKSPACE_VALIDATE: '/api/v1/sessions/workspace/validate',

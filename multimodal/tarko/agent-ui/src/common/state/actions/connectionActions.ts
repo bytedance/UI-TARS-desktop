@@ -4,6 +4,7 @@ import { apiService } from '@/common/services/apiService';
 import { socketService } from '@/common/services/socketService';
 import {
   connectionStatusAtom,
+  agentOptionsAtom,
 } from '@/common/state/atoms/ui';
 
 /**
@@ -22,7 +23,16 @@ export const checkConnectionStatusAction = atom(null, async (get, set) => {
       lastError: isConnected ? null : currentStatus.lastError,
     });
 
-    // Connection successful - workspace info will be loaded from session metadata when needed
+    // Load agent options on successful connection
+    if (isConnected) {
+      try {
+        const options = await apiService.getAgentOptions();
+        set(agentOptionsAtom, options);
+      } catch (error) {
+        console.error('Failed to load agent options:', error);
+        set(agentOptionsAtom, {});
+      }
+    }
 
     return isConnected;
   } catch (error) {

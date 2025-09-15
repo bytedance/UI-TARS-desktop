@@ -1,7 +1,7 @@
 import { atom } from 'jotai';
 import { SessionItemMetadata, AgentStatusInfo, LayoutMode } from '@tarko/interface';
 import { getDefaultLayoutMode } from '@/config/web-ui-config';
-import { ConnectionStatus, PanelContent } from '@/common/types';
+import { ConnectionStatus, PanelContent, SanitizedAgentOptions } from '@/common/types';
 import { activeSessionIdAtom } from './session';
 
 /**
@@ -39,6 +39,11 @@ export const connectionStatusAtom = atom<ConnectionStatus>({
   lastError: null,
   reconnecting: false,
 });
+
+/**
+ * Atom for agent options (sanitized)
+ */
+export const agentOptionsAtom = atom<SanitizedAgentOptions | null>(null);
 
 
 /**
