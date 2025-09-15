@@ -151,7 +151,7 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
 
     toolCallResultMap.clear();
 
-    // Load events only if messages aren't already loaded
+    // Load session data - since server always provides modelConfig, we can simplify this
     const messages = get(messagesAtom);
     const hasExistingMessages = messages[sessionId] && messages[sessionId].length > 0;
 
@@ -164,28 +164,21 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
       for (const event of processedEvents) {
         await set(processEventAction, { sessionId, event });
       }
-    } else {
-      console.log(`Session ${sessionId} already has messages, loading stored metadata only`);
+    }
 
-      // Load and restore ONLY stored metadata - don't enrich from events
-      // This preserves user's model selection and prevents event data from overriding it
-      try {
-        console.log(`Loading stored session metadata for ${sessionId}`);
-        const sessionDetails = await apiService.getSessionDetails(sessionId);
-
-        // Update the session metadata using the utility action
-        if (sessionDetails.metadata) {
-          set(updateSessionMetadataAction, {
-            sessionId,
-            metadata: sessionDetails.metadata,
-          });
-        } else {
-          console.log(`No stored metadata for session ${sessionId}`);
-        }
-      } catch (error) {
-        console.warn(`Failed to load session metadata:`, error);
-        // Keep current state on error
+    // Always ensure we have the latest session metadata (including modelConfig)
+    // This is lightweight since server always provides it
+    try {
+      const sessionDetails = await apiService.getSessionDetails(sessionId);
+      if (sessionDetails.metadata) {
+        set(updateSessionMetadataAction, {
+          sessionId,
+          metadata: sessionDetails.metadata,
+        });
       }
+    } catch (error) {
+      console.warn(`Failed to load session metadata:`, error);
+      // Keep current state on error
     }
 
     set(activeSessionIdAtom, sessionId);
