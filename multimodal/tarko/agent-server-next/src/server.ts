@@ -120,7 +120,13 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
       cors({
         origin: process.env.ACCESS_ALLOW_ORIGIN || '*',
         allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-        allowHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+        allowHeaders: [
+          'Content-Type',
+          'Authorization',
+          'X-Requested-With',
+          'x-user-info',
+          'x-jwt-token',
+        ],
         credentials: true,
       }),
     );
