@@ -1,8 +1,6 @@
 import { sessionAgentStatusAtom, sessionMetadataAtom } from '@/common/state/atoms/ui';
 import { AgentEventStream } from '@/common/types';
 import { EventHandler, EventHandlerContext } from '../types';
-import { apiService } from '@/common/services/apiService';
-import { SessionInfo } from '@tarko/interface';
 import { createAgentInfoFromEvent } from '@/common/utils/metadataUtils';
 import { shouldUpdateProcessingState } from '../utils/panelContentUpdater';
 
@@ -11,51 +9,25 @@ export class AgentRunStartHandler implements EventHandler<AgentEventStream.Agent
     return event.type === 'agent_run_start';
   }
 
-  async handle(
+  handle(
     context: EventHandlerContext,
     sessionId: string,
     event: AgentEventStream.AgentRunStartEvent,
-  ): Promise<void> {
+  ): void {
     const { set } = context;
 
     // Extract agent info from event (agentInfo is always safe to update)
     const agentInfo = createAgentInfoFromEvent(event);
     
     if (agentInfo) {
-      // Only update agentInfo - NEVER update modelConfig from events
-      // modelConfig should only be updated through explicit user actions
+      // Only update local state - NO persistence from event handlers
+      // Event handlers should be pure state updaters, not data persisters
       set(sessionMetadataAtom, (prev) => ({
         ...prev,
         agentInfo,
       }));
-
-      // Only persist agentInfo to server for real-time events
-      const isRealtimeEvent = Date.now() - event.timestamp < 10000;
       
-      if (isRealtimeEvent) {
-        try {
-          // Get current session details to preserve existing modelConfig
-          const sessionDetails = await apiService.getSessionDetails(sessionId);
-          const existingMetadata = sessionDetails.metadata || {};
-          
-          // Preserve existing modelConfig, only update agentInfo
-          const mergedMetadata = {
-            ...existingMetadata,
-            agentInfo, // Always update agentInfo for new runs
-            // modelConfig is deliberately NOT updated here - user choice is preserved
-          };
-          
-          await apiService.updateSessionInfo(sessionId, {
-            metadata: mergedMetadata,
-          });
-          
-          console.log('Persisted agentInfo from event (modelConfig preserved):', { agentInfo });
-        } catch (error) {
-          console.warn('Failed to persist session metadata:', error);
-        }
-      } else {
-        console.log('Skipped persisting historical agentInfo (realtime only)');
-      }
+      console.log('Updated agentInfo from event (local state only):', { agentInfo });
     }
 
     // Update processing state for the specific session

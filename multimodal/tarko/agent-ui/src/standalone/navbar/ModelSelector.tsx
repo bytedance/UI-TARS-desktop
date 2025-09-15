@@ -71,6 +71,9 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     return null;
   }, [models, sessionMetadata]);
 
+  console.log('sessionMetadata', sessionMetadata);
+  console.log('currentModel', currentModel);
+
   const muiTheme = React.useMemo(
     () =>
       createTheme({
