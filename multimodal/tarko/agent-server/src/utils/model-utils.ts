@@ -7,14 +7,9 @@ import type { AgentModel, AgentAppConfig } from '../types';
 
 /**
  * Public model information safe for frontend consumption
- * Excludes sensitive information like apiKey, baseURL, headers
+ * Excludes sensitive information like apiKey, baseURL, headers, baseProvider
  */
-export interface PublicModelInfo {
-  id: string;
-  provider: string;
-  displayName?: string;
-  baseProvider?: string;
-}
+export type PublicModelInfo = Pick<AgentModel, 'id' | 'provider' | 'displayName'>;
 
 export function getAvailableModels(appConfig: AgentAppConfig): AgentModel[] {
   const allModels = [
@@ -38,7 +33,6 @@ export function getPublicAvailableModels(appConfig: AgentAppConfig): PublicModel
     id: model.id,
     provider: model.provider,
     displayName: model.displayName,
-    baseProvider: model.baseProvider,
   }));
 }
 
