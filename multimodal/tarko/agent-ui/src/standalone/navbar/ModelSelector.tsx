@@ -190,10 +190,6 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   const { isReplayMode } = useReplayMode();
   const isProcessing = useAtomValue(isProcessingAtom);
 
-  // Centralized disabled state logic
-  const isDisabledDueToProcessing = isProcessing && models.length > 1;
-  const disabledTooltipMessage = 'Model selection unavailable during agent execution. Please wait for agent execution to complete';
-
   // Get current model from session metadata - simplified since server always provides modelConfig
   const currentModel = React.useMemo(() => {
     // Wait for models to be loaded
@@ -369,8 +365,8 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
         isDarkMode={isDarkMode}
         className={className}
         muiTheme={muiTheme}
-        isDisabled={isDisabledDueToProcessing}
-        disabledReason={isDisabledDueToProcessing ? disabledTooltipMessage : undefined}
+        isDisabled={isProcessing && models.length > 1}
+        disabledReason={isProcessing && models.length > 1 ? 'Model selection unavailable during agent execution. Please wait for agent execution to complete' : undefined}
       />
     );
   }
@@ -387,8 +383,8 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
         isDarkMode={isDarkMode}
         className={className}
         muiTheme={muiTheme}
-        isDisabled={isDisabledDueToProcessing}
-        disabledReason={isDisabledDueToProcessing ? disabledTooltipMessage : undefined}
+        isDisabled={isProcessing && models.length > 1}
+        disabledReason={isProcessing && models.length > 1 ? 'Model selection unavailable during agent execution. Please wait for agent execution to complete' : undefined}
       />
     );
   }
