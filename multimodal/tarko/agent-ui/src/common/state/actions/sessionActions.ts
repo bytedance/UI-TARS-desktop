@@ -186,16 +186,12 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
         console.log(`Loading stored session metadata for ${sessionId}`);
         const sessionDetails = await apiService.getSessionDetails(sessionId);
 
-        // Update the session in sessions array with loaded metadata
+        // Update the session metadata using the utility action
         if (sessionDetails.metadata) {
-          set(sessionsAtom, (prev) => 
-            prev.map(session => 
-              session.id === sessionId 
-                ? { ...session, metadata: sessionDetails.metadata }
-                : session
-            )
-          );
-          console.log(`Restored stored metadata for ${sessionId}:`, sessionDetails.metadata);
+          set(updateSessionMetadataAction, { 
+            sessionId, 
+            metadata: sessionDetails.metadata 
+          });
         } else {
           console.log(`No stored metadata for session ${sessionId}`);
         }
@@ -271,6 +267,30 @@ function preprocessStreamingEvents(events: AgentEventStream.Event[]): AgentEvent
 
   return events;
 }
+
+// Utility action to update session metadata without duplication
+export const updateSessionMetadataAction = atom(
+  null,
+  (get, set, params: { sessionId: string; metadata: Partial<SessionItemMetadata> }) => {
+    const { sessionId, metadata } = params;
+    
+    set(sessionsAtom, (prev) => 
+      prev.map(session => 
+        session.id === sessionId 
+          ? { 
+              ...session, 
+              metadata: {
+                ...session.metadata,
+                ...metadata,
+              }
+            }
+          : session
+      )
+    );
+    
+    console.log(`Updated metadata for session ${sessionId}:`, metadata);
+  }
+);
 
 export const deleteSessionAction = atom(null, async (get, set, sessionId: string) => {
   try {

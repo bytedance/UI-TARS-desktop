@@ -12,7 +12,7 @@ import {
   ThemeProvider,
 } from '@mui/material';
 import { useSetAtom } from 'jotai';
-import { sessionsAtom } from '@/common/state/atoms/session';
+import { updateSessionMetadataAction } from '@/common/state/actions/sessionActions';
 import { apiService } from '@/common/services/apiService';
 import { SessionItemMetadata } from '@tarko/interface';
 import { AgentModel } from '@tarko/agent-interface';
@@ -42,7 +42,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
 }) => {
   const [models, setModels] = useState<AgentModel[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const setSessions = useSetAtom(sessionsAtom);
+  const updateSessionMetadata = useSetAtom(updateSessionMetadataAction);
 
   // Get current model from session metadata - fix race condition
   const currentModel = React.useMemo(() => {
@@ -194,14 +194,11 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     try {
       const response = await apiService.updateSessionModel(activeSessionId, selectedModel);
       if (response.success && response.sessionInfo?.metadata) {
-        // Update the sessions array with new metadata
-        setSessions((prev) => 
-          prev.map(session => 
-            session.id === activeSessionId 
-              ? { ...session, metadata: response.sessionInfo.metadata }
-              : session
-          )
-        );
+        // Update session metadata using utility action
+        updateSessionMetadata({
+          sessionId: activeSessionId,
+          metadata: response.sessionInfo.metadata
+        });
       }
     } catch (error) {
       console.error('Failed to update session model:', error);

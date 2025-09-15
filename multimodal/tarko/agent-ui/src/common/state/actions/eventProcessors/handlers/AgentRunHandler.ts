@@ -1,5 +1,5 @@
 import { sessionAgentStatusAtom } from '@/common/state/atoms/ui';
-import { sessionsAtom } from '@/common/state/atoms/session';
+import { updateSessionMetadataAction } from '../../../sessionActions';
 import { AgentEventStream } from '@/common/types';
 import { EventHandler, EventHandlerContext } from '../types';
 import { createAgentInfoFromEvent } from '@/common/utils/metadataUtils';
@@ -21,22 +21,11 @@ export class AgentRunStartHandler implements EventHandler<AgentEventStream.Agent
     const agentInfo = createAgentInfoFromEvent(event);
     
     if (agentInfo) {
-      // Update agentInfo in the sessions array instead of separate atom
-      set(sessionsAtom, (prev) => 
-        prev.map(session => 
-          session.id === sessionId 
-            ? { 
-                ...session, 
-                metadata: {
-                  ...session.metadata,
-                  agentInfo,
-                }
-              }
-            : session
-        )
-      );
-      
-      console.log('Updated agentInfo from event (sessions array):', { agentInfo });
+      // Update agentInfo using utility action
+      set(updateSessionMetadataAction, {
+        sessionId,
+        metadata: { agentInfo }
+      });
     }
 
     // Update processing state for the specific session
