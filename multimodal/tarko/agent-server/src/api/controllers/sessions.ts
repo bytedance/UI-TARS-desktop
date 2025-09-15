@@ -78,10 +78,10 @@ export async function createSession(req: Request, res: Response) {
     // Store session metadata if we have storage
     if (server.storageProvider) {
       const now = Date.now();
-      
+
       // Get the default model config that will be used by the session
       const defaultModel = getDefaultModel(server.appConfig);
-      
+
       const sessionInfo: SessionInfo = {
         id: sessionId,
         createdAt: now,
