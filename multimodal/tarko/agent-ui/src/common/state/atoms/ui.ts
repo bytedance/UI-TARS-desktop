@@ -3,8 +3,6 @@ import { SessionItemMetadata, AgentStatusInfo, LayoutMode } from '@tarko/interfa
 import { getDefaultLayoutMode } from '@/config/web-ui-config';
 import { ConnectionStatus, PanelContent, SanitizedAgentOptions } from '@/common/types';
 import { activeSessionIdAtom } from './session';
-import { AgentModel } from '@tarko/agent-interface';
-import { apiService } from '@/common/services/apiService';
 
 /**
  * Session-specific panel content storage
@@ -147,74 +145,5 @@ export const initializeLayoutModeAtom = atom(null, (get, set) => {
   } catch (error) {
     console.warn('Failed to initialize layout mode:', error);
     set(baseLayoutModeAtom, 'default');
-  }
-});
-
-/**
- * Available models atom - global state for all available models
- */
-export const availableModelsAtom = atom<AgentModel[]>([]);
-
-/**
- * Loading state for models
- */
-export const modelsLoadingAtom = atom<boolean>(false);
-
-/**
- * Action atom to load available models
- */
-export const loadModelsAtom = atom(null, async (get, set) => {
-  if (get(modelsLoadingAtom)) return; // Prevent concurrent loads
-  
-  set(modelsLoadingAtom, true);
-  try {
-    const response = await apiService.getAvailableModels();
-    set(availableModelsAtom, response.models);
-  } catch (error) {
-    console.error('Failed to load available models:', error);
-    set(availableModelsAtom, []);
-  } finally {
-    set(modelsLoadingAtom, false);
-  }
-});
-
-/**
- * Current model for active session - derived from session metadata
- */
-export const currentModelAtom = atom(
-  (get) => {
-    const activeSessionId = get(activeSessionIdAtom);
-    const sessionMetadata = get(sessionMetadataAtom);
-    const availableModels = get(availableModelsAtom);
-    
-    if (!activeSessionId || !sessionMetadata.modelConfig) {
-      return availableModels[0] || null;
-    }
-    
-    const currentModel = availableModels.find(
-      (model) => 
-        model.provider === sessionMetadata.modelConfig?.provider && 
-        model.id === sessionMetadata.modelConfig?.id
-    );
-    
-    return currentModel || availableModels[0] || null;
-  }
-);
-
-/**
- * Action atom to update session model
- */
-export const updateSessionModelAtom = atom(null, async (get, set, model: AgentModel) => {
-  const activeSessionId = get(activeSessionIdAtom);
-  if (!activeSessionId) return;
-  
-  try {
-    const response = await apiService.updateSessionModel(activeSessionId, model);
-    if (response.success && response.sessionInfo?.metadata) {
-      set(sessionMetadataAtom, response.sessionInfo.metadata);
-    }
-  } catch (error) {
-    console.error('Failed to update session model:', error);
-    throw error;
   }
 });

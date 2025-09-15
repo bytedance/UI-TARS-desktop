@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { getModelDisplayName } from '@/common/utils/modelUtils';
 import {
@@ -11,14 +11,9 @@ import {
   createTheme,
   ThemeProvider,
 } from '@mui/material';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { 
-  availableModelsAtom, 
-  modelsLoadingAtom, 
-  loadModelsAtom, 
-  currentModelAtom, 
-  updateSessionModelAtom 
-} from '@/common/state/atoms/ui';
+import { useSetAtom } from 'jotai';
+import { sessionMetadataAtom } from '@/common/state/atoms/ui';
+import { apiService } from '@/common/services/apiService';
 import { SessionItemMetadata } from '@tarko/interface';
 import { AgentModel } from '@tarko/agent-interface';
 
@@ -45,12 +40,14 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   sessionMetadata,
   isDarkMode = false,
 }) => {
-  const availableModels = useAtomValue(availableModelsAtom);
-  const currentModel = useAtomValue(currentModelAtom);
-  const isLoading = useAtomValue(modelsLoadingAtom);
-  const loadModels = useSetAtom(loadModelsAtom);
-  const updateSessionModel = useSetAtom(updateSessionModelAtom);
-  const [isUpdating, setIsUpdating] = React.useState(false);
+  const [models, setModels] = useState<AgentModel[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const setSessionMetadata = useSetAtom(sessionMetadataAtom);
+  
+  // Get current model from session metadata
+  const currentModel = sessionMetadata?.modelConfig 
+    ? models.find(m => m.provider === sessionMetadata.modelConfig?.provider && m.id === sessionMetadata.modelConfig?.id)
+    : models[0];
 
   const muiTheme = React.useMemo(
     () =>
@@ -166,32 +163,42 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   );
 
   const handleModelChange = async (selectedModel: AgentModel) => {
-    if (!activeSessionId || isUpdating || !selectedModel) {
-      return;
-    }
-
-    setIsUpdating(true);
+    if (!activeSessionId || isLoading || !selectedModel) return;
+    
+    setIsLoading(true);
     try {
-      await updateSessionModel(selectedModel);
+      const response = await apiService.updateSessionModel(activeSessionId, selectedModel);
+      if (response.success && response.sessionInfo?.metadata) {
+        setSessionMetadata(response.sessionInfo.metadata);
+      }
     } catch (error) {
       console.error('Failed to update session model:', error);
     } finally {
-      setIsUpdating(false);
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
+    const loadModels = async () => {
+      if (models.length > 0) return; // Only load once
+      
+      try {
+        const response = await apiService.getAvailableModels();
+        setModels(response.models);
+      } catch (error) {
+        console.error('Failed to load models:', error);
+      }
+    };
+    
     loadModels();
-  }, [loadModels]);
+  }, [models.length]);
 
-  if (!activeSessionId || isLoading) {
+  if (!activeSessionId || models.length === 0) {
     return null;
   }
 
   // Show selector only if there are multiple models available
-  const hasMultipleModels = availableModels.length > 1;
-
-  if (!hasMultipleModels || availableModels.length === 0) {
+  if (models.length <= 1) {
     if (!sessionMetadata?.modelConfig) {
       return null;
     }
@@ -316,7 +323,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
             {selected.provider}
           </Typography>
         </Box>
-        {isUpdating && (
+        {isLoading && (
           <CircularProgress size={12} thickness={4} sx={{ color: '#6366f1', marginLeft: 'auto' }} />
         )}
       </Box>
@@ -331,14 +338,14 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
             value={currentModel ? getModelKey(currentModel) : ''}
             onChange={(event) => {
               const selectedKey = event.target.value as string;
-              const selectedModel = availableModels.find(
+              const selectedModel = models.find(
                 (model) => getModelKey(model) === selectedKey,
               );
               if (selectedModel) {
                 handleModelChange(selectedModel);
               }
             }}
-            disabled={isUpdating}
+            disabled={isLoading}
             displayEmpty
             renderValue={() => renderValue(currentModel)}
             size="small"
@@ -376,7 +383,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
               maxWidth: 360,
             }}
           >
-            {availableModels.map((model) => {
+            {models.map((model) => {
               const modelKey = getModelKey(model);
               const isSelected = isSameModel(currentModel, model);
               const displayText = getModelDisplayText(model);
