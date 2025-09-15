@@ -24,5 +24,3 @@ export function getModelDisplayName(modelConfig?: SessionItemMetadata['modelConf
 
   return modelConfig.id;
 }
-
-

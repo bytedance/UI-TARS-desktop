@@ -148,7 +148,7 @@ export class AgentSession {
         agentOptions.agio.provider,
         agentOptions,
         this.id,
-        wrappedAgent
+        wrappedAgent,
       );
 
       // Send agent initialization event to AGIO
@@ -231,7 +231,7 @@ export class AgentSession {
     this.eventBridge = new EventStreamBridge();
     this.sessionInfo = sessionInfo;
     this.agioProviderConstructor = agioProviderImpl;
-    
+
     // Agent will be created and initialized in initialize() method
     this.agent = null as any; // Temporary placeholder
   }

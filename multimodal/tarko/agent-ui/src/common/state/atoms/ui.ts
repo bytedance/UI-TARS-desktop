@@ -45,7 +45,6 @@ export const connectionStatusAtom = atom<ConnectionStatus>({
  */
 export const agentOptionsAtom = atom<SanitizedAgentOptions | null>(null);
 
-
 /**
  * Atom for sidebar collapsed state
  */

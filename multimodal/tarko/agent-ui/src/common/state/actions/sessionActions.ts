@@ -175,9 +175,9 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
 
         // Update the session metadata using the utility action
         if (sessionDetails.metadata) {
-          set(updateSessionMetadataAction, { 
-            sessionId, 
-            metadata: sessionDetails.metadata 
+          set(updateSessionMetadataAction, {
+            sessionId,
+            metadata: sessionDetails.metadata,
           });
         } else {
           console.log(`No stored metadata for session ${sessionId}`);
@@ -260,23 +260,23 @@ export const updateSessionMetadataAction = atom(
   null,
   (get, set, params: { sessionId: string; metadata: Partial<SessionItemMetadata> }) => {
     const { sessionId, metadata } = params;
-    
-    set(sessionsAtom, (prev) => 
-      prev.map(session => 
-        session.id === sessionId 
-          ? { 
-              ...session, 
+
+    set(sessionsAtom, (prev) =>
+      prev.map((session) =>
+        session.id === sessionId
+          ? {
+              ...session,
               metadata: {
                 ...session.metadata,
                 ...metadata,
-              }
+              },
             }
-          : session
-      )
+          : session,
+      ),
     );
-    
+
     console.log(`Updated metadata for session ${sessionId}:`, metadata);
-  }
+  },
 );
 
 export const deleteSessionAction = atom(null, async (get, set, sessionId: string) => {
@@ -462,7 +462,7 @@ export const checkSessionStatusAction = atom(null, async (get, set, sessionId: s
 
   const now = Date.now();
   const cached = statusCheckCache.get(sessionId);
-  
+
   // If we have a recent check or an ongoing request, skip
   if (cached) {
     if (cached.promise) {
@@ -479,9 +479,9 @@ export const checkSessionStatusAction = atom(null, async (get, set, sessionId: s
     // Mark that we're making a request
     const promise = apiService.getSessionStatus(sessionId);
     statusCheckCache.set(sessionId, { timestamp: now, promise });
-    
+
     const status = await promise;
-    
+
     set(sessionAgentStatusAtom, (prev) => ({
       ...prev,
       [sessionId]: {
@@ -495,7 +495,7 @@ export const checkSessionStatusAction = atom(null, async (get, set, sessionId: s
 
     // Clear the promise and update timestamp
     statusCheckCache.set(sessionId, { timestamp: now });
-    
+
     return status;
   } catch (error) {
     console.error('Failed to check session status:', error);
