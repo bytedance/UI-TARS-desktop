@@ -69,6 +69,7 @@ export class AgentSession {
   eventBridge: EventStreamBridge;
   private unsubscribe: (() => void) | null = null;
   private agioProvider?: AgioEvent.AgioProvider;
+  private agioProviderConstructor?: AgioProviderConstructor;
   private sessionInfo?: SessionInfo;
 
   /**
@@ -129,6 +130,43 @@ export class AgentSession {
       model: this.resolveModelConfig(sessionInfo),
     };
     return new agentResolution.agentConstructor(agentOptions);
+  }
+
+  /**
+   * Initialize agent with snapshot and AGIO support
+   */
+  private async initializeAgentWithWrappers(baseAgent: IAgent, sessionId: string): Promise<IAgent> {
+    // Apply snapshot wrapper if enabled
+    const wrappedAgent = this.createAgentWithSnapshot(baseAgent, sessionId);
+
+    // Initialize the agent
+    await wrappedAgent.initialize();
+
+    // Initialize AGIO collector if provider URL is configured
+    const agentOptions = { ...this.server.appConfig };
+    if (agentOptions.agio?.provider && this.agioProviderConstructor) {
+      this.agioProvider = new this.agioProviderConstructor(
+        agentOptions.agio.provider,
+        agentOptions,
+        sessionId,
+        wrappedAgent
+      );
+
+      // Send agent initialization event to AGIO
+      try {
+        await this.agioProvider.sendAgentInitialized();
+      } catch (error) {
+        console.error('Failed to send AGIO initialization event:', error);
+      }
+
+      // Log AGIO initialization
+      console.debug(`AGIO collector initialized with provider: ${agentOptions.agio.provider}`);
+    }
+
+    // Log agent configuration
+    console.info('Agent Config', JSON.stringify((wrappedAgent as any).getOptions?.(), null, 2));
+
+    return wrappedAgent;
   }
 
   /**
@@ -193,25 +231,13 @@ export class AgentSession {
     this.id = sessionId;
     this.eventBridge = new EventStreamBridge();
     this.sessionInfo = sessionInfo;
+    this.agioProviderConstructor = agioProviderImpl;
 
     // Create agent instance with session-aware configuration
     const agent = this.createAgent(sessionInfo);
 
-    // Apply snapshot wrapper if enabled
+    // Apply snapshot wrapper if enabled (will be fully initialized in initialize() method)
     this.agent = this.createAgentWithSnapshot(agent, sessionId);
-
-    // Initialize AGIO collector if provider URL is configured
-    const agentOptions = { ...server.appConfig };
-    if (agentOptions.agio?.provider && agioProviderImpl) {
-      const impl = agioProviderImpl;
-      this.agioProvider = new impl(agentOptions.agio.provider, agentOptions, sessionId, this.agent);
-
-      // Log AGIO initialization
-      console.debug(`AGIO collector initialized with provider: ${agentOptions.agio.provider}`);
-    }
-
-    // Log agent configuration
-    console.info('Agent Config', JSON.stringify((this.agent as any).getOptions?.(), null, 2));
   }
 
   /**
@@ -223,16 +249,8 @@ export class AgentSession {
   }
 
   async initialize() {
-    await this.agent.initialize();
-
-    // Send agent initialization event to AGIO if configured
-    if (this.agioProvider) {
-      try {
-        await this.agioProvider.sendAgentInitialized();
-      } catch (error) {
-        console.error('Failed to send AGIO initialization event:', error);
-      }
-    }
+    // Initialize agent with wrappers and AGIO
+    this.agent = await this.initializeAgentWithWrappers(this.agent, this.id);
 
     // Setup event stream connections
     const { storageUnsubscribe } = this.setupEventStreams();
@@ -461,19 +479,19 @@ export class AgentSession {
 
     // Recreate agent with new model configuration
     try {
-      // Clean up current agent
+      // Clean up current agent and AGIO provider
       if (this.agent && typeof this.agent.dispose === 'function') {
         await this.agent.dispose();
+      }
+      if (this.agioProvider?.cleanup) {
+        await this.agioProvider.cleanup();
       }
 
       // Create new agent with updated session info
       const newAgent = this.createAgent(sessionInfo);
 
-      // Apply snapshot wrapper if enabled
-      this.agent = this.createAgentWithSnapshot(newAgent, this.id);
-
-      // Re-initialize the new agent and reconnect event streams
-      await this.agent.initialize();
+      // Initialize agent with wrappers and AGIO (reusing the same logic as constructor)
+      this.agent = await this.initializeAgentWithWrappers(newAgent, this.id);
 
       // Reconnect event streams
       this.setupEventStreams();

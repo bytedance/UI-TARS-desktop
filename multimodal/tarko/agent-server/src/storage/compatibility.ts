@@ -15,13 +15,8 @@ export function migrateLegacyToJsonSchema(legacy: LegacySessionItemInfo): Sessio
 
   if (legacy.name) metadata.name = legacy.name;
   if (legacy.tags) metadata.tags = legacy.tags;
-  if (legacy.modelConfig) {
-    // Convert legacy modelConfig to AgentModel format
-    metadata.modelConfig = {
-      ...legacy.modelConfig,
-      provider: legacy.modelConfig.provider as AgentModel['provider'],
-    };
-  }
+  // @ts-expect-error
+  if (legacy.modelConfig) metadata.modelConfig = legacy.modelConfig;
 
   return {
     id: legacy.id,
@@ -68,13 +63,8 @@ export function createJsonSchemaSession(
 
   if (options?.name) metadata.name = options.name;
   if (options?.tags) metadata.tags = options.tags;
-  if (options?.modelConfig) {
-    // Convert to AgentModel format
-    metadata.modelConfig = {
-      ...options.modelConfig,
-      provider: options.modelConfig.provider as AgentModel['provider'],
-    };
-  }
+  // @ts-expect-error
+  if (options?.modelConfig) metadata.modelConfig = options.modelConfig;
 
   return {
     id,
