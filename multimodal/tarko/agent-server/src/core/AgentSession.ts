@@ -119,17 +119,15 @@ export class AgentSession {
    * Create agent instance with proper configuration
    */
   private createAgent(sessionInfo?: SessionInfo): IAgent {
-    const agentResolution = this.server['currentAgentResolution'];
+    const agentResolution = this.server.getCurrentAgentResolution();
     if (!agentResolution) {
       throw new Error('Cannot found available resolved agent');
     }
-
     const agentOptions = {
       ...this.server.appConfig,
       name: this.server.getCurrentAgentName(),
       model: this.resolveModelConfig(sessionInfo),
     };
-
     return new agentResolution.agentConstructor(agentOptions);
   }
 

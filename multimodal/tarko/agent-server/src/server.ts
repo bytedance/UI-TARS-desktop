@@ -108,8 +108,14 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   }
 
   /**
+   * Get the current agent resolution.
+   */
+  getCurrentAgentResolution(): AgentResolutionResult | undefined {
+    return this.currentAgentResolution;
+  }
+
+  /**
    * Get the custom AGIO provider if injected
-   * @returns Custom AGIO provider or undefined
    */
   getCustomAgioProvider(): AgioProviderConstructor | undefined {
     return this.currentAgentResolution?.agioProviderConstructor;
@@ -308,6 +314,4 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
 
     return Promise.resolve();
   }
-
-
 }
