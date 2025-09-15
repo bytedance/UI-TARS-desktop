@@ -222,7 +222,87 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     loadModels();
   }, [models.length]);
 
-  if (!activeSessionId || models.length === 0) {
+  // In share mode (no activeSessionId), show static display if we have model config
+  if (!activeSessionId) {
+    if (!sessionMetadata?.modelConfig) {
+      return null;
+    }
+    // Show static model info for share pages
+    return (
+      <ThemeProvider theme={muiTheme}>
+        <motion.div whileHover={{ scale: 1.02 }} className={className}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.75,
+              px: 1.25,
+              py: 0.375,
+              height: '28px',
+              minHeight: '28px',
+              background: isDarkMode ? 'rgba(55, 65, 81, 0.3)' : 'rgba(248, 250, 252, 0.8)',
+              backdropFilter: 'blur(8px)',
+              border: isDarkMode
+                ? '1px solid rgba(75, 85, 99, 0.3)'
+                : '1px solid rgba(203, 213, 225, 0.6)',
+              borderRadius: '8px',
+              '&:hover': {
+                background: isDarkMode ? 'rgba(55, 65, 81, 0.8)' : 'rgba(241, 245, 249, 0.9)',
+                boxShadow: isDarkMode
+                  ? '0 2px 4px -1px rgba(0, 0, 0, 0.2)'
+                  : '0 2px 4px -1px rgba(0, 0, 0, 0.05)',
+              },
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
+              {sessionMetadata?.modelConfig?.id && (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 500,
+                    fontSize: '12px',
+                    color: isDarkMode ? '#f3f4f6' : '#374151',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {getModelDisplayName(sessionMetadata.modelConfig)}
+                </Typography>
+              )}
+              {sessionMetadata?.modelConfig?.provider && sessionMetadata?.modelConfig?.id && (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: isDarkMode ? '#9ca3af' : '#6b7280',
+                    fontSize: '12px',
+                    flexShrink: 0,
+                  }}
+                >
+                  •
+                </Typography>
+              )}
+              {sessionMetadata?.modelConfig?.provider && (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 500,
+                    fontSize: '12px',
+                    color: isDarkMode ? '#d1d5db' : '#6b7280',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {sessionMetadata.modelConfig.provider}
+                </Typography>
+              )}
+            </Box>
+          </Box>
+        </motion.div>
+      </ThemeProvider>
+    );
+  }
+
+  if (models.length === 0) {
     return null;
   }
 
