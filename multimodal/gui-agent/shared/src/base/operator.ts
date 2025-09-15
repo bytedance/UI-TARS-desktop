@@ -5,6 +5,13 @@
 
 import { ExecuteParams, ScreenshotOutput, ExecuteOutput, SupportedActionType } from '../types';
 
+export interface ScreenContext {
+  screenWidth: number;
+  screenHeight: number;
+  scaleX: number;
+  scaleY: number;
+}
+
 /**
  * @abstract
  * @class BaseOperator
@@ -62,11 +69,26 @@ export abstract class Operator extends BaseOperator {
     ACTION_SPACES: [],
     EXAMPLES: [],
   };
+
   /**
    * Returns an array of supported action types
    * @returns Array of action types supported by this operator
    */
-  abstract supportedActions(): Array<SupportedActionType>;
+  abstract get supportedActions(): Array<SupportedActionType>;
+  /**
+   * Returns the screen context
+   * @returns The screen context
+   */
+  abstract get screenContext(): ScreenContext;
+  /**
+   * Takes a screenshot
+   * @returns Promise that resolves to the screenshot output
+   */
   abstract screenshot(): Promise<ScreenshotOutput>;
+  /**
+   * Executes actions
+   * @param params - The parameters for the actions
+   * @returns Promise that resolves to the execution output
+   */
   abstract execute(params: ExecuteParams): Promise<ExecuteOutput>;
 }
