@@ -37,6 +37,67 @@ const getModelKey = (model: AgentModel): string => `${model.provider}:${model.id
 
 const getModelDisplayText = (model: AgentModel) => model.displayName || model.id;
 
+// Shared component for displaying model information
+const ModelDisplayContent: React.FC<{
+  model: AgentModel;
+  isDarkMode: boolean;
+  fontSize?: string;
+  isSelected?: boolean;
+  showLoading?: boolean;
+}> = ({ model, isDarkMode, fontSize = '12px', isSelected = false, showLoading = false }) => {
+  const displayText = getModelDisplayText(model);
+  
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          fontWeight: isSelected ? 600 : 500,
+          fontSize,
+          color: isSelected
+            ? isDarkMode ? '#a5b4fc' : '#6366f1'
+            : isDarkMode ? '#f3f4f6' : '#374151',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+        title={displayText}
+      >
+        {displayText}
+      </Typography>
+      <Typography
+        variant="body2"
+        sx={{
+          color: isDarkMode ? '#9ca3af' : '#6b7280',
+          fontSize,
+          flexShrink: 0,
+        }}
+      >
+        •
+      </Typography>
+      <Typography
+        variant="body2"
+        sx={{
+          fontWeight: isSelected ? 600 : 500,
+          fontSize,
+          color: isSelected
+            ? isDarkMode ? '#a5b4fc' : '#6366f1'
+            : isDarkMode ? '#d1d5db' : '#6b7280',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+        title={model.provider}
+      >
+        {model.provider}
+      </Typography>
+      {showLoading && (
+        <CircularProgress size={12} thickness={4} sx={{ color: '#6366f1', marginLeft: 'auto' }} />
+      )}
+    </Box>
+  );
+};
+
 // Shared static model display component
 const StaticModelDisplay: React.FC<{
   sessionMetadata: SessionItemMetadata;
@@ -77,48 +138,11 @@ const StaticModelDisplay: React.FC<{
             },
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
-            {sessionMetadata.modelConfig.id && (
-              <Typography
-                variant="body2"
-                sx={{
-                  fontWeight: 500,
-                  fontSize: '12px',
-                  color: isDarkMode ? '#f3f4f6' : '#374151',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {getModelDisplayName(sessionMetadata.modelConfig)}
-              </Typography>
-            )}
-            {sessionMetadata.modelConfig.provider && sessionMetadata.modelConfig.id && (
-              <Typography
-                variant="body2"
-                sx={{
-                  color: isDarkMode ? '#9ca3af' : '#6b7280',
-                  fontSize: '12px',
-                  flexShrink: 0,
-                }}
-              >
-                •
-              </Typography>
-            )}
-            {sessionMetadata.modelConfig.provider && (
-              <Typography
-                variant="body2"
-                sx={{
-                  fontWeight: 500,
-                  fontSize: '12px',
-                  color: isDarkMode ? '#d1d5db' : '#6b7280',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {sessionMetadata.modelConfig.provider}
-              </Typography>
-            )}
-          </Box>
+          <ModelDisplayContent
+            model={sessionMetadata.modelConfig}
+            isDarkMode={isDarkMode}
+            fontSize="12px"
+          />
         </Box>
       </motion.div>
     </ThemeProvider>
@@ -335,52 +359,14 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   const renderValue = (selected: AgentModel | null) => {
     if (!selected) return 'Select Model';
 
-    const displayText = getModelDisplayText(selected);
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
-          <Typography
-            variant="body2"
-            sx={{
-              fontWeight: 500,
-              fontSize: '12px',
-              color: isDarkMode ? '#f3f4f6' : '#374151',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-            title={displayText}
-          >
-            {displayText}
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{
-              color: isDarkMode ? '#9ca3af' : '#6b7280',
-              fontSize: '12px',
-              flexShrink: 0,
-            }}
-          >
-            •
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{
-              fontWeight: 500,
-              fontSize: '12px',
-              color: isDarkMode ? '#d1d5db' : '#6b7280',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-            title={selected.provider}
-          >
-            {selected.provider}
-          </Typography>
-        </Box>
-        {isLoading && (
-          <CircularProgress size={12} thickness={4} sx={{ color: '#6366f1', marginLeft: 'auto' }} />
-        )}
+        <ModelDisplayContent
+          model={selected}
+          isDarkMode={isDarkMode}
+          fontSize="12px"
+          showLoading={isLoading}
+        />
       </Box>
     );
   };
@@ -445,63 +431,13 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
               return (
                 <MenuItem key={modelKey} value={modelKey}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 0.5,
-                        minWidth: 0,
-                        flex: 1,
-                      }}
-                    >
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontWeight: isSelected ? 600 : 500,
-                          fontSize: '14px',
-                          color: isSelected
-                            ? isDarkMode
-                              ? '#a5b4fc'
-                              : '#6366f1'
-                            : isDarkMode
-                              ? '#f3f4f6'
-                              : '#374151',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {displayText}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: isDarkMode ? '#9ca3af' : '#6b7280',
-                          fontSize: '14px',
-                          flexShrink: 0,
-                        }}
-                      >
-                        •
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontWeight: isSelected ? 600 : 500,
-                          fontSize: '13px',
-                          color: isSelected
-                            ? isDarkMode
-                              ? '#a5b4fc'
-                              : '#6366f1'
-                            : isDarkMode
-                              ? '#d1d5db'
-                              : '#6b7280',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {model.provider}
-                      </Typography>
+                    <Box sx={{ minWidth: 0, flex: 1 }}>
+                      <ModelDisplayContent
+                        model={model}
+                        isDarkMode={isDarkMode}
+                        fontSize="14px"
+                        isSelected={isSelected}
+                      />
                     </Box>
                   </Box>
                 </MenuItem>
