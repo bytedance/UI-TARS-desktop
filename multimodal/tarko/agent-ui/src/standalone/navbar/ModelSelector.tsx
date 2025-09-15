@@ -46,7 +46,7 @@ const ModelDisplayContent: React.FC<{
   showLoading?: boolean;
 }> = ({ model, isDarkMode, fontSize = '12px', isSelected = false, showLoading = false }) => {
   const displayText = getModelDisplayText(model);
-  
+
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
       <Typography
@@ -55,8 +55,12 @@ const ModelDisplayContent: React.FC<{
           fontWeight: isSelected ? 600 : 500,
           fontSize,
           color: isSelected
-            ? isDarkMode ? '#a5b4fc' : '#6366f1'
-            : isDarkMode ? '#f3f4f6' : '#374151',
+            ? isDarkMode
+              ? '#a5b4fc'
+              : '#6366f1'
+            : isDarkMode
+              ? '#f3f4f6'
+              : '#374151',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
@@ -81,8 +85,12 @@ const ModelDisplayContent: React.FC<{
           fontWeight: isSelected ? 600 : 500,
           fontSize,
           color: isSelected
-            ? isDarkMode ? '#a5b4fc' : '#6366f1'
-            : isDarkMode ? '#d1d5db' : '#6b7280',
+            ? isDarkMode
+              ? '#a5b4fc'
+              : '#6366f1'
+            : isDarkMode
+              ? '#d1d5db'
+              : '#6b7280',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
