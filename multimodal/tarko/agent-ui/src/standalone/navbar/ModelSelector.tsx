@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { getModelDisplayName } from '@/common/utils/modelUtils';
 import {
   Select,
   MenuItem,
@@ -191,6 +190,10 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   const { isReplayMode } = useReplayMode();
   const isProcessing = useAtomValue(isProcessingAtom);
 
+  // Centralized disabled state logic
+  const isDisabledDueToProcessing = isProcessing && models.length > 1;
+  const disabledTooltipMessage = 'Model selection unavailable during agent execution. Please wait for agent execution to complete';
+
   // Get current model from session metadata - simplified since server always provides modelConfig
   const currentModel = React.useMemo(() => {
     // Wait for models to be loaded
@@ -366,8 +369,8 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
         isDarkMode={isDarkMode}
         className={className}
         muiTheme={muiTheme}
-        isDisabled={isProcessing && models.length > 1}
-        disabledReason={isProcessing && models.length > 1 ? 'Model selection unavailable during agent execution. Please wait for agent execution to complete' : undefined}
+        isDisabled={isDisabledDueToProcessing}
+        disabledReason={isDisabledDueToProcessing ? disabledTooltipMessage : undefined}
       />
     );
   }
@@ -384,8 +387,8 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
         isDarkMode={isDarkMode}
         className={className}
         muiTheme={muiTheme}
-        isDisabled={isProcessing && models.length > 1}
-        disabledReason={isProcessing && models.length > 1 ? 'Model selection unavailable during agent execution. Please wait for agent execution to complete' : undefined}
+        isDisabled={isDisabledDueToProcessing}
+        disabledReason={isDisabledDueToProcessing ? disabledTooltipMessage : undefined}
       />
     );
   }
@@ -460,7 +463,6 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
             {models.map((model) => {
               const modelKey = getModelKey(model);
               const isSelected = isSameModel(currentModel, model);
-              const displayText = getModelDisplayText(model);
 
               return (
                 <MenuItem key={modelKey} value={modelKey}>
