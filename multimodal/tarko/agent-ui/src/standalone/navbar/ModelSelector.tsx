@@ -44,10 +44,24 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const setSessionMetadata = useSetAtom(sessionMetadataAtom);
   
-  // Get current model from session metadata
-  const currentModel = sessionMetadata?.modelConfig 
-    ? models.find(m => m.provider === sessionMetadata.modelConfig?.provider && m.id === sessionMetadata.modelConfig?.id)
-    : models[0];
+  // Get current model from session metadata - fix race condition
+  const currentModel = React.useMemo(() => {
+    // Wait for both models and sessionMetadata to be loaded
+    if (models.length === 0) return null;
+    
+    // If we have session metadata with model config, use it
+    if (sessionMetadata?.modelConfig) {
+      const foundModel = models.find(m => 
+        m.provider === sessionMetadata.modelConfig?.provider && 
+        m.id === sessionMetadata.modelConfig?.id
+      );
+      return foundModel || models[0]; // fallback to first model if not found
+    }
+    
+    // Only fallback to first model if we have confirmed no session metadata
+    // This prevents showing default model during initial loading
+    return models[0];
+  }, [models, sessionMetadata?.modelConfig]);
 
   const muiTheme = React.useMemo(
     () =>
