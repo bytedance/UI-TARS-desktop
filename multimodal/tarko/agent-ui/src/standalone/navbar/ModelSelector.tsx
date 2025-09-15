@@ -51,13 +51,16 @@ const StaticModelDisplay: React.FC<{
       <motion.div whileHover={{ scale: 1.02 }} className={className}>
         <Box
           sx={{
-            display: 'flex',
+            display: 'inline-flex',
             alignItems: 'center',
             gap: 0.75,
             px: 1.25,
             py: 0.375,
             height: '28px',
             minHeight: '28px',
+            width: 'auto',
+            minWidth: 'auto',
+            maxWidth: '300px',
             background: isDarkMode ? 'rgba(55, 65, 81, 0.3)' : 'rgba(248, 250, 252, 0.8)',
             backdropFilter: 'blur(8px)',
             border: isDarkMode
@@ -437,8 +440,9 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
               },
             }}
             sx={{
-              minWidth: 200,
-              maxWidth: 360,
+              width: 'auto',
+              minWidth: 'auto',
+              maxWidth: '300px',
             }}
           >
             {models.map((model) => {
