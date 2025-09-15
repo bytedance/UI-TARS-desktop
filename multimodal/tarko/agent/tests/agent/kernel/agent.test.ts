@@ -153,6 +153,7 @@ describe('Agent', () => {
           "displayName": undefined,
           "headers": {},
           "id": "gpt-4o",
+          "params": undefined,
           "provider": "openai",
         }
       `);
