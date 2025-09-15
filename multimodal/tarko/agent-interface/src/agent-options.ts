@@ -230,6 +230,13 @@ export interface AgentWorkspaceOptions {
 }
 
 /**
+ * Options for sandbox using in agent tools
+ */
+export interface AgentSandboxOptions {
+  sandboxUrl?: string;
+}
+
+/**
  * Some setting options used to instantiate an Agent.
  */
 export interface AgentOptions
@@ -239,7 +246,8 @@ export interface AgentOptions
     AgentLoopOptions,
     AgentMemoryOptions,
     AgentMiscOptions,
-    AgentWorkspaceOptions {}
+    AgentWorkspaceOptions,
+    AgentSandboxOptions {}
 
 /**
  * Options for configuring agent context behavior (e.g. message history)

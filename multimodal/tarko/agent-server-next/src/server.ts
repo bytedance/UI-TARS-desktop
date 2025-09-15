@@ -57,7 +57,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   // Session management
   public storageUnsubscribes: Record<string, () => void> = {};
   private sessionPool: AgentSessionPool;
-  private sessionFactory: AgentSessionFactory;
+  private sessionFactory?: AgentSessionFactory;
   private sandboxScheduler?: SandboxScheduler;
   public userConfigService?: UserConfigService;
 
@@ -104,14 +104,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     this.storageProvider = createStorageProvider(appConfig.server?.storage || { type: 'sqlite' });
 
     // Initialize session management
-    this.sessionPool = new AgentSessionPool({
-      maxSessions: (appConfig.server as any)?.maxSessions,
-      memoryLimitMB: (appConfig.server as any)?.memoryLimitMB,
-      checkIntervalMs: (appConfig.server as any)?.checkIntervalMs,
-    });
-
-    // Initialize session factory
-    this.sessionFactory = new AgentSessionFactory(this);
+    this.sessionPool = new AgentSessionPool();
 
     // Setup middlewares in correct order
     this.setupMiddlewares();
@@ -295,7 +288,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   /**
    * Create Agent with session-specific model configuration
    */
-  createAgentWithSessionModel(sessionInfo?: SessionInfo): IAgent {
+  createAgentWithSessionModel(sessionInfo: SessionInfo): IAgent {
     let modelConfig = this.getDefaultModelConfig();
 
     // If session has specific model config and it's still valid, use session config
@@ -316,6 +309,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
         provider: modelConfig.provider,
         id: modelConfig.modelId,
       },
+      sandboxUrl: sessionInfo?.metadata?.sandboxUrl,
     };
 
     if (!this.currentAgentResolution) {
@@ -390,6 +384,9 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
       }
     }
 
+    // Initialize session factory
+    this.sessionFactory = new AgentSessionFactory(this);
+
     // Initialize multi-tenant services if in multi-tenant mode
     if (this.isMultiTenant()) {
       await this.initializeMultiTenantServices();
@@ -430,7 +427,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
       });
 
       // Update session factory with sandbox scheduler
-      this.sessionFactory.setSandboxScheduler(this.sandboxScheduler);
+      this.sessionFactory?.setSandboxScheduler(this.sandboxScheduler);
 
       console.log('Multi-tenant services initialized successfully');
     } catch (error) {
@@ -464,21 +461,6 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   }
 
   /**
-   * Create a new Agent instance using the injected constructor
-   * @returns New Agent instance
-   */
-  createAgent(): IAgent {
-    if (!this.currentAgentResolution) {
-      throw new Error('Cannot found availble resolved agent');
-    }
-    const agentOptions: T = {
-      ...this.appConfig,
-      name: this.getCurrentAgentName(),
-    };
-    return new this.currentAgentResolution.agentConstructor(agentOptions);
-  }
-
-  /**
    * Get session manager instance
    */
   getSessionPool(): AgentSessionPool {
@@ -489,6 +471,9 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    * Get session factory instance
    */
   getSessionFactory(): AgentSessionFactory {
+    if (!this.sessionFactory) {
+      this.sessionFactory = new AgentSessionFactory(this);
+    }
     return this.sessionFactory;
   }
 

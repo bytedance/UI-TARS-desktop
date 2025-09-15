@@ -50,8 +50,10 @@ export async function getAgentOptions(c: HonoContext) {
     const server = c.get('server');
 
     // Get current agent and its options
-    const agent = server.createAgent();
-    const options = agent.getOptions();
+    const options = {
+      ...server.appConfig,
+      name: server.getCurrentAgentName(),
+    };
 
     // Sanitize sensitive information
     const sanitizedOptions = {

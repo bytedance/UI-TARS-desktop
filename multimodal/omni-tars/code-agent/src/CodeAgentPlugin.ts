@@ -4,17 +4,13 @@
  */
 
 import { AgentPlugin, CODE_ENVIRONMENT } from '@omni-tars/core';
-import { LLMRequestHookPayload, LLMResponseHookPayload } from '@tarko/agent';
+import { LLMRequestHookPayload, LLMResponseHookPayload, LogLevel } from '@tarko/agent';
 import { ExcuteBashProvider } from './tools/ExcuteBash';
 import { JupyterCIProvider } from './tools/JupyterCI';
 import { StrReplaceEditorProvider } from './tools/StrReplaceEditor';
 import { AioClient } from '@agent-infra/sandbox';
 import assert from 'assert';
-
-interface CodeAgentPluginOption {
-  aioSandboxUrl: string;
-  ignoreSandboxCheck?: boolean;
-}
+import { CodeAgentExtraOption } from '.';
 
 /**
  * Code Agent Plugin - handles CODE_ENVIRONMENT for bash, file editing, and Jupyter execution
@@ -24,14 +20,15 @@ export class CodeAgentPlugin extends AgentPlugin {
   readonly environmentSection = CODE_ENVIRONMENT;
   private client: AioClient;
 
-  constructor(option: CodeAgentPluginOption) {
+  constructor(option: CodeAgentExtraOption) {
     super();
 
-    assert(option.aioSandboxUrl, 'no AIO_SANDBOX_URL url providered.');
+    assert(option.sandboxUrl, 'no AIO_SANDBOX_URL url providered.');
 
     this.client = new AioClient({
-      baseUrl: option.aioSandboxUrl,
+      baseUrl: option.sandboxUrl,
       retries: 0,
+      logLevel: process.env.AGENT_DEBUG ? LogLevel.DEBUG : LogLevel.INFO,
     });
 
     // Initialize tools

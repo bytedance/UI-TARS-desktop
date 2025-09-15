@@ -10,6 +10,7 @@ import { getCurrentUser } from '../../middlewares/auth';
 import type { AgentServer, UserInfo, HonoContext } from '../../types';
 import type { AgioProviderConstructor, SessionInfo } from '@tarko/interface';
 import { ConsoleLogger, getLogger } from '@tarko/shared-utils';
+import { ISessionDAO } from '../../dao';
 
 export interface CreateSessionOptions {
   sessionId?: string;
@@ -28,11 +29,13 @@ export class AgentSessionFactory {
   private server: AgentServer;
   private sandboxScheduler?: SandboxScheduler;
   private logger: ConsoleLogger;
+  private sessionDao: ISessionDAO;
 
   constructor(server: AgentServer, sandboxScheduler?: SandboxScheduler) {
     this.server = server;
     this.sandboxScheduler = sandboxScheduler;
     this.logger = getLogger('AgentSessionFactory');
+    this.sessionDao = this.server.storageProvider.getDAOFactory().getSessionDAO();
   }
 
   /**
@@ -56,12 +59,13 @@ export class AgentSessionFactory {
           sessionId,
         });
       } catch (error) {
-        console.error(`Failed to allocate sandbox for session ${sessionId}:`, error);
+        this.logger.error(`Failed to allocate sandbox for session ${sessionId}:`, error);
       }
     }
 
+    this.logger.info('create new session using sandbox url: ', sandboxUrl);
+
     // Create session info for storage
-    let savedSessionInfo: SessionInfo | undefined;
 
     const now = Date.now();
 
@@ -80,17 +84,11 @@ export class AgentSessionFactory {
       },
     };
 
-    try {
-      savedSessionInfo = await this.server.storageProvider.createSession(newSessionInfo);
-    } catch (error) {
-      this.logger.error(`Failed to save session info for ${sessionId}:`, error);
-    }
+    const savedSessionInfo = await this.sessionDao.createSession(newSessionInfo);
 
-    // Create AgentSession with sandbox URL
+    // Create AgentSession instance with sandbox URL
     const session = this.createAgentSessionWithSandbox({
-      sessionId,
       sessionInfo: savedSessionInfo,
-      sandboxUrl,
       agioProvider: this.server.getCustomAgioProvider(),
     });
 
@@ -111,7 +109,7 @@ export class AgentSessionFactory {
     sessionId: string,
   ): Promise<{ session: AgentSession; storageUnsubscribe?: () => void } | null> {
     try {
-      const sessionInfo = await this.server.storageProvider.getSessionInfo(sessionId);
+      let sessionInfo = await this.sessionDao.getSessionInfo(sessionId);
       if (!sessionInfo) {
         return null;
       }
@@ -126,10 +124,28 @@ export class AgentSessionFactory {
           const exist = await this.sandboxScheduler.checkInstanceExist(sandboxUrl);
 
           if (!exist) {
-            sandboxUrl = await this.sandboxScheduler.getSandboxUrl({
+            const newSandboxUrl = await this.sandboxScheduler.getSandboxUrl({
               userId,
               sessionId,
             });
+
+            sessionInfo = await this.sessionDao.updateSessionInfo(sessionInfo.id, {
+              ...sessionInfo,
+              metadata: {
+                ...sessionInfo.metadata,
+                sandboxUrl: newSandboxUrl,
+              },
+            });
+
+            this.logger.info(
+              `session's sandbox url not existed, reallocate a sandbox: `,
+              JSON.stringify({
+                sessionId: sessionInfo.id,
+                userId: sessionInfo.userId,
+                oldSandbox: sandboxUrl,
+                newSandbox: newSandboxUrl,
+              }),
+            );
           }
         } catch (error) {
           console.warn(`Failed to reallocate sandbox for session ${sessionId}:`, error);
@@ -138,8 +154,6 @@ export class AgentSessionFactory {
 
       // Create and initialize session
       const session = this.createAgentSessionWithSandbox({
-        sessionId,
-        sandboxUrl,
         sessionInfo,
         agioProvider: this.server.getCustomAgioProvider(),
       });
@@ -157,27 +171,12 @@ export class AgentSessionFactory {
    * Create AgentSession with sandbox URL injected
    */
   private createAgentSessionWithSandbox(options: {
-    sessionId: string;
-    sessionInfo?: SessionInfo;
-    sandboxUrl?: string;
+    sessionInfo: SessionInfo;
     agioProvider?: AgioProviderConstructor;
   }): AgentSession {
-    const { sessionId, sandboxUrl, sessionInfo, agioProvider } = options;
+    const { sessionInfo, agioProvider } = options;
 
-    // Create the session
-    const session = new AgentSession(this.server, sessionId, agioProvider, sessionInfo);
-
-    // Inject sandbox URL into agent if available
-    if (sandboxUrl && 'aioSandboxUrl' in session.agent) {
-      try {
-        (session.agent as any).aioSandboxUrl = sandboxUrl;
-        console.log(
-          `[AgentSessionFactory] Injected sandbox URL for session ${sessionId}: ${sandboxUrl}`,
-        );
-      } catch (error) {
-        console.warn(`Failed to inject sandbox URL for session ${sessionId}:`, error);
-      }
-    }
+    const session = new AgentSession(this.server, sessionInfo, agioProvider);
 
     return session;
   }

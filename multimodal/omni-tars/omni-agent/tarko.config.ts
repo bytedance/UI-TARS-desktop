@@ -31,12 +31,11 @@ export default {
   snapshot: { storageDirectory: resolve(__dirname, 'snapshots'), enable: true },
   googleApiKey: process.env.GOOGLE_API_KEY,
   googleMcpUrl: process.env.GOOGLE_MCP_URL,
-  aioSandboxUrl: process.env.AIO_SANDBOX_URL,
+  sandboxUrl: process.env.AIO_SANDBOX_URL,
   // tavilyApiKey: process.env.TAVILY_API_KEY,
   linkReaderMcpUrl: process.env.LINK_READER_URL,
   linkReaderAK: process.env.LINK_READER_AK,
   ignoreSandboxCheck: true,
-  logLevel: LogLevel.DEBUG,
   thinking: {
     type: process.env.NATIVE_THINKING === 'true' ? 'enabled' : 'disabled',
   },

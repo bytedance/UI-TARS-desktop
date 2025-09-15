@@ -31,7 +31,7 @@ const server = new AgentServer({
     snapshot: { storageDirectory: resolve(workspace, 'snapshots'), enable: true },
     googleApiKey: process.env.GOOGLE_API_KEY,
     googleMcpUrl: process.env.GOOGLE_MCP_URL,
-    aioSandboxUrl: process.env.AIO_SANDBOX_URL,
+    sandboxUrl: process.env.AIO_SANDBOX_URL,
     linkReaderMcpUrl: process.env.LINK_READER_URL,
     linkReaderAK: process.env.LINK_READER_AK,
     ignoreSandboxCheck: true,

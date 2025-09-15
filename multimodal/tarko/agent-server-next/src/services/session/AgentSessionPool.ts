@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ConsoleLogger, getLogger } from '@tarko/shared-utils';
 import { AgentSession } from './AgentSession';
 
 export interface SessionPoolConfig {
@@ -27,12 +28,13 @@ export class AgentSessionPool {
   private readonly memoryLimitMB: number;
   private readonly checkIntervalMs: number;
   private memoryCheckTimer?: NodeJS.Timeout;
+  private logger: ConsoleLogger;
 
-  constructor(config: SessionPoolConfig = {}) {
-    this.maxSessions = config.maxSessions ?? 100;
-    this.memoryLimitMB = config.memoryLimitMB ?? 512;
-    this.checkIntervalMs = config.checkIntervalMs ?? 30000; // 30 seconds
-
+  constructor(config?: SessionPoolConfig) {
+    this.maxSessions = config?.maxSessions ?? 200;
+    this.memoryLimitMB = config?.memoryLimitMB ?? 512;
+    this.checkIntervalMs = config?.checkIntervalMs ?? 30000; // 30 seconds
+    this.logger = getLogger('AgentSessionPool');
     // Start periodic memory check
     this.startMemoryMonitoring();
   }
@@ -167,6 +169,20 @@ export class AgentSessionPool {
         this.sessions.size > this.maxSessions ? this.sessions.size - this.maxSessions : 0,
       );
 
+      this.logger.warn(
+        'detect memory reaching limit, cur stats: ',
+        JSON.stringify(
+          {
+            estimatedMemory,
+            memoryThreshold,
+            sessionSize: this.sessions.size,
+            maxSessions: this.maxSessions,
+          },
+          null,
+          2,
+        ),
+      );
+
       await this.evictOldestSessions(targetEvictions);
     }
   }
@@ -186,20 +202,19 @@ export class AgentSessionPool {
       try {
         await this.cleanupSession(entry.session);
         this.sessions.delete(sessionId);
-        console.log(`[SessionPool] Evicted session ${sessionId} (LRU)`);
+        this.logger.log(`[SessionPool] Evicted session ${sessionId} (LRU)`);
       } catch (error) {
-        console.error(`[SessionPool] Failed to evict session ${sessionId}:`, error);
+        this.logger.error(`[SessionPool] Failed to evict session ${sessionId}:`, error);
       }
     }
   }
 
   /**
    * Estimate memory usage based on session count
-   * This is a rough estimation, in production you might want more accurate measurement
    */
   private getEstimatedMemoryUsage(): number {
-    // Rough estimate: ~5MB per session (can be tuned based on actual usage)
-    return this.sessions.size * 5;
+    // FIXME: Rough estimate: ~3MB per session (should be tuned based on actual usage)
+    return this.sessions.size * 3;
   }
 
   /**
@@ -209,7 +224,7 @@ export class AgentSessionPool {
     try {
       await session.cleanup();
     } catch (error) {
-      console.error('Failed to cleanup session:', error);
+      this.logger.error('Failed to cleanup session:', error);
     }
   }
 

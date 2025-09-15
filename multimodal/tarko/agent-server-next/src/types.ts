@@ -12,6 +12,7 @@ import type {
   IAgent,
   GlobalDirectoryOptions,
   TenantConfig,
+  SessionInfo,
 } from '@tarko/interface';
 import type { StorageProvider } from './storage';
 import type { AgentSession, AgentSessionFactory, AgentSessionPool } from './services/session';
@@ -92,8 +93,7 @@ export interface AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   // Agent and workspace methods
   getCurrentWorkspace(): string;
   getCurrentAgentName(): string | undefined;
-  createAgent(): IAgent;
-  createAgentWithSessionModel(sessionInfo?: any): IAgent;
+  createAgentWithSessionModel(sessionInfo: SessionInfo): IAgent;
 
   // Model configuration
   getAvailableModels(): Array<{ name: string; models: string[]; baseURL?: string }>;

@@ -72,11 +72,10 @@ export class AgentSession {
 
   constructor(
     private server: AgentServer,
-    sessionId: string,
+    sessionInfo: SessionInfo,
     agioProviderImpl?: AgioProviderConstructor,
-    sessionInfo?: SessionInfo,
   ) {
-    this.id = sessionId;
+    this.id = sessionInfo.id;
     this.eventBridge = new EventStreamBridge();
     this.sessionInfo = sessionInfo;
 
@@ -92,11 +91,11 @@ export class AgentSession {
         agentOptions.snapshot.storageDirectory ?? server.getCurrentWorkspace();
 
       if (snapshotStoragesDirectory) {
-        const snapshotPath = path.join(snapshotStoragesDirectory, sessionId);
+        const snapshotPath = path.join(snapshotStoragesDirectory, this.id);
         // @ts-expect-error
         this.agent = new AgentSnapshot(agent, {
           snapshotPath,
-          snapshotName: sessionId,
+          snapshotName: this.id,
         }) as unknown as IAgent;
 
         // Log snapshot initialization if agent has logger
@@ -113,7 +112,7 @@ export class AgentSession {
     // Initialize AGIO collector if provider URL is configured
     if (agentOptions.agio?.provider && agioProviderImpl) {
       const impl = agioProviderImpl;
-      this.agioProvider = new impl(agentOptions.agio.provider, agentOptions, sessionId, this.agent);
+      this.agioProvider = new impl(agentOptions.agio.provider, agentOptions, this.id, this.agent);
 
       // Log AGIO initialization if agent has logger
       if ('logger' in this.agent) {
