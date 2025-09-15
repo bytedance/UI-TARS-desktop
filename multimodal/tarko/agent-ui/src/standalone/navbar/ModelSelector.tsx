@@ -10,6 +10,7 @@ import {
   CircularProgress,
   createTheme,
   ThemeProvider,
+  Tooltip,
 } from '@mui/material';
 import { useSetAtom } from 'jotai';
 import { updateSessionMetadataAction } from '@/common/state/actions/sessionActions';
@@ -19,6 +20,7 @@ import { AgentModel } from '@tarko/agent-interface';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useAtomValue } from 'jotai';
 import { isProcessingAtom } from '@/common/state/atoms/ui';
+import { getTooltipProps } from '@/common/components/TooltipConfig';
 
 interface NavbarModelSelectorProps {
   className?: string;
@@ -112,14 +114,18 @@ const StaticModelDisplay: React.FC<{
   isDarkMode: boolean;
   className?: string;
   muiTheme: any;
-}> = ({ sessionMetadata, isDarkMode, className, muiTheme }) => {
+  isDisabled?: boolean;
+  disabledReason?: string;
+}> = ({ sessionMetadata, isDarkMode, className, muiTheme, isDisabled = false, disabledReason }) => {
   if (!sessionMetadata?.modelConfig) {
     return null;
   }
 
-  return (
+  const tooltipProps = getTooltipProps('bottom');
+
+  const content = (
     <ThemeProvider theme={muiTheme}>
-      <motion.div whileHover={{ scale: 1.02 }} className={className}>
+      <motion.div whileHover={isDisabled ? {} : { scale: 1.02 }} className={className}>
         <Box
           sx={{
             display: 'inline-flex',
@@ -132,13 +138,19 @@ const StaticModelDisplay: React.FC<{
             width: 'auto',
             minWidth: 'auto',
             maxWidth: '300px',
-            background: isDarkMode ? 'rgba(55, 65, 81, 0.3)' : 'rgba(248, 250, 252, 0.8)',
+            background: isDisabled
+              ? isDarkMode ? 'rgba(55, 65, 81, 0.15)' : 'rgba(248, 250, 252, 0.4)'
+              : isDarkMode ? 'rgba(55, 65, 81, 0.3)' : 'rgba(248, 250, 252, 0.8)',
             backdropFilter: 'blur(8px)',
-            border: isDarkMode
+            border: isDisabled
+              ? isDarkMode ? '1px solid rgba(75, 85, 99, 0.15)' : '1px solid rgba(203, 213, 225, 0.3)'
+              : isDarkMode
               ? '1px solid rgba(75, 85, 99, 0.3)'
               : '1px solid rgba(203, 213, 225, 0.6)',
             borderRadius: '8px',
-            '&:hover': {
+            opacity: isDisabled ? 0.6 : 1,
+            cursor: isDisabled ? 'not-allowed' : 'default',
+            '&:hover': isDisabled ? {} : {
               background: isDarkMode ? 'rgba(55, 65, 81, 0.8)' : 'rgba(241, 245, 249, 0.9)',
               boxShadow: isDarkMode
                 ? '0 2px 4px -1px rgba(0, 0, 0, 0.2)'
@@ -155,6 +167,16 @@ const StaticModelDisplay: React.FC<{
       </motion.div>
     </ThemeProvider>
   );
+
+  if (isDisabled && disabledReason) {
+    return (
+      <Tooltip title={disabledReason} {...tooltipProps}>
+        <span>{content}</span>
+      </Tooltip>
+    );
+  }
+
+  return content;
 };
 
 export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
@@ -344,6 +366,8 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
         isDarkMode={isDarkMode}
         className={className}
         muiTheme={muiTheme}
+        isDisabled={isProcessing}
+        disabledReason={isProcessing ? 'Model selection unavailable during agent execution. Please wait for agent execution to complete' : undefined}
       />
     );
   }
@@ -360,6 +384,8 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
         isDarkMode={isDarkMode}
         className={className}
         muiTheme={muiTheme}
+        isDisabled={isProcessing}
+        disabledReason={isProcessing ? 'Model selection unavailable during agent execution. Please wait for agent execution to complete' : undefined}
       />
     );
   }
