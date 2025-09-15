@@ -366,8 +366,8 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
         isDarkMode={isDarkMode}
         className={className}
         muiTheme={muiTheme}
-        isDisabled={isProcessing}
-        disabledReason={isProcessing ? 'Model selection unavailable during agent execution. Please wait for agent execution to complete' : undefined}
+        isDisabled={isProcessing && models.length > 1}
+        disabledReason={isProcessing && models.length > 1 ? 'Model selection unavailable during agent execution. Please wait for agent execution to complete' : undefined}
       />
     );
   }
