@@ -46,7 +46,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
 
   // Get current model from session metadata - fix race condition
   const currentModel = React.useMemo(() => {
-    // Wait for both models and sessionMetadata to be loaded
+    // Wait for models to be loaded
     if (models.length === 0) return null;
 
     // If we have session metadata with model config, use it
@@ -56,13 +56,20 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
           m.provider === sessionMetadata.modelConfig?.provider &&
           m.id === sessionMetadata.modelConfig?.id,
       );
-      return foundModel || models[0]; // fallback to first model if not found
+      return foundModel || models[0]; // fallback to first model if saved model not found
     }
 
-    // Only fallback to first model if we have confirmed no session metadata
-    // This prevents showing default model during initial loading
-    return models[0];
-  }, [models, sessionMetadata?.modelConfig]);
+    // CRITICAL: Only show first model for NEW sessions without any metadata
+    // For existing sessions, wait for sessionMetadata to load properly
+    // sessionMetadata is undefined during loading, {} when no metadata exists
+    if (sessionMetadata && Object.keys(sessionMetadata).length === 0) {
+      // This is a confirmed empty metadata object - new session
+      return models[0];
+    }
+
+    // sessionMetadata is still loading or undefined - don't show any model yet
+    return null;
+  }, [models, sessionMetadata]);
 
   const muiTheme = React.useMemo(
     () =>
