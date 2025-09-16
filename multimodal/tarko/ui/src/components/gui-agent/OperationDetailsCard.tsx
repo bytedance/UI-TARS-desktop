@@ -30,7 +30,6 @@ export const OperationDetailsCard: React.FC<OperationDetailsCardProps> = ({
       className="relative"
     >
       <div className="bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-800 dark:to-gray-900/50 rounded-xl border border-gray-200/60 dark:border-gray-700/40 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden backdrop-blur-sm">
-        {/* Compact header with refined spacing */}
         <div className="relative px-5 py-3 bg-gradient-to-r from-gray-50/80 via-white/50 to-gray-50/80 dark:from-gray-800/60 dark:via-gray-800/40 dark:to-gray-800/60 border-b border-gray-100/60 dark:border-gray-700/40">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -75,9 +74,7 @@ export const OperationDetailsCard: React.FC<OperationDetailsCardProps> = ({
           </div>
         </div>
 
-        {/* Compact content area with refined spacing */}
         <div className="p-5 space-y-4">
-          {/* Thought process with compact styling */}
           {thought && (
             <div className="group">
               <div className="flex items-center mb-2">
@@ -96,7 +93,6 @@ export const OperationDetailsCard: React.FC<OperationDetailsCardProps> = ({
             </div>
           )}
 
-          {/* Step with compact styling */}
           {step && step !== thought && (
             <div className="group">
               <div className="flex items-center mb-2">
@@ -111,7 +107,6 @@ export const OperationDetailsCard: React.FC<OperationDetailsCardProps> = ({
             </div>
           )}
 
-          {/* Action command with compact code styling */}
           {action && (
             <div className="group">
               <div className="flex items-center mb-2">

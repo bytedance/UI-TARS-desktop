@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
-import { BrowserShell } from '@tarko/ui';
 import { MouseCursor } from './MouseCursor';
+import { BrowserShell } from '../ai';
 
 type ScreenshotStrategy = 'both' | 'beforeAction' | 'afterAction';
 
@@ -38,7 +38,6 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
   const shouldShowMouseCursor = (imageType: 'before' | 'after' | 'single') => {
     if (!mousePosition || !showCoordinates) return false;
 
-    // Only show cursor on before action images or single images in beforeAction strategy
     return imageType === 'before' || (imageType === 'single' && strategy === 'beforeAction');
   };
 
@@ -53,7 +52,6 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
     return content;
   };
 
-  // Render placeholder when no image available
   const renderPlaceholder = () => {
     const placeholderClassName = renderBrowserShell
       ? 'flex items-center justify-center bg-gray-50 dark:bg-gray-900 min-h-[400px]'
@@ -95,7 +93,6 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
       );
     }
 
-    // Show placeholder with consistent sizing using reference image
     if (referenceImage) {
       const imageClassName = renderBrowserShell
         ? 'w-full h-auto object-contain invisible'
@@ -122,7 +119,6 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
   };
 
   if (strategy === 'both') {
-    // Show both screenshots side by side
     return (
       <div className="space-y-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -163,7 +159,6 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
     );
   }
 
-  // Show single screenshot
   return wrapWithBrowserShell(
     renderImageContent(relatedImage, 'Browser Screenshot', shouldShowMouseCursor('single')),
     relatedImageUrl || undefined,

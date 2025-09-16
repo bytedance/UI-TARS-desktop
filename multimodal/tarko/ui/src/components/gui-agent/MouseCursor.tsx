@@ -34,7 +34,6 @@ export const MouseCursor: React.FC<MouseCursorProps> = ({ position, previousPosi
       }}
     >
       <div className="relative">
-        {/* Enhanced cursor icon with shadow effect */}
         <svg
           width="36"
           height="36"
@@ -61,10 +60,8 @@ export const MouseCursor: React.FC<MouseCursorProps> = ({ position, previousPosi
           />
         </svg>
 
-        {/* Artistic pulse effect for click actions */}
         {isClickAction && (
           <>
-            {/* Multiple layered ripple effects */}
             <motion.div
               className="absolute rounded-full"
               initial={{ opacity: 0.8, scale: 0 }}
@@ -104,7 +101,6 @@ export const MouseCursor: React.FC<MouseCursorProps> = ({ position, previousPosi
                 border: '1px solid rgba(99,102,241,0.5)',
               }}
             />
-            {/* Central highlight dot */}
             <motion.div
               className="absolute rounded-full bg-white"
               initial={{ opacity: 1, scale: 0.5 }}

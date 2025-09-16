@@ -33,8 +33,6 @@ export const StrategySwitch: React.FC<StrategySwitchProps> = ({
 }) => {
   const strategies: ScreenshotStrategy[] = ['beforeAction', 'afterAction', 'both'];
 
-
-
   return (
     <div className="flex items-center justify-center">
       <div className="inline-flex rounded-md" role="group">
