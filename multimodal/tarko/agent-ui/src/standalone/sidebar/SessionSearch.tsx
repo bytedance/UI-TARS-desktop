@@ -11,7 +11,6 @@ export const SessionSearch: React.FC<SessionSearchProps> = ({ onSearch }) => {
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Handle search input change
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const newQuery = e.target.value;
@@ -21,7 +20,6 @@ export const SessionSearch: React.FC<SessionSearchProps> = ({ onSearch }) => {
     [onSearch],
   );
 
-  // Clear search query
   const clearSearch = useCallback(() => {
     setQuery('');
     onSearch('');
@@ -30,16 +28,13 @@ export const SessionSearch: React.FC<SessionSearchProps> = ({ onSearch }) => {
     }
   }, [onSearch]);
 
-  // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Cmd+F or Ctrl+F to focus search
       if ((e.metaKey || e.ctrlKey) && e.key === 'f' && !e.shiftKey && !e.altKey) {
         e.preventDefault();
         inputRef.current?.focus();
       }
 
-      // Escape to clear and blur search when focused
       if (e.key === 'Escape' && document.activeElement === inputRef.current) {
         clearSearch();
         inputRef.current?.blur();
