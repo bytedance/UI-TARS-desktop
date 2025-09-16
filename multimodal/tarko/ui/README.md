@@ -1,6 +1,6 @@
 # @tarko/ui
 
-Reusable UI components and utilities for Tarko Agent applications.
+Reusable UI components and utilities for Tarko Agent UI.
 
 ## Installation
 
@@ -95,36 +95,7 @@ const diffContent = `
 - `maxHeight?: string` - Maximum height (default: '400px')
 - `className?: string` - Additional CSS classes
 
-#### `CodeEditorHeader`
 
-Reusable header component for code editors with file info and actions.
-
-```tsx
-import { CodeEditorHeader } from '@tarko/ui';
-
-<CodeEditorHeader
-  fileName="example.js"
-  filePath="/path/to/example.js"
-  fileSize="1.2 KB"
-  onCopy={() => navigator.clipboard.writeText(code)}
-  copyButtonTitle="Copy to clipboard"
->
-  <span>Additional content</span>
-</CodeEditorHeader>
-```
-
-#### `CodeEditorStatusBar`
-
-Status bar showing file statistics and editor state.
-
-```tsx
-import { CodeEditorStatusBar } from '@tarko/ui';
-
-<CodeEditorStatusBar
-  code="console.log('test');"
-  readOnly={true}
-/>
-```
 
 ## Utilities
 
@@ -195,24 +166,3 @@ Checks if a path is absolute (starts with `/` on Unix or drive letter on Windows
 
 - `clearPathNormalizationCache(): void` - Clear normalization cache
 - `getPathNormalizationCacheSize(): number` - Get cache size
-
-## Development
-
-```bash
-# Install dependencies
-pnpm install
-
-# Build library
-pnpm build
-
-# Watch mode
-pnpm dev
-```
-
-## Dependencies
-
-- **React** - UI framework
-- **Monaco Editor** - Advanced code editor
-- **highlight.js** - Syntax highlighting
-- **parse-diff** - Diff parsing
-- **react-icons** - Icon components
