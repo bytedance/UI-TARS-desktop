@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FiSend, FiRefreshCw, FiImage, FiSquare, FiX } from 'react-icons/fi';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { ConnectionStatus } from '@/common/types';
 import { ChatCompletionContentPart } from '@tarko/agent-interface';
 import { useSession } from '@/common/hooks/useSession';
@@ -409,13 +409,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             {/* File upload button */}
             {showAttachments && (
               <div className="absolute left-3 bottom-3 flex items-center gap-2">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                <button
                   type="button"
                   onClick={handleFileUpload}
                   disabled={isDisabled || isProcessing}
-                  className={`p-2 rounded-full transition-colors ${
+                  className={`p-2 rounded-full transition-all duration-200 hover:scale-105 active:scale-95 ${
                     isDisabled || isProcessing
                       ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
                       : 'text-gray-400 hover:text-accent-500 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:text-gray-400'
@@ -423,7 +421,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   title="Attach image (or paste directly)"
                 >
                   <FiImage size={18} />
-                </motion.button>
+                </button>
 
                 <input
                   type="file"
@@ -445,11 +443,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
-                  whileTap={{ scale: 0.9 }}
-                  whileHover={{ scale: 1.05 }}
                   type="button"
                   onClick={onReconnect}
-                  className="absolute right-3 bottom-3 p-2 rounded-full text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:text-gray-400 transition-all duration-200"
+                  className="absolute right-3 bottom-3 p-2 rounded-full text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:text-gray-400 transition-all duration-200 hover:scale-105 active:scale-90"
                   title="Try to reconnect"
                 >
                   <FiRefreshCw
@@ -464,16 +460,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.2 }}
-                  whileTap={{ scale: 0.95 }}
-                  whileHover={{ scale: 1.02 }}
                   type="button"
                   onClick={handleAbort}
                   disabled={isAborting}
-                  className={`absolute right-3 bottom-3 w-10 h-10 rounded-full flex items-center justify-center ${
+                  className={`absolute right-3 bottom-3 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 ${
                     isAborting
                       ? 'bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100 dark:from-indigo-800/30 dark:via-purple-800/30 dark:to-pink-800/30 text-indigo-400 dark:text-indigo-500 cursor-not-allowed border-2 border-indigo-200 dark:border-indigo-700/50'
                       : 'bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 hover:from-indigo-100 hover:via-purple-100 hover:to-pink-100 dark:from-indigo-900/20 dark:via-purple-900/20 dark:to-pink-900/20 dark:hover:from-indigo-900/30 dark:hover:via-purple-900/30 dark:hover:to-pink-900/30 text-indigo-600 dark:text-indigo-400 border-2 border-indigo-200 dark:border-indigo-700/50'
-                  } transition-all duration-200 shadow-sm bg-[length:200%_200%] animate-border-flow`}
+                  } shadow-sm bg-[length:200%_200%] animate-border-flow`}
                   title="Stop generation"
                 >
                   {isAborting ? (
@@ -488,15 +482,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
-                  whileTap={{ scale: 0.9 }}
-                  whileHover={{ scale: 1.05 }}
                   type="submit"
                   disabled={isMessageEmpty(contextualState.input, uploadedImages) || isDisabled}
-                  className={`absolute right-3 bottom-3 p-3 rounded-full ${
+                  className={`absolute right-3 bottom-3 p-3 rounded-full transition-all duration-200 hover:scale-105 active:scale-90 ${
                     isMessageEmpty(contextualState.input, uploadedImages) || isDisabled
                       ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
                       : 'bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 text-white dark:text-gray-900 shadow-sm'
-                  } transition-all duration-200`}
+                  }`}
                 >
                   <FiSend size={18} />
                 </motion.button>
@@ -510,34 +502,22 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       {showHelpText && (
         <div className="flex justify-center mt-2 text-xs">
           {connectionStatus && !connectionStatus.connected ? (
-            <motion.span
-              initial={{ opacity: 0.7 }}
-              animate={{ opacity: 1 }}
-              className="text-red-500 dark:text-red-400 flex items-center font-medium"
-            >
+            <span className="text-red-500 dark:text-red-400 flex items-center font-medium animate-in fade-in duration-300">
               {connectionStatus.reconnecting
                 ? 'Attempting to reconnect...'
                 : 'Server disconnected. Click the button to reconnect.'}
-            </motion.span>
+            </span>
           ) : isProcessing ? (
-            <motion.span
-              initial={{ opacity: 0.7 }}
-              whileHover={{ opacity: 1 }}
-              className="text-accent-500 dark:text-accent-400 flex items-center"
-            >
+            <span className="text-accent-500 dark:text-accent-400 flex items-center animate-in fade-in duration-300">
               <span className="typing-indicator mr-2">
                 <span></span>
                 <span></span>
                 <span></span>
               </span>
               Agent is processing your request...
-            </motion.span>
+            </span>
           ) : (
-            <motion.span
-              initial={{ opacity: 0.7 }}
-              whileHover={{ opacity: 1 }}
-              className="text-gray-500 dark:text-gray-400 transition-opacity"
-            >
+            <span className="text-gray-500 dark:text-gray-400 transition-opacity hover:opacity-100 animate-in fade-in duration-300">
               {contextualSelectorEnabled ? (
                 <>
                   Use @ to reference files/folders • Ctrl+Enter to send • You can also paste images
@@ -546,7 +526,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               ) : (
                 <>Use Ctrl+Enter to quickly send • You can also paste images directly</>
               )}
-            </motion.span>
+            </span>
           )}
         </div>
       )}

@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 
 interface SkeletonLoaderProps {
   lines?: number;
@@ -20,16 +19,10 @@ export const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
         )}
         <div className="flex-1 space-y-3">
           {Array.from({ length: lines }).map((_, index) => (
-            <motion.div
+            <div
               key={index}
-              initial={{ opacity: 0, width: '0%' }}
-              animate={{ opacity: 1, width: '100%' }}
-              transition={{
-                delay: index * 0.2,
-                duration: 0.8,
-                ease: 'easeOut',
-              }}
-              className="space-y-2"
+              className="space-y-2 animate-in fade-in duration-800"
+              style={{ animationDelay: `${index * 0.2}s` }}
             >
               <div
                 className="h-3 bg-gray-200 dark:bg-gray-700 rounded"
@@ -37,7 +30,7 @@ export const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
                   width: index === lines - 1 ? '75%' : '100%',
                 }}
               />
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
@@ -73,13 +66,7 @@ export const TypewriterLoader: React.FC<TypewriterLoaderProps> = ({
   return (
     <div className={`font-mono ${className}`}>
       {displayText}
-      <motion.span
-        animate={{ opacity: [1, 0] }}
-        transition={{ duration: 0.5, repeat: Infinity, repeatType: 'reverse' }}
-        className="ml-1"
-      >
-        |_
-      </motion.span>
+      <span className="ml-1 animate-pulse">|_</span>
     </div>
   );
 };

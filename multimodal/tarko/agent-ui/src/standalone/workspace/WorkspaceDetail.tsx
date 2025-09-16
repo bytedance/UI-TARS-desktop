@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { FiCode, FiEye } from 'react-icons/fi';
 import { useAtom } from 'jotai';
 import { useSession } from '@/common/hooks/useSession';
@@ -253,12 +252,7 @@ export const WorkspaceDetail: React.FC = () => {
 
   return (
     <>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="h-full flex flex-col bg-white dark:bg-gray-900/20"
-      >
+      <div className="h-full flex flex-col bg-white dark:bg-gray-900/20 animate-in fade-in duration-200">
         <WorkspaceHeader
           panelContent={panelContent}
           onBack={handleBack}
@@ -272,7 +266,7 @@ export const WorkspaceDetail: React.FC = () => {
           isReplayMode={isReplayMode}
         />
         <div className="flex-1 overflow-auto p-4 pt-2">{renderContent()}</div>
-      </motion.div>
+      </div>
 
       <ImageModal imageData={zoomedImage} onClose={() => setZoomedImage(null)} />
 
