@@ -4,7 +4,6 @@ import { Message } from '../index';
 import { isMultimodalContent } from '@/common/utils/typeGuards';
 import { MessageFooter } from './MessageFooter';
 import { ThinkingAnimation } from '@tarko/ui';
-import { SkeletonLoader } from './SkeletonLoader';
 import { useAtomValue } from 'jotai';
 import { isProcessingAtom } from '@/common/state/atoms/ui';
 import { getAgentTitle } from '@/config/web-ui-config';
@@ -92,17 +91,7 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
       {/* Simplified thinking animation */}
       {isThinking && (
         <div className="mt-4 space-y-4">
-          <ThinkingAnimation
-            text={`${getAgentTitle()} is running`}
-            size="medium"
-          />
-
-          {/* Show skeleton loader during processing */}
-          {isProcessing && (
-            <div className="ml-8">
-              <SkeletonLoader lines={2} showAvatar={false} className="opacity-50" />
-            </div>
-          )}
+          <ThinkingAnimation text={`${getAgentTitle()} is running`} size="medium" />
         </div>
       )}
 
