@@ -11,6 +11,7 @@
     "dev:core": "ptk d --packages @agent-tars/core",
     "build": "pnpm run -r build",
     "build:tarko": "pnpm --filter \"./tarko/**\" --include-dependencies build",
+    "build:ui": "pnpm --filter @tarko/ui --filter @tarko/agent-ui build",
     "build:agent-tars": "pnpm --filter \"./agent-tars/**\" --include-dependencies build",
     "build:omni-tars": "pnpm --filter \"./omni-tars/**\" --include-dependencies build",
     "build:gui-agent": "pnpm --filter \"./gui-agent/**\" --include-dependencies build",
