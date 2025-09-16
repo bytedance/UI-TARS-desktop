@@ -1,3 +1,3 @@
 export * from './file';
 export * from './pathNormalizer';
-export * from './mui';
+export * from './mui-theme';

@@ -8,11 +8,7 @@ export interface TooltipProps extends Omit<MuiTooltipProps, 'componentsProps'> {
 /**
  * Standard Tooltip component with consistent styling across the application
  */
-export const Tooltip: React.FC<TooltipProps> = ({ 
-  placement = 'bottom',
-  children,
-  ...props 
-}) => {
+export const Tooltip: React.FC<TooltipProps> = ({ placement = 'bottom', children, ...props }) => {
   return (
     <MuiTooltip
       arrow
