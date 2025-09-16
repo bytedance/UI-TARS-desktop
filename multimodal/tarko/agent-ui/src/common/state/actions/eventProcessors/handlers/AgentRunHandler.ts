@@ -1,4 +1,4 @@
-import { sessionAgentStatusAtom } from '@/common/state/atoms/ui';
+import { isProcessingAtom } from '@/common/state/atoms/ui';
 import { AgentEventStream } from '@/common/types';
 import { EventHandler, EventHandlerContext } from '../types';
 import { shouldUpdateProcessingState } from '../utils/panelContentUpdater';
@@ -15,16 +15,9 @@ export class AgentRunStartHandler implements EventHandler<AgentEventStream.Agent
   ): void {
     const { set } = context;
 
-    // Update processing state for the specific session
-    // Note: agentInfo and modelConfig are now set during session creation on server side
+    // Update processing state
     if (shouldUpdateProcessingState(sessionId)) {
-      set(sessionAgentStatusAtom, (prev) => ({
-        ...prev,
-        [sessionId]: {
-          ...(prev[sessionId] || {}),
-          isProcessing: true,
-        },
-      }));
+      set(isProcessingAtom, true);
     }
   }
 }
@@ -37,15 +30,9 @@ export class AgentRunEndHandler implements EventHandler<AgentEventStream.Event> 
   handle(context: EventHandlerContext, sessionId: string, event: AgentEventStream.Event): void {
     const { set } = context;
 
-    // Update processing state for the specific session
+    // Update processing state
     if (shouldUpdateProcessingState(sessionId)) {
-      set(sessionAgentStatusAtom, (prev) => ({
-        ...prev,
-        [sessionId]: {
-          ...(prev[sessionId] || {}),
-          isProcessing: false,
-        },
-      }));
+      set(isProcessingAtom, false);
     }
   }
 }

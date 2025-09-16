@@ -4,7 +4,7 @@ import { apiService } from '../../services/apiService';
 import { sessionsAtom, activeSessionIdAtom } from '../atoms/session';
 import { messagesAtom } from '../atoms/message';
 import { toolResultsAtom, toolCallResultMap } from '../atoms/tool';
-import { sessionAgentStatusAtom, sessionPanelContentAtom } from '../atoms/ui';
+import { sessionPanelContentAtom, isProcessingAtom } from '../atoms/ui';
 import { processEventAction } from './eventProcessors';
 import { Message, SessionInfo } from '@/common/types';
 import { connectionStatusAtom } from '../atoms/ui';
@@ -139,14 +139,7 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
       });
     }
 
-    // Initialize session status without API call - let useSession hook handle status checking
-    // This avoids duplicate API calls since useSession will check status when session becomes active
-    set(sessionAgentStatusAtom, (prev) => ({
-      ...prev,
-      [sessionId]: {
-        isProcessing: false, // Default to false, will be updated by useSession hook
-      },
-    }));
+    // Processing state will be managed by SSE events
 
     toolCallResultMap.clear();
 
@@ -293,12 +286,6 @@ export const deleteSessionAction = atom(null, async (get, set, sessionId: string
         delete newPanelContent[sessionId];
         return newPanelContent;
       });
-
-      set(sessionAgentStatusAtom, (prev) => {
-        const newAgentStatus = { ...prev };
-        delete newAgentStatus[sessionId];
-        return newAgentStatus;
-      });
     }
 
     return success;
@@ -317,14 +304,8 @@ export const sendMessageAction = atom(
       throw new Error('No active session');
     }
 
-    // Update processing state for active session
-    set(sessionAgentStatusAtom, (prev) => ({
-      ...prev,
-      [activeSessionId]: {
-        ...(prev[activeSessionId] || {}),
-        isProcessing: true,
-      },
-    }));
+    // Update processing state
+    set(isProcessingAtom, true);
 
     // Immediately add user message to UI for better UX
     // Server-side user_message events will be deduplicated in the handler
@@ -388,14 +369,8 @@ export const sendMessageAction = atom(
       });
     } catch (error) {
       console.error('Error sending message:', error);
-      // Set processing to false for this session on error
-      set(sessionAgentStatusAtom, (prev) => ({
-        ...prev,
-        [activeSessionId]: {
-          ...(prev[activeSessionId] || {}),
-          isProcessing: false,
-        },
-      }));
+      // Set processing to false on error
+      set(isProcessingAtom, false);
       throw error;
     }
   },
@@ -413,26 +388,14 @@ export const abortQueryAction = atom(null, async (get, set) => {
 
     // Immediately set processing to false on successful abort to prevent flickering
     if (success) {
-      set(sessionAgentStatusAtom, (prev) => ({
-        ...prev,
-        [activeSessionId]: {
-          ...(prev[activeSessionId] || {}),
-          isProcessing: false,
-        },
-      }));
+      set(isProcessingAtom, false);
     }
 
     return success;
   } catch (error) {
     console.error('Error aborting query:', error);
     // Also set processing to false on error to ensure UI consistency
-    set(sessionAgentStatusAtom, (prev) => ({
-      ...prev,
-      [activeSessionId]: {
-        ...(prev[activeSessionId] || {}),
-        isProcessing: false,
-      },
-    }));
+    set(isProcessingAtom, false);
     return false;
   }
 });
@@ -466,16 +429,8 @@ export const checkSessionStatusAction = atom(null, async (get, set, sessionId: s
 
     const status = await promise;
 
-    set(sessionAgentStatusAtom, (prev) => ({
-      ...prev,
-      [sessionId]: {
-        isProcessing: status.isProcessing,
-        state: status.state,
-        phase: status.phase,
-        message: status.message,
-        estimatedTime: status.estimatedTime,
-      },
-    }));
+    // Update simple processing state
+    set(isProcessingAtom, status.isProcessing);
 
     // Clear the promise and update timestamp
     statusCheckCache.set(sessionId, { timestamp: now });

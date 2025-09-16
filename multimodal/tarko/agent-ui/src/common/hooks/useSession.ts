@@ -8,8 +8,6 @@ import {
   isProcessingAtom,
   activePanelContentAtom,
   connectionStatusAtom,
-  agentStatusAtom,
-  sessionAgentStatusAtom,
 } from '../state/atoms/ui';
 import { replayStateAtom } from '../state/atoms/replay';
 import {
@@ -39,8 +37,6 @@ export function useSession() {
   const toolResults = useAtomValue(toolResultsAtom);
   const sessionFiles = useAtomValue(sessionFilesAtom);
   const [isProcessing, setIsProcessing] = useAtom(isProcessingAtom);
-  const [agentStatus, setAgentStatus] = useAtom(agentStatusAtom);
-  const setSessionAgentStatus = useSetAtom(sessionAgentStatusAtom);
   const [activePanelContent, setActivePanelContent] = useAtom(activePanelContentAtom);
   const [connectionStatus, setConnectionStatus] = useAtom(connectionStatusAtom);
 
@@ -97,7 +93,6 @@ export function useSession() {
       toolResults,
       sessionFiles,
       isProcessing,
-      agentStatus,
       activePanelContent,
       connectionStatus,
 
@@ -129,7 +124,6 @@ export function useSession() {
       toolResults,
       sessionFiles,
       isProcessing,
-      agentStatus,
       activePanelContent,
       connectionStatus,
       replayState,
