@@ -9,7 +9,6 @@ interface SessionCreatingStateProps {
  * SessionCreatingState Component - Enhanced loading state with clear loading indication
  */
 export const SessionCreatingState: React.FC<SessionCreatingStateProps> = ({ isCreating }) => {
-
   if (!isCreating) {
     return null;
   }
@@ -21,7 +20,10 @@ export const SessionCreatingState: React.FC<SessionCreatingStateProps> = ({ isCr
         <div className="relative mb-8 animate-in zoom-in duration-700">
           {/* Refined background glow - multiple layers for elegance */}
           <div className="absolute inset-0 w-32 h-32 mx-auto rounded-full bg-blue-500/10 blur-2xl animate-pulse" />
-          <div className="absolute inset-2 w-28 h-28 mx-auto rounded-full bg-blue-400/15 blur-xl animate-pulse" style={{ animationDelay: '0.5s' }} />
+          <div
+            className="absolute inset-2 w-28 h-28 mx-auto rounded-full bg-blue-400/15 blur-xl animate-pulse"
+            style={{ animationDelay: '0.5s' }}
+          />
 
           {/* Main loading container with subtle pulse */}
           <div className="relative w-24 h-24 bg-gradient-to-br from-white via-gray-50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-3xl flex items-center justify-center mx-auto shadow-xl border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-sm animate-pulse">

@@ -29,8 +29,12 @@ export const ThinkingAnimation: React.FC<ThinkingAnimationProps> = ({
       <div className="flex-1">
         {/* Main status text */}
         <div className="flex items-center space-x-2">
-          <span className={`${textClass} font-semibold text-gray-700 dark:text-gray-300`}>{text}</span>
-          <span className={`${textClass} text-gray-600 dark:text-gray-400 inline-block font-bold animate-pulse`}>
+          <span className={`${textClass} font-semibold text-gray-700 dark:text-gray-300`}>
+            {text}
+          </span>
+          <span
+            className={`${textClass} text-gray-600 dark:text-gray-400 inline-block font-bold animate-pulse`}
+          >
             •••
           </span>
         </div>

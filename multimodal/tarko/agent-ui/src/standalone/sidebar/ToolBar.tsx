@@ -1,6 +1,5 @@
 import React, { useCallback, useState } from 'react';
 
-
 import { FiPlus, FiHome, FiSettings } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/common/hooks/useSession';
@@ -96,6 +95,7 @@ export const ToolBar: React.FC = () => {
         <div className="flex flex-col items-center gap-4 pb-4">
           {!isReplayMode && enableLayoutSwitchButton && <LayoutSwitchButton />}
 
+          {/* Agent config button */}
           {!isReplayMode && (
             <button
               onClick={() => setIsConfigViewerOpen(true)}

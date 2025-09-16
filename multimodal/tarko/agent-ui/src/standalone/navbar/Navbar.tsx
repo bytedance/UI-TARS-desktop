@@ -97,7 +97,7 @@ export const Navbar: React.FC = () => {
     const colors = {
       code: 'emerald',
       monitor: 'blue',
-      terminal: 'purple', 
+      terminal: 'purple',
       browser: 'cyan',
       desktop: 'orange',
       default: 'slate',

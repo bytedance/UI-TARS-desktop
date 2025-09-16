@@ -110,7 +110,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ replayState, isReplayMod
             <div className="relative mb-8 animate-in zoom-in duration-700">
               {/* Background glow */}
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/15 via-purple-500/15 to-green-500/15 rounded-full blur-xl animate-pulse" />
-              
+
               {/* Main icon container */}
               <div className="relative w-20 h-20 bg-gradient-to-br from-white via-gray-50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-3xl flex items-center justify-center mx-auto shadow-lg border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-sm hover:scale-105 hover:-translate-y-0.5 transition-transform duration-200">
                 {/* Icon */}

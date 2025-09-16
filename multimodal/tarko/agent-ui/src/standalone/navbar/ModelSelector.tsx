@@ -121,7 +121,9 @@ const StaticModelDisplay: React.FC<{
 
   const content = (
     <ThemeProvider theme={muiTheme}>
-      <div className={`${className} transition-transform hover:scale-105 ${isDisabled ? '' : 'cursor-pointer'}`}>
+      <div
+        className={`${className} transition-transform hover:scale-105 ${isDisabled ? '' : 'cursor-pointer'}`}
+      >
         <Box
           sx={{
             display: 'inline-flex',

@@ -9,7 +9,6 @@ import { ShareButton } from './ShareButton';
 import { FileDisplayMode } from '../types';
 import { WorkspaceDisplayMode } from '@/common/state/atoms/workspace';
 
-
 interface WorkspaceHeaderProps {
   panelContent: StandardPanelContent;
   onBack: () => void;
@@ -98,7 +97,6 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
       </div>
 
       <div className="ml-4 flex-shrink-0 flex items-center gap-3">
-
         {/* Workspace display mode toggle */}
         {showWorkspaceToggle && onWorkspaceDisplayModeChange && (
           <ToggleSwitch<WorkspaceDisplayMode>
