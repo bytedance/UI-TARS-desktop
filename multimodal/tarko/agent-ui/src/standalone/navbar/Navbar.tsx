@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ShareButton } from '@/standalone/share';
 import { AboutModal } from './AboutModal';
-import { motion } from 'framer-motion';
+
 import {
   FiMoon,
   FiSun,
@@ -131,15 +131,13 @@ export const Navbar: React.FC = () => {
 
         {!isReplayMode && (
           <div className="ml-0">
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
+            <button
               onClick={toggleSidebar}
-              className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1.5 hover:bg-gray-100/40 dark:hover:bg-gray-800/40 rounded-full transition-colors"
+              className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1.5 hover:bg-gray-100/40 dark:hover:bg-gray-800/40 rounded-full transition-colors hover:scale-110 active:scale-95"
               title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
               {isSidebarCollapsed ? <GoSidebarCollapse size={20} /> : <GoSidebarExpand size={20} />}
-            </motion.button>
+            </button>
           </div>
         )}
 
@@ -158,41 +156,36 @@ export const Navbar: React.FC = () => {
                   const IconComponent = getNavItemIcon(navItem.icon);
                   const { className } = getNavItemStyle(navItem.icon);
                   return (
-                    <motion.button
+                    <button
                       key={navItem.title}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
                       onClick={() => handleNavItemClick(navItem.link)}
-                      className={className}
+                      className={`${className} hover:scale-[1.02] active:scale-[0.98] transition-transform`}
                       title={`Open ${navItem.title} in new tab`}
                     >
                       <IconComponent size={12} className="opacity-70" />
                       {navItem.title}
-                    </motion.button>
+                    </button>
                   );
                 })}
               </div>
             )}
-
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
+            {/* About button */}
+            <button
               onClick={() => setShowAboutModal(true)}
-              className="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100/40 dark:hover:bg-gray-800/40 transition-colors"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100/40 dark:hover:bg-gray-800/40 transition-all hover:scale-110 active:scale-95"
               title={`About ${getAgentTitle()}`}
             >
               <FiInfo size={16} />
-            </motion.button>
+            </button>
 
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
+            {/* Dark mode toggle */}
+            <button
               onClick={toggleDarkMode}
-              className="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100/40 dark:hover:bg-gray-800/40 transition-colors"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100/40 dark:hover:bg-gray-800/40 transition-all hover:scale-110 active:scale-95"
               title={isDarkMode ? 'Light Mode' : 'Dark Mode'}
             >
               {isDarkMode ? <FiSun size={16} /> : <FiMoon size={16} />}
-            </motion.button>
+            </button>
 
             {activeSessionId && !isReplayMode && (
               <ShareButton variant="navbar" disabled={isProcessing} />

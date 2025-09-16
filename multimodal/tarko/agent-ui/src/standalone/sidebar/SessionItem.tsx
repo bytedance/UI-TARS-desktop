@@ -1,5 +1,4 @@
 import React, { useCallback } from 'react';
-import { motion } from 'framer-motion';
 import { FiMessageSquare, FiEdit2, FiTrash2, FiTag, FiClock, FiLoader } from 'react-icons/fi';
 import { formatTimestamp } from '@/common/utils/formatters';
 import { SessionInfo } from '@/common/types';
@@ -80,12 +79,9 @@ const SessionItem: React.FC<SessionItemProps> = React.memo(
     const isEditing = editingSessionId === session.id;
 
     return (
-      <motion.div
+      <div
         key={session.id}
-        className="relative group"
-        initial={{ opacity: 0, x: -10 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.2 }}
+        className="relative group animate-in slide-in-from-left-2 fade-in duration-200"
       >
         {isEditing ? (
           <div className="flex items-center p-2 glass-effect rounded-xl">
@@ -105,12 +101,11 @@ const SessionItem: React.FC<SessionItemProps> = React.memo(
             </button>
           </div>
         ) : (
-          <motion.button
-            whileTap={{ scale: 0.98 }}
+          <button
             onClick={handleClick}
             disabled={!isConnected || isLoading}
             className={classNames(
-              'text-left text-sm flex items-center p-2 w-full rounded-xl border',
+              'text-left text-sm flex items-center p-2 w-full rounded-xl border transition-all active:scale-98',
               {
                 'bg-[#F5F5F5] dark:bg-gray-800/80 border-gray-100/60 dark:border-gray-700/30 text-gray-900 dark:text-gray-100':
                   isActive,
@@ -150,44 +145,39 @@ const SessionItem: React.FC<SessionItemProps> = React.memo(
 
             {!isLoading && (
               <div className="hidden group-hover:flex absolute right-2 gap-1">
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
+                <button
                   onClick={handleEdit}
-                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-all border border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/30 bg-white/80 dark:bg-gray-800/80"
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-all border border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/30 bg-white/80 dark:bg-gray-800/80 hover:scale-110 active:scale-90"
                   title="Edit task name"
                 >
                   <FiEdit2 size={12} />
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
+                </button>
+                <button
                   onClick={handleDelete}
-                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-all border border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/30 bg-white/80 dark:bg-gray-800/80"
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-all border border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/30 bg-white/80 dark:bg-gray-800/80 hover:scale-110 active:scale-90"
                   title="Delete task"
                 >
                   <FiTrash2 size={12} />
-                </motion.button>
+                </button>
               </div>
             )}
-          </motion.button>
+          </button>
         )}
 
         {session.tags && session.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 px-4 my-1 pb-2">
             {session.tags.map((tag, idx) => (
-              <motion.div
+              <div
                 key={idx}
-                whileHover={{ y: -2 }}
-                className="flex items-center bg-gray-50/60 dark:bg-gray-800/50 text-gray-600 dark:text-gray-300 rounded-full px-2 py-0.5 text-[10px] border border-gray-100/40 dark:border-gray-700/30"
+                className="flex items-center bg-gray-50/60 dark:bg-gray-800/50 text-gray-600 dark:text-gray-300 rounded-full px-2 py-0.5 text-[10px] border border-gray-100/40 dark:border-gray-700/30 hover:-translate-y-0.5 transition-transform"
               >
                 <FiTag size={8} className="mr-1" />
                 <HighlightText text={tag} highlight={searchQuery} />
-              </motion.div>
+              </div>
             ))}
           </div>
         )}
-      </motion.div>
+      </div>
     );
   },
 );

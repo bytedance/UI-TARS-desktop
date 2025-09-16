@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import { FiShare2 } from 'react-icons/fi';
 import { Tooltip } from '@mui/material';
 import { useSession } from '@/common/hooks/useSession';
@@ -55,18 +54,16 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
           {...tooltipProps}
         >
           <span>
-            <motion.button
-              whileHover={disabled ? {} : { scale: 1.05 }}
-              whileTap={disabled ? {} : { scale: 0.95 }}
+            <button
               onClick={handleOpenModal}
               className={`p-2 rounded-full transition-all duration-200 ${
                 disabled
                   ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
-                  : 'text-gray-600 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-200 hover:bg-gray-100/40 dark:hover:bg-gray-700/40'
+                  : 'text-gray-600 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-200 hover:bg-gray-100/40 dark:hover:bg-gray-700/40 hover:scale-105 active:scale-95'
               }`}
             >
               <FiShare2 size={16} />
-            </motion.button>
+            </button>
           </span>
         </Tooltip>
 
@@ -89,14 +86,12 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
         {...tooltipProps}
       >
         <span>
-          <motion.button
-            whileHover={disabled ? {} : { scale: 1.05 }}
-            whileTap={disabled ? {} : { scale: 0.95 }}
+          <button
             onClick={handleOpenModal}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-3xl text-xs border shadow-sm transition-all duration-200 ${
               disabled
                 ? 'text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 border-gray-200/50 dark:border-gray-600/30 cursor-not-allowed'
-                : 'text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border-gray-200/70 dark:border-gray-700/30 hover:bg-gray-50 dark:hover:bg-gray-700/70'
+                : 'text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border-gray-200/70 dark:border-gray-700/30 hover:bg-gray-50 dark:hover:bg-gray-700/70 hover:scale-105 active:scale-95'
             }`}
           >
             <FiShare2
@@ -106,7 +101,7 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
               size={14}
             />
             <span>Share</span>
-          </motion.button>
+          </button>
         </span>
       </Tooltip>
 

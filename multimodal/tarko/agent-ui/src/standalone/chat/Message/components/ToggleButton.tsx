@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
 
 interface ToggleButtonProps {
@@ -23,13 +22,12 @@ export const ToggleButton: React.FC<ToggleButtonProps> = ({
   icon,
   children,
 }) => (
-  <motion.button
-    whileHover={{ x: 3 }}
+  <button
     onClick={onToggle}
-    className="flex items-center text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 py-1 px-2 mt-1 rounded-lg hover:bg-gray-50/70 dark:hover:bg-gray-700/20 transition-all duration-200"
+    className="flex items-center text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 py-1 px-2 mt-1 rounded-lg hover:bg-gray-50/70 dark:hover:bg-gray-700/20 transition-all duration-200 hover:translate-x-1"
   >
     {isExpanded ? <FiChevronUp className="mr-1.5" /> : <FiChevronDown className="mr-1.5" />}
     {icon}
     {children}
-  </motion.button>
+  </button>
 );

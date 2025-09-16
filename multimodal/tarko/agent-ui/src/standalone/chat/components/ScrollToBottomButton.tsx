@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { FiChevronDown } from 'react-icons/fi';
 
 interface ScrollToBottomButtonProps {
@@ -24,18 +24,10 @@ export const ScrollToBottomButton: React.FC<ScrollToBottomButtonProps> = ({ show
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
-          transition={{
-            duration: 0.2,
-            ease: 'easeOut',
-          }}
+          transition={{ duration: 0.2 }}
           className="absolute -top-10 left-1/2 -translate-x-4 z-50"
         >
-          <motion.button
-            whileHover={{
-              scale: 1.02,
-              y: -1,
-            }}
-            whileTap={{ scale: 0.98 }}
+          <button
             onClick={onClick}
             className="
               relative flex items-center justify-center 
@@ -47,6 +39,7 @@ export const ScrollToBottomButton: React.FC<ScrollToBottomButtonProps> = ({ show
               shadow-lg hover:shadow-xl
               backdrop-blur-md
               transition-all duration-200 ease-out
+              hover:scale-105 hover:-translate-y-0.5 active:scale-95
               group
             "
             aria-label="Scroll to bottom"
@@ -54,30 +47,14 @@ export const ScrollToBottomButton: React.FC<ScrollToBottomButtonProps> = ({ show
             {/* Subtle glass effect */}
             <div className="absolute inset-0 rounded-full bg-gradient-to-t from-transparent via-white/3 to-white/6 dark:via-white/1 dark:to-white/3" />
 
-            {/* Icon with minimal animation */}
-            <motion.div
-              animate={{ y: [0, 0.5, 0] }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                ease: 'easeInOut',
-                repeatDelay: 3,
-              }}
-              className="relative z-10"
-            >
+            {/* Icon */}
+            <div className="relative z-10 animate-pulse">
               <FiChevronDown
                 size={14}
-                className="text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-all duration-200"
+                className="text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors duration-200"
               />
-            </motion.div>
-
-            {/* Subtle hover effect */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileHover={{ opacity: 0.05 }}
-              className="absolute inset-0 rounded-full bg-gray-500"
-            />
-          </motion.button>
+            </div>
+          </button>
         </motion.div>
       )}
     </AnimatePresence>

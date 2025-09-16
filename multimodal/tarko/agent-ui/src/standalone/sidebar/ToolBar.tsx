@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { motion } from 'framer-motion';
+
 
 import { FiPlus, FiHome, FiSettings } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
@@ -41,15 +41,10 @@ export const ToolBar: React.FC = () => {
       <div className="w-14 h-full flex flex-col backdrop-blur-sm">
         <div className="flex-1 flex flex-col items-center gap-4">
           {!isReplayMode && (
-            <motion.button
-              whileHover={{
-                scale: 1.08,
-              }}
-              whileTap={{ scale: 0.97 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+            <button
               onClick={handleNewSession}
               disabled={!connectionStatus.connected || isCreatingSession}
-              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
+              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 ${
                 connectionStatus.connected && !isCreatingSession
                   ? 'bg-white dark:bg-gray-800 text-black dark:text-white hover:shadow-md'
                   : isCreatingSession
@@ -65,10 +60,7 @@ export const ToolBar: React.FC = () => {
               }
             >
               {isCreatingSession ? (
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                >
+                <div className="animate-spin">
                   <svg
                     className="w-4 h-4"
                     viewBox="0 0 24 24"
@@ -83,26 +75,21 @@ export const ToolBar: React.FC = () => {
                       strokeLinejoin="round"
                     />
                   </svg>
-                </motion.div>
+                </div>
               ) : (
                 <FiPlus size={16} />
               )}
-            </motion.button>
+            </button>
           )}
 
           {!isReplayMode && (
-            <motion.button
-              whileHover={{
-                scale: 1.08,
-              }}
-              whileTap={{ scale: 0.97 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+            <button
               onClick={handleNavigateHome}
-              className="w-8 h-8 rounded-lg flex items-center justify-center bg-white dark:bg-gray-800 text-black dark:text-white hover:shadow-md"
+              className="w-8 h-8 rounded-lg flex items-center justify-center bg-white dark:bg-gray-800 text-black dark:text-white hover:shadow-md transition-all hover:scale-105 active:scale-95"
               title="Home"
             >
               <FiHome size={16} />
-            </motion.button>
+            </button>
           )}
         </div>
 
@@ -110,18 +97,13 @@ export const ToolBar: React.FC = () => {
           {!isReplayMode && enableLayoutSwitchButton && <LayoutSwitchButton />}
 
           {!isReplayMode && (
-            <motion.button
-              whileHover={{
-                scale: 1.08,
-              }}
-              whileTap={{ scale: 0.97 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+            <button
               onClick={() => setIsConfigViewerOpen(true)}
-              className="w-8 h-8 rounded-lg flex items-center justify-center bg-white dark:bg-gray-800 text-black dark:text-white hover:shadow-md"
+              className="w-8 h-8 rounded-lg flex items-center justify-center bg-white dark:bg-gray-800 text-black dark:text-white hover:shadow-md transition-all hover:scale-105 active:scale-95"
               title="Agent Configuration"
             >
               <FiSettings size={16} />
-            </motion.button>
+            </button>
           )}
         </div>
       </div>

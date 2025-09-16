@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import {
   Select,
   MenuItem,
@@ -36,6 +35,8 @@ const isSameModel = (a: AgentModel | null, b: AgentModel | null): boolean => {
 const getModelKey = (model: AgentModel): string => `${model.provider}:${model.id}`;
 
 const getModelDisplayText = (model: AgentModel) => model.displayName || model.id;
+
+// Shared component for displaying model information
 const ModelDisplayContent: React.FC<{
   model: AgentModel;
   isDarkMode: boolean;
@@ -120,7 +121,7 @@ const StaticModelDisplay: React.FC<{
 
   const content = (
     <ThemeProvider theme={muiTheme}>
-      <motion.div whileHover={isDisabled ? {} : { scale: 1.02 }} className={className}>
+      <div className={`${className} transition-transform hover:scale-105 ${isDisabled ? '' : 'cursor-pointer'}`}>
         <Box
           sx={{
             display: 'inline-flex',
@@ -167,7 +168,7 @@ const StaticModelDisplay: React.FC<{
             fontSize="12px"
           />
         </Box>
-      </motion.div>
+      </div>
     </ThemeProvider>
   );
 
@@ -298,7 +299,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
 
   return (
     <ThemeProvider theme={muiTheme}>
-      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className={className}>
+      <div className={`${className} transition-transform hover:scale-105 active:scale-95`}>
         <FormControl size="small">
           <Select
             value={currentModel ? getModelKey(currentModel) : ''}
@@ -369,7 +370,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
             })}
           </Select>
         </FormControl>
-      </motion.div>
+      </div>
     </ThemeProvider>
   );
 };

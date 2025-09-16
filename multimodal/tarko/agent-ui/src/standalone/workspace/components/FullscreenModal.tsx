@@ -5,6 +5,7 @@ import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 import { MessageContent } from '../renderers/generic/components/MessageContent';
 import { FullscreenFileData } from '../types/panelContent';
 import { normalizeFilePath } from '@/common/utils/pathNormalizer';
+
 interface FullscreenModalProps {
   data: FullscreenFileData | null;
   onClose: () => void;
@@ -51,15 +52,13 @@ export const FullscreenModal: React.FC<FullscreenModalProps> = ({ data, onClose 
         <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-200/60 dark:border-gray-700/60 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm flex-shrink-0">
           <div className="flex items-center min-w-0 flex-1">
             {/* Close button - refined and compact */}
-            <motion.button
-              whileHover={{ scale: 1.02, x: -1 }}
-              whileTap={{ scale: 0.98 }}
+            <button
               onClick={onClose}
-              className="mr-3 p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100/50 dark:hover:bg-gray-700/30 rounded-md transition-all duration-150"
+              className="mr-3 p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100/50 dark:hover:bg-gray-700/30 rounded-md transition-all duration-150 hover:scale-105 hover:-translate-x-0.5 active:scale-95"
               title="Exit fullscreen (ESC)"
             >
               <FiX size={16} />
-            </motion.button>
+            </button>
 
             {/* File info - single line with elegant typography */}
             <div className="min-w-0 flex-1 flex items-baseline gap-2">

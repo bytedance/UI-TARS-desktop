@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { FiArrowRight, FiClock, FiZap } from 'react-icons/fi';
 
 interface ActionButtonProps {
@@ -97,12 +96,9 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
   };
 
   return (
-    <motion.button
+    <button
       onClick={onClick}
-      className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-xl hover:scale-[1.01] active:scale-[0.99] border text-left group w-full ${getStatusColorClasses()} ${getHoverColorClasses()}`}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
+      className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-xl hover:scale-[1.01] active:scale-[0.99] border text-left group w-full transition-all ${getStatusColorClasses()} ${getHoverColorClasses()}`}
     >
       <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center">{icon}</div>
 
@@ -120,11 +116,8 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
         </div>
 
         {elapsedMs !== undefined && status !== 'pending' && (
-          <motion.div
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.2, type: 'spring', stiffness: 300 }}
-            className={`flex items-center gap-1 ml-2 px-2 py-1 rounded-full border ${getTimingBadgeStyle(elapsedMs).bg} ${getTimingBadgeStyle(elapsedMs).border} flex-shrink-0`}
+          <div
+            className={`flex items-center gap-1 ml-2 px-2 py-1 rounded-full border ${getTimingBadgeStyle(elapsedMs).bg} ${getTimingBadgeStyle(elapsedMs).border} flex-shrink-0 animate-in fade-in duration-300`}
           >
             <FiZap className={`${getTimingBadgeStyle(elapsedMs).icon}`} size={10} />
             <span
@@ -132,7 +125,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
             >
               {formatElapsedTime(elapsedMs)}
             </span>
-          </motion.div>
+          </div>
         )}
       </div>
 
@@ -144,6 +137,6 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
           />
         )}
       </div>
-    </motion.button>
+    </button>
   );
 };

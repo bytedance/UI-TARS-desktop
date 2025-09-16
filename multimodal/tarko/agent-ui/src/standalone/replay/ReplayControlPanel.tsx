@@ -68,58 +68,50 @@ export const ReplayControlPanel: React.FC = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             {/* Play/Pause */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            <button
               onClick={replayState.isPlaying ? pauseReplay : startReplay}
               disabled={!hasEvents}
-              className="p-2 rounded-lg bg-accent-50 dark:bg-accent-900/20 text-accent-600 dark:text-accent-400 hover:bg-accent-100 dark:hover:bg-accent-800/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-lg bg-accent-50 dark:bg-accent-900/20 text-accent-600 dark:text-accent-400 hover:bg-accent-100 dark:hover:bg-accent-800/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 active:scale-95"
             >
               {replayState.isPlaying ? <FiPause size={16} /> : <FiPlay size={16} />}
-            </motion.button>
+            </button>
 
             {/* Reset and play */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            <button
               onClick={resetAndPlay}
               disabled={!hasEvents}
-              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 active:scale-95"
               title="Reset and play from start"
             >
               <FiRotateCcw size={16} />
-            </motion.button>
+            </button>
 
             {/* Jump to end */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            <button
               onClick={jumpToFinalState}
               disabled={!hasEvents}
-              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 active:scale-95"
               title="Jump to final state"
             >
               <FiSkipForward size={16} />
-            </motion.button>
+            </button>
           </div>
 
           {/* Speed controls */}
           <div className="flex items-center space-x-2">
             <span className="text-xs text-gray-500 dark:text-gray-400">Speed:</span>
             {[0.5, 1, 2, 4].map((speed) => (
-              <motion.button
+              <button
                 key={speed}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
                 onClick={() => handleSpeedChange(speed)}
-                className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                className={`px-2 py-1 rounded text-xs font-medium transition-all hover:scale-105 active:scale-95 ${
                   replayState.playbackSpeed === speed
                     ? 'bg-accent-100 dark:bg-accent-900/30 text-accent-600 dark:text-accent-400'
                     : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                 }`}
               >
                 {speed}x
-              </motion.button>
+              </button>
             ))}
           </div>
         </div>
