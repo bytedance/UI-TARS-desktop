@@ -1,5 +1,6 @@
 import React from 'react';
 import { FiLoader, FiCheck, FiX, FiClock, FiAlertCircle, FiEdit3 } from 'react-icons/fi';
+import { motion } from 'framer-motion';
 import { ActionButton } from './ActionButton';
 import { normalizeFilePath } from '@/common/utils/pathNormalizer';
 
@@ -49,15 +50,30 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
     switch (status) {
       case 'constructing':
         return (
-          <div className="animate-pulse">
+          <motion.div
+            animate={{
+              x: [0, 2, -1, 1, 0],
+              y: [0, -1, 1, -0.5, 0],
+              rotate: [0, -5, 3, -2, 0],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: 'easeInOut',
+              times: [0, 0.2, 0.5, 0.8, 1],
+            }}
+          >
             <FiEdit3 size={16} className="text-blue-600 dark:text-blue-400" />
-          </div>
+          </motion.div>
         );
       case 'pending':
         return (
-          <div className="animate-spin">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+          >
             <FiLoader size={16} className="text-slate-500 dark:text-slate-400" />
-          </div>
+          </motion.div>
         );
       case 'success':
         return <FiCheck size={16} className="text-green-600 dark:text-green-400" />;

@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { FiArrowRight, FiClock, FiZap } from 'react-icons/fi';
 
 interface ActionButtonProps {
@@ -116,8 +117,11 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
         </div>
 
         {elapsedMs !== undefined && status !== 'pending' && (
-          <div
-            className={`flex items-center gap-1 ml-2 px-2 py-1 rounded-full border ${getTimingBadgeStyle(elapsedMs).bg} ${getTimingBadgeStyle(elapsedMs).border} flex-shrink-0 animate-in fade-in duration-300`}
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2, type: 'spring', stiffness: 300 }}
+            className={`flex items-center gap-1 ml-2 px-2 py-1 rounded-full border ${getTimingBadgeStyle(elapsedMs).bg} ${getTimingBadgeStyle(elapsedMs).border} flex-shrink-0`}
           >
             <FiZap className={`${getTimingBadgeStyle(elapsedMs).icon}`} size={10} />
             <span
@@ -125,7 +129,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
             >
               {formatElapsedTime(elapsedMs)}
             </span>
-          </div>
+          </motion.div>
         )}
       </div>
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { FiX, FiPlay, FiMessageSquare } from 'react-icons/fi';
 import { getAgentTitle } from '@/config/web-ui-config';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
@@ -116,13 +117,33 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ replayState, isReplayMod
                 {/* Icon */}
                 <div className="relative z-10">
                   {isReplayMode && replayState.currentEventIndex === -1 ? (
-                    <div className="text-green-600 dark:text-green-400 animate-pulse">
+                    <motion.div
+                      animate={{
+                        scale: [1, 1.1, 1],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                      }}
+                      className="text-green-600 dark:text-green-400"
+                    >
                       <FiPlay size={28} className="ml-1" />
-                    </div>
+                    </motion.div>
                   ) : (
-                    <div className="text-blue-600 dark:text-blue-400 animate-bounce">
+                    <motion.div
+                      animate={{
+                        rotate: [0, 5, -5, 0],
+                      }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                      }}
+                      className="text-blue-600 dark:text-blue-400"
+                    >
                       <FiMessageSquare size={28} />
-                    </div>
+                    </motion.div>
                   )}
                 </div>
               </div>

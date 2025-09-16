@@ -47,13 +47,22 @@ export const ScrollToBottomButton: React.FC<ScrollToBottomButtonProps> = ({ show
             {/* Subtle glass effect */}
             <div className="absolute inset-0 rounded-full bg-gradient-to-t from-transparent via-white/3 to-white/6 dark:via-white/1 dark:to-white/3" />
 
-            {/* Icon */}
-            <div className="relative z-10 animate-pulse">
+            {/* Icon with minimal animation */}
+            <motion.div
+              animate={{ y: [0, 0.5, 0] }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: 'easeInOut',
+                repeatDelay: 3,
+              }}
+              className="relative z-10"
+            >
               <FiChevronDown
                 size={14}
-                className="text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors duration-200"
+                className="text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-all duration-200"
               />
-            </div>
+            </motion.div>
           </button>
         </motion.div>
       )}
