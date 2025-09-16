@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { FiArrowLeft, FiBookOpen, FiMaximize, FiEye, FiCode } from 'react-icons/fi';
 import { formatTimestamp } from '@/common/utils/formatters';
 import { useTool } from '@/common/hooks/useTool';
@@ -54,15 +53,13 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
     <div className="flex items-center justify-between px-4 py-3 workspace-control-panel">
       <div className="flex items-center min-w-0 flex-1">
         {/* Back button - more compact and subtle */}
-        <motion.button
-          whileHover={{ scale: 1.02, x: -1 }}
-          whileTap={{ scale: 0.98 }}
+        <button
           onClick={onBack}
-          className="mr-3 p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100/50 dark:hover:bg-gray-700/30 rounded-md transition-all duration-150"
+          className="mr-3 p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100/50 dark:hover:bg-gray-700/30 rounded-md transition-all duration-150 hover:scale-105 hover:-translate-x-0.5 active:scale-95"
           title="Back to workspace"
         >
           <FiArrowLeft size={16} />
-        </motion.button>
+        </button>
 
         {/* Icon - smaller and more refined */}
         <div className="w-7 h-7 mr-3 rounded-lg flex items-center justify-center overflow-hidden relative flex-shrink-0 shadow-sm ring-1 ring-gray-200/50 dark:ring-gray-700/30">
@@ -124,15 +121,13 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
 
         {/* Fullscreen button */}
         {showFullscreen && onFullscreen && (
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <button
             onClick={onFullscreen}
-            className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+            className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all hover:scale-105 active:scale-95"
             title="Fullscreen preview"
           >
             <FiMaximize size={16} />
-          </motion.button>
+          </button>
         )}
       </div>
     </div>

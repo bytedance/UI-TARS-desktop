@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { FiFileText, FiBookOpen, FiChevronRight } from 'react-icons/fi';
 import { useSession } from '@/common/hooks/useSession';
 
@@ -28,11 +27,9 @@ export const ReportFileEntry: React.FC<ReportFileEntryProps> = ({ title, timesta
   };
 
   return (
-    <motion.div
-      whileHover={{ y: -2, backgroundColor: 'rgba(0, 0, 0, 0.01)' }}
-      whileTap={{ scale: 0.98 }}
+    <div
       onClick={handleClick}
-      className="mt-3 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100/40 dark:border-gray-700/20 cursor-pointer flex items-center gap-3 group"
+      className="mt-3 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100/40 dark:border-gray-700/20 cursor-pointer flex items-center gap-3 group transition-all duration-200 hover:-translate-y-0.5 hover:bg-gray-50/50 dark:hover:bg-gray-750/50 active:scale-98"
     >
       <div className="w-10 h-10 flex-shrink-0 rounded-lg bg-accent-50 dark:bg-accent-900/20 flex items-center justify-center border border-accent-100/40 dark:border-accent-800/30">
         <FiBookOpen className="text-accent-600 dark:text-accent-400" size={18} />
@@ -51,6 +48,6 @@ export const ReportFileEntry: React.FC<ReportFileEntryProps> = ({ title, timesta
         className="text-gray-400 dark:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity"
         size={16}
       />
-    </motion.div>
+    </div>
   );
 };

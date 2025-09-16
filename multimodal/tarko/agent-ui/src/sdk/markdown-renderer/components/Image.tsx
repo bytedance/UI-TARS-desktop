@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 
 interface ImageProps {
   src?: string;
@@ -22,13 +21,11 @@ export const InteractiveImage: React.FC<ImageProps> = ({
   };
 
   return (
-    <motion.img
-      className="max-w-full h-auto my-6 rounded-lg cursor-pointer"
+    <img
+      className="max-w-full h-auto my-6 rounded-lg cursor-pointer transition-transform duration-200 hover:scale-[1.01]"
       src={src}
       alt={alt}
       onClick={handleClick}
-      whileHover={{ scale: 1.01 }}
-      transition={{ duration: 0.2 }}
     />
   );
 };

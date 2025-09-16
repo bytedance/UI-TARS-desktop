@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import { FiShare2, FiCheck, FiCopy } from 'react-icons/fi';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 
@@ -59,14 +58,12 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
   };
 
   return (
-    <motion.button
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
+    <button
       onClick={handleShare}
-      className={`p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors ${className}`}
+      className={`p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all hover:scale-105 active:scale-95 ${className}`}
       title={title}
     >
       {copied ? <FiCheck size={16} className="text-green-500" /> : <FiShare2 size={16} />}
-    </motion.button>
+    </button>
   );
 };

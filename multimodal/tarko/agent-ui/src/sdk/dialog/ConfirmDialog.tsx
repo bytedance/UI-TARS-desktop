@@ -1,6 +1,5 @@
 import React from 'react';
 import { Dialog } from '@headlessui/react';
-import { motion } from 'framer-motion';
 import { FiAlertTriangle, FiX } from 'react-icons/fi';
 
 interface ConfirmDialogProps {
@@ -73,33 +72,27 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
               </div>
             </div>
 
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
+            <button
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-all hover:scale-110 active:scale-90"
             >
               <FiX size={18} />
-            </motion.button>
+            </button>
           </div>
 
           <div className="mt-6 flex justify-end gap-3">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            <button
               onClick={onClose}
-              className="px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg text-sm font-medium transition-colors"
+              className="px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg text-sm font-medium transition-all hover:scale-105 active:scale-95"
             >
               {cancelText}
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            </button>
+            <button
               onClick={onConfirm}
-              className={`px-4 py-2 ${typeStyles.confirmButton} rounded-lg text-sm font-medium transition-colors`}
+              className={`px-4 py-2 ${typeStyles.confirmButton} rounded-lg text-sm font-medium transition-all hover:scale-105 active:scale-95`}
             >
               {confirmText}
-            </motion.button>
+            </button>
           </div>
         </Dialog.Panel>
       </div>
