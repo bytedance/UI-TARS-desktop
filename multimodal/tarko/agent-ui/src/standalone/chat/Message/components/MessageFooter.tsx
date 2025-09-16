@@ -1,8 +1,8 @@
 import React from 'react';
+import { useCopyToClipboard } from '@tarko/ui';
 import { FiClock, FiCheck, FiCopy, FiZap, FiActivity } from 'react-icons/fi';
 import { formatTimestamp } from '@/common/utils/formatters';
 import { Message as MessageType, ChatCompletionContentPart } from '@/common/types';
-import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
 import { Tooltip } from '@tarko/ui';
 
 interface MessageFooterProps {

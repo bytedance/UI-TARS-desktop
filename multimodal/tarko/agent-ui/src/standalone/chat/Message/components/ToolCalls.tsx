@@ -1,5 +1,5 @@
 import React from 'react';
-import { FiLoader, FiCheck, FiX, FiClock, FiAlertCircle, FiEdit3 } from 'react-icons/fi';
+import { FiLoader, FiCheck, FiClock, FiAlertCircle, FiEdit3 } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import { ActionBlock } from '@tarko/ui';
 import { normalizeFilePath } from '@tarko/ui';
