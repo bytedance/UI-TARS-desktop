@@ -15,48 +15,39 @@ const WelcomePage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isDirectChatLoading, setIsDirectChatLoading] = useState(false);
 
-  // Get configuration from global window object with fallback defaults
   const webuiConfig = getWebUIConfig();
   const logoUrl = getLogoUrl();
   const pageTitle = webuiConfig?.title;
   const pageSubtitle = webuiConfig?.subtitle;
   const webclomeTitle = webuiConfig?.welcomTitle ?? webuiConfig?.title;
   const allPrompts = webuiConfig?.welcomePrompts ?? [];
-  
-  // State for managing displayed prompts
+
   const [displayedPrompts, setDisplayedPrompts] = useState<string[]>([]);
   const [usedPrompts, setUsedPrompts] = useState<Set<string>>(new Set());
   const [isShuffling, setIsShuffling] = useState(false);
   const [truncatedPrompts, setTruncatedPrompts] = useState<Set<string>>(new Set());
-  
-  // Function to check if text is truncated
+
   const checkTextTruncation = (element: HTMLElement) => {
     return element.scrollWidth > element.clientWidth;
   };
-  
-  // Constants for prompt management
+
   const MAX_DISPLAYED_PROMPTS = 3;
   const shouldShowShuffle = allPrompts.length > MAX_DISPLAYED_PROMPTS;
-  
-  // Function to get random prompts, avoiding recently used ones when possible
+
   const getRandomPrompts = (count: number): string[] => {
     if (allPrompts.length === 0) return [];
-    
-    // Get unused prompts first
-    const unusedPrompts = allPrompts.filter(prompt => !usedPrompts.has(prompt));
-    
-    // If we have enough unused prompts, use them
+
+    const unusedPrompts = allPrompts.filter((prompt) => !usedPrompts.has(prompt));
+
     if (unusedPrompts.length >= count) {
       const shuffled = [...unusedPrompts].sort(() => Math.random() - 0.5);
       return shuffled.slice(0, count);
     }
-    
-    // If not enough unused prompts, reset used prompts and use all
+
     const shuffled = [...allPrompts].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, count);
   };
-  
-  // Initialize displayed prompts on component mount
+
   useEffect(() => {
     if (allPrompts.length > 0) {
       const initialPrompts = getRandomPrompts(Math.min(MAX_DISPLAYED_PROMPTS, allPrompts.length));
@@ -64,24 +55,21 @@ const WelcomePage: React.FC = () => {
       setUsedPrompts(new Set(initialPrompts));
     }
   }, [allPrompts.length]);
-  
-  // Function to shuffle prompts
+
   const handleShuffle = () => {
     setIsShuffling(true);
-    
-    // Add a small delay to show animation
+
     setTimeout(() => {
       const newPrompts = getRandomPrompts(MAX_DISPLAYED_PROMPTS);
       setDisplayedPrompts(newPrompts);
-      
-      // Update used prompts, reset if we've used most of them
+
       const newUsedPrompts = new Set([...usedPrompts, ...newPrompts]);
       if (newUsedPrompts.size >= allPrompts.length - 1) {
         setUsedPrompts(new Set(newPrompts));
       } else {
         setUsedPrompts(newUsedPrompts);
       }
-      
+
       setIsShuffling(false);
     }, 200);
   };
@@ -91,41 +79,33 @@ const WelcomePage: React.FC = () => {
 
     setIsLoading(true);
 
-    // Navigate immediately to special "creating" state
     navigate('/creating');
 
     try {
-      // Create session in background
       const sessionId = await createSession();
 
-      // Navigate directly to session and send message immediately
       navigate(`/${sessionId}`, { replace: true });
 
-      // Send message immediately after navigation
       await sendMessage(content);
     } catch (error) {
       console.error('Failed to create session:', error);
-      // Navigate back to home on error
+
       navigate('/', { replace: true });
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Function to handle direct chat without entering a query
   const handleDirectChat = async () => {
     if (isDirectChatLoading) return;
 
     setIsDirectChatLoading(true);
 
     try {
-      // Check if there are existing sessions
       if (sessions && sessions.length > 0) {
-        // Find the latest session and navigate
-        const latestSession = sessions[0]; // Assuming sessions are sorted by time in descending order
+        const latestSession = sessions[0];
         navigate(`/${latestSession.id}`);
       } else {
-        // If no existing sessions, create a new session
         const sessionId = await createSession();
         navigate(`/${sessionId}`);
       }
@@ -138,10 +118,8 @@ const WelcomePage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      {/* Subtle background gradient */}
       <div className="fixed inset-0 bg-gradient-to-b from-transparent to-gray-100/50 dark:to-gray-800/50 pointer-events-none"></div>
 
-      {/* Header with logo */}
       <header className="relative z-10 pt-8 px-8">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center">
@@ -159,7 +137,6 @@ const WelcomePage: React.FC = () => {
         </div>
       </header>
 
-      {/* Main content */}
       <main className="flex-1 relative z-10 flex flex-col items-center justify-center px-4 py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -175,7 +152,6 @@ const WelcomePage: React.FC = () => {
           </p>
         </motion.div>
 
-        {/* Chat Input */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -194,7 +170,6 @@ const WelcomePage: React.FC = () => {
             variant="home"
           />
 
-          {/* Direct chat button */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -247,18 +222,17 @@ const WelcomePage: React.FC = () => {
             </motion.button>
           </motion.div>
 
-          {/* Example prompts - Use configuration with fallback */}
           {displayedPrompts.length > 0 && (
             <div className="mt-6 flex flex-wrap justify-center gap-2">
               {displayedPrompts.map((prompt, index) => {
                 const isTruncated = truncatedPrompts.has(prompt);
-                
+
                 const buttonElement = (
                   <motion.button
                     ref={(el) => {
                       if (el) {
                         const isTextTruncated = checkTextTruncation(el);
-                        setTruncatedPrompts(prev => {
+                        setTruncatedPrompts((prev) => {
                           const newSet = new Set(prev);
                           if (isTextTruncated) {
                             newSet.add(prompt);
@@ -280,19 +254,13 @@ const WelcomePage: React.FC = () => {
                     {prompt}
                   </motion.button>
                 );
-                
+
                 return isTruncated ? (
-                  <Tooltip
-                    key={`${prompt}-${index}`}
-                    title={prompt}
-                    {...getTooltipProps('top')}
-                  >
+                  <Tooltip key={`${prompt}-${index}`} title={prompt} {...getTooltipProps('top')}>
                     {buttonElement}
                   </Tooltip>
                 ) : (
-                  <div key={`${prompt}-${index}`}>
-                    {buttonElement}
-                  </div>
+                  <div key={`${prompt}-${index}`}>{buttonElement}</div>
                 );
               })}
               {shouldShowShuffle && (
@@ -300,7 +268,10 @@ const WelcomePage: React.FC = () => {
                   key={`shuffle-${displayedPrompts.join('-')}`}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: isShuffling ? 0.5 : 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: isShuffling ? 0 : 0.4 + displayedPrompts.length * 0.1 }}
+                  transition={{
+                    duration: 0.3,
+                    delay: isShuffling ? 0 : 0.4 + displayedPrompts.length * 0.1,
+                  }}
                   type="button"
                   onClick={handleShuffle}
                   className="text-sm px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/30 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300 transition-colors flex items-center gap-1.5"
@@ -309,7 +280,7 @@ const WelcomePage: React.FC = () => {
                 >
                   <motion.div
                     animate={{ rotate: isShuffling ? 360 : 0 }}
-                    transition={{ duration: 0.2, ease: "easeInOut" }}
+                    transition={{ duration: 0.2, ease: 'easeInOut' }}
                   >
                     <FiRefreshCw size={14} />
                   </motion.div>

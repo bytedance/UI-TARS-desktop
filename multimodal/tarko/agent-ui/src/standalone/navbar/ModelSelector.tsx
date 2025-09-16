@@ -36,7 +36,6 @@ const isSameModel = (a: AgentModel | null, b: AgentModel | null): boolean => {
 const getModelKey = (model: AgentModel): string => `${model.provider}:${model.id}`;
 
 const getModelDisplayText = (model: AgentModel) => model.displayName || model.id;
-
 const ModelDisplayContent: React.FC<{
   model: AgentModel;
   isDarkMode: boolean;

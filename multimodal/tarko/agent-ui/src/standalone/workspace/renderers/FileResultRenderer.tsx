@@ -8,7 +8,6 @@ import { useStableCodeContent } from '@/common/hooks/useStableValue';
 import { ThrottledHtmlRenderer } from '../components/ThrottledHtmlRenderer';
 import { formatBytes } from '../utils/codeUtils';
 
-// Constants
 const MAX_HEIGHT_CALC = 'calc(100vh - 215px)';
 
 interface FileResultRendererProps {
@@ -22,14 +21,11 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
   onAction,
   displayMode,
 }) => {
-  // Extract file content from panelContent
   const fileContent = getFileContent(panelContent);
   const filePath = getFilePath(panelContent);
 
-  // Use stable content to prevent unnecessary re-renders during streaming
   const stableContent = useStableCodeContent(fileContent || '');
 
-  // File metadata parsing
   const fileName = filePath ? filePath.split('/').pop() || filePath : '';
   const fileExtension = fileName ? fileName.split('.').pop()?.toLowerCase() || '' : '';
 
@@ -43,14 +39,11 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
   const approximateSize =
     typeof fileContent === 'string' ? formatBytes(fileContent.length) : 'Unknown size';
 
-  // Determine if content is currently streaming
   const isStreaming = panelContent.isStreaming || false;
 
   return (
     <div className="space-y-4">
-      {/* Content preview area */}
       <div className="overflow-hidden">
-        {/* File content display */}
         <div className="overflow-hidden">
           {isHtmlFile &&
           displayMode === 'rendered' &&
@@ -119,9 +112,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
   );
 };
 
-// Helper functions
 function getFileContent(panelContent: StandardPanelContent): string | null {
-  // Try arguments first (for file operations)
   if (panelContent.arguments?.content && typeof panelContent.arguments.content === 'string') {
     return panelContent.arguments.content;
   }
@@ -132,27 +123,22 @@ function getFileContent(panelContent: StandardPanelContent): string | null {
   }
 
   if (typeof panelContent.source === 'object') {
-    // Handle source array format
     if (Array.isArray(panelContent.source)) {
       return panelContent.source
         .filter((item) => item.type === 'text')
         .map((item) => item.text)
         .join('');
     } else {
-      // FIXME: For "str_replace_editor" "view"
       if (
         panelContent.arguments?.command === 'view' &&
         typeof panelContent.source === 'object' &&
         typeof panelContent.source.output === 'string'
       ) {
-        // Here's the result of running `cat -n` on /home/gem/ui-tars-website/index.html:\n     1\t<!DOCTYPE html>\n
-        // return panelContent.source.output.split('\n').slice(1).join('\n');
         return panelContent.source.output;
       }
     }
   }
 
-  // Try source as string (fallback for old format)
   if (typeof panelContent.source === 'string') {
     return panelContent.source;
   }
@@ -161,16 +147,13 @@ function getFileContent(panelContent: StandardPanelContent): string | null {
 }
 
 function getFilePath(panelContent: StandardPanelContent): string {
-  // Try arguments first
   if (panelContent.arguments?.path && typeof panelContent.arguments.path === 'string') {
     return panelContent.arguments.path;
   }
 
-  // Fallback to title
   return panelContent.title || 'Unknown file';
 }
 
-// Helper function for file type determination
 function determineFileType(extension: string): 'code' | 'document' | 'image' | 'other' {
   if (
     ['js', 'jsx', 'ts', 'tsx', 'py', 'java', 'c', 'cpp', 'php', 'html', 'css'].includes(extension)

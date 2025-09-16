@@ -26,7 +26,6 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
   elapsedMs,
   isFileRelated = false,
 }) => {
-  // Helper function to format elapsed time for display
   const formatElapsedTime = (ms: number): string => {
     if (ms < 1000) {
       return `${ms}ms`;
@@ -39,10 +38,8 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
     }
   };
 
-  // Helper function to get timing badge style based on duration
   const getTimingBadgeStyle = (ms: number) => {
     if (ms < 1000) {
-      // Very fast - green
       return {
         bg: 'bg-emerald-50 dark:bg-emerald-900/20',
         text: 'text-emerald-700 dark:text-emerald-400',
@@ -50,7 +47,6 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
         icon: 'text-emerald-600 dark:text-emerald-400',
       };
     } else if (ms < 5000) {
-      // Fast - blue
       return {
         bg: 'bg-blue-50 dark:bg-blue-900/20',
         text: 'text-blue-700 dark:text-blue-400',
@@ -58,7 +54,6 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
         icon: 'text-blue-600 dark:text-blue-400',
       };
     } else if (ms < 15000) {
-      // Medium - amber
       return {
         bg: 'bg-amber-50 dark:bg-amber-900/20',
         text: 'text-amber-700 dark:text-amber-400',
@@ -66,7 +61,6 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
         icon: 'text-amber-600 dark:text-amber-400',
       };
     } else {
-      // Slow - red
       return {
         bg: 'bg-red-50 dark:bg-red-900/20',
         text: 'text-red-700 dark:text-red-400',
@@ -76,7 +70,6 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
     }
   };
 
-  // Helper function to get status color classes
   const getStatusColorClasses = () => {
     switch (status) {
       case 'pending':
@@ -90,7 +83,6 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
     }
   };
 
-  // Helper function to get hover effect classes
   const getHoverColorClasses = () => {
     switch (status) {
       case 'pending':
@@ -112,18 +104,12 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      {/* Icon container */}
       <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center">{icon}</div>
 
-      {/* Main content area */}
       <div className="flex-1 min-w-0 flex items-center">
-        {/* Text content area */}
         <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center sm:gap-1">
-          {/* Tool name */}
-
           <span className="font-medium whitespace-nowrap">{label}</span>
 
-          {/* Description */}
           {description && (
             <span
               className={`font-[400] text-xs opacity-70 block sm:inline overflow-hidden whitespace-nowrap text-ellipsis ${isFileRelated ? '[direction:rtl] [text-align:left]' : ''}`}
@@ -133,7 +119,6 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
           )}
         </div>
 
-        {/* Enhanced timing badge */}
         {elapsedMs !== undefined && status !== 'pending' && (
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
@@ -151,7 +136,6 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
         )}
       </div>
 
-      {/* Status icon or arrow */}
       <div className="flex items-center gap-1.5 flex-shrink-0">
         {statusIcon || (
           <FiArrowRight
