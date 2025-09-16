@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FiPlay, FiPause, FiRotateCcw, FiSkipForward } from 'react-icons/fi';
-import { useReplay } from '@/common/hooks/useReplay';
+import { useReplay } from '@/common/hooks/useReplayMode';
 
 /**
  * ReplayControlPanel - Simplified replay controls

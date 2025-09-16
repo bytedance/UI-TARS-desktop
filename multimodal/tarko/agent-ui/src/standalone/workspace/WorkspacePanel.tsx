@@ -3,7 +3,7 @@ import { useSession } from '@/common/hooks/useSession';
 import { WorkspaceContent } from './WorkspaceContent';
 import { WorkspaceDetail } from './WorkspaceDetail';
 
-import { useReplay } from '@/common/hooks/useReplay';
+import { useReplay } from '@/common/hooks/useReplayMode';
 import { ReplayControlPanel } from '@/standalone/replay/ReplayControlPanel';
 import { FullscreenModal } from './components/FullscreenModal';
 import { AnimatePresence } from 'framer-motion';

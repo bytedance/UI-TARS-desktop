@@ -1,24 +1,49 @@
-import React, { createContext, useContext, ReactNode, useEffect, useRef } from 'react';
+import React, { createContext, useContext, ReactNode, useEffect, useRef, useCallback } from 'react';
 import { atom, useAtom } from 'jotai';
 import { replayStateAtom } from '../state/atoms/replay';
 import { activeSessionIdAtom, sessionsAtom } from '../state/atoms/session';
 import { messagesAtom } from '../state/atoms/message';
+import { toolResultsAtom } from '../state/atoms/tool';
 import { connectionStatusAtom, activePanelContentAtom } from '../state/atoms/ui';
 import { processEventAction } from '../state/actions/eventProcessors';
 import { useSetAtom } from 'jotai';
 import { AgentEventStream } from '@/common/types';
 
 /**
+ * Base interval for playback speed calculation (in milliseconds)
+ */
+const BASE_PLAYBACK_INTERVAL = 800;
+
+/**
  * ReplayModeContext - Global context for sharing replay mode state and controls
  */
 interface ReplayModeContextType {
   isReplayMode: boolean;
+  replayState: any;
+  // Replay controls
+  startReplay: () => void;
+  pauseReplay: () => void;
+  jumpToPosition: (position: number) => void;
+  jumpToFinalState: () => void;
+  resetAndPlay: () => void;
+  setPlaybackSpeed: (speed: number) => void;
   cancelAutoPlay: () => void;
+  exitReplay: () => void;
+  getCurrentPosition: () => number;
 }
 
 const ReplayModeContext = createContext<ReplayModeContextType>({
   isReplayMode: false,
+  replayState: null,
+  startReplay: () => {},
+  pauseReplay: () => {},
+  jumpToPosition: () => {},
+  jumpToFinalState: () => {},
+  resetAndPlay: () => {},
+  setPlaybackSpeed: () => {},
   cancelAutoPlay: () => {},
+  exitReplay: () => {},
+  getCurrentPosition: () => 0,
 });
 
 /**
@@ -70,32 +95,307 @@ function findGeneratedFile(events: AgentEventStream.Event[], fileName: string): 
 export const ReplayModeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [replayState, setReplayState] = useAtom(replayStateAtom);
   const [, setMessages] = useAtom(messagesAtom);
+  const [, setToolResults] = useAtom(toolResultsAtom);
   const [, setSessions] = useAtom(sessionsAtom);
   const [, setActiveSessionId] = useAtom(activeSessionIdAtom);
   const [, setConnectionStatus] = useAtom(connectionStatusAtom);
   const [, setActivePanelContent] = useAtom(activePanelContentAtom);
   const processEvent = useSetAtom(processEventAction);
 
-  // Timer refs for auto-play countdown - properly managed
+  // Timer refs for auto-play countdown and playback - properly managed
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const playbackIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const currentSpeedRef = useRef<number>(1);
+  const isProcessingEventRef = useRef<boolean>(false);
 
-  // Cancel auto-play countdown function
-  const cancelAutoPlay = React.useCallback(() => {
-    console.log('[ReplayMode] Canceling auto-play countdown');
+  // Timer management functions
+  const clearPlaybackTimer = useCallback(() => {
+    if (playbackIntervalRef.current) {
+      clearInterval(playbackIntervalRef.current);
+      playbackIntervalRef.current = null;
+    }
+  }, []);
 
-    // Clear the countdown timer
+  const clearCountdownTimer = useCallback(() => {
     if (countdownIntervalRef.current) {
       clearInterval(countdownIntervalRef.current);
       countdownIntervalRef.current = null;
     }
+  }, []);
 
-    // Update replay state to cancel auto-play
+  // Keep current speed ref synchronized with state
+  useEffect(() => {
+    currentSpeedRef.current = replayState.playbackSpeed;
+  }, [replayState.playbackSpeed]);
+
+  // Process events up to index function
+  const processEventsUpToIndex = useCallback(
+    (targetIndex: number) => {
+      const activeSessionId = replayState.events.length > 0 ? sessionsAtom : null;
+      if (!activeSessionId || !replayState.events.length || targetIndex < -1) return;
+
+      console.log('[ReplayMode] Processing events up to index:', targetIndex);
+
+      // Clear current session state
+      setMessages((prev) => ({
+        ...prev,
+        [activeSessionId]: [],
+      }));
+
+      setToolResults((prev) => ({
+        ...prev,
+        [activeSessionId]: [],
+      }));
+
+      // Process events from 0 to targetIndex
+      for (let i = 0; i <= targetIndex; i++) {
+        const event = replayState.events[i];
+        if (event) {
+          processEvent({ sessionId: activeSessionId, event });
+        }
+      }
+    },
+    [replayState.events, setMessages, setToolResults, processEvent],
+  );
+
+  // Process next single event in replay
+  const processNextEvent = useCallback(() => {
+    if (isProcessingEventRef.current) {
+      console.log('[ReplayMode] Skipping event processing - already processing');
+      return false;
+    }
+
+    isProcessingEventRef.current = true;
+
+    try {
+      setReplayState((current) => {
+        if (!current.isPlaying || !current.isActive) {
+          return current;
+        }
+
+        const nextIndex = current.currentEventIndex + 1;
+        if (nextIndex >= current.events.length) {
+          // Reached end of replay
+          clearPlaybackTimer();
+          return {
+            ...current,
+            isPlaying: false,
+            currentEventIndex: current.events.length - 1,
+          };
+        }
+
+        // Process the next event
+        const activeSessionId = current.events.length > 0 ? sessionsAtom : null;
+        if (activeSessionId && current.events[nextIndex]) {
+          console.log(`[ReplayMode] Processing event ${nextIndex}:`, current.events[nextIndex].type);
+          processEvent({
+            sessionId: activeSessionId,
+            event: current.events[nextIndex],
+          });
+        }
+
+        return {
+          ...current,
+          currentEventIndex: nextIndex,
+        };
+      });
+
+      return true;
+    } finally {
+      // Reset processing flag after a short delay to prevent rapid successive calls
+      setTimeout(() => {
+        isProcessingEventRef.current = false;
+      }, 50);
+    }
+  }, [processEvent, setReplayState, clearPlaybackTimer]);
+
+  // Start replay from current position
+  const startReplay = useCallback(() => {
+    console.log('startReplay');
+
+    clearPlaybackTimer();
+    clearCountdownTimer();
+
+    setReplayState((prev) => ({
+      ...prev,
+      isPlaying: true,
+      autoPlayCountdown: null,
+    }));
+
+    console.log('[ReplayMode] Starting replay with speed:', currentSpeedRef.current);
+
+    const interval = setInterval(
+      () => {
+        const success = processNextEvent();
+        if (!success) {
+          clearInterval(interval);
+        }
+      },
+      Math.max(200, BASE_PLAYBACK_INTERVAL / currentSpeedRef.current),
+    );
+
+    playbackIntervalRef.current = interval;
+  }, [clearPlaybackTimer, clearCountdownTimer, processNextEvent, setReplayState]);
+
+  // Pause replay
+  const pauseReplay = useCallback(() => {
+    clearPlaybackTimer();
+    clearCountdownTimer();
+    setReplayState((prev) => ({
+      ...prev,
+      isPlaying: false,
+      autoPlayCountdown: null,
+    }));
+  }, [clearPlaybackTimer, clearCountdownTimer, setReplayState]);
+
+  // Jump to specific position (0-1 range)
+  const jumpToPosition = useCallback(
+    (position: number) => {
+      const normalizedPosition = Math.max(0, Math.min(1, position));
+      if (replayState.events.length === 0) return;
+
+      const targetIndex = Math.floor(normalizedPosition * (replayState.events.length - 1));
+
+      clearPlaybackTimer();
+      clearCountdownTimer();
+
+      // Process events up to target index
+      processEventsUpToIndex(targetIndex);
+
+      setReplayState((prev) => ({
+        ...prev,
+        currentEventIndex: targetIndex,
+        isPlaying: false,
+        autoPlayCountdown: null,
+      }));
+    },
+    [
+      clearPlaybackTimer,
+      clearCountdownTimer,
+      processEventsUpToIndex,
+      replayState.events.length,
+      setReplayState,
+    ],
+  );
+
+  // Reset to beginning and start replay
+  const resetAndPlay = useCallback(() => {
+    clearPlaybackTimer();
+    clearCountdownTimer();
+
+    // Reset to beginning
+    processEventsUpToIndex(-1);
+
+    setReplayState((prev) => ({
+      ...prev,
+      currentEventIndex: -1,
+      isPlaying: false,
+      autoPlayCountdown: null,
+    }));
+
+    // Start playing after a brief delay
+    setTimeout(() => {
+      startReplay();
+    }, 100);
+  }, [
+    clearPlaybackTimer,
+    clearCountdownTimer,
+    processEventsUpToIndex,
+    setReplayState,
+    startReplay,
+  ]);
+
+  // Jump to final state
+  const jumpToFinalState = useCallback(() => {
+    if (replayState.events.length === 0) return;
+
+    const finalIndex = replayState.events.length - 1;
+    clearPlaybackTimer();
+    clearCountdownTimer();
+
+    processEventsUpToIndex(finalIndex);
+
+    setReplayState((prev) => ({
+      ...prev,
+      currentEventIndex: finalIndex,
+      isPlaying: false,
+      autoPlayCountdown: null,
+    }));
+  }, [
+    clearPlaybackTimer,
+    clearCountdownTimer,
+    processEventsUpToIndex,
+    replayState.events.length,
+    setReplayState,
+  ]);
+
+  // Set playback speed
+  const setPlaybackSpeed = useCallback(
+    (speed: number) => {
+      // Update the speed ref immediately for immediate use
+      currentSpeedRef.current = speed;
+
+      setReplayState((prev) => ({
+        ...prev,
+        playbackSpeed: speed,
+      }));
+
+      // If currently playing, restart with new speed
+      if (replayState.isPlaying) {
+        clearPlaybackTimer();
+
+        const interval = setInterval(
+          () => {
+            const success = processNextEvent();
+            if (!success) {
+              clearInterval(interval);
+            }
+          },
+          Math.max(200, BASE_PLAYBACK_INTERVAL / speed),
+        );
+
+        playbackIntervalRef.current = interval;
+      }
+    },
+    [replayState.isPlaying, processNextEvent, setReplayState, clearPlaybackTimer],
+  );
+
+  // Cancel auto-play countdown function
+  const cancelAutoPlay = useCallback(() => {
+    console.log('[ReplayMode] Canceling auto-play countdown');
+    clearPlaybackTimer();
+    clearCountdownTimer();
     setReplayState((prev) => ({
       ...prev,
       autoPlayCountdown: null,
       isPlaying: false,
     }));
-  }, [setReplayState]);
+  }, [clearPlaybackTimer, clearCountdownTimer, setReplayState]);
+
+  // Exit replay mode
+  const exitReplay = useCallback(() => {
+    clearPlaybackTimer();
+    clearCountdownTimer();
+    isProcessingEventRef.current = false;
+    setReplayState({
+      isActive: false,
+      events: [],
+      currentEventIndex: -1,
+      isPlaying: false,
+      playbackSpeed: 1,
+      startTimestamp: null,
+      endTimestamp: null,
+      autoPlayCountdown: null,
+    });
+  }, [clearPlaybackTimer, clearCountdownTimer, setReplayState]);
+
+  // Get current position percentage (0-100)
+  const getCurrentPosition = useCallback(() => {
+    if (!replayState.isActive || replayState.events.length <= 1) {
+      return 0;
+    }
+    return (replayState.currentEventIndex / (replayState.events.length - 1)) * 100;
+  }, [replayState.currentEventIndex, replayState.events.length, replayState.isActive]);
 
   // Initialize replay mode if window variables are present
   useEffect(() => {
@@ -234,10 +534,8 @@ export const ReplayModeProvider: React.FC<{ children: ReactNode }> = ({ children
 
     // Cleanup on unmount
     return () => {
-      if (countdownIntervalRef.current) {
-        clearInterval(countdownIntervalRef.current);
-        countdownIntervalRef.current = null;
-      }
+      clearPlaybackTimer();
+      clearCountdownTimer();
     };
   }, [
     setMessages,
@@ -251,8 +549,41 @@ export const ReplayModeProvider: React.FC<{ children: ReactNode }> = ({ children
 
   const isReplayMode = replayState.isActive || !!window.AGENT_REPLAY_MODE;
 
+  // Auto-start playback when countdown finishes
+  useEffect(() => {
+    if (
+      replayState.autoPlayCountdown === null &&
+      replayState.isPlaying &&
+      !playbackIntervalRef.current
+    ) {
+      console.log('[ReplayMode] Auto-starting playback after countdown');
+      startReplay();
+    }
+  }, [replayState.autoPlayCountdown, replayState.isPlaying, startReplay]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      clearPlaybackTimer();
+      clearCountdownTimer();
+      isProcessingEventRef.current = false;
+    };
+  }, [clearPlaybackTimer, clearCountdownTimer]);
+
   return (
-    <ReplayModeContext.Provider value={{ isReplayMode, cancelAutoPlay }}>
+    <ReplayModeContext.Provider value={{ 
+      isReplayMode, 
+      replayState,
+      startReplay,
+      pauseReplay,
+      jumpToPosition,
+      jumpToFinalState,
+      resetAndPlay,
+      setPlaybackSpeed,
+      cancelAutoPlay,
+      exitReplay,
+      getCurrentPosition,
+    }}>
       {children}
     </ReplayModeContext.Provider>
   );
@@ -277,7 +608,12 @@ function processAllEventsToIndex(
 /**
  * useReplayMode - Hook to access replay mode state and controls
  */
-export const useReplayMode = (): { isReplayMode: boolean; cancelAutoPlay: () => void } => {
-  const { isReplayMode, cancelAutoPlay } = useContext(ReplayModeContext);
-  return { isReplayMode, cancelAutoPlay };
+export const useReplayMode = () => {
+  const context = useContext(ReplayModeContext);
+  return context;
 };
+
+/**
+ * useReplay - Alias for useReplayMode for backward compatibility
+ */
+export const useReplay = useReplayMode;
