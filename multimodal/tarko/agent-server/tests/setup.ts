@@ -97,8 +97,6 @@ vi.mock('../storage', () => ({
   createStorageProvider: vi.fn().mockReturnValue(null),
 }));
 
-
-
 // Mock HTTP and Express properly
 vi.mock('http', async () => {
   const actual = await vi.importActual('http');
@@ -166,8 +164,6 @@ vi.mock('express', async () => {
 vi.mock('cors', () => ({
   default: vi.fn(() => (req: any, res: any, next: any) => next()),
 }));
-
-
 
 // Increase test timeout for integration tests
 vi.setConfig({ testTimeout: 15000 });
