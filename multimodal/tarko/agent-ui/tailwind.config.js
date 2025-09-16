@@ -2,7 +2,7 @@
 module.exports = {
   content: [
     './src/**/*.{html,js,ts,jsx,tsx}',
-    './node_modules/@tarko/ui/dist/**/*.{js,ts,jsx,tsx}',
+    './node_modules/@tarko/ui/dist/**/*.{mjs,js,ts,jsx,tsx}',
   ],
   darkMode: 'class',
   theme: {
