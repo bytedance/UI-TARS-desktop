@@ -4,6 +4,8 @@ import { FiX, FiPlay, FiMessageSquare } from 'react-icons/fi';
 import { getAgentTitle } from '@/config/web-ui-config';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { ReplayState } from '@/common/state/atoms/replay';
+import { SharedEmptyStateIcon } from '@/standalone/workspace/components/SharedEmptyStateIcon';
+import { SharedGradientTitle } from '@/standalone/workspace/components/SharedGradientTitle';
 
 interface EmptyStateProps {
   replayState: ReplayState;
@@ -182,72 +184,34 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ replayState, isReplayMod
         ) : (
           /* Modern standard empty state */
           <motion.div variants={containerVariants} className="max-w-md mx-auto">
-            {/* Enhanced icon with modern design */}
-            <motion.div variants={iconContainerVariants} className="relative mb-8">
-              {/* Background glow */}
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-blue-500/15 via-purple-500/15 to-green-500/15 rounded-full blur-xl"
-                animate={{
-                  scale: [0.8, 1.1, 0.8],
-                  opacity: [0.2, 0.4, 0.2],
-                }}
-                transition={{
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: 'easeInOut',
-                }}
-              />
-              
-              {/* Main icon container */}
-              <motion.div
-                className="relative w-20 h-20 bg-gradient-to-br from-white via-gray-50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-3xl flex items-center justify-center mx-auto shadow-lg border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-sm"
-                whileHover={{ scale: 1.05, y: -2 }}
-                transition={{ duration: 0.2 }}
-              >
-                {/* Icon */}
-                <div className="relative z-10">
-                  {isReplayMode && replayState.currentEventIndex === -1 ? (
+            <motion.div variants={iconContainerVariants}>
+              <SharedEmptyStateIcon
+                icon={
+                  isReplayMode && replayState.currentEventIndex === -1 ? (
                     <motion.div
-                      animate={{
-                        scale: [1, 1.1, 1],
-                      }}
-                      transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                        ease: 'easeInOut',
-                      }}
-                      className="text-green-600 dark:text-green-400"
+                      animate={{ scale: [1, 1.1, 1] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                     >
                       <FiPlay size={28} className="ml-1" />
                     </motion.div>
                   ) : (
                     <motion.div
-                      animate={{
-                        rotate: [0, 5, -5, 0],
-                      }}
-                      transition={{
-                        duration: 3,
-                        repeat: Infinity,
-                        ease: 'easeInOut',
-                      }}
-                      className="text-blue-600 dark:text-blue-400"
+                      animate={{ rotate: [0, 5, -5, 0] }}
+                      transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
                     >
                       <FiMessageSquare size={28} />
                     </motion.div>
-                  )}
-                </div>
-              </motion.div>
+                  )
+                }
+                color={isReplayMode && replayState.currentEventIndex === -1 ? 'green' : 'blue'}
+              />
             </motion.div>
 
-            {/* Enhanced title with gradient */}
-            <motion.h3
-              variants={itemVariants}
-              className="text-2xl font-semibold mb-4 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-gray-100 dark:via-white dark:to-gray-100 text-transparent bg-clip-text tracking-tight"
-            >
+            <SharedGradientTitle>
               {isReplayMode && replayState.currentEventIndex === -1
                 ? 'Ready to replay'
                 : 'Start a conversation'}
-            </motion.h3>
+            </SharedGradientTitle>
 
             {/* Elegant description */}
             <motion.p

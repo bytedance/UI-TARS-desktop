@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FiLoader } from 'react-icons/fi';
+import { SharedGradientTitle } from '@/standalone/workspace/components/SharedGradientTitle';
 
 interface SessionCreatingStateProps {
   isCreating: boolean;
@@ -125,12 +126,11 @@ export const SessionCreatingState: React.FC<SessionCreatingStateProps> = ({ isCr
         </motion.div>
 
         {/* Enhanced title with loading emphasis */}
-        <motion.h2
-          variants={itemVariants}
-          className="text-2xl font-semibold mb-3 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-gray-100 dark:via-white dark:to-gray-100 text-transparent bg-clip-text tracking-tight"
-        >
-          Preparing your session
-        </motion.h2>
+        <motion.div variants={itemVariants}>
+          <SharedGradientTitle className="mb-3">
+            Preparing your session
+          </SharedGradientTitle>
+        </motion.div>
 
         {/* More engaging description */}
         <motion.p
