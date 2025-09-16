@@ -44,15 +44,8 @@ export const createModelSelectorMuiTheme = (isDarkMode: boolean) => {
             border: isDarkMode
               ? '1px solid rgba(75, 85, 99, 0.3)'
               : '1px solid rgba(203, 213, 225, 0.6)',
-            '& .MuiOutlinedInput-notchedOutline': {
-              border: 'none',
-            },
-            '&:hover .MuiOutlinedInput-notchedOutline': {
-              border: 'none',
-            },
-            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-              border: 'none',
-            },
+            // Remove default outlined border in all states
+            '& .MuiOutlinedInput-notchedOutline': { border: 'none !important' },
             '&:hover': {
               background: isDarkMode ? 'rgba(55, 65, 81, 0.8)' : 'rgba(241, 245, 249, 0.9)',
               boxShadow: isDarkMode
