@@ -12,12 +12,10 @@ import type {
   IAgent,
   GlobalDirectoryOptions,
   TenantConfig,
-  SessionInfo,
 } from '@tarko/interface';
 import type { StorageProvider } from './storage';
 import type { AgentSession, AgentSessionFactory, AgentSessionPool } from './services/session';
 import type { UserConfigService } from './services/user';
-
 /**
  * AgentServer initialization options
  */
@@ -93,18 +91,14 @@ export interface AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   // Agent and workspace methods
   getCurrentWorkspace(): string;
   getCurrentAgentName(): string | undefined;
-  createAgentWithSessionModel(sessionInfo: SessionInfo): IAgent;
-
-  // Model configuration
-  getAvailableModels(): Array<{ name: string; models: string[]; baseURL?: string }>;
-  isModelConfigValid(provider: string, modelId: string): boolean;
-  getDefaultModelConfig(): { provider: string; modelId: string };
 
   // Exclusive mode management
   canAcceptNewRequest(): boolean;
   setRunningSession(sessionId: string): void;
   clearRunningSession(sessionId: string): void;
   getRunningSessionId(): string | null;
+
+  getCurrentAgentResolution(): AgentResolutionResult | undefined
 
   // Custom providers
   getCustomAgioProvider(): AgioProviderConstructor | undefined;

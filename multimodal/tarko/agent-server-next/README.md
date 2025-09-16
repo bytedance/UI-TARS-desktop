@@ -29,19 +29,19 @@
 
 ### 核心框架
 
-| 技术 | 选择 | 原因 |
-|------|------|------|
-| **Web 框架** | Hono | 高性能、类型安全、现代化 API |
-| **运行时** | Node.js 22+ | 与现有生态兼容 |
-| **构建工具** | Rslib | 提供优秀的 TypeScript 支持 |
-| **包管理** | pnpm | 符合项目现有标准 |
+| 技术         | 选择        | 原因                         |
+| ------------ | ----------- | ---------------------------- |
+| **Web 框架** | Hono        | 高性能、类型安全、现代化 API |
+| **运行时**   | Node.js 22+ | 与现有生态兼容               |
+| **构建工具** | Rslib       | 提供优秀的 TypeScript 支持   |
+| **包管理**   | pnpm        | 符合项目现有标准             |
 
 ### 存储层
 
-| 存储类型 | 实现 | 用途 |
-|----------|------|------|
-| **MongoDB** | Mongoose | 生产环境推荐，支持复杂查询 |
-| **SQLite** | node:sqlite | 开发环境和轻量级部署 |
+| 存储类型    | 实现        | 用途                       |
+| ----------- | ----------- | -------------------------- |
+| **MongoDB** | Mongoose    | 生产环境推荐，支持复杂查询 |
+| **SQLite**  | node:sqlite | 开发环境和轻量级部署       |
 
 ### 开发工具
 
@@ -75,21 +75,25 @@
 ### 核心组件
 
 #### 1. AgentServer 类
+
 - **职责**: 服务器生命周期管理、会话协调、配置管理
 - **特点**: 保持与原版构造函数兼容、支持泛型配置
 - **关键方法**: `start()`, `stop()`, `createAgent()`, `createAgentWithSessionModel()`
 
 #### 2. AgentSession 类
+
 - **职责**: 单个代理会话的生命周期管理
 - **特点**: 事件流桥接、存储集成、AGIO 监控
 - **关键方法**: `runQuery()`, `runQueryStreaming()`, `abortQuery()`, `cleanup()`
 
 #### 3. EventStreamBridge 类
+
 - **职责**: 事件流转换和客户端通信
 - **特点**: 发布-订阅模式、客户端友好的事件格式
 - **核心功能**: 将 Agent 原生事件转换为客户端可用格式
 
 #### 4. 存储提供者
+
 - **MongoDB**: 生产环境推荐，支持复杂会话管理
 - **SQLite**: 开发环境和单机部署友好
 
@@ -109,6 +113,7 @@ Request → Error Handling → Request ID → Logging → Server Injection → R
 ### 第一阶段：项目结构搭建
 
 #### 1. 项目初始化
+
 ```bash
 # 创建项目目录
 mkdir agent-server-next
@@ -123,6 +128,7 @@ pnpm add @tarko/interface @tarko/shared-utils
 ```
 
 #### 2. 目录结构设计
+
 ```
 src/
 ├── core/                 # 核心组件
@@ -154,6 +160,7 @@ src/
 #### 1. 类型系统设计
 
 **Hono Context 扩展**:
+
 ```typescript
 export interface ContextVariables {
   server: AgentServer;
@@ -166,6 +173,7 @@ export type HonoContext = Context<{ Variables: ContextVariables }>;
 ```
 
 **AgentServer 接口**:
+
 ```typescript
 export interface AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   // 核心组件
@@ -183,7 +191,7 @@ export interface AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   // Agent 管理
   createAgent(): IAgent;
   createAgentWithSessionModel(sessionInfo?: any): IAgent;
-  
+
   // 会话管理
   sessions: Record<string, AgentSession>;
   canAcceptNewRequest(): boolean;
@@ -195,11 +203,13 @@ export interface AgentServer<T extends AgentAppConfig = AgentAppConfig> {
 #### 2. 存储层迁移
 
 **MongoDB 存储提供者**:
+
 - 保持原有 Mongoose Schema 设计
 - 支持会话信息和事件存储
 - 实现连接池和错误重试机制
 
 **SQLite 存储提供者**:
+
 - 使用 Node.js 内置 `node:sqlite` 模块
 - 轻量级设计，适合开发环境
 - 支持基本的会话持久化
@@ -207,18 +217,20 @@ export interface AgentServer<T extends AgentAppConfig = AgentAppConfig> {
 #### 3. 事件流系统
 
 **EventStreamBridge**:
+
 ```typescript
 export class EventStreamBridge {
   private subscribers: Set<(type: string, data: any) => void> = new Set();
 
-  subscribe(handler: (type: string, data: any) => void): void
-  unsubscribe(handler: (type: string, data: any) => void): void
-  emit(type: string, data: any): void
-  connectToAgentEventStream(agentEventStream: AgentEventStream.Processor): () => void
+  subscribe(handler: (type: string, data: any) => void): void;
+  unsubscribe(handler: (type: string, data: any) => void): void;
+  emit(type: string, data: any): void;
+  connectToAgentEventStream(agentEventStream: AgentEventStream.Processor): () => void;
 }
 ```
 
 **关键特性**:
+
 - 发布-订阅模式的事件分发
 - Agent 原生事件到客户端事件的转换
 - 支持 TTFT (Time To First Token) 跟踪
@@ -234,19 +246,22 @@ export async function errorHandlingMiddleware(c: HonoContext, next: Next) {
     await next();
   } catch (error) {
     const requestId = c.get('requestId') || 'unknown';
-    
+
     if (error instanceof HTTPException) {
       logger.warn(`[${requestId}] HTTP Exception: ${error.status} - ${error.message}`);
       return c.json({ error: error.message, requestId, status: error.status }, error.status);
     }
-    
+
     logger.error(`[${requestId}] Unhandled error:`, error);
-    return c.json({
-      error: 'Internal Server Error',
-      message: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined,
-      requestId,
-      status: 500
-    }, 500);
+    return c.json(
+      {
+        error: 'Internal Server Error',
+        message: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined,
+        requestId,
+        status: 500,
+      },
+      500,
+    );
   }
 }
 ```
@@ -254,9 +269,12 @@ export async function errorHandlingMiddleware(c: HonoContext, next: Next) {
 #### 2. 会话恢复中间件
 
 ```typescript
-export async function sessionRestoreMiddleware(c: HonoContext, next: Next): Promise<void | Response> {
+export async function sessionRestoreMiddleware(
+  c: HonoContext,
+  next: Next,
+): Promise<void | Response> {
   const server = c.get('server');
-  
+
   const sessionId = c.req.query('sessionId') || (await getSessionIdFromBody(c));
   if (!sessionId) {
     return c.json({ error: 'Session ID is required' }, 400);
@@ -285,14 +303,20 @@ export async function sessionRestoreMiddleware(c: HonoContext, next: Next): Prom
 #### 3. 独占模式中间件
 
 ```typescript
-export async function exclusiveModeMiddleware(c: HonoContext, next: Next): Promise<void | Response> {
+export async function exclusiveModeMiddleware(
+  c: HonoContext,
+  next: Next,
+): Promise<void | Response> {
   const server = c.get('server');
 
   if (!server.canAcceptNewRequest()) {
-    return c.json({
-      error: 'Server is in exclusive mode and another session is currently running',
-      runningSessionId: server.getRunningSessionId(),
-    }, 409);
+    return c.json(
+      {
+        error: 'Server is in exclusive mode and another session is currently running',
+        runningSessionId: server.getRunningSessionId(),
+      },
+      409,
+    );
   }
 
   await next();
@@ -311,7 +335,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   constructor(
     private appConfig: T,
     versionInfo?: AgentServerVersionInfo,
-    directories?: GlobalDirectoryOptions
+    directories?: GlobalDirectoryOptions,
   ) {
     // 配置解析
     this.port = appConfig.server?.port ?? 3000;
@@ -414,15 +438,15 @@ export class AgentSession {
   ) {
     this.id = sessionId;
     this.eventBridge = new EventStreamBridge();
-    
+
     // 创建 Agent 实例
     const agent = server.createAgentWithSessionModel(sessionInfo);
-    
+
     // 初始化 Agent Snapshot（如果启用）
     if (server.appConfig.snapshot?.enable) {
       // ... Snapshot 初始化逻辑
     }
-    
+
     this.agent = agent;
   }
 }
@@ -507,32 +531,32 @@ async runQueryStreaming(options: {
 
 ### 1. 类型兼容性问题
 
-**问题**: Hono 和 Express 的上下文类型不兼容
-**解决方案**: 
+**问题**: Hono 和 Express 的上下文类型不兼容 **解决方案**:
+
 - 创建 `HonoContext` 类型别名
 - 使用 `ContextVariables` 接口扩展 Hono 上下文
 - 保持向后兼容的 API 设计
 
 ### 2. 中间件迁移
 
-**问题**: Express 中间件模式与 Hono 不直接兼容
-**解决方案**:
+**问题**: Express 中间件模式与 Hono 不直接兼容 **解决方案**:
+
 - 重新实现所有中间件以适配 Hono 的 `async/await` 模式
 - 保持中间件的核心业务逻辑不变
 - 统一错误处理和响应格式
 
 ### 3. 事件流处理
 
-**问题**: IAgent 接口方法签名变化
-**解决方案**:
+**问题**: IAgent 接口方法签名变化 **解决方案**:
+
 - 使用重载的 `run()` 方法替代 `runStreaming()`
 - 通过 `stream: true` 参数控制流式行为
 - 保持事件流桥接的兼容性
 
 ### 4. 存储抽象
 
-**问题**: 需要支持多种存储后端
-**解决方案**:
+**问题**: 需要支持多种存储后端 **解决方案**:
+
 - 设计统一的 `StorageProvider` 接口
 - 实现工厂模式创建存储实例
 - 保持现有存储格式的兼容性
@@ -647,119 +671,12 @@ const config: AgentAppConfig = {
     exclusive: process.env.EXCLUSIVE_MODE === 'true',
     storage: {
       type: process.env.STORAGE_TYPE || 'sqlite',
-      url: process.env.STORAGE_URL || './agents.db'
-    }
+      url: process.env.STORAGE_URL || './agents.db',
+    },
   },
   agent: {
     type: 'modulePath',
-    value: process.env.AGENT_MODULE || '@tarko/agent-markdown'
-  }
+    value: process.env.AGENT_MODULE || '@tarko/agent-markdown',
+  },
 };
 ```
-
-## 监控和日志
-
-### 1. 结构化日志
-
-```typescript
-logger.info('Session created', {
-  sessionId,
-  agentType: this.appConfig.agent.type,
-  timestamp: Date.now(),
-  requestId
-});
-```
-
-### 2. 性能监控
-
-```typescript
-// 请求耗时监控
-const start = Date.now();
-await next();
-const duration = Date.now() - start;
-logger.info(`Request completed in ${duration}ms`);
-```
-
-### 3. 错误追踪
-
-```typescript
-// 统一错误格式
-logger.error('Agent query failed', {
-  sessionId,
-  error: error.message,
-  stack: error.stack,
-  requestId,
-  timestamp: Date.now()
-});
-```
-
-## 向后兼容性
-
-### 1. API 兼容性
-
-- 保持所有公共 API 的签名不变
-- 维护相同的响应格式
-- 支持现有的配置选项
-
-### 2. 存储兼容性
-
-- 支持现有的数据库 Schema
-- 保持会话数据格式不变
-- 提供数据迁移工具（如需要）
-
-### 3. 配置兼容性
-
-- 支持现有的配置文件格式
-- 提供配置迁移指南
-- 保持环境变量的兼容性
-
-## 未来改进计划
-
-### 1. 功能增强
-
-- [ ] API 路由完整实现
-- [ ] 增强的错误处理和恢复
-- [ ] 更多存储后端支持
-- [ ] 内置健康检查端点
-
-### 2. 性能优化
-
-- [ ] 连接池优化
-- [ ] 缓存机制
-- [ ] 更高效的事件流处理
-- [ ] 资源使用优化
-
-### 3. 开发体验
-
-- [ ] 完整的测试覆盖
-- [ ] 更好的调试工具
-- [ ] 详细的 API 文档
-- [ ] 性能基准测试
-
-### 4. 生产就绪
-
-- [ ] 集群模式支持
-- [ ] 优雅的停机处理
-- [ ] 更完善的监控指标
-- [ ] 自动扩缩容支持
-
-## 总结
-
-Agent Server Next 项目成功地将原有的 Express 基础设施迁移到了现代化的 Hono 框架，在保持完全向后兼容的同时，提供了更好的性能、类型安全和开发体验。
-
-### 关键成就
-
-1. ✅ **完整的功能迁移**: 所有核心功能都已成功迁移并经过验证
-2. ✅ **性能提升**: Hono 框架带来的性能优势
-3. ✅ **类型安全**: 完善的 TypeScript 支持和类型检查
-4. ✅ **架构现代化**: 采用最新的 Web 标准和最佳实践
-5. ✅ **向后兼容**: 保持与现有系统的完全兼容性
-
-### 技术亮点
-
-- **零停机迁移**: 可以无缝替换现有的 agent-server
-- **模块化设计**: 清晰的组件边界和职责分离
-- **扩展性**: 易于添加新功能和存储后端
-- **可维护性**: 清晰的代码结构和完善的类型定义
-
-该项目为 Tarko 生态系统提供了一个坚实、现代化的 Agent 服务器实现，为未来的发展奠定了良好的基础。

@@ -179,6 +179,13 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     });
   }
 
+    /**
+   * Get the current agent resolution.
+   */
+  getCurrentAgentResolution(): AgentResolutionResult | undefined {
+    return this.currentAgentResolution;
+  }
+
   /**
    * Get the custom AGIO provider if injected
    * @returns Custom AGIO provider or undefined
@@ -212,43 +219,6 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     return this.currentAgentResolution?.agentName;
   }
 
-  /**
-   * Get currently available model providers
-   */
-  getAvailableModels(): Array<{ name: string; models: string[]; baseURL?: string }> {
-    const providers = this.appConfig.model?.providers || [];
-
-    // Convert new format to legacy format for API compatibility
-    return providers.map((provider) => ({
-      name: provider.name,
-      models: provider.models.map((model) => (typeof model === 'string' ? model : model.id)),
-      baseURL: provider.baseURL,
-    }));
-  }
-
-  /**
-   * Validate if a model configuration is still valid
-   */
-  isModelConfigValid(provider: string, modelId: string): boolean {
-    const providers = this.appConfig.model?.providers || [];
-    return providers.some(
-      (p) =>
-        p.name === provider &&
-        p.models.some((model) =>
-          typeof model === 'string' ? model === modelId : model.id === modelId,
-        ),
-    );
-  }
-
-  /**
-   * Get default model configuration
-   */
-  getDefaultModelConfig(): { provider: string; modelId: string } {
-    return {
-      provider: this.appConfig.model?.provider || '',
-      modelId: this.appConfig.model?.id || '',
-    };
-  }
 
   /**
    * Check if server can accept new requests in exclusive mode
@@ -290,40 +260,6 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   getRunningSessionId(): string | null {
     return this.runningSessionId;
   }
-
-  /**
-   * Create Agent with session-specific model configuration
-   */
-  createAgentWithSessionModel(sessionInfo: SessionInfo): IAgent {
-    let modelConfig = this.getDefaultModelConfig();
-
-    // If session has specific model config and it's still valid, use session config
-    if (sessionInfo?.metadata?.modelConfig) {
-      const { provider, modelId } = sessionInfo.metadata.modelConfig;
-      if (this.isModelConfigValid(provider, modelId)) {
-        modelConfig = { provider, modelId };
-      } else {
-        console.warn(`Session ${sessionInfo.id} model config is invalid, falling back to default`);
-      }
-    }
-
-    const agentAppOptionsWithModelConfig: T = {
-      ...this.appConfig,
-      name: this.getCurrentAgentName(),
-      model: {
-        ...this.appConfig.model,
-        provider: modelConfig.provider,
-        id: modelConfig.modelId,
-      },
-      sandboxUrl: sessionInfo?.metadata?.sandboxUrl,
-    };
-
-    if (!this.currentAgentResolution) {
-      throw new Error('Cannot found available resolved agent');
-    }
-    return new this.currentAgentResolution.agentConstructor(agentAppOptionsWithModelConfig);
-  }
-
   /**
    * Get the Hono application instance
    * @returns Hono application

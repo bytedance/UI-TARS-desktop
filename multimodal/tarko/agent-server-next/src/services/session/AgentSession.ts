@@ -15,12 +15,14 @@ import {
   IAgent,
   AgentStatusInfo,
   SessionInfo,
+  AgentAppConfig,
 } from '@tarko/interface';
 import { AgentSnapshot } from '@tarko/agent-snapshot';
 import { EventStreamBridge } from '../../utils/event-stream';
 import type { AgentServer } from '../../types';
 import { AgioEvent } from '@tarko/agio';
-import { handleAgentError } from '../../utils/error-handler';
+import { handleAgentError, ErrorWithCode } from '../../utils/error-handler';
+import { getAvailableModels, getDefaultModel } from '../../utils/model-utils';
 
 /**
  * Check if an event should be stored in persistent storage
@@ -68,117 +70,15 @@ export class AgentSession {
   eventBridge: EventStreamBridge;
   private unsubscribe: (() => void) | null = null;
   private agioProvider?: AgioEvent.AgioProvider;
+  private agioProviderConstructor?: AgioProviderConstructor;
   private sessionInfo?: SessionInfo;
 
-  constructor(
-    private server: AgentServer,
-    sessionInfo: SessionInfo,
-    agioProviderImpl?: AgioProviderConstructor,
-  ) {
-    this.id = sessionInfo.id;
-    this.eventBridge = new EventStreamBridge();
-    this.sessionInfo = sessionInfo;
-
-    // Get agent options from server
-    const agentOptions = { ...server.appConfig };
-
-    // Create agent instance using the server's session-aware factory method
-    const agent = server.createAgentWithSessionModel(sessionInfo);
-
-    // Initialize agent snapshot if enabled
-    if (agentOptions.snapshot?.enable) {
-      const snapshotStoragesDirectory =
-        agentOptions.snapshot.storageDirectory ?? server.getCurrentWorkspace();
-
-      if (snapshotStoragesDirectory) {
-        const snapshotPath = path.join(snapshotStoragesDirectory, this.id);
-        // @ts-expect-error
-        this.agent = new AgentSnapshot(agent, {
-          snapshotPath,
-          snapshotName: this.id,
-        }) as unknown as IAgent;
-
-        // Log snapshot initialization if agent has logger
-        if ('logger' in agent) {
-          (agent as any).logger.debug(`AgentSnapshot initialized with path: ${snapshotPath}`);
-        }
-      } else {
-        this.agent = agent;
-      }
-    } else {
-      this.agent = agent;
-    }
-
-    // Initialize AGIO collector if provider URL is configured
-    if (agentOptions.agio?.provider && agioProviderImpl) {
-      const impl = agioProviderImpl;
-      this.agioProvider = new impl(agentOptions.agio.provider, agentOptions, this.id, this.agent);
-
-      // Log AGIO initialization if agent has logger
-      if ('logger' in this.agent) {
-        (this.agent as any).logger.debug(
-          `AGIO collector initialized with provider: ${agentOptions.agio.provider}`,
-        );
-      }
-    }
-
-    // Log agent configuration if agent has logger and getOptions method
-    if ('logger' in this.agent && 'getOptions' in this.agent) {
-      (this.agent as any).logger.info(
-        'Agent Config',
-        JSON.stringify((this.agent as any).getOptions(), null, 2),
-      );
-    }
-  }
-
   /**
-   * Get the current processing status of the agent
-   * @returns Whether the agent is currently processing a request
+   * Create event handler for storage and AGIO processing
    */
-  getProcessingStatus(): boolean {
-    return this.agent.status() === AgentStatus.EXECUTING;
-  }
-
-  async initialize() {
-    const initStartTime = Date.now();
-
-    const agentInitStartTime = Date.now();
-    await this.agent.initialize();
-    const agentInitDuration = Date.now() - agentInitStartTime;
-
-    console.log(
-      `[AgentSession] agent.initialize() took ${agentInitDuration}ms for session ${this.id}`,
-    );
-
-    // Send agent initialization event to AGIO if configured
-    if (this.agioProvider) {
-      try {
-        await this.agioProvider.sendAgentInitialized();
-      } catch (error) {
-        console.error('Failed to send AGIO initialization event:', error);
-      }
-    }
-
-    const totalInitDuration = Date.now() - initStartTime;
-    console.log(
-      `[AgentSession] Total initialization took ${totalInitDuration}ms for session ${this.id}`,
-    );
-
-    // Log to agent if it has a logger
-    if ('logger' in this.agent) {
-      (this.agent as any).logger.info('Session initialization completed', {
-        sessionId: this.id,
-        agentInitDuration,
-        totalInitDuration,
-      });
-    }
-
-    // Connect to agent's event stream manager
-    const agentEventStream = this.agent.getEventStream();
-
-    // Create an event handler that saves events to storage and processes AGIO events
-    const handleEvent = async (event: AgentEventStream.Event) => {
-      // If we have storage, save the event (filtered for performance)
+  private createEventHandler() {
+    return async (event: AgentEventStream.Event) => {
+      // Save to storage if available and event should be stored
       if (this.server.storageProvider && shouldStoreEvent(event)) {
         try {
           await this.server.storageProvider.saveEvent(this.id, event);
@@ -196,12 +96,162 @@ export class AgentSession {
         }
       }
     };
+  }
+
+  /**
+   * Setup event stream connections for storage and client communication
+   */
+  private setupEventStreams() {
+    const agentEventStream = this.agent.getEventStream();
+    const handleEvent = this.createEventHandler();
 
     // Subscribe to events for storage and AGIO processing
     const storageUnsubscribe = agentEventStream.subscribe(handleEvent);
 
     // Connect to event bridge for client communication
+    if (this.unsubscribe) {
+      this.unsubscribe();
+    }
     this.unsubscribe = this.eventBridge.connectToAgentEventStream(agentEventStream);
+
+    return { storageUnsubscribe };
+  }
+
+  /**
+   * Create and initialize a complete agent instance with all wrappers and configuration
+   */
+  private async createAndInitializeAgent(sessionInfo?: SessionInfo): Promise<IAgent> {
+    // Get agent resolution
+    const agentResolution = this.server.getCurrentAgentResolution();
+    if (!agentResolution) {
+      throw new Error('Cannot found available resolved agent');
+    }
+
+    // Create agent options
+    const agentOptions: AgentAppConfig = {
+      ...this.server.appConfig,
+      name: this.server.getCurrentAgentName(),
+      model: this.resolveModelConfig(sessionInfo),
+      sandboxUrl: sessionInfo?.metadata?.sandboxUrl
+    };
+
+    // Create base agent
+    const baseAgent = new agentResolution.agentConstructor(agentOptions);
+
+    // Apply snapshot wrapper if enabled
+    const wrappedAgent = this.createAgentWithSnapshot(baseAgent, this.id);
+
+    // Initialize the agent
+    await wrappedAgent.initialize();
+
+    // Initialize AGIO collector if provider URL is configured
+    if (agentOptions.agio?.provider && this.agioProviderConstructor) {
+      this.agioProvider = new this.agioProviderConstructor(
+        agentOptions.agio.provider,
+        agentOptions,
+        this.id,
+        wrappedAgent,
+      );
+
+      // Send agent initialization event to AGIO
+      try {
+        await this.agioProvider.sendAgentInitialized();
+      } catch (error) {
+        console.error('Failed to send AGIO initialization event:', error);
+      }
+
+      // Log AGIO initialization
+      console.debug('AGIO collector initialized', { provider: agentOptions.agio.provider });
+    }
+
+    // Log agent configuration
+    console.info('Agent Config', JSON.stringify((wrappedAgent as any).getOptions?.(), null, 2));
+
+    return wrappedAgent;
+  }
+
+  /**
+   * Resolve model configuration for agent creation
+   */
+  private resolveModelConfig(sessionInfo?: SessionInfo) {
+    // Try to use session-specific model first
+    if (sessionInfo?.metadata?.modelConfig) {
+      const { provider, id: modelId } = sessionInfo.metadata.modelConfig;
+      const availableModels = getAvailableModels(this.server.appConfig);
+      const sessionModel = availableModels.find(
+        (model) => model.provider === provider && model.id === modelId,
+      );
+
+      if (sessionModel) {
+        return sessionModel;
+      }
+
+      // Log fallback warning if session model is not available
+      if (this.server.isDebug) {
+        console.warn('Session model not found, falling back to default', { provider, modelId });
+      }
+    }
+
+    // Fall back to default model
+    return getDefaultModel(this.server.appConfig);
+  }
+
+  /**
+   * Create agent with snapshot support if enabled
+   */
+  private createAgentWithSnapshot(baseAgent: IAgent, sessionId: string): IAgent {
+    const agentOptions = { ...this.server.appConfig };
+
+    if (agentOptions.snapshot?.enable) {
+      const snapshotStoragesDirectory =
+        agentOptions.snapshot.storageDirectory ?? this.server.getCurrentWorkspace();
+
+      if (snapshotStoragesDirectory) {
+        const snapshotPath = path.join(snapshotStoragesDirectory, sessionId);
+        const wrappedAgent = new AgentSnapshot(baseAgent as any, {
+          snapshotPath,
+          snapshotName: sessionId,
+        }) as unknown as IAgent;
+
+        // Log snapshot initialization
+        console.debug('AgentSnapshot initialized', { snapshotPath });
+
+        return wrappedAgent;
+      }
+    }
+
+    return baseAgent;
+  }
+
+  constructor(
+    private server: AgentServer,
+    sessionId: string,
+    agioProviderImpl?: AgioProviderConstructor,
+    sessionInfo?: SessionInfo,
+  ) {
+    this.id = sessionId;
+    this.eventBridge = new EventStreamBridge();
+    this.sessionInfo = sessionInfo;
+    this.agioProviderConstructor = agioProviderImpl;
+
+    // Agent will be created and initialized in initialize() method
+    this.agent = null as any; // Temporary placeholder
+  }
+
+  /**
+   * Get the current processing status of the agent
+   * @returns Whether the agent is currently processing a request
+   */
+  getProcessingStatus(): boolean {
+    return this.agent.status() === AgentStatus.EXECUTING;
+  }
+
+  async initialize() {
+    // Create and initialize agent with all wrappers
+    this.agent = await this.createAndInitializeAgent(this.sessionInfo);
+
+    // Setup event stream connections
+    const { storageUnsubscribe } = this.setupEventStreams();
 
     // Notify client that session is ready
     this.eventBridge.emit('ready', { sessionId: this.id });
@@ -218,117 +268,213 @@ export class AgentSession {
   async runQuery(options: {
     input: string | ChatCompletionContentPart[];
     environmentInput?: {
-      content: string;
+      content: string | ChatCompletionContentPart[];
       description?: string;
-      metadata?: Record<string, any>;
+      metadata?: AgentEventStream.EnvironmentInputMetadata;
     };
   }): Promise<AgentQueryResponse> {
     try {
-      // Set exclusive mode if enabled
-      if (this.server.isExclusive) {
-        this.server.setRunningSession(this.id);
+      // Set running session for exclusive mode
+      this.server.setRunningSession(this.id);
+
+      // Debug logging for issue #1150
+      if (this.server.isDebug) {
+        console.log('[DEBUG] Query started', {
+          sessionId: this.id,
+          queryType: typeof options.input === 'string' ? 'string' : 'ContentPart',
+          queryPreview:
+            typeof options.input === 'string'
+              ? options.input.substring(0, 100) + '...'
+              : '[ContentPart]',
+        });
       }
 
-      const result = await this.agent.run(options as AgentRunNonStreamingOptions);
-      return { success: true, result };
-    } catch (error) {
-      const errorResponse = handleAgentError(error);
-      return { success: false, error: errorResponse };
-    } finally {
-      // Clear exclusive mode if enabled
-      if (this.server.isExclusive) {
-        this.server.clearRunningSession(this.id);
+      // Prepare run options with session-specific model configuration
+      // Emit TTFT initialization status
+      this.eventBridge.emit('agent-status', {
+        isProcessing: true,
+        state: 'initializing',
+        phase: 'query_preparation',
+        message: 'Preparing to process your request...',
+        estimatedTime: '5-15 seconds',
+      } as AgentStatusInfo);
+
+      const runOptions: AgentRunNonStreamingOptions = {
+        input: options.input,
+        sessionId: this.id,
+        environmentInput: options.environmentInput,
+      };
+
+      // Run agent to process the query
+      const result = await this.agent.run(runOptions);
+
+      // Debug logging for issue #1150
+      if (this.server.isDebug) {
+        console.log('[DEBUG] Query completed successfully', { sessionId: this.id });
       }
+
+      return {
+        success: true,
+        result,
+      };
+    } catch (error) {
+      // Emit error event but don't throw
+      this.eventBridge.emit('error', {
+        message: error instanceof Error ? error.message : String(error),
+      });
+
+      // Handle error and return structured response
+      const handledError = handleAgentError(error, `Session ${this.id}`);
+
+      // Debug logging for issue #1150
+      if (this.server.isDebug) {
+        console.log('[DEBUG] Query failed', { sessionId: this.id, error: handledError.message });
+      }
+
+      return {
+        success: false,
+        error: {
+          code: handledError.code,
+          message: handledError.message,
+          details: handledError.details,
+        },
+      };
+    } finally {
+      // Clear running session for exclusive mode
+      this.server.clearRunningSession(this.id);
     }
   }
 
   /**
-   * Run a streaming query that returns an async iterator
+   * Execute a streaming query with robust error handling
    * @param options The query options containing input and optional environment input
-   * @returns Async iterator for streaming events
+   * @returns AsyncIterable of events or error response
    */
   async runQueryStreaming(options: {
     input: string | ChatCompletionContentPart[];
     environmentInput?: {
-      content: string;
+      content: string | ChatCompletionContentPart[];
       description?: string;
-      metadata?: Record<string, any>;
+      metadata?: AgentEventStream.EnvironmentInputMetadata;
     };
   }): Promise<AsyncIterable<AgentEventStream.Event>> {
     try {
-      // Set exclusive mode if enabled
-      if (this.server.isExclusive) {
-        this.server.setRunningSession(this.id);
+      // Set running session for exclusive mode
+      this.server.setRunningSession(this.id);
+
+      // Debug logging for issue #1150
+      if (this.server.isDebug) {
+        console.log('[DEBUG] Streaming query started', {
+          sessionId: this.id,
+          queryType: typeof options.input === 'string' ? 'string' : 'ContentPart',
+          queryPreview:
+            typeof options.input === 'string'
+              ? options.input.substring(0, 100) + '...'
+              : '[ContentPart]',
+        });
       }
 
-      // Use the streaming version of run method
-      const streamingOptions = {
-        ...options,
+      // Prepare run options with session-specific model configuration
+      // Emit enhanced TTFT initialization status for streaming
+      this.eventBridge.emit('agent-status', {
+        isProcessing: true,
+        state: 'initializing',
+        phase: 'streaming_preparation',
+        message: 'Preparing streaming response...',
+        estimatedTime: '3-10 seconds for first token',
+      } as AgentStatusInfo);
+
+      const runOptions: AgentRunStreamingOptions = {
+        input: options.input,
         stream: true,
-      } as AgentRunStreamingOptions;
+        sessionId: this.id,
+        environmentInput: options.environmentInput,
+      };
 
-      return await this.agent.run(streamingOptions);
+      // Run agent in streaming mode
+      const stream = await this.agent.run(runOptions);
+
+      // Wrap the stream to clear running session when done
+      return this.wrapStreamForExclusiveMode(stream);
     } catch (error) {
-      // For streaming, we need to return an async iterable that yields the error
-      const errorResponse = handleAgentError(error);
-      return (async function* () {
-        yield {
-          type: 'system',
-          level: 'error',
-          message: errorResponse.message || 'Unknown error occurred',
-          timestamp: Date.now(),
-        } as AgentEventStream.Event;
-      })();
-    } finally {
-      // Clear exclusive mode if enabled
-      if (this.server.isExclusive) {
-        this.server.clearRunningSession(this.id);
+      // Emit error event
+      this.eventBridge.emit('error', {
+        message: error instanceof Error ? error.message : String(error),
+      });
+
+      // Handle error and return a synthetic event stream with the error
+      const handledError = handleAgentError(error, `Session ${this.id} (streaming)`);
+
+      // Debug logging for issue #1150
+      if (this.server.isDebug) {
+        console.log('[DEBUG] Streaming query failed', {
+          sessionId: this.id,
+          error: handledError.message,
+        });
       }
+
+      // Create a synthetic event stream that yields just an error event
+      return this.createErrorEventStream(handledError);
     }
   }
 
   /**
-   * Abort the current running query
-   * @returns Promise that resolves when the abort is complete
+   * Wrap a stream to clear running session when done (for exclusive mode)
+   */
+  private async *wrapStreamForExclusiveMode(
+    stream: AsyncIterable<AgentEventStream.Event>,
+  ): AsyncIterable<AgentEventStream.Event> {
+    try {
+      for await (const event of stream) {
+        yield event;
+      }
+
+      // Debug logging for issue #1150
+      if (this.server.isDebug) {
+        console.log('[DEBUG] Streaming query completed', { sessionId: this.id });
+      }
+    } finally {
+      // Clear running session for exclusive mode when stream ends
+      this.server.clearRunningSession(this.id);
+    }
+  }
+
+  /**
+   * Create a synthetic event stream containing an error event
+   * This allows streaming endpoints to handle errors gracefully
+   */
+  private async *createErrorEventStream(
+    error: ErrorWithCode,
+  ): AsyncIterable<AgentEventStream.Event> {
+    yield this.agent.getEventStream().createEvent('system', {
+      level: 'error',
+      message: error.message,
+      details: {
+        errorCode: error.code,
+        details: error.details,
+      },
+    });
+  }
+
+  /**
+   * Abort the currently running query
+   * @returns True if the agent was running and aborted successfully
    */
   async abortQuery(): Promise<boolean> {
     try {
-      await this.agent.abort();
-      return true;
+      const aborted = this.agent.abort();
+      if (aborted) {
+        this.eventBridge.emit('aborted', { sessionId: this.id });
+        // Clear running session for exclusive mode when aborted
+        this.server.clearRunningSession(this.id);
+      }
+      return aborted;
     } catch (error) {
-      console.error('Failed to abort query:', error);
+      this.eventBridge.emit('error', {
+        message: error instanceof Error ? error.message : String(error),
+      });
       return false;
     }
-  }
-
-  /**
-   * Get current status information for the agent
-   * @returns Status information including processing state and agent details
-   */
-  getStatus(): {
-    isProcessing: boolean;
-    state: AgentStatus;
-    sessionId: string;
-    agentInfo?: AgentStatusInfo;
-  } {
-    const isProcessing = this.getProcessingStatus();
-    const state = this.agent.status();
-
-    let agentInfo: AgentStatusInfo | undefined;
-    if ('getStatusInfo' in this.agent) {
-      try {
-        agentInfo = (this.agent as any).getStatusInfo();
-      } catch {
-        // Ignore errors getting status info
-      }
-    }
-
-    return {
-      isProcessing,
-      state,
-      sessionId: this.id,
-      agentInfo,
-    };
   }
 
   /**
@@ -337,58 +483,52 @@ export class AgentSession {
    * @param sessionInfo Updated session metadata with new model config
    */
   async updateModelConfig(sessionInfo: SessionInfo): Promise<void> {
-    console.log(
-      `🔄 [AgentSession] Storing model config for session ${this.id}: ${sessionInfo.metadata?.modelConfig?.provider}:${sessionInfo.metadata?.modelConfig?.modelId}`,
-    );
-
     // Store the session metadata for use in future queries
     this.sessionInfo = sessionInfo;
 
-    // Emit model updated event to client
-    this.eventBridge.emit('model_updated', {
-      sessionId: this.id,
-      modelConfig: sessionInfo.metadata?.modelConfig,
-    });
-
-    console.log(`✅ [AgentSession] Model config updated for session ${this.id}`);
-  }
-
-  /**
-   * Cleanup resources when session is destroyed
-   * @returns Promise that resolves when cleanup is complete
-   */
-  async cleanup(): Promise<void> {
+    // Recreate agent with new model configuration
     try {
-      // Unsubscribe from event stream
-      if (this.unsubscribe) {
-        this.unsubscribe();
-        this.unsubscribe = null;
+      // Clean up current agent and AGIO provider
+      if (this.agent && typeof this.agent.dispose === 'function') {
+        await this.agent.dispose();
+      }
+      if (this.agioProvider?.cleanup) {
+        await this.agioProvider.cleanup();
       }
 
-      // Clean up AGIO provider
-      if (this.agioProvider && 'cleanup' in this.agioProvider) {
-        try {
-          await (this.agioProvider as any).cleanup();
-        } catch (error) {
-          console.error('Failed to cleanup AGIO provider:', error);
-        }
-      }
+      // Create and initialize new agent with updated session info
+      this.agent = await this.createAndInitializeAgent(sessionInfo);
 
-      // Clean up agent if it has a cleanup method
-      if ('cleanup' in this.agent) {
-        try {
-          await (this.agent as any).cleanup();
-        } catch (error) {
-          console.error('Failed to cleanup agent:', error);
-        }
-      }
-
-      // Clear exclusive mode if this session was running
-      if (this.server.isExclusive && this.server.getRunningSessionId() === this.id) {
-        this.server.clearRunningSession(this.id);
-      }
+      // Reconnect event streams
+      this.setupEventStreams();
     } catch (error) {
-      console.error('Error during session cleanup:', error);
+      console.error('Failed to recreate agent for session', { sessionId: this.id, error });
+      throw error;
     }
   }
+
+  async cleanup() {
+    // Clear running session for exclusive mode
+    this.server.clearRunningSession(this.id);
+
+    // Unsubscribe from event stream
+    if (this.unsubscribe) {
+      this.unsubscribe();
+      this.unsubscribe = null;
+    }
+
+    // Clean up agent resources
+    if (this.agent && typeof this.agent.dispose === 'function') {
+      await this.agent.dispose();
+    }
+
+    if (this.agioProvider) {
+      // This ensures that all buffered analytics events are sent before the session is terminated.
+      await this.agioProvider.cleanup?.();
+    }
+
+    this.eventBridge.emit('closed', { sessionId: this.id });
+  }
 }
+
+export default AgentSession;

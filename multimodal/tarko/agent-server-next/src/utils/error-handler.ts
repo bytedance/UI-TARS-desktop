@@ -4,11 +4,18 @@
  */
 
 /**
- * Error with additional code information
+ * ErrorWithCode - Extended Error class with error code
+ * Provides structured error information for better handling
  */
-export interface ErrorWithCode extends Error {
-  code?: string;
-  details?: Record<string, any>;
+export class ErrorWithCode extends Error {
+  constructor(
+    message: string,
+    public code: string,
+    public details?: Record<string, any>,
+  ) {
+    super(message);
+    this.name = 'AgentError';
+  }
 }
 
 /**
@@ -29,39 +36,31 @@ export interface AgentErrorResponse {
 }
 
 /**
- * Handle agent errors and convert them to standardized error responses
+ * Safely handles agent errors to prevent process crashes
  * @param error The error to handle
- * @returns Standardized error response
+ * @param context Additional context for logging
+ * @returns Normalized error object
  */
-export function handleAgentError(error: any): ErrorResponse {
+export function handleAgentError(error: unknown, context?: string): ErrorWithCode {
+  // Log the error with context
+  console.error(`Agent error${context ? ` [${context}]` : ''}:`, error);
+
+  // Normalize to ErrorWithCode
+  if (error instanceof ErrorWithCode) {
+    return error;
+  }
+
+  // Create structured error from generic error
   if (error instanceof Error) {
-    const errorWithCode = error as ErrorWithCode;
-    return {
-      code: errorWithCode.code || 'AGENT_ERROR',
-      message: errorWithCode.message,
-      details: errorWithCode.details,
-    };
+    return new ErrorWithCode(error.message, 'AGENT_EXECUTION_ERROR', { stack: error.stack });
   }
 
-  if (typeof error === 'string') {
-    return {
-      code: 'AGENT_ERROR',
-      message: error,
-    };
-  }
-
-  if (error && typeof error === 'object') {
-    return {
-      code: error.code || 'AGENT_ERROR',
-      message: error.message || 'Unknown error occurred',
-      details: error.details,
-    };
-  }
-
-  return {
-    code: 'UNKNOWN_ERROR',
-    message: 'An unknown error occurred',
-  };
+  // Handle non-Error objects
+  return new ErrorWithCode(
+    typeof error === 'string' ? error : 'Unknown agent execution error',
+    'UNKNOWN_ERROR',
+    { originalError: error },
+  );
 }
 
 /**

@@ -176,7 +176,7 @@ export class AgentSessionFactory {
   }): AgentSession {
     const { sessionInfo, agioProvider } = options;
 
-    const session = new AgentSession(this.server, sessionInfo, agioProvider);
+    const session = new AgentSession(this.server, sessionInfo.id, agioProvider, sessionInfo);
 
     return session;
   }

@@ -158,22 +158,28 @@ export async function getLatestSessionEvents(c: HonoContext) {
  * Get session status
  */
 export async function getSessionStatus(c: HonoContext) {
+  const session = c.get('session');
+
   try {
-    const session = c.get('session');
 
     if (!session) {
       return c.json({ error: 'Session not found' }, 404);
     }
 
+      const isProcessing = session.getProcessingStatus();
+
     return c.json(
       {
         sessionId: session.id,
-        status: session.getStatus(),
+        status: {
+          isProcessing,
+        state: session.agent.status(),
+      },
       },
       200,
     );
   } catch (error) {
-    console.error('Failed to get session status:', error);
+    console.error(`Error getting session status (${session?.id}):`, error);
     return c.json({ error: 'Failed to get session status' }, 500);
   }
 }
