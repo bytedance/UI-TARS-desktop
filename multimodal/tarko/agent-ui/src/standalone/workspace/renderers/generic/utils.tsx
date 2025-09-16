@@ -226,6 +226,17 @@ export function analyzeResult(content: any, toolName?: string): AnalyzedResult {
 }
 
 /**
+ * Creates a circular icon container with consistent styling
+ */
+function createIconContainer(colorClass: string, icon: React.ReactNode): React.ReactNode {
+  return (
+    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${colorClass}`}>
+      {icon}
+    </div>
+  );
+}
+
+/**
  * Gets the appropriate status icon based on result type and operation
  *
  * @param type - The result type
@@ -233,58 +244,49 @@ export function analyzeResult(content: any, toolName?: string): AnalyzedResult {
  * @returns React component for the status icon
  */
 export function getStatusIcon(type: ResultType, operation?: OperationType): React.ReactNode {
-  // First check for operation-specific icons
-  if (operation) {
-    switch (operation) {
-      case 'navigate':
-        return (
-          <div className="w-8 h-8 rounded-full flex items-center justify-center bg-accent-50 dark:bg-accent-900/20 text-accent-500 dark:text-accent-400">
-            <FiNavigation size={16} />
-          </div>
-        );
-      case 'click':
-        return (
-          <div className="w-8 h-8 rounded-full flex items-center justify-center bg-purple-50 dark:bg-purple-900/20 text-accent-500 dark:text-accent-400">
-            <FiMousePointer size={16} />
-          </div>
-        );
-      case 'browser':
-        return (
-          <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-50 dark:bg-blue-900/20 text-blue-500 dark:text-blue-400">
-            <FiGlobe size={16} />
-          </div>
-        );
-    }
+  // Define icon configurations
+  const iconConfigs = {
+    // Operation-specific icons
+    navigate: {
+      icon: <FiNavigation size={16} />,
+      colorClass: 'bg-accent-50 dark:bg-accent-900/20 text-accent-500 dark:text-accent-400',
+    },
+    click: {
+      icon: <FiMousePointer size={16} />,
+      colorClass: 'bg-purple-50 dark:bg-purple-900/20 text-accent-500 dark:text-accent-400',
+    },
+    browser: {
+      icon: <FiGlobe size={16} />,
+      colorClass: 'bg-blue-50 dark:bg-blue-900/20 text-blue-500 dark:text-blue-400',
+    },
+    // Status type icons
+    success: {
+      icon: <FiCheck size={16} />,
+      colorClass: 'bg-green-50 dark:bg-green-900/20 text-green-500 dark:text-green-400',
+    },
+    error: {
+      icon: <FiX size={16} />,
+      colorClass: 'bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400',
+    },
+    empty: {
+      icon: <FiLayers size={16} />,
+      colorClass: 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500',
+    },
+    info: {
+      icon: <FiInfo size={16} />,
+      colorClass: 'bg-blue-50 dark:bg-blue-900/20 text-blue-500 dark:text-blue-400',
+    },
+  };
+
+  // Check operation-specific icons first
+  if (operation && iconConfigs[operation]) {
+    const config = iconConfigs[operation];
+    return createIconContainer(config.colorClass, config.icon);
   }
 
   // Fall back to status type icons
-  switch (type) {
-    case 'success':
-      return (
-        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-green-50 dark:bg-green-900/20 text-green-500 dark:text-green-400">
-          <FiCheck size={16} />
-        </div>
-      );
-    case 'error':
-      return (
-        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400">
-          <FiX size={16} />
-        </div>
-      );
-    case 'empty':
-      return (
-        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500">
-          <FiLayers size={16} />
-        </div>
-      );
-    case 'info':
-    default:
-      return (
-        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-50 dark:bg-blue-900/20 text-blue-500 dark:text-blue-400">
-          <FiInfo size={16} />
-        </div>
-      );
-  }
+  const config = iconConfigs[type] || iconConfigs.info;
+  return createIconContainer(config.colorClass, config.icon);
 }
 
 /**
@@ -473,23 +475,48 @@ export function determineFileType(extension: string): 'code' | 'document' | 'ima
  * Get appropriate file icon based on extension
  */
 export function getFileIcon(extension: string): React.ReactNode {
-  if (['html', 'htm', 'xml'].includes(extension)) {
-    return <FiCode size={18} className="text-orange-500 dark:text-orange-400" />;
+  // Define file type mappings with their corresponding icons and colors
+  const fileTypeConfigs = [
+    {
+      extensions: ['html', 'htm', 'xml'],
+      icon: FiCode,
+      colorClass: 'text-orange-500 dark:text-orange-400',
+    },
+    {
+      extensions: ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'bmp'],
+      icon: FiImage,
+      colorClass: 'text-blue-500 dark:text-blue-400',
+    },
+    {
+      extensions: ['js', 'jsx', 'ts', 'tsx', 'py', 'java', 'c', 'cpp', 'php', 'css'],
+      icon: FiCode,
+      colorClass: 'text-accent-500 dark:text-accent-400',
+    },
+    {
+      extensions: ['json', 'yaml', 'yml', 'toml', 'ini', 'env', 'conf'],
+      icon: FiFileText,
+      colorClass: 'text-amber-500 dark:text-amber-400',
+    },
+    {
+      extensions: ['md', 'markdown'],
+      icon: FiFileText,
+      colorClass: 'text-emerald-500 dark:text-emerald-400',
+    },
+    {
+      extensions: ['csv', 'xlsx', 'xls'],
+      icon: FiDatabase,
+      colorClass: 'text-purple-500 dark:text-purple-400',
+    },
+  ];
+
+  // Find matching configuration
+  const config = fileTypeConfigs.find(({ extensions }) => extensions.includes(extension));
+  
+  if (config) {
+    const IconComponent = config.icon;
+    return <IconComponent size={18} className={config.colorClass} />;
   }
-  if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'bmp'].includes(extension)) {
-    return <FiImage size={18} className="text-blue-500 dark:text-blue-400" />;
-  }
-  if (['js', 'jsx', 'ts', 'tsx', 'py', 'java', 'c', 'cpp', 'php', 'css'].includes(extension)) {
-    return <FiCode size={18} className="text-accent-500 dark:text-accent-400" />;
-  }
-  if (['json', 'yaml', 'yml', 'toml', 'ini', 'env', 'conf'].includes(extension)) {
-    return <FiFileText size={18} className="text-amber-500 dark:text-amber-400" />;
-  }
-  if (['md', 'markdown'].includes(extension)) {
-    return <FiFileText size={18} className="text-emerald-500 dark:text-emerald-400" />;
-  }
-  if (['csv', 'xlsx', 'xls', 'xml'].includes(extension)) {
-    return <FiDatabase size={18} className="text-purple-500 dark:text-purple-400" />;
-  }
+
+  // Default fallback
   return <FiFile size={18} className="text-gray-600 dark:text-gray-400" />;
 }
