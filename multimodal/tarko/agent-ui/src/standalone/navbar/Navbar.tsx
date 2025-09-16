@@ -39,7 +39,7 @@ import { apiService } from '@/common/services/apiService';
 import { NavbarModelSelector } from './ModelSelector';
 import { getLogoUrl, getAgentTitle, getWorkspaceNavItems } from '@/config/web-ui-config';
 import type { WorkspaceNavItemIcon } from '@tarko/interface';
-import { getModelDisplayName } from '@/common/utils/modelUtils';
+
 
 import './Navbar.css';
 
@@ -433,7 +433,7 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
 
       if (sessionMetadata?.modelConfig) {
         const modelText = [
-          getModelDisplayName(sessionMetadata.modelConfig),
+          sessionMetadata.modelConfig.displayName || sessionMetadata.modelConfig.id,
           sessionMetadata.modelConfig.provider,
         ]
           .filter(Boolean)
