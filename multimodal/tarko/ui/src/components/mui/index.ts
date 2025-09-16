@@ -1,4 +1,4 @@
-export * from './MuiDialog';
+export { Dialog, DialogPanel, DialogTitle } from './MuiDialog';
 export * from './Tooltip';
 
 // Direct re-exports from @mui/material

@@ -22,15 +22,7 @@ interface DialogTitleProps {
   className?: string;
 }
 
-const DialogPanel: React.FC<DialogPanelProps> = ({ className, children }) => {
-  return <div className={className}>{children}</div>;
-};
-
-const DialogTitle: React.FC<DialogTitleProps> = ({ children, className }) => {
-  return <div className={className}>{children}</div>;
-};
-
-const DialogComponent: React.FC<DialogProps> = ({
+export const Dialog: React.FC<DialogProps> = ({
   open,
   onClose,
   className,
@@ -68,10 +60,10 @@ const DialogComponent: React.FC<DialogProps> = ({
   );
 };
 
-export const Dialog = DialogComponent as React.FC<DialogProps> & {
-  Panel: React.FC<DialogPanelProps>;
-  Title: React.FC<DialogTitleProps>;
+export const DialogPanel: React.FC<DialogPanelProps> = ({ className, children }) => {
+  return <div className={className}>{children}</div>;
 };
 
-Dialog.Panel = DialogPanel;
-Dialog.Title = DialogTitle;
+export const DialogTitle: React.FC<DialogTitleProps> = ({ children, className }) => {
+  return <div className={className}>{children}</div>;
+};

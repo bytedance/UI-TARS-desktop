@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog } from '@tarko/ui';
+import { Dialog, DialogPanel } from '@tarko/ui';
 import { motion } from 'framer-motion';
 
 interface ImageModalProps {
@@ -23,7 +23,7 @@ export const ImageModal: React.FC<ImageModalProps> = ({ isOpen, imageSrc, onClos
 
   return (
     <Dialog open={isOpen} onClose={onClose} maxWidth={false} fullWidth={false}>
-      <Dialog.Panel className="max-w-[90vw] max-h-[90vh] outline-none">
+      <DialogPanel className="max-w-[90vw] max-h-[90vh] outline-none">
         <motion.img
           src={imageSrc || ''}
           alt="Enlarged view"
@@ -38,7 +38,7 @@ export const ImageModal: React.FC<ImageModalProps> = ({ isOpen, imageSrc, onClos
           transition={{ type: 'spring', duration: 0.3 }}
           onClick={onClose}
         />
-      </Dialog.Panel>
+      </DialogPanel>
     </Dialog>
   );
 };

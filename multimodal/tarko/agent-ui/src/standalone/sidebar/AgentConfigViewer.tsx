@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiSettings, FiX } from 'react-icons/fi';
-import { Dialog } from '@tarko/ui';
+import { Dialog, DialogPanel } from '@tarko/ui';
 import { apiService } from '@/common/services/apiService';
 import { SanitizedAgentOptions } from '@/common/types';
 import { JsonRenderer } from '@/common/components/JsonRenderer';
@@ -39,7 +39,7 @@ export const AgentConfigViewer: React.FC<AgentConfigViewerProps> = ({ isOpen, on
 
   return (
     <Dialog open={isOpen} onClose={onClose} maxWidth="lg" fullWidth>
-      <Dialog.Panel className="relative max-h-[85vh] overflow-hidden">
+      <DialogPanel className="relative max-h-[85vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
           <div className="flex items-center gap-3">
@@ -108,7 +108,7 @@ export const AgentConfigViewer: React.FC<AgentConfigViewerProps> = ({ isOpen, on
             </div>
           )}
         </div>
-      </Dialog.Panel>
+      </DialogPanel>
     </Dialog>
   );
 };

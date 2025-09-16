@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiX, FiMaximize2, FiImage } from 'react-icons/fi';
 import { ChatCompletionContentPart } from '@tarko/agent-interface';
-import { Dialog } from '@tarko/ui';
+import { Dialog, DialogPanel } from '@tarko/ui';
 
 interface ImagePreviewProps {
   image: ChatCompletionContentPart;
@@ -91,7 +91,7 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({ image, onRemove }) =
 
       {/* Zoom modal */}
       <Dialog open={isZoomed} onClose={handleCloseZoom} maxWidth={false} fullWidth={false}>
-        <Dialog.Panel className="relative max-w-[90vw] max-h-[90vh] outline-none">
+        <DialogPanel className="relative max-w-[90vw] max-h-[90vh] outline-none">
           {/* Close button */}
           <motion.button
             whileHover={{ scale: 1.1 }}
@@ -112,7 +112,7 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({ image, onRemove }) =
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ type: 'spring', duration: 0.3 }}
           />
-        </Dialog.Panel>
+        </DialogPanel>
       </Dialog>
     </>
   );

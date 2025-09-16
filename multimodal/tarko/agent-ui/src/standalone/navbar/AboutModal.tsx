@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog } from '@tarko/ui';
+import { Dialog, DialogPanel } from '@tarko/ui';
 import { motion } from 'framer-motion';
 import { FiX, FiExternalLink, FiGithub, FiGlobe, FiCpu, FiCopy, FiCheck } from 'react-icons/fi';
 import { FaBrain } from 'react-icons/fa';
@@ -66,7 +66,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, session
 
   return (
     <Dialog open={isOpen} onClose={onClose} fullScreen>
-      <Dialog.Panel className="w-full h-full relative overflow-hidden">
+      <DialogPanel className="w-full h-full relative overflow-hidden">
         {/* Close button */}
         <motion.button
           whileHover={{ scale: 1.1 }}
@@ -267,7 +267,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, session
             </motion.a>
           </motion.div>
         </div>
-      </Dialog.Panel>
+      </DialogPanel>
     </Dialog>
   );
 };
