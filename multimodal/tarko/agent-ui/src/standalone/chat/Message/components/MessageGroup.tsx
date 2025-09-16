@@ -3,7 +3,7 @@ import { Message as MessageType } from '@/common/types';
 import { Message } from '../index';
 import { isMultimodalContent } from '@/common/utils/typeGuards';
 import { MessageFooter } from './MessageFooter';
-import { ThinkingAnimation } from './ThinkingAnimation';
+import { ThinkingAnimation } from '@tarko/ui';
 import { SkeletonLoader } from './SkeletonLoader';
 import { useAtomValue } from 'jotai';
 import { agentStatusAtom } from '@/common/state/atoms/ui';
@@ -93,7 +93,7 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
       {isThinking && (
         <div className="mt-4 space-y-4">
           <ThinkingAnimation
-            text={agentStatus.message || `${getAgentTitle()} is running`}
+            text={`${getAgentTitle()} is running`}
             phase={agentStatus.phase}
             estimatedTime={agentStatus.estimatedTime}
             showProgress={
@@ -106,10 +106,10 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
           {(agentStatus.phase === 'initializing' ||
             agentStatus.phase === 'warming_up' ||
             agentStatus.phase === 'processing') && (
-              <div className="ml-8">
-                <SkeletonLoader lines={2} showAvatar={false} className="opacity-50" />
-              </div>
-            )}
+            <div className="ml-8">
+              <SkeletonLoader lines={2} showAvatar={false} className="opacity-50" />
+            </div>
+          )}
         </div>
       )}
 

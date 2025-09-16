@@ -2,20 +2,16 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { FiLoader } from 'react-icons/fi';
 import { AgentProcessingPhase } from '@tarko/interface';
-import { getAgentTitle } from '@/config/web-ui-config';
 
 interface ThinkingAnimationProps {
+  text: string;
   size?: 'small' | 'medium' | 'large';
-  text?: string;
   className?: string;
   phase?: AgentProcessingPhase;
   estimatedTime?: string;
   showProgress?: boolean;
 }
 
-/**
- * GradientText Component - Creates fast left-to-right color gradient effect
- */
 interface GradientTextProps {
   text: string;
   className?: string;
@@ -24,10 +20,7 @@ interface GradientTextProps {
 const GradientText: React.FC<GradientTextProps> = ({ text, className = '' }) => {
   return (
     <span className={`relative inline-block ${className}`}>
-      {/* Base text */}
       <span className="font-medium text-gray-700 dark:text-gray-300">{text}</span>
-
-      {/* Animated gradient overlay */}
       <motion.span
         className="absolute inset-0 font-medium bg-gradient-to-r from-gray-700 from-30% via-gray-300 via-50% to-gray-700 to-70% dark:from-gray-300 dark:from-30% dark:via-gray-600 dark:via-50% dark:to-gray-300 dark:to-70% bg-clip-text text-transparent"
         style={{
@@ -50,14 +43,13 @@ const GradientText: React.FC<GradientTextProps> = ({ text, className = '' }) => 
 
 export const ThinkingAnimation: React.FC<ThinkingAnimationProps> = ({
   size = 'medium',
-  text = `${getAgentTitle()} is running`,
+  text,
   className = '',
 }) => {
   const textClass = size === 'small' ? 'text-xs' : size === 'medium' ? 'text-sm' : 'text-base';
 
   return (
     <div className={`p-3 flex items-center space-x-3 ${className}`}>
-      {/* Animated icon */}
       <motion.div
         animate={{
           rotate: 360,
@@ -73,7 +65,6 @@ export const ThinkingAnimation: React.FC<ThinkingAnimationProps> = ({
       </motion.div>
 
       <div className="flex-1">
-        {/* Main status text with gradient effect */}
         <div className="flex items-center space-x-2">
           <GradientText text={text} className={`${textClass} font-semibold`} />
           <motion.span
