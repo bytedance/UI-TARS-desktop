@@ -8,6 +8,7 @@ import { useStableCodeContent } from '@/common/hooks/useStableValue';
 import { ThrottledHtmlRenderer } from '../components/ThrottledHtmlRenderer';
 import { formatBytes } from '../utils/codeUtils';
 import { determineFileType } from './generic/utils';
+import { commonExtractors } from '@/common/utils/panelContentExtractor';
 
 // Constants
 const MAX_HEIGHT_CALC = 'calc(100vh - 215px)';
@@ -24,8 +25,9 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
   displayMode,
 }) => {
   // Extract file content from panelContent
-  const fileContent = getFileContent(panelContent);
-  const filePath = getFilePath(panelContent);
+  const fileData = commonExtractors.fileData(panelContent);
+  const fileContent = fileData?.content;
+  const filePath = fileData?.path || 'Unknown file';
 
   // Use stable content to prevent unnecessary re-renders during streaming
   const stableContent = useStableCodeContent(fileContent || '');
@@ -120,55 +122,6 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
   );
 };
 
-// Helper functions
-function getFileContent(panelContent: StandardPanelContent): string | null {
-  // Try arguments first (for file operations)
-  if (panelContent.arguments?.content && typeof panelContent.arguments.content === 'string') {
-    return panelContent.arguments.content;
-  }
 
-  // FIXME: For "str_replace_editor" "create", Found a better solution here,
-  if (panelContent.arguments?.file_text && typeof panelContent.arguments.file_text === 'string') {
-    return panelContent.arguments.file_text;
-  }
-
-  if (typeof panelContent.source === 'object') {
-    // Handle source array format
-    if (Array.isArray(panelContent.source)) {
-      return panelContent.source
-        .filter((item) => item.type === 'text')
-        .map((item) => item.text)
-        .join('');
-    } else {
-      // FIXME: For "str_replace_editor" "view"
-      if (
-        panelContent.arguments?.command === 'view' &&
-        typeof panelContent.source === 'object' &&
-        typeof panelContent.source.output === 'string'
-      ) {
-        // Here's the result of running `cat -n` on /home/gem/ui-tars-website/index.html:\n     1\t<!DOCTYPE html>\n
-        // return panelContent.source.output.split('\n').slice(1).join('\n');
-        return panelContent.source.output;
-      }
-    }
-  }
-
-  // Try source as string (fallback for old format)
-  if (typeof panelContent.source === 'string') {
-    return panelContent.source;
-  }
-
-  return null;
-}
-
-function getFilePath(panelContent: StandardPanelContent): string {
-  // Try arguments first
-  if (panelContent.arguments?.path && typeof panelContent.arguments.path === 'string') {
-    return panelContent.arguments.path;
-  }
-
-  // Fallback to title
-  return panelContent.title || 'Unknown file';
-}
 
 

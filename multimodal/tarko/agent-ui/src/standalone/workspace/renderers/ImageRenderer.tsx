@@ -6,6 +6,7 @@ import { BrowserShell } from './BrowserShell';
 import { FileDisplayMode } from '../types';
 import { commonExtractors } from '@/common/utils/panelContentExtractor';
 import { downloadFromUrl } from '@/common/utils/downloadUtils';
+import { isScreenshotImage } from '@/common/utils/stringUtils';
 
 interface ImageRendererProps {
   panelContent: StandardPanelContent;
@@ -37,8 +38,7 @@ export const ImageRenderer: React.FC<ImageRendererProps> = ({ panelContent, onAc
     }
   };
 
-  const isScreenshot =
-    name?.toLowerCase().includes('screenshot') || name?.toLowerCase().includes('browser');
+  const isScreenshot = name ? isScreenshotImage(name) : false;
 
   const actionButtons = (
     <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">

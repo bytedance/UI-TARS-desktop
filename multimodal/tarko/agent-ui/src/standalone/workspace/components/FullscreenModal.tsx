@@ -5,6 +5,7 @@ import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 import { MessageContent } from '../renderers/generic/components/MessageContent';
 import { FullscreenFileData } from '../types/panelContent';
 import { normalizeFilePath } from '@/common/utils/pathNormalizer';
+import { isHtmlFile, isMarkdownFile } from '@/common/utils/stringUtils';
 interface FullscreenModalProps {
   data: FullscreenFileData | null;
   onClose: () => void;
@@ -33,11 +34,8 @@ export const FullscreenModal: React.FC<FullscreenModalProps> = ({ data, onClose 
 
   if (!data) return null;
 
-  const isHtmlFile =
-    data.fileName.toLowerCase().endsWith('.html') || data.fileName.toLowerCase().endsWith('.htm');
-  const isMarkdownFile =
-    data.fileName.toLowerCase().endsWith('.md') ||
-    data.fileName.toLowerCase().endsWith('.markdown');
+  const isHtml = isHtmlFile(data.fileName);
+  const isMarkdown = isMarkdownFile(data.fileName);
 
   return (
     <AnimatePresence>
@@ -80,7 +78,7 @@ export const FullscreenModal: React.FC<FullscreenModalProps> = ({ data, onClose 
 
         {/* Content */}
         <div className="flex-1 overflow-auto">
-          {isHtmlFile && data.displayMode === 'rendered' ? (
+          {isHtml && data.displayMode === 'rendered' ? (
             <div className="h-full bg-white">
               <iframe
                 srcDoc={data.content}
@@ -99,7 +97,7 @@ export const FullscreenModal: React.FC<FullscreenModalProps> = ({ data, onClose 
                   displayMode={data.displayMode}
                   isShortMessage={false}
                 />
-              ) : isMarkdownFile && data.displayMode === 'rendered' ? (
+              ) : isMarkdown && data.displayMode === 'rendered' ? (
                 <MarkdownRenderer content={data.content} />
               ) : (
                 <pre className="whitespace-pre-wrap font-mono text-sm bg-gray-50 dark:bg-gray-800 p-4 rounded-lg overflow-auto">

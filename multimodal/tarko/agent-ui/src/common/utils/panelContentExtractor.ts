@@ -221,4 +221,72 @@ export const commonExtractors = {
 
     return null;
   },
+
+  /**
+   * Extract file content and path with advanced format support
+   */
+  fileData: (panelContent: StandardPanelContent) => {
+    const getPath = () => {
+      if (panelContent.arguments?.path && typeof panelContent.arguments.path === 'string') {
+        return panelContent.arguments.path;
+      }
+      return panelContent.title || 'Unknown file';
+    };
+
+    // Try arguments first (for file operations)
+    const args = panelContent.arguments;
+    if (args) {
+      const content = args.content || args.file_text;
+      
+      if (content && typeof content === 'string') {
+        return {
+          content,
+          path: getPath(),
+        };
+      }
+    }
+    
+    // Handle source as object
+    if (typeof panelContent.source === 'object' && panelContent.source !== null) {
+      // Handle source array format (text parts)
+      if (Array.isArray(panelContent.source)) {
+        const textContent = panelContent.source
+          .filter((item: any) => item.type === 'text')
+          .map((item: any) => item.text)
+          .join('');
+        
+        if (textContent) {
+          return {
+            content: textContent,
+            path: getPath(),
+          };
+        }
+      } else {
+        // Handle special "view" command format
+        const source = panelContent.source as any;
+        if (args?.command === 'view' && typeof source.output === 'string') {
+          return {
+            content: source.output,
+            path: getPath(),
+          };
+        }
+        
+        // Fallback to JSON stringify
+        return {
+          content: JSON.stringify(panelContent.source, null, 2),
+          path: getPath(),
+        };
+      }
+    }
+    
+    // Handle source as string content
+    if (typeof panelContent.source === 'string') {
+      return {
+        content: panelContent.source,
+        path: getPath(),
+      };
+    }
+    
+    return null;
+  },
 };

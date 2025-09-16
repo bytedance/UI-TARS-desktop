@@ -34,7 +34,8 @@ export const ResearchReportRenderer: React.FC<ResearchReportRendererProps> = ({
   const contentRef = useRef<HTMLDivElement>(null);
 
   // Extract content and metadata from panelContent
-  const content = getReportContent(panelContent);
+  const fileData = commonExtractors.fileData(panelContent);
+  const content = fileData?.content || '';
   const title = panelContent.title || 'Research Report';
   const isStreaming = Boolean(panelContent.isStreaming);
 
@@ -159,9 +160,4 @@ export const ResearchReportRenderer: React.FC<ResearchReportRendererProps> = ({
   );
 };
 
-function getReportContent(panelContent: StandardPanelContent): string {
-  if (typeof panelContent.source === 'string') {
-    return panelContent.source;
-  }
-  return JSON.stringify(panelContent.source, null, 2);
-}
+

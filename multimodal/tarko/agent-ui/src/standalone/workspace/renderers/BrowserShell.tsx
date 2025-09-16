@@ -1,5 +1,6 @@
 import React from 'react';
 import { FiLock, FiGlobe } from 'react-icons/fi';
+import { isSecureUrl, isUrl, getDomainFromUrl } from '@/common/utils/stringUtils';
 
 interface BrowserShellProps {
   children: React.ReactNode;
@@ -26,20 +27,10 @@ export const BrowserShell: React.FC<BrowserShellProps> = ({
 }) => {
   // Format URL for display
   const displayUrl = url || '';
-  const isSecure = displayUrl.startsWith('https://');
+  const isSecure = isSecureUrl(displayUrl);
 
   // Extract domain for tab display
-  const getDomain = (url: string) => {
-    try {
-      if (url.startsWith('http')) {
-        const domain = new URL(url).hostname;
-        return domain || title;
-      }
-    } catch (e) { }
-    return title;
-  };
-
-  const domain = getDomain(displayUrl);
+  const domain = isUrl(displayUrl) ? (getDomainFromUrl(displayUrl) || title) : title;
 
   return (
     <div
