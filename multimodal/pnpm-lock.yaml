@@ -288,6 +288,43 @@ importers:
         specifier: 3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.5.1)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
 
+  gui-agent/operator-adb:
+    dependencies:
+      '@agent-infra/browser':
+        specifier: 0.1.1
+        version: 0.1.1
+      '@agent-infra/logger':
+        specifier: 0.0.2-beta.2
+        version: 0.0.2-beta.2
+      '@agent-infra/media-utils':
+        specifier: 0.1.5
+        version: 0.1.5
+      '@agent-infra/sandbox':
+        specifier: 0.0.5
+        version: 0.0.5
+      '@gui-agent/shared':
+        specifier: workspace:*
+        version: link:../shared
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.10.0
+        version: 0.10.0(typescript@5.8.3)
+      dotenv:
+        specifier: ^16.3.1
+        version: 16.6.1
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@22.15.30)(typescript@5.8.3)
+      tsx:
+        specifier: ^4.19.2
+        version: 4.19.4
+      typescript:
+        specifier: ^5.7.2
+        version: 5.8.3
+      vitest:
+        specifier: ^3.0.2
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.5.1)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
+
   gui-agent/operator-aio:
     dependencies:
       '@agent-infra/browser':
@@ -18932,7 +18969,7 @@ snapshots:
     dependencies:
       '@rsbuild/core': 1.4.0-beta.3
       rsbuild-plugin-dts: 0.10.0(@rsbuild/core@1.4.0-beta.3)(typescript@5.8.3)
-      tinyglobby: 0.2.14
+      tinyglobby: 0.2.15
     optionalDependencies:
       typescript: 5.8.3
 
@@ -26408,7 +26445,7 @@ snapshots:
       '@rsbuild/core': 1.4.0-beta.3
       magic-string: 0.30.17
       picocolors: 1.1.1
-      tinyglobby: 0.2.14
+      tinyglobby: 0.2.15
       tsconfig-paths: 4.2.0
     optionalDependencies:
       typescript: 5.8.3
