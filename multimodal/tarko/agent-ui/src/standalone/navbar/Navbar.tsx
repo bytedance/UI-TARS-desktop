@@ -23,7 +23,6 @@ import { GoSidebarCollapse, GoSidebarExpand } from 'react-icons/go';
 import {
   Box,
   Typography,
-  createTheme,
   ThemeProvider,
   Menu,
   MenuItem,
@@ -40,6 +39,7 @@ import { NavbarModelSelector } from './ModelSelector';
 import { getLogoUrl, getAgentTitle, getWorkspaceNavItems } from '@/config/web-ui-config';
 import type { WorkspaceNavItemIcon } from '@tarko/interface';
 import { getModelDisplayName } from '@/common/utils/modelUtils';
+import { createBasicMuiTheme } from '@/common/utils/muiTheme';
 
 import './Navbar.css';
 
@@ -127,15 +127,7 @@ export const Navbar: React.FC = () => {
   };
 
   // Create MUI theme for consistent styling
-  const muiTheme = React.useMemo(
-    () =>
-      createTheme({
-        palette: {
-          mode: isDarkMode ? 'dark' : 'light',
-        },
-      }),
-    [isDarkMode],
-  );
+  const muiTheme = React.useMemo(() => createBasicMuiTheme(isDarkMode), [isDarkMode]);
 
   return (
     <ThemeProvider theme={muiTheme}>
