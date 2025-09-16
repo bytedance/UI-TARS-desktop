@@ -11,8 +11,6 @@
     "jotai": "^2.7.0",
     "jsonrepair": "3.12.0",
     "katex": "^0.16.9",
-    "monaco-editor": "0.52.0",
-    "parse-diff": "0.11.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.11.0",

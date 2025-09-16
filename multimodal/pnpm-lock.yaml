@@ -863,12 +863,6 @@ importers:
       katex:
         specifier: ^0.16.9
         version: 0.16.22
-      monaco-editor:
-        specifier: 0.52.0
-        version: 0.52.0
-      parse-diff:
-        specifier: 0.11.1
-        version: 0.11.1
       react:
         specifier: ^18.2.0
         version: 18.3.1
@@ -1372,9 +1366,18 @@ importers:
       highlight.js:
         specifier: ^11.9.0
         version: 11.11.1
+      monaco-editor:
+        specifier: 0.52.0
+        version: 0.52.0
+      parse-diff:
+        specifier: 0.11.1
+        version: 0.11.1
       react-dom:
         specifier: '>=16.9.0'
         version: 18.3.1(react@18.3.1)
+      react-icons:
+        specifier: ^4.11.0
+        version: 4.12.0(react@18.3.1)
     devDependencies:
       '@rslib/core':
         specifier: 0.10.0

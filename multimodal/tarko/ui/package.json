@@ -22,6 +22,9 @@
     "dev": "rslib build --watch"
   },
   "dependencies": {
+    "react-icons": "^4.11.0",
+    "monaco-editor": "0.52.0",
+    "parse-diff": "0.11.1",
     "@monaco-editor/react": "4.7.0",
     "highlight.js": "^11.9.0"
   },
