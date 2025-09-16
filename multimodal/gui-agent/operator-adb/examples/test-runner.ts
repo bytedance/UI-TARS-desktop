@@ -7,6 +7,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import 'dotenv/config';
 
+import { Base64ImageParser } from '@agent-infra/media-utils';
 import { ConsoleLogger, LogLevel } from '@agent-infra/logger';
 import { AdbOperator } from '../src';
 
@@ -53,6 +54,9 @@ async function testScreenshot() {
 
     // Save screenshot
     if (screenshot.base64) {
+      const base64Tool = new Base64ImageParser(screenshot.base64);
+      const dimensions = base64Tool.getDimensions();
+      testLogger.debug('Base64ImageParser dimensions:', JSON.stringify(dimensions));
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       const filename = `screenshot-${timestamp}.jpg`;
       const filepath = saveScreenshot(screenshot.base64, filename, dumpsDir);
@@ -510,10 +514,10 @@ async function main() {
   }
 
   if (success) {
-    testLogger.log('\n✨ Test script execution completed successfully');
+    testLogger.log('✨ Test script execution completed successfully');
     process.exit(0);
   } else {
-    testLogger.error('\n💥 Test script execution failed');
+    testLogger.error('💥 Test script execution failed');
     process.exit(1);
   }
 }
