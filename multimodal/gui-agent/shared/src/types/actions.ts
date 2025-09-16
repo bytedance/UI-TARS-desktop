@@ -119,6 +119,7 @@ export type DragAction = BaseAction<
   {
     start: Coordinates;
     end: Coordinates;
+    direction?: 'up' | 'down' | 'left' | 'right';
   }
 >;
 
@@ -204,6 +205,15 @@ export type LongPressAction = BaseAction<
   }
 >;
 
+export type SwipeAction = BaseAction<
+  'swipe' | 'drag',
+  {
+    start: Coordinates;
+    end: Coordinates;
+    direction: 'up' | 'down' | 'left' | 'right';
+  }
+>;
+
 /**
  * Home action
  */
@@ -276,6 +286,7 @@ export type GUIAction =
   | NavigateAction
   | NavigateBackAction
   | LongPressAction
+  | SwipeAction
   | HomeAction
   | BackAction
   | OpenAppAction
@@ -308,6 +319,8 @@ export function isSupportedActionType(type: string): type is SupportedActionType
     'move',
     'move_to',
     'drag',
+    'left_click_drag',
+    'select',
     'scroll',
 
     // Keyboard actions
@@ -322,6 +335,7 @@ export function isSupportedActionType(type: string): type is SupportedActionType
 
     // App actions
     'long_press',
+    'swipe',
     'home',
     'press_home',
     'back',
