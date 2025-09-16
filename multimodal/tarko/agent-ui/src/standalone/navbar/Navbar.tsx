@@ -118,7 +118,6 @@ export const Navbar: React.FC = () => {
     };
   };
 
-  // Create MUI theme for consistent styling
   const muiTheme = React.useMemo(() => createBasicMuiTheme(isDarkMode), [isDarkMode]);
 
   return (
@@ -127,17 +126,14 @@ export const Navbar: React.FC = () => {
         {/* Left section with conditional logo rendering */}
         <div className="flex items-center">
           {logoType === 'traffic-lights' ? (
-            /* macOS-style traffic lights */
             <div className="flex space-x-1.5 mr-3">
               <div className="traffic-light traffic-light-red" />
               <div className="traffic-light traffic-light-yellow" />
               <div className="traffic-light traffic-light-green" />
             </div>
           ) : logoType === 'space' ? (
-            /* Space for traffic lights - just the margin without content */
             <div className="mr-3" style={{ width: '54px' }} />
           ) : (
-            /* Logo (default) */
             <a href="http://agent-tars.com" target="blank" className="mr-3">
               <img src={logoUrl} alt={getAgentTitle()} className="w-6 h-6 rounded-lg" />
             </a>
@@ -159,7 +155,6 @@ export const Navbar: React.FC = () => {
           </div>
         )}
 
-        {/* Center section - Agent and Model info display - responsive positioning */}
         <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 max-[968px]:relative max-[968px]:left-auto max-[968px]:top-auto max-[968px]:transform-none max-[968px]:flex-1 max-[968px]:mx-3">
           <DynamicNavbarCenter
             sessionMetadata={sessionMetadata}
@@ -167,11 +162,8 @@ export const Navbar: React.FC = () => {
           />
         </div>
 
-        {/* Right section - workspace nav items, then About, Dark mode, Share */}
         <div className="flex items-center ml-auto relative">
-          {/* Desktop view - show all buttons */}
           <div className="hidden md:flex items-center space-x-2">
-            {/* Workspace navigation items */}
             {!isReplayMode && workspaceNavItems.length > 0 && (
               <div className="flex items-center gap-2 mr-2">
                 {workspaceNavItems.map((navItem) => {
@@ -194,7 +186,7 @@ export const Navbar: React.FC = () => {
                 })}
               </div>
             )}
-            {/* About button */}
+
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
@@ -205,7 +197,6 @@ export const Navbar: React.FC = () => {
               <FiInfo size={16} />
             </motion.button>
 
-            {/* Dark mode toggle */}
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
@@ -216,13 +207,11 @@ export const Navbar: React.FC = () => {
               {isDarkMode ? <FiSun size={16} /> : <FiMoon size={16} />}
             </motion.button>
 
-            {/* Share button */}
             {activeSessionId && !isReplayMode && (
               <ShareButton variant="navbar" disabled={isProcessing} />
             )}
           </div>
 
-          {/* Mobile view - MUI dropdown menu */}
           <div className="md:hidden">
             <IconButton
               onClick={handleMobileMenuOpen}
@@ -268,7 +257,6 @@ export const Navbar: React.FC = () => {
                 },
               }}
             >
-              {/* Workspace navigation items in dropdown */}
               {!isReplayMode &&
                 workspaceNavItems.length > 0 && [
                   ...workspaceNavItems.map((navItem) => {
@@ -291,7 +279,6 @@ export const Navbar: React.FC = () => {
                   <Divider key="divider" />,
                 ]}
 
-              {/* About option */}
               <MenuItem
                 onClick={() => {
                   setShowAboutModal(true);
@@ -303,7 +290,6 @@ export const Navbar: React.FC = () => {
                 About {getAgentTitle()}
               </MenuItem>
 
-              {/* Dark mode toggle option */}
               <MenuItem
                 onClick={() => {
                   toggleDarkMode();
@@ -319,7 +305,6 @@ export const Navbar: React.FC = () => {
                 {isDarkMode ? 'Light Mode' : 'Dark Mode'}
               </MenuItem>
 
-              {/* Share option */}
               {activeSessionId && !isReplayMode && (
                 <MenuItem
                   onClick={() => {
@@ -337,7 +322,6 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* About Modal - pass sessionMetadata */}
       <AboutModal
         isOpen={showAboutModal}
         onClose={() => setShowAboutModal(false)}

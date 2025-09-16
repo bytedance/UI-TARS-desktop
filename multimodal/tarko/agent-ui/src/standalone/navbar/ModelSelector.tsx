@@ -28,7 +28,6 @@ interface NavbarModelSelectorProps {
   isDarkMode?: boolean;
 }
 
-// Helper functions for model operations
 const isSameModel = (a: AgentModel | null, b: AgentModel | null): boolean => {
   if (!a || !b) return false;
   return a.provider === b.provider && a.id === b.id;
@@ -106,7 +105,6 @@ const ModelDisplayContent: React.FC<{
   );
 };
 
-// Shared static model display component
 const StaticModelDisplay: React.FC<{
   sessionMetadata: SessionItemMetadata;
   isDarkMode: boolean;
@@ -197,22 +195,18 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   const { isReplayMode } = useReplayMode();
   const isProcessing = useAtomValue(isProcessingAtom);
 
-  // Get current model from session metadata - simplified since server always provides modelConfig
   const currentModel = React.useMemo(() => {
-    // Wait for models to be loaded
     if (models.length === 0) return null;
 
-    // Server always provides modelConfig, so we can directly use it
     if (sessionMetadata?.modelConfig) {
       const foundModel = models.find(
         (m) =>
           m.provider === sessionMetadata.modelConfig?.provider &&
           m.id === sessionMetadata.modelConfig?.id,
       );
-      return foundModel || models[0]; // fallback to first model if saved model not found
+      return foundModel || models[0];
     }
 
-    // If sessionMetadata is still loading, don't show any model yet
     return null;
   }, [models, sessionMetadata]);
 
@@ -225,7 +219,6 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     try {
       const response = await apiService.updateSessionModel(activeSessionId, selectedModel);
       if (response.success && response.sessionInfo?.metadata) {
-        // Update session metadata using utility action
         updateSessionMetadata({
           sessionId: activeSessionId,
           metadata: response.sessionInfo.metadata,
@@ -240,7 +233,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
 
   useEffect(() => {
     const loadModels = async () => {
-      if (models.length > 0) return; // Only load once
+      if (models.length > 0) return;
 
       try {
         const response = await apiService.getAvailableModels();
@@ -253,7 +246,6 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     loadModels();
   }, [models.length]);
 
-  // In replay mode, share mode (no activeSessionId), or agent processing mode, show static display if we have model config
   if (!activeSessionId || isReplayMode || isProcessing) {
     return (
       <StaticModelDisplay
@@ -274,7 +266,6 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     return null;
   }
 
-  // Show selector only if there are multiple models available and agent is not processing
   if (models.length <= 1 || isProcessing) {
     return (
       <StaticModelDisplay
