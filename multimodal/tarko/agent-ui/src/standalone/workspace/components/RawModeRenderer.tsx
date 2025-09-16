@@ -1,7 +1,7 @@
 import React, { useRef, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { FiTerminal, FiClock, FiPlay, FiCheckCircle, FiXCircle, FiCopy, FiCheck } from 'react-icons/fi';
-import { JsonRenderer, JsonRendererRef } from '@/common/components/JsonRenderer';
+import { JSONViewer, JSONViewerRef } from '@tarko/ui';
 import { RawToolMapping } from '@/common/state/atoms/rawEvents';
 import { formatTimestamp } from '@/common/utils/formatters';
 
@@ -11,7 +11,7 @@ interface RawModeRendererProps {
 
 // Copy button component
 const CopyButton: React.FC<{
-  jsonRef: React.RefObject<JsonRendererRef>;
+  jsonRef: React.RefObject<JSONViewerRef>;
   title: string;
 }> = ({ jsonRef, title }) => {
   const [copied, setCopied] = useState(false);
@@ -49,10 +49,10 @@ const CopyButton: React.FC<{
 export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping }) => {
   const { toolCall, toolResult } = toolMapping;
   
-  // Refs for JsonRenderer components
-  const parametersRef = useRef<JsonRendererRef>(null);
-  const responseRef = useRef<JsonRendererRef>(null);
-  const metadataRef = useRef<JsonRendererRef>(null);
+  // Refs for JSONViewer components
+  const parametersRef = useRef<JSONViewerRef>(null);
+  const responseRef = useRef<JSONViewerRef>(null);
+  const metadataRef = useRef<JSONViewerRef>(null);
 
   return (
     <div className="space-y-3 mt-3">
@@ -98,7 +98,7 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
                   <CopyButton jsonRef={parametersRef} title="Copy parameters JSON" />
                 </div>
                 <div className="bg-white/60 dark:bg-slate-800/60 rounded-lg p-3 border border-slate-200/40 dark:border-slate-700/40">
-                  <JsonRenderer ref={parametersRef} data={toolCall.arguments} emptyMessage="No parameters provided" />
+                  <JSONViewer ref={parametersRef} data={toolCall.arguments} emptyMessage="No parameters provided" />
                 </div>
               </div>
             )}
@@ -183,7 +183,7 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
                   <CopyButton jsonRef={responseRef} title="Copy response JSON" />
                 </div>
                 <div className="bg-white/60 dark:bg-slate-800/60 rounded-lg p-3 border border-slate-200/40 dark:border-slate-700/40">
-                  <JsonRenderer ref={responseRef} data={toolResult.content} emptyMessage="No response data" />
+                  <JSONViewer ref={responseRef} data={toolResult.content} emptyMessage="No response data" />
                 </div>
               </div>
               {toolResult._extra && (
@@ -193,7 +193,7 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
                     <CopyButton jsonRef={metadataRef} title="Copy metadata JSON" />
                   </div>
                   <div className="bg-white/60 dark:bg-slate-800/60 rounded-lg p-3 border border-slate-200/40 dark:border-slate-700/40">
-                    <JsonRenderer ref={metadataRef} data={toolResult._extra} emptyMessage="No metadata" />
+                    <JSONViewer ref={metadataRef} data={toolResult._extra} emptyMessage="No metadata" />
                   </div>
                 </div>
               )}

@@ -4,8 +4,7 @@ import { FiSettings, FiX } from 'react-icons/fi';
 import { Dialog, DialogPanel } from '@tarko/ui';
 import { apiService } from '@/common/services/apiService';
 import { SanitizedAgentOptions } from '@/common/types';
-import { JsonRenderer } from '@/common/components/JsonRenderer';
-import { LoadingSpinner } from '@/common/components/LoadingSpinner';
+import { JSONViewer, LoadingSpinner } from '@tarko/ui';
 
 interface AgentConfigViewerProps {
   isOpen: boolean;
@@ -93,7 +92,7 @@ export const AgentConfigViewer: React.FC<AgentConfigViewerProps> = ({ isOpen, on
               </div>
             </div>
           ) : config && Object.keys(config).length > 0 ? (
-            <JsonRenderer data={config} emptyMessage="No configuration available" />
+            <JSONViewer data={config} emptyMessage="No configuration available" />
           ) : (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">

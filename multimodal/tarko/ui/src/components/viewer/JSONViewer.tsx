@@ -3,9 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiChevronRight, FiCopy, FiCheck, FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 
 /**
- * JsonRenderer - Universal JSON viewer component
+ * JSONViewer - Universal JSON viewer component
  *
- * Extracted from AgentConfigViewer for reusability across the application.
  * Supports hierarchical tree structure with smooth animations.
  */
 
@@ -190,17 +189,17 @@ const JsonItem: React.FC<JsonItemProps> = ({ label, value, level = 0, isRoot = f
   );
 };
 
-interface JsonRendererProps {
+interface JSONViewerProps {
   data: any;
   className?: string;
   emptyMessage?: string;
 }
 
-export interface JsonRendererRef {
+export interface JSONViewerRef {
   copyAll: () => string;
 }
 
-export const JsonRenderer = React.forwardRef<JsonRendererRef, JsonRendererProps>((
+export const JSONViewer = React.forwardRef<JSONViewerRef, JSONViewerProps>((
   { data, className = '', emptyMessage = 'No data available' },
   ref
 ) => {
