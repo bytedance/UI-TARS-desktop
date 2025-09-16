@@ -5,7 +5,6 @@
 
 import { IAgent } from '@tarko/interface';
 import { transliterate } from 'transliteration';
-import { utilsLogger } from './logger';
 
 /**
  * Response schema for LLM-generated slug
@@ -53,7 +52,7 @@ export class SlugGenerator {
         return llmSlug;
       }
     } catch (error) {
-      utilsLogger.error('LLM slug generation failed', { error });
+      console.error('[SlugGenerator] LLM slug generation failed:', error);
     }
 
     // Fallback to manual normalization
@@ -101,11 +100,11 @@ Return only a JSON object with a "slug" field.`,
         // Apply manual normalization to ensure LLM output is also sanitized
         return this.manualNormalization(parsed.slug);
       } catch (error) {
-        utilsLogger.error('Failed to parse LLM response', { error });
+        console.error('[SlugGenerator] Failed to parse LLM response:', error);
         return null;
       }
     } catch (error) {
-      utilsLogger.error('LLM call failed', { error });
+      console.error('[SlugGenerator] LLM call failed:', error);
       throw error; // Re-throw to be caught by the caller
     }
   }
@@ -206,7 +205,7 @@ Return only a JSON object with a "slug" field.`,
 
       return result;
     } catch (error) {
-      utilsLogger.error('Transliteration failed', { error });
+      console.error('[SlugGenerator] Transliteration failed:', error);
       return '';
     }
   }

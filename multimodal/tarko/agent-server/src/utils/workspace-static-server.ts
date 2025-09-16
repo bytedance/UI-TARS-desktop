@@ -7,7 +7,6 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
-import { utilsLogger } from './logger';
 
 /**
  * Extract session ID from referer URL
@@ -264,13 +263,13 @@ export function setupWorkspaceStaticServer(
 ): void {
   if (!workspacePath || !fs.existsSync(workspacePath)) {
     if (isDebug) {
-      utilsLogger.info('Workspace path not found, skipping static server setup');
+      console.log('Workspace path not found, skipping static server setup');
     }
     return;
   }
 
   if (isDebug) {
-    utilsLogger.info('Setting up workspace static server', { workspacePath });
+    console.log(`Setting up workspace static server at: ${workspacePath}`);
   }
 
   const fileResolver = new WorkspaceFileResolver(workspacePath);

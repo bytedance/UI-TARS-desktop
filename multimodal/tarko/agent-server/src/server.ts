@@ -20,7 +20,6 @@ import type {
   AgioProviderConstructor,
 } from './types';
 import { TARKO_CONSTANTS, GlobalDirectoryOptions } from '@tarko/interface';
-import { serverLogger } from './utils/logger';
 
 export { express };
 
@@ -164,7 +163,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     if (this.isExclusive) {
       this.runningSessionId = sessionId;
       if (this.isDebug) {
-        serverLogger.debug('Session started', { sessionId });
+        console.log(`[DEBUG] Session started: ${sessionId}`);
       }
     }
   }
@@ -176,7 +175,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     if (this.isExclusive && this.runningSessionId === sessionId) {
       this.runningSessionId = null;
       if (this.isDebug) {
-        serverLogger.debug('Session ended', { sessionId });
+        console.log(`[DEBUG] Session ended: ${sessionId}`);
       }
     }
   }
@@ -265,7 +264,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
       try {
         await this.storageProvider.initialize();
       } catch (error) {
-        serverLogger.error('Failed to initialize storage provider', { error });
+        console.error('Failed to initialize storage provider:', error);
       }
     }
 

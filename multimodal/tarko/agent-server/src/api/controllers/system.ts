@@ -6,7 +6,6 @@
 import { Request, Response } from 'express';
 import { sanitizeAgentOptions } from '../../utils/config-sanitizer';
 import { getPublicAvailableModels, isModelConfigValid } from '../../utils/model-utils';
-import { apiLogger } from '../../utils/logger';
 
 export function healthCheck(req: Request, res: Response) {
   res.status(200).json({ status: 'ok' });
@@ -73,7 +72,7 @@ export async function updateSessionModel(req: Request, res: Response) {
       // If session is currently active, recreate the agent with new model config
       const activeSession = server.sessions[sessionId];
       if (activeSession) {
-        apiLogger.info('Session model updated', {
+        console.log('Session model updated', {
           sessionId,
           provider: model.provider,
           modelId: model.id,
@@ -82,9 +81,9 @@ export async function updateSessionModel(req: Request, res: Response) {
         try {
           // Recreate agent with new model configuration
           await activeSession.updateModelConfig(updatedSessionInfo);
-          apiLogger.info('Session agent recreated with new model config', { sessionId });
+          console.log('Session agent recreated with new model config', { sessionId });
         } catch (error) {
-          apiLogger.error('Failed to update agent model config for session', { sessionId, error });
+          console.error('Failed to update agent model config for session', { sessionId, error });
           // Continue execution - the model config is saved, will apply on next session
         }
       }
@@ -97,7 +96,7 @@ export async function updateSessionModel(req: Request, res: Response) {
       res.status(400).json({ error: 'Storage not configured' });
     }
   } catch (error) {
-    apiLogger.error('Failed to update session model', { error });
+    console.error('Failed to update session model:', error);
     res.status(500).json({ error: 'Failed to update session model' });
   }
 }

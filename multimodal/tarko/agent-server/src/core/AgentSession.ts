@@ -22,7 +22,6 @@ import { AgioEvent } from '@tarko/agio';
 import { handleAgentError, ErrorWithCode } from '../utils/error-handler';
 import { SessionInfo } from '../storage';
 import { getAvailableModels, getDefaultModel } from '../utils';
-import { agentSessionLogger } from '../utils/logger';
 
 /**
  * Check if an event should be stored in persistent storage
@@ -83,7 +82,7 @@ export class AgentSession {
         try {
           await this.server.storageProvider.saveEvent(this.id, event);
         } catch (error) {
-          agentSessionLogger.error('Failed to save event to storage', { error });
+          console.error(`Failed to save event to storage: ${error}`);
         }
       }
 
@@ -92,7 +91,7 @@ export class AgentSession {
         try {
           await this.agioProvider.processAgentEvent(event);
         } catch (error) {
-          agentSessionLogger.error('Failed to process AGIO event', { error });
+          console.error('Failed to process AGIO event:', error);
         }
       }
     };
@@ -156,15 +155,15 @@ export class AgentSession {
       try {
         await this.agioProvider.sendAgentInitialized();
       } catch (error) {
-        agentSessionLogger.error('Failed to send AGIO initialization event', { error });
+        console.error('Failed to send AGIO initialization event:', error);
       }
 
       // Log AGIO initialization
-      agentSessionLogger.debug('AGIO collector initialized', { provider: agentOptions.agio.provider });
+      console.debug('AGIO collector initialized', { provider: agentOptions.agio.provider });
     }
 
     // Log agent configuration
-    agentSessionLogger.info('Agent Config', { config: (wrappedAgent as any).getOptions?.() });
+    console.info('Agent Config', JSON.stringify((wrappedAgent as any).getOptions?.(), null, 2));
 
     return wrappedAgent;
   }
@@ -187,7 +186,7 @@ export class AgentSession {
 
       // Log fallback warning if session model is not available
       if (this.server.isDebug) {
-        agentSessionLogger.warn('Session model not found, falling back to default', { provider, modelId });
+        console.warn('Session model not found, falling back to default', { provider, modelId });
       }
     }
 
@@ -213,7 +212,7 @@ export class AgentSession {
         }) as unknown as IAgent;
 
         // Log snapshot initialization
-        agentSessionLogger.debug('AgentSnapshot initialized', { snapshotPath });
+        console.debug('AgentSnapshot initialized', { snapshotPath });
 
         return wrappedAgent;
       }
@@ -278,7 +277,7 @@ export class AgentSession {
 
       // Debug logging for issue #1150
       if (this.server.isDebug) {
-        agentSessionLogger.debug('Query started', {
+        console.log('[DEBUG] Query started', {
           sessionId: this.id,
           queryType: typeof options.input === 'string' ? 'string' : 'ContentPart',
           queryPreview:
@@ -309,7 +308,7 @@ export class AgentSession {
 
       // Debug logging for issue #1150
       if (this.server.isDebug) {
-        agentSessionLogger.debug('Query completed successfully', { sessionId: this.id });
+        console.log('[DEBUG] Query completed successfully', { sessionId: this.id });
       }
 
       return {
@@ -327,7 +326,7 @@ export class AgentSession {
 
       // Debug logging for issue #1150
       if (this.server.isDebug) {
-        agentSessionLogger.debug('Query failed', { sessionId: this.id, error: handledError.message });
+        console.log('[DEBUG] Query failed', { sessionId: this.id, error: handledError.message });
       }
 
       return {
@@ -363,7 +362,7 @@ export class AgentSession {
 
       // Debug logging for issue #1150
       if (this.server.isDebug) {
-        agentSessionLogger.debug('Streaming query started', {
+        console.log('[DEBUG] Streaming query started', {
           sessionId: this.id,
           queryType: typeof options.input === 'string' ? 'string' : 'ContentPart',
           queryPreview:
@@ -406,7 +405,7 @@ export class AgentSession {
 
       // Debug logging for issue #1150
       if (this.server.isDebug) {
-        agentSessionLogger.debug('Streaming query failed', {
+        console.log('[DEBUG] Streaming query failed', {
           sessionId: this.id,
           error: handledError.message,
         });
@@ -430,7 +429,7 @@ export class AgentSession {
 
       // Debug logging for issue #1150
       if (this.server.isDebug) {
-        agentSessionLogger.debug('Streaming query completed', { sessionId: this.id });
+        console.log('[DEBUG] Streaming query completed', { sessionId: this.id });
       }
     } finally {
       // Clear running session for exclusive mode when stream ends
@@ -501,7 +500,7 @@ export class AgentSession {
       // Reconnect event streams
       this.setupEventStreams();
     } catch (error) {
-      agentSessionLogger.error('Failed to recreate agent for session', { sessionId: this.id, error });
+      console.error('Failed to recreate agent for session', { sessionId: this.id, error });
       throw error;
     }
   }

@@ -8,7 +8,6 @@ import { AgentEventStream, isAgentWebUIImplementationType } from '@tarko/interfa
 import { SessionInfo, StorageProvider } from '../storage';
 import { AgentUIBuilder } from '@tarko/agent-ui-builder';
 import { SlugGenerator } from '../utils/slug-generator';
-import { serviceLogger } from '../utils/logger';
 import fs from 'fs';
 import path from 'path';
 import { ensureHttps } from '../utils';

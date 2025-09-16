@@ -11,7 +11,6 @@ import { ShareService } from '../../services';
 import { getDefaultModel } from '../../utils/model-utils';
 import * as path from 'path';
 import * as fs from 'fs';
-import { apiLogger } from '../../utils/logger';
 
 /**
  * Get all sessions
@@ -35,7 +34,7 @@ export async function getAllSessions(req: Request, res: Response) {
 
     res.status(200).json({ sessions });
   } catch (error) {
-    apiLogger.error('Failed to get sessions', { error });
+    console.error('Failed to get sessions:', error);
     res.status(500).json({ error: 'Failed to get sessions' });
   }
 }
@@ -102,7 +101,7 @@ export async function createSession(req: Request, res: Response) {
 
     res.status(201).json({ sessionId, session: savedSessionInfo });
   } catch (error) {
-    apiLogger.error('Failed to create session', { error });
+    console.error('Failed to create session:', error);
     res.status(500).json({ error: 'Failed to create session' });
   }
 }
@@ -132,7 +131,7 @@ export async function getSessionDetails(req: Request, res: Response) {
 
     return res.status(404).json({ error: 'Session not found' });
   } catch (error) {
-    apiLogger.error('Error getting session details', { sessionId, error });
+    console.error(`Error getting session details for ${sessionId}:`, error);
     res.status(500).json({ error: 'Failed to get session details' });
   }
 }
@@ -157,7 +156,7 @@ export async function getSessionEvents(req: Request, res: Response) {
     const events = await server.storageProvider.getSessionEvents(sessionId);
     res.status(200).json({ events });
   } catch (error) {
-    apiLogger.error('Error getting events for session', { sessionId, error });
+    console.error(`Error getting events for session ${sessionId}:`, error);
     res.status(500).json({ error: 'Failed to get session events' });
   }
 }
@@ -185,7 +184,7 @@ export async function getSessionStatus(req: Request, res: Response) {
       },
     });
   } catch (error) {
-    apiLogger.error('Error getting session status', { sessionId, error });
+    console.error(`Error getting session status (${sessionId}):`, error);
     res.status(500).json({ error: 'Failed to get session status' });
   }
 }
@@ -224,7 +223,7 @@ export async function updateSession(req: Request, res: Response) {
 
     res.status(200).json({ session: updatedMetadata });
   } catch (error) {
-    apiLogger.error('Error updating session', { sessionId, error });
+    console.error(`Error updating session ${sessionId}:`, error);
     res.status(500).json({ error: 'Failed to update session' });
   }
 }
@@ -251,10 +250,9 @@ export async function deleteSession(req: Request, res: Response) {
           agent.dispose();
         }
       } catch (error) {
-        apiLogger.warn('Failed to cleanup agent for session', {
-          sessionId,
-          error: error instanceof Error ? error.message : String(error),
-        });
+        console.warn(
+          `Failed to cleanup agent for session ${sessionId}: ${error instanceof Error ? error.message : String(error)}`,
+        );
       }
 
       await server.sessions[sessionId].cleanup();
@@ -277,7 +275,7 @@ export async function deleteSession(req: Request, res: Response) {
 
     res.status(200).json({ success: true });
   } catch (error) {
-    apiLogger.error('Error deleting session', { sessionId, error });
+    console.error(`Error deleting session ${sessionId}:`, error);
     res.status(500).json({ error: 'Failed to delete session' });
   }
 }
@@ -315,7 +313,7 @@ export async function generateSummary(req: Request, res: Response) {
     // Return the summary
     res.status(200).json(summaryResponse);
   } catch (error) {
-    apiLogger.error('Error generating summary for session', { sessionId, error });
+    console.error(`Error generating summary for session ${sessionId}:`, error);
     res.status(500).json({
       error: 'Failed to generate summary',
       message: error instanceof Error ? error.message : String(error),
@@ -348,7 +346,7 @@ export async function shareSession(req: Request, res: Response) {
       });
     }
   } catch (error) {
-    apiLogger.error('Error sharing session', { sessionId, error });
+    console.error(`Error sharing session ${sessionId}:`, error);
     return res.status(500).json({ error: 'Failed to share session' });
   }
 }
@@ -387,7 +385,7 @@ export async function getLatestSessionEvents(req: Request, res: Response) {
       events,
     });
   } catch (error) {
-    apiLogger.error('Error getting latest session events', { error });
+    console.error('Error getting latest session events:', error);
     res.status(500).json({ error: 'Failed to get latest session events' });
   }
 }
@@ -479,7 +477,7 @@ export async function getSessionWorkspaceFiles(req: Request, res: Response) {
 
     return res.status(400).json({ error: 'Invalid path type' });
   } catch (error) {
-    apiLogger.error('Error accessing workspace files for session', { sessionId, error });
+    console.error(`Error accessing workspace files for session ${sessionId}:`, error);
     res.status(500).json({
       error: 'Failed to access workspace files',
       message: error instanceof Error ? error.message : String(error),
@@ -528,7 +526,7 @@ export async function searchWorkspaceItems(req: Request, res: Response) {
 
     res.status(200).json({ items: limitedItems });
   } catch (error) {
-    apiLogger.error('Error searching workspace items for session', { sessionId, error });
+    console.error(`Error searching workspace items for session ${sessionId}:`, error);
     res.status(500).json({
       error: 'Failed to search workspace items',
       message: error instanceof Error ? error.message : String(error),
@@ -594,7 +592,7 @@ async function searchWorkspaceItemsRecursive(
       }
     } catch (error) {
       // Skip directories we can't read
-      apiLogger.warn('Cannot read directory', { currentPath, error });
+      console.warn(`Cannot read directory ${currentPath}:`, error);
     }
   };
 
@@ -749,7 +747,7 @@ export async function validateWorkspacePaths(req: Request, res: Response) {
     // This could allow attackers to inject malicious content into logs.
     // Solution: Use structured logging or sanitize the sessionId before logging.
     // Example: console.error('Error validating workspace paths:', { sessionId: sessionId?.substring(0, 8) + '***' }, error);
-    apiLogger.error('Error validating workspace paths for session', { sessionId, error });
+    console.error(`Error validating workspace paths for session ${sessionId}:`, error);
     res.status(500).json({
       error: 'Failed to validate workspace paths',
       message: error instanceof Error ? error.message : String(error),
@@ -796,7 +794,7 @@ async function getWorkspaceRootItems(
       }
     }
   } catch (error) {
-    apiLogger.warn('Cannot read directory', { basePath, error });
+    console.warn(`Cannot read directory ${basePath}:`, error);
   }
 
   // Sort by type (directories first) then by name

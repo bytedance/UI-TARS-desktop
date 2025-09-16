@@ -6,7 +6,6 @@
 import { Request, Response } from 'express';
 import { createErrorResponse } from '../../utils/error-handler';
 import { ContextReferenceProcessor, ImageProcessor } from '@tarko/context-engineer/node';
-import { apiLogger } from '../../utils/logger';
 
 const imageProcessor = new ImageProcessor({
   quality: 5,
@@ -82,7 +81,7 @@ export async function executeQuery(req: Request, res: Response) {
     }
   } catch (error) {
     // This should never happen with the new error handling, but just in case
-    apiLogger.error('Unexpected error processing query', { sessionId, error });
+    console.error(`Unexpected error processing query in session ${sessionId}:`, error);
     res.status(500).json(createErrorResponse(error));
   }
 }
@@ -157,7 +156,7 @@ export async function executeStreamingQuery(req: Request, res: Response) {
     }
   } catch (error) {
     // This should almost never happen with the new error handling
-    apiLogger.error('Critical error in streaming query', { sessionId, error });
+    console.error(`Critical error in streaming query for session ${sessionId}:`, error);
 
     if (!res.headersSent) {
       res.status(500).json(createErrorResponse(error));
@@ -186,7 +185,7 @@ export async function abortQuery(req: Request, res: Response) {
     const aborted = await req.session!.abortQuery();
     res.status(200).json({ success: aborted });
   } catch (error) {
-    apiLogger.error('Error aborting query', { sessionId, error });
+    console.error(`Error aborting query in session ${sessionId}:`, error);
     res.status(500).json({ error: 'Failed to abort query' });
   }
 }
