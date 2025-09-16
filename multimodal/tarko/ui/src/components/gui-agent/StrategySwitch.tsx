@@ -1,6 +1,6 @@
 import React from 'react';
 import { FiClock, FiCheckCircle, FiShuffle } from 'react-icons/fi';
-import { Tooltip } from '@tarko/ui';
+import { Tooltip } from '../basic';
 
 type ScreenshotStrategy = 'both' | 'beforeAction' | 'afterAction';
 

@@ -5,6 +5,7 @@ type ScreenshotStrategy = 'both' | 'beforeAction' | 'afterAction';
 interface UseScreenshotsProps {
   activeSessionId?: string | null;
   toolCallId?: string | null;
+  // FIXME: remove implicit type.
   messages: Record<string, any[]>;
   environmentImage?: string;
   currentStrategy: ScreenshotStrategy;
@@ -48,6 +49,7 @@ export const useScreenshots = ({
 
     const sessionMessages = messages[activeSessionId] || [];
     const currentToolCallIndex = sessionMessages.findIndex((msg) =>
+      // @ts-expect-error FIXME: remove implicit type.
       msg.toolCalls?.some((tc) => tc.id === toolCallId),
     );
 
@@ -68,6 +70,7 @@ export const useScreenshots = ({
       if (msg.role !== 'environment' || !Array.isArray(msg.content)) return null;
 
       const imgContent = msg.content.find(
+        // @ts-expect-error FIXME: remove implicit type.
         (c) => typeof c === 'object' && 'type' in c && c.type === 'image_url',
       );
 
