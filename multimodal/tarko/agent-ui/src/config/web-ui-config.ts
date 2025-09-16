@@ -6,27 +6,12 @@
 import { loadWebUIConfigSync } from './config-loader';
 import type { BaseAgentWebUIImplementation } from '@tarko/interface';
 
-let cachedConfig: BaseAgentWebUIImplementation | null = null;
-let lastConfigCheck = 0;
-const CONFIG_CACHE_TTL = 5000; // 5 seconds
-
 /**
  * Get web UI configuration with enhanced multi-source loading
  */
 export function getWebUIConfig(): BaseAgentWebUIImplementation {
-  const now = Date.now();
-
-  // Use cached config if available and fresh
-  if (cachedConfig && now - lastConfigCheck < CONFIG_CACHE_TTL) {
-    return cachedConfig;
-  }
-
-  // Load configuration from all sources
   const result = loadWebUIConfigSync();
-  cachedConfig = result.config;
-  lastConfigCheck = now;
-
-  return cachedConfig;
+  return result.config;
 }
 
 /**

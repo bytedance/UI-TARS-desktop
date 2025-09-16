@@ -5,14 +5,13 @@
 
 import type { BaseAgentWebUIImplementation } from '@tarko/interface';
 import { DEFAULT_WEBUI_CONFIG } from './default-config';
-
+import { ENV_CONFIG } from '@/common/constants';
 /**
  * Configuration loading result
  */
 export interface ConfigLoadResult {
   config: BaseAgentWebUIImplementation;
   source: 'runtime' | 'env' | 'static' | 'default';
-  error?: string;
 }
 
 /**
@@ -60,7 +59,7 @@ function loadRuntimeConfig(): BaseAgentWebUIImplementation | null {
 function loadEnvConfig(): BaseAgentWebUIImplementation | null {
   try {
     // Access build-time environment variable
-    const envConfig = (import.meta as { env?: Record<string, string> }).env?.AGENT_WEBUI_CONFIG;
+    const envConfig = ENV_CONFIG.AGENT_WEBUI_CONFIG;
     if (envConfig) {
       const parsed = JSON.parse(envConfig);
       if (validateConfig(parsed)) {
@@ -78,36 +77,28 @@ function loadEnvConfig(): BaseAgentWebUIImplementation | null {
  * Only loads runtime and environment configs, skips static file config
  */
 export function loadWebUIConfigSync(): ConfigLoadResult {
-  let finalConfig = DEFAULT_WEBUI_CONFIG;
-  let source: ConfigLoadResult['source'] = 'default';
-  let error: string | undefined;
+  // Try runtime config (highest priority)
+  const runtimeConfig = loadRuntimeConfig();
 
-  try {
-    let workingConfig = DEFAULT_WEBUI_CONFIG;
+  if (runtimeConfig) {
+    return {
+      config: runtimeConfig,
+      source: 'runtime',
+    };
+  }
 
-    // Try environment config first
-    const envConfig = loadEnvConfig();
-    if (envConfig) {
-      workingConfig = envConfig;
-      source = 'env';
-    }
+  // Try environment config first
+  const envConfig = loadEnvConfig();
 
-    // Try runtime config (highest priority)
-    const runtimeConfig = loadRuntimeConfig();
-    if (runtimeConfig) {
-      workingConfig = runtimeConfig;
-      source = 'runtime';
-    }
-
-    finalConfig = workingConfig;
-  } catch (err) {
-    error = err instanceof Error ? err.message : 'Unknown error';
-    console.error('Failed to load WebUI config (sync):', error);
+  if (envConfig) {
+    return {
+      config: envConfig,
+      source: 'env',
+    };
   }
 
   return {
-    config: finalConfig,
-    source,
-    error,
+    config: DEFAULT_WEBUI_CONFIG,
+    source: 'default',
   };
 }

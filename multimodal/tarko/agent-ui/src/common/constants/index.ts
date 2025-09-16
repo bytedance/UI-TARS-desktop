@@ -4,11 +4,12 @@
  */
 
 export const ENV_CONFIG = {
-  AGENT_BASE_URL: process.env.AGENT_BASE_URL || '',
+  AGENT_BASE_URL: process.env.AGENT_BASE_URL,
+  AGENT_WEBUI_CONFIG: process.env.AGENT_WEBUI_CONFIG,
 } as const;
 
 export const API_BASE_URL = (() => {
-  if (ENV_CONFIG.AGENT_BASE_URL) {
+  if (ENV_CONFIG.AGENT_BASE_URL || ENV_CONFIG.AGENT_BASE_URL === '') {
     return ENV_CONFIG.AGENT_BASE_URL;
   }
 
