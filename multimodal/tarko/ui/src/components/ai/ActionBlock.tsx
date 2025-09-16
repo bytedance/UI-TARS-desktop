@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import React from 'react';
 import { FiArrowRight, FiZap } from 'react-icons/fi';
+import { formatDuration } from '../../utils';
 
 interface ActionBlockProps {
   icon: React.ReactNode;
@@ -23,18 +24,6 @@ export const ActionBlock: React.FC<ActionBlockProps> = ({
   elapsedMs,
   isFileRelated = false,
 }) => {
-  const formatElapsedTime = (ms: number): string => {
-    if (ms < 1000) {
-      return `${ms}ms`;
-    } else if (ms < 60000) {
-      return `${(ms / 1000).toFixed(1)}s`;
-    } else {
-      const minutes = Math.floor(ms / 60000);
-      const seconds = Math.floor((ms % 60000) / 1000);
-      return `${minutes}m ${seconds}s`;
-    }
-  };
-
   const getTimingBadgeStyle = (ms: number) => {
     if (ms < 1000) {
       return {
@@ -124,7 +113,7 @@ export const ActionBlock: React.FC<ActionBlockProps> = ({
             <span
               className={`text-[10px] font-mono font-medium whitespace-nowrap ${getTimingBadgeStyle(elapsedMs).text}`}
             >
-              {formatElapsedTime(elapsedMs)}
+              {formatDuration(elapsedMs)}
             </span>
           </motion.div>
         )}
