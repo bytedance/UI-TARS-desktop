@@ -2,8 +2,9 @@ import React from 'react';
 import { FiClock, FiCheck, FiCopy, FiZap, FiActivity } from 'react-icons/fi';
 import { Tooltip } from '@mui/material';
 import { formatTimestamp } from '@/common/utils/formatters';
+import { formatDuration } from '@/common/utils/duration';
 import { Message as MessageType, ChatCompletionContentPart } from '@/common/types';
-import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
+import { useCopyToClipboard } from '@/common/hooks/useCopyToClipboard';
 import { getTooltipProps } from '@/common/components/TooltipConfig';
 
 interface MessageFooterProps {
@@ -31,10 +32,7 @@ export const MessageFooter: React.FC<MessageFooterProps> = ({ message, className
     copyToClipboard(textToCopy);
   };
 
-  // Helper function to format elapsed time for display (always in ms for precision)
-  const formatElapsedTime = (ms: number): string => {
-    return `${ms}ms`;
-  };
+
 
   const tooltipProps = getTooltipProps();
 
@@ -59,7 +57,7 @@ export const MessageFooter: React.FC<MessageFooterProps> = ({ message, className
                 <div className="flex items-center">
                   <FiZap size={10} className="mr-1 text-gray-500 dark:text-gray-400" />
                   <span className="text-gray-500 dark:text-gray-400">
-                    {formatElapsedTime(message.ttftMs!)}
+                    {formatDuration(message.ttftMs!)}
                   </span>
                 </div>
               </Tooltip>
@@ -73,7 +71,7 @@ export const MessageFooter: React.FC<MessageFooterProps> = ({ message, className
                   <div className="flex items-center">
                     <FiActivity size={10} className="mr-1 text-gray-500 dark:text-gray-400" />
                     <span className="text-gray-500 dark:text-gray-400">
-                      {formatElapsedTime(message.ttltMs)}
+                      {formatDuration(message.ttltMs)}
                     </span>
                   </div>
                 </Tooltip>

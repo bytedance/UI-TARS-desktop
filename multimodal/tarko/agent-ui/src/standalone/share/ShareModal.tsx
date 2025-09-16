@@ -4,6 +4,7 @@ import { FiX, FiShare2, FiLink, FiDownload, FiCheck } from 'react-icons/fi';
 import { shareService, ShareConfig, ShareResult } from './shareService';
 import { Dialog } from '@headlessui/react';
 import { LoadingSpinner } from '@/common/components/LoadingSpinner';
+import { useCopyToClipboard } from '@/common/hooks/useCopyToClipboard';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -15,7 +16,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
   const [shareConfig, setShareConfig] = useState<ShareConfig | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [shareResult, setShareResult] = useState<ShareResult | null>(null);
-  const [copied, setCopied] = useState(false);
+  const { isCopied, copyToClipboard } = useCopyToClipboard();
 
   useEffect(() => {
     if (isOpen) {
@@ -85,9 +86,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
 
   const handleCopyLink = () => {
     if (shareResult?.url) {
-      navigator.clipboard.writeText(shareResult.url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      copyToClipboard(shareResult.url);
     }
   };
 
@@ -220,7 +219,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
                   onClick={handleCopyLink}
                   className="flex-shrink-0 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg text-xs font-medium text-gray-700 dark:text-gray-300 transition-colors"
                 >
-                  {copied ? (
+                  {isCopied ? (
                     <span className="flex items-center">
                       <FiCheck className="mr-1" size={12} />
                       Copied!

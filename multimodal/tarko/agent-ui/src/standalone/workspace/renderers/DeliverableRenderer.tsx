@@ -4,6 +4,7 @@ import { FiFileText, FiCode, FiDownload, FiExternalLink, FiCopy, FiCheck } from 
 import { StandardPanelContent } from '../types/panelContent';
 import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 import { FileDisplayMode } from '../types';
+import { useCopyToClipboard } from '@/common/hooks/useCopyToClipboard';
 
 interface DeliverableRendererProps {
   panelContent: StandardPanelContent;
@@ -18,7 +19,7 @@ export const DeliverableRenderer: React.FC<DeliverableRendererProps> = ({
   panelContent,
   onAction,
 }) => {
-  const [copied, setCopied] = React.useState(false);
+  const { isCopied, copyToClipboard } = useCopyToClipboard();
 
   // Extract deliverable data from panelContent
   const deliverableData = extractDeliverableData(panelContent);
@@ -53,9 +54,7 @@ export const DeliverableRenderer: React.FC<DeliverableRendererProps> = ({
 
   // Handle copy to clipboard
   const handleCopy = () => {
-    navigator.clipboard.writeText(content);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    copyToClipboard(content);
   };
 
   // Handle download
@@ -109,7 +108,7 @@ export const DeliverableRenderer: React.FC<DeliverableRendererProps> = ({
             className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
             title="Copy content"
           >
-            {copied ? <FiCheck size={18} className="text-green-500" /> : <FiCopy size={18} />}
+            {isCopied ? <FiCheck size={18} className="text-green-500" /> : <FiCopy size={18} />}
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.05 }}

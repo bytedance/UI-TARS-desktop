@@ -1,9 +1,10 @@
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { FiTerminal, FiClock, FiPlay, FiCheckCircle, FiXCircle, FiCopy, FiCheck } from 'react-icons/fi';
 import { JsonRenderer, JsonRendererRef } from '@/common/components/JsonRenderer';
 import { RawToolMapping } from '@/common/state/atoms/rawEvents';
 import { formatTimestamp } from '@/common/utils/formatters';
+import { useCopyToClipboard } from '@/common/hooks/useCopyToClipboard';
 
 interface RawModeRendererProps {
   toolMapping: RawToolMapping;
@@ -14,20 +15,18 @@ const CopyButton: React.FC<{
   jsonRef: React.RefObject<JsonRendererRef>;
   title: string;
 }> = ({ jsonRef, title }) => {
-  const [copied, setCopied] = useState(false);
+  const { isCopied, copyToClipboard } = useCopyToClipboard(1500);
 
   const handleCopy = useCallback(async () => {
     try {
       const jsonString = jsonRef.current?.copyAll();
       if (jsonString) {
-        await navigator.clipboard.writeText(jsonString);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
+        await copyToClipboard(jsonString);
       }
     } catch (error) {
       console.error('Failed to copy JSON:', error);
     }
-  }, [jsonRef]);
+  }, [jsonRef, copyToClipboard]);
 
   return (
     <motion.button
@@ -37,7 +36,7 @@ const CopyButton: React.FC<{
       className="p-1.5 rounded-md hover:bg-slate-200 dark:hover:bg-slate-700 transition-all opacity-0 group-hover:opacity-100"
       title={title}
     >
-      {copied ? (
+      {isCopied ? (
         <FiCheck size={12} className="text-green-500" />
       ) : (
         <FiCopy size={12} className="text-slate-400" />

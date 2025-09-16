@@ -5,6 +5,7 @@ import { FiDownload, FiBookOpen, FiLoader, FiShare2, FiCopy, FiCheck } from 'rea
 import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 import { StandardPanelContent } from '../types/panelContent';
 import { FileDisplayMode } from '../types';
+import { useCopyToClipboard } from '@/common/hooks/useCopyToClipboard';
 
 interface ResearchReportRendererProps {
   panelContent: StandardPanelContent;
@@ -28,7 +29,7 @@ export const ResearchReportRenderer: React.FC<ResearchReportRendererProps> = ({
   displayMode,
 }) => {
   const [scrollToBottom, setScrollToBottom] = useState(true);
-  const [copied, setCopied] = useState(false);
+  const { isCopied, copyToClipboard } = useCopyToClipboard();
   const contentRef = useRef<HTMLDivElement>(null);
 
   // Extract content and metadata from panelContent
@@ -84,9 +85,7 @@ export const ResearchReportRenderer: React.FC<ResearchReportRendererProps> = ({
 
   // Handle copy content
   const handleCopy = () => {
-    navigator.clipboard.writeText(formattedContent);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    copyToClipboard(formattedContent);
   };
 
   return (
@@ -122,7 +121,7 @@ export const ResearchReportRenderer: React.FC<ResearchReportRendererProps> = ({
             className="p-2 rounded-lg bg-gray-50/80 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:bg-gray-100/80 dark:hover:bg-gray-700/50 transition-colors border border-gray-200/50 dark:border-gray-700/30"
             title="Copy content"
           >
-            {copied ? <FiCheck size={20} className="text-green-500" /> : <FiCopy size={20} />}
+            {isCopied ? <FiCheck size={20} className="text-green-500" /> : <FiCopy size={20} />}
           </motion.button>
 
           <motion.button
