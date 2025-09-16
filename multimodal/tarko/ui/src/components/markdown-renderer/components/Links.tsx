@@ -7,26 +7,18 @@ interface LinkProps {
   children: React.ReactNode;
 }
 
-/**
- * Common link styles
- */
-const LINK_STYLES =
-  'text-accent-500 hover:text-accent-600 transition-colors underline underline-offset-2';
-
-/**
- * Smart link component that handles different URL types
- */
 export const SmartLink: React.FC<LinkProps> = ({ href, children, ...props }) => {
+  const linkStyles = 'text-accent-500 hover:text-accent-600 transition-colors underline underline-offset-2';
+  
   if (!href) {
     return <span {...props}>{children}</span>;
   }
 
-  // Hash links - smooth scrolling to anchors
   if (isHashLink(href)) {
     return (
       <a
         href={href}
-        className={LINK_STYLES}
+        className={linkStyles}
         onClick={(e) => {
           e.preventDefault();
           scrollToElement(href.substring(1));
@@ -38,18 +30,16 @@ export const SmartLink: React.FC<LinkProps> = ({ href, children, ...props }) => 
     );
   }
 
-  // Internal path links - use React Router
   if (isInternalPath(href)) {
     return (
-      <Link to={href} className={LINK_STYLES} {...props}>
+      <Link to={href} className={linkStyles} {...props}>
         {children}
       </Link>
     );
   }
 
-  // External links - open in new tab
   return (
-    <a href={href} className={LINK_STYLES} target="_blank" rel="noopener noreferrer" {...props}>
+    <a href={href} className={linkStyles} target="_blank" rel="noopener noreferrer" {...props}>
       {children}
     </a>
   );
