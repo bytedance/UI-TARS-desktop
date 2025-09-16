@@ -1,7 +1,5 @@
 import { atom } from 'jotai';
-import { SOCKET_EVENTS } from '@/common/constants';
 import { apiService } from '@/common/services/apiService';
-import { socketService } from '@/common/services/socketService';
 import { connectionStatusAtom, agentOptionsAtom } from '@/common/state/atoms/ui';
 
 /**
@@ -50,42 +48,6 @@ export const initConnectionMonitoringAction = atom(null, (get, set) => {
   // Perform initial check
   set(checkConnectionStatusAction);
 
-  // Set up socket event listeners
-  socketService.on(SOCKET_EVENTS.CONNECT, () => {
-    set(connectionStatusAtom, (prev) => ({
-      ...prev,
-      connected: true,
-      lastConnected: Date.now(),
-      lastError: null,
-      reconnecting: false,
-    }));
-  });
-
-  socketService.on(SOCKET_EVENTS.DISCONNECT, (reason) => {
-    set(connectionStatusAtom, (prev) => ({
-      ...prev,
-      connected: false,
-      lastError: `Disconnected: ${reason}`,
-      reconnecting: true,
-    }));
-  });
-
-  socketService.on(SOCKET_EVENTS.RECONNECT_ATTEMPT, () => {
-    set(connectionStatusAtom, (prev) => ({
-      ...prev,
-      reconnecting: true,
-    }));
-  });
-
-  socketService.on(SOCKET_EVENTS.RECONNECT_FAILED, () => {
-    set(connectionStatusAtom, (prev) => ({
-      ...prev,
-      connected: false,
-      reconnecting: false,
-      lastError: 'Failed to reconnect after multiple attempts',
-    }));
-  });
-
   // Set up periodic health checks
   const intervalId = setInterval(() => {
     set(checkConnectionStatusAction);
@@ -94,9 +56,5 @@ export const initConnectionMonitoringAction = atom(null, (get, set) => {
   // Return cleanup function
   return () => {
     clearInterval(intervalId);
-    socketService.off(SOCKET_EVENTS.CONNECT, () => {});
-    socketService.off(SOCKET_EVENTS.DISCONNECT, () => {});
-    socketService.off(SOCKET_EVENTS.RECONNECT_ATTEMPT, () => {});
-    socketService.off(SOCKET_EVENTS.RECONNECT_FAILED, () => {});
   };
 });

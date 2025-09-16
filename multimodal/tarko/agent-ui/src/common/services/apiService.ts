@@ -5,7 +5,7 @@ import {
   SanitizedAgentOptions,
   WorkspaceInfo,
 } from '@/common/types';
-import { socketService } from './socketService';
+
 import { ChatCompletionContentPart, AgentModel } from '@tarko/agent-interface';
 import { AgentServerVersionInfo } from '@agent-tars/interface';
 
@@ -36,13 +36,7 @@ class ApiService {
    */
   async checkServerHealth(): Promise<boolean> {
     try {
-      // Try ping through socket if connected
-      if (socketService.isConnected()) {
-        const pingSuccessful = await socketService.ping();
-        if (pingSuccessful) return true;
-      }
-
-      // Fall back to API health endpoint
+      // Use API health endpoint
       const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.HEALTH}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },

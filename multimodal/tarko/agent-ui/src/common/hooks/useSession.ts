@@ -27,7 +27,6 @@ import {
   initConnectionMonitoringAction,
   checkConnectionStatusAction,
 } from '../state/actions/connectionActions';
-import { socketService } from '../services/socketService';
 
 import { useEffect, useCallback, useMemo, useRef } from 'react';
 import { useReplayMode } from '../hooks/useReplayMode';
@@ -88,36 +87,6 @@ export function useSession() {
       }
     };
   }, [activeSessionId, connectionStatus.connected, checkSessionStatus, isReplayMode]);
-
-  const handleSessionStatusUpdate = useCallback(
-    (status: any) => {
-      if (status && typeof status.isProcessing === 'boolean' && !isReplayMode && activeSessionId) {
-        setSessionAgentStatus((prev) => ({
-          ...prev,
-          [activeSessionId]: {
-            isProcessing: status.isProcessing,
-            state: status.state,
-            phase: status.phase,
-            message: status.message,
-            estimatedTime: status.estimatedTime,
-          },
-        }));
-      }
-    },
-    [activeSessionId, isReplayMode, setSessionAgentStatus],
-  );
-
-  useEffect(() => {
-    if (!activeSessionId || !socketService.isConnected() || isReplayMode) return;
-
-    socketService.joinSession(activeSessionId, () => {}, handleSessionStatusUpdate);
-
-    socketService.on('agent-status', handleSessionStatusUpdate);
-
-    return () => {
-      socketService.off('agent-status', handleSessionStatusUpdate);
-    };
-  }, [activeSessionId, handleSessionStatusUpdate, isReplayMode]);
 
   const sessionState = useMemo(
     () => ({
