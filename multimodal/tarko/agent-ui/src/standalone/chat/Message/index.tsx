@@ -13,7 +13,7 @@ import { ModernThinkingToggle } from './components/ModernThinkingToggle';
 
 import { useAtomValue } from 'jotai';
 import { replayStateAtom } from '@/common/state/atoms/replay';
-import { ReportFileEntry } from './components/ReportFileEntry';
+
 import { messagesAtom } from '@/common/state/atoms/message';
 
 interface MessageProps {
@@ -38,7 +38,7 @@ export const Message: React.FC<MessageProps> = ({
   const isEnvironment = message.role === 'environment';
   const isUserMessage = message.role === 'user';
 
-  const isFinalAnswer = message.role === 'final_answer' || message.isDeepResearch;
+
 
   const isFinalAssistantResponse = message.role === 'assistant' && message.finishReason === 'stop';
 
@@ -157,13 +157,7 @@ export const Message: React.FC<MessageProps> = ({
 
             <div className={getProseClasses()}>{renderContent()}</div>
 
-            {isFinalAnswer && message.title && typeof message.content === 'string' && (
-              <ReportFileEntry
-                title={message.title || 'Research Report'}
-                timestamp={message.timestamp}
-                content={message.content}
-              />
-            )}
+
 
             {message.toolCalls && message.toolCalls.length > 0 && (
               <ToolCalls

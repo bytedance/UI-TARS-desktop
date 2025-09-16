@@ -15,7 +15,7 @@ import {
 
 import { SystemMessageHandler, EnvironmentInputHandler } from './handlers/SystemHandler';
 
-import { FinalAnswerHandler, FinalAnswerStreamingHandler } from './handlers/FinalAnswerHandler';
+
 
 import { AgentRunStartHandler, AgentRunEndHandler } from './handlers/AgentRunHandler';
 
@@ -48,9 +48,7 @@ export class EventHandlerRegistry {
     this.register(new SystemMessageHandler());
     this.register(new EnvironmentInputHandler());
 
-    // Final answer handlers
-    this.register(new FinalAnswerHandler());
-    this.register(new FinalAnswerStreamingHandler());
+
 
     // Agent run handlers
     this.register(new AgentRunStartHandler());

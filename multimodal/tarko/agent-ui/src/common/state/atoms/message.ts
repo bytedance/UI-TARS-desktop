@@ -116,7 +116,7 @@ function createMessageGroups(messages: Message[]): MessageGroup[] {
         continue;
       }
 
-      // Handle final answer in a thinking sequence
+      // Handle completed assistant response in a thinking sequence
       if (message.role === 'assistant' && message.finishReason === 'stop') {
         if (currentThinkingSequence) {
           currentThinkingSequence.messages.push(message);
@@ -124,7 +124,7 @@ function createMessageGroups(messages: Message[]): MessageGroup[] {
           currentThinkingSequence = null;
           continue;
         } else {
-          // Standalone final answer
+          // Standalone completed response
           currentGroup.push(message);
           continue;
         }

@@ -36,7 +36,7 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
   // Get user messages and assistant messages
   const userMessages = filteredMessages.filter((msg) => msg.role === 'user');
   const assistantMessages = filteredMessages.filter(
-    (msg) => msg.role === 'assistant' || msg.role === 'final_answer' || msg.role === 'system',
+    (msg) => msg.role === 'assistant' || msg.role === 'system',
   );
 
   // Get the final assistant message (only completed responses, not intermediate tool calls)

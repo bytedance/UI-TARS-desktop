@@ -16,7 +16,6 @@ export const processEventAction = atom(null, async (get, set, params: EventProce
       'assistant_streaming_message',
       'assistant_streaming_thinking_message',
       'assistant_streaming_tool_call',
-      'final_answer_streaming',
     ];
 
     if (skipInReplay.includes(event.type)) {

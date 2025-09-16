@@ -278,8 +278,7 @@ export const WorkspaceDetail: React.FC = () => {
 function isResearchReportType(content: StandardPanelContent): boolean {
   return (
     content.type === 'research_report' ||
-    content.type === 'deliverable' ||
-    Boolean(content.toolCallId?.startsWith('final-answer'))
+    content.type === 'deliverable'
   );
 }
 
