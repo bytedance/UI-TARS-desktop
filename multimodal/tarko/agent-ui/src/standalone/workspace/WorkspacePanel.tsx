@@ -10,14 +10,9 @@ import { AnimatePresence } from 'framer-motion';
 import { FullscreenFileData } from './types/panelContent';
 import { getFileTypeInfo } from './utils/fileTypeUtils';
 import './Workspace.css';
+import { getFocusParam } from '@/common/utils/urlParams';
 
-/**
- * Parse focus parameter from URL
- */
-function getFocusParam(): string | null {
-  const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get('focus');
-}
+
 
 /**
  * Check if file should be displayed in fullscreen based on extension

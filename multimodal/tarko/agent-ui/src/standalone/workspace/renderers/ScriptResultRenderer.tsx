@@ -5,6 +5,7 @@ import { FiPlay, FiCode, FiTerminal } from 'react-icons/fi';
 import { CodeEditor } from '@/sdk/code-editor';
 import { TerminalOutput } from '../components/TerminalOutput';
 import { FileDisplayMode } from '../types';
+import { highlightSimpleCommand } from '../utils/commandHighlight';
 
 interface ScriptResultRendererProps {
   panelContent: StandardPanelContent;
@@ -12,16 +13,7 @@ interface ScriptResultRendererProps {
   displayMode?: FileDisplayMode;
 }
 
-/**
- * Custom script highlighting function for command display
- */
-const highlightCommand = (command: string) => {
-  return (
-    <div className="command-line whitespace-nowrap">
-      <span className="text-cyan-400 font-bold">{command}</span>
-    </div>
-  );
-};
+
 
 /**
  * Language to file extension mapping
@@ -150,7 +142,7 @@ export const ScriptResultRenderer: React.FC<ScriptResultRendererProps> = ({ pane
             }
             command={
               <>
-                {highlightCommand(`${interpreter} << 'EOF'`)}
+                {highlightSimpleCommand(`${interpreter} << 'EOF'`)}
                 <div className="mt-2">
                   <span className="text-gray-500 text-xs">EOF</span>
                 </div>

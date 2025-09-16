@@ -7,6 +7,7 @@ import { connectionStatusAtom, activePanelContentAtom } from '../state/atoms/ui'
 import { processEventAction } from '../state/actions/eventProcessors';
 import { useSetAtom } from 'jotai';
 import { AgentEventStream } from '@/common/types';
+import { getFocusParam, shouldAutoPlay } from '@/common/utils/urlParams';
 
 /**
  * ReplayModeContext - Global context for sharing replay mode state and controls
@@ -21,21 +22,7 @@ const ReplayModeContext = createContext<ReplayModeContextType>({
   cancelAutoPlay: () => {},
 });
 
-/**
- * Parse URL parameters for replay configuration
- */
-function shouldAutoPlay(): boolean {
-  const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get('replay') === '1';
-}
 
-/**
- * Check if focus parameter exists
- */
-function getFocusParam(): string | null {
-  const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get('focus');
-}
 
 /**
  * Find specific file in generated files from events

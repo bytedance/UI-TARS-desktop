@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { copyToClipboard as copyToClipboardUtil } from '@/common/utils/clipboard';
 
 /**
  * Hook for copying text to clipboard with feedback state
@@ -10,7 +11,7 @@ export const useCopyToClipboard = () => {
 
   const copyToClipboard = async (text: string) => {
     try {
-      await navigator.clipboard.writeText(text);
+      await copyToClipboardUtil(text);
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
     } catch (err) {

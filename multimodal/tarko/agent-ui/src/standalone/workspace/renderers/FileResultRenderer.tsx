@@ -7,6 +7,7 @@ import { MonacoCodeEditor } from '@/sdk/code-editor';
 import { useStableCodeContent } from '@/common/hooks/useStableValue';
 import { ThrottledHtmlRenderer } from '../components/ThrottledHtmlRenderer';
 import { formatBytes } from '../utils/codeUtils';
+import { determineFileType } from './generic/utils';
 
 // Constants
 const MAX_HEIGHT_CALC = 'calc(100vh - 215px)';
@@ -170,18 +171,4 @@ function getFilePath(panelContent: StandardPanelContent): string {
   return panelContent.title || 'Unknown file';
 }
 
-// Helper function for file type determination
-function determineFileType(extension: string): 'code' | 'document' | 'image' | 'other' {
-  if (
-    ['js', 'jsx', 'ts', 'tsx', 'py', 'java', 'c', 'cpp', 'php', 'html', 'css'].includes(extension)
-  ) {
-    return 'code';
-  }
-  if (['md', 'txt', 'docx', 'pdf', 'rtf', 'markdown'].includes(extension)) {
-    return 'document';
-  }
-  if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'bmp'].includes(extension)) {
-    return 'image';
-  }
-  return 'other';
-}
+
