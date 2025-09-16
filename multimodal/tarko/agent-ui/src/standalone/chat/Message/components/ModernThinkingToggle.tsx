@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { formatDuration, MarkdownRenderer } from '@tarko/ui';
 import { FiLoader } from 'react-icons/fi';
 import { PiBrain } from 'react-icons/pi';
-import { MarkdownRenderer } from '@tarko/ui';
-import { formatDuration } from '@/common/utils/duration';
 
 interface ModernThinkingToggleProps {
   thinking: string;

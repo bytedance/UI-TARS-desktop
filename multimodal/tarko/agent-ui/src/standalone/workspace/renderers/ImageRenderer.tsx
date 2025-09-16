@@ -1,8 +1,8 @@
 import React from 'react';
+import { BrowserShell } from '@tarko/ui';
 import { StandardPanelContent } from '../types/panelContent';
 import { motion } from 'framer-motion';
 import { FiDownload, FiZoomIn } from 'react-icons/fi';
-import { BrowserShell } from './BrowserShell';
 import { FileDisplayMode } from '../types';
 
 interface ImageRendererProps {
@@ -173,7 +173,7 @@ function extractImageData(panelContent: StandardPanelContent): {
         // Extract MIME type from data URL
         const mimeTypeMatch = panelContent.source.match(/^data:([^;]+);/);
         const mimeType = mimeTypeMatch ? mimeTypeMatch[1] : 'image/png';
-        
+
         return {
           src: panelContent.source,
           mimeType,
