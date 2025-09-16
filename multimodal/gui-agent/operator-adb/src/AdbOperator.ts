@@ -2,6 +2,9 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
+import fs from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
 import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
 
@@ -20,11 +23,16 @@ import { ConsoleLogger, LogLevel } from '@agent-infra/logger';
 import { ADB } from 'appium-adb';
 
 const defaultLogger = new ConsoleLogger(undefined, LogLevel.DEBUG);
+const yadbCommand =
+  'app_process -Djava.class.path=/data/local/tmp/yadb /data/local/tmp com.ysbing.yadb.Main';
+const screenshotPathOnAndroid = '/data/local/tmp/ui_tars_screenshot.png';
+const screenshotPathOnLocal = path.join(os.homedir(), 'Downloads', 'ui_tars_screenshot.png');
 
 export class AdbOperator extends Operator {
   private logger: ConsoleLogger;
   private _deviceId: string | null = null;
   private _adb: ADB | null = null;
+  private _hasPushedYadb = false;
   private _screenContext: ScreenContext | null = null;
 
   constructor(logger: ConsoleLogger = defaultLogger) {
@@ -58,13 +66,7 @@ export class AdbOperator extends Operator {
     if (!this._adb) {
       throw new Error('The Operator not initialized');
     }
-    const screenshotBuffer = await this._adb.takeScreenshot(null);
-    // TODO: Add exception hanlder
-    const base64 = screenshotBuffer.toString('base64');
-    return {
-      status: 'success',
-      base64,
-    };
+    return await this.screenshotWithFallback();
   }
 
   protected async execute(params: ExecuteParams): Promise<ExecuteOutput> {
@@ -160,13 +162,13 @@ export class AdbOperator extends Operator {
     const screenSize = await adb.getScreenSize();
     this.logger.debug('getScreenSize', screenSize);
     if (!screenSize) {
-      throw new Error('Unable to get screen size');
+      throw new Error('Unable to get screenSize');
     }
 
     // handle string format "width x height"
     const match = screenSize.match(/(\d+)x(\d+)/);
     if (!match || match.length < 3) {
-      throw new Error(`Unable to parse screen size: ${screenSize}`);
+      throw new Error(`Unable to parse screenSize: ${screenSize}`);
     }
     const width = Number.parseInt(match[1], 10);
     const height = Number.parseInt(match[2], 10);
@@ -177,16 +179,12 @@ export class AdbOperator extends Operator {
     // Standard density is 160, calculate the ratio
     const deviceRatio = Number(densityNum) / 160;
     this.logger.debug('deviceRatio', deviceRatio);
-
-    const { x: adjustedWidth, y: adjustedHeight } = this.reverseAdjustCoordinates(
-      deviceRatio,
-      width,
-      height,
-    );
+    const adjustedSize = this.reverseAdjustCoordinates(deviceRatio, width, height);
+    this.logger.debug('adjustedWidth', adjustedSize);
 
     return {
-      screenWidth: adjustedWidth,
-      screenHeight: adjustedHeight,
+      screenWidth: width,
+      screenHeight: height,
       scaleX: 1,
       scaleY: 1,
     };
@@ -196,6 +194,30 @@ export class AdbOperator extends Operator {
     return {
       x: Math.round(x / ratio),
       y: Math.round(y / ratio),
+    };
+  }
+
+  async screenshotWithFallback(): Promise<ScreenshotOutput> {
+    let screenshotBuffer;
+    try {
+      screenshotBuffer = await this._adb!.takeScreenshot(null);
+    } catch (error) {
+      this.logger.warn('screenshotWithFallback', (error as Error).message);
+      // TODO: does the appium supports exec-out?
+      try {
+        const result = await this._adb!.shell(`screencap -p ${screenshotPathOnAndroid}`);
+        this.logger.debug('screenshotWithFallback result of screencap:', result);
+      } catch (error) {
+        // screenshot which is forbidden by app
+        await this.executeWithYadb(`-screenshot ${screenshotPathOnAndroid}`);
+      }
+      await this._adb!.pull(screenshotPathOnAndroid, screenshotPathOnLocal);
+      screenshotBuffer = await fs.promises.readFile(screenshotPathOnLocal);
+    }
+    const base64 = screenshotBuffer.toString('base64');
+    return {
+      status: 'success',
+      base64,
     };
   }
 
@@ -266,5 +288,19 @@ export class AdbOperator extends Operator {
         break;
     }
   */
+  }
+
+  /**
+   * @param subCommand, such as:
+   * -keyboard "${keyboardContent}
+   */
+  private async executeWithYadb(subCommand: string): Promise<void> {
+    if (!this._hasPushedYadb) {
+      // the size of yadb just 12kB, just adb push it every time initailied
+      const yadbBin = path.join(__dirname, '../bin/yadb');
+      await this._adb!.push(yadbBin, '/data/local/tmp');
+      this._hasPushedYadb = true;
+    }
+    await this._adb!.shell(`${yadbCommand} ${subCommand}`);
   }
 }
