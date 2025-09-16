@@ -20,7 +20,6 @@ import {
 import { MdDesktopWindows } from 'react-icons/md';
 import { GoSidebarCollapse, GoSidebarExpand } from 'react-icons/go';
 
-import { Box, Typography, ThemeProvider, Menu, MenuItem, Divider, IconButton } from '@mui/material';
 import { useLayout } from '@/common/hooks/useLayout';
 import { useSession } from '@/common/hooks/useSession';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
@@ -31,7 +30,16 @@ import { NavbarModelSelector } from './ModelSelector';
 import { getLogoUrl, getAgentTitle, getWorkspaceNavItems } from '@/config/web-ui-config';
 import type { WorkspaceNavItemIcon } from '@tarko/interface';
 import { getModelDisplayName } from '@/common/utils/modelUtils';
-import { createBasicMuiTheme } from '@tarko/ui';
+import { 
+  Box, 
+  Typography, 
+  ThemeProvider, 
+  Menu, 
+  MenuItem, 
+  Divider, 
+  IconButton,
+  createBasicMuiTheme 
+} from '@tarko/ui';
 
 import './Navbar.css';
 

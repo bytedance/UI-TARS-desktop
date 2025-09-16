@@ -1,13 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Select,
-  MenuItem,
-  FormControl,
-  Box,
-  Typography,
-  CircularProgress,
-  ThemeProvider,
-} from '@mui/material';
 import { useSetAtom } from 'jotai';
 import { updateSessionMetadataAction } from '@/common/state/actions/sessionActions';
 import { apiService } from '@/common/services/apiService';
@@ -16,7 +7,18 @@ import { AgentModel } from '@tarko/agent-interface';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useAtomValue } from 'jotai';
 import { isProcessingAtom } from '@/common/state/atoms/ui';
-import { createBasicMuiTheme, createModelSelectorMuiTheme, Tooltip } from '@tarko/ui';
+import { 
+  Select,
+  MenuItem,
+  FormControl,
+  Box,
+  Typography,
+  CircularProgress,
+  ThemeProvider,
+  createBasicMuiTheme, 
+  createModelSelectorMuiTheme, 
+  Tooltip 
+} from '@tarko/ui';
 
 interface NavbarModelSelectorProps {
   className?: string;
@@ -113,7 +115,6 @@ const StaticModelDisplay: React.FC<{
   if (!sessionMetadata?.modelConfig) {
     return null;
   }
-
 
   const muiTheme = React.useMemo(() => createBasicMuiTheme(isDarkMode), [isDarkMode]);
 
