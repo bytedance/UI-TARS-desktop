@@ -13,8 +13,6 @@ interface DiffViewerProps {
   className?: string;
 }
 
-
-
 const EDITOR_OPTIONS: editor.IStandaloneDiffEditorConstructionOptions = {
   readOnly: true,
   minimap: { enabled: false },
@@ -35,7 +33,6 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({
   const { original, modified, additions, deletions, displayFileName, normalizedPath } =
     useMemo(() => {
       try {
-
         const files = parseDiff(diffContent);
 
         if (files.length === 0) {
@@ -57,7 +54,6 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({
         const modifiedLines: string[] = [];
         let addCount = 0;
         let delCount = 0;
-
 
         chunks.forEach((chunk) => {
           chunk.changes.forEach((change) => {
@@ -112,20 +108,17 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({
   return (
     <div className={`code-editor-container ${className}`}>
       <div className="code-editor-wrapper">
-
         <CodeEditorHeader
           fileName={displayFileName}
           filePath={normalizedPath}
           onCopy={handleCopy}
           copyButtonTitle="Copy diff"
         >
-
           <div className="flex items-center space-x-2 text-xs">
             <span className="text-green-400">+{additions}</span>
             <span className="text-red-400">-{deletions}</span>
           </div>
         </CodeEditorHeader>
-
 
         <div className="code-editor-monaco-container" style={{ height: maxHeight }}>
           <DiffEditor
@@ -141,7 +134,6 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({
             }
           />
         </div>
-
 
         <div className="code-editor-status-bar">
           <div className="code-editor-status-left">
