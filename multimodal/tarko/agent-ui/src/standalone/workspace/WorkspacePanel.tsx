@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { useSession } from '@/common/hooks/useSession';
 import { WorkspaceContent } from './WorkspaceContent';
 import { WorkspaceDetail } from './WorkspaceDetail';
-
 import { useReplay } from '@/common/hooks/useReplay';
 import { ReplayControlPanel } from '@/standalone/replay/ReplayControlPanel';
 import { FullscreenModal } from './components/FullscreenModal';
@@ -11,17 +10,11 @@ import { FullscreenFileData } from './types/panelContent';
 import { getFileTypeInfo } from './utils/fileTypeUtils';
 import './Workspace.css';
 
-/**
- * Parse focus parameter from URL
- */
 function getFocusParam(): string | null {
   const urlParams = new URLSearchParams(window.location.search);
   return urlParams.get('focus');
 }
 
-/**
- * Check if file should be displayed in fullscreen based on extension
- */
 function shouldShowFullscreen(filePath: string): boolean {
   return getFileTypeInfo(filePath).isRenderableFile;
 }
@@ -30,20 +23,17 @@ export const WorkspacePanel: React.FC = () => {
   const { activeSessionId, activePanelContent, setActivePanelContent } = useSession();
   const { replayState } = useReplay();
   const [fullscreenData, setFullscreenData] = React.useState<FullscreenFileData | null>(null);
-  // Track whether focus parameter has already been processed once
   const [focusProcessed, setFocusProcessed] = React.useState(false);
 
   const isReplayActive = replayState.isActive;
   const focusParam = getFocusParam();
 
-  // Handle focus parameter for fullscreen display - only process once
   useEffect(() => {
     if (focusParam && activePanelContent && activePanelContent.type === 'file' && !focusProcessed) {
       const filePath = activePanelContent.arguments?.path || activePanelContent.title;
       const fileName = filePath.split('/').pop() || filePath;
       const content = activePanelContent.arguments?.content || activePanelContent.source;
 
-      // Check if this is the focused file and should be shown fullscreen
       if (
         (fileName === focusParam || filePath === focusParam) &&
         typeof content === 'string' &&
@@ -55,18 +45,15 @@ export const WorkspacePanel: React.FC = () => {
           content,
           fileName,
           filePath,
-          displayMode: 'rendered', // Default to rendered for focus mode
+          displayMode: 'rendered',
           isMarkdown,
           isHtml,
         });
 
-        // Mark focus parameter as processed
         setFocusProcessed(true);
       }
     }
   }, [focusParam, activePanelContent, focusProcessed]);
-
-
 
   return (
     <>
@@ -78,7 +65,6 @@ export const WorkspacePanel: React.FC = () => {
         <AnimatePresence>{isReplayActive && <ReplayControlPanel />}</AnimatePresence>
       </div>
 
-      {/* Fullscreen modal for focused files */}
       <FullscreenModal data={fullscreenData} onClose={() => setFullscreenData(null)} />
     </>
   );

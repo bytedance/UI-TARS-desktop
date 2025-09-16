@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { BrowserShell } from '../BrowserShell';
+import { BrowserShell } from '@tarko/ui';
 import { MouseCursor } from './MouseCursor';
 
 type ScreenshotStrategy = 'both' | 'beforeAction' | 'afterAction';

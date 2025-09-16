@@ -2,10 +2,7 @@
  * File utility functions for code editor components
  */
 
-/**
- * Language mapping for Monaco Editor
- */
-export const MONACO_LANGUAGE_MAP: Record<string, string> = {
+const LANGUAGE_MAP: Record<string, string> = {
   javascript: 'javascript',
   js: 'javascript',
   jsx: 'javascript',
@@ -28,23 +25,14 @@ export const MONACO_LANGUAGE_MAP: Record<string, string> = {
   sh: 'shell',
 };
 
-/**
- * Get Monaco Editor language from file extension
- */
 export const getMonacoLanguage = (lang: string): string => {
-  return MONACO_LANGUAGE_MAP[lang.toLowerCase()] || 'plaintext';
+  return LANGUAGE_MAP[lang.toLowerCase()] || 'plaintext';
 };
 
-/**
- * Extract display file name from fileName or filePath
- */
 export const getDisplayFileName = (fileName?: string, filePath?: string): string => {
   return fileName || (filePath ? filePath.split('/').pop() || filePath : 'Untitled');
 };
 
-/**
- * Extract file extension from fileName
- */
 export const getFileExtension = (fileName?: string): string => {
   return fileName && fileName.includes('.') ? fileName.split('.').pop()?.toLowerCase() || '' : '';
 };

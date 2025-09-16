@@ -1,9 +1,9 @@
 import React from 'react';
+import { BrowserShell } from '@tarko/ui';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StandardPanelContent } from '../../types/panelContent';
 import { DisplayMode } from './types';
 import { analyzeResult, extractImagesFromContent, isPossibleMarkdown } from './utils';
-import { BrowserShell } from '../BrowserShell';
 import {
   ImageContent,
   MessageContent,
