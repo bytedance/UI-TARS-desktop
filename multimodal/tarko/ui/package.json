@@ -27,7 +27,7 @@
     "parse-diff": "0.11.1",
     "@monaco-editor/react": "4.7.0",
     "highlight.js": "^11.9.0",
-    "@mui/material": "^6.1.6"
+    "@mui/material": "^5.15.11"
   },
   "devDependencies": {
     "@rslib/core": "0.10.0",
