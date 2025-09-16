@@ -5,6 +5,8 @@ import { StandardPanelContent } from '../types/panelContent';
 import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 import { FileDisplayMode } from '../types';
 import { useCopyToClipboard } from '@/common/hooks/useCopyToClipboard';
+import { commonExtractors } from '@/common/utils/panelContentExtractor';
+import { downloadContent } from '@/common/utils/downloadUtils';
 
 interface DeliverableRendererProps {
   panelContent: StandardPanelContent;
@@ -22,7 +24,7 @@ export const DeliverableRenderer: React.FC<DeliverableRendererProps> = ({
   const { isCopied, copyToClipboard } = useCopyToClipboard();
 
   // Extract deliverable data from panelContent
-  const deliverableData = extractDeliverableData(panelContent);
+  const deliverableData = commonExtractors.basicContent(panelContent);
 
   if (!deliverableData) {
     return <div className="text-gray-500 italic">No deliverable content available</div>;
@@ -59,15 +61,8 @@ export const DeliverableRenderer: React.FC<DeliverableRendererProps> = ({
 
   // Handle download
   const handleDownload = () => {
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = name || title || 'deliverable';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    const filename = name || title || 'deliverable';
+    downloadContent(content, filename, 'text/plain');
   };
 
   return (
@@ -145,53 +140,4 @@ export const DeliverableRenderer: React.FC<DeliverableRendererProps> = ({
   );
 };
 
-function extractDeliverableData(panelContent: StandardPanelContent): {
-  title?: string;
-  content: string;
-  name?: string;
-} | null {
-  try {
-    // Try arguments first
-    if (panelContent.arguments) {
-      const { title, text, data, name } = panelContent.arguments;
-      const content = text || (typeof data === 'string' ? data : JSON.stringify(data, null, 2));
 
-      if (content && typeof content === 'string') {
-        return {
-          title: title ? String(title) : panelContent.title,
-          content,
-          name: name ? String(name) : undefined,
-        };
-      }
-    }
-
-    // Try to extract from source
-    if (typeof panelContent.source === 'object' && panelContent.source !== null) {
-      const sourceObj = panelContent.source as any;
-      const { title, text, data, name } = sourceObj;
-      const content = text || (typeof data === 'string' ? data : JSON.stringify(data, null, 2));
-
-      if (content && typeof content === 'string') {
-        return {
-          title: title ? String(title) : panelContent.title,
-          content,
-          name: name ? String(name) : undefined,
-        };
-      }
-    }
-
-    // If source is a string, treat it as content
-    if (typeof panelContent.source === 'string') {
-      return {
-        title: panelContent.title,
-        content: panelContent.source,
-        name: undefined,
-      };
-    }
-
-    return null;
-  } catch (error) {
-    console.warn('Failed to extract deliverable data:', error);
-    return null;
-  }
-}

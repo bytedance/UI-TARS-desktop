@@ -6,6 +6,7 @@ import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 import { StandardPanelContent } from '../types/panelContent';
 import { FileDisplayMode } from '../types';
 import { useCopyToClipboard } from '@/common/hooks/useCopyToClipboard';
+import { downloadContent, sanitizeFilename } from '@/common/utils/downloadUtils';
 
 interface ResearchReportRendererProps {
   panelContent: StandardPanelContent;
@@ -70,17 +71,8 @@ export const ResearchReportRenderer: React.FC<ResearchReportRendererProps> = ({
 
   // Handle report download
   const handleDownload = () => {
-    const blob = new Blob([formattedContent], { type: 'text/markdown' });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${title.replace(/[^\w\s-]/g, '')}.md`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-
-    URL.revokeObjectURL(url);
+    const filename = `${sanitizeFilename(title)}.md`;
+    downloadContent(formattedContent, filename, 'text/markdown');
   };
 
   // Handle copy content

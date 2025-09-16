@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import { FiDownload, FiZoomIn } from 'react-icons/fi';
 import { BrowserShell } from './BrowserShell';
 import { FileDisplayMode } from '../types';
+import { commonExtractors } from '@/common/utils/panelContentExtractor';
+import { downloadFromUrl } from '@/common/utils/downloadUtils';
 
 interface ImageRendererProps {
   panelContent: StandardPanelContent;
@@ -16,7 +18,7 @@ interface ImageRendererProps {
  */
 export const ImageRenderer: React.FC<ImageRendererProps> = ({ panelContent, onAction }) => {
   // Extract image data from panelContent
-  const imageData = extractImageData(panelContent);
+  const imageData = commonExtractors.imageData(panelContent);
 
   if (!imageData) {
     return <div className="text-gray-500 italic">Image data missing</div>;
@@ -25,12 +27,8 @@ export const ImageRenderer: React.FC<ImageRendererProps> = ({ panelContent, onAc
   const { src, mimeType, name } = imageData;
 
   const handleDownload = () => {
-    const link = document.createElement('a');
-    link.href = src;
-    link.download = name || 'image';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const filename = name || 'image';
+    downloadFromUrl(src, filename);
   };
 
   const handleZoom = () => {
@@ -101,96 +99,4 @@ export const ImageRenderer: React.FC<ImageRendererProps> = ({ panelContent, onAc
   );
 };
 
-function extractImageData(panelContent: StandardPanelContent): {
-  src: string;
-  mimeType: string;
-  name: string;
-} | null {
-  try {
-    // Try arguments first
-    if (panelContent.arguments) {
-      const { imageData, mimeType = 'image/png', name } = panelContent.arguments;
 
-      if (imageData && typeof imageData === 'string') {
-        return {
-          src: `data:${mimeType};base64,${imageData}`,
-          mimeType,
-          name: String(name || panelContent.title || 'Image'),
-        };
-      }
-    }
-
-    // Handle ChatCompletionContentPart[] array format (for environment_input events)
-    if (Array.isArray(panelContent.source)) {
-      const imageContent = panelContent.source.find(
-        (item): item is { type: 'image_url'; image_url: { url: string } } =>
-          typeof item === 'object' &&
-          item !== null &&
-          'type' in item &&
-          item.type === 'image_url' &&
-          'image_url' in item &&
-          typeof item.image_url === 'object' &&
-          item.image_url !== null &&
-          'url' in item.image_url &&
-          typeof item.image_url.url === 'string',
-      );
-
-      if (imageContent && imageContent.image_url) {
-        return {
-          src: imageContent.image_url.url,
-          mimeType: 'image/jpeg',
-          name: panelContent.title || 'Environment Screenshot',
-        };
-      }
-    }
-
-    // Try to extract from source
-    if (typeof panelContent.source === 'object' && panelContent.source !== null) {
-      const sourceObj = panelContent.source as any;
-      const { imageData, mimeType = 'image/png', name } = sourceObj;
-
-      if (imageData && typeof imageData === 'string') {
-        return {
-          src: `data:${mimeType};base64,${imageData}`,
-          mimeType,
-          name: String(name || panelContent.title || 'Image'),
-        };
-      }
-    }
-
-    /**
-     * Check if source is a data URL or direct URL
-     * Handle cases like:
-     * {
-     *   "type": "image",
-     *   "source": "data:image/webp;base64,UklGRvgpAA...",
-     *   "title": "Image",
-     *   "timestamp": 1756996184111
-     * }
-     */
-    if (typeof panelContent.source === 'string') {
-      if (panelContent.source.startsWith('data:')) {
-        // Extract MIME type from data URL
-        const mimeTypeMatch = panelContent.source.match(/^data:([^;]+);/);
-        const mimeType = mimeTypeMatch ? mimeTypeMatch[1] : 'image/png';
-        
-        return {
-          src: panelContent.source,
-          mimeType,
-          name: panelContent.title || 'Image',
-        };
-      } else if (panelContent.source.startsWith('http')) {
-        return {
-          src: panelContent.source,
-          mimeType: 'image/png',
-          name: panelContent.title || 'Image',
-        };
-      }
-    }
-
-    return null;
-  } catch (error) {
-    console.warn('Failed to extract image data:', error);
-    return null;
-  }
-}

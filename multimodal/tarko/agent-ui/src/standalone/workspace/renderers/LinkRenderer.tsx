@@ -3,6 +3,7 @@ import { StandardPanelContent } from '../types/panelContent';
 import { motion } from 'framer-motion';
 import { FiExternalLink } from 'react-icons/fi';
 import { FileDisplayMode } from '../types';
+import { commonExtractors } from '@/common/utils/panelContentExtractor';
 
 interface LinkRendererProps {
   panelContent: StandardPanelContent;
@@ -15,7 +16,7 @@ interface LinkRendererProps {
  */
 export const LinkRenderer: React.FC<LinkRendererProps> = ({ panelContent }) => {
   // Extract link data from panelContent
-  const linkData = extractLinkData(panelContent);
+  const linkData = commonExtractors.urlContent(panelContent);
 
   if (!linkData) {
     return <div className="text-gray-500 italic">Link URL missing</div>;
@@ -48,47 +49,4 @@ export const LinkRenderer: React.FC<LinkRendererProps> = ({ panelContent }) => {
   );
 };
 
-function extractLinkData(panelContent: StandardPanelContent): {
-  url: string;
-  title?: string;
-} | null {
-  try {
-    // Try arguments first
-    if (panelContent.arguments) {
-      const { url, title } = panelContent.arguments;
 
-      if (url && typeof url === 'string') {
-        return {
-          url,
-          title: title ? String(title) : panelContent.title,
-        };
-      }
-    }
-
-    // Try to extract from source
-    if (typeof panelContent.source === 'object' && panelContent.source !== null) {
-      const sourceObj = panelContent.source as any;
-      const { url, title } = sourceObj;
-
-      if (url && typeof url === 'string') {
-        return {
-          url,
-          title: title ? String(title) : panelContent.title,
-        };
-      }
-    }
-
-    // Check if source is a direct URL
-    if (typeof panelContent.source === 'string' && panelContent.source.startsWith('http')) {
-      return {
-        url: panelContent.source,
-        title: panelContent.title,
-      };
-    }
-
-    return null;
-  } catch (error) {
-    console.warn('Failed to extract link data:', error);
-    return null;
-  }
-}

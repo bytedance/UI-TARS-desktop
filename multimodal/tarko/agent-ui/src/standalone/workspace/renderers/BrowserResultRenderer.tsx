@@ -4,8 +4,9 @@ import { FiMonitor, FiExternalLink, FiGlobe, FiBookmark, FiCopy, FiCheck } from 
 import { BrowserShell } from './BrowserShell';
 import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
 import { FileDisplayMode } from '../types';
+import { useCopyToClipboard } from '@/common/hooks/useCopyToClipboard';
+import { commonExtractors } from '@/common/utils/panelContentExtractor';
 
 interface BrowserResultRendererProps {
   panelContent: StandardPanelContent;
@@ -17,10 +18,10 @@ interface BrowserResultRendererProps {
  * Renders browser navigation and page content results with improved UI
  */
 export const BrowserResultRenderer: React.FC<BrowserResultRendererProps> = ({ panelContent }) => {
-  const [copied, setCopied] = useState(false);
+  const { isCopied, copyToClipboard } = useCopyToClipboard();
 
   // Extract browser result data from panelContent
-  const browserData = extractBrowserResultData(panelContent);
+  const browserData = commonExtractors.urlContent(panelContent);
 
   if (!browserData) {
     return <div className="text-gray-500 italic">Browser result is empty</div>;
@@ -31,9 +32,7 @@ export const BrowserResultRenderer: React.FC<BrowserResultRendererProps> = ({ pa
 
   const copyUrl = () => {
     if (url) {
-      navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      copyToClipboard(url);
     }
   };
 
@@ -77,7 +76,7 @@ export const BrowserResultRenderer: React.FC<BrowserResultRendererProps> = ({ pa
                 className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border border-gray-200/50 dark:border-gray-700/30"
                 title="Copy URL"
               >
-                {copied ? <FiCheck size={18} className="text-green-500" /> : <FiCopy size={18} />}
+                {isCopied ? <FiCheck size={18} className="text-green-500" /> : <FiCopy size={18} />}
               </motion.button>
               <motion.a
                 whileHover={{ scale: 1.05 }}
@@ -128,52 +127,4 @@ export const BrowserResultRenderer: React.FC<BrowserResultRendererProps> = ({ pa
   );
 };
 
-function extractBrowserResultData(panelContent: StandardPanelContent): {
-  url?: string;
-  content?: string;
-  title?: string;
-  contentType?: string;
-  screenshot?: string;
-} | null {
-  try {
-    // Try arguments first
-    if (panelContent.arguments) {
-      const { url, content, title, contentType } = panelContent.arguments;
 
-      return {
-        url: url ? String(url) : undefined,
-        content: content ? String(content) : undefined,
-        title: title ? String(title) : undefined,
-        contentType: contentType ? String(contentType) : undefined,
-        screenshot: panelContent._extra?.currentScreenshot,
-      };
-    }
-
-    // Try to extract from source
-    if (typeof panelContent.source === 'object' && panelContent.source !== null) {
-      const sourceObj = panelContent.source as any;
-      const { url, content, title, contentType } = sourceObj;
-
-      return {
-        url: url ? String(url) : undefined,
-        content: content ? String(content) : undefined,
-        title: title ? String(title) : undefined,
-        contentType: contentType ? String(contentType) : undefined,
-        screenshot: panelContent._extra?.currentScreenshot,
-      };
-    }
-
-    // If source is a string, treat it as content
-    if (typeof panelContent.source === 'string') {
-      return {
-        content: panelContent.source,
-        screenshot: panelContent._extra?.currentScreenshot,
-      };
-    }
-
-    return null;
-  } catch (error) {
-    console.warn('Failed to extract browser result data:', error);
-    return null;
-  }
-}
