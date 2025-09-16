@@ -50,6 +50,7 @@ export const Dialog: React.FC<DialogProps> & {
           sx: {
             backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
             color: isDarkMode ? '#f3f4f6' : '#111827',
+            borderRadius: 3,
           },
         }}
         sx={{
