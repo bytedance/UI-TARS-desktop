@@ -30,7 +30,7 @@ export const BrowserShell: React.FC<BrowserShellProps> = ({
   const isSecure = isSecureUrl(displayUrl);
 
   // Extract domain for tab display
-  const domain = isUrl(displayUrl) ? (getDomainFromUrl(displayUrl) || title) : title;
+  const domain = isUrl(displayUrl) ? getDomainFromUrl(displayUrl) || title : title;
 
   return (
     <div

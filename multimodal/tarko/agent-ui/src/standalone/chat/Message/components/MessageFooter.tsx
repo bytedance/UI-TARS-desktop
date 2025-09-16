@@ -32,8 +32,6 @@ export const MessageFooter: React.FC<MessageFooterProps> = ({ message, className
     copyToClipboard(textToCopy);
   };
 
-
-
   const tooltipProps = getTooltipProps();
 
   return (

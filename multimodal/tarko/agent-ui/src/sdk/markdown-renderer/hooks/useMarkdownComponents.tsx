@@ -30,7 +30,10 @@ interface UseMarkdownComponentsProps {
 /**
  * Custom hook that provides markdown components configuration
  */
-export const useMarkdownComponents = ({ onImageClick, codeBlockStyle }: UseMarkdownComponentsProps): Components => {
+export const useMarkdownComponents = ({
+  onImageClick,
+  codeBlockStyle,
+}: UseMarkdownComponentsProps): Components => {
   return React.useMemo(
     () => ({
       // Headings

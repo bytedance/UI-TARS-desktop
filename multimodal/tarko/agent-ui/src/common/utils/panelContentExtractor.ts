@@ -55,19 +55,19 @@ export function extractStringField(
  */
 export function extractContentField(data: any): string | null {
   const { text, data: dataField, content } = data;
-  
+
   if (text && typeof text === 'string') {
     return text;
   }
-  
+
   if (content && typeof content === 'string') {
     return content;
   }
-  
+
   if (typeof dataField === 'string') {
     return dataField;
   }
-  
+
   if (dataField && typeof dataField === 'object') {
     try {
       return JSON.stringify(dataField, null, 2);
@@ -75,7 +75,7 @@ export function extractContentField(data: any): string | null {
       return String(dataField);
     }
   }
-  
+
   return null;
 }
 
@@ -86,11 +86,11 @@ export const commonExtractors = {
   /**
    * Extract basic content with title and name
    */
-  basicContent: (panelContent: StandardPanelContent) => 
+  basicContent: (panelContent: StandardPanelContent) =>
     extractPanelData(panelContent, (data) => {
       const content = extractContentField(data);
       if (!content) return null;
-      
+
       return {
         title: extractStringField(data, 'title', panelContent.title),
         content,
@@ -104,7 +104,7 @@ export const commonExtractors = {
   urlContent: (panelContent: StandardPanelContent) =>
     extractPanelData(panelContent, (data) => {
       const { url } = data;
-      
+
       return {
         url: extractStringField(data, 'url'),
         title: extractStringField(data, 'title', panelContent.title),
@@ -112,16 +112,19 @@ export const commonExtractors = {
         contentType: extractStringField(data, 'contentType'),
         screenshot: panelContent._extra?.currentScreenshot,
       };
-    }) || (panelContent.source && typeof panelContent.source === 'string' ? (
-      panelContent.source.startsWith('http') ? {
-        url: panelContent.source,
-        title: panelContent.title,
-        screenshot: panelContent._extra?.currentScreenshot,
-      } : {
-        content: panelContent.source,
-        screenshot: panelContent._extra?.currentScreenshot,
-      }
-    ) : null),
+    }) ||
+    (panelContent.source && typeof panelContent.source === 'string'
+      ? panelContent.source.startsWith('http')
+        ? {
+            url: panelContent.source,
+            title: panelContent.title,
+            screenshot: panelContent._extra?.currentScreenshot,
+          }
+        : {
+            content: panelContent.source,
+            screenshot: panelContent._extra?.currentScreenshot,
+          }
+      : null),
 
   /**
    * Extract image data with support for multiple formats
@@ -131,16 +134,16 @@ export const commonExtractors = {
     const standardResult = extractPanelData(panelContent, (data) => {
       const { imageData, mimeType = 'image/png', name } = data;
       if (!imageData || typeof imageData !== 'string') return null;
-      
+
       return {
         src: `data:${mimeType};base64,${imageData}`,
         mimeType,
         name: extractStringField(data, 'name', panelContent.title || 'Image'),
       };
     });
-    
+
     if (standardResult) return standardResult;
-    
+
     // Handle ChatCompletionContentPart[] array format
     if (Array.isArray(panelContent.source)) {
       const imageContent = panelContent.source.find(
@@ -164,13 +167,13 @@ export const commonExtractors = {
         };
       }
     }
-    
+
     // Handle direct URL or data URL in source
     if (typeof panelContent.source === 'string') {
       if (panelContent.source.startsWith('data:')) {
         const mimeTypeMatch = panelContent.source.match(/^data:([^;]+);/);
         const mimeType = mimeTypeMatch ? mimeTypeMatch[1] : 'image/png';
-        
+
         return {
           src: panelContent.source,
           mimeType,
@@ -184,7 +187,7 @@ export const commonExtractors = {
         };
       }
     }
-    
+
     return null;
   },
 
@@ -237,7 +240,7 @@ export const commonExtractors = {
     const args = panelContent.arguments;
     if (args) {
       const content = args.content || args.file_text;
-      
+
       if (content && typeof content === 'string') {
         return {
           content,
@@ -245,7 +248,7 @@ export const commonExtractors = {
         };
       }
     }
-    
+
     // Handle source as object
     if (typeof panelContent.source === 'object' && panelContent.source !== null) {
       // Handle source array format (text parts)
@@ -254,7 +257,7 @@ export const commonExtractors = {
           .filter((item: any) => item.type === 'text')
           .map((item: any) => item.text)
           .join('');
-        
+
         if (textContent) {
           return {
             content: textContent,
@@ -270,7 +273,7 @@ export const commonExtractors = {
             path: getPath(),
           };
         }
-        
+
         // Fallback to JSON stringify
         return {
           content: JSON.stringify(panelContent.source, null, 2),
@@ -278,7 +281,7 @@ export const commonExtractors = {
         };
       }
     }
-    
+
     // Handle source as string content
     if (typeof panelContent.source === 'string') {
       return {
@@ -286,7 +289,7 @@ export const commonExtractors = {
         path: getPath(),
       };
     }
-    
+
     return null;
   },
 };

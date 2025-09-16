@@ -126,5 +126,3 @@ export const BrowserResultRenderer: React.FC<BrowserResultRendererProps> = ({ pa
     </div>
   );
 };
-
-

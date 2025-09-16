@@ -22,8 +22,6 @@ const ReplayModeContext = createContext<ReplayModeContextType>({
   cancelAutoPlay: () => {},
 });
 
-
-
 /**
  * Find specific file in generated files from events
  */

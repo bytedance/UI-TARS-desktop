@@ -22,40 +22,40 @@ const WelcomePage: React.FC = () => {
   const pageSubtitle = webuiConfig?.subtitle;
   const webclomeTitle = webuiConfig?.welcomTitle ?? webuiConfig?.title;
   const allPrompts = webuiConfig?.welcomePrompts ?? [];
-  
+
   // State for managing displayed prompts
   const [displayedPrompts, setDisplayedPrompts] = useState<string[]>([]);
   const [usedPrompts, setUsedPrompts] = useState<Set<string>>(new Set());
   const [isShuffling, setIsShuffling] = useState(false);
   const [truncatedPrompts, setTruncatedPrompts] = useState<Set<string>>(new Set());
-  
+
   // Function to check if text is truncated
   const checkTextTruncation = (element: HTMLElement) => {
     return element.scrollWidth > element.clientWidth;
   };
-  
+
   // Constants for prompt management
   const MAX_DISPLAYED_PROMPTS = 3;
   const shouldShowShuffle = allPrompts.length > MAX_DISPLAYED_PROMPTS;
-  
+
   // Function to get random prompts, avoiding recently used ones when possible
   const getRandomPrompts = (count: number): string[] => {
     if (allPrompts.length === 0) return [];
-    
+
     // Get unused prompts first
-    const unusedPrompts = allPrompts.filter(prompt => !usedPrompts.has(prompt));
-    
+    const unusedPrompts = allPrompts.filter((prompt) => !usedPrompts.has(prompt));
+
     // If we have enough unused prompts, use them
     if (unusedPrompts.length >= count) {
       const shuffled = [...unusedPrompts].sort(() => Math.random() - 0.5);
       return shuffled.slice(0, count);
     }
-    
+
     // If not enough unused prompts, reset used prompts and use all
     const shuffled = [...allPrompts].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, count);
   };
-  
+
   // Initialize displayed prompts on component mount
   useEffect(() => {
     if (allPrompts.length > 0) {
@@ -64,16 +64,16 @@ const WelcomePage: React.FC = () => {
       setUsedPrompts(new Set(initialPrompts));
     }
   }, [allPrompts.length]);
-  
+
   // Function to shuffle prompts
   const handleShuffle = () => {
     setIsShuffling(true);
-    
+
     // Add a small delay to show animation
     setTimeout(() => {
       const newPrompts = getRandomPrompts(MAX_DISPLAYED_PROMPTS);
       setDisplayedPrompts(newPrompts);
-      
+
       // Update used prompts, reset if we've used most of them
       const newUsedPrompts = new Set([...usedPrompts, ...newPrompts]);
       if (newUsedPrompts.size >= allPrompts.length - 1) {
@@ -81,7 +81,7 @@ const WelcomePage: React.FC = () => {
       } else {
         setUsedPrompts(newUsedPrompts);
       }
-      
+
       setIsShuffling(false);
     }, 200);
   };
@@ -252,13 +252,13 @@ const WelcomePage: React.FC = () => {
             <div className="mt-6 flex flex-wrap justify-center gap-2">
               {displayedPrompts.map((prompt, index) => {
                 const isTruncated = truncatedPrompts.has(prompt);
-                
+
                 const buttonElement = (
                   <motion.button
                     ref={(el) => {
                       if (el) {
                         const isTextTruncated = checkTextTruncation(el);
-                        setTruncatedPrompts(prev => {
+                        setTruncatedPrompts((prev) => {
                           const newSet = new Set(prev);
                           if (isTextTruncated) {
                             newSet.add(prompt);
@@ -280,19 +280,13 @@ const WelcomePage: React.FC = () => {
                     {prompt}
                   </motion.button>
                 );
-                
+
                 return isTruncated ? (
-                  <Tooltip
-                    key={`${prompt}-${index}`}
-                    title={prompt}
-                    {...getTooltipProps('top')}
-                  >
+                  <Tooltip key={`${prompt}-${index}`} title={prompt} {...getTooltipProps('top')}>
                     {buttonElement}
                   </Tooltip>
                 ) : (
-                  <div key={`${prompt}-${index}`}>
-                    {buttonElement}
-                  </div>
+                  <div key={`${prompt}-${index}`}>{buttonElement}</div>
                 );
               })}
               {shouldShowShuffle && (
@@ -300,7 +294,10 @@ const WelcomePage: React.FC = () => {
                   key={`shuffle-${displayedPrompts.join('-')}`}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: isShuffling ? 0.5 : 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: isShuffling ? 0 : 0.4 + displayedPrompts.length * 0.1 }}
+                  transition={{
+                    duration: 0.3,
+                    delay: isShuffling ? 0 : 0.4 + displayedPrompts.length * 0.1,
+                  }}
                   type="button"
                   onClick={handleShuffle}
                   className="text-sm px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/30 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300 transition-colors flex items-center gap-1.5"
@@ -309,7 +306,7 @@ const WelcomePage: React.FC = () => {
                 >
                   <motion.div
                     animate={{ rotate: isShuffling ? 360 : 0 }}
-                    transition={{ duration: 0.2, ease: "easeInOut" }}
+                    transition={{ duration: 0.2, ease: 'easeInOut' }}
                   >
                     <FiRefreshCw size={14} />
                   </motion.div>

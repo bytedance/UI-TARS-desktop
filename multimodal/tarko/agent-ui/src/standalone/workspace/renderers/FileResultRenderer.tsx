@@ -121,7 +121,3 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
     </div>
   );
 };
-
-
-
-

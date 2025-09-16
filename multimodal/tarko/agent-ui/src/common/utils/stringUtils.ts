@@ -6,8 +6,18 @@
  * Check if a string represents an image file
  */
 export function isImageFile(filename: string): boolean {
-  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp', '.bmp', '.tiff', '.ico'];
-  return imageExtensions.some(ext => filename.toLowerCase().endsWith(ext));
+  const imageExtensions = [
+    '.jpg',
+    '.jpeg',
+    '.png',
+    '.gif',
+    '.svg',
+    '.webp',
+    '.bmp',
+    '.tiff',
+    '.ico',
+  ];
+  return imageExtensions.some((ext) => filename.toLowerCase().endsWith(ext));
 }
 
 /**
@@ -58,8 +68,7 @@ export function isScreenshotImage(name: string): boolean {
  */
 export function isFileRelatedTool(toolName: string): boolean {
   const fileToolPrefixes = ['run_', 'list_', 'read_', 'write_', 'edit_'];
-  return fileToolPrefixes.some(prefix => toolName.startsWith(prefix)) || 
-         toolName === 'edit_file';
+  return fileToolPrefixes.some((prefix) => toolName.startsWith(prefix)) || toolName === 'edit_file';
 }
 
 /**
@@ -81,9 +90,37 @@ export function isBrowserNavigation(text: string): boolean {
  */
 export function isCodeFile(extension: string): boolean {
   const codeExtensions = [
-    'js', 'jsx', 'ts', 'tsx', 'py', 'java', 'c', 'cpp', 'cs', 'php', 'rb', 'go',
-    'rs', 'swift', 'kt', 'scala', 'sh', 'bash', 'ps1', 'sql', 'css', 'scss',
-    'less', 'json', 'xml', 'yaml', 'yml', 'toml', 'ini', 'cfg', 'conf'
+    'js',
+    'jsx',
+    'ts',
+    'tsx',
+    'py',
+    'java',
+    'c',
+    'cpp',
+    'cs',
+    'php',
+    'rb',
+    'go',
+    'rs',
+    'swift',
+    'kt',
+    'scala',
+    'sh',
+    'bash',
+    'ps1',
+    'sql',
+    'css',
+    'scss',
+    'less',
+    'json',
+    'xml',
+    'yaml',
+    'yml',
+    'toml',
+    'ini',
+    'cfg',
+    'conf',
   ];
   return codeExtensions.includes(extension.toLowerCase());
 }

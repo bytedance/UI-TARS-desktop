@@ -124,7 +124,7 @@ export const ToolBar: React.FC = () => {
         <div className="flex flex-col items-center gap-4 pb-4">
           {/* Layout switch button */}
           {!isReplayMode && enableLayoutSwitchButton && <LayoutSwitchButton />}
-          
+
           {/* Agent config button */}
           {!isReplayMode && (
             <motion.button

@@ -27,8 +27,6 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
   elapsedMs,
   isFileRelated = false,
 }) => {
-
-
   // Helper function to get timing badge style based on duration
   const getTimingBadgeStyle = (ms: number) => {
     if (ms < 1000) {

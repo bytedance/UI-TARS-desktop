@@ -159,5 +159,3 @@ export const ResearchReportRenderer: React.FC<ResearchReportRendererProps> = ({
     </div>
   );
 };
-
-

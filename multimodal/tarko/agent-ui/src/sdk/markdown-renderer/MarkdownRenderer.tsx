@@ -133,10 +133,7 @@ const MarkdownRendererContent: React.FC<MarkdownRendererProps> = ({
           // @ts-expect-error FIXME: find the root cause of type issue
           remarkPlugins={[remarkGfm, remarkMath, remarkAlert]}
           // @ts-expect-error FIXME: find the root cause of type issue
-          rehypePlugins={[
-            rehypeKatex,
-            [rehypeHighlight, { detect: true, ignoreMissing: true }],
-          ]}
+          rehypePlugins={[rehypeKatex, [rehypeHighlight, { detect: true, ignoreMissing: true }]]}
           components={components}
         >
           {processedContent}

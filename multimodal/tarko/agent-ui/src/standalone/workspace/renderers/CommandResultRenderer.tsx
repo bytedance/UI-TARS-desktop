@@ -11,8 +11,6 @@ interface CommandResultRendererProps {
   displayMode?: FileDisplayMode;
 }
 
-
-
 /**
  * Renders a terminal-like command and output result
  */
@@ -41,5 +39,3 @@ export const CommandResultRenderer: React.FC<CommandResultRendererProps> = ({ pa
     </div>
   );
 };
-
-

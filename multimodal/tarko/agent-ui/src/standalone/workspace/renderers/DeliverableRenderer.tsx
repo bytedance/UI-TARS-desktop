@@ -139,5 +139,3 @@ export const DeliverableRenderer: React.FC<DeliverableRendererProps> = ({
     </div>
   );
 };
-
-

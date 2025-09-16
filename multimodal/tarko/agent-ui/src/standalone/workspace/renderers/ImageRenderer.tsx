@@ -98,5 +98,3 @@ export const ImageRenderer: React.FC<ImageRendererProps> = ({ panelContent, onAc
     </div>
   );
 };
-
-

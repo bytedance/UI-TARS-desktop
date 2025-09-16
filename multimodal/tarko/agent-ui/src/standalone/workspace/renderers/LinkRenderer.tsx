@@ -48,5 +48,3 @@ export const LinkRenderer: React.FC<LinkRendererProps> = ({ panelContent }) => {
     </motion.a>
   );
 };
-
-

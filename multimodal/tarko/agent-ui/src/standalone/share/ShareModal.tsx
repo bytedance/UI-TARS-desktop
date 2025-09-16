@@ -186,7 +186,10 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
 
           {isLoading && (
             <div className="flex flex-col items-center justify-center py-10">
-              <LoadingSpinner size={12} className="border-gray-200 dark:border-gray-700 border-t-gray-600 dark:border-t-gray-300 mb-4" />
+              <LoadingSpinner
+                size={12}
+                className="border-gray-200 dark:border-gray-700 border-t-gray-600 dark:border-t-gray-300 mb-4"
+              />
               <p className="text-gray-700 dark:text-gray-300 text-center">
                 Preparing your conversation for sharing...
               </p>
