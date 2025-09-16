@@ -31,7 +31,7 @@ import { NavbarModelSelector } from './ModelSelector';
 import { getLogoUrl, getAgentTitle, getWorkspaceNavItems } from '@/config/web-ui-config';
 import type { WorkspaceNavItemIcon } from '@tarko/interface';
 import { getModelDisplayName } from '@/common/utils/modelUtils';
-import { createBasicMuiTheme } from '@/common/utils/muiTheme';
+import { createBasicMuiTheme } from '@tarko/ui';
 
 import './Navbar.css';
 

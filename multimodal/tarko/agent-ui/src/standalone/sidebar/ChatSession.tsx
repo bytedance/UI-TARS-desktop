@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { FiRefreshCw, FiWifiOff, FiChevronUp, FiChevronDown, FiSearch } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import SessionItem from './SessionItem';
-import { ConfirmDialog } from '@/sdk/dialog';
+import { ConfirmDialog } from '@tarko/ui';
 import { SessionSearch } from './SessionSearch';
 
 interface ChatSessionProps {

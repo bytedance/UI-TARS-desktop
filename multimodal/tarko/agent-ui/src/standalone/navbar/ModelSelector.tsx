@@ -18,7 +18,7 @@ import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useAtomValue } from 'jotai';
 import { isProcessingAtom } from '@/common/state/atoms/ui';
 import { getTooltipProps } from '@/common/components/TooltipConfig';
-import { createBasicMuiTheme, createModelSelectorMuiTheme } from '@/common/utils/muiTheme';
+import { createBasicMuiTheme, createModelSelectorMuiTheme } from '@tarko/ui';
 
 interface NavbarModelSelectorProps {
   className?: string;

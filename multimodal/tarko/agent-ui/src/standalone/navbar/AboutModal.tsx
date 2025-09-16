@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog } from '@/common/components/MuiDialog';
+import { Dialog } from '@tarko/ui';
 import { motion } from 'framer-motion';
 import { FiX, FiExternalLink, FiGithub, FiGlobe, FiCpu, FiCopy, FiCheck } from 'react-icons/fi';
 import { FaBrain } from 'react-icons/fa';

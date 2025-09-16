@@ -3,7 +3,7 @@
   "version": "0.3.0-beta.11",
   "description": "Default Web UI for Tarko",
   "dependencies": {
-    "@mui/material": "^5.15.11",
+    "@tarko/ui": "workspace:*",
     "ansi-to-react": "^6.1.6",
     "classnames": "^2.5.1",
     "framer-motion": "12.19.2",
@@ -29,7 +29,6 @@
   },
   "devDependencies": {
     "@agent-tars/interface": "workspace:*",
-    "@tarko/ui": "workspace:*",
     "@rsbuild/core": "1.3.18",
     "@rsbuild/plugin-react": "1.1.1",
     "@tarko/agent-interface": "workspace:*",

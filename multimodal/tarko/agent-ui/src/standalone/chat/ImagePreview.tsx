@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiX, FiMaximize2, FiImage } from 'react-icons/fi';
 import { ChatCompletionContentPart } from '@tarko/agent-interface';
-import { Dialog } from '@/common/components/MuiDialog';
+import { Dialog } from '@tarko/ui';
 
 interface ImagePreviewProps {
   image: ChatCompletionContentPart;

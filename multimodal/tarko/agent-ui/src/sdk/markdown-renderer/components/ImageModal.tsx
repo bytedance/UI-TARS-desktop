@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog } from '@/common/components/MuiDialog';
+import { Dialog } from '@tarko/ui';
 import { motion } from 'framer-motion';
 
 interface ImageModalProps {

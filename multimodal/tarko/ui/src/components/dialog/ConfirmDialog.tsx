@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog } from '@/common/components/MuiDialog';
+import { Dialog } from '../mui/MuiDialog';
 import { FiAlertTriangle, FiX } from 'react-icons/fi';
 
 interface ConfirmDialogProps {

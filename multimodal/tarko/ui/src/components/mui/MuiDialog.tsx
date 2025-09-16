@@ -1,6 +1,6 @@
 import React from 'react';
 import { Dialog as MuiDialog, DialogContent, ThemeProvider } from '@mui/material';
-import { createBasicMuiTheme } from '@/common/utils/muiTheme';
+import { createBasicMuiTheme } from '../../utils/mui/muiTheme';
 
 interface DialogProps {
   open: boolean;

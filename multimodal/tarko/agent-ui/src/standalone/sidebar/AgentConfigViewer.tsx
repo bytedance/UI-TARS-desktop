@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiSettings, FiX } from 'react-icons/fi';
-import { Dialog } from '@/common/components/MuiDialog';
+import { Dialog } from '@tarko/ui';
 import { apiService } from '@/common/services/apiService';
 import { SanitizedAgentOptions } from '@/common/types';
 import { JsonRenderer } from '@/common/components/JsonRenderer';
