@@ -14,7 +14,7 @@ import { MarkdownThemeProvider, useMarkdownStyles } from './context/MarkdownThem
 import 'katex/dist/katex.min.css';
 import 'remark-github-blockquote-alert/alert.css';
 import './styles/syntax-highlight.css';
-import './sryles/markdown.css';
+import './styles/markdown.css';
 
 interface MarkdownRendererProps {
   content: string;

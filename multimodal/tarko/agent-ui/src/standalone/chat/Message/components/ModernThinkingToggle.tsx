@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiLoader } from 'react-icons/fi';
 import { PiBrain } from 'react-icons/pi';
-import { MarkdownRenderer } from '@/sdk/markdown-renderer';
+import { MarkdownRenderer } from '@tarko/ui';
 import { formatDuration } from '@/common/utils/duration';
 
 interface ModernThinkingToggleProps {
@@ -46,7 +46,6 @@ export const ModernThinkingToggle: React.FC<ModernThinkingToggleProps> = ({
 
   return (
     <div className="mb-3">
-
       <motion.button
         onClick={() => setShowThinking(!showThinking)}
         className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors group"
@@ -63,9 +62,9 @@ export const ModernThinkingToggle: React.FC<ModernThinkingToggleProps> = ({
             </motion.div>
           ) : (
             <motion.div
-              animate={{ 
+              animate={{
                 scale: showThinking ? 1.1 : 1,
-                rotate: showThinking ? 5 : 0 
+                rotate: showThinking ? 5 : 0,
               }}
               transition={{ duration: 0.2 }}
               className="text-purple-500 dark:text-purple-400"
@@ -73,7 +72,7 @@ export const ModernThinkingToggle: React.FC<ModernThinkingToggleProps> = ({
               <PiBrain size={14} />
             </motion.div>
           )}
-          
+
           <span className="font-medium text-[16px]">
             {isThinking ? (
               <span className="flex items-center gap-1">
@@ -92,7 +91,6 @@ export const ModernThinkingToggle: React.FC<ModernThinkingToggleProps> = ({
           </span>
         </div>
       </motion.button>
-
 
       <AnimatePresence>
         {showThinking && (

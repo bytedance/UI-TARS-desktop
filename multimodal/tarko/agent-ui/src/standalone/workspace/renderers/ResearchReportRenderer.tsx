@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 
 import { FiDownload, FiBookOpen, FiLoader, FiShare2, FiCopy, FiCheck } from 'react-icons/fi';
-import { MarkdownRenderer } from '@/sdk/markdown-renderer';
+import { MarkdownRenderer } from '@tarko/ui';
 import { StandardPanelContent } from '../types/panelContent';
 import { FileDisplayMode } from '../types';
 

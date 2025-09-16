@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { MarkdownRenderer } from '@/sdk/markdown-renderer';
+import { MarkdownRenderer } from '@tarko/ui';
 import { wrapMarkdown } from '@/common/utils/markdown';
 import { DisplayMode } from '../types';
 

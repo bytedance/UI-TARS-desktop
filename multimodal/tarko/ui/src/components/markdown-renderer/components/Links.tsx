@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { isExternalUrl, isHashLink, isInternalPath, scrollToElement } from '../utils';
+import { isHashLink, isInternalPath, scrollToElement } from '../utils';
 
 interface LinkProps {
   href?: string;
@@ -42,7 +42,6 @@ export const SmartLink: React.FC<LinkProps> = ({ href, children, ...props }) => 
   if (isInternalPath(href)) {
     return (
       <Link to={href} className={LINK_STYLES} {...props}>
-        {/* @ts-expect-error */}
         {children}
       </Link>
     );

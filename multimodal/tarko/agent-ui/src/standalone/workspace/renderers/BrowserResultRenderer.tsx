@@ -2,7 +2,7 @@ import React from 'react';
 import { StandardPanelContent } from '../types/panelContent';
 import { FiMonitor, FiExternalLink, FiGlobe, FiBookmark, FiCopy, FiCheck } from 'react-icons/fi';
 import { BrowserShell } from './BrowserShell';
-import { MarkdownRenderer } from '@/sdk/markdown-renderer';
+import { MarkdownRenderer } from '@tarko/ui';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { FileDisplayMode } from '../types';

@@ -3,7 +3,7 @@ import { isMultimodalContent } from '@/common/utils/typeGuards';
 import { ChatCompletionContentPart, Message as MessageType } from '@/common/types';
 import { useSession } from '@/common/hooks/useSession';
 import { useTool } from '@/common/hooks/useTool';
-import { MarkdownRenderer } from '@/sdk/markdown-renderer';
+import { MarkdownRenderer } from '@tarko/ui';
 import './Message.css';
 
 import { SystemMessage } from './components/SystemMessage';
