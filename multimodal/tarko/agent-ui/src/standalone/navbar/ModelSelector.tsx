@@ -20,6 +20,7 @@ import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useAtomValue } from 'jotai';
 import { isProcessingAtom } from '@/common/state/atoms/ui';
 import { getTooltipProps } from '@/common/components/TooltipConfig';
+import { getModelDisplayName } from '@/common/utils/modelUtils';
 
 interface NavbarModelSelectorProps {
   className?: string;
@@ -36,7 +37,7 @@ const isSameModel = (a: AgentModel | null, b: AgentModel | null): boolean => {
 
 const getModelKey = (model: AgentModel): string => `${model.provider}:${model.id}`;
 
-const getModelDisplayText = (model: AgentModel) => model.displayName || model.id;
+
 
 // Shared component for displaying model information
 const ModelDisplayContent: React.FC<{
@@ -46,7 +47,7 @@ const ModelDisplayContent: React.FC<{
   isSelected?: boolean;
   showLoading?: boolean;
 }> = ({ model, isDarkMode, fontSize = '12px', isSelected = false, showLoading = false }) => {
-  const displayText = getModelDisplayText(model);
+  const displayText = getModelDisplayName(model);
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>

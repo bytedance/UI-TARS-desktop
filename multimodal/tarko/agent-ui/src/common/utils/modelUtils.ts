@@ -4,23 +4,19 @@
  */
 
 import { SessionItemMetadata } from '@tarko/interface';
+import { AgentModel } from '@tarko/agent-interface';
 
 /**
- * Get the display name for a model configuration.
+ * Get the display name for a model.
  * Returns displayName if available, otherwise falls back to modelId.
  *
- * @param modelConfig - The model configuration object
+ * @param model - The model object (AgentModel or modelConfig)
  * @returns The display name or model ID
  */
-export function getModelDisplayName(modelConfig?: SessionItemMetadata['modelConfig']): string {
-  if (!modelConfig?.id) {
+export function getModelDisplayName(model?: AgentModel | SessionItemMetadata['modelConfig']): string {
+  if (!model?.id) {
     return '';
   }
 
-  // Check for displayName first, then fall back to id
-  if (modelConfig.displayName && modelConfig.displayName.trim()) {
-    return modelConfig.displayName;
-  }
-
-  return modelConfig.id;
+  return model.displayName || model.id;
 }
