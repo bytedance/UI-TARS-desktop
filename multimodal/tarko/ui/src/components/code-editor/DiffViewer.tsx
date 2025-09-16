@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { DiffEditor } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
 import parseDiff from 'parse-diff';
-import { normalizeFilePath } from '../../utils';
+import { normalizeFilePath, getMonacoLanguage, getFileExtension } from '../../utils';
 import { CodeEditorHeader } from './CodeEditorHeader';
 import './MonacoCodeEditor.css';
 
@@ -13,22 +13,7 @@ interface DiffViewerProps {
   className?: string;
 }
 
-// Get language from filename
-function getLanguage(fileName: string): string {
-  const ext = fileName.split('.').pop()?.toLowerCase() || '';
-  const langMap: Record<string, string> = {
-    js: 'javascript',
-    jsx: 'javascript',
-    ts: 'typescript',
-    tsx: 'typescript',
-    py: 'python',
-    html: 'html',
-    css: 'css',
-    json: 'json',
-    md: 'markdown',
-  };
-  return langMap[ext] || 'plaintext';
-}
+
 
 const EDITOR_OPTIONS: editor.IStandaloneDiffEditorConstructionOptions = {
   readOnly: true,
@@ -50,7 +35,7 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({
   const { original, modified, additions, deletions, displayFileName, normalizedPath } =
     useMemo(() => {
       try {
-        // Parse diff using mature library
+
         const files = parseDiff(diffContent);
 
         if (files.length === 0) {
@@ -73,20 +58,20 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({
         let addCount = 0;
         let delCount = 0;
 
-        // Process chunks to reconstruct original and modified content
+
         chunks.forEach((chunk) => {
           chunk.changes.forEach((change) => {
             switch (change.type) {
               case 'add':
-                modifiedLines.push(change.content.slice(1)); // Remove '+' prefix
+                modifiedLines.push(change.content.slice(1));
                 addCount++;
                 break;
               case 'del':
-                originalLines.push(change.content.slice(1)); // Remove '-' prefix
+                originalLines.push(change.content.slice(1));
                 delCount++;
                 break;
               case 'normal':
-                const content = change.content.slice(1); // Remove ' ' prefix
+                const content = change.content.slice(1);
                 originalLines.push(content);
                 modifiedLines.push(content);
                 break;
@@ -118,7 +103,7 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({
       }
     }, [diffContent, fileName]);
 
-  const language = getLanguage(displayFileName);
+  const language = getMonacoLanguage(getFileExtension(displayFileName));
 
   const handleCopy = () => {
     navigator.clipboard.writeText(diffContent);
@@ -127,21 +112,21 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({
   return (
     <div className={`code-editor-container ${className}`}>
       <div className="code-editor-wrapper">
-        {/* Header */}
+
         <CodeEditorHeader
           fileName={displayFileName}
           filePath={normalizedPath}
           onCopy={handleCopy}
           copyButtonTitle="Copy diff"
         >
-          {/* Diff stats */}
+
           <div className="flex items-center space-x-2 text-xs">
             <span className="text-green-400">+{additions}</span>
             <span className="text-red-400">-{deletions}</span>
           </div>
         </CodeEditorHeader>
 
-        {/* Diff Editor */}
+
         <div className="code-editor-monaco-container" style={{ height: maxHeight }}>
           <DiffEditor
             original={original}
@@ -157,7 +142,7 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({
           />
         </div>
 
-        {/* Status Bar */}
+
         <div className="code-editor-status-bar">
           <div className="code-editor-status-left">
             <span className="code-editor-status-item text-green-400">+{additions}</span>
