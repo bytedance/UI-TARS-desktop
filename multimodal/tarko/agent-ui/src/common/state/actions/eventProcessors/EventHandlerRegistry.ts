@@ -15,8 +15,6 @@ import {
 
 import { SystemMessageHandler, EnvironmentInputHandler } from './handlers/SystemHandler';
 
-
-
 import { AgentRunStartHandler, AgentRunEndHandler } from './handlers/AgentRunHandler';
 
 /**
@@ -47,8 +45,6 @@ export class EventHandlerRegistry {
     // System handlers
     this.register(new SystemMessageHandler());
     this.register(new EnvironmentInputHandler());
-
-
 
     // Agent run handlers
     this.register(new AgentRunStartHandler());

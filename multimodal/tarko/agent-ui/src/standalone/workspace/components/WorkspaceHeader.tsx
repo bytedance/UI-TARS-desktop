@@ -37,7 +37,8 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
 }) => {
   const { getToolIcon } = useTool();
 
-  const isResearchReport = panelContent.type === 'research_report' || panelContent.type === 'deliverable';
+  const isResearchReport =
+    panelContent.type === 'research_report' || panelContent.type === 'deliverable';
 
   // Extract file name for share functionality with normalized path
   const getFileName = (): string => {

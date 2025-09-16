@@ -13,7 +13,6 @@ import { sessionFilesAtom, FileItem } from '../atoms/files';
 import { ChatCompletionContentPart, AgentEventStream } from '@tarko/agent-interface';
 import { SessionItemMetadata } from '@tarko/interface';
 
-
 // Priority-based file selection for workspace display: HTML > Markdown > Others
 function selectBestFileToDisplay(files: FileItem[]): FileItem | null {
   if (!files || files.length === 0) {

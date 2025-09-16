@@ -276,10 +276,7 @@ export const WorkspaceDetail: React.FC = () => {
 };
 
 function isResearchReportType(content: StandardPanelContent): boolean {
-  return (
-    content.type === 'research_report' ||
-    content.type === 'deliverable'
-  );
+  return content.type === 'research_report' || content.type === 'deliverable';
 }
 
 function isZoomData(data: unknown): data is { src: string; alt?: string } {

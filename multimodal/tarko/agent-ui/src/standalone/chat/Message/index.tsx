@@ -38,8 +38,6 @@ export const Message: React.FC<MessageProps> = ({
   const isEnvironment = message.role === 'environment';
   const isUserMessage = message.role === 'user';
 
-
-
   const isFinalAssistantResponse = message.role === 'assistant' && message.finishReason === 'stop';
 
   const handleToolCallClick = (toolCall: any) => {
@@ -156,8 +154,6 @@ export const Message: React.FC<MessageProps> = ({
             )}
 
             <div className={getProseClasses()}>{renderContent()}</div>
-
-
 
             {message.toolCalls && message.toolCalls.length > 0 && (
               <ToolCalls
