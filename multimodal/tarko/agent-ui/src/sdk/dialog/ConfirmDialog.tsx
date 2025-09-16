@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog } from '@headlessui/react';
+import { Dialog } from '@/common/components/MuiDialog';
 import { FiAlertTriangle, FiX } from 'react-icons/fi';
 
 interface ConfirmDialogProps {
@@ -52,50 +52,46 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   const typeStyles = getTypeStyles();
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-[9999]">
-      <div className="fixed inset-0 bg-black/25 backdrop-blur-sm" aria-hidden="true" />
-
-      <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="w-full max-w-md rounded-xl bg-white dark:bg-gray-800 p-6 shadow-xl border border-gray-200/50 dark:border-gray-700/30">
-          <div className="flex items-start">
-            <div className={`p-3 rounded-full ${typeStyles.iconBg} mr-4 flex-shrink-0`}>
-              {typeStyles.icon}
-            </div>
-
-            <div className="flex-1">
-              <Dialog.Title className="text-lg font-medium text-gray-900 dark:text-gray-100">
-                {title}
-              </Dialog.Title>
-
-              <div className="mt-2">
-                <p className="text-sm text-gray-600 dark:text-gray-400">{message}</p>
-              </div>
-            </div>
-
-            <button
-              onClick={onClose}
-              className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-all hover:scale-110 active:scale-90"
-            >
-              <FiX size={18} />
-            </button>
+    <Dialog open={isOpen} onClose={onClose} maxWidth="sm">
+      <Dialog.Panel className="p-6">
+        <div className="flex items-start">
+          <div className={`p-3 rounded-full ${typeStyles.iconBg} mr-4 flex-shrink-0`}>
+            {typeStyles.icon}
           </div>
 
-          <div className="mt-6 flex justify-end gap-3">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg text-sm font-medium transition-all hover:scale-105 active:scale-95"
-            >
-              {cancelText}
-            </button>
-            <button
-              onClick={onConfirm}
-              className={`px-4 py-2 ${typeStyles.confirmButton} rounded-lg text-sm font-medium transition-all hover:scale-105 active:scale-95`}
-            >
-              {confirmText}
-            </button>
+          <div className="flex-1">
+            <Dialog.Title className="text-lg font-medium text-gray-900 dark:text-gray-100">
+              {title}
+            </Dialog.Title>
+
+            <div className="mt-2">
+              <p className="text-sm text-gray-600 dark:text-gray-400">{message}</p>
+            </div>
           </div>
-        </Dialog.Panel>
-      </div>
+
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-all hover:scale-110 active:scale-90"
+          >
+            <FiX size={18} />
+          </button>
+        </div>
+
+        <div className="mt-6 flex justify-end gap-3">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg text-sm font-medium transition-all hover:scale-105 active:scale-95"
+          >
+            {cancelText}
+          </button>
+          <button
+            onClick={onConfirm}
+            className={`px-4 py-2 ${typeStyles.confirmButton} rounded-lg text-sm font-medium transition-all hover:scale-105 active:scale-95`}
+          >
+            {confirmText}
+          </button>
+        </div>
+      </Dialog.Panel>
     </Dialog>
   );
 };

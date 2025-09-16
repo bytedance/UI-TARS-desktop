@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiX, FiMaximize2, FiImage } from 'react-icons/fi';
 import { ChatCompletionContentPart } from '@tarko/agent-interface';
-import { Dialog } from '@headlessui/react';
+import { Dialog } from '@/common/components/MuiDialog';
 
 interface ImagePreviewProps {
   image: ChatCompletionContentPart;
@@ -90,35 +90,29 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({ image, onRemove }) =
       </motion.div>
 
       {/* Zoom modal */}
-      <Dialog open={isZoomed} onClose={handleCloseZoom} className="relative z-[9999]">
-        {/* Background overlay */}
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" aria-hidden="true" />
+      <Dialog open={isZoomed} onClose={handleCloseZoom} maxWidth={false} fullWidth={false}>
+        <Dialog.Panel className="relative max-w-[90vw] max-h-[90vh] outline-none">
+          {/* Close button */}
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={handleCloseZoom}
+            className="absolute -top-10 -right-10 bg-white/10 hover:bg-white/20 text-white rounded-full p-2 transition-colors z-10"
+          >
+            <FiX size={24} />
+          </motion.button>
 
-        {/* Modal content */}
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="relative max-w-[90vw] max-h-[90vh] outline-none">
-            {/* Close button */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={handleCloseZoom}
-              className="absolute -top-10 -right-10 bg-white/10 hover:bg-white/20 text-white rounded-full p-2 transition-colors z-10"
-            >
-              <FiX size={24} />
-            </motion.button>
-
-            {/* Zoomed image */}
-            <motion.img
-              src={image.image_url.url}
-              alt="Zoomed preview"
-              className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ type: 'spring', duration: 0.3 }}
-            />
-          </Dialog.Panel>
-        </div>
+          {/* Zoomed image */}
+          <motion.img
+            src={image.image_url.url}
+            alt="Zoomed preview"
+            className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ type: 'spring', duration: 0.3 }}
+          />
+        </Dialog.Panel>
       </Dialog>
     </>
   );

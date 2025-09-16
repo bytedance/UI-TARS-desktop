@@ -3,7 +3,6 @@
   "version": "0.3.0-beta.11",
   "description": "Default Web UI for Tarko",
   "dependencies": {
-    "@headlessui/react": "^1.7.17",
     "@mui/material": "^5.15.11",
     "ansi-to-react": "^6.1.6",
     "classnames": "^2.5.1",

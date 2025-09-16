@@ -839,9 +839,6 @@ importers:
 
   tarko/agent-ui:
     dependencies:
-      '@headlessui/react':
-        specifier: ^1.7.17
-        version: 1.7.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@mui/material':
         specifier: ^5.15.11
         version: 5.17.1(@emotion/react@11.14.0(@types/react@18.3.23)(react@18.3.1))(@emotion/styled@11.14.0(@emotion/react@11.14.0(@types/react@18.3.23)(react@18.3.1))(@types/react@18.3.23)(react@18.3.1))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1997,16 +1994,19 @@ packages:
   '@computer-use/libnut-darwin@2.7.1':
     resolution: {integrity: sha512-7B/aPcIYS4a4S7D3IYIHSpZ4B4m8Z3CjlYq0efTr+/JYmEu+LlO67ZhPvisLKifhagxf7goqEfnphg1F4jq5jw==}
     engines: {node: '>=10.15.3'}
+    cpu: [x64, arm64]
     os: [darwin, linux, win32]
 
   '@computer-use/libnut-linux@2.7.1':
     resolution: {integrity: sha512-QJD5URTFJ/2+JwBwRyajRF2BB+3eXpd4+t5btGeRVeiRQLKQ4lgorbMHySo6IrfAbSfnU1OVOrxAUygGxj0cFg==}
     engines: {node: '>=10.15.3'}
+    cpu: [x64, arm64]
     os: [darwin, linux, win32]
 
   '@computer-use/libnut-win32@2.7.1':
     resolution: {integrity: sha512-nDvH5kP1zoO2cBtFYWV0om9xtTu523cc1LIk8r/wizqPrIAm0wCizTU+odF3Fi42zcKJWT6J+Pguy8fKrZyIuA==}
     engines: {node: '>=10.15.3'}
+    cpu: [x64, arm64]
     os: [darwin, linux, win32]
 
   '@computer-use/libnut@4.2.0':
@@ -2026,6 +2026,7 @@ packages:
   '@computer-use/nut-js@4.2.0':
     resolution: {integrity: sha512-Xyq5ixrAEdy6qu/mtX021XfU0Y//YFgL0CW1xF6L05KUCbJcZZqViiEeSPulhKfLdvXuhIjnhf+exMb2T6jQIg==}
     engines: {node: '>=16'}
+    cpu: [x64, arm64]
     os: [linux, darwin, win32]
 
   '@computer-use/provider-interfaces@4.2.0':
@@ -2418,13 +2419,6 @@ packages:
   '@google/generative-ai@0.24.0':
     resolution: {integrity: sha512-fnEITCGEB7NdX0BhoYZ/cq/7WPZ1QS5IzJJfC3Tg/OwkvBetMiVJciyaan297OvE4B9Jg1xvo0zIazX/9sGu1Q==}
     engines: {node: '>=18.0.0'}
-
-  '@headlessui/react@1.7.19':
-    resolution: {integrity: sha512-Ll+8q3OlMJfJbAKM/+/Y2q6PPYbryqNTXDbryx7SXLIDamkF6iQFbriYHga0dY44PvDhvvBWCx1Xj4U5+G4hOw==}
-    engines: {node: '>=10'}
-    peerDependencies:
-      react: ^16 || ^17 || ^18
-      react-dom: ^16 || ^17 || ^18
 
   '@internationalized/date@3.8.1':
     resolution: {integrity: sha512-PgVE6B6eIZtzf9Gu5HvJxRK3ufUFz9DhspELuhW/N0GuMGMTLvPQNRkHP2hTuP9lblOk+f+1xi96sPiPXANXAA==}
@@ -5266,15 +5260,6 @@ packages:
   '@swc/helpers@0.5.17':
     resolution: {integrity: sha512-5IKx/Y13RsYd+sauPb2x+U/xZikHjolzfuDgTAl/Tdf3Q8rslRvC19NKDLgAJQ6wsqADk10ntlv08nPFw/gO/A==}
 
-  '@tanstack/react-virtual@3.13.9':
-    resolution: {integrity: sha512-SPWC8kwG/dWBf7Py7cfheAPOxuvIv4fFQ54PdmYbg7CpXfsKxkucak43Q0qKsxVthhUJQ1A7CIMAIplq4BjVwA==}
-    peerDependencies:
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-
-  '@tanstack/virtual-core@3.13.9':
-    resolution: {integrity: sha512-3jztt0jpaoJO5TARe2WIHC1UQC3VMLAFUW5mmMo0yrkwtDB2AQP0+sh10BVUpWrnvHjSLvzFizydtEGLCJKFoQ==}
-
   '@tavily/core@0.3.1':
     resolution: {integrity: sha512-7jyvPWG4Zjst0s4v0FMLO1f/dfHqs4FnqvKm86zOGYzXxSfxHu0isbLzlwjJad0csYwF0kifdlECTuNouHfr5A==}
 
@@ -6298,9 +6283,6 @@ packages:
   cli-width@3.0.0:
     resolution: {integrity: sha512-FxqpkPPwu1HjuN93Omfm4h8uIanXofW0RxVEW3k5RKx+mJJYSthzNhp32Kzxxy3YAEZ/Dc/EWN1vZRY0+kOhbw==}
     engines: {node: '>= 10'}
-
-  client-only@0.0.1:
-    resolution: {integrity: sha512-IV3Ou0jSMzZrd3pZ48nLkT9DA7Ag1pnPzaiQhpW7c3RbcqqzvzzVu+L8gfqMp/8IM2MQtSiqaCxrrcfu8I8rMA==}
 
   clipboardy@2.3.0:
     resolution: {integrity: sha512-mKhiIL2DrQIsuXMgBgnfEHOZOryC7kY7YO//TN6c63wlEm3NG5tz+YgY5rVi29KCmq/QQjKYvM7a19+MDOTHOQ==}
@@ -13131,13 +13113,6 @@ snapshots:
 
   '@google/generative-ai@0.24.0': {}
 
-  '@headlessui/react@1.7.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@tanstack/react-virtual': 3.13.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      client-only: 0.0.1
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-
   '@internationalized/date@3.8.1':
     dependencies:
       '@swc/helpers': 0.5.17
@@ -19659,14 +19634,6 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@tanstack/react-virtual@3.13.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@tanstack/virtual-core': 3.13.9
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-
-  '@tanstack/virtual-core@3.13.9': {}
-
   '@tavily/core@0.3.1':
     dependencies:
       axios: 1.9.0
@@ -20940,8 +20907,6 @@ snapshots:
   cli-spinners@2.9.2: {}
 
   cli-width@3.0.0: {}
-
-  client-only@0.0.1: {}
 
   clipboardy@2.3.0:
     dependencies:
