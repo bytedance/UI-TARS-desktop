@@ -69,7 +69,7 @@ export const useMarkdownTheme = () => {
 /**
  * Type definitions for better TypeScript support
  */
-export type ThemeColors = typeof THEME_COLORS.light;
+export type ThemeColors = typeof THEME_COLORS.light | typeof THEME_COLORS.dark;
 export type TextColors = ThemeColors['text'];
 export type BackgroundColors = ThemeColors['background'];
 export type BorderColors = ThemeColors['border'];
