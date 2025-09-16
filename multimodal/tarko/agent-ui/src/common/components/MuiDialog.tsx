@@ -33,7 +33,15 @@ const DialogTitle: React.FC<DialogTitleProps> = ({ children, className }) => {
 export const Dialog: React.FC<DialogProps> & {
   Panel: typeof DialogPanel;
   Title: typeof DialogTitle;
-} = ({ open, onClose, className, children, maxWidth = 'sm', fullWidth = true, fullScreen = false }) => {
+} = ({
+  open,
+  onClose,
+  className,
+  children,
+  maxWidth = 'sm',
+  fullWidth = true,
+  fullScreen = false,
+}) => {
   const isDarkMode = document.documentElement.classList.contains('dark');
   const theme = createBasicMuiTheme(isDarkMode);
 
