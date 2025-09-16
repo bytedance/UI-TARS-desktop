@@ -6,7 +6,6 @@
 import type { HonoContext } from '../types';
 import { getPublicAvailableModels, isModelConfigValid } from '../utils/model-utils';
 import { sanitizeAgentOptions } from '../utils/config-sanitizer';
-
 /**
  * Health check endpoint
  */
@@ -39,8 +38,8 @@ export async function getAgentOptions(c: HonoContext) {
 
 export function getAvailableModels(c: HonoContext) {
   const server = c.get('server');
-  const models = getPublicAvailableModels(server.appConfig);
 
+  const models = getPublicAvailableModels(server.appConfig);
   return c.json({ models }, 200);
 }
 
@@ -97,7 +96,7 @@ export async function updateSessionModel(c: HonoContext) {
       }
     }
 
-    c.json(
+    return c.json(
       {
         success: true,
         sessionInfo: updatedSessionInfo,

@@ -14,14 +14,14 @@ const server = new AgentServer({
       type: 'modulePath',
       value: '@omni-tars/agent',
     },
-    model: {
-      /** tars */
-      provider: 'volcengine',
-      id: process.env.OMNI_TARS_MODEL_ID,
-      baseURL: process.env.OMNI_TARS_BASE_URL,
-      apiKey: process.env.OMNI_TARS_API_KEY,
-      displayName: 'UI-TARS-2',
-    },
+    // model: {
+    //   /** tars */
+    //   provider: 'volcengine',
+    //   id: process.env.OMNI_TARS_MODEL_ID,
+    //   baseURL: process.env.OMNI_TARS_BASE_URL,
+    //   apiKey: process.env.OMNI_TARS_API_KEY,
+    //   displayName: 'UI-TARS-2',
+    // },
     share: {
       provider: process.env.SHARE_PROVIDER,
     },
@@ -52,6 +52,22 @@ const server = new AgentServer({
         mode: 'multi',
         auth: true,
       },
+      models: [
+        {
+          id: "ep-20250909173748-wcfb2",
+          provider: "volcengine",
+          displayName: "T6-SFT",
+          baseURL: process.env.OMNI_TARS_BASE_URL,
+          apiKey: process.env.OMNI_TARS_API_KEY,
+        },
+        {
+          id: "ep-20250905175225-hlrvd",
+          provider: "volcengine",
+          displayName: "T5-RL",
+          baseURL: process.env.OMNI_TARS_BASE_URL,
+          apiKey: process.env.OMNI_TARS_API_KEY,
+        },
+      ],
       sandbox: {
         baseUrl: process.env.SANDBOX_BASE_URL,
         getJwtToken: async () => {

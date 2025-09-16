@@ -11,6 +11,7 @@ import type { AgentServer, UserInfo, HonoContext } from '../../types';
 import type { AgioProviderConstructor, SessionInfo } from '@tarko/interface';
 import { ConsoleLogger, getLogger } from '@tarko/shared-utils';
 import { ISessionDAO } from '../../dao';
+import { getDefaultModel } from '../../utils/model-utils';
 
 export interface CreateSessionOptions {
   sessionId?: string;
@@ -48,6 +49,7 @@ export class AgentSessionFactory {
   }> {
     const sessionId = nanoid();
     const user = getCurrentUser(c);
+    const server = c.get('server');
 
     // Allocate sandbox if scheduler is available
     let sandboxUrl: string | undefined;
@@ -69,6 +71,8 @@ export class AgentSessionFactory {
 
     const now = Date.now();
 
+    const defaultModel = getDefaultModel(server.appConfig);
+
     const newSessionInfo: SessionInfo = {
       id: sessionId,
       createdAt: now,
@@ -80,6 +84,9 @@ export class AgentSessionFactory {
           name: this.server.getCurrentAgentName()!,
           configuredAt: now,
         },
+        ...(defaultModel && {
+            modelConfig: defaultModel,
+          }),
         sandboxUrl,
       },
     };
