@@ -15,7 +15,7 @@ export const useLogoType = (): LogoType => {
     const urlParam = new URLSearchParams(location.search).get('logo');
     const storedParam = localStorage.getItem('ui-logo-type');
     const param = urlParam || storedParam;
-    
-    return ['traffic-lights', 'space'].includes(param!) ? param as LogoType : 'logo';
+
+    return ['traffic-lights', 'space'].includes(param!) ? (param as LogoType) : 'logo';
   }, [location.search]);
 };
