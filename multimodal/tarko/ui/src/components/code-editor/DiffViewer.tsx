@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { DiffEditor } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
 import parseDiff from 'parse-diff';
-import { normalizeFilePath } from '@/common/utils/pathNormalizer';
+import { normalizeFilePath } from '../../utils';
 import { CodeEditorHeader } from './CodeEditorHeader';
 import './MonacoCodeEditor.css';
 
@@ -47,75 +47,76 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({
   maxHeight = '400px',
   className = '',
 }) => {
-  const { original, modified, additions, deletions, displayFileName, normalizedPath } = useMemo(() => {
-    try {
-      // Parse diff using mature library
-      const files = parseDiff(diffContent);
+  const { original, modified, additions, deletions, displayFileName, normalizedPath } =
+    useMemo(() => {
+      try {
+        // Parse diff using mature library
+        const files = parseDiff(diffContent);
 
-      if (files.length === 0) {
+        if (files.length === 0) {
+          const baseFileName = fileName || 'diff';
+          return {
+            original: '',
+            modified: diffContent,
+            additions: 0,
+            deletions: 0,
+            displayFileName: baseFileName.split('/').pop() || baseFileName,
+            normalizedPath: normalizeFilePath(baseFileName),
+          };
+        }
+
+        const file = files[0];
+        const chunks = file.chunks || [];
+
+        const originalLines: string[] = [];
+        const modifiedLines: string[] = [];
+        let addCount = 0;
+        let delCount = 0;
+
+        // Process chunks to reconstruct original and modified content
+        chunks.forEach((chunk) => {
+          chunk.changes.forEach((change) => {
+            switch (change.type) {
+              case 'add':
+                modifiedLines.push(change.content.slice(1)); // Remove '+' prefix
+                addCount++;
+                break;
+              case 'del':
+                originalLines.push(change.content.slice(1)); // Remove '-' prefix
+                delCount++;
+                break;
+              case 'normal':
+                const content = change.content.slice(1); // Remove ' ' prefix
+                originalLines.push(content);
+                modifiedLines.push(content);
+                break;
+            }
+          });
+        });
+
+        const fullPath = fileName || file.to || file.from || 'diff';
+        const baseFileName = fullPath.split('/').pop() || fullPath;
+        return {
+          original: originalLines.join('\n'),
+          modified: modifiedLines.join('\n'),
+          additions: addCount,
+          deletions: delCount,
+          displayFileName: baseFileName,
+          normalizedPath: normalizeFilePath(fullPath),
+        };
+      } catch (error) {
+        console.warn('Failed to parse diff, falling back to raw content:', error);
         const baseFileName = fileName || 'diff';
         return {
-        original: '',
-        modified: diffContent,
-        additions: 0,
-        deletions: 0,
+          original: '',
+          modified: diffContent,
+          additions: 0,
+          deletions: 0,
           displayFileName: baseFileName.split('/').pop() || baseFileName,
-        normalizedPath: normalizeFilePath(baseFileName),
-      };
+          normalizedPath: normalizeFilePath(baseFileName),
+        };
       }
-
-      const file = files[0];
-      const chunks = file.chunks || [];
-
-      const originalLines: string[] = [];
-      const modifiedLines: string[] = [];
-      let addCount = 0;
-      let delCount = 0;
-
-      // Process chunks to reconstruct original and modified content
-      chunks.forEach((chunk) => {
-        chunk.changes.forEach((change) => {
-          switch (change.type) {
-            case 'add':
-              modifiedLines.push(change.content.slice(1)); // Remove '+' prefix
-              addCount++;
-              break;
-            case 'del':
-              originalLines.push(change.content.slice(1)); // Remove '-' prefix
-              delCount++;
-              break;
-            case 'normal':
-              const content = change.content.slice(1); // Remove ' ' prefix
-              originalLines.push(content);
-              modifiedLines.push(content);
-              break;
-          }
-        });
-      });
-
-      const fullPath = fileName || file.to || file.from || 'diff';
-      const baseFileName = fullPath.split('/').pop() || fullPath;
-      return {
-        original: originalLines.join('\n'),
-        modified: modifiedLines.join('\n'),
-        additions: addCount,
-        deletions: delCount,
-        displayFileName: baseFileName,
-        normalizedPath: normalizeFilePath(fullPath),
-      };
-    } catch (error) {
-      console.warn('Failed to parse diff, falling back to raw content:', error);
-      const baseFileName = fileName || 'diff';
-      return {
-        original: '',
-        modified: diffContent,
-        additions: 0,
-        deletions: 0,
-        displayFileName: baseFileName.split('/').pop() || baseFileName,
-        normalizedPath: normalizeFilePath(baseFileName),
-      };
-    }
-  }, [diffContent, fileName]);
+    }, [diffContent, fileName]);
 
   const language = getLanguage(displayFileName);
 

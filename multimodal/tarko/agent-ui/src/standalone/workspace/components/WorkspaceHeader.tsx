@@ -2,7 +2,7 @@ import React from 'react';
 import { FiArrowLeft, FiBookOpen, FiMaximize, FiEye, FiCode } from 'react-icons/fi';
 import { formatTimestamp } from '@/common/utils/formatters';
 import { useTool } from '@/common/hooks/useTool';
-import { normalizeFilePath } from '@/common/utils/pathNormalizer';
+import { normalizeFilePath } from '@tarko/ui';
 import { StandardPanelContent } from '../types/panelContent';
 import { ToggleSwitch, ToggleSwitchProps } from '../renderers/generic/components/ToggleSwitch';
 import { ShareButton } from './ShareButton';

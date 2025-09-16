@@ -14,7 +14,7 @@ interface MonacoCodeEditorProps {
   maxHeight?: string;
   className?: string;
   onCopy?: () => void;
-  onChange?: (value: string) => void;
+  onChange?: (value: string | undefined) => void;
 }
 
 export const MonacoCodeEditor: React.FC<MonacoCodeEditorProps> = ({
@@ -43,7 +43,7 @@ export const MonacoCodeEditor: React.FC<MonacoCodeEditorProps> = ({
       lineNumbersMinChars: 3,
       renderLineHighlight: 'gutter',
       selectionHighlight: false,
-      occurrencesHighlight: false,
+      occurrencesHighlight: 'off',
       overviewRulerLanes: 0,
       hideCursorInOverviewRuler: true,
       renderValidationDecorations: 'off',
@@ -76,6 +76,7 @@ export const MonacoCodeEditor: React.FC<MonacoCodeEditorProps> = ({
     onCopy?.();
   }, [code, onCopy]);
 
+  // FIXME: Migrate `languageMap` to `src/utils`.
   const getMonacoLanguage = useCallback((lang: string): string => {
     const languageMap: Record<string, string> = {
       javascript: 'javascript',
@@ -102,8 +103,11 @@ export const MonacoCodeEditor: React.FC<MonacoCodeEditorProps> = ({
     return languageMap[lang.toLowerCase()] || 'plaintext';
   }, []);
 
-  const displayFileName = fileName || (filePath ? filePath.split('/').pop() || filePath : 'Untitled');
-  const fileExtension = fileName && fileName.includes('.') ? fileName.split('.').pop()?.toLowerCase() || '' : '';
+  // FIXME: Migrate to `src/utils`.
+  const displayFileName =
+    fileName || (filePath ? filePath.split('/').pop() || filePath : 'Untitled');
+  const fileExtension =
+    fileName && fileName.includes('.') ? fileName.split('.').pop()?.toLowerCase() || '' : '';
   const monacoLanguage = getMonacoLanguage(fileExtension);
 
   return (

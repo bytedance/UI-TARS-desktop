@@ -1,9 +1,9 @@
 import React from 'react';
+import { MonacoCodeEditor } from '@tarko/ui';
 import { FileDisplayMode } from '../types';
 import { StandardPanelContent } from '../types/panelContent';
 import { MessageContent } from './generic/components/MessageContent';
 import { DisplayMode } from './generic/types';
-import { MonacoCodeEditor } from '@/sdk/code-editor';
 import { useStableCodeContent } from '@/common/hooks/useStableValue';
 import { ThrottledHtmlRenderer } from '../components/ThrottledHtmlRenderer';
 import { formatBytes } from '../utils/codeUtils';

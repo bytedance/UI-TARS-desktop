@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSession } from '@/common/hooks/useSession';
 import { FiLayout, FiZap, FiLayers, FiActivity, FiFileText } from 'react-icons/fi';
 import { apiService } from '@/common/services/apiService';
-import { normalizeFilePath } from '@/common/utils/pathNormalizer';
+import { normalizeFilePath } from '@tarko/ui';
 import { getAgentTitle } from '@/config/web-ui-config';
 import { useAtomValue } from 'jotai';
 import { sessionFilesAtom } from '@/common/state/atoms/files';

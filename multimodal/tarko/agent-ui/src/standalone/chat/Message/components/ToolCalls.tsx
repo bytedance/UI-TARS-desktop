@@ -2,7 +2,7 @@ import React from 'react';
 import { FiLoader, FiCheck, FiX, FiClock, FiAlertCircle, FiEdit3 } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import { ActionButton } from './ActionButton';
-import { normalizeFilePath } from '@/common/utils/pathNormalizer';
+import { normalizeFilePath } from '@tarko/ui';
 
 interface ToolCallsProps {
   toolCalls: any[];

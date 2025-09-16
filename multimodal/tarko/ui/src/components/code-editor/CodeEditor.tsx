@@ -32,7 +32,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   const codeRef = useRef<HTMLElement>(null);
 
-  const displayFileName = fileName || (filePath ? filePath.split('/').pop() || filePath : 'Untitled');
+  const displayFileName =
+    fileName || (filePath ? filePath.split('/').pop() || filePath : 'Untitled');
   const fileExtension =
     fileName && fileName.includes('.') ? fileName.split('.').pop()?.toLowerCase() || '' : '';
   const language = fileExtension || 'text';

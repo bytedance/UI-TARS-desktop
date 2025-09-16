@@ -4,7 +4,7 @@ import { FiX } from 'react-icons/fi';
 import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 import { MessageContent } from '../renderers/generic/components/MessageContent';
 import { FullscreenFileData } from '../types/panelContent';
-import { normalizeFilePath } from '@/common/utils/pathNormalizer';
+import { normalizeFilePath } from '@tarko/ui';
 
 interface FullscreenModalProps {
   data: FullscreenFileData | null;

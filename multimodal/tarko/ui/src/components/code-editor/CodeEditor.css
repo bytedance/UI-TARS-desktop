@@ -1,8 +1,3 @@
-/**
- * Code Editor Dark IDE Theme Styles
- * Scoped with .code-editor- prefix for component isolation
- */
-
 .code-editor-container {
   font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Cascadia Code', 'Roboto Mono', monospace;
   height: 100%;

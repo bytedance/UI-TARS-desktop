@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { StandardPanelContent } from '../types/panelContent';
 import { FiFile, FiAlertCircle } from 'react-icons/fi';
-import { CodeEditor } from '@/sdk/code-editor';
+import { CodeEditor } from '@tarko/ui';
 import { getFileTypeInfo } from '../utils/fileTypeUtils';
 import { formatBytes } from '../utils/codeUtils';
 
