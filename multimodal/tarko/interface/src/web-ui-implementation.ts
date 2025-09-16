@@ -120,6 +120,19 @@ export interface TarkoWebUIGUIAgentConfig {
 }
 
 /**
+ * Debug configuration options
+ */
+export interface DebugConfig {
+  /**
+   * Enable Event Stream Viewer for debugging
+   * Shows real-time event stream in a modal accessible from sidebar
+   * 
+   * @defaultValue false
+   */
+  enableEventStreamViewer?: boolean;
+}
+
+/**
  * Base agent implementation interface
  */
 export interface BaseAgentWebUIImplementation {
@@ -176,6 +189,10 @@ export interface BaseAgentWebUIImplementation {
    * GUI Agent configuration for web UI
    */
   guiAgent?: TarkoWebUIGUIAgentConfig;
+  /**
+   * Debug configuration
+   */
+  debug?: DebugConfig;
 }
 
 /**

@@ -7,6 +7,7 @@ import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { ResearchReportRenderer } from './renderers/ResearchReportRenderer';
 import { WorkspaceHeader } from './components/WorkspaceHeader';
 import { RawModeRenderer } from './components/RawModeRenderer';
+import { WorkspaceDisplayModeToggle } from './components/WorkspaceDisplayModeToggle';
 import { ImageModal } from './components/ImageModal';
 import { FullscreenModal } from './components/FullscreenModal';
 import { StandardPanelContent, ZoomedImageData, FullscreenFileData } from './types/panelContent';

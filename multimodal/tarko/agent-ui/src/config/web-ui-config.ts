@@ -99,3 +99,21 @@ export function isLayoutSwitchButtonEnabled(): boolean {
 export function getDefaultLayoutMode() {
   return getLayoutConfig().defaultLayout || 'default';
 }
+
+/**
+ * Get debug configuration from web UI config
+ */
+export function getDebugConfig() {
+  return (
+    getWebUIConfig().debug || {
+      enableEventStreamViewer: false,
+    }
+  );
+}
+
+/**
+ * Check if Event Stream Viewer is enabled
+ */
+export function isEventStreamViewerEnabled(): boolean {
+  return getDebugConfig().enableEventStreamViewer ?? false;
+}

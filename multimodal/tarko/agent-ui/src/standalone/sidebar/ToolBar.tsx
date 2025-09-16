@@ -1,13 +1,15 @@
 import React, { useCallback, useState } from 'react';
 import { motion } from 'framer-motion';
 
-import { FiPlus, FiHome, FiSettings } from 'react-icons/fi';
+import { FiPlus, FiHome, FiSettings, FiActivity } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/common/hooks/useSession';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
-import { isLayoutSwitchButtonEnabled } from '@/config/web-ui-config';
+import { isLayoutSwitchButtonEnabled, isEventStreamViewerEnabled } from '@/config/web-ui-config';
 import { AgentConfigViewer } from './AgentConfigViewer';
 import { LayoutSwitchButton } from './LayoutSwitchButton';
+import { useAtom } from 'jotai';
+import { eventStreamModalOpenAtom } from '@/common/state/atoms/eventStreamModal';
 
 /**
  * ToolBar Component - Vertical toolbar inspired by modern IDE designs
@@ -24,8 +26,10 @@ export const ToolBar: React.FC = () => {
   const { createSession, connectionStatus } = useSession();
   const [isConfigViewerOpen, setIsConfigViewerOpen] = useState(false);
   const [isCreatingSession, setIsCreatingSession] = useState(false);
+  const [isEventStreamModalOpen, setIsEventStreamModalOpen] = useAtom(eventStreamModalOpenAtom);
 
   const enableLayoutSwitchButton = isLayoutSwitchButtonEnabled();
+  const enableEventStreamViewer = isEventStreamViewerEnabled();
 
   // Create new session
   const handleNewSession = useCallback(async () => {
@@ -46,6 +50,11 @@ export const ToolBar: React.FC = () => {
   const handleNavigateHome = useCallback(() => {
     navigate('/');
   }, [navigate]);
+
+  // Toggle event stream modal
+  const handleToggleEventStream = useCallback(() => {
+    setIsEventStreamModalOpen(!isEventStreamModalOpen);
+  }, [isEventStreamModalOpen, setIsEventStreamModalOpen]);
 
   return (
     <>
@@ -122,9 +131,29 @@ export const ToolBar: React.FC = () => {
 
         {/* Bottom tool buttons */}
         <div className="flex flex-col items-center gap-4 pb-4">
+          {/* Event stream viewer button */}
+          {!isReplayMode && enableEventStreamViewer && (
+            <motion.button
+              whileHover={{
+                scale: 1.08,
+              }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+              onClick={handleToggleEventStream}
+              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
+                isEventStreamModalOpen
+                  ? 'bg-blue-500 text-white shadow-md'
+                  : 'bg-white dark:bg-gray-800 text-black dark:text-white hover:shadow-md'
+              }`}
+              title="Event Stream Viewer"
+            >
+              <FiActivity size={16} />
+            </motion.button>
+          )}
+
           {/* Layout switch button */}
           {!isReplayMode && enableLayoutSwitchButton && <LayoutSwitchButton />}
-          
+
           {/* Agent config button */}
           {!isReplayMode && (
             <motion.button
