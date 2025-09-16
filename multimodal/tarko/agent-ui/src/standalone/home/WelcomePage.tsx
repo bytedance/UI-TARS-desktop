@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { FiArrowUpRight, FiRefreshCw } from 'react-icons/fi';
-import { Tooltip } from '@mui/material';
 import { useSession } from '@/common/hooks/useSession';
 import { getWebUIConfig, getLogoUrl, getAgentTitle } from '@/config/web-ui-config';
 import { ChatInput } from '@/standalone/chat/MessageInput';
 import { ChatCompletionContentPart } from '@tarko/agent-interface';
-import { getTooltipProps } from '@/common/components/TooltipConfig';
+import { Tooltip } from '@tarko/ui';
 
 const WelcomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -256,7 +255,7 @@ const WelcomePage: React.FC = () => {
                 );
 
                 return isTruncated ? (
-                  <Tooltip key={`${prompt}-${index}`} title={prompt} {...getTooltipProps('top')}>
+                  <Tooltip key={`${prompt}-${index}`} title={prompt} placement="top">
                     {buttonElement}
                   </Tooltip>
                 ) : (

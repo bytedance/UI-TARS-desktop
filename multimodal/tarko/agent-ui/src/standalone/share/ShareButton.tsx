@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { FiShare2 } from 'react-icons/fi';
-import { Tooltip } from '@mui/material';
 import { useSession } from '@/common/hooks/useSession';
 import { ShareModal } from './ShareModal';
-import { getTooltipProps } from '@/common/components/TooltipConfig';
+import { Tooltip } from '@tarko/ui';
 
 interface ShareButtonProps {
   variant?: 'default' | 'navbar';
@@ -26,7 +25,7 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { activeSessionId } = useSession();
 
-  const tooltipProps = getTooltipProps('bottom');
+
 
   const handleOpenModal = () => {
     if (disabled) return;
@@ -51,7 +50,7 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
               ? 'Share unavailable during agent execution. Please wait for agent execution to complete'
               : 'Share this conversation'
           }
-          {...tooltipProps}
+          placement="bottom"
         >
           <span>
             <button
@@ -83,7 +82,7 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
             ? 'Share unavailable during agent execution. Please wait for agent execution to complete'
             : 'Share this conversation'
         }
-        {...tooltipProps}
+        placement="bottom"
       >
         <span>
           <button

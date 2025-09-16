@@ -1,7 +1,6 @@
 import React from 'react';
 import { FiClock, FiCheckCircle, FiShuffle } from 'react-icons/fi';
-import { Tooltip } from '@mui/material';
-import { getTooltipProps } from '@/common/components/TooltipConfig';
+import { Tooltip } from '@tarko/ui';
 
 type ScreenshotStrategy = 'both' | 'beforeAction' | 'afterAction';
 
@@ -34,7 +33,7 @@ export const StrategySwitch: React.FC<StrategySwitchProps> = ({
 }) => {
   const strategies: ScreenshotStrategy[] = ['beforeAction', 'afterAction', 'both'];
 
-  const tooltipProps = getTooltipProps('bottom');
+
 
   return (
     <div className="flex items-center justify-center">
@@ -46,7 +45,7 @@ export const StrategySwitch: React.FC<StrategySwitchProps> = ({
           const isLast = index === strategies.length - 1;
 
           return (
-            <Tooltip key={strategy} title={config.tooltip} {...tooltipProps}>
+            <Tooltip key={strategy} title={config.tooltip} placement="bottom">
               <button
                 type="button"
                 onClick={() => onStrategyChange(strategy)}
