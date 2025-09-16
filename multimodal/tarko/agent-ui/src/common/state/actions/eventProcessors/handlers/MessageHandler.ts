@@ -4,6 +4,7 @@ import { AgentEventStream, Message } from '@/common/types';
 import { messagesAtom } from '@/common/state/atoms/message';
 import { sessionPanelContentAtom } from '@/common/state/atoms/ui';
 import { shouldUpdatePanelContent } from '../utils/panelContentUpdater';
+import { MessageUpdater } from '../utils/messageUpdater';
 
 // Constants for thinking message newline trimming performance
 const LEADING_NEWLINES_REGEX = /^\n+/;
@@ -90,56 +91,26 @@ export class AssistantMessageHandler
     sessionId: string,
     event: AgentEventStream.AssistantMessageEvent,
   ): void {
-    const { get, set } = context;
-    const messageId = event.messageId;
+    const { set } = context;
+    const updater = new MessageUpdater(set);
 
-    set(messagesAtom, (prev: Record<string, Message[]>) => {
-      const sessionMessages = prev[sessionId] || [];
-
-      // Update existing message if messageId matches, otherwise create new
-      if (messageId) {
-        const existingMessageIndex = sessionMessages.findIndex(
-          (msg) => msg.messageId === messageId,
-        );
-
-        if (existingMessageIndex !== -1) {
-          const updatedMessages = [...sessionMessages];
-          updatedMessages[existingMessageIndex] = {
-            ...updatedMessages[existingMessageIndex],
-            content: event.content,
-            timestamp: event.timestamp,
-            toolCalls: event.toolCalls,
-            finishReason: event.finishReason,
-            isStreaming: false,
-            ttftMs: event.ttftMs,
-            ttltMs: event.ttltMs,
-          };
-
-          return {
-            ...prev,
-            [sessionId]: updatedMessages,
-          };
-        }
-      }
-
-      return {
-        ...prev,
-        [sessionId]: [
-          ...sessionMessages,
-          {
-            id: event.id,
-            role: 'assistant',
-            content: event.content,
-            timestamp: event.timestamp,
-            toolCalls: event.toolCalls,
-            finishReason: event.finishReason,
-            messageId: messageId,
-            ttftMs: event.ttftMs,
-            ttltMs: event.ttltMs,
-          },
-        ],
-      };
-    });
+    updater.updateMessage(
+      sessionId,
+      event.messageId,
+      (existingMessage) => ({
+        id: event.id,
+        role: 'assistant' as const,
+        content: event.content,
+        timestamp: event.timestamp,
+        toolCalls: event.toolCalls,
+        finishReason: event.finishReason,
+        messageId: event.messageId,
+        ttftMs: event.ttftMs,
+        ttltMs: event.ttltMs,
+        isStreaming: false,
+        ...(existingMessage && { id: existingMessage.id }), // Preserve existing ID if updating
+      }),
+    );
   }
 }
 
@@ -158,62 +129,23 @@ export class StreamingMessageHandler
     event: AgentEventStream.AssistantStreamingMessageEvent,
   ): void {
     const { set } = context;
+    const updater = new MessageUpdater(set);
 
-    set(messagesAtom, (prev: Record<string, Message[]>) => {
-      const sessionMessages = prev[sessionId] || [];
-      const messageIdToFind = event.messageId;
-      let existingMessageIndex = -1;
-
-      // Find by messageId first, fallback to last streaming message
-      if (messageIdToFind) {
-        existingMessageIndex = sessionMessages.findIndex(
-          (msg) => msg.messageId === messageIdToFind,
-        );
-      } else if (sessionMessages.length > 0) {
-        const lastMessageIndex = sessionMessages.length - 1;
-        const lastMessage = sessionMessages[lastMessageIndex];
-        if (lastMessage && lastMessage.role === 'assistant' && lastMessage.isStreaming) {
-          existingMessageIndex = lastMessageIndex;
-        }
-      }
-
-      if (existingMessageIndex !== -1) {
-        const existingMessage = sessionMessages[existingMessageIndex];
-        const updatedMessage = {
-          ...existingMessage,
-          content:
-            typeof existingMessage.content === 'string'
-              ? existingMessage.content + event.content
-              : event.content,
-          isStreaming: !event.isComplete,
-          toolCalls: event.toolCalls || existingMessage.toolCalls,
-        };
-
-        return {
-          ...prev,
-          [sessionId]: [
-            ...sessionMessages.slice(0, existingMessageIndex),
-            updatedMessage,
-            ...sessionMessages.slice(existingMessageIndex + 1),
-          ],
-        };
-      }
-
-      const newMessage: Message = {
+    updater.appendStreamingContent(
+      sessionId,
+      event.messageId,
+      event.content,
+      event.isComplete,
+      {
         id: event.id || uuidv4(),
-        role: 'assistant',
-        content: event.content,
+        role: 'assistant' as const,
         timestamp: event.timestamp,
-        isStreaming: !event.isComplete,
         toolCalls: event.toolCalls,
         messageId: event.messageId,
-      };
-
-      return {
-        ...prev,
-        [sessionId]: [...sessionMessages, newMessage],
-      };
-    });
+      },
+      // Fallback: find last streaming assistant message
+      (msg) => msg.role === 'assistant' && msg.isStreaming,
+    );
   }
 }
 
