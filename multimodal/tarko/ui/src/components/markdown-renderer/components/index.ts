@@ -8,3 +8,4 @@ export * from './TextElements';
 export * from './Image';
 export * from './ImageModal';
 export * from './CodeBlock';
+export * from './useMarkdownComponents';

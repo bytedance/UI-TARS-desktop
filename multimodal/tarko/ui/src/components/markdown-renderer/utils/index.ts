@@ -2,7 +2,19 @@
  * Utility functions for markdown rendering
  */
 
-export * from './linkPreprocessor';
+/**
+ * Preprocess markdown links to handle special cases
+ */
+export const preprocessMarkdownLinks = (content: string): string => {
+  // Handle image links with markdown syntax
+  return content.replace(
+    /!\[([^\]]*)\]\(([^)]+)\)/g,
+    (match, alt, src) => {
+      // Keep the original markdown syntax for images
+      return match;
+    }
+  );
+};
 
 /**
  * Generate a URL-friendly ID from text content

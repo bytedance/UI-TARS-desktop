@@ -2,15 +2,14 @@ import React, { useState, useEffect, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
-
 import rehypeKatex from 'rehype-katex';
 import { remarkAlert } from 'remark-github-blockquote-alert';
 import rehypeHighlight from 'rehype-highlight';
-import { useMarkdownComponents } from './hooks/useMarkdownComponents';
+import { useMarkdownComponents } from './components';
 import { ImageModal } from './components/ImageModal';
 import { resetFirstH1Flag } from './components/Headings';
 import { scrollToElement, preprocessMarkdownLinks } from './utils';
-import { MarkdownThemeProvider, useMarkdownStyles } from './context/MarkdownThemeContext';
+import { useDarkMode } from '../../hooks';
 import 'katex/dist/katex.min.css';
 import 'remark-github-blockquote-alert/alert.css';
 import './styles/syntax-highlight.css';
@@ -25,15 +24,7 @@ interface MarkdownRendererProps {
   codeBlockStyle?: React.CSSProperties;
 }
 
-export const MarkdownRenderer: React.FC<MarkdownRendererProps> = (props) => {
-  return (
-    <MarkdownThemeProvider>
-      <MarkdownRendererContent {...props} />
-    </MarkdownThemeProvider>
-  );
-};
-
-const MarkdownRendererContent: React.FC<MarkdownRendererProps> = ({
+export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   content,
   publishDate,
   author,
@@ -43,7 +34,8 @@ const MarkdownRendererContent: React.FC<MarkdownRendererProps> = ({
 }) => {
   const [openImage, setOpenImage] = useState<string | null>(null);
   const [renderError, setRenderError] = useState<Error | null>(null);
-  const { themeClass, colors } = useMarkdownStyles();
+  const isDarkMode = useDarkMode();
+  const themeClass = forceDarkTheme ? 'dark' : (isDarkMode ? 'dark' : 'light');
 
   const handleImageClick = (src: string) => {
     setOpenImage(src);
@@ -89,8 +81,7 @@ const MarkdownRendererContent: React.FC<MarkdownRendererProps> = ({
     return preprocessMarkdownLinks(content);
   }, [content]);
 
-  const finalThemeClass = forceDarkTheme ? 'dark' : themeClass;
-  const markdownContentClass = `${finalThemeClass} markdown-content font-inter leading-relaxed ${colors.text.primary} ${className}`;
+  const markdownContentClass = `${themeClass} markdown-content font-inter leading-relaxed ${className}`;
 
   try {
     return (

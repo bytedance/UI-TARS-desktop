@@ -1,6 +1,6 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { generateId } from '../utils';
-import { useHeadingStyles } from '../context/MarkdownThemeContext';
+import { useDarkMode } from '../../../hooks';
 
 interface HeadingProps {
   children: React.ReactNode;
@@ -24,20 +24,24 @@ export const resetFirstH1Flag = (): void => {
  */
 export const Heading: React.FC<HeadingProps> = ({ children, level }) => {
   const id = generateId(children?.toString());
-  const headingStyles = useHeadingStyles();
+  const isDarkMode = useDarkMode();
+  
+  const baseHeadingStyles = 'group scroll-mt-20 flex items-center font-semibold leading-tight';
+  const textColor = isDarkMode ? 'text-gray-100' : 'text-gray-900';
+  const borderColor = isDarkMode ? 'border-gray-700' : 'border-gray-200';
 
   const getHeadingClassName = () => {
     switch (level) {
       case 1:
-        return headingStyles.h1;
+        return `${baseHeadingStyles} ${textColor} text-3xl font-bold mt-6 mb-2 pb-2 border-b ${borderColor}`;
       case 2:
-        return headingStyles.h2;
+        return `${baseHeadingStyles} ${textColor} text-2xl font-bold mt-6 mb-2 pb-2`;
       case 3:
-        return headingStyles.h3;
+        return `${baseHeadingStyles} ${textColor} text-xl font-semibold mt-8 mb-3`;
       case 4:
-        return headingStyles.h4;
+        return `${baseHeadingStyles} ${textColor} text-md font-semibold mt-6 mb-2`;
       default:
-        return headingStyles.h5h6;
+        return `${baseHeadingStyles} ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} text-sm font-medium mt-4 mb-2`;
     }
   };
 

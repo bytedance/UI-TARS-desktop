@@ -20,7 +20,7 @@ import {
   Blockquote,
   HorizontalRule,
   InteractiveImage,
-} from '../components';
+} from './index';
 
 interface UseMarkdownComponentsProps {
   onImageClick: (src: string) => void;
