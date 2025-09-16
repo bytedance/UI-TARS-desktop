@@ -5,7 +5,6 @@ interface MessageAvatarProps {
   role: string;
 }
 
-
 export const MessageAvatar: React.FC<MessageAvatarProps> = ({ role }) => {
   if (role === 'user') {
     return (

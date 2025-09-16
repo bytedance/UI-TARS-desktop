@@ -6,7 +6,6 @@ import { useTool } from '@/common/hooks/useTool';
 import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 import './Message.css';
 
-
 import { SystemMessage } from './components/SystemMessage';
 import { MultimodalContent } from './components/MultimodalContent';
 import { ToolCalls } from './components/ToolCalls';
@@ -22,7 +21,6 @@ interface MessageProps {
   shouldDisplayTimestamp?: boolean;
   isInGroup?: boolean;
 }
-
 
 export const Message: React.FC<MessageProps> = ({
   message,
@@ -42,9 +40,7 @@ export const Message: React.FC<MessageProps> = ({
 
   const isFinalAnswer = message.role === 'final_answer' || message.isDeepResearch;
 
-
   const isFinalAssistantResponse = message.role === 'assistant' && message.finishReason === 'stop';
-
 
   const handleToolCallClick = (toolCall: any) => {
     if (message.toolResults && message.toolResults.length > 0) {
@@ -64,7 +60,6 @@ export const Message: React.FC<MessageProps> = ({
     }
   };
 
-
   const renderContent = () => {
     if (isMultimodal) {
       return (
@@ -75,7 +70,6 @@ export const Message: React.FC<MessageProps> = ({
         />
       );
     }
-
 
     if (message.role === 'assistant' && message.toolCalls && message.toolCalls.length > 0) {
       return (
@@ -97,10 +91,8 @@ export const Message: React.FC<MessageProps> = ({
       );
     }
 
-
     return <MarkdownRenderer content={message.content as string} forceDarkTheme={isUserMessage} />;
   };
-
 
   const getMessageBubbleClasses = () => {
     let baseClasses = '';
@@ -122,7 +114,6 @@ export const Message: React.FC<MessageProps> = ({
     return baseClasses;
   };
 
-
   const isImageOnlyMessage = React.useMemo(() => {
     if (!isMultimodalContent(message.content)) return false;
 
@@ -132,12 +123,10 @@ export const Message: React.FC<MessageProps> = ({
     return imageContents.length > 0 && textContents.length === 0;
   }, [message.content]);
 
-
   const getProseClasses = () => {
     if (message.role === 'user') {
       return 'prose prose-invert prose-sm max-w-none';
     } else {
-
       return 'prose dark:prose-invert prose-sm max-w-none';
     }
   };
@@ -156,7 +145,6 @@ export const Message: React.FC<MessageProps> = ({
           />
         ) : (
           <>
-
             {message.thinking && (
               <ModernThinkingToggle
                 thinking={message.thinking}

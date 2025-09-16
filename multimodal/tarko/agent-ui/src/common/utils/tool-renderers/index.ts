@@ -7,7 +7,6 @@ import {
 } from './renderer-conditions';
 
 const TOOL_TO_RENDERER_CONFIG: ToolToRendererCondition[] = [
-
   { toolName: 'web_search', renderer: 'search_result' },
   { toolName: 'browser_vision_control', renderer: 'browser_vision_control' },
   { toolName: 'browser_screenshot', renderer: 'image' },
@@ -21,22 +20,16 @@ const TOOL_TO_RENDERER_CONFIG: ToolToRendererCondition[] = [
   { toolName: 'execute_bash', renderer: 'command_result' },
   { toolName: 'JupyterCI', renderer: 'script_result' },
 
-
   strReplaceEditorRendererCondition,
-
 
   readMultipleFilesRendererCondition,
 
-
   generalRendererCondition,
-
 
   imageRendererCondition,
 
-
   (): string => 'json',
 ];
-
 
 export function determineToolRendererType(name: string, content: any): string {
   for (const condition of TOOL_TO_RENDERER_CONFIG) {
@@ -49,7 +42,6 @@ export function determineToolRendererType(name: string, content: any): string {
       return condition.renderer;
     }
   }
-
 
   return 'json';
 }

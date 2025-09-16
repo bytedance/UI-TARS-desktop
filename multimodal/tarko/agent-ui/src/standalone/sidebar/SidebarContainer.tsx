@@ -4,7 +4,6 @@ import { ChatSession } from './ChatSession';
 import { useLayout } from '@/common/hooks/useLayout';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 
-
 export const SidebarContainer: React.FC = () => {
   const { isSidebarCollapsed } = useLayout();
   const { isReplayMode } = useReplayMode();

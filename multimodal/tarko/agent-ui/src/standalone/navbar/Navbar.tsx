@@ -44,16 +44,13 @@ export const Navbar: React.FC = () => {
   const [mobileMenuAnchor, setMobileMenuAnchor] = React.useState<null | HTMLElement>(null);
   const workspaceNavItems = getWorkspaceNavItems();
 
-
   useEffect(() => {
     const updateTitle = () => {
       const parts = [];
 
-
       if (sessionMetadata?.agentInfo?.name) {
         parts.push(sessionMetadata.agentInfo.name);
       }
-
 
       const title = parts.length > 0 ? parts.join(' | ') : getAgentTitle();
       document.title = title;
@@ -62,12 +59,9 @@ export const Navbar: React.FC = () => {
     updateTitle();
   }, [sessionMetadata?.agentInfo?.name]);
 
-
   const logoUrl = getLogoUrl();
 
-
   const logoType = useLogoType();
-
 
   const toggleDarkMode = useCallback(() => {
     const newMode = !isDarkMode;
@@ -75,11 +69,9 @@ export const Navbar: React.FC = () => {
     localStorage.setItem('agent-tars-theme', newMode ? 'dark' : 'light');
   }, [isDarkMode]);
 
-
   const handleNavItemClick = (link: string) => {
     window.open(link, '_blank', 'noopener,noreferrer');
   };
-
 
   const handleMobileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setMobileMenuAnchor(event.currentTarget);
@@ -88,7 +80,6 @@ export const Navbar: React.FC = () => {
   const handleMobileMenuClose = () => {
     setMobileMenuAnchor(null);
   };
-
 
   const getNavItemIcon = (iconType: WorkspaceNavItemIcon = 'default') => {
     const iconMap = {
@@ -101,7 +92,6 @@ export const Navbar: React.FC = () => {
     };
     return iconMap[iconType];
   };
-
 
   const getNavItemStyle = (iconType: WorkspaceNavItemIcon = 'default') => {
     const colors = {
@@ -123,10 +113,8 @@ export const Navbar: React.FC = () => {
   return (
     <ThemeProvider theme={muiTheme}>
       <div className="h-12 backdrop-blur-sm flex items-center px-3 flex-shrink-0 relative">
-
         <div className="flex items-center">
           {logoType === 'traffic-lights' ? (
-
             <div className="flex space-x-1.5 mr-3">
               <div className="traffic-light traffic-light-red" />
               <div className="traffic-light traffic-light-yellow" />
@@ -141,7 +129,6 @@ export const Navbar: React.FC = () => {
           )}
         </div>
 
-
         {!isReplayMode && (
           <div className="ml-0">
             <motion.button
@@ -155,7 +142,6 @@ export const Navbar: React.FC = () => {
             </motion.button>
           </div>
         )}
-
 
         <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 max-[968px]:relative max-[968px]:left-auto max-[968px]:top-auto max-[968px]:transform-none max-[968px]:flex-1 max-[968px]:mx-3">
           <DynamicNavbarCenter
@@ -173,7 +159,6 @@ export const Navbar: React.FC = () => {
                   const { className } = getNavItemStyle(navItem.icon);
                   return (
                     <motion.button
-
                       key={navItem.title}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
@@ -199,7 +184,6 @@ export const Navbar: React.FC = () => {
               <FiInfo size={16} />
             </motion.button>
 
-
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
@@ -210,12 +194,10 @@ export const Navbar: React.FC = () => {
               {isDarkMode ? <FiSun size={16} /> : <FiMoon size={16} />}
             </motion.button>
 
-
             {activeSessionId && !isReplayMode && (
               <ShareButton variant="navbar" disabled={isProcessing} />
             )}
           </div>
-
 
           <div className="md:hidden">
             <IconButton
@@ -262,14 +244,12 @@ export const Navbar: React.FC = () => {
                 },
               }}
             >
-
               {!isReplayMode &&
                 workspaceNavItems.length > 0 && [
                   ...workspaceNavItems.map((navItem) => {
                     const IconComponent = getNavItemIcon(navItem.icon);
                     return (
                       <MenuItem
-
                         key={navItem.title}
                         onClick={() => {
                           handleNavItemClick(navItem.link);
@@ -285,7 +265,6 @@ export const Navbar: React.FC = () => {
                   <Divider key="divider" />,
                 ]}
 
-
               <MenuItem
                 onClick={() => {
                   setShowAboutModal(true);
@@ -296,7 +275,6 @@ export const Navbar: React.FC = () => {
                 <FiInfo size={16} style={{ opacity: 0.7 }} />
                 About {getAgentTitle()}
               </MenuItem>
-
 
               <MenuItem
                 onClick={() => {
@@ -313,11 +291,9 @@ export const Navbar: React.FC = () => {
                 {isDarkMode ? 'Light Mode' : 'Dark Mode'}
               </MenuItem>
 
-
               {activeSessionId && !isReplayMode && (
                 <MenuItem
                   onClick={() => {
-
                     handleMobileMenuClose();
                   }}
                   sx={{ gap: 1.5 }}
@@ -331,7 +307,6 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
 
-
       <AboutModal
         isOpen={showAboutModal}
         onClose={() => setShowAboutModal(false)}
@@ -340,7 +315,6 @@ export const Navbar: React.FC = () => {
     </ThemeProvider>
   );
 };
-
 
 interface DynamicNavbarCenterProps {
   sessionMetadata?: {
@@ -362,7 +336,6 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
   const [modelTextWidth, setModelTextWidth] = useState(0);
   const isDarkMode = useDarkMode();
 
-
   useEffect(() => {
     const calculateWidths = () => {
       if (!containerRef.current) return;
@@ -370,12 +343,10 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
       const container = containerRef.current;
       const containerWidth = container.offsetWidth;
 
-
       const reservedSpace = 120;
       const available = Math.max(containerWidth - reservedSpace, 200);
 
       setAvailableWidth(available);
-
 
       const measureText = (text: string, className: string) => {
         const temp = document.createElement('span');
@@ -407,7 +378,6 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
 
     calculateWidths();
 
-
     const handleResize = () => {
       setTimeout(calculateWidths, 100);
     };
@@ -421,10 +391,8 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
     sessionMetadata?.modelConfig?.provider,
   ]);
 
-
   const totalTextWidth = agentTextWidth + modelTextWidth;
   const hasSpace = totalTextWidth <= availableWidth;
-
 
   const agentMaxWidth = hasSpace
     ? 'none'
@@ -440,7 +408,6 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
       className="flex items-center gap-3 min-w-0"
       style={{ maxWidth: '100%' }}
     >
-
       {sessionMetadata?.agentInfo?.name && (
         <Box
           sx={{
@@ -451,7 +418,6 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
             py: 0.375,
             height: '28px',
             minHeight: '28px',
-
 
             background: isDarkMode
               ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 50%, rgba(168, 85, 247, 0.15) 100%)'
@@ -502,7 +468,6 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
           </Typography>
         </Box>
       )}
-
 
       <NavbarModelSelector
         className="min-w-0"

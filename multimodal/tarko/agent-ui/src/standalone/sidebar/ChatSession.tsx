@@ -11,7 +11,6 @@ interface ChatSessionProps {
   isCollapsed: boolean;
 }
 
-
 export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
   const {
     sessions,
@@ -37,7 +36,6 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchMode, setIsSearchMode] = useState(false);
 
-
   const [visibleSessionsCount, setVisibleSessionsCount] = useState<Record<string, number>>({
     today: 10,
     yesterday: 10,
@@ -46,15 +44,12 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
     searchResults: 10,
   });
 
-
   const refreshingRef = useRef(false);
   const sessionActionInProgressRef = useRef<string | null>(null);
-
 
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
     setIsSearchMode(!!query);
-
 
     if (query) {
       setVisibleSessionsCount((prev) => ({
@@ -64,7 +59,6 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
     }
   }, []);
 
-
   const toggleSectionCollapse = useCallback((sectionKey: string) => {
     setCollapsedSections((prev) => ({
       ...prev,
@@ -72,14 +66,12 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
     }));
   }, []);
 
-
   const loadMoreSessions = useCallback((groupKey: string) => {
     setVisibleSessionsCount((prev) => ({
       ...prev,
       [groupKey]: prev[groupKey] + 10,
     }));
   }, []);
-
 
   const filteredSessions = useMemo(() => {
     if (!searchQuery) return sessions;
@@ -93,9 +85,7 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
     );
   }, [sessions, searchQuery]);
 
-
   const groupedSessions = useMemo(() => {
-
     if (isSearchMode) {
       return [
         {
@@ -115,14 +105,12 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
     const lastWeek = new Date(today);
     lastWeek.setDate(lastWeek.getDate() - 7);
 
-
     const groups: Array<{ label: string; sessions: Array<any>; key: string }> = [
       { label: 'Today', sessions: [], key: 'today' },
       { label: 'Yesterday', sessions: [], key: 'yesterday' },
       { label: 'This Week', sessions: [], key: 'thisWeek' },
       { label: 'Earlier', sessions: [], key: 'earlier' },
     ];
-
 
     sessions.forEach((session) => {
       const sessionDate = new Date(session.updatedAt || session.createdAt);
@@ -138,10 +126,8 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
       }
     });
 
-
     return groups.filter((group) => group.sessions.length > 0);
   }, [sessions, isSearchMode, filteredSessions]);
-
 
   const handleSessionClick = useCallback(
     (sessionId: string) => {
@@ -154,14 +140,11 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
         return;
       }
 
-
       sessionActionInProgressRef.current = sessionId;
       setSwitchingSessionId(sessionId);
 
-
       requestAnimationFrame(() => {
         navigate(`/${sessionId}`);
-
 
         setTimeout(() => {
           setSwitchingSessionId(null);
@@ -172,7 +155,6 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
     [connectionStatus.connected, loadingSessionId, switchingSessionId, navigate],
   );
 
-
   const refreshSessions = useCallback(async () => {
     if (refreshingRef.current) return;
 
@@ -180,7 +162,6 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
     setIsRefreshing(true);
 
     try {
-
       const [isConnected] = await Promise.all([checkServerStatus()]);
 
       if (isConnected) {
@@ -193,7 +174,6 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
       refreshingRef.current = false;
     }
   }, [checkServerStatus, loadSessions]);
-
 
   const handleEditSession = useCallback((sessionId: string, currentName?: string) => {
     setEditingSessionId(sessionId);
@@ -222,19 +202,14 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
     if (!sessionToDelete) return;
 
     try {
-
       if (sessionToDelete === activeSessionId && sessions.length > 1) {
-
         const nextSession = sessions.find((s) => s.id !== sessionToDelete);
         if (nextSession) {
-
           navigate(`/${nextSession.id}`);
-
 
           await new Promise((resolve) => setTimeout(resolve, 50));
         }
       }
-
 
       await deleteSession(sessionToDelete);
     } catch (error) {
@@ -245,7 +220,6 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
     }
   }, [deleteSession, sessionToDelete, sessions, activeSessionId, navigate]);
 
-
   if (isCollapsed) {
     return (
       <div className="flex flex-col h-full bg-transparent w-0 border-r border-gray-100/40 dark:border-gray-700/20" />
@@ -254,11 +228,9 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
 
   return (
     <div className="w-64 bg-white dark:bg-gray-800/95 rounded-xl flex flex-col h-full backdrop-blur-sm mr-3">
-
       <div className="p-4 flex items-center justify-between border-b border-gray-100/40 dark:border-gray-700/20">
         <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Recent Tasks</div>
         <div className="flex items-center gap-2">
-
           <div
             className={`h-2 w-2 rounded-full ${
               connectionStatus.connected
@@ -291,9 +263,7 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
         </div>
       </div>
 
-
       <SessionSearch onSearch={handleSearch} />
-
 
       {!connectionStatus.connected && sessions.length > 0 && (
         <div className="px-3 py-2">
@@ -321,7 +291,6 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
         </div>
       )}
 
-
       {isSearchMode && filteredSessions.length === 0 && (
         <div className="p-6 text-center">
           <div className="flex justify-center mb-3 text-gray-400 dark:text-gray-500">
@@ -334,12 +303,10 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
         </div>
       )}
 
-
       <div className="flex-1 overflow-y-auto sidebar-scrollbar p-3">
         <AnimatePresence>
           {groupedSessions.map((group) => (
             <div key={group.key} className="mb-4">
-
               <motion.button
                 onClick={() => toggleSectionCollapse(group.key)}
                 className="w-full flex items-center justify-between px-1 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-300"
@@ -355,7 +322,6 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
                   <FiChevronUp size={14} />
                 </motion.div>
               </motion.button>
-
 
               <AnimatePresence>
                 {!collapsedSections[group.key] && (
@@ -390,7 +356,6 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
                         ))}
                     </div>
 
-
                     {group.sessions.length > visibleSessionsCount[group.key] && (
                       <motion.button
                         initial={{ opacity: 0 }}
@@ -410,7 +375,6 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
           ))}
         </AnimatePresence>
       </div>
-
 
       <ConfirmDialog
         isOpen={deleteConfirmOpen}

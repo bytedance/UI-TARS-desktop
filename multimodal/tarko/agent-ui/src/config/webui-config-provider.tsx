@@ -7,7 +7,6 @@ import React, { createContext, useContext, useEffect, useState, type ReactNode }
 import type { BaseAgentWebUIImplementation } from '@tarko/interface';
 import { loadWebUIConfigSync, type ConfigLoadResult } from './config-loader';
 
-
 interface WebUIConfigContext {
   config: BaseAgentWebUIImplementation;
   error?: string;
@@ -15,14 +14,11 @@ interface WebUIConfigContext {
   reload: () => void;
 }
 
-
 const WebUIConfigContext = createContext<WebUIConfigContext | null>(null);
-
 
 interface WebUIConfigProviderProps {
   children: ReactNode;
 }
-
 
 export function WebUIConfigProvider({ children }: WebUIConfigProviderProps) {
   const [configState, setConfigState] = useState<{
@@ -30,7 +26,6 @@ export function WebUIConfigProvider({ children }: WebUIConfigProviderProps) {
     error?: string;
     source: ConfigLoadResult['source'];
   }>(() => {
-
     const syncResult = loadWebUIConfigSync();
     return {
       config: syncResult.config,
@@ -48,12 +43,10 @@ export function WebUIConfigProvider({ children }: WebUIConfigProviderProps) {
     });
   };
 
-
   useEffect(() => {
     const handleConfigChange = () => {
       loadConfig();
     };
-
 
     window.addEventListener('webui-config-changed', handleConfigChange);
 
@@ -72,7 +65,6 @@ export function WebUIConfigProvider({ children }: WebUIConfigProviderProps) {
   return <WebUIConfigContext.Provider value={contextValue}>{children}</WebUIConfigContext.Provider>;
 }
 
-
 export function useWebUIConfig(): WebUIConfigContext {
   const context = useContext(WebUIConfigContext);
 
@@ -83,12 +75,10 @@ export function useWebUIConfig(): WebUIConfigContext {
   return context;
 }
 
-
 export function useWebUIConfigValue(): BaseAgentWebUIImplementation {
   const { config } = useWebUIConfig();
   return config;
 }
-
 
 export function withWebUIConfig<P extends object>(
   Component: React.ComponentType<P & { webuiConfig: BaseAgentWebUIImplementation }>,
@@ -98,7 +88,6 @@ export function withWebUIConfig<P extends object>(
     return <Component {...props} webuiConfig={config} />;
   };
 }
-
 
 export function triggerConfigReload() {
   window.dispatchEvent(new CustomEvent('webui-config-changed'));

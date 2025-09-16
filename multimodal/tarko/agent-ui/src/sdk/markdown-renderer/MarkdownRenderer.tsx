@@ -25,7 +25,6 @@ interface MarkdownRendererProps {
   codeBlockStyle?: React.CSSProperties;
 }
 
-
 export const MarkdownRenderer: React.FC<MarkdownRendererProps> = (props) => {
   return (
     <MarkdownThemeProvider>
@@ -33,7 +32,6 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = (props) => {
     </MarkdownThemeProvider>
   );
 };
-
 
 const MarkdownRendererContent: React.FC<MarkdownRendererProps> = ({
   content,
@@ -47,16 +45,13 @@ const MarkdownRendererContent: React.FC<MarkdownRendererProps> = ({
   const [renderError, setRenderError] = useState<Error | null>(null);
   const { themeClass, colors } = useMarkdownStyles();
 
-
   const handleImageClick = (src: string) => {
     setOpenImage(src);
   };
 
-
   const handleCloseModal = () => {
     setOpenImage(null);
   };
-
 
   useEffect(() => {
     if (window.location.hash) {
@@ -68,18 +63,15 @@ const MarkdownRendererContent: React.FC<MarkdownRendererProps> = ({
     }
   }, [content]);
 
-
   useEffect(() => {
     resetFirstH1Flag();
     setRenderError(null);
   }, [content]);
 
-
   const components = useMarkdownComponents({
     onImageClick: handleImageClick,
     codeBlockStyle,
   });
-
 
   if (renderError) {
     return (
@@ -90,15 +82,12 @@ const MarkdownRendererContent: React.FC<MarkdownRendererProps> = ({
     );
   }
 
-
   const processedContent = useMemo(() => {
-
     if (!content.includes('http')) {
       return content;
     }
     return preprocessMarkdownLinks(content);
   }, [content]);
-
 
   const finalThemeClass = forceDarkTheme ? 'dark' : themeClass;
   const markdownContentClass = `${finalThemeClass} markdown-content font-inter leading-relaxed ${colors.text.primary} ${className}`;
@@ -107,13 +96,8 @@ const MarkdownRendererContent: React.FC<MarkdownRendererProps> = ({
     return (
       <div className={markdownContentClass}>
         <ReactMarkdown
-
           remarkPlugins={[remarkGfm, remarkMath, remarkAlert]}
-
-          rehypePlugins={[
-            rehypeKatex,
-            [rehypeHighlight, { detect: true, ignoreMissing: true }],
-          ]}
+          rehypePlugins={[rehypeKatex, [rehypeHighlight, { detect: true, ignoreMissing: true }]]}
           components={components}
         >
           {processedContent}
@@ -125,7 +109,6 @@ const MarkdownRendererContent: React.FC<MarkdownRendererProps> = ({
   } catch (error) {
     console.error('Error rendering markdown:', error);
     setRenderError(error instanceof Error ? error : new Error(String(error)));
-
 
     return (
       <pre className="p-3 text-sm border border-gray-200 rounded-md overflow-auto">{content}</pre>

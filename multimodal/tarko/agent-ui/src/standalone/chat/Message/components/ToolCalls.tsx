@@ -12,7 +12,6 @@ interface ToolCallsProps {
   toolResults?: any[]; // Add toolResults to check completion status
 }
 
-
 export const ToolCalls: React.FC<ToolCallsProps> = ({
   toolCalls,
   onToolCallClick,
@@ -20,14 +19,11 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
   isIntermediate = false,
   toolResults = [],
 }) => {
-
   const getToolCallStatus = (toolCall: any) => {
-
     if (toolCall.function?.arguments) {
       try {
         JSON.parse(toolCall.function.arguments);
       } catch (error) {
-
         return 'pending';
       }
     }
@@ -45,12 +41,10 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
     return 'success';
   };
 
-
   const getToolCallElapsedTime = (toolCall: any): number | undefined => {
     const result = toolResults.find((result) => result.toolCallId === toolCall.id);
     return result?.elapsedMs;
   };
-
 
   const getStatusIcon = (status: string, toolName: string) => {
     switch (status) {
@@ -89,7 +83,6 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
         return <FiClock size={16} className="text-slate-500 dark:text-slate-400" />;
     }
   };
-
 
   const getToolDescription = (toolCall: any, status: string) => {
     try {
@@ -160,7 +153,6 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
     }
   };
 
-
   const getResultInfo = (toolCall: any, status: string) => {
     const result = toolResults.find((result) => result.toolCallId === toolCall.id);
 
@@ -189,11 +181,8 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
     return '';
   };
 
-
   const getToolDisplayName = (toolName: string) => {
-
     const nameWithSpaces = toolName.replace(/_/g, ' ');
-
 
     switch (toolName) {
       case 'browser_navigate':
@@ -217,14 +206,12 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
       case 'edit_file':
         return 'Edit File';
       default:
-
         return nameWithSpaces
           .split(' ')
           .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
           .join(' ');
     }
   };
-
 
   const isFileRelatedTool = (toolName: string) => {
     const fileTools = [

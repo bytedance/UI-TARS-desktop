@@ -32,9 +32,7 @@ import { socketService } from '../services/socketService';
 import { useEffect, useCallback, useMemo, useRef } from 'react';
 import { useReplayMode } from '../hooks/useReplayMode';
 
-
 export function useSession() {
-
   const [sessions, setSessions] = useAtom(sessionsAtom);
   const [activeSessionId, setActiveSessionId] = useAtom(activeSessionIdAtom);
   const messages = useAtomValue(messagesAtom);
@@ -55,9 +53,7 @@ export function useSession() {
     return currentSession?.metadata || {};
   }, [activeSessionId, sessions]);
 
-
   const { isReplayMode } = useReplayMode();
-
 
   const loadSessions = useSetAtom(loadSessionsAction);
   const createSession = useSetAtom(createSessionAction);
@@ -71,17 +67,14 @@ export function useSession() {
   const checkServerStatus = useSetAtom(checkConnectionStatusAction);
   const checkSessionStatus = useSetAtom(checkSessionStatusAction);
 
-
   const statusCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (!activeSessionId || !connectionStatus.connected || isReplayMode) return;
 
-
     if (statusCheckTimeoutRef.current) {
       clearTimeout(statusCheckTimeoutRef.current);
     }
-
 
     statusCheckTimeoutRef.current = setTimeout(() => {
       if (activeSessionId && connectionStatus.connected && !isReplayMode) {
@@ -95,7 +88,6 @@ export function useSession() {
       }
     };
   }, [activeSessionId, connectionStatus.connected, checkSessionStatus, isReplayMode]);
-
 
   const handleSessionStatusUpdate = useCallback(
     (status: any) => {
@@ -115,30 +107,20 @@ export function useSession() {
     [activeSessionId, isReplayMode, setSessionAgentStatus],
   );
 
-
   useEffect(() => {
     if (!activeSessionId || !socketService.isConnected() || isReplayMode) return;
 
-
-    socketService.joinSession(
-      activeSessionId,
-      () => {},
-      handleSessionStatusUpdate,
-    );
-
+    socketService.joinSession(activeSessionId, () => {}, handleSessionStatusUpdate);
 
     socketService.on('agent-status', handleSessionStatusUpdate);
 
     return () => {
-
       socketService.off('agent-status', handleSessionStatusUpdate);
     };
   }, [activeSessionId, handleSessionStatusUpdate, isReplayMode]);
 
-
   const sessionState = useMemo(
     () => ({
-
       sessions,
       activeSessionId,
       messages,
@@ -153,7 +135,6 @@ export function useSession() {
       replayState,
       sessionMetadata,
 
-
       loadSessions,
       createSession,
       setActiveSession,
@@ -161,17 +142,13 @@ export function useSession() {
       updateSessionMetadata,
       deleteSession,
 
-
       sendMessage,
       abortQuery,
 
-
       setActivePanelContent,
-
 
       initConnectionMonitoring,
       checkServerStatus,
-
 
       checkSessionStatus,
     }),

@@ -9,7 +9,6 @@ interface ShellProps {
   className?: string;
 }
 
-
 export const Shell: React.FC<ShellProps> = ({
   children,
   title,

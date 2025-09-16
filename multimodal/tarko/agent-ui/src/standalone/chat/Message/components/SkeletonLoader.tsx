@@ -7,7 +7,6 @@ interface SkeletonLoaderProps {
   className?: string;
 }
 
-
 export const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
   lines = 3,
   showAvatar = true,
@@ -45,7 +44,6 @@ export const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
     </div>
   );
 };
-
 
 interface TypewriterLoaderProps {
   text: string;

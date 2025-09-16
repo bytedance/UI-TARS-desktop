@@ -9,22 +9,18 @@ interface MultimodalContentProps {
   setActivePanelContent: any;
 }
 
-
 export const MultimodalContent: React.FC<MultimodalContentProps> = ({
   content,
   timestamp,
   setActivePanelContent,
 }) => {
-
   const imageContents = content.filter((part) => part.type === 'image_url');
   const textContents = content.filter((part) => part.type === 'text');
-
 
   const isImageOnly = imageContents.length > 0 && textContents.length === 0;
 
   return (
     <>
-
       {imageContents.length > 0 && (
         <div
           className={`${isImageOnly ? '' : 'mt-2 mb-2'} ${imageContents.length > 1 ? 'flex flex-wrap gap-2' : ''}`}
@@ -43,19 +39,15 @@ export const MultimodalContent: React.FC<MultimodalContentProps> = ({
               }
               className="relative group cursor-pointer inline-block"
             >
-
               <img
                 src={part.image_url.url}
                 alt={'Image'}
                 className={`${isImageOnly ? 'max-h-48' : 'h-24'} rounded-3xl object-cover`}
               />
-
-
             </motion.div>
           ))}
         </div>
       )}
-
 
       {textContents.map((part, index) => (
         <div key={`text-${index}`} className="text-current" style={{ whiteSpace: 'break-spaces' }}>

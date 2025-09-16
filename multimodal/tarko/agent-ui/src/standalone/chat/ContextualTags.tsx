@@ -18,12 +18,10 @@ interface PathValidation {
   };
 }
 
-
 export const ContextualTags: React.FC<ContextualTagsProps> = ({ items, onRemove }) => {
   const { activeSessionId } = useSession();
   const [pathValidation, setPathValidation] = useState<PathValidation>({});
   const [isValidating, setIsValidating] = useState(false);
-
 
   useEffect(() => {
     if (!activeSessionId || items.length === 0) {
@@ -35,8 +33,8 @@ export const ContextualTags: React.FC<ContextualTagsProps> = ({ items, onRemove 
       setIsValidating(true);
       try {
         const pathsToValidate = items
-        .filter((item) => item.type !== 'workspace')
-        .map((item) => item.relativePath);
+          .filter((item) => item.type !== 'workspace')
+          .map((item) => item.relativePath);
 
         if (pathsToValidate.length > 0) {
           const results = await apiService.validateWorkspacePaths(activeSessionId, pathsToValidate);
@@ -59,7 +57,6 @@ export const ContextualTags: React.FC<ContextualTagsProps> = ({ items, onRemove 
       }
     };
 
-
     const debounceTimer = setTimeout(validatePaths, 300);
     return () => clearTimeout(debounceTimer);
   }, [items, activeSessionId]);
@@ -69,7 +66,6 @@ export const ContextualTags: React.FC<ContextualTagsProps> = ({ items, onRemove 
   const getItemIcon = (item: ContextualItem) => {
     const validation = pathValidation[item.relativePath];
     const isInvalid = validation && !validation.exists;
-
 
     if (isInvalid) {
       return <FiAlertTriangle size={14} className="text-red-500 dark:text-red-400 flex-shrink-0" />;

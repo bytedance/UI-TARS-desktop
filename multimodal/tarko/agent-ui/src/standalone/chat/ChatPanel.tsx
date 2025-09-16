@@ -15,24 +15,20 @@ import { SessionCreatingState } from './components/SessionCreatingState';
 
 import './ChatPanel.css';
 
-
 export const ChatPanel: React.FC = () => {
   const { sessionId: urlSessionId } = useParams<{ sessionId: string }>();
   const { activeSessionId, isProcessing, connectionStatus, checkServerStatus, sendMessage } =
     useSession();
-
 
   const currentSessionId = urlSessionId || activeSessionId;
   const groupedMessages = useAtomValue(groupedMessagesAtom);
   const replayState = useAtomValue(replayStateAtom);
   const { isReplayMode } = useReplayMode();
 
-
   const activeMessages =
     currentSessionId && currentSessionId !== 'creating'
       ? groupedMessages[currentSessionId] || []
       : [];
-
 
   const { messagesContainerRef, messagesEndRef, showScrollToBottom, scrollToBottom } =
     useScrollToBottom({
@@ -43,11 +39,9 @@ export const ChatPanel: React.FC = () => {
       autoScrollOnUserMessage: !isReplayMode,
     });
 
-
   const isCreatingSession = !currentSessionId || currentSessionId === 'creating';
   const hasMessages = activeMessages.length > 0;
   const showEmptyState = !isCreatingSession && !hasMessages;
-
 
   if (isCreatingSession) {
     return <SessionCreatingState isCreating={currentSessionId === 'creating'} />;

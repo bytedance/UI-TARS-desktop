@@ -36,7 +36,6 @@ interface ChatInputProps {
   variant?: 'default' | 'home';
 }
 
-
 export const ChatInput: React.FC<ChatInputProps> = ({
   onSubmit,
   isDisabled = false,
@@ -67,9 +66,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   const { abortQuery } = useSession();
 
-
   const contextualSelectorEnabled = isContextualSelectorEnabled() && showContextualSelector;
-
 
   useEffect(() => {
     if (initialValue && !contextualState.input) {
@@ -92,10 +89,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     const newValue = target.value;
     const newCursorPosition = target.selectionStart;
 
-
     target.style.height = 'auto';
     target.style.height = `${Math.min(target.scrollHeight, 200)}px`;
-
 
     setContextualState((prev) => ({
       ...prev,
@@ -106,18 +101,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
     if (!contextualSelectorEnabled) return;
 
-
     const textBeforeCursor = newValue.slice(0, newCursorPosition);
     const lastAtIndex = textBeforeCursor.lastIndexOf('@');
 
     if (lastAtIndex !== -1) {
-
       const charBeforeAt = lastAtIndex > 0 ? textBeforeCursor[lastAtIndex - 1] : ' ';
       const isValidAtPosition = /\s/.test(charBeforeAt) || lastAtIndex === 0;
 
       if (isValidAtPosition) {
         const queryAfterAt = textBeforeCursor.slice(lastAtIndex + 1);
-
 
         if (!queryAfterAt.includes(' ') && !queryAfterAt.includes(':')) {
           updateSelectorState({
@@ -129,7 +121,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       }
     }
 
-
     if (contextualState.showSelector) {
       updateSelectorState({
         showSelector: false,
@@ -138,11 +129,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     }
   };
 
-
-
   const handleContextualSelect = (item: ContextualItem) => {
     addContextualItem(item);
-
 
     const textBeforeCursor = contextualState.input.slice(0, contextualState.cursorPosition);
     const lastAtIndex = textBeforeCursor.lastIndexOf('@');
@@ -161,12 +149,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       const newInput = textBefore + tagText + ' ' + textAfter;
       const newCursorPos = lastAtIndex + tagText.length + 1;
 
-
       setTimeout(() => {
         if (inputRef.current) {
           inputRef.current.focus();
           inputRef.current.setSelectionRange(newCursorPos, newCursorPos);
-
 
           setContextualState((prev) => ({
             ...prev,
@@ -190,14 +176,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
     handleSelectorClose();
 
-
     if (inputRef.current) {
       inputRef.current.style.height = 'auto';
     }
 
-
     const messageContent = composeMessageContent(contextualState.input, uploadedImages);
-
 
     clearContextualState();
     setUploadedImages([]);
@@ -234,7 +217,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     } catch (error) {
       console.error('Failed to abort:', error);
     } finally {
-
       setTimeout(() => setIsAborting(false), 100);
     }
   };
@@ -276,12 +258,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const handlePaste = async (e: React.ClipboardEvent) => {
     if (isDisabled || isProcessing) return;
 
-
     e.preventDefault();
 
     const handled = await handleMultimodalPaste(e.nativeEvent, {
       onTextPaste: (text: string) => {
-
         const textarea = inputRef.current;
         if (!textarea) return;
 
@@ -298,7 +278,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           contextualItems: parseContextualReferences(newValue),
         }));
 
-
         setTimeout(() => {
           if (textarea) {
             textarea.setSelectionRange(newCursorPos, newCursorPos);
@@ -313,7 +292,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         : undefined,
       onMultimodalPaste: showAttachments
         ? (text: string, images: ChatCompletionContentPart[]) => {
-
             const textarea = inputRef.current;
             if (!textarea) return;
 
@@ -332,7 +310,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
             setUploadedImages((prev) => [...prev, ...images]);
 
-
             setTimeout(() => {
               if (textarea) {
                 textarea.setSelectionRange(newCursorPos, newCursorPos);
@@ -348,7 +325,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     });
 
     if (!handled) {
-
       console.log('Paste not handled by multimodal clipboard');
     }
   };

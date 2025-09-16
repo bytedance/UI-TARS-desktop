@@ -9,7 +9,6 @@ import { isLayoutSwitchButtonEnabled } from '@/config/web-ui-config';
 import { AgentConfigViewer } from './AgentConfigViewer';
 import { LayoutSwitchButton } from './LayoutSwitchButton';
 
-
 export const ToolBar: React.FC = () => {
   const navigate = useNavigate();
   const { isReplayMode } = useReplayMode();
@@ -18,7 +17,6 @@ export const ToolBar: React.FC = () => {
   const [isCreatingSession, setIsCreatingSession] = useState(false);
 
   const enableLayoutSwitchButton = isLayoutSwitchButtonEnabled();
-
 
   const handleNewSession = useCallback(async () => {
     if (isCreatingSession || !connectionStatus.connected) return;
@@ -34,7 +32,6 @@ export const ToolBar: React.FC = () => {
     }
   }, [createSession, navigate, isCreatingSession, connectionStatus.connected]);
 
-
   const handleNavigateHome = useCallback(() => {
     navigate('/');
   }, [navigate]);
@@ -42,9 +39,7 @@ export const ToolBar: React.FC = () => {
   return (
     <>
       <div className="w-14 h-full flex flex-col backdrop-blur-sm">
-
         <div className="flex-1 flex flex-col items-center gap-4">
-
           {!isReplayMode && (
             <motion.button
               whileHover={{
@@ -95,7 +90,6 @@ export const ToolBar: React.FC = () => {
             </motion.button>
           )}
 
-
           {!isReplayMode && (
             <motion.button
               whileHover={{
@@ -112,9 +106,7 @@ export const ToolBar: React.FC = () => {
           )}
         </div>
 
-
         <div className="flex flex-col items-center gap-4 pb-4">
-
           {!isReplayMode && enableLayoutSwitchButton && <LayoutSwitchButton />}
 
           {!isReplayMode && (
@@ -133,7 +125,6 @@ export const ToolBar: React.FC = () => {
           )}
         </div>
       </div>
-
 
       <AgentConfigViewer isOpen={isConfigViewerOpen} onClose={() => setIsConfigViewerOpen(false)} />
     </>

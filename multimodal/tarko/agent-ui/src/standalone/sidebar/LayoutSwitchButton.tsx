@@ -5,7 +5,6 @@ import { FiColumns, FiSidebar } from 'react-icons/fi';
 import { layoutModeAtom } from '@/common/state/atoms/ui';
 import { LayoutMode } from '@tarko/interface';
 
-
 export const LayoutSwitchButton: React.FC = () => {
   const [layoutMode, setLayoutMode] = useAtom(layoutModeAtom);
 

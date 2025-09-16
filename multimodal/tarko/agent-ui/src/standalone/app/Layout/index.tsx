@@ -15,14 +15,12 @@ interface LayoutProps {
   isReplayMode?: boolean;
 }
 
-
 export const Layout: React.FC<LayoutProps> = ({ isReplayMode: propIsReplayMode }) => {
   const { isReplayMode: contextIsReplayMode } = useReplayMode();
   const [layoutMode] = useAtom(layoutModeAtom);
   const initializeLayoutMode = useSetAtom(initializeLayoutModeAtom);
 
   const isReplayMode = propIsReplayMode !== undefined ? propIsReplayMode : contextIsReplayMode;
-
 
   useEffect(() => {
     initializeLayoutMode();
@@ -40,27 +38,35 @@ export const Layout: React.FC<LayoutProps> = ({ isReplayMode: propIsReplayMode }
             'ml-3': isReplayMode,
           })}
         >
-
           <div className="hidden md:flex gap-3 flex-1 min-h-0">
-            <div className={classNames('flex flex-col overflow-hidden transition-all duration-300 ease-in-out', {
-              'flex-1': layoutMode === 'default',
-              'flex-[1_1_33.333%]': layoutMode === 'narrow-chat',
-            })}>
+            <div
+              className={classNames(
+                'flex flex-col overflow-hidden transition-all duration-300 ease-in-out',
+                {
+                  'flex-1': layoutMode === 'default',
+                  'flex-[1_1_33.333%]': layoutMode === 'narrow-chat',
+                },
+              )}
+            >
               <Shell className="h-full rounded-xl shadow-lg shadow-gray-200/50 dark:shadow-gray-950/20">
                 <ChatPanel />
               </Shell>
             </div>
 
-            <div className={classNames('flex flex-col overflow-hidden transition-all duration-300 ease-in-out', {
-              'flex-1': layoutMode === 'default',
-              'flex-[2_1_66.667%]': layoutMode === 'narrow-chat',
-            })}>
+            <div
+              className={classNames(
+                'flex flex-col overflow-hidden transition-all duration-300 ease-in-out',
+                {
+                  'flex-1': layoutMode === 'default',
+                  'flex-[2_1_66.667%]': layoutMode === 'narrow-chat',
+                },
+              )}
+            >
               <Shell className="h-full rounded-xl shadow-lg shadow-gray-200/50 dark:shadow-gray-950/20">
                 <WorkspacePanel />
               </Shell>
             </div>
           </div>
-
 
           <div className="md:hidden flex flex-col gap-3 flex-1 min-h-0">
             <div className="flex-1 flex flex-col overflow-hidden min-h-0">

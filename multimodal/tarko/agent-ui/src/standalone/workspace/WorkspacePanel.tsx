@@ -26,14 +26,12 @@ function shouldShowFullscreen(filePath: string): boolean {
   return getFileTypeInfo(filePath).isRenderableFile;
 }
 
-
 export const WorkspacePanel: React.FC = () => {
   const { activeSessionId, activePanelContent, setActivePanelContent } = useSession();
   const { replayState } = useReplay();
   const [fullscreenData, setFullscreenData] = React.useState<FullscreenFileData | null>(null);
   // Track whether focus parameter has already been processed once
   const [focusProcessed, setFocusProcessed] = React.useState(false);
-
 
   const isReplayActive = replayState.isActive;
   const focusParam = getFocusParam();
@@ -74,11 +72,7 @@ export const WorkspacePanel: React.FC = () => {
     <>
       <div className="flex flex-col h-full">
         <div className="flex-1 overflow-hidden">
-          {activePanelContent ? (
-            <WorkspaceDetail />
-          ) : (
-            <WorkspaceContent />
-          )}
+          {activePanelContent ? <WorkspaceDetail /> : <WorkspaceContent />}
         </div>
 
         <AnimatePresence>{isReplayActive && <ReplayControlPanel />}</AnimatePresence>

@@ -16,7 +16,6 @@ import { workspaceDisplayModeAtom, WorkspaceDisplayMode } from '@/common/state/a
 import { rawToolMappingAtom } from '@/common/state/atoms/rawEvents';
 import { getFileTypeInfo, getDefaultDisplayMode } from './utils/fileTypeUtils';
 
-
 import { ImageRenderer } from './renderers/ImageRenderer';
 import { LinkRenderer } from './renderers/LinkRenderer';
 import { LinkReaderRenderer } from './renderers/LinkReaderRenderer';
@@ -31,7 +30,6 @@ import { DeliverableRenderer } from './renderers/DeliverableRenderer';
 import { DiffRenderer } from './renderers/DiffRenderer';
 import { FileResultRenderer } from './renderers/FileResultRenderer';
 import { TabbedFilesRenderer } from './renderers/TabbedFilesRenderer';
-
 
 const CONTENT_RENDERERS: Record<
   string,
@@ -59,7 +57,6 @@ const CONTENT_RENDERERS: Record<
   tabbed_files: TabbedFilesRenderer,
 };
 
-
 export const WorkspaceDetail: React.FC = () => {
   const { activePanelContent, setActivePanelContent, activeSessionId } = useSession();
   const { isReplayMode } = useReplayMode();
@@ -67,7 +64,6 @@ export const WorkspaceDetail: React.FC = () => {
   const [rawToolMapping] = useAtom(rawToolMappingAtom);
   const [zoomedImage, setZoomedImage] = useState<ZoomedImageData | null>(null);
   const [fullscreenData, setFullscreenData] = useState<FullscreenFileData | null>(null);
-
 
   const getInitialDisplayMode = (): FileDisplayMode => {
     if (
@@ -86,7 +82,6 @@ export const WorkspaceDetail: React.FC = () => {
 
   const [displayMode, setDisplayMode] = useState<FileDisplayMode>(getInitialDisplayMode());
 
-
   useEffect(() => {
     if (
       !activePanelContent ||
@@ -98,7 +93,6 @@ export const WorkspaceDetail: React.FC = () => {
 
     const { isHtml } = getFileTypeInfo(activePanelContent.arguments.path);
 
-
     if (isHtml && !activePanelContent.isStreaming && displayMode === 'source') {
       const timer = setTimeout(() => {
         setDisplayMode('rendered');
@@ -108,7 +102,6 @@ export const WorkspaceDetail: React.FC = () => {
     }
   }, [activePanelContent?.isStreaming, displayMode]);
 
-
   useEffect(() => {
     setDisplayMode(getInitialDisplayMode());
   }, [activePanelContent?.toolCallId, activePanelContent?.timestamp]);
@@ -117,16 +110,13 @@ export const WorkspaceDetail: React.FC = () => {
     return null;
   }
 
-
   const panelContent = activePanelContent as StandardPanelContent;
-
 
   const getCurrentToolMapping = () => {
     if (!activeSessionId || !panelContent.toolCallId) return null;
     const sessionMappings = rawToolMapping[activeSessionId];
     return sessionMappings?.[panelContent.toolCallId] || null;
   };
-
 
   if (isResearchReportType(panelContent)) {
     return (
@@ -137,7 +127,6 @@ export const WorkspaceDetail: React.FC = () => {
       />
     );
   }
-
 
   const handleContentAction = (action: string, data: unknown) => {
     switch (action) {
@@ -154,11 +143,9 @@ export const WorkspaceDetail: React.FC = () => {
     }
   };
 
-
   const handleBack = () => {
     setActivePanelContent(null);
   };
-
 
   const handleFullscreen = () => {
     if (
@@ -179,7 +166,6 @@ export const WorkspaceDetail: React.FC = () => {
     }
   };
 
-
   const shouldShowToggle = () => {
     if (workspaceDisplayMode === 'raw') return false;
     if (panelContent.type === 'file' && panelContent.arguments?.path) {
@@ -187,7 +173,6 @@ export const WorkspaceDetail: React.FC = () => {
     }
     return false;
   };
-
 
   const shouldShowFullscreen = () => {
     if (workspaceDisplayMode === 'raw') return false;
@@ -197,11 +182,9 @@ export const WorkspaceDetail: React.FC = () => {
     return false;
   };
 
-
   const shouldShowWorkspaceToggle = () => {
     return Boolean(panelContent.toolCallId && getCurrentToolMapping());
   };
-
 
   const getToggleConfig = (): ToggleSwitchProps<FileDisplayMode> | undefined => {
     if (panelContent.type === 'file' && panelContent.arguments?.path) {
@@ -235,7 +218,6 @@ export const WorkspaceDetail: React.FC = () => {
     }
   };
 
-
   const renderContent = () => {
     if (workspaceDisplayMode === 'raw') {
       const toolMapping = getCurrentToolMapping();
@@ -257,7 +239,6 @@ export const WorkspaceDetail: React.FC = () => {
         );
       }
     }
-
 
     const RendererComponent = CONTENT_RENDERERS[panelContent.type] || GenericResultRenderer;
 
