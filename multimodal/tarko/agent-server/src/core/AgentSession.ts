@@ -13,7 +13,6 @@ import {
   AgioProviderConstructor,
   ChatCompletionContentPart,
   IAgent,
-  AgentStatusInfo,
 } from '@tarko/interface';
 import { AgentSnapshot } from '@tarko/agent-snapshot';
 import { EventStreamBridge } from '../utils/event-stream';
@@ -288,14 +287,6 @@ export class AgentSession {
       }
 
       // Prepare run options with session-specific model configuration
-      // Emit TTFT initialization status
-      this.eventBridge.emit('agent-status', {
-        isProcessing: true,
-        state: 'initializing',
-        phase: 'query_preparation',
-        message: 'Preparing to process your request...',
-        estimatedTime: '5-15 seconds',
-      } as AgentStatusInfo);
 
       const runOptions: AgentRunNonStreamingOptions = {
         input: options.input,
@@ -373,14 +364,6 @@ export class AgentSession {
       }
 
       // Prepare run options with session-specific model configuration
-      // Emit enhanced TTFT initialization status for streaming
-      this.eventBridge.emit('agent-status', {
-        isProcessing: true,
-        state: 'initializing',
-        phase: 'streaming_preparation',
-        message: 'Preparing streaming response...',
-        estimatedTime: '3-10 seconds for first token',
-      } as AgentStatusInfo);
 
       const runOptions: AgentRunStreamingOptions = {
         input: options.input,

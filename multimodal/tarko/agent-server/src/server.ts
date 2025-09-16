@@ -5,11 +5,9 @@
 
 import express from 'express';
 import http from 'http';
-import { Server as SocketIOServer } from 'socket.io';
 import { setupAPI } from './api';
 import { LogLevel } from '@tarko/interface';
 import { StorageProvider, createStorageProvider } from './storage';
-import { setupSocketIO } from './core/SocketHandlers';
 import type { AgentSession } from './core';
 import { resolveAgentImplementation } from './utils/agent-resolver';
 import type {
@@ -40,7 +38,6 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   // Core server components
   private app: express.Application;
   private server: http.Server;
-  private io: SocketIOServer; // Socket.IO server
 
   // Server state
   private isRunning = false;
@@ -99,9 +96,6 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
       workspacePath: this.getCurrentWorkspace(),
       isDebug: this.isDebug,
     });
-
-    // Setup WebSocket functionality
-    this.io = setupSocketIO(this.server, this);
 
     // Make server instance available to request handlers
     this.app.locals.server = this;
@@ -201,14 +195,6 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    */
   getHttpServer(): http.Server {
     return this.server;
-  }
-
-  /**
-   * Get the Socket.IO server instance
-   * @returns Socket.IO server
-   */
-  getSocketIOServer(): SocketIOServer {
-    return this.io;
   }
 
   /**

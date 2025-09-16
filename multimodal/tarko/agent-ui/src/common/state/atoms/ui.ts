@@ -1,5 +1,5 @@
 import { atom } from 'jotai';
-import { SessionItemMetadata, AgentStatusInfo, LayoutMode } from '@tarko/interface';
+import { SessionItemMetadata, LayoutMode } from '@tarko/interface';
 import { getDefaultLayoutMode } from '@/config/web-ui-config';
 import { ConnectionStatus, PanelContent, SanitizedAgentOptions } from '@/common/types';
 import { activeSessionIdAtom } from './session';
@@ -56,45 +56,9 @@ export const sidebarCollapsedAtom = atom<boolean>(true);
 export const workspacePanelCollapsedAtom = atom<boolean>(false);
 
 /**
- * Session-specific agent status storage
+ * Simple processing state atom based on SSE events
  */
-export const sessionAgentStatusAtom = atom<Record<string, AgentStatusInfo>>({});
-
-/**
- * Enhanced agent status atom for TTFT optimization with session isolation
- */
-export const agentStatusAtom = atom(
-  (get) => {
-    const activeSessionId = get(activeSessionIdAtom);
-    const sessionAgentStatus = get(sessionAgentStatusAtom);
-    return activeSessionId
-      ? sessionAgentStatus[activeSessionId] || { isProcessing: false }
-      : { isProcessing: false };
-  },
-  (get, set, update: AgentStatusInfo | ((prev: AgentStatusInfo) => AgentStatusInfo)) => {
-    const activeSessionId = get(activeSessionIdAtom);
-    if (activeSessionId) {
-      set(sessionAgentStatusAtom, (prev) => {
-        const currentStatus = prev[activeSessionId] || { isProcessing: false };
-        const newStatus = typeof update === 'function' ? update(currentStatus) : update;
-        return {
-          ...prev,
-          [activeSessionId]: newStatus,
-        };
-      });
-    }
-  },
-);
-
-/**
- * Derived atom for backward compatibility with session isolation
- */
-export const isProcessingAtom = atom(
-  (get) => get(agentStatusAtom).isProcessing,
-  (get, set, update: boolean) => {
-    set(agentStatusAtom, (prev) => ({ ...prev, isProcessing: update }));
-  },
-);
+export const isProcessingAtom = atom<boolean>(false);
 
 /**
  * Atom for offline mode state (view-only when disconnected)
