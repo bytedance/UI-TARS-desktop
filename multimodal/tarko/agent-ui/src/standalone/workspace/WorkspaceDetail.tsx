@@ -33,6 +33,7 @@ import { DeliverableRenderer } from './renderers/DeliverableRenderer';
 import { DiffRenderer } from './renderers/DiffRenderer';
 import { FileResultRenderer } from './renderers/FileResultRenderer';
 import { TabbedFilesRenderer } from './renderers/TabbedFilesRenderer';
+import { StandardRenderer } from './renderers/StandardRenderer';
 
 /**
  * Registry of content renderers that handle StandardPanelContent directly
@@ -264,7 +265,18 @@ export const WorkspaceDetail: React.FC = () => {
       }
     }
 
-    // Default interaction mode rendering
+    // Use new standardized renderer if available
+    if (panelContent.standardResult) {
+      return (
+        <StandardRenderer
+          standardResult={panelContent.standardResult}
+          onAction={handleContentAction}
+          displayMode={displayMode}
+        />
+      );
+    }
+
+    // Fallback to legacy renderer system
     const RendererComponent = CONTENT_RENDERERS[panelContent.type] || GenericResultRenderer;
 
     return (

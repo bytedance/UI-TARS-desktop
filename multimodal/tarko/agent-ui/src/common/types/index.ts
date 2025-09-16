@@ -5,6 +5,7 @@ import {
   ChatCompletionMessageToolCall,
 } from '@tarko/agent-interface';
 import { SanitizedAgentOptions, WorkspaceInfo, SessionInfo } from '@tarko/interface';
+import type { StandardToolResult } from '../utils/tool-renderers/types';
 
 export { AgentEventStream };
 export type { SanitizedAgentOptions, WorkspaceInfo, SessionInfo };
@@ -25,6 +26,8 @@ export interface ToolResult {
   arguments?: any;
   elapsedMs?: number;
   _extra?: { currentScreenshot: string };
+  /** Standardized tool result for new renderer system */
+  standardResult?: StandardToolResult;
 }
 
 /**
@@ -97,6 +100,8 @@ export interface PanelContent {
   // FIXME: Consider whether to remove it
   isDeepResearch?: boolean;
   messageId?: string;
+  /** Standardized tool result for new renderer system */
+  standardResult?: StandardToolResult;
 }
 
 /**
