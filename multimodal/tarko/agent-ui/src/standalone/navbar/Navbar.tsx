@@ -112,33 +112,18 @@ export const Navbar: React.FC = () => {
 
   // Get styling for nav item based on icon type
   const getNavItemStyle = (iconType: WorkspaceNavItemIcon = 'default') => {
-    const styleMap = {
-      code: {
-        className:
-          'flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50/80 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-lg border border-emerald-200/60 dark:border-emerald-700/50 hover:bg-emerald-100/90 dark:hover:bg-emerald-800/40 hover:text-emerald-800 dark:hover:text-emerald-200 transition-all duration-200 text-xs font-medium backdrop-blur-sm hover:shadow-sm',
-      },
-      monitor: {
-        className:
-          'flex items-center gap-1.5 px-3 py-1.5 bg-blue-50/80 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg border border-blue-200/60 dark:border-blue-700/50 hover:bg-blue-100/90 dark:hover:bg-blue-800/40 hover:text-blue-800 dark:hover:text-blue-200 transition-all duration-200 text-xs font-medium backdrop-blur-sm hover:shadow-sm',
-      },
-      terminal: {
-        className:
-          'flex items-center gap-1.5 px-3 py-1.5 bg-purple-50/80 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg border border-purple-200/60 dark:border-purple-700/50 hover:bg-purple-100/90 dark:hover:bg-purple-800/40 hover:text-purple-800 dark:hover:text-purple-200 transition-all duration-200 text-xs font-medium backdrop-blur-sm hover:shadow-sm',
-      },
-      browser: {
-        className:
-          'flex items-center gap-1.5 px-3 py-1.5 bg-cyan-50/80 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 rounded-lg border border-cyan-200/60 dark:border-cyan-700/50 hover:bg-cyan-100/90 dark:hover:bg-cyan-800/40 hover:text-cyan-800 dark:hover:text-cyan-200 transition-all duration-200 text-xs font-medium backdrop-blur-sm hover:shadow-sm',
-      },
-      desktop: {
-        className:
-          'flex items-center gap-1.5 px-3 py-1.5 bg-orange-50/80 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-lg border border-orange-200/60 dark:border-orange-700/50 hover:bg-orange-100/90 dark:hover:bg-orange-800/40 hover:text-orange-800 dark:hover:text-orange-200 transition-all duration-200 text-xs font-medium backdrop-blur-sm hover:shadow-sm',
-      },
-      default: {
-        className:
-          'flex items-center gap-1.5 px-3 py-1.5 bg-slate-50/80 dark:bg-slate-800/30 text-slate-700 dark:text-slate-300 rounded-lg border border-slate-200/60 dark:border-slate-700/50 hover:bg-slate-100/90 dark:hover:bg-slate-700/40 hover:text-slate-800 dark:hover:text-slate-200 transition-all duration-200 text-xs font-medium backdrop-blur-sm hover:shadow-sm',
-      },
+    const colors = {
+      code: 'emerald',
+      monitor: 'blue',
+      terminal: 'purple', 
+      browser: 'cyan',
+      desktop: 'orange',
+      default: 'slate',
     };
-    return styleMap[iconType];
+    const color = colors[iconType];
+    return {
+      className: `flex items-center gap-1.5 px-3 py-1.5 bg-${color}-50/80 dark:bg-${color}-900/30 text-${color}-700 dark:text-${color}-300 rounded-lg border border-${color}-200/60 dark:border-${color}-700/50 hover:bg-${color}-100/90 dark:hover:bg-${color}-800/40 hover:text-${color}-800 dark:hover:text-${color}-200 transition-all duration-200 text-xs font-medium backdrop-blur-sm hover:shadow-sm`,
+    };
   };
 
   // Create MUI theme for consistent styling

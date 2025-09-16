@@ -67,40 +67,13 @@ const CountdownCircle: React.FC<{ seconds: number; total: number }> = ({ seconds
 export const EmptyState: React.FC<EmptyStateProps> = ({ replayState, isReplayMode }) => {
   const { cancelAutoPlay } = useReplayMode();
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        duration: 0.6,
-        staggerChildren: 0.15,
-        ease: [0.25, 0.46, 0.45, 0.94],
-      },
-    },
-  };
-
-  const itemVariants = {
+  const fadeInVariants = {
     hidden: { opacity: 0, y: 24, scale: 0.95 },
     visible: {
       opacity: 1,
       y: 0,
       scale: 1,
-      transition: {
-        duration: 0.6,
-        ease: [0.25, 0.46, 0.45, 0.94],
-      },
-    },
-  };
-
-  const iconContainerVariants = {
-    hidden: { scale: 0.8, opacity: 0 },
-    visible: {
-      scale: 1,
-      opacity: 1,
-      transition: {
-        duration: 0.7,
-        ease: [0.25, 0.46, 0.45, 0.94],
-      },
+      transition: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] },
     },
   };
 
@@ -108,7 +81,10 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ replayState, isReplayMod
     <motion.div
       initial="hidden"
       animate="visible"
-      variants={containerVariants}
+      variants={{
+        hidden: { opacity: 0 },
+        visible: { opacity: 1, transition: { duration: 0.6, staggerChildren: 0.15 } },
+      }}
       className="flex items-center justify-center h-full min-h-[400px]"
     >
       <div className="text-center p-8 max-w-lg">
@@ -150,13 +126,13 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ replayState, isReplayMod
               {/* Enhanced title and description */}
               <motion.h3
                 className="text-xl font-display font-semibold mb-3 text-gray-900 dark:text-gray-100"
-                variants={itemVariants}
+                variants={fadeInVariants}
               >
                 Auto-play starting
               </motion.h3>
               <motion.p
                 className="text-gray-600 dark:text-gray-400 text-sm mb-8 leading-relaxed max-w-sm mx-auto"
-                variants={itemVariants}
+                variants={fadeInVariants}
               >
                 Replay will begin in{' '}
                 <span className="font-medium text-gray-800 dark:text-gray-200">
@@ -168,7 +144,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ replayState, isReplayMod
 
               {/* Enhanced cancel button */}
               <motion.button
-                variants={itemVariants}
+                variants={fadeInVariants}
                 whileHover={{ scale: 1.02, y: -1 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={cancelAutoPlay}
@@ -181,9 +157,14 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ replayState, isReplayMod
           </motion.div>
         ) : (
           /* Modern standard empty state */
-          <motion.div variants={containerVariants} className="max-w-md mx-auto">
+          <div className="max-w-md mx-auto">
             {/* Enhanced icon with modern design */}
-            <motion.div variants={iconContainerVariants} className="relative mb-8">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.7 }}
+              className="relative mb-8"
+            >
               {/* Background glow */}
               <motion.div
                 className="absolute inset-0 bg-gradient-to-r from-blue-500/15 via-purple-500/15 to-green-500/15 rounded-full blur-xl"
@@ -241,7 +222,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ replayState, isReplayMod
 
             {/* Enhanced title with gradient */}
             <motion.h3
-              variants={itemVariants}
+              variants={fadeInVariants}
               className="text-2xl font-semibold mb-4 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-gray-100 dark:via-white dark:to-gray-100 text-transparent bg-clip-text tracking-tight"
             >
               {isReplayMode && replayState.currentEventIndex === -1
@@ -251,14 +232,14 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ replayState, isReplayMod
 
             {/* Elegant description */}
             <motion.p
-              variants={itemVariants}
+              variants={fadeInVariants}
               className="text-gray-600 dark:text-gray-400 leading-relaxed mb-6 max-w-sm mx-auto"
             >
               {isReplayMode && replayState.currentEventIndex === -1
                 ? 'Press play to start the replay or use the timeline to navigate through the session.'
                 : `Ask ${getAgentTitle()} a question or submit a task to begin your conversation.`}
             </motion.p>
-          </motion.div>
+          </div>
         )}
       </div>
     </motion.div>

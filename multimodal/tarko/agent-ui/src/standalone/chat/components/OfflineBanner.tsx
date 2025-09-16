@@ -31,49 +31,30 @@ export const OfflineBanner: React.FC<OfflineBannerProps> = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: -10, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -10, scale: 0.98 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.3 }}
       className="mb-6 p-4 bg-gradient-to-r from-red-50/80 to-orange-50/80 dark:from-red-900/20 dark:to-orange-900/20 backdrop-blur-sm text-red-700 dark:text-red-300 text-sm rounded-2xl border border-red-200/40 dark:border-red-700/40 shadow-sm"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-start space-x-3">
-          {/* Icon with subtle animation */}
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-            className="mt-0.5"
-          >
+          <div className="mt-0.5">
             <FiWifiOff className="text-red-500 dark:text-red-400" size={18} />
-          </motion.div>
+          </div>
 
           <div className="flex-1">
-            <motion.div
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4, delay: 0.2 }}
-              className="font-medium text-red-800 dark:text-red-200 mb-1"
-            >
+            <div className="font-medium text-red-800 dark:text-red-200 mb-1">
               Viewing in offline mode
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4, delay: 0.3 }}
-              className="text-red-600 dark:text-red-300 text-xs leading-relaxed"
-            >
+            </div>
+            <div className="text-red-600 dark:text-red-300 text-xs leading-relaxed">
               You can view previous messages but cannot send new ones until reconnected.
-            </motion.div>
+            </div>
           </div>
         </div>
 
         {/* Reconnect button */}
         <motion.button
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4, delay: 0.4 }}
           whileHover={{ scale: 1.02, y: -1 }}
           whileTap={{ scale: 0.98 }}
           onClick={onReconnect}
@@ -82,11 +63,7 @@ export const OfflineBanner: React.FC<OfflineBannerProps> = ({
         >
           <motion.div
             animate={connectionStatus.reconnecting ? { rotate: 360 } : { rotate: 0 }}
-            transition={
-              connectionStatus.reconnecting
-                ? { duration: 1, repeat: Infinity, ease: 'linear' }
-                : { duration: 0.2 }
-            }
+            transition={connectionStatus.reconnecting ? { duration: 1, repeat: Infinity, ease: 'linear' } : { duration: 0.2 }}
             className="mr-2"
           >
             <FiRefreshCw size={14} />

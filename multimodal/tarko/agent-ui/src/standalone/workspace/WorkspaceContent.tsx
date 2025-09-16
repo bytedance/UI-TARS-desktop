@@ -67,7 +67,6 @@ export const WorkspaceContent: React.FC = () => {
   // Enhanced empty state when session exists but no content
   const files = (activeSessionId && allFiles[activeSessionId]) ?? [];
   const hasFiles = files.length > 0;
-  const hasContent = hasFiles;
 
   return (
     <div className="h-full flex flex-col">
@@ -88,7 +87,7 @@ export const WorkspaceContent: React.FC = () => {
 
       {/* Content area with elegant empty state */}
       <div className="flex-1 overflow-y-auto p-6">
-        {hasContent ? (
+        {hasFiles ? (
           <div className="space-y-6">
             {/* Generated Files */}
             {hasFiles && activeSessionId && (
