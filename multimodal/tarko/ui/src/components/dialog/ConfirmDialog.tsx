@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog } from '../mui/MuiDialog';
+import { Dialog, DialogPanel, DialogTitle } from '../mui/MuiDialog';
 import { FiAlertTriangle, FiX } from 'react-icons/fi';
 
 interface ConfirmDialogProps {
@@ -53,16 +53,16 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onClose={onClose} maxWidth="sm">
-      <Dialog.Panel className="p-6">
+      <DialogPanel className="p-6">
         <div className="flex items-start">
           <div className={`p-3 rounded-full ${typeStyles.iconBg} mr-4 flex-shrink-0`}>
             {typeStyles.icon}
           </div>
 
           <div className="flex-1">
-            <Dialog.Title className="text-lg font-medium text-gray-900 dark:text-gray-100">
+            <DialogTitle className="text-lg font-medium text-gray-900 dark:text-gray-100">
               {title}
-            </Dialog.Title>
+            </DialogTitle>
 
             <div className="mt-2">
               <p className="text-sm text-gray-600 dark:text-gray-400">{message}</p>
@@ -91,7 +91,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             {confirmText}
           </button>
         </div>
-      </Dialog.Panel>
+      </DialogPanel>
     </Dialog>
   );
 };
