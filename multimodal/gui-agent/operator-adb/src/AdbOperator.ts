@@ -94,8 +94,11 @@ export class AdbOperator extends Operator {
       }
       case 'long_press':
         break;
-      case 'type':
+      case 'type': {
+        const { content } = actionInputs;
+        this.handleType(content);
         break;
+      }
       case 'swipe':
       case 'drag':
         break;
@@ -224,6 +227,21 @@ export class AdbOperator extends Operator {
   private async handleClick(x: number, y: number): Promise<void> {
     // Use adjusted coordinates
     await this._adb!.shell(`input tap ${x} ${y}`);
+  }
+
+  private async handleType(text: string): Promise<void> {
+    if (!text) {
+      throw new Error('The content of type is empty');
+    }
+
+    const isChinese = /[\p{Script=Han}\p{sc=Hani}]/u.test(text);
+    // for pure ASCII characters, directly use inputText
+    if (!isChinese) {
+      await this._adb!.inputText(text);
+      return;
+    }
+    // for non-ASCII characters, use yadb
+    await this.executeWithYadb(`-keyboard "${text}"`);
   }
 
   private async handleHotkey(action: HotkeyAction) {
