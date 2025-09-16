@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import hljs from 'highlight.js';
 import { CodeEditorHeader } from './CodeEditorHeader';
+import { CodeEditorStatusBar } from './CodeEditorStatusBar';
+import { getDisplayFileName, getFileExtension } from '../../utils/file';
 import './CodeEditor.css';
 
 interface CodeEditorProps {
@@ -32,10 +34,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   const codeRef = useRef<HTMLElement>(null);
 
-  const displayFileName =
-    fileName || (filePath ? filePath.split('/').pop() || filePath : 'Untitled');
-  const fileExtension =
-    fileName && fileName.includes('.') ? fileName.split('.').pop()?.toLowerCase() || '' : '';
+  const displayFileName = getDisplayFileName(fileName, filePath);
+  const fileExtension = getFileExtension(fileName);
   const language = fileExtension || 'text';
 
   useEffect(() => {
@@ -51,7 +51,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   };
 
   const lines = code.split('\n');
-  const lineCount = lines.length;
 
   return (
     <div className={`code-editor-container ${className}`}>
@@ -68,7 +67,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             {showLineNumbers && (
               <div className="code-editor-line-numbers">
                 <div className="code-editor-line-numbers-inner">
-                  {Array.from({ length: lineCount }, (_, i) => (
+                  {Array.from({ length: lines.length }, (_, i) => (
                     <div key={i + 1} className="code-editor-line-number">
                       {i + 1}
                     </div>
@@ -87,15 +86,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           </div>
         </div>
 
-        <div className="code-editor-status-bar">
-          <div className="code-editor-status-left">
-            <span className="code-editor-status-item">{lineCount} lines</span>
-            <span className="code-editor-status-item">{code.length} characters</span>
-          </div>
-          <div className="code-editor-status-right">
-            {readOnly && <span className="code-editor-status-item">Read-only</span>}
-          </div>
-        </div>
+        <CodeEditorStatusBar code={code} readOnly={readOnly} />
       </div>
     </div>
   );

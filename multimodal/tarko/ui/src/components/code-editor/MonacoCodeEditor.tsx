@@ -2,6 +2,8 @@ import React, { useCallback, useMemo, useRef } from 'react';
 import Editor from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
 import { CodeEditorHeader } from './CodeEditorHeader';
+import { CodeEditorStatusBar } from './CodeEditorStatusBar';
+import { getMonacoLanguage, getDisplayFileName, getFileExtension } from '../../utils/file';
 import './MonacoCodeEditor.css';
 
 interface MonacoCodeEditorProps {
@@ -76,38 +78,8 @@ export const MonacoCodeEditor: React.FC<MonacoCodeEditorProps> = ({
     onCopy?.();
   }, [code, onCopy]);
 
-  // FIXME: Migrate `languageMap` to `src/utils`.
-  const getMonacoLanguage = useCallback((lang: string): string => {
-    const languageMap: Record<string, string> = {
-      javascript: 'javascript',
-      js: 'javascript',
-      jsx: 'javascript',
-      typescript: 'typescript',
-      ts: 'typescript',
-      tsx: 'typescript',
-      python: 'python',
-      py: 'python',
-      html: 'html',
-      css: 'css',
-      scss: 'scss',
-      less: 'less',
-      json: 'json',
-      xml: 'xml',
-      yaml: 'yaml',
-      yml: 'yaml',
-      markdown: 'markdown',
-      md: 'markdown',
-      bash: 'shell',
-      sh: 'shell',
-    };
-    return languageMap[lang.toLowerCase()] || 'plaintext';
-  }, []);
-
-  // FIXME: Migrate to `src/utils`.
-  const displayFileName =
-    fileName || (filePath ? filePath.split('/').pop() || filePath : 'Untitled');
-  const fileExtension =
-    fileName && fileName.includes('.') ? fileName.split('.').pop()?.toLowerCase() || '' : '';
+  const displayFileName = getDisplayFileName(fileName, filePath);
+  const fileExtension = getFileExtension(fileName);
   const monacoLanguage = getMonacoLanguage(fileExtension);
 
   return (
@@ -139,15 +111,7 @@ export const MonacoCodeEditor: React.FC<MonacoCodeEditorProps> = ({
           />
         </div>
 
-        <div className="code-editor-status-bar">
-          <div className="code-editor-status-left">
-            <span className="code-editor-status-item">{code.split('\n').length} lines</span>
-            <span className="code-editor-status-item">{code.length} characters</span>
-          </div>
-          <div className="code-editor-status-right">
-            {readOnly && <span className="code-editor-status-item">Read-only</span>}
-          </div>
-        </div>
+        <CodeEditorStatusBar code={code} readOnly={readOnly} />
       </div>
     </div>
   );
