@@ -6,28 +6,40 @@ import {
   readMultipleFilesRendererCondition,
 } from './renderer-conditions';
 
+// Group similar tools by renderer type for better maintainability
+const SEARCH_TOOLS = ['web_search', 'Search'];
+const COMMAND_TOOLS = ['run_command', 'execute_bash'];
+const SCRIPT_TOOLS = ['run_script', 'JupyterCI'];
+const FILE_TOOLS = ['write_file', 'read_file'];
+
 const TOOL_TO_RENDERER_CONFIG: ToolToRendererCondition[] = [
-  { toolName: 'web_search', renderer: 'search_result' },
+  // Browser tools
   { toolName: 'browser_vision_control', renderer: 'browser_vision_control' },
   { toolName: 'browser_screenshot', renderer: 'image' },
-  { toolName: 'write_file', renderer: 'file_result' },
-  { toolName: 'read_file', renderer: 'file_result' },
+  
+  // File operations
+  ...FILE_TOOLS.map(tool => ({ toolName: tool, renderer: 'file_result' })),
   { toolName: 'edit_file', renderer: 'diff_result' },
-  { toolName: 'run_command', renderer: 'command_result' },
-  { toolName: 'run_script', renderer: 'script_result' },
+  
+  // Command execution
+  ...COMMAND_TOOLS.map(tool => ({ toolName: tool, renderer: 'command_result' })),
+  
+  // Script execution
+  ...SCRIPT_TOOLS.map(tool => ({ toolName: tool, renderer: 'script_result' })),
+  
+  // Search tools
+  ...SEARCH_TOOLS.map(tool => ({ toolName: tool, renderer: 'search_result' })),
+  
+  // Link tools
   { toolName: 'LinkReader', renderer: 'link_reader' },
-  { toolName: 'Search', renderer: 'search_result' },
-  { toolName: 'execute_bash', renderer: 'command_result' },
-  { toolName: 'JupyterCI', renderer: 'script_result' },
 
+  // Dynamic conditions (order matters - more specific first)
   strReplaceEditorRendererCondition,
-
   readMultipleFilesRendererCondition,
-
   generalRendererCondition,
-
   imageRendererCondition,
 
+  // Fallback
   (): string => 'json',
 ];
 

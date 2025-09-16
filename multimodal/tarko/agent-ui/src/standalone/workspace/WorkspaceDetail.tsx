@@ -39,22 +39,32 @@ const CONTENT_RENDERERS: Record<
     displayMode?: FileDisplayMode;
   }>
 > = {
+  // Media renderers
   image: ImageRenderer,
+  
+  // Content renderers
   link: LinkRenderer,
   link_reader: LinkReaderRenderer,
   search_result: SearchResultRenderer,
+  
+  // Execution result renderers
   command_result: CommandResultRenderer,
   script_result: ScriptResultRenderer,
   browser_result: BrowserResultRenderer,
   browser_vision_control: BrowserControlRenderer,
-
-  research_report: ResearchReportRenderer,
-  json: GenericResultRenderer,
-  deliverable: DeliverableRenderer,
+  
+  // File renderers
   file_result: FileResultRenderer,
+  file: FileResultRenderer, // Legacy alias for file_result
   diff_result: DiffRenderer,
-  file: FileResultRenderer,
   tabbed_files: TabbedFilesRenderer,
+  
+  // Special renderers
+  research_report: ResearchReportRenderer,
+  deliverable: DeliverableRenderer,
+  
+  // Fallback renderer
+  json: GenericResultRenderer,
 };
 
 export const WorkspaceDetail: React.FC = () => {
@@ -166,7 +176,8 @@ export const WorkspaceDetail: React.FC = () => {
     }
   };
 
-  const shouldShowToggle = () => {
+  // Consolidated logic for file-based UI controls
+  const isRenderableFile = () => {
     if (workspaceDisplayMode === 'raw') return false;
     if (panelContent.type === 'file' && panelContent.arguments?.path) {
       return getFileTypeInfo(panelContent.arguments.path).isRenderableFile;
@@ -174,13 +185,8 @@ export const WorkspaceDetail: React.FC = () => {
     return false;
   };
 
-  const shouldShowFullscreen = () => {
-    if (workspaceDisplayMode === 'raw') return false;
-    if (panelContent.type === 'file' && panelContent.arguments?.path) {
-      return getFileTypeInfo(panelContent.arguments.path).isRenderableFile;
-    }
-    return false;
-  };
+  const shouldShowToggle = isRenderableFile;
+  const shouldShowFullscreen = isRenderableFile;
 
   const shouldShowWorkspaceToggle = () => {
     return Boolean(panelContent.toolCallId && getCurrentToolMapping());
@@ -190,23 +196,10 @@ export const WorkspaceDetail: React.FC = () => {
     if (panelContent.type === 'file' && panelContent.arguments?.path) {
       const { isHtml, isMarkdown } = getFileTypeInfo(panelContent.arguments.path);
 
-      if (isHtml) {
+      if (isHtml || isMarkdown) {
         return {
-          leftLabel: 'Source Code',
-          rightLabel: 'Preview',
-          leftIcon: <FiCode size={12} />,
-          rightIcon: <FiEye size={12} />,
-          value: displayMode,
-          leftValue: 'source',
-          rightValue: 'rendered',
-          onChange: setDisplayMode,
-        };
-      }
-
-      if (isMarkdown) {
-        return {
-          leftLabel: 'Source',
-          rightLabel: 'Rendered',
+          leftLabel: isHtml ? 'Source Code' : 'Source',
+          rightLabel: isHtml ? 'Preview' : 'Rendered',
           leftIcon: <FiCode size={12} />,
           rightIcon: <FiEye size={12} />,
           value: displayMode,
