@@ -1,8 +1,17 @@
 export * from './MuiDialog';
 export * from './Tooltip';
-export * from './Box';
-export * from './Typography';
-export * from './ThemeProvider';
-export * from './CircularProgress';
-export * from './Select';
-export * from './Menu';
+
+// Direct re-exports from @mui/material
+export {
+  Box,
+  Typography,
+  CircularProgress,
+  Select,
+  MenuItem,
+  FormControl,
+  Menu,
+  IconButton,
+  Divider
+} from '@mui/material';
+
+export { ThemeProvider } from '@mui/material/styles';
