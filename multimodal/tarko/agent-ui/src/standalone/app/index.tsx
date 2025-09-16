@@ -7,10 +7,10 @@ import { HashRouter, BrowserRouter } from 'react-router-dom';
 
 
 export const AgentWebUI: React.FC = () => {
-  // Initialize theme based on user preference, defaulting to dark mode
+
   useThemeInitialization();
 
-  // Use HashRouter for shared HTML files (replay mode) to prevent routing issues
+
   const isReplayMode = window.AGENT_REPLAY_MODE === true;
   console.log('isReplayMode', isReplayMode);
   const Router = isReplayMode ? HashRouter : BrowserRouter;

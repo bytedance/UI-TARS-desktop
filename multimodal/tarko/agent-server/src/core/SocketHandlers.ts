@@ -9,6 +9,7 @@ import { Server as SocketIOServer } from 'socket.io';
 import http from 'http';
 import { AgentServer } from '../server';
 import { handleAgentError } from '../utils/error-handler';
+import { socketHandlerLogger } from '../utils/logger';
 
 /**
  * Setup WebSocket functionality for the server
@@ -46,7 +47,7 @@ export class SocketHandlers {
    * Handle client connection
    */
   static handleConnection(socket: Socket, server: AgentServer) {
-    console.log('Client connected:', socket.id);
+    socketHandlerLogger.info('Client connected', { socketId: socket.id });
 
     // Register event handlers
     socket.on('ping', (callback) => {
@@ -72,7 +73,7 @@ export class SocketHandlers {
     });
 
     socket.on('disconnect', () => {
-      console.log('Client disconnected:', socket.id);
+      socketHandlerLogger.info('Client disconnected', { socketId: socket.id });
     });
   }
 
@@ -82,7 +83,7 @@ export class SocketHandlers {
   static handleJoinSession(socket: Socket, server: AgentServer, sessionId: string) {
     if (server.sessions[sessionId]) {
       socket.join(sessionId);
-      console.log(`Client ${socket.id} joined session ${sessionId}`);
+      socketHandlerLogger.info('Client joined session', { socketId: socket.id, sessionId });
 
       // Subscribe to session's event stream
       const eventHandler = (eventType: string, data: any) => {
@@ -128,7 +129,7 @@ export class SocketHandlers {
       } catch (error) {
         // This should never happen with the new error handling
         const handledError = handleAgentError(error);
-        console.error('Unexpected error in socket query:', handledError);
+        socketHandlerLogger.error('Unexpected error in socket query', { handledError });
         socket.emit('error', handledError.message);
       }
     } else {
@@ -145,7 +146,7 @@ export class SocketHandlers {
         const aborted = await server.sessions[sessionId].abortQuery();
         socket.emit('abort-result', { success: aborted });
       } catch (error) {
-        console.error('Error aborting query:', error);
+        socketHandlerLogger.error('Error aborting query', { error });
         socket.emit('error', 'Failed to abort query');
       }
     } else {

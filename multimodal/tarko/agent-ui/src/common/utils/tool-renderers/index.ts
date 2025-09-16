@@ -7,7 +7,7 @@ import {
 } from './renderer-conditions';
 
 const TOOL_TO_RENDERER_CONFIG: ToolToRendererCondition[] = [
-  // Static tool name mappings
+
   { toolName: 'web_search', renderer: 'search_result' },
   { toolName: 'browser_vision_control', renderer: 'browser_vision_control' },
   { toolName: 'browser_screenshot', renderer: 'image' },
@@ -21,19 +21,19 @@ const TOOL_TO_RENDERER_CONFIG: ToolToRendererCondition[] = [
   { toolName: 'execute_bash', renderer: 'command_result' },
   { toolName: 'JupyterCI', renderer: 'script_result' },
 
-  // str_replace_editor
+
   strReplaceEditorRendererCondition,
 
-  // read_multiple_files detection
+
   readMultipleFilesRendererCondition,
 
-  // Dynamic conditions based on content
+
   generalRendererCondition,
 
-  // Image content detection
+
   imageRendererCondition,
 
-  // Fallback to JSON renderer
+
   (): string => 'json',
 ];
 
@@ -50,6 +50,6 @@ export function determineToolRendererType(name: string, content: any): string {
     }
   }
 
-  // This should never be reached due to the fallback function, but kept for safety
+
   return 'json';
 }

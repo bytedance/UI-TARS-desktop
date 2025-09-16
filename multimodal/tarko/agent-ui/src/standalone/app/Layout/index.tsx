@@ -23,7 +23,7 @@ export const Layout: React.FC<LayoutProps> = ({ isReplayMode: propIsReplayMode }
 
   const isReplayMode = propIsReplayMode !== undefined ? propIsReplayMode : contextIsReplayMode;
 
-  // Initialize layout mode on mount
+
   useEffect(() => {
     initializeLayoutMode();
   }, [initializeLayoutMode]);
@@ -40,7 +40,7 @@ export const Layout: React.FC<LayoutProps> = ({ isReplayMode: propIsReplayMode }
             'ml-3': isReplayMode,
           })}
         >
-          {/* Desktop layout: horizontal split */}
+
           <div className="hidden md:flex gap-3 flex-1 min-h-0">
             <div className={classNames('flex flex-col overflow-hidden transition-all duration-300 ease-in-out', {
               'flex-1': layoutMode === 'default',
@@ -61,7 +61,7 @@ export const Layout: React.FC<LayoutProps> = ({ isReplayMode: propIsReplayMode }
             </div>
           </div>
 
-          {/* Mobile layout: vertical split */}
+
           <div className="md:hidden flex flex-col gap-3 flex-1 min-h-0">
             <div className="flex-1 flex flex-col overflow-hidden min-h-0">
               <Shell className="h-full rounded-xl shadow-lg shadow-gray-200/50 dark:shadow-gray-950/20">

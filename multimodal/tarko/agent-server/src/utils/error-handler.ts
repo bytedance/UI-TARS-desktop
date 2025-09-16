@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { utilsLogger } from './logger';
+
 /**
  * ErrorWithCode - Extended Error class with error code
  * Provides structured error information for better handling
@@ -26,7 +28,7 @@ export class ErrorWithCode extends Error {
  */
 export function handleAgentError(error: unknown, context?: string): ErrorWithCode {
   // Log the error with context
-  console.error(`Agent error${context ? ` [${context}]` : ''}:`, error);
+  utilsLogger.error('Agent error', { context, error });
 
   // Normalize to ErrorWithCode
   if (error instanceof ErrorWithCode) {

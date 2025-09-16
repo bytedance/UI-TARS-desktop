@@ -12,19 +12,19 @@ export const App: React.FC = () => {
     useSession();
   const { isReplayMode } = useReplayMode();
 
-  // Initialize connection monitoring and load sessions on mount - but not in replay mode
+
   useEffect(() => {
-    // In replay mode, skip connection monitoring and session loading
+
     if (isReplayMode) {
       console.log('[ReplayMode] Skipping connection initialization in replay mode');
       return;
     }
 
     const initialize = async () => {
-      // Initialize connection monitoring
+
       const cleanup = initConnectionMonitoring();
 
-      // Load sessions if connected
+
       if (connectionStatus.connected) {
         await loadSessions();
       }
@@ -34,7 +34,7 @@ export const App: React.FC = () => {
 
     const cleanupPromise = initialize();
 
-    // Cleanup on unmount
+
     return () => {
       cleanupPromise.then((cleanup) => {
         if (typeof cleanup === 'function') {
@@ -44,7 +44,7 @@ export const App: React.FC = () => {
     };
   }, [initConnectionMonitoring, loadSessions, connectionStatus.connected, isReplayMode]);
 
-  // Special handling for replay mode - bypass normal routing
+
   if (isReplayMode) {
     console.log('[ReplayMode] Rendering replay layout directly');
     return <Layout isReplayMode={true} />;

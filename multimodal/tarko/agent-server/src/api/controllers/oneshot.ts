@@ -9,6 +9,7 @@ import { nanoid } from 'nanoid';
 import { SessionInfo } from '../../storage';
 import { AgentSession } from '../../core';
 import { createErrorResponse } from '../../utils/error-handler';
+import { apiLogger } from '../../utils/logger';
 
 /**
  * Interface for one-shot query request body
@@ -91,7 +92,7 @@ export async function createAndQuery(req: Request, res: Response) {
       });
     }
   } catch (error) {
-    console.error(`Unexpected error in createAndQuery:`, error);
+    apiLogger.error('Unexpected error in createAndQuery', { error });
     res.status(500).json(createErrorResponse(error));
   }
 }
@@ -180,7 +181,7 @@ export async function createAndStreamingQuery(req: Request, res: Response) {
       res.end();
     }
   } catch (error) {
-    console.error(`Critical error in streaming query creation:`, error);
+    apiLogger.error('Critical error in streaming query creation', { error });
 
     if (!res.headersSent) {
       res.status(500).json(createErrorResponse(error));

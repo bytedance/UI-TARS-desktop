@@ -67,10 +67,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   const { abortQuery } = useSession();
 
-  // Check if contextual selector is enabled
+
   const contextualSelectorEnabled = isContextualSelectorEnabled() && showContextualSelector;
 
-  // Initialize with initial value
+
   useEffect(() => {
     if (initialValue && !contextualState.input) {
       setContextualState((prev) => ({
@@ -92,11 +92,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     const newValue = target.value;
     const newCursorPosition = target.selectionStart;
 
-    // Dynamic height adjustment
+
     target.style.height = 'auto';
     target.style.height = `${Math.min(target.scrollHeight, 200)}px`;
 
-    // Update contextual state with new input and cursor position
+
     setContextualState((prev) => ({
       ...prev,
       input: newValue,
@@ -106,19 +106,19 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
     if (!contextualSelectorEnabled) return;
 
-    // Check for @ symbol at cursor position
+
     const textBeforeCursor = newValue.slice(0, newCursorPosition);
     const lastAtIndex = textBeforeCursor.lastIndexOf('@');
 
     if (lastAtIndex !== -1) {
-      // Check if @ is at start of line or preceded by whitespace
+
       const charBeforeAt = lastAtIndex > 0 ? textBeforeCursor[lastAtIndex - 1] : ' ';
       const isValidAtPosition = /\s/.test(charBeforeAt) || lastAtIndex === 0;
 
       if (isValidAtPosition) {
         const queryAfterAt = textBeforeCursor.slice(lastAtIndex + 1);
 
-        // Only show selector if there's no space after @ and not already a complete reference
+
         if (!queryAfterAt.includes(' ') && !queryAfterAt.includes(':')) {
           updateSelectorState({
             showSelector: true,
@@ -129,7 +129,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       }
     }
 
-    // Hide selector if conditions are not met
+
     if (contextualState.showSelector) {
       updateSelectorState({
         showSelector: false,
@@ -138,12 +138,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     }
   };
 
-  // Parse contextual references from input text
+
 
   const handleContextualSelect = (item: ContextualItem) => {
     addContextualItem(item);
 
-    // Calculate the correct cursor position after insertion
+
     const textBeforeCursor = contextualState.input.slice(0, contextualState.cursorPosition);
     const lastAtIndex = textBeforeCursor.lastIndexOf('@');
 
@@ -159,15 +159,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       }
 
       const newInput = textBefore + tagText + ' ' + textAfter;
-      const newCursorPos = lastAtIndex + tagText.length + 1; // +1 for the space after
+      const newCursorPos = lastAtIndex + tagText.length + 1;
 
-      // Focus back to input and set correct cursor position
+
       setTimeout(() => {
         if (inputRef.current) {
           inputRef.current.focus();
           inputRef.current.setSelectionRange(newCursorPos, newCursorPos);
 
-          // Update contextual state with the new cursor position
+
           setContextualState((prev) => ({
             ...prev,
             cursorPosition: newCursorPos,
@@ -190,15 +190,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
     handleSelectorClose();
 
-    // Reset textarea height
+
     if (inputRef.current) {
       inputRef.current.style.height = 'auto';
     }
 
-    // Compose message content using utility function
+
     const messageContent = composeMessageContent(contextualState.input, uploadedImages);
 
-    // Clear both text input and images immediately after sending
+
     clearContextualState();
     setUploadedImages([]);
 
@@ -206,7 +206,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       await onSubmit(messageContent);
     } catch (error) {
       console.error('Failed to send message:', error);
-      // Note: We don't restore content on failure to keep UX simple
+
       return;
     }
   };
@@ -234,7 +234,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     } catch (error) {
       console.error('Failed to abort:', error);
     } finally {
-      // Add a small delay to prevent UI flickering
+
       setTimeout(() => setIsAborting(false), 100);
     }
   };
@@ -276,13 +276,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const handlePaste = async (e: React.ClipboardEvent) => {
     if (isDisabled || isProcessing) return;
 
-    // Prevent default paste behavior to handle it ourselves
+
     e.preventDefault();
 
     const handled = await handleMultimodalPaste(e.nativeEvent, {
       onTextPaste: (text: string) => {
-        // For regular text, let the default textarea paste behavior handle it
-        // by inserting at cursor position
+
         const textarea = inputRef.current;
         if (!textarea) return;
 
@@ -299,7 +298,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           contextualItems: parseContextualReferences(newValue),
         }));
 
-        // Set cursor position after state update
+
         setTimeout(() => {
           if (textarea) {
             textarea.setSelectionRange(newCursorPos, newCursorPos);
@@ -314,7 +313,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         : undefined,
       onMultimodalPaste: showAttachments
         ? (text: string, images: ChatCompletionContentPart[]) => {
-            // Handle Tarko multimodal protocol paste
+
             const textarea = inputRef.current;
             if (!textarea) return;
 
@@ -333,7 +332,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
             setUploadedImages((prev) => [...prev, ...images]);
 
-            // Set cursor position after state update
+
             setTimeout(() => {
               if (textarea) {
                 textarea.setSelectionRange(newCursorPos, newCursorPos);
@@ -349,8 +348,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     });
 
     if (!handled) {
-      // If our handler didn't process anything, fall back to default behavior
-      // This shouldn't happen often since we handle most cases
+
       console.log('Paste not handled by multimodal clipboard');
     }
   };
