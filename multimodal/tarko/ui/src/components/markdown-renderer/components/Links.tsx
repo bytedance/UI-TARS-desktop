@@ -8,8 +8,9 @@ interface LinkProps {
 }
 
 export const SmartLink: React.FC<LinkProps> = ({ href, children, ...props }) => {
-  const linkStyles = 'text-accent-500 hover:text-accent-600 transition-colors underline underline-offset-2';
-  
+  const linkStyles =
+    'text-accent-500 hover:text-accent-600 transition-colors underline underline-offset-2';
+
   if (!href) {
     return <span {...props}>{children}</span>;
   }

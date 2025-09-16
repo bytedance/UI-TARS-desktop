@@ -1,13 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FiLoader } from 'react-icons/fi';
-import { AgentProcessingPhase } from '@tarko/interface';
 
 interface ThinkingAnimationProps {
   text: string;
   size?: 'small' | 'medium' | 'large';
   className?: string;
-  phase?: AgentProcessingPhase;
   estimatedTime?: string;
   showProgress?: boolean;
 }
