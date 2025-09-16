@@ -137,23 +137,31 @@ const StaticModelDisplay: React.FC<{
             minWidth: 'auto',
             maxWidth: '300px',
             background: isDisabled
-              ? isDarkMode ? 'rgba(55, 65, 81, 0.15)' : 'rgba(248, 250, 252, 0.4)'
-              : isDarkMode ? 'rgba(55, 65, 81, 0.3)' : 'rgba(248, 250, 252, 0.8)',
+              ? isDarkMode
+                ? 'rgba(55, 65, 81, 0.15)'
+                : 'rgba(248, 250, 252, 0.4)'
+              : isDarkMode
+                ? 'rgba(55, 65, 81, 0.3)'
+                : 'rgba(248, 250, 252, 0.8)',
             backdropFilter: 'blur(8px)',
             border: isDisabled
-              ? isDarkMode ? '1px solid rgba(75, 85, 99, 0.15)' : '1px solid rgba(203, 213, 225, 0.3)'
+              ? isDarkMode
+                ? '1px solid rgba(75, 85, 99, 0.15)'
+                : '1px solid rgba(203, 213, 225, 0.3)'
               : isDarkMode
-              ? '1px solid rgba(75, 85, 99, 0.3)'
-              : '1px solid rgba(203, 213, 225, 0.6)',
+                ? '1px solid rgba(75, 85, 99, 0.3)'
+                : '1px solid rgba(203, 213, 225, 0.6)',
             borderRadius: '8px',
             opacity: isDisabled ? 0.6 : 1,
             cursor: isDisabled ? 'not-allowed' : 'default',
-            '&:hover': isDisabled ? {} : {
-              background: isDarkMode ? 'rgba(55, 65, 81, 0.8)' : 'rgba(241, 245, 249, 0.9)',
-              boxShadow: isDarkMode
-                ? '0 2px 4px -1px rgba(0, 0, 0, 0.2)'
-                : '0 2px 4px -1px rgba(0, 0, 0, 0.05)',
-            },
+            '&:hover': isDisabled
+              ? {}
+              : {
+                  background: isDarkMode ? 'rgba(55, 65, 81, 0.8)' : 'rgba(241, 245, 249, 0.9)',
+                  boxShadow: isDarkMode
+                    ? '0 2px 4px -1px rgba(0, 0, 0, 0.2)'
+                    : '0 2px 4px -1px rgba(0, 0, 0, 0.05)',
+                },
           }}
         >
           <ModelDisplayContent
@@ -253,7 +261,11 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
         isDarkMode={isDarkMode}
         className={className}
         isDisabled={isProcessing && models.length > 1}
-        disabledReason={isProcessing && models.length > 1 ? 'Model selection unavailable during agent execution. Please wait for agent execution to complete' : undefined}
+        disabledReason={
+          isProcessing && models.length > 1
+            ? 'Model selection unavailable during agent execution. Please wait for agent execution to complete'
+            : undefined
+        }
       />
     );
   }
@@ -270,7 +282,11 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
         isDarkMode={isDarkMode}
         className={className}
         isDisabled={isProcessing && models.length > 1}
-        disabledReason={isProcessing && models.length > 1 ? 'Model selection unavailable during agent execution. Please wait for agent execution to complete' : undefined}
+        disabledReason={
+          isProcessing && models.length > 1
+            ? 'Model selection unavailable during agent execution. Please wait for agent execution to complete'
+            : undefined
+        }
       />
     );
   }

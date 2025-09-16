@@ -20,15 +20,7 @@ import {
 import { MdDesktopWindows } from 'react-icons/md';
 import { GoSidebarCollapse, GoSidebarExpand } from 'react-icons/go';
 
-import {
-  Box,
-  Typography,
-  ThemeProvider,
-  Menu,
-  MenuItem,
-  Divider,
-  IconButton,
-} from '@mui/material';
+import { Box, Typography, ThemeProvider, Menu, MenuItem, Divider, IconButton } from '@mui/material';
 import { useLayout } from '@/common/hooks/useLayout';
 import { useSession } from '@/common/hooks/useSession';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
@@ -358,8 +350,8 @@ export const Navbar: React.FC = () => {
 // Dynamic Navbar Center Component with space optimization
 interface DynamicNavbarCenterProps {
   sessionMetadata?: {
-    agentInfo?: { name: string;[key: string]: any };
-    modelConfig?: { provider: string; id: string;[key: string]: any };
+    agentInfo?: { name: string; [key: string]: any };
+    modelConfig?: { provider: string; id: string; [key: string]: any };
     [key: string]: any;
   };
   activeSessionId?: string;

@@ -83,15 +83,11 @@ export const createModelSelectorMuiTheme = (isDarkMode: boolean) => {
             minHeight: '40px',
             transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
             '&:hover': {
-              backgroundColor: isDarkMode
-                ? 'rgba(99, 102, 241, 0.15)'
-                : 'rgba(99, 102, 241, 0.08)',
+              backgroundColor: isDarkMode ? 'rgba(99, 102, 241, 0.15)' : 'rgba(99, 102, 241, 0.08)',
               transform: 'translateX(2px)',
             },
             '&.Mui-selected': {
-              backgroundColor: isDarkMode
-                ? 'rgba(99, 102, 241, 0.25)'
-                : 'rgba(99, 102, 241, 0.12)',
+              backgroundColor: isDarkMode ? 'rgba(99, 102, 241, 0.25)' : 'rgba(99, 102, 241, 0.12)',
               color: isDarkMode ? '#a5b4fc' : '#6366f1',
               '&:hover': {
                 backgroundColor: isDarkMode
