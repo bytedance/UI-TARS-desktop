@@ -30,10 +30,7 @@ const DialogTitle: React.FC<DialogTitleProps> = ({ children, className }) => {
   return <div className={className}>{children}</div>;
 };
 
-export const Dialog: React.FC<DialogProps> & {
-  Panel: typeof DialogPanel;
-  Title: typeof DialogTitle;
-} = ({
+const DialogComponent: React.FC<DialogProps> = ({
   open,
   onClose,
   className,
@@ -69,6 +66,11 @@ export const Dialog: React.FC<DialogProps> & {
       </MuiDialog>
     </ThemeProvider>
   );
+};
+
+export const Dialog = DialogComponent as React.FC<DialogProps> & {
+  Panel: React.FC<DialogPanelProps>;
+  Title: React.FC<DialogTitleProps>;
 };
 
 Dialog.Panel = DialogPanel;
