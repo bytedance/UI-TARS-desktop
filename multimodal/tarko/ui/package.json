@@ -22,6 +22,7 @@
     "dev": "rslib build --watch"
   },
   "dependencies": {
+    "framer-motion": "12.19.2",
     "react-icons": "^4.11.0",
     "monaco-editor": "0.52.0",
     "parse-diff": "0.11.1",

@@ -1,7 +1,7 @@
 import React from 'react';
 import { FiLoader, FiCheck, FiX, FiClock, FiAlertCircle, FiEdit3 } from 'react-icons/fi';
 import { motion } from 'framer-motion';
-import { ActionButton } from './ActionButton';
+import { ActionBlock } from '@tarko/ui';
 import { normalizeFilePath } from '@tarko/ui';
 
 interface ToolCallsProps {
@@ -238,7 +238,7 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
         const elapsedMs = getToolCallElapsedTime(toolCall);
 
         return (
-          <ActionButton
+          <ActionBlock
             key={toolCall.id}
             icon={getToolIcon(toolCall.function.name)}
             label={displayName}

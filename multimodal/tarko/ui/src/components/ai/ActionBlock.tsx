@@ -1,8 +1,8 @@
-import React from 'react';
 import { motion } from 'framer-motion';
-import { FiArrowRight, FiClock, FiZap } from 'react-icons/fi';
+import React from 'react';
+import { FiArrowRight, FiZap } from 'react-icons/fi';
 
-interface ActionButtonProps {
+interface ActionBlockProps {
   icon: React.ReactNode;
   label: string;
   onClick: () => void;
@@ -13,10 +13,7 @@ interface ActionButtonProps {
   isFileRelated?: boolean;
 }
 
-/**
- * ActionButton - Enhanced with improved timing display
- */
-export const ActionButton: React.FC<ActionButtonProps> = ({
+export const ActionBlock: React.FC<ActionBlockProps> = ({
   icon,
   label,
   onClick,
