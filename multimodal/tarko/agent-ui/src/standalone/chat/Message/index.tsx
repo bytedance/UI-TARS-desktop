@@ -23,15 +23,7 @@ interface MessageProps {
   isInGroup?: boolean;
 }
 
-/**
- * Message Component - Refactored version, removing isIntermediate differences
- *
- * Design principles:
- * - Unified message styling, no distinction between intermediate and final states
- * - Focus on content, reduce visual distractions
- * - Elegant styling and typography
- * - Support convenient message copying functionality
- */
+
 export const Message: React.FC<MessageProps> = ({
   message,
   isInGroup = false,

@@ -7,9 +7,7 @@ interface SessionRouterProps {
   children: React.ReactNode;
 }
 
-/**
- * SessionRouter Component - Handles session routing logic
- */
+
 export const SessionRouter: React.FC<SessionRouterProps> = ({ children }) => {
   const { sessionId } = useParams<{ sessionId: string }>();
   const { setActiveSession, sessions, connectionStatus, activeSessionId, sendMessage } =

@@ -3,9 +3,7 @@ import { EventProcessingParams, EventHandlerContext } from './types';
 import { eventHandlerRegistry } from './EventHandlerRegistry';
 import { replayStateAtom } from '@/common/state/atoms/replay';
 
-/**
- * Main event processor action - maintains the original API
- */
+
 export const processEventAction = atom(null, async (get, set, params: EventProcessingParams) => {
   const { sessionId, event } = params;
 

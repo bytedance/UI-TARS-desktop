@@ -3,9 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import WelcomePage from './WelcomePage';
 import { useSession } from '@/common/hooks/useSession';
 
-/**
- * HomePage Component - Handles the welcome page and query parameter processing
- */
+
 const HomePage: React.FC = () => {
   const { activeSessionId, sendMessage, createSession } = useSession();
   const location = useLocation();

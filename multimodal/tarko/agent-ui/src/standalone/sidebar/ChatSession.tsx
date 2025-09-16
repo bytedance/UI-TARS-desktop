@@ -11,9 +11,7 @@ interface ChatSessionProps {
   isCollapsed: boolean;
 }
 
-/**
- * ChatSession Component - Collapsible sidebar for session management
- */
+
 export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
   const {
     sessions,

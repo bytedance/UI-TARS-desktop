@@ -57,7 +57,7 @@ export function WebUIConfigProvider({ children }: WebUIConfigProviderProps) {
     });
   };
 
-  // Listen for runtime config changes， Leave a hole for subsequent online configurations
+
   useEffect(() => {
     const handleConfigChange = () => {
       loadConfig();

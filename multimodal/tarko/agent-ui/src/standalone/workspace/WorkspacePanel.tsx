@@ -26,9 +26,7 @@ function shouldShowFullscreen(filePath: string): boolean {
   return getFileTypeInfo(filePath).isRenderableFile;
 }
 
-/**
- * WorkspacePanel Component - Container for workspace content
- */
+
 export const WorkspacePanel: React.FC = () => {
   const { activeSessionId, activePanelContent, setActivePanelContent } = useSession();
   const { replayState } = useReplay();

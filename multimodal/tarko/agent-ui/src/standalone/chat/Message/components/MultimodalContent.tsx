@@ -9,14 +9,7 @@ interface MultimodalContentProps {
   setActivePanelContent: any;
 }
 
-/**
- * Component for rendering multimodal content (text and images)
- *
- * Design principles:
- * - Seamless integration of different content types
- * - Interactive image previews with expansion capability
- * - Consistent formatting of text and visual elements
- */
+
 export const MultimodalContent: React.FC<MultimodalContentProps> = ({
   content,
   timestamp,

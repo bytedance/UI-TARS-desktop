@@ -25,10 +25,7 @@ interface MarkdownRendererProps {
   codeBlockStyle?: React.CSSProperties;
 }
 
-/**
- * MarkdownRenderer component
- * Renders markdown content with custom styling and enhanced functionality
- */
+
 export const MarkdownRenderer: React.FC<MarkdownRendererProps> = (props) => {
   return (
     <MarkdownThemeProvider>

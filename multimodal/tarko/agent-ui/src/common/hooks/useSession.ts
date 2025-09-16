@@ -32,9 +32,7 @@ import { socketService } from '../services/socketService';
 import { useEffect, useCallback, useMemo, useRef } from 'react';
 import { useReplayMode } from '../hooks/useReplayMode';
 
-/**
- * Hook for session management functionality
- */
+
 export function useSession() {
   // State
   const [sessions, setSessions] = useAtom(sessionsAtom);

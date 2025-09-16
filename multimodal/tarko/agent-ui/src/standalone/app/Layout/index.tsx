@@ -15,17 +15,7 @@ interface LayoutProps {
   isReplayMode?: boolean;
 }
 
-/**
- * Layout Component - Main application layout
- *
- * Design principles:
- * - Clean, minimalist aesthetic with refined borders and subtle shadows
- * - Neutral color palette with elegant accent colors
- * - Consistent spacing and typography for optimal readability
- * - Seamless visual flow between different interface elements
- * - Adapts layout based on replay mode status
- * - Responsive design: horizontal layout on desktop, vertical on mobile
- */
+
 export const Layout: React.FC<LayoutProps> = ({ isReplayMode: propIsReplayMode }) => {
   const { isReplayMode: contextIsReplayMode } = useReplayMode();
   const [layoutMode] = useAtom(layoutModeAtom);

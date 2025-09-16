@@ -18,16 +18,7 @@ interface PathValidation {
   };
 }
 
-/**
- * ContextualTags - Display selected contextual items as removable tags
- *
- * Features:
- * - Visual distinction between files, directories, and workspace
- * - Smooth animations for add/remove operations
- * - Hover effects and clear remove actions
- * - Compact layout to preserve input space
- * - Path validation with visual indicators for invalid paths
- */
+
 export const ContextualTags: React.FC<ContextualTagsProps> = ({ items, onRemove }) => {
   const { activeSessionId } = useSession();
   const [pathValidation, setPathValidation] = useState<PathValidation>({});

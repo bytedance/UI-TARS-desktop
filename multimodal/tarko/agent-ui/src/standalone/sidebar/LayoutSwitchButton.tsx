@@ -5,14 +5,7 @@ import { FiColumns, FiSidebar } from 'react-icons/fi';
 import { layoutModeAtom } from '@/common/state/atoms/ui';
 import { LayoutMode } from '@tarko/interface';
 
-/**
- * LayoutSwitchButton Component - Toggle between layout modes
- *
- * Design principles:
- * - Consistent with toolbar button styling
- * - Clear visual indication of current mode
- * - Smooth animations for state transitions
- */
+
 export const LayoutSwitchButton: React.FC = () => {
   const [layoutMode, setLayoutMode] = useAtom(layoutModeAtom);
 

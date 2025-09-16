@@ -9,15 +9,7 @@ import { isLayoutSwitchButtonEnabled } from '@/config/web-ui-config';
 import { AgentConfigViewer } from './AgentConfigViewer';
 import { LayoutSwitchButton } from './LayoutSwitchButton';
 
-/**
- * ToolBar Component - Vertical toolbar inspired by modern IDE designs
- *
- * Design principles:
- * - Minimalist vertical bar with icon-only actions
- * - Consistent visual language with subtle animations
- * - Quick access to essential functionality
- * - Always visible regardless of sidebar collapse state
- */
+
 export const ToolBar: React.FC = () => {
   const navigate = useNavigate();
   const { isReplayMode } = useReplayMode();

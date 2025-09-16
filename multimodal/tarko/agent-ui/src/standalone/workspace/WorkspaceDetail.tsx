@@ -63,9 +63,7 @@ const CONTENT_RENDERERS: Record<
   tabbed_files: TabbedFilesRenderer,
 };
 
-/**
- * WorkspaceDetail Component - Displays details of a single tool result or report
- */
+
 export const WorkspaceDetail: React.FC = () => {
   const { activePanelContent, setActivePanelContent, activeSessionId } = useSession();
   const { isReplayMode } = useReplayMode();

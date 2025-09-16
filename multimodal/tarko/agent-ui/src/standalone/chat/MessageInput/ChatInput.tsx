@@ -36,17 +36,7 @@ interface ChatInputProps {
   variant?: 'default' | 'home';
 }
 
-/**
- * ChatInput - Reusable chat input component with multimodal and contextual capabilities
- *
- * Features:
- * - Text input with auto-resize
- * - Image upload and paste support
- * - Contextual file/folder selector (@-mentions)
- * - Connection status handling
- * - Keyboard shortcuts (Ctrl+Enter to send)
- * - Customizable appearance and behavior
- */
+
 export const ChatInput: React.FC<ChatInputProps> = ({
   onSubmit,
   isDisabled = false,

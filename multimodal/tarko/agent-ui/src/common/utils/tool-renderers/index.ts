@@ -37,10 +37,7 @@ const TOOL_TO_RENDERER_CONFIG: ToolToRendererCondition[] = [
   (): string => 'json',
 ];
 
-/**
- * Determine the renderer type from tool name and content
- * Uses the flexible condition-based configuration system
- */
+
 export function determineToolRendererType(name: string, content: any): string {
   for (const condition of TOOL_TO_RENDERER_CONFIG) {
     if (typeof condition === 'function') {

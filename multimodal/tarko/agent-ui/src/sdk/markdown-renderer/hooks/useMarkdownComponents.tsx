@@ -27,9 +27,7 @@ interface UseMarkdownComponentsProps {
   codeBlockStyle?: React.CSSProperties;
 }
 
-/**
- * Custom hook that provides markdown components configuration
- */
+
 export const useMarkdownComponents = ({ onImageClick, codeBlockStyle }: UseMarkdownComponentsProps): Components => {
   return React.useMemo(
     () => ({

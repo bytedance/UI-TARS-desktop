@@ -6,9 +6,7 @@ import HomePage from '@/standalone/home/HomePage';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { SessionRouter } from './Router/SessionRouter';
 
-/**
- * App Component - Main application container with routing
- */
+
 export const App: React.FC = () => {
   const { initConnectionMonitoring, loadSessions, connectionStatus, activeSessionId } =
     useSession();

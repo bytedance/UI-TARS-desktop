@@ -12,17 +12,7 @@ interface ToolCallsProps {
   toolResults?: any[]; // Add toolResults to check completion status
 }
 
-/**
- * Component for displaying tool calls with enhanced icons and loading states
- *
- * Design principles:
- * - Distinct visual identity for different tool types
- * - Shows loading state for pending tool calls
- * - Shows constructing state for streaming tool calls
- * - Displays success/error status with appropriate icons
- * - Provides clear visual feedback with enhanced tool-specific colors
- * - Privacy-protected path display in tool descriptions
- */
+
 export const ToolCalls: React.FC<ToolCallsProps> = ({
   toolCalls,
   onToolCallClick,

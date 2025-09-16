@@ -5,14 +5,7 @@ interface MessageAvatarProps {
   role: string;
 }
 
-/**
- * Component for displaying role-specific avatars
- *
- * Design principles:
- * - Consistent sizing and styling across different roles
- * - Visual differentiation between message sources
- * - Role-appropriate iconography
- */
+
 export const MessageAvatar: React.FC<MessageAvatarProps> = ({ role }) => {
   if (role === 'user') {
     return (

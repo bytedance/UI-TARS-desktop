@@ -5,12 +5,7 @@ import { ReplayModeProvider } from '@/common/hooks/useReplayMode';
 import { useThemeInitialization } from '@/common/hooks/useThemeInitialization';
 import { HashRouter, BrowserRouter } from 'react-router-dom';
 
-/**
- * Agent Web UI v2 - Entry Component
- *
- * Provides the Jotai atom provider and initializes theme based on user preference.
- * Uses the enhanced ReplayModeProvider that now handles both context provision and initialization.
- */
+
 export const AgentWebUI: React.FC = () => {
   // Initialize theme based on user preference, defaulting to dark mode
   useThemeInitialization();

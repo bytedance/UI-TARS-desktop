@@ -15,9 +15,7 @@ import { SessionCreatingState } from './components/SessionCreatingState';
 
 import './ChatPanel.css';
 
-/**
- * ChatPanel Component - Main chat interface with improved maintainability
- */
+
 export const ChatPanel: React.FC = () => {
   const { sessionId: urlSessionId } = useParams<{ sessionId: string }>();
   const { activeSessionId, isProcessing, connectionStatus, checkServerStatus, sendMessage } =
