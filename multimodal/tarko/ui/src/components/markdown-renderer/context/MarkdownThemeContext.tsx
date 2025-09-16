@@ -31,7 +31,7 @@ interface MarkdownStyles {
  */
 const createMarkdownStyles = (colors: ThemeColors, themeClass: string): MarkdownStyles => {
   const baseHeadingStyles = 'group scroll-mt-20 flex items-center font-semibold leading-tight';
-  
+
   return {
     text: {
       paragraph: `my-2 ${colors.text.primary} leading-relaxed text-base`,
@@ -65,17 +65,13 @@ const MarkdownThemeContext = createContext<MarkdownStyles | null>(null);
  */
 export const MarkdownThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { colors, themeClass } = useMarkdownTheme();
-  
+
   // Memoize the entire style object to prevent recalculation
   const styles = useMemo(() => {
     return createMarkdownStyles(colors, themeClass);
   }, [colors, themeClass]);
-  
-  return (
-    <MarkdownThemeContext.Provider value={styles}>
-      {children}
-    </MarkdownThemeContext.Provider>
-  );
+
+  return <MarkdownThemeContext.Provider value={styles}>{children}</MarkdownThemeContext.Provider>;
 };
 
 /**
@@ -84,11 +80,11 @@ export const MarkdownThemeProvider: React.FC<{ children: ReactNode }> = ({ child
  */
 export const useMarkdownStyles = (): MarkdownStyles => {
   const context = useContext(MarkdownThemeContext);
-  
+
   if (!context) {
     throw new Error('useMarkdownStyles must be used within MarkdownThemeProvider');
   }
-  
+
   return context;
 };
 

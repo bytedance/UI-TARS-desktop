@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useDarkMode } from '@/common/hooks/useDarkMode';
+import { useDarkMode } from '../../../hooks';
 
 /**
  * Theme color definitions - cached and optimized
@@ -20,7 +20,7 @@ const THEME_COLORS = {
     border: {
       default: 'border-gray-200',
       quote: 'border-gray-200',
-    }
+    },
   },
   dark: {
     text: {
@@ -36,14 +36,14 @@ const THEME_COLORS = {
     border: {
       default: 'border-gray-700',
       quote: 'border-slate-600',
-    }
-  }
+    },
+  },
 } as const;
 
 /**
  * Optimized theme management hook with memoization
  * Provides consistent color schemes and theme detection across all markdown elements
- * 
+ *
  * Performance optimizations:
  * - Memoized color object to prevent unnecessary re-renders
  * - Static theme definitions for better bundling
@@ -51,12 +51,12 @@ const THEME_COLORS = {
  */
 export const useMarkdownTheme = () => {
   const isDarkMode = useDarkMode();
-  
+
   // Memoize the color object to prevent unnecessary re-renders
   const colors = useMemo(() => {
     return THEME_COLORS[isDarkMode ? 'dark' : 'light'];
   }, [isDarkMode]);
-  
+
   const themeClass = isDarkMode ? 'dark' : 'light';
 
   return {

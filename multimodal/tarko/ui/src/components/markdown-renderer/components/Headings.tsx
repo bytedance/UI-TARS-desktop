@@ -25,7 +25,7 @@ export const resetFirstH1Flag = (): void => {
 export const Heading: React.FC<HeadingProps> = ({ children, level }) => {
   const id = generateId(children?.toString());
   const headingStyles = useHeadingStyles();
-  
+
   const getHeadingClassName = () => {
     switch (level) {
       case 1:

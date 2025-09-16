@@ -42,6 +42,7 @@ export const SmartLink: React.FC<LinkProps> = ({ href, children, ...props }) => 
   if (isInternalPath(href)) {
     return (
       <Link to={href} className={LINK_STYLES} {...props}>
+        {/* @ts-expect-error */}
         {children}
       </Link>
     );

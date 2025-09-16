@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, DialogPanel } from '@tarko/ui';
+import { Dialog, DialogPanel } from '../../basic';
 import { motion } from 'framer-motion';
 
 interface ImageModalProps {

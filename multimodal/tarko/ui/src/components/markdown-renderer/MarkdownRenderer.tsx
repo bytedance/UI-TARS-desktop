@@ -13,8 +13,8 @@ import { scrollToElement, preprocessMarkdownLinks } from './utils';
 import { MarkdownThemeProvider, useMarkdownStyles } from './context/MarkdownThemeContext';
 import 'katex/dist/katex.min.css';
 import 'remark-github-blockquote-alert/alert.css';
-import './syntax-highlight.css';
-import './markdown.css';
+import './styles/syntax-highlight.css';
+import './sryles/markdown.css';
 
 interface MarkdownRendererProps {
   content: string;
