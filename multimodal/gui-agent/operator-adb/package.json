@@ -38,9 +38,9 @@
   "dependencies": {
     "@agent-infra/browser": "0.1.1",
     "@agent-infra/logger": "0.0.2-beta.2",
-    "@agent-infra/sandbox": "0.0.5",
     "@agent-infra/media-utils": "0.1.5",
-    "@gui-agent/shared": "workspace:*"
+    "@gui-agent/shared": "workspace:*",
+    "appium-adb": "^13.0.3"
   },
   "devDependencies": {
     "@rslib/core": "0.10.0",
