@@ -1,6 +1,7 @@
 import React from 'react';
 import { Dialog as MuiDialog, DialogContent, ThemeProvider } from '@mui/material';
 import { createBasicMuiTheme } from '../../utils';
+import { useDarkMode } from '../../hooks/useDarkMode';
 
 interface DialogProps {
   open: boolean;
@@ -31,7 +32,7 @@ export const Dialog: React.FC<DialogProps> = ({
   fullWidth = true,
   fullScreen = false,
 }) => {
-  const isDarkMode = document.documentElement.classList.contains('dark');
+  const isDarkMode = useDarkMode();
   const theme = createBasicMuiTheme(isDarkMode);
 
   return (
@@ -45,8 +46,8 @@ export const Dialog: React.FC<DialogProps> = ({
         className={className}
         PaperProps={{
           sx: {
-            backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
-            color: isDarkMode ? '#f3f4f6' : '#111827',
+            backgroundColor: isDarkMode ? '#111827' : '#ffffff',
+            color: isDarkMode ? '#f9fafb' : '#111827',
             borderRadius: 3,
           },
         }}
