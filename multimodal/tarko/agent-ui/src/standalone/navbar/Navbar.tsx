@@ -419,36 +419,28 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
             py: 0.375,
             height: '28px',
             minHeight: '28px',
-
+            width: 'auto',
+            minWidth: 'auto',
+            maxWidth: agentMaxWidth,
             background: isDarkMode
-              ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 50%, rgba(168, 85, 247, 0.15) 100%)'
-              : 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.08) 50%, rgba(168, 85, 247, 0.08) 100%)',
+              ? 'rgba(99, 102, 241, 0.15)'
+              : 'rgba(99, 102, 241, 0.08)',
             backdropFilter: 'blur(8px)',
             border: isDarkMode
-              ? '1px solid rgba(139, 92, 246, 0.25)'
-              : '1px solid rgba(99, 102, 241, 0.15)',
+              ? '1px solid rgba(99, 102, 241, 0.3)'
+              : '1px solid rgba(99, 102, 241, 0.2)',
             borderRadius: '8px',
-            position: 'relative',
-            '&::before': {
-              content: '""',
-              position: 'absolute',
-              inset: 0,
-              borderRadius: '8px',
-              background: isDarkMode
-                ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 50%, rgba(168, 85, 247, 0.05) 100%)'
-                : 'linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(139, 92, 246, 0.03) 50%, rgba(168, 85, 247, 0.03) 100%)',
-              zIndex: -1,
-            },
+            transition: 'all 150ms ease-in-out',
             '&:hover': {
               background: isDarkMode
-                ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(139, 92, 246, 0.25) 50%, rgba(168, 85, 247, 0.25) 100%)'
-                : 'linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(139, 92, 246, 0.12) 50%, rgba(168, 85, 247, 0.12) 100%)',
+                ? 'rgba(99, 102, 241, 0.25)'
+                : 'rgba(99, 102, 241, 0.12)',
               border: isDarkMode
-                ? '1px solid rgba(139, 92, 246, 0.35)'
-                : '1px solid rgba(99, 102, 241, 0.25)',
+                ? '1px solid rgba(99, 102, 241, 0.4)'
+                : '1px solid rgba(99, 102, 241, 0.3)',
               boxShadow: isDarkMode
-                ? '0 2px 8px -1px rgba(99, 102, 241, 0.15)'
-                : '0 2px 8px -1px rgba(99, 102, 241, 0.08)',
+                ? '0 2px 8px -1px rgba(99, 102, 241, 0.2)'
+                : '0 2px 8px -1px rgba(99, 102, 241, 0.1)',
             },
           }}
         >

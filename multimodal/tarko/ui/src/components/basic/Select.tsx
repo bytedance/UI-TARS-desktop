@@ -110,15 +110,15 @@ export const Select: React.FC<SelectProps> = ({
 
   const menuStyle: React.CSSProperties = {
     position: 'absolute',
-    zIndex: 10000,
+    zIndex: 50000, // Increased z-index to ensure it's above other elements
     marginTop: '4px',
     width: '100%',
     backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
     border: isDarkMode ? '1px solid rgba(75, 85, 99, 0.3)' : '1px solid rgba(203, 213, 225, 0.6)',
     borderRadius: '8px',
     boxShadow: isDarkMode
-      ? '0 10px 25px -5px rgba(0, 0, 0, 0.25), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
-      : '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+      ? '0 20px 40px -10px rgba(0, 0, 0, 0.4), 0 10px 20px -5px rgba(0, 0, 0, 0.2)'
+      : '0 20px 40px -10px rgba(0, 0, 0, 0.15), 0 10px 20px -5px rgba(0, 0, 0, 0.08)',
     maxHeight: MenuProps?.PaperProps?.style?.maxHeight || '360px',
     overflowY: 'auto',
     ...MenuProps?.PaperProps?.style,
