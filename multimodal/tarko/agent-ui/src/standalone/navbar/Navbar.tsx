@@ -33,12 +33,7 @@ import { getModelDisplayName } from '@/common/utils/modelUtils';
 import {
   Box,
   Typography,
-  ThemeProvider,
-  Menu,
-  MenuItem,
-  Divider,
   IconButton,
-  createBasicMuiTheme,
 } from '@tarko/ui';
 
 import './Navbar.css';
@@ -116,10 +111,8 @@ export const Navbar: React.FC = () => {
     };
   };
 
-  const muiTheme = React.useMemo(() => createBasicMuiTheme(isDarkMode), [isDarkMode]);
-
   return (
-    <ThemeProvider theme={muiTheme}>
+    <div>
       <div className="h-12 backdrop-blur-sm flex items-center px-3 flex-shrink-0 relative">
         <div className="flex items-center">
           {logoType === 'traffic-lights' ? (
@@ -210,16 +203,13 @@ export const Navbar: React.FC = () => {
               <FiMoreHorizontal size={16} />
             </IconButton>
 
-            <Menu
-              anchorEl={mobileMenuAnchor}
-              open={Boolean(mobileMenuAnchor)}
-              onClose={handleMobileMenuClose}
-              transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-              sx={{
-                '& .MuiPaper-root': {
-                  minWidth: 200,
-                  mt: 1,
+            {Boolean(mobileMenuAnchor) && (
+              <div
+                style={{
+                  position: 'fixed',
+                  top: '50px',
+                  right: '16px',
+                  minWidth: '200px',
                   backgroundColor: isDarkMode
                     ? 'rgba(30, 41, 59, 0.95)'
                     : 'rgba(255, 255, 255, 0.95)',
@@ -231,79 +221,157 @@ export const Navbar: React.FC = () => {
                   boxShadow: isDarkMode
                     ? '0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2)'
                     : '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-                },
-                '& .MuiMenuItem-root': {
-                  color: isDarkMode ? 'rgba(226, 232, 240, 0.9)' : 'rgba(51, 65, 85, 0.9)',
-                  '&:hover': {
-                    backgroundColor: isDarkMode
-                      ? 'rgba(71, 85, 105, 0.3)'
-                      : 'rgba(241, 245, 249, 0.8)',
-                  },
-                },
-                '& .MuiDivider-root': {
-                  borderColor: isDarkMode ? 'rgba(71, 85, 105, 0.3)' : 'rgba(226, 232, 240, 0.6)',
-                },
-              }}
-            >
-              {!isReplayMode &&
-                workspaceNavItems.length > 0 && [
-                  ...workspaceNavItems.map((navItem) => {
-                    const IconComponent = getNavItemIcon(navItem.icon);
-                    return (
-                      <MenuItem
-                        key={navItem.title}
-                        onClick={() => {
-                          handleNavItemClick(navItem.link);
-                          handleMobileMenuClose();
-                        }}
-                        sx={{ gap: 1.5 }}
-                      >
-                        <IconComponent size={16} style={{ opacity: 0.7 }} />
-                        {navItem.title}
-                      </MenuItem>
-                    );
-                  }),
-                  <Divider key="divider" />,
-                ]}
-
-              <MenuItem
-                onClick={() => {
-                  setShowAboutModal(true);
-                  handleMobileMenuClose();
+                  zIndex: 1000,
+                  padding: '8px',
                 }}
-                sx={{ gap: 1.5 }}
               >
-                <FiInfo size={16} style={{ opacity: 0.7 }} />
-                About {getAgentTitle()}
-              </MenuItem>
-
-              <MenuItem
-                onClick={() => {
-                  toggleDarkMode();
-                  handleMobileMenuClose();
-                }}
-                sx={{ gap: 1.5 }}
-              >
-                {isDarkMode ? (
-                  <FiSun size={16} style={{ opacity: 0.7 }} />
-                ) : (
-                  <FiMoon size={16} style={{ opacity: 0.7 }} />
+                {!isReplayMode && workspaceNavItems.length > 0 && (
+                  <>
+                    {workspaceNavItems.map((navItem) => {
+                      const IconComponent = getNavItemIcon(navItem.icon);
+                      return (
+                        <button
+                          key={navItem.title}
+                          onClick={() => {
+                            handleNavItemClick(navItem.link);
+                            handleMobileMenuClose();
+                          }}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            width: '100%',
+                            padding: '8px 16px',
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            borderRadius: '8px',
+                            color: isDarkMode ? 'rgba(226, 232, 240, 0.9)' : 'rgba(51, 65, 85, 0.9)',
+                            cursor: 'pointer',
+                            fontSize: '14px',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = isDarkMode
+                              ? 'rgba(71, 85, 105, 0.3)'
+                              : 'rgba(241, 245, 249, 0.8)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                          }}
+                        >
+                          <IconComponent size={16} style={{ opacity: 0.7 }} />
+                          {navItem.title}
+                        </button>
+                      );
+                    })}
+                    <div
+                      style={{
+                        height: '1px',
+                        backgroundColor: isDarkMode ? 'rgba(71, 85, 105, 0.3)' : 'rgba(226, 232, 240, 0.6)',
+                        margin: '8px 0',
+                      }}
+                    />
+                  </>
                 )}
-                {isDarkMode ? 'Light Mode' : 'Dark Mode'}
-              </MenuItem>
 
-              {activeSessionId && !isReplayMode && (
-                <MenuItem
+                <button
                   onClick={() => {
+                    setShowAboutModal(true);
                     handleMobileMenuClose();
                   }}
-                  sx={{ gap: 1.5 }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    width: '100%',
+                    padding: '8px 16px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: isDarkMode ? 'rgba(226, 232, 240, 0.9)' : 'rgba(51, 65, 85, 0.9)',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = isDarkMode
+                      ? 'rgba(71, 85, 105, 0.3)'
+                      : 'rgba(241, 245, 249, 0.8)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
                 >
-                  <FiShare size={16} style={{ opacity: 0.7 }} />
-                  Share
-                </MenuItem>
-              )}
-            </Menu>
+                  <FiInfo size={16} style={{ opacity: 0.7 }} />
+                  About {getAgentTitle()}
+                </button>
+
+                <button
+                  onClick={() => {
+                    toggleDarkMode();
+                    handleMobileMenuClose();
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    width: '100%',
+                    padding: '8px 16px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: isDarkMode ? 'rgba(226, 232, 240, 0.9)' : 'rgba(51, 65, 85, 0.9)',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = isDarkMode
+                      ? 'rgba(71, 85, 105, 0.3)'
+                      : 'rgba(241, 245, 249, 0.8)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
+                >
+                  {isDarkMode ? (
+                    <FiSun size={16} style={{ opacity: 0.7 }} />
+                  ) : (
+                    <FiMoon size={16} style={{ opacity: 0.7 }} />
+                  )}
+                  {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+                </button>
+
+                {activeSessionId && !isReplayMode && (
+                  <button
+                    onClick={() => {
+                      handleMobileMenuClose();
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      width: '100%',
+                      padding: '8px 16px',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      borderRadius: '8px',
+                      color: isDarkMode ? 'rgba(226, 232, 240, 0.9)' : 'rgba(51, 65, 85, 0.9)',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = isDarkMode
+                        ? 'rgba(71, 85, 105, 0.3)'
+                        : 'rgba(241, 245, 249, 0.8)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
+                  >
+                    <FiShare size={16} style={{ opacity: 0.7 }} />
+                    Share
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -313,7 +381,7 @@ export const Navbar: React.FC = () => {
         onClose={() => setShowAboutModal(false)}
         sessionMetadata={sessionMetadata}
       />
-    </ThemeProvider>
+    </div>
   );
 };
 

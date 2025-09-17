@@ -2,7 +2,4 @@
 export { Box, Typography, CircularProgress, IconButton, Divider } from './primitives';
 
 // Select components - now using Headless UI implementations
-export { Select, MenuItem, FormControl, Menu } from './Select';
-
-// Theme provider - compatibility layer (no longer uses MUI)
-export { ThemeProvider, createBasicMuiTheme, createModelSelectorMuiTheme } from './ThemeProvider';
+export { Select, MenuItem, FormControl } from './Select';

@@ -258,15 +258,4 @@ export const FormControl: React.FC<FormControlProps> = ({ children, size, disabl
   );
 };
 
-// Legacy Menu component for compatibility (not used in new Select)
-export interface MenuProps {
-  children: React.ReactNode;
-  open?: boolean;
-  onClose?: () => void;
-  anchorEl?: Element | null;
-}
 
-export const Menu: React.FC<MenuProps> = ({ children }) => {
-  // Placeholder for compatibility - not implemented as it's not used in our codebase
-  return <div>{children}</div>;
-};

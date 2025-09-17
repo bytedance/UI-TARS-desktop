@@ -14,9 +14,6 @@ import {
   Box,
   Typography,
   CircularProgress,
-  ThemeProvider,
-  createBasicMuiTheme, 
-  createModelSelectorMuiTheme, 
   Tooltip 
 } from '@tarko/ui';
 
@@ -116,61 +113,57 @@ const StaticModelDisplay: React.FC<{
     return null;
   }
 
-  const muiTheme = React.useMemo(() => createBasicMuiTheme(isDarkMode), [isDarkMode]);
-
   const content = (
-    <ThemeProvider theme={muiTheme}>
-      <div
-        className={`${className} transition-transform hover:scale-105 ${isDisabled ? '' : 'cursor-pointer'}`}
+    <div
+      className={`${className} transition-transform hover:scale-105 ${isDisabled ? '' : 'cursor-pointer'}`}
+    >
+      <Box
+        sx={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 0.75,
+          px: 1.25,
+          py: 0.375,
+          height: '28px',
+          minHeight: '28px',
+          width: 'auto',
+          minWidth: 'auto',
+          maxWidth: '300px',
+          background: isDisabled
+            ? isDarkMode
+              ? 'rgba(55, 65, 81, 0.15)'
+              : 'rgba(248, 250, 252, 0.4)'
+            : isDarkMode
+              ? 'rgba(55, 65, 81, 0.3)'
+              : 'rgba(248, 250, 252, 0.8)',
+          backdropFilter: 'blur(8px)',
+          border: isDisabled
+            ? isDarkMode
+              ? '1px solid rgba(75, 85, 99, 0.15)'
+              : '1px solid rgba(203, 213, 225, 0.3)'
+            : isDarkMode
+              ? '1px solid rgba(75, 85, 99, 0.3)'
+              : '1px solid rgba(203, 213, 225, 0.6)',
+          borderRadius: '8px',
+          opacity: isDisabled ? 0.6 : 1,
+          cursor: isDisabled ? 'not-allowed' : 'default',
+          '&:hover': isDisabled
+            ? {}
+            : {
+                background: isDarkMode ? 'rgba(55, 65, 81, 0.8)' : 'rgba(241, 245, 249, 0.9)',
+                boxShadow: isDarkMode
+                  ? '0 2px 4px -1px rgba(0, 0, 0, 0.2)'
+                  : '0 2px 4px -1px rgba(0, 0, 0, 0.05)',
+              },
+        }}
       >
-        <Box
-          sx={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 0.75,
-            px: 1.25,
-            py: 0.375,
-            height: '28px',
-            minHeight: '28px',
-            width: 'auto',
-            minWidth: 'auto',
-            maxWidth: '300px',
-            background: isDisabled
-              ? isDarkMode
-                ? 'rgba(55, 65, 81, 0.15)'
-                : 'rgba(248, 250, 252, 0.4)'
-              : isDarkMode
-                ? 'rgba(55, 65, 81, 0.3)'
-                : 'rgba(248, 250, 252, 0.8)',
-            backdropFilter: 'blur(8px)',
-            border: isDisabled
-              ? isDarkMode
-                ? '1px solid rgba(75, 85, 99, 0.15)'
-                : '1px solid rgba(203, 213, 225, 0.3)'
-              : isDarkMode
-                ? '1px solid rgba(75, 85, 99, 0.3)'
-                : '1px solid rgba(203, 213, 225, 0.6)',
-            borderRadius: '8px',
-            opacity: isDisabled ? 0.6 : 1,
-            cursor: isDisabled ? 'not-allowed' : 'default',
-            '&:hover': isDisabled
-              ? {}
-              : {
-                  background: isDarkMode ? 'rgba(55, 65, 81, 0.8)' : 'rgba(241, 245, 249, 0.9)',
-                  boxShadow: isDarkMode
-                    ? '0 2px 4px -1px rgba(0, 0, 0, 0.2)'
-                    : '0 2px 4px -1px rgba(0, 0, 0, 0.05)',
-                },
-          }}
-        >
-          <ModelDisplayContent
-            model={sessionMetadata.modelConfig}
-            isDarkMode={isDarkMode}
-            fontSize="12px"
-          />
-        </Box>
-      </div>
-    </ThemeProvider>
+        <ModelDisplayContent
+          model={sessionMetadata.modelConfig}
+          isDarkMode={isDarkMode}
+          fontSize="12px"
+        />
+      </Box>
+    </div>
   );
 
   if (isDisabled && disabledReason) {
@@ -211,7 +204,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     return null;
   }, [models, sessionMetadata]);
 
-  const muiTheme = React.useMemo(() => createModelSelectorMuiTheme(isDarkMode), [isDarkMode]);
+
 
   const handleModelChange = async (selectedModel: AgentModel) => {
     if (!activeSessionId || isLoading || !selectedModel) return;
@@ -299,79 +292,77 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
   };
 
   return (
-    <ThemeProvider theme={muiTheme}>
-      <div className={`${className} transition-transform hover:scale-105 active:scale-95`}>
-        <FormControl size="small">
-          <Select
-            value={currentModel ? getModelKey(currentModel) : ''}
-            onChange={(event) => {
-              const selectedKey = event.target.value as string;
-              const selectedModel = models.find((model) => getModelKey(model) === selectedKey);
-              if (selectedModel) {
-                handleModelChange(selectedModel);
-              }
-            }}
-            disabled={isLoading}
-            displayEmpty
-            renderValue={() => renderValue(currentModel)}
-            size="small"
-            MenuProps={{
-              PaperProps: {
-                style: {
-                  maxHeight: 360,
-                  marginTop: 8,
-                },
-                sx: {
-                  zIndex: 10000,
-                  '@keyframes menuSlideIn': {
-                    '0%': {
-                      opacity: 0,
-                      transform: 'translateY(-8px) scale(0.95)',
-                    },
-                    '100%': {
-                      opacity: 1,
-                      transform: 'translateY(0) scale(1)',
-                    },
+    <div className={`${className} transition-transform hover:scale-105 active:scale-95`}>
+      <FormControl size="small">
+        <Select
+          value={currentModel ? getModelKey(currentModel) : ''}
+          onChange={(event) => {
+            const selectedKey = event.target.value as string;
+            const selectedModel = models.find((model) => getModelKey(model) === selectedKey);
+            if (selectedModel) {
+              handleModelChange(selectedModel);
+            }
+          }}
+          disabled={isLoading}
+          displayEmpty
+          renderValue={() => renderValue(currentModel)}
+          size="small"
+          MenuProps={{
+            PaperProps: {
+              style: {
+                maxHeight: 360,
+                marginTop: 8,
+              },
+              sx: {
+                zIndex: 10000,
+                '@keyframes menuSlideIn': {
+                  '0%': {
+                    opacity: 0,
+                    transform: 'translateY(-8px) scale(0.95)',
+                  },
+                  '100%': {
+                    opacity: 1,
+                    transform: 'translateY(0) scale(1)',
                   },
                 },
               },
-              anchorOrigin: {
-                vertical: 'bottom',
-                horizontal: 'left',
-              },
-              transformOrigin: {
-                vertical: 'top',
-                horizontal: 'left',
-              },
-            }}
-            sx={{
-              width: 'auto',
-              minWidth: 'auto',
-              maxWidth: '300px',
-            }}
-          >
-            {models.map((model) => {
-              const modelKey = getModelKey(model);
-              const isSelected = isSameModel(currentModel, model);
+            },
+            anchorOrigin: {
+              vertical: 'bottom',
+              horizontal: 'left',
+            },
+            transformOrigin: {
+              vertical: 'top',
+              horizontal: 'left',
+            },
+          }}
+          sx={{
+            width: 'auto',
+            minWidth: 'auto',
+            maxWidth: '300px',
+          }}
+        >
+          {models.map((model) => {
+            const modelKey = getModelKey(model);
+            const isSelected = isSameModel(currentModel, model);
 
-              return (
-                <MenuItem key={modelKey} value={modelKey}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
-                    <Box sx={{ minWidth: 0, flex: 1 }}>
-                      <ModelDisplayContent
-                        model={model}
-                        isDarkMode={isDarkMode}
-                        fontSize="14px"
-                        isSelected={isSelected}
-                      />
-                    </Box>
+            return (
+              <MenuItem key={modelKey} value={modelKey}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+                  <Box sx={{ minWidth: 0, flex: 1 }}>
+                    <ModelDisplayContent
+                      model={model}
+                      isDarkMode={isDarkMode}
+                      fontSize="14px"
+                      isSelected={isSelected}
+                    />
                   </Box>
-                </MenuItem>
-              );
-            })}
-          </Select>
-        </FormControl>
-      </div>
-    </ThemeProvider>
+                </Box>
+              </MenuItem>
+            );
+          })}
+        </Select>
+      </FormControl>
+    </div>
   );
 };
