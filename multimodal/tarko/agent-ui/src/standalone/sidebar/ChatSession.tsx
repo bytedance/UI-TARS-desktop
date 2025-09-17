@@ -225,7 +225,7 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
   }
 
   return (
-    <div className="w-64 bg-white dark:bg-gray-800/95 rounded-xl flex flex-col h-full backdrop-blur-sm">
+    <div className="w-72 bg-white dark:bg-gray-800/95 flex flex-col h-full backdrop-blur-sm">
       <div className="p-4 flex items-center justify-between border-b border-gray-100/40 dark:border-gray-700/20">
         <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Recent Tasks</div>
         <div className="flex items-center gap-2">

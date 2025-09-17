@@ -23,12 +23,11 @@ export const SidebarContainer: React.FC = () => {
       <div className="flex h-full pb-2 lg:pb-3">
         <ToolBar />
       </div>
-      
+
       {/* Modal overlay and ChatSession */}
       <AnimatePresence>
         {!isSidebarCollapsed && (
           <>
-            {/* Backdrop overlay */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -37,8 +36,6 @@ export const SidebarContainer: React.FC = () => {
               className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
               onClick={toggleSidebar} // Close modal when clicking backdrop
             />
-            
-            {/* ChatSession modal */}
             <motion.div
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
@@ -46,9 +43,7 @@ export const SidebarContainer: React.FC = () => {
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
               className="fixed left-0 top-0 h-full z-50"
             >
-              <div className="pt-3 pb-3">
-                <ChatSession isCollapsed={false} />
-              </div>
+              <ChatSession isCollapsed={false} />
             </motion.div>
           </>
         )}

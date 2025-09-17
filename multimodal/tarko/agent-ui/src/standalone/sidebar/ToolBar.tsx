@@ -41,18 +41,26 @@ export const ToolBar: React.FC = () => {
   return (
     <>
       <div className="w-12 h-full flex flex-col backdrop-blur-sm">
-        {/* Logo at the top */}
-        <div className="flex justify-center pt-3 pb-2">
+        <div className="flex flex-col items-center gap-4 pt-3">
           <button onClick={handleNavigateHome} title="Back to Home">
-            <img 
-              src={getLogoUrl()} 
-              alt={getAgentTitle()} 
-              className="w-6 h-6 rounded-lg hover:scale-105 transition-transform" 
+            <img
+              src={getLogoUrl()}
+              alt={getAgentTitle()}
+              className="w-6 h-6 rounded-lg hover:scale-105 transition-transform"
             />
           </button>
-        </div>
-        
-        <div className="flex-1 flex flex-col items-center gap-4">
+
+          {/* Sidebar toggle button */}
+          {!isReplayMode && (
+            <button
+              onClick={toggleSidebar}
+              className="w-6 h-6 rounded-lg flex items-center justify-center bg-white dark:bg-gray-800 text-black dark:text-white hover:shadow-md transition-all hover:scale-105 active:scale-95"
+              title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {isSidebarCollapsed ? <GoSidebarExpand size={12} /> : <GoSidebarCollapse size={12} />}
+            </button>
+          )}
+
           {!isReplayMode && (
             <button
               onClick={handleNewSession}
@@ -94,22 +102,11 @@ export const ToolBar: React.FC = () => {
               )}
             </button>
           )}
-
-
         </div>
 
-        <div className="flex flex-col items-center gap-4 pb-4">
-          {/* Sidebar toggle button */}
-          {!isReplayMode && (
-            <button
-              onClick={toggleSidebar}
-              className="w-6 h-6 rounded-lg flex items-center justify-center bg-white dark:bg-gray-800 text-black dark:text-white hover:shadow-md transition-all hover:scale-105 active:scale-95"
-              title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            >
-              {isSidebarCollapsed ? <GoSidebarExpand size={12} /> : <GoSidebarCollapse size={12} />}
-            </button>
-          )}
+        <div className="flex-1" />
 
+        <div className="flex flex-col items-center gap-4 pb-4">
           {!isReplayMode && enableLayoutSwitchButton && <LayoutSwitchButton />}
 
           {/* Agent config button */}
