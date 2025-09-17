@@ -6,7 +6,7 @@
 import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
 import { cors } from 'hono/cors';
-import { LogLevel, SessionInfo, TenantConfig } from '@tarko/interface';
+import { LogLevel, TenantConfig } from '@tarko/interface';
 import { StorageProvider, createStorageProvider } from './storage';
 import { resolveAgentImplementation } from './utils/agent-resolver';
 import type {
@@ -15,7 +15,6 @@ import type {
   AgentAppConfig,
   AgentResolutionResult,
   AgioProviderConstructor,
-  IAgent,
   ContextVariables,
 } from './types';
 import { AgentSessionPool, AgentSessionFactory } from './services/session';
@@ -32,6 +31,7 @@ import {
   createSystemRoutes,
 } from './routes';
 import { createUserConfigRoutes } from './routes/user';
+import { HookManager, BuiltInPriorities, type HookRegistrationOptions } from './hooks';
 import { config } from 'dotenv';
 
 config();
@@ -77,6 +77,9 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   // Current agent resolution, resolved before server started
   private currentAgentResolution?: AgentResolutionResult;
 
+  // Hook system
+  public readonly hookManager: HookManager;
+
   constructor(instantiationOptions: AgentServerInitOptions<T>) {
     const { appConfig, versionInfo, directories } = instantiationOptions;
 
@@ -106,18 +109,30 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     // Initialize session management
     this.sessionPool = new AgentSessionPool();
 
+    // Initialize hook system
+    this.hookManager = new HookManager();
+
     // Setup middlewares in correct order
     this.setupMiddlewares();
   }
 
   /**
-   * Setup Hono middlewares in correct order
+   * Setup Hono middlewares - only register hooks, don't apply yet
    */
   private setupMiddlewares(): void {
-    // CORS middleware (should be early to handle preflight requests)
-    this.app.use(
-      '*',
-      cors({
+    this.registerBuiltInHooks();
+    }
+
+  /**
+   * Register built-in middlewares as hooks with their priorities
+   */
+  private registerBuiltInHooks(): void {
+    this.hookManager.register({
+      id: 'cors',
+      name: 'CORS',
+      priority: BuiltInPriorities.CORS,
+      description: 'Cross-Origin Resource Sharing middleware',
+      handler: cors({
         origin: process.env.ACCESS_ALLOW_ORIGIN || '*',
         allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         allowHeaders: [
@@ -129,25 +144,82 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
         ],
         credentials: true,
       }),
-    );
-
-    // Server instance injection middleware
-    this.app.use('*', async (c, next) => {
-      c.set('server', this);
-      await next();
     });
 
-    // Error handling middleware (after CORS to catch all errors)
-    this.app.use('*', errorHandlingMiddleware);
+    // Server instance injection middleware
+    this.hookManager.register({
+      id: 'server-injection',
+      name: 'Server Injection',
+      priority: BuiltInPriorities.SERVER_INJECTION,
+      description: 'Injects server instance into context',
+      handler: async (c, next) => {
+        c.set('server', this);
+        await next();
+      },
+    });
 
-    // Request ID middleware (early for logging)
-    this.app.use('*', requestIdMiddleware);
+    // Error handling middleware
+    this.hookManager.register({
+      id: 'error-handling',
+      name: 'Error Handling',
+      priority: BuiltInPriorities.ERROR_HANDLING,
+      description: 'Global error handling middleware',
+      handler: errorHandlingMiddleware,
+    });
 
-    // Logging middleware (after request ID)
-    this.app.use('*', accessLogMiddleware);
+    // Request ID middleware
+    this.hookManager.register({
+      id: 'request-id',
+      name: 'Request ID',
+      priority: BuiltInPriorities.REQUEST_ID,
+      description: 'Generates unique request IDs for tracking',
+      handler: requestIdMiddleware,
+    });
 
-    // Authentication middleware (for multi-tenant mode)
-    this.app.use('*', authMiddleware);
+    // Access logging middleware
+    this.hookManager.register({
+      id: 'access-log',
+      name: 'Access Log',
+      priority: BuiltInPriorities.ACCESS_LOG,
+      description: 'Logs HTTP requests and responses',
+      handler: accessLogMiddleware,
+    });
+
+    // Authentication middleware
+    this.hookManager.register({
+      id: 'auth',
+      name: 'Authentication',
+      priority: BuiltInPriorities.AUTH,
+      description: 'Authentication and authorization middleware',
+      handler: authMiddleware,
+    });
+  }
+
+  /**
+   * Apply all registered hooks to the Hono app in priority order
+   * This method is called during server start after all hooks are registered
+   */
+  private applyHooks(): void {
+    // Get all hooks sorted by priority (highest first)
+    const hooks = this.hookManager.getHooks();
+    
+    if (hooks.length === 0) {
+      console.warn('No hooks registered. Server will run without middleware.');
+      return;
+    }
+    
+    // Validate hook configuration
+    const validation = this.hookManager.validateExecutionOrder();
+    if (!validation.isValid) {
+      console.warn('Hook validation warnings detected:');
+      validation.warnings.forEach(warning => console.warn(`  - ${warning}`));
+    }
+
+    
+    for (const hook of hooks) {
+        console.log(`${hook.name} (id: ${hook.id}, priority: ${hook.priority})`);
+        this.app.use('*', hook.handler);
+    }
   }
 
   /**
@@ -334,6 +406,9 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
       await this.initializeMultiTenantServices();
     }
 
+    // Apply all registered hooks in priority order
+    this.applyHooks();
+
     // Setup API routes
     this.setupRoutes();
 
@@ -431,5 +506,46 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    */
   getMemoryStats() {
     return this.sessionPool.getMemoryStats();
+  }
+
+  /**
+   * Register a custom hook/middleware
+   * @param options Hook registration options
+   */
+  registerHook(options: HookRegistrationOptions): void {
+    if (this.isRunning) {
+      throw new Error(
+        `Cannot register hook '${options.id}' after server has started. ` +
+        'Please register all hooks before calling start().'
+      );
+    }
+    
+    this.hookManager.register(options);
+    
+    if (this.isDebug) {
+      console.log(`[DEBUG] Registered hook: ${options.name} (id: ${options.id}, priority: ${options.priority || 200})`);
+    }
+  }
+
+  /**
+   * Unregister a hook by id
+   * @param id Hook identifier
+   * @returns true if hook was found and removed
+   */
+  unregisterHook(id: string): boolean {
+    if (this.isRunning) {
+      throw new Error(
+        `Cannot unregister hook '${id}' after server has started. ` +
+        'Please manage hooks before calling start().'
+      );
+    }
+    
+    const result = this.hookManager.unregister(id);
+    
+    if (result && this.isDebug) {
+      console.log(`[DEBUG] Unregistered hook: ${id}`);
+    }
+    
+    return result;
   }
 }

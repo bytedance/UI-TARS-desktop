@@ -16,6 +16,7 @@ import type {
 import type { StorageProvider } from './storage';
 import type { AgentSession, AgentSessionFactory, AgentSessionPool } from './services/session';
 import type { UserConfigService } from './services/user';
+import { HookRegistrationOptions } from './hooks/types';
 /**
  * AgentServer initialization options
  */
@@ -52,6 +53,12 @@ export interface ContextVariables {
   requestId?: string;
   startTime?: number;
   user?: UserInfo;
+  // Hook system variables
+  requestMetrics?: Record<string, any>;
+  apiKey?: string;
+  apiVersion?: string;
+  // Allow arbitrary string keys for hook system extensibility
+  [key: string]: any;
 }
 
 /**
@@ -106,6 +113,11 @@ export interface AgentServer<T extends AgentAppConfig = AgentAppConfig> {
 
   // Storage information
   getStorageInfo(): { type: string; path?: string };
+
+  //hook system
+  registerHook(options: HookRegistrationOptions): void
+  unregisterHook(id: string): boolean
+
 }
 
 // Re-export types from interface
@@ -117,3 +129,6 @@ export type {
   IAgent,
   GlobalDirectoryOptions,
 };
+
+// Hook system types
+export * from './hooks/types';
