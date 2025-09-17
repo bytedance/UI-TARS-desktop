@@ -53,6 +53,9 @@ export const Dialog: React.FC<DialogProps> = ({
         }}
         sx={{
           zIndex: 9999,
+          '& .MuiBackdrop-root': {
+            backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0.8)' : 'rgba(0, 0, 0, 0.5)',
+          },
         }}
       >
         <DialogContent sx={{ padding: 0 }}>{children}</DialogContent>
