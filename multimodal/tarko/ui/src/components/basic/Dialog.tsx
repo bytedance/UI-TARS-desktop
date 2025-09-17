@@ -36,7 +36,7 @@ export const Dialog: React.FC<DialogProps> = ({
   // Map maxWidth to actual CSS values
   const maxWidthMap = {
     xs: '444px',
-    sm: '600px', 
+    sm: '600px',
     md: '900px',
     lg: '1200px',
     xl: '1536px',
@@ -45,11 +45,11 @@ export const Dialog: React.FC<DialogProps> = ({
   const dialogStyle: React.CSSProperties = {
     position: 'fixed',
     inset: 0,
-    zIndex: 9999,
+    zIndex: 50000, // Increased z-index to ensure it's above everything
     display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '16px',
+    alignItems: fullScreen ? 'stretch' : 'center',
+    justifyContent: fullScreen ? 'stretch' : 'center',
+    padding: fullScreen ? 0 : '16px',
   };
 
   const backdropStyle: React.CSSProperties = {
@@ -57,6 +57,7 @@ export const Dialog: React.FC<DialogProps> = ({
     inset: 0,
     backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0.8)' : 'rgba(0, 0, 0, 0.5)',
     transition: 'opacity 225ms cubic-bezier(0.4, 0, 0.2, 1)',
+    zIndex: -1, // Behind the dialog panel
   };
 
   const paperStyle: React.CSSProperties = {
@@ -67,7 +68,7 @@ export const Dialog: React.FC<DialogProps> = ({
       : '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
     outline: 'none',
     position: 'relative',
-    overflow: 'hidden',
+    overflow: fullScreen ? 'auto' : 'hidden',
     transition: 'all 225ms cubic-bezier(0.4, 0, 0.2, 1)',
     ...(fullScreen
       ? {
@@ -76,6 +77,7 @@ export const Dialog: React.FC<DialogProps> = ({
           maxWidth: 'none',
           maxHeight: 'none',
           borderRadius: 0,
+          flex: 1, // Take full available space
         }
       : {
           borderRadius: '12px',
@@ -86,18 +88,21 @@ export const Dialog: React.FC<DialogProps> = ({
   };
 
   return (
-    <HeadlessDialog
-      open={open}
-      onClose={onClose}
-      className={className}
-      style={dialogStyle}
-    >
+    <HeadlessDialog open={open} onClose={onClose} className={className} style={dialogStyle}>
       {/* Backdrop */}
       <div style={backdropStyle} aria-hidden="true" />
-      
+
       {/* Dialog panel */}
       <HeadlessDialog.Panel style={paperStyle}>
-        <div style={{ padding: 0 }}>
+        <div
+          style={{
+            padding: 0,
+            width: '100%',
+            height: fullScreen ? '100%' : 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
           {children}
         </div>
       </HeadlessDialog.Panel>
