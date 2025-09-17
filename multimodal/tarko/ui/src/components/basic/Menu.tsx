@@ -27,10 +27,13 @@ const getMenuStyles = (isDarkMode: boolean) => ({
     top: '50px',
     right: '16px',
     minWidth: '200px',
-    backgroundColor: isDarkMode ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-    border: isDarkMode ? '1px solid rgba(71, 85, 105, 0.3)' : '1px solid rgba(226, 232, 240, 0.8)',
-    borderRadius: '12px',
-    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2)',
+    backgroundColor: isDarkMode ? 'rgba(15, 23, 42, 0.98)' : 'rgba(255, 255, 255, 0.98)',
+    border: isDarkMode ? '1px solid rgba(99, 102, 241, 0.4)' : '1px solid rgba(99, 102, 241, 0.2)',
+    borderRadius: '16px',
+    boxShadow: isDarkMode 
+      ? '0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(99, 102, 241, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)'
+      : '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(99, 102, 241, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)',
+    backdropFilter: 'blur(20px)',
     zIndex: 50000,
     padding: '8px',
   },
@@ -39,17 +42,25 @@ const getMenuStyles = (isDarkMode: boolean) => ({
     alignItems: 'center',
     gap: '12px',
     width: '100%',
-    padding: '8px 16px',
+    padding: '12px 16px',
     backgroundColor: 'transparent',
     border: 'none',
-    borderRadius: '8px',
-    color: isDarkMode ? 'rgba(226, 232, 240, 0.9)' : 'rgba(51, 65, 85, 0.9)',
+    borderRadius: '10px',
+    color: isDarkMode ? 'rgba(248, 250, 252, 0.95)' : 'rgba(30, 41, 59, 0.9)',
     cursor: 'pointer',
     fontSize: '14px',
+    fontWeight: '500',
     textAlign: 'left' as const,
+    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+    position: 'relative' as const,
   },
   itemHover: {
-    backgroundColor: isDarkMode ? 'rgba(71, 85, 105, 0.3)' : 'rgba(241, 245, 249, 0.8)',
+    backgroundColor: isDarkMode ? 'rgba(99, 102, 241, 0.15)' : 'rgba(99, 102, 241, 0.08)',
+    color: isDarkMode ? 'rgba(165, 180, 252, 0.95)' : 'rgba(99, 102, 241, 0.9)',
+    transform: 'translateX(2px)',
+    boxShadow: isDarkMode 
+      ? 'inset 0 1px 0 rgba(255, 255, 255, 0.05)'
+      : 'inset 0 1px 0 rgba(255, 255, 255, 0.8)',
   },
 });
 
@@ -101,7 +112,18 @@ export const MenuItem: React.FC<MenuItemProps> = ({
       onMouseLeave={() => setIsHovered(false)}
       disabled={disabled}
     >
-      {icon && <span style={{ opacity: 0.7, flexShrink: 0 }}>{icon}</span>}
+      {icon && (
+        <span 
+          style={{ 
+            opacity: isHovered ? 0.9 : 0.7, 
+            flexShrink: 0,
+            transition: 'opacity 0.2s ease',
+            color: isHovered ? (isDarkMode ? '#a5b4fc' : '#6366f1') : 'inherit'
+          }}
+        >
+          {icon}
+        </span>
+      )}
       {children}
     </button>
   );
