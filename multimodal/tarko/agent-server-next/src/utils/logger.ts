@@ -23,18 +23,19 @@ export function getLogger(module: string): ILogger {
     }
 
     // Create proxy to prepend module name to log messages
-    return new Proxy(rootLogger, {
-        get(target, prop) {
-            const logMethods = ['info', 'warn', 'debug', 'error'] as const;
+    // return new Proxy(rootLogger, {
+    //     get(target, prop) {
+    //         const logMethods = ['info', 'warn', 'debug', 'error'] as const;
             
-            if (logMethods.includes(prop as any)) {
-                return function(message: string, ...args: any[]) {
-                    const prefixedMessage = `[${module}] ${message}`;
-                    return (target as any)[prop](prefixedMessage, ...args);
-                };
-            }
+    //         if (logMethods.includes(prop as any)) {
+    //             return function(message: string, ...args: any[]) {
+    //                 const prefixedMessage = `[${module}] ${message}`;
+    //                 return (target as any)[prop](prefixedMessage, ...args);
+    //             };
+    //         }
             
-            return (target as any)[prop];
-        }
-    });
+    //         return (target as any)[prop];
+    //     }
+    // });
+    return rootLogger;
 }
