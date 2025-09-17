@@ -74,7 +74,7 @@ export class MockAgent implements IAgent {
     return this.currentStatus;
   }
 
-  getEventStream(): AgentEventStream {
+  getEventStream(): AgentEventStream.Processor {
     return this.eventStream;
   }
 
@@ -86,27 +86,88 @@ export class MockAgent implements IAgent {
     this.currentStatus = AgentStatus.IDLE;
     this.eventStream.removeAllListeners();
   }
+
+  // Additional required methods from IAgent interface
+  getTools(): any[] {
+    return [];
+  }
+
+  getLLMClient(): any {
+    return undefined;
+  }
+
+  getCurrentModel(): any {
+    return undefined;
+  }
+
+  onLLMRequest(): void {}
+  onLLMResponse(): void {}
+  onLLMStreamingResponse(): void {}
+  onBeforeToolCall(): any {}
+  onAfterToolCall(): any {}
+  onToolCallError(): any {}
+  onEachAgentLoopStart(): void {}
+  onEachAgentLoopEnd(): void {}
+  onAgentLoopEnd(): void {}
+  onProcessToolCalls(): any {}
+  onBeforeLoopTermination(): any {
+    return { finished: true };
+  }
+  requestLoopTermination(): boolean {
+    return false;
+  }
+  isLoopTerminationRequested(): boolean {
+    return false;
+  }
+  getCurrentLoopIteration(): number {
+    return 0;
+  }
+  getOptions(): any {
+    return this.options;
+  }
+  callLLM(): any {
+    return Promise.resolve({});
+  }
+  onPrepareRequest(): any {
+    return { systemPrompt: '', tools: [] };
+  }
 }
 
 /**
  * Mock EventStream implementation
  */
-class MockEventStream extends EventEmitter implements AgentEventStream {
+class MockEventStream extends EventEmitter implements AgentEventStream.Processor {
+  private events: AgentEventStream.Event[] = [];
+
   subscribe(handler: (event: AgentEventStream.Event) => void): () => void {
     this.on('event', handler);
     return () => this.off('event', handler);
   }
 
-  emit(eventType: string, data: any): boolean {
-    const event = this.createEvent(eventType as any, data);
-    return super.emit('event', event);
+  sendEvent(event: AgentEventStream.Event): void {
+    this.events.push(event);
+    super.emit('event', event);
+  }
+
+  getEvents(): AgentEventStream.Event[] {
+    return [...this.events];
+  }
+
+  getEventsByType(types: AgentEventStream.EventType[]): AgentEventStream.Event[] {
+    return this.events.filter(event => types.includes(event.type));
+  }
+
+  dispose(): void {
+    this.events = [];
+    this.removeAllListeners();
   }
 
   createEvent(type: AgentEventStream.EventType, data: any): AgentEventStream.Event {
     return {
+      id: `event-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       type,
-      data,
-      timestamp: Date.now(),
-    };
+      timestamp: new Date().toISOString(),
+      ...data,
+    } as AgentEventStream.Event;
   }
 }

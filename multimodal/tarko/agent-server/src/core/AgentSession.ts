@@ -70,6 +70,7 @@ export class AgentSession {
   private agioProvider?: AgioEvent.AgioProvider;
   private agioProviderConstructor?: AgioProviderConstructor;
   private sessionInfo?: SessionInfo;
+  private sessionStartTime: number;
 
   /**
    * Create event handler for storage and AGIO processing
@@ -77,9 +78,18 @@ export class AgentSession {
   private createEventHandler() {
     return async (event: AgentEventStream.Event) => {
       // Save to storage if available and event should be stored
+      // Skip saving if this is a restored event (indicated by missing timestamp or being too old)
       if (this.server.storageProvider && shouldStoreEvent(event)) {
         try {
-          await this.server.storageProvider.saveEvent(this.id, event);
+          // Check if this might be a restored event by comparing timestamp
+          // Restored events should have been created before the current session started
+          const eventTime = event.timestamp ? new Date(event.timestamp).getTime() : Date.now();
+          const sessionStartTime = this.sessionStartTime || Date.now();
+          
+          // Only save events that are new (created after session start)
+          if (eventTime >= sessionStartTime) {
+            await this.server.storageProvider.saveEvent(this.id, event);
+          }
         } catch (error) {
           console.error(`Failed to save event to storage: ${error}`);
         }
@@ -141,6 +151,9 @@ export class AgentSession {
     // Initialize the agent
     await wrappedAgent.initialize();
 
+    // Restore events from storage if available
+    await this.restoreEventsFromStorage(wrappedAgent);
+
     // Initialize AGIO collector if provider URL is configured
     if (agentOptions.agio?.provider && this.agioProviderConstructor) {
       this.agioProvider = new this.agioProviderConstructor(
@@ -194,6 +207,42 @@ export class AgentSession {
   }
 
   /**
+   * Restore events from storage to the agent's event stream
+   * This ensures context continuity when agent instances are recreated
+   */
+  private async restoreEventsFromStorage(agent: IAgent): Promise<void> {
+    // Only restore if storage provider is available
+    if (!this.server.storageProvider) {
+      return;
+    }
+
+    try {
+      // Get stored events for this session
+      const storedEvents = await this.server.storageProvider.getSessionEvents(this.id);
+      
+      if (storedEvents.length === 0) {
+        return;
+      }
+
+      // Get the agent's event stream
+      const eventStream = agent.getEventStream();
+      
+      // Restore events to the event stream
+      // We need to replay the events in order to rebuild the conversation context
+      for (const event of storedEvents) {
+        // Send the event to the event stream without triggering storage save again
+        // This rebuilds the internal state (like message history) without duplicate storage
+        eventStream.sendEvent(event);
+      }
+
+      console.info(`Restored ${storedEvents.length} events from storage for session ${this.id}`);
+    } catch (error) {
+      console.error(`Failed to restore events from storage for session ${this.id}:`, error);
+      // Don't throw - continue with empty context rather than failing
+    }
+  }
+
+  /**
    * Create agent with snapshot support if enabled
    */
   private createAgentWithSnapshot(baseAgent: IAgent, sessionId: string): IAgent {
@@ -230,6 +279,7 @@ export class AgentSession {
     this.eventBridge = new EventStreamBridge();
     this.sessionInfo = sessionInfo;
     this.agioProviderConstructor = agioProviderImpl;
+    this.sessionStartTime = Date.now();
 
     // Agent will be created and initialized in initialize() method
     this.agent = null as any; // Temporary placeholder
@@ -466,6 +516,9 @@ export class AgentSession {
   async updateModelConfig(sessionInfo: SessionInfo): Promise<void> {
     // Store the session metadata for use in future queries
     this.sessionInfo = sessionInfo;
+
+    // Update session start time to ensure restored events aren't saved again
+    this.sessionStartTime = Date.now();
 
     // Recreate agent with new model configuration
     try {
