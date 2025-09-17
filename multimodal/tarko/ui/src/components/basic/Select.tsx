@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { Listbox } from '@headlessui/react';
 import { useDarkMode } from '../../hooks/useDarkMode';
 
@@ -54,11 +55,38 @@ export const Select: React.FC<SelectProps> = ({
 
   const selectedOption = options.find((opt) => opt.value === value);
   const handleChange = (newValue: any) => onChange({ target: { value: newValue } });
+  
+  const [buttonRect, setButtonRect] = React.useState<DOMRect | null>(null);
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
+
+  const updateButtonRect = React.useCallback(() => {
+    if (buttonRef.current) {
+      setButtonRect(buttonRef.current.getBoundingClientRect());
+    }
+  }, []);
 
   return (
     <div className={className} style={{ position: 'relative' }}>
       <Listbox value={value} onChange={handleChange} disabled={disabled}>
-        <Listbox.Button
+        {({ open }) => {
+          React.useEffect(() => {
+            if (open) {
+              updateButtonRect();
+              const handleScroll = () => updateButtonRect();
+              const handleResize = () => updateButtonRect();
+              window.addEventListener('scroll', handleScroll, true);
+              window.addEventListener('resize', handleResize);
+              return () => {
+                window.removeEventListener('scroll', handleScroll, true);
+                window.removeEventListener('resize', handleResize);
+              };
+            }
+          }, [open, updateButtonRect]);
+
+          return (
+            <>
+              <Listbox.Button
+                ref={buttonRef}
           style={{
             width: '100%',
             minHeight: size === 'small' ? '32px' : '40px',
@@ -84,73 +112,78 @@ export const Select: React.FC<SelectProps> = ({
               ? renderValue(value)
               : selectedOption?.label || (displayEmpty ? 'Select...' : '')}
           </span>
-          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </Listbox.Button>
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </Listbox.Button>
 
-        <Listbox.Options
-          style={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            right: 0,
-            zIndex: 50000, // 确保在最顶层
-            marginTop: '8px',
-            backgroundColor: isDarkMode ? 'rgba(31, 41, 55, 0.98)' : 'rgba(255, 255, 255, 0.98)',
-            backdropFilter: 'blur(20px)',
-            border: isDarkMode
-              ? '1px solid rgba(75, 85, 99, 0.4)'
-              : '1px solid rgba(229, 231, 235, 0.6)',
-            borderRadius: '16px',
-            boxShadow: isDarkMode
-              ? '0 20px 40px -10px rgba(0, 0, 0, 0.5), 0 8px 16px -4px rgba(0, 0, 0, 0.3)'
-              : '0 20px 40px -10px rgba(0, 0, 0, 0.15), 0 8px 16px -4px rgba(0, 0, 0, 0.08)',
-            maxHeight: '360px',
-            maxWidth: '400px',
-            overflowY: 'auto',
-            padding: '8px',
-          }}
-        >
-          {options.map((option, index) => (
-            <Listbox.Option
-              key={`${option.value}-${index}`}
-              value={option.value}
-              disabled={option.disabled}
-            >
-              {({ active, selected }) => (
-                <div
+              {open && buttonRect && createPortal(
+                <Listbox.Options
                   style={{
-                    padding: '8px 16px',
-                    borderRadius: '8px',
-                    margin: '3px 0',
-                    minHeight: '40px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                    backgroundColor: active
-                      ? isDarkMode
-                        ? 'rgba(99, 102, 241, 0.15)'
-                        : 'rgba(99, 102, 241, 0.08)'
-                      : 'transparent',
-                    color: selected
-                      ? isDarkMode
-                        ? '#a5b4fc'
-                        : '#6366f1'
-                      : isDarkMode
-                        ? '#f9fafb'
-                        : '#111827',
-                    fontWeight: selected ? 500 : 400,
-                    cursor: 'pointer',
-                    transform: active ? 'translateX(2px)' : 'translateX(0)',
+                    position: 'fixed',
+                    top: buttonRect.bottom + 8,
+                    left: buttonRect.left,
+                    minWidth: buttonRect.width,
+                    zIndex: 50000,
+                    backgroundColor: isDarkMode ? 'rgba(31, 41, 55, 0.98)' : 'rgba(255, 255, 255, 0.98)',
+                    backdropFilter: 'blur(20px)',
+                    border: isDarkMode
+                      ? '1px solid rgba(75, 85, 99, 0.4)'
+                      : '1px solid rgba(229, 231, 235, 0.6)',
+                    borderRadius: '16px',
+                    boxShadow: isDarkMode
+                      ? '0 20px 40px -10px rgba(0, 0, 0, 0.5), 0 8px 16px -4px rgba(0, 0, 0, 0.3)'
+                      : '0 20px 40px -10px rgba(0, 0, 0, 0.15), 0 8px 16px -4px rgba(0, 0, 0, 0.08)',
+                    maxHeight: '360px',
+                    maxWidth: '400px',
+                    overflowY: 'auto',
+                    padding: '8px',
                   }}
                 >
-                  {option.label}
-                </div>
+                  {options.map((option, index) => (
+                    <Listbox.Option
+                      key={`${option.value}-${index}`}
+                      value={option.value}
+                      disabled={option.disabled}
+                    >
+                      {({ active, selected }) => (
+                        <div
+                          style={{
+                            padding: '8px 16px',
+                            borderRadius: '8px',
+                            margin: '3px 0',
+                            minHeight: '40px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                            backgroundColor: active
+                              ? isDarkMode
+                                ? 'rgba(99, 102, 241, 0.15)'
+                                : 'rgba(99, 102, 241, 0.08)'
+                              : 'transparent',
+                            color: selected
+                              ? isDarkMode
+                                ? '#a5b4fc'
+                                : '#6366f1'
+                              : isDarkMode
+                                ? '#f9fafb'
+                                : '#111827',
+                            fontWeight: selected ? 500 : 400,
+                            cursor: 'pointer',
+                            transform: active ? 'translateX(2px)' : 'translateX(0)',
+                          }}
+                        >
+                          {option.label}
+                        </div>
+                      )}
+                    </Listbox.Option>
+                  ))}
+                </Listbox.Options>,
+                document.body
               )}
-            </Listbox.Option>
-          ))}
-        </Listbox.Options>
+            </>
+          );
+        }}
       </Listbox>
     </div>
   );
