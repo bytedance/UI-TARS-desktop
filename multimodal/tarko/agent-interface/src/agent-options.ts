@@ -184,6 +184,15 @@ export interface AgentMemoryOptions {
    * @defaultValue `false`
    */
   enableStreamingToolCallEvents?: boolean;
+
+  /**
+   * Initial events to restore to the agent's event stream during initialization.
+   * This is useful for restoring conversation context from storage when recreating agent instances.
+   * Events will be restored without triggering subscribers or side effects.
+   *
+   * @defaultValue `undefined`
+   */
+  initialEvents?: AgentEventStream.Event[];
 }
 
 /**
