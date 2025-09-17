@@ -675,8 +675,6 @@ export namespace AgentEventStream {
      */
     getLatestToolResults(): { toolCallId: string; toolName: string; content: any }[];
 
-
-
     /**
      * Clear all events from the stream
      */

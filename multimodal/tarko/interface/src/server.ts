@@ -124,7 +124,7 @@ export interface AgentServerOptions {
     models?: AgentModel[];
     /*
      * Sandbox config
-    */
+     */
     sandbox?: SandboxConfig;
 
     /**

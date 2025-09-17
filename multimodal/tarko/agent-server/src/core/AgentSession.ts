@@ -126,7 +126,7 @@ export class AgentSession {
     }
 
     // Get stored events for this session before creating the agent
-    const storedEvents = this.server.storageProvider 
+    const storedEvents = this.server.storageProvider
       ? await this.server.storageProvider.getSessionEvents(this.id)
       : [];
 
@@ -198,8 +198,6 @@ export class AgentSession {
     // Fall back to default model
     return getDefaultModel(this.server.appConfig);
   }
-
-
 
   /**
    * Create agent with snapshot support if enabled

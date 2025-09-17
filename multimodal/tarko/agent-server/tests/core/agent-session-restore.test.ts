@@ -7,10 +7,11 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { AgentSession } from '../../src/core/AgentSession';
 import { MemoryStorageProvider } from '../../src/storage/MemoryStorageProvider';
 import { MockAgent } from '../mocks/MockAgent';
-import { AgentEventStream } from '@tarko/interface';
+import { AgentEventStream, SessionInfo } from '@tarko/interface';
+import { AgentServer } from '../../src/server';
 
 describe('AgentSession - Context Restore (Simplest Implementation)', () => {
-  let mockServer: any;
+  let mockServer: AgentServer;
   let storageProvider: MemoryStorageProvider;
   let session: AgentSession;
   const sessionId = 'test-session-restore';
@@ -20,11 +21,10 @@ describe('AgentSession - Context Restore (Simplest Implementation)', () => {
     storageProvider = new MemoryStorageProvider();
     await storageProvider.initialize();
 
-    // Create mock server
+    // @ts-expect-error
     mockServer = {
       storageProvider,
       appConfig: {
-        agent: 'test-agent',
         workspace: '/tmp/test',
         model: {
           provider: 'openai',
@@ -56,25 +56,24 @@ describe('AgentSession - Context Restore (Simplest Implementation)', () => {
     // Create session info
     const sessionInfo = await storageProvider.createSession({
       id: sessionId,
-      title: 'Test Session',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
       workspace: '/tmp/test',
       metadata: {},
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
     });
 
     // Create some test events in storage
     const userEvent: AgentEventStream.UserMessageEvent = {
       id: 'event-1',
       type: 'user_message',
-      timestamp: new Date().toISOString(),
+      timestamp: Date.now(),
       content: 'Hello, this is a test message',
     };
 
     const assistantEvent: AgentEventStream.AssistantMessageEvent = {
       id: 'event-2',
       type: 'assistant_message',
-      timestamp: new Date().toISOString(),
+      timestamp: Date.now(),
       content: 'Hello! I understand your test message.',
       finishReason: 'stop',
     };
@@ -93,27 +92,30 @@ describe('AgentSession - Context Restore (Simplest Implementation)', () => {
 
     // Verify that events were restored
     expect(events.length).toBeGreaterThanOrEqual(2);
-    
+
     // Find our test events
-    const restoredUserEvent = events.find(e => e.id === 'event-1');
-    const restoredAssistantEvent = events.find(e => e.id === 'event-2');
+    const restoredUserEvent = events.find((e) => e.id === 'event-1');
+    const restoredAssistantEvent = events.find((e) => e.id === 'event-2');
 
     expect(restoredUserEvent).toBeDefined();
     expect(restoredUserEvent?.type).toBe('user_message');
-    expect((restoredUserEvent as AgentEventStream.UserMessageEvent)?.content).toBe('Hello, this is a test message');
+    expect((restoredUserEvent as AgentEventStream.UserMessageEvent)?.content).toBe(
+      'Hello, this is a test message',
+    );
 
     expect(restoredAssistantEvent).toBeDefined();
     expect(restoredAssistantEvent?.type).toBe('assistant_message');
-    expect((restoredAssistantEvent as AgentEventStream.AssistantMessageEvent)?.content).toBe('Hello! I understand your test message.');
+    expect((restoredAssistantEvent as AgentEventStream.AssistantMessageEvent)?.content).toBe(
+      'Hello! I understand your test message.',
+    );
   });
 
   it('should not duplicate events when updating model config', async () => {
     // Create session info
     const sessionInfo = await storageProvider.createSession({
       id: sessionId,
-      title: 'Test Session',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
       workspace: '/tmp/test',
       metadata: {},
     });
@@ -127,20 +129,20 @@ describe('AgentSession - Context Restore (Simplest Implementation)', () => {
     const testEvent: AgentEventStream.UserMessageEvent = {
       id: 'test-event',
       type: 'user_message',
-      timestamp: new Date().toISOString(),
+      timestamp: Date.now(),
       content: 'Test message before model update',
     };
     eventStream.sendEvent(testEvent);
 
     // Wait a bit to ensure event is processed
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 10));
 
     // Get initial event count from storage
     const initialEvents = await storageProvider.getSessionEvents(sessionId);
     const initialEventCount = initialEvents.length;
 
     // Update model config (this recreates the agent with EventStream initialEvents)
-    const updatedSessionInfo = {
+    const updatedSessionInfo: SessionInfo = {
       ...sessionInfo,
       metadata: {
         modelConfig: {
@@ -152,7 +154,7 @@ describe('AgentSession - Context Restore (Simplest Implementation)', () => {
     await session.updateModelConfig(updatedSessionInfo);
 
     // Wait a bit to ensure events are processed
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 10));
 
     // Check that events weren't duplicated in storage
     const finalEvents = await storageProvider.getSessionEvents(sessionId);
@@ -167,9 +169,8 @@ describe('AgentSession - Context Restore (Simplest Implementation)', () => {
     // Create session info without any stored events
     const sessionInfo = await storageProvider.createSession({
       id: sessionId,
-      title: 'Empty Session',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
       workspace: '/tmp/test',
       metadata: {},
     });
@@ -181,7 +182,7 @@ describe('AgentSession - Context Restore (Simplest Implementation)', () => {
     // Should not throw and should have minimal events
     const eventStream = session.agent.getEventStream();
     const events = eventStream.getEvents();
-    
+
     // Should have at least the ready event or similar
     expect(events).toBeDefined();
     expect(Array.isArray(events)).toBe(true);
