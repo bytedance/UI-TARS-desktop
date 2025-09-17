@@ -58,9 +58,7 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
           <span className="text-sm font-medium">Share</span>
         </button>
 
-        {!disabled && (
-          <ShareModal isOpen={isModalOpen} onClose={handleCloseModal} sessionId={activeSessionId} />
-        )}
+        <ShareModal isOpen={isModalOpen} onClose={handleCloseModal} sessionId={activeSessionId} />
       </>
     );
   }
@@ -91,9 +89,7 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
           </span>
         </Tooltip>
 
-        {!disabled && (
-          <ShareModal isOpen={isModalOpen} onClose={handleCloseModal} sessionId={activeSessionId} />
-        )}
+        <ShareModal isOpen={isModalOpen} onClose={handleCloseModal} sessionId={activeSessionId} />
       </>
     );
   }
@@ -129,9 +125,7 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
         </span>
       </Tooltip>
 
-      {!disabled && (
-        <ShareModal isOpen={isModalOpen} onClose={handleCloseModal} sessionId={activeSessionId} />
-      )}
+      <ShareModal isOpen={isModalOpen} onClose={handleCloseModal} sessionId={activeSessionId} />
     </>
   );
 };
