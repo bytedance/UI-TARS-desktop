@@ -78,12 +78,7 @@ export interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEl
   children: React.ReactNode;
 }
 
-export const IconButton: React.FC<IconButtonProps> = ({
-  children,
-  style,
-  className,
-  ...props
-}) => {
+export const IconButton: React.FC<IconButtonProps> = ({ children, style, className, ...props }) => {
   const baseStyle: React.CSSProperties = {
     display: 'inline-flex',
     alignItems: 'center',

@@ -53,6 +53,10 @@ export const Tooltip: React.FC<TooltipProps> = ({
         break;
     }
     
+    // Add scroll offset
+    top += window.scrollY;
+    left += window.scrollX;
+    
     setPosition({ top, left });
   };
 
@@ -66,18 +70,18 @@ export const Tooltip: React.FC<TooltipProps> = ({
       position: 'fixed',
       top: position.top,
       left: position.left,
-      backgroundColor: 'rgba(0, 0, 0, 0.9)',
+      backgroundColor: '#1f2937',
       color: '#ffffff',
       fontSize: '12px',
-      padding: '6px 8px',
+      padding: '6px 10px',
       borderRadius: '6px',
-      zIndex: 50001,
+      zIndex: 9999,
       pointerEvents: 'none',
       whiteSpace: 'nowrap',
       opacity: isVisible ? 1 : 0,
       transition: 'opacity 150ms ease-in-out',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-      backdropFilter: 'blur(8px)',
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+      border: '1px solid rgba(255, 255, 255, 0.1)',
     };
 
     switch (placement) {

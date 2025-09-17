@@ -48,7 +48,7 @@ export const Select: React.FC<SelectProps> = ({
 
   const selectedOption = options.find((opt) => opt.value === value);
   const handleChange = (newValue: any) => onChange({ target: { value: newValue } });
-  
+
   const [buttonRect, setButtonRect] = React.useState<DOMRect | null>(null);
   const buttonRef = React.useRef<HTMLButtonElement>(null);
 
@@ -80,99 +80,112 @@ export const Select: React.FC<SelectProps> = ({
             <>
               <Listbox.Button
                 ref={buttonRef}
-          style={{
-            width: '100%',
-            minHeight: '32px',
-            padding: '4px 24px 4px 12px', // 减少右侧 padding 从 32px 到 24px
-            backgroundColor: isDarkMode ? 'rgba(55, 65, 81, 0.3)' : 'rgba(248, 250, 252, 0.8)',
-            border: isDarkMode
-              ? '1px solid rgba(75, 85, 99, 0.3)'
-              : '1px solid rgba(203, 213, 225, 0.6)',
-            borderRadius: '8px',
-            fontSize: '0.875rem',
-            color: isDarkMode ? '#f9fafb' : '#111827',
-            cursor: disabled ? 'not-allowed' : 'pointer',
-            opacity: disabled ? 0.6 : 1,
-            textAlign: 'left',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
-          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {renderValue
-              ? renderValue(value)
-              : selectedOption?.label || (displayEmpty ? 'Select...' : '')}
-          </span>
+                style={{
+                  width: '100%',
+                  minHeight: '32px',
+                  padding: '4px 12px',
+                  backgroundColor: isDarkMode
+                    ? 'rgba(55, 65, 81, 0.3)'
+                    : 'rgba(248, 250, 252, 0.8)',
+                  border: isDarkMode
+                    ? '1px solid rgba(75, 85, 99, 0.3)'
+                    : '1px solid rgba(203, 213, 225, 0.6)',
+                  borderRadius: '8px',
+                  fontSize: '0.875rem',
+                  color: isDarkMode ? '#f9fafb' : '#111827',
+                  cursor: disabled ? 'not-allowed' : 'pointer',
+                  opacity: disabled ? 0.6 : 1,
+                  textAlign: 'left',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <span
+                  style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                >
+                  {renderValue
+                    ? renderValue(value)
+                    : selectedOption?.label || (displayEmpty ? 'Select...' : '')}
+                </span>
                 <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
                 </svg>
               </Listbox.Button>
 
-              {open && buttonRect && createPortal(
-                <Listbox.Options
-                  style={{
-                    position: 'fixed',
-                    top: buttonRect.bottom + 8,
-                    left: buttonRect.left,
-                    minWidth: buttonRect.width,
-                    zIndex: 50000,
-                    backgroundColor: isDarkMode ? 'rgba(31, 41, 55, 0.98)' : 'rgba(255, 255, 255, 0.98)',
-                    backdropFilter: 'blur(20px)',
-                    border: isDarkMode
-                      ? '1px solid rgba(75, 85, 99, 0.4)'
-                      : '1px solid rgba(229, 231, 235, 0.6)',
-                    borderRadius: '16px',
-                    boxShadow: isDarkMode
-                      ? '0 20px 40px -10px rgba(0, 0, 0, 0.5), 0 8px 16px -4px rgba(0, 0, 0, 0.3)'
-                      : '0 20px 40px -10px rgba(0, 0, 0, 0.15), 0 8px 16px -4px rgba(0, 0, 0, 0.08)',
-                    maxHeight: '360px',
-                    maxWidth: '400px',
-                    overflowY: 'auto',
-                    padding: '8px',
-                  }}
-                >
-                  {options.map((option, index) => (
-                    <Listbox.Option
-                      key={`${option.value}-${index}`}
-                      value={option.value}
-                      disabled={option.disabled}
-                    >
-                      {({ active, selected }) => (
-                        <div
-                          style={{
-                            padding: '8px 16px',
-                            borderRadius: '8px',
-                            margin: '3px 0',
-                            minHeight: '40px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                            backgroundColor: active
-                              ? isDarkMode
-                                ? 'rgba(99, 102, 241, 0.15)'
-                                : 'rgba(99, 102, 241, 0.08)'
-                              : 'transparent',
-                            color: selected
-                              ? isDarkMode
-                                ? '#a5b4fc'
-                                : '#6366f1'
-                              : isDarkMode
-                                ? '#f9fafb'
-                                : '#111827',
-                            fontWeight: selected ? 500 : 400,
-                            cursor: 'pointer',
-                            transform: active ? 'translateX(2px)' : 'translateX(0)',
-                          }}
-                        >
-                          {option.label}
-                        </div>
-                      )}
-                    </Listbox.Option>
-                  ))}
-                </Listbox.Options>,
-                document.body
-              )}
+              {open &&
+                buttonRect &&
+                createPortal(
+                  <Listbox.Options
+                    style={{
+                      position: 'fixed',
+                      top: buttonRect.bottom + 8,
+                      left: buttonRect.left,
+                      minWidth: buttonRect.width,
+                      zIndex: 50000,
+                      backgroundColor: isDarkMode
+                        ? 'rgba(31, 41, 55, 0.98)'
+                        : 'rgba(255, 255, 255, 0.98)',
+                      backdropFilter: 'blur(20px)',
+                      border: isDarkMode
+                        ? '1px solid rgba(75, 85, 99, 0.4)'
+                        : '1px solid rgba(229, 231, 235, 0.6)',
+                      borderRadius: '16px',
+                      boxShadow: isDarkMode
+                        ? '0 20px 40px -10px rgba(0, 0, 0, 0.5), 0 8px 16px -4px rgba(0, 0, 0, 0.3)'
+                        : '0 20px 40px -10px rgba(0, 0, 0, 0.15), 0 8px 16px -4px rgba(0, 0, 0, 0.08)',
+                      maxHeight: '360px',
+                      maxWidth: '400px',
+                      overflowY: 'auto',
+                      padding: '8px',
+                    }}
+                  >
+                    {options.map((option, index) => (
+                      <Listbox.Option
+                        key={`${option.value}-${index}`}
+                        value={option.value}
+                        disabled={option.disabled}
+                      >
+                        {({ active, selected }) => (
+                          <div
+                            style={{
+                              padding: '8px 16px',
+                              borderRadius: '8px',
+                              margin: '3px 0',
+                              minHeight: '40px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                              backgroundColor: active
+                                ? isDarkMode
+                                  ? 'rgba(99, 102, 241, 0.15)'
+                                  : 'rgba(99, 102, 241, 0.08)'
+                                : 'transparent',
+                              color: selected
+                                ? isDarkMode
+                                  ? '#a5b4fc'
+                                  : '#6366f1'
+                                : isDarkMode
+                                  ? '#f9fafb'
+                                  : '#111827',
+                              fontWeight: selected ? 500 : 400,
+                              cursor: 'pointer',
+                              transform: active ? 'translateX(2px)' : 'translateX(0)',
+                            }}
+                          >
+                            {option.label}
+                          </div>
+                        )}
+                      </Listbox.Option>
+                    ))}
+                  </Listbox.Options>,
+                  document.body,
+                )}
             </>
           );
         }}
@@ -186,9 +199,5 @@ export const MenuItem: React.FC<MenuItemProps> = ({ children }) => {
 };
 
 export const FormControl: React.FC<FormControlProps> = ({ children }) => {
-  return (
-    <div style={{ display: 'inline-block' }}>
-      {children}
-    </div>
-  );
+  return <div style={{ display: 'inline-block' }}>{children}</div>;
 };
