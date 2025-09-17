@@ -250,9 +250,9 @@ export const Navbar: React.FC = () => {
               </MenuItem>
 
               {activeSessionId && !isReplayMode && (
-                <MenuItem onClick={handleMobileMenuClose} icon={<FiShare size={16} />}>
-                  Share
-                </MenuItem>
+                <div onClick={handleMobileMenuClose}>
+                  <ShareButton variant="mobile" disabled={isProcessing} />
+                </div>
               )}
             </Menu>
           </div>

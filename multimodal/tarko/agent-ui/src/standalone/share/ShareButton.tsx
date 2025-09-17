@@ -5,7 +5,7 @@ import { ShareModal } from './ShareModal';
 import { Tooltip } from '@tarko/ui';
 
 interface ShareButtonProps {
-  variant?: 'default' | 'navbar';
+  variant?: 'default' | 'navbar' | 'mobile';
   disabled?: boolean;
 }
 
@@ -38,6 +38,30 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
 
   if (!activeSessionId) {
     return null;
+  }
+
+  // Mobile variant for menu items
+  if (variant === 'mobile') {
+    return (
+      <>
+        <button
+          onClick={handleOpenModal}
+          className={`flex items-center gap-3 w-full px-4 py-3 text-left ${
+            disabled
+              ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
+              : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100/80 dark:hover:bg-gray-700/50'
+          } transition-colors rounded-lg`}
+          disabled={disabled}
+        >
+          <FiShare2 size={16} className="opacity-70" />
+          <span className="text-sm font-medium">Share</span>
+        </button>
+
+        {!disabled && (
+          <ShareModal isOpen={isModalOpen} onClose={handleCloseModal} sessionId={activeSessionId} />
+        )}
+      </>
+    );
   }
 
   // Navbar variant has different styling
