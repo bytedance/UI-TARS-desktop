@@ -13,12 +13,6 @@ interface ShareButtonProps {
 
 /**
  * Share button component - displayed at the bottom of chat panel or in navigation bar
- *
- * Design principles:
- * - Clean monochrome icon, consistent with the overall black-white-gray style
- * - Circular button design, maintaining elegant visual effect
- * - Fine hover and click animations, enhancing interactive experience
- * - Support different display variants to adapt to different positions
  */
 export const ShareButton: React.FC<ShareButtonProps> = ({
   variant = 'default',
@@ -32,7 +26,7 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
   const handleOpenModal = () => {
     console.log('ShareButton handleOpenModal called', { disabled, activeSessionId, variant });
     if (disabled) return;
-    
+
     if (onShare) {
       // External modal management
       console.log('Using external modal management');
@@ -56,11 +50,7 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
   if (variant === 'mobile') {
     return (
       <>
-        <MenuItem
-          onClick={handleOpenModal}
-          icon={<FiShare2 size={16} />}
-          disabled={disabled}
-        >
+        <MenuItem onClick={handleOpenModal} icon={<FiShare2 size={16} />} disabled={disabled}>
           Share
         </MenuItem>
 
@@ -104,7 +94,6 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
     );
   }
 
-  // Default variant (original styling)
   return (
     <>
       <Tooltip

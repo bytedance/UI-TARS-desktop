@@ -151,7 +151,10 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
                   </div>
                   <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
                     <FiShare2 size={14} className="sm:hidden text-gray-500 dark:text-gray-400" />
-                    <FiShare2 size={16} className="hidden sm:block text-gray-500 dark:text-gray-400" />
+                    <FiShare2
+                      size={16}
+                      className="hidden sm:block text-gray-500 dark:text-gray-400"
+                    />
                   </div>
                 </motion.button>
               )}
@@ -168,7 +171,9 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
                     <FiDownload size={20} className="hidden sm:block" />
                   </div>
                   <div className="text-left">
-                    <h4 className="font-medium text-gray-800 dark:text-gray-200 text-sm sm:text-base">Download HTML</h4>
+                    <h4 className="font-medium text-gray-800 dark:text-gray-200 text-sm sm:text-base">
+                      Download HTML
+                    </h4>
                     <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">
                       Save the conversation as HTML file
                     </p>
@@ -176,7 +181,10 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
                 </div>
                 <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
                   <FiDownload size={14} className="sm:hidden text-gray-500 dark:text-gray-400" />
-                  <FiDownload size={16} className="hidden sm:block text-gray-500 dark:text-gray-400" />
+                  <FiDownload
+                    size={16}
+                    className="hidden sm:block text-gray-500 dark:text-gray-400"
+                  />
                 </div>
               </motion.button>
             </div>
@@ -291,7 +299,9 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
                 <FiX className="text-red-600 dark:text-red-400" size={14} />
               </div>
               <div>
-                <p className="font-medium text-gray-800 dark:text-gray-200 text-sm sm:text-base">Failed to share</p>
+                <p className="font-medium text-gray-800 dark:text-gray-200 text-sm sm:text-base">
+                  Failed to share
+                </p>
                 <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
                   {shareResult.error || 'An error occurred while trying to share the conversation.'}
                 </p>
