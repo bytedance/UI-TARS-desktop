@@ -48,7 +48,7 @@ const ModelDisplayContent: React.FC<{
   const textStyles = getTextStyles();
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
+    <Box style={{ display: 'flex', alignItems: 'center', gap: '4px', minWidth: 0 }}>
       <Typography
         variant="body2"
         style={{
@@ -84,7 +84,7 @@ const ModelDisplayContent: React.FC<{
         {model.provider}
       </Typography>
       {showLoading && (
-        <CircularProgress size={12} thickness={4} sx={{ color: '#6366f1', marginLeft: 'auto' }} />
+        <CircularProgress size={12} thickness={4} style={{ color: '#6366f1', marginLeft: 'auto' }} />
       )}
     </Box>
   );
@@ -112,7 +112,7 @@ const StaticModelDisplay: React.FC<{
       className={`${className} transition-transform hover:scale-105 ${isDisabled ? '' : 'cursor-pointer'}`}
     >
       <Box
-        sx={{
+        style={{
           ...modelStyles.base,
           maxWidth: '300px',
           ...(isHovered && !isDisabled ? modelStyles.hover : {}),
@@ -241,7 +241,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
     if (!selected) return 'Select Model';
 
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+      <Box style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
         <ModelDisplayContent
           model={selected}
           isDarkMode={isDarkMode}
@@ -254,7 +254,7 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
 
   return (
     <div className={`${className} transition-transform hover:scale-105 active:scale-95`}>
-      <FormControl size="small">
+      <FormControl>
         <Select
           value={currentModel ? getModelKey(currentModel) : ''}
           onChange={(event) => {
@@ -267,41 +267,6 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
           disabled={isLoading}
           displayEmpty
           renderValue={() => renderValue(currentModel)}
-          size="small"
-          MenuProps={{
-            PaperProps: {
-              style: {
-                maxHeight: 360,
-                marginTop: 8,
-              },
-              sx: {
-                zIndex: 10000,
-                '@keyframes menuSlideIn': {
-                  '0%': {
-                    opacity: 0,
-                    transform: 'translateY(-8px) scale(0.95)',
-                  },
-                  '100%': {
-                    opacity: 1,
-                    transform: 'translateY(0) scale(1)',
-                  },
-                },
-              },
-            },
-            anchorOrigin: {
-              vertical: 'bottom',
-              horizontal: 'left',
-            },
-            transformOrigin: {
-              vertical: 'top',
-              horizontal: 'left',
-            },
-          }}
-          sx={{
-            width: 'auto',
-            minWidth: 'auto',
-            maxWidth: '300px',
-          }}
         >
           {models.map((model) => {
             const modelKey = getModelKey(model);
@@ -309,8 +274,8 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
 
             return (
               <SelectMenuItem key={modelKey} value={modelKey}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
-                  <Box sx={{ minWidth: 0, flex: 1 }}>
+                <Box style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%' }}>
+                  <Box style={{ minWidth: 0, flex: 1 }}>
                     <ModelDisplayContent
                       model={model}
                       isDarkMode={isDarkMode}

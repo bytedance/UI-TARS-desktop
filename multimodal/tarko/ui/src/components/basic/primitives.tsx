@@ -5,25 +5,21 @@ import React from 'react';
 export interface BoxProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
   component?: keyof JSX.IntrinsicElements;
-  sx?: React.CSSProperties;
 }
 
 export const Box: React.FC<BoxProps> = ({
   children,
   component: Component = 'div',
-  sx,
   style,
   className,
   ...props
 }) => {
-  const combinedStyle = { ...sx, ...style };
-
   return React.createElement(
     Component,
     {
       ...props,
       className,
-      style: combinedStyle,
+      style,
     },
     children,
   );
@@ -44,14 +40,12 @@ export interface TypographyProps extends React.HTMLAttributes<HTMLElement> {
     | 'subtitle1'
     | 'subtitle2';
   component?: keyof JSX.IntrinsicElements;
-  sx?: React.CSSProperties;
 }
 
 export const Typography: React.FC<TypographyProps> = ({
   children,
   variant = 'body1',
   component,
-  sx,
   style,
   className,
   ...props
@@ -80,7 +74,7 @@ export const Typography: React.FC<TypographyProps> = ({
     margin: 0,
   };
 
-  const combinedStyle = { ...variantStyle, ...sx, ...style };
+  const combinedStyle = { ...variantStyle, ...style };
 
   return React.createElement(
     Component,
@@ -97,14 +91,12 @@ export interface CircularProgressProps {
   size?: number;
   thickness?: number;
   className?: string;
-  sx?: React.CSSProperties;
 }
 
 export const CircularProgress: React.FC<CircularProgressProps> = ({
   size = 40,
   thickness = 3.6,
   className,
-  sx,
 }) => {
   return (
     <div
@@ -114,7 +106,6 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
         width: size,
         height: size,
         animation: 'spin 1s linear infinite',
-        ...sx,
       }}
     >
       <svg width={size} height={size} viewBox="0 0 24 24">
@@ -146,13 +137,11 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
 export interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
   size?: 'small' | 'medium' | 'large';
-  sx?: React.CSSProperties;
 }
 
 export const IconButton: React.FC<IconButtonProps> = ({
   children,
   size = 'medium',
-  sx,
   style,
   className,
   ...props
@@ -177,7 +166,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
     ...sizeStyles[size],
   };
 
-  const combinedStyle = { ...baseStyle, ...sx, ...style };
+  const combinedStyle = { ...baseStyle, ...style };
 
   return (
     <button {...props} className={className} style={combinedStyle}>
@@ -189,10 +178,9 @@ export const IconButton: React.FC<IconButtonProps> = ({
 export interface DividerProps {
   orientation?: 'horizontal' | 'vertical';
   className?: string;
-  sx?: React.CSSProperties;
 }
 
-export const Divider: React.FC<DividerProps> = ({ orientation = 'horizontal', className, sx }) => {
+export const Divider: React.FC<DividerProps> = ({ orientation = 'horizontal', className }) => {
   const baseStyle: React.CSSProperties = {
     border: 'none',
     backgroundColor: 'rgba(0, 0, 0, 0.12)',
@@ -201,7 +189,5 @@ export const Divider: React.FC<DividerProps> = ({ orientation = 'horizontal', cl
       : { width: '1px', height: '100%' }),
   };
 
-  const combinedStyle = { ...baseStyle, ...sx };
-
-  return <hr className={className} style={combinedStyle} />;
+  return <hr className={className} style={baseStyle} />;
 };

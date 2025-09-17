@@ -10,9 +10,6 @@ export interface SelectProps<T = any> {
   disabled?: boolean;
   displayEmpty?: boolean;
   renderValue?: (value: T) => React.ReactNode;
-  size?: 'small' | 'medium';
-  MenuProps?: any; // Keep for compatibility
-  sx?: React.CSSProperties;
   className?: string;
 }
 
@@ -24,8 +21,6 @@ export interface MenuItemProps {
 
 export interface FormControlProps {
   children: React.ReactNode;
-  size?: 'small' | 'medium';
-  disabled?: boolean;
 }
 
 export const Select: React.FC<SelectProps> = ({
@@ -35,8 +30,6 @@ export const Select: React.FC<SelectProps> = ({
   disabled = false,
   displayEmpty = false,
   renderValue,
-  size = 'medium',
-  sx,
   className,
 }) => {
   const isDarkMode = useDarkMode();
@@ -89,14 +82,14 @@ export const Select: React.FC<SelectProps> = ({
                 ref={buttonRef}
           style={{
             width: '100%',
-            minHeight: size === 'small' ? '32px' : '40px',
-            padding: size === 'small' ? '4px 32px 4px 12px' : '8px 32px 8px 16px',
+            minHeight: '32px',
+            padding: '4px 32px 4px 12px',
             backgroundColor: isDarkMode ? 'rgba(55, 65, 81, 0.3)' : 'rgba(248, 250, 252, 0.8)',
             border: isDarkMode
               ? '1px solid rgba(75, 85, 99, 0.3)'
               : '1px solid rgba(203, 213, 225, 0.6)',
             borderRadius: '8px',
-            fontSize: size === 'small' ? '0.875rem' : '1rem',
+            fontSize: '0.875rem',
             color: isDarkMode ? '#f9fafb' : '#111827',
             cursor: disabled ? 'not-allowed' : 'pointer',
             opacity: disabled ? 0.6 : 1,
@@ -104,7 +97,6 @@ export const Select: React.FC<SelectProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            ...sx,
           }}
         >
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -193,15 +185,10 @@ export const MenuItem: React.FC<MenuItemProps> = ({ children }) => {
   return <>{children}</>;
 };
 
-export const FormControl: React.FC<FormControlProps> = ({ children, size, disabled }) => {
+export const FormControl: React.FC<FormControlProps> = ({ children }) => {
   return (
     <div style={{ display: 'inline-block' }}>
-      {React.Children.map(children, (child) => {
-        if (React.isValidElement(child)) {
-          return React.cloneElement(child, { size, disabled, ...child.props });
-        }
-        return child;
-      })}
+      {children}
     </div>
   );
 };
