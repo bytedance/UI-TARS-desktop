@@ -22,16 +22,17 @@
     "dev": "rslib build --watch"
   },
   "dependencies": {
-    "react-router-dom": "^6.26.1",
+    "@headlessui/react": "^1.7.19",
+    "@monaco-editor/react": "4.7.0",
+    "@mui/material": "^5.15.11",
     "framer-motion": "12.19.2",
-    "react-icons": "^4.11.0",
+    "highlight.js": "^11.9.0",
+    "katex": "^0.16.9",
     "monaco-editor": "0.52.0",
     "parse-diff": "0.11.1",
-    "@monaco-editor/react": "4.7.0",
-    "highlight.js": "^11.9.0",
-    "@mui/material": "^5.15.11",
-    "katex": "^0.16.9",
+    "react-icons": "^4.11.0",
     "react-markdown": "10.1.0",
+    "react-router-dom": "^6.26.1",
     "rehype-highlight": "7.0.2",
     "rehype-katex": "^7.0.1",
     "remark-gfm": "4.0.1",
@@ -43,8 +44,8 @@
     "@types/node": "22.15.30",
     "@types/react": "^18.2.75",
     "@types/react-dom": "^18.2.24",
-    "typescript": "^5.5.3",
-    "react": "18"
+    "react": "18",
+    "typescript": "^5.5.3"
   },
   "peerDependencies": {
     "react": ">=16.9.0",
