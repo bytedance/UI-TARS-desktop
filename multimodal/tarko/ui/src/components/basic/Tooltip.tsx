@@ -86,7 +86,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
       position: 'fixed',
       top: position.top,
       left: position.left,
-      backgroundColor: '#1f2937',
+      backgroundColor: '#000000',
       color: '#ffffff',
       fontSize: '12px',
       padding: '6px 10px',
