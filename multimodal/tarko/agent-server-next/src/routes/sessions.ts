@@ -37,6 +37,7 @@ export function createSessionRoutes(): Hono<{ Variables: ContextVariables }> {
   router.post('/api/v1/sessions/update', sessionsController.updateSession);
   router.post('/api/v1/sessions/delete', sessionsController.deleteSession);
   router.post('/api/v1/sessions/generate-summary', sessionsController.generateSummary);
+  router.post('/share', sessionsController.shareSession);
 
   return router;
 }

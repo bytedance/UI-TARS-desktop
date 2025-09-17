@@ -6,6 +6,7 @@
 import type { HonoContext } from '../types';
 import { getCurrentUserId } from '../middlewares/auth';
 import { SessionInfo } from '@tarko/interface';
+import { ShareService } from '../services';
 
 /**
  * Get all sessions (with multi-tenant support)
@@ -308,5 +309,35 @@ export async function generateSummary(c: HonoContext) {
       },
       500,
     );
+  }
+}
+
+/**
+ * Share a session
+ */
+export async function shareSession(c: HonoContext) {
+  const { sessionId, upload } = await c.req.json()
+
+  if (!sessionId) {
+    return c.json({ error: 'Session ID is required' }, 400);
+  }
+
+  try {
+    const server = c.get('server');
+    const shareService = new ShareService(server.appConfig, server.storageProvider, server);
+
+    // Get agent instance if session is active (for slug generation)
+    const agent = server.getSessionPool().get(sessionId)?.agent;
+    const result = await shareService.shareSession(sessionId, upload, agent, server.versionInfo);
+    if (result.success) {
+      return c.json(result, 200);
+    } else {
+      return c.json({
+        error: result.error || 'Failed to share session',
+      }, 500);
+    }
+  } catch (error) {
+    console.error(`Error sharing session ${sessionId}:`, error);
+    return c.json({ error: 'Failed to share session' }, 500);
   }
 }
