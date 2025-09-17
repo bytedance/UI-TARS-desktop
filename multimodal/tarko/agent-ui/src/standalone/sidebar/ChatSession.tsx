@@ -301,7 +301,7 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto sidebar-scrollbar p-3">
+      <div className="flex-1 overflow-y-auto sidebar-scrollbar px-3 pb-3">
         <AnimatePresence>
           {groupedSessions.map((group) => (
             <div key={group.key} className="mb-4">
