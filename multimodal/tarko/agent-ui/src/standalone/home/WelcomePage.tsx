@@ -85,7 +85,13 @@ const WelcomePage: React.FC = () => {
 
       navigate(`/${sessionId}`, { replace: true });
 
-      await sendMessage(content);
+      try {
+        await sendMessage(content);
+      } catch (messageError) {
+        console.error('Failed to send message:', messageError);
+        // Stay on the chat page even if message sending fails
+        // The error will be handled by the chat interface
+      }
     } catch (error) {
       console.error('Failed to create session:', error);
 

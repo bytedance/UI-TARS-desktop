@@ -54,7 +54,7 @@ export const Dialog: React.FC<DialogProps> = ({
           zIndex: 9999,
         }}
       >
-        <DialogContent sx={{ padding: 0 }}>{children}</DialogContent>
+        <DialogContent sx={{ padding: 0 }}>{children as React.ReactNode}</DialogContent>
       </MuiDialog>
     </ThemeProvider>
   );

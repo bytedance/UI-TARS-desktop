@@ -4,7 +4,7 @@ import { apiService } from '../../services/apiService';
 import { sessionsAtom, activeSessionIdAtom } from '../atoms/session';
 import { messagesAtom } from '../atoms/message';
 import { toolResultsAtom, toolCallResultMap } from '../atoms/tool';
-import { sessionPanelContentAtom, isProcessingAtom } from '../atoms/ui';
+import { sessionPanelContentAtom, isProcessingAtom, messageErrorAtom } from '../atoms/ui';
 import { processEventAction } from './eventProcessors';
 import { Message, SessionInfo } from '@/common/types';
 import { connectionStatusAtom } from '../atoms/ui';
@@ -304,6 +304,9 @@ export const sendMessageAction = atom(
       throw new Error('No active session');
     }
 
+    // Clear any previous error
+    set(messageErrorAtom, null);
+
     // Update processing state
     set(isProcessingAtom, true);
 
@@ -369,8 +372,14 @@ export const sendMessageAction = atom(
       });
     } catch (error) {
       console.error('Error sending message:', error);
+      
       // Set processing to false on error
       set(isProcessingAtom, false);
+      
+      // Set error message for UI display
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send message';
+      set(messageErrorAtom, errorMessage);
+      
       throw error;
     }
   },

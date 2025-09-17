@@ -12,6 +12,7 @@ import { ScrollToBottomButton } from './components/ScrollToBottomButton';
 import { EmptyState } from './components/EmptyState';
 import { OfflineBanner } from './components/OfflineBanner';
 import { SessionCreatingState } from './components/SessionCreatingState';
+import { MessageErrorBanner } from './components/MessageErrorBanner';
 
 import './ChatPanel.css';
 
@@ -59,6 +60,8 @@ export const ChatPanel: React.FC = () => {
           isReplayMode={isReplayMode}
           onReconnect={checkServerStatus}
         />
+
+        <MessageErrorBanner />
 
         {showEmptyState ? (
           <EmptyState replayState={replayState} isReplayMode={isReplayMode} />

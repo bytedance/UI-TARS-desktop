@@ -4,7 +4,7 @@ import { messagesAtom, groupedMessagesAtom } from '../state/atoms/message';
 import { toolResultsAtom } from '../state/atoms/tool';
 
 import { sessionFilesAtom } from '../state/atoms/files';
-import { isProcessingAtom, activePanelContentAtom, connectionStatusAtom } from '../state/atoms/ui';
+import { isProcessingAtom, activePanelContentAtom, connectionStatusAtom, messageErrorAtom } from '../state/atoms/ui';
 import { replayStateAtom } from '../state/atoms/replay';
 import {
   loadSessionsAction,
@@ -35,6 +35,7 @@ export function useSession() {
   const [isProcessing, setIsProcessing] = useAtom(isProcessingAtom);
   const [activePanelContent, setActivePanelContent] = useAtom(activePanelContentAtom);
   const [connectionStatus, setConnectionStatus] = useAtom(connectionStatusAtom);
+  const messageError = useAtomValue(messageErrorAtom);
 
   const [replayState, setReplayState] = useAtom(replayStateAtom);
 
@@ -91,6 +92,7 @@ export function useSession() {
       isProcessing,
       activePanelContent,
       connectionStatus,
+      messageError,
 
       replayState,
       sessionMetadata,
@@ -122,6 +124,7 @@ export function useSession() {
       isProcessing,
       activePanelContent,
       connectionStatus,
+      messageError,
       replayState,
       sessionMetadata,
       loadSessions,

@@ -61,6 +61,11 @@ export const workspacePanelCollapsedAtom = atom<boolean>(false);
 export const isProcessingAtom = atom<boolean>(false);
 
 /**
+ * Atom for tracking message sending errors
+ */
+export const messageErrorAtom = atom<string | null>(null);
+
+/**
  * Atom for offline mode state (view-only when disconnected)
  */
 export const offlineModeAtom = atom<boolean>(false);
