@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FiShare2 } from 'react-icons/fi';
 import { useSession } from '@/common/hooks/useSession';
 import { ShareModal } from './ShareModal';
-import { Tooltip } from '@tarko/ui';
+import { Tooltip, MenuItem } from '@tarko/ui';
 
 interface ShareButtonProps {
   variant?: 'default' | 'navbar' | 'mobile';
@@ -45,18 +45,13 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
   if (variant === 'mobile') {
     return (
       <>
-        <button
+        <MenuItem
           onClick={handleOpenModal}
-          className={`flex items-center gap-3 w-full px-4 py-3 text-left ${
-            disabled
-              ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
-              : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100/80 dark:hover:bg-gray-700/50'
-          } transition-colors rounded-lg`}
+          icon={<FiShare2 size={16} />}
           disabled={disabled}
         >
-          <FiShare2 size={16} className="opacity-70" />
-          <span className="text-sm font-medium">Share</span>
-        </button>
+          Share
+        </MenuItem>
 
         <ShareModal isOpen={isModalOpen} onClose={handleCloseModal} sessionId={activeSessionId} />
       </>
