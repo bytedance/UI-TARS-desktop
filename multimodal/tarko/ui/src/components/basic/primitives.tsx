@@ -130,13 +130,15 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
           strokeLinecap="round"
         />
       </svg>
-      <style dangerouslySetInnerHTML={{
-        __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
           @keyframes spin {
             to { transform: rotate(360deg); }
           }
-        `
-      }} />
+        `,
+        }}
+      />
     </div>
   );
 };

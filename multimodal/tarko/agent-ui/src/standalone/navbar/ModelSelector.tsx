@@ -7,7 +7,7 @@ import { AgentModel } from '@tarko/agent-interface';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useAtomValue } from 'jotai';
 import { isProcessingAtom } from '@/common/state/atoms/ui';
-import { 
+import {
   Select,
   SelectMenuItem,
   FormControl,
@@ -55,11 +55,7 @@ const ModelDisplayContent: React.FC<{
           ...textStyles.modelName,
           fontSize,
           fontWeight: isSelected ? 600 : 500,
-          color: isSelected
-            ? isDarkMode
-              ? '#a5b4fc'
-              : '#6366f1'
-            : textStyles.modelName.color,
+          color: isSelected ? (isDarkMode ? '#a5b4fc' : '#6366f1') : textStyles.modelName.color,
         }}
         title={displayText}
       >
@@ -81,11 +77,7 @@ const ModelDisplayContent: React.FC<{
           ...textStyles.provider,
           fontSize,
           fontWeight: isSelected ? 600 : 500,
-          color: isSelected
-            ? isDarkMode
-              ? '#a5b4fc'
-              : '#6366f1'
-            : textStyles.provider.color,
+          color: isSelected ? (isDarkMode ? '#a5b4fc' : '#6366f1') : textStyles.provider.color,
         }}
         title={model.provider}
       >
@@ -108,7 +100,7 @@ const StaticModelDisplay: React.FC<{
   const { getModelSelectorStyles } = useNavbarStyles();
   const { applyHoverStyles, resetStyles } = useHoverHandlers();
   const [isHovered, setIsHovered] = React.useState(false);
-  
+
   if (!sessionMetadata?.modelConfig) {
     return null;
   }
@@ -174,8 +166,6 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
 
     return null;
   }, [models, sessionMetadata]);
-
-
 
   const handleModelChange = async (selectedModel: AgentModel) => {
     if (!activeSessionId || isLoading || !selectedModel) return;
@@ -318,18 +308,18 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
             const isSelected = isSameModel(currentModel, model);
 
             return (
-            <SelectMenuItem key={modelKey} value={modelKey}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
-            <Box sx={{ minWidth: 0, flex: 1 }}>
-            <ModelDisplayContent
-            model={model}
-            isDarkMode={isDarkMode}
-            fontSize="14px"
-            isSelected={isSelected}
-            />
-            </Box>
-            </Box>
-            </SelectMenuItem>
+              <SelectMenuItem key={modelKey} value={modelKey}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+                  <Box sx={{ minWidth: 0, flex: 1 }}>
+                    <ModelDisplayContent
+                      model={model}
+                      isDarkMode={isDarkMode}
+                      fontSize="14px"
+                      isSelected={isSelected}
+                    />
+                  </Box>
+                </Box>
+              </SelectMenuItem>
             );
           })}
         </Select>
