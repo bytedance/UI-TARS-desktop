@@ -12,7 +12,6 @@ import {
   SelectMenuItem,
   FormControl,
   Box,
-  Typography,
   CircularProgress,
   Tooltip,
   useNavbarStyles,
@@ -49,8 +48,7 @@ const ModelDisplayContent: React.FC<{
 
   return (
     <Box style={{ display: 'flex', alignItems: 'center', gap: '4px', minWidth: 0 }}>
-      <Typography
-        variant="body2"
+      <span
         style={{
           ...textStyles.modelName,
           fontSize,
@@ -60,9 +58,8 @@ const ModelDisplayContent: React.FC<{
         title={displayText}
       >
         {displayText}
-      </Typography>
-      <Typography
-        variant="body2"
+      </span>
+      <span
         style={{
           color: isDarkMode ? '#9ca3af' : '#6b7280',
           fontSize,
@@ -70,9 +67,8 @@ const ModelDisplayContent: React.FC<{
         }}
       >
         •
-      </Typography>
-      <Typography
-        variant="body2"
+      </span>
+      <span
         style={{
           ...textStyles.provider,
           fontSize,
@@ -82,7 +78,7 @@ const ModelDisplayContent: React.FC<{
         title={model.provider}
       >
         {model.provider}
-      </Typography>
+      </span>
       {showLoading && (
         <CircularProgress
           size={12}

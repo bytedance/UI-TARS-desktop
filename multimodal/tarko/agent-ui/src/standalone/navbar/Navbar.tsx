@@ -32,7 +32,6 @@ import type { WorkspaceNavItemIcon } from '@tarko/interface';
 import { getModelDisplayName } from '@/common/utils/modelUtils';
 import {
   Box,
-  Typography,
   IconButton,
   Menu,
   MenuItem,
@@ -376,15 +375,14 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
           }}
         >
           <FiZap size={12} color={isDarkMode ? '#a5b4fc' : '#6366f1'} style={{ flexShrink: 0 }} />
-          <Typography
-            variant="body2"
+          <span
             style={{
               ...getTextStyles().agentName,
             }}
             title={sessionMetadata.agentInfo.name}
           >
             {sessionMetadata.agentInfo.name}
-          </Typography>
+          </span>
         </div>
       )}
 

@@ -25,67 +25,7 @@ export const Box: React.FC<BoxProps> = ({
   );
 };
 
-export interface TypographyProps extends React.HTMLAttributes<HTMLElement> {
-  children?: React.ReactNode;
-  variant?:
-    | 'h1'
-    | 'h2'
-    | 'h3'
-    | 'h4'
-    | 'h5'
-    | 'h6'
-    | 'body1'
-    | 'body2'
-    | 'caption'
-    | 'subtitle1'
-    | 'subtitle2';
-  component?: keyof JSX.IntrinsicElements;
-}
-
-export const Typography: React.FC<TypographyProps> = ({
-  children,
-  variant = 'body1',
-  component,
-  style,
-  className,
-  ...props
-}) => {
-  // Map variants to default components and styles
-  const variantConfig = {
-    h1: { component: 'h1', fontSize: '2rem', fontWeight: 300, lineHeight: 1.167 },
-    h2: { component: 'h2', fontSize: '1.5rem', fontWeight: 300, lineHeight: 1.2 },
-    h3: { component: 'h3', fontSize: '1.25rem', fontWeight: 400, lineHeight: 1.167 },
-    h4: { component: 'h4', fontSize: '1.125rem', fontWeight: 400, lineHeight: 1.235 },
-    h5: { component: 'h5', fontSize: '1rem', fontWeight: 400, lineHeight: 1.334 },
-    h6: { component: 'h6', fontSize: '0.875rem', fontWeight: 500, lineHeight: 1.6 },
-    subtitle1: { component: 'h6', fontSize: '1rem', fontWeight: 400, lineHeight: 1.75 },
-    subtitle2: { component: 'h6', fontSize: '0.875rem', fontWeight: 500, lineHeight: 1.57 },
-    body1: { component: 'p', fontSize: '1rem', fontWeight: 400, lineHeight: 1.5 },
-    body2: { component: 'p', fontSize: '0.875rem', fontWeight: 400, lineHeight: 1.43 },
-    caption: { component: 'span', fontSize: '0.75rem', fontWeight: 400, lineHeight: 1.66 },
-  };
-
-  const config = variantConfig[variant];
-  const Component = component || config.component;
-  const variantStyle = {
-    fontSize: config.fontSize,
-    fontWeight: config.fontWeight,
-    lineHeight: config.lineHeight,
-    margin: 0,
-  };
-
-  const combinedStyle = { ...variantStyle, ...style };
-
-  return React.createElement(
-    Component,
-    {
-      ...props,
-      className,
-      style: combinedStyle,
-    },
-    children,
-  );
-};
+// Typography 组件已删除 - 直接使用原生 HTML 元素更简单
 
 export interface CircularProgressProps {
   size?: number;
