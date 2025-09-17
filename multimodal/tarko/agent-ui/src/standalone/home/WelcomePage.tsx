@@ -205,7 +205,7 @@ const WelcomePage: React.FC = () => {
           </motion.div>
 
           {displayedPrompts.length > 0 && (
-            <div className="mt-6 flex flex-wrap justify-center gap-2">
+            <div className="mt-6 flex flex-wrap justify-center gap-2 px-4">
               {displayedPrompts.map((prompt, index) => {
                 const isTruncated = truncatedPrompts.has(prompt);
 
@@ -230,7 +230,7 @@ const WelcomePage: React.FC = () => {
                     transition={{ duration: 0.3, delay: 0.4 + index * 0.1 }}
                     type="button"
                     onClick={() => handleChatSubmit(prompt)}
-                    className="text-sm px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/30 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300 transition-colors max-w-xs whitespace-nowrap overflow-hidden text-ellipsis"
+                    className="text-sm px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/30 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300 transition-colors max-w-[280px] sm:max-w-sm md:max-w-md whitespace-nowrap overflow-hidden text-ellipsis"
                     disabled={isLoading || isDirectChatLoading}
                   >
                     {prompt}
