@@ -92,18 +92,36 @@ export class AdbOperator extends Operator {
         await this.handleClick(realX, realY);
         break;
       }
-      case 'long_press':
+      case 'long_press': {
+        const { point } = actionInputs;
+        if (!point) {
+          throw new Error('point is required when click');
+        }
+        const { realX, realY } = await this.calculateRealCoords(point);
+        this.handleSwipe({ x: realX, y: realY }, { x: realX, y: realY }, 1500);
+        break;
+      }
+      case 'swipe':
+      case 'drag': {
+        const { start: startPoint, end: endPoint } = actionInputs;
+        if (!startPoint) {
+          throw new Error('start point is required when swipe/drag');
+        }
+        if (!endPoint) {
+          throw new Error('end point is required when swipe/drag');
+        }
+        const { realX: startX, realY: startY } = await this.calculateRealCoords(startPoint);
+        const { realX: endX, realY: endY } = await this.calculateRealCoords(endPoint);
+        this.handleSwipe({ x: startX, y: startY }, { x: endX, y: endY }, 300);
+        break;
+      }
+      case 'scroll':
         break;
       case 'type': {
         const { content } = actionInputs;
         this.handleType(content);
         break;
       }
-      case 'swipe':
-      case 'drag':
-        break;
-      case 'scroll':
-        break;
       case 'hotkey': {
         const { key } = actionInputs;
         await this.handleHotkey(key);
@@ -130,7 +148,20 @@ export class AdbOperator extends Operator {
   private async calculateRealCoords(
     coords: Coordinates,
   ): Promise<{ realX: number; realY: number }> {
-    throw new Error('Method not implemented.');
+    if (!coords.normalized) {
+      if (!coords.raw) {
+        throw new Error('Invalide coordinates');
+      }
+      return {
+        realX: coords.raw.x,
+        realY: coords.raw.y,
+      };
+    }
+    const screenContext = await this.getScreenContext();
+    return {
+      realX: coords.normalized.x * screenContext.screenWidth * screenContext.scaleX,
+      realY: coords.normalized.y * screenContext.screenHeight * screenContext.scaleY,
+    };
   }
 
   /**
@@ -284,6 +315,14 @@ export class AdbOperator extends Operator {
       throw new Error(`Unsupported key: ${keyStr}`);
     }
     this._adb!.keyevent(keyCode);
+  }
+
+  private async handleSwipe(
+    from: { x: number; y: number },
+    to: { x: number; y: number },
+    duration: number, // ms
+  ): Promise<void> {
+    await this._adb!.shell(`input swipe ${from.x} ${from.y} ${to.x} ${to.y} ${duration}`);
   }
 
   /**
