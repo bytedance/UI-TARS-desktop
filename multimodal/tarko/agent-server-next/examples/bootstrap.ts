@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { AuthHook, CorsHook, AgentServer } from './src/index';
+import { AuthHook, CorsHook, AgentServer } from '../src/index';
 import { resolve } from 'path';
 
 const workspace = resolve(__dirname, './tmp');
@@ -13,14 +13,6 @@ const server = new AgentServer({
       type: 'modulePath',
       value: '@omni-tars/agent',
     },
-    // model: {
-    //   /** tars */
-    //   provider: 'volcengine',
-    //   id: process.env.OMNI_TARS_MODEL_ID,
-    //   baseURL: process.env.OMNI_TARS_BASE_URL,
-    //   apiKey: process.env.OMNI_TARS_API_KEY,
-    //   displayName: 'UI-TARS-2',
-    // },
     share: {
       provider: process.env.SHARE_PROVIDER,
     },

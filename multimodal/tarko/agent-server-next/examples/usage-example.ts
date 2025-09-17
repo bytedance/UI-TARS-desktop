@@ -14,8 +14,8 @@
  * 5. Debug and monitor hooks
  */
 
-import { AgentServer } from '../server';
-import type { AgentServerInitOptions } from '../types';
+import { AgentServer } from '../src/server';
+import type { AgentServerInitOptions } from '../src/types';
 import { registerAuditLogHook } from './custom-hooks';
 
 async function createServerWithHooks() {

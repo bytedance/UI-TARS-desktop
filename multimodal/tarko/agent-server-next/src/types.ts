@@ -48,16 +48,10 @@ export interface UserInfo {
  * Variables that can be stored in Hono context
  */
 export interface ContextVariables {
+  user?: UserInfo;
   server: AgentServer;
   session?: AgentSession;
   requestId?: string;
-  startTime?: number;
-  user?: UserInfo;
-  // Hook system variables
-  requestMetrics?: Record<string, any>;
-  apiKey?: string;
-  apiVersion?: string;
-  // Allow arbitrary string keys for hook system extensibility
   [key: string]: any;
 }
 

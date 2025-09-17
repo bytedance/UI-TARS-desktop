@@ -5,7 +5,6 @@
 
 import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
-import { cors } from 'hono/cors';
 import { LogLevel, TenantConfig } from '@tarko/interface';
 import { StorageProvider, createStorageProvider } from './storage';
 import { resolveAgentImplementation } from './utils/agent-resolver';
@@ -21,9 +20,7 @@ import { AgentSessionPool, AgentSessionFactory } from './services/session';
 import { SandboxScheduler } from './services/sandbox';
 import { UserConfigService } from './services/user';
 import { MongoDBStorageProvider } from './storage/MongoDBStorageProvider';
-import { authMiddleware } from './middlewares/auth';
 import { TARKO_CONSTANTS, GlobalDirectoryOptions } from '@tarko/interface';
-import { requestIdMiddleware, accessLogMiddleware, errorHandlingMiddleware } from './middlewares';
 import {
   createQueryRoutes,
   createSessionRoutes,
@@ -49,11 +46,8 @@ config();
  * - Generic Agent dependency injection
  */
 export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
-  // Core server components
   private app: Hono<{ Variables: ContextVariables }>;
-  private server: any; // Node.js HTTP server
-
-  // Server state
+  private server: any;
   private isRunning = false;
 
   // Session management
@@ -194,7 +188,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     });
   }
 
-    /**
+  /**
    * Get the current agent resolution.
    */
   getCurrentAgentResolution(): AgentResolutionResult | undefined {
@@ -315,7 +309,6 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
       };
     }
 
-    // For other storage types
     return {
       type: this.storageProvider.constructor.name.replace('StorageProvider', '').toLowerCase(),
     };

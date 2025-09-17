@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { AgentServer } from '../types';
+import type { AgentServer } from '../src/types';
 import { getLogger } from '@tarko/shared-utils';
 
 const logger = getLogger('CustomHooks');

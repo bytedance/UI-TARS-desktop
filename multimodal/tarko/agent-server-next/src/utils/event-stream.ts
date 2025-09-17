@@ -3,8 +3,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-
-import { AgentEventStream, AgentProcessingPhase, AgentStatusInfo } from '@tarko/interface';
+import { AgentEventStream } from '@tarko/interface';
 
 /**
  * Implement event stream bridging to forward Agent's native events to the client
@@ -46,46 +45,21 @@ export class EventStreamBridge {
    */
   connectToAgentEventStream(agentEventStream: AgentEventStream.Processor): () => void {
     const handleEvent = (event: AgentEventStream.Event) => {
-      // Mapping event types to client-friendly events
+      // Mapping event types to socket.io-friendly events
       switch (event.type) {
         case 'agent_run_start':
-          // Enhanced TTFT status with detailed state
-          this.emit('agent-status', {
-            isProcessing: true,
-            state: 'initializing',
-            phase: 'model_initialization' as AgentProcessingPhase,
-            message: 'Initializing model and processing request...',
-          } as AgentStatusInfo);
           break;
 
         case 'agent_run_end':
-          // 确保明确发送完成状态
-          this.emit('agent-status', { isProcessing: false, state: event.status || 'idle' });
           break;
 
         case 'user_message':
-          // Enhanced TTFT phase tracking
-          this.emit('agent-status', {
-            isProcessing: true,
-            state: 'processing',
-            phase: 'request_processing' as AgentProcessingPhase,
-            message: 'Processing your request...',
-          } as AgentStatusInfo);
           this.emit('query', { text: event.content });
           break;
         case 'assistant_message':
           this.emit('answer', { text: event.content });
           break;
         case 'assistant_streaming_message':
-          // First token received - TTFT milestone reached
-          if (!event.isComplete) {
-            this.emit('agent-status', {
-              isProcessing: true,
-              state: 'streaming',
-              phase: 'first_token_received' as AgentProcessingPhase,
-              message: 'Generating response...',
-            } as AgentStatusInfo);
-          }
           this.emit('streaming_message', {
             content: event.content,
             isComplete: event.isComplete,
@@ -93,33 +67,40 @@ export class EventStreamBridge {
           });
           break;
         case 'tool_call':
-          this.emit('agent-status', {
-            isProcessing: true,
-            state: 'executing_tools',
-            phase: 'tool_execution' as AgentProcessingPhase,
-            message: `Executing ${event.name}...`,
-          } as AgentStatusInfo);
-          this.emit('tool_call', event);
+          this.emit('event', {
+            type: 'tool_call',
+            name: event.name,
+            toolCallId: event.toolCallId,
+            arguments: event.arguments,
+          });
           break;
         case 'tool_result':
-          this.emit('tool_result', event);
+          this.emit('event', {
+            type: 'tool_result',
+            name: event.name,
+            toolCallId: event.toolCallId,
+            content: event.content,
+            error: event.error,
+          });
           break;
         case 'system':
-          if ((event as any).level === 'error') {
-            this.emit('error', event);
-          } else if ((event as any).level === 'debug') {
-            this.emit('debug', event);
-          } else {
-            this.emit('system', event);
-          }
+          this.emit(event.level, { message: event.message });
           break;
         default:
-          // Forward other events as-is
-          this.emit(event.type, event);
+          this.emit('event', event);
+      }
+
+      if (event.type === 'system' && event.message?.includes('aborted')) {
+        this.emit('aborted', { message: event.message });
+      }
+
+      // Add handling for status events
+      if (event.type === 'system' && event.message?.includes('status')) {
+        this.emit('status', { message: event.message });
       }
     };
 
-    // Subscribe to agent events
+    // Subscribe to the Agent's event stream
     return agentEventStream.subscribe(handleEvent);
   }
 }

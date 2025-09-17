@@ -15,26 +15,6 @@ import { ISandboxAllocationDAO } from './ISandboxAllocationDAO';
  */
 export interface IDAOFactory {
   /**
-   * Get UserConfig DAO instance
-   */
-  getUserConfigDAO(): IUserConfigDAO;
-
-  /**
-   * Get Session DAO instance
-   */
-  getSessionDAO(): ISessionDAO;
-
-  /**
-   * Get Event DAO instance
-   */
-  getEventDAO(): IEventDAO;
-
-  /**
-   * Get SandboxAllocation DAO instance
-   */
-  getSandboxAllocationDAO(): ISandboxAllocationDAO;
-
-  /**
    * Initialize the DAO factory and underlying connections
    */
   initialize(): Promise<void>;
@@ -48,11 +28,12 @@ export interface IDAOFactory {
    * Close all connections and cleanup resources
    */
   close(): Promise<void>;
-
-  /**
-   * Health check for the underlying storage
-   */
+  getUserConfigDAO(): IUserConfigDAO;
+  getSessionDAO(): ISessionDAO;
+  getEventDAO(): IEventDAO;
+  getSandboxAllocationDAO(): ISandboxAllocationDAO;
   healthCheck(): Promise<{ healthy: boolean; message?: string; [key: string]: any }>;
+
 }
 
 /**

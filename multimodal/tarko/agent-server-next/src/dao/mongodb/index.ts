@@ -3,11 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// MongoDB DAO implementations
 export { UserConfigDAO } from './UserConfigDAO';
 export { SessionDAO } from './SessionDAO';
 export { EventDAO } from './EventDAO';
 export { SandboxAllocationDAO } from './SandboxAllocationDAO';
-
-// MongoDB DAO Factory
 export { MongoDAOFactory } from './MongoDAOFactory';
