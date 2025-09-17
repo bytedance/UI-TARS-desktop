@@ -55,17 +55,21 @@ export const Dialog: React.FC<DialogProps> = ({
   const backdropStyle: React.CSSProperties = {
     position: 'fixed',
     inset: 0,
-    backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0.8)' : 'rgba(0, 0, 0, 0.5)',
-    transition: 'opacity 225ms cubic-bezier(0.4, 0, 0.2, 1)',
+    backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0.6)' : 'rgba(0, 0, 0, 0.4)',
+    backdropFilter: 'blur(12px)',
+    WebkitBackdropFilter: 'blur(12px)', // Safari support
+    transition: 'all 225ms cubic-bezier(0.4, 0, 0.2, 1)',
     zIndex: -1, // Behind the dialog panel
   };
 
   const paperStyle: React.CSSProperties = {
-    backgroundColor: isDarkMode ? '#111827' : '#ffffff',
+    backgroundColor: isDarkMode ? 'rgba(17, 24, 39, 0.95)' : 'rgba(255, 255, 255, 0.95)',
     color: isDarkMode ? '#f9fafb' : '#111827',
     boxShadow: isDarkMode
-      ? '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
-      : '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+      ? '0 25px 50px -12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05)'
+      : '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05)',
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)', // Safari support
     outline: 'none',
     position: 'relative',
     overflow: fullScreen ? 'auto' : 'hidden',
