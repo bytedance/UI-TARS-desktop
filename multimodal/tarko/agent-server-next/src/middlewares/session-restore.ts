@@ -35,7 +35,7 @@ export async function sessionRestoreMiddleware(
       const restored = await server.getSessionFactory().restoreSession(sessionId);
 
       if (restored?.session) {
-        logger.debug(`Session ${sessionId} restored from storage`);
+        logger.info(`Session ${sessionId} restored from storage`);
 
         session = restored?.session;
         sessionPool.set(sessionId, session);

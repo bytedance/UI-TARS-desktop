@@ -122,7 +122,7 @@ export class MongoDBStorageProvider implements StorageProvider {
     if (this.daoFactory) {
       try {
         await this.daoFactory.close();
-        logger.debug('MongoDB DAO Factory closed successfully');
+        logger.info('MongoDB DAO Factory closed successfully');
       } catch (error) {
         logger.error('Error closing MongoDB DAO Factory:', error);
       } finally {

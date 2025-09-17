@@ -48,7 +48,7 @@ export class SessionDAO implements ISessionDAO {
 
       await session.save();
 
-      this.logger.debug(`Session created successfully: ${sessionData.id}`);
+      this.logger.info(`Session created successfully: ${sessionData.id}`);
       return sessionData;
     } catch (error) {
       if ((error as any).code === 11000) {
@@ -89,7 +89,7 @@ export class SessionDAO implements ISessionDAO {
         throw new Error(`Session not found: ${sessionId}`);
       }
 
-      this.logger.debug(`Session updated successfully: ${sessionId}`);
+      this.logger.info(`Session updated successfully: ${sessionId}`);
 
       return {
         id: updatedSession._id,
@@ -187,17 +187,17 @@ export class SessionDAO implements ISessionDAO {
 
       const sessionExists = await SessionModel.exists({ _id: sessionId });
       if (!sessionExists) {
-        this.logger.debug(`Session not found: ${sessionId}`);
+        this.logger.info(`Session not found: ${sessionId}`);
         return false;
       }
 
       const deleteResult = await SessionModel.findByIdAndDelete(sessionId);
 
       if (deleteResult) {
-        this.logger.debug(`Session deleted successfully: ${sessionId}`);
+        this.logger.info(`Session deleted successfully: ${sessionId}`);
         return true;
       } else {
-        this.logger.debug(`Session not found during deletion: ${sessionId}`);
+        this.logger.info(`Session not found during deletion: ${sessionId}`);
         return false;
       }
     } catch (error) {

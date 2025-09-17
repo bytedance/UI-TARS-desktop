@@ -164,7 +164,7 @@ export class MongoDAOFactory implements IDAOFactory {
     if (this.connection) {
       try {
         await this.connection.close();
-        logger.debug('MongoDB DAO Factory connection closed successfully');
+        logger.info('MongoDB DAO Factory connection closed successfully');
       } catch (error) {
         logger.error('Error closing MongoDB DAO Factory connection:', error);
       } finally {

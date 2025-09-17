@@ -137,7 +137,7 @@ export class EventDAO implements IEventDAO {
     try {
       const EventModel = this.getEventModel();
       const result = await EventModel.deleteMany({ sessionId });
-      logger.debug(`Deleted ${result.deletedCount} events for session: ${sessionId}`);
+      logger.info(`Deleted ${result.deletedCount} events for session: ${sessionId}`);
       return result.deletedCount || 0;
     } catch (error) {
       logger.error(`Failed to delete events for session ${sessionId}:`, error);
@@ -164,7 +164,7 @@ export class EventDAO implements IEventDAO {
     try {
       const EventModel = this.getEventModel();
       const result = await EventModel.deleteMany({ timestamp: { $lt: timestamp } });
-      logger.debug(`Deleted ${result.deletedCount} events older than ${timestamp}`);
+      logger.info(`Deleted ${result.deletedCount} events older than ${timestamp}`);
       return result.deletedCount || 0;
     } catch (error) {
       logger.error(`Failed to delete old events:`, error);

@@ -192,7 +192,7 @@ export class SandboxAllocationDAO implements ISandboxAllocationDAO {
         { lastUsedAt: now },
       );
 
-      this.logger.debug(`Sandbox last used time updated: ${sandboxId}`);
+      this.logger.info(`Sandbox last used time updated: ${sandboxId}`);
     } catch (error) {
       this.logger.error(`Failed to update sandbox last used time for ${sandboxId}:`, error);
       throw new Error('Failed to update sandbox last used time');
@@ -213,7 +213,7 @@ export class SandboxAllocationDAO implements ISandboxAllocationDAO {
         return false;
       }
 
-      this.logger.debug(`Sandbox allocation deactivated: ${sandboxId}`);
+      this.logger.info(`Sandbox allocation deactivated: ${sandboxId}`);
       return true;
     } catch (error) {
       this.logger.error(`Failed to deactivate sandbox allocation ${sandboxId}:`, error);
@@ -235,7 +235,7 @@ export class SandboxAllocationDAO implements ISandboxAllocationDAO {
         return false;
       }
 
-      this.logger.debug(`Sandbox allocation activated: ${sandboxId}`);
+      this.logger.info(`Sandbox allocation activated: ${sandboxId}`);
       return true;
     } catch (error) {
       this.logger.error(`Failed to activate sandbox allocation ${sandboxId}:`, error);
@@ -251,7 +251,7 @@ export class SandboxAllocationDAO implements ISandboxAllocationDAO {
       const deleted = result.deletedCount > 0;
 
       if (deleted) {
-        this.logger.debug(`Sandbox allocation deleted: ${sandboxId}`);
+        this.logger.info(`Sandbox allocation deleted: ${sandboxId}`);
       }
 
       return deleted;
@@ -327,7 +327,7 @@ export class SandboxAllocationDAO implements ISandboxAllocationDAO {
         return null;
       }
 
-      this.logger.debug(`Sandbox allocation updated: ${sandboxId}`);
+      this.logger.info(`Sandbox allocation updated: ${sandboxId}`);
 
       return {
         sandboxId: result.sandboxId,
