@@ -221,9 +221,7 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
   }, [deleteSession, sessionToDelete, sessions, activeSessionId, navigate]);
 
   if (isCollapsed) {
-    return (
-      <div className="flex flex-col h-full bg-transparent w-0 border-r border-gray-100/40 dark:border-gray-700/20" />
-    );
+    return null; // Don't render anything when collapsed in modal mode
   }
 
   return (
