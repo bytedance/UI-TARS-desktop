@@ -83,6 +83,11 @@ export abstract class Operator extends BaseOperator {
   private _initializing = false;
   private _initPromise: Promise<void> | null = null;
 
+  constructor() {
+    super();
+    this.ensureInitialized();
+  }
+
   /**
    * Initializes the operator
    * @description Performs initialization operations for the operator, such as validating connections,
