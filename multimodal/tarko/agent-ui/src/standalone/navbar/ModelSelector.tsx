@@ -9,12 +9,14 @@ import { useAtomValue } from 'jotai';
 import { isProcessingAtom } from '@/common/state/atoms/ui';
 import { 
   Select,
-  MenuItem,
+  SelectMenuItem,
   FormControl,
   Box,
   Typography,
   CircularProgress,
-  Tooltip 
+  Tooltip,
+  useNavbarStyles,
+  useHoverHandlers,
 } from '@tarko/ui';
 
 interface NavbarModelSelectorProps {
@@ -42,24 +44,22 @@ const ModelDisplayContent: React.FC<{
   showLoading?: boolean;
 }> = ({ model, isDarkMode, fontSize = '12px', isSelected = false, showLoading = false }) => {
   const displayText = getModelDisplayText(model);
+  const { getTextStyles } = useNavbarStyles();
+  const textStyles = getTextStyles();
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
       <Typography
         variant="body2"
-        sx={{
-          fontWeight: isSelected ? 600 : 500,
+        style={{
+          ...textStyles.modelName,
           fontSize,
+          fontWeight: isSelected ? 600 : 500,
           color: isSelected
             ? isDarkMode
               ? '#a5b4fc'
               : '#6366f1'
-            : isDarkMode
-              ? '#f3f4f6'
-              : '#374151',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
+            : textStyles.modelName.color,
         }}
         title={displayText}
       >
@@ -67,7 +67,7 @@ const ModelDisplayContent: React.FC<{
       </Typography>
       <Typography
         variant="body2"
-        sx={{
+        style={{
           color: isDarkMode ? '#9ca3af' : '#6b7280',
           fontSize,
           flexShrink: 0,
@@ -77,19 +77,15 @@ const ModelDisplayContent: React.FC<{
       </Typography>
       <Typography
         variant="body2"
-        sx={{
-          fontWeight: isSelected ? 600 : 500,
+        style={{
+          ...textStyles.provider,
           fontSize,
+          fontWeight: isSelected ? 600 : 500,
           color: isSelected
             ? isDarkMode
               ? '#a5b4fc'
               : '#6366f1'
-            : isDarkMode
-              ? '#d1d5db'
-              : '#6b7280',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
+            : textStyles.provider.color,
         }}
         title={model.provider}
       >
@@ -109,9 +105,15 @@ const StaticModelDisplay: React.FC<{
   isDisabled?: boolean;
   disabledReason?: string;
 }> = ({ sessionMetadata, isDarkMode, className, isDisabled = false, disabledReason }) => {
+  const { getModelSelectorStyles } = useNavbarStyles();
+  const { applyHoverStyles, resetStyles } = useHoverHandlers();
+  const [isHovered, setIsHovered] = React.useState(false);
+  
   if (!sessionMetadata?.modelConfig) {
     return null;
   }
+
+  const modelStyles = getModelSelectorStyles(isDisabled);
 
   const content = (
     <div
@@ -119,43 +121,12 @@ const StaticModelDisplay: React.FC<{
     >
       <Box
         sx={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 0.75,
-          px: 1.25,
-          py: 0.375,
-          height: '28px',
-          minHeight: '28px',
-          width: 'auto',
-          minWidth: 'auto',
+          ...modelStyles.base,
           maxWidth: '300px',
-          background: isDisabled
-            ? isDarkMode
-              ? 'rgba(55, 65, 81, 0.15)'
-              : 'rgba(248, 250, 252, 0.4)'
-            : isDarkMode
-              ? 'rgba(55, 65, 81, 0.3)'
-              : 'rgba(248, 250, 252, 0.8)',
-          backdropFilter: 'blur(8px)',
-          border: isDisabled
-            ? isDarkMode
-              ? '1px solid rgba(75, 85, 99, 0.15)'
-              : '1px solid rgba(203, 213, 225, 0.3)'
-            : isDarkMode
-              ? '1px solid rgba(75, 85, 99, 0.3)'
-              : '1px solid rgba(203, 213, 225, 0.6)',
-          borderRadius: '8px',
-          opacity: isDisabled ? 0.6 : 1,
-          cursor: isDisabled ? 'not-allowed' : 'default',
-          '&:hover': isDisabled
-            ? {}
-            : {
-                background: isDarkMode ? 'rgba(55, 65, 81, 0.8)' : 'rgba(241, 245, 249, 0.9)',
-                boxShadow: isDarkMode
-                  ? '0 2px 4px -1px rgba(0, 0, 0, 0.2)'
-                  : '0 2px 4px -1px rgba(0, 0, 0, 0.05)',
-              },
+          ...(isHovered && !isDisabled ? modelStyles.hover : {}),
         }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
         <ModelDisplayContent
           model={sessionMetadata.modelConfig}
@@ -347,18 +318,18 @@ export const NavbarModelSelector: React.FC<NavbarModelSelectorProps> = ({
             const isSelected = isSameModel(currentModel, model);
 
             return (
-              <MenuItem key={modelKey} value={modelKey}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
-                  <Box sx={{ minWidth: 0, flex: 1 }}>
-                    <ModelDisplayContent
-                      model={model}
-                      isDarkMode={isDarkMode}
-                      fontSize="14px"
-                      isSelected={isSelected}
-                    />
-                  </Box>
-                </Box>
-              </MenuItem>
+            <SelectMenuItem key={modelKey} value={modelKey}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+            <Box sx={{ minWidth: 0, flex: 1 }}>
+            <ModelDisplayContent
+            model={model}
+            isDarkMode={isDarkMode}
+            fontSize="14px"
+            isSelected={isSelected}
+            />
+            </Box>
+            </Box>
+            </SelectMenuItem>
             );
           })}
         </Select>

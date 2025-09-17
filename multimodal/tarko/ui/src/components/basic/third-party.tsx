@@ -2,4 +2,7 @@
 export { Box, Typography, CircularProgress, IconButton, Divider } from './primitives';
 
 // Select components - now using Headless UI implementations
-export { Select, MenuItem, FormControl } from './Select';
+export { Select, MenuItem as SelectMenuItem, FormControl } from './Select';
+
+// Menu components - native dropdown menu implementation
+export { Menu, MenuItem, MenuDivider } from './Menu';
