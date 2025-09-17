@@ -377,10 +377,8 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
   const totalTextWidth = agentTextWidth + modelTextWidth;
   const hasSpace = totalTextWidth <= availableWidth;
 
-  // Prioritize agent name - give it more space and ensure it's not truncated
-  const agentMaxWidth = hasSpace
-    ? 'none'
-    : `${Math.min(agentTextWidth + 40, availableWidth * 0.6)}px`; // Give agent name priority
+  // Agent name should never be truncated
+  const agentMaxWidth = 'none';
 
   const modelMaxWidth = hasSpace
     ? 'none'
