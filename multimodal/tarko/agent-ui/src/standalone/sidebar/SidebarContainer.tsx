@@ -44,7 +44,7 @@ export const SidebarContainer: React.FC = () => {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="fixed left-12 top-0 h-full z-50"
+              className="fixed left-0 top-0 h-full z-50"
             >
               <div className="pt-3 pb-3">
                 <ChatSession isCollapsed={false} />
