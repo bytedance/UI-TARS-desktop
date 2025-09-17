@@ -20,7 +20,6 @@ export interface MenuDividerProps {
   className?: string;
 }
 
-// 简化的样式常量
 const getMenuStyles = (isDarkMode: boolean) => ({
   container: {
     position: 'fixed' as const,
@@ -77,7 +76,12 @@ export const Menu: React.FC<MenuProps> = ({ open, onClose, children, className }
   );
 };
 
-export const MenuItem: React.FC<MenuItemProps> = ({ onClick, children, icon, disabled = false }) => {
+export const MenuItem: React.FC<MenuItemProps> = ({
+  onClick,
+  children,
+  icon,
+  disabled = false,
+}) => {
   const isDarkMode = useDarkMode();
   const styles = getMenuStyles(isDarkMode);
   const [isHovered, setIsHovered] = React.useState(false);

@@ -3,19 +3,24 @@ import { createPortal } from 'react-dom';
 
 export interface TooltipProps {
   title: React.ReactNode;
-  placement?: 'top' | 'bottom' | 'left' | 'right' | 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right';
+  placement?:
+    | 'top'
+    | 'bottom'
+    | 'left'
+    | 'right'
+    | 'bottom-left'
+    | 'bottom-right'
+    | 'top-left'
+    | 'top-right';
   children: React.ReactElement;
   className?: string;
 }
 
-/**
- * Simple Tooltip component
- */
-export const Tooltip: React.FC<TooltipProps> = ({ 
-  title, 
-  placement = 'bottom', 
-  children, 
-  className 
+export const Tooltip: React.FC<TooltipProps> = ({
+  title,
+  placement = 'bottom',
+  children,
+  className,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
@@ -27,13 +32,13 @@ export const Tooltip: React.FC<TooltipProps> = ({
 
   const updatePosition = () => {
     if (!triggerRef.current) return;
-    
+
     const rect = triggerRef.current.getBoundingClientRect();
     const offset = 8;
-    
+
     let top = 0;
     let left = 0;
-    
+
     switch (placement) {
       case 'top':
         top = rect.top - offset;
@@ -68,11 +73,11 @@ export const Tooltip: React.FC<TooltipProps> = ({
         left = rect.right;
         break;
     }
-    
+
     // Add scroll offset
     top += window.scrollY;
     left += window.scrollX;
-    
+
     setPosition({ top, left });
   };
 
@@ -122,15 +127,11 @@ export const Tooltip: React.FC<TooltipProps> = ({
     }
   };
 
-  const tooltipElement = isVisible ? (
-    <div style={getTooltipStyle()}>
-      {title}
-    </div>
-  ) : null;
+  const tooltipElement = isVisible ? <div style={getTooltipStyle()}>{title}</div> : null;
 
   return (
     <>
-      <div 
+      <div
         ref={triggerRef}
         className={className}
         style={{ position: 'relative', display: 'inline-block' }}

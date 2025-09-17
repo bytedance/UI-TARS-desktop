@@ -1,7 +1,5 @@
 import React from 'react';
 
-// Basic HTML primitives to replace simple MUI components
-
 export interface BoxProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
   component?: keyof JSX.IntrinsicElements;
@@ -24,8 +22,6 @@ export const Box: React.FC<BoxProps> = ({
     children,
   );
 };
-
-// Typography 组件已删除 - 直接使用原生 HTML 元素更简单
 
 export interface CircularProgressProps {
   size?: number;
@@ -99,5 +95,3 @@ export const IconButton: React.FC<IconButtonProps> = ({ children, style, classNa
     </button>
   );
 };
-
-// Divider 组件已删除 - 未被使用，可直接用 <hr> 或 MenuDivider

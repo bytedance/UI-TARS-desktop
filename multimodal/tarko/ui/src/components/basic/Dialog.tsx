@@ -89,10 +89,7 @@ export const Dialog: React.FC<DialogProps> = ({
 
   return (
     <HeadlessDialog open={open} onClose={onClose} className={className} style={dialogStyle}>
-      {/* Backdrop */}
       <div style={backdropStyle} aria-hidden="true" />
-
-      {/* Dialog panel */}
       <HeadlessDialog.Panel style={paperStyle}>
         <div
           style={{
