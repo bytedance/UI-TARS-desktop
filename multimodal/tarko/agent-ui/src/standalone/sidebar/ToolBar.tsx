@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 
 import { FiPlus, FiHome, FiSettings } from 'react-icons/fi';
 import { GoSidebarCollapse, GoSidebarExpand } from 'react-icons/go';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useSession } from '@/common/hooks/useSession';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useLayout } from '@/common/hooks/useLayout';
@@ -12,6 +12,7 @@ import { LayoutSwitchButton } from './LayoutSwitchButton';
 
 export const ToolBar: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isReplayMode } = useReplayMode();
   const { createSession, connectionStatus } = useSession();
   const { isSidebarCollapsed, toggleSidebar } = useLayout();
@@ -19,6 +20,7 @@ export const ToolBar: React.FC = () => {
   const [isCreatingSession, setIsCreatingSession] = useState(false);
 
   const enableLayoutSwitchButton = isLayoutSwitchButtonEnabled();
+  const isHomePage = location.pathname === '/';
 
   const handleNewSession = useCallback(async () => {
     if (isCreatingSession || !connectionStatus.connected) return;
@@ -107,7 +109,7 @@ export const ToolBar: React.FC = () => {
         <div className="flex-1" />
 
         <div className="flex flex-col items-center gap-4 pb-4">
-          {!isReplayMode && enableLayoutSwitchButton && <LayoutSwitchButton />}
+          {!isReplayMode && enableLayoutSwitchButton && !isHomePage && <LayoutSwitchButton />}
 
           {/* Agent config button */}
           {!isReplayMode && (
