@@ -46,9 +46,11 @@ export const SidebarContainer: React.FC = () => {
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
               className="fixed left-0 top-0 h-full z-50 flex"
             >
-              <div className="flex h-full pb-2 lg:pb-3 pl-2 lg:pl-3">
+              <div className="flex h-full">
                 <div className="w-12 flex-shrink-0" /> {/* Space for ToolBar */}
-                <ChatSession isCollapsed={false} />
+                <div className="pl-3 pt-3 pb-3">
+                  <ChatSession isCollapsed={false} />
+                </div>
               </div>
             </motion.div>
           </>
