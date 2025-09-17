@@ -50,7 +50,7 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
               ? 'Share unavailable during agent execution. Please wait for agent execution to complete'
               : 'Share this conversation'
           }
-          placement="bottom"
+          placement="bottom-right"
         >
           <span>
             <button

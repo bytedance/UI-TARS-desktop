@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 
 export interface TooltipProps {
   title: React.ReactNode;
-  placement?: 'top' | 'bottom' | 'left' | 'right';
+  placement?: 'top' | 'bottom' | 'left' | 'right' | 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right';
   children: React.ReactElement;
   className?: string;
 }
@@ -51,6 +51,22 @@ export const Tooltip: React.FC<TooltipProps> = ({
         top = rect.top + rect.height / 2;
         left = rect.right + offset;
         break;
+      case 'bottom-left':
+        top = rect.bottom + offset;
+        left = rect.left;
+        break;
+      case 'bottom-right':
+        top = rect.bottom + offset;
+        left = rect.right;
+        break;
+      case 'top-left':
+        top = rect.top - offset;
+        left = rect.left;
+        break;
+      case 'top-right':
+        top = rect.top - offset;
+        left = rect.right;
+        break;
     }
     
     // Add scroll offset
@@ -93,6 +109,14 @@ export const Tooltip: React.FC<TooltipProps> = ({
         return { ...baseStyle, transform: 'translate(-100%, -50%)' };
       case 'right':
         return { ...baseStyle, transform: 'translateY(-50%)' };
+      case 'bottom-left':
+        return { ...baseStyle, transform: 'translateY(0)' };
+      case 'bottom-right':
+        return { ...baseStyle, transform: 'translate(-100%, 0)' };
+      case 'top-left':
+        return { ...baseStyle, transform: 'translateY(-100%)' };
+      case 'top-right':
+        return { ...baseStyle, transform: 'translate(-100%, -100%)' };
       default:
         return baseStyle;
     }
