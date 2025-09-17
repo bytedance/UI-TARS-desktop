@@ -33,6 +33,8 @@ import {
 import { createUserConfigRoutes } from './routes/user';
 import { HookManager, BuiltInPriorities, type HookRegistrationOptions } from './hooks';
 import { config } from 'dotenv';
+import { ErroHandlingHook, RequestIdHook } from './hooks/builtInHooks';
+import chalk from 'chalk';
 
 config();
 /**
@@ -120,33 +122,6 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    * Setup Hono middlewares - only register hooks, don't apply yet
    */
   private setupMiddlewares(): void {
-    this.registerBuiltInHooks();
-    }
-
-  /**
-   * Register built-in middlewares as hooks with their priorities
-   */
-  private registerBuiltInHooks(): void {
-    this.hookManager.register({
-      id: 'cors',
-      name: 'CORS',
-      priority: BuiltInPriorities.CORS,
-      description: 'Cross-Origin Resource Sharing middleware',
-      handler: cors({
-        origin: process.env.ACCESS_ALLOW_ORIGIN || '*',
-        allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-        allowHeaders: [
-          'Content-Type',
-          'Authorization',
-          'X-Requested-With',
-          'x-user-info',
-          'x-jwt-token',
-        ],
-        credentials: true,
-      }),
-    });
-
-    // Server instance injection middleware
     this.hookManager.register({
       id: 'server-injection',
       name: 'Server Injection',
@@ -158,42 +133,10 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
       },
     });
 
-    // Error handling middleware
-    this.hookManager.register({
-      id: 'error-handling',
-      name: 'Error Handling',
-      priority: BuiltInPriorities.ERROR_HANDLING,
-      description: 'Global error handling middleware',
-      handler: errorHandlingMiddleware,
-    });
-
-    // Request ID middleware
-    this.hookManager.register({
-      id: 'request-id',
-      name: 'Request ID',
-      priority: BuiltInPriorities.REQUEST_ID,
-      description: 'Generates unique request IDs for tracking',
-      handler: requestIdMiddleware,
-    });
-
-    // Access logging middleware
-    this.hookManager.register({
-      id: 'access-log',
-      name: 'Access Log',
-      priority: BuiltInPriorities.ACCESS_LOG,
-      description: 'Logs HTTP requests and responses',
-      handler: accessLogMiddleware,
-    });
-
-    // Authentication middleware
-    this.hookManager.register({
-      id: 'auth',
-      name: 'Authentication',
-      priority: BuiltInPriorities.AUTH,
-      description: 'Authentication and authorization middleware',
-      handler: authMiddleware,
-    });
+    this.hookManager.register(ErroHandlingHook);
+    this.hookManager.register(RequestIdHook)
   }
+
 
   /**
    * Apply all registered hooks to the Hono app in priority order
@@ -217,7 +160,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
 
     
     for (const hook of hooks) {
-        console.log(`${hook.name} (id: ${hook.id}, priority: ${hook.priority})`);
+        console.log(chalk.green(`[Hook] ${hook.name} (id: ${hook.id}, priority: ${hook.priority})`));
         this.app.use('*', hook.handler);
     }
   }

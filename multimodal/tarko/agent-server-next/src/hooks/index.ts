@@ -4,4 +4,5 @@
  */
 
 export { HookManager } from './HookManager';
+export { CorsHook, AccessLogHook, AuthHook } from './builtInHooks'
 export * from './types';

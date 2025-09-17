@@ -2,8 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { registerMinimalHook } from './src/examples/custom-hooks';
-import { AgentServer } from './src/server';
+import { AuthHook, CorsHook, AgentServer } from './src/index';
 import { resolve } from 'path';
 
 const workspace = resolve(__dirname, './tmp');
@@ -87,8 +86,8 @@ const server = new AgentServer({
   },
 });
 
-
-registerMinimalHook(server);
+server.registerHook(AuthHook);
+server.registerHook(CorsHook);
 
 console.log('🚀 Starting UI-TARS Agent Server...');
 server.start();
