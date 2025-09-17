@@ -93,11 +93,12 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
 
   return (
     <Dialog open={isOpen} onClose={onClose} maxWidth="sm">
-      <DialogPanel className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <DialogTitle className="text-xl font-medium text-gray-800 dark:text-gray-200 flex items-center">
-            <FiShare2 className="mr-3 text-gray-500 dark:text-gray-400" />
-            Share Conversation
+      <DialogPanel className="p-4 sm:p-6">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <DialogTitle className="text-lg sm:text-xl font-medium text-gray-800 dark:text-gray-200 flex items-center">
+            <FiShare2 className="mr-2 sm:mr-3 text-gray-500 dark:text-gray-400" size={18} />
+            <span className="hidden sm:inline">Share Conversation</span>
+            <span className="sm:hidden">Share</span>
           </DialogTitle>
           <motion.button
             whileHover={{ scale: 1.1 }}
@@ -119,34 +120,36 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
         )}
 
         {shareConfig && !isLoading && !shareResult && (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <p className="text-gray-600 dark:text-gray-400 text-sm">
               Choose how you want to share this conversation:
             </p>
 
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {shareConfig.hasShareProvider && (
                 <motion.button
                   whileHover={{ y: -2 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleUpload}
-                  className="w-full flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-xl border border-[#E5E6EC] dark:border-gray-700/30 hover:border-gray-300 dark:hover:border-gray-600/70 transition-all duration-200"
+                  className="w-full flex items-center justify-between p-3 sm:p-4 bg-white dark:bg-gray-800 rounded-xl border border-[#E5E6EC] dark:border-gray-700/30 hover:border-gray-300 dark:hover:border-gray-600/70 transition-all duration-200"
                 >
                   <div className="flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 mr-3">
-                      <FiLink size={20} />
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 mr-3">
+                      <FiLink size={16} className="sm:hidden" />
+                      <FiLink size={20} className="hidden sm:block" />
                     </div>
                     <div className="text-left">
-                      <h4 className="font-medium text-gray-800 dark:text-gray-200">
+                      <h4 className="font-medium text-gray-800 dark:text-gray-200 text-sm sm:text-base">
                         Get shareable link
                       </h4>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">
                         Upload and get a link to share
                       </p>
                     </div>
                   </div>
-                  <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                    <FiShare2 size={16} className="text-gray-500 dark:text-gray-400" />
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                    <FiShare2 size={14} className="sm:hidden text-gray-500 dark:text-gray-400" />
+                    <FiShare2 size={16} className="hidden sm:block text-gray-500 dark:text-gray-400" />
                   </div>
                 </motion.button>
               )}
@@ -155,21 +158,23 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
                 whileHover={{ y: -2 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleDownload}
-                className="w-full flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-xl border border-[#E5E6EC] dark:border-gray-700/30 hover:border-gray-300 dark:hover:border-gray-600/70 transition-all duration-200"
+                className="w-full flex items-center justify-between p-3 sm:p-4 bg-white dark:bg-gray-800 rounded-xl border border-[#E5E6EC] dark:border-gray-700/30 hover:border-gray-300 dark:hover:border-gray-600/70 transition-all duration-200"
               >
                 <div className="flex items-center">
-                  <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 mr-3">
-                    <FiDownload size={20} />
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 mr-3">
+                    <FiDownload size={16} className="sm:hidden" />
+                    <FiDownload size={20} className="hidden sm:block" />
                   </div>
                   <div className="text-left">
-                    <h4 className="font-medium text-gray-800 dark:text-gray-200">Download HTML</h4>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <h4 className="font-medium text-gray-800 dark:text-gray-200 text-sm sm:text-base">Download HTML</h4>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">
                       Save the conversation as HTML file
                     </p>
                   </div>
                 </div>
-                <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                  <FiDownload size={16} className="text-gray-500 dark:text-gray-400" />
+                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                  <FiDownload size={14} className="sm:hidden text-gray-500 dark:text-gray-400" />
+                  <FiDownload size={16} className="hidden sm:block text-gray-500 dark:text-gray-400" />
                 </div>
               </motion.button>
             </div>
@@ -210,19 +215,23 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
                 type="text"
                 value={shareResult.url}
                 readOnly
-                className="flex-grow pl-4 py-3 bg-transparent text-gray-800 dark:text-gray-200 text-sm focus:outline-none"
+                className="flex-grow pl-3 sm:pl-4 py-2 sm:py-3 bg-transparent text-gray-800 dark:text-gray-200 text-xs sm:text-sm focus:outline-none"
               />
               <button
                 onClick={handleCopyLink}
-                className="flex-shrink-0 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg text-xs font-medium text-gray-700 dark:text-gray-300 transition-colors"
+                className="flex-shrink-0 px-2 sm:px-3 py-1 sm:py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg text-xs font-medium text-gray-700 dark:text-gray-300 transition-colors"
               >
                 {copied ? (
                   <span className="flex items-center">
                     <FiCheck className="mr-1" size={12} />
-                    Copied!
+                    <span className="hidden sm:inline">Copied!</span>
+                    <span className="sm:hidden">✓</span>
                   </span>
                 ) : (
-                  'Copy Link'
+                  <span>
+                    <span className="hidden sm:inline">Copy Link</span>
+                    <span className="sm:hidden">Copy</span>
+                  </span>
                 )}
               </button>
             </div>
@@ -236,7 +245,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={onClose}
-                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                className="px-3 sm:px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-xl text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
               >
                 Close
               </motion.button>
@@ -265,7 +274,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={onClose}
-                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                className="px-3 sm:px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-xl text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
               >
                 Close
               </motion.button>
@@ -274,14 +283,14 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
         )}
 
         {shareResult && !shareResult.success && (
-          <div className="space-y-6">
-            <div className="bg-red-50/50 dark:bg-red-900/20 rounded-xl p-4 border border-red-100/60 dark:border-red-800/30 flex items-start">
-              <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-800/40 flex items-center justify-center flex-shrink-0 mr-3">
-                <FiX className="text-red-600 dark:text-red-400" size={16} />
+          <div className="space-y-4 sm:space-y-6">
+            <div className="bg-red-50/50 dark:bg-red-900/20 rounded-xl p-3 sm:p-4 border border-red-100/60 dark:border-red-800/30 flex items-start">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-red-100 dark:bg-red-800/40 flex items-center justify-center flex-shrink-0 mr-2 sm:mr-3">
+                <FiX className="text-red-600 dark:text-red-400" size={14} />
               </div>
               <div>
-                <p className="font-medium text-gray-800 dark:text-gray-200">Failed to share</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                <p className="font-medium text-gray-800 dark:text-gray-200 text-sm sm:text-base">Failed to share</p>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
                   {shareResult.error || 'An error occurred while trying to share the conversation.'}
                 </p>
               </div>
@@ -292,7 +301,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={onClose}
-                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                className="px-3 sm:px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-xl text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
               >
                 Close
               </motion.button>
