@@ -24,7 +24,6 @@
   "dependencies": {
     "@headlessui/react": "^1.7.19",
     "@monaco-editor/react": "4.7.0",
-    "@mui/material": "^5.15.11",
     "framer-motion": "12.19.2",
     "highlight.js": "^11.9.0",
     "katex": "^0.16.9",
