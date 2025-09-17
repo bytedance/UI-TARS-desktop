@@ -1,5 +1,5 @@
 // Basic components - now using native implementations instead of MUI
-export { Box, CircularProgress, IconButton, Divider } from './primitives';
+export { Box, CircularProgress, IconButton } from './primitives';
 
 // Select components - now using Headless UI implementations
 export { Select, MenuItem as SelectMenuItem, FormControl } from './Select';

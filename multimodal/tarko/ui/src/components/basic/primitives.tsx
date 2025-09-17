@@ -76,34 +76,24 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
 
 export interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
-  size?: 'small' | 'medium' | 'large';
 }
 
 export const IconButton: React.FC<IconButtonProps> = ({
   children,
-  size = 'medium',
   style,
   className,
   ...props
 }) => {
-  const sizeStyles = {
-    small: { padding: '5px', fontSize: '1.125rem' },
-    medium: { padding: '8px', fontSize: '1.5rem' },
-    large: { padding: '12px', fontSize: '1.75rem' },
-  };
-
   const baseStyle: React.CSSProperties = {
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    position: 'relative',
     backgroundColor: 'transparent',
     border: 'none',
     borderRadius: '50%',
     cursor: 'pointer',
-    userSelect: 'none',
-    transition: 'background-color 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
-    ...sizeStyles[size],
+    padding: '8px',
+    transition: 'background-color 150ms ease-in-out',
   };
 
   const combinedStyle = { ...baseStyle, ...style };
@@ -115,19 +105,4 @@ export const IconButton: React.FC<IconButtonProps> = ({
   );
 };
 
-export interface DividerProps {
-  orientation?: 'horizontal' | 'vertical';
-  className?: string;
-}
-
-export const Divider: React.FC<DividerProps> = ({ orientation = 'horizontal', className }) => {
-  const baseStyle: React.CSSProperties = {
-    border: 'none',
-    backgroundColor: 'rgba(0, 0, 0, 0.12)',
-    ...(orientation === 'horizontal'
-      ? { height: '1px', width: '100%' }
-      : { width: '1px', height: '100%' }),
-  };
-
-  return <hr className={className} style={baseStyle} />;
-};
+// Divider 组件已删除 - 未被使用，可直接用 <hr> 或 MenuDivider
