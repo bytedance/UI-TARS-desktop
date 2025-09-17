@@ -92,45 +92,7 @@ export class MockAgent implements IAgent {
     return [];
   }
 
-  getLLMClient(): any {
-    return undefined;
-  }
 
-  getCurrentModel(): any {
-    return undefined;
-  }
-
-  onLLMRequest(): void {}
-  onLLMResponse(): void {}
-  onLLMStreamingResponse(): void {}
-  onBeforeToolCall(): any {}
-  onAfterToolCall(): any {}
-  onToolCallError(): any {}
-  onEachAgentLoopStart(): void {}
-  onEachAgentLoopEnd(): void {}
-  onAgentLoopEnd(): void {}
-  onProcessToolCalls(): any {}
-  onBeforeLoopTermination(): any {
-    return { finished: true };
-  }
-  requestLoopTermination(): boolean {
-    return false;
-  }
-  isLoopTerminationRequested(): boolean {
-    return false;
-  }
-  getCurrentLoopIteration(): number {
-    return 0;
-  }
-  getOptions(): any {
-    return this.options;
-  }
-  callLLM(): any {
-    return Promise.resolve({});
-  }
-  onPrepareRequest(): any {
-    return { systemPrompt: '', tools: [] };
-  }
 }
 
 /**
