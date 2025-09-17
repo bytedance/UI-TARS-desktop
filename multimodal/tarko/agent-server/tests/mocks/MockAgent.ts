@@ -181,36 +181,5 @@ class MockEventStream extends EventEmitter implements AgentEventStream.Processor
     } as AgentEventStream.Event;
   }
 
-  subscribeToTypes(
-    types: AgentEventStream.EventType[],
-    callback: (event: AgentEventStream.Event) => void,
-  ): () => void {
-    const wrappedCallback = (event: AgentEventStream.Event) => {
-      if (types.includes(event.type)) {
-        callback(event);
-      }
-    };
-    this.on('event', wrappedCallback);
-    return () => this.off('event', wrappedCallback);
-  }
 
-  subscribeToStreamingEvents(
-    callback: (
-      event:
-        | AgentEventStream.AssistantStreamingMessageEvent
-        | AgentEventStream.AssistantStreamingThinkingMessageEvent
-        | AgentEventStream.AssistantStreamingToolCallEvent,
-    ) => void,
-  ): () => void {
-    const streamingTypes: AgentEventStream.EventType[] = [
-      'assistant_streaming_message',
-      'assistant_streaming_thinking_message',
-      'assistant_streaming_tool_call',
-    ];
-    return this.subscribeToTypes(streamingTypes, callback as any);
-  }
-
-  getLatestToolResults(): { toolCallId: string; toolName: string; content: any }[] {
-    return [];
-  }
 }
