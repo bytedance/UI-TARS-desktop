@@ -83,7 +83,7 @@ export const Select: React.FC<SelectProps> = ({
           style={{
             width: '100%',
             minHeight: '32px',
-            padding: '4px 32px 4px 12px',
+            padding: '4px 24px 4px 12px', // 减少右侧 padding 从 32px 到 24px
             backgroundColor: isDarkMode ? 'rgba(55, 65, 81, 0.3)' : 'rgba(248, 250, 252, 0.8)',
             border: isDarkMode
               ? '1px solid rgba(75, 85, 99, 0.3)'

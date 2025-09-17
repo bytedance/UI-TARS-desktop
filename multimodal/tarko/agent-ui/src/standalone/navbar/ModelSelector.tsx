@@ -84,7 +84,11 @@ const ModelDisplayContent: React.FC<{
         {model.provider}
       </Typography>
       {showLoading && (
-        <CircularProgress size={12} thickness={4} style={{ color: '#6366f1', marginLeft: 'auto' }} />
+        <CircularProgress
+          size={12}
+          thickness={4}
+          style={{ color: '#6366f1', marginLeft: 'auto' }}
+        />
       )}
     </Box>
   );
