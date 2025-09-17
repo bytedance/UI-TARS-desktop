@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { useDarkMode } from '../../hooks/useDarkMode';
 
 export interface MenuProps {
@@ -30,7 +31,7 @@ const getMenuStyles = (isDarkMode: boolean) => ({
     border: isDarkMode ? '1px solid rgba(71, 85, 105, 0.3)' : '1px solid rgba(226, 232, 240, 0.8)',
     borderRadius: '12px',
     boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2)',
-    zIndex: 1000,
+    zIndex: 50000,
     padding: '8px',
   },
   item: {
@@ -69,10 +70,11 @@ export const Menu: React.FC<MenuProps> = ({ open, onClose, children, className }
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div data-menu className={className} style={styles.container}>
       {children}
-    </div>
+    </div>,
+    document.body
   );
 };
 
