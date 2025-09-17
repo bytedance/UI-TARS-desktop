@@ -8,16 +8,16 @@ export interface BoxProps extends React.HTMLAttributes<HTMLDivElement> {
   sx?: React.CSSProperties;
 }
 
-export const Box: React.FC<BoxProps> = ({ 
-  children, 
-  component: Component = 'div', 
-  sx, 
+export const Box: React.FC<BoxProps> = ({
+  children,
+  component: Component = 'div',
+  sx,
   style,
   className,
-  ...props 
+  ...props
 }) => {
   const combinedStyle = { ...sx, ...style };
-  
+
   return React.createElement(
     Component,
     {
@@ -25,13 +25,24 @@ export const Box: React.FC<BoxProps> = ({
       className,
       style: combinedStyle,
     },
-    children
+    children,
   );
 };
 
 export interface TypographyProps extends React.HTMLAttributes<HTMLElement> {
   children?: React.ReactNode;
-  variant?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'body1' | 'body2' | 'caption' | 'subtitle1' | 'subtitle2';
+  variant?:
+    | 'h1'
+    | 'h2'
+    | 'h3'
+    | 'h4'
+    | 'h5'
+    | 'h6'
+    | 'body1'
+    | 'body2'
+    | 'caption'
+    | 'subtitle1'
+    | 'subtitle2';
   component?: keyof JSX.IntrinsicElements;
   sx?: React.CSSProperties;
 }
@@ -78,7 +89,7 @@ export const Typography: React.FC<TypographyProps> = ({
       className,
       style: combinedStyle,
     },
-    children
+    children,
   );
 };
 
@@ -200,11 +211,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
   const combinedStyle = { ...baseStyle, ...sx, ...style };
 
   return (
-    <button
-      {...props}
-      className={className}
-      style={combinedStyle}
-    >
+    <button {...props} className={className} style={combinedStyle}>
       {children}
     </button>
   );
@@ -216,11 +223,7 @@ export interface DividerProps {
   sx?: React.CSSProperties;
 }
 
-export const Divider: React.FC<DividerProps> = ({
-  orientation = 'horizontal',
-  className,
-  sx,
-}) => {
+export const Divider: React.FC<DividerProps> = ({ orientation = 'horizontal', className, sx }) => {
   const baseStyle: React.CSSProperties = {
     border: 'none',
     backgroundColor: 'rgba(0, 0, 0, 0.12)',

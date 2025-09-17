@@ -424,9 +424,7 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
             width: 'auto',
             minWidth: 'auto',
             maxWidth: agentMaxWidth,
-            background: isDarkMode
-              ? 'rgba(99, 102, 241, 0.15)'
-              : 'rgba(99, 102, 241, 0.08)',
+            background: isDarkMode ? 'rgba(99, 102, 241, 0.15)' : 'rgba(99, 102, 241, 0.08)',
             backdropFilter: 'blur(8px)',
             border: isDarkMode
               ? '1px solid rgba(99, 102, 241, 0.3)'
