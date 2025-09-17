@@ -104,17 +104,23 @@ export class AdbOperator extends Operator {
         break;
       case 'scroll':
         break;
-      case 'hotkey':
-        await this.handleHotkey(action as HotkeyAction);
+      case 'hotkey': {
+        const { key } = actionInputs;
+        await this.handleHotkey(key);
         break;
+      }
       case 'open_app':
         break;
       case 'home':
-      case 'press_home':
+      case 'press_home': {
+        await this.handleHotkey('home');
         break;
+      }
       case 'back':
-      case 'press_back':
+      case 'press_back': {
+        await this.handleHotkey('back');
         break;
+      }
       default:
         this.logger.warn(`[AdbOperator] Unsupported action: ${actionType}`);
         throw new Error(`Unsupported action: ${actionType}`);
@@ -244,68 +250,40 @@ export class AdbOperator extends Operator {
     await this.executeWithYadb(`-keyboard "${text}"`);
   }
 
-  private async handleHotkey(action: HotkeyAction) {
-    /*
-    const { inputs } = action;
-    const { key } = inputs;
-    switch (key) {
-      case 'enter': // Enter key
-        await commandWithTimeout(
-          `adb -s ${this.deviceId} shell input keyevent KEYCODE_ENTER`,
-        );
-        break;
-      case 'back': // Back key
-        await commandWithTimeout(
-          `adb -s ${this.deviceId} shell input keyevent KEYCODE_BACK`,
-        );
-        break;
-      case 'home': // Return to home screen
-        await commandWithTimeout(
-          `adb -s ${this.deviceId} shell input keyevent KEYCODE_HOME`,
-        );
-        break;
-      case 'backspace': // Backspace key
-        await commandWithTimeout(
-          `adb -s ${this.deviceId} shell input keyevent 67`,
-        );
-        break;
-      case 'delete': // Delete key
-        await commandWithTimeout(
-          `adb -s ${this.deviceId} shell input keyevent 112`,
-        );
-        break;
-      case 'menu': // Open menu (less commonly used)
-        await commandWithTimeout(
-          `adb -s ${this.deviceId} shell input keyevent KEYCODE_MENU`,
-        );
-        break;
-      case 'power': // Power key (lock/unlock screen)
-        await commandWithTimeout(
-          `adb -s ${this.deviceId} shell input keyevent KEYCODE_POWER`,
-        );
-        break;
-      case 'volume_up': // Increase volume
-        await commandWithTimeout(
-          `adb -s ${this.deviceId} shell input keyevent KEYCODE_VOLUME_UP`,
-        );
-        break;
-      case 'volume_down': // Decrease volume
-        await commandWithTimeout(
-          `adb -s ${this.deviceId} shell input keyevent KEYCODE_VOLUME_DOWN`,
-        );
-        break;
-      case 'mute': // Mute
-        await commandWithTimeout(
-          `adb -s ${this.deviceId} shell input keyevent KEYCODE_VOLUME_MUTE`,
-        );
-        break;
-      case 'lock': // Lock screen
-        await commandWithTimeout(
-          `adb -s ${this.deviceId} shell input keyevent 26`,
-        );
-        break;
+  private async handleHotkey(keyStr: string) {
+    if (!keyStr) {
+      throw new Error('The hotkey is empty');
     }
-  */
+    const keyMap: Record<string, number> = {
+      home: 3, // KEYCODE_HOME, https://developer.android.com/reference/android/view/KeyEvent#KEYCODE_HOME
+      back: 4, // KEYCODE_BACK, https://developer.android.com/reference/android/view/KeyEvent#KEYCODE_BACK
+      menu: 82, // KEYCODE_MENU, https://developer.android.com/reference/android/view/KeyEvent#KEYCODE_MENU
+      power: 26, // KEYCODE_POWER, https://developer.android.com/reference/android/view/KeyEvent#KEYCODE_POWER
+      volume_up: 24, // KEYCODE_VOLUME_UP, https://developer.android.com/reference/android/view/KeyEvent#KEYCODE_VOLUME_UP
+      volumeup: 24,
+      volume_down: 25, // KEYCODE_VOLUME_DOWN, https://developer.android.com/reference/android/view/KeyEvent#KEYCODE_VOLUME_DOWN
+      volumedown: 25,
+      mute: 164, // KEYCODE_VOLUME_MUTE, https://developer.android.com/reference/android/view/KeyEvent#KEYCODE_VOLUME_MUTE
+      enter: 66, // KEYCODE_ENTER, https://developer.android.com/reference/android/view/KeyEvent#KEYCODE_ENTER
+      delete: 112,
+      lock: 26,
+      // tab: 61,
+      // arrowup: 19,
+      // arrow_up: 19,
+      // arrowdown: 20,
+      // arrow_down: 20,
+      // arrowleft: 21,
+      // arrow_left: 21,
+      // arrowright: 22,
+      // arrowr_ight: 22,
+      // escape: 111,
+      // end: 123,
+    };
+    const keyCode = keyMap[keyStr.toLowerCase()];
+    if (!keyCode) {
+      throw new Error(`Unsupported key: ${keyStr}`);
+    }
+    this._adb!.keyevent(keyCode);
   }
 
   /**
