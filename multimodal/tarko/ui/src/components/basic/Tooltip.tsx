@@ -14,6 +14,7 @@ export interface TooltipProps {
     | 'top-right';
   children: React.ReactElement;
   className?: string;
+  maxWidth?: string;
 }
 
 export const Tooltip: React.FC<TooltipProps> = ({
@@ -21,6 +22,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   placement = 'bottom',
   children,
   className,
+  maxWidth = '300px',
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
@@ -35,9 +37,6 @@ export const Tooltip: React.FC<TooltipProps> = ({
 
     const rect = triggerRef.current.getBoundingClientRect();
     const offset = 8;
-    const tooltipMaxWidth = 300;
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
 
     let top = 0;
     let left = 0;
@@ -77,28 +76,6 @@ export const Tooltip: React.FC<TooltipProps> = ({
         break;
     }
 
-    // Boundary detection and adjustment
-    if (placement.includes('left') || placement.includes('right')) {
-      // For centered placements, ensure tooltip doesn't overflow horizontally
-      if (left - tooltipMaxWidth / 2 < 10) {
-        left = tooltipMaxWidth / 2 + 10;
-      } else if (left + tooltipMaxWidth / 2 > viewportWidth - 10) {
-        left = viewportWidth - tooltipMaxWidth / 2 - 10;
-      }
-    } else {
-      // For other placements, ensure tooltip stays within viewport
-      if (left < 10) {
-        left = 10;
-      } else if (left + tooltipMaxWidth > viewportWidth - 10) {
-        left = viewportWidth - tooltipMaxWidth - 10;
-      }
-    }
-
-    // Ensure tooltip doesn't go above viewport
-    if (top < 10) {
-      top = 10;
-    }
-
     // Add scroll offset
     top += window.scrollY;
     left += window.scrollX;
@@ -123,7 +100,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
       borderRadius: '6px',
       zIndex: 9999,
       pointerEvents: 'none',
-      maxWidth: '300px',
+      maxWidth,
       wordWrap: 'break-word',
       whiteSpace: 'normal',
       opacity: isVisible ? 1 : 0,
