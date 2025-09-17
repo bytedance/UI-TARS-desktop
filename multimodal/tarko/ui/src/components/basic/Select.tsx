@@ -110,11 +110,13 @@ export const Select: React.FC<SelectProps> = ({
                     : selectedOption?.label || (displayEmpty ? 'Select...' : '')}
                 </span>
                 <HiChevronDown 
-                  size={16} 
+                  size={12} 
                   style={{ 
                     transition: 'transform 0.2s ease-in-out',
                     transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-                    opacity: disabled ? 0.4 : 0.7
+                    opacity: disabled ? 0.4 : 0.6,
+                    marginLeft: '8px',
+                    flexShrink: 0
                   }} 
                 />
               </Listbox.Button>
