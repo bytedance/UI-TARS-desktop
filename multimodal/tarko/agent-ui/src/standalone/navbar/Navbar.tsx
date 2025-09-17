@@ -146,12 +146,8 @@ export const Navbar: React.FC = () => {
           ) : logoType === 'space' ? (
             <div className="mr-3" style={{ width: '54px' }} />
           ) : (
-            <button
-              onClick={handleNavigateHome}
-              className="w-8 h-8 rounded-lg flex items-center justify-center bg-white dark:bg-gray-800 text-black dark:text-white hover:shadow-md transition-all hover:scale-105 active:scale-95 mr-3"
-              title="Home"
-            >
-              <FiHome size={16} />
+            <button onClick={handleNavigateHome} className="mr-3" title="Back to Home">
+              <img src={logoUrl} alt={getAgentTitle()} className="w-6 h-6 rounded-lg hover:scale-105 transition-transform" />
             </button>
           )}
         </div>

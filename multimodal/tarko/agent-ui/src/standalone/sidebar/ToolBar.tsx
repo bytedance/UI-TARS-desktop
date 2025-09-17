@@ -43,7 +43,7 @@ export const ToolBar: React.FC = () => {
             <button
               onClick={handleNewSession}
               disabled={!connectionStatus.connected || isCreatingSession}
-              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 ${
+              className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 ${
                 connectionStatus.connected && !isCreatingSession
                   ? 'bg-white dark:bg-gray-800 text-black dark:text-white hover:shadow-md'
                   : isCreatingSession
@@ -76,7 +76,7 @@ export const ToolBar: React.FC = () => {
                   </svg>
                 </div>
               ) : (
-                <FiPlus size={16} />
+                <FiPlus size={12} />
               )}
             </button>
           )}
@@ -91,10 +91,10 @@ export const ToolBar: React.FC = () => {
           {!isReplayMode && (
             <button
               onClick={() => setIsConfigViewerOpen(true)}
-              className="w-8 h-8 rounded-lg flex items-center justify-center bg-white dark:bg-gray-800 text-black dark:text-white hover:shadow-md transition-all hover:scale-105 active:scale-95"
+              className="w-6 h-6 rounded-lg flex items-center justify-center bg-white dark:bg-gray-800 text-black dark:text-white hover:shadow-md transition-all hover:scale-105 active:scale-95"
               title="Agent Configuration"
             >
-              <FiSettings size={16} />
+              <FiSettings size={12} />
             </button>
           )}
         </div>

@@ -17,11 +17,11 @@ export const LayoutSwitchButton: React.FC = () => {
   return (
     <button
       onClick={toggleLayout}
-      className="w-8 h-8 rounded-lg flex items-center justify-center bg-white dark:bg-gray-800 text-black dark:text-white hover:shadow-md transition-all hover:scale-105 active:scale-95"
+      className="w-6 h-6 rounded-lg flex items-center justify-center bg-white dark:bg-gray-800 text-black dark:text-white hover:shadow-md transition-all hover:scale-105 active:scale-95"
       title={isNarrowChat ? 'Switch to Equal Layout' : 'Switch to Narrow Chat Layout'}
     >
       <div className="transition-all duration-200">
-        {isNarrowChat ? <FiColumns size={16} /> : <FiSidebar size={16} />}
+        {isNarrowChat ? <FiColumns size={12} /> : <FiSidebar size={12} />}
       </div>
     </button>
   );
