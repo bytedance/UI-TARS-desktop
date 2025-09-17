@@ -57,7 +57,7 @@ export const ToolBar: React.FC = () => {
               className="w-6 h-6 rounded-lg flex items-center justify-center bg-white dark:bg-gray-800 text-black dark:text-white hover:shadow-md transition-all hover:scale-105 active:scale-95"
               title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
-              {isSidebarCollapsed ? <GoSidebarExpand size={12} /> : <GoSidebarCollapse size={12} />}
+              {isSidebarCollapsed ? <GoSidebarCollapse size={12} /> : <GoSidebarExpand size={12} />}
             </button>
           )}
 
