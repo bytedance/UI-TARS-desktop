@@ -29,7 +29,6 @@
     }
   },
   "scripts": {
-    "prepare": "npm run build",
     "dev": "rslib build --watch",
     "build": "rslib build",
     "build:watch": "rslib build --watch"
