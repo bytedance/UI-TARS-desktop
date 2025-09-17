@@ -21,16 +21,10 @@ export class MockAgent implements IAgent {
   private isAborted = false;
 
   constructor(private options: AgentAppConfig) {
-    this.eventStream = new MockEventStream();
+    this.eventStream = new MockEventStream(options.initialEvents);
   }
 
   async initialize(): Promise<void> {
-    // Restore initial events if provided
-    if (this.options.initialEvents && this.options.initialEvents.length > 0) {
-      this.eventStream.restoreEvents(this.options.initialEvents);
-      console.info(`[MockAgent] Restored ${this.options.initialEvents.length} initial events`);
-    }
-    
     this.currentStatus = AgentStatus.READY;
   }
 
@@ -144,6 +138,14 @@ export class MockAgent implements IAgent {
  */
 class MockEventStream extends EventEmitter implements AgentEventStream.Processor {
   private events: AgentEventStream.Event[] = [];
+
+  constructor(initialEvents?: AgentEventStream.Event[]) {
+    super();
+    if (initialEvents && initialEvents.length > 0) {
+      this.events = [...initialEvents];
+      console.info(`[MockEventStream] Initialized with ${initialEvents.length} initial events`);
+    }
+  }
 
   subscribe(handler: (event: AgentEventStream.Event) => void): () => void {
     this.on('event', handler);

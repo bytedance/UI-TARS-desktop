@@ -9,7 +9,7 @@ import { MemoryStorageProvider } from '../../src/storage/MemoryStorageProvider';
 import { MockAgent } from '../mocks/MockAgent';
 import { AgentEventStream } from '@tarko/interface';
 
-describe('AgentSession - Context Restore (Elegant Implementation)', () => {
+describe('AgentSession - Context Restore (Simplest Implementation)', () => {
   let mockServer: any;
   let storageProvider: MemoryStorageProvider;
   let session: AgentSession;
@@ -83,7 +83,7 @@ describe('AgentSession - Context Restore (Elegant Implementation)', () => {
     await storageProvider.saveEvent(sessionId, userEvent);
     await storageProvider.saveEvent(sessionId, assistantEvent);
 
-    // Create session (this should restore events via Agent constructor)
+    // Create session (this should restore events via EventStream constructor)
     session = new AgentSession(mockServer, sessionId, undefined, sessionInfo);
     await session.initialize();
 
@@ -139,7 +139,7 @@ describe('AgentSession - Context Restore (Elegant Implementation)', () => {
     const initialEvents = await storageProvider.getSessionEvents(sessionId);
     const initialEventCount = initialEvents.length;
 
-    // Update model config (this recreates the agent with initialEvents)
+    // Update model config (this recreates the agent with EventStream initialEvents)
     const updatedSessionInfo = {
       ...sessionInfo,
       metadata: {

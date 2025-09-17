@@ -613,6 +613,9 @@ export namespace AgentEventStream {
 
     /** Whether to automatically trim old events */
     autoTrim?: boolean;
+
+    /** Initial events to restore when creating the event stream */
+    initialEvents?: AgentEventStream.Event[];
   }
 
   /**

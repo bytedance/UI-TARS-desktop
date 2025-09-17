@@ -76,7 +76,6 @@ export class Agent<T extends AgentOptions = AgentOptions>
   public isReplaySnapshot = false;
   private currentModel: AgentModel;
   private executionStartTime = 0; // Track execution start time
-  private initialEvents?: AgentEventStream.Event[]; // Events to restore during initialization
 
   /**
    * Creates a new Agent instance.
@@ -102,11 +101,11 @@ export class Agent<T extends AgentOptions = AgentOptions>
       this.logger.debug(`Log level set to: ${LogLevel[options.logLevel]}`);
     }
 
-    // Initialize event stream manager
-    this.eventStream = new AgentEventStreamProcessor(options.eventStreamOptions);
-
-    // Store initial events for restoration during initialization
-    this.initialEvents = options.initialEvents;
+    // Initialize event stream manager with initial events
+    this.eventStream = new AgentEventStreamProcessor({
+      ...options.eventStreamOptions,
+      initialEvents: options.initialEvents,
+    });
 
     // Initialize Tool Manager
     this.toolManager = new ToolManager(this.logger);
@@ -172,25 +171,7 @@ export class Agent<T extends AgentOptions = AgentOptions>
     this.executionController = new AgentExecutionController();
   }
 
-  /**
-   * Initialize the agent and restore initial events if provided
-   * @override
-   */
-  public async initialize(): Promise<void> {
-    // Call parent initialization first
-    await super.initialize();
 
-    // Restore initial events if provided
-    if (this.initialEvents && this.initialEvents.length > 0) {
-      this.eventStream.restoreEvents(this.initialEvents);
-      this.logger.info(`[Agent] Restored ${this.initialEvents.length} initial events`);
-      
-      // Clear the initial events after restoration to prevent memory leaks
-      this.initialEvents = undefined;
-    }
-
-    this.initialized = true;
-  }
 
   /**
    * Custom LLM client for testing or custom implementations
