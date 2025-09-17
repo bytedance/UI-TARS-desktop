@@ -410,13 +410,15 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
       style={{ maxWidth: '100%' }}
     >
       {sessionMetadata?.agentInfo?.name && (
-        <Box
-          sx={{
+        <div
+          style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 0.75,
-            px: 1.25,
-            py: 0.375,
+            gap: '6px',
+            paddingLeft: '10px',
+            paddingRight: '10px',
+            paddingTop: '3px',
+            paddingBottom: '3px',
             height: '28px',
             minHeight: '28px',
             width: 'auto',
@@ -431,23 +433,35 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
               : '1px solid rgba(99, 102, 241, 0.2)',
             borderRadius: '8px',
             transition: 'all 150ms ease-in-out',
-            '&:hover': {
-              background: isDarkMode
-                ? 'rgba(99, 102, 241, 0.25)'
-                : 'rgba(99, 102, 241, 0.12)',
-              border: isDarkMode
-                ? '1px solid rgba(99, 102, 241, 0.4)'
-                : '1px solid rgba(99, 102, 241, 0.3)',
-              boxShadow: isDarkMode
-                ? '0 2px 8px -1px rgba(99, 102, 241, 0.2)'
-                : '0 2px 8px -1px rgba(99, 102, 241, 0.1)',
-            },
+            cursor: 'default',
+          }}
+          onMouseEnter={(e) => {
+            const target = e.currentTarget;
+            target.style.background = isDarkMode
+              ? 'rgba(99, 102, 241, 0.25)'
+              : 'rgba(99, 102, 241, 0.12)';
+            target.style.border = isDarkMode
+              ? '1px solid rgba(99, 102, 241, 0.4)'
+              : '1px solid rgba(99, 102, 241, 0.3)';
+            target.style.boxShadow = isDarkMode
+              ? '0 2px 8px -1px rgba(99, 102, 241, 0.2)'
+              : '0 2px 8px -1px rgba(99, 102, 241, 0.1)';
+          }}
+          onMouseLeave={(e) => {
+            const target = e.currentTarget;
+            target.style.background = isDarkMode
+              ? 'rgba(99, 102, 241, 0.15)'
+              : 'rgba(99, 102, 241, 0.08)';
+            target.style.border = isDarkMode
+              ? '1px solid rgba(99, 102, 241, 0.3)'
+              : '1px solid rgba(99, 102, 241, 0.2)';
+            target.style.boxShadow = 'none';
           }}
         >
           <FiZap size={12} color={isDarkMode ? '#a5b4fc' : '#6366f1'} style={{ flexShrink: 0 }} />
           <Typography
             variant="body2"
-            sx={{
+            style={{
               fontWeight: 500,
               fontSize: '12px',
               color: isDarkMode ? '#e0e7ff' : '#4338ca',
@@ -459,7 +473,7 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
           >
             {sessionMetadata.agentInfo.name}
           </Typography>
-        </Box>
+        </div>
       )}
 
       <NavbarModelSelector
