@@ -37,7 +37,7 @@ export const ToolBar: React.FC = () => {
 
   return (
     <>
-      <div className="w-10 h-full flex flex-col backdrop-blur-sm">
+      <div className="w-12 h-full flex flex-col backdrop-blur-sm">
         <div className="flex-1 flex flex-col items-center gap-4">
           {!isReplayMode && (
             <button
