@@ -150,7 +150,6 @@ const WelcomePage: React.FC = () => {
             autoFocus={true}
             showHelpText={false}
             variant="home"
-            showModelSelector={true}
           />
 
           <motion.div
