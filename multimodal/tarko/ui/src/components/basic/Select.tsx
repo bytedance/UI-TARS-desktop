@@ -5,7 +5,7 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 
 export interface SelectProps<T = any> {
   value: T;
-  onChange: (value: T) => void;
+  onChange: (event: { target: { value: T } }) => void;
   children: React.ReactNode;
   disabled?: boolean;
   displayEmpty?: boolean;
@@ -44,7 +44,7 @@ export interface FormControlProps {
 // Context to pass data between Select and MenuItem
 const SelectContext = React.createContext<{
   selectedValue: any;
-  onSelect: (value: any) => void;
+  onSelect: (event: { target: { value: any } }) => void;
   isDarkMode: boolean;
 } | null>(null);
 
@@ -142,9 +142,14 @@ export const Select: React.FC<SelectProps> = ({
     return baseStyle;
   };
 
+  // Create MUI-compatible onChange handler
+  const handleChange = React.useCallback((newValue: any) => {
+    onChange({ target: { value: newValue } });
+  }, [onChange]);
+
   return (
     <SelectContext.Provider value={{ selectedValue: value, onSelect: onChange, isDarkMode }}>
-      <Listbox value={value} onChange={onChange} disabled={disabled}>
+      <Listbox value={value} onChange={handleChange} disabled={disabled}>
         {({ open }) => {
           React.useEffect(() => {
             if (open) {
