@@ -250,9 +250,11 @@ export const Navbar: React.FC = () => {
               </MenuItem>
 
               {activeSessionId && !isReplayMode && (
-                <div onClick={handleMobileMenuClose}>
-                  <ShareButton variant="mobile" disabled={isProcessing} />
-                </div>
+                <ShareButton 
+                  variant="mobile" 
+                  disabled={isProcessing} 
+                  onShare={handleMobileMenuClose}
+                />
               )}
             </Menu>
           </div>

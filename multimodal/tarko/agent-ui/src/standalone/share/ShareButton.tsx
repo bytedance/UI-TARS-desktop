@@ -7,6 +7,7 @@ import { Tooltip } from '@tarko/ui';
 interface ShareButtonProps {
   variant?: 'default' | 'navbar' | 'mobile';
   disabled?: boolean;
+  onShare?: () => void;
 }
 
 /**
@@ -21,15 +22,15 @@ interface ShareButtonProps {
 export const ShareButton: React.FC<ShareButtonProps> = ({
   variant = 'default',
   disabled = false,
+  onShare,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { activeSessionId } = useSession();
 
-
-
   const handleOpenModal = () => {
     if (disabled) return;
     setIsModalOpen(true);
+    onShare?.(); // Call the callback when share is triggered
   };
 
   const handleCloseModal = () => {
