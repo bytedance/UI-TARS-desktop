@@ -17,6 +17,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
   const [shareResult, setShareResult] = useState<ShareResult | null>(null);
   const [copied, setCopied] = useState(false);
 
+  console.log('ShareModal render', { isOpen, sessionId });
+
   useEffect(() => {
     if (isOpen) {
       const fetchConfig = async () => {

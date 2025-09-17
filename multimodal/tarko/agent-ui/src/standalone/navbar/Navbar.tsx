@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDarkMode } from '@tarko/ui';
 import { ShareButton } from '@/standalone/share';
+import { ShareModal } from '@/standalone/share/ShareModal';
 import { AboutModal } from './AboutModal';
 
 import {
@@ -48,6 +49,7 @@ export const Navbar: React.FC = () => {
   const { isReplayMode } = useReplayMode();
   const { isDarkMode } = useNavbarStyles();
   const [showAboutModal, setShowAboutModal] = React.useState(false);
+  const [showShareModal, setShowShareModal] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const workspaceNavItems = getWorkspaceNavItems();
 
@@ -86,6 +88,15 @@ export const Navbar: React.FC = () => {
 
   const handleMobileMenuClose = () => {
     setMobileMenuOpen(false);
+  };
+
+  const handleShareOpen = () => {
+    setShowShareModal(true);
+    setMobileMenuOpen(false); // Close mobile menu if open
+  };
+
+  const handleShareClose = () => {
+    setShowShareModal(false);
   };
 
   const getNavItemIcon = (iconType: WorkspaceNavItemIcon = 'default') => {
@@ -193,7 +204,7 @@ export const Navbar: React.FC = () => {
             </button>
 
             {activeSessionId && !isReplayMode && (
-              <ShareButton variant="navbar" disabled={isProcessing} />
+              <ShareButton variant="navbar" disabled={isProcessing} onShare={handleShareOpen} />
             )}
           </div>
 
@@ -250,11 +261,13 @@ export const Navbar: React.FC = () => {
               </MenuItem>
 
               {activeSessionId && !isReplayMode && (
-                <ShareButton 
-                  variant="mobile" 
-                  disabled={isProcessing} 
-                  onShare={handleMobileMenuClose}
-                />
+                <MenuItem
+                  onClick={handleShareOpen}
+                  icon={<FiShare size={16} />}
+                  disabled={isProcessing}
+                >
+                  Share
+                </MenuItem>
               )}
             </Menu>
           </div>
@@ -266,6 +279,14 @@ export const Navbar: React.FC = () => {
         onClose={() => setShowAboutModal(false)}
         sessionMetadata={sessionMetadata}
       />
+
+      {activeSessionId && (
+        <ShareModal
+          isOpen={showShareModal}
+          onClose={handleShareClose}
+          sessionId={activeSessionId}
+        />
+      )}
     </div>
   );
 };

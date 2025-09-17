@@ -8,6 +8,7 @@ interface ShareButtonProps {
   variant?: 'default' | 'navbar' | 'mobile';
   disabled?: boolean;
   onShare?: () => void;
+  showModal?: boolean; // For external modal management
 }
 
 /**
@@ -23,14 +24,24 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
   variant = 'default',
   disabled = false,
   onShare,
+  showModal,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { activeSessionId } = useSession();
 
   const handleOpenModal = () => {
+    console.log('ShareButton handleOpenModal called', { disabled, activeSessionId, variant });
     if (disabled) return;
-    setIsModalOpen(true);
-    onShare?.(); // Call the callback when share is triggered
+    
+    if (onShare) {
+      // External modal management
+      console.log('Using external modal management');
+      onShare();
+    } else {
+      // Internal modal management
+      console.log('Using internal modal management');
+      setIsModalOpen(true);
+    }
   };
 
   const handleCloseModal = () => {
@@ -53,7 +64,9 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
           Share
         </MenuItem>
 
-        <ShareModal isOpen={isModalOpen} onClose={handleCloseModal} sessionId={activeSessionId} />
+        {!onShare && (
+          <ShareModal isOpen={isModalOpen} onClose={handleCloseModal} sessionId={activeSessionId} />
+        )}
       </>
     );
   }
@@ -84,7 +97,9 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
           </span>
         </Tooltip>
 
-        <ShareModal isOpen={isModalOpen} onClose={handleCloseModal} sessionId={activeSessionId} />
+        {!onShare && (
+          <ShareModal isOpen={isModalOpen} onClose={handleCloseModal} sessionId={activeSessionId} />
+        )}
       </>
     );
   }
@@ -120,7 +135,9 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
         </span>
       </Tooltip>
 
-      <ShareModal isOpen={isModalOpen} onClose={handleCloseModal} sessionId={activeSessionId} />
+      {!onShare && (
+        <ShareModal isOpen={isModalOpen} onClose={handleCloseModal} sessionId={activeSessionId} />
+      )}
     </>
   );
 };
