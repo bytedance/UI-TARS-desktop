@@ -65,11 +65,9 @@ export const App: React.FC = () => {
             <Sidebar />
             <div className="flex-1 flex flex-col overflow-hidden">
               <Navbar />
-              <div className="flex-1 overflow-hidden">
-                <SessionRouter>
-                  <Layout />
-                </SessionRouter>
-              </div>
+              <SessionRouter>
+                <Layout />
+              </SessionRouter>
             </div>
           </div>
         }
