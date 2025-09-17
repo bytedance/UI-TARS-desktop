@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { Listbox, Transition } from '@headlessui/react';
 import { useDarkMode } from '../../hooks/useDarkMode';
 
@@ -108,85 +109,125 @@ export const Select: React.FC<SelectProps> = ({
     transition: 'transform 150ms ease-in-out',
   };
 
-  const menuStyle: React.CSSProperties = {
-    position: 'absolute',
-    zIndex: 50000, // Increased z-index to ensure it's above other elements
-    marginTop: '4px',
-    width: '100%',
-    backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
-    border: isDarkMode ? '1px solid rgba(75, 85, 99, 0.3)' : '1px solid rgba(203, 213, 225, 0.6)',
-    borderRadius: '8px',
-    boxShadow: isDarkMode
-      ? '0 20px 40px -10px rgba(0, 0, 0, 0.4), 0 10px 20px -5px rgba(0, 0, 0, 0.2)'
-      : '0 20px 40px -10px rgba(0, 0, 0, 0.15), 0 10px 20px -5px rgba(0, 0, 0, 0.08)',
-    maxHeight: MenuProps?.PaperProps?.style?.maxHeight || '360px',
-    overflowY: 'auto',
-    ...MenuProps?.PaperProps?.style,
+  const [buttonRect, setButtonRect] = React.useState<DOMRect | null>(null);
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
+
+  const updateButtonRect = React.useCallback(() => {
+    if (buttonRef.current) {
+      setButtonRect(buttonRef.current.getBoundingClientRect());
+    }
+  }, []);
+
+  const getMenuStyle = (): React.CSSProperties => {
+    const baseStyle: React.CSSProperties = {
+      position: 'fixed',
+      zIndex: 50000,
+      backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+      border: isDarkMode ? '1px solid rgba(75, 85, 99, 0.3)' : '1px solid rgba(203, 213, 225, 0.6)',
+      borderRadius: '8px',
+      boxShadow: isDarkMode
+        ? '0 20px 40px -10px rgba(0, 0, 0, 0.4), 0 10px 20px -5px rgba(0, 0, 0, 0.2)'
+        : '0 20px 40px -10px rgba(0, 0, 0, 0.15), 0 10px 20px -5px rgba(0, 0, 0, 0.08)',
+      maxHeight: MenuProps?.PaperProps?.style?.maxHeight || '360px',
+      overflowY: 'auto',
+      minWidth: buttonRect?.width || 200,
+      ...MenuProps?.PaperProps?.style,
+    };
+
+    if (buttonRect) {
+      baseStyle.top = buttonRect.bottom + 4;
+      baseStyle.left = buttonRect.left;
+    }
+
+    return baseStyle;
   };
 
   return (
     <SelectContext.Provider value={{ selectedValue: value, onSelect: onChange, isDarkMode }}>
       <Listbox value={value} onChange={onChange} disabled={disabled}>
-        <div className={className} style={{ position: 'relative' }}>
-          <Listbox.Button style={buttonStyle}>
-            <span style={{ flex: 1, textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {renderValue ? renderValue(value) : (selectedOption?.label || (displayEmpty ? 'Select...' : ''))}
-            </span>
-            <svg style={arrowStyle} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </Listbox.Button>
-          
-          <Transition
-            as={React.Fragment}
-            leave="transition ease-in duration-100"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <Listbox.Options style={menuStyle}>
-              {options.map((option, index) => (
-                <Listbox.Option
-                  key={`${option.value}-${index}`}
-                  value={option.value}
-                  disabled={option.disabled}
-                >
-                  {({ active, selected, disabled: optionDisabled }) => {
-                    const optionStyle: React.CSSProperties = {
-                      display: 'flex',
-                      alignItems: 'center',
-                      padding: '8px 16px',
-                      cursor: optionDisabled ? 'not-allowed' : 'pointer',
-                      backgroundColor: active
-                        ? isDarkMode
-                          ? 'rgba(59, 130, 246, 0.1)'
-                          : 'rgba(59, 130, 246, 0.05)'
-                        : 'transparent',
-                      color: optionDisabled
-                        ? isDarkMode
-                          ? '#6b7280'
-                          : '#9ca3af'
-                        : selected
-                          ? isDarkMode
-                            ? '#60a5fa'
-                            : '#2563eb'
-                          : isDarkMode
-                            ? '#f9fafb'
-                            : '#111827',
-                      fontWeight: selected ? 500 : 400,
-                      opacity: optionDisabled ? 0.5 : 1,
-                    };
+        {({ open }) => {
+          React.useEffect(() => {
+            if (open) {
+              updateButtonRect();
+              const handleScroll = () => updateButtonRect();
+              const handleResize = () => updateButtonRect();
+              window.addEventListener('scroll', handleScroll, true);
+              window.addEventListener('resize', handleResize);
+              return () => {
+                window.removeEventListener('scroll', handleScroll, true);
+                window.removeEventListener('resize', handleResize);
+              };
+            }
+          }, [open, updateButtonRect]);
 
-                    return (
-                      <div style={optionStyle}>
-                        {option.label}
-                      </div>
-                    );
-                  }}
-                </Listbox.Option>
-              ))}
-            </Listbox.Options>
-          </Transition>
-        </div>
+          return (
+            <>
+              <div className={className} style={{ position: 'relative' }}>
+                <Listbox.Button ref={buttonRef} style={buttonStyle}>
+                  <span style={{ flex: 1, textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {renderValue ? renderValue(value) : (selectedOption?.label || (displayEmpty ? 'Select...' : ''))}
+                  </span>
+                  <svg style={arrowStyle} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </Listbox.Button>
+              </div>
+              
+              {open && buttonRect && createPortal(
+                <Transition
+                  as={React.Fragment}
+                  leave="transition ease-in duration-100"
+                  leaveFrom="opacity-100"
+                  leaveTo="opacity-0"
+                >
+                  <Listbox.Options style={getMenuStyle()}>
+                    {options.map((option, index) => (
+                      <Listbox.Option
+                        key={`${option.value}-${index}`}
+                        value={option.value}
+                        disabled={option.disabled}
+                      >
+                        {({ active, selected, disabled: optionDisabled }) => {
+                          const optionStyle: React.CSSProperties = {
+                            display: 'flex',
+                            alignItems: 'center',
+                            padding: '8px 16px',
+                            cursor: optionDisabled ? 'not-allowed' : 'pointer',
+                            backgroundColor: active
+                              ? isDarkMode
+                                ? 'rgba(59, 130, 246, 0.1)'
+                                : 'rgba(59, 130, 246, 0.05)'
+                              : 'transparent',
+                            color: optionDisabled
+                              ? isDarkMode
+                                ? '#6b7280'
+                                : '#9ca3af'
+                              : selected
+                                ? isDarkMode
+                                  ? '#60a5fa'
+                                  : '#2563eb'
+                                : isDarkMode
+                                  ? '#f9fafb'
+                                  : '#111827',
+                            fontWeight: selected ? 500 : 400,
+                            opacity: optionDisabled ? 0.5 : 1,
+                          };
+
+                          return (
+                            <div style={optionStyle}>
+                              {option.label}
+                            </div>
+                          );
+                        }}
+                      </Listbox.Option>
+                    ))}
+                  </Listbox.Options>
+                </Transition>,
+                document.body
+              )}
+            </>
+          );
+        }}
       </Listbox>
     </SelectContext.Provider>
   );
