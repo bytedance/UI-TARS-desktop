@@ -48,7 +48,7 @@ export const SidebarContainer: React.FC = () => {
             >
               <div className="flex h-full">
                 <div className="w-12 flex-shrink-0" /> {/* Space for ToolBar */}
-                <div className="pl-3 pt-3 pb-3">
+                <div className="pt-3 pb-3">
                   <ChatSession isCollapsed={false} />
                 </div>
               </div>
