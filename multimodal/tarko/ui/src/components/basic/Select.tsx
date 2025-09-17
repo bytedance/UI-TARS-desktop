@@ -1,6 +1,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { Listbox } from '@headlessui/react';
+import { HiChevronDown } from 'react-icons/hi2';
 import { useDarkMode } from '../../hooks/useDarkMode';
 
 export interface SelectProps<T = any> {
@@ -108,14 +109,14 @@ export const Select: React.FC<SelectProps> = ({
                     ? renderValue(value)
                     : selectedOption?.label || (displayEmpty ? 'Select...' : '')}
                 </span>
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
+                <HiChevronDown 
+                  size={16} 
+                  style={{ 
+                    transition: 'transform 0.2s ease-in-out',
+                    transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+                    opacity: disabled ? 0.4 : 0.7
+                  }} 
+                />
               </Listbox.Button>
 
               {open &&
