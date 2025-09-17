@@ -115,8 +115,14 @@ export class AdbOperator extends Operator {
         this.handleSwipe({ x: startX, y: startY }, { x: endX, y: endY }, 300);
         break;
       }
-      case 'scroll':
+      case 'scroll': {
+        const { direction, point } = actionInputs;
+        if (!direction) {
+          throw new Error(`Direction required when scroll`);
+        }
+        this.handleScroll(direction, point);
         break;
+      }
       case 'type': {
         const { content } = actionInputs;
         this.handleType(content);
@@ -128,7 +134,7 @@ export class AdbOperator extends Operator {
         break;
       }
       case 'open_app':
-        break;
+        throw new Error('The device does NOT support open app directly');
       case 'home':
       case 'press_home': {
         await this.handleHotkey('home');
@@ -323,6 +329,36 @@ export class AdbOperator extends Operator {
     duration: number, // ms
   ): Promise<void> {
     await this._adb!.shell(`input swipe ${from.x} ${from.y} ${to.x} ${to.y} ${duration}`);
+  }
+
+  private async handleScroll(direction: string, point?: Coordinates) {
+    const screenContext = await this.getScreenContext();
+    let startX = screenContext.screenWidth / 2;
+    let startY = screenContext.screenHeight / 2;
+    if (point) {
+      const { realX, realY } = await this.calculateRealCoords(point);
+      startX = realX;
+      startY = realY;
+    }
+    let endX = startX;
+    let endY = startY;
+    switch (direction.toLowerCase()) {
+      case 'up':
+        endY = endY - 200;
+        break;
+      case 'down':
+        endY = endY + 200;
+        break;
+      case 'left':
+        endX = endX - 200;
+        break;
+      case 'right':
+        endX = endX + 200;
+        break;
+      default:
+        throw new Error(`Unsupported scroll direction: ${direction}`);
+    }
+    this.handleSwipe({ x: startX, y: startY }, { x: endX, y: endY }, 300);
   }
 
   /**
