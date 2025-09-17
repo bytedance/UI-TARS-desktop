@@ -18,6 +18,7 @@ import {
   FiShare,
   FiTerminal,
   FiGlobe,
+  FiHome,
 } from 'react-icons/fi';
 import { MdDesktopWindows } from 'react-icons/md';
 import { GoSidebarCollapse, GoSidebarExpand } from 'react-icons/go';
@@ -26,6 +27,7 @@ import { useLayout } from '@/common/hooks/useLayout';
 import { useSession } from '@/common/hooks/useSession';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useLogoType } from '@/common/hooks/useLogoType';
+import { useNavigate } from 'react-router-dom';
 import { apiService } from '@/common/services/apiService';
 import { NavbarModelSelector } from './ModelSelector';
 import { getLogoUrl, getAgentTitle, getWorkspaceNavItems } from '@/config/web-ui-config';
@@ -52,6 +54,11 @@ export const Navbar: React.FC = () => {
   const [showShareModal, setShowShareModal] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const workspaceNavItems = getWorkspaceNavItems();
+  const navigate = useNavigate();
+  
+  const handleNavigateHome = useCallback(() => {
+    navigate('/');
+  }, [navigate]);
 
   useEffect(() => {
     const updateTitle = () => {
@@ -139,9 +146,13 @@ export const Navbar: React.FC = () => {
           ) : logoType === 'space' ? (
             <div className="mr-3" style={{ width: '54px' }} />
           ) : (
-            <a href="http://agent-tars.com" target="blank" className="mr-3">
-              <img src={logoUrl} alt={getAgentTitle()} className="w-6 h-6 rounded-lg" />
-            </a>
+            <button
+              onClick={handleNavigateHome}
+              className="w-8 h-8 rounded-lg flex items-center justify-center bg-white dark:bg-gray-800 text-black dark:text-white hover:shadow-md transition-all hover:scale-105 active:scale-95 mr-3"
+              title="Home"
+            >
+              <FiHome size={16} />
+            </button>
           )}
         </div>
 

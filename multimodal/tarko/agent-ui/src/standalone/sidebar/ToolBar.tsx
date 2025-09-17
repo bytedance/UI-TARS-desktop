@@ -81,15 +81,7 @@ export const ToolBar: React.FC = () => {
             </button>
           )}
 
-          {!isReplayMode && (
-            <button
-              onClick={handleNavigateHome}
-              className="w-8 h-8 rounded-lg flex items-center justify-center bg-white dark:bg-gray-800 text-black dark:text-white hover:shadow-md transition-all hover:scale-105 active:scale-95"
-              title="Home"
-            >
-              <FiHome size={16} />
-            </button>
-          )}
+
         </div>
 
         <div className="flex flex-col items-center gap-4 pb-4">
