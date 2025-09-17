@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 export interface TooltipProps {
   title: React.ReactNode;
@@ -17,51 +18,100 @@ export const Tooltip: React.FC<TooltipProps> = ({
   className 
 }) => {
   const [isVisible, setIsVisible] = useState(false);
+  const [position, setPosition] = useState({ top: 0, left: 0 });
+  const triggerRef = useRef<HTMLDivElement>(null);
 
   if (!title) {
     return children;
   }
 
+  const updatePosition = () => {
+    if (!triggerRef.current) return;
+    
+    const rect = triggerRef.current.getBoundingClientRect();
+    const offset = 8;
+    
+    let top = 0;
+    let left = 0;
+    
+    switch (placement) {
+      case 'top':
+        top = rect.top - offset;
+        left = rect.left + rect.width / 2;
+        break;
+      case 'bottom':
+        top = rect.bottom + offset;
+        left = rect.left + rect.width / 2;
+        break;
+      case 'left':
+        top = rect.top + rect.height / 2;
+        left = rect.left - offset;
+        break;
+      case 'right':
+        top = rect.top + rect.height / 2;
+        left = rect.right + offset;
+        break;
+    }
+    
+    setPosition({ top, left });
+  };
+
+  const handleMouseEnter = () => {
+    updatePosition();
+    setIsVisible(true);
+  };
+
   const getTooltipStyle = (): React.CSSProperties => {
     const baseStyle: React.CSSProperties = {
-      position: 'absolute',
-      backgroundColor: '#000000',
+      position: 'fixed',
+      top: position.top,
+      left: position.left,
+      backgroundColor: 'rgba(0, 0, 0, 0.9)',
       color: '#ffffff',
       fontSize: '12px',
       padding: '6px 8px',
-      borderRadius: '4px',
-      zIndex: 1000,
+      borderRadius: '6px',
+      zIndex: 50001,
       pointerEvents: 'none',
       whiteSpace: 'nowrap',
       opacity: isVisible ? 1 : 0,
-      transition: 'opacity 150ms',
+      transition: 'opacity 150ms ease-in-out',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+      backdropFilter: 'blur(8px)',
     };
 
     switch (placement) {
       case 'top':
-        return { ...baseStyle, bottom: '100%', left: '50%', transform: 'translateX(-50%)', marginBottom: '4px' };
+        return { ...baseStyle, transform: 'translate(-50%, -100%)' };
       case 'bottom':
-        return { ...baseStyle, top: '100%', left: '50%', transform: 'translateX(-50%)', marginTop: '4px' };
+        return { ...baseStyle, transform: 'translateX(-50%)' };
       case 'left':
-        return { ...baseStyle, right: '100%', top: '50%', transform: 'translateY(-50%)', marginRight: '4px' };
+        return { ...baseStyle, transform: 'translate(-100%, -50%)' };
       case 'right':
-        return { ...baseStyle, left: '100%', top: '50%', transform: 'translateY(-50%)', marginLeft: '4px' };
+        return { ...baseStyle, transform: 'translateY(-50%)' };
       default:
         return baseStyle;
     }
   };
 
-  return (
-    <div 
-      className={className}
-      style={{ position: 'relative', display: 'inline-block' }}
-      onMouseEnter={() => setIsVisible(true)}
-      onMouseLeave={() => setIsVisible(false)}
-    >
-      {children}
-      <div style={getTooltipStyle()}>
-        {title}
-      </div>
+  const tooltipElement = isVisible ? (
+    <div style={getTooltipStyle()}>
+      {title}
     </div>
+  ) : null;
+
+  return (
+    <>
+      <div 
+        ref={triggerRef}
+        className={className}
+        style={{ position: 'relative', display: 'inline-block' }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={() => setIsVisible(false)}
+      >
+        {children}
+      </div>
+      {tooltipElement && createPortal(tooltipElement, document.body)}
+    </>
   );
 };
