@@ -119,23 +119,6 @@ const WelcomePage: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <div className="fixed inset-0 bg-gradient-to-b from-transparent to-gray-100/50 dark:to-gray-800/50 pointer-events-none"></div>
 
-      <header className="relative z-10 pt-8 px-8">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center">
-            <motion.img
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              src={logoUrl}
-              className="w-8 h-8 rounded-xl flex items-center justify-center mx-auto text-white dark:text-gray-900 cursor-pointer mr-3"
-              alt="Logo"
-            />
-            <span className="text-xl font-display font-bold text-gray-900 dark:text-gray-100">
-              {pageTitle ?? sessionMetadata?.agentInfo?.name ?? 'Tarko'}
-            </span>
-          </div>
-        </div>
-      </header>
-
       <main className="flex-1 relative z-10 flex flex-col items-center justify-center px-4 py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -167,6 +150,7 @@ const WelcomePage: React.FC = () => {
             autoFocus={true}
             showHelpText={false}
             variant="home"
+            showModelSelector={true}
           />
 
           <motion.div

@@ -18,6 +18,8 @@ import { ImagePreviewInline } from './ImagePreviewInline';
 import { getAgentTitle, isContextualSelectorEnabled } from '@/config/web-ui-config';
 import { composeMessageContent, isMessageEmpty, parseContextualReferences } from './utils';
 import { handleMultimodalPaste } from '@/common/utils/clipboard';
+import { NavbarModelSelector } from '@/standalone/navbar/ModelSelector';
+import { useNavbarStyles } from '@tarko/ui';
 
 interface ChatInputProps {
   onSubmit: (content: string | ChatCompletionContentPart[]) => Promise<void>;
@@ -34,6 +36,7 @@ interface ChatInputProps {
   autoFocus?: boolean;
   showHelpText?: boolean;
   variant?: 'default' | 'home';
+  showModelSelector?: boolean;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
@@ -51,10 +54,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   autoFocus = true,
   showHelpText = true,
   variant = 'default',
+  showModelSelector = false,
 }) => {
   const [uploadedImages, setUploadedImages] = useState<ChatCompletionContentPart[]>([]);
   const [isAborting, setIsAborting] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  
+  const { activeSessionId, sessionMetadata } = useSession();
+  const { isDarkMode } = useNavbarStyles();
 
   const [contextualState, setContextualState] = useAtom(contextualSelectorAtom);
   const addContextualItem = useSetAtom(addContextualItemAction);
@@ -344,6 +351,18 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   return (
     <div className={`relative ${className}`}>
+      {/* Model Selector for home page */}
+      {showModelSelector && variant === 'home' && (
+        <div className="flex justify-center mb-4">
+          <NavbarModelSelector
+            activeSessionId={activeSessionId}
+            sessionMetadata={sessionMetadata}
+            isDarkMode={isDarkMode}
+            className="scale-110"
+          />
+        </div>
+      )}
+      
       {/* Only show contextual items outside, images are now inside input */}
       {showAttachments && contextualState.contextualItems.length > 0 && (
         <MessageAttachments
