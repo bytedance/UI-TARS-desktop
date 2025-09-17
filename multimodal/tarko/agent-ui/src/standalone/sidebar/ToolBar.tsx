@@ -4,7 +4,7 @@ import { FiPlus, FiHome, FiSettings } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/common/hooks/useSession';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
-import { isLayoutSwitchButtonEnabled } from '@/config/web-ui-config';
+import { isLayoutSwitchButtonEnabled, getLogoUrl, getAgentTitle } from '@/config/web-ui-config';
 import { AgentConfigViewer } from './AgentConfigViewer';
 import { LayoutSwitchButton } from './LayoutSwitchButton';
 
@@ -38,6 +38,17 @@ export const ToolBar: React.FC = () => {
   return (
     <>
       <div className="w-12 h-full flex flex-col backdrop-blur-sm">
+        {/* Logo at the top */}
+        <div className="flex justify-center pt-3 pb-2">
+          <button onClick={handleNavigateHome} title="Back to Home">
+            <img 
+              src={getLogoUrl()} 
+              alt={getAgentTitle()} 
+              className="w-6 h-6 rounded-lg hover:scale-105 transition-transform" 
+            />
+          </button>
+        </div>
+        
         <div className="flex-1 flex flex-col items-center gap-4">
           {!isReplayMode && (
             <button
