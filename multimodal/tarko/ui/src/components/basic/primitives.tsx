@@ -106,71 +106,38 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
   className,
   sx,
 }) => {
-  const strokeWidth = thickness;
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-
-  // Create unique IDs for animations to avoid conflicts
-  const spinId = React.useMemo(() => `spin-${Math.random().toString(36).substr(2, 9)}`, []);
-  const progressId = React.useMemo(() => `progress-${Math.random().toString(36).substr(2, 9)}`, []);
-
   return (
-    <>
-      <style>
-        {`
-          @keyframes ${spinId} {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+    <div
+      className={className}
+      style={{
+        display: 'inline-block',
+        width: size,
+        height: size,
+        animation: 'spin 1s linear infinite',
+        ...sx,
+      }}
+    >
+      <svg width={size} height={size} viewBox="0 0 24 24">
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          strokeWidth={thickness}
+          fill="none"
+          strokeDasharray="31.416"
+          strokeDashoffset="7.854"
+          strokeLinecap="round"
+        />
+      </svg>
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          @keyframes spin {
+            to { transform: rotate(360deg); }
           }
-          @keyframes ${progressId} {
-            0% {
-              stroke-dasharray: 1px, 200px;
-              stroke-dashoffset: 0;
-            }
-            50% {
-              stroke-dasharray: 100px, 200px;
-              stroke-dashoffset: -15px;
-            }
-            100% {
-              stroke-dasharray: 100px, 200px;
-              stroke-dashoffset: -125px;
-            }
-          }
-        `}
-      </style>
-      <div
-        className={className}
-        style={{
-          display: 'inline-block',
-          width: size,
-          height: size,
-          ...sx,
-        }}
-      >
-        <svg
-          width={size}
-          height={size}
-          style={{
-            animation: `${spinId} 1.4s linear infinite`,
-          }}
-        >
-          <circle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={strokeWidth}
-            strokeDasharray={circumference}
-            strokeDashoffset={circumference * 0.25}
-            strokeLinecap="round"
-            style={{
-              animation: `${progressId} 1.4s ease-in-out infinite`,
-            }}
-          />
-        </svg>
-      </div>
-    </>
+        `
+      }} />
+    </div>
   );
 };
 

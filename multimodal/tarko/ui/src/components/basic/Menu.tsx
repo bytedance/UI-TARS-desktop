@@ -20,9 +20,21 @@ export interface MenuDividerProps {
   className?: string;
 }
 
-// 共享的菜单项样式
-const getMenuItemStyles = (isDarkMode: boolean) => ({
-  base: {
+// 简化的样式常量
+const getMenuStyles = (isDarkMode: boolean) => ({
+  container: {
+    position: 'fixed' as const,
+    top: '50px',
+    right: '16px',
+    minWidth: '200px',
+    backgroundColor: isDarkMode ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+    border: isDarkMode ? '1px solid rgba(71, 85, 105, 0.3)' : '1px solid rgba(226, 232, 240, 0.8)',
+    borderRadius: '12px',
+    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2)',
+    zIndex: 1000,
+    padding: '8px',
+  },
+  item: {
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
@@ -36,51 +48,21 @@ const getMenuItemStyles = (isDarkMode: boolean) => ({
     fontSize: '14px',
     textAlign: 'left' as const,
   },
-  hover: {
-    backgroundColor: isDarkMode
-      ? 'rgba(71, 85, 105, 0.3)'
-      : 'rgba(241, 245, 249, 0.8)',
+  itemHover: {
+    backgroundColor: isDarkMode ? 'rgba(71, 85, 105, 0.3)' : 'rgba(241, 245, 249, 0.8)',
   },
-  disabled: {
-    opacity: 0.5,
-    cursor: 'not-allowed',
-  },
-});
-
-// 共享的菜单容器样式
-const getMenuContainerStyles = (isDarkMode: boolean) => ({
-  position: 'fixed' as const,
-  top: '50px',
-  right: '16px',
-  minWidth: '200px',
-  backgroundColor: isDarkMode
-    ? 'rgba(30, 41, 59, 0.95)'
-    : 'rgba(255, 255, 255, 0.95)',
-  backdropFilter: 'blur(12px)',
-  border: isDarkMode
-    ? '1px solid rgba(71, 85, 105, 0.3)'
-    : '1px solid rgba(226, 232, 240, 0.8)',
-  borderRadius: '12px',
-  boxShadow: isDarkMode
-    ? '0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2)'
-    : '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-  zIndex: 1000,
-  padding: '8px',
 });
 
 export const Menu: React.FC<MenuProps> = ({ open, onClose, children, className }) => {
   const isDarkMode = useDarkMode();
+  const styles = getMenuStyles(isDarkMode);
 
-  // Close menu when clicking outside
   React.useEffect(() => {
     if (open) {
       const handleClickOutside = (event: MouseEvent) => {
         const target = event.target as HTMLElement;
-        if (!target.closest('[data-menu]')) {
-          onClose();
-        }
+        if (!target.closest('[data-menu]')) onClose();
       };
-
       document.addEventListener('mousedown', handleClickOutside);
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
@@ -89,11 +71,7 @@ export const Menu: React.FC<MenuProps> = ({ open, onClose, children, className }
   if (!open) return null;
 
   return (
-    <div
-      data-menu
-      className={className}
-      style={getMenuContainerStyles(isDarkMode)}
-    >
+    <div data-menu className={className} style={styles.container}>
       {children}
     </div>
   );
@@ -101,34 +79,23 @@ export const Menu: React.FC<MenuProps> = ({ open, onClose, children, className }
 
 export const MenuItem: React.FC<MenuItemProps> = ({ onClick, children, icon, disabled = false }) => {
   const isDarkMode = useDarkMode();
-  const styles = getMenuItemStyles(isDarkMode);
+  const styles = getMenuStyles(isDarkMode);
   const [isHovered, setIsHovered] = React.useState(false);
-
-  const handleClick = () => {
-    if (!disabled && onClick) {
-      onClick();
-    }
-  };
-
-  const combinedStyle = {
-    ...styles.base,
-    ...(isHovered && !disabled ? styles.hover : {}),
-    ...(disabled ? styles.disabled : {}),
-  };
 
   return (
     <button
-      onClick={handleClick}
-      style={combinedStyle}
+      onClick={() => !disabled && onClick?.()}
+      style={{
+        ...styles.item,
+        ...(isHovered && !disabled ? styles.itemHover : {}),
+        opacity: disabled ? 0.5 : 1,
+        cursor: disabled ? 'not-allowed' : 'pointer',
+      }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       disabled={disabled}
     >
-      {icon && (
-        <span style={{ opacity: 0.7, flexShrink: 0 }}>
-          {icon}
-        </span>
-      )}
+      {icon && <span style={{ opacity: 0.7, flexShrink: 0 }}>{icon}</span>}
       {children}
     </button>
   );
@@ -136,7 +103,6 @@ export const MenuItem: React.FC<MenuItemProps> = ({ onClick, children, icon, dis
 
 export const MenuDivider: React.FC<MenuDividerProps> = ({ className }) => {
   const isDarkMode = useDarkMode();
-
   return (
     <div
       className={className}
@@ -148,6 +114,3 @@ export const MenuDivider: React.FC<MenuDividerProps> = ({ className }) => {
     />
   );
 };
-
-// 导出样式工具函数供其他组件使用
-export { getMenuItemStyles, getMenuContainerStyles };
