@@ -9,6 +9,7 @@ import { AgentOptions } from '@tarko/agent';
 import { GUIAgentToolCallEngine } from './GUIAgentToolCallEngine';
 import { OperatorManager } from './OperatorManager';
 
+export { OperatorManager } from './OperatorManager';
 export { GuiAgentPlugin } from './GuiAgentPlugin';
 export { GuiToolCallEngineProvider } from './GuiToolCallEngineProvider';
 
@@ -31,16 +32,14 @@ export interface GUIAgentConfig<TOperator> {
   loopIntervalInMs?: number;
 }
 
-export const guiPlugin = new GuiAgentPlugin({
-  operatorManager: OperatorManager.createHybird(),
-});
 
 export default class GUIAgent extends ComposableAgent {
   static label: 'Browser GUI Agent';
   constructor(options: AgentOptions) {
+
     super({
       ...options,
-      plugins: [guiPlugin],
+      plugins: [new GuiAgentPlugin({ operatorManager: OperatorManager.createHybird(options.sandboxUrl) })],
       toolCallEngine: GUIAgentToolCallEngine,
     });
   }

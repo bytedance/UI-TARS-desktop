@@ -12,13 +12,16 @@ export class OperatorManager {
   private remoteBrowser: RemoteBrowser | null = null;
   private operator: Operator | null = null;
   private browser: LocalBrowser | null = null;
+  private sandboxUrl: string;
   private initialized = false;
 
-  constructor(target: 'local' | 'remote' | 'hybird') {
+  constructor(target: 'local' | 'remote' | 'hybird', sandboxUrl?: string) {
     this.target = target;
+    this.sandboxUrl = sandboxUrl ?? getAioUrl();
+
     if (this.target === 'remote') {
       this.aioClient = new AioClient({
-        baseUrl: getAioUrl(),
+        baseUrl: this.sandboxUrl
       });
     } else if (this.target === 'local') {
       const browser = new LocalBrowser();
@@ -56,7 +59,7 @@ export class OperatorManager {
       });
     } else {
       this.operator = await AIOHybridOperator.create({
-        baseURL: getAioUrl(),
+        baseURL: this.sandboxUrl,
         timeout: 10000,
       });
     }
@@ -82,11 +85,11 @@ export class OperatorManager {
     return new OperatorManager('local');
   }
 
-  static createRemote(): OperatorManager {
-    return new OperatorManager('remote');
+  static createRemote(sandboxUrl?: string): OperatorManager {
+    return new OperatorManager('remote', sandboxUrl);
   }
 
-  static createHybird(): OperatorManager {
-    return new OperatorManager('hybird');
+  static createHybird(sandboxUrl?: string): OperatorManager {
+    return new OperatorManager('hybird', sandboxUrl);
   }
 }
