@@ -50,12 +50,10 @@ export const App: React.FC = () => {
       <Route
         path="/"
         element={
-          <div className="flex flex-col h-screen bg-[#F2F3F5] dark:bg-gray-900 text-gray-900 dark:text-gray-100 overflow-hidden">
-            <div className="flex flex-1 overflow-hidden">
-              <Sidebar />
-              <div className="flex-1 flex flex-col overflow-hidden">
-                <HomePage />
-              </div>
+          <div className="flex h-screen bg-[#F2F3F5] dark:bg-gray-900 text-gray-900 dark:text-gray-100 overflow-hidden">
+            <Sidebar />
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <HomePage />
             </div>
           </div>
         }
@@ -63,11 +61,11 @@ export const App: React.FC = () => {
       <Route
         path="/:sessionId"
         element={
-          <div className="flex flex-col h-screen bg-[#F2F3F5] dark:bg-gray-900 text-gray-900 dark:text-gray-100 overflow-hidden">
-            <Navbar />
-            <div className="flex flex-1 overflow-hidden">
-              <Sidebar />
-              <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex h-screen bg-[#F2F3F5] dark:bg-gray-900 text-gray-900 dark:text-gray-100 overflow-hidden">
+            <Sidebar />
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <Navbar />
+              <div className="flex-1 overflow-hidden">
                 <SessionRouter>
                   <Layout />
                 </SessionRouter>

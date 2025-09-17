@@ -1,9 +1,11 @@
 import React, { useCallback, useState } from 'react';
 
 import { FiPlus, FiHome, FiSettings } from 'react-icons/fi';
+import { GoSidebarCollapse, GoSidebarExpand } from 'react-icons/go';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/common/hooks/useSession';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
+import { useLayout } from '@/common/hooks/useLayout';
 import { isLayoutSwitchButtonEnabled, getLogoUrl, getAgentTitle } from '@/config/web-ui-config';
 import { AgentConfigViewer } from './AgentConfigViewer';
 import { LayoutSwitchButton } from './LayoutSwitchButton';
@@ -12,6 +14,7 @@ export const ToolBar: React.FC = () => {
   const navigate = useNavigate();
   const { isReplayMode } = useReplayMode();
   const { createSession, connectionStatus } = useSession();
+  const { isSidebarCollapsed, toggleSidebar } = useLayout();
   const [isConfigViewerOpen, setIsConfigViewerOpen] = useState(false);
   const [isCreatingSession, setIsCreatingSession] = useState(false);
 
@@ -96,6 +99,17 @@ export const ToolBar: React.FC = () => {
         </div>
 
         <div className="flex flex-col items-center gap-4 pb-4">
+          {/* Sidebar toggle button */}
+          {!isReplayMode && (
+            <button
+              onClick={toggleSidebar}
+              className="w-6 h-6 rounded-lg flex items-center justify-center bg-white dark:bg-gray-800 text-black dark:text-white hover:shadow-md transition-all hover:scale-105 active:scale-95"
+              title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {isSidebarCollapsed ? <GoSidebarExpand size={12} /> : <GoSidebarCollapse size={12} />}
+            </button>
+          )}
+
           {!isReplayMode && enableLayoutSwitchButton && <LayoutSwitchButton />}
 
           {/* Agent config button */}

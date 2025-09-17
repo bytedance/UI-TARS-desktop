@@ -21,9 +21,9 @@ import {
   FiHome,
 } from 'react-icons/fi';
 import { MdDesktopWindows } from 'react-icons/md';
-import { GoSidebarCollapse, GoSidebarExpand } from 'react-icons/go';
 
-import { useLayout } from '@/common/hooks/useLayout';
+
+
 import { useSession } from '@/common/hooks/useSession';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useLogoType } from '@/common/hooks/useLogoType';
@@ -46,7 +46,7 @@ import {
 import './Navbar.css';
 
 export const Navbar: React.FC = () => {
-  const { isSidebarCollapsed, toggleSidebar } = useLayout();
+
   const { activeSessionId, isProcessing, sessionMetadata } = useSession();
   const { isReplayMode } = useReplayMode();
   const { isDarkMode } = useNavbarStyles();
@@ -148,17 +148,7 @@ export const Navbar: React.FC = () => {
           ) : null}
         </div>
 
-        {!isReplayMode && (
-          <div className="ml-0">
-            <button
-              onClick={toggleSidebar}
-              className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1.5 hover:bg-gray-100/40 dark:hover:bg-gray-800/40 rounded-full transition-colors hover:scale-110 active:scale-95"
-              title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            >
-              {isSidebarCollapsed ? <GoSidebarCollapse size={20} /> : <GoSidebarExpand size={20} />}
-            </button>
-          </div>
-        )}
+
 
         <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 max-[968px]:relative max-[968px]:left-auto max-[968px]:top-auto max-[968px]:transform-none max-[968px]:flex-1 max-[968px]:mx-3">
           <DynamicNavbarCenter
