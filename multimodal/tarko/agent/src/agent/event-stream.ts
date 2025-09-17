@@ -211,25 +211,7 @@ export class AgentEventStreamProcessor implements AgentEventStream.Processor {
     };
   }
 
-  /**
-   * Restore events to the stream without triggering subscribers
-   * This is useful for loading historical events from storage
-   */
-  restoreEvents(events: AgentEventStream.Event[]): void {
-    this.events = [...events];
-    this.logger.debug(`Restored ${events.length} events from storage`);
 
-    // Auto-trim if needed
-    if (
-      this.options.autoTrim &&
-      this.options.maxEvents &&
-      this.events.length > this.options.maxEvents
-    ) {
-      const overflow = this.events.length - this.options.maxEvents;
-      this.events = this.events.slice(overflow);
-      this.logger.debug(`Auto-trimmed ${overflow} restored events`);
-    }
-  }
 
   /**
    * Clear all events from the stream

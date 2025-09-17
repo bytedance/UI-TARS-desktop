@@ -675,11 +675,7 @@ export namespace AgentEventStream {
      */
     getLatestToolResults(): { toolCallId: string; toolName: string; content: any }[];
 
-    /**
-     * Restore events to the stream without triggering subscribers
-     * This is useful for loading historical events from storage
-     */
-    restoreEvents(events: AgentEventStream.Event[]): void;
+
 
     /**
      * Clear all events from the stream
