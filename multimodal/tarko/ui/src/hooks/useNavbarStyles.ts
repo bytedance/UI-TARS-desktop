@@ -1,10 +1,8 @@
 import { useDarkMode } from './useDarkMode';
 
-// 简化的导航栏样式
 export const useNavbarStyles = () => {
   const isDarkMode = useDarkMode();
 
-  // 基础样式常量
   const colors = {
     agentBg: isDarkMode ? 'rgba(99, 102, 241, 0.15)' : 'rgba(99, 102, 241, 0.08)',
     agentBorder: isDarkMode ? 'rgba(99, 102, 241, 0.3)' : 'rgba(99, 102, 241, 0.2)',
@@ -20,8 +18,8 @@ export const useNavbarStyles = () => {
       display: 'flex',
       alignItems: 'center',
       gap: '6px',
-      padding: '4px 12px',
-      height: '32px',
+      padding: '3px 10px',
+      height: '28px',
       background: colors.agentBg,
       border: `1px solid ${colors.agentBorder}`,
       borderRadius: '8px',
@@ -38,16 +36,18 @@ export const useNavbarStyles = () => {
       gap: 0.75,
       px: 1.25,
       py: 0.375,
-      height: '32px',
+      height: '28px',
       background: colors.modelBg,
       border: `1px solid ${colors.modelBorder}`,
       borderRadius: '8px',
       opacity: isDisabled ? 0.6 : 1,
       cursor: isDisabled ? 'not-allowed' : 'default',
     },
-    hover: isDisabled ? {} : {
-      background: isDarkMode ? 'rgba(55, 65, 81, 0.8)' : 'rgba(241, 245, 249, 0.9)',
-    },
+    hover: isDisabled
+      ? {}
+      : {
+          background: isDarkMode ? 'rgba(55, 65, 81, 0.8)' : 'rgba(241, 245, 249, 0.9)',
+        },
   });
 
   const getTextStyles = () => ({
@@ -80,8 +80,9 @@ export const useNavbarStyles = () => {
   return { isDarkMode, getAgentBadgeStyles, getModelSelectorStyles, getTextStyles };
 };
 
-// 简化的 Hover 处理器
 export const useHoverHandlers = () => ({
-  applyHoverStyles: (element: HTMLElement, styles: Record<string, any>) => Object.assign(element.style, styles),
-  resetStyles: (element: HTMLElement, styles: Record<string, any>) => Object.assign(element.style, styles),
+  applyHoverStyles: (element: HTMLElement, styles: Record<string, any>) =>
+    Object.assign(element.style, styles),
+  resetStyles: (element: HTMLElement, styles: Record<string, any>) =>
+    Object.assign(element.style, styles),
 });

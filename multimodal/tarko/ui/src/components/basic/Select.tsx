@@ -83,8 +83,8 @@ export const Select: React.FC<SelectProps> = ({
                 ref={buttonRef}
                 style={{
                   width: '100%',
-                  minHeight: '32px',
-                  padding: '4px 12px',
+                  minHeight: '28px',
+                  padding: '3px 10px',
                   backgroundColor: isDarkMode
                     ? 'rgba(55, 65, 81, 0.3)'
                     : 'rgba(248, 250, 252, 0.8)',
