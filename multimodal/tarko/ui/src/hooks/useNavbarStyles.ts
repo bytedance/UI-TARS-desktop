@@ -33,9 +33,8 @@ export const useNavbarStyles = () => {
     base: {
       display: 'inline-flex',
       alignItems: 'center',
-      gap: 0.75,
-      px: 1.25,
-      py: 0.375,
+      gap: '6px',
+      padding: '3px 10px',
       height: '28px',
       background: colors.modelBg,
       border: `1px solid ${colors.modelBorder}`,
