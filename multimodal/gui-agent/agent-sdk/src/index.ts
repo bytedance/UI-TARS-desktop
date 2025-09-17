@@ -8,9 +8,18 @@ import os from 'node:os';
 import { env } from 'process';
 import * as p from '@clack/prompts';
 import { Command } from 'commander';
-import { SYSTEM_PROMPT_LATEST, SYSTEM_PROMPT } from './constants';
+import { SYSTEM_PROMPT_LATEST, SYSTEM_PROMPT } from './prompts';
 import { SeedGUIAgent } from './SeedGUIAgent';
 import { AgentModel } from '@tarko/agent-interface';
+import { Operator } from '@gui-agent/shared/base';
+
+import { LocalBrowser } from '@agent-infra/browser';
+import { BrowserOperator } from '@gui-agent/operator-browser';
+import { NutJSOperator } from '@gui-agent/operator-nutjs';
+import { AdbOperator } from '@gui-agent/operator-adb';
+import { ConsoleLogger, LogLevel } from '@agent-infra/logger';
+
+const defaultLogger = new ConsoleLogger('[GUI Agent CLI]', LogLevel.DEBUG);
 
 interface TestOptions {
   target?: string;
@@ -75,6 +84,39 @@ async function getConfigFromFile(): Promise<ConfigFileData> {
   return {};
 }
 
+async function initilizeOperator(operatorType: 'browser' | 'computer' | 'android') {
+  let operator: Operator;
+  if (operatorType === 'browser') {
+    /*
+    const browser = new LocalBrowser();
+    const browserOperator = new BrowserOperator({
+      browser,
+      browserType: 'chrome',
+      logger: defaultLogger,
+      highlightClickableElements: false,
+      showActionInfo: false,
+    });
+
+    await browser.launch();
+    const openingPage = await browser.createPage();
+    await openingPage.goto('https://www.google.com/', {
+      waitUntil: 'networkidle2',
+    });
+    operator = browserOperator;
+    */
+    throw new Error('The Browser Operator refactor NOT ready.');
+  } else if (operatorType === 'computer') {
+    const computerOperator = new NutJSOperator();
+    operator = computerOperator;
+  } else if (operatorType === 'android') {
+    const adbOperator = new AdbOperator();
+    operator = adbOperator;
+  } else {
+    throw new Error(`Unknown operator type: ${operatorType}`);
+  }
+  return operator;
+}
+
 async function runWithOperator(
   operatorType: 'browser' | 'computer' | 'android',
   instruction: string,
@@ -82,15 +124,16 @@ async function runWithOperator(
 ) {
   console.log(`🚀 运行 ${operatorType} operator...`);
 
+  const operator = await initilizeOperator(operatorType);
   const seedGUIAgent = new SeedGUIAgent({
-    operatorType,
+    operator,
     model: {
       provider: 'openai-non-streaming',
       baseURL: modelConfig.baseURL,
       id: modelConfig.model!, // 注意这里是model而不是id
       apiKey: modelConfig.apiKey, // secretlint-disable-line
     },
-    uiTarsVersion: 'latest',
+    // uiTarsVersion: 'latest',
     systemPrompt: SYSTEM_PROMPT,
   });
 
@@ -173,10 +216,11 @@ async function startCli(options: CliOptions) {
 async function testBrowserOperator() {
   console.log('🌐 Testing Browser Operator...');
 
+  const operator = await initilizeOperator('browser');
   const seedGUIAgentForBrowser = new SeedGUIAgent({
-    operatorType: 'browser',
+    operator,
     model: getModelConfig(),
-    uiTarsVersion: 'latest',
+    // uiTarsVersion: 'latest',
     systemPrompt: SYSTEM_PROMPT,
   });
 
@@ -193,15 +237,16 @@ async function testBrowserOperator() {
 async function testComputerOperator() {
   console.log('💻 Testing Computer Operator...');
 
+  const operator = await initilizeOperator('computer');
   const seedGUIAgentForComputer = new SeedGUIAgent({
-    operatorType: 'computer',
+    operator,
     model: {
       provider: getModelConfig().provider,
       baseURL: getModelConfig().baseURL,
       id: getModelConfig().id,
       apiKey: getModelConfig().apiKey, // secretlint-disable-line
     },
-    uiTarsVersion: 'latest',
+    // uiTarsVersion: 'latest',
     systemPrompt: SYSTEM_PROMPT,
   });
 
@@ -218,10 +263,11 @@ async function testComputerOperator() {
 async function testAndroidOperator() {
   console.log('📱 Testing Android Operator...');
 
+  const operator = await initilizeOperator('android');
   const seedGUIAgentForAndroid = new SeedGUIAgent({
-    operatorType: 'android',
+    operator,
     model: getModelConfig(),
-    uiTarsVersion: 'latest',
+    // uiTarsVersion: 'latest',
     // TODO: 这里的systemPrompt需要根据android的prompt来写
     systemPrompt: SYSTEM_PROMPT,
   });

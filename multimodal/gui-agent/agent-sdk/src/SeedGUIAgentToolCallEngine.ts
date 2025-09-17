@@ -150,7 +150,7 @@ export class SeedGUIAgentToolCallEngine extends ToolCallEngine {
           id: toolCallId,
           type: 'function',
           function: {
-            name: 'browser_vision_control',
+            name: adaptorToolName,
             arguments: JSON.stringify({
               action: actionStrList[idx - 1],
               step: action.thought,
