@@ -7,8 +7,6 @@ import { getWebUIConfig, getLogoUrl, getAgentTitle } from '@/config/web-ui-confi
 import { ChatInput } from '@/standalone/chat/MessageInput';
 import { ChatCompletionContentPart } from '@tarko/agent-interface';
 import { Tooltip } from '@tarko/ui';
-import { Sidebar } from '@/standalone/sidebar';
-import { Navbar } from '@/standalone/navbar';
 
 const WelcomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -118,16 +116,27 @@ const WelcomePage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-[#F2F3F5] dark:bg-gray-900 text-gray-900 dark:text-gray-100 overflow-hidden">
-      <Navbar />
-      
-      <div className="flex flex-1 overflow-hidden">
-        <Sidebar />
-        
-        <div className="flex-1 flex flex-col overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-          <div className="fixed inset-0 bg-gradient-to-b from-transparent to-gray-100/50 dark:to-gray-800/50 pointer-events-none"></div>
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+      <div className="fixed inset-0 bg-gradient-to-b from-transparent to-gray-100/50 dark:to-gray-800/50 pointer-events-none"></div>
 
-          <main className="flex-1 relative z-10 flex flex-col items-center justify-center px-4 py-12">
+      <header className="relative z-10 pt-8 px-8">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div className="flex items-center">
+            <motion.img
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              src={logoUrl}
+              className="w-8 h-8 rounded-xl flex items-center justify-center mx-auto text-white dark:text-gray-900 cursor-pointer mr-3"
+              alt="Logo"
+            />
+            <span className="text-xl font-display font-bold text-gray-900 dark:text-gray-100">
+              {pageTitle ?? sessionMetadata?.agentInfo?.name ?? 'Tarko'}
+            </span>
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-1 relative z-10 flex flex-col items-center justify-center px-4 py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -279,10 +288,8 @@ const WelcomePage: React.FC = () => {
               )}
             </div>
           )}
-          </motion.div>
-          </main>
-        </div>
-      </div>
+        </motion.div>
+      </main>
     </div>
   );
 };

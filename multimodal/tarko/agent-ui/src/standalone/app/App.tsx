@@ -5,6 +5,8 @@ import { useSession } from '@/common/hooks/useSession';
 import HomePage from '@/standalone/home/HomePage';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { SessionRouter } from './Router/SessionRouter';
+import { Sidebar } from '@/standalone/sidebar';
+import { Navbar } from '@/standalone/navbar';
 
 export const App: React.FC = () => {
   const { initConnectionMonitoring, loadSessions, connectionStatus, activeSessionId } =
@@ -44,16 +46,26 @@ export const App: React.FC = () => {
   }
 
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route
-        path="/:sessionId"
-        element={
-          <SessionRouter>
-            <Layout />
-          </SessionRouter>
-        }
-      />
-    </Routes>
+    <div className="flex flex-col h-screen bg-[#F2F3F5] dark:bg-gray-900 text-gray-900 dark:text-gray-100 overflow-hidden">
+      <Navbar />
+      
+      <div className="flex flex-1 overflow-hidden">
+        <Sidebar />
+        
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route
+              path="/:sessionId"
+              element={
+                <SessionRouter>
+                  <Layout />
+                </SessionRouter>
+              }
+            />
+          </Routes>
+        </div>
+      </div>
+    </div>
   );
 };

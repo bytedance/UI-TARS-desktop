@@ -1,7 +1,5 @@
 import React, { useEffect } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
-import { Sidebar } from '@/standalone/sidebar';
-import { Navbar } from '@/standalone/navbar';
 import { ChatPanel } from '@/standalone/chat/ChatPanel';
 import { WorkspacePanel } from '@/standalone/workspace/WorkspacePanel';
 import { useSession } from '@/common/hooks/useSession';
@@ -27,17 +25,11 @@ export const Layout: React.FC<LayoutProps> = ({ isReplayMode: propIsReplayMode }
   }, [initializeLayoutMode]);
 
   return (
-    <div className="flex flex-col h-screen bg-[#F2F3F5] dark:bg-gray-900 text-gray-900 dark:text-gray-100 overflow-hidden">
-      <Navbar />
-
-      <div className="flex flex-1 overflow-hidden">
-        {!isReplayMode && <Sidebar />}
-
-        <div
-          className={classNames('flex-1 flex flex-col overflow-hidden pr-2 pb-2 lg:pr-3 lg:pb-3', {
-            'ml-3': isReplayMode,
-          })}
-        >
+    <div
+      className={classNames('flex-1 flex flex-col overflow-hidden pr-2 pb-2 lg:pr-3 lg:pb-3', {
+        'ml-3': isReplayMode,
+      })}
+    >
           <div className="hidden md:flex gap-3 flex-1 min-h-0">
             <div
               className={classNames(
@@ -80,8 +72,6 @@ export const Layout: React.FC<LayoutProps> = ({ isReplayMode: propIsReplayMode }
                 <WorkspacePanel />
               </Shell>
             </div>
-          </div>
-        </div>
       </div>
     </div>
   );
