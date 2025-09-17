@@ -157,6 +157,10 @@ class MockEventStream extends EventEmitter implements AgentEventStream.Processor
     return this.events.filter(event => types.includes(event.type));
   }
 
+  restoreEvents(events: AgentEventStream.Event[]): void {
+    this.events = [...events];
+  }
+
   dispose(): void {
     this.events = [];
     this.removeAllListeners();

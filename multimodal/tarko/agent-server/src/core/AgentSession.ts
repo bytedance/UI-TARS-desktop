@@ -70,7 +70,6 @@ export class AgentSession {
   private agioProvider?: AgioEvent.AgioProvider;
   private agioProviderConstructor?: AgioProviderConstructor;
   private sessionInfo?: SessionInfo;
-  private sessionStartTime: number;
 
   /**
    * Create event handler for storage and AGIO processing
@@ -78,18 +77,9 @@ export class AgentSession {
   private createEventHandler() {
     return async (event: AgentEventStream.Event) => {
       // Save to storage if available and event should be stored
-      // Skip saving if this is a restored event (indicated by missing timestamp or being too old)
       if (this.server.storageProvider && shouldStoreEvent(event)) {
         try {
-          // Check if this might be a restored event by comparing timestamp
-          // Restored events should have been created before the current session started
-          const eventTime = event.timestamp ? new Date(event.timestamp).getTime() : Date.now();
-          const sessionStartTime = this.sessionStartTime || Date.now();
-          
-          // Only save events that are new (created after session start)
-          if (eventTime >= sessionStartTime) {
-            await this.server.storageProvider.saveEvent(this.id, event);
-          }
+          await this.server.storageProvider.saveEvent(this.id, event);
         } catch (error) {
           console.error(`Failed to save event to storage: ${error}`);
         }
@@ -227,13 +217,9 @@ export class AgentSession {
       // Get the agent's event stream
       const eventStream = agent.getEventStream();
       
-      // Restore events to the event stream
-      // We need to replay the events in order to rebuild the conversation context
-      for (const event of storedEvents) {
-        // Send the event to the event stream without triggering storage save again
-        // This rebuilds the internal state (like message history) without duplicate storage
-        eventStream.sendEvent(event);
-      }
+      // Restore events directly without triggering subscribers or side effects
+      // This is much more efficient and cleaner than sending events one by one
+      eventStream.restoreEvents(storedEvents);
 
       console.info(`Restored ${storedEvents.length} events from storage for session ${this.id}`);
     } catch (error) {
@@ -279,7 +265,6 @@ export class AgentSession {
     this.eventBridge = new EventStreamBridge();
     this.sessionInfo = sessionInfo;
     this.agioProviderConstructor = agioProviderImpl;
-    this.sessionStartTime = Date.now();
 
     // Agent will be created and initialized in initialize() method
     this.agent = null as any; // Temporary placeholder
@@ -516,9 +501,6 @@ export class AgentSession {
   async updateModelConfig(sessionInfo: SessionInfo): Promise<void> {
     // Store the session metadata for use in future queries
     this.sessionInfo = sessionInfo;
-
-    // Update session start time to ensure restored events aren't saved again
-    this.sessionStartTime = Date.now();
 
     // Recreate agent with new model configuration
     try {
