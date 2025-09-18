@@ -1,461 +1,496 @@
 ---
-title: SDK
-description: Using Tarko as an SDK in your applications
+title: SDK Reference
+description: Complete SDK reference for Tarko agent development
 ---
 
-# SDK
+# SDK Reference
 
-Tarko can be used as an SDK to integrate Agent capabilities directly into your applications. This approach gives you full control over the Agent lifecycle and allows for deep customization.
+Comprehensive guide to using the **`@tarko/agent`** SDK for building production-ready agents.
 
 ## Installation
 
-Install the core Tarko packages:
-
 ```bash
-npm install @tarko/agent @tarko/tools
+npm install @tarko/agent
+# or
+pnpm add @tarko/agent
 ```
 
-For specific tools:
-
-```bash
-npm install @tarko/tools-browser @tarko/tools-filesystem
-```
-
-## Basic Usage
-
-### Creating an Agent
+## Core Imports
 
 ```typescript
+// Main Agent class
 import { Agent } from '@tarko/agent';
-import { FileSystemTool, BrowserTool } from '@tarko/tools';
 
-const agent = new Agent({
-  name: 'MyAgent',
-  description: 'A helpful assistant',
-  
-  model: {
-    provider: 'openai',
-    apiKey: process.env.OPENAI_API_KEY,
-    model: 'gpt-4'
-  },
-  
-  systemPrompt: `You are a helpful assistant that can:
-  - Read and write files
-  - Browse the web
-  - Execute commands
-  
-  Always be helpful and accurate.`,
-  
-  tools: [
-    new FileSystemTool(),
-    new BrowserTool()
-  ]
-});
+// Tool definition
+import { Tool, z } from '@tarko/agent';
+
+// Type definitions
+import type {
+  AgentOptions,
+  AgentRunOptions,
+  AgentEventStream,
+  AgentModel
+} from '@tarko/agent';
+
+// Utilities
+import { getLogger, LogLevel } from '@tarko/agent';
 ```
 
-### Chat Interface
+## Agent Class
+
+### Constructor
 
 ```typescript
-// Simple chat
-const response = await agent.chat('Hello, can you help me?');
-console.log(response);
-
-// Chat with context
-const conversation = agent.createConversation();
-const response1 = await conversation.chat('What\'s the weather like?');
-const response2 = await conversation.chat('What about tomorrow?');
+const agent = new Agent(options: AgentOptions)
 ```
 
-### Streaming Responses
+#### AgentOptions Interface
 
 ```typescript
-const stream = agent.chatStream('Write a long story about AI');
-
-for await (const chunk of stream) {
-  if (chunk.type === 'content') {
-    process.stdout.write(chunk.data);
-  } else if (chunk.type === 'tool_call') {
-    console.log('Tool called:', chunk.data.name);
-  }
-}
-```
-
-## Advanced Usage
-
-### Custom Tools
-
-Create domain-specific tools:
-
-```typescript
-import { Tool } from '@tarko/agent';
-
-class DatabaseTool implements Tool {
-  name = 'query_database';
-  description = 'Query the application database';
+interface AgentOptions {
+  // Core Configuration
+  instructions?: string;           // System prompt
+  name?: string;                  // Agent identifier
+  id?: string;                    // Unique agent ID
   
-  parameters = {
-    type: 'object',
-    properties: {
-      query: {
-        type: 'string',
-        description: 'SQL query to execute'
-      }
-    },
-    required: ['query']
+  // Model Configuration
+  model?: {
+    provider: string;             // 'openai' | 'anthropic' | 'volcengine'
+    id: string;                   // Model ID (e.g., 'gpt-4o')
+    apiKey?: string;             // API key (or use env vars)
   };
-
-  async execute(params: { query: string }) {
-    // Your database logic here
-    const results = await this.db.query(params.query);
-    return { results };
-  }
-
-  constructor(private db: DatabaseConnection) {}
+  
+  // Tools
+  tools?: Tool[];                 // Available tools
+  toolCallEngine?: string;        // 'native' | 'prompt-engineering' | 'structured-outputs'
+  
+  // Execution Control
+  maxIterations?: number;         // Max reasoning loops (default: 1000)
+  maxTokens?: number;            // Token limit per request
+  temperature?: number;          // LLM temperature (default: 0.7)
+  top_p?: number;               // Top-p sampling
+  
+  // Context Management
+  context?: {
+    maxImagesCount?: number;      // Max images in context (default: 5)
+    retainHistory?: boolean;      // Keep conversation history
+    summarizeAfter?: number;      // Summarize after N messages
+  };
+  
+  // Advanced Features
+  thinking?: {
+    type: 'enabled' | 'disabled'; // Enable reasoning mode
+  };
+  enableStreamingToolCallEvents?: boolean;
+  
+  // Logging
+  logLevel?: LogLevel;           // DEBUG | INFO | WARN | ERROR
 }
+```
 
-const agent = new Agent({
-  // ... other config
-  tools: [
-    new DatabaseTool(myDatabase),
-    new FileSystemTool()
+### Core Methods
+
+#### `run()` - Execute Agent
+
+**Basic Usage:**
+```typescript
+// Simple text input
+const response = await agent.run('What is the weather like?');
+console.log(response.content);
+```
+
+**Advanced Usage:**
+```typescript
+// With options
+const response = await agent.run({
+  input: 'Analyze this data',
+  sessionId: 'session-123',
+  model: 'gpt-4o-mini',          // Override default model
+  provider: 'openai',           // Override provider
+});
+```
+
+**Streaming:**
+```typescript
+// Streaming responses
+for await (const event of await agent.run({
+  input: 'Write a long story',
+  stream: true
+})) {
+  if (event.type === 'assistant_message_chunk') {
+    process.stdout.write(event.content);
+  }
+}
+```
+
+**Multimodal Input:**
+```typescript
+// Image + text input
+const response = await agent.run({
+  input: [
+    { type: 'text', text: 'What do you see in this image?' },
+    { 
+      type: 'image_url', 
+      image_url: { url: 'data:image/jpeg;base64,...' } 
+    }
   ]
 });
+```
+
+#### `registerTool()` - Add Tools
+
+```typescript
+// Define a tool using Zod schema
+const weatherTool = new Tool({
+  id: 'getWeather',
+  description: 'Get weather information for a location',
+  parameters: z.object({
+    location: z.string().describe('City name'),
+    units: z.enum(['celsius', 'fahrenheit']).optional()
+  }),
+  function: async ({ location, units = 'celsius' }) => {
+    // Your implementation
+    const weather = await fetchWeather(location, units);
+    return weather;
+  }
+});
+
+// Register the tool
+agent.registerTool(weatherTool);
+```
+
+#### `callLLM()` - Direct LLM Access
+
+```typescript
+// Direct LLM call (non-streaming)
+const response = await agent.callLLM({
+  messages: [
+    { role: 'system', content: 'You are a helpful assistant' },
+    { role: 'user', content: 'Hello!' }
+  ],
+  temperature: 0.5
+});
+
+// Streaming LLM call
+for await (const chunk of await agent.callLLM({
+  messages: [{ role: 'user', content: 'Count to 10' }],
+  stream: true
+})) {
+  process.stdout.write(chunk.choices[0]?.delta?.content || '');
+}
+```
+
+#### State Management
+
+```typescript
+// Get current status
+const status = agent.status(); // 'idle' | 'running' | 'error'
+
+// Abort running task
+const aborted = agent.abort();
+
+// Get current iteration
+const iteration = agent.getCurrentLoopIteration();
+
+// Get current model
+const model = agent.getCurrentModel();
+```
+
+#### Event Stream Access
+
+```typescript
+// Access event stream
+const eventStream = agent.getEventStream();
+
+// Listen to events
+eventStream.on('assistant_message', (event) => {
+  console.log('Agent response:', event.content);
+});
+
+eventStream.on('tool_call', (event) => {
+  console.log('Tool called:', event.name, event.args);
+});
+```
+
+## Tool Definition
+
+### Tool Class
+
+```typescript
+const tool = new Tool({
+  id: string;                     // Unique tool identifier
+  description: string;            // What the tool does
+  parameters: ZodSchema;          // Zod schema for parameters
+  function: AsyncFunction;        // Implementation function
+});
+```
+
+### Examples
+
+**Simple Tool:**
+```typescript
+const calculatorTool = new Tool({
+  id: 'calculate',
+  description: 'Perform mathematical calculations',
+  parameters: z.object({
+    expression: z.string().describe('Mathematical expression to evaluate')
+  }),
+  function: async ({ expression }) => {
+    try {
+      // Safe evaluation (use a proper math library in production)
+      const result = eval(expression);
+      return { result, expression };
+    } catch (error) {
+      return { error: 'Invalid expression' };
+    }
+  }
+});
+```
+
+**File System Tool:**
+```typescript
+const readFileTool = new Tool({
+  id: 'readFile',
+  description: 'Read contents of a file',
+  parameters: z.object({
+    path: z.string().describe('File path to read'),
+    encoding: z.string().default('utf8').describe('File encoding')
+  }),
+  function: async ({ path, encoding }) => {
+    const fs = await import('fs/promises');
+    try {
+      const content = await fs.readFile(path, encoding);
+      return { content, path };
+    } catch (error) {
+      return { error: error.message, path };
+    }
+  }
+});
+```
+
+**API Tool:**
+```typescript
+const httpTool = new Tool({
+  id: 'httpRequest',
+  description: 'Make HTTP requests',
+  parameters: z.object({
+    url: z.string().url(),
+    method: z.enum(['GET', 'POST', 'PUT', 'DELETE']).default('GET'),
+    headers: z.record(z.string()).optional(),
+    body: z.string().optional()
+  }),
+  function: async ({ url, method, headers, body }) => {
+    const response = await fetch(url, {
+      method,
+      headers,
+      body: body ? JSON.stringify(JSON.parse(body)) : undefined
+    });
+    
+    return {
+      status: response.status,
+      headers: Object.fromEntries(response.headers),
+      body: await response.text()
+    };
+  }
+});
+```
+
+## Event Stream
+
+### Event Types
+
+```typescript
+// Core events
+type AgentEvents = 
+  | 'agent_run_start'           // Execution begins
+  | 'user_message'              // User input received
+  | 'assistant_message'         // Agent response
+  | 'assistant_message_chunk'   // Streaming response chunk
+  | 'tool_call'                 // Tool execution starts
+  | 'tool_result'               // Tool execution completes
+  | 'agent_run_end'            // Execution complete
+  | 'error';                   // Error occurred
 ```
 
 ### Event Handling
 
 ```typescript
-// Listen to Agent events
-agent.on('tool_call', (event) => {
-  console.log(`Tool called: ${event.data.name}`);
-  // Log to analytics, update UI, etc.
+const eventStream = agent.getEventStream();
+
+// Handle specific events
+eventStream.on('tool_call', (event) => {
+  console.log(`🔧 Calling ${event.name} with:`, event.args);
 });
 
-agent.on('error', (event) => {
-  console.error('Agent error:', event.data.error);
-  // Handle errors, notify users, etc.
+eventStream.on('tool_result', (event) => {
+  console.log(`✅ Tool result:`, event.result);
 });
 
-agent.on('context_updated', (event) => {
-  console.log('Context length:', event.data.newLength);
-  // Monitor context usage
+eventStream.on('error', (event) => {
+  console.error(`❌ Error:`, event.error);
+});
+
+// Handle all events
+eventStream.on('*', (event) => {
+  console.log(`📝 Event: ${event.type}`, event);
 });
 ```
 
-### Context Management
+## Advanced Configuration
+
+### Custom LLM Client
+
+```typescript
+import { OpenAI } from '@tarko/model-provider';
+
+// Custom client with proxy
+const customClient = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: 'https://your-proxy.com/v1',
+  defaultHeaders: {
+    'Custom-Header': 'value'
+  }
+});
+
+agent.setCustomLLMClient(customClient);
+```
+
+### Tool Call Engines
 
 ```typescript
 const agent = new Agent({
-  // ... other config
+  toolCallEngine: 'native',           // Use model's native tool calling
+  // or
+  toolCallEngine: 'prompt-engineering', // Use prompt-based tool calling
+  // or
+  toolCallEngine: 'structured-outputs'  // Use structured output parsing
+});
+```
+
+### Context Engineering
+
+```typescript
+const agent = new Agent({
   context: {
-    maxLength: 32000,
-    compressionRatio: 0.8,
-    retentionStrategy: 'hybrid'
-  }
-});
-
-// Manual context operations
-const summary = await agent.summarizeContext();
-const compressed = await agent.compressContext(0.5);
-await agent.clearContext();
-```
-
-### Agent Hooks
-
-```typescript
-const agent = new Agent({
-  // ... other config
-  hooks: {
-    beforeToolCall: async (toolCall) => {
-      // Validate tool call
-      if (toolCall.name === 'dangerous_operation') {
-        throw new Error('Operation not allowed');
-      }
-    },
-    
-    afterToolCall: async (result) => {
-      // Log result
-      await logToolResult(result);
-    },
-    
-    onError: async (error) => {
-      // Custom error handling
-      await notifyAdmins(error);
-    }
-  }
+    maxImagesCount: 10,           // Max images to keep in context
+    retainHistory: true,          // Keep conversation history
+    summarizeAfter: 50,          // Auto-summarize after 50 messages
+  },
+  maxIterations: 20,             // Allow more reasoning loops
+  maxTokens: 4000               // Limit response length
 });
 ```
 
-## Integration Patterns
-
-### Express.js Integration
-
-```typescript
-import express from 'express';
-import { Agent } from '@tarko/agent';
-
-const app = express();
-const agent = new Agent(config);
-
-app.use(express.json());
-
-// Chat endpoint
-app.post('/chat', async (req, res) => {
-  try {
-    const { message, conversationId } = req.body;
-    
-    const conversation = conversationId 
-      ? agent.getConversation(conversationId)
-      : agent.createConversation();
-    
-    const response = await conversation.chat(message);
-    
-    res.json({
-      response,
-      conversationId: conversation.id
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Streaming endpoint
-app.get('/chat/stream', async (req, res) => {
-  const { message } = req.query;
-  
-  res.writeHead(200, {
-    'Content-Type': 'text/event-stream',
-    'Cache-Control': 'no-cache',
-    'Connection': 'keep-alive'
-  });
-  
-  const stream = agent.chatStream(message as string);
-  
-  for await (const chunk of stream) {
-    res.write(`data: ${JSON.stringify(chunk)}\n\n`);
-  }
-  
-  res.end();
-});
-
-app.listen(3000);
-```
-
-### React Integration
-
-```typescript
-import { useState, useEffect } from 'react';
-import { Agent } from '@tarko/agent';
-
-function useAgent(config: AgentConfig) {
-  const [agent, setAgent] = useState<Agent | null>(null);
-  const [loading, setLoading] = useState(false);
-  
-  useEffect(() => {
-    const agentInstance = new Agent(config);
-    setAgent(agentInstance);
-    
-    return () => {
-      agentInstance.dispose();
-    };
-  }, []);
-  
-  const chat = async (message: string) => {
-    if (!agent) return;
-    
-    setLoading(true);
-    try {
-      const response = await agent.chat(message);
-      return response;
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  return { agent, chat, loading };
-}
-
-function ChatComponent() {
-  const { chat, loading } = useAgent({
-    model: { provider: 'openai', apiKey: 'your-key', model: 'gpt-4' },
-    tools: []
-  });
-  
-  const [message, setMessage] = useState('');
-  const [response, setResponse] = useState('');
-  
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const result = await chat(message);
-    setResponse(result || '');
-    setMessage('');
-  };
-  
-  return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <input
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          disabled={loading}
-        />
-        <button type="submit" disabled={loading}>
-          {loading ? 'Thinking...' : 'Send'}
-        </button>
-      </form>
-      {response && <div>{response}</div>}
-    </div>
-  );
-}
-```
-
-### Background Processing
-
-```typescript
-import { Worker } from 'worker_threads';
-import { Agent } from '@tarko/agent';
-
-// worker.js
-const agent = new Agent({
-  model: { provider: 'openai', apiKey: process.env.OPENAI_API_KEY },
-  tools: [new FileSystemTool()]
-});
-
-process.on('message', async (task) => {
-  try {
-    const result = await agent.chat(task.message);
-    process.send({ id: task.id, result });
-  } catch (error) {
-    process.send({ id: task.id, error: error.message });
-  }
-});
-
-// main.js
-class AgentWorkerPool {
-  private workers: Worker[] = [];
-  private taskQueue: any[] = [];
-  
-  constructor(private poolSize: number = 4) {
-    for (let i = 0; i < poolSize; i++) {
-      this.createWorker();
-    }
-  }
-  
-  private createWorker() {
-    const worker = new Worker('./worker.js');
-    worker.on('message', this.handleWorkerMessage.bind(this));
-    this.workers.push(worker);
-  }
-  
-  async processTask(message: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const task = {
-        id: Math.random().toString(36),
-        message,
-        resolve,
-        reject
-      };
-      
-      this.taskQueue.push(task);
-      this.processQueue();
-    });
-  }
-  
-  private processQueue() {
-    // Worker assignment logic
-  }
-  
-  private handleWorkerMessage(data: any) {
-    // Handle worker responses
-  }
-}
-```
-
-## Best Practices
-
-### Error Handling
+## Error Handling
 
 ```typescript
 try {
-  const response = await agent.chat(message);
-  return response;
+  const response = await agent.run('Complex task');
+  console.log(response.content);
 } catch (error) {
-  if (error instanceof ToolExecutionError) {
-    // Handle tool-specific errors
-    console.error('Tool error:', error.toolName, error.message);
-  } else if (error instanceof ModelProviderError) {
-    // Handle model provider errors
-    console.error('Model error:', error.provider, error.message);
+  if (error.name === 'AbortError') {
+    console.log('Task was aborted');
+  } else if (error.message.includes('rate limit')) {
+    console.log('Rate limited, retrying...');
+    // Implement retry logic
   } else {
-    // Handle general errors
-    console.error('Unexpected error:', error.message);
-  }
-  
-  throw error;
-}
-```
-
-### Resource Management
-
-```typescript
-class AgentManager {
-  private agents = new Map<string, Agent>();
-  
-  getAgent(userId: string): Agent {
-    if (!this.agents.has(userId)) {
-      const agent = new Agent(this.getConfigForUser(userId));
-      this.agents.set(userId, agent);
-      
-      // Cleanup after inactivity
-      setTimeout(() => {
-        this.agents.delete(userId);
-        agent.dispose();
-      }, 30 * 60 * 1000); // 30 minutes
-    }
-    
-    return this.agents.get(userId)!;
-  }
-  
-  dispose() {
-    for (const agent of this.agents.values()) {
-      agent.dispose();
-    }
-    this.agents.clear();
+    console.error('Unexpected error:', error);
   }
 }
 ```
 
-### Performance Optimization
+## Resource Management
 
 ```typescript
-// Use connection pooling for database tools
-const agent = new Agent({
-  tools: [
-    new DatabaseTool({
-      pool: {
-        min: 2,
-        max: 10,
-        acquireTimeoutMillis: 30000
-      }
-    })
-  ]
+// Always dispose of agents when done
+try {
+  const response = await agent.run('Task');
+  // Process response
+} finally {
+  await agent.dispose(); // Clean up resources
+}
+```
+
+## Real Examples
+
+Based on the actual examples in `multimodal/tarko/agent/examples/`:
+
+### Basic Tool Calls
+
+```typescript
+// From examples/tool-calls/basic.ts
+import { Agent, Tool, z, LogLevel } from '@tarko/agent';
+
+const locationTool = new Tool({
+  id: 'getCurrentLocation',
+  description: "Get user's current location",
+  parameters: z.object({}),
+  function: async () => {
+    return { location: 'Boston' };
+  },
 });
 
-// Implement caching for expensive operations
-const cache = new Map();
+const weatherTool = new Tool({
+  id: 'getWeather',
+  description: 'Get weather information for a specified location',
+  parameters: z.object({
+    location: z.string().describe('Location name, such as city name'),
+  }),
+  function: async (input) => {
+    const { location } = input;
+    return {
+      location,
+      temperature: '70°F (21°C)',
+      condition: 'Sunny',
+      precipitation: '10%',
+      humidity: '45%',
+      wind: '5 mph',
+    };
+  },
+});
 
-class CachedSearchTool extends SearchTool {
-  async execute(params: { query: string }) {
-    const cacheKey = `search:${params.query}`;
-    
-    if (cache.has(cacheKey)) {
-      return cache.get(cacheKey);
-    }
-    
-    const result = await super.execute(params);
-    cache.set(cacheKey, result);
-    
-    return result;
-  }
+const agent = new Agent({
+  model: {
+    provider: 'volcengine',
+    id: 'ep-20250510145437-5sxhs',
+    apiKey: process.env.ARK_API_KEY,
+  },
+  tools: [locationTool, weatherTool],
+  logLevel: LogLevel.DEBUG,
+});
+
+const response = await agent.run("How's the weather today?");
+console.log(response);
+```
+
+### Streaming with Tool Calls
+
+```typescript
+// From examples/streaming/tool-calls.ts
+const agent = new Agent({
+  model: {
+    provider: 'volcengine',
+    id: 'ep-20250510145437-5sxhs',
+    apiKey: process.env.ARK_API_KEY,
+  },
+  tools: [locationTool, weatherTool],
+  toolCallEngine: 'native',
+  enableStreamingToolCallEvents: true,
+});
+
+const response = await agent.run({
+  input: "How's the weather today?",
+  stream: true,
+});
+
+for await (const chunk of response) {
+  console.log(chunk);
 }
 ```
+
+## Next Steps
+
+- [Architecture →](/guide/get-started/architecture)
+- [Configuration →](/guide/basic/configuration)
+- [Tools →](/guide/basic/tools)
+- [Agent Hooks →](/guide/advanced/agent-hooks)
