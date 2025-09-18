@@ -147,88 +147,6 @@ export class ActionParserHelper {
   }
 
   /**
-   * Example:
-   * {
-   *   "function=scroll": {
-   *     "parameter=direction": "up",
-   *     "parameter=point": {
-   *       "point": "500 500",
-   *     },
-   *   },
-   *   "function=type": {
-   *     "parameter=content": "hello",
-   *     "parameter=point": {
-   *       "point": "200 126",
-   *     },
-   *   },
-   *   "function=wait": "",
-   * }
-   */
-  public standardizeGUIActions(object: unknown): BaseAction[] {
-    const result: BaseAction[] = [];
-    if (!object || typeof object !== 'object') return result;
-
-    for (const [key, value] of Object.entries(object as Record<string, unknown>)) {
-      // Check if key is in format like "function=scroll", "function=type", etc.
-      // Extract the function name and process accordingly
-      const functionMatch = key.match(/^function=(.+)$/);
-      if (!functionMatch) continue;
-
-      const functionName = functionMatch[1]; // Extract function name (e.g., "scroll", "type")
-      if (!isSupportedActionType(functionName)) {
-        this.logger.warn(`Unsupported action type: ${functionName}`);
-        continue;
-      }
-
-      const argumentsRecord = this.standardizeActionInputsRecord(functionName, value);
-      const actionInputs = this.standardizeActionInputs(functionName, argumentsRecord);
-
-      result.push({
-        type: functionName,
-        inputs: actionInputs,
-      });
-    }
-    return result;
-  }
-
-  public standardizeActionInputsRecord(
-    actionType: string,
-    object: unknown,
-  ): Record<string, string> {
-    if (!object || typeof object !== 'object') return {};
-
-    const argumentsObj: Record<string, string> = {};
-    const builder = new XMLBuilder();
-    for (const [key, value] of Object.entries(object as Record<string, string>)) {
-      // Check if key is in format like "parameter=content", "parameter=point", etc.
-      // Extract the parameter name and process accordingly
-      const parameterMatch = key.match(/^parameter=(.+)$/);
-      if (!parameterMatch) continue;
-
-      const paramName = parameterMatch[1];
-      if (typeof value === 'string') {
-        argumentsObj[paramName] = value;
-      } else if (value && typeof value === 'object') {
-        let xmlStr = builder.build(value);
-        if (!xmlStr || typeof xmlStr !== 'string') {
-          throw new SyntaxError(
-            `The required parameters of ${paramName} of ${actionType} action is empty`,
-          );
-        }
-        this.logger.debug(`[standardizeActionInputsRecord] built xml string: ${xmlStr}`);
-        // Support format: click(point='<point>510 150</point>')
-        if (xmlStr.includes('<point>')) {
-          xmlStr = xmlStr.replace(/<point>|<\/point>/g, '').replace(/\s+/g, ',');
-          xmlStr = `(${xmlStr})`;
-          this.logger.debug(`[standardizeActionInputsRecord] formatted point: ${xmlStr}`);
-        }
-        argumentsObj[paramName] = xmlStr;
-      }
-    }
-    return argumentsObj;
-  }
-
-  /**
    * Standardizes action inputs based on action type by normalizing parameter names
    * and converting coordinate strings to structured Coordinates objects.
    *
@@ -529,5 +447,123 @@ export class ActionParserHelper {
     }
 
     return action_string;
+  }
+
+  /**
+   * @param objectFromXML
+   * The object parsed from XML, where keys are in the format "function=scroll", "function=type", etc.
+   * and values are objects with keys like "parameter=direction", "parameter=content", etc.
+   *
+   * Example:
+   * {
+   *   "function=scroll": {
+   *     "parameter=direction": "up",
+   *     "parameter=point": {
+   *       "point": "500 500",
+   *     },
+   *   },
+   *   "function=type": {
+   *     "parameter=content": "hello",
+   *     "parameter=point": {
+   *       "point": "200 126",
+   *     },
+   *   },
+   *   "function=wait": "",
+   * }
+   * @return The standardized GUIActions array
+   */
+  public standardizeGUIActionsFromXMLObject(object: unknown): BaseAction[] {
+    const result: BaseAction[] = [];
+    if (!object || typeof object !== 'object') return result;
+
+    for (const [key, value] of Object.entries(object as Record<string, unknown>)) {
+      // Check if key is in format like "function=scroll", "function=type", etc.
+      // Extract the function name and process accordingly
+      const functionMatch = key.match(/^function=(.+)$/);
+      if (!functionMatch) continue;
+
+      const functionName = functionMatch[1]; // Extract function name (e.g., "scroll", "type")
+      if (!isSupportedActionType(functionName)) {
+        this.logger.warn(`Unsupported action type: ${functionName}`);
+        continue;
+      }
+
+      const argumentsRecord = this.standardizeActionInputsFromXMLObject(functionName, value);
+      const actionInputs = this.standardizeActionInputs(functionName, argumentsRecord);
+
+      result.push({
+        type: functionName,
+        inputs: actionInputs,
+      });
+    }
+    return result;
+  }
+
+  /**
+   * Standardizes action input parameters for a specific action type.
+   *
+   * This method processes raw input parameters by:
+   * 1. Filtering keys with 'parameter=' prefix
+   * 2. Extracting parameter names from keys
+   * 3. Organizing them into a standardized format for GUIAction
+   *
+   * Examples of input formats:
+   * Example 1:
+   * {
+   *   "parameter=direction": "up",
+   *   "parameter=point": {
+   *     "point": "500 500",
+   *   },
+   * }
+   *
+   * Example 2:
+   * {
+   *   "parameter=content": "hello",
+   *   "parameter=point": {
+   *     "point": "200 126",
+   *   },
+   * }
+   *
+   * Example 3: "" (empty string)
+   *
+   * @param actionType - The type of the action
+   * @param object - The raw parameters of the action
+   * @returns The standardized parameters object for GUIAction
+   */
+  public standardizeActionInputsFromXMLObject(
+    actionType: string,
+    object: unknown,
+  ): Record<string, string> {
+    if (!object || typeof object !== 'object') return {};
+
+    const argumentsObj: Record<string, string> = {};
+    const builder = new XMLBuilder();
+    for (const [key, value] of Object.entries(object as Record<string, string>)) {
+      // Check if key is in format like "parameter=content", "parameter=point", etc.
+      // Extract the parameter name and process accordingly
+      const parameterMatch = key.match(/^parameter=(.+)$/);
+      if (!parameterMatch) continue;
+
+      const paramName = parameterMatch[1];
+      if (typeof value === 'string') {
+        argumentsObj[paramName] = value;
+      } else if (value && typeof value === 'object') {
+        const xmlStr = builder.build(value);
+        if (!xmlStr || typeof xmlStr !== 'string') {
+          throw new SyntaxError(
+            `The required parameters of ${paramName} of ${actionType} action is empty`,
+          );
+        }
+        this.logger.debug(`[standardizeActionInputsRecord] built xml string: ${xmlStr}`);
+        // Support format: click(point='<point>510 150</point>')
+        // if (xmlStr.includes('<point>')) {
+        //   xmlStr = xmlStr.replace(/<point>|<\/point>/g, '').replace(/\s+/g, ',');
+        //   xmlStr = `(${xmlStr})`;
+        //   this.logger.debug(`[standardizeActionInputsRecord] formatted point: ${xmlStr}`);
+        // }
+        argumentsObj[paramName] = xmlStr;
+      }
+    }
+    return argumentsObj;
   }
 }

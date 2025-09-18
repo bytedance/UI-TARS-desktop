@@ -71,7 +71,7 @@ export class XMLFormatParser implements FormatParser {
       }
       if (key === 'seed:tool_call') {
         canParse = true;
-        actions.push(...this.helper.standardizeGUIActions(value));
+        actions.push(...this.helper.standardizeGUIActionsFromXMLObject(value));
         continue;
       }
     }
