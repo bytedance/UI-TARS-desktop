@@ -250,28 +250,14 @@ class ApiService {
         const { done, value } = await reader.read();
         if (done) break;
 
-        // Add the new chunk to the buffer
-        buffer += decoder.decode(value, { stream: true });
+        // Add the new chunk to the buffer and normalize line endings
+        buffer += decoder.decode(value, { stream: true }).replace(/\r\n?/g, '\n');
 
         // Process all complete events in the buffer
-        // Support SSE line separators: \r\n, \n, \r
         let eventEndIndex;
-        while (true) {
-          // Find the earliest occurrence of any double separator
-          const crlfIndex = buffer.indexOf('\r\n\r\n');
-          const lfIndex = buffer.indexOf('\n\n');
-          const crIndex = buffer.indexOf('\r\r');
-          
-          eventEndIndex = Math.min(
-            ...[crlfIndex, lfIndex, crIndex].filter(i => i !== -1)
-          );
-          
-          if (eventEndIndex === Infinity) break; // No complete event found
-          
+        while ((eventEndIndex = buffer.indexOf('\n\n')) !== -1) {
           const eventString = buffer.slice(0, eventEndIndex);
-          // Determine separator length based on which separator was found
-          const separatorLength = eventEndIndex === crlfIndex ? 4 : 2;
-          buffer = buffer.slice(eventEndIndex + separatorLength);
+          buffer = buffer.slice(eventEndIndex + 2);
 
           if (eventString.startsWith('data: ')) {
             try {
