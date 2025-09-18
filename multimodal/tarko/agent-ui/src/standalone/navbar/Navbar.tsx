@@ -28,7 +28,6 @@ import { useLogoType } from '@/common/hooks/useLogoType';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '@/common/services/apiService';
 import { NavbarModelSelector } from './ModelSelector';
-import { AgentOptionsSelector } from './AgentOptionsSelector';
 import { getLogoUrl, getAgentTitle, getWorkspaceNavItems } from '@/config/web-ui-config';
 import type { WorkspaceNavItemIcon } from '@tarko/interface';
 import { getModelDisplayName } from '@/common/utils/modelUtils';
@@ -431,23 +430,12 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
         </div>
       )}
 
-      <div className="hidden md:block min-w-0">
-        <NavbarModelSelector
-          className="min-w-0"
-          activeSessionId={activeSessionId}
-          sessionMetadata={sessionMetadata}
-          isDarkMode={isDarkMode}
-        />
-      </div>
-
-      <div className="hidden md:block min-w-0">
-        <AgentOptionsSelector
-          className="min-w-0"
-          activeSessionId={activeSessionId}
-          sessionMetadata={sessionMetadata}
-          isDarkMode={isDarkMode}
-        />
-      </div>
+      <NavbarModelSelector
+        className="min-w-0"
+        activeSessionId={activeSessionId}
+        sessionMetadata={sessionMetadata}
+        isDarkMode={isDarkMode}
+      />
     </div>
   );
 };
