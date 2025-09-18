@@ -4,3 +4,4 @@
  */
 
 export * from './agent-tars-initializer';
+export * from './agent-tars-aio-initializer';

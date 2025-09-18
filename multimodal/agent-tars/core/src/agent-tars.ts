@@ -29,7 +29,7 @@ import { applyDefaultOptions } from './shared/config-utils';
 import { MessageHistoryDumper } from './shared/message-history-dumper';
 import { WorkspacePathResolver } from './shared/workspace-path-resolver';
 import { AgentWebUIImplementation } from '@agent-tars/interface';
-import { AgentTARSInitializer } from './initializers/agent-tars-initializer';
+import { AgentTARSInitializer, AgentTARSAIOInitializer } from './initializers';
 import { ToolLogger, ResourceCleaner } from './utils';
 
 /**
@@ -76,7 +76,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   private readonly workspacePathResolver: WorkspacePathResolver;
   private readonly toolLogger: ToolLogger;
   private readonly resourceCleaner: ResourceCleaner;
-  private readonly initializer: AgentTARSInitializer;
+  private readonly initializer: AgentTARSInitializer | AgentTARSAIOInitializer;
 
   // Component instances (initialized during setup)
   private browserToolsManager?: BrowserToolsManager;
@@ -138,12 +138,21 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
     this.workspacePathResolver = new WorkspacePathResolver({ workspace });
     this.toolLogger = new ToolLogger(this.logger);
     this.resourceCleaner = new ResourceCleaner(this.logger);
-    this.initializer = new AgentTARSInitializer(
-      this.tarsOptions,
-      this.workspace,
-      this.browserManager,
-      this.logger,
-    );
+    
+    // Choose initializer based on AIO sandbox option
+    this.initializer = processedOptions.aioSandbox
+      ? new AgentTARSAIOInitializer(
+          this.tarsOptions,
+          this.workspace,
+          this.browserManager,
+          this.logger,
+        )
+      : new AgentTARSInitializer(
+          this.tarsOptions,
+          this.workspace,
+          this.browserManager,
+          this.logger,
+        );
 
     // Initialize optional features
     this.initializeOptionalFeatures();
@@ -192,14 +201,17 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
     toolCall: { toolCallId: string; name: string },
     args: any,
   ): Promise<any> {
-    // Handle browser tool calls with lazy initialization
-    if (toolCall.name.startsWith('browser')) {
-      await this.ensureBrowserReady();
-    }
+    // Skip local browser operations in AIO sandbox mode
+    if (!this.tarsOptions.aioSandbox) {
+      // Handle browser tool calls with lazy initialization
+      if (toolCall.name.startsWith('browser')) {
+        await this.ensureBrowserReady();
+      }
 
-    // Resolve workspace paths for filesystem operations
-    if (this.workspacePathResolver.hasPathParameters(toolCall.name)) {
-      return this.workspacePathResolver.resolveToolPaths(toolCall.name, args);
+      // Resolve workspace paths for filesystem operations
+      if (this.workspacePathResolver.hasPathParameters(toolCall.name)) {
+        return this.workspacePathResolver.resolveToolPaths(toolCall.name, args);
+      }
     }
 
     return args;
@@ -209,7 +221,9 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
    * Handle agent loop start (GUI Agent screenshot if needed)
    */
   override async onEachAgentLoopStart(sessionId: string): Promise<void> {
+    // Skip local browser operations in AIO sandbox mode
     if (
+      !this.tarsOptions.aioSandbox &&
       this.tarsOptions.browser?.control !== 'dom' &&
       this.browserGUIAgent &&
       this.browserManager.isLaunchingComplete()
@@ -233,8 +247,9 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   ): Promise<any> {
     const processedResult = await super.onAfterToolCall(id, toolCall, result);
 
-    // Update browser state after navigation
+    // Skip local browser state updates in AIO sandbox mode
     if (
+      !this.tarsOptions.aioSandbox &&
       toolCall.name === 'browser_navigate' &&
       this.browserManager.isLaunchingComplete() &&
       (await this.browserManager.isBrowserAlive())
@@ -259,7 +274,8 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
    * Handle session disposal
    */
   override async onDispose(): Promise<void> {
-    if (this.browserManager?.isLaunchingComplete()) {
+    // Skip local browser cleanup in AIO sandbox mode
+    if (!this.tarsOptions.aioSandbox && this.browserManager?.isLaunchingComplete()) {
       this.logger.info('🧹 Closing browser pages before session disposal');
       await this.browserManager.closeAllPages();
     }
@@ -348,6 +364,17 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
     options: AgentTARSOptions,
     workspace: string,
   ): MCPServerRegistry {
+    // For AIO sandbox mode, exclude local MCP servers and connect to AIO sandbox
+    if (options.aioSandbox) {
+      return {
+        aio: {
+          type: 'streamable-http',
+          url: `${options.aioSandbox}/mcp`,
+        },
+        ...(options.mcpServers || {}),
+      };
+    }
+
     if (options.mcpImpl === 'stdio') {
       return {
         browser: {
