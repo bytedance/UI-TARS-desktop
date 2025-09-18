@@ -5,7 +5,6 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { ConsoleLogger } from '@agent-infra/logger';
 import { AgentOptions } from '@tarko/agent-interface';
 import { Factors, BaseAction, Coordinates } from './actions';
 
@@ -60,9 +59,11 @@ export type SerializeSupportedActions = (
   >,
 ) => string;
 
-export interface ExecuteParams extends ParsedGUIResponse {
-  context?: Record<string, unknown>;
-}
+export type ExecuteParams = {
+  /** Required actions to execute */
+  actions: BaseAction[];
+} & Partial<Omit<ParsedGUIResponse, 'actions'>> &
+  Record<string, any>;
 
 export type ExecuteOutput = {
   status: 'success' | 'failed';
@@ -119,10 +120,8 @@ export interface GUIAgentConfig<TOperator> extends AgentOptions {
   customeActionParser?: CustomActionParser;
   /** The function to normalize raw coordinates */
   normalizeCoordinates?: NormalizeCoordinates;
-  /** Maximum number of turns for Agent to execute, @default 100 */
+  /** Maximum number of turns for Agent to execute, @default 1000 */
   maxLoopCount?: number;
   /** Time interval between two loop iterations (in milliseconds), @default 0 */
   loopIntervalInMs?: number;
-  /** The logger for GUI Agent */
-  logger?: ConsoleLogger;
 }
