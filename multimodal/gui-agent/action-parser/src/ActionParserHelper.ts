@@ -8,7 +8,7 @@ import { BaseAction, Coordinates, isSupportedActionType } from '@gui-agent/share
 import { XMLBuilder } from 'fast-xml-parser';
 import isNumber from 'lodash.isnumber';
 
-const defaultLogger = new ConsoleLogger('XMLFormatAdapter', LogLevel.DEBUG);
+const defaultLogger = new ConsoleLogger(undefined, LogLevel.DEBUG);
 
 export class ActionParserHelper {
   private logger: ConsoleLogger;
