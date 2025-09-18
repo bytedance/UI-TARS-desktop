@@ -1,11 +1,18 @@
 import React, { useEffect } from 'react';
-import { useAtom, useSetAtom } from 'jotai';
+import { useAtom, useSetAtom, useAtomValue } from 'jotai';
 import { ChatPanel } from '@/standalone/chat/ChatPanel';
 import { WorkspacePanel } from '@/standalone/workspace/WorkspacePanel';
 import { useSession } from '@/common/hooks/useSession';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
-import { layoutModeAtom, initializeLayoutModeAtom } from '@/common/state/atoms/ui';
+import {
+  layoutModeAtom,
+  initializeLayoutModeAtom,
+  mobileBottomSheetAtom,
+  closeMobileBottomSheetAtom,
+  toggleMobileBottomSheetFullscreenAtom,
+} from '@/common/state/atoms/ui';
 import { Shell } from './Shell';
+import { MobileBottomSheet } from './MobileBottomSheet';
 import './Layout.css';
 import classNames from 'classnames';
 
@@ -17,6 +24,9 @@ export const Layout: React.FC<LayoutProps> = ({ isReplayMode: propIsReplayMode }
   const { isReplayMode: contextIsReplayMode } = useReplayMode();
   const [layoutMode] = useAtom(layoutModeAtom);
   const initializeLayoutMode = useSetAtom(initializeLayoutModeAtom);
+  const mobileBottomSheet = useAtomValue(mobileBottomSheetAtom);
+  const closeMobileBottomSheet = useSetAtom(closeMobileBottomSheetAtom);
+  const toggleMobileBottomSheetFullscreen = useSetAtom(toggleMobileBottomSheetFullscreenAtom);
 
   const isReplayMode = propIsReplayMode !== undefined ? propIsReplayMode : contextIsReplayMode;
 
@@ -30,6 +40,7 @@ export const Layout: React.FC<LayoutProps> = ({ isReplayMode: propIsReplayMode }
         'ml-3': isReplayMode,
       })}
     >
+      {/* Desktop Layout */}
       <div className="hidden md:flex gap-3 flex-1 min-h-0">
         <div
           className={classNames(
@@ -60,19 +71,20 @@ export const Layout: React.FC<LayoutProps> = ({ isReplayMode: propIsReplayMode }
         </div>
       </div>
 
-      <div className="md:hidden flex flex-col gap-3 flex-1 min-h-0">
-        <div className="flex-1 flex flex-col overflow-hidden min-h-0">
-          <Shell className="h-full rounded-xl shadow-lg shadow-gray-200/50 dark:shadow-gray-950/20">
-            <ChatPanel />
-          </Shell>
-        </div>
-
-        <div className="flex-1 flex flex-col overflow-hidden min-h-0">
-          <Shell className="h-full rounded-xl shadow-lg shadow-gray-200/50 dark:shadow-gray-950/20">
-            <WorkspacePanel />
-          </Shell>
-        </div>
+      {/* Mobile Layout - Only Chat */}
+      <div className="md:hidden flex flex-col flex-1 min-h-0">
+        <Shell className="h-full rounded-xl shadow-lg shadow-gray-200/50 dark:shadow-gray-950/20">
+          <ChatPanel />
+        </Shell>
       </div>
+
+      {/* Mobile Bottom Sheet */}
+      <MobileBottomSheet
+        isOpen={mobileBottomSheet.isOpen}
+        isFullscreen={mobileBottomSheet.isFullscreen}
+        onClose={closeMobileBottomSheet}
+        onToggleFullscreen={toggleMobileBottomSheetFullscreen}
+      />
     </div>
   );
 };

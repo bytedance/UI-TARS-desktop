@@ -3,6 +3,8 @@ import { FiLoader, FiCheck, FiClock, FiAlertCircle, FiEdit3 } from 'react-icons/
 import { motion } from 'framer-motion';
 import { ActionBlock } from '@tarko/ui';
 import { normalizeFilePath } from '@tarko/ui';
+import { useSetAtom } from 'jotai';
+import { openMobileBottomSheetAtom } from '@/common/state/atoms/ui';
 
 interface ToolCallsProps {
   toolCalls: any[];
@@ -19,6 +21,8 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
   isIntermediate = false,
   toolResults = [],
 }) => {
+  const openMobileBottomSheet = useSetAtom(openMobileBottomSheetAtom);
+
   const getToolCallStatus = (toolCall: any) => {
     if (toolCall.function?.arguments) {
       try {
@@ -224,6 +228,23 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
     return fileTools.includes(toolName);
   };
 
+  const handleToolCallClick = (toolCall: any) => {
+    // Check if we're on mobile
+    const isMobile = window.innerWidth < 768;
+
+    if (isMobile) {
+      // On mobile, open the bottom sheet and then set the panel content
+      openMobileBottomSheet(false);
+      // Small delay to ensure bottom sheet opens before setting content
+      setTimeout(() => {
+        onToolCallClick(toolCall);
+      }, 100);
+    } else {
+      // On desktop, use the normal behavior
+      onToolCallClick(toolCall);
+    }
+  };
+
   return (
     <div className="mt-2 space-y-1.5">
       {toolCalls.map((toolCall) => {
@@ -242,7 +263,7 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
             key={toolCall.id}
             icon={getToolIcon(toolCall.function.name)}
             label={displayName}
-            onClick={() => onToolCallClick(toolCall)}
+            onClick={() => handleToolCallClick(toolCall)}
             status={status === 'constructing' ? 'pending' : status}
             statusIcon={getStatusIcon(status, toolCall.function.name)}
             description={description || browserInfo || undefined}

@@ -105,3 +105,36 @@ export const initializeLayoutModeAtom = atom(null, (get, set) => {
     set(baseLayoutModeAtom, 'default');
   }
 });
+
+/**
+ * Mobile bottom sheet state
+ */
+export const mobileBottomSheetAtom = atom({
+  isOpen: false,
+  isFullscreen: false,
+});
+
+/**
+ * Actions for mobile bottom sheet
+ */
+export const openMobileBottomSheetAtom = atom(null, (get, set, fullscreen: boolean = false) => {
+  set(mobileBottomSheetAtom, {
+    isOpen: true,
+    isFullscreen: fullscreen,
+  });
+});
+
+export const closeMobileBottomSheetAtom = atom(null, (get, set) => {
+  set(mobileBottomSheetAtom, {
+    isOpen: false,
+    isFullscreen: false,
+  });
+});
+
+export const toggleMobileBottomSheetFullscreenAtom = atom(null, (get, set) => {
+  const current = get(mobileBottomSheetAtom);
+  set(mobileBottomSheetAtom, {
+    ...current,
+    isFullscreen: !current.isFullscreen,
+  });
+});
