@@ -99,21 +99,31 @@ const agent = new Agent({
 
 ## Environment Variables
 
-Tarko supports configuration through environment variables:
+Common environment variables for **Tarko Agents**:
 
 ```bash
-# Model configuration
-TARKO_MODEL_PROVIDER=openai
-TARKO_MODEL_API_KEY=your-api-key
-TARKO_MODEL_NAME=gpt-4
+# Model Provider API Keys
+OPENAI_API_KEY=your_openai_key
+ANTHROPIC_API_KEY=your_anthropic_key
+VOLCENGINE_API_KEY=your_volcengine_key  # For Doubao models
+ARK_API_KEY=your_ark_key               # Alternative for Volcengine
 
-# Agent configuration
-TARKO_AGENT_NAME=MyAgent
-TARKO_AGENT_DESCRIPTION="A helpful assistant"
+# Optional: Custom endpoints
+OPENAI_BASE_URL=https://your-proxy.com/v1
+ANTHROPIC_BASE_URL=https://your-proxy.com
 
-# Context configuration
-TARKO_CONTEXT_MAX_LENGTH=32000
-TARKO_CONTEXT_COMPRESSION_RATIO=0.8
+# Development settings
+NODE_ENV=development
+LOG_LEVEL=debug
+```
+
+### Example .env file
+
+```bash
+# .env
+OPENAI_API_KEY=sk-...
+VOLCENGINE_API_KEY=your-volcengine-key
+LOG_LEVEL=info
 ```
 
 ## Configuration File

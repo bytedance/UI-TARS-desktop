@@ -6,11 +6,6 @@
   },
   {
     "type": "file",
-    "name": "workspace",
-    "label": "Workspace"
-  },
-  {
-    "type": "file",
     "name": "model-provider",
     "label": "Model Provider"
   },

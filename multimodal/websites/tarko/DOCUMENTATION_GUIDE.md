@@ -75,11 +75,7 @@ npx tsx basic.ts
 - New model providers added
 - New configuration options
 
-#### `/guide/basic/workspace.mdx`
-**Source References:**
-- `multimodal/tarko/agent/package.json` - Dependencies
-- `multimodal/tarko/agent/tsconfig.json` - TypeScript config
-- `multimodal/tarko/agent/examples/` - Project structure examples
+
 
 #### `/guide/basic/model-provider.mdx`
 **Source References:**
