@@ -76,14 +76,14 @@ describe('AgentUIBuilder', () => {
   });
 
   describe('dump()', () => {
-    it('should generate HTML in memory', () => {
+    it('should generate HTML in memory', async () => {
       const builder = new AgentUIBuilder({
         events: mockEvents,
         sessionInfo: mockSessionInfo,
         staticPath: mockStaticPath,
       });
 
-      const html = builder.dump();
+      const html = await builder.dump();
 
       expect(html).toContain('window.AGENT_REPLAY_MODE = true');
       expect(html).toContain('window.AGENT_SESSION_DATA');
@@ -92,7 +92,7 @@ describe('AgentUIBuilder', () => {
       expect(html).toContain('test-session'); // session ID should be in the data
     });
 
-    it('should generate HTML and save to file', () => {
+    it('should generate HTML and save to file', async () => {
       const outputPath = path.join(tempDir, 'output.html');
       const builder = new AgentUIBuilder({
         events: mockEvents,
@@ -100,7 +100,7 @@ describe('AgentUIBuilder', () => {
         staticPath: mockStaticPath,
       });
 
-      const html = builder.dump(outputPath);
+      const html = await builder.dump(outputPath);
 
       // Should return the HTML
       expect(html).toContain('window.AGENT_REPLAY_MODE = true');
@@ -111,7 +111,7 @@ describe('AgentUIBuilder', () => {
       expect(fileContent).toBe(html);
     });
 
-    it('should create directory if it does not exist', () => {
+    it('should create directory if it does not exist', async () => {
       const nestedPath = path.join(tempDir, 'nested', 'dir', 'output.html');
       const builder = new AgentUIBuilder({
         events: mockEvents,
@@ -119,13 +119,13 @@ describe('AgentUIBuilder', () => {
         staticPath: mockStaticPath,
       });
 
-      const html = builder.dump(nestedPath);
+      const html = await builder.dump(nestedPath);
 
       expect(fs.existsSync(nestedPath)).toBe(true);
       expect(html).toContain('window.AGENT_REPLAY_MODE = true');
     });
 
-    it('should work without staticPath (using built-in static files)', () => {
+    it('should work without staticPath (using built-in static files)', async () => {
       if (isDefaultStaticPathValid()) {
         // If built-in static files exist, it should work
         const builder = new AgentUIBuilder({
@@ -133,33 +133,31 @@ describe('AgentUIBuilder', () => {
           sessionInfo: mockSessionInfo,
           // No staticPath provided
         });
-        const html = builder.dump();
+        const html = await builder.dump();
         expect(html).toContain('window.AGENT_REPLAY_MODE = true');
       } else {
         // If built-in static files don't exist, it should throw an error
-        expect(() => {
+        expect(async () => {
           const builder = new AgentUIBuilder({
             events: mockEvents,
             sessionInfo: mockSessionInfo,
             // No staticPath provided
           });
-          builder.dump();
-        }).toThrow('No valid static path found');
+          await builder.dump();
+        }).rejects.toThrow('No valid static path found');
       }
     });
 
-    it('should throw error if static path does not exist', () => {
-      expect(() => {
-        const builder = new AgentUIBuilder({
-          events: mockEvents,
-          sessionInfo: mockSessionInfo,
-          staticPath: '/nonexistent/path',
-        });
-        builder.dump();
-      }).toThrow('Static web UI not found');
+    it('should throw error if static path does not exist', async () => {
+      const builder = new AgentUIBuilder({
+        events: mockEvents,
+        sessionInfo: mockSessionInfo,
+        staticPath: '/nonexistent/path',
+      });
+      await expect(builder.dump()).rejects.toThrow('Static web UI not found');
     });
 
-    it('should include server info when provided', () => {
+    it('should include server info when provided', async () => {
       const serverInfo = {
         version: '1.0.0',
         buildTime: Date.now(),
@@ -173,13 +171,13 @@ describe('AgentUIBuilder', () => {
         serverInfo,
       });
 
-      const html = builder.dump();
+      const html = await builder.dump();
 
       expect(html).toContain('window.AGENT_VERSION_INFO');
       expect(html).toContain('1.0.0');
     });
 
-    it('should include web UI config when provided', () => {
+    it('should include web UI config when provided', async () => {
       const uiConfig = { type: 'static', staticPath: mockStaticPath, theme: 'dark' } as any;
 
       const builder = new AgentUIBuilder({
@@ -189,7 +187,7 @@ describe('AgentUIBuilder', () => {
         uiConfig,
       });
 
-      const html = builder.dump();
+      const html = await builder.dump();
 
       expect(html).toContain('window.AGENT_WEB_UI_CONFIG');
       expect(html).toContain('dark');
@@ -210,7 +208,7 @@ describe('AgentUIBuilder', () => {
         json: async () => ({ url: 'https://share.example.com/abc123' }),
       });
 
-      const html = builder.dump();
+      const html = await builder.dump();
       const shareUrl = await builder.upload(html, 'https://api.example.com/upload');
 
       expect(shareUrl).toBe('https://share.example.com/abc123?replay=1');
@@ -232,7 +230,7 @@ describe('AgentUIBuilder', () => {
         json: async () => ({ url: 'https://share.example.com/my-slug' }),
       });
 
-      const html = builder.dump();
+      const html = await builder.dump();
       const shareUrl = await builder.upload(html, 'https://api.example.com/upload', {
         slug: 'my-session',
         query: 'How to use this API?',
@@ -271,7 +269,7 @@ describe('AgentUIBuilder', () => {
         json: async () => ({ url: 'https://share.example.com/abc123' }),
       });
 
-      const html = builder.dump();
+      const html = await builder.dump();
       await builder.upload(html, 'https://api.example.com/upload');
 
       expect(mockFetch).toHaveBeenCalledWith('https://api.example.com/upload', {
@@ -292,7 +290,7 @@ describe('AgentUIBuilder', () => {
         status: 500,
       });
 
-      const html = builder.dump();
+      const html = await builder.dump();
 
       await expect(builder.upload(html, 'https://api.example.com/upload')).rejects.toThrow(
         'HTTP error! status: 500',
@@ -311,7 +309,7 @@ describe('AgentUIBuilder', () => {
         json: async () => ({ error: 'Invalid request' }), // No url field
       });
 
-      const html = builder.dump();
+      const html = await builder.dump();
 
       await expect(builder.upload(html, 'https://api.example.com/upload')).rejects.toThrow(
         'Invalid response from share provider',
@@ -329,7 +327,7 @@ describe('AgentUIBuilder', () => {
       });
 
       // Generate and save HTML
-      const html = builder.dump(outputPath);
+      const html = await builder.dump(outputPath);
       expect(fs.existsSync(outputPath)).toBe(true);
 
       // Upload the same HTML

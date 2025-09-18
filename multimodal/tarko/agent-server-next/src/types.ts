@@ -33,7 +33,7 @@ export interface ILogger {
 /**
  * AgentServer initialization options
  */
-export interface AgentServerInitOptions<T extends AgentAppConfig = AgentAppConfig> {
+export interface AgentServerInitOptions<T extends AgentAppConfig> {
   appConfig: T;
   versionInfo?: AgentServerVersionInfo;
   directories?: GlobalDirectoryOptions;

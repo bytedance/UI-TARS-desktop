@@ -48,4 +48,5 @@ export default {
       },
     },
   },
+
 } as AgentAppConfig;

@@ -77,6 +77,10 @@ const server = new AgentServer({
         },
       },
     },
+    webui: {
+      type: 'remote',
+      remoteUrl: process.env.WEBUI_REMOTE_URL,
+    }
   },
 });
 

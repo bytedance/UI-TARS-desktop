@@ -194,6 +194,7 @@ export interface StaticAgentWebUIImplementation extends BaseAgentWebUIImplementa
  */
 export interface RemoteAgentWebUIImplementation extends BaseAgentWebUIImplementation {
   type?: 'remote';
+  remoteUrl?: string;
 }
 
 /**

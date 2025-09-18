@@ -33,7 +33,7 @@ const builder = new AgentUIBuilder({
 });
 
 // Generate HTML in memory
-const html = builder.dump();
+const html = await builder.dump();
 console.log('Generated HTML:', html);
 ```
 
@@ -48,7 +48,7 @@ const builder = new AgentUIBuilder({
 });
 
 // Generate HTML and save to file
-const html = builder.dump('/path/to/output/replay.html');
+const html = await builder.dump('/path/to/output/replay.html');
 console.log('HTML saved to file and returned:', html);
 ```
 
@@ -63,12 +63,12 @@ const builder = new AgentUIBuilder({
 });
 
 // Generate HTML
-const html = builder.dump();
+const html = await builder.dump();
 
 // Upload to share provider
 const shareUrl = await builder.upload(html, 'https://share-provider.example.com/upload', {
   slug: 'my-session',
-  query: 'original user query'
+  query: 'original user query',
 });
 
 console.log('Share URL:', shareUrl);
@@ -85,12 +85,12 @@ const builder = new AgentUIBuilder({
 });
 
 // Generate and save HTML
-const html = builder.dump('/local/backup/replay.html');
+const html = await builder.dump('/local/backup/replay.html');
 
 // Upload the same HTML for sharing
 const shareUrl = await builder.upload(html, shareProviderUrl, {
   slug: 'user-session-backup',
-  query: 'How to build a web app?'
+  query: 'How to build a web app?',
 });
 
 console.log('Local file saved and share URL:', shareUrl);
@@ -107,6 +107,7 @@ new AgentUIBuilder(input: AgentUIBuilderInputOptions)
 ```
 
 **Parameters:**
+
 - `input.events`: Array of agent events
 - `input.sessionInfo`: Session metadata
 - `input.staticPath?`: Optional path to static web UI files
@@ -120,17 +121,19 @@ new AgentUIBuilder(input: AgentUIBuilderInputOptions)
 Generates HTML from session data and optionally saves to file.
 
 **Parameters:**
+
 - `filePath?`: Optional file path to save HTML
 
 **Returns:** Generated HTML string
 
 **Example:**
+
 ```typescript
 // Generate HTML only
-const html = builder.dump();
+const html = await builder.dump();
 
 // Generate HTML and save to file
-const html = builder.dump('/path/to/file.html');
+const html = await builder.dump('/path/to/file.html');
 ```
 
 ##### `upload(html: string, shareProviderUrl: string, options?: UploadOptions): Promise<string>`
@@ -138,6 +141,7 @@ const html = builder.dump('/path/to/file.html');
 Uploads HTML to a share provider and returns the share URL.
 
 **Parameters:**
+
 - `html`: HTML content to upload
 - `shareProviderUrl`: URL of the share provider endpoint
 - `options?`: Upload options
@@ -147,10 +151,11 @@ Uploads HTML to a share provider and returns the share URL.
 **Returns:** Promise resolving to share URL with replay parameter
 
 **Example:**
+
 ```typescript
 const shareUrl = await builder.upload(html, 'https://api.example.com/share', {
   slug: 'my-session',
-  query: 'How to use the API?'
+  query: 'How to use the API?',
 });
 ```
 
@@ -162,7 +167,6 @@ const shareUrl = await builder.upload(html, 'https://api.example.com/share', {
 interface AgentUIBuilderInputOptions {
   events: AgentEventStream.Event[];
   sessionInfo: SessionInfo;
-  staticPath?: string;
   serverInfo?: AgentServerVersionInfo;
   uiConfig?: AgentWebUIImplementation;
 }
@@ -172,7 +176,7 @@ interface AgentUIBuilderInputOptions {
 
 ```typescript
 interface UploadOptions {
-  slug?: string;  // Custom slug for the share URL
+  slug?: string; // Custom slug for the share URL
   query?: string; // Original user query for metadata
 }
 ```
@@ -181,7 +185,8 @@ interface UploadOptions {
 
 This package follows a simple and clean design:
 
-1. **Two Core Methods**: 
+1. **Two Core Methods**:
+
    - `dump()` for generating (and optionally saving) HTML
    - `upload()` for sharing HTML content
 
@@ -212,7 +217,7 @@ html = builder.dump()
 html = builder.dump('/path/to/file.html')
 
 # Upload for sharing
-share_url = await builder.upload(html, provider_url, {
+share_url = builder.upload(html, provider_url, {
     'slug': 'my-session',
     'query': 'user query'
 })

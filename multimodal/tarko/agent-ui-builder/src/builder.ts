@@ -7,6 +7,7 @@ import fs from 'fs';
 import path from 'path';
 import type { AgentUIBuilderInputOptions, UploadOptions } from './types';
 import { getStaticPath } from './static-path';
+import { AgentWebUIImplementation } from '@tarko/interface';
 
 /**
  * Agent UI Builder - Simple class for generating and uploading replay HTML
@@ -23,19 +24,11 @@ export class AgentUIBuilder {
    * @param filePath Optional file path to save HTML
    * @returns Generated HTML string
    */
-  public dump(filePath?: string): string {
-    const { events, sessionInfo, staticPath: customStaticPath, serverInfo, uiConfig } = this.input;
-
-    // Use provided static path or fallback to built-in static files
-    const staticPath = customStaticPath || getStaticPath();
-
-    const indexPath = path.join(staticPath, 'index.html');
-    if (!fs.existsSync(indexPath)) {
-      throw new Error(`Static web UI not found at: ${indexPath}`);
-    }
+  async dump(filePath?: string): Promise<string> {
+    const { events, sessionInfo, serverInfo, uiConfig, staticPath } = this.input;
 
     try {
-      let htmlContent = fs.readFileSync(indexPath, 'utf8');
+      let htmlContent = await this.getHtmlContent(staticPath, uiConfig);
 
       const safeEventJson = AgentUIBuilder.safeJsonStringify(events);
       const safeSessionInfoJson = AgentUIBuilder.safeJsonStringify(sessionInfo);
@@ -87,6 +80,31 @@ export class AgentUIBuilder {
         `Failed to generate HTML: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
+  }
+
+  async getHtmlContent(staticPath: string | undefined, webui: AgentWebUIImplementation | undefined) {
+    if(webui?.type === 'remote' && webui?.remoteUrl) {
+      const url = webui.remoteUrl;
+
+      const resp = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': "text/html"
+        }
+      });
+
+      return await resp.text()
+    }
+
+    staticPath = staticPath || getStaticPath();
+
+    const indexPath = path.join(staticPath, 'index.html');
+
+    if (!fs.existsSync(indexPath)) {
+      throw new Error(`Static web UI not found at: ${indexPath}`);
+    }
+
+    return fs.readFileSync(indexPath, 'utf8');   
   }
 
   /**

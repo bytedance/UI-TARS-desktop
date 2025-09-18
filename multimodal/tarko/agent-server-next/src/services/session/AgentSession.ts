@@ -172,7 +172,7 @@ export class AgentSession {
     this.logger.info('create new agent with config: ',  JSON.stringify({
       agent: agentOptions.agent,
       share: agentOptions.share,
-      workspace: agentOptions.share,
+      workspace: agentOptions.workspace,
       thinking: agentOptions.thinking,
       name: agentOptions.name
     }, null, 2));
