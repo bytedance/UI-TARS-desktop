@@ -122,6 +122,11 @@ export interface AgentServerOptions {
      * These models will be merged with AgentOptions.model and made available for selection in the UI
      */
     models?: AgentModel[];
+    /**
+     * Agent options configuration schema
+     * JSON Schema defining configurable agent options for the UI
+     */
+    agentOptions?: Record<string, any>;
     /*
      * Sandbox config
      */
@@ -202,6 +207,10 @@ export interface SessionItemMetadata {
     configuredAt: number;
     [key: string]: any; // Future agent info fields
   };
+  /**
+   * Current agent options configuration
+   */
+  agentOptions?: Record<string, any>;
   /** The sandbox associated with the current session */
   sandboxUrl?: string;
   /**
