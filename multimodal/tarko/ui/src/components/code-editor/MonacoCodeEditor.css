@@ -15,8 +15,8 @@
 
 /* Line numbers styling */
 .code-editor-monaco-container .monaco-editor .margin .line-numbers {
-  padding-left: 12px !important;
-  padding-right: 12px !important;
+  padding-left: 16px !important;
+  padding-right: 16px !important;
   text-align: right !important;
 }
 
