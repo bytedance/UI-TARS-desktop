@@ -1,0 +1,384 @@
+---
+title: CLI 部署
+description: 使用 CLI 部署 Tarko Agent
+---
+
+# CLI 部署
+
+**Tarko Agent CLI** 提供了一种简单的方式在各种环境中部署和运行基于 Tarko 的 Agent。使用 `tarko run [agent]` 创建无头或有头的 Agent 运行时环境。
+
+## 安装
+
+全局安装 Tarko CLI：
+
+```bash
+npm install -g @tarko/agent-cli
+```
+
+或使用 npx：
+
+```bash
+npx @tarko/agent-cli run my-agent
+```
+
+## 基础用法
+
+### 运行 Agent
+
+```bash
+# 在当前目录运行 Agent
+tarko run
+
+# 运行特定 Agent
+tarko run ./my-agent
+
+# 使用自定义配置运行
+tarko run --config ./custom-config.json
+```
+
+### 开发模式
+
+```bash
+# 在开发模式下运行，支持热重载
+tarko run --dev
+
+# 运行时启用调试日志
+tarko run --debug
+
+# 运行在特定端口
+tarko run --port 3001
+```
+
+## 配置
+
+### CLI 配置文件
+
+创建 `tarko.config.js` 文件：
+
+```javascript
+module.exports = {
+  name: 'MyAgent',
+  description: '一个有用的助手',
+  
+  // 运行时配置
+  runtime: {
+    port: 3000,
+    host: '0.0.0.0',
+    mode: 'production' // 或 'development'
+  },
+  
+  // 模型配置
+  model: {
+    provider: 'openai',
+    apiKey: process.env.OPENAI_API_KEY,
+    model: 'gpt-4'
+  },
+  
+  // 工具
+  tools: [
+    '@tarko/tools/file-system',
+    '@tarko/tools/browser',
+    './custom-tools/weather'
+  ],
+  
+  // UI 配置
+  ui: {
+    enabled: true,
+    theme: 'default',
+    title: 'My Agent'
+  }
+};
+```
+
+### 环境变量
+
+```bash
+# 模型配置
+export TARKO_MODEL_PROVIDER=openai
+export TARKO_MODEL_API_KEY=your-api-key
+export TARKO_MODEL_NAME=gpt-4
+
+# 运行时配置
+export TARKO_PORT=3000
+export TARKO_HOST=0.0.0.0
+export TARKO_MODE=production
+
+# UI 配置
+export TARKO_UI_ENABLED=true
+export TARKO_UI_THEME=default
+```
+
+## 部署模式
+
+### 无头模式
+
+运行无 UI，仅提供 API 访问：
+
+```bash
+tarko run --headless
+```
+
+配置：
+
+```javascript
+module.exports = {
+  runtime: {
+    mode: 'headless',
+    api: {
+      enabled: true,
+      cors: true,
+      rateLimit: {
+        windowMs: 15 * 60 * 1000, // 15 分钟
+        max: 100 // 每个 IP 在 windowMs 内限制 100 个请求
+      }
+    }
+  },
+  ui: {
+    enabled: false
+  }
+};
+```
+
+### 有头模式
+
+运行带 Web UI：
+
+```bash
+tarko run --ui
+```
+
+配置：
+
+```javascript
+module.exports = {
+  ui: {
+    enabled: true,
+    title: 'My Agent',
+    theme: 'default',
+    customization: {
+      logo: './assets/logo.png',
+      primaryColor: '#007bff',
+      layout: 'sidebar' // 或 'topbar'
+    }
+  }
+};
+```
+
+## 生产部署
+
+### Docker
+
+创建 `Dockerfile`：
+
+```dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+
+# 复制包文件
+COPY package*.json ./
+RUN npm ci --only=production
+
+# 复制 Agent 代码
+COPY . .
+
+# 安装 Tarko CLI
+RUN npm install -g @tarko/agent-cli
+
+EXPOSE 3000
+
+CMD ["tarko", "run", "--port", "3000", "--host", "0.0.0.0"]
+```
+
+构建和运行：
+
+```bash
+docker build -t my-agent .
+docker run -p 3000:3000 -e OPENAI_API_KEY=your-key my-agent
+```
+
+### Docker Compose
+
+```yaml
+version: '3.8'
+
+services:
+  agent:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - TARKO_MODEL_PROVIDER=openai
+      - TARKO_MODEL_API_KEY=${OPENAI_API_KEY}
+      - TARKO_MODEL_NAME=gpt-4
+      - TARKO_MODE=production
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+```
+
+### 进程管理器 (PM2)
+
+```javascript
+// ecosystem.config.js
+module.exports = {
+  apps: [{
+    name: 'my-agent',
+    script: 'tarko',
+    args: 'run --port 3000',
+    instances: 1,
+    autorestart: true,
+    watch: false,
+    max_memory_restart: '1G',
+    env: {
+      NODE_ENV: 'production',
+      TARKO_MODEL_PROVIDER: 'openai',
+      TARKO_MODEL_API_KEY: process.env.OPENAI_API_KEY
+    }
+  }]
+};
+```
+
+部署：
+
+```bash
+npm install -g pm2
+pm2 start ecosystem.config.js
+pm2 save
+pm2 startup
+```
+
+## 监控和日志
+
+### 健康检查
+
+```bash
+# 检查 Agent 状态
+curl http://localhost:3000/health
+
+# 检查详细状态
+curl http://localhost:3000/status
+```
+
+### 日志配置
+
+```javascript
+module.exports = {
+  logging: {
+    level: 'info', // debug, info, warn, error
+    format: 'json', // json, text
+    output: {
+      console: true,
+      file: {
+        enabled: true,
+        path: './logs/agent.log',
+        maxSize: '10m',
+        maxFiles: 5
+      }
+    }
+  }
+};
+```
+
+### 指标
+
+启用指标收集：
+
+```javascript
+module.exports = {
+  metrics: {
+    enabled: true,
+    endpoint: '/metrics',
+    collectors: {
+      requests: true,
+      responses: true,
+      toolCalls: true,
+      errors: true
+    }
+  }
+};
+```
+
+## 负载均衡
+
+### Nginx 配置
+
+```nginx
+upstream tarko_agents {
+    server localhost:3000;
+    server localhost:3001;
+    server localhost:3002;
+}
+
+server {
+    listen 80;
+    server_name my-agent.example.com;
+    
+    location / {
+        proxy_pass http://tarko_agents;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
+
+## 故障排除
+
+### 常见问题
+
+**端口已被使用：**
+```bash
+# 查找使用端口的进程
+lsof -i :3000
+
+# 终止进程
+kill -9 <PID>
+
+# 或使用不同端口
+tarko run --port 3001
+```
+
+**权限错误：**
+```bash
+# 使用 sudo 运行（不推荐）
+sudo tarko run
+
+# 或更改为非特权端口
+tarko run --port 8080
+```
+
+**内存问题：**
+```bash
+# 增加 Node.js 内存限制
+NODE_OPTIONS="--max-old-space-size=4096" tarko run
+```
+
+### 调试模式
+
+```bash
+# 启用调试日志
+DEBUG=tarko:* tarko run --debug
+
+# 启用 Node.js 检查器
+tarko run --inspect
+
+# 启用详细输出
+tarko run --verbose
+```

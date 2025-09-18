@@ -1,0 +1,110 @@
+---
+title: 工具
+description: 为你的 Tarko Agent 添加工具
+---
+
+# 工具
+
+工具是使 Agent 能够与外部世界交互的核心能力。Tarko 支持遵循 **OpenAI Function Call** 协议的各种类型工具。
+
+## 内置工具
+
+### 文件系统
+
+提供文件操作能力：
+
+```typescript
+import { FileSystemTool } from '@tarko/tools';
+
+const agent = new Agent({
+  tools: [new FileSystemTool()]
+});
+```
+
+### 浏览器
+
+启用网页浏览和交互：
+
+```typescript
+import { BrowserTool } from '@tarko/tools';
+
+const agent = new Agent({
+  tools: [new BrowserTool()]
+});
+```
+
+### 命令
+
+执行系统命令：
+
+```typescript
+import { CommandTool } from '@tarko/tools';
+
+const agent = new Agent({
+  tools: [new CommandTool()]
+});
+```
+
+### 搜索
+
+提供搜索能力：
+
+```typescript
+import { SearchTool } from '@tarko/tools';
+
+const agent = new Agent({
+  tools: [new SearchTool()]
+});
+```
+
+## 自定义工具
+
+通过实现 Tool 接口创建自定义工具：
+
+```typescript
+import { Tool } from '@tarko/agent';
+
+class WeatherTool implements Tool {
+  name = 'get_weather';
+  description = '获取指定位置的当前天气';
+  
+  parameters = {
+    type: 'object',
+    properties: {
+      location: {
+        type: 'string',
+        description: '城市和州，例如 San Francisco, CA'
+      }
+    },
+    required: ['location']
+  };
+
+  async execute(params: { location: string }) {
+    // 在这里实现
+    return { temperature: 72, condition: 'sunny' };
+  }
+}
+
+const agent = new Agent({
+  tools: [new WeatherTool()]
+});
+```
+
+## 工具配置
+
+工具可以配置特定选项：
+
+```typescript
+const agent = new Agent({
+  tools: [
+    new FileSystemTool({
+      allowedPaths: ['/workspace'],
+      maxFileSize: '10MB'
+    }),
+    new BrowserTool({
+      headless: true,
+      timeout: 30000
+    })
+  ]
+});
+```

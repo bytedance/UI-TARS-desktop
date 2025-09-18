@@ -1,0 +1,250 @@
+---
+title: Agent Snapshot
+description: 捕获和回放 Agent 状态进行调试和测试
+---
+
+# Agent Snapshot
+
+Agent Snapshot 是一个强大的功能，允许你在运行时捕获 Agent 的完整状态并稍后回放。这对于调试、测试和确保确定性 Agent 行为至关重要。
+
+## 什么是 Agent Snapshot？
+
+Agent Snapshot 捕获：
+- 完整的对话历史
+- 当前上下文状态
+- 工具调用历史和结果
+- Agent 配置
+- 环境状态
+
+## 创建快照
+
+### 自动快照
+
+启用自动快照创建：
+
+```typescript
+import { Agent } from '@tarko/agent';
+
+const agent = new Agent({
+  ...config,
+  snapshot: {
+    enabled: true,
+    interval: 'on_tool_call', // 或 'on_message', 'manual'
+    storage: {
+      type: 'file',
+      path: './snapshots'
+    }
+  }
+});
+```
+
+### 手动快照
+
+程序化创建快照：
+
+```typescript
+// 创建快照
+const snapshot = await agent.createSnapshot({
+  name: 'debug-session-1',
+  description: '问题工具调用之前'
+});
+
+console.log('快照已创建:', snapshot.id);
+```
+
+## 快照结构
+
+快照包含：
+
+```typescript
+interface AgentSnapshot {
+  id: string;
+  timestamp: string;
+  name?: string;
+  description?: string;
+  
+  // Agent 状态
+  context: {
+    messages: Message[];
+    length: number;
+    metadata: Record<string, any>;
+  };
+  
+  // 配置
+  config: AgentConfig;
+  
+  // 环境
+  environment: {
+    variables: Record<string, string>;
+    workingDirectory: string;
+    platform: string;
+  };
+  
+  // 工具状态
+  tools: {
+    available: ToolDefinition[];
+    history: ToolCall[];
+  };
+}
+```
+
+## 回放快照
+
+### 加载和回放
+
+```typescript
+import { Agent, loadSnapshot } from '@tarko/agent';
+
+// 加载快照
+const snapshot = await loadSnapshot('./snapshots/debug-session-1.json');
+
+// 从快照创建 Agent
+const agent = Agent.fromSnapshot(snapshot);
+
+// 从快照状态继续对话
+const response = await agent.chat('接下来发生了什么？');
+```
+
+### 带修改的回放
+
+```typescript
+// 加载快照并修改配置
+const snapshot = await loadSnapshot('./snapshots/debug-session-1.json');
+
+// 覆盖测试的模型设置
+snapshot.config.model.temperature = 0.1;
+snapshot.config.model.model = 'gpt-4';
+
+const agent = Agent.fromSnapshot(snapshot);
+```
+
+## 使用快照进行测试
+
+### 基于快照的测试
+
+```typescript
+import { test, expect } from '@jest/globals';
+import { Agent, loadSnapshot } from '@tarko/agent';
+
+test('应该正确处理文件操作', async () => {
+  // 加载预录制的快照
+  const snapshot = await loadSnapshot('./test-snapshots/file-ops.json');
+  const agent = Agent.fromSnapshot(snapshot);
+  
+  // 回放场景
+  const response = await agent.chat('创建一个名为 test.txt 的新文件');
+  
+  // 断言预期行为
+  expect(response).toContain('文件创建成功');
+});
+```
+
+### 回归测试
+
+```typescript
+// 捕获基线行为
+const baselineSnapshot = await agent.createSnapshot({
+  name: 'baseline-v1.0'
+});
+
+// 稍后，针对基线测试
+const currentSnapshot = await agent.createSnapshot({
+  name: 'current-test'
+});
+
+// 比较快照
+const diff = compareSnapshots(baselineSnapshot, currentSnapshot);
+if (diff.hasChanges) {
+  console.warn('行为已更改:', diff.changes);
+}
+```
+
+## 快照管理
+
+### 列出快照
+
+```typescript
+const snapshots = await agent.listSnapshots();
+snapshots.forEach(snapshot => {
+  console.log(`${snapshot.name} (${snapshot.timestamp})`);
+});
+```
+
+### 删除快照
+
+```typescript
+// 删除特定快照
+await agent.deleteSnapshot('debug-session-1');
+
+// 清理旧快照
+await agent.cleanupSnapshots({
+  olderThan: '7d',
+  keepLatest: 10
+});
+```
+
+## 最佳实践
+
+### 何时创建快照
+
+- 复杂操作之前
+- 成功工具调用之后
+- 调试问题时
+- 进行回归测试时
+
+### 命名约定
+
+```typescript
+// 使用描述性名称
+const snapshot = await agent.createSnapshot({
+  name: 'before-file-upload-v2.1',
+  description: '实施新文件上传逻辑之前的状态'
+});
+```
+
+### 存储考虑
+
+```typescript
+// 配置适当的存储
+const agent = new Agent({
+  snapshot: {
+    storage: {
+      type: 'redis', // 用于生产
+      url: 'redis://localhost:6379',
+      ttl: 86400 // 24 小时
+    },
+    compression: true, // 减少存储大小
+    maxSnapshots: 100  // 限制存储使用
+  }
+});
+```
+
+## 使用快照调试
+
+### 捕获问题状态
+
+```typescript
+agent.on('error', async (error) => {
+  // 错误时自动创建快照
+  const snapshot = await agent.createSnapshot({
+    name: `error-${Date.now()}`,
+    description: `错误: ${error.message}`
+  });
+  
+  console.log('错误快照已保存:', snapshot.id);
+});
+```
+
+### 逐步调试
+
+```typescript
+// 加载问题快照
+const snapshot = await loadSnapshot('./snapshots/error-123.json');
+const agent = Agent.fromSnapshot(snapshot);
+
+// 启用详细日志
+agent.setLogLevel('debug');
+
+// 带调试回放
+const response = await agent.chat('从这里继续');
+```

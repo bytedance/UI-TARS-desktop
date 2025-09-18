@@ -1,42 +1,30 @@
 [
   {
-    "type": "file",
-    "name": "introduction",
-    "label": "Introduction"
+    "type": "dir",
+    "name": "get-started",
+    "label": "Get Started",
+    "collapsible": false,
+    "collapsed": false
   },
   {
-    "type": "file",
-    "name": "quick-start",
-    "label": "Quick Start"
+    "type": "dir",
+    "name": "basic",
+    "label": "Basic",
+    "collapsible": false,
+    "collapsed": false
   },
   {
-    "type": "file",
-    "name": "architecture",
-    "label": "Architecture"
+    "type": "dir",
+    "name": "advanced",
+    "label": "Advanced",
+    "collapsible": false,
+    "collapsed": false
   },
   {
-    "type": "file",
-    "name": "context-engineering",
-    "label": "Context Engineering"
-  },
-  {
-    "type": "file",
-    "name": "tool-call-engine",
-    "label": "Tool Call Engine"
-  },
-  {
-    "type": "file",
-    "name": "agent-protocol",
-    "label": "Agent Protocol"
-  },
-  {
-    "type": "file",
-    "name": "agent-hooks",
-    "label": "Agent Hooks"
-  },
-  {
-    "type": "file",
-    "name": "server",
-    "label": "Server"
+    "type": "dir",
+    "name": "deployment",
+    "label": "Deployment",
+    "collapsible": false,
+    "collapsed": false
   }
 ]

@@ -1,0 +1,149 @@
+---
+title: 配置
+description: 配置你的 Tarko Agent
+---
+
+# 配置
+
+Tarko Agent 通过一个全面的配置对象进行配置，该对象定义了 Agent 的行为、能力和运行时设置。
+
+## 基础配置
+
+```typescript
+import { Agent } from '@tarko/agent';
+
+const agent = new Agent({
+  // Agent 身份
+  name: 'MyAgent',
+  description: '一个有用的助手',
+  
+  // 模型配置
+  model: {
+    provider: 'openai',
+    apiKey: process.env.OPENAI_API_KEY,
+    model: 'gpt-4'
+  },
+  
+  // 系统提示
+  systemPrompt: '你是一个有用的助手...',
+  
+  // 工具
+  tools: []
+});
+```
+
+## 配置选项
+
+### Agent 身份
+
+```typescript
+{
+  name: 'string',           // Agent 名称
+  description: 'string',    // Agent 描述
+  version: 'string'         // Agent 版本
+}
+```
+
+### 模型配置
+
+```typescript
+{
+  model: {
+    provider: 'openai' | 'anthropic' | 'volcengine' | 'custom',
+    apiKey: 'string',
+    model: 'string',
+    baseURL?: 'string',     // 自定义提供商
+    temperature?: number,   // 0-1，默认：0.7
+    maxTokens?: number,     // 最大响应令牌
+    topP?: number          // 核采样
+  }
+}
+```
+
+### Context Engineering
+
+```typescript
+{
+  context: {
+    maxLength: 32000,       // 最大上下文长度
+    compressionRatio: 0.8,  // 上下文压缩比
+    retentionStrategy: 'recent' | 'important' | 'hybrid'
+  }
+}
+```
+
+### Tool Call Engine
+
+```typescript
+{
+  toolCallEngine: {
+    type: 'native' | 'prompt-engineering' | 'kor',
+    maxRetries: 3,
+    timeout: 30000
+  }
+}
+```
+
+### Agent Hooks
+
+```typescript
+{
+  hooks: {
+    beforeToolCall?: (toolCall) => void,
+    afterToolCall?: (result) => void,
+    onError?: (error) => void,
+    onComplete?: (result) => void
+  }
+}
+```
+
+## 环境变量
+
+Tarko 支持通过环境变量进行配置：
+
+```bash
+# 模型配置
+TARKO_MODEL_PROVIDER=openai
+TARKO_MODEL_API_KEY=your-api-key
+TARKO_MODEL_NAME=gpt-4
+
+# Agent 配置
+TARKO_AGENT_NAME=MyAgent
+TARKO_AGENT_DESCRIPTION="一个有用的助手"
+
+# 上下文配置
+TARKO_CONTEXT_MAX_LENGTH=32000
+TARKO_CONTEXT_COMPRESSION_RATIO=0.8
+```
+
+## 配置文件
+
+你也可以使用配置文件（`tarko.config.js`）：
+
+```javascript
+module.exports = {
+  name: 'MyAgent',
+  description: '一个有用的助手',
+  model: {
+    provider: 'openai',
+    apiKey: process.env.OPENAI_API_KEY,
+    model: 'gpt-4'
+  },
+  tools: [
+    '@tarko/tools/file-system',
+    '@tarko/tools/browser'
+  ]
+};
+```
+
+## 验证
+
+Tarko 在启动时验证配置并提供有用的错误消息：
+
+```typescript
+try {
+  const agent = new Agent(config);
+} catch (error) {
+  console.error('配置错误:', error.message);
+}
+```

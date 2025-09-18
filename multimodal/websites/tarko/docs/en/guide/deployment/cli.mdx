@@ -1,0 +1,384 @@
+---
+title: CLI Deployment
+description: Deploy Tarko Agents using the CLI
+---
+
+# CLI Deployment
+
+The **Tarko Agent CLI** provides a simple way to deploy and run Tarko-based Agents in various environments. Use `tarko run [agent]` to create headless or headful Agent runtime environments.
+
+## Installation
+
+Install the Tarko CLI globally:
+
+```bash
+npm install -g @tarko/agent-cli
+```
+
+Or use with npx:
+
+```bash
+npx @tarko/agent-cli run my-agent
+```
+
+## Basic Usage
+
+### Run an Agent
+
+```bash
+# Run agent in current directory
+tarko run
+
+# Run specific agent
+tarko run ./my-agent
+
+# Run with custom configuration
+tarko run --config ./custom-config.json
+```
+
+### Development Mode
+
+```bash
+# Run in development mode with hot reload
+tarko run --dev
+
+# Run with debug logging
+tarko run --debug
+
+# Run with specific port
+tarko run --port 3001
+```
+
+## Configuration
+
+### CLI Configuration File
+
+Create a `tarko.config.js` file:
+
+```javascript
+module.exports = {
+  name: 'MyAgent',
+  description: 'A helpful assistant',
+  
+  // Runtime configuration
+  runtime: {
+    port: 3000,
+    host: '0.0.0.0',
+    mode: 'production' // or 'development'
+  },
+  
+  // Model configuration
+  model: {
+    provider: 'openai',
+    apiKey: process.env.OPENAI_API_KEY,
+    model: 'gpt-4'
+  },
+  
+  // Tools
+  tools: [
+    '@tarko/tools/file-system',
+    '@tarko/tools/browser',
+    './custom-tools/weather'
+  ],
+  
+  // UI configuration
+  ui: {
+    enabled: true,
+    theme: 'default',
+    title: 'My Agent'
+  }
+};
+```
+
+### Environment Variables
+
+```bash
+# Model configuration
+export TARKO_MODEL_PROVIDER=openai
+export TARKO_MODEL_API_KEY=your-api-key
+export TARKO_MODEL_NAME=gpt-4
+
+# Runtime configuration
+export TARKO_PORT=3000
+export TARKO_HOST=0.0.0.0
+export TARKO_MODE=production
+
+# UI configuration
+export TARKO_UI_ENABLED=true
+export TARKO_UI_THEME=default
+```
+
+## Deployment Modes
+
+### Headless Mode
+
+Run without UI for API-only access:
+
+```bash
+tarko run --headless
+```
+
+Configuration:
+
+```javascript
+module.exports = {
+  runtime: {
+    mode: 'headless',
+    api: {
+      enabled: true,
+      cors: true,
+      rateLimit: {
+        windowMs: 15 * 60 * 1000, // 15 minutes
+        max: 100 // limit each IP to 100 requests per windowMs
+      }
+    }
+  },
+  ui: {
+    enabled: false
+  }
+};
+```
+
+### Headful Mode
+
+Run with web UI:
+
+```bash
+tarko run --ui
+```
+
+Configuration:
+
+```javascript
+module.exports = {
+  ui: {
+    enabled: true,
+    title: 'My Agent',
+    theme: 'default',
+    customization: {
+      logo: './assets/logo.png',
+      primaryColor: '#007bff',
+      layout: 'sidebar' // or 'topbar'
+    }
+  }
+};
+```
+
+## Production Deployment
+
+### Docker
+
+Create a `Dockerfile`:
+
+```dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copy agent code
+COPY . .
+
+# Install Tarko CLI
+RUN npm install -g @tarko/agent-cli
+
+EXPOSE 3000
+
+CMD ["tarko", "run", "--port", "3000", "--host", "0.0.0.0"]
+```
+
+Build and run:
+
+```bash
+docker build -t my-agent .
+docker run -p 3000:3000 -e OPENAI_API_KEY=your-key my-agent
+```
+
+### Docker Compose
+
+```yaml
+version: '3.8'
+
+services:
+  agent:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - TARKO_MODEL_PROVIDER=openai
+      - TARKO_MODEL_API_KEY=${OPENAI_API_KEY}
+      - TARKO_MODEL_NAME=gpt-4
+      - TARKO_MODE=production
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+```
+
+### Process Manager (PM2)
+
+```javascript
+// ecosystem.config.js
+module.exports = {
+  apps: [{
+    name: 'my-agent',
+    script: 'tarko',
+    args: 'run --port 3000',
+    instances: 1,
+    autorestart: true,
+    watch: false,
+    max_memory_restart: '1G',
+    env: {
+      NODE_ENV: 'production',
+      TARKO_MODEL_PROVIDER: 'openai',
+      TARKO_MODEL_API_KEY: process.env.OPENAI_API_KEY
+    }
+  }]
+};
+```
+
+Deploy:
+
+```bash
+npm install -g pm2
+pm2 start ecosystem.config.js
+pm2 save
+pm2 startup
+```
+
+## Monitoring and Logging
+
+### Health Checks
+
+```bash
+# Check agent status
+curl http://localhost:3000/health
+
+# Check detailed status
+curl http://localhost:3000/status
+```
+
+### Logging Configuration
+
+```javascript
+module.exports = {
+  logging: {
+    level: 'info', // debug, info, warn, error
+    format: 'json', // json, text
+    output: {
+      console: true,
+      file: {
+        enabled: true,
+        path: './logs/agent.log',
+        maxSize: '10m',
+        maxFiles: 5
+      }
+    }
+  }
+};
+```
+
+### Metrics
+
+Enable metrics collection:
+
+```javascript
+module.exports = {
+  metrics: {
+    enabled: true,
+    endpoint: '/metrics',
+    collectors: {
+      requests: true,
+      responses: true,
+      toolCalls: true,
+      errors: true
+    }
+  }
+};
+```
+
+## Load Balancing
+
+### Nginx Configuration
+
+```nginx
+upstream tarko_agents {
+    server localhost:3000;
+    server localhost:3001;
+    server localhost:3002;
+}
+
+server {
+    listen 80;
+    server_name my-agent.example.com;
+    
+    location / {
+        proxy_pass http://tarko_agents;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**Port already in use:**
+```bash
+# Find process using port
+lsof -i :3000
+
+# Kill process
+kill -9 <PID>
+
+# Or use different port
+tarko run --port 3001
+```
+
+**Permission errors:**
+```bash
+# Run with sudo (not recommended)
+sudo tarko run
+
+# Or change port to non-privileged
+tarko run --port 8080
+```
+
+**Memory issues:**
+```bash
+# Increase Node.js memory limit
+NODE_OPTIONS="--max-old-space-size=4096" tarko run
+```
+
+### Debug Mode
+
+```bash
+# Enable debug logging
+DEBUG=tarko:* tarko run --debug
+
+# Enable Node.js inspector
+tarko run --inspect
+
+# Enable verbose output
+tarko run --verbose
+```

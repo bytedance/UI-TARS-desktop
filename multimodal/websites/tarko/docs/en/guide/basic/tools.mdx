@@ -1,0 +1,110 @@
+---
+title: Tools
+description: Adding tools to your Tarko Agent
+---
+
+# Tools
+
+Tools are the core capabilities that enable your Agent to interact with the external world. Tarko supports various types of tools following the **OpenAI Function Call** protocol.
+
+## Built-in Tools
+
+### File System
+
+Provides file operations capabilities:
+
+```typescript
+import { FileSystemTool } from '@tarko/tools';
+
+const agent = new Agent({
+  tools: [new FileSystemTool()]
+});
+```
+
+### Browser
+
+Enables web browsing and interaction:
+
+```typescript
+import { BrowserTool } from '@tarko/tools';
+
+const agent = new Agent({
+  tools: [new BrowserTool()]
+});
+```
+
+### Command
+
+Executes system commands:
+
+```typescript
+import { CommandTool } from '@tarko/tools';
+
+const agent = new Agent({
+  tools: [new CommandTool()]
+});
+```
+
+### Search
+
+Provides search capabilities:
+
+```typescript
+import { SearchTool } from '@tarko/tools';
+
+const agent = new Agent({
+  tools: [new SearchTool()]
+});
+```
+
+## Custom Tools
+
+Create custom tools by implementing the Tool interface:
+
+```typescript
+import { Tool } from '@tarko/agent';
+
+class WeatherTool implements Tool {
+  name = 'get_weather';
+  description = 'Get current weather for a location';
+  
+  parameters = {
+    type: 'object',
+    properties: {
+      location: {
+        type: 'string',
+        description: 'The city and state, e.g. San Francisco, CA'
+      }
+    },
+    required: ['location']
+  };
+
+  async execute(params: { location: string }) {
+    // Implementation here
+    return { temperature: 72, condition: 'sunny' };
+  }
+}
+
+const agent = new Agent({
+  tools: [new WeatherTool()]
+});
+```
+
+## Tool Configuration
+
+Tools can be configured with specific options:
+
+```typescript
+const agent = new Agent({
+  tools: [
+    new FileSystemTool({
+      allowedPaths: ['/workspace'],
+      maxFileSize: '10MB'
+    }),
+    new BrowserTool({
+      headless: true,
+      timeout: 30000
+    })
+  ]
+});
+```

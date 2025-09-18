@@ -1,0 +1,149 @@
+---
+title: Configuration
+description: Configure your Tarko Agent
+---
+
+# Configuration
+
+Tarko Agents are configured through a comprehensive configuration object that defines the Agent's behavior, capabilities, and runtime settings.
+
+## Basic Configuration
+
+```typescript
+import { Agent } from '@tarko/agent';
+
+const agent = new Agent({
+  // Agent identity
+  name: 'MyAgent',
+  description: 'A helpful assistant',
+  
+  // Model configuration
+  model: {
+    provider: 'openai',
+    apiKey: process.env.OPENAI_API_KEY,
+    model: 'gpt-4'
+  },
+  
+  // System prompt
+  systemPrompt: 'You are a helpful assistant...',
+  
+  // Tools
+  tools: []
+});
+```
+
+## Configuration Options
+
+### Agent Identity
+
+```typescript
+{
+  name: 'string',           // Agent name
+  description: 'string',    // Agent description
+  version: 'string'         // Agent version
+}
+```
+
+### Model Configuration
+
+```typescript
+{
+  model: {
+    provider: 'openai' | 'anthropic' | 'volcengine' | 'custom',
+    apiKey: 'string',
+    model: 'string',
+    baseURL?: 'string',     // For custom providers
+    temperature?: number,   // 0-1, default: 0.7
+    maxTokens?: number,     // Max response tokens
+    topP?: number          // Nucleus sampling
+  }
+}
+```
+
+### Context Engineering
+
+```typescript
+{
+  context: {
+    maxLength: 32000,       // Max context length
+    compressionRatio: 0.8,  // Context compression ratio
+    retentionStrategy: 'recent' | 'important' | 'hybrid'
+  }
+}
+```
+
+### Tool Call Engine
+
+```typescript
+{
+  toolCallEngine: {
+    type: 'native' | 'prompt-engineering' | 'kor',
+    maxRetries: 3,
+    timeout: 30000
+  }
+}
+```
+
+### Agent Hooks
+
+```typescript
+{
+  hooks: {
+    beforeToolCall?: (toolCall) => void,
+    afterToolCall?: (result) => void,
+    onError?: (error) => void,
+    onComplete?: (result) => void
+  }
+}
+```
+
+## Environment Variables
+
+Tarko supports configuration through environment variables:
+
+```bash
+# Model configuration
+TARKO_MODEL_PROVIDER=openai
+TARKO_MODEL_API_KEY=your-api-key
+TARKO_MODEL_NAME=gpt-4
+
+# Agent configuration
+TARKO_AGENT_NAME=MyAgent
+TARKO_AGENT_DESCRIPTION="A helpful assistant"
+
+# Context configuration
+TARKO_CONTEXT_MAX_LENGTH=32000
+TARKO_CONTEXT_COMPRESSION_RATIO=0.8
+```
+
+## Configuration File
+
+You can also use a configuration file (`tarko.config.js`):
+
+```javascript
+module.exports = {
+  name: 'MyAgent',
+  description: 'A helpful assistant',
+  model: {
+    provider: 'openai',
+    apiKey: process.env.OPENAI_API_KEY,
+    model: 'gpt-4'
+  },
+  tools: [
+    '@tarko/tools/file-system',
+    '@tarko/tools/browser'
+  ]
+};
+```
+
+## Validation
+
+Tarko validates configuration at startup and provides helpful error messages:
+
+```typescript
+try {
+  const agent = new Agent(config);
+} catch (error) {
+  console.error('Configuration error:', error.message);
+}
+```

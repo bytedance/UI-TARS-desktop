@@ -1,0 +1,331 @@
+---
+title: 测试
+description: Tarko Agent 的测试策略
+---
+
+# 测试
+
+测试 Agent 由于其非确定性特性和与外部系统的复杂交互而面临独特挑战。Tarko 提供了多种测试策略和工具来确保可靠的 Agent 行为。
+
+## 测试策略
+
+### 单元测试
+
+独立测试各个组件：
+
+```typescript
+import { test, expect } from '@jest/globals';
+import { WeatherTool } from './tools/weather';
+
+test('WeatherTool 应该正确格式化位置', () => {
+  const tool = new WeatherTool();
+  const result = tool.formatLocation('san francisco, ca');
+  expect(result).toBe('San Francisco, CA');
+});
+```
+
+### 集成测试
+
+测试 Agent 与工具的交互：
+
+```typescript
+import { Agent } from '@tarko/agent';
+import { MockWeatherTool } from './mocks';
+
+test('应该获取天气信息', async () => {
+  const agent = new Agent({
+    model: { provider: 'mock' },
+    tools: [new MockWeatherTool()]
+  });
+  
+  const response = await agent.chat('旧金山的天气怎么样？');
+  expect(response).toContain('72°F');
+});
+```
+
+### 端到端测试
+
+测试完整的 Agent 工作流：
+
+```typescript
+import { Agent } from '@tarko/agent';
+import { TestEnvironment } from '@tarko/testing';
+
+test('完整文件处理工作流', async () => {
+  const env = new TestEnvironment();
+  const agent = new Agent({
+    model: { provider: 'mock' },
+    tools: env.getTools()
+  });
+  
+  // 设置测试文件
+  await env.createFile('input.txt', '测试内容');
+  
+  // 执行工作流
+  const response = await agent.chat('处理 input.txt 文件');
+  
+  // 验证结果
+  expect(await env.fileExists('output.txt')).toBe(true);
+  expect(response).toContain('处理成功');
+});
+```
+
+## 基于快照的测试
+
+使用快照进行确定性测试：
+
+```typescript
+import { loadSnapshot, Agent } from '@tarko/agent';
+
+test('应该处理复杂场景', async () => {
+  // 加载预录制的场景
+  const snapshot = await loadSnapshot('./test-data/complex-scenario.json');
+  const agent = Agent.fromSnapshot(snapshot);
+  
+  // 测试特定行为
+  const response = await agent.chat('继续任务');
+  
+  // 断言预期结果
+  expect(response).toMatchSnapshot();
+});
+```
+
+## Mock
+
+### Mock 工具
+
+创建确定性的工具行为：
+
+```typescript
+import { Tool } from '@tarko/agent';
+
+class MockFileSystemTool implements Tool {
+  name = 'read_file';
+  description = '读取文件内容';
+  
+  private files = new Map<string, string>();
+  
+  async execute(params: { path: string }) {
+    const content = this.files.get(params.path);
+    if (!content) {
+      throw new Error('文件未找到');
+    }
+    return { content };
+  }
+  
+  // 测试辅助方法
+  setFile(path: string, content: string) {
+    this.files.set(path, content);
+  }
+}
+```
+
+### Mock 模型提供商
+
+控制模型响应：
+
+```typescript
+import { ModelProvider } from '@tarko/agent';
+
+class MockModelProvider implements ModelProvider {
+  private responses: string[] = [];
+  private responseIndex = 0;
+  
+  async generateResponse(messages: Message[]) {
+    const response = this.responses[this.responseIndex];
+    this.responseIndex = (this.responseIndex + 1) % this.responses.length;
+    return { content: response };
+  }
+  
+  // 测试辅助方法
+  setResponses(responses: string[]) {
+    this.responses = responses;
+    this.responseIndex = 0;
+  }
+}
+```
+
+## 测试工具
+
+### 测试环境
+
+Tarko 提供隔离测试的测试环境：
+
+```typescript
+import { TestEnvironment } from '@tarko/testing';
+
+const env = new TestEnvironment({
+  filesystem: {
+    initialFiles: {
+      'config.json': '{ "setting": "value" }',
+      'data.txt': '示例数据'
+    }
+  },
+  network: {
+    mockEndpoints: {
+      'https://api.example.com/data': { status: 200, data: { result: 'success' } }
+    }
+  }
+});
+
+const agent = new Agent({
+  model: { provider: 'mock' },
+  tools: env.getTools(),
+  environment: env
+});
+```
+
+### 断言辅助工具
+
+```typescript
+import { expect } from '@tarko/testing';
+
+// Agent 测试的自定义匹配器
+expect(agent).toHaveCalledTool('read_file');
+expect(agent).toHaveGeneratedEvents(['tool_call', 'tool_result']);
+expect(response).toContainToolCall('search', { query: 'test' });
+```
+
+## 性能测试
+
+### 响应时间测试
+
+```typescript
+test('应该在可接受时间内响应', async () => {
+  const start = Date.now();
+  const response = await agent.chat('简单问题');
+  const duration = Date.now() - start;
+  
+  expect(duration).toBeLessThan(5000); // 5 秒
+  expect(response).toBeDefined();
+});
+```
+
+### 内存使用测试
+
+```typescript
+test('长对话期间不应泄漏内存', async () => {
+  const initialMemory = process.memoryUsage().heapUsed;
+  
+  // 模拟长对话
+  for (let i = 0; i < 100; i++) {
+    await agent.chat(`消息 ${i}`);
+  }
+  
+  // 强制垃圾回收
+  global.gc();
+  
+  const finalMemory = process.memoryUsage().heapUsed;
+  const memoryIncrease = finalMemory - initialMemory;
+  
+  // 不应显著增加
+  expect(memoryIncrease).toBeLessThan(50 * 1024 * 1024); // 50MB
+});
+```
+
+## 持续集成
+
+### GitHub Actions
+
+```yaml
+name: Agent Tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run unit tests
+      run: npm run test:unit
+      
+    - name: Run integration tests
+      run: npm run test:integration
+      env:
+        TEST_MODEL_PROVIDER: mock
+        
+    - name: Run snapshot tests
+      run: npm run test:snapshots
+```
+
+### 测试配置
+
+```json
+{
+  "scripts": {
+    "test": "jest",
+    "test:unit": "jest --testPathPattern=unit",
+    "test:integration": "jest --testPathPattern=integration",
+    "test:snapshots": "jest --testPathPattern=snapshots",
+    "test:watch": "jest --watch"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "setupFilesAfterEnv": ["<rootDir>/test/setup.js"],
+    "testTimeout": 30000
+  }
+}
+```
+
+## 最佳实践
+
+### 测试组织
+
+```
+tests/
+├── unit/
+│   ├── tools/
+│   └── utils/
+├── integration/
+│   ├── workflows/
+│   └── tools/
+├── snapshots/
+│   ├── scenarios/
+│   └── regression/
+├── fixtures/
+│   ├── snapshots/
+│   └── data/
+└── helpers/
+    ├── mocks.js
+    └── setup.js
+```
+
+### 测试数据管理
+
+```typescript
+// 使用一致的测试数据
+const TEST_DATA = {
+  files: {
+    'sample.txt': '这是示例内容',
+    'config.json': JSON.stringify({ key: 'value' })
+  },
+  responses: {
+    weather: '天气晴朗，72°F',
+    error: '处理您的请求时遇到错误'
+  }
+};
+```
+
+### 确定性测试
+
+```typescript
+// 种子随机生成器
+Math.random = jest.fn(() => 0.5);
+
+// 使用固定时间戳
+Date.now = jest.fn(() => 1640995200000);
+
+// 控制异步时序
+jest.useFakeTimers();
+```

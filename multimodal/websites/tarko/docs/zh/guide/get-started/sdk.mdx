@@ -1,0 +1,364 @@
+---
+title: SDK
+description: 在应用中使用 Tarko SDK
+---
+
+# SDK
+
+Tarko 可以作为 SDK 使用，直接将 Agent 能力集成到你的应用中。这种方式让你完全控制 Agent 的生命周期，并允许深度定制。
+
+## 安装
+
+安装核心 Tarko 包：
+
+```bash
+npm install @tarko/agent @tarko/tools
+```
+
+安装特定工具：
+
+```bash
+npm install @tarko/tools-browser @tarko/tools-filesystem
+```
+
+## 基础用法
+
+### 创建 Agent
+
+```typescript
+import { Agent } from '@tarko/agent';
+import { FileSystemTool, BrowserTool } from '@tarko/tools';
+
+const agent = new Agent({
+  name: 'MyAgent',
+  description: '一个有用的助手',
+  
+  model: {
+    provider: 'openai',
+    apiKey: process.env.OPENAI_API_KEY,
+    model: 'gpt-4'
+  },
+  
+  systemPrompt: `你是一个有用的助手，可以：
+  - 读写文件
+  - 浏览网页
+  - 执行命令
+  
+  始终保持有用和准确。`,
+  
+  tools: [
+    new FileSystemTool(),
+    new BrowserTool()
+  ]
+});
+```
+
+### 聊天接口
+
+```typescript
+// 简单聊天
+const response = await agent.chat('你好，可以帮助我吗？');
+console.log(response);
+
+// 带上下文的聊天
+const conversation = agent.createConversation();
+const response1 = await conversation.chat('今天天气怎么样？');
+const response2 = await conversation.chat('明天呢？');
+```
+
+### 流式响应
+
+```typescript
+const stream = agent.chatStream('写一个关于 AI 的长故事');
+
+for await (const chunk of stream) {
+  if (chunk.type === 'content') {
+    process.stdout.write(chunk.data);
+  } else if (chunk.type === 'tool_call') {
+    console.log('调用工具:', chunk.data.name);
+  }
+}
+```
+
+## 高级用法
+
+### 自定义工具
+
+创建特定领域的工具：
+
+```typescript
+import { Tool } from '@tarko/agent';
+
+class DatabaseTool implements Tool {
+  name = 'query_database';
+  description = '查询应用数据库';
+  
+  parameters = {
+    type: 'object',
+    properties: {
+      query: {
+        type: 'string',
+        description: '要执行的 SQL 查询'
+      }
+    },
+    required: ['query']
+  };
+
+  async execute(params: { query: string }) {
+    // 你的数据库逻辑
+    const results = await this.db.query(params.query);
+    return { results };
+  }
+
+  constructor(private db: DatabaseConnection) {}
+}
+
+const agent = new Agent({
+  // ... 其他配置
+  tools: [
+    new DatabaseTool(myDatabase),
+    new FileSystemTool()
+  ]
+});
+```
+
+### 事件处理
+
+```typescript
+// 监听 Agent 事件
+agent.on('tool_call', (event) => {
+  console.log(`调用工具: ${event.data.name}`);
+  // 记录到分析系统、更新 UI 等
+});
+
+agent.on('error', (event) => {
+  console.error('Agent 错误:', event.data.error);
+  // 处理错误、通知用户等
+});
+
+agent.on('context_updated', (event) => {
+  console.log('上下文长度:', event.data.newLength);
+  // 监控上下文使用情况
+});
+```
+
+### 上下文管理
+
+```typescript
+const agent = new Agent({
+  // ... 其他配置
+  context: {
+    maxLength: 32000,
+    compressionRatio: 0.8,
+    retentionStrategy: 'hybrid'
+  }
+});
+
+// 手动上下文操作
+const summary = await agent.summarizeContext();
+const compressed = await agent.compressContext(0.5);
+await agent.clearContext();
+```
+
+### Agent Hooks
+
+```typescript
+const agent = new Agent({
+  // ... 其他配置
+  hooks: {
+    beforeToolCall: async (toolCall) => {
+      // 验证工具调用
+      if (toolCall.name === 'dangerous_operation') {
+        throw new Error('不允许此操作');
+      }
+    },
+    
+    afterToolCall: async (result) => {
+      // 记录结果
+      await logToolResult(result);
+    },
+    
+    onError: async (error) => {
+      // 自定义错误处理
+      await notifyAdmins(error);
+    }
+  }
+});
+```
+
+## 集成模式
+
+### Express.js 集成
+
+```typescript
+import express from 'express';
+import { Agent } from '@tarko/agent';
+
+const app = express();
+const agent = new Agent(config);
+
+app.use(express.json());
+
+// 聊天端点
+app.post('/chat', async (req, res) => {
+  try {
+    const { message, conversationId } = req.body;
+    
+    const conversation = conversationId 
+      ? agent.getConversation(conversationId)
+      : agent.createConversation();
+    
+    const response = await conversation.chat(message);
+    
+    res.json({
+      response,
+      conversationId: conversation.id
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 流式端点
+app.get('/chat/stream', async (req, res) => {
+  const { message } = req.query;
+  
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive'
+  });
+  
+  const stream = agent.chatStream(message as string);
+  
+  for await (const chunk of stream) {
+    res.write(`data: ${JSON.stringify(chunk)}\n\n`);
+  }
+  
+  res.end();
+});
+
+app.listen(3000);
+```
+
+### React 集成
+
+```typescript
+import { useState, useEffect } from 'react';
+import { Agent } from '@tarko/agent';
+
+function useAgent(config: AgentConfig) {
+  const [agent, setAgent] = useState<Agent | null>(null);
+  const [loading, setLoading] = useState(false);
+  
+  useEffect(() => {
+    const agentInstance = new Agent(config);
+    setAgent(agentInstance);
+    
+    return () => {
+      agentInstance.dispose();
+    };
+  }, []);
+  
+  const chat = async (message: string) => {
+    if (!agent) return;
+    
+    setLoading(true);
+    try {
+      const response = await agent.chat(message);
+      return response;
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  return { agent, chat, loading };
+}
+
+function ChatComponent() {
+  const { chat, loading } = useAgent({
+    model: { provider: 'openai', apiKey: 'your-key', model: 'gpt-4' },
+    tools: []
+  });
+  
+  const [message, setMessage] = useState('');
+  const [response, setResponse] = useState('');
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const result = await chat(message);
+    setResponse(result || '');
+    setMessage('');
+  };
+  
+  return (
+    <div>
+      <form onSubmit={handleSubmit}>
+        <input
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          disabled={loading}
+        />
+        <button type="submit" disabled={loading}>
+          {loading ? '思考中...' : '发送'}
+        </button>
+      </form>
+      {response && <div>{response}</div>}
+    </div>
+  );
+}
+```
+
+## 最佳实践
+
+### 错误处理
+
+```typescript
+try {
+  const response = await agent.chat(message);
+  return response;
+} catch (error) {
+  if (error instanceof ToolExecutionError) {
+    // 处理工具特定错误
+    console.error('工具错误:', error.toolName, error.message);
+  } else if (error instanceof ModelProviderError) {
+    // 处理模型提供商错误
+    console.error('模型错误:', error.provider, error.message);
+  } else {
+    // 处理一般错误
+    console.error('意外错误:', error.message);
+  }
+  
+  throw error;
+}
+```
+
+### 资源管理
+
+```typescript
+class AgentManager {
+  private agents = new Map<string, Agent>();
+  
+  getAgent(userId: string): Agent {
+    if (!this.agents.has(userId)) {
+      const agent = new Agent(this.getConfigForUser(userId));
+      this.agents.set(userId, agent);
+      
+      // 非活跃后清理
+      setTimeout(() => {
+        this.agents.delete(userId);
+        agent.dispose();
+      }, 30 * 60 * 1000); // 30 分钟
+    }
+    
+    return this.agents.get(userId)!;
+  }
+  
+  dispose() {
+    for (const agent of this.agents.values()) {
+      agent.dispose();
+    }
+    this.agents.clear();
+  }
+}
+```
