@@ -1,0 +1,17 @@
+[
+  {
+    "type": "file",
+    "name": "introduction",
+    "label": "Introduction"
+  },
+  {
+    "type": "file",
+    "name": "web",
+    "label": "Web UI"
+  },
+  {
+    "type": "file",
+    "name": "native",
+    "label": "Native UI"
+  }
+]

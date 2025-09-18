@@ -1,0 +1,186 @@
+---
+title: Workspace
+description: Understanding Tarko workspace and project structure
+---
+
+# Workspace
+
+Understand how to organize and structure your **Tarko Agent** projects.
+
+## Project Structure
+
+A typical **Tarko Agent** project follows this structure:
+
+```
+my-agent/
+├── src/
+│   ├── agent.ts          # Main agent implementation
+│   ├── tools/             # Custom tools
+│   ├── hooks/             # Agent hooks
+│   └── config/            # Configuration files
+├── package.json
+├── tsconfig.json
+└── tarko.config.ts        # Tarko configuration
+```
+
+## Configuration Files
+
+### `tarko.config.ts`
+
+The main configuration file for your **Tarko Agent**:
+
+```typescript
+import { defineConfig } from '@tarko/agent';
+
+export default defineConfig({
+  agent: {
+    name: 'MyAgent',
+    description: 'A custom Tarko agent',
+    systemPrompt: 'You are a helpful assistant...',
+  },
+  modelProvider: {
+    provider: 'openai',
+    model: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  tools: [
+    // Tool configurations
+  ],
+});
+```
+
+### `package.json`
+
+Ensure your `package.json` includes the necessary **Tarko** dependencies:
+
+```json
+{
+  "name": "my-agent",
+  "version": "1.0.0",
+  "dependencies": {
+    "@tarko/agent": "latest",
+    "@tarko/tools": "latest"
+  },
+  "scripts": {
+    "dev": "tarko run --dev",
+    "build": "tarko build",
+    "start": "tarko run"
+  }
+}
+```
+
+## Development Workflow
+
+### 1. Initialize Project
+
+```bash
+npm create tarko my-agent
+cd my-agent
+```
+
+### 2. Development Mode
+
+```bash
+npm run dev
+```
+
+This starts the agent in development mode with hot reloading.
+
+### 3. Testing
+
+```bash
+npm test
+```
+
+### 4. Production Build
+
+```bash
+npm run build
+npm start
+```
+
+## Environment Variables
+
+Common environment variables for **Tarko Agents**:
+
+```bash
+# Model Provider
+OPENAI_API_KEY=your_openai_key
+ANTHROPIC_API_KEY=your_anthropic_key
+VOLCENGINE_API_KEY=your_volcengine_key
+
+# Agent Configuration
+AGENT_NAME=MyAgent
+AGENT_PORT=3000
+AGENT_LOG_LEVEL=info
+
+# Tools
+SEARCH_API_KEY=your_search_key
+BROWSER_HEADLESS=true
+```
+
+## Best Practices
+
+### Modular Organization
+
+Organize your agent code into modules:
+
+```
+src/
+├── agent.ts              # Main agent
+├── tools/
+│   ├── index.ts          # Tool exports
+│   ├── search.ts         # Search tool
+│   └── browser.ts        # Browser tool
+├── hooks/
+│   ├── index.ts          # Hook exports
+│   ├── logging.ts        # Logging hook
+│   └── metrics.ts        # Metrics hook
+└── utils/
+    ├── helpers.ts        # Utility functions
+    └── constants.ts      # Constants
+```
+
+### Version Control
+
+Add to `.gitignore`:
+
+```bash
+# .gitignore
+node_modules/
+.env
+.env.local
+dist/
+build/
+.tarko/
+logs/
+```
+
+### TypeScript Configuration
+
+Recommended `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "outDir": "dist"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
+```
+
+## Next Steps
+
+- [Configuration →](/guide/basic/configuration)
+- [Model Provider →](/guide/basic/model-provider)
+- [Tools →](/guide/basic/tools)
