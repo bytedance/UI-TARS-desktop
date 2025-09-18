@@ -254,11 +254,13 @@ class ApiService {
         buffer += decoder.decode(value, { stream: true });
 
         // Process all complete events in the buffer
+        // Support SSE line separators: \r\n, \n, \r
         let eventEndIndex;
-        while ((eventEndIndex = buffer.indexOf('\n\n')) !== -1) {
+        while ((eventEndIndex = buffer.search(/\r\n\r\n|\n\n|\r\r/)) !== -1) {
           const eventString = buffer.slice(0, eventEndIndex);
-          // Move buffer to the next event
-          buffer = buffer.slice(eventEndIndex + 2);
+          // Determine separator length and move buffer to the next event
+          const separatorLength = buffer.slice(eventEndIndex).match(/^(\r\n\r\n|\n\n|\r\r)/)?.[0].length || 2;
+          buffer = buffer.slice(eventEndIndex + separatorLength);
 
           if (eventString.startsWith('data: ')) {
             try {
