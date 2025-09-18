@@ -256,10 +256,21 @@ class ApiService {
         // Process all complete events in the buffer
         // Support SSE line separators: \r\n, \n, \r
         let eventEndIndex;
-        while ((eventEndIndex = buffer.search(/\r\n\r\n|\n\n|\r\r/)) !== -1) {
+        while (true) {
+          // Find the earliest occurrence of any double separator
+          const crlfIndex = buffer.indexOf('\r\n\r\n');
+          const lfIndex = buffer.indexOf('\n\n');
+          const crIndex = buffer.indexOf('\r\r');
+          
+          eventEndIndex = Math.min(
+            ...[crlfIndex, lfIndex, crIndex].filter(i => i !== -1)
+          );
+          
+          if (eventEndIndex === Infinity) break; // No complete event found
+          
           const eventString = buffer.slice(0, eventEndIndex);
-          // Determine separator length and move buffer to the next event
-          const separatorLength = buffer.slice(eventEndIndex).match(/^(\r\n\r\n|\n\n|\r\r)/)?.[0].length || 2;
+          // Determine separator length based on which separator was found
+          const separatorLength = eventEndIndex === crlfIndex ? 4 : 2;
           buffer = buffer.slice(eventEndIndex + separatorLength);
 
           if (eventString.startsWith('data: ')) {
