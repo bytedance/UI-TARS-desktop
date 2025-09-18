@@ -30,8 +30,8 @@ const agent = new Agent({
 ```typescript
 {
   provider: 'openai',
+  id: 'gpt-4',
   apiKey: 'your-api-key',
-  model: 'gpt-4'
 }
 ```
 
@@ -40,8 +40,8 @@ const agent = new Agent({
 ```typescript
 {
   provider: 'anthropic',
+  id: 'claude-3-5-sonnet-20241022',
   apiKey: 'your-api-key',
-  model: 'claude-3-sonnet'
 }
 ```
 
@@ -50,8 +50,8 @@ const agent = new Agent({
 ```typescript
 {
   provider: 'volcengine',
+  id: 'ep-20250510145437-5sxhs',  // 或 'doubao-1.5-thinking-vision-pro'
   apiKey: 'your-api-key',
-  model: 'doubao-pro'
 }
 ```
 
@@ -61,9 +61,9 @@ const agent = new Agent({
 
 ```typescript
 {
-  provider: 'custom',
+  provider: 'openai',  // 使用 openai 兼容协议
   baseURL: 'https://your-endpoint.com/v1',
+  id: 'your-model',
   apiKey: 'your-api-key',
-  model: 'your-model'
 }
 ```

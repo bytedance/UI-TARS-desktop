@@ -18,10 +18,5 @@
     "type": "file",
     "name": "agent-snapshot",
     "label": "Agent Snapshot"
-  },
-  {
-    "type": "file",
-    "name": "testing",
-    "label": "Testing"
   }
 ]

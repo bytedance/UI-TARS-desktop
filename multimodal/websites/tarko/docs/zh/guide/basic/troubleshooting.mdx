@@ -1,0 +1,289 @@
+---
+title: 故障排除
+description: Tarko Agent 常见问题和解决方案
+---
+
+# 故障排除
+
+使用 **Tarko Agent** 时的常见问题和解决方案。
+
+## 安装问题
+
+### Node.js 版本
+
+**问题**：安装失败，出现 Node.js 版本错误。
+
+**解决方案**：确保使用 Node.js 18 或更高版本：
+
+```bash
+node --version  # 应该是 18.0.0 或更高
+npm --version   # 应该是 8.0.0 或更高
+```
+
+### 包安装
+
+**问题**：`npm install` 失败，出现依赖冲突。
+
+**解决方案**：清除缓存并重新安装：
+
+```bash
+npm cache clean --force
+rm -rf node_modules package-lock.json
+npm install
+```
+
+## 运行时问题
+
+### Agent 无法启动
+
+**问题**：Agent 启动失败，出现配置错误。
+
+**解决方案**：检查你的 `tarko.config.ts`：
+
+```typescript
+// 确保所有必需字段都存在
+export default defineConfig({
+  agent: {
+    name: 'MyAgent',        // 必需
+    systemPrompt: '...',    // 必需
+  },
+  modelProvider: {
+    provider: 'openai',     // 必需
+    apiKey: process.env.OPENAI_API_KEY, // 必需
+  },
+});
+```
+
+### API 密钥问题
+
+**问题**："无效的 API 密钥" 或认证错误。
+
+**解决方案**：验证环境变量：
+
+```bash
+# 检查 API 密钥是否已设置
+echo $OPENAI_API_KEY
+
+# 如果缺失，设置 API 密钥
+export OPENAI_API_KEY="your-api-key-here"
+```
+
+### 端口已被占用
+
+**问题**："端口 3000 已被占用" 错误。
+
+**解决方案**：使用不同的端口：
+
+```bash
+# 选项 1：终止现有进程
+lsof -ti:3000 | xargs kill -9
+
+# 选项 2：使用不同端口
+AGENT_PORT=3001 tarko run
+```
+
+## 工具问题
+
+### 找不到工具
+
+**问题**："找不到工具 'xyz'" 错误。
+
+**解决方案**：确保工具已正确注册：
+
+```typescript
+import { searchTool } from '@tarko/tools';
+
+export default defineConfig({
+  tools: [
+    searchTool(),  // 确保工具已包含
+  ],
+});
+```
+
+### 浏览器工具问题
+
+**问题**：浏览器工具启动失败。
+
+**解决方案**：安装浏览器依赖：
+
+```bash
+# Ubuntu/Debian
+sudo apt-get install -y chromium-browser
+
+# macOS
+brew install chromium
+
+# 或使用无头模式
+BROWSER_HEADLESS=true tarko run
+```
+
+### 文件系统权限
+
+**问题**：文件系统工具无法访问文件。
+
+**解决方案**：检查文件权限和工作区配置：
+
+```typescript
+export default defineConfig({
+  tools: [
+    fileSystemTool({
+      allowedPaths: ['/path/to/workspace'],  // 指定允许的路径
+      readonly: false,                       // 允许写操作
+    }),
+  ],
+});
+```
+
+## 性能问题
+
+### 响应时间慢
+
+**问题**：Agent 响应非常慢。
+
+**解决方案**：优化配置：
+
+```typescript
+export default defineConfig({
+  modelProvider: {
+    provider: 'openai',
+    model: 'gpt-4o-mini',  // 使用更快的模型
+    temperature: 0.1,      // 降低温度以获得更快响应
+    maxTokens: 1000,       // 限制响应长度
+  },
+  agent: {
+    maxIterations: 5,      // 限制思考循环
+    timeout: 30000,        // 30 秒超时
+  },
+});
+```
+
+### 内存使用
+
+**问题**：内存消耗过高。
+
+**解决方案**：配置上下文限制：
+
+```typescript
+export default defineConfig({
+  agent: {
+    maxContextLength: 8000,    // 限制上下文大小
+    contextStrategy: 'sliding', // 使用滑动窗口
+  },
+});
+```
+
+## 开发问题
+
+### 热重载不工作
+
+**问题**：更改不会在开发模式下触发重载。
+
+**解决方案**：检查文件监听：
+
+```bash
+# 增加文件监听限制（Linux）
+echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
+
+# 重启开发服务器
+npm run dev
+```
+
+### TypeScript 错误
+
+**问题**：TypeScript 编译错误。
+
+**解决方案**：检查 `tsconfig.json` 和依赖：
+
+```bash
+# 安装类型定义
+npm install --save-dev @types/node
+
+# 检查 TypeScript 版本
+npx tsc --version
+
+# 手动编译查看错误
+npx tsc --noEmit
+```
+
+## 调试
+
+### 启用调试日志
+
+```bash
+# 设置日志级别为调试
+AGENT_LOG_LEVEL=debug tarko run
+
+# 或在配置中
+export default defineConfig({
+  agent: {
+    logLevel: 'debug',
+  },
+});
+```
+
+### 检查 Agent 状态
+
+```typescript
+import { useAgentHooks } from '@tarko/agent';
+
+export default defineConfig({
+  hooks: {
+    onBeforeToolCall: (context) => {
+      console.log('工具调用:', context.toolName, context.args);
+    },
+    onAfterToolCall: (context) => {
+      console.log('工具结果:', context.result);
+    },
+  },
+});
+```
+
+### 网络问题
+
+```bash
+# 测试 API 连接
+curl -H "Authorization: Bearer $OPENAI_API_KEY" \
+     https://api.openai.com/v1/models
+
+# 检查代理设置
+echo $HTTP_PROXY
+echo $HTTPS_PROXY
+```
+
+## 获取帮助
+
+### 日志文件
+
+检查日志文件获取详细错误信息：
+
+```bash
+# 默认日志位置
+tail -f ~/.tarko/logs/agent.log
+
+# 或自定义日志位置
+tail -f ./logs/tarko.log
+```
+
+### 常见错误代码
+
+| 错误代码 | 描述 | 解决方案 |
+|----------|------|----------|
+| `ECONNREFUSED` | 连接被拒绝 | 检查网络/API 端点 |
+| `ENOTFOUND` | DNS 解析失败 | 检查网络连接 |
+| `EACCES` | 权限被拒绝 | 检查文件/目录权限 |
+| `EMFILE` | 打开文件过多 | 增加文件描述符限制 |
+
+### 社区支持
+
+- [GitHub Issues](https://github.com/bytedance/UI-TARS-desktop/issues)
+- [文档](https://tarko.dev)
+- [Discord 社区](#) {/* 社区链接占位符 */}
+
+## 下一步
+
+如果你仍然遇到问题：
+
+1. 查看[配置指南](/guide/basic/configuration)
+2. 查看[Agent Hooks](/guide/advanced/agent-hooks)进行调试
+3. 探索[Agent Hooks](/guide/advanced/agent-hooks)进行调试

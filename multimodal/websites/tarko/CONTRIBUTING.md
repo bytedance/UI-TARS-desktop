@@ -1,321 +1,107 @@
-# Contributing to Tarko Documentation
+# Tarko 文档贡献指南
 
-This guide helps contributors understand how Tarko documentation maps to source code and how to maintain accurate documentation.
+> **🚨 重要：所有 Git Commit 信息必须使用中文！英文提交 = PR 被拒绝**
+> 
+> 正确：`feat: 添加新功能` ✅  
+> 错误：`feat: add new feature` ❌
 
-## Documentation Structure
+## 📚 文档-源代码映射
 
-The Tarko documentation follows this structure:
+### `@tarko/agent` 核心包
+**源码：** `multimodal/tarko/agent/`
 
-```
-multimodal/websites/tarko/docs/
-├── en/                          # English documentation
-│   ├── guide/
-│   │   ├── get-started/         # Getting started guides
-│   │   ├── basic/              # Basic concepts
-│   │   ├── advanced/           # Advanced features
-│   │   ├── ui-integration/     # UI integration guides
-│   │   └── deployment/         # Deployment guides
-│   ├── api/                    # API reference
-│   └── examples/               # Code examples
-└── zh/                         # Chinese documentation (mirrors en/)
-```
+| 文档页面 | 源代码文件 | 说明 |
+|----------|------------|------|
+| `/guide/get-started/sdk.mdx` | `src/agent/agent.ts` | 主 Agent 类 API |
+| `/guide/basic/tool-call-engine.mdx` | `src/tool-call-engine/` | 工具调用引擎 |
+| `/guide/basic/event-stream.mdx` | `src/agent/event-stream.ts` | 事件流处理器 |
+| `/guide/advanced/agent-hooks.mdx` | `src/agent/base-agent.ts` | Agent 钩子实现 |
+| `/guide/advanced/context-engineering.mdx` | `src/agent/message-history.ts` | 上下文管理 |
+| `/api/agent.mdx` | `src/index.ts` | 主要导出和接口 |
 
-## Source Code Mapping
+### `@tarko/agent-interface` 接口包
+**源码：** `multimodal/tarko/agent-interface/`
 
-This section maps each documentation page to its corresponding source code:
+| 文档页面 | 源代码文件 | 说明 |
+|----------|------------|------|
+| `/api/agent.mdx` | `src/agent.ts` | IAgent 接口 |
+| `/api/tool-call-engine.mdx` | `src/tool-call-engine.ts` | 工具调用引擎接口 |
+| `/guide/basic/event-stream.mdx` | `src/agent-event-stream.ts` | 事件流类型 |
 
-### Core Package: `@tarko/agent`
+### `@tarko/model-provider` 模型提供商
+**源码：** `multimodal/tarko/model-provider/`
 
-**Source:** `multimodal/tarko/agent/`
+| 文档页面 | 源代码文件 | 说明 |
+|----------|------------|------|
+| `/guide/basic/model-provider.mdx` | `src/` | 模型提供商实现 |
 
-| Documentation | Source Code | Description |
-|---------------|-------------|-------------|
-| `/guide/get-started/sdk.mdx` | `src/agent/agent.ts` | Main Agent class API |
-| `/guide/basic/tool-call-engine.mdx` | `src/tool-call-engine/` | Tool call engines |
-| `/guide/basic/event-stream.mdx` | `src/agent/event-stream.ts` | Event stream processor |
-| `/guide/advanced/agent-hooks.mdx` | `src/agent/base-agent.ts` | Agent hooks implementation |
-| `/guide/advanced/context-engineering.mdx` | `src/agent/message-history.ts` | Context management |
-| `/api/agent.mdx` | `src/index.ts` | Main exports and interfaces |
+### `@tarko/agent-server` 服务器
+**源码：** `multimodal/tarko/agent-server/`
 
-**Key Files:**
-- `src/agent/agent.ts` - Main Agent class (constructor, run(), methods)
-- `src/agent/base-agent.ts` - Base class with hooks
-- `src/agent/tool-manager.ts` - Tool registration and management
-- `src/agent/agent-runner.ts` - Execution logic
-- `src/tool-call-engine/` - Tool call engines
-- `examples/` - Real usage examples
+| 文档页面 | 源代码文件 | 说明 |
+|----------|------------|------|
+| `/guide/deployment/server.mdx` | `src/` | 服务器实现 |
+| `/guide/advanced/agent-protocol.mdx` | `src/` | 协议定义 |
 
-### Agent Interface: `@tarko/agent-interface`
+### `@tarko/agent-cli` 命令行
+**源码：** `multimodal/tarko/agent-cli/`
 
-**Source:** `multimodal/tarko/agent-interface/`
+| 文档页面 | 源代码文件 | 说明 |
+|----------|------------|------|
+| `/guide/deployment/cli.mdx` | `src/` | CLI 实现 |
 
-| Documentation | Source Code | Description |
-|---------------|-------------|-------------|
-| `/api/agent.mdx` | `src/agent.ts` | IAgent interface |
-| `/api/tool-call-engine.mdx` | `src/tool-call-engine.ts` | Tool call engine interfaces |
-| `/guide/basic/event-stream.mdx` | `src/agent-event-stream.ts` | Event stream types |
+### `@tarko/agent-ui` 用户界面
+**源码：** `multimodal/tarko/agent-ui/`
 
-### Model Provider: `@tarko/model-provider`
+| 文档页面 | 源代码文件 | 说明 |
+|----------|------------|------|
+| `/guide/ui-integration/web.mdx` | `src/` | Web UI 组件 |
+| `/guide/ui-integration/native.mdx` | `src/` | 原生集成 |
 
-**Source:** `multimodal/tarko/model-provider/`
+## ✅ 文档编写规则
 
-| Documentation | Source Code | Description |
-|---------------|-------------|-------------|
-| `/guide/basic/model-provider.mdx` | `src/` | Model provider implementations |
+1. **代码示例必须真实** - 从 `examples/` 目录复制，禁止编造代码
+2. **API 文档匹配接口** - 检查 TypeScript 定义，确保参数名称和类型正确
+3. **中英文同步** - 同时更新两个版本
+4. **链接到源码** - 提供 GitHub 链接
+5. **Tool Call Engine 类型** - 必须使用源码中的实际类型：`native`、`prompt_engineering`、`structured_outputs`
+6. **Tool 定义** - 使用 `Tool` 类构造函数，参数为 `{ id, description, parameters, function }`
+7. **Agent 配置** - 使用实际的 `AgentOptions` 接口属性名
 
-### Agent Server: `@tarko/agent-server`
-
-**Source:** `multimodal/tarko/agent-server/`
-
-| Documentation | Source Code | Description |
-|---------------|-------------|-------------|
-| `/guide/deployment/server.mdx` | `src/` | Server implementation |
-| `/guide/advanced/agent-protocol.mdx` | `src/` | Protocol definitions |
-
-### Agent CLI: `@tarko/agent-cli`
-
-**Source:** `multimodal/tarko/agent-cli/`
-
-| Documentation | Source Code | Description |
-|---------------|-------------|-------------|
-| `/guide/deployment/cli.mdx` | `src/` | CLI implementation |
-
-## Documentation Guidelines
-
-### 1. Code Examples Must Be Real
-
-❌ **Don't** write fictional examples:
-```typescript
-// This doesn't exist in the codebase
-const agent = new Agent({
-  provider: 'fictional-provider',
-  model: 'fake-model'
-});
-```
-
-✅ **Do** use examples from the actual codebase:
-```typescript
-// From multimodal/tarko/agent/examples/tool-calls/basic.ts
-const agent = new Agent({
-  model: {
-    provider: 'volcengine',
-    id: 'ep-20250510145437-5sxhs',
-    apiKey: process.env.ARK_API_KEY,
-  },
-  tools: [locationTool, weatherTool],
-  logLevel: LogLevel.DEBUG,
-});
-```
-
-### 2. API Documentation Must Match Interfaces
-
-Always check the actual TypeScript interfaces:
-
-```typescript
-// Check multimodal/tarko/agent-interface/src/agent-options.ts
-interface AgentOptions {
-  instructions?: string;
-  name?: string;
-  // ... actual properties
-}
-```
-
-### 3. Keep Examples Updated
-
-When source code changes, update documentation:
-
-1. Check if examples in `multimodal/tarko/agent/examples/` still work
-2. Update documentation to match new API
-3. Test examples before committing
-
-### 4. Link to Source Code
-
-When documenting features, link to the actual implementation:
-
-```markdown
-## Agent Hooks
-
-Agent hooks are implemented in [`base-agent.ts`](https://github.com/bytedance/UI-TARS-desktop/blob/main/multimodal/tarko/agent/src/agent/base-agent.ts).
-```
-
-## Validation Process
-
-### Before Writing Documentation
-
-1. **Read the source code** in the corresponding package
-2. **Run the examples** to ensure they work
-3. **Check TypeScript interfaces** for accurate API documentation
-4. **Look at tests** for usage patterns
-
-### Documentation Checklist
-
-- [ ] Code examples are from actual source code
-- [ ] API documentation matches TypeScript interfaces
-- [ ] Links to source code are correct
-- [ ] Examples can be copy-pasted and run
-- [ ] All imports are correct
-- [ ] Environment variables are documented
-
-### Testing Documentation
+## 🔍 验证流程
 
 ```bash
-# Test that examples work
+# 测试示例
 cd multimodal/tarko/agent/examples/tool-calls
 npx tsx basic.ts
 
-# Test streaming example
-cd ../streaming
-npx tsx tool-calls.ts
+# 验证 Tool Call Engine 类型
+grep -r "toolCallEngine:" examples/ | head -3
 
-# Build documentation
+# 验证 Tool 构造函数
+grep -r "new Tool({" examples/ | head -3
+
+# 构建文档
 cd ../../../websites/tarko
 npm run build
+
+# 检查提交信息（必须包含中文）
+git log --oneline | head -5
 ```
 
-## Common Patterns
-
-### Code Example Template
-
-```markdown
-## Feature Name
-
-### Basic Usage
-
-```typescript
-// From multimodal/tarko/agent/examples/[example-file].ts
-import { Agent, Tool, z } from '@tarko/agent';
-
-// Real example code here
-```
-
-### Advanced Usage
-
-```typescript
-// More complex example
-```
-
-**Source:** [`multimodal/tarko/agent/examples/[example-file].ts`](link-to-github)
-```
-
-### API Reference Template
-
-```markdown
-## Method Name
-
-### Signature
-
-```typescript
-// Copy from actual TypeScript interface
-method(param: Type): ReturnType
-```
-
-### Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| param | Type | Description from source |
-
-### Example
-
-```typescript
-// Real example from codebase
-```
-
-**Implementation:** [`src/path/to/file.ts`](link-to-github)
-```
-
-## Updating Documentation
-
-### When Source Code Changes
-
-1. **Identify affected documentation** using the mapping table above
-2. **Update examples** to match new API
-3. **Update type definitions** if interfaces changed
-4. **Test all examples** to ensure they still work
-5. **Update version numbers** if needed
-
-### Adding New Features
-
-1. **Add source code mapping** to this guide
-2. **Create documentation** following the templates above
-3. **Add examples** based on actual usage
-4. **Update navigation** in `_meta.json` files
-
-## Review Process
-
-### For Documentation PRs
-
-1. **Verify code examples work** by running them
-2. **Check source code links** are correct
-3. **Ensure API documentation matches** TypeScript interfaces
-4. **Test documentation build** succeeds
-5. **Review for accuracy** against actual implementation
-
-### For Code PRs Affecting Documentation
-
-1. **Update corresponding documentation** pages
-2. **Fix broken examples** if API changed
-3. **Update type definitions** if interfaces changed
-4. **Test documentation build** after changes
-
-## Tools and Scripts
-
-### Useful Commands
+## 📝 提交信息格式
 
 ```bash
-# Find all references to a class/method in documentation
-grep -r "Agent" docs/
+# 正确格式
+git commit -m "feat: 添加新的模型提供商支持"
+git commit -m "fix: 修复事件流处理器的内存泄漏"
+git commit -m "docs: 更新 API 参考文档"
 
-# Check if examples compile
-cd multimodal/tarko/agent
-npm run build
-
-# Test specific example
-npx tsx examples/tool-calls/basic.ts
-
-# Build and test documentation
-cd ../../websites/tarko
-npm run build
-npm run dev
+# 错误格式（将被拒绝）
+git commit -m "feat: add new model provider"  # ❌
+git commit -m "fix: memory leak"              # ❌
 ```
-
-### Validation Script
-
-Create a script to validate documentation:
-
-```bash
-#!/bin/bash
-# validate-docs.sh
-
-echo "Testing Tarko agent examples..."
-cd multimodal/tarko/agent
-
-# Test each example
-for example in examples/*/; do
-  echo "Testing $example"
-  cd "$example"
-  if [ -f "*.ts" ]; then
-    # Run TypeScript check
-    npx tsc --noEmit *.ts
-  fi
-  cd ..
-done
-
-echo "Building documentation..."
-cd ../../websites/tarko
-npm run build
-
-echo "Validation complete!"
-```
-
-## Contact
-
-For questions about documentation:
-
-- Create an issue in the repository
-- Check existing documentation for patterns
-- Refer to source code for ground truth
 
 ---
 
-**Remember:** Documentation should always reflect the actual implementation, not aspirational features.
+**记住：** 文档必须反映真实代码，不能编造！中文提交信息是强制要求！

@@ -9,10 +9,10 @@ export default defineConfig({
   root: path.join(__dirname, 'docs'),
   lang: 'en',
   title: 'Tarko',
-  icon: '/favicon.ico',
+  icon: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/vryha/ljhwZthlaukjlkulzlp/tarko.png',
   logo: {
-    light: '/tarko-logo.png',
-    dark: '/tarko-logo.png',
+    light: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/vryha/ljhwZthlaukjlkulzlp/tarko.png',
+    dark: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/vryha/ljhwZthlaukjlkulzlp/tarko.png',
   },
   builderConfig: {
     resolve: {
@@ -24,7 +24,8 @@ export default defineConfig({
     html: {
       title: 'Tarko - Tool-augmented Agent Runtime Kernel',
       meta: {
-        description: 'A tool-augmented agent runtime kernel with powerful Context Engineering capabilities',
+        description:
+          'A tool-augmented agent runtime kernel with powerful Context Engineering capabilities',
         keywords: 'agent, runtime, tool-call, context-engineering, llm, ai',
         author: 'Tarko Team',
         viewport: 'width=device-width, initial-scale=1, maximum-scale=5',

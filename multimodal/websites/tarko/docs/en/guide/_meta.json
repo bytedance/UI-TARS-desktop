@@ -22,13 +22,6 @@
   },
   {
     "type": "dir",
-    "name": "ui-integration",
-    "label": "UI Integration",
-    "collapsible": false,
-    "collapsed": false
-  },
-  {
-    "type": "dir",
     "name": "deployment",
     "label": "Deployment",
     "collapsible": false,

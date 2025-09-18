@@ -1,11 +1,61 @@
 ---
-title: Web UI Integration
+title: UI Integration
 description: Build web interfaces for Tarko agents
 ---
 
-# Web UI Integration
+# UI Integration
 
-Learn how to build web interfaces for your **Tarko Agents** using modern web technologies.
+**Tarko** provides flexible UI integration options to build user interfaces for your agents using modern web technologies.
+
+## Integration Options
+
+### 1. **Tarko Agent UI** (Recommended)
+
+The official web UI implementation that works out-of-the-box with any **Tarko Agent**:
+
+```bash
+npm install @tarko/agent-ui
+```
+
+**Features:**
+- Real-time agent communication
+- Built-in chat interface
+- Tool execution visualization
+- Event stream monitoring
+- Responsive design
+
+### 2. **Custom Web UI**
+
+Build your own web interface using the **Agent Protocol**:
+
+```typescript
+import { AgentClient } from '@tarko/agent-client';
+
+const client = new AgentClient({
+  endpoint: 'http://localhost:3000',
+});
+
+// Send message to agent
+const response = await client.sendMessage('Hello, agent!');
+```
+
+### 3. **Native Applications**
+
+Integrate with desktop or mobile applications using HTTP/WebSocket APIs.
+
+## Architecture Overview
+
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   Frontend UI   │◄──►│  Tarko Agent     │◄──►│  LLM Provider   │
+│                 │    │  Server          │    │                 │
+├─────────────────┤    ├──────────────────┤    ├─────────────────┤
+│ • Chat Interface│    │ • Agent Protocol │    │ • OpenAI        │
+│ • Tool Outputs  │    │ • Event Stream   │    │ • Anthropic     │
+│ • Real-time     │    │ • Tool Execution │    │ • Volcengine    │
+│   Updates       │    │ • Context Mgmt   │    │ • Others        │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+```
 
 ## Quick Start with Tarko Agent UI
 
@@ -43,6 +93,73 @@ tarko run --server
 ```
 
 Your web UI will connect to the agent automatically!
+
+## Communication Protocols
+
+### HTTP API
+
+RESTful API for basic agent interactions:
+
+```typescript
+// Send message
+POST /api/chat
+{
+  "message": "Hello, agent!",
+  "sessionId": "session-123"
+}
+
+// Get session history
+GET /api/sessions/session-123/messages
+```
+
+### WebSocket
+
+Real-time bidirectional communication:
+
+```typescript
+const ws = new WebSocket('ws://localhost:3000/ws');
+
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  console.log('Agent event:', data);
+};
+```
+
+### Server-Sent Events (SSE)
+
+Streaming responses for real-time updates:
+
+```typescript
+const eventSource = new EventSource('/api/stream/session-123');
+
+eventSource.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  console.log('Stream update:', data);
+};
+```
+
+## Event Stream
+
+**Tarko** uses a standardized event stream format for real-time communication:
+
+```typescript
+interface AgentEvent {
+  type: 'message' | 'tool_call' | 'tool_result' | 'thinking' | 'error';
+  timestamp: string;
+  sessionId: string;
+  data: any;
+}
+```
+
+### Event Types
+
+| Event Type | Description | Data |
+|------------|-------------|------|
+| `message` | Agent response message | `{ content: string, role: 'assistant' }` |
+| `tool_call` | Tool execution started | `{ name: string, args: object }` |
+| `tool_result` | Tool execution completed | `{ result: any, success: boolean }` |
+| `thinking` | Agent reasoning process | `{ content: string }` |
+| `error` | Error occurred | `{ message: string, code?: string }` |
 
 ## Custom Web UI Development
 
@@ -289,7 +406,29 @@ class AgentEventSource {
 }
 ```
 
-## Advanced UI Components
+## UI Components
+
+### Chat Interface
+
+Basic chat component structure:
+
+```typescript
+interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+  toolCalls?: ToolCall[];
+}
+
+interface ToolCall {
+  id: string;
+  name: string;
+  args: object;
+  result?: any;
+  status: 'pending' | 'success' | 'error';
+}
+```
 
 ### Tool Execution Visualization
 
@@ -456,7 +595,64 @@ const ThinkingProcess: React.FC<{ thoughts: string[] }> = ({ thoughts }) => {
 }
 ```
 
-## Production Deployment
+## Authentication & Security
+
+### API Keys
+
+Secure API key authentication:
+
+```typescript
+const client = new AgentClient({
+  endpoint: 'http://localhost:3000',
+  apiKey: process.env.TARKO_API_KEY,
+});
+```
+
+### Session Management
+
+Manage user sessions and context:
+
+```typescript
+interface Session {
+  id: string;
+  userId?: string;
+  createdAt: Date;
+  lastActivity: Date;
+  context: AgentContext;
+}
+```
+
+## Deployment Considerations
+
+### CORS Configuration
+
+For web UIs, configure CORS in your agent server:
+
+```typescript
+export default defineConfig({
+  server: {
+    cors: {
+      origin: ['http://localhost:3000', 'https://myapp.com'],
+      credentials: true,
+    },
+  },
+});
+```
+
+### Reverse Proxy
+
+Use a reverse proxy for production deployments:
+
+```nginx
+location /api/ {
+    proxy_pass http://localhost:3001/;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host $host;
+    proxy_cache_bypass $http_upgrade;
+}
+```
 
 ### Environment Configuration
 
@@ -502,6 +698,6 @@ CMD ["nginx", "-g", "daemon off;"]
 
 ## Next Steps
 
-- [Native UI Integration →](/guide/ui-integration/native)
 - [Agent Protocol →](/guide/advanced/agent-protocol)
 - [Event Stream →](/guide/basic/event-stream)
+- [Configuration →](/guide/basic/configuration)

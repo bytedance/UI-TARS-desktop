@@ -15,20 +15,26 @@ import { Agent } from '@tarko/agent';
 const agent = new Agent({
   // Agent 身份
   name: 'MyAgent',
-  description: '一个有用的助手',
+  id: 'my-agent-v1',
   
   // 模型配置
   model: {
     provider: 'openai',
+    id: 'gpt-4',
     apiKey: process.env.OPENAI_API_KEY,
-    model: 'gpt-4'
   },
   
-  // 系统提示
-  systemPrompt: '你是一个有用的助手...',
+  // 系统提示（使用 instructions）
+  instructions: '你是一个有用的助手...',
   
   // 工具
-  tools: []
+  tools: [],
+  
+  // 最大迭代次数
+  maxIterations: 10,
+  
+  // 温度参数
+  temperature: 0.7,
 });
 ```
 
@@ -39,8 +45,7 @@ const agent = new Agent({
 ```typescript
 {
   name: 'string',           // Agent 名称
-  description: 'string',    // Agent 描述
-  version: 'string'         // Agent 版本
+  id: 'string',             // Agent ID
 }
 ```
 
@@ -49,14 +54,14 @@ const agent = new Agent({
 ```typescript
 {
   model: {
-    provider: 'openai' | 'anthropic' | 'volcengine' | 'custom',
+    provider: 'openai' | 'anthropic' | 'volcengine',
+    id: 'string',           // 模型 ID，如 'gpt-4', 'claude-3-sonnet'
     apiKey: 'string',
-    model: 'string',
-    baseURL?: 'string',     // 自定义提供商
-    temperature?: number,   // 0-1，默认：0.7
-    maxTokens?: number,     // 最大响应令牌
-    topP?: number          // 核采样
-  }
+    baseURL?: 'string',     // 自定义端点
+  },
+  temperature?: number,     // 0-1，默认：0.7
+  maxTokens?: number,       // 最大响应令牌
+  top_p?: number           // 核采样
 }
 ```
 
@@ -65,9 +70,8 @@ const agent = new Agent({
 ```typescript
 {
   context: {
-    maxLength: 32000,       // 最大上下文长度
-    compressionRatio: 0.8,  // 上下文压缩比
-    retentionStrategy: 'recent' | 'important' | 'hybrid'
+    maxImagesCount: 5,      // 最大图片数量
+    // 其他上下文选项根据实际实现
   }
 }
 ```
@@ -76,24 +80,17 @@ const agent = new Agent({
 
 ```typescript
 {
-  toolCallEngine: {
-    type: 'native' | 'prompt-engineering' | 'kor',
-    maxRetries: 3,
-    timeout: 30000
-  }
+  toolCallEngine: 'native' | 'prompt_engineering' | 'structured_outputs'
 }
 ```
 
-### Agent Hooks
+### 其他配置选项
 
 ```typescript
 {
-  hooks: {
-    beforeToolCall?: (toolCall) => void,
-    afterToolCall?: (result) => void,
-    onError?: (error) => void,
-    onComplete?: (result) => void
-  }
+  maxIterations: number,              // 最大循环次数，默认 1000
+  logLevel: LogLevel.DEBUG,           // 日志级别
+  enableStreamingToolCallEvents: boolean,  // 启用流式工具调用事件
 }
 ```
 

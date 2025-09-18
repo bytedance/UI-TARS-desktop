@@ -16,10 +16,8 @@ Tarko 定义了几种核心事件类型：
 ```typescript
 {
   type: 'user_message',
-  data: {
-    content: '你好，可以帮助我吗？',
-    timestamp: '2025-01-01T00:00:00Z'
-  }
+  content: '你好，可以帮助我吗？',
+  timestamp: '2025-01-01T00:00:00Z'
 }
 ```
 
@@ -27,11 +25,9 @@ Tarko 定义了几种核心事件类型：
 
 ```typescript
 {
-  type: 'agent_message',
-  data: {
-    content: '我很乐意帮助你！',
-    timestamp: '2025-01-01T00:00:01Z'
-  }
+  type: 'assistant_message',
+  content: '我很乐意帮助你！',
+  timestamp: '2025-01-01T00:00:01Z'
 }
 ```
 
@@ -40,20 +36,22 @@ Tarko 定义了几种核心事件类型：
 ```typescript
 {
   type: 'tool_call',
-  data: {
-    name: 'search',
-    parameters: { query: '今天天气' },
-    timestamp: '2025-01-01T00:00:02Z'
-  }
+  toolCall: {
+    id: 'call_123',
+    function: {
+      name: 'getWeather',
+      arguments: '{"location": "Boston"}'
+    }
+  },
+  timestamp: '2025-01-01T00:00:02Z'
 }
 
 {
   type: 'tool_result',
-  data: {
-    name: 'search',
-    result: { temperature: 72, condition: 'sunny' },
-    timestamp: '2025-01-01T00:00:03Z'
-  }
+  toolCallId: 'call_123',
+  toolName: 'getWeather',
+  result: { temperature: 72, condition: 'sunny' },
+  timestamp: '2025-01-01T00:00:03Z'
 }
 ```
 
@@ -72,25 +70,26 @@ Tarko 定义了几种核心事件类型：
 
 ## 监听事件
 
-从你的 Agent 订阅事件：
+通过事件流处理器订阅事件：
 
 ```typescript
 import { Agent } from '@tarko/agent';
 
 const agent = new Agent(config);
+const eventStream = agent.getEventStream();
 
 // 监听所有事件
-agent.on('event', (event) => {
-  console.log('事件:', event.type, event.data);
+eventStream.on('event', (event) => {
+  console.log('事件:', event.type);
 });
 
 // 监听特定事件类型
-agent.on('tool_call', (event) => {
-  console.log('调用工具:', event.data.name);
+eventStream.on('tool_call', (event) => {
+  console.log('调用工具:', event.toolCall.function.name);
 });
 
-agent.on('agent_message', (event) => {
-  console.log('Agent 响应:', event.data.content);
+eventStream.on('assistant_message', (event) => {
+  console.log('Agent 响应:', event.content);
 });
 ```
 
@@ -104,23 +103,23 @@ const eventProcessor = {
     switch (event.type) {
       case 'tool_call':
         // 记录工具使用
-        await logToolUsage(event.data);
+        await logToolUsage(event.toolCall);
         break;
         
-      case 'agent_message':
+      case 'assistant_message':
         // 更新 UI
-        await updateUI(event.data.content);
+        await updateUI(event.content);
         break;
         
       case 'error':
         // 处理错误
-        await handleError(event.data);
+        await handleError(event.error);
         break;
     }
   }
 };
 
-agent.on('event', eventProcessor.processEvent);
+eventStream.on('event', eventProcessor.processEvent);
 ```
 
 ## 服务器发送事件 (SSE)
@@ -136,7 +135,8 @@ app.get('/agent/stream', (req, res) => {
     'Connection': 'keep-alive'
   });
 
-  agent.on('event', (event) => {
+  const eventStream = agent.getEventStream();
+  eventStream.on('event', (event) => {
     res.write(`data: ${JSON.stringify(event)}\n\n`);
   });
 });

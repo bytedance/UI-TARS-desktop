@@ -14,49 +14,68 @@ description: 几分钟内开始使用 Tarko
 
 ## 安装
 
-### 创建新的 Agent
+### 创建新的 Agent（开发中）
 
-使用 Tarko CLI 的最快方式：
+🚧 **开发中**：使用 Tarko CLI 的最快方式即将推出：
 
 ```bash
-npm create tarko
+npm create tarko  # 即将推出
 ```
 
-或使用 agent starter 模板：
+### 安装 Tarko 包
+
+目前请手动安装核心包：
 
 ```bash
-git clone https://github.com/agent-infra/agent-starter
-cd agent-starter
-npm install
-```
-
-### 手动安装 Tarko 包
-
-```bash
-npm install @tarko/agent @tarko/agent-cli
+npm install @tarko/agent
 ```
 
 ## 基本使用
 
 ### 1. 定义你的 Agent
 
-创建 `agent.ts` 文件：
+基于真实示例创建 `agent.ts` 文件：
 
 ```typescript
-import { Agent } from '@tarko/agent';
+// 来自 multimodal/tarko/agent/examples/tool-calls/basic.ts
+import { Agent, Tool, z, LogLevel } from '@tarko/agent';
+
+const locationTool = new Tool({
+  id: 'getCurrentLocation',
+  description: "获取用户当前位置",
+  parameters: z.object({}),
+  function: async () => {
+    return { location: 'Boston' };
+  },
+});
+
+const weatherTool = new Tool({
+  id: 'getWeather',
+  description: '获取指定位置的天气信息',
+  parameters: z.object({
+    location: z.string().describe('位置名称，如城市名'),
+  }),
+  function: async (input) => {
+    const { location } = input;
+    return {
+      location,
+      temperature: '70°F (21°C)',
+      condition: 'Sunny',
+      precipitation: '10%',
+      humidity: '45%',
+      wind: '5 mph',
+    };
+  },
+});
 
 const agent = new Agent({
-  name: 'MyAgent',
-  description: '一个有用的助手 Agent',
-  systemPrompt: '你是一个有用的助手。',
-  tools: [
-    // 在这里添加你的工具
-  ],
-  modelProvider: {
-    apiKey: process.env.OPENAI_API_KEY,
-    baseURL: 'https://api.openai.com/v1',
-    model: 'gpt-4'
-  }
+  model: {
+    provider: 'volcengine',
+    id: 'ep-20250510145437-5sxhs',
+    apiKey: process.env.ARK_API_KEY,
+  },
+  tools: [locationTool, weatherTool],
+  logLevel: LogLevel.DEBUG,
 });
 
 export default agent;
@@ -64,17 +83,71 @@ export default agent;
 
 ### 2. 运行你的 Agent
 
-使用 CLI 启动你的 Agent：
+直接运行你的 Agent：
 
-```bash
-npx tarko run agent.ts
+```typescript
+// 运行 Agent
+const response = await agent.run("今天天气怎么样？");
+console.log(response);
 ```
 
-这将在 `http://localhost:3000` 启动一个本地服务器和 Web UI。
+### 3. 流式示例
+
+对于流式响应：
+
+```typescript
+// 来自 multimodal/tarko/agent/examples/streaming/tool-calls.ts
+const response = await agent.run({
+  input: "今天天气怎么样？",
+  stream: true,
+});
+
+for await (const chunk of response) {
+  console.log(chunk);
+}
+```
+
+## 环境变量
+
+创建包含 API 密钥的 `.env` 文件：
+
+```bash
+# .env 文件
+ARK_API_KEY=your-volcengine-api-key
+OPENAI_API_KEY=your-openai-api-key
+ANTHROPIC_API_KEY=your-anthropic-api-key
+```
+
+## 真实示例
+
+探索仓库中的工作示例：
+
+- [`multimodal/tarko/agent/examples/tool-calls/basic.ts`](https://github.com/bytedance/UI-TARS-desktop/blob/main/multimodal/tarko/agent/examples/tool-calls/basic.ts) - 基础工具调用
+- [`multimodal/tarko/agent/examples/streaming/tool-calls.ts`](https://github.com/bytedance/UI-TARS-desktop/blob/main/multimodal/tarko/agent/examples/streaming/tool-calls.ts) - 流式工具调用
+- [`multimodal/tarko/agent/examples/model-providers/`](https://github.com/bytedance/UI-TARS-desktop/tree/main/multimodal/tarko/agent/examples/model-providers) - 不同模型提供商
 
 ## 下一步
 
+- [SDK 参考](/guide/get-started/sdk) - 完整 API 参考
 - [架构设计](/guide/get-started/architecture) - 了解 Tarko 的设计
-- [Context Engineering](/guide/advanced/context-engineering) - 掌握长程运行的 Agent
-- [Tool Call Engine](/guide/basic/tool-call-engine) - 构建自定义工具
+- [工具](/guide/basic/tools) - 创建自定义工具
 - [示例](/examples/getting-started) - 探索实际案例
+
+## 测试示例
+
+测试示例是否工作：
+
+```bash
+# 克隆仓库
+git clone https://github.com/bytedance/UI-TARS-desktop.git
+cd UI-TARS-desktop/multimodal/tarko/agent
+
+# 安装依赖
+npm install
+
+# 运行基础工具调用示例
+npx tsx examples/tool-calls/basic.ts
+
+# 运行流式示例
+npx tsx examples/streaming/tool-calls.ts
+```

@@ -26,56 +26,67 @@ npm install @tarko/tools-browser @tarko/tools-filesystem
 ### 创建 Agent
 
 ```typescript
-import { Agent } from '@tarko/agent';
-import { FileSystemTool, BrowserTool } from '@tarko/tools';
+import { Agent, Tool, z } from '@tarko/agent';
+
+// 创建自定义工具
+const weatherTool = new Tool({
+  id: 'getWeather',
+  description: '获取指定位置的天气信息',
+  parameters: z.object({
+    location: z.string().describe('位置名称，如城市名'),
+  }),
+  function: async (input) => {
+    const { location } = input;
+    return {
+      location,
+      temperature: '70°F (21°C)',
+      condition: 'Sunny',
+    };
+  },
+});
 
 const agent = new Agent({
   name: 'MyAgent',
-  description: '一个有用的助手',
   
   model: {
     provider: 'openai',
+    id: 'gpt-4',
     apiKey: process.env.OPENAI_API_KEY,
-    model: 'gpt-4'
   },
   
-  systemPrompt: `你是一个有用的助手，可以：
-  - 读写文件
-  - 浏览网页
-  - 执行命令
+  instructions: `你是一个有用的助手，可以获取天气信息。`,
   
-  始终保持有用和准确。`,
-  
-  tools: [
-    new FileSystemTool(),
-    new BrowserTool()
-  ]
+  tools: [weatherTool]
 });
 ```
 
-### 聊天接口
+### 运行 Agent
 
 ```typescript
-// 简单聊天
-const response = await agent.chat('你好，可以帮助我吗？');
+// 简单运行
+const response = await agent.run('你好，可以帮助我吗？');
 console.log(response);
 
-// 带上下文的聊天
-const conversation = agent.createConversation();
-const response1 = await conversation.chat('今天天气怎么样？');
-const response2 = await conversation.chat('明天呢？');
+// 使用配置选项运行
+const response2 = await agent.run({
+  input: '今天天气怎么样？',
+  sessionId: 'my-session'
+});
 ```
 
 ### 流式响应
 
 ```typescript
-const stream = agent.chatStream('写一个关于 AI 的长故事');
+const stream = await agent.run({
+  input: '写一个关于 AI 的长故事',
+  stream: true
+});
 
 for await (const chunk of stream) {
-  if (chunk.type === 'content') {
-    process.stdout.write(chunk.data);
+  if (chunk.type === 'assistant_message') {
+    process.stdout.write(chunk.content);
   } else if (chunk.type === 'tool_call') {
-    console.log('调用工具:', chunk.data.name);
+    console.log('调用工具:', chunk.toolCall.function.name);
   }
 }
 ```
@@ -87,58 +98,59 @@ for await (const chunk of stream) {
 创建特定领域的工具：
 
 ```typescript
-import { Tool } from '@tarko/agent';
+import { Tool, z } from '@tarko/agent';
 
-class DatabaseTool implements Tool {
-  name = 'query_database';
-  description = '查询应用数据库';
-  
-  parameters = {
-    type: 'object',
-    properties: {
-      query: {
-        type: 'string',
-        description: '要执行的 SQL 查询'
-      }
-    },
-    required: ['query']
-  };
-
-  async execute(params: { query: string }) {
+// 创建数据库查询工具
+const databaseTool = new Tool({
+  id: 'query_database',
+  description: '查询应用数据库',
+  parameters: z.object({
+    query: z.string().describe('要执行的 SQL 查询'),
+    limit: z.number().optional().describe('结果限制数量')
+  }),
+  function: async (params) => {
+    const { query, limit = 10 } = params;
     // 你的数据库逻辑
-    const results = await this.db.query(params.query);
-    return { results };
-  }
-
-  constructor(private db: DatabaseConnection) {}
-}
+    const results = await myDatabase.query(query, { limit });
+    return { results, count: results.length };
+  },
+});
 
 const agent = new Agent({
-  // ... 其他配置
-  tools: [
-    new DatabaseTool(myDatabase),
-    new FileSystemTool()
-  ]
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  tools: [databaseTool]
 });
 ```
 
 ### 事件处理
 
 ```typescript
-// 监听 Agent 事件
-agent.on('tool_call', (event) => {
-  console.log(`调用工具: ${event.data.name}`);
+// 获取事件流处理器
+const eventStream = agent.getEventStream();
+
+// 监听工具调用事件
+eventStream.on('tool_call', (event) => {
+  console.log(`调用工具: ${event.toolCall.function.name}`);
   // 记录到分析系统、更新 UI 等
 });
 
-agent.on('error', (event) => {
-  console.error('Agent 错误:', event.data.error);
+// 监听错误事件
+eventStream.on('error', (event) => {
+  console.error('Agent 错误:', event.error);
   // 处理错误、通知用户等
 });
 
-agent.on('context_updated', (event) => {
-  console.log('上下文长度:', event.data.newLength);
-  // 监控上下文使用情况
+// 监听 Agent 运行状态
+eventStream.on('agent_run_start', (event) => {
+  console.log('Agent 开始运行:', event.sessionId);
+});
+
+eventStream.on('agent_run_end', (event) => {
+  console.log('Agent 运行结束:', event.iterations, '次迭代');
 });
 ```
 
@@ -146,43 +158,63 @@ agent.on('context_updated', (event) => {
 
 ```typescript
 const agent = new Agent({
-  // ... 其他配置
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
   context: {
-    maxLength: 32000,
-    compressionRatio: 0.8,
-    retentionStrategy: 'hybrid'
+    maxImagesCount: 5,  // 支持的最大图片数量
   }
 });
 
-// 手动上下文操作
-const summary = await agent.summarizeContext();
-const compressed = await agent.compressContext(0.5);
-await agent.clearContext();
+// 生成对话摘要
+const summary = await agent.generateSummary({
+  messages: conversationHistory,
+});
+console.log('对话摘要:', summary.summary);
 ```
 
 ### Agent Hooks
 
+Tarko 提供多种钩子来自定义 Agent 行为。通过继承 Agent 类并重写钩子方法：
+
 ```typescript
-const agent = new Agent({
-  // ... 其他配置
-  hooks: {
-    beforeToolCall: async (toolCall) => {
-      // 验证工具调用
-      if (toolCall.name === 'dangerous_operation') {
-        throw new Error('不允许此操作');
-      }
-    },
-    
-    afterToolCall: async (result) => {
-      // 记录结果
-      await logToolResult(result);
-    },
-    
-    onError: async (error) => {
-      // 自定义错误处理
-      await notifyAdmins(error);
+import { Agent } from '@tarko/agent';
+
+class CustomAgent extends Agent {
+  async onBeforeToolCall(id: string, toolCall: any, args: any) {
+    // 验证工具调用
+    if (toolCall.name === 'dangerous_operation') {
+      throw new Error('不允许此操作');
     }
+    return args;
   }
+  
+  async onAfterToolCall(id: string, toolCall: any, result: any) {
+    // 记录结果
+    await this.logToolResult(toolCall, result);
+    return result;
+  }
+  
+  async onToolCallError(id: string, toolCall: any, error: any) {
+    // 自定义错误处理
+    console.error('工具调用错误:', toolCall.name, error);
+    return { error: '工具执行失败，请重试' };
+  }
+  
+  private async logToolResult(toolCall: any, result: any) {
+    console.log(`工具 ${toolCall.name} 执行完成:`, result);
+  }
+}
+
+const agent = new CustomAgent({
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  tools: [weatherTool]
 });
 ```
 
