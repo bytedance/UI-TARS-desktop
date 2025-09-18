@@ -250,14 +250,15 @@ class ApiService {
         const { done, value } = await reader.read();
         if (done) break;
 
-        // Add the new chunk to the buffer and normalize line endings
-        buffer += decoder.decode(value, { stream: true }).replace(/\r\n?/g, '\n');
+        // Add the new chunk to the buffer
+        buffer += decoder.decode(value, { stream: true });
 
         // Process all complete events in the buffer
         let eventEndIndex;
-        while ((eventEndIndex = buffer.indexOf('\n\n')) !== -1) {
+        while ((eventEndIndex = buffer.search(/\r\n\r\n|\n\n|\r\r/)) !== -1) {
           const eventString = buffer.slice(0, eventEndIndex);
-          buffer = buffer.slice(eventEndIndex + 2);
+          const sepLength = buffer.substr(eventEndIndex, 4) === '\r\n\r\n' ? 4 : 2;
+          buffer = buffer.slice(eventEndIndex + sepLength);
 
           if (eventString.startsWith('data: ')) {
             try {
