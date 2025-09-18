@@ -228,6 +228,21 @@ export class ActionParserHelper {
     return argumentsObj;
   }
 
+  /**
+   * Standardizes action inputs based on action type by normalizing parameter names
+   * and converting coordinate strings to structured Coordinates objects.
+   *
+   * Key transformations:
+   * 1. Normalizes parameter names:
+   *    - 'start_box' or any parameter containing 'start' -> 'start'
+   *    - 'end_box' or any parameter containing 'end' -> 'end'
+   * 2. If 'start' exists without 'end', renames 'start' to 'point'
+   * 3. Converts string coordinate formats to structured Coordinates objects
+   *
+   * @param actionType - The type of the action
+   * @param params - The raw parameters of the action
+   * @returns The standardized parameters object for GUIAction(see: @gui-agent/shared/types)
+   */
   public standardizeActionInputs(
     actionType: string,
     params: Record<string, string>,
