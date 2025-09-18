@@ -69,7 +69,7 @@ Visit the comprehensive [Quick Start](https://agent-tars.com/guide/get-started/q
 - 🐦 [Release Announcement on Twitter](https://x.com/_ulivz/status/1938009759413899384)
 - 🐦 [Official Twitter](https://x.com/agent_tars)
 - 💬 [Discord Community](https://discord.gg/HnKcSBgTVx)
-- 💬 [飞书交流群](https://applink.larkoffice.com/client/chat/chatter/add_by_link?link_token=279h3365-b0fa-407f-89f3-0f96f36cd4d8)
+- 💬 [飞书交流群](https://applink.larkoffice.com/client/chat/chatter/add_by_link?link_token=deen76f4-ea3c-4964-93a3-78f126f39651)
 - 🚀 [Quick Start](https://agent-tars.com/quick-start)
 - 💻 [CLI Documentation](https://agent-tars.com/guide/basic/cli.html)
 - 🖥️ [Web UI Guide](https://agent-tars.com/guide/basic/web-ui.html)
