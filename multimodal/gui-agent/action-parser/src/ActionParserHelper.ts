@@ -259,7 +259,7 @@ export class ActionParserHelper {
         paramName.includes('end_box') ||
         paramName.includes('point')
       ) {
-        const coords = this.standardlizeCoordinates(trimmedParam);
+        const coords = this.parseCoordinates(trimmedParam);
         if (!coords) {
           continue;
         }
@@ -296,12 +296,19 @@ export class ActionParserHelper {
   /**
    * Parses coordinate string into structured coordinates
    * @param {string} params - The coordinate string to parse, supported format:
+   *  - 100, 200
+   *  - 100 200
    *  - "(100, 200)"
+   *  - "(100 200)"
    *  - "[100, 200]"
+   *  - "[100 200]"
+   *  - "<point>100, 200</point>"
+   *  - "<point>100 200</point>"
+   * and the coordinate must contain either 2 numbers (x,y) or 4 numbers (x1,y1,x2,y2)
    * @returns {Coordinates} Parsed coordinates object
    * @throws {Error} If coordinate string is invalid
    */
-  public standardlizeCoordinates(params: string): Coordinates {
+  public parseCoordinates(params: string): Coordinates {
     const oriBox = params.trim();
     this.logger.debug(`[parseCoordinates] processing trimmed params:`, oriBox);
 
@@ -310,16 +317,17 @@ export class ActionParserHelper {
       throw new Error('Coordinate string is empty');
     }
 
-    const hasValidBrackets = /[[\]()]+/.test(oriBox);
+    const hasValidBrackets = /[[\]()<point></point>]+/.test(oriBox);
     if (!hasValidBrackets) {
       this.logger.warn('[parseCoordinates] invalid bracket format');
-      throw new Error('Invalid coordinate format');
+      // to support '100, 200' or '100 200', NOT throw error
+      // throw new Error('Invalid coordinate format');
     }
 
-    // Remove parentheses and split
+    // Remove brackets and split
     const numbers = oriBox
-      .replace(/[()[\]]/g, '')
-      .split(',')
+      .replace(/[()[\]<point></point>]/g, '')
+      .split(/[,\s]+/) // Split by comma or whitespace
       .map((s) => s.trim())
       .filter((s) => s !== '');
     this.logger.debug(`[parseCoordinates] extracted numbers:`, numbers);
@@ -334,7 +342,7 @@ export class ActionParserHelper {
       const result = Number.parseFloat(num);
       if (isNaN(result)) {
         this.logger.warn(`[parseCoordinates] invalid number at position ${index}: ${num}`);
-        return 0;
+        throw new Error(`Invalid number at position ${index}: ${num}`);
       }
       this.logger.debug(`[parseCoordinates] number conversion: ${num} = ${result}`);
       return result;

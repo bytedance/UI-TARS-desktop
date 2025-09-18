@@ -4,68 +4,224 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { ActionParserHelper } from '../src/ActionParserHelper';
 
-function parseNumFromBoxString(oriBox: string) {
-  const numbers = oriBox
-    .replace(/[()[\]]/g, '')
-    .split(',')
-    .map((s) => s.trim())
-    .filter((s) => s !== '');
-  return numbers;
-}
+const helper = new ActionParserHelper();
 
-describe('xml parser', () => {
+describe('parseCoordinates', () => {
   it('(1.1)', () => {
     const input = `(1.1)`;
-    const result = parseNumFromBoxString(input);
-    expect(result).toEqual(['1.1']);
+    expect(() => helper.parseCoordinates(input)).toThrow(
+      'Insufficient coordinate, at least 2 numbers required',
+    );
   });
 
   it('(1, 1)', () => {
     const input = `(1, 1)`;
-    const result = parseNumFromBoxString(input);
-    expect(result).toEqual(['1', '1']);
+    const result = helper.parseCoordinates(input);
+    expect(result).toEqual({
+      raw: {
+        x: 1,
+        y: 1,
+      },
+      referenceBox: {
+        x1: 1,
+        x2: 1,
+        y1: 1,
+        y2: 1,
+      },
+    });
+  });
+
+  it('1 2 3 4', () => {
+    const input = `1 2 3 4`;
+    const result = helper.parseCoordinates(input);
+    expect(result).toEqual({
+      raw: {
+        x: 2,
+        y: 3,
+      },
+      referenceBox: {
+        x1: 1,
+        y1: 2,
+        x2: 3,
+        y2: 4,
+      },
+    });
   });
 
   it('[1, 1]', () => {
     const input = `[1, 1]`;
-    const result = parseNumFromBoxString(input);
-    expect(result).toEqual(['1', '1']);
+    const result = helper.parseCoordinates(input);
+    expect(result).toEqual({
+      raw: {
+        x: 1,
+        y: 1,
+      },
+      referenceBox: {
+        x1: 1,
+        x2: 1,
+        y1: 1,
+        y2: 1,
+      },
+    });
   });
 
   it('[1,1]', () => {
     const input = `[1,1]`;
-    const result = parseNumFromBoxString(input);
-    expect(result).toEqual(['1', '1']);
+    const result = helper.parseCoordinates(input);
+    expect(result).toEqual({
+      raw: {
+        x: 1,
+        y: 1,
+      },
+      referenceBox: {
+        x1: 1,
+        x2: 1,
+        y1: 1,
+        y2: 1,
+      },
+    });
   });
 
   it('[1 1]', () => {
     const input = `[1 1]`;
-    const result = parseNumFromBoxString(input);
-    expect(result).toEqual(['1 1']);
+    const result = helper.parseCoordinates(input);
+    expect(result).toEqual({
+      raw: {
+        x: 1,
+        y: 1,
+      },
+      referenceBox: {
+        x1: 1,
+        x2: 1,
+        y1: 1,
+        y2: 1,
+      },
+    });
   });
 
   it('(1 1)', () => {
     const input = `(1 1)`;
-    const result = parseNumFromBoxString(input);
-    expect(result).toEqual(['1 1']);
+    const result = helper.parseCoordinates(input);
+    expect(result).toEqual({
+      raw: {
+        x: 1,
+        y: 1,
+      },
+      referenceBox: {
+        x1: 1,
+        x2: 1,
+        y1: 1,
+        y2: 1,
+      },
+    });
   });
 
   it('((1, 1))', () => {
     const input = `((1, 1))`;
-    const result = parseNumFromBoxString(input);
-    expect(result).toEqual(['1', '1']);
+    const result = helper.parseCoordinates(input);
+    expect(result).toEqual({
+      raw: {
+        x: 1,
+        y: 1,
+      },
+      referenceBox: {
+        x1: 1,
+        x2: 1,
+        y1: 1,
+        y2: 1,
+      },
+    });
   });
 
   it('1, 1', () => {
     const input = `1, 1`;
-    const result = parseNumFromBoxString(input);
-    expect(result).toEqual(['1', '1']);
+    const result = helper.parseCoordinates(input);
+    expect(result).toEqual({
+      raw: {
+        x: 1,
+        y: 1,
+      },
+      referenceBox: {
+        x1: 1,
+        x2: 1,
+        y1: 1,
+        y2: 1,
+      },
+    });
   });
 
   it('1 1', () => {
     const input = `1 1`;
-    const result = parseNumFromBoxString(input);
-    expect(result).toEqual(['1 1']);
+    const result = helper.parseCoordinates(input);
+    expect(result).toEqual({
+      raw: {
+        x: 1,
+        y: 1,
+      },
+      referenceBox: {
+        x1: 1,
+        x2: 1,
+        y1: 1,
+        y2: 1,
+      },
+    });
+  });
+
+  it('<point>1, 1<point>', () => {
+    const input = `<point>1, 1<point>`;
+    const result = helper.parseCoordinates(input);
+    expect(result).toEqual({
+      raw: {
+        x: 1,
+        y: 1,
+      },
+      referenceBox: {
+        x1: 1,
+        x2: 1,
+        y1: 1,
+        y2: 1,
+      },
+    });
+  });
+
+  it('<point>1 1<point>', () => {
+    const input = `<point>1 1<point>`;
+    const result = helper.parseCoordinates(input);
+    expect(result).toEqual({
+      raw: {
+        x: 1,
+        y: 1,
+      },
+      referenceBox: {
+        x1: 1,
+        x2: 1,
+        y1: 1,
+        y2: 1,
+      },
+    });
+  });
+
+  it('<point>1,1<point>', () => {
+    const input = `<point>1,1<point>`;
+    const result = helper.parseCoordinates(input);
+    expect(result).toEqual({
+      raw: {
+        x: 1,
+        y: 1,
+      },
+      referenceBox: {
+        x1: 1,
+        x2: 1,
+        y1: 1,
+        y2: 1,
+      },
+    });
+  });
+
+  it('a, b', () => {
+    const input = `a, b`;
+    expect(() => helper.parseCoordinates(input)).toThrow('Invalid number at position 0: a');
   });
 });
