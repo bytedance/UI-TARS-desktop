@@ -1,0 +1,39 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "module": "ESNext",
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": false,
+    "skipLibCheck": true,
+    "noImplicitAny": false,
+    "strict": false,
+    "baseUrl": "src",
+    "paths": {
+      "@/*": ["*"]
+    }
+  },
+  "include": [
+    "src/index.tsx",
+    "src/components/**/*",
+    "src/standalone/app/index.tsx",
+    "src/config/webui-config-provider.tsx",
+    "src/common/hooks/**/*",
+    "src/common/state/atoms/ui.ts"
+  ],
+  "exclude": [
+    "src/entry.tsx",
+    "dist",
+    "node_modules"
+  ]
+}

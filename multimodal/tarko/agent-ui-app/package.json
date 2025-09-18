@@ -1,0 +1,26 @@
+{
+  "name": "@tarko/agent-ui-app",
+  "version": "0.3.0-beta.11",
+  "description": "Default Web UI Application for Tarko",
+  "dependencies": {
+    "@tarko/agent-ui": "workspace:*",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "devDependencies": {
+    "@rsbuild/core": "1.3.18",
+    "@rsbuild/plugin-react": "1.1.1",
+    "@types/react": "^18.2.75",
+    "@types/react-dom": "^18.2.24"
+  },
+  "scripts": {
+    "dev": "rsbuild dev",
+    "prepublishOnly": "npm run build",
+    "build": "rsbuild build",
+    "preview": "rsbuild preview"
+  }
+}
