@@ -11,10 +11,7 @@ import {
   ConsoleLogger,
   LoopTerminationCheckResult,
 } from '@tarko/mcp-agent';
-import {
-  AgentTARSOptions,
-  BrowserState,
-} from './types';
+import { AgentTARSOptions, BrowserState } from './types';
 import { DEFAULT_SYSTEM_PROMPT, generateBrowserRulesPrompt } from './prompt';
 import { BrowserManager } from './environments/local/browser';
 import { validateBrowserControlMode } from './environments/local/browser/browser-control-validator';
@@ -123,13 +120,13 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
 
     // Initialize core utilities
     this.toolLogger = new ToolLogger(this.logger);
-    
+
     // Use the environment created earlier (with updated logger)
     this.environment = environment;
     // Update environment logger to use the initialized logger
     if ('logger' in this.environment) {
       (this.environment as any).logger = this.logger.spawn(
-        processedOptions.aioSandbox ? 'AIOEnvironment' : 'LocalEnvironment'
+        processedOptions.aioSandbox ? 'AIOEnvironment' : 'LocalEnvironment',
       );
     }
 
@@ -146,10 +143,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
 
     try {
       // Initialize all components through the environment
-      await this.environment.initialize(
-        (tool) => this.registerTool(tool),
-        this.eventStream,
-      );
+      await this.environment.initialize((tool) => this.registerTool(tool), this.eventStream);
 
       // Log registered tools
       this.toolLogger.logRegisteredTools(this.getTools());
@@ -172,23 +166,14 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
     toolCall: { toolCallId: string; name: string },
     args: any,
   ): Promise<any> {
-    return await this.environment.onBeforeToolCall(
-      id,
-      toolCall,
-      args,
-      this.isReplaySnapshot,
-    );
+    return await this.environment.onBeforeToolCall(id, toolCall, args, this.isReplaySnapshot);
   }
 
   /**
    * Handle agent loop start - delegate to environment
    */
   override async onEachAgentLoopStart(sessionId: string): Promise<void> {
-    await this.environment.onEachAgentLoopStart(
-      sessionId,
-      this.eventStream,
-      this.isReplaySnapshot,
-    );
+    await this.environment.onEachAgentLoopStart(sessionId, this.eventStream, this.isReplaySnapshot);
 
     await super.onEachAgentLoopStart(sessionId);
   }
@@ -203,12 +188,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   ): Promise<any> {
     const processedResult = await super.onAfterToolCall(id, toolCall, result);
 
-    return await this.environment.onAfterToolCall(
-      id,
-      toolCall,
-      processedResult,
-      this.browserState,
-    );
+    return await this.environment.onAfterToolCall(id, toolCall, processedResult, this.browserState);
   }
 
   /**
@@ -286,8 +266,6 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
 
   // Private helper methods
 
-
-
   /**
    * Build system instructions
    */
@@ -330,8 +308,4 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
       }
     });
   }
-
-
-
-
 }

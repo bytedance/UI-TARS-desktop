@@ -3,7 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { InMemoryTransport, Client, Tool, JSONSchema7, ConsoleLogger, MCPServerRegistry } from '@tarko/mcp-agent';
+import {
+  InMemoryTransport,
+  Client,
+  Tool,
+  JSONSchema7,
+  ConsoleLogger,
+  MCPServerRegistry,
+} from '@tarko/mcp-agent';
 import { ResourceCleaner } from '../../utils';
 import { AgentTARSOptions, BuiltInMCPServers, BuiltInMCPServerName } from '../../types';
 import { BrowserGUIAgent, BrowserManager, BrowserToolsManager } from './browser';
@@ -27,7 +34,7 @@ export class AgentTARSLocalEnvironment {
   private logger: ConsoleLogger;
   private options: AgentTARSOptions;
   private workspace: string;
-  
+
   // Component managers - owned by this environment
   private readonly browserManager: BrowserManager;
   private readonly workspacePathResolver: WorkspacePathResolver;
@@ -41,22 +48,18 @@ export class AgentTARSLocalEnvironment {
   private mcpServers: BuiltInMCPServers = {};
   private mcpClients: Partial<Record<BuiltInMCPServerName, Client>> = {};
 
-  constructor(
-    options: AgentTARSOptions,
-    workspace: string,
-    logger: ConsoleLogger,
-  ) {
+  constructor(options: AgentTARSOptions, workspace: string, logger: ConsoleLogger) {
     this.options = options;
     this.workspace = workspace;
     this.logger = logger.spawn('LocalEnvironment');
-    
+
     // Initialize environment-owned components
     this.browserManager = BrowserManager.getInstance(this.logger);
     this.browserManager.lastLaunchOptions = {
       headless: this.options.browser?.headless,
       cdpEndpoint: this.options.browser?.cdpEndpoint,
     };
-    
+
     this.workspacePathResolver = new WorkspacePathResolver({ workspace });
     this.resourceCleaner = new ResourceCleaner(this.logger);
   }
@@ -390,7 +393,7 @@ export class AgentTARSLocalEnvironment {
       this.browserManager,
       undefined, // messageHistoryDumper is handled by main class
     );
-    
+
     // Clear references
     this.mcpClients = {};
     this.mcpServers = {};
@@ -497,7 +500,7 @@ export class AgentTARSLocalEnvironment {
         ...(this.options.mcpServers || {}),
       };
     }
-    
+
     // For local mode with in-memory implementation or custom servers only
     return this.options.mcpServers || {};
   }

@@ -24,11 +24,7 @@ export class AgentTARSAIOEnvironment {
   private searchToolProvider?: SearchToolProvider;
   private mcpClients: Partial<Record<BuiltInMCPServerName, any>> = {};
 
-  constructor(
-    options: AgentTARSOptions,
-    workspace: string,
-    logger: ConsoleLogger,
-  ) {
+  constructor(options: AgentTARSOptions, workspace: string, logger: ConsoleLogger) {
     this.options = options;
     this.workspace = workspace;
     this.logger = logger.spawn('AIOEnvironment');
