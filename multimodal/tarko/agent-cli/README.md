@@ -1,6 +1,6 @@
-# Agent CLI
+# Tarko Agent CLI
 
-A flexible Agent CLI framework built on top of the **Agent Kernel**. Deploy and run agents with ease, featuring built-in Web UI and powerful extensibility.
+A flexible Agent CLI framework built on top of the **Agent Kernel** ([`@tarko/agent`](https://www.npmjs.com/package/@tarko/agent)). Deploy and run agents with ease, featuring built-in Web UI and powerful extensibility.
 
 ## Quick Start
 
@@ -142,19 +142,7 @@ tarko --workspace ./my-workspace
 tarko --debug
 ```
 
-### Environment Variables
 
-Create `.env.local` or `.env` in project root:
-
-```bash
-OPENAI_API_KEY="your-api-key"
-```
-
-Or export in shell:
-
-```bash
-export OPENAI_API_KEY="your-api-key"
-```
 
 ### Priority Order
 
@@ -166,104 +154,7 @@ export OPENAI_API_KEY="your-api-key"
 
 ## Custom Development
 
-### Creating Custom CLI
-
-```typescript
-// my-cli.ts
-import { AgentCLI, AgentCLIInitOptions } from '@tarko/agent-cli';
-import { MyAgent } from './my-agent';
-
-class MyCLI extends AgentCLI {
-  constructor() {
-    super({
-      version: '1.0.0',
-      buildTime: Date.now(),
-      gitHash: 'abc123',
-      binName: 'my-agent',
-      defaultAgent: {
-        agentConstructor: MyAgent,
-        agentName: 'My Agent',
-      },
-    });
-  }
-
-  // Add custom CLI options
-  protected configureAgentCommand(command: CLICommand): CLICommand {
-    return command
-      .option('--custom-option <value>', 'Custom option')
-      .option('--feature.enable', 'Enable feature');
-  }
-
-  // Custom welcome message
-  protected printLogo(): void {
-    printWelcomeLogo(
-      'My Agent',
-      '1.0.0',
-      'My custom agent description',
-      ['Custom ASCII art lines'],
-      'https://my-agent.com',
-    );
-  }
-
-  // Add custom commands
-  protected extendCli(cli: CLIInstance): void {
-    cli
-      .command('analyze', 'Analysis command')
-      .option('--deep', 'Deep analysis')
-      .action(async (options) => {
-        // Custom command logic
-      });
-  }
-}
-
-// Bootstrap CLI
-new MyCLI().bootstrap();
-```
-
-### Agent Implementation
-
-Create custom agents by implementing the `IAgent` interface:
-
-```typescript
-import { IAgent, AgentOptions, AgentEventStream } from '@tarko/agent-interface';
-
-export class MyAgent implements IAgent {
-  constructor(private options: AgentOptions) {}
-
-  async initialize(): Promise<void> {
-    // Initialization logic
-  }
-
-  async run(input: string): Promise<AgentEventStream.AssistantMessageEvent> {
-    // Agent execution logic
-    return {
-      id: 'msg-1',
-      type: 'assistant_message',
-      timestamp: Date.now(),
-      content: 'My response',
-    };
-  }
-
-  // Implement other required methods...
-}
-```
-
-### Configuration Processing
-
-Extend configuration handling with **CLI options enhancer**:
-
-```typescript
-protected configureCLIOptionsEnhancer(): CLIOptionsEnhancer | undefined {
-  return (cliArguments, appConfig) => {
-    if (cliArguments.customOption) {
-      appConfig.customFeature = {
-        enabled: true,
-        value: cliArguments.customOption,
-      };
-    }
-  };
-}
-```
+_Coming soon_
 
 ## Advanced Features
 
@@ -327,67 +218,17 @@ tarko --tool.include "file_*,web_*" --tool.exclude "dangerous_*"
 tarko --mcpServer.include "filesystem" --mcpServer.exclude "experimental_*"
 ```
 
-## Deployment
 
-### Docker
 
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package.json .
-RUN npm install
-COPY . .
-EXPOSE 8888
-CMD ["tarko", "serve", "--port", "8888"]
-```
 
-### Process Management
-
-```bash
-# PM2
-pm2 start tarko --name "my-agent" -- serve --port 8888
-
-# systemd
-sudo systemctl enable my-agent.service
-sudo systemctl start my-agent.service
-```
-
-## Troubleshooting
-
-### Common Issues
-
-**API Key Errors**
-```bash
-echo $OPENAI_API_KEY  # Check environment
-tarko --debug         # Enable debug mode
-```
-
-**Port Conflicts**
-```bash
-tarko serve --port 3000  # Use different port
-lsof -i :8888            # Check port usage
-```
-
-**Permission Issues**
-```bash
-ls -la ./workspace       # Check permissions
-chmod -R 755 ./workspace # Fix permissions
-```
-
-### Debug Mode
-
-```bash
-tarko --debug --logLevel debug
-tarko --debug run "test" --include-logs
-```
 
 ## API Reference
 
 Refer to TypeScript definitions:
 
-- `@tarko/agent-interface` - Core agent interfaces
-- `@tarko/interface` - Application layer interfaces
-- `@tarko/agent-cli` - CLI framework interfaces
+- [`@tarko/agent-interface`](https://www.npmjs.com/package/@tarko/agent-interface) - Core agent interfaces
+- [`@tarko/interface`](https://www.npmjs.com/package/@tarko/interface) - Application layer interfaces
+- [`@tarko/agent-cli`](https://www.npmjs.com/package/@tarko/agent-cli) - CLI framework interfaces
 
 ## Examples
 
