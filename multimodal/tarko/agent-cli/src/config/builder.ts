@@ -56,7 +56,7 @@ export function buildAppConfig<
     config = deepMerge(config, workspaceConfig);
   }
 
-  // Extract CLI-specific properties
+  // Extract CLI-specific properties that should not be passed to appConfig
   const {
     agent,
     workspace,
@@ -77,8 +77,31 @@ export function buildAppConfig<
     mcpServer,
     // Extract server options
     server,
+    // Extract headless mode specific options
+    headless,
+    input,
+    format,
+    includeLogs,
+    useCache,
+    open,
     ...cliConfigProps
   } = cliArguments;
+
+  // Manually preserve all unknown options by copying them from original cliArguments
+  // This ensures that agent-specific options like --aio-sandbox are preserved
+  const knownCliOptions = new Set([
+    'agent', 'workspace', 'config', 'debug', 'quiet', 'port', 'stream',
+    'provider', 'apiKey', 'baseURL', 'shareProvider', 'thinking',
+    'tool', 'mcpServer', 'server',
+    'headless', 'input', 'format', 'includeLogs', 'useCache', 'open'
+  ]);
+  
+  // Add any unknown options to cliConfigProps
+  Object.keys(cliArguments).forEach(key => {
+    if (!knownCliOptions.has(key) && !(key in cliConfigProps)) {
+      (cliConfigProps as any)[key] = (cliArguments as any)[key];
+    }
+  });
 
   // Handle deprecated options
   const deprecatedOptions = {
