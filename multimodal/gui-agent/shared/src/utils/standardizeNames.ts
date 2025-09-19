@@ -53,7 +53,8 @@ const actionTypeMap: Record<string, string> = {
   select: 'drag',
   left_click_drag: 'drag',
   leftclickdrag: 'drag',
-  swipe: 'drag',
+  // swipe
+  swipe: 'swipe',
   // scroll
   scroll: 'scroll',
 

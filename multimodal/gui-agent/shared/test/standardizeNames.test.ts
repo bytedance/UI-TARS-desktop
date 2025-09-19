@@ -48,7 +48,8 @@ describe('standardizeActionType', () => {
       expect(standardizeActionType('drag')).toBe('drag');
       expect(standardizeActionType('select')).toBe('drag');
       expect(standardizeActionType('left_click_drag')).toBe('drag');
-      expect(standardizeActionType('swipe')).toBe('drag');
+      // expect(standardizeActionType('swipe')).toBe('drag');
+      expect(standardizeActionType('swipe')).toBe('swipe');
     });
 
     it('should standardize scroll action types', () => {
