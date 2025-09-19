@@ -1,30 +1,31 @@
 [
   {
-    "id": "1bc710f8-4d3e-4eaf-a337-afb682f8fe9b",
+    "id": "9f967399-0d91-4380-ad4c-51ac20fa6ab3",
     "type": "user_message",
-    "timestamp": 1752414632671,
+    "timestamp": 1758276115586,
     "content": "How's the weather today?"
   },
   {
-    "id": "ee212fcf-2004-4024-ba98-bcca14630fd0",
+    "id": "909ea595-ddda-409f-839c-e8ed4f265f1b",
     "type": "agent_run_start",
-    "timestamp": 1752414632671,
-    "sessionId": "1752414632670-8234wgx",
+    "timestamp": 1758276115586,
+    "sessionId": "1758276115586-yede0v8",
     "runOptions": {
       "input": "How's the weather today?"
     },
     "provider": "azure-openai",
-    "model": "aws_sdk_claude37_sonnet"
+    "model": "aws_sdk_claude37_sonnet",
+    "agentName": "Anonymous"
   },
   {
-    "id": "9abb2f86-32d3-442a-b0e8-009418d89260",
+    "id": "a54baaba-597b-4ea4-a6c8-06dc5631d2c4",
     "type": "assistant_message",
-    "timestamp": 1752414635466,
-    "content": "I'll check the weather for you. First, I need to determine your location.",
-    "rawContent": "I'll check the weather for you. First, I need to determine your location.",
+    "timestamp": 1758276118314,
+    "content": "I'll check the weather for your current location.",
+    "rawContent": "I'll check the weather for your current location.",
     "toolCalls": [
       {
-        "id": "call_1752414635465_mx369",
+        "id": "call_1758276118311_pdd2h",
         "type": "function",
         "function": {
           "name": "getCurrentLocation",
@@ -33,16 +34,16 @@
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "msg_1752414634409_jrd9i0c2"
+    "messageId": "msg_1758276117583_a3gu0z1j"
   },
   {
-    "id": "8e2f6b6d-9363-4efe-9895-c60bbc6f1c37",
+    "id": "003bd73a-1ac2-4396-8794-d8d878db292c",
     "type": "tool_call",
-    "timestamp": 1752414635470,
-    "toolCallId": "call_1752414635465_mx369",
+    "timestamp": 1758276118315,
+    "toolCallId": "call_1758276118311_pdd2h",
     "name": "getCurrentLocation",
     "arguments": {},
-    "startTime": 1752414635470,
+    "startTime": 1758276118315,
     "tool": {
       "name": "getCurrentLocation",
       "description": "Get user's current location",
@@ -53,10 +54,10 @@
     }
   },
   {
-    "id": "a4ec1239-2284-4d52-926a-fdb192e5f42e",
+    "id": "8786c9b9-23da-4650-bec3-4a05f92fab9d",
     "type": "tool_result",
-    "timestamp": 1752414635471,
-    "toolCallId": "call_1752414635465_mx369",
+    "timestamp": 1758276118316,
+    "toolCallId": "call_1758276118311_pdd2h",
     "name": "getCurrentLocation",
     "content": {
       "location": "Boston"
