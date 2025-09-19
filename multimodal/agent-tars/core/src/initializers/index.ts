@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export * from './agent-tars-initializer';
-export * from './agent-tars-aio-initializer';
+export * from './agent-tars-local-environment';
+export * from './agent-tars-aio-environment';
 
 // Legacy exports for backward compatibility
-export { AgentTARSLocalEnvironment as AgentTARSInitializer } from './agent-tars-initializer';
-export { AgentTARSAIOEnvironment as AgentTARSAIOInitializer } from './agent-tars-aio-initializer';
+export { AgentTARSLocalEnvironment as AgentTARSInitializer } from './agent-tars-local-environment';
+export { AgentTARSAIOEnvironment as AgentTARSAIOInitializer } from './agent-tars-aio-environment';
