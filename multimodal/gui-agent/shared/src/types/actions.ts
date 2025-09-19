@@ -53,7 +53,7 @@ export type ScreenShotAction = BaseAction<
  * Click action with coordinates
  */
 export type ClickAction = BaseAction<
-  'click' | 'left_click',
+  'click',
   {
     point: Coordinates;
   }
@@ -63,7 +63,7 @@ export type ClickAction = BaseAction<
  * Right click action with coordinates
  */
 export type RightClickAction = BaseAction<
-  'right_click' | 'right_single',
+  'right_click',
   {
     point: Coordinates;
   }
@@ -73,7 +73,17 @@ export type RightClickAction = BaseAction<
  * Double click action with coordinates
  */
 export type DoubleClickAction = BaseAction<
-  'double_click' | 'left_double',
+  'double_click',
+  {
+    point: Coordinates;
+  }
+>;
+
+/**
+ * Middle click action with coordinates
+ */
+export type MiddleClickAction = BaseAction<
+  'middle_click',
   {
     point: Coordinates;
   }
@@ -105,7 +115,7 @@ export type MouseUpAction = BaseAction<
  * Mouse move action
  */
 export type MouseMoveAction = BaseAction<
-  'move' | 'move_to' | 'mouse_move' | 'hover',
+  'mouse_move', // 'move' | 'move_to' | 'hover',
   {
     point: Coordinates; // Target coordinates
   }
@@ -115,7 +125,7 @@ export type MouseMoveAction = BaseAction<
  * Drag action with start and end coordinates
  */
 export type DragAction = BaseAction<
-  'drag' | 'left_click_drag' | 'select',
+  'drag', // 'left_click_drag' | 'select',
   {
     start: Coordinates;
     end: Coordinates;
@@ -206,7 +216,7 @@ export type LongPressAction = BaseAction<
 >;
 
 export type SwipeAction = BaseAction<
-  'swipe' | 'drag',
+  'swipe', // 'drag',
   {
     start: Coordinates;
     end: Coordinates;
@@ -274,6 +284,7 @@ export type GUIAction =
   | ClickAction
   | DoubleClickAction
   | RightClickAction
+  | MiddleClickAction
   | MouseDownAction
   | MouseUpAction
   | MouseMoveAction
