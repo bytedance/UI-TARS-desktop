@@ -336,12 +336,9 @@ importers:
       '@agent-infra/sandbox':
         specifier: 0.0.6
         version: 0.0.6
-      '@ui-tars/sdk':
-        specifier: 1.2.3
-        version: 1.2.3(ws@8.18.3)(zod@3.25.36)
-      '@ui-tars/shared':
-        specifier: 1.2.3
-        version: 1.2.3
+      '@gui-agent/shared':
+        specifier: workspace:*
+        version: link:../shared
     devDependencies:
       '@rslib/core':
         specifier: 0.10.0
@@ -546,6 +543,9 @@ importers:
       '@gui-agent/operator-browser':
         specifier: workspace:*
         version: link:../../gui-agent/operator-browser
+      '@gui-agent/shared':
+        specifier: workspace:*
+        version: link:../../gui-agent/shared
       '@omni-tars/core':
         specifier: workspace:*
         version: link:../core
@@ -558,12 +558,6 @@ importers:
       '@tarko/shared-utils':
         specifier: workspace:*
         version: link:../../tarko/shared-utils
-      '@ui-tars/sdk':
-        specifier: 1.2.3
-        version: 1.2.3(ws@8.18.3)(zod@3.25.36)
-      '@ui-tars/shared':
-        specifier: 1.2.3
-        version: 1.2.3
       lodash.isnumber:
         specifier: 3.0.3
         version: 3.0.3

@@ -46,7 +46,7 @@ export class AIOHybridOperator extends Operator {
   }
 
   protected async initialize(): Promise<void> {
-    this.aioComputer.screenshot(0); // Ping the aio sandbox
+    await this.aioComputer.screenshot(0); // Ping the aio sandbox
     this.aioBrowser = await AIOBrowser.create({
       baseURl: this.options.baseURL,
       logger: this.logger,
@@ -64,25 +64,17 @@ export class AIOHybridOperator extends Operator {
       'navigate_back',
       'wait',
       'mouse_move',
-      'hover',
       'click',
-      'left_click',
-      // 'left_single',
-      'left_double',
       'double_click',
       'right_click',
-      'right_single',
-      // 'middle_click',
-      'left_click_drag',
+      'middle_click',
       'drag',
-      'select',
       'type',
       'hotkey',
       'press',
       'scroll',
       'call_user',
       'finished',
-      // 'user_stop',
     ];
   }
 

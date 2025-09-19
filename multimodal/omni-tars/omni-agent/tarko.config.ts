@@ -48,5 +48,5 @@ export default {
       },
     },
   },
-
+  logLevel: LogLevel.DEBUG,
 } as AgentAppConfig;

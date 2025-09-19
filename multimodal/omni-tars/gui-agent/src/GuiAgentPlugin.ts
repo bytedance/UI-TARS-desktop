@@ -16,7 +16,7 @@ import {
   createGUIErrorResponse,
 } from '@tarko/shared-utils';
 import { Base64ImageParser } from '@agent-infra/media-utils';
-import { getScreenInfo, setScreenInfo } from './shared';
+import { setScreenInfo } from './shared';
 import { OperatorManager } from './OperatorManager';
 import { BrowserOperator } from '@gui-agent/operator-browser';
 import { AIOHybridOperator } from '@gui-agent/operator-aio';
@@ -49,19 +49,20 @@ export class GuiAgentPlugin extends AgentPlugin {
           try {
             this.agent.logger.info('browser_vision_control', input);
             const op = await this.operatorManager.getInstance();
-            const rawResult = await op?.execute({
-              parsedPrediction: input.operator_action,
-              screenWidth: getScreenInfo().screenWidth ?? 1000,
-              screenHeight: getScreenInfo().screenHeight ?? 1000,
-              prediction: input.operator_action,
-              scaleFactor: 1000,
-              factors: [1, 1],
+            const rawResult = await op?.doExecute({
+              rawContent: '',
+              rawActionStrings: [],
+              actions: input.operator_action,
             });
-            const result = rawResult as unknown as GUIExecuteResult;
-
-            // Convert to GUI Agent protocol format
-            const guiResponse = convertToGUIResponse(input.action, input.operator_action, result);
-            return guiResponse;
+            if (rawResult?.errorMessage) {
+              return createGUIErrorResponse(input.action, rawResult?.errorMessage);
+            }
+            return {
+              success: true,
+              action: input.action,
+              normalizedAction: input.action_for_gui,
+              observation: undefined, // Reserved for future implementation
+            };
           } catch (error) {
             // Return error response in GUI Agent format
             return createGUIErrorResponse(input.action, error);
@@ -92,7 +93,7 @@ export class GuiAgentPlugin extends AgentPlugin {
     this.agent.logger.info('onEachAgentLoopEnd lastToolCall', lastToolCallIsComputerUse);
 
     const operator = await this.operatorManager.getInstance();
-    const output = await operator?.screenshot();
+    const output = await operator?.doScreenshot();
     if (!output) {
       console.error('Failed to get screenshot');
       return;
@@ -104,10 +105,6 @@ export class GuiAgentPlugin extends AgentPlugin {
       return;
     }
 
-    const meta =
-      operator instanceof BrowserOperator || operator instanceof AIOHybridOperator
-        ? await operator.getMeta()
-        : null;
     const content: ChatCompletionContentPart[] = [
       {
         type: 'image_url',
@@ -117,10 +114,10 @@ export class GuiAgentPlugin extends AgentPlugin {
       },
     ];
 
-    if (meta?.url) {
+    if (output?.url) {
       content.push({
         type: 'text',
-        text: `The current page's url: ${meta?.url}`,
+        text: `The current page's url: ${output.url}`,
       });
     }
 
@@ -130,7 +127,7 @@ export class GuiAgentPlugin extends AgentPlugin {
       content,
       metadata: {
         type: 'screenshot',
-        url: meta?.url,
+        url: output?.url,
       },
     });
     eventStream.sendEvent(event);
