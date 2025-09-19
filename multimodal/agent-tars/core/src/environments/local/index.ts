@@ -10,6 +10,7 @@ import {
   JSONSchema7,
   ConsoleLogger,
   MCPServerRegistry,
+  AgentEventStream,
 } from '@tarko/mcp-agent';
 import { ResourceCleaner } from '../../utils';
 import { AgentTARSOptions, BuiltInMCPServers, BuiltInMCPServerName } from '../../types';
@@ -69,7 +70,7 @@ export class AgentTARSLocalEnvironment {
    */
   async initialize(
     registerToolFn: (tool: Tool) => void,
-    eventStream?: any,
+    eventStream?: AgentEventStream.Processor,
   ): Promise<{
     browserToolsManager?: BrowserToolsManager;
     filesystemToolsManager?: FilesystemToolsManager;
@@ -115,7 +116,7 @@ export class AgentTARSLocalEnvironment {
   /**
    * Initialize GUI Agent for visual browser control
    */
-  private async initializeGUIAgent(eventStream?: any): Promise<void> {
+  private async initializeGUIAgent(eventStream?: AgentEventStream.Processor): Promise<void> {
     this.logger.info('🖥️ Initializing GUI Agent for visual browser control');
 
     this.browserGUIAgent = new BrowserGUIAgent({
@@ -323,7 +324,7 @@ export class AgentTARSLocalEnvironment {
    */
   async onEachAgentLoopStart(
     sessionId: string,
-    eventStream: any,
+    eventStream: AgentEventStream.Processor,
     isReplaySnapshot: boolean,
   ): Promise<void> {
     // Handle local browser operations
