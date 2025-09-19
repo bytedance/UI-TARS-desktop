@@ -188,6 +188,114 @@ export class ActionParserHelper {
   }
 
   /**
+   * Parse a JSON string representation of an OpenAI function call into a standardized BaseAction.
+   *
+   * This method accepts a JSON string that represents a function call object conforming to
+   * OpenAI's ChatCompletionMessageToolCall.Function format, parses it, and converts it
+   * into a standardized GUI action.
+   *
+   * @param functionCallString - JSON string representation of a function call object
+   * @returns The parsed and standardized BaseAction object, or null if parsing fails
+   * @throws Error if the JSON string is malformed or function call cannot be processed
+   *
+   * @example
+   * ```typescript
+   * // Input JSON string examples:
+   * const scrollAction = '{"name": "scroll", "arguments": "{\\"direction\\": \\"up\\", \\"point\\": \\"<point>500 500</point>\\"}"}';
+   * const clickAction = '{"name": "left_double", "arguments": "{\\"point\\": \\"<point>18 58</point>\\"}"}';
+   * const typeAction = '{"name": "type", "arguments": "{\\"content\\": \\"hello\\", \\"point\\": \\"<point>200 126</point>\\"}"}';
+   * const hotkeyAction = '{"name": "hotkey", "arguments": "{\\"key\\": \\"enter\\"}"}';
+   * const waitAction = '{"name": "wait", "arguments": ""}';
+   *
+   * const action = parser.parseFunctionCall(scrollAction);
+   * // Returns standardized BaseAction object
+   * ```
+   */
+  public parseFunctionCallString(functionCallString: string): BaseAction | null {
+    try {
+      const functionCall = JSON.parse(functionCallString);
+      const roughAction = this.parseRoughFromFunctionCall(functionCall);
+      this.logger.debug(`[parseFunctionCallString] rough action:`, roughAction);
+
+      if (!roughAction) return null;
+
+      const action = this.standardizeAction(roughAction.roughType, roughAction.roughInputs);
+      this.logger.debug(`[parseFunctionCallString] standard action:`, action);
+      return action;
+    } catch (e) {
+      this.logger.warn(`[parseFunctionCallString] parse failed '${functionCallString}': ${e}`);
+      throw new Error(`Failed to parse GUI action: ${(e as Error).message}`);
+    }
+  }
+
+  /**
+   * Extract rough action information from an OpenAI function call object.
+   *
+   * This method processes a function call object that conforms to OpenAI's
+   * ChatCompletionMessageToolCall.Function format, extracting the action type
+   * and parameters for further standardization.
+   *
+   * The function call object format is defined by OpenAI's API specification:
+   * - `name`: The name of the function to call (becomes roughType)
+   * - `arguments`: JSON string containing the function arguments (becomes roughInputs)
+   *
+   * @param functionCall - Function call object from OpenAI ChatCompletionMessageToolCall.Function
+   * @returns Object containing roughType (action name) and roughInputs (parsed arguments)
+   * @throws Error if arguments JSON string cannot be parsed
+   *
+   * @example
+   * ```typescript
+   * // Input function call object examples:
+   * const scrollCall = {
+   *   name: 'scroll',
+   *   arguments: '{"direction": "up", "point": "<point>500 500</point>"}'
+   * };
+   *
+   * const clickCall = {
+   *   name: 'left_double',
+   *   arguments: '{"point": "<point>18 58</point>"}'
+   * };
+   *
+   * const typeCall = {
+   *   name: 'type',
+   *   arguments: '{"content": "hello", "point": "<point>200 126</point>"}'
+   * };
+   *
+   * const hotkeyCall = {
+   *   name: 'hotkey',
+   *   arguments: '{"key": "enter"}'
+   * };
+   *
+   * const waitCall = {
+   *   name: 'wait',
+   *   arguments: ''  // Empty arguments for wait action
+   * };
+   *
+   * const result = parser.parseRoughFromFunctionCall(scrollCall);
+   * // Returns: { roughType: 'scroll', roughInputs: { direction: 'up', point: '<point>500 500</point>' } }
+   * ```
+   */
+  public parseRoughFromFunctionCall(functionCall: any): {
+    roughType: string;
+    roughInputs: Record<string, string>;
+  } {
+    const roughType = functionCall.name;
+    let roughInputs: Record<string, string> = {};
+    try {
+      roughInputs = functionCall.arguments ? JSON.parse(functionCall.arguments) : {};
+    } catch (error) {
+      this.logger.warn(
+        `[parseRoughFromFunctionCall] parse arguments failed '${functionCall.arguments}': ${error}`,
+      );
+      throw error;
+    }
+    return {
+      roughType,
+      roughInputs,
+    };
+  }
+
+  /**
    * Standardizes action inputs based on action type by normalizing parameter names
    * and converting coordinate strings to structured Coordinates objects.
    *
