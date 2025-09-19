@@ -154,4 +154,17 @@ export class AgentTARSAIOEnvironment {
   getMCPServers(): BuiltInMCPServers {
     return {}; // No local MCP servers in AIO mode
   }
+
+  /**
+   * Get MCP server registry configuration for AIO mode
+   */
+  getMCPServerRegistry(): MCPServerRegistry {
+    // For AIO sandbox mode, connect to AIO sandbox MCP
+    return {
+      aio: {
+        url: `${this.options.aioSandbox}/mcp`,
+      },
+      ...(this.options.mcpServers || {}),
+    };
+  }
 }

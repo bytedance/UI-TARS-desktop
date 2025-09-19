@@ -4,10 +4,8 @@
  */
 
 import {
-  Client,
   AgentEventStream,
   MCPAgent,
-  MCPServerRegistry,
   LLMRequestHookPayload,
   LLMResponseHookPayload,
   ConsoleLogger,
@@ -15,22 +13,16 @@ import {
 } from '@tarko/mcp-agent';
 import {
   AgentTARSOptions,
-  BuiltInMCPServers,
-  BuiltInMCPServerName,
-  AgentTARSPlannerOptions,
   BrowserState,
 } from './types';
 import { DEFAULT_SYSTEM_PROMPT, generateBrowserRulesPrompt } from './prompt';
-import { BrowserGUIAgent, BrowserManager, BrowserToolsManager } from './environments/local/browser';
+import { BrowserManager } from './environments/local/browser';
 import { validateBrowserControlMode } from './environments/local/browser/browser-control-validator';
-import { SearchToolProvider } from './environments/local/search';
-import { FilesystemToolsManager } from './environments/local/filesystem';
 import { applyDefaultOptions } from './shared/config-utils';
 import { MessageHistoryDumper } from './shared/message-history-dumper';
-import { WorkspacePathResolver } from './shared/workspace-path-resolver';
 import { AgentWebUIImplementation } from '@agent-tars/interface';
 import { AgentTARSLocalEnvironment, AgentTARSAIOEnvironment } from './environments';
-import { ToolLogger, ResourceCleaner } from './utils';
+import { ToolLogger } from './utils';
 
 /**
  * AgentTARS - A multimodal AI agent with browser, filesystem, and search capabilities
@@ -73,12 +65,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
 
   // Core utilities
   private readonly toolLogger: ToolLogger;
-  private readonly resourceCleaner: ResourceCleaner;
   private readonly environment: AgentTARSLocalEnvironment | AgentTARSAIOEnvironment;
-
-  // Legacy component references (for cleanup and public API)
-  private inMemoryMCPClients: Partial<Record<BuiltInMCPServerName, Client>> = {};
-  private mcpServers: BuiltInMCPServers = {};
 
   // State and utilities
   private browserState: BrowserState = {};
@@ -104,15 +91,25 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
       options.instructions,
     );
 
-    // Get MCP servers configuration based on mode
-    const mcpServers = AgentTARS.buildMCPServerRegistry(processedOptions, workspace);
+    // Create environment first to get MCP configuration
+    const environment = processedOptions.aioSandbox
+      ? new AgentTARSAIOEnvironment(
+          processedOptions,
+          workspace,
+          new ConsoleLogger(options.id || 'AgentTARS'),
+        )
+      : new AgentTARSLocalEnvironment(
+          processedOptions,
+          workspace,
+          new ConsoleLogger(options.id || 'AgentTARS'),
+        );
 
-    // Initialize parent class first
+    // Initialize parent class with environment-provided MCP configuration
     super({
       ...processedOptions,
       name: options.name ?? 'AgentTARS',
       instructions,
-      mcpServers,
+      mcpServers: environment.getMCPServerRegistry(),
       maxTokens: processedOptions.maxTokens,
     });
 
@@ -126,20 +123,15 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
 
     // Initialize core utilities
     this.toolLogger = new ToolLogger(this.logger);
-    this.resourceCleaner = new ResourceCleaner(this.logger);
     
-    // Create environment - it will manage all components internally
-    this.environment = processedOptions.aioSandbox
-      ? new AgentTARSAIOEnvironment(
-          this.tarsOptions,
-          this.workspace,
-          this.logger,
-        )
-      : new AgentTARSLocalEnvironment(
-          this.tarsOptions,
-          this.workspace,
-          this.logger,
-        );
+    // Use the environment created earlier (with updated logger)
+    this.environment = environment;
+    // Update environment logger to use the initialized logger
+    if ('logger' in this.environment) {
+      (this.environment as any).logger = this.logger.spawn(
+        processedOptions.aioSandbox ? 'AIOEnvironment' : 'LocalEnvironment'
+      );
+    }
 
     // Initialize optional features
     this.initializeOptionalFeatures();
@@ -154,14 +146,10 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
 
     try {
       // Initialize all components through the environment
-      const components = await this.environment.initialize(
+      await this.environment.initialize(
         (tool) => this.registerTool(tool),
         this.eventStream,
       );
-
-      // Store legacy references for cleanup
-      this.inMemoryMCPClients = components.mcpClients;
-      this.mcpServers = this.environment.getMCPServers();
 
       // Log registered tools
       this.toolLogger.logRegisteredTools(this.getTools());
@@ -245,16 +233,8 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
    * Clean up all resources
    */
   async cleanup(): Promise<void> {
-    await this.resourceCleaner.cleanup(
-      this.inMemoryMCPClients,
-      this.mcpServers,
-      this.browserManager,
-      this.messageHistoryDumper,
-    );
-
-    // Clear references
-    this.inMemoryMCPClients = {};
-    this.mcpServers = {};
+    // Delegate cleanup to environment
+    await this.environment.onDispose();
   }
 
   // Public API methods
@@ -306,45 +286,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
 
   // Private helper methods
 
-  /**
-   * Build MCP server registry based on implementation type
-   */
-  private static buildMCPServerRegistry(
-    options: AgentTARSOptions,
-    workspace: string,
-  ): MCPServerRegistry {
-    // For AIO sandbox mode, connect to AIO sandbox MCP
-    if (options.aioSandbox) {
-      return {
-        aio: {
-          url: `${options.aioSandbox}/mcp`,
-        },
-        ...(options.mcpServers || {}),
-      };
-    }
 
-    // For local mode with stdio implementation
-    if (options.mcpImpl === 'stdio') {
-      return {
-        browser: {
-          command: 'npx',
-          args: ['-y', '@agent-infra/mcp-server-browser'],
-        },
-        filesystem: {
-          command: 'npx',
-          args: ['-y', '@agent-infra/mcp-server-filesystem', workspace],
-        },
-        commands: {
-          command: 'npx',
-          args: ['-y', '@agent-infra/mcp-server-commands'],
-        },
-        ...(options.mcpServers || {}),
-      };
-    }
-    
-    // For local mode with in-memory implementation or custom servers only
-    return options.mcpServers || {};
-  }
 
   /**
    * Build system instructions

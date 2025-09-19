@@ -4,6 +4,7 @@
  */
 
 import { InMemoryTransport, Client, Tool, JSONSchema7, ConsoleLogger, MCPServerRegistry } from '@tarko/mcp-agent';
+import { ResourceCleaner } from '../../utils';
 import { AgentTARSOptions, BuiltInMCPServers, BuiltInMCPServerName } from '../../types';
 import { BrowserGUIAgent, BrowserManager, BrowserToolsManager } from './browser';
 import { SearchToolProvider } from './search';
@@ -30,6 +31,7 @@ export class AgentTARSLocalEnvironment {
   // Component managers - owned by this environment
   private readonly browserManager: BrowserManager;
   private readonly workspacePathResolver: WorkspacePathResolver;
+  private readonly resourceCleaner: ResourceCleaner;
 
   // Component instances
   private browserToolsManager?: BrowserToolsManager;
@@ -56,6 +58,7 @@ export class AgentTARSLocalEnvironment {
     };
     
     this.workspacePathResolver = new WorkspacePathResolver({ workspace });
+    this.resourceCleaner = new ResourceCleaner(this.logger);
   }
 
   /**
@@ -380,11 +383,17 @@ export class AgentTARSLocalEnvironment {
    * Handle session disposal
    */
   async onDispose(): Promise<void> {
-    // Close browser pages before session disposal
-    if (this.browserManager.isLaunchingComplete()) {
-      this.logger.info('🧹 Closing browser pages before session disposal');
-      await this.browserManager.closeAllPages();
-    }
+    // Use ResourceCleaner for comprehensive cleanup
+    await this.resourceCleaner.cleanup(
+      this.mcpClients,
+      this.mcpServers,
+      this.browserManager,
+      undefined, // messageHistoryDumper is handled by main class
+    );
+    
+    // Clear references
+    this.mcpClients = {};
+    this.mcpServers = {};
   }
 
   /**
@@ -464,5 +473,32 @@ export class AgentTARSLocalEnvironment {
    */
   getMCPServers(): BuiltInMCPServers {
     return this.mcpServers;
+  }
+
+  /**
+   * Get MCP server registry configuration for local mode
+   */
+  getMCPServerRegistry(): MCPServerRegistry {
+    // For local mode with stdio implementation
+    if (this.options.mcpImpl === 'stdio') {
+      return {
+        browser: {
+          command: 'npx',
+          args: ['-y', '@agent-infra/mcp-server-browser'],
+        },
+        filesystem: {
+          command: 'npx',
+          args: ['-y', '@agent-infra/mcp-server-filesystem', this.workspace],
+        },
+        commands: {
+          command: 'npx',
+          args: ['-y', '@agent-infra/mcp-server-commands'],
+        },
+        ...(this.options.mcpServers || {}),
+      };
+    }
+    
+    // For local mode with in-memory implementation or custom servers only
+    return this.options.mcpServers || {};
   }
 }
