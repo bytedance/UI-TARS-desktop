@@ -8,7 +8,7 @@ import { BrowserGUIAgent } from './browser-gui-agent';
 import { ConsoleLogger } from '@tarko/mcp-agent';
 import { StrategyFactory } from './browser-control-strategies/strategy-factory';
 import { BrowserControlStrategy } from './browser-control-strategies/base-strategy';
-import { BrowserControlMode } from '../types';
+import { BrowserControlMode } from '../../../types';
 import { BrowserManager } from './browser-manager';
 
 /**

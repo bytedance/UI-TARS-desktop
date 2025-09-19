@@ -5,7 +5,7 @@
 
 import { Client, ConsoleLogger } from '@tarko/mcp-agent';
 import { BuiltInMCPServers, BuiltInMCPServerName } from '../types';
-import { BrowserManager } from '../browser';
+import { BrowserManager } from '../environments/local/browser';
 import { MessageHistoryDumper } from '../shared/message-history-dumper';
 
 /**

@@ -8,7 +8,7 @@ import { BrowserControlStrategy } from './base-strategy';
 import { BrowserHybridStrategy } from './browser-hybrid-strategy';
 import { BrowserVisualGroundingStrategy } from './browser-visual-grounding-strategy';
 import { BrowserDOMStrategy } from './browser-dom-strategy';
-import { BrowserControlMode } from '../../types';
+import { BrowserControlMode } from '../../../../types';
 
 /**
  * StrategyFactory - Factory for creating browser control strategies

@@ -4,7 +4,7 @@
  */
 
 import { ConsoleLogger } from '@tarko/mcp-agent';
-import { BrowserControlMode } from '../types';
+import { BrowserControlMode } from '../../../types';
 import { ModelProviderName } from '@tarko/agent';
 
 /**
