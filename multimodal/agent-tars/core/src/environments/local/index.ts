@@ -4,11 +4,11 @@
  */
 
 import { InMemoryTransport, Client, Tool, JSONSchema7, ConsoleLogger, MCPServerRegistry } from '@tarko/mcp-agent';
-import { AgentTARSOptions, BuiltInMCPServers, BuiltInMCPServerName } from '../types';
-import { BrowserGUIAgent, BrowserManager, BrowserToolsManager } from '../browser';
-import { SearchToolProvider } from '../search';
-import { FilesystemToolsManager } from '../filesystem';
-import { WorkspacePathResolver } from '../shared/workspace-path-resolver';
+import { AgentTARSOptions, BuiltInMCPServers, BuiltInMCPServerName } from '../../types';
+import { BrowserGUIAgent, BrowserManager, BrowserToolsManager } from './browser';
+import { SearchToolProvider } from './search';
+import { FilesystemToolsManager } from './filesystem';
+import { WorkspacePathResolver } from '../../shared/workspace-path-resolver';
 
 // Static imports for MCP modules
 // @ts-expect-error - Default esm asset has some issues

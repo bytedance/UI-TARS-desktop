@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ConsoleLogger, Client } from '@tarko/mcp-agent';
-import { FilesystemToolsManager } from '../../src/filesystem/filesystem-tools-manager';
+import { FilesystemToolsManager } from '../../src/environments/local/filesystem/filesystem-tools-manager';
 
 describe('FilesystemToolsManager', () => {
   const logger = new ConsoleLogger('test');

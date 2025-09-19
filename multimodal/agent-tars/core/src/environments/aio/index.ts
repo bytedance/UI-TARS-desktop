@@ -4,10 +4,10 @@
  */
 
 import { Tool, ConsoleLogger, MCPServerRegistry } from '@tarko/mcp-agent';
-import { AgentTARSOptions, BuiltInMCPServers, BuiltInMCPServerName } from '../types';
-import { BrowserGUIAgent, BrowserManager, BrowserToolsManager } from '../browser';
-import { SearchToolProvider } from '../search';
-import { FilesystemToolsManager } from '../filesystem';
+import { AgentTARSOptions, BuiltInMCPServers, BuiltInMCPServerName } from '../../types';
+import { BrowserGUIAgent, BrowserManager, BrowserToolsManager } from '../local/browser';
+import { SearchToolProvider } from '../local/search';
+import { FilesystemToolsManager } from '../local/filesystem';
 
 /**
  * AgentTARSAIOEnvironment - Handles AIO Sandbox environment operations

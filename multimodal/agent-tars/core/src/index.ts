@@ -5,9 +5,11 @@
 
 export * from '@tarko/mcp-agent';
 export * from './agent-tars';
-export * from './browser';
+export * from './environments/local/browser';
+export * from './environments/local/filesystem';
+export * from './environments/local/search';
+export * from './environments';
 export * from './shared';
-export * from './search';
 export type * from './types';
 
 export { AgentTARS as default } from './agent-tars';

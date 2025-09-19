@@ -21,15 +21,15 @@ import {
   BrowserState,
 } from './types';
 import { DEFAULT_SYSTEM_PROMPT, generateBrowserRulesPrompt } from './prompt';
-import { BrowserGUIAgent, BrowserManager, BrowserToolsManager } from './browser';
-import { validateBrowserControlMode } from './browser/browser-control-validator';
-import { SearchToolProvider } from './search';
-import { FilesystemToolsManager } from './filesystem';
+import { BrowserGUIAgent, BrowserManager, BrowserToolsManager } from './environments/local/browser';
+import { validateBrowserControlMode } from './environments/local/browser/browser-control-validator';
+import { SearchToolProvider } from './environments/local/search';
+import { FilesystemToolsManager } from './environments/local/filesystem';
 import { applyDefaultOptions } from './shared/config-utils';
 import { MessageHistoryDumper } from './shared/message-history-dumper';
 import { WorkspacePathResolver } from './shared/workspace-path-resolver';
 import { AgentWebUIImplementation } from '@agent-tars/interface';
-import { AgentTARSLocalEnvironment, AgentTARSAIOEnvironment } from './initializers';
+import { AgentTARSLocalEnvironment, AgentTARSAIOEnvironment } from './environments';
 import { ToolLogger, ResourceCleaner } from './utils';
 
 /**
