@@ -7,12 +7,13 @@ import { BaseAction } from '@gui-agent/shared/types';
 import { XMLBuilder, XMLParser } from 'fast-xml-parser';
 // Remove circular dependency
 import { ActionParserHelper } from './ActionParserHelper';
+import { serializeAction } from '@gui-agent/shared/utils';
 
 export interface FormatParser {
   parse(text: string): {
     reasoningContent: string | null;
-    rawActionStrings: string[] | null;
-    actions: BaseAction[] | null;
+    rawActionStrings: string[] | undefined;
+    actions: BaseAction[] | undefined;
   } | null;
 }
 
@@ -24,8 +25,8 @@ export class XMLFormatParser implements FormatParser {
 
   parse(text: string): {
     reasoningContent: string | null;
-    rawActionStrings: string[] | null;
-    actions: BaseAction[] | null;
+    rawActionStrings: string[] | undefined;
+    actions: BaseAction[] | undefined;
   } | null {
     if (text.includes('computer_env')) {
       // The text is omni format, not a solid XML format, refuse parse
@@ -85,9 +86,7 @@ export class XMLFormatParser implements FormatParser {
 
     const rawActionStrings: string[] = [];
     for (const action of actions) {
-      rawActionStrings.push(
-        this.helper.convertRoughActionInputsToLegacyActionString(action.type, action.inputs),
-      );
+      rawActionStrings.push(serializeAction(action));
     }
 
     return {
@@ -123,8 +122,8 @@ export class OmniFormatParser implements FormatParser {
 
   parse(text: string): {
     reasoningContent: string | null;
-    rawActionStrings: string[] | null;
-    actions: BaseAction[] | null;
+    rawActionStrings: string[] | undefined;
+    actions: BaseAction[] | undefined;
   } | null {
     if (!this.canParse(text)) {
       return null;
@@ -148,7 +147,7 @@ export class OmniFormatParser implements FormatParser {
     const result = {
       reasoningContent,
       rawActionStrings: actionStr.split('\n\n').filter((action) => action.trim() !== ''),
-      actions: null,
+      actions: undefined,
     };
     return result;
   }
@@ -187,8 +186,8 @@ export class UnifiedBCFormatParser implements FormatParser {
 
   parse(text: string): {
     reasoningContent: string | null;
-    rawActionStrings: string[] | null;
-    actions: BaseAction[] | null;
+    rawActionStrings: string[] | undefined;
+    actions: BaseAction[] | undefined;
   } | null {
     if (!this.canParse(text)) {
       return null;
@@ -220,7 +219,7 @@ export class UnifiedBCFormatParser implements FormatParser {
     return {
       reasoningContent,
       rawActionStrings: actionStr.split('\n\n').filter((action) => action.trim() !== ''),
-      actions: null,
+      actions: undefined,
     };
   }
 }
@@ -245,8 +244,8 @@ class BCComplexFormatParser implements FormatParser {
 
   parse(text: string): {
     reasoningContent: string | null;
-    rawActionStrings: string[] | null;
-    actions: BaseAction[] | null;
+    rawActionStrings: string[] | undefined;
+    actions: BaseAction[] | undefined;
   } | null {
     if (!this.canParse(text)) {
       return null;
@@ -282,7 +281,7 @@ class BCComplexFormatParser implements FormatParser {
       reasoningContent:
         reflection && thought ? `${reflection}, ${thought}` : (thought ?? reflection),
       rawActionStrings: actionStr.split('\n\n').filter((action) => action.trim() !== ''),
-      actions: null,
+      actions: undefined,
     };
   }
 }
@@ -306,8 +305,8 @@ class O1FormatParser implements FormatParser {
 
   parse(text: string): {
     reasoningContent: string | null;
-    rawActionStrings: string[] | null;
-    actions: BaseAction[] | null;
+    rawActionStrings: string[] | undefined;
+    actions: BaseAction[] | undefined;
   } | null {
     // this.logger.debug('[O1FormatParser] start...');
     if (!this.canParse(text)) {
@@ -333,7 +332,7 @@ class O1FormatParser implements FormatParser {
     return {
       reasoningContent: thought,
       rawActionStrings: actionContent.split('\n\n').filter((action) => action.trim() !== ''),
-      actions: null,
+      actions: undefined,
     };
   }
 }
@@ -350,8 +349,8 @@ class FallbackFormatParser implements FormatParser {
 
   parse(text: string): {
     reasoningContent: string | null;
-    rawActionStrings: string[] | null;
-    actions: BaseAction[] | null;
+    rawActionStrings: string[] | undefined;
+    actions: BaseAction[] | undefined;
   } | null {
     this.logger.debug('[FallbackFormatParser] canParse: always true');
 
@@ -386,7 +385,7 @@ class FallbackFormatParser implements FormatParser {
     return {
       reasoningContent: thoughtStr,
       rawActionStrings: actionStr.split('\n\n').filter((action) => action.trim() !== ''),
-      actions: null,
+      actions: undefined,
     };
   }
 }
@@ -411,8 +410,8 @@ export class FormatParserChain {
 
   parse(text: string): {
     reasoningContent: string | null;
-    rawActionStrings: string[] | null;
-    actions: BaseAction[] | null;
+    rawActionStrings: string[] | undefined;
+    actions: BaseAction[] | undefined;
   } {
     this.logger.debug('[FormatParserChain] start...');
 

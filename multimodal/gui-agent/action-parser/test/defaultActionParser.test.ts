@@ -138,7 +138,7 @@ Action: type(text='Hello', start_box='(300,400)')`;
           {
             type: 'type',
             inputs: {
-              text: 'Hello',
+              content: 'Hello',
               point: {
                 raw: {
                   x: 300,
@@ -311,7 +311,7 @@ type(text='Hello', start_box='<bbox>300 400</bbox>')`;
           {
             type: 'type',
             inputs: {
-              text: 'Hello',
+              content: 'Hello',
               point: {
                 raw: {
                   x: 300,
@@ -351,7 +351,7 @@ Action: type(text='Hello', start_box='<bbox>300 400</bbox>')`;
           {
             type: 'type',
             inputs: {
-              text: 'Hello',
+              content: 'Hello',
               point: {
                 raw: {
                   x: 300,
@@ -942,8 +942,8 @@ Action: click(point='<point>400 435</point>')
           },
         ],
         rawActionStrings: [
-          "scroll(point='(500, 500)', direction='up')",
-          "type(content='hello')",
+          "scroll(direction='up', point='(500, 500)')",
+          "type(content='hello', point='(200, 126)')",
           'wait()',
         ],
         rawContent: `<thinkt>需要模拟向上滚动的动作，使用scroll工具，direction设为up，point可以随便选一个页面内的坐标，比如<point>500 500</point>。这样就能完成向上滚动的操作了。</thinkt>

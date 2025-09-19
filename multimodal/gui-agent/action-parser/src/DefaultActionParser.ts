@@ -31,29 +31,15 @@ export class DefaultActionParser extends BaseActionParser {
     input = input.trim();
 
     let reasoningContent = null;
-    let rawActionStrings = null;
-    let actions = null;
+    let rawActionStrings: string[] | undefined = undefined;
+    let actions: BaseAction[] | undefined = undefined;
     try {
       ({ reasoningContent, rawActionStrings, actions } = this.extractActionStrings(input));
     } catch (error) {
-      return {
-        errorMessage: (error as Error).message,
-        rawContent: originInput,
-        rawActionStrings: [],
-        actions: [],
-      };
+      return this.createErrorResponse((error as Error).message, originInput);
     }
 
-    if (!rawActionStrings || rawActionStrings.length <= 0) {
-      return {
-        errorMessage: 'There is no GUI action detected',
-        rawContent: originInput,
-        reasoningContent,
-        rawActionStrings: [],
-        actions: [],
-      };
-    }
-
+    // if actions has prased, just return it
     if (actions && actions.length > 0) {
       return {
         rawContent: originInput,
@@ -63,28 +49,22 @@ export class DefaultActionParser extends BaseActionParser {
       };
     }
 
+    if (!rawActionStrings || rawActionStrings.length <= 0) {
+      return this.createErrorResponse('There is no GUI action detected', originInput);
+    }
+
     actions = [];
     try {
       for (const actionString of rawActionStrings) {
-        const action = this.helper.parseActionFromString(actionString);
+        const action = this.helper.parseActionCallString(actionString);
         if (action) actions.push(action);
       }
     } catch (error) {
-      return {
-        errorMessage: (error as Error).message,
-        rawContent: originInput,
-        reasoningContent,
-        rawActionStrings,
-        actions: [],
-      };
+      return this.createErrorResponse((error as Error).message, originInput);
     }
 
-    this.logger.debug(
-      '[parsePrediction] final result: reasoningContent:',
-      reasoningContent,
-      ', actions lenth:',
-      actions.length,
-    );
+    this.logger.debug('[parsePrediction] reasoningContent:', reasoningContent);
+    this.logger.debug('[parsePrediction] actions lenth:', actions.length);
 
     return {
       rawContent: originInput,
@@ -116,6 +96,14 @@ export class DefaultActionParser extends BaseActionParser {
       reasoningContent: reasoningContent || undefined,
       rawActionStrings: rawActionStrings || undefined,
       actions: actions || undefined,
+    };
+  }
+
+  private createErrorResponse(errorMessage: string, rawContent: string): ParsedGUIResponse {
+    return {
+      errorMessage,
+      rawContent,
+      actions: [],
     };
   }
 }

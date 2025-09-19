@@ -46,10 +46,8 @@ Action: click(start_box='')`,
       ),
     ).toEqual({
       actions: [],
-      rawActionStrings: [`click(start_box='')`],
       rawContent: `Thought: I need to click on this element
 Action: click(start_box='')`,
-      reasoningContent: 'I need to click on this element',
       errorMessage: 'The required parameters of start_box of click action is empty',
     });
   });
@@ -126,8 +124,6 @@ Action：click(start_box='(100,200)')`,
 
     expect(result).toEqual({
       actions: [],
-      rawActionStrings: [],
-      reasoningContent: 'Empty action',
       rawContent: `Thought: Empty action\nAction:`,
       errorMessage: 'There is no GUI action detected',
     });
