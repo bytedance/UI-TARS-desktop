@@ -4,19 +4,22 @@ Learn how to develop custom tools to extend Agent capabilities.
 
 ## Overview
 
-Tools are the building blocks that enable Agents to interact with external systems. @agent-tars/core provides a comprehensive toolkit for creating custom tools that integrate seamlessly with the Agent ecosystem.
+Tools are the building blocks that enable Agents to interact with external systems. @agent-tars/core uses the MCP (Model Context Protocol) framework for tool integration, providing a standardized way to create and register tools.
 
 ## Tool Architecture
 
-Every tool in the system follows a consistent structure:
+Tools in @agent-tars/core are based on MCP Tool interface from `@tarko/mcp-agent`:
 
 ```typescript
-interface Tool {
-  name: string;
-  description: string;
-  parameters: JSONSchema7;
-  execute: (params: any) => Promise<ToolResult>;
-}
+import { Tool } from '@tarko/mcp-agent';
+
+// Tools are created using the Tool class constructor
+const tool = new Tool({
+  id: 'tool_name',
+  description: 'Tool description',
+  parameters: JSONSchema7,
+  function: async (args) => { /* implementation */ }
+});
 ```
 
 ## Creating Your First Tool
@@ -24,207 +27,137 @@ interface Tool {
 ### Basic Tool Structure
 
 ```typescript
-import { Tool, ToolResult } from '@agent-tars/core';
+import { Tool, JSONSchema7 } from '@tarko/mcp-agent';
 
-export class CalculatorTool implements Tool {
-  name = 'calculator';
-  description = 'Perform basic mathematical calculations';
-  
-  parameters = {
-    type: 'object',
-    properties: {
-      operation: {
-        type: 'string',
-        enum: ['add', 'subtract', 'multiply', 'divide'],
-        description: 'Mathematical operation to perform'
-      },
-      a: {
-        type: 'number',
-        description: 'First number'
-      },
-      b: {
-        type: 'number',
-        description: 'Second number'
-      }
-    },
-    required: ['operation', 'a', 'b']
-  };
-
-  async execute(params: {
-    operation: string;
-    a: number;
-    b: number;
-  }): Promise<ToolResult> {
-    const { operation, a, b } = params;
-    
-    let result: number;
-    
-    switch (operation) {
-      case 'add':
-        result = a + b;
-        break;
-      case 'subtract':
-        result = a - b;
-        break;
-      case 'multiply':
-        result = a * b;
-        break;
-      case 'divide':
-        if (b === 0) {
-          return {
-            success: false,
-            error: 'Division by zero is not allowed'
-          };
+export function createCalculatorTool(): Tool {
+  return new Tool({
+    id: 'calculator',
+    description: 'Perform basic mathematical calculations',
+    parameters: {
+      type: 'object',
+      properties: {
+        operation: {
+          type: 'string',
+          enum: ['add', 'subtract', 'multiply', 'divide'],
+          description: 'Mathematical operation to perform'
+        },
+        a: {
+          type: 'number',
+          description: 'First number'
+        },
+        b: {
+          type: 'number',
+          description: 'Second number'
         }
-        result = a / b;
-        break;
-      default:
-        return {
-          success: false,
-          error: `Unknown operation: ${operation}`
-        };
-    }
-    
-    return {
-      success: true,
-      data: {
-        result,
-        operation: `${a} ${operation} ${b} = ${result}`
+      },
+      required: ['operation', 'a', 'b']
+    } as JSONSchema7,
+    function: async (params: {
+      operation: string;
+      a: number;
+      b: number;
+    }) => {
+      const { operation, a, b } = params;
+      
+      let result: number;
+      
+      switch (operation) {
+        case 'add':
+          result = a + b;
+          break;
+        case 'subtract':
+          result = a - b;
+          break;
+        case 'multiply':
+          result = a * b;
+          break;
+        case 'divide':
+          if (b === 0) {
+            throw new Error('Division by zero is not allowed');
+          }
+          result = a / b;
+          break;
+        default:
+          throw new Error(`Unknown operation: ${operation}`);
       }
-    };
-  }
+      
+      return [{
+        type: 'text',
+        text: `${a} ${operation} ${b} = ${result}`
+      }];
+    }
+  });
 }
 ```
 
 ### Registering Tools
 
-```typescript
-import { Agent } from '@agent-tars/core';
-import { CalculatorTool } from './calculator-tool';
+Tools are registered through MCP servers or directly in AgentTARS:
 
-const agent = new Agent({
-  tools: [
-    new CalculatorTool()
-  ]
+```typescript
+import { AgentTARS } from '@agent-tars/core';
+import { createCalculatorTool } from './calculator-tool';
+
+// Register tools through custom MCP server
+const agent = new AgentTARS({
+  mcpServers: {
+    calculator: {
+      // Custom MCP server with calculator tool
+    }
+  }
 });
+
+// Or register during initialization
+agent.registerTool(createCalculatorTool());
 ```
 
-## Tool Categories
+## Built-in Tool Categories
 
-### Built-in Tool Categories
+@agent-tars/core includes built-in tools across 4 MCP server categories:
 
-@agent-tars/core includes 32 built-in tools across 4 categories:
+- **browser**: Web automation via `@agent-infra/mcp-server-browser`
+- **filesystem**: File operations via `@agent-infra/mcp-server-filesystem`
+- **commands**: System commands via `@agent-infra/mcp-server-commands`
+- **search**: Web search via `@agent-infra/search`
 
-- **general** (1 tool): Web search capabilities
-- **browser** (18 tools): Web automation and interaction
-- **filesystem** (11 tools): File and directory operations
-- **commands** (2 tools): System command execution
+These are managed through `BrowserToolsManager`, `FilesystemToolsManager`, and `SearchToolProvider` classes.
 
-### Custom Tool Categories
-
-Organize your custom tools by implementing category interfaces:
-
-```typescript
-export interface ToolCategory {
-  name: string;
-  description: string;
-  tools: Tool[];
-}
-
-export class DatabaseToolCategory implements ToolCategory {
-  name = 'database';
-  description = 'Database operations and queries';
-  
-  tools = [
-    new QueryTool(),
-    new InsertTool(),
-    new UpdateTool()
-  ];
-}
-```
-
-## Advanced Tool Development
+## Tool Implementation Patterns
 
 ### Async Operations
 
-Tools can perform complex async operations:
+MCP tools naturally support async operations:
 
 ```typescript
-export class ApiTool implements Tool {
-  name = 'api_request';
-  description = 'Make HTTP API requests';
-  
-  async execute(params: {
-    url: string;
-    method: string;
-    headers?: Record<string, string>;
-    body?: any;
-  }): Promise<ToolResult> {
-    try {
-      const response = await fetch(params.url, {
-        method: params.method,
-        headers: params.headers,
-        body: params.body ? JSON.stringify(params.body) : undefined
-      });
-      
-      const data = await response.json();
-      
-      return {
-        success: true,
-        data: {
-          status: response.status,
-          headers: Object.fromEntries(response.headers.entries()),
-          body: data
-        }
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: `API request failed: ${error.message}`
-      };
+export function createApiTool(): Tool {
+  return new Tool({
+    id: 'api_request',
+    description: 'Make HTTP API requests',
+    parameters: {
+      type: 'object',
+      properties: {
+        url: { type: 'string', description: 'Request URL' },
+        method: { type: 'string', enum: ['GET', 'POST', 'PUT', 'DELETE'] }
+      },
+      required: ['url', 'method']
+    } as JSONSchema7,
+    function: async (params: { url: string; method: string }) => {
+      try {
+        const response = await fetch(params.url, {
+          method: params.method
+        });
+        
+        const data = await response.text();
+        
+        return [{
+          type: 'text',
+          text: `Status: ${response.status}\n${data}`
+        }];
+      } catch (error) {
+        throw new Error(`API request failed: ${error.message}`);
+      }
     }
-  }
-}
-```
-
-### State Management
-
-Tools can maintain state across executions:
-
-```typescript
-export class SessionTool implements Tool {
-  private sessions = new Map<string, any>();
-  
-  name = 'session_manager';
-  description = 'Manage session data';
-  
-  async execute(params: {
-    action: 'get' | 'set' | 'delete';
-    key: string;
-    value?: any;
-  }): Promise<ToolResult> {
-    const { action, key, value } = params;
-    
-    switch (action) {
-      case 'get':
-        return {
-          success: true,
-          data: { value: this.sessions.get(key) }
-        };
-      case 'set':
-        this.sessions.set(key, value);
-        return {
-          success: true,
-          data: { message: 'Value set successfully' }
-        };
-      case 'delete':
-        this.sessions.delete(key);
-        return {
-          success: true,
-          data: { message: 'Value deleted successfully' }
-        };
-    }
-  }
+  });
 }
 ```
 
@@ -232,32 +165,25 @@ export class SessionTool implements Tool {
 
 ### Error Handling
 
-Always provide meaningful error messages:
+Use proper error handling with meaningful messages:
 
 ```typescript
-async execute(params: any): Promise<ToolResult> {
+function: async (params: any) => {
   try {
     // Tool logic here
-    return { success: true, data: result };
+    return [{ type: 'text', text: 'Success result' }];
   } catch (error) {
-    return {
-      success: false,
-      error: `Tool execution failed: ${error.message}`,
-      details: {
-        stack: error.stack,
-        params
-      }
-    };
+    throw new Error(`Tool execution failed: ${error.message}`);
   }
 }
 ```
 
 ### Parameter Validation
 
-Use comprehensive JSON Schema validation:
+Define comprehensive JSON Schema for parameters:
 
 ```typescript
-parameters = {
+parameters: {
   type: 'object',
   properties: {
     email: {
@@ -274,113 +200,29 @@ parameters = {
   },
   required: ['email'],
   additionalProperties: false
-};
-```
-
-### Resource Management
-
-Clean up resources properly:
-
-```typescript
-export class DatabaseTool implements Tool {
-  private connection: DatabaseConnection;
-  
-  async execute(params: any): Promise<ToolResult> {
-    try {
-      await this.connection.connect();
-      const result = await this.connection.query(params.sql);
-      return { success: true, data: result };
-    } finally {
-      await this.connection.close();
-    }
-  }
-}
+} as JSONSchema7
 ```
 
 ## Testing Tools
 
-### Unit Testing
+Test your tools using standard testing frameworks:
 
 ```typescript
-import { CalculatorTool } from './calculator-tool';
+import { createCalculatorTool } from './calculator-tool';
 
-describe('CalculatorTool', () => {
-  let tool: CalculatorTool;
-  
-  beforeEach(() => {
-    tool = new CalculatorTool();
-  });
-  
-  it('should add numbers correctly', async () => {
-    const result = await tool.execute({
+describe('Calculator Tool', () => {
+  it('should perform calculations', async () => {
+    const tool = createCalculatorTool();
+    
+    const result = await tool.function({
       operation: 'add',
       a: 5,
       b: 3
     });
     
-    expect(result.success).toBe(true);
-    expect(result.data.result).toBe(8);
-  });
-  
-  it('should handle division by zero', async () => {
-    const result = await tool.execute({
-      operation: 'divide',
-      a: 10,
-      b: 0
-    });
-    
-    expect(result.success).toBe(false);
-    expect(result.error).toContain('Division by zero');
+    expect(result[0].text).toContain('8');
   });
 });
-```
-
-### Integration Testing
-
-```typescript
-import { Agent } from '@agent-tars/core';
-import { CalculatorTool } from './calculator-tool';
-
-describe('Calculator Integration', () => {
-  it('should work with agent', async () => {
-    const agent = new Agent({
-      tools: [new CalculatorTool()]
-    });
-    
-    const response = await agent.execute(
-      'Calculate 15 plus 25'
-    );
-    
-    expect(response).toContain('40');
-  });
-});
-```
-
-## Tool Documentation
-
-Document your tools thoroughly:
-
-```typescript
-/**
- * Email validation and sending tool
- * 
- * @example
- * ```typescript
- * const emailTool = new EmailTool({
- *   smtpHost: 'smtp.gmail.com',
- *   smtpPort: 587
- * });
- * 
- * await emailTool.execute({
- *   to: 'user@example.com',
- *   subject: 'Hello',
- *   body: 'Hello world!'
- * });
- * ```
- */
-export class EmailTool implements Tool {
-  // Implementation...
-}
 ```
 
 ## Next Steps
