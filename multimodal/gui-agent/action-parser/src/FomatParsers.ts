@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { ConsoleLogger } from '@agent-infra/logger';
+import { ConsoleLogger, LogLevel } from '@agent-infra/logger';
 import { BaseAction } from '@gui-agent/shared/types';
 import { XMLBuilder, XMLParser } from 'fast-xml-parser';
 // Remove circular dependency
@@ -71,7 +71,7 @@ export class XMLFormatParser implements FormatParser {
       }
       if (key === 'seed:tool_call') {
         canParse = true;
-        actions.push(...this.helper.standardizeGUIActions(value));
+        actions.push(...this.helper.standardizeGUIActionsFromXMLObject(value));
         continue;
       }
     }
@@ -391,10 +391,14 @@ class FallbackFormatParser implements FormatParser {
   }
 }
 
+const defaultLogger = new ConsoleLogger(undefined, LogLevel.DEBUG);
+
 export class FormatParserChain {
+  private logger: ConsoleLogger;
   private parsers: FormatParser[];
 
-  constructor(private logger: ConsoleLogger) {
+  constructor(logger: ConsoleLogger = defaultLogger) {
+    this.logger = logger.spawn('[FormatParserChain]');
     this.parsers = [
       new XMLFormatParser(this.logger),
       new OmniFormatParser(this.logger),
