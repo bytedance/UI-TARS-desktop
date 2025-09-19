@@ -19,8 +19,6 @@ export async function accessLogMiddleware(c: HonoContext, next: Next) {
   const url = c.req.url;
   const requestId = c.get('requestId') || 'unknown';
 
-  logger.info(`[${requestId}] ${method} ${url} - Request started`);
-
   try {
     await next();
     const duration = Date.now() - start;

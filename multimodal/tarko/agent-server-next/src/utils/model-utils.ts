@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentModel } from '@tarko/interface';
+import { AgentModel, SessionInfo } from '@tarko/interface';
 import type { AgentAppConfig } from '../types';
 
 /**
@@ -49,4 +49,25 @@ export function isModelConfigValid(
   return getAvailableModels(appConfig).some(
     (model) => model.provider === provider && model.id === modelId,
   );
+}
+
+/**
+ * Process session to prevent model sensitive information from being exposed
+ */
+export function filterSessionModel(sessionInfos: SessionInfo[] | undefined) {
+  if(!sessionInfos) {
+    return;
+  }
+
+  for(const sess of sessionInfos) {
+    if(sess.metadata?.modelConfig) {
+      const { id, displayName, provider } = sess.metadata?.modelConfig;
+
+      sess.metadata.modelConfig = {
+          id, 
+          displayName,
+           provider
+      }
+    }
+  }
 }

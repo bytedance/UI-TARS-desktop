@@ -122,13 +122,13 @@ export class AgentSessionFactory {
       }
 
       // Reallocate sandbox if scheduler is available
-      let sandboxUrl = sessionInfo.metadata?.sandboxUrl;
+      let old_sandboxUrl = sessionInfo.metadata?.sandboxUrl;
       const userId = sessionInfo.userId;
 
       if (this.sandboxScheduler && userId) {
         try {
           // check current sandbox status
-          const exist = await this.sandboxScheduler.checkInstanceExist(sandboxUrl);
+          const exist = await this.sandboxScheduler.checkInstanceExist(old_sandboxUrl);
 
           if (!exist) {
             const newSandboxUrl = await this.sandboxScheduler.getSandboxUrl({
@@ -149,7 +149,7 @@ export class AgentSessionFactory {
               JSON.stringify({
                 sessionId: sessionInfo.id,
                 userId: sessionInfo.userId,
-                oldSandbox: sandboxUrl,
+                oldSandbox: old_sandboxUrl,
                 newSandbox: newSandboxUrl,
               }),
             );

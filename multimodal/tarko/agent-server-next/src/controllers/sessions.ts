@@ -7,6 +7,7 @@ import type { HonoContext } from '../types';
 import { getCurrentUserId } from '../middlewares/auth';
 import { SessionInfo } from '@tarko/interface';
 import { ShareService } from '../services';
+import { filterSessionModel } from '../utils';
 
 /**
  * Get all sessions (with multi-tenant support)
@@ -33,6 +34,8 @@ export async function getAllSessions(c: HonoContext) {
       // Single tenant mode: get all sessions
       sessions = await server.storageProvider.getAllSessions();
     }
+
+    filterSessionModel(sessions);
 
     return c.json({ sessions }, 200);
   } catch (error) {
@@ -88,6 +91,8 @@ export async function getSessionDetails(c: HonoContext) {
     if (server.storageProvider && sessionId) {
       const sessionInfo = await server.storageProvider.getSessionInfo(sessionId);
 
+      sessionInfo && filterSessionModel([sessionInfo]);
+
       if (sessionInfo) {
         return c.json(
           {
@@ -109,6 +114,8 @@ export async function getSessionDetails(c: HonoContext) {
  * Get session events
  */
 export async function getSessionEvents(c: HonoContext) {
+
+
   const server = c.get('server');
   const sessionId = c.req.query('sessionId');
 

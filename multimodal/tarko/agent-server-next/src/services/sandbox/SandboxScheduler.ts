@@ -52,14 +52,6 @@ export class SandboxScheduler {
 
     this.logger.info('Getting sandbox URL', { userId, sessionId, strategy });
 
-    // Try to find existing sandbox first
-    const existingSandbox = await this.findExistingSandbox({ userId, sessionId, strategy });
-    if (existingSandbox) {
-      // Update last used time
-      this.logger.info('use existing sandbox: ', existingSandbox.sandboxId);
-      await this.updateSandboxLastUsed(existingSandbox.sandboxId);
-      return existingSandbox.sandboxUrl;
-    }
 
     // TODO:session exclusive mode: limits the total amount of sandbox users can apply for. This place also needs to be modified with the previous findExistingSandbox. It is divided into several situations.
     // 1. If quota is not exceeded, a new sandbox will be created first.
@@ -155,75 +147,37 @@ export class SandboxScheduler {
     const { userId, sessionId, strategy } = options;
 
     try {
-      // Create sandbox instance
+      
       const instance = await this.sandboxManager.createInstance({
         userId,
         sessionId,
         allocationStrategy: strategy,
       });
 
-      // Check if sandbox allocation already exists (handle race conditions)
-      const existingAllocation = await this.sandboxAllocationDAO.getSandboxAllocation(instance.id);
+      const allocation = await this.sandboxAllocationDAO.createSandboxAllocation({
+        sandboxId: instance.id,
+        sandboxUrl: instance.url,
+        userId,
+        sessionId,
+        allocationStrategy: strategy,
+        isActive: true,
+      });
 
-      if (existingAllocation) {
-        this.logger.info('Sandbox allocation already exists, returning existing', {
-          sandboxId: instance.id,
-          strategy,
-          userId,
-          sessionId,
-        });
+      this.logger.info('New sandbox created and allocated', {
+        sandboxId: instance.id,
+        strategy,
+        userId,
+        sessionId,
+      });
 
-        return existingAllocation;
-      }
+      return allocation;
 
-      // Record allocation in database
-      try {
-        const allocation = await this.sandboxAllocationDAO.createSandboxAllocation({
-          sandboxId: instance.id,
-          sandboxUrl: instance.url,
-          userId,
-          sessionId,
-          allocationStrategy: strategy,
-          isActive: true,
-        });
-
-        this.logger.info('New sandbox created and allocated', {
-          sandboxId: instance.id,
-          strategy,
-          userId,
-          sessionId,
-        });
-
-        return allocation;
-      } catch (saveError: any) {
-        // Handle duplicate key error (race condition)
-        this.logger.info('Duplicate key error caught, fetching existing allocation', {
-          sandboxId: instance.id,
-          error: saveError.message,
-        });
-
-        const existingAllocation = await this.sandboxAllocationDAO.getSandboxAllocation(instance.id);
-        if (existingAllocation) {
-          return existingAllocation;
-        }
-        throw saveError;
-      }
     } catch (error) {
       this.logger.error('Failed to create new sandbox:', error);
       throw error;
     }
   }
 
-  /**
-   * Update sandbox last used time
-   */
-  private async updateSandboxLastUsed(sandboxId: string): Promise<void> {
-    try {
-      await this.sandboxAllocationDAO.updateSandboxLastUsed(sandboxId);
-    } catch (error) {
-      this.logger.error('Failed to update sandbox last used time:', error);
-    }
-  }
 
   /**
    * Release a sandbox (mark as inactive)

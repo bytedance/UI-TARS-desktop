@@ -32,10 +32,14 @@ export async function sessionRestoreMiddleware(
 
     // If not exist, restored the AgentSession instance based on the database data.
     if (!session) {
+      logger.info('session instance not exist, prepare to restore')
+
+      const start = Date.now();
+
       const restored = await server.getSessionFactory().restoreSession(sessionId);
 
       if (restored?.session) {
-        logger.info(`Session ${sessionId} restored from storage`);
+        logger.info(`Session ${sessionId} restored from storage, cost: `, Date.now() - start);
 
         session = restored?.session;
         sessionPool.set(sessionId, session);
