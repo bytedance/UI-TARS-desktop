@@ -320,7 +320,6 @@ export const agent = new BrowserGUIAgent({
     // baseURL: process.env.AWS_CLAUDE_API_BASE_URL,
     // id: 'aws_sdk_claude37_sonnet',
   },
-  toolCallEngine: 'structured_outputs',
   logLevel: LogLevel.DEBUG,
 });
 
