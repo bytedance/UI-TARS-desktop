@@ -39,7 +39,7 @@ import {
 import { getLogger, LogLevel, rootLogger } from '@tarko/shared-utils';
 import { AgentExecutionController } from './execution-controller';
 import { getLLMClient } from './llm-client';
-import { getToolCallEngineForProvider } from '../tool-call-engine/engine-selector';
+
 import { filterTools } from '../utils/tool-filter';
 
 /**
@@ -317,14 +317,7 @@ Provide concise and accurate responses.`;
         normalizedOptions.sessionId ??
         `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
-      // Determine the best tool call engine based on the provider if not explicitly specified
-      if (!this.options.toolCallEngine && !normalizedOptions.toolCallEngine) {
-        const providerEngine = getToolCallEngineForProvider(this.currentModel.provider);
-        normalizedOptions.toolCallEngine = providerEngine;
-        this.logger.info(
-          `[Agent] Auto-selected tool call engine "${providerEngine}" for provider "${this.currentModel.provider}"`,
-        );
-      }
+
 
       // Create and send agent run start event
       const runStartEvent = this.eventStream.createEvent('agent_run_start', {
