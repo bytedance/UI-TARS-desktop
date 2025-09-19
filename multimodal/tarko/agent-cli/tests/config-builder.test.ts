@@ -804,4 +804,249 @@ describe('buildAppConfig', () => {
       expect(result.model?.provider).toBe('openai');
     });
   });
+
+  describe('unknown options passthrough', () => {
+    it('should preserve unknown CLI options in the final config', () => {
+      const cliArgs: AgentCLIArguments = {
+        model: {
+          provider: 'openai',
+          id: 'gpt-4',
+        },
+        // Unknown options that should be preserved
+        aioSandbox: 'test-sandbox-value',
+        customOption: 'custom-value',
+        nestedUnknown: {
+          nested: 'value',
+        },
+      };
+
+      const result = buildAppConfig(cliArgs, {});
+
+      // Known options should work as expected
+      expect(result.model).toEqual({
+        provider: 'openai',
+        id: 'gpt-4',
+      });
+
+      // Unknown options should be preserved
+      expect((result as any).aioSandbox).toBe('test-sandbox-value');
+      expect((result as any).customOption).toBe('custom-value');
+      expect((result as any).nestedUnknown).toEqual({
+        nested: 'value',
+      });
+    });
+
+    it('should preserve unknown options while filtering out known CLI-only options', () => {
+      const cliArgs: AgentCLIArguments = {
+        // Known CLI-only options that should be filtered out
+        agent: 'agent-tars',
+        workspace: '/workspace',
+        debug: true,
+        quiet: false,
+        headless: true,
+        input: 'test input',
+        format: 'json',
+        includeLogs: true,
+        useCache: false,
+        open: true,
+        
+        // Known options that should be preserved
+        model: {
+          provider: 'openai',
+        },
+        
+        // Unknown options that should be preserved
+        aioSandbox: 'sandbox-value',
+        customAgentOption: 'agent-specific-value',
+      };
+
+      const result = buildAppConfig(cliArgs, {});
+
+      // Known CLI-only options should not appear in result
+      expect((result as any).agent).toBeUndefined();
+      expect((result as any).workspace).toBeUndefined();
+      expect((result as any).debug).toBeUndefined();
+      expect((result as any).quiet).toBeUndefined();
+      expect((result as any).headless).toBeUndefined();
+      expect((result as any).input).toBeUndefined();
+      expect((result as any).format).toBeUndefined();
+      expect((result as any).includeLogs).toBeUndefined();
+      expect((result as any).useCache).toBeUndefined();
+      expect((result as any).open).toBeUndefined();
+
+      // Known options should be preserved
+      expect(result.model).toEqual({
+        provider: 'openai',
+      });
+
+      // Unknown options should be preserved
+      expect((result as any).aioSandbox).toBe('sandbox-value');
+      expect((result as any).customAgentOption).toBe('agent-specific-value');
+    });
+
+    it('should preserve unknown options alongside deprecated options', () => {
+      const cliArgs: AgentCLIArguments = {
+        // Deprecated options
+        provider: 'openai',
+        apiKey: 'deprecated-key', // secretlint-disable-line
+        
+        // Unknown options
+        aioSandbox: 'test-value',
+        customFeature: true,
+      };
+
+      const result = buildAppConfig(cliArgs, {});
+
+      // Deprecated options should be handled normally
+      expect(result.model).toEqual({
+        provider: 'openai',
+        apiKey: 'deprecated-key', // secretlint-disable-line
+      });
+
+      // Unknown options should be preserved
+      expect((result as any).aioSandbox).toBe('test-value');
+      expect((result as any).customFeature).toBe(true);
+    });
+
+    it('should handle unknown options with complex data types', () => {
+      const complexObject = {
+        nested: {
+          array: [1, 2, 3],
+          boolean: true,
+          string: 'test',
+        },
+      };
+
+      const cliArgs: AgentCLIArguments = {
+        model: {
+          provider: 'openai',
+        },
+        complexUnknownOption: complexObject,
+        arrayOption: ['item1', 'item2'],
+        numberOption: 42,
+        booleanOption: false,
+      };
+
+      const result = buildAppConfig(cliArgs, {});
+
+      expect((result as any).complexUnknownOption).toEqual(complexObject);
+      expect((result as any).arrayOption).toEqual(['item1', 'item2']);
+      expect((result as any).numberOption).toBe(42);
+      expect((result as any).booleanOption).toBe(false);
+    });
+
+    it('should preserve unknown options when merging with user config', () => {
+      const cliArgs: AgentCLIArguments = {
+        model: {
+          provider: 'openai',
+        },
+        aioSandbox: 'cli-value',
+        cliOnlyOption: 'cli-only',
+      };
+
+      const userConfig: AgentAppConfig = {
+        model: {
+          id: 'user-model',
+        },
+        instructions: 'User instructions',
+        // User config might also have unknown properties
+        userSpecificOption: 'user-value',
+      } as any;
+
+      const result = buildAppConfig(cliArgs, userConfig);
+
+      // Known options should merge correctly
+      expect(result.model).toEqual({
+        provider: 'openai', // From CLI
+        id: 'user-model', // From user config
+      });
+      expect(result.instructions).toBe('User instructions');
+
+      // Unknown options from both sources should be preserved
+      expect((result as any).aioSandbox).toBe('cli-value'); // CLI overrides
+      expect((result as any).cliOnlyOption).toBe('cli-only');
+      expect((result as any).userSpecificOption).toBe('user-value');
+    });
+
+    it('should handle unknown options with CLI enhancer', () => {
+      const cliArgs: AgentCLIArguments = {
+        model: {
+          provider: 'openai',
+        },
+        aioSandbox: 'test-value',
+        customOption: 'original-value',
+      };
+
+      const userConfig: AgentAppConfig = {};
+
+      const enhancer: any = (cliArguments: any, appConfig: any) => {
+        // Enhancer might modify unknown options
+        if (cliArguments.customOption) {
+          appConfig.enhancedCustomOption = `enhanced-${cliArguments.customOption}`;
+        }
+      };
+
+      const result = buildAppConfig(cliArgs, userConfig, undefined, enhancer);
+
+      // Original unknown options should be preserved
+      expect((result as any).aioSandbox).toBe('test-value');
+      expect((result as any).customOption).toBe('original-value');
+      
+      // Enhancer modifications should also be present
+      expect((result as any).enhancedCustomOption).toBe('enhanced-original-value');
+    });
+
+    it('should not include known options in unknown options preservation', () => {
+      const cliArgs: AgentCLIArguments = {
+        // All known options
+        model: { provider: 'openai' },
+        thinking: { type: 'enabled' },
+        toolCallEngine: 'native',
+        share: { provider: 'test' },
+        snapshot: { enable: true },
+        logLevel: 'info' as any,
+        server: { exclusive: true },
+        port: 3000,
+        provider: 'deprecated-provider',
+        apiKey: 'deprecated-key', // secretlint-disable-line
+        baseURL: 'deprecated-url',
+        shareProvider: 'deprecated-share',
+        config: ['config.json'],
+        debug: true,
+        quiet: false,
+        stream: true,
+        open: true,
+        agent: 'test-agent',
+        headless: true,
+        input: 'test',
+        format: 'json',
+        includeLogs: true,
+        useCache: true,
+        workspace: '/workspace',
+        
+        // Unknown option
+        unknownOption: 'should-be-preserved',
+      };
+
+      const result = buildAppConfig(cliArgs, {});
+
+      // All the known options should be properly processed, not duplicated as unknown
+      expect(result.model?.provider).toBe('openai');
+      expect(result.thinking?.type).toBe('enabled');
+      expect(result.toolCallEngine).toBe('native');
+      expect(result.share?.provider).toBe('test');
+      expect(result.snapshot?.enable).toBe(true);
+      expect(result.server?.exclusive).toBe(true);
+      expect(result.server?.port).toBe(3000);
+
+      // Unknown option should be preserved
+      expect((result as any).unknownOption).toBe('should-be-preserved');
+
+      // Known CLI-only options should not appear
+      expect((result as any).agent).toBeUndefined();
+      expect((result as any).workspace).toBeUndefined();
+      expect((result as any).debug).toBeUndefined();
+      expect((result as any).config).toBeUndefined();
+    });
+  });
 });
