@@ -829,9 +829,9 @@ describe('buildAppConfig', () => {
       });
 
       // Unknown options should be preserved
-      expect((result as any).aioSandbox).toBe('test-sandbox-value');
-      expect((result as any).customOption).toBe('custom-value');
-      expect((result as any).nestedUnknown).toEqual({
+      expect(result).toHaveProperty('aioSandbox', 'test-sandbox-value');
+      expect(result).toHaveProperty('customOption', 'custom-value');
+      expect(result).toHaveProperty('nestedUnknown', {
         nested: 'value',
       });
     });
@@ -863,16 +863,16 @@ describe('buildAppConfig', () => {
       const result = buildAppConfig(cliArgs, {});
 
       // Known CLI-only options should not appear in result
-      expect((result as any).agent).toBeUndefined();
-      expect((result as any).workspace).toBeUndefined();
-      expect((result as any).debug).toBeUndefined();
-      expect((result as any).quiet).toBeUndefined();
-      expect((result as any).headless).toBeUndefined();
-      expect((result as any).input).toBeUndefined();
-      expect((result as any).format).toBeUndefined();
-      expect((result as any).includeLogs).toBeUndefined();
-      expect((result as any).useCache).toBeUndefined();
-      expect((result as any).open).toBeUndefined();
+      expect(result).not.toHaveProperty('agent');
+      expect(result).not.toHaveProperty('workspace');
+      expect(result).not.toHaveProperty('debug');
+      expect(result).not.toHaveProperty('quiet');
+      expect(result).not.toHaveProperty('headless');
+      expect(result).not.toHaveProperty('input');
+      expect(result).not.toHaveProperty('format');
+      expect(result).not.toHaveProperty('includeLogs');
+      expect(result).not.toHaveProperty('useCache');
+      expect(result).not.toHaveProperty('open');
 
       // Known options should be preserved
       expect(result.model).toEqual({
@@ -880,8 +880,8 @@ describe('buildAppConfig', () => {
       });
 
       // Unknown options should be preserved
-      expect((result as any).aioSandbox).toBe('sandbox-value');
-      expect((result as any).customAgentOption).toBe('agent-specific-value');
+      expect(result).toHaveProperty('aioSandbox', 'sandbox-value');
+      expect(result).toHaveProperty('customAgentOption', 'agent-specific-value');
     });
 
     it('should preserve unknown options alongside deprecated options', () => {
@@ -904,8 +904,8 @@ describe('buildAppConfig', () => {
       });
 
       // Unknown options should be preserved
-      expect((result as any).aioSandbox).toBe('test-value');
-      expect((result as any).customFeature).toBe(true);
+      expect(result).toHaveProperty('aioSandbox', 'test-value');
+      expect(result).toHaveProperty('customFeature', true);
     });
 
     it('should handle unknown options with complex data types', () => {
@@ -929,10 +929,10 @@ describe('buildAppConfig', () => {
 
       const result = buildAppConfig(cliArgs, {});
 
-      expect((result as any).complexUnknownOption).toEqual(complexObject);
-      expect((result as any).arrayOption).toEqual(['item1', 'item2']);
-      expect((result as any).numberOption).toBe(42);
-      expect((result as any).booleanOption).toBe(false);
+      expect(result).toHaveProperty('complexUnknownOption', complexObject);
+      expect(result).toHaveProperty('arrayOption', ['item1', 'item2']);
+      expect(result).toHaveProperty('numberOption', 42);
+      expect(result).toHaveProperty('booleanOption', false);
     });
 
     it('should preserve unknown options when merging with user config', () => {
@@ -963,9 +963,9 @@ describe('buildAppConfig', () => {
       expect(result.instructions).toBe('User instructions');
 
       // Unknown options from both sources should be preserved
-      expect((result as any).aioSandbox).toBe('cli-value'); // CLI overrides
-      expect((result as any).cliOnlyOption).toBe('cli-only');
-      expect((result as any).userSpecificOption).toBe('user-value');
+      expect(result).toHaveProperty('aioSandbox', 'cli-value'); // CLI overrides
+      expect(result).toHaveProperty('cliOnlyOption', 'cli-only');
+      expect(result).toHaveProperty('userSpecificOption', 'user-value');
     });
 
     it('should handle unknown options with CLI enhancer', () => {
@@ -989,11 +989,11 @@ describe('buildAppConfig', () => {
       const result = buildAppConfig(cliArgs, userConfig, undefined, enhancer);
 
       // Original unknown options should be preserved
-      expect((result as any).aioSandbox).toBe('test-value');
-      expect((result as any).customOption).toBe('original-value');
+      expect(result).toHaveProperty('aioSandbox', 'test-value');
+      expect(result).toHaveProperty('customOption', 'original-value');
       
       // Enhancer modifications should also be present
-      expect((result as any).enhancedCustomOption).toBe('enhanced-original-value');
+      expect(result).toHaveProperty('enhancedCustomOption', 'enhanced-original-value');
     });
 
     it('should not include known options in unknown options preservation', () => {
@@ -1040,13 +1040,13 @@ describe('buildAppConfig', () => {
       expect(result.server?.port).toBe(3000);
 
       // Unknown option should be preserved
-      expect((result as any).unknownOption).toBe('should-be-preserved');
+      expect(result).toHaveProperty('unknownOption', 'should-be-preserved');
 
       // Known CLI-only options should not appear
-      expect((result as any).agent).toBeUndefined();
-      expect((result as any).workspace).toBeUndefined();
-      expect((result as any).debug).toBeUndefined();
-      expect((result as any).config).toBeUndefined();
+      expect(result).not.toHaveProperty('agent');
+      expect(result).not.toHaveProperty('workspace');
+      expect(result).not.toHaveProperty('debug');
+      expect(result).not.toHaveProperty('config');
     });
   });
 });

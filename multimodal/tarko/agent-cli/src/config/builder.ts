@@ -56,9 +56,8 @@ export function buildAppConfig<
     config = deepMerge(config, workspaceConfig);
   }
 
-  // Extract CLI arguments into categorized groups
+  // Extract known CLI options, everything else (including unknown options) goes to cliConfigProps
   const {
-    // CLI-only options that should not be passed to agent config
     agent,
     workspace,
     config: configPath,
@@ -72,34 +71,16 @@ export function buildAppConfig<
     includeLogs,
     useCache,
     open,
-    // Deprecated options that need special handling
     provider,
     apiKey,
     baseURL,
     shareProvider,
     thinking,
-    // Filter options that need special processing
     tool,
     mcpServer,
     server,
-    // Everything else goes to cliConfigProps (including unknown options)
     ...cliConfigProps
   } = cliArguments;
-
-  // Define the keys that should be excluded from agent config
-  const excludedKeys = new Set([
-    'agent', 'workspace', 'config', 'debug', 'quiet', 'port', 'stream',
-    'headless', 'input', 'format', 'includeLogs', 'useCache', 'open',
-    'provider', 'apiKey', 'baseURL', 'shareProvider', 'thinking',
-    'tool', 'mcpServer', 'server'
-  ]);
-
-  // Preserve unknown options by adding them back to cliConfigProps
-  Object.keys(cliArguments).forEach(key => {
-    if (!excludedKeys.has(key) && !(key in cliConfigProps)) {
-      (cliConfigProps as any)[key] = (cliArguments as any)[key];
-    }
-  });
 
   // Handle deprecated options
   const deprecatedOptionValues = {
