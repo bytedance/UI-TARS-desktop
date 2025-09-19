@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { describe, it, expect } from 'vitest';
-import { serializeGUIAction } from '../src/utils';
+import { serializeAction } from '../src/utils';
 
 describe('serializeGUIAction', () => {
   it('(1)', () => {
@@ -24,7 +24,7 @@ describe('serializeGUIAction', () => {
         },
       },
     };
-    const result = serializeGUIAction(input);
+    const result = serializeAction(input);
     expect(result).toEqual(`click(point='(1, 1)')`);
   });
 
@@ -47,7 +47,7 @@ describe('serializeGUIAction', () => {
         },
       },
     };
-    const result = serializeGUIAction(input);
+    const result = serializeAction(input);
     expect(result).toEqual(`type(content='Hello, world!', point='(1, 1)')`);
   });
 
@@ -68,7 +68,7 @@ describe('serializeGUIAction', () => {
         },
       },
     };
-    const result = serializeGUIAction(input);
+    const result = serializeAction(input);
     expect(result).toEqual(`type(content='Hello, world!', point='(1, 1)')`);
   });
 
@@ -85,7 +85,7 @@ describe('serializeGUIAction', () => {
         },
       },
     };
-    const result = serializeGUIAction(input);
+    const result = serializeAction(input);
     expect(result).toEqual(`type(content='Hello, world!', point='(0.001, 0.001)')`);
   });
 
@@ -108,7 +108,7 @@ describe('serializeGUIAction', () => {
         },
       },
     };
-    const result = serializeGUIAction(input);
+    const result = serializeAction(input);
     expect(result).toEqual(`type(content='Hello, world!', point='<bbox>1, 1, 2, 2</bbox>')`);
   });
 
@@ -135,7 +135,7 @@ describe('serializeGUIAction', () => {
         },
       },
     };
-    const result = serializeGUIAction(input);
+    const result = serializeAction(input);
     expect(result).toEqual(`type(content='Hello, world!', point='(1, 1)')`);
   });
 
@@ -152,7 +152,7 @@ describe('serializeGUIAction', () => {
         },
       },
     };
-    const result = serializeGUIAction(input);
+    const result = serializeAction(input);
     expect(result).toEqual(`type(content='Hello, world!', point='(1, 1)')`);
   });
 
@@ -174,7 +174,7 @@ describe('serializeGUIAction', () => {
         },
       },
     };
-    const result = serializeGUIAction(input);
+    const result = serializeAction(input);
     expect(result).toEqual(`drag(start='(1, 1)', end='(1, 1)')`);
   });
 
@@ -191,7 +191,7 @@ describe('serializeGUIAction', () => {
         direction: 'up',
       },
     };
-    const result = serializeGUIAction(input);
+    const result = serializeAction(input);
     expect(result).toEqual(`scroll(point='(1, 1)', direction='up')`);
   });
 
@@ -202,7 +202,7 @@ describe('serializeGUIAction', () => {
         key: 'pagedown',
       },
     };
-    const result = serializeGUIAction(input);
+    const result = serializeAction(input);
     expect(result).toEqual(`hotkey(key='pagedown')`);
   });
 
@@ -213,7 +213,7 @@ describe('serializeGUIAction', () => {
         url: 'www.google.com',
       },
     };
-    const result = serializeGUIAction(input);
+    const result = serializeAction(input);
     expect(result).toEqual(`navigate(url='www.google.com')`);
   });
 
@@ -222,7 +222,7 @@ describe('serializeGUIAction', () => {
       type: 'navigate_back',
       inputs: {},
     };
-    const result = serializeGUIAction(input);
+    const result = serializeAction(input);
     expect(result).toEqual(`navigate_back()`);
   });
 
@@ -245,7 +245,7 @@ describe('serializeGUIAction', () => {
         button: 'left',
       },
     };
-    const result = serializeGUIAction(input);
+    const result = serializeAction(input);
     expect(result).toEqual(`mouse_down(point='(1, 1)', button='left')`);
   });
 
@@ -256,7 +256,7 @@ describe('serializeGUIAction', () => {
         time: 1,
       },
     };
-    const result = serializeGUIAction(input);
+    const result = serializeAction(input);
     expect(result).toEqual(`wait(time='1s')`);
   });
 
@@ -265,7 +265,7 @@ describe('serializeGUIAction', () => {
       type: 'wait',
       inputs: {},
     };
-    const result = serializeGUIAction(input);
+    const result = serializeAction(input);
     expect(result).toEqual(`wait()`);
   });
 });

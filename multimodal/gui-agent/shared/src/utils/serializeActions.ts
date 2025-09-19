@@ -10,7 +10,7 @@ import { BaseAction } from '../types';
  * Serializes a BaseAction into a string representation
  * Format: "actionType(param1='value1', param2='value2', ...)"
  */
-export function serializeGUIAction<T extends string, I extends Record<string, any>>(
+export function serializeAction<T extends string, I extends Record<string, any>>(
   action: BaseAction<T, I>,
 ): string {
   const { type, inputs } = action;
