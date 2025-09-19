@@ -23,7 +23,20 @@ async function main() {
   });
 
   await aioAgent.initialize();
-  const response = aioAgent.run('What is UI-TARS-2?');
+
+  const tools = aioAgent.getTools();
+  console.log('\n📋 Available Tools:');
+  console.log('─'.repeat(80));
+  tools.forEach((tool, index) => {
+    const num = (index + 1).toString().padStart(2, ' ');
+    const name = tool.name.padEnd(30, ' ');
+    const desc = tool.description || 'No description';
+    console.log(`${num}. ${name} │ ${desc}`);
+  });
+  console.log('─'.repeat(80));
+  console.log(`Total: ${tools.length} tools\n`);
+
+  const response = await aioAgent.run('Open https://seed-tars.com');
   console.log(response);
 }
 
