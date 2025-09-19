@@ -17,7 +17,7 @@ import { actionParser, actionStringParser } from '@gui-agent/action-parser';
 import { getScreenInfo } from './shared';
 
 /**
- * SeedGUIAgentToolCallEngine - Minimal prompt engineering tool call engine
+ * GUIAgentToolCallEngine - Minimal prompt engineering tool call engine
  *
  * This is the simplest possible implementation of a tool call engine that:
  * 1. Uses prompt engineering to instruct the LLM to output tool calls in a specific format
@@ -26,7 +26,7 @@ import { getScreenInfo } from './shared';
  *
  * Format used: <tool_call>{"name": "tool_name", "arguments": {...}}</tool_call>
  */
-export class SeedGUIAgentToolCallEngine extends ToolCallEngine {
+export class GUIAgentToolCallEngine extends ToolCallEngine {
   /**
    * Prepare system prompt with tool information and instructions
    */

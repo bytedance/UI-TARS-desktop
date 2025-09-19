@@ -217,15 +217,21 @@ importers:
       '@clack/prompts':
         specifier: 0.11.0
         version: 0.11.0
-      '@computer-use/nut-js':
-        specifier: ^4.2.0
-        version: 4.2.0
       '@gui-agent/action-parser':
         specifier: workspace:*
         version: link:../action-parser
+      '@gui-agent/operator-adb':
+        specifier: workspace:*
+        version: link:../operator-adb
       '@gui-agent/operator-browser':
         specifier: workspace:*
         version: link:../operator-browser
+      '@gui-agent/operator-nutjs':
+        specifier: workspace:*
+        version: link:../operator-nutjs
+      '@gui-agent/shared':
+        specifier: workspace:*
+        version: link:../shared
       '@tarko/agent':
         specifier: workspace:*
         version: link:../../tarko/agent
@@ -235,18 +241,6 @@ importers:
       '@tarko/agent-interface':
         specifier: workspace:*
         version: link:../../tarko/agent-interface
-      '@ui-tars/operator-adb':
-        specifier: 1.2.3
-        version: 1.2.3
-      '@ui-tars/operator-nut-js':
-        specifier: 1.2.3
-        version: 1.2.3(@ui-tars/sdk@1.2.3(ws@8.18.3)(zod@3.25.36))
-      '@ui-tars/sdk':
-        specifier: 1.2.3
-        version: 1.2.3(ws@8.18.3)(zod@3.25.36)
-      '@ui-tars/shared':
-        specifier: 1.2.3
-        version: 1.2.3
       big.js:
         specifier: ^6.2.2
         version: 6.2.2
@@ -5952,14 +5946,6 @@ packages:
   '@ui-tars/action-parser@1.2.3':
     resolution: {integrity: sha512-S58yb7mDeiFcvbnRpxQdILAvJ4NR+0emtpMdMD6lwlBz122ZOqd5p+lKrX5e5Nl/HGl8d2jKOnUW2RbqBpr3sQ==}
 
-  '@ui-tars/operator-adb@1.2.3':
-    resolution: {integrity: sha512-5Jln7VqY4j8j+9BXz/0GPBh4O9m+NeYjf7NtOp1GL+CqhfstaGCnb67N8NFPfUDOmBF7yGGayTL/3E4ED4G8yQ==}
-
-  '@ui-tars/operator-nut-js@1.2.3':
-    resolution: {integrity: sha512-6M/H+4xarDIxmOPgwvJ/hzRLrhN/+fDruw2QJLGAtukGqvbg2Fi7E64kPVFKpAS3sOH4hwYHYZboYqkQuknm/Q==}
-    peerDependencies:
-      '@ui-tars/sdk': 1.2.3
-
   '@ui-tars/sdk@1.2.3':
     resolution: {integrity: sha512-N2sGjBNRxqClm8RKs3p9K3Cu98rgPxmmoRLYRefvGw3lA5hsHmN4/6LHbKCdymKeO/4JTWHSAuqvoWkilPa1kg==}
 
@@ -7623,10 +7609,6 @@ packages:
     resolution: {integrity: sha512-j5W0//W7f8UxAn8hXVnwG8tLwdiUy4FJLcSupCg6maBYZDpyBvTApK7KyuI4bKj8KOh1r2YH+6ucuYtJv1bTZA==}
     engines: {node: '>=10'}
 
-  execa@5.0.1:
-    resolution: {integrity: sha512-4hFTjFbFzQa3aCLobpbPJR/U+VoL1wdV5ozOWjeet0AWDeYr9UFGM1eUFWHX+VtOWFq4p0xXUXfW1YxUaP4fpw==}
-    engines: {node: '>=10'}
-
   execa@5.1.1:
     resolution: {integrity: sha512-8uSpZZocAZRBAPIEINJj3Lo9HyGitllczc27Eh5YYojjMFMn8yHMDMaUHE2Jqfq05D/wucwI4JGURyXt1vchyg==}
     engines: {node: '>=10'}
@@ -8385,10 +8367,6 @@ packages:
 
   inline-style-parser@0.2.4:
     resolution: {integrity: sha512-0aO8FkhNZlj/ZIbNi7Lxxr12obT7cL1moPfE4tg1LkX7LlLfC6DeX4l2ZEud1ukP9jNQyNnfzQVqwbwmAATY4Q==}
-
-  inquirer@8.2.4:
-    resolution: {integrity: sha512-nn4F01dxU8VeKfq192IjLsxu0/OmMZ4Lg3xKAns148rCaXP6ntAoEkVYZThWjwON8AlzdZZi6oqnhNbxUG9hVg==}
-    engines: {node: '>=12.0.0'}
 
   inquirer@8.2.6:
     resolution: {integrity: sha512-M1WuAmb7pn9zdFRtQYk26ZBoY043Sse0wVDdk4Bppr+JOXyQYybdtvK+l9wUibhtjdjvtoiNy8tk+EgsYIUqKg==}
@@ -20725,24 +20703,6 @@ snapshots:
       '@ui-tars/shared': 1.2.3
       lodash.isnumber: 3.0.3
 
-  '@ui-tars/operator-adb@1.2.3':
-    dependencies:
-      '@ui-tars/shared': 1.2.3
-      execa: 5.0.1
-      inquirer: 8.2.4
-      jimp: 1.6.0
-
-  '@ui-tars/operator-nut-js@1.2.3(@ui-tars/sdk@1.2.3(ws@8.18.3)(zod@3.25.36))':
-    dependencies:
-      '@computer-use/nut-js': 4.2.0
-      '@ui-tars/sdk': 1.2.3(ws@8.18.3)(zod@3.25.36)
-      '@ui-tars/shared': 1.2.3
-      big.js: 6.2.2
-      jimp: 1.6.0
-    transitivePeerDependencies:
-      - debug
-      - encoding
-
   '@ui-tars/sdk@1.2.3(ws@8.18.3)(zod@3.25.36)':
     dependencies:
       '@ui-tars/action-parser': 1.2.3
@@ -22754,18 +22714,6 @@ snapshots:
       signal-exit: 3.0.7
       strip-final-newline: 2.0.0
 
-  execa@5.0.1:
-    dependencies:
-      cross-spawn: 7.0.6
-      get-stream: 6.0.1
-      human-signals: 2.1.0
-      is-stream: 2.0.1
-      merge-stream: 2.0.0
-      npm-run-path: 4.0.1
-      onetime: 5.1.2
-      signal-exit: 3.0.7
-      strip-final-newline: 2.0.0
-
   execa@5.1.1:
     dependencies:
       cross-spawn: 7.0.6
@@ -23825,24 +23773,6 @@ snapshots:
   ini@5.0.0: {}
 
   inline-style-parser@0.2.4: {}
-
-  inquirer@8.2.4:
-    dependencies:
-      ansi-escapes: 4.3.2
-      chalk: 4.1.2
-      cli-cursor: 3.1.0
-      cli-width: 3.0.0
-      external-editor: 3.1.0
-      figures: 3.2.0
-      lodash: 4.17.21
-      mute-stream: 0.0.8
-      ora: 5.4.1
-      run-async: 2.4.1
-      rxjs: 7.8.2
-      string-width: 4.2.3
-      strip-ansi: 6.0.1
-      through: 2.3.8
-      wrap-ansi: 7.0.0
 
   inquirer@8.2.6:
     dependencies:

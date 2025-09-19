@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { Agent, ConsoleLogger, LLMRequestHookPayload, LogLevel, Tool } from '@tarko/agent';
-import { SeedGUIAgentToolCallEngine } from './SeedGUIAgentToolCallEngine';
+import { GUIAgentToolCallEngine } from './ToolCallEngine';
 import { SYSTEM_PROMPT } from './prompts';
 import { getScreenInfo, setScreenInfo } from './shared';
 import { Base64ImageParser } from '@agent-infra/media-utils';
 import { GUIAgentConfig } from '@gui-agent/shared/types';
 import { Operator, BaseGUIAgent } from '@gui-agent/shared/base';
 
-export class SeedGUIAgent<T extends Operator> extends BaseGUIAgent {
+export class GUIAgent<T extends Operator> extends BaseGUIAgent {
   static label = 'GUI Agent';
 
   private operator: Operator | undefined;
@@ -29,7 +29,7 @@ export class SeedGUIAgent<T extends Operator> extends BaseGUIAgent {
       name: 'Seed GUI Agent',
       instructions: SYSTEM_PROMPT,
       tools: [],
-      toolCallEngine: SeedGUIAgentToolCallEngine,
+      toolCallEngine: GUIAgentToolCallEngine,
       model: model,
       ...(maxLoopCount && { maxIterations: maxLoopCount }),
       logLevel: LogLevel.DEBUG,

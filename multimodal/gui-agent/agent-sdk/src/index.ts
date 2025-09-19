@@ -9,7 +9,7 @@ import { env } from 'process';
 import * as p from '@clack/prompts';
 import { Command } from 'commander';
 import { SYSTEM_PROMPT_LATEST, SYSTEM_PROMPT } from './prompts';
-import { SeedGUIAgent } from './SeedGUIAgent';
+import { GUIAgent } from './GUIAgent';
 import { AgentModel } from '@tarko/agent-interface';
 import { Operator } from '@gui-agent/shared/base';
 
@@ -125,7 +125,7 @@ async function runWithOperator(
   console.log(`🚀 运行 ${operatorType} operator...`);
 
   const operator = await initilizeOperator(operatorType);
-  const seedGUIAgent = new SeedGUIAgent({
+  const guiAgent = new GUIAgent({
     operator,
     model: {
       provider: 'openai-non-streaming',
@@ -137,7 +137,7 @@ async function runWithOperator(
     systemPrompt: SYSTEM_PROMPT,
   });
 
-  const response = await seedGUIAgent.run({
+  const response = await guiAgent.run({
     input: [{ type: 'text', text: instruction }],
   });
 
@@ -217,14 +217,14 @@ async function testBrowserOperator() {
   console.log('🌐 Testing Browser Operator...');
 
   const operator = await initilizeOperator('browser');
-  const seedGUIAgentForBrowser = new SeedGUIAgent({
+  const guiAgentForBrowser = new GUIAgent({
     operator,
     model: getModelConfig(),
     // uiTarsVersion: 'latest',
     systemPrompt: SYSTEM_PROMPT,
   });
 
-  const browserResponse = await seedGUIAgentForBrowser.run({
+  const browserResponse = await guiAgentForBrowser.run({
     input: [{ type: 'text', text: 'What is Agent TARS' }],
   });
 
@@ -238,7 +238,7 @@ async function testComputerOperator() {
   console.log('💻 Testing Computer Operator...');
 
   const operator = await initilizeOperator('computer');
-  const seedGUIAgentForComputer = new SeedGUIAgent({
+  const guiAgentForComputer = new GUIAgent({
     operator,
     model: {
       provider: getModelConfig().provider,
@@ -250,7 +250,7 @@ async function testComputerOperator() {
     systemPrompt: SYSTEM_PROMPT,
   });
 
-  const computerResponse = await seedGUIAgentForComputer.run({
+  const computerResponse = await guiAgentForComputer.run({
     input: [{ type: 'text', text: 'What is Agent TARS' }],
   });
 
@@ -264,7 +264,7 @@ async function testAndroidOperator() {
   console.log('📱 Testing Android Operator...');
 
   const operator = await initilizeOperator('android');
-  const seedGUIAgentForAndroid = new SeedGUIAgent({
+  const guiAgentForAndroid = new GUIAgent({
     operator,
     model: getModelConfig(),
     // uiTarsVersion: 'latest',
@@ -272,7 +272,7 @@ async function testAndroidOperator() {
     systemPrompt: SYSTEM_PROMPT,
   });
 
-  const androidResponse = await seedGUIAgentForAndroid.run({
+  const androidResponse = await guiAgentForAndroid.run({
     input: [{ type: 'text', text: 'What is Agent TARS' }],
   });
 
@@ -291,11 +291,11 @@ async function testAllOperators() {
 
 async function main() {
   const program = new Command();
-  program.name('seed-gui-agent').description('SeedGUIAgent CLI').version('0.0.1');
+  program.name('gui-agent').description('GUIAgent CLI').version('0.0.1');
 
   program
     .command('start')
-    .description('启动 SeedGUIAgent...')
+    .description('启动 GUIAgent...')
     .option('-t, --target <target>', '目标operator (browser|computer|android)')
     .option('-q, --query <query>', '用户指令')
     .action(async (options: CliOptions) => {
@@ -310,7 +310,7 @@ async function main() {
 
   program
     .command('test')
-    .description('测试 SeedGUIAgent 不同Operator')
+    .description('测试 GUIAgent 不同Operator')
     .option('-t, --target <target>', '目标Operator (browser|computer|android|all)', 'all')
     .action(async (options: TestOptions) => {
       validateEnvironmentVariables();
@@ -342,5 +342,5 @@ if (require.main === module) {
   main().catch(console.error);
 }
 
-export * from './SeedGUIAgent';
-export { SeedGUIAgent as default } from './SeedGUIAgent';
+export * from './GUIAgent';
+export { GUIAgent as default } from './GUIAgent';
