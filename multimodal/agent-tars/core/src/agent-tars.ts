@@ -29,7 +29,7 @@ import { applyDefaultOptions } from './shared/config-utils';
 import { MessageHistoryDumper } from './shared/message-history-dumper';
 import { WorkspacePathResolver } from './shared/workspace-path-resolver';
 import { AgentWebUIImplementation } from '@agent-tars/interface';
-import { AgentTARSInitializer, AgentTARSAIOInitializer } from './initializers';
+import { AgentTARSLocalEnvironment, AgentTARSAIOEnvironment } from './initializers';
 import { ToolLogger, ResourceCleaner } from './utils';
 
 /**
@@ -76,7 +76,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   private readonly workspacePathResolver: WorkspacePathResolver;
   private readonly toolLogger: ToolLogger;
   private readonly resourceCleaner: ResourceCleaner;
-  private readonly initializer: AgentTARSInitializer | AgentTARSAIOInitializer;
+  private readonly environment: AgentTARSLocalEnvironment | AgentTARSAIOEnvironment;
 
   // Component instances (initialized during setup)
   private browserToolsManager?: BrowserToolsManager;
@@ -141,15 +141,15 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
     this.toolLogger = new ToolLogger(this.logger);
     this.resourceCleaner = new ResourceCleaner(this.logger);
     
-    // Create initializer with proper logger and managers
-    this.initializer = processedOptions.aioSandbox
-      ? new AgentTARSAIOInitializer(
+    // Create environment with proper logger and managers
+    this.environment = processedOptions.aioSandbox
+      ? new AgentTARSAIOEnvironment(
           this.tarsOptions,
           this.workspace,
           this.browserManager,
           this.logger,
         )
-      : new AgentTARSInitializer(
+      : new AgentTARSLocalEnvironment(
           this.tarsOptions,
           this.workspace,
           this.browserManager,
@@ -168,8 +168,8 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
     this.logger.info('🚀 Initializing AgentTARS...');
 
     try {
-      // Initialize all components through the initializer
-      const components = await this.initializer.initialize(
+      // Initialize all components through the environment
+      const components = await this.environment.initialize(
         (tool) => this.registerTool(tool),
         this.eventStream,
       );
@@ -180,7 +180,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
       this.searchToolProvider = components.searchToolProvider;
       this.browserGUIAgent = components.browserGUIAgent;
       this.inMemoryMCPClients = components.mcpClients;
-      this.mcpServers = this.initializer.getMCPServers();
+      this.mcpServers = this.environment.getMCPServers();
 
       // Log registered tools
       this.toolLogger.logRegisteredTools(this.getTools());
@@ -196,51 +196,42 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   }
 
   /**
-   * Handle tool call preprocessing (lazy browser launch and path resolution)
+   * Handle tool call preprocessing - delegate to environment
    */
   override async onBeforeToolCall(
     id: string,
     toolCall: { toolCallId: string; name: string },
     args: any,
   ): Promise<any> {
-    // Skip local browser operations in AIO sandbox mode
-    if (!this.tarsOptions.aioSandbox) {
-      // Handle browser tool calls with lazy initialization
-      if (toolCall.name.startsWith('browser')) {
-        await this.ensureBrowserReady();
-      }
-
-      // Resolve workspace paths for filesystem operations
-      if (this.workspacePathResolver.hasPathParameters(toolCall.name)) {
-        return this.workspacePathResolver.resolveToolPaths(toolCall.name, args);
-      }
-    }
-
-    return args;
+    return await this.environment.onBeforeToolCall(
+      id,
+      toolCall,
+      args,
+      this.browserManager,
+      this.workspacePathResolver,
+      this.tarsOptions.browser,
+      this.isReplaySnapshot,
+    );
   }
 
   /**
-   * Handle agent loop start (GUI Agent screenshot if needed)
+   * Handle agent loop start - delegate to environment
    */
   override async onEachAgentLoopStart(sessionId: string): Promise<void> {
-    // Skip local browser operations in AIO sandbox mode
-    if (
-      !this.tarsOptions.aioSandbox &&
-      this.tarsOptions.browser?.control !== 'dom' &&
-      this.browserGUIAgent &&
-      this.browserManager.isLaunchingComplete()
-    ) {
-      if (this.browserGUIAgent.setEventStream) {
-        this.browserGUIAgent.setEventStream(this.eventStream);
-      }
-      await this.browserGUIAgent.onEachAgentLoopStart(this.eventStream, this.isReplaySnapshot);
-    }
+    await this.environment.onEachAgentLoopStart(
+      sessionId,
+      this.eventStream,
+      this.isReplaySnapshot,
+      this.browserGUIAgent,
+      this.browserManager,
+      this.tarsOptions.browser?.control,
+    );
 
     await super.onEachAgentLoopStart(sessionId);
   }
 
   /**
-   * Handle post-tool call processing (browser state updates)
+   * Handle post-tool call processing - delegate to environment
    */
   override async onAfterToolCall(
     id: string,
@@ -249,17 +240,13 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   ): Promise<any> {
     const processedResult = await super.onAfterToolCall(id, toolCall, result);
 
-    // Skip local browser state updates in AIO sandbox mode
-    if (
-      !this.tarsOptions.aioSandbox &&
-      toolCall.name === 'browser_navigate' &&
-      this.browserManager.isLaunchingComplete() &&
-      (await this.browserManager.isBrowserAlive())
-    ) {
-      await this.updateBrowserState();
-    }
-
-    return processedResult;
+    return await this.environment.onAfterToolCall(
+      id,
+      toolCall,
+      processedResult,
+      this.browserManager,
+      () => this.updateBrowserState(),
+    );
   }
 
   /**
@@ -273,14 +260,10 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   }
 
   /**
-   * Handle session disposal
+   * Handle session disposal - delegate to environment
    */
   override async onDispose(): Promise<void> {
-    // Skip local browser cleanup in AIO sandbox mode
-    if (!this.tarsOptions.aioSandbox && this.browserManager?.isLaunchingComplete()) {
-      this.logger.info('🧹 Closing browser pages before session disposal');
-      await this.browserManager.closeAllPages();
-    }
+    await this.environment.onDispose(this.browserManager);
     await super.onDispose();
   }
 
@@ -442,28 +425,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
     });
   }
 
-  /**
-   * Ensure browser is ready for tool calls
-   */
-  private async ensureBrowserReady(): Promise<void> {
-    if (!this.browserManager.isLaunchingComplete()) {
-      if (!this.isReplaySnapshot) {
-        await this.browserManager.launchBrowser({
-          headless: this.tarsOptions.browser?.headless,
-          cdpEndpoint: this.tarsOptions.browser?.cdpEndpoint,
-        });
-      }
-    } else {
-      const isAlive = await this.browserManager.isBrowserAlive(true);
-      if (!isAlive && !this.isReplaySnapshot) {
-        this.logger.warn('🔄 Browser recovery needed, attempting explicit recovery...');
-        const recovered = await this.browserManager.recoverBrowser();
-        if (!recovered) {
-          this.logger.error('❌ Browser recovery failed - tool call may not work correctly');
-        }
-      }
-    }
-  }
+
 
   /**
    * Update browser state after navigation

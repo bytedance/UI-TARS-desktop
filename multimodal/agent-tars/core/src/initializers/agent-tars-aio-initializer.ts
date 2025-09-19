@@ -10,12 +10,12 @@ import { SearchToolProvider } from '../search';
 import { FilesystemToolsManager } from '../filesystem';
 
 /**
- * AgentTARSAIOInitializer - Handles initialization for AIO Sandbox environment
+ * AgentTARSAIOEnvironment - Handles AIO Sandbox environment operations
  *
- * This initializer disables local resource operations and relies on AIO Sandbox MCP
+ * This environment disables local resource operations and relies on AIO Sandbox MCP
  * for all tool functionality when aioSandbox option is provided.
  */
-export class AgentTARSAIOInitializer {
+export class AgentTARSAIOEnvironment {
   private logger: ConsoleLogger;
   private options: AgentTARSOptions;
   private workspace: string;
@@ -86,6 +86,50 @@ export class AgentTARSAIOInitializer {
     registerToolFn(searchTool);
 
     this.logger.info('✅ Search tools initialized for AIO mode');
+  }
+
+  /**
+   * Handle agent loop start - no local browser operations in AIO mode
+   */
+  async onEachAgentLoopStart(sessionId: string): Promise<void> {
+    // Skip all local browser operations in AIO sandbox mode
+    this.logger.info('⏭️ Skipping local browser operations in AIO mode');
+  }
+
+  /**
+   * Handle tool call preprocessing - no local operations in AIO mode
+   */
+  async onBeforeToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    args: any,
+    browserManager?: any,
+    workspacePathResolver?: any,
+    browserOptions?: any,
+    isReplaySnapshot?: boolean,
+  ): Promise<any> {
+    // Skip all local tool preprocessing in AIO sandbox mode
+    return args;
+  }
+
+  /**
+   * Handle post-tool call processing - no local operations in AIO mode
+   */
+  async onAfterToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    result: any,
+  ): Promise<any> {
+    // Skip all local post-processing in AIO sandbox mode
+    return result;
+  }
+
+  /**
+   * Handle session disposal - no local cleanup in AIO mode
+   */
+  async onDispose(): Promise<void> {
+    // No local resources to clean up in AIO sandbox mode
+    this.logger.info('🧹 No local resources to clean up in AIO mode');
   }
 
   /**

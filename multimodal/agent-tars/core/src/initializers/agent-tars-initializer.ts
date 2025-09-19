@@ -16,12 +16,12 @@ import * as filesystemModule from '@agent-infra/mcp-server-filesystem';
 import * as commandsModule from '@agent-infra/mcp-server-commands';
 
 /**
- * AgentTARSInitializer - Handles complex initialization logic for AgentTARS
+ * AgentTARSLocalEnvironment - Handles local environment operations for AgentTARS
  *
- * This class separates the initialization concerns from the main AgentTARS class,
- * making the code more maintainable and testable.
+ * This environment manages local browser, filesystem, and other resources,
+ * providing full local functionality.
  */
-export class AgentTARSInitializer {
+export class AgentTARSLocalEnvironment {
   private logger: ConsoleLogger;
   private options: AgentTARSOptions;
   private workspace: string;
@@ -298,6 +298,116 @@ export class AgentTARSInitializer {
     } catch (error) {
       this.logger.error(`❌ Failed to register tools from '${moduleName}':`, error);
       throw error;
+    }
+  }
+
+  /**
+   * Handle agent loop start (GUI Agent screenshot if needed)
+   */
+  async onEachAgentLoopStart(
+    sessionId: string,
+    eventStream: any,
+    isReplaySnapshot: boolean,
+    browserGUIAgent?: BrowserGUIAgent,
+    browserManager?: BrowserManager,
+    browserControl?: string,
+  ): Promise<void> {
+    // Handle local browser operations
+    if (
+      browserControl !== 'dom' &&
+      browserGUIAgent &&
+      browserManager?.isLaunchingComplete()
+    ) {
+      if (browserGUIAgent.setEventStream) {
+        browserGUIAgent.setEventStream(eventStream);
+      }
+      await browserGUIAgent.onEachAgentLoopStart(eventStream, isReplaySnapshot);
+    }
+  }
+
+  /**
+   * Handle tool call preprocessing (lazy browser launch and path resolution)
+   */
+  async onBeforeToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    args: any,
+    browserManager?: BrowserManager,
+    workspacePathResolver?: any,
+    browserOptions?: any,
+    isReplaySnapshot?: boolean,
+  ): Promise<any> {
+    // Handle browser tool calls with lazy initialization
+    if (toolCall.name.startsWith('browser') && browserManager) {
+      await this.ensureBrowserReady(browserManager, browserOptions, isReplaySnapshot);
+    }
+
+    // Resolve workspace paths for filesystem operations
+    if (workspacePathResolver?.hasPathParameters(toolCall.name)) {
+      return workspacePathResolver.resolveToolPaths(toolCall.name, args);
+    }
+
+    return args;
+  }
+
+  /**
+   * Handle post-tool call processing (browser state updates)
+   */
+  async onAfterToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    result: any,
+    browserManager?: BrowserManager,
+    updateBrowserStateFn?: () => Promise<void>,
+  ): Promise<any> {
+    // Update browser state after navigation
+    if (
+      toolCall.name === 'browser_navigate' &&
+      browserManager?.isLaunchingComplete() &&
+      (await browserManager.isBrowserAlive()) &&
+      updateBrowserStateFn
+    ) {
+      await updateBrowserStateFn();
+    }
+
+    return result;
+  }
+
+  /**
+   * Handle session disposal
+   */
+  async onDispose(browserManager?: BrowserManager): Promise<void> {
+    // Close browser pages before session disposal
+    if (browserManager?.isLaunchingComplete()) {
+      this.logger.info('🧹 Closing browser pages before session disposal');
+      await browserManager.closeAllPages();
+    }
+  }
+
+  /**
+   * Ensure browser is ready for tool calls
+   */
+  private async ensureBrowserReady(
+    browserManager: BrowserManager,
+    browserOptions?: any,
+    isReplaySnapshot?: boolean,
+  ): Promise<void> {
+    if (!browserManager.isLaunchingComplete()) {
+      if (!isReplaySnapshot) {
+        await browserManager.launchBrowser({
+          headless: browserOptions?.headless,
+          cdpEndpoint: browserOptions?.cdpEndpoint,
+        });
+      }
+    } else {
+      const isAlive = await browserManager.isBrowserAlive(true);
+      if (!isAlive && !isReplaySnapshot) {
+        this.logger.warn('🔄 Browser recovery needed, attempting explicit recovery...');
+        const recovered = await browserManager.recoverBrowser();
+        if (!recovered) {
+          this.logger.error('❌ Browser recovery failed - tool call may not work correctly');
+        }
+      }
     }
   }
 
