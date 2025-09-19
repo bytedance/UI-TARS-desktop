@@ -129,11 +129,11 @@ export const WorkspaceContent: React.FC = () => {
 
               {/* Enhanced feature cards with modern design */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-lg mx-auto">
-                <div className="flex flex-col items-center p-4 bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-2xl border border-gray-200/60 dark:border-gray-700/60 shadow-lg backdrop-blur-sm relative overflow-hidden">
-                  <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/20 flex items-center justify-center mb-3 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-700/40 shadow-sm">
+                <div className="flex md:flex-col items-center md:items-center p-4 bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-2xl border border-gray-200/60 dark:border-gray-700/60 shadow-lg backdrop-blur-sm relative overflow-hidden">
+                  <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/20 flex items-center justify-center md:mb-3 mr-3 md:mr-0 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-700/40 shadow-sm flex-shrink-0">
                     <FiLayout size={20} />
                   </div>
-                  <div className="text-center relative z-10">
+                  <div className="md:text-center relative z-10">
                     <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
                       Tool Results
                     </div>
@@ -143,11 +143,11 @@ export const WorkspaceContent: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex flex-col items-center p-4 bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-2xl border border-gray-200/60 dark:border-gray-700/60 shadow-lg backdrop-blur-sm relative overflow-hidden">
-                  <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/20 flex items-center justify-center mb-3 text-green-600 dark:text-green-400 border border-green-200/60 dark:border-green-700/40 shadow-sm">
+                <div className="flex md:flex-col items-center md:items-center p-4 bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-2xl border border-gray-200/60 dark:border-gray-700/60 shadow-lg backdrop-blur-sm relative overflow-hidden">
+                  <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/20 flex items-center justify-center md:mb-3 mr-3 md:mr-0 text-green-600 dark:text-green-400 border border-green-200/60 dark:border-green-700/40 shadow-sm flex-shrink-0">
                     <FiZap size={20} />
                   </div>
-                  <div className="text-center relative z-10">
+                  <div className="md:text-center relative z-10">
                     <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
                       Live Updates
                     </div>
@@ -157,11 +157,11 @@ export const WorkspaceContent: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex flex-col items-center p-4 bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-2xl border border-gray-200/60 dark:border-gray-700/60 shadow-lg backdrop-blur-sm relative overflow-hidden">
-                  <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/20 flex items-center justify-center mb-3 text-amber-600 dark:text-amber-400 border border-amber-200/60 dark:border-amber-700/40 shadow-sm">
+                <div className="flex md:flex-col items-center md:items-center p-4 bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-2xl border border-gray-200/60 dark:border-gray-700/60 shadow-lg backdrop-blur-sm relative overflow-hidden">
+                  <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/20 flex items-center justify-center md:mb-3 mr-3 md:mr-0 text-amber-600 dark:text-amber-400 border border-amber-200/60 dark:border-amber-700/40 shadow-sm flex-shrink-0">
                     <FiFileText size={20} />
                   </div>
-                  <div className="text-center relative z-10">
+                  <div className="md:text-center relative z-10">
                     <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
                       Deliverables
                     </div>
