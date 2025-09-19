@@ -19,7 +19,6 @@ export class AgentTARSAIOEnvironment {
   private logger: ConsoleLogger;
   private options: AgentTARSOptions;
   private workspace: string;
-  private browserManager: BrowserManager;
 
   // Component instances (minimal for AIO mode)
   private searchToolProvider?: SearchToolProvider;
@@ -28,13 +27,11 @@ export class AgentTARSAIOEnvironment {
   constructor(
     options: AgentTARSOptions,
     workspace: string,
-    browserManager: BrowserManager,
     logger: ConsoleLogger,
   ) {
     this.options = options;
     this.workspace = workspace;
-    this.browserManager = browserManager;
-    this.logger = logger.spawn('AIOInitializer');
+    this.logger = logger.spawn('AIOEnvironment');
   }
 
   /**
@@ -91,7 +88,11 @@ export class AgentTARSAIOEnvironment {
   /**
    * Handle agent loop start - no local browser operations in AIO mode
    */
-  async onEachAgentLoopStart(sessionId: string): Promise<void> {
+  async onEachAgentLoopStart(
+    sessionId: string,
+    eventStream: any,
+    isReplaySnapshot: boolean,
+  ): Promise<void> {
     // Skip all local browser operations in AIO sandbox mode
     this.logger.info('⏭️ Skipping local browser operations in AIO mode');
   }
@@ -103,9 +104,6 @@ export class AgentTARSAIOEnvironment {
     id: string,
     toolCall: { toolCallId: string; name: string },
     args: any,
-    browserManager?: any,
-    workspacePathResolver?: any,
-    browserOptions?: any,
     isReplaySnapshot?: boolean,
   ): Promise<any> {
     // Skip all local tool preprocessing in AIO sandbox mode
@@ -119,6 +117,7 @@ export class AgentTARSAIOEnvironment {
     id: string,
     toolCall: { toolCallId: string; name: string },
     result: any,
+    browserState: any,
   ): Promise<any> {
     // Skip all local post-processing in AIO sandbox mode
     return result;
@@ -130,6 +129,23 @@ export class AgentTARSAIOEnvironment {
   async onDispose(): Promise<void> {
     // No local resources to clean up in AIO sandbox mode
     this.logger.info('🧹 No local resources to clean up in AIO mode');
+  }
+
+  /**
+   * Get browser control information
+   */
+  getBrowserControlInfo(): { mode: string; tools: string[] } {
+    return {
+      mode: 'aio-sandbox',
+      tools: [], // Tools are provided by AIO Sandbox
+    };
+  }
+
+  /**
+   * Get the browser manager instance
+   */
+  getBrowserManager(): undefined {
+    return undefined; // No local browser manager in AIO mode
   }
 
   /**

@@ -71,18 +71,12 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   private readonly workspace: string;
   private readonly tarsOptions: AgentTARSOptions;
 
-  // Component managers
-  private readonly browserManager: BrowserManager;
-  private readonly workspacePathResolver: WorkspacePathResolver;
+  // Core utilities
   private readonly toolLogger: ToolLogger;
   private readonly resourceCleaner: ResourceCleaner;
   private readonly environment: AgentTARSLocalEnvironment | AgentTARSAIOEnvironment;
 
-  // Component instances (initialized during setup)
-  private browserToolsManager?: BrowserToolsManager;
-  private filesystemToolsManager?: FilesystemToolsManager;
-  private searchToolProvider?: SearchToolProvider;
-  private browserGUIAgent?: BrowserGUIAgent;
+  // Legacy component references (for cleanup and public API)
   private inMemoryMCPClients: Partial<Record<BuiltInMCPServerName, Client>> = {};
   private mcpServers: BuiltInMCPServers = {};
 
@@ -130,29 +124,20 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
     this.logger = this.logger.spawn('AgentTARS');
     this.logger.info(`🤖 AgentTARS initialized | Working directory: ${workspace}`);
 
-    // Initialize managers and utilities
-    this.browserManager = BrowserManager.getInstance(this.logger);
-    this.browserManager.lastLaunchOptions = {
-      headless: this.tarsOptions.browser?.headless,
-      cdpEndpoint: this.tarsOptions.browser?.cdpEndpoint,
-    };
-
-    this.workspacePathResolver = new WorkspacePathResolver({ workspace });
+    // Initialize core utilities
     this.toolLogger = new ToolLogger(this.logger);
     this.resourceCleaner = new ResourceCleaner(this.logger);
     
-    // Create environment with proper logger and managers
+    // Create environment - it will manage all components internally
     this.environment = processedOptions.aioSandbox
       ? new AgentTARSAIOEnvironment(
           this.tarsOptions,
           this.workspace,
-          this.browserManager,
           this.logger,
         )
       : new AgentTARSLocalEnvironment(
           this.tarsOptions,
           this.workspace,
-          this.browserManager,
           this.logger,
         );
 
@@ -174,11 +159,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
         this.eventStream,
       );
 
-      // Store component references
-      this.browserToolsManager = components.browserToolsManager;
-      this.filesystemToolsManager = components.filesystemToolsManager;
-      this.searchToolProvider = components.searchToolProvider;
-      this.browserGUIAgent = components.browserGUIAgent;
+      // Store legacy references for cleanup
       this.inMemoryMCPClients = components.mcpClients;
       this.mcpServers = this.environment.getMCPServers();
 
@@ -207,9 +188,6 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
       id,
       toolCall,
       args,
-      this.browserManager,
-      this.workspacePathResolver,
-      this.tarsOptions.browser,
       this.isReplaySnapshot,
     );
   }
@@ -222,9 +200,6 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
       sessionId,
       this.eventStream,
       this.isReplaySnapshot,
-      this.browserGUIAgent,
-      this.browserManager,
-      this.tarsOptions.browser?.control,
     );
 
     await super.onEachAgentLoopStart(sessionId);
@@ -244,8 +219,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
       id,
       toolCall,
       processedResult,
-      this.browserManager,
-      () => this.updateBrowserState(),
+      this.browserState,
     );
   }
 
@@ -263,7 +237,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
    * Handle session disposal - delegate to environment
    */
   override async onDispose(): Promise<void> {
-    await this.environment.onDispose(this.browserManager);
+    await this.environment.onDispose();
     await super.onDispose();
   }
 
@@ -281,7 +255,6 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
     // Clear references
     this.inMemoryMCPClients = {};
     this.mcpServers = {};
-    this.browserGUIAgent = undefined;
   }
 
   // Public API methods
@@ -290,16 +263,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
    * Get browser control information
    */
   public getBrowserControlInfo(): { mode: string; tools: string[] } {
-    if (this.browserToolsManager) {
-      return {
-        mode: this.browserToolsManager.getMode(),
-        tools: this.browserToolsManager.getRegisteredTools(),
-      };
-    }
-    return {
-      mode: this.tarsOptions.browser?.control || 'default',
-      tools: [],
-    };
+    return this.environment.getBrowserControlInfo();
   }
 
   /**
@@ -326,8 +290,8 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   /**
    * Get the browser manager instance
    */
-  public getBrowserManager(): BrowserManager {
-    return this.browserManager;
+  public getBrowserManager(): BrowserManager | undefined {
+    return this.environment.getBrowserManager();
   }
 
   // Message history hooks for experimental features
@@ -427,29 +391,5 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
 
 
 
-  /**
-   * Update browser state after navigation
-   */
-  private async updateBrowserState(): Promise<void> {
-    try {
-      if (this.tarsOptions.browser?.control === 'dom') {
-        const response = await this.inMemoryMCPClients.browser?.callTool({
-          name: 'browser_screenshot',
-          arguments: { highlight: true },
-        });
 
-        if (Array.isArray(response?.content)) {
-          const { data, type, mimeType } = response.content[1];
-          if (type === 'image') {
-            this.browserState.currentScreenshot = `data:${mimeType};base64,${data}`;
-          }
-        }
-      } else if (this.browserGUIAgent) {
-        const { compressedBase64 } = await this.browserGUIAgent.screenshot();
-        this.browserState.currentScreenshot = compressedBase64;
-      }
-    } catch (error) {
-      this.logger.warn('⚠️ Failed to update browser state:', error);
-    }
-  }
 }

@@ -8,6 +8,7 @@ import { AgentTARSOptions, BuiltInMCPServers, BuiltInMCPServerName } from '../ty
 import { BrowserGUIAgent, BrowserManager, BrowserToolsManager } from '../browser';
 import { SearchToolProvider } from '../search';
 import { FilesystemToolsManager } from '../filesystem';
+import { WorkspacePathResolver } from '../shared/workspace-path-resolver';
 
 // Static imports for MCP modules
 // @ts-expect-error - Default esm asset has some issues
@@ -25,7 +26,10 @@ export class AgentTARSLocalEnvironment {
   private logger: ConsoleLogger;
   private options: AgentTARSOptions;
   private workspace: string;
-  private browserManager: BrowserManager;
+  
+  // Component managers - owned by this environment
+  private readonly browserManager: BrowserManager;
+  private readonly workspacePathResolver: WorkspacePathResolver;
 
   // Component instances
   private browserToolsManager?: BrowserToolsManager;
@@ -38,13 +42,20 @@ export class AgentTARSLocalEnvironment {
   constructor(
     options: AgentTARSOptions,
     workspace: string,
-    browserManager: BrowserManager,
     logger: ConsoleLogger,
   ) {
     this.options = options;
     this.workspace = workspace;
-    this.browserManager = browserManager;
-    this.logger = logger.spawn('Initializer');
+    this.logger = logger.spawn('LocalEnvironment');
+    
+    // Initialize environment-owned components
+    this.browserManager = BrowserManager.getInstance(this.logger);
+    this.browserManager.lastLaunchOptions = {
+      headless: this.options.browser?.headless,
+      cdpEndpoint: this.options.browser?.cdpEndpoint,
+    };
+    
+    this.workspacePathResolver = new WorkspacePathResolver({ workspace });
   }
 
   /**
@@ -308,20 +319,17 @@ export class AgentTARSLocalEnvironment {
     sessionId: string,
     eventStream: any,
     isReplaySnapshot: boolean,
-    browserGUIAgent?: BrowserGUIAgent,
-    browserManager?: BrowserManager,
-    browserControl?: string,
   ): Promise<void> {
     // Handle local browser operations
     if (
-      browserControl !== 'dom' &&
-      browserGUIAgent &&
-      browserManager?.isLaunchingComplete()
+      this.options.browser?.control !== 'dom' &&
+      this.browserGUIAgent &&
+      this.browserManager.isLaunchingComplete()
     ) {
-      if (browserGUIAgent.setEventStream) {
-        browserGUIAgent.setEventStream(eventStream);
+      if (this.browserGUIAgent.setEventStream) {
+        this.browserGUIAgent.setEventStream(eventStream);
       }
-      await browserGUIAgent.onEachAgentLoopStart(eventStream, isReplaySnapshot);
+      await this.browserGUIAgent.onEachAgentLoopStart(eventStream, isReplaySnapshot);
     }
   }
 
@@ -332,19 +340,16 @@ export class AgentTARSLocalEnvironment {
     id: string,
     toolCall: { toolCallId: string; name: string },
     args: any,
-    browserManager?: BrowserManager,
-    workspacePathResolver?: any,
-    browserOptions?: any,
     isReplaySnapshot?: boolean,
   ): Promise<any> {
     // Handle browser tool calls with lazy initialization
-    if (toolCall.name.startsWith('browser') && browserManager) {
-      await this.ensureBrowserReady(browserManager, browserOptions, isReplaySnapshot);
+    if (toolCall.name.startsWith('browser')) {
+      await this.ensureBrowserReady(isReplaySnapshot);
     }
 
     // Resolve workspace paths for filesystem operations
-    if (workspacePathResolver?.hasPathParameters(toolCall.name)) {
-      return workspacePathResolver.resolveToolPaths(toolCall.name, args);
+    if (this.workspacePathResolver?.hasPathParameters(toolCall.name)) {
+      return this.workspacePathResolver.resolveToolPaths(toolCall.name, args);
     }
 
     return args;
@@ -357,17 +362,15 @@ export class AgentTARSLocalEnvironment {
     id: string,
     toolCall: { toolCallId: string; name: string },
     result: any,
-    browserManager?: BrowserManager,
-    updateBrowserStateFn?: () => Promise<void>,
+    browserState: any,
   ): Promise<any> {
     // Update browser state after navigation
     if (
       toolCall.name === 'browser_navigate' &&
-      browserManager?.isLaunchingComplete() &&
-      (await browserManager.isBrowserAlive()) &&
-      updateBrowserStateFn
+      this.browserManager.isLaunchingComplete() &&
+      (await this.browserManager.isBrowserAlive())
     ) {
-      await updateBrowserStateFn();
+      await this.updateBrowserState(browserState);
     }
 
     return result;
@@ -376,38 +379,83 @@ export class AgentTARSLocalEnvironment {
   /**
    * Handle session disposal
    */
-  async onDispose(browserManager?: BrowserManager): Promise<void> {
+  async onDispose(): Promise<void> {
     // Close browser pages before session disposal
-    if (browserManager?.isLaunchingComplete()) {
+    if (this.browserManager.isLaunchingComplete()) {
       this.logger.info('🧹 Closing browser pages before session disposal');
-      await browserManager.closeAllPages();
+      await this.browserManager.closeAllPages();
     }
+  }
+
+  /**
+   * Get browser control information
+   */
+  getBrowserControlInfo(): { mode: string; tools: string[] } {
+    if (this.browserToolsManager) {
+      return {
+        mode: this.browserToolsManager.getMode(),
+        tools: this.browserToolsManager.getRegisteredTools(),
+      };
+    }
+    return {
+      mode: this.options.browser?.control || 'default',
+      tools: [],
+    };
+  }
+
+  /**
+   * Get the browser manager instance
+   */
+  getBrowserManager(): BrowserManager {
+    return this.browserManager;
   }
 
   /**
    * Ensure browser is ready for tool calls
    */
-  private async ensureBrowserReady(
-    browserManager: BrowserManager,
-    browserOptions?: any,
-    isReplaySnapshot?: boolean,
-  ): Promise<void> {
-    if (!browserManager.isLaunchingComplete()) {
+  private async ensureBrowserReady(isReplaySnapshot?: boolean): Promise<void> {
+    if (!this.browserManager.isLaunchingComplete()) {
       if (!isReplaySnapshot) {
-        await browserManager.launchBrowser({
-          headless: browserOptions?.headless,
-          cdpEndpoint: browserOptions?.cdpEndpoint,
+        await this.browserManager.launchBrowser({
+          headless: this.options.browser?.headless,
+          cdpEndpoint: this.options.browser?.cdpEndpoint,
         });
       }
     } else {
-      const isAlive = await browserManager.isBrowserAlive(true);
+      const isAlive = await this.browserManager.isBrowserAlive(true);
       if (!isAlive && !isReplaySnapshot) {
         this.logger.warn('🔄 Browser recovery needed, attempting explicit recovery...');
-        const recovered = await browserManager.recoverBrowser();
+        const recovered = await this.browserManager.recoverBrowser();
         if (!recovered) {
           this.logger.error('❌ Browser recovery failed - tool call may not work correctly');
         }
       }
+    }
+  }
+
+  /**
+   * Update browser state after navigation
+   */
+  private async updateBrowserState(browserState: any): Promise<void> {
+    try {
+      if (this.options.browser?.control === 'dom') {
+        const response = await this.mcpClients.browser?.callTool({
+          name: 'browser_screenshot',
+          arguments: { highlight: true },
+        });
+
+        if (Array.isArray(response?.content)) {
+          const { data, type, mimeType } = response.content[1];
+          if (type === 'image') {
+            browserState.currentScreenshot = `data:${mimeType};base64,${data}`;
+          }
+        }
+      } else if (this.browserGUIAgent) {
+        const { compressedBase64 } = await this.browserGUIAgent.screenshot();
+        browserState.currentScreenshot = compressedBase64;
+      }
+    } catch (error) {
+      this.logger.warn('⚠️ Failed to update browser state:', error);
     }
   }
 
