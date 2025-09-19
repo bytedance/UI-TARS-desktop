@@ -19,7 +19,7 @@ export interface ParsedGUIResponse {
   /** parsed from Thought: `<thought>` */
   reasoningContent?: string;
   /** parsed from Action: action(params=`action`) */
-  rawActionStrings: string[];
+  rawActionStrings?: string[];
   /** parsed from Action: action(params=`action`) */
   actions: BaseAction[];
   /** error message to feedback to LLM */
