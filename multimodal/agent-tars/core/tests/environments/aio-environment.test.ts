@@ -81,6 +81,7 @@ describe('AgentTARSAIOEnvironment', () => {
     it('should return AIO sandbox MCP registry', () => {
       const registry = environment.getMCPServerRegistry();
       expect(registry.aio).toEqual({
+        type: 'streamable-http',
         url: 'http://localhost:8080/mcp',
       });
     });
