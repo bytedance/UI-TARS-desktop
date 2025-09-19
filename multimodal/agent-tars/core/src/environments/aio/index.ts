@@ -12,7 +12,7 @@ import { FilesystemToolsManager } from '../local/filesystem';
 /**
  * AgentTARSAIOEnvironment - Handles AIO Sandbox environment operations
  *
- * This environment disables local resource operations and relies on AIO Sandbox MCP
+ * This environment disables all local resource operations and relies entirely on AIO Sandbox MCP
  * for all tool functionality when aioSandbox option is provided.
  */
 export class AgentTARSAIOEnvironment {
@@ -20,8 +20,7 @@ export class AgentTARSAIOEnvironment {
   private options: AgentTARSOptions;
   private workspace: string;
 
-  // Component instances (minimal for AIO mode)
-  private searchToolProvider?: SearchToolProvider;
+  // Component instances (none for AIO mode - all tools from MCP)
   private mcpClients: Partial<Record<BuiltInMCPServerName, any>> = {};
 
   constructor(options: AgentTARSOptions, workspace: string, logger: ConsoleLogger) {
@@ -32,6 +31,7 @@ export class AgentTARSAIOEnvironment {
 
   /**
    * Initialize components for AIO Sandbox mode
+   * All tools are provided by AIO Sandbox MCP - no local tools initialized
    */
   async initialize(
     registerToolFn: (tool: Tool) => void,
@@ -45,40 +45,13 @@ export class AgentTARSAIOEnvironment {
   }> {
     this.logger.info('🌐 Initializing AgentTARS in AIO Sandbox mode');
     this.logger.info(`🔗 AIO Sandbox endpoint: ${this.options.aioSandbox}`);
+    this.logger.info('🚫 All local tools disabled - using AIO Sandbox MCP only');
 
-    // Initialize only search tools for AIO mode
-    // All other tools (browser, filesystem, commands) are provided by AIO Sandbox MCP
-    if (this.options.search) {
-      await this.initializeSearchTools(registerToolFn);
-    }
-
-    this.logger.info('✅ AIO Sandbox initialization complete - local resources disabled');
+    this.logger.info('✅ AIO Sandbox initialization complete - all tools via MCP');
 
     return {
-      searchToolProvider: this.searchToolProvider,
       mcpClients: this.mcpClients,
     };
-  }
-
-  /**
-   * Initialize search tools (only component that works in AIO mode)
-   */
-  private async initializeSearchTools(registerToolFn: (tool: Tool) => void): Promise<void> {
-    this.logger.info('🔍 Initializing search tools for AIO mode');
-
-    this.searchToolProvider = new SearchToolProvider(this.logger, {
-      provider: this.options.search!.provider,
-      count: this.options.search!.count,
-      cdpEndpoint: this.options.browser?.cdpEndpoint,
-      browserSearch: this.options.search!.browserSearch,
-      apiKey: this.options.search!.apiKey,
-      baseUrl: this.options.search!.baseUrl,
-    });
-
-    const searchTool = this.searchToolProvider.createSearchTool();
-    registerToolFn(searchTool);
-
-    this.logger.info('✅ Search tools initialized for AIO mode');
   }
 
   /**
