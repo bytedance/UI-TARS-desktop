@@ -380,7 +380,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     connectionStatus && !connectionStatus.connected
       ? 'Server disconnected...'
       : isProcessing
-        ? `${getAgentTitle()} is running...`
+        ? `Insert a message while ${getAgentTitle()} is running... (Ctrl+Enter to send)`
         : contextualSelectorEnabled
           ? `Ask ${getAgentTitle()} something... (Use @ to reference files/folders, Ctrl+Enter to send)`
           : `Ask ${getAgentTitle()} something... (Ctrl+Enter to send)`;
