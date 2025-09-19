@@ -1,0 +1,393 @@
+# Tool Development
+
+Learn how to develop custom tools to extend Agent capabilities.
+
+## Overview
+
+Tools are the building blocks that enable Agents to interact with external systems. @agent-tars/core provides a comprehensive toolkit for creating custom tools that integrate seamlessly with the Agent ecosystem.
+
+## Tool Architecture
+
+Every tool in the system follows a consistent structure:
+
+```typescript
+interface Tool {
+  name: string;
+  description: string;
+  parameters: JSONSchema7;
+  execute: (params: any) => Promise<ToolResult>;
+}
+```
+
+## Creating Your First Tool
+
+### Basic Tool Structure
+
+```typescript
+import { Tool, ToolResult } from '@agent-tars/core';
+
+export class CalculatorTool implements Tool {
+  name = 'calculator';
+  description = 'Perform basic mathematical calculations';
+  
+  parameters = {
+    type: 'object',
+    properties: {
+      operation: {
+        type: 'string',
+        enum: ['add', 'subtract', 'multiply', 'divide'],
+        description: 'Mathematical operation to perform'
+      },
+      a: {
+        type: 'number',
+        description: 'First number'
+      },
+      b: {
+        type: 'number',
+        description: 'Second number'
+      }
+    },
+    required: ['operation', 'a', 'b']
+  };
+
+  async execute(params: {
+    operation: string;
+    a: number;
+    b: number;
+  }): Promise<ToolResult> {
+    const { operation, a, b } = params;
+    
+    let result: number;
+    
+    switch (operation) {
+      case 'add':
+        result = a + b;
+        break;
+      case 'subtract':
+        result = a - b;
+        break;
+      case 'multiply':
+        result = a * b;
+        break;
+      case 'divide':
+        if (b === 0) {
+          return {
+            success: false,
+            error: 'Division by zero is not allowed'
+          };
+        }
+        result = a / b;
+        break;
+      default:
+        return {
+          success: false,
+          error: `Unknown operation: ${operation}`
+        };
+    }
+    
+    return {
+      success: true,
+      data: {
+        result,
+        operation: `${a} ${operation} ${b} = ${result}`
+      }
+    };
+  }
+}
+```
+
+### Registering Tools
+
+```typescript
+import { Agent } from '@agent-tars/core';
+import { CalculatorTool } from './calculator-tool';
+
+const agent = new Agent({
+  tools: [
+    new CalculatorTool()
+  ]
+});
+```
+
+## Tool Categories
+
+### Built-in Tool Categories
+
+@agent-tars/core includes 32 built-in tools across 4 categories:
+
+- **general** (1 tool): Web search capabilities
+- **browser** (18 tools): Web automation and interaction
+- **filesystem** (11 tools): File and directory operations
+- **commands** (2 tools): System command execution
+
+### Custom Tool Categories
+
+Organize your custom tools by implementing category interfaces:
+
+```typescript
+export interface ToolCategory {
+  name: string;
+  description: string;
+  tools: Tool[];
+}
+
+export class DatabaseToolCategory implements ToolCategory {
+  name = 'database';
+  description = 'Database operations and queries';
+  
+  tools = [
+    new QueryTool(),
+    new InsertTool(),
+    new UpdateTool()
+  ];
+}
+```
+
+## Advanced Tool Development
+
+### Async Operations
+
+Tools can perform complex async operations:
+
+```typescript
+export class ApiTool implements Tool {
+  name = 'api_request';
+  description = 'Make HTTP API requests';
+  
+  async execute(params: {
+    url: string;
+    method: string;
+    headers?: Record<string, string>;
+    body?: any;
+  }): Promise<ToolResult> {
+    try {
+      const response = await fetch(params.url, {
+        method: params.method,
+        headers: params.headers,
+        body: params.body ? JSON.stringify(params.body) : undefined
+      });
+      
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: {
+          status: response.status,
+          headers: Object.fromEntries(response.headers.entries()),
+          body: data
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `API request failed: ${error.message}`
+      };
+    }
+  }
+}
+```
+
+### State Management
+
+Tools can maintain state across executions:
+
+```typescript
+export class SessionTool implements Tool {
+  private sessions = new Map<string, any>();
+  
+  name = 'session_manager';
+  description = 'Manage session data';
+  
+  async execute(params: {
+    action: 'get' | 'set' | 'delete';
+    key: string;
+    value?: any;
+  }): Promise<ToolResult> {
+    const { action, key, value } = params;
+    
+    switch (action) {
+      case 'get':
+        return {
+          success: true,
+          data: { value: this.sessions.get(key) }
+        };
+      case 'set':
+        this.sessions.set(key, value);
+        return {
+          success: true,
+          data: { message: 'Value set successfully' }
+        };
+      case 'delete':
+        this.sessions.delete(key);
+        return {
+          success: true,
+          data: { message: 'Value deleted successfully' }
+        };
+    }
+  }
+}
+```
+
+## Best Practices
+
+### Error Handling
+
+Always provide meaningful error messages:
+
+```typescript
+async execute(params: any): Promise<ToolResult> {
+  try {
+    // Tool logic here
+    return { success: true, data: result };
+  } catch (error) {
+    return {
+      success: false,
+      error: `Tool execution failed: ${error.message}`,
+      details: {
+        stack: error.stack,
+        params
+      }
+    };
+  }
+}
+```
+
+### Parameter Validation
+
+Use comprehensive JSON Schema validation:
+
+```typescript
+parameters = {
+  type: 'object',
+  properties: {
+    email: {
+      type: 'string',
+      format: 'email',
+      description: 'Valid email address'
+    },
+    age: {
+      type: 'number',
+      minimum: 0,
+      maximum: 150,
+      description: 'Age in years'
+    }
+  },
+  required: ['email'],
+  additionalProperties: false
+};
+```
+
+### Resource Management
+
+Clean up resources properly:
+
+```typescript
+export class DatabaseTool implements Tool {
+  private connection: DatabaseConnection;
+  
+  async execute(params: any): Promise<ToolResult> {
+    try {
+      await this.connection.connect();
+      const result = await this.connection.query(params.sql);
+      return { success: true, data: result };
+    } finally {
+      await this.connection.close();
+    }
+  }
+}
+```
+
+## Testing Tools
+
+### Unit Testing
+
+```typescript
+import { CalculatorTool } from './calculator-tool';
+
+describe('CalculatorTool', () => {
+  let tool: CalculatorTool;
+  
+  beforeEach(() => {
+    tool = new CalculatorTool();
+  });
+  
+  it('should add numbers correctly', async () => {
+    const result = await tool.execute({
+      operation: 'add',
+      a: 5,
+      b: 3
+    });
+    
+    expect(result.success).toBe(true);
+    expect(result.data.result).toBe(8);
+  });
+  
+  it('should handle division by zero', async () => {
+    const result = await tool.execute({
+      operation: 'divide',
+      a: 10,
+      b: 0
+    });
+    
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('Division by zero');
+  });
+});
+```
+
+### Integration Testing
+
+```typescript
+import { Agent } from '@agent-tars/core';
+import { CalculatorTool } from './calculator-tool';
+
+describe('Calculator Integration', () => {
+  it('should work with agent', async () => {
+    const agent = new Agent({
+      tools: [new CalculatorTool()]
+    });
+    
+    const response = await agent.execute(
+      'Calculate 15 plus 25'
+    );
+    
+    expect(response).toContain('40');
+  });
+});
+```
+
+## Tool Documentation
+
+Document your tools thoroughly:
+
+```typescript
+/**
+ * Email validation and sending tool
+ * 
+ * @example
+ * ```typescript
+ * const emailTool = new EmailTool({
+ *   smtpHost: 'smtp.gmail.com',
+ *   smtpPort: 587
+ * });
+ * 
+ * await emailTool.execute({
+ *   to: 'user@example.com',
+ *   subject: 'Hello',
+ *   body: 'Hello world!'
+ * });
+ * ```
+ */
+export class EmailTool implements Tool {
+  // Implementation...
+}
+```
+
+## Next Steps
+
+- Learn about [Tool Management](/guide/tool/management) for filtering and organizing tools
+- Explore [Tool Call Engine](/guide/tool/tool-call-engine) for advanced execution patterns
+- Check out the [API Reference](/api/tools) for complete tool interfaces
+
+<!-- Placeholder: Add screenshots of tool development workflow -->
+<!-- Placeholder: Add video tutorial for creating custom tools -->

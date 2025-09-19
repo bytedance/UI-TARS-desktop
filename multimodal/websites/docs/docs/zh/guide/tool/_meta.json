@@ -1,0 +1,17 @@
+[
+  {
+    "type": "file",
+    "name": "basic",
+    "label": "Basic"
+  },
+  {
+    "type": "file",
+    "name": "management",
+    "label": "Management"
+  },
+  {
+    "type": "file",
+    "name": "tool-call-engine",
+    "label": "Tool Call Engine"
+  }
+]
