@@ -70,13 +70,11 @@ export const ImageRenderer: React.FC<ImageRendererProps> = ({ panelContent, onAc
     return (
       <div className="relative group md:text-base text-sm">
         <BrowserShell title={name || 'Browser Screenshot'}>
-          <div className="max-w-full">
-            <img
-              src={src}
-              alt={name || 'Image'}
-              className="w-full h-auto object-contain md:max-h-[70vh] max-h-48 rounded-lg"
-            />
-          </div>
+          <img
+            src={src}
+            alt={name || 'Image'}
+            className="w-full h-auto object-contain md:max-h-[70vh] max-h-48 rounded-lg"
+          />
         </BrowserShell>
         {actionButtons}
       </div>

@@ -40,7 +40,6 @@ export const Layout: React.FC<LayoutProps> = ({ isReplayMode: propIsReplayMode }
         'ml-3': isReplayMode,
       })}
     >
-      {/* Desktop Layout */}
       <div className="hidden md:flex gap-3 flex-1 min-h-0">
         <div
           className={classNames(
@@ -71,14 +70,12 @@ export const Layout: React.FC<LayoutProps> = ({ isReplayMode: propIsReplayMode }
         </div>
       </div>
 
-      {/* Mobile Layout - Only Chat */}
       <div className="md:hidden flex flex-col flex-1 min-h-0">
         <Shell className="h-full rounded-xl shadow-lg shadow-gray-200/50 dark:shadow-gray-950/20">
           <ChatPanel />
         </Shell>
       </div>
 
-      {/* Mobile Bottom Sheet */}
       <MobileBottomSheet
         isOpen={mobileBottomSheet.isOpen}
         isFullscreen={mobileBottomSheet.isFullscreen}

@@ -430,7 +430,6 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
         </div>
       )}
 
-      {/* Hide model selector on mobile (md:block = show on desktop) */}
       <div className="hidden md:block min-w-0">
         <NavbarModelSelector
           className="min-w-0"
