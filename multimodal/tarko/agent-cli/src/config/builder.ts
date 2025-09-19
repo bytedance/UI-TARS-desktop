@@ -56,8 +56,9 @@ export function buildAppConfig<
     config = deepMerge(config, workspaceConfig);
   }
 
-  // Extract CLI-specific properties that should not be passed to appConfig
+  // Extract CLI arguments into categorized groups
   const {
+    // CLI-only options that should not be passed to agent config
     agent,
     workspace,
     config: configPath,
@@ -65,58 +66,55 @@ export function buildAppConfig<
     quiet,
     port,
     stream,
-    // Extract core deprecated options
-    provider,
-    apiKey,
-    baseURL,
-    shareProvider,
-    thinking,
-    // Extract tool filter options
-    tool,
-    // Extract MCP server filter options
-    mcpServer,
-    // Extract server options
-    server,
-    // Extract headless mode specific options
     headless,
     input,
     format,
     includeLogs,
     useCache,
     open,
+    // Deprecated options that need special handling
+    provider,
+    apiKey,
+    baseURL,
+    shareProvider,
+    thinking,
+    // Filter options that need special processing
+    tool,
+    mcpServer,
+    server,
+    // Everything else goes to cliConfigProps (including unknown options)
     ...cliConfigProps
   } = cliArguments;
 
-  // Manually preserve all unknown options by copying them from original cliArguments
-  // This ensures that agent-specific options like --aio-sandbox are preserved
-  const knownCliOptions = new Set([
+  // Define the keys that should be excluded from agent config
+  const excludedKeys = new Set([
     'agent', 'workspace', 'config', 'debug', 'quiet', 'port', 'stream',
+    'headless', 'input', 'format', 'includeLogs', 'useCache', 'open',
     'provider', 'apiKey', 'baseURL', 'shareProvider', 'thinking',
-    'tool', 'mcpServer', 'server',
-    'headless', 'input', 'format', 'includeLogs', 'useCache', 'open'
+    'tool', 'mcpServer', 'server'
   ]);
-  
-  // Add any unknown options to cliConfigProps
+
+  // Preserve unknown options by adding them back to cliConfigProps
   Object.keys(cliArguments).forEach(key => {
-    if (!knownCliOptions.has(key) && !(key in cliConfigProps)) {
+    if (!excludedKeys.has(key) && !(key in cliConfigProps)) {
       (cliConfigProps as any)[key] = (cliArguments as any)[key];
     }
   });
 
   // Handle deprecated options
-  const deprecatedOptions = {
+  const deprecatedOptionValues = {
     provider,
     apiKey: apiKey || undefined,
     baseURL,
     shareProvider,
     thinking,
   }; // secretlint-disable-line @secretlint/secretlint-rule-pattern
-  const deprecatedKeys = Object.entries(deprecatedOptions)
+  const deprecatedKeys = Object.entries(deprecatedOptionValues)
     .filter(([, value]) => value !== undefined)
     .map(([optionName]) => optionName);
 
   logDeprecatedWarning(deprecatedKeys);
-  handleCoreDeprecatedOptions(cliConfigProps, deprecatedOptions);
+  handleCoreDeprecatedOptions(cliConfigProps, deprecatedOptionValues);
 
   // Handle tool filters
   handleToolFilterOptions(cliConfigProps, { tool });
