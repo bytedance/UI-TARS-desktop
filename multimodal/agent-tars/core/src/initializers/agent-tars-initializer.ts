@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { InMemoryTransport, Client, Tool, JSONSchema7, ConsoleLogger } from '@tarko/mcp-agent';
+import { InMemoryTransport, Client, Tool, JSONSchema7, ConsoleLogger, MCPServerRegistry } from '@tarko/mcp-agent';
 import { AgentTARSOptions, BuiltInMCPServers, BuiltInMCPServerName } from '../types';
 import { BrowserGUIAgent, BrowserManager, BrowserToolsManager } from '../browser';
 import { SearchToolProvider } from '../search';
@@ -32,6 +32,7 @@ export class AgentTARSInitializer {
   private filesystemToolsManager?: FilesystemToolsManager;
   private searchToolProvider?: SearchToolProvider;
   private browserGUIAgent?: BrowserGUIAgent;
+  private mcpServerRegistry: MCPServerRegistry = {};
   private mcpServers: BuiltInMCPServers = {};
   private mcpClients: Partial<Record<BuiltInMCPServerName, Client>> = {};
 
@@ -62,6 +63,9 @@ export class AgentTARSInitializer {
   }> {
     const control = this.options.browser?.control || 'hybrid';
 
+    // Setup MCP servers for local mode
+    this.setupLocalMCPServers();
+
     // Initialize browser tools manager
     this.browserToolsManager = new BrowserToolsManager(this.logger, control);
     this.browserToolsManager.setBrowserManager(this.browserManager);
@@ -77,7 +81,9 @@ export class AgentTARSInitializer {
     }
 
     // Initialize search tools
-    await this.initializeSearchTools(registerToolFn);
+    if (this.options.search) {
+      await this.initializeSearchTools(registerToolFn);
+    }
 
     // Initialize MCP servers if using in-memory implementation
     if (this.options.mcpImpl === 'in-memory') {
@@ -114,6 +120,35 @@ export class AgentTARSInitializer {
   }
 
   /**
+   * Setup MCP servers for local mode
+   */
+  private setupLocalMCPServers(): void {
+    this.logger.info('🔧 Setting up local MCP servers');
+    
+    if (this.options.mcpImpl === 'stdio') {
+      this.mcpServerRegistry = {
+        browser: {
+          command: 'npx',
+          args: ['-y', '@agent-infra/mcp-server-browser'],
+        },
+        filesystem: {
+          command: 'npx',
+          args: ['-y', '@agent-infra/mcp-server-filesystem', this.workspace],
+        },
+        commands: {
+          command: 'npx',
+          args: ['-y', '@agent-infra/mcp-server-commands'],
+        },
+        ...(this.options.mcpServers || {}),
+      };
+    } else {
+      this.mcpServerRegistry = this.options.mcpServers || {};
+    }
+
+    this.logger.info('✅ Local MCP servers configured');
+  }
+
+  /**
    * Initialize search tools
    */
   private async initializeSearchTools(registerToolFn: (tool: Tool) => void): Promise<void> {
@@ -122,7 +157,7 @@ export class AgentTARSInitializer {
     this.searchToolProvider = new SearchToolProvider(this.logger, {
       provider: this.options.search!.provider,
       count: this.options.search!.count,
-      cdpEndpoint: this.options.browser!.cdpEndpoint,
+      cdpEndpoint: this.options.browser?.cdpEndpoint,
       browserSearch: this.options.search!.browserSearch,
       apiKey: this.options.search!.apiKey,
       baseUrl: this.options.search!.baseUrl,
@@ -297,6 +332,13 @@ export class AgentTARSInitializer {
       this.logger.error(`❌ Failed to register tools from '${moduleName}':`, error);
       throw error;
     }
+  }
+
+  /**
+   * Get MCP servers registry for the MCPAgent
+   */
+  getMCPServerRegistry(): MCPServerRegistry {
+    return this.mcpServerRegistry;
   }
 
   /**

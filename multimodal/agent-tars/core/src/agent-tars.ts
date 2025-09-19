@@ -104,14 +104,31 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
     }
 
     const workspace = processedOptions.workspace ?? process.cwd();
-    const mcpServers = AgentTARS.buildMCPServerRegistry(options, workspace);
     const instructions = AgentTARS.buildInstructions(
       processedOptions,
       workspace,
       options.instructions,
     );
 
-    // Initialize parent class
+    // Create temporary initializer to get MCP servers before super() call
+    const tempInitializer = processedOptions.aioSandbox
+      ? new AgentTARSAIOInitializer(
+          processedOptions,
+          workspace,
+          BrowserManager.getInstance(new ConsoleLogger(options.id || 'AgentTARS')),
+          new ConsoleLogger(options.id || 'AgentTARS'),
+        )
+      : new AgentTARSInitializer(
+          processedOptions,
+          workspace,
+          BrowserManager.getInstance(new ConsoleLogger(options.id || 'AgentTARS')),
+          new ConsoleLogger(options.id || 'AgentTARS'),
+        );
+
+    // Get MCP servers from initializer
+    const mcpServers = tempInitializer.getMCPServerRegistry();
+
+    // Initialize parent class first
     super({
       ...processedOptions,
       name: options.name ?? 'AgentTARS',
@@ -139,7 +156,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
     this.toolLogger = new ToolLogger(this.logger);
     this.resourceCleaner = new ResourceCleaner(this.logger);
     
-    // Choose initializer based on AIO sandbox option
+    // Set the proper initializer with correct logger
     this.initializer = processedOptions.aioSandbox
       ? new AgentTARSAIOInitializer(
           this.tarsOptions,
@@ -356,44 +373,6 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   }
 
   // Private helper methods
-
-  /**
-   * Build MCP server registry based on implementation type
-   */
-  private static buildMCPServerRegistry(
-    options: AgentTARSOptions,
-    workspace: string,
-  ): MCPServerRegistry {
-    // For AIO sandbox mode, exclude local MCP servers and connect to AIO sandbox
-    if (options.aioSandbox) {
-      return {
-        aio: {
-          type: 'streamable-http',
-          url: `${options.aioSandbox}/mcp`,
-        },
-        ...(options.mcpServers || {}),
-      };
-    }
-
-    if (options.mcpImpl === 'stdio') {
-      return {
-        browser: {
-          command: 'npx',
-          args: ['-y', '@agent-infra/mcp-server-browser'],
-        },
-        filesystem: {
-          command: 'npx',
-          args: ['-y', '@agent-infra/mcp-server-filesystem', workspace],
-        },
-        commands: {
-          command: 'npx',
-          args: ['-y', '@agent-infra/mcp-server-commands'],
-        },
-        ...(options.mcpServers || {}),
-      };
-    }
-    return options.mcpServers || {};
-  }
 
   /**
    * Build system instructions
