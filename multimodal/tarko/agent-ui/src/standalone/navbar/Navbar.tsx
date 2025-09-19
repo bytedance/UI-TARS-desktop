@@ -160,7 +160,7 @@ export const Navbar: React.FC = () => {
           ) : null}
         </div>
 
-        <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 max-[968px]:relative max-[968px]:left-auto max-[968px]:top-auto max-[968px]:transform-none max-[968px]:flex-1 max-[968px]:mx-3">
+        <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 max-[968px]:absolute max-[968px]:left-1/2 max-[968px]:top-1/2 max-[968px]:transform max-[968px]:-translate-x-1/2 max-[968px]:-translate-y-1/2">
           <DynamicNavbarCenter
             sessionMetadata={sessionMetadata}
             activeSessionId={activeSessionId}
