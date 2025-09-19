@@ -18,16 +18,13 @@ export class BrowserHybridStrategy extends AbstractBrowserControlStrategy {
    * Register both GUI Agent tools and complementary MCP Browser tools
    */
   async registerTools(registerToolFn: (tool: Tool) => void): Promise<string[]> {
-    // Register GUI Agent tool if available
     if (this.browserGUIAgent) {
       const guiAgentTool = this.browserGUIAgent.getTool();
       registerToolFn(guiAgentTool);
       this.registeredTools.add(guiAgentTool.name);
     }
 
-    // Register custom tools using browser manager
     if (this.browserManager) {
-      // Register custom markdown extraction tool instead of MCP-provided one
       const contentTools = createContentTools(this.logger, this.browserManager);
       const navigationTools = createNavigationTools(this.logger, this.browserManager);
       const visualTools = createVisualTools(this.logger, this.browserManager);
@@ -38,41 +35,20 @@ export class BrowserHybridStrategy extends AbstractBrowserControlStrategy {
       });
     }
 
-    // Register all browser tools from MCP Browser server except markdown extraction
     if (this.browserClient) {
-      // Register all browser tools except content extraction tools
-      // Use our custom markdown tool instead
       const browserTools = [
-        // Navigation tools
-        // 'browser_navigate',
-        // 'browser_go_back',
-        // 'browser_go_forward',
-
-        // Skip `browser_get_markdown` - using custom implementation
-        // 'browser_get_markdown',
-
-        // Interaction tools
         'browser_click',
         'browser_form_input_fill',
         'browser_press_key',
         'browser_hover',
         'browser_scroll',
         'browser_select',
-
-        // Status tools
         'browser_get_clickable_elements',
         'browser_read_links',
-
-        // Visual tools
-        // 'browser_screenshot',
-
-        // Tab management
         'browser_tab_list',
         'browser_new_tab',
         'browser_close_tab',
         'browser_switch_tab',
-
-        // Advanced tools
         'browser_evaluate',
       ];
 

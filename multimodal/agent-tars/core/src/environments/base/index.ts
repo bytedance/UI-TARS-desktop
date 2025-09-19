@@ -47,7 +47,6 @@ export abstract class AgentTARSBaseEnvironment {
     args: any,
     isReplaySnapshot?: boolean,
   ): Promise<any> {
-    // Default: no preprocessing
     return args;
   }
 
@@ -60,7 +59,6 @@ export abstract class AgentTARSBaseEnvironment {
     result: any,
     browserState: any,
   ): Promise<any> {
-    // Default: no post-processing
     return result;
   }
 
@@ -68,7 +66,7 @@ export abstract class AgentTARSBaseEnvironment {
    * Handle session disposal
    */
   async onDispose(): Promise<void> {
-    // Default: no cleanup needed
+    // No cleanup needed by default
   }
 
   /**

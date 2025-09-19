@@ -20,7 +20,6 @@ export class AgentTARSAIOEnvironment extends AgentTARSBaseEnvironment {
 
   /**
    * Initialize components for AIO Sandbox mode
-   * All tools are provided by AIO Sandbox MCP - no local tools initialized
    */
   async initialize(
     registerToolFn: (tool: Tool) => void,
@@ -28,37 +27,34 @@ export class AgentTARSAIOEnvironment extends AgentTARSBaseEnvironment {
   ): Promise<void> {
     this.logger.info('🌐 Initializing AgentTARS in AIO Sandbox mode');
     this.logger.info(`🔗 AIO Sandbox endpoint: ${this.options.aioSandbox}`);
-    this.logger.info('🚫 All local tools disabled - using AIO Sandbox MCP only');
-    this.logger.info('✅ AIO Sandbox initialization complete - all tools via MCP');
+    this.logger.info('✅ AIO Sandbox initialization complete');
   }
 
   /**
-   * Handle agent loop start - no local browser operations in AIO mode
+   * Handle agent loop start
    */
   async onEachAgentLoopStart(
     sessionId: string,
     eventStream: AgentEventStream.Processor,
     isReplaySnapshot: boolean,
   ): Promise<void> {
-    // Skip all local browser operations in AIO sandbox mode
     this.logger.debug('⏭️ Skipping local browser operations in AIO mode');
   }
 
   /**
-   * Get browser control information for AIO mode
+   * Get browser control information
    */
   getBrowserControlInfo(): { mode: string; tools: string[] } {
     return {
       mode: 'aio-sandbox',
-      tools: [], // Tools are provided by AIO Sandbox
+      tools: [],
     };
   }
 
   /**
-   * Get MCP server registry configuration for AIO mode
+   * Get MCP server registry configuration
    */
   getMCPServerRegistry(): MCPServerRegistry {
-    // For AIO sandbox mode, connect to AIO sandbox MCP
     return {
       aio: {
         url: `${this.options.aioSandbox}/mcp`,
