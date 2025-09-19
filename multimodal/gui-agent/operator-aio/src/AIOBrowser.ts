@@ -110,6 +110,41 @@ export class AIOBrowser {
     }
 
     this.logger.info(`Navigating to: ${url}`);
+    await page.evaluateOnNewDocument(`
+      // Webdriver属性隐藏
+      Object.defineProperty(navigator, 'webdriver', {{
+          get: () => undefined
+      }});
+
+      // 根据配置统一语言设置
+      Object.defineProperty(navigator, 'languages', {{
+          get: () => ['zh-CN', 'zh']
+      }});
+
+      // 模拟插件
+      Object.defineProperty(navigator, 'plugins', {{
+          get: () => [1, 2, 3, 4, 5]
+      }});
+
+      // Chrome运行时环境
+      window.chrome = {{ runtime: {{}} }};
+
+      // 权限查询
+      const originalQuery = window.navigator.permissions.query;
+      window.navigator.permissions.query = (parameters) => (
+          parameters.name === 'notifications' ?
+              Promise.resolve({{ state: Notification.permission }}) :
+              originalQuery(parameters)
+      );
+
+    // Shadow DOM处理
+    (function () {{
+        const originalAttachShadow = Element.prototype.attachShadow;
+        Element.prototype.attachShadow = function attachShadow(options) {{
+            return originalAttachShadow.call(this, {{ ...options, mode: "open" }});
+        }};
+    }})();
+    `);
     await page.goto(url, {
       waitUntil: [], // Wait for no event
     });
