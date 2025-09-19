@@ -11,14 +11,19 @@
   },
   "exports": {
     "./types": {
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/types/index.mjs",
-      "require": "./dist/types/index.js",
-      "types": "./dist/types/index.d.ts"
+      "require": "./dist/types/index.js"
     },
     "./base": {
+      "types": "./dist/base/index.d.ts",
       "import": "./dist/base/index.mjs",
-      "require": "./dist/base/index.js",
-      "types": "./dist/base/index.d.ts"
+      "require": "./dist/base/index.js"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.mjs",
+      "require": "./dist/utils/index.js"
     }
   },
   "typesVersions": {
@@ -31,10 +36,13 @@
   "scripts": {
     "dev": "rslib build --watch",
     "build": "rslib build",
-    "build:watch": "rslib build --watch"
+    "build:watch": "rslib build --watch",
+    "test": "vitest"
   },
   "keywords": [
-    "UI-TARS"
+    "UI-TARS",
+    "GUI Agent",
+    "SDK"
   ],
   "license": "Apache-2.0",
   "publishConfig": {
@@ -52,6 +60,7 @@
   },
   "devDependencies": {
     "@rslib/core": "0.10.0",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^3.0.2"
   }
 }
