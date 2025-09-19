@@ -71,13 +71,7 @@ export class AgentTARSLocalEnvironment {
   async initialize(
     registerToolFn: (tool: Tool) => void,
     eventStream?: AgentEventStream.Processor,
-  ): Promise<{
-    browserToolsManager?: BrowserToolsManager;
-    filesystemToolsManager?: FilesystemToolsManager;
-    searchToolProvider?: SearchToolProvider;
-    browserGUIAgent?: BrowserGUIAgent;
-    mcpClients: Partial<Record<BuiltInMCPServerName, Client>>;
-  }> {
+  ): Promise<void> {
     const control = this.options.browser?.control || 'hybrid';
 
     // Initialize browser tools manager
@@ -104,13 +98,7 @@ export class AgentTARSLocalEnvironment {
       await this.initializeInMemoryMCP(registerToolFn);
     }
 
-    return {
-      browserToolsManager: this.browserToolsManager,
-      filesystemToolsManager: this.filesystemToolsManager,
-      searchToolProvider: this.searchToolProvider,
-      browserGUIAgent: this.browserGUIAgent,
-      mcpClients: this.mcpClients,
-    };
+    // All components are now managed internally by the environment
   }
 
   /**

@@ -5,9 +5,6 @@
 
 import { Tool, ConsoleLogger, MCPServerRegistry } from '@tarko/mcp-agent';
 import { AgentTARSOptions, BuiltInMCPServers, BuiltInMCPServerName } from '../../types';
-import { BrowserGUIAgent, BrowserManager, BrowserToolsManager } from '../local/browser';
-import { SearchToolProvider } from '../local/search';
-import { FilesystemToolsManager } from '../local/filesystem';
 
 /**
  * AgentTARSAIOEnvironment - Handles AIO Sandbox environment operations
@@ -36,22 +33,12 @@ export class AgentTARSAIOEnvironment {
   async initialize(
     registerToolFn: (tool: Tool) => void,
     eventStream?: any,
-  ): Promise<{
-    browserToolsManager?: BrowserToolsManager;
-    filesystemToolsManager?: FilesystemToolsManager;
-    searchToolProvider?: SearchToolProvider;
-    browserGUIAgent?: BrowserGUIAgent;
-    mcpClients: Partial<Record<BuiltInMCPServerName, any>>;
-  }> {
+  ): Promise<void> {
     this.logger.info('🌐 Initializing AgentTARS in AIO Sandbox mode');
     this.logger.info(`🔗 AIO Sandbox endpoint: ${this.options.aioSandbox}`);
     this.logger.info('🚫 All local tools disabled - using AIO Sandbox MCP only');
 
     this.logger.info('✅ AIO Sandbox initialization complete - all tools via MCP');
-
-    return {
-      mcpClients: this.mcpClients,
-    };
   }
 
   /**
