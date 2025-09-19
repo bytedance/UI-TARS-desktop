@@ -621,3 +621,142 @@
 .workspace-control-panel {
   @apply bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm;
 }
+
+/* Mobile workspace adaptations */
+.mobile-workspace {
+  @apply h-full flex flex-col;
+}
+
+.mobile-workspace .workspace-header {
+  @apply px-3 py-2;
+}
+
+.mobile-workspace .workspace-header h3 {
+  @apply text-base;
+}
+
+.mobile-workspace .workspace-header .header-controls {
+  @apply gap-1;
+}
+
+.mobile-workspace .workspace-header .header-controls button {
+  @apply w-8 h-8 text-sm;
+}
+
+.mobile-workspace .workspace-content {
+  @apply flex-1 overflow-auto px-3 py-2;
+}
+
+/* Mobile-specific tool renderers */
+.mobile-workspace .tool-renderer {
+  @apply text-sm;
+}
+
+.mobile-workspace .tool-renderer h1 {
+  @apply text-xl;
+}
+
+.mobile-workspace .tool-renderer h2 {
+  @apply text-lg;
+}
+
+.mobile-workspace .tool-renderer h3 {
+  @apply text-base;
+}
+
+.mobile-workspace .tool-renderer pre {
+  @apply text-xs p-3;
+}
+
+.mobile-workspace .tool-renderer code {
+  @apply text-xs;
+}
+
+.mobile-workspace .tool-renderer table {
+  @apply text-xs;
+}
+
+.mobile-workspace .tool-renderer table th,
+.mobile-workspace .tool-renderer table td {
+  @apply px-2 py-1;
+}
+
+/* Mobile image rendering */
+.mobile-workspace .image-container {
+  @apply max-w-full;
+}
+
+.mobile-workspace .image-container img {
+  @apply w-full h-auto max-h-60 object-contain;
+}
+
+/* Mobile file viewer */
+.mobile-workspace .file-viewer {
+  @apply text-sm;
+}
+
+.mobile-workspace .file-viewer .file-content {
+  @apply max-h-96 overflow-auto;
+}
+
+/* Mobile browser result */
+.mobile-workspace .browser-result {
+  @apply text-sm;
+}
+
+.mobile-workspace .browser-result .screenshot {
+  @apply max-w-full;
+}
+
+.mobile-workspace .browser-result .screenshot img {
+  @apply w-full h-auto max-h-48 object-contain rounded-lg;
+}
+
+/* Mobile command result */
+.mobile-workspace .command-result pre {
+  @apply text-xs p-2 max-h-48 overflow-auto;
+}
+
+/* Mobile scrollbars */
+.mobile-workspace .workspace-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.mobile-workspace .workspace-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+}
+
+.dark .mobile-workspace .workspace-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Mobile touch improvements */
+.mobile-workspace .interactive-element {
+  @apply min-h-[44px] flex items-center;
+}
+
+.mobile-workspace .tool-button {
+  @apply min-h-[44px] px-3 py-2;
+}
+
+/* Mobile typography improvements */
+.mobile-workspace .research-report p,
+.mobile-workspace .research-report li {
+  @apply text-sm leading-relaxed;
+}
+
+.mobile-workspace .research-report ul,
+.mobile-workspace .research-report ol {
+  @apply pl-4;
+}
+
+/* Mobile layout spacing */
+.mobile-workspace .workspace-section {
+  @apply mb-4;
+}
+
+.mobile-workspace .workspace-section:last-child {
+  @apply mb-0;
+}

@@ -263,6 +263,25 @@ export const Navbar: React.FC = () => {
                 {isDarkMode ? 'Light Mode' : 'Dark Mode'}
               </MenuItem>
 
+              {/* Model Selector for Mobile */}
+              {sessionMetadata?.modelConfig && (
+                <>
+                  <MenuDivider />
+                  <MenuItem
+                    onClick={() => handleMobileMenuClose()}
+                    icon={<FiCpu size={16} />}
+                    disabled
+                  >
+                    <div className="flex flex-col gap-1">
+                      <span className="text-xs text-gray-500 dark:text-gray-400">Model</span>
+                      <span className="text-sm font-medium">
+                        {getModelDisplayName(sessionMetadata.modelConfig)} • {sessionMetadata.modelConfig.provider}
+                      </span>
+                    </div>
+                  </MenuItem>
+                </>
+              )}
+
               {activeSessionId && !isReplayMode && (
                 <MenuItem
                   onClick={handleShareOpen}
@@ -411,12 +430,15 @@ const DynamicNavbarCenter: React.FC<DynamicNavbarCenterProps> = ({
         </div>
       )}
 
-      <NavbarModelSelector
-        className="min-w-0"
-        activeSessionId={activeSessionId}
-        sessionMetadata={sessionMetadata}
-        isDarkMode={isDarkMode}
-      />
+      {/* Hide model selector on mobile (md:block = show on desktop) */}
+      <div className="hidden md:block min-w-0">
+        <NavbarModelSelector
+          className="min-w-0"
+          activeSessionId={activeSessionId}
+          sessionMetadata={sessionMetadata}
+          isDarkMode={isDarkMode}
+        />
+      </div>
     </div>
   );
 };

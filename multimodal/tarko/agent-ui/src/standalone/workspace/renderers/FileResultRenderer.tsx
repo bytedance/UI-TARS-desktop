@@ -42,9 +42,9 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
   const isStreaming = panelContent.isStreaming || false;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 file-viewer">
       <div className="overflow-hidden">
-        <div className="overflow-hidden">
+        <div className="overflow-hidden file-content">
           {isHtmlFile &&
           displayMode === 'rendered' &&
           // FIXME: For "str_replace_editor" "create", Found a better solution here,
@@ -84,7 +84,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
                 />
               </div>
             ) : (
-              <div className="prose dark:prose-invert prose-sm max-w-none p-4 pt-0">
+              <div className="prose dark:prose-invert prose-sm max-w-none p-4 pt-0 tool-renderer">
                 <MessageContent
                   message={stableContent}
                   isMarkdown={true}

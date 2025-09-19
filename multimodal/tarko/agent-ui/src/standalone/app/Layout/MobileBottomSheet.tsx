@@ -81,7 +81,9 @@ export const MobileBottomSheet: React.FC<MobileBottomSheetProps> = ({
 
             {/* Content */}
             <div className="flex-1 overflow-hidden">
-              <WorkspacePanel />
+              <div className="h-full mobile-workspace">
+                <WorkspacePanel />
+              </div>
             </div>
           </motion.div>
         </>

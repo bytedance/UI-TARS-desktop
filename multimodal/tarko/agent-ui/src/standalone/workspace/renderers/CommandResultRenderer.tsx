@@ -108,7 +108,7 @@ export const CommandResultRenderer: React.FC<CommandResultRendererProps> = ({ pa
   const isError = exitCode !== 0 && exitCode !== undefined;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 command-result">
       <TerminalOutput
         command={command ? highlightCommand(command) : undefined}
         stdout={stdout}

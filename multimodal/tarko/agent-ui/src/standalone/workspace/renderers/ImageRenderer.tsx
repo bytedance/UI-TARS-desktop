@@ -68,13 +68,15 @@ export const ImageRenderer: React.FC<ImageRendererProps> = ({ panelContent, onAc
 
   if (isScreenshot) {
     return (
-      <div className="relative group">
+      <div className="relative group browser-result">
         <BrowserShell title={name || 'Browser Screenshot'}>
-          <img
-            src={src}
-            alt={name || 'Image'}
-            className="w-full h-auto object-contain max-h-[70vh]"
-          />
+          <div className="screenshot">
+            <img
+              src={src}
+              alt={name || 'Image'}
+              className="w-full h-auto object-contain max-h-[70vh]"
+            />
+          </div>
         </BrowserShell>
         {actionButtons}
       </div>
@@ -82,7 +84,7 @@ export const ImageRenderer: React.FC<ImageRendererProps> = ({ panelContent, onAc
   }
 
   return (
-    <div className="relative group">
+    <div className="relative group image-container">
       <motion.div
         whileHover={{ scale: 1.01 }}
         className="bg-white dark:bg-gray-800 rounded-xl p-2 border border-gray-200/50 dark:border-gray-700/30 shadow-sm"
