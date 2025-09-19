@@ -4,6 +4,7 @@
  */
 
 // Environment implementations
+export { AgentTARSBaseEnvironment } from './base';
 export { AgentTARSLocalEnvironment } from './local';
 export { AgentTARSAIOEnvironment } from './aio';
 

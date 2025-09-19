@@ -18,6 +18,7 @@ import { BrowserGUIAgent, BrowserManager, BrowserToolsManager } from './browser'
 import { SearchToolProvider } from './search';
 import { FilesystemToolsManager } from './filesystem';
 import { WorkspacePathResolver } from '../../shared/workspace-path-resolver';
+import { AgentTARSBaseEnvironment } from '../base';
 
 // Static imports for MCP modules
 // @ts-expect-error - Default esm asset has some issues
@@ -31,11 +32,7 @@ import * as commandsModule from '@agent-infra/mcp-server-commands';
  * This environment manages local browser, filesystem, and other resources,
  * providing full local functionality.
  */
-export class AgentTARSLocalEnvironment {
-  private logger: ConsoleLogger;
-  private options: AgentTARSOptions;
-  private workspace: string;
-
+export class AgentTARSLocalEnvironment extends AgentTARSBaseEnvironment {
   // Component managers - owned by this environment
   private readonly browserManager: BrowserManager;
   private readonly workspacePathResolver: WorkspacePathResolver;
@@ -50,9 +47,7 @@ export class AgentTARSLocalEnvironment {
   private mcpClients: Partial<Record<BuiltInMCPServerName, Client>> = {};
 
   constructor(options: AgentTARSOptions, workspace: string, logger: ConsoleLogger) {
-    this.options = options;
-    this.workspace = workspace;
-    this.logger = logger.spawn('LocalEnvironment');
+    super(options, workspace, logger.spawn('LocalEnvironment'));
 
     // Initialize environment-owned components
     this.browserManager = BrowserManager.getInstance(this.logger);

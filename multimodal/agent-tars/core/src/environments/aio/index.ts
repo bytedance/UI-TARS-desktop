@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Tool, ConsoleLogger, MCPServerRegistry } from '@tarko/mcp-agent';
-import { AgentTARSOptions, BuiltInMCPServers, BuiltInMCPServerName } from '../../types';
+import { Tool, ConsoleLogger, MCPServerRegistry, AgentEventStream } from '@tarko/mcp-agent';
+import { AgentTARSOptions } from '../../types';
+import { AgentTARSBaseEnvironment } from '../base';
 
 /**
  * AgentTARSAIOEnvironment - Handles AIO Sandbox environment operations
@@ -12,18 +13,9 @@ import { AgentTARSOptions, BuiltInMCPServers, BuiltInMCPServerName } from '../..
  * This environment disables all local resource operations and relies entirely on AIO Sandbox MCP
  * for all tool functionality when aioSandbox option is provided.
  */
-export class AgentTARSAIOEnvironment {
-  private logger: ConsoleLogger;
-  private options: AgentTARSOptions;
-  private workspace: string;
-
-  // Component instances (none for AIO mode - all tools from MCP)
-  private mcpClients: Partial<Record<BuiltInMCPServerName, any>> = {};
-
+export class AgentTARSAIOEnvironment extends AgentTARSBaseEnvironment {
   constructor(options: AgentTARSOptions, workspace: string, logger: ConsoleLogger) {
-    this.options = options;
-    this.workspace = workspace;
-    this.logger = logger.spawn('AIOEnvironment');
+    super(options, workspace, logger.spawn('AIOEnvironment'));
   }
 
   /**
@@ -32,12 +24,11 @@ export class AgentTARSAIOEnvironment {
    */
   async initialize(
     registerToolFn: (tool: Tool) => void,
-    eventStream?: any,
+    eventStream?: AgentEventStream.Processor,
   ): Promise<void> {
     this.logger.info('🌐 Initializing AgentTARS in AIO Sandbox mode');
     this.logger.info(`🔗 AIO Sandbox endpoint: ${this.options.aioSandbox}`);
     this.logger.info('🚫 All local tools disabled - using AIO Sandbox MCP only');
-
     this.logger.info('✅ AIO Sandbox initialization complete - all tools via MCP');
   }
 
@@ -46,69 +37,21 @@ export class AgentTARSAIOEnvironment {
    */
   async onEachAgentLoopStart(
     sessionId: string,
-    eventStream: any,
+    eventStream: AgentEventStream.Processor,
     isReplaySnapshot: boolean,
   ): Promise<void> {
     // Skip all local browser operations in AIO sandbox mode
-    this.logger.info('⏭️ Skipping local browser operations in AIO mode');
+    this.logger.debug('⏭️ Skipping local browser operations in AIO mode');
   }
 
   /**
-   * Handle tool call preprocessing - no local operations in AIO mode
-   */
-  async onBeforeToolCall(
-    id: string,
-    toolCall: { toolCallId: string; name: string },
-    args: any,
-    isReplaySnapshot?: boolean,
-  ): Promise<any> {
-    // Skip all local tool preprocessing in AIO sandbox mode
-    return args;
-  }
-
-  /**
-   * Handle post-tool call processing - no local operations in AIO mode
-   */
-  async onAfterToolCall(
-    id: string,
-    toolCall: { toolCallId: string; name: string },
-    result: any,
-    browserState: any,
-  ): Promise<any> {
-    // Skip all local post-processing in AIO sandbox mode
-    return result;
-  }
-
-  /**
-   * Handle session disposal - no local cleanup in AIO mode
-   */
-  async onDispose(): Promise<void> {
-    // No local resources to clean up in AIO sandbox mode
-    this.logger.info('🧹 No local resources to clean up in AIO mode');
-  }
-
-  /**
-   * Get browser control information
+   * Get browser control information for AIO mode
    */
   getBrowserControlInfo(): { mode: string; tools: string[] } {
     return {
       mode: 'aio-sandbox',
       tools: [], // Tools are provided by AIO Sandbox
     };
-  }
-
-  /**
-   * Get the browser manager instance
-   */
-  getBrowserManager(): undefined {
-    return undefined; // No local browser manager in AIO mode
-  }
-
-  /**
-   * Get MCP servers for cleanup
-   */
-  getMCPServers(): BuiltInMCPServers {
-    return {}; // No local MCP servers in AIO mode
   }
 
   /**

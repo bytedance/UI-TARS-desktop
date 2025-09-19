@@ -19,6 +19,7 @@ import { applyDefaultOptions } from './shared/config-utils';
 import { MessageHistoryDumper } from './shared/message-history-dumper';
 import { AgentWebUIImplementation } from '@agent-tars/interface';
 import { AgentTARSLocalEnvironment, AgentTARSAIOEnvironment } from './environments';
+import { AgentTARSBaseEnvironment } from './environments/base';
 import { ToolLogger } from './utils';
 
 /**
@@ -62,7 +63,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
 
   // Core utilities
   private readonly toolLogger: ToolLogger;
-  private readonly environment: AgentTARSLocalEnvironment | AgentTARSAIOEnvironment;
+  private readonly environment: AgentTARSBaseEnvironment;
 
   // State and utilities
   private browserState: BrowserState = {};
