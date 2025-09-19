@@ -109,7 +109,7 @@ const StaticModelDisplay: React.FC<{
 
   const content = (
     <div
-      className={`${className} transition-transform hover:scale-105 ${isDisabled ? '' : 'cursor-pointer'}`}
+      className={`${className} transition-transform hover:scale-105 ${isDisabled ? '' : 'cursor-pointer'} hidden md:block`}
     >
       <Box
         style={{
@@ -132,7 +132,7 @@ const StaticModelDisplay: React.FC<{
   if (isDisabled && disabledReason) {
     return (
       <Tooltip title={disabledReason} placement="bottom">
-        <span>{content}</span>
+        <span className="hidden md:inline">{content}</span>
       </Tooltip>
     );
   }
