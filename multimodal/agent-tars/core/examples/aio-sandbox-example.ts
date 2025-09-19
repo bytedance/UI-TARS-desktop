@@ -30,7 +30,7 @@ async function main() {
   tools.forEach((tool, index) => {
     const num = (index + 1).toString().padStart(2, ' ');
     const name = tool.name.padEnd(30, ' ');
-    const desc = tool.description || 'No description';
+    const desc = (tool.description || 'No description').substring(0, 45).replace(/\n/g, ' ');
     console.log(`${num}. ${name} │ ${desc}`);
   });
   console.log('─'.repeat(80));
