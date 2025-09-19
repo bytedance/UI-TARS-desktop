@@ -57,6 +57,7 @@ export class AgentTARSAIOEnvironment extends AgentTARSBaseEnvironment {
   getMCPServerRegistry(): MCPServerRegistry {
     return {
       aio: {
+        type: 'streamable-http',
         url: `${this.options.aioSandbox}/mcp`,
       },
       ...(this.options.mcpServers || {}),
