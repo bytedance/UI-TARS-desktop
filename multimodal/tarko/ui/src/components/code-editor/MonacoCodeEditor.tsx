@@ -41,8 +41,6 @@ export const MonacoCodeEditor: React.FC<MonacoCodeEditorProps> = ({
       lineNumbers: showLineNumbers ? 'on' : 'off',
       glyphMargin: false,
       folding: true,
-      lineDecorationsWidth: 0,
-      lineNumbersMinChars: 4,
       renderLineHighlight: 'gutter',
       selectionHighlight: false,
       occurrencesHighlight: 'off',

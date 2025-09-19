@@ -13,13 +13,6 @@
   background: #010409 !important;
 }
 
-/* Line numbers styling */
-.code-editor-monaco-container .monaco-editor .margin .line-numbers {
-  padding-left: 16px !important;
-  padding-right: 16px !important;
-  text-align: right !important;
-}
-
 .code-editor-monaco-container .monaco-editor .monaco-editor-background {
   background: #0d1117 !important;
 }
