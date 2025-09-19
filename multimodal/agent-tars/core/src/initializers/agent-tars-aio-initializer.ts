@@ -23,7 +23,6 @@ export class AgentTARSAIOInitializer {
 
   // Component instances (minimal for AIO mode)
   private searchToolProvider?: SearchToolProvider;
-  private mcpServerRegistry: MCPServerRegistry = {};
   private mcpClients: Partial<Record<BuiltInMCPServerName, any>> = {};
 
   constructor(
@@ -54,9 +53,6 @@ export class AgentTARSAIOInitializer {
     this.logger.info('🌐 Initializing AgentTARS in AIO Sandbox mode');
     this.logger.info(`🔗 AIO Sandbox endpoint: ${this.options.aioSandbox}`);
 
-    // Setup MCP servers for AIO mode
-    this.setupAIOMCPServers();
-
     // Initialize only search tools for AIO mode
     // All other tools (browser, filesystem, commands) are provided by AIO Sandbox MCP
     if (this.options.search) {
@@ -69,25 +65,6 @@ export class AgentTARSAIOInitializer {
       searchToolProvider: this.searchToolProvider,
       mcpClients: this.mcpClients,
     };
-  }
-
-  /**
-   * Setup MCP servers for AIO Sandbox mode
-   */
-  private setupAIOMCPServers(): void {
-    this.logger.info('🔧 Setting up AIO Sandbox MCP connection');
-    
-    // Configure MCP servers to connect to AIO Sandbox
-    // Note: This will be used by the parent MCPAgent class
-    this.mcpServerRegistry = {
-      aio: {
-        url: `${this.options.aioSandbox}/mcp`,
-      },
-      // Include any additional user-provided MCP servers
-      ...(this.options.mcpServers || {}),
-    };
-
-    this.logger.info('✅ AIO Sandbox MCP servers configured');
   }
 
   /**
@@ -109,13 +86,6 @@ export class AgentTARSAIOInitializer {
     registerToolFn(searchTool);
 
     this.logger.info('✅ Search tools initialized for AIO mode');
-  }
-
-  /**
-   * Get MCP servers registry for the MCPAgent
-   */
-  getMCPServerRegistry(): MCPServerRegistry {
-    return this.mcpServerRegistry;
   }
 
   /**

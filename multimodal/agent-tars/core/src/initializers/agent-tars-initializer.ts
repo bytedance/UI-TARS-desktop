@@ -32,7 +32,6 @@ export class AgentTARSInitializer {
   private filesystemToolsManager?: FilesystemToolsManager;
   private searchToolProvider?: SearchToolProvider;
   private browserGUIAgent?: BrowserGUIAgent;
-  private mcpServerRegistry: MCPServerRegistry = {};
   private mcpServers: BuiltInMCPServers = {};
   private mcpClients: Partial<Record<BuiltInMCPServerName, Client>> = {};
 
@@ -62,9 +61,6 @@ export class AgentTARSInitializer {
     mcpClients: Partial<Record<BuiltInMCPServerName, Client>>;
   }> {
     const control = this.options.browser?.control || 'hybrid';
-
-    // Setup MCP servers for local mode
-    this.setupLocalMCPServers();
 
     // Initialize browser tools manager
     this.browserToolsManager = new BrowserToolsManager(this.logger, control);
@@ -117,35 +113,6 @@ export class AgentTARSInitializer {
     }
 
     this.logger.info('✅ GUI Agent initialized successfully');
-  }
-
-  /**
-   * Setup MCP servers for local mode
-   */
-  private setupLocalMCPServers(): void {
-    this.logger.info('🔧 Setting up local MCP servers');
-    
-    if (this.options.mcpImpl === 'stdio') {
-      this.mcpServerRegistry = {
-        browser: {
-          command: 'npx',
-          args: ['-y', '@agent-infra/mcp-server-browser'],
-        },
-        filesystem: {
-          command: 'npx',
-          args: ['-y', '@agent-infra/mcp-server-filesystem', this.workspace],
-        },
-        commands: {
-          command: 'npx',
-          args: ['-y', '@agent-infra/mcp-server-commands'],
-        },
-        ...(this.options.mcpServers || {}),
-      };
-    } else {
-      this.mcpServerRegistry = this.options.mcpServers || {};
-    }
-
-    this.logger.info('✅ Local MCP servers configured');
   }
 
   /**
@@ -332,13 +299,6 @@ export class AgentTARSInitializer {
       this.logger.error(`❌ Failed to register tools from '${moduleName}':`, error);
       throw error;
     }
-  }
-
-  /**
-   * Get MCP servers registry for the MCPAgent
-   */
-  getMCPServerRegistry(): MCPServerRegistry {
-    return this.mcpServerRegistry;
   }
 
   /**

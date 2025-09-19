@@ -110,23 +110,8 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
       options.instructions,
     );
 
-    // Create temporary initializer to get MCP servers before super() call
-    const tempInitializer = processedOptions.aioSandbox
-      ? new AgentTARSAIOInitializer(
-          processedOptions,
-          workspace,
-          BrowserManager.getInstance(new ConsoleLogger(options.id || 'AgentTARS')),
-          new ConsoleLogger(options.id || 'AgentTARS'),
-        )
-      : new AgentTARSInitializer(
-          processedOptions,
-          workspace,
-          BrowserManager.getInstance(new ConsoleLogger(options.id || 'AgentTARS')),
-          new ConsoleLogger(options.id || 'AgentTARS'),
-        );
-
-    // Get MCP servers from initializer
-    const mcpServers = tempInitializer.getMCPServerRegistry();
+    // Get MCP servers configuration based on mode
+    const mcpServers = AgentTARS.buildMCPServerRegistry(processedOptions, workspace);
 
     // Initialize parent class first
     super({
@@ -156,7 +141,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
     this.toolLogger = new ToolLogger(this.logger);
     this.resourceCleaner = new ResourceCleaner(this.logger);
     
-    // Set the proper initializer with correct logger
+    // Create initializer with proper logger and managers
     this.initializer = processedOptions.aioSandbox
       ? new AgentTARSAIOInitializer(
           this.tarsOptions,
@@ -373,6 +358,46 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   }
 
   // Private helper methods
+
+  /**
+   * Build MCP server registry based on implementation type
+   */
+  private static buildMCPServerRegistry(
+    options: AgentTARSOptions,
+    workspace: string,
+  ): MCPServerRegistry {
+    // For AIO sandbox mode, connect to AIO sandbox MCP
+    if (options.aioSandbox) {
+      return {
+        aio: {
+          url: `${options.aioSandbox}/mcp`,
+        },
+        ...(options.mcpServers || {}),
+      };
+    }
+
+    // For local mode with stdio implementation
+    if (options.mcpImpl === 'stdio') {
+      return {
+        browser: {
+          command: 'npx',
+          args: ['-y', '@agent-infra/mcp-server-browser'],
+        },
+        filesystem: {
+          command: 'npx',
+          args: ['-y', '@agent-infra/mcp-server-filesystem', workspace],
+        },
+        commands: {
+          command: 'npx',
+          args: ['-y', '@agent-infra/mcp-server-commands'],
+        },
+        ...(options.mcpServers || {}),
+      };
+    }
+    
+    // For local mode with in-memory implementation or custom servers only
+    return options.mcpServers || {};
+  }
 
   /**
    * Build system instructions
