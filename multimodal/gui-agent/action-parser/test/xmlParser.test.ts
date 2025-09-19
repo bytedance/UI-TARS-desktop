@@ -418,8 +418,8 @@ Action: click(start_box='<bbox>637 964 637 964</bbox>')`;
         },
       ],
       rawActionStrings: [
-        "scroll(point='(500, 500)', direction='up')",
-        "type(content='hello')",
+        "scroll(direction='up', point='(500, 500)')",
+        "type(content='hello', point='(200, 126)')",
         'wait()',
       ],
       reasoningContent:

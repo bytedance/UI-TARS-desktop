@@ -56,7 +56,7 @@ export class DefaultActionParser extends BaseActionParser {
     actions = [];
     try {
       for (const actionString of rawActionStrings) {
-        const action = this.helper.parseActionFromString(actionString);
+        const action = this.helper.parseActionCallString(actionString);
         if (action) actions.push(action);
       }
     } catch (error) {

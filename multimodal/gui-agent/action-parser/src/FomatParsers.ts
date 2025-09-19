@@ -7,6 +7,7 @@ import { BaseAction } from '@gui-agent/shared/types';
 import { XMLBuilder, XMLParser } from 'fast-xml-parser';
 // Remove circular dependency
 import { ActionParserHelper } from './ActionParserHelper';
+import { serializeAction } from '@gui-agent/shared/utils';
 
 export interface FormatParser {
   parse(text: string): {
@@ -83,14 +84,14 @@ export class XMLFormatParser implements FormatParser {
       throw Error('No valid GUI action string was detected');
     }
 
-    // const rawActionStrings: string[] = [];
-    // for (const action of actions) {
-    //   rawActionStrings.push(serializeAction(action));
-    // }
+    const rawActionStrings: string[] = [];
+    for (const action of actions) {
+      rawActionStrings.push(serializeAction(action));
+    }
 
     return {
       reasoningContent,
-      rawActionStrings: undefined,
+      rawActionStrings,
       actions,
     };
   }
