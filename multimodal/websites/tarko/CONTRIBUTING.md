@@ -1,9 +1,9 @@
 # Tarko 文档贡献指南
 
-> **🚨 重要：所有 Git Commit 信息必须使用中文！英文提交 = PR 被拒绝**
+> **📝 重要：遵循项目的 Conventional Commits 规范**
 > 
-> 正确：`feat: 添加新功能` ✅  
-> 错误：`feat: add new feature` ❌
+> 格式：`type(scope): description`  
+> 示例：`docs(tarko): fix model id in examples` ✅
 
 ## 📚 文档-源代码映射
 
@@ -92,16 +92,16 @@ git log --oneline | head -5
 ## 📝 提交信息格式
 
 ```bash
-# 正确格式
-git commit -m "feat: 添加新的模型提供商支持"
-git commit -m "fix: 修复事件流处理器的内存泄漏"
-git commit -m "docs: 更新 API 参考文档"
+# 遵循 Conventional Commits 规范
+git commit -m "feat(tarko): add new model provider support"
+git commit -m "fix(agent): resolve event stream memory leak"
+git commit -m "docs(tarko): update api reference"
 
-# 错误格式（将被拒绝）
-git commit -m "feat: add new model provider"  # ❌
-git commit -m "fix: memory leak"              # ❌
+# 包含 scope 以明确影响范围
+git commit -m "docs(tarko): fix model id in examples"  # ✅
+git commit -m "fix(ui): resolve mobile layout issue"    # ✅
 ```
 
 ---
 
-**记住：** 文档必须反映真实代码，不能编造！中文提交信息是强制要求！
+**记住：** 文档必须反映真实代码，不能编造！遵循 Conventional Commits 规范！
