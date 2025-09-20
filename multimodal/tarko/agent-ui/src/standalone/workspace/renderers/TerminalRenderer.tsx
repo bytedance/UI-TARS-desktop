@@ -138,12 +138,14 @@ export const TerminalRenderer: React.FC<TerminalRendererProps> = ({
 
               {/* Arguments section */}
               {argumentsJson && (
-                <div className="p-3 [&_.code-editor-container]:!bg-transparent [&_.code-editor-wrapper]:!bg-transparent [&_.code-editor-content]:!bg-transparent [&_.code-editor-pre]:!bg-transparent [&_.code-editor-header]:hidden [&_.code-editor-status-bar]:hidden">
+                <div className="p-3 pb-0">
                   <CodeEditor
                     code={argumentsJson}
                     fileName="arguments.json"
                     readOnly={true}
+                    showHeader={false}
                     showLineNumbers={false}
+                    showStatusBar={false}
                     maxHeight="200px"
                     className="border-0 rounded-none"
                   />
@@ -152,12 +154,14 @@ export const TerminalRenderer: React.FC<TerminalRendererProps> = ({
 
               {/* Output section */}
               {output && (
-                <div className="p-3 [&_.code-editor-container]:!bg-transparent [&_.code-editor-wrapper]:!bg-transparent [&_.code-editor-content]:!bg-transparent [&_.code-editor-pre]:!bg-transparent [&_.code-editor-header]:hidden [&_.code-editor-status-bar]:hidden">
+                <div className="p-3 pb-0">
                   <CodeEditor
                     code={output}
                     fileName="output.json"
                     readOnly={true}
+                    showHeader={false}
                     showLineNumbers={false}
+                    showStatusBar={false}
                     maxHeight="calc(100vh - 300px)"
                     className="border-0 rounded-none"
                   />

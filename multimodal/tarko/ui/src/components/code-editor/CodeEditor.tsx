@@ -11,6 +11,8 @@ interface CodeEditorProps {
   filePath?: string;
   fileSize?: string;
   readOnly?: boolean;
+  showHeader?: boolean;
+  showStatusBar?: boolean;
   showLineNumbers?: boolean;
   maxHeight?: string;
   className?: string;
@@ -23,7 +25,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   filePath,
   fileSize,
   readOnly = true,
+  showHeader = true,
   showLineNumbers = true,
+  showStatusBar = true,
   maxHeight = 'none',
   className = '',
   onCopy,
@@ -55,12 +59,14 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   return (
     <div className={`code-editor-container ${className}`}>
       <div className="code-editor-wrapper">
-        <CodeEditorHeader
-          fileName={displayFileName}
-          filePath={filePath}
-          fileSize={fileSize}
-          onCopy={handleCopy}
-        />
+        {showHeader && (
+          <CodeEditorHeader
+            fileName={displayFileName}
+            filePath={filePath}
+            fileSize={fileSize}
+            onCopy={handleCopy}
+          />
+        )}
 
         <div className="code-editor-content" style={{ maxHeight }}>
           <div className="code-editor-inner">
@@ -85,8 +91,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             </div>
           </div>
         </div>
-
-        <CodeEditorStatusBar code={code} readOnly={readOnly} />
+        {showStatusBar && <CodeEditorStatusBar code={code} readOnly={readOnly} />}
       </div>
     </div>
   );
