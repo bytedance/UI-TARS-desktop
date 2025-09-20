@@ -57,6 +57,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const [uploadedImages, setUploadedImages] = useState<ChatCompletionContentPart[]>([]);
   const [isAborting, setIsAborting] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const { activeSessionId, sessionMetadata } = useSession();
   const { isDarkMode } = useNavbarStyles();
@@ -72,6 +73,31 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const { abortQuery } = useSession();
 
   const contextualSelectorEnabled = isContextualSelectorEnabled() && showContextualSelector;
+
+  // Upload files to server
+  const uploadFiles = async (files: File[]): Promise<ChatCompletionContentPart[]> => {
+    const formData = new FormData();
+    files.forEach(file => {
+      formData.append('files', file);
+    });
+
+    try {
+      const response = await fetch('/v1/file/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Upload failed: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      return result as ChatCompletionContentPart[];
+    } catch (error) {
+      console.error('File upload failed:', error);
+      throw error;
+    }
+  };
 
   useEffect(() => {
     if (initialValue && !contextualState.input) {
@@ -232,31 +258,24 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    Array.from(files).forEach((file) => {
-      if (!file.type.startsWith('image/')) return;
-
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          const newImage: ChatCompletionContentPart = {
-            type: 'image_url',
-            image_url: {
-              url: event.target.result as string,
-              detail: 'auto',
-            },
-          };
-          setUploadedImages((prev) => [...prev, newImage]);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+    const fileArray = Array.from(files);
+    
+    setIsUploading(true);
+    try {
+      const uploadedContent = await uploadFiles(fileArray);
+      setUploadedImages((prev) => [...prev, ...uploadedContent]);
+    } catch (error) {
+      console.error('Failed to upload files:', error);
+      // TODO: Show error notification to user
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -265,72 +284,76 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
     e.preventDefault();
 
-    const handled = await handleMultimodalPaste(e.nativeEvent, {
-      onTextPaste: (text: string) => {
+    // Handle file paste by uploading to server
+    const handleImagePasteWithUpload = async (files: File[]) => {
+      if (!showAttachments || files.length === 0) return;
+      
+      setIsUploading(true);
+      try {
+        const uploadedContent = await uploadFiles(files);
+        setUploadedImages((prev) => [...prev, ...uploadedContent]);
+        console.log('Processed pasted image(s) via server upload');
+      } catch (error) {
+        console.error('Failed to upload pasted files:', error);
+        // TODO: Show error notification to user
+      } finally {
+        setIsUploading(false);
+      }
+    };
+
+    // Extract files from clipboard
+    const items = e.clipboardData?.items;
+    if (items) {
+      const files: File[] = [];
+      let hasText = false;
+      let clipboardText = '';
+
+      // First pass: collect text and files
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        
+        if (item.type === 'text/plain') {
+          hasText = true;
+          clipboardText = await new Promise<string>((resolve) => {
+            item.getAsString(resolve);
+          });
+        } else if (item.type.indexOf('image') !== -1) {
+          const file = item.getAsFile();
+          if (file) {
+            files.push(file);
+          }
+        }
+      }
+
+      // Handle text paste
+      if (hasText && clipboardText) {
         const textarea = inputRef.current;
-        if (!textarea) return;
+        if (textarea) {
+          const start = textarea.selectionStart;
+          const end = textarea.selectionEnd;
+          const currentValue = contextualState.input;
+          const newValue = currentValue.slice(0, start) + clipboardText + currentValue.slice(end);
+          const newCursorPos = start + clipboardText.length;
 
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        const currentValue = contextualState.input;
-        const newValue = currentValue.slice(0, start) + text + currentValue.slice(end);
-        const newCursorPos = start + text.length;
+          setContextualState((prev) => ({
+            ...prev,
+            input: newValue,
+            cursorPosition: newCursorPos,
+            contextualItems: parseContextualReferences(newValue),
+          }));
 
-        setContextualState((prev) => ({
-          ...prev,
-          input: newValue,
-          cursorPosition: newCursorPos,
-          contextualItems: parseContextualReferences(newValue),
-        }));
+          setTimeout(() => {
+            if (textarea) {
+              textarea.setSelectionRange(newCursorPos, newCursorPos);
+            }
+          }, 0);
+        }
+      }
 
-        setTimeout(() => {
-          if (textarea) {
-            textarea.setSelectionRange(newCursorPos, newCursorPos);
-          }
-        }, 0);
-      },
-      onImagePaste: showAttachments
-        ? (images: ChatCompletionContentPart[]) => {
-            setUploadedImages((prev) => [...prev, ...images]);
-            console.log('Processed pasted image(s)');
-          }
-        : undefined,
-      onMultimodalPaste: showAttachments
-        ? (text: string, images: ChatCompletionContentPart[]) => {
-            const textarea = inputRef.current;
-            if (!textarea) return;
-
-            const start = textarea.selectionStart;
-            const end = textarea.selectionEnd;
-            const currentValue = contextualState.input;
-            const newValue = currentValue.slice(0, start) + text + currentValue.slice(end);
-            const newCursorPos = start + text.length;
-
-            setContextualState((prev) => ({
-              ...prev,
-              input: newValue,
-              cursorPosition: newCursorPos,
-              contextualItems: parseContextualReferences(newValue),
-            }));
-
-            setUploadedImages((prev) => [...prev, ...images]);
-
-            setTimeout(() => {
-              if (textarea) {
-                textarea.setSelectionRange(newCursorPos, newCursorPos);
-              }
-            }, 0);
-
-            console.log('Processed Tarko multimodal clipboard data:', {
-              text,
-              imageCount: images.length,
-            });
-          }
-        : undefined,
-    });
-
-    if (!handled) {
-      console.log('Paste not handled by multimodal clipboard');
+      // Handle image paste
+      if (files.length > 0) {
+        await handleImagePasteWithUpload(files);
+      }
     }
   };
 
@@ -417,25 +440,28 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 <button
                   type="button"
                   onClick={handleFileUpload}
-                  disabled={isDisabled || isProcessing}
+                  disabled={isDisabled || isProcessing || isUploading}
                   className={`p-2 rounded-full transition-all duration-200 hover:scale-105 active:scale-95 ${
-                    isDisabled || isProcessing
+                    isDisabled || isProcessing || isUploading
                       ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
                       : 'text-gray-400 hover:text-accent-500 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:text-gray-400'
                   }`}
-                  title="Attach image (or paste directly)"
+                  title={isUploading ? 'Uploading...' : 'Attach files (or paste directly)'}
                 >
-                  <FiImage size={18} />
+                  {isUploading ? (
+                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <FiImage size={18} />
+                  )}
                 </button>
 
                 <input
                   type="file"
                   ref={fileInputRef}
                   onChange={handleFileChange}
-                  accept="image/*"
                   multiple
                   className="hidden"
-                  disabled={isDisabled || isProcessing}
+                  disabled={isDisabled || isProcessing || isUploading}
                 />
               </div>
             )}
@@ -525,11 +551,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             <span className="text-gray-500 dark:text-gray-400 transition-opacity hover:opacity-100 animate-in fade-in duration-300">
               {contextualSelectorEnabled ? (
                 <>
-                  Use @ to reference files/folders • Ctrl+Enter to send • You can also paste images
+                  Use @ to reference files/folders • Ctrl+Enter to send • You can also paste or upload files
                   directly
                 </>
               ) : (
-                <>Use Ctrl+Enter to quickly send • You can also paste images directly</>
+                <>Use Ctrl+Enter to quickly send • You can also paste or upload files directly</>
               )}
             </span>
           )}
