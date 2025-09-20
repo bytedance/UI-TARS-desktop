@@ -9,7 +9,7 @@ Tarko's **Agent Hooks** system provides extension points throughout the agent li
 
 ## Overview
 
-Agent Hooks are callback methods that execute at specific points during agent operation. All hooks are defined in the `BaseAgent` class and can be overridden in custom agent implementations:
+Agent Hooks are callback methods that execute at specific points during agent operation. All hooks are defined in the `Agent` class and can be overridden in custom agent implementations:
 
 - **LLM Hooks**: Request/response interception and modification
 - **Tool Hooks**: Tool call execution lifecycle management
@@ -24,9 +24,9 @@ Agent Hooks are callback methods that execute at specific points during agent op
 Intercept and monitor LLM requests and responses:
 
 ```typescript
-import { Agent, BaseAgent } from '@tarko/agent';
+import { Agent } from '@tarko/agent';
 
-class MonitoringAgent extends BaseAgent {
+class MonitoringAgent extends Agent {
   // Called before each LLM request
   override async onLLMRequest(id: string, payload: LLMRequestHookPayload) {
     console.log(`[${id}] Sending request to ${payload.model}`);
@@ -65,7 +65,7 @@ class MonitoringAgent extends BaseAgent {
 Monitor and control tool call execution:
 
 ```typescript
-class ToolMonitoringAgent extends BaseAgent {
+class ToolMonitoringAgent extends Agent {
   private toolUsageStats = new Map<string, number>();
   
   // Called before each tool execution
@@ -153,7 +153,7 @@ class ToolMonitoringAgent extends BaseAgent {
 Control agent loop iterations and termination:
 
 ```typescript
-class LoopControlAgent extends BaseAgent {
+class LoopControlAgent extends Agent {
   private iterationStartTimes = new Map<string, number>();
   
   // Called at the start of each loop iteration
@@ -200,7 +200,7 @@ class LoopControlAgent extends BaseAgent {
 Use `onBeforeLoopTermination` to enforce specific completion requirements:
 
 ```typescript
-class ValidatingAgent extends BaseAgent {
+class ValidatingAgent extends Agent {
   private requiredToolsCalled = new Set<string>();
   private requiredTools = ['gather_data', 'analyze_results', 'final_report'];
   
@@ -270,7 +270,7 @@ Do not provide a final answer until all required tools have been called.`,
 Use `onPrepareRequest` to dynamically modify system prompts and available tools:
 
 ```typescript
-class AdaptiveAgent extends BaseAgent {
+class AdaptiveAgent extends Agent {
   private userExpertiseLevel: 'beginner' | 'intermediate' | 'expert' = 'intermediate';
   
   override async onPrepareRequest(
@@ -322,7 +322,7 @@ class AdaptiveAgent extends BaseAgent {
 ### Error Handling and Recovery
 
 ```typescript
-class ResilientAgent extends BaseAgent {
+class ResilientAgent extends Agent {
   private errorCounts = new Map<string, number>();
   private maxRetries = 3;
   
@@ -404,9 +404,9 @@ Understanding the hook execution sequence is crucial for proper implementation:
 ### Unit Testing Individual Hooks
 
 ```typescript
-import { BaseAgent, AgentOptions } from '@tarko/agent';
+import { Agent, AgentOptions } from '@tarko/agent';
 
-class TestableAgent extends BaseAgent {
+class TestableAgent extends Agent {
   public hookCallLog: string[] = [];
   
   override async onLLMRequest(id: string, payload: any) {
