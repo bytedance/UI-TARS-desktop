@@ -109,12 +109,6 @@ export const TerminalRenderer: React.FC<TerminalRendererProps> = ({
   const command = formatCommand(panelContent.title, panelContent.arguments);
   const argumentsJson = formatArguments(panelContent.arguments);
   const output = formatOutput(panelContent.source);
-  debugger;
-
-  // Combine arguments and output into a single terminal output
-  const combinedOutput = [argumentsJson && argumentsJson.trim(), output && output.trim()]
-    .filter(Boolean)
-    .join('\n\n');
 
   return (
     <div className="space-y-4 md:text-base text-sm">
@@ -142,17 +136,43 @@ export const TerminalRenderer: React.FC<TerminalRendererProps> = ({
                 <div className="flex-1 text-gray-200">{command}</div>
               </div>
 
-              {/* Output section with JSON highlighting using CodeEditor */}
-              <div className="[&_.code-editor-container]:!bg-transparent [&_.code-editor-wrapper]:!bg-transparent [&_.code-editor-content]:!bg-transparent [&_.code-editor-pre]:!bg-transparent [&_.code-editor-header]:hidden [&_.code-editor-status-bar]:hidden">
-                <CodeEditor
-                  code={combinedOutput || '(no output)'}
-                  fileName="output.json"
-                  readOnly={true}
-                  showLineNumbers={false}
-                  maxHeight="calc(100vh - 215px)"
-                  className="border-0 rounded-none"
-                />
-              </div>
+              {/* Arguments section */}
+              {argumentsJson && (
+                <>
+                  <div className="px-3 py-1 border-b border-gray-800">
+                    <span className="text-gray-400 text-xs font-medium">Arguments:</span>
+                  </div>
+                  <div className="[&_.code-editor-container]:!bg-transparent [&_.code-editor-wrapper]:!bg-transparent [&_.code-editor-content]:!bg-transparent [&_.code-editor-pre]:!bg-transparent [&_.code-editor-header]:hidden [&_.code-editor-status-bar]:hidden">
+                    <CodeEditor
+                      code={argumentsJson}
+                      fileName="arguments.json"
+                      readOnly={true}
+                      showLineNumbers={false}
+                      maxHeight="200px"
+                      className="border-0 rounded-none"
+                    />
+                  </div>
+                </>
+              )}
+              
+              {/* Output section */}
+              {output && (
+                <>
+                  <div className="px-3 py-1 border-b border-gray-800">
+                    <span className="text-gray-400 text-xs font-medium">Output:</span>
+                  </div>
+                  <div className="[&_.code-editor-container]:!bg-transparent [&_.code-editor-wrapper]:!bg-transparent [&_.code-editor-content]:!bg-transparent [&_.code-editor-pre]:!bg-transparent [&_.code-editor-header]:hidden [&_.code-editor-status-bar]:hidden">
+                    <CodeEditor
+                      code={output}
+                      fileName="output.json"
+                      readOnly={true}
+                      showLineNumbers={false}
+                      maxHeight="calc(100vh - 300px)"
+                      className="border-0 rounded-none"
+                    />
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
