@@ -2,6 +2,7 @@ import React from 'react';
 import { StandardPanelContent } from '../types/panelContent';
 import { FileDisplayMode } from '../types';
 import { TerminalOutput } from '../components/TerminalOutput';
+import { getAgentTitle } from '@/config/web-ui-config';
 
 interface TerminalRendererProps {
   panelContent: StandardPanelContent;
@@ -10,39 +11,76 @@ interface TerminalRendererProps {
 }
 
 /**
- * Format tool arguments with JSON syntax highlighting
+ * JSON syntax highlighting component
  */
-function formatArguments(args: Record<string, any>): React.ReactNode {
-  if (!args || Object.keys(args).length === 0) {
-    return null;
-  }
+const JsonHighlight: React.FC<{ content: string }> = ({ content }) => {
+  const highlightJson = (jsonString: string) => {
+    // Try to parse and re-stringify to ensure valid JSON formatting
+    let formattedJson: string;
+    try {
+      const parsed = JSON.parse(jsonString);
+      formattedJson = JSON.stringify(parsed, null, 2);
+    } catch {
+      formattedJson = jsonString;
+    }
 
-  const argLines: React.ReactNode[] = [];
-  
-  Object.entries(args).forEach(([key, value], index) => {
-    argLines.push(
-      <div key={index} className="flex">
-        <span className="text-cyan-400 font-bold">{key}</span>
-        <span className="text-gray-400 mx-2">:</span>
-        <span className="text-orange-300">
-          {typeof value === 'string' && value.length > 80
-            ? `"${value.substring(0, 80)}..."`
-            : JSON.stringify(value)}
-        </span>
-      </div>
-    );
-  });
+    // Apply syntax highlighting
+    return formattedJson
+      .split('\n')
+      .map((line, index) => {
+        const highlightedLine = line
+          // Highlight property names (keys)
+          .replace(/"([^"]+)":/g, '<span class="text-cyan-400 font-medium">"$1"</span>:')
+          // Highlight string values
+          .replace(/:\s*"([^"]*)"/g, ': <span class="text-orange-300">"$1"</span>')
+          // Highlight numbers
+          .replace(/:\s*(\d+\.?\d*)/g, ': <span class="text-yellow-300">$1</span>')
+          // Highlight booleans
+          .replace(/:\s*(true|false)/g, ': <span class="text-purple-400">$1</span>')
+          // Highlight null
+          .replace(/:\s*(null)/g, ': <span class="text-gray-500">$1</span>')
+          // Highlight brackets and braces
+          .replace(/([\[\]{}])/g, '<span class="text-gray-400">$1</span>')
+          // Highlight commas
+          .replace(/(,)/g, '<span class="text-gray-500">$1</span>');
+
+        return (
+          <div key={index} dangerouslySetInnerHTML={{ __html: highlightedLine }} />
+        );
+      });
+  };
 
   return (
-    <div className="mb-3">
-      <div className="text-yellow-300 font-bold mb-1"># Tool Arguments:</div>
-      <div className="ml-3 space-y-1">{argLines}</div>
+    <div className="font-mono text-sm leading-relaxed">
+      {highlightJson(content)}
     </div>
   );
+};
+
+/**
+ * Check if content is valid JSON
+ */
+function isValidJson(str: string): boolean {
+  try {
+    JSON.parse(str);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /**
- * Format tool output with JSON syntax highlighting when applicable
+ * Format tool arguments as JSON string
+ */
+function formatArguments(args: Record<string, any>): string {
+  if (!args || Object.keys(args).length === 0) {
+    return '';
+  }
+  return JSON.stringify(args, null, 2);
+}
+
+/**
+ * Format tool output as JSON string when applicable
  */
 function formatOutput(source: any): string {
   if (Array.isArray(source)) {
@@ -113,32 +151,61 @@ export const TerminalRenderer: React.FC<TerminalRendererProps> = ({
   displayMode,
 }) => {
   const command = formatCommand(panelContent.title, panelContent.arguments);
-  const argumentsDisplay = formatArguments(panelContent.arguments);
+  const argumentsJson = formatArguments(panelContent.arguments);
   const output = formatOutput(panelContent.source);
   
-  // Combine arguments and output
-  const fullOutput = argumentsDisplay 
-    ? React.createElement('div', {}, 
-        argumentsDisplay,
-        React.createElement('div', { className: 'text-yellow-300 font-bold mb-1' }, '# Tool Output:'),
-        React.createElement('pre', { className: 'ml-3 whitespace-pre-wrap' }, output)
-      )
-    : output;
+  // Combine arguments and output into a single terminal output
+  const combinedOutput = [
+    argumentsJson && argumentsJson.trim(),
+    output && output.trim()
+  ].filter(Boolean).join('\n\n');
+  
+  const hasJsonContent = argumentsJson || (output && isValidJson(output));
   
   return (
     <div className="space-y-4 md:text-base text-sm">
       <div className="md:[&_pre]:text-sm [&_pre]:text-xs md:[&_pre]:p-4 [&_pre]:p-2">
-        <TerminalOutput
-          command={command}
-          stdout={typeof fullOutput === 'string' ? fullOutput : undefined}
-          maxHeight="calc(100vh - 215px)"
-        />
-        {typeof fullOutput !== 'string' && (
-          <div className="rounded-lg overflow-hidden border border-gray-900 shadow-[0_8px_24px_rgba(0,0,0,0.3)] mt-4">
-            <div className="bg-black p-3 font-mono text-sm">
-              <div className="text-gray-200">{fullOutput}</div>
+        {hasJsonContent ? (
+          // Custom terminal with JSON highlighting
+          <div className="rounded-lg overflow-hidden border border-gray-900 shadow-[0_8px_24px_rgba(0,0,0,0.3)]">
+            {/* Terminal title bar */}
+            <div className="bg-[#111111] px-3 py-1.5 border-b border-gray-900 flex items-center">
+              <div className="flex space-x-1.5 mr-3">
+                <div className="w-3 h-3 rounded-full bg-red-500 shadow-sm"></div>
+                <div className="w-3 h-3 rounded-full bg-yellow-500 shadow-sm"></div>
+                <div className="w-3 h-3 rounded-full bg-green-500 shadow-sm"></div>
+              </div>
+              <div className="text-gray-400 text-xs font-medium mx-auto">
+                user@{getAgentTitle().toLowerCase().replace(/\s+/g, '-')}
+              </div>
+            </div>
+
+            {/* Terminal content area */}
+            <div
+              className="bg-black p-3 font-mono text-sm terminal-content overflow-auto"
+              style={{ maxHeight: 'calc(100vh - 215px)' }}
+            >
+              <div className="overflow-x-auto min-w-full">
+                {/* Command section */}
+                <div className="flex items-start">
+                  <span className="select-none text-green-400 mr-2 font-bold">$</span>
+                  <div className="flex-1 text-gray-200">{command}</div>
+                </div>
+
+                {/* Output section with JSON highlighting */}
+                <div className="mt-3 ml-3">
+                  <JsonHighlight content={combinedOutput || '(no output)'} />
+                </div>
+              </div>
             </div>
           </div>
+        ) : (
+          // Use standard TerminalOutput for non-JSON content
+          <TerminalOutput
+            command={command}
+            stdout={combinedOutput || '(no output)'}
+            maxHeight="calc(100vh - 215px)"
+          />
         )}
       </div>
     </div>
