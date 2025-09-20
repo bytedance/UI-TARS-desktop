@@ -14,7 +14,13 @@ export function migrateLegacyToJsonSchema(legacy: LegacySessionItemInfo): Sessio
 
   if (legacy.name) metadata.name = legacy.name;
   if (legacy.tags) metadata.tags = legacy.tags;
-  if (legacy.modelConfig) metadata.modelConfig = legacy.modelConfig;
+  if (legacy.modelConfig) {
+    metadata.modelConfig = {
+      provider: legacy.modelConfig.provider,
+      modelId: (legacy.modelConfig as any).modelId || (legacy.modelConfig as any).id,
+      configuredAt: (legacy.modelConfig as any).configuredAt || Date.now(),
+    } as any;
+  }
 
   return {
     id: legacy.id,
@@ -30,6 +36,7 @@ export function migrateLegacyToJsonSchema(legacy: LegacySessionItemInfo): Sessio
  * This allows existing code to continue working during transition
  */
 export function extractLegacyFields(session: SessionInfo): LegacySessionItemInfo {
+  const modelConfig = session.metadata?.modelConfig;
   return {
     id: session.id,
     createdAt: session.createdAt,
@@ -37,7 +44,11 @@ export function extractLegacyFields(session: SessionInfo): LegacySessionItemInfo
     workspace: session.workspace,
     name: session.metadata?.name,
     tags: session.metadata?.tags,
-    modelConfig: session.metadata?.modelConfig,
+    modelConfig: modelConfig ? {
+      provider: modelConfig.provider,
+      modelId: (modelConfig as any).modelId || (modelConfig as any).id,
+      configuredAt: (modelConfig as any).configuredAt || Date.now(),
+    } as any : undefined,
   };
 }
 
@@ -52,7 +63,7 @@ export function createJsonSchemaSession(
     tags?: string[];
     modelConfig?: {
       provider: string;
-      modelId: string;
+      id: string;
       configuredAt: number;
     };
   },
@@ -62,7 +73,13 @@ export function createJsonSchemaSession(
 
   if (options?.name) metadata.name = options.name;
   if (options?.tags) metadata.tags = options.tags;
-  if (options?.modelConfig) metadata.modelConfig = options.modelConfig;
+  if (options?.modelConfig) {
+    metadata.modelConfig = {
+      provider: options.modelConfig.provider,
+      modelId: options.modelConfig.id,
+      configuredAt: (options.modelConfig as any).configuredAt || Date.now(),
+    } as any;
+  }
 
   return {
     id,

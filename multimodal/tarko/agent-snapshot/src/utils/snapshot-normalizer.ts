@@ -4,7 +4,6 @@
  */
 
 import stringify from 'fast-json-stable-stringify';
-import * as snapshotDiff from 'snapshot-diff';
 
 /**
  * Configuration for snapshot normalization
@@ -155,15 +154,10 @@ export class AgentSnapshotNormalizer {
       return { equal: true, diff: null };
     }
 
-    // Generate diff using snapshot-diff
-    const diff = snapshotDiff.default(
+    // Generate simple diff
+    const diff = this.generateSimpleDiff(
       JSON.stringify(normalizedExpected, null, 2),
-      JSON.stringify(normalizedActual, null, 2),
-      {
-        aAnnotation: 'Expected',
-        bAnnotation: 'Actual',
-        contextLines: 3,
-      }
+      JSON.stringify(normalizedActual, null, 2)
     );
 
     return { equal: false, diff };
@@ -201,5 +195,31 @@ export class AgentSnapshotNormalizer {
       return pattern.test(key) || pattern.test(path);
     }
     return key === pattern || path === pattern;
+  }
+
+  private generateSimpleDiff(expected: string, actual: string): string {
+    const expectedLines = expected.split('\n');
+    const actualLines = actual.split('\n');
+    const maxLines = Math.max(expectedLines.length, actualLines.length);
+    
+    const diffLines: string[] = [];
+    diffLines.push('Expected vs Actual:');
+    diffLines.push('');
+    
+    for (let i = 0; i < maxLines; i++) {
+      const expectedLine = expectedLines[i] || '';
+      const actualLine = actualLines[i] || '';
+      
+      if (expectedLine !== actualLine) {
+        if (expectedLine) {
+          diffLines.push(`- ${expectedLine}`);
+        }
+        if (actualLine) {
+          diffLines.push(`+ ${actualLine}`);
+        }
+      }
+    }
+    
+    return diffLines.join('\n');
   }
 }

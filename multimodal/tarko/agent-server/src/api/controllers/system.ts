@@ -82,9 +82,8 @@ export async function updateSessionModel(req: Request, res: Response) {
           ...currentSessionInfo.metadata,
           modelConfig: {
             provider,
-            modelId,
-            configuredAt: Date.now(),
-          },
+            id: modelId,
+          } as any,
         },
       });
 

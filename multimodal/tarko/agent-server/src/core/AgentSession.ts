@@ -403,7 +403,7 @@ export class AgentSession {
    */
   async updateModelConfig(sessionInfo: import('../storage').SessionInfo): Promise<void> {
     console.log(
-      `🔄 [AgentSession] Storing model config for session ${this.id}: ${sessionInfo.metadata?.modelConfig?.provider}:${sessionInfo.metadata?.modelConfig?.modelId}`,
+      `🔄 [AgentSession] Storing model config for session ${this.id}: ${sessionInfo.metadata?.modelConfig?.provider}:${(sessionInfo.metadata?.modelConfig as any)?.modelId || (sessionInfo.metadata?.modelConfig as any)?.id}`,
     );
 
     // Store the session metadata for use in future queries
