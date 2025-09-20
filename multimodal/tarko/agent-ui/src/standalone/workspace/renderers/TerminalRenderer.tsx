@@ -56,7 +56,13 @@ function formatOutput(source: any): string {
     }
     return outputLines.join('\n');
   } else if (typeof source === 'string') {
-    return source;
+    // Try to parse and reformat if it's a JSON string
+    try {
+      const parsed = JSON.parse(source);
+      return JSON.stringify(parsed, null, 2);
+    } catch {
+      return source;
+    }
   } else if (source && typeof source === 'object') {
     return JSON.stringify(source, null, 2);
   } else {
