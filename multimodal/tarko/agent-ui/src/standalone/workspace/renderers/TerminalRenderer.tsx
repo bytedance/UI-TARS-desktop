@@ -11,17 +11,7 @@ interface TerminalRendererProps {
   displayMode?: FileDisplayMode;
 }
 
-/**
- * Check if content is valid JSON
- */
-function isValidJson(str: string): boolean {
-  try {
-    JSON.parse(str);
-    return true;
-  } catch {
-    return false;
-  }
-}
+
 
 /**
  * Format tool arguments as JSON string
@@ -120,58 +110,48 @@ export const TerminalRenderer: React.FC<TerminalRendererProps> = ({
     output && output.trim()
   ].filter(Boolean).join('\n\n');
   
-  // Always use JSON highlighting for better formatting
-  const hasJsonContent = true;
+
   
   return (
     <div className="space-y-4 md:text-base text-sm">
       <div className="md:[&_pre]:text-sm [&_pre]:text-xs md:[&_pre]:p-4 [&_pre]:p-2">
-        {hasJsonContent ? (
-          // Custom terminal with JSON highlighting using CodeEditor
-          <div className="rounded-lg overflow-hidden border border-gray-900 shadow-[0_8px_24px_rgba(0,0,0,0.3)]">
-            {/* Terminal title bar */}
-            <div className="bg-[#111111] px-3 py-1.5 border-b border-gray-900 flex items-center">
-              <div className="flex space-x-1.5 mr-3">
-                <div className="w-3 h-3 rounded-full bg-red-500 shadow-sm"></div>
-                <div className="w-3 h-3 rounded-full bg-yellow-500 shadow-sm"></div>
-                <div className="w-3 h-3 rounded-full bg-green-500 shadow-sm"></div>
-              </div>
-              <div className="text-gray-400 text-xs font-medium mx-auto">
-                user@{getAgentTitle().toLowerCase().replace(/\s+/g, '-')}
-              </div>
+        {/* Terminal with JSON highlighting using CodeEditor */}
+        <div className="rounded-lg overflow-hidden border border-gray-900 shadow-[0_8px_24px_rgba(0,0,0,0.3)]">
+          {/* Terminal title bar */}
+          <div className="bg-[#111111] px-3 py-1.5 border-b border-gray-900 flex items-center">
+            <div className="flex space-x-1.5 mr-3">
+              <div className="w-3 h-3 rounded-full bg-red-500 shadow-sm"></div>
+              <div className="w-3 h-3 rounded-full bg-yellow-500 shadow-sm"></div>
+              <div className="w-3 h-3 rounded-full bg-green-500 shadow-sm"></div>
             </div>
+            <div className="text-gray-400 text-xs font-medium mx-auto">
+              user@{getAgentTitle().toLowerCase().replace(/\s+/g, '-')}
+            </div>
+          </div>
 
-            {/* Terminal content area */}
-            <div className="bg-black">
-              <div className="overflow-x-auto min-w-full">
-                {/* Command section */}
-                <div className="flex items-start p-3 pb-0">
-                  <span className="select-none text-green-400 mr-2 font-bold">$</span>
-                  <div className="flex-1 text-gray-200">{command}</div>
-                </div>
+          {/* Terminal content area */}
+          <div className="bg-black">
+            <div className="overflow-x-auto min-w-full">
+              {/* Command section */}
+              <div className="flex items-start p-3 pb-0">
+                <span className="select-none text-green-400 mr-2 font-bold">$</span>
+                <div className="flex-1 text-gray-200">{command}</div>
+              </div>
 
-                {/* Output section with JSON highlighting using CodeEditor */}
-                <div className="[&_.code-editor-container]:!bg-transparent [&_.code-editor-wrapper]:!bg-transparent [&_.code-editor-content]:!bg-transparent [&_.code-editor-pre]:!bg-transparent [&_.code-editor-header]:hidden [&_.code-editor-status-bar]:hidden">
-                  <CodeEditor
-                    code={combinedOutput || '(no output)'}
-                    fileName="output.json"
-                    readOnly={true}
-                    showLineNumbers={false}
-                    maxHeight="calc(100vh - 215px)"
-                    className="border-0 rounded-none"
-                  />
-                </div>
+              {/* Output section with JSON highlighting using CodeEditor */}
+              <div className="[&_.code-editor-container]:!bg-transparent [&_.code-editor-wrapper]:!bg-transparent [&_.code-editor-content]:!bg-transparent [&_.code-editor-pre]:!bg-transparent [&_.code-editor-header]:hidden [&_.code-editor-status-bar]:hidden">
+                <CodeEditor
+                  code={combinedOutput || '(no output)'}
+                  fileName="output.json"
+                  readOnly={true}
+                  showLineNumbers={false}
+                  maxHeight="calc(100vh - 215px)"
+                  className="border-0 rounded-none"
+                />
               </div>
             </div>
           </div>
-        ) : (
-          // Use standard TerminalOutput for non-JSON content
-          <TerminalOutput
-            command={command}
-            stdout={combinedOutput || '(no output)'}
-            maxHeight="calc(100vh - 215px)"
-          />
-        )}
+        </div>
       </div>
     </div>
   );
