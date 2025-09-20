@@ -69,6 +69,11 @@ const weatherTool = new Tool({
 });
 
 const agent = new Agent({
+  model: {
+    provider: 'volcengine',
+    id: 'doubao-seed-1-6-vision-250815',
+    apiKey: process.env.ARK_API_KEY,
+  },
   tools: [locationTool, weatherTool],
 });
 
@@ -115,11 +120,22 @@ const agent = new Agent({
 
 #### Agent Options
 
-- `tools`: Array of tools available to the agent
-- `systemPrompt`: System prompt for the agent
-- `modelProvider`: Configuration for the LLM provider
-- `stream`: Enable streaming responses (default: false)
-- `maxIterations`: Maximum number of iterations (default: 10)
+Based on the actual `AgentOptions` interface from `multimodal/tarko/agent-interface/src/agent-options.ts`:
+
+- `id?: string` - Unique agent identifier
+- `name?: string` - Agent name for identification
+- `instructions?: string` - System prompt (replaces default when provided)
+- `model?: AgentModel` - Model configuration including provider, id, and apiKey
+- `tools?: Tool[]` - Array of tools available to the agent
+- `toolCallEngine?: ToolCallEngineType` - Tool call engine type ('native' | 'prompt_engineering' | 'structured_outputs')
+- `maxIterations?: number` - Maximum number of iterations (default: 1000)
+- `maxTokens?: number` - Token limit per request (default: 1000)
+- `temperature?: number` - LLM temperature (default: 0.7)
+- `logLevel?: LogLevel` - Log level setting
+- `workspace?: string` - Directory for filesystem operations
+- `context?: object` - Context management options including maxImagesCount
+- `enableStreamingToolCallEvents?: boolean` - Enable streaming tool call events
+- `initialEvents?: AgentEventStream.Event[]` - Restore conversation context
 
 ### Tool
 
@@ -245,17 +261,19 @@ try {
 
 ```ts
 const agent = new Agent({
-  tools: [weatherTool, locationTool],
-  systemPrompt: 'You are a helpful weather assistant.',
-  modelProvider: {
+  name: 'WeatherAssistant',
+  instructions: 'You are a helpful weather assistant.',
+  model: {
+    provider: 'openai',
+    id: 'gpt-4o',
     apiKey: process.env.OPENAI_API_KEY,
-    baseURL: 'https://api.openai.com/v1',
-    model: 'gpt-4',
-    temperature: 0.7,
-    maxTokens: 1000,
   },
+  tools: [weatherTool, locationTool],
+  toolCallEngine: 'native',
   maxIterations: 5,
-  stream: true,
+  maxTokens: 1000,
+  temperature: 0.7,
+  logLevel: LogLevel.DEBUG,
 });
 ```
 
