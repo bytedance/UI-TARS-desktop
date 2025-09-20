@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import path from 'path';
 import fs from 'fs';
 import { Agent } from '@tarko/agent';
 import {
@@ -16,166 +15,109 @@ import {
   ChatCompletionMessageToolCall,
 } from '@tarko/agent-interface';
 import { logger } from './utils/logger';
-import { SnapshotManager } from './snapshot-manager';
 
 /**
- * Base class for agent hooks that provides common functionality
- * for both snapshot generation and LLM mocking
+ * Hook configuration options
+ */
+export interface HookOptions {
+  snapshotPath: string;
+  snapshotName: string;
+}
+
+/**
+ * Base class for agent hooks providing common functionality
  */
 export abstract class AgentHookBase {
-  protected agent: Agent;
-  protected snapshotPath: string;
-  protected snapshotName: string;
-  protected originalRequestHook: Agent['onLLMRequest'] | null = null;
-  protected originalResponseHook: Agent['onLLMResponse'] | null = null;
-  protected originalLoopEndHook: Agent['onAgentLoopEnd'] | null = null;
-  protected originalEachLoopStartHook: Agent['onEachAgentLoopStart'] | null = null;
-  protected originalStreamingResponseHook: Agent['onLLMStreamingResponse'] | null = null;
-  protected originalBeforeToolCallHook: Agent['onBeforeToolCall'] | null = null;
-  protected originalAfterToolCallHook: Agent['onAfterToolCall'] | null = null;
-  protected originalToolCallErrorHook: Agent['onToolCallError'] | null = null;
-  protected originalProcessToolCallsHook: Agent['onProcessToolCalls'] | null = null;
-  protected isHooked = false;
+  protected readonly agent: Agent;
+  protected readonly snapshotPath: string;
+  protected readonly snapshotName: string;
   protected currentRunOptions?: AgentRunOptions;
-  protected snapshotManager?: SnapshotManager;
   protected lastError: Error | null = null;
+  private isHooked = false;
+  private originalHooks: Partial<Agent> = {};
 
-  constructor(
-    agent: Agent,
-    options: {
-      snapshotPath: string;
-      snapshotName: string;
-    },
-  ) {
+  // Protected access to original hooks for subclasses
+  protected get originalRequestHook() { return this.originalHooks.onLLMRequest; }
+  protected get originalResponseHook() { return this.originalHooks.onLLMResponse; }
+  protected get originalStreamingResponseHook() { return this.originalHooks.onLLMStreamingResponse; }
+  protected get originalLoopEndHook() { return this.originalHooks.onAgentLoopEnd; }
+  protected get originalEachLoopStartHook() { return this.originalHooks.onEachAgentLoopStart; }
+  protected get originalBeforeToolCallHook() { return this.originalHooks.onBeforeToolCall; }
+  protected get originalAfterToolCallHook() { return this.originalHooks.onAfterToolCall; }
+  protected get originalToolCallErrorHook() { return this.originalHooks.onToolCallError; }
+  protected get originalProcessToolCallsHook() { return this.originalHooks.onProcessToolCalls; }
+
+  constructor(agent: Agent, options: HookOptions) {
     this.agent = agent;
     this.snapshotPath = options.snapshotPath;
     this.snapshotName = options.snapshotName;
 
-    // Create output directory
-    if (!fs.existsSync(this.snapshotPath)) {
-      fs.mkdirSync(this.snapshotPath, { recursive: true });
-    }
+    this.ensureSnapshotDirectory();
   }
 
   /**
-   * Store current run options
+   * Set current run options for context
    */
   setCurrentRunOptions(options: AgentRunOptions): void {
     this.currentRunOptions = options;
   }
 
   /**
-   * Hook into the agent by replacing its hook methods
+   * Hook into the agent
    */
-  hookAgent(): boolean {
-    if (this.isHooked) return false;
+  hookAgent(): void {
+    if (this.isHooked) {
+      logger.warn('Agent already hooked, skipping');
+      return;
+    }
 
     // Store original hooks
-    this.originalRequestHook = this.agent.onLLMRequest;
-    this.originalResponseHook = this.agent.onLLMResponse;
-    this.originalStreamingResponseHook = this.agent.onLLMStreamingResponse;
-    this.originalLoopEndHook = this.agent.onAgentLoopEnd;
-    this.originalEachLoopStartHook = this.agent.onEachAgentLoopStart;
-    this.originalBeforeToolCallHook = this.agent.onBeforeToolCall;
-    this.originalAfterToolCallHook = this.agent.onAfterToolCall;
-    this.originalToolCallErrorHook = this.agent.onToolCallError;
-    this.originalProcessToolCallsHook = this.agent.onProcessToolCalls;
+    this.originalHooks = {
+      onLLMRequest: this.agent.onLLMRequest,
+      onLLMResponse: this.agent.onLLMResponse,
+      onLLMStreamingResponse: this.agent.onLLMStreamingResponse,
+      onAgentLoopEnd: this.agent.onAgentLoopEnd,
+      onEachAgentLoopStart: this.agent.onEachAgentLoopStart,
+      onBeforeToolCall: this.agent.onBeforeToolCall,
+      onAfterToolCall: this.agent.onAfterToolCall,
+      onToolCallError: this.agent.onToolCallError,
+      onProcessToolCalls: this.agent.onProcessToolCalls,
+    };
 
-    // Replace with our hooks
-    this.agent.onLLMRequest = (id, payload) =>
-      this.safeExecuteHook(() => this.onLLMRequest(id, payload));
-    this.agent.onLLMResponse = (id, payload) =>
-      this.safeExecuteHook(() => this.onLLMResponse(id, payload));
-    this.agent.onLLMStreamingResponse = (id, payload) =>
-      this.safeExecuteHook(() => this.onLLMStreamingResponse(id, payload));
-    this.agent.onAgentLoopEnd = (id) => this.safeExecuteHook(() => this.onAgentLoopEnd(id));
-    this.agent.onEachAgentLoopStart = (id) =>
-      this.safeExecuteHook(() => this.onEachAgentLoopStart(id));
-    this.agent.onBeforeToolCall = (id, toolCall, args) =>
-      this.safeExecuteHook(() => this.onBeforeToolCall(id, toolCall, args));
-    this.agent.onAfterToolCall = (id, toolCall, result) =>
-      this.safeExecuteHook(() => this.onAfterToolCall(id, toolCall, result));
-    this.agent.onToolCallError = (id, toolCall, error) =>
-      this.safeExecuteHook(() => this.onToolCallError(id, toolCall, error));
-    this.agent.onProcessToolCalls = (id, toolCalls) =>
-      this.safeExecuteHook(() => this.onProcessToolCalls(id, toolCalls));
+    // Install our hooks
+    this.agent.onLLMRequest = (id, payload) => this.safeHook(() => this.onLLMRequest(id, payload));
+    this.agent.onLLMResponse = (id, payload) => this.safeHook(() => this.onLLMResponse(id, payload));
+    this.agent.onLLMStreamingResponse = (id, payload) => this.safeHook(() => this.onLLMStreamingResponse(id, payload));
+    this.agent.onAgentLoopEnd = (id) => this.safeHook(() => this.onAgentLoopEnd(id));
+    this.agent.onEachAgentLoopStart = (id) => this.safeHook(() => this.onEachAgentLoopStart(id));
+    this.agent.onBeforeToolCall = (id, toolCall, args) => this.safeHook(() => this.onBeforeToolCall(id, toolCall, args));
+    this.agent.onAfterToolCall = (id, toolCall, result) => this.safeHook(() => this.onAfterToolCall(id, toolCall, result));
+    this.agent.onToolCallError = (id, toolCall, error) => this.safeHook(() => this.onToolCallError(id, toolCall, error));
+    this.agent.onProcessToolCalls = (id, toolCalls) => {
+      const result = this.safeHook(() => this.onProcessToolCalls(id, toolCalls));
+      // Handle the Promise<void | ToolCallResult[]> return type
+      return result as Promise<ToolCallResult[] | undefined> | ToolCallResult[] | undefined;
+    };
 
     this.isHooked = true;
-    logger.info(`Hooked into agent: ${this.snapshotName}`);
-    return true;
+    logger.debug(`Hooked into agent: ${this.snapshotName}`);
   }
 
   /**
-   * Unhook from the agent, restoring original hooks
-   * @param force If true, force unhooking even if isHooked is false
+   * Unhook from the agent
    */
-  unhookAgent(force = false): boolean {
-    if (!this.isHooked && !force) return false;
+  unhookAgent(): void {
+    if (!this.isHooked) {
+      return;
+    }
 
     // Restore original hooks
-    if (this.originalRequestHook) {
-      this.agent.onLLMRequest = this.originalRequestHook;
-    }
-
-    if (this.originalResponseHook) {
-      this.agent.onLLMResponse = this.originalResponseHook;
-    }
-
-    if (this.originalStreamingResponseHook) {
-      this.agent.onLLMStreamingResponse = this.originalStreamingResponseHook;
-    }
-
-    if (this.originalLoopEndHook) {
-      this.agent.onAgentLoopEnd = this.originalLoopEndHook;
-    }
-
-    if (this.originalEachLoopStartHook) {
-      this.agent.onEachAgentLoopStart = this.originalEachLoopStartHook;
-    }
-
-    if (this.originalBeforeToolCallHook) {
-      this.agent.onBeforeToolCall = this.originalBeforeToolCallHook;
-    }
-
-    if (this.originalAfterToolCallHook) {
-      this.agent.onAfterToolCall = this.originalAfterToolCallHook;
-    }
-
-    if (this.originalToolCallErrorHook) {
-      this.agent.onToolCallError = this.originalToolCallErrorHook;
-    }
-
-    if (this.originalProcessToolCallsHook) {
-      this.agent.onProcessToolCalls = this.originalProcessToolCallsHook;
-    }
-
+    Object.assign(this.agent, this.originalHooks);
+    
     this.isHooked = false;
-    logger.info(`Unhooked from agent: ${this.snapshotName}`);
-    return true;
-  }
-
-  /**
-   * Safely execute a hook function, capturing any errors
-   */
-  protected async safeExecuteHook<T>(hookFn: () => T | Promise<T>) {
-    try {
-      const result = await hookFn();
-
-      // Handle both synchronous and asynchronous results
-      if (result instanceof Promise) {
-        return result.catch((error) => {
-          this.lastError = error;
-          logger.error(`Hook execution error: ${error.message}`);
-          throw error; // Re-throw to propagate
-        });
-      }
-
-      return result;
-    } catch (error) {
-      this.lastError = error as Error;
-      logger.error(`Hook execution error: ${(error as Error).message}`);
-      // do not throw it.
-    }
+    this.originalHooks = {};
+    
+    logger.debug(`Unhooked from agent: ${this.snapshotName}`);
   }
 
   /**
@@ -186,7 +128,7 @@ export abstract class AgentHookBase {
   }
 
   /**
-   * Get the last error that occurred during hook execution
+   * Get the last error that occurred
    */
   getLastError(): Error | null {
     return this.lastError;
@@ -200,57 +142,67 @@ export abstract class AgentHookBase {
   }
 
   /**
-   * Write streaming chunks to a file
+   * Safely execute a hook function with error handling
    */
-  protected writeStreamingChunks(filePath: string, chunks: ChatCompletionChunk[]): void {
-    // Skip if no chunks
-    if (!chunks || chunks.length === 0) {
-      return;
-    }
-
+  private async safeHook<T>(hookFn: () => T | Promise<T>): Promise<T | void> {
     try {
-      // Format each chunk as a JSON line
-      const chunksAsJsonLines = chunks.map((chunk) => JSON.stringify(chunk)).join('\n');
-      fs.writeFileSync(filePath, chunksAsJsonLines, 'utf-8');
-      logger.debug(`${chunks.length} chunks written to ${filePath}`);
+      const result = await hookFn();
+      return result;
     } catch (error) {
-      logger.error(`Error writing streaming chunks: ${error}`);
-      this.lastError = error as Error;
-      throw error;
+      this.lastError = error instanceof Error ? error : new Error(String(error));
+      logger.error(`Hook execution error in ${this.snapshotName}: ${this.lastError.message}`);
+      // Don't re-throw to avoid breaking agent execution
     }
   }
 
   /**
-   * Hook implementations to be provided by subclasses
+   * Write streaming chunks to a file
    */
+  protected writeStreamingChunks(filePath: string, chunks: ChatCompletionChunk[]): void {
+    if (!chunks?.length) {
+      return;
+    }
+
+    try {
+      const content = chunks.map(chunk => JSON.stringify(chunk)).join('\n');
+      fs.writeFileSync(filePath, content, 'utf-8');
+      logger.debug(`Wrote ${chunks.length} streaming chunks to ${filePath}`);
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      logger.error(`Failed to write streaming chunks: ${err.message}`);
+      this.lastError = err;
+    }
+  }
+
+  private ensureSnapshotDirectory(): void {
+    if (!fs.existsSync(this.snapshotPath)) {
+      fs.mkdirSync(this.snapshotPath, { recursive: true });
+    }
+  }
+
+  // Abstract methods to be implemented by subclasses
   protected abstract onLLMRequest(id: string, payload: LLMRequestHookPayload): void | Promise<void>;
-  protected abstract onLLMResponse(
-    id: string,
-    payload: LLMResponseHookPayload,
-  ): void | Promise<void>;
-  protected abstract onLLMStreamingResponse(
-    id: string,
-    payload: LLMStreamingResponseHookPayload,
-  ): void;
+  protected abstract onLLMResponse(id: string, payload: LLMResponseHookPayload): void | Promise<void>;
+  protected abstract onLLMStreamingResponse(id: string, payload: LLMStreamingResponseHookPayload): void;
   protected abstract onAgentLoopEnd(id: string): void | Promise<void>;
   protected abstract onEachAgentLoopStart(id: string): void | Promise<void>;
   protected abstract onBeforeToolCall(
     id: string,
     toolCall: { toolCallId: string; name: string },
-    args: unknown,
+    args: unknown
   ): Promise<unknown> | unknown;
   protected abstract onAfterToolCall(
     id: string,
     toolCall: { toolCallId: string; name: string },
-    result: unknown,
+    result: unknown
   ): Promise<unknown> | unknown;
   protected abstract onToolCallError(
     id: string,
     toolCall: { toolCallId: string; name: string },
-    error: unknown,
+    error: unknown
   ): Promise<unknown> | unknown;
-  public abstract onProcessToolCalls(
+  protected abstract onProcessToolCalls(
     id: string,
-    toolCalls: ChatCompletionMessageToolCall[],
+    toolCalls: ChatCompletionMessageToolCall[]
   ): Promise<ToolCallResult[] | undefined> | ToolCallResult[] | undefined;
 }

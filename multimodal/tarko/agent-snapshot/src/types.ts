@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentEventStream } from '@tarko/agent-interface';
-import { AgentSnapshotNormalizer, AgentNormalizerConfig } from './utils/snapshot-normalizer';
+import { AgentEventStream, AgentRunOptions } from '@tarko/agent-interface';
+import { AgentNormalizerConfig } from './utils/snapshot-normalizer';
 
 /**
  * Configuration options for AgentSnapshot
@@ -16,19 +16,15 @@ export interface AgentSnapshotOptions {
   snapshotPath: string;
 
   /**
-   * Snapshot name
+   * Snapshot name (defaults to basename of snapshotPath)
    */
   snapshotName?: string;
 
   /**
-   * Whether to update existing snapshots
+   * Whether to update existing snapshots during tests
+   * @default false
    */
   updateSnapshots?: boolean;
-
-  /**
-   * Test name to use for the snapshots
-   */
-  testName?: string;
 
   /**
    * Configuration for the snapshot normalizer
@@ -38,25 +34,30 @@ export interface AgentSnapshotOptions {
   /**
    * Verification options for test runs
    */
-  verification?: {
-    /**
-     * Whether to verify LLM requests against snapshots
-     * @default true
-     */
-    verifyLLMRequests?: boolean;
+  verification?: VerificationOptions;
+}
 
-    /**
-     * Whether to verify event stream states against snapshots
-     * @default true
-     */
-    verifyEventStreams?: boolean;
+/**
+ * Verification options that control what gets verified during tests
+ */
+export interface VerificationOptions {
+  /**
+   * Whether to verify LLM requests against snapshots
+   * @default true
+   */
+  verifyLLMRequests?: boolean;
 
-    /**
-     * Whether to verify tool calls against snapshots
-     * @default true
-     */
-    verifyToolCalls?: boolean;
-  };
+  /**
+   * Whether to verify event stream states against snapshots
+   * @default true
+   */
+  verifyEventStreams?: boolean;
+
+  /**
+   * Whether to verify tool calls against snapshots
+   * @default true
+   */
+  verifyToolCalls?: boolean;
 }
 
 /**
@@ -69,7 +70,7 @@ export interface SnapshotGenerationResult {
   snapshotPath: string;
 
   /**
-   * Number of iterations/loops captured
+   * Number of agent loops captured
    */
   loopCount: number;
 
@@ -93,9 +94,9 @@ export interface SnapshotGenerationResult {
 }
 
 /**
- * Result from snapshot playback/test
+ * Result from snapshot test (renamed from SnapshotRunResult for clarity)
  */
-export interface SnapshotRunResult {
+export interface SnapshotTestResult {
   /**
    * Final agent response
    */
@@ -121,7 +122,8 @@ export interface SnapshotRunResult {
  */
 export interface TestRunConfig {
   /**
-   * Whether to update existing snapshots
+   * Whether to update existing snapshots instead of verifying
+   * @default false
    */
   updateSnapshots?: boolean;
 
@@ -138,20 +140,83 @@ export interface TestRunConfig {
   /**
    * Verification options for this particular test run
    */
-  verification?: {
-    /**
-     * Whether to verify LLM requests against snapshots
-     */
-    verifyLLMRequests?: boolean;
-
-    /**
-     * Whether to verify event stream states against snapshots
-     */
-    verifyEventStreams?: boolean;
-
-    /**
-     * Whether to verify tool calls against snapshots
-     */
-    verifyToolCalls?: boolean;
-  };
+  verification?: VerificationOptions;
 }
+
+/**
+ * Tool call data structure for snapshots
+ */
+export interface ToolCallData {
+  toolCallId: string;
+  name: string;
+  args: unknown;
+  result?: unknown;
+  error?: unknown;
+  executionTime?: number;
+}
+
+/**
+ * Configuration for snapshot test cases
+ */
+export interface SnapshotCaseConfig {
+  /**
+   * Case name for identification
+   */
+  name: string;
+  
+  /**
+   * Path to the test case module
+   */
+  path: string;
+  
+  /**
+   * Directory where snapshots are stored
+   */
+  snapshotPath: string;
+  
+  /**
+   * Optional vitest snapshot path
+   */
+  vitestSnapshotPath?: string;
+}
+
+/**
+ * Test case module structure
+ */
+export interface SnapshotCase {
+  /**
+   * Agent instance to test
+   */
+  agent: import('@tarko/agent').Agent;
+  
+  /**
+   * Input options for the agent run
+   */
+  runOptions: AgentRunOptions;
+}
+
+/**
+ * Hook setup options for internal use
+ */
+export interface HookSetupOptions {
+  updateSnapshots?: boolean;
+  normalizerConfig?: AgentNormalizerConfig;
+  verification?: VerificationOptions;
+}
+
+/**
+ * Snapshot information
+ */
+export interface SnapshotInfo {
+  exists: boolean;
+  loopCount: number;
+  path: string;
+  name: string;
+}
+
+// Re-export for backward compatibility
+/** @deprecated Use SnapshotTestResult instead */
+export type SnapshotRunResult = SnapshotTestResult;
+
+/** @deprecated Use SnapshotCaseConfig instead */
+export type CaseConfig = SnapshotCaseConfig;
