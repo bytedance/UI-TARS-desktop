@@ -3,59 +3,13 @@ import { StandardPanelContent } from '../types/panelContent';
 import { FileDisplayMode } from '../types';
 import { TerminalOutput } from '../components/TerminalOutput';
 import { getAgentTitle } from '@/config/web-ui-config';
+import { CodeEditor } from '@tarko/ui';
 
 interface TerminalRendererProps {
   panelContent: StandardPanelContent;
   onAction?: (action: string, data: unknown) => void;
   displayMode?: FileDisplayMode;
 }
-
-/**
- * JSON syntax highlighting component
- */
-const JsonHighlight: React.FC<{ content: string }> = ({ content }) => {
-  const highlightJson = (jsonString: string) => {
-    // Try to parse and re-stringify to ensure valid JSON formatting
-    let formattedJson: string;
-    try {
-      const parsed = JSON.parse(jsonString);
-      formattedJson = JSON.stringify(parsed, null, 2);
-    } catch {
-      formattedJson = jsonString;
-    }
-
-    // Apply syntax highlighting
-    return formattedJson
-      .split('\n')
-      .map((line, index) => {
-        const highlightedLine = line
-          // Highlight property names (keys)
-          .replace(/"([^"]+)":/g, '<span class="text-cyan-400 font-medium">"$1"</span>:')
-          // Highlight string values
-          .replace(/:\s*"([^"]*)"/g, ': <span class="text-orange-300">"$1"</span>')
-          // Highlight numbers
-          .replace(/:\s*(\d+\.?\d*)/g, ': <span class="text-yellow-300">$1</span>')
-          // Highlight booleans
-          .replace(/:\s*(true|false)/g, ': <span class="text-purple-400">$1</span>')
-          // Highlight null
-          .replace(/:\s*(null)/g, ': <span class="text-gray-500">$1</span>')
-          // Highlight brackets and braces
-          .replace(/([\[\]{}])/g, '<span class="text-gray-400">$1</span>')
-          // Highlight commas
-          .replace(/(,)/g, '<span class="text-gray-500">$1</span>');
-
-        return (
-          <div key={index} dangerouslySetInnerHTML={{ __html: highlightedLine }} />
-        );
-      });
-  };
-
-  return (
-    <div className="font-mono text-sm leading-relaxed">
-      {highlightJson(content)}
-    </div>
-  );
-};
 
 /**
  * Check if content is valid JSON
@@ -166,7 +120,7 @@ export const TerminalRenderer: React.FC<TerminalRendererProps> = ({
     <div className="space-y-4 md:text-base text-sm">
       <div className="md:[&_pre]:text-sm [&_pre]:text-xs md:[&_pre]:p-4 [&_pre]:p-2">
         {hasJsonContent ? (
-          // Custom terminal with JSON highlighting
+          // Custom terminal with JSON highlighting using CodeEditor
           <div className="rounded-lg overflow-hidden border border-gray-900 shadow-[0_8px_24px_rgba(0,0,0,0.3)]">
             {/* Terminal title bar */}
             <div className="bg-[#111111] px-3 py-1.5 border-b border-gray-900 flex items-center">
@@ -181,20 +135,24 @@ export const TerminalRenderer: React.FC<TerminalRendererProps> = ({
             </div>
 
             {/* Terminal content area */}
-            <div
-              className="bg-black p-3 font-mono text-sm terminal-content overflow-auto"
-              style={{ maxHeight: 'calc(100vh - 215px)' }}
-            >
+            <div className="bg-black">
               <div className="overflow-x-auto min-w-full">
                 {/* Command section */}
-                <div className="flex items-start">
+                <div className="flex items-start p-3 pb-0">
                   <span className="select-none text-green-400 mr-2 font-bold">$</span>
                   <div className="flex-1 text-gray-200">{command}</div>
                 </div>
 
-                {/* Output section with JSON highlighting */}
-                <div className="mt-3 ml-3">
-                  <JsonHighlight content={combinedOutput || '(no output)'} />
+                {/* Output section with JSON highlighting using CodeEditor */}
+                <div className="[&_.code-editor-container]:!bg-transparent [&_.code-editor-wrapper]:!bg-transparent [&_.code-editor-content]:!bg-transparent [&_.code-editor-pre]:!bg-transparent [&_.code-editor-header]:hidden [&_.code-editor-status-bar]:hidden">
+                  <CodeEditor
+                    code={combinedOutput || '(no output)'}
+                    fileName="output.json"
+                    readOnly={true}
+                    showLineNumbers={false}
+                    maxHeight="calc(100vh - 215px)"
+                    className="border-0 rounded-none"
+                  />
                 </div>
               </div>
             </div>
