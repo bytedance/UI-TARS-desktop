@@ -367,6 +367,9 @@ export const sendMessageAction = atom(
       await apiService.sendStreamingQuery(activeSessionId, content, (event) => {
         set(processEventAction, { sessionId: activeSessionId, event });
       });
+      
+      // Ensure processing state is updated after stream completes
+      set(isProcessingAtom, false);
     } catch (error) {
       console.error('Error sending message:', error);
       // Set processing to false on error
