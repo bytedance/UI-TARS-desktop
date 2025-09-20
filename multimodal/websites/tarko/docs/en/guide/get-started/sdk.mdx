@@ -49,8 +49,8 @@ Based on the actual interface from `multimodal/tarko/agent-interface/src/agent-o
 ```typescript
 interface AgentOptions {
   // Core Configuration
-  id?: string;                    // Unique agent ID
-  name?: string;                  // Agent identifier
+  id?: string;                    // Unique agent ID (default: "@tarko/agent")
+  name?: string;                  // Agent identifier (default: "Anonymous")
   instructions?: string;          // System prompt
   
   // Model Configuration
@@ -58,10 +58,12 @@ interface AgentOptions {
   maxTokens?: number;            // Token limit per request (default: 1000)
   temperature?: number;          // LLM temperature (default: 0.7)
   top_p?: number;               // Top-p sampling
+  thinking?: LLMReasoningOptions; // Reasoning options
   
   // Tools
   tools?: Tool[];                 // Available tools
-  toolCallEngine?: ToolCallEngineType; // Tool call engine type
+  tool?: AgentToolFilterOptions;  // Tool filtering options
+  toolCallEngine?: ToolCallEngineType; // Tool call engine type (default: 'native')
   
   // Execution Control
   maxIterations?: number;         // Max reasoning loops (default: 1000)
@@ -70,19 +72,18 @@ interface AgentOptions {
   context?: {
     maxImagesCount?: number;      // Max images in context
   };
-  
-  // Advanced Features
-  thinking?: LLMReasoningOptions; // Reasoning options
-  enableStreamingToolCallEvents?: boolean;
+  eventStreamOptions?: AgentEventStream.ProcessorOptions;
+  enableStreamingToolCallEvents?: boolean; // (default: false)
   initialEvents?: AgentEventStream.Event[]; // Restore events
   
   // Workspace
   workspace?: string;             // Workspace directory
+  sandboxUrl?: string;           // Sandbox URL
   
   // Logging
   logLevel?: LogLevel;           // Log level
-  metric?: {                     // Metric collection
-    enable?: boolean;
+  metric?: {
+    enable?: boolean;            // Enable metric collection (default: false)
   };
 }
 ```
@@ -262,7 +263,7 @@ const agent = new Agent({
 const agent = new Agent({
   model: {
     provider: 'volcengine',
-    id: 'ep-20250510145437-5sxhs',
+    id: 'doubao-seed-1-6-vision-250815',
     apiKey: process.env.ARK_API_KEY,
   },
   // or
@@ -326,7 +327,7 @@ const weatherTool = new Tool({
 const agent = new Agent({
   model: {
     provider: 'volcengine',
-    id: 'ep-20250510145437-5sxhs',
+    id: 'doubao-seed-1-6-vision-250815',
     apiKey: process.env.ARK_API_KEY,
   },
   tools: [locationTool, weatherTool],
@@ -344,7 +345,7 @@ console.log(response);
 const agent = new Agent({
   model: {
     provider: 'volcengine',
-    id: 'ep-20250510145437-5sxhs',
+    id: 'doubao-seed-1-6-vision-250815',
     apiKey: process.env.ARK_API_KEY,
   },
   tools: [locationTool, weatherTool],
