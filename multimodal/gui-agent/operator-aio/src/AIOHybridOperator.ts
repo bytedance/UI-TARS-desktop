@@ -3,96 +3,106 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import {
-  type ScreenshotOutput,
-  type ExecuteParams,
-  type ExecuteOutput,
-  Operator,
-  StatusEnum,
-} from '@ui-tars/sdk/core';
-import { ConsoleLogger } from '@agent-infra/logger';
+  BaseAction,
+  Coordinates,
+  ExecuteOutput,
+  ExecuteParams,
+  ScreenshotOutput,
+  SupportedActionType,
+} from '@gui-agent/shared/types';
+import { Operator, ScreenContext } from '@gui-agent/shared/base';
+import { ConsoleLogger, LogLevel } from '@agent-infra/logger';
 import { Base64ImageParser } from '@agent-infra/media-utils';
-import { sleep } from '@ui-tars/shared/utils';
-import { parseBoxToScreenCoords } from './utils';
-import { AIOComputer } from './AIOComputer';
-import type { AIOHybridOptions } from './types';
-import { AIOBrowser } from './AIOBrowser';
-import { log } from 'console';
 
-const logger = new ConsoleLogger('AioHybridOperator');
+import { AIOComputer } from './AIOComputer';
+import { AIOBrowser } from './AIOBrowser';
+import type { AIOHybridOptions } from './types';
+
+const defaultLogger = new ConsoleLogger(undefined, LogLevel.DEBUG);
 
 export class AIOHybridOperator extends Operator {
-  static MANUAL = {
-    ACTION_SPACES: [
-      `click(start_box='[x1, y1, x2, y2]')`,
-      `left_double(start_box='[x1, y1, x2, y2]')`,
-      `right_single(start_box='[x1, y1, x2, y2]')`,
-      `drag(start_box='[x1, y1, x2, y2]', end_box='[x3, y3, x4, y4]')`,
-      `hotkey(key='')`,
-      `type(content='') #If you want to submit your input, use "\\n" at the end of \`content\`.`,
-      `scroll(start_box='[x1, y1, x2, y2]', direction='down or up or right or left')`,
-      `wait() #Sleep for 5s and take a screenshot to check for any changes.`,
-      `finished()`,
-      `call_user() # Submit the task and call the user when the task is unsolvable, or when you need the user's help.`,
-    ],
-  };
-
   private static currentInstance: AIOHybridOperator | null = null;
+  public static async create(options: AIOHybridOptions): Promise<AIOHybridOperator> {
+    defaultLogger.info('[AioHybridOperator.create]:', options.baseURL);
+    const instance = new AIOHybridOperator(options);
+    // await instance.initialize(options);
+    this.currentInstance = instance;
+    return instance;
+  }
+
+  private options: AIOHybridOptions;
+  private logger: ConsoleLogger;
   private aioBrowser: AIOBrowser | null = null;
   private aioComputer: AIOComputer;
 
   private screenshotWidth = 1280;
   private screenshotHeight = 1024;
 
-  public static async create(options: AIOHybridOptions): Promise<AIOHybridOperator> {
-    logger.info('[AioHybridOperator] construct:', options.baseURL);
-    const instance = new AIOHybridOperator(options);
-    await instance.initialize(options);
-    this.currentInstance = instance;
-    return instance;
-  }
-
-  private constructor(options: AIOHybridOptions) {
+  private constructor(options: AIOHybridOptions, logger: ConsoleLogger = defaultLogger) {
     super();
+    this.options = options;
+    this.logger = logger.spawn('[AIOHybridOperator]');
     this.aioComputer = new AIOComputer(options);
   }
 
-  private async initialize(options: AIOHybridOptions): Promise<void> {
+  protected async initialize(): Promise<void> {
     this.aioComputer.screenshot(0); // Ping the aio sandbox
     this.aioBrowser = await AIOBrowser.create({
-      baseURl: options.baseURL,
-      logger: logger,
+      baseURl: this.options.baseURL,
+      logger: this.logger,
     });
     await this.aioBrowser?.launch({
       timeout: 1000,
-      defaultViewport: { width: 1280, height: 1024 },
+      defaultViewport: { width: this.screenshotWidth, height: this.screenshotHeight },
     });
-    logger.info('[AioHybridOperator] AIOBrowser launched successfully');
-    logger.info('[AioHybridOperator] AIOBrowser initialized successfully');
+    this.logger.info('AIOBrowser initialized successfully');
   }
 
-  public async getMeta(): Promise<{ url: string }> {
-    let url = '';
-    try {
-      const retUrl = await this.aioBrowser?.getActiveUrl();
-      if (retUrl) {
-        url = retUrl;
-      }
-    } catch (error) {
-      logger.error('Failed to get page meta:', error);
-    }
+  protected supportedActions(): Array<SupportedActionType> {
+    return [
+      'navigate',
+      'navigate_back',
+      'wait',
+      'mouse_move',
+      'hover',
+      'click',
+      'left_click',
+      // 'left_single',
+      'left_double',
+      'double_click',
+      'right_click',
+      'right_single',
+      // 'middle_click',
+      'left_click_drag',
+      'drag',
+      'select',
+      'type',
+      'hotkey',
+      'press',
+      'scroll',
+      'call_user',
+      'finished',
+      // 'user_stop',
+    ];
+  }
+
+  protected screenContext(): ScreenContext {
     return {
-      url,
+      screenWidth: this.screenshotWidth,
+      screenHeight: this.screenshotHeight,
+      scaleX: 1,
+      scaleY: 1,
     };
   }
 
   public async screenshot(): Promise<ScreenshotOutput> {
-    logger.info('[AioHybridOperator] Taking screenshot');
+    this.logger.info('Taking Screenshot...');
 
     try {
       const result = await this.aioComputer.screenshot();
 
       if (!result.success) {
-        throw new Error(result.message || 'Screenshot failed');
+        throw new Error(`Screenshot failed: ${result.message || 'Unknown error'}`);
       }
 
       // Convert the response to ScreenshotOutput format expected by the SDK
@@ -103,228 +113,273 @@ export class AIOHybridOperator extends Operator {
           this.screenshotWidth = dimensions?.width;
           this.screenshotHeight = dimensions?.height;
         }
-        logger.info('[AioHybridOperator] screenshot dimensions:', JSON.stringify(dimensions));
+        this.logger.info('Screenshot size:', JSON.stringify(dimensions));
         return {
+          status: 'success',
           base64: result.data.base64,
-          scaleFactor: result.data.scaleFactor || 1,
+          url: await this.getCurrentUrl(),
         };
       } else {
         throw new Error('No base64 image data received from screenshot API');
       }
     } catch (error) {
-      logger.error('[AioHybridOperator] Screenshot failed:', error);
+      this.logger.error('Screenshot failed:', error);
       throw error;
     }
   }
 
-  async execute(params: ExecuteParams): Promise<ExecuteOutput> {
-    const { parsedPrediction, screenWidth, screenHeight, scaleFactor } = params;
-    const { action_type, action_inputs } = parsedPrediction;
-    const startBoxStr = action_inputs?.start_box || '';
+  protected async execute(params: ExecuteParams): Promise<ExecuteOutput> {
+    const { actions } = params;
+    for (const action of actions) {
+      this.logger.info('Execute action', action);
+      await this.singleActionExecutor(action);
+    }
+    return {
+      status: 'success',
+    };
+  }
 
-    logger.info(
-      '[AioHybridOperator] Executing action',
-      action_type,
-      action_inputs,
+  async singleActionExecutor(action: BaseAction): Promise<ExecuteOutput> {
+    const { type: actionType, inputs: actionInputs } = action;
+    this.logger.info(
+      'Executing action',
+      actionType,
+      actionInputs,
       ', screen context',
-      this.screenshotWidth,
-      this.screenshotHeight,
-    );
-
-    const {
-      x: rawX,
-      y: rawY,
-      percentX: rawPercentX,
-      percentY: rawPercentY,
-    } = parseBoxToScreenCoords({
-      boxStr: startBoxStr,
-      screenWidth: this.screenshotWidth,
-      screenHeight: this.screenshotHeight,
-      factors: [1000, 1000],
-    });
-
-    const startX = rawX !== null ? Math.round(rawX) : null;
-    const startY = rawY !== null ? Math.round(rawY) : null;
-
-    logger.info(`[AioHybridOperator] Action position: (${startX}, ${startY})`);
-    logger.info(
-      `[AioHybridOperator] Action position percent raw: (${rawPercentX}, ${rawPercentY})`,
+      await this.getScreenContext(),
     );
 
     let startXPercent = null,
       startYPercent = null;
 
     try {
-      switch (action_type) {
-        case 'navigate':
-          logger.info('[AioHybridOperator] Navigating to', action_inputs?.content);
-          await this.aioBrowser?.handleNavigate({ url: action_inputs?.content || '' });
+      switch (actionType) {
+        case 'navigate': {
+          const { url, content } = actionInputs;
+          if (!url && !content) {
+            throw new Error('url is required when navigate');
+          }
+          this.logger.info('Navigating to', url || content);
+          await this.aioBrowser?.handleNavigate({ url: url || content });
           break;
-        case 'navigate_back':
-          logger.info('[AioHybridOperator] Navigating back');
+        }
+        case 'navigate_back': {
+          this.logger.info('Navigating back');
           await this.aioBrowser?.handleNavigateBack();
           break;
-        case 'wait':
-          logger.info('[AioHybridOperator] Waiting for 5 seconds');
-          await sleep(5000);
-          break;
-
+        }
+        case 'move':
+        case 'move_to':
         case 'mouse_move':
-        case 'hover':
-          if (startX !== null && startY !== null) {
-            await this.aioComputer.moveTo(startX, startY);
-            startXPercent = rawPercentX;
-            startYPercent = rawPercentY;
+        case 'hover': {
+          const { point } = actionInputs;
+          if (!point) {
+            throw new Error('point is required when mouse move');
           }
+          const { realX, realY } = await this.calculateRealCoords(point);
+          await this.aioComputer.moveTo(realX, realY);
+          startXPercent = (point as Coordinates).normalized?.x;
+          startYPercent = (point as Coordinates).normalized?.y;
           break;
-
+        }
         case 'click':
         case 'left_click':
-        case 'left_single':
-          if (startX !== null && startY !== null) {
-            await this.aioComputer.click(startX, startY);
-            startXPercent = rawPercentX;
-            startYPercent = rawPercentY;
-          }
+        case 'left_single': {
+          this.handleClick(actionInputs, 'left');
+          const { point } = actionInputs;
+          startXPercent = (point as Coordinates)?.normalized?.x;
+          startYPercent = (point as Coordinates)?.normalized?.y;
           break;
-
+        }
         case 'left_double':
-        case 'double_click':
-          if (startX !== null && startY !== null) {
-            await this.aioComputer.doubleClick(startX, startY);
-            startXPercent = rawPercentX;
-            startYPercent = rawPercentY;
-          }
+        case 'double_click': {
+          this.handleClick(actionInputs, 'left', 2);
+          const { point } = actionInputs;
+          startXPercent = (point as Coordinates)?.normalized?.x;
+          startYPercent = (point as Coordinates)?.normalized?.y;
           break;
-
+        }
         case 'right_click':
-        case 'right_single':
-          if (startX !== null && startY !== null) {
-            await this.aioComputer.rightClick(startX, startY);
-            startXPercent = rawPercentX;
-            startYPercent = rawPercentY;
-          }
+        case 'right_single': {
+          this.handleClick(actionInputs, 'right');
+          const { point } = actionInputs;
+          startXPercent = (point as Coordinates)?.normalized?.x;
+          startYPercent = (point as Coordinates)?.normalized?.y;
           break;
-
-        case 'middle_click':
-          if (startX !== null && startY !== null) {
-            await this.aioComputer.click(startX, startY, 'middle');
-            startXPercent = rawPercentX;
-            startYPercent = rawPercentY;
-          }
+        }
+        case 'middle_click': {
+          this.handleClick(actionInputs, 'middle');
+          const { point } = actionInputs;
+          startXPercent = (point as Coordinates)?.normalized?.x;
+          startYPercent = (point as Coordinates)?.normalized?.y;
           break;
-
+        }
         case 'left_click_drag':
         case 'drag':
         case 'select': {
-          if (action_inputs?.end_box) {
-            const { x: rawEndX, y: rawEndY } = parseBoxToScreenCoords({
-              boxStr: action_inputs.end_box,
-              screenWidth,
-              screenHeight,
-            });
-            const endX = rawEndX !== null ? Math.round(rawEndX) : null;
-            const endY = rawEndY !== null ? Math.round(rawEndY) : null;
-
-            if (startX && startY && endX && endY) {
-              // Move to start position, press mouse, drag to end position, release mouse
-              await this.aioComputer.moveTo(startX, startY);
-              await this.aioComputer.mouseDown();
-              await this.aioComputer.dragTo(endX, endY);
-              await this.aioComputer.mouseUp();
-            }
-          }
+          this.handleDrag(actionInputs);
           break;
         }
-
         case 'type': {
-          const content = action_inputs.content?.trim();
-          if (content) {
-            const stripContent = content.replace(/\\n$/, '').replace(/\n$/, '');
-            await this.aioComputer.type(stripContent);
+          const content = actionInputs.content?.trim();
+          if (!content) {
+            throw new Error('content is required when type');
           }
+          const stripContent = content.replace(/\\n$/, '').replace(/\n$/, '');
+          await this.aioComputer.type(stripContent);
           break;
         }
-
         case 'hotkey':
         case 'press': {
-          const keyStr = action_inputs?.key || action_inputs?.hotkey;
-          if (keyStr) {
-            // 处理组合键
-            const keys = keyStr.split(/[\s+]/).filter((k) => k.length > 0);
-            if (keys.length > 1) {
-              await this.aioComputer.hotkey(keys);
-            } else {
-              await this.aioComputer.press(keyStr);
-            }
+          const keyStr = actionInputs?.key || actionInputs?.hotkey;
+          if (typeof keyStr !== 'string') {
+            throw new Error('key string is required when press or hotkey');
+          }
+          const keys = keyStr.split(/[\s+]/).filter((k) => k.length > 0);
+          if (keys.length > 1) {
+            await this.aioComputer.hotkey(keys);
+          } else {
+            await this.aioComputer.press(keyStr);
           }
           break;
         }
-
         case 'scroll': {
-          const { direction } = action_inputs;
-          if (startX !== null && startY !== null && direction) {
-            const normalizedDirection = direction.toLowerCase();
-            let dx = 0,
-              dy = 0;
-
-            switch (normalizedDirection) {
-              case 'up':
-                dy = 10;
-                break;
-              case 'down':
-                dy = -10;
-                break;
-              case 'left':
-                dx = 10;
-                break;
-              case 'right':
-                dx = -10;
-                break;
-            }
-
-            if (dx !== 0 || dy !== 0) {
-              await this.aioComputer.scroll(dx, dy);
-            }
-          }
+          await this.handleScroll(actionInputs);
           break;
         }
-
-        case 'error_env':
-        case 'call_user':
-        case 'finished':
-        case 'user_stop':
+        case 'wait':
+          this.logger.info('Waiting for 3 seconds');
+          let sleepTime = 3000;
+          if (actionInputs?.time) {
+            sleepTime = actionInputs.time * 1000;
+          }
+          await new Promise((resolve) => setTimeout(resolve, sleepTime));
           break;
-
         default:
-          logger.warn(`Unsupported action type: ${action_type}`);
+          this.logger.warn(`Unsupported action type: ${actionType}`);
+          throw new Error(`Unsupported action type: ${actionType}`);
       }
 
-      // const { startXPercent, startYPercent } = parseBoxToScreenCoordsPercent({
-      //   startX,
-      //   startY,
-      //   screenWidth,
-      //   screenHeight,
-      //   deviceScaleFactor: scaleFactor,
-      // });
-      logger.info(
-        `[AioHybridOperator] position percent return: (${startXPercent}, ${startYPercent})`,
-      );
+      this.logger.info(`position percent return: (${startXPercent}, ${startYPercent})`);
 
-      // return { status: StatusEnum.INIT };
       return {
+        status: 'success',
         // Hand it over to the upper layer to avoid redundancy
-        // @ts-expect-error fix type later
-        startX,
-        startY,
+        // startX,
+        // startY,
         // Add percentage coordinates for new GUI Agent design
         startXPercent,
         startYPercent,
-        action_inputs,
+        actionInputs,
       };
     } catch (error) {
-      logger.error('[AioHybridOperator] 执行失败:', error);
-      return { status: StatusEnum.ERROR };
+      this.logger.error('Execute action failed:', error);
+      throw new Error(`Execute action failed: ${actionType}, message: ${(error as Error).message}`);
+    }
+  }
+
+  private async getCurrentUrl(): Promise<string | undefined> {
+    try {
+      const retUrl = await this.aioBrowser?.getActiveUrl();
+      if (retUrl) {
+        return retUrl;
+      }
+    } catch (error) {
+      this.logger.warn('Failed to get page url:', error);
+    }
+  }
+
+  private async calculateRealCoords(
+    coords: Coordinates,
+  ): Promise<{ realX: number; realY: number }> {
+    if (!coords.normalized) {
+      if (!coords.raw) {
+        throw new Error('Invalide coordinates');
+      }
+      return {
+        realX: coords.raw.x,
+        realY: coords.raw.y,
+      };
+    }
+    const screenContext = await this.getScreenContext();
+    return {
+      realX: coords.normalized.x * screenContext.screenWidth * screenContext.scaleX,
+      realY: coords.normalized.y * screenContext.screenHeight * screenContext.scaleY,
+    };
+  }
+
+  private async handleClick(
+    actionInputs: Record<string, unknown>,
+    button: 'left' | 'right' | 'middle',
+    clickNum: 1 | 2 = 1,
+  ) {
+    const { point } = actionInputs;
+    if (!point) {
+      throw new Error('point is required when click');
+    }
+    const { realX, realY } = await this.calculateRealCoords(point);
+    if (clickNum === 1) {
+      if (button === 'left') {
+        await this.aioComputer.click(realX, realY);
+      } else if (button === 'right') {
+        await this.aioComputer.rightClick(realX, realY);
+      } else if (button === 'middle') {
+        await this.aioComputer.click(realX, realY, 'middle');
+      }
+    } else {
+      await this.aioComputer.doubleClick(realX, realY);
+    }
+  }
+
+  private async handleDrag(actionInputs: Record<string, unknown>) {
+    const { start: startPoint, end: endPoint } = actionInputs;
+    if (!startPoint) {
+      throw new Error('start point is required when drag/select');
+    }
+    if (!endPoint) {
+      throw new Error('end point is required when drag/select');
+    }
+    const { realX: startX, realY: startY } = await this.calculateRealCoords(startPoint);
+    const { realX: endX, realY: endY } = await this.calculateRealCoords(endPoint);
+    if (startX > endX || startY > endY) {
+      throw new Error('start point must be top left of end point');
+    }
+    // Move to start position, press mouse, drag to end position, release mouse
+    await this.aioComputer.moveTo(startX, startY);
+    await this.aioComputer.mouseDown();
+    await this.aioComputer.dragTo(endX, endY);
+    await this.aioComputer.mouseUp();
+  }
+
+  private async handleScroll(actionInputs: Record<string, unknown>) {
+    const { direction, point } = actionInputs;
+    // if startX and startY is not null, move mouse to
+    if (point) {
+      const { realX, realY } = await this.calculateRealCoords(point);
+      await this.aioComputer.moveTo(realX, realY);
+    }
+    if (typeof direction !== 'string') {
+      throw new Error('direction is required when scroll');
+    }
+    const normalizedDirection = direction.toLowerCase();
+    let dx = 0;
+    let dy = 0;
+    switch (normalizedDirection) {
+      case 'up':
+        dy = 10;
+        break;
+      case 'down':
+        dy = -10;
+        break;
+      case 'left':
+        dx = 10;
+        break;
+      case 'right':
+        dx = -10;
+        break;
+    }
+    if (dx !== 0 || dy !== 0) {
+      await this.aioComputer.scroll(dx, dy);
     }
   }
 }
