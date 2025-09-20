@@ -245,6 +245,46 @@ export class StreamingToolCallHandler
 
     toolCallArgumentsCache.set(toolCallId, parsedArgs);
 
+    // Update raw tool mapping for streaming tool calls
+    set(rawToolMappingAtom, (prev) => {
+      const sessionMappings = prev[sessionId] || {};
+      const existing = sessionMappings[toolCallId] || {
+        toolCall: null,
+        toolResult: null,
+      };
+      
+      // Create or update the tool call event
+      const toolCallEvent = existing.toolCall || {
+        id: `streaming-${toolCallId}`,
+        type: 'tool_call' as const,
+        timestamp: event.timestamp,
+        toolCallId,
+        name: toolName || 'unknown',
+        arguments: {},
+        startTime: event.timestamp,
+        tool: {
+          name: toolName || 'unknown',
+          description: 'Streaming tool call',
+          schema: {},
+        },
+      };
+      
+      // Update arguments with parsed data
+      toolCallEvent.arguments = parsedArgs;
+      toolCallEvent.name = toolName || toolCallEvent.name;
+      
+      return {
+        ...prev,
+        [sessionId]: {
+          ...sessionMappings,
+          [toolCallId]: {
+            ...existing,
+            toolCall: toolCallEvent,
+          },
+        },
+      };
+    });
+
     set(messagesAtom, (prev: Record<string, Message[]>) => {
       const sessionMessages = prev[sessionId] || [];
       let existingMessageIndex = -1;
