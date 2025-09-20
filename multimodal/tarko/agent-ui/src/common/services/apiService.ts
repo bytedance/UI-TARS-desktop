@@ -530,6 +530,58 @@ class ApiService {
       return { success: false };
     }
   }
+
+  async getSessionAgentOptions(sessionId: string): Promise<{
+    schema: Record<string, any> | null;
+    currentValues: Record<string, any> | null;
+    message?: string;
+  }> {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/v1/sessions/agent-options?sessionId=${sessionId}`,
+        {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          signal: AbortSignal.timeout(3000),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to get session agent options: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error getting session agent options:', error);
+      return { schema: null, currentValues: null, message: 'Failed to load agent options' };
+    }
+  }
+
+  async updateSessionAgentOptions(
+    sessionId: string,
+    agentOptions: Record<string, any>,
+  ): Promise<{ success: boolean; sessionInfo?: SessionInfo }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/sessions/agent-options`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId, agentOptions }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update session agent options: ${response.statusText}`);
+      }
+
+      const responseData = await response.json();
+      return {
+        success: responseData.success,
+        sessionInfo: responseData.sessionInfo,
+      };
+    } catch (error) {
+      console.error('Error updating session agent options:', error);
+      return { success: false };
+    }
+  }
 }
 
 // Export singleton instance

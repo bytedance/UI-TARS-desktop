@@ -100,3 +100,124 @@ export async function updateSessionModel(req: Request, res: Response) {
     res.status(500).json({ error: 'Failed to update session model' });
   }
 }
+
+/**
+ * Get session agent options configuration
+ */
+export async function getSessionAgentOptions(req: Request, res: Response) {
+  const sessionId = req.query.sessionId as string;
+  const server = req.app.locals.server;
+
+  if (!sessionId) {
+    return res.status(400).json({ error: 'Session ID is required' });
+  }
+
+  try {
+    // Get agent options schema from server config
+    const agentOptionsSchema = (server.appConfig.server as any)?.agentOptions;
+
+    if (!agentOptionsSchema) {
+      return res.status(200).json({
+        schema: null,
+        currentValues: null,
+        message: 'No agent options configured',
+      });
+    }
+
+    // Get current session values if storage is available
+    let currentValues = null;
+    if (server.storageProvider) {
+      try {
+        const sessionInfo = await server.storageProvider.getSessionInfo(sessionId);
+        currentValues = sessionInfo?.metadata?.agentOptions || null;
+      } catch (error) {
+        // Session not found or no stored values - use defaults from schema
+      }
+    }
+
+    // Extract default values from schema if no current values
+    if (
+      !currentValues &&
+      agentOptionsSchema &&
+      typeof agentOptionsSchema === 'object' &&
+      agentOptionsSchema.properties
+    ) {
+      currentValues = {} as Record<string, any>;
+      for (const [key, property] of Object.entries(agentOptionsSchema.properties)) {
+        if (typeof property === 'object' && property !== null && 'default' in property) {
+          (currentValues as any)[key] = (property as any).default;
+        }
+      }
+    }
+
+    res.status(200).json({
+      schema: agentOptionsSchema,
+      currentValues,
+    });
+  } catch (error) {
+    console.error('Failed to get session agent options:', error);
+    res.status(500).json({ error: 'Failed to get session agent options' });
+  }
+}
+
+/**
+ * Update session agent options configuration
+ */
+export async function updateSessionAgentOptions(req: Request, res: Response) {
+  const { sessionId, agentOptions } = req.body;
+  const server = req.app.locals.server;
+
+  if (!sessionId) {
+    return res.status(400).json({ error: 'Session ID is required' });
+  }
+
+  if (!agentOptions || typeof agentOptions !== 'object') {
+    return res.status(400).json({ error: 'Agent options object is required' });
+  }
+
+  try {
+    // Validate agent options against schema if available
+    const agentOptionsSchema = (server.appConfig.server as any)?.agentOptions;
+    if (
+      agentOptionsSchema &&
+      typeof agentOptionsSchema === 'object' &&
+      agentOptionsSchema.properties
+    ) {
+      // Basic validation - check if all provided keys exist in schema
+      for (const key of Object.keys(agentOptions)) {
+        if (!(agentOptionsSchema.properties as any)[key]) {
+          return res.status(400).json({
+            error: `Unknown agent option: ${key}`,
+          });
+        }
+      }
+    }
+
+    // Update session agent options configuration
+    if (server.storageProvider) {
+      // Get current session metadata
+      const currentSessionInfo = await server.storageProvider.getSessionInfo(sessionId);
+      if (!currentSessionInfo) {
+        return res.status(404).json({ error: 'Session not found' });
+      }
+
+      // Update metadata with new agent options
+      const updatedSessionInfo = await server.storageProvider.updateSessionInfo(sessionId, {
+        metadata: {
+          ...currentSessionInfo.metadata,
+          agentOptions,
+        },
+      });
+
+      res.status(200).json({
+        success: true,
+        sessionInfo: updatedSessionInfo,
+      });
+    } else {
+      res.status(400).json({ error: 'Storage not configured' });
+    }
+  } catch (error) {
+    console.error('Failed to update session agent options:', error);
+    res.status(500).json({ error: 'Failed to update session agent options' });
+  }
+}

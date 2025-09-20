@@ -19,6 +19,7 @@ import { getAgentTitle, isContextualSelectorEnabled } from '@/config/web-ui-conf
 import { composeMessageContent, isMessageEmpty, parseContextualReferences } from './utils';
 import { handleMultimodalPaste } from '@/common/utils/clipboard';
 import { NavbarModelSelector } from '@/standalone/navbar/ModelSelector';
+import { AgentOptionsSelector } from './AgentOptionsSelector';
 import { useNavbarStyles } from '@tarko/ui';
 
 interface ChatInputProps {
@@ -411,34 +412,40 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               rows={2}
             />
 
-            {/* File upload button */}
-            {showAttachments && (
-              <div className="absolute left-3 bottom-3 flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleFileUpload}
-                  disabled={isDisabled || isProcessing}
-                  className={`p-2 rounded-full transition-all duration-200 hover:scale-105 active:scale-95 ${
-                    isDisabled || isProcessing
-                      ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
-                      : 'text-gray-400 hover:text-accent-500 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:text-gray-400'
-                  }`}
-                  title="Attach image (or paste directly)"
-                >
-                  <FiImage size={18} />
-                </button>
+            {/* Left side controls */}
+            <div className="absolute left-3 bottom-3 flex items-center gap-2">
+              {/* File upload button */}
+              {showAttachments && (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleFileUpload}
+                    disabled={isDisabled || isProcessing}
+                    className={`p-2 rounded-full transition-all duration-200 hover:scale-105 active:scale-95 ${
+                      isDisabled || isProcessing
+                        ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
+                        : 'text-gray-400 hover:text-accent-500 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:text-gray-400'
+                    }`}
+                    title="Attach image (or paste directly)"
+                  >
+                    <FiImage size={18} />
+                  </button>
 
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                  disabled={isDisabled || isProcessing}
-                />
-              </div>
-            )}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    disabled={isDisabled || isProcessing}
+                  />
+                </>
+              )}
+
+              {/* Agent Options Selector */}
+              <AgentOptionsSelector activeSessionId={sessionId} sessionMetadata={sessionMetadata} />
+            </div>
 
             {/* Action buttons */}
             <AnimatePresence mode="wait">
