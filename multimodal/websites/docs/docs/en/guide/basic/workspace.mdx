@@ -30,111 +30,143 @@ Assuming the current directory is the [UI-TARS-desktop](https://github.com/byted
 ![](/list-files-custom-workspace.png)
 
 
-## Global Workspace
+## Manual Configuration Management
 
-Since Agent TARS is typically installed globally, Agent TARS also offers a convenient way to manage Config and File System through a unified Global Workspace in the global installation usage mode.
+For consistent configuration across projects, you can manually manage configuration files using several approaches:
 
-The Global Workspace will be created in `~/.agent-tars-workspace` to store your Config and project files.
+### Project-Specific Configuration
 
-### Creating a Global Workspace
-
-To initialize a new Agent TARS workspace:
-
-```bash
-agent-tars workspace --init
-```
-
-This will start an interactive creation process:
-
-<VideoPanel
-  src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/create-workspace.mp4"
-  loop
-  autoPlay
-/>
-
-We recommend using TypeScript to maintain your configuration, which will give you the additional benefits of auto-completion and type checking:
+Create configuration files directly in your project directories:
 
 ```typescript
-// ~/.agent-tars-workspace/agent-tars.config.ts
-import { defineConfig } from '@agent-tars/interface';
+// ./tarko.config.ts
+import { AgentAppConfig } from '@tarko/interface';
 
-export default defineConfig({
+const config: AgentAppConfig = {
   model: {
     provider: 'openai',
     id: 'gpt-4o',
-    apiKey: 'your-api-key', // Using environment variables is better
+    apiKey: process.env.OPENAI_API_KEY, // Using environment variables is recommended
   },
-});
+};
+
+export default config;
 ```
 
----
+### Shared Configuration Files
 
-### Effects of Global Workspace
-
-When you've created a Global Workspace, the specific effects regardless of which directory you run `agent-tars` from are:
-
-1. The Config File in the Global Workspace will take effect;
-2. The Agent's `workspace` will be set to `~/.agent-tars-workspace`;
-3. The File System will point to the Global Workspace, meaning files output by the LLM through the File tool will be in this directory;
-4. Some capabilities in the Agent TARS CLI that depend on the File System will also point to this directory, such as Snapshot.
-
-You can customize the configuration through the configuration file in the Global Workspace:
-
-- `agent-tars.config.ts` (TypeScript, recommended)
-- `agent-tars.config.json` (JSON)
-- `agent-tars.config.yaml` (YAML)
-
----
-
-### Open the Global Workspace
-
-To open your workspace in Visual Studio Code:
+Create a shared configuration file and reference it using the `--config` flag:
 
 ```bash
-agent-tars workspace --open
+# Create shared config
+mkdir -p ~/configs
+cat > ~/configs/tarko.config.ts << 'EOF'
+import { AgentAppConfig } from '@tarko/interface';
+
+const config: AgentAppConfig = {
+  model: {
+    provider: 'openai',
+    id: 'gpt-4o',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+};
+
+export default config;
+EOF
+
+# Use shared config
+tarko --config ~/configs/tarko.config.ts
 ```
 
-If VS Code is installed, this will launch VS Code and open your workspace folder. If VS Code is not available, the CLI will provide instructions on how to open the workspace manually.
+### Environment Variables
 
----
-
-### Disable the Global Workspace
-
-If you don't want to rely on the Global Workspace configuration for a particular use, you can choose to temporarily disable it:
+Set up environment variables for consistent model provider credentials:
 
 ```bash
-agent-tars workspace --disable
+# Add to your shell profile (.bashrc, .zshrc, etc.)
+export OPENAI_API_KEY="your-api-key"
+export ANTHROPIC_API_KEY="your-anthropic-key"
+
+# Use environment variables in config
+tarko --model.provider openai --model.apiKey $OPENAI_API_KEY
+```
+
+### CLI Configuration Overrides
+
+Override specific settings per execution:
+
+```bash
+# Override model provider
+tarko --model.provider anthropic --model.id claude-3-5-sonnet-20241022
+
+# Override workspace
+tarko --workspace ./my-project-workspace
+
+# Combine multiple overrides
+tarko --workspace ./data --model.provider openai --model.id gpt-4
 ```
 
 ## FAQ
 
-### Can I have multiple workspaces?
+### Can I have multiple configurations?
 
-The `workspace` command creates a global workspace in `~/.agent-tars-workspace`. While you can only have one global workspace, you can create and use different configurations in different project folders by simply specifying the `--workspace` option when running other commands.
+Yes! You can create different configuration files for different projects or use cases:
+
+- **Project-specific**: Create `tarko.config.{ts,yaml,json}` in each project directory
+- **Shared configs**: Create multiple config files and reference them with `--config`
+- **Environment-based**: Use environment variables to switch between different setups
 
 ### How do I update my configuration?
 
-Simply edit the configuration file in your workspace directory using any text editor. If you're using TypeScript, make sure to install any necessary dependencies first.
+Simply edit the configuration file using any text editor. If you're using TypeScript, make sure to install any necessary dependencies first:
 
-### Can I share my workspace with others?
+```bash
+npm install @tarko/interface
+```
 
-Yes! A workspace is just a folder containing configuration files. You can share it using Git or any other version control system. Just make sure to exclude files containing sensitive information like API keys.
+### Can I share my configuration with others?
 
-### What happens if I delete my workspace?
+Yes! Configuration files can be shared using Git or any other version control system. Just make sure to:
 
-You can always recreate your workspace by running `agent-tars workspace --init` again. However, any configurations or files in the workspace will be lost, so make sure to back up important files.
+- Use environment variables for sensitive information like API keys
+- Document required environment variables in your README
+- Consider creating a template config file for others to copy
 
 ### How do I specify different API keys or model providers?
 
-You can:
+You have several options:
 
-1. Edit your workspace configuration file
-2. Use command line options to override settings when running commands:
-
+1. **Environment variables** (recommended):
 ```bash
-agent-tars --model.provider openai --model.apiKey YOUR_API_KEY
+export OPENAI_API_KEY="your-key"
+tarko --model.provider openai
 ```
 
-### How do I use workspaces in CI/CD pipelines?
+2. **CLI overrides**:
+```bash
+tarko --model.provider openai --model.apiKey YOUR_API_KEY
+```
 
-For continuous integration environments, we recommend creating a specific workspace directory in your project and explicitly specifying it with `--workspace` rather than relying on the global workspace.
+3. **Config file**:
+```typescript
+// tarko.config.ts
+export default {
+  model: {
+    provider: 'openai',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+};
+```
+
+### How do I use configurations in CI/CD pipelines?
+
+For continuous integration environments:
+
+1. **Create project-specific config**: Add `tarko.config.{ts,yaml,json}` to your repository
+2. **Use environment variables**: Set API keys and other secrets as CI environment variables
+3. **Explicit workspace**: Always specify `--workspace` to control file operations
+
+```bash
+# Example CI command
+tarko --workspace ./ci-workspace --model.apiKey $CI_OPENAI_API_KEY
+```

@@ -93,15 +93,7 @@ Direct **LLM requests** for debugging and testing.
 tarko request --provider openai --model gpt-4 --body '{"messages":[{"role":"user","content":"Hello"}]}'
 ```
 
-### `tarko workspace`
 
-**Workspace management** utilities.
-
-```bash
-tarko workspace --init     # Initialize workspace
-tarko workspace --open     # Open in VSCode
-tarko workspace --status   # Show status
-```
 
 ## Configuration
 
@@ -151,6 +143,26 @@ tarko --debug
 3. **User config file** (`--config`)
 4. **Remote config URL**
 5. **Default config** (lowest)
+
+### Manual Configuration Management
+
+For consistent configuration across projects, you can:
+
+1. **Project-specific config**: Create `tarko.config.{ts,yaml,json}` in your project directory
+2. **Shared config**: Use `--config` to specify a shared configuration file
+3. **Environment variables**: Set model provider credentials via environment variables
+4. **CLI overrides**: Use CLI flags to override specific settings per execution
+
+```bash
+# Use project config
+cd my-project && tarko
+
+# Use shared config file
+tarko --config ~/shared/tarko.config.ts
+
+# Override via CLI
+tarko --model.provider openai --model.apiKey $OPENAI_API_KEY
+```
 
 ## Custom Development
 
