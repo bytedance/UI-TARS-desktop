@@ -138,40 +138,30 @@ export const TerminalRenderer: React.FC<TerminalRendererProps> = ({
 
               {/* Arguments section */}
               {argumentsJson && (
-                <>
-                  <div className="px-3 py-1 border-b border-gray-800">
-                    <span className="text-gray-400 text-xs font-medium">Arguments:</span>
-                  </div>
-                  <div className="[&_.code-editor-container]:!bg-transparent [&_.code-editor-wrapper]:!bg-transparent [&_.code-editor-content]:!bg-transparent [&_.code-editor-pre]:!bg-transparent [&_.code-editor-header]:hidden [&_.code-editor-status-bar]:hidden">
-                    <CodeEditor
-                      code={argumentsJson}
-                      fileName="arguments.json"
-                      readOnly={true}
-                      showLineNumbers={false}
-                      maxHeight="200px"
-                      className="border-0 rounded-none"
-                    />
-                  </div>
-                </>
+                <div className="p-3 [&_.code-editor-container]:!bg-transparent [&_.code-editor-wrapper]:!bg-transparent [&_.code-editor-content]:!bg-transparent [&_.code-editor-pre]:!bg-transparent [&_.code-editor-header]:hidden [&_.code-editor-status-bar]:hidden">
+                  <CodeEditor
+                    code={argumentsJson}
+                    fileName="arguments.json"
+                    readOnly={true}
+                    showLineNumbers={false}
+                    maxHeight="200px"
+                    className="border-0 rounded-none"
+                  />
+                </div>
               )}
-              
+
               {/* Output section */}
               {output && (
-                <>
-                  <div className="px-3 py-1 border-b border-gray-800">
-                    <span className="text-gray-400 text-xs font-medium">Output:</span>
-                  </div>
-                  <div className="[&_.code-editor-container]:!bg-transparent [&_.code-editor-wrapper]:!bg-transparent [&_.code-editor-content]:!bg-transparent [&_.code-editor-pre]:!bg-transparent [&_.code-editor-header]:hidden [&_.code-editor-status-bar]:hidden">
-                    <CodeEditor
-                      code={output}
-                      fileName="output.json"
-                      readOnly={true}
-                      showLineNumbers={false}
-                      maxHeight="calc(100vh - 300px)"
-                      className="border-0 rounded-none"
-                    />
-                  </div>
-                </>
+                <div className="p-3 [&_.code-editor-container]:!bg-transparent [&_.code-editor-wrapper]:!bg-transparent [&_.code-editor-content]:!bg-transparent [&_.code-editor-pre]:!bg-transparent [&_.code-editor-header]:hidden [&_.code-editor-status-bar]:hidden">
+                  <CodeEditor
+                    code={output}
+                    fileName="output.json"
+                    readOnly={true}
+                    showLineNumbers={false}
+                    maxHeight="calc(100vh - 300px)"
+                    className="border-0 rounded-none"
+                  />
+                </div>
               )}
             </div>
           </div>
