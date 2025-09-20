@@ -10,26 +10,38 @@ export function NotFoundLayout() {
   }
 
   return (
-    <div className="not-found-container">
-      <div className="not-found-content">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-8">
+      <div className="text-center max-w-2xl w-full">
         {/* Large 404 number with elegant styling */}
-        <div className="not-found-number">
-          <span className="number-4-1">4</span>
-          <span className="number-0">0</span>
-          <span className="number-4-2">4</span>
+        <div className="flex justify-center items-center mb-4 font-extrabold leading-none tracking-tight">
+          <span className="text-8xl md:text-9xl lg:text-[12rem] text-slate-800 dark:text-slate-100 drop-shadow-sm">
+            4
+          </span>
+          <span className="text-8xl md:text-9xl lg:text-[12rem] text-slate-500 dark:text-slate-400 opacity-60 -mx-2">
+            0
+          </span>
+          <span className="text-8xl md:text-9xl lg:text-[12rem] text-slate-800 dark:text-slate-100 drop-shadow-sm">
+            4
+          </span>
         </div>
 
         {/* Subtitle */}
-        <div className="not-found-subtitle">PAGE NOT FOUND</div>
+        <div className="text-sm font-semibold tracking-[0.2em] text-slate-500 dark:text-slate-400 mb-12 uppercase">
+          PAGE NOT FOUND
+        </div>
 
         {/* Main content */}
-        <div className="not-found-main">
-          <h1 className="not-found-title">{t('not-found.title')}</h1>
-          <p className="not-found-description">{t('not-found.description')}</p>
+        <div className="mb-12">
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-4 leading-tight">
+            {t('not-found.title')}
+          </h1>
+          <p className="text-base text-slate-600 dark:text-slate-300 leading-relaxed max-w-md mx-auto">
+            {t('not-found.description')}
+          </p>
         </div>
 
         {/* Action buttons */}
-        <div className="not-found-actions">
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center mb-12">
           <ActionCard
             title={t('not-found.github')}
             description={t('not-found.github-desc')}
@@ -50,162 +62,15 @@ export function NotFoundLayout() {
         </div>
 
         {/* Take me home link */}
-        <div className="not-found-home">
-          <a href="/" className="home-link">
+        <div className="border-t border-slate-200 dark:border-slate-700 pt-8">
+          <a 
+            href="/" 
+            className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 no-underline font-medium text-sm transition-all duration-200 px-4 py-2 rounded-lg border border-transparent hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-200 dark:hover:border-blue-800"
+          >
             Take me home
           </a>
         </div>
       </div>
-
-      <style jsx>{`
-        .not-found-container {
-          min-height: 100vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-          padding: 2rem;
-        }
-
-        .dark .not-found-container {
-          background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-        }
-
-        .not-found-content {
-          text-align: center;
-          max-width: 600px;
-          width: 100%;
-        }
-
-        .not-found-number {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          margin-bottom: 1rem;
-          font-weight: 800;
-          line-height: 1;
-          letter-spacing: -0.05em;
-        }
-
-        .number-4-1,
-        .number-4-2 {
-          font-size: clamp(6rem, 15vw, 12rem);
-          color: #1e293b;
-          text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .dark .number-4-1,
-        .dark .number-4-2 {
-          color: #f1f5f9;
-          text-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
-        }
-
-        .number-0 {
-          font-size: clamp(6rem, 15vw, 12rem);
-          color: #64748b;
-          margin: 0 -0.5rem;
-          opacity: 0.6;
-        }
-
-        .dark .number-0 {
-          color: #94a3b8;
-        }
-
-        .not-found-subtitle {
-          font-size: 0.875rem;
-          font-weight: 600;
-          letter-spacing: 0.2em;
-          color: #64748b;
-          margin-bottom: 3rem;
-          text-transform: uppercase;
-        }
-
-        .dark .not-found-subtitle {
-          color: #94a3b8;
-        }
-
-        .not-found-main {
-          margin-bottom: 3rem;
-        }
-
-        .not-found-title {
-          font-size: 1.5rem;
-          font-weight: 700;
-          color: #1e293b;
-          margin-bottom: 1rem;
-          line-height: 1.4;
-        }
-
-        .dark .not-found-title {
-          color: #f1f5f9;
-        }
-
-        .not-found-description {
-          font-size: 1rem;
-          color: #64748b;
-          line-height: 1.6;
-          max-width: 480px;
-          margin: 0 auto;
-        }
-
-        .dark .not-found-description {
-          color: #94a3b8;
-        }
-
-        .not-found-actions {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-          margin-bottom: 3rem;
-        }
-
-        @media (min-width: 640px) {
-          .not-found-actions {
-            flex-direction: row;
-            justify-content: center;
-            gap: 1.5rem;
-          }
-        }
-
-        .not-found-home {
-          border-top: 1px solid #e2e8f0;
-          padding-top: 2rem;
-        }
-
-        .dark .not-found-home {
-          border-top-color: #334155;
-        }
-
-        .home-link {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.5rem;
-          color: #3b82f6;
-          text-decoration: none;
-          font-weight: 500;
-          font-size: 0.875rem;
-          transition: all 0.2s ease;
-          padding: 0.5rem 1rem;
-          border-radius: 0.5rem;
-          border: 1px solid transparent;
-        }
-
-        .home-link:hover {
-          color: #2563eb;
-          background-color: #eff6ff;
-          border-color: #dbeafe;
-        }
-
-        .dark .home-link {
-          color: #60a5fa;
-        }
-
-        .dark .home-link:hover {
-          color: #93c5fd;
-          background-color: #1e3a8a;
-          border-color: #1d4ed8;
-        }
-      `}</style>
     </div>
   );
 }
