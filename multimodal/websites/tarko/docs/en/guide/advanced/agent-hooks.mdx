@@ -1,673 +1,440 @@
 ---
 title: Agent Hooks
-description: Extend and customize agent behavior with powerful hook system
+description: Extend and customize agent behavior with lifecycle hooks
 ---
 
 # Agent Hooks
 
-Tarko's **Agent Hooks** system provides powerful extension points throughout the agent lifecycle, allowing you to customize behavior, add monitoring, implement custom logic, and integrate with external systems.
+Tarko's **Agent Hooks** system provides extension points throughout the agent lifecycle, allowing you to customize behavior, add monitoring, implement custom logic, and integrate with external systems.
 
 ## Overview
 
-Agent Hooks are callback functions that execute at specific points during agent operation:
+Agent Hooks are callback methods that execute at specific points during agent operation. All hooks are defined in the `BaseAgent` class and can be overridden in custom agent implementations:
 
-- **Lifecycle Hooks**: Agent startup, shutdown, session management
-- **Message Hooks**: Before/after message processing
-- **Tool Hooks**: Tool call execution and result processing
-- **Context Hooks**: Context engineering operations
-- **Error Hooks**: Error handling and recovery
+- **LLM Hooks**: Request/response interception and modification
+- **Tool Hooks**: Tool call execution lifecycle management
+- **Loop Hooks**: Agent loop iteration control and monitoring
+- **Termination Hooks**: Custom completion criteria enforcement
+- **Request Preparation**: Dynamic system prompt and tool modification
 
-## Basic Hook Usage
+## Core Hook Categories
 
-### Defining Hooks
+### LLM Communication Hooks
+
+Intercept and monitor LLM requests and responses:
 
 ```typescript
-import { Agent } from '@tarko/agent';
+import { Agent, BaseAgent } from '@tarko/agent';
 
-const agent = new Agent({
-  hooks: {
-    // Lifecycle hooks
-    onStart: async (agent) => {
-      console.log('Agent started:', agent.name);
-    },
+class MonitoringAgent extends BaseAgent {
+  // Called before each LLM request
+  override async onLLMRequest(id: string, payload: LLMRequestHookPayload) {
+    console.log(`[${id}] Sending request to ${payload.model}`);
+    console.log('Messages count:', payload.messages.length);
     
-    onStop: async (agent) => {
-      console.log('Agent stopped:', agent.name);
-    },
+    // Log token usage estimates
+    const tokenEstimate = this.estimateTokens(payload.messages);
+    console.log('Estimated tokens:', tokenEstimate);
+  }
+  
+  // Called after each LLM response
+  override async onLLMResponse(id: string, payload: LLMResponseHookPayload) {
+    const response = payload.response;
+    console.log(`[${id}] Received response:`);
+    console.log('Usage:', response.usage);
+    console.log('Finish reason:', response.choices[0]?.finish_reason);
     
-    // Message hooks
-    beforeMessage: async (message, context) => {
-      console.log('Processing message:', message.content);
-      return message; // Return modified message or original
-    },
-    
-    afterMessage: async (message, response, context) => {
-      console.log('Message processed. Response length:', response.length);
-    },
-    
-    // Tool hooks
-    beforeToolCall: async (toolCall, context) => {
-      console.log('Calling tool:', toolCall.function.name);
-      return toolCall; // Can modify tool call
-    },
-    
-    afterToolCall: async (toolCall, result, context) => {
-      console.log('Tool completed:', toolCall.function.name, 'Success:', result.success);
+    // Log tool calls if present
+    const toolCalls = response.choices[0]?.message?.tool_calls;
+    if (toolCalls?.length) {
+      console.log('Tool calls:', toolCalls.map(tc => tc.function.name));
     }
   }
-});
-```
-
-### Hook Context
-
-All hooks receive a context object with useful information:
-
-```typescript
-interface HookContext {
-  agent: Agent;
-  sessionId: string;
-  messages: Message[];
-  agentState: any;
-  user?: UserInfo;
-  metadata: Record<string, any>;
   
-  // Utility methods
-  emit: (event: AgentEvent) => void;
-  getState: (key: string) => any;
-  setState: (key: string, value: any) => void;
-  callTool: (name: string, args: any) => Promise<any>;
+  // Called during streaming responses
+  override onLLMStreamingResponse(id: string, payload: LLMStreamingResponseHookPayload) {
+    // Monitor streaming chunks in real-time
+    const chunks = payload.chunks;
+    console.log(`[${id}] Received ${chunks.length} streaming chunks`);
+  }
 }
 ```
 
-## Lifecycle Hooks
+### Tool Execution Hooks
 
-### Agent Lifecycle
+Monitor and control tool call execution:
 
 ```typescript
-const agent = new Agent({
-  hooks: {
-    // Called when agent starts
-    onStart: async (agent) => {
-      console.log(`Agent ${agent.name} starting...`);
-      
-      // Initialize external services
-      await initializeDatabase();
-      await connectToMetrics();
-      
-      // Set initial state
-      agent.setState('startTime', Date.now());
-    },
+class ToolMonitoringAgent extends BaseAgent {
+  private toolUsageStats = new Map<string, number>();
+  
+  // Called before each tool execution
+  override async onBeforeToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    args: any
+  ) {
+    console.log(`[${id}] Executing tool: ${toolCall.name}`);
+    console.log('Arguments:', JSON.stringify(args, null, 2));
     
-    // Called when agent stops
-    onStop: async (agent) => {
-      const startTime = agent.getState('startTime');
-      const uptime = Date.now() - startTime;
-      
-      console.log(`Agent ${agent.name} stopping. Uptime: ${uptime}ms`);
-      
-      // Cleanup resources
-      await closeDatabase();
-      await disconnectFromMetrics();
-    },
+    // Track tool usage
+    const currentCount = this.toolUsageStats.get(toolCall.name) || 0;
+    this.toolUsageStats.set(toolCall.name, currentCount + 1);
     
-    // Called on agent errors
-    onError: async (error, context) => {
-      console.error('Agent error:', error.message);
-      
-      // Send error to monitoring service
-      await sendErrorToMonitoring(error, context);
-      
-      // Attempt recovery
-      if (error.recoverable) {
-        await attemptRecovery(error, context);
-      }
+    // Validate arguments or apply rate limiting
+    if (toolCall.name === 'expensive_api' && currentCount >= 5) {
+      throw new Error('Rate limit exceeded for expensive_api');
     }
-  }
-});
-```
-
-### Session Lifecycle
-
-```typescript
-const agent = new Agent({
-  hooks: {
-    // Called when new session starts
-    onSessionStart: async (sessionId, context) => {
-      console.log('New session started:', sessionId);
-      
-      // Initialize session-specific data
-      context.setState('sessionStartTime', Date.now());
-      context.setState('messageCount', 0);
-      
-      // Load user preferences
-      const user = await loadUserPreferences(context.user?.id);
-      context.setState('userPreferences', user);
-    },
     
-    // Called when session ends
-    onSessionEnd: async (sessionId, context) => {
-      const startTime = context.getState('sessionStartTime');
-      const messageCount = context.getState('messageCount');
-      const duration = Date.now() - startTime;
-      
-      console.log(`Session ${sessionId} ended. Duration: ${duration}ms, Messages: ${messageCount}`);
-      
-      // Save session analytics
-      await saveSessionAnalytics({
-        sessionId,
-        duration,
-        messageCount,
-        userId: context.user?.id
-      });
+    // Return potentially modified args
+    return args;
+  }
+  
+  // Called after each tool execution
+  override async onAfterToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    result: any
+  ) {
+    console.log(`[${id}] Tool ${toolCall.name} completed`);
+    console.log('Result type:', typeof result);
+    
+    // Log errors or successful results
+    if (result?.error) {
+      console.error('Tool execution failed:', result.error);
+    } else {
+      console.log('Tool execution successful');
     }
+    
+    // Return potentially modified result
+    return result;
   }
-});
-```
-
-## Message Processing Hooks
-
-### Message Transformation
-
-```typescript
-const agent = new Agent({
-  hooks: {
-    // Preprocess user messages
-    beforeMessage: async (message, context) => {
-      // Add timestamp
-      message.timestamp = Date.now();
-      
-      // Content filtering
-      if (containsInappropriateContent(message.content)) {
-        throw new Error('Message contains inappropriate content');
-      }
-      
-      // Language detection
-      const language = detectLanguage(message.content);
-      message.metadata = { ...message.metadata, language };
-      
-      // Increment message counter
-      const count = context.getState('messageCount') || 0;
-      context.setState('messageCount', count + 1);
-      
-      return message;
-    },
+  
+  // Called when tool execution fails
+  override async onToolCallError(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    error: any
+  ) {
+    console.error(`[${id}] Tool ${toolCall.name} failed:`, error);
     
-    // Process assistant responses
-    afterMessage: async (userMessage, assistantResponse, context) => {
-      // Log conversation
-      await logConversation({
-        sessionId: context.sessionId,
-        userMessage: userMessage.content,
-        assistantResponse,
-        timestamp: Date.now()
-      });
-      
-      // Update user engagement metrics
-      await updateEngagementMetrics(context.user?.id, {
-        messageLength: userMessage.content.length,
-        responseLength: assistantResponse.length,
-        responseTime: Date.now() - userMessage.timestamp
-      });
-    },
-    
-    // Handle streaming responses
-    onMessageDelta: async (delta, accumulated, context) => {
-      // Real-time content filtering
-      if (containsInappropriateContent(accumulated)) {
-        context.emit({
-          type: 'content_filter_triggered',
-          data: { reason: 'inappropriate_content' }
-        });
-        
-        // Stop streaming
-        return { stop: true };
-      }
-      
-      // Real-time translation for international users
-      if (context.user?.language !== 'en') {
-        const translatedDelta = await translateText(delta, context.user.language);
-        return { delta: translatedDelta };
-      }
-      
-      return { delta };
+    // Implement retry logic or error transformation
+    if (error.message?.includes('timeout')) {
+      return 'Tool execution timed out. Please try again later.';
     }
-  }
-});
-```
-
-## Tool Execution Hooks
-
-### Tool Call Monitoring
-
-```typescript
-const agent = new Agent({
-  hooks: {
-    // Before tool execution
-    beforeToolCall: async (toolCall, context) => {
-      const startTime = Date.now();
-      
-      // Log tool usage
-      console.log(`Executing tool: ${toolCall.function.name}`);
-      console.log('Arguments:', toolCall.function.arguments);
-      
-      // Check permissions
-      if (!hasToolPermission(context.user, toolCall.function.name)) {
-        throw new Error(`User does not have permission to use ${toolCall.function.name}`);
-      }
-      
-      // Rate limiting
-      const toolUsage = context.getState(`tool_usage_${toolCall.function.name}`) || [];
-      const recentUsage = toolUsage.filter(time => Date.now() - time < 60000); // Last minute
-      
-      if (recentUsage.length >= 10) {
-        throw new Error(`Rate limit exceeded for ${toolCall.function.name}`);
-      }
-      
-      // Update usage tracking
-      recentUsage.push(startTime);
-      context.setState(`tool_usage_${toolCall.function.name}`, recentUsage);
-      context.setState(`tool_start_${toolCall.id}`, startTime);
-      
-      // Emit monitoring event
-      context.emit({
-        type: 'tool_execution_start',
-        data: {
-          toolName: toolCall.function.name,
-          arguments: toolCall.function.arguments,
-          startTime
-        }
-      });
-      
-      return toolCall;
-    },
     
-    // After tool execution
-    afterToolCall: async (toolCall, result, context) => {
-      const startTime = context.getState(`tool_start_${toolCall.id}`);
-      const duration = Date.now() - startTime;
-      
-      // Log execution results
-      console.log(`Tool ${toolCall.function.name} completed in ${duration}ms`);
-      console.log('Success:', result.success);
-      
-      // Record metrics
-      await recordToolMetrics({
-        toolName: toolCall.function.name,
-        duration,
-        success: result.success,
-        userId: context.user?.id,
-        sessionId: context.sessionId
-      });
-      
-      // Handle errors
-      if (!result.success) {
-        await handleToolError({
-          toolName: toolCall.function.name,
-          error: result.error,
-          arguments: toolCall.function.arguments,
-          context
-        });
-      }
-      
-      // Emit completion event
-      context.emit({
-        type: 'tool_execution_complete',
-        data: {
-          toolName: toolCall.function.name,
-          duration,
-          success: result.success,
-          resultLength: result.content?.length || 0
-        }
-      });
-    },
-    
-    // Handle tool errors
-    onToolError: async (error, toolCall, context) => {
-      console.error(`Tool ${toolCall.function.name} failed:`, error.message);
-      
-      // Attempt automatic retry for transient errors
-      if (isTransientError(error) && !toolCall.retryAttempt) {
-        console.log('Retrying tool call...');
-        
-        // Mark as retry attempt
-        toolCall.retryAttempt = true;
-        
-        // Retry after delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        return { retry: true };
-      }
-      
-      // Log persistent failures
-      await logToolFailure({
-        toolName: toolCall.function.name,
-        error: error.message,
-        arguments: toolCall.function.arguments,
-        sessionId: context.sessionId
-      });
-      
-      return { retry: false };
-    }
+    return `Error: ${error.message || error}`;
   }
-});
-```
-
-## Context Engineering Hooks
-
-### Context Management
-
-```typescript
-const agent = new Agent({
-  hooks: {
-    // Before context compression
-    beforeContextCompression: async (context, messages) => {
-      console.log(`Compressing context: ${messages.length} messages`);
-      
-      // Save full context before compression
-      await saveContextSnapshot({
-        sessionId: context.sessionId,
-        messages,
-        timestamp: Date.now()
-      });
-      
-      // Custom importance scoring
-      return messages.map(message => ({
-        ...message,
-        importance: calculateImportanceScore(message, context)
+  
+  // Override tool call processing entirely
+  override async onProcessToolCalls(
+    id: string,
+    toolCalls: ChatCompletionMessageToolCall[]
+  ) {
+    // Return undefined to execute tools normally
+    // Return ToolCallResult[] to skip normal execution
+    
+    // Example: Mock tool execution for testing
+    if (process.env.NODE_ENV === 'test') {
+      return toolCalls.map(tc => ({
+        toolCallId: tc.id,
+        result: `Mocked result for ${tc.function.name}`,
+        success: true
       }));
-    },
-    
-    // After context compression
-    afterContextCompression: async (originalMessages, compressedMessages, context) => {
-      const compressionRatio = compressedMessages.length / originalMessages.length;
-      
-      console.log(`Context compressed: ${originalMessages.length} → ${compressedMessages.length} (${(compressionRatio * 100).toFixed(1)}%)`);
-      
-      // Log compression metrics
-      await logCompressionMetrics({
-        sessionId: context.sessionId,
-        originalLength: originalMessages.length,
-        compressedLength: compressedMessages.length,
-        compressionRatio,
-        timestamp: Date.now()
-      });
-      
-      // Alert if compression ratio is too aggressive
-      if (compressionRatio < 0.3) {
-        console.warn('High compression ratio detected. Consider adjusting compression settings.');
-      }
-    },
-    
-    // Context limit reached
-    onContextLimitReached: async (context, messages) => {
-      console.warn('Context limit reached. Initiating emergency compression.');
-      
-      // Emergency context preservation
-      const criticalMessages = messages.filter(msg => 
-        msg.role === 'system' || 
-        msg.metadata?.critical === true
-      );
-      
-      await saveEmergencyContext({
-        sessionId: context.sessionId,
-        criticalMessages,
-        allMessages: messages,
-        timestamp: Date.now()
-      });
-      
-      // Emit alert
-      context.emit({
-        type: 'context_limit_alert',
-        data: {
-          messageCount: messages.length,
-          criticalMessageCount: criticalMessages.length
-        }
-      });
     }
+    
+    return undefined; // Execute tools normally
   }
-});
-```
-
-## Custom Hook Implementation
-
-### Plugin System
-
-```typescript
-// Define a plugin interface
-interface AgentPlugin {
-  name: string;
-  version: string;
-  hooks: Partial<AgentHooks>;
-  install?: (agent: Agent) => Promise<void>;
-  uninstall?: (agent: Agent) => Promise<void>;
 }
-
-// Analytics plugin
-const analyticsPlugin: AgentPlugin = {
-  name: 'analytics',
-  version: '1.0.0',
-  hooks: {
-    onSessionStart: async (sessionId, context) => {
-      await analytics.track('session_started', {
-        sessionId,
-        userId: context.user?.id,
-        timestamp: Date.now()
-      });
-    },
-    
-    afterMessage: async (userMessage, response, context) => {
-      await analytics.track('message_processed', {
-        sessionId: context.sessionId,
-        messageLength: userMessage.content.length,
-        responseLength: response.length,
-        timestamp: Date.now()
-      });
-    },
-    
-    afterToolCall: async (toolCall, result, context) => {
-      await analytics.track('tool_used', {
-        toolName: toolCall.function.name,
-        success: result.success,
-        sessionId: context.sessionId,
-        timestamp: Date.now()
-      });
-    }
-  },
-  
-  install: async (agent) => {
-    console.log('Analytics plugin installed');
-    await analytics.initialize(agent.config.analytics);
-  },
-  
-  uninstall: async (agent) => {
-    console.log('Analytics plugin uninstalled');
-    await analytics.cleanup();
-  }
-};
-
-// Use plugin
-const agent = new Agent({
-  plugins: [analyticsPlugin]
-});
 ```
 
-### Conditional Hooks
+### Loop Lifecycle Hooks
+
+Control agent loop iterations and termination:
 
 ```typescript
-const agent = new Agent({
-  hooks: {
-    // Development-only hooks
-    ...(process.env.NODE_ENV === 'development' && {
-      beforeMessage: async (message, context) => {
-        console.log('🔍 Debug - Processing message:', message.content);
-        return message;
-      },
-      
-      afterToolCall: async (toolCall, result, context) => {
-        console.log('🔧 Debug - Tool result:', {
-          tool: toolCall.function.name,
-          success: result.success,
-          resultLength: result.content?.length
-        });
-      }
-    }),
+class LoopControlAgent extends BaseAgent {
+  private iterationStartTimes = new Map<string, number>();
+  
+  // Called at the start of each loop iteration
+  override async onEachAgentLoopStart(sessionId: string) {
+    this.iterationStartTimes.set(sessionId, Date.now());
+    console.log(`[${sessionId}] Starting iteration ${this.getCurrentLoopIteration()}`);
     
-    // Production-only hooks
-    ...(process.env.NODE_ENV === 'production' && {
-      onError: async (error, context) => {
-        await sendErrorToSentry(error, {
-          sessionId: context.sessionId,
-          userId: context.user?.id,
-          agentName: context.agent.name
-        });
-      }
-    }),
-    
-    // User-specific hooks
-    beforeMessage: async (message, context) => {
-      // Premium user features
-      if (context.user?.tier === 'premium') {
-        message.metadata = {
-          ...message.metadata,
-          priority: 'high',
-          features: ['advanced_tools', 'priority_processing']
-        };
-      }
-      
-      return message;
-    }
+    // Inject additional context or perform setup
+    const currentTime = new Date().toISOString();
+    console.log(`Current time: ${currentTime}`);
   }
-});
+  
+  // Called at the end of each loop iteration
+  override async onEachAgentLoopEnd(context: EachAgentLoopEndContext) {
+    const startTime = this.iterationStartTimes.get(context.sessionId);
+    if (startTime) {
+      const duration = Date.now() - startTime;
+      console.log(`[${context.sessionId}] Iteration completed in ${duration}ms`);
+    }
+    
+    // Log iteration results
+    console.log('Events in this iteration:', context.events?.length || 0);
+    console.log('Tool calls made:', context.toolCallResults?.length || 0);
+  }
+  
+  // Called when the entire agent loop ends
+  override async onAgentLoopEnd(id: string) {
+    console.log(`[${id}] Agent loop completed`);
+    console.log('Total iterations:', this.getCurrentLoopIteration());
+    
+    // Cleanup iteration tracking
+    this.iterationStartTimes.delete(id);
+    
+    // Call parent implementation
+    await super.onAgentLoopEnd(id);
+  }
+}
 ```
 
 ## Advanced Hook Patterns
 
-### Hook Composition
+### Enforcing Completion Criteria
+
+Use `onBeforeLoopTermination` to enforce specific completion requirements:
 
 ```typescript
-// Compose multiple hooks
-function composeHooks<T extends (...args: any[]) => any>(
-  ...hooks: T[]
-): T {
-  return ((...args: Parameters<T>) => {
-    return hooks.reduce(async (prev, hook) => {
-      await prev;
-      return hook(...args);
-    }, Promise.resolve());
-  }) as T;
+class ValidatingAgent extends BaseAgent {
+  private requiredToolsCalled = new Set<string>();
+  private requiredTools = ['gather_data', 'analyze_results', 'final_report'];
+  
+  constructor(options: AgentOptions) {
+    super({
+      ...options,
+      instructions: `${options.instructions || ''}
+
+You must call these tools in order: gather_data, analyze_results, final_report.
+Do not provide a final answer until all required tools have been called.`,
+    });
+  }
+  
+  override async onAfterToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    result: any
+  ) {
+    // Track required tool calls
+    if (this.requiredTools.includes(toolCall.name)) {
+      this.requiredToolsCalled.add(toolCall.name);
+      console.log(`Required tool called: ${toolCall.name}`);
+      console.log('Remaining:', this.requiredTools.filter(t => !this.requiredToolsCalled.has(t)));
+    }
+    
+    return await super.onAfterToolCall(id, toolCall, result);
+  }
+  
+  // Prevent termination until all required tools are called
+  override async onBeforeLoopTermination(
+    id: string,
+    finalEvent: AgentEventStream.AssistantMessageEvent
+  ): Promise<LoopTerminationCheckResult> {
+    const missingTools = this.requiredTools.filter(tool => 
+      !this.requiredToolsCalled.has(tool)
+    );
+    
+    if (missingTools.length > 0) {
+      console.log(`[${id}] Preventing termination. Missing tools:`, missingTools);
+      
+      // Inject a reminder message
+      const reminderEvent = this.getEventStream().createEvent('user_message', {
+        content: `Please call the following required tools before providing your final answer: ${missingTools.join(', ')}`
+      });
+      this.getEventStream().sendEvent(reminderEvent);
+      
+      return {
+        finished: false,
+        message: `Must call required tools: ${missingTools.join(', ')}`
+      };
+    }
+    
+    console.log(`[${id}] All required tools called. Allowing termination.`);
+    return { finished: true };
+  }
+  
+  override async onAgentLoopEnd(id: string) {
+    // Reset for next run
+    this.requiredToolsCalled.clear();
+    await super.onAgentLoopEnd(id);
+  }
 }
-
-const loggingHook = async (message: Message, context: HookContext) => {
-  console.log('Logging:', message.content);
-};
-
-const analyticsHook = async (message: Message, context: HookContext) => {
-  await analytics.track('message', { length: message.content.length });
-};
-
-const validationHook = async (message: Message, context: HookContext) => {
-  if (!message.content.trim()) {
-    throw new Error('Empty message not allowed');
-  }
-};
-
-const agent = new Agent({
-  hooks: {
-    beforeMessage: composeHooks(validationHook, loggingHook, analyticsHook)
-  }
-});
 ```
 
-### Async Hook Patterns
+### Dynamic Request Preparation
+
+Use `onPrepareRequest` to dynamically modify system prompts and available tools:
 
 ```typescript
-const agent = new Agent({
-  hooks: {
-    // Parallel execution
-    afterMessage: async (userMessage, response, context) => {
-      await Promise.all([
-        logToDatabase(userMessage, response, context),
-        sendToAnalytics(userMessage, response, context),
-        updateUserProfile(context.user, response),
-        generateSummary(context.sessionId, response)
-      ]);
-    },
+class AdaptiveAgent extends BaseAgent {
+  private userExpertiseLevel: 'beginner' | 'intermediate' | 'expert' = 'intermediate';
+  
+  override async onPrepareRequest(
+    context: PrepareRequestContext
+  ): Promise<PrepareRequestResult> {
+    // Modify system prompt based on context
+    let systemPrompt = context.systemPrompt;
     
-    // Sequential with error handling
-    beforeToolCall: async (toolCall, context) => {
-      try {
-        // Step 1: Validate permissions
-        await validatePermissions(toolCall, context.user);
-        
-        // Step 2: Check rate limits
-        await checkRateLimit(toolCall.function.name, context.user);
-        
-        // Step 3: Log usage
-        await logToolUsage(toolCall, context);
-        
-        return toolCall;
-      } catch (error) {
-        // Handle validation errors
-        context.emit({
-          type: 'tool_validation_failed',
-          data: { error: error.message, toolName: toolCall.function.name }
-        });
-        throw error;
+    // Add expertise-level specific instructions
+    switch (this.userExpertiseLevel) {
+      case 'beginner':
+        systemPrompt += '\n\nExplain concepts in simple terms and provide step-by-step guidance.';
+        break;
+      case 'expert':
+        systemPrompt += '\n\nProvide technical details and assume advanced knowledge.';
+        break;
+    }
+    
+    // Filter tools based on iteration count
+    let availableTools = context.tools;
+    const iteration = this.getCurrentLoopIteration();
+    
+    if (iteration === 1) {
+      // First iteration: only allow information gathering tools
+      availableTools = context.tools.filter(tool => 
+        tool.id.includes('search') || tool.id.includes('read')
+      );
+    } else if (iteration >= 5) {
+      // Later iterations: add analysis and reporting tools
+      availableTools = context.tools; // All tools available
+    }
+    
+    console.log(`Iteration ${iteration}: ${availableTools.length} tools available`);
+    
+    return {
+      systemPrompt,
+      tools: availableTools
+    };
+  }
+  
+  // Method to update user expertise level
+  setUserExpertiseLevel(level: 'beginner' | 'intermediate' | 'expert') {
+    this.userExpertiseLevel = level;
+    console.log(`User expertise level set to: ${level}`);
+  }
+}
+```
+
+### Error Handling and Recovery
+
+```typescript
+class ResilientAgent extends BaseAgent {
+  private errorCounts = new Map<string, number>();
+  private maxRetries = 3;
+  
+  override async onToolCallError(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    error: any
+  ) {
+    const errorKey = `${id}-${toolCall.name}`;
+    const currentCount = this.errorCounts.get(errorKey) || 0;
+    
+    console.error(`Tool ${toolCall.name} failed (attempt ${currentCount + 1}):`, error);
+    
+    // Implement retry logic
+    if (currentCount < this.maxRetries && this.isRetriableError(error)) {
+      this.errorCounts.set(errorKey, currentCount + 1);
+      
+      // Add delay before retry
+      await new Promise(resolve => setTimeout(resolve, 1000 * (currentCount + 1)));
+      
+      console.log(`Retrying ${toolCall.name} (attempt ${currentCount + 2})`);
+      return 'Retrying due to temporary error...';
+    }
+    
+    // Max retries exceeded or non-retriable error
+    this.errorCounts.delete(errorKey);
+    return `Tool ${toolCall.name} failed after ${currentCount + 1} attempts: ${error.message || error}`;
+  }
+  
+  private isRetriableError(error: any): boolean {
+    const errorMessage = error.message || error.toString();
+    return (
+      errorMessage.includes('timeout') ||
+      errorMessage.includes('network') ||
+      errorMessage.includes('503') ||
+      errorMessage.includes('502')
+    );
+  }
+  
+  override async onAgentLoopEnd(id: string) {
+    // Clear error counts for this session
+    for (const key of this.errorCounts.keys()) {
+      if (key.startsWith(id)) {
+        this.errorCounts.delete(key);
       }
     }
+    
+    await super.onAgentLoopEnd(id);
   }
-});
+}
+```
+
+## Hook Execution Order
+
+Understanding the hook execution sequence is crucial for proper implementation:
+
+```
+1. Agent.run() called
+2. onEachAgentLoopStart() - Start of iteration
+3. onPrepareRequest() - Prepare LLM request
+4. onLLMRequest() - Before sending to LLM
+5. onLLMResponse() / onLLMStreamingResponse() - After LLM response
+6. [If tool calls present]
+   a. onProcessToolCalls() - Override tool execution (optional)
+   b. For each tool call:
+      - onBeforeToolCall() - Before tool execution
+      - [Tool execution]
+      - onAfterToolCall() - After successful execution
+      - OR onToolCallError() - After failed execution
+7. onEachAgentLoopEnd() - End of iteration
+8. [If final answer ready]
+   a. onBeforeLoopTermination() - Check if should terminate
+   b. [If termination allowed] onAgentLoopEnd() - End of agent loop
+9. [Otherwise repeat from step 2]
 ```
 
 ## Testing Hooks
 
-### Unit Testing
+### Unit Testing Individual Hooks
 
 ```typescript
-import { createMockAgent, createMockContext } from '@tarko/agent/testing';
+import { BaseAgent, AgentOptions } from '@tarko/agent';
+
+class TestableAgent extends BaseAgent {
+  public hookCallLog: string[] = [];
+  
+  override async onLLMRequest(id: string, payload: any) {
+    this.hookCallLog.push(`onLLMRequest:${id}`);
+  }
+  
+  override async onBeforeToolCall(id: string, toolCall: any, args: any) {
+    this.hookCallLog.push(`onBeforeToolCall:${toolCall.name}`);
+    return args;
+  }
+}
 
 describe('Agent Hooks', () => {
-  let agent: Agent;
-  let mockContext: HookContext;
+  let agent: TestableAgent;
   
   beforeEach(() => {
-    agent = createMockAgent();
-    mockContext = createMockContext({
-      sessionId: 'test-session',
-      user: { id: 'test-user' }
-    });
+    agent = new TestableAgent({});
   });
   
-  it('should log messages before processing', async () => {
-    const logSpy = jest.spyOn(console, 'log');
+  it('should call hooks in correct order', async () => {
+    // Test hook execution order
+    await agent.onLLMRequest('test-session', { model: 'gpt-4', messages: [] });
+    await agent.onBeforeToolCall('test-session', { name: 'test-tool' }, {});
     
-    const hooks = {
-      beforeMessage: async (message: Message, context: HookContext) => {
-        console.log('Processing:', message.content);
-        return message;
-      }
-    };
-    
-    agent.setHooks(hooks);
-    
-    const message = { role: 'user', content: 'Hello' };
-    await agent.hooks.beforeMessage?.(message, mockContext);
-    
-    expect(logSpy).toHaveBeenCalledWith('Processing:', 'Hello');
-  });
-  
-  it('should handle hook errors gracefully', async () => {
-    const hooks = {
-      beforeMessage: async (message: Message, context: HookContext) => {
-        throw new Error('Hook error');
-      }
-    };
-    
-    agent.setHooks(hooks);
-    
-    const message = { role: 'user', content: 'Hello' };
-    
-    await expect(agent.hooks.beforeMessage?.(message, mockContext))
-      .rejects.toThrow('Hook error');
+    expect(agent.hookCallLog).toEqual([
+      'onLLMRequest:test-session',
+      'onBeforeToolCall:test-tool'
+    ]);
   });
 });
 ```
@@ -676,40 +443,19 @@ describe('Agent Hooks', () => {
 
 ```typescript
 describe('Hook Integration', () => {
-  it('should execute hooks in correct order', async () => {
-    const executionOrder: string[] = [];
-    
-    const agent = new Agent({
-      hooks: {
-        beforeMessage: async (message, context) => {
-          executionOrder.push('beforeMessage');
-          return message;
-        },
-        
-        beforeToolCall: async (toolCall, context) => {
-          executionOrder.push('beforeToolCall');
-          return toolCall;
-        },
-        
-        afterToolCall: async (toolCall, result, context) => {
-          executionOrder.push('afterToolCall');
-        },
-        
-        afterMessage: async (userMessage, response, context) => {
-          executionOrder.push('afterMessage');
-        }
-      },
-      tools: [testTool]
+  it('should prevent termination when required', async () => {
+    const agent = new ValidatingAgent({
+      tools: [/* required tools */]
     });
     
-    await agent.query('Use the test tool');
+    // Mock a scenario where not all required tools are called
+    const result = await agent.onBeforeLoopTermination(
+      'test-session',
+      { content: 'Final answer' } as any
+    );
     
-    expect(executionOrder).toEqual([
-      'beforeMessage',
-      'beforeToolCall', 
-      'afterToolCall',
-      'afterMessage'
-    ]);
+    expect(result.finished).toBe(false);
+    expect(result.message).toContain('Must call required tools');
   });
 });
 ```
@@ -718,30 +464,43 @@ describe('Hook Integration', () => {
 
 ### 1. Hook Design
 - Keep hooks focused and lightweight
-- Handle errors gracefully
+- Always call `super.hookMethod()` when overriding
+- Handle errors gracefully without breaking agent execution
 - Use async/await for asynchronous operations
-- Return modified data when appropriate
 
-### 2. Performance
+### 2. State Management
+- Store hook-specific state in instance variables
+- Clean up state in `onAgentLoopEnd`
+- Use session IDs to track per-conversation state
+
+### 3. Performance
 - Avoid blocking operations in critical hooks
-- Use Promise.all() for parallel operations
+- Use caching for expensive computations
 - Implement timeouts for external calls
-- Cache expensive computations
 
-### 3. Error Handling
-- Always handle hook errors
-- Provide fallback behavior
-- Log errors for debugging
-- Don't let hook errors break agent operation
+### 4. Error Handling
+- Always handle hook errors gracefully
+- Provide fallback behavior when possible
+- Log errors for debugging without exposing sensitive data
 
-### 4. Testing
+### 5. Testing
 - Unit test hooks in isolation
 - Test hook composition and ordering
 - Mock external dependencies
 - Test error scenarios
 
+## Real-World Examples
+
+See our [Examples](/examples/custom-hooks) section for complete implementations of:
+
+- Analytics and metrics collection
+- User permission enforcement
+- Rate limiting and quota management
+- Multi-step workflow validation
+- Error recovery and retry mechanisms
+
 ## Next Steps
 
-- [Examples](/examples/custom-hooks) - See real-world hook implementations
 - [Agent Protocol](/guide/advanced/agent-protocol) - Understand event handling in hooks
-- [Server](/guide/deployment/server) - Use hooks in server environments
+- [Tool Management](/guide/basic/tools) - Learn about tool registration and execution
+- [Context Engineering](/guide/advanced/context-engineering) - Advanced context management
