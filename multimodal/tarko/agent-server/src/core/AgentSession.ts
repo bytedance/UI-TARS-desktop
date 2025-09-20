@@ -465,6 +465,51 @@ export class AgentSession {
   }
 
   /**
+   * Insert environment input while agent is running
+   * @param content Environment input content
+   * @param description Optional description of the input
+   * @returns Promise resolving when environment input is inserted
+   */
+  async insertEnvironmentInput(
+    content: string | ChatCompletionContentPart[],
+    description?: string,
+  ): Promise<void> {
+    try {
+      // Create environment input event
+      const environmentInputEvent = this.agent.getEventStream().createEvent('environment_input', {
+        content,
+        description: description || 'User interrupt message during agent execution',
+        metadata: {
+          type: 'user_interrupt',
+        },
+      });
+
+      // Process the event through our handler for storage and AGIO
+      const handleEvent = this.createEventHandler();
+      await handleEvent(environmentInputEvent);
+
+      // Emit to client via event bridge
+      this.eventBridge.emit('environment_input', {
+        sessionId: this.id,
+        event: environmentInputEvent,
+      });
+
+      if (this.server.isDebug) {
+        console.log('[DEBUG] Environment input inserted', {
+          sessionId: this.id,
+          contentType: typeof content === 'string' ? 'string' : 'ContentPart',
+          description,
+        });
+      }
+    } catch (error) {
+      this.eventBridge.emit('error', {
+        message: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
+  }
+
+  /**
    * Store the updated model configuration for this session
    * The model will be used in subsequent queries via Agent.run() parameters
    * @param sessionInfo Updated session metadata with new model config
