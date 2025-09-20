@@ -120,7 +120,8 @@ export const TerminalRenderer: React.FC<TerminalRendererProps> = ({
     output && output.trim()
   ].filter(Boolean).join('\n\n');
   
-  const hasJsonContent = argumentsJson || (output && isValidJson(output));
+  // Always use JSON highlighting for better formatting
+  const hasJsonContent = true;
   
   return (
     <div className="space-y-4 md:text-base text-sm">
