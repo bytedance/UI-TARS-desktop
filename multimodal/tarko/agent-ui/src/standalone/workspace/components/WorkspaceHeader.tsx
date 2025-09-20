@@ -4,7 +4,7 @@ import { formatTimestamp } from '@/common/utils/formatters';
 import { useTool } from '@/common/hooks/useTool';
 import { normalizeFilePath } from '@tarko/ui';
 import { StandardPanelContent } from '../types/panelContent';
-import { ToggleSwitch, ToggleSwitchProps } from '../renderers/generic/components/ToggleSwitch';
+import { ToggleSwitch, ToggleSwitchProps } from './shared';
 import { ShareButton } from './ShareButton';
 import { FileDisplayMode } from '../types';
 import { WorkspaceDisplayMode } from '@/common/state/atoms/workspace';

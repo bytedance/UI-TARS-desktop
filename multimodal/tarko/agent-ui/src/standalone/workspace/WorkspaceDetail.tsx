@@ -10,7 +10,7 @@ import { ImageModal } from './components/ImageModal';
 import { FullscreenModal } from './components/FullscreenModal';
 import { StandardPanelContent, ZoomedImageData, FullscreenFileData } from './types/panelContent';
 import { FileDisplayMode } from './types';
-import { ToggleSwitchProps } from './renderers/generic/components';
+import { ToggleSwitchProps } from './components/shared';
 import { workspaceDisplayModeAtom, WorkspaceDisplayMode } from '@/common/state/atoms/workspace';
 import { rawToolMappingAtom } from '@/common/state/atoms/rawEvents';
 import { getFileTypeInfo, getDefaultDisplayMode } from './utils/fileTypeUtils';
@@ -24,7 +24,7 @@ import { ScriptResultRenderer } from './renderers/ScriptResultRenderer';
 import { BrowserResultRenderer } from './renderers/BrowserResultRenderer';
 import { BrowserControlRenderer } from './renderers/BrowserControlRenderer';
 
-import { GenericResultRenderer } from './renderers/generic/GenericResultRenderer';
+import { TerminalRenderer } from './renderers/TerminalRenderer';
 import { DeliverableRenderer } from './renderers/DeliverableRenderer';
 import { DiffRenderer } from './renderers/DiffRenderer';
 import { FileResultRenderer } from './renderers/FileResultRenderer';
@@ -48,7 +48,7 @@ const CONTENT_RENDERERS: Record<
   browser_vision_control: BrowserControlRenderer,
 
   research_report: ResearchReportRenderer,
-  json: GenericResultRenderer,
+  json: TerminalRenderer,
   deliverable: DeliverableRenderer,
   file_result: FileResultRenderer,
   diff_result: DiffRenderer,
@@ -239,7 +239,7 @@ export const WorkspaceDetail: React.FC = () => {
       }
     }
 
-    const RendererComponent = CONTENT_RENDERERS[panelContent.type] || GenericResultRenderer;
+    const RendererComponent = CONTENT_RENDERERS[panelContent.type] || TerminalRenderer;
 
     return (
       <RendererComponent

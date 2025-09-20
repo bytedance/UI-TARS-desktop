@@ -2,7 +2,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { MarkdownRenderer } from '@tarko/ui';
 import { wrapMarkdown } from '@/common/utils/markdown';
-import { DisplayMode } from '../types';
+
+type DisplayMode = 'source' | 'rendered';
 
 interface MessageContentProps {
   message: string;
