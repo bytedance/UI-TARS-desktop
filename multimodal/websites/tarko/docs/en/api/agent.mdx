@@ -38,7 +38,7 @@ npm install @tarko/agent
 Create a `index.ts`:
 
 ```ts
-import { Agent, Tool, z } from '@tarko/agent';
+import { Agent, Tool, z, LogLevel } from '@tarko/agent';
 
 const locationTool = new Tool({
   id: 'getCurrentLocation',
@@ -69,6 +69,11 @@ const weatherTool = new Tool({
 });
 
 const agent = new Agent({
+  model: {
+    provider: 'openai',
+    id: 'gpt-4o',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
   tools: [locationTool, weatherTool],
 });
 
@@ -115,11 +120,16 @@ const agent = new Agent({
 
 #### Agent Options
 
+Based on the actual `AgentOptions` interface from the source code:
+
 - `tools`: Array of tools available to the agent
-- `systemPrompt`: System prompt for the agent
-- `modelProvider`: Configuration for the LLM provider
-- `stream`: Enable streaming responses (default: false)
-- `maxIterations`: Maximum number of iterations (default: 10)
+- `instructions`: System prompt for the agent (not `systemPrompt`)
+- `model`: Model configuration (not `modelProvider`)
+- `maxIterations`: Maximum number of iterations (default: 1000, not 10)
+- `temperature`: LLM temperature (default: 0.7)
+- `maxTokens`: Token limit per request (default: 1000)
+- `toolCallEngine`: Tool call engine type ('native' | 'prompt_engineering' | 'structured_outputs')
+- `logLevel`: Log level for debugging
 
 ### Tool
 
@@ -246,16 +256,17 @@ try {
 ```ts
 const agent = new Agent({
   tools: [weatherTool, locationTool],
-  systemPrompt: 'You are a helpful weather assistant.',
-  modelProvider: {
+  instructions: 'You are a helpful weather assistant.',
+  model: {
+    provider: 'openai',
+    id: 'gpt-4o',
     apiKey: process.env.OPENAI_API_KEY,
-    baseURL: 'https://api.openai.com/v1',
-    model: 'gpt-4',
-    temperature: 0.7,
-    maxTokens: 1000,
   },
-  maxIterations: 5,
-  stream: true,
+  temperature: 0.7,
+  maxTokens: 1000,
+  maxIterations: 20,
+  toolCallEngine: 'native',
+  logLevel: LogLevel.DEBUG,
 });
 ```
 
