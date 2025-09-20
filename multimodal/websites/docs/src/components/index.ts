@@ -10,6 +10,8 @@ export * from './NotFoundLayout';
 export * from './UnderConstructionLayout';
 export * from './SocialCallout';
 export * from './Link';
+export * from './BlogCard';
+export * from './BlogIndex';
 
 export * from './Banner';
 export * from './Replay';
