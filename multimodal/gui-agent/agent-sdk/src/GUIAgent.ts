@@ -9,6 +9,7 @@ import { getScreenInfo, setScreenInfo } from './shared';
 import { Base64ImageParser } from '@agent-infra/media-utils';
 import { GUIAgentConfig } from '@gui-agent/shared/types';
 import { Operator, BaseGUIAgent } from '@gui-agent/shared/base';
+import { GUI_ADAPTED_TOOL_NAME } from './constants';
 
 export class GUIAgent<T extends Operator> extends BaseGUIAgent {
   static label = 'GUI Agent';
@@ -40,11 +41,11 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent {
   async initialize() {
     this.registerTool(
       new Tool({
-        id: adaptorToolName,
+        id: GUI_ADAPTED_TOOL_NAME,
         description: 'operator tool',
         parameters: {},
         function: async (input) => {
-          this.logger.log(`${adaptorToolName} input:`, input);
+          this.logger.log(`${GUI_ADAPTED_TOOL_NAME} input:`, input);
           if (!this.operator) {
             return { status: 'error', message: 'Operator not initialized' };
           }

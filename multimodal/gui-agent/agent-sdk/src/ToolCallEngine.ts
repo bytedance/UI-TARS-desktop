@@ -15,6 +15,7 @@ import {
 } from '@tarko/agent-interface';
 import { actionParser, actionStringParser } from '@gui-agent/action-parser';
 import { getScreenInfo } from './shared';
+import { GUI_ADAPTED_TOOL_NAME } from './constants';
 
 /**
  * GUIAgentToolCallEngine - Minimal prompt engineering tool call engine
@@ -150,7 +151,7 @@ export class GUIAgentToolCallEngine extends ToolCallEngine {
           id: toolCallId,
           type: 'function',
           function: {
-            name: adaptorToolName,
+            name: GUI_ADAPTED_TOOL_NAME,
             arguments: JSON.stringify({
               action: actionStrList[idx - 1],
               step: action.thought,
