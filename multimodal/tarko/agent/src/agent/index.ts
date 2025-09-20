@@ -8,3 +8,4 @@ export * from './agent-runner';
 export * from './tool-manager';
 export * from './llm-client';
 export * from './message-history';
+// Note: BaseAgent is intentionally not exported as it's an internal implementation detail
