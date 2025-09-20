@@ -15,13 +15,6 @@
   },
   {
     "type": "dir",
-    "name": "tool",
-    "label": "Tool",
-    "collapsible": false,
-    "collapsed": false
-  },
-  {
-    "type": "dir",
     "name": "advanced",
     "label": "Advanced",
     "collapsible": false,

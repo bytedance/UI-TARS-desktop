@@ -2,16 +2,16 @@
   {
     "type": "file",
     "name": "basic",
-    "label": "Basic"
+    "label": "基础"
   },
   {
     "type": "file",
     "name": "management",
-    "label": "Management"
+    "label": "管理"
   },
   {
     "type": "file",
     "name": "tool-call-engine",
-    "label": "Tool Call Engine"
+    "label": "执行引擎"
   }
 ]

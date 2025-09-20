@@ -15,6 +15,13 @@
   },
   {
     "type": "dir",
+    "name": "tool",
+    "label": "工具",
+    "collapsible": false,
+    "collapsed": false
+  },
+  {
+    "type": "dir",
     "name": "advanced",
     "label": "高级",
     "collapsible": false,
