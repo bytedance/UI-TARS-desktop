@@ -1,10 +1,10 @@
 # Tool Management
 
-Filter, organize, and optimize Agent tool capabilities for specific tasks and performance.
+Filter and organize Agent tool capabilities for specific tasks and performance optimization.
 
 ## Overview
 
-@agent-tars/core includes **32 built-in tools** across 4 categories: **general** (1), **browser** (18), **filesystem** (11), and **commands** (2). Tool management allows you to precisely control which tools are available to optimize performance and focus capabilities.
+Tarko includes **32 built-in tools** across 4 categories: **general** (1), **browser** (18), **filesystem** (11), and **commands** (2). Tool management allows you to precisely control which tools are available to optimize performance and focus capabilities.
 
 ## Quick Start
 
@@ -27,8 +27,6 @@ tarko --tool.include "browser,filesystem" --tool.exclude "run_command,run_script
 |--------|-------------|----------|
 | `--tool.include <patterns>` | Include tools matching patterns | `--tool.include browser` |
 | `--tool.exclude <patterns>` | Exclude tools matching patterns | `--tool.exclude delete` |
-| `--tool.list` | List all available tools | `--tool.list` |
-| `--tool.categories` | Show tool categories | `--tool.categories` |
 
 ### Pattern Matching Rules
 
@@ -68,7 +66,7 @@ tarko --tool.include "read_file,read_multiple_files,list_directory,browser_scree
 ### Agent Configuration
 
 ```typescript
-import { Agent } from '@agent-tars/core';
+import { Agent } from '@tarko/agent';
 
 const agent = new Agent({
   tool: {
@@ -84,47 +82,38 @@ const agent = new Agent({
 {
   "tool": {
     "include": ["browser", "filesystem"],
-    "exclude": ["delete", "remove"],
-    "categories": {
-      "browser": {
-        "enabled": true,
-        "exclude": ["browser_get_markdown"]
-      },
-      "filesystem": {
-        "enabled": true,
-        "exclude": ["move_file"]
-      },
-      "commands": {
-        "enabled": false
-      }
-    }
+    "exclude": ["delete", "remove"]
   }
 }
 ```
 
-### Dynamic Tool Management
+### Tool Registration
 
 ```typescript
-import { Agent, ToolManager } from '@agent-tars/core';
+import { Agent, Tool } from '@tarko/agent';
 
 const agent = new Agent();
-const toolManager = agent.getToolManager();
 
-// Runtime tool filtering
-toolManager.filterTools({
-  include: ['browser'],
-  exclude: ['browser_close_tab']
+// Register custom tools
+const customTool = new Tool({
+  id: 'custom_tool',
+  description: 'My custom tool',
+  parameters: {
+    type: 'object',
+    properties: {
+      input: { type: 'string', description: 'Input parameter' }
+    }
+  },
+  function: async (params) => {
+    return `Processed: ${params.input}`;
+  }
 });
 
-// Add custom tools
-toolManager.addTool(new CustomTool());
+agent.registerTool(customTool);
 
-// Remove specific tools
-toolManager.removeTool('browser_get_markdown');
-
-// Get active tools
-const activeTools = toolManager.getActiveTools();
-console.log(`Active tools: ${activeTools.length}`);
+// Get all available tools
+const tools = agent.getTools();
+console.log(`Available tools: ${tools.length}`);
 ```
 
 ## Tool Categories
@@ -171,152 +160,6 @@ console.log(`Active tools: ${activeTools.length}`);
 - `run_command` - Execute shell commands
 - `run_script` - Run scripts with interpreters
 
-### Custom Categories
-
-```typescript
-import { ToolCategory, Tool } from '@agent-tars/core';
-
-export class DatabaseCategory implements ToolCategory {
-  name = 'database';
-  description = 'Database operations and queries';
-  
-  tools: Tool[] = [
-    new QueryTool(),
-    new InsertTool(),
-    new UpdateTool(),
-    new DeleteTool()
-  ];
-}
-
-// Register custom category
-const agent = new Agent({
-  toolCategories: [
-    new DatabaseCategory()
-  ]
-});
-```
-
-## Performance Optimization
-
-### Tool Loading Strategies
-
-```typescript
-// Lazy loading for heavy tools
-const agent = new Agent({
-  tool: {
-    loadingStrategy: 'lazy',
-    include: ['browser'],
-    preload: ['browser_navigate', 'browser_screenshot']
-  }
-});
-```
-
-### Memory Management
-
-```typescript
-// Tool instance pooling
-const agent = new Agent({
-  tool: {
-    pooling: {
-      enabled: true,
-      maxInstances: 5,
-      idleTimeout: 30000 // 30 seconds
-    }
-  }
-});
-```
-
-### Execution Limits
-
-```typescript
-// Set execution limits per tool
-const agent = new Agent({
-  tool: {
-    limits: {
-      'run_command': {
-        timeout: 10000, // 10 seconds
-        maxConcurrent: 1
-      },
-      'browser_screenshot': {
-        timeout: 5000,
-        maxConcurrent: 3
-      }
-    }
-  }
-});
-```
-
-## Security and Permissions
-
-### Tool Permissions
-
-```typescript
-const agent = new Agent({
-  tool: {
-    permissions: {
-      'run_command': {
-        allowedCommands: ['ls', 'pwd', 'cat'],
-        blockedCommands: ['rm', 'sudo', 'chmod']
-      },
-      'write_file': {
-        allowedPaths: ['/tmp', '/workspace'],
-        blockedPaths: ['/etc', '/usr', '/system']
-      }
-    }
-  }
-});
-```
-
-### Sandboxing
-
-```typescript
-// Enable tool sandboxing
-const agent = new Agent({
-  tool: {
-    sandbox: {
-      enabled: true,
-      isolateFileSystem: true,
-      isolateNetwork: false,
-      allowedDomains: ['api.example.com']
-    }
-  }
-});
-```
-
-## Monitoring and Analytics
-
-### Tool Usage Tracking
-
-```typescript
-import { ToolMonitor } from '@agent-tars/core';
-
-const monitor = new ToolMonitor();
-
-monitor.on('toolExecuted', (event) => {
-  console.log(`Tool ${event.toolName} executed in ${event.duration}ms`);
-});
-
-monitor.on('toolError', (event) => {
-  console.error(`Tool ${event.toolName} failed: ${event.error}`);
-});
-
-const agent = new Agent({
-  monitor
-});
-```
-
-### Performance Metrics
-
-```typescript
-// Get tool performance metrics
-const metrics = await agent.getToolMetrics();
-
-console.log('Tool Usage Statistics:');
-metrics.forEach(metric => {
-  console.log(`${metric.toolName}: ${metric.executionCount} calls, avg ${metric.averageDuration}ms`);
-});
-```
-
 ## Troubleshooting
 
 ### Debug Tool Filtering
@@ -331,9 +174,6 @@ tarko --debug --tool.include browser
 
 #### No Tools Available
 ```bash
-# Check available tools
-tarko --tool.list
-
 # Use broader patterns
 tarko --tool.exclude "run_command" # Instead of strict includes
 ```
@@ -355,67 +195,33 @@ try {
 }
 ```
 
-### Logging and Debugging
+## Performance Considerations
 
-```typescript
-import { Agent, LogLevel } from '@agent-tars/core';
+### Filter Implementation
 
-const agent = new Agent({
-  logging: {
-    level: LogLevel.DEBUG,
-    categories: ['tool-manager', 'tool-execution']
-  }
-});
+- **Complexity**: O(n×m) where n=tools, m=patterns
+- **Matching**: Simple `string.includes()` for optimal speed
+- **Logging**: Detailed filter operations logged for debugging
+- **Compatibility**: Fully backward compatible
+
+### Examples
+
+#### Browser-Only Agent
+```bash
+tarko --tool.include browser
+# Result: 18 browser tools (browser_click, browser_navigate, etc.)
 ```
 
-## Advanced Patterns
-
-### Conditional Tool Loading
-
-```typescript
-const agent = new Agent({
-  tool: {
-    conditional: {
-      'run_command': {
-        condition: () => process.env.NODE_ENV === 'development',
-        fallback: 'safe_command'
-      }
-    }
-  }
-});
+#### File Operations Without Editing
+```bash
+tarko --tool.include filesystem --tool.exclude edit_file
+# Result: 10 filesystem tools (read_file, write_file, list_directory, etc.)
 ```
 
-### Tool Composition
-
-```typescript
-// Compose tools into workflows
-const workflow = new ToolWorkflow([
-  'browser_navigate',
-  'browser_screenshot',
-  'write_file'
-]);
-
-const agent = new Agent({
-  workflows: [workflow]
-});
-```
-
-### Plugin System
-
-```typescript
-// Tool plugins for extensibility
-const toolPlugin = {
-  name: 'database-tools',
-  version: '1.0.0',
-  tools: [
-    new QueryTool(),
-    new MigrationTool()
-  ]
-};
-
-const agent = new Agent({
-  plugins: [toolPlugin]
-});
+#### Specific Tool Exclusion
+```bash
+tarko --tool.include "browser,filesystem" --tool.exclude "browser_get_markdown,run_command"
+# Result: 28 tools (17 browser + 11 filesystem, excluding markdown and commands)
 ```
 
 ## Next Steps
@@ -423,5 +229,5 @@ const agent = new Agent({
 - Learn about [Tool Development](/guide/tool/basic) to create custom tools
 - Explore [Tool Call Engine](/guide/tool/tool-call-engine) for execution optimization
 
-{/* Placeholder: Add tool management dashboard screenshot */}
-{/* Placeholder: Add performance monitoring charts */}
+{/* Placeholder: Add tool filtering flow diagram */}
+{/* Placeholder: Add performance comparison charts */}

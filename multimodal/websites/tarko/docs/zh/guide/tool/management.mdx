@@ -1,10 +1,10 @@
 # Tool 管理
 
-过滤、组织和优化 Agent 工具能力，针对特定任务和性能进行调优。
+过滤和组织 Agent 工具能力，针对特定任务和性能进行优化。
 
 ## 概述
 
-@agent-tars/core 包含 **32 个内置工具**，分为 4 个类别：**general** (1)、**browser** (18)、**filesystem** (11) 和 **commands** (2)。Tool 管理允许你精确控制哪些工具可用，以优化性能和聚焦能力。
+Tarko 包含 **32 个内置工具**，分为 4 个类别：**general** (1)、**browser** (18)、**filesystem** (11) 和 **commands** (2)。Tool 管理允许你精确控制哪些工具可用，以优化性能和聚焦能力。
 
 ## 快速开始
 
@@ -27,8 +27,6 @@ tarko --tool.include "browser,filesystem" --tool.exclude "run_command,run_script
 |------|------|------|
 | `--tool.include <patterns>` | 包含匹配模式的工具 | `--tool.include browser` |
 | `--tool.exclude <patterns>` | 排除匹配模式的工具 | `--tool.exclude delete` |
-| `--tool.list` | 列出所有可用工具 | `--tool.list` |
-| `--tool.categories` | 显示工具分类 | `--tool.categories` |
 
 ### 模式匹配规则
 
@@ -68,7 +66,7 @@ tarko --tool.include "read_file,read_multiple_files,list_directory,browser_scree
 ### Agent 配置
 
 ```typescript
-import { Agent } from '@agent-tars/core';
+import { Agent } from '@tarko/agent';
 
 const agent = new Agent({
   tool: {
@@ -84,47 +82,38 @@ const agent = new Agent({
 {
   "tool": {
     "include": ["browser", "filesystem"],
-    "exclude": ["delete", "remove"],
-    "categories": {
-      "browser": {
-        "enabled": true,
-        "exclude": ["browser_get_markdown"]
-      },
-      "filesystem": {
-        "enabled": true,
-        "exclude": ["move_file"]
-      },
-      "commands": {
-        "enabled": false
-      }
-    }
+    "exclude": ["delete", "remove"]
   }
 }
 ```
 
-### 动态 Tool 管理
+### Tool 注册
 
 ```typescript
-import { Agent, ToolManager } from '@agent-tars/core';
+import { Agent, Tool } from '@tarko/agent';
 
 const agent = new Agent();
-const toolManager = agent.getToolManager();
 
-// 运行时工具过滤
-toolManager.filterTools({
-  include: ['browser'],
-  exclude: ['browser_close_tab']
+// 注册自定义工具
+const customTool = new Tool({
+  id: 'custom_tool',
+  description: '我的自定义工具',
+  parameters: {
+    type: 'object',
+    properties: {
+      input: { type: 'string', description: '输入参数' }
+    }
+  },
+  function: async (params) => {
+    return `处理结果: ${params.input}`;
+  }
 });
 
-// 添加自定义工具
-toolManager.addTool(new CustomTool());
+agent.registerTool(customTool);
 
-// 移除特定工具
-toolManager.removeTool('browser_get_markdown');
-
-// 获取活跃工具
-const activeTools = toolManager.getActiveTools();
-console.log(`活跃工具: ${activeTools.length}`);
+// 获取所有可用工具
+const tools = agent.getTools();
+console.log(`可用工具: ${tools.length}`);
 ```
 
 ## Tool 分类
@@ -171,152 +160,6 @@ console.log(`活跃工具: ${activeTools.length}`);
 - `run_command` - 执行 shell 命令
 - `run_script` - 运行脚本和解释器
 
-### 自定义分类
-
-```typescript
-import { ToolCategory, Tool } from '@agent-tars/core';
-
-export class DatabaseCategory implements ToolCategory {
-  name = 'database';
-  description = '数据库操作和查询';
-  
-  tools: Tool[] = [
-    new QueryTool(),
-    new InsertTool(),
-    new UpdateTool(),
-    new DeleteTool()
-  ];
-}
-
-// 注册自定义分类
-const agent = new Agent({
-  toolCategories: [
-    new DatabaseCategory()
-  ]
-});
-```
-
-## 性能优化
-
-### Tool 加载策略
-
-```typescript
-// 重型工具的懒加载
-const agent = new Agent({
-  tool: {
-    loadingStrategy: 'lazy',
-    include: ['browser'],
-    preload: ['browser_navigate', 'browser_screenshot']
-  }
-});
-```
-
-### 内存管理
-
-```typescript
-// Tool 实例池
-const agent = new Agent({
-  tool: {
-    pooling: {
-      enabled: true,
-      maxInstances: 5,
-      idleTimeout: 30000 // 30 秒
-    }
-  }
-});
-```
-
-### 执行限制
-
-```typescript
-// 为每个工具设置执行限制
-const agent = new Agent({
-  tool: {
-    limits: {
-      'run_command': {
-        timeout: 10000, // 10 秒
-        maxConcurrent: 1
-      },
-      'browser_screenshot': {
-        timeout: 5000,
-        maxConcurrent: 3
-      }
-    }
-  }
-});
-```
-
-## 安全和权限
-
-### Tool 权限
-
-```typescript
-const agent = new Agent({
-  tool: {
-    permissions: {
-      'run_command': {
-        allowedCommands: ['ls', 'pwd', 'cat'],
-        blockedCommands: ['rm', 'sudo', 'chmod']
-      },
-      'write_file': {
-        allowedPaths: ['/tmp', '/workspace'],
-        blockedPaths: ['/etc', '/usr', '/system']
-      }
-    }
-  }
-});
-```
-
-### 沙箱化
-
-```typescript
-// 启用工具沙箱
-const agent = new Agent({
-  tool: {
-    sandbox: {
-      enabled: true,
-      isolateFileSystem: true,
-      isolateNetwork: false,
-      allowedDomains: ['api.example.com']
-    }
-  }
-});
-```
-
-## 监控和分析
-
-### Tool 使用跟踪
-
-```typescript
-import { ToolMonitor } from '@agent-tars/core';
-
-const monitor = new ToolMonitor();
-
-monitor.on('toolExecuted', (event) => {
-  console.log(`工具 ${event.toolName} 执行耗时 ${event.duration}ms`);
-});
-
-monitor.on('toolError', (event) => {
-  console.error(`工具 ${event.toolName} 失败: ${event.error}`);
-});
-
-const agent = new Agent({
-  monitor
-});
-```
-
-### 性能指标
-
-```typescript
-// 获取工具性能指标
-const metrics = await agent.getToolMetrics();
-
-console.log('Tool 使用统计:');
-metrics.forEach(metric => {
-  console.log(`${metric.toolName}: ${metric.executionCount} 次调用，平均 ${metric.averageDuration}ms`);
-});
-```
-
 ## 故障排除
 
 ### 调试 Tool 过滤
@@ -331,9 +174,6 @@ tarko --debug --tool.include browser
 
 #### 没有可用工具
 ```bash
-# 检查可用工具
-tarko --tool.list
-
 # 使用更宽泛的模式
 tarko --tool.exclude "run_command" # 排除特定工具而不是严格包含
 ```
@@ -355,67 +195,33 @@ try {
 }
 ```
 
-### 日志和调试
+## 性能考虑
 
-```typescript
-import { Agent, LogLevel } from '@agent-tars/core';
+### 过滤器实现
 
-const agent = new Agent({
-  logging: {
-    level: LogLevel.DEBUG,
-    categories: ['tool-manager', 'tool-execution']
-  }
-});
+- **复杂度**：O(n×m) 其中 n=工具数，m=模式数
+- **匹配**：简单的 `string.includes()` 实现最佳速度
+- **日志**：详细的过滤操作日志用于调试
+- **兼容性**：完全向后兼容
+
+### 示例
+
+#### 仅浏览器 Agent
+```bash
+tarko --tool.include browser
+# 结果：18 个浏览器工具（browser_click、browser_navigate 等）
 ```
 
-## 高级模式
-
-### 条件 Tool 加载
-
-```typescript
-const agent = new Agent({
-  tool: {
-    conditional: {
-      'run_command': {
-        condition: () => process.env.NODE_ENV === 'development',
-        fallback: 'safe_command'
-      }
-    }
-  }
-});
+#### 文件操作但不编辑
+```bash
+tarko --tool.include filesystem --tool.exclude edit_file
+# 结果：10 个文件系统工具（read_file、write_file、list_directory 等）
 ```
 
-### Tool 组合
-
-```typescript
-// 将工具组合成工作流
-const workflow = new ToolWorkflow([
-  'browser_navigate',
-  'browser_screenshot',
-  'write_file'
-]);
-
-const agent = new Agent({
-  workflows: [workflow]
-});
-```
-
-### 插件系统
-
-```typescript
-// 用于扩展性的工具插件
-const toolPlugin = {
-  name: 'database-tools',
-  version: '1.0.0',
-  tools: [
-    new QueryTool(),
-    new MigrationTool()
-  ]
-};
-
-const agent = new Agent({
-  plugins: [toolPlugin]
-});
+#### 特定工具排除
+```bash
+tarko --tool.include "browser,filesystem" --tool.exclude "browser_get_markdown,run_command"
+# 结果：28 个工具（17 个浏览器 + 11 个文件系统，排除 markdown 和命令）
 ```
 
 ## 下一步
@@ -423,5 +229,5 @@ const agent = new Agent({
 - 了解 [Tool 开发](/guide/tool/basic) 来创建自定义工具
 - 探索 [Tool Call Engine](/guide/tool/tool-call-engine) 的执行优化
 
-{/* Placeholder: 添加工具管理仪表板截图 */}
-{/* Placeholder: 添加性能监控图表 */}
+{/* Placeholder: 添加工具过滤流程图 */}
+{/* Placeholder: 添加性能对比图表 */}
