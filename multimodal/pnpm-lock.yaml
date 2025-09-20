@@ -843,6 +843,9 @@ importers:
       mongoose:
         specifier: ^8.8.4
         version: 8.18.0(@aws-sdk/credential-providers@3.883.0)(@mongodb-js/zstd@2.0.1)(kerberos@2.2.2)(snappy@7.3.2)(socks@2.8.4)
+      multer:
+        specifier: ^1.4.5-lts.1
+        version: 1.4.5-lts.2
       transliteration:
         specifier: ^2.3.5
         version: 2.3.5
@@ -892,9 +895,6 @@ importers:
       lowdb:
         specifier: ^6.0.1
         version: 6.1.1
-      multer:
-        specifier: ^1.4.5-lts.1
-        version: 1.4.5-lts.2
       nanoid:
         specifier: ^5.0.8
         version: 5.1.5

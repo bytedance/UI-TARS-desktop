@@ -22,7 +22,8 @@
     "@tarko/agent-ui-builder": "workspace:*",
     "@tarko/context-engineer": "workspace:*",
     "mongoose": "^8.8.4",
-    "transliteration": "^2.3.5"
+    "transliteration": "^2.3.5",
+    "multer": "^1.4.5-lts.1"
   },
   "devDependencies": {
     "@agent-infra/shared": "0.0.2",
@@ -40,7 +41,6 @@
     "express": "4.21.2",
     "http-proxy-middleware": "^2.0.6",
     "lowdb": "^6.0.1",
-    "multer": "^1.4.5-lts.1",
     "nanoid": "^5.0.8",
     "supertest": "^7.0.0",
     "typescript": "^5.5.3",

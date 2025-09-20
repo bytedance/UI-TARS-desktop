@@ -3,11 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Request, Response } from 'express';
+import { Request, Response, RequestHandler } from 'express';
 import multer from 'multer';
 import * as path from 'path';
 import * as fs from 'fs';
 import { ChatCompletionContentPart } from '../../types';
+
+// Augment Express Request interface
+declare module 'express-serve-static-core' {
+  interface Request {
+    files?: Express.Multer.File[];
+  }
+}
 
 /**
  * Configure multer for file uploads
@@ -22,7 +29,7 @@ const upload = multer({
 /**
  * Get multer middleware for file uploads
  */
-export const uploadMiddleware = upload.array('files', 10); // Allow up to 10 files
+export const uploadMiddleware: RequestHandler = upload.array('files', 10); // Allow up to 10 files
 
 /**
  * Check if a file is an image based on its MIME type
