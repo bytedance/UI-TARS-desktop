@@ -11,8 +11,6 @@ interface TerminalRendererProps {
   displayMode?: FileDisplayMode;
 }
 
-
-
 /**
  * Format tool arguments as JSON string
  */
@@ -36,7 +34,15 @@ function formatOutput(source: any): string {
           if (item.name) {
             outputLines.push(`[${item.name}]`);
           }
-          outputLines.push(String(item.text));
+          // Try to parse and format the text if it's JSON
+          let textContent = String(item.text);
+          try {
+            const parsed = JSON.parse(textContent);
+            textContent = JSON.stringify(parsed, null, 2);
+          } catch {
+            // Keep original text if not JSON
+          }
+          outputLines.push(textContent);
         } else {
           outputLines.push(JSON.stringify(item, null, 2));
         }
@@ -65,33 +71,33 @@ function formatOutput(source: any): string {
  */
 function formatCommand(title: string, args?: Record<string, any>): React.ReactNode {
   const parts: React.ReactNode[] = [];
-  
+
   // Tool name in cyan
   parts.push(
     <span key="tool" className="text-cyan-400 font-bold">
       {title}
-    </span>
+    </span>,
   );
-  
+
   // Add key arguments inline if they exist
   if (args && Object.keys(args).length > 0) {
     // Show key arguments inline for common tools
-    const keyArgs = ['command', 'path', 'url', 'query'].filter(key => args[key]);
+    const keyArgs = ['command', 'path', 'url', 'query'].filter((key) => args[key]);
     if (keyArgs.length > 0) {
       parts.push(
         <span key="args" className="text-gray-400 ml-2">
-          {keyArgs.map(key => (
+          {keyArgs.map((key) => (
             <span key={key}>
               <span className="text-yellow-300">--{key}</span>
               <span className="text-orange-300 ml-1">'{args[key]}'</span>
               <span className="ml-2"></span>
             </span>
           ))}
-        </span>
+        </span>,
       );
     }
   }
-  
+
   return <div className="flex flex-wrap items-center">{parts}</div>;
 }
 
@@ -103,15 +109,13 @@ export const TerminalRenderer: React.FC<TerminalRendererProps> = ({
   const command = formatCommand(panelContent.title, panelContent.arguments);
   const argumentsJson = formatArguments(panelContent.arguments);
   const output = formatOutput(panelContent.source);
-  
-  // Combine arguments and output into a single terminal output
-  const combinedOutput = [
-    argumentsJson && argumentsJson.trim(),
-    output && output.trim()
-  ].filter(Boolean).join('\n\n');
-  
+  debugger;
 
-  
+  // Combine arguments and output into a single terminal output
+  const combinedOutput = [argumentsJson && argumentsJson.trim(), output && output.trim()]
+    .filter(Boolean)
+    .join('\n\n');
+
   return (
     <div className="space-y-4 md:text-base text-sm">
       <div className="md:[&_pre]:text-sm [&_pre]:text-xs md:[&_pre]:p-4 [&_pre]:p-2">
