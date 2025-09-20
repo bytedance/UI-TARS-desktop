@@ -248,3 +248,77 @@ agent.setLogLevel('debug');
 // Replay with debugging
 const response = await agent.chat('Continue from here');
 ```
+
+## Real-World Debugging Case
+
+### Model Provider Compatibility Issues
+
+Agent Snapshot is particularly useful when debugging model provider compatibility issues. Here's a real example from Agent TARS development:
+
+**Problem**: AWS Bedrock compatibility error
+
+```
+[Stream] Error in agent loop execution: Error: 400 operation error Bedrock Runtime: ConverseStream, https response error StatusCode: 400, RequestID: 31427985-ebcf-4321-af29-d498c474a20f, ValidationException: The json schema definition at toolConfig.tools.13.toolSpec.inputSchema is invalid. Fix the following errors and try again: $.properties: null found, object expected
+```
+
+**Solution Process**:
+
+1. **Enable Snapshot in Agent TARS**:
+
+```typescript
+// agent-tars.config.ts
+import { resolve } from 'node:path';
+import { defineConfig } from '@agent-tars/interface';
+
+export default defineConfig({
+  // ...
+  snapshot: {
+    enable: true,
+    storageDirectory: resolve(__dirname, 'snapshots')
+  }
+});
+```
+
+2. **Analyze Snapshot Structure**:
+
+The snapshot generates a detailed directory structure:
+
+```bash
+snapshots
+└── c3fMyx8jePXnhjYvHOhKr           # Session id
+    ├── event-stream.jsonl          # Final event stream
+    ├── loop-1                      # Loop 1
+    │   ├── event-stream.jsonl
+    │   ├── llm-request.jsonl
+    │   ├── llm-response.jsonl
+    │   └── tool-calls.jsonl
+    ├── loop-2                      # Loop 2
+    │   ├── event-stream.jsonl
+    │   ├── llm-request.jsonl
+    │   ├── llm-response.jsonl
+    │   └── tool-calls.jsonl
+    └── loop-3                      # Loop 3
+        ├── event-stream.jsonl
+        ├── llm-request.jsonl
+        └── llm-response.jsonl
+```
+
+3. **Root Cause Analysis**:
+
+By examining `loop-1/llm-request.jsonl`, we discovered that AWS Bedrock requires JSON Schema to include a `properties` field when `type` is "object", even if empty.
+
+4. **Fix Implementation**:
+
+```diff
+"type": "function",
+"function": {
+    "name": "browser_get_clickable_elements",
+    "description": "[browser] Get the clickable or hoverable or selectable elements on the current page, don't call this tool multiple times",
+    "parameters": {
+        "type": "object",
++       "properties": {}
+    }
+}
+```
+
+This real-world example demonstrates how Agent Snapshot enables "white-box" debugging, making complex Agent systems more transparent and debuggable. For the complete fix, see [bytedance/UI-TARS-desktop#770](https://github.com/bytedance/UI-TARS-desktop/pull/770).
