@@ -2,10 +2,9 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { defineConfig } from '@tarko/agent-cli';
-import { SYSTEM_PROMPT_LATEST } from './src/constants';
-import { SYSTEM_PROMPT } from './dist/constants';
 import path from 'path';
+import { defineConfig } from '@tarko/agent-cli';
+import { SYSTEM_PROMPT } from './src/prompts';
 
 export default defineConfig({
   operatorType: 'android',
