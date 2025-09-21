@@ -186,9 +186,7 @@ export const TabbedFilesRenderer: React.FC<TabbedFilesRendererProps> = ({
                   ) : (
                     <FiFile size={12} />
                   )}
-                  <span className="truncate max-w-32" title={file.path}>
-                    {tabFileName}
-                  </span>
+                  <span title={file.path}>{tabFileName}</span>
                 </div>
               </button>
             );
