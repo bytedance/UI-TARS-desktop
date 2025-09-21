@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiX } from 'react-icons/fi';
 import { MarkdownRenderer } from '@tarko/ui';
-import { MessageContent } from '../renderers/generic/components/MessageContent';
 import { FullscreenFileData } from '../types/panelContent';
 import { normalizeFilePath } from '@tarko/ui';
 
@@ -91,14 +90,7 @@ export const FullscreenModal: React.FC<FullscreenModalProps> = ({ data, onClose 
             </div>
           ) : (
             <div className="max-w-5xl mx-auto prose dark:prose-invert prose-lg p-12">
-              {data.isMarkdown && data.displayMode === 'rendered' ? (
-                <MessageContent
-                  message={data.content}
-                  isMarkdown={true}
-                  displayMode={data.displayMode}
-                  isShortMessage={false}
-                />
-              ) : isMarkdownFile && data.displayMode === 'rendered' ? (
+              {(data.isMarkdown || isMarkdownFile) && data.displayMode === 'rendered' ? (
                 <MarkdownRenderer content={data.content} />
               ) : (
                 <pre className="whitespace-pre-wrap font-mono text-sm bg-gray-50 dark:bg-gray-800 p-4 rounded-lg overflow-auto">

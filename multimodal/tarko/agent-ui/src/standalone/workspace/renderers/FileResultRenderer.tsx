@@ -1,9 +1,7 @@
 import React from 'react';
-import { MonacoCodeEditor } from '@tarko/ui';
+import { MonacoCodeEditor, MarkdownRenderer } from '@tarko/ui';
 import { FileDisplayMode } from '../types';
 import { StandardPanelContent } from '../types/panelContent';
-import { MessageContent } from './generic/components/MessageContent';
-import { DisplayMode } from './generic/types';
 import { useStableCodeContent } from '@/common/hooks/useStableValue';
 import { ThrottledHtmlRenderer } from '../components/ThrottledHtmlRenderer';
 import { formatBytes } from '../utils/codeUtils';
@@ -85,12 +83,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
               </div>
             ) : (
               <div className="prose dark:prose-invert prose-sm max-w-none p-4 pt-0 md:text-base text-sm md:[&_h1]:text-2xl [&_h1]:text-xl md:[&_h2]:text-xl [&_h2]:text-lg md:[&_h3]:text-lg [&_h3]:text-base md:[&_pre]:text-sm [&_pre]:text-xs md:[&_pre]:p-4 [&_pre]:p-3 md:[&_code]:text-sm [&_code]:text-xs md:[&_table]:text-base [&_table]:text-xs md:[&_th]:px-4 md:[&_th]:py-2 [&_th]:px-2 [&_th]:py-1 md:[&_td]:px-4 md:[&_td]:py-2 [&_td]:px-2 [&_td]:py-1">
-                <MessageContent
-                  message={stableContent}
-                  isMarkdown={true}
-                  displayMode={displayMode as DisplayMode}
-                  isShortMessage={false}
-                />
+                <MarkdownRenderer content={stableContent} />
               </div>
             )
           ) : (
