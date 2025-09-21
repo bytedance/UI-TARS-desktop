@@ -2,19 +2,26 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { Agent, ConsoleLogger, LLMRequestHookPayload, LogLevel, Tool } from '@tarko/agent';
+import { LLMRequestHookPayload, LogLevel, Tool } from '@tarko/agent';
 import { GUIAgentToolCallEngine } from './ToolCallEngine';
 import { SYSTEM_PROMPT } from './prompts';
 import { getScreenInfo, setScreenInfo } from './shared';
 import { Base64ImageParser } from '@agent-infra/media-utils';
-import { GUIAgentConfig } from '@gui-agent/shared/types';
 import { Operator, BaseGUIAgent } from '@gui-agent/shared/base';
+import { GUIAgentConfig, NormalizeCoordinates } from '@gui-agent/shared/types';
+import {
+  assembleSystemPrompt,
+  isSystemPromptTemplate,
+  defaultNormalizeCoords,
+  normalizeActionCoords,
+} from '@gui-agent/shared/utils';
 import { GUI_ADAPTED_TOOL_NAME } from './constants';
 
 export class GUIAgent<T extends Operator> extends BaseGUIAgent {
   static label = 'GUI Agent';
 
   private operator: Operator | undefined;
+  private normalizeCoordinates: NormalizeCoordinates;
 
   constructor(config: GUIAgentConfig<T>) {
     const {
@@ -26,9 +33,15 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent {
       maxLoopCount,
       loopIntervalInMs,
     } = config;
+    let finalSystemPrompt = SYSTEM_PROMPT;
+    if (typeof systemPrompt === 'string') {
+      finalSystemPrompt = systemPrompt;
+    } else if (systemPrompt && isSystemPromptTemplate(systemPrompt)) {
+      finalSystemPrompt = assembleSystemPrompt(systemPrompt, operator.getSupportedActions());
+    }
     super({
       name: 'Seed GUI Agent',
-      instructions: SYSTEM_PROMPT,
+      instructions: finalSystemPrompt,
       tools: [],
       toolCallEngine: GUIAgentToolCallEngine,
       model: model,
@@ -36,21 +49,31 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent {
       logLevel: LogLevel.DEBUG,
     });
     this.operator = operator;
+    this.normalizeCoordinates = normalizeCoordinates ?? defaultNormalizeCoords;
+    this.logger = this.logger.spawn('[GUIAgent]');
   }
 
   async initialize() {
+    // Register the GUI tool
     this.registerTool(
       new Tool({
         id: GUI_ADAPTED_TOOL_NAME,
         description: 'operator tool',
-        parameters: {},
+        parameters: {}, // no need to pass parameters
         function: async (input) => {
           this.logger.log(`${GUI_ADAPTED_TOOL_NAME} input:`, input);
           if (!this.operator) {
             return { status: 'error', message: 'Operator not initialized' };
           }
+          // normalize coordinates
+          if (input.operator_action) {
+            input.operator_action = normalizeActionCoords(
+              input.operator_action,
+              this.normalizeCoordinates,
+            );
+          }
           const result = await this.operator!.doExecute({
-            actions: input.actions,
+            actions: [input.operator_action],
           });
           if (result.errorMessage) {
             return { status: 'error', message: result.errorMessage };
