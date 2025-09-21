@@ -71,17 +71,6 @@ Tarko CLI 包含几个即用型 Agent：
 
 ## 主要功能
 
-### 事件驱动架构
-
-基于事件驱动架构监控 Agent 执行：
-
-```typescript
-const eventStream = agent.getEventStream();
-eventStream.subscribe((event) => {
-  console.log('事件:', event.type, event);
-});
-```
-
 ### Tool 和 MCP Server 过滤
 
 通过配置过滤可用的工具和 MCP 服务器：
