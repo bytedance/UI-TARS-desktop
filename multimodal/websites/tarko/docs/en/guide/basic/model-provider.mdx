@@ -17,8 +17,8 @@ import { Agent } from '@tarko/agent';
 const agent = new Agent({
   model: {
     provider: 'openai',
+    id: 'gpt-4o',
     apiKey: process.env.OPENAI_API_KEY,
-    model: 'gpt-4'
   }
 });
 ```
@@ -30,8 +30,8 @@ const agent = new Agent({
 ```typescript
 {
   provider: 'openai',
+  id: 'gpt-4o',
   apiKey: 'your-api-key',
-  model: 'gpt-4'
 }
 ```
 
@@ -40,8 +40,8 @@ const agent = new Agent({
 ```typescript
 {
   provider: 'anthropic',
+  id: 'claude-3-5-sonnet-20241022',
   apiKey: 'your-api-key',
-  model: 'claude-3-sonnet'
 }
 ```
 
@@ -50,8 +50,8 @@ const agent = new Agent({
 ```typescript
 {
   provider: 'volcengine',
+  id: 'doubao-seed-1-6-vision-250815',
   apiKey: 'your-api-key',
-  model: 'doubao-pro'
 }
 ```
 
@@ -61,9 +61,9 @@ You can also use any OpenAI-compatible endpoint:
 
 ```typescript
 {
-  provider: 'custom',
+  provider: 'openai',  // Use openai provider for custom endpoints
   baseURL: 'https://your-endpoint.com/v1',
+  id: 'your-model-id',
   apiKey: 'your-api-key',
-  model: 'your-model'
 }
 ```
