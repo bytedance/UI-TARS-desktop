@@ -36,10 +36,9 @@ const greetingTool = createTool({
 // Create the agent
 const agent = new Agent({
   name: 'GreetingBot',
-  description: 'A friendly greeting assistant',
-  systemPrompt: 'You are a friendly assistant that helps users with greetings.',
+  instructions: 'You are a friendly assistant that helps users with greetings.',
   tools: [greetingTool],
-  modelProvider: {
+  model: {
     apiKey: process.env.OPENAI_API_KEY,
     baseURL: 'https://api.openai.com/v1',
     model: 'gpt-4'
@@ -113,12 +112,11 @@ const weatherTool = createTool({
 
 const weatherAgent = new Agent({
   name: 'WeatherBot',
-  description: 'A helpful weather assistant',
-  systemPrompt: `You are a weather assistant that provides current weather information for any location.
+  instructions: `You are a weather assistant that provides current weather information for any location.
 Use the get_weather tool to fetch real-time weather data when users ask about weather conditions.
 Always be helpful and provide clear, formatted weather information.`,
   tools: [weatherTool],
-  modelProvider: {
+  model: {
     apiKey: process.env.OPENAI_API_KEY,
     baseURL: 'https://api.openai.com/v1',
     model: 'gpt-4'
@@ -257,15 +255,14 @@ const unitConverterTool = createTool({
 
 const calculatorAgent = new Agent({
   name: 'MathBot',
-  description: 'A mathematical assistant for calculations and unit conversions',
-  systemPrompt: `You are a helpful mathematical assistant that can:
+  instructions: `You are a helpful mathematical assistant that can:
 1. Perform calculations using the calculate tool
 2. Convert between different units using the convert_units tool
 
 Always use the appropriate tool for mathematical operations and unit conversions.
 Provide clear explanations of your calculations when helpful.`,
   tools: [calculatorTool, unitConverterTool],
-  modelProvider: {
+  model: {
     apiKey: process.env.OPENAI_API_KEY,
     baseURL: 'https://api.openai.com/v1',
     model: 'gpt-4'
@@ -406,8 +403,7 @@ const writeFileTool = createTool({
 
 const fileSystemAgent = new Agent({
   name: 'FileBot',
-  description: 'A file system assistant for reading, writing, and managing files',
-  systemPrompt: `You are a helpful file system assistant that can:
+  instructions: `You are a helpful file system assistant that can:
 1. Read file contents using read_file
 2. List directory contents using list_directory
 3. Write files using write_file
@@ -415,7 +411,7 @@ const fileSystemAgent = new Agent({
 Always be careful with file operations and provide clear feedback about what you're doing.
 For security, you can only access files within the current working directory.`,
   tools: [readFileTool, listDirectoryTool, writeFileTool],
-  modelProvider: {
+  model: {
     apiKey: process.env.OPENAI_API_KEY,
     baseURL: 'https://api.openai.com/v1',
     model: 'gpt-4'
