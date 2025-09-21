@@ -5,7 +5,6 @@
 import { LLMRequestHookPayload, ChatCompletionContentPart, LogLevel, Tool } from '@tarko/agent';
 import { GUIAgentToolCallEngine } from './ToolCallEngine';
 import { SYSTEM_PROMPT } from './prompts';
-import { getScreenInfo, setScreenInfo } from './shared';
 import { Base64ImageParser } from '@agent-infra/media-utils';
 import { Operator, BaseGUIAgent } from '@gui-agent/shared/base';
 import { GUIAgentConfig, NormalizeCoordinates } from '@gui-agent/shared/types';

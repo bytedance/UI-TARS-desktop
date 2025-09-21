@@ -14,7 +14,6 @@ import {
   StreamChunkResult,
 } from '@tarko/agent-interface';
 import { DefaultActionParser } from '@gui-agent/action-parser';
-import { getScreenInfo } from './shared';
 import { GUI_ADAPTED_TOOL_NAME } from './constants';
 import { ConsoleLogger, LogLevel } from '@agent-infra/logger';
 import { serializeAction } from '@gui-agent/shared/utils';
@@ -109,8 +108,6 @@ export class GUIAgentToolCallEngine extends ToolCallEngine {
    * Extract tool calls from complete response text
    */
   finalizeStreamProcessing(state: StreamProcessingState): ParsedModelResponse {
-    defaultLogger.log('[finalizeStreamProcessing]', getScreenInfo());
-
     const fullContent = state.contentBuffer;
     defaultLogger.log('[finalizeStreamProcessing] fullContent', fullContent);
 
