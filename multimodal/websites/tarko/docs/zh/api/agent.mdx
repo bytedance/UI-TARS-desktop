@@ -120,6 +120,8 @@ const agent = new Agent({
 
 #### Agent 选项
 
+基于源码中实际的 `AgentOptions` 接口：
+
 - `tools`: Agent 可用的工具数组
 - `instructions`: Agent 的系统提示（不是 `systemPrompt`）
 - `model`: Model 配置（不是 `modelProvider`）
@@ -127,7 +129,7 @@ const agent = new Agent({
 - `temperature`: LLM 温度（默认: 0.7）
 - `maxTokens`: 每次请求的 Token 限制（默认: 1000）
 - `toolCallEngine`: 工具调用引擎类型（'native' | 'prompt_engineering' | 'structured_outputs'）
-- `logLevel`: 调试的日志级别
+- `logLevel`: 调试日志级别
 
 ### Tool
 
@@ -157,7 +159,7 @@ const locationTool = new Tool({
 
 ### 流式模式
 
-在上面的基础示例中，如果你启用 `stream: true`：
+在上面的基础示例中，如果启用 `stream: true`：
 
 ```ts
 async function main() {
