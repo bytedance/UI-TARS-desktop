@@ -144,8 +144,8 @@ export abstract class Operator extends BaseOperator {
    * Safely returns an array of supported action types with initialization guarantee
    * @returns Array of action types supported by this operator
    */
-  async getSupportedActions(): Promise<Array<SupportedActionType>> {
-    await this.ensureInitialized();
+  getSupportedActions(): Array<SupportedActionType> {
+    // await this.ensureInitialized();
     return this.supportedActions();
   }
 
