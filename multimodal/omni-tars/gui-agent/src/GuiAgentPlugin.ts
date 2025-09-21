@@ -79,29 +79,31 @@ export class GuiAgentPlugin extends AgentPlugin {
   // async onEachAgentLoopStart(): Promise<void> {
   // }
 
-  async onEachAgentLoopEnd(): Promise<void> {
-    const events = this.agent.getEventStream().getEvents();
-    const lastToolCallIsComputerUse = this.findLastMatch<AgentEventStream.Event>(
-      events,
-      (item) => item.type === 'tool_call' && item.name === 'browser_vision_control',
-    );
-    if (!lastToolCallIsComputerUse) {
-      this.agent.logger.info('Last tool not GUI action, skipping screenshot');
+  // async onEachAgentLoopEnd(): Promise<void> {
+  // }
+
+  async onAfterToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    result: unknown,
+  ): Promise<void> {
+    this.agent.logger.info('onAfterToolCall toolCall', JSON.stringify(toolCall));
+
+    if (toolCall.name !== 'browser_vision_control') {
+      this.agent.logger.info('onAfterToolCall: skipping screenshot');
       return;
     }
-
-    this.agent.logger.info('onEachAgentLoopEnd lastToolCall', lastToolCallIsComputerUse);
 
     const operator = await this.operatorManager.getInstance();
     const output = await operator?.doScreenshot();
     if (!output) {
-      console.error('Failed to get screenshot');
+      this.agent.logger.error('Failed to get screenshot');
       return;
     }
     const base64Tool = new Base64ImageParser(output.base64);
     const base64Uri = base64Tool.getDataUri();
     if (!base64Uri) {
-      console.error('Failed to get base64 image uri');
+      this.agent.logger.error('Failed to get base64 image uri');
       return;
     }
 
@@ -122,6 +124,9 @@ export class GuiAgentPlugin extends AgentPlugin {
     }
 
     const eventStream = this.agent.getEventStream();
+    const events = eventStream.getEvents();
+    this.agent.logger.info('onAfterToolCall events length:', events.length);
+
     const event = eventStream.createEvent('environment_input', {
       description: 'Browser Screenshot',
       content,
