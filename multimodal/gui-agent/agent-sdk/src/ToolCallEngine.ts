@@ -13,9 +13,14 @@ import {
   StreamProcessingState,
   StreamChunkResult,
 } from '@tarko/agent-interface';
-import { actionParser, actionStringParser } from '@gui-agent/action-parser';
+import { DefaultActionParser } from '@gui-agent/action-parser';
 import { getScreenInfo } from './shared';
 import { GUI_ADAPTED_TOOL_NAME } from './constants';
+import { ConsoleLogger, LogLevel } from '@agent-infra/logger';
+import { serializeAction } from '@gui-agent/shared/utils';
+
+const defaultParser = new DefaultActionParser();
+const defaultLogger = new ConsoleLogger('[GUIAgent:ToolCallEngine]', LogLevel.DEBUG);
 
 /**
  * GUIAgentToolCallEngine - Minimal prompt engineering tool call engine
@@ -104,82 +109,46 @@ export class GUIAgentToolCallEngine extends ToolCallEngine {
    * Extract tool calls from complete response text
    */
   finalizeStreamProcessing(state: StreamProcessingState): ParsedModelResponse {
-    console.log('getScreenInfo()', getScreenInfo());
+    defaultLogger.log('[finalizeStreamProcessing]', getScreenInfo());
 
     const fullContent = state.contentBuffer;
-    console.log('fullContent', fullContent);
+    defaultLogger.log('[finalizeStreamProcessing] fullContent', fullContent);
 
-    const { parsed } = actionParser({
-      prediction: fullContent,
-      factor: [1000, 1000] as [number, number],
-      screenContext: {
-        width: getScreenInfo().screenWidth!,
-        height: getScreenInfo().screenHeight!,
-      },
-    });
-
-    const actionStrList = actionStringParser(fullContent);
-
-    console.log('parsed', parsed);
-
-    console.log('actionStrList', actionStrList);
+    const parsedGUIResponse = defaultParser.parsePrediction(fullContent);
+    if (!parsedGUIResponse) {
+      return {
+        content: '',
+        rawContent: fullContent,
+      };
+    }
 
     const toolCalls: ChatCompletionMessageToolCall[] = [];
 
     let finished = false;
     let finishMessage: string | null = null;
-    let idx = 0;
-    if (Array.isArray(parsed)) {
-      for (const action of parsed) {
-        idx = idx + 1;
-
-        const cleanedThought = action.thought.replace(/think_never_used_[a-f0-9]{32}>/g, '');
-        if (cleanedThought) {
-          action.thought = cleanedThought;
-        }
-
-        if (action.action_type === 'finished') {
-          finished = true;
-          finishMessage = action.action_inputs.content ?? null;
-          continue;
-        }
-        if (action.action_type === '') {
-          continue;
-        }
-        const toolCallId = this.generateToolCallId();
-        toolCalls.push({
-          id: toolCallId,
-          type: 'function',
-          function: {
-            name: GUI_ADAPTED_TOOL_NAME,
-            arguments: JSON.stringify({
-              action: actionStrList[idx - 1],
-              step: action.thought,
-              thought: action.thought,
-              operator_action: action,
-            }),
-          },
-        });
+    for (const action of parsedGUIResponse.actions) {
+      if (action.type === 'finished') {
+        finished = true;
+        finishMessage = action.inputs?.content ?? null;
+        continue;
       }
-    }
-
-    // TODO: Remove this logic after the new model instruction is followed
-    if (fullContent.includes('</answer>')) {
-      // 兼容两种格式：FunctionCallBegin 和 FCResponseBegin
-      const functionCallBeginMatch = fullContent.match(
-        /<\|(FunctionCallBegin|FCResponseBegin)\|>([\s\S]*?)(?:<\/answer>|$)/,
-      );
-      let extractedContent: string | null = null;
-      if (functionCallBeginMatch) {
-        extractedContent = functionCallBeginMatch[2]; // Use the second capture group, as the first is the tag name
-      }
-      finished = true;
-      finishMessage = extractedContent;
-      console.log('extractedContent', extractedContent);
+      toolCalls.push({
+        id: this.generateToolCallId(),
+        type: 'function',
+        function: {
+          name: GUI_ADAPTED_TOOL_NAME,
+          arguments: JSON.stringify({
+            action: serializeAction(action),
+            step: '',
+            thought: parsedGUIResponse.reasoningContent ?? '',
+            operator_action: action,
+          }),
+        },
+      });
     }
 
     const content = finishMessage ?? '';
-    const reasoningContent = parsed[0].thought ?? '';
+    const reasoningContent = parsedGUIResponse.reasoningContent ?? '';
     const contentForWebUI = content.replace(/\\n|\n/g, '<br>');
     const reasoningContentForWebUI = reasoningContent.replace(/\\n|\n/g, '<br>');
 
