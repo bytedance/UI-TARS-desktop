@@ -5,7 +5,7 @@ description: Deploy Tarko Agents using the CLI
 
 # CLI Deployment
 
-The **Tarko Agent CLI** provides a simple way to deploy and run Tarko-based Agents in various environments. Use `tarko run [agent]` to create headless or headful Agent runtime environments.
+The **Tarko Agent CLI** provides a simple way to deploy and run Tarko-based Agents in various environments. Use `tarko serve` for headless deployment or `tarko run` for interactive development.
 
 ## Installation
 
@@ -23,30 +23,30 @@ npx @tarko/agent-cli run my-agent
 
 ## Basic Usage
 
-### Run an Agent
+### Deploy an Agent Server
 
 ```bash
-# Run agent in current directory
-tarko run
+# Start headless server in current directory
+tarko serve
 
-# Run specific agent
-tarko run ./my-agent
+# Start server with specific agent
+tarko serve ./my-agent
 
-# Run with custom configuration
-tarko run --config ./custom-config.json
+# Start server with custom configuration
+tarko serve --config ./custom-config.json
 ```
 
 ### Development Mode
 
 ```bash
-# Run in development mode with hot reload
-tarko run --dev
+# Start server with debug logging
+tarko serve --debug
 
-# Run with debug logging
-tarko run --debug
+# Start server with specific port
+tarko serve --port 3001
 
-# Run with specific port
-tarko run --port 3001
+# For interactive development with UI
+tarko run
 ```
 
 ## Configuration
@@ -112,10 +112,10 @@ export TARKO_UI_THEME=default
 
 ### Headless Mode
 
-Run without UI for API-only access:
+Start server without UI for API-only access:
 
 ```bash
-tarko run --headless
+tarko serve
 ```
 
 Configuration:
@@ -139,12 +139,12 @@ module.exports = {
 };
 ```
 
-### Headful Mode
+### Interactive Mode
 
-Run with web UI:
+Run with web UI for development:
 
 ```bash
-tarko run --ui
+tarko run
 ```
 
 Configuration:
@@ -187,7 +187,7 @@ RUN npm install -g @tarko/agent-cli
 
 EXPOSE 3000
 
-CMD ["tarko", "run", "--port", "3000", "--host", "0.0.0.0"]
+CMD ["tarko", "serve", "--port", "3000"]
 ```
 
 Build and run:
@@ -236,7 +236,7 @@ module.exports = {
   apps: [{
     name: 'my-agent',
     script: 'tarko',
-    args: 'run --port 3000',
+    args: 'serve --port 3000',
     instances: 1,
     autorestart: true,
     watch: false,

@@ -5,7 +5,7 @@ description: 使用 CLI 部署 Tarko Agent
 
 # CLI 部署
 
-**Tarko Agent CLI** 提供了一种简单的方式在各种环境中部署和运行基于 Tarko 的 Agent。使用 `tarko run [agent]` 创建无头或有头的 Agent 运行时环境。
+**Tarko Agent CLI** 提供了一种简单的方式在各种环境中部署和运行基于 Tarko 的 Agent。使用 `tarko serve` 进行无头部署，或使用 `tarko run` 进行交互式开发。
 
 ## 安装
 
@@ -23,30 +23,30 @@ npx @tarko/agent-cli run my-agent
 
 ## 基础用法
 
-### 运行 Agent
+### 部署 Agent 服务器
 
 ```bash
-# 在当前目录运行 Agent
-tarko run
+# 在当前目录启动无头服务器
+tarko serve
 
-# 运行特定 Agent
-tarko run ./my-agent
+# 启动特定 Agent 服务器
+tarko serve ./my-agent
 
-# 使用自定义配置运行
-tarko run --config ./custom-config.json
+# 使用自定义配置启动服务器
+tarko serve --config ./custom-config.json
 ```
 
 ### 开发模式
 
 ```bash
-# 在开发模式下运行，支持热重载
-tarko run --dev
+# 启动服务器并启用调试日志
+tarko serve --debug
 
-# 运行时启用调试日志
-tarko run --debug
+# 启动服务器在特定端口
+tarko serve --port 3001
 
-# 运行在特定端口
-tarko run --port 3001
+# 交互式开发带 UI
+tarko run
 ```
 
 ## 配置
@@ -112,10 +112,10 @@ export TARKO_UI_THEME=default
 
 ### 无头模式
 
-运行无 UI，仅提供 API 访问：
+启动服务器无 UI，仅提供 API 访问：
 
 ```bash
-tarko run --headless
+tarko serve
 ```
 
 配置：
@@ -139,12 +139,12 @@ module.exports = {
 };
 ```
 
-### 有头模式
+### 交互模式
 
-运行带 Web UI：
+运行带 Web UI 进行开发：
 
 ```bash
-tarko run --ui
+tarko run
 ```
 
 配置：
@@ -187,7 +187,7 @@ RUN npm install -g @tarko/agent-cli
 
 EXPOSE 3000
 
-CMD ["tarko", "run", "--port", "3000", "--host", "0.0.0.0"]
+CMD ["tarko", "serve", "--port", "3000"]
 ```
 
 构建和运行：
@@ -236,7 +236,7 @@ module.exports = {
   apps: [{
     name: 'my-agent',
     script: 'tarko',
-    args: 'run --port 3000',
+    args: 'serve --port 3000',
     instances: 1,
     autorestart: true,
     watch: false,
@@ -352,33 +352,33 @@ lsof -i :3000
 kill -9 <PID>
 
 # 或使用不同端口
-tarko run --port 3001
+tarko serve --port 3001
 ```
 
 **权限错误：**
 ```bash
 # 使用 sudo 运行（不推荐）
-sudo tarko run
+sudo tarko serve
 
 # 或更改为非特权端口
-tarko run --port 8080
+tarko serve --port 8080
 ```
 
 **内存问题：**
 ```bash
 # 增加 Node.js 内存限制
-NODE_OPTIONS="--max-old-space-size=4096" tarko run
+NODE_OPTIONS="--max-old-space-size=4096" tarko serve
 ```
 
 ### 调试模式
 
 ```bash
 # 启用调试日志
-DEBUG=tarko:* tarko run --debug
+DEBUG=tarko:* tarko serve --debug
 
 # 启用 Node.js 检查器
-tarko run --inspect
+tarko serve --inspect
 
 # 启用详细输出
-tarko run --verbose
+tarko serve --verbose
 ```
