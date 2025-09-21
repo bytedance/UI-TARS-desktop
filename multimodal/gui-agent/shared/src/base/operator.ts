@@ -85,7 +85,7 @@ export abstract class Operator extends BaseOperator {
 
   constructor() {
     super();
-    this.ensureInitialized();
+    // this.ensureInitialized();
   }
 
   /**
