@@ -7,15 +7,43 @@ description: Complete API reference for @tarko/agent
 
 ## Introduction
 
-`@tarko/agent` is an event-stream driven meta agent framework for building effective multimodal Agents.
+`@tarko/agent` is an event-stream driven meta agent framework designed for building efficient multimodal AI Agents. It provides complete Agent lifecycle management, tool integration, and multi-model support.
 
 ## When to use?
 
-This Agent SDK provides a low-level programmatic API, useful when you want to build an AI agent from scratch, e.g.
+This Agent SDK provides a low-level programmatic API, suitable for building AI agents from scratch:
 
-- **MCP Agent**: Connect to mcp client
-- **GUI Agent**: Build a gui agent
-- **Custom Agents**: Build specialized agents for specific domains
+- **MCP Agent**: Connect to MCP clients and implement standardized AI tool protocols
+- **GUI Agent**: Build graphical interface agents that handle user interactions
+- **Custom Agents**: Build specialized agents for specific domains like code generation, data analysis, etc.
+
+Unlike high-level frameworks, `@tarko/agent` gives you complete control to customize Agent behavior.
+
+## Architecture Overview
+
+```mermaid
+graph TD
+    A[User Input] --> B[Agent.run()]
+    B --> C[Message History Management]
+    C --> D[LLM Request]
+    D --> E{Need Tool Calls?}
+    E -->|Yes| F[Tool Execution]
+    E -->|No| G[Generate Response]
+    F --> H[Tool Results]
+    H --> I{Max Iterations?}
+    I -->|No| D
+    I -->|Yes| G
+    G --> J[Event Stream Output]
+    
+    K[Event Stream] --> L[Real-time UI Updates]
+    K --> M[Logging]
+    K --> N[Performance Monitoring]
+    
+    style A fill:#e1f5fe
+    style G fill:#c8e6c9
+    style F fill:#fff3e0
+    style K fill:#f3e5f5
+```
 
 ## Install
 
@@ -23,15 +51,30 @@ This Agent SDK provides a low-level programmatic API, useful when you want to bu
 npm install @tarko/agent
 ```
 
-## Features
+## Core Features
 
-- [x] **Tool Integration**: Effortlessly create and call tools within agent responses.
-- [x] **Event-stream driven**: Standard Event Stream protocol driver to build Context and UI more efficiently.
-- [x] **Native Streaming**: Native streaming allows you to understand the Agent's output in real time.
-- [x] **Multimodal analysis**: Automatically analysis multimodal tool result allowing you to focus more on building Agents.
-- [x] **Strong extension capabilities**: Rich lifecycle design allows you to implement more high-level Agents.
-- [x] **Multiple model providers**: Supports multiple models, and supports advance configuration and runtime selection.
-- [x] **Multiple tool call engines**: The multiple tool call engine allows you to more easily access tool calling capabilities
+### 🔧 Tool Integration
+Effortlessly create and call tools within agent responses, supporting complex multi-step workflows.
+
+### 📡 Event-Stream Driven
+Based on standard event stream protocols, real-time tracking of Agent state for efficient context and UI building.
+
+### ⚡ Native Streaming
+Native streaming transmission lets you understand the Agent's thinking process and output results in real time.
+
+### 🎯 Multimodal Analysis
+Automatically analyze multimodal tool results (images, text, files, etc.), letting you focus on business logic.
+
+### 🔌 Strong Extension Capabilities
+Rich lifecycle hook design allows you to implement more advanced Agent behaviors.
+
+### 🌐 Multiple Model Providers
+Supports OpenAI, Claude, Doubao and other models, with advanced configuration and runtime switching.
+
+### ⚙️ Multiple Tool Call Engines
+- `native`: OpenAI-compatible native function calling
+- `prompt_engineering`: Prompt-based tool calling
+- `structured_outputs`: JSON Schema structured outputs
 
 ## Quick Start
 
@@ -72,9 +115,12 @@ const agent = new Agent({
   model: {
     provider: 'openai',
     id: 'gpt-4o',
-    apiKey: process.env.OPENAI_API_KEY,
+    apiKey: process.env.OPENAI_API_KEY!, // From environment variable
   },
   tools: [locationTool, weatherTool],
+  instructions: 'You are a professional weather assistant capable of getting accurate location and weather information.',
+  temperature: 0.7,
+  maxIterations: 50,
 });
 
 async function main() {
@@ -120,16 +166,42 @@ const agent = new Agent({
 
 #### Agent Options
 
-Based on the actual `AgentOptions` interface from the source code:
+Based on the actual `AgentOptions` interface from the source code, all options are optional:
 
+##### Basic Configuration
+- `id`: Unique identifier for the agent instance (default: `"@tarko/agent"`)
+- `name`: Agent name for tracking and logging (default: `"Anonymous"`)
+- `instructions`: Agent system prompt, completely replaces default prompt (default: built-in intelligent assistant prompt)
+
+##### Model Configuration
+- `model`: Model configuration object containing `provider`, `id`, `apiKey`, etc.
+- `temperature`: LLM temperature controlling output randomness (default: `0.7`)
+- `top_p`: Nucleus sampling parameter controlling vocabulary selection diversity (default: model default)
+- `maxTokens`: Token limit per request (default: `1000`)
+- `thinking`: Reasoning content control options
+
+##### Tool Configuration
 - `tools`: Array of tools available to the agent
-- `instructions`: System prompt for the agent (not `systemPrompt`)
-- `model`: Model configuration (not `modelProvider`)
-- `maxIterations`: Maximum number of iterations (default: 1000, not 10)
-- `temperature`: LLM temperature (default: 0.7)
-- `maxTokens`: Token limit per request (default: 1000)
-- `toolCallEngine`: Tool call engine type ('native' | 'prompt_engineering' | 'structured_outputs')
-- `logLevel`: Log level for debugging
+- `tool`: Tool filtering options supporting `include`/`exclude` patterns
+- `toolCallEngine`: Tool call engine type (default: `'native'`)
+  - `'native'`: OpenAI-compatible native function calling
+  - `'prompt_engineering'`: Prompt-based tool calling
+  - `'structured_outputs'`: JSON Schema structured outputs
+
+##### Execution Control
+- `maxIterations`: Maximum number of iterations (default: `1000`)
+- `context`: Context awareness options like `maxImagesCount`
+
+##### Debug and Monitoring
+- `logLevel`: Log level (`LogLevel.DEBUG`, `LogLevel.INFO`, etc.)
+- `metric`: Performance metrics collection configuration
+- `enableStreamingToolCallEvents`: Enable streaming tool call events (default: `false`)
+
+##### Advanced Options
+- `workspace`: Working directory for filesystem operations
+- `sandboxUrl`: Sandbox environment URL
+- `eventStreamOptions`: Event stream processor configuration
+- `initialEvents`: Array of events to restore during initialization
 
 ### Tool
 
@@ -159,7 +231,7 @@ const locationTool = new Tool({
 
 ### Streaming Mode
 
-In above basic example, if you enable `stream: true`:
+Streaming mode allows you to monitor the Agent's execution process in real time, including thinking, tool calls, and response generation:
 
 ```ts
 async function main() {
@@ -168,18 +240,36 @@ async function main() {
     stream: true,
   });
 
-  for await (const chunk of stream) {
-    console.log(JSON.stringify(chunk));
+  for await (const event of stream) {
+    switch (event.type) {
+      case 'assistant_streaming_message':
+        process.stdout.write(event.content); // Real-time output
+        break;
+      case 'tool_call':
+        console.log(`🔧 Calling tool: ${event.name}`);
+        break;
+      case 'tool_result':
+        console.log(`✅ Tool result: ${event.elapsedMs}ms`);
+        break;
+      case 'assistant_message':
+        console.log(`\n💬 Complete response: ${event.content}`);
+        break;
+    }
   }
 }
 ```
 
-You will get streaming outputs with different event types:
+#### Main Event Types
 
-- `assistant_message`: Complete assistant messages
-- `tool_call`: Tool execution events
+- `user_message`: User input message
+- `agent_run_start`: Agent starts execution
+- `assistant_streaming_message`: Real-time streaming message chunks
+- `tool_call`: Tool call starts
 - `tool_result`: Tool execution results
-- `assistant_streaming_message`: Streaming message chunks
+- `assistant_message`: Complete assistant message
+- `agent_run_end`: Agent execution ends
+
+Streaming mode is particularly suitable for building real-time UI interfaces, letting users see the Agent's "thinking process".
 
 ### Event Types
 
@@ -239,35 +329,282 @@ interface StreamingMessage {
 }
 ```
 
-### Error Handling
+### Utility Methods
+
+#### Direct LLM Calls
+
+Besides the complete Agent workflow, you can also directly call the currently configured LLM:
+
+```ts
+// Non-streaming call
+const response = await agent.callLLM({
+  messages: [
+    { role: 'user', content: 'Hello' }
+  ],
+  temperature: 0.5,
+});
+
+// Streaming call
+const stream = await agent.callLLM({
+  messages: [
+    { role: 'user', content: 'Write a poem' }
+  ],
+  stream: true,
+});
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content || '');
+}
+```
+
+#### Get Available Tools
+
+```ts
+// Get all registered tools
+const allTools = agent.getTools();
+
+// Get tools processed through hooks
+const availableTools = await agent.getAvailableTools();
+
+console.log(`${availableTools.length} tools available`);
+```
+
+#### Generate Conversation Summary
+
+```ts
+const summary = await agent.generateSummary({
+  messages: [
+    { role: 'user', content: "How's the weather today?" },
+    { role: 'assistant', content: 'Today is sunny with 22°C temperature.' },
+  ],
+});
+
+console.log(summary.summary); // "Weather Query"
+```
+
+#### Execution Control
+
+```ts
+// Check Agent status
+console.log(agent.status()); // 'idle' | 'running' | 'error'
+
+// Get current iteration count
+console.log(agent.getCurrentLoopIteration());
+
+// Abort execution
+if (agent.status() === 'running') {
+  agent.abort();
+}
+
+// Resource cleanup
+await agent.dispose();
+```
+
+### Advanced Configuration Examples
+
+#### Production Environment Configuration
+
+```ts
+const productionAgent = new Agent({
+  // Basic configuration
+  name: 'WeatherAssistant',
+  id: 'weather-v1.0',
+  instructions: `You are a professional weather assistant. Please follow these principles:
+1. Always get user location first, then query weather
+2. Provide detailed but concise weather information
+3. If data is inaccurate, please indicate
+4. Reply with a friendly tone`,
+  
+  // Model configuration
+  model: {
+    provider: 'openai',
+    id: 'gpt-4o',
+    apiKey: process.env.OPENAI_API_KEY!, // From environment variable
+  },
+  temperature: 0.3, // More deterministic responses
+  maxTokens: 2000,
+  
+  // Tool configuration
+  tools: [locationTool, weatherTool, alertTool],
+  toolCallEngine: 'native',
+  tool: {
+    exclude: ['dangerousTool'], // Exclude specific tools
+  },
+  
+  // Execution control
+  maxIterations: 10, // Limit iterations
+  context: {
+    maxImagesCount: 3, // Limit image count
+  },
+  
+  // Monitoring configuration
+  logLevel: LogLevel.INFO,
+  metric: {
+    enable: true, // Enable performance metrics
+  },
+  
+  // Advanced options
+  enableStreamingToolCallEvents: true, // Debug mode
+});
+```
+
+#### Multi-Model Switching
+
+```ts
+// Support runtime model switching
+const response1 = await agent.run({
+  input: "Analyze this image",
+  model: {
+    provider: 'openai',
+    id: 'gpt-4o', // Vision model
+  },
+});
+
+const response2 = await agent.run({
+  input: "Generate code",
+  model: {
+    provider: 'anthropic',
+    id: 'claude-3-5-sonnet-20241022', // Code generation model
+  },
+});
+```
+
+#### Error Handling and Retry
 
 ```ts
 try {
   const response = await agent.run({
     input: "How's the weather today?",
+    // Add timeout control
+    abortSignal: AbortSignal.timeout(30000),
   });
 } catch (error) {
-  console.error('Agent execution failed:', error);
+  if (error.name === 'AbortError') {
+    console.log('Request timeout');
+  } else {
+    console.error('Agent execution failed:', error.message);
+  }
 }
 ```
 
-### Advanced Configuration
+### Lifecycle Hooks
+
+`@tarko/agent` provides rich hooks for customizing Agent behavior:
 
 ```ts
-const agent = new Agent({
-  tools: [weatherTool, locationTool],
-  instructions: 'You are a helpful weather assistant.',
-  model: {
-    provider: 'openai',
-    id: 'gpt-4o',
-    apiKey: process.env.OPENAI_API_KEY,
-  },
-  temperature: 0.7,
-  maxTokens: 1000,
-  maxIterations: 20,
-  toolCallEngine: 'native',
-  logLevel: LogLevel.DEBUG,
+class CustomAgent extends Agent {
+  async onBeforeToolCall(sessionId, toolCall, args) {
+    console.log(`Preparing to call tool: ${toolCall.name}`);
+    // Can modify arguments
+    return { ...args, timestamp: Date.now() };
+  }
+  
+  async onAfterToolCall(sessionId, toolCall, result) {
+    console.log(`Tool call completed: ${toolCall.name}`);
+    // Can modify result
+    return result;
+  }
+  
+  async onLLMRequest(sessionId, payload) {
+    console.log(`Sending LLM request: ${payload.messages.length} messages`);
+  }
+}
+```
+
+## Best Practices
+
+### 🎯 Choose the Right Tool Call Engine
+
+```ts
+// For models supporting function calling (recommended)
+const nativeAgent = new Agent({
+  toolCallEngine: 'native', // OpenAI, Claude, etc.
+});
+
+// For models not supporting function calling
+const promptAgent = new Agent({
+  toolCallEngine: 'prompt_engineering', // Open source models
+});
+
+// For scenarios requiring strict structured output
+const structuredAgent = new Agent({
+  toolCallEngine: 'structured_outputs',
 });
 ```
 
-For more advanced usage patterns, see the [Agent Hooks documentation](/api/hooks).
+### 🔧 Tool Design Principles
+
+```ts
+// ✅ Good tool design
+const goodTool = new Tool({
+  id: 'searchWeb',
+  description: 'Search for information on the web and return relevant results',
+  parameters: z.object({
+    query: z.string().describe('Search keywords'),
+    limit: z.number().default(5).describe('Number of results to return'),
+  }),
+  function: async ({ query, limit }) => {
+    // Implement search logic
+    return { results: [], total: 0 };
+  },
+});
+
+// ❌ Avoid this tool design
+const badTool = new Tool({
+  id: 'doEverything', // Too broad functionality
+  description: 'Do anything', // Unclear description
+  parameters: z.object({
+    input: z.any(), // Unclear parameter type
+  }),
+  function: async (input) => {
+    // Logic too complex
+  },
+});
+```
+
+### 📊 Performance Optimization
+
+```ts
+const optimizedAgent = new Agent({
+  // Limit context size
+  context: {
+    maxImagesCount: 3, // Avoid oversized context
+  },
+  
+  // Reasonable iteration count
+  maxIterations: 20, // Avoid infinite loops
+  
+  // Enable performance monitoring
+  metric: {
+    enable: true,
+  },
+  
+  // Appropriate temperature setting
+  temperature: 0.3, // Lower temperature recommended for production
+});
+```
+
+### 🛡️ Security Considerations
+
+```ts
+// Tool filtering
+const safeAgent = new Agent({
+  tools: [allTools],
+  tool: {
+    exclude: ['fileDelete', 'systemCommand'], // Exclude dangerous tools
+  },
+});
+
+// Input validation
+class SecureAgent extends Agent {
+  async onBeforeToolCall(sessionId, toolCall, args) {
+    // Validate tool parameters
+    if (toolCall.name === 'fileRead' && args.path.includes('..')) {
+      throw new Error('Path traversal attack detected');
+    }
+    return args;
+  }
+}
+```
+
+For more advanced usage patterns, see the [Agent Hooks documentation](/guide/advanced/agent-hooks).

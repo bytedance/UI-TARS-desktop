@@ -115,7 +115,7 @@ const agent = new Agent({
   model: {
     provider: 'openai',
     id: 'gpt-4o',
-    apiKey: process.env.OPENAI_API_KEY,
+    apiKey: process.env.OPENAI_API_KEY!, // 从环境变量获取
   },
   tools: [locationTool, weatherTool],
   instructions: '你是一个专业的天气助手，能够获取准确的位置和天气信息。',
@@ -401,7 +401,7 @@ const productionAgent = new Agent({
   model: {
     provider: 'openai',
     id: 'gpt-4o',
-    apiKey: process.env.OPENAI_API_KEY,
+    apiKey: process.env.OPENAI_API_KEY!, // 从环境变量获取
   },
   temperature: 0.3, // 更确定的回复
   maxTokens: 2000,
