@@ -7,3 +7,4 @@ export * from './serializeActions';
 export * from './sleep';
 export * from './standardizeNames';
 export * from './systemPromptProcessor';
+export * from './coordinateNormalizer';
