@@ -1,21 +1,21 @@
 [
   {
-    "type": "page",
+    "type": "file",
     "name": "overview",
     "label": "Overview"
   },
   {
-    "type": "page",
+    "type": "file",
     "name": "commands",
     "label": "Commands"
   },
   {
-    "type": "page",
+    "type": "file",
     "name": "configuration",
     "label": "Configuration"
   },
   {
-    "type": "page",
+    "type": "file",
     "name": "built-in-agents",
     "label": "Built-in Agents"
   }

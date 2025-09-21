@@ -1,21 +1,21 @@
 [
   {
-    "type": "page",
+    "type": "file",
     "name": "overview",
     "label": "概述"
   },
   {
-    "type": "page",
+    "type": "file",
     "name": "commands",
     "label": "命令"
   },
   {
-    "type": "page",
+    "type": "file",
     "name": "configuration",
     "label": "配置"
   },
   {
-    "type": "page",
+    "type": "file",
     "name": "built-in-agents",
     "label": "内置 Agent"
   }
