@@ -99,6 +99,24 @@ describe('buildAppConfig', () => {
       });
     });
 
+    it('should handle model displayName configuration', () => {
+      const cliArgs: AgentCLIArguments = {
+        model: {
+          provider: 'openai',
+          id: 'gpt-4',
+          displayName: 'GPT-4 Turbo',
+        },
+      };
+
+      const result = buildAppConfig(cliArgs, {});
+
+      expect(result.model).toEqual({
+        provider: 'openai',
+        id: 'gpt-4',
+        displayName: 'GPT-4 Turbo',
+      });
+    });
+
     it('should handle thinking configuration', () => {
       const cliArgs: AgentCLIArguments = {
         thinking: {

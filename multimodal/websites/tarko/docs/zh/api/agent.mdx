@@ -38,7 +38,7 @@ npm install @tarko/agent
 创建 `index.ts`：
 
 ```ts
-import { Agent, Tool, z } from '@tarko/agent';
+import { Agent, Tool, z, LogLevel } from '@tarko/agent';
 
 const locationTool = new Tool({
   id: 'getCurrentLocation',
@@ -69,6 +69,11 @@ const weatherTool = new Tool({
 });
 
 const agent = new Agent({
+  model: {
+    provider: 'openai',
+    id: 'gpt-4o',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
   tools: [locationTool, weatherTool],
 });
 
@@ -116,10 +121,13 @@ const agent = new Agent({
 #### Agent 选项
 
 - `tools`: Agent 可用的工具数组
-- `systemPrompt`: Agent 的系统提示
-- `modelProvider`: LLM 提供商的配置
-- `stream`: 启用流式响应（默认: false）
-- `maxIterations`: 最大迭代次数（默认: 10）
+- `instructions`: Agent 的系统提示（不是 `systemPrompt`）
+- `model`: Model 配置（不是 `modelProvider`）
+- `maxIterations`: 最大迭代次数（默认: 1000，不是 10）
+- `temperature`: LLM 温度（默认: 0.7）
+- `maxTokens`: 每次请求的 Token 限制（默认: 1000）
+- `toolCallEngine`: 工具调用引擎类型（'native' | 'prompt_engineering' | 'structured_outputs'）
+- `logLevel`: 调试的日志级别
 
 ### Tool
 
@@ -149,7 +157,7 @@ const locationTool = new Tool({
 
 ### 流式模式
 
-启用 `stream: true`：
+在上面的基础示例中，如果你启用 `stream: true`：
 
 ```ts
 async function main() {
@@ -246,16 +254,17 @@ try {
 ```ts
 const agent = new Agent({
   tools: [weatherTool, locationTool],
-  systemPrompt: '你是一个有用的天气助手。',
-  modelProvider: {
+  instructions: '你是一个有用的天气助手。',
+  model: {
+    provider: 'openai',
+    id: 'gpt-4o',
     apiKey: process.env.OPENAI_API_KEY,
-    baseURL: 'https://api.openai.com/v1',
-    model: 'gpt-4',
-    temperature: 0.7,
-    maxTokens: 1000,
   },
-  maxIterations: 5,
-  stream: true,
+  temperature: 0.7,
+  maxTokens: 1000,
+  maxIterations: 20,
+  toolCallEngine: 'native',
+  logLevel: LogLevel.DEBUG,
 });
 ```
 
