@@ -22,7 +22,8 @@
     "@tarko/agent-ui-builder": "workspace:*",
     "@tarko/context-engineer": "workspace:*",
     "mongoose": "^8.8.4",
-    "transliteration": "^2.3.5"
+    "transliteration": "^2.3.5",
+    "multer": "^1.4.5-lts.1"
   },
   "devDependencies": {
     "@agent-infra/shared": "0.0.2",
@@ -33,6 +34,7 @@
     "@tarko/shared-utils": "workspace:*",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
+    "@types/multer": "^1.4.12",
     "@types/node": "22.15.30",
     "@types/supertest": "^6.0.2",
     "cors": "^2.8.5",
