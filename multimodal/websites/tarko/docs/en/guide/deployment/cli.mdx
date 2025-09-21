@@ -5,7 +5,7 @@ description: Deploy Tarko Agents using the CLI
 
 # CLI Deployment
 
-The **Tarko Agent CLI** provides a simple way to deploy and run Tarko-based Agents in various environments. Use `tarko run [agent]` to create headless or headful Agent runtime environments.
+The **Tarko Agent CLI** provides a flexible framework for deploying and running Tarko-based Agents in various environments. It supports multiple deployment modes from interactive development to production servers.
 
 ## Installation
 
@@ -21,147 +21,236 @@ Or use with npx:
 npx @tarko/agent-cli run my-agent
 ```
 
-## Basic Usage
+## Core Commands
 
-### Run an Agent
+### `tarko` / `tarko run`
+
+Launches **interactive Web UI** for real-time conversation and file browsing:
 
 ```bash
-# Run agent in current directory
-tarko run
+# Start interactive Web UI (default)
+tarko
 
-# Run specific agent
-tarko run ./my-agent
+# Run with specific agent
+tarko run ./my-agent.js
 
-# Run with custom configuration
-tarko run --config ./custom-config.json
+# Run with built-in agents
+tarko run agent-tars  # Agent TARS
+tarko run omni-tars   # Omni-TARS
+tarko run mcp-agent   # MCP Agent
+
+# Run with custom port and auto-open browser
+tarko run --port 8888 --open
 ```
 
-### Development Mode
+### `tarko serve`
+
+Starts **headless API server** for system integration:
 
 ```bash
-# Run in development mode with hot reload
-tarko run --dev
+# Start headless server
+tarko serve
 
-# Run with debug logging
-tarko run --debug
+# Start server with specific agent
+tarko serve ./my-agent
 
-# Run with specific port
-tarko run --port 3001
+# Start server with custom configuration
+tarko serve --config ./custom-config.json --port 8888
+# API available at: http://localhost:8888/api/v1/
+```
+
+### `tarko run --headless`
+
+**Silent mode** execution with stdout output, perfect for scripting:
+
+```bash
+# Direct input with text output (default)
+tarko run --headless --input "Analyze current directory structure"
+
+# Pipeline input
+echo "Summarize this code" | tarko run --headless
+
+# JSON output for programmatic use
+tarko run --headless --input "Analyze files" --format json
+
+# Include debug logs
+tarko run --headless --input "Analyze files" --include-logs
+
+# Disable cache for fresh execution
+tarko run --headless --input "Analyze files" --use-cache false
+```
+
+### `tarko request`
+
+Direct **LLM requests** for debugging and testing:
+
+```bash
+# Basic request
+tarko request --provider openai --model gpt-4 --body '{"messages":[{"role":"user","content":"Hello"}]}'
+
+# With custom API key and base URL
+tarko request --provider openai --model gpt-4 --apiKey sk-xxx --baseURL https://api.openai.com/v1 --body request.json
+
+# Streaming mode
+tarko request --provider openai --model gpt-4 --body request.json --stream
+
+# Reasoning mode (for supported models)
+tarko request --provider openai --model o1-preview --body request.json --thinking
+
+# Semantic output format
+tarko request --provider openai --model gpt-4 --body request.json --format semantic
+```
+
+### `tarko workspace`
+
+**Workspace management** utilities:
+
+```bash
+tarko workspace --init     # Initialize new workspace
+tarko workspace --open     # Open workspace in VSCode
+tarko workspace --enable   # Enable global workspace
+tarko workspace --disable  # Disable global workspace
+tarko workspace --status   # Show workspace status
+```
+
+## Built-in Agents
+
+Tarko CLI includes several built-in agents for immediate use:
+
+- **`agent-tars`** - Agent TARS: Advanced task automation and reasoning system
+- **`omni-tars`** - Omni-TARS: Multi-modal agent with comprehensive capabilities
+- **`mcp-agent`** - MCP Agent: Model Context Protocol agent for tool integration
+
+```bash
+# Use built-in agents in any mode
+tarko run agent-tars
+tarko serve omni-tars --port 8888
+tarko run mcp-agent --headless --input "List available tools"
 ```
 
 ## Configuration
 
-### CLI Configuration File
+### Configuration Files
 
-Create a `tarko.config.js` file:
+Supports multiple formats with auto-discovery of `tarko.config.{ts,yaml,json}`:
 
-```javascript
-module.exports = {
-  name: 'MyAgent',
-  description: 'A helpful assistant',
-  
-  // Runtime configuration
-  runtime: {
-    port: 3000,
-    host: '0.0.0.0',
-    mode: 'production' // or 'development'
-  },
-  
-  // Model configuration
+```typescript
+// tarko.config.ts
+import { AgentAppConfig } from '@tarko/interface';
+
+const config: AgentAppConfig = {
   model: {
     provider: 'openai',
+    id: 'gpt-4',
     apiKey: process.env.OPENAI_API_KEY,
-    model: 'gpt-4'
   },
-  
-  // Tools
-  tools: [
-    '@tarko/tools/file-system',
-    '@tarko/tools/browser',
-    './custom-tools/weather'
-  ],
-  
-  // UI configuration
-  ui: {
-    enabled: true,
-    theme: 'default',
-    title: 'My Agent'
-  }
+  workspace: './workspace',
+  server: { port: 8888 },
 };
+
+export default config;
+```
+
+```yaml
+# tarko.config.yaml
+model:
+  provider: openai
+  id: gpt-4
+  apiKey: ${OPENAI_API_KEY}
+workspace: ./workspace
+server:
+  port: 8888
+```
+
+```json
+{
+  "model": {
+    "provider": "openai",
+    "id": "gpt-4",
+    "apiKey": "${OPENAI_API_KEY}"
+  },
+  "workspace": "./workspace",
+  "server": {
+    "port": 8888
+  }
+}
+```
+
+### CLI Options
+
+```bash
+# Model configuration
+tarko --model.provider openai --model.id gpt-4 --model.apiKey sk-xxx
+
+# Server settings
+tarko serve --port 3000
+
+# Workspace path
+tarko --workspace ./my-workspace
+
+# Debug mode
+tarko --debug
 ```
 
 ### Environment Variables
 
 ```bash
 # Model configuration
-export TARKO_MODEL_PROVIDER=openai
-export TARKO_MODEL_API_KEY=your-api-key
-export TARKO_MODEL_NAME=gpt-4
+export OPENAI_API_KEY=your-api-key
+export ANTHROPIC_API_KEY=your-api-key
 
-# Runtime configuration
+# Server configuration
 export TARKO_PORT=3000
 export TARKO_HOST=0.0.0.0
-export TARKO_MODE=production
 
-# UI configuration
-export TARKO_UI_ENABLED=true
-export TARKO_UI_THEME=default
+# Debug settings
+export DEBUG=tarko:*
 ```
+
+### Configuration Priority
+
+1. **CLI arguments** (highest)
+2. **Workspace config**
+3. **User config file** (`--config`)
+4. **Remote config URL**
+5. **Default config** (lowest)
 
 ## Deployment Modes
 
-### Headless Mode
+### Interactive Development
 
-Run without UI for API-only access:
-
-```bash
-tarko run --headless
-```
-
-Configuration:
-
-```javascript
-module.exports = {
-  runtime: {
-    mode: 'headless',
-    api: {
-      enabled: true,
-      cors: true,
-      rateLimit: {
-        windowMs: 15 * 60 * 1000, // 15 minutes
-        max: 100 // limit each IP to 100 requests per windowMs
-      }
-    }
-  },
-  ui: {
-    enabled: false
-  }
-};
-```
-
-### Headful Mode
-
-Run with web UI:
+For development and testing with Web UI:
 
 ```bash
-tarko run --ui
+# Start with UI (default behavior)
+tarko run
+
+# With specific agent and port
+tarko run ./my-agent --port 8888 --open
 ```
 
-Configuration:
+### Headless Server
 
-```javascript
-module.exports = {
-  ui: {
-    enabled: true,
-    title: 'My Agent',
-    theme: 'default',
-    customization: {
-      logo: './assets/logo.png',
-      primaryColor: '#007bff',
-      layout: 'sidebar' // or 'topbar'
-    }
-  }
-};
+For production API deployment:
+
+```bash
+# Start API server
+tarko serve --port 3000
+
+# With specific configuration
+tarko serve --config production.config.ts --port 3000
+```
+
+### Scripting Mode
+
+For automation and CI/CD pipelines:
+
+```bash
+# One-shot execution
+tarko run --headless --input "Analyze this project" --format json
+
+# Pipeline processing
+cat input.txt | tarko run --headless --format text > output.txt
 ```
 
 ## Production Deployment
@@ -187,7 +276,8 @@ RUN npm install -g @tarko/agent-cli
 
 EXPOSE 3000
 
-CMD ["tarko", "run", "--port", "3000", "--host", "0.0.0.0"]
+# Use serve for production deployment
+CMD ["tarko", "serve", "--port", "3000"]
 ```
 
 Build and run:
@@ -208,13 +298,17 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - TARKO_MODEL_PROVIDER=openai
-      - TARKO_MODEL_API_KEY=${OPENAI_API_KEY}
-      - TARKO_MODEL_NAME=gpt-4
-      - TARKO_MODE=production
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
     volumes:
-      - ./data:/app/data
+      - ./workspace:/app/workspace
+      - ./logs:/app/logs
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   redis:
     image: redis:alpine
@@ -234,18 +328,20 @@ volumes:
 // ecosystem.config.js
 module.exports = {
   apps: [{
-    name: 'my-agent',
+    name: 'tarko-agent',
     script: 'tarko',
-    args: 'run --port 3000',
+    args: 'serve --port 3000',
     instances: 1,
     autorestart: true,
     watch: false,
     max_memory_restart: '1G',
     env: {
       NODE_ENV: 'production',
-      TARKO_MODEL_PROVIDER: 'openai',
-      TARKO_MODEL_API_KEY: process.env.OPENAI_API_KEY
-    }
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY
+    },
+    error_file: './logs/err.log',
+    out_file: './logs/out.log',
+    log_file: './logs/combined.log'
   }]
 };
 ```
@@ -259,22 +355,141 @@ pm2 save
 pm2 startup
 ```
 
+### Kubernetes
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tarko-agent
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: tarko-agent
+  template:
+    metadata:
+      labels:
+        app: tarko-agent
+    spec:
+      containers:
+      - name: tarko-agent
+        image: my-agent:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-keys
+              key: openai
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /api/v1/health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tarko-agent-service
+spec:
+  selector:
+    app: tarko-agent
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 3000
+  type: LoadBalancer
+```
+
+## Advanced Features
+
+### Tool & MCP Server Filtering
+
+Filter available tools and MCP servers via configuration:
+
+```typescript
+// In config
+const config = {
+  tool: {
+    include: ['file_*', 'web_*'],
+    exclude: ['dangerous_*'],
+  },
+  mcpServer: {
+    include: ['filesystem', 'browser'],
+    exclude: ['experimental_*'],
+  },
+};
+```
+
+```bash
+# Via CLI
+tarko --tool.include "file_*,web_*" --tool.exclude "dangerous_*"
+tarko --mcpServer.include "filesystem" --mcpServer.exclude "experimental_*"
+```
+
+### Event System
+
+Built on event-driven architecture for monitoring agent execution:
+
+```typescript
+const eventStream = agent.getEventStream();
+
+// Subscribe to all events
+eventStream.subscribe((event) => {
+  console.log('Event:', event.type, event);
+});
+
+// Subscribe to specific event types
+eventStream.subscribeToTypes(['tool_call', 'tool_result'], (event) => {
+  console.log('Tool event:', event);
+});
+```
+
+### Console Interception
+
+Capture and process console output during execution:
+
+```typescript
+import { ConsoleInterceptor } from '@tarko/agent-cli';
+
+const { result, logs } = await ConsoleInterceptor.run(
+  async () => {
+    return await agent.run('input');
+  },
+  {
+    silent: true,    // Suppress output
+    capture: true,   // Capture logs
+  },
+);
+```
+
 ## Monitoring and Logging
 
 ### Health Checks
 
 ```bash
-# Check agent status
-curl http://localhost:3000/health
+# Check server status
+curl http://localhost:3000/api/v1/health
 
 # Check detailed status
-curl http://localhost:3000/status
+curl http://localhost:3000/api/v1/status
 ```
 
 ### Logging Configuration
 
-```javascript
-module.exports = {
+```typescript
+// In config
+const config = {
   logging: {
     level: 'info', // debug, info, warn, error
     format: 'json', // json, text
@@ -291,12 +506,11 @@ module.exports = {
 };
 ```
 
-### Metrics
+### Metrics Collection
 
-Enable metrics collection:
-
-```javascript
-module.exports = {
+```typescript
+// Enable metrics
+const config = {
   metrics: {
     enabled: true,
     endpoint: '/metrics',
@@ -335,6 +549,7 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
+        proxy_read_timeout 86400;
     }
 }
 ```
@@ -352,33 +567,68 @@ lsof -i :3000
 kill -9 <PID>
 
 # Or use different port
-tarko run --port 3001
+tarko serve --port 8080
 ```
 
 **Permission errors:**
 ```bash
-# Run with sudo (not recommended)
-sudo tarko run
+# Use non-privileged port
+tarko serve --port 8080
 
-# Or change port to non-privileged
-tarko run --port 8080
+# Or adjust file permissions
+chmod +x ./my-agent.js
 ```
 
 **Memory issues:**
 ```bash
 # Increase Node.js memory limit
-NODE_OPTIONS="--max-old-space-size=4096" tarko run
+NODE_OPTIONS="--max-old-space-size=4096" tarko serve
+```
+
+**Agent not found:**
+```bash
+# Verify agent path
+ls -la ./my-agent.js
+
+# Use absolute path
+tarko run /full/path/to/my-agent.js
+
+# Check built-in agents
+tarko run agent-tars
 ```
 
 ### Debug Mode
 
 ```bash
 # Enable debug logging
-DEBUG=tarko:* tarko run --debug
+DEBUG=tarko:* tarko serve --debug
 
 # Enable Node.js inspector
-tarko run --inspect
+tarko serve --inspect
 
-# Enable verbose output
-tarko run --verbose
+# Verbose output
+tarko serve --debug --verbose
+
+# Check configuration
+tarko --debug --dry-run
 ```
+
+### Performance Optimization
+
+```bash
+# Use clustering for production
+NODE_ENV=production tarko serve --port 3000
+
+# Enable caching
+tarko serve --cache-enabled
+
+# Optimize memory usage
+NODE_OPTIONS="--max-old-space-size=2048 --gc-interval=100" tarko serve
+```
+
+## Next Steps
+
+- [Agent Server API](/guide/deployment/server) - Understand the server architecture
+- [Agent Configuration](/guide/basic/configuration) - Learn about advanced configuration
+- [Tool Integration](/guide/basic/tool-call-engine) - Add custom tools to your agents
+- [Examples](/examples/deployment) - See deployment examples
