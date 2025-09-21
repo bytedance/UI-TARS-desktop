@@ -253,6 +253,59 @@ function extractScriptData(panelContent: StandardPanelContent): {
       }
     }
 
+    /**
+     * Handle run_script tool results
+     * 
+     * The run_script tool typically has:
+     * - arguments: { script: string, interpreter: string }
+     * - source: execution result (could be string, array, or object)
+     */
+    if (panelContent.title === 'run_script' && panelContent.arguments) {
+      const { script, interpreter = 'python' } = panelContent.arguments;
+      
+      if (script && typeof script === 'string') {
+        let stdout = '';
+        let stderr = '';
+        let exitCode = 0;
+
+        // Handle different source formats
+        if (panelContent.source) {
+          if (typeof panelContent.source === 'string') {
+            // Simple string output
+            stdout = panelContent.source;
+          } else if (Array.isArray(panelContent.source)) {
+            // Array format - look for text content
+            const textContent = panelContent.source.find(
+              (item) =>
+                typeof item === 'object' &&
+                item !== null &&
+                'type' in item &&
+                item.type === 'text' &&
+                'text' in item,
+            );
+            if (textContent && 'text' in textContent && typeof textContent.text === 'string') {
+              stdout = textContent.text;
+            }
+          } else if (typeof panelContent.source === 'object' && panelContent.source !== null) {
+            // Object format - extract relevant fields
+            const sourceObj = panelContent.source as any;
+            stdout = sourceObj.stdout || sourceObj.output || sourceObj.result || '';
+            stderr = sourceObj.stderr || sourceObj.error || '';
+            exitCode = typeof sourceObj.exitCode === 'number' ? sourceObj.exitCode : 
+                      (sourceObj.success === false || stderr ? 1 : 0);
+          }
+        }
+
+        return {
+          script,
+          interpreter: String(interpreter),
+          stdout: stdout || undefined,
+          stderr: stderr || undefined,
+          exitCode,
+        };
+      }
+    }
+
     // Try arguments first for other tools
     if (panelContent.arguments) {
       const { script, interpreter = 'python', stdout, stderr, exitCode } = panelContent.arguments;
