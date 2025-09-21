@@ -38,19 +38,19 @@ npm install
 
 **Problem**: Agent fails to start with configuration errors.
 
-**Solution**: Check your `tarko.config.ts`:
+**Solution**: Check your Agent configuration:
 
 ```typescript
 // Ensure all required fields are present
-export default defineConfig({
-  agent: {
-    name: 'MyAgent',        // Required
-    systemPrompt: '...',    // Required
-  },
-  modelProvider: {
+import { Agent } from '@tarko/agent';
+
+const agent = new Agent({
+  model: {
     provider: 'openai',     // Required
+    id: 'gpt-4o',          // Required
     apiKey: process.env.OPENAI_API_KEY, // Required
   },
+  instructions: '...',      // System prompt
 });
 ```
 
@@ -91,11 +91,11 @@ AGENT_PORT=3001 tarko run
 **Solution**: Ensure tool is properly registered:
 
 ```typescript
-import { searchTool } from '@tarko/tools';
+import { Agent, Tool } from '@tarko/agent';
 
-export default defineConfig({
+const agent = new Agent({
   tools: [
-    searchTool(),  // Make sure tool is included
+    myTool,  // Make sure tool is included
   ],
 });
 ```
@@ -124,12 +124,10 @@ BROWSER_HEADLESS=true tarko run
 **Solution**: Check file permissions and workspace configuration:
 
 ```typescript
-export default defineConfig({
+const agent = new Agent({
+  workspace: '/path/to/workspace',  // Specify workspace directory
   tools: [
-    fileSystemTool({
-      allowedPaths: ['/path/to/workspace'],  // Specify allowed paths
-      readonly: false,                       // Allow write operations
-    }),
+    fileSystemTool,  // Include file system tool
   ],
 });
 ```
@@ -143,17 +141,15 @@ export default defineConfig({
 **Solution**: Optimize configuration:
 
 ```typescript
-export default defineConfig({
-  modelProvider: {
+const agent = new Agent({
+  model: {
     provider: 'openai',
-    model: 'gpt-4o-mini',  // Use faster model
-    temperature: 0.1,      // Lower temperature for faster responses
-    maxTokens: 1000,       // Limit response length
+    id: 'gpt-4o-mini',     // Use faster model
+    apiKey: process.env.OPENAI_API_KEY,
   },
-  agent: {
-    maxIterations: 5,      // Limit thinking loops
-    timeout: 30000,        // 30 second timeout
-  },
+  temperature: 0.1,        // Lower temperature for faster responses
+  maxTokens: 1000,         // Limit response length
+  maxIterations: 5,        // Limit thinking loops
 });
 ```
 
@@ -164,10 +160,10 @@ export default defineConfig({
 **Solution**: Configure context limits:
 
 ```typescript
-export default defineConfig({
-  agent: {
-    maxContextLength: 8000,    // Limit context size
-    contextStrategy: 'sliding', // Use sliding window
+const agent = new Agent({
+  maxTokens: 2000,         // Limit response length
+  context: {
+    maxImagesCount: 5,     // Limit images in context
   },
 });
 ```
@@ -210,33 +206,32 @@ npx tsc --noEmit
 
 ### Enable Debug Logging
 
-```bash
-# Set log level to debug
-AGENT_LOG_LEVEL=debug tarko run
+```typescript
+// Enable debug logging in Agent configuration
+import { LogLevel } from '@tarko/agent';
 
-# Or in configuration
-export default defineConfig({
-  agent: {
-    logLevel: 'debug',
-  },
+const agent = new Agent({
+  logLevel: LogLevel.DEBUG,
 });
 ```
 
 ### Inspect Agent State
 
 ```typescript
-import { useAgentHooks } from '@tarko/agent';
-
-export default defineConfig({
-  hooks: {
-    onBeforeToolCall: (context) => {
-      console.log('Tool call:', context.toolName, context.args);
-    },
-    onAfterToolCall: (context) => {
-      console.log('Tool result:', context.result);
-    },
-  },
+// Use streaming to inspect agent execution
+const response = await agent.run({
+  input: 'Your query',
+  stream: true,
 });
+
+for await (const event of response) {
+  if (event.type === 'tool_call') {
+    console.log('Tool call:', event.name, event.arguments);
+  }
+  if (event.type === 'tool_result') {
+    console.log('Tool result:', event.content);
+  }
+}
 ```
 
 ### Network Issues
@@ -285,5 +280,5 @@ tail -f ./logs/tarko.log
 If you're still experiencing issues:
 
 1. Check the [Configuration Guide](/guide/basic/configuration)
-2. Review [Agent Hooks](/guide/advanced/agent-hooks) for debugging
-3. Explore [Agent Hooks](/guide/advanced/agent-hooks) for debugging
+2. Review [Event Stream](/guide/basic/event-stream) for debugging
+3. Explore [Agent Hooks](/guide/advanced/agent-hooks) for advanced debugging
