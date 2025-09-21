@@ -6,7 +6,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { AgentOptions } from '@tarko/agent-interface';
-import { Factors, BaseAction, Coordinates } from './actions';
+import { Factors, BaseAction, Coordinates, SupportedActionType, ActionMetadata } from './actions';
 
 /**
  * Type definition for parsed GUI response structure
@@ -46,18 +46,11 @@ export type NormalizeCoordinates = (
 export type CustomActionParser = (prediction: string) => ParsedGUIResponse | null;
 
 /**
- * Type definition for a function that converts BaseAction array to string representation
- * @param actions - Array of BaseAction objects to be converted to string
- * @returns String representation of the actions
+ * Function type for serializing supported actions to string format
+ * @param actions - Array of supported action types
+ * @returns String representation of the actions for agent processing
  */
-export type SerializeSupportedActions = (
-  actions: Array<
-    Pick<BaseAction, 'type' | 'inputs'> & {
-      description: string;
-      example?: Record<string, unknown>;
-    }
-  >,
-) => string;
+export type SerializeSupportedActions = (actions: Array<SupportedActionType>) => string;
 
 export type ExecuteParams = {
   /** Required actions to execute */
@@ -87,7 +80,7 @@ export const ACTION_SPACE_PLACEHOLDER = 'action_space';
 export interface SystemPromptTemplate {
   /**
    * Template string with placeholders. Must include an action space placeholder
-   * `{${ACTION_SPACE_PLACEHOLDER}}` that will be replaced with the string representation of available actions
+   * `{{${ACTION_SPACE_PLACEHOLDER}}}` that will be replaced with the string representation of available actions
    */
   template: string;
 
