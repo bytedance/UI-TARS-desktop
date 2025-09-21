@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { LLMRequestHookPayload, LogLevel, Tool } from '@tarko/agent';
+import { LLMRequestHookPayload, ChatCompletionContentPart, LogLevel, Tool } from '@tarko/agent';
 import { GUIAgentToolCallEngine } from './ToolCallEngine';
 import { SYSTEM_PROMPT } from './prompts';
 import { getScreenInfo, setScreenInfo } from './shared';
@@ -91,35 +91,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent {
   }
 
   async onEachAgentLoopStart(sessionId: string) {
-    const output = await this.operator!.doScreenshot();
-    const base64Tool = new Base64ImageParser(output.base64);
-    const base64Uri = base64Tool.getDataUri();
-    if (!base64Uri) {
-      this.logger.error('Failed to get base64 image uri');
-      return;
-    }
-
-    const event = this.eventStream.createEvent('environment_input', {
-      description: 'Browser Screenshot',
-      content: [
-        {
-          type: 'image_url',
-          image_url: {
-            url: base64Uri,
-          },
-        },
-      ],
-    });
-
-    // Extract image dimensions from screenshot
-    const dimensions = base64Tool.getDimensions();
-    if (dimensions) {
-      setScreenInfo({
-        screenWidth: dimensions.width,
-        screenHeight: dimensions.height,
-      });
-    }
-    this.eventStream.sendEvent(event);
+    this.logger.info('onEachAgentLoopStart', sessionId);
   }
 
   async onAgentLoopEnd(id: string): Promise<void> {
@@ -132,5 +104,61 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent {
     args: unknown,
   ) {
     return args;
+  }
+
+  async onAfterToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    result: unknown,
+  ): Promise<void> {
+    this.logger.info('onAfterToolCall toolCall', JSON.stringify(toolCall));
+
+    if (toolCall.name !== GUI_ADAPTED_TOOL_NAME) {
+      this.logger.info('onAfterToolCall: skipping screenshot');
+      return;
+    }
+
+    const output = await this.operator!.doScreenshot();
+    if (!output) {
+      this.logger.error('Failed to get screenshot');
+      return;
+    }
+
+    const base64Tool = new Base64ImageParser(output.base64);
+    const base64Uri = base64Tool.getDataUri();
+    if (!base64Uri) {
+      this.logger.error('Failed to get base64 image uri');
+      return;
+    }
+
+    const content: ChatCompletionContentPart[] = [
+      {
+        type: 'image_url',
+        image_url: {
+          url: base64Uri,
+        },
+      },
+    ];
+
+    if (output?.url) {
+      content.push({
+        type: 'text',
+        text: `The current page's url: ${output.url}`,
+      });
+    }
+
+    const eventStream = this.getEventStream();
+    const events = eventStream.getEvents();
+    this.logger.info('onAfterToolCall events length:', events.length);
+
+    const event = eventStream.createEvent('environment_input', {
+      description: 'Browser Screenshot',
+      content,
+      metadata: {
+        type: 'screenshot',
+        url: output?.url,
+      },
+    });
+    eventStream.sendEvent(event);
   }
 }
