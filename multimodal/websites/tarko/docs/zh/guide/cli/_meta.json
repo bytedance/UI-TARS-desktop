@@ -1,0 +1,22 @@
+[
+  {
+    "type": "page",
+    "name": "overview",
+    "label": "概述"
+  },
+  {
+    "type": "page",
+    "name": "commands",
+    "label": "命令"
+  },
+  {
+    "type": "page",
+    "name": "configuration",
+    "label": "配置"
+  },
+  {
+    "type": "page",
+    "name": "built-in-agents",
+    "label": "内置 Agent"
+  }
+]

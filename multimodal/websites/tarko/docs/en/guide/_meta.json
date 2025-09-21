@@ -15,6 +15,13 @@
   },
   {
     "type": "dir",
+    "name": "cli",
+    "label": "CLI",
+    "collapsible": false,
+    "collapsed": false
+  },
+  {
+    "type": "dir",
     "name": "tool",
     "label": "Tool",
     "collapsible": false,

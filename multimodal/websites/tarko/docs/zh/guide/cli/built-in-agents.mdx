@@ -1,0 +1,364 @@
+---
+title: 内置 Agent
+description: 使用 Tarko CLI 包含的预构建 Agent
+---
+
+# 内置 Agent
+
+Tarko CLI 包含几个即用型 Agent，展示了不同的能力和使用场景。这些 Agent 无需任何额外设置即可立即使用。
+
+## 可用 Agent
+
+### `agent-tars`
+
+**Agent TARS** - 高级任务自动化和推理系统，专为复杂问题解决和多步骤工作流而设计。
+
+#### 能力
+- 高级推理和规划
+- 多步骤任务执行
+- 上下文感知决策
+- 工具编排
+- 错误处理和恢复
+
+#### 使用场景
+- 复杂自动化任务
+- 多步骤工作流
+- 问题解决场景
+- 研究和分析
+- 代码生成和调试
+
+#### 用法
+
+```bash
+# 交互模式带 Web UI
+tarko run agent-tars
+
+# 无头服务器部署
+tarko serve agent-tars --port 8080
+
+# 脚本模式
+tarko run agent-tars --headless --input "分析这个代码库并提出改进建议"
+
+# 使用自定义配置
+tarko run agent-tars --config ./tars-config.ts
+```
+
+#### 示例任务
+
+```bash
+# 代码分析和改进
+tarko run agent-tars --headless --input "审查 ./src 中的代码并提供优化建议"
+
+# 项目设置自动化
+tarko run agent-tars --headless --input "使用最佳实践设置一个新的 React TypeScript 项目"
+
+# 文档生成
+tarko run agent-tars --headless --input "为这个 API 生成全面的文档"
+
+# 测试策略
+tarko run agent-tars --headless --input "为这个应用程序创建测试策略"
+```
+
+### `omni-tars`
+
+**Omni-TARS** - 多模态 Agent，具有处理文本、图像、文件和网络交互的综合能力。
+
+#### 能力
+- 多模态输入处理（文本、图像、文档）
+- 网络浏览和抓取
+- 文件系统操作
+- 图像分析和生成
+- 文档处理
+- API 集成
+
+#### 使用场景
+- 内容创建和编辑
+- 网络研究和数据收集
+- 文档分析和处理
+- 图像分析和操作
+- 多模态工作流
+
+#### 用法
+
+```bash
+# 交互模式带 Web UI
+tarko run omni-tars
+
+# 无头服务器部署
+tarko serve omni-tars --port 8080
+
+# 带文件输入的脚本模式
+tarko run omni-tars --headless --input "分析 ./assets 中的图像并创建摘要"
+
+# 网络研究模式
+tarko run omni-tars --headless --input "研究 AI 的最新趋势并创建报告"
+```
+
+#### 示例任务
+
+```bash
+# 图像分析
+tarko run omni-tars --headless --input "分析 ./image.png 中的截图并描述你看到的内容"
+
+# 网络研究
+tarko run omni-tars --headless --input "研究量子计算的最新发展"
+
+# 文档处理
+tarko run omni-tars --headless --input "总结 ./reports/ 中的 PDF 文档"
+
+# 内容创建
+tarko run omni-tars --headless --input "基于最近的新闻创建一篇关于可持续技术的博客文章"
+```
+
+### `mcp-agent`
+
+**MCP Agent** - 专门用于工具集成和外部服务连接的模型上下文协议 Agent。
+
+#### 能力
+- MCP 服务器管理
+- 工具发现和集成
+- 外部服务连接
+- 协议处理
+- 资源管理
+
+#### 使用场景
+- 工具集成测试
+- MCP 服务器开发
+- 外部 API 集成
+- 服务编排
+- 协议调试
+
+#### 用法
+
+```bash
+# 用于工具探索的交互模式
+tarko run mcp-agent
+
+# 列出可用工具和服务器
+tarko run mcp-agent --headless --input "列出所有可用工具及其能力"
+
+# 测试 MCP 服务器连接
+tarko run mcp-agent --headless --input "测试所有配置的 MCP 服务器的连接"
+
+# 工具集成工作流
+tarko serve mcp-agent --port 8080
+```
+
+#### 示例任务
+
+```bash
+# 工具发现
+tarko run mcp-agent --headless --input "发现并列出所有可用工具"
+
+# MCP 服务器状态
+tarko run mcp-agent --headless --input "检查所有 MCP 服务器的状态"
+
+# 工具测试
+tarko run mcp-agent --headless --input "使用简单的读取操作测试文件系统工具"
+
+# 集成工作流
+tarko run mcp-agent --headless --input "演示使用多个工具的工作流"
+```
+
+## Agent 比较
+
+| 功能 | agent-tars | omni-tars | mcp-agent |
+|------|------------|-----------|----------|
+| **主要焦点** | 推理和自动化 | 多模态处理 | 工具集成 |
+| **复杂性** | 高 | 中高 | 中 |
+| **使用场景** | 复杂工作流 | 内容和研究 | 工具开发 |
+| **多模态** | 有限 | 完全支持 | 有限 |
+| **网络浏览** | 是 | 是 | 有限 |
+| **文件操作** | 是 | 是 | 是 |
+| **工具集成** | 高级 | 标准 | 专业化 |
+| **MCP 支持** | 是 | 是 | 主要焦点 |
+
+## 配置
+
+### Agent 特定配置
+
+每个内置 Agent 都可以使用特定设置进行配置：
+
+```typescript
+// tarko.config.ts
+import { AgentAppConfig } from '@tarko/interface';
+
+const config: AgentAppConfig = {
+  // Agent 特定配置
+  agent: {
+    type: 'agent-tars', // 或 'omni-tars', 'mcp-agent'
+    config: {
+      // Agent 特定设置
+      maxSteps: 10,
+      timeoutMs: 30000,
+      retryAttempts: 3,
+    },
+  },
+  
+  // Agent 的模型配置
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    temperature: 0.7,
+  },
+  
+  // 特定 Agent 的工具过滤
+  tool: {
+    include: ['file_*', 'web_*'], // 自定义可用工具
+  },
+};
+
+export default config;
+```
+
+### 环境特定 Agent
+
+```bash
+# 使用 agent-tars 进行开发
+NODE_ENV=development tarko run agent-tars --debug
+
+# 使用 omni-tars 进行生产部署
+NODE_ENV=production tarko serve omni-tars --port 8080
+
+# 使用 mcp-agent 进行测试
+tarko run mcp-agent --headless --input "运行诊断"
+```
+
+## 自定义 Agent 开发
+
+虽然内置 Agent 提供了即时功能，但你也可以创建自定义 Agent：
+
+### 创建自定义 Agent
+
+```typescript
+// my-custom-agent.ts
+import { Agent } from '@tarko/agent';
+import { AgentOptions } from '@tarko/interface';
+
+class MyCustomAgent extends Agent {
+  constructor(options: AgentOptions) {
+    super({
+      ...options,
+      name: 'MyCustomAgent',
+      description: '用于特定任务的自定义 Agent',
+    });
+  }
+  
+  async processInput(input: string): Promise<string> {
+    // 自定义 Agent 逻辑
+    return `已处理：${input}`;
+  }
+}
+
+export default MyCustomAgent;
+```
+
+### 使用自定义 Agent
+
+```bash
+# 运行自定义 Agent
+tarko run ./my-custom-agent.ts
+
+# 部署自定义 Agent
+tarko serve ./my-custom-agent.ts --port 8080
+
+# 测试自定义 Agent
+tarko run ./my-custom-agent.ts --headless --input "测试输入"
+```
+
+## Agent 选择指南
+
+### 选择 `agent-tars` 当：
+- 需要复杂推理和规划
+- 处理多步骤工作流
+- 需要高级问题解决能力
+- 构建自动化系统
+- 需要复杂的错误处理
+
+### 选择 `omni-tars` 当：
+- 处理多种内容类型（文本、图像、文档）
+- 需要网络浏览和研究能力
+- 处理多媒体内容
+- 跨不同格式创建内容
+- 需要全面的工具访问
+
+### 选择 `mcp-agent` 当：
+- 开发或测试 MCP 服务器
+- 集成外部工具和服务
+- 调试协议实现
+- 构建以工具为中心的工作流
+- 需要专业的 MCP 功能
+
+## 性能考虑
+
+### 资源使用
+
+| Agent | 内存使用 | CPU 使用 | 网络使用 |
+|-------|----------|----------|----------|
+| agent-tars | 高 | 高 | 中 |
+| omni-tars | 中高 | 中 | 高 |
+| mcp-agent | 中 | 低中 | 低 |
+
+### 优化技巧
+
+```bash
+# 优化内存使用
+NODE_OPTIONS="--max-old-space-size=2048" tarko run agent-tars
+
+# 限制并发操作
+tarko run omni-tars --config ./optimized-config.ts
+
+# 使用缓存以获得更好的性能
+tarko run mcp-agent --cache-enabled
+```
+
+## 故障排除
+
+### 常见问题
+
+**找不到 Agent：**
+```bash
+# 验证 Agent 名称
+tarko run agent-tars --dry-run
+
+# 列出可用 Agent
+tarko --help
+```
+
+**性能问题：**
+```bash
+# 启用调试模式
+tarko run omni-tars --debug
+
+# 监控资源使用
+tarko run agent-tars --metrics-enabled
+```
+
+**工具访问问题：**
+```bash
+# 检查工具配置
+tarko run mcp-agent --show-config
+
+# 测试工具连接
+tarko run mcp-agent --headless --input "测试工具"
+```
+
+### 调试模式
+
+```bash
+# 调试 Agent 执行
+DEBUG=tarko:agent:* tarko run agent-tars --debug
+
+# 详细日志
+tarko run omni-tars --debug --verbose
+
+# 性能分析
+tarko run mcp-agent --debug --profile
+```
+
+## 下一步
+
+- [CLI 命令](/guide/cli/commands) - 学习所有可用的 CLI 命令
+- [配置](/guide/cli/configuration) - 高级配置选项
+- [部署](/guide/deployment/cli) - 生产部署策略
+- [Tool 集成](/guide/basic/tool-call-engine) - 为你的 Agent 添加自定义工具

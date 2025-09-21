@@ -1,0 +1,22 @@
+[
+  {
+    "type": "page",
+    "name": "overview",
+    "label": "Overview"
+  },
+  {
+    "type": "page",
+    "name": "commands",
+    "label": "Commands"
+  },
+  {
+    "type": "page",
+    "name": "configuration",
+    "label": "Configuration"
+  },
+  {
+    "type": "page",
+    "name": "built-in-agents",
+    "label": "Built-in Agents"
+  }
+]

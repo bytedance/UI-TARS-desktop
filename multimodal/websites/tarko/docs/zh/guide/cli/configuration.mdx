@@ -1,0 +1,577 @@
+---
+title: CLI 配置
+description: 配置 Tarko CLI 的完整指南
+---
+
+# CLI 配置
+
+Tarko CLI 支持多种配置格式和来源，具有清晰的优先级系统。
+
+## 配置文件
+
+Tarko CLI 按以下顺序自动发现配置文件：
+
+1. `tarko.config.ts` (TypeScript)
+2. `tarko.config.yaml` (YAML)
+3. `tarko.config.json` (JSON)
+
+### TypeScript 配置
+
+```typescript
+// tarko.config.ts
+import { AgentAppConfig } from '@tarko/interface';
+
+const config: AgentAppConfig = {
+  // 模型配置
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY,
+    baseURL: 'https://api.openai.com/v1',
+    temperature: 0.7,
+    maxTokens: 4000,
+  },
+  
+  // 工作区设置
+  workspace: './workspace',
+  
+  // 服务器配置
+  server: {
+    port: 8888,
+    host: '0.0.0.0',
+    cors: true,
+  },
+  
+  // Tool 过滤
+  tool: {
+    include: ['file_*', 'web_*'],
+    exclude: ['dangerous_*'],
+  },
+  
+  // MCP Server 过滤
+  mcpServer: {
+    include: ['filesystem', 'browser'],
+    exclude: ['experimental_*'],
+  },
+  
+  // UI 配置
+  ui: {
+    enabled: true,
+    title: 'My Agent',
+    theme: 'default',
+    autoOpen: false,
+  },
+  
+  // 日志配置
+  logging: {
+    level: 'info',
+    format: 'json',
+    output: {
+      console: true,
+      file: {
+        enabled: true,
+        path: './logs/agent.log',
+        maxSize: '10m',
+        maxFiles: 5,
+      },
+    },
+  },
+  
+  // 指标配置
+  metrics: {
+    enabled: true,
+    endpoint: '/metrics',
+    collectors: {
+      requests: true,
+      responses: true,
+      toolCalls: true,
+      errors: true,
+    },
+  },
+};
+
+export default config;
+```
+
+### YAML 配置
+
+```yaml
+# tarko.config.yaml
+model:
+  provider: openai
+  id: gpt-4
+  apiKey: ${OPENAI_API_KEY}
+  baseURL: https://api.openai.com/v1
+  temperature: 0.7
+  maxTokens: 4000
+
+workspace: ./workspace
+
+server:
+  port: 8888
+  host: 0.0.0.0
+  cors: true
+
+tool:
+  include:
+    - 'file_*'
+    - 'web_*'
+  exclude:
+    - 'dangerous_*'
+
+mcpServer:
+  include:
+    - filesystem
+    - browser
+  exclude:
+    - 'experimental_*'
+
+ui:
+  enabled: true
+  title: My Agent
+  theme: default
+  autoOpen: false
+
+logging:
+  level: info
+  format: json
+  output:
+    console: true
+    file:
+      enabled: true
+      path: ./logs/agent.log
+      maxSize: 10m
+      maxFiles: 5
+
+metrics:
+  enabled: true
+  endpoint: /metrics
+  collectors:
+    requests: true
+    responses: true
+    toolCalls: true
+    errors: true
+```
+
+### JSON 配置
+
+```json
+{
+  "model": {
+    "provider": "openai",
+    "id": "gpt-4",
+    "apiKey": "${OPENAI_API_KEY}",
+    "baseURL": "https://api.openai.com/v1",
+    "temperature": 0.7,
+    "maxTokens": 4000
+  },
+  "workspace": "./workspace",
+  "server": {
+    "port": 8888,
+    "host": "0.0.0.0",
+    "cors": true
+  },
+  "tool": {
+    "include": ["file_*", "web_*"],
+    "exclude": ["dangerous_*"]
+  },
+  "mcpServer": {
+    "include": ["filesystem", "browser"],
+    "exclude": ["experimental_*"]
+  },
+  "ui": {
+    "enabled": true,
+    "title": "My Agent",
+    "theme": "default",
+    "autoOpen": false
+  },
+  "logging": {
+    "level": "info",
+    "format": "json",
+    "output": {
+      "console": true,
+      "file": {
+        "enabled": true,
+        "path": "./logs/agent.log",
+        "maxSize": "10m",
+        "maxFiles": 5
+      }
+    }
+  },
+  "metrics": {
+    "enabled": true,
+    "endpoint": "/metrics",
+    "collectors": {
+      "requests": true,
+      "responses": true,
+      "toolCalls": true,
+      "errors": true
+    }
+  }
+}
+```
+
+## 配置优先级
+
+配置按以下优先级顺序解析（最高到最低）：
+
+1. **CLI 参数**（最高优先级）
+2. **工作区配置**
+3. **用户配置文件**（`--config`）
+4. **远程配置 URL**
+5. **默认配置**（最低优先级）
+
+### CLI 参数覆盖
+
+```bash
+# 覆盖模型配置
+tarko --model.provider openai --model.id gpt-4 --model.apiKey sk-xxx
+
+# 覆盖服务器设置
+tarko serve --port 3000 --host 0.0.0.0
+
+# 覆盖工作区
+tarko --workspace ./custom-workspace
+
+# 覆盖工具过滤
+tarko --tool.include "file_*,web_*" --tool.exclude "dangerous_*"
+```
+
+## 环境变量
+
+环境变量提供了配置文件的替代方案：
+
+### 模型配置
+
+```bash
+# API 密钥
+export OPENAI_API_KEY=your-openai-key
+export ANTHROPIC_API_KEY=your-anthropic-key
+export AZURE_OPENAI_API_KEY=your-azure-key
+export GEMINI_API_KEY=your-gemini-key
+
+# 模型设置
+export TARKO_MODEL_PROVIDER=openai
+export TARKO_MODEL_ID=gpt-4
+export TARKO_MODEL_BASE_URL=https://api.openai.com/v1
+export TARKO_MODEL_TEMPERATURE=0.7
+export TARKO_MODEL_MAX_TOKENS=4000
+```
+
+### 服务器配置
+
+```bash
+# 服务器设置
+export TARKO_PORT=3000
+export TARKO_HOST=0.0.0.0
+export TARKO_CORS=true
+
+# 工作区
+export TARKO_WORKSPACE=./my-workspace
+
+# UI 设置
+export TARKO_UI_ENABLED=true
+export TARKO_UI_TITLE="My Agent"
+export TARKO_UI_THEME=default
+export TARKO_UI_AUTO_OPEN=false
+```
+
+### 调试和日志
+
+```bash
+# 调试设置
+export DEBUG=tarko:*
+export TARKO_LOG_LEVEL=debug
+export TARKO_LOG_FORMAT=json
+
+# 指标
+export TARKO_METRICS_ENABLED=true
+export TARKO_METRICS_ENDPOINT=/metrics
+```
+
+## 配置部分
+
+### 模型配置
+
+```typescript
+model: {
+  provider: 'openai' | 'anthropic' | 'azure' | 'ollama' | 'gemini',
+  id: string,              // 模型 ID（例如 'gpt-4', 'claude-3-opus'）
+  apiKey?: string,          // API 密钥（为安全起见使用环境变量）
+  baseURL?: string,         // 自定义 API 端点
+  temperature?: number,     // 创造性（0-1）
+  maxTokens?: number,       // 最大响应令牌
+  topP?: number,            // 核采样
+  frequencyPenalty?: number,// 频率惩罚
+  presencePenalty?: number, // 存在惩罚
+  timeout?: number,         // 请求超时（毫秒）
+  retries?: number,         // 重试次数
+}
+```
+
+### 服务器配置
+
+```typescript
+server: {
+  port?: number,            // 服务器端口（默认：3000）
+  host?: string,            // 服务器主机（默认：'localhost'）
+  cors?: boolean,           // 启用 CORS（默认：true）
+  rateLimit?: {             // 速率限制
+    windowMs: number,       // 时间窗口（毫秒）
+    max: number,            // 每个窗口的最大请求数
+  },
+  ssl?: {                   // SSL 配置
+    enabled: boolean,
+    cert: string,           // 证书路径
+    key: string,            // 私钥路径
+  },
+}
+```
+
+### Tool 过滤
+
+```typescript
+tool: {
+  include?: string[],       // 要包含的工具模式
+  exclude?: string[],       // 要排除的工具模式
+}
+
+// 示例：
+// include: ['file_*', 'web_*'] - 包含所有文件和网络工具
+// exclude: ['dangerous_*'] - 排除危险工具
+// include: ['file_read', 'file_write'] - 包含特定工具
+```
+
+### MCP Server 过滤
+
+```typescript
+mcpServer: {
+  include?: string[],       // 要包含的 MCP 服务器模式
+  exclude?: string[],       // 要排除的 MCP 服务器模式
+}
+
+// 示例：
+// include: ['filesystem', 'browser'] - 包含特定服务器
+// exclude: ['experimental_*'] - 排除实验性服务器
+```
+
+### UI 配置
+
+```typescript
+ui: {
+  enabled?: boolean,        // 启用 Web UI（默认：true）
+  title?: string,           // UI 标题
+  theme?: 'default' | 'dark' | 'light',
+  autoOpen?: boolean,       // 自动打开浏览器（默认：false）
+  customization?: {
+    logo?: string,          // 自定义 logo 路径
+    primaryColor?: string,  // 主色调十六进制
+    layout?: 'sidebar' | 'topbar',
+  },
+}
+```
+
+### 日志配置
+
+```typescript
+logging: {
+  level?: 'debug' | 'info' | 'warn' | 'error',
+  format?: 'json' | 'text',
+  output?: {
+    console?: boolean,      // 输出到控制台
+    file?: {
+      enabled: boolean,
+      path: string,         // 日志文件路径
+      maxSize: string,      // 最大文件大小（例如 '10m'）
+      maxFiles: number,     // 最大文件数
+    },
+    syslog?: {              // Syslog 配置
+      enabled: boolean,
+      host: string,
+      port: number,
+      facility: string,
+    },
+  },
+}
+```
+
+### 指标配置
+
+```typescript
+metrics: {
+  enabled?: boolean,        // 启用指标收集
+  endpoint?: string,        // 指标端点（默认：'/metrics'）
+  collectors?: {
+    requests?: boolean,     // HTTP 请求指标
+    responses?: boolean,    // HTTP 响应指标
+    toolCalls?: boolean,    // 工具调用指标
+    errors?: boolean,       // 错误指标
+    memory?: boolean,       // 内存使用指标
+    cpu?: boolean,          // CPU 使用指标
+  },
+}
+```
+
+## 高级配置
+
+### 远程配置
+
+从远程 URL 加载配置：
+
+```bash
+tarko --config https://example.com/agent-config.json
+```
+
+### 环境特定配置
+
+```typescript
+// tarko.config.ts
+import { AgentAppConfig } from '@tarko/interface';
+
+const baseConfig: AgentAppConfig = {
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+  },
+};
+
+const developmentConfig: AgentAppConfig = {
+  ...baseConfig,
+  server: { port: 3000 },
+  logging: { level: 'debug' },
+  ui: { autoOpen: true },
+};
+
+const productionConfig: AgentAppConfig = {
+  ...baseConfig,
+  server: { port: 8080, host: '0.0.0.0' },
+  logging: { level: 'info', format: 'json' },
+  ui: { enabled: false },
+  metrics: { enabled: true },
+};
+
+const config = process.env.NODE_ENV === 'production' 
+  ? productionConfig 
+  : developmentConfig;
+
+export default config;
+```
+
+### 工作区配置
+
+`.tarko/config.ts` 中的工作区特定配置：
+
+```typescript
+// .tarko/config.ts
+import { AgentAppConfig } from '@tarko/interface';
+
+const config: AgentAppConfig = {
+  // 工作区特定设置
+  workspace: '.',
+  tool: {
+    include: ['file_*'], // 此工作区仅使用文件工具
+  },
+};
+
+export default config;
+```
+
+## 配置验证
+
+Tarko CLI 在启动时验证配置：
+
+```bash
+# 不运行即验证配置
+tarko --dry-run --show-config
+
+# 显示解析的配置
+tarko --show-config
+
+# 调试配置解析
+tarko --debug --show-config
+```
+
+## 配置示例
+
+### 开发设置
+
+```typescript
+// tarko.config.ts
+export default {
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  server: { port: 3000 },
+  ui: { autoOpen: true },
+  logging: { level: 'debug' },
+};
+```
+
+### 生产设置
+
+```typescript
+// tarko.config.ts
+export default {
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  server: {
+    port: 8080,
+    host: '0.0.0.0',
+    cors: true,
+    rateLimit: {
+      windowMs: 15 * 60 * 1000,
+      max: 100,
+    },
+  },
+  ui: { enabled: false },
+  logging: {
+    level: 'info',
+    format: 'json',
+    output: {
+      console: false,
+      file: {
+        enabled: true,
+        path: './logs/agent.log',
+        maxSize: '100m',
+        maxFiles: 10,
+      },
+    },
+  },
+  metrics: { enabled: true },
+};
+```
+
+### 安全重点设置
+
+```typescript
+// tarko.config.ts
+export default {
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  tool: {
+    exclude: ['dangerous_*', 'system_*', 'network_*'],
+  },
+  mcpServer: {
+    include: ['filesystem'], // 仅允许文件系统访问
+  },
+  server: {
+    cors: false,
+    rateLimit: {
+      windowMs: 15 * 60 * 1000,
+      max: 50, // 严格的速率限制
+    },
+  },
+  logging: {
+    level: 'info',
+    format: 'json',
+  },
+};
+```

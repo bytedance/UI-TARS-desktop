@@ -1,0 +1,364 @@
+---
+title: Built-in Agents
+description: Using pre-built agents included with Tarko CLI
+---
+
+# Built-in Agents
+
+Tarko CLI includes several ready-to-use agents that demonstrate different capabilities and use cases. These agents are immediately available without any additional setup.
+
+## Available Agents
+
+### `agent-tars`
+
+**Agent TARS** - Advanced task automation and reasoning system designed for complex problem-solving and multi-step workflows.
+
+#### Capabilities
+- Advanced reasoning and planning
+- Multi-step task execution
+- Context-aware decision making
+- Tool orchestration
+- Error handling and recovery
+
+#### Use Cases
+- Complex automation tasks
+- Multi-step workflows
+- Problem-solving scenarios
+- Research and analysis
+- Code generation and debugging
+
+#### Usage
+
+```bash
+# Interactive mode with Web UI
+tarko run agent-tars
+
+# Headless server deployment
+tarko serve agent-tars --port 8080
+
+# Scripting mode
+tarko run agent-tars --headless --input "Analyze this codebase and suggest improvements"
+
+# With custom configuration
+tarko run agent-tars --config ./tars-config.ts
+```
+
+#### Example Tasks
+
+```bash
+# Code analysis and improvement
+tarko run agent-tars --headless --input "Review the code in ./src and provide optimization suggestions"
+
+# Project setup automation
+tarko run agent-tars --headless --input "Set up a new React TypeScript project with best practices"
+
+# Documentation generation
+tarko run agent-tars --headless --input "Generate comprehensive documentation for this API"
+
+# Testing strategy
+tarko run agent-tars --headless --input "Create a testing strategy for this application"
+```
+
+### `omni-tars`
+
+**Omni-TARS** - Multi-modal agent with comprehensive capabilities for handling text, images, files, and web interactions.
+
+#### Capabilities
+- Multi-modal input processing (text, images, documents)
+- Web browsing and scraping
+- File system operations
+- Image analysis and generation
+- Document processing
+- API integrations
+
+#### Use Cases
+- Content creation and editing
+- Web research and data collection
+- Document analysis and processing
+- Image analysis and manipulation
+- Multi-modal workflows
+
+#### Usage
+
+```bash
+# Interactive mode with Web UI
+tarko run omni-tars
+
+# Headless server deployment
+tarko serve omni-tars --port 8080
+
+# Scripting mode with file input
+tarko run omni-tars --headless --input "Analyze the images in ./assets and create a summary"
+
+# Web research mode
+tarko run omni-tars --headless --input "Research the latest trends in AI and create a report"
+```
+
+#### Example Tasks
+
+```bash
+# Image analysis
+tarko run omni-tars --headless --input "Analyze the screenshot in ./image.png and describe what you see"
+
+# Web research
+tarko run omni-tars --headless --input "Research the latest developments in quantum computing"
+
+# Document processing
+tarko run omni-tars --headless --input "Summarize the PDF documents in ./reports/"
+
+# Content creation
+tarko run omni-tars --headless --input "Create a blog post about sustainable technology based on recent news"
+```
+
+### `mcp-agent`
+
+**MCP Agent** - Model Context Protocol agent specialized in tool integration and external service connectivity.
+
+#### Capabilities
+- MCP server management
+- Tool discovery and integration
+- External service connectivity
+- Protocol handling
+- Resource management
+
+#### Use Cases
+- Tool integration testing
+- MCP server development
+- External API integration
+- Service orchestration
+- Protocol debugging
+
+#### Usage
+
+```bash
+# Interactive mode for tool exploration
+tarko run mcp-agent
+
+# List available tools and servers
+tarko run mcp-agent --headless --input "List all available tools and their capabilities"
+
+# Test MCP server connectivity
+tarko run mcp-agent --headless --input "Test connectivity to all configured MCP servers"
+
+# Tool integration workflow
+tarko serve mcp-agent --port 8080
+```
+
+#### Example Tasks
+
+```bash
+# Tool discovery
+tarko run mcp-agent --headless --input "Discover and list all available tools"
+
+# MCP server status
+tarko run mcp-agent --headless --input "Check the status of all MCP servers"
+
+# Tool testing
+tarko run mcp-agent --headless --input "Test the file system tools with a simple read operation"
+
+# Integration workflow
+tarko run mcp-agent --headless --input "Demonstrate a workflow using multiple tools"
+```
+
+## Agent Comparison
+
+| Feature | agent-tars | omni-tars | mcp-agent |
+|---------|------------|-----------|----------|
+| **Primary Focus** | Reasoning & Automation | Multi-modal Processing | Tool Integration |
+| **Complexity** | High | Medium-High | Medium |
+| **Use Case** | Complex workflows | Content & research | Tool development |
+| **Multi-modal** | Limited | Full support | Limited |
+| **Web Browsing** | Yes | Yes | Limited |
+| **File Operations** | Yes | Yes | Yes |
+| **Tool Integration** | Advanced | Standard | Specialized |
+| **MCP Support** | Yes | Yes | Primary focus |
+
+## Configuration
+
+### Agent-Specific Configuration
+
+Each built-in agent can be configured with specific settings:
+
+```typescript
+// tarko.config.ts
+import { AgentAppConfig } from '@tarko/interface';
+
+const config: AgentAppConfig = {
+  // Agent-specific configuration
+  agent: {
+    type: 'agent-tars', // or 'omni-tars', 'mcp-agent'
+    config: {
+      // Agent-specific settings
+      maxSteps: 10,
+      timeoutMs: 30000,
+      retryAttempts: 3,
+    },
+  },
+  
+  // Model configuration for the agent
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    temperature: 0.7,
+  },
+  
+  // Tool filtering for specific agents
+  tool: {
+    include: ['file_*', 'web_*'], // Customize available tools
+  },
+};
+
+export default config;
+```
+
+### Environment-Specific Agents
+
+```bash
+# Development with agent-tars
+NODE_ENV=development tarko run agent-tars --debug
+
+# Production deployment with omni-tars
+NODE_ENV=production tarko serve omni-tars --port 8080
+
+# Testing with mcp-agent
+tarko run mcp-agent --headless --input "Run diagnostics"
+```
+
+## Custom Agent Development
+
+While built-in agents provide immediate functionality, you can also create custom agents:
+
+### Creating a Custom Agent
+
+```typescript
+// my-custom-agent.ts
+import { Agent } from '@tarko/agent';
+import { AgentOptions } from '@tarko/interface';
+
+class MyCustomAgent extends Agent {
+  constructor(options: AgentOptions) {
+    super({
+      ...options,
+      name: 'MyCustomAgent',
+      description: 'A custom agent for specific tasks',
+    });
+  }
+  
+  async processInput(input: string): Promise<string> {
+    // Custom agent logic
+    return `Processed: ${input}`;
+  }
+}
+
+export default MyCustomAgent;
+```
+
+### Using Custom Agents
+
+```bash
+# Run custom agent
+tarko run ./my-custom-agent.ts
+
+# Deploy custom agent
+tarko serve ./my-custom-agent.ts --port 8080
+
+# Test custom agent
+tarko run ./my-custom-agent.ts --headless --input "Test input"
+```
+
+## Agent Selection Guidelines
+
+### Choose `agent-tars` when:
+- You need complex reasoning and planning
+- Working with multi-step workflows
+- Require advanced problem-solving capabilities
+- Building automation systems
+- Need sophisticated error handling
+
+### Choose `omni-tars` when:
+- Working with multiple content types (text, images, documents)
+- Need web browsing and research capabilities
+- Processing multimedia content
+- Creating content across different formats
+- Require comprehensive tool access
+
+### Choose `mcp-agent` when:
+- Developing or testing MCP servers
+- Integrating external tools and services
+- Debugging protocol implementations
+- Building tool-centric workflows
+- Need specialized MCP functionality
+
+## Performance Considerations
+
+### Resource Usage
+
+| Agent | Memory Usage | CPU Usage | Network Usage |
+|-------|-------------|-----------|---------------|
+| agent-tars | High | High | Medium |
+| omni-tars | Medium-High | Medium | High |
+| mcp-agent | Medium | Low-Medium | Low |
+
+### Optimization Tips
+
+```bash
+# Optimize memory usage
+NODE_OPTIONS="--max-old-space-size=2048" tarko run agent-tars
+
+# Limit concurrent operations
+tarko run omni-tars --config ./optimized-config.ts
+
+# Use caching for better performance
+tarko run mcp-agent --cache-enabled
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**Agent not found:**
+```bash
+# Verify agent name
+tarko run agent-tars --dry-run
+
+# List available agents
+tarko --help
+```
+
+**Performance issues:**
+```bash
+# Enable debug mode
+tarko run omni-tars --debug
+
+# Monitor resource usage
+tarko run agent-tars --metrics-enabled
+```
+
+**Tool access issues:**
+```bash
+# Check tool configuration
+tarko run mcp-agent --show-config
+
+# Test tool connectivity
+tarko run mcp-agent --headless --input "Test tools"
+```
+
+### Debug Mode
+
+```bash
+# Debug agent execution
+DEBUG=tarko:agent:* tarko run agent-tars --debug
+
+# Verbose logging
+tarko run omni-tars --debug --verbose
+
+# Performance profiling
+tarko run mcp-agent --debug --profile
+```
+
+## Next Steps
+
+- [CLI Commands](/guide/cli/commands) - Learn all available CLI commands
+- [Configuration](/guide/cli/configuration) - Advanced configuration options
+- [Deployment](/guide/deployment/cli) - Production deployment strategies
+- [Tool Integration](/guide/basic/tool-call-engine) - Adding custom tools

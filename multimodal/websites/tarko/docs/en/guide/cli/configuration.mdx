@@ -1,0 +1,577 @@
+---
+title: CLI Configuration
+description: Complete guide to configuring Tarko CLI
+---
+
+# CLI Configuration
+
+Tarko CLI supports multiple configuration formats and sources with a clear priority system.
+
+## Configuration Files
+
+Tarko CLI automatically discovers configuration files in the following order:
+
+1. `tarko.config.ts` (TypeScript)
+2. `tarko.config.yaml` (YAML)
+3. `tarko.config.json` (JSON)
+
+### TypeScript Configuration
+
+```typescript
+// tarko.config.ts
+import { AgentAppConfig } from '@tarko/interface';
+
+const config: AgentAppConfig = {
+  // Model configuration
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY,
+    baseURL: 'https://api.openai.com/v1',
+    temperature: 0.7,
+    maxTokens: 4000,
+  },
+  
+  // Workspace settings
+  workspace: './workspace',
+  
+  // Server configuration
+  server: {
+    port: 8888,
+    host: '0.0.0.0',
+    cors: true,
+  },
+  
+  // Tool filtering
+  tool: {
+    include: ['file_*', 'web_*'],
+    exclude: ['dangerous_*'],
+  },
+  
+  // MCP Server filtering
+  mcpServer: {
+    include: ['filesystem', 'browser'],
+    exclude: ['experimental_*'],
+  },
+  
+  // UI configuration
+  ui: {
+    enabled: true,
+    title: 'My Agent',
+    theme: 'default',
+    autoOpen: false,
+  },
+  
+  // Logging configuration
+  logging: {
+    level: 'info',
+    format: 'json',
+    output: {
+      console: true,
+      file: {
+        enabled: true,
+        path: './logs/agent.log',
+        maxSize: '10m',
+        maxFiles: 5,
+      },
+    },
+  },
+  
+  // Metrics configuration
+  metrics: {
+    enabled: true,
+    endpoint: '/metrics',
+    collectors: {
+      requests: true,
+      responses: true,
+      toolCalls: true,
+      errors: true,
+    },
+  },
+};
+
+export default config;
+```
+
+### YAML Configuration
+
+```yaml
+# tarko.config.yaml
+model:
+  provider: openai
+  id: gpt-4
+  apiKey: ${OPENAI_API_KEY}
+  baseURL: https://api.openai.com/v1
+  temperature: 0.7
+  maxTokens: 4000
+
+workspace: ./workspace
+
+server:
+  port: 8888
+  host: 0.0.0.0
+  cors: true
+
+tool:
+  include:
+    - 'file_*'
+    - 'web_*'
+  exclude:
+    - 'dangerous_*'
+
+mcpServer:
+  include:
+    - filesystem
+    - browser
+  exclude:
+    - 'experimental_*'
+
+ui:
+  enabled: true
+  title: My Agent
+  theme: default
+  autoOpen: false
+
+logging:
+  level: info
+  format: json
+  output:
+    console: true
+    file:
+      enabled: true
+      path: ./logs/agent.log
+      maxSize: 10m
+      maxFiles: 5
+
+metrics:
+  enabled: true
+  endpoint: /metrics
+  collectors:
+    requests: true
+    responses: true
+    toolCalls: true
+    errors: true
+```
+
+### JSON Configuration
+
+```json
+{
+  "model": {
+    "provider": "openai",
+    "id": "gpt-4",
+    "apiKey": "${OPENAI_API_KEY}",
+    "baseURL": "https://api.openai.com/v1",
+    "temperature": 0.7,
+    "maxTokens": 4000
+  },
+  "workspace": "./workspace",
+  "server": {
+    "port": 8888,
+    "host": "0.0.0.0",
+    "cors": true
+  },
+  "tool": {
+    "include": ["file_*", "web_*"],
+    "exclude": ["dangerous_*"]
+  },
+  "mcpServer": {
+    "include": ["filesystem", "browser"],
+    "exclude": ["experimental_*"]
+  },
+  "ui": {
+    "enabled": true,
+    "title": "My Agent",
+    "theme": "default",
+    "autoOpen": false
+  },
+  "logging": {
+    "level": "info",
+    "format": "json",
+    "output": {
+      "console": true,
+      "file": {
+        "enabled": true,
+        "path": "./logs/agent.log",
+        "maxSize": "10m",
+        "maxFiles": 5
+      }
+    }
+  },
+  "metrics": {
+    "enabled": true,
+    "endpoint": "/metrics",
+    "collectors": {
+      "requests": true,
+      "responses": true,
+      "toolCalls": true,
+      "errors": true
+    }
+  }
+}
+```
+
+## Configuration Priority
+
+Configuration is resolved in the following priority order (highest to lowest):
+
+1. **CLI arguments** (highest priority)
+2. **Workspace configuration**
+3. **User configuration file** (`--config`)
+4. **Remote configuration URL**
+5. **Default configuration** (lowest priority)
+
+### CLI Arguments Override
+
+```bash
+# Override model configuration
+tarko --model.provider openai --model.id gpt-4 --model.apiKey sk-xxx
+
+# Override server settings
+tarko serve --port 3000 --host 0.0.0.0
+
+# Override workspace
+tarko --workspace ./custom-workspace
+
+# Override tool filtering
+tarko --tool.include "file_*,web_*" --tool.exclude "dangerous_*"
+```
+
+## Environment Variables
+
+Environment variables provide an alternative to configuration files:
+
+### Model Configuration
+
+```bash
+# API Keys
+export OPENAI_API_KEY=your-openai-key
+export ANTHROPIC_API_KEY=your-anthropic-key
+export AZURE_OPENAI_API_KEY=your-azure-key
+export GEMINI_API_KEY=your-gemini-key
+
+# Model settings
+export TARKO_MODEL_PROVIDER=openai
+export TARKO_MODEL_ID=gpt-4
+export TARKO_MODEL_BASE_URL=https://api.openai.com/v1
+export TARKO_MODEL_TEMPERATURE=0.7
+export TARKO_MODEL_MAX_TOKENS=4000
+```
+
+### Server Configuration
+
+```bash
+# Server settings
+export TARKO_PORT=3000
+export TARKO_HOST=0.0.0.0
+export TARKO_CORS=true
+
+# Workspace
+export TARKO_WORKSPACE=./my-workspace
+
+# UI settings
+export TARKO_UI_ENABLED=true
+export TARKO_UI_TITLE="My Agent"
+export TARKO_UI_THEME=default
+export TARKO_UI_AUTO_OPEN=false
+```
+
+### Debug and Logging
+
+```bash
+# Debug settings
+export DEBUG=tarko:*
+export TARKO_LOG_LEVEL=debug
+export TARKO_LOG_FORMAT=json
+
+# Metrics
+export TARKO_METRICS_ENABLED=true
+export TARKO_METRICS_ENDPOINT=/metrics
+```
+
+## Configuration Sections
+
+### Model Configuration
+
+```typescript
+model: {
+  provider: 'openai' | 'anthropic' | 'azure' | 'ollama' | 'gemini',
+  id: string,              // Model ID (e.g., 'gpt-4', 'claude-3-opus')
+  apiKey?: string,          // API key (use env vars for security)
+  baseURL?: string,         // Custom API endpoint
+  temperature?: number,     // Creativity (0-1)
+  maxTokens?: number,       // Maximum response tokens
+  topP?: number,            // Nucleus sampling
+  frequencyPenalty?: number,// Frequency penalty
+  presencePenalty?: number, // Presence penalty
+  timeout?: number,         // Request timeout (ms)
+  retries?: number,         // Retry attempts
+}
+```
+
+### Server Configuration
+
+```typescript
+server: {
+  port?: number,            // Server port (default: 3000)
+  host?: string,            // Server host (default: 'localhost')
+  cors?: boolean,           // Enable CORS (default: true)
+  rateLimit?: {             // Rate limiting
+    windowMs: number,       // Time window (ms)
+    max: number,            // Max requests per window
+  },
+  ssl?: {                   // SSL configuration
+    enabled: boolean,
+    cert: string,           // Certificate path
+    key: string,            // Private key path
+  },
+}
+```
+
+### Tool Filtering
+
+```typescript
+tool: {
+  include?: string[],       // Tool patterns to include
+  exclude?: string[],       // Tool patterns to exclude
+}
+
+// Examples:
+// include: ['file_*', 'web_*'] - Include all file and web tools
+// exclude: ['dangerous_*'] - Exclude dangerous tools
+// include: ['file_read', 'file_write'] - Include specific tools
+```
+
+### MCP Server Filtering
+
+```typescript
+mcpServer: {
+  include?: string[],       // MCP server patterns to include
+  exclude?: string[],       // MCP server patterns to exclude
+}
+
+// Examples:
+// include: ['filesystem', 'browser'] - Include specific servers
+// exclude: ['experimental_*'] - Exclude experimental servers
+```
+
+### UI Configuration
+
+```typescript
+ui: {
+  enabled?: boolean,        // Enable Web UI (default: true)
+  title?: string,           // UI title
+  theme?: 'default' | 'dark' | 'light',
+  autoOpen?: boolean,       // Auto-open browser (default: false)
+  customization?: {
+    logo?: string,          // Custom logo path
+    primaryColor?: string,  // Primary color hex
+    layout?: 'sidebar' | 'topbar',
+  },
+}
+```
+
+### Logging Configuration
+
+```typescript
+logging: {
+  level?: 'debug' | 'info' | 'warn' | 'error',
+  format?: 'json' | 'text',
+  output?: {
+    console?: boolean,      // Log to console
+    file?: {
+      enabled: boolean,
+      path: string,         // Log file path
+      maxSize: string,      // Max file size (e.g., '10m')
+      maxFiles: number,     // Max number of files
+    },
+    syslog?: {              // Syslog configuration
+      enabled: boolean,
+      host: string,
+      port: number,
+      facility: string,
+    },
+  },
+}
+```
+
+### Metrics Configuration
+
+```typescript
+metrics: {
+  enabled?: boolean,        // Enable metrics collection
+  endpoint?: string,        // Metrics endpoint (default: '/metrics')
+  collectors?: {
+    requests?: boolean,     // HTTP request metrics
+    responses?: boolean,    // HTTP response metrics
+    toolCalls?: boolean,    // Tool call metrics
+    errors?: boolean,       // Error metrics
+    memory?: boolean,       // Memory usage metrics
+    cpu?: boolean,          // CPU usage metrics
+  },
+}
+```
+
+## Advanced Configuration
+
+### Remote Configuration
+
+Load configuration from a remote URL:
+
+```bash
+tarko --config https://example.com/agent-config.json
+```
+
+### Environment-Specific Configurations
+
+```typescript
+// tarko.config.ts
+import { AgentAppConfig } from '@tarko/interface';
+
+const baseConfig: AgentAppConfig = {
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+  },
+};
+
+const developmentConfig: AgentAppConfig = {
+  ...baseConfig,
+  server: { port: 3000 },
+  logging: { level: 'debug' },
+  ui: { autoOpen: true },
+};
+
+const productionConfig: AgentAppConfig = {
+  ...baseConfig,
+  server: { port: 8080, host: '0.0.0.0' },
+  logging: { level: 'info', format: 'json' },
+  ui: { enabled: false },
+  metrics: { enabled: true },
+};
+
+const config = process.env.NODE_ENV === 'production' 
+  ? productionConfig 
+  : developmentConfig;
+
+export default config;
+```
+
+### Workspace Configuration
+
+Workspace-specific configuration in `.tarko/config.ts`:
+
+```typescript
+// .tarko/config.ts
+import { AgentAppConfig } from '@tarko/interface';
+
+const config: AgentAppConfig = {
+  // Workspace-specific settings
+  workspace: '.',
+  tool: {
+    include: ['file_*'], // Only file tools for this workspace
+  },
+};
+
+export default config;
+```
+
+## Configuration Validation
+
+Tarko CLI validates configuration at startup:
+
+```bash
+# Validate configuration without running
+tarko --dry-run --show-config
+
+# Show resolved configuration
+tarko --show-config
+
+# Debug configuration resolution
+tarko --debug --show-config
+```
+
+## Configuration Examples
+
+### Development Setup
+
+```typescript
+// tarko.config.ts
+export default {
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  server: { port: 3000 },
+  ui: { autoOpen: true },
+  logging: { level: 'debug' },
+};
+```
+
+### Production Setup
+
+```typescript
+// tarko.config.ts
+export default {
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  server: {
+    port: 8080,
+    host: '0.0.0.0',
+    cors: true,
+    rateLimit: {
+      windowMs: 15 * 60 * 1000,
+      max: 100,
+    },
+  },
+  ui: { enabled: false },
+  logging: {
+    level: 'info',
+    format: 'json',
+    output: {
+      console: false,
+      file: {
+        enabled: true,
+        path: './logs/agent.log',
+        maxSize: '100m',
+        maxFiles: 10,
+      },
+    },
+  },
+  metrics: { enabled: true },
+};
+```
+
+### Security-Focused Setup
+
+```typescript
+// tarko.config.ts
+export default {
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  tool: {
+    exclude: ['dangerous_*', 'system_*', 'network_*'],
+  },
+  mcpServer: {
+    include: ['filesystem'], // Only allow filesystem access
+  },
+  server: {
+    cors: false,
+    rateLimit: {
+      windowMs: 15 * 60 * 1000,
+      max: 50, // Strict rate limiting
+    },
+  },
+  logging: {
+    level: 'info',
+    format: 'json',
+  },
+};
+```
