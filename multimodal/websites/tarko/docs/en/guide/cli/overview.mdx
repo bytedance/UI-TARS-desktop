@@ -80,19 +80,16 @@ tarko --tool.include "file_*,web_*" --tool.exclude "dangerous_*"
 tarko --mcpServer.include "filesystem" --mcpServer.exclude "experimental_*"
 ```
 
-### Console Interception
+### 调试支持
 
-Capture and process console output during execution:
+通过 `--debug` 参数启用详细日志：
 
-```typescript
-import { ConsoleInterceptor } from '@tarko/agent-cli';
+```bash
+# 启用调试模式
+tarko run --debug
 
-const { result, logs } = await ConsoleInterceptor.run(
-  async () => {
-    return await agent.run('input');
-  },
-  { silent: true, capture: true }
-);
+# 使用环境变量
+DEBUG=tarko:* tarko run
 ```
 
 ## Use Cases
