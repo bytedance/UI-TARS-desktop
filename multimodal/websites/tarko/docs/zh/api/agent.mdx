@@ -88,6 +88,19 @@ main();
 npx tsx index.ts
 ```
 
+输出：
+
+```json
+{
+  "id": "5c38c0a1-ccbe-48f0-8b97-ae78a4d9407e",
+  "type": "assistant_message",
+  "timestamp": 1750188571248,
+  "content": "波士顿今天天气晴朗，温度为 70°F (21°C)。降水概率为 10%，湿度为 45%，风速为 5 mph。",
+  "finishReason": "stop",
+  "messageId": "msg_1750188570877_ics24k3x"
+}
+```
+
 ## API
 
 ### Agent
@@ -158,6 +171,64 @@ async function main() {
 - `tool_result`: 工具执行结果
 - `assistant_streaming_message`: 流式消息块
 
+### 事件类型
+
+#### AssistantMessage
+
+```ts
+interface AssistantMessage {
+  id: string;
+  type: 'assistant_message';
+  timestamp: number;
+  content: string;
+  toolCalls?: ToolCall[];
+  finishReason: 'stop' | 'tool_calls' | 'length';
+  messageId: string;
+}
+```
+
+#### ToolCall
+
+```ts
+interface ToolCallEvent {
+  id: string;
+  type: 'tool_call';
+  timestamp: number;
+  toolCallId: string;
+  name: string;
+  arguments: any;
+  startTime: number;
+  tool: ToolDefinition;
+}
+```
+
+#### ToolResult
+
+```ts
+interface ToolResult {
+  id: string;
+  type: 'tool_result';
+  timestamp: number;
+  toolCallId: string;
+  name: string;
+  content: any;
+  elapsedMs: number;
+}
+```
+
+#### StreamingMessage
+
+```ts
+interface StreamingMessage {
+  id: string;
+  type: 'assistant_streaming_message';
+  timestamp: number;
+  content: string;
+  isComplete: boolean;
+  messageId: string;
+}
+```
+
 ### 错误处理
 
 ```ts
@@ -189,14 +260,3 @@ const agent = new Agent({
 ```
 
 更多高级使用模式，请参阅 [Agent Hooks 文档](/api/hooks)。
-
-## 即将推出
-
-详细的 API 文档正在完善中，敬请期待：
-
-- 完整的事件类型定义
-- 高级配置选项
-- 错误处理最佳实践
-- 性能优化指南
-
-目前请参考 [英文版 Agent API 文档](/api/agent) 了解完整信息。
