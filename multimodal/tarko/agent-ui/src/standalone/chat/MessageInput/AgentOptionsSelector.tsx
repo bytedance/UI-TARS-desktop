@@ -160,7 +160,7 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
   const [currentValues, setCurrentValues] = useState<Record<string, any> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0 });
+  const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0, placement: 'below' as 'above' | 'below' });
   const updateSessionMetadata = useSetAtom(updateSessionMetadataAction);
   const { isReplayMode } = useReplayMode();
   const isProcessing = useAtomValue(isProcessingAtom);
@@ -170,9 +170,27 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
   const updatePopupPosition = () => {
     if (buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const popupHeight = 300; // Estimated popup height
+      const margin = 8;
+      
+      // Check if there's enough space below the button
+      const spaceBelow = viewportHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      
+      let placement: 'above' | 'below' = 'below';
+      let top = rect.bottom + margin;
+      
+      // If not enough space below but enough space above, place above
+      if (spaceBelow < popupHeight + margin && spaceAbove > popupHeight + margin) {
+        placement = 'above';
+        top = rect.top - margin;
+      }
+      
       setPopupPosition({
-        top: rect.bottom + 8, // Position below button
+        top,
         left: rect.left,
+        placement,
       });
     }
   };
@@ -318,6 +336,7 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
             style={{
               top: `${popupPosition.top}px`,
               left: `${popupPosition.left}px`,
+              transform: popupPosition.placement === 'above' ? 'translateY(-100%)' : 'none',
               zIndex: 10000,
             }}
           >
