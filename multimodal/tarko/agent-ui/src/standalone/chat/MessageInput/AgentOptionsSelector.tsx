@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useSetAtom } from 'jotai';
 import { updateSessionMetadataAction } from '@/common/state/actions/sessionActions';
 import { apiService } from '@/common/services/apiService';
@@ -10,11 +10,22 @@ import { FiPlus, FiCheck, FiChevronRight } from 'react-icons/fi';
 import { TbBulb, TbSearch, TbBook, TbSettings } from 'react-icons/tb';
 import { Dropdown, DropdownItem, DropdownHeader, DropdownDivider } from '@tarko/ui';
 
+interface ActiveOption {
+  key: string;
+  title: string;
+  currentValue: any;
+}
+
 interface AgentOptionsSelectorProps {
   activeSessionId?: string;
   sessionMetadata?: SessionItemMetadata;
   className?: string;
-  onActiveOptionsChange?: (options: string[]) => void;
+  onActiveOptionsChange?: (options: ActiveOption[]) => void;
+  onToggleOption?: (key: string, currentValue: any) => void;
+}
+
+export interface AgentOptionsSelectorRef {
+  toggleOption: (key: string) => void;
 }
 
 interface AgentOptionsSchema {
@@ -28,18 +39,41 @@ interface AgentOptionConfig {
   currentValue: any;
 }
 
-export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
-  activeSessionId,
-  sessionMetadata,
-  className = '',
-  onActiveOptionsChange,
-}) => {
+export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOptionsSelectorProps>((
+  {
+    activeSessionId,
+    sessionMetadata,
+    className = '',
+    onActiveOptionsChange,
+    onToggleOption,
+  },
+  ref
+) => {
   const [schema, setSchema] = useState<AgentOptionsSchema | null>(null);
   const [currentValues, setCurrentValues] = useState<Record<string, any> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const updateSessionMetadata = useSetAtom(updateSessionMetadataAction);
   const { isReplayMode } = useReplayMode();
   const isProcessing = useAtomValue(isProcessingAtom);
+
+  // Expose methods to parent component
+  useImperativeHandle(ref, () => ({
+    toggleOption: (key: string) => {
+      if (!schema || !currentValues) return;
+      
+      const property = schema.properties[key];
+      if (!property) return;
+      
+      const currentValue = currentValues[key] ?? property.default;
+      
+      if (property.type === 'boolean') {
+        handleOptionChange(key, !currentValue);
+      } else if (property.type === 'string' && property.enum) {
+        // For enum, toggle to default value
+        handleOptionChange(key, property.default);
+      }
+    },
+  }), [schema, currentValues]);
 
   const getOptionIcon = (key: string, property: any) => {
     // Map common option keys to icons
@@ -82,6 +116,11 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
     const newValues = { ...currentValues, [key]: value };
     setCurrentValues(newValues);
 
+    // Notify parent about the toggle
+    if (onToggleOption) {
+      onToggleOption(key, value);
+    }
+
     setIsLoading(true);
     try {
       const response = await apiService.updateSessionRuntimeSettings(activeSessionId, newValues);
@@ -109,7 +148,7 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
   // Notify parent about active options
   useEffect(() => {
     if (onActiveOptionsChange && schema && currentValues) {
-      const activeOptions = Object.entries(schema.properties)
+      const activeOptionsWithKeys = Object.entries(schema.properties)
         .filter(([key, property]) => {
           const currentValue = currentValues[key] ?? property.default;
           if (property.type === 'boolean') {
@@ -120,9 +159,13 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
           }
           return false;
         })
-        .map(([key, property]) => property.title || key);
+        .map(([key, property]) => ({
+          key,
+          title: property.title || key,
+          currentValue: currentValues[key] ?? property.default
+        }));
       
-      onActiveOptionsChange(activeOptions);
+      onActiveOptionsChange(activeOptionsWithKeys);
     }
   }, [schema, currentValues, onActiveOptionsChange]);
 
@@ -245,4 +288,4 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
       {options.map(renderOptionItem)}
     </Dropdown>
   );
-};
+});

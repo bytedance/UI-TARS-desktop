@@ -19,7 +19,7 @@ import { getAgentTitle, isContextualSelectorEnabled } from '@/config/web-ui-conf
 import { composeMessageContent, isMessageEmpty, parseContextualReferences } from './utils';
 import { handleMultimodalPaste } from '@/common/utils/clipboard';
 import { NavbarModelSelector } from '@/standalone/navbar/ModelSelector';
-import { AgentOptionsSelector } from './AgentOptionsSelector';
+import { AgentOptionsSelector, AgentOptionsSelectorRef } from './AgentOptionsSelector';
 import { useNavbarStyles } from '@tarko/ui';
 
 interface ChatInputProps {
@@ -58,7 +58,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const [uploadedImages, setUploadedImages] = useState<ChatCompletionContentPart[]>([]);
   const [isAborting, setIsAborting] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  const [activeAgentOptions, setActiveAgentOptions] = useState<string[]>([]);
+  const [activeAgentOptions, setActiveAgentOptions] = useState<Array<{key: string, title: string, currentValue: any}>>([]);
+  const agentOptionsSelectorRef = useRef<AgentOptionsSelectorRef | null>(null);
 
   const { activeSessionId, sessionMetadata } = useSession();
   const { isDarkMode } = useNavbarStyles();
@@ -74,6 +75,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const { abortQuery } = useSession();
 
   const contextualSelectorEnabled = isContextualSelectorEnabled() && showContextualSelector;
+
+  const handleToggleOption = (key: string, currentValue: any) => {
+    // Use the ref to call the toggle method on AgentOptionsSelector
+    if (agentOptionsSelectorRef.current) {
+      agentOptionsSelectorRef.current.toggleOption(key);
+    }
+  };
 
   useEffect(() => {
     if (initialValue && !contextualState.input) {
@@ -404,12 +412,24 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               <div className="px-5 pt-3 pb-1">
                 <div className="flex flex-wrap gap-1.5">
                   {activeAgentOptions.map((option, index) => (
-                    <span
-                      key={index}
-                      className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700"
+                    <button
+                      key={option.key}
+                      onClick={() => {
+                        handleToggleOption(option.key, option.currentValue);
+                      }}
+                      className="group inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700 hover:bg-blue-200 dark:hover:bg-blue-900/50 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-150 cursor-pointer"
+                      title={`Click to disable ${option.title}`}
                     >
-                      {option}
-                    </span>
+                      <span className="truncate">{option.title}</span>
+                      <svg
+                        className="ml-1.5 w-3 h-3 text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -441,9 +461,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             <div className="absolute left-3 bottom-3 flex items-center gap-2">
               {/* Agent Options Selector - First (leftmost) */}
               <AgentOptionsSelector 
+                ref={agentOptionsSelectorRef}
                 activeSessionId={sessionId} 
                 sessionMetadata={sessionMetadata} 
                 onActiveOptionsChange={setActiveAgentOptions}
+                onToggleOption={handleToggleOption}
               />
               
               {/* File upload button */}
