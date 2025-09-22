@@ -67,12 +67,12 @@ export class ActionParserHelper {
 
     // prettier-ignore
     const roughAction = this.parseRoughFromCallString(actionString.replace(/\n/g, String.raw`\n`).trimStart());
-    this.logger.debug(`[parseActionCallString] rough action:`, roughAction);
+    this.logger.debug(`[parseActionCallString] rough action:`, JSON.stringify(roughAction));
 
     if (!roughAction) return null;
 
     const action = this.standardizeAction(roughAction.roughType, roughAction.roughInputs);
-    this.logger.debug(`[parseActionCallString] standard action:`, action);
+    this.logger.debug(`[parseActionCallString] standard action:`, JSON.stringify(action));
 
     return action;
   }
@@ -215,12 +215,12 @@ export class ActionParserHelper {
     try {
       const functionCall = JSON.parse(functionCallString);
       const roughAction = this.parseRoughFromFunctionCall(functionCall);
-      this.logger.debug(`[parseFunctionCallString] rough action:`, roughAction);
+      this.logger.debug(`[parseFunctionCallString] rough action:`, JSON.stringify(roughAction));
 
       if (!roughAction) return null;
 
       const action = this.standardizeAction(roughAction.roughType, roughAction.roughInputs);
-      this.logger.debug(`[parseFunctionCallString] standard action:`, action);
+      this.logger.debug(`[parseFunctionCallString] standard action:`, JSON.stringify(action));
       return action;
     } catch (e) {
       this.logger.warn(`[parseFunctionCallString] parse failed '${functionCallString}': ${e}`);
@@ -452,7 +452,7 @@ export class ActionParserHelper {
       },
     };
 
-    this.logger.debug('[parseCoordinates] final coordinates:', coords);
+    this.logger.debug('[parseCoordinates] final coordinates:', JSON.stringify(coords));
     return coords;
   }
 
