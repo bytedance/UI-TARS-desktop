@@ -39,31 +39,21 @@ interface AgentOptionConfig {
   currentValue: any;
 }
 
-export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOptionsSelectorProps>((
-  {
-    activeSessionId,
-    sessionMetadata,
-    className = '',
-    onActiveOptionsChange,
-    onToggleOption,
-  },
-  ref
-) => {
+export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOptionsSelectorProps>(({
+  activeSessionId,
+  sessionMetadata,
+  className = '',
+  onActiveOptionsChange,
+  onToggleOption,
+}, ref) => {
   const [schema, setSchema] = useState<AgentOptionsSchema | null>(null);
   const [currentValues, setCurrentValues] = useState<Record<string, any> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const currentValuesRef = useRef<Record<string, any> | null>(null);
   const updateSessionMetadata = useSetAtom(updateSessionMetadataAction);
   const { isReplayMode } = useReplayMode();
   const isProcessing = useAtomValue(isProcessingAtom);
 
-  // Keep ref in sync with state
-  useEffect(() => {
-    currentValuesRef.current = currentValues;
-  }, [currentValues]);
-
   const getOptionIcon = (key: string, property: any) => {
-    // Map common option keys to icons
     const iconMap: Record<string, React.ReactNode> = {
       'foo': <TbBulb className="w-4 h-4" />,
       'search': <TbSearch className="w-4 h-4" />,
@@ -72,7 +62,6 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
       'mode': <TbSettings className="w-4 h-4" />,
     };
     
-    // Try to match by key or title
     const lowerKey = key.toLowerCase();
     const lowerTitle = (property.title || '').toLowerCase();
     
@@ -82,9 +71,10 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
       }
     }
     
-    return <TbSettings className="w-4 h-4" />; // Default icon
+    return <TbSettings className="w-4 h-4" />;
   };
 
+  // Load agent options - NO dependencies to avoid cycles
   const loadAgentOptions = useCallback(async () => {
     if (!activeSessionId) return;
 
@@ -97,43 +87,43 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
     }
   }, [activeSessionId]);
 
+  // Handle option change - NO currentValues dependency
   const handleOptionChange = useCallback(async (key: string, value: any) => {
     if (!activeSessionId || isLoading) return;
 
     setIsLoading(true);
     
-    // Update state first
+    // Update state optimistically
     setCurrentValues(prev => prev ? { ...prev, [key]: value } : { [key]: value });
 
-    // Notify parent about the toggle
+    // Notify parent
     if (onToggleOption) {
       onToggleOption(key, value);
     }
 
     try {
-      // Use ref to get current values for API call
-      const valuesToSend = currentValuesRef.current ? { ...currentValuesRef.current, [key]: value } : { [key]: value };
-      const response = await apiService.updateSessionRuntimeSettings(activeSessionId, valuesToSend);
+      // Get fresh values and update
+      const response = await apiService.getSessionRuntimeSettings(activeSessionId);
+      const newValues = { ...response.currentValues, [key]: value };
       
-      if (response.success && response.sessionInfo?.metadata) {
-        updateSessionMetadata({
-          sessionId: activeSessionId,
-          metadata: response.sessionInfo.metadata,
-        });
-      }
+      await apiService.updateSessionRuntimeSettings(activeSessionId, newValues);
+      
+      // Update state with server response
+      setCurrentValues(newValues);
+      
     } catch (error) {
       console.error('Failed to update runtime settings:', error);
-      // Revert the change on error - reload from server
+      // Reload on error
       loadAgentOptions();
     } finally {
       setIsLoading(false);
     }
-  }, [activeSessionId, isLoading, onToggleOption, updateSessionMetadata, loadAgentOptions]);
+  }, [activeSessionId, isLoading, onToggleOption, loadAgentOptions]);
 
-  // Expose methods to parent component
+  // Expose methods - stable reference
   useImperativeHandle(ref, () => ({
     toggleOption: (key: string) => {
-      if (!schema || !currentValues) return;
+      if (!schema?.properties || !currentValues) return;
       
       const property = schema.properties[key];
       if (!property) return;
@@ -143,19 +133,19 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
       if (property.type === 'boolean') {
         handleOptionChange(key, !currentValue);
       } else if (property.type === 'string' && property.enum) {
-        // For enum, toggle to default value
         handleOptionChange(key, property.default);
       }
     },
-  }), [handleOptionChange]);
+  }), [schema, currentValues, handleOptionChange]);
 
+  // Load on mount/session change
   useEffect(() => {
     if (activeSessionId && !isReplayMode) {
       loadAgentOptions();
     }
   }, [activeSessionId, isReplayMode, loadAgentOptions]);
 
-  // Notify parent about active options - use useMemo to prevent unnecessary re-renders
+  // Calculate active options
   const activeOptionsWithKeys = React.useMemo(() => {
     if (!schema || !currentValues) return [];
     
@@ -177,14 +167,14 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
       }));
   }, [schema, currentValues]);
 
+  // Notify parent about active options
   useEffect(() => {
     if (onActiveOptionsChange) {
       onActiveOptionsChange(activeOptionsWithKeys);
     }
   }, [activeOptionsWithKeys, onActiveOptionsChange]);
 
-  // Don't show anything if no schema, in replay mode, or processing
-  if (isReplayMode || isProcessing || !schema || !schema.properties) {
+  if (isReplayMode || isProcessing || !schema?.properties) {
     return null;
   }
 
@@ -232,10 +222,9 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
     }
 
     if (property.type === 'string' && property.enum) {
-      const options = property.enum || [];
+      const enumOptions = property.enum || [];
       return (
-        <>
-          {/* Section header for enum options */}
+        <React.Fragment key={key}>
           <div className="px-3 py-1.5">
             <div className="flex items-center">
               <span className="mr-3 text-gray-600 dark:text-gray-400 flex-shrink-0">{icon}</span>
@@ -253,9 +242,8 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
             </div>
           </div>
           
-          {/* Options */}
           <div className="ml-7 mr-3 mb-1 space-y-0.5">
-            {options.map((option: any) => (
+            {enumOptions.map((option: any) => (
               <button
                 key={`${key}-${option}`}
                 onClick={() => handleOptionChange(key, option)}
@@ -274,7 +262,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
               </button>
             ))}
           </div>
-        </>
+        </React.Fragment>
       );
     }
 
