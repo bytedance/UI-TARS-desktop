@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useImperativeHandle, forwardRef, useCallback } from 'react';
+import React, { useState, useEffect, useImperativeHandle, forwardRef, useCallback, useRef } from 'react';
 import { useSetAtom } from 'jotai';
 import { updateSessionMetadataAction } from '@/common/state/actions/sessionActions';
 import { apiService } from '@/common/services/apiService';
@@ -52,9 +52,15 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
   const [schema, setSchema] = useState<AgentOptionsSchema | null>(null);
   const [currentValues, setCurrentValues] = useState<Record<string, any> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const currentValuesRef = useRef<Record<string, any> | null>(null);
   const updateSessionMetadata = useSetAtom(updateSessionMetadataAction);
   const { isReplayMode } = useReplayMode();
   const isProcessing = useAtomValue(isProcessingAtom);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    currentValuesRef.current = currentValues;
+  }, [currentValues]);
 
   const getOptionIcon = (key: string, property: any) => {
     // Map common option keys to icons
@@ -92,19 +98,23 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
   }, [activeSessionId]);
 
   const handleOptionChange = useCallback(async (key: string, value: any) => {
-    if (!activeSessionId || isLoading || !currentValues) return;
+    if (!activeSessionId || isLoading) return;
 
-    const newValues = { ...currentValues, [key]: value };
-    setCurrentValues(newValues);
+    setIsLoading(true);
+    
+    // Update state first
+    setCurrentValues(prev => prev ? { ...prev, [key]: value } : { [key]: value });
 
     // Notify parent about the toggle
     if (onToggleOption) {
       onToggleOption(key, value);
     }
 
-    setIsLoading(true);
     try {
-      const response = await apiService.updateSessionRuntimeSettings(activeSessionId, newValues);
+      // Use ref to get current values for API call
+      const valuesToSend = currentValuesRef.current ? { ...currentValuesRef.current, [key]: value } : { [key]: value };
+      const response = await apiService.updateSessionRuntimeSettings(activeSessionId, valuesToSend);
+      
       if (response.success && response.sessionInfo?.metadata) {
         updateSessionMetadata({
           sessionId: activeSessionId,
@@ -113,12 +123,12 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
       }
     } catch (error) {
       console.error('Failed to update runtime settings:', error);
-      // Revert the change on error
-      setCurrentValues(currentValues);
+      // Revert the change on error - reload from server
+      loadAgentOptions();
     } finally {
       setIsLoading(false);
     }
-  }, [activeSessionId, isLoading, currentValues, onToggleOption, updateSessionMetadata]);
+  }, [activeSessionId, isLoading, onToggleOption, updateSessionMetadata, loadAgentOptions]);
 
   // Expose methods to parent component
   useImperativeHandle(ref, () => ({
