@@ -19,6 +19,7 @@ import {
   isSystemPromptTemplate,
   defaultNormalizeCoords,
   normalizeActionCoords,
+  sleep,
 } from '@gui-agent/shared/utils';
 import { GUI_ADAPTED_TOOL_NAME } from './constants';
 
@@ -29,6 +30,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent {
 
   private operator: Operator | undefined;
   private normalizeCoordinates: NormalizeCoordinates;
+  private loopIntervalInMs: number;
 
   constructor(config: GUIAgentConfig<T>) {
     const {
@@ -38,7 +40,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent {
       customeActionParser,
       normalizeCoordinates,
       maxLoopCount,
-      loopIntervalInMs,
+      loopIntervalInMs = 500,
     } = config;
     let finalSystemPrompt = SYSTEM_PROMPT;
     if (typeof systemPrompt === 'string') {
@@ -47,17 +49,26 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent {
       finalSystemPrompt = assembleSystemPrompt(systemPrompt, operator.getSupportedActions());
     }
     defaultLogger.debug('final instructions for sp:', finalSystemPrompt);
+
+    // Create a adapted ToolCallEngine constructor that captures the customeActionParser
+    const AdaptedToolCallEngine = class extends GUIAgentToolCallEngine {
+      constructor() {
+        super(customeActionParser);
+      }
+    };
+
     super({
       name: 'Seed GUI Agent',
       instructions: finalSystemPrompt,
       tools: [],
-      toolCallEngine: GUIAgentToolCallEngine,
+      toolCallEngine: AdaptedToolCallEngine,
       model: model,
       ...(maxLoopCount && { maxIterations: maxLoopCount }),
       logLevel: LogLevel.DEBUG,
     });
     this.operator = operator;
     this.normalizeCoordinates = normalizeCoordinates ?? defaultNormalizeCoords;
+    this.loopIntervalInMs = loopIntervalInMs;
     this.logger = this.logger.spawn('[GUIAgent]');
   }
 
@@ -126,6 +137,8 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent {
       this.logger.info('onAfterToolCall: skipping screenshot');
       return;
     }
+
+    await sleep(this.loopIntervalInMs);
 
     const output = await this.operator!.doScreenshot();
     if (!output) {

@@ -17,6 +17,7 @@ import { DefaultActionParser } from '@gui-agent/action-parser';
 import { GUI_ADAPTED_TOOL_NAME } from './constants';
 import { ConsoleLogger, LogLevel } from '@agent-infra/logger';
 import { serializeAction } from '@gui-agent/shared/utils';
+import { CustomActionParser } from '@gui-agent/shared/types';
 
 const defaultParser = new DefaultActionParser();
 const defaultLogger = new ConsoleLogger('[GUIAgent:ToolCallEngine]', LogLevel.DEBUG);
@@ -32,6 +33,13 @@ const defaultLogger = new ConsoleLogger('[GUIAgent:ToolCallEngine]', LogLevel.DE
  * Format used: <tool_call>{"name": "tool_name", "arguments": {...}}</tool_call>
  */
 export class GUIAgentToolCallEngine extends ToolCallEngine {
+  private customActionParser?: CustomActionParser;
+
+  constructor(customActionParser?: CustomActionParser) {
+    super();
+    this.customActionParser = customActionParser;
+  }
+
   /**
    * Prepare system prompt with tool information and instructions
    */
@@ -111,7 +119,19 @@ export class GUIAgentToolCallEngine extends ToolCallEngine {
     const fullContent = state.contentBuffer;
     defaultLogger.log('[finalizeStreamProcessing] fullContent', fullContent);
 
-    const parsedGUIResponse = defaultParser.parsePrediction(fullContent);
+    // Try custom action parser first if available
+    let parsedGUIResponse = null;
+    if (this.customActionParser) {
+      parsedGUIResponse = this.customActionParser(fullContent);
+      defaultLogger.log('[finalizeStreamProcessing] Using custom action parser');
+    }
+
+    // Fall back to default parser if custom parser is not available or returns null
+    if (!parsedGUIResponse) {
+      parsedGUIResponse = defaultParser.parsePrediction(fullContent);
+      defaultLogger.log('[finalizeStreamProcessing] Using default action parser');
+    }
+
     if (!parsedGUIResponse) {
       return {
         content: '',
