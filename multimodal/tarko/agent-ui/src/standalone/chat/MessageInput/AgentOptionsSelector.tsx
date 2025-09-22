@@ -102,7 +102,7 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
       return (
         <DropdownItem
           key={key}
-          onClick={() => handleOptionChange(key, !Boolean(currentValue))}
+          onClick={() => handleOptionChange(key, !currentValue)}
           className="flex items-center justify-between"
         >
           <div className="flex-1">
@@ -115,12 +115,12 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
           </div>
           <div
             className={`ml-3 relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-              Boolean(currentValue) ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-600'
+              currentValue ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-600'
             }`}
           >
             <span
               className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
-                Boolean(currentValue) ? 'translate-x-5' : 'translate-x-1'
+                currentValue ? 'translate-x-5' : 'translate-x-1'
               }`}
             />
           </div>
@@ -142,9 +142,7 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
             <div className="text-sm font-medium">{property.title || key}</div>
             <div className="text-xs text-gray-500 dark:text-gray-400">{option}</div>
           </div>
-          {currentValue === option && (
-            <div className="ml-3 w-2 h-2 bg-indigo-600 rounded-full" />
-          )}
+          {currentValue === option && <div className="ml-3 w-2 h-2 bg-indigo-600 rounded-full" />}
         </DropdownItem>
       ));
     }
@@ -155,6 +153,7 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
   return (
     <Dropdown
       placement="top-start"
+      menuClassName="!fixed !z-[10000]"
       trigger={
         <button
           type="button"
