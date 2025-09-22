@@ -39,208 +39,207 @@ interface AgentOptionConfig {
   currentValue: any;
 }
 
-export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOptionsSelectorProps>(({
-  activeSessionId,
-  sessionMetadata,
-  className = '',
-  onActiveOptionsChange,
-  onToggleOption,
-}, ref) => {
-  const [schema, setSchema] = useState<AgentOptionsSchema | null>(null);
-  const [currentValues, setCurrentValues] = useState<Record<string, any> | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasLoaded, setHasLoaded] = useState(false);
-  const updateSessionMetadata = useSetAtom(updateSessionMetadataAction);
-  const { isReplayMode } = useReplayMode();
-  const isProcessing = useAtomValue(isProcessingAtom);
+export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOptionsSelectorProps>(
+  (
+    { activeSessionId, sessionMetadata, className = '', onActiveOptionsChange, onToggleOption },
+    ref,
+  ) => {
+    const [schema, setSchema] = useState<AgentOptionsSchema | null>(null);
+    const [currentValues, setCurrentValues] = useState<Record<string, any> | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [hasLoaded, setHasLoaded] = useState(false);
+    const updateSessionMetadata = useSetAtom(updateSessionMetadataAction);
+    const { isReplayMode } = useReplayMode();
+    const isProcessing = useAtomValue(isProcessingAtom);
 
-  // Load agent options - ONLY when session changes
-  useEffect(() => {
-    if (!activeSessionId || isReplayMode || hasLoaded) return;
+    // Load agent options - ONLY when session changes
+    useEffect(() => {
+      if (!activeSessionId || isReplayMode || hasLoaded) return;
 
-    const loadOptions = async () => {
+      const loadOptions = async () => {
+        try {
+          const response = await apiService.getSessionRuntimeSettings(activeSessionId);
+          setSchema(response.schema);
+          setCurrentValues(response.currentValues);
+          setHasLoaded(true);
+        } catch (error) {
+          console.error('Failed to load runtime settings:', error);
+        }
+      };
+
+      loadOptions();
+    }, [activeSessionId, isReplayMode]); // NO hasLoaded dependency to prevent loop
+
+    // Reset loaded state when session changes
+    useEffect(() => {
+      setHasLoaded(false);
+      setSchema(null);
+      setCurrentValues(null);
+    }, [activeSessionId]);
+
+    // Handle option change - simple and direct
+    const handleOptionChange = async (key: string, value: any) => {
+      if (!activeSessionId || isLoading || !currentValues) return;
+
+      const newValues = { ...currentValues, [key]: value };
+      setCurrentValues(newValues);
+      setIsLoading(true);
+
       try {
-        const response = await apiService.getSessionRuntimeSettings(activeSessionId);
-        setSchema(response.schema);
-        setCurrentValues(response.currentValues);
-        setHasLoaded(true);
+        const response = await apiService.updateSessionRuntimeSettings(activeSessionId, newValues);
+        if (response.success && response.sessionInfo?.metadata) {
+          updateSessionMetadata({
+            sessionId: activeSessionId,
+            metadata: response.sessionInfo.metadata,
+          });
+        }
       } catch (error) {
-        console.error('Failed to load runtime settings:', error);
+        console.error('Failed to update runtime settings:', error);
+        // Revert on error
+        setCurrentValues(currentValues);
+      } finally {
+        setIsLoading(false);
+      }
+
+      // Notify parent
+      if (onToggleOption) {
+        onToggleOption(key, value);
       }
     };
 
-    loadOptions();
-  }, [activeSessionId, isReplayMode]); // NO hasLoaded dependency to prevent loop
+    // Expose toggle method
+    useImperativeHandle(ref, () => ({
+      toggleOption: (key: string) => {
+        if (!schema?.properties || !currentValues) return;
 
-  // Reset loaded state when session changes
-  useEffect(() => {
-    setHasLoaded(false);
-    setSchema(null);
-    setCurrentValues(null);
-  }, [activeSessionId]);
+        const property = schema.properties[key];
+        if (!property) return;
 
-  // Handle option change - simple and direct
-  const handleOptionChange = async (key: string, value: any) => {
-    if (!activeSessionId || isLoading || !currentValues) return;
-
-    const newValues = { ...currentValues, [key]: value };
-    setCurrentValues(newValues);
-    setIsLoading(true);
-
-    try {
-      const response = await apiService.updateSessionRuntimeSettings(activeSessionId, newValues);
-      if (response.success && response.sessionInfo?.metadata) {
-        updateSessionMetadata({
-          sessionId: activeSessionId,
-          metadata: response.sessionInfo.metadata,
-        });
-      }
-    } catch (error) {
-      console.error('Failed to update runtime settings:', error);
-      // Revert on error
-      setCurrentValues(currentValues);
-    } finally {
-      setIsLoading(false);
-    }
-
-    // Notify parent
-    if (onToggleOption) {
-      onToggleOption(key, value);
-    }
-  };
-
-  // Expose toggle method
-  useImperativeHandle(ref, () => ({
-    toggleOption: (key: string) => {
-      if (!schema?.properties || !currentValues) return;
-      
-      const property = schema.properties[key];
-      if (!property) return;
-      
-      const currentValue = currentValues[key] ?? property.default;
-      
-      if (property.type === 'boolean') {
-        handleOptionChange(key, !currentValue);
-      } else if (property.type === 'string' && property.enum) {
-        handleOptionChange(key, property.default);
-      }
-    },
-  }));
-
-  // Calculate and notify active options
-  useEffect(() => {
-    if (!onActiveOptionsChange || !schema || !currentValues) return;
-
-    const activeOptions = Object.entries(schema.properties)
-      .filter(([key, property]) => {
         const currentValue = currentValues[key] ?? property.default;
+
         if (property.type === 'boolean') {
-          return currentValue === true;
+          handleOptionChange(key, !currentValue);
+        } else if (property.type === 'string' && property.enum) {
+          handleOptionChange(key, property.default);
         }
-        if (property.type === 'string' && property.enum) {
-          return currentValue && currentValue !== property.default;
-        }
-        return false;
-      })
-      .map(([key, property]) => ({
-        key,
-        title: property.title || key,
-        currentValue: currentValues[key] ?? property.default
-      }));
+      },
+    }));
 
-    onActiveOptionsChange(activeOptions);
-  }, [schema, currentValues, onActiveOptionsChange]);
+    // Calculate and notify active options
+    useEffect(() => {
+      if (!onActiveOptionsChange || !schema || !currentValues) return;
 
-  // Don't render if conditions not met
-  if (isReplayMode || isProcessing || !schema?.properties || !currentValues) {
-    return null;
-  }
+      const activeOptions = Object.entries(schema.properties)
+        .filter(([key, property]) => {
+          const currentValue = currentValues[key] ?? property.default;
+          if (property.type === 'boolean') {
+            return currentValue === true;
+          }
+          if (property.type === 'string' && property.enum) {
+            return currentValue && currentValue !== property.default;
+          }
+          return false;
+        })
+        .map(([key, property]) => ({
+          key,
+          title: property.title || key,
+          currentValue: currentValues[key] ?? property.default,
+        }));
 
-  const options = Object.entries(schema.properties).map(([key, property]) => ({
-    key,
-    property,
-    currentValue: currentValues[key] ?? property.default,
-  }));
+      onActiveOptionsChange(activeOptions);
+    }, [schema, currentValues, onActiveOptionsChange]);
 
-  if (options.length === 0) {
-    return null;
-  }
-
-  const getOptionIcon = (key: string, property: any) => {
-    const lowerKey = key.toLowerCase();
-    const lowerTitle = (property.title || '').toLowerCase();
-    if (lowerKey.includes('search')) return <TbSearch className="w-4 h-4" />;
-    if (lowerKey.includes('research')) return <TbBook className="w-4 h-4" />;
-    if (lowerKey.includes('foo')) return <TbBulb className="w-4 h-4" />;
-    if (lowerKey.includes('thinking') || lowerTitle.includes('思考')) return <TbBrain className="w-4 h-4" />;
-    return <TbSettings className="w-4 h-4" />;
-  };
-
-  const renderOptionItem = (config: AgentOptionConfig) => {
-    const { key, property, currentValue } = config;
-
-    if (property.type === 'boolean') {
-      return (
-        <DropdownItem
-          key={key}
-          icon={getOptionIcon(key, property)}
-          onClick={() => handleOptionChange(key, !currentValue)}
-          className={currentValue ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <div className="font-medium text-sm">{property.title || key}</div>
-              {property.description && (
-                <div className="text-xs text-gray-500">{property.description}</div>
-              )}
-            </div>
-            {currentValue && <FiCheck className="w-4 h-4 text-blue-600" />}
-          </div>
-        </DropdownItem>
-      );
+    // Don't render if conditions not met
+    if (isReplayMode || isProcessing || !schema?.properties || !currentValues) {
+      return null;
     }
 
-    if (property.type === 'string' && property.enum) {
-      return (
-        <React.Fragment key={key}>
-          <div className="px-3 py-2 border-b">
-            <div className="font-medium text-sm">{property.title || key}</div>
-          </div>
-          {property.enum.map((option: any) => (
-            <DropdownItem
-              key={`${key}-${option}`}
-              onClick={() => handleOptionChange(key, option)}
-              className={currentValue === option ? 'bg-blue-50' : ''}
-            >
-              <div className="flex items-center justify-between">
-                <span>{option}</span>
-                {currentValue === option && <FiCheck className="w-4 h-4 text-blue-600" />}
+    const options = Object.entries(schema.properties).map(([key, property]) => ({
+      key,
+      property,
+      currentValue: currentValues[key] ?? property.default,
+    }));
+
+    if (options.length === 0) {
+      return null;
+    }
+
+    const getOptionIcon = (key: string, property: any) => {
+      const lowerKey = key.toLowerCase();
+      const lowerTitle = (property.title || '').toLowerCase();
+      if (lowerKey.includes('search')) return <TbSearch className="w-4 h-4" />;
+      if (lowerKey.includes('research')) return <TbBook className="w-4 h-4" />;
+      if (lowerKey.includes('foo')) return <TbBulb className="w-4 h-4" />;
+      if (lowerKey.includes('thinking')) return <TbBrain className="w-4 h-4" />;
+      return <TbSettings className="w-4 h-4" />;
+    };
+
+    const renderOptionItem = (config: AgentOptionConfig) => {
+      const { key, property, currentValue } = config;
+
+      if (property.type === 'boolean') {
+        return (
+          <DropdownItem
+            key={key}
+            icon={getOptionIcon(key, property)}
+            onClick={() => handleOptionChange(key, !currentValue)}
+            className={currentValue ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <div className="font-medium text-sm">{property.title || key}</div>
+                {property.description && (
+                  <div className="text-xs text-gray-500">{property.description}</div>
+                )}
               </div>
-            </DropdownItem>
-          ))}
-        </React.Fragment>
-      );
-    }
-
-    return null;
-  };
-
-  return (
-    <Dropdown
-      placement="top-start"
-      trigger={
-        <button
-          type="button"
-          disabled={isLoading}
-          className="flex items-center justify-center w-8 h-8 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors"
-          title={`Agent Options (${options.length})`}
-        >
-          <FiPlus size={16} />
-        </button>
+              {currentValue && <FiCheck className="w-4 h-4 text-blue-600" />}
+            </div>
+          </DropdownItem>
+        );
       }
-    >
-      <DropdownHeader>Agent Settings</DropdownHeader>
-      {options.map(renderOptionItem)}
-    </Dropdown>
-  );
-});
+
+      if (property.type === 'string' && property.enum) {
+        return (
+          <React.Fragment key={key}>
+            <div className="px-3 py-2 border-b">
+              <div className="font-medium text-sm">{property.title || key}</div>
+            </div>
+            {property.enum.map((option: any) => (
+              <DropdownItem
+                key={`${key}-${option}`}
+                onClick={() => handleOptionChange(key, option)}
+                className={currentValue === option ? 'bg-blue-50' : ''}
+              >
+                <div className="flex items-center justify-between">
+                  <span>{option}</span>
+                  {currentValue === option && <FiCheck className="w-4 h-4 text-blue-600" />}
+                </div>
+              </DropdownItem>
+            ))}
+          </React.Fragment>
+        );
+      }
+
+      return null;
+    };
+
+    return (
+      <Dropdown
+        placement="top-start"
+        trigger={
+          <button
+            type="button"
+            disabled={isLoading}
+            className="flex items-center justify-center w-8 h-8 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors"
+            title={`Agent Options (${options.length})`}
+          >
+            <FiPlus size={16} />
+          </button>
+        }
+      >
+        <DropdownHeader>Agent Settings</DropdownHeader>
+        {options.map(renderOptionItem)}
+      </Dropdown>
+    );
+  },
+);
