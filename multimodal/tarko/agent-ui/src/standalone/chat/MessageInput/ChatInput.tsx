@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { FiSend, FiRefreshCw, FiImage, FiSquare, FiX } from 'react-icons/fi';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ConnectionStatus } from '@/common/types';
@@ -76,12 +76,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   const contextualSelectorEnabled = isContextualSelectorEnabled() && showContextualSelector;
 
-  const handleToggleOption = (key: string, currentValue: any) => {
+  const handleToggleOption = useCallback((key: string, currentValue: any) => {
     // Use the ref to call the toggle method on AgentOptionsSelector
     if (agentOptionsSelectorRef.current) {
       agentOptionsSelectorRef.current.toggleOption(key);
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (initialValue && !contextualState.input) {

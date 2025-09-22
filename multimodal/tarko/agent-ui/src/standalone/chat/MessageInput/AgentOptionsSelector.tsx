@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
+import React, { useState, useEffect, useImperativeHandle, forwardRef, useCallback } from 'react';
 import { useSetAtom } from 'jotai';
 import { updateSessionMetadataAction } from '@/common/state/actions/sessionActions';
 import { apiService } from '@/common/services/apiService';
@@ -73,7 +73,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
         handleOptionChange(key, property.default);
       }
     },
-  }), [schema, currentValues]);
+  }), [handleOptionChange]);
 
   const getOptionIcon = (key: string, property: any) => {
     // Map common option keys to icons
@@ -98,7 +98,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
     return <TbSettings className="w-4 h-4" />; // Default icon
   };
 
-  const loadAgentOptions = async () => {
+  const loadAgentOptions = useCallback(async () => {
     if (!activeSessionId) return;
 
     try {
@@ -108,9 +108,9 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
     } catch (error) {
       console.error('Failed to load runtime settings:', error);
     }
-  };
+  }, [activeSessionId]);
 
-  const handleOptionChange = async (key: string, value: any) => {
+  const handleOptionChange = useCallback(async (key: string, value: any) => {
     if (!activeSessionId || isLoading || !currentValues) return;
 
     const newValues = { ...currentValues, [key]: value };
@@ -137,37 +137,41 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [activeSessionId, isLoading, currentValues, onToggleOption, updateSessionMetadata]);
 
   useEffect(() => {
     if (activeSessionId && !isReplayMode) {
       loadAgentOptions();
     }
-  }, [activeSessionId, isReplayMode]);
+  }, [activeSessionId, isReplayMode, loadAgentOptions]);
 
-  // Notify parent about active options
+  // Notify parent about active options - use useMemo to prevent unnecessary re-renders
+  const activeOptionsWithKeys = React.useMemo(() => {
+    if (!schema || !currentValues) return [];
+    
+    return Object.entries(schema.properties)
+      .filter(([key, property]) => {
+        const currentValue = currentValues[key] ?? property.default;
+        if (property.type === 'boolean') {
+          return currentValue === true;
+        }
+        if (property.type === 'string' && property.enum) {
+          return currentValue && currentValue !== property.default;
+        }
+        return false;
+      })
+      .map(([key, property]) => ({
+        key,
+        title: property.title || key,
+        currentValue: currentValues[key] ?? property.default
+      }));
+  }, [schema, currentValues]);
+
   useEffect(() => {
-    if (onActiveOptionsChange && schema && currentValues) {
-      const activeOptionsWithKeys = Object.entries(schema.properties)
-        .filter(([key, property]) => {
-          const currentValue = currentValues[key] ?? property.default;
-          if (property.type === 'boolean') {
-            return currentValue === true;
-          }
-          if (property.type === 'string' && property.enum) {
-            return currentValue && currentValue !== property.default;
-          }
-          return false;
-        })
-        .map(([key, property]) => ({
-          key,
-          title: property.title || key,
-          currentValue: currentValues[key] ?? property.default
-        }));
-      
+    if (onActiveOptionsChange) {
       onActiveOptionsChange(activeOptionsWithKeys);
     }
-  }, [schema, currentValues, onActiveOptionsChange]);
+  }, [activeOptionsWithKeys, onActiveOptionsChange]);
 
   // Don't show anything if no schema, in replay mode, or processing
   if (isReplayMode || isProcessing || !schema || !schema.properties) {
