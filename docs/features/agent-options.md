@@ -68,23 +68,34 @@ Retrieve the current session's options in your agent implementation:
 
 ```typescript
 // your-agent.ts
-import { AgentSession } from '@tarko/agent-interface';
+import { Agent } from '@tarko/agent';
 
-class MyAgent {
-  async processMessage(session: AgentSession, message: string) {
-    // Get current agent options for this session
-    const options = session.metadata?.agentOptions || {};
+class MyAgent extends Agent {
+  async run(input: string, options?: { sessionId?: string }) {
+    // Access agent options through the event stream's session metadata
+    const sessionMetadata = this.getEventStream().getSessionMetadata(options?.sessionId);
+    const agentOptions = sessionMetadata?.agentOptions || {};
     
-    const isVerbose = options.verboseMode || false;
-    const agentType = options.agentType || 'omni';
-    const style = options.responseStyle || 'detailed';
+    const isVerbose = agentOptions.verboseMode || false;
+    const agentType = agentOptions.agentType || 'omni';
+    const style = agentOptions.responseStyle || 'detailed';
     
-    // Use options to customize behavior
+    // Customize behavior based on options
     if (agentType === 'gui-agent') {
-      return this.handleGuiAgentMode(message, { verbose: isVerbose, style });
+      return this.handleGuiAgentMode(input, { verbose: isVerbose, style });
     } else {
-      return this.handleOmniMode(message, { verbose: isVerbose, style });
+      return this.handleOmniMode(input, { verbose: isVerbose, style });
     }
+  }
+  
+  private async handleGuiAgentMode(input: string, config: { verbose: boolean; style: string }) {
+    // GUI agent specific logic
+    return super.run(input);
+  }
+  
+  private async handleOmniMode(input: string, config: { verbose: boolean; style: string }) {
+    // Omni mode specific logic
+    return super.run(input);
   }
 }
 ```
@@ -223,42 +234,77 @@ const agentConfig = {
 
 ```typescript
 // dynamic-agent.ts
-class DynamicAgent {
-  async generateResponse(session: AgentSession, prompt: string) {
-    const options = session.metadata?.agentOptions || {};
+import { Agent, createTool } from '@tarko/agent';
+
+class DynamicAgent extends Agent {
+  constructor(options = {}) {
+    super({
+      name: 'DynamicAgent',
+      instructions: 'You are a dynamic assistant that adapts behavior based on user preferences.',
+      tools: [
+        createTool({
+          name: 'web_search',
+          description: 'Search the web for information',
+          parameters: {
+            type: 'object',
+            properties: {
+              query: { type: 'string', description: 'Search query' }
+            },
+            required: ['query']
+          },
+          handler: async ({ query }) => {
+            // Web search implementation
+            return `Search results for: ${query}`;
+          }
+        })
+      ],
+      ...options
+    });
+  }
+  
+  async run(input: string, runOptions?: { sessionId?: string }) {
+    // Get agent options from session metadata
+    const sessionMetadata = this.getEventStream().getSessionMetadata(runOptions?.sessionId);
+    const options = sessionMetadata?.agentOptions || {};
     
-    // Adjust behavior based on options
-    let response = '';
+    // Customize instructions based on options
+    let customInstructions = this.instructions;
     
     // Show thinking process if enabled
     if (options.showThinking) {
-      response += '🤔 **Thinking**: Analyzing your request...\n\n';
+      customInstructions += '\n\nAlways explain your reasoning process step by step.';
     }
     
     // Adjust personality
     const personality = options.personality || 'friendly';
-    const greeting = {
-      professional: 'I will assist you with',
-      friendly: 'I\'d be happy to help you with',
-      technical: 'Processing request for'
-    }[personality];
+    const personalityPrompts = {
+      professional: 'Maintain a professional and formal tone.',
+      friendly: 'Be warm, approachable, and conversational.',
+      technical: 'Focus on technical accuracy and detailed explanations.'
+    };
+    customInstructions += `\n\n${personalityPrompts[personality]}`;
     
-    response += `${greeting} ${prompt}\n\n`;
-    
-    // Use web search if allowed
-    if (options.allowWebSearch && this.needsWebSearch(prompt)) {
-      const searchResults = await this.searchWeb(prompt);
-      response += `📊 **Research**: ${searchResults}\n\n`;
+    // Web search preference
+    if (!options.allowWebSearch) {
+      customInstructions += '\n\nDo not use web search tools unless absolutely necessary.';
     }
     
-    // Generate code in preferred style
-    if (this.needsCode(prompt)) {
-      const codeStyle = options.codeStyle || 'typescript';
-      const code = await this.generateCode(prompt, codeStyle);
-      response += `\`\`\`${codeStyle}\n${code}\n\`\`\`\n`;
+    // Code style preference
+    if (options.codeStyle) {
+      customInstructions += `\n\nWhen generating code, prefer ${options.codeStyle} syntax and conventions.`;
     }
     
-    return response;
+    // Temporarily update instructions for this run
+    const originalInstructions = this.instructions;
+    this.instructions = customInstructions;
+    
+    try {
+      const result = await super.run(input);
+      return result;
+    } finally {
+      // Restore original instructions
+      this.instructions = originalInstructions;
+    }
   }
 }
 ```
@@ -450,19 +496,34 @@ import { AgentOptionsSelector } from './AgentOptionsSelector';
 Enable debug logging to troubleshoot issues:
 
 ```typescript
-// In your agent config
-{
-  debugAgentOptions: {
-    type: 'boolean',
-    title: 'Debug Mode',
-    description: 'Enable debug logging for agent options',
-    default: false
+// In your server config
+const serverOptions: AgentServerOptions = {
+  agentOptions: {
+    type: 'object',
+    properties: {
+      debugAgentOptions: {
+        type: 'boolean',
+        title: 'Debug Mode',
+        description: 'Enable debug logging for agent options',
+        default: false
+      }
+    }
   }
-}
+};
 
 // In your agent code
-if (options.debugAgentOptions) {
-  console.log('Current agent options:', options);
+class DebuggableAgent extends Agent {
+  async run(input: string, runOptions?: { sessionId?: string }) {
+    const sessionMetadata = this.getEventStream().getSessionMetadata(runOptions?.sessionId);
+    const options = sessionMetadata?.agentOptions || {};
+    
+    if (options.debugAgentOptions) {
+      console.log('Current agent options:', options);
+      console.log('Input:', input);
+    }
+    
+    return super.run(input);
+  }
 }
 ```
 
@@ -478,9 +539,17 @@ const AGENT_MODE = 'omni';
 const VERBOSE = false;
 
 // After - Dynamic options
-const options = session.metadata?.agentOptions || {};
-const agentMode = options.agentMode || 'omni';
-const verbose = options.verboseMode || false;
+class MyAgent extends Agent {
+  async run(input: string, options?: { sessionId?: string }) {
+    const sessionMetadata = this.getEventStream().getSessionMetadata(options?.sessionId);
+    const agentOptions = sessionMetadata?.agentOptions || {};
+    const agentMode = agentOptions.agentMode || 'omni';
+    const verbose = agentOptions.verboseMode || false;
+    
+    // Use dynamic options in your logic
+    return super.run(input);
+  }
+}
 ```
 
 ### From Environment Variables
@@ -490,7 +559,19 @@ const verbose = options.verboseMode || false;
 const DEBUG_MODE = process.env.DEBUG_MODE === 'true';
 
 // After - Session options
-const debugMode = session.metadata?.agentOptions?.debugMode || false;
+class MyAgent extends Agent {
+  async run(input: string, options?: { sessionId?: string }) {
+    const sessionMetadata = this.getEventStream().getSessionMetadata(options?.sessionId);
+    const agentOptions = sessionMetadata?.agentOptions || {};
+    const debugMode = agentOptions.debugMode || false;
+    
+    if (debugMode) {
+      console.log('Debug mode enabled for this session');
+    }
+    
+    return super.run(input);
+  }
+}
 ```
 
 ## Examples Repository
