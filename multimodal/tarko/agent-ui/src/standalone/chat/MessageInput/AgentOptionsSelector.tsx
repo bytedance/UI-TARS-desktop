@@ -125,7 +125,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
         handleOptionChange(key, property.default);
       }
     },
-  }), [schema, currentValues]);
+  }));
 
   // Calculate and notify active options
   useEffect(() => {
