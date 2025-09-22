@@ -408,9 +408,41 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               <ImagePreviewInline images={uploadedImages} onRemoveImage={handleRemoveImage} />
             )}
 
-            {/* Active agent options tags */}
-            {activeAgentOptions.length > 0 && (
-              <div className="px-5 pt-3 pb-1">
+            <textarea
+              ref={inputRef}
+              value={contextualState.input}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              onPaste={handlePaste}
+              placeholder={placeholder || defaultPlaceholder}
+              disabled={isDisabled}
+              className={`w-full px-5 ${
+                uploadedImages.length > 0
+                  ? 'pt-2' 
+                  : 'pt-5'
+              } pb-12 focus:outline-none resize-none ${
+                uploadedImages.length > 0
+                  ? (variant === 'home' ? 'min-h-[100px]' : 'min-h-[80px]') 
+                  : variant === 'home' ? 'min-h-[120px]' : 'min-h-[100px]'
+              } max-h-[220px] bg-transparent text-sm leading-relaxed rounded-[1.4rem]`}
+              rows={2}
+            />
+
+            {/* Left side controls */}
+            <div className="absolute left-3 bottom-3 flex items-center gap-2">
+              {/* Agent Options Selector - First (leftmost) */}
+              <AgentOptionsSelector 
+                ref={agentOptionsSelectorRef}
+                activeSessionId={sessionId} 
+                sessionMetadata={sessionMetadata} 
+                onActiveOptionsChange={setActiveAgentOptions}
+                onToggleOption={handleToggleOption}
+              />
+              
+              {/* Active agent options tags */}
+              {activeAgentOptions.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
                   {activeAgentOptions.map((option, index) => {
                     // Get icon based on option key
@@ -442,41 +474,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                     );
                   })}
                 </div>
-              </div>
-            )}
-
-            <textarea
-              ref={inputRef}
-              value={contextualState.input}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyDown}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-              onPaste={handlePaste}
-              placeholder={placeholder || defaultPlaceholder}
-              disabled={isDisabled}
-              className={`w-full px-5 ${
-                uploadedImages.length > 0 || activeAgentOptions.length > 0 
-                  ? 'pt-2' 
-                  : 'pt-5'
-              } pb-12 focus:outline-none resize-none ${
-                uploadedImages.length > 0 || activeAgentOptions.length > 0
-                  ? (variant === 'home' ? 'min-h-[100px]' : 'min-h-[80px]') 
-                  : variant === 'home' ? 'min-h-[120px]' : 'min-h-[100px]'
-              } max-h-[220px] bg-transparent text-sm leading-relaxed rounded-[1.4rem]`}
-              rows={2}
-            />
-
-            {/* Left side controls */}
-            <div className="absolute left-3 bottom-3 flex items-center gap-2">
-              {/* Agent Options Selector - First (leftmost) */}
-              <AgentOptionsSelector 
-                ref={agentOptionsSelectorRef}
-                activeSessionId={sessionId} 
-                sessionMetadata={sessionMetadata} 
-                onActiveOptionsChange={setActiveAgentOptions}
-                onToggleOption={handleToggleOption}
-              />
+              )}
               
               {/* File upload button */}
               {showAttachments && (
