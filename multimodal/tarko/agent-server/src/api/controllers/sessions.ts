@@ -97,15 +97,34 @@ export async function updateRuntimeSettings(req: Request, res: Response) {
       return res.status(404).json({ error: 'Session not found' });
     }
 
-    const updatedMetadata = await server.storageProvider.updateSessionInfo(sessionId, {
+    // Update session info with new runtime settings
+    const updatedSessionInfo = await server.storageProvider.updateSessionInfo(sessionId, {
       metadata: {
         ...sessionInfo.metadata,
         runtimeSettings,
       },
     });
 
+    // If session is currently active, recreate the agent with new runtime settings
+    const activeSession = server.sessions[sessionId];
+    if (activeSession) {
+      console.log('Runtime settings updated', {
+        sessionId,
+        runtimeSettings,
+      });
+
+      try {
+        // Recreate agent with new runtime settings configuration
+        await activeSession.updateSessionConfig(updatedSessionInfo);
+        console.log('Session agent recreated with new runtime settings', { sessionId });
+      } catch (error) {
+        console.error('Failed to update agent runtime settings for session', { sessionId, error });
+        // Continue execution - the runtime settings are saved, will apply on next session
+      }
+    }
+
     res.status(200).json({ 
-      session: updatedMetadata,
+      session: updatedSessionInfo,
       runtimeSettings 
     });
   } catch (error) {
