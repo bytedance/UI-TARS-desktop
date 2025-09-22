@@ -248,8 +248,6 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
           </button>
         }
       >
-        <DropdownHeader>Options</DropdownHeader>
-        
         {/* File upload option */}
         {showAttachments && (
           <DropdownItem
@@ -264,9 +262,6 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
         
         {/* Separator between upload and agent settings */}
         {showAttachments && options.length > 0 && <DropdownDivider />}
-        
-        {/* Agent settings header */}
-        {options.length > 0 && <DropdownHeader>Agent Settings</DropdownHeader>}
         
         {/* Agent options */}
         {options.map(renderOptionItem)}
