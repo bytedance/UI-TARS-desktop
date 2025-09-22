@@ -459,14 +459,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
             {/* Left side controls */}
             <div className="absolute left-3 bottom-3 flex items-center gap-2">
-              {/* Agent Options Selector - First (leftmost) */}
-              <AgentOptionsSelector 
+              {/* Agent Options Selector - TEMPORARILY DISABLED DUE TO INFINITE REQUESTS */}
+              {/* <AgentOptionsSelector 
                 ref={agentOptionsSelectorRef}
                 activeSessionId={sessionId} 
                 sessionMetadata={sessionMetadata} 
                 onActiveOptionsChange={setActiveAgentOptions}
                 onToggleOption={handleToggleOption}
-              />
+              /> */}
               
               {/* File upload button */}
               {showAttachments && (
