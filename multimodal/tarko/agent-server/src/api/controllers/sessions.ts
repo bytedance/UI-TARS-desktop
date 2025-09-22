@@ -48,7 +48,7 @@ export async function getRuntimeSettings(req: Request, res: Response) {
 
     // Merge with default values from schema
     const schema = runtimeSettingsConfig.schema;
-    const mergedValues = { ...currentValues };
+    const mergedValues: Record<string, any> = { ...currentValues };
     
     if (schema.properties) {
       Object.entries(schema.properties).forEach(([key, propSchema]: [string, any]) => {
