@@ -256,7 +256,6 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
             disabled={isDisabled}
           >
             <div className="font-medium text-sm">Upload Images</div>
-            <div className="text-xs text-gray-500">Add photos to your message</div>
           </DropdownItem>
         )}
         
