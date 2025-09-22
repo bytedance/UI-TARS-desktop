@@ -11,6 +11,11 @@
   },
   {
     "type": "file",
+    "name": "agent-options",
+    "label": "Agent 选项"
+  },
+  {
+    "type": "file",
     "name": "server-integration",
     "label": "服务器集成"
   },

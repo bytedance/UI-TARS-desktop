@@ -11,6 +11,11 @@
   },
   {
     "type": "file",
+    "name": "agent-options",
+    "label": "Agent Options"
+  },
+  {
+    "type": "file",
     "name": "server-integration",
     "label": "Server Integration"
   },
