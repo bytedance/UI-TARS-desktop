@@ -6,8 +6,9 @@ import { SessionItemMetadata } from '@tarko/interface';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useAtomValue } from 'jotai';
 import { isProcessingAtom } from '@/common/state/atoms/ui';
-import { FiPlus } from 'react-icons/fi';
-import { Dropdown, DropdownItem, DropdownHeader } from '@tarko/ui';
+import { FiPlus, FiCheck, FiChevronRight } from 'react-icons/fi';
+import { TbBulb, TbSearch, TbBook, TbSettings } from 'react-icons/tb';
+import { Dropdown, DropdownItem, DropdownHeader, DropdownDivider } from '@tarko/ui';
 
 interface AgentOptionsSelectorProps {
   activeSessionId?: string;
@@ -39,6 +40,29 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
   const updateSessionMetadata = useSetAtom(updateSessionMetadataAction);
   const { isReplayMode } = useReplayMode();
   const isProcessing = useAtomValue(isProcessingAtom);
+
+  const getOptionIcon = (key: string, property: any) => {
+    // Map common option keys to icons
+    const iconMap: Record<string, React.ReactNode> = {
+      'foo': <TbBulb className="w-5 h-5" />,
+      'search': <TbSearch className="w-5 h-5" />,
+      'research': <TbBook className="w-5 h-5" />,
+      'enable': <TbSettings className="w-5 h-5" />,
+      'mode': <TbSettings className="w-5 h-5" />,
+    };
+    
+    // Try to match by key or title
+    const lowerKey = key.toLowerCase();
+    const lowerTitle = (property.title || '').toLowerCase();
+    
+    for (const [pattern, icon] of Object.entries(iconMap)) {
+      if (lowerKey.includes(pattern) || lowerTitle.includes(pattern)) {
+        return icon;
+      }
+    }
+    
+    return <TbSettings className="w-5 h-5" />; // Default icon
+  };
 
   const loadAgentOptions = async () => {
     if (!activeSessionId) return;
@@ -119,48 +143,80 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
 
   const renderOptionItem = (config: AgentOptionConfig) => {
     const { key, property, currentValue } = config;
+    const icon = getOptionIcon(key, property);
 
     if (property.type === 'boolean') {
       return (
         <DropdownItem
           key={key}
+          icon={icon}
           onClick={() => handleOptionChange(key, !currentValue)}
-          className={`${
+          className={`relative ${
             currentValue 
-              ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-900 dark:text-blue-100 border border-blue-200 dark:border-blue-700' 
-              : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
+              ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-900 dark:text-blue-100' 
+              : ''
           }`}
         >
           <div className="flex-1">
-            <div className="font-medium">{property.title || key}</div>
+            <div className="font-medium text-sm">{property.title || key}</div>
             {property.description && (
               <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                 {property.description}
               </div>
             )}
           </div>
+          {currentValue && (
+            <FiCheck className="w-4 h-4 text-blue-600 dark:text-blue-400 ml-2" />
+          )}
         </DropdownItem>
       );
     }
 
     if (property.type === 'string' && property.enum) {
       const options = property.enum || [];
-      return options.map((option: any) => (
-        <DropdownItem
-          key={`${key}-${option}`}
-          onClick={() => handleOptionChange(key, option)}
-          className={`${
-            currentValue === option 
-              ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-900 dark:text-blue-100 border border-blue-200 dark:border-blue-700' 
-              : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
-          }`}
-        >
-          <div className="flex-1">
-            <div className="font-medium">{property.title || key}</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">{option}</div>
+      return (
+        <>
+          {/* Section header for enum options */}
+          <div className="px-3 py-2">
+            <div className="flex items-center">
+              <span className="mr-3 text-gray-600 dark:text-gray-400">{icon}</span>
+              <div className="flex-1">
+                <div className="font-medium text-sm text-gray-900 dark:text-gray-100">
+                  {property.title || key}
+                </div>
+                {property.description && (
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    {property.description}
+                  </div>
+                )}
+              </div>
+              <FiChevronRight className="w-4 h-4 text-gray-400" />
+            </div>
           </div>
-        </DropdownItem>
-      ));
+          
+          {/* Options */}
+          <div className="ml-8 mr-3 mb-2 space-y-1">
+            {options.map((option: any) => (
+              <button
+                key={`${key}-${option}`}
+                onClick={() => handleOptionChange(key, option)}
+                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
+                  currentValue === option 
+                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-900 dark:text-blue-100' 
+                    : 'hover:bg-gray-50 dark:hover:bg-gray-800/50 text-gray-700 dark:text-gray-300'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">{option}</span>
+                  {currentValue === option && (
+                    <FiCheck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
+        </>
+      );
     }
 
     return null;
@@ -184,7 +240,7 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
       }
     >
       <DropdownHeader>Agent Options</DropdownHeader>
-      <div className="text-xs text-gray-500 dark:text-gray-400 px-1 pb-2 mb-2 border-b border-gray-100 dark:border-gray-700">
+      <div className="text-sm text-gray-500 dark:text-gray-400 px-1 pb-3 mb-3 border-b border-gray-100 dark:border-gray-800">
         Configure agent behavior for this session
       </div>
       {options.map(renderOptionItem)}
