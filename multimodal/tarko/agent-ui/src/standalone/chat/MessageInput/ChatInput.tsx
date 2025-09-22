@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { FiSend, FiRefreshCw, FiImage, FiSquare, FiX } from 'react-icons/fi';
-import { TbBulb, TbSearch, TbBook, TbSettings } from 'react-icons/tb';
+import { TbBulb, TbSearch, TbBook, TbSettings, TbBrain } from 'react-icons/tb';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ConnectionStatus } from '@/common/types';
 import { ChatCompletionContentPart } from '@tarko/agent-interface';
@@ -416,9 +416,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                     // Get icon based on option key
                     const getOptionIcon = () => {
                       const lowerKey = option.key.toLowerCase();
+                      const lowerTitle = option.title.toLowerCase();
                       if (lowerKey.includes('foo')) return <TbBulb className="w-3 h-3" />;
                       if (lowerKey.includes('search')) return <TbSearch className="w-3 h-3" />;
                       if (lowerKey.includes('research')) return <TbBook className="w-3 h-3" />;
+                      if (lowerKey.includes('thinking') || lowerTitle.includes('思考')) return <TbBrain className="w-3 h-3" />;
                       return <TbSettings className="w-3 h-3" />;
                     };
 

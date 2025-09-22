@@ -7,7 +7,7 @@ import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useAtomValue } from 'jotai';
 import { isProcessingAtom } from '@/common/state/atoms/ui';
 import { FiPlus, FiCheck, FiChevronRight } from 'react-icons/fi';
-import { TbBulb, TbSearch, TbBook, TbSettings } from 'react-icons/tb';
+import { TbBulb, TbSearch, TbBook, TbSettings, TbBrain } from 'react-icons/tb';
 import { Dropdown, DropdownItem, DropdownHeader } from '@tarko/ui';
 
 interface ActiveOption {
@@ -166,11 +166,13 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
     return null;
   }
 
-  const getOptionIcon = (key: string) => {
+  const getOptionIcon = (key: string, property: any) => {
     const lowerKey = key.toLowerCase();
+    const lowerTitle = (property.title || '').toLowerCase();
     if (lowerKey.includes('search')) return <TbSearch className="w-4 h-4" />;
     if (lowerKey.includes('research')) return <TbBook className="w-4 h-4" />;
     if (lowerKey.includes('foo')) return <TbBulb className="w-4 h-4" />;
+    if (lowerKey.includes('thinking') || lowerTitle.includes('思考')) return <TbBrain className="w-4 h-4" />;
     return <TbSettings className="w-4 h-4" />;
   };
 
@@ -181,7 +183,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
       return (
         <DropdownItem
           key={key}
-          icon={getOptionIcon(key)}
+          icon={getOptionIcon(key, property)}
           onClick={() => handleOptionChange(key, !currentValue)}
           className={currentValue ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
         >
