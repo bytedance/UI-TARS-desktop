@@ -65,22 +65,24 @@ export const Dropdown: React.FC<DropdownProps> = ({
       <Menu.Items
         as={React.Fragment}
       >
-        {({ open }) => open && createPortal(
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: placement.startsWith('top') ? 10 : -10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: placement.startsWith('top') ? 10 : -10 }}
-            transition={{ duration: 0.15 }}
-            className={`fixed z-50 min-w-56 origin-top-right rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden ${menuClassName}`}
-            style={{
-              top: `${position.top}px`,
-              left: `${position.left}px`,
-              transform: placement.startsWith('top') ? 'translateY(-100%)' : 'none',
-            }}
-          >
-            <div className="p-1">{children}</div>
-          </motion.div>,
-          document.body
+        {({ open }) => (
+          open ? createPortal(
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: placement.startsWith('top') ? 10 : -10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: placement.startsWith('top') ? 10 : -10 }}
+              transition={{ duration: 0.15 }}
+              className={`fixed z-50 min-w-56 origin-top-right rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden ${menuClassName}`}
+              style={{
+                top: `${position.top}px`,
+                left: `${position.left}px`,
+                transform: placement.startsWith('top') ? 'translateY(-100%)' : 'none',
+              }}
+            >
+              <div className="p-1">{children}</div>
+            </motion.div>,
+            document.body
+          ) : <div />
         )}
       </Menu.Items>
     </Menu>
