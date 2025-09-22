@@ -153,17 +153,18 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
   return (
     <Dropdown
       placement="top-start"
-      menuClassName="!fixed !z-[10000]"
       trigger={
-        <div
-          className="flex items-center justify-center w-8 h-8 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-all duration-200 disabled:opacity-50"
+        <button
+          type="button"
+          disabled={isLoading}
+          className="flex items-center justify-center w-8 h-8 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-all duration-200"
           title={`Agent Options (${options.length})`}
         >
           <FiPlus size={16} className="transition-transform duration-200" />
           {isLoading && (
             <div className="absolute w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin" />
           )}
-        </div>
+        </button>
       }
     >
       <DropdownHeader>Agent Options</DropdownHeader>
