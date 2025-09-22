@@ -6,9 +6,9 @@ import { SessionItemMetadata } from '@tarko/interface';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useAtomValue } from 'jotai';
 import { isProcessingAtom } from '@/common/state/atoms/ui';
-import { FiPlus, FiCheck, FiChevronRight } from 'react-icons/fi';
-import { TbBulb, TbSearch, TbBook, TbSettings, TbBrain } from 'react-icons/tb';
-import { Dropdown, DropdownItem, DropdownHeader } from '@tarko/ui';
+import { FiPlus, FiCheck, FiChevronRight, FiImage, FiPaperclip } from 'react-icons/fi';
+import { TbBulb, TbSearch, TbBook, TbSettings, TbBrain, TbPhoto } from 'react-icons/tb';
+import { Dropdown, DropdownItem, DropdownHeader, DropdownDivider } from '@tarko/ui';
 
 interface ActiveOption {
   key: string;
@@ -22,6 +22,10 @@ interface AgentOptionsSelectorProps {
   className?: string;
   onActiveOptionsChange?: (options: ActiveOption[]) => void;
   onToggleOption?: (key: string, currentValue: any) => void;
+  showAttachments?: boolean;
+  onFileUpload?: () => void;
+  isDisabled?: boolean;
+  isProcessing?: boolean;
 }
 
 export interface AgentOptionsSelectorRef {
@@ -41,7 +45,17 @@ interface AgentOptionConfig {
 
 export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOptionsSelectorProps>(
   (
-    { activeSessionId, sessionMetadata, className = '', onActiveOptionsChange, onToggleOption },
+    { 
+      activeSessionId, 
+      sessionMetadata, 
+      className = '', 
+      onActiveOptionsChange, 
+      onToggleOption,
+      showAttachments = true,
+      onFileUpload,
+      isDisabled = false,
+      isProcessing: isProcessingProp = false
+    },
     ref,
   ) => {
     const [schema, setSchema] = useState<AgentOptionsSchema | null>(null);
@@ -149,20 +163,17 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
       onActiveOptionsChange(activeOptions);
     }, [schema, currentValues, onActiveOptionsChange]);
 
-    // Don't render if conditions not met
-    if (isReplayMode || isProcessing || !schema?.properties || !currentValues) {
+    // Don't render if in replay mode or processing
+    if (isReplayMode || isProcessingProp) {
       return null;
     }
 
-    const options = Object.entries(schema.properties).map(([key, property]) => ({
+    // Always show the button, even if no schema options available
+    const options = schema?.properties ? Object.entries(schema.properties).map(([key, property]) => ({
       key,
       property,
-      currentValue: currentValues[key] ?? property.default,
-    }));
-
-    if (options.length === 0) {
-      return null;
-    }
+      currentValue: currentValues?.[key] ?? property.default,
+    })) : [];
 
     const getOptionIcon = (key: string, property: any) => {
       const lowerKey = key.toLowerCase();
@@ -229,15 +240,35 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
         trigger={
           <button
             type="button"
-            disabled={isLoading}
-            className="flex items-center justify-center w-8 h-8 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors"
-            title={`Agent Options (${options.length})`}
+            disabled={isLoading || isDisabled}
+            className="flex items-center justify-center w-8 h-8 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Options"
           >
             <FiPlus size={16} />
           </button>
         }
       >
-        <DropdownHeader>Agent Settings</DropdownHeader>
+        <DropdownHeader>Options</DropdownHeader>
+        
+        {/* File upload option */}
+        {showAttachments && (
+          <DropdownItem
+            icon={<TbPhoto className="w-4 h-4" />}
+            onClick={onFileUpload}
+            disabled={isDisabled}
+          >
+            <div className="font-medium text-sm">Upload Images</div>
+            <div className="text-xs text-gray-500">Add photos to your message</div>
+          </DropdownItem>
+        )}
+        
+        {/* Separator between upload and agent settings */}
+        {showAttachments && options.length > 0 && <DropdownDivider />}
+        
+        {/* Agent settings header */}
+        {options.length > 0 && <DropdownHeader>Agent Settings</DropdownHeader>}
+        
+        {/* Agent options */}
         {options.map(renderOptionItem)}
       </Dropdown>
     );

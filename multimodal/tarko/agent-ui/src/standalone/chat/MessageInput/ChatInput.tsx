@@ -439,6 +439,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 sessionMetadata={sessionMetadata} 
                 onActiveOptionsChange={setActiveAgentOptions}
                 onToggleOption={handleToggleOption}
+                showAttachments={showAttachments}
+                onFileUpload={handleFileUpload}
+                isDisabled={isDisabled}
+                isProcessing={isProcessing}
               />
               
               {/* Active agent options tags */}
@@ -475,36 +479,20 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   })}
                 </div>
               )}
-              
-              {/* File upload button */}
-              {showAttachments && (
-                <>
-                  <button
-                    type="button"
-                    onClick={handleFileUpload}
-                    disabled={isDisabled || isProcessing}
-                    className={`p-2 rounded-full transition-all duration-200 hover:scale-105 active:scale-95 ${
-                      isDisabled || isProcessing
-                        ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
-                        : 'text-gray-400 hover:text-accent-500 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:text-gray-400'
-                    }`}
-                    title="Attach image (or paste directly)"
-                  >
-                    <FiImage size={18} />
-                  </button>
-
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileChange}
-                    accept="image/*"
-                    multiple
-                    className="hidden"
-                    disabled={isDisabled || isProcessing}
-                  />
-                </>
-              )}
             </div>
+
+            {/* Hidden file input for image upload */}
+            {showAttachments && (
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/*"
+                multiple
+                className="hidden"
+                disabled={isDisabled || isProcessing}
+              />
+            )}
 
             {/* Action buttons */}
             <AnimatePresence mode="wait">
