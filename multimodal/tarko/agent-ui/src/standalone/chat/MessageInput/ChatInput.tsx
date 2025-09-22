@@ -58,6 +58,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const [uploadedImages, setUploadedImages] = useState<ChatCompletionContentPart[]>([]);
   const [isAborting, setIsAborting] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const [activeAgentOptions, setActiveAgentOptions] = useState<string[]>([]);
 
   const { activeSessionId, sessionMetadata } = useSession();
   const { isDarkMode } = useNavbarStyles();
@@ -398,6 +399,22 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               <ImagePreviewInline images={uploadedImages} onRemoveImage={handleRemoveImage} />
             )}
 
+            {/* Active agent options tags */}
+            {activeAgentOptions.length > 0 && (
+              <div className="px-5 pt-3 pb-1">
+                <div className="flex flex-wrap gap-1.5">
+                  {activeAgentOptions.map((option, index) => (
+                    <span
+                      key={index}
+                      className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700"
+                    >
+                      {option}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <textarea
               ref={inputRef}
               value={contextualState.input}
@@ -408,14 +425,26 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               onPaste={handlePaste}
               placeholder={placeholder || defaultPlaceholder}
               disabled={isDisabled}
-              className={`w-full px-5 ${uploadedImages.length > 0 ? 'pt-2' : 'pt-5'} pb-12 focus:outline-none resize-none ${uploadedImages.length > 0 ? (variant === 'home' ? 'min-h-[100px]' : 'min-h-[80px]') : variant === 'home' ? 'min-h-[120px]' : 'min-h-[100px]'} max-h-[220px] bg-transparent text-sm leading-relaxed rounded-[1.4rem]`}
+              className={`w-full px-5 ${
+                uploadedImages.length > 0 || activeAgentOptions.length > 0 
+                  ? 'pt-2' 
+                  : 'pt-5'
+              } pb-12 focus:outline-none resize-none ${
+                uploadedImages.length > 0 || activeAgentOptions.length > 0
+                  ? (variant === 'home' ? 'min-h-[100px]' : 'min-h-[80px]') 
+                  : variant === 'home' ? 'min-h-[120px]' : 'min-h-[100px]'
+              } max-h-[220px] bg-transparent text-sm leading-relaxed rounded-[1.4rem]`}
               rows={2}
             />
 
             {/* Left side controls */}
             <div className="absolute left-3 bottom-3 flex items-center gap-2">
               {/* Agent Options Selector - First (leftmost) */}
-              <AgentOptionsSelector activeSessionId={sessionId} sessionMetadata={sessionMetadata} />
+              <AgentOptionsSelector 
+                activeSessionId={sessionId} 
+                sessionMetadata={sessionMetadata} 
+                onActiveOptionsChange={setActiveAgentOptions}
+              />
               
               {/* File upload button */}
               {showAttachments && (
