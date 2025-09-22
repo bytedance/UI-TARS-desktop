@@ -6,7 +6,7 @@ import { SessionItemMetadata } from '@tarko/interface';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useAtomValue } from 'jotai';
 import { isProcessingAtom } from '@/common/state/atoms/ui';
-import { FiPlus, FiCheck, FiChevronRight, FiImage, FiPaperclip } from 'react-icons/fi';
+import { FiPlus, FiCheck, FiChevronRight, FiImage, FiPaperclip, FiLoader } from 'react-icons/fi';
 import { TbBulb, TbSearch, TbBook, TbSettings, TbBrain, TbPhoto } from 'react-icons/tb';
 import { Dropdown, DropdownItem, DropdownHeader, DropdownDivider } from '@tarko/ui';
 
@@ -91,7 +91,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
       setCurrentValues(null);
     }, [activeSessionId]);
 
-    // Handle option change - simple and direct
+    // Handle option change - with loading state for agent recreation
     const handleOptionChange = async (key: string, value: any) => {
       if (!activeSessionId || isLoading || !currentValues) return;
 
@@ -106,13 +106,19 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
             sessionId: activeSessionId,
             metadata: response.sessionInfo.metadata,
           });
+          
+          // Show success feedback briefly
+          console.log('Agent options updated successfully', { key, value });
         }
       } catch (error) {
         console.error('Failed to update runtime settings:', error);
         // Revert on error
         setCurrentValues(currentValues);
       } finally {
-        setIsLoading(false);
+        // Add a small delay to show the loading state
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 500);
       }
 
       // Notify parent
@@ -194,7 +200,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
             key={key}
             icon={getOptionIcon(key, property)}
             onClick={() => handleOptionChange(key, !currentValue)}
-            className={currentValue ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
+            className={`${currentValue ? 'bg-blue-50 dark:bg-blue-900/20' : ''} ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
           >
             <div className="flex items-center justify-between">
               <div className="flex-1">
@@ -203,7 +209,10 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
                   <div className="text-xs text-gray-500">{property.description}</div>
                 )}
               </div>
-              {currentValue && <FiCheck className="w-4 h-4 text-blue-600" />}
+              <div className="flex items-center gap-2">
+                {isLoading && <FiLoader className="w-3 h-3 animate-spin text-blue-600" />}
+                {currentValue && !isLoading && <FiCheck className="w-4 h-4 text-blue-600" />}
+              </div>
             </div>
           </DropdownItem>
         );
@@ -235,19 +244,25 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
     };
 
     return (
-      <Dropdown
-        placement="top-start"
-        trigger={
-          <button
-            type="button"
-            disabled={isLoading || isDisabled}
-            className="flex items-center justify-center w-8 h-8 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Options"
-          >
-            <FiPlus size={16} />
-          </button>
-        }
-      >
+    <Dropdown
+    placement="top-start"
+    trigger={
+    <button
+    type="button"
+    disabled={isLoading || isDisabled}
+    className={`flex items-center justify-center w-8 h-8 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+    isLoading ? 'animate-pulse' : ''
+    }`}
+    title={isLoading ? 'Updating agent options...' : 'Options'}
+    >
+    {isLoading ? (
+    <FiLoader size={16} className="animate-spin" />
+    ) : (
+    <FiPlus size={16} />
+    )}
+    </button>
+    }
+    >
         {/* File upload option */}
         {showAttachments && (
           <DropdownItem
