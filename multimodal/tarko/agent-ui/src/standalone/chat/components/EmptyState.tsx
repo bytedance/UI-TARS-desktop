@@ -71,7 +71,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ replayState, isReplayMod
         {isReplayMode && replayState.autoPlayCountdown !== null ? (
           <div className="relative animate-in zoom-in duration-400">
             {/* Enhanced background card */}
-            <div className="bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-800 dark:to-gray-800/80 backdrop-blur-sm rounded-3xl p-10 shadow-xl border border-gray-100/60 dark:border-gray-700/40">
+            <div className="bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-800 dark:to-gray-800/80 backdrop-blur-sm rounded-3xl p-10 border border-gray-100/60 dark:border-gray-700/40">
               {/* Countdown circle with improved design */}
               <div className="flex justify-center mb-8 animate-in zoom-in duration-500 delay-100">
                 <div className="relative">
@@ -97,7 +97,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ replayState, isReplayMod
               {/* Enhanced cancel button */}
               <button
                 onClick={cancelAutoPlay}
-                className="inline-flex items-center px-6 py-3 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-2xl text-sm font-medium text-gray-700 dark:text-gray-300 transition-all duration-200 border border-gray-200/80 dark:border-gray-600/80 shadow-sm hover:shadow-md hover:scale-105 hover:-translate-y-0.5 active:scale-95 animate-in slide-in-from-bottom-4 fade-in duration-600 delay-300"
+                className="inline-flex items-center px-6 py-3 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-2xl text-sm font-medium text-gray-700 dark:text-gray-300 transition-all duration-200 border border-gray-200/80 dark:border-gray-600/80 hover:scale-105 hover:-translate-y-0.5 active:scale-95 animate-in slide-in-from-bottom-4 fade-in duration-600 delay-300"
               >
                 <FiX size={16} className="mr-2" />
                 Cancel Auto-play
@@ -113,7 +113,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ replayState, isReplayMod
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/15 via-purple-500/15 to-green-500/15 rounded-full blur-xl animate-pulse" />
 
               {/* Main icon container */}
-              <div className="relative w-20 h-20 bg-gradient-to-br from-white via-gray-50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-3xl flex items-center justify-center mx-auto shadow-lg border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-sm hover:scale-105 hover:-translate-y-0.5 transition-transform duration-200">
+              <div className="relative w-20 h-20 bg-gradient-to-br from-white via-gray-50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-3xl flex items-center justify-center mx-auto border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-sm hover:scale-105 hover:-translate-y-0.5 transition-transform duration-200">
                 {/* Icon */}
                 <div className="relative z-10">
                   {isReplayMode && replayState.currentEventIndex === -1 ? (

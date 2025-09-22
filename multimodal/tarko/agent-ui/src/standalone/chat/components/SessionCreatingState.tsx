@@ -26,7 +26,7 @@ export const SessionCreatingState: React.FC<SessionCreatingStateProps> = ({ isCr
           />
 
           {/* Main loading container with subtle pulse */}
-          <div className="relative w-24 h-24 bg-gradient-to-br from-white via-gray-50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-3xl flex items-center justify-center mx-auto shadow-xl border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-sm animate-pulse">
+          <div className="relative w-24 h-24 bg-gradient-to-br from-white via-gray-50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-3xl flex items-center justify-center mx-auto border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-sm animate-pulse">
             {/* Clean loading spinner */}
             <div className="relative z-10">
               <div className="text-blue-600 dark:text-blue-400 animate-spin">
