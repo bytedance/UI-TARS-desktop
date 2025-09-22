@@ -1,9 +1,10 @@
-import { ACTION_SPACE_PLACEHOLDER } from 'gui-agent/shared/src/types';
-
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
+
+import { ACTION_SPACE_PLACEHOLDER } from '@gui-agent/shared/types';
+
 export const SYSTEM_PROMPT_1 = `
 You are a GUI agent. You are given a task and your action history, with screenshots. You need to perform the next action to complete the task.
 

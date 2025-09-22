@@ -2,8 +2,13 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import fs from 'node:fs';
+
+// Load environment variables from .env.local file
+import { config } from 'dotenv';
 import path from 'node:path';
+config({ path: path.join(__dirname, '..', '.env.local') });
+
+import fs from 'node:fs';
 import * as p from '@clack/prompts';
 import { Command } from 'commander';
 import { GUIAgent } from '../src/GUIAgent';
@@ -15,6 +20,7 @@ import { NutJSOperator } from '@gui-agent/operator-nutjs';
 import { AdbOperator } from '@gui-agent/operator-adb';
 import { ConsoleLogger, LogLevel } from '@agent-infra/logger';
 import { doubao_1_5_vp } from './configs/models';
+import { systemPromptTemplate1 } from './configs/promptTemps';
 
 const defaultLogger = new ConsoleLogger('[GUIAgent Test CLI]', LogLevel.DEBUG);
 
@@ -240,11 +246,11 @@ async function testComputerOperator() {
   const guiAgentForComputer = new GUIAgent({
     operator,
     model: doubao_1_5_vp as AgentModel,
-    systemPrompt: SYSTEM_PROMPT,
+    systemPrompt: systemPromptTemplate1,
   });
 
   const computerResponse = await guiAgentForComputer.run({
-    input: [{ type: 'text', text: 'What is Agent TARS' }],
+    input: [{ type: 'text', text: 'Check the weather in Beijing' }],
   });
 
   console.log('\n📝 Agent with Computer Operator Response:');

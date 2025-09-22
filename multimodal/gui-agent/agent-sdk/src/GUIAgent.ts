@@ -2,7 +2,13 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { LLMRequestHookPayload, ChatCompletionContentPart, LogLevel, Tool } from '@tarko/agent';
+import {
+  LLMRequestHookPayload,
+  ChatCompletionContentPart,
+  LogLevel,
+  Tool,
+  ConsoleLogger,
+} from '@tarko/agent';
 import { GUIAgentToolCallEngine } from './ToolCallEngine';
 import { SYSTEM_PROMPT } from './prompts';
 import { Base64ImageParser } from '@agent-infra/media-utils';
@@ -15,6 +21,8 @@ import {
   normalizeActionCoords,
 } from '@gui-agent/shared/utils';
 import { GUI_ADAPTED_TOOL_NAME } from './constants';
+
+const defaultLogger = new ConsoleLogger('[GUIAgent]', LogLevel.DEBUG);
 
 export class GUIAgent<T extends Operator> extends BaseGUIAgent {
   static label = 'GUI Agent';
@@ -38,6 +46,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent {
     } else if (systemPrompt && isSystemPromptTemplate(systemPrompt)) {
       finalSystemPrompt = assembleSystemPrompt(systemPrompt, operator.getSupportedActions());
     }
+    defaultLogger.debug('final instructions for sp:', finalSystemPrompt);
     super({
       name: 'Seed GUI Agent',
       instructions: finalSystemPrompt,
@@ -71,6 +80,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent {
               this.normalizeCoordinates,
             );
           }
+          this.logger.info('action to execute:', JSON.stringify(input.operator_action));
           const result = await this.operator!.doExecute({
             actions: [input.operator_action],
           });

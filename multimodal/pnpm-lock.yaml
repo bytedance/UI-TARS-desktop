@@ -247,6 +247,9 @@ importers:
       commander:
         specifier: ^14.0.0
         version: 14.0.0
+      dotenv:
+        specifier: ^17.2.2
+        version: 17.2.2
       jimp:
         specifier: 1.6.0
         version: 1.6.0

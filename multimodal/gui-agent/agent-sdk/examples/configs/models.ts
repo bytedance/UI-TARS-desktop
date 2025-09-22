@@ -2,6 +2,10 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
+import { config } from 'dotenv';
+import path from 'node:path';
+config({ path: path.join(__dirname, '../../', '.env.local') });
+
 export const doubao_1_5_ui_tars = {
   provider: 'volcengine',
   baseURL: process.env.ARK_BASE_URL,
