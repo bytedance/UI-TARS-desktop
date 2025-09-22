@@ -171,7 +171,7 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
     if (buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
       setPopupPosition({
-        top: rect.top - 8, // Small margin above button
+        top: rect.bottom + 8, // Position below button
         left: rect.left,
       });
     }
@@ -318,7 +318,6 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
             style={{
               top: `${popupPosition.top}px`,
               left: `${popupPosition.left}px`,
-              transform: 'translateY(-100%)', // Position above button
               zIndex: 10000,
             }}
           >
