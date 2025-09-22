@@ -131,11 +131,29 @@ export class AgentSession {
       : [];
 
     // Create agent options including initial events
-    const agentOptions = {
+    const baseAgentOptions = {
       ...this.server.appConfig,
       name: this.server.getCurrentAgentName(),
       model: this.resolveModelConfig(sessionInfo),
       initialEvents: storedEvents, // 🎯 Pass initial events directly to agent
+    };
+
+    // Apply runtime settings transformation if available
+    const runtimeSettingsConfig = this.server.appConfig?.server?.runtimeSettings;
+    let transformedOptions = {};
+    
+    if (runtimeSettingsConfig?.transform && sessionInfo?.metadata?.runtimeSettings) {
+      try {
+        transformedOptions = runtimeSettingsConfig.transform(sessionInfo.metadata.runtimeSettings);
+      } catch (error) {
+        console.warn('Failed to apply runtime settings transform:', error);
+      }
+    }
+
+    // Merge base options with transformed runtime settings
+    const agentOptions = {
+      ...baseAgentOptions,
+      ...transformedOptions,
     };
 
     // Create base agent
@@ -465,15 +483,15 @@ export class AgentSession {
   }
 
   /**
-   * Store the updated model configuration for this session
-   * The model will be used in subsequent queries via Agent.run() parameters
-   * @param sessionInfo Updated session metadata with new model config
+   * Update session configuration (model and runtime settings)
+   * The configuration will be used in subsequent queries
+   * @param sessionInfo Updated session metadata
    */
-  async updateModelConfig(sessionInfo: SessionInfo): Promise<void> {
+  async updateSessionConfig(sessionInfo: SessionInfo): Promise<void> {
     // Store the session metadata for use in future queries
     this.sessionInfo = sessionInfo;
 
-    // Recreate agent with new model configuration
+    // Recreate agent with new configuration
     try {
       // Clean up current agent and AGIO provider
       if (this.agent && typeof this.agent.dispose === 'function') {
@@ -492,6 +510,16 @@ export class AgentSession {
       console.error('Failed to recreate agent for session', { sessionId: this.id, error });
       throw error;
     }
+  }
+
+  /**
+   * Store the updated model configuration for this session
+   * The model will be used in subsequent queries via Agent.run() parameters
+   * @param sessionInfo Updated session metadata with new model config
+   * @deprecated Use updateSessionConfig instead
+   */
+  async updateModelConfig(sessionInfo: SessionInfo): Promise<void> {
+    return this.updateSessionConfig(sessionInfo);
   }
 
   async cleanup() {

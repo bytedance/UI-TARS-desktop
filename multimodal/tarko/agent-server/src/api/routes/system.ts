@@ -23,8 +23,4 @@ export function registerSystemRoutes(app: express.Application): void {
   // Model management endpoints
   app.get('/api/v1/models', systemController.getAvailableModels);
   app.post('/api/v1/sessions/model', systemController.updateSessionModel);
-
-  // Agent options management endpoints
-  app.get('/api/v1/sessions/agent-options', systemController.getSessionAgentOptions);
-  app.post('/api/v1/sessions/agent-options', systemController.updateSessionAgentOptions);
 }

@@ -13,6 +13,108 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 /**
+ * Get runtime settings schema and current values
+ */
+export async function getRuntimeSettings(req: Request, res: Response) {
+  const sessionId = req.query.sessionId as string;
+
+  if (!sessionId) {
+    return res.status(400).json({ error: 'Session ID is required' });
+  }
+
+  try {
+    const server = req.app.locals.server;
+    
+    // Get runtime settings configuration from server config
+    const runtimeSettingsConfig = server.appConfig?.server?.runtimeSettings;
+    
+    if (!runtimeSettingsConfig) {
+      return res.status(200).json({ 
+        schema: { type: 'object', properties: {} },
+        currentValues: {}
+      });
+    }
+
+    // Get current session info to retrieve stored runtime settings
+    let currentValues = {};
+    if (server.storageProvider) {
+      try {
+        const sessionInfo = await server.storageProvider.getSessionInfo(sessionId);
+        currentValues = sessionInfo?.metadata?.runtimeSettings || {};
+      } catch (error) {
+        // Session doesn't exist or no stored values, use defaults from schema
+      }
+    }
+
+    // Merge with default values from schema
+    const schema = runtimeSettingsConfig.schema;
+    const mergedValues = { ...currentValues };
+    
+    if (schema.properties) {
+      Object.entries(schema.properties).forEach(([key, propSchema]: [string, any]) => {
+        if (mergedValues[key] === undefined && propSchema.default !== undefined) {
+          mergedValues[key] = propSchema.default;
+        }
+      });
+    }
+
+    res.status(200).json({
+      schema: runtimeSettingsConfig.schema,
+      currentValues: mergedValues
+    });
+  } catch (error) {
+    console.error(`Error getting runtime settings for session ${sessionId}:`, error);
+    res.status(500).json({ error: 'Failed to get runtime settings' });
+  }
+}
+
+/**
+ * Update runtime settings for a session
+ */
+export async function updateRuntimeSettings(req: Request, res: Response) {
+  const { sessionId, runtimeSettings } = req.body as {
+    sessionId: string;
+    runtimeSettings: Record<string, any>;
+  };
+
+  if (!sessionId) {
+    return res.status(400).json({ error: 'Session ID is required' });
+  }
+
+  if (!runtimeSettings || typeof runtimeSettings !== 'object') {
+    return res.status(400).json({ error: 'Runtime settings object is required' });
+  }
+
+  try {
+    const server = req.app.locals.server;
+
+    if (!server.storageProvider) {
+      return res.status(404).json({ error: 'Storage not configured, cannot update runtime settings' });
+    }
+
+    const sessionInfo = await server.storageProvider.getSessionInfo(sessionId);
+    if (!sessionInfo) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    const updatedMetadata = await server.storageProvider.updateSessionInfo(sessionId, {
+      metadata: {
+        ...sessionInfo.metadata,
+        runtimeSettings,
+      },
+    });
+
+    res.status(200).json({ 
+      session: updatedMetadata,
+      runtimeSettings 
+    });
+  } catch (error) {
+    console.error(`Error updating runtime settings for session ${sessionId}:`, error);
+    res.status(500).json({ error: 'Failed to update runtime settings' });
+  }
+}
+
+/**
  * Get all sessions
  */
 export async function getAllSessions(req: Request, res: Response) {

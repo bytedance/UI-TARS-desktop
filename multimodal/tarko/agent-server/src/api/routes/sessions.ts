@@ -30,6 +30,10 @@ export function registerSessionRoutes(app: express.Application): void {
     router.get('/status', sessionsController.getSessionStatus);
     // Update session metadata
     router.post('/update', sessionsController.updateSession);
+    // Get runtime settings schema
+    router.get('/runtime-settings', sessionsController.getRuntimeSettings);
+    // Update runtime settings
+    router.post('/runtime-settings', sessionsController.updateRuntimeSettings);
     // Delete a session
     router.post('/delete', sessionsController.deleteSession);
     // Generate summary for a session

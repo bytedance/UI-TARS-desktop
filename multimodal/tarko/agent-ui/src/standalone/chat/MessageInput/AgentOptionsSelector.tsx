@@ -168,11 +168,11 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
     if (!activeSessionId) return;
 
     try {
-      const response = await apiService.getSessionAgentOptions(activeSessionId);
+      const response = await apiService.getSessionRuntimeSettings(activeSessionId);
       setSchema(response.schema);
       setCurrentValues(response.currentValues);
     } catch (error) {
-      console.error('Failed to load agent options:', error);
+      console.error('Failed to load runtime settings:', error);
     }
   };
 
@@ -184,7 +184,7 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
 
     setIsLoading(true);
     try {
-      const response = await apiService.updateSessionAgentOptions(activeSessionId, newValues);
+      const response = await apiService.updateSessionRuntimeSettings(activeSessionId, newValues);
       if (response.success && response.sessionInfo?.metadata) {
         updateSessionMetadata({
           sessionId: activeSessionId,
@@ -192,7 +192,7 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
         });
       }
     } catch (error) {
-      console.error('Failed to update agent options:', error);
+      console.error('Failed to update runtime settings:', error);
       // Revert the change on error
       setCurrentValues(currentValues);
     } finally {

@@ -531,14 +531,14 @@ class ApiService {
     }
   }
 
-  async getSessionAgentOptions(sessionId: string): Promise<{
+  async getSessionRuntimeSettings(sessionId: string): Promise<{
     schema: Record<string, any> | null;
     currentValues: Record<string, any> | null;
     message?: string;
   }> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/v1/sessions/agent-options?sessionId=${sessionId}`,
+        `${API_BASE_URL}/api/v1/sessions/runtime-settings?sessionId=${sessionId}`,
         {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
@@ -547,38 +547,38 @@ class ApiService {
       );
 
       if (!response.ok) {
-        throw new Error(`Failed to get session agent options: ${response.statusText}`);
+        throw new Error(`Failed to get session runtime settings: ${response.statusText}`);
       }
 
       return await response.json();
     } catch (error) {
-      console.error('Error getting session agent options:', error);
-      return { schema: null, currentValues: null, message: 'Failed to load agent options' };
+      console.error('Error getting session runtime settings:', error);
+      return { schema: null, currentValues: null, message: 'Failed to load runtime settings' };
     }
   }
 
-  async updateSessionAgentOptions(
+  async updateSessionRuntimeSettings(
     sessionId: string,
-    agentOptions: Record<string, any>,
+    runtimeSettings: Record<string, any>,
   ): Promise<{ success: boolean; sessionInfo?: SessionInfo }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/sessions/agent-options`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/sessions/runtime-settings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId, agentOptions }),
+        body: JSON.stringify({ sessionId, runtimeSettings }),
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to update session agent options: ${response.statusText}`);
+        throw new Error(`Failed to update session runtime settings: ${response.statusText}`);
       }
 
       const responseData = await response.json();
       return {
-        success: responseData.success,
-        sessionInfo: responseData.sessionInfo,
+        success: true,
+        sessionInfo: responseData.session,
       };
     } catch (error) {
-      console.error('Error updating session agent options:', error);
+      console.error('Error updating session runtime settings:', error);
       return { success: false };
     }
   }
