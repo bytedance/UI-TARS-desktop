@@ -31,15 +31,38 @@ export const Dropdown: React.FC<DropdownProps> = ({
   placement = 'bottom-start',
 }) => {
   const [buttonRef, setButtonRef] = React.useState<HTMLElement | null>(null);
-  const [position, setPosition] = React.useState({ top: 0, left: 0 });
+  const [position, setPosition] = React.useState({ top: 0, left: 0, transform: '' });
   const [isOpen, setIsOpen] = React.useState(false);
 
   const updatePosition = React.useCallback(() => {
     if (buttonRef) {
       const rect = buttonRef.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const dropdownHeight = 300; // Estimated dropdown height
+      const margin = 8;
+      
+      // Check available space
+      const spaceBelow = viewportHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      
+      let top: number;
+      let transform = '';
+      
+      // Smart placement: prefer above to avoid covering input
+      if (spaceAbove > dropdownHeight + margin || spaceBelow < dropdownHeight + margin) {
+        // Place above
+        top = rect.top - margin;
+        transform = 'translateY(-100%)';
+      } else {
+        // Place below
+        top = rect.bottom + margin;
+        transform = 'none';
+      }
+      
       const newPosition = {
-        top: placement.startsWith('top') ? rect.top - 8 : rect.bottom + 8,
+        top,
         left: placement.endsWith('end') ? rect.right : rect.left,
+        transform,
       };
       setPosition(newPosition);
     }
@@ -87,7 +110,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
           style={{
             top: `${position.top}px`,
             left: `${position.left}px`,
-            transform: placement.startsWith('top') ? 'translateY(-100%)' : 'none',
+            transform: position.transform,
           }}
           onClick={(e) => {
             e.stopPropagation();
