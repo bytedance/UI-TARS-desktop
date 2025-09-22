@@ -52,14 +52,14 @@ export const Dropdown: React.FC<DropdownProps> = ({
       
       {/* Menu */}
       <div
-        className={`fixed z-50 w-72 rounded-xl bg-white dark:bg-gray-900 shadow-xl border border-gray-200/80 dark:border-gray-700/80 overflow-hidden ${menuClassName}`}
+        className={`fixed z-50 w-72 rounded-2xl bg-white dark:bg-gray-900 shadow-2xl shadow-black/10 dark:shadow-black/30 border border-gray-200/60 dark:border-gray-700/60 overflow-hidden backdrop-blur-sm ${menuClassName}`}
         style={{
           top: `${position.top}px`,
           left: `${position.left}px`,
           transform: placement.startsWith('top') ? 'translateY(-100%)' : 'none',
         }}
       >
-        <div className="p-3">{children}</div>
+        <div className="p-2">{children}</div>
       </div>
     </>
   ) : null;
@@ -87,8 +87,8 @@ export const DropdownItem: React.FC<DropdownItemProps> = ({
   return (
     <button
       onClick={onClick}
-      className={`group flex w-full items-center rounded-lg px-3 py-2 text-left transition-all duration-150 hover:bg-gray-50 dark:hover:bg-gray-800/50 text-gray-900 dark:text-gray-100 ${
-        disabled ? 'opacity-50 cursor-not-allowed' : ''
+      className={`group flex w-full items-center rounded-xl px-3 py-2.5 text-left transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800/50 text-gray-900 dark:text-gray-100 ${
+        disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02]'
       } ${className}`}
       disabled={disabled}
     >
@@ -101,7 +101,7 @@ export const DropdownItem: React.FC<DropdownItemProps> = ({
 };
 
 export const DropdownDivider: React.FC<DropdownDividerProps> = ({ className = '' }) => {
-  return <div className={`my-3 h-px bg-gray-100 dark:bg-gray-800 ${className}`} />;
+  return <div className={`my-2 h-px bg-gray-100 dark:bg-gray-800 ${className}`} />;
 };
 
 export const DropdownHeader: React.FC<{ children: React.ReactNode; className?: string }> = ({
