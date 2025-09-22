@@ -31,7 +31,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
 }) => {
   return (
     <Menu as="div" className={`relative inline-block text-left ${className}`}>
-      <Menu.Button as="div">{trigger}</Menu.Button>
+      <Menu.Button className="w-full">{trigger}</Menu.Button>
 
       <Transition
         as={Fragment}
