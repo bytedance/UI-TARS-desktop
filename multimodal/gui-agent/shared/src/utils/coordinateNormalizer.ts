@@ -45,10 +45,7 @@ export function normalizeActionCoords<T extends BaseAction>(
     normalizedAction.inputs.point
   ) {
     const normalizedResult = normalizeCoordinates(normalizedAction.inputs.point as Coordinates);
-    normalizedAction.inputs.point = {
-      ...(normalizedAction.inputs.point as Coordinates),
-      normalized: normalizedResult.normalized,
-    };
+    normalizedAction.inputs.point = normalizedResult.normalized;
   }
 
   // Normalize start coordinates
@@ -58,20 +55,14 @@ export function normalizeActionCoords<T extends BaseAction>(
     normalizedAction.inputs.start
   ) {
     const normalizedResult = normalizeCoordinates(normalizedAction.inputs.start as Coordinates);
-    normalizedAction.inputs.start = {
-      ...(normalizedAction.inputs.start as Coordinates),
-      normalized: normalizedResult.normalized,
-    };
+    normalizedAction.inputs.start = normalizedResult.normalized;
   }
 
   // Normalize end coordinates
   // eslint-disable-next-line prettier/prettier
   if (normalizedAction.inputs && 'end' in normalizedAction.inputs && normalizedAction.inputs.end) {
     const normalizedResult = normalizeCoordinates(normalizedAction.inputs.end as Coordinates);
-    normalizedAction.inputs.end = {
-      ...(normalizedAction.inputs.end as Coordinates),
-      normalized: normalizedResult.normalized,
-    };
+    normalizedAction.inputs.end = normalizedResult.normalized;
   }
 
   return normalizedAction;
