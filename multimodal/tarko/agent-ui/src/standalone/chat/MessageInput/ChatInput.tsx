@@ -461,23 +461,38 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                     };
 
                     return (
-                      <button
+                      <motion.button
                         key={option.key}
                         type="button"
+                        initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.8, y: -10 }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                           handleToggleOption(option.key, option.currentValue);
                         }}
-                        className="group inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700 hover:bg-blue-200 dark:hover:bg-blue-900/50 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 cursor-pointer"
+                        className="group relative overflow-hidden inline-flex items-center pl-3 pr-8 py-1.5 rounded-2xl text-xs font-medium bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-700 dark:text-blue-300 border border-blue-200/50 dark:border-blue-700/50 hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/30 dark:hover:to-indigo-900/30 hover:border-blue-300/70 dark:hover:border-blue-600/70 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md backdrop-blur-sm"
                         title={`Click to disable ${option.title}`}
                       >
-                        <span className="mr-1.5 text-blue-600 dark:text-blue-400 group-hover:opacity-0 transition-opacity duration-200">
+                        {/* Background glow effect */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 to-indigo-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        
+                        {/* Icon */}
+                        <span className="relative z-10 mr-2 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform duration-200">
                           {getOptionIcon()}
                         </span>
-                        <FiX className="absolute ml-0 w-3 h-3 text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                        <span className="truncate">{option.title}</span>
-                      </button>
+                        
+                        {/* Text */}
+                        <span className="relative z-10 truncate font-medium">{option.title}</span>
+                        
+                        {/* Close button */}
+                        <div className="absolute right-2 top-1/2 transform -translate-y-1/2 w-5 h-5 rounded-full bg-blue-200/50 dark:bg-blue-700/50 opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center hover:bg-blue-300/70 dark:hover:bg-blue-600/70 hover:scale-110">
+                          <FiX className="w-3 h-3 text-blue-600 dark:text-blue-300" />
+                        </div>
+                      </motion.button>
                     );
                   })}
                 </div>
