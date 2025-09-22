@@ -52,14 +52,14 @@ export const Dropdown: React.FC<DropdownProps> = ({
       
       {/* Menu */}
       <div
-        className={`fixed z-50 min-w-56 origin-top-right rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden ${menuClassName}`}
+        className={`fixed z-50 w-80 rounded-2xl bg-white dark:bg-gray-800 shadow-2xl border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm overflow-hidden ${menuClassName}`}
         style={{
           top: `${position.top}px`,
           left: `${position.left}px`,
           transform: placement.startsWith('top') ? 'translateY(-100%)' : 'none',
         }}
       >
-        <div className="p-1">{children}</div>
+        <div className="p-4">{children}</div>
       </div>
     </>
   ) : null;
@@ -87,19 +87,21 @@ export const DropdownItem: React.FC<DropdownItemProps> = ({
   return (
     <button
       onClick={onClick}
-      className={`group flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 ${
-        disabled ? 'opacity-50 cursor-not-allowed' : ''
+      className={`group flex w-full items-center rounded-xl px-4 py-3 text-left transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-700/30 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 ${
+        disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02]'
       } ${className}`}
       disabled={disabled}
     >
-      {icon && <span className="mr-3 flex-shrink-0">{icon}</span>}
-      {children}
+      {icon && <span className="mr-4 flex-shrink-0 text-lg">{icon}</span>}
+      <div className="flex-1">
+        {children}
+      </div>
     </button>
   );
 };
 
 export const DropdownDivider: React.FC<DropdownDividerProps> = ({ className = '' }) => {
-  return <div className={`my-1 h-px bg-gray-200 dark:bg-gray-600 ${className}`} />;
+  return <div className={`my-3 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-600 to-transparent ${className}`} />;
 };
 
 export const DropdownHeader: React.FC<{ children: React.ReactNode; className?: string }> = ({
@@ -107,7 +109,7 @@ export const DropdownHeader: React.FC<{ children: React.ReactNode; className?: s
   className = '',
 }) => {
   return (
-    <div className={`px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider ${className}`}>
+    <div className={`px-1 py-2 mb-2 text-sm font-semibold text-gray-900 dark:text-gray-100 ${className}`}>
       {children}
     </div>
   );

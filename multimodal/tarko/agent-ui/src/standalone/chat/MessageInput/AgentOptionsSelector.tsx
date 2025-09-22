@@ -106,21 +106,21 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
           className="flex items-center justify-between"
         >
           <div className="flex-1">
-            <div className="text-sm font-medium">{property.title || key}</div>
+            <div className="font-medium text-gray-900 dark:text-gray-100">{property.title || key}</div>
             {property.description && (
-              <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+              <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 {property.description}
               </div>
             )}
           </div>
           <div
-            className={`ml-3 relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-              currentValue ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-600'
+            className={`ml-4 relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${
+              currentValue ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'
             }`}
           >
             <span
-              className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
-                currentValue ? 'translate-x-5' : 'translate-x-1'
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${
+                currentValue ? 'translate-x-6' : 'translate-x-1'
               }`}
             />
           </div>
@@ -135,14 +135,16 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
           key={`${key}-${option}`}
           onClick={() => handleOptionChange(key, option)}
           className={`flex items-center justify-between ${
-            currentValue === option ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''
+            currentValue === option ? 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500' : ''
           }`}
         >
           <div className="flex-1">
-            <div className="text-sm font-medium">{property.title || key}</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">{option}</div>
+            <div className="font-medium text-gray-900 dark:text-gray-100">{property.title || key}</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">{option}</div>
           </div>
-          {currentValue === option && <div className="ml-3 w-2 h-2 bg-indigo-600 rounded-full" />}
+          {currentValue === option && (
+            <div className="ml-4 w-2 h-2 bg-blue-600 rounded-full" />
+          )}
         </DropdownItem>
       ));
     }
@@ -168,7 +170,7 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
       }
     >
       <DropdownHeader>Agent Options</DropdownHeader>
-      <div className="text-xs text-gray-500 dark:text-gray-400 px-3 pb-2">
+      <div className="text-sm text-gray-600 dark:text-gray-400 px-1 pb-3 border-b border-gray-100 dark:border-gray-700 mb-3">
         Configure agent behavior for this session
       </div>
       {options.map(renderOptionItem)}
