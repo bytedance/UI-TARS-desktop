@@ -414,6 +414,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
             {/* Left side controls */}
             <div className="absolute left-3 bottom-3 flex items-center gap-2">
+              {/* Agent Options Selector - First (leftmost) */}
+              <AgentOptionsSelector activeSessionId={sessionId} sessionMetadata={sessionMetadata} />
+              
               {/* File upload button */}
               {showAttachments && (
                 <>
@@ -442,9 +445,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   />
                 </>
               )}
-
-              {/* Agent Options Selector */}
-              <AgentOptionsSelector activeSessionId={sessionId} sessionMetadata={sessionMetadata} />
             </div>
 
             {/* Action buttons */}

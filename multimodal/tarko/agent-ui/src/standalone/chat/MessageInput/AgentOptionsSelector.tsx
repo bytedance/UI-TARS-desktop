@@ -6,7 +6,7 @@ import { SessionItemMetadata } from '@tarko/interface';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useAtomValue } from 'jotai';
 import { isProcessingAtom } from '@/common/state/atoms/ui';
-import { FiChevronDown, FiSettings } from 'react-icons/fi';
+import { FiChevronDown, FiSettings, FiPlus } from 'react-icons/fi';
 import { AnimatePresence, motion } from 'framer-motion';
 
 interface AgentOptionsSelectorProps {
@@ -259,17 +259,12 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         disabled={isLoading}
-        className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-all duration-200"
-        title="Agent Options"
+        className="flex items-center justify-center w-8 h-8 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-all duration-200"
+        title={`Agent Options (${options.length})`}
       >
-        <FiSettings size={14} />
-        <span>Options ({options.length})</span>
-        <FiChevronDown
-          size={12}
-          className={`transform transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-        />
+        <FiPlus size={16} className={`transform transition-transform duration-200 ${isOpen ? 'rotate-45' : ''}`} />
         {isLoading && (
-          <div className="w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin" />
+          <div className="absolute w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin" />
         )}
       </button>
 
@@ -280,7 +275,7 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="absolute bottom-full left-0 mb-2 w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-50 overflow-hidden"
+            className="absolute bottom-full left-0 mb-2 w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-[9999] overflow-hidden"
           >
             <div className="p-4">
               <div className="mb-3">
