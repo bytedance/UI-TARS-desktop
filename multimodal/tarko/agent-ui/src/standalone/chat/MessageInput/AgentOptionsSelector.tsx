@@ -178,13 +178,13 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
       const spaceBelow = viewportHeight - rect.bottom;
       const spaceAbove = rect.top;
       
-      let placement: 'above' | 'below' = 'below';
-      let top = rect.bottom + margin;
+      let placement: 'above' | 'below' = 'above'; // Default to above to avoid covering input
+      let top = rect.top - margin;
       
-      // If not enough space below but enough space above, place above
-      if (spaceBelow < popupHeight + margin && spaceAbove > popupHeight + margin) {
-        placement = 'above';
-        top = rect.top - margin;
+      // Only place below if there's significantly more space below AND not enough above
+      if (spaceBelow > popupHeight + 100 && spaceAbove < popupHeight + margin) {
+        placement = 'below';
+        top = rect.bottom + margin;
       }
       
       setPopupPosition({
