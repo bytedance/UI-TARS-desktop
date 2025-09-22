@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { FiSend, FiRefreshCw, FiImage, FiSquare, FiX } from 'react-icons/fi';
+import { TbBulb, TbSearch, TbBook, TbSettings } from 'react-icons/tb';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ConnectionStatus } from '@/common/types';
 import { ChatCompletionContentPart } from '@tarko/agent-interface';
@@ -415,10 +416,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                     // Get icon based on option key
                     const getOptionIcon = () => {
                       const lowerKey = option.key.toLowerCase();
-                      if (lowerKey.includes('foo')) return '💡';
-                      if (lowerKey.includes('search')) return '🔍';
-                      if (lowerKey.includes('research')) return '📚';
-                      return '⚙️';
+                      if (lowerKey.includes('foo')) return <TbBulb className="w-3 h-3" />;
+                      if (lowerKey.includes('search')) return <TbSearch className="w-3 h-3" />;
+                      if (lowerKey.includes('research')) return <TbBook className="w-3 h-3" />;
+                      return <TbSettings className="w-3 h-3" />;
                     };
 
                     return (
@@ -430,7 +431,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                         className="group inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700 hover:bg-blue-200 dark:hover:bg-blue-900/50 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 cursor-pointer"
                         title={`Click to disable ${option.title}`}
                       >
-                        <span className="mr-1.5 text-sm group-hover:opacity-0 transition-opacity duration-200">
+                        <span className="mr-1.5 text-blue-600 dark:text-blue-400 group-hover:opacity-0 transition-opacity duration-200">
                           {getOptionIcon()}
                         </span>
                         <FiX className="absolute ml-0 w-3 h-3 text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
