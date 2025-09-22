@@ -1,34 +1,34 @@
 ---
-title: Agent 选项示例
-description: 学习如何使用 Agent 选项实现可配置的智能体行为
+title: Agent Options 示例
+description: 学习如何使用 Agent Options 实现可配置的 Agent 行为
 ---
 
-# Agent 选项示例
+# Agent Options 示例
 
-Agent 选项允许您创建可配置的、特定于会话的设置，用户可以直接从聊天界面切换这些设置。这使得无需更改代码或重启服务器即可实现动态智能体行为定制。
+Agent Options 允许您创建可配置的、特定于会话的设置，用户可以直接从聊天界面切换这些设置。这使得无需更改代码或重启服务器即可实现动态 Agent 行为定制。
 
 ## 概述
 
-本指南提供了在 Tarko 应用程序中实现 Agent 选项的实用示例：
+本指南提供了在 Tarko 应用程序中实现 Agent Options 的实用示例：
 
-- **基础示例**：具有基本选项的简单聊天机器人
-- **高级示例**：具有广泛定制功能的复杂多模态助手
+- **基础示例**：具有基本 Options 的简单聊天机器人
+- **高级示例**：具有广泛定制功能的复杂多模态 Agent
 
 ## 基础示例
 
-一个具有基本智能体选项的简单聊天机器人：
+一个具有基本 Agent Options 的简单聊天机器人：
 
 ```typescript
 import { Agent, createTool } from '@tarko/agent';
 import { AgentServerOptions } from '@tarko/interface';
 
-// 1. 定义 Agent 选项架构
+// 1. 定义 Agent Options Schema
 const serverOptions: AgentServerOptions = {
   port: 3000,
   agentOptions: {
     type: 'object',
     properties: {
-      // 布尔选项 - 切换开关
+      // 布尔 Options - 切换开关
       verboseMode: {
         type: 'boolean',
         title: '详细模式',
@@ -40,7 +40,7 @@ const serverOptions: AgentServerOptions = {
       responseStyle: {
         type: 'string',
         title: '回复风格',
-        description: '选择智能体的回复方式',
+        description: '选择 Agent 的回复方式',
         enum: ['casual', 'formal'],
         default: 'casual',
       },
@@ -49,7 +49,7 @@ const serverOptions: AgentServerOptions = {
       language: {
         type: 'string',
         title: '回复语言',
-        description: '智能体回复的语言',
+        description: 'Agent 回复的语言',
         enum: ['chinese', 'english', 'japanese'],
         default: 'chinese',
       },
@@ -57,7 +57,7 @@ const serverOptions: AgentServerOptions = {
   },
 };
 
-// 2. 创建支持选项的智能体
+// 2. 创建支持 Options 的 Agent
 class BasicChatAgent extends Agent {
   constructor() {
     super({
@@ -72,7 +72,7 @@ class BasicChatAgent extends Agent {
   }
 
   async run(input: string, runOptions?: { sessionId?: string }) {
-    // 从会话元数据获取当前选项
+    // 从会话元数据获取当前 Options
     const sessionMetadata = this.getEventStream().getSessionMetadata(runOptions?.sessionId);
     const options = sessionMetadata?.agentOptions || {};
 
@@ -80,7 +80,7 @@ class BasicChatAgent extends Agent {
     const style = options.responseStyle || 'casual';
     const language = options.language || 'chinese';
 
-    // 根据选项自定义指令
+    // 根据 Options 自定义指令
     let customInstructions = this.instructions;
 
     // 如果启用详细模式，添加详细指令
@@ -149,19 +149,19 @@ export { serverOptions, BasicChatAgent };
 
 ## 高级示例
 
-一个具有广泛定制功能的综合多模态 AI 助手：
+一个具有广泛定制功能的综合多模态 AI Agent：
 
 ```typescript
 import { Agent, createTool } from '@tarko/agent';
 import { AgentServerOptions } from '@tarko/interface';
 
-// 高级智能体选项配置
+// 高级 Agent Options 配置
 const advancedServerOptions: AgentServerOptions = {
   port: 3000,
   agentOptions: {
     type: 'object',
     properties: {
-      // === UI 行为选项 ===
+      // === UI 行为 Options ===
       showThinkingProcess: {
         type: 'boolean',
         title: '显示思考过程',
@@ -176,11 +176,11 @@ const advancedServerOptions: AgentServerOptions = {
         default: true,
       },
 
-      // === 智能体个性 ===
+      // === Agent 个性 ===
       personalityMode: {
         type: 'string',
         title: '个性',
-        description: '智能体的沟通和行为方式',
+        description: 'Agent 的沟通和行为方式',
         enum: ['professional', 'friendly', 'technical', 'creative'],
         default: 'friendly',
       },
@@ -193,11 +193,11 @@ const advancedServerOptions: AgentServerOptions = {
         default: 'detailed',
       },
 
-      // === 工具和功能控制 ===
+      // === Tool 和功能控制 ===
       enableWebSearch: {
         type: 'boolean',
         title: '网络搜索',
-        description: '允许智能体搜索互联网获取最新信息',
+        description: '允许 Agent 搜索互联网获取最新信息',
         default: false,
       },
 
@@ -215,7 +215,7 @@ const advancedServerOptions: AgentServerOptions = {
         default: true,
       },
 
-      // === 输出格式选项 ===
+      // === 输出格式 Options ===
       preferredCodeLanguage: {
         type: 'string',
         title: '代码语言',
@@ -276,12 +276,12 @@ const advancedServerOptions: AgentServerOptions = {
   },
 };
 
-// 高级智能体实现
+// 高级 Agent 实现
 class AdvancedMultiModalAgent extends Agent {
   constructor() {
     super({
       name: 'AdvancedMultiModalAgent',
-      instructions: '你是一个具有广泛定制选项的高级 AI 助手。',
+      instructions: '你是一个具有广泛定制 Options 的高级 AI Agent。',
       tools: [
         createTool({
           name: 'web_search',
@@ -324,11 +324,11 @@ class AdvancedMultiModalAgent extends Agent {
   }
 
   async run(input: string, runOptions?: { sessionId?: string }) {
-    // 从会话元数据获取当前选项
+    // 从会话元数据获取当前 Options
     const sessionMetadata = this.getEventStream().getSessionMetadata(runOptions?.sessionId);
     const options = sessionMetadata?.agentOptions || {};
 
-    // 根据选项构建自定义指令
+    // 根据 Options 构建自定义指令
     let customInstructions = this.buildCustomInstructions(options);
 
     // 临时更新此次运行的指令
@@ -362,9 +362,9 @@ class AdvancedMultiModalAgent extends Agent {
       instructions += '\n\n执行长时间操作时，提供进度更新。';
     }
 
-    // 工具偏好
+    // Tool 偏好
     if (!options.enableWebSearch) {
-      instructions += '\n\n除非绝对必要，否则不要使用网络搜索工具。';
+      instructions += '\n\n除非绝对必要，否则不要使用网络搜索 Tool。';
     }
 
     if (!options.enableCodeGeneration) {
@@ -456,7 +456,7 @@ export { advancedServerOptions, AdvancedMultiModalAgent };
 
 ## 关键概念
 
-### 选项类型
+### Options 类型
 
 ```typescript
 // 布尔值 - 切换开关
@@ -482,7 +482,7 @@ export { advancedServerOptions, AdvancedMultiModalAgent };
 }
 ```
 
-### 访问选项
+### 访问 Options
 
 ```typescript
 class MyAgent extends Agent {
@@ -491,7 +491,7 @@ class MyAgent extends Agent {
     const options = sessionMetadata?.agentOptions || {};
     const isFeatureEnabled = options.featureName || false;
     
-    // 使用选项来自定义行为
+    // 使用 Options 来自定义行为
     return super.run(input);
   }
 }
@@ -557,18 +557,18 @@ class MyAgent extends Agent {
 
 ## 测试您的实现
 
-1. 使用新配置启动您的智能体服务器
+1. 使用新配置启动您的 Agent 服务器
 2. 打开 UI 并开始新的聊天会话
-3. 在聊天输入区域查找"选项"按钮
-4. 切换不同选项并验证它们是否影响智能体行为
-5. 检查选项是否在同一会话的消息中持续存在
+3. 在聊天输入区域查找"Options"按钮
+4. 切换不同 Options 并验证它们是否影响 Agent 行为
+5. 检查 Options 是否在同一会话的消息中持续存在
 
 ## 常见模式
 
 ### 功能切换
 ```typescript
 if (options.enableWebSearch) {
-  // 使用网络搜索工具
+  // 使用网络搜索 Tool
   const results = await this.callTool('web_search', { query });
 }
 ```
@@ -596,6 +596,6 @@ const maxSteps = parseInt(options.maxSteps) || 10;
 ## 下一步
 
 - 探索 [Agent 配置文档](/guide/basic/configuration)
-- 学习 [自定义工具](/examples/custom-tools)
+- 学习 [自定义 Tool](/examples/custom-tools)
 - 查看 [服务器集成](/examples/server-integration)
 - 阅读 [自定义 Hooks](/examples/custom-hooks)
