@@ -1,6 +1,7 @@
 import React from 'react';
 import { Menu } from '@headlessui/react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { createPortal } from 'react-dom';
 
 export interface DropdownProps {
   trigger: React.ReactNode;
@@ -29,30 +30,59 @@ export const Dropdown: React.FC<DropdownProps> = ({
   menuClassName = '',
   placement = 'bottom-start',
 }) => {
+  const [buttonRef, setButtonRef] = React.useState<HTMLElement | null>(null);
+  const [position, setPosition] = React.useState({ top: 0, left: 0 });
+
+  const updatePosition = React.useCallback(() => {
+    if (buttonRef) {
+      const rect = buttonRef.getBoundingClientRect();
+      const newPosition = {
+        top: placement.startsWith('top') ? rect.top - 8 : rect.bottom + 8,
+        left: placement.endsWith('end') ? rect.right : rect.left,
+      };
+      setPosition(newPosition);
+    }
+  }, [buttonRef, placement]);
+
+  React.useEffect(() => {
+    updatePosition();
+    const handleResize = () => updatePosition();
+    const handleScroll = () => updatePosition();
+    
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('scroll', handleScroll, true);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('scroll', handleScroll, true);
+    };
+  }, [updatePosition]);
+
   return (
     <Menu as="div" className={`relative inline-block text-left ${className}`}>
-      <Menu.Button as="div">{trigger}</Menu.Button>
+      <Menu.Button as="div" ref={setButtonRef}>{trigger}</Menu.Button>
 
-      <AnimatePresence>
-        <Menu.Items
-          as={motion.div}
-          initial={{ opacity: 0, scale: 0.95, y: placement.startsWith('top') ? 10 : -10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: placement.startsWith('top') ? 10 : -10 }}
-          transition={{ duration: 0.15 }}
-          className={`absolute z-50 min-w-56 origin-top-right rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden ${
-            placement === 'bottom-start'
-              ? 'top-full left-0 mt-2'
-              : placement === 'bottom-end'
-              ? 'top-full right-0 mt-2'
-              : placement === 'top-start'
-              ? 'bottom-full left-0 mb-2'
-              : 'bottom-full right-0 mb-2'
-          } ${menuClassName}`}
-        >
-          <div className="p-1">{children}</div>
-        </Menu.Items>
-      </AnimatePresence>
+      <Menu.Items
+        as={React.Fragment}
+      >
+        {({ open }) => open && createPortal(
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: placement.startsWith('top') ? 10 : -10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: placement.startsWith('top') ? 10 : -10 }}
+            transition={{ duration: 0.15 }}
+            className={`fixed z-50 min-w-56 origin-top-right rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden ${menuClassName}`}
+            style={{
+              top: `${position.top}px`,
+              left: `${position.left}px`,
+              transform: placement.startsWith('top') ? 'translateY(-100%)' : 'none',
+            }}
+          >
+            <div className="p-1">{children}</div>
+          </motion.div>,
+          document.body
+        )}
+      </Menu.Items>
     </Menu>
   );
 };
