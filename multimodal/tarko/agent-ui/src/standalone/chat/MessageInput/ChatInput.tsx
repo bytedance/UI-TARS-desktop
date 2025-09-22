@@ -411,19 +411,33 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             {activeAgentOptions.length > 0 && (
               <div className="px-5 pt-3 pb-1">
                 <div className="flex flex-wrap gap-1.5">
-                  {activeAgentOptions.map((option, index) => (
-                    <button
-                      key={option.key}
-                      onClick={() => {
-                        handleToggleOption(option.key, option.currentValue);
-                      }}
-                      className="group inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700 hover:bg-blue-200 dark:hover:bg-blue-900/50 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-150 cursor-pointer"
-                      title={`Click to disable ${option.title}`}
-                    >
-                      <span className="truncate">{option.title}</span>
-                      <FiX className="ml-1.5 w-3 h-3 text-blue-600 dark:text-blue-400" />
-                    </button>
-                  ))}
+                  {activeAgentOptions.map((option, index) => {
+                    // Get icon based on option key
+                    const getOptionIcon = () => {
+                      const lowerKey = option.key.toLowerCase();
+                      if (lowerKey.includes('foo')) return '💡';
+                      if (lowerKey.includes('search')) return '🔍';
+                      if (lowerKey.includes('research')) return '📚';
+                      return '⚙️';
+                    };
+
+                    return (
+                      <button
+                        key={option.key}
+                        onClick={() => {
+                          handleToggleOption(option.key, option.currentValue);
+                        }}
+                        className="group inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700 hover:bg-blue-200 dark:hover:bg-blue-900/50 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 cursor-pointer"
+                        title={`Click to disable ${option.title}`}
+                      >
+                        <span className="mr-1.5 text-sm group-hover:opacity-0 transition-opacity duration-200">
+                          {getOptionIcon()}
+                        </span>
+                        <FiX className="absolute ml-0 w-3 h-3 text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                        <span className="truncate">{option.title}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
