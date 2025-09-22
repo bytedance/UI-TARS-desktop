@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
-import { Menu, Transition } from '@headlessui/react';
-import { Fragment } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 export interface DropdownProps {
   trigger: React.ReactNode;
@@ -30,38 +29,51 @@ export const Dropdown: React.FC<DropdownProps> = ({
   placement = 'bottom-start',
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [position, setPosition] = useState({ top: 0, left: 0 });
+  const triggerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setPosition({
+        top: placement.startsWith('top') ? rect.top - 8 : rect.bottom + 8,
+        left: placement.endsWith('end') ? rect.right : rect.left,
+      });
+    }
+  }, [isOpen, placement]);
+
+  const dropdownContent = isOpen ? (
+    <>
+      {/* Overlay */}
+      <div 
+        className="fixed inset-0 z-40" 
+        onClick={() => setIsOpen(false)}
+      />
+      
+      {/* Menu */}
+      <div
+        className={`fixed z-50 min-w-56 origin-top-right rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden ${menuClassName}`}
+        style={{
+          top: `${position.top}px`,
+          left: `${position.left}px`,
+          transform: placement.startsWith('top') ? 'translateY(-100%)' : 'none',
+        }}
+      >
+        <div className="p-1">{children}</div>
+      </div>
+    </>
+  ) : null;
 
   return (
-    <div className={`relative inline-block text-left ${className}`}>
-      <div onClick={() => setIsOpen(!isOpen)}>
-        {trigger}
+    <>
+      <div className={`relative inline-block text-left ${className}`} ref={triggerRef}>
+        <div onClick={() => setIsOpen(!isOpen)}>
+          {trigger}
+        </div>
       </div>
-
-      {isOpen && (
-        <>
-          {/* Overlay */}
-          <div 
-            className="fixed inset-0 z-40" 
-            onClick={() => setIsOpen(false)}
-          />
-          
-          {/* Menu */}
-          <div
-            className={`absolute z-50 min-w-56 origin-top-right rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden ${
-              placement === 'bottom-start'
-                ? 'top-full left-0 mt-2'
-                : placement === 'bottom-end'
-                ? 'top-full right-0 mt-2'
-                : placement === 'top-start'
-                ? 'bottom-full left-0 mb-2'
-                : 'bottom-full right-0 mb-2'
-            } ${menuClassName}`}
-          >
-            <div className="p-1">{children}</div>
-          </div>
-        </>
-      )}
-    </div>
+      
+      {typeof document !== 'undefined' && dropdownContent && createPortal(dropdownContent, document.body)}
+    </>
   );
 };
 
