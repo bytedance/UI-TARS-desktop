@@ -32,6 +32,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
 }) => {
   const [buttonRef, setButtonRef] = React.useState<HTMLElement | null>(null);
   const [position, setPosition] = React.useState({ top: 0, left: 0 });
+  const [isOpen, setIsOpen] = React.useState(false);
 
   const updatePosition = React.useCallback(() => {
     if (buttonRef) {
@@ -45,47 +46,67 @@ export const Dropdown: React.FC<DropdownProps> = ({
   }, [buttonRef, placement]);
 
   React.useEffect(() => {
-    updatePosition();
-    const handleResize = () => updatePosition();
-    const handleScroll = () => updatePosition();
-    
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('scroll', handleScroll, true);
-    
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('scroll', handleScroll, true);
-    };
-  }, [updatePosition]);
+    if (isOpen) {
+      updatePosition();
+      const handleResize = () => updatePosition();
+      const handleScroll = () => updatePosition();
+      
+      window.addEventListener('resize', handleResize);
+      window.addEventListener('scroll', handleScroll, true);
+      
+      return () => {
+        window.removeEventListener('resize', handleResize);
+        window.removeEventListener('scroll', handleScroll, true);
+      };
+    }
+  }, [updatePosition, isOpen]);
 
   return (
-    <Menu as="div" className={`relative inline-block text-left ${className}`}>
-      <Menu.Button as="div" ref={setButtonRef}>{trigger}</Menu.Button>
+    <>
+      <Menu as="div" className={`relative inline-block text-left ${className}`}>
+        <Menu.Button as="div" ref={setButtonRef} onClick={() => setIsOpen(!isOpen)}>
+          {trigger}
+        </Menu.Button>
 
-      <Menu.Items
-        as={React.Fragment}
-      >
-        {({ open }) => (
-          open ? createPortal(
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: placement.startsWith('top') ? 10 : -10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: placement.startsWith('top') ? 10 : -10 }}
-              transition={{ duration: 0.15 }}
-              className={`fixed z-50 min-w-56 origin-top-right rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden ${menuClassName}`}
-              style={{
-                top: `${position.top}px`,
-                left: `${position.left}px`,
-                transform: placement.startsWith('top') ? 'translateY(-100%)' : 'none',
-              }}
-            >
-              <div className="p-1">{children}</div>
-            </motion.div>,
-            document.body
-          ) : <div />
-        )}
-      </Menu.Items>
-    </Menu>
+        <Menu.Items
+          className={`absolute invisible ${menuClassName}`}
+          style={{ visibility: 'hidden', pointerEvents: 'none' }}
+        >
+          <div className="p-1">{children}</div>
+        </Menu.Items>
+      </Menu>
+
+      {/* Portal for actual visible dropdown */}
+      {isOpen && createPortal(
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: placement.startsWith('top') ? 10 : -10 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: placement.startsWith('top') ? 10 : -10 }}
+          transition={{ duration: 0.15 }}
+          className={`fixed z-50 min-w-56 origin-top-right rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden ${menuClassName}`}
+          style={{
+            top: `${position.top}px`,
+            left: `${position.left}px`,
+            transform: placement.startsWith('top') ? 'translateY(-100%)' : 'none',
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          <div className="p-1">{children}</div>
+        </motion.div>,
+        document.body
+      )}
+
+      {/* Click outside handler */}
+      {isOpen && createPortal(
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setIsOpen(false)}
+        />,
+        document.body
+      )}
+    </>
   );
 };
 
@@ -97,24 +118,21 @@ export const DropdownItem: React.FC<DropdownItemProps> = ({
   className = '',
 }) => {
   return (
-    <Menu.Item disabled={disabled}>
-      {({ active }) => (
-        <button
-          onClick={onClick}
-          className={`${
-            active
-              ? 'bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-gray-100'
-              : 'text-gray-700 dark:text-gray-300'
-          } group flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors ${
-            disabled ? 'opacity-50 cursor-not-allowed' : ''
-          } ${className}`}
-          disabled={disabled}
-        >
-          {icon && <span className="mr-3 flex-shrink-0">{icon}</span>}
-          {children}
-        </button>
-      )}
-    </Menu.Item>
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        if (!disabled && onClick) {
+          onClick();
+        }
+      }}
+      className={`group flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 ${
+        disabled ? 'opacity-50 cursor-not-allowed' : ''
+      } ${className}`}
+      disabled={disabled}
+    >
+      {icon && <span className="mr-3 flex-shrink-0">{icon}</span>}
+      {children}
+    </button>
   );
 };
 
