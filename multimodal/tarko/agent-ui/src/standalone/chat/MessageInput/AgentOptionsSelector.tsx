@@ -56,25 +56,6 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
   const { isReplayMode } = useReplayMode();
   const isProcessing = useAtomValue(isProcessingAtom);
 
-  // Expose methods to parent component
-  useImperativeHandle(ref, () => ({
-    toggleOption: (key: string) => {
-      if (!schema || !currentValues) return;
-      
-      const property = schema.properties[key];
-      if (!property) return;
-      
-      const currentValue = currentValues[key] ?? property.default;
-      
-      if (property.type === 'boolean') {
-        handleOptionChange(key, !currentValue);
-      } else if (property.type === 'string' && property.enum) {
-        // For enum, toggle to default value
-        handleOptionChange(key, property.default);
-      }
-    },
-  }), [handleOptionChange]);
-
   const getOptionIcon = (key: string, property: any) => {
     // Map common option keys to icons
     const iconMap: Record<string, React.ReactNode> = {
@@ -138,6 +119,25 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
       setIsLoading(false);
     }
   }, [activeSessionId, isLoading, currentValues, onToggleOption, updateSessionMetadata]);
+
+  // Expose methods to parent component
+  useImperativeHandle(ref, () => ({
+    toggleOption: (key: string) => {
+      if (!schema || !currentValues) return;
+      
+      const property = schema.properties[key];
+      if (!property) return;
+      
+      const currentValue = currentValues[key] ?? property.default;
+      
+      if (property.type === 'boolean') {
+        handleOptionChange(key, !currentValue);
+      } else if (property.type === 'string' && property.enum) {
+        // For enum, toggle to default value
+        handleOptionChange(key, property.default);
+      }
+    },
+  }), [handleOptionChange]);
 
   useEffect(() => {
     if (activeSessionId && !isReplayMode) {
