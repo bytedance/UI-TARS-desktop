@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useSetAtom } from 'jotai';
 import { updateSessionMetadataAction } from '@/common/state/actions/sessionActions';
 import { apiService } from '@/common/services/apiService';
@@ -159,10 +160,22 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
   const [currentValues, setCurrentValues] = useState<Record<string, any> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0 });
   const updateSessionMetadata = useSetAtom(updateSessionMetadataAction);
   const { isReplayMode } = useReplayMode();
   const isProcessing = useAtomValue(isProcessingAtom);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  // Calculate popup position when opening
+  const updatePopupPosition = () => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setPopupPosition({
+        top: rect.top - 10, // 10px margin above button
+        left: rect.left,
+      });
+    }
+  };
 
   const loadAgentOptions = async () => {
     if (!activeSessionId) return;
@@ -209,16 +222,34 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (buttonRef.current && !buttonRef.current.contains(event.target as Node)) {
+        // Check if click is inside the portal popup
+        const popupElement = document.getElementById('agent-options-popup');
+        if (popupElement && popupElement.contains(event.target as Node)) {
+          return;
+        }
         setIsOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    const handleScroll = () => {
+      if (isOpen) {
+        updatePopupPosition();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      window.addEventListener('scroll', handleScroll, true);
+      window.addEventListener('resize', handleScroll);
+    }
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('scroll', handleScroll, true);
+      window.removeEventListener('resize', handleScroll);
     };
-  }, []);
+  }, [isOpen]);
 
   // Don't show anything if no schema, in replay mode, or processing
   if (isReplayMode || isProcessing || !schema || !schema.properties) {
@@ -254,10 +285,16 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
   };
 
   return (
-    <div className={`relative ${className}`} ref={dropdownRef}>
+    <>
       <button
+        ref={buttonRef}
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          if (!isOpen) {
+            updatePopupPosition();
+          }
+          setIsOpen(!isOpen);
+        }}
         disabled={isLoading}
         className="flex items-center justify-center w-8 h-8 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-all duration-200"
         title={`Agent Options (${options.length})`}
@@ -268,14 +305,21 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
         )}
       </button>
 
-      <AnimatePresence>
-        {isOpen && (
+      {/* Portal for popup */}
+      {isOpen && createPortal(
+        <AnimatePresence>
           <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            id="agent-options-popup"
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="absolute bottom-full left-0 mb-2 w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-[9999] overflow-hidden"
+            className="fixed w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden"
+            style={{
+              top: `${popupPosition.top - 320}px`, // 320px is approximate popup height
+              left: `${popupPosition.left}px`,
+              zIndex: 10000,
+            }}
           >
             <div className="p-4">
               <div className="mb-3">
@@ -289,8 +333,9 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
               <div className="space-y-1 max-h-64 overflow-y-auto">{options.map(renderOption)}</div>
             </div>
           </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+        </AnimatePresence>,
+        document.body
+      )}
+    </>
   );
 };
