@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
+import React, { useState, useEffect } from 'react';
 import { useSetAtom } from 'jotai';
 import { updateSessionMetadataAction } from '@/common/state/actions/sessionActions';
 import { apiService } from '@/common/services/apiService';
@@ -7,8 +6,8 @@ import { SessionItemMetadata } from '@tarko/interface';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useAtomValue } from 'jotai';
 import { isProcessingAtom } from '@/common/state/atoms/ui';
-import { FiChevronDown, FiSettings, FiPlus } from 'react-icons/fi';
-import { AnimatePresence, motion } from 'framer-motion';
+import { FiPlus } from 'react-icons/fi';
+import { Dropdown, DropdownItem, DropdownHeader } from '@tarko/ui';
 
 interface AgentOptionsSelectorProps {
   activeSessionId?: string;
@@ -27,130 +26,6 @@ interface AgentOptionConfig {
   currentValue: any;
 }
 
-// Component for boolean options (toggle switch)
-const BooleanOption: React.FC<{
-  config: AgentOptionConfig;
-  onChange: (key: string, value: any) => void;
-}> = ({ config, onChange }) => {
-  const { key, property, currentValue } = config;
-  const isChecked = Boolean(currentValue);
-
-  return (
-    <div className="flex items-center justify-between py-2">
-      <div className="flex-1">
-        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-          {property.title || key}
-        </div>
-        {property.description && (
-          <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            {property.description}
-          </div>
-        )}
-      </div>
-      <button
-        type="button"
-        onClick={() => onChange(key, !isChecked)}
-        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
-          isChecked ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-600'
-        }`}
-      >
-        <span
-          className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
-            isChecked ? 'translate-x-5' : 'translate-x-1'
-          }`}
-        />
-      </button>
-    </div>
-  );
-};
-
-// Component for enum options with 2 values (toggle buttons)
-const BinaryEnumOption: React.FC<{
-  config: AgentOptionConfig;
-  onChange: (key: string, value: any) => void;
-}> = ({ config, onChange }) => {
-  const { key, property, currentValue } = config;
-  const options = property.enum || [];
-  const isFirstOption = currentValue === options[0];
-
-  return (
-    <div className="py-2">
-      <div className="mb-2">
-        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-          {property.title || key}
-        </div>
-        {property.description && (
-          <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            {property.description}
-          </div>
-        )}
-      </div>
-      <div
-        className="inline-flex rounded-md border border-gray-200 dark:border-gray-600"
-        role="group"
-      >
-        <button
-          type="button"
-          onClick={() => onChange(key, options[0])}
-          className={`px-3 py-1.5 text-xs font-medium transition-all rounded-l-md ${
-            isFirstOption
-              ? 'bg-indigo-600 text-white'
-              : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
-          }`}
-        >
-          {options[0]}
-        </button>
-        <button
-          type="button"
-          onClick={() => onChange(key, options[1])}
-          className={`px-3 py-1.5 text-xs font-medium transition-all rounded-r-md border-l border-gray-200 dark:border-gray-600 ${
-            !isFirstOption
-              ? 'bg-indigo-600 text-white'
-              : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
-          }`}
-        >
-          {options[1]}
-        </button>
-      </div>
-    </div>
-  );
-};
-
-// Component for enum options with 3+ values (select dropdown)
-const MultiEnumOption: React.FC<{
-  config: AgentOptionConfig;
-  onChange: (key: string, value: any) => void;
-}> = ({ config, onChange }) => {
-  const { key, property, currentValue } = config;
-  const options = property.enum || [];
-
-  return (
-    <div className="py-2">
-      <div className="mb-2">
-        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-          {property.title || key}
-        </div>
-        {property.description && (
-          <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            {property.description}
-          </div>
-        )}
-      </div>
-      <select
-        value={currentValue || options[0]}
-        onChange={(e) => onChange(key, e.target.value)}
-        className="w-full px-3 py-1.5 text-sm border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-      >
-        {options.map((option: any) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-};
-
 export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
   activeSessionId,
   sessionMetadata,
@@ -159,41 +34,9 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
   const [schema, setSchema] = useState<AgentOptionsSchema | null>(null);
   const [currentValues, setCurrentValues] = useState<Record<string, any> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-  const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0, placement: 'below' as 'above' | 'below' });
   const updateSessionMetadata = useSetAtom(updateSessionMetadataAction);
   const { isReplayMode } = useReplayMode();
   const isProcessing = useAtomValue(isProcessingAtom);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-
-  // Calculate popup position when opening
-  const updatePopupPosition = () => {
-    if (buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
-      const popupHeight = 300; // Estimated popup height
-      const margin = 8;
-      
-      // Check if there's enough space below the button
-      const spaceBelow = viewportHeight - rect.bottom;
-      const spaceAbove = rect.top;
-      
-      let placement: 'above' | 'below' = 'above'; // Default to above to avoid covering input
-      let top = rect.top - margin;
-      
-      // Only place below if there's significantly more space below AND not enough above
-      if (spaceBelow > popupHeight + 100 && spaceAbove < popupHeight + margin) {
-        placement = 'below';
-        top = rect.bottom + margin;
-      }
-      
-      setPopupPosition({
-        top,
-        left: rect.left,
-        placement,
-      });
-    }
-  };
 
   const loadAgentOptions = async () => {
     if (!activeSessionId) return;
@@ -237,38 +80,6 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
     }
   }, [activeSessionId, isReplayMode]);
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (buttonRef.current && !buttonRef.current.contains(event.target as Node)) {
-        // Check if click is inside the portal popup
-        const popupElement = document.getElementById('agent-options-popup');
-        if (popupElement && popupElement.contains(event.target as Node)) {
-          return;
-        }
-        setIsOpen(false);
-      }
-    };
-
-    const handleScroll = () => {
-      if (isOpen) {
-        updatePopupPosition();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      window.addEventListener('scroll', handleScroll, true);
-      window.addEventListener('resize', handleScroll);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      window.removeEventListener('scroll', handleScroll, true);
-      window.removeEventListener('resize', handleScroll);
-    };
-  }, [isOpen]);
-
   // Don't show anything if no schema, in replay mode, or processing
   if (isReplayMode || isProcessing || !schema || !schema.properties) {
     return null;
@@ -284,77 +95,85 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
     return null;
   }
 
-  const renderOption = (config: AgentOptionConfig) => {
-    const { property } = config;
+  const renderOptionItem = (config: AgentOptionConfig) => {
+    const { key, property, currentValue } = config;
 
     if (property.type === 'boolean') {
-      return <BooleanOption key={config.key} config={config} onChange={handleOptionChange} />;
+      return (
+        <DropdownItem
+          key={key}
+          onClick={() => handleOptionChange(key, !Boolean(currentValue))}
+          className="flex items-center justify-between"
+        >
+          <div className="flex-1">
+            <div className="text-sm font-medium">{property.title || key}</div>
+            {property.description && (
+              <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                {property.description}
+              </div>
+            )}
+          </div>
+          <div
+            className={`ml-3 relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+              Boolean(currentValue) ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-600'
+            }`}
+          >
+            <span
+              className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                Boolean(currentValue) ? 'translate-x-5' : 'translate-x-1'
+              }`}
+            />
+          </div>
+        </DropdownItem>
+      );
     }
 
     if (property.type === 'string' && property.enum) {
-      if (property.enum.length === 2) {
-        return <BinaryEnumOption key={config.key} config={config} onChange={handleOptionChange} />;
-      } else {
-        return <MultiEnumOption key={config.key} config={config} onChange={handleOptionChange} />;
-      }
+      const options = property.enum || [];
+      return options.map((option: any) => (
+        <DropdownItem
+          key={`${key}-${option}`}
+          onClick={() => handleOptionChange(key, option)}
+          className={`flex items-center justify-between ${
+            currentValue === option ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''
+          }`}
+        >
+          <div className="flex-1">
+            <div className="text-sm font-medium">{property.title || key}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">{option}</div>
+          </div>
+          {currentValue === option && (
+            <div className="ml-3 w-2 h-2 bg-indigo-600 rounded-full" />
+          )}
+        </DropdownItem>
+      ));
     }
 
     return null;
   };
 
   return (
-    <>
-      <button
-        ref={buttonRef}
-        type="button"
-        onClick={() => {
-          if (!isOpen) {
-            updatePopupPosition();
-          }
-          setIsOpen(!isOpen);
-        }}
-        disabled={isLoading}
-        className="flex items-center justify-center w-8 h-8 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-all duration-200"
-        title={`Agent Options (${options.length})`}
-      >
-        <FiPlus size={16} className={`transform transition-transform duration-200 ${isOpen ? 'rotate-45' : ''}`} />
-        {isLoading && (
-          <div className="absolute w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin" />
-        )}
-      </button>
-
-      {/* Portal for popup */}
-      {isOpen && createPortal(
-        <AnimatePresence>
-          <motion.div
-            id="agent-options-popup"
-            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            transition={{ duration: 0.15 }}
-            className="fixed w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden"
-            style={{
-              top: `${popupPosition.top}px`,
-              left: `${popupPosition.left}px`,
-              transform: popupPosition.placement === 'above' ? 'translateY(-100%)' : 'none',
-              zIndex: 10000,
-            }}
-          >
-            <div className="p-4">
-              <div className="mb-3">
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                  Agent Options
-                </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Configure agent behavior for this session
-                </p>
-              </div>
-              <div className="space-y-1 max-h-64 overflow-y-auto">{options.map(renderOption)}</div>
-            </div>
-          </motion.div>
-        </AnimatePresence>,
-        document.body
-      )}
-    </>
+    <Dropdown
+      placement="top-start"
+      trigger={
+        <button
+          type="button"
+          disabled={isLoading}
+          className="flex items-center justify-center w-8 h-8 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-all duration-200"
+          title={`Agent Options (${options.length})`}
+        >
+          <FiPlus size={16} className="transition-transform duration-200" />
+          {isLoading && (
+            <div className="absolute w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin" />
+          )}
+        </button>
+      }
+    >
+      <DropdownHeader>Agent Options</DropdownHeader>
+      <div className="text-xs text-gray-500 dark:text-gray-400 px-3 pb-2">
+        Configure agent behavior for this session
+      </div>
+      {options.map(renderOptionItem)}
+    </Dropdown>
   );
 };

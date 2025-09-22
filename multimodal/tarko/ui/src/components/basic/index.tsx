@@ -1,5 +1,6 @@
 export * from './ConfirmDialog';
 export * from './Dialog';
+export * from './Dropdown';
 export * from './Tooltip';
 export * from './LoadingSpinner';
 export { Box, CircularProgress, IconButton } from './primitives';
