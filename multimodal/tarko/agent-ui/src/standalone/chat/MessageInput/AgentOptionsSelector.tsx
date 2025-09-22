@@ -241,10 +241,7 @@ export const AgentOptionsSelector: React.FC<AgentOptionsSelectorProps> = ({
         </button>
       }
     >
-      <DropdownHeader>Agent Options</DropdownHeader>
-      <div className="text-xs text-gray-500 dark:text-gray-400 px-1 pb-2 mb-2 border-b border-gray-100 dark:border-gray-800">
-        Configure agent behavior for this session
-      </div>
+      <DropdownHeader>Settings</DropdownHeader>
       {options.map(renderOptionItem)}
     </Dropdown>
   );
