@@ -50,7 +50,19 @@ export class AdbOperator extends Operator {
   }
 
   protected supportedActions(): Array<SupportedActionType> {
-    throw new Error('Method not implemented.');
+    return [
+      'click',
+      'double_click',
+      'type',
+      'long_press',
+      'swipe',
+      'press_back',
+      'press_home',
+      'open_app',
+      'wait',
+      'call_user',
+      'finished',
+    ];
   }
 
   protected screenContext(): ScreenContext {

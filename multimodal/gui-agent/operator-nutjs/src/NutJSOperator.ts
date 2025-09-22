@@ -48,7 +48,24 @@ export class NutJSOperator extends Operator {
   }
 
   protected supportedActions(): Array<SupportedActionType> {
-    throw new Error('Method not implemented.');
+    return [
+      'click',
+      'right_click',
+      'middle_click',
+      'double_click',
+      'mouse_down',
+      'mouse_up',
+      'mouse_move',
+      'drag',
+      'scroll',
+      'type',
+      'hotkey',
+      'press',
+      'release',
+      'wait',
+      'call_user',
+      'finished',
+    ];
   }
 
   protected screenContext(): ScreenContext {
@@ -64,12 +81,12 @@ export class NutJSOperator extends Operator {
     const screenWithScale = await grabImage.toRGB();
     const scaleFactor = screenWithScale.pixelDensity.scaleX;
 
-    this.logger.info(
-      'scaleX',
-      screenWithScale.pixelDensity.scaleX,
-      'scaleY',
-      screenWithScale.pixelDensity.scaleY,
-    );
+    // this.logger.info(
+    //   'scaleX',
+    //   screenWithScale.pixelDensity.scaleX,
+    //   'scaleY',
+    //   screenWithScale.pixelDensity.scaleY,
+    // );
 
     const screenWithScaleImage = await Jimp.fromBitmap({
       width: screenWithScale.width,
@@ -99,7 +116,7 @@ export class NutJSOperator extends Operator {
   protected async execute(params: ExecuteParams): Promise<ExecuteOutput> {
     const { actions } = params;
     for (const action of actions) {
-      this.logger.info('execute action', action);
+      this.logger.info('execute action', JSON.stringify(action));
       await this.singleActionExecutor(action);
     }
     return {
@@ -317,10 +334,10 @@ export class NutJSOperator extends Operator {
             keyMap[k as keyof typeof keyMap] ?? lowercaseKeyMap[k as Lowercase<keyof typeof Key>],
         )
         .filter(Boolean);
-      this.logger.info('hotkey: ', keys);
+      this.logger.info('getHotkeys: key codes list:', keys);
       return keys;
     } else {
-      this.logger.error('hotkey error: ', `${keyStr} is not a valid key`);
+      this.logger.error('getHotkeys error: ', `${keyStr} is not a valid key`);
       throw new Error(`Error: ${keyStr} is not a valid key`);
     }
   }
