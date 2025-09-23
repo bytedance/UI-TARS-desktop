@@ -46,7 +46,7 @@ export const WorkspaceContent: React.FC = () => {
             <div className="absolute inset-0 w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-gray-200/50 to-gray-100/30 dark:from-gray-700/30 dark:to-gray-800/20 blur-xl"></div>
 
             {/* Main icon */}
-            <div className="relative w-24 h-24 mx-auto rounded-3xl bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center border border-gray-200/60 dark:border-gray-700/40">
+            <div className="relative w-24 h-24 mx-auto rounded-3xl bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center border border-gray-200/60 dark:border-gray-700/40 hover:scale-105 hover:-translate-y-0.5 transition-transform duration-200">
               <FiLayout size={40} className="text-gray-500 dark:text-gray-400" />
             </div>
           </div>
@@ -73,7 +73,7 @@ export const WorkspaceContent: React.FC = () => {
       {/* Header with refined styling */}
       <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100/60 dark:border-gray-700/30 bg-white dark:bg-gray-800/90">
         <div className="flex items-center">
-          <div className="w-10 h-10 mr-4 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 border border-gray-200/60 dark:border-gray-700/40">
+          <div className="w-10 h-10 mr-4 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 border border-gray-200/60 dark:border-gray-700/40 hover:scale-105 transition-transform duration-200">
             <FiLayers size={18} />
           </div>
           <div>
@@ -106,7 +106,7 @@ export const WorkspaceContent: React.FC = () => {
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500/15 via-purple-500/15 to-green-500/15 rounded-full blur-xl" />
 
                 {/* Main icon container */}
-                <div className="relative w-20 h-20 bg-gradient-to-br from-white via-gray-50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-3xl flex items-center justify-center mx-auto border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-sm">
+                <div className="relative w-20 h-20 bg-gradient-to-br from-white via-gray-50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-3xl flex items-center justify-center mx-auto border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-sm hover:scale-105 hover:-translate-y-0.5 transition-transform duration-200">
                   {/* Icon */}
                   <div className="relative z-10">
                     <div className="text-blue-600 dark:text-blue-400">
@@ -129,7 +129,7 @@ export const WorkspaceContent: React.FC = () => {
 
               {/* Enhanced feature cards with modern design */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-lg mx-auto">
-                <div className="flex md:flex-col items-center md:items-center p-4 bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-2xl border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-sm relative overflow-hidden">
+                <div className="flex md:flex-col items-center md:items-center p-4 bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-2xl border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-sm relative overflow-hidden hover:scale-105 hover:-translate-y-1 transition-all duration-200">
                   <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/20 flex items-center justify-center md:mb-3 mr-3 md:mr-0 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-700/40 flex-shrink-0">
                     <FiLayout size={20} />
                   </div>
@@ -143,7 +143,7 @@ export const WorkspaceContent: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex md:flex-col items-center md:items-center p-4 bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-2xl border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-sm relative overflow-hidden">
+                <div className="flex md:flex-col items-center md:items-center p-4 bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-2xl border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-sm relative overflow-hidden hover:scale-105 hover:-translate-y-1 transition-all duration-200">
                   <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/20 flex items-center justify-center md:mb-3 mr-3 md:mr-0 text-green-600 dark:text-green-400 border border-green-200/60 dark:border-green-700/40 flex-shrink-0">
                     <FiZap size={20} />
                   </div>
@@ -157,7 +157,7 @@ export const WorkspaceContent: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex md:flex-col items-center md:items-center p-4 bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-2xl border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-sm relative overflow-hidden">
+                <div className="flex md:flex-col items-center md:items-center p-4 bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-gray-800 dark:via-gray-750 dark:to-gray-800 rounded-2xl border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-sm relative overflow-hidden hover:scale-105 hover:-translate-y-1 transition-all duration-200">
                   <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/20 flex items-center justify-center md:mb-3 mr-3 md:mr-0 text-amber-600 dark:text-amber-400 border border-amber-200/60 dark:border-amber-700/40 flex-shrink-0">
                     <FiFileText size={20} />
                   </div>
