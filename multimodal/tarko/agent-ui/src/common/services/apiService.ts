@@ -238,6 +238,18 @@ class ApiService {
         throw new Error(`Failed to send query: ${response.statusText}`);
       }
 
+      // Check if response is JSON (environment input insertion) or streaming
+      const contentType = response.headers.get('content-type');
+      if (contentType?.includes('application/json')) {
+        // This is an environment input insertion response
+        const result = await response.json();
+        if (result.type === 'environment_input_inserted') {
+          console.log('User input inserted as environment input during agent execution');
+          return; // No streaming for environment input insertion
+        }
+      }
+
+      // Handle streaming response
       const reader = response.body?.getReader();
       if (!reader) {
         throw new Error('ReadableStream not supported');
