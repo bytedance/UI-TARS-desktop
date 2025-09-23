@@ -17,6 +17,10 @@ export const systemPromptTemplate1: SystemPromptTemplate = {
             return `right_single(point='<point>x1 y1</point>')`;
           case 'double_click':
             return `left_double(point='<point>x1 y1</point>')`;
+          case 'navigate':
+            return `navigate(url='xxx') # Navigate to the given url.`;
+          case 'navigate_back':
+            return `navigate_back() # Navigate back to the previous page.`;
           case 'drag':
             return `swipe(start_point='<point>x1 y1</point>', end_point='<point>x2 y2</point>') # Swipe/Drag to show more information or select elements. The direction of the page movement is opposite to the finger's movement`;
           case 'hotkey':

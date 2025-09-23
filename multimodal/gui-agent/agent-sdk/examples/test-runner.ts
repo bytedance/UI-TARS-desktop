@@ -29,7 +29,7 @@ interface TestOptions {
 }
 
 interface ConfigData {
-  operatorType: 'browser' | 'computer' | 'android';
+  operator: Operator;
   model: AgentModel;
   systemPrompt: string;
   snapshot?: {
@@ -71,9 +71,9 @@ async function loadConfig(configName: string): Promise<ConfigData> {
     }
 
     // Validate required fields
-    if (!config.operatorType || !['browser', 'computer', 'android'].includes(config.operatorType)) {
+    if (!config.operator) {
       throw new Error(
-        `Invalid or missing operatorType in config ${configName}. Must be one of: browser, computer, android`,
+        `Invalid or missing operator in config ${configName}. Must be a valid operator instance.`,
       );
     }
 
@@ -88,7 +88,7 @@ async function loadConfig(configName: string): Promise<ConfigData> {
     }
 
     defaultLogger.debug(`✅ Successfully loaded config: ${configName}`);
-    defaultLogger.debug(`   - Operator Type: ${config.operatorType}`);
+    // defaultLogger.debug(`   - Operator Type: ${config.operatorType}`);
     defaultLogger.debug(`   - Model Provider: ${config.model.provider}`);
     defaultLogger.debug(`   - Model ID: ${config.model.id}`);
 
@@ -115,12 +115,12 @@ function listAvailableConfigs(): string[] {
 }
 
 // Run with operator using config
-async function runWithTarkoConfig(config: ConfigData) {
-  defaultLogger.debug(`🚀 Running ${config.operatorType} operator with tarko command...`);
+async function runWithTarkoConfig(configName: string) {
+  defaultLogger.debug(`🚀 Running with tarko command...`);
 
   // Map operator type to config file based on the loaded config
   const configsDir = path.resolve(__dirname, 'configs');
-  const configFileName = `${config.operatorType}-${config.model?.provider || 'openai'}.config.ts`;
+  const configFileName = `${configName}.config.ts`;
   const configPath = path.resolve(configsDir, configFileName);
 
   defaultLogger.debug(`📋 Using config file: ${configPath}`);
@@ -157,10 +157,10 @@ async function runWithTarkoConfig(config: ConfigData) {
 
     tarkoProcess.on('close', (code) => {
       if (code === 0) {
-        defaultLogger.debug(`✅ ${config.operatorType} operator completed successfully`);
+        defaultLogger.debug(`✅ gui agent with config ${configName} completed successfully`);
         resolve(output);
       } else {
-        defaultLogger.error(`❌ ${config.operatorType} operator failed with exit code ${code}`);
+        defaultLogger.error(`❌ gui agent with config ${configName} failed with exit code ${code}`);
         reject(new Error(`Tarko process exited with code ${code}`));
       }
     });
@@ -175,6 +175,7 @@ async function runWithTarkoConfig(config: ConfigData) {
 async function runCli(options: { config?: string }) {
   // Load config if specified, otherwise prompt for selection
   let config: ConfigData;
+  let configName: string;
 
   if (options.config) {
     try {
@@ -183,6 +184,7 @@ async function runCli(options: { config?: string }) {
       defaultLogger.error(`❌ Failed to load config: ${error}`);
       process.exit(1);
     }
+    configName = options.config;
   } else {
     // List available configs and let user choose
     const availableConfigs = listAvailableConfigs();
@@ -197,9 +199,11 @@ async function runCli(options: { config?: string }) {
     })) as string;
 
     config = await loadConfig(selectedConfig);
+    configName = selectedConfig;
   }
+  defaultLogger.debug(`✅ Successfully loaded config: ${JSON.stringify(config, null, 2)}`);
 
-  await runWithTarkoConfig(config);
+  await runWithTarkoConfig(configName);
 }
 
 async function initializeOperator(operatorType: 'browser' | 'computer' | 'android') {

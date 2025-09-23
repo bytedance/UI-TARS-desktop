@@ -95,6 +95,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent {
           const result = await this.operator!.doExecute({
             actions: [input.operator_action],
           });
+          // TODO: why agent does not handle this error?
           if (result.errorMessage) {
             return { status: 'error', message: result.errorMessage };
           }
