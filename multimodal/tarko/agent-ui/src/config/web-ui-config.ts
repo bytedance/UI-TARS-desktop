@@ -67,6 +67,7 @@ export function getLayoutConfig() {
     getWebUIConfig().layout || {
       defaultLayout: 'default',
       enableLayoutSwitchButton: false,
+      enableSidebar: true,
     }
   );
 }
@@ -83,4 +84,11 @@ export function isLayoutSwitchButtonEnabled(): boolean {
  */
 export function getDefaultLayoutMode() {
   return getLayoutConfig().defaultLayout || 'default';
+}
+
+/**
+ * Check if sidebar is enabled
+ */
+export function isSidebarEnabled(): boolean {
+  return getLayoutConfig().enableSidebar ?? true;
 }

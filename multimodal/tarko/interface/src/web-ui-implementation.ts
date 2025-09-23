@@ -61,6 +61,11 @@ export interface LayoutConfig {
    * @defaultValue false
    */
   enableLayoutSwitchButton?: boolean;
+  /**
+   * Enable sidebar display
+   * @defaultValue true
+   */
+  enableSidebar?: boolean;
 }
 
 /**
