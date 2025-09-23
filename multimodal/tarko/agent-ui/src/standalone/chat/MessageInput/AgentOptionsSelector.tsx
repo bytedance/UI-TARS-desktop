@@ -8,7 +8,7 @@ import { useAtomValue } from 'jotai';
 import { isProcessingAtom } from '@/common/state/atoms/ui';
 import { FiPlus, FiCheck, FiChevronRight, FiImage, FiPaperclip, FiLoader, FiX } from 'react-icons/fi';
 import { TbBulb, TbSearch, TbBook, TbSettings, TbBrain, TbPhoto } from 'react-icons/tb';
-import { Dialog, DialogPanel, DialogTitle, Dropdown, DropdownItem, DropdownDivider } from '@tarko/ui';
+import { Modal } from '@tarko/ui';
 
 interface ActiveOption {
   key: string;
@@ -62,8 +62,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
     const [currentValues, setCurrentValues] = useState<Record<string, any> | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [hasLoaded, setHasLoaded] = useState(false);
-    const [isAgentOptionsModalOpen, setIsAgentOptionsModalOpen] = useState(false);
-    const [isFileUploadModalOpen, setIsFileUploadModalOpen] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const updateSessionMetadata = useSetAtom(updateSessionMetadataAction);
     const { isReplayMode } = useReplayMode();
     const isProcessing = useAtomValue(isProcessingAtom);
@@ -263,94 +262,65 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
 
     return (
     <>
-    <Dropdown
-    placement="top-start"
-    trigger={
-      <button
-        type="button"
-      disabled={isLoading || isDisabled}
-        className={`flex items-center justify-center w-8 h-8 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-          isLoading ? 'animate-pulse' : ''
-          }`}
-        title={isLoading ? 'Updating agent options...' : 'Options'}
+    <button
+    type="button"
+    disabled={isLoading || isDisabled}
+    onClick={() => setIsModalOpen(true)}
+    className={`flex items-center justify-center w-8 h-8 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+    isLoading ? 'animate-pulse' : ''
+    }`}
+    title={isLoading ? 'Updating agent options...' : 'Options'}
     >
-        {isLoading ? (
-        <FiLoader size={16} className="animate-spin" />
-        ) : (
-            <FiPlus size={16} />
-              )}
-        </button>
-    }
+    {isLoading ? (
+    <FiLoader size={16} className="animate-spin" />
+    ) : (
+    <FiPlus size={16} />
+    )}
+    </button>
+
+    <Modal
+    isOpen={isModalOpen}
+    onClose={() => setIsModalOpen(false)}
+    title="Agent Options"
+    size="md"
     >
+    <div className="space-y-4">
     {/* File upload option */}
     {showAttachments && (
-        <DropdownItem
-        icon={<TbPhoto className="w-4 h-4" />}
-      onClick={() => setIsFileUploadModalOpen(true)}
-      disabled={isDisabled}
+    <div
+    onClick={onFileUpload}
+    className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
     >
-    <div className="font-medium text-sm">Upload Images</div>
-    </DropdownItem>
+    <div className="text-blue-600 dark:text-blue-400">
+    <TbPhoto className="w-5 h-5" />
+    </div>
+    <div className="flex-1">
+    <div className="font-medium text-sm text-gray-900 dark:text-gray-100">Upload Images</div>
+    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Add images to your conversation</div>
+    </div>
+    </div>
+    )}
+    
+    {/* Separator */}
+    {showAttachments && options.length > 0 && (
+    <div className="border-t border-gray-200 dark:border-gray-700 my-4" />
     )}
     
     {/* Agent options */}
-    {options.length > 0 && (
-    <DropdownItem
-    icon={<TbSettings className="w-4 h-4" />}
-    onClick={() => setIsAgentOptionsModalOpen(true)}
-    disabled={isDisabled}
-    >
-      <div className="font-medium text-sm">Agent Options</div>
-    </DropdownItem>
+    <div className="space-y-3">
+    {options.map(renderOptionItem).flat()}
+    </div>
+    
+    {/* No options message */}
+    {options.length === 0 && (
+    <div className="text-center py-8">
+    <TbSettings className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+    <p className="text-sm text-gray-500 dark:text-gray-400">No agent options available</p>
+    </div>
     )}
-    </Dropdown>
-
-    {/* File Upload Modal */}
-    <Dialog open={isFileUploadModalOpen} onClose={() => setIsFileUploadModalOpen(false)}>
-    <DialogPanel className="max-w-md mx-auto bg-white dark:bg-gray-800 rounded-lg p-6">
-    <DialogTitle className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
-    Upload Images
-    </DialogTitle>
-    <div className="space-y-4">
-      <div
-        onClick={() => {
-        onFileUpload?.();
-      setIsFileUploadModalOpen(false);
-    }}
-      className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
-      >
-          <div className="text-blue-600 dark:text-blue-400">
-              <TbPhoto className="w-6 h-6" />
-              </div>
-                <div className="flex-1">
-                  <div className="font-medium text-sm text-gray-900 dark:text-gray-100">Choose Images</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Select images to add to your conversation</div>
-                </div>
-              </div>
-            </div>
-          </DialogPanel>
-        </Dialog>
-
-        {/* Agent Options Modal */}
-        <Dialog open={isAgentOptionsModalOpen} onClose={() => setIsAgentOptionsModalOpen(false)}>
-          <DialogPanel className="max-w-lg mx-auto bg-white dark:bg-gray-800 rounded-lg p-6">
-            <DialogTitle className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
-              Agent Options
-            </DialogTitle>
-            <div className="space-y-3">
-              {options.map(renderOptionItem).flat()}
-              
-              {/* No options message */}
-              {options.length === 0 && (
-                <div className="text-center py-8">
-                  <TbSettings className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-                  <p className="text-sm text-gray-500 dark:text-gray-400">No agent options available</p>
-                </div>
-              )}
-            </div>
-          </DialogPanel>
-        </Dialog>
-      </>
+    </div>
+    </Modal>
+    </>
     );
   },
 );
