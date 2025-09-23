@@ -23,6 +23,7 @@ interface AgentOptionsSelectorProps {
   sessionMetadata?: SessionItemMetadata;
   className?: string;
   onActiveOptionsChange?: (options: ActiveOption[]) => void;
+  onSchemaChange?: (hasOptions: boolean) => void;
   onToggleOption?: (key: string, currentValue: any) => void;
   showAttachments?: boolean;
   onFileUpload?: () => void;
@@ -128,14 +129,14 @@ const DropdownSubMenu: React.FC<DropdownSubMenuProps> = ({
   return (
     <>
       <button
-      ref={triggerRef}
-      onClick={() => !disabled && setIsOpen(!isOpen)}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      className={`group flex w-full items-center rounded-lg px-2.5 py-1.5 text-left transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800/50 text-gray-900 dark:text-gray-100 ${
-      disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02]'
-      }`}
-      disabled={disabled}
+        ref={triggerRef}
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        className={`group flex w-full items-center rounded-lg px-2.5 py-1.5 text-left transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800/50 text-gray-900 dark:text-gray-100 ${
+          disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02]'
+        }`}
+        disabled={disabled}
       >
         {trigger}
         <FiChevronRight className="ml-1.5 w-3.5 h-3.5 text-gray-400" />
@@ -155,6 +156,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
       sessionMetadata,
       className = '',
       onActiveOptionsChange,
+      onSchemaChange,
       onToggleOption,
       showAttachments = true,
       onFileUpload,
@@ -326,24 +328,36 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
       onActiveOptionsChange(activeOptions);
     }, [schema, currentValues, onActiveOptionsChange]);
 
-    // Don't render if in replay mode or processing
-    if (isReplayMode || isProcessingProp) {
+    // Notify parent about schema availability
+    useEffect(() => {
+      if (onSchemaChange) {
+        const hasOptions = schema?.properties && Object.keys(schema.properties).length > 0;
+        onSchemaChange(!!hasOptions);
+      }
+    }, [schema, onSchemaChange]);
+
+    // Don't render if in replay mode, processing, or no schema available
+    if (
+      isReplayMode ||
+      isProcessingProp ||
+      !schema?.properties ||
+      Object.keys(schema.properties).length === 0
+    ) {
       return null;
     }
 
-    // Always show the button, even if no schema options available
-    const options = schema?.properties
-      ? Object.entries(schema.properties).map(([key, property]) => ({
-          key,
-          property,
-          currentValue: currentValues?.[key] ?? property.default,
-        }))
-      : [];
+    // Only show the button when schema options are available
+    const options = Object.entries(schema.properties).map(([key, property]) => ({
+      key,
+      property,
+      currentValue: currentValues?.[key] ?? property.default,
+    }));
 
     const getOptionIcon = (key: string, property: any) => {
       const lowerKey = key.toLowerCase();
       const lowerTitle = (property.title || '').toLowerCase();
-      if (lowerKey.includes('browser') || lowerTitle.includes('browser')) return <TbBrowser className="w-4 h-4" />;
+      if (lowerKey.includes('browser') || lowerTitle.includes('browser'))
+        return <TbBrowser className="w-4 h-4" />;
       if (lowerKey.includes('search')) return <TbSearch className="w-4 h-4" />;
       if (lowerKey.includes('research')) return <TbBook className="w-4 h-4" />;
       if (lowerKey.includes('foo')) return <TbBulb className="w-4 h-4" />;

@@ -62,6 +62,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const [activeAgentOptions, setActiveAgentOptions] = useState<
     Array<{ key: string; title: string; currentValue: any; displayValue?: string }>
   >([]);
+  const [hasAgentOptions, setHasAgentOptions] = useState(false);
   const agentOptionsSelectorRef = useRef<AgentOptionsSelectorRef | null>(null);
 
   const { activeSessionId, sessionMetadata } = useSession();
@@ -82,7 +83,19 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   // Clear active agent options when session changes
   useEffect(() => {
     setActiveAgentOptions([]);
+    setHasAgentOptions(false);
   }, [sessionId]);
+
+  const handleSchemaChange = useCallback((hasOptions: boolean) => {
+    setHasAgentOptions(hasOptions);
+  }, []);
+
+  const handleActiveOptionsChange = useCallback(
+    (options: Array<{ key: string; title: string; currentValue: any; displayValue?: string }>) => {
+      setActiveAgentOptions(options);
+    },
+    [],
+  );
 
   const handleToggleOption = useCallback((key: string, currentValue: any) => {
     // Use the ref to call the toggle method on AgentOptionsSelector
@@ -450,13 +463,27 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 ref={agentOptionsSelectorRef}
                 activeSessionId={sessionId}
                 sessionMetadata={sessionMetadata}
-                onActiveOptionsChange={setActiveAgentOptions}
+                onActiveOptionsChange={handleActiveOptionsChange}
+                onSchemaChange={handleSchemaChange}
                 onToggleOption={handleToggleOption}
                 showAttachments={showAttachments}
                 onFileUpload={handleFileUpload}
                 isDisabled={isDisabled}
                 isProcessing={isProcessing}
               />
+
+              {/* Fallback image upload button when no agent options */}
+              {!hasAgentOptions && showAttachments && (
+                <button
+                  type="button"
+                  onClick={handleFileUpload}
+                  disabled={isDisabled || isProcessing}
+                  className="p-2 rounded-full text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:text-gray-400 transition-all duration-200 hover:scale-105 active:scale-90"
+                  title="Add Images"
+                >
+                  <FiImage size={18} />
+                </button>
+              )}
 
               {/* Active agent options tags */}
               {activeAgentOptions.length > 0 && (
@@ -466,7 +493,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                     const getOptionIcon = () => {
                       const lowerKey = option.key.toLowerCase();
                       const lowerTitle = option.title.toLowerCase();
-                      if (lowerKey.includes('browser') || lowerTitle.includes('browser')) return <TbBrowser className="w-3 h-3" />;
+                      if (lowerKey.includes('browser') || lowerTitle.includes('browser'))
+                        return <TbBrowser className="w-3 h-3" />;
                       if (lowerKey.includes('foo')) return <TbBulb className="w-3 h-3" />;
                       if (lowerKey.includes('search')) return <TbSearch className="w-3 h-3" />;
                       if (lowerKey.includes('research')) return <TbBook className="w-3 h-3" />;
