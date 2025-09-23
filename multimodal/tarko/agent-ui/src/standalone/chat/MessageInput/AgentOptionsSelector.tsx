@@ -32,7 +32,6 @@ interface AgentOptionsSelectorProps {
 
 export interface AgentOptionsSelectorRef {
   toggleOption: (key: string) => void;
-  clearOption: (key: string) => void;
 }
 
 interface AgentOptionsSchema {
@@ -250,20 +249,6 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
           const nextIndex = (currentIndex + 1) % property.enum.length;
           const nextValue = property.enum[nextIndex];
           handleOptionChange(key, nextValue);
-        }
-      },
-      clearOption: (key: string) => {
-        if (!schema?.properties || !currentValues) return;
-
-        const property = schema.properties[key];
-        if (!property) return;
-
-        if (property.type === 'boolean') {
-          // For boolean, set to false (disabled)
-          handleOptionChange(key, false);
-        } else if (property.type === 'string' && property.enum) {
-          // For enum, set to default value
-          handleOptionChange(key, property.default);
         }
       },
     }));
