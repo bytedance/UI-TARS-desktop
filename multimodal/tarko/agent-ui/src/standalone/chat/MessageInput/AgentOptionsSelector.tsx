@@ -32,6 +32,7 @@ interface AgentOptionsSelectorProps {
 
 export interface AgentOptionsSelectorRef {
   toggleOption: (key: string) => void;
+  removeOption: (key: string) => void;
 }
 
 interface AgentOptionsSchema {
@@ -197,39 +198,74 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
 
     // Handle option change - with loading state for agent recreation
     const handleOptionChange = async (key: string, value: any) => {
-      if (!activeSessionId || isLoading || !currentValues) return;
+    if (!activeSessionId || isLoading || !currentValues) return;
 
-      const newValues = { ...currentValues, [key]: value };
-      setCurrentValues(newValues);
-      setIsLoading(true);
+    const newValues = { ...currentValues, [key]: value };
+    setCurrentValues(newValues);
+    setIsLoading(true);
 
-      try {
-        const response = await apiService.updateSessionRuntimeSettings(activeSessionId, newValues);
-        if (response.success && response.sessionInfo?.metadata) {
-          updateSessionMetadata({
-            sessionId: activeSessionId,
-            metadata: response.sessionInfo.metadata,
-          });
+    try {
+    const response = await apiService.updateSessionRuntimeSettings(activeSessionId, newValues);
+    if (response.success && response.sessionInfo?.metadata) {
+    updateSessionMetadata({
+    sessionId: activeSessionId,
+    metadata: response.sessionInfo.metadata,
+    });
 
-          // Show success feedback briefly
-          console.log('Agent options updated successfully', { key, value });
-        }
-      } catch (error) {
-        console.error('Failed to update runtime settings:', error);
-        // Revert on error
-        setCurrentValues(currentValues);
-      } finally {
-        // Add a small delay to show the loading state
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 500);
-      }
+    // Show success feedback briefly
+    console.log('Agent options updated successfully', { key, value });
+    }
+    } catch (error) {
+    console.error('Failed to update runtime settings:', error);
+    // Revert on error
+    setCurrentValues(currentValues);
+    } finally {
+    // Add a small delay to show the loading state
+    setTimeout(() => {
+    setIsLoading(false);
+    }, 500);
+    }
 
-      // Notify parent
-      if (onToggleOption) {
-        onToggleOption(key, value);
-      }
+    // Notify parent
+    if (onToggleOption) {
+    onToggleOption(key, value);
+    }
     };
+
+  // Handle option removal - clear to undefined to remove from active options
+  const handleOptionRemove = async (key: string) => {
+    if (!activeSessionId || isLoading || !currentValues) return;
+
+    const newValues = { ...currentValues };
+    delete newValues[key]; // Remove the key entirely
+    setCurrentValues(newValues);
+    setIsLoading(true);
+
+    try {
+      const response = await apiService.updateSessionRuntimeSettings(activeSessionId, newValues);
+      if (response.success && response.sessionInfo?.metadata) {
+        updateSessionMetadata({
+          sessionId: activeSessionId,
+          metadata: response.sessionInfo.metadata,
+        });
+
+        console.log('Agent option removed successfully', { key });
+      }
+    } catch (error) {
+      console.error('Failed to remove runtime setting:', error);
+      // Revert on error
+      setCurrentValues(currentValues);
+    } finally {
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 500);
+    }
+
+    // Notify parent
+    if (onToggleOption) {
+      onToggleOption(key, undefined);
+    }
+  };
 
     // Expose toggle method
     useImperativeHandle(ref, () => ({
@@ -251,6 +287,9 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
           handleOptionChange(key, nextValue);
         }
       },
+      removeOption: (key: string) => {
+        handleOptionRemove(key);
+      },
     }));
 
     // Calculate and notify active options
@@ -259,18 +298,22 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
 
       const activeOptions = Object.entries(schema.properties)
         .filter(([key, property]) => {
-          const currentValue = currentValues[key] ?? property.default;
+          // Only show options that are explicitly set (not using default values)
+          const hasExplicitValue = key in currentValues;
+          if (!hasExplicitValue) return false;
+
+          const currentValue = currentValues[key];
           if (property.type === 'boolean') {
             return currentValue === true;
           }
           if (property.type === 'string' && property.enum) {
-            // Always show enum options with their current value
-            return true;
+            // Show enum options only if they differ from default
+            return currentValue !== property.default;
           }
           return false;
         })
         .map(([key, property]) => {
-          const currentValue = currentValues[key] ?? property.default;
+          const currentValue = currentValues[key];
           return {
             key,
             title: property.title || key,
