@@ -13,7 +13,7 @@ import type {
   GlobalDirectoryOptions,
   TenantConfig,
 } from '@tarko/interface';
-import type { StorageProvider } from './storage';
+import type { IDAOFactory } from './dao';
 import type { AgentSession, AgentSessionFactory, AgentSessionPool } from './services/session';
 import type { UserConfigService } from './services/user';
 import { HookRegistrationOptions } from './hooks/types';
@@ -81,7 +81,7 @@ export interface AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   readonly port: number;
   readonly isDebug: boolean;
   readonly isExclusive: boolean;
-  readonly storageProvider: StorageProvider;
+  readonly daoFactory: IDAOFactory;
   readonly appConfig: T;
   readonly versionInfo?: AgentServerVersionInfo;
   readonly directories: Required<GlobalDirectoryOptions>;

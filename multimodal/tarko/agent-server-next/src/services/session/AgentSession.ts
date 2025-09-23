@@ -79,9 +79,9 @@ export class AgentSession {
   private createEventHandler() {
     return async (event: AgentEventStream.Event) => {
       // Save to storage if available and event should be stored
-      if (this.server.storageProvider && shouldStoreEvent(event)) {
+      if (this.server.daoFactory && shouldStoreEvent(event)) {
         try {
-          await this.server.storageProvider.saveEvent(this.id, event);
+          await this.server.daoFactory.saveEvent(this.id, event);
         } catch (error) {
           console.error(`Failed to save event to storage: ${error}`);
         }
@@ -128,8 +128,8 @@ export class AgentSession {
     }
 
        // Get stored events for this session before creating the agent
-    const storedEvents = this.server.storageProvider
-      ? await this.server.storageProvider.getSessionEvents(this.id)
+    const storedEvents = this.server.daoFactory
+      ? await this.server.daoFactory.getSessionEvents(this.id)
       : [];
 
     // Create agent options

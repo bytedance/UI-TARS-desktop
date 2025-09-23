@@ -6,7 +6,7 @@
 import { Connection, Model } from 'mongoose';
 import { SessionInfo } from '@tarko/interface';
 import { ISessionDAO } from '../interfaces/ISessionDAO';
-import { SessionDocument } from '../../storage/MongoDBStorageProvider/MongoDBSchemas';
+import { SessionDocument } from './MongoDBSchemas';
 import { getLogger } from '../../utils/logger';
 import { ILogger } from '../../types';
 

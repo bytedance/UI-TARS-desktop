@@ -4,7 +4,7 @@
  */
 
 import mongoose, { Connection, ConnectOptions } from 'mongoose';
-import { MongoDBAgentStorageImplementation } from '@tarko/interface';
+import { AgentEventStream, MongoDBAgentStorageImplementation, SessionInfo } from '@tarko/interface';
 import { 
   IDAOFactory, 
   IUserConfigDAO, 
@@ -21,7 +21,7 @@ import {
   EventModel,
   UserConfigModel,
   SandboxAllocationModel,
-} from '../../storage/MongoDBStorageProvider/MongoDBSchemas';
+} from './MongoDBSchemas';
 import { getLogger } from '../../utils/logger';
 
 const logger = getLogger('MongoDAOFactory');
@@ -178,6 +178,54 @@ export class MongoDAOFactory implements IDAOFactory {
         this.sandboxAllocationDAO = null;
       }
     }
+  }
+
+  // StorageProvider methods - delegate to DAOs
+  async createSession(metadata: SessionInfo): Promise<SessionInfo> {
+    return this.getSessionDAO().createSession(metadata);
+  }
+
+  async updateSessionInfo(
+    sessionId: string,
+    sessionInfo: Partial<Omit<SessionInfo, 'id'>>,
+  ): Promise<SessionInfo> {
+    return this.getSessionDAO().updateSessionInfo(sessionId, sessionInfo);
+  }
+
+  async getSessionInfo(sessionId: string): Promise<SessionInfo | null> {
+    return this.getSessionDAO().getSessionInfo(sessionId);
+  }
+
+  async getAllSessions(): Promise<SessionInfo[]> {
+    return this.getSessionDAO().getAllSessions();
+  }
+
+  async getUserSessions(userId: string): Promise<SessionInfo[]> {
+    return this.getSessionDAO().getUserSessions(userId);
+  }
+
+  async deleteSession(sessionId: string): Promise<boolean> {
+    // Delete events first, then session
+    await this.getEventDAO().deleteSessionEvents(sessionId);
+    return this.getSessionDAO().deleteSession(sessionId);
+  }
+
+  async saveEvent(sessionId: string, event: AgentEventStream.Event): Promise<void> {
+    // Check if session exists first
+    const sessionExists = await this.getSessionDAO().sessionExists(sessionId);
+    if (!sessionExists) {
+      throw new Error(`Session not found: ${sessionId}`);
+    }
+
+    // Save the event
+    await this.getEventDAO().saveEvent(sessionId, event);
+
+    // Update session timestamp
+    await this.getSessionDAO().updateSessionTimestamp(sessionId);
+  }
+
+  async getSessionEvents(sessionId: string): Promise<AgentEventStream.Event[]> {
+    return this.getEventDAO().getSessionEvents(sessionId);
   }
 
   private ensureInitialized(): void {

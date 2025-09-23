@@ -4,7 +4,7 @@
  */
 
 import { IUserConfigDAO, UserConfig, UserConfigInfo } from '../../dao/interfaces/IUserConfigDAO';
-import { StorageProvider } from '../../storage/types';
+import { IDAOFactory } from '../../dao/interfaces/IDAOFactory';
 
 // Re-export types for backward compatibility
 export type { UserConfig, UserConfigInfo };
@@ -16,8 +16,8 @@ export type { UserConfig, UserConfigInfo };
 export class UserConfigService {
   private userConfigDAO: IUserConfigDAO;
 
-  constructor(storageProvider: StorageProvider) {
-    this.userConfigDAO = storageProvider.getDAOFactory().getUserConfigDAO();
+  constructor(daoFactory: IDAOFactory) {
+    this.userConfigDAO = daoFactory.getUserConfigDAO();
   }
   /**
    * Get user configuration by user ID

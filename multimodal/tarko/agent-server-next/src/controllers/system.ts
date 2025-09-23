@@ -63,13 +63,13 @@ export async function updateSessionModel(c: HonoContext) {
 
   try {
     // Get current session metadata
-    const currentSessionInfo = await server.storageProvider.getSessionInfo(sessionId);
+    const currentSessionInfo = await server.daoFactory.getSessionInfo(sessionId);
     if (!currentSessionInfo) {
       return c.json({ error: 'Session not found' }, 404);
     }
 
     // Update metadata with new model config
-    const updatedSessionInfo = await server.storageProvider.updateSessionInfo(sessionId, {
+    const updatedSessionInfo = await server.daoFactory.updateSessionInfo(sessionId, {
       metadata: {
         ...currentSessionInfo.metadata,
         modelConfig: model,

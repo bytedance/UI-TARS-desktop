@@ -11,6 +11,6 @@ import type { HonoContext } from '../types';
  */
 export function getShareConfig(c: HonoContext) {
   const server = c.get('server');
-  const shareService = new ShareService(server.appConfig, server.storageProvider, server);
+  const shareService = new ShareService(server.appConfig, server.daoFactory, server);
   return c.json(shareService.getShareConfig(), 200);
 }

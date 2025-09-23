@@ -5,7 +5,7 @@
 
 import crypto from 'crypto';
 import { AgentEventStream, isAgentWebUIImplementationType } from '@tarko/interface';
-import { StorageProvider } from '../storage';
+import { IDAOFactory } from '../dao';
 import { AgentUIBuilder } from '@tarko/agent-ui-builder';
 import { SlugGenerator } from '../utils/slug-generator';
 import fs from 'fs';
@@ -27,7 +27,7 @@ import type { AgentServer } from '../types';
 export class ShareService {
   constructor(
     private appConfig: AgentAppConfig,
-    private storageProvider: StorageProvider | null,
+    private daoFactory: IDAOFactory | null,
     private server?: AgentServer,
   ) {}
 
@@ -52,19 +52,19 @@ export class ShareService {
     error?: string;
   }> {
     try {
-      // Verify storage is available
-      if (!this.storageProvider) {
-        throw new Error('Storage not configured, cannot share session');
+      // Verify DAO factory is available
+      if (!this.daoFactory) {
+        throw new Error('DAO factory not configured, cannot share session');
       }
 
       // Get session metadata
-      const metadata = await this.storageProvider.getSessionInfo(sessionId);
+      const metadata = await this.daoFactory.getSessionInfo(sessionId);
       if (!metadata) {
         throw new Error('Session not found');
       }
 
       // Get session events
-      const events = await this.storageProvider.getSessionEvents(sessionId);
+      const events = await this.daoFactory.getSessionEvents(sessionId);
 
       // Filter key frame events, exclude streaming messages
       const keyFrameEvents = events.filter(
@@ -112,9 +112,9 @@ export class ShareService {
         let normalizedSlug = '';
         let originalQuery = '';
 
-        if (this.storageProvider && agent) {
+        if (this.daoFactory && agent) {
           try {
-            const events = await this.storageProvider.getSessionEvents(sessionId);
+            const events = await this.daoFactory.getSessionEvents(sessionId);
             const firstUserMessage = events.find((e) => e.type === 'user_message');
 
             if (firstUserMessage && firstUserMessage.content) {

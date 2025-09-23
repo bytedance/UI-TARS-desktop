@@ -6,7 +6,7 @@
 import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
 import { LogLevel, TenantConfig } from '@tarko/interface';
-import { StorageProvider, createStorageProvider } from './storage';
+import { IDAOFactory, createDAOFactory } from './dao';
 import { resolveAgentImplementation } from './utils/agent-resolver';
 import type {
   AgentServerVersionInfo,
@@ -20,7 +20,7 @@ import type {
 import { AgentSessionPool, AgentSessionFactory } from './services/session';
 import { SandboxScheduler } from './services/sandbox';
 import { UserConfigService } from './services/user';
-import { MongoDBStorageProvider } from './storage/MongoDBStorageProvider';
+import { MongoDAOFactory } from './dao/mongodb/MongoDAOFactory';
 import { TARKO_CONSTANTS, GlobalDirectoryOptions } from '@tarko/interface';
 import {
   createQueryRoutes,
@@ -63,7 +63,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   public readonly port: number;
   public readonly isDebug: boolean;
   public readonly isExclusive: boolean;
-  public readonly storageProvider: StorageProvider;
+  public readonly daoFactory: IDAOFactory;
   public readonly appConfig: T;
   public readonly versionInfo?: AgentServerVersionInfo;
   public readonly directories: Required<GlobalDirectoryOptions>;
@@ -101,8 +101,8 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     // Initialize Hono app
     this.app = new Hono<{ Variables: ContextVariables }>();
 
-    // Initialize storage
-    this.storageProvider = createStorageProvider(appConfig.server?.storage || { type: 'sqlite' });
+    // Initialize DAO factory
+    this.daoFactory = createDAOFactory(appConfig.server?.storage || { type: 'sqlite' });
 
     // Initialize session management
     this.sessionPool = new AgentSessionPool();
@@ -300,19 +300,19 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    * @returns Object containing storage type and path (if applicable)
    */
   getStorageInfo(): { type: string; path?: string } {
-    if (!this.storageProvider) {
+    if (!this.daoFactory) {
       return { type: 'none' };
     }
 
-    if (this.storageProvider.constructor.name === 'SQLiteStorageProvider') {
+    if (this.daoFactory.constructor.name === 'SQLiteDAOFactory') {
       return {
         type: 'sqlite',
-        path: (this.storageProvider as any).dbPath,
+        path: (this.daoFactory as any).dbPath,
       };
     }
 
     return {
-      type: this.storageProvider.constructor.name.replace('StorageProvider', '').toLowerCase(),
+      type: this.daoFactory.constructor.name.replace('DAOFactory', '').toLowerCase(),
     };
   }
 
@@ -327,12 +327,12 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     });
     this.currentAgentResolution = agentResolutionResult;
 
-    // Initialize storage if available
-    if (this.storageProvider) {
+    // Initialize DAO factory if available
+    if (this.daoFactory) {
       try {
-        await this.storageProvider.initialize();
+        await this.daoFactory.initialize();
       } catch (error) {
-        console.error('Failed to initialize storage provider:', error);
+        console.error('Failed to initialize DAO factory:', error);
       }
     }
 
@@ -369,16 +369,16 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     }
 
     try {
-      // Ensure we have MongoDB storage for multi-tenant mode
-      if (!(this.storageProvider instanceof MongoDBStorageProvider)) {
-        throw new Error('Multi-tenant mode requires MongoDB storage provider');
+      // Ensure we have MongoDB DAO factory for multi-tenant mode
+      if (!(this.daoFactory instanceof MongoDAOFactory)) {
+        throw new Error('Multi-tenant mode requires MongoDB DAO factory');
       }
 
-      this.userConfigService = new UserConfigService(this.storageProvider);
+      this.userConfigService = new UserConfigService(this.daoFactory);
 
       this.sandboxScheduler = new SandboxScheduler({
         sandboxConfig: this.appConfig.server.sandbox,
-        storageProvider: this.storageProvider,
+        daoFactory: this.daoFactory,
       });
 
       // Update session factory with sandbox scheduler
@@ -402,9 +402,9 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     Object.values(this.storageUnsubscribes).forEach((unsubscribe) => unsubscribe());
     this.storageUnsubscribes = {};
 
-    // Close storage provider
-    if (this.storageProvider) {
-      await this.storageProvider.close();
+    // Close DAO factory
+    if (this.daoFactory) {
+      await this.daoFactory.close();
     }
 
     // Close server if running

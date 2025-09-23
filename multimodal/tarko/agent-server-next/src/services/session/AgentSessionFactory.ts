@@ -36,7 +36,7 @@ export class AgentSessionFactory {
     this.server = server;
     this.sandboxScheduler = sandboxScheduler;
     this.logger = getLogger('AgentSessionFactory');
-    this.sessionDao = this.server.storageProvider.getDAOFactory().getSessionDAO();
+    this.sessionDao = this.server.daoFactory.getSessionDAO();
   }
 
   /**

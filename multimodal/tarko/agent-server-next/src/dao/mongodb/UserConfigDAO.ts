@@ -5,7 +5,7 @@
 
 import { Connection, Model } from 'mongoose';
 import { IUserConfigDAO, UserConfig, UserConfigInfo } from '../interfaces/IUserConfigDAO';
-import { UserConfigDocument } from '../../storage/MongoDBStorageProvider/MongoDBSchemas';
+import { UserConfigDocument } from './MongoDBSchemas';
 import { getLogger } from '../../utils/logger';
 
 const logger = getLogger('UserConfigDAO');

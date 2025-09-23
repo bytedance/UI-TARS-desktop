@@ -4,7 +4,7 @@
  */
 
 import { SandboxManager } from './SandboxManager';
-import { StorageProvider } from '../../storage/types';
+import { IDAOFactory } from '../../dao/interfaces/IDAOFactory';
 import type { SandboxAllocationStrategy, SandboxAllocation } from './types';
 import { ISandboxAllocationDAO } from '../../dao/interfaces/ISandboxAllocationDAO';
 import { SandboxConfig } from '@tarko/interface';
@@ -13,7 +13,7 @@ import { ILogger } from '../../types';
 
 export interface SandboxSchedulerOptions {
   sandboxConfig: SandboxConfig;
-  storageProvider: StorageProvider;
+  daoFactory: IDAOFactory;
 }
 
 /**
@@ -23,13 +23,13 @@ export interface SandboxSchedulerOptions {
 export class SandboxScheduler {
   private sandboxManager: SandboxManager;
   private sandboxAllocationDAO: ISandboxAllocationDAO;
-  private storageProvider: StorageProvider;
+  private daoFactory: IDAOFactory;
   private logger: ILogger;
 
   constructor(options: SandboxSchedulerOptions) {
     this.sandboxManager = new SandboxManager(options.sandboxConfig);
-    this.storageProvider = options.storageProvider;
-    this.sandboxAllocationDAO = options.storageProvider.getDAOFactory().getSandboxAllocationDAO();
+    this.daoFactory = options.daoFactory;
+    this.sandboxAllocationDAO = options.daoFactory.getSandboxAllocationDAO();
     this.logger = getLogger('SandboxScheduler');
   }
 

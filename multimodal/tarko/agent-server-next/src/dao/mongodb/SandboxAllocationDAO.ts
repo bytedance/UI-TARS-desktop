@@ -5,7 +5,7 @@
 
 import { Connection, Model } from 'mongoose';
 import { ISandboxAllocationDAO, SandboxAllocation } from '../interfaces/ISandboxAllocationDAO';
-import { SandboxAllocationDocument } from '../../storage/MongoDBStorageProvider/MongoDBSchemas';
+import { SandboxAllocationDocument } from './MongoDBSchemas';
 import { getLogger } from '../../utils/logger';
 import { ILogger } from '../../types';
 

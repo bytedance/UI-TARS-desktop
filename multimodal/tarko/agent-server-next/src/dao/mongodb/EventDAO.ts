@@ -6,7 +6,7 @@
 import { Connection, Model } from 'mongoose';
 import { AgentEventStream } from '@tarko/interface';
 import { IEventDAO } from '../interfaces/IEventDAO';
-import { EventDocument } from '../../storage/MongoDBStorageProvider/MongoDBSchemas';
+import { EventDocument } from './MongoDBSchemas';
 import { getLogger } from '../../utils/logger';
 
 const logger = getLogger('EventDAO');
