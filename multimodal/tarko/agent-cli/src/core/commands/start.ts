@@ -17,7 +17,7 @@ import boxen from 'boxen';
 import chalk from 'chalk';
 import gradient from 'gradient-string';
 import { logger, toUserFriendlyPath, ensureServerConfig } from '../../utils';
-import { createPathMatcher } from '../../utils/webui-routing';
+import { createPathMatcher } from '@tarko/shared-utils';
 import { AgentCLIRunInteractiveUICommandOptions } from '../../types';
 
 /**
