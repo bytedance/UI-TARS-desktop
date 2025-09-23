@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { isRegexPattern, createPathMatcher } from '../src/utils/webui-routing';
+import { isRegexPattern, createPathMatcher, extractActualBasename } from '@tarko/shared-utils';
 
 describe('WebUI Routing Functions', () => {
   beforeEach(() => {
@@ -29,6 +29,14 @@ describe('WebUI Routing Functions', () => {
       expect(isRegexPattern('/foo/bar')).toBe(false);
       expect(isRegexPattern('/simple/path')).toBe(false);
       expect(isRegexPattern('')).toBe(false);
+    });
+  });
+
+  describe('extractActualBasename', () => {
+    it('should extract basename from URL for frontend routing', () => {
+      expect(extractActualBasename('/tenant-.+', '/tenant-abc/chat')).toBe('/tenant-abc');
+      expect(extractActualBasename('/[a-zA-Z0-9]+', '/p9fgsSryzeO5JtefS1bMfsa7G11S6pGKY/workspace')).toBe('/p9fgsSryzeO5JtefS1bMfsa7G11S6pGKY');
+      expect(extractActualBasename('/agent-ui', '/agent-ui/settings')).toBe('/agent-ui');
     });
   });
 

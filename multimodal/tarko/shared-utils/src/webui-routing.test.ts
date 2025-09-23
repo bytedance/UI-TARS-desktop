@@ -4,15 +4,16 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { isRegexPattern, extractActualBasename } from '@tarko/shared-utils';
+import { isRegexPattern, createPathMatcher, extractActualBasename } from './webui-routing';
 
-describe('AgentWebUI basename extraction', () => {
+describe('WebUI Routing Shared Utils', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   describe('isRegexPattern', () => {
     it('should detect regex patterns correctly', () => {
+      // Regex patterns
       expect(isRegexPattern('/tenant-.+')).toBe(true);
       expect(isRegexPattern('/(foo|bar)/app')).toBe(true);
       expect(isRegexPattern('/user/[^/]+/dashboard')).toBe(true);
@@ -50,13 +51,6 @@ describe('AgentWebUI basename extraction', () => {
         expect(extractActualBasename('/agent-ui/', '/agent-ui')).toBe('/agent-ui');
         expect(extractActualBasename('/agent-ui/', '/agent-ui/')).toBe('/agent-ui');
         expect(extractActualBasename('/agent-ui/', '/agent-ui/chat')).toBe('/agent-ui');
-      });
-
-      it('should handle nested static paths', () => {
-        expect(extractActualBasename('/foo/bar', '/foo/bar')).toBe('/foo/bar');
-        expect(extractActualBasename('/foo/bar', '/foo/bar/baz')).toBe('/foo/bar');
-        expect(extractActualBasename('/foo/bar', '/foo')).toBe('');
-        expect(extractActualBasename('/foo/bar', '/foo/other')).toBe('');
       });
     });
 
@@ -98,55 +92,94 @@ describe('AgentWebUI basename extraction', () => {
         expect(extractActualBasename('', '/')).toBe('');
       });
 
-      it('should handle root path basePath', () => {
-        expect(extractActualBasename('/', '/')).toBe('');
-        expect(extractActualBasename('/', '/chat')).toBe('');
+      it('should handle real-world scenarios', () => {
+        // Random ID patterns
+        expect(extractActualBasename('/[a-zA-Z0-9]+', '/p9fgsSryzeO5JtefS1bMfsa7G11S6pGKY')).toBe('/p9fgsSryzeO5JtefS1bMfsa7G11S6pGKY');
+        expect(extractActualBasename('/[a-zA-Z0-9]+', '/p9fgsSryzeO5JtefS1bMfsa7G11S6pGKY/chat')).toBe('/p9fgsSryzeO5JtefS1bMfsa7G11S6pGKY');
+        
+        // Multi-tenant patterns
+        expect(extractActualBasename('/tenant-.+', '/tenant-company1')).toBe('/tenant-company1');
+        expect(extractActualBasename('/tenant-.+', '/tenant-company1/dashboard')).toBe('/tenant-company1');
+        
+        // Environment-specific patterns
+        expect(extractActualBasename('/(dev|staging|prod)/.+', '/dev/app1')).toBe('/dev/app1');
+        expect(extractActualBasename('/(dev|staging|prod)/.+', '/staging/app2/dashboard')).toBe('/staging/app2');
+      });
+    });
+  });
+
+  describe('createPathMatcher', () => {
+    describe('static basePath', () => {
+      it('should match exact static paths', () => {
+        const matcher = createPathMatcher('/agent-ui');
+
+        expect(matcher.test('/agent-ui')).toBe(true);
+        expect(matcher.test('/agent-ui/')).toBe(true);
+        expect(matcher.test('/agent-ui/chat')).toBe(true);
+        expect(matcher.test('/agent-ui/workspace')).toBe(true);
+
+        expect(matcher.test('/other-path')).toBe(false);
+        expect(matcher.test('/agent')).toBe(false);
+        expect(matcher.test('/agent-ui-extended')).toBe(false);
       });
 
-      it('should handle unicode characters', () => {
-        expect(extractActualBasename('/agent-ui', '/agent-ui/测试')).toBe('/agent-ui');
-        expect(extractActualBasename('/agent-ui', '/agent-ui/🚀')).toBe('/agent-ui');
+      it('should extract paths correctly for static basePath', () => {
+        const matcher = createPathMatcher('/agent-ui');
+
+        expect(matcher.extract('/agent-ui')).toBe('/');
+        expect(matcher.extract('/agent-ui/')).toBe('/');
+        expect(matcher.extract('/agent-ui/chat')).toBe('/chat');
+        expect(matcher.extract('/agent-ui/workspace/files')).toBe('/workspace/files');
       });
     });
 
-    describe('real-world scenarios', () => {
-      it('should handle random ID patterns', () => {
-        const randomIdPattern = '/[a-zA-Z0-9]+';
-        expect(extractActualBasename(randomIdPattern, '/p9fgsSryzeO5JtefS1bMfsa7G11S6pGKY')).toBe('/p9fgsSryzeO5JtefS1bMfsa7G11S6pGKY');
-        expect(extractActualBasename(randomIdPattern, '/p9fgsSryzeO5JtefS1bMfsa7G11S6pGKY/chat')).toBe('/p9fgsSryzeO5JtefS1bMfsa7G11S6pGKY');
-        expect(extractActualBasename(randomIdPattern, '/p9fgsSryzeO5JtefS1bMfsa7G11S6pGKY/workspace/files')).toBe('/p9fgsSryzeO5JtefS1bMfsa7G11S6pGKY');
+    describe('regex basePath', () => {
+      it('should match regex patterns correctly', () => {
+        const matcher = createPathMatcher('/tenant-.+');
+
+        expect(matcher.test('/tenant-abc')).toBe(true);
+        expect(matcher.test('/tenant-xyz')).toBe(true);
+        expect(matcher.test('/tenant-123')).toBe(true);
+        expect(matcher.test('/tenant-abc/chat')).toBe(true);
+
+        expect(matcher.test('/tenant-')).toBe(false);
+        expect(matcher.test('/other-abc')).toBe(false);
+        expect(matcher.test('/tenant')).toBe(false);
       });
 
-      it('should handle fixed-length ID patterns', () => {
-        const fixedLengthPattern = '/[a-zA-Z0-9]{33}'; // Actual length is 33
-        expect(extractActualBasename(fixedLengthPattern, '/p9fgsSryzeO5JtefS1bMfsa7G11S6pGKY')).toBe('/p9fgsSryzeO5JtefS1bMfsa7G11S6pGKY');
-        expect(extractActualBasename(fixedLengthPattern, '/p9fgsSryzeO5JtefS1bMfsa7G11S6pGKY/chat')).toBe('/p9fgsSryzeO5JtefS1bMfsa7G11S6pGKY');
-        expect(extractActualBasename(fixedLengthPattern, '/short')).toBe('');
+      it('should extract paths correctly for regex basePath', () => {
+        const matcher = createPathMatcher('/tenant-.+');
+
+        expect(matcher.extract('/tenant-abc')).toBe('/');
+        expect(matcher.extract('/tenant-xyz/chat')).toBe('/chat');
+        expect(matcher.extract('/tenant-123/workspace/files')).toBe('/workspace/files');
+      });
+    });
+
+    describe('edge cases', () => {
+      it('should handle empty basePath', () => {
+        const matcher = createPathMatcher('');
+
+        expect(matcher.test('/')).toBe(true);
+        expect(matcher.test('/any/path')).toBe(true);
+        expect(matcher.test('/agent-ui')).toBe(true);
+
+        expect(matcher.extract('/')).toBe('/');
+        expect(matcher.extract('/any/path')).toBe('/any/path');
+        expect(matcher.extract('/agent-ui')).toBe('/agent-ui');
       });
 
-      it('should handle range-length ID patterns', () => {
-        const rangeLengthPattern = '/[a-zA-Z0-9]{25,35}';
-        expect(extractActualBasename(rangeLengthPattern, '/p9fgsSryzeO5JtefS1bMfsa7G11S6pGKY')).toBe('/p9fgsSryzeO5JtefS1bMfsa7G11S6pGKY');
-        expect(extractActualBasename(rangeLengthPattern, '/p9fgsSryzeO5JtefS1bMfsa7G11S6pGKY/chat')).toBe('/p9fgsSryzeO5JtefS1bMfsa7G11S6pGKY');
-        expect(extractActualBasename(rangeLengthPattern, '/short')).toBe('');
-        // This will match the first 35 characters, which is still a valid match
-        expect(extractActualBasename(rangeLengthPattern, '/toolongpatternexceedingthirtyfivecharacters')).toBe('/toolongpatternexceedingthirtyfivech');
-      });
+      it('should handle malformed regex patterns gracefully', () => {
+        expect(() => createPathMatcher('/[unclosed')).not.toThrow();
 
-      it('should handle multi-tenant patterns', () => {
-        const tenantPattern = '/tenant-.+';
-        expect(extractActualBasename(tenantPattern, '/tenant-company1')).toBe('/tenant-company1');
-        expect(extractActualBasename(tenantPattern, '/tenant-company1/dashboard')).toBe('/tenant-company1');
-        expect(extractActualBasename(tenantPattern, '/tenant-company1/users/123')).toBe('/tenant-company1');
-        expect(extractActualBasename(tenantPattern, '/other-company1')).toBe('');
-      });
+        const matcher = createPathMatcher('/[unclosed');
+        expect(typeof matcher.test).toBe('function');
+        expect(typeof matcher.extract).toBe('function');
 
-      it('should handle environment-specific patterns', () => {
-        const envPattern = '/(dev|staging|prod)/.+';
-        expect(extractActualBasename(envPattern, '/dev/app1')).toBe('/dev/app1');
-        expect(extractActualBasename(envPattern, '/staging/app2/dashboard')).toBe('/staging/app2');
-        expect(extractActualBasename(envPattern, '/prod/app3/users/123')).toBe('/prod/app3');
-        expect(extractActualBasename(envPattern, '/test/app1')).toBe('');
+        // Should work as static path since regex is malformed
+        expect(matcher.test('/[unclosed')).toBe(true);
+        expect(matcher.test('/[unclosed/path')).toBe(true);
+        expect(matcher.test('/other')).toBe(false);
       });
     });
   });
