@@ -119,7 +119,7 @@ function isRegexPattern(path: string): boolean {
  */
 function createPathMatcher(basePath: string) {
   if (!basePath) return { test: () => true, extract: (path: string) => path };
-  
+
   if (isRegexPattern(basePath)) {
     const regex = new RegExp(`^${basePath}`);
     return {
@@ -127,13 +127,14 @@ function createPathMatcher(basePath: string) {
       extract: (path: string) => {
         const match = path.match(regex);
         return match ? (path === match[0] ? '/' : path.substring(match[0].length) || '/') : path;
-      }
+      },
     };
   } else {
     const normalized = basePath.replace(/\/$/, '');
     return {
       test: (path: string) => path === normalized || path.startsWith(normalized + '/'),
-      extract: (path: string) => path === normalized ? '/' : path.substring(normalized.length) || '/'
+      extract: (path: string) =>
+        path === normalized ? '/' : path.substring(normalized.length) || '/',
     };
   }
 }
@@ -165,8 +166,12 @@ function setupUI(
     }
 
     const extractedPath = pathMatcher.extract(req.path);
-    
-    if (!extractedPath.endsWith('.html') && extractedPath !== '/' && !extractedPath.match(/^\/[^.]*$/)) {
+
+    if (
+      !extractedPath.endsWith('.html') &&
+      extractedPath !== '/' &&
+      !extractedPath.match(/^\/[^.]*$/)
+    ) {
       return next();
     }
 
@@ -190,7 +195,7 @@ function setupUI(
     }
 
     const extractedPath = pathMatcher.extract(req.path);
-    
+
     // Handle root path
     if (extractedPath === '/') {
       return injectBaseURL(req, res, next);
@@ -220,7 +225,11 @@ function setupUI(
     }
 
     // Fallback for SPA routes
-    if (req.method === 'GET' && !extractedPath.includes('.') && !extractedPath.startsWith('/api/')) {
+    if (
+      req.method === 'GET' &&
+      !extractedPath.includes('.') &&
+      !extractedPath.startsWith('/api/')
+    ) {
       return injectBaseURL(req, res, next);
     }
 

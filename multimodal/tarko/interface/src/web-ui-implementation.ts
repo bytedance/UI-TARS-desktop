@@ -167,10 +167,10 @@ export interface BaseAgentWebUIImplementation {
   /**
    * Base path for routing deployment
    * Supports both static paths and regex patterns
-   * 
+   *
    * @example
    * basePath: "/agent-ui"           // Static path
-   * basePath: "/tenant-.+"         // Regex pattern  
+   * basePath: "/tenant-.+"         // Regex pattern
    * basePath: "/(foo|bar)/app"     // Regex with groups
    */
   basePath?: string;
