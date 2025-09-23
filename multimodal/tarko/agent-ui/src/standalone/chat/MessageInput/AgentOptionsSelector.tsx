@@ -452,7 +452,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
             onClick={onFileUpload}
             disabled={isDisabled}
           >
-            <div className="font-medium text-sm">Upload Images</div>
+            <div className="font-medium text-sm">Add Images</div>
           </DropdownItem>
         )}
 
