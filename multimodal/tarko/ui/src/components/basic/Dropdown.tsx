@@ -49,7 +49,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
 
       {/* Menu */}
       <div
-        className={`fixed z-50 w-56 rounded-xl bg-white dark:bg-gray-900 shadow-lg shadow-black/5 dark:shadow-black/40 border border-gray-300/80 dark:border-gray-600/80 overflow-hidden backdrop-blur-sm ${menuClassName}`}
+        className={`fixed z-50 w-56 rounded-2xl bg-white dark:bg-gray-900 shadow-lg shadow-black/5 dark:shadow-black/40 border border-gray-300/80 dark:border-gray-600/80 overflow-hidden backdrop-blur-sm ${menuClassName}`}
         style={{
           top: `${position.top}px`,
           left: `${position.left}px`,
@@ -84,7 +84,7 @@ export const DropdownItem: React.FC<DropdownItemProps> = ({
   return (
     <button
       onClick={onClick}
-      className={`group flex w-full items-center rounded-xl px-3 py-2.5 text-left transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800/50 text-gray-900 dark:text-gray-100 ${
+      className={`group flex w-full items-center rounded-xl px-3 py-2 text-left transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800/50 text-gray-900 dark:text-gray-100 ${
         disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02]'
       } ${className}`}
       disabled={disabled}
