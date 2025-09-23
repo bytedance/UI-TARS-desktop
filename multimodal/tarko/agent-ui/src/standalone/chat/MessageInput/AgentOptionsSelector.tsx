@@ -261,132 +261,134 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
     };
 
     return (
-      <div className="relative">
-        <Dropdown
-          placement="top-start"
-          trigger={
-            <button
-              type="button"
-              disabled={isLoading || isDisabled}
-              className={`flex items-center justify-center w-8 h-8 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                isLoading ? 'animate-pulse' : ''
-              }`}
-              title={isLoading ? 'Updating agent options...' : 'Options'}
-            >
-              {isLoading ? (
-                <FiLoader size={16} className="animate-spin" />
-              ) : (
-                <FiPlus size={16} />
-              )}
-            </button>
-          }
-        >
-          {/* File upload option */}
-          {showAttachments && (
-            <DropdownItem
-              icon={<TbPhoto className="w-4 h-4" />}
-              onClick={onFileUpload}
-              disabled={isDisabled}
-            >
-              <div className="font-medium text-sm">添加照片和文件</div>
-            </DropdownItem>
-          )}
-          
-          {/* Individual boolean agent options in dropdown */}
-          {options
-            .filter(config => config.property.type === 'boolean')
-            .map(config => {
-              const { key, property, currentValue } = config;
-              
-              return (
-                <DropdownItem
-                  key={key}
-                  icon={getOptionIcon(key, property)}
-                  onClick={() => handleOptionChange(key, !currentValue)}
-                  className={`${currentValue ? 'bg-blue-50 dark:bg-blue-900/20' : ''} ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
+    <>
+    <Dropdown
+    placement="top-start"
+    trigger={
+    <button
+    type="button"
+    disabled={isLoading || isDisabled}
+    className={`flex items-center justify-center w-8 h-8 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+    isLoading ? 'animate-pulse' : ''
+    }`}
+    title={isLoading ? 'Updating agent options...' : 'Options'}
+    >
+    {isLoading ? (
+    <FiLoader size={16} className="animate-spin" />
+    ) : (
+    <FiPlus size={16} />
+    )}
+    </button>
+    }
+    >
+    {/* File upload option */}
+    {showAttachments && (
+    <DropdownItem
+    icon={<TbPhoto className="w-4 h-4" />}
+    onClick={onFileUpload}
+    disabled={isDisabled}
+    >
+    <div className="font-medium text-sm">添加照片和文件</div>
+    </DropdownItem>
+    )}
+    
+    {/* Individual agent options in dropdown */}
+    {options.map(config => {
+    const { key, property, currentValue } = config;
+    
+    if (property.type === 'boolean') {
+    return (
+        <DropdownItem
+        key={key}
+          icon={getOptionIcon(key, property)}
+            onClick={() => handleOptionChange(key, !currentValue)}
+              className={`${currentValue ? 'bg-blue-50 dark:bg-blue-900/20' : ''} ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
                 >
-                  <div className="flex items-center justify-between w-full">
-                    <div className="font-medium text-sm">{property.title || key}</div>
-                    {isLoading && <FiLoader className="w-3 h-3 animate-spin text-blue-600" />}
-                    {currentValue && !isLoading && <FiCheck className="w-4 h-4 text-blue-600" />}
-                  </div>
-                </DropdownItem>
-              );
-            })}
-          
-          {/* More options that opens modal - only if we have enum options */}
-          {options.some(config => config.property.type === 'string' && config.property.enum) && (
-            <>
-              <DropdownDivider />
-              <DropdownItem
-                icon={<TbSettings className="w-4 h-4" />}
-                onClick={() => setIsAgentOptionsModalOpen(true)}
-                disabled={isDisabled}
-              >
-                <div className="flex items-center justify-between w-full">
-                  <div className="font-medium text-sm">更多</div>
-                  <FiChevronRight className="w-4 h-4" />
-                </div>
+              <div className="flex items-center justify-between w-full">
+                <div className="font-medium text-sm">{property.title || key}</div>
+              {isLoading && <FiLoader className="w-3 h-3 animate-spin text-blue-600" />}
+            {currentValue && !isLoading && <FiCheck className="w-4 h-4 text-blue-600" />}
+        </div>
+        </DropdownItem>
+      );
+    }
+    
+    return null;
+    }).filter(Boolean)}
+    
+    {/* More options that opens modal */}
+    {options.some(config => config.property.type === 'string' && config.property.enum) && (
+    <>
+    <DropdownDivider />
+    <DropdownItem
+    icon={<TbSettings className="w-4 h-4" />}
+    onClick={() => setIsAgentOptionsModalOpen(true)}
+    disabled={isDisabled}
+    >
+      <div className="flex items-center justify-between w-full">
+          <div className="font-medium text-sm">更多</div>
+            <FiChevronRight className="w-4 h-4" />
+            </div>
               </DropdownItem>
-            </>
-          )}
-        </Dropdown>
+        </>
+      )}
+    </Dropdown>
 
-        {/* Agent Options Modal - only for enum options */}
-        {isAgentOptionsModalOpen && (
-          <>
-            {/* Backdrop */}
-            <div 
-              className="fixed inset-0 bg-black bg-opacity-50 z-50"
-              onClick={() => setIsAgentOptionsModalOpen(false)}
-            />
-            
-            {/* Modal */}
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-              <div 
-                className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[80vh] overflow-y-auto"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                    Agent Options
-                  </h2>
-                  <button
-                    onClick={() => setIsAgentOptionsModalOpen(false)}
-                    className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                  >
-                    <FiX className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                  </button>
-                </div>
-                
-                {/* Content */}
-                <div className="p-4 space-y-3">
-                  {options
-                    .filter(config => config.property.type === 'string' && config.property.enum)
-                    .map(config => {
-                      const { key, property, currentValue } = config;
-                      
-                      return property.enum?.map((option: any) => {
-                        const isSelected = currentValue === option;
-                        const optionKey = `${key}-${option}`;
-                        
-                        return (
-                          <div
-                            key={optionKey}
-                            onClick={() => {
-                              handleOptionChange(key, option);
-                              setIsAgentOptionsModalOpen(false);
-                            }}
-                            className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all hover:bg-gray-50 dark:hover:bg-gray-800 ${
-                              isSelected ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700' : 'border-gray-200 dark:border-gray-700'
-                            } ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="text-blue-600 dark:text-blue-400">
-                                {getOptionIcon(key, property)}
-                              </div>
-                              <div className="flex-1">
+    {/* Agent Options Modal - only for enum options */}
+    {isAgentOptionsModalOpen && (
+    <>
+    {/* Backdrop */}
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 z-50"
+      onClick={() => setIsAgentOptionsModalOpen(false)}
+    />
+    
+    {/* Modal */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div 
+    className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[80vh] overflow-y-auto"
+    onClick={(e) => e.stopPropagation()}
+    >
+    {/* Header */}
+    <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+    Agent Options
+    </h2>
+    <button
+    onClick={() => setIsAgentOptionsModalOpen(false)}
+    className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+    >
+    <FiX className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+    </button>
+    </div>
+    
+    {/* Content */}
+    <div className="p-4 space-y-3">
+    {options
+    .filter(config => config.property.type === 'string' && config.property.enum)
+    .map(config => {
+    const { key, property, currentValue } = config;
+    
+    return property.enum?.map((option: any) => {
+    const isSelected = currentValue === option;
+    const optionKey = `${key}-${option}`;
+    
+      return (
+          <div
+              key={optionKey}
+                onClick={() => {
+                  handleOptionChange(key, option);
+                    setIsAgentOptionsModalOpen(false);
+                  }}
+                  className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all hover:bg-gray-50 dark:hover:bg-gray-800 ${
+                  isSelected ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700' : 'border-gray-200 dark:border-gray-700'
+              } ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
+            >
+                <div className="flex items-center gap-3">
+                    <div className="text-blue-600 dark:text-blue-400">
+                        {getOptionIcon(key, property)}
+                        </div>
+                          <div className="flex-1">
                                 <div className="font-medium text-sm text-gray-900 dark:text-gray-100">{option}</div>
                               </div>
                             </div>
@@ -412,7 +414,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
             </div>
           </>
         )}
-      </div>
+      </>
     );
   },
 );
