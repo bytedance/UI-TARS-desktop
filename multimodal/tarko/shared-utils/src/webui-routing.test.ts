@@ -33,7 +33,7 @@ describe('WebUI Routing Shared Utils', () => {
   });
 
   describe('extractActualBasename', () => {
-    describe('static basePath', () => {
+    describe('static base', () => {
       it('should extract static basename correctly', () => {
         expect(extractActualBasename('/agent-ui', '/agent-ui')).toBe('/agent-ui');
         expect(extractActualBasename('/agent-ui', '/agent-ui/')).toBe('/agent-ui');
@@ -47,14 +47,14 @@ describe('WebUI Routing Shared Utils', () => {
         expect(extractActualBasename('/agent-ui', '/agent-ui-extended')).toBe('');
       });
 
-      it('should handle basePath with trailing slash', () => {
+      it('should handle base with trailing slash', () => {
         expect(extractActualBasename('/agent-ui/', '/agent-ui')).toBe('/agent-ui');
         expect(extractActualBasename('/agent-ui/', '/agent-ui/')).toBe('/agent-ui');
         expect(extractActualBasename('/agent-ui/', '/agent-ui/chat')).toBe('/agent-ui');
       });
     });
 
-    describe('regex basePath', () => {
+    describe('regex base', () => {
       it('should extract regex basename correctly', () => {
         expect(extractActualBasename('/tenant-.+', '/tenant-abc')).toBe('/tenant-abc');
         expect(extractActualBasename('/tenant-.+', '/tenant-xyz/chat')).toBe('/tenant-xyz');
@@ -87,12 +87,12 @@ describe('WebUI Routing Shared Utils', () => {
     });
 
     describe('edge cases', () => {
-      it('should handle empty basePath', () => {
+      it('should handle empty base', () => {
         expect(extractActualBasename('', '/any/path')).toBe('');
         expect(extractActualBasename('', '/')).toBe('');
       });
 
-      it('should handle undefined basePath', () => {
+      it('should handle undefined base', () => {
         expect(extractActualBasename(undefined, '/any/path')).toBe('');
         expect(extractActualBasename(undefined, '/')).toBe('');
       });
@@ -114,7 +114,7 @@ describe('WebUI Routing Shared Utils', () => {
   });
 
   describe('createPathMatcher', () => {
-    describe('static basePath', () => {
+    describe('static base', () => {
       it('should match exact static paths', () => {
         const matcher = createPathMatcher('/agent-ui');
 
@@ -128,7 +128,7 @@ describe('WebUI Routing Shared Utils', () => {
         expect(matcher.test('/agent-ui-extended')).toBe(false);
       });
 
-      it('should extract paths correctly for static basePath', () => {
+      it('should extract paths correctly for static base', () => {
         const matcher = createPathMatcher('/agent-ui');
 
         expect(matcher.extract('/agent-ui')).toBe('/');
@@ -138,7 +138,7 @@ describe('WebUI Routing Shared Utils', () => {
       });
     });
 
-    describe('regex basePath', () => {
+    describe('regex base', () => {
       it('should match regex patterns correctly', () => {
         const matcher = createPathMatcher('/tenant-.+');
 
@@ -152,7 +152,7 @@ describe('WebUI Routing Shared Utils', () => {
         expect(matcher.test('/tenant')).toBe(false);
       });
 
-      it('should extract paths correctly for regex basePath', () => {
+      it('should extract paths correctly for regex base', () => {
         const matcher = createPathMatcher('/tenant-.+');
 
         expect(matcher.extract('/tenant-abc')).toBe('/');
@@ -162,7 +162,7 @@ describe('WebUI Routing Shared Utils', () => {
     });
 
     describe('edge cases', () => {
-      it('should handle empty basePath', () => {
+      it('should handle empty base', () => {
         const matcher = createPathMatcher('');
 
         expect(matcher.test('/')).toBe(true);
@@ -174,7 +174,7 @@ describe('WebUI Routing Shared Utils', () => {
         expect(matcher.extract('/agent-ui')).toBe('/agent-ui');
       });
 
-      it('should handle undefined basePath', () => {
+      it('should handle undefined base', () => {
         const matcher = createPathMatcher(undefined);
 
         expect(matcher.test('/')).toBe(true);

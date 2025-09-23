@@ -1,27 +1,27 @@
-// 快速验证 basePath 功能
+// 快速验证 base 功能
 const { createPathMatcher, extractActualBasename, isRegexPattern } = require('./multimodal/tarko/shared-utils/dist/webui-routing.js');
 
-console.log('🧪 Quick BasePath Function Test\n');
+console.log('🧪 Quick Base Function Test\n');
 
 // 测试用例
 const testCases = [
-  // Static basePath tests
-  { basePath: '/foo', testPath: '/foo', expected: { matches: true, extracted: '/' } },
-  { basePath: '/foo', testPath: '/foo/chat', expected: { matches: true, extracted: '/chat' } },
-  { basePath: '/foo', testPath: '/bar', expected: { matches: false, extracted: '/bar' } },
+  // Static base tests
+  { base: '/foo', testPath: '/foo', expected: { matches: true, extracted: '/' } },
+  { base: '/foo', testPath: '/foo/chat', expected: { matches: true, extracted: '/chat' } },
+  { base: '/foo', testPath: '/bar', expected: { matches: false, extracted: '/bar' } },
   
-  // Regex basePath tests  
-  { basePath: '/tenant-.+', testPath: '/tenant-abc', expected: { matches: true, extracted: '/' } },
-  { basePath: '/tenant-.+', testPath: '/tenant-xyz/dashboard', expected: { matches: true, extracted: '/dashboard' } },
-  { basePath: '/tenant-.+', testPath: '/other-abc', expected: { matches: false, extracted: '/other-abc' } },
+  // Regex base tests  
+  { base: '/tenant-.+', testPath: '/tenant-abc', expected: { matches: true, extracted: '/' } },
+  { base: '/tenant-.+', testPath: '/tenant-xyz/dashboard', expected: { matches: true, extracted: '/dashboard' } },
+  { base: '/tenant-.+', testPath: '/other-abc', expected: { matches: false, extracted: '/other-abc' } },
   
   // Complex regex tests
-  { basePath: '/(dev|staging|prod)/app', testPath: '/dev/app', expected: { matches: true, extracted: '/' } },
-  { basePath: '/(dev|staging|prod)/app', testPath: '/staging/app/settings', expected: { matches: true, extracted: '/settings' } },
-  { basePath: '/(dev|staging|prod)/app', testPath: '/test/app', expected: { matches: false, extracted: '/test/app' } },
+  { base: '/(dev|staging|prod)/app', testPath: '/dev/app', expected: { matches: true, extracted: '/' } },
+  { base: '/(dev|staging|prod)/app', testPath: '/staging/app/settings', expected: { matches: true, extracted: '/settings' } },
+  { base: '/(dev|staging|prod)/app', testPath: '/test/app', expected: { matches: false, extracted: '/test/app' } },
   
-  // Undefined basePath tests
-  { basePath: undefined, testPath: '/any/path', expected: { matches: true, extracted: '/any/path' } },
+  // Undefined base tests
+  { base: undefined, testPath: '/any/path', expected: { matches: true, extracted: '/any/path' } },
 ];
 
 console.log('📋 Running test cases...\n');
@@ -30,17 +30,17 @@ let passed = 0;
 let failed = 0;
 
 testCases.forEach((testCase, index) => {
-  const { basePath, testPath, expected } = testCase;
+  const { base, testPath, expected } = testCase;
   
-  console.log(`Test ${index + 1}: ${basePath || 'undefined'} -> ${testPath}`);
+  console.log(`Test ${index + 1}: ${base || 'undefined'} -> ${testPath}`);
   
   // Test createPathMatcher
-  const matcher = createPathMatcher(basePath);
+  const matcher = createPathMatcher(base);
   const matches = matcher.test(testPath);
   const extracted = matcher.extract(testPath);
   
   // Test extractActualBasename
-  const basename = extractActualBasename(basePath, testPath);
+  const basename = extractActualBasename(base, testPath);
   
   // Check results
   const matchesOk = matches === expected.matches;
@@ -56,8 +56,8 @@ testCases.forEach((testCase, index) => {
   }
   
   // Show regex detection
-  if (basePath) {
-    console.log(`  🔍 isRegexPattern: ${isRegexPattern(basePath)}`);
+  if (base) {
+    console.log(`  🔍 isRegexPattern: ${isRegexPattern(base)}`);
   }
   
   console.log('');
@@ -66,13 +66,13 @@ testCases.forEach((testCase, index) => {
 console.log(`📊 Results: ${passed} passed, ${failed} failed`);
 
 if (failed === 0) {
-  console.log('🎉 All tests passed! BasePath functionality is working correctly.');
+  console.log('🎉 All tests passed! Base functionality is working correctly.');
 } else {
   console.log('⚠️  Some tests failed. Please check the implementation.');
 }
 
 console.log('\n🌐 Real-world examples:');
-console.log('Static deployment:     /agent-ui/chat -> basePath: /agent-ui');
-console.log('Multi-tenant:          /tenant-company1/dashboard -> basePath: /tenant-.+');
-console.log('Environment-specific:  /dev/app/settings -> basePath: /(dev|staging|prod)/app');
-console.log('Random ID:             /abc123xyz/workspace -> basePath: /[a-zA-Z0-9]+');
+console.log('Static deployment:     /agent-ui/chat -> base: /agent-ui');
+console.log('Multi-tenant:          /tenant-company1/dashboard -> base: /tenant-.+');
+console.log('Environment-specific:  /dev/app/settings -> base: /(dev|staging|prod)/app');
+console.log('Random ID:             /abc123xyz/workspace -> base: /[a-zA-Z0-9]+');

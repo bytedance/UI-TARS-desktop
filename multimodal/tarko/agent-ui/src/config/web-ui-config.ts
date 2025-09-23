@@ -23,8 +23,8 @@ export function getWebUIRouteBase(): string {
   // Extract actual basename from current URL using shared utility
   const currentPath = window.location.pathname;
   const config = getWebUIConfig();
-  const actualBasename = extractActualBasename(config.basePath, currentPath);
-  console.log('[Agent UI] basePath config:', config.basePath);
+  const actualBasename = extractActualBasename(config.base, currentPath);
+  console.log('[Agent UI] base config:', config.base);
   console.log('[Agent UI] current path:', currentPath);
   console.log('[Agent UI] extracted basename:', actualBasename);
   return actualBasename;

@@ -121,7 +121,7 @@ function setupUI(
     logger.debug(`Using static files from: ${staticPath}`);
   }
 
-  const pathMatcher = createPathMatcher(webui.basePath);
+  const pathMatcher = createPathMatcher(webui.base);
 
   // Middleware to inject baseURL for HTML requests
   const injectBaseURL = (
@@ -129,7 +129,7 @@ function setupUI(
     res: express.Response,
     next: express.NextFunction,
   ) => {
-    // Check if request path matches basePath pattern
+    // Check if request path matches base pattern
     if (!pathMatcher.test(req.path)) {
       return next();
     }
@@ -157,7 +157,7 @@ function setupUI(
     res.send(htmlContent);
   };
 
-  // Handle root path and client-side routes with basePath support
+  // Handle root path and client-side routes with base support
   app.get('*', (req, res, next) => {
     if (!pathMatcher.test(req.path)) {
       return next();

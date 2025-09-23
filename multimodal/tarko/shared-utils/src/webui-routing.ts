@@ -11,27 +11,27 @@ export function isRegexPattern(path: string): boolean {
 }
 
 /**
- * Extract the actual basename from current URL using the configured basePath pattern
+ * Extract the actual basename from current URL using the configured base pattern
  * Used by React Router to compute dynamic basename
  */
-export function extractActualBasename(basePath: string | undefined, currentPath: string): string {
-  if (!basePath) return '';
+export function extractActualBasename(base: string | undefined, currentPath: string): string {
+  if (!base) return '';
   
-  if (isRegexPattern(basePath)) {
+  if (isRegexPattern(base)) {
     try {
       // Replace .+ with [^/]+ (non-greedy match)
-      const extractPattern = basePath.replace(/\.\+/g, '[^/]+');
+      const extractPattern = base.replace(/\.\+/g, '[^/]+');
       const extractRegex = new RegExp(`^${extractPattern}`);
       const match = currentPath.match(extractRegex);
       
       return match ? match[0] : '';
     } catch (error) {
-      console.warn('Invalid regex pattern in basePath:', basePath, error);
+      console.warn('Invalid regex pattern in base:', base, error);
       return '';
     }
   } else {
     // Static path
-    const normalized = basePath.replace(/\/$/, '');
+    const normalized = base.replace(/\/$/, '');
     if (currentPath === normalized || currentPath.startsWith(normalized + '/')) {
       return normalized;
     }
@@ -43,25 +43,25 @@ export function extractActualBasename(basePath: string | undefined, currentPath:
  * Create a path matcher for both static paths and regex patterns
  * Used by server-side routing logic
  */
-export function createPathMatcher(basePath: string | undefined) {
-  if (!basePath) return { test: () => true, extract: (path: string) => path };
+export function createPathMatcher(base: string | undefined) {
+  if (!base) return { test: () => true, extract: (path: string) => path };
 
-  if (isRegexPattern(basePath)) {
+  if (isRegexPattern(base)) {
     let regex: RegExp;
     let extractRegex: RegExp;
     try {
       // For regex patterns, we create two regexes:
       // 1. One for testing if the path matches
       // 2. One for extracting the base part (non-greedy)
-      regex = new RegExp(`^${basePath}`);
+      regex = new RegExp(`^${base}`);
 
       // Create a non-greedy version for extraction
       // Replace .+ with [^/]+ to match up to the first slash
-      const extractPattern = basePath.replace(/\.\+/g, '[^/]+');
+      const extractPattern = base.replace(/\.\+/g, '[^/]+');
       extractRegex = new RegExp(`^${extractPattern}`);
     } catch (error) {
       // If regex is malformed, treat as static path
-      const normalized = basePath.replace(/\/$/, '');
+      const normalized = base.replace(/\/$/, '');
       return {
         test: (path: string) => path === normalized || path.startsWith(normalized + '/'),
         extract: (path: string) => {
@@ -85,7 +85,7 @@ export function createPathMatcher(basePath: string | undefined) {
       },
     };
   } else {
-    const normalized = basePath.replace(/\/$/, '');
+    const normalized = base.replace(/\/$/, '');
     return {
       test: (path: string) => path === normalized || path.startsWith(normalized + '/'),
       extract: (path: string) => {
