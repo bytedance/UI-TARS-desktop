@@ -79,7 +79,7 @@ export class AgentSession {
   private createEventHandler() {
     return async (event: AgentEventStream.Event) => {
       // Save to storage if available and event should be stored
-      if (this.server.daoFactory && shouldStoreEvent(event)) {
+      if (shouldStoreEvent(event)) {
         try {
           await this.server.daoFactory.saveEvent(this.id, event);
         } catch (error) {

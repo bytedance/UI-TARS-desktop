@@ -16,10 +16,6 @@ export async function getAllSessions(c: HonoContext) {
   try {
     const server = c.get('server');
 
-    if (!server.daoFactory) {
-      throw new Error('no DAO factory!');
-    }
-
     let sessions: SessionInfo[];
 
     // In multi-tenant mode, only get user's sessions
@@ -88,7 +84,7 @@ export async function getSessionDetails(c: HonoContext) {
       return c.json({ error: 'Session not found' }, 404);
     }
 
-    if (server.daoFactory && sessionId) {
+    if (sessionId) {
       const sessionInfo = await server.daoFactory.getSessionInfo(sessionId);
 
       sessionInfo && filterSessionModel([sessionInfo]);
@@ -124,10 +120,6 @@ export async function getSessionEvents(c: HonoContext) {
       return c.json({ error: 'Session ID is required' }, 400);
     }
 
-    if (!server.daoFactory) {
-      return c.json({ error: 'DAO factory not configured' }, 503);
-    }
-
     const events = await server.daoFactory.getSessionEvents(sessionId);
 
     return c.json({ events }, 200);
@@ -147,10 +139,6 @@ export async function getLatestSessionEvents(c: HonoContext) {
 
     if (!sessionId) {
       return c.json({ error: 'Session ID is required' }, 400);
-    }
-
-    if (!server.daoFactory) {
-      return c.json({ error: 'DAO factory not configured' }, 503);
     }
 
     const events = await server.daoFactory.getSessionEvents(sessionId);
@@ -209,11 +197,7 @@ export async function updateSession(c: HonoContext) {
     if (!session) {
       return c.json({ error: 'Session not found' }, 404);
     }
-
-    if (!server.daoFactory) {
-      return c.json({ error: 'DAO factory not configured' }, 503);
-    }
-
+    
     const sessionInfo = await server.daoFactory.getSessionInfo(sessionId);
     if (!sessionInfo) {
       return c.json({ error: 'Session not found' }, 404);
@@ -258,14 +242,7 @@ export async function deleteSession(c: HonoContext) {
       delete server.storageUnsubscribes[sessionId];
     }
 
-    // Delete from storage if available
-    if (server.daoFactory) {
-      try {
-        await server.daoFactory.deleteSession(sessionId);
-      } catch (error) {
-        console.warn(`Failed to delete session ${sessionId} from storage:`, error);
-      }
-    }
+    await server.daoFactory.deleteSession(sessionId);   
 
     return c.json({ success: true, message: 'Session deleted successfully' }, 200);
   } catch (error) {

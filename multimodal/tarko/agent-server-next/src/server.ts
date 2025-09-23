@@ -327,14 +327,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     });
     this.currentAgentResolution = agentResolutionResult;
 
-    // Initialize DAO factory if available
-    if (this.daoFactory) {
-      try {
-        await this.daoFactory.initialize();
-      } catch (error) {
-        console.error('Failed to initialize DAO factory:', error);
-      }
-    }
+    await this.daoFactory.initialize();
 
     // Initialize session factory
     this.sessionFactory = new AgentSessionFactory(this);
