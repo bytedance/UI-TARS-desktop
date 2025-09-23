@@ -470,28 +470,24 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                     };
 
                     return (
-                      <div
+                      <button
                         key={option.key}
-                        className="group inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 transition-all duration-200 relative"
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          // Call the remove method directly on AgentOptionsSelector
+                          if (agentOptionsSelectorRef.current) {
+                            agentOptionsSelectorRef.current.removeOption(option.key);
+                          }
+                        }}
+                        className="group inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-all duration-200 cursor-pointer"
+                        title={`Remove ${option.title}`}
                       >
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            // Call the remove method directly on AgentOptionsSelector
-                            if (agentOptionsSelectorRef.current) {
-                              agentOptionsSelectorRef.current.removeOption(option.key);
-                            }
-                          }}
-                          className="absolute -left-1 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-blue-600 dark:bg-blue-400 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-blue-700 dark:hover:bg-blue-300 z-10"
-                          title={`Remove ${option.title}`}
-                        >
-                          <FiX className="w-2.5 h-2.5" />
-                        </button>
-                        <span className="mr-1.5 text-blue-600 dark:text-blue-400">
+                        <span className="mr-1.5 text-blue-600 dark:text-blue-400 group-hover:opacity-0 transition-opacity duration-200">
                           {getOptionIcon()}
                         </span>
+                        <FiX className="absolute ml-0 w-3 h-3 text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                         <span className="truncate flex items-center">
                           <span>{option.title}</span>
                           {option.displayValue && (
@@ -500,7 +496,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                             </span>
                           )}
                         </span>
-                      </div>
+                      </button>
                     );
                   })}
                 </div>
