@@ -169,6 +169,7 @@ export class AgentSession {
       // Log AGIO initialization
       console.debug('AGIO collector initialized', { provider: agentOptions.agio.provider });
     }
+    
     this.logger.info('create new agent with config: ',  JSON.stringify({
       agent: agentOptions.agent,
       share: agentOptions.share,

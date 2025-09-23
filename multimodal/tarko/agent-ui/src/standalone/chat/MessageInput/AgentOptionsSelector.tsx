@@ -189,11 +189,12 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
       loadOptions();
     }, [activeSessionId, isReplayMode]); // NO hasLoaded dependency to prevent loop
 
-    // Reset loaded state when session changes
+    // Reset all state when session changes
     useEffect(() => {
       setHasLoaded(false);
       setSchema(null);
       setCurrentValues(null);
+      setIsLoading(false);
     }, [activeSessionId]);
 
     // Handle option change - with loading state for agent recreation

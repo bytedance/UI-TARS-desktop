@@ -79,6 +79,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   const contextualSelectorEnabled = isContextualSelectorEnabled() && showContextualSelector;
 
+  // Clear active agent options when session changes
+  useEffect(() => {
+    setActiveAgentOptions([]);
+  }, [sessionId]);
+
   const handleToggleOption = useCallback((key: string, currentValue: any) => {
     // Use the ref to call the toggle method on AgentOptionsSelector
     if (agentOptionsSelectorRef.current) {
