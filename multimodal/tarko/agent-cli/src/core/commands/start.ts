@@ -114,7 +114,7 @@ function setupUI(
   app: express.Application,
   isDebug = false,
   staticPath: string,
-  webui: AgentWebUIImplementation & Record<string, any>,
+  mergedWebUIConfig: AgentWebUIImplementation & Record<string, any>,
 ): void {
   if (isDebug) {
     logger.debug(`Using static files from: ${staticPath}`);
@@ -135,7 +135,7 @@ function setupUI(
 
     const scriptTag = `<script>
       window.AGENT_BASE_URL = "";
-      window.AGENT_WEB_UI_CONFIG = ${JSON.stringify(webui)};
+      window.AGENT_WEB_UI_CONFIG = ${JSON.stringify(mergedWebUIConfig)};
       console.log("Agent: Using API baseURL:", window.AGENT_BASE_URL);
     </script>`;
 
