@@ -49,14 +49,14 @@ export const Dropdown: React.FC<DropdownProps> = ({
 
       {/* Menu */}
       <div
-        className={`fixed z-50 w-64 rounded-2xl bg-white dark:bg-gray-900 shadow-2xl shadow-black/10 dark:shadow-black/30 border border-gray-200/60 dark:border-gray-700/60 overflow-hidden backdrop-blur-sm ${menuClassName}`}
+        className={`fixed z-50 w-56 rounded-xl bg-white dark:bg-gray-900 shadow-lg shadow-black/5 dark:shadow-black/40 border border-gray-300/80 dark:border-gray-600/80 overflow-hidden backdrop-blur-sm ${menuClassName}`}
         style={{
           top: `${position.top}px`,
           left: `${position.left}px`,
           transform: placement.startsWith('top') ? 'translateY(-100%)' : 'none',
         }}
       >
-        <div className="p-2">{children}</div>
+        <div className="p-1.5">{children}</div>
       </div>
     </>
   ) : null;

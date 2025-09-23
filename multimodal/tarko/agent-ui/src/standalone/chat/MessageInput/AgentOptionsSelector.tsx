@@ -112,7 +112,7 @@ const DropdownSubMenu: React.FC<DropdownSubMenuProps> = ({
       {/* Submenu */}
       <div
         ref={submenuRef}
-        className="fixed z-50 w-64 rounded-2xl bg-white dark:bg-gray-900 shadow-lg shadow-black/5 dark:shadow-black/40 border border-gray-300/80 dark:border-gray-600/80 overflow-hidden backdrop-blur-sm"
+        className="fixed z-50 w-56 rounded-xl bg-white dark:bg-gray-900 shadow-lg shadow-black/5 dark:shadow-black/40 border border-gray-300/80 dark:border-gray-600/80 overflow-hidden backdrop-blur-sm"
         style={{
           top: `${position.top}px`,
           left: `${position.left}px`,
@@ -120,7 +120,7 @@ const DropdownSubMenu: React.FC<DropdownSubMenuProps> = ({
         onMouseEnter={() => setIsOpen(true)}
         onMouseLeave={() => setIsOpen(false)}
       >
-        <div className="p-2">{children}</div>
+        <div className="p-1.5">{children}</div>
       </div>
     </>
   ) : null;
@@ -132,7 +132,7 @@ const DropdownSubMenu: React.FC<DropdownSubMenuProps> = ({
       onClick={() => !disabled && setIsOpen(!isOpen)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`group flex w-full items-center rounded-xl px-4 py-3 text-left transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800/50 text-gray-900 dark:text-gray-100 ${
+      className={`group flex w-full items-center rounded-xl px-3 py-2.5 text-left transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800/50 text-gray-900 dark:text-gray-100 ${
       disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02]'
       }`}
       disabled={disabled}
