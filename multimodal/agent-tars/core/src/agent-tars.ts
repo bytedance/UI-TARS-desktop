@@ -45,7 +45,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
       'Tell me the top 5 most popular projects on ProductHunt today',
       'Please book me the earliest flight from Hangzhou to Shenzhen on 10.1',
     ],
-    enableContextualSelector: true,
+    enableContextualSelector: false,
     guiAgent: {
       defaultScreenshotRenderStrategy: 'beforeAction',
       enableScreenshotRenderStrategySwitch: true,
