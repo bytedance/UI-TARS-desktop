@@ -59,7 +59,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const [uploadedImages, setUploadedImages] = useState<ChatCompletionContentPart[]>([]);
   const [isAborting, setIsAborting] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  const [activeAgentOptions, setActiveAgentOptions] = useState<Array<{key: string, title: string, currentValue: any}>>([]);
+  const [activeAgentOptions, setActiveAgentOptions] = useState<Array<{key: string, title: string, currentValue: any, displayValue?: string}>>([]);
   const agentOptionsSelectorRef = useRef<AgentOptionsSelectorRef | null>(null);
 
   const { activeSessionId, sessionMetadata } = useSession();
@@ -476,7 +476,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                           {getOptionIcon()}
                         </span>
                         <FiX className="absolute ml-0 w-3 h-3 text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                        <span className="truncate">{option.title}</span>
+                        <span className="truncate">
+                          {option.title}
+                          {option.displayValue && (
+                            <span className="ml-1 text-blue-600 dark:text-blue-300 font-normal">
+                              [{option.displayValue}]
+                            </span>
+                          )}
+                        </span>
                       </button>
                     );
                   })}

@@ -15,6 +15,7 @@ interface ActiveOption {
   key: string;
   title: string;
   currentValue: any;
+  displayValue?: string;
 }
 
 interface AgentOptionsSelectorProps {
@@ -256,15 +257,20 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
             return currentValue === true;
           }
           if (property.type === 'string' && property.enum) {
-            return currentValue && currentValue !== property.default;
+            // Always show enum options with their current value
+            return true;
           }
           return false;
         })
-        .map(([key, property]) => ({
-          key,
-          title: property.title || key,
-          currentValue: currentValues[key] ?? property.default,
-        }));
+        .map(([key, property]) => {
+          const currentValue = currentValues[key] ?? property.default;
+          return {
+            key,
+            title: property.title || key,
+            currentValue,
+            displayValue: property.type === 'string' && property.enum ? currentValue : undefined,
+          };
+        });
 
       onActiveOptionsChange(activeOptions);
     }, [schema, currentValues, onActiveOptionsChange]);
@@ -322,18 +328,18 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
         // Use submenu for enum options
         const submenuTrigger = (
           <div className="flex items-center justify-between w-full">
-            <div className="flex items-center">
+            <div className="flex items-center min-w-0 flex-1">
               {getOptionIcon(key, property)}
-              <div className="ml-3 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-sm">{property.title || key}</span>
-                  <span className="text-xs text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full">
+              <div className="ml-3 flex-1 min-w-0">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="font-medium text-sm truncate">{property.title || key}</span>
+                  <span className="text-xs text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
                     {currentValue || property.default}
                   </span>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0">
               {isLoading && <FiLoader className="w-3 h-3 animate-spin text-blue-600" />}
             </div>
           </div>
