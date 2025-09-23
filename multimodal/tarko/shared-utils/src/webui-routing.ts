@@ -14,7 +14,7 @@ export function isRegexPattern(path: string): boolean {
  * Extract the actual basename from current URL using the configured basePath pattern
  * Used by React Router to compute dynamic basename
  */
-export function extractActualBasename(basePath: string, currentPath: string): string {
+export function extractActualBasename(basePath: string | undefined, currentPath: string): string {
   if (!basePath) return '';
   
   if (isRegexPattern(basePath)) {
@@ -43,7 +43,7 @@ export function extractActualBasename(basePath: string, currentPath: string): st
  * Create a path matcher for both static paths and regex patterns
  * Used by server-side routing logic
  */
-export function createPathMatcher(basePath: string) {
+export function createPathMatcher(basePath: string | undefined) {
   if (!basePath) return { test: () => true, extract: (path: string) => path };
 
   if (isRegexPattern(basePath)) {

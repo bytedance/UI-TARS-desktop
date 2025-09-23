@@ -92,6 +92,11 @@ describe('WebUI Routing Shared Utils', () => {
         expect(extractActualBasename('', '/')).toBe('');
       });
 
+      it('should handle undefined basePath', () => {
+        expect(extractActualBasename(undefined, '/any/path')).toBe('');
+        expect(extractActualBasename(undefined, '/')).toBe('');
+      });
+
       it('should handle real-world scenarios', () => {
         // Random ID patterns
         expect(extractActualBasename('/[a-zA-Z0-9]+', '/p9fgsSryzeO5JtefS1bMfsa7G11S6pGKY')).toBe('/p9fgsSryzeO5JtefS1bMfsa7G11S6pGKY');
@@ -159,6 +164,18 @@ describe('WebUI Routing Shared Utils', () => {
     describe('edge cases', () => {
       it('should handle empty basePath', () => {
         const matcher = createPathMatcher('');
+
+        expect(matcher.test('/')).toBe(true);
+        expect(matcher.test('/any/path')).toBe(true);
+        expect(matcher.test('/agent-ui')).toBe(true);
+
+        expect(matcher.extract('/')).toBe('/');
+        expect(matcher.extract('/any/path')).toBe('/any/path');
+        expect(matcher.extract('/agent-ui')).toBe('/agent-ui');
+      });
+
+      it('should handle undefined basePath', () => {
+        const matcher = createPathMatcher(undefined);
 
         expect(matcher.test('/')).toBe(true);
         expect(matcher.test('/any/path')).toBe(true);
