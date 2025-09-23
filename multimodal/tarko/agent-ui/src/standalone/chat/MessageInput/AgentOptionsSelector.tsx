@@ -112,7 +112,7 @@ const DropdownSubMenu: React.FC<DropdownSubMenuProps> = ({
       {/* Submenu */}
       <div
         ref={submenuRef}
-        className="fixed z-50 w-56 rounded-2xl bg-white dark:bg-gray-900 shadow-2xl shadow-black/10 dark:shadow-black/30 border border-gray-200/60 dark:border-gray-700/60 overflow-hidden backdrop-blur-sm"
+        className="fixed z-50 w-56 rounded-2xl bg-white dark:bg-gray-900 shadow-lg shadow-black/5 dark:shadow-black/40 border border-gray-300/80 dark:border-gray-600/80 overflow-hidden backdrop-blur-sm"
         style={{
           top: `${position.top}px`,
           left: `${position.left}px`,
