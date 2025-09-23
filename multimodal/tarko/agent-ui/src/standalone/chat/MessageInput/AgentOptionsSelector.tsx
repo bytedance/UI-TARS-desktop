@@ -6,9 +6,9 @@ import { SessionItemMetadata } from '@tarko/interface';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useAtomValue } from 'jotai';
 import { isProcessingAtom } from '@/common/state/atoms/ui';
-import { FiPlus, FiCheck, FiChevronRight, FiImage, FiPaperclip, FiLoader } from 'react-icons/fi';
+import { FiPlus, FiCheck, FiChevronRight, FiImage, FiPaperclip, FiLoader, FiX } from 'react-icons/fi';
 import { TbBulb, TbSearch, TbBook, TbSettings, TbBrain, TbPhoto } from 'react-icons/tb';
-import { Dropdown, DropdownItem, DropdownHeader, DropdownDivider } from '@tarko/ui';
+import { Modal } from '@tarko/ui';
 
 interface ActiveOption {
   key: string;
@@ -62,6 +62,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
     const [currentValues, setCurrentValues] = useState<Record<string, any> | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [hasLoaded, setHasLoaded] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const updateSessionMetadata = useSetAtom(updateSessionMetadataAction);
     const { isReplayMode } = useReplayMode();
     const isProcessing = useAtomValue(isProcessingAtom);
@@ -196,25 +197,29 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
 
       if (property.type === 'boolean') {
         return (
-          <DropdownItem
+          <div
             key={key}
-            icon={getOptionIcon(key, property)}
             onClick={() => handleOptionChange(key, !currentValue)}
-            className={`${currentValue ? 'bg-blue-50 dark:bg-blue-900/20' : ''} ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
+            className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all hover:bg-gray-50 dark:hover:bg-gray-800 ${
+              currentValue ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700' : 'border-gray-200 dark:border-gray-700'
+            } ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
           >
-            <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="text-blue-600 dark:text-blue-400">
+                {getOptionIcon(key, property)}
+              </div>
               <div className="flex-1">
-                <div className="font-medium text-sm">{property.title || key}</div>
+                <div className="font-medium text-sm text-gray-900 dark:text-gray-100">{property.title || key}</div>
                 {property.description && (
-                  <div className="text-xs text-gray-500">{property.description}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{property.description}</div>
                 )}
               </div>
-              <div className="flex items-center gap-2">
-                {isLoading && <FiLoader className="w-3 h-3 animate-spin text-blue-600" />}
-                {currentValue && !isLoading && <FiCheck className="w-4 h-4 text-blue-600" />}
-              </div>
             </div>
-          </DropdownItem>
+            <div className="flex items-center gap-2">
+              {isLoading && <FiLoader className="w-4 h-4 animate-spin text-blue-600" />}
+              {currentValue && !isLoading && <FiCheck className="w-5 h-5 text-blue-600" />}
+            </div>
+          </div>
         );
       }
 
@@ -225,25 +230,29 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
           const optionKey = `${key}-${option}`;
           
           return (
-            <DropdownItem
+            <div
               key={optionKey}
-              icon={getOptionIcon(key, property)}
               onClick={() => handleOptionChange(key, option)}
-              className={`${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''} ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
+              className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all hover:bg-gray-50 dark:hover:bg-gray-800 ${
+                isSelected ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700' : 'border-gray-200 dark:border-gray-700'
+              } ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
             >
-              <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="text-blue-600 dark:text-blue-400">
+                  {getOptionIcon(key, property)}
+                </div>
                 <div className="flex-1">
-                  <div className="font-medium text-sm">{option}</div>
+                  <div className="font-medium text-sm text-gray-900 dark:text-gray-100">{option}</div>
                   {property.description && (
-                    <div className="text-xs text-gray-500">{property.description}</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{property.description}</div>
                   )}
                 </div>
-                <div className="flex items-center gap-2">
-                  {isLoading && <FiLoader className="w-3 h-3 animate-spin text-blue-600" />}
-                  {isSelected && !isLoading && <FiCheck className="w-4 h-4 text-blue-600" />}
-                </div>
               </div>
-            </DropdownItem>
+              <div className="flex items-center gap-2">
+                {isLoading && <FiLoader className="w-4 h-4 animate-spin text-blue-600" />}
+                {isSelected && !isLoading && <FiCheck className="w-5 h-5 text-blue-600" />}
+              </div>
+            </div>
           );
         });
       }
@@ -252,12 +261,11 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
     };
 
     return (
-    <Dropdown
-    placement="top-start"
-    trigger={
+    <>
     <button
     type="button"
     disabled={isLoading || isDisabled}
+    onClick={() => setIsModalOpen(true)}
     className={`flex items-center justify-center w-8 h-8 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
     isLoading ? 'animate-pulse' : ''
     }`}
@@ -269,25 +277,50 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
     <FiPlus size={16} />
     )}
     </button>
-    }
+
+    <Modal
+    isOpen={isModalOpen}
+    onClose={() => setIsModalOpen(false)}
+    title="Agent Options"
+    size="md"
     >
-        {/* File upload option */}
-        {showAttachments && (
-          <DropdownItem
-            icon={<TbPhoto className="w-4 h-4" />}
-            onClick={onFileUpload}
-            disabled={isDisabled}
-          >
-            <div className="font-medium text-sm">Upload Images</div>
-          </DropdownItem>
-        )}
-        
-        {/* Separator between upload and agent settings */}
-        {showAttachments && options.length > 0 && <DropdownDivider />}
-        
-        {/* Agent options */}
-        {options.map(renderOptionItem).flat()}
-      </Dropdown>
+    <div className="space-y-4">
+    {/* File upload option */}
+    {showAttachments && (
+    <div
+    onClick={onFileUpload}
+    className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
+    >
+    <div className="text-blue-600 dark:text-blue-400">
+    <TbPhoto className="w-5 h-5" />
+    </div>
+    <div className="flex-1">
+    <div className="font-medium text-sm text-gray-900 dark:text-gray-100">Upload Images</div>
+    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Add images to your conversation</div>
+    </div>
+    </div>
+    )}
+    
+    {/* Separator */}
+    {showAttachments && options.length > 0 && (
+    <div className="border-t border-gray-200 dark:border-gray-700 my-4" />
+    )}
+    
+    {/* Agent options */}
+    <div className="space-y-3">
+    {options.map(renderOptionItem).flat()}
+    </div>
+    
+    {/* No options message */}
+    {options.length === 0 && (
+    <div className="text-center py-8">
+    <TbSettings className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+    <p className="text-sm text-gray-500 dark:text-gray-400">No agent options available</p>
+    </div>
+    )}
+    </div>
+    </Modal>
+    </>
     );
   },
 );
