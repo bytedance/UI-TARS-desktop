@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
+import React, { useState, useEffect, useImperativeHandle, forwardRef, useRef } from 'react';
 import { useSetAtom } from 'jotai';
 import { updateSessionMetadataAction } from '@/common/state/actions/sessionActions';
 import { apiService } from '@/common/services/apiService';
@@ -9,6 +9,7 @@ import { isProcessingAtom } from '@/common/state/atoms/ui';
 import { FiPlus, FiCheck, FiChevronRight, FiImage, FiPaperclip, FiLoader } from 'react-icons/fi';
 import { TbBulb, TbSearch, TbBook, TbSettings, TbBrain, TbPhoto } from 'react-icons/tb';
 import { Dropdown, DropdownItem, DropdownHeader, DropdownDivider } from '@tarko/ui';
+import { createPortal } from 'react-dom';
 
 interface ActiveOption {
   key: string;
@@ -42,6 +43,70 @@ interface AgentOptionConfig {
   property: any;
   currentValue: any;
 }
+
+// Sub-menu component for enum options
+interface DropdownSubMenuProps {
+  trigger: React.ReactNode;
+  children: React.ReactNode;
+  disabled?: boolean;
+}
+
+const DropdownSubMenu: React.FC<DropdownSubMenuProps> = ({ trigger, children, disabled = false }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [position, setPosition] = useState({ top: 0, left: 0 });
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (isOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setPosition({
+        top: rect.top,
+        left: rect.right + 8,
+      });
+    }
+  }, [isOpen]);
+
+  const submenuContent = isOpen ? (
+    <>
+      {/* Overlay */}
+      <div 
+        className="fixed inset-0 z-40" 
+        onClick={() => setIsOpen(false)}
+      />
+      
+      {/* Submenu */}
+      <div
+        className="fixed z-50 w-56 rounded-2xl bg-white dark:bg-gray-900 shadow-2xl shadow-black/10 dark:shadow-black/30 border border-gray-200/60 dark:border-gray-700/60 overflow-hidden backdrop-blur-sm"
+        style={{
+          top: `${position.top}px`,
+          left: `${position.left}px`,
+        }}
+      >
+        <div className="p-2">{children}</div>
+      </div>
+    </>
+  ) : null;
+
+  return (
+    <>
+      <button
+        ref={triggerRef}
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        onMouseEnter={() => !disabled && setIsOpen(true)}
+        onMouseLeave={() => setIsOpen(false)}
+        className={`group flex w-full items-center rounded-xl px-3 py-2.5 text-left transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800/50 text-gray-900 dark:text-gray-100 ${
+          disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02]'
+        }`}
+        disabled={disabled}
+      >
+        {trigger}
+        <FiChevronRight className="ml-2 w-4 h-4 text-gray-400" />
+      </button>
+      
+      {typeof document !== 'undefined' && submenuContent && createPortal(submenuContent, document.body)}
+    </>
+  );
+};
 
 export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOptionsSelectorProps>(
   (
@@ -219,33 +284,54 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
       }
 
       if (property.type === 'string' && property.enum) {
-        // Render each enum value as a separate option item
-        return property.enum.map((option: any) => {
+        // Use submenu for enum options
+        const submenuTrigger = (
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              {getOptionIcon(key, property)}
+              <div className="ml-3 flex-1">
+                <div className="font-medium text-sm">{property.title || key}</div>
+                <div className="text-xs text-gray-500">
+                  {currentValue || property.default}
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {isLoading && <FiLoader className="w-3 h-3 animate-spin text-blue-600" />}
+            </div>
+          </div>
+        );
+
+        const submenuItems = property.enum.map((option: any) => {
           const isSelected = currentValue === option;
-          const optionKey = `${key}-${option}`;
           
           return (
             <DropdownItem
-              key={optionKey}
-              icon={getOptionIcon(key, property)}
+              key={option}
               onClick={() => handleOptionChange(key, option)}
               className={`${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''} ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
             >
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <div className="font-medium text-sm">{option}</div>
-                  {property.description && (
-                    <div className="text-xs text-gray-500">{property.description}</div>
-                  )}
                 </div>
                 <div className="flex items-center gap-2">
-                  {isLoading && <FiLoader className="w-3 h-3 animate-spin text-blue-600" />}
                   {isSelected && !isLoading && <FiCheck className="w-4 h-4 text-blue-600" />}
                 </div>
               </div>
             </DropdownItem>
           );
         });
+
+        return (
+          <DropdownSubMenu
+            key={key}
+            trigger={submenuTrigger}
+            disabled={isLoading}
+          >
+            {submenuItems}
+          </DropdownSubMenu>
+        );
       }
 
       return null;
@@ -286,7 +372,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
         {showAttachments && options.length > 0 && <DropdownDivider />}
         
         {/* Agent options */}
-        {options.map(renderOptionItem).flat()}
+        {options.map(renderOptionItem)}
       </Dropdown>
     );
   },
