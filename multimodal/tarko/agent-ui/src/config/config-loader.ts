@@ -61,7 +61,7 @@ function loadEnvConfig(): BaseAgentWebUIImplementation | null {
     // Access build-time environment variable
     const envConfig = ENV_CONFIG.AGENT_WEBUI_CONFIG;
     if (envConfig) {
-      const parsed = JSON.parse(envConfig);
+      const parsed = typeof envConfig === 'string' ? JSON.parse(envConfig) : envConfig;
       if (validateConfig(parsed)) {
         return parsed;
       }

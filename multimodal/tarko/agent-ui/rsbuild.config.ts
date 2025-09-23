@@ -7,9 +7,11 @@ export default defineConfig({
   source: {
     define: {
       'process.env.AGENT_BASE_URL': JSON.stringify(process.env.AGENT_BASE_URL || ''),
-      'process.env.AGENT_WEBUI_CONFIG': JSON.stringify(process.env.AGENT_WEBUI_CONFIG || {
-        
-      }),
+      'process.env.AGENT_WEBUI_CONFIG': JSON.stringify(
+        process.env.AGENT_WEBUI_CONFIG || {
+          basePath: '/[a-zA-Z0-9]+',
+        },
+      ),
     },
     entry: {
       index: './src/entry.tsx',

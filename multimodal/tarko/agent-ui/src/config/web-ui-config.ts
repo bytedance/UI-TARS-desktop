@@ -3,8 +3,10 @@
  * Enhanced to support multiple configuration sources with fallback strategy
  */
 
+import { extractActualBasename } from '@tarko/shared-utils';
 import { loadWebUIConfigSync } from './config-loader';
 import type { BaseAgentWebUIImplementation } from '@tarko/interface';
+import { ENV_CONFIG } from '@/common/constants';
 
 /**
  * Get web UI configuration with enhanced multi-source loading
@@ -13,6 +15,46 @@ export function getWebUIConfig(): BaseAgentWebUIImplementation {
   const result = loadWebUIConfigSync();
   return result.config;
 }
+
+/**
+ * Get web UI configuration with enhanced multi-source loading
+ */
+export function getWebUIRouteBase(): string {
+  // Extract actual basename from current URL using shared utility
+  const currentPath = window.location.pathname;
+  const config = getWebUIConfig();
+  const actualBasename = extractActualBasename(config.basePath, currentPath);
+  console.log('[Agent UI] basePath config:', config.basePath);
+  console.log('[Agent UI] current path:', currentPath);
+  console.log('[Agent UI] extracted basename:', actualBasename);
+  return actualBasename;
+}
+
+/**
+ * Get API Base URL.
+ */
+export function getAPIBaseUrl() {
+  const configuredBaseUrl = ENV_CONFIG.AGENT_BASE_URL ?? window.AGENT_BASE_URL;
+  /**
+   * Scene 1. The Agent Server and Agent UI are deployed together ()
+   * If routeBase exists, we should respect it
+   */
+  if (configuredBaseUrl === '') {
+    const routeBase = getWebUIRouteBase();
+    if (routeBase) {
+      return configuredBaseUrl + routeBase;
+    }
+    return configuredBaseUrl;
+  }
+
+  /**
+   * Scene 1. The Agent Server and Agent UI are deployed in different locations
+   * We should directly respect the API Base URL
+   */
+  return configuredBaseUrl;
+}
+
+export const API_BASE_URL = getAPIBaseUrl();
 
 /**
  * Get agent title from web UI config with fallback

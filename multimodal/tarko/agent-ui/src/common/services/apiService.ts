@@ -1,4 +1,4 @@
-import { API_BASE_URL, API_ENDPOINTS } from '@/common/constants';
+import { API_ENDPOINTS } from '@/common/constants';
 import {
   AgentEventStream,
   SessionInfo,
@@ -8,6 +8,7 @@ import {
 
 import { ChatCompletionContentPart, AgentModel } from '@tarko/agent-interface';
 import { AgentServerVersionInfo } from '@agent-tars/interface';
+import { API_BASE_URL } from '@/config/web-ui-config';
 
 /**
  * Workspace item interface for contextual selector

@@ -1,4 +1,5 @@
-import { API_BASE_URL, API_ENDPOINTS } from '@/common/constants';
+import { API_ENDPOINTS } from '@/common/constants';
+import { API_BASE_URL } from '@/config/web-ui-config';
 
 /**
  * Share configuration interface

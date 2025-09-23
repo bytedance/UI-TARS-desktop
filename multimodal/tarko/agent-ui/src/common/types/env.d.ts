@@ -1,5 +1,9 @@
 import { AgentEventStream } from '@tarko/agent-interface';
-import type { AgentServerVersionInfo, AgentWebUIImplementation, SessionInfo } from '@tarko/interface';
+import type {
+  AgentServerVersionInfo,
+  AgentWebUIImplementation,
+  SessionInfo,
+} from '@tarko/interface';
 
 /**
  * FIXME: move to Agent Server.
