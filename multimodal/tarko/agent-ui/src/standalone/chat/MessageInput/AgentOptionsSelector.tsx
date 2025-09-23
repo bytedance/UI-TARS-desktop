@@ -7,7 +7,7 @@ import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useAtomValue } from 'jotai';
 import { isProcessingAtom } from '@/common/state/atoms/ui';
 import { FiPlus, FiCheck, FiChevronRight, FiImage, FiPaperclip, FiLoader } from 'react-icons/fi';
-import { TbBulb, TbSearch, TbBook, TbSettings, TbBrain, TbPhoto } from 'react-icons/tb';
+import { TbBulb, TbSearch, TbBook, TbSettings, TbBrain, TbPhoto, TbBrowser } from 'react-icons/tb';
 import { Dropdown, DropdownItem, DropdownHeader, DropdownDivider } from '@tarko/ui';
 import { createPortal } from 'react-dom';
 
@@ -112,7 +112,7 @@ const DropdownSubMenu: React.FC<DropdownSubMenuProps> = ({
       {/* Submenu */}
       <div
         ref={submenuRef}
-        className="fixed z-50 w-56 rounded-2xl bg-white dark:bg-gray-900 shadow-lg shadow-black/5 dark:shadow-black/40 border border-gray-300/80 dark:border-gray-600/80 overflow-hidden backdrop-blur-sm"
+        className="fixed z-50 w-64 rounded-2xl bg-white dark:bg-gray-900 shadow-lg shadow-black/5 dark:shadow-black/40 border border-gray-300/80 dark:border-gray-600/80 overflow-hidden backdrop-blur-sm"
         style={{
           top: `${position.top}px`,
           left: `${position.left}px`,
@@ -128,14 +128,14 @@ const DropdownSubMenu: React.FC<DropdownSubMenuProps> = ({
   return (
     <>
       <button
-        ref={triggerRef}
-        onClick={() => !disabled && setIsOpen(!isOpen)}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        className={`group flex w-full items-center rounded-xl px-3 py-2.5 text-left transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800/50 text-gray-900 dark:text-gray-100 ${
-          disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02]'
-        }`}
-        disabled={disabled}
+      ref={triggerRef}
+      onClick={() => !disabled && setIsOpen(!isOpen)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      className={`group flex w-full items-center rounded-xl px-4 py-3 text-left transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800/50 text-gray-900 dark:text-gray-100 ${
+      disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02]'
+      }`}
+      disabled={disabled}
       >
         {trigger}
         <FiChevronRight className="ml-2 w-4 h-4 text-gray-400" />
@@ -198,74 +198,74 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
 
     // Handle option change - with loading state for agent recreation
     const handleOptionChange = async (key: string, value: any) => {
-    if (!activeSessionId || isLoading || !currentValues) return;
+      if (!activeSessionId || isLoading || !currentValues) return;
 
-    const newValues = { ...currentValues, [key]: value };
-    setCurrentValues(newValues);
-    setIsLoading(true);
+      const newValues = { ...currentValues, [key]: value };
+      setCurrentValues(newValues);
+      setIsLoading(true);
 
-    try {
-    const response = await apiService.updateSessionRuntimeSettings(activeSessionId, newValues);
-    if (response.success && response.sessionInfo?.metadata) {
-    updateSessionMetadata({
-    sessionId: activeSessionId,
-    metadata: response.sessionInfo.metadata,
-    });
+      try {
+        const response = await apiService.updateSessionRuntimeSettings(activeSessionId, newValues);
+        if (response.success && response.sessionInfo?.metadata) {
+          updateSessionMetadata({
+            sessionId: activeSessionId,
+            metadata: response.sessionInfo.metadata,
+          });
 
-    // Show success feedback briefly
-    console.log('Agent options updated successfully', { key, value });
-    }
-    } catch (error) {
-    console.error('Failed to update runtime settings:', error);
-    // Revert on error
-    setCurrentValues(currentValues);
-    } finally {
-    // Add a small delay to show the loading state
-    setTimeout(() => {
-    setIsLoading(false);
-    }, 500);
-    }
+          // Show success feedback briefly
+          console.log('Agent options updated successfully', { key, value });
+        }
+      } catch (error) {
+        console.error('Failed to update runtime settings:', error);
+        // Revert on error
+        setCurrentValues(currentValues);
+      } finally {
+        // Add a small delay to show the loading state
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 500);
+      }
 
-    // Notify parent
-    if (onToggleOption) {
-    onToggleOption(key, value);
-    }
+      // Notify parent
+      if (onToggleOption) {
+        onToggleOption(key, value);
+      }
     };
 
-  // Handle option removal - clear to undefined to remove from active options
-  const handleOptionRemove = async (key: string) => {
-    if (!activeSessionId || isLoading || !currentValues) return;
+    // Handle option removal - clear to undefined to remove from active options
+    const handleOptionRemove = async (key: string) => {
+      if (!activeSessionId || isLoading || !currentValues) return;
 
-    const newValues = { ...currentValues };
-    delete newValues[key]; // Remove the key entirely
-    setCurrentValues(newValues);
-    setIsLoading(true);
+      const newValues = { ...currentValues };
+      delete newValues[key]; // Remove the key entirely
+      setCurrentValues(newValues);
+      setIsLoading(true);
 
-    try {
-      const response = await apiService.updateSessionRuntimeSettings(activeSessionId, newValues);
-      if (response.success && response.sessionInfo?.metadata) {
-        updateSessionMetadata({
-          sessionId: activeSessionId,
-          metadata: response.sessionInfo.metadata,
-        });
+      try {
+        const response = await apiService.updateSessionRuntimeSettings(activeSessionId, newValues);
+        if (response.success && response.sessionInfo?.metadata) {
+          updateSessionMetadata({
+            sessionId: activeSessionId,
+            metadata: response.sessionInfo.metadata,
+          });
 
-        console.log('Agent option removed successfully', { key });
+          console.log('Agent option removed successfully', { key });
+        }
+      } catch (error) {
+        console.error('Failed to remove runtime setting:', error);
+        // Revert on error
+        setCurrentValues(currentValues);
+      } finally {
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 500);
       }
-    } catch (error) {
-      console.error('Failed to remove runtime setting:', error);
-      // Revert on error
-      setCurrentValues(currentValues);
-    } finally {
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 500);
-    }
 
-    // Notify parent
-    if (onToggleOption) {
-      onToggleOption(key, undefined);
-    }
-  };
+      // Notify parent
+      if (onToggleOption) {
+        onToggleOption(key, undefined);
+      }
+    };
 
     // Expose toggle method
     useImperativeHandle(ref, () => ({
@@ -342,6 +342,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
     const getOptionIcon = (key: string, property: any) => {
       const lowerKey = key.toLowerCase();
       const lowerTitle = (property.title || '').toLowerCase();
+      if (lowerKey.includes('browser') || lowerTitle.includes('browser')) return <TbBrowser className="w-4 h-4" />;
       if (lowerKey.includes('search')) return <TbSearch className="w-4 h-4" />;
       if (lowerKey.includes('research')) return <TbBook className="w-4 h-4" />;
       if (lowerKey.includes('foo')) return <TbBulb className="w-4 h-4" />;
