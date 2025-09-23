@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BasePath Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 50px auto; 
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section { 
+            background: white; 
+            padding: 20px; 
+            margin: 20px 0; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .result { 
+            background: #f8f9fa; 
+            padding: 10px; 
+            border-left: 4px solid #007bff; 
+            margin: 10px 0; 
+        }
+        .success { border-left-color: #28a745; }
+        .error { border-left-color: #dc3545; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>🧪 WebUI Routing BasePath Test</h1>
+    
+    <div class="test-section">
+        <h2>Current URL Info</h2>
+        <div class="result">
+            <strong>Current URL:</strong> <span id="currentUrl"></span><br>
+            <strong>Current Path:</strong> <span id="currentPath"></span><br>
+            <strong>Base URL:</strong> <span id="baseUrl"></span>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>BasePath Extraction Test</h2>
+        <div>
+            <label>BasePath Pattern: </label>
+            <input type="text" id="basePathInput" value="/foo" style="width: 200px; padding: 5px;">
+            <button onclick="testExtraction()">Test Extraction</button>
+        </div>
+        <div class="result" id="extractionResult"></div>
+        
+        <h3>预设测试</h3>
+        <button onclick="testStatic()">Static: /foo</button>
+        <button onclick="testRegex()">Regex: /tenant-.+</button>
+        <button onclick="testComplex()">Complex: /(dev|prod)/app</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Path Matcher Test</h2>
+        <div>
+            <label>Test Path: </label>
+            <input type="text" id="testPathInput" value="/foo/chat" style="width: 200px; padding: 5px;">
+            <button onclick="testMatcher()">Test Match</button>
+        </div>
+        <div class="result" id="matcherResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Navigation Test</h2>
+        <p>点击这些链接测试不同的路径：</p>
+        <button onclick="navigate('/foo')">Navigate to /foo</button>
+        <button onclick="navigate('/foo/chat')">Navigate to /foo/chat</button>
+        <button onclick="navigate('/foo/workspace')">Navigate to /foo/workspace</button>
+        <button onclick="navigate('/bar/test')">Navigate to /bar/test</button>
+    </div>
+
+    <script>
+        // 模拟 shared-utils 中的函数
+        function isRegexPattern(path) {
+            return /[.*+?^${}()|[\]\\]/.test(path);
+        }
+
+        function extractActualBasename(basePath, currentPath) {
+            if (!basePath) return '';
+            
+            if (isRegexPattern(basePath)) {
+                try {
+                    const extractPattern = basePath.replace(/\.+/g, '[^/]+');
+                    const extractRegex = new RegExp(`^${extractPattern}`);
+                    const match = currentPath.match(extractRegex);
+                    return match ? match[0] : '';
+                } catch (error) {
+                    console.warn('Invalid regex pattern in basePath:', basePath, error);
+                    return '';
+                }
+            } else {
+                const normalized = basePath.replace(/\/$/, '');
+                if (currentPath === normalized || currentPath.startsWith(normalized + '/')) {
+                    return normalized;
+                }
+                return '';
+            }
+        }
+
+        function createPathMatcher(basePath) {
+            if (!basePath) return { test: () => true, extract: (path) => path };
+
+            if (isRegexPattern(basePath)) {
+                let regex, extractRegex;
+                try {
+                    regex = new RegExp(`^${basePath}`);
+                    const extractPattern = basePath.replace(/\.+/g, '[^/]+');
+                    extractRegex = new RegExp(`^${extractPattern}`);
+                } catch (error) {
+                    const normalized = basePath.replace(/\/$/, '');
+                    return {
+                        test: (path) => path === normalized || path.startsWith(normalized + '/'),
+                        extract: (path) => path === normalized ? '/' : path.substring(normalized.length) || '/',
+                    };
+                }
+
+                return {
+                    test: (path) => regex.test(path),
+                    extract: (path) => {
+                        const match = path.match(extractRegex);
+                        if (!match) return path;
+                        const matchedPart = match[0];
+                        return path === matchedPart ? '/' : path.substring(matchedPart.length) || '/';
+                    },
+                };
+            } else {
+                const normalized = basePath.replace(/\/$/, '');
+                return {
+                    test: (path) => path === normalized || path.startsWith(normalized + '/'),
+                    extract: (path) => path === normalized ? '/' : path.substring(normalized.length) || '/',
+                };
+            }
+        }
+
+        // 更新当前URL信息
+        function updateUrlInfo() {
+            document.getElementById('currentUrl').textContent = window.location.href;
+            document.getElementById('currentPath').textContent = window.location.pathname;
+            document.getElementById('baseUrl').textContent = window.location.origin;
+        }
+
+        // 测试提取功能
+        function testExtraction() {
+            const basePath = document.getElementById('basePathInput').value;
+            const currentPath = window.location.pathname;
+            const result = extractActualBasename(basePath, currentPath);
+            
+            document.getElementById('extractionResult').innerHTML = `
+                <strong>BasePath:</strong> ${basePath}<br>
+                <strong>Current Path:</strong> ${currentPath}<br>
+                <strong>Extracted Basename:</strong> <code>${result}</code><br>
+                <strong>Is Regex:</strong> ${isRegexPattern(basePath)}
+            `;
+        }
+
+        // 测试路径匹配器
+        function testMatcher() {
+            const basePath = document.getElementById('basePathInput').value;
+            const testPath = document.getElementById('testPathInput').value;
+            const matcher = createPathMatcher(basePath);
+            
+            const matches = matcher.test(testPath);
+            const extracted = matcher.extract(testPath);
+            
+            document.getElementById('matcherResult').innerHTML = `
+                <strong>BasePath:</strong> ${basePath}<br>
+                <strong>Test Path:</strong> ${testPath}<br>
+                <strong>Matches:</strong> <span style="color: ${matches ? 'green' : 'red'}">${matches}</span><br>
+                <strong>Extracted Path:</strong> <code>${extracted}</code>
+            `;
+            document.getElementById('matcherResult').className = matches ? 'result success' : 'result error';
+        }
+
+        // 预设测试
+        function testStatic() {
+            document.getElementById('basePathInput').value = '/foo';
+            testExtraction();
+            testMatcher();
+        }
+
+        function testRegex() {
+            document.getElementById('basePathInput').value = '/tenant-.+';
+            document.getElementById('testPathInput').value = '/tenant-abc/dashboard';
+            testExtraction();
+            testMatcher();
+        }
+
+        function testComplex() {
+            document.getElementById('basePathInput').value = '/(dev|prod)/app';
+            document.getElementById('testPathInput').value = '/dev/app/settings';
+            testExtraction();
+            testMatcher();
+        }
+
+        // 导航功能
+        function navigate(path) {
+            window.history.pushState({}, '', path);
+            updateUrlInfo();
+            // 自动测试当前路径
+            testExtraction();
+            testMatcher();
+        }
+
+        // 初始化
+        updateUrlInfo();
+        testExtraction();
+        testMatcher();
+
+        // 监听浏览器前进后退
+        window.addEventListener('popstate', () => {
+            updateUrlInfo();
+            testExtraction();
+            testMatcher();
+        });
+    </script>
+</body>
+</html>

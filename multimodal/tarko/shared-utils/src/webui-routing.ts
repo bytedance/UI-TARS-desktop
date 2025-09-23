@@ -64,8 +64,13 @@ export function createPathMatcher(basePath: string | undefined) {
       const normalized = basePath.replace(/\/$/, '');
       return {
         test: (path: string) => path === normalized || path.startsWith(normalized + '/'),
-        extract: (path: string) =>
-          path === normalized ? '/' : path.substring(normalized.length) || '/',
+        extract: (path: string) => {
+          if (path === normalized) return '/';
+          if (path.startsWith(normalized + '/')) {
+            return path.substring(normalized.length) || '/';
+          }
+          return path; // Return original path if not matching
+        },
       };
     }
 
@@ -83,8 +88,13 @@ export function createPathMatcher(basePath: string | undefined) {
     const normalized = basePath.replace(/\/$/, '');
     return {
       test: (path: string) => path === normalized || path.startsWith(normalized + '/'),
-      extract: (path: string) =>
-        path === normalized ? '/' : path.substring(normalized.length) || '/',
+      extract: (path: string) => {
+        if (path === normalized) return '/';
+        if (path.startsWith(normalized + '/')) {
+          return path.substring(normalized.length) || '/';
+        }
+        return path; // Return original path if not matching
+      },
     };
   }
 }
