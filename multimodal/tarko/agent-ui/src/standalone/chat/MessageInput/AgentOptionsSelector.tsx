@@ -244,7 +244,11 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
         if (property.type === 'boolean') {
           handleOptionChange(key, !currentValue);
         } else if (property.type === 'string' && property.enum) {
-          handleOptionChange(key, property.default);
+          // For enum, cycle to the next value
+          const currentIndex = property.enum.indexOf(currentValue);
+          const nextIndex = (currentIndex + 1) % property.enum.length;
+          const nextValue = property.enum[nextIndex];
+          handleOptionChange(key, nextValue);
         }
       },
     }));
