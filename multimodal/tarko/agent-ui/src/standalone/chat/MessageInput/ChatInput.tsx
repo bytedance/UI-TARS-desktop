@@ -476,10 +476,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                           {getOptionIcon()}
                         </span>
                         <FiX className="absolute ml-0 w-3 h-3 text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                        <span className="truncate">
-                          {option.title}
+                        <span className="truncate flex items-center">
+                          <span>{option.title}</span>
                           {option.displayValue && (
-                            <span className="ml-1.5 text-xs text-blue-500 dark:text-blue-400 bg-blue-100 dark:bg-blue-800/50 px-1.5 py-0.5 rounded-md font-medium">
+                            <span className="ml-2 text-xs text-gray-500 dark:text-gray-400 bg-white/80 dark:bg-gray-700/80 px-2 py-0.5 rounded-full font-medium backdrop-blur-sm border border-gray-200/50 dark:border-gray-600/50">
                               {option.displayValue}
                             </span>
                           )}

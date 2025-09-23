@@ -333,7 +333,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
               <div className="ml-3 flex-1 min-w-0">
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="font-medium text-sm truncate">{property.title || key}</span>
-                  <span className="text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-md font-medium border border-blue-200 dark:border-blue-700/50 whitespace-nowrap flex-shrink-0">
+                  <span className="text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/60 px-2 py-1 rounded-full whitespace-nowrap flex-shrink-0 font-medium">
                     {currentValue || property.default}
                   </span>
                 </div>
