@@ -17,6 +17,7 @@ import boxen from 'boxen';
 import chalk from 'chalk';
 import gradient from 'gradient-string';
 import { logger, toUserFriendlyPath, ensureServerConfig } from '../../utils';
+import { createPathMatcher } from '../../utils/webui-routing';
 import { AgentCLIRunInteractiveUICommandOptions } from '../../types';
 
 /**
@@ -105,38 +106,6 @@ export async function startInteractiveWebUI(
   }
 
   return httpServer;
-}
-
-/**
- * Auto-detect if a path is a regex pattern
- */
-function isRegexPattern(path: string): boolean {
-  return /[.*+?^${}()|[\\]\\]/.test(path);
-}
-
-/**
- * Create a path matcher for both static paths and regex patterns
- */
-function createPathMatcher(basePath: string) {
-  if (!basePath) return { test: () => true, extract: (path: string) => path };
-
-  if (isRegexPattern(basePath)) {
-    const regex = new RegExp(`^${basePath}`);
-    return {
-      test: (path: string) => regex.test(path),
-      extract: (path: string) => {
-        const match = path.match(regex);
-        return match ? (path === match[0] ? '/' : path.substring(match[0].length) || '/') : path;
-      },
-    };
-  } else {
-    const normalized = basePath.replace(/\/$/, '');
-    return {
-      test: (path: string) => path === normalized || path.startsWith(normalized + '/'),
-      extract: (path: string) =>
-        path === normalized ? '/' : path.substring(normalized.length) || '/',
-    };
-  }
 }
 
 /**
