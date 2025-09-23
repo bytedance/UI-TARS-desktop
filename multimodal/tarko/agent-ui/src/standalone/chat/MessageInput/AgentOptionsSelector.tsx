@@ -331,9 +331,9 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
             <div className="flex items-center min-w-0 flex-1">
               {getOptionIcon(key, property)}
               <div className="ml-3 flex-1 min-w-0">
-                <div className="flex items-center gap-2 min-w-0">
+                <div className="flex items-center gap-3 min-w-0">
                   <span className="font-medium text-sm truncate">{property.title || key}</span>
-                  <span className="text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/60 px-2 py-1 rounded-full whitespace-nowrap flex-shrink-0 font-medium">
+                  <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap flex-shrink-0">
                     {currentValue || property.default}
                   </span>
                 </div>

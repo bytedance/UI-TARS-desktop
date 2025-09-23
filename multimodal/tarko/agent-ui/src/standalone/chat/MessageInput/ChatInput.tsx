@@ -479,7 +479,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                         <span className="truncate flex items-center">
                           <span>{option.title}</span>
                           {option.displayValue && (
-                            <span className="ml-2 text-xs text-gray-500 dark:text-gray-400 bg-white/80 dark:bg-gray-700/80 px-2 py-0.5 rounded-full font-medium backdrop-blur-sm border border-gray-200/50 dark:border-gray-600/50">
+                            <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
                               {option.displayValue}
                             </span>
                           )}
