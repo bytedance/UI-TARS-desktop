@@ -108,6 +108,37 @@ export async function startInteractiveWebUI(
 }
 
 /**
+ * Auto-detect if a path is a regex pattern
+ */
+function isRegexPattern(path: string): boolean {
+  return /[.*+?^${}()|[\\]\\]/.test(path);
+}
+
+/**
+ * Create a path matcher for both static paths and regex patterns
+ */
+function createPathMatcher(basePath: string) {
+  if (!basePath) return { test: () => true, extract: (path: string) => path };
+  
+  if (isRegexPattern(basePath)) {
+    const regex = new RegExp(`^${basePath}`);
+    return {
+      test: (path: string) => regex.test(path),
+      extract: (path: string) => {
+        const match = path.match(regex);
+        return match ? (path === match[0] ? '/' : path.substring(match[0].length) || '/') : path;
+      }
+    };
+  } else {
+    const normalized = basePath.replace(/\/$/, '');
+    return {
+      test: (path: string) => path === normalized || path.startsWith(normalized + '/'),
+      extract: (path: string) => path === normalized ? '/' : path.substring(normalized.length) || '/'
+    };
+  }
+}
+
+/**
  * Configure Express app to serve UI files
  */
 function setupUI(
@@ -120,13 +151,22 @@ function setupUI(
     logger.debug(`Using static files from: ${staticPath}`);
   }
 
+  const pathMatcher = createPathMatcher(webui.basePath);
+
   // Middleware to inject baseURL for HTML requests
   const injectBaseURL = (
     req: express.Request,
     res: express.Response,
     next: express.NextFunction,
   ) => {
-    if (!req.path.endsWith('.html') && req.path !== '/' && !req.path.match(/^\/[^.]*$/)) {
+    // Check if request path matches basePath pattern
+    if (!pathMatcher.test(req.path)) {
+      return next();
+    }
+
+    const extractedPath = pathMatcher.extract(req.path);
+    
+    if (!extractedPath.endsWith('.html') && extractedPath !== '/' && !extractedPath.match(/^\/[^.]*$/)) {
       return next();
     }
 
@@ -143,39 +183,47 @@ function setupUI(
     res.send(htmlContent);
   };
 
-  // Handle root path and client-side routes
-  app.get('/', injectBaseURL);
-
-  app.get(/^\/[^.]*$/, (req, res, next) => {
-    if (
-      req.path.includes('.') &&
-      !req.path.endsWith('.html') &&
-      !req.path.startsWith('/static/') &&
-      !req.path.startsWith('/assets/') &&
-      !req.path.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/)
-    ) {
+  // Handle root path and client-side routes with basePath support
+  app.get('*', (req, res, next) => {
+    if (!pathMatcher.test(req.path)) {
       return next();
     }
 
-    injectBaseURL(req, res, next);
-  });
+    const extractedPath = pathMatcher.extract(req.path);
+    
+    // Handle root path
+    if (extractedPath === '/') {
+      return injectBaseURL(req, res, next);
+    }
 
-  // Serve static files
-  app.use((req, res, next) => {
-    if (req.path.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|map)$/)) {
-      const filePath = path.join(staticPath, req.path);
+    // Handle client-side routes
+    if (extractedPath.match(/^\/[^.]*$/)) {
+      if (
+        extractedPath.includes('.') &&
+        !extractedPath.endsWith('.html') &&
+        !extractedPath.startsWith('/static/') &&
+        !extractedPath.startsWith('/assets/') &&
+        !extractedPath.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/)
+      ) {
+        return next();
+      }
+
+      return injectBaseURL(req, res, next);
+    }
+
+    // Handle static files
+    if (extractedPath.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|map)$/)) {
+      const filePath = path.join(staticPath, extractedPath);
       if (fs.existsSync(filePath)) {
         return res.sendFile(filePath);
       }
     }
-    next();
-  });
 
-  // Fallback to index.html for SPA routes
-  app.use((req, res, next) => {
-    if (req.method === 'GET' && !req.path.includes('.') && !req.path.startsWith('/api/')) {
+    // Fallback for SPA routes
+    if (req.method === 'GET' && !extractedPath.includes('.') && !extractedPath.startsWith('/api/')) {
       return injectBaseURL(req, res, next);
     }
+
     next();
   });
 }
