@@ -59,7 +59,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const [uploadedImages, setUploadedImages] = useState<ChatCompletionContentPart[]>([]);
   const [isAborting, setIsAborting] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  const [activeAgentOptions, setActiveAgentOptions] = useState<Array<{key: string, title: string, currentValue: any, displayValue?: string}>>([]);
+  const [activeAgentOptions, setActiveAgentOptions] = useState<
+    Array<{ key: string; title: string; currentValue: any; displayValue?: string }>
+  >([]);
   const agentOptionsSelectorRef = useRef<AgentOptionsSelectorRef | null>(null);
 
   const { activeSessionId, sessionMetadata } = useSession();
@@ -419,13 +421,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               placeholder={placeholder || defaultPlaceholder}
               disabled={isDisabled}
               className={`w-full px-5 ${
-                uploadedImages.length > 0
-                  ? 'pt-2' 
-                  : 'pt-5'
+                uploadedImages.length > 0 ? 'pt-2' : 'pt-5'
               } pb-12 focus:outline-none resize-none ${
                 uploadedImages.length > 0
-                  ? (variant === 'home' ? 'min-h-[100px]' : 'min-h-[80px]') 
-                  : variant === 'home' ? 'min-h-[120px]' : 'min-h-[100px]'
+                  ? variant === 'home'
+                    ? 'min-h-[100px]'
+                    : 'min-h-[80px]'
+                  : variant === 'home'
+                    ? 'min-h-[120px]'
+                    : 'min-h-[100px]'
               } max-h-[220px] bg-transparent text-sm leading-relaxed rounded-[1.4rem]`}
               rows={2}
             />
@@ -433,10 +437,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             {/* Left side controls */}
             <div className="absolute left-3 bottom-3 flex items-center gap-2">
               {/* Agent Options Selector - First (leftmost) */}
-              <AgentOptionsSelector 
+              <AgentOptionsSelector
                 ref={agentOptionsSelectorRef}
-                activeSessionId={sessionId} 
-                sessionMetadata={sessionMetadata} 
+                activeSessionId={sessionId}
+                sessionMetadata={sessionMetadata}
                 onActiveOptionsChange={setActiveAgentOptions}
                 onToggleOption={handleToggleOption}
                 showAttachments={showAttachments}
@@ -444,7 +448,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 isDisabled={isDisabled}
                 isProcessing={isProcessing}
               />
-              
+
               {/* Active agent options tags */}
               {activeAgentOptions.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
@@ -456,7 +460,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                       if (lowerKey.includes('foo')) return <TbBulb className="w-3 h-3" />;
                       if (lowerKey.includes('search')) return <TbSearch className="w-3 h-3" />;
                       if (lowerKey.includes('research')) return <TbBook className="w-3 h-3" />;
-                      if (lowerKey.includes('thinking') || lowerTitle.includes('思考')) return <TbBrain className="w-3 h-3" />;
+                      if (lowerKey.includes('thinking') || lowerTitle.includes('思考'))
+                        return <TbBrain className="w-3 h-3" />;
                       return <TbSettings className="w-3 h-3" />;
                     };
 

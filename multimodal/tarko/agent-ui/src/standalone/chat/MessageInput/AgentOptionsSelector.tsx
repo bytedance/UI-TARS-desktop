@@ -52,7 +52,11 @@ interface DropdownSubMenuProps {
   disabled?: boolean;
 }
 
-const DropdownSubMenu: React.FC<DropdownSubMenuProps> = ({ trigger, children, disabled = false }) => {
+const DropdownSubMenu: React.FC<DropdownSubMenuProps> = ({
+  trigger,
+  children,
+  disabled = false,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -81,7 +85,7 @@ const DropdownSubMenu: React.FC<DropdownSubMenuProps> = ({ trigger, children, di
       const submenuRect = submenu.getBoundingClientRect();
       const mouseX = e.clientX;
       const mouseY = e.clientY;
-      
+
       // If mouse is within submenu bounds or moving towards it, don't close
       if (
         mouseX >= submenuRect.left - 10 &&
@@ -92,7 +96,7 @@ const DropdownSubMenu: React.FC<DropdownSubMenuProps> = ({ trigger, children, di
         return;
       }
     }
-    
+
     // Delay closing to allow mouse to reach submenu
     setTimeout(() => {
       setIsOpen(false);
@@ -102,11 +106,8 @@ const DropdownSubMenu: React.FC<DropdownSubMenuProps> = ({ trigger, children, di
   const submenuContent = isOpen ? (
     <>
       {/* Overlay */}
-      <div 
-        className="fixed inset-0 z-40" 
-        onClick={() => setIsOpen(false)}
-      />
-      
+      <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+
       {/* Submenu */}
       <div
         ref={submenuRef}
@@ -138,24 +139,26 @@ const DropdownSubMenu: React.FC<DropdownSubMenuProps> = ({ trigger, children, di
         {trigger}
         <FiChevronRight className="ml-2 w-4 h-4 text-gray-400" />
       </button>
-      
-      {typeof document !== 'undefined' && submenuContent && createPortal(submenuContent, document.body)}
+
+      {typeof document !== 'undefined' &&
+        submenuContent &&
+        createPortal(submenuContent, document.body)}
     </>
   );
 };
 
 export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOptionsSelectorProps>(
   (
-    { 
-      activeSessionId, 
-      sessionMetadata, 
-      className = '', 
-      onActiveOptionsChange, 
+    {
+      activeSessionId,
+      sessionMetadata,
+      className = '',
+      onActiveOptionsChange,
       onToggleOption,
       showAttachments = true,
       onFileUpload,
       isDisabled = false,
-      isProcessing: isProcessingProp = false
+      isProcessing: isProcessingProp = false,
     },
     ref,
   ) => {
@@ -207,7 +210,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
             sessionId: activeSessionId,
             metadata: response.sessionInfo.metadata,
           });
-          
+
           // Show success feedback briefly
           console.log('Agent options updated successfully', { key, value });
         }
@@ -281,11 +284,13 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
     }
 
     // Always show the button, even if no schema options available
-    const options = schema?.properties ? Object.entries(schema.properties).map(([key, property]) => ({
-      key,
-      property,
-      currentValue: currentValues?.[key] ?? property.default,
-    })) : [];
+    const options = schema?.properties
+      ? Object.entries(schema.properties).map(([key, property]) => ({
+          key,
+          property,
+          currentValue: currentValues?.[key] ?? property.default,
+        }))
+      : [];
 
     const getOptionIcon = (key: string, property: any) => {
       const lowerKey = key.toLowerCase();
@@ -347,7 +352,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
 
         const submenuItems = property.enum.map((option: any) => {
           const isSelected = currentValue === option;
-          
+
           return (
             <DropdownItem
               key={option}
@@ -367,11 +372,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
         });
 
         return (
-          <DropdownSubMenu
-            key={key}
-            trigger={submenuTrigger}
-            disabled={isLoading}
-          >
+          <DropdownSubMenu key={key} trigger={submenuTrigger} disabled={isLoading}>
             {submenuItems}
           </DropdownSubMenu>
         );
@@ -381,25 +382,21 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
     };
 
     return (
-    <Dropdown
-    placement="top-start"
-    trigger={
-    <button
-    type="button"
-    disabled={isLoading || isDisabled}
-    className={`flex items-center justify-center w-8 h-8 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-    isLoading ? 'animate-pulse' : ''
-    }`}
-    title={isLoading ? 'Updating agent options...' : 'Options'}
-    >
-    {isLoading ? (
-    <FiLoader size={16} className="animate-spin" />
-    ) : (
-    <FiPlus size={16} />
-    )}
-    </button>
-    }
-    >
+      <Dropdown
+        placement="top-start"
+        trigger={
+          <button
+            type="button"
+            disabled={isLoading || isDisabled}
+            className={`flex items-center justify-center w-8 h-8 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+              isLoading ? 'animate-pulse' : ''
+            }`}
+            title={isLoading ? 'Updating agent options...' : 'Options'}
+          >
+            {isLoading ? <FiLoader size={16} className="animate-spin" /> : <FiPlus size={16} />}
+          </button>
+        }
+      >
         {/* File upload option */}
         {showAttachments && (
           <DropdownItem
@@ -410,10 +407,10 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
             <div className="font-medium text-sm">Upload Images</div>
           </DropdownItem>
         )}
-        
+
         {/* Separator between upload and agent settings */}
         {showAttachments && options.length > 0 && <DropdownDivider />}
-        
+
         {/* Agent options */}
         {options.map(renderOptionItem)}
       </Dropdown>

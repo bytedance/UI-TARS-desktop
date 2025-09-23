@@ -45,11 +45,8 @@ export const Dropdown: React.FC<DropdownProps> = ({
   const dropdownContent = isOpen ? (
     <>
       {/* Overlay */}
-      <div 
-        className="fixed inset-0 z-40" 
-        onClick={() => setIsOpen(false)}
-      />
-      
+      <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+
       {/* Menu */}
       <div
         className={`fixed z-50 w-72 rounded-2xl bg-white dark:bg-gray-900 shadow-2xl shadow-black/10 dark:shadow-black/30 border border-gray-200/60 dark:border-gray-700/60 overflow-hidden backdrop-blur-sm ${menuClassName}`}
@@ -67,12 +64,12 @@ export const Dropdown: React.FC<DropdownProps> = ({
   return (
     <>
       <div className={`relative inline-block text-left ${className}`} ref={triggerRef}>
-        <div onClick={() => setIsOpen(!isOpen)}>
-          {trigger}
-        </div>
+        <div onClick={() => setIsOpen(!isOpen)}>{trigger}</div>
       </div>
-      
-      {typeof document !== 'undefined' && dropdownContent && createPortal(dropdownContent, document.body)}
+
+      {typeof document !== 'undefined' &&
+        dropdownContent &&
+        createPortal(dropdownContent, document.body)}
     </>
   );
 };
@@ -92,10 +89,12 @@ export const DropdownItem: React.FC<DropdownItemProps> = ({
       } ${className}`}
       disabled={disabled}
     >
-      {icon && <span className="mr-3 flex-shrink-0 text-base text-gray-600 dark:text-gray-400">{icon}</span>}
-      <div className="flex-1 min-w-0">
-        {children}
-      </div>
+      {icon && (
+        <span className="mr-3 flex-shrink-0 text-base text-gray-600 dark:text-gray-400">
+          {icon}
+        </span>
+      )}
+      <div className="flex-1 min-w-0">{children}</div>
     </button>
   );
 };
@@ -109,7 +108,9 @@ export const DropdownHeader: React.FC<{ children: React.ReactNode; className?: s
   className = '',
 }) => {
   return (
-    <div className={`px-1 py-1.5 mb-2 text-sm font-medium text-gray-900 dark:text-gray-100 ${className}`}>
+    <div
+      className={`px-1 py-1.5 mb-2 text-sm font-medium text-gray-900 dark:text-gray-100 ${className}`}
+    >
       {children}
     </div>
   );
