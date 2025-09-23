@@ -100,7 +100,7 @@ export const DropdownItem: React.FC<DropdownItemProps> = ({
 };
 
 export const DropdownDivider: React.FC<DropdownDividerProps> = ({ className = '' }) => {
-  return <div className={`my-2 h-px bg-gray-100 dark:bg-gray-800 ${className}`} />;
+  return <div className={`my-1 h-px bg-gray-100 dark:bg-gray-800 ${className}`} />;
 };
 
 export const DropdownHeader: React.FC<{ children: React.ReactNode; className?: string }> = ({
