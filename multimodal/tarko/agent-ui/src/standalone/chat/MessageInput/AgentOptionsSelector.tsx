@@ -8,7 +8,7 @@ import { useAtomValue } from 'jotai';
 import { isProcessingAtom } from '@/common/state/atoms/ui';
 import { FiPlus, FiCheck, FiChevronRight, FiImage, FiPaperclip, FiLoader, FiX } from 'react-icons/fi';
 import { TbBulb, TbSearch, TbBook, TbSettings, TbBrain, TbPhoto } from 'react-icons/tb';
-import { Dialog, DialogPanel, DialogTitle, Dropdown, DropdownItem, DropdownDivider } from '@tarko/ui';
+import { Dropdown, DropdownItem, DropdownDivider } from '@tarko/ui';
 
 interface ActiveOption {
   key: string;
@@ -335,60 +335,85 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
     </Dropdown>
 
     {/* Agent Options Modal - only for enum options */}
-    <Dialog open={isAgentOptionsModalOpen} onClose={() => setIsAgentOptionsModalOpen(false)}>
-    <DialogPanel className="max-w-lg mx-auto bg-white dark:bg-gray-800 rounded-lg p-6">
-    <DialogTitle className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+    {isAgentOptionsModalOpen && (
+    <>
+    {/* Backdrop */}
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 z-50"
+      onClick={() => setIsAgentOptionsModalOpen(false)}
+    />
+    
+    {/* Modal */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div 
+    className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[80vh] overflow-y-auto"
+    onClick={(e) => e.stopPropagation()}
+    >
+    {/* Header */}
+    <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
     Agent Options
-    </DialogTitle>
-    <div className="space-y-3">
+    </h2>
+    <button
+    onClick={() => setIsAgentOptionsModalOpen(false)}
+    className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+    >
+    <FiX className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+    </button>
+    </div>
+    
+    {/* Content */}
+    <div className="p-4 space-y-3">
     {options
     .filter(config => config.property.type === 'string' && config.property.enum)
     .map(config => {
-      const { key, property, currentValue } = config;
-        
-          return property.enum?.map((option: any) => {
-              const isSelected = currentValue === option;
-                const optionKey = `${key}-${option}`;
-                  
-                    return (
-                      <div
-                        key={optionKey}
-                        onClick={() => {
-                          handleOptionChange(key, option);
-                          setIsAgentOptionsModalOpen(false);
-                        }}
-                        className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all hover:bg-gray-50 dark:hover:bg-gray-800 ${
-                          isSelected ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700' : 'border-gray-200 dark:border-gray-700'
-                        } ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="text-blue-600 dark:text-blue-400">
-                            {getOptionIcon(key, property)}
-                          </div>
+    const { key, property, currentValue } = config;
+    
+    return property.enum?.map((option: any) => {
+    const isSelected = currentValue === option;
+    const optionKey = `${key}-${option}`;
+    
+      return (
+          <div
+              key={optionKey}
+                onClick={() => {
+                  handleOptionChange(key, option);
+                    setIsAgentOptionsModalOpen(false);
+                  }}
+                  className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all hover:bg-gray-50 dark:hover:bg-gray-800 ${
+                  isSelected ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700' : 'border-gray-200 dark:border-gray-700'
+              } ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
+            >
+                <div className="flex items-center gap-3">
+                    <div className="text-blue-600 dark:text-blue-400">
+                        {getOptionIcon(key, property)}
+                        </div>
                           <div className="flex-1">
-                            <div className="font-medium text-sm text-gray-900 dark:text-gray-100">{option}</div>
+                                <div className="font-medium text-sm text-gray-900 dark:text-gray-100">{option}</div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {isLoading && <FiLoader className="w-4 h-4 animate-spin text-blue-600" />}
+                              {isSelected && !isLoading && <FiCheck className="w-5 h-5 text-blue-600" />}
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {isLoading && <FiLoader className="w-4 h-4 animate-spin text-blue-600" />}
-                          {isSelected && !isLoading && <FiCheck className="w-5 h-5 text-blue-600" />}
-                        </div>
-                      </div>
-                    );
-                  });
-                })
-                .flat()}
-              
-              {/* No enum options message */}
-              {!options.some(config => config.property.type === 'string' && config.property.enum) && (
-                <div className="text-center py-8">
-                  <TbSettings className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-                  <p className="text-sm text-gray-500 dark:text-gray-400">No additional options available</p>
+                        );
+                      });
+                    })
+                    .flat()}
+                  
+                  {/* No enum options message */}
+                  {!options.some(config => config.property.type === 'string' && config.property.enum) && (
+                    <div className="text-center py-8">
+                      <TbSettings className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+                      <p className="text-sm text-gray-500 dark:text-gray-400">No additional options available</p>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
-          </DialogPanel>
-        </Dialog>
+          </>
+        )}
       </>
     );
   },
