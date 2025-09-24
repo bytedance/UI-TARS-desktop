@@ -142,11 +142,10 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
     return <TbSettings className="w-4 h-4" />;
   };
 
-  // Don't render if in replay mode, processing, or not chat-bottom placement
+  // Don't render if in replay mode or processing
   if (
     isReplayMode ||
     isProcessingProp ||
-    placement !== 'chat-bottom' ||
     !schema?.properties ||
     Object.keys(schema.properties).length === 0
   ) {
@@ -155,7 +154,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
 
   // Filter options that should appear in chat-bottom
   const chatBottomOptions = Object.entries(schema.properties).filter(([key, property]) => {
-    const optionPlacement = property.placement || placement;
+    const optionPlacement = property.placement || 'dropdown-item';
     return optionPlacement === 'chat-bottom';
   });
 
