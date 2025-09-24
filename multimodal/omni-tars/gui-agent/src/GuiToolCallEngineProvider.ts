@@ -3,7 +3,7 @@
  * Provides optimized tool call engine for GUI automation and computer use tasks
  */
 
-import { ToolCallEngineProvider, ToolCallEngineContext } from '@omni-tars/core';
+import { ToolCallEngineProvider, ToolCallEngineContext, AgentMode } from '@omni-tars/core';
 import { GUIAgentToolCallEngine } from './GUIAgentToolCallEngine';
 
 export class GuiToolCallEngineProvider extends ToolCallEngineProvider<GUIAgentToolCallEngine> {

@@ -9,7 +9,6 @@ import { SessionInfo } from '@tarko/interface';
 import { ShareService } from '../services';
 import { filterSessionModel } from '../utils';
 
-
 /**
  * Get runtime settings schema and current values
  */
@@ -65,54 +64,43 @@ export async function getRuntimeSettings(c: HonoContext) {
  * Update runtime settings for a session
  */
 export async function updateRuntimeSettings(c: HonoContext) {
-  const body = await c.req.json()
+  const body = await c.req.json();
+  const server = c.get('server');
+  const activeSession = c.get('session');
 
-  const { sessionId, runtimeSettings } =  body as {
+  if (!activeSession) {
+    return c.json({ error: 'Session not found' }, 404);
+  }
+
+  const { runtimeSettings } =  body as {
     sessionId: string;
     runtimeSettings: Record<string, any>;
   };
+  const sessionId = activeSession.id;
 
-  if (!sessionId) {
-    return c.json({ error: 'Session ID is required' }, 400);
-  }
 
   if (!runtimeSettings || typeof runtimeSettings !== 'object') {
     return c.json({ error: 'Runtime settings object is required' }, 400);
   }
 
   try {
-    const server = c.get('server');
-
-    const sessionInfo = await server.daoFactory.getSessionInfo(sessionId);
-    if (!sessionInfo) {
-      return c.json({ error: 'Session not found' }, 404);
-    }
-
     // Update session info with new runtime settings
-    const updatedSessionInfo = await server.daoFactory.updateSessionInfo(sessionId, {
+    const updated = {
       metadata: {
-        ...sessionInfo.metadata,
+        ...activeSession.sessionInfo?.metadata,
         runtimeSettings,
       },
-    });
+    }
 
-    // If session is currently active, recreate the agent with new runtime settings
-    const activeSession = server.getSessionPool().get(sessionId);
+    const updatedSessionInfo = await server.daoFactory.updateSessionInfo(sessionId, updated);
 
-    if (activeSession) {
-      console.log('Runtime settings updated', {
-        sessionId,
-        runtimeSettings,
-      });
-
-      try {
-        // Recreate agent with new runtime settings configuration
-        await activeSession!.updateSessionConfig(updatedSessionInfo);
-        console.log('Session agent recreated with new runtime settings', { sessionId });
-      } catch (error) {
-        console.error('Failed to update agent runtime settings for session', { sessionId, error });
-        // Continue execution - the runtime settings are saved, will apply on next session
-      }
+    try {
+      // Recreate agent with new runtime settings configuration
+      await activeSession!.updateSessionConfig(updatedSessionInfo);
+      console.log('Session agent recreated with new runtime settings', { sessionId });
+    } catch (error) {
+      console.error('Failed to update agent runtime settings for session', { sessionId, error });
+      // Continue execution - the runtime settings are saved, will apply on next session
     }
 
     return c.json({ 

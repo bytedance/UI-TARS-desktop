@@ -140,7 +140,7 @@ export class AgentSession {
 
     // Apply runtime settings transformation if available
     const runtimeSettingsConfig = this.server.appConfig?.server?.runtimeSettings;
-    let transformedOptions = {};
+    let transformedOptions = sessionInfo?.metadata?.runtimeSettings ?? {};
     
     if (runtimeSettingsConfig?.transform && sessionInfo?.metadata?.runtimeSettings) {
       try {

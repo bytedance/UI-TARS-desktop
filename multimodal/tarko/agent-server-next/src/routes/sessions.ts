@@ -28,6 +28,7 @@ export function createSessionRoutes(): Hono<{ Variables: ContextVariables }> {
   router.use('/api/v1/sessions/generate-summary', sessionRestoreMiddleware);
   router.use('/api/v1/sessions/share', sessionRestoreMiddleware);
   router.use('/api/v1/sessions/workspace/*', sessionRestoreMiddleware);
+  router.use('/api/v1/sessions/runtime-settings', sessionRestoreMiddleware);
 
   // Session-specific routes
   router.get('/api/v1/sessions/details', sessionsController.getSessionDetails);
@@ -38,7 +39,6 @@ export function createSessionRoutes(): Hono<{ Variables: ContextVariables }> {
   router.post('/api/v1/sessions/delete', sessionsController.deleteSession);
   router.post('/api/v1/sessions/generate-summary', sessionsController.generateSummary);
   router.post('/api/v1/sessions/share', sessionsController.shareSession);
-  // runtime settings
   router.get('/api/v1/sessions/runtime-settings', sessionsController.getRuntimeSettings);
   router.post('/api/v1/sessions/runtime-settings', sessionsController.updateRuntimeSettings);
 

@@ -34,6 +34,19 @@ const server = new AgentServer({
       type: process.env.NATIVE_THINKING === 'true' ? 'enabled' : 'disabled',
     },
     server: {
+      runtimeSettings: {
+        schema: {
+          type: 'object',
+          properties: {
+            agentMode: {
+              type: 'string',
+              title: 'Agent Mode',
+              enum: ['omni', 'gui'],
+              default: 'omni',
+            },
+          },
+        },
+      },
       storage: {
         type: 'mongodb',
         uri: process.env.MONGO_URI,
@@ -80,7 +93,7 @@ const server = new AgentServer({
     webui: {
       type: 'remote',
       remoteUrl: process.env.WEBUI_REMOTE_URL,
-    }
+    },
   },
 });
 

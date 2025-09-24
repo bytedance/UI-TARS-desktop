@@ -7,7 +7,7 @@ export { ComposableAgent } from './ComposableAgent';
 export type { ComposableAgentOptions } from './ComposableAgent';
 export { createComposableToolCallEngineFactory } from './ComposableToolCallEngineFactory';
 export { ToolCallEngineProvider } from './types';
-export type { ToolCallEngineContext } from './types';
+export type { ToolCallEngineContext, AgentMode } from './types';
 
 export { CODE_ENVIRONMENT } from './environments/code';
 export { MCP_ENVIRONMENT } from './environments/mcp';

@@ -2,32 +2,12 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import {
-  codePluginBuilder,
-  CodeToolCallEngineProvider,
-  CodeAgentExtraOption,
-} from '@omni-tars/code-agent';
-import {
-  mcpPluginBuilder,
-  McpToolCallEngineProvider,
-  MCPTarsExtraOption,
-} from '@omni-tars/mcp-agent';
-import { GuiAgentPlugin, GuiToolCallEngineProvider, OperatorManager } from '@omni-tars/gui-agent';
-import { ComposableAgent, createComposableToolCallEngineFactory } from '@omni-tars/core';
-import { AgentOptions } from '@tarko/agent';
-import { AgentWebUIImplementation } from '@tarko/interface';
 
-const mcpToolCallEngine = new McpToolCallEngineProvider();
-
-const toolCallEngine = createComposableToolCallEngineFactory({
-  engines: [new GuiToolCallEngineProvider(), mcpToolCallEngine, new CodeToolCallEngineProvider()],
-  defaultEngine: mcpToolCallEngine,
-});
+import { ComposableAgent } from '@omni-tars/core';
+import {  AgentWebUIImplementation } from '@tarko/interface';
+import { getComposableOption, OmniTarsOption } from './options';
 
 const sandboxBaseUrl = process.env.AIO_SANDBOX_URL ?? '.';
-
-type OmniTarsOption = AgentOptions & MCPTarsExtraOption & CodeAgentExtraOption;
-
 export default class OmniTARSAgent extends ComposableAgent {
   static label = 'Omni Agent';
 
@@ -76,33 +56,7 @@ export default class OmniTARSAgent extends ComposableAgent {
     },
   };
 
-  constructor(options: OmniTarsOption) {
-    const {
-      tavilyApiKey,
-      googleApiKey,
-      googleMcpUrl,
-      sandboxUrl,
-      ignoreSandboxCheck,
-      linkReaderAK,
-      linkReaderMcpUrl,
-      ...restOptions
-    } = options;
-    super({
-      ...restOptions,
-      plugins: [
-        mcpPluginBuilder({
-          tavilyApiKey,
-          googleApiKey,
-          googleMcpUrl,
-          linkReaderAK,
-          linkReaderMcpUrl,
-        }),
-        codePluginBuilder({ sandboxUrl, ignoreSandboxCheck }),
-        new GuiAgentPlugin({ operatorManager: OperatorManager.createHybird(options.sandboxUrl) }),
-      ],
-      toolCallEngine,
-      maxTokens: 32768,
-      enableStreamingToolCallEvents: true,
-    });
+  constructor(option: OmniTarsOption) {
+    super(getComposableOption(option));
   }
 }

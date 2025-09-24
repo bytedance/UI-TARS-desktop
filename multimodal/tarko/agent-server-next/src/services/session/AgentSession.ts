@@ -71,7 +71,7 @@ export class AgentSession {
   private unsubscribe: (() => void) | null = null;
   private agioProvider?: AgioEvent.AgioProvider;
   private agioProviderConstructor?: AgioProviderConstructor;
-  private sessionInfo?: SessionInfo;
+  public sessionInfo?: SessionInfo;
   private logger: ILogger;
   /**
    * Create event handler for storage and AGIO processing
@@ -143,7 +143,7 @@ export class AgentSession {
 
     // Apply runtime settings transformation if available
     const runtimeSettingsConfig = this.server.appConfig?.server?.runtimeSettings;
-    let transformedOptions = {};
+    let transformedOptions = sessionInfo?.metadata?.runtimeSettings ?? {};
 
     if (runtimeSettingsConfig?.transform && sessionInfo?.metadata?.runtimeSettings) {
       try {
