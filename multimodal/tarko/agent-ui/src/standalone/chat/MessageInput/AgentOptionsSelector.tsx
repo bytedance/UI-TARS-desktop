@@ -443,15 +443,13 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
             <div className="flex items-center min-w-0 flex-1">
               {getOptionIcon(key, property)}
               <div className="ml-2.5 flex-1 min-w-0">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <span className="font-medium text-sm truncate">{property.title || key}</span>
-                  <span className="text-xs text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded whitespace-nowrap flex-shrink-0">
-                    {getEnumDisplayLabel(property, currentValue || property.default)}
-                  </span>
-                </div>
+                <div className="font-medium text-sm">{property.title || key}</div>
               </div>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
+              <span className="text-xs text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded whitespace-nowrap">
+                {getEnumDisplayLabel(property, currentValue || property.default)}
+              </span>
               {isLoading && <FiLoader className="w-3 h-3 animate-spin text-blue-600" />}
             </div>
           </div>
