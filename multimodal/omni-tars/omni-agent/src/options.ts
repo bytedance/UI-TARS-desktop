@@ -63,11 +63,6 @@ export function getComposableOption(options: OmniTarsOption) {
         new GuiAgentPlugin({ operatorManager: OperatorManager.createHybird(options.sandboxUrl) }),
       ];
     }
-    
-    console.log('******* agent options: ', JSON.stringify({
-      ...baseOptions,
-      initialEvents: []
-    }, null, 2));
-
+  
     return baseOptions as ComposableAgentOptions;
 }
