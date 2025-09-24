@@ -138,19 +138,15 @@ export const TerminalRenderer: React.FC<TerminalRendererProps> = ({
 
               {/* Arguments section */}
               {argumentsJson && (
-                <div className="p-3 pb-0">
-                  <div className="bg-gray-900 rounded border border-gray-700 p-2 max-h-48 overflow-auto">
-                    <CodeHighlight code={argumentsJson} language="json" />
-                  </div>
+                <div className="p-3 pb-0 bg-gray-900 rounded border border-gray-700 m-3 mb-0 max-h-48 overflow-auto">
+                  <CodeHighlight code={argumentsJson} language="json" />
                 </div>
               )}
 
               {/* Output section */}
               {output && (
-                <div className="p-3">
-                  <div className="bg-gray-900 rounded border border-gray-700 p-2 max-h-96 overflow-auto">
-                    <CodeHighlight code={output} language="json" />
-                  </div>
+                <div className="p-3 bg-gray-900 rounded border border-gray-700 m-3 max-h-96 overflow-auto">
+                  <CodeHighlight code={output} language="json" />
                 </div>
               )}
             </div>
