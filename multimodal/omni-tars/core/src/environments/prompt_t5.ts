@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { AgentMode } from '../types';
 import { getTimeString } from '../utils/hepler';
 import { HOME_INSTRUCTION, PROXY_INSTRUCTION } from './code';
 
@@ -11,13 +12,21 @@ export const use_native_thinking = process.env.NATIVE_THINKING === 'true';
 export const bypass_native_thinking = process.env.NATIVE_THINKING === 'bypass';
 
 const think_budget = '\n';
+
 const task_description = `\nCurrent time is: ${getTimeString()}\n
 As a professional personal assistant (Doubao) capable of solving various user problems, you will first reason through a user's problem to devise a solution, flexibly using a series of tools in combination with your thinking to accomplish the task and provide an accurate, reliable answer. While thinking and using tools, you may continuously and flexibly adjust your solution approach based on the results of tool calls. \n`;
 
+const gui_task_description = `\nCurrent time is: ${getTimeString()}\n
+You are a GUI agent. You are given a task and your action history, with screenshots. You need to perform the next action to complete the task. \n`;
+
+
 //Mixed scenarios use this additional_notes
-const additional_notes = '- Use english in your reasoning process.';
+const omni_additional_notes = `- Use english in your reasoning process. \n
+${HOME_INSTRUCTION}
+${PROXY_INSTRUCTION}
+`;
 //Pure GUI scenarios use this additional_notes_gui
-const additional_notes_gui = `- You can execute multiple actions within a single tool call. For example:\n<seed:tool_call>\n<function=example_function_1>\n<parameter=example_parameter_1>value_1</parameter>\n<parameter=example_parameter_2>\nThis is the value for the second parameter\nthat can span\nmultiple lines\n</parameter>\n</function>\n\n<function=example_function_2>\n<parameter=example_parameter_3>value_4</parameter>\n</function>\n</seed:tool_call>`;
+const gui_additional_notes = `- You can execute multiple actions within a single tool call. For example:\n<seed:tool_call>\n<function=example_function_1>\n<parameter=example_parameter_1>value_1</parameter>\n<parameter=example_parameter_2>\nThis is the value for the second parameter\nthat can span\nmultiple lines\n</parameter>\n</function>\n\n<function=example_function_2>\n<parameter=example_parameter_3>value_4</parameter>\n</function>\n</seed:tool_call>`;
 
 export const mcp_functions = `
 {"type": "function", "name": "LinkReader", "description": "这是一个链接浏览工具，可以打开链接（可以是网页、pdf等）并根据需求描述汇总页面上的所有相关信息。建议对所有有价值的链接都调用该工具来获取信息，有价值的链接包括但不限于如下几种：1.任务中明确提供的网址，2.搜索结果提供的带有相关摘要的网址，3. 之前调用LinkReader返回的内容中包含的且判断可能含有有用信息的网址。请尽量避免自己凭空构造链接。", "parameters": {"properties": {"url": {"type": "string", "description": "目标链接，应该是一个完整的url（以 http 开头）"}, "description": {"type": "string", "description": "需求描述文本，详细描述在当前url内想要获取的内容"}}, "required": ["url", "description"]}}
@@ -46,15 +55,21 @@ export const gui_functions = `
 {"type": "function", "name": "wait", "parameters": {"type": "object", "properties": {"time": {"type": "integer", "description": "Wait time in seconds."}}, "required": []}, "description": "Wait for a while."}
 `;
 
+
+
+const createPROMPT2 = (description: string) => {
+    return `You are an agent designed to accomplish tasks.
+${description}
+<seed:cot_budget_reflect>${think_budget}</seed:cot_budget_reflect>`;
+}
+
 /** 3.1 Think Prompt */
 const PROMPT1 = use_native_thinking
   ? ``
   : `You should first think about the reasoning process in the mind and then provide the user with the answer. The reasoning process is enclosed within <${think_token}> </${think_token}> tags, i.e. <${think_token}> reasoning process here </${think_token}> answer here`;
 
 /** 3.2 Role/Task Prompt */
-const PROMPT2 = `You are an agent designed to accomplish tasks.
-${task_description}
-<seed:cot_budget_reflect>${think_budget}</seed:cot_budget_reflect>`;
+
 
 /** 3.3 Action/Function Definition Prompt (如果没有functions则不需要这段prompt) */
 const createPROMPT3 = (functions: string[], additionalNotes: string) => `## Function Definition
@@ -82,27 +97,31 @@ multiple lines
 
 ## Additional Notes
 ${additionalNotes}
-
-${HOME_INSTRUCTION}
-${PROXY_INSTRUCTION}
 `;
 
-// Default SYSTEM_PROMPT_GROUP for backwards compatibility (omni mode)
-const PROMPT3 = createPROMPT3([mcp_functions, code_functions, gui_functions], additional_notes);
 
-export const SYSTEM_PROMPT_GROUP = [PROMPT1, PROMPT2, PROMPT3].filter(Boolean);
+// Default SYSTEM_PROMPT_GROUP for backwards compatibility (omni mode)
+export const SYSTEM_PROMPT_GROUP = [
+  PROMPT1, 
+  createPROMPT2(task_description),
+  createPROMPT3([mcp_functions, code_functions, gui_functions], omni_additional_notes)
+];
 
 /**
  * Create system prompt group based on agent mode
  * @param agentMode - The agent mode ('omni' or 'gui')
  * @returns Array of prompt strings
  */
-export const createSystemPromptGroup = (agentMode: 'omni' | 'gui'): string[] => {
+export const createSystemPromptGroup = (agentMode: AgentMode = 'omni'): string[] => {
   if (agentMode === 'omni') {
     return SYSTEM_PROMPT_GROUP;
-  } 
+  }else if(agentMode === 'gui') {
+    return [
+      PROMPT1, 
+      createPROMPT2(gui_task_description),
+      createPROMPT3([gui_functions], gui_additional_notes)
+    ]
+  }
 
-  const prompt3 = createPROMPT3([gui_functions], additional_notes_gui);
-  
-  return [PROMPT1, PROMPT2, prompt3].filter(Boolean);
+  return []
 };
