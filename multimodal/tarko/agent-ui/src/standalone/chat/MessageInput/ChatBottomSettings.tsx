@@ -229,7 +229,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
           disabled={isOptionLoading || isDisabled}
           className={`inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
             currentValue
-              ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/30'
+              ? 'bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 hover:bg-indigo-100 dark:hover:bg-indigo-500/20'
               : 'bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50'
           } ${isOptionLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
           title={property.description || property.title || key}
@@ -282,11 +282,11 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
               <DropdownItem
                 key={option}
                 onClick={() => handleOptionChange(key, option)}
-                className={`${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''} ${isOptionLoading ? 'opacity-50 pointer-events-none' : ''}`}
+                className={`${isSelected ? 'bg-indigo-50 dark:bg-indigo-500/15' : ''} ${isOptionLoading ? 'opacity-50 pointer-events-none' : ''}`}
               >
                 <div className="flex items-center justify-between">
                   <span className="font-medium text-sm">{displayLabel}</span>
-                  {isSelected && !isOptionLoading && <FiCheck className="w-4 h-4 text-blue-600" />}
+                  {isSelected && !isOptionLoading && <FiCheck className="w-4 h-4 text-indigo-600" />}
                 </div>
               </DropdownItem>
             );
