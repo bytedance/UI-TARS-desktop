@@ -163,12 +163,12 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
     // Use custom icon if specified
     if (property?.icon) {
       switch (property.icon) {
-        case 'browser': return <TbBrowser className="w-4 h-4" />;
-        case 'search': return <TbSearch className="w-4 h-4" />;
-        case 'book': return <TbBook className="w-4 h-4" />;
-        case 'bulb': return <TbBulb className="w-4 h-4" />;
-        case 'brain': return <TbBrain className="w-4 h-4" />;
-        default: return <TbSettings className="w-4 h-4" />;
+        case 'browser': return <TbBrowser className="w-3.5 h-3.5" />;
+        case 'search': return <TbSearch className="w-3.5 h-3.5" />;
+        case 'book': return <TbBook className="w-3.5 h-3.5" />;
+        case 'bulb': return <TbBulb className="w-3.5 h-3.5" />;
+        case 'brain': return <TbBrain className="w-3.5 h-3.5" />;
+        default: return <TbSettings className="w-3.5 h-3.5" />;
       }
     }
 
@@ -176,12 +176,12 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
     const lowerKey = key.toLowerCase();
     const lowerTitle = (property?.title || '').toLowerCase();
     if (lowerKey.includes('browser') || lowerTitle.includes('browser'))
-      return <TbBrowser className="w-4 h-4" />;
-    if (lowerKey.includes('search')) return <TbSearch className="w-4 h-4" />;
-    if (lowerKey.includes('research')) return <TbBook className="w-4 h-4" />;
-    if (lowerKey.includes('foo')) return <TbBulb className="w-4 h-4" />;
-    if (lowerKey.includes('thinking') || lowerTitle.includes('思考')) return <TbBrain className="w-4 h-4" />;
-    return <TbSettings className="w-4 h-4" />;
+      return <TbBrowser className="w-3.5 h-3.5" />;
+    if (lowerKey.includes('search')) return <TbSearch className="w-3.5 h-3.5" />;
+    if (lowerKey.includes('research')) return <TbBook className="w-3.5 h-3.5" />;
+    if (lowerKey.includes('foo')) return <TbBulb className="w-3.5 h-3.5" />;
+    if (lowerKey.includes('thinking') || lowerTitle.includes('思考')) return <TbBrain className="w-3.5 h-3.5" />;
+    return <TbSettings className="w-3.5 h-3.5" />;
   };
 
   const renderActivatedOption = (option: ActiveOption) => {
@@ -197,13 +197,13 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
           e.stopPropagation();
           onRemoveOption?.(option.key);
         }}
-        className="group inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 cursor-pointer"
+        className="group inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 cursor-pointer"
         title={`Remove ${option.title}`}
       >
         <span className="mr-1.5 text-blue-600 dark:text-blue-400 group-hover:opacity-0 transition-opacity duration-200">
           {getOptionIcon(option.key, property)}
         </span>
-        <FiX className="absolute ml-0 w-4 h-4 text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+        <FiX className="absolute ml-0 w-3.5 h-3.5 text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
         <span className="truncate flex items-center">
           <span className="font-medium">{option.title}</span>
           {option.displayValue && (
@@ -227,7 +227,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
           type="button"
           onClick={() => handleOptionChange(key, !currentValue)}
           disabled={isOptionLoading || isDisabled}
-          className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer ${
+          className={`inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
             currentValue
               ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/30'
               : 'bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50'
@@ -238,8 +238,8 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
             {getOptionIcon(key, property)}
           </span>
           <span className="font-medium">{property.title || key}</span>
-          {isOptionLoading && <FiLoader className="w-4 h-4 animate-spin ml-1.5" />}
-          {currentValue && !isOptionLoading && <FiCheck className="w-4 h-4 ml-1.5" />}
+          {isOptionLoading && <FiLoader className="w-3.5 h-3.5 animate-spin ml-1.5" />}
+          {currentValue && !isOptionLoading && <FiCheck className="w-3.5 h-3.5 ml-1.5" />}
         </button>
       );
     }
@@ -255,7 +255,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
             <button
               type="button"
               disabled={isOptionLoading || isDisabled}
-              className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer ${
+              className={`inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
                 isOptionLoading 
                   ? 'opacity-50 cursor-not-allowed bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700'
                   : 'bg-gray-50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50'
@@ -267,9 +267,9 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
               <span className="font-medium">{property.title || key}:</span>
               <span className="ml-1.5 font-medium text-gray-700 dark:text-gray-300">{currentDisplayLabel}</span>
               {isOptionLoading ? (
-                <FiLoader className="w-4 h-4 animate-spin ml-1.5 text-gray-500 dark:text-gray-400" />
+                <FiLoader className="w-3.5 h-3.5 animate-spin ml-1.5 text-gray-500 dark:text-gray-400" />
               ) : (
-                <FiChevronDown className="w-4 h-4 ml-1.5 text-gray-400 dark:text-gray-500" />
+                <FiChevronDown className="w-3.5 h-3.5 ml-1.5 text-gray-400 dark:text-gray-500" />
               )}
             </button>
           }
