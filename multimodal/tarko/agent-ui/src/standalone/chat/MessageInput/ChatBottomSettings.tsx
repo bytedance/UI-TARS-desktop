@@ -121,12 +121,12 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
     // Use custom icon if specified
     if (property.icon) {
       switch (property.icon) {
-        case 'browser': return <TbBrowser className="w-4 h-4" />;
-        case 'search': return <TbSearch className="w-4 h-4" />;
-        case 'book': return <TbBook className="w-4 h-4" />;
-        case 'bulb': return <TbBulb className="w-4 h-4" />;
-        case 'brain': return <TbBrain className="w-4 h-4" />;
-        default: return <TbSettings className="w-4 h-4" />;
+        case 'browser': return <TbBrowser className="w-3 h-3" />;
+        case 'search': return <TbSearch className="w-3 h-3" />;
+        case 'book': return <TbBook className="w-3 h-3" />;
+        case 'bulb': return <TbBulb className="w-3 h-3" />;
+        case 'brain': return <TbBrain className="w-3 h-3" />;
+        default: return <TbSettings className="w-3 h-3" />;
       }
     }
 
@@ -134,12 +134,12 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
     const lowerKey = key.toLowerCase();
     const lowerTitle = (property.title || '').toLowerCase();
     if (lowerKey.includes('browser') || lowerTitle.includes('browser'))
-      return <TbBrowser className="w-4 h-4" />;
-    if (lowerKey.includes('search')) return <TbSearch className="w-4 h-4" />;
-    if (lowerKey.includes('research')) return <TbBook className="w-4 h-4" />;
-    if (lowerKey.includes('foo')) return <TbBulb className="w-4 h-4" />;
-    if (lowerKey.includes('thinking')) return <TbBrain className="w-4 h-4" />;
-    return <TbSettings className="w-4 h-4" />;
+      return <TbBrowser className="w-3 h-3" />;
+    if (lowerKey.includes('search')) return <TbSearch className="w-3 h-3" />;
+    if (lowerKey.includes('research')) return <TbBook className="w-3 h-3" />;
+    if (lowerKey.includes('foo')) return <TbBulb className="w-3 h-3" />;
+    if (lowerKey.includes('thinking')) return <TbBrain className="w-3 h-3" />;
+    return <TbSettings className="w-3 h-3" />;
   };
 
   // Don't render if in replay mode or processing
@@ -163,7 +163,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
   }
 
   return (
-    <div className={`flex flex-wrap gap-2 ${className}`}>
+    <>
       {chatBottomOptions.map(([key, property]) => {
         const currentValue = currentValues?.[key] ?? property.default;
 
@@ -174,7 +174,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
               type="button"
               onClick={() => handleOptionChange(key, !currentValue)}
               disabled={isLoading || isDisabled}
-              className={`group inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md ${
+              className={`group inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md ${
                 currentValue
                   ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-700 dark:text-blue-300 border border-blue-200/50 dark:border-blue-700/50 hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/30 dark:hover:to-indigo-900/30 hover:border-blue-300/60 dark:hover:border-blue-600/60'
                   : 'bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 border border-gray-200/50 dark:border-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:border-gray-300/60 dark:hover:border-gray-600/60'
@@ -196,10 +196,10 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
         if (property.type === 'string' && property.enum) {
           return (
             <div key={key} className="inline-flex items-center">
-              <span className="mr-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+              <span className="mr-2 text-xs font-medium text-gray-700 dark:text-gray-300">
                 {property.title || key}:
               </span>
-              <div className="inline-flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div className="inline-flex rounded-full border border-gray-200 dark:border-gray-700 overflow-hidden">
                 {property.enum.map((option, index) => {
                   const isSelected = currentValue === option;
                   const displayLabel = getEnumDisplayLabel(property, option);
@@ -210,7 +210,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
                       type="button"
                       onClick={() => handleOptionChange(key, option)}
                       disabled={isLoading || isDisabled}
-                      className={`px-3 py-1.5 text-sm font-medium transition-all duration-200 ${
+                      className={`px-2 py-0.5 text-xs font-medium transition-all duration-200 ${
                         isSelected
                           ? 'bg-blue-600 text-white shadow-sm'
                           : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
@@ -233,6 +233,6 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
 
         return null;
       })}
-    </div>
+    </>
   );
 };

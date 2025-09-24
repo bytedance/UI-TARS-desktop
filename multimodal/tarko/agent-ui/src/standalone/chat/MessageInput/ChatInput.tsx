@@ -536,6 +536,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   })}
                 </div>
               )}
+
+              {/* Chat bottom settings - inline with other controls */}
+              <ChatBottomSettings
+                activeSessionId={sessionId}
+                sessionMetadata={sessionMetadata}
+                isDisabled={isDisabled}
+                isProcessing={isProcessing}
+              />
             </div>
 
             {/* Hidden file input for image upload */}
@@ -613,15 +621,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           </div>
         </div>
       </form>
-
-      {/* Chat bottom settings */}
-      <ChatBottomSettings
-        activeSessionId={sessionId}
-        sessionMetadata={sessionMetadata}
-        className="mt-3"
-        isDisabled={isDisabled}
-        isProcessing={isProcessing}
-      />
 
       {/* Status text */}
       {showHelpText && (
