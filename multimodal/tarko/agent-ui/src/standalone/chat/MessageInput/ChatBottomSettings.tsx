@@ -263,55 +263,52 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
       const currentDisplayLabel = getEnumDisplayLabel(property, currentValue);
       
       return (
-        <div key={`chat-bottom-${key}`} className="inline-flex items-center gap-2">
-          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-            {property.title || key}:
-          </span>
-          <div 
-            className="relative" 
-            ref={(el) => { dropdownRefs.current[key] = el; }}
+        <div 
+          key={`chat-bottom-${key}`}
+          className="relative" 
+          ref={(el) => { dropdownRefs.current[key] = el; }}
+        >
+          <button
+            type="button"
+            onClick={() => setOpenDropdowns(prev => ({ ...prev, [key]: !prev[key] }))}
+            disabled={isLoading || isDisabled}
+            className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-all duration-200 cursor-pointer"
           >
-            <button
-              type="button"
-              onClick={() => setOpenDropdowns(prev => ({ ...prev, [key]: !prev[key] }))}
-              disabled={isLoading || isDisabled}
-              className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-all duration-200 cursor-pointer"
-            >
-              <span className="font-medium">{currentDisplayLabel}</span>
-              <FiChevronDown className={`w-3 h-3 ml-1.5 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
-            </button>
-            
-            {isOpen && (
-              <div className="absolute top-full left-0 mt-1 min-w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
-                {property.enum.map((option) => {
-                  const isSelected = currentValue === option;
-                  const displayLabel = getEnumDisplayLabel(property, option);
-                  
-                  return (
-                    <button
-                      key={option}
-                      type="button"
-                      onClick={() => {
-                        handleOptionChange(key, option);
-                        setOpenDropdowns(prev => ({ ...prev, [key]: false }));
-                      }}
-                      disabled={isLoading || isDisabled}
-                      className={`w-full px-3 py-2 text-left text-xs font-medium transition-all duration-200 ${
-                        isSelected
-                          ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
-                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
-                      } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span>{displayLabel}</span>
-                        {isSelected && <FiCheck className="w-3 h-3" />}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+            <span className="font-medium">{property.title || key}:</span>
+            <span className="ml-1.5 font-medium">{currentDisplayLabel}</span>
+            <FiChevronDown className={`w-3 h-3 ml-1.5 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+          </button>
+          
+          {isOpen && (
+            <div className="absolute bottom-full left-0 mb-1 min-w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
+              {property.enum.map((option) => {
+                const isSelected = currentValue === option;
+                const displayLabel = getEnumDisplayLabel(property, option);
+                
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => {
+                      handleOptionChange(key, option);
+                      setOpenDropdowns(prev => ({ ...prev, [key]: false }));
+                    }}
+                    disabled={isLoading || isDisabled}
+                    className={`w-full px-3 py-2 text-left text-xs font-medium transition-all duration-200 ${
+                      isSelected
+                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                    } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span>{displayLabel}</span>
+                      {isSelected && <FiCheck className="w-3 h-3" />}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       );
     }
