@@ -65,7 +65,7 @@ const DropdownSubMenu: React.FC<DropdownSubMenuProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
-  const triggerRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
   const submenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -132,19 +132,18 @@ const DropdownSubMenu: React.FC<DropdownSubMenuProps> = ({
 
   return (
     <>
-      <button
+      <div
         ref={triggerRef}
         onClick={() => !disabled && setIsOpen(!isOpen)}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        className={`group flex w-full items-center rounded-lg px-2.5 py-1.5 text-left transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800/50 text-gray-900 dark:text-gray-100 ${
-          disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02]'
-        }`}
-        disabled={disabled}
+        className={disabled ? 'opacity-50 cursor-not-allowed' : ''}
       >
-        {trigger}
-        <FiChevronRight className="ml-1.5 w-3.5 h-3.5 text-gray-400" />
-      </button>
+        <div className="relative">
+          {trigger}
+          <FiChevronRight className="absolute right-3 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+        </div>
+      </div>
 
       {typeof document !== 'undefined' &&
         submenuContent &&
@@ -446,26 +445,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
       }
 
       if (property.type === 'string' && property.enum) {
-        // Use submenu for enum options
-        const submenuTrigger = (
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center">
-              <div className="w-4 h-4 flex items-center justify-center">
-                {getOptionIcon(key, property)}
-              </div>
-              <div className="ml-3">
-                <div className="font-medium text-sm">{property.title || key}</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded whitespace-nowrap">
-                {getEnumDisplayLabel(property, currentValue || property.default)}
-              </span>
-              {isOptionLoading && <FiLoader className="w-3 h-3 animate-spin text-blue-600" />}
-            </div>
-          </div>
-        );
-
+        // Generate submenu items first
         const submenuItems = property.enum.map((option: string) => {
           const isSelected = currentValue === option;
           const displayLabel = getEnumDisplayLabel(property, option);
@@ -488,8 +468,31 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
           );
         });
 
+        // Use DropdownItem with submenu for enum options to match layout
         return (
-          <DropdownSubMenu key={key} trigger={submenuTrigger} disabled={isOptionLoading}>
+          <DropdownSubMenu 
+            key={key} 
+            trigger={
+              <DropdownItem
+                icon={getOptionIcon(key, property)}
+                disabled={isOptionLoading}
+                className={`${isOptionLoading ? 'opacity-50 pointer-events-none' : ''}`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="font-medium text-sm">{property.title || key}</div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded whitespace-nowrap">
+                      {getEnumDisplayLabel(property, currentValue || property.default)}
+                    </span>
+                    {isOptionLoading && <FiLoader className="w-3 h-3 animate-spin text-blue-600" />}
+                  </div>
+                </div>
+              </DropdownItem>
+            } 
+            disabled={isOptionLoading}
+          >
             {submenuItems}
           </DropdownSubMenu>
         );
