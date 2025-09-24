@@ -448,20 +448,20 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
       if (property.type === 'string' && property.enum) {
         // Use submenu for enum options
         const submenuTrigger = (
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center min-w-0 flex-1">
-              <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
+          <div className="flex items-center justify-center w-full">
+            <div className="flex items-center">
+              <div className="w-4 h-4 flex items-center justify-center">
                 {getOptionIcon(key, property)}
               </div>
-              <div className="ml-3 flex-1 min-w-0">
+              <div className="ml-3">
                 <div className="font-medium text-sm">{property.title || key}</div>
               </div>
-            </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <span className="text-xs text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded whitespace-nowrap">
-                {getEnumDisplayLabel(property, currentValue || property.default)}
-              </span>
-              {isOptionLoading && <FiLoader className="w-3 h-3 animate-spin text-blue-600" />}
+              <div className="ml-2 flex items-center gap-2">
+                <span className="text-xs text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded whitespace-nowrap">
+                  {getEnumDisplayLabel(property, currentValue || property.default)}
+                </span>
+                {isOptionLoading && <FiLoader className="w-3 h-3 animate-spin text-blue-600" />}
+              </div>
             </div>
           </div>
         );
