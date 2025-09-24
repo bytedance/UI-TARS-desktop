@@ -31,6 +31,14 @@ export function getWebUIRouteBase(): string {
 }
 
 /**
+ * Get server base path from injected configuration
+ */
+function getServerBase(): string {
+  const config = getWebUIConfig();
+  return (config as any).serverBase || '';
+}
+
+/**
  * Get API Base URL.
  */
 export function getAPIBaseUrl() {
@@ -40,11 +48,12 @@ export function getAPIBaseUrl() {
    * If routeBase exists, we should respect it
    */
   if (configuredBaseUrl === '') {
-    const routeBase = getWebUIRouteBase();
-    if (routeBase) {
-      return configuredBaseUrl + routeBase;
-    }
-    return configuredBaseUrl;
+    const serverBase = getServerBase();
+    const webUIRouteBase = getWebUIRouteBase();
+    
+    // Use server.base for API URLs, fallback to webui.base
+    const apiBase = serverBase || webUIRouteBase;
+    return configuredBaseUrl + apiBase;
   }
 
   /**
