@@ -221,6 +221,17 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
       setIsLoading(false);
     }, [activeSessionId]);
 
+    // Helper function to get enum display label
+    const getEnumDisplayLabel = (property: AgentRuntimeSettingProperty, value: string): string => {
+      if (property.enumLabels && property.enum) {
+        const index = property.enum.indexOf(value);
+        if (index >= 0 && index < property.enumLabels.length) {
+          return property.enumLabels[index];
+        }
+      }
+      return value;
+    };
+
     // Handle option change - with loading state for agent recreation
     const handleOptionChange = async (key: string, value: any) => {
       if (!activeSessionId || isLoading || !currentValues) return;
@@ -388,16 +399,6 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
       property,
       currentValue: currentValues?.[key] ?? property.default,
     }));
-
-    const getEnumDisplayLabel = (property: AgentRuntimeSettingProperty, value: string): string => {
-      if (property.enumLabels && property.enum) {
-        const index = property.enum.indexOf(value);
-        if (index >= 0 && index < property.enumLabels.length) {
-          return property.enumLabels[index];
-        }
-      }
-      return value;
-    };
 
     const getOptionIcon = (key: string, property: AgentRuntimeSettingProperty) => {
       const lowerKey = key.toLowerCase();
