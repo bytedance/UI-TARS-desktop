@@ -68,6 +68,7 @@ export function getLayoutConfig() {
       defaultLayout: 'default',
       enableLayoutSwitchButton: false,
       enableSidebar: true,
+      enableHome: true,
     }
   );
 }
@@ -91,4 +92,11 @@ export function getDefaultLayoutMode() {
  */
 export function isSidebarEnabled(): boolean {
   return getLayoutConfig().enableSidebar ?? true;
+}
+
+/**
+ * Check if home route is enabled
+ */
+export function isHomeEnabled(): boolean {
+  return getLayoutConfig().enableHome ?? true;
 }

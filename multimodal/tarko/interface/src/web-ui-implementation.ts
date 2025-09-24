@@ -66,6 +66,11 @@ export interface LayoutConfig {
    * @defaultValue true
    */
   enableSidebar?: boolean;
+  /**
+   * Enable home route registration
+   * @defaultValue true
+   */
+  enableHome?: boolean;
 }
 
 /**

@@ -7,13 +7,14 @@ import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { SessionRouter } from './Router/SessionRouter';
 import { Sidebar } from '@/standalone/sidebar';
 import { Navbar } from '@/standalone/navbar';
-import { isSidebarEnabled } from '@/config/web-ui-config';
+import { isSidebarEnabled, isHomeEnabled } from '@/config/web-ui-config';
 
 export const App: React.FC = () => {
   const { initConnectionMonitoring, loadSessions, connectionStatus, activeSessionId } =
     useSession();
   const { isReplayMode } = useReplayMode();
   const sidebarEnabled = isSidebarEnabled();
+  const homeEnabled = isHomeEnabled();
 
   useEffect(() => {
     if (isReplayMode) {
@@ -57,17 +58,19 @@ export const App: React.FC = () => {
 
   return (
     <Routes>
-      <Route
-        path="/"
-        element={
-          <div className="flex h-screen bg-[#F2F3F5] dark:bg-gray-900 text-gray-900 dark:text-gray-100 overflow-hidden">
-            {sidebarEnabled && <Sidebar />}
-            <div className="flex-1 flex flex-col overflow-hidden">
-              <HomePage />
+      {homeEnabled && (
+        <Route
+          path="/"
+          element={
+            <div className="flex h-screen bg-[#F2F3F5] dark:bg-gray-900 text-gray-900 dark:text-gray-100 overflow-hidden">
+              {sidebarEnabled && <Sidebar />}
+              <div className="flex-1 flex flex-col overflow-hidden">
+                <HomePage />
+              </div>
             </div>
-          </div>
-        }
-      />
+          }
+        />
+      )}
       <Route
         path="/:sessionId"
         element={
