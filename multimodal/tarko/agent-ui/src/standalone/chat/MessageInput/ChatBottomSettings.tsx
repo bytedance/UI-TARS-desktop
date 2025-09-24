@@ -2,28 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSetAtom } from 'jotai';
 import { updateSessionMetadataAction } from '@/common/state/actions/sessionActions';
 import { apiService } from '@/common/services/apiService';
-import { SessionItemMetadata } from '@tarko/interface';
+import { SessionItemMetadata, AgentRuntimeSettingsSchema, AgentRuntimeSettingProperty } from '@tarko/interface';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useAtomValue } from 'jotai';
 import { isProcessingAtom } from '@/common/state/atoms/ui';
 import { FiCheck, FiLoader } from 'react-icons/fi';
 import { TbBulb, TbSearch, TbBook, TbSettings, TbBrain, TbBrowser } from 'react-icons/tb';
 
-interface AgentRuntimeSettingProperty {
-  type: 'boolean' | 'string' | 'number';
-  title?: string;
-  default?: any;
-  enum?: string[];
-  enumLabels?: string[];
-  description?: string;
-  icon?: string;
-  placement?: 'dropdown-item' | 'chat-bottom';
-}
 
-interface AgentOptionsSchema {
-  type: string;
-  properties: Record<string, AgentRuntimeSettingProperty>;
-}
 
 interface ChatBottomSettingsProps {
   activeSessionId?: string;
@@ -40,7 +26,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
   isDisabled = false,
   isProcessing: isProcessingProp = false,
 }) => {
-  const [schema, setSchema] = useState<AgentOptionsSchema | null>(null);
+  const [schema, setSchema] = useState<AgentRuntimeSettingsSchema | null>(null);
   const [currentValues, setCurrentValues] = useState<Record<string, any> | null>(null);
   const [placement, setPlacement] = useState<'dropdown-item' | 'chat-bottom'>('dropdown-item');
   const [isLoading, setIsLoading] = useState(false);
@@ -56,9 +42,24 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
     const loadOptions = async () => {
       try {
         const response = await apiService.getSessionRuntimeSettings(activeSessionId);
-        setSchema(response.schema);
-        setCurrentValues(response.currentValues);
-        setPlacement(response.placement || 'dropdown-item');
+        const schema = response.schema as AgentRuntimeSettingsSchema;
+        let currentValues = response.currentValues || {};
+        
+        // Merge with default values from schema if not present
+        if (schema?.properties) {
+          const mergedValues: Record<string, any> = { ...currentValues };
+          Object.entries(schema.properties).forEach(([key, propSchema]) => {
+            if (mergedValues[key] === undefined && propSchema.default !== undefined) {
+              mergedValues[key] = propSchema.default;
+            }
+          });
+          currentValues = mergedValues;
+        }
+        
+        setSchema(schema);
+        setCurrentValues(currentValues);
+        // Use default placement
+        setPlacement('dropdown-item');
         setHasLoaded(true);
       } catch (error) {
         console.error('Failed to load runtime settings:', error);

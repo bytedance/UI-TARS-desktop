@@ -535,7 +535,6 @@ class ApiService {
   async getSessionRuntimeSettings(sessionId: string): Promise<{
     schema: Record<string, any> | null;
     currentValues: Record<string, any> | null;
-    placement?: 'dropdown-item' | 'chat-bottom';
     message?: string;
   }> {
     try {
@@ -555,7 +554,7 @@ class ApiService {
       return await response.json();
     } catch (error) {
       console.error('Error getting session runtime settings:', error);
-      return { schema: null, currentValues: null, placement: 'dropdown-item', message: 'Failed to load runtime settings' };
+      return { schema: null, currentValues: null, message: 'Failed to load runtime settings' };
     }
   }
 
