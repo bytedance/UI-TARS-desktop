@@ -172,7 +172,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
     const [schema, setSchema] = useState<AgentRuntimeSettingsSchema | null>(null);
     const [currentValues, setCurrentValues] = useState<Record<string, any> | null>(null);
     const [placement, setPlacement] = useState<'dropdown-item' | 'chat-bottom'>('dropdown-item');
-    const [isLoading, setIsLoading] = useState(false);
+    const [loadingOptions, setLoadingOptions] = useState<Set<string>>(new Set());
     const [hasLoaded, setHasLoaded] = useState(false);
     const updateSessionMetadata = useSetAtom(updateSessionMetadataAction);
     const { isReplayMode } = useReplayMode();
@@ -218,7 +218,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
       setSchema(null);
       setCurrentValues(null);
       setPlacement('dropdown-item');
-      setIsLoading(false);
+      setLoadingOptions(new Set());
     }, [activeSessionId]);
 
     // Helper function to get enum display label
@@ -234,11 +234,11 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
 
     // Handle option change - with loading state for agent recreation
     const handleOptionChange = async (key: string, value: any) => {
-      if (!activeSessionId || isLoading || !currentValues) return;
+      if (!activeSessionId || loadingOptions.has(key) || !currentValues) return;
 
       const newValues = { ...currentValues, [key]: value };
       setCurrentValues(newValues);
-      setIsLoading(true);
+      setLoadingOptions(prev => new Set(prev).add(key));
 
       try {
         const response = await apiService.updateSessionRuntimeSettings(activeSessionId, newValues);
@@ -258,7 +258,11 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
       } finally {
         // Add a small delay to show the loading state
         setTimeout(() => {
-          setIsLoading(false);
+          setLoadingOptions(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(key);
+            return newSet;
+          });
         }, 500);
       }
 
@@ -270,12 +274,12 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
 
     // Handle option removal - clear to undefined to remove from active options
     const handleOptionRemove = async (key: string) => {
-      if (!activeSessionId || isLoading || !currentValues) return;
+      if (!activeSessionId || loadingOptions.has(key) || !currentValues) return;
 
       const newValues = { ...currentValues };
       delete newValues[key]; // Remove the key entirely
       setCurrentValues(newValues);
-      setIsLoading(true);
+      setLoadingOptions(prev => new Set(prev).add(key));
 
       try {
         const response = await apiService.updateSessionRuntimeSettings(activeSessionId, newValues);
@@ -293,7 +297,11 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
         setCurrentValues(currentValues);
       } finally {
         setTimeout(() => {
-          setIsLoading(false);
+          setLoadingOptions(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(key);
+            return newSet;
+          });
         }, 500);
       }
 
@@ -414,6 +422,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
 
     const renderOptionItem = (config: AgentOptionConfig) => {
       const { key, property, currentValue } = config;
+      const isOptionLoading = loadingOptions.has(key);
 
       if (property.type === 'boolean') {
         return (
@@ -421,15 +430,15 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
             key={key}
             icon={getOptionIcon(key, property)}
             onClick={() => handleOptionChange(key, !currentValue)}
-            className={`${currentValue ? 'bg-blue-50 dark:bg-blue-900/20' : ''} ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
+            className={`${currentValue ? 'bg-blue-50 dark:bg-blue-900/20' : ''} ${isOptionLoading ? 'opacity-50 pointer-events-none' : ''}`}
           >
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <div className="font-medium text-sm">{property.title || key}</div>
               </div>
               <div className="flex items-center gap-2">
-                {isLoading && <FiLoader className="w-3 h-3 animate-spin text-blue-600" />}
-                {currentValue && !isLoading && <FiCheck className="w-4 h-4 text-blue-600" />}
+                {isOptionLoading && <FiLoader className="w-3 h-3 animate-spin text-blue-600" />}
+                {currentValue && !isOptionLoading && <FiCheck className="w-4 h-4 text-blue-600" />}
               </div>
             </div>
           </DropdownItem>
@@ -452,7 +461,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
               <span className="text-xs text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded whitespace-nowrap">
                 {getEnumDisplayLabel(property, currentValue || property.default)}
               </span>
-              {isLoading && <FiLoader className="w-3 h-3 animate-spin text-blue-600" />}
+              {isOptionLoading && <FiLoader className="w-3 h-3 animate-spin text-blue-600" />}
             </div>
           </div>
         );
@@ -465,14 +474,14 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
             <DropdownItem
               key={option}
               onClick={() => handleOptionChange(key, option)}
-              className={`${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''} ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
+              className={`${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''} ${isOptionLoading ? 'opacity-50 pointer-events-none' : ''}`}
             >
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <div className="font-medium text-sm">{displayLabel}</div>
                 </div>
                 <div className="flex items-center gap-2">
-                  {isSelected && !isLoading && <FiCheck className="w-4 h-4 text-blue-600" />}
+                  {isSelected && !isOptionLoading && <FiCheck className="w-4 h-4 text-blue-600" />}
                 </div>
               </div>
             </DropdownItem>
@@ -480,7 +489,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
         });
 
         return (
-          <DropdownSubMenu key={key} trigger={submenuTrigger} disabled={isLoading}>
+          <DropdownSubMenu key={key} trigger={submenuTrigger} disabled={isOptionLoading}>
             {submenuItems}
           </DropdownSubMenu>
         );
@@ -495,13 +504,13 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
         trigger={
           <button
             type="button"
-            disabled={isLoading || isDisabled}
+            disabled={loadingOptions.size > 0 || isDisabled}
             className={`flex items-center justify-center w-8 h-8 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100/50 dark:hover:bg-gray-700/30 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-              isLoading ? 'animate-pulse' : ''
+              loadingOptions.size > 0 ? 'animate-pulse' : ''
             }`}
-            title={isLoading ? 'Updating agent options...' : 'Options'}
+            title={loadingOptions.size > 0 ? 'Updating agent options...' : 'Options'}
           >
-            {isLoading ? <FiLoader size={16} className="animate-spin" /> : <FiPlus size={16} />}
+            {loadingOptions.size > 0 ? <FiLoader size={16} className="animate-spin" /> : <FiPlus size={16} />}
           </button>
         }
       >
