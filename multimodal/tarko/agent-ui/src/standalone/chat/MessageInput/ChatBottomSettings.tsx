@@ -37,7 +37,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
   const [schema, setSchema] = useState<AgentRuntimeSettingsSchema | null>(null);
   const [currentValues, setCurrentValues] = useState<Record<string, any> | null>(null);
   const [placement, setPlacement] = useState<'dropdown-item' | 'chat-bottom'>('dropdown-item');
-  const [isLoading, setIsLoading] = useState(false);
+  const [loadingOptions, setLoadingOptions] = useState<Set<string>>(new Set());
   const [hasLoaded, setHasLoaded] = useState(false);
   const updateSessionMetadata = useSetAtom(updateSessionMetadataAction);
   const { isReplayMode } = useReplayMode();
@@ -83,16 +83,16 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
     setSchema(null);
     setCurrentValues(null);
     setPlacement('dropdown-item');
-    setIsLoading(false);
+    setLoadingOptions(new Set());
   }, [activeSessionId]);
 
   // Handle option change
   const handleOptionChange = async (key: string, value: any) => {
-    if (!activeSessionId || isLoading || !currentValues) return;
+    if (!activeSessionId || loadingOptions.has(key) || !currentValues) return;
 
     const newValues = { ...currentValues, [key]: value };
     setCurrentValues(newValues);
-    setIsLoading(true);
+    setLoadingOptions(prev => new Set(prev).add(key));
 
     try {
       const response = await apiService.updateSessionRuntimeSettings(activeSessionId, newValues);
@@ -110,7 +110,11 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
       setCurrentValues(currentValues);
     } finally {
       setTimeout(() => {
-        setIsLoading(false);
+        setLoadingOptions(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(key);
+          return newSet;
+        });
       }, 500);
     }
   };
@@ -214,6 +218,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
 
   const renderChatBottomOption = ([key, property]: [string, AgentRuntimeSettingProperty]) => {
     const currentValue = currentValues?.[key] ?? property.default;
+    const isOptionLoading = loadingOptions.has(key);
 
     if (property.type === 'boolean') {
       return (
@@ -221,20 +226,20 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
           key={`chat-bottom-${key}`}
           type="button"
           onClick={() => handleOptionChange(key, !currentValue)}
-          disabled={isLoading || isDisabled}
+          disabled={isOptionLoading || isDisabled}
           className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
             currentValue
               ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/30'
               : 'bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50'
-          } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          } ${isOptionLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
           title={property.description || property.title || key}
         >
           <span className="mr-1.5 text-current">
             {getOptionIcon(key, property)}
           </span>
           <span className="font-medium">{property.title || key}</span>
-          {isLoading && <FiLoader className="w-3 h-3 animate-spin ml-1.5" />}
-          {currentValue && !isLoading && <FiCheck className="w-3 h-3 ml-1.5" />}
+          {isOptionLoading && <FiLoader className="w-3 h-3 animate-spin ml-1.5" />}
+          {currentValue && !isOptionLoading && <FiCheck className="w-3 h-3 ml-1.5" />}
         </button>
       );
     }
@@ -249,7 +254,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
           trigger={
             <button
               type="button"
-              disabled={isLoading || isDisabled}
+              disabled={isOptionLoading || isDisabled}
               className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-all duration-200 cursor-pointer"
             >
               <span className="font-medium">{property.title || key}:</span>
@@ -266,7 +271,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
               <DropdownItem
                 key={option}
                 onClick={() => handleOptionChange(key, option)}
-                className={`${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''} ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
+                className={`${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''} ${isOptionLoading ? 'opacity-50 pointer-events-none' : ''}`}
               >
                 <div className="flex items-center justify-between">
                   <span className="font-medium text-sm">{displayLabel}</span>
