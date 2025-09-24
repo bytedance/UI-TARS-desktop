@@ -3,6 +3,7 @@
   "version": "0.3.0-beta.12",
   "description": "Default Web UI for Tarko",
   "dependencies": {
+    "@tarko/shared-utils": "workspace:*",
     "@tarko/ui": "workspace:*",
     "ansi-to-react": "^6.1.6",
     "classnames": "^2.5.1",
