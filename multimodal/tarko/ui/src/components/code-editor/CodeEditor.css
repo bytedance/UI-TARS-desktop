@@ -133,6 +133,11 @@
   overflow: auto;
 }
 
+.code-editor-code-area .hljs {
+  color: #e1e4e8;
+  background: transparent;
+}
+
 .code-editor-pre {
   margin: 0;
   padding: 12px 16px;
