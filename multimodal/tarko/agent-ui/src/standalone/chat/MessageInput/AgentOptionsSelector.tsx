@@ -441,7 +441,9 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
         const submenuTrigger = (
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center min-w-0 flex-1">
-              {getOptionIcon(key, property)}
+              <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
+                {getOptionIcon(key, property)}
+              </div>
               <div className="ml-2.5 flex-1 min-w-0">
                 <div className="font-medium text-sm">{property.title || key}</div>
               </div>
