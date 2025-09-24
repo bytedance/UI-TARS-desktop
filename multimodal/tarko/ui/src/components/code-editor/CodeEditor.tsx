@@ -1,8 +1,8 @@
-import React, { useEffect, useRef } from 'react';
-import hljs from 'highlight.js';
+import React from 'react';
 import { CodeEditorHeader } from './CodeEditorHeader';
 import { CodeEditorStatusBar } from './CodeEditorStatusBar';
-import { getDisplayFileName, getFileExtension } from '../../utils/file';
+import { CodeHighlight } from './CodeHighlight';
+import { getDisplayFileName } from '../../utils/file';
 import './CodeEditor.css';
 
 interface CodeEditorProps {
@@ -36,18 +36,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     return null;
   }
 
-  const codeRef = useRef<HTMLElement>(null);
-
   const displayFileName = getDisplayFileName(fileName, filePath);
-  const fileExtension = getFileExtension(fileName);
-  const language = fileExtension || 'text';
-
-  useEffect(() => {
-    if (codeRef.current) {
-      codeRef.current.removeAttribute('data-highlighted');
-      hljs.highlightElement(codeRef.current);
-    }
-  }, [code, language]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(code);
@@ -82,13 +71,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               </div>
             )}
 
-            <div className="code-editor-code-area">
-              <pre className="code-editor-pre">
-                <code ref={codeRef} className={`language-${language} code-editor-code`}>
-                  {code}
-                </code>
-              </pre>
-            </div>
+            <CodeHighlight code={code} fileName={fileName} />
           </div>
         </div>
         {showStatusBar && <CodeEditorStatusBar code={code} readOnly={readOnly} />}

@@ -3,7 +3,7 @@ import { StandardPanelContent } from '../types/panelContent';
 import { FileDisplayMode } from '../types';
 import { TerminalOutput } from '../components/TerminalOutput';
 import { getAgentTitle } from '@/config/web-ui-config';
-import { CodeEditor } from '@tarko/ui';
+import { CodeHighlight } from '@tarko/ui';
 
 interface TerminalRendererProps {
   panelContent: StandardPanelContent;
@@ -139,32 +139,18 @@ export const TerminalRenderer: React.FC<TerminalRendererProps> = ({
               {/* Arguments section */}
               {argumentsJson && (
                 <div className="p-3 pb-0">
-                  <CodeEditor
-                    code={argumentsJson}
-                    fileName="arguments.json"
-                    readOnly={true}
-                    showHeader={false}
-                    showLineNumbers={false}
-                    showStatusBar={false}
-                    maxHeight="200px"
-                    className="border-0 rounded-none"
-                  />
+                  <div className="bg-gray-900 rounded border border-gray-700 p-2 max-h-48 overflow-auto">
+                    <CodeHighlight code={argumentsJson} language="json" />
+                  </div>
                 </div>
               )}
 
               {/* Output section */}
               {output && (
-                <div className="p-3 pb-0">
-                  <CodeEditor
-                    code={output}
-                    fileName="output.json"
-                    readOnly={true}
-                    showHeader={false}
-                    showLineNumbers={false}
-                    showStatusBar={false}
-                    maxHeight="calc(100vh - 300px)"
-                    className="border-0 rounded-none"
-                  />
+                <div className="p-3">
+                  <div className="bg-gray-900 rounded border border-gray-700 p-2 max-h-96 overflow-auto">
+                    <CodeHighlight code={output} language="json" />
+                  </div>
                 </div>
               )}
             </div>
