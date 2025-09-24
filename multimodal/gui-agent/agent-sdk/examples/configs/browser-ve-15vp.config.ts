@@ -30,5 +30,11 @@ export default defineConfig({
       'Visit YouTube and find tutorials on machine learning',
       'Browse Amazon and search for tech gadgets',
     ],
+    guiAgent: {
+      defaultScreenshotRenderStrategy: 'afterAction',
+      enableScreenshotRenderStrategySwitch: true,
+      renderGUIAction: true,
+      renderBrowserShell: false,
+    },
   },
 });

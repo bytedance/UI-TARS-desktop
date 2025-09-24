@@ -29,5 +29,11 @@ export default defineConfig({
       'Test fundamental GUI interaction patterns',
       'Validate core browser automation features',
     ],
+    guiAgent: {
+      defaultScreenshotRenderStrategy: 'afterAction',
+      enableScreenshotRenderStrategySwitch: true,
+      renderGUIAction: true,
+      renderBrowserShell: false,
+    },
   },
 });

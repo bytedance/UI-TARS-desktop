@@ -22,6 +22,7 @@ import {
   sleep,
 } from '@gui-agent/shared/utils';
 import { GUI_ADAPTED_TOOL_NAME } from './constants';
+import { convertToAgentUIAction } from './utils';
 
 const defaultLogger = new ConsoleLogger('[GUIAgent]', LogLevel.DEBUG);
 
@@ -97,9 +98,23 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent {
           });
           // TODO: why agent does not handle this error?
           if (result.errorMessage) {
-            return { status: 'error', message: result.errorMessage };
+            return {
+              success: false,
+              action: input.action,
+              normalizedAction: {
+                type: 'wait',
+                inputs: {},
+              },
+              error: result.errorMessage,
+            };
           }
-          return { action: input.action, status: 'success', result };
+          // return { action: input.action, status: 'success', result };
+          return {
+            success: true,
+            action: input.action,
+            normalizedAction: convertToAgentUIAction(input.operator_action),
+            observation: undefined, // Reserved for future implementation
+          };
         },
       }),
     );

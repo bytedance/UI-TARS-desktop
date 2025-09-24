@@ -29,5 +29,11 @@ export default defineConfig({
       'Validate advanced GUI interaction capabilities',
       'Test multi-environment task handling',
     ],
+    guiAgent: {
+      defaultScreenshotRenderStrategy: 'afterAction',
+      enableScreenshotRenderStrategySwitch: true,
+      renderGUIAction: true,
+      renderBrowserShell: false,
+    },
   },
 });

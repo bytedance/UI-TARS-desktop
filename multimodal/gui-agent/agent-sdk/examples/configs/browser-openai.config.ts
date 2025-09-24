@@ -29,5 +29,11 @@ export default defineConfig({
       'Browse Reddit and find interesting tech discussions',
       'Open Wikipedia and search for information about quantum computing',
     ],
+    guiAgent: {
+      defaultScreenshotRenderStrategy: 'afterAction',
+      enableScreenshotRenderStrategySwitch: true,
+      renderGUIAction: true,
+      renderBrowserShell: false,
+    },
   },
 });

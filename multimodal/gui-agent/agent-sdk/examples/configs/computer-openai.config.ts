@@ -30,5 +30,11 @@ export default defineConfig({
       'Perform system administration tasks',
       'Help with software installation and configuration',
     ],
+    guiAgent: {
+      defaultScreenshotRenderStrategy: 'afterAction',
+      enableScreenshotRenderStrategySwitch: true,
+      renderGUIAction: true,
+      renderBrowserShell: false,
+    },
   },
 });

@@ -29,5 +29,11 @@ export default defineConfig({
       'Set an alarm for 8:00',
       'Check the current device version',
     ],
+    guiAgent: {
+      defaultScreenshotRenderStrategy: 'afterAction',
+      enableScreenshotRenderStrategySwitch: true,
+      renderGUIAction: true,
+      renderBrowserShell: false,
+    },
   },
 });

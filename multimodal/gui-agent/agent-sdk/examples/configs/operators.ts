@@ -4,7 +4,7 @@
  */
 import { AdbOperator } from '@gui-agent/operator-adb';
 import { NutJSOperator } from '@gui-agent/operator-nutjs';
-import { Operator, ScreenContext } from 'gui-agent/shared/src/base';
+import { Operator, ScreenContext } from '@gui-agent/shared/base';
 import {
   SupportedActionType,
   ScreenshotOutput,

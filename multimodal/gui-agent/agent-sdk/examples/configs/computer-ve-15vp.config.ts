@@ -5,7 +5,6 @@
 import 'dotenv/config';
 import path from 'path';
 import { defineConfig } from '@tarko/agent-cli';
-import { SYSTEM_PROMPT_2 } from './prompts';
 import { computerOperator } from './operators';
 import { doubao_1_5_vp } from './models';
 import { systemPromptTemplate1 } from './promptTemps';
@@ -30,5 +29,11 @@ export default defineConfig({
       'Create and edit documents using desktop applications',
       'Navigate through file systems and perform file operations',
     ],
+    guiAgent: {
+      defaultScreenshotRenderStrategy: 'afterAction',
+      enableScreenshotRenderStrategySwitch: true,
+      renderGUIAction: true,
+      renderBrowserShell: false,
+    },
   },
 });

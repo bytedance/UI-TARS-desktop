@@ -29,5 +29,11 @@ export default defineConfig({
       'Browse e-commerce sites and compare product features',
       'Open educational platforms and find relevant courses',
     ],
+    guiAgent: {
+      defaultScreenshotRenderStrategy: 'afterAction',
+      enableScreenshotRenderStrategySwitch: true,
+      renderGUIAction: true,
+      renderBrowserShell: false,
+    },
   },
 });
