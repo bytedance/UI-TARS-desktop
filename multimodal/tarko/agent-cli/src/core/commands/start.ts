@@ -121,43 +121,24 @@ function setupUI(
     logger.debug(`Using static files from: ${staticPath}`);
   }
 
-  const pathMatcher = createPathMatcher(webui.base);
+  const pathMatcher = createPathMatcher(mergedWebUIConfig.base);
+  const staticFilePattern = /\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|map)$/;
 
-  // Middleware to inject baseURL for HTML requests
-  const injectBaseURL = (
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction,
-  ) => {
-    // Check if request path matches base pattern
-    if (!pathMatcher.test(req.path)) {
-      return next();
-    }
-
-    const extractedPath = pathMatcher.extract(req.path);
-
-    if (
-      !extractedPath.endsWith('.html') &&
-      extractedPath !== '/' &&
-      !extractedPath.match(/^\/[^.]*$/)
-    ) {
-      return next();
-    }
-
-    const indexPath = path.join(staticPath, 'index.html');
-    let htmlContent = fs.readFileSync(indexPath, 'utf8');
-
+  const injectConfig = (htmlContent: string): string => {
     const scriptTag = `<script>
       window.AGENT_BASE_URL = "";
       window.AGENT_WEB_UI_CONFIG = ${JSON.stringify(mergedWebUIConfig)};
       console.log("Agent: Using API baseURL:", window.AGENT_BASE_URL);
     </script>`;
-
-    htmlContent = htmlContent.replace('</head>', `${scriptTag}\n</head>`);
-    res.send(htmlContent);
+    return htmlContent.replace('</head>', `${scriptTag}\n</head>`);
   };
 
-  // Handle root path and client-side routes with base support
+  const serveIndexWithConfig = (res: express.Response): void => {
+    const indexPath = path.join(staticPath, 'index.html');
+    const htmlContent = fs.readFileSync(indexPath, 'utf8');
+    res.send(injectConfig(htmlContent));
+  };
+
   app.get('*', (req, res, next) => {
     if (!pathMatcher.test(req.path)) {
       return next();
@@ -165,43 +146,18 @@ function setupUI(
 
     const extractedPath = pathMatcher.extract(req.path);
 
-    // Handle root path
-    if (extractedPath === '/') {
-      return injectBaseURL(req, res, next);
-    }
-
-    // Handle client-side routes
-    if (extractedPath.match(/^\/[^.]*$/)) {
-      if (
-        extractedPath.includes('.') &&
-        !extractedPath.endsWith('.html') &&
-        !extractedPath.startsWith('/static/') &&
-        !extractedPath.startsWith('/assets/') &&
-        !extractedPath.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/)
-      ) {
-        return next();
-      }
-
-      return injectBaseURL(req, res, next);
-    }
-
-    // Handle static files
-    if (extractedPath.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|map)$/)) {
+    // Serve static files directly
+    if (staticFilePattern.test(extractedPath)) {
       const filePath = path.join(staticPath, extractedPath);
-      if (fs.existsSync(filePath)) {
-        return res.sendFile(filePath);
-      }
+      return fs.existsSync(filePath) ? res.sendFile(filePath) : next();
     }
 
-    // Fallback for SPA routes
-    if (
-      req.method === 'GET' &&
-      !extractedPath.includes('.') &&
-      !extractedPath.startsWith('/api/')
-    ) {
-      return injectBaseURL(req, res, next);
+    // Skip API routes
+    if (extractedPath.startsWith('/api/')) {
+      return next();
     }
 
-    next();
+    // Serve index.html with injected config for all other routes (SPA)
+    serveIndexWithConfig(res);
   });
 }
