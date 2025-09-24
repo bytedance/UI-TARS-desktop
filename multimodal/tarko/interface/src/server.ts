@@ -1,3 +1,64 @@
+/**
+ * Enhanced runtime settings configuration with UI placement and enum labels support
+ */
+export interface AgentRuntimeSettings {
+  /**
+   * JSON Schema defining the structure and UI rendering of runtime settings
+   */
+  schema: AgentRuntimeSettingsSchema;
+  /**
+   * Optional transform function to convert runtime settings to agent-specific options
+   * @param runtimeSettings - The current runtime settings values
+   * @returns Transformed options that can be applied to the agent
+   */
+  transform?: (runtimeSettings: any) => any;
+  /**
+   * UI placement configuration
+   * Controls where settings appear in the interface
+   * @default 'dropdown-item'
+   */
+  placement?: 'dropdown-item' | 'chat-bottom';
+}
+
+/**
+ * Enhanced JSON Schema for runtime settings with UI-specific extensions
+ */
+export interface AgentRuntimeSettingsSchema {
+  type: 'object';
+  properties: Record<string, AgentRuntimeSettingProperty>;
+}
+
+/**
+ * Runtime setting property with enhanced UI support
+ */
+export interface AgentRuntimeSettingProperty {
+  /** Property type */
+  type: 'boolean' | 'string' | 'number';
+  /** Display title for the setting */
+  title?: string;
+  /** Default value */
+  default?: any;
+  /** For string type: allowed enum values */
+  enum?: string[];
+  /** For enum type: display labels corresponding to enum values */
+  enumLabels?: string[];
+  /** Setting description */
+  description?: string;
+  /** Icon identifier for UI rendering */
+  icon?: string;
+  /** UI placement override for individual settings */
+  placement?: 'dropdown-item' | 'chat-bottom';
+}
+
+/**
+ * Legacy interface for backward compatibility
+ * @deprecated Use AgentRuntimeSettings instead
+ */
+export interface LegacyAgentRuntimeSettings {
+  schema: Record<string, any>;
+  transform?: (runtimeSettings: any) => any;
+}
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
@@ -126,18 +187,7 @@ export interface AgentServerOptions {
      * Runtime settings configuration
      * Defines user-configurable settings that can be adjusted during runtime
      */
-    runtimeSettings?: {
-      /**
-       * JSON Schema defining the structure and UI rendering of runtime settings
-       */
-      schema: Record<string, any>;
-      /**
-       * Optional transform function to convert runtime settings to agent-specific options
-       * @param runtimeSettings - The current runtime settings values
-       * @returns Transformed options that can be applied to the agent
-       */
-      transform?: (runtimeSettings: any) => any;
-    };
+    runtimeSettings?: AgentRuntimeSettings;
     /*
      * Sandbox config
      */

@@ -13,7 +13,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 /**
- * Get runtime settings schema and current values
+ * Get runtime settings schema and current values with enhanced UI support
  */
 export async function getRuntimeSettings(req: Request, res: Response) {
   const sessionId = req.query.sessionId as string;
@@ -31,7 +31,8 @@ export async function getRuntimeSettings(req: Request, res: Response) {
     if (!runtimeSettingsConfig) {
       return res.status(200).json({ 
         schema: { type: 'object', properties: {} },
-        currentValues: {}
+        currentValues: {},
+        placement: 'dropdown-item'
       });
     }
 
@@ -58,9 +59,26 @@ export async function getRuntimeSettings(req: Request, res: Response) {
       });
     }
 
+    // Support both new enhanced schema and legacy schema format
+    const responseSchema = {
+      ...schema,
+      // Ensure properties have enhanced UI fields if using new format
+      properties: Object.fromEntries(
+        Object.entries(schema.properties).map(([key, prop]: [string, any]) => [
+          key,
+          {
+            ...prop,
+            // Add UI-specific defaults if not present
+            placement: prop.placement || runtimeSettingsConfig.placement || 'dropdown-item',
+          }
+        ])
+      )
+    };
+
     res.status(200).json({
-      schema: runtimeSettingsConfig.schema,
-      currentValues: mergedValues
+      schema: responseSchema,
+      currentValues: mergedValues,
+      placement: runtimeSettingsConfig.placement || 'dropdown-item'
     });
   } catch (error) {
     console.error(`Error getting runtime settings for session ${sessionId}:`, error);

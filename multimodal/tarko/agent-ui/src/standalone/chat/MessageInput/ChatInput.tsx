@@ -21,6 +21,7 @@ import { composeMessageContent, isMessageEmpty, parseContextualReferences } from
 import { handleMultimodalPaste } from '@/common/utils/clipboard';
 import { NavbarModelSelector } from '@/standalone/navbar/ModelSelector';
 import { AgentOptionsSelector, AgentOptionsSelectorRef } from './AgentOptionsSelector';
+import { ChatBottomSettings } from './ChatBottomSettings';
 import { useNavbarStyles } from '@tarko/ui';
 
 interface ChatInputProps {
@@ -612,6 +613,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           </div>
         </div>
       </form>
+
+      {/* Chat bottom settings */}
+      <ChatBottomSettings
+        activeSessionId={sessionId}
+        sessionMetadata={sessionMetadata}
+        className="mt-3"
+        isDisabled={isDisabled}
+        isProcessing={isProcessing}
+      />
 
       {/* Status text */}
       {showHelpText && (
