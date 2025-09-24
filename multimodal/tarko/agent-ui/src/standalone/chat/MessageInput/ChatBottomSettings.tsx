@@ -192,7 +192,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
           e.stopPropagation();
           onRemoveOption?.(option.key);
         }}
-        className="group inline-flex items-center px-2.5 py-1.5 rounded-md text-xs font-medium bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 cursor-pointer"
+        className="group inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 cursor-pointer"
         title={`Remove ${option.title}`}
       >
         <span className="mr-1.5 text-blue-600 dark:text-blue-400 group-hover:opacity-0 transition-opacity duration-200">
@@ -202,7 +202,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
         <span className="truncate flex items-center">
           <span className="font-medium">{option.title}</span>
           {option.displayValue && (
-            <span className="ml-1.5 text-xs text-blue-600/80 dark:text-blue-300/80 bg-white/90 dark:bg-gray-800/90 px-1.5 py-0.5 rounded font-medium">
+            <span className="ml-1.5 text-xs text-blue-600/80 dark:text-blue-300/80 bg-white/90 dark:bg-gray-800/90 px-1.5 py-0.5 rounded-full font-medium">
               {option.displayValue}
             </span>
           )}
@@ -221,7 +221,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
           type="button"
           onClick={() => handleOptionChange(key, !currentValue)}
           disabled={isLoading || isDisabled}
-          className={`inline-flex items-center px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-200 cursor-pointer ${
+          className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
             currentValue
               ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/30'
               : 'bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50'
@@ -244,34 +244,30 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
           <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
             {property.title || key}:
           </span>
-          <div className="inline-flex rounded-md border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-800">
-            {property.enum.map((option, index) => {
-              const isSelected = currentValue === option;
-              const displayLabel = getEnumDisplayLabel(property, option);
-              
-              return (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => handleOptionChange(key, option)}
-                  disabled={isLoading || isDisabled}
-                  className={`px-3 py-1.5 text-xs font-medium transition-all duration-200 relative ${
-                    isSelected
-                      ? 'bg-blue-600 text-white z-10'
-                      : 'bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
-                  } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${
-                    index > 0 ? 'border-l border-gray-200 dark:border-gray-700' : ''
-                  }`}
-                  title={property.description}
-                >
-                  {displayLabel}
-                  {isLoading && isSelected && (
-                    <FiLoader className="w-3 h-3 animate-spin ml-1 inline" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
+          {property.enum.map((option, index) => {
+            const isSelected = currentValue === option;
+            const displayLabel = getEnumDisplayLabel(property, option);
+            
+            return (
+              <button
+                key={option}
+                type="button"
+                onClick={() => handleOptionChange(key, option)}
+                disabled={isLoading || isDisabled}
+                className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
+                  isSelected
+                    ? 'bg-blue-600 text-white border border-blue-600'
+                    : 'bg-gray-50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50'
+                } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                title={property.description}
+              >
+                {displayLabel}
+                {isLoading && isSelected && (
+                  <FiLoader className="w-3 h-3 animate-spin ml-1 inline" />
+                )}
+              </button>
+            );
+          })}
         </div>
       );
     }
