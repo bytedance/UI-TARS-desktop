@@ -10,7 +10,18 @@ import { ImageModal } from './components/ImageModal';
 import { FullscreenModal } from './components/FullscreenModal';
 import { StandardPanelContent, ZoomedImageData, FullscreenFileData } from './types/panelContent';
 import { FileDisplayMode } from './types';
-import { ToggleSwitchProps } from './renderers/generic/components';
+
+// Define ToggleSwitchProps inline since we removed the generic components
+interface ToggleSwitchProps<T> {
+  leftLabel: string;
+  rightLabel: string;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
+  value: T;
+  leftValue: T;
+  rightValue: T;
+  onChange: (value: T) => void;
+}
 import { workspaceDisplayModeAtom, WorkspaceDisplayMode } from '@/common/state/atoms/workspace';
 import { rawToolMappingAtom } from '@/common/state/atoms/rawEvents';
 import { getFileTypeInfo, getDefaultDisplayMode } from './utils/fileTypeUtils';
@@ -24,7 +35,7 @@ import { ScriptResultRenderer } from './renderers/ScriptResultRenderer';
 import { BrowserResultRenderer } from './renderers/BrowserResultRenderer';
 import { BrowserControlRenderer } from './renderers/BrowserControlRenderer';
 
-import { GenericResultRenderer } from './renderers/generic/GenericResultRenderer';
+import { TerminalRenderer } from './renderers/TerminalRenderer';
 import { DeliverableRenderer } from './renderers/DeliverableRenderer';
 import { DiffRenderer } from './renderers/DiffRenderer';
 import { FileResultRenderer } from './renderers/FileResultRenderer';
@@ -48,7 +59,7 @@ const CONTENT_RENDERERS: Record<
   browser_vision_control: BrowserControlRenderer,
 
   research_report: ResearchReportRenderer,
-  json: GenericResultRenderer,
+  json: TerminalRenderer,
   deliverable: DeliverableRenderer,
   file_result: FileResultRenderer,
   diff_result: DiffRenderer,
@@ -117,16 +128,6 @@ export const WorkspaceDetail: React.FC = () => {
     return sessionMappings?.[panelContent.toolCallId] || null;
   };
 
-  if (isResearchReportType(panelContent)) {
-    return (
-      <ResearchReportRenderer
-        panelContent={panelContent}
-        onAction={handleContentAction}
-        displayMode={displayMode}
-      />
-    );
-  }
-
   const handleContentAction = (action: string, data: unknown) => {
     switch (action) {
       case 'zoom':
@@ -141,6 +142,16 @@ export const WorkspaceDetail: React.FC = () => {
         break;
     }
   };
+
+  if (isResearchReportType(panelContent)) {
+    return (
+      <ResearchReportRenderer
+        panelContent={panelContent}
+        onAction={handleContentAction}
+        displayMode={displayMode}
+      />
+    );
+  }
 
   const handleBack = () => {
     setActivePanelContent(null);
@@ -239,7 +250,7 @@ export const WorkspaceDetail: React.FC = () => {
       }
     }
 
-    const RendererComponent = CONTENT_RENDERERS[panelContent.type] || GenericResultRenderer;
+    const RendererComponent = CONTENT_RENDERERS[panelContent.type] || TerminalRenderer;
 
     return (
       <RendererComponent
