@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.3.0-beta.12-canary-6cd5c0821-20250924063735](https://github.com/bytedance/UI-TARS-desktop/compare/v0.3.0-beta.12...v0.3.0-beta.12-canary-6cd5c0821-20250924063735) (2025-09-24)
+
+### Features
+
+* **agent-server:** support remote static html and add share for server-next ([#1558](https://github.com/bytedance/UI-TARS-desktop/pull/1558)) ([87dd3b9](https://github.com/bytedance/UI-TARS-desktop/commit/87dd3b965)) [@小健](https://github.com/小健)
+* **agent-tars:** disable contextual selector by default ([#1621](https://github.com/bytedance/UI-TARS-desktop/pull/1621)) ([86f3da0](https://github.com/bytedance/UI-TARS-desktop/commit/86f3da017)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars:** support aio sandbox environment ([#1573](https://github.com/bytedance/UI-TARS-desktop/pull/1573)) ([2e38422](https://github.com/bytedance/UI-TARS-desktop/commit/2e38422d0)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent:** runtime settings ([#1561](https://github.com/bytedance/UI-TARS-desktop/pull/1561)) ([a59d33d](https://github.com/bytedance/UI-TARS-desktop/commit/a59d33d58)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent:** remove engine-selector from agent kernel ([#1576](https://github.com/bytedance/UI-TARS-desktop/pull/1576)) ([76da098](https://github.com/bytedance/UI-TARS-desktop/commit/76da0988f)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-agent, agent-ui:** add `webui.base` support ([#1623](https://github.com/bytedance/UI-TARS-desktop/pull/1623)) ([dce0e7e](https://github.com/bytedance/UI-TARS-desktop/commit/dce0e7e8c)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-cli:** add `--model.displayName` option support ([#1605](https://github.com/bytedance/UI-TARS-desktop/pull/1605)) ([dadfe4e](https://github.com/bytedance/UI-TARS-desktop/commit/dadfe4ec1)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-cli:** support unknown options passthrough ([#1574](https://github.com/bytedance/UI-TARS-desktop/pull/1574)) ([f1f2ccd](https://github.com/bytedance/UI-TARS-desktop/commit/f1f2ccda9)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-ui:** add `webui.layout.enableHome` config ([#1629](https://github.com/bytedance/UI-TARS-desktop/pull/1629)) ([d6673d5](https://github.com/bytedance/UI-TARS-desktop/commit/d6673d541)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-ui:** add `webui.layout.enableSidebar` config ([#1624](https://github.com/bytedance/UI-TARS-desktop/pull/1624)) ([530c435](https://github.com/bytedance/UI-TARS-desktop/commit/530c435ca)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-ui:** mobile ui bottom sheet ([#1563](https://github.com/bytedance/UI-TARS-desktop/pull/1563)) ([0a1b7cf](https://github.com/bytedance/UI-TARS-desktop/commit/0a1b7cf08)) [@ULIVZ](https://github.com/ULIVZ)
+
+### Bug Fixes
+
+* **tarko-agent-cli:** merged webui config in script injection (close: #1626) (close: [#1626](https://github.com/bytedance/UI-TARS-desktop/issues/1626)) ([#1627](https://github.com/bytedance/UI-TARS-desktop/pull/1627)) ([c8e83ef](https://github.com/bytedance/UI-TARS-desktop/commit/c8e83ef09)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-ui:** restore container and navbar in replay mode ([#1615](https://github.com/bytedance/UI-TARS-desktop/pull/1615)) ([2afe334](https://github.com/bytedance/UI-TARS-desktop/commit/2afe334dd)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-ui:** restore fallback image upload when no runtime settings ([#1619](https://github.com/bytedance/UI-TARS-desktop/pull/1619)) ([cf4d88b](https://github.com/bytedance/UI-TARS-desktop/commit/cf4d88b2f)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-ui:** improve `read_multiple_files` renderer parsing and error handling ([#1606](https://github.com/bytedance/UI-TARS-desktop/pull/1606)) ([a243be9](https://github.com/bytedance/UI-TARS-desktop/commit/a243be9d5)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-ui:** remove duplicate url actions bar from browser renderer ([#1584](https://github.com/bytedance/UI-TARS-desktop/pull/1584)) ([c2466c1](https://github.com/bytedance/UI-TARS-desktop/commit/c2466c148)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-ui:** improve monaco editor line numbers spacing ([#1571](https://github.com/bytedance/UI-TARS-desktop/pull/1571)) ([77a2a27](https://github.com/bytedance/UI-TARS-desktop/commit/77a2a27a4)) [@ULIVZ](https://github.com/ULIVZ)
+
 ## [0.3.0-beta.12](https://github.com/bytedance/UI-TARS-desktop/compare/v0.3.0-beta.11-canary-e70d431f-20250917163005...v0.3.0-beta.12) (2025-09-18)
 
 ### Features
