@@ -9,6 +9,122 @@ import { SessionInfo } from '@tarko/interface';
 import { ShareService } from '../services';
 import { filterSessionModel } from '../utils';
 
+
+/**
+ * Get runtime settings schema and current values
+ */
+export async function getRuntimeSettings(c: HonoContext) {
+  const sessionId = c.req.query('sessionId');
+
+  if (!sessionId) {
+    return c.json({ error: 'Session ID is required' }, 400);
+  }
+
+  try {
+    const server = c.get('server');
+    
+    // Get runtime settings configuration from server config
+    const runtimeSettingsConfig = server.appConfig?.server?.runtimeSettings;
+    
+    if (!runtimeSettingsConfig) {
+      return c.json({ 
+        schema: { type: 'object', properties: {} },
+        currentValues: {}
+      }, 200);
+    }
+
+    // Get current session info to retrieve stored runtime settings
+    let currentValues = {};
+
+    const sessionInfo = await server.daoFactory.getSessionInfo(sessionId);
+    currentValues = sessionInfo?.metadata?.runtimeSettings || {};
+
+    // Merge with default values from schema
+    const schema = runtimeSettingsConfig.schema;
+    const mergedValues: Record<string, any> = { ...currentValues };
+    
+    if (schema.properties) {
+      Object.entries(schema.properties).forEach(([key, propSchema]: [string, any]) => {
+        if (mergedValues[key] === undefined && propSchema.default !== undefined) {
+          mergedValues[key] = propSchema.default;
+        }
+      });
+    }
+
+    return c.json({
+      schema: runtimeSettingsConfig.schema,
+      currentValues: mergedValues
+    }, 200);
+  } catch (error) {
+    console.error(`Error getting runtime settings for session ${sessionId}:`, error);
+    return c.json({ error: 'Failed to get runtime settings' }, 500);
+  }
+}
+
+/**
+ * Update runtime settings for a session
+ */
+export async function updateRuntimeSettings(c: HonoContext) {
+  const body = await c.req.json()
+
+  const { sessionId, runtimeSettings } =  body as {
+    sessionId: string;
+    runtimeSettings: Record<string, any>;
+  };
+
+  if (!sessionId) {
+    return c.json({ error: 'Session ID is required' }, 400);
+  }
+
+  if (!runtimeSettings || typeof runtimeSettings !== 'object') {
+    return c.json({ error: 'Runtime settings object is required' }, 400);
+  }
+
+  try {
+    const server = c.get('server');
+
+    const sessionInfo = await server.daoFactory.getSessionInfo(sessionId);
+    if (!sessionInfo) {
+      return c.json({ error: 'Session not found' }, 404);
+    }
+
+    // Update session info with new runtime settings
+    const updatedSessionInfo = await server.daoFactory.updateSessionInfo(sessionId, {
+      metadata: {
+        ...sessionInfo.metadata,
+        runtimeSettings,
+      },
+    });
+
+    // If session is currently active, recreate the agent with new runtime settings
+    const activeSession = server.getSessionPool().get(sessionId);
+
+    if (activeSession) {
+      console.log('Runtime settings updated', {
+        sessionId,
+        runtimeSettings,
+      });
+
+      try {
+        // Recreate agent with new runtime settings configuration
+        await activeSession!.updateSessionConfig(updatedSessionInfo);
+        console.log('Session agent recreated with new runtime settings', { sessionId });
+      } catch (error) {
+        console.error('Failed to update agent runtime settings for session', { sessionId, error });
+        // Continue execution - the runtime settings are saved, will apply on next session
+      }
+    }
+
+    return c.json({ 
+      session: updatedSessionInfo,
+      runtimeSettings 
+    }, 200);
+  } catch (error) {
+    console.error(`Error updating runtime settings for session ${sessionId}:`, error);
+    return c.json({ error: 'Failed to update runtime settings' }, 500);
+  }
+}
+
 /**
  * Get all sessions (with multi-tenant support)
  */

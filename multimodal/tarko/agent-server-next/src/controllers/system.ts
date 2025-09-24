@@ -88,7 +88,7 @@ export async function updateSessionModel(c: HonoContext) {
 
       try {
         // Recreate agent with new model configuration
-        await activeSession.updateModelConfig(updatedSessionInfo);
+        await activeSession.updateSessionConfig(updatedSessionInfo);
         console.log(`Session ${sessionId} agent recreated with new model config`);
       } catch (error) {
         console.error(`Failed to update agent model config for session ${sessionId}:`, error);
