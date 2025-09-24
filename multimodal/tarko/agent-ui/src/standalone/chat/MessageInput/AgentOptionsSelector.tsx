@@ -496,7 +496,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
           <button
             type="button"
             disabled={isLoading || isDisabled}
-            className={`flex items-center justify-center w-8 h-8 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+            className={`flex items-center justify-center w-8 h-8 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100/50 dark:hover:bg-gray-700/30 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
               isLoading ? 'animate-pulse' : ''
             }`}
             title={isLoading ? 'Updating agent options...' : 'Options'}
