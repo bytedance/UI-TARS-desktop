@@ -2,13 +2,12 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { MarkdownRenderer } from '@tarko/ui';
 import { wrapMarkdown } from '@/common/utils/markdown';
-
-type DisplayMode = 'source' | 'rendered';
+import { FileDisplayMode } from '../../types';
 
 interface MessageContentProps {
   message: string;
   isMarkdown?: boolean;
-  displayMode?: DisplayMode;
+  displayMode?: FileDisplayMode;
   isShortMessage?: boolean;
 }
 

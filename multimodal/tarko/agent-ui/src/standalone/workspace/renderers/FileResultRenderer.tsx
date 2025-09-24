@@ -3,8 +3,6 @@ import { MonacoCodeEditor } from '@tarko/ui';
 import { FileDisplayMode } from '../types';
 import { StandardPanelContent } from '../types/panelContent';
 import { MessageContent } from '../components/shared';
-
-type DisplayMode = 'source' | 'rendered';
 import { useStableCodeContent } from '@/common/hooks/useStableValue';
 import { ThrottledHtmlRenderer } from '../components/ThrottledHtmlRenderer';
 import { formatBytes } from '../utils/codeUtils';
@@ -89,7 +87,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
                 <MessageContent
                   message={stableContent}
                   isMarkdown={true}
-                  displayMode={displayMode as DisplayMode}
+                  displayMode={displayMode}
                   isShortMessage={false}
                 />
               </div>

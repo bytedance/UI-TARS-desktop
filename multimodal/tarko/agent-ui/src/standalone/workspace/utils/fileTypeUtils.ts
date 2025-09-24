@@ -2,6 +2,8 @@
  * Utility functions for file type detection and handling
  */
 
+import { FileDisplayMode } from '../types';
+
 export interface FileTypeInfo {
   isHtml: boolean;
   isMarkdown: boolean;
@@ -16,7 +18,7 @@ export interface FileTypeInfo {
 export function getFileTypeInfo(filePath: string): FileTypeInfo {
   const fileName = filePath.split('/').pop() || filePath;
   const extension = fileName.toLowerCase().split('.').pop() || '';
-  
+
   const isHtml = extension === 'html' || extension === 'htm';
   const isMarkdown = extension === 'md' || extension === 'markdown';
   const isRenderableFile = isHtml || isMarkdown;
@@ -54,13 +56,13 @@ export function isMarkdownFile(filePath: string): boolean {
 /**
  * Get the appropriate default display mode for a file during streaming
  */
-export function getDefaultDisplayMode(filePath: string, isStreaming: boolean): 'source' | 'rendered' {
+export function getDefaultDisplayMode(filePath: string, isStreaming: boolean): FileDisplayMode {
   const { isHtml } = getFileTypeInfo(filePath);
-  
+
   // For HTML files during streaming, default to source mode
   if (isHtml && isStreaming) {
     return 'source';
   }
-  
+
   return 'rendered';
 }
