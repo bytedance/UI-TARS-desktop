@@ -7,21 +7,21 @@ import path from 'path';
 import { defineConfig } from '@tarko/agent-cli';
 import { SYSTEM_PROMPT_2 } from './prompts';
 import { androidOperator } from './operators';
-import { model_openai } from './models';
+import { model_claude_4 } from './models';
 
 export default defineConfig({
   operator: androidOperator,
-  model: model_openai,
-  systemPrompt: SYSTEM_PROMPT_2, // TODO: use corresponding system prompt
+  model: model_claude_4,
+  systemPrompt: SYSTEM_PROMPT_2, // TODO: add corresponding system prompt
   snapshot: {
     enable: true,
-    storageDirectory: path.join(__dirname, '../snapshots/android-openai'),
+    storageDirectory: path.join(__dirname, '../snapshots/android-claude'),
   },
   webui: {
     logo: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/icon.png',
-    title: 'GUI Agent - Android (OpenAI)',
-    subtitle: 'Android mobile GUI agent powered by OpenAI GPT models',
-    welcomTitle: 'Android GUI Agent with OpenAI',
+    title: 'GUI Agent - Android (Claude)',
+    subtitle: 'Android-based GUI agent powered by Anthropic Claude models',
+    welcomTitle: 'Android GUI Agent with Claude',
     welcomePrompts: [
       'Check the weather in Beijing',
       'Add Tom: 12345678900 to contacts',

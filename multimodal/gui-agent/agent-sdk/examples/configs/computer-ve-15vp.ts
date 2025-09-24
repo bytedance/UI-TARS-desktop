@@ -6,21 +6,18 @@ import 'dotenv/config';
 import path from 'path';
 import { defineConfig } from '@tarko/agent-cli';
 import { SYSTEM_PROMPT_2 } from './prompts';
+import { computerOperator } from './operators';
+import { doubao_1_5_vp } from './models';
+import { systemPromptTemplate1 } from './promptTemps';
 
 export default defineConfig({
-  operatorType: 'computer',
-  model: {
-    provider: 'volcengine',
-    baseURL: process.env.ARK_BASE_URL,
-    id: process.env.ARK_MODEL,
-    apiKey: process.env.ARK_API_KEY, // secretlint-disable-line
-  },
-  systemPrompt: SYSTEM_PROMPT_2,
+  operator: computerOperator,
+  model: doubao_1_5_vp,
+  systemPrompt: systemPromptTemplate1,
   snapshot: {
     enable: true,
-    storageDirectory: path.join(__dirname, '../snapshots/computer-volcengine'),
+    storageDirectory: path.join(__dirname, '../snapshots/computer-ve-15vp'),
   },
-  uiTarsVersion: 'latest',
   webui: {
     logo: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/icon.png',
     title: 'GUI Agent - Computer (Volcengine)',

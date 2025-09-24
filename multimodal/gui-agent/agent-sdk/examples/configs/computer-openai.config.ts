@@ -6,21 +6,18 @@ import 'dotenv/config';
 import path from 'path';
 import { defineConfig } from '@tarko/agent-cli';
 import { SYSTEM_PROMPT_2 } from './prompts';
+import { computerOperator } from './operators';
+import { model_openai } from './models';
+import { systemPromptTemplate1 } from './promptTemps';
 
 export default defineConfig({
-  operatorType: 'computer',
-  model: {
-    provider: 'openai',
-    baseURL: process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1',
-    id: process.env.OPENAI_MODEL || 'gpt-4o',
-    apiKey: process.env.OPENAI_API_KEY, // secretlint-disable-line
-  },
-  systemPrompt: SYSTEM_PROMPT_2,
+  operator: computerOperator,
+  model: model_openai,
+  systemPrompt: systemPromptTemplate1,
   snapshot: {
     enable: true,
     storageDirectory: path.join(__dirname, '../snapshots/computer-openai'),
   },
-  uiTarsVersion: 'latest',
   webui: {
     logo: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/icon.png',
     title: 'GUI Agent - Computer (OpenAI)',

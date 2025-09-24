@@ -4,23 +4,20 @@
  */
 import 'dotenv/config';
 import path from 'path';
+
 import { defineConfig } from '@tarko/agent-cli';
-import { SYSTEM_PROMPT_2 } from './prompts';
+import { browserOperator } from './operators';
+import { doubao_1_5_vp } from './models';
+import { systemPromptTemplate1 } from './promptTemps';
 
 export default defineConfig({
-  operatorType: 'browser',
-  model: {
-    provider: 'volcengine',
-    baseURL: process.env.ARK_BASE_URL,
-    id: process.env.ARK_MODEL,
-    apiKey: process.env.ARK_API_KEY, // secretlint-disable-line
-  },
-  systemPrompt: SYSTEM_PROMPT_2,
+  operator: browserOperator,
+  model: doubao_1_5_vp,
+  systemPrompt: systemPromptTemplate1,
   snapshot: {
     enable: true,
-    storageDirectory: path.join(__dirname, '../snapshots/browser-volcengine'),
+    storageDirectory: path.join(__dirname, '../snapshots/browser-ve-15vp'),
   },
-  uiTarsVersion: 'latest',
   webui: {
     logo: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/icon.png',
     title: 'GUI Agent - Browser (Volcengine)',
