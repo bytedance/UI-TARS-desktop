@@ -244,30 +244,34 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
           <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
             {property.title || key}:
           </span>
-          {property.enum.map((option, index) => {
-            const isSelected = currentValue === option;
-            const displayLabel = getEnumDisplayLabel(property, option);
-            
-            return (
-              <button
-                key={option}
-                type="button"
-                onClick={() => handleOptionChange(key, option)}
-                disabled={isLoading || isDisabled}
-                className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
-                  isSelected
-                    ? 'bg-blue-600 text-white border border-blue-600'
-                    : 'bg-gray-50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50'
-                } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                title={property.description}
-              >
-                {displayLabel}
-                {isLoading && isSelected && (
-                  <FiLoader className="w-3 h-3 animate-spin ml-1 inline" />
-                )}
-              </button>
-            );
-          })}
+          <div className="inline-flex rounded-full border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-800">
+            {property.enum.map((option, index) => {
+              const isSelected = currentValue === option;
+              const displayLabel = getEnumDisplayLabel(property, option);
+              
+              return (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => handleOptionChange(key, option)}
+                  disabled={isLoading || isDisabled}
+                  className={`px-3 py-1 text-xs font-medium transition-all duration-200 relative ${
+                    isSelected
+                      ? 'bg-blue-600 text-white z-10'
+                      : 'bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                  } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${
+                    index > 0 ? 'border-l border-gray-200 dark:border-gray-700' : ''
+                  }`}
+                  title={property.description}
+                >
+                  {displayLabel}
+                  {isLoading && isSelected && (
+                    <FiLoader className="w-3 h-3 animate-spin ml-1 inline" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
       );
     }
