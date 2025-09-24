@@ -39,14 +39,23 @@ export class GUIAgentT5Adapter {
     reasoningBuffer: string,
   ): BrowserVisionControlCall[] {
     return tools.map((tool) => {
-      this.logger.debug(
-        `[convertToBrowserVisionControlCalls] Processing tool: ${JSON.stringify(tool)}`,
-      );
+      this.logger.debug(`[convertToBVCCalls] Processing tool: ${JSON.stringify(tool)}`);
 
       const { roughType, roughInputs } = this.helper.parseRoughFromFunctionCall(tool.function);
       const operator_action = this.helper.standardizeAction(roughType, roughInputs);
+      this.logger.debug(
+        `[convertToBVCCalls] Standardized action: ${JSON.stringify(operator_action)}`,
+      );
       this.normalizeActionCoordinates(operator_action.inputs);
+      this.logger.debug(
+        `[convertToBVCCalls] Normalized action: ${JSON.stringify(operator_action)}`,
+      );
       const actionString = serializeAction(operator_action);
+      this.logger.debug(`[convertToBVCCalls] Serialized action: ${actionString}`);
+      const action_for_gui_render = convertToAgentUIAction(operator_action);
+      this.logger.debug(
+        `[convertToBVCCalls] action_for_gui: ${JSON.stringify(action_for_gui_render)}`,
+      );
 
       const browserCall: BrowserVisionControlCall = {
         id: tool.id,
@@ -58,14 +67,12 @@ export class GUIAgentT5Adapter {
             step: '',
             thought: reasoningBuffer,
             operator_action: [operator_action],
-            action_for_gui: convertToAgentUIAction(operator_action),
+            action_for_gui: action_for_gui_render,
           }),
         },
       };
 
-      this.logger.debug(
-        `[convertToBrowserVisionControlCalls] Generated browser call for tool ${tool.id}`,
-      );
+      this.logger.debug(`[convertToBVCCalls] Generated browser call for tool ${tool.id}`);
       return browserCall;
     });
   }

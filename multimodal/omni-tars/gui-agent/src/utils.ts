@@ -67,8 +67,8 @@ export function convertToAgentUIAction(action: BaseAction): Record<string, any> 
       return {
         type: 'scroll',
         inputs: {
-          startX: action_inputs.start.point.normalized.x || 0,
-          startY: action_inputs.start.point.normalized.y || 0,
+          startX: action_inputs.point?.normalized?.x || 0,
+          startY: action_inputs.point?.normalized?.y || 0,
           direction: (action_inputs.direction as 'up' | 'down' | 'left' | 'right') || 'down',
         },
       };
