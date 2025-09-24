@@ -13,11 +13,11 @@ import { AgentAppConfig } from "@tarko/interface";
 const mcpToolCallEngine = new McpToolCallEngineProvider();
 
 const omniToolCallEngine = createComposableToolCallEngineFactory({
-  engines: [new GuiToolCallEngineProvider(), mcpToolCallEngine, new CodeToolCallEngineProvider()],
+  engines: [new GuiToolCallEngineProvider('omni'), mcpToolCallEngine, new CodeToolCallEngineProvider()],
   defaultEngine: mcpToolCallEngine,
 });
 
-const guiToolCallEngine = createComposableToolCallEngineFactory({ engines: [new GuiToolCallEngineProvider()] });
+const guiToolCallEngine = createComposableToolCallEngineFactory({ engines: [new GuiToolCallEngineProvider('gui')] });
 
 
 export type OmniTarsOption = AgentAppConfig & MCPTarsExtraOption & CodeAgentExtraOption & {
@@ -34,7 +34,7 @@ export function getComposableOption(options: OmniTarsOption) {
         ignoreSandboxCheck,
         linkReaderAK,
         linkReaderMcpUrl,
-        agentMode,
+        agentMode = 'omni',
         ...restOptions
       } = options;
 

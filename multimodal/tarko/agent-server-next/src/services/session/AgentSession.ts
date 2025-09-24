@@ -193,7 +193,8 @@ export class AgentSession {
       share: agentOptions.share,
       workspace: agentOptions.workspace,
       thinking: agentOptions.thinking,
-      name: agentOptions.name
+      name: agentOptions.name,
+      runtimeSettings: transformedOptions
     }, null, 2));
 
     return wrappedAgent;

@@ -18,5 +18,5 @@ export { AgentPlugin } from './AgentPlugin';
 export { parseCodeContent, parseComputerContent, parseMcpContent } from './utils/parser';
 export * from './utils/streamingParser';
 export * from './utils/streamingParserT5';
-export { SYSTEM_PROMPT_GROUP, think_token } from './environments/prompt_t5';
+export { SYSTEM_PROMPT_GROUP, createSystemPromptGroup, think_token } from './environments/prompt_t5';
 export { getAioUrl, extractAioPort } from './utils/hepler';
