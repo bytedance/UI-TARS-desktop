@@ -6,7 +6,7 @@ import { SessionItemMetadata, AgentRuntimeSettingsSchema, AgentRuntimeSettingPro
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useAtomValue } from 'jotai';
 import { isProcessingAtom } from '@/common/state/atoms/ui';
-import { FiCheck, FiLoader, FiX } from 'react-icons/fi';
+import { FiCheck, FiLoader, FiX, FiChevronDown } from 'react-icons/fi';
 import { TbBulb, TbSearch, TbBook, TbSettings, TbBrain, TbBrowser } from 'react-icons/tb';
 
 interface ActiveOption {
@@ -239,38 +239,71 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
     }
 
     if (property.type === 'string' && property.enum) {
+      const [isOpen, setIsOpen] = useState(false);
+      const dropdownRef = useRef<HTMLDivElement>(null);
+      
+      // Close dropdown when clicking outside
+      useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+          if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+            setIsOpen(false);
+          }
+        };
+        
+        if (isOpen) {
+          document.addEventListener('mousedown', handleClickOutside);
+          return () => document.removeEventListener('mousedown', handleClickOutside);
+        }
+      }, [isOpen]);
+      
+      const currentDisplayLabel = getEnumDisplayLabel(property, currentValue);
+      
       return (
         <div key={`chat-bottom-${key}`} className="inline-flex items-center gap-2">
           <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
             {property.title || key}:
           </span>
-          <div className="inline-flex rounded-full border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-800">
-            {property.enum.map((option, index) => {
-              const isSelected = currentValue === option;
-              const displayLabel = getEnumDisplayLabel(property, option);
-              
-              return (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => handleOptionChange(key, option)}
-                  disabled={isLoading || isDisabled}
-                  className={`px-3 py-1 text-xs font-medium transition-all duration-200 relative ${
-                    isSelected
-                      ? 'bg-blue-600 text-white z-10'
-                      : 'bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
-                  } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${
-                    index > 0 ? 'border-l border-gray-200 dark:border-gray-700' : ''
-                  }`}
-                  title={property.description}
-                >
-                  {displayLabel}
-                  {isLoading && isSelected && (
-                    <FiLoader className="w-3 h-3 animate-spin ml-1 inline" />
-                  )}
-                </button>
-              );
-            })}
+          <div className="relative" ref={dropdownRef}>
+            <button
+              type="button"
+              onClick={() => setIsOpen(!isOpen)}
+              disabled={isLoading || isDisabled}
+              className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-all duration-200 cursor-pointer"
+            >
+              <span className="font-medium">{currentDisplayLabel}</span>
+              <FiChevronDown className={`w-3 h-3 ml-1.5 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+            </button>
+            
+            {isOpen && (
+              <div className="absolute top-full left-0 mt-1 min-w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
+                {property.enum.map((option) => {
+                  const isSelected = currentValue === option;
+                  const displayLabel = getEnumDisplayLabel(property, option);
+                  
+                  return (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => {
+                        handleOptionChange(key, option);
+                        setIsOpen(false);
+                      }}
+                      disabled={isLoading || isDisabled}
+                      className={`w-full px-3 py-2 text-left text-xs font-medium transition-all duration-200 ${
+                        isSelected
+                          ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                      } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span>{displayLabel}</span>
+                        {isSelected && <FiCheck className="w-3 h-3" />}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       );
