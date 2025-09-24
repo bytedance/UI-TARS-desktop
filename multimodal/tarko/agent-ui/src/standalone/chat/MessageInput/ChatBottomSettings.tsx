@@ -192,7 +192,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
           e.stopPropagation();
           onRemoveOption?.(option.key);
         }}
-        className="group inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-700 dark:text-blue-300 border border-blue-200/50 dark:border-blue-700/50 hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/30 dark:hover:to-indigo-900/30 hover:border-blue-300/60 dark:hover:border-blue-600/60 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md"
+        className="group inline-flex items-center px-2.5 py-1.5 rounded-md text-xs font-medium bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 cursor-pointer"
         title={`Remove ${option.title}`}
       >
         <span className="mr-1.5 text-blue-600 dark:text-blue-400 group-hover:opacity-0 transition-opacity duration-200">
@@ -202,7 +202,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
         <span className="truncate flex items-center">
           <span className="font-medium">{option.title}</span>
           {option.displayValue && (
-            <span className="ml-1.5 text-xs text-blue-600/80 dark:text-blue-300/80 bg-white/90 dark:bg-gray-800/90 px-1.5 py-0.5 rounded-full font-medium backdrop-blur-sm border border-blue-200/30 dark:border-blue-600/30 shadow-sm">
+            <span className="ml-1.5 text-xs text-blue-600/80 dark:text-blue-300/80 bg-white/90 dark:bg-gray-800/90 px-1.5 py-0.5 rounded font-medium">
               {option.displayValue}
             </span>
           )}
@@ -221,10 +221,10 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
           type="button"
           onClick={() => handleOptionChange(key, !currentValue)}
           disabled={isLoading || isDisabled}
-          className={`group inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md ${
+          className={`inline-flex items-center px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-200 cursor-pointer ${
             currentValue
-              ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-700 dark:text-blue-300 border border-blue-200/50 dark:border-blue-700/50 hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/30 dark:hover:to-indigo-900/30 hover:border-blue-300/60 dark:hover:border-blue-600/60'
-              : 'bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 border border-gray-200/50 dark:border-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:border-gray-300/60 dark:hover:border-gray-600/60'
+              ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/30'
+              : 'bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50'
           } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
           title={property.description || property.title || key}
         >
@@ -232,21 +232,19 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
             {getOptionIcon(key, property)}
           </span>
           <span className="font-medium">{property.title || key}</span>
-          <div className="flex items-center gap-1 ml-1.5">
-            {isLoading && <FiLoader className="w-3 h-3 animate-spin" />}
-            {currentValue && !isLoading && <FiCheck className="w-3 h-3" />}
-          </div>
+          {isLoading && <FiLoader className="w-3 h-3 animate-spin ml-1.5" />}
+          {currentValue && !isLoading && <FiCheck className="w-3 h-3 ml-1.5" />}
         </button>
       );
     }
 
     if (property.type === 'string' && property.enum) {
       return (
-        <div key={`chat-bottom-${key}`} className="inline-flex items-center">
-          <span className="mr-2 text-xs font-medium text-gray-700 dark:text-gray-300">
+        <div key={`chat-bottom-${key}`} className="inline-flex items-center gap-2">
+          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
             {property.title || key}:
           </span>
-          <div className="inline-flex rounded-full border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="inline-flex rounded-md border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-800">
             {property.enum.map((option, index) => {
               const isSelected = currentValue === option;
               const displayLabel = getEnumDisplayLabel(property, option);
@@ -257,13 +255,13 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
                   type="button"
                   onClick={() => handleOptionChange(key, option)}
                   disabled={isLoading || isDisabled}
-                  className={`px-2 py-0.5 text-xs font-medium transition-all duration-200 ${
+                  className={`px-3 py-1.5 text-xs font-medium transition-all duration-200 relative ${
                     isSelected
-                      ? 'bg-blue-600 text-white shadow-sm'
-                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                      ? 'bg-blue-600 text-white z-10'
+                      : 'bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
                   } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${
-                    index === 0 ? 'border-r border-gray-200 dark:border-gray-700' : ''
-                  } ${index === property.enum!.length - 1 ? '' : 'border-r border-gray-200 dark:border-gray-700'}`}
+                    index > 0 ? 'border-l border-gray-200 dark:border-gray-700' : ''
+                  }`}
                   title={property.description}
                 >
                   {displayLabel}
@@ -282,12 +280,12 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
   };
 
   return (
-    <>
+    <div className="inline-flex items-center gap-2 flex-wrap">
       {/* Render activated dropdown options first */}
       {activatedDropdownOptions.map(renderActivatedOption)}
       
       {/* Render default visible chat-bottom options */}
       {chatBottomOptions.map(renderChatBottomOption)}
-    </>
+    </div>
   );
 };
