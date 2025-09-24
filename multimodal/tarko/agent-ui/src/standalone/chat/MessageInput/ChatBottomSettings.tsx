@@ -38,9 +38,28 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
   const [placement, setPlacement] = useState<'dropdown-item' | 'chat-bottom'>('dropdown-item');
   const [isLoading, setIsLoading] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({});
+  const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const updateSessionMetadata = useSetAtom(updateSessionMetadataAction);
   const { isReplayMode } = useReplayMode();
   const isProcessing = useAtomValue(isProcessingAtom);
+
+  // Handle click outside for all dropdowns
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      Object.entries(openDropdowns).forEach(([key, isOpen]) => {
+        if (isOpen && dropdownRefs.current[key] && !dropdownRefs.current[key]!.contains(event.target as Node)) {
+          setOpenDropdowns(prev => ({ ...prev, [key]: false }));
+        }
+      });
+    };
+    
+    const hasOpenDropdowns = Object.values(openDropdowns).some(Boolean);
+    if (hasOpenDropdowns) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [openDropdowns]);
 
   // Load agent options - ONLY when session changes
   useEffect(() => {
@@ -83,6 +102,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
     setCurrentValues(null);
     setPlacement('dropdown-item');
     setIsLoading(false);
+    setOpenDropdowns({});
   }, [activeSessionId]);
 
   // Handle option change
@@ -239,23 +259,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
     }
 
     if (property.type === 'string' && property.enum) {
-      const [isOpen, setIsOpen] = useState(false);
-      const dropdownRef = useRef<HTMLDivElement>(null);
-      
-      // Close dropdown when clicking outside
-      useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-          if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-            setIsOpen(false);
-          }
-        };
-        
-        if (isOpen) {
-          document.addEventListener('mousedown', handleClickOutside);
-          return () => document.removeEventListener('mousedown', handleClickOutside);
-        }
-      }, [isOpen]);
-      
+      const isOpen = openDropdowns[key] || false;
       const currentDisplayLabel = getEnumDisplayLabel(property, currentValue);
       
       return (
@@ -263,10 +267,13 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
           <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
             {property.title || key}:
           </span>
-          <div className="relative" ref={dropdownRef}>
+          <div 
+            className="relative" 
+            ref={(el) => { dropdownRefs.current[key] = el; }}
+          >
             <button
               type="button"
-              onClick={() => setIsOpen(!isOpen)}
+              onClick={() => setOpenDropdowns(prev => ({ ...prev, [key]: !prev[key] }))}
               disabled={isLoading || isDisabled}
               className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-all duration-200 cursor-pointer"
             >
@@ -286,7 +293,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
                       type="button"
                       onClick={() => {
                         handleOptionChange(key, option);
-                        setIsOpen(false);
+                        setOpenDropdowns(prev => ({ ...prev, [key]: false }));
                       }}
                       disabled={isLoading || isDisabled}
                       className={`w-full px-3 py-2 text-left text-xs font-medium transition-all duration-200 ${

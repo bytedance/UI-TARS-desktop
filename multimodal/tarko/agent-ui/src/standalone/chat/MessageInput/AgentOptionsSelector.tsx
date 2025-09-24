@@ -2,7 +2,11 @@ import React, { useState, useEffect, useImperativeHandle, forwardRef, useRef } f
 import { useSetAtom } from 'jotai';
 import { updateSessionMetadataAction } from '@/common/state/actions/sessionActions';
 import { apiService } from '@/common/services/apiService';
-import { SessionItemMetadata, AgentRuntimeSettingsSchema, AgentRuntimeSettingProperty } from '@tarko/interface';
+import {
+  SessionItemMetadata,
+  AgentRuntimeSettingsSchema,
+  AgentRuntimeSettingProperty,
+} from '@tarko/interface';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useAtomValue } from 'jotai';
 import { isProcessingAtom } from '@/common/state/atoms/ui';
@@ -35,8 +39,6 @@ export interface AgentOptionsSelectorRef {
   toggleOption: (key: string) => void;
   removeOption: (key: string) => void;
 }
-
-
 
 interface RuntimeSettingsResponse {
   schema: AgentRuntimeSettingsSchema;
@@ -185,7 +187,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
           const response = await apiService.getSessionRuntimeSettings(activeSessionId);
           const schema = response.schema as AgentRuntimeSettingsSchema;
           let currentValues = response.currentValues || {};
-          
+
           // Merge with default values from schema if not present
           if (schema?.properties) {
             const mergedValues: Record<string, any> = { ...currentValues };
@@ -196,7 +198,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
             });
             currentValues = mergedValues;
           }
-          
+
           setSchema(schema);
           setCurrentValues(currentValues);
           // Use default placement - let UI handle this
@@ -341,8 +343,10 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
             key,
             title: property.title || key,
             currentValue,
-            displayValue: property.type === 'string' && property.enum ? 
-              getEnumDisplayLabel(property, currentValue) : undefined,
+            displayValue:
+              property.type === 'string' && property.enum
+                ? getEnumDisplayLabel(property, currentValue)
+                : undefined,
           };
         });
 
