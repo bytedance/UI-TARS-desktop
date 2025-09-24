@@ -197,17 +197,17 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
           e.stopPropagation();
           onRemoveOption?.(option.key);
         }}
-        className="group inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700 hover:bg-purple-100 dark:hover:bg-purple-900/30 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-200 cursor-pointer"
+        className="group inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 hover:border-indigo-300 dark:hover:border-indigo-500/40 transition-all duration-200 cursor-pointer"
         title={`Remove ${option.title}`}
       >
-        <span className="mr-1.5 text-purple-600 dark:text-purple-400 group-hover:opacity-0 transition-opacity duration-200">
+        <span className="mr-1.5 text-indigo-600 dark:text-indigo-400 group-hover:opacity-0 transition-opacity duration-200">
           {getOptionIcon(option.key, property)}
         </span>
-        <FiX className="absolute ml-0 w-3.5 h-3.5 text-purple-600 dark:text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+        <FiX className="absolute ml-0 w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
         <span className="truncate flex items-center">
           <span className="font-medium">{option.title}</span>
           {option.displayValue && (
-            <span className="ml-1.5 text-xs text-purple-600/80 dark:text-purple-300/80 bg-white/90 dark:bg-gray-800/90 px-1.5 py-0.5 rounded-full font-medium">
+            <span className="ml-1.5 text-xs text-indigo-600/80 dark:text-indigo-300/80 bg-white/90 dark:bg-gray-800/90 px-1.5 py-0.5 rounded-full font-medium">
               {option.displayValue}
             </span>
           )}
