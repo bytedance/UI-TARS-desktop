@@ -444,7 +444,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
               <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
                 {getOptionIcon(key, property)}
               </div>
-              <div className="ml-2.5 flex-1 min-w-0">
+              <div className="ml-3 flex-1 min-w-0">
                 <div className="font-medium text-sm">{property.title || key}</div>
               </div>
             </div>
