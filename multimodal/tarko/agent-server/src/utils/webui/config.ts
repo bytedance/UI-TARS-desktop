@@ -4,6 +4,7 @@
  */
 
 import { AgentWebUIImplementation } from '@tarko/interface';
+import { deepMerge } from '@tarko/shared-utils';
 import type { AgentServer } from '../../server';
 
 /**
@@ -18,5 +19,5 @@ export function mergeWebUIConfig(
   server?: AgentServer,
 ): AgentWebUIImplementation & Record<string, any> {
   const agentConstructorWebConfig = server?.getAgentConstructorWebConfig();
-  return { ...baseWebUIConfig, ...agentConstructorWebConfig };
+  return deepMerge(agentConstructorWebConfig || {}, baseWebUIConfig);
 }
