@@ -52,7 +52,7 @@ export async function startInteractiveWebUI(
   if (webui.staticPath) {
     const app = server.getApp();
     const mergedWebUIConfig = mergeWebUIConfig(webui, server);
-    setupUI(app, isDebug, webui.staticPath, mergedWebUIConfig);
+    setupUI(app, isDebug, webui.staticPath, mergedWebUIConfig, appConfig);
   }
 
   const port = appConfig.server!.port!;
@@ -116,12 +116,13 @@ function setupUI(
   isDebug = false,
   staticPath: string,
   mergedWebUIConfig: AgentWebUIImplementation & Record<string, any>,
+  appConfig: any,
 ): void {
   if (isDebug) {
     logger.debug(`Using static files from: ${staticPath}`);
   }
 
-  const pathMatcher = createPathMatcher(webui.base);
+  const pathMatcher = createPathMatcher(mergedWebUIConfig.base);
 
   // Middleware to inject baseURL for HTML requests
   const injectBaseURL = (
@@ -149,7 +150,10 @@ function setupUI(
 
     const scriptTag = `<script>
       window.AGENT_BASE_URL = "";
-      window.AGENT_WEB_UI_CONFIG = ${JSON.stringify(mergedWebUIConfig)};
+      window.AGENT_WEB_UI_CONFIG = ${JSON.stringify({
+        ...mergedWebUIConfig,
+        serverBase: appConfig.server?.base || ''
+      })};
       console.log("Agent: Using API baseURL:", window.AGENT_BASE_URL);
     </script>`;
 
