@@ -86,6 +86,22 @@ export function convertToAgentUIAction(action: BaseAction): Record<string, any> 
 }
 
 /**
+ * Create an error response for failed GUI operations
+ *
+ * @param actionStr - Raw action string that failed
+ * @param error - Error that occurred
+ * @returns Error response in GUI Agent format
+ */
+export function createGUIErrorResponse(actionStr: unknown, error: unknown): any {
+  return {
+    success: false,
+    action: String(actionStr),
+    normalizedAction: createErrorAction(),
+    error: error instanceof Error ? error.message : String(error),
+  };
+}
+
+/**
  * Create a default error action for failed operations
  *
  * @returns Default wait action for error scenarios

@@ -22,7 +22,7 @@ import {
   sleep,
 } from '@gui-agent/shared/utils';
 import { GUI_ADAPTED_TOOL_NAME } from './constants';
-import { convertToAgentUIAction } from './utils';
+import { convertToAgentUIAction, createGUIErrorResponse } from './utils';
 
 const defaultLogger = new ConsoleLogger('[GUIAgent]', LogLevel.DEBUG);
 
@@ -83,7 +83,10 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent {
         function: async (input) => {
           this.logger.log(`${GUI_ADAPTED_TOOL_NAME} input:`, input);
           if (!this.operator) {
-            return { status: 'error', message: 'Operator not initialized' };
+            return createGUIErrorResponse(input.action, 'Operator not initialized');
+          }
+          if (input.errorMessage) {
+            return createGUIErrorResponse(input.action, input.errorMessage);
           }
           // normalize coordinates
           if (input.operator_action) {
@@ -96,17 +99,8 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent {
           const result = await this.operator!.doExecute({
             actions: [input.operator_action],
           });
-          // TODO: why agent does not handle this error?
           if (result.errorMessage) {
-            return {
-              success: false,
-              action: input.action,
-              normalizedAction: {
-                type: 'wait',
-                inputs: {},
-              },
-              error: result.errorMessage,
-            };
+            return createGUIErrorResponse(input.action, result.errorMessage);
           }
           // return { action: input.action, status: 'success', result };
           return {

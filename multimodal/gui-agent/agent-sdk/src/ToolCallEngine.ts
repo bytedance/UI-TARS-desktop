@@ -132,10 +132,28 @@ export class GUIAgentToolCallEngine extends ToolCallEngine {
       defaultLogger.log('[finalizeStreamProcessing] Using default action parser');
     }
 
-    if (!parsedGUIResponse) {
+    if (!parsedGUIResponse || parsedGUIResponse.errorMessage) {
       return {
         content: '',
         rawContent: fullContent,
+        toolCalls: [
+          {
+            id: this.generateToolCallId(),
+            type: 'function',
+            function: {
+              name: GUI_ADAPTED_TOOL_NAME,
+              arguments: JSON.stringify({
+                action: '',
+                step: '',
+                thought: '',
+                operator_action: null,
+                errorMessage:
+                  parsedGUIResponse?.errorMessage ?? 'Failed to parse GUI Action from output',
+              }),
+            },
+          },
+        ],
+        finishReason: 'tool_calls',
       };
     }
 
