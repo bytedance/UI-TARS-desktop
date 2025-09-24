@@ -255,11 +255,22 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
             <button
               type="button"
               disabled={isOptionLoading || isDisabled}
-              className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-all duration-200 cursor-pointer"
+              className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
+                isOptionLoading 
+                  ? 'opacity-50 cursor-not-allowed bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700'
+                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:border-gray-400 dark:hover:border-gray-500 shadow-sm'
+              }`}
             >
+              <span className="mr-1.5 text-gray-500 dark:text-gray-400">
+                {getOptionIcon(key, property)}
+              </span>
               <span className="font-medium">{property.title || key}:</span>
-              <span className="ml-1.5 font-medium">{currentDisplayLabel}</span>
-              <FiChevronDown className="w-3 h-3 ml-1.5" />
+              <span className="ml-1.5 font-medium text-blue-600 dark:text-blue-400">{currentDisplayLabel}</span>
+              {isOptionLoading ? (
+                <FiLoader className="w-3 h-3 animate-spin ml-1.5 text-blue-600" />
+              ) : (
+                <FiChevronDown className="w-3 h-3 ml-1.5 text-gray-400 dark:text-gray-500" />
+              )}
             </button>
           }
         >
@@ -275,7 +286,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
               >
                 <div className="flex items-center justify-between">
                   <span className="font-medium text-sm">{displayLabel}</span>
-                  {isSelected && <FiCheck className="w-4 h-4 text-blue-600" />}
+                  {isSelected && !isOptionLoading && <FiCheck className="w-4 h-4 text-blue-600" />}
                 </div>
               </DropdownItem>
             );
