@@ -265,9 +265,9 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
                 {getOptionIcon(key, property)}
               </span>
               <span className="font-medium">{property.title || key}:</span>
-              <span className="ml-1.5 font-medium text-blue-600 dark:text-blue-400">{currentDisplayLabel}</span>
+              <span className="ml-1.5 font-medium text-gray-700 dark:text-gray-300">{currentDisplayLabel}</span>
               {isOptionLoading ? (
-                <FiLoader className="w-3 h-3 animate-spin ml-1.5 text-blue-600" />
+                <FiLoader className="w-3 h-3 animate-spin ml-1.5 text-gray-500 dark:text-gray-400" />
               ) : (
                 <FiChevronDown className="w-3 h-3 ml-1.5 text-gray-400 dark:text-gray-500" />
               )}
