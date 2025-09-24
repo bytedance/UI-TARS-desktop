@@ -111,7 +111,7 @@ export const TerminalRenderer: React.FC<TerminalRendererProps> = ({
   const output = formatOutput(panelContent.source);
 
   return (
-    <div className="space-y-4 md:text-base text-sm">
+    <div className="space-y-4 md:text-base text-sm font-mono">
       <div className="md:[&_pre]:text-sm [&_pre]:text-xs md:[&_pre]:p-4 [&_pre]:p-2">
         {/* Terminal with JSON highlighting using CodeEditor */}
         <div className="rounded-lg overflow-hidden border border-gray-900 shadow-[0_8px_24px_rgba(0,0,0,0.3)]">
@@ -131,21 +131,21 @@ export const TerminalRenderer: React.FC<TerminalRendererProps> = ({
           <div className="bg-black">
             <div className="overflow-x-auto min-w-full">
               {/* Command section */}
-              <div className="flex items-start p-3 pb-0">
+              <div className="flex items-start p-3 pb-0 text-sm">
                 <span className="select-none text-green-400 mr-2 font-bold">$</span>
                 <div className="flex-1 text-gray-200">{command}</div>
               </div>
 
               {/* Arguments section */}
               {argumentsJson && (
-                <div className="p-3 pb-0 bg-gray-900 rounded border border-gray-700 m-3 mb-0 max-h-48 overflow-auto">
+                <div className="p-3 pb-0 bg-[#121212] rounded m-3 mb-0 max-h-[40vh] overflow-auto">
                   <CodeHighlight code={argumentsJson} language="json" />
                 </div>
               )}
 
               {/* Output section */}
               {output && (
-                <div className="p-3 bg-gray-900 rounded border border-gray-700 m-3 max-h-96 overflow-auto">
+                <div className="p-3 bg-[#121212] rounded m-3 max-h-[80vh] overflow-auto">
                   <CodeHighlight code={output} language="json" />
                 </div>
               )}
