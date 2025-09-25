@@ -22,7 +22,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   placement = 'bottom',
   children,
   className,
-  maxWidth = '300px',
+  maxWidth = '400px',
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
