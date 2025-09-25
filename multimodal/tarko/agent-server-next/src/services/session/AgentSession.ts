@@ -127,7 +127,7 @@ export class AgentSession {
       throw new Error('Cannot found available resolved agent');
     }
 
-       // Get stored events for this session before creating the agent
+    // Get stored events for this session before creating the agent
     const storedEvents = this.server.daoFactory
       ? await this.server.daoFactory.getSessionEvents(this.id)
       : [];
@@ -187,15 +187,26 @@ export class AgentSession {
       // Log AGIO initialization
       console.debug('AGIO collector initialized', { provider: agentOptions.agio.provider });
     }
-    
-    this.logger.info('create new agent with config: ',  JSON.stringify({
-      agent: agentOptions.agent,
-      share: agentOptions.share,
-      workspace: agentOptions.workspace,
-      thinking: agentOptions.thinking,
-      name: agentOptions.name,
-      runtimeSettings: transformedOptions
-    }, null, 2));
+
+    this.logger.info(
+      'create new agent with config: ',
+      JSON.stringify(
+        {
+          agent: agentOptions.agent,
+          share: agentOptions.share,
+          workspace: agentOptions.workspace,
+          thinking: agentOptions.thinking,
+          name: agentOptions.name,
+          model: {
+            id: agentOptions.model?.id,
+            provider: agentOptions.model?.provider,
+          },
+          runtimeSettings: transformedOptions,
+        },
+        null,
+        2,
+      ),
+    );
 
     return wrappedAgent;
   }
@@ -551,7 +562,5 @@ export class AgentSession {
     this.eventBridge.emit('closed', { sessionId: this.id });
   }
 }
-
-
 
 export default AgentSession;

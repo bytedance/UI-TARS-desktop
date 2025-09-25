@@ -4,7 +4,7 @@
  */
 
 import { ComposableAgent } from '@omni-tars/core';
-import {  AgentWebUIImplementation } from '@tarko/interface';
+import { AgentWebUIImplementation } from '@tarko/interface';
 import { getComposableOption, OmniTarsOption } from './options';
 
 const sandboxBaseUrl = process.env.AIO_SANDBOX_URL ?? '.';

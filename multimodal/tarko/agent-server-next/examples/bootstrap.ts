@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { getContext } from 'hono/context-storage';
-import { AuthHook, CorsHook, AgentServer,  ContextStorageHook } from '../src/index';
+import { AuthHook, CorsHook, AgentServer, ContextStorageHook } from '../src/index';
 import { resolve } from 'path';
 import { ContextVariables } from '../src/types';
 
@@ -42,7 +42,22 @@ const server = new AgentServer({
               type: 'string',
               title: 'Agent Mode',
               enum: ['omni', 'gui'],
+              enumLabels: ['Omni', 'GUI'],
               default: 'omni',
+              placement: 'chat-bottom',
+            },
+
+            browserMode: {
+              type: 'string',
+              title: 'Browser Control',
+              enum: ['hybrid'],
+              enumLabels: ['混合模式'],
+              default: 'hybrid',
+              placement: 'chat-bottom',
+              visible: {
+                dependsOn: 'agentMode',
+                when: 'gui',
+              },
             },
           },
         },
@@ -60,16 +75,16 @@ const server = new AgentServer({
       },
       models: [
         {
-          id: "ep-20250909173748-wcfb2",
-          provider: "volcengine",
-          displayName: "T6-SFT",
+          id: 'ep-20250909173748-wcfb2',
+          provider: 'volcengine',
+          displayName: 'T6-SFT',
           baseURL: process.env.OMNI_TARS_BASE_URL,
           apiKey: process.env.OMNI_TARS_API_KEY,
         },
         {
-          id: "ep-20250905175225-hlrvd",
-          provider: "volcengine",
-          displayName: "T5-RL",
+          id: 'ep-20250905175225-hlrvd',
+          provider: 'volcengine',
+          displayName: 'T5-RL',
           baseURL: process.env.OMNI_TARS_BASE_URL,
           apiKey: process.env.OMNI_TARS_API_KEY,
         },
@@ -101,15 +116,15 @@ const logger = {
   name: 'custom',
   info: (...splat) => {
     const requestId = getContext<{ Variables: ContextVariables }>().var.requestId;
-    console.log(`[CUSTOM LOGGER] ${requestId}`, ...splat)
+    console.log(`[CUSTOM LOGGER] ${requestId}`, ...splat);
   },
   warn: console.warn,
   error: console.error,
   debug: console.debug,
-  setLevel: () => {  }
-}
+  setLevel: () => {},
+};
 
-server.setLogger(logger)
+server.setLogger(logger);
 server.registerHook(AuthHook);
 server.registerHook(CorsHook);
 server.registerHook(ContextStorageHook);

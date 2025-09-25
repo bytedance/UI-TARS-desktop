@@ -32,7 +32,7 @@ export async function sessionRestoreMiddleware(
 
     // If not exist, restored the AgentSession instance based on the database data.
     if (!session) {
-      logger.info('session instance not exist, prepare to restore')
+      logger.info('session instance not exist, prepare to restore');
 
       const start = Date.now();
 
@@ -47,6 +47,8 @@ export async function sessionRestoreMiddleware(
         restored.storageUnsubscribe &&
           (server.storageUnsubscribes[sessionId] = restored.storageUnsubscribe);
       }
+    } else {
+      logger.info('get session from sessionPool, sessionId:', session.id);
     }
 
     if (!session) {

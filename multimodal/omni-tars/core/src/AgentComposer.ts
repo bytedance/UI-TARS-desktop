@@ -32,7 +32,9 @@ export class AgentComposer {
    */
   async initialize(): Promise<void> {
     for (const plugin of this.plugins) {
+      const start = Date.now();
       await plugin.initialize?.();
+      this.logger.info(`initialize agent plugin ${plugin.name} cost: `, Date.now() - start);
     }
   }
 
