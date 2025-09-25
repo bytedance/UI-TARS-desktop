@@ -122,7 +122,7 @@ const WelcomePage: React.FC = () => {
       <div className="fixed inset-0 bg-gradient-to-b from-transparent to-gray-100/50 dark:to-gray-800/50 pointer-events-none"></div>
 
       {/* Main Content - Centered */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-12 relative z-10">
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-12 relative z-10 min-h-[80vh]">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
