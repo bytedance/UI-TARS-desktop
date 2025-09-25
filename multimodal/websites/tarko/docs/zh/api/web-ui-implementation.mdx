@@ -1,0 +1,289 @@
+# Web UI Implementation
+
+Web UI Implementation API 提供了用于自定义 Agent Web 界面的类型定义和配置选项。支持静态和远程部署策略，具有灵活的布局和工作区配置。
+
+## 类型定义
+
+### AgentWebUIImplementationType
+
+```typescript
+type AgentWebUIImplementationType = 'static' | 'remote'
+```
+
+定义 Agent Web UI 的部署策略：
+- `static` - 本地静态目录部署
+- `remote` - 远程 Web UI 实现（计划中）
+
+### WorkspaceNavItemIcon
+
+```typescript
+type WorkspaceNavItemIcon = 'code' | 'monitor' | 'terminal' | 'browser' | 'desktop' | 'default'
+```
+
+工作区导航项可用的图标类型。
+
+### LayoutMode
+
+```typescript
+type LayoutMode = 'default' | 'narrow-chat'
+```
+
+布局显示模式：
+- `default` - 标准布局，包含完整工作区
+- `narrow-chat` - 紧凑的聊天专注布局
+
+## 接口定义
+
+### WorkspaceNavItem
+
+```typescript
+interface WorkspaceNavItem {
+  title: string
+  link: string
+  icon?: WorkspaceNavItemIcon
+}
+```
+
+工作区头部导航项配置。
+
+**属性：**
+- `title` - 导航按钮的显示文本
+- `link` - 点击时在新标签页打开的 URL
+- `icon` - 图标类型（默认：`'default'`）
+
+### LayoutConfig
+
+```typescript
+interface LayoutConfig {
+  defaultLayout?: LayoutMode
+  enableLayoutSwitchButton?: boolean
+  enableSidebar?: boolean
+  enableHome?: boolean
+}
+```
+
+布局行为配置。
+
+**属性：**
+- `defaultLayout` - 初始布局模式（默认：`'default'`）
+- `enableLayoutSwitchButton` - 在工具栏显示布局切换按钮（默认：`false`）
+- `enableSidebar` - 显示侧边栏面板（默认：`true`）
+- `enableHome` - 注册首页路由（默认：`true`）
+
+### WorkspaceConfig
+
+```typescript
+interface WorkspaceConfig {
+  navItems?: WorkspaceNavItem[]
+}
+```
+
+工作区特定配置。
+
+**属性：**
+- `navItems` - 在工作区头部显示的导航项
+
+### TarkoWebUIGUIAgentConfig
+
+```typescript
+interface TarkoWebUIGUIAgentConfig {
+  defaultScreenshotRenderStrategy?: 'both' | 'beforeAction' | 'afterAction'
+  enableScreenshotRenderStrategySwitch?: boolean
+  renderGUIAction?: boolean
+  renderBrowserShell?: boolean
+}
+```
+
+GUI Agent 显示配置。
+
+**属性：**
+- `defaultScreenshotRenderStrategy` - 截图显示策略（默认：`'afterAction'`）
+  - `both` - 显示操作前后截图对比
+  - `beforeAction` - 仅显示操作前截图（适用于 Agent-TARS）
+  - `afterAction` - 仅显示操作后截图（适用于 Omni-TARS）
+- `enableScreenshotRenderStrategySwitch` - 允许运行时策略切换（默认：`false`）
+- `renderGUIAction` - 显示 GUI 操作详情卡片（默认：`true`）
+- `renderBrowserShell` - 在截图外包裹浏览器外壳 UI（默认：`true`）
+
+### WelcomeCard
+
+```typescript
+interface WelcomeCard {
+  title: string
+  prompt: string
+  image?: string
+  category: string
+  agentOptions?: Record<string, any>
+}
+```
+
+欢迎屏幕卡片配置。
+
+**属性：**
+- `title` - 卡片显示标题
+- `prompt` - 卡片的提示内容
+- `image` - 背景图片 URL（可选）
+- `category` - 卡片分组类别
+- `agentOptions` - 创建会话时传递的 Agent 配置
+
+### BaseAgentWebUIImplementation
+
+```typescript
+interface BaseAgentWebUIImplementation {
+  type?: AgentWebUIImplementationType
+  logo?: string
+  title?: string
+  subtitle?: string
+  welcomTitle?: string
+  welcomePrompts?: string[]
+  welcomeCards?: WelcomeCard[]
+  enableContextualSelector?: boolean
+  base?: string
+  workspace?: WorkspaceConfig
+  layout?: LayoutConfig
+  guiAgent?: TarkoWebUIGUIAgentConfig
+}
+```
+
+所有 Agent 实现的基础配置接口。
+
+**属性：**
+- `type` - 实现类型（默认：`'static'`）
+- `logo` - Web UI 徽标 URL（默认：Tarko 徽标）
+- `title` - 在导航栏显示的站点标题（默认：Agent 名称）
+- `subtitle` - 首页和 SEO 的副标题
+- `welcomTitle` - 首页的主标题
+- `welcomePrompts` - 欢迎提示建议数组
+- `welcomeCards` - 欢迎屏幕卡片配置
+- `enableContextualSelector` - 启用 @ 语法文件选择器（默认：`false`）
+- `base` - 路由基础路径（支持正则表达式模式）
+- `workspace` - 工作区配置
+- `layout` - 布局配置
+- `guiAgent` - GUI Agent 显示配置
+
+### StaticAgentWebUIImplementation
+
+```typescript
+interface StaticAgentWebUIImplementation extends BaseAgentWebUIImplementation {
+  type?: 'static'
+  staticPath: string
+}
+```
+
+静态部署实现。
+
+**属性：**
+- `staticPath` - 静态 UI 文件路径（例如：`@tarko/agent-ui`）
+
+### RemoteAgentWebUIImplementation
+
+```typescript
+interface RemoteAgentWebUIImplementation extends BaseAgentWebUIImplementation {
+  type?: 'remote'
+  remoteUrl?: string
+}
+```
+
+远程部署实现（计划功能）。
+
+**属性：**
+- `remoteUrl` - 远程 UI 服务 URL
+
+## 联合类型
+
+### AgentWebUIImplementation
+
+```typescript
+type AgentWebUIImplementation = StaticAgentWebUIImplementation | RemoteAgentWebUIImplementation
+```
+
+所有支持的 Agent 实现的联合类型。
+
+### AgentWebUIImplementationByType
+
+```typescript
+type AgentWebUIImplementationByType<T extends AgentWebUIImplementationType> = 
+  T extends 'static' ? StaticAgentWebUIImplementation :
+  T extends 'remote' ? RemoteAgentWebUIImplementation : never
+```
+
+根据类型提取特定实现的工具类型。
+
+## 工具函数
+
+### isAgentWebUIImplementationType
+
+```typescript
+function isAgentWebUIImplementationType<T extends AgentWebUIImplementationType>(
+  implementation: AgentWebUIImplementation,
+  type: T
+): implementation is AgentWebUIImplementationByType<T>
+```
+
+检查实现是否匹配特定类型的类型守卫。
+
+**参数：**
+- `implementation` - 要检查的 Agent 实现
+- `type` - 期望的实现类型
+
+**返回值：** 类型收窄的布尔结果
+
+## 使用示例
+
+### 基础静态实现
+
+```typescript
+const agentUI: StaticAgentWebUIImplementation = {
+  type: 'static',
+  staticPath: '@tarko/agent-ui',
+  title: 'My Agent',
+  subtitle: '开发 AI 助手',
+  welcomTitle: '欢迎使用 My Agent',
+  workspace: {
+    navItems: [
+      {
+        title: '代码编辑器',
+        link: 'http://localhost:3000',
+        icon: 'code'
+      }
+    ]
+  }
+}
+```
+
+### GUI Agent 配置
+
+```typescript
+const guiAgentUI: StaticAgentWebUIImplementation = {
+  type: 'static',
+  staticPath: '@tarko/agent-ui',
+  guiAgent: {
+    defaultScreenshotRenderStrategy: 'both',
+    enableScreenshotRenderStrategySwitch: true,
+    renderBrowserShell: false
+  }
+}
+```
+
+### 欢迎卡片设置
+
+```typescript
+const welcomeCardsUI: StaticAgentWebUIImplementation = {
+  type: 'static',
+  staticPath: '@tarko/agent-ui',
+  welcomeCards: [
+    {
+      title: '代码审查',
+      prompt: '审查我最新的 Pull Request',
+      category: '开发',
+      agentOptions: { mode: 'review' }
+    },
+    {
+      title: 'Bug 修复',
+      prompt: '帮我调试这个问题',
+      category: '开发',
+      agentOptions: { mode: 'debug' }
+    }
+  ]
+}
+```

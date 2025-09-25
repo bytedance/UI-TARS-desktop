@@ -23,5 +23,10 @@
     "type": "file",
     "name": "hooks",
     "label": "Hooks"
+  },
+  {
+    "type": "file",
+    "name": "web-ui-implementation",
+    "label": "Web UI Implementation"
   }
 ]

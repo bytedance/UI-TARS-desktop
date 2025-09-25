@@ -1,0 +1,289 @@
+# Web UI Implementation
+
+The Web UI Implementation API provides type definitions and configurations for customizing Agent web interfaces. It supports both static and remote deployment strategies with flexible layout and workspace configurations.
+
+## Types
+
+### AgentWebUIImplementationType
+
+```typescript
+type AgentWebUIImplementationType = 'static' | 'remote'
+```
+
+Defines the deployment strategy for Agent web UI:
+- `static` - Local static directory deployment
+- `remote` - Remote web UI implementation (planned)
+
+### WorkspaceNavItemIcon
+
+```typescript
+type WorkspaceNavItemIcon = 'code' | 'monitor' | 'terminal' | 'browser' | 'desktop' | 'default'
+```
+
+Icon types available for workspace navigation items.
+
+### LayoutMode
+
+```typescript
+type LayoutMode = 'default' | 'narrow-chat'
+```
+
+Layout display modes:
+- `default` - Standard layout with full workspace
+- `narrow-chat` - Compact chat-focused layout
+
+## Interfaces
+
+### WorkspaceNavItem
+
+```typescript
+interface WorkspaceNavItem {
+  title: string
+  link: string
+  icon?: WorkspaceNavItemIcon
+}
+```
+
+Navigation item configuration for workspace header.
+
+**Properties:**
+- `title` - Display text for the navigation button
+- `link` - URL to open in new tab when clicked
+- `icon` - Icon type (default: `'default'`)
+
+### LayoutConfig
+
+```typescript
+interface LayoutConfig {
+  defaultLayout?: LayoutMode
+  enableLayoutSwitchButton?: boolean
+  enableSidebar?: boolean
+  enableHome?: boolean
+}
+```
+
+Layout behavior configuration.
+
+**Properties:**
+- `defaultLayout` - Initial layout mode (default: `'default'`)
+- `enableLayoutSwitchButton` - Show layout toggle in toolbar (default: `false`)
+- `enableSidebar` - Display sidebar panel (default: `true`)
+- `enableHome` - Register home route (default: `true`)
+
+### WorkspaceConfig
+
+```typescript
+interface WorkspaceConfig {
+  navItems?: WorkspaceNavItem[]
+}
+```
+
+Workspace-specific configuration.
+
+**Properties:**
+- `navItems` - Navigation items displayed in workspace header
+
+### TarkoWebUIGUIAgentConfig
+
+```typescript
+interface TarkoWebUIGUIAgentConfig {
+  defaultScreenshotRenderStrategy?: 'both' | 'beforeAction' | 'afterAction'
+  enableScreenshotRenderStrategySwitch?: boolean
+  renderGUIAction?: boolean
+  renderBrowserShell?: boolean
+}
+```
+
+GUI Agent display configuration.
+
+**Properties:**
+- `defaultScreenshotRenderStrategy` - Screenshot display strategy (default: `'afterAction'`)
+  - `both` - Show before and after screenshots for comparison
+  - `beforeAction` - Show only pre-action screenshots (suitable for Agent-TARS)
+  - `afterAction` - Show only post-action screenshots (suitable for Omni-TARS)
+- `enableScreenshotRenderStrategySwitch` - Allow runtime strategy switching (default: `false`)
+- `renderGUIAction` - Show GUI operation details card (default: `true`)
+- `renderBrowserShell` - Wrap screenshots in browser shell UI (default: `true`)
+
+### WelcomeCard
+
+```typescript
+interface WelcomeCard {
+  title: string
+  prompt: string
+  image?: string
+  category: string
+  agentOptions?: Record<string, any>
+}
+```
+
+Welcome screen card configuration.
+
+**Properties:**
+- `title` - Card display title
+- `prompt` - Prompt content for the card
+- `image` - Background image URL (optional)
+- `category` - Grouping category for cards
+- `agentOptions` - Agent configuration passed when creating session
+
+### BaseAgentWebUIImplementation
+
+```typescript
+interface BaseAgentWebUIImplementation {
+  type?: AgentWebUIImplementationType
+  logo?: string
+  title?: string
+  subtitle?: string
+  welcomTitle?: string
+  welcomePrompts?: string[]
+  welcomeCards?: WelcomeCard[]
+  enableContextualSelector?: boolean
+  base?: string
+  workspace?: WorkspaceConfig
+  layout?: LayoutConfig
+  guiAgent?: TarkoWebUIGUIAgentConfig
+}
+```
+
+Base configuration interface for all Agent implementations.
+
+**Properties:**
+- `type` - Implementation type (default: `'static'`)
+- `logo` - Web UI logo URL (default: Tarko logo)
+- `title` - Site title displayed in navbar (default: Agent name)
+- `subtitle` - Subtitle for home page and SEO
+- `welcomTitle` - Hero title on home page
+- `welcomePrompts` - Array of welcome prompt suggestions
+- `welcomeCards` - Welcome screen card configurations
+- `enableContextualSelector` - Enable @ syntax file selector (default: `false`)
+- `base` - Base path for routing (supports regex patterns)
+- `workspace` - Workspace configuration
+- `layout` - Layout configuration  
+- `guiAgent` - GUI Agent display configuration
+
+### StaticAgentWebUIImplementation
+
+```typescript
+interface StaticAgentWebUIImplementation extends BaseAgentWebUIImplementation {
+  type?: 'static'
+  staticPath: string
+}
+```
+
+Static deployment implementation.
+
+**Properties:**
+- `staticPath` - Path to static UI files (e.g., `@tarko/agent-ui`)
+
+### RemoteAgentWebUIImplementation
+
+```typescript
+interface RemoteAgentWebUIImplementation extends BaseAgentWebUIImplementation {
+  type?: 'remote'
+  remoteUrl?: string
+}
+```
+
+Remote deployment implementation (planned feature).
+
+**Properties:**
+- `remoteUrl` - Remote UI service URL
+
+## Union Types
+
+### AgentWebUIImplementation
+
+```typescript
+type AgentWebUIImplementation = StaticAgentWebUIImplementation | RemoteAgentWebUIImplementation
+```
+
+Union type for all supported Agent implementations.
+
+### AgentWebUIImplementationByType
+
+```typescript
+type AgentWebUIImplementationByType<T extends AgentWebUIImplementationType> = 
+  T extends 'static' ? StaticAgentWebUIImplementation :
+  T extends 'remote' ? RemoteAgentWebUIImplementation : never
+```
+
+Utility type to extract specific implementation by type.
+
+## Utility Functions
+
+### isAgentWebUIImplementationType
+
+```typescript
+function isAgentWebUIImplementationType<T extends AgentWebUIImplementationType>(
+  implementation: AgentWebUIImplementation,
+  type: T
+): implementation is AgentWebUIImplementationByType<T>
+```
+
+Type guard to check if implementation matches specific type.
+
+**Parameters:**
+- `implementation` - Agent implementation to check
+- `type` - Expected implementation type
+
+**Returns:** Type-narrowed boolean result
+
+## Usage Examples
+
+### Basic Static Implementation
+
+```typescript
+const agentUI: StaticAgentWebUIImplementation = {
+  type: 'static',
+  staticPath: '@tarko/agent-ui',
+  title: 'My Agent',
+  subtitle: 'AI Assistant for Development',
+  welcomTitle: 'Welcome to My Agent',
+  workspace: {
+    navItems: [
+      {
+        title: 'Code Editor',
+        link: 'http://localhost:3000',
+        icon: 'code'
+      }
+    ]
+  }
+}
+```
+
+### GUI Agent Configuration
+
+```typescript
+const guiAgentUI: StaticAgentWebUIImplementation = {
+  type: 'static',
+  staticPath: '@tarko/agent-ui',
+  guiAgent: {
+    defaultScreenshotRenderStrategy: 'both',
+    enableScreenshotRenderStrategySwitch: true,
+    renderBrowserShell: false
+  }
+}
+```
+
+### Welcome Cards Setup
+
+```typescript
+const welcomeCardsUI: StaticAgentWebUIImplementation = {
+  type: 'static',
+  staticPath: '@tarko/agent-ui',
+  welcomeCards: [
+    {
+      title: 'Code Review',
+      prompt: 'Review my latest pull request',
+      category: 'Development',
+      agentOptions: { mode: 'review' }
+    },
+    {
+      title: 'Bug Fix',
+      prompt: 'Help me debug this issue',
+      category: 'Development',
+      agentOptions: { mode: 'debug' }
+    }
+  ]
+}
+```
