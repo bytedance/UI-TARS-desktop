@@ -188,12 +188,10 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
           
           // Special handling for home page placeholder
           if (activeSessionId === 'home-placeholder') {
-            // For home page, create a temporary session to get default schema
-            const tempSession = await apiService.createSession();
-            response = await apiService.getSessionRuntimeSettings(tempSession.sessionId);
-            // Clean up the temporary session
-            await apiService.deleteSession(tempSession.sessionId);
+            // For home page, get only schema without session
+            response = await apiService.getSessionRuntimeSettings();
           } else {
+            // For real sessions, get schema + current values
             response = await apiService.getSessionRuntimeSettings(activeSessionId);
           }
           

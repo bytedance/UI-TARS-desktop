@@ -1,10 +1,13 @@
 import React, { forwardRef, useImperativeHandle } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
-import { AgentOptionsSelector, AgentOptionsSelectorRef } from '@/standalone/chat/MessageInput/AgentOptionsSelector';
-import { 
+import {
+  AgentOptionsSelector,
+  AgentOptionsSelectorRef,
+} from '@/standalone/chat/MessageInput/AgentOptionsSelector';
+import {
   globalRuntimeSettingsAtom,
   updateGlobalRuntimeSettingsAction,
-  resetGlobalRuntimeSettingsAction 
+  resetGlobalRuntimeSettingsAction,
 } from '@/common/state/atoms/globalRuntimeSettings';
 
 export interface HomeAgentOptionsSelectorRef {

@@ -533,28 +533,29 @@ class ApiService {
     }
   }
 
-  async getSessionRuntimeSettings(sessionId: string): Promise<{
+  async getSessionRuntimeSettings(sessionId?: string): Promise<{
     schema: Record<string, any> | null;
     currentValues: Record<string, any> | null;
     message?: string;
   }> {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/v1/sessions/runtime-settings?sessionId=${sessionId}`,
-        {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-          signal: AbortSignal.timeout(3000),
-        },
-      );
+      const url = sessionId 
+        ? `${API_BASE_URL}/api/v1/runtime-settings?sessionId=${sessionId}`
+        : `${API_BASE_URL}/api/v1/runtime-settings`;
+        
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(3000),
+      });
 
       if (!response.ok) {
-        throw new Error(`Failed to get session runtime settings: ${response.statusText}`);
+        throw new Error(`Failed to get runtime settings: ${response.statusText}`);
       }
 
       return await response.json();
     } catch (error) {
-      console.error('Error getting session runtime settings:', error);
+      console.error('Error getting runtime settings:', error);
       return { schema: null, currentValues: null, message: 'Failed to load runtime settings' };
     }
   }
@@ -564,14 +565,14 @@ class ApiService {
     runtimeSettings: Record<string, any>,
   ): Promise<{ success: boolean; sessionInfo?: SessionInfo }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/sessions/runtime-settings`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/runtime-settings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId, runtimeSettings }),
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to update session runtime settings: ${response.statusText}`);
+        throw new Error(`Failed to update runtime settings: ${response.statusText}`);
       }
 
       const responseData = await response.json();
@@ -580,7 +581,7 @@ class ApiService {
         sessionInfo: responseData.session,
       };
     } catch (error) {
-      console.error('Error updating session runtime settings:', error);
+      console.error('Error updating runtime settings:', error);
       return { success: false };
     }
   }
