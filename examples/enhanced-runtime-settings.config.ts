@@ -7,7 +7,7 @@ export default {
     runtimeSettings: {
       // Global placement preference (can be overridden per setting)
       placement: 'chat-bottom', // 'dropdown-item' | 'chat-bottom'
-      
+
       schema: {
         type: 'object',
         properties: {
@@ -20,7 +20,7 @@ export default {
             icon: 'brain',
             placement: 'chat-bottom', // Override global placement
           },
-          
+
           // Enum setting with custom labels - appears as segmented control in chat-bottom
           browserMode: {
             type: 'string',
@@ -32,7 +32,7 @@ export default {
             icon: 'browser',
             placement: 'chat-bottom',
           },
-          
+
           // Setting that appears in dropdown
           advancedMode: {
             type: 'boolean',
@@ -42,7 +42,7 @@ export default {
             icon: 'settings',
             placement: 'dropdown-item', // Appears in dropdown
           },
-          
+
           // Enum setting in dropdown with labels
           searchEngine: {
             type: 'string',
@@ -56,7 +56,7 @@ export default {
           },
         },
       },
-      
+
       // Transform function to convert UI settings to agent options
       transform: (runtimeSettings: Record<string, unknown>) => {
         return {
@@ -64,12 +64,12 @@ export default {
           thinking: {
             type: runtimeSettings.enableThinking ? 'enabled' : 'disabled',
           },
-          
+
           // Transform browser setting
           browser: {
             control: runtimeSettings.browserMode ?? 'hybrid',
           },
-          
+
           // Transform other settings
           advanced: runtimeSettings.advancedMode ?? false,
           search: {
@@ -78,7 +78,7 @@ export default {
         };
       },
     },
-    
+
     // ... rest of server options
   },
 };
@@ -89,7 +89,7 @@ export const mixedPlacementConfig = {
     runtimeSettings: {
       // Default placement for all settings
       placement: 'dropdown-item',
-      
+
       schema: {
         type: 'object',
         properties: {
@@ -100,7 +100,7 @@ export const mixedPlacementConfig = {
             default: false,
             placement: 'chat-bottom', // Override for quick access
           },
-          
+
           mode: {
             type: 'string',
             title: 'Mode',
@@ -109,7 +109,7 @@ export const mixedPlacementConfig = {
             default: 'balanced',
             placement: 'chat-bottom',
           },
-          
+
           // Less critical settings stay in dropdown
           debugMode: {
             type: 'boolean',
@@ -117,7 +117,7 @@ export const mixedPlacementConfig = {
             default: false,
             // Uses global placement: 'dropdown-item'
           },
-          
+
           logLevel: {
             type: 'string',
             title: 'Log Level',
@@ -128,7 +128,7 @@ export const mixedPlacementConfig = {
           },
         },
       },
-      
+
       transform: (settings: Record<string, unknown>) => ({
         thinking: { enabled: settings.thinking ?? false },
         mode: settings.mode ?? 'balanced',
@@ -155,7 +155,7 @@ export const simpleEnumLabelsConfig = {
           },
         },
       },
-      
+
       transform: (settings: Record<string, unknown>) => ({
         locale: settings.language ?? 'en',
       }),
