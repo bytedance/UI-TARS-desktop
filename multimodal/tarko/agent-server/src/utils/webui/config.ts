@@ -19,5 +19,5 @@ export function mergeWebUIConfig(
   server?: AgentServer,
 ): AgentWebUIImplementation & Record<string, any> {
   const agentConstructorWebConfig = server?.getAgentConstructorWebConfig();
-  return deepMerge(agentConstructorWebConfig || {}, baseWebUIConfig);
+  return deepMerge(baseWebUIConfig, agentConstructorWebConfig || {});
 }
