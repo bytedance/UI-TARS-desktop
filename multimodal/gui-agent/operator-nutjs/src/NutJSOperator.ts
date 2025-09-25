@@ -174,9 +174,9 @@ export class NutJSOperator extends Operator {
         const { realX: startX, realY: startY } = await this.calculateRealCoords(startPoint);
         const { realX: endX, realY: endY } = await this.calculateRealCoords(endPoint);
         this.logger.info(`drag: start(${startX},${startY}) -> end(${endX},${endY})`);
-        if (startX > endX || startY > endY) {
-          throw new Error('start point must be top left of end point');
-        }
+        // if (startX > endX || startY > endY) {
+        //   throw new Error('start point must be top left of end point');
+        // }
 
         await this.moveStraightTo(startX, startY);
         await sleep(100);

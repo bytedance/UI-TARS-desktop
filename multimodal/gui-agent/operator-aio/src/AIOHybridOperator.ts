@@ -169,7 +169,7 @@ export class AIOHybridOperator extends Operator {
         case 'click':
         case 'left_click':
         case 'left_single': {
-          this.handleClick(actionInputs, 'left');
+          await this.handleClick(actionInputs, 'left');
           const { point } = actionInputs;
           startXPercent = (point as Coordinates)?.normalized?.x;
           startYPercent = (point as Coordinates)?.normalized?.y;
@@ -177,7 +177,7 @@ export class AIOHybridOperator extends Operator {
         }
         case 'left_double':
         case 'double_click': {
-          this.handleClick(actionInputs, 'left', 2);
+          await this.handleClick(actionInputs, 'left', 2);
           const { point } = actionInputs;
           startXPercent = (point as Coordinates)?.normalized?.x;
           startYPercent = (point as Coordinates)?.normalized?.y;
@@ -185,14 +185,14 @@ export class AIOHybridOperator extends Operator {
         }
         case 'right_click':
         case 'right_single': {
-          this.handleClick(actionInputs, 'right');
+          await this.handleClick(actionInputs, 'right');
           const { point } = actionInputs;
           startXPercent = (point as Coordinates)?.normalized?.x;
           startYPercent = (point as Coordinates)?.normalized?.y;
           break;
         }
         case 'middle_click': {
-          this.handleClick(actionInputs, 'middle');
+          await this.handleClick(actionInputs, 'middle');
           const { point } = actionInputs;
           startXPercent = (point as Coordinates)?.normalized?.x;
           startYPercent = (point as Coordinates)?.normalized?.y;
@@ -201,7 +201,7 @@ export class AIOHybridOperator extends Operator {
         case 'left_click_drag':
         case 'drag':
         case 'select': {
-          this.handleDrag(actionInputs);
+          await this.handleDrag(actionInputs);
           break;
         }
         case 'type': {
@@ -336,9 +336,9 @@ export class AIOHybridOperator extends Operator {
     }
     const { realX: startX, realY: startY } = await this.calculateRealCoords(startPoint);
     const { realX: endX, realY: endY } = await this.calculateRealCoords(endPoint);
-    if (startX > endX || startY > endY) {
-      throw new Error('start point must be top left of end point');
-    }
+    // if (startX > endX || startY > endY) {
+    //   throw new Error('start point must be top left of end point');
+    // }
     // Move to start position, press mouse, drag to end position, release mouse
     await this.aioComputer.moveTo(startX, startY);
     await this.aioComputer.mouseDown();
