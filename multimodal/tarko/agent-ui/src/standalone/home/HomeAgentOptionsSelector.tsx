@@ -26,22 +26,28 @@ export const HomeAgentOptionsSelector = forwardRef<
   const [globalSettings] = useAtom(globalRuntimeSettingsAtom);
   const updateGlobalSettings = useSetAtom(updateGlobalRuntimeSettingsAction);
   const resetGlobalSettings = useSetAtom(resetGlobalRuntimeSettingsAction);
-  const [hasDefaultSchema, setHasDefaultSchema] = useState(false);
+  const [tempSessionId, setTempSessionId] = useState<string | null>(null);
+  const [isCreatingSession, setIsCreatingSession] = useState(false);
 
-  // Check if default schema is available on mount
+  // Create a temporary session to get default schema
   useEffect(() => {
-    const checkDefaultSchema = async () => {
+    const createTempSession = async () => {
+      if (tempSessionId || isCreatingSession) return;
+      
+      setIsCreatingSession(true);
       try {
-        const response = await apiService.getDefaultAgentOptionsSchema();
-        setHasDefaultSchema(!!response.schema);
+        // Create a temporary session without runtime settings to get default schema
+        const session = await apiService.createSession();
+        setTempSessionId(session.sessionId);
       } catch (error) {
-        console.error('Failed to check default schema:', error);
-        setHasDefaultSchema(false);
+        console.error('Failed to create temporary session for schema:', error);
+      } finally {
+        setIsCreatingSession(false);
       }
     };
 
-    checkDefaultSchema();
-  }, []);
+    createTempSession();
+  }, [tempSessionId, isCreatingSession]);
 
   useImperativeHandle(ref, () => ({
     getSelectedValues: () => globalSettings.selectedValues,
@@ -69,15 +75,15 @@ export const HomeAgentOptionsSelector = forwardRef<
     }
   };
 
-  // Don't render if no default schema available
-  if (!hasDefaultSchema) {
+  // Don't render until we have a temp session
+  if (!tempSessionId) {
     return null;
   }
 
-  // Reuse existing AgentOptionsSelector with virtual session
+  // Reuse existing AgentOptionsSelector with temp session
   return (
     <AgentOptionsSelector
-      activeSessionId="" // Empty string to get default schema
+      activeSessionId={tempSessionId}
       sessionMetadata={virtualSessionMetadata}
       className={className}
       onToggleOption={handleToggleOption}
