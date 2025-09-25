@@ -7,7 +7,6 @@ import { Tool, LLMRequestHookPayload, ChatCompletionContentPart } from '@tarko/a
 import { ConsoleLogger, createGUIErrorResponse, LogLevel } from '@tarko/shared-utils';
 import { Base64ImageParser } from '@agent-infra/media-utils';
 import { ImageCompressor, formatBytes } from '@tarko/shared-media-utils';
-import { setScreenInfo } from './shared';
 import { OperatorManager } from './OperatorManager';
 
 interface GuiAgentPluginOption {
@@ -36,6 +35,10 @@ export class GuiAgentPlugin extends AgentPlugin {
   }
 
   async initialize(): Promise<void> {
+    if (this.agentMode && this.agentMode.id === 'game') {
+      await this.emitScreenshotEvent();
+    }
+
     this.agent.registerTool(
       new Tool({
         id: 'browser_vision_control',
@@ -95,6 +98,10 @@ export class GuiAgentPlugin extends AgentPlugin {
       return;
     }
 
+    await this.emitScreenshotEvent();
+  }
+
+  private async emitScreenshotEvent(): Promise<void> {
     const operator = await this.operatorManager.getInstance();
     const output = await operator?.doScreenshot();
     if (!output?.base64) {
@@ -150,22 +157,5 @@ export class GuiAgentPlugin extends AgentPlugin {
       },
     });
     eventStream.sendEvent(event);
-    // Extract image dimensions from screenshot
-    const dimensions = base64Tool.getDimensions();
-    if (dimensions) {
-      setScreenInfo({
-        screenWidth: dimensions.width,
-        screenHeight: dimensions.height,
-      });
-    }
-  }
-
-  private findLastMatch<T>(array: T[], callback: (item: T) => boolean) {
-    for (let i = array.length - 1; i >= 0; i--) {
-      if (callback(array[i])) {
-        return array[i];
-      }
-    }
-    return undefined;
   }
 }
