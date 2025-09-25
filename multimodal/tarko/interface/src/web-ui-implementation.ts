@@ -142,9 +142,9 @@ export interface WelcomeCard {
    */
   prompt: string;
   /**
-   * Card avatar URL or icon
+   * Card background image URL
    */
-  avatar?: string;
+  image?: string;
   /**
    * Card category for grouping
    */

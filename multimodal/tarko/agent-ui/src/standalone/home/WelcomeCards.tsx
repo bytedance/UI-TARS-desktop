@@ -101,26 +101,20 @@ const WelcomeCards: React.FC<WelcomeCardsProps> = ({
             transition={{ duration: 0.3, delay: 0.1 * index }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200/50 dark:border-gray-700/30 p-4 cursor-pointer hover:shadow-md transition-all duration-200"
+            className="relative bg-white dark:bg-gray-800 rounded-lg border border-gray-200/50 dark:border-gray-700/30 overflow-hidden cursor-pointer hover:shadow-md transition-all duration-200 min-h-[120px]"
             onClick={() => handleCardClick(card)}
           >
-            <div className="flex items-start gap-3">
-              {card.avatar && (
-                <div className="flex-shrink-0">
-                  <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
-                    {card.avatar.startsWith('http') ? (
-                      <img 
-                        src={card.avatar} 
-                        alt={card.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-lg">{card.avatar}</span>
-                    )}
-                  </div>
-                </div>
-              )}
-              <div className="flex-1 min-w-0">
+            {/* Background Image */}
+            {card.image && (
+              <div 
+                className="absolute inset-0 bg-cover bg-center opacity-20"
+                style={{ backgroundImage: `url(${card.image})` }}
+              />
+            )}
+            
+            {/* Content Overlay */}
+            <div className="relative z-10 p-4 h-full flex flex-col justify-between">
+              <div>
                 <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2 truncate">
                   {card.title}
                 </h3>

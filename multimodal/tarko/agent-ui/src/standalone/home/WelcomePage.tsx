@@ -121,6 +121,7 @@ const WelcomePage: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <div className="fixed inset-0 bg-gradient-to-b from-transparent to-gray-100/50 dark:to-gray-800/50 pointer-events-none"></div>
 
+      {/* Main Content - Always Centered */}
       <main className="flex-1 relative z-10 flex flex-col items-center justify-center px-4 py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -274,14 +275,18 @@ const WelcomePage: React.FC = () => {
             </div>
           )}
         </motion.div>
-
-        {/* Welcome Cards */}
-        <WelcomeCards 
-          cards={welcomeCards}
-          isLoading={isLoading}
-          isDirectChatLoading={isDirectChatLoading}
-        />
       </main>
+
+      {/* Welcome Cards - Fixed at Bottom */}
+      {welcomeCards.length > 0 && (
+        <div className="relative z-10 pb-12">
+          <WelcomeCards 
+            cards={welcomeCards}
+            isLoading={isLoading}
+            isDirectChatLoading={isDirectChatLoading}
+          />
+        </div>
+      )}
     </div>
   );
 };

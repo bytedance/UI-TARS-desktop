@@ -1,0 +1,45 @@
+{
+  "welcomeCards": [
+    {
+      "title": "AI Code Assistant",
+      "prompt": "Help me write, review, and optimize code with AI assistance",
+      "image": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=200&fit=crop",
+      "category": "Assistant",
+      "agentOptions": {
+        "aiModel": "claude-3.5-sonnet",
+        "codeLanguages": ["typescript", "python", "javascript"]
+      }
+    },
+    {
+      "title": "Smart Debugger",
+      "prompt": "Intelligent debugging assistance with error analysis and solutions",
+      "image": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=200&fit=crop",
+      "category": "Assistant",
+      "agentOptions": {
+        "debugMode": "intelligent",
+        "provideAlternatives": true
+      }
+    },
+    {
+      "title": "Documentation Generator",
+      "prompt": "Automatically generate comprehensive documentation from code",
+      "image": "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400&h=200&fit=crop",
+      "category": "Assistant",
+      "agentOptions": {
+        "autoGenerate": true,
+        "includeExamples": true,
+        "formats": ["markdown", "html"]
+      }
+    },
+    {
+      "title": "Performance Optimizer",
+      "prompt": "Analyze and optimize code performance with AI recommendations",
+      "image": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=200&fit=crop",
+      "category": "Assistant",
+      "agentOptions": {
+        "optimizationLevel": "aggressive",
+        "metrics": ["speed", "memory", "cpu"]
+      }
+    }
+  ]
+}
