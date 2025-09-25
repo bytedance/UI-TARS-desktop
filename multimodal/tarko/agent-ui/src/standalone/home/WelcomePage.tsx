@@ -133,7 +133,7 @@ const WelcomePage: React.FC = () => {
       </motion.div>
 
       {/* Main Content - Scrollable */}
-      <div className="flex-1 flex flex-col relative z-10">
+      <div className="flex-1 flex flex-col relative z-10 min-h-[100vh]">
         {/* Top Section - Chat Input Area */}
         <div className="flex-none flex flex-col items-center justify-center px-4 pt-[24vh] pb-4">
           <motion.div
