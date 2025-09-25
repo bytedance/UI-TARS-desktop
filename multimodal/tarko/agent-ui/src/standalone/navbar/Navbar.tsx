@@ -3,6 +3,7 @@ import { useDarkMode } from '@tarko/ui';
 import { ShareButton } from '@/standalone/share';
 import { ShareModal } from '@/standalone/share/ShareModal';
 import { AboutModal } from './AboutModal';
+import { ThemeToggle } from '@/standalone/components';
 
 import {
   FiMoon,
@@ -198,13 +199,7 @@ export const Navbar: React.FC = () => {
             </button>
 
             {/* Dark mode toggle */}
-            <button
-              onClick={toggleDarkMode}
-              className="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100/40 dark:hover:bg-gray-800/40 transition-all hover:scale-110 active:scale-95"
-              title={isDarkMode ? 'Light Mode' : 'Dark Mode'}
-            >
-              {isDarkMode ? <FiSun size={16} /> : <FiMoon size={16} />}
-            </button>
+            <ThemeToggle variant="navbar" size="medium" />
 
             {activeSessionId && !isReplayMode && (
               <ShareButton variant="navbar" disabled={isProcessing} onShare={handleShareOpen} />

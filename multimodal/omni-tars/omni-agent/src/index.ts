@@ -15,7 +15,7 @@ export default class OmniTARSAgent extends ComposableAgent {
     logo: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/icon.png',
     title: 'Omni Agent',
     subtitle: 'Offering seamless integration with a wide range of real-world tools.',
-    welcomTitle: 'A multimodal AI agent',
+    welcomTitle: 'Omni Agent',
     welcomePrompts: [],
     welcomeCards: [
       {

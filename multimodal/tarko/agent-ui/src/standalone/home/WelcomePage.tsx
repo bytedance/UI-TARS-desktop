@@ -7,6 +7,7 @@ import { getWebUIConfig, getLogoUrl, getAgentTitle } from '@/config/web-ui-confi
 import { ChatInput } from '@/standalone/chat/MessageInput';
 import { ChatCompletionContentPart } from '@tarko/agent-interface';
 import { Tooltip } from '@tarko/ui';
+import { ThemeToggle } from '@/standalone/components';
 import WelcomeCards from './WelcomeCards';
 
 const WelcomePage: React.FC = () => {
@@ -120,6 +121,16 @@ const WelcomePage: React.FC = () => {
   return (
     <div className="flex flex-col bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <div className="fixed inset-0 bg-gradient-to-b from-transparent to-gray-100/50 dark:to-gray-800/50 pointer-events-none"></div>
+
+      {/* Theme Toggle - Fixed Position */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3, delay: 0.5 }}
+        className="fixed top-6 right-6 z-20"
+      >
+        <ThemeToggle variant="floating" size="medium" />
+      </motion.div>
 
       {/* Main Content - Scrollable */}
       <div className="flex-1 flex flex-col relative z-10">
