@@ -118,11 +118,11 @@ const WelcomePage: React.FC = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 overflow-hidden">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <div className="fixed inset-0 bg-gradient-to-b from-transparent to-gray-100/50 dark:to-gray-800/50 pointer-events-none"></div>
 
-      {/* Main Content - Always Centered in Viewport */}
-      <div className="h-screen flex flex-col items-center justify-center px-4 py-12 relative z-20">
+      {/* Main Content - Centered */}
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-12 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -141,7 +141,7 @@ const WelcomePage: React.FC = () => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="w-full max-w-3xl mx-auto"
+          className="w-full max-w-3xl mx-auto mb-8"
         >
           <ChatInput
             onSubmit={handleChatSubmit}
@@ -277,16 +277,14 @@ const WelcomePage: React.FC = () => {
         </motion.div>
       </div>
 
-      {/* Welcome Cards - Overlay at Bottom with Scroll */}
+      {/* Welcome Cards - Below Main Content */}
       {welcomeCards.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 max-h-[40vh] overflow-y-auto bg-gradient-to-t from-gray-50/95 to-transparent dark:from-gray-900/95 dark:to-transparent backdrop-blur-sm z-10">
-          <div className="pb-12 pt-8">
-            <WelcomeCards 
-              cards={welcomeCards}
-              isLoading={isLoading}
-              isDirectChatLoading={isDirectChatLoading}
-            />
-          </div>
+        <div className="relative z-10 pb-12">
+          <WelcomeCards 
+            cards={welcomeCards}
+            isLoading={isLoading}
+            isDirectChatLoading={isDirectChatLoading}
+          />
         </div>
       )}
     </div>
