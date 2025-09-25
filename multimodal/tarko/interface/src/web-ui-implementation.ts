@@ -130,6 +130,32 @@ export interface TarkoWebUIGUIAgentConfig {
 }
 
 /**
+ * Welcome card configuration
+ */
+export interface WelcomeCard {
+  /**
+   * Card title
+   */
+  title: string;
+  /**
+   * Card prompt content
+   */
+  prompt: string;
+  /**
+   * Card avatar URL or icon
+   */
+  avatar?: string;
+  /**
+   * Card category for grouping
+   */
+  category: string;
+  /**
+   * Agent options to pass when creating session
+   */
+  agentOptions?: Record<string, any>;
+}
+
+/**
  * Base agent implementation interface
  */
 export interface BaseAgentWebUIImplementation {
@@ -164,9 +190,13 @@ export interface BaseAgentWebUIImplementation {
    */
   welcomTitle?: string;
   /**
-   * Welcome prompts
-   */
-  welcomePrompts?: string[];
+  * Welcome prompts
+  */
+welcomePrompts?: string[];
+/**
+ * Welcome cards configuration
+ */
+welcomeCards?: WelcomeCard[];
   /**
    * Enable contextual file selector with @ syntax
    * When enabled, users can type @ in the input to search and select workspace files/directories

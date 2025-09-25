@@ -7,6 +7,7 @@ import { getWebUIConfig, getLogoUrl, getAgentTitle } from '@/config/web-ui-confi
 import { ChatInput } from '@/standalone/chat/MessageInput';
 import { ChatCompletionContentPart } from '@tarko/agent-interface';
 import { Tooltip } from '@tarko/ui';
+import WelcomeCards from './WelcomeCards';
 
 const WelcomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ const WelcomePage: React.FC = () => {
   const pageSubtitle = webuiConfig?.subtitle;
   const webclomeTitle = webuiConfig?.welcomTitle ?? webuiConfig?.title;
   const allPrompts = webuiConfig?.welcomePrompts ?? [];
+  const welcomeCards = webuiConfig?.welcomeCards ?? [];
 
   const [displayedPrompts, setDisplayedPrompts] = useState<string[]>([]);
   const [usedPrompts, setUsedPrompts] = useState<Set<string>>(new Set());
@@ -272,6 +274,13 @@ const WelcomePage: React.FC = () => {
             </div>
           )}
         </motion.div>
+
+        {/* Welcome Cards */}
+        <WelcomeCards 
+          cards={welcomeCards}
+          isLoading={isLoading}
+          isDirectChatLoading={isDirectChatLoading}
+        />
       </main>
     </div>
   );
