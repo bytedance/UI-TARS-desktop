@@ -12,6 +12,39 @@ interface TerminalRendererProps {
 }
 
 /**
+ * URL regex pattern to detect URLs in text
+ */
+const URL_REGEX = /(https?:\/\/[^\s<>"{}|\\^`\[\]]+)/g;
+
+/**
+ * Convert text with URLs to JSX with clickable links
+ */
+function linkifyText(text: string): React.ReactNode {
+  if (!text || typeof text !== 'string') {
+    return text;
+  }
+
+  const parts = text.split(URL_REGEX);
+  return parts.map((part, index) => {
+    if (URL_REGEX.test(part)) {
+      return (
+        <a
+          key={index}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-400 hover:text-blue-300 underline cursor-pointer"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
+}
+
+/**
  * Format tool arguments as JSON string
  */
 function formatArguments(args: Record<string, any>): string {
@@ -19,6 +52,44 @@ function formatArguments(args: Record<string, any>): string {
     return '';
   }
   return JSON.stringify(args, null, 2);
+}
+
+/**
+ * Custom CodeHighlight wrapper that makes URLs clickable in JSON
+ */
+function CodeHighlightWithLinks({ code, language }: { code: string; language: string }) {
+  const [processedCode, setProcessedCode] = React.useState<string>(code);
+  
+  React.useEffect(() => {
+    if (language === 'json') {
+      // Replace URLs in JSON strings with clickable links
+      const urlRegex = /"(https?:\/\/[^"\s]+)"/g;
+      const linkedCode = code.replace(urlRegex, (match, url) => {
+        return `"<span class='json-url-link text-blue-400 hover:text-blue-300 underline cursor-pointer' data-url='${url}'>${url}</span>"`;
+      });
+      setProcessedCode(linkedCode);
+    } else {
+      setProcessedCode(code);
+    }
+  }, [code, language]);
+  
+  const handleClick = React.useCallback((e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.classList.contains('json-url-link')) {
+      e.preventDefault();
+      e.stopPropagation();
+      const url = target.getAttribute('data-url');
+      if (url) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }
+    }
+  }, []);
+  
+  return (
+    <div onClick={handleClick}>
+      <CodeHighlight code={processedCode} language={language} />
+    </div>
+  );
 }
 
 /**
@@ -139,14 +210,14 @@ export const TerminalRenderer: React.FC<TerminalRendererProps> = ({
               {/* Arguments section */}
               {argumentsJson && (
                 <div className="p-3 pb-0 bg-[#121212] rounded m-3 mb-0 max-h-[40vh] overflow-auto">
-                  <CodeHighlight code={argumentsJson} language="json" />
+                  <CodeHighlightWithLinks code={argumentsJson} language="json" />
                 </div>
               )}
 
               {/* Output section */}
               {output && (
                 <div className="p-3 bg-[#121212] rounded m-3 max-h-[80vh] overflow-auto">
-                  <CodeHighlight code={output} language="json" />
+                  <CodeHighlightWithLinks code={output} language="json" />
                 </div>
               )}
             </div>
