@@ -77,9 +77,10 @@ const CreatingPage: React.FC = () => {
 
         console.log('Creating session with:', { runtimeSettings, agentOptions, query });
 
-        // Create session with runtime settings (persistent)
+        // Create session with runtime settings (persistent) and agent options (one-time)
         const session = await apiService.createSession(
-          Object.keys(runtimeSettings).length > 0 ? runtimeSettings : undefined
+          Object.keys(runtimeSettings).length > 0 ? runtimeSettings : undefined,
+          Object.keys(agentOptions).length > 0 ? agentOptions : undefined
         );
 
         // Clear global settings after successful session creation
@@ -90,10 +91,8 @@ const CreatingPage: React.FC = () => {
         // Navigate to the new session
         navigate(`/${session.sessionId}`, { replace: true });
 
-        // Send the initial query (agentOptions support pending API update)
+        // Send the initial query
         if (query) {
-          // TODO: Pass agentOptions to sendMessage when API supports it
-          // await sendMessage(query, agentOptions);
           await sendMessage(query);
         }
       } catch (error) {

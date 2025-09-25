@@ -43,16 +43,17 @@ const WelcomeCards: React.FC<WelcomeCardsProps> = ({
 
     const cardId = `${card.category}-${card.title}`;
     setLoadingCardId(cardId);
-    navigate('/creating');
 
     try {
-      const sessionId = await createSession();
-      navigate(`/${sessionId}`, { replace: true });
-      await sendMessage(card.prompt);
+      // Navigate to creating page with card-specific agent options
+      navigate('/creating', {
+        state: {
+          query: card.prompt,
+          agentOptions: card.agentOptions || {}
+        }
+      });
     } catch (error) {
-      console.error('Failed to create session:', error);
-      navigate('/', { replace: true });
-    } finally {
+      console.error('Failed to navigate to creating:', error);
       setLoadingCardId(null);
     }
   };

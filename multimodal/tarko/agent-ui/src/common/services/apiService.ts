@@ -54,12 +54,15 @@ class ApiService {
   /**
    * Create a new session
    */
-  async createSession(runtimeSettings?: Record<string, any>): Promise<SessionInfo> {
+  async createSession(
+    runtimeSettings?: Record<string, any>,
+    agentOptions?: Record<string, any>
+  ): Promise<SessionInfo> {
     try {
       const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.CREATE_SESSION}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ runtimeSettings }),
+        body: JSON.stringify({ runtimeSettings, agentOptions }),
       });
 
       if (!response.ok) {

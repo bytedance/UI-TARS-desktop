@@ -45,7 +45,10 @@ export async function getAllSessions(req: Request, res: Response) {
 export async function createSession(req: Request, res: Response) {
   try {
     const server = req.app.locals.server;
-    const { runtimeSettings } = req.body as { runtimeSettings?: Record<string, any> };
+    const { runtimeSettings, agentOptions } = req.body as { 
+      runtimeSettings?: Record<string, any>;
+      agentOptions?: Record<string, any>;
+    };
     const sessionId = nanoid();
 
     // Get session metadata if it exists (for restored sessions)
@@ -58,12 +61,13 @@ export async function createSession(req: Request, res: Response) {
       }
     }
 
-    // Pass custom AGIO provider and session metadata if available
+    // Pass custom AGIO provider, session metadata, and agent options if available
     const session = new AgentSession(
       server,
       sessionId,
       server.getCustomAgioProvider(),
       sessionInfo || undefined,
+      agentOptions // Pass agentOptions for one-time Agent initialization
     );
 
     server.sessions[sessionId] = session;
@@ -94,9 +98,13 @@ export async function createSession(req: Request, res: Response) {
           ...(defaultModel && {
             modelConfig: defaultModel,
           }),
-          // Include runtime settings if provided
+          // Include runtime settings if provided (persistent session settings)
           ...(runtimeSettings && {
             runtimeSettings,
+          }),
+          // Include agent options if provided (one-time initialization options)
+          ...(agentOptions && {
+            agentOptions,
           }),
         },
       };

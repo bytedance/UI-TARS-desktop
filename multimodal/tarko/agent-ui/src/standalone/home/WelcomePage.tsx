@@ -92,11 +92,11 @@ const WelcomePage: React.FC = () => {
         ? globalSettings.selectedValues 
         : {};
       
-      // Navigate to creating page with agent options
+      // Navigate to creating page with runtime settings
       navigate('/creating', {
         state: {
           query: typeof content === 'string' ? content : JSON.stringify(content),
-          agentOptions: selectedRuntimeSettings
+          runtimeSettings: selectedRuntimeSettings
         }
       });
     } catch (error) {
@@ -115,7 +115,7 @@ const WelcomePage: React.FC = () => {
         const latestSession = sessions[0];
         navigate(`/${latestSession.id}`);
       } else {
-        const sessionId = await createSession();
+        const sessionId = await createSession(); // No parameters for simple session creation
         navigate(`/${sessionId}`);
       }
     } catch (error) {
