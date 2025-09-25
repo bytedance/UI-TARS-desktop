@@ -121,10 +121,10 @@ const WelcomePage: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <div className="fixed inset-0 bg-gradient-to-b from-transparent to-gray-100/50 dark:to-gray-800/50 pointer-events-none"></div>
 
-      {/* Main Content - Fixed Position */}
-      <div className="h-screen flex flex-col relative z-10">
-        {/* Top Section - Fixed Height */}
-        <div className="flex-none flex flex-col items-center justify-center px-4 pt-12 pb-4" style={{ height: 'calc(100vh - 300px)' }}>
+      {/* Main Content - Scrollable */}
+      <div className="flex-1 flex flex-col relative z-10">
+        {/* Top Section - Chat Input Area */}
+        <div className="flex-none flex flex-col items-center justify-center px-4 pt-12 pb-8 min-h-[60vh]">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -279,18 +279,16 @@ const WelcomePage: React.FC = () => {
           </motion.div>
         </div>
 
-        {/* Bottom Section - Fixed Height for Welcome Cards */}
-        <div className="flex-none h-[300px] relative z-10 overflow-hidden">
-          {welcomeCards.length > 0 && (
-            <div className="h-full overflow-y-auto pb-12">
-              <WelcomeCards 
-                cards={welcomeCards}
-                isLoading={isLoading}
-                isDirectChatLoading={isDirectChatLoading}
-              />
-            </div>
-          )}
-        </div>
+        {/* Bottom Section - Welcome Cards */}
+        {welcomeCards.length > 0 && (
+          <div className="flex-none relative z-10 pb-12">
+            <WelcomeCards 
+              cards={welcomeCards}
+              isLoading={isLoading}
+              isDirectChatLoading={isDirectChatLoading}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
