@@ -62,10 +62,12 @@ export const App: React.FC = () => {
         <Route
           path="/"
           element={
-            <div className="flex min-h-screen bg-[#F2F3F5] dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+            <div className="flex h-screen bg-[#F2F3F5] dark:bg-gray-900 text-gray-900 dark:text-gray-100">
               {sidebarEnabled && <Sidebar />}
-              <div className="flex-1 flex flex-col">
-                <HomePage />
+              <div className="flex-1 flex flex-col overflow-hidden">
+                <div className="flex-1 overflow-y-auto">
+                  <HomePage />
+                </div>
               </div>
             </div>
           }
