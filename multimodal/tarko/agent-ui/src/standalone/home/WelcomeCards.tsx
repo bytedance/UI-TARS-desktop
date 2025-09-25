@@ -64,14 +64,14 @@ const WelcomeCards: React.FC<WelcomeCardsProps> = ({
   const showTabs = categories.length > 1;
   const activeCards = cardsByCategory[activeCategory] || [];
 
-  // 简洁的渐变色彩
+  // 简洁的渐变色彩 - 优化浅色模式
   const elegantGradients = [
-    'from-slate-600 to-slate-800',
-    'from-gray-600 to-gray-800',
-    'from-zinc-600 to-zinc-800',
-    'from-stone-600 to-stone-800',
-    'from-neutral-600 to-neutral-800',
-    'from-slate-700 to-gray-800',
+    'from-slate-700 to-slate-900 dark:from-slate-600 dark:to-slate-800',
+    'from-gray-700 to-gray-900 dark:from-gray-600 dark:to-gray-800',
+    'from-zinc-700 to-zinc-900 dark:from-zinc-600 dark:to-zinc-800',
+    'from-stone-700 to-stone-900 dark:from-stone-600 dark:to-stone-800',
+    'from-neutral-700 to-neutral-900 dark:from-neutral-600 dark:to-neutral-800',
+    'from-slate-800 to-gray-900 dark:from-slate-700 dark:to-gray-800',
   ];
 
   const getCardGradient = (index: number) => {
@@ -88,7 +88,7 @@ const WelcomeCards: React.FC<WelcomeCardsProps> = ({
       {/* 分类标签 - 简洁优雅设计 */}
       {showTabs && (
         <div className="flex justify-center mb-8">
-          <div className="flex items-center gap-1 p-1 bg-white/5 dark:bg-black/10 rounded-2xl backdrop-blur-sm border border-white/10 dark:border-white/5">
+          <div className="flex items-center gap-1 p-1 bg-gray-100/80 dark:bg-black/10 rounded-2xl backdrop-blur-sm border border-gray-200/60 dark:border-white/5 shadow-sm dark:shadow-none">
             {categories.map((category) => {
               const categoryCards = cardsByCategory[category] || [];
               const count = categoryCards.length;
@@ -101,15 +101,15 @@ const WelcomeCards: React.FC<WelcomeCardsProps> = ({
                   whileTap={{ scale: 0.98 }}
                   className={`relative px-4 py-2 text-sm font-medium rounded-xl transition-all duration-300 flex items-center gap-2 ${
                     activeCategory === category
-                      ? 'text-white bg-white/10 dark:bg-white/5'
-                      : 'text-gray-400 dark:text-gray-500 hover:text-gray-300 dark:hover:text-gray-400'
+                      ? 'text-gray-900 dark:text-white bg-white dark:bg-white/5 shadow-sm dark:shadow-none'
+                      : 'text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-400'
                   }`}
                   disabled={isLoading || isDirectChatLoading}
                 >
                   {activeCategory === category && (
                     <motion.div
                       layoutId="activeTabBg"
-                      className="absolute inset-0 bg-white/10 dark:bg-white/5 rounded-xl"
+                      className="absolute inset-0 bg-white dark:bg-white/5 rounded-xl shadow-sm dark:shadow-none"
                       transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                     />
                   )}
@@ -118,8 +118,8 @@ const WelcomeCards: React.FC<WelcomeCardsProps> = ({
                   <span
                     className={`relative z-10 px-2 py-0.5 rounded-lg text-xs font-medium ${
                       activeCategory === category
-                        ? 'bg-white/15 dark:bg-white/10 text-white'
-                        : 'bg-gray-600/30 dark:bg-gray-700/30 text-gray-400 dark:text-gray-500'
+                        ? 'bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-white'
+                        : 'bg-gray-200/60 dark:bg-gray-700/30 text-gray-500 dark:text-gray-500'
                     }`}
                   >
                     {count}
@@ -170,7 +170,7 @@ const WelcomeCards: React.FC<WelcomeCardsProps> = ({
                 }`}
               >
                 {/* 主卡片容器 */}
-                <div className="relative h-64 rounded-2xl overflow-hidden bg-white/5 dark:bg-black/10 backdrop-blur-sm border border-white/10 dark:border-white/5 transition-all duration-300 group-hover:border-white/20 dark:group-hover:border-white/10">
+                <div className="relative h-64 rounded-2xl overflow-hidden bg-white dark:bg-black/10 backdrop-blur-sm border border-gray-200/40 dark:border-white/5 transition-all duration-300 group-hover:border-gray-300/60 dark:group-hover:border-white/10 shadow-lg dark:shadow-none group-hover:shadow-xl dark:group-hover:shadow-none">
                   {/* 背景层 */}
                   <div className="absolute inset-0">
                     {card.image ? (
@@ -180,10 +180,10 @@ const WelcomeCards: React.FC<WelcomeCardsProps> = ({
                           alt={card.title}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
-                        <div className="absolute inset-0 bg-black/40 dark:bg-black/50" />
+                        <div className="absolute inset-0 bg-black/50 dark:bg-black/50" />
                       </>
                     ) : (
-                      <div className={`w-full h-full bg-gradient-to-br ${gradient} opacity-80`} />
+                      <div className={`w-full h-full bg-gradient-to-br ${gradient} opacity-90 dark:opacity-80`} />
                     )}
                   </div>
 
@@ -191,11 +191,11 @@ const WelcomeCards: React.FC<WelcomeCardsProps> = ({
                   <div className="relative h-full p-6 flex flex-col justify-between">
                     {/* 顶部：分类标签和操作按钮 */}
                     <div className="flex justify-between items-start">
-                      <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium bg-white/20 dark:bg-white/10 text-white backdrop-blur-sm">
+                      <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium bg-black/20 dark:bg-white/10 text-white backdrop-blur-sm">
                         {card.category}
                       </span>
 
-                      <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/20 dark:bg-white/10 backdrop-blur-sm transition-all duration-300 group-hover:bg-white/30 dark:group-hover:bg-white/20 group-hover:scale-110">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-black/20 dark:bg-white/10 backdrop-blur-sm transition-all duration-300 group-hover:bg-black/30 dark:group-hover:bg-white/20 group-hover:scale-110">
                         {isCardLoading ? (
                           <motion.div
                             animate={{ rotate: 360 }}
@@ -222,7 +222,7 @@ const WelcomeCards: React.FC<WelcomeCardsProps> = ({
 
                   {/* 悬浮时的微妙光效 */}
                   <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-white/5 to-transparent dark:from-white/3 dark:to-transparent" />
+                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-black/5 dark:from-white/3 to-transparent" />
                   </div>
                 </div>
               </motion.div>
@@ -238,8 +238,8 @@ const WelcomeCards: React.FC<WelcomeCardsProps> = ({
           animate={{ opacity: 1, y: 0 }}
           className="text-center py-20"
         >
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/5 dark:bg-black/10 flex items-center justify-center">
-            <div className="w-8 h-8 rounded-full bg-white/10 dark:bg-white/5" />
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-black/10 border border-gray-200 dark:border-white/5 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-white/5" />
           </div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
             No cards found
