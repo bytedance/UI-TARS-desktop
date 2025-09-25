@@ -45,7 +45,7 @@ export async function getAllSessions(req: Request, res: Response) {
 export async function createSession(req: Request, res: Response) {
   try {
     const server = req.app.locals.server;
-    const { runtimeSettings, agentOptions } = req.body as { 
+    const { runtimeSettings, agentOptions } = req.body as {
       runtimeSettings?: Record<string, any>;
       agentOptions?: Record<string, any>;
     };
@@ -67,7 +67,7 @@ export async function createSession(req: Request, res: Response) {
       sessionId,
       server.getCustomAgioProvider(),
       sessionInfo || undefined,
-      agentOptions // Pass agentOptions for one-time Agent initialization
+      agentOptions, // Pass agentOptions for one-time Agent initialization
     );
 
     server.sessions[sessionId] = session;
@@ -110,7 +110,7 @@ export async function createSession(req: Request, res: Response) {
       };
 
       savedSessionInfo = await server.storageProvider.createSession(sessionInfo);
-      
+
       // If runtime settings were provided and session is active, update the agent configuration
       if (runtimeSettings && savedSessionInfo) {
         try {
