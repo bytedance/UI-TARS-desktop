@@ -153,10 +153,11 @@ export class AgentSession {
       }
     }
 
-    // Merge base options with transformed runtime settings
+    // Merge base options with transformed runtime settings and one-time agent options
     const agentOptions = {
       ...baseAgentOptions,
       ...transformedOptions,
+      ...(this.agentOptions || {}), // Apply one-time agent initialization options
     };
 
     // Create base agent
@@ -269,6 +270,7 @@ export class AgentSession {
     sessionId: string,
     agioProviderImpl?: AgioProviderConstructor,
     sessionInfo?: SessionInfo,
+    private agentOptions?: Record<string, any>, // One-time agent initialization options
   ) {
     this.id = sessionId;
     this.eventBridge = new EventStreamBridge();

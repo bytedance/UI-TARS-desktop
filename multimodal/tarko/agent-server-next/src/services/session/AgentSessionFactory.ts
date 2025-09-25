@@ -50,6 +50,13 @@ export class AgentSessionFactory {
     const sessionId = nanoid();
     const user = getCurrentUser(c);
     const server = c.get('server');
+    
+    // Get runtimeSettings and agentOptions from request body
+    const body = await c.req.json().catch(() => ({}));
+    const { runtimeSettings, agentOptions } = body as {
+      runtimeSettings?: Record<string, any>;
+      agentOptions?: Record<string, any>;
+    };
 
     // Allocate sandbox if scheduler is available
     let sandboxUrl: string | undefined;
@@ -88,19 +95,39 @@ export class AgentSessionFactory {
             modelConfig: defaultModel,
           }),
         sandboxUrl,
+        // Include runtime settings if provided (persistent session settings)
+        ...(runtimeSettings && {
+          runtimeSettings,
+        }),
+        // Include agent options if provided (one-time initialization options)
+        ...(agentOptions && {
+          agentOptions,
+        }),
       },
     };
 
     const savedSessionInfo = await this.sessionDao.createSession(newSessionInfo);
 
-    // Create AgentSession instance with sandbox URL
+    // Create AgentSession instance with sandbox URL and agent options
     const session = this.createAgentSessionWithSandbox({
       sessionInfo: savedSessionInfo,
       agioProvider: this.server.getCustomAgioProvider(),
+      agentOptions, // Pass one-time agent options
     });
 
     // Initialize the session
     const { storageUnsubscribe } = await session.initialize();
+    
+    // If runtime settings were provided and session is active, update the agent configuration
+    if (runtimeSettings && savedSessionInfo) {
+      try {
+        await session.updateSessionConfig(savedSessionInfo);
+        console.log('Session created with runtime settings', { sessionId, runtimeSettings });
+      } catch (error) {
+        console.error('Failed to apply runtime settings to new session', { sessionId, error });
+        // Continue execution - the runtime settings are saved, will apply on next session restart
+      }
+    }
 
     return {
       session,
@@ -163,6 +190,7 @@ export class AgentSessionFactory {
       const session = this.createAgentSessionWithSandbox({
         sessionInfo,
         agioProvider: this.server.getCustomAgioProvider(),
+        // No agentOptions for restored sessions - they are one-time initialization only
       });
 
       const { storageUnsubscribe } = await session.initialize();
@@ -180,10 +208,11 @@ export class AgentSessionFactory {
   private createAgentSessionWithSandbox(options: {
     sessionInfo: SessionInfo;
     agioProvider?: AgioProviderConstructor;
+    agentOptions?: Record<string, any>; // One-time agent initialization options
   }): AgentSession {
-    const { sessionInfo, agioProvider } = options;
+    const { sessionInfo, agioProvider, agentOptions } = options;
 
-    const session = new AgentSession(this.server, sessionInfo.id, agioProvider, sessionInfo);
+    const session = new AgentSession(this.server, sessionInfo.id, agioProvider, sessionInfo, agentOptions);
 
     return session;
   }
