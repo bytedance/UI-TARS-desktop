@@ -122,7 +122,7 @@ const WelcomePage: React.FC = () => {
       <div className="fixed inset-0 bg-gradient-to-b from-transparent to-gray-100/50 dark:to-gray-800/50 pointer-events-none"></div>
 
       {/* Main Content - Always Centered in Viewport */}
-      <div className="h-screen flex flex-col items-center justify-center px-4 py-12 relative z-10">
+      <div className="h-screen flex flex-col items-center justify-center px-4 py-12 relative z-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -279,7 +279,7 @@ const WelcomePage: React.FC = () => {
 
       {/* Welcome Cards - Overlay at Bottom with Scroll */}
       {welcomeCards.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 max-h-[40vh] overflow-y-auto bg-gradient-to-t from-gray-50/95 to-transparent dark:from-gray-900/95 dark:to-transparent backdrop-blur-sm z-20">
+        <div className="fixed bottom-0 left-0 right-0 max-h-[40vh] overflow-y-auto bg-gradient-to-t from-gray-50/95 to-transparent dark:from-gray-900/95 dark:to-transparent backdrop-blur-sm z-10">
           <div className="pb-12 pt-8">
             <WelcomeCards 
               cards={welcomeCards}
