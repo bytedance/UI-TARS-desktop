@@ -64,7 +64,6 @@ const WelcomeCards: React.FC<WelcomeCardsProps> = ({
   const showTabs = categories.length > 1;
   const activeCards = cardsByCategory[activeCategory] || [];
 
-  // 简洁的渐变色彩 - 优化浅色模式
   const elegantGradients = [
     'from-slate-700 to-slate-900 dark:from-slate-600 dark:to-slate-800',
     'from-gray-700 to-gray-900 dark:from-gray-600 dark:to-gray-800',
@@ -83,9 +82,8 @@ const WelcomeCards: React.FC<WelcomeCardsProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.4 }}
-      className="w-full max-w-7xl mx-auto px-6 py-8"
+      className="w-full max-w-7xl mx-auto px-4"
     >
-      {/* 分类标签 - 简洁优雅设计 */}
       {showTabs && (
         <div className="flex justify-center mb-8">
           <div className="flex items-center gap-1 p-1 bg-gray-100/80 dark:bg-black/10 rounded-2xl backdrop-blur-sm border border-gray-200/60 dark:border-white/5 shadow-sm dark:shadow-none">
@@ -183,7 +181,9 @@ const WelcomeCards: React.FC<WelcomeCardsProps> = ({
                         <div className="absolute inset-0 bg-black/50 dark:bg-black/50" />
                       </>
                     ) : (
-                      <div className={`w-full h-full bg-gradient-to-br ${gradient} opacity-90 dark:opacity-80`} />
+                      <div
+                        className={`w-full h-full bg-gradient-to-br ${gradient} opacity-90 dark:opacity-80`}
+                      />
                     )}
                   </div>
 
