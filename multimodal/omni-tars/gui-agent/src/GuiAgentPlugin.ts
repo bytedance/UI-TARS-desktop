@@ -26,7 +26,7 @@ export class GuiAgentPlugin extends AgentPlugin {
 
   constructor(option: GuiAgentPluginOption) {
     super();
-
+    this.agent.logger = this.agent.logger.spawn('[GUIAgent]');
     this.operatorManager = option.operatorManager;
   }
 

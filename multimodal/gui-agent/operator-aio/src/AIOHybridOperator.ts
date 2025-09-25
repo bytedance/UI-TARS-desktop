@@ -14,93 +14,11 @@ import { Operator, ScreenContext } from '@gui-agent/shared/base';
 import { ConsoleLogger, LogLevel } from '@agent-infra/logger';
 import { Base64ImageParser } from '@agent-infra/media-utils';
 
-import { AIOComputer, validKeysOnAio } from './AIOComputer';
+import { AIOComputer, keyNameMap } from './AIOComputer';
 import { AIOBrowser } from './AIOBrowser';
 import type { AIOHybridOptions } from './types';
 
 const defaultLogger = new ConsoleLogger(undefined, LogLevel.DEBUG);
-
-// Comprehensive key name mapping for common key variations
-const keyNameMap = {
-  // Arrow keys
-  arrowup: 'up',
-  arrowdown: 'down',
-  arrowleft: 'left',
-  arrowright: 'right',
-  // Common key aliases
-  space: ' ',
-  spacebar: ' ',
-  enter: 'enter',
-  return: 'return',
-  tab: 'tab',
-  escape: 'esc',
-  backspace: 'backspace',
-  delete: 'del',
-  insert: 'insert',
-  home: 'home',
-  end: 'end',
-  pageup: 'pageup',
-  pagedown: 'pagedown',
-  // Function keys
-  // f1: 'f1', f2: 'f2', f3: 'f3', f4: 'f4', f5: 'f5', f6: 'f6',
-  // f7: 'f7', f8: 'f8', f9: 'f9', f10: 'f10', f11: 'f11', f12: 'f12',
-  // Modifier keys
-  ctrl: 'ctrl',
-  control: 'ctrl',
-  alt: 'alt',
-  shift: 'shift',
-  cmd: 'command',
-  command: 'command',
-  meta: 'command',
-  win: 'win',
-  windows: 'win',
-
-  // Number pad
-  numpad0: 'num0',
-  numpad1: 'num1',
-  numpad2: 'num2',
-  numpad3: 'num3',
-  numpad4: 'num4',
-  numpad5: 'num5',
-  numpad6: 'num6',
-  numpad7: 'num7',
-  numpad8: 'num8',
-  numpad9: 'num9',
-
-  // Special characters and punctuation
-  comma: ',',
-  period: '.',
-  semicolon: ';',
-  quote: "'",
-  doublequote: '"',
-  backquote: '`',
-  tilde: '~',
-  exclamation: '!',
-  at: '@',
-  hash: '#',
-  dollar: '$',
-  percent: '%',
-  caret: '^',
-  ampersand: '&',
-  asterisk: '*',
-  leftparen: '(',
-  rightparen: ')',
-  underscore: '_',
-  plus: '+',
-  minus: '-',
-  equal: '=',
-  leftbracket: '[',
-  rightbracket: ']',
-  backslash: '\\',
-  pipe: '|',
-  leftbrace: '{',
-  rightbrace: '}',
-  colon: ':',
-  less: '<',
-  greater: '>',
-  question: '?',
-  slash: '/',
-};
 
 export class AIOHybridOperator extends Operator {
   private static currentInstance: AIOHybridOperator | null = null;
@@ -305,24 +223,18 @@ export class AIOHybridOperator extends Operator {
         }
         case 'hotkey':
         case 'press': {
-          let keyStr = actionInputs?.key || actionInputs?.hotkey;
+          const keyStr = actionInputs?.key || actionInputs?.hotkey;
           if (typeof keyStr !== 'string') {
             throw new Error('key string is required when press or hotkey');
           }
-          keyStr = keyStr.toLowerCase();
-          const keys = (keyStr as string).split(/\s+/).filter((k) => k.length > 0);
+          const lowerKeyStr: string = keyStr.toLowerCase();
+          const keys = lowerKeyStr.split(/\s+/).filter((k) => k.length > 0);
 
           // Validate and map each key in the hotkey combination
           const mappedKeys = keys.map((key) => {
-            const mappedKey = keyNameMap[key as keyof typeof keyNameMap] || key;
-            if (!validKeysOnAio.includes(mappedKey)) {
-              throw new Error(
-                `Unsupported key in hotkey combination: '${key}' (mapped to '${mappedKey}')`,
-              );
-            }
-            return mappedKey;
+            return keyNameMap[key as keyof typeof keyNameMap] || key;
           });
-          if (keys.length === 0 || mappedKeys.length === 0) {
+          if (mappedKeys.length === 0) {
             throw new Error('key string is required when press or hotkey');
           }
 
