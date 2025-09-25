@@ -22,6 +22,7 @@ import { handleMultimodalPaste } from '@/common/utils/clipboard';
 import { NavbarModelSelector } from '@/standalone/navbar/ModelSelector';
 import { AgentOptionsSelector, AgentOptionsSelectorRef } from './AgentOptionsSelector';
 import { HomeAgentOptionsSelector } from '@/standalone/home/HomeAgentOptionsSelector';
+import { HomeChatBottomSettings } from '@/standalone/home/HomeChatBottomSettings';
 import { ChatBottomSettings } from './ChatBottomSettings';
 import { useNavbarStyles } from '@tarko/ui';
 
@@ -460,12 +461,18 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
             {/* Left side controls */}
             <div className="absolute left-3 bottom-3 flex items-center gap-2">
-              {/* Home mode: Show home AgentOptionsSelector */}
+              {/* Home mode: Show home AgentOptionsSelector and HomeChatBottomSettings */}
               {variant === 'home' && (
-                <HomeAgentOptionsSelector
-                  showAttachments={showAttachments}
-                  onFileUpload={handleFileUpload}
-                />
+                <>
+                  <HomeAgentOptionsSelector
+                    showAttachments={showAttachments}
+                    onFileUpload={handleFileUpload}
+                  />
+                  <HomeChatBottomSettings
+                    isDisabled={isDisabled}
+                    isProcessing={isProcessing}
+                  />
+                </>
               )}
 
               {/* Session mode: Show existing AgentOptionsSelector */}
