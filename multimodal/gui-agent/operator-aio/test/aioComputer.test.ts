@@ -435,28 +435,19 @@ describe('AIOComputer', () => {
     it('should handle HTTP errors', async () => {
       mockAioClient.browserActions.mockRejectedValue(new Error('HTTP 404: Not Found'));
 
-      const result = await aioComputer.click(100, 200);
-
-      expect(result.success).toBe(false);
-      expect(result.message).toBe('HTTP 404: Not Found');
+      await expect(aioComputer.click(100, 200)).rejects.toThrow('HTTP 404: Not Found');
     });
 
     it('should handle network errors', async () => {
       mockAioClient.browserActions.mockRejectedValue(new Error('Network timeout'));
 
-      const result = await aioComputer.click(100, 200);
-
-      expect(result.success).toBe(false);
-      expect(result.message).toBe('Network timeout');
+      await expect(aioComputer.click(100, 200)).rejects.toThrow('Network timeout');
     });
 
     it('should handle unknown errors', async () => {
       mockAioClient.browserActions.mockRejectedValue('Unknown error');
 
-      const result = await aioComputer.click(100, 200);
-
-      expect(result.success).toBe(false);
-      expect(result.message).toBe('Unknown error');
+      await expect(aioComputer.click(100, 200)).rejects.toThrow('Unknown error');
     });
   });
 });
