@@ -1,60 +1,195 @@
-# Web UI Implementation
+# Web UI Configuration
 
-The Web UI Implementation API provides type definitions and configurations for customizing Agent web interfaces. It supports both static and remote deployment strategies with flexible layout and workspace configurations.
+The Web UI Configuration API allows you to customize the Agent web interface appearance, layout, and behavior. Configure branding, welcome screens, navigation, and GUI Agent display options.
 
-## Types
+## Configuration Methods
 
-### AgentWebUIImplementationType
+### Via tarko.config.ts
+
+Configure Web UI through the `webui` option in your `tarko.config.ts`:
 
 ```typescript
-type AgentWebUIImplementationType = 'static' | 'remote'
+// tarko.config.ts
+import { AgentAppConfig } from '@tarko/interface'
+
+export default {
+  // ... other config
+  webui: {
+    logo: 'https://example.com/logo.png',
+    title: 'My Agent',
+    subtitle: 'AI Assistant for Development',
+    welcomTitle: 'Welcome to My Agent',
+    welcomePrompts: [
+      'Search for the latest GUI Agent papers',
+      'Find information about UI TARS'
+    ]
+  }
+} as AgentAppConfig
 ```
 
-Defines the deployment strategy for Agent web UI:
-- `static` - Local static directory deployment
-- `remote` - Remote web UI implementation (planned)
+### Via Agent Constructor
 
-### WorkspaceNavItemIcon
+Set Web UI configuration through the static `webuiConfig` property:
 
 ```typescript
-type WorkspaceNavItemIcon = 'code' | 'monitor' | 'terminal' | 'browser' | 'desktop' | 'default'
-```
+// Agent class
+import { AgentWebUIImplementation } from '@tarko/interface'
 
-Icon types available for workspace navigation items.
-
-### LayoutMode
-
-```typescript
-type LayoutMode = 'default' | 'narrow-chat'
-```
-
-Layout display modes:
-- `default` - Standard layout with full workspace
-- `narrow-chat` - Compact chat-focused layout
-
-## Interfaces
-
-### WorkspaceNavItem
-
-```typescript
-interface WorkspaceNavItem {
-  title: string
-  link: string
-  icon?: WorkspaceNavItemIcon
+export class MyAgent extends MCPAgent {
+  static webuiConfig: AgentWebUIImplementation = {
+    logo: 'https://example.com/logo.png',
+    title: 'My Agent',
+    workspace: {
+      navItems: [
+        {
+          title: 'Code Editor',
+          link: 'http://localhost:3000',
+          icon: 'code'
+        }
+      ]
+    }
+  }
 }
 ```
 
-Navigation item configuration for workspace header.
+## Configuration Options
 
-**Properties:**
-- `title` - Display text for the navigation button
-- `link` - URL to open in new tab when clicked
-- `icon` - Icon type (default: `'default'`)
+### Basic Branding
 
-### LayoutConfig
+#### logo
 
 ```typescript
-interface LayoutConfig {
+logo?: string
+```
+
+Web UI logo URL. Displayed in the navigation bar.
+
+**Default:** Tarko logo
+
+#### title
+
+```typescript
+title?: string
+```
+
+Site title displayed in navbar and browser tab.
+
+**Default:** Agent name
+
+#### subtitle
+
+```typescript
+subtitle?: string
+```
+
+Subtitle for home page and SEO meta description.
+
+#### welcomTitle
+
+```typescript
+welcomTitle?: string
+```
+
+Hero title displayed on the home page welcome screen.
+
+### Welcome Screen
+
+#### welcomePrompts
+
+```typescript
+welcomePrompts?: string[]
+```
+
+Array of suggested prompts displayed on the welcome screen.
+
+**Example:**
+```typescript
+welcomePrompts: [
+  'Search for the latest GUI Agent papers',
+  'Find information about UI TARS',
+  'Tell me the top 5 most popular projects on ProductHunt today'
+]
+```
+
+#### welcomeCards
+
+```typescript
+welcomeCards?: WelcomeCard[]
+```
+
+Welcome screen cards with predefined prompts and Agent options.
+
+**WelcomeCard Interface:**
+```typescript
+interface WelcomeCard {
+  title: string          // Card display title
+  prompt: string         // Prompt content
+  image?: string         // Background image URL
+  category: string       // Grouping category
+  agentOptions?: Record<string, any>  // Agent configuration
+}
+```
+
+**Example:**
+```typescript
+welcomeCards: [
+  {
+    title: 'Code Review',
+    prompt: 'Review my latest pull request',
+    category: 'Development',
+    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71',
+    agentOptions: { mode: 'review' }
+  }
+]
+```
+
+### Workspace Configuration
+
+#### workspace
+
+```typescript
+workspace?: {
+  navItems?: WorkspaceNavItem[]
+}
+```
+
+Workspace header navigation configuration.
+
+**WorkspaceNavItem Interface:**
+```typescript
+interface WorkspaceNavItem {
+  title: string                    // Display text
+  link: string                     // URL to open in new tab
+  icon?: WorkspaceNavItemIcon      // Icon type
+}
+
+type WorkspaceNavItemIcon = 'code' | 'monitor' | 'terminal' | 'browser' | 'desktop' | 'default'
+```
+
+**Example:**
+```typescript
+workspace: {
+  navItems: [
+    {
+      title: 'Code Server',
+      link: 'http://localhost:8080',
+      icon: 'code'
+    },
+    {
+      title: 'VNC',
+      link: 'http://localhost:6080',
+      icon: 'monitor'
+    }
+  ]
+}
+```
+
+### Layout Configuration
+
+#### layout
+
+```typescript
+layout?: {
   defaultLayout?: LayoutMode
   enableLayoutSwitchButton?: boolean
   enableSidebar?: boolean
@@ -62,31 +197,36 @@ interface LayoutConfig {
 }
 ```
 
-Layout behavior configuration.
+Layout behavior and display options.
+
+**LayoutMode:**
+```typescript
+type LayoutMode = 'default' | 'narrow-chat'
+```
 
 **Properties:**
 - `defaultLayout` - Initial layout mode (default: `'default'`)
+  - `default` - Standard layout with full workspace
+  - `narrow-chat` - Compact chat-focused layout
 - `enableLayoutSwitchButton` - Show layout toggle in toolbar (default: `false`)
 - `enableSidebar` - Display sidebar panel (default: `true`)
 - `enableHome` - Register home route (default: `true`)
 
-### WorkspaceConfig
-
+**Example:**
 ```typescript
-interface WorkspaceConfig {
-  navItems?: WorkspaceNavItem[]
+layout: {
+  defaultLayout: 'narrow-chat',
+  enableLayoutSwitchButton: true,
+  enableSidebar: true
 }
 ```
 
-Workspace-specific configuration.
+### GUI Agent Configuration
 
-**Properties:**
-- `navItems` - Navigation items displayed in workspace header
-
-### TarkoWebUIGUIAgentConfig
+#### guiAgent
 
 ```typescript
-interface TarkoWebUIGUIAgentConfig {
+guiAgent?: {
   defaultScreenshotRenderStrategy?: 'both' | 'beforeAction' | 'afterAction'
   enableScreenshotRenderStrategySwitch?: boolean
   renderGUIAction?: boolean
@@ -94,7 +234,7 @@ interface TarkoWebUIGUIAgentConfig {
 }
 ```
 
-GUI Agent display configuration.
+GUI Agent display and screenshot rendering options.
 
 **Properties:**
 - `defaultScreenshotRenderStrategy` - Screenshot display strategy (default: `'afterAction'`)
@@ -105,185 +245,39 @@ GUI Agent display configuration.
 - `renderGUIAction` - Show GUI operation details card (default: `true`)
 - `renderBrowserShell` - Wrap screenshots in browser shell UI (default: `true`)
 
-### WelcomeCard
-
+**Example:**
 ```typescript
-interface WelcomeCard {
-  title: string
-  prompt: string
-  image?: string
-  category: string
-  agentOptions?: Record<string, any>
+guiAgent: {
+  defaultScreenshotRenderStrategy: 'beforeAction',
+  enableScreenshotRenderStrategySwitch: true,
+  renderGUIAction: true,
+  renderBrowserShell: false
 }
 ```
 
-Welcome screen card configuration.
+### Advanced Options
 
-**Properties:**
-- `title` - Card display title
-- `prompt` - Prompt content for the card
-- `image` - Background image URL (optional)
-- `category` - Grouping category for cards
-- `agentOptions` - Agent configuration passed when creating session
-
-### BaseAgentWebUIImplementation
+#### enableContextualSelector
 
 ```typescript
-interface BaseAgentWebUIImplementation {
-  type?: AgentWebUIImplementationType
-  logo?: string
-  title?: string
-  subtitle?: string
-  welcomTitle?: string
-  welcomePrompts?: string[]
-  welcomeCards?: WelcomeCard[]
-  enableContextualSelector?: boolean
-  base?: string
-  workspace?: WorkspaceConfig
-  layout?: LayoutConfig
-  guiAgent?: TarkoWebUIGUIAgentConfig
-}
+enableContextualSelector?: boolean
 ```
 
-Base configuration interface for all Agent implementations.
+Enable @ syntax file selector. When enabled, users can type @ in the input to search and select workspace files/directories.
 
-**Properties:**
-- `type` - Implementation type (default: `'static'`)
-- `logo` - Web UI logo URL (default: Tarko logo)
-- `title` - Site title displayed in navbar (default: Agent name)
-- `subtitle` - Subtitle for home page and SEO
-- `welcomTitle` - Hero title on home page
-- `welcomePrompts` - Array of welcome prompt suggestions
-- `welcomeCards` - Welcome screen card configurations
-- `enableContextualSelector` - Enable @ syntax file selector (default: `false`)
-- `base` - Base path for routing (supports regex patterns)
-- `workspace` - Workspace configuration
-- `layout` - Layout configuration  
-- `guiAgent` - GUI Agent display configuration
+**Default:** `false`
 
-### StaticAgentWebUIImplementation
+#### base
 
 ```typescript
-interface StaticAgentWebUIImplementation extends BaseAgentWebUIImplementation {
-  type?: 'static'
-  staticPath: string
-}
+base?: string
 ```
 
-Static deployment implementation.
+Base path for routing deployment. Supports both static paths and regex patterns.
 
-**Properties:**
-- `staticPath` - Path to static UI files (e.g., `@tarko/agent-ui`)
-
-### RemoteAgentWebUIImplementation
-
+**Examples:**
 ```typescript
-interface RemoteAgentWebUIImplementation extends BaseAgentWebUIImplementation {
-  type?: 'remote'
-  remoteUrl?: string
-}
-```
-
-Remote deployment implementation (planned feature).
-
-**Properties:**
-- `remoteUrl` - Remote UI service URL
-
-## Union Types
-
-### AgentWebUIImplementation
-
-```typescript
-type AgentWebUIImplementation = StaticAgentWebUIImplementation | RemoteAgentWebUIImplementation
-```
-
-Union type for all supported Agent implementations.
-
-### AgentWebUIImplementationByType
-
-```typescript
-type AgentWebUIImplementationByType<T extends AgentWebUIImplementationType> = 
-  T extends 'static' ? StaticAgentWebUIImplementation :
-  T extends 'remote' ? RemoteAgentWebUIImplementation : never
-```
-
-Utility type to extract specific implementation by type.
-
-## Utility Functions
-
-### isAgentWebUIImplementationType
-
-```typescript
-function isAgentWebUIImplementationType<T extends AgentWebUIImplementationType>(
-  implementation: AgentWebUIImplementation,
-  type: T
-): implementation is AgentWebUIImplementationByType<T>
-```
-
-Type guard to check if implementation matches specific type.
-
-**Parameters:**
-- `implementation` - Agent implementation to check
-- `type` - Expected implementation type
-
-**Returns:** Type-narrowed boolean result
-
-## Usage Examples
-
-### Basic Static Implementation
-
-```typescript
-const agentUI: StaticAgentWebUIImplementation = {
-  type: 'static',
-  staticPath: '@tarko/agent-ui',
-  title: 'My Agent',
-  subtitle: 'AI Assistant for Development',
-  welcomTitle: 'Welcome to My Agent',
-  workspace: {
-    navItems: [
-      {
-        title: 'Code Editor',
-        link: 'http://localhost:3000',
-        icon: 'code'
-      }
-    ]
-  }
-}
-```
-
-### GUI Agent Configuration
-
-```typescript
-const guiAgentUI: StaticAgentWebUIImplementation = {
-  type: 'static',
-  staticPath: '@tarko/agent-ui',
-  guiAgent: {
-    defaultScreenshotRenderStrategy: 'both',
-    enableScreenshotRenderStrategySwitch: true,
-    renderBrowserShell: false
-  }
-}
-```
-
-### Welcome Cards Setup
-
-```typescript
-const welcomeCardsUI: StaticAgentWebUIImplementation = {
-  type: 'static',
-  staticPath: '@tarko/agent-ui',
-  welcomeCards: [
-    {
-      title: 'Code Review',
-      prompt: 'Review my latest pull request',
-      category: 'Development',
-      agentOptions: { mode: 'review' }
-    },
-    {
-      title: 'Bug Fix',
-      prompt: 'Help me debug this issue',
-      category: 'Development',
-      agentOptions: { mode: 'debug' }
-    }
-  ]
-}
+base: "/agent-ui"           // Static path
+base: "/tenant-.+"         // Regex pattern
+base: "/(foo|bar)/app"     // Regex with groups
 ```
