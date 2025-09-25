@@ -21,24 +21,16 @@ import type { AIOHybridOptions } from './types';
 const defaultLogger = new ConsoleLogger(undefined, LogLevel.DEBUG);
 
 export class AIOHybridOperator extends Operator {
-  private static currentInstance: AIOHybridOperator | null = null;
-  public static async create(options: AIOHybridOptions): Promise<AIOHybridOperator> {
-    defaultLogger.info('[AioHybridOperator.create]:', options.baseURL);
-    const instance = new AIOHybridOperator(options);
-    // await instance.initialize(options);
-    this.currentInstance = instance;
-    return instance;
-  }
-
   private options: AIOHybridOptions;
-  private logger: ConsoleLogger;
-  private aioBrowser: AIOBrowser | null = null;
-  private aioComputer: AIOComputer;
+
+  protected logger: ConsoleLogger;
+  protected aioBrowser: AIOBrowser | null = null;
+  protected aioComputer: AIOComputer;
 
   private screenshotWidth = 1280;
   private screenshotHeight = 1024;
 
-  private constructor(options: AIOHybridOptions, logger: ConsoleLogger = defaultLogger) {
+  constructor(options: AIOHybridOptions, logger: ConsoleLogger = defaultLogger) {
     super();
     this.options = options;
     this.logger = logger.spawn('[AIOHybridOperator]');
