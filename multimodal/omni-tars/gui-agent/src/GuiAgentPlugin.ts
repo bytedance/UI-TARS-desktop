@@ -46,6 +46,7 @@ export class GuiAgentPlugin extends AgentPlugin {
               actions: input.operator_action,
             });
             if (rawResult?.errorMessage) {
+              this.agent.logger.error('execute error', rawResult?.errorMessage);
               return createGUIErrorResponse(input.action, rawResult?.errorMessage);
             }
             return {
@@ -56,6 +57,10 @@ export class GuiAgentPlugin extends AgentPlugin {
             };
           } catch (error) {
             // Return error response in GUI Agent format
+            this.agent.logger.error(
+              'execute error from trycatch',
+              error instanceof Error ? error.message : 'Unknown error',
+            );
             return createGUIErrorResponse(input.action, error);
           }
         },
