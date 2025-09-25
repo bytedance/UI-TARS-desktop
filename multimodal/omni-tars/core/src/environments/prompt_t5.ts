@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { getLogger } from '@tarko/agent';
 import { AgentMode } from '../types';
 import { getTimeString } from '../utils/hepler';
 import { HOME_INSTRUCTION, PROXY_INSTRUCTION } from './code';
@@ -11,6 +12,7 @@ export const think_token = process.env.THINK_TOKEN || 'thinkt';
 export const use_native_thinking = process.env.NATIVE_THINKING === 'true';
 export const bypass_native_thinking = process.env.NATIVE_THINKING === 'bypass';
 
+const logger = getLogger('prompt_t5');
 const think_budget = '\n';
 
 const task_description = `\nCurrent time is: ${getTimeString()}\n
@@ -19,6 +21,17 @@ As a professional personal assistant (Doubao) capable of solving various user pr
 const gui_task_description = `\nCurrent time is: ${getTimeString()}\n
 You are a GUI agent. You are given a task and your action history, with screenshots. You need to perform the next action to complete the task. \n`;
 
+const game_task_description = `You should begin by detailing the internal reasoning process, and then present the answer to the user. The reasoning process should be enclosed within <${think_token}> </${think_token}> tags, as follows:
+<${think_token}> reasoning process here </${think_token}> answer here. 
+You have different modes of thinking:
+Unrestricted think mode: Engage in an internal thinking process with thorough reasoning and reflections. You have an unlimited budget for thinking tokens and can continue thinking until you fully solve the problem.
+Efficient think mode: Provide a concise internal thinking process with efficient reasoning and reflections. You don't have a strict token budget but be less verbose and more direct in your thinking. 
+No think mode: Respond directly to the question without any internal reasoning process or extra thinking tokens. Still follow the template with the minimum required thinking tokens to justify the answer. 
+Budgeted think mode: Limit your internal reasoning and reflections to stay within the specified token budget
+Based on the complexity of the problem, select the appropriate mode for reasoning among the provided options listed below.
+Provided Mode(s):
+Unrestricted think.
+You are provided with a task description, a history of previous actions, and corresponding screenshots. Your goal is to perform the next action to complete the task. Please note that if performing the same action multiple times results in a static screen with no changes, you should attempt a modified or alternative action.`;
 
 //Mixed scenarios use this additional_notes
 const omni_additional_notes = `- Use english in your reasoning process. \n
@@ -55,13 +68,11 @@ export const gui_functions = `
 {"type": "function", "name": "wait", "parameters": {"type": "object", "properties": {"time": {"type": "integer", "description": "Wait time in seconds."}}, "required": []}, "description": "Wait for a while."}
 `;
 
-
-
 const createPROMPT2 = (description: string) => {
-    return `You are an agent designed to accomplish tasks.
+  return `You are an agent designed to accomplish tasks.
 ${description}
 <seed:cot_budget_reflect>${think_budget}</seed:cot_budget_reflect>`;
-}
+};
 
 /** 3.1 Think Prompt */
 const PROMPT1 = use_native_thinking
@@ -69,7 +80,6 @@ const PROMPT1 = use_native_thinking
   : `You should first think about the reasoning process in the mind and then provide the user with the answer. The reasoning process is enclosed within <${think_token}> </${think_token}> tags, i.e. <${think_token}> reasoning process here </${think_token}> answer here`;
 
 /** 3.2 Role/Task Prompt */
-
 
 /** 3.3 Action/Function Definition Prompt (如果没有functions则不需要这段prompt) */
 const createPROMPT3 = (functions: string[], additionalNotes: string) => `## Function Definition
@@ -99,12 +109,11 @@ multiple lines
 ${additionalNotes}
 `;
 
-
 // Default SYSTEM_PROMPT_GROUP for backwards compatibility (omni mode)
 export const SYSTEM_PROMPT_GROUP = [
-  PROMPT1, 
+  PROMPT1,
   createPROMPT2(task_description),
-  createPROMPT3([mcp_functions, code_functions, gui_functions], omni_additional_notes)
+  createPROMPT3([mcp_functions, code_functions, gui_functions], omni_additional_notes),
 ];
 
 /**
@@ -112,16 +121,25 @@ export const SYSTEM_PROMPT_GROUP = [
  * @param agentMode - The agent mode ('omni' or 'gui')
  * @returns Array of prompt strings
  */
-export const createSystemPromptGroup = (agentMode: AgentMode = 'omni'): string[] => {
-  if (agentMode === 'omni') {
-    return SYSTEM_PROMPT_GROUP;
-  }else if(agentMode === 'gui') {
-    return [
-      PROMPT1, 
-      createPROMPT2(gui_task_description),
-      createPROMPT3([gui_functions], gui_additional_notes)
-    ]
+export const createSystemPromptGroup = (agentMode: AgentMode): string[] => {
+  logger.info('agentMode: ', agentMode);
+
+  switch (agentMode.id) {
+    case 'omni':
+      return SYSTEM_PROMPT_GROUP;
+    case 'gui':
+      return [
+        PROMPT1,
+        createPROMPT2(gui_task_description),
+        createPROMPT3([gui_functions], gui_additional_notes),
+      ];
+    case 'game':
+      return [
+        PROMPT1,
+        createPROMPT2(game_task_description),
+        createPROMPT3([gui_functions], gui_additional_notes),
+      ];
   }
 
-  return []
+  return [];
 };

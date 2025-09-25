@@ -21,26 +21,10 @@ import {
 } from '@omni-tars/mcp-agent';
 import { AgentAppConfig } from '@tarko/interface';
 
-const mcpToolCallEngine = new McpToolCallEngineProvider();
-
-const omniToolCallEngine = createComposableToolCallEngineFactory({
-  engines: [
-    new GuiToolCallEngineProvider('omni'),
-    mcpToolCallEngine,
-    new CodeToolCallEngineProvider(),
-  ],
-  defaultEngine: mcpToolCallEngine,
-});
-
-const guiToolCallEngine = createComposableToolCallEngineFactory({
-  engines: [new GuiToolCallEngineProvider('gui')],
-});
-
 export type OmniTarsOption = AgentAppConfig &
   MCPTarsExtraOption &
   CodeAgentExtraOption & {
     agentMode: AgentMode;
-    browserMode: 'dom' | 'visual-grounding' | 'hybrid';
   };
 
 export function getComposableOption(options: OmniTarsOption) {
@@ -52,8 +36,7 @@ export function getComposableOption(options: OmniTarsOption) {
     ignoreSandboxCheck,
     linkReaderAK,
     linkReaderMcpUrl,
-    agentMode = 'omni',
-    browserMode = 'hybrid',
+    agentMode = { id: 'omni' },
     ...restOptions
   } = options;
 
@@ -67,22 +50,35 @@ export function getComposableOption(options: OmniTarsOption) {
     operatorManager: OperatorManager.createHybird(options.sandboxUrl),
   });
 
-  if (agentMode === 'gui') {
-    baseOptions.toolCallEngine = guiToolCallEngine;
-    baseOptions.plugins = [guiPlugin];
-  } else if (agentMode === 'omni') {
-    baseOptions.toolCallEngine = omniToolCallEngine;
-    baseOptions.plugins = [
-      mcpPluginBuilder({
-        tavilyApiKey,
-        googleApiKey,
-        googleMcpUrl,
-        linkReaderAK,
-        linkReaderMcpUrl,
-      }),
-      codePluginBuilder({ sandboxUrl, ignoreSandboxCheck }),
-      guiPlugin,
-    ];
+  switch (agentMode.id) {
+    case 'game':
+    case 'gui':
+      baseOptions.toolCallEngine = createComposableToolCallEngineFactory({
+        engines: [new GuiToolCallEngineProvider(agentMode)],
+      });
+      baseOptions.plugins = [guiPlugin];
+      break;
+    case 'omni':
+    default:
+      baseOptions.toolCallEngine = createComposableToolCallEngineFactory({
+        engines: [
+          new GuiToolCallEngineProvider(agentMode),
+          new McpToolCallEngineProvider(),
+          new CodeToolCallEngineProvider(),
+        ],
+      });
+      baseOptions.plugins = [
+        mcpPluginBuilder({
+          tavilyApiKey,
+          googleApiKey,
+          googleMcpUrl,
+          linkReaderAK,
+          linkReaderMcpUrl,
+        }),
+        codePluginBuilder({ sandboxUrl, ignoreSandboxCheck }),
+        guiPlugin,
+      ];
+      break;
   }
 
   return baseOptions as ComposableAgentOptions;

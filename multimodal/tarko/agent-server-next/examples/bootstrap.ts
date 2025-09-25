@@ -41,12 +41,11 @@ const server = new AgentServer({
             agentMode: {
               type: 'string',
               title: 'Agent Mode',
-              enum: ['omni', 'gui'],
-              enumLabels: ['Omni', 'GUI'],
+              enum: ['omni', 'gui', 'game'],
+              enumLabels: ['Omni', 'GUI', 'Game'],
               default: 'omni',
               placement: 'chat-bottom',
             },
-
             browserMode: {
               type: 'string',
               title: 'Browser Control',
@@ -60,6 +59,15 @@ const server = new AgentServer({
               },
             },
           },
+        },
+        transform: (runtimeSettings: Record<string, unknown>) => {
+          return {
+            agentMode: {
+              id: runtimeSettings.agentMode,
+              browserMode: runtimeSettings.browserMode,
+              link: 'http://example.com',
+            },
+          };
         },
       },
       storage: {

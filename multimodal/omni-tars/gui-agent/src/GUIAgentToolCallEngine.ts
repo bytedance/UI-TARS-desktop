@@ -38,8 +38,8 @@ export class GUIAgentToolCallEngine extends ToolCallEngine {
 
   constructor(...args: unknown[]) {
     super();
-    const agentMode = args[0] as AgentMode | undefined;
-    this.agentMode = agentMode || 'gui';
+    const agentMode = args[0] as AgentMode;
+    this.agentMode = agentMode;
   }
 
   /**
