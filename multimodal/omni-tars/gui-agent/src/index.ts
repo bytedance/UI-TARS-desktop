@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ComposableAgent } from '@omni-tars/core';
+import { AgentMode, ComposableAgent } from '@omni-tars/core';
 import { GuiAgentPlugin } from './GuiAgentPlugin';
 import { AgentOptions } from '@tarko/agent';
 import { GUIAgentToolCallEngine } from './GUIAgentToolCallEngine';
@@ -32,14 +32,17 @@ export interface GUIAgentConfig<TOperator> {
   loopIntervalInMs?: number;
 }
 
-
 export default class GUIAgent extends ComposableAgent {
   static label: 'Browser GUI Agent';
-  constructor(options: AgentOptions) {
-
+  constructor(options: AgentOptions & { agentMode?: AgentMode }) {
     super({
       ...options,
-      plugins: [new GuiAgentPlugin({ operatorManager: OperatorManager.createHybird(options.sandboxUrl) })],
+      plugins: [
+        new GuiAgentPlugin({
+          operatorManager: OperatorManager.create(options.agentMode, options.sandboxUrl),
+          agentMode: options.agentMode,
+        }),
+      ],
       toolCallEngine: GUIAgentToolCallEngine,
     });
   }

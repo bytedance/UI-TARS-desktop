@@ -47,7 +47,8 @@ export function getComposableOption(options: OmniTarsOption) {
   };
 
   const guiPlugin = new GuiAgentPlugin({
-    operatorManager: OperatorManager.createHybird(options.sandboxUrl),
+    operatorManager: OperatorManager.create(options.agentMode, options.sandboxUrl),
+    agentMode,
   });
 
   switch (agentMode.id) {

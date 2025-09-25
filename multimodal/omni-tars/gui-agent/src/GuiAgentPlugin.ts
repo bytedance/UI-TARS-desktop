@@ -2,18 +2,17 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { AgentPlugin, COMPUTER_USE_ENVIRONMENT } from '@omni-tars/core';
+import { AgentMode, AgentPlugin, COMPUTER_USE_ENVIRONMENT } from '@omni-tars/core';
 import { Tool, LLMRequestHookPayload, ChatCompletionContentPart } from '@tarko/agent';
 import { createGUIErrorResponse } from '@tarko/shared-utils';
 import { Base64ImageParser } from '@agent-infra/media-utils';
 import { ImageCompressor, formatBytes } from '@tarko/shared-media-utils';
 import { setScreenInfo } from './shared';
 import { OperatorManager } from './OperatorManager';
-import { BrowserOperator } from '@gui-agent/operator-browser';
-import { AIOHybridOperator } from '@gui-agent/operator-aio';
 
 interface GuiAgentPluginOption {
   operatorManager: OperatorManager;
+  agentMode?: AgentMode;
 }
 
 /**
@@ -22,12 +21,17 @@ interface GuiAgentPluginOption {
 export class GuiAgentPlugin extends AgentPlugin {
   readonly name = 'gui-agent';
   readonly environmentSection = COMPUTER_USE_ENVIRONMENT;
+  private agentMode?: AgentMode;
   private operatorManager: OperatorManager;
 
   constructor(option: GuiAgentPluginOption) {
     super();
     this.agent.logger = this.agent.logger.spawn('[GUIAgent]');
+    this.agentMode = option.agentMode;
     this.operatorManager = option.operatorManager;
+    if (this.agentMode) {
+      this.agent.logger.info('AgentMode:', JSON.stringify(this.agentMode));
+    }
   }
 
   async initialize(): Promise<void> {

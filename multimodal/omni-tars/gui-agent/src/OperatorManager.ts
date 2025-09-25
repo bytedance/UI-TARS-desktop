@@ -1,12 +1,12 @@
 import { LocalBrowser, RemoteBrowser } from '@agent-infra/browser';
 import { BrowserOperator, RemoteBrowserOperator } from '@gui-agent/operator-browser';
-import { AIOHybridOperator } from '@gui-agent/operator-aio';
+import { AIOGameOperator, AIOHybridOperator } from '@gui-agent/operator-aio';
 import { Operator } from '@gui-agent/shared/base';
-import { getAioUrl } from '@omni-tars/core';
+import { AgentMode, getAioUrl } from '@omni-tars/core';
 import { AioClient, CDPVersionResp } from '@agent-infra/sandbox';
 
 export class OperatorManager {
-  private target: 'local' | 'remote' | 'hybird';
+  private agentMode: AgentMode;
   private aioClient: AioClient | null = null;
   private remoteOperator: Operator | null = null;
   private remoteBrowser: RemoteBrowser | null = null;
@@ -15,9 +15,27 @@ export class OperatorManager {
   private sandboxUrl: string;
   private initialized = false;
 
-  constructor(target: 'local' | 'remote' | 'hybird', sandboxUrl?: string) {
-    this.target = target;
+  constructor(agentMode: AgentMode, sandboxUrl?: string) {
+    this.agentMode = agentMode;
     this.sandboxUrl = sandboxUrl ?? getAioUrl();
+
+    if (this.agentMode.id === 'game') {
+      const targetUrl = this.agentMode.link;
+      if (!targetUrl) {
+        throw new Error('Game agent mode link is required');
+      }
+      this.operator = new AIOGameOperator({
+        baseURL: this.sandboxUrl,
+        timeout: 10000,
+        targetUrl,
+      });
+      this.initialized = true;
+    } else {
+      this.operator = new AIOHybridOperator({
+        baseURL: this.sandboxUrl,
+        timeout: 10000,
+      });
+    }
 
     /*
     if (this.target === 'remote') {
@@ -67,13 +85,7 @@ export class OperatorManager {
       });
     }
     */
-    if (this.target !== 'hybird') {
-      throw new Error('OperatorManager only support hybird aio operator');
-    }
-    this.operator = await AIOHybridOperator.create({
-      baseURL: this.sandboxUrl,
-      timeout: 10000,
-    });
+    await this.operator?.doInitialize();
     this.initialized = true;
   }
 
@@ -89,8 +101,8 @@ export class OperatorManager {
     return this.operator;
   }
 
-  getMode(): 'local' | 'remote' | 'hybird' {
-    return this.target;
+  getMode(): AgentMode {
+    return this.agentMode;
   }
 
   // static createLocal(): OperatorManager {
@@ -101,7 +113,7 @@ export class OperatorManager {
   //   return new OperatorManager('remote', sandboxUrl);
   // }
 
-  static createHybird(sandboxUrl?: string): OperatorManager {
-    return new OperatorManager('hybird', sandboxUrl);
+  static create(agentMode?: AgentMode, sandboxUrl?: string): OperatorManager {
+    return new OperatorManager(agentMode ?? { id: 'gui', browserMode: 'hybrid' }, sandboxUrl);
   }
 }
