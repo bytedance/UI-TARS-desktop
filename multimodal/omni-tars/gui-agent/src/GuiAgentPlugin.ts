@@ -4,7 +4,7 @@
  */
 import { AgentMode, AgentPlugin, COMPUTER_USE_ENVIRONMENT } from '@omni-tars/core';
 import { Tool, LLMRequestHookPayload, ChatCompletionContentPart } from '@tarko/agent';
-import { createGUIErrorResponse } from '@tarko/shared-utils';
+import { ConsoleLogger, createGUIErrorResponse, LogLevel } from '@tarko/shared-utils';
 import { Base64ImageParser } from '@agent-infra/media-utils';
 import { ImageCompressor, formatBytes } from '@tarko/shared-media-utils';
 import { setScreenInfo } from './shared';
@@ -14,6 +14,8 @@ interface GuiAgentPluginOption {
   operatorManager: OperatorManager;
   agentMode?: AgentMode;
 }
+
+const guiLogger = new ConsoleLogger('[O-GUIAgent]', LogLevel.DEBUG);
 
 /**
  * GUI Agent Plugin - handles COMPUTER_USE_ENVIRONMENT for screen interaction
@@ -26,11 +28,10 @@ export class GuiAgentPlugin extends AgentPlugin {
 
   constructor(option: GuiAgentPluginOption) {
     super();
-    this.agent.logger = this.agent.logger.spawn('[GUIAgent]');
     this.agentMode = option.agentMode;
     this.operatorManager = option.operatorManager;
     if (this.agentMode) {
-      this.agent.logger.info('AgentMode:', JSON.stringify(this.agentMode));
+      guiLogger.info('AgentMode:', JSON.stringify(this.agentMode));
     }
   }
 
@@ -42,7 +43,7 @@ export class GuiAgentPlugin extends AgentPlugin {
         parameters: {},
         function: async (input) => {
           try {
-            this.agent.logger.info('browser_vision_control', input);
+            guiLogger.info('browser_vision_control', input);
             const op = await this.operatorManager.getInstance();
             const rawResult = await op?.doExecute({
               rawContent: '',
@@ -50,7 +51,7 @@ export class GuiAgentPlugin extends AgentPlugin {
               actions: input.operator_action,
             });
             if (rawResult?.errorMessage) {
-              this.agent.logger.error('execute error', rawResult?.errorMessage);
+              guiLogger.error('execute error', rawResult?.errorMessage);
               return createGUIErrorResponse(input.action, rawResult?.errorMessage);
             }
             return {
@@ -61,7 +62,7 @@ export class GuiAgentPlugin extends AgentPlugin {
             };
           } catch (error) {
             // Return error response in GUI Agent format
-            this.agent.logger.error(
+            guiLogger.error(
               'execute error from trycatch',
               error instanceof Error ? error.message : 'Unknown error',
             );
@@ -87,17 +88,17 @@ export class GuiAgentPlugin extends AgentPlugin {
     toolCall: { toolCallId: string; name: string },
     result: unknown,
   ): Promise<void> {
-    this.agent.logger.info('onAfterToolCall toolCall', JSON.stringify(toolCall));
+    guiLogger.info('onAfterToolCall toolCall', JSON.stringify(toolCall));
 
     if (toolCall.name !== 'browser_vision_control') {
-      this.agent.logger.info('onAfterToolCall: skipping screenshot');
+      guiLogger.info('onAfterToolCall: skipping screenshot');
       return;
     }
 
     const operator = await this.operatorManager.getInstance();
     const output = await operator?.doScreenshot();
     if (!output?.base64) {
-      this.agent.logger.error('Failed to get screenshot');
+      guiLogger.error('Failed to get screenshot');
       return;
     }
     const base64Tool = new Base64ImageParser(output.base64);
@@ -114,7 +115,7 @@ export class GuiAgentPlugin extends AgentPlugin {
     const compressedSize = compressedBuffer.byteLength;
     const compressionRatio = (((originalSize - compressedSize) / originalSize) * 100).toFixed(2);
 
-    this.agent.logger.debug(`compression stat: `, {
+    guiLogger.debug(`compression stat: `, {
       originalSize: formatBytes(originalSize),
       compressedSize: formatBytes(compressedSize),
       compressionRatio: `${compressionRatio}% reduction`,
@@ -138,7 +139,7 @@ export class GuiAgentPlugin extends AgentPlugin {
 
     const eventStream = this.agent.getEventStream();
     const events = eventStream.getEvents();
-    this.agent.logger.info('onAfterToolCall events length:', events.length);
+    guiLogger.info('onAfterToolCall events length:', events.length);
 
     const event = eventStream.createEvent('environment_input', {
       description: 'Browser Screenshot',
