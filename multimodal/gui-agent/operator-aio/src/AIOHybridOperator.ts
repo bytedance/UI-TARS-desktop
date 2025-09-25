@@ -20,6 +20,13 @@ import type { AIOHybridOptions } from './types';
 
 const defaultLogger = new ConsoleLogger(undefined, LogLevel.DEBUG);
 
+const arrowKeyMap = {
+  arrowup: 'up',
+  arrowdown: 'down',
+  arrowleft: 'left',
+  arrowright: 'right',
+};
+
 export class AIOHybridOperator extends Operator {
   private static currentInstance: AIOHybridOperator | null = null;
   public static async create(options: AIOHybridOptions): Promise<AIOHybridOperator> {
@@ -223,15 +230,18 @@ export class AIOHybridOperator extends Operator {
         }
         case 'hotkey':
         case 'press': {
-          const keyStr = actionInputs?.key || actionInputs?.hotkey;
+          let keyStr = actionInputs?.key || actionInputs?.hotkey;
           if (typeof keyStr !== 'string') {
             throw new Error('key string is required when press or hotkey');
           }
-          const keys = keyStr.split(/[\s+]/).filter((k) => k.length > 0);
+          keyStr = keyStr.toLowerCase();
+          const keys = (keyStr as string).split(/[\s+]/).filter((k) => k.length > 0);
           if (keys.length > 1) {
             await this.aioComputer.hotkey(keys);
           } else {
-            await this.aioComputer.press(keyStr);
+            // Check if the key can be mapped using arrowKeyMap
+            const mappedKey = arrowKeyMap[keyStr as keyof typeof arrowKeyMap] || keyStr;
+            await this.aioComputer.press(mappedKey);
           }
           break;
         }
