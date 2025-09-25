@@ -3,19 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { AgentPlugin, COMPUTER_USE_ENVIRONMENT } from '@omni-tars/core';
-import {
-  Tool,
-  LLMRequestHookPayload,
-  LLMResponseHookPayload,
-  AgentEventStream,
-  ChatCompletionContentPart,
-} from '@tarko/agent';
-import {
-  GUIExecuteResult,
-  convertToGUIResponse,
-  createGUIErrorResponse,
-} from '@tarko/shared-utils';
+import { Tool, LLMRequestHookPayload, ChatCompletionContentPart } from '@tarko/agent';
+import { createGUIErrorResponse } from '@tarko/shared-utils';
 import { Base64ImageParser } from '@agent-infra/media-utils';
+import { ImageCompressor, formatBytes } from '@tarko/shared-media-utils';
 import { setScreenInfo } from './shared';
 import { OperatorManager } from './OperatorManager';
 import { BrowserOperator } from '@gui-agent/operator-browser';
@@ -96,22 +87,35 @@ export class GuiAgentPlugin extends AgentPlugin {
 
     const operator = await this.operatorManager.getInstance();
     const output = await operator?.doScreenshot();
-    if (!output) {
+    if (!output?.base64) {
       this.agent.logger.error('Failed to get screenshot');
       return;
     }
     const base64Tool = new Base64ImageParser(output.base64);
-    const base64Uri = base64Tool.getDataUri();
-    if (!base64Uri) {
-      this.agent.logger.error('Failed to get base64 image uri');
-      return;
-    }
+    const originalBuffer = Buffer.from(output.base64, 'base64');
+    const originalSize = originalBuffer.byteLength;
+
+    // Create image compressor with WebP format and 80% quality
+    const compressor = new ImageCompressor({
+      quality: 80,
+      format: 'webp',
+    });
+    const compressedBuffer = await compressor.compressToBuffer(originalBuffer);
+    const compressedBase64 = `data:image/webp;base64,${compressedBuffer.toString('base64')}`;
+    const compressedSize = compressedBuffer.byteLength;
+    const compressionRatio = (((originalSize - compressedSize) / originalSize) * 100).toFixed(2);
+
+    this.agent.logger.debug(`compression stat: `, {
+      originalSize: formatBytes(originalSize),
+      compressedSize: formatBytes(compressedSize),
+      compressionRatio: `${compressionRatio}% reduction`,
+    });
 
     const content: ChatCompletionContentPart[] = [
       {
         type: 'image_url',
         image_url: {
-          url: base64Uri,
+          url: compressedBase64,
         },
       },
     ];
