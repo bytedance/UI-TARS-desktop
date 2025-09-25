@@ -190,13 +190,13 @@ export interface BaseAgentWebUIImplementation {
    */
   welcomTitle?: string;
   /**
-  * Welcome prompts
-  */
-welcomePrompts?: string[];
-/**
- * Welcome cards configuration
- */
-welcomeCards?: WelcomeCard[];
+   * Welcome prompts
+   */
+  welcomePrompts?: string[];
+  /**
+   * Welcome cards configuration
+   */
+  welcomeCards?: WelcomeCard[];
   /**
    * Enable contextual file selector with @ syntax
    * When enabled, users can type @ in the input to search and select workspace files/directories
