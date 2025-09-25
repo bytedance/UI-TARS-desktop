@@ -85,7 +85,6 @@ const WelcomePage: React.FC = () => {
     if (isLoading) return;
 
     setIsLoading(true);
-    navigate('/creating');
 
     try {
       // Get user selected RuntimeSettings
@@ -93,14 +92,15 @@ const WelcomePage: React.FC = () => {
         ? globalSettings.selectedValues 
         : {};
       
-      // Create session with RuntimeSettings
-      const sessionId = await createSession(selectedRuntimeSettings);
-      navigate(`/${sessionId}`, { replace: true });
-      await sendMessage(content);
+      // Navigate to creating page with agent options
+      navigate('/creating', {
+        state: {
+          query: typeof content === 'string' ? content : JSON.stringify(content),
+          agentOptions: selectedRuntimeSettings
+        }
+      });
     } catch (error) {
-      console.error('Failed to create session:', error);
-      navigate('/', { replace: true });
-    } finally {
+      console.error('Failed to navigate to creating:', error);
       setIsLoading(false);
     }
   };

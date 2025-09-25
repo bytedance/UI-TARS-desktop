@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle, useState, useEffect } from 'react';
+import React, { forwardRef, useImperativeHandle } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
 import { AgentOptionsSelector, AgentOptionsSelectorRef } from '@/standalone/chat/MessageInput/AgentOptionsSelector';
 import { 
@@ -6,7 +6,6 @@ import {
   updateGlobalRuntimeSettingsAction,
   resetGlobalRuntimeSettingsAction 
 } from '@/common/state/atoms/globalRuntimeSettings';
-import { apiService } from '@/common/services/apiService';
 
 export interface HomeAgentOptionsSelectorRef {
   getSelectedValues: () => Record<string, any>;
@@ -26,28 +25,6 @@ export const HomeAgentOptionsSelector = forwardRef<
   const [globalSettings] = useAtom(globalRuntimeSettingsAtom);
   const updateGlobalSettings = useSetAtom(updateGlobalRuntimeSettingsAction);
   const resetGlobalSettings = useSetAtom(resetGlobalRuntimeSettingsAction);
-  const [tempSessionId, setTempSessionId] = useState<string | null>(null);
-  const [isCreatingSession, setIsCreatingSession] = useState(false);
-
-  // Create a temporary session to get default schema
-  useEffect(() => {
-    const createTempSession = async () => {
-      if (tempSessionId || isCreatingSession) return;
-      
-      setIsCreatingSession(true);
-      try {
-        // Create a temporary session without runtime settings to get default schema
-        const session = await apiService.createSession();
-        setTempSessionId(session.sessionId);
-      } catch (error) {
-        console.error('Failed to create temporary session for schema:', error);
-      } finally {
-        setIsCreatingSession(false);
-      }
-    };
-
-    createTempSession();
-  }, [tempSessionId, isCreatingSession]);
 
   useImperativeHandle(ref, () => ({
     getSelectedValues: () => globalSettings.selectedValues,
@@ -75,15 +52,12 @@ export const HomeAgentOptionsSelector = forwardRef<
     }
   };
 
-  // Don't render until we have a temp session
-  if (!tempSessionId) {
-    return null;
-  }
-
-  // Reuse existing AgentOptionsSelector with temp session
+  // For home page, we need to use a placeholder session to get schema
+  // This is a limitation of the current AgentOptionsSelector design
+  // TODO: Extract schema loading logic to be independent of session
   return (
     <AgentOptionsSelector
-      activeSessionId={tempSessionId}
+      activeSessionId="home-placeholder" // Special placeholder for home page
       sessionMetadata={virtualSessionMetadata}
       className={className}
       onToggleOption={handleToggleOption}
