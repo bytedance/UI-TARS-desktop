@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useSetAtom } from 'jotai';
 import { updateSessionMetadataAction } from '@/common/state/actions/sessionActions';
 import { apiService } from '@/common/services/apiService';
-import { SessionItemMetadata, AgentRuntimeSettingsSchema, AgentRuntimeSettingProperty } from '@tarko/interface';
+import {
+  SessionItemMetadata,
+  AgentRuntimeSettingsSchema,
+  AgentRuntimeSettingProperty,
+} from '@tarko/interface';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useAtomValue } from 'jotai';
 import { isProcessingAtom } from '@/common/state/atoms/ui';
@@ -52,7 +56,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
         const response = await apiService.getSessionRuntimeSettings(activeSessionId);
         const schema = response.schema as AgentRuntimeSettingsSchema;
         let currentValues = response.currentValues || {};
-        
+
         // Merge with default values from schema if not present
         if (schema?.properties) {
           const mergedValues: Record<string, any> = { ...currentValues };
@@ -63,7 +67,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
           });
           currentValues = mergedValues;
         }
-        
+
         setSchema(schema);
         setCurrentValues(currentValues);
         // Use default placement
@@ -92,7 +96,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
 
     const newValues = { ...currentValues, [key]: value };
     setCurrentValues(newValues);
-    setLoadingOptions(prev => new Set(prev).add(key));
+    setLoadingOptions((prev) => new Set(prev).add(key));
 
     try {
       const response = await apiService.updateSessionRuntimeSettings(activeSessionId, newValues);
@@ -110,7 +114,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
       setCurrentValues(currentValues);
     } finally {
       setTimeout(() => {
-        setLoadingOptions(prev => {
+        setLoadingOptions((prev) => {
           const newSet = new Set(prev);
           newSet.delete(key);
           return newSet;
@@ -146,7 +150,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
   });
 
   // Get activated dropdown options that should also appear here
-  const activatedDropdownOptions = activeOptions.filter(option => {
+  const activatedDropdownOptions = activeOptions.filter((option) => {
     // Only show dropdown options that are actually activated
     const property = schema.properties[option.key];
     if (!property) return false;
@@ -163,12 +167,18 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
     // Use custom icon if specified
     if (property?.icon) {
       switch (property.icon) {
-        case 'browser': return <TbBrowser className="w-3.5 h-3.5" />;
-        case 'search': return <TbSearch className="w-3.5 h-3.5" />;
-        case 'book': return <TbBook className="w-3.5 h-3.5" />;
-        case 'bulb': return <TbBulb className="w-3.5 h-3.5" />;
-        case 'brain': return <TbBrain className="w-3.5 h-3.5" />;
-        default: return <TbSettings className="w-3.5 h-3.5" />;
+        case 'browser':
+          return <TbBrowser className="w-3.5 h-3.5" />;
+        case 'search':
+          return <TbSearch className="w-3.5 h-3.5" />;
+        case 'book':
+          return <TbBook className="w-3.5 h-3.5" />;
+        case 'bulb':
+          return <TbBulb className="w-3.5 h-3.5" />;
+        case 'brain':
+          return <TbBrain className="w-3.5 h-3.5" />;
+        default:
+          return <TbSettings className="w-3.5 h-3.5" />;
       }
     }
 
@@ -180,7 +190,8 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
     if (lowerKey.includes('search')) return <TbSearch className="w-3.5 h-3.5" />;
     if (lowerKey.includes('research')) return <TbBook className="w-3.5 h-3.5" />;
     if (lowerKey.includes('foo')) return <TbBulb className="w-3.5 h-3.5" />;
-    if (lowerKey.includes('thinking') || lowerTitle.includes('思考')) return <TbBrain className="w-3.5 h-3.5" />;
+    if (lowerKey.includes('thinking') || lowerTitle.includes('思考'))
+      return <TbBrain className="w-3.5 h-3.5" />;
     return <TbSettings className="w-3.5 h-3.5" />;
   };
 
@@ -227,16 +238,14 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
           type="button"
           onClick={() => handleOptionChange(key, !currentValue)}
           disabled={isOptionLoading || isDisabled}
-          className={`inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
+          className={`inline-flex items-center px-2.5 py-2 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
             currentValue
               ? 'bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 hover:bg-indigo-100 dark:hover:bg-indigo-500/20'
               : 'bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50'
           } ${isOptionLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
           title={property.description || property.title || key}
         >
-          <span className="mr-1.5 text-current">
-            {getOptionIcon(key, property)}
-          </span>
+          <span className="mr-1.5 text-current">{getOptionIcon(key, property)}</span>
           <span className="font-medium">{property.title || key}</span>
           {isOptionLoading && <FiLoader className="w-3.5 h-3.5 animate-spin ml-1.5" />}
           {currentValue && !isOptionLoading && <FiCheck className="w-3.5 h-3.5 ml-1.5" />}
@@ -246,7 +255,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
 
     if (property.type === 'string' && property.enum) {
       const currentDisplayLabel = getEnumDisplayLabel(property, currentValue);
-      
+
       return (
         <Dropdown
           key={`chat-bottom-${key}`}
@@ -255,8 +264,8 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
             <button
               type="button"
               disabled={isOptionLoading || isDisabled}
-              className={`inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
-                isOptionLoading 
+              className={`inline-flex items-center px-2.5 py-2 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
+                isOptionLoading
                   ? 'opacity-50 cursor-not-allowed bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700'
                   : 'bg-gray-50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50'
               }`}
@@ -265,7 +274,9 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
                 {getOptionIcon(key, property)}
               </span>
               <span className="font-medium">{property.title || key}:</span>
-              <span className="ml-1.5 font-medium text-gray-700 dark:text-gray-300">{currentDisplayLabel}</span>
+              <span className="ml-1.5 font-medium text-gray-700 dark:text-gray-300">
+                {currentDisplayLabel}
+              </span>
               {isOptionLoading ? (
                 <FiLoader className="w-3.5 h-3.5 animate-spin ml-1.5 text-gray-500 dark:text-gray-400" />
               ) : (
@@ -277,7 +288,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
           {property.enum.map((option) => {
             const isSelected = currentValue === option;
             const displayLabel = getEnumDisplayLabel(property, option);
-            
+
             return (
               <DropdownItem
                 key={option}
@@ -286,7 +297,9 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
               >
                 <div className="flex items-center justify-between">
                   <span className="font-medium text-sm">{displayLabel}</span>
-                  {isSelected && !isOptionLoading && <FiCheck className="w-4 h-4 text-indigo-600" />}
+                  {isSelected && !isOptionLoading && (
+                    <FiCheck className="w-4 h-4 text-indigo-600" />
+                  )}
                 </div>
               </DropdownItem>
             );
@@ -302,7 +315,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
     <div className="inline-flex items-center gap-2 flex-wrap">
       {/* Render activated dropdown options first */}
       {activatedDropdownOptions.map(renderActivatedOption)}
-      
+
       {/* Render default visible chat-bottom options */}
       {chatBottomOptions.map(renderChatBottomOption)}
     </div>
