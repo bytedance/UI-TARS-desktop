@@ -22,6 +22,7 @@
     "dev": "rslib build --watch"
   },
   "dependencies": {
+    "@assistant-ui/react-markdown": "^0.11.0",
     "@headlessui/react": "^1.7.19",
     "@monaco-editor/react": "4.7.0",
     "framer-motion": "12.19.2",

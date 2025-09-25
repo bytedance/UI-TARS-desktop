@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { SmoothMarkdownRenderer } from './enhanced/SmoothMarkdownRenderer';
+import { MarkdownText } from './assistant-ui/MarkdownText';
 import { ImageModal } from './components/ImageModal';
 import { resetFirstH1Flag } from './components/Headings';
 import { scrollToElement, preprocessMarkdownLinks } from './utils';
@@ -8,9 +8,8 @@ import 'katex/dist/katex.min.css';
 import 'remark-github-blockquote-alert/alert.css';
 import './styles/syntax-highlight.css';
 import './styles/markdown.css';
-import './styles/smooth.css';
 
-interface MarkdownRendererProps {
+interface MarkdownRendererV2Props {
   content: string;
   publishDate?: string;
   author?: string;
@@ -20,7 +19,7 @@ interface MarkdownRendererProps {
   smooth?: boolean;
 }
 
-export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
+export const MarkdownRendererV2: React.FC<MarkdownRendererV2Props> = ({
   content,
   publishDate,
   author,
@@ -78,7 +77,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   try {
     return (
       <div className={markdownContentClass}>
-        <SmoothMarkdownRenderer
+        <MarkdownText
           content={processedContent}
           onImageClick={handleImageClick}
           codeBlockStyle={codeBlockStyle}

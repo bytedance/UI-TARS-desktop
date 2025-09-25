@@ -1,0 +1,6 @@
+@import "@assistant-ui/react-markdown/styles/dot.css";
+
+/* Additional custom styles for assistant-ui integration */
+.aui-md {
+  /* Inherit the existing markdown styles */
+}

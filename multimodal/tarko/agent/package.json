@@ -43,6 +43,7 @@
   "dependencies": {
     "uuid": "^9.0.0",
     "jsonrepair": "3.12.0",
+    "zod": "3.25.36",
     "zod-to-json-schema": "3.24.3",
     "@tarko/llm-client": "workspace:*",
     "@tarko/shared-utils": "workspace:*",
