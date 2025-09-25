@@ -3,55 +3,71 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CodeAgentExtraOption, codePluginBuilder, CodeToolCallEngineProvider } from "@omni-tars/code-agent";
-import { AgentMode, ComposableAgentOptions, createComposableToolCallEngineFactory } from "@omni-tars/core";
-import { GuiAgentPlugin, GuiToolCallEngineProvider, OperatorManager } from "@omni-tars/gui-agent";
-import { mcpPluginBuilder, MCPTarsExtraOption, McpToolCallEngineProvider } from "@omni-tars/mcp-agent";
-import { AgentAppConfig } from "@tarko/interface";
+import {
+  CodeAgentExtraOption,
+  codePluginBuilder,
+  CodeToolCallEngineProvider,
+} from '@omni-tars/code-agent';
+import {
+  AgentMode,
+  ComposableAgentOptions,
+  createComposableToolCallEngineFactory,
+} from '@omni-tars/core';
+import { GuiAgentPlugin, GuiToolCallEngineProvider, OperatorManager } from '@omni-tars/gui-agent';
+import {
+  mcpPluginBuilder,
+  MCPTarsExtraOption,
+  McpToolCallEngineProvider,
+} from '@omni-tars/mcp-agent';
+import { AgentAppConfig } from '@tarko/interface';
 
-
-const mcpToolCallEngine = new McpToolCallEngineProvider();
-
-const omniToolCallEngine = createComposableToolCallEngineFactory({
-  engines: [new GuiToolCallEngineProvider('omni'), mcpToolCallEngine, new CodeToolCallEngineProvider()],
-  defaultEngine: mcpToolCallEngine,
-});
-
-const guiToolCallEngine = createComposableToolCallEngineFactory({ engines: [new GuiToolCallEngineProvider('gui')] });
-
-
-export type OmniTarsOption = AgentAppConfig & MCPTarsExtraOption & CodeAgentExtraOption & {
-  agentMode: AgentMode
-};
-
+export type OmniTarsOption = AgentAppConfig &
+  MCPTarsExtraOption &
+  CodeAgentExtraOption & {
+    agentMode: AgentMode;
+  };
 
 export function getComposableOption(options: OmniTarsOption) {
-    const {
-        tavilyApiKey,
-        googleApiKey,
-        googleMcpUrl,
-        sandboxUrl,
-        ignoreSandboxCheck,
-        linkReaderAK,
-        linkReaderMcpUrl,
-        agentMode = 'omni',
-        ...restOptions
-      } = options;
+  const {
+    tavilyApiKey,
+    googleApiKey,
+    googleMcpUrl,
+    sandboxUrl,
+    ignoreSandboxCheck,
+    linkReaderAK,
+    linkReaderMcpUrl,
+    agentMode = { id: 'omni' },
+    ...restOptions
+  } = options;
 
-    const baseOptions: Partial<ComposableAgentOptions> = {
-      ...restOptions,
-      maxTokens: 32768,
-      enableStreamingToolCallEvents: true,
-    };
+  const baseOptions: Partial<ComposableAgentOptions> = {
+    ...restOptions,
+    maxTokens: 32768,
+    enableStreamingToolCallEvents: true,
+  };
 
-    if(agentMode === 'gui') {
-      baseOptions.toolCallEngine = guiToolCallEngine;
-      baseOptions.plugins =  [
-        new GuiAgentPlugin({ operatorManager: OperatorManager.createHybird(options.sandboxUrl) }),
-      ];
-    } else if(agentMode === 'omni') {
-      baseOptions.toolCallEngine = omniToolCallEngine;
-      baseOptions.plugins =  [
+  const guiPlugin = new GuiAgentPlugin({
+    operatorManager: OperatorManager.createHybird(options.sandboxUrl),
+  });
+
+  switch (agentMode.id) {
+    case 'game':
+    case 'gui':
+      baseOptions.toolCallEngine = createComposableToolCallEngineFactory({
+        engines: [new GuiToolCallEngineProvider(agentMode)],
+      });
+      baseOptions.plugins = [guiPlugin];
+      break;
+    case 'omni':
+    default:
+      baseOptions.toolCallEngine = createComposableToolCallEngineFactory({
+        engines: [
+          new GuiToolCallEngineProvider(agentMode),
+          new McpToolCallEngineProvider(),
+          new CodeToolCallEngineProvider(),
+        ],
+      });
+      baseOptions.plugins = [
         mcpPluginBuilder({
           tavilyApiKey,
           googleApiKey,
@@ -60,9 +76,10 @@ export function getComposableOption(options: OmniTarsOption) {
           linkReaderMcpUrl,
         }),
         codePluginBuilder({ sandboxUrl, ignoreSandboxCheck }),
-        new GuiAgentPlugin({ operatorManager: OperatorManager.createHybird(options.sandboxUrl) }),
+        guiPlugin,
       ];
-    }
-  
-    return baseOptions as ComposableAgentOptions;
+      break;
+  }
+
+  return baseOptions as ComposableAgentOptions;
 }

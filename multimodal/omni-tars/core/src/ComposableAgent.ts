@@ -84,4 +84,13 @@ export class ComposableAgent extends Agent {
     // Call parent implementation to ensure proper agent loop termination
     await super.onAgentLoopEnd(id);
   }
+
+  async onAfterToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    result: unknown,
+  ): Promise<void> {
+    // Execute hooks for all plugins
+    await this.composer.executeOnAfterToolCall(id, toolCall, result);
+  }
 }

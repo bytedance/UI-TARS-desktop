@@ -2,7 +2,12 @@ import React, { useState, useEffect, useImperativeHandle, forwardRef, useRef } f
 import { useSetAtom } from 'jotai';
 import { updateSessionMetadataAction } from '@/common/state/actions/sessionActions';
 import { apiService } from '@/common/services/apiService';
-import { SessionItemMetadata } from '@tarko/interface';
+import {
+  SessionItemMetadata,
+  AgentRuntimeSettingsSchema,
+  AgentRuntimeSettingProperty,
+  AgentRuntimeSettingVisibilityCondition,
+} from '@tarko/interface';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useAtomValue } from 'jotai';
 import { isProcessingAtom } from '@/common/state/atoms/ui';
@@ -36,9 +41,9 @@ export interface AgentOptionsSelectorRef {
   removeOption: (key: string) => void;
 }
 
-interface AgentOptionsSchema {
-  type: string;
-  properties: Record<string, any>;
+interface RuntimeSettingsResponse {
+  schema: AgentRuntimeSettingsSchema;
+  currentValues: Record<string, any>;
 }
 
 interface AgentOptionConfig {
@@ -61,7 +66,7 @@ const DropdownSubMenu: React.FC<DropdownSubMenuProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
-  const triggerRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
   const submenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -128,19 +133,18 @@ const DropdownSubMenu: React.FC<DropdownSubMenuProps> = ({
 
   return (
     <>
-      <button
+      <div
         ref={triggerRef}
         onClick={() => !disabled && setIsOpen(!isOpen)}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        className={`group flex w-full items-center rounded-lg px-2.5 py-1.5 text-left transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800/50 text-gray-900 dark:text-gray-100 ${
-          disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02]'
-        }`}
-        disabled={disabled}
+        className={disabled ? 'opacity-50 cursor-not-allowed' : ''}
       >
-        {trigger}
-        <FiChevronRight className="ml-1.5 w-3.5 h-3.5 text-gray-400" />
-      </button>
+        <div className="relative">
+          {trigger}
+          <FiChevronRight className="absolute right-3 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+        </div>
+      </div>
 
       {typeof document !== 'undefined' &&
         submenuContent &&
@@ -165,9 +169,10 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
     },
     ref,
   ) => {
-    const [schema, setSchema] = useState<AgentOptionsSchema | null>(null);
+    const [schema, setSchema] = useState<AgentRuntimeSettingsSchema | null>(null);
     const [currentValues, setCurrentValues] = useState<Record<string, any> | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [placement, setPlacement] = useState<'dropdown-item' | 'chat-bottom'>('dropdown-item');
+    const [loadingOptions, setLoadingOptions] = useState<Set<string>>(new Set());
     const [hasLoaded, setHasLoaded] = useState(false);
     const updateSessionMetadata = useSetAtom(updateSessionMetadataAction);
     const { isReplayMode } = useReplayMode();
@@ -179,9 +184,35 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
 
       const loadOptions = async () => {
         try {
-          const response = await apiService.getSessionRuntimeSettings(activeSessionId);
-          setSchema(response.schema);
-          setCurrentValues(response.currentValues);
+          let response: RuntimeSettingsResponse;
+          
+          // Special handling for home page placeholder
+          if (activeSessionId === 'home-placeholder') {
+            // For home page, get only schema without session
+            response = await apiService.getSessionRuntimeSettings();
+          } else {
+            // For real sessions, get schema + current values
+            response = await apiService.getSessionRuntimeSettings(activeSessionId);
+          }
+          
+          const schema = response.schema as AgentRuntimeSettingsSchema;
+          let currentValues = response.currentValues || {};
+
+          // Merge with default values from schema if not present
+          if (schema?.properties) {
+            const mergedValues: Record<string, any> = { ...currentValues };
+            Object.entries(schema.properties).forEach(([key, propSchema]) => {
+              if (mergedValues[key] === undefined && propSchema.default !== undefined) {
+                mergedValues[key] = propSchema.default;
+              }
+            });
+            currentValues = mergedValues;
+          }
+
+          setSchema(schema);
+          setCurrentValues(currentValues);
+          // Use default placement - let UI handle this
+          setPlacement('dropdown-item');
           setHasLoaded(true);
         } catch (error) {
           console.error('Failed to load runtime settings:', error);
@@ -196,27 +227,59 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
       setHasLoaded(false);
       setSchema(null);
       setCurrentValues(null);
-      setIsLoading(false);
+      setPlacement('dropdown-item');
+      setLoadingOptions(new Set());
     }, [activeSessionId]);
+
+    // Helper function to check if an option should be visible
+    const isOptionVisible = (key: string, property: AgentRuntimeSettingProperty): boolean => {
+      if (!property.visible || !currentValues) {
+        return true; // Always visible if no condition
+      }
+
+      const { dependsOn, when } = property.visible;
+      const dependentValue = currentValues[dependsOn];
+      
+      // Support both exact match and deep equality for complex values
+      return dependentValue === when;
+    };
+
+    // Helper function to get enum display label
+    const getEnumDisplayLabel = (property: AgentRuntimeSettingProperty, value: string): string => {
+      if (property.enumLabels && property.enum) {
+        const index = property.enum.indexOf(value);
+        if (index >= 0 && index < property.enumLabels.length) {
+          return property.enumLabels[index];
+        }
+      }
+      return value;
+    };
 
     // Handle option change - with loading state for agent recreation
     const handleOptionChange = async (key: string, value: any) => {
-      if (!activeSessionId || isLoading || !currentValues) return;
+      if (!activeSessionId || loadingOptions.has(key) || !currentValues) return;
 
       const newValues = { ...currentValues, [key]: value };
       setCurrentValues(newValues);
-      setIsLoading(true);
+      setLoadingOptions(prev => new Set(prev).add(key));
 
       try {
-        const response = await apiService.updateSessionRuntimeSettings(activeSessionId, newValues);
-        if (response.success && response.sessionInfo?.metadata) {
-          updateSessionMetadata({
-            sessionId: activeSessionId,
-            metadata: response.sessionInfo.metadata,
-          });
+        // Skip server update for home placeholder - only update local state
+        if (activeSessionId === 'home-placeholder') {
+          // For home page, just update local state
+          console.log('Home page agent option updated', { key, value });
+        } else {
+          // For real sessions, update server
+          const response = await apiService.updateSessionRuntimeSettings(activeSessionId, newValues);
+          if (response.success && response.sessionInfo?.metadata) {
+            updateSessionMetadata({
+              sessionId: activeSessionId,
+              metadata: response.sessionInfo.metadata,
+            });
 
-          // Show success feedback briefly
-          console.log('Agent options updated successfully', { key, value });
+            // Show success feedback briefly
+            console.log('Agent options updated successfully', { key, value });
+          }
         }
       } catch (error) {
         console.error('Failed to update runtime settings:', error);
@@ -225,7 +288,11 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
       } finally {
         // Add a small delay to show the loading state
         setTimeout(() => {
-          setIsLoading(false);
+          setLoadingOptions(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(key);
+            return newSet;
+          });
         }, 500);
       }
 
@@ -237,22 +304,29 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
 
     // Handle option removal - clear to undefined to remove from active options
     const handleOptionRemove = async (key: string) => {
-      if (!activeSessionId || isLoading || !currentValues) return;
+      if (!activeSessionId || loadingOptions.has(key) || !currentValues) return;
 
       const newValues = { ...currentValues };
       delete newValues[key]; // Remove the key entirely
       setCurrentValues(newValues);
-      setIsLoading(true);
+      setLoadingOptions(prev => new Set(prev).add(key));
 
       try {
-        const response = await apiService.updateSessionRuntimeSettings(activeSessionId, newValues);
-        if (response.success && response.sessionInfo?.metadata) {
-          updateSessionMetadata({
-            sessionId: activeSessionId,
-            metadata: response.sessionInfo.metadata,
-          });
+        // Skip server update for home placeholder - only update local state
+        if (activeSessionId === 'home-placeholder') {
+          // For home page, just update local state
+          console.log('Home page agent option removed', { key });
+        } else {
+          // For real sessions, update server
+          const response = await apiService.updateSessionRuntimeSettings(activeSessionId, newValues);
+          if (response.success && response.sessionInfo?.metadata) {
+            updateSessionMetadata({
+              sessionId: activeSessionId,
+              metadata: response.sessionInfo.metadata,
+            });
 
-          console.log('Agent option removed successfully', { key });
+            console.log('Agent option removed successfully', { key });
+          }
         }
       } catch (error) {
         console.error('Failed to remove runtime setting:', error);
@@ -260,7 +334,11 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
         setCurrentValues(currentValues);
       } finally {
         setTimeout(() => {
-          setIsLoading(false);
+          setLoadingOptions(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(key);
+            return newSet;
+          });
         }, 500);
       }
 
@@ -301,6 +379,9 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
 
       const activeOptions = Object.entries(schema.properties)
         .filter(([key, property]) => {
+          // Check visibility first
+          if (!isOptionVisible(key, property)) return false;
+
           // Only show options that are explicitly set (not using default values)
           const hasExplicitValue = key in currentValues;
           if (!hasExplicitValue) return false;
@@ -321,7 +402,10 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
             key,
             title: property.title || key,
             currentValue,
-            displayValue: property.type === 'string' && property.enum ? currentValue : undefined,
+            displayValue:
+              property.type === 'string' && property.enum
+                ? getEnumDisplayLabel(property, currentValue)
+                : undefined,
           };
         });
 
@@ -336,7 +420,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
       }
     }, [schema, onSchemaChange]);
 
-    // Don't render if in replay mode, processing, or no schema available
+    // Don't render if in replay mode, processing, or not dropdown placement
     if (
       isReplayMode ||
       isProcessingProp ||
@@ -346,14 +430,26 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
       return null;
     }
 
-    // Only show the button when schema options are available
-    const options = Object.entries(schema.properties).map(([key, property]) => ({
+    // Filter options that should appear in dropdown (not chat-bottom)
+    const dropdownOptions = Object.entries(schema.properties).filter(([key, property]) => {
+      const optionPlacement = property.placement || placement;
+      const isVisible = isOptionVisible(key, property);
+      return optionPlacement === 'dropdown-item' && isVisible;
+    });
+
+    // Don't render if no dropdown options
+    if (dropdownOptions.length === 0) {
+      return null;
+    }
+
+    // Only show the button when dropdown options are available
+    const options = dropdownOptions.map(([key, property]) => ({
       key,
       property,
       currentValue: currentValues?.[key] ?? property.default,
     }));
 
-    const getOptionIcon = (key: string, property: any) => {
+    const getOptionIcon = (key: string, property: AgentRuntimeSettingProperty) => {
       const lowerKey = key.toLowerCase();
       const lowerTitle = (property.title || '').toLowerCase();
       if (lowerKey.includes('browser') || lowerTitle.includes('browser'))
@@ -367,6 +463,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
 
     const renderOptionItem = (config: AgentOptionConfig) => {
       const { key, property, currentValue } = config;
+      const isOptionLoading = loadingOptions.has(key);
 
       if (property.type === 'boolean') {
         return (
@@ -374,15 +471,15 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
             key={key}
             icon={getOptionIcon(key, property)}
             onClick={() => handleOptionChange(key, !currentValue)}
-            className={`${currentValue ? 'bg-blue-50 dark:bg-blue-900/20' : ''} ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
+            className={`${currentValue ? 'bg-blue-50 dark:bg-blue-900/20' : ''} ${isOptionLoading ? 'opacity-50 pointer-events-none' : ''}`}
           >
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <div className="font-medium text-sm">{property.title || key}</div>
               </div>
               <div className="flex items-center gap-2">
-                {isLoading && <FiLoader className="w-3 h-3 animate-spin text-blue-600" />}
-                {currentValue && !isLoading && <FiCheck className="w-4 h-4 text-blue-600" />}
+                {isOptionLoading && <FiLoader className="w-3 h-3 animate-spin text-blue-600" />}
+                {currentValue && !isOptionLoading && <FiCheck className="w-4 h-4 text-blue-600" />}
               </div>
             </div>
           </DropdownItem>
@@ -390,49 +487,54 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
       }
 
       if (property.type === 'string' && property.enum) {
-        // Use submenu for enum options
-        const submenuTrigger = (
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center min-w-0 flex-1">
-              {getOptionIcon(key, property)}
-              <div className="ml-2.5 flex-1 min-w-0">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <span className="font-medium text-sm truncate">{property.title || key}</span>
-                  <span className="text-xs text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded whitespace-nowrap flex-shrink-0">
-                    {currentValue || property.default}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              {isLoading && <FiLoader className="w-3 h-3 animate-spin text-blue-600" />}
-            </div>
-          </div>
-        );
-
-        const submenuItems = property.enum.map((option: any) => {
+        // Generate submenu items first
+        const submenuItems = property.enum.map((option: string) => {
           const isSelected = currentValue === option;
+          const displayLabel = getEnumDisplayLabel(property, option);
 
           return (
             <DropdownItem
               key={option}
               onClick={() => handleOptionChange(key, option)}
-              className={`${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''} ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
+              className={`${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''} ${isOptionLoading ? 'opacity-50 pointer-events-none' : ''}`}
             >
               <div className="flex items-center justify-between">
                 <div className="flex-1">
-                  <div className="font-medium text-sm">{option}</div>
+                  <div className="font-medium text-sm">{displayLabel}</div>
                 </div>
                 <div className="flex items-center gap-2">
-                  {isSelected && !isLoading && <FiCheck className="w-4 h-4 text-blue-600" />}
+                  {isSelected && !isOptionLoading && <FiCheck className="w-4 h-4 text-blue-600" />}
                 </div>
               </div>
             </DropdownItem>
           );
         });
 
+        // Use DropdownItem with submenu for enum options to match layout
         return (
-          <DropdownSubMenu key={key} trigger={submenuTrigger} disabled={isLoading}>
+          <DropdownSubMenu 
+            key={key} 
+            trigger={
+              <DropdownItem
+                icon={getOptionIcon(key, property)}
+                disabled={isOptionLoading}
+                className={`${isOptionLoading ? 'opacity-50 pointer-events-none' : ''}`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="font-medium text-sm">{property.title || key}</div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded whitespace-nowrap">
+                      {getEnumDisplayLabel(property, currentValue || property.default)}
+                    </span>
+                    {isOptionLoading && <FiLoader className="w-3 h-3 animate-spin text-blue-600" />}
+                  </div>
+                </div>
+              </DropdownItem>
+            } 
+            disabled={isOptionLoading}
+          >
             {submenuItems}
           </DropdownSubMenu>
         );
@@ -447,13 +549,13 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
         trigger={
           <button
             type="button"
-            disabled={isLoading || isDisabled}
-            className={`flex items-center justify-center w-8 h-8 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-              isLoading ? 'animate-pulse' : ''
+            disabled={loadingOptions.size > 0 || isDisabled}
+            className={`flex items-center justify-center w-8 h-8 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100/50 dark:hover:bg-gray-700/30 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+              loadingOptions.size > 0 ? 'animate-pulse' : ''
             }`}
-            title={isLoading ? 'Updating agent options...' : 'Options'}
+            title={loadingOptions.size > 0 ? 'Updating agent options...' : 'Options'}
           >
-            {isLoading ? <FiLoader size={16} className="animate-spin" /> : <FiPlus size={16} />}
+            {loadingOptions.size > 0 ? <FiLoader size={16} className="animate-spin" /> : <FiPlus size={16} />}
           </button>
         }
       >

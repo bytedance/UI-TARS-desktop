@@ -32,7 +32,9 @@ export class AgentComposer {
    */
   async initialize(): Promise<void> {
     for (const plugin of this.plugins) {
+      const start = Date.now();
       await plugin.initialize?.();
+      this.logger.info(`initialize agent plugin ${plugin.name} cost: `, Date.now() - start);
     }
   }
 
@@ -119,6 +121,21 @@ export class AgentComposer {
     for (const plugin of this.plugins) {
       if (plugin.onAgentLoopEnd) {
         await plugin.onAgentLoopEnd();
+      }
+    }
+  }
+
+  /**
+   * Execute onAfterToolCall hooks for all plugins
+   */
+  async executeOnAfterToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    result: unknown,
+  ): Promise<void> {
+    for (const plugin of this.plugins) {
+      if (plugin.onAfterToolCall) {
+        await plugin.onAfterToolCall(id, toolCall, result);
       }
     }
   }

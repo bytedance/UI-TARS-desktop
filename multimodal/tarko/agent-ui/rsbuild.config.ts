@@ -8,9 +8,11 @@ export default defineConfig({
     define: {
       'process.env.AGENT_BASE_URL': JSON.stringify(process.env.AGENT_BASE_URL || ''),
       'process.env.AGENT_WEBUI_CONFIG': JSON.stringify(
-        process.env.AGENT_WEBUI_CONFIG || {
-          basePath: '/[a-zA-Z0-9]+',
-        },
+        process.env.AGENT_WEBUI_CONFIG,
+        // ||
+        // {
+        //   basePath: '/[a-zA-Z0-9]+',
+        // },
       ),
     },
     entry: {
@@ -20,9 +22,9 @@ export default defineConfig({
   dev: {
     writeToDisk: true,
   },
-  server: {
-    base: '/p9fgsSryzeO5JtefS1bMfsa7G11S6pGKY',
-  },
+  // server: {
+  //   base: '/p9fgsSryzeO5JtefS1bMfsa7G11S6pGKY',
+  // },
   output: {
     cleanDistPath: true,
     inlineScripts: true,

@@ -11,10 +11,9 @@ export class GuiToolCallEngineProvider extends ToolCallEngineProvider<GUIAgentTo
   readonly priority = 90; // High priority for GUI tasks
   readonly description =
     'Tool call engine optimized for GUI automation, computer use, and visual interface interactions';
-  
   private agentMode: AgentMode;
 
-  constructor(agentMode: AgentMode = 'gui') {
+  constructor(agentMode: AgentMode) {
     super();
     this.agentMode = agentMode;
   }

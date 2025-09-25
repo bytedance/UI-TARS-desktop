@@ -41,6 +41,8 @@ export class AIOBrowser {
    */
   private logger: Logger;
 
+  private launchOptions?: LaunchOptions;
+
   /**
    * Creates an instance of AIOBrowser
    * @param {AIOBrowserOptions} options - Configuration options
@@ -64,6 +66,7 @@ export class AIOBrowser {
     try {
       await this.browser.launch(options);
       this.logger.success('Browser launched successfully');
+      this.launchOptions = options;
     } catch (error) {
       this.logger.error('Failed to launch browser:', error);
       throw error;
@@ -148,6 +151,7 @@ export class AIOBrowser {
   async getActivePage(): Promise<Page> {
     this.logger.info('Getting active page');
     const pages = await this.browser.getBrowser().pages();
+    this.logger.info(`getActivePage pages length: ${pages.length}`);
     try {
       // First try to find a visible page without waiting
       for (const page of pages) {
@@ -192,10 +196,14 @@ export class AIOBrowser {
           continue;
         }
       }
-      this.logger.success('Active original page retrieved successfully');
+      this.logger.success('Active original page retrieved failed, fallback to active page');
       return this.browser.getActivePage();
     } catch (error) {
       this.logger.error('Failed to get active page:', error);
+      if ((error as Error).message.includes('Protocol error: Connection closed')) {
+        this.logger.error('Connection closed, reconnecting...');
+        this.browser.launch(this.launchOptions);
+      }
       throw error;
     }
   }

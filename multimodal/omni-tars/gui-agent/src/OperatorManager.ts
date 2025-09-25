@@ -1,7 +1,7 @@
 import { LocalBrowser, RemoteBrowser } from '@agent-infra/browser';
 import { BrowserOperator, RemoteBrowserOperator } from '@gui-agent/operator-browser';
 import { AIOHybridOperator } from '@gui-agent/operator-aio';
-import { Operator } from '@ui-tars/sdk/dist/core';
+import { Operator } from '@gui-agent/shared/base';
 import { getAioUrl } from '@omni-tars/core';
 import { AioClient, CDPVersionResp } from '@agent-infra/sandbox';
 
@@ -19,6 +19,7 @@ export class OperatorManager {
     this.target = target;
     this.sandboxUrl = sandboxUrl ?? getAioUrl();
 
+    /*
     if (this.target === 'remote') {
       this.aioClient = new AioClient({
         baseUrl: this.sandboxUrl
@@ -34,9 +35,11 @@ export class OperatorManager {
         showActionInfo: false,
       });
     }
+    */
   }
 
   async init() {
+    /*
     if (this.target === 'remote') {
       const cdpVersionResponse = await this.aioClient?.cdpVersion();
       const cdpVersion: CDPVersionResp = (cdpVersionResponse?.data ||
@@ -63,6 +66,14 @@ export class OperatorManager {
         timeout: 10000,
       });
     }
+    */
+    if (this.target !== 'hybird') {
+      throw new Error('OperatorManager only support hybird aio operator');
+    }
+    this.operator = await AIOHybridOperator.create({
+      baseURL: this.sandboxUrl,
+      timeout: 10000,
+    });
     this.initialized = true;
   }
 
@@ -70,24 +81,25 @@ export class OperatorManager {
     if (!this.initialized) {
       await this.init();
     }
-    if (this.target === 'remote') {
-      return this.remoteOperator;
-    } else {
-      return this.operator;
-    }
+    // if (this.target === 'remote') {
+    //   return this.remoteOperator;
+    // } else {
+    //   return this.operator;
+    // }
+    return this.operator;
   }
 
   getMode(): 'local' | 'remote' | 'hybird' {
     return this.target;
   }
 
-  static createLocal(): OperatorManager {
-    return new OperatorManager('local');
-  }
+  // static createLocal(): OperatorManager {
+  //   return new OperatorManager('local');
+  // }
 
-  static createRemote(sandboxUrl?: string): OperatorManager {
-    return new OperatorManager('remote', sandboxUrl);
-  }
+  // static createRemote(sandboxUrl?: string): OperatorManager {
+  //   return new OperatorManager('remote', sandboxUrl);
+  // }
 
   static createHybird(sandboxUrl?: string): OperatorManager {
     return new OperatorManager('hybird', sandboxUrl);

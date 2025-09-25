@@ -13,127 +13,6 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 /**
- * Get runtime settings schema and current values
- */
-export async function getRuntimeSettings(req: Request, res: Response) {
-  const sessionId = req.query.sessionId as string;
-
-  if (!sessionId) {
-    return res.status(400).json({ error: 'Session ID is required' });
-  }
-
-  try {
-    const server = req.app.locals.server;
-    
-    // Get runtime settings configuration from server config
-    const runtimeSettingsConfig = server.appConfig?.server?.runtimeSettings;
-    
-    if (!runtimeSettingsConfig) {
-      return res.status(200).json({ 
-        schema: { type: 'object', properties: {} },
-        currentValues: {}
-      });
-    }
-
-    // Get current session info to retrieve stored runtime settings
-    let currentValues = {};
-    if (server.storageProvider) {
-      try {
-        const sessionInfo = await server.storageProvider.getSessionInfo(sessionId);
-        currentValues = sessionInfo?.metadata?.runtimeSettings || {};
-      } catch (error) {
-        // Session doesn't exist or no stored values, use defaults from schema
-      }
-    }
-
-    // Merge with default values from schema
-    const schema = runtimeSettingsConfig.schema;
-    const mergedValues: Record<string, any> = { ...currentValues };
-    
-    if (schema.properties) {
-      Object.entries(schema.properties).forEach(([key, propSchema]: [string, any]) => {
-        if (mergedValues[key] === undefined && propSchema.default !== undefined) {
-          mergedValues[key] = propSchema.default;
-        }
-      });
-    }
-
-    res.status(200).json({
-      schema: runtimeSettingsConfig.schema,
-      currentValues: mergedValues
-    });
-  } catch (error) {
-    console.error(`Error getting runtime settings for session ${sessionId}:`, error);
-    res.status(500).json({ error: 'Failed to get runtime settings' });
-  }
-}
-
-/**
- * Update runtime settings for a session
- */
-export async function updateRuntimeSettings(req: Request, res: Response) {
-  const { sessionId, runtimeSettings } = req.body as {
-    sessionId: string;
-    runtimeSettings: Record<string, any>;
-  };
-
-  if (!sessionId) {
-    return res.status(400).json({ error: 'Session ID is required' });
-  }
-
-  if (!runtimeSettings || typeof runtimeSettings !== 'object') {
-    return res.status(400).json({ error: 'Runtime settings object is required' });
-  }
-
-  try {
-    const server = req.app.locals.server;
-
-    if (!server.storageProvider) {
-      return res.status(404).json({ error: 'Storage not configured, cannot update runtime settings' });
-    }
-
-    const sessionInfo = await server.storageProvider.getSessionInfo(sessionId);
-    if (!sessionInfo) {
-      return res.status(404).json({ error: 'Session not found' });
-    }
-
-    // Update session info with new runtime settings
-    const updatedSessionInfo = await server.storageProvider.updateSessionInfo(sessionId, {
-      metadata: {
-        ...sessionInfo.metadata,
-        runtimeSettings,
-      },
-    });
-
-    // If session is currently active, recreate the agent with new runtime settings
-    const activeSession = server.sessions[sessionId];
-    if (activeSession) {
-      console.log('Runtime settings updated', {
-        sessionId,
-        runtimeSettings,
-      });
-
-      try {
-        // Recreate agent with new runtime settings configuration
-        await activeSession.updateSessionConfig(updatedSessionInfo);
-        console.log('Session agent recreated with new runtime settings', { sessionId });
-      } catch (error) {
-        console.error('Failed to update agent runtime settings for session', { sessionId, error });
-        // Continue execution - the runtime settings are saved, will apply on next session
-      }
-    }
-
-    res.status(200).json({ 
-      session: updatedSessionInfo,
-      runtimeSettings 
-    });
-  } catch (error) {
-    console.error(`Error updating runtime settings for session ${sessionId}:`, error);
-    res.status(500).json({ error: 'Failed to update runtime settings' });
-  }
-}
-
-/**
  * Get all sessions
  */
 export async function getAllSessions(req: Request, res: Response) {
@@ -166,6 +45,10 @@ export async function getAllSessions(req: Request, res: Response) {
 export async function createSession(req: Request, res: Response) {
   try {
     const server = req.app.locals.server;
+    const { runtimeSettings, agentOptions } = req.body as {
+      runtimeSettings?: Record<string, any>;
+      agentOptions?: Record<string, any>;
+    };
     const sessionId = nanoid();
 
     // Get session metadata if it exists (for restored sessions)
@@ -178,12 +61,13 @@ export async function createSession(req: Request, res: Response) {
       }
     }
 
-    // Pass custom AGIO provider and session metadata if available
+    // Pass custom AGIO provider, session metadata, and agent options if available
     const session = new AgentSession(
       server,
       sessionId,
       server.getCustomAgioProvider(),
       sessionInfo || undefined,
+      agentOptions, // Pass agentOptions for one-time Agent initialization
     );
 
     server.sessions[sessionId] = session;
@@ -214,10 +98,29 @@ export async function createSession(req: Request, res: Response) {
           ...(defaultModel && {
             modelConfig: defaultModel,
           }),
+          // Include runtime settings if provided (persistent session settings)
+          ...(runtimeSettings && {
+            runtimeSettings,
+          }),
+          // Include agent options if provided (one-time initialization options)
+          ...(agentOptions && {
+            agentOptions,
+          }),
         },
       };
 
       savedSessionInfo = await server.storageProvider.createSession(sessionInfo);
+
+      // If runtime settings were provided and session is active, update the agent configuration
+      if (runtimeSettings && savedSessionInfo) {
+        try {
+          await session.updateSessionConfig(savedSessionInfo);
+          console.log('Session created with runtime settings', { sessionId, runtimeSettings });
+        } catch (error) {
+          console.error('Failed to apply runtime settings to new session', { sessionId, error });
+          // Continue execution - the runtime settings are saved, will apply on next session restart
+        }
+      }
     }
 
     res.status(201).json({ sessionId, session: savedSessionInfo });

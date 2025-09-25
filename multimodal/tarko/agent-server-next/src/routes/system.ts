@@ -22,6 +22,10 @@ export function createSystemRoutes(): Hono<{ Variables: ContextVariables }> {
   // Agent options endpoint (sanitized)
   router.get('/api/v1/agent/options', systemController.getAgentOptions);
 
+  // Runtime settings endpoints
+  router.get('/api/v1/runtime-settings', systemController.getRuntimeSettings);
+  router.post('/api/v1/runtime-settings', systemController.updateRuntimeSettings);
+
   // Model management endpoints
   router.get('/api/v1/models', systemController.getAvailableModels);
   router.post('/api/v1/sessions/model', systemController.updateSessionModel);

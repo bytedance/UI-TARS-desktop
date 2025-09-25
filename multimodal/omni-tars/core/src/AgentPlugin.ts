@@ -60,4 +60,13 @@ export class AgentPlugin {
   async onAgentLoopEnd(): Promise<void> {
     //logic here
   }
+
+  /** Hook called after each tool call */
+  async onAfterToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    result: unknown,
+  ): Promise<void> {
+    //logic here
+  }
 }

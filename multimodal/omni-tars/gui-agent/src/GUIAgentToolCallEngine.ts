@@ -38,8 +38,8 @@ export class GUIAgentToolCallEngine extends ToolCallEngine {
 
   constructor(...args: unknown[]) {
     super();
-    const agentMode = args[0] as AgentMode | undefined;
-    this.agentMode = agentMode || 'gui';
+    const agentMode = args[0] as AgentMode;
+    this.agentMode = agentMode;
   }
 
   /**
@@ -93,7 +93,7 @@ export class GUIAgentToolCallEngine extends ToolCallEngine {
     const toolCalls = state.toolCalls;
     this.logger.debug('finalizeStreamProcessing toolCalls:', toolCalls);
 
-    const convertedToolCalls = this.t5Adapter.convertToolsToOperatorActions(
+    const convertedToolCalls = this.t5Adapter.convertToBrowserVisionControlCalls(
       toolCalls,
       state.reasoningBuffer ?? '',
     );

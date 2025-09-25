@@ -15,7 +15,7 @@ const HomePage: React.FC = () => {
 
       if (query && !activeSessionId) {
         try {
-          const sessionId = await createSession();
+          const sessionId = await createSession(); // No parameters for simple session creation
 
           navigate(`/${sessionId}`);
 
