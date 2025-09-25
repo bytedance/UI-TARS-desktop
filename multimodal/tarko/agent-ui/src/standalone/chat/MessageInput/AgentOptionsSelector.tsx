@@ -6,6 +6,7 @@ import {
   SessionItemMetadata,
   AgentRuntimeSettingsSchema,
   AgentRuntimeSettingProperty,
+  AgentRuntimeSettingVisibilityCondition,
 } from '@tarko/interface';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useAtomValue } from 'jotai';
@@ -220,6 +221,19 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
       setLoadingOptions(new Set());
     }, [activeSessionId]);
 
+    // Helper function to check if an option should be visible
+    const isOptionVisible = (key: string, property: AgentRuntimeSettingProperty): boolean => {
+      if (!property.visible || !currentValues) {
+        return true; // Always visible if no condition
+      }
+
+      const { dependsOn, when } = property.visible;
+      const dependentValue = currentValues[dependsOn];
+      
+      // Support both exact match and deep equality for complex values
+      return dependentValue === when;
+    };
+
     // Helper function to get enum display label
     const getEnumDisplayLabel = (property: AgentRuntimeSettingProperty, value: string): string => {
       if (property.enumLabels && property.enum) {
@@ -341,6 +355,9 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
 
       const activeOptions = Object.entries(schema.properties)
         .filter(([key, property]) => {
+          // Check visibility first
+          if (!isOptionVisible(key, property)) return false;
+
           // Only show options that are explicitly set (not using default values)
           const hasExplicitValue = key in currentValues;
           if (!hasExplicitValue) return false;
@@ -392,7 +409,8 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
     // Filter options that should appear in dropdown (not chat-bottom)
     const dropdownOptions = Object.entries(schema.properties).filter(([key, property]) => {
       const optionPlacement = property.placement || placement;
-      return optionPlacement === 'dropdown-item';
+      const isVisible = isOptionVisible(key, property);
+      return optionPlacement === 'dropdown-item' && isVisible;
     });
 
     // Don't render if no dropdown options

@@ -6,6 +6,7 @@ import {
   SessionItemMetadata,
   AgentRuntimeSettingsSchema,
   AgentRuntimeSettingProperty,
+  AgentRuntimeSettingVisibilityCondition,
 } from '@tarko/interface';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useAtomValue } from 'jotai';
@@ -90,6 +91,19 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
     setLoadingOptions(new Set());
   }, [activeSessionId]);
 
+  // Helper function to check if an option should be visible
+  const isOptionVisible = (key: string, property: AgentRuntimeSettingProperty): boolean => {
+    if (!property.visible || !currentValues) {
+      return true; // Always visible if no condition
+    }
+
+    const { dependsOn, when } = property.visible;
+    const dependentValue = currentValues[dependsOn];
+    
+    // Support both exact match and deep equality for complex values
+    return dependentValue === when;
+  };
+
   // Handle option change
   const handleOptionChange = async (key: string, value: any) => {
     if (!activeSessionId || loadingOptions.has(key) || !currentValues) return;
@@ -146,7 +160,8 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
   // Get all options that should appear in chat-bottom (default visible)
   const chatBottomOptions = Object.entries(schema.properties).filter(([key, property]) => {
     const optionPlacement = property.placement || 'dropdown-item';
-    return optionPlacement === 'chat-bottom';
+    const isVisible = isOptionVisible(key, property);
+    return optionPlacement === 'chat-bottom' && isVisible;
   });
 
   // Get activated dropdown options that should also appear here

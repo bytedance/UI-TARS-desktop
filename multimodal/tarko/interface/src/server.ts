@@ -29,6 +29,17 @@ export interface AgentRuntimeSettingsSchema {
 }
 
 /**
+ * Visibility condition for runtime settings
+ * Defines when a setting should be visible based on other setting values
+ */
+export interface AgentRuntimeSettingVisibilityCondition {
+  /** The key of the setting to check */
+  dependsOn: string;
+  /** The value that the dependent setting must have for this setting to be visible */
+  when: any;
+}
+
+/**
  * Runtime setting property with enhanced UI support
  */
 export interface AgentRuntimeSettingProperty {
@@ -48,6 +59,8 @@ export interface AgentRuntimeSettingProperty {
   icon?: string;
   /** UI placement override for individual settings */
   placement?: 'dropdown-item' | 'chat-bottom';
+  /** Visibility condition - when this setting should be shown */
+  visible?: AgentRuntimeSettingVisibilityCondition;
 }
 
 /**
