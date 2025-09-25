@@ -9,7 +9,8 @@ import { useSetAtom } from 'jotai';
 
 interface LocationState {
   query?: string;
-  agentOptions?: Record<string, any>;
+  runtimeSettings?: Record<string, any>; // Persistent settings for the session
+  agentOptions?: Record<string, any>; // One-time options for this specific task
 }
 
 /**
@@ -29,28 +30,40 @@ const CreatingPage: React.FC = () => {
   useEffect(() => {
     const createSessionWithOptions = async () => {
       try {
-        // Get agent options from multiple sources (priority order):
+        // Get parameters from multiple sources (priority order):
         // 1. Router state (internal navigation from home page)
-        // 2. Global runtime settings (from home page AgentOptionsSelector)
+        // 2. Global runtime settings (from home page)
         // 3. URL search params (deployment users)
         
         const state = location.state as LocationState | null;
-        let agentOptions: Record<string, any> = {};
+        let runtimeSettings: Record<string, any> = {}; // Persistent session settings
+        let agentOptions: Record<string, any> = {}; // One-time task options
         let query: string | null = null;
 
         // Source 1: Router state (highest priority)
-        if (state?.agentOptions) {
-          agentOptions = state.agentOptions;
+        if (state) {
+          runtimeSettings = state.runtimeSettings || {};
+          agentOptions = state.agentOptions || {};
           query = state.query || null;
         }
         // Source 2: Global runtime settings from home page
         else if (globalSettings.isActive && Object.keys(globalSettings.selectedValues).length > 0) {
-          agentOptions = globalSettings.selectedValues;
+          runtimeSettings = globalSettings.selectedValues;
           query = searchParams.get('q');
         }
         // Source 3: URL search params (for deployment users)
         else {
+          const runtimeSettingsParam = searchParams.get('runtimeSettings');
           const agentOptionsParam = searchParams.get('agentOptions');
+          
+          if (runtimeSettingsParam) {
+            try {
+              runtimeSettings = JSON.parse(decodeURIComponent(runtimeSettingsParam));
+            } catch (error) {
+              console.error('Failed to parse runtimeSettings from URL:', error);
+            }
+          }
+          
           if (agentOptionsParam) {
             try {
               agentOptions = JSON.parse(decodeURIComponent(agentOptionsParam));
@@ -58,14 +71,15 @@ const CreatingPage: React.FC = () => {
               console.error('Failed to parse agentOptions from URL:', error);
             }
           }
+          
           query = searchParams.get('q');
         }
 
-        console.log('Creating session with options:', { agentOptions, query });
+        console.log('Creating session with:', { runtimeSettings, agentOptions, query });
 
-        // Create session with runtime settings
+        // Create session with runtime settings (persistent)
         const session = await apiService.createSession(
-          Object.keys(agentOptions).length > 0 ? agentOptions : undefined
+          Object.keys(runtimeSettings).length > 0 ? runtimeSettings : undefined
         );
 
         // Clear global settings after successful session creation
@@ -76,8 +90,10 @@ const CreatingPage: React.FC = () => {
         // Navigate to the new session
         navigate(`/${session.sessionId}`, { replace: true });
 
-        // Send the initial query if provided
+        // Send the initial query (agentOptions support pending API update)
         if (query) {
+          // TODO: Pass agentOptions to sendMessage when API supports it
+          // await sendMessage(query, agentOptions);
           await sendMessage(query);
         }
       } catch (error) {
