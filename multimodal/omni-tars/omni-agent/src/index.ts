@@ -19,6 +19,22 @@ export default class OmniTARSAgent extends ComposableAgent {
     welcomePrompts: [],
     welcomeCards: [
       {
+        title: 'Play Game',
+        category: 'Game',
+        prompt: `1. Open this game: https://cpstest.click/en/aim-trainer#google_vignette
+2. Select total sec to 50
+3. Play and pass this game`,
+        image:
+          'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center',
+        agentOptions: {
+          agentMode: {
+            id: 'game',
+            link: 'https://cpstest.click/en/aim-trainer#google_vignette',
+            browserMode: 'hybrid',
+          },
+        },
+      },
+      {
         title: 'GUI Agent Research',
         category: 'Research',
         prompt: 'Search for the latest GUI Agent papers',
@@ -141,6 +157,8 @@ export default class OmniTARSAgent extends ComposableAgent {
   };
 
   constructor(option: OmniTarsOption) {
+    console.log('[option]', option);
+
     super(getComposableOption(option));
   }
 }
