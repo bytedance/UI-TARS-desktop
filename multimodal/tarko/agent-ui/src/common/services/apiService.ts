@@ -507,8 +507,6 @@ class ApiService {
     }
   }
 
-
-
   async updateSessionModel(
     sessionId: string,
     model: AgentModel,

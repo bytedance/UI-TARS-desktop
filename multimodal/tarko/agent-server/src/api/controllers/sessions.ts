@@ -166,6 +166,7 @@ export async function getAllSessions(req: Request, res: Response) {
 export async function createSession(req: Request, res: Response) {
   try {
     const server = req.app.locals.server;
+    const { runtimeSettings } = req.body as { runtimeSettings?: Record<string, any> };
     const sessionId = nanoid();
 
     // Get session metadata if it exists (for restored sessions)
@@ -214,10 +215,25 @@ export async function createSession(req: Request, res: Response) {
           ...(defaultModel && {
             modelConfig: defaultModel,
           }),
+          // Include runtime settings if provided
+          ...(runtimeSettings && {
+            runtimeSettings,
+          }),
         },
       };
 
       savedSessionInfo = await server.storageProvider.createSession(sessionInfo);
+      
+      // If runtime settings were provided and session is active, update the agent configuration
+      if (runtimeSettings && savedSessionInfo) {
+        try {
+          await session.updateSessionConfig(savedSessionInfo);
+          console.log('Session created with runtime settings', { sessionId, runtimeSettings });
+        } catch (error) {
+          console.error('Failed to apply runtime settings to new session', { sessionId, error });
+          // Continue execution - the runtime settings are saved, will apply on next session restart
+        }
+      }
     }
 
     res.status(201).json({ sessionId, session: savedSessionInfo });
