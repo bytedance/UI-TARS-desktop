@@ -27,6 +27,7 @@ interface ChatBottomSettingsProps {
   sessionMetadata?: SessionItemMetadata;
   activeOptions?: ActiveOption[];
   onRemoveOption?: (key: string) => void;
+  onOptionChange?: (key: string, value: any) => Promise<void> | void; // Custom option change handler
   isDisabled?: boolean;
   isProcessing?: boolean;
 }
@@ -36,6 +37,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
   sessionMetadata,
   activeOptions = [],
   onRemoveOption,
+  onOptionChange,
   isDisabled = false,
   isProcessing: isProcessingProp = false,
 }) => {
@@ -106,7 +108,32 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
 
   // Handle option change
   const handleOptionChange = async (key: string, value: any) => {
-    if (!activeSessionId || loadingOptions.has(key) || !currentValues) return;
+    if (loadingOptions.has(key) || !currentValues) return;
+
+    // Use custom option change handler if provided (e.g., for home page)
+    if (onOptionChange) {
+      setLoadingOptions((prev) => new Set(prev).add(key));
+      try {
+        await onOptionChange(key, value);
+        // Update local state after successful custom handling
+        const newValues = { ...currentValues, [key]: value };
+        setCurrentValues(newValues);
+      } catch (error) {
+        console.error('Failed to update runtime settings via custom handler:', error);
+      } finally {
+        setTimeout(() => {
+          setLoadingOptions((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(key);
+            return newSet;
+          });
+        }, 500);
+      }
+      return;
+    }
+
+    // Default behavior for session mode
+    if (!activeSessionId) return;
 
     const newValues = { ...currentValues, [key]: value };
     setCurrentValues(newValues);
