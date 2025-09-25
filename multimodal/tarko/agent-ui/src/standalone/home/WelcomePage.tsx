@@ -124,7 +124,7 @@ const WelcomePage: React.FC = () => {
       {/* Main Content - Scrollable */}
       <div className="flex-1 flex flex-col relative z-10">
         {/* Top Section - Chat Input Area */}
-        <div className="flex-none flex flex-col items-center justify-center px-4 pt-12 pb-8 min-h-[60vh]">
+        <div className="flex-none flex flex-col items-center justify-center px-4 pt-[24vh] pb-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -282,7 +282,7 @@ const WelcomePage: React.FC = () => {
         {/* Bottom Section - Welcome Cards */}
         {welcomeCards.length > 0 && (
           <div className="flex-none relative z-10 pb-12">
-            <WelcomeCards 
+            <WelcomeCards
               cards={welcomeCards}
               isLoading={isLoading}
               isDirectChatLoading={isDirectChatLoading}
