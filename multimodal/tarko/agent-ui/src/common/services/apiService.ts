@@ -54,11 +54,12 @@ class ApiService {
   /**
    * Create a new session
    */
-  async createSession(): Promise<SessionInfo> {
+  async createSession(runtimeSettings?: Record<string, any>): Promise<SessionInfo> {
     try {
       const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.CREATE_SESSION}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ runtimeSettings }),
       });
 
       if (!response.ok) {
@@ -503,6 +504,31 @@ class ApiService {
     } catch (error) {
       console.error('Error getting available models:', error);
       return { models: [] };
+    }
+  }
+
+  /**
+   * Get default agent options schema
+   */
+  async getDefaultAgentOptionsSchema(): Promise<{
+    schema: Record<string, any> | null;
+    defaultValues: Record<string, any> | null;
+  }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.AGENT_OPTIONS_SCHEMA}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(3000),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get default agent options schema: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error getting default agent options schema:', error);
+      return { schema: null, defaultValues: null };
     }
   }
 

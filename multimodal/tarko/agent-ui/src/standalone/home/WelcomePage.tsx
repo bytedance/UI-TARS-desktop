@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { FiArrowUpRight, FiRefreshCw } from 'react-icons/fi';
@@ -9,12 +9,17 @@ import { ChatCompletionContentPart } from '@tarko/agent-interface';
 import { Tooltip } from '@tarko/ui';
 import { ThemeToggle } from '@/standalone/components';
 import WelcomeCards from './WelcomeCards';
+import { HomeAgentOptionsSelectorRef } from './HomeAgentOptionsSelector';
+import { useAtomValue } from 'jotai';
+import { globalRuntimeSettingsAtom } from '@/common/state/atoms/globalRuntimeSettings';
 
 const WelcomePage: React.FC = () => {
   const navigate = useNavigate();
   const { createSession, sendMessage, sessions, sessionMetadata } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [isDirectChatLoading, setIsDirectChatLoading] = useState(false);
+  const homeAgentOptionsRef = useRef<HomeAgentOptionsSelectorRef>(null);
+  const globalSettings = useAtomValue(globalRuntimeSettingsAtom);
 
   const webuiConfig = getWebUIConfig();
   const logoUrl = getLogoUrl();
@@ -80,18 +85,20 @@ const WelcomePage: React.FC = () => {
     if (isLoading) return;
 
     setIsLoading(true);
-
     navigate('/creating');
 
     try {
-      const sessionId = await createSession();
-
+      // Get user selected RuntimeSettings
+      const selectedRuntimeSettings = globalSettings.isActive 
+        ? globalSettings.selectedValues 
+        : {};
+      
+      // Create session with RuntimeSettings
+      const sessionId = await createSession(selectedRuntimeSettings);
       navigate(`/${sessionId}`, { replace: true });
-
       await sendMessage(content);
     } catch (error) {
       console.error('Failed to create session:', error);
-
       navigate('/', { replace: true });
     } finally {
       setIsLoading(false);

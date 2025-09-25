@@ -21,6 +21,7 @@ import { composeMessageContent, isMessageEmpty, parseContextualReferences } from
 import { handleMultimodalPaste } from '@/common/utils/clipboard';
 import { NavbarModelSelector } from '@/standalone/navbar/ModelSelector';
 import { AgentOptionsSelector, AgentOptionsSelectorRef } from './AgentOptionsSelector';
+import { HomeAgentOptionsSelector } from '@/standalone/home/HomeAgentOptionsSelector';
 import { ChatBottomSettings } from './ChatBottomSettings';
 import { useNavbarStyles } from '@tarko/ui';
 
@@ -459,22 +460,32 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
             {/* Left side controls */}
             <div className="absolute left-3 bottom-3 flex items-center gap-2">
-              {/* Agent Options Selector - First (leftmost) */}
-              <AgentOptionsSelector
-                ref={agentOptionsSelectorRef}
-                activeSessionId={sessionId}
-                sessionMetadata={sessionMetadata}
-                onActiveOptionsChange={handleActiveOptionsChange}
-                onSchemaChange={handleSchemaChange}
-                onToggleOption={handleToggleOption}
-                showAttachments={showAttachments}
-                onFileUpload={handleFileUpload}
-                isDisabled={isDisabled}
-                isProcessing={isProcessing}
-              />
+              {/* Home mode: Show home AgentOptionsSelector */}
+              {variant === 'home' && (
+                <HomeAgentOptionsSelector
+                  showAttachments={showAttachments}
+                  onFileUpload={handleFileUpload}
+                />
+              )}
 
-              {/* Fallback image upload button when no agent options */}
-              {!hasAgentOptions && showAttachments && (
+              {/* Session mode: Show existing AgentOptionsSelector */}
+              {variant !== 'home' && (
+                <AgentOptionsSelector
+                  ref={agentOptionsSelectorRef}
+                  activeSessionId={sessionId}
+                  sessionMetadata={sessionMetadata}
+                  onActiveOptionsChange={handleActiveOptionsChange}
+                  onSchemaChange={handleSchemaChange}
+                  onToggleOption={handleToggleOption}
+                  showAttachments={showAttachments}
+                  onFileUpload={handleFileUpload}
+                  isDisabled={isDisabled}
+                  isProcessing={isProcessing}
+                />
+              )}
+
+              {/* Fallback image upload button when no agent options and not home mode */}
+              {variant !== 'home' && !hasAgentOptions && showAttachments && (
                 <button
                   type="button"
                   onClick={handleFileUpload}
@@ -486,19 +497,21 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 </button>
               )}
 
-              {/* Unified chat bottom settings - shows both default visible and activated options */}
-              <ChatBottomSettings
-                activeSessionId={sessionId}
-                sessionMetadata={sessionMetadata}
-                activeOptions={activeAgentOptions}
-                onRemoveOption={(key) => {
-                  if (agentOptionsSelectorRef.current) {
-                    agentOptionsSelectorRef.current.removeOption(key);
-                  }
-                }}
-                isDisabled={isDisabled}
-                isProcessing={isProcessing}
-              />
+              {/* Unified chat bottom settings - only for session mode */}
+              {variant !== 'home' && (
+                <ChatBottomSettings
+                  activeSessionId={sessionId}
+                  sessionMetadata={sessionMetadata}
+                  activeOptions={activeAgentOptions}
+                  onRemoveOption={(key) => {
+                    if (agentOptionsSelectorRef.current) {
+                      agentOptionsSelectorRef.current.removeOption(key);
+                    }
+                  }}
+                  isDisabled={isDisabled}
+                  isProcessing={isProcessing}
+                />
+              )}
             </div>
 
             {/* Hidden file input for image upload */}

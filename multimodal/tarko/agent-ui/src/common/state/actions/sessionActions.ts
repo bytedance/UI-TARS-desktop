@@ -81,9 +81,9 @@ export const loadSessionsAction = atom(null, async (get, set) => {
   }
 });
 
-export const createSessionAction = atom(null, async (get, set) => {
+export const createSessionAction = atom(null, async (get, set, runtimeSettings?: Record<string, any>) => {
   try {
-    const newSession = await apiService.createSession();
+    const newSession = await apiService.createSession(runtimeSettings);
 
     set(sessionsAtom, (prev) => [newSession, ...prev]);
 
