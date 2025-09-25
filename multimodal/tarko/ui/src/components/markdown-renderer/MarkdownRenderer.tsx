@@ -9,6 +9,7 @@ import 'remark-github-blockquote-alert/alert.css';
 import './styles/syntax-highlight.css';
 import './styles/markdown.css';
 import './styles/smooth.css';
+import './styles/assistant-ui.css';
 
 interface MarkdownRendererProps {
   content: string;
