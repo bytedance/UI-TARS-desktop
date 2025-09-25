@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { useAtomValue } from 'jotai';
-import { apiService } from '@/common/services/apiService';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { useSession } from '@/common/hooks/useSession';
 import { SessionCreatingState } from '@/standalone/chat/components/SessionCreatingState';
 import { globalRuntimeSettingsAtom, resetGlobalRuntimeSettingsAction } from '@/common/state/atoms/globalRuntimeSettings';
-import { useSetAtom } from 'jotai';
+import { createSessionAction } from '@/common/state/actions/sessionActions';
 
 interface LocationState {
   query?: string;
@@ -25,6 +24,7 @@ const CreatingPage: React.FC = () => {
   const { sendMessage } = useSession();
   const globalSettings = useAtomValue(globalRuntimeSettingsAtom);
   const resetGlobalSettings = useSetAtom(resetGlobalRuntimeSettingsAction);
+  const createSession = useSetAtom(createSessionAction);
   const [isCreating, setIsCreating] = useState(true);
 
   useEffect(() => {
@@ -78,7 +78,7 @@ const CreatingPage: React.FC = () => {
         console.log('Creating session with:', { runtimeSettings, agentOptions, query });
 
         // Create session with runtime settings (persistent) and agent options (one-time)
-        const session = await apiService.createSession(
+        const sessionId = await createSession(
           Object.keys(runtimeSettings).length > 0 ? runtimeSettings : undefined,
           Object.keys(agentOptions).length > 0 ? agentOptions : undefined
         );
@@ -89,7 +89,7 @@ const CreatingPage: React.FC = () => {
         }
 
         // Navigate to the new session
-        navigate(`/${session.sessionId}`, { replace: true });
+        navigate(`/${sessionId}`, { replace: true });
 
         // Send the initial query
         if (query) {
@@ -105,7 +105,7 @@ const CreatingPage: React.FC = () => {
     };
 
     createSessionWithOptions();
-  }, [location.state, searchParams, globalSettings, resetGlobalSettings, navigate, sendMessage]);
+  }, [location.state, searchParams, globalSettings, resetGlobalSettings, navigate, sendMessage, createSession]);
 
   return (
     <div className="h-full flex items-center justify-center">

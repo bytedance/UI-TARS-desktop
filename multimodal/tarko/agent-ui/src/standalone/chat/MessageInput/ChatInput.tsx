@@ -468,10 +468,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                     showAttachments={showAttachments}
                     onFileUpload={handleFileUpload}
                   />
-                  <HomeChatBottomSettings
-                    isDisabled={isDisabled}
-                    isProcessing={isProcessing}
-                  />
+                  <HomeChatBottomSettings isDisabled={isDisabled} isProcessing={isProcessing} />
                 </>
               )}
 

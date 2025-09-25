@@ -56,7 +56,7 @@ class ApiService {
    */
   async createSession(
     runtimeSettings?: Record<string, any>,
-    agentOptions?: Record<string, any>
+    agentOptions?: Record<string, any>,
   ): Promise<SessionInfo> {
     try {
       const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.CREATE_SESSION}`, {
@@ -542,10 +542,10 @@ class ApiService {
     message?: string;
   }> {
     try {
-      const url = sessionId 
+      const url = sessionId
         ? `${API_BASE_URL}/api/v1/runtime-settings?sessionId=${sessionId}`
         : `${API_BASE_URL}/api/v1/runtime-settings`;
-        
+
       const response = await fetch(url, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
