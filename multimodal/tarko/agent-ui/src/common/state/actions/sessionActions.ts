@@ -129,11 +129,8 @@ export const createSessionAction = atom(null, async (get, set, runtimeSettings?:
       const bestFile = selectBestFileToDisplay(files);
 
       if (bestFile) {
-        console.log(`Auto-selecting file for workspace: ${bestFile.name} (${bestFile.path})`);
         setWorkspacePanelForFile(set, newSession.id, bestFile);
       }
-    } else {
-      console.log('Panel content already set by initialization events, skipping auto-file selection');
     }
 
     return newSession.id;
@@ -210,7 +207,6 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
     const bestFile = selectBestFileToDisplay(files);
 
     if (bestFile) {
-      console.log(`Auto-selecting file for workspace: ${bestFile.name} (${bestFile.path})`);
       setWorkspacePanelForFile(set, sessionId, bestFile);
     } else {
       // Only clear panel content if there are no files AND no existing panel content
@@ -218,13 +214,10 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
       const sessionPanelContent = currentPanelContent[sessionId];
       
       if (!sessionPanelContent) {
-        console.log(`No files and no existing panel content, clearing panel for session ${sessionId}`);
         set(sessionPanelContentAtom, (prev) => ({
           ...prev,
           [sessionId]: null,
         }));
-      } else {
-        console.log(`No files but panel content exists, keeping existing panel for session ${sessionId}`);
       }
     }
   } catch (error) {

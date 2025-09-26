@@ -97,40 +97,22 @@ export class EnvironmentInputHandler
           (currentSessionPanel && currentSessionPanel.type === 'browser_vision_control') ||
           shouldUpdatePanelContent(get, sessionId);
 
-        console.log('EnvironmentInputHandler debug:', {
-          sessionId,
-          isFirstEnvironmentInput,
-          currentSessionPanel,
-          shouldUpdate,
-          eventId: event.id,
-        });
-
         if (shouldUpdate) {
           if (isFirstEnvironmentInput) {
             // First environment input: use simple image renderer
-            console.log('Setting image panel for first environment input:', sessionId);
-            const panelContent = {
-              type: 'image',
-              source: imageContent.image_url.url,
-              title: event.description || 'Environment Screenshot',
-              timestamp: event.timestamp,
-              originalContent: event.content,
-              environmentId: event.id,
-            };
-            console.log('Panel content being set:', panelContent);
             set(sessionPanelContentAtom, (prev) => ({
               ...prev,
-              [sessionId]: panelContent,
+              [sessionId]: {
+                type: 'image',
+                source: imageContent.image_url.url,
+                title: event.description || 'Environment Screenshot',
+                timestamp: event.timestamp,
+                originalContent: event.content,
+                environmentId: event.id,
+              },
             }));
-            
-            // Debug: check if it was actually set
-            setTimeout(() => {
-              const currentPanelContent = get(sessionPanelContentAtom);
-              console.log('Panel content after setting:', currentPanelContent[sessionId]);
-            }, 100);
           } else if (currentSessionPanel && currentSessionPanel.type === 'browser_vision_control') {
             // Update existing browser_vision_control panel
-            console.log('Updating browser_vision_control panel for session:', sessionId);
             set(sessionPanelContentAtom, (prev) => ({
               ...prev,
               [sessionId]: {
@@ -153,12 +135,6 @@ export class EnvironmentInputHandler
               },
             }));
           }
-        } else {
-          console.log('Not setting sessionPanelContentAtom, conditions not met:', {
-            shouldUpdate,
-            isFirstEnvironmentInput,
-            currentSessionPanel: !!currentSessionPanel,
-          });
         }
         // Skip update for other panel types to avoid duplicate Browser Screenshot rendering
       }
