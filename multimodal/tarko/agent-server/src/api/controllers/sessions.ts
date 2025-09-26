@@ -61,26 +61,8 @@ export async function createSession(req: Request, res: Response) {
       }
     }
 
-    // Pass custom AGIO provider, session metadata, and agent options if available
-    const session = new AgentSession(
-      server,
-      sessionId,
-      server.getCustomAgioProvider(),
-      sessionInfo || undefined,
-      agentOptions, // Pass agentOptions for one-time Agent initialization
-    );
-
-    server.sessions[sessionId] = session;
-
-    const { storageUnsubscribe } = await session.initialize();
-
-    // Save unsubscribe function for cleanup
-    if (storageUnsubscribe) {
-      server.storageUnsubscribes[sessionId] = storageUnsubscribe;
-    }
-
     let savedSessionInfo: SessionInfo | undefined;
-    // Store session metadata if we have storage
+    // Store session metadata FIRST if we have storage
     if (server.storageProvider) {
       const now = Date.now();
 
@@ -110,16 +92,34 @@ export async function createSession(req: Request, res: Response) {
       };
 
       savedSessionInfo = await server.storageProvider.createSession(sessionInfo);
+    }
 
-      // If runtime settings were provided and session is active, update the agent configuration
-      if (runtimeSettings && savedSessionInfo) {
-        try {
-          await session.updateSessionConfig(savedSessionInfo);
-          console.log('Session created with runtime settings', { sessionId, runtimeSettings });
-        } catch (error) {
-          console.error('Failed to apply runtime settings to new session', { sessionId, error });
-          // Continue execution - the runtime settings are saved, will apply on next session restart
-        }
+    // Pass custom AGIO provider, session metadata, and agent options if available
+    const session = new AgentSession(
+      server,
+      sessionId,
+      server.getCustomAgioProvider(),
+      savedSessionInfo || undefined,
+      agentOptions, // Pass agentOptions for one-time Agent initialization
+    );
+
+    server.sessions[sessionId] = session;
+
+    const { storageUnsubscribe } = await session.initialize();
+
+    // Save unsubscribe function for cleanup
+    if (storageUnsubscribe) {
+      server.storageUnsubscribes[sessionId] = storageUnsubscribe;
+    }
+
+    // If runtime settings were provided and session is active, update the agent configuration
+    if (runtimeSettings && savedSessionInfo) {
+      try {
+        await session.updateSessionConfig(savedSessionInfo);
+        console.log('Session created with runtime settings', { sessionId, runtimeSettings });
+      } catch (error) {
+        console.error('Failed to apply runtime settings to new session', { sessionId, error });
+        // Continue execution - the runtime settings are saved, will apply on next session restart
       }
     }
 
