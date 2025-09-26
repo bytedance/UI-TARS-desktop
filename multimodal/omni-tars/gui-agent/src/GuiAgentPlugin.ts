@@ -168,9 +168,7 @@ export class GuiAgentPlugin extends AgentPlugin {
   private async emitPresetUserQuey(): Promise<void> {
     const eventStream = this.agent.getEventStream();
     const events = eventStream.getEvents();
-    // Only emit if no user messages exist yet
-    const hasUserMessage = events.some(event => event.type === 'user_message');
-    if (!hasUserMessage) {
+    if (events.length === 0) {
       const event = eventStream.createEvent('user_message', {
         content: `Goto: ${this.agentMode!.link}`,
       });
@@ -181,13 +179,10 @@ export class GuiAgentPlugin extends AgentPlugin {
   private async emitPresetAssistantMessage(): Promise<void> {
     const eventStream = this.agent.getEventStream();
     const events = eventStream.getEvents();
-    // Only emit if no assistant messages exist yet
-    const hasAssistantMessage = events.some(event => event.type === 'assistant_message');
-    if (!hasAssistantMessage) {
-      const event = eventStream.createEvent('assistant_message', {
-        content: `Successfully navigated to ${this.agentMode!.link}, page loaded successfully`,
-      });
-      eventStream.sendEvent(event);
-    }
+    guiLogger.debug('emitPresetAssistantMessage events length:', events.length);
+    const event = eventStream.createEvent('assistant_message', {
+      content: `Successfully navigated to ${this.agentMode!.link}, page loaded completely`,
+    });
+    eventStream.sendEvent(event);
   }
 }
