@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { EventHandler, EventHandlerContext } from '../types';
 import { AgentEventStream, Message } from '@/common/types';
 import { messagesAtom } from '@/common/state/atoms/message';
-import { activePanelContentAtom } from '@/common/state/atoms/ui';
+import { sessionPanelContentAtom } from '@/common/state/atoms/ui';
 import { shouldUpdatePanelContent } from '../utils/panelContentUpdater';
 import { ChatCompletionContentPartImage } from '@tarko/agent-interface';
 
@@ -82,21 +82,25 @@ export class EnvironmentInputHandler
       );
 
       if (imageContent && imageContent.image_url) {
-        const currentPanel = get(activePanelContentAtom);
+        const currentPanelContent = get(sessionPanelContentAtom);
         const sessionMessages = get(messagesAtom)[sessionId] || [];
         
         // Check if this is the first environment_input event in the session
         const isFirstEnvironmentInput = sessionMessages.filter(msg => msg.role === 'environment').length === 0;
+        const currentSessionPanel = currentPanelContent[sessionId];
 
         // Always show first environment_input (initialization screenshot) or update existing browser_vision_control panel
-        if (isFirstEnvironmentInput || (currentPanel && currentPanel.type === 'browser_vision_control')) {
-          set(activePanelContentAtom, {
-            type: 'browser_vision_control',
-            title: event.description || 'Browser Screenshot',
-            timestamp: event.timestamp,
-            originalContent: event.content,
-            environmentId: event.id,
-          });
+        if (isFirstEnvironmentInput || (currentSessionPanel && currentSessionPanel.type === 'browser_vision_control')) {
+          set(sessionPanelContentAtom, (prev) => ({
+            ...prev,
+            [sessionId]: {
+              type: 'browser_vision_control',
+              title: event.description || 'Browser Screenshot',
+              timestamp: event.timestamp,
+              originalContent: event.content,
+              environmentId: event.id,
+            },
+          }));
         }
         // Skip update for other panel types to avoid duplicate Browser Screenshot rendering
       }
