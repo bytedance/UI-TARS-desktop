@@ -118,21 +118,6 @@ export const createSessionAction = atom(null, async (get, set, runtimeSettings?:
       }
     }
 
-    // Auto-select best file for workspace display ONLY if no panel content was set by initialization events
-    const currentPanelContent = get(sessionPanelContentAtom);
-    const sessionPanelContent = currentPanelContent[newSession.id];
-    
-    if (!sessionPanelContent) {
-      // No panel content was set by initialization events, try to auto-select a file
-      const sessionFiles = get(sessionFilesAtom);
-      const files = sessionFiles[newSession.id] || [];
-      const bestFile = selectBestFileToDisplay(files);
-
-      if (bestFile) {
-        setWorkspacePanelForFile(set, newSession.id, bestFile);
-      }
-    }
-
     return newSession.id;
   } catch (error) {
     console.error('Failed to create session:', error);
@@ -209,16 +194,11 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
     if (bestFile) {
       setWorkspacePanelForFile(set, sessionId, bestFile);
     } else {
-      // Only clear panel content if there are no files AND no existing panel content
-      const currentPanelContent = get(sessionPanelContentAtom);
-      const sessionPanelContent = currentPanelContent[sessionId];
-      
-      if (!sessionPanelContent) {
-        set(sessionPanelContentAtom, (prev) => ({
-          ...prev,
-          [sessionId]: null,
-        }));
-      }
+      // Clear panel content for this session
+      set(sessionPanelContentAtom, (prev) => ({
+        ...prev,
+        [sessionId]: null,
+      }));
     }
   } catch (error) {
     console.error('Failed to set active session:', error);
