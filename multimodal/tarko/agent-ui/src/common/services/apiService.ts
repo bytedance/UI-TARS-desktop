@@ -57,7 +57,7 @@ class ApiService {
   async createSession(
     runtimeSettings?: Record<string, any>,
     agentOptions?: Record<string, any>,
-  ): Promise<SessionInfo> {
+  ): Promise<{ session: SessionInfo; events: AgentEventStream.Event[] }> {
     try {
       const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.CREATE_SESSION}`, {
         method: 'POST',
@@ -69,8 +69,8 @@ class ApiService {
         throw new Error(`Failed to create session: ${response.statusText}`);
       }
 
-      const { sessionId, session } = await response.json();
-      return session as SessionInfo;
+      const { sessionId, session, events } = await response.json();
+      return { session: session as SessionInfo, events: events || [] };
     } catch (error) {
       console.error('Error creating session:', error);
       throw error;
@@ -585,30 +585,6 @@ class ApiService {
       };
     } catch (error) {
       console.error('Error updating runtime settings:', error);
-      return { success: false };
-    }
-  }
-
-  /**
-   * Delete a session
-   */
-  async deleteSession(sessionId: string): Promise<{ success: boolean }> {
-    try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.DELETE_SESSION}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ sessionId }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to delete session: ${response.statusText}`);
-      }
-
-      return { success: true };
-    } catch (error) {
-      console.error('Error deleting session:', error);
       return { success: false };
     }
   }

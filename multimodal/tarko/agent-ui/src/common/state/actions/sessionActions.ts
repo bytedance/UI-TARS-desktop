@@ -83,7 +83,7 @@ export const loadSessionsAction = atom(null, async (get, set) => {
 
 export const createSessionAction = atom(null, async (get, set, runtimeSettings?: Record<string, any>, agentOptions?: Record<string, any>) => {
   try {
-    const newSession = await apiService.createSession(runtimeSettings, agentOptions);
+    const { session: newSession, events: initializationEvents } = await apiService.createSession(runtimeSettings, agentOptions);
 
     set(sessionsAtom, (prev) => [newSession, ...prev]);
 
@@ -106,6 +106,17 @@ export const createSessionAction = atom(null, async (get, set, runtimeSettings?:
       [newSession.id]: null,
     }));
     set(activeSessionIdAtom, newSession.id);
+
+    // Process initialization events if any were returned
+    if (initializationEvents && initializationEvents.length > 0) {
+      console.log(`Processing ${initializationEvents.length} initialization events for session ${newSession.id}`);
+      
+      const processedEvents = preprocessStreamingEvents(initializationEvents);
+      
+      for (const event of processedEvents) {
+        await set(processEventAction, { sessionId: newSession.id, event });
+      }
+    }
 
     return newSession.id;
   } catch (error) {

@@ -123,7 +123,22 @@ export async function createSession(req: Request, res: Response) {
       }
     }
 
-    res.status(201).json({ sessionId, session: savedSessionInfo });
+    // Get events that were created during agent initialization
+    let initializationEvents: any[] = [];
+    if (server.storageProvider) {
+      try {
+        initializationEvents = await server.storageProvider.getSessionEvents(sessionId);
+      } catch (error) {
+        console.warn('Failed to retrieve initialization events:', error);
+        // Continue without events - not critical for session creation
+      }
+    }
+
+    res.status(201).json({ 
+      sessionId, 
+      session: savedSessionInfo,
+      events: initializationEvents 
+    });
   } catch (error) {
     console.error('Failed to create session:', error);
     res.status(500).json({ error: 'Failed to create session' });
