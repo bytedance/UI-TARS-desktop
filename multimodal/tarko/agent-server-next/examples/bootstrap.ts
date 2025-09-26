@@ -65,7 +65,7 @@ const server = new AgentServer({
             agentMode: {
               id: runtimeSettings.agentMode,
               browserMode: runtimeSettings.browserMode,
-              link: 'http://example.com',
+              link: runtimeSettings.link || '',
             },
           };
         },

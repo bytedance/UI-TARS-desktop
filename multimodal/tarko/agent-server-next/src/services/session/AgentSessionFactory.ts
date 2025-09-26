@@ -120,16 +120,6 @@ export class AgentSessionFactory {
     // Initialize the session
     const { storageUnsubscribe } = await session.initialize();
     
-    // If runtime settings were provided and session is active, update the agent configuration
-    if (runtimeSettings && savedSessionInfo) {
-      try {
-        await session.updateSessionConfig(savedSessionInfo);
-        console.log('Session created with runtime settings', { sessionId, runtimeSettings });
-      } catch (error) {
-        console.error('Failed to apply runtime settings to new session', { sessionId, error });
-        // Continue execution - the runtime settings are saved, will apply on next session restart
-      }
-    }
 
     // Wait a short time to ensure all initialization events are persisted
     // This handles the async nature of event storage during agent initialization
