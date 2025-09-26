@@ -97,11 +97,20 @@ export class EnvironmentInputHandler
           (currentSessionPanel && currentSessionPanel.type === 'browser_vision_control') ||
           shouldUpdatePanelContent(get, sessionId);
 
+        console.log('EnvironmentInputHandler debug:', {
+          sessionId,
+          isFirstEnvironmentInput,
+          currentSessionPanel,
+          shouldUpdate,
+          eventId: event.id
+        });
+
         if (
           shouldUpdate &&
           (isFirstEnvironmentInput ||
             (currentSessionPanel && currentSessionPanel.type === 'browser_vision_control'))
         ) {
+          console.log('Setting sessionPanelContentAtom for session:', sessionId);
           set(sessionPanelContentAtom, (prev) => ({
             ...prev,
             [sessionId]: {
@@ -112,6 +121,12 @@ export class EnvironmentInputHandler
               environmentId: event.id,
             },
           }));
+        } else {
+          console.log('Not setting sessionPanelContentAtom, conditions not met:', {
+            shouldUpdate,
+            isFirstEnvironmentInput,
+            currentSessionPanel: !!currentSessionPanel
+          });
         }
         // Skip update for other panel types to avoid duplicate Browser Screenshot rendering
       }
