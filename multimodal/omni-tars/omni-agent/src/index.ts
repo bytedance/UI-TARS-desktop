@@ -35,7 +35,7 @@ export default class OmniTARSAgent extends ComposableAgent {
       {
         title: 'Four in a Row',
         category: 'Game',
-        prompt: `Play this game, win the computer`,
+        // prompt: `Play this game, win the computer`,
         image:
           'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=80,height=80,fit=cover,f=auto/e80686db-b0fb-4f2c-bd2f-3a89734f102a/four-in-a-row.jpg',
         agentOptions: {
@@ -49,7 +49,7 @@ export default class OmniTARSAgent extends ComposableAgent {
       {
         title: 'Block the Pig',
         category: 'Game',
-        prompt: `Play this game, reach level 5`,
+        // prompt: `Play this game, reach level 5`,
         image:
           'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=80,height=80,fit=cover,f=auto/9fec1234ce2afd5e789f56da463dcffc/block-the-pig.jpeg',
         agentOptions: {
@@ -63,7 +63,7 @@ export default class OmniTARSAgent extends ComposableAgent {
       {
         title: 'Factory Balls Forever',
         category: 'Game',
-        prompt: `Play this game, reach level 5`,
+        // prompt: `Play this game, reach level 5`,
         image:
           'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=80,height=80,fit=cover,f=auto/2a503d0a1d9475d6e62c7ea11caa429ab952aa8f500755613a34e66e2196fe82/factory-balls-forever.png',
         agentOptions: {
@@ -77,7 +77,7 @@ export default class OmniTARSAgent extends ComposableAgent {
       {
         title: 'Snake Solver',
         category: 'Game',
-        prompt: `Play this game, reach level 5`,
+        // prompt: `Play this game, reach level 5`,
         image:
           'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=80,height=80,fit=cover,f=auto/e466baf845544ef47e0dfbd60f127071/snake-solver.png',
         agentOptions: {
@@ -91,7 +91,7 @@ export default class OmniTARSAgent extends ComposableAgent {
       {
         title: 'Penalty Kicks',
         category: 'Game',
-        prompt: `Play this game, your target score is 600`,
+        // prompt: `Play this game, your target score is 600`,
         image:
           'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=80,height=80,fit=cover,f=auto/0770daaa8c4ff3c36dd53e6e41f59396/penalty-kicks.png',
         agentOptions: {
