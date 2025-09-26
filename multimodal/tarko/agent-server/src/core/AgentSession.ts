@@ -98,6 +98,9 @@ export class AgentSession {
 
   /**
    * Setup event stream connections for storage and client communication
+   * @deprecated This method is no longer used as event streams are now set up
+   * within createAndInitializeAgent before agent initialization to ensure
+   * initialize() events are properly persisted.
    */
   private setupEventStreams() {
     const agentEventStream = this.agent.getEventStream();
@@ -141,7 +144,7 @@ export class AgentSession {
     // Apply runtime settings transformation if available
     const runtimeSettingsConfig = this.server.appConfig?.server?.runtimeSettings;
     let transformedOptions = sessionInfo?.metadata?.runtimeSettings ?? {};
-    
+
     if (runtimeSettingsConfig?.transform && sessionInfo?.metadata?.runtimeSettings) {
       try {
         transformedOptions = runtimeSettingsConfig.transform(sessionInfo.metadata.runtimeSettings);
@@ -163,7 +166,22 @@ export class AgentSession {
     // Apply snapshot wrapper if enabled
     const wrappedAgent = this.createAgentWithSnapshot(baseAgent, this.id);
 
+    // 🎯 Setup event stream connections BEFORE agent initialization
+    // This ensures that any events emitted during initialize() are properly persisted
+    const agentEventStream = wrappedAgent.getEventStream();
+    const handleEvent = this.createEventHandler();
+
+    // Subscribe to events for storage and AGIO processing before initialization
+    const storageUnsubscribe = agentEventStream.subscribe(handleEvent);
+
+    // Connect to event bridge for client communication before initialization
+    if (this.unsubscribe) {
+      this.unsubscribe();
+    }
+    this.unsubscribe = this.eventBridge.connectToAgentEventStream(agentEventStream);
+
     // Initialize the agent (this will automatically restore events)
+    // Now any events emitted during initialize() will be properly persisted
     await wrappedAgent.initialize();
 
     // Initialize AGIO collector if provider URL is configured
@@ -188,6 +206,10 @@ export class AgentSession {
 
     // Log agent configuration
     console.info('Agent Config', JSON.stringify((wrappedAgent as any).getOptions?.(), null, 2));
+
+    // Return the storage unsubscribe function along with the agent
+    // We need to store this for cleanup, but the agent is the primary return value
+    (wrappedAgent as any)._storageUnsubscribe = storageUnsubscribe;
 
     return wrappedAgent;
   }
@@ -271,10 +293,14 @@ export class AgentSession {
 
   async initialize() {
     // Create and initialize agent with all wrappers
+    // Event streams are now set up within createAndInitializeAgent before agent.initialize()
     this.agent = await this.createAndInitializeAgent(this.sessionInfo);
 
-    // Setup event stream connections
-    const { storageUnsubscribe } = this.setupEventStreams();
+    // Extract the storage unsubscribe function that was attached during agent creation
+    const storageUnsubscribe = (this.agent as any)._storageUnsubscribe;
+
+    // Clean up the temporary property
+    delete (this.agent as any)._storageUnsubscribe;
 
     // Notify client that session is ready
     this.eventBridge.emit('ready', { sessionId: this.id });
@@ -504,10 +530,10 @@ export class AgentSession {
       }
 
       // Create and initialize new agent with updated session info
+      // Event streams are automatically set up within createAndInitializeAgent
       this.agent = await this.createAndInitializeAgent(sessionInfo);
 
-      // Reconnect event streams
-      this.setupEventStreams();
+      // No need to call setupEventStreams() as it's now handled within createAndInitializeAgent
     } catch (error) {
       console.error('Failed to recreate agent for session', { sessionId: this.id, error });
       throw error;
