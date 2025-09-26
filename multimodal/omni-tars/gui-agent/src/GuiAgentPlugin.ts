@@ -185,7 +185,7 @@ export class GuiAgentPlugin extends AgentPlugin {
     const hasAssistantMessage = events.some((event) => event.type === 'assistant_message');
     if (!hasAssistantMessage) {
       const event = eventStream.createEvent('assistant_message', {
-        content: `Successfully navigated to ${this.agentMode!.link}, page loaded completely.`,
+        content: `Successfully navigated to ${this.agentMode!.link}, and the page has loaded.`,
       });
       eventStream.sendEvent(event);
     }
