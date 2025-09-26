@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useSession } from '@/common/hooks/useSession';
@@ -26,8 +26,15 @@ const CreatingPage: React.FC = () => {
   const resetGlobalSettings = useSetAtom(resetGlobalRuntimeSettingsAction);
   const createSession = useSetAtom(createSessionAction);
   const [isCreating, setIsCreating] = useState(true);
+  const hasExecuted = useRef(false);
 
   useEffect(() => {
+    // Prevent double execution
+    if (hasExecuted.current) {
+      return;
+    }
+    hasExecuted.current = true;
+
     const createSessionWithOptions = async () => {
       try {
         // Get parameters from multiple sources (priority order):
@@ -105,7 +112,7 @@ const CreatingPage: React.FC = () => {
     };
 
     createSessionWithOptions();
-  }, [location.state, searchParams, globalSettings, resetGlobalSettings, navigate, sendMessage, createSession]);
+  }, []); // Empty dependency array since we use useRef to prevent double execution
 
   return (
     <div className="h-full flex items-center justify-center">
