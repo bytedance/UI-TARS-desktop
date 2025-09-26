@@ -98,28 +98,6 @@ export class AgentSession {
   }
 
   /**
-   * Setup event stream connections for storage and client communication
-   * @deprecated This method is no longer used as event streams are now set up
-   * within createAndInitializeAgent before agent initialization to ensure
-   * initialize() events are properly persisted.
-   */
-  private setupEventStreams() {
-    const agentEventStream = this.agent.getEventStream();
-    const handleEvent = this.createEventHandler();
-
-    // Subscribe to events for storage and AGIO processing
-    const storageUnsubscribe = agentEventStream.subscribe(handleEvent);
-
-    // Connect to event bridge for client communication
-    if (this.unsubscribe) {
-      this.unsubscribe();
-    }
-    this.unsubscribe = this.eventBridge.connectToAgentEventStream(agentEventStream);
-
-    return { storageUnsubscribe };
-  }
-
-  /**
    * Create and initialize a complete agent instance with all wrappers and configuration
    */
   private async createAndInitializeAgent(sessionInfo?: SessionInfo): Promise<IAgent> {
