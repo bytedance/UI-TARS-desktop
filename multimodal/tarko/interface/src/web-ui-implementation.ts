@@ -140,7 +140,7 @@ export interface WelcomeCard {
   /**
    * Card prompt content
    */
-  prompt: string;
+  prompt?: string;
   /**
    * Card background image URL
    */
