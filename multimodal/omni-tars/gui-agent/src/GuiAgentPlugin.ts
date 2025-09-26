@@ -8,6 +8,7 @@ import { ConsoleLogger, createGUIErrorResponse, LogLevel } from '@tarko/shared-u
 import { Base64ImageParser } from '@agent-infra/media-utils';
 import { ImageCompressor, formatBytes } from '@tarko/shared-media-utils';
 import { OperatorManager } from './OperatorManager';
+import { sleep } from '@gui-agent/shared/utils';
 
 interface GuiAgentPluginOption {
   operatorManager: OperatorManager;
@@ -36,7 +37,9 @@ export class GuiAgentPlugin extends AgentPlugin {
 
   async initialize(): Promise<void> {
     if (this.agentMode && this.agentMode.id === 'game') {
+      await this.emitPresetUserQuey();
       await this.emitScreenshotEvent();
+      await this.emitPresetAssistantMessage();
     }
 
     this.agent.registerTool(
@@ -101,8 +104,9 @@ export class GuiAgentPlugin extends AgentPlugin {
     await this.emitScreenshotEvent();
   }
 
-  private async emitScreenshotEvent(): Promise<void> {
+  private async emitScreenshotEvent(interval = 0): Promise<void> {
     const operator = await this.operatorManager.getInstance();
+    if (interval > 0) await sleep(interval);
     const output = await operator?.doScreenshot();
     if (!output?.base64) {
       guiLogger.error('Failed to get screenshot');
@@ -157,5 +161,27 @@ export class GuiAgentPlugin extends AgentPlugin {
       },
     });
     eventStream.sendEvent(event);
+  }
+
+  private async emitPresetUserQuey(): Promise<void> {
+    const eventStream = this.agent.getEventStream();
+    const events = eventStream.getEvents();
+    if (events.length === 0) {
+      const event = eventStream.createEvent('user_message', {
+        content: `Goto: ${this.agentMode!.link}`,
+      });
+      eventStream.sendEvent(event);
+    }
+  }
+
+  private async emitPresetAssistantMessage(): Promise<void> {
+    const eventStream = this.agent.getEventStream();
+    const events = eventStream.getEvents();
+    if (events.length === 0) {
+      const event = eventStream.createEvent('assistant_message', {
+        content: `Successfully navigated to ${this.agentMode!.link}, page loaded successfully`,
+      });
+      eventStream.sendEvent(event);
+    }
   }
 }
