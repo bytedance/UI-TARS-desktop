@@ -51,6 +51,11 @@ export class EnvironmentInputHandler
   ): void {
     const { get, set } = context;
 
+    // Check if this is the first environment_input event BEFORE adding the current message
+    const existingSessionMessages = get(messagesAtom)[sessionId] || [];
+    const isFirstEnvironmentInput =
+      existingSessionMessages.filter((msg) => msg.role === 'environment').length === 0;
+
     const environmentMessage: Message = {
       id: event.id,
       role: 'environment',
@@ -83,12 +88,6 @@ export class EnvironmentInputHandler
 
       if (imageContent && imageContent.image_url) {
         const currentPanelContent = get(sessionPanelContentAtom);
-        const sessionMessages = get(messagesAtom)[sessionId] || [];
-
-        // Check if this is the first environment_input event in the session
-        // Note: We check messages that were added BEFORE this event (excluding the current one being processed)
-        const isFirstEnvironmentInput =
-          sessionMessages.filter((msg) => msg.role === 'environment').length === 0;
         const currentSessionPanel = currentPanelContent[sessionId];
 
         // Always show first environment_input (initialization screenshot) or update existing browser_vision_control panel
