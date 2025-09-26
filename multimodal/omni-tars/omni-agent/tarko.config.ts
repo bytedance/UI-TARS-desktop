@@ -47,6 +47,42 @@ export default {
         dbName: process.env.MONGO_DB_NAME,
       },
     },
+    runtimeSettings: {
+        schema: {
+          type: 'object',
+          properties: {
+            agentMode: {
+              type: 'string',
+              title: 'Agent Mode',
+              enum: ['omni', 'gui', 'game'],
+              enumLabels: ['Omni', 'GUI', 'Game'],
+              default: 'omni',
+              placement: 'chat-bottom',
+            },
+            browserMode: {
+              type: 'string',
+              title: 'Browser Control',
+              enum: ['hybrid'],
+              enumLabels: ['混合模式'],
+              default: 'hybrid',
+              placement: 'chat-bottom',
+              visible: {
+                dependsOn: 'agentMode',
+                when: 'gui',
+              },
+            },
+          },
+        },
+        transform: (runtimeSettings: Record<string, unknown>) => {
+          return {
+            agentMode: {
+              id: runtimeSettings.agentMode,
+              browserMode: runtimeSettings.browserMode,
+              link: 'http://example.com',
+            },
+          };
+        },
+      },
   },
   logLevel: LogLevel.DEBUG,
   webui: {
