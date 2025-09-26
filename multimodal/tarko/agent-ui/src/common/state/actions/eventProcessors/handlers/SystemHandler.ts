@@ -90,66 +90,48 @@ export class EnvironmentInputHandler
         const currentPanelContent = get(sessionPanelContentAtom);
         const currentSessionPanel = currentPanelContent[sessionId];
 
+        // Common panel properties
+        const basePanelContent = {
+          title: event.description || 'Environment Screenshot',
+          timestamp: event.timestamp,
+          originalContent: event.content,
+          environmentId: event.id,
+        };
+
+        let panelContent = null;
+
         if (isFirstEnvironmentInput) {
           // First environment input: always show as simple image
+          panelContent = {
+            ...basePanelContent,
+            type: 'image',
+            source: imageContent.image_url.url,
+          };
+        } else if (currentSessionPanel?.type === 'browser_vision_control' || shouldUpdatePanelContent(get, sessionId)) {
+          // Update existing browser_vision_control panel or create new one
+          panelContent = {
+            ...basePanelContent,
+            type: 'browser_vision_control',
+            source: null,
+            title: event.description || 'Browser Screenshot',
+            arguments: {
+              thought: undefined,
+              step: undefined,
+              action: undefined,
+              status: undefined,
+            },
+            _extra: {
+              currentScreenshot: imageContent.image_url.url,
+            },
+          };
+        }
+
+        if (panelContent) {
           set(sessionPanelContentAtom, (prev) => ({
             ...prev,
-            [sessionId]: {
-              type: 'image',
-              source: imageContent.image_url.url,
-              title: event.description || 'Environment Screenshot',
-              timestamp: event.timestamp,
-              originalContent: event.content,
-              environmentId: event.id,
-            },
-          }));
-        } else if (currentSessionPanel?.type === 'browser_vision_control') {
-          // Update existing browser_vision_control panel
-          set(sessionPanelContentAtom, (prev) => ({
-            ...prev,
-            [sessionId]: {
-              type: 'browser_vision_control',
-              source: null,
-              title: event.description || 'Browser Screenshot',
-              timestamp: event.timestamp,
-              originalContent: event.content,
-              environmentId: event.id,
-              arguments: {
-                // Browser control data - can be empty for environment screenshots
-                thought: undefined,
-                step: undefined,
-                action: undefined,
-                status: undefined,
-              },
-              _extra: {
-                currentScreenshot: imageContent.image_url.url,
-              },
-            },
-          }));
-        } else if (shouldUpdatePanelContent(get, sessionId)) {
-          // Other cases: check if should update based on existing logic
-          set(sessionPanelContentAtom, (prev) => ({
-            ...prev,
-            [sessionId]: {
-              type: 'browser_vision_control',
-              source: null,
-              title: event.description || 'Browser Screenshot',
-              timestamp: event.timestamp,
-              originalContent: event.content,
-              environmentId: event.id,
-              arguments: {
-                thought: undefined,
-                step: undefined,
-                action: undefined,
-                status: undefined,
-              },
-              _extra: {
-                currentScreenshot: imageContent.image_url.url,
-              },
-            },
+            [sessionId]: panelContent,
           }));
         }
-        // Skip update for other panel types to avoid duplicate Browser Screenshot rendering
       }
     }
   }
