@@ -71,19 +71,26 @@ export class AgentSession {
   private agioProviderConstructor?: AgioProviderConstructor;
   private sessionInfo?: SessionInfo;
   private storageUnsubscribeMap = new WeakMap<IAgent, () => void>();
+  private pendingEventSaves = new Set<Promise<void>>();
 
   /**
    * Create event handler for storage and AGIO processing
    */
   private createEventHandler() {
     return async (event: AgentEventStream.Event) => {
+      console.log('Receive event', event);
+
       // Save to storage if available and event should be stored
       if (this.server.storageProvider && shouldStoreEvent(event)) {
-        try {
-          await this.server.storageProvider.saveEvent(this.id, event);
-        } catch (error) {
-          console.error(`Failed to save event to storage: ${error}`);
-        }
+        const savePromise = this.server.storageProvider.saveEvent(this.id, event)
+          .catch(error => {
+            console.error(`Failed to save event to storage: ${error}`);
+          })
+          .finally(() => {
+            this.pendingEventSaves.delete(savePromise);
+          });
+        
+        this.pendingEventSaves.add(savePromise);
       }
 
       // Process AGIO events if collector is configured
@@ -95,6 +102,16 @@ export class AgentSession {
         }
       }
     };
+  }
+
+  /**
+   * Wait for all pending event saves to complete
+   * This ensures that all events emitted during initialization are persisted before querying storage
+   */
+  async waitForEventSavesToComplete(): Promise<void> {
+    if (this.pendingEventSaves.size > 0) {
+      await Promise.all(Array.from(this.pendingEventSaves));
+    }
   }
 
   /**

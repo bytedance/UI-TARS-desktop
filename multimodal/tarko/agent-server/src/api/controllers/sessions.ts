@@ -123,6 +123,10 @@ export async function createSession(req: Request, res: Response) {
       }
     }
 
+    // Wait a short time to ensure all initialization events are persisted
+    // This handles the async nature of event storage during agent initialization
+    await session.waitForEventSavesToComplete();
+
     // Get events that were created during agent initialization
     let initializationEvents: any[] = [];
     if (server.storageProvider) {
@@ -134,10 +138,12 @@ export async function createSession(req: Request, res: Response) {
       }
     }
 
-    res.status(201).json({ 
-      sessionId, 
+    console.log('Return initializationEvents', initializationEvents);
+
+    res.status(201).json({
+      sessionId,
       session: savedSessionInfo,
-      events: initializationEvents 
+      events: initializationEvents,
     });
   } catch (error) {
     console.error('Failed to create session:', error);
