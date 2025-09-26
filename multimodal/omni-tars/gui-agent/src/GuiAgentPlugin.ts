@@ -25,6 +25,7 @@ export class GuiAgentPlugin extends AgentPlugin {
   readonly environmentSection = COMPUTER_USE_ENVIRONMENT;
   private agentMode?: AgentMode;
   private operatorManager: OperatorManager;
+  private initializedWithMode = false;
 
   constructor(option: GuiAgentPluginOption) {
     super();
@@ -36,10 +37,11 @@ export class GuiAgentPlugin extends AgentPlugin {
   }
 
   async initialize(): Promise<void> {
-    if (this.agentMode && this.agentMode.id === 'game') {
+    if (this.agentMode && this.agentMode.id === 'game' && !this.initializedWithMode) {
       await this.emitPresetUserQuey();
       await this.emitScreenshotEvent();
       await this.emitPresetAssistantMessage();
+      this.initializedWithMode = true;
     }
 
     this.agent.registerTool(
@@ -109,7 +111,7 @@ export class GuiAgentPlugin extends AgentPlugin {
     if (interval > 0) await sleep(interval);
     const output = await operator?.doScreenshot();
     if (!output?.base64) {
-      guiLogger.error('Failed to get screenshot');
+      guiLogger.error('emitScreenshotEvent: Failed to get screenshot');
       return;
     }
     const base64Tool = new Base64ImageParser(output.base64);
@@ -126,7 +128,7 @@ export class GuiAgentPlugin extends AgentPlugin {
     const compressedSize = compressedBuffer.byteLength;
     const compressionRatio = (((originalSize - compressedSize) / originalSize) * 100).toFixed(2);
 
-    guiLogger.debug(`compression stat: `, {
+    guiLogger.debug(`emitScreenshotEvent compression stat: `, {
       originalSize: formatBytes(originalSize),
       compressedSize: formatBytes(compressedSize),
       compressionRatio: `${compressionRatio}% reduction`,
@@ -150,7 +152,7 @@ export class GuiAgentPlugin extends AgentPlugin {
 
     const eventStream = this.agent.getEventStream();
     const events = eventStream.getEvents();
-    guiLogger.info('onAfterToolCall events length:', events.length);
+    guiLogger.info('emitScreenshotEvent events length:', events.length);
 
     const event = eventStream.createEvent('environment_input', {
       description: 'Browser Screenshot',
@@ -177,11 +179,10 @@ export class GuiAgentPlugin extends AgentPlugin {
   private async emitPresetAssistantMessage(): Promise<void> {
     const eventStream = this.agent.getEventStream();
     const events = eventStream.getEvents();
-    if (events.length === 0) {
-      const event = eventStream.createEvent('assistant_message', {
-        content: `Successfully navigated to ${this.agentMode!.link}, page loaded successfully`,
-      });
-      eventStream.sendEvent(event);
-    }
+    guiLogger.debug('emitPresetAssistantMessage events length:', events.length);
+    const event = eventStream.createEvent('assistant_message', {
+      content: `Successfully navigated to ${this.agentMode!.link}, page loaded completely`,
+    });
+    eventStream.sendEvent(event);
   }
 }
