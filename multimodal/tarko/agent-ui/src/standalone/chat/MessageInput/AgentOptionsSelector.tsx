@@ -11,7 +11,7 @@ import {
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useAtomValue } from 'jotai';
 import { isProcessingAtom } from '@/common/state/atoms/ui';
-import { FiPlus, FiCheck, FiChevronRight, FiImage, FiPaperclip, FiLoader } from 'react-icons/fi';
+import { FiPlus, FiCheck, FiChevronRight, FiImage, FiPaperclip, FiLoader, FiZap } from 'react-icons/fi';
 import { TbBulb, TbSearch, TbBook, TbSettings, TbBrain, TbPhoto, TbBrowser } from 'react-icons/tb';
 import { Dropdown, DropdownItem, DropdownHeader, DropdownDivider } from '@tarko/ui';
 import { createPortal } from 'react-dom';
@@ -555,7 +555,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
             }`}
             title={loadingOptions.size > 0 ? 'Updating agent options...' : 'Options'}
           >
-            {loadingOptions.size > 0 ? <FiLoader size={16} className="animate-spin" /> : <FiPlus size={16} />}
+            {loadingOptions.size > 0 ? <FiLoader size={16} className="animate-spin" /> : <FiZap size={16} />}
           </button>
         }
       >
