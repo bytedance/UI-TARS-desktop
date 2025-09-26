@@ -186,19 +186,20 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
 
     set(activeSessionIdAtom, sessionId);
 
-    // Auto-select best file for workspace display
-    const sessionFiles = get(sessionFilesAtom);
-    const files = sessionFiles[sessionId] || [];
-    const bestFile = selectBestFileToDisplay(files);
+    // Auto-select best file for workspace display only if no panel content was set by events
+    const currentPanelContent = get(sessionPanelContentAtom);
+    const sessionPanelContent = currentPanelContent[sessionId];
+    
+    if (!sessionPanelContent) {
+      // No panel content was set by events, try to auto-select a file
+      const sessionFiles = get(sessionFilesAtom);
+      const files = sessionFiles[sessionId] || [];
+      const bestFile = selectBestFileToDisplay(files);
 
-    if (bestFile) {
-      setWorkspacePanelForFile(set, sessionId, bestFile);
-    } else {
-      // Clear panel content for this session
-      set(sessionPanelContentAtom, (prev) => ({
-        ...prev,
-        [sessionId]: null,
-      }));
+      if (bestFile) {
+        setWorkspacePanelForFile(set, sessionId, bestFile);
+      }
+      // If no files and no panel content, leave it as null (don't explicitly clear)
     }
   } catch (error) {
     console.error('Failed to set active session:', error);

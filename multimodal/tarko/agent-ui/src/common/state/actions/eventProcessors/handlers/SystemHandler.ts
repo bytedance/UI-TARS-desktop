@@ -56,6 +56,8 @@ export class EnvironmentInputHandler
     const isFirstEnvironmentInput =
       existingSessionMessages.filter((msg) => msg.role === 'environment').length === 0;
 
+    debugger;
+
     const environmentMessage: Message = {
       id: event.id,
       role: 'environment',
