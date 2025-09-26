@@ -118,6 +118,24 @@ export const createSessionAction = atom(null, async (get, set, runtimeSettings?:
       }
     }
 
+    // Auto-select best file for workspace display ONLY if no panel content was set by initialization events
+    const currentPanelContent = get(sessionPanelContentAtom);
+    const sessionPanelContent = currentPanelContent[newSession.id];
+    
+    if (!sessionPanelContent) {
+      // No panel content was set by initialization events, try to auto-select a file
+      const sessionFiles = get(sessionFilesAtom);
+      const files = sessionFiles[newSession.id] || [];
+      const bestFile = selectBestFileToDisplay(files);
+
+      if (bestFile) {
+        console.log(`Auto-selecting file for workspace: ${bestFile.name} (${bestFile.path})`);
+        setWorkspacePanelForFile(set, newSession.id, bestFile);
+      }
+    } else {
+      console.log('Panel content already set by initialization events, skipping auto-file selection');
+    }
+
     return newSession.id;
   } catch (error) {
     console.error('Failed to create session:', error);
@@ -195,11 +213,19 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
       console.log(`Auto-selecting file for workspace: ${bestFile.name} (${bestFile.path})`);
       setWorkspacePanelForFile(set, sessionId, bestFile);
     } else {
-      // Clear panel content for this session
-      set(sessionPanelContentAtom, (prev) => ({
-        ...prev,
-        [sessionId]: null,
-      }));
+      // Only clear panel content if there are no files AND no existing panel content
+      const currentPanelContent = get(sessionPanelContentAtom);
+      const sessionPanelContent = currentPanelContent[sessionId];
+      
+      if (!sessionPanelContent) {
+        console.log(`No files and no existing panel content, clearing panel for session ${sessionId}`);
+        set(sessionPanelContentAtom, (prev) => ({
+          ...prev,
+          [sessionId]: null,
+        }));
+      } else {
+        console.log(`No files but panel content exists, keeping existing panel for session ${sessionId}`);
+      }
     }
   } catch (error) {
     console.error('Failed to set active session:', error);
