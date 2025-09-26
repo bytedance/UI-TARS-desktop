@@ -92,6 +92,10 @@ export class MockAgent implements IAgent {
     return [];
   }
 
+  getOptions(): AgentAppConfig {
+    return this.options;
+  }
+
 
 }
 
