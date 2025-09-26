@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "agent-tars",
-  "version": "0.3.0-beta.12",
+  "version": "0.3.0-beta.12-canary-2fb6c8fbf-20250926150458",
   "description": "Agent TARS",
   "scripts": {
     "bootstrap": "pnpm install --prefer-offline && npm run build",
