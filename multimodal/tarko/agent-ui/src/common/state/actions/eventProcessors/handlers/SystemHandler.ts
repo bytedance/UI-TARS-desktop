@@ -83,13 +83,16 @@ export class EnvironmentInputHandler
 
       if (imageContent && imageContent.image_url) {
         const currentPanel = get(activePanelContentAtom);
+        const sessionMessages = get(messagesAtom)[sessionId] || [];
+        
+        // Check if this is the first environment_input event in the session
+        const isFirstEnvironmentInput = sessionMessages.filter(msg => msg.role === 'environment').length === 0;
 
-        // Only update if current panel is browser_vision_control to maintain context
-        if (currentPanel && currentPanel.type === 'browser_vision_control') {
+        // Always show first environment_input (initialization screenshot) or update existing browser_vision_control panel
+        if (isFirstEnvironmentInput || (currentPanel && currentPanel.type === 'browser_vision_control')) {
           set(activePanelContentAtom, {
-            ...currentPanel,
             type: 'browser_vision_control',
-            title: currentPanel.title,
+            title: event.description || 'Browser Screenshot',
             timestamp: event.timestamp,
             originalContent: event.content,
             environmentId: event.id,
