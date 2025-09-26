@@ -118,6 +118,30 @@ export const createSessionAction = atom(null, async (get, set, runtimeSettings?:
       }
     }
 
+    // Only auto-select files if no environment_input has set panel content
+    const currentPanelContent = get(sessionPanelContentAtom);
+    const sessionPanelContent = currentPanelContent[newSession.id];
+    
+    if (!sessionPanelContent || sessionPanelContent.type !== 'browser_vision_control') {
+      // Auto-select best file for workspace display only if no environment screenshot was set
+      const sessionFiles = get(sessionFilesAtom);
+      const files = sessionFiles[newSession.id] || [];
+      const bestFile = selectBestFileToDisplay(files);
+
+      if (bestFile) {
+        console.log(`Auto-selecting file for workspace: ${bestFile.name} (${bestFile.path})`);
+        setWorkspacePanelForFile(set, newSession.id, bestFile);
+      } else {
+        // Clear panel content for this session only if no browser_vision_control was set
+        set(sessionPanelContentAtom, (prev) => ({
+          ...prev,
+          [newSession.id]: null,
+        }));
+      }
+    } else {
+      console.log(`Keeping environment screenshot panel for session ${newSession.id}`);
+    }
+
     return newSession.id;
   } catch (error) {
     console.error('Failed to create session:', error);
