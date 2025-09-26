@@ -23,7 +23,7 @@ export default class OmniTARSAgent extends ComposableAgent {
         category: 'Game',
         // prompt: `Play this game, your target score is 1024`,
         image:
-          'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=80,height=80,fit=cover,f=auto/cb8c967c-4a78-4ffa-8506-cbac69746f4f/2048.png',
+          'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=628,height=628,fit=cover,f=auto/cb8c967c-4a78-4ffa-8506-cbac69746f4f/2048.png',
         agentOptions: {
           agentMode: {
             id: 'game',
@@ -37,7 +37,7 @@ export default class OmniTARSAgent extends ComposableAgent {
         category: 'Game',
         // prompt: `Play this game, win the computer`,
         image:
-          'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=80,height=80,fit=cover,f=auto/e80686db-b0fb-4f2c-bd2f-3a89734f102a/four-in-a-row.jpg',
+          'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=628,height=628,fit=cover,f=auto/e80686db-b0fb-4f2c-bd2f-3a89734f102a/four-in-a-row.jpg',
         agentOptions: {
           agentMode: {
             id: 'game',
@@ -51,7 +51,7 @@ export default class OmniTARSAgent extends ComposableAgent {
         category: 'Game',
         // prompt: `Play this game, reach level 5`,
         image:
-          'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=80,height=80,fit=cover,f=auto/9fec1234ce2afd5e789f56da463dcffc/block-the-pig.jpeg',
+          'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=628,height=628,fit=cover,f=auto/9fec1234ce2afd5e789f56da463dcffc/block-the-pig.jpeg',
         agentOptions: {
           agentMode: {
             id: 'game',
@@ -65,7 +65,7 @@ export default class OmniTARSAgent extends ComposableAgent {
         category: 'Game',
         // prompt: `Play this game, reach level 5`,
         image:
-          'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=80,height=80,fit=cover,f=auto/2a503d0a1d9475d6e62c7ea11caa429ab952aa8f500755613a34e66e2196fe82/factory-balls-forever.png',
+          'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=628,height=628,fit=cover,f=auto/2a503d0a1d9475d6e62c7ea11caa429ab952aa8f500755613a34e66e2196fe82/factory-balls-forever.png',
         agentOptions: {
           agentMode: {
             id: 'game',
@@ -79,7 +79,7 @@ export default class OmniTARSAgent extends ComposableAgent {
         category: 'Game',
         // prompt: `Play this game, reach level 5`,
         image:
-          'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=80,height=80,fit=cover,f=auto/894ed059623f65b643795d0e70ed41cd/cubinko.png',
+          'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=628,height=628,fit=cover,f=auto/894ed059623f65b643795d0e70ed41cd/cubinko.png',
         agentOptions: {
           agentMode: {
             id: 'game',
@@ -93,7 +93,7 @@ export default class OmniTARSAgent extends ComposableAgent {
         category: 'Game',
         // prompt: `Play this game, your target score is 600`,
         image:
-          'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=80,height=80,fit=cover,f=auto/0770daaa8c4ff3c36dd53e6e41f59396/penalty-kicks.png',
+          'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=628,height=628,fit=cover,f=auto/0770daaa8c4ff3c36dd53e6e41f59396/penalty-kicks.png',
         agentOptions: {
           agentMode: {
             id: 'game',

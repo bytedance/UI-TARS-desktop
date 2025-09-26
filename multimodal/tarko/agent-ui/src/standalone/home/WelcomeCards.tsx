@@ -148,11 +148,7 @@ const WelcomeCards: React.FC<WelcomeCardsProps> = ({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3 }}
-          className={`grid justify-center ${
-            activeCategory === 'Game'
-              ? 'grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 max-w-4xl mx-auto'
-              : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
-          }`}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
         >
           {activeCards.map((card, index) => {
             const cardId = `${card.category}-${card.title}`;
@@ -183,11 +179,7 @@ const WelcomeCards: React.FC<WelcomeCardsProps> = ({
                 }`}
               >
                 {/* 主卡片容器 */}
-                <div
-                  className={`relative rounded-2xl overflow-hidden bg-white dark:bg-black/10 backdrop-blur-sm border border-gray-200/40 dark:border-white/5 transition-all duration-300 group-hover:border-gray-300/60 dark:group-hover:border-white/10 shadow-lg dark:shadow-none group-hover:shadow-xl dark:group-hover:shadow-none ${
-                    card.category === 'Game' ? 'h-32 aspect-square' : 'h-64'
-                  }`}
-                >
+                <div className="relative h-64 rounded-2xl overflow-hidden bg-white dark:bg-black/10 backdrop-blur-sm border border-gray-200/40 dark:border-white/5 transition-all duration-300 group-hover:border-gray-300/60 dark:group-hover:border-white/10 shadow-lg dark:shadow-none group-hover:shadow-xl dark:group-hover:shadow-none">
                   {/* 背景层 */}
                   <div className="absolute inset-0">
                     {card.image ? (
