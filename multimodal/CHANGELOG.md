@@ -1,5 +1,55 @@
 # Changelog
 
+## [0.3.0-beta.12-canary-2fb6c8fbf-20250926150458](https://github.com/bytedance/UI-TARS-desktop/compare/v0.3.0-beta.12...v0.3.0-beta.12-canary-2fb6c8fbf-20250926150458) (2025-09-26)
+
+### Features
+
+* **agent-server:** support remote static html and add share for server-next ([#1558](https://github.com/bytedance/UI-TARS-desktop/pull/1558)) ([87dd3b9](https://github.com/bytedance/UI-TARS-desktop/commit/87dd3b965)) [@小健](https://github.com/小健)
+* **agent-tars:** disable contextual selector by default ([#1621](https://github.com/bytedance/UI-TARS-desktop/pull/1621)) ([86f3da0](https://github.com/bytedance/UI-TARS-desktop/commit/86f3da017)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars:** support aio sandbox environment ([#1573](https://github.com/bytedance/UI-TARS-desktop/pull/1573)) ([2e38422](https://github.com/bytedance/UI-TARS-desktop/commit/2e38422d0)) [@ULIVZ](https://github.com/ULIVZ)
+* **o-gui-agent:** set waiting time as 5s when initailize screenshot ([#1671](https://github.com/bytedance/UI-TARS-desktop/pull/1671)) ([3b6ca2b](https://github.com/bytedance/UI-TARS-desktop/commit/3b6ca2b95)) [@heh](https://github.com/heh)
+* **o-gui-agent:** insert preset messages before real query from user ([#1661](https://github.com/bytedance/UI-TARS-desktop/pull/1661)) ([43ba4cf](https://github.com/bytedance/UI-TARS-desktop/commit/43ba4cf6d)) [@heh](https://github.com/heh)
+* **o-gui-agent:** support agent mode and game operator with enhanced error handling ([#1656](https://github.com/bytedance/UI-TARS-desktop/pull/1656)) ([4539b80](https://github.com/bytedance/UI-TARS-desktop/commit/4539b8098)) [@heh](https://github.com/heh)
+* **omni-agent:** zoom out game welcome card ([#1672](https://github.com/bytedance/UI-TARS-desktop/pull/1672)) ([9dc0d05](https://github.com/bytedance/UI-TARS-desktop/commit/9dc0d0574)) [@heh](https://github.com/heh)
+* **omni-agent:** add functions prompt for game mode ([#1668](https://github.com/bytedance/UI-TARS-desktop/pull/1668)) ([eab67bf](https://github.com/bytedance/UI-TARS-desktop/commit/eab67bf12)) [@heh](https://github.com/heh)
+* **omni-agent:** optimize agent game mode UI ([#1665](https://github.com/bytedance/UI-TARS-desktop/pull/1665)) ([db0aade](https://github.com/bytedance/UI-TARS-desktop/commit/db0aade42)) [@heh](https://github.com/heh)
+* **omni-agent:** add default runtimeSettings ([#1657](https://github.com/bytedance/UI-TARS-desktop/pull/1657)) ([464ee9b](https://github.com/bytedance/UI-TARS-desktop/commit/464ee9b41)) [@小健](https://github.com/小健)
+* **omni-agent:** agentMode structure update; add game mode support ([#1649](https://github.com/bytedance/UI-TARS-desktop/pull/1649)) ([f3ec7d4](https://github.com/bytedance/UI-TARS-desktop/commit/f3ec7d471)) [@小健](https://github.com/小健)
+* **omni-agent:** compress images for gui screenshot ([#1647](https://github.com/bytedance/UI-TARS-desktop/pull/1647)) ([b8e3d68](https://github.com/bytedance/UI-TARS-desktop/commit/b8e3d68af)) [@小健](https://github.com/小健)
+* **omni-agent:** update agent mode config structure ([#1642](https://github.com/bytedance/UI-TARS-desktop/pull/1642)) ([c3e8513](https://github.com/bytedance/UI-TARS-desktop/commit/c3e8513f7)) [@小健](https://github.com/小健)
+* **tarko:** add runtime settings api in server-next ([#1634](https://github.com/bytedance/UI-TARS-desktop/pull/1634)) ([8d6b08e](https://github.com/bytedance/UI-TARS-desktop/commit/8d6b08ee2)) [@小健](https://github.com/小健)
+* **tarko-agent:** enhance runtime settings with enum labels and UI placement control ([#1638](https://github.com/bytedance/UI-TARS-desktop/pull/1638)) ([70571c2](https://github.com/bytedance/UI-TARS-desktop/commit/70571c24b)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent:** runtime settings ([#1561](https://github.com/bytedance/UI-TARS-desktop/pull/1561)) ([a59d33d](https://github.com/bytedance/UI-TARS-desktop/commit/a59d33d58)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent:** remove engine-selector from agent kernel ([#1576](https://github.com/bytedance/UI-TARS-desktop/pull/1576)) ([76da098](https://github.com/bytedance/UI-TARS-desktop/commit/76da0988f)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-agent, agent-ui:** add `webui.base` support ([#1623](https://github.com/bytedance/UI-TARS-desktop/pull/1623)) ([dce0e7e](https://github.com/bytedance/UI-TARS-desktop/commit/dce0e7e8c)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-cli:** add `--model.displayName` option support ([#1605](https://github.com/bytedance/UI-TARS-desktop/pull/1605)) ([dadfe4e](https://github.com/bytedance/UI-TARS-desktop/commit/dadfe4ec1)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-cli:** support unknown options passthrough ([#1574](https://github.com/bytedance/UI-TARS-desktop/pull/1574)) ([f1f2ccd](https://github.com/bytedance/UI-TARS-desktop/commit/f1f2ccda9)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-next:** sync code from agent-server ([#1663](https://github.com/bytedance/UI-TARS-desktop/pull/1663)) ([2602b10](https://github.com/bytedance/UI-TARS-desktop/commit/2602b1045)) [@小健](https://github.com/小健)
+* **tarko-agent-server, agent-ui:** return initialization events from session create ([#1662](https://github.com/bytedance/UI-TARS-desktop/pull/1662)) ([008124a](https://github.com/bytedance/UI-TARS-desktop/commit/008124a97)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-server, agent-ui:** refine arch of agent options and settings from home to session ([#1645](https://github.com/bytedance/UI-TARS-desktop/pull/1645)) ([3a27504](https://github.com/bytedance/UI-TARS-desktop/commit/3a27504f1)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-ui:** welcome cards ([#1643](https://github.com/bytedance/UI-TARS-desktop/pull/1643)) ([37babcc](https://github.com/bytedance/UI-TARS-desktop/commit/37babcc5c)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-ui:** replaced generic tool renderer with terminal-style renderer ([#1594](https://github.com/bytedance/UI-TARS-desktop/pull/1594)) ([6367f5a](https://github.com/bytedance/UI-TARS-desktop/commit/6367f5ada)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-ui:** add `webui.layout.enableHome` config ([#1629](https://github.com/bytedance/UI-TARS-desktop/pull/1629)) ([d6673d5](https://github.com/bytedance/UI-TARS-desktop/commit/d6673d541)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-ui:** add `webui.layout.enableSidebar` config ([#1624](https://github.com/bytedance/UI-TARS-desktop/pull/1624)) ([530c435](https://github.com/bytedance/UI-TARS-desktop/commit/530c435ca)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-ui:** mobile ui bottom sheet ([#1563](https://github.com/bytedance/UI-TARS-desktop/pull/1563)) ([0a1b7cf](https://github.com/bytedance/UI-TARS-desktop/commit/0a1b7cf08)) [@ULIVZ](https://github.com/ULIVZ)
+
+### Bug Fixes
+
+* **tarko-agent-cli:** merged webui config in script injection (close: #1626) (close: [#1626](https://github.com/bytedance/UI-TARS-desktop/issues/1626)) ([#1627](https://github.com/bytedance/UI-TARS-desktop/pull/1627)) ([c8e83ef](https://github.com/bytedance/UI-TARS-desktop/commit/c8e83ef09)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-server:** system setting api 404 issues ([#1669](https://github.com/bytedance/UI-TARS-desktop/pull/1669)) ([a14bf9a](https://github.com/bytedance/UI-TARS-desktop/commit/a14bf9a26)) [@小健](https://github.com/小健)
+* **tarko-agent-server:** fix agent events problem ([#1666](https://github.com/bytedance/UI-TARS-desktop/pull/1666)) ([3276766](https://github.com/bytedance/UI-TARS-desktop/commit/3276766a6)) [@小健](https://github.com/小健)
+* **tarko-agent-server:** ensure agent initialize events are persisted ([#1660](https://github.com/bytedance/UI-TARS-desktop/pull/1660)) ([221eb37](https://github.com/bytedance/UI-TARS-desktop/commit/221eb3775)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-ui:** display environment input on session creation ([#1667](https://github.com/bytedance/UI-TARS-desktop/pull/1667)) ([2fb6c8f](https://github.com/bytedance/UI-TARS-desktop/commit/2fb6c8fbf)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-ui:** make welcome cards prompt optional ([#1658](https://github.com/bytedance/UI-TARS-desktop/pull/1658)) ([9ec1243](https://github.com/bytedance/UI-TARS-desktop/commit/9ec1243c1)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-ui:** remove ugly container from ImageRenderer ([#1639](https://github.com/bytedance/UI-TARS-desktop/pull/1639)) ([e35aa78](https://github.com/bytedance/UI-TARS-desktop/commit/e35aa78e8)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-ui:** code editor light mode highlighting ([#1636](https://github.com/bytedance/UI-TARS-desktop/pull/1636)) ([6037e0e](https://github.com/bytedance/UI-TARS-desktop/commit/6037e0ef1)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-ui:** restore container and navbar in replay mode ([#1615](https://github.com/bytedance/UI-TARS-desktop/pull/1615)) ([2afe334](https://github.com/bytedance/UI-TARS-desktop/commit/2afe334dd)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-ui:** restore fallback image upload when no runtime settings ([#1619](https://github.com/bytedance/UI-TARS-desktop/pull/1619)) ([cf4d88b](https://github.com/bytedance/UI-TARS-desktop/commit/cf4d88b2f)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-ui:** improve `read_multiple_files` renderer parsing and error handling ([#1606](https://github.com/bytedance/UI-TARS-desktop/pull/1606)) ([a243be9](https://github.com/bytedance/UI-TARS-desktop/commit/a243be9d5)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-ui:** remove duplicate url actions bar from browser renderer ([#1584](https://github.com/bytedance/UI-TARS-desktop/pull/1584)) ([c2466c1](https://github.com/bytedance/UI-TARS-desktop/commit/c2466c148)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-agent-ui:** improve monaco editor line numbers spacing ([#1571](https://github.com/bytedance/UI-TARS-desktop/pull/1571)) ([77a2a27](https://github.com/bytedance/UI-TARS-desktop/commit/77a2a27a4)) [@ULIVZ](https://github.com/ULIVZ)
+* **tarko-server-next:** remove unexisted routes ([#1650](https://github.com/bytedance/UI-TARS-desktop/pull/1650)) ([7bb5945](https://github.com/bytedance/UI-TARS-desktop/commit/7bb5945cd)) [@小健](https://github.com/小健)
+
 ## [0.3.0-beta.12](https://github.com/bytedance/UI-TARS-desktop/compare/v0.3.0-beta.11-canary-e70d431f-20250917163005...v0.3.0-beta.12) (2025-09-18)
 
 ### Features
