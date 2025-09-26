@@ -1,12 +1,10 @@
 /**
  * Format a timestamp to a user-friendly date string
- * Handles null/undefined timestamps by using current time as fallback
  */
-export const formatTimestamp = (timestamp: number | null | undefined, compact = false): string => {
-  const validTimestamp = timestamp ?? Date.now();
+export const formatTimestamp = (timestamp: number, compact = false): string => {
   const now = Date.now();
-  const diff = now - validTimestamp;
-  const date = new Date(validTimestamp);
+  const diff = now - timestamp;
+  const date = new Date(timestamp);
 
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 };

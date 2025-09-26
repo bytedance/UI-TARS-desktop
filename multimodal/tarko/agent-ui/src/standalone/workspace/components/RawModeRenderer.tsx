@@ -1,6 +1,14 @@
 import React, { useRef, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { FiTerminal, FiClock, FiPlay, FiCheckCircle, FiXCircle, FiCopy, FiCheck } from 'react-icons/fi';
+import {
+  FiTerminal,
+  FiClock,
+  FiPlay,
+  FiCheckCircle,
+  FiXCircle,
+  FiCopy,
+  FiCheck,
+} from 'react-icons/fi';
 import { JSONViewer, JSONViewerRef } from '@tarko/ui';
 import { RawToolMapping } from '@/common/state/atoms/rawEvents';
 import { formatTimestamp } from '@/common/utils/formatters';
@@ -48,7 +56,7 @@ const CopyButton: React.FC<{
 
 export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping }) => {
   const { toolCall, toolResult } = toolMapping;
-  
+
   // Refs for JSONViewer components
   const parametersRef = useRef<JSONViewerRef>(null);
   const responseRef = useRef<JSONViewerRef>(null);
@@ -71,7 +79,9 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
             <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 mt-0.5">
               <div className="flex items-center gap-1.5">
                 <FiClock size={11} />
-                <span className="font-medium">{formatTimestamp(toolCall.timestamp, true)}</span>
+                <span className="font-medium">
+                  {toolCall.timestamp ? formatTimestamp(toolCall.timestamp, true) : 'Unknown time'}
+                </span>
               </div>
               <div className="w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-500"></div>
               <span className="font-mono text-xs px-2 py-0.5 bg-slate-200/60 dark:bg-slate-700/60 rounded-md">
@@ -98,7 +108,11 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
                   <CopyButton jsonRef={parametersRef} title="Copy parameters JSON" />
                 </div>
                 <div className="bg-white/60 dark:bg-slate-800/60 rounded-lg p-3 border border-slate-200/40 dark:border-slate-700/40">
-                  <JSONViewer ref={parametersRef} data={toolCall.arguments} emptyMessage="No parameters provided" />
+                  <JSONViewer
+                    ref={parametersRef}
+                    data={toolCall.arguments}
+                    emptyMessage="No parameters provided"
+                  />
                 </div>
               </div>
             )}
@@ -147,7 +161,9 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
               <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 mt-0.5">
                 <div className="flex items-center gap-1.5">
                   <FiClock size={11} />
-                  <span className="font-medium">{formatTimestamp(toolResult.timestamp, true)}</span>
+                  <span className="font-medium">
+                    {toolResult.timestamp ? formatTimestamp(toolResult.timestamp, true) : 'Unknown time'}
+                  </span>
                 </div>
                 {toolResult.elapsedMs && (
                   <>
@@ -183,7 +199,11 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
                   <CopyButton jsonRef={responseRef} title="Copy response JSON" />
                 </div>
                 <div className="bg-white/60 dark:bg-slate-800/60 rounded-lg p-3 border border-slate-200/40 dark:border-slate-700/40">
-                  <JSONViewer ref={responseRef} data={toolResult.content} emptyMessage="No response data" />
+                  <JSONViewer
+                    ref={responseRef}
+                    data={toolResult.content}
+                    emptyMessage="No response data"
+                  />
                 </div>
               </div>
               {toolResult._extra && (
@@ -193,7 +213,11 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
                     <CopyButton jsonRef={metadataRef} title="Copy metadata JSON" />
                   </div>
                   <div className="bg-white/60 dark:bg-slate-800/60 rounded-lg p-3 border border-slate-200/40 dark:border-slate-700/40">
-                    <JSONViewer ref={metadataRef} data={toolResult._extra} emptyMessage="No metadata" />
+                    <JSONViewer
+                      ref={metadataRef}
+                      data={toolResult._extra}
+                      emptyMessage="No metadata"
+                    />
                   </div>
                 </div>
               )}
