@@ -48,9 +48,9 @@ const WelcomeCards: React.FC<WelcomeCardsProps> = ({
       // Navigate to creating page with card-specific agent options
       navigate('/creating', {
         state: {
-          query: card.prompt,
-          agentOptions: card.agentOptions || {}
-        }
+          ...(card.prompt && { query: card.prompt }),
+          agentOptions: card.agentOptions || {},
+        },
       });
     } catch (error) {
       console.error('Failed to navigate to creating:', error);
