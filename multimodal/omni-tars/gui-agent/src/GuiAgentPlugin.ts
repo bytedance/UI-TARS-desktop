@@ -39,7 +39,7 @@ export class GuiAgentPlugin extends AgentPlugin {
   async initialize(): Promise<void> {
     if (this.agentMode && this.agentMode.id === 'game' && !this.initializedWithMode) {
       await this.emitPresetUserQuey();
-      await this.emitScreenshotEvent();
+      await this.emitScreenshotEvent(4000);
       await this.emitPresetAssistantMessage();
       this.initializedWithMode = true;
     }
