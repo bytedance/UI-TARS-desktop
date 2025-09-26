@@ -68,7 +68,7 @@ export class EnvironmentInputHandler
       };
     });
 
-    if (Array.isArray(event.content) && shouldUpdatePanelContent(get, sessionId)) {
+    if (Array.isArray(event.content)) {
       const imageContent = event.content.find(
         (item): item is ChatCompletionContentPartImage =>
           typeof item === 'object' &&
@@ -84,13 +84,25 @@ export class EnvironmentInputHandler
       if (imageContent && imageContent.image_url) {
         const currentPanelContent = get(sessionPanelContentAtom);
         const sessionMessages = get(messagesAtom)[sessionId] || [];
-        
+
         // Check if this is the first environment_input event in the session
-        const isFirstEnvironmentInput = sessionMessages.filter(msg => msg.role === 'environment').length === 0;
+        // Note: We check messages that were added BEFORE this event (excluding the current one being processed)
+        const isFirstEnvironmentInput =
+          sessionMessages.filter((msg) => msg.role === 'environment').length === 0;
         const currentSessionPanel = currentPanelContent[sessionId];
 
         // Always show first environment_input (initialization screenshot) or update existing browser_vision_control panel
-        if (isFirstEnvironmentInput || (currentSessionPanel && currentSessionPanel.type === 'browser_vision_control')) {
+        // For session creation, we bypass the shouldUpdatePanelContent check for first environment_input
+        const shouldUpdate =
+          isFirstEnvironmentInput ||
+          (currentSessionPanel && currentSessionPanel.type === 'browser_vision_control') ||
+          shouldUpdatePanelContent(get, sessionId);
+
+        if (
+          shouldUpdate &&
+          (isFirstEnvironmentInput ||
+            (currentSessionPanel && currentSessionPanel.type === 'browser_vision_control'))
+        ) {
           set(sessionPanelContentAtom, (prev) => ({
             ...prev,
             [sessionId]: {
