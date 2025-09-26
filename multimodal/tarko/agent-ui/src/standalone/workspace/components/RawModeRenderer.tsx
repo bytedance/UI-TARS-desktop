@@ -71,7 +71,7 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
             <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 mt-0.5">
               <div className="flex items-center gap-1.5">
                 <FiClock size={11} />
-                <span className="font-medium">{formatTimestamp(toolCall.timestamp || Date.now(), true)}</span>
+                <span className="font-medium">{formatTimestamp(toolCall.timestamp, true)}</span>
               </div>
               <div className="w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-500"></div>
               <span className="font-mono text-xs px-2 py-0.5 bg-slate-200/60 dark:bg-slate-700/60 rounded-md">
@@ -147,7 +147,7 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
               <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 mt-0.5">
                 <div className="flex items-center gap-1.5">
                   <FiClock size={11} />
-                  <span className="font-medium">{formatTimestamp(toolResult.timestamp || Date.now(), true)}</span>
+                  <span className="font-medium">{formatTimestamp(toolResult.timestamp, true)}</span>
                 </div>
                 {toolResult.elapsedMs && (
                   <>
