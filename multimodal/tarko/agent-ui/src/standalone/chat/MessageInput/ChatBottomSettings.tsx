@@ -12,8 +12,8 @@ import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useAtomValue } from 'jotai';
 import { isProcessingAtom } from '@/common/state/atoms/ui';
 import { FiCheck, FiLoader, FiX, FiChevronDown } from 'react-icons/fi';
-import { TbBulb, TbSearch, TbBook, TbSettings, TbBrain, TbBrowser } from 'react-icons/tb';
 import { Dropdown, DropdownItem, DropdownHeader, DropdownDivider } from '@tarko/ui';
+import { getAgentOptionIcon } from './agentIconUtils';
 
 interface ActiveOption {
   key: string;
@@ -206,35 +206,7 @@ export const ChatBottomSettings: React.FC<ChatBottomSettingsProps> = ({
   }
 
   const getOptionIcon = (key: string, property?: AgentRuntimeSettingProperty) => {
-    // Use custom icon if specified
-    if (property?.icon) {
-      switch (property.icon) {
-        case 'browser':
-          return <TbBrowser className="w-3.5 h-3.5" />;
-        case 'search':
-          return <TbSearch className="w-3.5 h-3.5" />;
-        case 'book':
-          return <TbBook className="w-3.5 h-3.5" />;
-        case 'bulb':
-          return <TbBulb className="w-3.5 h-3.5" />;
-        case 'brain':
-          return <TbBrain className="w-3.5 h-3.5" />;
-        default:
-          return <TbSettings className="w-3.5 h-3.5" />;
-      }
-    }
-
-    // Fallback to key/title-based detection
-    const lowerKey = key.toLowerCase();
-    const lowerTitle = (property?.title || '').toLowerCase();
-    if (lowerKey.includes('browser') || lowerTitle.includes('browser'))
-      return <TbBrowser className="w-3.5 h-3.5" />;
-    if (lowerKey.includes('search')) return <TbSearch className="w-3.5 h-3.5" />;
-    if (lowerKey.includes('research')) return <TbBook className="w-3.5 h-3.5" />;
-    if (lowerKey.includes('foo')) return <TbBulb className="w-3.5 h-3.5" />;
-    if (lowerKey.includes('thinking') || lowerTitle.includes('思考'))
-      return <TbBrain className="w-3.5 h-3.5" />;
-    return <TbSettings className="w-3.5 h-3.5" />;
+    return getAgentOptionIcon(key, property, 'sm');
   };
 
   const renderActivatedOption = (option: ActiveOption) => {

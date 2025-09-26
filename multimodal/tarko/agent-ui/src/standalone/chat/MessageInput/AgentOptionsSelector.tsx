@@ -11,18 +11,11 @@ import {
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useAtomValue } from 'jotai';
 import { isProcessingAtom } from '@/common/state/atoms/ui';
-import {
-  FiPlus,
-  FiCheck,
-  FiChevronRight,
-  FiImage,
-  FiPaperclip,
-  FiLoader,
-  FiZap,
-} from 'react-icons/fi';
-import { TbBulb, TbSearch, TbBook, TbSettings, TbBrain, TbPhoto, TbBrowser } from 'react-icons/tb';
+import { FiPlus, FiCheck, FiChevronRight, FiImage, FiPaperclip, FiLoader } from 'react-icons/fi';
+import { TbPhoto } from 'react-icons/tb';
 import { Dropdown, DropdownItem, DropdownHeader, DropdownDivider } from '@tarko/ui';
 import { createPortal } from 'react-dom';
+import { getAgentOptionIcon } from './agentIconUtils';
 
 interface ActiveOption {
   key: string;
@@ -464,15 +457,7 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
     }));
 
     const getOptionIcon = (key: string, property: AgentRuntimeSettingProperty) => {
-      const lowerKey = key.toLowerCase();
-      const lowerTitle = (property.title || '').toLowerCase();
-      if (lowerKey.includes('browser') || lowerTitle.includes('browser'))
-        return <TbBrowser className="w-4 h-4" />;
-      if (lowerKey.includes('search')) return <TbSearch className="w-4 h-4" />;
-      if (lowerKey.includes('research')) return <TbBook className="w-4 h-4" />;
-      if (lowerKey.includes('foo')) return <TbBulb className="w-4 h-4" />;
-      if (lowerKey.includes('thinking')) return <TbBrain className="w-4 h-4" />;
-      return <FiZap className="w-4 h-4" />;
+      return getAgentOptionIcon(key, property);
     };
 
     const renderOptionItem = (config: AgentOptionConfig) => {
