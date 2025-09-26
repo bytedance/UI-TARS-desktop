@@ -70,6 +70,7 @@ export class AgentSession {
   private agioProvider?: AgioEvent.AgioProvider;
   private agioProviderConstructor?: AgioProviderConstructor;
   private sessionInfo?: SessionInfo;
+  private storageUnsubscribeMap = new WeakMap<IAgent, () => void>();
 
   /**
    * Create event handler for storage and AGIO processing
@@ -205,11 +206,13 @@ export class AgentSession {
     }
 
     // Log agent configuration
-    console.info('Agent Config', JSON.stringify((wrappedAgent as any).getOptions?.(), null, 2));
+    if ('getOptions' in wrappedAgent && typeof wrappedAgent.getOptions === 'function') {
+      console.info('Agent Config', JSON.stringify(wrappedAgent.getOptions(), null, 2));
+    }
 
-    // Return the storage unsubscribe function along with the agent
-    // We need to store this for cleanup, but the agent is the primary return value
-    (wrappedAgent as any)._storageUnsubscribe = storageUnsubscribe;
+    // Store the storage unsubscribe function for later cleanup
+    // We'll use a WeakMap to avoid polluting the agent object
+    this.storageUnsubscribeMap.set(wrappedAgent, storageUnsubscribe);
 
     return wrappedAgent;
   }
@@ -296,11 +299,11 @@ export class AgentSession {
     // Event streams are now set up within createAndInitializeAgent before agent.initialize()
     this.agent = await this.createAndInitializeAgent(this.sessionInfo);
 
-    // Extract the storage unsubscribe function that was attached during agent creation
-    const storageUnsubscribe = (this.agent as any)._storageUnsubscribe;
+    // Extract the storage unsubscribe function from our WeakMap
+    const storageUnsubscribe = this.storageUnsubscribeMap.get(this.agent);
 
-    // Clean up the temporary property
-    delete (this.agent as any)._storageUnsubscribe;
+    // Clean up the WeakMap entry
+    this.storageUnsubscribeMap.delete(this.agent);
 
     // Notify client that session is ready
     this.eventBridge.emit('ready', { sessionId: this.id });
