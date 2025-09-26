@@ -68,6 +68,22 @@ export const gui_functions = `
 {"type": "function", "name": "wait", "parameters": {"type": "object", "properties": {"time": {"type": "integer", "description": "Wait time in seconds."}}, "required": []}, "description": "Wait for a while."}
 `;
 
+export const game_functions = `
+{"type": "function", "name": "click", "parameters": {"type": "object", "properties": {"point": {"type": "string", "description": "Click coordinates. The format is: <point>x y</point>"}}, "required": ["point"]}, "description": "Mouse left single click action."}
+{"type": "function", "name": "drag", "parameters": {"type": "object", "properties": {"start_point": {"type": "string", "description": "Drag start point. The format is: <point>x y</point>"}, "end_point": {"type": "string", "description": "Drag end point. The format is: <point>x y</point>"}}, "required": ["start_point", "end_point"]}, "description": "Mouse left button drag action."}
+{"type": "function", "name": "hotkey", "parameters": {"type": "object", "properties": {"key": {"type": "string", "description": "Hotkeys you want to press. Split keys with a space and use lowercase."}}, "required": ["key"]}, "description": "Press hotkey."}
+{"type": "function", "name": "left_double", "parameters": {"type": "object", "properties": {"point": {"type": "string", "description": "Click coordinates. The format is: <point>x y</point>"}}, "required": ["point"]}, "description": "Mouse left double click action."}
+{"type": "function", "name": "mouse_down", "parameters": {"type": "object", "properties": {"point": {"type": "string", "description": "Mouse down position. If not specified, default to execute on the current mouse position. The format is: <point>x y</point>"}, "button": {"type": "string", "description": "Down button. Default to left.", "enum": ["left", "right"]}}, "required": []}, "description": "Mouse down action."}
+{"type": "function", "name": "mouse_up", "parameters": {"type": "object", "properties": {"point": {"type": "string", "description": "Mouse up position. If not specified, default to execute on the current mouse position. The format is: <point>x y</point>"}, "button": {"type": "string", "description": "Up button. Default to left.", "enum": ["left", "right"]}}, "required": []}, "description": "Mouse up action."}
+{"type": "function", "name": "move_to", "parameters": {"type": "object", "properties": {"point": {"type": "string", "description": "Target coordinates. The format is: <point>x y</point>"}}, "required": ["point"]}, "description": "Mouse move action."}
+{"type": "function", "name": "press", "parameters": {"type": "object", "properties": {"key": {"type": "string", "description": "Key you want to press. Only one key can be pressed at one time."}}, "required": ["key"]}, "description": "Press key."}
+{"type": "function", "name": "release", "parameters": {"type": "object", "properties": {"key": {"type": "string", "description": "Key you want to release. Only one key can be released at one time."}}, "required": ["key"]}, "description": "Release key."}
+{"type": "function", "name": "right_single", "parameters": {"type": "object", "properties": {"point": {"type": "string", "description": "Click coordinates. The format is: <point>x y</point>"}}, "required": ["point"]}, "description": "Mouse right single click action."}
+{"type": "function", "name": "scroll", "parameters": {"type": "object", "properties": {"point": {"type": "string", "description": "Scroll start position. If not specified, default to execute on the current mouse position. The format is: <point>x y</point>"}, "direction": {"type": "string", "description": "Scroll direction.", "enum": ["up", "down", "left", "right"]}}, "required": ["direction"]}, "description": "Scroll action."}
+{"type": "function", "name": "type", "parameters": {"type": "object", "properties": {"content": {"type": "string", "description": "Type content. If you want to submit your input, use \n at the end of content."}}, "required": ["content"]}, "description": "Type content."}
+{"type": "function", "name": "wait", "parameters": {"type": "object", "properties": {"time": {"type": "integer", "description": "Wait time in seconds."}}, "required": []}, "description": "Wait for a while."}
+`;
+
 const createPROMPT2 = (description: string) => {
   return `You are an agent designed to accomplish tasks.
 ${description}
@@ -137,7 +153,7 @@ export const createSystemPromptGroup = (agentMode: AgentMode): string[] => {
       return [
         PROMPT1,
         createPROMPT2(game_task_description),
-        createPROMPT3([gui_functions], gui_additional_notes),
+        createPROMPT3([game_functions], gui_additional_notes),
       ];
   }
 
