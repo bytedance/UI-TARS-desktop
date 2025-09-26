@@ -58,37 +58,50 @@ function formatArguments(args: Record<string, any>): string {
  * Custom CodeHighlight wrapper that makes URLs clickable in JSON
  */
 function CodeHighlightWithLinks({ code, language }: { code: string; language: string }) {
-  const [processedCode, setProcessedCode] = React.useState<string>(code);
-  
-  React.useEffect(() => {
-    if (language === 'json') {
-      // Replace URLs in JSON strings with clickable links
-      const urlRegex = /"(https?:\/\/[^"\s]+)"/g;
-      const linkedCode = code.replace(urlRegex, (match, url) => {
-        return `"<span class='json-url-link text-blue-400 hover:text-blue-300 underline cursor-pointer' data-url='${url}'>${url}</span>"`;
-      });
-      setProcessedCode(linkedCode);
-    } else {
-      setProcessedCode(code);
-    }
-  }, [code, language]);
-  
-  const handleClick = React.useCallback((e: React.MouseEvent) => {
-    const target = e.target as HTMLElement;
-    if (target.classList.contains('json-url-link')) {
-      e.preventDefault();
-      e.stopPropagation();
-      const url = target.getAttribute('data-url');
-      if (url) {
-        window.open(url, '_blank', 'noopener,noreferrer');
+  if (language !== 'json') {
+    return <CodeHighlight code={code} language={language} />;
+  }
+
+  // For JSON, render with clickable URLs
+  const renderJsonWithLinks = (jsonString: string) => {
+    const urlRegex = /"(https?:\/\/[^"\s]+)"/g;
+    const parts = jsonString.split(urlRegex);
+    
+    return parts.map((part, index) => {
+      // Check if this part is a URL (every odd index after split)
+      if (index > 0 && index % 2 === 1 && /^https?:\/\//.test(part)) {
+        return (
+          <React.Fragment key={index}>
+            <span className="text-green-400">"</span>
+            <a
+              href={part}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:text-blue-300 underline cursor-pointer"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {part}
+            </a>
+            <span className="text-green-400">"</span>
+          </React.Fragment>
+        );
       }
-    }
-  }, []);
+      return <span key={index}>{part}</span>;
+    });
+  };
+
+  // Check if the code contains URLs in JSON strings
+  const hasUrls = /"https?:\/\/[^"\s]+"/.test(code);
   
+  if (!hasUrls) {
+    return <CodeHighlight code={code} language={language} />;
+  }
+
+  // Render with custom URL handling
   return (
-    <div onClick={handleClick}>
-      <CodeHighlight code={processedCode} language={language} />
-    </div>
+    <pre className="text-sm bg-transparent text-gray-300 whitespace-pre-wrap break-words font-mono">
+      <code>{renderJsonWithLinks(code)}</code>
+    </pre>
   );
 }
 
