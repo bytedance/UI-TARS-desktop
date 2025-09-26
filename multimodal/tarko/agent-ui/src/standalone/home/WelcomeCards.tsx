@@ -45,11 +45,21 @@ const WelcomeCards: React.FC<WelcomeCardsProps> = ({
     setLoadingCardId(cardId);
 
     try {
-      // Navigate to creating page with card-specific agent options
+      // Set runtime settings based on card category
+      const runtimeSettings: Record<string, unknown> = {};
+      // If activeCategory is "Game", set agentMode to "game"
+      if (activeCategory === 'Game') {
+        runtimeSettings.agentMode = 'game';
+      }
+      // For other categories, use default values (omni mode)
+      // The default value will be applied by the system if not specified
+
+      // Navigate to creating page with card-specific agent options and runtime settings
       navigate('/creating', {
         state: {
           ...(card.prompt && { query: card.prompt }),
           agentOptions: card.agentOptions || {},
+          ...(Object.keys(runtimeSettings).length > 0 && { runtimeSettings }),
         },
       });
     } catch (error) {
