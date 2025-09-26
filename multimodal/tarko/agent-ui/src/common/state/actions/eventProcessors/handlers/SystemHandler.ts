@@ -102,41 +102,54 @@ export class EnvironmentInputHandler
           isFirstEnvironmentInput,
           currentSessionPanel,
           shouldUpdate,
-          eventId: event.id
+          eventId: event.id,
         });
 
-        if (
-          shouldUpdate &&
-          (isFirstEnvironmentInput ||
-            (currentSessionPanel && currentSessionPanel.type === 'browser_vision_control'))
-        ) {
-          console.log('Setting sessionPanelContentAtom for session:', sessionId);
-          set(sessionPanelContentAtom, (prev) => ({
-            ...prev,
-            [sessionId]: {
-              type: 'browser_vision_control',
-              source: null,
-              title: event.description || 'Browser Screenshot',
-              timestamp: event.timestamp,
-              originalContent: event.content,
-              environmentId: event.id,
-              arguments: {
-                // Browser control data - can be empty for environment screenshots
-                thought: undefined,
-                step: undefined,
-                action: undefined,
-                status: undefined,
+        if (shouldUpdate) {
+          if (isFirstEnvironmentInput) {
+            // First environment input: use simple image renderer
+            console.log('Setting image panel for first environment input:', sessionId);
+            set(sessionPanelContentAtom, (prev) => ({
+              ...prev,
+              [sessionId]: {
+                type: 'image',
+                source: imageContent.image_url.url,
+                title: event.description || 'Environment Screenshot',
+                timestamp: event.timestamp,
+                originalContent: event.content,
+                environmentId: event.id,
               },
-              _extra: {
-                currentScreenshot: imageContent.image_url.url,
+            }));
+          } else if (currentSessionPanel && currentSessionPanel.type === 'browser_vision_control') {
+            // Update existing browser_vision_control panel
+            console.log('Updating browser_vision_control panel for session:', sessionId);
+            set(sessionPanelContentAtom, (prev) => ({
+              ...prev,
+              [sessionId]: {
+                type: 'browser_vision_control',
+                source: null,
+                title: event.description || 'Browser Screenshot',
+                timestamp: event.timestamp,
+                originalContent: event.content,
+                environmentId: event.id,
+                arguments: {
+                  // Browser control data - can be empty for environment screenshots
+                  thought: undefined,
+                  step: undefined,
+                  action: undefined,
+                  status: undefined,
+                },
+                _extra: {
+                  currentScreenshot: imageContent.image_url.url,
+                },
               },
-            },
-          }));
+            }));
+          }
         } else {
           console.log('Not setting sessionPanelContentAtom, conditions not met:', {
             shouldUpdate,
             isFirstEnvironmentInput,
-            currentSessionPanel: !!currentSessionPanel
+            currentSessionPanel: !!currentSessionPanel,
           });
         }
         // Skip update for other panel types to avoid duplicate Browser Screenshot rendering
