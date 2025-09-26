@@ -73,6 +73,41 @@ export class AgentSession {
   private storageUnsubscribeMap = new WeakMap<IAgent, () => void>();
   private pendingEventSaves = new Set<Promise<void>>();
 
+
+  constructor(
+    private server: AgentServer,
+    sessionId: string,
+    agioProviderImpl?: AgioProviderConstructor,
+    sessionInfo?: SessionInfo,
+    private agentOptions?: Record<string, any>, // One-time agent initialization options
+  ) {
+    this.id = sessionId;
+    this.eventBridge = new EventStreamBridge();
+    this.sessionInfo = sessionInfo;
+    this.agioProviderConstructor = agioProviderImpl;
+
+    // Agent will be created and initialized in initialize() method
+    this.agent = null as any; // Temporary placeholder
+  }
+
+
+  async initialize() {
+    // Create and initialize agent with all wrappers
+    // Event streams are now set up within createAndInitializeAgent before agent.initialize()
+    this.agent = await this.createAndInitializeAgent(this.sessionInfo);
+
+    // Extract the storage unsubscribe function from our WeakMap
+    const storageUnsubscribe = this.storageUnsubscribeMap.get(this.agent);
+
+    // Clean up the WeakMap entry
+    this.storageUnsubscribeMap.delete(this.agent);
+
+    // Notify client that session is ready
+    this.eventBridge.emit('ready', { sessionId: this.id });
+
+    return { storageUnsubscribe };
+  }
+
   /**
    * Create event handler for storage and AGIO processing
    */
@@ -262,21 +297,7 @@ export class AgentSession {
     return baseAgent;
   }
 
-  constructor(
-    private server: AgentServer,
-    sessionId: string,
-    agioProviderImpl?: AgioProviderConstructor,
-    sessionInfo?: SessionInfo,
-    private agentOptions?: Record<string, any>, // One-time agent initialization options
-  ) {
-    this.id = sessionId;
-    this.eventBridge = new EventStreamBridge();
-    this.sessionInfo = sessionInfo;
-    this.agioProviderConstructor = agioProviderImpl;
 
-    // Agent will be created and initialized in initialize() method
-    this.agent = null as any; // Temporary placeholder
-  }
 
   /**
    * Get the current processing status of the agent
@@ -286,22 +307,6 @@ export class AgentSession {
     return this.agent.status() === AgentStatus.EXECUTING;
   }
 
-  async initialize() {
-    // Create and initialize agent with all wrappers
-    // Event streams are now set up within createAndInitializeAgent before agent.initialize()
-    this.agent = await this.createAndInitializeAgent(this.sessionInfo);
-
-    // Extract the storage unsubscribe function from our WeakMap
-    const storageUnsubscribe = this.storageUnsubscribeMap.get(this.agent);
-
-    // Clean up the WeakMap entry
-    this.storageUnsubscribeMap.delete(this.agent);
-
-    // Notify client that session is ready
-    this.eventBridge.emit('ready', { sessionId: this.id });
-
-    return { storageUnsubscribe };
-  }
 
   /**
    * Run a query and return a strongly-typed response
