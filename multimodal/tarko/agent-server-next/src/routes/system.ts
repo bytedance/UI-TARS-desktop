@@ -6,16 +6,11 @@
 import { Hono } from 'hono';
 import * as systemController from '../controllers/system';
 import type { ContextVariables } from '../types';
-import { sessionRestoreMiddleware } from '../middlewares';
-
 /**
  * Create system information routes
  */
 export function createSystemRoutes(): Hono<{ Variables: ContextVariables }> {
   const router = new Hono<{ Variables: ContextVariables }>();
-
-    router.use('/api/v1/runtime-settings', sessionRestoreMiddleware);
-
 
   // Health check endpoint
   router.get('/api/v1/health', systemController.healthCheck);
