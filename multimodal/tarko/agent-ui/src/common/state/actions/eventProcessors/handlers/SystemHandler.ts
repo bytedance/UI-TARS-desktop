@@ -107,22 +107,16 @@ export class EnvironmentInputHandler
             type: 'image',
             source: imageContent.image_url.url,
           };
-        } else if (currentSessionPanel?.type === 'browser_vision_control' || shouldUpdatePanelContent(get, sessionId)) {
+        } else if (
+          currentSessionPanel?.type === 'browser_vision_control' ||
+          shouldUpdatePanelContent(get, sessionId)
+        ) {
           // Update existing browser_vision_control panel or create new one
           panelContent = {
             ...basePanelContent,
             type: 'browser_vision_control',
             source: null,
             title: event.description || 'Browser Screenshot',
-            arguments: {
-              thought: undefined,
-              step: undefined,
-              action: undefined,
-              status: undefined,
-            },
-            _extra: {
-              currentScreenshot: imageContent.image_url.url,
-            },
           };
         }
 
