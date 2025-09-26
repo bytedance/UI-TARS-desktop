@@ -21,7 +21,7 @@ export default class OmniTARSAgent extends ComposableAgent {
       {
         title: '2048',
         category: 'Game',
-        prompt: `Play this game, your target score is 1024`,
+        // prompt: `Play this game, your target score is 1024`,
         image:
           'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=80,height=80,fit=cover,f=auto/cb8c967c-4a78-4ffa-8506-cbac69746f4f/2048.png',
         agentOptions: {
