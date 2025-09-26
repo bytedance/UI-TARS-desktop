@@ -1,6 +1,6 @@
 {
   "name": "@tarko/agio",
-  "version": "0.3.0-beta.12",
+  "version": "0.3.0-beta.12-canary-2602b1045-20250926090631",
   "description": "Agio (Agent Insights and Observations) - A standardized multimodal AI Agent Server monitoring protocol for server-side agent operation monitoring and analytics",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
