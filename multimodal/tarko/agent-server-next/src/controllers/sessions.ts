@@ -47,11 +47,11 @@ export async function createSession(c: HonoContext) {
   try {
     const server = c.get('server');
     const sessionFactory = server.getSessionFactory();
-    const sessionManager = server.getSessionPool();
+    const sessionPool = server.getSessionPool();
 
-    const { session, sessionInfo, storageUnsubscribe } = await sessionFactory.createSession(c);
+    const { session, events, sessionInfo, storageUnsubscribe } = await sessionFactory.createSession(c);
 
-    sessionManager.set(session.id, session);
+    sessionPool.set(session.id, session);
 
     // Save unsubscribe function for cleanup
     if (storageUnsubscribe) {
@@ -62,6 +62,7 @@ export async function createSession(c: HonoContext) {
       {
         sessionId: session.id,
         session: sessionInfo,
+        events
       },
       201,
     );

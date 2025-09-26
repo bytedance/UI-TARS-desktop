@@ -74,6 +74,7 @@ export class AgentSession {
   public sessionInfo?: SessionInfo;
   private logger: ILogger;
   private storageUnsubscribeMap = new WeakMap<IAgent, () => void>();
+  private pendingEventSaves = new Set<Promise<void>>();
 
 
   constructor(
@@ -119,11 +120,15 @@ export class AgentSession {
     return async (event: AgentEventStream.Event) => {
       // Save to storage if available and event should be stored
       if (shouldStoreEvent(event)) {
-        try {
-          await this.server.daoFactory.saveEvent(this.id, event);
-        } catch (error) {
-          console.error(`Failed to save event to storage: ${error}`);
-        }
+        const savePromise = this.server.daoFactory.saveEvent(this.id, event)
+          .catch(error => {
+            console.error(`Failed to save event to storage: ${error}`);
+          })
+          .finally(() => {
+            this.pendingEventSaves.delete(savePromise);
+          });
+        
+        this.pendingEventSaves.add(savePromise);
       }
 
       // Process AGIO events if collector is configured
@@ -135,6 +140,16 @@ export class AgentSession {
         }
       }
     };
+  }
+
+    /**
+   * Wait for all pending event saves to complete
+   * This ensures that all events emitted during initialization are persisted before querying storage
+   */
+  async waitForEventSavesToComplete(): Promise<void> {
+    if (this.pendingEventSaves.size > 0) {
+      await Promise.all(Array.from(this.pendingEventSaves));
+    }
   }
 
   /**

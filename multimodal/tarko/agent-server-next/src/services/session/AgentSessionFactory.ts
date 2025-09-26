@@ -46,6 +46,7 @@ export class AgentSessionFactory {
     session: AgentSession;
     sessionInfo?: SessionInfo;
     storageUnsubscribe?: () => void;
+    events: any[]
   }> {
     const sessionId = nanoid();
     const user = getCurrentUser(c);
@@ -53,6 +54,7 @@ export class AgentSessionFactory {
     
     // Get runtimeSettings and agentOptions from request body
     const body = await c.req.json().catch(() => ({}));
+
     const { runtimeSettings, agentOptions } = body as {
       runtimeSettings?: Record<string, any>;
       agentOptions?: Record<string, any>;
@@ -129,10 +131,20 @@ export class AgentSessionFactory {
       }
     }
 
+    // Wait a short time to ensure all initialization events are persisted
+    // This handles the async nature of event storage during agent initialization
+    await session.waitForEventSavesToComplete();
+
+    // Get events that were created during agent initialization
+    let initializationEvents = await server.daoFactory.getSessionEvents(sessionId);
+
+    console.log('Return initializationEvents', initializationEvents);
+
     return {
       session,
       sessionInfo: savedSessionInfo,
       storageUnsubscribe,
+      events: initializationEvents,
     };
   }
 

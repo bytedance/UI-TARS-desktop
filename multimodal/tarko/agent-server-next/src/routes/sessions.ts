@@ -28,7 +28,6 @@ export function createSessionRoutes(): Hono<{ Variables: ContextVariables }> {
   router.use('/api/v1/sessions/generate-summary', sessionRestoreMiddleware);
   router.use('/api/v1/sessions/share', sessionRestoreMiddleware);
   router.use('/api/v1/sessions/workspace/*', sessionRestoreMiddleware);
-  router.use('/api/v1/sessions/runtime-settings', sessionRestoreMiddleware);
 
   // Session-specific routes
   router.get('/api/v1/sessions/details', sessionsController.getSessionDetails);
