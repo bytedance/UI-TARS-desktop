@@ -115,10 +115,21 @@ export class EnvironmentInputHandler
             ...prev,
             [sessionId]: {
               type: 'browser_vision_control',
+              source: null,
               title: event.description || 'Browser Screenshot',
               timestamp: event.timestamp,
               originalContent: event.content,
               environmentId: event.id,
+              arguments: {
+                // Browser control data - can be empty for environment screenshots
+                thought: undefined,
+                step: undefined,
+                action: undefined,
+                status: undefined,
+              },
+              _extra: {
+                currentScreenshot: imageContent.image_url.url,
+              },
             },
           }));
         } else {
