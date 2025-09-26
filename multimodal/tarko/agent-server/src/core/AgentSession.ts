@@ -117,7 +117,7 @@ export class AgentSession {
       ...this.server.appConfig,
       name: this.server.getCurrentAgentName(),
       model: this.resolveModelConfig(sessionInfo),
-      initialEvents: storedEvents, // 🎯 Pass initial events directly to agent
+      initialEvents: storedEvents, // Pass initial events directly to agent
     };
 
     // Apply runtime settings transformation if available
@@ -183,10 +183,7 @@ export class AgentSession {
       console.debug('AGIO collector initialized', { provider: agentOptions.agio.provider });
     }
 
-    // Log agent configuration
-    if ('getOptions' in wrappedAgent && typeof wrappedAgent.getOptions === 'function') {
-      console.info('Agent Config', JSON.stringify(wrappedAgent.getOptions(), null, 2));
-    }
+    console.info('Agent Config', JSON.stringify(wrappedAgent.getOptions(), null, 2));
 
     // Store the storage unsubscribe function for later cleanup
     // We'll use a WeakMap to avoid polluting the agent object
@@ -513,8 +510,6 @@ export class AgentSession {
       // Create and initialize new agent with updated session info
       // Event streams are automatically set up within createAndInitializeAgent
       this.agent = await this.createAndInitializeAgent(sessionInfo);
-
-      // No need to call setupEventStreams() as it's now handled within createAndInitializeAgent
     } catch (error) {
       console.error('Failed to recreate agent for session', { sessionId: this.id, error });
       throw error;
