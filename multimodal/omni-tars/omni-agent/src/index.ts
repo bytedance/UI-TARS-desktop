@@ -75,15 +75,15 @@ export default class OmniTARSAgent extends ComposableAgent {
         },
       },
       {
-        title: 'Snake Solver',
+        title: 'Cubinko',
         category: 'Game',
         // prompt: `Play this game, reach level 5`,
         image:
-          'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=80,height=80,fit=cover,f=auto/e466baf845544ef47e0dfbd60f127071/snake-solver.png',
+          'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=80,height=80,fit=cover,f=auto/894ed059623f65b643795d0e70ed41cd/cubinko.png',
         agentOptions: {
           agentMode: {
             id: 'game',
-            link: 'https://poki.com/zh/g/snake-solver',
+            link: 'https://poki.com/zh/g/cubinko',
             browserMode: 'hybrid',
           },
         },
