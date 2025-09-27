@@ -114,7 +114,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
       minWidth: dynamicMinWidth,
       width: 'auto',
       wordWrap: 'break-word',
-      whiteSpace: 'pre-wrap',
+      whiteSpace: 'normal',
       lineHeight: '1.4',
       opacity: isVisible ? 1 : 0,
       transition: 'opacity 150ms ease-in-out',
