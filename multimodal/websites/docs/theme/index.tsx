@@ -1,4 +1,3 @@
-
 import { Layout as BasicLayout } from '@rspress/core/theme';
 import { NotFoundLayout } from '../src/components';
 import { Showcase } from '../src/components/Showcase';
