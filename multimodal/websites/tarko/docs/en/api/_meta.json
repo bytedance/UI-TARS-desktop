@@ -26,7 +26,7 @@
   },
   {
     "type": "file",
-    "name": "web-ui-configuration",
-    "label": "Web UI Configuration"
+    "name": "agent-ui-config",
+    "label": "Agent UI Config"
   }
 ]

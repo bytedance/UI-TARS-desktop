@@ -112,7 +112,7 @@ new AgentUIBuilder(input: AgentUIBuilderInputOptions)
 - `input.sessionInfo`: Session metadata
 - `input.staticPath?`: Optional path to static web UI files
 - `input.serverInfo?`: Optional server version info
-- `input.uiConfig?`: Optional web UI configuration
+- `input.uiConfig?`: Optional Agent UI Configuration
 
 #### Methods
 

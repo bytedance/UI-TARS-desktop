@@ -9,7 +9,7 @@ import type { BaseAgentWebUIImplementation } from '@tarko/interface';
 import { ENV_CONFIG } from '@/common/constants';
 
 /**
- * Get web UI configuration with enhanced multi-source loading
+ * Get Agent UI Configuration with enhanced multi-source loading
  */
 export function getWebUIConfig(): BaseAgentWebUIImplementation {
   const result = loadWebUIConfigSync();
@@ -17,7 +17,7 @@ export function getWebUIConfig(): BaseAgentWebUIImplementation {
 }
 
 /**
- * Get web UI configuration with enhanced multi-source loading
+ * Get Agent UI Configuration with enhanced multi-source loading
  */
 export function getWebUIRouteBase(): string {
   // Extract actual basename from current URL using shared utility

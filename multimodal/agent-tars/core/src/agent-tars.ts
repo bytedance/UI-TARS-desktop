@@ -32,7 +32,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   static label = '@agent-tars/core';
 
   /**
-   * Default Web UI configuration for Agent TARS
+   * Default Agent UI Configuration for Agent TARS
    */
   static webuiConfig: AgentWebUIImplementation = {
     logo: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png',
