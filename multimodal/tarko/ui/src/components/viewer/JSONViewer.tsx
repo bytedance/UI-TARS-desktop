@@ -211,8 +211,10 @@ export const JSONViewer = React.forwardRef<JSONViewerRef, JSONViewerProps>((
     return (
       <div className={`flex items-center justify-center py-8 ${className}`}>
         <div className="text-center">
-          <div className="text-gray-400 mb-2">📄</div>
-          <p className="text-gray-600 dark:text-gray-400 font-medium">{emptyMessage}</p>
+          <div className="w-8 h-8 mx-auto mb-3 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
+            <div className="w-4 h-4 border-2 border-slate-300 dark:border-slate-600 rounded-sm opacity-60"></div>
+          </div>
+          <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{emptyMessage}</p>
         </div>
       </div>
     );
