@@ -89,6 +89,9 @@ export const Tooltip: React.FC<TooltipProps> = ({
   };
 
   const getTooltipStyle = (): React.CSSProperties => {
+    const titleLength = typeof title === 'string' ? title.length : 0;
+    const dynamicMinWidth = titleLength < 20 ? 'auto' : '120px';
+    
     const baseStyle: React.CSSProperties = {
       position: 'fixed',
       top: position.top,
@@ -101,7 +104,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
       zIndex: 9999,
       pointerEvents: 'none',
       maxWidth,
-      minWidth: '120px',
+      minWidth: dynamicMinWidth,
       width: 'auto',
       wordWrap: 'break-word',
       whiteSpace: 'pre-wrap',
@@ -134,7 +137,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
     }
   };
 
-  const tooltipElement = isVisible ? <div style={getTooltipStyle()}>{title}</div> : null;
+  const tooltipElement = <div style={getTooltipStyle()}>{title}</div>;
 
   return (
     <>
