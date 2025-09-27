@@ -501,6 +501,42 @@ describe('PromptEngineeringToolCallEngine', () => {
         expect(state.toolCalls).toHaveLength(0);
       });
 
+      it('should handle incomplete tool call with truncated JSON array in parameters', () => {
+        const state = engine.initStreamProcessingState();
+
+        // Simulate the exact case from the error - truncated JSON array
+        const incompleteContent = 'Now I need to add ref to the mobile dropdown container:\n\n<tool_call>\n{\n  "name": "edit_file",\n  "parameters": {\n    "path": "multimodal/tarko/agent-ui/src/standalone/navbar/Navbar.tsx",\n    "edits": [\n      {\n        "oldText": "          {/* Mobile view - dropdown menu */}\\n          <div className=\\"md:hidden\\"",\n        "newText": "          {/* Mobile view - dropdown menu */}\\n          <div className=\\"md:hidden\\" ref={dropdownRef}"\n      }\n    ]\n  }\n}\n';
+
+        const chunks = incompleteContent.split('').map((char) => ({
+          choices: [{ delta: { content: char }, index: 0, finish_reason: 'stop' }],
+        }));
+
+        let accumulatedContent = '';
+        let hasToolCallUpdate = false;
+
+        for (const chunk of chunks) {
+          const result = engine.processStreamingChunk(chunk as ChatCompletionChunk, state);
+          accumulatedContent += result.content;
+
+          if (result.hasToolCallUpdate) {
+            hasToolCallUpdate = true;
+          }
+        }
+
+        // Should handle the incomplete tool call in finalization
+        const finalResult = engine.finalizeStreamProcessing(state);
+
+        expect(accumulatedContent).toBe('Now I need to add ref to the mobile dropdown container:\n\n');
+        expect(hasToolCallUpdate).toBe(true);
+        expect(finalResult.toolCalls).toHaveLength(1);
+        expect(finalResult.toolCalls?.[0].function.name).toBe('edit_file');
+        
+        // Should have repaired the incomplete JSON
+        const args = JSON.parse(finalResult.toolCalls?.[0].function.arguments || '{}');
+        expect(args.path).toBe('multimodal/tarko/agent-ui/src/standalone/navbar/Navbar.tsx');
+        expect(args.edits).toBeDefined();
+      });
+
       it('should process real LLM response chunks correctly', () => {
         const state = engine.initStreamProcessingState();
 
