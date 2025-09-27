@@ -3,210 +3,240 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Agent, AgentRunOptions } from '@tarko/agent';
 import { AgentSnapshot } from './agent-snapshot';
-import { SnapshotRunResult } from './types';
+import { SnapshotCaseConfig, SnapshotCase, SnapshotTestResult } from './types';
+import { logger } from './utils/logger';
 
 /**
- * Define case configurations for snapshot generation and testing
+ * AgentSnapshotRunner - Batch operations for multiple snapshot test cases
+ * 
+ * Provides utilities for generating and testing multiple agent snapshots,
+ * useful for comprehensive test suites.
  */
-export interface CaseConfig {
-  /**
-   * Case name.
-   */
-  name: string;
-  /**
-   * Case module path, export {@type SnapshotCase}
-   */
-  path: string;
-  /**
-   * Generated Snapshot path.
-   */
-  snapshotPath: string;
-  vitestSnapshotPath: string;
-}
-
-interface SnapshotCase {
-  agent: Agent;
-  runOptions: AgentRunOptions;
-}
-
 export class AgentSnapshotRunner {
-  public readonly examples: CaseConfig[];
+  private readonly cases: SnapshotCaseConfig[];
 
-  constructor(examples: CaseConfig[]) {
-    console.log(JSON.stringify(examples, null, 2));
-
-    this.examples = examples;
+  constructor(cases: SnapshotCaseConfig[]) {
+    this.cases = [...cases];
+    logger.info(`Initialized runner with ${cases.length} test cases`);
   }
 
   /**
-   * Check if the update snapshot flag is present in command line arguments
+   * Command-line interface for snapshot operations
    */
-  private shouldUpdateSnapshots(): boolean {
-    return process.argv.includes('-u') || process.argv.includes('--updateSnapshot');
-  }
-
-  /**
-   * A simple cli to run agent snapshot
-   */
-  async cli() {
-    {
-      const args = process.argv.slice(2);
-      const command = args[0];
-      const exampleName = args[1];
-      console.log(args, command, exampleName);
-
-      // Check for update flag
-      const updateSnapshots = this.shouldUpdateSnapshots();
-      if (updateSnapshots) {
-        console.log('Update snapshots mode enabled (-u flag detected)');
-      }
-
-      if (command === 'generate') {
-        if (exampleName) {
-          if (exampleName === 'all') {
-            // Generate snapshots for all examples using wildcard
-            await this.generateAll();
-          } else {
-            const example = this.getCaseByName(exampleName);
-            if (example) {
-              await this.generateSnapshot(example);
-            } else {
-              console.error(`Example "${exampleName}" not found.`);
-              process.exit(1);
-            }
-          }
-        } else {
-          await this.generateAll();
-        }
-      } else if (command === 'replay') {
-        if (exampleName) {
-          if (exampleName === 'all') {
-            // Test snapshots for all examples using wildcard
-            await this.replayAll(updateSnapshots);
-          } else {
-            const example = this.getCaseByName(exampleName);
-            if (example) {
-              await this.replaySnapshot(example, updateSnapshots);
-            } else {
-              console.error(`Example "${exampleName}" not found.`);
-              process.exit(1);
-            }
-          }
-        } else {
-          await this.replayAll(updateSnapshots);
-        }
-      } else {
-        console.log('Usage: cli.ts [generate|replay] [example-name] [-u|--updateSnapshot]');
-        console.log('Options:');
-        console.log(
-          '  -u, --updateSnapshot    Update snapshots when replaying (skips verification and updates files directly)',
-        );
-        console.log('Available examples:');
-        this.examples.forEach((e) => console.log(`- ${e.name}`));
-        console.log('- all  (all examples)');
-      }
-    }
-  }
-
-  /**
-   * Get example config by name
-   */
-  getCaseByName(name: string): CaseConfig | undefined {
-    return this.examples.find((e) => e.name === name);
-  }
-
-  /**
-   * Load case
-   */
-  async loadSnapshotCase(exampleConfig: CaseConfig): Promise<SnapshotCase> {
-    // const importPromise = new Function(`return import('${exampleConfig.path}')`)();
-    const importedModule = await import(exampleConfig.path);
-
-    if (importedModule.agent && importedModule.runOptions) {
-      return importedModule;
-    }
-
-    if (
-      importedModule.default &&
-      importedModule.default.agent &&
-      importedModule.default.runOptions
-    ) {
-      return importedModule.default;
-    }
-
-    throw new Error(
-      `Invalid agent case module: ${exampleConfig.path}, required an "agent" instance and "runOptiond" exported`,
-    );
-  }
-
-  /**
-   * Generate snapshot for a specific example
-   */
-  async generateSnapshot(exampleConfig: CaseConfig): Promise<void> {
-    console.log(`Generating snapshot for ${exampleConfig.name}...`);
-
-    const { agent, runOptions } = await this.loadSnapshotCase(exampleConfig);
-    const agentSnapshot = new AgentSnapshot(agent, {
-      updateSnapshots: true,
-      snapshotPath: exampleConfig.snapshotPath,
-    });
-
-    await agentSnapshot.generate(runOptions);
-    console.log(`Snapshot generated at ${exampleConfig.snapshotPath}`);
-  }
-
-  /**
-   * Replay snapshot for a specific example
-   */
-  async replaySnapshot(
-    exampleConfig: CaseConfig,
-    updateSnapshots = false,
-  ): Promise<SnapshotRunResult> {
-    console.log(`Testing snapshot for ${exampleConfig.name}...`);
+  async cli(): Promise<void> {
+    const args = process.argv.slice(2);
+    const [command, caseName, ...flags] = args;
+    
+    const updateSnapshots = flags.includes('-u') || flags.includes('--updateSnapshot');
+    
     if (updateSnapshots) {
-      console.log(`Update mode enabled: will update snapshots if they don't match`);
+      logger.info('Update snapshots mode enabled');
     }
 
-    const { agent, runOptions } = await this.loadSnapshotCase(exampleConfig);
-
-    console.log(`Testing agent instance`, agent);
-    console.log(`Testing agent run options`, runOptions);
-
-    if (!agent || !runOptions) {
-      throw new Error(
-        `Invalid agent case module: ${exampleConfig.path}, required an "agent" instance and "runOptiond" exported`,
-      );
+    try {
+      switch (command) {
+        case 'generate':
+          await this.handleGenerateCommand(caseName);
+          break;
+          
+        case 'test':
+        case 'replay': // backward compatibility
+          await this.handleTestCommand(caseName, updateSnapshots);
+          break;
+          
+        default:
+          this.printUsage();
+          break;
+      }
+    } catch (error) {
+      logger.error(`Command failed: ${error}`);
+      process.exit(1);
     }
-
-    const agentSnapshot = new AgentSnapshot(agent, {
-      snapshotPath: exampleConfig.snapshotPath,
-      updateSnapshots, // Pass the update flag to AgentSnapshot
-    });
-
-    const response = await agentSnapshot.replay(runOptions);
-    console.log(`Snapshot test result for ${exampleConfig.name}:`, response);
-    return response;
   }
 
   /**
-   * Generate snapshots for all examples
+   * Generate snapshot for a specific case or all cases
+   */
+  async generate(caseName?: string): Promise<void> {
+    if (caseName === 'all' || !caseName) {
+      await this.generateAll();
+    } else {
+      const caseConfig = this.findCase(caseName);
+      await this.generateSnapshot(caseConfig);
+    }
+  }
+
+  /**
+   * Test snapshot for a specific case or all cases
+   */
+  async test(caseName?: string, updateSnapshots = false): Promise<SnapshotTestResult | Record<string, SnapshotTestResult>> {
+    if (caseName === 'all' || !caseName) {
+      return this.testAll(updateSnapshots);
+    } else {
+      const caseConfig = this.findCase(caseName);
+      return this.testSnapshot(caseConfig, updateSnapshots);
+    }
+  }
+
+  /**
+   * Generate snapshots for all cases
    */
   async generateAll(): Promise<void> {
-    for (const example of this.examples) {
-      await this.generateSnapshot(example);
+    logger.info(`Generating snapshots for ${this.cases.length} cases`);
+    
+    for (const caseConfig of this.cases) {
+      try {
+        await this.generateSnapshot(caseConfig);
+      } catch (error) {
+        logger.error(`Failed to generate snapshot for ${caseConfig.name}: ${error}`);
+        throw error;
+      }
     }
+    
+    logger.success('All snapshots generated successfully');
   }
 
   /**
-   * Test snapshots for all examples
+   * Test all snapshots
    */
-  async replayAll(updateSnapshots = false): Promise<Record<string, unknown>> {
-    const results: Record<string, unknown> = {};
-    for (const example of this.examples) {
-      results[example.name] = await this.replaySnapshot(example, updateSnapshots);
+  async testAll(updateSnapshots = false): Promise<Record<string, SnapshotTestResult>> {
+    logger.info(`Testing ${this.cases.length} snapshots`);
+    
+    const results: Record<string, SnapshotTestResult> = {};
+    
+    for (const caseConfig of this.cases) {
+      try {
+        results[caseConfig.name] = await this.testSnapshot(caseConfig, updateSnapshots);
+      } catch (error) {
+        logger.error(`Test failed for ${caseConfig.name}: ${error}`);
+        throw error;
+      }
     }
+    
+    logger.success('All tests passed');
     return results;
   }
+
+  /**
+   * Get case configuration by name
+   */
+  getCase(name: string): SnapshotCaseConfig | undefined {
+    return this.cases.find(c => c.name === name);
+  }
+
+  /**
+   * List all available cases
+   */
+  listCases(): SnapshotCaseConfig[] {
+    return [...this.cases];
+  }
+
+  private async handleGenerateCommand(caseName?: string): Promise<void> {
+    if (!caseName) {
+      await this.generateAll();
+    } else if (caseName === 'all') {
+      await this.generateAll();
+    } else {
+      const caseConfig = this.findCase(caseName);
+      await this.generateSnapshot(caseConfig);
+    }
+  }
+
+  private async handleTestCommand(caseName?: string, updateSnapshots = false): Promise<void> {
+    if (!caseName) {
+      await this.testAll(updateSnapshots);
+    } else if (caseName === 'all') {
+      await this.testAll(updateSnapshots);
+    } else {
+      const caseConfig = this.findCase(caseName);
+      await this.testSnapshot(caseConfig, updateSnapshots);
+    }
+  }
+
+  private findCase(name: string): SnapshotCaseConfig {
+    const caseConfig = this.getCase(name);
+    if (!caseConfig) {
+      throw new Error(`Case "${name}" not found. Available cases: ${this.cases.map(c => c.name).join(', ')}`);
+    }
+    return caseConfig;
+  }
+
+  private async loadSnapshotCase(caseConfig: SnapshotCaseConfig): Promise<SnapshotCase> {
+    try {
+      const importedModule = await import(caseConfig.path);
+      
+      // Try default export first
+      if (importedModule.default?.agent && importedModule.default?.runOptions) {
+        return importedModule.default;
+      }
+      
+      // Try named exports
+      if (importedModule.agent && importedModule.runOptions) {
+        return importedModule;
+      }
+      
+      throw new Error(
+        `Invalid case module: must export 'agent' and 'runOptions' (either as named exports or default export)`
+      );
+    } catch (error) {
+      throw new Error(`Failed to load case module "${caseConfig.path}": ${error}`);
+    }
+  }
+
+  private async generateSnapshot(caseConfig: SnapshotCaseConfig): Promise<void> {
+    logger.info(`Generating snapshot: ${caseConfig.name}`);
+    
+    const { agent, runOptions } = await this.loadSnapshotCase(caseConfig);
+    
+    const snapshot = new AgentSnapshot(agent, {
+      snapshotPath: caseConfig.snapshotPath,
+      updateSnapshots: true,
+    });
+
+    await snapshot.generate(runOptions);
+    logger.success(`Snapshot generated: ${caseConfig.snapshotPath}`);
+  }
+
+  private async testSnapshot(
+    caseConfig: SnapshotCaseConfig,
+    updateSnapshots = false
+  ): Promise<SnapshotTestResult> {
+    logger.info(`Testing snapshot: ${caseConfig.name}`);
+    
+    if (updateSnapshots) {
+      logger.warn('Update mode: snapshots will be updated instead of verified');
+    }
+
+    const { agent, runOptions } = await this.loadSnapshotCase(caseConfig);
+
+    const snapshot = new AgentSnapshot(agent, {
+      snapshotPath: caseConfig.snapshotPath,
+      updateSnapshots,
+    });
+
+    const result = await snapshot.test(runOptions);
+    logger.success(`Test passed: ${caseConfig.name}`);
+    
+    return result;
+  }
+
+  private printUsage(): void {
+    console.log('Usage: runner [command] [case-name] [options]');
+    console.log('');
+    console.log('Commands:');
+    console.log('  generate [case-name|all]  Generate snapshots');
+    console.log('  test [case-name|all]      Test against snapshots');
+    console.log('');
+    console.log('Options:');
+    console.log('  -u, --updateSnapshot      Update snapshots during testing');
+    console.log('');
+    console.log('Available cases:');
+    this.cases.forEach(c => console.log(`  - ${c.name}`));
+    console.log('  - all (all cases)');
+  }
 }
+
+// Re-export for backward compatibility
+/** @deprecated Use SnapshotCaseConfig instead */
+export type CaseConfig = SnapshotCaseConfig;

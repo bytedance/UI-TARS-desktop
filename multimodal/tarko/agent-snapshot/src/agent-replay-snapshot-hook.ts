@@ -48,6 +48,7 @@ export class AgentReplaySnapshotHook extends AgentHookBase {
   private verifyToolCalls = true;
   private toolCallsByLoop: Record<number, ToolCallData[]> = {};
   private startTimeByToolCall: Record<string, number> = {};
+  private snapshotManager?: SnapshotManager;
 
   /**
    * Set up the LLM mocker with an agent and test case
@@ -58,11 +59,7 @@ export class AgentReplaySnapshotHook extends AgentHookBase {
     totalLoops: number,
     options: LLMMockerSetupOptions = {},
   ) {
-    // LLMMocker directly extends AgentHookBase but uses a different constructor
-    // pattern, so we need to set these properties manually
-    this.agent = agent;
-    this.snapshotPath = casePath;
-    this.snapshotName = path.basename(casePath);
+    // Note: agent, snapshotPath, snapshotName are readonly and set in constructor
     this.totalLoops = totalLoops;
     this.updateSnapshots = options.updateSnapshots || false;
 
@@ -327,8 +324,7 @@ export class AgentReplaySnapshotHook extends AgentHookBase {
         await this.snapshotManager.verifyRequestSnapshot(
           path.basename(this.snapshotPath),
           loopDir,
-          // @ts-expect-error
-          payload,
+          payload as unknown as Record<string, unknown>,
           this.updateSnapshots,
         );
       } catch (error) {
@@ -553,7 +549,7 @@ export class AgentReplaySnapshotHook extends AgentHookBase {
       for (let i = 0; i < toolCalls.length; i++) {
         const toolCall = toolCalls[i];
         // Find matching saved tool call by name and args
-        const savedToolCall = savedToolCalls.find((stc) => stc.name === toolCall.function.name);
+        const savedToolCall = savedToolCalls.find((stc: ToolCallData) => stc.name === toolCall.function.name);
 
         if (savedToolCall) {
           // Use result from saved tool call
