@@ -370,9 +370,9 @@ importers:
       '@agent-infra/puppeteer-enhance':
         specifier: 0.1.6
         version: 0.1.6
-      '@ui-tars/sdk':
-        specifier: 1.2.3
-        version: 1.2.3(ws@8.18.3)(zod@3.25.36)
+      '@gui-agent/shared':
+        specifier: workspace:*
+        version: link:../shared
     devDependencies:
       '@rslib/core':
         specifier: 0.10.0
