@@ -207,7 +207,7 @@ export function VLMSettings({
         setIsCheckingResponseApi(true);
         const modelConfig = {
           baseUrl: newBaseUrl,
-          apiKey: newApiKey,
+          apiKey: newApiKey, // secretlint-disable-line
           modelName: newModelName,
         };
 
@@ -389,14 +389,16 @@ export function VLMSettings({
           />
 
           {/* Model Availability Check */}
-          <ModelAvailabilityCheck
-            modelConfig={{
-              baseUrl: newBaseUrl,
-              apiKey: newApiKey,
-              modelName: newModelName,
-            }}
-            onResponseApiSupportChange={setResponseApiSupported}
-          />
+          {!window.location.href.includes('replay') && (
+            <ModelAvailabilityCheck
+              modelConfig={{
+                baseUrl: newBaseUrl,
+                apiKey: newApiKey, // secretlint-disable-line
+                modelName: newModelName,
+              }}
+              onResponseApiSupportChange={setResponseApiSupported}
+            />
+          )}
 
           {/* VLM Model Responses API */}
           <FormField
@@ -443,7 +445,7 @@ export function VLMSettings({
 interface ModelAvailabilityCheckProps {
   modelConfig: {
     baseUrl: string;
-    apiKey: string;
+    apiKey: string; // secretlint-disable-line
     modelName: string;
   };
   disabled?: boolean;
