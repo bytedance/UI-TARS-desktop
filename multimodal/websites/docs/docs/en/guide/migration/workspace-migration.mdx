@@ -1,0 +1,366 @@
+# Global Workspace Migration Guide
+
+This guide will help you migrate from Tarko CLI 0.2's automated Global Workspace to 0.3's manual configuration management mode.
+
+## Migration Overview
+
+**0.2 Global Workspace:**
+- Automatically created `~/.tarko` directory
+- Initialized via `tarko workspace --init`
+- Automatically applied global configuration
+- Centralized management of all project configurations
+
+**0.3 Manual Configuration:**
+- Removed `tarko workspace` command
+- Supports project-level configuration files
+- Specify shared configuration via `--config`
+- More flexible configuration management
+
+## Step 1: Backup Existing Configuration
+
+First, backup your existing Global Workspace configuration:
+
+```bash
+# Check if Global Workspace exists
+ls -la ~/.tarko
+
+# Backup the entire directory
+cp -r ~/.tarko ~/.tarko-backup-$(date +%Y%m%d)
+
+# View existing configuration files
+find ~/.tarko -name "tarko.config.*" -o -name "agent-tars.config.*"
+```
+
+## Step 2: Analyze Existing Configuration
+
+Examine your configuration file contents to understand what needs to be migrated:
+
+```bash
+# View TypeScript configuration
+cat ~/.tarko/tarko.config.ts
+
+# Or view JSON configuration
+cat ~/.tarko/tarko.config.json
+
+# Or view YAML configuration
+cat ~/.tarko/tarko.config.yaml
+```
+
+A typical 0.2 configuration file might look like:
+
+```typescript
+// ~/.tarko/tarko.config.ts
+import { AgentAppConfig } from '@tarko/interface';
+
+const config: AgentAppConfig = {
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  workspace: '~/.tarko',
+  // Other configurations...
+};
+
+export default config;
+```
+
+## Step 3: Choose Migration Strategy
+
+Select the appropriate migration strategy based on your use case:
+
+### Strategy A: Global Shared Configuration
+
+**Use Case:** You want to use the same configuration across all projects
+
+```bash
+# Create shared configuration directory
+mkdir -p ~/configs
+
+# Copy configuration file to new location
+cp ~/.tarko/tarko.config.ts ~/configs/tarko-global.config.ts
+
+# Edit configuration file, remove workspace setting
+vim ~/configs/tarko-global.config.ts
+```
+
+Update the configuration file:
+
+```typescript
+// ~/configs/tarko-global.config.ts
+import { AgentAppConfig } from '@tarko/interface';
+
+const config: AgentAppConfig = {
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  // Remove workspace setting, let each project specify its own
+};
+
+export default config;
+```
+
+Usage:
+
+```bash
+# Use global configuration in any directory
+tarko --config ~/configs/tarko-global.config.ts
+
+# Specify a specific working directory
+tarko --config ~/configs/tarko-global.config.ts --workspace ./my-project
+```
+
+### Strategy B: Project-Specific Configuration
+
+**Use Case:** Different projects need different configurations
+
+```bash
+# Create configuration file for each project
+cd ~/projects/project1
+cp ~/.tarko/tarko.config.ts ./tarko.config.ts
+
+cd ~/projects/project2
+cp ~/.tarko/tarko.config.ts ./tarko.config.ts
+# Modify configuration based on project needs
+```
+
+Project configuration example:
+
+```typescript
+// ~/projects/project1/tarko.config.ts
+import { AgentAppConfig } from '@tarko/interface';
+
+const config: AgentAppConfig = {
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  // workspace will be automatically set to current directory
+};
+
+export default config;
+```
+
+Usage:
+
+```bash
+# Run directly in project directory, automatically uses project configuration
+cd ~/projects/project1
+tarko
+```
+
+### Strategy C: Hybrid Mode
+
+**Use Case:** Need both global default configuration and project-specific configuration
+
+```bash
+# Create base global configuration
+mkdir -p ~/configs
+cp ~/.tarko/tarko.config.ts ~/configs/tarko-base.config.ts
+
+# Create specific configuration for special projects
+cd ~/projects/special-project
+cp ~/configs/tarko-base.config.ts ./tarko.config.ts
+# Modify project-specific settings
+```
+
+## Step 4: Environment Variable Setup
+
+Migrate sensitive information to environment variables:
+
+```bash
+# Edit your shell configuration file
+vim ~/.bashrc  # or ~/.zshrc
+
+# Add environment variables
+export OPENAI_API_KEY="your-openai-api-key"
+export ANTHROPIC_API_KEY="your-anthropic-api-key"
+export VOLCENGINE_API_KEY="your-volcengine-api-key"
+
+# Reload configuration
+source ~/.bashrc  # or source ~/.zshrc
+```
+
+## Step 5: Create Convenience Scripts
+
+To simplify usage, create some convenience scripts:
+
+```bash
+# Create global tarko aliases
+vim ~/.bashrc
+
+# Add aliases
+alias tarko-global='tarko --config ~/configs/tarko-global.config.ts'
+alias tarko-dev='tarko --config ~/configs/tarko-dev.config.ts'
+
+# Or create functions
+tarko-with-workspace() {
+    local workspace_dir=${1:-.}
+    tarko --config ~/configs/tarko-global.config.ts --workspace "$workspace_dir"
+}
+```
+
+## Step 6: Verify Migration
+
+Test that the new configuration works properly:
+
+```bash
+# Test global configuration
+tarko --config ~/configs/tarko-global.config.ts --workspace /tmp/test-workspace
+
+# Test project configuration
+cd ~/projects/project1
+tarko
+
+# Test environment variables
+echo $OPENAI_API_KEY
+tarko --model.provider openai --headless --input "Hello"
+```
+
+## Step 7: Clean Up Old Files
+
+After confirming the migration is successful, clean up the old Global Workspace:
+
+```bash
+# Only execute after confirming new configuration works properly
+# rm -rf ~/.tarko
+
+# Or rename to keep for a while
+mv ~/.tarko ~/.tarko-deprecated-$(date +%Y%m%d)
+```
+
+## Common Issues & Solutions
+
+### Q1: How to simulate the original global behavior?
+
+**A:** Use shared configuration + shell aliases:
+
+```bash
+# ~/.bashrc or ~/.zshrc
+alias tarko='tarko --config ~/configs/tarko-global.config.ts'
+
+# Now you can use tarko in any directory, similar to the original global configuration
+```
+
+### Q2: How to share partial configuration between different projects?
+
+**A:** Create configuration templates and inheritance:
+
+```typescript
+// ~/configs/tarko-base.config.ts
+export const baseConfig = {
+  model: {
+    provider: 'openai',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+};
+
+// ~/projects/project1/tarko.config.ts
+import { baseConfig } from '~/configs/tarko-base.config.ts';
+
+export default {
+  ...baseConfig,
+  model: {
+    ...baseConfig.model,
+    id: 'gpt-4',  // Project-specific model
+  },
+};
+```
+
+### Q3: How to handle team collaboration?
+
+**A:** Use version control + environment variables:
+
+```bash
+# Create configuration template in project root
+cat > tarko.config.template.ts << 'EOF'
+import { AgentAppConfig } from '@tarko/interface';
+
+const config: AgentAppConfig = {
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY, // Set your API Key
+  },
+};
+
+export default config;
+EOF
+
+# Add to .gitignore
+echo "tarko.config.ts" >> .gitignore
+
+# Document setup in README
+cat >> README.md << 'EOF'
+## Development Setup
+
+1. Copy configuration template: `cp tarko.config.template.ts tarko.config.ts`
+2. Set environment variables: `export OPENAI_API_KEY="your-key"`
+3. Run: `tarko`
+EOF
+```
+
+### Q4: How to use in CI/CD?
+
+**A:** Use environment variables + temporary configuration:
+
+```yaml
+# .github/workflows/test.yml
+name: Test
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: Run Tarko Tests
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          # Create temporary configuration
+          cat > tarko.config.ts << 'EOF'
+          export default {
+            model: {
+              provider: 'openai',
+              id: 'gpt-4',
+              apiKey: process.env.OPENAI_API_KEY,
+            },
+          };
+          EOF
+          
+          # Run tests
+          tarko --workspace ./ci-workspace --headless --input "Run tests"
+```
+
+## Migration Checklist
+
+- [ ] Backed up the original `~/.tarko` directory
+- [ ] Analyzed existing configuration file contents
+- [ ] Chose appropriate migration strategy
+- [ ] Created new configuration files
+- [ ] Set up necessary environment variables
+- [ ] Tested new configuration functionality
+- [ ] Updated team documentation (if applicable)
+- [ ] Created convenience scripts or aliases
+- [ ] Cleaned up old configuration files
+
+## Summary
+
+While 0.3's manual configuration management requires some initial setup, it provides greater flexibility:
+
+- **Better project isolation**: Each project can have its own configuration
+- **More flexible configuration**: Choose different configuration strategies as needed
+- **Better team collaboration**: Configurations can be version controlled and shared among team members
+- **Simpler CI/CD**: No dependency on global state, easier to use in automated environments
+
+Following this migration guide, you should be able to smoothly migrate from 0.2's Global Workspace to 0.3's manual configuration management mode.

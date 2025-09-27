@@ -9,7 +9,6 @@ import path from 'path';
 import {
   AgentCLIArguments,
   AgentServerVersionInfo,
-  TARKO_CONSTANTS,
   LogLevel,
 } from '@tarko/interface';
 import { addCommonOptions, resolveAgentFromCLIArgument } from './options';
@@ -22,7 +21,7 @@ import {
   loadAgentConfig,
   loadEnvironmentVars,
 } from '../config';
-import { GlobalWorkspaceCommand } from './commands';
+
 import { CLICommand, CLIInstance, AgentCLIInitOptions, AgentServerInitOptions } from '../types';
 
 const DEFAULT_OPTIONS: Partial<AgentCLIInitOptions> = {
@@ -124,7 +123,7 @@ export class AgentCLI {
     this.registerServeCommand(cli);
     this.registerRunCommand(cli);
     this.registerRequestCommand(cli);
-    this.registerWorkspaceCommand(cli);
+
   }
 
   /**
@@ -371,19 +370,13 @@ export class AgentCLI {
     // Init Environment Variables from .env files
     loadEnvironmentVars(workspace, isDebug);
 
-    const globalWorkspaceCommand = new GlobalWorkspaceCommand(
-      this.options.directories?.globalWorkspaceDir,
-    );
-    const globalWorkspaceEnabled = await globalWorkspaceCommand.isGlobalWorkspaceEnabled();
+    const globalWorkspaceEnabled = false;
 
     // Build config paths with proper priority order
     const configPaths = buildConfigPaths({
       cliConfigPaths: cliArguments.config,
       remoteConfig: this.options.remoteConfig,
       workspace,
-      globalWorkspaceEnabled,
-      globalWorkspaceDir:
-        this.options.directories?.globalWorkspaceDir || TARKO_CONSTANTS.GLOBAL_WORKSPACE_DIR,
       isDebug,
     });
 
@@ -429,38 +422,5 @@ export class AgentCLI {
     };
   }
 
-  private registerWorkspaceCommand(cli: CLIInstance): void {
-    const workspaceCommand = cli.command('workspace', 'Manage agent workspace');
 
-    workspaceCommand
-      .option('--init', 'Initialize a new workspace')
-      .option('--open', 'Open the workspace in VSCode')
-      .option('--enable', 'Enable global workspace')
-      .option('--disable', 'Disable global workspace')
-      .option('--status', 'Show workspace status')
-      .action(
-        async (
-          options: {
-            init?: boolean;
-            open?: boolean;
-            enable?: boolean;
-            disable?: boolean;
-            status?: boolean;
-          } = {},
-        ) => {
-          try {
-            const workspaceCmd = new GlobalWorkspaceCommand(
-              this.options.directories?.globalWorkspaceDir,
-            );
-            await workspaceCmd.execute(options);
-          } catch (err) {
-            console.error(
-              'Workspace command failed:',
-              err instanceof Error ? err.message : String(err),
-            );
-            process.exit(1);
-          }
-        },
-      );
-  }
 }
