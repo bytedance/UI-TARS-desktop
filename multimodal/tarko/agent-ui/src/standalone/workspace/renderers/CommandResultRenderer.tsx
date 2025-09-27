@@ -101,20 +101,17 @@ export const CommandResultRenderer: React.FC<CommandResultRendererProps> = ({ pa
   // Always show terminal UI, even for empty results
   const { command, stdout, stderr, exitCode } = commandData || {
     command: panelContent.arguments?.command,
-    stdout: undefined,
+    stdout: 'Command result is empty',
     stderr: undefined,
     exitCode: undefined,
   };
-
-  // For empty results, show "Command result is empty" as stdout
-  const displayStdout = stdout || (commandData === null ? 'Command result is empty' : undefined);
 
   return (
     <div className="space-y-4 md:text-base text-sm">
       <div className="md:[&_pre]:text-sm [&_pre]:text-xs md:[&_pre]:p-4 [&_pre]:p-2 md:[&_pre]:max-h-none [&_pre]:overflow-auto">
         <TerminalOutput
           command={command ? highlightCommand(command) : undefined}
-          stdout={displayStdout}
+          stdout={stdout}
           stderr={stderr}
           exitCode={exitCode}
           maxHeight="calc(100vh - 215px)"
@@ -204,18 +201,6 @@ function extractCommandData(panelContent: StandardPanelContent) {
       command: panelContent.arguments?.command,
       stdout: panelContent.source.output,
       exitCode: panelContent.source.returncode,
-    };
-  }
-
-  /**
-   * Handle execute_bash with undefined content
-   */
-  if (panelContent.title === 'execute_bash' && panelContent.source === undefined) {
-    return {
-      command: panelContent.arguments?.command,
-      stdout: undefined,
-      stderr: undefined,
-      exitCode: undefined,
     };
   }
 
