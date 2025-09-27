@@ -90,7 +90,14 @@ export const Tooltip: React.FC<TooltipProps> = ({
 
   const getTooltipStyle = (): React.CSSProperties => {
     const titleLength = typeof title === 'string' ? title.length : 0;
-    const dynamicMinWidth = titleLength < 20 ? 'auto' : '120px';
+    
+    // Dynamic minWidth algorithm based on content length
+    let dynamicMinWidth = 'auto';
+    if (titleLength >= 60) {
+      dynamicMinWidth = '240px';
+    } else if (titleLength >= 20) {
+      dynamicMinWidth = '120px';
+    }
     
     const baseStyle: React.CSSProperties = {
       position: 'fixed',
