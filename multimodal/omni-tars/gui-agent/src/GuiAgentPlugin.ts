@@ -6,7 +6,7 @@ import { AgentMode, AgentPlugin, COMPUTER_USE_ENVIRONMENT } from '@omni-tars/cor
 import { Tool, LLMRequestHookPayload, ChatCompletionContentPart } from '@tarko/agent';
 import { ConsoleLogger, createGUIErrorResponse, LogLevel } from '@tarko/shared-utils';
 import { Base64ImageParser } from '@agent-infra/media-utils';
-import { ImageCompressor, formatBytes } from '@tarko/shared-media-utils';
+import { ImageCompressor, formatBytes } from './utils/ImageCompressor';
 import { OperatorManager } from './OperatorManager';
 import { sleep } from '@gui-agent/shared/utils';
 

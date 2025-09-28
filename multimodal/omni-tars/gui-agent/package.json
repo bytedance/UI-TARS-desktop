@@ -38,7 +38,7 @@
     "@gui-agent/operator-browser": "workspace:*",
     "@gui-agent/operator-aio": "workspace:*",
     "@gui-agent/action-parser": "workspace:*",
-    "@tarko/shared-media-utils": "workspace:*",
+    "sharp": "^0.33.0",
     "lodash.isnumber": "3.0.3"
   },
   "devDependencies": {
