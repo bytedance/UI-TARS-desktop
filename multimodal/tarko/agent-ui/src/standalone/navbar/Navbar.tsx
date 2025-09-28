@@ -51,7 +51,8 @@ export const Navbar: React.FC = () => {
   const [showAboutModal, setShowAboutModal] = React.useState(false);
   const [showShareModal, setShowShareModal] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-  const workspaceNavItems = getWorkspaceNavItems();
+  const workspaceNavItems = getWorkspaceNavItems(sessionMetadata?.sandboxUrl);
+
   const navigate = useNavigate();
 
   const handleNavigateHome = useCallback(() => {

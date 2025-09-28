@@ -83,8 +83,16 @@ export function getLogoUrl(): string {
 /**
  * Get workspace navigation items from web UI config
  */
-export function getWorkspaceNavItems() {
-  return getWebUIConfig().workspace?.navItems || [];
+export function getWorkspaceNavItems(prefix?: string) {
+  const items = getWebUIConfig().workspace?.navItems || [];
+
+  if(prefix) {
+      items.forEach(item => {
+        item.link = item.link.replace('{prefix}', prefix);
+      });
+  }
+
+  return items;
 }
 
 /**
