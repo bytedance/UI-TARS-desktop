@@ -5,6 +5,7 @@
 import { Page } from '@agent-infra/browser';
 import { Logger } from '@agent-infra/logger';
 import { ParsedPrediction } from './types';
+import { BaseAction } from '@gui-agent/shared/types';
 
 /**
  * Helper class for UI interactions in the browser
@@ -291,10 +292,23 @@ export class UIHelper {
    * @param prediction The parsed prediction containing action details
    */
   async showActionInfo(prediction: ParsedPrediction) {
+    const { action_type, action_inputs, thought } = prediction;
+    this.showActionInfoInternal(action_type, action_inputs, thought);
+  }
+
+  async showActionInfoByAction(action: BaseAction, thought: string) {
+    const { type: action_type, inputs: action_inputs } = action;
+    this.showActionInfoInternal(action_type, action_inputs, thought);
+  }
+
+  async showActionInfoInternal(
+    action_type: string,
+    action_inputs: Record<string, unknown>,
+    thought: string,
+  ) {
     this.logger.info('Showing action info ...');
     await this.injectStyles();
 
-    const { action_type, action_inputs, thought } = prediction;
     const page = await this.getCurrentPage();
 
     await page.evaluate(
