@@ -53,7 +53,21 @@ export function setupAPI(
   // Register API routes with base path support
   if (serverBase) {
     const apiRouter = express.Router();
-    registerAllRoutes(apiRouter);
+    
+    // Add group method to router for compatibility
+    (apiRouter as any).group = (
+      prefix: string,
+      ...handlers: (express.RequestHandler | ((router: express.Router) => void))[]
+    ) => {
+      const router = express.Router();
+      const routerCallback = handlers.pop() as (router: express.Router) => void;
+      const middlewares = handlers as express.RequestHandler[];
+
+      routerCallback(router);
+      apiRouter.use(prefix, ...middlewares, router);
+    };
+    
+    registerAllRoutes(apiRouter as any);
     app.use(serverBase, apiRouter);
   } else {
     registerAllRoutes(app);
