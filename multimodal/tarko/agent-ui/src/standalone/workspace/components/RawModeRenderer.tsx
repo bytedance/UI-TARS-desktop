@@ -143,7 +143,7 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
               <FiTerminal size={14} />
               Tool
             </div>
-            <div className="font-mono text-sm bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700">
+            <div className="font-mono text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700">
               {toolCall.name}
             </div>
           </div>
