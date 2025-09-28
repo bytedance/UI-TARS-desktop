@@ -28,7 +28,7 @@ export class CodeAgentPlugin extends AgentPlugin {
     this.client = new AioClient({
       baseUrl: option.sandboxUrl,
       retries: 0,
-      logLevel: process.env.AGENT_DEBUG ? LogLevel.DEBUG : LogLevel.INFO,
+      logLevel: process.env.AIO_DEBUG ? LogLevel.DEBUG : LogLevel.INFO,
     });
 
     // Initialize tools
