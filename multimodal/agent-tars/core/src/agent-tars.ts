@@ -256,10 +256,10 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
     userInstructions?: string,
   ): string {
     const browserRules = generateBrowserRulesPrompt(options.browser?.control);
-    const systemPrompt = `${DEFAULT_SYSTEM_PROMPT}\\n${browserRules}\\n\\n<environment>\\nCurrent Working Directory: ${workspace}\\n</environment>\\n`;
+    const systemPrompt = `${DEFAULT_SYSTEM_PROMPT}\n${browserRules}\n\n<environment>\nCurrent Working Directory: ${workspace}\n</environment>\n`;
 
     return userInstructions
-      ? `${systemPrompt}\\n\\n---\\n\\n**User Instructions (Higher Priority):**\\n\\n${userInstructions}`
+      ? `${systemPrompt}\n\n---\n\n**User Instructions (Higher Priority):**\n\n${userInstructions}`
       : systemPrompt;
   }
 
