@@ -8,18 +8,41 @@ import { AgentWebUIImplementation } from '@agent-tars/interface';
 /**
  * Default Agent UI Configuration for Agent TARS
  */
-export const agentTARSWebuiConfig: AgentWebUIImplementation = {
+export const AGENT_TARS_WEBUI_CONFIG: AgentWebUIImplementation = {
   logo: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png',
   title: 'Agent TARS',
   subtitle: 'Offering seamless integration with a wide range of real-world tools.',
   welcomTitle: 'A multimodal AI agent',
-  welcomePrompts: [
-    'Search for the latest GUI Agent papers',
-    'Find information about UI TARS',
-    'Tell me the top 5 most popular projects on ProductHunt today',
-    'Please book me the earliest flight from Hangzhou to Shenzhen on 10.1',
-  ],
+  welcomePrompts: [],
   welcomeCards: [
+    {
+      title: 'Search for the latest GUI Agent papers',
+      category: 'Research',
+      prompt: 'Search for the latest GUI Agent papers',
+      image:
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop&crop=center',
+    },
+    {
+      title: 'Find information about UI TARS',
+      category: 'Research',
+      prompt: 'Find information about UI TARS',
+      image:
+        'https://images.unsplash.com/photo-1518186285589-2f7649de83e0?w=400&h=300&fit=crop&crop=center',
+    },
+    {
+      title: 'Tell me the top 5 most popular projects on ProductHunt today',
+      category: 'Research',
+      prompt: 'Tell me the top 5 most popular projects on ProductHunt today',
+      image:
+        'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop&crop=center',
+    },
+    {
+      title: 'Please book me the earliest flight from Hangzhou to Shenzhen on 10.1',
+      category: 'AI Browser',
+      prompt: 'Please book me the earliest flight from Hangzhou to Shenzhen on 10.1',
+      image:
+        'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=400&h=300&fit=crop&crop=center',
+    },
     {
       title: 'Analyze Google Network Request',
       category: 'CodeAct',

@@ -21,7 +21,7 @@ import { AgentWebUIImplementation } from '@agent-tars/interface';
 import { AgentTARSLocalEnvironment, AgentTARSAIOEnvironment } from './environments';
 import { AgentTARSBaseEnvironment } from './environments/base';
 import { ToolLogger } from './utils';
-import { agentTARSWebuiConfig } from './webui-config';
+import { AGENT_TARS_WEBUI_CONFIG } from './webui-config';
 
 /**
  * AgentTARS - A multimodal AI agent with browser, filesystem, and search capabilities
@@ -35,7 +35,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   /**
    * Default Agent UI Configuration for Agent TARS
    */
-  static webuiConfig: AgentWebUIImplementation = agentTARSWebuiConfig;
+  static webuiConfig: AgentWebUIImplementation = AGENT_TARS_WEBUI_CONFIG;
 
   // Core configuration
   private readonly workspace: string;
