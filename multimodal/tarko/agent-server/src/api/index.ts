@@ -26,6 +26,7 @@ export function setupAPI(
   options?: {
     workspacePath?: string;
     isDebug?: boolean;
+    serverBase?: string;
   },
 ) {
   // Apply CORS middleware
@@ -47,8 +48,16 @@ export function setupAPI(
     app.use(prefix, ...middlewares, router);
   };
 
-  // Register all API routes first (highest priority)
-  registerAllRoutes(app);
+  const { serverBase } = options || {};
+
+  // Register API routes with base path support
+  if (serverBase) {
+    const apiRouter = express.Router();
+    registerAllRoutes(apiRouter);
+    app.use(serverBase, apiRouter);
+  } else {
+    registerAllRoutes(app);
+  }
 
   // Setup workspace static server (lower priority, after API routes)
   if (options?.workspacePath) {

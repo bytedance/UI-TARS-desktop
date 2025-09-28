@@ -183,6 +183,12 @@ export interface AgentServerOptions {
      */
     port?: number;
     /**
+     * Base path for API routes
+     * @example '/api-gateway' - API routes will be available at /api-gateway/api/*
+     * @example '/tenant-.+' - Regex pattern for multi-tenant scenarios
+     */
+    base?: string;
+    /**
      * Server Storage options.
      */
     storage?: AgentStorageImplementation;
