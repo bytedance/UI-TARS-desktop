@@ -165,7 +165,7 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
                 <span>Parameters</span>
                 <CopyButton jsonRef={parametersRef} title="Copy parameters" />
               </div>
-              <div className="bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-3">
+              <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-3">
                 <JSONViewer
                   ref={parametersRef}
                   data={toolCall.arguments}
@@ -225,7 +225,7 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
                 <span>Response</span>
                 <CopyButton jsonRef={responseRef} title="Copy response" />
               </div>
-              <div className="bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-3">
+              <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-3">
                 <JSONViewer
                   ref={responseRef}
                   data={toolResult.content}
@@ -241,7 +241,7 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
                   <span>Metadata</span>
                   <CopyButton jsonRef={metadataRef} title="Copy metadata" />
                 </div>
-                <div className="bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-3">
+                <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-3">
                   <JSONViewer
                     ref={metadataRef}
                     data={toolResult._extra}
