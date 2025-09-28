@@ -108,7 +108,7 @@ export class Agent<T extends AgentOptions = AgentOptions>
     });
 
     // Initialize Tool Manager
-    this.toolManager = new ToolManager(this.logger);
+    this.toolManager = new ToolManager();
 
     // Ensure context options have default values
     const contextAwarenessOptions: AgentContextAwarenessOptions = options.context ?? {};

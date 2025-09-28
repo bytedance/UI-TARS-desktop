@@ -225,8 +225,6 @@ export default class OmniTARSAgent extends ComposableAgent {
   };
 
   constructor(option: OmniTarsOption) {
-    console.log('[option]', option);
-
     super(getComposableOption(option));
   }
 }

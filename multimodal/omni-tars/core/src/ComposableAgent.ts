@@ -89,8 +89,8 @@ export class ComposableAgent extends Agent {
     id: string,
     toolCall: { toolCallId: string; name: string },
     result: unknown,
-  ): Promise<void> {
+  ): Promise<any> {
     // Execute hooks for all plugins
-    await this.composer.executeOnAfterToolCall(id, toolCall, result);
+    return await this.composer.executeOnAfterToolCall(id, toolCall, result);
   }
 }

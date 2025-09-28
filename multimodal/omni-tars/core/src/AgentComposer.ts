@@ -132,12 +132,14 @@ export class AgentComposer {
     id: string,
     toolCall: { toolCallId: string; name: string },
     result: unknown,
-  ): Promise<void> {
+  ): Promise<any> {
     for (const plugin of this.plugins) {
       if (plugin.onAfterToolCall) {
         await plugin.onAfterToolCall(id, toolCall, result);
       }
     }
+
+    return result;
   }
 
   /**
