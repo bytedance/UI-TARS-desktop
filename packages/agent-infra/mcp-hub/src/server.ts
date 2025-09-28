@@ -489,6 +489,121 @@ app.post('/mcp', async (req: Request, res: Response) => {
 // Reusable handler for GET and DELETE requests
 const handleSessionRequest = async (req: Request, res: Response) => {
   try {
+    // Check if this is a marketplace query request (GET with query parameters)
+    if (req.method === 'GET' && Object.keys(req.query).length > 0) {
+      // Check for marketplace query parameters
+      const { search, category, tags, sort, limit, info, categories, alltags } =
+        req.query;
+
+      // Handle marketplace queries
+      if (
+        search ||
+        category ||
+        tags ||
+        sort ||
+        categories !== undefined ||
+        alltags !== undefined ||
+        info
+      ) {
+        if (!marketplace) {
+          throw new ServerError('Marketplace not initialized');
+        }
+
+        // Handle special requests
+        if (categories !== undefined) {
+          // Return all categories
+          const servers = await marketplace.getCatalog();
+          const categoriesMap = new Map<string, number>();
+          servers.forEach((server: any) => {
+            const count = categoriesMap.get(server.category) || 0;
+            categoriesMap.set(server.category, count + 1);
+          });
+
+          return res.json({
+            categories: Array.from(categoriesMap.entries())
+              .map(([name, count]) => ({
+                name,
+                count,
+              }))
+              .sort((a, b) => a.name.localeCompare(b.name)),
+            timestamp: new Date().toISOString(),
+          });
+        }
+
+        if (alltags !== undefined) {
+          // Return all tags
+          const servers = await marketplace.getCatalog();
+          const tagsMap = new Map<string, number>();
+          servers.forEach((server: any) => {
+            server.tags.forEach((tag: string) => {
+              const count = tagsMap.get(tag) || 0;
+              tagsMap.set(tag, count + 1);
+            });
+          });
+
+          return res.json({
+            tags: Array.from(tagsMap.entries())
+              .map(([name, count]) => ({ name, count }))
+              .sort((a, b) => b.count - a.count)
+              .slice(0, 50), // Top 50 tags
+            timestamp: new Date().toISOString(),
+          });
+        }
+
+        if (info) {
+          // Get detailed info about a specific server
+          const details = await marketplace.getServerDetails(info as string);
+          if (!details) {
+            return res.status(404).json({
+              error: `Server not found: ${info}`,
+              timestamp: new Date().toISOString(),
+            });
+          }
+
+          return res.json({
+            server: details.server,
+            readmePreview: details.readmeContent
+              ? details.readmeContent.substring(0, 1000) +
+                (details.readmeContent.length > 1000 ? '...' : '')
+              : null,
+            timestamp: new Date().toISOString(),
+          });
+        }
+
+        // Regular search query
+        let servers = await marketplace.getCatalog({
+          search: search as string,
+          category: category as string,
+          tags: tags ? (tags as string).split(',') : undefined,
+          sort: sort as any,
+        });
+
+        // Apply limit if specified
+        if (limit) {
+          const limitNum = parseInt(limit as string);
+          if (limitNum > 0) {
+            servers = servers.slice(0, limitNum);
+          }
+        }
+
+        return res.json({
+          total: servers.length,
+          servers: servers.map((s: any) => ({
+            id: s.id,
+            name: s.name,
+            description: s.description,
+            category: s.category,
+            tags: s.tags,
+            stars: s.stars || 0,
+            author: s.author,
+            url: s.url,
+          })),
+          timestamp: new Date().toISOString(),
+        });
+      }
+    }
+
+    // Default MCP handler for session management
     if (!mcpServerEndpoint) {
       throw new ServerError('MCP server endpoint not initialized');
     }

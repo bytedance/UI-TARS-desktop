@@ -36,6 +36,8 @@ This dual-interface approach means you can manage servers through the Hub's UI w
 | **Marketplace** ||||
 | | Server Discovery | ✅ | Browse available servers |
 | | Installation | ✅ | Auto configuration |
+| | Search & Filter | ✅ | Query by category, tags, keywords |
+| | CLI Query Tool | ✅ | `mcp-query` command for searching |
 | **Real-time** ||||
 | | Status Updates | ✅ | Server & connection state |
 | | Capability Updates | ✅ | Automatic refresh |
@@ -640,7 +642,68 @@ Response:
 
 ### Marketplace Integration
 
-#### List Available Servers
+#### MCP Query API
+
+The `/mcp` endpoint supports URL query parameters for searching and filtering MCP servers from the marketplace:
+
+**Query Parameters:**
+
+- `search` - Search by name, description, or tags
+- `category` - Filter by category
+- `tags` - Filter by tags (comma-separated)
+- `sort` - Sort results (`newest`, `stars`, `name`)
+- `limit` - Limit number of results
+- `info` - Get detailed info about a specific server (by ID)
+- `categories` - List all available categories
+- `alltags` - List all available tags
+
+**Examples:**
+
+```bash
+# Search for database servers
+GET /mcp?search=database
+
+# Filter by category and tags
+GET /mcp?category=data&tags=sql,postgres
+
+# Get top 10 servers sorted by stars
+GET /mcp?sort=stars&limit=10
+
+# Get detailed info about a specific server
+GET /mcp?info=github-mcp
+
+# List all categories
+GET /mcp?categories
+
+# List all tags
+GET /mcp?alltags
+
+# Complex query
+GET /mcp?search=api&category=integration&sort=newest&limit=5
+```
+
+**Response Format:**
+
+```json
+{
+  "total": 10,
+  "servers": [
+    {
+      "id": "github-mcp",
+      "name": "GitHub MCP",
+      "description": "GitHub integration for MCP",
+      "category": "integration",
+      "tags": ["github", "api", "vcs"],
+      "stars": 150,
+      "author": "github",
+      "url": "https://github.com/github/mcp"
+    }
+  ],
+  "timestamp": "2024-02-20T05:55:00.000Z"
+}
+```
+
+#### List Available Servers (API)
 
 ```bash
 GET /api/marketplace
