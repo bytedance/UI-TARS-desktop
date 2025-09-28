@@ -6,12 +6,13 @@
 import express from 'express';
 import * as oneshotController from '../controllers/oneshot';
 import { exclusiveModeMiddleware } from '../middleware';
+import type { ExtendedExpress } from '../types';
 
 /**
  * Register one-shot query routes (create session and execute query in one step)
- * @param app Express application
+ * @param app Express application or router
  */
-export function registerOneshotRoutes(app: express.Application): void {
+export function registerOneshotRoutes(app: ExtendedExpress): void {
   // Create session and send a query (non-streaming)
   app.post('/api/v1/oneshot/query', exclusiveModeMiddleware, oneshotController.createAndQuery);
 

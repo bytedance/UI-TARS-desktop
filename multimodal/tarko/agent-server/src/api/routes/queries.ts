@@ -6,12 +6,13 @@
 import express from 'express';
 import * as queriesController from '../controllers/queries';
 import { sessionRestoreMiddleware } from '../middleware';
+import type { ExtendedExpress } from '../types';
 
 /**
  * Register query execution routes
- * @param app Express application
+ * @param app Express application or router
  */
-export function registerQueryRoutes(app: express.Application): void {
+export function registerQueryRoutes(app: ExtendedExpress): void {
   app.group('/api/v1/sessions', [sessionRestoreMiddleware], (router: express.Router) => {
     // Send a query (non-streaming)
     router.post('/query', queriesController.executeQuery);

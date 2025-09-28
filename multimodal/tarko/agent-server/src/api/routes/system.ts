@@ -5,12 +5,13 @@
 
 import express from 'express';
 import * as systemController from '../controllers/system';
+import type { ExtendedExpress } from '../types';
 
 /**
  * Register system information routes
- * @param app Express application
+ * @param app Express application or router
  */
-export function registerSystemRoutes(app: express.Application): void {
+export function registerSystemRoutes(app: ExtendedExpress): void {
   // Health check endpoint
   app.get('/api/v1/health', systemController.healthCheck);
 

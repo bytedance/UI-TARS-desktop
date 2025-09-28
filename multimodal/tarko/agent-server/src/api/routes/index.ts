@@ -9,12 +9,13 @@ import { registerQueryRoutes } from './queries';
 import { registerSystemRoutes } from './system';
 import { registerShareRoutes } from './share';
 import { registerOneshotRoutes } from './oneshot';
+import type { ExtendedExpress } from '../types';
 
 /**
- * Register all API routes with the Express application
- * @param app Express application
+ * Register all API routes with the Express application or router
+ * @param app Express application or router
  */
-export function registerAllRoutes(app: express.Application): void {
+export function registerAllRoutes(app: ExtendedExpress): void {
   registerSessionRoutes(app);
   registerQueryRoutes(app);
   registerSystemRoutes(app);

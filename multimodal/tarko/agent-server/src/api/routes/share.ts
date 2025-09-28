@@ -5,12 +5,13 @@
 
 import express from 'express';
 import * as shareController from '../controllers/share';
+import type { ExtendedExpress } from '../types';
 
 /**
  * Register sharing-related routes
- * @param app Express application
+ * @param app Express application or router
  */
-export function registerShareRoutes(app: express.Application): void {
+export function registerShareRoutes(app: ExtendedExpress): void {
   // Get share configuration
   app.get('/api/v1/share/config', shareController.getShareConfig);
 }

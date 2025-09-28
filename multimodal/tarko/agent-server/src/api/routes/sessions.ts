@@ -6,12 +6,13 @@
 import express from 'express';
 import * as sessionsController from '../controllers/sessions';
 import { sessionRestoreMiddleware, exclusiveModeMiddleware } from '../middleware';
+import type { ExtendedExpress } from '../types';
 
 /**
  * Register session management routes
- * @param app Express application
+ * @param app Express application or router
  */
-export function registerSessionRoutes(app: express.Application): void {
+export function registerSessionRoutes(app: ExtendedExpress): void {
   app.group('/api/v1/sessions', (router: express.Router) => {
     // Get all sessions
     router.get('/', sessionsController.getAllSessions);

@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { registerAllRoutes } from './routes';
 import { setupWorkspaceStaticServer } from '../utils/workspace-static-server';
+import type { ExtendedExpress } from './types';
 
 /**
  * Get default CORS options if none are provided
@@ -52,10 +53,10 @@ export function setupAPI(
 
   // Register API routes with base path support
   if (serverBase) {
-    const apiRouter = express.Router();
+    const apiRouter = express.Router() as ExtendedExpress;
     
     // Add group method to router for compatibility
-    (apiRouter as any).group = (
+    apiRouter.group = (
       prefix: string,
       ...handlers: (express.RequestHandler | ((router: express.Router) => void))[]
     ) => {
@@ -67,10 +68,10 @@ export function setupAPI(
       apiRouter.use(prefix, ...middlewares, router);
     };
     
-    registerAllRoutes(apiRouter as any);
+    registerAllRoutes(apiRouter);
     app.use(serverBase, apiRouter);
   } else {
-    registerAllRoutes(app);
+    registerAllRoutes(app as ExtendedExpress);
   }
 
   // Setup workspace static server (lower priority, after API routes)
