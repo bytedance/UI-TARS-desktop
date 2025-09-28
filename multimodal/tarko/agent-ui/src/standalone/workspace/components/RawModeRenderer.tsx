@@ -59,7 +59,9 @@ const CollapsibleSection: React.FC<{
   children: React.ReactNode;
   defaultOpen?: boolean;
   icon?: React.ReactNode;
-}> = ({ title, children, defaultOpen = true, icon }) => {
+  timestamp?: string;
+  duration?: string;
+}> = ({ title, children, defaultOpen = true, icon, timestamp, duration }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
@@ -69,11 +71,30 @@ const CollapsibleSection: React.FC<{
         className="w-full flex items-center gap-3 px-4 py-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-750 transition-colors text-left"
       >
         {icon}
-        <span className="font-medium text-slate-900 dark:text-slate-100 flex-1">{title}</span>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between">
+            <span className="font-medium text-slate-900 dark:text-slate-100">{title}</span>
+            {(timestamp || duration) && (
+              <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+                {timestamp && (
+                  <div className="flex items-center gap-1">
+                    <FiClock size={12} />
+                    <span className="font-mono">{timestamp}</span>
+                  </div>
+                )}
+                {duration && (
+                  <div className="bg-slate-200 dark:bg-slate-700 px-2 py-1 rounded-md">
+                    <span className="font-mono">{duration}</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
         {isOpen ? (
-          <FiChevronDown size={16} className="text-slate-400" />
+          <FiChevronDown size={16} className="text-slate-400 flex-shrink-0" />
         ) : (
-          <FiChevronRight size={16} className="text-slate-400" />
+          <FiChevronRight size={16} className="text-slate-400 flex-shrink-0" />
         )}
       </button>
       {isOpen && <div className="p-4 bg-slate-50 dark:bg-slate-800">{children}</div>}
@@ -134,6 +155,7 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
       <CollapsibleSection
         title="Input"
         icon={<FiPlay size={16} className="text-blue-500" />}
+        timestamp={toolCall.timestamp ? formatTimestamp(toolCall.timestamp, true) : undefined}
         defaultOpen={true}
       >
         <div className="space-y-4">
@@ -148,15 +170,8 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
             </div>
           </div>
 
-          {/* Metadata */}
-          <div className="flex flex-wrap gap-4">
-            <MetadataRow
-              label="Time"
-              value={toolCall.timestamp ? formatTimestamp(toolCall.timestamp, true) : 'Unknown'}
-              icon={<FiClock size={12} />}
-            />
-            <MetadataRow label="ID" value={toolCall.toolCallId.slice(-8)} />
-          </div>
+          {/* ID */}
+          <MetadataRow label="ID" value={toolCall.toolCallId.slice(-8)} />
 
           {/* Parameters */}
           {hasParameters && (
@@ -186,24 +201,12 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
             size={16}
           />
         }
+        timestamp={toolResult?.timestamp ? formatTimestamp(toolResult.timestamp, true) : undefined}
+        duration={toolResult?.elapsedMs ? `${toolResult.elapsedMs}ms` : undefined}
         defaultOpen={true}
       >
         {toolResult ? (
           <div className="space-y-4">
-            {/* Metadata */}
-            <div className="flex flex-wrap gap-4">
-              <MetadataRow
-                label="Time"
-                value={
-                  toolResult.timestamp ? formatTimestamp(toolResult.timestamp, true) : 'Unknown'
-                }
-                icon={<FiClock size={12} />}
-              />
-              {toolResult.elapsedMs && (
-                <MetadataRow label="Duration" value={`${toolResult.elapsedMs}ms`} />
-              )}
-            </div>
-
             {/* Error display */}
             {toolResult.error && (
               <div>
