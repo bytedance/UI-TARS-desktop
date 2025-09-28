@@ -1,9 +1,8 @@
-import { join } from 'path';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { execa } from 'execa';
 import { logger } from './logger';
+import { AgentModel } from '@tarko/model-provider';
 
-// Types for AI-generated changelog
 interface CommitEntry {
   hash: string;
   author: string;
@@ -41,21 +40,12 @@ interface ChangelogData {
 export class AIChangelogGenerator {
   private cwd: string;
   private tagPrefix: string;
-  private modelOptions: {
-    provider?: string;
-    model?: string;
-    apiKey?: string;
-    baseURL?: string;
-  };
+  private model: Partial<AgentModel>;
 
-  constructor(
-    cwd: string,
-    tagPrefix = 'v',
-    modelOptions: { provider?: string; model?: string; apiKey?: string; baseURL?: string } = {},
-  ) {
+  constructor(cwd: string, tagPrefix = 'v', model: Partial<AgentModel> = {}) {
     this.cwd = cwd;
     this.tagPrefix = tagPrefix;
-    this.modelOptions = modelOptions;
+    this.model = model;
   }
 
   /**
@@ -163,26 +153,9 @@ export class AIChangelogGenerator {
       };
     }
 
-    const { createLLMClient, ModelResolver } = await import('@tarko/model-provider');
+    const { createLLMClient } = await import('@tarko/model-provider');
 
-    // Set up LLM client
-    const resolver = new ModelResolver({
-      providers: [
-        {
-          // @ts-expect-error
-          name: this.modelOptions.provider,
-          models: [],
-          baseURL: this.modelOptions.baseURL,
-          apiKey: this.modelOptions.apiKey,
-        },
-      ],
-      // @ts-expect-error
-      provider: this.modelOptions.provider,
-      id: this.modelOptions.model,
-    });
-
-    const resolvedModel = resolver.resolve();
-    const llm = createLLMClient(resolvedModel);
+    const llm = createLLMClient(this.model as AgentModel);
 
     // Prepare prompt for LLM
     const prompt = `Analyze these git commits and generate a structured changelog:
@@ -212,7 +185,7 @@ Provide a concise, professional changelog in JSON format with the following stru
 
     // Call LLM with JSON mode
     const response = await llm.chat.completions.create({
-      model: resolvedModel.id,
+      model: this.model.id,
       messages: [
         {
           role: 'system',

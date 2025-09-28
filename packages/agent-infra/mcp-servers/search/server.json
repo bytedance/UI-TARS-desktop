@@ -1,0 +1,137 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
+  "name": "io.github.bytedance/mcp-server-search",
+  "description": "MCP server for web search operations",
+  "status": "active",
+  "repository": {
+    "url": "https://github.com/bytedance/UI-TARS-desktop",
+    "source": "github",
+    "subfolder": "packages/agent-infra/mcp-servers/search"
+  },
+  "version": "1.0.0",
+  "packages": [
+    {
+      "registry_type": "npm",
+      "registry_base_url": "https://registry.npmjs.org",
+      "identifier": "@agent-infra/mcp-server-search",
+      "version": "latest",
+      "transport": {
+        "type": "stdio"
+      },
+      "package_arguments": [
+        {
+          "type": "named",
+          "name": "engine",
+          "description": "Search engine to use for browser search (default: google)",
+          "format": "string",
+          "default": "google",
+          "is_required": false
+        },
+        {
+          "type": "named",
+          "name": "api-key",
+          "description": "API key for the search provider",
+          "format": "string",
+          "is_required": false
+        },
+        {
+          "type": "named",
+          "name": "base-url",
+          "description": "Base URL for the search provider",
+          "format": "string",
+          "is_required": false
+        }
+      ]
+    },
+    {
+      "registry_type": "npm",
+      "registry_base_url": "https://registry.npmjs.org",
+      "identifier": "@agent-infra/mcp-server-search",
+      "version": "latest",
+      "runtime_hint": "npx",
+      "transport": {
+        "type": "sse",
+        "url": "http://127.0.0.1:{port}/sse"
+      },
+      "runtime_arguments": [],
+      "package_arguments": [
+        {
+          "type": "named",
+          "name": "engine",
+          "description": "Search engine to use for browser search (default: google)",
+          "format": "string",
+          "default": "google",
+          "is_required": false
+        },
+        {
+          "type": "named",
+          "name": "api-key",
+          "description": "API key for the search provider",
+          "format": "string",
+          "is_required": false
+        },
+        {
+          "type": "named",
+          "name": "base-url",
+          "description": "Base URL for the search provider",
+          "format": "string",
+          "is_required": false
+        },
+        {
+          "type": "named",
+          "name": "port",
+          "description": "Server port number",
+          "format": "number",
+          "is_required": true,
+          "default": "8089"
+        }
+      ],
+      "environment_variables": []
+    },
+    {
+      "registry_type": "npm",
+      "registry_base_url": "https://registry.npmjs.org",
+      "identifier": "@agent-infra/mcp-server-search",
+      "version": "latest",
+      "runtime_hint": "npx",
+      "transport": {
+        "type": "streamable-http",
+        "url": "http://127.0.0.1:{port}/mcp"
+      },
+      "runtime_arguments": [],
+      "package_arguments": [
+        {
+          "type": "named",
+          "name": "engine",
+          "description": "Search engine to use for browser search (default: google)",
+          "format": "string",
+          "default": "google",
+          "is_required": false
+        },
+        {
+          "type": "named",
+          "name": "api-key",
+          "description": "API key for the search provider",
+          "format": "string",
+          "is_required": false
+        },
+        {
+          "type": "named",
+          "name": "base-url",
+          "description": "Base URL for the search provider",
+          "format": "string",
+          "is_required": false
+        },
+        {
+          "type": "named",
+          "name": "port",
+          "description": "Server port number",
+          "format": "number",
+          "is_required": true,
+          "default": "8089"
+        }
+      ],
+      "environment_variables": []
+    }
+  ]
+}

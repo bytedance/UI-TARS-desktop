@@ -15,12 +15,6 @@ import type { AgentTARSAppConfig } from './config';
  *
  * export default defineConfig({
  *   model: {
- *     providers: [
- *       {
- *         name: 'openai',
- *         apiKey: process.env.OPENAI_API_KEY,
- *       }
- *     ],
  *     provider: 'openai',
  *     id: 'gpt-4o',
  *   },

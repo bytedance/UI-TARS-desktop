@@ -1,0 +1,146 @@
+---
+title: 配置
+description: 配置你的 Tarko Agent
+---
+
+# 配置
+
+Tarko Agent 通过一个全面的配置对象进行配置，该对象定义了 Agent 的行为、能力和运行时设置。
+
+## 基础配置
+
+```typescript
+import { Agent } from '@tarko/agent';
+
+const agent = new Agent({
+  // Agent 身份
+  name: 'MyAgent',
+  id: 'my-agent-v1',
+  
+  // 模型配置
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  
+  // 系统提示（使用 instructions）
+  instructions: '你是一个有用的助手...',
+  
+  // 工具
+  tools: [],
+  
+  // 最大迭代次数
+  maxIterations: 10,
+  
+  // 温度参数
+  temperature: 0.7,
+});
+```
+
+## 配置选项
+
+### Agent 身份
+
+```typescript
+{
+  name: 'string',           // Agent 名称
+  id: 'string',             // Agent ID
+}
+```
+
+### 模型配置
+
+```typescript
+{
+  model: {
+    provider: 'openai' | 'anthropic' | 'volcengine',
+    id: 'string',           // 模型 ID，如 'gpt-4', 'claude-3-sonnet'
+    apiKey: 'string',
+    baseURL?: 'string',     // 自定义端点
+  },
+  temperature?: number,     // 0-1，默认：0.7
+  maxTokens?: number,       // 最大响应令牌
+  top_p?: number           // 核采样
+}
+```
+
+### Context Engineering
+
+```typescript
+{
+  context: {
+    maxImagesCount: 5,      // 最大图片数量
+    // 其他上下文选项根据实际实现
+  }
+}
+```
+
+### Tool Call Engine
+
+```typescript
+{
+  toolCallEngine: 'native' | 'prompt_engineering' | 'structured_outputs'
+}
+```
+
+### 其他配置选项
+
+```typescript
+{
+  maxIterations: number,              // 最大循环次数，默认 1000
+  logLevel: LogLevel.DEBUG,           // 日志级别
+  enableStreamingToolCallEvents: boolean,  // 启用流式工具调用事件
+}
+```
+
+## 环境变量
+
+Tarko 支持通过环境变量进行配置：
+
+```bash
+# 模型配置
+TARKO_MODEL_PROVIDER=openai
+TARKO_MODEL_API_KEY=your-api-key
+TARKO_MODEL_NAME=gpt-4
+
+# Agent 配置
+TARKO_AGENT_NAME=MyAgent
+TARKO_AGENT_DESCRIPTION="一个有用的助手"
+
+# 上下文配置
+TARKO_CONTEXT_MAX_LENGTH=32000
+TARKO_CONTEXT_COMPRESSION_RATIO=0.8
+```
+
+## 配置文件
+
+你也可以使用配置文件（`tarko.config.js`）：
+
+```javascript
+module.exports = {
+  name: 'MyAgent',
+  description: '一个有用的助手',
+  model: {
+    provider: 'openai',
+    apiKey: process.env.OPENAI_API_KEY,
+    model: 'gpt-4'
+  },
+  tools: [
+    '@tarko/tools/file-system',
+    '@tarko/tools/browser'
+  ]
+};
+```
+
+## 验证
+
+Tarko 在启动时验证配置并提供有用的错误消息：
+
+```typescript
+try {
+  const agent = new Agent(config);
+} catch (error) {
+  console.error('配置错误:', error.message);
+}
+```

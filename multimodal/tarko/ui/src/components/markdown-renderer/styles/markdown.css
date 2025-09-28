@@ -1,0 +1,59 @@
+/**
+ * Markdown Content Styles
+ * 
+ * This file contains styles that cannot be easily expressed with Tailwind utility classes,
+ * primarily complex selectors and pseudo-classes for table styling.
+ */
+
+/* Ensure proper scrolling for long content */
+.markdown-content {
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+.markdown-content pre {
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.markdown-content code {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.markdown-content table {
+  width: 100%;
+  min-width: max-content;
+  table-layout: auto;
+}
+
+/* Table styling - nth-child and complex selectors removed */
+
+/* Table cell content spacing - ensuring proper margin handling */
+.markdown-content table td > * {
+  margin-bottom: 0;
+}
+
+.markdown-content table td > pre {
+  margin: 0;
+}
+
+.markdown-content pre {
+  font-size: 14px;
+  line-height: 18px;
+}
+
+/* Table code styling - specific background colors for table context */
+.markdown-content table code {
+  white-space: pre;
+  word-break: keep-all;
+  background-color: rgba(241, 245, 249, 0.7);
+  color: #334155;
+}
+
+.dark .markdown-content table code {
+  background-color: rgba(30, 41, 59, 0.7);
+  color: #e2e8f0;
+}

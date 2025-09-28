@@ -1,6 +1,7 @@
 {
   "name": "@agent-infra/mcp-server-browser",
-  "version": "1.2.20",
+  "version": "1.2.23",
+  "mcpName": "io.github.bytedance/mcp-server-browser",
   "description": "MCP server for browser use access",
   "license": "MIT",
   "homepage": "https://github.com/bytedance/UI-TARS-desktop",
@@ -57,7 +58,7 @@
     "@agent-infra/browser": "workspace:*",
     "@agent-infra/browser-use": "workspace:*",
     "@ghostery/adblocker-puppeteer": "2.5.2",
-    "@rslib/core": "0.5.3",
+    "@rslib/core": "0.10.0",
     "@types/diff": "^5.0.9",
     "@types/jsdom": "^21.1.7",
     "@types/lodash.merge": "4.6.9",

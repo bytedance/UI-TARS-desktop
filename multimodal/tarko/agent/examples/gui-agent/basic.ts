@@ -313,14 +313,13 @@ export const agent = new BrowserGUIAgent({
   instructions: `You are a GUI Agent, you are good at using browser_action_tool to solve user problems`,
   model: {
     provider: 'volcengine',
-    id: 'ep-20250510145437-5sxhs', // 'doubao-1.5-thinking-vision-pro',
+    id: 'doubao-seed-1-6-vision-250815',
     apiKey: process.env.ARK_API_KEY,
     // TODO: Support Claude 3.7
     // provider: 'azure-openai',
     // baseURL: process.env.AWS_CLAUDE_API_BASE_URL,
     // id: 'aws_sdk_claude37_sonnet',
   },
-  toolCallEngine: 'structured_outputs',
   logLevel: LogLevel.DEBUG,
 });
 

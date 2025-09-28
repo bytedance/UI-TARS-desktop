@@ -1,0 +1,226 @@
+---
+title: Tools
+description: Adding tools to your Tarko Agent
+---
+
+# Tools
+
+Tools are the core capabilities that enable your Agent to interact with the external world. Tarko uses the **Tool** class to define structured function calls with type-safe parameters.
+
+## Tool Definition
+
+Based on the actual Tool class from `multimodal/tarko/agent-interface/src/tool.ts`:
+
+```typescript
+import { Tool, z } from '@tarko/agent';
+
+const tool = new Tool({
+  id: string,                     // Unique tool identifier
+  description: string,            // What the tool does
+  parameters: ZodSchema,          // Zod schema for parameters
+  function: (input) => any        // Implementation function
+});
+```
+
+## Real Examples from Source Code
+
+### Location Tool
+
+From `multimodal/tarko/agent/examples/tool-calls/basic.ts`:
+
+```typescript
+const locationTool = new Tool({
+  id: 'getCurrentLocation',
+  description: "Get user's current location",
+  parameters: z.object({}),
+  function: async () => {
+    return { location: 'Boston' };
+  },
+});
+```
+
+### Weather Tool
+
+From `multimodal/tarko/agent/examples/tool-calls/basic.ts`:
+
+```typescript
+const weatherTool = new Tool({
+  id: 'getWeather',
+  description: 'Get weather information for a specified location',
+  parameters: z.object({
+    location: z.string().describe('Location name, such as city name'),
+  }),
+  function: async (input) => {
+    const { location } = input;
+    return {
+      location,
+      temperature: '70°F (21°C)',
+      condition: 'Sunny',
+      precipitation: '10%',
+      humidity: '45%',
+      wind: '5 mph',
+    };
+  },
+});
+```
+
+## Creating Custom Tools
+
+### Simple Tool
+
+```typescript
+const calculatorTool = new Tool({
+  id: 'calculate',
+  description: 'Perform basic mathematical calculations',
+  parameters: z.object({
+    expression: z.string().describe('Mathematical expression like "2 + 2"'),
+  }),
+  function: async ({ expression }) => {
+    // Simple evaluation (use a proper math library in production)
+    try {
+      const result = Function(`"use strict"; return (${expression})`)();
+      return { result, expression };
+    } catch (error) {
+      return { error: 'Invalid expression', expression };
+    }
+  },
+});
+```
+
+### File System Tool
+
+```typescript
+const readFileTool = new Tool({
+  id: 'readFile',
+  description: 'Read contents of a text file',
+  parameters: z.object({
+    path: z.string().describe('File path to read'),
+    encoding: z.string().default('utf8').describe('File encoding'),
+  }),
+  function: async ({ path, encoding }) => {
+    const fs = await import('fs/promises');
+    try {
+      const content = await fs.readFile(path, encoding);
+      return { content, path, size: content.length };
+    } catch (error) {
+      return { error: error.message, path };
+    }
+  },
+});
+```
+
+### HTTP Request Tool
+
+```typescript
+const httpTool = new Tool({
+  id: 'httpRequest',
+  description: 'Make HTTP requests to APIs',
+  parameters: z.object({
+    url: z.string().url().describe('URL to request'),
+    method: z.enum(['GET', 'POST', 'PUT', 'DELETE']).default('GET'),
+    headers: z.record(z.string()).optional().describe('HTTP headers'),
+    body: z.string().optional().describe('Request body (JSON string)'),
+  }),
+  function: async ({ url, method, headers, body }) => {
+    try {
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          ...headers,
+        },
+        body: body ? JSON.stringify(JSON.parse(body)) : undefined,
+      });
+      
+      const responseBody = await response.text();
+      return {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers),
+        body: responseBody,
+      };
+    } catch (error) {
+      return { error: error.message, url };
+    }
+  },
+});
+```
+
+## Using Tools with Agent
+
+```typescript
+import { Agent, Tool, z, LogLevel } from '@tarko/agent';
+
+// Define your tools
+const tools = [locationTool, weatherTool, calculatorTool];
+
+// Create agent with tools
+const agent = new Agent({
+  model: {
+    provider: 'volcengine',
+    id: 'ep-20250510145437-5sxhs',
+    apiKey: process.env.ARK_API_KEY,
+  },
+  tools,
+  logLevel: LogLevel.DEBUG,
+});
+
+// Run agent with tools
+const response = await agent.run('What is 15 * 23 and what\'s the weather like?');
+console.log(response);
+```
+
+## Tool Call Engines
+
+Tarko supports different tool call engines:
+
+```typescript
+const agent = new Agent({
+  tools: [weatherTool],
+  toolCallEngine: 'native',              // Use model's native function calling
+  // or
+  toolCallEngine: 'prompt_engineering',  // Use prompt-based approach
+  // or  
+  toolCallEngine: 'structured_outputs',  // Use structured output parsing
+});
+```
+
+## Error Handling in Tools
+
+```typescript
+const robustTool = new Tool({
+  id: 'robustOperation',
+  description: 'A tool that handles errors gracefully',
+  parameters: z.object({
+    input: z.string(),
+  }),
+  function: async ({ input }) => {
+    try {
+      // Your tool logic here
+      const result = await someOperation(input);
+      return { success: true, result };
+    } catch (error) {
+      // Return error information instead of throwing
+      return {
+        success: false,
+        error: error.message,
+        input,
+      };
+    }
+  },
+});
+```
+
+## Testing Tools
+
+You can test tools independently:
+
+```typescript
+// Test a tool directly
+const result = await weatherTool.function({ location: 'Boston' });
+console.log('Tool result:', result);
+
+// Check tool schema
+console.log('Tool has Zod schema:', weatherTool.hasZodSchema());
+console.log('Tool has JSON schema:', weatherTool.hasJsonSchema());
+```

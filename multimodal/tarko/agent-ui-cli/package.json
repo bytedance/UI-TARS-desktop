@@ -1,0 +1,45 @@
+{
+  "name": "@tarko/agent-ui-cli",
+  "version": "0.3.0-beta.12",
+  "description": "CLI for Agent UI Builder - generate and share agent replay HTML files",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "agui": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "rslib build --watch",
+    "build": "rslib build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "pnpm build"
+  },
+  "dependencies": {
+    "@tarko/agent-ui-builder": "workspace:*",
+    "@tarko/config-loader": "workspace:*",
+    "@tarko/interface": "workspace:*",
+    "jiti": "2.5.1",
+    "cac": "6.7.14"
+  },
+  "devDependencies": {
+    "@rslib/core": "0.10.0",
+    "@types/node": "22.15.30",
+    "typescript": "^5.5.3",
+    "vitest": "3.2.4"
+  }
+}

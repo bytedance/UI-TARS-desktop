@@ -1,0 +1,737 @@
+---
+title: CLI 部署
+description: 使用 Tarko CLI 的生产部署策略
+---
+
+# CLI 部署
+
+本指南涵盖使用 Tarko CLI 的生产部署策略。有关完整的 CLI 参考和命令，请参阅 [CLI 指南](/guide/cli/overview)。
+
+## 概述
+
+Tarko CLI 提供针对不同环境优化的多种部署模式：
+
+- **生产服务器** (`tarko serve`) - 用于生产的无头 API 服务器
+- **开发** (`tarko run`) - 用于开发和测试的交互式 UI
+- **自动化** (`tarko run --headless`) - 脚本和 CI/CD 集成
+
+有关详细的命令参考，请参阅 [CLI 命令](/guide/cli/commands)。
+
+## 生产服务器部署
+
+### 基本服务器设置
+
+为生产使用部署无头 API 服务器：
+
+```bash
+# 启动生产服务器
+tarko serve --port 8080 --host 0.0.0.0
+
+# 使用特定 Agent
+tarko serve agent-tars --port 8080
+
+# 使用生产配置
+tarko serve --config production.config.ts --port 8080
+```
+
+服务器在以下地址公开 REST 和 WebSocket API：
+- `GET /api/v1/health` - 健康检查
+- `POST /api/v1/chat` - 聊天端点
+- `GET /api/v1/events` - 事件流（WebSocket）
+
+### 生产配置
+
+创建生产优化配置：
+
+```typescript
+// production.config.ts
+import { AgentAppConfig } from '@tarko/interface';
+
+const config: AgentAppConfig = {
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  
+  server: {
+    port: 8080,
+    host: '0.0.0.0',
+    cors: true,
+    rateLimit: {
+      windowMs: 15 * 60 * 1000, // 15 分钟
+      max: 100, // 每个窗口的请求数
+    },
+  },
+  
+  ui: {
+    enabled: false, // 生产环境禁用 UI
+  },
+  
+  logging: {
+    level: 'info',
+    format: 'json',
+    output: {
+      console: false,
+      file: {
+        enabled: true,
+        path: './logs/agent.log',
+        maxSize: '100m',
+        maxFiles: 10,
+      },
+    },
+  },
+  
+  metrics: {
+    enabled: true,
+    endpoint: '/metrics',
+  },
+};
+
+export default config;
+```
+
+有关完整的配置选项，请参阅 [CLI 配置](/guide/cli/configuration)。
+
+## 容器部署
+
+### Docker
+
+创建生产 Docker 镜像：
+
+```dockerfile
+# Dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+
+# 安装依赖
+COPY package*.json ./
+RUN npm ci --only=production
+
+# 复制应用代码
+COPY . .
+
+# 全局安装 Tarko CLI
+RUN npm install -g @tarko/agent-cli
+
+# 创建非 root 用户
+RUN addgroup -g 1001 -S tarko && \
+    adduser -S tarko -u 1001
+USER tarko
+
+# 暴露端口
+EXPOSE 8080
+
+# 健康检查
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8080/api/v1/health || exit 1
+
+# 启动服务器
+CMD ["tarko", "serve", "--port", "8080", "--host", "0.0.0.0"]
+```
+
+构建和运行：
+
+```bash
+# 构建镜像
+docker build -t my-agent:latest .
+
+# 运行容器
+docker run -d \
+  --name my-agent \
+  -p 8080:8080 \
+  -e OPENAI_API_KEY=${OPENAI_API_KEY} \
+  -v $(pwd)/logs:/app/logs \
+  --restart unless-stopped \
+  my-agent:latest
+
+# 检查健康状态
+docker exec my-agent curl -f http://localhost:8080/api/v1/health
+```
+
+### Docker Compose
+
+用于多服务部署：
+
+```yaml
+# docker-compose.yml
+version: '3.8'
+
+services:
+  agent:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - NODE_ENV=production
+    volumes:
+      - ./workspace:/app/workspace
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - agent
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+```
+
+部署堆栈：
+
+```bash
+# 启动服务
+docker-compose up -d
+
+# 查看日志
+docker-compose logs -f agent
+
+# 扩展 Agent
+docker-compose up -d --scale agent=3
+
+# 健康检查
+curl -f http://localhost:8080/api/v1/health
+```
+
+## Kubernetes 部署
+
+### 基本部署
+
+```yaml
+# k8s/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tarko-agent
+  labels:
+    app: tarko-agent
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: tarko-agent
+  template:
+    metadata:
+      labels:
+        app: tarko-agent
+    spec:
+      containers:
+      - name: agent
+        image: my-agent:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-secrets
+              key: openai-key
+        - name: NODE_ENV
+          value: "production"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /api/v1/health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/v1/health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - name: workspace
+          mountPath: /app/workspace
+        - name: logs
+          mountPath: /app/logs
+      volumes:
+      - name: workspace
+        persistentVolumeClaim:
+          claimName: agent-workspace
+      - name: logs
+        persistentVolumeClaim:
+          claimName: agent-logs
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tarko-agent-service
+spec:
+  selector:
+    app: tarko-agent
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tarko-agent-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: agent.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: tarko-agent-service
+            port:
+              number: 80
+```
+
+部署到 Kubernetes：
+
+```bash
+# 创建密钥
+kubectl create secret generic api-secrets \
+  --from-literal=openai-key=${OPENAI_API_KEY}
+
+# 应用清单
+kubectl apply -f k8s/
+
+# 检查部署
+kubectl get pods -l app=tarko-agent
+kubectl logs -l app=tarko-agent
+
+# 端口转发用于测试
+kubectl port-forward svc/tarko-agent-service 8080:80
+```
+
+## 进程管理
+
+### PM2
+
+用于传统服务器部署：
+
+```javascript
+// ecosystem.config.js
+module.exports = {
+  apps: [{
+    name: 'tarko-agent',
+    script: 'tarko',
+    args: 'serve --port 8080 --config production.config.ts',
+    instances: 'max', // 使用所有 CPU 核心
+    exec_mode: 'cluster',
+    autorestart: true,
+    watch: false,
+    max_memory_restart: '1G',
+    env: {
+      NODE_ENV: 'production',
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    },
+    error_file: './logs/err.log',
+    out_file: './logs/out.log',
+    log_file: './logs/combined.log',
+    time: true,
+  }]
+};
+```
+
+使用 PM2 部署：
+
+```bash
+# 安装 PM2
+npm install -g pm2
+
+# 启动应用
+pm2 start ecosystem.config.js
+
+# 保存 PM2 配置
+pm2 save
+
+# 设置启动脚本
+pm2 startup
+sudo env PATH=$PATH:/usr/bin pm2 startup systemd -u $USER --hp $HOME
+
+# 监控
+pm2 monit
+pm2 logs tarko-agent
+
+# 重启
+pm2 restart tarko-agent
+
+# 停止
+pm2 stop tarko-agent
+```
+
+### Systemd 服务
+
+创建 systemd 服务：
+
+```ini
+# /etc/systemd/system/tarko-agent.service
+[Unit]
+Description=Tarko Agent Server
+After=network.target
+
+[Service]
+Type=simple
+User=tarko
+WorkingDirectory=/opt/tarko-agent
+Environment=NODE_ENV=production
+Environment=OPENAI_API_KEY=your-api-key
+ExecStart=/usr/bin/tarko serve --port 8080 --config production.config.ts
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+```
+
+管理服务：
+
+```bash
+# 启用并启动
+sudo systemctl enable tarko-agent
+sudo systemctl start tarko-agent
+
+# 检查状态
+sudo systemctl status tarko-agent
+
+# 查看日志
+sudo journalctl -u tarko-agent -f
+
+# 重启
+sudo systemctl restart tarko-agent
+```
+
+## 负载均衡
+
+### Nginx 配置
+
+```nginx
+# nginx.conf
+upstream tarko_agents {
+    least_conn;
+    server localhost:8080 max_fails=3 fail_timeout=30s;
+    server localhost:8081 max_fails=3 fail_timeout=30s;
+    server localhost:8082 max_fails=3 fail_timeout=30s;
+}
+
+server {
+    listen 80;
+    server_name agent.example.com;
+    
+    # 重定向 HTTP 到 HTTPS
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name agent.example.com;
+    
+    # SSL 配置
+    ssl_certificate /etc/nginx/ssl/cert.pem;
+    ssl_certificate_key /etc/nginx/ssl/key.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    
+    # 安全头
+    add_header X-Frame-Options DENY;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+    
+    location / {
+        proxy_pass http://tarko_agents;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        proxy_read_timeout 86400;
+        
+        # 速率限制
+        limit_req zone=api burst=20 nodelay;
+    }
+    
+    # 健康检查端点
+    location /health {
+        access_log off;
+        proxy_pass http://tarko_agents/api/v1/health;
+    }
+    
+    # 指标端点（限制访问）
+    location /metrics {
+        allow 10.0.0.0/8;
+        deny all;
+        proxy_pass http://tarko_agents/metrics;
+    }
+}
+
+# 速率限制
+http {
+    limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
+}
+```
+
+## 监控和可观测性
+
+### 健康检查
+
+```bash
+# 基本健康检查
+curl -f http://localhost:8080/api/v1/health
+
+# 详细状态
+curl http://localhost:8080/api/v1/status
+
+# 指标（Prometheus 格式）
+curl http://localhost:8080/metrics
+```
+
+### 日志
+
+为生产配置结构化日志：
+
+```typescript
+// 在 production.config.ts 中
+logging: {
+  level: 'info',
+  format: 'json',
+  output: {
+    console: false,
+    file: {
+      enabled: true,
+      path: './logs/agent.log',
+      maxSize: '100m',
+      maxFiles: 10,
+    },
+  },
+}
+```
+
+使用 ELK 堆栈或类似工具进行日志聚合：
+
+```yaml
+# docker-compose.override.yml
+version: '3.8'
+services:
+  agent:
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=tarko-agent"
+```
+
+### 指标和告警
+
+启用 Prometheus 指标：
+
+```typescript
+// 在 production.config.ts 中
+metrics: {
+  enabled: true,
+  endpoint: '/metrics',
+  collectors: {
+    requests: true,
+    responses: true,
+    toolCalls: true,
+    errors: true,
+    memory: true,
+    cpu: true,
+  },
+}
+```
+
+## CI/CD 集成
+
+### GitHub Actions
+
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy Agent
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Install Tarko CLI
+      run: npm install -g @tarko/agent-cli
+    
+    - name: Test agent
+      run: |
+        tarko run --headless --input "健康检查" --format json
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    
+    - name: Build Docker image
+      run: |
+        docker build -t my-agent:${{ github.sha }} .
+        docker tag my-agent:${{ github.sha }} my-agent:latest
+    
+    - name: Deploy to production
+      run: |
+        # 部署到你的基础设施
+        echo "部署到生产环境..."
+```
+
+### 部署脚本
+
+```bash
+#!/bin/bash
+# deploy.sh
+
+set -e
+
+echo "部署 Tarko Agent..."
+
+# 构建并推送镜像
+docker build -t my-agent:latest .
+docker push my-agent:latest
+
+# 更新 Kubernetes 部署
+kubectl set image deployment/tarko-agent agent=my-agent:latest
+kubectl rollout status deployment/tarko-agent
+
+# 验证部署
+kubectl get pods -l app=tarko-agent
+echo "部署完成！"
+```
+
+## 安全考虑
+
+### 环境变量
+
+```bash
+# 使用安全的环境变量管理
+export OPENAI_API_KEY=$(cat /run/secrets/openai_key)
+export ANTHROPIC_API_KEY=$(cat /run/secrets/anthropic_key)
+
+# 或使用容器密钥
+docker run -d \
+  --secret openai_key \
+  --secret anthropic_key \
+  my-agent:latest
+```
+
+### 网络安全
+
+```typescript
+// 在生产中限制工具访问
+tool: {
+  exclude: ['dangerous_*', 'system_*', 'network_*'],
+},
+
+// 仅为受信任的域启用 CORS
+server: {
+  cors: {
+    origin: ['https://trusted-domain.com'],
+    credentials: true,
+  },
+}
+```
+
+## 故障排除
+
+### 常见问题
+
+**端口冲突：**
+```bash
+# 检查端口使用
+lsof -i :8080
+
+# 使用不同端口
+tarko serve --port 8081
+```
+
+**内存问题：**
+```bash
+# 增加 Node.js 内存
+NODE_OPTIONS="--max-old-space-size=4096" tarko serve
+
+# 监控内存使用
+top -p $(pgrep -f "tarko serve")
+```
+
+**配置错误：**
+```bash
+# 验证配置
+tarko --show-config --dry-run
+
+# 调试配置加载
+DEBUG=tarko:config tarko serve --debug
+```
+
+### 调试模式
+
+```bash
+# 启用调试日志
+DEBUG=tarko:* tarko serve --debug
+
+# 使用详细输出监控
+tarko serve --debug --verbose
+
+# 性能分析
+NODE_OPTIONS="--inspect" tarko serve
+```
+
+## 下一步
+
+- [CLI 概述](/guide/cli/overview) - 完整的 CLI 参考
+- [CLI 配置](/guide/cli/configuration) - 高级配置
+- [内置 Agent](/guide/cli/built-in-agents) - 使用预构建的 Agent
+- [服务器 API](/guide/deployment/server) - 服务器 API 参考

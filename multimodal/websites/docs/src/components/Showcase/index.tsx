@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Spinner, Button } from '@nextui-org/react';
 import { FiRefreshCw, FiAlertCircle } from 'react-icons/fi';
-import { useLocation, useNavigate } from 'rspress/runtime';
+import { useLocation, useNavigate } from '@rspress/core/runtime';
 import { ShowcaseCard } from './components/ShowcaseCard';
 import { CategoryFilter } from './components/CategoryFilter';
 import { ShowcaseHeader } from './components/ShowcaseHeader';
@@ -98,7 +98,7 @@ export const Showcase: React.FC = () => {
       onNavigateToDetail={(item, activeCategory) => {
         // Pass current category as state to preserve filter when navigating back
         navigate(`/showcase/${encodeURIComponent(item.id)}`, {
-          state: { previousCategory: activeCategory !== 'all' ? activeCategory : null }
+          state: { previousCategory: activeCategory !== 'all' ? activeCategory : null },
         });
       }}
     />
@@ -125,10 +125,10 @@ const ShowcaseListPage: React.FC<ShowcaseListPageProps> = ({
   const location = useLocation();
   const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
-  
+
   // Get category from URL params, default to 'all'
   const [activeCategory, setActiveCategory] = useState(searchParams.get('category') || 'all');
-  
+
   // Update URL when category changes
   const handleCategoryChange = (categoryId: string) => {
     setActiveCategory(categoryId);
@@ -138,9 +138,11 @@ const ShowcaseListPage: React.FC<ShowcaseListPageProps> = ({
     } else {
       newSearchParams.set('category', categoryId);
     }
-    navigate(`/showcase${newSearchParams.toString() ? `?${newSearchParams.toString()}` : ''}`, { replace: true });
+    navigate(`/showcase${newSearchParams.toString() ? `?${newSearchParams.toString()}` : ''}`, {
+      replace: true,
+    });
   };
-  
+
   // Sync state with URL changes (for browser back/forward)
   useEffect(() => {
     const currentCategory = searchParams.get('category') || 'all';
@@ -421,7 +423,7 @@ const ShowcaseDetailPage: React.FC<ShowcaseDetailPageProps> = ({
       navigate('/showcase');
     }
   };
-  
+
   return <ShowcaseDetail item={items[0]} onBack={handleBackToShowcase} />;
 };
 

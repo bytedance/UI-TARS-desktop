@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { MCPAgent } from '../src';
-import { TEST_MODEL_PROVIDERS } from '@tarko/agent/_config';
 
 async function main() {
   const agent = new MCPAgent({
@@ -16,8 +15,10 @@ async function main() {
       },
     },
     model: {
-      providers: TEST_MODEL_PROVIDERS,
+      provider: 'azure-openai',
+      model: 'aws_sdk_claude37_sonnet',
     },
+    toolCallEngine: 'prompt_engineering',
   });
 
   try {

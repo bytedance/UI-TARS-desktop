@@ -1,22 +1,20 @@
-{"id":"2025071321504402FC97FA5928D837FE0A","created":1752414645,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"role":"assistant"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504402FC97FA5928D837FE0A","created":1752414645,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"{"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504402FC97FA5928D837FE0A","created":1752414645,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"content"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504402FC97FA5928D837FE0A","created":1752414645,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\": \"I"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504402FC97FA5928D837FE0A","created":1752414645,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"'ll"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504402FC97FA5928D837FE0A","created":1752414645,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" check the current"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504402FC97FA5928D837FE0A","created":1752414645,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" weather in"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504402FC97FA5928D837FE0A","created":1752414645,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" Boston for you.\","},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504402FC97FA5928D837FE0A","created":1752414645,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"tool"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504402FC97FA5928D837FE0A","created":1752414645,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"Call\": {"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504402FC97FA5928D837FE0A","created":1752414645,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n    \"name\":"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504402FC97FA5928D837FE0A","created":1752414646,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" \"get"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504402FC97FA5928D837FE0A","created":1752414646,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"Weather\","},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504402FC97FA5928D837FE0A","created":1752414646,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n    \"args\":"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504402FC97FA5928D837FE0A","created":1752414646,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" {\n      \""},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504402FC97FA5928D837FE0A","created":1752414646,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"location\": \"Boston"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504402FC97FA5928D837FE0A","created":1752414646,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\"\n    }"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504402FC97FA5928D837FE0A","created":1752414646,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  }"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504402FC97FA5928D837FE0A","created":1752414646,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n}"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504402FC97FA5928D837FE0A","created":1752414646,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504402FC97FA5928D837FE0A","created":1752414646,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"finish_reason":"stop","stop_reason":"end_turn"}],"usage":{}}
-{"id":"2025071321504402FC97FA5928D837FE0A","created":1752414646,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{"completion_tokens":60,"prompt_tokens":411,"total_tokens":471}}
+{"id":"20250919180206CD2C1384A53FF91DB3BD","created":1758276128,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"role":"assistant"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180206CD2C1384A53FF91DB3BD","created":1758276128,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"{"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180206CD2C1384A53FF91DB3BD","created":1758276128,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"content"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180206CD2C1384A53FF91DB3BD","created":1758276128,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\": \"I"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180206CD2C1384A53FF91DB3BD","created":1758276128,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"'ll"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180206CD2C1384A53FF91DB3BD","created":1758276128,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" check the weather in"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180206CD2C1384A53FF91DB3BD","created":1758276128,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" Boston for you.\","},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180206CD2C1384A53FF91DB3BD","created":1758276128,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"tool"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180206CD2C1384A53FF91DB3BD","created":1758276129,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"Call\": {"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180206CD2C1384A53FF91DB3BD","created":1758276129,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n    \"name\": \"get"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180206CD2C1384A53FF91DB3BD","created":1758276129,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"Weather\","},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180206CD2C1384A53FF91DB3BD","created":1758276129,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n    \"args\":"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180206CD2C1384A53FF91DB3BD","created":1758276129,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" {\n      \""},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180206CD2C1384A53FF91DB3BD","created":1758276129,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"location\": \"Boston"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180206CD2C1384A53FF91DB3BD","created":1758276129,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\"\n    }"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180206CD2C1384A53FF91DB3BD","created":1758276129,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  }"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180206CD2C1384A53FF91DB3BD","created":1758276129,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n}"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180206CD2C1384A53FF91DB3BD","created":1758276129,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180206CD2C1384A53FF91DB3BD","created":1758276129,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"finish_reason":"stop","stop_reason":"end_turn"}],"usage":{}}
+{"id":"20250919180206CD2C1384A53FF91DB3BD","created":1758276129,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{"completion_tokens":59,"prompt_tokens":411,"total_tokens":470}}

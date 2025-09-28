@@ -11,3 +11,4 @@ export * from './commands/dev';
 export * from './commands/release';
 export * from './commands/patch';
 export * from './commands/changelog';
+export * from './commands/github-release';

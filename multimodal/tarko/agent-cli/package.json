@@ -1,6 +1,6 @@
 {
   "name": "@tarko/agent-cli",
-  "version": "0.3.0-beta.6",
+  "version": "0.3.0-beta.12",
   "description": "A flexible Agent CLI framework for building multimodal agent applications",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -28,6 +28,7 @@
   "dependencies": {
     "@tarko/agent": "workspace:*",
     "@tarko/agent-server": "workspace:*",
+    "@tarko/agent-ui-builder": "workspace:*",
     "@tarko/shared-utils": "workspace:*",
     "@agent-tars/core": "workspace:*",
     "@omni-tars/agent": "workspace:*",
@@ -37,7 +38,7 @@
   "devDependencies": {
     "@tarko/agent-interface": "workspace:*",
     "@tarko/interface": "workspace:*",
-    "@tarko/web-ui": "workspace:*",
+    "@tarko/agent-ui": "workspace:*",
     "@tarko/agio": "workspace:*",
     "@tarko/config-loader": "workspace:*",
     "@clack/prompts": "0.11.0",

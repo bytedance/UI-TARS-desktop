@@ -215,24 +215,6 @@ stream.on('assistant_message', (event) => {
 
 ## Advanced Configuration
 
-### Custom Model Providers
-
-```typescript
-const agent = new Agent({
-  model: {
-    providers: [
-      {
-        name: 'custom-provider',
-        baseURL: 'https://api.custom-llm.com/v1',
-        apiKey: process.env.CUSTOM_API_KEY
-      }
-    ],
-    provider: 'custom-provider',
-    id: 'custom-model-v1'
-  }
-});
-```
-
 ### Context Awareness
 
 ```typescript

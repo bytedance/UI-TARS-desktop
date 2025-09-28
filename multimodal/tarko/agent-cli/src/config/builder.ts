@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import path from 'path';
 import { deepMerge, isTest } from '@tarko/shared-utils';
+import { getStaticPath } from '@tarko/agent-ui-builder';
 import {
   CommonFilterOptions,
   AgentCLIArguments,
@@ -56,7 +56,7 @@ export function buildAppConfig<
     config = deepMerge(config, workspaceConfig);
   }
 
-  // Extract CLI-specific properties
+  // Extract known CLI options, everything else (including unknown options) goes to cliConfigProps
   const {
     agent,
     workspace,
@@ -65,35 +65,37 @@ export function buildAppConfig<
     quiet,
     port,
     stream,
-    // Extract core deprecated options
+    headless,
+    input,
+    format,
+    includeLogs,
+    useCache,
+    open,
     provider,
     apiKey,
     baseURL,
     shareProvider,
     thinking,
-    // Extract tool filter options
     tool,
-    // Extract MCP server filter options
     mcpServer,
-    // Extract server options
     server,
     ...cliConfigProps
   } = cliArguments;
 
   // Handle deprecated options
-  const deprecatedOptions = {
+  const deprecatedOptionValues = {
     provider,
     apiKey: apiKey || undefined,
     baseURL,
     shareProvider,
     thinking,
   }; // secretlint-disable-line @secretlint/secretlint-rule-pattern
-  const deprecatedKeys = Object.entries(deprecatedOptions)
+  const deprecatedKeys = Object.entries(deprecatedOptionValues)
     .filter(([, value]) => value !== undefined)
     .map(([optionName]) => optionName);
 
   logDeprecatedWarning(deprecatedKeys);
-  handleCoreDeprecatedOptions(cliConfigProps, deprecatedOptions);
+  handleCoreDeprecatedOptions(cliConfigProps, deprecatedOptionValues);
 
   // Handle tool filters
   handleToolFilterOptions(cliConfigProps, { tool });
@@ -146,29 +148,13 @@ function handleCoreDeprecatedOptions(
 
   // Handle deprecated model configuration
   if (provider || deprecatedApiKey || baseURL) {
-    if (config.model) {
-      if (typeof config.model === 'string') {
-        config.model = {
-          id: config.model,
-        };
-      }
-    } else {
-      config.model = {};
-    }
-
-    if (provider && !config.model.provider) {
-      config.model.provider = provider as ModelProviderName;
-    }
-
-    if (deprecatedApiKey && !config.model.apiKey) {
-      config.model['apiKey'] = deprecatedApiKey;
-    }
-
-    if (baseURL && !config.model.baseURL) {
-      config.model.baseURL = baseURL;
-    }
+    config.model = {
+      id: (typeof config.model === 'string' ? config.model : config.model?.id)!,
+      provider: (config.model?.provider ?? provider) as ModelProviderName,
+      apiKey: config.model?.apiKey ?? deprecatedApiKey,
+      baseURL: config.model?.baseURL ?? baseURL,
+    };
   }
-
   // Handle deprecated share provider
   if (shareProvider) {
     if (!config.share) {
@@ -305,7 +291,7 @@ function applyWebUIDefaults(config: AgentAppConfig): void {
   }
 
   if (isAgentWebUIImplementationType(config.webui, 'static') && !config.webui.staticPath) {
-    config.webui.staticPath = isTest() ? '/path/to/web-ui' : path.resolve(__dirname, '../static');
+    config.webui.staticPath = isTest() ? '/path/to/web-ui' : getStaticPath();
   }
 
   if (!config.webui.title) {

@@ -13,15 +13,14 @@ import {
   AgioProviderConstructor,
   ChatCompletionContentPart,
   IAgent,
-  ModelProviderName,
-  AgentProcessingPhase,
-  AgentStatusInfo,
 } from '@tarko/interface';
 import { AgentSnapshot } from '@tarko/agent-snapshot';
 import { EventStreamBridge } from '../utils/event-stream';
 import type { AgentServer } from '../server';
 import { AgioEvent } from '@tarko/agio';
 import { handleAgentError, ErrorWithCode } from '../utils/error-handler';
+import { SessionInfo } from '../storage';
+import { getAvailableModels, getDefaultModel } from '../utils';
 
 /**
  * Check if an event should be stored in persistent storage
@@ -69,102 +68,64 @@ export class AgentSession {
   eventBridge: EventStreamBridge;
   private unsubscribe: (() => void) | null = null;
   private agioProvider?: AgioEvent.AgioProvider;
-  private sessionItemInfo?: import('../storage').SessionItemInfo;
+  private agioProviderConstructor?: AgioProviderConstructor;
+  private sessionInfo?: SessionInfo;
+  private storageUnsubscribeMap = new WeakMap<IAgent, () => void>();
+  private pendingEventSaves = new Set<Promise<void>>();
+
 
   constructor(
     private server: AgentServer,
     sessionId: string,
     agioProviderImpl?: AgioProviderConstructor,
-    sessionItemInfo?: import('../storage').SessionItemInfo,
+    sessionInfo?: SessionInfo,
+    private agentOptions?: Record<string, any>, // One-time agent initialization options
   ) {
     this.id = sessionId;
     this.eventBridge = new EventStreamBridge();
-    this.sessionItemInfo = sessionItemInfo;
+    this.sessionInfo = sessionInfo;
+    this.agioProviderConstructor = agioProviderImpl;
 
-    // Get agent options from server
-    const agentOptions = { ...server.appConfig };
+    // Agent will be created and initialized in initialize() method
+    this.agent = null as any; // Temporary placeholder
+  }
 
-    // Create agent instance using the server's session-aware factory method
-    const agent = server.createAgentWithSessionModel(sessionItemInfo);
 
-    // Initialize agent snapshot if enabled
-    if (agentOptions.snapshot?.enable) {
-      const snapshotStoragesDirectory =
-        agentOptions.snapshot.storageDirectory ?? server.getCurrentWorkspace();
+  async initialize() {
+    // Create and initialize agent with all wrappers
+    // Event streams are now set up within createAndInitializeAgent before agent.initialize()
+    this.agent = await this.createAndInitializeAgent(this.sessionInfo);
 
-      if (snapshotStoragesDirectory) {
-        const snapshotPath = path.join(snapshotStoragesDirectory, sessionId);
-        // @ts-expect-error
-        this.agent = new AgentSnapshot(agent, {
-          snapshotPath,
-          snapshotName: sessionId,
-        }) as unknown as IAgent;
+    // Extract the storage unsubscribe function from our WeakMap
+    const storageUnsubscribe = this.storageUnsubscribeMap.get(this.agent);
 
-        // Log snapshot initialization if agent has logger
-        if ('logger' in agent) {
-          (agent as any).logger.debug(`AgentSnapshot initialized with path: ${snapshotPath}`);
-        }
-      } else {
-        this.agent = agent;
-      }
-    } else {
-      this.agent = agent;
-    }
+    // Clean up the WeakMap entry
+    this.storageUnsubscribeMap.delete(this.agent);
 
-    // Initialize AGIO collector if provider URL is configured
-    if (agentOptions.agio?.provider && agioProviderImpl) {
-      const impl = agioProviderImpl;
-      this.agioProvider = new impl(agentOptions.agio.provider, agentOptions, sessionId, this.agent);
+    // Notify client that session is ready
+    this.eventBridge.emit('ready', { sessionId: this.id });
 
-      // Log AGIO initialization if agent has logger
-      if ('logger' in this.agent) {
-        (this.agent as any).logger.debug(
-          `AGIO collector initialized with provider: ${agentOptions.agio.provider}`,
-        );
-      }
-    }
-
-    // Log agent configuration if agent has logger and getOptions method
-    if ('logger' in this.agent && 'getOptions' in this.agent) {
-      (this.agent as any).logger.info(
-        'Agent Config',
-        JSON.stringify((this.agent as any).getOptions(), null, 2),
-      );
-    }
+    return { storageUnsubscribe };
   }
 
   /**
-   * Get the current processing status of the agent
-   * @returns Whether the agent is currently processing a request
+   * Create event handler for storage and AGIO processing
    */
-  getProcessingStatus(): boolean {
-    return this.agent.status() === AgentStatus.EXECUTING;
-  }
+  private createEventHandler() {
+    return async (event: AgentEventStream.Event) => {
+      console.log('Receive event', event);
 
-  async initialize() {
-    await this.agent.initialize();
-
-    // Send agent initialization event to AGIO if configured
-    if (this.agioProvider) {
-      try {
-        await this.agioProvider.sendAgentInitialized();
-      } catch (error) {
-        console.error('Failed to send AGIO initialization event:', error);
-      }
-    }
-
-    // Connect to agent's event stream manager
-    const agentEventStream = this.agent.getEventStream();
-
-    // Create an event handler that saves events to storage and processes AGIO events
-    const handleEvent = async (event: AgentEventStream.Event) => {
-      // If we have storage, save the event (filtered for performance)
+      // Save to storage if available and event should be stored
       if (this.server.storageProvider && shouldStoreEvent(event)) {
-        try {
-          await this.server.storageProvider.saveEvent(this.id, event);
-        } catch (error) {
-          console.error(`Failed to save event to storage: ${error}`);
-        }
+        const savePromise = this.server.storageProvider.saveEvent(this.id, event)
+          .catch(error => {
+            console.error(`Failed to save event to storage: ${error}`);
+          })
+          .finally(() => {
+            this.pendingEventSaves.delete(savePromise);
+          });
+        
+        this.pendingEventSaves.add(savePromise);
       }
 
       // Process AGIO events if collector is configured
@@ -176,18 +137,176 @@ export class AgentSession {
         }
       }
     };
+  }
 
-    // Subscribe to events for storage and AGIO processing
+  /**
+   * Wait for all pending event saves to complete
+   * This ensures that all events emitted during initialization are persisted before querying storage
+   */
+  async waitForEventSavesToComplete(): Promise<void> {
+    if (this.pendingEventSaves.size > 0) {
+      await Promise.all(Array.from(this.pendingEventSaves));
+    }
+  }
+
+  /**
+   * Create and initialize a complete agent instance with all wrappers and configuration
+   */
+  private async createAndInitializeAgent(sessionInfo?: SessionInfo): Promise<IAgent> {
+    // Get agent resolution
+    const agentResolution = this.server.getCurrentAgentResolution();
+    if (!agentResolution) {
+      throw new Error('Cannot found available resolved agent');
+    }
+
+    // Get stored events for this session before creating the agent
+    const storedEvents = this.server.storageProvider
+      ? await this.server.storageProvider.getSessionEvents(this.id)
+      : [];
+
+    // Create agent options including initial events
+    const baseAgentOptions = {
+      ...this.server.appConfig,
+      name: this.server.getCurrentAgentName(),
+      model: this.resolveModelConfig(sessionInfo),
+      initialEvents: storedEvents, // Pass initial events directly to agent
+    };
+
+    // Apply runtime settings transformation if available
+    const runtimeSettingsConfig = this.server.appConfig?.server?.runtimeSettings;
+    let transformedOptions = sessionInfo?.metadata?.runtimeSettings ?? {};
+
+    if (runtimeSettingsConfig?.transform && sessionInfo?.metadata?.runtimeSettings) {
+      try {
+        transformedOptions = runtimeSettingsConfig.transform(sessionInfo.metadata.runtimeSettings);
+      } catch (error) {
+        console.warn('Failed to apply runtime settings transform:', error);
+      }
+    }
+
+    // Merge base options with transformed runtime settings and one-time agent options
+    const agentOptions = {
+      ...baseAgentOptions,
+      ...transformedOptions,
+      ...(this.agentOptions || {}), // Apply one-time agent initialization options
+    };
+
+    // Create base agent
+    const baseAgent = new agentResolution.agentConstructor(agentOptions);
+
+    // Apply snapshot wrapper if enabled
+    const wrappedAgent = this.createAgentWithSnapshot(baseAgent, this.id);
+
+    // 🎯 Setup event stream connections BEFORE agent initialization
+    // This ensures that any events emitted during initialize() are properly persisted
+    const agentEventStream = wrappedAgent.getEventStream();
+    const handleEvent = this.createEventHandler();
+
+    // Subscribe to events for storage and AGIO processing before initialization
     const storageUnsubscribe = agentEventStream.subscribe(handleEvent);
 
-    // Connect to event bridge for client communication
+    // Connect to event bridge for client communication before initialization
+    if (this.unsubscribe) {
+      this.unsubscribe();
+    }
     this.unsubscribe = this.eventBridge.connectToAgentEventStream(agentEventStream);
 
-    // Notify client that session is ready
-    this.eventBridge.emit('ready', { sessionId: this.id });
+    // Initialize the agent (this will automatically restore events)
+    // Now any events emitted during initialize() will be properly persisted
+    await wrappedAgent.initialize();
 
-    return { storageUnsubscribe };
+    // Initialize AGIO collector if provider URL is configured
+    if (agentOptions.agio?.provider && this.agioProviderConstructor) {
+      this.agioProvider = new this.agioProviderConstructor(
+        agentOptions.agio.provider,
+        agentOptions,
+        this.id,
+        wrappedAgent,
+      );
+
+      // Send agent initialization event to AGIO
+      try {
+        await this.agioProvider.sendAgentInitialized();
+      } catch (error) {
+        console.error('Failed to send AGIO initialization event:', error);
+      }
+
+      // Log AGIO initialization
+      console.debug('AGIO collector initialized', { provider: agentOptions.agio.provider });
+    }
+
+    console.info('Agent Config', JSON.stringify(wrappedAgent.getOptions(), null, 2));
+
+    // Store the storage unsubscribe function for later cleanup
+    // We'll use a WeakMap to avoid polluting the agent object
+    this.storageUnsubscribeMap.set(wrappedAgent, storageUnsubscribe);
+
+    return wrappedAgent;
   }
+
+  /**
+   * Resolve model configuration for agent creation
+   */
+  private resolveModelConfig(sessionInfo?: SessionInfo) {
+    // Try to use session-specific model first
+    if (sessionInfo?.metadata?.modelConfig) {
+      const { provider, id: modelId } = sessionInfo.metadata.modelConfig;
+      const availableModels = getAvailableModels(this.server.appConfig);
+      const sessionModel = availableModels.find(
+        (model) => model.provider === provider && model.id === modelId,
+      );
+
+      if (sessionModel) {
+        return sessionModel;
+      }
+
+      // Log fallback warning if session model is not available
+      if (this.server.isDebug) {
+        console.warn('Session model not found, falling back to default', { provider, modelId });
+      }
+    }
+
+    // Fall back to default model
+    return getDefaultModel(this.server.appConfig);
+  }
+
+  /**
+   * Create agent with snapshot support if enabled
+   */
+  private createAgentWithSnapshot(baseAgent: IAgent, sessionId: string): IAgent {
+    const agentOptions = { ...this.server.appConfig };
+
+    if (agentOptions.snapshot?.enable) {
+      const snapshotStoragesDirectory =
+        agentOptions.snapshot.storageDirectory ?? this.server.getCurrentWorkspace();
+
+      if (snapshotStoragesDirectory) {
+        const snapshotPath = path.join(snapshotStoragesDirectory, sessionId);
+        const wrappedAgent = new AgentSnapshot(baseAgent as any, {
+          snapshotPath,
+          snapshotName: sessionId,
+        }) as unknown as IAgent;
+
+        // Log snapshot initialization
+        console.debug('AgentSnapshot initialized', { snapshotPath });
+
+        return wrappedAgent;
+      }
+    }
+
+    return baseAgent;
+  }
+
+
+
+  /**
+   * Get the current processing status of the agent
+   * @returns Whether the agent is currently processing a request
+   */
+  getProcessingStatus(): boolean {
+    return this.agent.status() === AgentStatus.EXECUTING;
+  }
+
 
   /**
    * Run a query and return a strongly-typed response
@@ -209,20 +328,17 @@ export class AgentSession {
 
       // Debug logging for issue #1150
       if (this.server.isDebug) {
-        console.log(
-          `[DEBUG] Query started - Session: ${this.id}, Query: ${typeof options.input === 'string' ? options.input.substring(0, 100) + '...' : '[ContentPart]'}`,
-        );
+        console.log('[DEBUG] Query started', {
+          sessionId: this.id,
+          queryType: typeof options.input === 'string' ? 'string' : 'ContentPart',
+          queryPreview:
+            typeof options.input === 'string'
+              ? options.input.substring(0, 100) + '...'
+              : '[ContentPart]',
+        });
       }
 
       // Prepare run options with session-specific model configuration
-      // Emit TTFT initialization status
-      this.eventBridge.emit('agent-status', {
-        isProcessing: true,
-        state: 'initializing',
-        phase: 'query_preparation',
-        message: 'Preparing to process your request...',
-        estimatedTime: '5-15 seconds',
-      } as AgentStatusInfo);
 
       const runOptions: AgentRunNonStreamingOptions = {
         input: options.input,
@@ -231,23 +347,11 @@ export class AgentSession {
       };
 
       // Run agent to process the query
-
-      // Add model configuration if available in session metadata
-      if (this.sessionItemInfo?.metadata?.modelConfig) {
-        runOptions.provider = this.sessionItemInfo.metadata.modelConfig
-          .provider as ModelProviderName;
-        runOptions.model = this.sessionItemInfo.metadata.modelConfig.modelId;
-        console.log(
-          `🎯 [AgentSession] Using session model: ${runOptions.provider}:${runOptions.model}`,
-        );
-      }
-
-      // Run agent to process the query
       const result = await this.agent.run(runOptions);
 
       // Debug logging for issue #1150
       if (this.server.isDebug) {
-        console.log(`[DEBUG] Query completed successfully - Session: ${this.id}`);
+        console.log('[DEBUG] Query completed successfully', { sessionId: this.id });
       }
 
       return {
@@ -265,7 +369,7 @@ export class AgentSession {
 
       // Debug logging for issue #1150
       if (this.server.isDebug) {
-        console.log(`[DEBUG] Query failed - Session: ${this.id}, Error: ${handledError.message}`);
+        console.log('[DEBUG] Query failed', { sessionId: this.id, error: handledError.message });
       }
 
       return {
@@ -301,20 +405,17 @@ export class AgentSession {
 
       // Debug logging for issue #1150
       if (this.server.isDebug) {
-        console.log(
-          `[DEBUG] Streaming query started - Session: ${this.id}, Query: ${typeof options.input === 'string' ? options.input.substring(0, 100) + '...' : '[ContentPart]'}`,
-        );
+        console.log('[DEBUG] Streaming query started', {
+          sessionId: this.id,
+          queryType: typeof options.input === 'string' ? 'string' : 'ContentPart',
+          queryPreview:
+            typeof options.input === 'string'
+              ? options.input.substring(0, 100) + '...'
+              : '[ContentPart]',
+        });
       }
 
       // Prepare run options with session-specific model configuration
-      // Emit enhanced TTFT initialization status for streaming
-      this.eventBridge.emit('agent-status', {
-        isProcessing: true,
-        state: 'initializing',
-        phase: 'streaming_preparation',
-        message: 'Preparing streaming response...',
-        estimatedTime: '3-10 seconds for first token',
-      } as AgentStatusInfo);
 
       const runOptions: AgentRunStreamingOptions = {
         input: options.input,
@@ -322,16 +423,6 @@ export class AgentSession {
         sessionId: this.id,
         environmentInput: options.environmentInput,
       };
-
-      // Add model configuration if available in session metadata
-      if (this.sessionItemInfo?.metadata?.modelConfig) {
-        runOptions.provider = this.sessionItemInfo.metadata.modelConfig
-          .provider as ModelProviderName;
-        runOptions.model = this.sessionItemInfo.metadata.modelConfig.modelId;
-        console.log(
-          `🎯 [AgentSession] Using session model for streaming: ${runOptions.provider}:${runOptions.model}`,
-        );
-      }
 
       // Run agent in streaming mode
       const stream = await this.agent.run(runOptions);
@@ -349,9 +440,10 @@ export class AgentSession {
 
       // Debug logging for issue #1150
       if (this.server.isDebug) {
-        console.log(
-          `[DEBUG] Streaming query failed - Session: ${this.id}, Error: ${handledError.message}`,
-        );
+        console.log('[DEBUG] Streaming query failed', {
+          sessionId: this.id,
+          error: handledError.message,
+        });
       }
 
       // Create a synthetic event stream that yields just an error event
@@ -372,7 +464,7 @@ export class AgentSession {
 
       // Debug logging for issue #1150
       if (this.server.isDebug) {
-        console.log(`[DEBUG] Streaming query completed - Session: ${this.id}`);
+        console.log('[DEBUG] Streaming query completed', { sessionId: this.id });
       }
     } finally {
       // Clear running session for exclusive mode when stream ends
@@ -419,25 +511,41 @@ export class AgentSession {
   }
 
   /**
+   * Update session configuration (model and runtime settings)
+   * The configuration will be used in subsequent queries
+   * @param sessionInfo Updated session metadata
+   */
+  async updateSessionConfig(sessionInfo: SessionInfo): Promise<void> {
+    // Store the session metadata for use in future queries
+    this.sessionInfo = sessionInfo;
+
+    // Recreate agent with new configuration
+    try {
+      // Clean up current agent and AGIO provider
+      if (this.agent && typeof this.agent.dispose === 'function') {
+        await this.agent.dispose();
+      }
+      if (this.agioProvider?.cleanup) {
+        await this.agioProvider.cleanup();
+      }
+
+      // Create and initialize new agent with updated session info
+      // Event streams are automatically set up within createAndInitializeAgent
+      this.agent = await this.createAndInitializeAgent(sessionInfo);
+    } catch (error) {
+      console.error('Failed to recreate agent for session', { sessionId: this.id, error });
+      throw error;
+    }
+  }
+
+  /**
    * Store the updated model configuration for this session
    * The model will be used in subsequent queries via Agent.run() parameters
-   * @param sessionItemInfo Updated session metadata with new model config
+   * @param sessionInfo Updated session metadata with new model config
+   * @deprecated Use updateSessionConfig instead
    */
-  async updateModelConfig(sessionItemInfo: import('../storage').SessionItemInfo): Promise<void> {
-    console.log(
-      `🔄 [AgentSession] Storing model config for session ${this.id}: ${sessionItemInfo.metadata?.modelConfig?.provider}:${sessionItemInfo.metadata?.modelConfig?.modelId}`,
-    );
-
-    // Store the session metadata for use in future queries
-    this.sessionItemInfo = sessionItemInfo;
-
-    // Emit model updated event to client
-    this.eventBridge.emit('model_updated', {
-      sessionId: this.id,
-      modelConfig: sessionItemInfo.metadata?.modelConfig,
-    });
-
-    console.log(`✅ [AgentSession] Model config stored for session ${this.id}`);
+  async updateModelConfig(sessionInfo: SessionInfo): Promise<void> {
+    return this.updateSessionConfig(sessionInfo);
   }
 
   async cleanup() {

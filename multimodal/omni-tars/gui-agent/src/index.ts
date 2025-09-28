@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ComposableAgent } from '@omni-tars/core';
+import { AgentMode, ComposableAgent } from '@omni-tars/core';
 import { GuiAgentPlugin } from './GuiAgentPlugin';
 import { AgentOptions } from '@tarko/agent';
 import { GUIAgentToolCallEngine } from './GUIAgentToolCallEngine';
 import { OperatorManager } from './OperatorManager';
 
+export { OperatorManager } from './OperatorManager';
 export { GuiAgentPlugin } from './GuiAgentPlugin';
 export { GuiToolCallEngineProvider } from './GuiToolCallEngineProvider';
 
@@ -31,16 +32,17 @@ export interface GUIAgentConfig<TOperator> {
   loopIntervalInMs?: number;
 }
 
-export const guiPlugin = new GuiAgentPlugin({
-  operatorManager: OperatorManager.createRemote(),
-});
-
 export default class GUIAgent extends ComposableAgent {
   static label: 'Browser GUI Agent';
-  constructor(options: AgentOptions) {
+  constructor(options: AgentOptions & { agentMode?: AgentMode }) {
     super({
       ...options,
-      plugins: [guiPlugin],
+      plugins: [
+        new GuiAgentPlugin({
+          operatorManager: OperatorManager.create(options.agentMode, options.sandboxUrl),
+          agentMode: options.agentMode,
+        }),
+      ],
       toolCallEngine: GUIAgentToolCallEngine,
     });
   }

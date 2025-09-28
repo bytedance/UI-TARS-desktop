@@ -1,0 +1,157 @@
+---
+title: 工具
+description: 为你的 Tarko Agent 添加工具
+---
+
+# 工具
+
+工具是使 Agent 能够与外部世界交互的核心能力。Tarko 支持遵循 **OpenAI Function Call** 协议的各种类型工具。
+
+## 工具定义
+
+所有工具都使用 `Tool` 类创建，遵循 **OpenAI Function Call** 协议。
+
+### 基本工具示例
+
+```typescript
+import { Tool, z } from '@tarko/agent';
+
+// 获取当前位置的工具
+const locationTool = new Tool({
+  id: 'getCurrentLocation',
+  description: "获取用户当前位置",
+  parameters: z.object({}),
+  function: async () => {
+    return { location: 'Boston' };
+  },
+});
+
+// 获取天气信息的工具
+const weatherTool = new Tool({
+  id: 'getWeather',
+  description: '获取指定位置的天气信息',
+  parameters: z.object({
+    location: z.string().describe('位置名称，如城市名'),
+  }),
+  function: async (input) => {
+    const { location } = input;
+    return {
+      location,
+      temperature: '70°F (21°C)',
+      condition: 'Sunny',
+      precipitation: '10%',
+      humidity: '45%',
+      wind: '5 mph',
+    };
+  },
+});
+```
+
+## 使用 Zod Schema
+
+Tarko 推荐使用 Zod 来定义工具参数，提供类型安全和运行时验证：
+
+```typescript
+import { Tool, z } from '@tarko/agent';
+
+// 复杂参数的工具
+const searchTool = new Tool({
+  id: 'search',
+  description: '在互联网上搜索信息',
+  parameters: z.object({
+    query: z.string().describe('搜索查询'),
+    maxResults: z.number().optional().describe('最大结果数，默认 10'),
+    language: z.enum(['zh', 'en']).optional().describe('搜索语言'),
+  }),
+  function: async (input) => {
+    const { query, maxResults = 10, language = 'zh' } = input;
+    // 实现搜索逻辑
+    return {
+      results: [
+        { title: '搜索结果 1', url: 'https://example.com/1' },
+        { title: '搜索结果 2', url: 'https://example.com/2' },
+      ],
+      totalResults: maxResults
+    };
+  },
+});
+```
+
+## 使用 JSON Schema
+
+也可以使用标准 JSON Schema：
+
+```typescript
+const fileTool = new Tool({
+  id: 'readFile',
+  description: '读取文件内容',
+  parameters: {
+    type: 'object',
+    properties: {
+      path: {
+        type: 'string',
+        description: '文件路径'
+      },
+      encoding: {
+        type: 'string',
+        enum: ['utf8', 'base64'],
+        description: '文件编码'
+      }
+    },
+    required: ['path']
+  },
+  function: async (params: { path: string; encoding?: string }) => {
+    // 实现文件读取逻辑
+    return { content: '文件内容', size: 1024 };
+  },
+});
+```
+
+## 注册工具到 Agent
+
+将工具添加到 Agent：
+
+```typescript
+import { Agent } from '@tarko/agent';
+
+const agent = new Agent({
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  tools: [
+    locationTool,
+    weatherTool,
+    searchTool,
+    fileTool
+  ]
+});
+
+// 也可以动态注册工具
+agent.registerTool(newTool);
+
+// 获取所有已注册的工具
+const allTools = agent.getTools();
+console.log('已注册工具:', allTools.map(t => t.name));
+```
+
+## 工具执行示例
+
+完整的工具使用示例：
+
+```typescript
+// 来自真实示例：multimodal/tarko/agent/examples/tool-calls/basic.ts
+const agent = new Agent({
+  model: {
+    provider: 'volcengine',
+    id: 'ep-20250510145437-5sxhs',
+    apiKey: process.env.ARK_API_KEY,
+  },
+  tools: [locationTool, weatherTool],
+});
+
+const response = await agent.run("今天天气怎么样？");
+console.log(response);
+```
+```

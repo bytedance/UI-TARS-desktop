@@ -35,6 +35,7 @@ export class OpenRouterHandler extends BaseHandler<OpenRouterModel> {
       defaultHeaders: {
         'HTTP-Referer': 'docs.tokenjs.ai',
         'X-Title': 'Token.js',
+        ...this.opts.defaultHeaders,
       },
     });
 

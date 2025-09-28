@@ -1,0 +1,234 @@
+# Tool Development
+
+Learn how to develop custom tools to extend Agent capabilities.
+
+## Overview
+
+Tools are the building blocks that enable Agents to interact with external systems. @agent-tars/core uses the MCP (Model Context Protocol) framework for tool integration, providing a standardized way to create and register tools.
+
+## Tool Architecture
+
+Tools in @agent-tars/core are based on MCP Tool interface from `@tarko/mcp-agent`:
+
+```typescript
+import { Tool } from '@tarko/mcp-agent';
+
+// Tools are created using the Tool class constructor
+const tool = new Tool({
+  id: 'tool_name',
+  description: 'Tool description',
+  parameters: JSONSchema7,
+  function: async (args) => { /* implementation */ }
+});
+```
+
+## Creating Your First Tool
+
+### Basic Tool Structure
+
+```typescript
+import { Tool, JSONSchema7 } from '@tarko/mcp-agent';
+
+export function createCalculatorTool(): Tool {
+  return new Tool({
+    id: 'calculator',
+    description: 'Perform basic mathematical calculations',
+    parameters: {
+      type: 'object',
+      properties: {
+        operation: {
+          type: 'string',
+          enum: ['add', 'subtract', 'multiply', 'divide'],
+          description: 'Mathematical operation to perform'
+        },
+        a: {
+          type: 'number',
+          description: 'First number'
+        },
+        b: {
+          type: 'number',
+          description: 'Second number'
+        }
+      },
+      required: ['operation', 'a', 'b']
+    } as JSONSchema7,
+    function: async (params: {
+      operation: string;
+      a: number;
+      b: number;
+    }) => {
+      const { operation, a, b } = params;
+      
+      let result: number;
+      
+      switch (operation) {
+        case 'add':
+          result = a + b;
+          break;
+        case 'subtract':
+          result = a - b;
+          break;
+        case 'multiply':
+          result = a * b;
+          break;
+        case 'divide':
+          if (b === 0) {
+            throw new Error('Division by zero is not allowed');
+          }
+          result = a / b;
+          break;
+        default:
+          throw new Error(`Unknown operation: ${operation}`);
+      }
+      
+      return [{
+        type: 'text',
+        text: `${a} ${operation} ${b} = ${result}`
+      }];
+    }
+  });
+}
+```
+
+### Registering Tools
+
+Tools are registered through MCP servers or directly in AgentTARS:
+
+```typescript
+import { AgentTARS } from '@agent-tars/core';
+import { createCalculatorTool } from './calculator-tool';
+
+// Register tools through custom MCP server
+const agent = new AgentTARS({
+  mcpServers: {
+    calculator: {
+      // Custom MCP server with calculator tool
+    }
+  }
+});
+
+// Or register during initialization
+agent.registerTool(createCalculatorTool());
+```
+
+## Built-in Tool Categories
+
+@agent-tars/core includes built-in tools across 4 MCP server categories:
+
+- **browser**: Web automation via `@agent-infra/mcp-server-browser`
+- **filesystem**: File operations via `@agent-infra/mcp-server-filesystem`
+- **commands**: System commands via `@agent-infra/mcp-server-commands`
+- **search**: Web search via `@agent-infra/search`
+
+These are managed through `BrowserToolsManager`, `FilesystemToolsManager`, and `SearchToolProvider` classes.
+
+## Tool Implementation Patterns
+
+### Async Operations
+
+MCP tools naturally support async operations:
+
+```typescript
+export function createApiTool(): Tool {
+  return new Tool({
+    id: 'api_request',
+    description: 'Make HTTP API requests',
+    parameters: {
+      type: 'object',
+      properties: {
+        url: { type: 'string', description: 'Request URL' },
+        method: { type: 'string', enum: ['GET', 'POST', 'PUT', 'DELETE'] }
+      },
+      required: ['url', 'method']
+    } as JSONSchema7,
+    function: async (params: { url: string; method: string }) => {
+      try {
+        const response = await fetch(params.url, {
+          method: params.method
+        });
+        
+        const data = await response.text();
+        
+        return [{
+          type: 'text',
+          text: `Status: ${response.status}\n${data}`
+        }];
+      } catch (error) {
+        throw new Error(`API request failed: ${error.message}`);
+      }
+    }
+  });
+}
+```
+
+## Best Practices
+
+### Error Handling
+
+Use proper error handling with meaningful messages:
+
+```typescript
+function: async (params: any) => {
+  try {
+    // Tool logic here
+    return [{ type: 'text', text: 'Success result' }];
+  } catch (error) {
+    throw new Error(`Tool execution failed: ${error.message}`);
+  }
+}
+```
+
+### Parameter Validation
+
+Define comprehensive JSON Schema for parameters:
+
+```typescript
+parameters: {
+  type: 'object',
+  properties: {
+    email: {
+      type: 'string',
+      format: 'email',
+      description: 'Valid email address'
+    },
+    age: {
+      type: 'number',
+      minimum: 0,
+      maximum: 150,
+      description: 'Age in years'
+    }
+  },
+  required: ['email'],
+  additionalProperties: false
+} as JSONSchema7
+```
+
+## Testing Tools
+
+Test your tools using standard testing frameworks:
+
+```typescript
+import { createCalculatorTool } from './calculator-tool';
+
+describe('Calculator Tool', () => {
+  it('should perform calculations', async () => {
+    const tool = createCalculatorTool();
+    
+    const result = await tool.function({
+      operation: 'add',
+      a: 5,
+      b: 3
+    });
+    
+    expect(result[0].text).toContain('8');
+  });
+});
+```
+
+## Next Steps
+
+- Learn about [Tool Management](/guide/tool/management) for filtering and organizing tools
+- Explore [Tool Call Engine](/guide/tool/tool-call-engine) for advanced execution patterns
+
+{/* Placeholder: Add screenshots of tool development workflow */}
+{/* Placeholder: Add video tutorial for creating custom tools */}

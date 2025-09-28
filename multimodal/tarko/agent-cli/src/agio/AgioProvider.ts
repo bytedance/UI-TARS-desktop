@@ -62,9 +62,8 @@ export class AgioProvider implements AgioEvent.AgioProvider {
     // Get tools count from agent
     const toolsCount = this.agent.getTools().length;
 
-    // Get model providers count from agent options
-    const modelProviders = this.appConfig.model?.providers;
-    const modelProvidersCount = Array.isArray(modelProviders) ? modelProviders.length : 1;
+    // FIXME: retrieve `model.providers` count from future `server.models`.
+    const modelProvidersCount = this.appConfig.model?.provider ? 1 : 0;
 
     // @ts-expect-error
     // Get MCP servers count from config
@@ -90,15 +89,15 @@ export class AgioProvider implements AgioEvent.AgioProvider {
 
     this.hasInitialized = true;
 
-    const resolvedModel = this.agent.getCurrentResolvedModel();
+    const currentModel = this.agent.getCurrentModel();
     const counts = this.calculateCounts();
 
-    this.modelName = resolvedModel?.id;
+    this.modelName = currentModel?.id;
 
     const event = AgioEvent.createEvent('agent_initialized', this.sessionId, {
       config: {
-        modelProvider: resolvedModel?.provider,
-        modelName: resolvedModel?.id,
+        modelProvider: currentModel?.provider,
+        modelName: currentModel?.id,
         toolCallEngine: this.appConfig.toolCallEngine,
         maxTokens: this.appConfig.maxTokens!,
         temperature: this.appConfig.temperature,

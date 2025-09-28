@@ -80,7 +80,7 @@ describe('Agent Execution Tools Cleanup', () => {
       agent.setCustomLLMClient(mockLLMClient);
 
       // Mock model resolution
-      vi.spyOn(agent, 'getCurrentResolvedModel').mockReturnValue({
+      vi.spyOn(agent, 'getCurrentModel').mockReturnValue({
         // @ts-expect-error
         provider: 'x',
         id: 'mock-model',
@@ -227,7 +227,7 @@ describe('Agent Execution Tools Cleanup', () => {
       iterationAgent.registerTool(registeredTool);
 
       // Mock model and LLM client
-      vi.spyOn(iterationAgent, 'getCurrentResolvedModel').mockReturnValue({
+      vi.spyOn(iterationAgent, 'getCurrentModel').mockReturnValue({
         // @ts-expect-error
         provider: 'x',
         id: 'mock-model',
@@ -328,7 +328,7 @@ describe('Agent Execution Tools Cleanup', () => {
       agent.registerTool(weatherTool);
 
       // Mock LLM and model
-      vi.spyOn(agent, 'getCurrentResolvedModel').mockReturnValue({
+      vi.spyOn(agent, 'getCurrentModel').mockReturnValue({
         // @ts-expect-error
         provider: 'x',
         id: 'mock-model',

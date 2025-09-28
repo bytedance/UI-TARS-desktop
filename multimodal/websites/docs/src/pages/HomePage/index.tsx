@@ -5,7 +5,7 @@ import { FaGithub, FaCopy, FaCheck } from 'react-icons/fa';
 import CustomCursor from '@components/CustomCursor';
 import { Link } from '@components/Link';
 import { VideoPanel } from '@components/VideoPanel';
-import { useCursor } from '@components/CursorContext';
+
 import { usePageMeta, generatePageTitle, optimizeDescription } from '@components/hooks';
 import './index.css';
 
@@ -20,7 +20,7 @@ const SEO_CONFIG = {
   keywords: ['AI agent', 'browser control', 'multimodal', 'open-source', 'natural language'],
 };
 
-export const HomePage = () => {
+const HomePageContent = () => {
   // Set SEO meta tags for home page with enhanced options
   usePageMeta({
     title: generatePageTitle(), // Will generate "Agent TARS" as the main title
@@ -36,7 +36,7 @@ export const HomePage = () => {
   const [cursorVisible, setCursorVisible] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [copied, setCopied] = useState(false);
-  const { setIsHovered } = useCursor();
+
 
   const auroraRef = useRef<HTMLDivElement>(null);
 
@@ -289,8 +289,7 @@ export const HomePage = () => {
           className="text-white hover:text-primary transition-colors duration-300"
           target="_blank"
           rel="noopener noreferrer"
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
+
         >
           <FaGithub className="w-8 h-8 hover:text-[var(--accent)] transition-all duration-300" />
         </Link>
@@ -440,8 +439,7 @@ export const HomePage = () => {
                     className="absolute right-0 top-1/2 transform -translate-y-1/2 text-accent hover:text-white p-2 rounded-full bg-black/30 transition-all duration-300"
                     onClick={copyCommand}
                     title="Copy Command"
-                    onMouseEnter={() => setIsHovered(true)}
-                    onMouseLeave={() => setIsHovered(false)}
+
                   >
                     {copied ? <FaCheck className="text-[var(--accent)]" /> : <FaCopy />}
                   </button>
@@ -489,4 +487,8 @@ export const HomePage = () => {
       </main>
     </div>
   );
+};
+
+export const HomePage = () => {
+  return <HomePageContent />;
 };

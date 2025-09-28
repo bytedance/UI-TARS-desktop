@@ -115,8 +115,11 @@ export function extractToolCallT5(
           // Look for parameter opening tag, but make sure it comes before any function closing tag
           const parameterMatch = state.toolCallBuffer.match(/<parameter=([^>]+)>/);
           const functionCloseMatch = state.toolCallBuffer.match(/<\/function>/);
-          
-          if (parameterMatch && (!functionCloseMatch || parameterMatch.index! < functionCloseMatch.index!)) {
+
+          if (
+            parameterMatch &&
+            (!functionCloseMatch || parameterMatch.index! < functionCloseMatch.index!)
+          ) {
             // Found parameter opening tag and it comes before any function closing
             const paramName = parameterMatch[1];
             state.currentParameterName = paramName;
@@ -154,7 +157,11 @@ export function extractToolCallT5(
 
             // Complete the JSON arguments
             const toolCall = state.toolCalls.find((tc) => tc.id === state.currentToolCallId);
-            if (toolCall && !toolCall.function.arguments.endsWith('}')) {
+            if (
+              toolCall &&
+              !toolCall.function.arguments.endsWith('}') &&
+              toolCall.function.arguments.length > 0
+            ) {
               toolCall.function.arguments += '}';
 
               hasToolCallUpdate = true;
@@ -205,15 +212,19 @@ export function extractToolCallT5(
           // Inside parameter, look for parameter closing tag OR function closing tag
           const parameterCloseMatch = state.toolCallBuffer.match(/<\/parameter>/);
           const functionCloseMatchInside = state.toolCallBuffer.match(/<\/function>/);
-          
+
           // Check if function closing tag comes before parameter closing tag
-          if (functionCloseMatchInside && parameterCloseMatch && functionCloseMatchInside.index! < parameterCloseMatch.index!) {
+          if (
+            functionCloseMatchInside &&
+            parameterCloseMatch &&
+            functionCloseMatchInside.index! < parameterCloseMatch.index!
+          ) {
             // Function closes before parameter closes - this shouldn't happen in well-formed XML, but handle it
             // Exit parameter mode and handle function close
             state.insideParameter = false;
             continue;
           }
-          
+
           if (parameterCloseMatch) {
             // Found parameter closing tag
             const paramValue = state.toolCallBuffer.substring(0, parameterCloseMatch.index);

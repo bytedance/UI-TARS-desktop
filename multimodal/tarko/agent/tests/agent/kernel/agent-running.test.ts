@@ -55,7 +55,7 @@ describe('Agent Running Behavior', () => {
       agent.setCustomLLMClient(mockLLMClient);
 
       // Mock model resolution to avoid errors
-      vi.spyOn(agent, 'getCurrentResolvedModel').mockReturnValue({
+      vi.spyOn(agent, 'getCurrentModel').mockReturnValue({
         // @ts-expect-error
         provider: 'x',
         id: 'mock-model',
@@ -197,52 +197,81 @@ describe('Agent Running Behavior', () => {
       // Register the mock tool
       agent.registerTool(mockTool);
 
-      // Mock the LLM client to return a response with tool calls
+      // Mock the LLM client to return a full two-iteration flow:
+      // 1) first call yields a tool_call, 2) second call yields final content
+      const createMockToolCallStream = () => ({
+        [Symbol.asyncIterator]: async function* () {
+          // First yield a fake tool call
+          yield {
+            choices: [
+              {
+                delta: {
+                  tool_calls: [
+                    {
+                      index: 0,
+                      id: 'call_12345',
+                      type: 'function',
+                      function: {
+                        name: 'calculator',
+                        arguments: JSON.stringify({ operation: 'add', a: 5, b: 3 }),
+                      },
+                    },
+                  ],
+                },
+                finish_reason: null,
+              },
+            ],
+          };
+          // Then finish tool calls
+          yield {
+            choices: [
+              {
+                delta: {},
+                finish_reason: 'tool_calls',
+              },
+            ],
+          };
+        },
+      });
+
+      const createMockFinalStream = () => ({
+        [Symbol.asyncIterator]: async function* () {
+          // Final normal content with stop
+          yield {
+            choices: [
+              {
+                delta: { content: 'The result is 8.' },
+                finish_reason: 'stop',
+              },
+            ],
+          };
+        },
+      });
+
+      const createFn = vi
+        .fn()
+        // First LLM call: request tools
+        .mockImplementationOnce(async () => createMockToolCallStream())
+        // Second LLM call: produce final answer
+        .mockImplementationOnce(async () => createMockFinalStream())
+        // Any further calls: produce a minimal stop to be safe
+        .mockImplementation(async () => ({
+          [Symbol.asyncIterator]: async function* () {
+            yield {
+              choices: [
+                {
+                  delta: { content: '' },
+                  finish_reason: 'stop',
+                },
+              ],
+            };
+          },
+        }));
+
       const mockLLMClient = {
         chat: {
           completions: {
-            create: vi.fn().mockImplementation(async () => {
-              // Return a mock tool call stream
-              return {
-                [Symbol.asyncIterator]: async function* () {
-                  // First yield a fake tool call
-                  yield {
-                    choices: [
-                      {
-                        delta: {
-                          tool_calls: [
-                            {
-                              index: 0,
-                              id: 'call_12345',
-                              type: 'function',
-                              function: {
-                                name: 'calculator',
-                                arguments: JSON.stringify({
-                                  operation: 'add',
-                                  a: 5,
-                                  b: 3,
-                                }),
-                              },
-                            },
-                          ],
-                        },
-                        finish_reason: null,
-                      },
-                    ],
-                  };
-
-                  // Then yield the finish reason
-                  yield {
-                    choices: [
-                      {
-                        delta: {},
-                        finish_reason: 'tool_calls',
-                      },
-                    ],
-                  };
-                },
-              };
-            }),
+            create: createFn,
           },
         },
       } as unknown as OpenAI;
@@ -250,7 +279,7 @@ describe('Agent Running Behavior', () => {
       agent.setCustomLLMClient(mockLLMClient);
 
       // Mock model resolution
-      vi.spyOn(agent, 'getCurrentResolvedModel').mockReturnValue({
+      vi.spyOn(agent, 'getCurrentModel').mockReturnValue({
         // @ts-expect-error
         provider: 'x',
         id: 'mock-model',
@@ -275,42 +304,24 @@ describe('Agent Running Behavior', () => {
       // Spy on the onProcessToolCalls method we mocked above
       const spy = vi.spyOn(agent, 'onProcessToolCalls');
 
-      // Run the agent (but don't await the result since we've mocked just part of the process)
-      try {
-        const runPromise = agent.run({ input: 'Calculate 5 + 3', stream: false });
+      // Run the agent end-to-end and await natural completion
+      const result = await agent.run({ input: 'Calculate 5 + 3', stream: false });
 
-        // Give event loop time to process
-        await new Promise((resolve) => setTimeout(resolve, 50));
+      // Verify the onProcessToolCalls method was called
+      expect(spy).toHaveBeenCalled();
 
-        // Abort the run to prevent hanging
-        agent.abort();
+      // The first arg should be the session ID, and the second should be the tool calls
+      const toolCalls = spy.mock.calls[0][1];
+      expect(toolCalls).toHaveLength(1);
+      expect(toolCalls[0].function.name).toBe('calculator');
 
-        // Clean up
-        try {
-          await runPromise;
-        } catch (e) {
-          // Expected to throw due to abortion
-        }
+      // Verify arguments were passed correctly
+      const args = JSON.parse(toolCalls[0].function.arguments);
+      expect(args).toEqual({ operation: 'add', a: 5, b: 3 });
 
-        // Verify the onProcessToolCalls method was called
-        expect(spy).toHaveBeenCalled();
-
-        // The first arg should be the session ID, and the second should be the tool calls
-        const toolCalls = spy.mock.calls[0][1];
-        expect(toolCalls).toHaveLength(1);
-        expect(toolCalls[0].function.name).toBe('calculator');
-
-        // Verify arguments were passed correctly
-        const args = JSON.parse(toolCalls[0].function.arguments);
-        expect(args).toEqual({
-          operation: 'add',
-          a: 5,
-          b: 3,
-        });
-      } catch (e) {
-        console.error('Test error:', e);
-        throw e;
-      }
+      // Ensure the agent finished naturally without max-iteration warning
+      expect(result.finishReason).toBe('stop');
+      expect(result.content).toContain('The result is 8');
     });
   });
 });

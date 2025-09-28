@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ConsoleLogger } from '@tarko/mcp-agent';
-import { BrowserToolsManager } from '../../src/browser/browser-tools-manager';
+import { BrowserToolsManager } from '../../src/environments/local/browser/browser-tools-manager';
 
 describe('BrowserToolsManager', () => {
   const logger = new ConsoleLogger('test');

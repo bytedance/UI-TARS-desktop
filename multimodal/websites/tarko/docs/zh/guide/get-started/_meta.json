@@ -1,0 +1,22 @@
+[
+  {
+    "type": "file",
+    "name": "introduction",
+    "label": "介绍"
+  },
+  {
+    "type": "file",
+    "name": "quick-start",
+    "label": "快速开始"
+  },
+  {
+    "type": "file",
+    "name": "architecture",
+    "label": "架构"
+  },
+  {
+    "type": "file",
+    "name": "sdk",
+    "label": "SDK"
+  }
+]

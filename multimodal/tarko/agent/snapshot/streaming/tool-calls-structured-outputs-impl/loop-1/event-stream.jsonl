@@ -1,20 +1,21 @@
 [
   {
-    "id": "1a622ca4-ba96-4b7f-99a9-357960786896",
+    "id": "56abe63b-9a0d-4a8a-8e90-94d7d492f653",
     "type": "user_message",
-    "timestamp": 1752414641314,
+    "timestamp": 1758276123698,
     "content": "How's the weather today?"
   },
   {
-    "id": "9457dc94-bcb1-4945-97af-5be7a68bc07a",
+    "id": "e0fdf6b4-9d63-463e-9147-16a66e1ca03d",
     "type": "agent_run_start",
-    "timestamp": 1752414641314,
-    "sessionId": "1752414641314-qhjmf5m",
+    "timestamp": 1758276123698,
+    "sessionId": "1758276123698-rsibuiz",
     "runOptions": {
       "input": "How's the weather today?",
       "stream": true
     },
     "provider": "azure-openai",
-    "model": "aws_sdk_claude37_sonnet"
+    "model": "aws_sdk_claude37_sonnet",
+    "agentName": "Anonymous"
   }
 ]

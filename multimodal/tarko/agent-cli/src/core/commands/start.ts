@@ -12,11 +12,12 @@ import {
   isAgentWebUIImplementationType,
   AgentWebUIImplementation,
 } from '@tarko/interface';
-import { AgentServer, AgentServerOptions, express } from '@tarko/agent-server';
+import { AgentServer, AgentServerOptions, express, mergeWebUIConfig } from '@tarko/agent-server';
 import boxen from 'boxen';
 import chalk from 'chalk';
 import gradient from 'gradient-string';
 import { logger, toUserFriendlyPath, ensureServerConfig } from '../../utils';
+import { createPathMatcher } from '@tarko/shared-utils';
 import { AgentCLIRunInteractiveUICommandOptions } from '../../types';
 
 /**
@@ -50,8 +51,7 @@ export async function startInteractiveWebUI(
   // Set up UI if static path is provided
   if (webui.staticPath) {
     const app = server.getApp();
-    const agentConstructorWebConfig = server.getAgentConstructorWebConfig();
-    const mergedWebUIConfig = { ...webui, ...agentConstructorWebConfig };
+    const mergedWebUIConfig = mergeWebUIConfig(webui, server);
     setupUI(app, isDebug, webui.staticPath, mergedWebUIConfig);
   }
 
@@ -115,68 +115,49 @@ function setupUI(
   app: express.Application,
   isDebug = false,
   staticPath: string,
-  webui: AgentWebUIImplementation & Record<string, any>,
+  mergedWebUIConfig: AgentWebUIImplementation & Record<string, any>,
 ): void {
   if (isDebug) {
     logger.debug(`Using static files from: ${staticPath}`);
   }
 
-  // Middleware to inject baseURL for HTML requests
-  const injectBaseURL = (
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction,
-  ) => {
-    if (!req.path.endsWith('.html') && req.path !== '/' && !req.path.match(/^\/[^.]*$/)) {
-      return next();
-    }
+  const pathMatcher = createPathMatcher(mergedWebUIConfig.base);
+  const staticFilePattern = /\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|map)$/;
 
-    const indexPath = path.join(staticPath, 'index.html');
-    let htmlContent = fs.readFileSync(indexPath, 'utf8');
-
+  const injectConfig = (htmlContent: string): string => {
     const scriptTag = `<script>
       window.AGENT_BASE_URL = "";
-      window.AGENT_WEB_UI_CONFIG = ${JSON.stringify(webui)};
+      window.AGENT_WEB_UI_CONFIG = ${JSON.stringify(mergedWebUIConfig)};
       console.log("Agent: Using API baseURL:", window.AGENT_BASE_URL);
     </script>`;
-
-    htmlContent = htmlContent.replace('</head>', `${scriptTag}\n</head>`);
-    res.send(htmlContent);
+    return htmlContent.replace('</head>', `${scriptTag}\n</head>`);
   };
 
-  // Handle root path and client-side routes
-  app.get('/', injectBaseURL);
+  const serveIndexWithConfig = (res: express.Response): void => {
+    const indexPath = path.join(staticPath, 'index.html');
+    const htmlContent = fs.readFileSync(indexPath, 'utf8');
+    res.send(injectConfig(htmlContent));
+  };
 
-  app.get(/^\/[^.]*$/, (req, res, next) => {
-    if (
-      req.path.includes('.') &&
-      !req.path.endsWith('.html') &&
-      !req.path.startsWith('/static/') &&
-      !req.path.startsWith('/assets/') &&
-      !req.path.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/)
-    ) {
+  app.get('*', (req, res, next) => {
+    if (!pathMatcher.test(req.path)) {
       return next();
     }
 
-    injectBaseURL(req, res, next);
-  });
+    const extractedPath = pathMatcher.extract(req.path);
 
-  // Serve static files
-  app.use((req, res, next) => {
-    if (req.path.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|map)$/)) {
-      const filePath = path.join(staticPath, req.path);
-      if (fs.existsSync(filePath)) {
-        return res.sendFile(filePath);
-      }
+    // Serve static files directly
+    if (staticFilePattern.test(extractedPath)) {
+      const filePath = path.join(staticPath, extractedPath);
+      return fs.existsSync(filePath) ? res.sendFile(filePath) : next();
     }
-    next();
-  });
 
-  // Fallback to index.html for SPA routes
-  app.use((req, res, next) => {
-    if (req.method === 'GET' && !req.path.includes('.') && !req.path.startsWith('/api/')) {
-      return injectBaseURL(req, res, next);
+    // Skip API routes
+    if (extractedPath.startsWith('/api/')) {
+      return next();
     }
-    next();
+
+    // Serve index.html with injected config for all other routes (SPA)
+    serveIndexWithConfig(res);
   });
 }

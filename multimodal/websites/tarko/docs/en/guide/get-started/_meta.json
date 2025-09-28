@@ -1,0 +1,22 @@
+[
+  {
+    "type": "file",
+    "name": "introduction",
+    "label": "Introduction"
+  },
+  {
+    "type": "file",
+    "name": "quick-start",
+    "label": "Quick Start"
+  },
+  {
+    "type": "file",
+    "name": "architecture",
+    "label": "Architecture"
+  },
+  {
+    "type": "file",
+    "name": "sdk",
+    "label": "SDK"
+  }
+]

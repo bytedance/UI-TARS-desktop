@@ -11,10 +11,9 @@ import {
   ToolCallEngine,
   ToolCallEngineType,
   AgentContextAwarenessOptions,
-  TConstructor,
 } from '@tarko/agent-interface';
 import { ToolManager } from './tool-manager';
-import { ResolvedModel, LLMReasoningOptions } from '@tarko/model-provider';
+import { AgentModel, LLMReasoningOptions } from '@tarko/model-provider';
 import { getLogger } from '@tarko/shared-utils';
 import type { Agent } from './agent';
 import {
@@ -170,14 +169,14 @@ export class AgentRunner {
   /**
    * Handles errors from LLM processing and agent loop execution
    * @param error The error that occurred
-   * @param resolvedModel The resolved model information
+   * @param currentModel The current model information
    * @param sessionId The current session ID
    * @param abortSignal Optional abort signal
    * @returns An assistant message event with error information
    */
   private handleError(
     error: unknown,
-    resolvedModel: ResolvedModel,
+    currentModel: AgentModel,
     sessionId: string,
     abortSignal?: AbortSignal,
   ): AgentEventStream.AssistantMessageEvent {
@@ -192,7 +191,7 @@ export class AgentRunner {
       const systemEvent = this.eventStream.createEvent('system', {
         level: 'info',
         message: `LLM request aborted`,
-        details: { provider: resolvedModel.provider },
+        details: { provider: currentModel.provider },
       });
       this.eventStream.sendEvent(systemEvent);
 
@@ -212,7 +211,7 @@ export class AgentRunner {
       const systemEvent = this.eventStream.createEvent('system', {
         level: 'error',
         message: `LLM API error: ${error}`,
-        details: { error: String(error), provider: resolvedModel.provider },
+        details: { error: String(error), provider: currentModel.provider },
       });
       this.eventStream.sendEvent(systemEvent);
 
@@ -229,13 +228,13 @@ export class AgentRunner {
    * Executes the agent's reasoning loop in non-streaming mode
    *
    * @param runOptions Options for this execution
-   * @param resolvedModel The resolved model configuration
+   * @param currentModel The current model configuration
    * @param sessionId Unique session identifier
    * @returns Final answer as an AgentEventStream.AssistantMessageEvent
    */
   async execute(
     runOptions: AgentRunObjectOptions,
-    resolvedModel: ResolvedModel,
+    currentModel: AgentModel,
     sessionId: string,
   ): Promise<AgentEventStream.AssistantMessageEvent> {
     // Resolve which model and provider to use
@@ -243,7 +242,7 @@ export class AgentRunner {
 
     this.logger.info(
       `[Session] Execution started | SessionId: "${sessionId}" | ` +
-        `Provider: "${resolvedModel.provider}" | Model: "${resolvedModel.id}" | ` +
+        `Provider: "${currentModel.provider}" | Model: "${currentModel.id}" | ` +
         `Mode: non-streaming`,
     );
 
@@ -273,7 +272,7 @@ export class AgentRunner {
       try {
         // Execute the agent loop with abort signal
         return await this.loopExecutor.executeLoop(
-          resolvedModel,
+          currentModel,
           sessionId,
           toolCallEngine,
           false, // Non-streaming mode
@@ -281,7 +280,7 @@ export class AgentRunner {
         );
       } catch (error) {
         // Handle LLM and execution errors
-        return this.handleError(error, resolvedModel, sessionId, abortSignal);
+        return this.handleError(error, currentModel, sessionId, abortSignal);
       }
     } finally {
       await this.agent.onAgentLoopEnd(sessionId);
@@ -292,13 +291,13 @@ export class AgentRunner {
    * Executes the agent's reasoning loop in streaming mode
    *
    * @param runOptions Options for this execution
-   * @param resolvedModel The resolved model configuration
+   * @param currentModel The current model configuration
    * @param sessionId Unique session identifier
    * @returns AsyncIterable of streaming events
    */
   async executeStreaming(
     runOptions: AgentRunStreamingOptions,
-    resolvedModel: ResolvedModel,
+    currentModel: AgentModel,
     sessionId: string,
   ): Promise<AsyncIterable<AgentEventStream.Event>> {
     // Resolve which model and provider to use
@@ -306,7 +305,7 @@ export class AgentRunner {
 
     this.logger.info(
       `[Session] Execution started | SessionId: "${sessionId}" | ` +
-        `Provider: "${resolvedModel.provider}" | Model: "${resolvedModel.id}" | ` +
+        `Provider: "${currentModel.provider}" | Model: "${currentModel.id}" | ` +
         `Mode: streaming`,
     );
 
@@ -335,7 +334,7 @@ export class AgentRunner {
     // Start the agent loop execution in the background
     this.loopExecutor
       .executeLoop(
-        resolvedModel,
+        currentModel,
         sessionId,
         toolCallEngine,
         true, // Streaming mode
@@ -360,7 +359,7 @@ export class AgentRunner {
           const systemEvent = this.eventStream.createEvent('system', {
             level: 'error',
             message: `Error in agent execution: ${error}`,
-            details: { error: String(error), provider: resolvedModel.provider },
+            details: { error: String(error), provider: currentModel.provider },
           });
           this.eventStream.sendEvent(systemEvent);
         }

@@ -1,0 +1,66 @@
+{
+  "name": "@gui-agent/shared",
+  "version": "0.3.0-beta.12",
+  "description": "Shared types for GUI-Agent",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bytedance/UI-TARS-desktop"
+  },
+  "bugs": {
+    "url": "https://github.com/bytedance/UI-TARS-desktop/issues"
+  },
+  "exports": {
+    "./types": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/types/index.mjs",
+      "require": "./dist/types/index.js"
+    },
+    "./base": {
+      "types": "./dist/base/index.d.ts",
+      "import": "./dist/base/index.mjs",
+      "require": "./dist/base/index.js"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.mjs",
+      "require": "./dist/utils/index.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./src/*/index.ts"
+      ]
+    }
+  },
+  "scripts": {
+    "dev": "rslib build --watch",
+    "build": "rslib build",
+    "build:watch": "rslib build --watch",
+    "test": "vitest"
+  },
+  "keywords": [
+    "UI-TARS",
+    "GUI Agent",
+    "SDK"
+  ],
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "dependencies": {
+    "@agent-infra/logger": "0.0.2-beta.2",
+    "@tarko/agent": "workspace:*",
+    "@tarko/agent-interface": "workspace:*"
+  },
+  "devDependencies": {
+    "@rslib/core": "0.10.0",
+    "typescript": "^5.7.2",
+    "vitest": "^3.0.2"
+  }
+}

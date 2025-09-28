@@ -1,0 +1,332 @@
+---
+title: Context Engineering
+description: Master long-running agent operations with advanced context management
+---
+
+# Context Engineering
+
+**Context Engineering** is Tarko's core capability for building agents capable of long-running operations. It manages context windows and optimizes memory usage through intelligent message history management.
+
+## What is Context Engineering?
+
+Traditional agents struggle with long-running tasks due to context window limitations. Tarko's Context Engineering solves this through:
+
+- **Message History Management**: Intelligent conversion of event streams to LLM context
+- **Image Limiting**: Controls the number of images in context to prevent overflow
+- **Context Awareness**: Configurable context management for multimodal content
+- **Event Stream Processing**: Maintains conversation structure for optimal LLM context
+
+## Key Features
+
+### 1. Context Awareness Configuration
+
+Configure how the agent manages context and multimodal content:
+
+```typescript
+import { Agent } from '@tarko/agent';
+
+const agent = new Agent({
+  context: {
+    maxImagesCount: 5, // Limit images in context (default: 5)
+  }
+});
+```
+
+### 2. Message History Management
+
+The `MessageHistory` class automatically converts event streams to message history:
+
+```typescript
+// From multimodal/tarko/agent/src/agent/message-history.ts
+const messageHistory = new MessageHistory(
+  eventStream,
+  5 // maxImagesCount - limits images to prevent context overflow
+);
+
+const messages = messageHistory.toMessageHistory(
+  toolCallEngine,
+  systemPrompt,
+  tools
+);
+```
+
+### 3. Image Context Management
+
+Control how images are handled in long conversations:
+
+```typescript
+const agent = new Agent({
+  context: {
+    maxImagesCount: 10, // Allow up to 10 images in context
+  }
+});
+```
+
+**How it works:**
+- Images beyond the limit are replaced with text placeholders
+- Newest images are preserved, oldest are omitted
+- Maintains context structure while reducing token usage
+
+## Configuration Options
+
+### Context Awareness Configuration
+
+Based on the actual `AgentContextAwarenessOptions` interface:
+
+```typescript
+interface AgentContextAwarenessOptions {
+  /**
+   * Maximum number of images to include in context
+   * When exceeded, oldest images are replaced with text placeholders
+   * @default 5
+   */
+  maxImagesCount?: number;
+}
+```
+
+### Agent Configuration
+
+```typescript
+const agent = new Agent({
+  context: {
+    maxImagesCount: 10, // Limit images in context
+  },
+  // Other agent options...
+});
+```
+
+## Best Practices
+
+### 1. Configure Image Limits Appropriately
+
+**For text-heavy conversations**:
+```typescript
+const agent = new Agent({
+  context: {
+    maxImagesCount: 3, // Keep fewer images for text focus
+  },
+});
+```
+
+**For visual analysis tasks**:
+```typescript
+const agent = new Agent({
+  context: {
+    maxImagesCount: 15, // Allow more images for visual context
+  },
+});
+```
+
+### 2. Monitor Context Usage
+
+Use event stream to track context changes:
+
+```typescript
+const response = await agent.run({
+  input: "Analyze these images",
+  stream: true,
+});
+
+for await (const event of response) {
+  if (event.type === 'user_message' || event.type === 'environment_input') {
+    console.log('Context updated with:', event.content);
+  }
+}
+```
+
+### 3. Handle Multimodal Content
+
+```typescript
+// Environment input with images
+const response = await agent.run({
+  input: "What do you see?",
+  environmentInput: {
+    content: [
+      { type: 'text', text: 'Current screen:' },
+      { type: 'image_url', image_url: { url: 'data:image/png;base64,...' } }
+    ],
+    description: 'Screen capture'
+  }
+});
+```
+
+## Advanced Usage
+
+### Custom Message History Processing
+
+Extend the `MessageHistory` class for custom context management:
+
+```typescript
+import { MessageHistory } from '@tarko/agent';
+
+class CustomMessageHistory extends MessageHistory {
+  constructor(eventStream, maxImagesCount = 5) {
+    super(eventStream, maxImagesCount);
+  }
+
+  // Override to add custom system prompt with time
+  getSystemPromptWithTime(instructions: string): string {
+    const customTime = new Date().toLocaleString('en-US', {
+      timeZone: 'America/New_York'
+    });
+    return `${instructions}\n\nCurrent time (EST): ${customTime}`;
+  }
+}
+```
+
+### Working with Event Streams
+
+Access and manipulate the event stream for custom context logic:
+
+```typescript
+const agent = new Agent({ /* options */ });
+
+// Get the event stream
+const eventStream = agent.getEventStream();
+
+// Access events
+const events = eventStream.getEvents();
+console.log(`Total events: ${events.length}`);
+
+// Filter specific event types
+const userMessages = events.filter(e => e.type === 'user_message');
+const toolCalls = events.filter(e => e.type === 'tool_call');
+```
+
+## Integration with Agent Hooks
+
+Use Agent Hooks to customize context behavior:
+
+```typescript
+const agent = new Agent({
+  hooks: {
+    onBeforeToolCall: async (context) => {
+      // Log context before tool execution
+      console.log('Context before tool call:', context.messages.length);
+    },
+    
+    onAfterToolCall: async (context) => {
+      // Monitor context growth after tool execution
+      console.log('Context after tool call:', context.messages.length);
+    },
+    
+    onRetrieveTools: async (tools) => {
+      // Filter tools based on context size
+      const eventStream = agent.getEventStream();
+      const events = eventStream.getEvents();
+      
+      if (events.length > 50) {
+        // Reduce tools for large contexts
+        return tools.slice(0, 3);
+      }
+      return tools;
+    }
+  }
+});
+```
+
+## Performance Considerations
+
+### Memory Usage
+
+- Configure `maxImagesCount` based on available memory
+- Monitor event stream size for long-running conversations
+- Consider disposing agents after extended use
+
+### Context Window Management
+
+- Images consume significant token space
+- Text placeholders maintain context structure
+- Balance between context richness and token limits
+
+### Best Practices
+
+- Use environment input for transient context
+- Limit images for text-focused tasks
+- Monitor event stream growth in production
+
+## Debugging Context Issues
+
+### Enable Debug Logging
+
+```typescript
+import { LogLevel } from '@tarko/agent';
+
+const agent = new Agent({
+  logLevel: LogLevel.DEBUG, // Enable detailed logging
+});
+```
+
+### Context Inspection
+
+```typescript
+// Get event stream for analysis
+const eventStream = agent.getEventStream();
+const events = eventStream.getEvents();
+
+console.log('Total events:', events.length);
+console.log('Event types:', [...new Set(events.map(e => e.type))]);
+
+// Count images in context
+const imageCount = events.reduce((count, event) => {
+  if (event.type === 'user_message' && Array.isArray(event.content)) {
+    return count + event.content.filter(part => 
+      typeof part === 'object' && part.type === 'image_url'
+    ).length;
+  }
+  return count;
+}, 0);
+
+console.log('Images in context:', imageCount);
+
+// Export events for analysis
+const fs = require('fs');
+fs.writeFileSync('events-dump.json', JSON.stringify(events, null, 2));
+```
+
+## Real-World Examples
+
+### Visual Analysis Agent
+
+```typescript
+const visualAgent = new Agent({
+  context: {
+    maxImagesCount: 20, // Allow many images for visual tasks
+  },
+  instructions: 'You are a visual analysis expert. Analyze images and provide detailed insights.',
+});
+```
+
+### Text-Focused Assistant
+
+```typescript
+const textAssistant = new Agent({
+  context: {
+    maxImagesCount: 2, // Minimal images for text focus
+  },
+  instructions: 'You are a writing assistant focused on text analysis and generation.',
+});
+```
+
+### Long-Running Conversation Agent
+
+```typescript
+const conversationAgent = new Agent({
+  context: {
+    maxImagesCount: 8, // Balanced for mixed content
+  },
+  instructions: 'You are a helpful assistant for extended conversations.',
+});
+
+// Monitor context growth
+setInterval(() => {
+  const events = conversationAgent.getEventStream().getEvents();
+  console.log(`Context events: ${events.length}`);
+}, 60000); // Check every minute
+```
+
+## Next Steps
+
+- [Tool Call Engine](/guide/basic/tool-call-engine) - Learn about tool integration
+- [Agent Protocol](/guide/advanced/agent-protocol) - Understand communication standards
+- [Agent Hooks](/guide/advanced/agent-hooks) - Extend agent behavior

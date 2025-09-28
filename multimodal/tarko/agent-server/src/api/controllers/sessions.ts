@@ -5,9 +5,10 @@
 
 import { Request, Response } from 'express';
 import { nanoid } from 'nanoid';
-import { SessionItemInfo } from '../../storage';
+import { SessionInfo } from '../../storage';
 import { AgentSession } from '../../core';
 import { ShareService } from '../../services';
+import { getDefaultModel } from '../../utils/model-utils';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -44,24 +45,62 @@ export async function getAllSessions(req: Request, res: Response) {
 export async function createSession(req: Request, res: Response) {
   try {
     const server = req.app.locals.server;
+    const { runtimeSettings, agentOptions } = req.body as {
+      runtimeSettings?: Record<string, any>;
+      agentOptions?: Record<string, any>;
+    };
     const sessionId = nanoid();
 
     // Get session metadata if it exists (for restored sessions)
-    let sessionItemInfo = null;
+    let sessionInfo = null;
     if (server.storageProvider) {
       try {
-        sessionItemInfo = await server.storageProvider.getSessionItemInfo(sessionId);
+        sessionInfo = await server.storageProvider.getSessionInfo(sessionId);
       } catch (error) {
         // Session doesn't exist yet, will be created below
       }
     }
 
-    // Pass custom AGIO provider and session metadata if available
+    let savedSessionInfo: SessionInfo | undefined;
+    // Store session metadata FIRST if we have storage
+    if (server.storageProvider) {
+      const now = Date.now();
+
+      const defaultModel = getDefaultModel(server.appConfig);
+      const sessionInfo: SessionInfo = {
+        id: sessionId,
+        createdAt: now,
+        updatedAt: now,
+        workspace: server.getCurrentWorkspace(),
+        metadata: {
+          agentInfo: {
+            name: server.getCurrentAgentName()!,
+            configuredAt: now,
+          },
+          ...(defaultModel && {
+            modelConfig: defaultModel,
+          }),
+          // Include runtime settings if provided (persistent session settings)
+          ...(runtimeSettings && {
+            runtimeSettings,
+          }),
+          // Include agent options if provided (one-time initialization options)
+          ...(agentOptions && {
+            agentOptions,
+          }),
+        },
+      };
+
+      savedSessionInfo = await server.storageProvider.createSession(sessionInfo);
+    }
+
+    // Pass custom AGIO provider, session metadata, and agent options if available
     const session = new AgentSession(
       server,
       sessionId,
       server.getCustomAgioProvider(),
-      sessionItemInfo || undefined,
+      savedSessionInfo || undefined,
+      agentOptions, // Pass agentOptions for one-time Agent initialization
     );
 
     server.sessions[sessionId] = session;
@@ -73,27 +112,29 @@ export async function createSession(req: Request, res: Response) {
       server.storageUnsubscribes[sessionId] = storageUnsubscribe;
     }
 
-    let savedSessionItemInfo: SessionItemInfo | undefined;
-    // Store session metadata if we have storage
-    if (server.storageProvider) {
-      const now = Date.now();
-      const sessionItemInfo: SessionItemInfo = {
-        id: sessionId,
-        createdAt: now,
-        updatedAt: now,
-        workspace: server.getCurrentWorkspace(),
-        metadata: {
-          agentInfo: {
-            name: server.getCurrentAgentName()!,
-            configuredAt: now,
-          },
-        },
-      };
 
-      savedSessionItemInfo = await server.storageProvider.createSession(sessionItemInfo);
+    // Wait a short time to ensure all initialization events are persisted
+    // This handles the async nature of event storage during agent initialization
+    await session.waitForEventSavesToComplete();
+
+    // Get events that were created during agent initialization
+    let initializationEvents: any[] = [];
+    if (server.storageProvider) {
+      try {
+        initializationEvents = await server.storageProvider.getSessionEvents(sessionId);
+      } catch (error) {
+        console.warn('Failed to retrieve initialization events:', error);
+        // Continue without events - not critical for session creation
+      }
     }
 
-    res.status(201).json({ sessionId, session: savedSessionItemInfo });
+    console.log('Return initializationEvents', initializationEvents);
+
+    res.status(201).json({
+      sessionId,
+      session: savedSessionInfo,
+      events: initializationEvents,
+    });
   } catch (error) {
     console.error('Failed to create session:', error);
     res.status(500).json({ error: 'Failed to create session' });
@@ -115,7 +156,7 @@ export async function getSessionDetails(req: Request, res: Response) {
 
     // Check storage first
     if (server.storageProvider) {
-      const metadata = await server.storageProvider.getSessionItemInfo(sessionId);
+      const metadata = await server.storageProvider.getSessionInfo(sessionId);
       if (metadata) {
         return res.status(200).json({
           session: metadata,
@@ -189,7 +230,7 @@ export async function getSessionStatus(req: Request, res: Response) {
 export async function updateSession(req: Request, res: Response) {
   const { sessionId, metadata: metadataUpdates } = req.body as {
     sessionId: string;
-    metadata: Partial<SessionItemInfo['metadata']>;
+    metadata: Partial<SessionInfo['metadata']>;
   };
 
   if (!sessionId) {
@@ -203,14 +244,14 @@ export async function updateSession(req: Request, res: Response) {
       return res.status(404).json({ error: 'Storage not configured, cannot update session' });
     }
 
-    const sessionItemInfo = await server.storageProvider.getSessionItemInfo(sessionId);
-    if (!sessionItemInfo) {
+    const sessionInfo = await server.storageProvider.getSessionInfo(sessionId);
+    if (!sessionInfo) {
       return res.status(404).json({ error: 'Session not found' });
     }
 
-    const updatedMetadata = await server.storageProvider.updateSessionItemInfo(sessionId, {
+    const updatedMetadata = await server.storageProvider.updateSessionInfo(sessionId, {
       metadata: {
-        ...sessionItemInfo.metadata,
+        ...sessionInfo.metadata,
         ...metadataUpdates,
       },
     });
@@ -327,7 +368,7 @@ export async function shareSession(req: Request, res: Response) {
 
   try {
     const server = req.app.locals.server;
-    const shareService = new ShareService(server.appConfig, server.storageProvider);
+    const shareService = new ShareService(server.appConfig, server.storageProvider, server);
 
     // Get agent instance if session is active (for slug generation)
     const agent = server.sessions[sessionId]?.agent;
@@ -375,7 +416,7 @@ export async function getLatestSessionEvents(req: Request, res: Response) {
 
     res.status(200).json({
       sessionId: latestSession.id,
-      sessionItemInfo: latestSession,
+      sessionInfo: latestSession,
       events,
     });
   } catch (error) {
@@ -401,7 +442,7 @@ export async function getSessionWorkspaceFiles(req: Request, res: Response) {
 
     // Check if session exists (active or stored)
     if (!session && server.storageProvider) {
-      const metadata = await server.storageProvider.getSessionItemInfo(sessionId);
+      const metadata = await server.storageProvider.getSessionInfo(sessionId);
       if (!metadata) {
         return res.status(404).json({ error: 'Session not found' });
       }

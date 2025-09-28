@@ -1,0 +1,289 @@
+---
+title: Troubleshooting
+description: Common issues and solutions for Tarko agents
+---
+
+# Troubleshooting
+
+Common issues and solutions when working with **Tarko Agents**.
+
+## Installation Issues
+
+### Node.js Version
+
+**Problem**: Installation fails with Node.js version errors.
+
+**Solution**: Ensure you're using Node.js 18 or later:
+
+```bash
+node --version  # Should be 18.0.0 or higher
+npm --version   # Should be 8.0.0 or higher
+```
+
+### Package Installation
+
+**Problem**: `npm install` fails with dependency conflicts.
+
+**Solution**: Clear cache and reinstall:
+
+```bash
+npm cache clean --force
+rm -rf node_modules package-lock.json
+npm install
+```
+
+## Runtime Issues
+
+### Agent Won't Start
+
+**Problem**: Agent fails to start with configuration errors.
+
+**Solution**: Check your `tarko.config.ts`:
+
+```typescript
+// Ensure all required fields are present
+export default defineConfig({
+  agent: {
+    name: 'MyAgent',        // Required
+    systemPrompt: '...',    // Required
+  },
+  modelProvider: {
+    provider: 'openai',     // Required
+    apiKey: process.env.OPENAI_API_KEY, // Required
+  },
+});
+```
+
+### API Key Issues
+
+**Problem**: "Invalid API key" or authentication errors.
+
+**Solution**: Verify environment variables:
+
+```bash
+# Check if API key is set
+echo $OPENAI_API_KEY
+
+# Set API key if missing
+export OPENAI_API_KEY="your-api-key-here"
+```
+
+### Port Already in Use
+
+**Problem**: "Port 3000 is already in use" error.
+
+**Solution**: Use a different port:
+
+```bash
+# Option 1: Kill existing process
+lsof -ti:3000 | xargs kill -9
+
+# Option 2: Use different port
+AGENT_PORT=3001 tarko run
+```
+
+## Tool Issues
+
+### Tool Not Found
+
+**Problem**: "Tool 'xyz' not found" error.
+
+**Solution**: Ensure tool is properly registered:
+
+```typescript
+import { searchTool } from '@tarko/tools';
+
+export default defineConfig({
+  tools: [
+    searchTool(),  // Make sure tool is included
+  ],
+});
+```
+
+### Browser Tool Issues
+
+**Problem**: Browser tool fails to launch.
+
+**Solution**: Install browser dependencies:
+
+```bash
+# For Ubuntu/Debian
+sudo apt-get install -y chromium-browser
+
+# For macOS
+brew install chromium
+
+# Or use headless mode
+BROWSER_HEADLESS=true tarko run
+```
+
+### File System Permissions
+
+**Problem**: File system tool can't access files.
+
+**Solution**: Check file permissions and workspace configuration:
+
+```typescript
+export default defineConfig({
+  tools: [
+    fileSystemTool({
+      allowedPaths: ['/path/to/workspace'],  // Specify allowed paths
+      readonly: false,                       // Allow write operations
+    }),
+  ],
+});
+```
+
+## Performance Issues
+
+### Slow Response Times
+
+**Problem**: Agent responses are very slow.
+
+**Solution**: Optimize configuration:
+
+```typescript
+export default defineConfig({
+  modelProvider: {
+    provider: 'openai',
+    model: 'gpt-4o-mini',  // Use faster model
+    temperature: 0.1,      // Lower temperature for faster responses
+    maxTokens: 1000,       // Limit response length
+  },
+  agent: {
+    maxIterations: 5,      // Limit thinking loops
+    timeout: 30000,        // 30 second timeout
+  },
+});
+```
+
+### Memory Usage
+
+**Problem**: High memory consumption.
+
+**Solution**: Configure context limits:
+
+```typescript
+export default defineConfig({
+  agent: {
+    maxContextLength: 8000,    // Limit context size
+    contextStrategy: 'sliding', // Use sliding window
+  },
+});
+```
+
+## Development Issues
+
+### Hot Reload Not Working
+
+**Problem**: Changes don't trigger reload in development mode.
+
+**Solution**: Check file watching:
+
+```bash
+# Increase file watch limit (Linux)
+echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
+
+# Restart development server
+npm run dev
+```
+
+### TypeScript Errors
+
+**Problem**: TypeScript compilation errors.
+
+**Solution**: Check `tsconfig.json` and dependencies:
+
+```bash
+# Install type definitions
+npm install --save-dev @types/node
+
+# Check TypeScript version
+npx tsc --version
+
+# Compile manually to see errors
+npx tsc --noEmit
+```
+
+## Debugging
+
+### Enable Debug Logging
+
+```bash
+# Set log level to debug
+AGENT_LOG_LEVEL=debug tarko run
+
+# Or in configuration
+export default defineConfig({
+  agent: {
+    logLevel: 'debug',
+  },
+});
+```
+
+### Inspect Agent State
+
+```typescript
+import { useAgentHooks } from '@tarko/agent';
+
+export default defineConfig({
+  hooks: {
+    onBeforeToolCall: (context) => {
+      console.log('Tool call:', context.toolName, context.args);
+    },
+    onAfterToolCall: (context) => {
+      console.log('Tool result:', context.result);
+    },
+  },
+});
+```
+
+### Network Issues
+
+```bash
+# Test API connectivity
+curl -H "Authorization: Bearer $OPENAI_API_KEY" \
+     https://api.openai.com/v1/models
+
+# Check proxy settings
+echo $HTTP_PROXY
+echo $HTTPS_PROXY
+```
+
+## Getting Help
+
+### Log Files
+
+Check log files for detailed error information:
+
+```bash
+# Default log location
+tail -f ~/.tarko/logs/agent.log
+
+# Or custom log location
+tail -f ./logs/tarko.log
+```
+
+### Common Error Codes
+
+| Error Code | Description | Solution |
+|------------|-------------|----------|
+| `ECONNREFUSED` | Connection refused | Check network/API endpoint |
+| `ENOTFOUND` | DNS resolution failed | Check internet connection |
+| `EACCES` | Permission denied | Check file/directory permissions |
+| `EMFILE` | Too many open files | Increase file descriptor limit |
+
+### Community Support
+
+- [GitHub Issues](https://github.com/bytedance/UI-TARS-desktop/issues)
+- [Documentation](https://tarko.dev)
+- [Discord Community](#) {/* Placeholder for community link */}
+
+## Next Steps
+
+If you're still experiencing issues:
+
+1. Check the [Configuration Guide](/guide/basic/configuration)
+2. Review [Agent Hooks](/guide/advanced/agent-hooks) for debugging
+3. Explore [Agent Hooks](/guide/advanced/agent-hooks) for debugging

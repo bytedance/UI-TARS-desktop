@@ -1,0 +1,56 @@
+{
+  "welcomeCards": [
+    {
+      "title": "Quick Code Review",
+      "prompt": "Review my code and suggest improvements",
+      "image": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=200&fit=crop",
+      "category": "Code",
+      "agentOptions": {
+        "mode": "quick-review"
+      }
+    },
+    {
+      "title": "Write Documentation",
+      "prompt": "Help me write clear documentation for this project",
+      "image": "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400&h=200&fit=crop",
+      "category": "Docs",
+      "agentOptions": {
+        "format": "markdown"
+      }
+    },
+    {
+      "title": "Debug Helper",
+      "prompt": "Help me debug this issue step by step",
+      "image": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=200&fit=crop",
+      "category": "Code",
+      "agentOptions": {
+        "debugLevel": "detailed"
+      }
+    },
+    {
+      "title": "Research Topic",
+      "prompt": "Research the latest trends and best practices",
+      "image": "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=200&fit=crop",
+      "category": "Research"
+    },
+    {
+      "title": "Create Tutorial",
+      "prompt": "Create a step-by-step tutorial for beginners",
+      "image": "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400&h=200&fit=crop",
+      "category": "Docs",
+      "agentOptions": {
+        "audience": "beginner",
+        "includeExamples": true
+      }
+    },
+    {
+      "title": "Optimize Performance",
+      "prompt": "Analyze and optimize application performance",
+      "image": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=200&fit=crop",
+      "category": "Code",
+      "agentOptions": {
+        "focus": "performance"
+      }
+    }
+  ]
+}

@@ -61,3 +61,9 @@ export interface ToolCallEngineCompositionConfig {
   /** Default engine to use when no specific engine matches */
   defaultEngine?: ToolCallEngineProvider;
 }
+
+export type AgentMode = {
+  id: 'omni' | 'gui' | 'game';
+  link?: string;
+  browserMode?: 'dom' | 'visual-grounding' | 'hybrid';
+};

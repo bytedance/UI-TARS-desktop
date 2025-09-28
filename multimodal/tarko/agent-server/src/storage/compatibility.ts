@@ -3,17 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SessionItemInfo, LegacySessionItemInfo } from './types';
+import { SessionInfo, LegacySessionItemInfo } from './types';
+import { AgentModel } from '../types';
 
 /**
- * Convert legacy SessionItemInfo to new JSON schema format
+ * Convert legacy SessionInfo to new JSON schema format
  * Provides backward compatibility during the transition period
  */
-export function migrateLegacyToJsonSchema(legacy: LegacySessionItemInfo): SessionItemInfo {
-  const metadata: SessionItemInfo['metadata'] = { version: 1 };
+export function migrateLegacyToJsonSchema(legacy: LegacySessionItemInfo): SessionInfo {
+  const metadata: SessionInfo['metadata'] = { version: 1 };
 
   if (legacy.name) metadata.name = legacy.name;
   if (legacy.tags) metadata.tags = legacy.tags;
+  // @ts-expect-error
   if (legacy.modelConfig) metadata.modelConfig = legacy.modelConfig;
 
   return {
@@ -29,7 +31,7 @@ export function migrateLegacyToJsonSchema(legacy: LegacySessionItemInfo): Sessio
  * Extract legacy fields from JSON schema for backward compatibility
  * This allows existing code to continue working during transition
  */
-export function extractLegacyFields(session: SessionItemInfo): LegacySessionItemInfo {
+export function extractLegacyFields(session: SessionInfo): LegacySessionItemInfo {
   return {
     id: session.id,
     createdAt: session.createdAt,
@@ -52,16 +54,16 @@ export function createJsonSchemaSession(
     tags?: string[];
     modelConfig?: {
       provider: string;
-      modelId: string;
-      configuredAt: number;
+      id: string;
     };
   },
-): SessionItemInfo {
+): SessionInfo {
   const now = Date.now();
-  const metadata: SessionItemInfo['metadata'] = { version: 1 };
+  const metadata: SessionInfo['metadata'] = { version: 1 };
 
   if (options?.name) metadata.name = options.name;
   if (options?.tags) metadata.tags = options.tags;
+  // @ts-expect-error
   if (options?.modelConfig) metadata.modelConfig = options.modelConfig;
 
   return {

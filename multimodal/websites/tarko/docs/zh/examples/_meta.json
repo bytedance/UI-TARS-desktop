@@ -1,0 +1,27 @@
+[
+  {
+    "type": "file",
+    "name": "getting-started",
+    "label": "入门示例"
+  },
+  {
+    "type": "file",
+    "name": "custom-tools",
+    "label": "自定义工具"
+  },
+  {
+    "type": "file",
+    "name": "server-integration",
+    "label": "服务器集成"
+  },
+  {
+    "type": "file",
+    "name": "custom-hooks",
+    "label": "自定义 Hooks"
+  },
+  {
+    "type": "file",
+    "name": "protocol-integration",
+    "label": "协议集成"
+  }
+]

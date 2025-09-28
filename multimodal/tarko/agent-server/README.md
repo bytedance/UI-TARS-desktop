@@ -203,13 +203,6 @@ const server = new AgentServer({
     model: {
       provider: 'openai',                 // Model provider
       id: 'gpt-4',                       // Model ID
-      providers: [                        // Available providers
-        {
-          name: 'openai',
-          models: ['gpt-4', 'gpt-3.5-turbo'],
-          baseURL: 'https://api.openai.com/v1'
-        }
-      ]
     }
   }
 });

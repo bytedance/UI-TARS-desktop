@@ -17,18 +17,6 @@ export interface AgentRunBaseOptions {
    */
   input: string | ChatCompletionContentPart[];
   /**
-   * Model id used to run the agent.
-   *
-   * @defaultValue "model.id" or the first configured "model.providers."
-   */
-  model?: string;
-  /**
-   * Model provider used to run the agent.
-   *
-   * @defaultValue "model.provider" or the first configured "model.providers."
-   */
-  provider?: ModelProviderName;
-  /**
    * Optional session identifier to track the agent loop conversation
    * If not provided, a random ID will be generated
    */

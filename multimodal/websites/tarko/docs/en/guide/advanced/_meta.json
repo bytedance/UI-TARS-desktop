@@ -1,0 +1,22 @@
+[
+  {
+    "type": "file",
+    "name": "context-engineering",
+    "label": "Context Engineering"
+  },
+  {
+    "type": "file",
+    "name": "agent-protocol",
+    "label": "Agent Protocol"
+  },
+  {
+    "type": "file",
+    "name": "agent-hooks",
+    "label": "Agent Hooks"
+  },
+  {
+    "type": "file",
+    "name": "agent-snapshot",
+    "label": "Agent Snapshot"
+  }
+]

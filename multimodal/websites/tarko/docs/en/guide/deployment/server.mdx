@@ -1,0 +1,551 @@
+---
+title: Server
+description: Build production-ready agent servers with Tarko Agent Server
+---
+
+# Server
+
+Tarko Agent Server is a production-ready server component built on top of Tarko Agent Core. It provides session management, storage capabilities, and a standardized HTTP/WebSocket API for agent interactions.
+
+## Installation
+
+```bash
+npm install @tarko/agent-server
+```
+
+## Quick Start
+
+### Using CLI
+
+The easiest way to start a server:
+
+```bash
+npx tarko serve my-agent.ts
+```
+
+### Programmatic Usage
+
+```typescript
+import { AgentServer } from '@tarko/agent-server';
+import myAgent from './my-agent';
+
+const server = new AgentServer({
+  agent: myAgent,
+  port: 8888,
+  storage: {
+    type: 'sqlite',
+    path: '~/.tarko'
+  }
+});
+
+await server.start();
+console.log('Server running on http://localhost:8888');
+```
+
+## Core Concepts
+
+### Session
+Represents a complete agent interaction context, containing:
+- Message history
+- Tool calls and results
+- Agent state information
+- Metadata (name, tags, timestamps)
+
+### Query
+A single request executed within a session:
+- Text input
+- Multimodal content (text + images)
+- Streaming or non-streaming execution
+
+## Configuration
+
+### Server Options
+
+```typescript
+interface ServerConfig {
+  agent: Agent;
+  port?: number;
+  host?: string;
+  basePath?: string; // Default: '/api/v1'
+  cors?: CorsOptions;
+  storage?: StorageConfig;
+  auth?: AuthConfig;
+  sharing?: SharingConfig;
+}
+```
+
+### Storage Configuration
+
+```typescript
+interface StorageConfig {
+  type: 'memory' | 'file' | 'sqlite' | 'redis';
+  path?: string; // For file/sqlite storage
+  connectionString?: string; // For redis storage
+  options?: Record<string, any>;
+}
+```
+
+### Example Configuration
+
+```typescript
+const server = new AgentServer({
+  agent: myAgent,
+  port: 8888,
+  storage: {
+    type: 'sqlite',
+    path: '~/.tarko/sessions.db'
+  },
+  cors: {
+    origin: ['http://localhost:3000'],
+    credentials: true
+  },
+  auth: {
+    enabled: true,
+    provider: 'jwt',
+    secret: process.env.JWT_SECRET
+  }
+});
+```
+
+## Session Management API
+
+### Create Session
+
+```http
+POST /api/v1/sessions/create
+```
+
+**Response:**
+```json
+{
+  "sessionId": "unique-session-id"
+}
+```
+
+### List Sessions
+
+```http
+GET /api/v1/sessions
+```
+
+**Response:**
+```json
+{
+  "sessions": [
+    {
+      "id": "session-id-1",
+      "createdAt": 1622548800000,
+      "updatedAt": 1622548800000,
+      "name": "Session Name",
+      "workspace": "/path/to/workspace",
+      "tags": ["tag1", "tag2"]
+    }
+  ]
+}
+```
+
+### Get Session Details
+
+```http
+GET /api/v1/sessions/details?sessionId=session-id
+```
+
+### Update Session
+
+```http
+POST /api/v1/sessions/update
+```
+
+**Request:**
+```json
+{
+  "sessionId": "session-id",
+  "name": "New Session Name",
+  "tags": ["updated", "tags"]
+}
+```
+
+### Delete Session
+
+```http
+POST /api/v1/sessions/delete
+```
+
+**Request:**
+```json
+{
+  "sessionId": "session-id"
+}
+```
+
+## Query Execution API
+
+### Standard Query
+
+```http
+POST /api/v1/sessions/query
+```
+
+**Text Query:**
+```json
+{
+  "sessionId": "session-id",
+  "query": "Hello, how can you help me?"
+}
+```
+
+**Multimodal Query:**
+```json
+{
+  "sessionId": "session-id",
+  "query": [
+    { "type": "text", "text": "What's in this image?" },
+    { 
+      "type": "image_url", 
+      "image_url": {
+        "url": "data:image/jpeg;base64,..."
+      }
+    }
+  ]
+}
+```
+
+### Streaming Query
+
+```http
+POST /api/v1/sessions/query/stream
+```
+
+Returns Server-Sent Events (SSE) stream with real-time agent responses.
+
+### Abort Query
+
+```http
+POST /api/v1/sessions/abort
+```
+
+**Request:**
+```json
+{
+  "sessionId": "session-id"
+}
+```
+
+## One-shot API
+
+For simple use cases, execute queries without explicit session management:
+
+### One-shot Query
+
+```http
+POST /api/v1/oneshot/query
+```
+
+**Request:**
+```json
+{
+  "query": "What's the weather like?",
+  "sessionName": "Weather Check",
+  "sessionTags": ["weather", "oneshot"]
+}
+```
+
+### One-shot Streaming
+
+```http
+POST /api/v1/oneshot/query/stream
+```
+
+## WebSocket API
+
+For real-time bidirectional communication:
+
+```javascript
+import { io } from 'socket.io-client';
+
+const socket = io('http://localhost:8888');
+
+// Join a session
+socket.emit('join-session', 'session-id');
+
+// Listen for agent events
+socket.on('agent-event', (event) => {
+  console.log('Agent event:', event);
+});
+
+// Send a query
+socket.emit('send-query', {
+  sessionId: 'session-id',
+  query: 'Hello!'
+});
+
+// Abort query
+socket.emit('abort-query', { sessionId: 'session-id' });
+```
+
+## Event Stream Format
+
+Tarko Server uses structured event streams following the Agent Protocol:
+
+```typescript
+interface AgentEvent {
+  id: string;
+  type: string;
+  timestamp: number;
+  sessionId: string;
+  data: any;
+}
+```
+
+**Example Event Stream:**
+```json
+[
+  {
+    "id": "evt-1",
+    "type": "user_message",
+    "timestamp": 1622548800000,
+    "sessionId": "session-1",
+    "data": { "content": "Hello!" }
+  },
+  {
+    "id": "evt-2",
+    "type": "assistant_message_start",
+    "timestamp": 1622548800100,
+    "sessionId": "session-1",
+    "data": {}
+  },
+  {
+    "id": "evt-3",
+    "type": "assistant_message_delta",
+    "timestamp": 1622548800150,
+    "sessionId": "session-1",
+    "data": { "delta": "Hello! How" }
+  },
+  {
+    "id": "evt-4",
+    "type": "tool_call",
+    "timestamp": 1622548800200,
+    "sessionId": "session-1",
+    "data": {
+      "name": "get_weather",
+      "arguments": { "location": "San Francisco" }
+    }
+  }
+]
+```
+
+## Storage Providers
+
+### Memory Storage (Default)
+```typescript
+storage: {
+  type: 'memory'
+  // Data lost on server restart
+}
+```
+
+### File Storage
+```typescript
+storage: {
+  type: 'file',
+  path: '~/.tarko/sessions'
+}
+```
+
+### SQLite Storage
+```typescript
+storage: {
+  type: 'sqlite',
+  path: '~/.tarko/sessions.db'
+}
+```
+
+### Redis Storage
+```typescript
+storage: {
+  type: 'redis',
+  connectionString: 'redis://localhost:6379',
+  options: {
+    keyPrefix: 'tarko:',
+    db: 0
+  }
+}
+```
+
+## Authentication
+
+### JWT Authentication
+
+```typescript
+const server = new AgentServer({
+  auth: {
+    enabled: true,
+    provider: 'jwt',
+    secret: process.env.JWT_SECRET,
+    expiresIn: '24h'
+  }
+});
+```
+
+### Custom Authentication
+
+```typescript
+const server = new AgentServer({
+  auth: {
+    enabled: true,
+    provider: 'custom',
+    authenticate: async (req) => {
+      const token = req.headers.authorization;
+      // Custom authentication logic
+      return { userId: 'user-123', permissions: ['read', 'write'] };
+    }
+  }
+});
+```
+
+## Middleware Extensions
+
+Extend server functionality with custom middleware:
+
+```typescript
+import express from 'express';
+
+const server = new AgentServer(config);
+const app = server.getApp();
+
+// Add custom routes
+app.get('/custom/health', (req, res) => {
+  res.json({ status: 'custom-ok', timestamp: Date.now() });
+});
+
+// Add middleware
+app.use('/api/v1', express.json({ limit: '50mb' }));
+
+// Custom error handling
+app.use((error, req, res, next) => {
+  console.error('Server error:', error);
+  res.status(500).json({ error: 'Internal server error' });
+});
+
+await server.start();
+```
+
+## Deployment
+
+### Docker Deployment
+
+```dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --production
+
+COPY . .
+EXPOSE 8888
+
+CMD ["npx", "tarko", "serve", "agent.ts", "--port", "8888"]
+```
+
+### Environment Variables
+
+```bash
+# .env
+PORT=8888
+NODE_ENV=production
+JWT_SECRET=your-secret-key
+STORAGE_TYPE=sqlite
+STORAGE_PATH=/data/sessions.db
+OPENAI_API_KEY=your-api-key
+```
+
+### Production Configuration
+
+```typescript
+// production.config.ts
+export default {
+  server: {
+    port: process.env.PORT || 8888,
+    storage: {
+      type: 'sqlite',
+      path: process.env.STORAGE_PATH || '/data/sessions.db'
+    },
+    auth: {
+      enabled: true,
+      provider: 'jwt',
+      secret: process.env.JWT_SECRET
+    },
+    cors: {
+      origin: process.env.ALLOWED_ORIGINS?.split(',') || ['https://your-domain.com'],
+      credentials: true
+    }
+  }
+};
+```
+
+## Monitoring and Logging
+
+### Health Check
+
+```http
+GET /api/v1/health
+```
+
+**Response:**
+```json
+{
+  "status": "ok",
+  "timestamp": 1622548800000,
+  "uptime": 3600,
+  "memory": {
+    "used": 123456789,
+    "total": 1073741824
+  }
+}
+```
+
+### Custom Logging
+
+```typescript
+const server = new AgentServer({
+  logging: {
+    level: 'info',
+    format: 'json',
+    transports: [
+      { type: 'console' },
+      { type: 'file', filename: 'tarko-server.log' }
+    ]
+  }
+});
+```
+
+## Best Practices
+
+### 1. Session Management
+- Implement session cleanup for old/inactive sessions
+- Use appropriate storage based on scale requirements
+- Consider session sharing and collaboration features
+
+### 2. Security
+- Always enable authentication in production
+- Use HTTPS in production environments
+- Implement rate limiting for public APIs
+- Validate and sanitize all inputs
+
+### 3. Performance
+- Use Redis for high-concurrency scenarios
+- Implement connection pooling for database storage
+- Monitor memory usage and implement cleanup
+- Use streaming for long-running queries
+
+### 4. Error Handling
+- Implement comprehensive error logging
+- Provide meaningful error messages to clients
+- Handle agent timeouts gracefully
+- Implement circuit breakers for external dependencies
+
+## Next Steps
+
+- [Agent Protocol](/guide/advanced/agent-protocol) - Understand the communication standards
+- [Agent Hooks](/guide/advanced/agent-hooks) - Extend server behavior
+- [Examples](/examples/server-integration) - See server integration examples

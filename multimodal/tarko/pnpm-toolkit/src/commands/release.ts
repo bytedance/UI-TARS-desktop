@@ -15,9 +15,10 @@ import chalk from 'chalk';
 import { execa } from 'execa';
 
 import { loadWorkspacePackages, resolveWorkspaceConfig } from '../utils/workspace';
-import { gitCommit, gitCreateTag, gitPushTag } from '../utils/git';
+import { gitCommit, gitCreateTag, gitPushTag, getCurrentBranch, createAndSwitchBranch, switchBranch } from '../utils/git';
 import { publishPackage } from '../utils/npm';
 import { logger } from '../utils/logger';
+import { createGitHubRelease } from '../utils/github';
 import { patch } from './patch';
 import { changelog } from './changelog';
 
@@ -29,6 +30,28 @@ interface DependencyBackup {
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   peerDependencies?: Record<string, string>;
+}
+
+/**
+ * Generates canary version with format: {version}-canary-{commitHash}-{timestamp}
+ */
+async function generateCanaryVersion(
+  currentVersion: string,
+  cwd: string,
+): Promise<{ version: string; tag: string }> {
+  // Get current commit hash (short)
+  const { stdout: commitHash } = await execa('git', ['rev-parse', '--short', 'HEAD'], { cwd });
+
+  // Generate timestamp
+  const timestamp = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14); // YYYYMMDDHHMMSS
+
+  // Generate canary version
+  const canaryVersion = `${currentVersion}-canary-${commitHash.trim()}-${timestamp}`;
+
+  return {
+    version: canaryVersion,
+    tag: 'nightly',
+  };
 }
 
 /**
@@ -205,12 +228,19 @@ export async function release(options: ReleaseOptions = {}): Promise<void> {
     build = false,
     pushTag = false,
     tagPrefix = 'v',
+    canary = false,
     useAi = false,
+    createGithubRelease = false,
+    autoCreateReleaseBranch = false,
   } = options;
 
   if (dryRun) {
     logger.info('Dry run mode enabled - no actual changes will be made');
   }
+
+  // Handle auto-create release branch variables
+  let originalBranch: string | null = null;
+  let releaseBranch: string | null = null;
 
   try {
     // Get workspace configuration
@@ -219,21 +249,56 @@ export async function release(options: ReleaseOptions = {}): Promise<void> {
 
     logger.info(`Current version: ${currentVersion}`);
 
-    // Prompt for version and tag
-    const { version, tag } = await selectVersionAndTag(currentVersion);
+    // Get version and tag based on canary mode
+    let version: string;
+    let tag: string;
 
-    const { yes } = await inquirer.prompt([
-      {
-        name: 'yes',
-        message: `Confirm releasing ${version} (${tag})?`,
-        type: 'list',
-        choices: ['N', 'Y'],
-      },
-    ]);
+    if (canary) {
+      // Skip prompts for canary release
+      const canaryResult = await generateCanaryVersion(currentVersion, cwd);
+      version = canaryResult.version;
+      tag = canaryResult.tag;
+      logger.info(`Canary release: ${version} (${tag})`);
+    } else {
+      // Prompt for version and tag
+      const result = await selectVersionAndTag(currentVersion);
+      version = result.version;
+      tag = result.tag;
 
-    if (yes === 'N') {
-      logger.info('Release cancelled.');
-      return;
+      const { yes } = await inquirer.prompt([
+        {
+          name: 'yes',
+          message: `Confirm releasing ${version} (${tag})?`,
+          type: 'list',
+          choices: ['N', 'Y'],
+        },
+      ]);
+
+      if (yes === 'N') {
+        logger.info('Release cancelled.');
+        return;
+      }
+    }
+
+    // Handle auto-create release branch
+    if (autoCreateReleaseBranch) {
+      try {
+        // Get current branch
+        originalBranch = await getCurrentBranch(cwd);
+        releaseBranch = `release/${version}`;
+
+        if (dryRun) {
+          logger.info(`[dry-run] Would create and switch to release branch: ${releaseBranch}`);
+          logger.info(`[dry-run] Original branch: ${originalBranch}`);
+        } else {
+          logger.info(`Creating release branch: ${releaseBranch}`);
+          await createAndSwitchBranch(releaseBranch, cwd);
+          logger.success(`Switched to release branch: ${releaseBranch}`);
+        }
+      } catch (err) {
+        logger.error(`Failed to create release branch: ${(err as Error).message}`);
+        throw err;
+      }
     }
 
     // Set environment variable for build scripts
@@ -268,25 +333,27 @@ export async function release(options: ReleaseOptions = {}): Promise<void> {
       return;
     }
 
-    // Confirm packages to publish
+    // Confirm packages to publish (skip in canary mode)
     console.log(chalk.bold('\nPackages to be published:'));
     packagesToPublish.forEach((pkg) => {
       console.log(`  - ${chalk.cyan(pkg.name)} (${chalk.gray(pkg.dir)})`);
     });
     console.log();
 
-    const { confirmPublish } = await inquirer.prompt([
-      {
-        name: 'confirmPublish',
-        message: 'Are these the correct packages to publish?',
-        type: 'list',
-        choices: ['Y', 'N'],
-      },
-    ]);
+    if (!canary) {
+      const { confirmPublish } = await inquirer.prompt([
+        {
+          name: 'confirmPublish',
+          message: 'Are these the correct packages to publish?',
+          type: 'list',
+          choices: ['Y', 'N'],
+        },
+      ]);
 
-    if (confirmPublish === 'N') {
-      logger.info('Publication cancelled.');
-      return;
+      if (confirmPublish === 'N') {
+        logger.info('Publication cancelled.');
+        return;
+      }
     }
 
     // Update package versions
@@ -328,19 +395,23 @@ export async function release(options: ReleaseOptions = {}): Promise<void> {
       }
 
       if (hasWorkspaceDeps) {
-        const { continuePublish } = await inquirer.prompt([
-          {
-            name: 'continuePublish',
-            message: 'Unreplaced workspace dependencies found. Continue with publishing?',
-            type: 'list',
-            choices: ['No', 'Yes'],
-          },
-        ]);
+        if (canary) {
+          logger.warn('Unreplaced workspace dependencies found in canary mode, continuing anyway');
+        } else {
+          const { continuePublish } = await inquirer.prompt([
+            {
+              name: 'continuePublish',
+              message: 'Unreplaced workspace dependencies found. Continue with publishing?',
+              type: 'list',
+              choices: ['No', 'Yes'],
+            },
+          ]);
 
-        if (continuePublish === 'No') {
-          await restoreDependencies(backups, dryRun);
-          logger.info('Publishing cancelled, dependencies restored');
-          return;
+          if (continuePublish === 'No') {
+            await restoreDependencies(backups, dryRun);
+            logger.info('Publishing cancelled, dependencies restored');
+            return;
+          }
         }
       } else {
         logger.success('All workspace dependencies properly replaced');
@@ -389,7 +460,7 @@ export async function release(options: ReleaseOptions = {}): Promise<void> {
           logger.warn(`Tag ${tagName} already exists, skipping tag creation`);
         } else {
           // Commit changes
-          await gitCommit(`chore(agent-tars): release ${version}`, cwd);
+          await gitCommit(`chore(tars-stack): release ${version}`, cwd);
 
           // Create tag
           await gitCreateTag(tagName, `Release ${version}`, cwd);
@@ -406,24 +477,38 @@ export async function release(options: ReleaseOptions = {}): Promise<void> {
               logger.info(`You can manually push the tag later with: git push origin ${tagName}`);
             }
           } else {
-            // Ask if user wants to push
-            const { pushToRemote } = await inquirer.prompt([
-              {
-                name: 'pushToRemote',
-                message: `Push tag ${tagName} to remote repository?`,
-                type: 'list',
-                choices: ['Yes', 'No'],
-              },
-            ]);
-
-            if (pushToRemote === 'Yes') {
+            // Ask if user wants to push (skip in canary mode)
+            if (canary) {
+              // Auto-push in canary mode
               try {
-                logger.info(`Pushing git tag to remote...`);
+                logger.info(`Auto-pushing git tag to remote in canary mode...`);
                 await gitPushTag(tagName, true, cwd);
                 logger.success(`Successfully pushed tag and commit to remote`);
               } catch (err) {
                 logger.error(`Failed to push to remote: ${(err as Error).message}`);
                 logger.info(`You can manually push the tag later with: git push origin ${tagName}`);
+              }
+            } else {
+              const { pushToRemote } = await inquirer.prompt([
+                {
+                  name: 'pushToRemote',
+                  message: `Push tag ${tagName} to remote repository?`,
+                  type: 'list',
+                  choices: ['Yes', 'No'],
+                },
+              ]);
+
+              if (pushToRemote === 'Yes') {
+                try {
+                  logger.info(`Pushing git tag to remote...`);
+                  await gitPushTag(tagName, true, cwd);
+                  logger.success(`Successfully pushed tag and commit to remote`);
+                } catch (err) {
+                  logger.error(`Failed to push to remote: ${(err as Error).message}`);
+                  logger.info(
+                    `You can manually push the tag later with: git push origin ${tagName}`,
+                  );
+                }
               }
             }
           }
@@ -467,9 +552,54 @@ export async function release(options: ReleaseOptions = {}): Promise<void> {
       }
     }
 
+    // Create GitHub release if requested
+    if (createGithubRelease) {
+      try {
+        await createGitHubRelease({
+          version,
+          tagName,
+          cwd,
+          dryRun,
+        });
+      } catch (error) {
+        logger.error(`Failed to create GitHub release: ${(error as Error).message}`);
+        logger.warn('Release was successful but GitHub release creation failed');
+        // Don't throw here as the main release was successful
+      }
+    }
+
+    // Switch back to original branch if auto-create release branch was used
+    if (autoCreateReleaseBranch && originalBranch && releaseBranch) {
+      try {
+        if (dryRun) {
+          logger.info(`[dry-run] Would switch back to original branch: ${originalBranch}`);
+          logger.info(`[dry-run] Release branch created: ${releaseBranch}`);
+        } else {
+          logger.info(`Switching back to original branch: ${originalBranch}`);
+          await switchBranch(originalBranch, cwd);
+          logger.success(`Switched back to original branch: ${originalBranch}`);
+          logger.info(`Release branch created: ${chalk.cyan(releaseBranch)}`);
+        }
+      } catch (err) {
+        logger.warn(`Failed to switch back to original branch: ${(err as Error).message}`);
+        logger.info(`You are currently on release branch: ${chalk.cyan(releaseBranch)}`);
+      }
+    }
+
     logger.success(`Release ${version} completed successfully!`);
   } catch (err) {
     logger.error(`Release failed: ${(err as Error).message}`);
+
+    // Switch back to original branch if auto-create release branch was used
+    if (autoCreateReleaseBranch && originalBranch && !dryRun) {
+      try {
+        logger.info(`Switching back to original branch due to error: ${originalBranch}`);
+        await switchBranch(originalBranch, cwd);
+        logger.success(`Switched back to original branch: ${originalBranch}`);
+      } catch (switchErr) {
+        logger.warn(`Failed to switch back to original branch: ${(switchErr as Error).message}`);
+      }
+    }
 
     // Try to patch the failed release
     if (!dryRun) {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateBrowserControlMode } from '../../src/browser/browser-control-validator';
+import { validateBrowserControlMode } from '../../src/environments/local/browser/browser-control-validator';
 import { ConsoleLogger } from '@tarko/mcp-agent';
 
 describe('Browser Control Validator', () => {

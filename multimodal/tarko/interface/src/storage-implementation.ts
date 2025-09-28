@@ -11,8 +11,9 @@
  * - `file`: File-based storage implementation, stores data in local files.
  * - `sqlite`: SQLite database storage implementation.
  * - `database`: External database storage implementation.
+ * - `mongodb`: MongoDB database storage implementation.
  */
-export type AgentStorageImplementationType = 'memory' | 'file' | 'sqlite' | 'database';
+export type AgentStorageImplementationType = 'memory' | 'file' | 'sqlite' | 'database' | 'mongodb';
 
 /**
  * Base agent storage implementation interface
@@ -85,13 +86,38 @@ export interface DatabaseAgentStorageImplementation extends BaseAgentStorageImpl
 }
 
 /**
+ * MongoDB-based storage implementation
+ */
+export interface MongoDBAgentStorageImplementation extends BaseAgentStorageImplementation {
+  type: 'mongodb';
+  /**
+   * MongoDB connection uri string
+   */
+  uri: string;
+
+  /**
+   * Additional MongoDB connection options
+   */
+  options?: {
+    dbName?: string;
+    user?: string;
+    pass?: string;
+    maxPoolSize?: number;
+    serverSelectionTimeoutMS?: number;
+    socketTimeoutMS?: number;
+    [key: string]: any;
+  };
+}
+
+/**
  * Union type for all agent storage implementations
  */
 export type AgentStorageImplementation =
   | MemoryAgentStorageImplementation
   | FileAgentStorageImplementation
   | SqliteAgentStorageImplementation
-  | DatabaseAgentStorageImplementation;
+  | DatabaseAgentStorageImplementation
+  | MongoDBAgentStorageImplementation;
 
 /**
  * Utility type to extract implementation by type
@@ -105,7 +131,9 @@ export type AgentStorageImplementationByType<T extends AgentStorageImplementatio
         ? SqliteAgentStorageImplementation
         : T extends 'database'
           ? DatabaseAgentStorageImplementation
-          : never;
+          : T extends 'mongodb'
+            ? MongoDBAgentStorageImplementation
+            : never;
 
 /**
  * Type guard to check if implementation is of specific type

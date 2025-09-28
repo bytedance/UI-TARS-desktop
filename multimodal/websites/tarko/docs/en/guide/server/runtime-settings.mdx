@@ -1,0 +1,361 @@
+---
+title: Runtime Settings
+description: Configure Agent behavior dynamically during execution
+---
+
+# Runtime Settings
+
+Runtime Settings enable dynamic configuration of Agent behavior during execution without requiring server restarts. This powerful feature allows users to adjust Agent parameters through the UI in real-time.
+
+## Overview
+
+Runtime Settings provide a flexible configuration system that:
+
+- **Dynamic Configuration** - Modify Agent behavior without restarting
+- **UI Integration** - Seamless integration with the Tarko interface
+- **Type Safety** - JSON Schema validation for all settings
+- **Conditional Logic** - Show/hide settings based on dependencies
+- **Transform Support** - Convert UI values to Agent-specific formats
+
+## Basic Configuration
+
+Define runtime settings using the `AgentRuntimeSettings` interface:
+
+```typescript
+import { AgentRuntimeSettings } from '@tarko/agent-server';
+
+const runtimeSettings: AgentRuntimeSettings = {
+  schema: {
+    type: 'object',
+    properties: {
+      temperature: {
+        type: 'number',
+        title: 'Temperature',
+        default: 0.7,
+        description: 'Controls response randomness'
+      }
+    }
+  }
+};
+```
+
+## Schema Properties
+
+Each setting property supports rich configuration options:
+
+### Basic Types
+
+```typescript
+// Boolean setting
+enableDebug: {
+  type: 'boolean',
+  title: 'Enable Debug Mode',
+  default: false,
+  description: 'Show detailed debugging information'
+}
+
+// Number setting
+maxTokens: {
+  type: 'number',
+  title: 'Max Tokens',
+  default: 1000,
+  description: 'Maximum tokens in response'
+}
+
+// String setting
+systemPrompt: {
+  type: 'string',
+  title: 'System Prompt',
+  default: 'You are a helpful assistant',
+  description: 'Initial system message'
+}
+```
+
+### Enum Settings
+
+Create dropdown selections with enum values:
+
+```typescript
+model: {
+  type: 'string',
+  title: 'Model',
+  enum: ['gpt-4', 'gpt-3.5-turbo', 'claude-3'],
+  enumLabels: ['GPT-4', 'GPT-3.5 Turbo', 'Claude 3'],
+  default: 'gpt-4',
+  description: 'AI model to use'
+}
+```
+
+### Conditional Visibility
+
+Show settings based on other setting values:
+
+```typescript
+const schema = {
+  type: 'object',
+  properties: {
+    enableTools: {
+      type: 'boolean',
+      title: 'Enable Tools',
+      default: true
+    },
+    toolTimeout: {
+      type: 'number',
+      title: 'Tool Timeout (seconds)',
+      default: 30,
+      visible: {
+        dependsOn: 'enableTools',
+        when: true
+      }
+    }
+  }
+};
+```
+
+## UI Placement
+
+Control where settings appear in the interface:
+
+```typescript
+const runtimeSettings: AgentRuntimeSettings = {
+  schema: { /* ... */ },
+  placement: 'dropdown-item' // or 'chat-bottom'
+};
+```
+
+### Placement Options
+
+- **`dropdown-item`** - Settings in dropdown menu (default)
+- **`chat-bottom`** - Settings at bottom of chat interface
+
+Individual settings can override global placement:
+
+```typescript
+temperature: {
+  type: 'number',
+  title: 'Temperature',
+  placement: 'chat-bottom' // Override global placement
+}
+```
+
+## Transform Function
+
+Convert UI setting values to Agent-compatible formats:
+
+```typescript
+const runtimeSettings: AgentRuntimeSettings = {
+  schema: {
+    type: 'object',
+    properties: {
+      model: {
+        type: 'string',
+        enum: ['gpt-4', 'claude-3'],
+        default: 'gpt-4'
+      },
+      temperature: {
+        type: 'number',
+        default: 0.7
+      }
+    }
+  },
+  transform: (settings) => ({
+    model: { 
+      id: settings.model,
+      provider: settings.model.startsWith('gpt') ? 'openai' : 'anthropic'
+    },
+    temperature: settings.temperature,
+    options: {
+      stream: true,
+      maxTokens: 1000
+    }
+  })
+};
+```
+
+## Complete Example
+
+Here's a comprehensive runtime settings configuration:
+
+```typescript
+import { AgentRuntimeSettings } from '@tarko/agent-server';
+
+const runtimeSettings: AgentRuntimeSettings = {
+  schema: {
+    type: 'object',
+    properties: {
+      // Model selection
+      model: {
+        type: 'string',
+        title: 'AI Model',
+        enum: ['gpt-4', 'gpt-3.5-turbo', 'claude-3-sonnet'],
+        enumLabels: ['GPT-4', 'GPT-3.5 Turbo', 'Claude 3 Sonnet'],
+        default: 'gpt-4',
+        icon: 'model',
+        description: 'Choose the AI model for this Agent'
+      },
+      
+      // Temperature control
+      temperature: {
+        type: 'number',
+        title: 'Temperature',
+        default: 0.7,
+        description: 'Controls creativity (0.0 = focused, 1.0 = creative)'
+      },
+      
+      // Tool configuration
+      enableTools: {
+        type: 'boolean',
+        title: 'Enable Tools',
+        default: true,
+        description: 'Allow Agent to use external tools'
+      },
+      
+      toolMode: {
+        type: 'string',
+        title: 'Tool Mode',
+        enum: ['auto', 'manual', 'disabled'],
+        enumLabels: ['Automatic', 'Manual Approval', 'Disabled'],
+        default: 'auto',
+        visible: {
+          dependsOn: 'enableTools',
+          when: true
+        },
+        description: 'How tools should be executed'
+      },
+      
+      // Advanced settings
+      maxTokens: {
+        type: 'number',
+        title: 'Max Response Tokens',
+        default: 2000,
+        placement: 'chat-bottom',
+        description: 'Maximum length of AI responses'
+      }
+    }
+  },
+  
+  transform: (settings) => ({
+    model: {
+      id: settings.model,
+      temperature: settings.temperature,
+      maxTokens: settings.maxTokens
+    },
+    tools: settings.enableTools ? {
+      mode: settings.toolMode,
+      timeout: 30000
+    } : undefined,
+    options: {
+      stream: true,
+      debug: false
+    }
+  }),
+  
+  placement: 'dropdown-item'
+};
+
+export default runtimeSettings;
+```
+
+## Server Integration
+
+Integrate runtime settings with your Agent Server:
+
+```typescript
+import { AgentServer } from '@tarko/agent-server';
+import runtimeSettings from './runtime-settings';
+
+const server = new AgentServer({
+  server: {
+    port: 3000,
+    runtimeSettings,
+    // other server options...
+  }
+});
+```
+
+## Best Practices
+
+### Setting Organization
+
+- Group related settings logically
+- Use clear, descriptive titles and descriptions
+- Provide sensible default values
+- Use icons to improve visual recognition
+
+### Performance Considerations
+
+- Keep transform functions lightweight
+- Avoid complex computations in transform
+- Cache transformed values when possible
+
+### User Experience
+
+- Use conditional visibility to reduce clutter
+- Provide helpful descriptions for all settings
+- Choose appropriate UI placement for setting importance
+- Test settings with different screen sizes
+
+## Advanced Features
+
+### Icons
+
+Add visual indicators to settings:
+
+```typescript
+model: {
+  type: 'string',
+  title: 'Model',
+  icon: 'cpu', // Icon identifier
+  // ...
+}
+```
+
+### Complex Conditions
+
+Create sophisticated visibility rules:
+
+```typescript
+advancedMode: {
+  type: 'boolean',
+  title: 'Advanced Mode',
+  default: false
+},
+
+debugLevel: {
+  type: 'string',
+  enum: ['info', 'debug', 'trace'],
+  visible: {
+    dependsOn: 'advancedMode',
+    when: true
+  }
+}
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**Settings not appearing**: Check schema validation and placement configuration
+
+**Transform errors**: Ensure transform function handles all possible setting values
+
+**Visibility not working**: Verify `dependsOn` references existing setting keys
+
+### Debugging
+
+Enable debug mode to inspect runtime settings behavior:
+
+```typescript
+const server = new AgentServer({
+  server: {
+    debug: true,
+    runtimeSettings
+  }
+});
+```
+
+## Next Steps
+
+- Explore [Server Configuration](/guide/deployment/server) for complete setup
+- Learn about [Agent Server](/api/agent-server) for transform targets
+- See [Examples](/examples/server-integration) for real-world implementations

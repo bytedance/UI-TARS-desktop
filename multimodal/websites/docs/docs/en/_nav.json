@@ -1,0 +1,26 @@
+[
+  {
+    "text": "Guide",
+    "link": "/guide/get-started/introduction",
+    "activeMatch": "/guide/"
+  },
+  {
+    "text": "Showcase",
+    "link": "/showcase",
+    "activeMatch": "/showcase"
+  },
+  {
+    "text": "Blog",
+    "link": "/blog",
+    "activeMatch": "/blog/"
+  },
+  {
+    "text": "Version",
+    "items": [
+      {
+        "text": "Archived preview website",
+        "link": "https://preview.agent-tars.com/"
+      }
+    ]
+  }
+]

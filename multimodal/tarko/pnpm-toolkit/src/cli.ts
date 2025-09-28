@@ -7,7 +7,7 @@
  * CLI entry point for PTK
  */
 import { cac } from 'cac';
-import { dev, release, patch, changelog } from './index';
+import { dev, release, patch, changelog, githubRelease } from './index';
 import { logger } from './utils/logger';
 
 /**
@@ -93,6 +93,9 @@ export function bootstrapCli() {
     .option('--tag-prefix <prefix>', 'Prefix for git tags', {
       default: 'v',
     })
+    .option('--canary', 'Skip version/tag selection and auto-generate canary version', {
+      default: false,
+    })
     .option('--use-ai', 'Use AI to generate changelog', {
       default: false,
     })
@@ -101,20 +104,31 @@ export function bootstrapCli() {
     .option('--apiKey, --api-key <apiKey>', 'Custom API key for LLM')
     .option('--baseURL, --base-url <baseURL>', 'Custom base URL for LLM')
     .option('--filter-scopes <scopes>', 'Comma-separated list of scopes to include in changelog', {
-      default: 'agent',
+      default: 'tars,agent,tarko,o-agent,tars-stack,browser,infra,mcp,all',
     })
     .option(
       '--filter-types <types>',
       'Comma-separated list of commit types to include in changelog',
+      {
+        default: 'feat,fix',
+      },
     )
+    .option('--create-github-release', 'Create GitHub release after successful release', {
+      default: false,
+    })
+    .option('--auto-create-release-branch', 'Automatically create release branch before release', {
+      default: false,
+    })
     .alias('release')
     .action((opts) => {
       // Process filter options
       if (opts.filterScopes) {
         opts.filterScopes = opts.filterScopes.split(',').map((s: string) => s.trim());
       }
-      if (opts.filterTypes) {
+      if (opts.filterTypes && opts.filterTypes.trim()) {
         opts.filterTypes = opts.filterTypes.split(',').map((s: string) => s.trim());
+      } else {
+        opts.filterTypes = [];
       }
       return wrapCommand(release, opts);
     });
@@ -122,7 +136,7 @@ export function bootstrapCli() {
   // Patch command
   cli
     .command('p', 'Patch the failure of release process')
-    .option('--version <version>', 'Version (e.g. 1.0.0, 2.0.0-alpha.9)', {
+    .option('--patch-version <version>', 'Version (e.g. 1.0.0, 2.0.0-alpha.9)', {
       // There is no default value here, because the default is read from package.json
     })
     .option('--tag <tag>', 'Tag (e.g. latest, next, beta)')
@@ -133,12 +147,18 @@ export function bootstrapCli() {
       default: false,
     })
     .alias('patch')
-    .action((opts) => wrapCommand(patch, opts));
+    .action((opts) => {
+      // Map patch-version to version for compatibility
+      if (opts.patchVersion) {
+        opts.version = opts.patchVersion;
+      }
+      return wrapCommand(patch, opts);
+    });
 
   // Changelog command
   cli
     .command('changelog', 'Create changelog')
-    .option('--version <version>', 'Version', {
+    .option('--changelog-version <version>', 'Version', {
       // There is no default value here, because the default is read from package.json
     })
     .option('--tag-prefix <prefix>', 'Prefix for git tags', {
@@ -167,21 +187,52 @@ export function bootstrapCli() {
     .option('--apiKey, --api-key <apiKey>', 'Custom API key for LLM')
     .option('--baseURL, --base-url <baseURL>', 'Custom base URL for LLM')
     .option('--filter-scopes <scopes>', 'Comma-separated list of scopes to include in changelog', {
-      default: 'agent',
+      default: 'tars,agent,tarko,o-agent,tars-stack,browser,infra,mcp,all',
     })
     .option(
       '--filter-types <types>',
       'Comma-separated list of commit types to include in changelog',
+      {
+        default: 'feat,fix',
+      },
     )
     .action((opts) => {
+      // Map changelog-version to version for compatibility
+      if (opts.changelogVersion) {
+        opts.version = opts.changelogVersion;
+      }
       // Process filter options
       if (opts.filterScopes) {
         opts.filterScopes = opts.filterScopes.split(',').map((s: string) => s.trim());
       }
-      if (opts.filterTypes) {
+      if (opts.filterTypes && opts.filterTypes.trim()) {
         opts.filterTypes = opts.filterTypes.split(',').map((s: string) => s.trim());
+      } else {
+        opts.filterTypes = [];
       }
       return wrapCommand(changelog, opts);
+    });
+
+  // GitHub Release command
+  cli
+    .command('github-release', 'Create GitHub release from changelog')
+    .option(
+      '--release-version <version>',
+      'Version to release (reads from package.json if not provided)',
+    )
+    .option('--tag-prefix <prefix>', 'Prefix for git tags', {
+      default: 'v',
+    })
+    .option('--dry-run', 'Preview execution without creating actual release', {
+      default: false,
+    })
+    .alias('gh-release')
+    .action((opts) => {
+      // Map release-version to version for compatibility
+      if (opts.releaseVersion) {
+        opts.version = opts.releaseVersion;
+      }
+      return wrapCommand(githubRelease, opts);
     });
 
   cli.version(pkg.version);

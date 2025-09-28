@@ -1,0 +1,104 @@
+{
+  "logs": [
+    {
+      "type": "user_input",
+      "timestamp": "2024-01-01T10:00:00.000Z",
+      "message": "Help me calculate the tip for a $85 dinner bill. I want to tip 18%."
+    },
+    {
+      "type": "tool_execution",
+      "timestamp": "2024-01-01T10:00:01.000Z",
+      "tool_name": "calculator",
+      "parameters": {
+        "expression": "85 * 0.18",
+        "operation": "percentage_calculation"
+      },
+      "result": {
+        "result": 15.3,
+        "formatted": "$15.30",
+        "calculation": "$85.00 × 18% = $15.30"
+      }
+    },
+    {
+      "type": "tool_execution",
+      "timestamp": "2024-01-01T10:00:02.000Z",
+      "tool_name": "calculator",
+      "parameters": {
+        "expression": "85 + 15.3",
+        "operation": "addition"
+      },
+      "result": {
+        "result": 100.3,
+        "formatted": "$100.30",
+        "calculation": "$85.00 + $15.30 = $100.30"
+      }
+    },
+    {
+      "type": "agent_response",
+      "timestamp": "2024-01-01T10:00:04.000Z",
+      "message": "For an $85 dinner bill with an 18% tip:\n\n• Tip amount: **$15.30**\n• Total amount: **$100.30**\n\nThe calculation: $85.00 × 18% = $15.30 tip, so your total will be $85.00 + $15.30 = $100.30.",
+      "parameters": {
+        "finishReason": "stop",
+        "ttftMs": 95,
+        "ttltMs": 800,
+        "messageId": "msg-001-final"
+      }
+    },
+    {
+      "type": "agent_thinking",
+      "timestamp": "2024-01-01T10:00:02.500Z",
+      "message": "I need to calculate 18% tip on $85. Let me use the calculator tool for accuracy.",
+      "parameters": {
+        "isComplete": true,
+        "thinkingDurationMs": 800,
+        "messageId": "thinking-001"
+      }
+    },
+    {
+      "type": "agent_response",
+      "timestamp": "2024-01-01T10:00:03.000Z",
+      "message": "I'll calculate the tip for you using the calculator.",
+      "parameters": {
+        "ttftMs": 120,
+        "ttltMs": 1200,
+        "messageId": "msg-001"
+      }
+    },
+    {
+      "type": "user_input",
+      "timestamp": "2024-01-01T10:01:00.000Z",
+      "message": "What's the weather like in San Francisco today?"
+    },
+    {
+      "type": "tool_execution",
+      "timestamp": "2024-01-01T10:01:01.000Z",
+      "tool_name": "weather_api",
+      "parameters": {
+        "location": "San Francisco, CA",
+        "date": "today",
+        "units": "imperial"
+      },
+      "result": {
+        "temperature": 68,
+        "condition": "Partly Cloudy",
+        "humidity": 72,
+        "wind_speed": 12,
+        "wind_direction": "NW",
+        "visibility": 10,
+        "uv_index": 6,
+        "description": "Partly cloudy with mild temperatures and light northwest winds"
+      }
+    },
+    {
+      "type": "agent_response",
+      "timestamp": "2024-01-01T10:01:02.000Z",
+      "message": "The weather in San Francisco today is quite pleasant:\n\n🌤️ **Partly Cloudy**\n🌡️ **68°F**\n💨 **12 mph NW winds**\n💧 **72% humidity**\n👁️ **10 miles visibility**\n☀️ **UV Index: 6**\n\nIt's a nice day with mild temperatures and light northwest winds. Perfect weather for outdoor activities!",
+      "parameters": {
+        "finishReason": "stop",
+        "ttftMs": 95,
+        "ttltMs": 980,
+        "messageId": "msg-002"
+      }
+    }
+  ]
+}

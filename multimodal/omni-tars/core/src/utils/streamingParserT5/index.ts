@@ -100,11 +100,15 @@ export function processT5StreamingChunk(
     state.finishReason = chunk.choices[0].finish_reason;
   }
 
+  // @ts-expect-error Not in OpenAI types but present in compatible LLMs
+  if (delta?.reasoning_content) {
+    // @ts-expect-error
+    reasoningContent = delta.reasoning_content;
+    state.reasoningBuffer += reasoningContent;
+  }
+
   if (delta?.content) {
     state.contentBuffer += delta.content;
-
-    // Process content in order: think first, then tool calls, then chat content
-    // Each extractor will manage its own buffer and coordinate with the others
 
     // Parse think content first - this will set insideThink flag and manage thinkBuffer
     reasoningContent = extractThinkT5(delta.content, state);

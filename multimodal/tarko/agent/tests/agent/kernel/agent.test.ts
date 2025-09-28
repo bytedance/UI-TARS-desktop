@@ -143,15 +143,17 @@ describe('Agent', () => {
       expect(agent.getLLMClient()).toBe(mockLLMClient);
     });
 
-    it('should handle initial resolved model correctly', () => {
-      // Initially, no resolved model should be available
-      expect(agent.getCurrentResolvedModel()).toMatchInlineSnapshot(`
+    it('should handle initial current model correctly', () => {
+      // Initially, no current model should be available
+      expect(agent.getCurrentModel()).toMatchInlineSnapshot(`
         {
-          "actualProvider": "openai",
           "apiKey": undefined,
+          "baseProvider": "openai",
           "baseURL": undefined,
           "displayName": undefined,
+          "headers": {},
           "id": "gpt-4o",
+          "params": undefined,
           "provider": "openai",
         }
       `);

@@ -5,7 +5,7 @@
 
 import { AgentEventStream, ToolCallEngine, EachAgentLoopEndContext } from '@tarko/agent-interface';
 import { getLogger } from '@tarko/shared-utils';
-import { ResolvedModel } from '@tarko/model-provider';
+import { AgentModel } from '@tarko/model-provider';
 import { LLMProcessor } from './llm-processor';
 import { ToolProcessor } from './tool-processor';
 import type { Agent } from '../agent';
@@ -40,7 +40,7 @@ export class LoopExecutor {
   /**
    * Executes the full reasoning loop until completion or max iterations
    *
-   * @param resolvedModel The resolved model configuration
+   * @param currentModel The current model configuration
    * @param sessionId Session identifier
    * @param toolCallEngine The tool call engine to use
    * @param streamingMode Whether to operate in streaming mode
@@ -48,7 +48,7 @@ export class LoopExecutor {
    * @returns The final assistant message event
    */
   async executeLoop(
-    resolvedModel: ResolvedModel,
+    currentModel: AgentModel,
     sessionId: string,
     toolCallEngine: ToolCallEngine,
     streamingMode = false,
@@ -141,7 +141,7 @@ export class LoopExecutor {
 
         // Process the current iteration
         await this.llmProcessor.processRequest(
-          resolvedModel,
+          currentModel,
           this.instructions,
           toolCallEngine,
           sessionId,

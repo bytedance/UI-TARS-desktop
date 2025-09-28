@@ -1,215 +1,167 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { ModelResolver } from '../src/model-resolver';
-import { ModelProvider, ModelProviderName } from '../src/types';
-import { ModelDefaultSelection } from '../src/types';
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-describe('ModelResolver', () => {
-  let testProviders: ModelProvider[];
+import { describe, it, expect } from 'vitest';
+import { resolveModel } from '../src/model-resolver';
+import { AgentModel } from '../src/types';
 
-  beforeEach(() => {
-    testProviders = [
-      {
-        name: 'openai',
-        models: ['gpt-4o', 'gpt-3.5-turbo'],
-        baseURL: 'https://api.openai.com/v1',
-        apiKey: 'test-openai-key',
-      },
-      {
-        name: 'anthropic',
-        models: ['claude-3-haiku', 'claude-3-sonnet'],
-        baseURL: 'https://api.anthropic.com',
-        apiKey: 'test-anthropic-key',
-      },
-      {
-        name: 'ollama',
-        models: ['llama3', 'mistral'],
-        baseURL: 'http://localhost:11434/v1',
-        apiKey: 'test-ollama-key',
-      },
-    ];
-  });
+describe('resolveModel', () => {
+  it('should use default values when no parameters provided', () => {
+    const result = resolveModel();
 
-  it('should initialize with default values when no options provided', () => {
-    const resolver = new ModelResolver();
-    const defaultSelection = resolver.getDefaultSelection();
-
-    expect(defaultSelection).toEqual({});
-    expect(resolver.getAllProviders()).toEqual([]);
-  });
-
-  it('should initialize with provided options', () => {
-    const resolver = new ModelResolver({
-      providers: testProviders,
-    });
-
-    expect(resolver.getAllProviders()).toEqual(testProviders);
-    expect(resolver.getDefaultSelection()).toEqual({
+    expect(result).toEqual({
       provider: 'openai',
       id: 'gpt-4o',
-      baseURL: 'https://api.openai.com/v1',
-      apiKey: 'test-openai-key',
-    });
-  });
-
-  it('should use explicit default selection when provided', () => {
-    const defaultSelection: ModelDefaultSelection = {
-      provider: 'anthropic',
-      id: 'claude-3-haiku',
-    };
-
-    const resolver = new ModelResolver({
-      providers: testProviders,
-      ...defaultSelection,
-    });
-
-    expect(resolver.getDefaultSelection()).toEqual(defaultSelection);
-  });
-
-  it('should resolve model using explicit run parameters', () => {
-    const resolver = new ModelResolver({
-      providers: testProviders,
-    });
-
-    const resolved = resolver.resolve('claude-3-sonnet', 'anthropic');
-
-    expect(resolved).toEqual({
-      provider: 'anthropic',
-      id: 'claude-3-sonnet',
-      baseURL: 'https://api.anthropic.com',
-      apiKey: 'test-anthropic-key',
-      actualProvider: 'anthropic',
-    });
-  });
-
-  it('should infer provider when only model is specified', () => {
-    const resolver = new ModelResolver({
-      providers: testProviders,
-    });
-
-    const resolved = resolver.resolve('llama3');
-
-    expect(resolved).toEqual({
-      provider: 'ollama',
-      id: 'llama3',
-      baseURL: 'http://localhost:11434/v1',
-      apiKey: 'test-ollama-key',
-      actualProvider: 'openai', // 'ollama' maps to 'openai' as actualProvider
-    });
-  });
-
-  it('should use default selection when no run parameters provided', () => {
-    const resolver = new ModelResolver({
-      providers: testProviders,
-      provider: 'anthropic',
-      id: 'claude-3-sonnet',
-    });
-
-    const resolved = resolver.resolve();
-
-    expect(resolved).toEqual({
-      provider: 'anthropic',
-      id: 'claude-3-sonnet',
-      baseURL: 'https://api.anthropic.com',
-      apiKey: 'test-anthropic-key',
-      actualProvider: 'anthropic',
-    });
-  });
-
-  it('should default to openai when provider cannot be inferred', () => {
-    const resolver = new ModelResolver({
-      providers: testProviders,
-    });
-
-    const resolved = resolver.resolve('unknown-model');
-
-    expect(resolved).toEqual({
-      provider: 'openai',
-      id: 'unknown-model',
-      baseURL: 'https://api.openai.com/v1',
-      apiKey: 'test-openai-key',
-      actualProvider: 'openai',
-    });
-  });
-
-  it('should map providers to their actual implementations', () => {
-    const resolver = new ModelResolver({
-      providers: [
-        {
-          name: 'ollama',
-          models: ['llama3'],
-          baseURL: 'http://custom-ollama:11434/v1',
-          apiKey: 'custom-key',
-        },
-      ],
-    });
-
-    const resolved = resolver.resolve('llama3');
-
-    expect(resolved).toEqual({
-      provider: 'ollama',
-      id: 'llama3',
-      baseURL: 'http://custom-ollama:11434/v1',
-      apiKey: 'custom-key',
-      actualProvider: 'openai', // 'ollama' maps to 'openai'
-    });
-  });
-
-  // it('should throw error when no model can be resolved', () => {
-  //   const resolver = new ModelResolver({
-  //     providers: [],
-  //   });
-
-  //   expect(() => resolver.resolve(undefined, undefined)).toThrow(/Missing model configuration/);
-  // });
-
-  it('should apply default configuration from MODEL_PROVIDER_CONFIGS', () => {
-    const resolver = new ModelResolver();
-
-    const resolved = resolver.resolve('llama3', 'ollama');
-
-    expect(resolved).toEqual({
-      provider: 'ollama',
-      id: 'llama3',
-      baseURL: 'http://127.0.0.1:11434/v1',
-      apiKey: 'ollama',
-      actualProvider: 'openai',
-    });
-  });
-
-  it('should prioritize user-provided configuration over defaults', () => {
-    const resolver = new ModelResolver({
-      providers: [
-        {
-          name: 'ollama',
-          models: ['llama3'],
-          baseURL: 'http://custom-server:11434/v1',
-          apiKey: 'custom-key',
-        },
-      ],
-    });
-
-    const resolved = resolver.resolve('llama3', 'ollama');
-
-    expect(resolved).toEqual({
-      provider: 'ollama',
-      id: 'llama3',
-      baseURL: 'http://custom-server:11434/v1',
-      apiKey: 'custom-key',
-      actualProvider: 'openai',
-    });
-  });
-
-  it('should handle case with no providers configured', () => {
-    const resolver = new ModelResolver();
-
-    const resolved = resolver.resolve('gpt-4o', 'openai');
-
-    expect(resolved).toEqual({
-      provider: 'openai',
-      id: 'gpt-4o',
+      displayName: undefined,
       baseURL: undefined,
       apiKey: undefined,
-      actualProvider: 'openai',
+      headers: {},
+      params: undefined,
+      baseProvider: 'openai',
+    });
+  });
+
+  it('should use agent model configuration', () => {
+    const agentModel: AgentModel = {
+      provider: 'anthropic',
+      id: 'claude-3-5-sonnet-20241022',
+      displayName: 'Claude 3.5 Sonnet',
+      apiKey: 'test-key',
+      baseURL: 'https://api.anthropic.com',
+    };
+
+    const result = resolveModel(agentModel);
+
+    expect(result).toEqual({
+      provider: 'anthropic',
+      id: 'claude-3-5-sonnet-20241022',
+      displayName: 'Claude 3.5 Sonnet',
+      baseURL: 'https://api.anthropic.com',
+      apiKey: 'test-key',
+      headers: {
+        'anthropic-beta': 'fine-grained-tool-streaming-2025-05-14,token-efficient-tools-2025-02-19',
+      },
+      params: undefined,
+      baseProvider: 'anthropic',
+    });
+  });
+
+  it('should override with runtime parameters', () => {
+    const agentModel: AgentModel = {
+      provider: 'openai',
+      id: 'gpt-4',
+      apiKey: 'original-key',
+    };
+
+    const result = resolveModel(agentModel, 'gpt-4o-mini', 'anthropic');
+
+    expect(result).toEqual({
+      provider: 'anthropic',
+      id: 'gpt-4o-mini',
+      displayName: undefined,
+      baseURL: undefined,
+      apiKey: 'original-key',
+      headers: {},
+      params: undefined,
+      baseProvider: 'anthropic',
+    });
+  });
+
+  it('should apply default configuration for extended providers', () => {
+    const result = resolveModel(undefined, 'llama3.2', 'ollama');
+
+    expect(result).toEqual({
+      provider: 'ollama',
+      id: 'llama3.2',
+      displayName: undefined,
+      baseURL: 'http://127.0.0.1:11434/v1',
+      apiKey: 'ollama',
+      headers: {},
+      params: undefined,
+      baseProvider: 'openai',
+    });
+  });
+
+  it('should preserve agent model values over defaults', () => {
+    const agentModel: AgentModel = {
+      provider: 'ollama',
+      id: 'custom-model',
+      baseURL: 'http://custom-host:8080/v1',
+      apiKey: 'custom-key',
+    };
+
+    const result = resolveModel(agentModel);
+
+    expect(result).toEqual({
+      provider: 'ollama',
+      id: 'custom-model',
+      displayName: undefined,
+      baseURL: 'http://custom-host:8080/v1',
+      apiKey: 'custom-key',
+      headers: {},
+      params: undefined,
+      baseProvider: 'openai',
+    });
+  });
+
+  it('should handle volcengine provider correctly', () => {
+    const result = resolveModel(undefined, 'doubao-pro-4k', 'volcengine');
+
+    expect(result).toEqual({
+      provider: 'volcengine',
+      id: 'doubao-pro-4k',
+      displayName: undefined,
+      baseURL: 'https://ark.cn-beijing.volces.com/api/v3',
+      apiKey: undefined,
+      headers: {},
+      params: undefined,
+      baseProvider: 'openai',
+    });
+  });
+
+  it('should handle deepseek provider correctly', () => {
+    const agentModel: AgentModel = {
+      provider: 'deepseek',
+      id: 'deepseek-chat',
+      apiKey: 'deepseek-key',
+    };
+
+    const result = resolveModel(agentModel);
+
+    expect(result).toEqual({
+      provider: 'deepseek',
+      id: 'deepseek-chat',
+      displayName: undefined,
+      baseURL: 'https://api.deepseek.com/v1',
+      apiKey: 'deepseek-key',
+      headers: {},
+      params: undefined,
+      baseProvider: 'openai',
+    });
+  });
+
+  it('should add anthropic_beta params for azure-openai provider with gcp-claude4-sonnet model', () => {
+    const agentModel: AgentModel = {
+      provider: 'azure-openai',
+      id: 'gcp-claude4-sonnet',
+      apiKey: 'azure-key',
+    };
+
+    const result = resolveModel(agentModel);
+
+    expect(result).toEqual({
+      provider: 'azure-openai',
+      id: 'gcp-claude4-sonnet',
+      displayName: undefined,
+      baseURL: undefined,
+      apiKey: 'azure-key',
+      headers: {},
+      params: {
+        anthropic_beta: ['fine-grained-tool-streaming-2025-05-14'],
+      },
+      baseProvider: 'azure-openai',
     });
   });
 });

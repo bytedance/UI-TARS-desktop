@@ -1,0 +1,552 @@
+# Tool Call Engine
+
+高级工具执行引擎，提供优化性能、并行处理和智能执行策略。
+
+## 概述
+
+**Tool Call Engine** 是核心执行层，负责编排工具调用、管理并发、处理故障和优化性能。它提供了超越简单顺序工具调用的复杂执行模式。
+
+## 架构
+
+```typescript
+interface ToolCallEngine {
+  execute(calls: ToolCall[]): Promise<ToolResult[]>;
+  executeParallel(calls: ToolCall[]): Promise<ToolResult[]>;
+  executeSequential(calls: ToolCall[]): Promise<ToolResult[]>;
+  executePipeline(pipeline: ToolPipeline): Promise<ToolResult>;
+}
+```
+
+### 核心组件
+
+- **Executor**：管理工具调用和生命周期
+- **Scheduler**：确定执行顺序和并行化
+- **Monitor**：跟踪性能和健康指标
+- **Cache**：优化重复的工具调用
+- **Retry Handler**：管理故障恢复
+
+## 执行策略
+
+### 顺序执行
+
+默认执行模式 - 工具按顺序逐个运行：
+
+```typescript
+import { Agent, ExecutionMode } from '@agent-tars/core';
+
+const agent = new Agent({
+  execution: {
+    mode: ExecutionMode.SEQUENTIAL,
+    timeout: 30000 // 每个工具 30 秒
+  }
+});
+
+// 工具按顺序执行：导航 → 截图 → 保存
+const result = await agent.execute(
+  '导航到 example.com，截图并保存为 example.png'
+);
+```
+
+### 并行执行
+
+同时运行独立工具以提高性能：
+
+```typescript
+const agent = new Agent({
+  execution: {
+    mode: ExecutionMode.PARALLEL,
+    maxConcurrency: 5,
+    timeout: 30000
+  }
+});
+
+// 独立的文件操作并行运行
+const result = await agent.execute(
+  '读取 config.json、package.json 和 README.md 文件'
+);
+```
+
+### 管道执行
+
+链接工具，其中一个的输出成为下一个的输入：
+
+```typescript
+const agent = new Agent({
+  execution: {
+    mode: ExecutionMode.PIPELINE,
+    enableStreaming: true
+  }
+});
+
+// 数据流经：搜索 → 提取 → 分析 → 报告
+const result = await agent.execute(
+  '搜索 React 教程，提取关键概念，分析趋势并生成报告'
+);
+```
+
+### 自适应执行
+
+根据工具依赖关系智能选择执行策略：
+
+```typescript
+const agent = new Agent({
+  execution: {
+    mode: ExecutionMode.ADAPTIVE,
+    dependencyAnalysis: true,
+    optimizeForLatency: true
+  }
+});
+```
+
+## 高级配置
+
+### 执行策略
+
+```typescript
+const agent = new Agent({
+  execution: {
+    policies: {
+      // 超时配置
+      timeout: {
+        default: 30000,
+        perTool: {
+          'browser_screenshot': 10000,
+          'run_command': 60000
+        }
+      },
+      
+      // 重试配置
+      retry: {
+        enabled: true,
+        maxAttempts: 3,
+        backoffStrategy: 'exponential',
+        retryableErrors: ['timeout', 'network']
+      },
+      
+      // 并发限制
+      concurrency: {
+        global: 10,
+        perCategory: {
+          'browser': 3,
+          'filesystem': 5,
+          'commands': 1
+        }
+      }
+    }
+  }
+});
+```
+
+### 性能优化
+
+```typescript
+const agent = new Agent({
+  execution: {
+    optimization: {
+      // 工具结果缓存
+      cache: {
+        enabled: true,
+        ttl: 300000, // 5 分钟
+        maxSize: 100,
+        strategy: 'lru'
+      },
+      
+      // 预测性加载
+      preloading: {
+        enabled: true,
+        patterns: ['browser_navigate', 'browser_screenshot'],
+        lookahead: 2
+      },
+      
+      // 资源池
+      pooling: {
+        enabled: true,
+        warmupTools: ['browser_navigate'],
+        maxPoolSize: 5
+      }
+    }
+  }
+});
+```
+
+## Tool 依赖关系
+
+### 依赖声明
+
+```typescript
+import { Tool, ToolDependency } from '@agent-tars/core';
+
+export class AnalyticsTool implements Tool {
+  name = 'analytics';
+  description = '分析来自多个来源的数据';
+  
+  // 声明工具依赖
+  dependencies: ToolDependency[] = [
+    {
+      tool: 'read_file',
+      required: true,
+      timeout: 10000
+    },
+    {
+      tool: 'web_search',
+      required: false,
+      fallback: 'local_search'
+    }
+  ];
+  
+  async execute(params: any): Promise<ToolResult> {
+    // 工具实现
+  }
+}
+```
+
+### 依赖解析
+
+```typescript
+// 引擎自动解析和排序工具执行
+const engine = new ToolCallEngine({
+  dependencyResolution: {
+    enabled: true,
+    strategy: 'topological',
+    circularDependencyHandling: 'error'
+  }
+});
+```
+
+## 错误处理和恢复
+
+### 故障策略
+
+```typescript
+const agent = new Agent({
+  execution: {
+    errorHandling: {
+      // 在非关键故障时继续执行
+      continueOnError: true,
+      
+      // 故障时的备用工具
+      fallbacks: {
+        'browser_screenshot': 'browser_get_markdown',
+        'run_command': 'safe_command'
+      },
+      
+      // 断路器模式
+      circuitBreaker: {
+        enabled: true,
+        failureThreshold: 5,
+        resetTimeout: 60000
+      }
+    }
+  }
+});
+```
+
+### 自定义错误处理器
+
+```typescript
+import { ToolExecutionError, ErrorHandler } from '@agent-tars/core';
+
+class CustomErrorHandler implements ErrorHandler {
+  async handle(error: ToolExecutionError): Promise<ToolResult> {
+    // 记录错误
+    console.error(`工具 ${error.toolName} 失败:`, error.message);
+    
+    // 尝试恢复
+    if (error.isRetryable) {
+      return this.retry(error);
+    }
+    
+    // 返回备用结果
+    return {
+      success: false,
+      error: '工具执行失败',
+      fallback: true
+    };
+  }
+  
+  private async retry(error: ToolExecutionError): Promise<ToolResult> {
+    // 实现重试逻辑
+  }
+}
+
+const agent = new Agent({
+  execution: {
+    errorHandler: new CustomErrorHandler()
+  }
+});
+```
+
+## 监控和可观测性
+
+### 执行指标
+
+```typescript
+import { ExecutionMonitor } from '@agent-tars/core';
+
+const monitor = new ExecutionMonitor();
+
+monitor.on('executionStarted', (event) => {
+  console.log(`执行开始: ${event.executionId}`);
+});
+
+monitor.on('toolExecuted', (event) => {
+  console.log(`工具 ${event.toolName}: ${event.duration}ms`);
+});
+
+monitor.on('executionCompleted', (event) => {
+  console.log(`执行完成，耗时 ${event.totalDuration}ms`);
+  console.log(`执行工具数: ${event.toolCount}`);
+  console.log(`成功率: ${event.successRate}%`);
+});
+
+const agent = new Agent({
+  execution: {
+    monitor
+  }
+});
+```
+
+### 性能分析
+
+```typescript
+// 获取详细执行指标
+const metrics = await agent.getExecutionMetrics();
+
+console.log('执行性能:');
+console.log(`平均执行时间: ${metrics.averageExecutionTime}ms`);
+console.log(`工具成功率: ${metrics.successRate}%`);
+console.log(`缓存命中率: ${metrics.cacheHitRate}%`);
+console.log(`并行效率: ${metrics.parallelEfficiency}%`);
+
+// 工具特定指标
+metrics.toolMetrics.forEach(tool => {
+  console.log(`${tool.name}: ${tool.averageDuration}ms (${tool.executionCount} 次调用)`);
+});
+```
+
+## 高级模式
+
+### 自定义执行策略
+
+```typescript
+import { ExecutionStrategy, ToolCall } from '@agent-tars/core';
+
+class PriorityExecutionStrategy implements ExecutionStrategy {
+  async execute(calls: ToolCall[]): Promise<ToolResult[]> {
+    // 按优先级排序
+    const sortedCalls = calls.sort((a, b) => 
+      (b.priority || 0) - (a.priority || 0)
+    );
+    
+    // 先执行高优先级工具
+    const results: ToolResult[] = [];
+    
+    for (const call of sortedCalls) {
+      const result = await this.executeTool(call);
+      results.push(result);
+      
+      // 在关键故障时停止
+      if (!result.success && call.critical) {
+        break;
+      }
+    }
+    
+    return results;
+  }
+}
+
+const agent = new Agent({
+  execution: {
+    strategy: new PriorityExecutionStrategy()
+  }
+});
+```
+
+### Tool 编排
+
+```typescript
+// 定义复杂的工具工作流
+const workflow = {
+  name: 'web-analysis',
+  steps: [
+    {
+      tool: 'browser_navigate',
+      params: { url: '${input.url}' },
+      output: 'navigation'
+    },
+    {
+      tool: 'browser_screenshot',
+      dependsOn: ['navigation'],
+      output: 'screenshot'
+    },
+    {
+      tool: 'browser_get_markdown',
+      dependsOn: ['navigation'],
+      output: 'content'
+    },
+    {
+      tool: 'analyze_content',
+      params: {
+        content: '${content}',
+        screenshot: '${screenshot}'
+      },
+      output: 'analysis'
+    }
+  ]
+};
+
+const result = await agent.executeWorkflow(workflow, {
+  url: 'https://example.com'
+});
+```
+
+### 流式执行
+
+```typescript
+// 在工具完成时流式传输结果
+const stream = agent.executeStream(
+  '分析多个文件并生成报告'
+);
+
+stream.on('toolResult', (result) => {
+  console.log(`工具 ${result.toolName} 完成:`, result.data);
+});
+
+stream.on('progress', (progress) => {
+  console.log(`进度: ${progress.completed}/${progress.total} 个工具`);
+});
+
+stream.on('complete', (finalResult) => {
+  console.log('所有工具完成:', finalResult);
+});
+```
+
+## 性能调优
+
+### 分析工具执行
+
+```typescript
+import { ExecutionProfiler } from '@agent-tars/core';
+
+const profiler = new ExecutionProfiler();
+
+const agent = new Agent({
+  execution: {
+    profiler,
+    enableProfiling: true
+  }
+});
+
+// 生成性能报告
+const report = await profiler.generateReport();
+console.log('性能报告:', report);
+```
+
+### 内存管理
+
+```typescript
+const agent = new Agent({
+  execution: {
+    memory: {
+      // 工具结果的垃圾回收
+      gcInterval: 60000, // 1 分钟
+      maxResultsInMemory: 1000,
+      
+      // 工具实例生命周期
+      toolInstanceLifetime: 300000, // 5 分钟
+      maxToolInstances: 50
+    }
+  }
+});
+```
+
+### 资源优化
+
+```typescript
+const agent = new Agent({
+  execution: {
+    resources: {
+      // CPU 使用限制
+      maxCpuUsage: 80, // 80%
+      
+      // 内存限制
+      maxMemoryUsage: '2GB',
+      
+      // 网络限制
+      maxConcurrentRequests: 10,
+      requestTimeout: 30000
+    }
+  }
+});
+```
+
+## 测试和调试
+
+### 执行测试
+
+```typescript
+import { ExecutionTester } from '@agent-tars/core';
+
+const tester = new ExecutionTester();
+
+// 测试执行策略
+const testResult = await tester.testExecution({
+  tools: ['browser_navigate', 'browser_screenshot'],
+  strategy: 'parallel',
+  mockData: {
+    'browser_navigate': { success: true },
+    'browser_screenshot': { success: true }
+  }
+});
+
+expect(testResult.executionTime).toBeLessThan(5000);
+expect(testResult.successRate).toBe(100);
+```
+
+### 调试模式
+
+```typescript
+const agent = new Agent({
+  execution: {
+    debug: {
+      enabled: true,
+      logLevel: 'verbose',
+      traceExecution: true,
+      captureToolInputs: true,
+      captureToolOutputs: true
+    }
+  }
+});
+```
+
+## 最佳实践
+
+### 执行策略选择
+
+- **顺序**：用于依赖操作或顺序重要时
+- **并行**：用于独立操作以提高性能
+- **管道**：用于数据转换工作流
+- **自适应**：当你想要自动优化时
+
+### 性能指南
+
+- 为不同工具类型设置适当的超时
+- 对昂贵或重复操作使用缓存
+- 根据系统资源限制并发
+- 监控和分析执行性能
+- 实现适当的错误处理和备用方案
+
+### 资源管理
+
+- 使用后清理工具实例
+- 为不可靠工具实现断路器
+- 对基于网络的工具使用连接池
+- 监控内存使用并实现垃圾回收
+
+## 下一步
+
+- 了解 [Tool 开发](/guide/tool/basic) 来创建自定义工具
+- 探索 [Tool 管理](/guide/tool/management) 来组织工具集合
+
+{/* Placeholder: 添加执行流程图 */}
+{/* Placeholder: 添加性能监控仪表板截图 */}

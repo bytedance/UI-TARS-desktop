@@ -36,6 +36,22 @@ export function createTestContext(): TestContext {
 }
 
 /**
+ * Interface for accessing Agent internal components in tests
+ * Use this instead of 'as any' for type-safe internal access
+ */
+export interface AgentWithInternals {
+  runner: {
+    toolProcessor: {
+      processToolCalls: (toolCalls: any[], sessionId: string) => Promise<void>;
+    };
+  };
+  toolManager: {
+    registerTool: (tool: any) => void;
+    getTools: () => any[];
+  };
+}
+
+/**
  * Creates an Agent instance for testing with optional overrides
  */
 export function createTestAgent(
@@ -45,6 +61,14 @@ export function createTestAgent(
   const agent = new Agent(options as AgentOptions);
   context.agent = agent;
   return agent;
+}
+
+/**
+ * Safely cast Agent to access internal components for testing
+ * Use this instead of 'as any' for better type safety
+ */
+export function getAgentInternals(agent: Agent): AgentWithInternals {
+  return agent as unknown as AgentWithInternals;
 }
 
 /**

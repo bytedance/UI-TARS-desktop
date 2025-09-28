@@ -37,6 +37,7 @@ export class OpenAIHandler extends BaseHandler<OpenAIModel> {
     const openai = new OpenAI({
       ...this.opts,
       apiKey,
+      defaultHeaders: this.opts.defaultHeaders,
     });
 
     // We have to delete the provider field because it's not a valid parameter for the OpenAI API.

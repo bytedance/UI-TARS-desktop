@@ -1,0 +1,361 @@
+---
+title: Runtime Settings
+description: 在执行过程中动态配置 Agent 行为
+---
+
+# Runtime Settings
+
+Runtime Settings 使您能够在 Agent 执行过程中动态配置行为，无需重启服务器。这个强大的功能允许用户通过 UI 实时调整 Agent 参数。
+
+## 概述
+
+Runtime Settings 提供了一个灵活的配置系统：
+
+- **动态配置** - 无需重启即可修改 Agent 行为
+- **UI 集成** - 与 Tarko 界面无缝集成
+- **类型安全** - 所有设置的 JSON Schema 验证
+- **条件逻辑** - 基于依赖关系显示/隐藏设置
+- **Transform 支持** - 将 UI 值转换为 Agent 特定格式
+
+## 基础配置
+
+使用 `AgentRuntimeSettings` 接口定义 Runtime Settings：
+
+```typescript
+import { AgentRuntimeSettings } from '@tarko/agent-server';
+
+const runtimeSettings: AgentRuntimeSettings = {
+  schema: {
+    type: 'object',
+    properties: {
+      temperature: {
+        type: 'number',
+        title: 'Temperature',
+        default: 0.7,
+        description: '控制响应的随机性'
+      }
+    }
+  }
+};
+```
+
+## Schema 属性
+
+每个设置属性支持丰富的配置选项：
+
+### 基础类型
+
+```typescript
+// 布尔设置
+enableDebug: {
+  type: 'boolean',
+  title: '启用调试模式',
+  default: false,
+  description: '显示详细的调试信息'
+}
+
+// 数字设置
+maxTokens: {
+  type: 'number',
+  title: '最大 Token 数',
+  default: 1000,
+  description: '响应中的最大 Token 数量'
+}
+
+// 字符串设置
+systemPrompt: {
+  type: 'string',
+  title: '系统提示词',
+  default: 'You are a helpful assistant',
+  description: '初始系统消息'
+}
+```
+
+### 枚举设置
+
+使用枚举值创建下拉选择：
+
+```typescript
+model: {
+  type: 'string',
+  title: 'Model',
+  enum: ['gpt-4', 'gpt-3.5-turbo', 'claude-3'],
+  enumLabels: ['GPT-4', 'GPT-3.5 Turbo', 'Claude 3'],
+  default: 'gpt-4',
+  description: '要使用的 AI Model'
+}
+```
+
+### 条件可见性
+
+基于其他设置值显示设置：
+
+```typescript
+const schema = {
+  type: 'object',
+  properties: {
+    enableTools: {
+      type: 'boolean',
+      title: '启用 Tool',
+      default: true
+    },
+    toolTimeout: {
+      type: 'number',
+      title: 'Tool 超时时间（秒）',
+      default: 30,
+      visible: {
+        dependsOn: 'enableTools',
+        when: true
+      }
+    }
+  }
+};
+```
+
+## UI 放置
+
+控制设置在界面中的显示位置：
+
+```typescript
+const runtimeSettings: AgentRuntimeSettings = {
+  schema: { /* ... */ },
+  placement: 'dropdown-item' // 或 'chat-bottom'
+};
+```
+
+### 放置选项
+
+- **`dropdown-item`** - 设置在下拉菜单中（默认）
+- **`chat-bottom`** - 设置在聊天界面底部
+
+单个设置可以覆盖全局放置：
+
+```typescript
+temperature: {
+  type: 'number',
+  title: 'Temperature',
+  placement: 'chat-bottom' // 覆盖全局放置
+}
+```
+
+## Transform 函数
+
+将 UI 设置值转换为 Agent 兼容的格式：
+
+```typescript
+const runtimeSettings: AgentRuntimeSettings = {
+  schema: {
+    type: 'object',
+    properties: {
+      model: {
+        type: 'string',
+        enum: ['gpt-4', 'claude-3'],
+        default: 'gpt-4'
+      },
+      temperature: {
+        type: 'number',
+        default: 0.7
+      }
+    }
+  },
+  transform: (settings) => ({
+    model: { 
+      id: settings.model,
+      provider: settings.model.startsWith('gpt') ? 'openai' : 'anthropic'
+    },
+    temperature: settings.temperature,
+    options: {
+      stream: true,
+      maxTokens: 1000
+    }
+  })
+};
+```
+
+## 完整示例
+
+这是一个全面的 Runtime Settings 配置：
+
+```typescript
+import { AgentRuntimeSettings } from '@tarko/agent-server';
+
+const runtimeSettings: AgentRuntimeSettings = {
+  schema: {
+    type: 'object',
+    properties: {
+      // Model 选择
+      model: {
+        type: 'string',
+        title: 'AI Model',
+        enum: ['gpt-4', 'gpt-3.5-turbo', 'claude-3-sonnet'],
+        enumLabels: ['GPT-4', 'GPT-3.5 Turbo', 'Claude 3 Sonnet'],
+        default: 'gpt-4',
+        icon: 'model',
+        description: '为此 Agent 选择 AI Model'
+      },
+      
+      // Temperature 控制
+      temperature: {
+        type: 'number',
+        title: 'Temperature',
+        default: 0.7,
+        description: '控制创造性（0.0 = 专注，1.0 = 创造性）'
+      },
+      
+      // Tool 配置
+      enableTools: {
+        type: 'boolean',
+        title: '启用 Tool',
+        default: true,
+        description: '允许 Agent 使用外部 Tool'
+      },
+      
+      toolMode: {
+        type: 'string',
+        title: 'Tool 模式',
+        enum: ['auto', 'manual', 'disabled'],
+        enumLabels: ['自动', '手动批准', '禁用'],
+        default: 'auto',
+        visible: {
+          dependsOn: 'enableTools',
+          when: true
+        },
+        description: 'Tool 的执行方式'
+      },
+      
+      // 高级设置
+      maxTokens: {
+        type: 'number',
+        title: '最大响应 Token 数',
+        default: 2000,
+        placement: 'chat-bottom',
+        description: 'AI 响应的最大长度'
+      }
+    }
+  },
+  
+  transform: (settings) => ({
+    model: {
+      id: settings.model,
+      temperature: settings.temperature,
+      maxTokens: settings.maxTokens
+    },
+    tools: settings.enableTools ? {
+      mode: settings.toolMode,
+      timeout: 30000
+    } : undefined,
+    options: {
+      stream: true,
+      debug: false
+    }
+  }),
+  
+  placement: 'dropdown-item'
+};
+
+export default runtimeSettings;
+```
+
+## Server 集成
+
+将 Runtime Settings 与您的 Agent Server 集成：
+
+```typescript
+import { AgentServer } from '@tarko/agent-server';
+import runtimeSettings from './runtime-settings';
+
+const server = new AgentServer({
+  server: {
+    port: 3000,
+    runtimeSettings,
+    // 其他服务器选项...
+  }
+});
+```
+
+## 最佳实践
+
+### 设置组织
+
+- 逻辑地分组相关设置
+- 使用清晰、描述性的标题和说明
+- 提供合理的默认值
+- 使用图标改善视觉识别
+
+### 性能考虑
+
+- 保持 Transform 函数轻量级
+- 避免在 Transform 中进行复杂计算
+- 在可能的情况下缓存转换后的值
+
+### 用户体验
+
+- 使用条件可见性减少混乱
+- 为所有设置提供有用的描述
+- 根据设置重要性选择适当的 UI 放置
+- 在不同屏幕尺寸下测试设置
+
+## 高级功能
+
+### 图标
+
+为设置添加视觉指示器：
+
+```typescript
+model: {
+  type: 'string',
+  title: 'Model',
+  icon: 'cpu', // 图标标识符
+  // ...
+}
+```
+
+### 复杂条件
+
+创建复杂的可见性规则：
+
+```typescript
+advancedMode: {
+  type: 'boolean',
+  title: '高级模式',
+  default: false
+},
+
+debugLevel: {
+  type: 'string',
+  enum: ['info', 'debug', 'trace'],
+  visible: {
+    dependsOn: 'advancedMode',
+    when: true
+  }
+}
+```
+
+## 故障排除
+
+### 常见问题
+
+**设置未显示**：检查 Schema 验证和放置配置
+
+**Transform 错误**：确保 Transform 函数处理所有可能的设置值
+
+**可见性不工作**：验证 `dependsOn` 引用现有的设置键
+
+### 调试
+
+启用调试模式来检查 Runtime Settings 行为：
+
+```typescript
+const server = new AgentServer({
+  server: {
+    debug: true,
+    runtimeSettings
+  }
+});
+```
+
+## 下一步
+
+- 探索 [Server 配置](/guide/deployment/server) 以了解完整设置
+- 了解 [Agent Server](/api/agent-server) 以了解 Transform 目标
+- 查看 [服务器集成示例](/examples/server-integration) 了解实际应用

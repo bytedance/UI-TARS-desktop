@@ -7,6 +7,7 @@ import { StorageProvider } from './types';
 import { MemoryStorageProvider } from './MemoryStorageProvider';
 import { FileStorageProvider } from './FileStorageProvider';
 import { SQLiteStorageProvider } from './SQLiteStorageProvider';
+import { MongoDBStorageProvider } from './MongoDBStorageProvider/index';
 import { AgentStorageImplementation, TARKO_CONSTANTS } from '@tarko/interface';
 
 export * from './types';
@@ -26,6 +27,10 @@ export function createStorageProvider(options?: AgentStorageImplementation): Sto
 
   if (options.type === 'sqlite') {
     return new SQLiteStorageProvider(options);
+  }
+
+  if (options.type === 'mongodb') {
+    return new MongoDBStorageProvider(options);
   }
 
   if (options.type === 'database') {

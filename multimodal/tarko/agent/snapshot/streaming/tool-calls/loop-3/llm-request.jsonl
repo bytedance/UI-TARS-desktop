@@ -1,11 +1,11 @@
 {
   "provider": "volcengine",
   "request": {
-    "model": "ep-20250510145437-5sxhs",
+    "model": "doubao-seed-1-6-vision-250815",
     "messages": [
       {
         "role": "system",
-        "content": "You are an intelligent assistant that can use provided tools to answer user questions.\nPlease use tools when needed to get information, don't make up answers.\nProvide concise and accurate responses.\n\nCurrent time: 5/20/2025, 10:00:00 AM"
+        "content": "You are an intelligent assistant that can use provided tools to answer user questions.\nPlease use tools when needed to get information, don't make up answers.\nProvide concise and accurate responses.\n\nCurrent time: 9/19/2025, 6:02:09 PM"
       },
       {
         "role": "user",
@@ -13,40 +13,40 @@
       },
       {
         "role": "assistant",
-        "content": "To get the weather, I first need the user's current location. So call getCurrentLocation to retrieve that information.",
+        "content": "To determine the weather today, we first need to know the user's current location. So we will call the `getCurrentLocation` tool to obtain the location information.\n",
         "tool_calls": [
           {
-            "id": "call_ujaix1getqm4gw2y1vg80j7h",
+            "id": "call_qq3gl3rl39z4155fol7riqge",
             "type": "function",
             "function": {
               "name": "getCurrentLocation",
-              "arguments": "{}"
+              "arguments": " {}"
             }
           }
         ]
       },
       {
         "role": "tool",
-        "tool_call_id": "call_ujaix1getqm4gw2y1vg80j7h",
+        "tool_call_id": "call_qq3gl3rl39z4155fol7riqge",
         "content": "{\n  \"location\": \"Boston\"\n}"
       },
       {
         "role": "assistant",
-        "content": "Now that we have the location \"Boston\", we can call getWeather with this location to get the weather information.",
+        "content": "Now that we have the location as Boston, we can call the `getWeather` tool to get the weather information for Boston today.\n",
         "tool_calls": [
           {
-            "id": "call_zpphvg1kbk8s13vpp0ahr83x",
+            "id": "call_12d8kh2d4b0thhm0wnzqfh4u",
             "type": "function",
             "function": {
               "name": "getWeather",
-              "arguments": "{\"location\":\"Boston\"}"
+              "arguments": " {\"location\": \"Boston\"}"
             }
           }
         ]
       },
       {
         "role": "tool",
-        "tool_call_id": "call_zpphvg1kbk8s13vpp0ahr83x",
+        "tool_call_id": "call_12d8kh2d4b0thhm0wnzqfh4u",
         "content": "{\n  \"location\": \"Boston\",\n  \"temperature\": \"70°F (21°C)\",\n  \"condition\": \"Sunny\",\n  \"precipitation\": \"10%\",\n  \"humidity\": \"45%\",\n  \"wind\": \"5 mph\"\n}"
       }
     ],

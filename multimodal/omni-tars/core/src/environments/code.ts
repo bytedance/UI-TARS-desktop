@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getAioUrl } from '../utils/hepler';
-
 export const HOME_INSTRUCTION = `- execute_bash, str_replace_editor must be executed based on the /home/gem root directory. 
 If you think that solving the problem requires creating a complete project, then you should first execute mkdir -p {project_dir} for the project, and all the remaining operations must be under /home/gem/{project_dir}. 
 For the specific directory name, please be reasonably named according to the content of the task.`;
@@ -15,7 +13,7 @@ export const STOP_INSTRUCTION = `\n
   - When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
   `;
 
-export const PROXY_INSTRUCTION = `- If you start the service on a port, Do not use port in [8080,8079,8081,8088,8091,8100,8101,8102,8888,9222]; finally tell the user that you can access it at http://${getAioUrl()}/proxy/\${PORT}, where PORT is the port for the service listening`;
+export const PROXY_INSTRUCTION = `- If you start the service on a port, Do not use port in [8080,8079,8081,8088,8091,8100,8101,8102,8888,9222]. After launch the service, navigate it through a web browser`;
 
 export const CODE_ENVIRONMENT = `<CODE_ENVIRONMENT>
 

@@ -691,17 +691,10 @@ const handleToolCall = async (
 function createServer(config: GlobalConfig = {}): McpServer {
   setConfig(config);
 
-  const server = new McpServer(
-    {
-      name: 'Web Browser',
-      version: process.env.VERSION || '0.0.1',
-    },
-    {
-      capabilities: {
-        logging: {},
-      },
-    },
-  );
+  const server = new McpServer({
+    name: 'Web Browser',
+    version: process.env.VERSION || '0.0.1',
+  });
 
   // === Tools ===
   // Old

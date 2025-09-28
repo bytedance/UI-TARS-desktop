@@ -1,0 +1,37 @@
+[
+  {
+    "type": "file",
+    "name": "configuration",
+    "label": "Configuration"
+  },
+  {
+    "type": "file",
+    "name": "model-provider",
+    "label": "Model Provider"
+  },
+  {
+    "type": "file",
+    "name": "tools",
+    "label": "Tools"
+  },
+  {
+    "type": "file",
+    "name": "tool-call-engine",
+    "label": "Tool Call Engine"
+  },
+  {
+    "type": "file",
+    "name": "event-stream",
+    "label": "Event Stream"
+  },
+  {
+    "type": "file",
+    "name": "troubleshooting",
+    "label": "Troubleshooting"
+  },
+  {
+    "type": "file",
+    "name": "ui-integration",
+    "label": "UI Integration"
+  }
+]

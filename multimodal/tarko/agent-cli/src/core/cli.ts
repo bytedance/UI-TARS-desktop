@@ -150,6 +150,9 @@ export class AgentCLI {
     // Apply agent-specific configurations for commands that run agents
     configuredCommand = this.configureAgentCommand(configuredCommand);
 
+    // Allow unknown options to be passed through to agents
+    configuredCommand.allowUnknownOptions();
+
     configuredCommand.action(async (cliArguments: AgentCLIArguments = {}) => {
       this.printLogo();
 
@@ -203,6 +206,10 @@ export class AgentCLI {
 
     // Apply agent-specific configurations for commands that run agents
     configuredCommand = this.configureAgentCommand(configuredCommand);
+
+    // Allow unknown options to be passed through to agents
+    configuredCommand.allowUnknownOptions();
+
     configuredCommand.action(async (...args: any[]) => {
       // Handle dynamic arguments due to optional positional parameters [run] [agent]
       // CAC passes arguments in this pattern:

@@ -1,0 +1,55 @@
+{
+  "name": "@gui-agent/operator-nutjs",
+  "description": "computer operator based NutJS for GUI Agent",
+  "version": "0.3.0-beta.12",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bytedance/UI-TARS-desktop"
+  },
+  "bugs": {
+    "url": "https://github.com/bytedance/UI-TARS-desktop/issues"
+  },
+  "keywords": [
+    "AI",
+    "Core",
+    "SDK",
+    "Operator",
+    "UI-TARS",
+    "AIO"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "dev": "rslib build --watch",
+    "build": "rslib build",
+    "build:watch": "rslib build --watch",
+    "test": "vitest",
+    "example": "npx tsx examples/test-runner.ts"
+  },
+  "license": "Apache-2.0",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "dependencies": {
+    "@agent-infra/browser": "0.1.1",
+    "@agent-infra/logger": "0.0.2-beta.2",
+    "@agent-infra/sandbox": "0.0.5",
+    "@agent-infra/media-utils": "0.1.5",
+    "@gui-agent/shared": "workspace:*",
+    "@computer-use/nut-js": "^4.2.0",
+    "jimp": "1.6.0"
+  },
+  "devDependencies": {
+    "@rslib/core": "0.10.0",
+    "dotenv": "^16.3.1",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^3.0.2"
+  }
+}

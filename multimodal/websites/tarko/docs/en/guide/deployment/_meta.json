@@ -1,0 +1,12 @@
+[
+  {
+    "type": "file",
+    "name": "cli",
+    "label": "CLI"
+  },
+  {
+    "type": "file",
+    "name": "server",
+    "label": "Server"
+  }
+]

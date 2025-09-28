@@ -168,14 +168,14 @@ describe('MessageHistory', () => {
           },
           {
             "role": "assistant",
-            "content": "To get the weather, I first need your current location. Retrieving your location...",
+            "content": "To determine the weather today, we first need to know the user's current location. So we will call the \`getCurrentLocation\` tool to obtain the location information.\\n",
             "tool_calls": [
               {
                 "id": "<<ID>>",
                 "type": "function",
                 "function": {
                   "name": "getCurrentLocation",
-                  "arguments": "{}"
+                  "arguments": " {}"
                 }
               }
             ]
@@ -210,14 +210,14 @@ describe('MessageHistory', () => {
           },
           {
             "role": "assistant",
-            "content": "To get the weather, I first need your current location. Retrieving your location...",
+            "content": "To determine the weather today, we first need to know the user's current location. So we will call the \`getCurrentLocation\` tool to obtain the location information.\\n",
             "tool_calls": [
               {
                 "id": "<<ID>>",
                 "type": "function",
                 "function": {
                   "name": "getCurrentLocation",
-                  "arguments": "{}"
+                  "arguments": " {}"
                 }
               }
             ]
@@ -229,14 +229,14 @@ describe('MessageHistory', () => {
           },
           {
             "role": "assistant",
-            "content": "Fetching weather for Boston...",
+            "content": "Now that we have the location as Boston, we can call the \`getWeather\` tool with this location to get the weather information for today.\\n",
             "tool_calls": [
               {
                 "id": "<<ID>>",
                 "type": "function",
                 "function": {
                   "name": "getWeather",
-                  "arguments": "{\\"location\\":\\"Boston\\"}"
+                  "arguments": " {\\"location\\": \\"Boston\\"}"
                 }
               }
             ]
@@ -404,7 +404,7 @@ describe('MessageHistory', () => {
           },
           {
             "role": "assistant",
-            "content": "To get the weather, I first need your current location. Retrieving your location..."
+            "content": ""
           },
           {
             "role": "user",
@@ -435,7 +435,7 @@ describe('MessageHistory', () => {
           },
           {
             "role": "assistant",
-            "content": "To get the weather, I first need your current location. Retrieving your location..."
+            "content": ""
           },
           {
             "role": "user",
@@ -443,7 +443,7 @@ describe('MessageHistory', () => {
           },
           {
             "role": "assistant",
-            "content": "Fetching weather for Boston..."
+            "content": ""
           },
           {
             "role": "user",

@@ -1,0 +1,51 @@
+[
+  {
+    "type": "dir",
+    "name": "get-started",
+    "label": "快速开始",
+    "collapsible": false,
+    "collapsed": false
+  },
+  {
+    "type": "dir",
+    "name": "basic",
+    "label": "基础",
+    "collapsible": false,
+    "collapsed": false
+  },
+  {
+    "type": "dir",
+    "name": "server",
+    "label": "Server",
+    "collapsible": false,
+    "collapsed": false
+  },
+  {
+    "type": "dir",
+    "name": "cli",
+    "label": "CLI",
+    "collapsible": false,
+    "collapsed": false
+  },
+  {
+    "type": "dir",
+    "name": "tool",
+    "label": "工具",
+    "collapsible": false,
+    "collapsed": false
+  },
+  {
+    "type": "dir",
+    "name": "advanced",
+    "label": "高级",
+    "collapsible": false,
+    "collapsed": false
+  },
+  {
+    "type": "dir",
+    "name": "deployment",
+    "label": "部署",
+    "collapsible": false,
+    "collapsed": false
+  }
+]

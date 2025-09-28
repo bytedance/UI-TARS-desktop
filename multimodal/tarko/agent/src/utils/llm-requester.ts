@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ModelResolver, ResolvedModel } from '@tarko/model-provider';
+import { resolveModel, AgentModel, Model } from '@tarko/model-provider';
 import { LLMRequestHookPayload } from '@tarko/agent-interface';
 import { getLogger } from '@tarko/shared-utils';
 import { getLLMClient } from '../agent';
@@ -15,27 +15,19 @@ const logger = getLogger('LLMRequester');
 /**
  * Options for LLM request
  */
-export interface LLMRequestOptions {
-  /**
-   * Provider name
-   */
-  provider: string;
+export interface LLMRequestOptions extends Model {
   /**
    * Model name
    */
   model: string;
   /**
+   * Provider name
+   */
+  provider: string;
+  /**
    * Path to the request body JSON file or JSON string
    */
   body: string;
-  /**
-   * API key (optional)
-   */
-  apiKey?: string;
-  /**
-   * Base URL (optional)
-   */
-  baseURL?: string;
   /**
    * Whether to use streaming mode
    */
@@ -56,14 +48,14 @@ export class LLMRequester {
   async request(options: LLMRequestOptions): Promise<any> {
     const { provider, model, body, apiKey, baseURL, stream = false } = options;
 
-    const modelResolver = new ModelResolver({
-      provider: provider as ResolvedModel['provider'],
+    const agentModel: AgentModel = {
+      provider: provider as AgentModel['provider'],
       id: model,
       baseURL,
       apiKey,
-    });
+    };
 
-    const resolvedModel = modelResolver.resolve();
+    const currentModel = resolveModel(agentModel);
 
     // Get request body
     const response = this.getRequestBody(body);
@@ -79,14 +71,12 @@ export class LLMRequester {
     }
 
     // Create LLM client
-    const client = getLLMClient(resolvedModel, { type: options.thinking ? 'enabled' : 'disabled' });
+    const client = getLLMClient(currentModel, { type: options.thinking ? 'enabled' : 'disabled' });
 
     try {
-      // @ts-expect-error
       // Add stream option to request
       requestBody.stream = requestBody.stream ?? stream;
 
-      // @ts-expect-error
       // Send request
       const response = await client.chat.completions.create(requestBody);
 

@@ -1,0 +1,12 @@
+[
+  {
+    "type": "file",
+    "name": "agent-api",
+    "label": "Agent API"
+  },
+  {
+    "type": "file",
+    "name": "agent-hooks",
+    "label": "Agent Hooks"
+  }
+]

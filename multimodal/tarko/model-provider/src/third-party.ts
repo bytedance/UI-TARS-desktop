@@ -7,6 +7,7 @@ import { z, ZodType } from 'zod';
 import { OpenAI, AzureOpenAI } from 'openai';
 import { RequestOptions } from 'openai/core';
 import type { JSONSchema7 } from 'json-schema';
+import type { ChatCompletionCreateParamsBase } from 'openai/resources/chat/completions';
 import type {
   ChatCompletion,
   FunctionParameters,
@@ -26,6 +27,7 @@ import type {
 
 export { z, ZodType };
 export type { OpenAI, AzureOpenAI, JSONSchema7 };
+export type { ChatCompletionCreateParamsBase };
 export type {
   RequestOptions,
   ChatCompletion,

@@ -1,0 +1,205 @@
+{
+  "events": [
+    {
+      "id": "event-1",
+      "type": "agent_run_start",
+      "timestamp": 1704103200000,
+      "sessionId": "custom-session-001",
+      "runOptions": {
+        "input": "Help me calculate the tip for a $85 dinner bill. I want to tip 18%.",
+        "stream": false
+      },
+      "provider": "custom",
+      "model": "custom-model",
+      "modelDisplayName": "Custom Agent",
+      "agentName": "Custom Agent"
+    },
+    {
+      "id": "event-2",
+      "type": "user_message",
+      "timestamp": 1704103200000,
+      "content": "Help me calculate the tip for a $85 dinner bill. I want to tip 18%."
+    },
+    {
+      "id": "event-3",
+      "type": "assistant_thinking_message",
+      "timestamp": 1704103202500,
+      "content": "I need to calculate 18% tip on $85. Let me use the calculator tool for accuracy.",
+      "isComplete": true,
+      "thinkingDurationMs": 800,
+      "messageId": "msg-001-final"
+    },
+    {
+      "id": "event-6",
+      "type": "assistant_message",
+      "timestamp": 1704103204000,
+      "content": "For an $85 dinner bill with an 18% tip:\n\n• Tip amount: **$15.30**\n• Total amount: **$100.30**\n\nThe calculation: $85.00 × 18% = $15.30 tip, so your total will be $85.00 + $15.30 = $100.30.",
+      "rawContent": "For an $85 dinner bill with an 18% tip:\n\n• Tip amount: **$15.30**\n• Total amount: **$100.30**\n\nThe calculation: $85.00 × 18% = $15.30 tip, so your total will be $85.00 + $15.30 = $100.30.",
+      "toolCalls": [
+        {
+          "id": "tool-call-4",
+          "type": "function",
+          "function": {
+            "name": "calculator",
+            "arguments": "{\"expression\":\"85 * 0.18\",\"operation\":\"percentage_calculation\"}"
+          }
+        },
+        {
+          "id": "tool-call-5",
+          "type": "function",
+          "function": {
+            "name": "calculator",
+            "arguments": "{\"expression\":\"85 + 15.3\",\"operation\":\"addition\"}"
+          }
+        }
+      ],
+      "finishReason": "stop",
+      "ttftMs": 95,
+      "ttltMs": 800,
+      "messageId": "msg-001-final"
+    },
+    {
+      "id": "event-7",
+      "type": "assistant_message",
+      "timestamp": 1704103203000,
+      "content": "I'll calculate the tip for you using the calculator.",
+      "rawContent": "I'll calculate the tip for you using the calculator.",
+      "finishReason": "stop",
+      "ttftMs": 120,
+      "ttltMs": 1200,
+      "messageId": "msg-001"
+    },
+    {
+      "id": "event-8",
+      "type": "tool_call",
+      "timestamp": 1704103201000,
+      "toolCallId": "tool-call-4",
+      "name": "calculator",
+      "arguments": {
+        "expression": "85 * 0.18",
+        "operation": "percentage_calculation"
+      },
+      "startTime": 1704103201000,
+      "tool": {
+        "name": "calculator",
+        "description": "Tool: calculator",
+        "schema": {}
+      }
+    },
+    {
+      "id": "event-9",
+      "type": "tool_result",
+      "timestamp": 1704103201100,
+      "toolCallId": "tool-call-4",
+      "name": "calculator",
+      "content": {
+        "result": 15.3,
+        "formatted": "$15.30",
+        "calculation": "$85.00 × 18% = $15.30"
+      },
+      "elapsedMs": 100
+    },
+    {
+      "id": "event-10",
+      "type": "tool_call",
+      "timestamp": 1704103202000,
+      "toolCallId": "tool-call-5",
+      "name": "calculator",
+      "arguments": {
+        "expression": "85 + 15.3",
+        "operation": "addition"
+      },
+      "startTime": 1704103202000,
+      "tool": {
+        "name": "calculator",
+        "description": "Tool: calculator",
+        "schema": {}
+      }
+    },
+    {
+      "id": "event-11",
+      "type": "tool_result",
+      "timestamp": 1704103202100,
+      "toolCallId": "tool-call-5",
+      "name": "calculator",
+      "content": {
+        "result": 100.3,
+        "formatted": "$100.30",
+        "calculation": "$85.00 + $15.30 = $100.30"
+      },
+      "elapsedMs": 100
+    },
+    {
+      "id": "event-12",
+      "type": "user_message",
+      "timestamp": 1704103260000,
+      "content": "What's the weather like in San Francisco today?"
+    },
+    {
+      "id": "event-14",
+      "type": "assistant_message",
+      "timestamp": 1704103262000,
+      "content": "The weather in San Francisco today is quite pleasant:\n\n🌤️ **Partly Cloudy**\n🌡️ **68°F**\n💨 **12 mph NW winds**\n💧 **72% humidity**\n👁️ **10 miles visibility**\n☀️ **UV Index: 6**\n\nIt's a nice day with mild temperatures and light northwest winds. Perfect weather for outdoor activities!",
+      "rawContent": "The weather in San Francisco today is quite pleasant:\n\n🌤️ **Partly Cloudy**\n🌡️ **68°F**\n💨 **12 mph NW winds**\n💧 **72% humidity**\n👁️ **10 miles visibility**\n☀️ **UV Index: 6**\n\nIt's a nice day with mild temperatures and light northwest winds. Perfect weather for outdoor activities!",
+      "toolCalls": [
+        {
+          "id": "tool-call-13",
+          "type": "function",
+          "function": {
+            "name": "weather_api",
+            "arguments": "{\"location\":\"San Francisco, CA\",\"date\":\"today\",\"units\":\"imperial\"}"
+          }
+        }
+      ],
+      "finishReason": "stop",
+      "ttftMs": 95,
+      "ttltMs": 980,
+      "messageId": "msg-002"
+    },
+    {
+      "id": "event-15",
+      "type": "tool_call",
+      "timestamp": 1704103261000,
+      "toolCallId": "tool-call-13",
+      "name": "weather_api",
+      "arguments": {
+        "location": "San Francisco, CA",
+        "date": "today",
+        "units": "imperial"
+      },
+      "startTime": 1704103261000,
+      "tool": {
+        "name": "weather_api",
+        "description": "Tool: weather_api",
+        "schema": {}
+      }
+    },
+    {
+      "id": "event-16",
+      "type": "tool_result",
+      "timestamp": 1704103261100,
+      "toolCallId": "tool-call-13",
+      "name": "weather_api",
+      "content": {
+        "temperature": 68,
+        "condition": "Partly Cloudy",
+        "humidity": 72,
+        "wind_speed": 12,
+        "wind_direction": "NW",
+        "visibility": 10,
+        "uv_index": 6,
+        "description": "Partly cloudy with mild temperatures and light northwest winds"
+      },
+      "elapsedMs": 100
+    },
+    {
+      "id": "event-17",
+      "type": "agent_run_end",
+      "timestamp": 1704103262100,
+      "sessionId": "custom-session-001",
+      "iterations": 2,
+      "elapsedMs": 62000,
+      "status": "idle"
+    }
+  ]
+}

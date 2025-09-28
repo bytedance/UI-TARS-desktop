@@ -27,3 +27,9 @@ export function extractAioPort(str?: string): number {
 export function getAioUrl() {
   return process.env.AIO_SANDBOX_URL || 'http://localhost:8080';
 }
+
+export function getTimeString() {
+  const d = new Date();
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}

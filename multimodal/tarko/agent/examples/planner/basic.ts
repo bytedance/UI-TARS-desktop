@@ -98,10 +98,10 @@ IMPORTANT: You must ALWAYS call the "final_answer" tool once ALL plan steps are 
     }
   }
 
-  private getLLMClientAndResolvedModel() {
-    const resolvedModel = this.getCurrentResolvedModel()!;
+  private getLLMClientAndAgentModel() {
+    const agentModel = this.getCurrentModel()!;
     const llmClient = this.getLLMClient()!;
-    return { resolvedModel, llmClient };
+    return { agentModel, llmClient };
   }
 
   /**
@@ -113,7 +113,7 @@ IMPORTANT: You must ALWAYS call the "final_answer" tool once ALL plan steps are 
       sessionId,
     });
     this.getEventStream().sendEvent(startEvent);
-    const { llmClient, resolvedModel } = this.getLLMClientAndResolvedModel();
+    const { llmClient, agentModel } = this.getLLMClientAndAgentModel();
 
     // Get messages from event stream to understand the task
     const messages = this.getMessages();
@@ -121,7 +121,7 @@ IMPORTANT: You must ALWAYS call the "final_answer" tool once ALL plan steps are 
     try {
       // Request the LLM to create an initial plan with steps
       const response = await llmClient.chat.completions.create({
-        model: resolvedModel.id,
+        model: agentModel.id,
         response_format: { type: 'json_object' },
         messages: [
           ...messages,
@@ -191,12 +191,12 @@ IMPORTANT: You must ALWAYS call the "final_answer" tool once ALL plan steps are 
   private async updatePlan(sessionId: string): Promise<void> {
     // Get the current conversation context
     const messages = this.getMessages();
-    const { llmClient, resolvedModel } = this.getLLMClientAndResolvedModel();
+    const { llmClient, agentModel } = this.getLLMClientAndAgentModel();
 
     try {
       // Request the LLM to evaluate and update the plan
       const response = await llmClient.chat.completions.create({
-        model: resolvedModel.id,
+        model: agentModel.id,
         response_format: { type: 'json_object' },
         messages: [
           ...messages,
@@ -271,7 +271,7 @@ IMPORTANT: You must ALWAYS call the "final_answer" tool once ALL plan steps are 
     // Request loop termination to allow proper completion
     this.requestLoopTermination();
 
-    const { llmClient, resolvedModel } = this.getLLMClientAndResolvedModel();
+    const { llmClient, agentModel } = this.getLLMClientAndAgentModel();
 
     // Get all events for context
     const events = this.getEventStream().getEvents();
@@ -283,7 +283,7 @@ IMPORTANT: You must ALWAYS call the "final_answer" tool once ALL plan steps are 
     try {
       // Request the LLM to create a comprehensive report
       const response = await llmClient.chat.completions.create({
-        model: resolvedModel.id,
+        model: agentModel.id,
         temperature: 0.3, // Lower temperature for more factual reports
         messages: [
           {
@@ -558,7 +558,7 @@ export const agent = new PlannerAgent({
   logLevel: LogLevel.INFO,
   model: {
     provider: 'volcengine',
-    id: 'ep-20250510145437-5sxhs', // 'doubao-1.5-thinking-vision-pro',
+    id: 'doubao-seed-1-6-vision-250815',
     apiKey: process.env.ARK_API_KEY,
   },
   maxIterations: 100,

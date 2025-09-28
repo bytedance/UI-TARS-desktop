@@ -1,0 +1,130 @@
+---
+title: CLI Overview
+description: Introduction to Tarko Agent CLI
+---
+
+# CLI Overview
+
+The **Tarko Agent CLI** is a flexible framework built on top of the **Agent Kernel** ([`@tarko/agent`](https://www.npmjs.com/package/@tarko/agent)). It provides a comprehensive command-line interface for deploying and running agents with ease, featuring built-in Web UI and powerful extensibility.
+
+## Installation
+
+Install globally via npm:
+
+```bash
+npm install -g @tarko/agent-cli
+```
+
+Or use with npx for one-time execution:
+
+```bash
+npx @tarko/agent-cli run my-agent
+```
+
+## Quick Start
+
+```bash
+# Start interactive Web UI (default)
+tarko
+
+# Run with built-in agents
+tarko run agent-tars  # Agent TARS
+tarko run omni-tars   # Omni-TARS
+tarko run mcp-agent   # MCP Agent
+
+# Run with custom agent
+tarko run ./my-agent.js
+
+# Start headless API server
+tarko serve
+
+# Headless mode with direct input
+tarko run --headless --input "Analyze current directory structure"
+
+# Pipeline input
+echo "Summarize this code" | tarko run --headless
+```
+
+## Core Concepts
+
+### Deployment Modes
+
+- **Interactive Mode** (`tarko run`) - Web UI for development and testing
+- **Server Mode** (`tarko serve`) - Headless API server for production
+- **Scripting Mode** (`tarko run --headless`) - Silent execution for automation
+
+### Built-in Agents
+
+Tarko CLI includes several ready-to-use agents:
+
+- **`agent-tars`** - Advanced task automation and reasoning system
+- **`omni-tars`** - Multi-modal agent with comprehensive capabilities
+- **`mcp-agent`** - Model Context Protocol agent for tool integration
+
+### Configuration Flexibility
+
+Supports multiple configuration formats with auto-discovery:
+- `tarko.config.ts` - TypeScript configuration
+- `tarko.config.yaml` - YAML configuration
+- `tarko.config.json` - JSON configuration
+- Environment variables and CLI arguments
+
+## Key Features
+
+### Tool & MCP Server Filtering
+
+Filter available tools and MCP servers via configuration:
+
+```bash
+tarko --tool.include "file_*,web_*" --tool.exclude "dangerous_*"
+tarko --mcpServer.include "filesystem" --mcpServer.exclude "experimental_*"
+```
+
+### 调试支持
+
+通过 `--debug` 参数启用详细日志：
+
+```bash
+# 启用调试模式
+tarko run --debug
+
+# 使用环境变量
+DEBUG=tarko:* tarko run
+```
+
+## Use Cases
+
+### Development
+- Interactive agent development with Web UI
+- Real-time debugging and testing
+- Hot reload and development mode
+
+### Production
+- Headless API server deployment
+- Docker and Kubernetes integration
+- Load balancing and scaling
+
+### Automation
+- CI/CD pipeline integration
+- Batch processing and scripting
+- Silent execution with structured output
+
+### Testing
+- Direct LLM requests for debugging
+- Agent behavior validation
+- Performance testing and benchmarking
+
+## Next Steps
+
+- [Commands Reference](/guide/cli/commands) - Detailed command documentation
+- [Configuration Guide](/guide/cli/configuration) - Advanced configuration options
+- [Built-in Agents](/guide/cli/built-in-agents) - Using pre-built agents
+- [Deployment Guide](/guide/deployment/cli) - Production deployment strategies
+
+## API Reference
+
+For detailed TypeScript definitions:
+
+- [`@tarko/agent-interface`](https://www.npmjs.com/package/@tarko/agent-interface) - Core agent interfaces
+- [`@tarko/interface`](https://www.npmjs.com/package/@tarko/interface) - Application layer interfaces
+- [`@tarko/agent-cli`](https://www.npmjs.com/package/@tarko/agent-cli) - CLI framework interfaces

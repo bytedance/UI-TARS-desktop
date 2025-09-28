@@ -14,7 +14,7 @@ Always provide helpful and accurate responses based on the search results.`,
 
   model: {
     provider: 'volcengine',
-    id: 'ep-20250510145437-5sxhs',
+    id: 'doubao-seed-1-6-vision-250815',
     apiKey: process.env.ARK_API_KEY,
   },
 

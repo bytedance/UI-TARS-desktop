@@ -131,8 +131,9 @@ export async function loadAgentConfig(
   for (const path of configPaths) {
     let config: AgentAppConfig = {};
 
-    if (isUrl(path)) {
+    if (isUrl(path) && !existsSync(path)) {
       // Load from URL
+      // Note: a local file can be a valid URL, but we can not fetch it
       config = await loadRemoteConfig(path, isDebug);
     } else {
       // Load from file

@@ -1,0 +1,283 @@
+---
+title: Configuration
+description: Configure your Tarko Agent
+---
+
+# Configuration
+
+Tarko Agents are configured through the `AgentOptions` interface that defines the Agent's behavior, capabilities, and runtime settings.
+
+## Basic Configuration
+
+Based on real examples from `multimodal/tarko/agent/examples/`:
+
+```typescript
+import { Agent, Tool, z, LogLevel } from '@tarko/agent';
+
+const agent = new Agent({
+  // Agent identity
+  name: 'MyAgent',
+  id: 'my-agent-instance',
+  
+  // System instructions
+  instructions: 'You are a helpful assistant...',
+  
+  // Model configuration
+  model: {
+    provider: 'volcengine',
+    id: 'ep-20250510145437-5sxhs',
+    apiKey: process.env.ARK_API_KEY,
+  },
+  
+  // Tools
+  tools: [],
+  
+  // Logging
+  logLevel: LogLevel.DEBUG,
+});
+```
+
+## Configuration Options
+
+Based on the actual `AgentOptions` interface from `multimodal/tarko/agent-interface/src/agent-options.ts`:
+
+### Agent Identity
+
+```typescript
+{
+  id?: string,              // Unique agent ID
+  name?: string,            // Agent name for identification
+  instructions?: string,    // System prompt (replaces default)
+}
+```
+
+### Model Configuration
+
+```typescript
+{
+  model?: {
+    provider: 'volcengine' | 'openai' | 'anthropic',
+    id: string,             // Model ID (e.g., 'gpt-4o', 'ep-20250510145437-5sxhs')
+    apiKey?: string,        // API key (or use environment variables)
+  },
+  temperature?: number,     // 0-1, default: 0.7
+  maxTokens?: number,       // Max tokens per request, default: 1000
+  top_p?: number,          // Nucleus sampling parameter
+}
+```
+
+### Tools Configuration
+
+```typescript
+{
+  tools?: Tool[],                    // Array of tool instances
+  toolCallEngine?: ToolCallEngineType, // 'native' | 'prompt_engineering' | 'structured_outputs'
+  tool?: {                          // Tool filtering options
+    include?: string[],             // Include tools matching these names
+    exclude?: string[],             // Exclude tools matching these names
+  },
+}
+```
+
+### Execution Control
+
+```typescript
+{
+  maxIterations?: number,   // Max agent loop iterations, default: 1000
+}
+```
+
+### Context Management
+
+```typescript
+{
+  context?: {
+    maxImagesCount?: number,  // Max images to keep in context
+  },
+}
+```
+
+### Advanced Features
+
+```typescript
+{
+  thinking?: LLMReasoningOptions,     // Reasoning/thinking options
+  enableStreamingToolCallEvents?: boolean, // Enable streaming tool call events
+  initialEvents?: AgentEventStream.Event[], // Restore conversation context
+}
+```
+
+### Workspace and Environment
+
+```typescript
+{
+  workspace?: string,       // Directory for filesystem operations
+  sandboxUrl?: string,      // Sandbox URL for tool execution
+}
+```
+
+### Monitoring and Logging
+
+```typescript
+{
+  logLevel?: LogLevel,      // DEBUG | INFO | WARN | ERROR
+  metric?: {
+    enable?: boolean,       // Enable metric collection (TTFT, TTLT, etc.)
+  },
+}
+```
+
+## Environment Variables
+
+Common environment variables for Tarko Agents:
+
+```bash
+# Model Provider API Keys
+OPENAI_API_KEY=your_openai_key
+ANTHROPIC_API_KEY=your_anthropic_key
+ARK_API_KEY=your_volcengine_key        # For Volcengine/Doubao models
+
+# Development settings
+NODE_ENV=development
+```
+
+### Example .env file
+
+```bash
+# .env
+ARK_API_KEY=your-volcengine-api-key
+OPENAI_API_KEY=sk-your-openai-key
+ANTHROPIC_API_KEY=your-anthropic-key
+```
+
+## Real Configuration Examples
+
+### Basic Agent with Tools
+
+From `multimodal/tarko/agent/examples/tool-calls/basic.ts`:
+
+```typescript
+import { Agent, Tool, z, LogLevel } from '@tarko/agent';
+
+const agent = new Agent({
+  model: {
+    provider: 'volcengine',
+    id: 'ep-20250510145437-5sxhs',
+    apiKey: process.env.ARK_API_KEY,
+  },
+  tools: [locationTool, weatherTool],
+  logLevel: LogLevel.DEBUG,
+});
+```
+
+### Streaming Configuration
+
+From `multimodal/tarko/agent/examples/streaming/tool-calls.ts`:
+
+```typescript
+const agent = new Agent({
+  model: {
+    provider: 'volcengine',
+    id: 'ep-20250510145437-5sxhs',
+    apiKey: process.env.ARK_API_KEY,
+  },
+  tools: [locationTool, weatherTool],
+  toolCallEngine: 'native',
+  enableStreamingToolCallEvents: true,
+});
+```
+
+### Different Model Providers
+
+```typescript
+// Volcengine/Doubao
+const volcengineAgent = new Agent({
+  model: {
+    provider: 'volcengine',
+    id: 'ep-20250510145437-5sxhs',
+    apiKey: process.env.ARK_API_KEY,
+  },
+});
+
+// OpenAI
+const openaiAgent = new Agent({
+  model: {
+    provider: 'openai',
+    id: 'gpt-4o',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+});
+
+// Anthropic
+const anthropicAgent = new Agent({
+  model: {
+    provider: 'anthropic',
+    id: 'claude-3-5-sonnet-20241022',
+    apiKey: process.env.ANTHROPIC_API_KEY,
+  },
+});
+```
+
+## Advanced Configuration
+
+### Context and Performance Tuning
+
+```typescript
+const agent = new Agent({
+  model: {
+    provider: 'volcengine',
+    id: 'ep-20250510145437-5sxhs',
+    apiKey: process.env.ARK_API_KEY,
+  },
+  maxIterations: 50,        // Limit reasoning loops
+  maxTokens: 2000,         // Limit response length
+  temperature: 0.3,        // More deterministic responses
+  context: {
+    maxImagesCount: 5,     // Limit images in context
+  },
+  metric: {
+    enable: true,          // Enable performance metrics
+  },
+});
+```
+
+### Tool Call Engine Selection
+
+```typescript
+// For models with native function calling
+const nativeAgent = new Agent({
+  toolCallEngine: 'native',
+  tools: [myTool],
+});
+
+// For models without native function calling
+const promptAgent = new Agent({
+  toolCallEngine: 'prompt_engineering',
+  tools: [myTool],
+});
+
+// For structured output parsing
+const structuredAgent = new Agent({
+  toolCallEngine: 'structured_outputs',
+  tools: [myTool],
+});
+```
+
+## Validation and Error Handling
+
+```typescript
+try {
+  const agent = new Agent({
+    model: {
+      provider: 'volcengine',
+      id: 'ep-20250510145437-5sxhs',
+      apiKey: process.env.ARK_API_KEY,
+    },
+  });
+  
+  const response = await agent.run('Hello!');
+  console.log(response);
+} catch (error) {
+  console.error('Agent configuration or execution error:', error);
+}
+```

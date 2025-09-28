@@ -7,11 +7,9 @@ import path from 'path';
 import fs from 'fs';
 import { Agent } from '@tarko/agent';
 import {
-  AgentRunOptions,
   LLMRequestHookPayload,
   LLMResponseHookPayload,
   LLMStreamingResponseHookPayload,
-  ChatCompletionChunk,
   ChatCompletionMessageToolCall,
   ToolCallResult,
 } from '@tarko/agent-interface';

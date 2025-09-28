@@ -1,0 +1,27 @@
+[
+  {
+    "type": "file",
+    "name": "getting-started",
+    "label": "Getting Started"
+  },
+  {
+    "type": "file",
+    "name": "custom-tools",
+    "label": "Custom Tools"
+  },
+  {
+    "type": "file",
+    "name": "server-integration",
+    "label": "Server Integration"
+  },
+  {
+    "type": "file",
+    "name": "custom-hooks",
+    "label": "Custom Hooks"
+  },
+  {
+    "type": "file",
+    "name": "protocol-integration",
+    "label": "Protocol Integration"
+  }
+]

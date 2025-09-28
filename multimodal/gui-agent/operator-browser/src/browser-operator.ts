@@ -11,9 +11,9 @@ import type { ScreenshotOutput, ExecuteParams, ExecuteOutput } from '@ui-tars/sd
 import { BrowserOperatorOptions, SearchEngine } from './types';
 import { UIHelper } from './ui-helper';
 import { BrowserFinder } from '@agent-infra/browser';
+import { Hotkey, getEnvInfo } from '@agent-infra/puppeteer-enhance';
 
 import { KEY_MAPPINGS } from './key-map';
-import { shortcuts } from './shortcuts';
 
 /**
  * BrowserOperator class that extends the base Operator
@@ -35,6 +35,8 @@ export class BrowserOperator extends Operator {
   private showWaterFlowEffect = true;
 
   private deviceScaleFactor?: number;
+
+  private hotkeyExecutor?: Hotkey;
 
   /**
    * Creates a new BrowserOperator instance
@@ -60,6 +62,23 @@ export class BrowserOperator extends Operator {
     if (options.showWaterFlow === false) {
       this.showWaterFlowEffect = false;
     }
+  }
+
+  private async getHotkeyExecutor() {
+    if (this.hotkeyExecutor) {
+      return this.hotkeyExecutor;
+    }
+
+    const pptrBrowser = (await this.getActivePage()).browser();
+    // @ts-ignore
+    const envInfo = await getEnvInfo(pptrBrowser);
+
+    this.hotkeyExecutor = new Hotkey({
+      osName: envInfo.osName,
+      browserName: envInfo.browserName,
+    });
+
+    return this.hotkeyExecutor;
   }
 
   /**
@@ -313,6 +332,20 @@ export class BrowserOperator extends Operator {
     };
   }
 
+  public async getMeta(): Promise<{ url: string }> {
+    try {
+      const page = await this.getActivePage();
+      return {
+        url: page.url(),
+      };
+    } catch (error) {
+      this.logger.error('Failed to get page meta:', error);
+    }
+    return {
+      url: '',
+    };
+  }
+
   private async handleClick(x: number, y: number) {
     this.logger.info(`Clicking at (${x}, ${y})`);
     const page = await this.getActivePage();
@@ -417,35 +450,12 @@ export class BrowserOperator extends Operator {
 
     this.logger.info(`Executing hotkey: ${keyStr}`);
 
-    const keys = keyStr.split(/[\s+]/);
-    // secretlint-disable-next-line
-    const normalizedKeys: KeyInput[] = keys.map((key: string) => {
-      const lowercaseKey = key.toLowerCase();
-      const keyInput = KEY_MAPPINGS[lowercaseKey];
-
-      if (keyInput) {
-        return keyInput;
-      }
-
-      throw new Error(`Unsupported key: ${key}`); // secretlint-disable-line
-    });
-
-    this.logger.info(`Normalized keys:`, normalizedKeys);
-
-    await shortcuts(page, normalizedKeys, this.options.browserType);
-
-    // For hotkey combinations that may trigger navigation,
-    // wait for navigation to complete
-    const navigationKeys = ['Enter', 'F5'];
-    // secretlint-disable-next-line
-    if (normalizedKeys.some((key: string) => navigationKeys.includes(key))) {
-      this.logger.info('Waiting for possible navigation after hotkey');
-      await this.waitForPossibleNavigation(page);
-    } else {
-      await this.delay(500);
+    try {
+      // @ts-ignore
+      await (await this.getHotkeyExecutor()).press(page as unknown as Page, keyStr);
+    } catch (error) {
+      this.logger.error('Hotkey execution failed:', error);
     }
-
-    this.logger.info('Hotkey execution completed');
   }
 
   private async handlePress(inputs: Record<string, any>) {
@@ -459,25 +469,11 @@ export class BrowserOperator extends Operator {
 
     this.logger.info(`Pressing key: ${keyStr}`); // secretlint-disable-line
 
-    const keys = keyStr.split(/[\s+]/);
-    // secretlint-disable-next-line
-    const normalizedKeys: KeyInput[] = keys.map((key: string) => {
-      const lowercaseKey = key.toLowerCase();
-      const keyInput = KEY_MAPPINGS[lowercaseKey];
-
-      if (keyInput) {
-        return keyInput;
-      }
-
-      throw new Error(`Unsupported key: ${key}`); // secretlint-disable-line
-    });
-
-    this.logger.info(`Normalized keys for press:`, normalizedKeys);
-
-    // Only press the keys
-    for (const key of normalizedKeys) {
-      await page.keyboard.down(key);
-      await this.delay(50); // 添加小延迟确保按键稳定
+    try {
+      // @ts-ignore
+      await (await this.getHotkeyExecutor()).down(page as unknown as Page, keyStr);
+    } catch (error) {
+      this.logger.error('Press execution failed:', error);
     }
 
     this.logger.info('Press operation completed');
@@ -494,36 +490,11 @@ export class BrowserOperator extends Operator {
 
     this.logger.info(`Releasing key: ${keyStr}`); // secretlint-disable-line
 
-    const keys = keyStr.split(/[\s+]/);
-    // secretlint-disable-next-line
-    const normalizedKeys: KeyInput[] = keys.map((key: string) => {
-      const lowercaseKey = key.toLowerCase();
-      const keyInput = KEY_MAPPINGS[lowercaseKey];
-
-      if (keyInput) {
-        return keyInput;
-      }
-
-      throw new Error(`Unsupported key: ${key}`); // secretlint-disable-line
-    });
-
-    this.logger.info(`Normalized keys for release:`, normalizedKeys);
-
-    // Release the keys
-    for (const key of normalizedKeys) {
-      await page.keyboard.up(key);
-      await this.delay(50); // 添加小延迟确保按键稳定
-    }
-
-    // For hotkey combinations that may trigger navigation,
-    // wait for navigation to complete
-    const navigationKeys = ['Enter', 'F5'];
-    // secretlint-disable-next-line
-    if (normalizedKeys.some((key: string) => navigationKeys.includes(key))) {
-      this.logger.info('Waiting for possible navigation after key release');
-      await this.waitForPossibleNavigation(page);
-    } else {
-      await this.delay(500);
+    try {
+      // @ts-ignore
+      await (await this.getHotkeyExecutor()).up(page as unknown as Page, keyStr);
+    } catch (error) {
+      this.logger.error('Release execution failed:', error);
     }
 
     this.logger.info('Release operation completed');

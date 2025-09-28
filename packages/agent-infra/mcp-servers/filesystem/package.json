@@ -1,6 +1,7 @@
 {
   "name": "@agent-infra/mcp-server-filesystem",
-  "version": "1.2.20",
+  "version": "1.2.23",
+  "mcpName": "io.github.bytedance/mcp-server-filesystem",
   "description": "MCP server for filesystem access",
   "license": "MIT",
   "type": "module",
@@ -48,7 +49,7 @@
     "vitest": "^3.0.7",
     "@types/diff": "^5.0.9",
     "@types/minimatch": "^5.1.2",
-    "@rslib/core": "0.5.3",
+    "@rslib/core": "0.10.0",
     "@types/node": "^22",
     "shx": "^0.3.4",
     "typescript": "^5.7.3"

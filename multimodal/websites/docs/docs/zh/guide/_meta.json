@@ -2,21 +2,14 @@
   {
     "type": "dir",
     "name": "get-started",
-    "label": "Get Started",
+    "label": "快速开始",
     "collapsible": false,
     "collapsed": false
   },
   {
     "type": "dir",
     "name": "basic",
-    "label": "Basic",
-    "collapsible": false,
-    "collapsed": false
-  },
-  {
-    "type": "dir",
-    "name": "advanced",
-    "label": "Advanced",
+    "label": "基础",
     "collapsible": false,
     "collapsed": false
   }

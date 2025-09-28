@@ -14,6 +14,7 @@
 - 🚀 **Release Management**: Automated version bumping and publishing
 - 🔧 **Patch System**: Repair failed package publications
 - 📝 **Changelog Generation**: Automatic, customizable changelog creation
+- 🏷️ **GitHub Release**: Automatic GitHub release creation with changelog extraction
 
 ## Install
 
@@ -68,6 +69,7 @@ Options:
 - `--build`: Execute custom build script before release
 - `--ignore-scripts`: Ignore npm scripts during release
 - `--push-tag`: Automatically push git tag to remote
+- `--create-github-release`: Create GitHub release after successful release
 
 ### Patching Failed Releases
 
@@ -85,6 +87,51 @@ Create customized changelogs:
 ptk changelog --version 1.0.0 --beautify --commit
 ```
 
+### Creating GitHub Releases
+
+Create GitHub releases independently or as part of the release process:
+
+```bash
+# Create GitHub release independently
+ptk github-release
+
+# Create GitHub release for specific version
+ptk github-release --version 1.0.0
+
+# Preview what would be created (dry run)
+ptk github-release --dry-run
+
+# Create GitHub release during package release
+ptk release --create-github-release
+
+# Short alias
+ptk gh-release --version 1.0.0
+```
+
+**Prerequisites**:
+- GitHub CLI (`gh`) must be installed and authenticated
+- Repository must be hosted on GitHub
+- `CHANGELOG.md` file should exist with proper version sections
+
+**Features**:
+- Automatically extracts release notes from `CHANGELOG.md`
+- Detects prerelease versions (containing `-`) and marks them appropriately
+- Uses standard semantic version tags (e.g., `v1.0.0`)
+- Graceful failure - main release succeeds even if GitHub release fails
+
+**Changelog Format Expected**:
+```markdown
+## [1.0.0](compare-link) (2025-01-01)
+
+### Features
+
+* **scope:** description ([#123](pr-link)) ([commit](commit-link)) [@author](author-link)
+
+### Bug Fixes
+
+* **scope:** fix description ([#124](pr-link)) ([commit](commit-link)) [@author](author-link)
+```
+
 ## Advanced Guide
 
 ### Integration with package.json
@@ -95,7 +142,10 @@ Add these scripts to your root package.json:
 {
   "scripts": {
     "dev": "ptk dev",
-    "release": "ptk release",
+    "release": "ptk release --push-tag",
+    "release:full": "ptk release --push-tag --create-github-release",
+    "release:dry": "ptk release --dry-run --create-github-release",
+    "github-release": "ptk github-release",
     "changelog": "ptk changelog"
   }
 }
@@ -116,6 +166,28 @@ Enable custom build processes during release:
 ```bash
 ptk release --build "npm run custom-build"
 ```
+
+### Separating NPM and GitHub Releases
+
+For more control, you can separate npm publishing from GitHub release creation:
+
+```bash
+# Step 1: Release packages to npm
+ptk release --push-tag
+
+# Step 2: Create GitHub release independently
+ptk github-release
+
+# Or in CI/CD pipeline
+npm run release        # Publishes to npm
+npm run github-release # Creates GitHub release
+```
+
+This approach allows you to:
+- Handle npm publishing failures independently
+- Create GitHub releases from different environments
+- Customize release timing and conditions
+- Integrate with different CI/CD workflows
 
 ## License
 

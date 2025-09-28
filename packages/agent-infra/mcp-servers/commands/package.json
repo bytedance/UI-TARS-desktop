@@ -1,6 +1,7 @@
 {
   "name": "@agent-infra/mcp-server-commands",
-  "version": "1.2.20",
+  "version": "1.2.23",
+  "mcpName": "io.github.bytedance/mcp-server-commands",
   "description": "An MCP server to run arbitrary commands",
   "type": "module",
   "main": "./dist/server.cjs",
@@ -43,7 +44,7 @@
   "devDependencies": {
     "commander": "^13.1.0",
     "tsx": "^4.19.3",
-    "@rslib/core": "0.5.3",
+    "@rslib/core": "0.10.0",
     "zod": "^3.23.8",
     "shx": "^0.3.4",
     "vitest": "^3.0.7",

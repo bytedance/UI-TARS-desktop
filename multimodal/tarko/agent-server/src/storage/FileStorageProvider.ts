@@ -13,13 +13,13 @@ import {
   getGlobalStorageDirectory,
   TARKO_CONSTANTS,
 } from '@tarko/interface';
-import { StorageProvider, SessionItemInfo } from './types';
+import { StorageProvider, SessionInfo } from './types';
 
 /**
  * Data structure for lowdb
  */
 interface DbSchema {
-  sessions: Record<string, SessionItemInfo>;
+  sessions: Record<string, SessionInfo>;
   events: Record<string, AgentEventStream.Event[]>;
 }
 
@@ -64,26 +64,26 @@ export class FileStorageProvider implements StorageProvider {
     }
   }
 
-  async createSession(sessionItemInfo: SessionItemInfo): Promise<SessionItemInfo> {
+  async createSession(sessionInfo: SessionInfo): Promise<SessionInfo> {
     await this.ensureInitialized();
 
     const sessionData = {
-      ...sessionItemInfo,
-      createdAt: sessionItemInfo.createdAt || Date.now(),
-      updatedAt: sessionItemInfo.updatedAt || Date.now(),
+      ...sessionInfo,
+      createdAt: sessionInfo.createdAt || Date.now(),
+      updatedAt: sessionInfo.updatedAt || Date.now(),
     };
 
-    this.db.data.sessions[sessionItemInfo.id] = sessionData;
-    this.db.data.events[sessionItemInfo.id] = [];
+    this.db.data.sessions[sessionInfo.id] = sessionData;
+    this.db.data.events[sessionInfo.id] = [];
 
     await this.db.write();
     return sessionData;
   }
 
-  async updateSessionItemInfo(
+  async updateSessionInfo(
     sessionId: string,
-    sessionItemInfo: Partial<Omit<SessionItemInfo, 'id'>>,
-  ): Promise<SessionItemInfo> {
+    sessionInfo: Partial<Omit<SessionInfo, 'id'>>,
+  ): Promise<SessionInfo> {
     await this.ensureInitialized();
 
     const session = this.db.data.sessions[sessionId];
@@ -93,7 +93,7 @@ export class FileStorageProvider implements StorageProvider {
 
     const updatedSession = {
       ...session,
-      ...sessionItemInfo,
+      ...sessionInfo,
       updatedAt: Date.now(),
     };
 
@@ -103,12 +103,12 @@ export class FileStorageProvider implements StorageProvider {
     return updatedSession;
   }
 
-  async getSessionItemInfo(sessionId: string): Promise<SessionItemInfo | null> {
+  async getSessionInfo(sessionId: string): Promise<SessionInfo | null> {
     await this.ensureInitialized();
     return this.db.data.sessions[sessionId] || null;
   }
 
-  async getAllSessions(): Promise<SessionItemInfo[]> {
+  async getAllSessions(): Promise<SessionInfo[]> {
     await this.ensureInitialized();
     return Object.values(this.db.data.sessions);
   }

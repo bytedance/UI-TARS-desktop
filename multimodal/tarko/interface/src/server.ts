@@ -1,3 +1,77 @@
+/**
+ * Enhanced runtime settings configuration with UI placement and enum labels support
+ */
+export interface AgentRuntimeSettings {
+  /**
+   * JSON Schema defining the structure and UI rendering of runtime settings
+   */
+  schema: AgentRuntimeSettingsSchema;
+  /**
+   * Optional transform function to convert runtime settings to agent-specific options
+   * @param runtimeSettings - The current runtime settings values
+   * @returns Transformed options that can be applied to the agent
+   */
+  transform?: (runtimeSettings: any) => any;
+  /**
+   * UI placement configuration
+   * Controls where settings appear in the interface
+   * @default 'dropdown-item'
+   */
+  placement?: 'dropdown-item' | 'chat-bottom';
+}
+
+/**
+ * Enhanced JSON Schema for runtime settings with UI-specific extensions
+ */
+export interface AgentRuntimeSettingsSchema {
+  type: 'object';
+  properties: Record<string, AgentRuntimeSettingProperty>;
+}
+
+/**
+ * Visibility condition for runtime settings
+ * Defines when a setting should be visible based on other setting values
+ */
+export interface AgentRuntimeSettingVisibilityCondition {
+  /** The key of the setting to check */
+  dependsOn: string;
+  /** The value that the dependent setting must have for this setting to be visible */
+  when: any;
+}
+
+/**
+ * Runtime setting property with enhanced UI support
+ */
+export interface AgentRuntimeSettingProperty {
+  /** Property type */
+  type: 'boolean' | 'string' | 'number';
+  /** Display title for the setting */
+  title?: string;
+  /** Default value */
+  default?: any;
+  /** For string type: allowed enum values */
+  enum?: string[];
+  /** For enum type: display labels corresponding to enum values */
+  enumLabels?: string[];
+  /** Setting description */
+  description?: string;
+  /** Icon identifier for UI rendering */
+  icon?: string;
+  /** UI placement override for individual settings */
+  placement?: 'dropdown-item' | 'chat-bottom';
+  /** Visibility condition - when this setting should be shown */
+  visible?: AgentRuntimeSettingVisibilityCondition;
+}
+
+/**
+ * Legacy interface for backward compatibility
+ * @deprecated Use AgentRuntimeSettings instead
+ */
+export interface LegacyAgentRuntimeSettings {
+  schema: Record<string, any>;
+  transform?: (runtimeSettings: any) => any;
+}
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
@@ -5,7 +79,7 @@
  */
 
 import { AgioEvent } from '@tarko/agio';
-import { IAgent, TConstructor, AgentOptions } from '@tarko/agent-interface';
+import { IAgent, TConstructor, AgentOptions, AgentModel } from '@tarko/agent-interface';
 import { AgentImplementation } from './agent-implementation';
 import { AgentWebUIImplementation } from './web-ui-implementation';
 import { AgentStorageImplementation } from './storage-implementation';
@@ -49,6 +123,45 @@ export interface AgentServerSnapshotOptions {
 }
 
 /**
+ * Sandbox configuration for agent execution environments
+ *
+ * Defines the connection and authentication settings for sandbox instance management
+ * where agents execute their tasks in isolated environments.
+ */
+export interface SandboxConfig {
+  /**
+   * Base URL of the sandbox manager service endpoint
+   */
+  baseUrl: string;
+
+  /**
+   * Static JWT token for sandbox manager authentication
+   */
+  jwtToken?: string;
+
+  /**
+   * Dynamic JWT token provider function
+   * Use this for scenarios requiring token refresh or dynamic token generation
+   * @returns Promise that resolves to a valid JWT token
+   */
+  getJwtToken?: () => Promise<string>;
+
+  /**
+   * Default time-to-live for sandbox instances in minutes
+   */
+  defaultTtlMinutes?: number;
+}
+
+/**
+ * Tenant mode
+ * @type {('multi' | 'single')}
+ */
+export interface TenantConfig {
+  mode: 'multi' | 'single';
+  auth: boolean;
+}
+
+/**
  * Options implemented by Agent Server
  *
  * Defines all customizable aspects of the server including:
@@ -78,6 +191,25 @@ export interface AgentServerOptions {
      * @default false
      */
     exclusive?: boolean;
+    /**
+     * Available models for the agent server
+     * These models will be merged with AgentOptions.model and made available for selection in the UI
+     */
+    models?: AgentModel[];
+    /**
+     * Runtime settings configuration
+     * Defines user-configurable settings that can be adjusted during runtime
+     */
+    runtimeSettings?: AgentRuntimeSettings;
+    /*
+     * Sandbox config
+     */
+    sandbox?: SandboxConfig;
+
+    /**
+     * Tenant mode, default to single tenant, no auth required
+     */
+    tenant?: TenantConfig;
   };
   /**
    * Share config
@@ -140,12 +272,7 @@ export interface SessionItemMetadata {
   /**
    * Current using model configuration
    */
-  modelConfig?: {
-    provider: string;
-    modelId: string;
-    displayName?: string;
-    configuredAt: number;
-  };
+  modelConfig?: AgentModel;
   /**
    * Current using agent configuration
    */
@@ -155,25 +282,33 @@ export interface SessionItemMetadata {
     [key: string]: any; // Future agent info fields
   };
   /**
+   * Current runtime settings configuration
+   * User-adjustable settings that affect agent behavior during execution
+   */
+  runtimeSettings?: Record<string, any>;
+  /** The sandbox associated with the current session */
+  sandboxUrl?: string;
+  /**
    * Future extensible fields
    */
   [key: string]: any;
 }
 
 /**
- * Session item interface
+ * Session interface
  */
-export interface SessionItemInfo {
+export interface SessionInfo {
   id: string;
   createdAt: number;
   updatedAt: number;
   workspace: string;
   metadata?: SessionItemMetadata;
+  userId?: string;
 }
 
 /**
  * Legacy interface for backward compatibility during transition
- * @deprecated Use SessionItemInfo.metadata instead
+ * @deprecated Use SessionInfo.metadata instead
  */
 export interface LegacySessionItemInfo {
   id: string;
@@ -184,7 +319,6 @@ export interface LegacySessionItemInfo {
   tags?: string[];
   modelConfig?: {
     provider: string;
-    modelId: string;
-    configuredAt: number;
+    id: string;
   };
 }

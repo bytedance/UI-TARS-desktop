@@ -87,7 +87,7 @@ export function logConfigComplete(config: AgentAppConfig, isDebug = false) {
 /**
  * Log debug information (debug only)
  */
-export function logDebugInfo(label: string, data: any, isDebug = false) {
+export function logDebugInfo(label: string, data: unknown, isDebug = false) {
   if (!isDebug) return;
 
   if (Array.isArray(data)) {

@@ -31,7 +31,27 @@ The `multimodal` directory contains several sub-packages. Here are the most impo
 └── agent-tars-web-ui      # Level 6. Agent TARS Web UI
 ```
 
-### 2.2 Starting the Dev Server
+### 2.2 Release Management
+
+#### 2.2.1 Publishing Historical Versions
+
+If you need to publish a historical version that was previously missed, you can use the GitHub release command:
+
+```bash
+# Publish historical version (dry-run first to preview)
+pnpm run github-release:dryrun --release-version 0.3.0-beta.9
+
+# Actually publish the historical version
+pnpm run github-release --release-version 0.3.0-beta.9
+```
+
+This will:
+- Create a GitHub release for the specified version
+- Generate beautiful release notes with conventional commit format
+- Use the correct tag format (`v0.3.0-beta.9`)
+- Display as clean version title (`v0.3.0-beta.9`)
+
+### 2.3 Starting the Dev Server
 
 From the `multimodal` directory, run the following command to watch for changes and build all sub-packages as needed:
 
@@ -39,7 +59,7 @@ From the `multimodal` directory, run the following command to watch for changes 
 pnpm dev
 ```
 
-### 2.3 Debugging Core Packages
+### 2.4 Debugging Core Packages
 
 When you're working on lower-level core packages (such as `@tarko/agent`), it's recommended to use the following command:
 
@@ -61,7 +81,7 @@ pnpm ptk d --packages @package/name1,@package/name2
 
 Note that package matching is based on the package name in package.json, not the directory name.
 
-### 2.4 Running Agent TARS
+### 2.5 Running Agent TARS
 
 Use the following command to run Agent TARS, replacing the path with your local CLI path:
 
@@ -75,7 +95,7 @@ Use the following command to run Agent TARS, replacing the path with your local 
 
 Make sure to replace `/path/to/UI-TARS-desktop/multimodal/agent-tars-cli/bin/cli.js` with the actual path on your system.
 
-### 2.4 Running Agent TARS in Headless Mode
+### 2.6 Running Agent TARS in Headless Mode
 
 To run Agent TARS in headless mode, use the same command with the `serve` option:
 

@@ -1,20 +1,21 @@
 [
   {
-    "id": "e16ef26f-1be8-4dd7-853b-d56ac6b6923f",
+    "id": "685ad77b-84a9-4946-a581-9dfeff9332f2",
     "type": "user_message",
-    "timestamp": 1752414641307,
+    "timestamp": 1758276123689,
     "content": "How's the weather today?"
   },
   {
-    "id": "8a3bd982-cf29-4e10-b241-00716ad681c6",
+    "id": "356ce3bc-d6a6-4f4a-bb6a-e89ed5297606",
     "type": "agent_run_start",
-    "timestamp": 1752414641307,
-    "sessionId": "1752414641307-8metiy2",
+    "timestamp": 1758276123689,
+    "sessionId": "1758276123689-gdtl5ac",
     "runOptions": {
       "input": "How's the weather today?",
       "stream": true
     },
     "provider": "volcengine",
-    "model": "ep-20250510145437-5sxhs"
+    "model": "doubao-seed-1-6-vision-250815",
+    "agentName": "Anonymous"
   }
 ]

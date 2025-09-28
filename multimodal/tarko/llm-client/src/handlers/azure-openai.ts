@@ -47,6 +47,7 @@ export class AzureOpenAIHandler extends BaseHandler<AzureOpenAIModel> {
       azureADTokenProvider,
       apiVersion,
       endpoint,
+      defaultHeaders: this.opts.defaultHeaders,
     });
 
     // We have to delete the provider field because it's not a valid parameter for the OpenAI API.

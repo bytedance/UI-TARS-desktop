@@ -50,6 +50,7 @@ export function addCommonOptions(command: Command): Command {
       'LLM provider name (deprecated, replaced by `--model.provider`)',
     )
     .option('--model.id [model]', 'Model identifier')
+    .option('--model.displayName [displayName]', 'Model display name')
     .option('--model.apiKey [apiKey]', 'Model API key')
     .option('--apiKey [apiKey]', 'Model API key (deprecated, replaced by `--model.apiKey`)')
     .option('--model.baseURL [baseURL]', 'Model base URL')
@@ -150,7 +151,7 @@ const BUILTIN_AGENTS: Record<string, { modulePath: string; label: string }> = {
   },
   'omni-tars': {
     modulePath: '@omni-tars/agent',
-    label: 'Omni-TARS Agent',
+    label: 'Omni Agent',
   },
   'mcp-agent': {
     modulePath: '@tarko/mcp-agent',

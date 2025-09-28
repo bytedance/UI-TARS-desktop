@@ -1,0 +1,283 @@
+# Agent UI Config
+
+The Agent UI Configuration API allows you to customize the Agent web interface appearance, layout, and behavior. Configure branding, welcome screens, navigation, and GUI Agent display options.
+
+## Configuration Methods
+
+### Via tarko.config.ts
+
+Configure Web UI through the `webui` option in your `tarko.config.ts`:
+
+```typescript
+// tarko.config.ts
+import { AgentAppConfig } from '@tarko/interface'
+
+export default {
+  // ... other config
+  webui: {
+    logo: 'https://example.com/logo.png',
+    title: 'My Agent',
+    subtitle: 'AI Assistant for Development',
+    welcomTitle: 'Welcome to My Agent',
+    welcomePrompts: [
+      'Search for the latest GUI Agent papers',
+      'Find information about UI TARS'
+    ]
+  }
+} as AgentAppConfig
+```
+
+### Via Agent Constructor
+
+Set Agent UI Configuration through the static `webuiConfig` property:
+
+```typescript
+// Agent class
+import { AgentWebUIImplementation } from '@tarko/interface'
+
+export class MyAgent extends MCPAgent {
+  static webuiConfig: AgentWebUIImplementation = {
+    logo: 'https://example.com/logo.png',
+    title: 'My Agent',
+    workspace: {
+      navItems: [
+        {
+          title: 'Code Editor',
+          link: 'http://localhost:3000',
+          icon: 'code'
+        }
+      ]
+    }
+  }
+}
+```
+
+## Configuration Options
+
+### Basic Branding
+
+#### logo
+
+```typescript
+logo?: string
+```
+
+Web UI logo URL. Displayed in the navigation bar.
+
+**Default:** Tarko logo
+
+#### title
+
+```typescript
+title?: string
+```
+
+Site title displayed in navbar and browser tab.
+
+**Default:** Agent name
+
+#### subtitle
+
+```typescript
+subtitle?: string
+```
+
+Subtitle for home page and SEO meta description.
+
+#### welcomTitle
+
+```typescript
+welcomTitle?: string
+```
+
+Hero title displayed on the home page welcome screen.
+
+### Welcome Screen
+
+#### welcomePrompts
+
+```typescript
+welcomePrompts?: string[]
+```
+
+Array of suggested prompts displayed on the welcome screen.
+
+**Example:**
+```typescript
+welcomePrompts: [
+  'Search for the latest GUI Agent papers',
+  'Find information about UI TARS',
+  'Tell me the top 5 most popular projects on ProductHunt today'
+]
+```
+
+#### welcomeCards
+
+```typescript
+welcomeCards?: WelcomeCard[]
+```
+
+Welcome screen cards with predefined prompts and Agent options.
+
+**WelcomeCard Interface:**
+```typescript
+interface WelcomeCard {
+  title: string          // Card display title
+  prompt: string         // Prompt content
+  image?: string         // Background image URL
+  category: string       // Grouping category
+  agentOptions?: Record<string, any>  // Agent configuration
+}
+```
+
+**Example:**
+```typescript
+welcomeCards: [
+  {
+    title: 'Code Review',
+    prompt: 'Review my latest pull request',
+    category: 'Development',
+    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71',
+    agentOptions: { mode: 'review' }
+  }
+]
+```
+
+### Workspace Configuration
+
+#### workspace
+
+```typescript
+workspace?: {
+  navItems?: WorkspaceNavItem[]
+}
+```
+
+Workspace header navigation configuration.
+
+**WorkspaceNavItem Interface:**
+```typescript
+interface WorkspaceNavItem {
+  title: string                    // Display text
+  link: string                     // URL to open in new tab
+  icon?: WorkspaceNavItemIcon      // Icon type
+}
+
+type WorkspaceNavItemIcon = 'code' | 'monitor' | 'terminal' | 'browser' | 'desktop' | 'default'
+```
+
+**Example:**
+```typescript
+workspace: {
+  navItems: [
+    {
+      title: 'Code Server',
+      link: 'http://localhost:8080',
+      icon: 'code'
+    },
+    {
+      title: 'VNC',
+      link: 'http://localhost:6080',
+      icon: 'monitor'
+    }
+  ]
+}
+```
+
+### Layout Configuration
+
+#### layout
+
+```typescript
+layout?: {
+  defaultLayout?: LayoutMode
+  enableLayoutSwitchButton?: boolean
+  enableSidebar?: boolean
+  enableHome?: boolean
+}
+```
+
+Layout behavior and display options.
+
+**LayoutMode:**
+```typescript
+type LayoutMode = 'default' | 'narrow-chat'
+```
+
+**Properties:**
+- `defaultLayout` - Initial layout mode (default: `'default'`)
+  - `default` - Standard layout with full workspace
+  - `narrow-chat` - Compact chat-focused layout
+- `enableLayoutSwitchButton` - Show layout toggle in toolbar (default: `false`)
+- `enableSidebar` - Display sidebar panel (default: `true`)
+- `enableHome` - Register home route (default: `true`)
+
+**Example:**
+```typescript
+layout: {
+  defaultLayout: 'narrow-chat',
+  enableLayoutSwitchButton: true,
+  enableSidebar: true
+}
+```
+
+### GUI Agent Configuration
+
+#### guiAgent
+
+```typescript
+guiAgent?: {
+  defaultScreenshotRenderStrategy?: 'both' | 'beforeAction' | 'afterAction'
+  enableScreenshotRenderStrategySwitch?: boolean
+  renderGUIAction?: boolean
+  renderBrowserShell?: boolean
+}
+```
+
+GUI Agent display and screenshot rendering options.
+
+**Properties:**
+- `defaultScreenshotRenderStrategy` - Screenshot display strategy (default: `'afterAction'`)
+  - `both` - Show before and after screenshots for comparison
+  - `beforeAction` - Show only pre-action screenshots (suitable for Agent-TARS)
+  - `afterAction` - Show only post-action screenshots (suitable for Omni-TARS)
+- `enableScreenshotRenderStrategySwitch` - Allow runtime strategy switching (default: `false`)
+- `renderGUIAction` - Show GUI operation details card (default: `true`)
+- `renderBrowserShell` - Wrap screenshots in browser shell UI (default: `true`)
+
+**Example:**
+```typescript
+guiAgent: {
+  defaultScreenshotRenderStrategy: 'beforeAction',
+  enableScreenshotRenderStrategySwitch: true,
+  renderGUIAction: true,
+  renderBrowserShell: false
+}
+```
+
+### Advanced Options
+
+#### enableContextualSelector
+
+```typescript
+enableContextualSelector?: boolean
+```
+
+Enable @ syntax file selector. When enabled, users can type @ in the input to search and select workspace files/directories.
+
+**Default:** `false`
+
+#### base
+
+```typescript
+base?: string
+```
+
+Base path for routing deployment. Supports both static paths and regex patterns.
+
+**Examples:**
+```typescript
+base: "/agent-ui"           // Static path
+base: "/tenant-.+"         // Regex pattern
+base: "/(foo|bar)/app"     // Regex with groups
+```

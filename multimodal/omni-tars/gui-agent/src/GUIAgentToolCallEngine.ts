@@ -8,18 +8,15 @@ import {
   MultimodalToolCallResult,
   AgentEventStream,
   ChatCompletionMessageParam,
-  ChatCompletionMessageToolCall,
   ParsedModelResponse,
-  StreamProcessingState,
   StreamChunkResult,
 } from '@tarko/agent-interface';
-import { actionParser, actionStringParser } from '@gui-agent/action-parser';
-import { getScreenInfo } from './shared';
 import {
   processT5StreamingChunk as omniProcessStreamingChunk,
   T5StreamProcessingState as OmniStreamProcessingState,
   createT5InitState as createInitState,
-  SYSTEM_PROMPT_GROUP,
+  createSystemPromptGroup,
+  AgentMode,
 } from '@omni-tars/core';
 import { getLogger } from '@tarko/agent';
 import { GUIAgentT5Adapter } from './GUIAgentT5Adapter';
@@ -37,12 +34,19 @@ import { GUIAgentT5Adapter } from './GUIAgentT5Adapter';
 export class GUIAgentToolCallEngine extends ToolCallEngine {
   private logger = getLogger('GUIAgentToolCallEngine');
   private t5Adapter = new GUIAgentT5Adapter(this.logger);
+  private agentMode: AgentMode;
+
+  constructor(...args: unknown[]) {
+    super();
+    const agentMode = args[0] as AgentMode;
+    this.agentMode = agentMode;
+  }
 
   /**
-   * Prepare system prompt with tool information and instructions
+   * Prepare system prompt with tool information and instructions based on agent mode
    */
   preparePrompt(instructions: string, tools: Tool[]) {
-    return SYSTEM_PROMPT_GROUP;
+    return createSystemPromptGroup(this.agentMode);
   }
 
   /**
@@ -89,7 +93,7 @@ export class GUIAgentToolCallEngine extends ToolCallEngine {
     const toolCalls = state.toolCalls;
     this.logger.debug('finalizeStreamProcessing toolCalls:', toolCalls);
 
-    const convertedToolCalls = this.t5Adapter.convertToolsToOperatorActions(
+    const convertedToolCalls = this.t5Adapter.convertToBrowserVisionControlCalls(
       toolCalls,
       state.reasoningBuffer ?? '',
     );

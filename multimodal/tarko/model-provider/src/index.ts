@@ -7,6 +7,9 @@ export * from './types';
 export * from './model-resolver';
 export * from './llm-client';
 export * from './third-party';
+export * from './constants';
+export * from './claude-headers';
+export * from './azure-claude-params';
 
 // Re-export OpenAI for convenience
 export { OpenAI } from 'openai';

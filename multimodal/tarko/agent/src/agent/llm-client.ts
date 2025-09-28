@@ -3,34 +3,34 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { getLogger } from '@tarko/shared-utils';
-import { ResolvedModel } from '@tarko/model-provider';
-import { createLLMClient, LLMReasoningOptions, LLMRequest } from '@tarko/model-provider';
+import { AgentModel, LLMRequestInterceptor } from '@tarko/model-provider';
+import { createLLMClient, LLMReasoningOptions } from '@tarko/model-provider';
 
 const logger = getLogger('ModelProvider');
 
 /**
- * Get LLM Client based on resolved model configuration
+ * Get LLM Client based on current model configuration
  *
- * @param resolvedModel Resolved model configuration
+ * @param currentModel Resolved model configuration
  * @param reasoningOptions Reasoning options
  * @param requestInterceptor Optional request interceptor
  * @returns OpenAI-compatible client
  */
 export function getLLMClient(
-  resolvedModel: ResolvedModel,
+  currentModel: AgentModel,
   reasoningOptions: LLMReasoningOptions,
-  requestInterceptor?: (provider: string, request: LLMRequest, baseURL?: string) => any,
+  requestInterceptor?: LLMRequestInterceptor,
 ) {
-  const { provider, id, actualProvider, baseURL } = resolvedModel;
+  const { provider, id, baseProvider, baseURL } = currentModel;
 
   logger.info(`Creating LLM client: 
 - Provider: ${provider} 
 - Model: ${id} 
-- Actual Provider: ${actualProvider} 
+- Actual Provider: ${baseProvider} 
 - Base URL: ${baseURL || 'default'} 
 `);
 
-  return createLLMClient(resolvedModel, (provider, request, baseURL) => {
+  return createLLMClient(currentModel, (provider, request, baseURL) => {
     // Add reasoning options for compatible providers
     if (provider !== 'openai') {
       request.thinking = reasoningOptions;

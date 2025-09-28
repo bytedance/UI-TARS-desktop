@@ -1,0 +1,324 @@
+---
+title: Agent Snapshot
+description: Capture and replay Agent state for debugging and testing
+---
+
+# Agent Snapshot
+
+Agent Snapshot is a powerful feature that allows you to capture the complete state of an Agent at runtime and replay it later. This is essential for debugging, testing, and ensuring deterministic Agent behavior.
+
+## What is Agent Snapshot?
+
+An Agent Snapshot captures:
+- Complete conversation history
+- Current context state
+- Tool call history and results
+- Agent configuration
+- Environment state
+
+## Creating Snapshots
+
+### Automatic Snapshots
+
+Enable automatic snapshot creation:
+
+```typescript
+import { Agent } from '@tarko/agent';
+
+const agent = new Agent({
+  ...config,
+  snapshot: {
+    enabled: true,
+    interval: 'on_tool_call', // or 'on_message', 'manual'
+    storage: {
+      type: 'file',
+      path: './snapshots'
+    }
+  }
+});
+```
+
+### Manual Snapshots
+
+Create snapshots programmatically:
+
+```typescript
+// Create a snapshot
+const snapshot = await agent.createSnapshot({
+  name: 'debug-session-1',
+  description: 'Before problematic tool call'
+});
+
+console.log('Snapshot created:', snapshot.id);
+```
+
+## Snapshot Structure
+
+A snapshot contains:
+
+```typescript
+interface AgentSnapshot {
+  id: string;
+  timestamp: string;
+  name?: string;
+  description?: string;
+  
+  // Agent state
+  context: {
+    messages: Message[];
+    length: number;
+    metadata: Record<string, any>;
+  };
+  
+  // Configuration
+  config: AgentConfig;
+  
+  // Environment
+  environment: {
+    variables: Record<string, string>;
+    workingDirectory: string;
+    platform: string;
+  };
+  
+  // Tool state
+  tools: {
+    available: ToolDefinition[];
+    history: ToolCall[];
+  };
+}
+```
+
+## Replaying Snapshots
+
+### Load and Replay
+
+```typescript
+import { Agent, loadSnapshot } from '@tarko/agent';
+
+// Load snapshot
+const snapshot = await loadSnapshot('./snapshots/debug-session-1.json');
+
+// Create agent from snapshot
+const agent = Agent.fromSnapshot(snapshot);
+
+// Continue conversation from snapshot state
+const response = await agent.chat('What happened next?');
+```
+
+### Replay with Modifications
+
+```typescript
+// Load snapshot and modify configuration
+const snapshot = await loadSnapshot('./snapshots/debug-session-1.json');
+
+// Override model settings for testing
+snapshot.config.model.temperature = 0.1;
+snapshot.config.model.model = 'gpt-4';
+
+const agent = Agent.fromSnapshot(snapshot);
+```
+
+## Testing with Snapshots
+
+### Snapshot-Based Testing
+
+```typescript
+import { test, expect } from '@jest/globals';
+import { Agent, loadSnapshot } from '@tarko/agent';
+
+test('should handle file operations correctly', async () => {
+  // Load pre-recorded snapshot
+  const snapshot = await loadSnapshot('./test-snapshots/file-ops.json');
+  const agent = Agent.fromSnapshot(snapshot);
+  
+  // Replay the scenario
+  const response = await agent.chat('Create a new file called test.txt');
+  
+  // Assert expected behavior
+  expect(response).toContain('File created successfully');
+});
+```
+
+### Regression Testing
+
+```typescript
+// Capture baseline behavior
+const baselineSnapshot = await agent.createSnapshot({
+  name: 'baseline-v1.0'
+});
+
+// Later, test against baseline
+const currentSnapshot = await agent.createSnapshot({
+  name: 'current-test'
+});
+
+// Compare snapshots
+const diff = compareSnapshots(baselineSnapshot, currentSnapshot);
+if (diff.hasChanges) {
+  console.warn('Behavior changed:', diff.changes);
+}
+```
+
+## Snapshot Management
+
+### List Snapshots
+
+```typescript
+const snapshots = await agent.listSnapshots();
+snapshots.forEach(snapshot => {
+  console.log(`${snapshot.name} (${snapshot.timestamp})`);
+});
+```
+
+### Delete Snapshots
+
+```typescript
+// Delete specific snapshot
+await agent.deleteSnapshot('debug-session-1');
+
+// Clean up old snapshots
+await agent.cleanupSnapshots({
+  olderThan: '7d',
+  keepLatest: 10
+});
+```
+
+## Best Practices
+
+### When to Create Snapshots
+
+- Before complex operations
+- After successful tool calls
+- When debugging issues
+- For regression testing
+
+### Naming Conventions
+
+```typescript
+// Use descriptive names
+const snapshot = await agent.createSnapshot({
+  name: 'before-file-upload-v2.1',
+  description: 'State before implementing new file upload logic'
+});
+```
+
+### Storage Considerations
+
+```typescript
+// Configure appropriate storage
+const agent = new Agent({
+  snapshot: {
+    storage: {
+      type: 'redis', // For production
+      url: 'redis://localhost:6379',
+      ttl: 86400 // 24 hours
+    },
+    compression: true, // Reduce storage size
+    maxSnapshots: 100  // Limit storage usage
+  }
+});
+```
+
+## Debugging with Snapshots
+
+### Capture Problem State
+
+```typescript
+agent.on('error', async (error) => {
+  // Automatically create snapshot on error
+  const snapshot = await agent.createSnapshot({
+    name: `error-${Date.now()}`,
+    description: `Error: ${error.message}`
+  });
+  
+  console.log('Error snapshot saved:', snapshot.id);
+});
+```
+
+### Step-by-Step Debugging
+
+```typescript
+// Load problematic snapshot
+const snapshot = await loadSnapshot('./snapshots/error-123.json');
+const agent = Agent.fromSnapshot(snapshot);
+
+// Enable detailed logging
+agent.setLogLevel('debug');
+
+// Replay with debugging
+const response = await agent.chat('Continue from here');
+```
+
+## Real-World Debugging Case
+
+### Model Provider Compatibility Issues
+
+Agent Snapshot is particularly useful when debugging model provider compatibility issues. Here's a real example from Agent TARS development:
+
+**Problem**: AWS Bedrock compatibility error
+
+```
+[Stream] Error in agent loop execution: Error: 400 operation error Bedrock Runtime: ConverseStream, https response error StatusCode: 400, RequestID: 31427985-ebcf-4321-af29-d498c474a20f, ValidationException: The json schema definition at toolConfig.tools.13.toolSpec.inputSchema is invalid. Fix the following errors and try again: $.properties: null found, object expected
+```
+
+**Solution Process**:
+
+1. **Enable Snapshot in Agent TARS**:
+
+```typescript
+// agent-tars.config.ts
+import { resolve } from 'node:path';
+import { defineConfig } from '@agent-tars/interface';
+
+export default defineConfig({
+  // ...
+  snapshot: {
+    enable: true,
+    storageDirectory: resolve(__dirname, 'snapshots')
+  }
+});
+```
+
+2. **Analyze Snapshot Structure**:
+
+The snapshot generates a detailed directory structure:
+
+```bash
+snapshots
+└── c3fMyx8jePXnhjYvHOhKr           # Session id
+    ├── event-stream.jsonl          # Final event stream
+    ├── loop-1                      # Loop 1
+    │   ├── event-stream.jsonl
+    │   ├── llm-request.jsonl
+    │   ├── llm-response.jsonl
+    │   └── tool-calls.jsonl
+    ├── loop-2                      # Loop 2
+    │   ├── event-stream.jsonl
+    │   ├── llm-request.jsonl
+    │   ├── llm-response.jsonl
+    │   └── tool-calls.jsonl
+    └── loop-3                      # Loop 3
+        ├── event-stream.jsonl
+        ├── llm-request.jsonl
+        └── llm-response.jsonl
+```
+
+3. **Root Cause Analysis**:
+
+By examining `loop-1/llm-request.jsonl`, we discovered that AWS Bedrock requires JSON Schema to include a `properties` field when `type` is "object", even if empty.
+
+4. **Fix Implementation**:
+
+```diff
+"type": "function",
+"function": {
+    "name": "browser_get_clickable_elements",
+    "description": "[browser] Get the clickable or hoverable or selectable elements on the current page, don't call this tool multiple times",
+    "parameters": {
+        "type": "object",
++       "properties": {}
+    }
+}
+```
+
+This real-world example demonstrates how Agent Snapshot enables "white-box" debugging, making complex Agent systems more transparent and debuggable. For the complete fix, see [bytedance/UI-TARS-desktop#770](https://github.com/bytedance/UI-TARS-desktop/pull/770).

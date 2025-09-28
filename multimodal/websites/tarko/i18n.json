@@ -1,0 +1,20 @@
+{
+  "not-found": {
+    "github": "GitHub",
+    "edit-page": "Edit this page",
+    "last-updated": "Last updated"
+  },
+  "search": {
+    "placeholder": "Search documentation...",
+    "no-results": "No results found",
+    "results": "Search results"
+  },
+  "nav": {
+    "guide": "Guide",
+    "api": "API",
+    "examples": "Examples"
+  },
+  "toc": {
+    "title": "On This Page"
+  }
+}

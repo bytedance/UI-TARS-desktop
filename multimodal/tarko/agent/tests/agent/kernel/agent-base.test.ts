@@ -103,7 +103,7 @@ describe('Agent Base Methods', () => {
       ).rejects.toThrow('LLM client is not available');
     });
 
-    it('should throw error when resolved model is not available', async () => {
+    it('should throw error when current model is not available', async () => {
       const agent = createTestAgent({}, testContext);
 
       // Mock getLLMClient to return a valid client
@@ -115,8 +115,8 @@ describe('Agent Base Methods', () => {
         },
       } as unknown as OpenAI);
 
-      // Mock getCurrentResolvedModel to return undefined
-      vi.spyOn(agent, 'getCurrentResolvedModel').mockReturnValue(undefined);
+      // Mock getCurrentModel to return undefined
+      vi.spyOn(agent, 'getCurrentModel').mockReturnValue(undefined);
 
       // Attempt to call LLM
       await expect(
@@ -144,8 +144,8 @@ describe('Agent Base Methods', () => {
         },
       } as unknown as OpenAI);
 
-      // Mock getCurrentResolvedModel to return a valid model
-      vi.spyOn(agent, 'getCurrentResolvedModel').mockReturnValue({
+      // Mock getCurrentModel to return a valid model
+      vi.spyOn(agent, 'getCurrentModel').mockReturnValue({
         // @ts-expect-error
         provider: 'x',
         id: 'test-model',

@@ -1,0 +1,392 @@
+# Tool 开发
+
+学习如何开发自定义工具来扩展 Agent 能力。
+
+## 概述
+
+Tool 是使 Agent 能够与外部系统交互的构建块。@agent-tars/core 提供了一个全面的工具包，用于创建与 Agent 生态系统无缝集成的自定义工具。
+
+## Tool 架构
+
+系统中的每个工具都遵循一致的结构：
+
+```typescript
+interface Tool {
+  name: string;
+  description: string;
+  parameters: JSONSchema7;
+  execute: (params: any) => Promise<ToolResult>;
+}
+```
+
+## 创建你的第一个 Tool
+
+### 基本 Tool 结构
+
+```typescript
+import { Tool, ToolResult } from '@agent-tars/core';
+
+export class CalculatorTool implements Tool {
+  name = 'calculator';
+  description = '执行基本数学计算';
+  
+  parameters = {
+    type: 'object',
+    properties: {
+      operation: {
+        type: 'string',
+        enum: ['add', 'subtract', 'multiply', 'divide'],
+        description: '要执行的数学运算'
+      },
+      a: {
+        type: 'number',
+        description: '第一个数字'
+      },
+      b: {
+        type: 'number',
+        description: '第二个数字'
+      }
+    },
+    required: ['operation', 'a', 'b']
+  };
+
+  async execute(params: {
+    operation: string;
+    a: number;
+    b: number;
+  }): Promise<ToolResult> {
+    const { operation, a, b } = params;
+    
+    let result: number;
+    
+    switch (operation) {
+      case 'add':
+        result = a + b;
+        break;
+      case 'subtract':
+        result = a - b;
+        break;
+      case 'multiply':
+        result = a * b;
+        break;
+      case 'divide':
+        if (b === 0) {
+          return {
+            success: false,
+            error: '不允许除以零'
+          };
+        }
+        result = a / b;
+        break;
+      default:
+        return {
+          success: false,
+          error: `未知运算: ${operation}`
+        };
+    }
+    
+    return {
+      success: true,
+      data: {
+        result,
+        operation: `${a} ${operation} ${b} = ${result}`
+      }
+    };
+  }
+}
+```
+
+### 注册 Tool
+
+```typescript
+import { Agent } from '@agent-tars/core';
+import { CalculatorTool } from './calculator-tool';
+
+const agent = new Agent({
+  tools: [
+    new CalculatorTool()
+  ]
+});
+```
+
+## Tool 分类
+
+### 内置 Tool 分类
+
+@agent-tars/core 包含 32 个内置工具，分为 4 个类别：
+
+- **general** (1 个工具)：网络搜索功能
+- **browser** (18 个工具)：Web 自动化和交互
+- **filesystem** (11 个工具)：文件和目录操作
+- **commands** (2 个工具)：系统命令执行
+
+### 自定义 Tool 分类
+
+通过实现分类接口来组织你的自定义工具：
+
+```typescript
+export interface ToolCategory {
+  name: string;
+  description: string;
+  tools: Tool[];
+}
+
+export class DatabaseToolCategory implements ToolCategory {
+  name = 'database';
+  description = '数据库操作和查询';
+  
+  tools = [
+    new QueryTool(),
+    new InsertTool(),
+    new UpdateTool()
+  ];
+}
+```
+
+## 高级 Tool 开发
+
+### 异步操作
+
+Tool 可以执行复杂的异步操作：
+
+```typescript
+export class ApiTool implements Tool {
+  name = 'api_request';
+  description = '发起 HTTP API 请求';
+  
+  async execute(params: {
+    url: string;
+    method: string;
+    headers?: Record<string, string>;
+    body?: any;
+  }): Promise<ToolResult> {
+    try {
+      const response = await fetch(params.url, {
+        method: params.method,
+        headers: params.headers,
+        body: params.body ? JSON.stringify(params.body) : undefined
+      });
+      
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: {
+          status: response.status,
+          headers: Object.fromEntries(response.headers.entries()),
+          body: data
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `API 请求失败: ${error.message}`
+      };
+    }
+  }
+}
+```
+
+### 状态管理
+
+Tool 可以在执行过程中维护状态：
+
+```typescript
+export class SessionTool implements Tool {
+  private sessions = new Map<string, any>();
+  
+  name = 'session_manager';
+  description = '管理会话数据';
+  
+  async execute(params: {
+    action: 'get' | 'set' | 'delete';
+    key: string;
+    value?: any;
+  }): Promise<ToolResult> {
+    const { action, key, value } = params;
+    
+    switch (action) {
+      case 'get':
+        return {
+          success: true,
+          data: { value: this.sessions.get(key) }
+        };
+      case 'set':
+        this.sessions.set(key, value);
+        return {
+          success: true,
+          data: { message: '值设置成功' }
+        };
+      case 'delete':
+        this.sessions.delete(key);
+        return {
+          success: true,
+          data: { message: '值删除成功' }
+        };
+    }
+  }
+}
+```
+
+## 最佳实践
+
+### 错误处理
+
+始终提供有意义的错误消息：
+
+```typescript
+async execute(params: any): Promise<ToolResult> {
+  try {
+    // 工具逻辑
+    return { success: true, data: result };
+  } catch (error) {
+    return {
+      success: false,
+      error: `工具执行失败: ${error.message}`,
+      details: {
+        stack: error.stack,
+        params
+      }
+    };
+  }
+}
+```
+
+### 参数验证
+
+使用全面的 JSON Schema 验证：
+
+```typescript
+parameters = {
+  type: 'object',
+  properties: {
+    email: {
+      type: 'string',
+      format: 'email',
+      description: '有效的邮箱地址'
+    },
+    age: {
+      type: 'number',
+      minimum: 0,
+      maximum: 150,
+      description: '年龄（岁）'
+    }
+  },
+  required: ['email'],
+  additionalProperties: false
+};
+```
+
+### 资源管理
+
+正确清理资源：
+
+```typescript
+export class DatabaseTool implements Tool {
+  private connection: DatabaseConnection;
+  
+  async execute(params: any): Promise<ToolResult> {
+    try {
+      await this.connection.connect();
+      const result = await this.connection.query(params.sql);
+      return { success: true, data: result };
+    } finally {
+      await this.connection.close();
+    }
+  }
+}
+```
+
+## 测试 Tool
+
+### 单元测试
+
+```typescript
+import { CalculatorTool } from './calculator-tool';
+
+describe('CalculatorTool', () => {
+  let tool: CalculatorTool;
+  
+  beforeEach(() => {
+    tool = new CalculatorTool();
+  });
+  
+  it('应该正确执行加法', async () => {
+    const result = await tool.execute({
+      operation: 'add',
+      a: 5,
+      b: 3
+    });
+    
+    expect(result.success).toBe(true);
+    expect(result.data.result).toBe(8);
+  });
+  
+  it('应该处理除零错误', async () => {
+    const result = await tool.execute({
+      operation: 'divide',
+      a: 10,
+      b: 0
+    });
+    
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('除以零');
+  });
+});
+```
+
+### 集成测试
+
+```typescript
+import { Agent } from '@agent-tars/core';
+import { CalculatorTool } from './calculator-tool';
+
+describe('Calculator 集成测试', () => {
+  it('应该与 agent 协同工作', async () => {
+    const agent = new Agent({
+      tools: [new CalculatorTool()]
+    });
+    
+    const response = await agent.execute(
+      '计算 15 加 25'
+    );
+    
+    expect(response).toContain('40');
+  });
+});
+```
+
+## Tool 文档
+
+全面记录你的工具：
+
+```typescript
+/**
+ * 邮箱验证和发送工具
+ * 
+ * @example
+ * ```typescript
+ * const emailTool = new EmailTool({
+ *   smtpHost: 'smtp.gmail.com',
+ *   smtpPort: 587
+ * });
+ * 
+ * await emailTool.execute({
+ *   to: 'user@example.com',
+ *   subject: 'Hello',
+ *   body: 'Hello world!'
+ * });
+ * ```
+ */
+export class EmailTool implements Tool {
+  // 实现...
+}
+```
+
+## 下一步
+
+- 了解 [Tool Management](/guide/tool/management) 来过滤和组织工具
+- 探索 [Tool Call Engine](/guide/tool/tool-call-engine) 的高级执行模式
+
+{/* Placeholder: 添加工具开发工作流截图 */}
+{/* Placeholder: 添加创建自定义工具的视频教程 */}

@@ -7,10 +7,8 @@
  * Simple example: How Agent prevents concurrent execution
  * Demonstrates that attempting to run a second task while one is executing will result in an error
  */
-
 import { Agent, LogLevel, Tool, z } from '../../src';
 
-// Create a tool that simulates a time-consuming operation
 const delayTool = new Tool({
   id: 'delay',
   description: 'Perform a delay operation for a specified duration',
@@ -34,14 +32,11 @@ async function main() {
       'You are an assistant who can use the delay tool to demonstrate time-consuming operations.',
   });
 
-  // Start the first task (5 seconds)
   console.log('Starting first task (5 seconds)...');
   const firstTaskPromise = agent.run('Please perform a task that takes 5 seconds to complete');
 
-  // Wait a moment to ensure the first task has started
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  // Try to start a second task (should fail because the first task is still running)
   console.log('Trying to start a second task while the first task is running...');
   try {
     const secondTaskResult = await agent.run('Please perform another task');
@@ -50,7 +45,6 @@ async function main() {
     console.error('Second task failed as expected:', error.message);
   }
 
-  // Wait for the first task to complete
   try {
     const firstTaskResult = await firstTaskPromise;
     console.log('First task completed:', firstTaskResult);
@@ -58,7 +52,6 @@ async function main() {
     console.error('First task failed:', error.message);
   }
 
-  // After the first task completes, the third task should execute normally
   console.log('\nStarting third task after first task completion...');
   try {
     const thirdTaskResult = await agent.run('Please perform a quick task');

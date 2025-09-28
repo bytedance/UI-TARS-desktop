@@ -1,0 +1,241 @@
+---
+title: Tool Call Engine
+description: Understanding Tarko's Tool Call Engine types and selection
+---
+
+# Tool Call Engine
+
+Tarko's **Tool Call Engine** determines how the Agent processes and executes tool calls. Different engines provide compatibility with various LLM providers and use cases.
+
+## Overview
+
+The Tool Call Engine handles:
+
+- **Function Call Parsing**: How tool calls are extracted from LLM responses
+- **Provider Compatibility**: Works with models that have different tool calling capabilities
+- **Execution Strategy**: How tools are invoked and results processed
+- **Error Handling**: Managing failed tool calls and retries
+
+## Available Engine Types
+
+Based on the actual `ToolCallEngineType` from the source code:
+
+### 1. Native Engine
+
+**Best for**: Models with native function calling support (GPT-4, Claude 3.5, etc.)
+
+```typescript
+import { Agent } from '@tarko/agent';
+
+const agent = new Agent({
+  toolCallEngine: 'native',
+  model: {
+    provider: 'openai',
+    id: 'gpt-4o',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  tools: [weatherTool],
+});
+```
+
+**How it works**:
+- Uses the model's built-in function calling capabilities
+- Sends tools as function definitions in the API request
+- Parses structured function call responses
+- Most reliable and efficient for supported models
+
+### 2. Prompt Engineering Engine
+
+**Best for**: Models without native function calling or custom parsing needs
+
+```typescript
+const agent = new Agent({
+  toolCallEngine: 'prompt_engineering',
+  model: {
+    provider: 'volcengine', 
+    id: 'ep-20250510145437-5sxhs',
+    apiKey: process.env.ARK_API_KEY,
+  },
+  tools: [weatherTool],
+});
+```
+
+**How it works**:
+- Embeds tool descriptions in the system prompt
+- Instructs the model to output tool calls in a specific format
+- Parses tool calls from the text response using regex/patterns
+- Provides fallback compatibility for any text-based model
+
+### 3. Structured Outputs Engine
+
+**Best for**: Models that support structured output but not function calling
+
+```typescript
+const agent = new Agent({
+  toolCallEngine: 'structured_outputs',
+  model: {
+    provider: 'anthropic',
+    id: 'claude-3-5-sonnet-20241022', 
+    apiKey: process.env.ANTHROPIC_API_KEY,
+  },
+  tools: [weatherTool],
+});
+```
+
+**How it works**:
+- Uses structured output schemas to enforce tool call format
+- More reliable than prompt engineering for parsing
+- Reduces parsing errors and improves consistency
+- Works with models that support JSON schema constraints
+
+## Engine Selection Guide
+
+### Automatic Selection
+
+Tarko can automatically select the best engine for your model:
+
+```typescript
+// Tarko will choose the optimal engine based on the model provider
+const agent = new Agent({
+  // toolCallEngine not specified - auto-selected
+  model: {
+    provider: 'openai',
+    id: 'gpt-4o',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  tools: [weatherTool],
+});
+```
+
+### Manual Selection
+
+Choose explicitly based on your needs:
+
+```typescript
+// Force prompt engineering for custom control
+const agent = new Agent({
+  toolCallEngine: 'prompt_engineering',
+  model: {
+    provider: 'openai', // Even for OpenAI, use prompt engineering
+    id: 'gpt-4o',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  tools: [weatherTool],
+});
+```
+
+## Engine Comparison
+
+| Engine | Reliability | Performance | Compatibility | Use Case |
+|--------|-------------|-------------|---------------|----------|
+| `native` | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | Production with supported models |
+| `structured_outputs` | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | Models with schema support |
+| `prompt_engineering` | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | Universal compatibility |
+
+## Real Examples from Source Code
+
+### Basic Tool Call Engine Usage
+
+From `multimodal/tarko/agent/examples/tool-calls/basic.ts`:
+
+```typescript
+import { Agent, Tool, z, LogLevel } from '@tarko/agent';
+
+const agent = new Agent({
+  model: {
+    provider: 'volcengine',
+    id: 'ep-20250510145437-5sxhs',
+    apiKey: process.env.ARK_API_KEY,
+  },
+  tools: [locationTool, weatherTool],
+  logLevel: LogLevel.DEBUG,
+  // toolCallEngine will be auto-selected based on model capabilities
+});
+```
+
+### Streaming with Tool Call Engine
+
+From `multimodal/tarko/agent/examples/streaming/tool-calls.ts`:
+
+```typescript
+const agent = new Agent({
+  model: {
+    provider: 'volcengine',
+    id: 'ep-20250510145437-5sxhs',
+    apiKey: process.env.ARK_API_KEY,
+  },
+  tools: [locationTool, weatherTool],
+  toolCallEngine: 'native',
+  enableStreamingToolCallEvents: true,
+});
+```
+
+## Debugging Tool Call Engines
+
+### Enable Debug Logging
+
+```typescript
+import { LogLevel } from '@tarko/agent';
+
+const agent = new Agent({
+  toolCallEngine: 'prompt_engineering',
+  logLevel: LogLevel.DEBUG, // See detailed tool call parsing
+  tools: [weatherTool],
+});
+```
+
+### Monitor Tool Call Events
+
+```typescript
+const response = await agent.run({
+  input: "What's the weather?",
+  stream: true,
+});
+
+for await (const event of response) {
+  if (event.type === 'tool_call') {
+    console.log('Tool called:', event.toolCall.function.name);
+  }
+  if (event.type === 'tool_result') {
+    console.log('Tool result:', event.result);
+  }
+}
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**Tool calls not being detected**:
+- Check if the model supports the selected engine type
+- Try switching to `prompt_engineering` for broader compatibility
+- Verify tool descriptions are clear and specific
+
+**Parsing errors with prompt engineering**:
+- The model may not be following the expected format
+- Try `structured_outputs` if the model supports schemas
+- Simplify tool parameter schemas
+
+**Performance issues**:
+- `native` engine is fastest for supported models
+- `prompt_engineering` adds parsing overhead
+- Consider caching for expensive tool operations
+
+### Engine Selection Decision Tree
+
+```
+Does your model support native function calling?
+├─ Yes → Use 'native' (recommended)
+└─ No
+   ├─ Does it support structured outputs?
+   │  ├─ Yes → Use 'structured_outputs'
+   │  └─ No → Use 'prompt_engineering'
+   └─ Need custom parsing logic?
+      └─ Consider implementing custom engine
+```
+
+## Next Steps
+
+- [Tools](/guide/basic/tools) - Learn how to create tools
+- [Configuration](/guide/basic/configuration) - Configure tool call engines
+- [Event Stream](/guide/basic/event-stream) - Monitor tool call events

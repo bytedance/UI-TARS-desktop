@@ -539,11 +539,32 @@ ${JSON.stringify(schema)}
   }
 
   /**
+   * Extract clean JSON content from potentially malformed tool call content
+   */
+  private extractCleanJsonContent(content: string): string {
+    const trimmed = content.trim();
+    
+    // Extract first complete JSON object using regex
+    const jsonMatch = trimmed.match(/^\s*\{[\s\S]*?\}(?=\s*(?:\}|\n|$))/);
+    if (jsonMatch) {
+      const candidate = jsonMatch[0].trim();
+      try {
+        JSON.parse(candidate);
+        return candidate;
+      } catch {
+        // Fall through to original content
+      }
+    }
+    
+    return trimmed;
+  }
+
+  /**
    * Complete a tool call when closing tag is found
    */
   private completeToolCall(state: ExtendedStreamProcessingState): StreamingToolCallUpdate | null {
     try {
-      const toolCallContent = state.currentToolCallBuffer.trim();
+      const toolCallContent = this.extractCleanJsonContent(state.currentToolCallBuffer);
       const toolCallData = JSON.parse(toolCallContent);
 
       if (toolCallData && toolCallData.name) {
@@ -595,7 +616,7 @@ ${JSON.stringify(schema)}
       try {
         // Try to parse the incomplete tool call buffer
         // Add closing brace if it seems like valid JSON that was truncated
-        let toolCallContent = extendedState.currentToolCallBuffer.trim();
+        let toolCallContent = this.extractCleanJsonContent(extendedState.currentToolCallBuffer);
 
         // Attempt to repair incomplete JSON
         if (toolCallContent && !toolCallContent.endsWith('}')) {
@@ -682,7 +703,7 @@ ${JSON.stringify(schema)}
     let cleanedContent = content;
 
     while ((match = toolCallRegex.exec(content)) !== null) {
-      const toolCallContent = match[1].trim();
+      const toolCallContent = this.extractCleanJsonContent(match[1]);
 
       try {
         const toolCallData = JSON.parse(toolCallContent);

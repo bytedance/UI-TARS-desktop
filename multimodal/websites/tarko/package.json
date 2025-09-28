@@ -1,0 +1,25 @@
+{
+  "private": true,
+  "name": "@tarko/docs",
+  "version": "0.3.0-beta.12",
+  "scripts": {
+    "build": "rspress build",
+    "dev": "rspress dev",
+    "preview": "rspress preview"
+  },
+  "dependencies": {
+    "@rspress/core": "2.0.0-beta.31",
+    "@rspress/theme-default": "2.0.0-beta.31",
+    "react-icons": "5.5.0",
+    "framer-motion": "12.19.2",
+    "tailwindcss": "^3.4.17",
+    "clsx": "2.1.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.75",
+    "@types/react-dom": "^18.2.24",
+    "@rspress/plugin-client-redirects": "2.0.0-beta.31",
+    "@types/node": "^18.11.17",
+    "rspress-plugin-mermaid": "^0.3.0"
+  }
+}

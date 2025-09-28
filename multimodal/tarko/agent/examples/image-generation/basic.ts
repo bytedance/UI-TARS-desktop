@@ -12,10 +12,14 @@
 import { Agent } from '../../src';
 
 async function main() {
-  const agent = new Agent();
+  const agent = new Agent({
+    model: {
+      provider: 'openai',
+      id: 'gpt-image-1',
+    },
+  });
 
   const answer = await agent.run({
-    model: 'gpt-image-1',
     input: 'Generate a colorful poster with UI-TARS as the theme',
   });
 

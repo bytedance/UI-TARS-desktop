@@ -40,7 +40,7 @@ export async function gitPushTag(
  */
 export async function gitCommit(message: string, cwd = process.cwd()): Promise<void> {
   await execa.execa('git', ['add', '-A'], { cwd, stdio: 'inherit' });
-  await execa.execa('git', ['commit', '-m', message], { cwd, stdio: 'inherit' });
+  await execa.execa('git', ['commit', '-m', message, '--no-verify'], { cwd, stdio: 'inherit' });
 }
 
 /**
@@ -52,6 +52,34 @@ export async function gitCreateTag(
   cwd = process.cwd(),
 ): Promise<void> {
   await execa.execa('git', ['tag', '-a', tagName, '-m', message], { cwd, stdio: 'inherit' });
+}
+
+/**
+ * Gets current git branch name
+ */
+export async function getCurrentBranch(cwd = process.cwd()): Promise<string> {
+  const result = await execa.execa('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd });
+  return result.stdout.trim();
+}
+
+/**
+ * Creates and switches to a new git branch
+ */
+export async function createAndSwitchBranch(
+  branchName: string,
+  cwd = process.cwd(),
+): Promise<void> {
+  await execa.execa('git', ['checkout', '-b', branchName], { cwd, stdio: 'inherit' });
+}
+
+/**
+ * Switches to an existing git branch
+ */
+export async function switchBranch(
+  branchName: string,
+  cwd = process.cwd(),
+): Promise<void> {
+  await execa.execa('git', ['checkout', branchName], { cwd, stdio: 'inherit' });
 }
 
 /**
