@@ -59,7 +59,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent {
     };
 
     super({
-      name: 'Seed GUI Agent',
+      name: GUIAgent.label,
       instructions: finalSystemPrompt,
       tools: [],
       toolCallEngine: AdaptedToolCallEngine,
@@ -140,7 +140,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent {
     id: string,
     toolCall: { toolCallId: string; name: string },
     result: unknown,
-  ): Promise<void> {
+  ): Promise<unknown> {
     this.logger.info('onAfterToolCall toolCall', JSON.stringify(toolCall));
 
     if (toolCall.name !== GUI_ADAPTED_TOOL_NAME) {
@@ -192,5 +192,6 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent {
       },
     });
     eventStream.sendEvent(event);
+    return result;
   }
 }
