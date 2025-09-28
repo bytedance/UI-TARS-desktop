@@ -76,7 +76,7 @@ const CollapsibleSection: React.FC<{
           <FiChevronRight size={16} className="text-slate-400" />
         )}
       </button>
-      {isOpen && <div className="p-4 bg-white dark:bg-slate-900">{children}</div>}
+      {isOpen && <div className="p-4 bg-slate-50 dark:bg-slate-800">{children}</div>}
     </div>
   );
 };
