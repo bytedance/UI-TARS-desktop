@@ -1,6 +1,6 @@
 {
   "name": "@tarko/interface",
-  "version": "0.3.0-beta.12",
+  "version": "0.3.0-beta.12-canary-41702d44a-20250928105656",
   "description": "High-level interfaces for Tarko, including Tarko Agent Server and Tarko Agent CLI",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
