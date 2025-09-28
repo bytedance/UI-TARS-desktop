@@ -77,27 +77,24 @@ export async function createSession(c: HonoContext) {
  */
 export async function getSessionDetails(c: HonoContext) {
   const server = c.get('server');
-  const session = c.get('session');
   const sessionId = c.req.query('sessionId');
 
   try {
-    if (!session) {
-      return c.json({ error: 'Session not found' }, 404);
+    if (!sessionId) {
+      return c.json({ error: 'SessionId not found' }, 404);
     }
 
-    if (sessionId) {
-      const sessionInfo = await server.daoFactory.getSessionInfo(sessionId);
+    const sessionInfo = await server.daoFactory.getSessionInfo(sessionId);
 
-      sessionInfo && filterSessionModel([sessionInfo]);
+    sessionInfo && filterSessionModel([sessionInfo]);
 
-      if (sessionInfo) {
-        return c.json(
-          {
-            session: sessionInfo,
-          },
-          200,
-        );
-      }
+    if (sessionInfo) {
+      return c.json(
+        {
+          session: sessionInfo,
+        },
+        200,
+      );
     }
 
     return c.json({ error: 'Session not found' }, 404);
@@ -163,7 +160,7 @@ export async function getSessionStatus(c: HonoContext) {
       return c.json({ error: 'Session not found' }, 404);
     }
 
-      const isProcessing = session.getProcessingStatus();
+    const isProcessing = session.getProcessingStatus();
 
     return c.json(
       {
@@ -186,7 +183,6 @@ export async function getSessionStatus(c: HonoContext) {
  */
 export async function updateSession(c: HonoContext) {
   const server = c.get('server');
-  const session = c.get('session');
   const body = await c.req.json();
 
   const { sessionId, metadata: metadataUpdates } = body as {
@@ -195,8 +191,8 @@ export async function updateSession(c: HonoContext) {
   };
 
   try {
-    if (!session) {
-      return c.json({ error: 'Session not found' }, 404);
+    if (!sessionId) {
+      return c.json({ error: 'SessionId not found' }, 404);
     }
     
     const sessionInfo = await server.daoFactory.getSessionInfo(sessionId);
@@ -223,13 +219,11 @@ export async function updateSession(c: HonoContext) {
  */
 export async function deleteSession(c: HonoContext) {
   const server = c.get('server');
-  const session = c.get('session');
+  const sessionId = (await c.req.json())?.sessionId
 
-  if (!session) {
-    return c.json({ error: 'Session not found' }, 404);
+  if (!sessionId) {
+    return c.json({ error: 'sessionId not found' }, 404);
   }
-
-  const sessionId = session.id;
 
   try {
     const sessionPool = server.getSessionPool();
