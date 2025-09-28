@@ -170,9 +170,6 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
             </div>
           </div>
 
-          {/* ID */}
-          <MetadataRow label="ID" value={toolCall.toolCallId.slice(-8)} />
-
           {/* Parameters */}
           {hasParameters && (
             <div className="group">
