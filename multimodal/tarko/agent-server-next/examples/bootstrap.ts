@@ -50,7 +50,7 @@ const server = new AgentServer({
               type: 'string',
               title: 'Browser Control',
               enum: ['hybrid'],
-              enumLabels: ['混合模式'],
+              enumLabels: ['Hybrid'],
               default: 'hybrid',
               placement: 'chat-bottom',
               visible: {
@@ -83,16 +83,23 @@ const server = new AgentServer({
       },
       models: [
         {
-          id: 'ep-20250909173748-wcfb2',
+          id: 'ep-20250905175225-hlrvd',
           provider: 'volcengine',
-          displayName: 'T6-SFT',
+          displayName: 'T5-RL',
           baseURL: process.env.OMNI_TARS_BASE_URL,
           apiKey: process.env.OMNI_TARS_API_KEY,
         },
         {
-          id: 'ep-20250905175225-hlrvd',
+          id: 'ep-20250926155907-tnrqq',
           provider: 'volcengine',
-          displayName: 'T5-RL',
+          displayName: 'T6.5-RL',
+          baseURL: process.env.OMNI_TARS_BASE_URL,
+          apiKey: process.env.OMNI_TARS_API_KEY,
+        },
+        {
+          id: 'ep-20250909173748-wcfb2',
+          provider: 'volcengine',
+          displayName: 'T6-SFT',
           baseURL: process.env.OMNI_TARS_BASE_URL,
           apiKey: process.env.OMNI_TARS_API_KEY,
         },
