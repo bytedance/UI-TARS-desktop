@@ -3,18 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { ConsoleLogger, LogLevel } from '@agent-infra/logger';
-import { LocalBrowser, BrowserFinder, BrowserType } from '@agent-infra/browser';
-
-import { LocalBrowserOperatorOptions, SearchEngine, searchEngineUrlMap } from './types';
 import { RefactoredOperator } from './refactored-operator';
+import { RemoteBrowserOperatorOptions, SearchEngine, searchEngineUrlMap } from './types';
+import { BrowserType, RemoteBrowser } from '@agent-infra/browser';
 
-export class LocalBrowserOperator extends RefactoredOperator {
-  private browserPath: string;
-  private browserType: BrowserType;
+export class RemoteBrowserOperator extends RefactoredOperator {
+  private wsEndpoint: string;
   private searchEngine?: SearchEngine;
 
-  constructor(options?: LocalBrowserOperatorOptions) {
+  constructor(options: RemoteBrowserOperatorOptions) {
     const {
+      wsEndpoint,
       highlightClickableElements = false,
       showActionInfo = false,
       showWaterFlow = false,
@@ -23,41 +22,39 @@ export class LocalBrowserOperator extends RefactoredOperator {
 
     // Create logger with LocalBrowserOperator prefix
     const logger = (options?.logger || new ConsoleLogger(undefined, LogLevel.DEBUG)).spawn(
-      '[LocalBrowserOperator]',
+      '[RemoteBrowserOperator]',
     );
+    logger.debug('ctor: wsEndpoint: ', wsEndpoint);
 
-    const browserFinder = new BrowserFinder(logger.spawn('[Finder]'));
-    const { path, type } = browserFinder.findBrowser();
-    logger.debug('ctor: browserData: ', { path, type });
+    const browser = new RemoteBrowser({
+      wsEndpoint: wsEndpoint,
+      logger: logger.spawn('[Browser]'),
+    });
 
-    const browser = new LocalBrowser({ logger: logger.spawn('[Browser]') });
     const browserOptions = {
       browser: browser,
-      browserType: type,
+      browserType: 'chrome' as BrowserType,
       logger: logger,
       highlightClickableElements: highlightClickableElements,
       showActionInfo: showActionInfo,
       showWaterFlow: showWaterFlow,
     };
+
     super(browserOptions);
     logger.debug('super ctor done');
 
-    this.browserPath = path;
-    this.browserType = type;
+    this.wsEndpoint = wsEndpoint;
     this.searchEngine = searchEngine;
   }
 
   protected async initialize(): Promise<void> {
     this.logger.debug('initialize: start');
-    await this.browser.launch({
-      executablePath: this.browserPath,
-      browserType: this.browserType,
-    });
+    await this.browser.launch();
     this.logger.debug('initialize: browser launched');
 
+    const openingPage = await this.browser?.getActivePage();
     const targetUrl = this.searchEngine ? searchEngineUrlMap[this.searchEngine] : undefined;
     if (targetUrl) {
-      const openingPage = await this.browser?.getActivePage();
       await openingPage?.goto(targetUrl, {
         waitUntil: 'networkidle2',
       });

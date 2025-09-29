@@ -101,6 +101,14 @@ export class RefactoredOperator extends Operator {
     this.logger.info('Cleanup completed');
   }
 
+  public async destroyInstance(): Promise<void> {
+    this.logger.debug('destroyInstance: start');
+    await this.cleanup();
+    if (this.browser) {
+      await this.browser.close();
+    }
+  }
+
   protected async initialize(): Promise<void> {
     this.logger.info('initialize: getting screen context info...');
 
