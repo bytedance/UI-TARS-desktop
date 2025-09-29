@@ -19,6 +19,7 @@
     "ui-tars-desktop",
     "ui-tars-desktop-renderer",
     "@common/*",
-    "@agent-infra/mcp-benchmark"
+    "@agent-infra/mcp-benchmark",
+    "@agent-infra/mcp-hub"
   ]
 }
