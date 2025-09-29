@@ -739,8 +739,8 @@ importers:
         specifier: ^9.31.0
         version: 9.36.0
       '@modelcontextprotocol/sdk':
-        specifier: ^1.17.2
-        version: 1.18.2
+        specifier: ~1.15.1
+        version: 1.15.1
       '@rslib/core':
         specifier: ^0.12.1
         version: 0.12.4(typescript@5.9.2)
@@ -3599,10 +3599,6 @@ packages:
 
   '@modelcontextprotocol/sdk@1.15.1':
     resolution: {integrity: sha512-W/XlN9c528yYn+9MQkVjxiTPgPxoxt+oczfjHBDsJx0+59+O7B75Zhsp0B16Xbwbz8ANISDajh6+V7nIcPMc5w==}
-    engines: {node: '>=18'}
-
-  '@modelcontextprotocol/sdk@1.18.2':
-    resolution: {integrity: sha512-beedclIvFcCnPrYgHsylqiYJVJ/CI47Vyc4tY8no1/Li/O8U4BTlJfy6ZwxkYwx+Mx10nrgwSVrA7VBbhh4slg==}
     engines: {node: '>=18'}
 
   '@module-federation/error-codes@0.15.0':
@@ -14667,23 +14663,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@modelcontextprotocol/sdk@1.18.2':
-    dependencies:
-      ajv: 6.12.6
-      content-type: 1.0.5
-      cors: 2.8.5
-      cross-spawn: 7.0.6
-      eventsource: 3.0.5
-      eventsource-parser: 3.0.2
-      express: 5.1.0
-      express-rate-limit: 7.5.0(express@5.1.0)
-      pkce-challenge: 5.0.0
-      raw-body: 3.0.0
-      zod: 3.25.76
-      zod-to-json-schema: 3.24.3(zod@3.25.76)
-    transitivePeerDependencies:
-      - supports-color
-
   '@module-federation/error-codes@0.15.0': {}
 
   '@module-federation/error-codes@0.18.0': {}
@@ -17172,7 +17151,7 @@ snapshots:
       '@testing-library/user-event': 14.6.1(@testing-library/dom@10.4.0)
       '@vitest/mocker': 3.0.5(msw@2.7.0(@types/node@22.13.10)(typescript@5.7.3))(vite@6.2.2(@types/node@22.13.10)(jiti@2.6.0)(lightningcss@1.29.2)(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.2)(yaml@2.7.0))
       '@vitest/utils': 3.0.5
-      magic-string: 0.30.17
+      magic-string: 0.30.19
       msw: 2.7.0(@types/node@22.13.10)(typescript@5.7.3)
       sirv: 3.0.1
       tinyrainbow: 2.0.0
@@ -17193,7 +17172,7 @@ snapshots:
       '@testing-library/user-event': 14.6.1(@testing-library/dom@10.4.0)
       '@vitest/mocker': 3.0.5(msw@2.7.0(@types/node@22.13.10)(typescript@5.7.3))(vite@6.2.2(@types/node@22.13.10)(jiti@2.6.0)(lightningcss@1.29.2)(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.3)(yaml@2.7.0))
       '@vitest/utils': 3.0.5
-      magic-string: 0.30.17
+      magic-string: 0.30.19
       msw: 2.7.0(@types/node@22.13.10)(typescript@5.7.3)
       sirv: 3.0.1
       tinyrainbow: 2.0.0
@@ -17531,7 +17510,7 @@ snapshots:
       '@vue/compiler-ssr': 3.5.13
       '@vue/shared': 3.5.13
       estree-walker: 2.0.2
-      magic-string: 0.30.17
+      magic-string: 0.30.19
       postcss: 8.5.3
       source-map-js: 1.2.1
     optional: true
