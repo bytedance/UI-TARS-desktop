@@ -1,0 +1,153 @@
+---
+title: Quick Start
+description: Get started with Tarko in minutes
+---
+
+# Quick Start
+
+Get up and running with Tarko in just a few minutes.
+
+## Prerequisites
+
+- Node.js 18+ 
+- npm or pnpm
+
+## Installation
+
+### Create a New Agent (WIP)
+
+🚧 **Work in Progress**: The fastest way to get started will be using the Tarko CLI:
+
+```bash
+npm create tarko  # Coming soon
+```
+
+### Install Tarko Packages
+
+For now, install the core packages manually:
+
+```bash
+npm install @tarko/agent
+```
+
+## Basic Usage
+
+### 1. Define Your Agent
+
+Create an `agent.ts` file based on the real examples:
+
+```typescript
+// From multimodal/tarko/agent/examples/tool-calls/basic.ts
+import { Agent, Tool, z, LogLevel } from '@tarko/agent';
+
+const locationTool = new Tool({
+  id: 'getCurrentLocation',
+  description: "Get user's current location",
+  parameters: z.object({}),
+  function: async () => {
+    return { location: 'Boston' };
+  },
+});
+
+const weatherTool = new Tool({
+  id: 'getWeather',
+  description: 'Get weather information for a specified location',
+  parameters: z.object({
+    location: z.string().describe('Location name, such as city name'),
+  }),
+  function: async (input) => {
+    const { location } = input;
+    return {
+      location,
+      temperature: '70°F (21°C)',
+      condition: 'Sunny',
+      precipitation: '10%',
+      humidity: '45%',
+      wind: '5 mph',
+    };
+  },
+});
+
+const agent = new Agent({
+  model: {
+    provider: 'volcengine',
+    id: 'ep-20250510145437-5sxhs',
+    apiKey: process.env.ARK_API_KEY,
+  },
+  tools: [locationTool, weatherTool],
+  logLevel: LogLevel.DEBUG,
+});
+
+export default agent;
+```
+
+### 2. Run Your Agent
+
+Run your agent directly:
+
+```typescript
+// Run the agent
+const response = await agent.run("How's the weather today?");
+console.log(response);
+```
+
+### 3. Streaming Example
+
+For streaming responses:
+
+```typescript
+// From multimodal/tarko/agent/examples/streaming/tool-calls.ts
+const response = await agent.run({
+  input: "How's the weather today?",
+  stream: true,
+});
+
+for await (const chunk of response) {
+  console.log(chunk);
+}
+```
+
+## Environment Variables
+
+Create a `.env` file with your API keys:
+
+```bash
+# .env file
+ARK_API_KEY=your-volcengine-api-key
+OPENAI_API_KEY=your-openai-api-key
+ANTHROPIC_API_KEY=your-anthropic-api-key
+```
+
+## Real Examples
+
+Explore working examples in the repository:
+
+- [`multimodal/tarko/agent/examples/tool-calls/basic.ts`](https://github.com/bytedance/UI-TARS-desktop/blob/main/multimodal/tarko/agent/examples/tool-calls/basic.ts) - Basic tool calls
+- [`multimodal/tarko/agent/examples/streaming/tool-calls.ts`](https://github.com/bytedance/UI-TARS-desktop/blob/main/multimodal/tarko/agent/examples/streaming/tool-calls.ts) - Streaming with tools
+- [`multimodal/tarko/agent/examples/model-providers/`](https://github.com/bytedance/UI-TARS-desktop/tree/main/multimodal/tarko/agent/examples/model-providers) - Different model providers
+
+## Next Steps
+
+- [SDK Reference](/guide/get-started/sdk) - Complete API reference
+- [Architecture](/guide/get-started/architecture) - Learn about Tarko's design
+- [Tools](/guide/basic/tools) - Create custom tools
+- [Examples](/examples/getting-started) - Explore real-world examples
+
+## Testing Examples
+
+To test the examples work:
+
+```bash
+# Clone the repository
+git clone https://github.com/bytedance/UI-TARS-desktop.git
+cd UI-TARS-desktop/multimodal/tarko/agent
+
+# Install dependencies
+npm install
+
+# Run basic tool call example
+npx tsx examples/tool-calls/basic.ts
+
+# Run streaming example
+npx tsx examples/streaming/tool-calls.ts
+```

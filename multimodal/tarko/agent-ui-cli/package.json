@@ -1,6 +1,6 @@
 {
   "name": "@tarko/agent-ui-cli",
-  "version": "0.3.0-beta.11",
+  "version": "0.3.0-beta.12",
   "description": "CLI for Agent UI Builder - generate and share agent replay HTML files",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

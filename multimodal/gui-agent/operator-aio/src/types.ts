@@ -125,3 +125,7 @@ export interface AIOHybridOptions {
   timeout?: number;
   headers?: Record<string, string>;
 }
+
+export interface AIOGameOptions extends AIOHybridOptions {
+  targetUrl: string;
+}

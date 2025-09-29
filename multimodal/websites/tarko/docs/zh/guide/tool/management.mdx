@@ -1,0 +1,233 @@
+# Tool 管理
+
+过滤和组织 Agent 工具能力，针对特定任务和性能进行优化。
+
+## 概述
+
+Tarko 包含 **32 个内置工具**，分为 4 个类别：**general** (1)、**browser** (18)、**filesystem** (11) 和 **commands** (2)。Tool 管理允许你精确控制哪些工具可用，以优化性能和聚焦能力。
+
+## 快速开始
+
+```bash
+# 仅包含浏览器工具（18 个工具）
+tarko --tool.include browser
+
+# 包含文件系统但排除文件编辑
+tarko --tool.include filesystem --tool.exclude edit_file
+
+# 多个类别并排除特定工具
+tarko --tool.include "browser,filesystem" --tool.exclude "run_command,run_script"
+```
+
+## CLI Tool 过滤
+
+### 可用选项
+
+| 选项 | 描述 | 示例 |
+|------|------|------|
+| `--tool.include <patterns>` | 包含匹配模式的工具 | `--tool.include browser` |
+| `--tool.exclude <patterns>` | 排除匹配模式的工具 | `--tool.exclude delete` |
+
+### 模式匹配规则
+
+- **子字符串匹配**：使用 `string.includes()` 实现高性能
+- **大小写敏感**：模式必须匹配确切的大小写（`browser` 而不是 `Browser`）
+- **执行顺序**：先应用包含过滤器，然后应用排除过滤器
+- **分类名称**：使用分类名称进行批量操作
+
+### 常见用例
+
+#### 仅 Web 自动化
+```bash
+# 浏览器工具 + 网络搜索（19 个工具）
+tarko --tool.include "browser,web_search"
+```
+
+#### 安全文件操作
+```bash
+# 文件系统但不执行命令（11 个工具）
+tarko --tool.include filesystem --tool.exclude "run_command,run_script"
+```
+
+#### 只读 Agent
+```bash
+# 不允许文件写入或命令执行
+tarko --tool.exclude "write_file,edit_file,create_directory,move_file,run_command,run_script"
+```
+
+#### 最小化 Agent
+```bash
+# 仅基本只读工具
+tarko --tool.include "read_file,read_multiple_files,list_directory,browser_screenshot,web_search"
+```
+
+## 编程式 Tool 管理
+
+### Agent 配置
+
+```typescript
+import { Agent } from '@tarko/agent';
+
+const agent = new Agent({
+  tool: {
+    include: ['browser', 'filesystem'],
+    exclude: ['browser_get_markdown', 'run_command']
+  }
+});
+```
+
+### 配置文件
+
+```json
+{
+  "tool": {
+    "include": ["browser", "filesystem"],
+    "exclude": ["delete", "remove"]
+  }
+}
+```
+
+### Tool 注册
+
+```typescript
+import { Agent, Tool } from '@tarko/agent';
+
+const agent = new Agent();
+
+// 注册自定义工具
+const customTool = new Tool({
+  id: 'custom_tool',
+  description: '我的自定义工具',
+  parameters: {
+    type: 'object',
+    properties: {
+      input: { type: 'string', description: '输入参数' }
+    }
+  },
+  function: async (params) => {
+    return `处理结果: ${params.input}`;
+  }
+});
+
+agent.registerTool(customTool);
+
+// 获取所有可用工具
+const tools = agent.getTools();
+console.log(`可用工具: ${tools.length}`);
+```
+
+## Tool 分类
+
+### 内置分类
+
+#### 📦 general (1 个工具)
+- `web_search` - 搜索网络信息
+
+#### 📦 browser (18 个工具)
+- `browser_click` - 点击页面元素
+- `browser_close_tab` - 关闭浏览器标签页
+- `browser_evaluate` - 执行 JavaScript 代码
+- `browser_form_input_fill` - 填写表单输入
+- `browser_get_clickable_elements` - 获取可点击元素
+- `browser_get_markdown` - 提取页面内容为 markdown
+- `browser_go_back` - 在历史记录中后退
+- `browser_go_forward` - 在历史记录中前进
+- `browser_hover` - 悬停在元素上
+- `browser_navigate` - 导航到 URL
+- `browser_new_tab` - 打开新浏览器标签页
+- `browser_press_key` - 按下键盘按键
+- `browser_read_links` - 提取所有页面链接
+- `browser_screenshot` - 截取页面截图
+- `browser_scroll` - 滚动页面内容
+- `browser_select` - 选择下拉选项
+- `browser_switch_tab` - 在标签页间切换
+- `browser_tab_list` - 列出所有打开的标签页
+
+#### 📦 filesystem (11 个工具)
+- `create_directory` - 创建新目录
+- `directory_tree` - 获取目录结构
+- `edit_file` - 编辑现有文件
+- `get_file_info` - 获取文件元数据
+- `list_allowed_directories` - 列出可访问目录
+- `list_directory` - 列出目录内容
+- `move_file` - 移动或重命名文件
+- `read_file` - 读取文件内容
+- `read_multiple_files` - 一次读取多个文件
+- `search_files` - 按模式搜索文件
+- `write_file` - 写入内容到文件
+
+#### 📦 commands (2 个工具)
+- `run_command` - 执行 shell 命令
+- `run_script` - 运行脚本和解释器
+
+## 故障排除
+
+### 调试 Tool 过滤
+
+```bash
+# 查看哪些工具被过滤
+tarko --debug --tool.include browser
+# 输出: "应用包含过滤器，模式 [browser]，32/32 工具中匹配了 18 个"
+```
+
+### 常见问题
+
+#### 没有可用工具
+```bash
+# 使用更宽泛的模式
+tarko --tool.exclude "run_command" # 排除特定工具而不是严格包含
+```
+
+#### 模式不工作
+- 验证大小写敏感性（`browser` 而不是 `Browser`）
+- 使用确切的工具名称（`browser_click` 而不是 `click`）
+- 检查分类名称：`browser`、`filesystem`、`commands`、`general`
+
+#### Tool 加载错误
+```typescript
+try {
+  const agent = new Agent({
+    tool: { include: ['invalid_tool'] }
+  });
+} catch (error) {
+  console.error('工具加载失败:', error.message);
+  // 回退到默认工具
+}
+```
+
+## 性能考虑
+
+### 过滤器实现
+
+- **复杂度**：O(n×m) 其中 n=工具数，m=模式数
+- **匹配**：简单的 `string.includes()` 实现最佳速度
+- **日志**：详细的过滤操作日志用于调试
+- **兼容性**：完全向后兼容
+
+### 示例
+
+#### 仅浏览器 Agent
+```bash
+tarko --tool.include browser
+# 结果：18 个浏览器工具（browser_click、browser_navigate 等）
+```
+
+#### 文件操作但不编辑
+```bash
+tarko --tool.include filesystem --tool.exclude edit_file
+# 结果：10 个文件系统工具（read_file、write_file、list_directory 等）
+```
+
+#### 特定工具排除
+```bash
+tarko --tool.include "browser,filesystem" --tool.exclude "browser_get_markdown,run_command"
+# 结果：28 个工具（17 个浏览器 + 11 个文件系统，排除 markdown 和命令）
+```
+
+## 下一步
+
+- 了解 [Tool 开发](/guide/tool/basic) 来创建自定义工具
+- 探索 [Tool Call Engine](/guide/tool/tool-call-engine) 的执行优化
+
+{/* Placeholder: 添加工具过滤流程图 */}
+{/* Placeholder: 添加性能对比图表 */}

@@ -55,6 +55,34 @@ export async function gitCreateTag(
 }
 
 /**
+ * Gets current git branch name
+ */
+export async function getCurrentBranch(cwd = process.cwd()): Promise<string> {
+  const result = await execa.execa('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd });
+  return result.stdout.trim();
+}
+
+/**
+ * Creates and switches to a new git branch
+ */
+export async function createAndSwitchBranch(
+  branchName: string,
+  cwd = process.cwd(),
+): Promise<void> {
+  await execa.execa('git', ['checkout', '-b', branchName], { cwd, stdio: 'inherit' });
+}
+
+/**
+ * Switches to an existing git branch
+ */
+export async function switchBranch(
+  branchName: string,
+  cwd = process.cwd(),
+): Promise<void> {
+  await execa.execa('git', ['checkout', branchName], { cwd, stdio: 'inherit' });
+}
+
+/**
  * Gets author information for a commit
  */
 export function getCommitAuthor(hash: string, cwd = process.cwd()): CommitAuthor {

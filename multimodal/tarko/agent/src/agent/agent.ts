@@ -39,7 +39,7 @@ import {
 import { getLogger, LogLevel, rootLogger } from '@tarko/shared-utils';
 import { AgentExecutionController } from './execution-controller';
 import { getLLMClient } from './llm-client';
-import { getToolCallEngineForProvider } from '../tool-call-engine/engine-selector';
+
 import { filterTools } from '../utils/tool-filter';
 
 /**
@@ -101,11 +101,14 @@ export class Agent<T extends AgentOptions = AgentOptions>
       this.logger.debug(`Log level set to: ${LogLevel[options.logLevel]}`);
     }
 
-    // Initialize event stream manager
-    this.eventStream = new AgentEventStreamProcessor(options.eventStreamOptions);
+    // Initialize event stream manager with initial events
+    this.eventStream = new AgentEventStreamProcessor({
+      ...options.eventStreamOptions,
+      initialEvents: options.initialEvents,
+    });
 
     // Initialize Tool Manager
-    this.toolManager = new ToolManager(this.logger);
+    this.toolManager = new ToolManager();
 
     // Ensure context options have default values
     const contextAwarenessOptions: AgentContextAwarenessOptions = options.context ?? {};
@@ -167,6 +170,8 @@ export class Agent<T extends AgentOptions = AgentOptions>
     // Initialize execution controller
     this.executionController = new AgentExecutionController();
   }
+
+
 
   /**
    * Custom LLM client for testing or custom implementations
@@ -312,14 +317,7 @@ Provide concise and accurate responses.`;
         normalizedOptions.sessionId ??
         `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
-      // Determine the best tool call engine based on the provider if not explicitly specified
-      if (!this.options.toolCallEngine && !normalizedOptions.toolCallEngine) {
-        const providerEngine = getToolCallEngineForProvider(this.currentModel.provider);
-        normalizedOptions.toolCallEngine = providerEngine;
-        this.logger.info(
-          `[Agent] Auto-selected tool call engine "${providerEngine}" for provider "${this.currentModel.provider}"`,
-        );
-      }
+
 
       // Create and send agent run start event
       const runStartEvent = this.eventStream.createEvent('agent_run_start', {

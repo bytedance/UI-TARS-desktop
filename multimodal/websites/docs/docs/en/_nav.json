@@ -11,7 +11,8 @@
   },
   {
     "text": "Blog",
-    "link": "/blog/2025-06-25-introducing-agent-tars-beta.html"
+    "link": "/blog",
+    "activeMatch": "/blog/"
   },
   {
     "text": "Version",

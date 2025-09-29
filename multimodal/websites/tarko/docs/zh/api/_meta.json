@@ -1,0 +1,32 @@
+[
+  {
+    "type": "file",
+    "name": "agent",
+    "label": "Agent"
+  },
+  {
+    "type": "file",
+    "name": "agent-server",
+    "label": "Agent Server"
+  },
+  {
+    "type": "file",
+    "name": "tool-call-engine",
+    "label": "Tool Call Engine"
+  },
+  {
+    "type": "file",
+    "name": "context-engineering",
+    "label": "Context Engineering"
+  },
+  {
+    "type": "file",
+    "name": "hooks",
+    "label": "Hooks"
+  },
+  {
+    "type": "file",
+    "name": "agent-ui-config",
+    "label": "Agent UI Config"
+  }
+]

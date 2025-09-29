@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FiExternalLink, FiCopy, FiCheck, FiGlobe } from 'react-icons/fi';
 import { StandardPanelContent } from '../types/panelContent';
-import { MarkdownRenderer } from '@/sdk/markdown-renderer';
+import { MarkdownRenderer } from '@tarko/ui';
 import { wrapMarkdown } from '@/common/utils/markdown';
 import { FileDisplayMode } from '../types';
 import { isOmniTarsTextContentArray, OmniTarsTextContent } from '@/common/services/SearchService';
@@ -82,10 +82,11 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
             {/* Floating copy button */}
             <button
               onClick={() => copyContent(result.content, index)}
-              className={`absolute top-6 right-6 z-10 p-2 rounded-lg backdrop-blur-md transition-all duration-200 opacity-0 group-hover:opacity-100 ${isCopied
+              className={`absolute top-6 right-6 z-10 p-2 rounded-lg backdrop-blur-md transition-all duration-200 opacity-0 group-hover:opacity-100 ${
+                isCopied
                   ? 'bg-green-900/40 text-green-400 border border-green-700/50'
                   : 'bg-gray-800/80 text-gray-400 border border-gray-600/50 hover:bg-gray-700 hover:text-gray-300'
-                }`}
+              }`}
               title="Copy content"
             >
               {isCopied ? (
@@ -125,9 +126,9 @@ export const LinkReaderRenderer: React.FC<LinkReaderRendererProps> = ({ panelCon
 
               {/* Content area */}
               <div>
-                <MarkdownRenderer 
-                  content={wrapMarkdown(result.content)} 
-                  forceDarkTheme 
+                <MarkdownRenderer
+                  content={wrapMarkdown(result.content)}
+                  forceDarkTheme
                   codeBlockStyle={{ whiteSpace: 'pre-wrap' }}
                 />
               </div>
@@ -296,9 +297,9 @@ function parseVersion2Content(
     const content =
       summaryIndex >= 0
         ? lines
-          .slice(summaryIndex + 1)
-          .join('\n')
-          .trim()
+            .slice(summaryIndex + 1)
+            .join('\n')
+            .trim()
         : textContent;
 
     if (!content) {

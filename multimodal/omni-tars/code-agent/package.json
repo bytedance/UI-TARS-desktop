@@ -1,6 +1,6 @@
 {
   "name": "@omni-tars/code-agent",
-  "version": "0.3.0-beta.11",
+  "version": "0.3.0-beta.12",
   "description": "",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -29,7 +29,7 @@
     "@tarko/agent": "workspace:*",
     "@omni-tars/core": "workspace:*",
     "@tarko/agent-interface": "workspace:*",
-    "@agent-infra/sandbox": "0.0.5"
+    "@agent-infra/sandbox": "0.0.6"
   },
   "devDependencies": {
     "@rslib/core": "0.10.0",

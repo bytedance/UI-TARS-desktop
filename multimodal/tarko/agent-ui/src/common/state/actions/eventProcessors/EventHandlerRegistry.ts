@@ -1,7 +1,5 @@
 import { EventHandler } from './types';
 import { AgentEventStream } from '@/common/types';
-
-// Import all handlers
 import {
   UserMessageHandler,
   AssistantMessageHandler,
@@ -15,11 +13,7 @@ import {
   StreamingToolCallHandler,
 } from './handlers/ToolHandler';
 
-import { PlanStartHandler, PlanUpdateHandler, PlanFinishHandler } from './handlers/PlanHandler';
-
 import { SystemMessageHandler, EnvironmentInputHandler } from './handlers/SystemHandler';
-
-import { FinalAnswerHandler, FinalAnswerStreamingHandler } from './handlers/FinalAnswerHandler';
 
 import { AgentRunStartHandler, AgentRunEndHandler } from './handlers/AgentRunHandler';
 
@@ -48,18 +42,9 @@ export class EventHandlerRegistry {
     this.register(new ToolResultHandler());
     this.register(new StreamingToolCallHandler());
 
-    // Plan handlers
-    this.register(new PlanStartHandler());
-    this.register(new PlanUpdateHandler());
-    this.register(new PlanFinishHandler());
-
     // System handlers
     this.register(new SystemMessageHandler());
     this.register(new EnvironmentInputHandler());
-
-    // Final answer handlers
-    this.register(new FinalAnswerHandler());
-    this.register(new FinalAnswerStreamingHandler());
 
     // Agent run handlers
     this.register(new AgentRunStartHandler());

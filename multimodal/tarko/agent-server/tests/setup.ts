@@ -97,14 +97,6 @@ vi.mock('../storage', () => ({
   createStorageProvider: vi.fn().mockReturnValue(null),
 }));
 
-// Mock Socket.IO setup
-vi.mock('../core/SocketHandlers', () => ({
-  setupSocketIO: vi.fn().mockReturnValue({
-    emit: vi.fn(),
-    on: vi.fn(),
-  }),
-}));
-
 // Mock HTTP and Express properly
 vi.mock('http', async () => {
   const actual = await vi.importActual('http');
@@ -171,14 +163,6 @@ vi.mock('express', async () => {
 // Mock CORS
 vi.mock('cors', () => ({
   default: vi.fn(() => (req: any, res: any, next: any) => next()),
-}));
-
-// Mock Socket.IO
-vi.mock('socket.io', () => ({
-  Server: vi.fn().mockImplementation(() => ({
-    on: vi.fn(),
-    emit: vi.fn(),
-  })),
 }));
 
 // Increase test timeout for integration tests

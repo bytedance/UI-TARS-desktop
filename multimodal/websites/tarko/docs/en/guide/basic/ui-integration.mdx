@@ -1,0 +1,703 @@
+---
+title: UI Integration
+description: Build web interfaces for Tarko agents
+---
+
+# UI Integration
+
+**Tarko** provides flexible UI integration options to build user interfaces for your agents using modern web technologies.
+
+## Integration Options
+
+### 1. **Tarko Agent UI** (Recommended)
+
+The official web UI implementation that works out-of-the-box with any **Tarko Agent**:
+
+```bash
+npm install @tarko/agent-ui
+```
+
+**Features:**
+- Real-time agent communication
+- Built-in chat interface
+- Tool execution visualization
+- Event stream monitoring
+- Responsive design
+
+### 2. **Custom Web UI**
+
+Build your own web interface using the **Agent Protocol**:
+
+```typescript
+import { AgentClient } from '@tarko/agent-client';
+
+const client = new AgentClient({
+  endpoint: 'http://localhost:3000',
+});
+
+// Send message to agent
+const response = await client.sendMessage('Hello, agent!');
+```
+
+### 3. **Native Applications**
+
+Integrate with desktop or mobile applications using HTTP/WebSocket APIs.
+
+## Architecture Overview
+
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   Frontend UI   │◄──►│  Tarko Agent     │◄──►│  LLM Provider   │
+│                 │    │  Server          │    │                 │
+├─────────────────┤    ├──────────────────┤    ├─────────────────┤
+│ • Chat Interface│    │ • Agent Protocol │    │ • OpenAI        │
+│ • Tool Outputs  │    │ • Event Stream   │    │ • Anthropic     │
+│ • Real-time     │    │ • Tool Execution │    │ • Volcengine    │
+│   Updates       │    │ • Context Mgmt   │    │ • Others        │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+```
+
+## Quick Start with Tarko Agent UI
+
+The fastest way to get a web UI for your agent:
+
+### 1. Install Dependencies
+
+```bash
+npm install @tarko/agent-ui
+```
+
+### 2. Basic Setup
+
+```typescript
+import { AgentUI } from '@tarko/agent-ui';
+import '@tarko/agent-ui/styles.css';
+
+function App() {
+  return (
+    <AgentUI
+      endpoint="http://localhost:3000"
+      title="My Agent"
+      theme="light"
+    />
+  );
+}
+
+export default App;
+```
+
+### 3. Start Your Agent Server
+
+```bash
+tarko run --server
+```
+
+Your web UI will connect to the agent automatically!
+
+## Communication Protocols
+
+### HTTP API
+
+RESTful API for basic agent interactions:
+
+```typescript
+// Send message
+POST /api/chat
+{
+  "message": "Hello, agent!",
+  "sessionId": "session-123"
+}
+
+// Get session history
+GET /api/sessions/session-123/messages
+```
+
+### WebSocket
+
+Real-time bidirectional communication:
+
+```typescript
+const ws = new WebSocket('ws://localhost:3000/ws');
+
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  console.log('Agent event:', data);
+};
+```
+
+### Server-Sent Events (SSE)
+
+Streaming responses for real-time updates:
+
+```typescript
+const eventSource = new EventSource('/api/stream/session-123');
+
+eventSource.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  console.log('Stream update:', data);
+};
+```
+
+## Event Stream
+
+**Tarko** uses a standardized event stream format for real-time communication:
+
+```typescript
+interface AgentEvent {
+  type: 'message' | 'tool_call' | 'tool_result' | 'thinking' | 'error';
+  timestamp: string;
+  sessionId: string;
+  data: any;
+}
+```
+
+### Event Types
+
+| Event Type | Description | Data |
+|------------|-------------|------|
+| `message` | Agent response message | `{ content: string, role: 'assistant' }` |
+| `tool_call` | Tool execution started | `{ name: string, args: object }` |
+| `tool_result` | Tool execution completed | `{ result: any, success: boolean }` |
+| `thinking` | Agent reasoning process | `{ content: string }` |
+| `error` | Error occurred | `{ message: string, code?: string }` |
+
+## Custom Web UI Development
+
+### React Integration
+
+Build a custom React interface:
+
+```typescript
+import React, { useState, useEffect } from 'react';
+import { AgentClient } from '@tarko/agent-client';
+
+const CustomAgentUI = () => {
+  const [client] = useState(() => new AgentClient({
+    endpoint: 'http://localhost:3000'
+  }));
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const sendMessage = async () => {
+    if (!input.trim()) return;
+    
+    setLoading(true);
+    const userMessage = { role: 'user', content: input };
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+
+    try {
+      const response = await client.sendMessage(input);
+      const assistantMessage = { role: 'assistant', content: response.content };
+      setMessages(prev => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error('Error sending message:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="agent-ui">
+      <div className="messages">
+        {messages.map((msg, idx) => (
+          <div key={idx} className={`message ${msg.role}`}>
+            {msg.content}
+          </div>
+        ))}
+      </div>
+      <div className="input-area">
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+          placeholder="Type your message..."
+          disabled={loading}
+        />
+        <button onClick={sendMessage} disabled={loading}>
+          {loading ? 'Sending...' : 'Send'}
+        </button>
+      </div>
+    </div>
+  );
+};
+```
+
+### Vue.js Integration
+
+```vue
+<template>
+  <div class="agent-ui">
+    <div class="messages">
+      <div
+        v-for="(message, index) in messages"
+        :key="index"
+        :class="`message ${message.role}`"
+      >
+        {{ message.content }}
+      </div>
+    </div>
+    <div class="input-area">
+      <input
+        v-model="input"
+        @keyup.enter="sendMessage"
+        placeholder="Type your message..."
+        :disabled="loading"
+      />
+      <button @click="sendMessage" :disabled="loading">
+        {{ loading ? 'Sending...' : 'Send' }}
+      </button>
+    </div>
+  </div>
+</template>
+
+<script>
+import { AgentClient } from '@tarko/agent-client';
+
+export default {
+  data() {
+    return {
+      client: new AgentClient({ endpoint: 'http://localhost:3000' }),
+      messages: [],
+      input: '',
+      loading: false
+    };
+  },
+  methods: {
+    async sendMessage() {
+      if (!this.input.trim()) return;
+      
+      this.loading = true;
+      this.messages.push({ role: 'user', content: this.input });
+      const message = this.input;
+      this.input = '';
+
+      try {
+        const response = await this.client.sendMessage(message);
+        this.messages.push({ role: 'assistant', content: response.content });
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        this.loading = false;
+      }
+    }
+  }
+};
+</script>
+```
+
+## Real-time Features
+
+### WebSocket Connection
+
+Implement real-time communication:
+
+```typescript
+class AgentWebSocket {
+  private ws: WebSocket;
+  private eventHandlers: Map<string, Function[]> = new Map();
+
+  constructor(endpoint: string) {
+    this.ws = new WebSocket(endpoint.replace('http', 'ws') + '/ws');
+    this.setupEventHandlers();
+  }
+
+  private setupEventHandlers() {
+    this.ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      const handlers = this.eventHandlers.get(data.type) || [];
+      handlers.forEach(handler => handler(data));
+    };
+
+    this.ws.onopen = () => {
+      console.log('WebSocket connected');
+    };
+
+    this.ws.onclose = () => {
+      console.log('WebSocket disconnected');
+      // Implement reconnection logic
+    };
+  }
+
+  on(eventType: string, handler: Function) {
+    if (!this.eventHandlers.has(eventType)) {
+      this.eventHandlers.set(eventType, []);
+    }
+    this.eventHandlers.get(eventType)!.push(handler);
+  }
+
+  sendMessage(message: string) {
+    this.ws.send(JSON.stringify({ type: 'message', content: message }));
+  }
+}
+
+// Usage
+const agentWS = new AgentWebSocket('http://localhost:3000');
+
+agentWS.on('message', (data) => {
+  console.log('Received message:', data.content);
+});
+
+agentWS.on('tool_call', (data) => {
+  console.log('Tool called:', data.name, data.args);
+});
+
+agentWS.on('tool_result', (data) => {
+  console.log('Tool result:', data.result);
+});
+```
+
+### Server-Sent Events
+
+Alternative approach using SSE:
+
+```typescript
+class AgentEventSource {
+  private eventSource: EventSource;
+  private sessionId: string;
+
+  constructor(endpoint: string, sessionId: string) {
+    this.sessionId = sessionId;
+    this.eventSource = new EventSource(`${endpoint}/api/stream/${sessionId}`);
+    this.setupEventHandlers();
+  }
+
+  private setupEventHandlers() {
+    this.eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      this.handleEvent(data);
+    };
+
+    this.eventSource.onerror = (error) => {
+      console.error('SSE error:', error);
+    };
+  }
+
+  private handleEvent(data: any) {
+    switch (data.type) {
+      case 'message':
+        this.onMessage(data);
+        break;
+      case 'tool_call':
+        this.onToolCall(data);
+        break;
+      case 'tool_result':
+        this.onToolResult(data);
+        break;
+    }
+  }
+
+  onMessage(data: any) {
+    // Override in subclass or pass callback
+  }
+
+  onToolCall(data: any) {
+    // Override in subclass or pass callback
+  }
+
+  onToolResult(data: any) {
+    // Override in subclass or pass callback
+  }
+
+  close() {
+    this.eventSource.close();
+  }
+}
+```
+
+## UI Components
+
+### Chat Interface
+
+Basic chat component structure:
+
+```typescript
+interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+  toolCalls?: ToolCall[];
+}
+
+interface ToolCall {
+  id: string;
+  name: string;
+  args: object;
+  result?: any;
+  status: 'pending' | 'success' | 'error';
+}
+```
+
+### Tool Execution Visualization
+
+```typescript
+import React from 'react';
+
+interface ToolExecutionProps {
+  toolCall: {
+    name: string;
+    args: object;
+    result?: any;
+    status: 'pending' | 'success' | 'error';
+    startTime: Date;
+    endTime?: Date;
+  };
+}
+
+const ToolExecution: React.FC<ToolExecutionProps> = ({ toolCall }) => {
+  const duration = toolCall.endTime 
+    ? toolCall.endTime.getTime() - toolCall.startTime.getTime()
+    : null;
+
+  return (
+    <div className={`tool-execution ${toolCall.status}`}>
+      <div className="tool-header">
+        <span className="tool-name">{toolCall.name}</span>
+        <span className="tool-status">{toolCall.status}</span>
+        {duration && (
+          <span className="tool-duration">{duration}ms</span>
+        )}
+      </div>
+      
+      <details className="tool-args">
+        <summary>Arguments</summary>
+        <pre>{JSON.stringify(toolCall.args, null, 2)}</pre>
+      </details>
+      
+      {toolCall.result && (
+        <details className="tool-result">
+          <summary>Result</summary>
+          <pre>{JSON.stringify(toolCall.result, null, 2)}</pre>
+        </details>
+      )}
+    </div>
+  );
+};
+```
+
+### Thinking Process Display
+
+```typescript
+const ThinkingProcess: React.FC<{ thoughts: string[] }> = ({ thoughts }) => {
+  return (
+    <div className="thinking-process">
+      <div className="thinking-header">
+        <span>🤔 Agent is thinking...</span>
+      </div>
+      <div className="thoughts">
+        {thoughts.map((thought, idx) => (
+          <div key={idx} className="thought">
+            {thought}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+```
+
+## Styling and Theming
+
+### CSS Variables
+
+```css
+:root {
+  --agent-primary: #007bff;
+  --agent-secondary: #6c757d;
+  --agent-success: #28a745;
+  --agent-danger: #dc3545;
+  --agent-warning: #ffc107;
+  --agent-info: #17a2b8;
+  
+  --agent-bg: #ffffff;
+  --agent-text: #333333;
+  --agent-border: #e9ecef;
+  
+  --agent-message-user-bg: #007bff;
+  --agent-message-user-text: #ffffff;
+  --agent-message-assistant-bg: #f8f9fa;
+  --agent-message-assistant-text: #333333;
+}
+
+[data-theme="dark"] {
+  --agent-bg: #1a1a1a;
+  --agent-text: #ffffff;
+  --agent-border: #333333;
+  
+  --agent-message-assistant-bg: #2d2d2d;
+  --agent-message-assistant-text: #ffffff;
+}
+```
+
+### Component Styles
+
+```css
+.agent-ui {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--agent-bg);
+  color: var(--agent-text);
+}
+
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.message {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  max-width: 80%;
+}
+
+.message.user {
+  background: var(--agent-message-user-bg);
+  color: var(--agent-message-user-text);
+  margin-left: auto;
+}
+
+.message.assistant {
+  background: var(--agent-message-assistant-bg);
+  color: var(--agent-message-assistant-text);
+}
+
+.input-area {
+  display: flex;
+  padding: 1rem;
+  border-top: 1px solid var(--agent-border);
+}
+
+.input-area input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid var(--agent-border);
+  border-radius: 0.25rem;
+  margin-right: 0.5rem;
+}
+
+.input-area button {
+  padding: 0.75rem 1.5rem;
+  background: var(--agent-primary);
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.input-area button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+```
+
+## Authentication & Security
+
+### API Keys
+
+Secure API key authentication:
+
+```typescript
+const client = new AgentClient({
+  endpoint: 'http://localhost:3000',
+  apiKey: process.env.TARKO_API_KEY,
+});
+```
+
+### Session Management
+
+Manage user sessions and context:
+
+```typescript
+interface Session {
+  id: string;
+  userId?: string;
+  createdAt: Date;
+  lastActivity: Date;
+  context: AgentContext;
+}
+```
+
+## Deployment Considerations
+
+### CORS Configuration
+
+For web UIs, configure CORS in your agent server:
+
+```typescript
+export default defineConfig({
+  server: {
+    cors: {
+      origin: ['http://localhost:3000', 'https://myapp.com'],
+      credentials: true,
+    },
+  },
+});
+```
+
+### Reverse Proxy
+
+Use a reverse proxy for production deployments:
+
+```nginx
+location /api/ {
+    proxy_pass http://localhost:3001/;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host $host;
+    proxy_cache_bypass $http_upgrade;
+}
+```
+
+### Environment Configuration
+
+```typescript
+// config.ts
+export const config = {
+  apiEndpoint: process.env.REACT_APP_API_ENDPOINT || 'http://localhost:3000',
+  wsEndpoint: process.env.REACT_APP_WS_ENDPOINT || 'ws://localhost:3000',
+  apiKey: process.env.REACT_APP_API_KEY,
+};
+```
+
+### Build and Deploy
+
+```bash
+# Build for production
+npm run build
+
+# Deploy to static hosting
+# (Vercel, Netlify, AWS S3, etc.)
+```
+
+### Docker Deployment
+
+```dockerfile
+# Dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+
+COPY . .
+RUN npm run build
+
+FROM nginx:alpine
+COPY --from=0 /app/build /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/nginx.conf
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+## Next Steps
+
+- [Agent Protocol →](/guide/advanced/agent-protocol)
+- [Event Stream →](/guide/basic/event-stream)
+- [Configuration →](/guide/basic/configuration)

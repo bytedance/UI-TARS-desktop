@@ -1,0 +1,181 @@
+---
+title: 事件流
+description: 理解 Tarko 的事件驱动架构
+---
+
+# 事件流
+
+Tarko 基于 **事件驱动架构** 构建，所有 Agent 交互都表示为流中的事件。这使得实时监控、调试和上下文管理等强大功能成为可能。
+
+## 事件类型
+
+Tarko 定义了几种核心事件类型：
+
+### 用户事件
+
+```typescript
+{
+  type: 'user_message',
+  content: '你好，可以帮助我吗？',
+  timestamp: '2025-01-01T00:00:00Z'
+}
+```
+
+### Agent 事件
+
+```typescript
+{
+  type: 'assistant_message',
+  content: '我很乐意帮助你！',
+  timestamp: '2025-01-01T00:00:01Z'
+}
+```
+
+### 工具事件
+
+```typescript
+{
+  type: 'tool_call',
+  toolCall: {
+    id: 'call_123',
+    function: {
+      name: 'getWeather',
+      arguments: '{"location": "Boston"}'
+    }
+  },
+  timestamp: '2025-01-01T00:00:02Z'
+}
+
+{
+  type: 'tool_result',
+  toolCallId: 'call_123',
+  toolName: 'getWeather',
+  result: { temperature: 72, condition: 'sunny' },
+  timestamp: '2025-01-01T00:00:03Z'
+}
+```
+
+### 系统事件
+
+```typescript
+{
+  type: 'context_updated',
+  data: {
+    reason: 'compression',
+    newLength: 8000,
+    timestamp: '2025-01-01T00:00:04Z'
+  }
+}
+```
+
+## 监听事件
+
+通过事件流处理器订阅事件：
+
+```typescript
+import { Agent } from '@tarko/agent';
+
+const agent = new Agent(config);
+const eventStream = agent.getEventStream();
+
+// 监听所有事件
+eventStream.on('event', (event) => {
+  console.log('事件:', event.type);
+});
+
+// 监听特定事件类型
+eventStream.on('tool_call', (event) => {
+  console.log('调用工具:', event.toolCall.function.name);
+});
+
+eventStream.on('assistant_message', (event) => {
+  console.log('Agent 响应:', event.content);
+});
+```
+
+## 事件流处理
+
+实时处理事件：
+
+```typescript
+const eventProcessor = {
+  async processEvent(event) {
+    switch (event.type) {
+      case 'tool_call':
+        // 记录工具使用
+        await logToolUsage(event.toolCall);
+        break;
+        
+      case 'assistant_message':
+        // 更新 UI
+        await updateUI(event.content);
+        break;
+        
+      case 'error':
+        // 处理错误
+        await handleError(event.error);
+        break;
+    }
+  }
+};
+
+eventStream.on('event', eventProcessor.processEvent);
+```
+
+## 服务器发送事件 (SSE)
+
+对于 Web 应用，事件可以通过 SSE 流式传输：
+
+```typescript
+// 服务器
+app.get('/agent/stream', (req, res) => {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive'
+  });
+
+  const eventStream = agent.getEventStream();
+  eventStream.on('event', (event) => {
+    res.write(`data: ${JSON.stringify(event)}\n\n`);
+  });
+});
+```
+
+```javascript
+// 客户端
+const eventSource = new EventSource('/agent/stream');
+
+eventSource.onmessage = (event) => {
+  const agentEvent = JSON.parse(event.data);
+  handleAgentEvent(agentEvent);
+};
+```
+
+## 事件持久化
+
+事件可以持久化以供回放和分析：
+
+```typescript
+const agent = new Agent({
+  ...config,
+  persistence: {
+    enabled: true,
+    storage: 'file', // 或 'redis', 'mongodb'
+    path: './agent-events.jsonl'
+  }
+});
+```
+
+## 事件过滤
+
+基于条件过滤事件：
+
+```typescript
+agent.on('event', (event) => {
+  // 只处理工具相关事件
+  if (event.type.startsWith('tool_')) {
+    processToolEvent(event);
+  }
+});
+```

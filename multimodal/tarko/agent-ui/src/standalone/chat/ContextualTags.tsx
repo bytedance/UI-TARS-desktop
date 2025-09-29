@@ -18,22 +18,11 @@ interface PathValidation {
   };
 }
 
-/**
- * ContextualTags - Display selected contextual items as removable tags
- *
- * Features:
- * - Visual distinction between files, directories, and workspace
- * - Smooth animations for add/remove operations
- * - Hover effects and clear remove actions
- * - Compact layout to preserve input space
- * - Path validation with visual indicators for invalid paths
- */
 export const ContextualTags: React.FC<ContextualTagsProps> = ({ items, onRemove }) => {
   const { activeSessionId } = useSession();
   const [pathValidation, setPathValidation] = useState<PathValidation>({});
   const [isValidating, setIsValidating] = useState(false);
 
-  // Validate paths when items change
   useEffect(() => {
     if (!activeSessionId || items.length === 0) {
       setPathValidation({});
@@ -44,7 +33,7 @@ export const ContextualTags: React.FC<ContextualTagsProps> = ({ items, onRemove 
       setIsValidating(true);
       try {
         const pathsToValidate = items
-          .filter((item) => item.type !== 'workspace') // Skip workspace validation
+          .filter((item) => item.type !== 'workspace')
           .map((item) => item.relativePath);
 
         if (pathsToValidate.length > 0) {
@@ -68,7 +57,6 @@ export const ContextualTags: React.FC<ContextualTagsProps> = ({ items, onRemove 
       }
     };
 
-    // Debounce validation to avoid too many requests
     const debounceTimer = setTimeout(validatePaths, 300);
     return () => clearTimeout(debounceTimer);
   }, [items, activeSessionId]);
@@ -79,7 +67,6 @@ export const ContextualTags: React.FC<ContextualTagsProps> = ({ items, onRemove 
     const validation = pathValidation[item.relativePath];
     const isInvalid = validation && !validation.exists;
 
-    // Show warning icon for invalid paths
     if (isInvalid) {
       return <FiAlertTriangle size={14} className="text-red-500 dark:text-red-400 flex-shrink-0" />;
     }

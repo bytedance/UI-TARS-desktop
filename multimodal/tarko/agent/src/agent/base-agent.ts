@@ -29,8 +29,8 @@ import { getLogger } from '@tarko/shared-utils';
  * - Loop management hooks (onEachAgentLoopStart, onAgentLoopEnd, etc.)
  * - Termination control (requestLoopTermination, onBeforeLoopTermination)
  *
- * Derived classes can override these methods to implement custom behavior
- * without needing to implement the complete agent functionality.
+ * @internal This class is an internal implementation detail and should not be extended directly.
+ * Use the Agent class instead for custom agent implementations.
  */
 export abstract class BaseAgent<T extends AgentOptions = AgentOptions> {
   protected logger = getLogger('BaseAgent');

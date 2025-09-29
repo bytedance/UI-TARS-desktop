@@ -16,7 +16,7 @@ export type BuiltInMCPServers = Partial<Record<BuiltInMCPServerName, McpServer>>
 
 /**
  * Browser state information for tracking current page status
- * 
+ *
  * This interface tracks the current browser state including URL and screenshot
  * for use in tool results and event streams.
  */

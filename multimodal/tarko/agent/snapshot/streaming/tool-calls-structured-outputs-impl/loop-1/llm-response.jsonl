@@ -1,11 +1,18 @@
-{"id":"2025071321504102FC97FA5928D837FD0E","created":1752414642,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"role":"assistant"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504102FC97FA5928D837FD0E","created":1752414642,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"{"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504102FC97FA5928D837FD0E","created":1752414642,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"content\": \"I"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504102FC97FA5928D837FD0E","created":1752414643,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"'ll check the weather for you. First"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504102FC97FA5928D837FD0E","created":1752414643,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":", I need to find your current location.\","},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504102FC97FA5928D837FD0E","created":1752414643,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"toolCall\": {"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504102FC97FA5928D837FD0E","created":1752414643,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n    \"name\": \"getCurrentLocation\","},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504102FC97FA5928D837FD0E","created":1752414643,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n    \"args\": {}\n  }\n}"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504102FC97FA5928D837FD0E","created":1752414643,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504102FC97FA5928D837FD0E","created":1752414643,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"finish_reason":"stop","stop_reason":"end_turn"}],"usage":{}}
-{"id":"2025071321504102FC97FA5928D837FD0E","created":1752414643,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{"completion_tokens":55,"prompt_tokens":368,"total_tokens":423}}
+{"id":"20250919180204CD2C1384A53FF91DB2E3","created":1758276125,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"role":"assistant"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180204CD2C1384A53FF91DB2E3","created":1758276125,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"{"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180204CD2C1384A53FF91DB2E3","created":1758276125,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"content"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180204CD2C1384A53FF91DB2E3","created":1758276125,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\": \"I'll"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180204CD2C1384A53FF91DB2E3","created":1758276125,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" check the weather for you"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180204CD2C1384A53FF91DB2E3","created":1758276125,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":". First, I"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180204CD2C1384A53FF91DB2E3","created":1758276125,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" need to get your current"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180204CD2C1384A53FF91DB2E3","created":1758276126,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" location.\","},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180204CD2C1384A53FF91DB2E3","created":1758276126,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"tool"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180204CD2C1384A53FF91DB2E3","created":1758276126,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"Call\": {"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180204CD2C1384A53FF91DB2E3","created":1758276126,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n    \"name\":"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180204CD2C1384A53FF91DB2E3","created":1758276126,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" \"getCurrentLocation\","},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180204CD2C1384A53FF91DB2E3","created":1758276126,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n    \"args"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180204CD2C1384A53FF91DB2E3","created":1758276126,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\": {}\n  "},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180204CD2C1384A53FF91DB2E3","created":1758276126,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"}\n}"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180204CD2C1384A53FF91DB2E3","created":1758276126,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250919180204CD2C1384A53FF91DB2E3","created":1758276126,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"finish_reason":"stop","stop_reason":"end_turn"}],"usage":{}}
+{"id":"20250919180204CD2C1384A53FF91DB2E3","created":1758276126,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{"completion_tokens":55,"prompt_tokens":368,"total_tokens":423}}

@@ -184,6 +184,15 @@ export interface AgentMemoryOptions {
    * @defaultValue `false`
    */
   enableStreamingToolCallEvents?: boolean;
+
+  /**
+   * Initial events to restore to the agent's event stream during initialization.
+   * This is useful for restoring conversation context from storage when recreating agent instances.
+   * Events will be restored without triggering subscribers or side effects.
+   *
+   * @defaultValue `undefined`
+   */
+  initialEvents?: AgentEventStream.Event[];
 }
 
 /**
@@ -230,6 +239,13 @@ export interface AgentWorkspaceOptions {
 }
 
 /**
+ * Options for sandbox using in agent tools
+ */
+export interface AgentSandboxOptions {
+  sandboxUrl?: string;
+}
+
+/**
  * Some setting options used to instantiate an Agent.
  */
 export interface AgentOptions
@@ -239,7 +255,8 @@ export interface AgentOptions
     AgentLoopOptions,
     AgentMemoryOptions,
     AgentMiscOptions,
-    AgentWorkspaceOptions {}
+    AgentWorkspaceOptions,
+    AgentSandboxOptions {}
 
 /**
  * Options for configuring agent context behavior (e.g. message history)

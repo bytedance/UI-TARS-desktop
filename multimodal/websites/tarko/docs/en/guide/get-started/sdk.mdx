@@ -1,0 +1,371 @@
+---
+title: SDK Reference
+description: Complete SDK reference for Tarko agent development
+---
+
+# SDK Reference
+
+Comprehensive guide to using the **`@tarko/agent`** SDK for building production-ready agents.
+
+## Installation
+
+```bash
+npm install @tarko/agent
+# or
+pnpm add @tarko/agent
+```
+
+## Core Imports
+
+```typescript
+// Main Agent class
+import { Agent } from '@tarko/agent';
+
+// Tool definition
+import { Tool, z } from '@tarko/agent';
+
+// Type definitions
+import type {
+  AgentOptions,
+  AgentModel
+} from '@tarko/agent';
+
+// Utilities
+import { getLogger, LogLevel } from '@tarko/agent';
+```
+
+## Agent Class
+
+### Constructor
+
+```typescript
+const agent = new Agent(options: AgentOptions)
+```
+
+#### AgentOptions Interface
+
+Based on the actual interface from `multimodal/tarko/agent-interface/src/agent-options.ts`:
+
+```typescript
+interface AgentOptions {
+  // Core Configuration
+  id?: string;                    // Unique agent ID (default: "@tarko/agent")
+  name?: string;                  // Agent identifier (default: "Anonymous")
+  instructions?: string;          // System prompt
+  
+  // Model Configuration
+  model?: AgentModel;             // Model configuration
+  maxTokens?: number;            // Token limit per request (default: 1000)
+  temperature?: number;          // LLM temperature (default: 0.7)
+  top_p?: number;               // Top-p sampling
+  thinking?: LLMReasoningOptions; // Reasoning options
+  
+  // Tools
+  tools?: Tool[];                 // Available tools
+  tool?: AgentToolFilterOptions;  // Tool filtering options
+  toolCallEngine?: ToolCallEngineType; // Tool call engine type (default: 'native')
+  
+  // Execution Control
+  maxIterations?: number;         // Max reasoning loops (default: 1000)
+  
+  // Context Management
+  context?: {
+    maxImagesCount?: number;      // Max images in context
+  };
+  eventStreamOptions?: AgentEventStream.ProcessorOptions;
+  enableStreamingToolCallEvents?: boolean; // (default: false)
+  initialEvents?: AgentEventStream.Event[]; // Restore events
+  
+  // Workspace
+  workspace?: string;             // Workspace directory
+  sandboxUrl?: string;           // Sandbox URL
+  
+  // Logging
+  logLevel?: LogLevel;           // Log level
+  metric?: {
+    enable?: boolean;            // Enable metric collection (default: false)
+  };
+}
+```
+
+### Core Methods
+
+#### `run()` - Execute Agent
+
+**Basic Usage:**
+```typescript
+// Simple text input - from examples/tool-calls/basic.ts
+const response = await agent.run("How's the weather today?");
+console.log(response);
+```
+
+**With Options:**
+```typescript
+// Using AgentRunNonStreamingOptions
+const runOptions = {
+  input: "How's the weather today?",
+};
+const response = await agent.run(runOptions);
+```
+
+**Streaming:**
+```typescript
+// From examples/streaming/tool-calls.ts
+const response = await agent.run({
+  input: "How's the weather today?",
+  stream: true,
+});
+
+for await (const chunk of response) {
+  console.log(chunk);
+}
+```
+
+#### Tool Definition
+
+Tools are defined using the Tool class and passed to the Agent constructor:
+
+```typescript
+// From examples/tool-calls/basic.ts
+const weatherTool = new Tool({
+  id: 'getWeather',
+  description: 'Get weather information for a specified location',
+  parameters: z.object({
+    location: z.string().describe('Location name, such as city name'),
+  }),
+  function: async (input) => {
+    const { location } = input;
+    return {
+      location,
+      temperature: '70°F (21°C)',
+      condition: 'Sunny',
+      precipitation: '10%',
+      humidity: '45%',
+      wind: '5 mph',
+    };
+  },
+});
+
+// Tools are passed to Agent constructor
+const agent = new Agent({
+  tools: [weatherTool],
+  // ... other options
+});
+```
+
+## Tool Definition
+
+### Tool Class
+
+Based on the actual Tool class from `multimodal/tarko/agent-interface/src/tool.ts`:
+
+```typescript
+const tool = new Tool({
+  id: string;                     // Unique tool identifier
+  description: string;            // What the tool does
+  parameters: ZodSchema | JSONSchema7; // Zod schema or JSON schema
+  function: (input: TParams) => Promise<any> | any; // Implementation function
+});
+```
+
+### Real Examples from Source Code
+
+**Location Tool:**
+```typescript
+// From examples/tool-calls/basic.ts
+const locationTool = new Tool({
+  id: 'getCurrentLocation',
+  description: "Get user's current location",
+  parameters: z.object({}),
+  function: async () => {
+    return { location: 'Boston' };
+  },
+});
+```
+
+**Weather Tool:**
+```typescript
+// From examples/tool-calls/basic.ts
+const weatherTool = new Tool({
+  id: 'getWeather',
+  description: 'Get weather information for a specified location',
+  parameters: z.object({
+    location: z.string().describe('Location name, such as city name'),
+  }),
+  function: async (input) => {
+    const { location } = input;
+    return {
+      location,
+      temperature: '70°F (21°C)',
+      condition: 'Sunny',
+      precipitation: '10%',
+      humidity: '45%',
+      wind: '5 mph',
+    };
+  },
+});
+```
+
+## Event Stream
+
+### Event Types
+
+Based on `multimodal/tarko/agent-interface/src/agent-event-stream.ts`, the Agent uses an internal event stream system. Events are emitted during agent execution and can be accessed through streaming responses.
+
+### Streaming Events
+
+```typescript
+// From examples/streaming/tool-calls.ts
+const response = await agent.run({
+  input: "How's the weather today?",
+  stream: true,
+});
+
+// Iterate through streaming events
+for await (const chunk of response) {
+  console.log('Event:', chunk);
+  // Events include: user_message, assistant_message_chunk, tool_call, tool_result, etc.
+}
+```
+
+## Advanced Configuration
+
+### Tool Call Engines
+
+```typescript
+// From actual source code - ToolCallEngineType options
+const agent = new Agent({
+  toolCallEngine: 'native',              // Use model's native tool calling
+  // or
+  toolCallEngine: 'prompt_engineering',  // Use prompt-based tool calling
+  // or
+  toolCallEngine: 'structured_outputs'   // Use structured output parsing
+});
+```
+
+### Context Management
+
+```typescript
+const agent = new Agent({
+  context: {
+    maxImagesCount: 10,           // Max images to keep in context
+  },
+  maxIterations: 20,             // Allow more reasoning loops
+  maxTokens: 4000,              // Limit response length
+  temperature: 0.7,             // Control randomness
+});
+```
+
+### Model Configuration
+
+```typescript
+// Different model providers
+const agent = new Agent({
+  model: {
+    provider: 'volcengine',
+    id: 'doubao-seed-1-6-vision-250815',
+    apiKey: process.env.ARK_API_KEY,
+  },
+  // or
+  model: {
+    provider: 'openai',
+    id: 'gpt-4o',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+});
+```
+
+## Error Handling
+
+```typescript
+try {
+  const response = await agent.run('Complex task');
+  console.log(response);
+} catch (error) {
+  console.error('Agent execution error:', error);
+}
+```
+
+## Real Examples
+
+Based on the actual examples in `multimodal/tarko/agent/examples/`:
+
+### Basic Tool Calls
+
+```typescript
+// From examples/tool-calls/basic.ts
+import { Agent, Tool, z, LogLevel } from '@tarko/agent';
+
+const locationTool = new Tool({
+  id: 'getCurrentLocation',
+  description: "Get user's current location",
+  parameters: z.object({}),
+  function: async () => {
+    return { location: 'Boston' };
+  },
+});
+
+const weatherTool = new Tool({
+  id: 'getWeather',
+  description: 'Get weather information for a specified location',
+  parameters: z.object({
+    location: z.string().describe('Location name, such as city name'),
+  }),
+  function: async (input) => {
+    const { location } = input;
+    return {
+      location,
+      temperature: '70°F (21°C)',
+      condition: 'Sunny',
+      precipitation: '10%',
+      humidity: '45%',
+      wind: '5 mph',
+    };
+  },
+});
+
+const agent = new Agent({
+  model: {
+    provider: 'volcengine',
+    id: 'doubao-seed-1-6-vision-250815',
+    apiKey: process.env.ARK_API_KEY,
+  },
+  tools: [locationTool, weatherTool],
+  logLevel: LogLevel.DEBUG,
+});
+
+const response = await agent.run("How's the weather today?");
+console.log(response);
+```
+
+### Streaming with Tool Calls
+
+```typescript
+// From examples/streaming/tool-calls.ts
+const agent = new Agent({
+  model: {
+    provider: 'volcengine',
+    id: 'doubao-seed-1-6-vision-250815',
+    apiKey: process.env.ARK_API_KEY,
+  },
+  tools: [locationTool, weatherTool],
+  toolCallEngine: 'native',
+  enableStreamingToolCallEvents: true,
+});
+
+const response = await agent.run({
+  input: "How's the weather today?",
+  stream: true,
+});
+
+for await (const chunk of response) {
+  console.log(chunk);
+}
+```
+
+## Next Steps
+
+- [Architecture →](/guide/get-started/architecture)
+- [Configuration →](/guide/basic/configuration)
+- [Tools →](/guide/basic/tools)
+- [Agent Hooks →](/guide/advanced/agent-hooks)

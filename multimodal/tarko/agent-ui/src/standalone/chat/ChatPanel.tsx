@@ -3,8 +3,6 @@ import { useParams } from 'react-router-dom';
 import { useSession } from '@/common/hooks/useSession';
 import { MessageGroup } from './Message/components/MessageGroup';
 import { ChatInput } from './MessageInput';
-import { ActionBar } from './ActionBar';
-
 import { useAtomValue } from 'jotai';
 import { groupedMessagesAtom } from '@/common/state/atoms/message';
 import { replayStateAtom } from '@/common/state/atoms/replay';
@@ -17,42 +15,34 @@ import { SessionCreatingState } from './components/SessionCreatingState';
 
 import './ChatPanel.css';
 
-/**
- * ChatPanel Component - Main chat interface with improved maintainability
- */
 export const ChatPanel: React.FC = () => {
   const { sessionId: urlSessionId } = useParams<{ sessionId: string }>();
   const { activeSessionId, isProcessing, connectionStatus, checkServerStatus, sendMessage } =
     useSession();
 
-  // Use URL sessionId if available, fallback to activeSessionId
   const currentSessionId = urlSessionId || activeSessionId;
   const groupedMessages = useAtomValue(groupedMessagesAtom);
   const replayState = useAtomValue(replayStateAtom);
   const { isReplayMode } = useReplayMode();
 
-  // Use messages from current session
   const activeMessages =
     currentSessionId && currentSessionId !== 'creating'
       ? groupedMessages[currentSessionId] || []
       : [];
 
-  // Scroll-to-bottom functionality
   const { messagesContainerRef, messagesEndRef, showScrollToBottom, scrollToBottom } =
     useScrollToBottom({
       threshold: 50,
       dependencies: [activeMessages],
       sessionId: currentSessionId,
       isReplayMode,
-      autoScrollOnUserMessage: !isReplayMode, // Enable auto-scroll for user messages in normal mode
+      autoScrollOnUserMessage: !isReplayMode,
     });
 
-  // Simplified state logic
   const isCreatingSession = !currentSessionId || currentSessionId === 'creating';
   const hasMessages = activeMessages.length > 0;
   const showEmptyState = !isCreatingSession && !hasMessages;
 
-  // Render session creating state only for the initial 'creating' state
   if (isCreatingSession) {
     return <SessionCreatingState isCreating={currentSessionId === 'creating'} />;
   }
@@ -92,7 +82,6 @@ export const ChatPanel: React.FC = () => {
 
       <div className="p-4 relative">
         <ScrollToBottomButton show={showScrollToBottom} onClick={scrollToBottom} />
-        <ActionBar sessionId={currentSessionId === 'creating' ? null : currentSessionId} />
         {!isReplayMode && (
           <ChatInput
             onSubmit={sendMessage}

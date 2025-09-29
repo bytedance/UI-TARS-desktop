@@ -1,0 +1,283 @@
+# Web UI 配置
+
+Web UI 配置 API 允许您自定义 Agent Web 界面的外观、布局和行为。配置品牌、欢迎屏幕、导航和 GUI Agent 显示选项。
+
+## 配置方式
+
+### 通过 tarko.config.ts
+
+在 `tarko.config.ts` 中通过 `webui` 选项配置 Web UI：
+
+```typescript
+// tarko.config.ts
+import { AgentAppConfig } from '@tarko/interface'
+
+export default {
+  // ... 其他配置
+  webui: {
+    logo: 'https://example.com/logo.png',
+    title: 'My Agent',
+    subtitle: 'AI 开发助手',
+    welcomTitle: '欢迎使用 My Agent',
+    welcomePrompts: [
+      '搜索最新的 GUI Agent 论文',
+      '查找 UI TARS 的相关信息'
+    ]
+  }
+} as AgentAppConfig
+```
+
+### 通过 Agent 构造函数
+
+通过静态属性 `webuiConfig` 设置 Web UI 配置：
+
+```typescript
+// Agent 类
+import { AgentWebUIImplementation } from '@tarko/interface'
+
+export class MyAgent extends MCPAgent {
+  static webuiConfig: AgentWebUIImplementation = {
+    logo: 'https://example.com/logo.png',
+    title: 'My Agent',
+    workspace: {
+      navItems: [
+        {
+          title: '代码编辑器',
+          link: 'http://localhost:3000',
+          icon: 'code'
+        }
+      ]
+    }
+  }
+}
+```
+
+## 配置选项
+
+### 基础品牌
+
+#### logo
+
+```typescript
+logo?: string
+```
+
+Web UI 徽标 URL，显示在导航栏中。
+
+**默认值：** Tarko 徽标
+
+#### title
+
+```typescript
+title?: string
+```
+
+在导航栏和浏览器标签页显示的站点标题。
+
+**默认值：** Agent 名称
+
+#### subtitle
+
+```typescript
+subtitle?: string
+```
+
+首页和 SEO 元描述的副标题。
+
+#### welcomTitle
+
+```typescript
+welcomTitle?: string
+```
+
+在首页欢迎屏幕显示的主标题。
+
+### 欢迎屏幕
+
+#### welcomePrompts
+
+```typescript
+welcomePrompts?: string[]
+```
+
+在欢迎屏幕显示的建议提示数组。
+
+**示例：**
+```typescript
+welcomePrompts: [
+  '搜索最新的 GUI Agent 论文',
+  '查找 UI TARS 的相关信息',
+  '告诉我今天 ProductHunt 上最受欢迎的 5 个项目'
+]
+```
+
+#### welcomeCards
+
+```typescript
+welcomeCards?: WelcomeCard[]
+```
+
+包含预定义提示和 Agent 选项的欢迎屏幕卡片。
+
+**WelcomeCard 接口：**
+```typescript
+interface WelcomeCard {
+  title: string          // 卡片显示标题
+  prompt: string         // 提示内容
+  image?: string         // 背景图片 URL
+  category: string       // 分组类别
+  agentOptions?: Record<string, any>  // Agent 配置
+}
+```
+
+**示例：**
+```typescript
+welcomeCards: [
+  {
+    title: '代码审查',
+    prompt: '审查我最新的 Pull Request',
+    category: '开发',
+    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71',
+    agentOptions: { mode: 'review' }
+  }
+]
+```
+
+### 工作区配置
+
+#### workspace
+
+```typescript
+workspace?: {
+  navItems?: WorkspaceNavItem[]
+}
+```
+
+工作区头部导航配置。
+
+**WorkspaceNavItem 接口：**
+```typescript
+interface WorkspaceNavItem {
+  title: string                    // 显示文本
+  link: string                     // 在新标签页打开的 URL
+  icon?: WorkspaceNavItemIcon      // 图标类型
+}
+
+type WorkspaceNavItemIcon = 'code' | 'monitor' | 'terminal' | 'browser' | 'desktop' | 'default'
+```
+
+**示例：**
+```typescript
+workspace: {
+  navItems: [
+    {
+      title: '代码服务器',
+      link: 'http://localhost:8080',
+      icon: 'code'
+    },
+    {
+      title: 'VNC',
+      link: 'http://localhost:6080',
+      icon: 'monitor'
+    }
+  ]
+}
+```
+
+### 布局配置
+
+#### layout
+
+```typescript
+layout?: {
+  defaultLayout?: LayoutMode
+  enableLayoutSwitchButton?: boolean
+  enableSidebar?: boolean
+  enableHome?: boolean
+}
+```
+
+布局行为和显示选项。
+
+**LayoutMode：**
+```typescript
+type LayoutMode = 'default' | 'narrow-chat'
+```
+
+**属性：**
+- `defaultLayout` - 初始布局模式（默认：`'default'`）
+  - `default` - 标准布局，包含完整工作区
+  - `narrow-chat` - 紧凑的聊天专注布局
+- `enableLayoutSwitchButton` - 在工具栏显示布局切换按钮（默认：`false`）
+- `enableSidebar` - 显示侧边栏面板（默认：`true`）
+- `enableHome` - 注册首页路由（默认：`true`）
+
+**示例：**
+```typescript
+layout: {
+  defaultLayout: 'narrow-chat',
+  enableLayoutSwitchButton: true,
+  enableSidebar: true
+}
+```
+
+### GUI Agent 配置
+
+#### guiAgent
+
+```typescript
+guiAgent?: {
+  defaultScreenshotRenderStrategy?: 'both' | 'beforeAction' | 'afterAction'
+  enableScreenshotRenderStrategySwitch?: boolean
+  renderGUIAction?: boolean
+  renderBrowserShell?: boolean
+}
+```
+
+GUI Agent 显示和截图渲染选项。
+
+**属性：**
+- `defaultScreenshotRenderStrategy` - 截图显示策略（默认：`'afterAction'`）
+  - `both` - 显示操作前后截图对比
+  - `beforeAction` - 仅显示操作前截图（适用于 Agent-TARS）
+  - `afterAction` - 仅显示操作后截图（适用于 Omni-TARS）
+- `enableScreenshotRenderStrategySwitch` - 允许运行时策略切换（默认：`false`）
+- `renderGUIAction` - 显示 GUI 操作详情卡片（默认：`true`）
+- `renderBrowserShell` - 在截图外包裹浏览器外壳 UI（默认：`true`）
+
+**示例：**
+```typescript
+guiAgent: {
+  defaultScreenshotRenderStrategy: 'beforeAction',
+  enableScreenshotRenderStrategySwitch: true,
+  renderGUIAction: true,
+  renderBrowserShell: false
+}
+```
+
+### 高级选项
+
+#### enableContextualSelector
+
+```typescript
+enableContextualSelector?: boolean
+```
+
+启用 @ 语法文件选择器。启用后，用户可以在输入框中输入 @ 来搜索和选择工作区文件/目录。
+
+**默认值：** `false`
+
+#### base
+
+```typescript
+base?: string
+```
+
+路由部署的基础路径。支持静态路径和正则表达式模式。
+
+**示例：**
+```typescript
+base: "/agent-ui"           // 静态路径
+base: "/tenant-.+"         // 正则表达式模式
+base: "/(foo|bar)/app"     // 带分组的正则表达式
+```

@@ -12,7 +12,7 @@ import {
 import { FileItem } from '@/common/state/atoms/files';
 import { useSession } from '@/common/hooks/useSession';
 import { formatTimestamp } from '@/common/utils/formatters';
-import { normalizeFilePath } from '@/common/utils/pathNormalizer';
+import { normalizeFilePath } from '@tarko/ui';
 
 interface WorkspaceFileManagerProps {
   files: FileItem[];
@@ -33,8 +33,6 @@ export const WorkspaceFileManager: React.FC<WorkspaceFileManagerProps> = ({ file
   const { setActivePanelContent } = useSession();
   const [isExpanded, setIsExpanded] = useState(true);
   const [selectedFileType, setSelectedFileType] = useState<string>('all');
-
-
 
   if (files.length === 0) {
     return null;
@@ -141,8 +139,6 @@ export const WorkspaceFileManager: React.FC<WorkspaceFileManagerProps> = ({ file
         );
     }
   };
-
-
 
   return (
     <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700/50 overflow-hidden">

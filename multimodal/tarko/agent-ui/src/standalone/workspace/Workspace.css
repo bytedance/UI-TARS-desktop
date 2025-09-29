@@ -499,7 +499,7 @@
   background: rgba(255, 255, 255, 0.15);
 }
 
-/* New animation for plan view */
+/* Animation utilities */
 @keyframes pulse-subtle {
   0%,
   100% {
@@ -620,4 +620,31 @@
 
 .workspace-control-panel {
   @apply bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm;
+}
+
+/* Mobile workspace adaptations - minimal custom CSS, mostly using Tailwind */
+@media (max-width: 768px) {
+  /* Mobile scrollbars - can't be done with Tailwind */
+  .workspace-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  
+  .workspace-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+  }
+  
+  .dark .workspace-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  /* Touch-friendly interactive elements */
+  .interactive-element {
+    @apply min-h-[44px] flex items-center;
+  }
+  
+  .tool-button {
+    @apply min-h-[44px] px-3 py-2;
+  }
 }

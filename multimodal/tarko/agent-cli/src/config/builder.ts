@@ -56,7 +56,7 @@ export function buildAppConfig<
     config = deepMerge(config, workspaceConfig);
   }
 
-  // Extract CLI-specific properties
+  // Extract known CLI options, everything else (including unknown options) goes to cliConfigProps
   const {
     agent,
     workspace,
@@ -65,35 +65,37 @@ export function buildAppConfig<
     quiet,
     port,
     stream,
-    // Extract core deprecated options
+    headless,
+    input,
+    format,
+    includeLogs,
+    useCache,
+    open,
     provider,
     apiKey,
     baseURL,
     shareProvider,
     thinking,
-    // Extract tool filter options
     tool,
-    // Extract MCP server filter options
     mcpServer,
-    // Extract server options
     server,
     ...cliConfigProps
   } = cliArguments;
 
   // Handle deprecated options
-  const deprecatedOptions = {
+  const deprecatedOptionValues = {
     provider,
     apiKey: apiKey || undefined,
     baseURL,
     shareProvider,
     thinking,
   }; // secretlint-disable-line @secretlint/secretlint-rule-pattern
-  const deprecatedKeys = Object.entries(deprecatedOptions)
+  const deprecatedKeys = Object.entries(deprecatedOptionValues)
     .filter(([, value]) => value !== undefined)
     .map(([optionName]) => optionName);
 
   logDeprecatedWarning(deprecatedKeys);
-  handleCoreDeprecatedOptions(cliConfigProps, deprecatedOptions);
+  handleCoreDeprecatedOptions(cliConfigProps, deprecatedOptionValues);
 
   // Handle tool filters
   handleToolFilterOptions(cliConfigProps, { tool });

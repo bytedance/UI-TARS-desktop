@@ -1,6 +1,6 @@
 import React from 'react';
 import { StandardPanelContent } from '../types/panelContent';
-import { DiffViewer } from '@/sdk/code-editor';
+import { DiffViewer } from '@tarko/ui';
 import { FileDisplayMode } from '../types';
 
 interface DiffRendererProps {
@@ -24,18 +24,18 @@ function extractDiffContent(content: string): string {
 function convertToUnifiedDiff(oldContent: string, newContent: string, fileName: string): string {
   const oldLines = oldContent.split('\n');
   const newLines = newContent.split('\n');
-  
+
   // Simple unified diff header
   const header = `--- a/${fileName}\n+++ b/${fileName}\n@@ -1,${oldLines.length} +1,${newLines.length} @@`;
-  
+
   // Generate diff lines
   const diffLines = [];
   const maxLines = Math.max(oldLines.length, newLines.length);
-  
+
   for (let i = 0; i < maxLines; i++) {
     const oldLine = oldLines[i];
     const newLine = newLines[i];
-    
+
     if (oldLine === newLine) {
       if (oldLine !== undefined) {
         diffLines.push(` ${oldLine}`);
@@ -49,16 +49,14 @@ function convertToUnifiedDiff(oldContent: string, newContent: string, fileName: 
       }
     }
   }
-  
+
   return `${header}\n${diffLines.join('\n')}`;
 }
-
-
 
 export const DiffRenderer: React.FC<DiffRendererProps> = ({ panelContent }) => {
   // First try to extract str_replace_editor diff data (for edit_file type)
   const strReplaceData = extractStrReplaceEditorDiffData(panelContent);
-  
+
   if (strReplaceData) {
     const { oldContent, newContent, path } = strReplaceData;
     const fileName = path || 'Edited File';
@@ -193,5 +191,3 @@ function extractDiffData(panelContent: StandardPanelContent): {
     return null;
   }
 }
-
-

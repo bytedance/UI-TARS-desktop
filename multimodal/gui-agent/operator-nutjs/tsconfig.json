@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "Bundler",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "src/**/*",
+    // "test/**/*", // Test files are excluded from dist
+    // "examples/**/*" // Example files are excluded from dist, the index.d.ts will save on dist/index.d.ts instead of dist/src/index.d.ts
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

@@ -98,7 +98,7 @@ export class AguiCore {
       };
 
       const builder = new AgentUIBuilder(builderOptions);
-      const html = builder.dump();
+      const html = await builder.dump();
       const shareUrl = await builder.upload(html, uploadUrl);
 
       return shareUrl;

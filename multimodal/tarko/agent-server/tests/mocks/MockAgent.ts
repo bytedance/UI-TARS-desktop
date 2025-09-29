@@ -21,7 +21,7 @@ export class MockAgent implements IAgent {
   private isAborted = false;
 
   constructor(private options: AgentAppConfig) {
-    this.eventStream = new MockEventStream();
+    this.eventStream = new MockEventStream(options.initialEvents);
   }
 
   async initialize(): Promise<void> {
@@ -36,10 +36,6 @@ export class MockAgent implements IAgent {
     this.currentStatus = AgentStatus.EXECUTING;
 
     // Emit some test events
-    this.eventStream.emit('agent-status', {
-      isProcessing: true,
-      state: 'executing',
-    });
 
     // Simulate some work
     await new Promise((resolve) => setTimeout(resolve, 10));
@@ -78,7 +74,7 @@ export class MockAgent implements IAgent {
     return this.currentStatus;
   }
 
-  getEventStream(): AgentEventStream {
+  getEventStream(): AgentEventStream.Processor {
     return this.eventStream;
   }
 
@@ -90,27 +86,66 @@ export class MockAgent implements IAgent {
     this.currentStatus = AgentStatus.IDLE;
     this.eventStream.removeAllListeners();
   }
+
+  // Additional required methods from IAgent interface
+  getTools(): any[] {
+    return [];
+  }
+
+  getOptions(): AgentAppConfig {
+    return this.options;
+  }
+
+
 }
 
 /**
  * Mock EventStream implementation
  */
-class MockEventStream extends EventEmitter implements AgentEventStream {
+class MockEventStream extends EventEmitter implements AgentEventStream.Processor {
+  private events: AgentEventStream.Event[] = [];
+
+  constructor(initialEvents?: AgentEventStream.Event[]) {
+    super();
+    if (initialEvents && initialEvents.length > 0) {
+      this.events = [...initialEvents];
+      console.info(`[MockEventStream] Initialized with ${initialEvents.length} initial events`);
+    }
+  }
+
   subscribe(handler: (event: AgentEventStream.Event) => void): () => void {
     this.on('event', handler);
     return () => this.off('event', handler);
   }
 
-  emit(eventType: string, data: any): boolean {
-    const event = this.createEvent(eventType as any, data);
-    return super.emit('event', event);
+  sendEvent(event: AgentEventStream.Event): void {
+    this.events.push(event);
+    super.emit('event', event);
+  }
+
+  getEvents(): AgentEventStream.Event[] {
+    return [...this.events];
+  }
+
+  getEventsByType(types: AgentEventStream.EventType[]): AgentEventStream.Event[] {
+    return this.events.filter(event => types.includes(event.type));
+  }
+
+
+
+  dispose(): void {
+    this.events = [];
+    this.removeAllListeners();
   }
 
   createEvent(type: AgentEventStream.EventType, data: any): AgentEventStream.Event {
     return {
+      id: `event-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       type,
-      data,
-      timestamp: Date.now(),
-    };
+      timestamp: new Date().toISOString(),
+      ...data,
+    } as AgentEventStream.Event;
   }
+
+
 }

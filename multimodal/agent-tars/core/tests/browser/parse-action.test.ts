@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { BrowserGUIAgent } from '../../src/browser/browser-gui-agent';
+import { BrowserGUIAgent } from '../../src/environments/local/browser/browser-gui-agent';
 import { LocalBrowser } from '@agent-infra/browser';
 import { ConsoleLogger } from '@tarko/mcp-agent';
 

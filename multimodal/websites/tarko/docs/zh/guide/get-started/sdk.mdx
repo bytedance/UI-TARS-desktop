@@ -1,0 +1,396 @@
+---
+title: SDK
+description: 在应用中使用 Tarko SDK
+---
+
+# SDK
+
+Tarko 可以作为 SDK 使用，直接将 Agent 能力集成到你的应用中。这种方式让你完全控制 Agent 的生命周期，并允许深度定制。
+
+## 安装
+
+安装核心 Tarko 包：
+
+```bash
+npm install @tarko/agent @tarko/tools
+```
+
+安装特定工具：
+
+```bash
+npm install @tarko/tools-browser @tarko/tools-filesystem
+```
+
+## 基础用法
+
+### 创建 Agent
+
+```typescript
+import { Agent, Tool, z } from '@tarko/agent';
+
+// 创建自定义工具
+const weatherTool = new Tool({
+  id: 'getWeather',
+  description: '获取指定位置的天气信息',
+  parameters: z.object({
+    location: z.string().describe('位置名称，如城市名'),
+  }),
+  function: async (input) => {
+    const { location } = input;
+    return {
+      location,
+      temperature: '70°F (21°C)',
+      condition: 'Sunny',
+    };
+  },
+});
+
+const agent = new Agent({
+  name: 'MyAgent',
+  
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  
+  instructions: `你是一个有用的助手，可以获取天气信息。`,
+  
+  tools: [weatherTool]
+});
+```
+
+### 运行 Agent
+
+```typescript
+// 简单运行
+const response = await agent.run('你好，可以帮助我吗？');
+console.log(response);
+
+// 使用配置选项运行
+const response2 = await agent.run({
+  input: '今天天气怎么样？',
+  sessionId: 'my-session'
+});
+```
+
+### 流式响应
+
+```typescript
+const stream = await agent.run({
+  input: '写一个关于 AI 的长故事',
+  stream: true
+});
+
+for await (const chunk of stream) {
+  if (chunk.type === 'assistant_message') {
+    process.stdout.write(chunk.content);
+  } else if (chunk.type === 'tool_call') {
+    console.log('调用工具:', chunk.toolCall.function.name);
+  }
+}
+```
+
+## 高级用法
+
+### 自定义工具
+
+创建特定领域的工具：
+
+```typescript
+import { Tool, z } from '@tarko/agent';
+
+// 创建数据库查询工具
+const databaseTool = new Tool({
+  id: 'query_database',
+  description: '查询应用数据库',
+  parameters: z.object({
+    query: z.string().describe('要执行的 SQL 查询'),
+    limit: z.number().optional().describe('结果限制数量')
+  }),
+  function: async (params) => {
+    const { query, limit = 10 } = params;
+    // 你的数据库逻辑
+    const results = await myDatabase.query(query, { limit });
+    return { results, count: results.length };
+  },
+});
+
+const agent = new Agent({
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  tools: [databaseTool]
+});
+```
+
+### 事件处理
+
+```typescript
+// 获取事件流处理器
+const eventStream = agent.getEventStream();
+
+// 监听工具调用事件
+eventStream.on('tool_call', (event) => {
+  console.log(`调用工具: ${event.toolCall.function.name}`);
+  // 记录到分析系统、更新 UI 等
+});
+
+// 监听错误事件
+eventStream.on('error', (event) => {
+  console.error('Agent 错误:', event.error);
+  // 处理错误、通知用户等
+});
+
+// 监听 Agent 运行状态
+eventStream.on('agent_run_start', (event) => {
+  console.log('Agent 开始运行:', event.sessionId);
+});
+
+eventStream.on('agent_run_end', (event) => {
+  console.log('Agent 运行结束:', event.iterations, '次迭代');
+});
+```
+
+### 上下文管理
+
+```typescript
+const agent = new Agent({
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  context: {
+    maxImagesCount: 5,  // 支持的最大图片数量
+  }
+});
+
+// 生成对话摘要
+const summary = await agent.generateSummary({
+  messages: conversationHistory,
+});
+console.log('对话摘要:', summary.summary);
+```
+
+### Agent Hooks
+
+Tarko 提供多种钩子来自定义 Agent 行为。通过继承 Agent 类并重写钩子方法：
+
+```typescript
+import { Agent } from '@tarko/agent';
+
+class CustomAgent extends Agent {
+  async onBeforeToolCall(id: string, toolCall: any, args: any) {
+    // 验证工具调用
+    if (toolCall.name === 'dangerous_operation') {
+      throw new Error('不允许此操作');
+    }
+    return args;
+  }
+  
+  async onAfterToolCall(id: string, toolCall: any, result: any) {
+    // 记录结果
+    await this.logToolResult(toolCall, result);
+    return result;
+  }
+  
+  async onToolCallError(id: string, toolCall: any, error: any) {
+    // 自定义错误处理
+    console.error('工具调用错误:', toolCall.name, error);
+    return { error: '工具执行失败，请重试' };
+  }
+  
+  private async logToolResult(toolCall: any, result: any) {
+    console.log(`工具 ${toolCall.name} 执行完成:`, result);
+  }
+}
+
+const agent = new CustomAgent({
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  tools: [weatherTool]
+});
+```
+
+## 集成模式
+
+### Express.js 集成
+
+```typescript
+import express from 'express';
+import { Agent } from '@tarko/agent';
+
+const app = express();
+const agent = new Agent(config);
+
+app.use(express.json());
+
+// 聊天端点
+app.post('/chat', async (req, res) => {
+  try {
+    const { message, conversationId } = req.body;
+    
+    const conversation = conversationId 
+      ? agent.getConversation(conversationId)
+      : agent.createConversation();
+    
+    const response = await conversation.chat(message);
+    
+    res.json({
+      response,
+      conversationId: conversation.id
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 流式端点
+app.get('/chat/stream', async (req, res) => {
+  const { message } = req.query;
+  
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive'
+  });
+  
+  const stream = agent.chatStream(message as string);
+  
+  for await (const chunk of stream) {
+    res.write(`data: ${JSON.stringify(chunk)}\n\n`);
+  }
+  
+  res.end();
+});
+
+app.listen(3000);
+```
+
+### React 集成
+
+```typescript
+import { useState, useEffect } from 'react';
+import { Agent } from '@tarko/agent';
+
+function useAgent(config: AgentConfig) {
+  const [agent, setAgent] = useState<Agent | null>(null);
+  const [loading, setLoading] = useState(false);
+  
+  useEffect(() => {
+    const agentInstance = new Agent(config);
+    setAgent(agentInstance);
+    
+    return () => {
+      agentInstance.dispose();
+    };
+  }, []);
+  
+  const chat = async (message: string) => {
+    if (!agent) return;
+    
+    setLoading(true);
+    try {
+      const response = await agent.chat(message);
+      return response;
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  return { agent, chat, loading };
+}
+
+function ChatComponent() {
+  const { chat, loading } = useAgent({
+    model: { provider: 'openai', apiKey: 'your-key', model: 'gpt-4' },
+    tools: []
+  });
+  
+  const [message, setMessage] = useState('');
+  const [response, setResponse] = useState('');
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const result = await chat(message);
+    setResponse(result || '');
+    setMessage('');
+  };
+  
+  return (
+    <div>
+      <form onSubmit={handleSubmit}>
+        <input
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          disabled={loading}
+        />
+        <button type="submit" disabled={loading}>
+          {loading ? '思考中...' : '发送'}
+        </button>
+      </form>
+      {response && <div>{response}</div>}
+    </div>
+  );
+}
+```
+
+## 最佳实践
+
+### 错误处理
+
+```typescript
+try {
+  const response = await agent.chat(message);
+  return response;
+} catch (error) {
+  if (error instanceof ToolExecutionError) {
+    // 处理工具特定错误
+    console.error('工具错误:', error.toolName, error.message);
+  } else if (error instanceof ModelProviderError) {
+    // 处理模型提供商错误
+    console.error('模型错误:', error.provider, error.message);
+  } else {
+    // 处理一般错误
+    console.error('意外错误:', error.message);
+  }
+  
+  throw error;
+}
+```
+
+### 资源管理
+
+```typescript
+class AgentManager {
+  private agents = new Map<string, Agent>();
+  
+  getAgent(userId: string): Agent {
+    if (!this.agents.has(userId)) {
+      const agent = new Agent(this.getConfigForUser(userId));
+      this.agents.set(userId, agent);
+      
+      // 非活跃后清理
+      setTimeout(() => {
+        this.agents.delete(userId);
+        agent.dispose();
+      }, 30 * 60 * 1000); // 30 分钟
+    }
+    
+    return this.agents.get(userId)!;
+  }
+  
+  dispose() {
+    for (const agent of this.agents.values()) {
+      agent.dispose();
+    }
+    this.agents.clear();
+  }
+}
+```

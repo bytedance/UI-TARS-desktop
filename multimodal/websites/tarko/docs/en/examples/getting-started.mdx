@@ -1,0 +1,510 @@
+---
+title: Getting Started Examples
+description: Practical examples to get started with Tarko
+---
+
+# Getting Started Examples
+
+This page provides practical examples to help you get started with Tarko quickly.
+
+## Basic Agent
+
+Create a simple agent with basic functionality:
+
+```typescript
+import { Agent, createTool } from '@tarko/agent';
+
+// Create a simple greeting tool
+const greetingTool = createTool({
+  name: 'greet_user',
+  description: 'Greet a user with their name',
+  parameters: {
+    type: 'object',
+    properties: {
+      name: {
+        type: 'string',
+        description: 'The user\'s name'
+      }
+    },
+    required: ['name']
+  },
+  handler: async ({ name }) => {
+    return `Hello, ${name}! Nice to meet you!`;
+  }
+});
+
+// Create the agent
+const agent = new Agent({
+  name: 'GreetingBot',
+  instructions: 'You are a friendly assistant that helps users with greetings.',
+  tools: [greetingTool],
+  model: {
+    apiKey: process.env.OPENAI_API_KEY,
+    baseURL: 'https://api.openai.com/v1',
+    model: 'gpt-4'
+  }
+});
+
+export default agent;
+```
+
+## Weather Agent
+
+Build an agent that can fetch weather information:
+
+```typescript
+import { Agent, createTool } from '@tarko/agent';
+
+// Weather tool with real API integration
+const weatherTool = createTool({
+  name: 'get_weather',
+  description: 'Get current weather information for a location',
+  parameters: {
+    type: 'object',
+    properties: {
+      location: {
+        type: 'string',
+        description: 'City name or coordinates (e.g., "New York" or "40.7128,-74.0060")'
+      },
+      units: {
+        type: 'string',
+        enum: ['metric', 'imperial'],
+        default: 'metric',
+        description: 'Temperature units'
+      }
+    },
+    required: ['location']
+  },
+  handler: async ({ location, units = 'metric' }) => {
+    const apiKey = process.env.OPENWEATHER_API_KEY;
+    if (!apiKey) {
+      throw new Error('OpenWeather API key not configured');
+    }
+
+    try {
+      const response = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(location)}&appid=${apiKey}&units=${units}`
+      );
+      
+      if (!response.ok) {
+        throw new Error(`Weather API error: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      const temperature = Math.round(data.main.temp);
+      const description = data.weather[0].description;
+      const humidity = data.main.humidity;
+      const windSpeed = data.wind.speed;
+      const unitSymbol = units === 'metric' ? '°C' : '°F';
+      const speedUnit = units === 'metric' ? 'm/s' : 'mph';
+      
+      return `Weather in ${data.name}, ${data.sys.country}:
+🌡️ Temperature: ${temperature}${unitSymbol}
+🌤️ Condition: ${description}
+💧 Humidity: ${humidity}%
+💨 Wind Speed: ${windSpeed} ${speedUnit}`;
+    } catch (error) {
+      return `Sorry, I couldn't fetch weather data for "${location}". Please check the location name and try again.`;
+    }
+  }
+});
+
+const weatherAgent = new Agent({
+  name: 'WeatherBot',
+  instructions: `You are a weather assistant that provides current weather information for any location.
+Use the get_weather tool to fetch real-time weather data when users ask about weather conditions.
+Always be helpful and provide clear, formatted weather information.`,
+  tools: [weatherTool],
+  model: {
+    apiKey: process.env.OPENAI_API_KEY,
+    baseURL: 'https://api.openai.com/v1',
+    model: 'gpt-4'
+  }
+});
+
+export default weatherAgent;
+```
+
+## Calculator Agent
+
+Create an agent with mathematical capabilities:
+
+```typescript
+import { Agent, createTool } from '@tarko/agent';
+
+// Safe math evaluation tool
+const calculatorTool = createTool({
+  name: 'calculate',
+  description: 'Perform mathematical calculations safely',
+  parameters: {
+    type: 'object',
+    properties: {
+      expression: {
+        type: 'string',
+        description: 'Mathematical expression (e.g., "2 + 3 * 4", "sqrt(16)", "sin(pi/2)")'
+      }
+    },
+    required: ['expression']
+  },
+  validate: ({ expression }) => {
+    // Basic validation for safety
+    const allowedPattern = /^[0-9+\-*/().\s,sqrt,sin,cos,tan,log,ln,pi,e]+$/i;
+    if (!allowedPattern.test(expression)) {
+      throw new Error('Expression contains invalid characters. Only numbers, basic operators, and common math functions are allowed.');
+    }
+    return true;
+  },
+  handler: async ({ expression }) => {
+    try {
+      // Replace common math functions and constants
+      let safeExpression = expression
+        .replace(/pi/gi, 'Math.PI')
+        .replace(/e(?![0-9])/gi, 'Math.E')
+        .replace(/sqrt\(/gi, 'Math.sqrt(')
+        .replace(/sin\(/gi, 'Math.sin(')
+        .replace(/cos\(/gi, 'Math.cos(')
+        .replace(/tan\(/gi, 'Math.tan(')
+        .replace(/log\(/gi, 'Math.log10(')
+        .replace(/ln\(/gi, 'Math.log(');
+      
+      // Use Function constructor for safer evaluation
+      const result = new Function('return ' + safeExpression)();
+      
+      if (typeof result !== 'number' || !isFinite(result)) {
+        throw new Error('Invalid calculation result');
+      }
+      
+      return `${expression} = ${result}`;
+    } catch (error) {
+      return `Error calculating "${expression}": ${error.message}`;
+    }
+  }
+});
+
+// Unit conversion tool
+const unitConverterTool = createTool({
+  name: 'convert_units',
+  description: 'Convert between different units of measurement',
+  parameters: {
+    type: 'object',
+    properties: {
+      value: {
+        type: 'number',
+        description: 'The numeric value to convert'
+      },
+      fromUnit: {
+        type: 'string',
+        description: 'Source unit (e.g., "celsius", "fahrenheit", "meters", "feet", "kg", "lbs")'
+      },
+      toUnit: {
+        type: 'string',
+        description: 'Target unit'
+      }
+    },
+    required: ['value', 'fromUnit', 'toUnit']
+  },
+  handler: async ({ value, fromUnit, toUnit }) => {
+    const conversions: Record<string, Record<string, (v: number) => number>> = {
+      // Temperature
+      celsius: {
+        fahrenheit: (c) => (c * 9/5) + 32,
+        kelvin: (c) => c + 273.15
+      },
+      fahrenheit: {
+        celsius: (f) => (f - 32) * 5/9,
+        kelvin: (f) => ((f - 32) * 5/9) + 273.15
+      },
+      kelvin: {
+        celsius: (k) => k - 273.15,
+        fahrenheit: (k) => ((k - 273.15) * 9/5) + 32
+      },
+      // Length
+      meters: {
+        feet: (m) => m * 3.28084,
+        inches: (m) => m * 39.3701,
+        kilometers: (m) => m / 1000
+      },
+      feet: {
+        meters: (ft) => ft / 3.28084,
+        inches: (ft) => ft * 12,
+        kilometers: (ft) => ft / 3280.84
+      },
+      // Weight
+      kg: {
+        lbs: (kg) => kg * 2.20462,
+        grams: (kg) => kg * 1000
+      },
+      lbs: {
+        kg: (lbs) => lbs / 2.20462,
+        grams: (lbs) => (lbs / 2.20462) * 1000
+      }
+    };
+    
+    const fromKey = fromUnit.toLowerCase();
+    const toKey = toUnit.toLowerCase();
+    
+    if (!conversions[fromKey] || !conversions[fromKey][toKey]) {
+      return `Conversion from ${fromUnit} to ${toUnit} is not supported. Available conversions: temperature (celsius, fahrenheit, kelvin), length (meters, feet, inches, kilometers), weight (kg, lbs, grams).`;
+    }
+    
+    const result = conversions[fromKey][toKey](value);
+    return `${value} ${fromUnit} = ${result.toFixed(4)} ${toUnit}`;
+  }
+});
+
+const calculatorAgent = new Agent({
+  name: 'MathBot',
+  instructions: `You are a helpful mathematical assistant that can:
+1. Perform calculations using the calculate tool
+2. Convert between different units using the convert_units tool
+
+Always use the appropriate tool for mathematical operations and unit conversions.
+Provide clear explanations of your calculations when helpful.`,
+  tools: [calculatorTool, unitConverterTool],
+  model: {
+    apiKey: process.env.OPENAI_API_KEY,
+    baseURL: 'https://api.openai.com/v1',
+    model: 'gpt-4'
+  }
+});
+
+export default calculatorAgent;
+```
+
+## File System Agent
+
+Build an agent that can interact with the file system:
+
+```typescript
+import { Agent, createTool } from '@tarko/agent';
+import { promises as fs } from 'fs';
+import path from 'path';
+
+// File reading tool
+const readFileTool = createTool({
+  name: 'read_file',
+  description: 'Read the contents of a text file',
+  parameters: {
+    type: 'object',
+    properties: {
+      filePath: {
+        type: 'string',
+        description: 'Path to the file to read'
+      }
+    },
+    required: ['filePath']
+  },
+  handler: async ({ filePath }) => {
+    try {
+      // Basic security check - prevent directory traversal
+      const resolvedPath = path.resolve(filePath);
+      const workingDir = process.cwd();
+      
+      if (!resolvedPath.startsWith(workingDir)) {
+        throw new Error('Access denied: File is outside working directory');
+      }
+      
+      const content = await fs.readFile(resolvedPath, 'utf-8');
+      return `File content of ${filePath}:\n\n${content}`;
+    } catch (error) {
+      return `Error reading file ${filePath}: ${error.message}`;
+    }
+  }
+});
+
+// Directory listing tool
+const listDirectoryTool = createTool({
+  name: 'list_directory',
+  description: 'List files and directories in a given path',
+  parameters: {
+    type: 'object',
+    properties: {
+      dirPath: {
+        type: 'string',
+        description: 'Path to the directory to list',
+        default: '.'
+      }
+    }
+  },
+  handler: async ({ dirPath = '.' }) => {
+    try {
+      const resolvedPath = path.resolve(dirPath);
+      const workingDir = process.cwd();
+      
+      if (!resolvedPath.startsWith(workingDir)) {
+        throw new Error('Access denied: Directory is outside working directory');
+      }
+      
+      const items = await fs.readdir(resolvedPath, { withFileTypes: true });
+      
+      const files = items.filter(item => item.isFile()).map(item => item.name);
+      const dirs = items.filter(item => item.isDirectory()).map(item => item.name);
+      
+      let result = `Contents of ${dirPath}:\n\n`;
+      
+      if (dirs.length > 0) {
+        result += `📁 Directories (${dirs.length}):\n${dirs.map(d => `  ${d}/`).join('\n')}\n\n`;
+      }
+      
+      if (files.length > 0) {
+        result += `📄 Files (${files.length}):\n${files.map(f => `  ${f}`).join('\n')}`;
+      }
+      
+      if (dirs.length === 0 && files.length === 0) {
+        result += 'Directory is empty.';
+      }
+      
+      return result;
+    } catch (error) {
+      return `Error listing directory ${dirPath}: ${error.message}`;
+    }
+  }
+});
+
+// File writing tool
+const writeFileTool = createTool({
+  name: 'write_file',
+  description: 'Write content to a file',
+  parameters: {
+    type: 'object',
+    properties: {
+      filePath: {
+        type: 'string',
+        description: 'Path where to write the file'
+      },
+      content: {
+        type: 'string',
+        description: 'Content to write to the file'
+      }
+    },
+    required: ['filePath', 'content']
+  },
+  handler: async ({ filePath, content }) => {
+    try {
+      const resolvedPath = path.resolve(filePath);
+      const workingDir = process.cwd();
+      
+      if (!resolvedPath.startsWith(workingDir)) {
+        throw new Error('Access denied: File is outside working directory');
+      }
+      
+      // Ensure directory exists
+      const dir = path.dirname(resolvedPath);
+      await fs.mkdir(dir, { recursive: true });
+      
+      await fs.writeFile(resolvedPath, content, 'utf-8');
+      return `Successfully wrote ${content.length} characters to ${filePath}`;
+    } catch (error) {
+      return `Error writing file ${filePath}: ${error.message}`;
+    }
+  }
+});
+
+const fileSystemAgent = new Agent({
+  name: 'FileBot',
+  instructions: `You are a helpful file system assistant that can:
+1. Read file contents using read_file
+2. List directory contents using list_directory
+3. Write files using write_file
+
+Always be careful with file operations and provide clear feedback about what you're doing.
+For security, you can only access files within the current working directory.`,
+  tools: [readFileTool, listDirectoryTool, writeFileTool],
+  model: {
+    apiKey: process.env.OPENAI_API_KEY,
+    baseURL: 'https://api.openai.com/v1',
+    model: 'gpt-4'
+  }
+});
+
+export default fileSystemAgent;
+```
+
+## Running the Examples
+
+### Environment Setup
+
+Create a `.env` file with your API keys:
+
+```bash
+# .env file
+# OpenAI API Key (required for all examples)
+OPENAI_API_KEY=your_openai_api_key_here
+
+# OpenWeather API Key (required for weather agent)
+OPENWEATHER_API_KEY=your_openweather_api_key_here
+
+# Optional: Use different model provider
+# MODEL_PROVIDER=anthropic
+# ANTHROPIC_API_KEY=your_anthropic_key_here
+```
+
+### Using with CLI
+
+Save any of the examples as a `.ts` file and run:
+
+```bash
+# Run the weather agent
+npx tarko run weather-agent.ts
+
+# Run with custom port
+npx tarko run calculator-agent.ts --port 3001
+
+# Run in development mode with hot reload
+npx tarko dev file-system-agent.ts
+```
+
+### Programmatic Usage
+
+```typescript
+import weatherAgent from './weather-agent';
+
+async function main() {
+  // Start a conversation
+  const response = await weatherAgent.query('What\'s the weather like in Tokyo?');
+  console.log(response);
+  
+  // Continue the conversation
+  const followUp = await weatherAgent.query('How about in London?');
+  console.log(followUp);
+}
+
+main().catch(console.error);
+```
+
+### Testing Examples
+
+```typescript
+import { describe, it, expect } from '@jest/globals';
+import calculatorAgent from './calculator-agent';
+
+describe('Calculator Agent', () => {
+  it('should perform basic calculations', async () => {
+    const response = await calculatorAgent.query('What is 15 * 7?');
+    expect(response).toContain('105');
+  });
+  
+  it('should convert units', async () => {
+    const response = await calculatorAgent.query('Convert 100 fahrenheit to celsius');
+    expect(response).toContain('37.7778');
+  });
+});
+```
+
+## Next Steps
+
+- [Custom Tools](/examples/custom-tools) - Learn to build more advanced tools
+- [Server Integration](/examples/server-integration) - Deploy agents as servers
+- [Custom Hooks](/examples/custom-hooks) - Add custom behavior with hooks
+
+## Common Issues
+
+### API Key Not Found
+Make sure your `.env` file is in the project root and contains the required API keys.
+
+### File Access Denied
+The file system agent only allows access to files within the current working directory for security reasons.
+
+### Tool Call Failures
+Check your internet connection and API key validity. Tools will provide error messages to help debug issues.

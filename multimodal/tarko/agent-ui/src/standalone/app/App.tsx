@@ -3,30 +3,29 @@ import { Routes, Route, Navigate, useParams, useNavigate, useLocation } from 're
 import { Layout } from './Layout';
 import { useSession } from '@/common/hooks/useSession';
 import HomePage from '@/standalone/home/HomePage';
+import CreatingPage from '@/standalone/home/CreatingPage';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { SessionRouter } from './Router/SessionRouter';
+import { Sidebar } from '@/standalone/sidebar';
+import { Navbar } from '@/standalone/navbar';
+import { isSidebarEnabled, isHomeEnabled } from '@/config/web-ui-config';
 
-/**
- * App Component - Main application container with routing
- */
 export const App: React.FC = () => {
   const { initConnectionMonitoring, loadSessions, connectionStatus, activeSessionId } =
     useSession();
   const { isReplayMode } = useReplayMode();
+  const sidebarEnabled = isSidebarEnabled();
+  const homeEnabled = isHomeEnabled();
 
-  // Initialize connection monitoring and load sessions on mount - but not in replay mode
   useEffect(() => {
-    // In replay mode, skip connection monitoring and session loading
     if (isReplayMode) {
       console.log('[ReplayMode] Skipping connection initialization in replay mode');
       return;
     }
 
     const initialize = async () => {
-      // Initialize connection monitoring
       const cleanup = initConnectionMonitoring();
 
-      // Load sessions if connected
       if (connectionStatus.connected) {
         await loadSessions();
       }
@@ -36,7 +35,6 @@ export const App: React.FC = () => {
 
     const cleanupPromise = initialize();
 
-    // Cleanup on unmount
     return () => {
       cleanupPromise.then((cleanup) => {
         if (typeof cleanup === 'function') {
@@ -46,21 +44,63 @@ export const App: React.FC = () => {
     };
   }, [initConnectionMonitoring, loadSessions, connectionStatus.connected, isReplayMode]);
 
-  // Special handling for replay mode - bypass normal routing
   if (isReplayMode) {
     console.log('[ReplayMode] Rendering replay layout directly');
-    return <Layout isReplayMode={true} />;
+    return (
+      <div className="flex h-screen bg-[#F2F3F5] dark:bg-gray-900 text-gray-900 dark:text-gray-100 overflow-hidden">
+        {sidebarEnabled && <Sidebar />}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Navbar />
+          <Layout isReplayMode={true} />
+        </div>
+      </div>
+    );
   }
 
   return (
     <Routes>
-      <Route path="/" element={<HomePage />} />
+      {homeEnabled && (
+        <Route
+          path="/"
+          element={
+            <div className="flex h-screen bg-[#F2F3F5] dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+              {sidebarEnabled && <Sidebar />}
+              <div className="flex-1 flex flex-col overflow-hidden">
+                <div className="flex-1 overflow-y-auto">
+                  <HomePage />
+                </div>
+              </div>
+            </div>
+          }
+        />
+      )}
+      {homeEnabled && (
+        <Route
+          path="/creating"
+          element={
+            <div className="flex h-screen bg-[#F2F3F5] dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+              {sidebarEnabled && <Sidebar />}
+              <div className="flex-1 flex flex-col overflow-hidden">
+                <div className="flex-1 overflow-y-auto">
+                  <CreatingPage />
+                </div>
+              </div>
+            </div>
+          }
+        />
+      )}
       <Route
         path="/:sessionId"
         element={
-          <SessionRouter>
-            <Layout />
-          </SessionRouter>
+          <div className="flex h-screen bg-[#F2F3F5] dark:bg-gray-900 text-gray-900 dark:text-gray-100 overflow-hidden">
+            {sidebarEnabled && <Sidebar />}
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <Navbar />
+              <SessionRouter>
+                <Layout />
+              </SessionRouter>
+            </div>
+          </div>
         }
       />
     </Routes>

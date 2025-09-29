@@ -1,8 +1,8 @@
 import React from 'react';
+import { BrowserShell } from '@tarko/ui';
 import { StandardPanelContent } from '../types/panelContent';
 import { motion } from 'framer-motion';
 import { FiDownload, FiZoomIn } from 'react-icons/fi';
-import { BrowserShell } from './BrowserShell';
 import { FileDisplayMode } from '../types';
 
 interface ImageRendererProps {
@@ -68,34 +68,26 @@ export const ImageRenderer: React.FC<ImageRendererProps> = ({ panelContent, onAc
 
   if (isScreenshot) {
     return (
-      <div className="relative group">
-        <BrowserShell title={name || 'Browser Screenshot'}>
-          <img
-            src={src}
-            alt={name || 'Image'}
-            className="w-full h-auto object-contain max-h-[70vh]"
-          />
-        </BrowserShell>
+      <div className="relative group md:text-base text-sm">
+        <img
+          src={src}
+          alt={name || 'Image'}
+          className="w-full h-auto object-contain md:max-h-[70vh] max-h-48 rounded-lg"
+        />
         {actionButtons}
       </div>
     );
   }
 
   return (
-    <div className="relative group">
-      <motion.div
-        whileHover={{ scale: 1.01 }}
-        className="bg-white dark:bg-gray-800 rounded-xl p-2 border border-gray-200/50 dark:border-gray-700/30 shadow-sm"
-      >
-        <div className="relative">
-          <img
-            src={src}
-            alt={name || 'Image'}
-            className="max-h-[70vh] object-contain rounded-lg mx-auto"
-          />
-
-          {actionButtons}
-        </div>
+    <div className="relative group max-w-full">
+      <motion.div whileHover={{ scale: 1.01 }} className="relative">
+        <img
+          src={src}
+          alt={name || 'Image'}
+          className="md:max-h-[70vh] max-h-60 w-full h-auto object-contain rounded-lg mx-auto"
+        />
+        {actionButtons}
       </motion.div>
     </div>
   );
@@ -173,7 +165,7 @@ function extractImageData(panelContent: StandardPanelContent): {
         // Extract MIME type from data URL
         const mimeTypeMatch = panelContent.source.match(/^data:([^;]+);/);
         const mimeType = mimeTypeMatch ? mimeTypeMatch[1] : 'image/png';
-        
+
         return {
           src: panelContent.source,
           mimeType,

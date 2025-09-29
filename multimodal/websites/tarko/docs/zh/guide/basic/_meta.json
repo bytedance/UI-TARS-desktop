@@ -1,0 +1,37 @@
+[
+  {
+    "type": "file",
+    "name": "configuration",
+    "label": "配置"
+  },
+  {
+    "type": "file",
+    "name": "model-provider",
+    "label": "模型提供商"
+  },
+  {
+    "type": "file",
+    "name": "tools",
+    "label": "工具"
+  },
+  {
+    "type": "file",
+    "name": "tool-call-engine",
+    "label": "Tool Call Engine"
+  },
+  {
+    "type": "file",
+    "name": "event-stream",
+    "label": "事件流"
+  },
+  {
+    "type": "file",
+    "name": "troubleshooting",
+    "label": "故障排除"
+  },
+  {
+    "type": "file",
+    "name": "ui-integration",
+    "label": "UI 集成"
+  }
+]

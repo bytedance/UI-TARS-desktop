@@ -1,0 +1,347 @@
+---
+title: CLI 命令
+description: 所有 Tarko CLI 命令的完整参考
+---
+
+# CLI 命令
+
+所有 Tarko Agent CLI 命令及其选项的完整参考。
+
+## `tarko` / `tarko run`
+
+启动**交互式 Web UI** 进行实时对话和文件浏览。
+
+### 基本用法
+
+```bash
+# 启动交互式 Web UI（默认）
+tarko
+
+# 等效的显式命令
+tarko run
+
+# 运行特定 Agent
+tarko run ./my-agent.js
+
+# 运行内置 Agent
+tarko run agent-tars
+tarko run omni-tars
+tarko run mcp-agent
+```
+
+### 选项
+
+```bash
+# 自定义端口并自动打开浏览器
+tarko run --port 8888 --open
+
+# 开发模式带热重载
+tarko run --dev
+
+# 调试模式带详细日志
+tarko run --debug
+
+# 自定义配置文件
+tarko run --config ./custom-config.ts
+
+# 自定义工作区
+tarko run --workspace ./my-workspace
+```
+
+### 无头模式
+
+**静默模式**执行，输出到 stdout，非常适合脚本使用：
+
+```bash
+# 直接输入，文本输出（默认）
+tarko run --headless --input "分析当前目录结构"
+
+# 管道输入
+echo "总结这段代码" | tarko run --headless
+
+# JSON 输出用于程序化使用
+tarko run --headless --input "分析文件" --format json
+
+# 在输出中包含调试日志
+tarko run --headless --input "分析文件" --include-logs
+
+# 禁用缓存进行全新执行
+tarko run --headless --input "分析文件" --use-cache false
+
+# 与内置 Agent 结合使用
+tarko run agent-tars --headless --input "列出目录内容"
+```
+
+#### 无头模式选项
+
+| 选项 | 描述 | 默认值 |
+|------|------|--------|
+| `--input <text>` | 直接输入文本 | - |
+| `--format <type>` | 输出格式：`text`、`json` | `text` |
+| `--include-logs` | 在输出中包含调试日志 | `false` |
+| `--use-cache <bool>` | 启用/禁用缓存 | `true` |
+
+## `tarko serve`
+
+启动**无头 API 服务器**用于系统集成和生产部署。
+
+### 基本用法
+
+```bash
+# 启动无头服务器
+tarko serve
+
+# 使用特定 Agent 启动服务器
+tarko serve ./my-agent
+
+# 使用内置 Agent 启动服务器
+tarko serve omni-tars
+
+# 自定义端口和配置
+tarko serve --port 8888 --config ./production.config.ts
+```
+
+### 选项
+
+```bash
+# 自定义端口（默认：3000）
+tarko serve --port 8888
+
+# 自定义主机（默认：localhost）
+tarko serve --host 0.0.0.0
+
+# 调试模式
+tarko serve --debug
+
+# 自定义配置
+tarko serve --config ./server.config.yaml
+
+# 自定义工作区
+tarko serve --workspace ./server-workspace
+```
+
+### API 端点
+
+运行 `tarko serve` 时，以下端点可用：
+
+- `GET /api/v1/health` - 健康检查
+- `GET /api/v1/status` - 详细状态
+- `POST /api/v1/chat` - 与 Agent 聊天
+- `GET /api/v1/events` - 事件流（WebSocket）
+- `GET /metrics` - Prometheus 指标（如果启用）
+
+## `tarko request`
+
+直接**LLM 请求**用于调试和测试目的。
+
+### 基本用法
+
+```bash
+# 基本请求
+tarko request --provider openai --model gpt-4 --body '{"messages":[{"role":"user","content":"你好"}]}'
+
+# 从文件加载请求
+tarko request --provider openai --model gpt-4 --body ./request.json
+```
+
+### 高级选项
+
+```bash
+# 自定义 API 配置
+tarko request --provider openai --model gpt-4 \
+  --apiKey sk-xxx \
+  --baseURL https://api.openai.com/v1 \
+  --body request.json
+
+# 流式模式
+tarko request --provider openai --model gpt-4 --body request.json --stream
+
+# 推理模式（支持的模型如 o1）
+tarko request --provider openai --model o1-preview --body request.json --thinking
+
+# 语义输出格式
+tarko request --provider openai --model gpt-4 --body request.json --format semantic
+```
+
+### 支持的提供商
+
+- `openai` - OpenAI GPT 模型
+- `anthropic` - Anthropic Claude 模型
+- `azure` - Azure OpenAI 服务
+- `ollama` - 本地 Ollama 模型
+- `gemini` - Google Gemini 模型
+
+### 请求体格式
+
+```json
+{
+  "messages": [
+    {"role": "system", "content": "你是一个有用的助手。"},
+    {"role": "user", "content": "你好！"}
+  ],
+  "temperature": 0.7,
+  "max_tokens": 1000
+}
+```
+
+## `tarko workspace`
+
+**工作区管理**实用程序，用于组织 Agent 项目。
+
+### 命令
+
+```bash
+# 在当前目录初始化新工作区
+tarko workspace --init
+
+# 在 VSCode 中打开工作区
+tarko workspace --open
+
+# 启用全局工作区
+tarko workspace --enable
+
+# 禁用全局工作区
+tarko workspace --disable
+
+# 显示工作区状态和配置
+tarko workspace --status
+```
+
+### 工作区结构
+
+初始化工作区会创建：
+
+```
+my-workspace/
+├── tarko.config.ts          # 主配置
+├── agents/                   # 自定义 Agent
+├── tools/                    # 自定义工具
+├── data/                     # Agent 数据和缓存
+├── logs/                     # 执行日志
+└── .tarko/                   # 内部工作区数据
+```
+
+## 全局选项
+
+这些选项适用于所有命令：
+
+### 配置
+
+```bash
+# 模型配置
+tarko --model.provider openai --model.id gpt-4 --model.apiKey sk-xxx
+
+# 自定义配置文件
+tarko --config ./custom.config.ts
+
+# 自定义工作区
+tarko --workspace ./my-workspace
+```
+
+### 调试
+
+```bash
+# 启用调试日志
+tarko --debug
+
+# 详细输出
+tarko --verbose
+
+# 试运行（显示将要执行的内容）
+tarko --dry-run
+
+# 显示配置并退出
+tarko --show-config
+```
+
+### Tool 和 MCP 过滤
+
+```bash
+# 包含特定工具
+tarko --tool.include "file_*,web_*"
+
+# 排除特定工具
+tarko --tool.exclude "dangerous_*"
+
+# 包含特定 MCP 服务器
+tarko --mcpServer.include "filesystem,browser"
+
+# 排除特定 MCP 服务器
+tarko --mcpServer.exclude "experimental_*"
+```
+
+## 环境变量
+
+CLI 选项的替代方案：
+
+```bash
+# 模型配置
+export OPENAI_API_KEY=your-api-key
+export ANTHROPIC_API_KEY=your-api-key
+
+# 服务器配置
+export TARKO_PORT=3000
+export TARKO_HOST=0.0.0.0
+
+# 调试设置
+export DEBUG=tarko:*
+export TARKO_LOG_LEVEL=debug
+
+# 工作区
+export TARKO_WORKSPACE=./my-workspace
+```
+
+## 退出代码
+
+| 代码 | 描述 |
+|------|------|
+| 0 | 成功 |
+| 1 | 一般错误 |
+| 2 | 配置错误 |
+| 3 | 网络错误 |
+| 4 | 认证错误 |
+| 5 | Agent 执行错误 |
+
+## 示例
+
+### 开发工作流
+
+```bash
+# 1. 初始化工作区
+tarko workspace --init --name my-project
+
+# 2. 启动开发带 UI
+tarko run --dev --open
+
+# 3. 使用无头模式测试
+tarko run --headless --input "测试我的 Agent"
+
+# 4. 部署到生产
+tarko serve --port 3000 --config production.config.ts
+```
+
+### CI/CD 集成
+
+```bash
+# 测试 Agent 功能
+tarko run agent-tars --headless --input "运行测试" --format json > results.json
+
+# 验证配置
+tarko --dry-run --show-config
+
+# 健康检查
+curl -f http://localhost:3000/api/v1/health || exit 1
+```
+
+### 调试
+
+```bash
+# 使用详细日志调试
+DEBUG=tarko:* tarko run --debug --verbose
+
+# 测试直接 LLM 请求
+tarko request --provider openai --model gpt-4 --body '{"messages":[{"role":"user","content":"你好"}]}' --debug
+
+# 检查配置
+tarko --show-config --debug
+```

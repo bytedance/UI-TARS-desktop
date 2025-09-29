@@ -1,6 +1,5 @@
 import React from 'react';
 import { StandardPanelContent } from '../types/panelContent';
-import { motion } from 'framer-motion';
 import { FiExternalLink } from 'react-icons/fi';
 import { FileDisplayMode } from '../types';
 
@@ -24,12 +23,11 @@ export const LinkRenderer: React.FC<LinkRendererProps> = ({ panelContent }) => {
   const { url, title } = linkData;
 
   return (
-    <motion.a
+    <a
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      whileHover={{ scale: 1.01, x: 2 }}
-      className="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/30 text-accent-600 dark:text-accent-400 hover:text-accent-700 dark:hover:text-accent-300 shadow-sm group"
+      className="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/30 text-accent-600 dark:text-accent-400 hover:text-accent-700 dark:hover:text-accent-300 shadow-sm group transition-all duration-200 hover:scale-[1.01] hover:translate-x-0.5"
     >
       <FiExternalLink
         className="flex-shrink-0 text-gray-400 group-hover:text-accent-500 transition-colors"
@@ -44,7 +42,7 @@ export const LinkRenderer: React.FC<LinkRendererProps> = ({ panelContent }) => {
       <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
         <FiExternalLink size={14} className="text-gray-400" />
       </div>
-    </motion.a>
+    </a>
   );
 };
 

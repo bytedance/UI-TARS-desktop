@@ -3,7 +3,7 @@
  * Provides optimized tool call engine for GUI automation and computer use tasks
  */
 
-import { ToolCallEngineProvider, ToolCallEngineContext } from '@omni-tars/core';
+import { ToolCallEngineProvider, ToolCallEngineContext, AgentMode } from '@omni-tars/core';
 import { GUIAgentToolCallEngine } from './GUIAgentToolCallEngine';
 
 export class GuiToolCallEngineProvider extends ToolCallEngineProvider<GUIAgentToolCallEngine> {
@@ -11,17 +11,21 @@ export class GuiToolCallEngineProvider extends ToolCallEngineProvider<GUIAgentTo
   readonly priority = 90; // High priority for GUI tasks
   readonly description =
     'Tool call engine optimized for GUI automation, computer use, and visual interface interactions';
+  private agentMode: AgentMode;
+
+  constructor(agentMode: AgentMode) {
+    super();
+    this.agentMode = agentMode;
+  }
 
   protected createEngine(): GUIAgentToolCallEngine {
-    return new GUIAgentToolCallEngine();
+    return new GUIAgentToolCallEngine(this.agentMode);
   }
 
   canHandle(context: ToolCallEngineContext): boolean {
     //Check if any tools are GUI/computer use related
     if (context.toolCalls) {
-      const guiToolNames = [
-        'navigate',
-        'navigate_back',
+      const toolNames = [
         'call_user',
         'click',
         'drag',
@@ -39,8 +43,13 @@ export class GuiToolCallEngineProvider extends ToolCallEngineProvider<GUIAgentTo
         'wait',
       ];
 
+      if (this.agentMode.id !== 'game') {
+        toolNames.push('navigate');
+        toolNames.push('navigate_back');
+      }
+
       const hasGuiTools = context?.toolCalls?.some((tool) =>
-        guiToolNames.some((guiName) =>
+        toolNames.some((guiName) =>
           tool.function.name.toLowerCase().includes(guiName.toLowerCase()),
         ),
       );

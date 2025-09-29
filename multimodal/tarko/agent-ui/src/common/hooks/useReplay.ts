@@ -6,7 +6,6 @@ import { messagesAtom } from '../state/atoms/message';
 import { toolResultsAtom } from '../state/atoms/tool';
 import { processEventAction } from '../state/actions/eventProcessors';
 import { useSetAtom } from 'jotai';
-import { plansAtom } from '../state/atoms/plan';
 
 /**
  * Base interval for playback speed calculation (in milliseconds)
@@ -26,7 +25,7 @@ export function useReplay() {
 
   const [, setMessages] = useAtom(messagesAtom);
   const [, setToolResults] = useAtom(toolResultsAtom);
-  const [, setPlans] = useAtom(plansAtom);
+
   const processEvent = useSetAtom(processEventAction);
 
   // Keep current speed ref synchronized with state
@@ -74,17 +73,6 @@ export function useReplay() {
         [activeSessionId]: [],
       }));
 
-      setPlans((prev) => ({
-        ...prev,
-        [activeSessionId]: {
-          steps: [],
-          isComplete: false,
-          summary: null,
-          hasGeneratedPlan: false,
-          keyframes: [],
-        },
-      }));
-
       // Process events from 0 to targetIndex
       for (let i = 0; i <= targetIndex; i++) {
         const event = replayState.events[i];
@@ -93,7 +81,7 @@ export function useReplay() {
         }
       }
     },
-    [activeSessionId, replayState.events, setMessages, setToolResults, setPlans, processEvent],
+    [activeSessionId, replayState.events, setMessages, setToolResults, processEvent],
   );
 
   /**

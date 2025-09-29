@@ -1,49 +1,49 @@
 [
   {
-    "id": "c989ba61-4bd1-484c-b8cc-876ef0020ec6",
+    "id": "3165d8e2-db19-4850-93f7-88eb3304bf46",
     "type": "user_message",
-    "timestamp": 1752414622041,
+    "timestamp": 1758276103049,
     "content": "How's the weather today?"
   },
   {
-    "id": "7ef6dc01-74c3-49e6-9c8b-e8dd736c3ef0",
+    "id": "316eedb5-1520-47d3-8a98-54eced21cd06",
     "type": "agent_run_start",
-    "timestamp": 1752414622041,
-    "sessionId": "1752414622041-dk98hqm",
+    "timestamp": 1758276103049,
+    "sessionId": "1758276103049-d6o4kd7",
     "runOptions": {
-      "input": "How's the weather today?",
-      "toolCallEngine": "structured_outputs"
+      "input": "How's the weather today?"
     },
     "provider": "volcengine",
-    "model": "ep-20250510145437-5sxhs"
+    "model": "doubao-seed-1-6-vision-250815",
+    "agentName": "Anonymous"
   },
   {
-    "id": "8015709d-7c62-4978-ba8c-d2136f4b303f",
+    "id": "c53fd2de-6623-4c46-a835-54dfb78313f4",
     "type": "assistant_message",
-    "timestamp": 1752414623313,
-    "content": "To get the weather, I first need your current location. Retrieving your location...",
-    "rawContent": "To get the weather, I first need your current location. Retrieving your location...",
+    "timestamp": 1758276105650,
+    "content": "To determine the weather today, we first need to know the user's current location. So we will call the `getCurrentLocation` tool to obtain the location information.\n",
+    "rawContent": "",
     "toolCalls": [
       {
-        "id": "call_1752414623313_5rdiq",
+        "id": "call_bvgy2ky1fmbyqhy1gct18f17",
         "type": "function",
         "function": {
           "name": "getCurrentLocation",
-          "arguments": "{}"
+          "arguments": " {}"
         }
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "msg_1752414622526_0xf2c07f"
+    "messageId": "msg_1758276104350_5ys9743i"
   },
   {
-    "id": "cf621f16-f33a-4cca-916a-75f3934f049a",
+    "id": "fb51abe0-7c44-44d7-a22f-d6bfe768c951",
     "type": "tool_call",
-    "timestamp": 1752414623314,
-    "toolCallId": "call_1752414623313_5rdiq",
+    "timestamp": 1758276105652,
+    "toolCallId": "call_bvgy2ky1fmbyqhy1gct18f17",
     "name": "getCurrentLocation",
     "arguments": {},
-    "startTime": 1752414623314,
+    "startTime": 1758276105651,
     "tool": {
       "name": "getCurrentLocation",
       "description": "Get user's current location",
@@ -54,10 +54,10 @@
     }
   },
   {
-    "id": "8c830caf-ade4-4af6-9fd0-5be0d13c1688",
+    "id": "a94e5134-eb42-443d-a2bf-fe1ebe7ccbf3",
     "type": "tool_result",
-    "timestamp": 1752414623317,
-    "toolCallId": "call_1752414623313_5rdiq",
+    "timestamp": 1758276105656,
+    "toolCallId": "call_bvgy2ky1fmbyqhy1gct18f17",
     "name": "getCurrentLocation",
     "content": {
       "location": "Boston"
@@ -65,34 +65,34 @@
     "elapsedMs": 0
   },
   {
-    "id": "4c8e99ca-3350-4f35-9ca9-15a60f5e38f6",
+    "id": "04f93e3a-0cd1-485f-ba1e-a489bb3c15cc",
     "type": "assistant_message",
-    "timestamp": 1752414624276,
-    "content": "Fetching weather for Boston...",
-    "rawContent": "Fetching weather for Boston...",
+    "timestamp": 1758276107790,
+    "content": "Now that we have the location as Boston, we can call the `getWeather` tool with this location to get the weather information for today.\n",
+    "rawContent": "",
     "toolCalls": [
       {
-        "id": "call_1752414624276_96qaw",
+        "id": "call_ztpsz2lreib2j3ckchidw1z4",
         "type": "function",
         "function": {
           "name": "getWeather",
-          "arguments": "{\"location\":\"Boston\"}"
+          "arguments": " {\"location\": \"Boston\"}"
         }
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "msg_1752414623689_fso8s4z5"
+    "messageId": "msg_1758276106456_5rfa9toj"
   },
   {
-    "id": "c71df401-90d4-4927-94e7-70f3d7f75bc8",
+    "id": "9533352c-e05e-4d97-81d2-9a07eb4d6b60",
     "type": "tool_call",
-    "timestamp": 1752414624281,
-    "toolCallId": "call_1752414624276_96qaw",
+    "timestamp": 1758276107794,
+    "toolCallId": "call_ztpsz2lreib2j3ckchidw1z4",
     "name": "getWeather",
     "arguments": {
       "location": "Boston"
     },
-    "startTime": 1752414624280,
+    "startTime": 1758276107793,
     "tool": {
       "name": "getWeather",
       "description": "Get weather information for a specified location",
@@ -111,10 +111,10 @@
     }
   },
   {
-    "id": "57a1fd46-d722-4f94-963e-e9bf113c53b3",
+    "id": "d5ea6fef-c418-43d8-8430-db6bfa3f2ba1",
     "type": "tool_result",
-    "timestamp": 1752414624282,
-    "toolCallId": "call_1752414624276_96qaw",
+    "timestamp": 1758276107794,
+    "toolCallId": "call_ztpsz2lreib2j3ckchidw1z4",
     "name": "getWeather",
     "content": {
       "location": "Boston",

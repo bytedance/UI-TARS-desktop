@@ -26,7 +26,7 @@ export interface AgentUIBuilderInputOptions {
   /** Optional server version info */
   serverInfo?: AgentServerVersionInfo;
 
-  /** Optional web UI configuration to inject */
+  /** Optional Agent UI Configuration to inject */
   uiConfig?: AgentWebUIImplementation;
 }
 
@@ -36,7 +36,7 @@ export interface AgentUIBuilderInputOptions {
 export interface UploadOptions {
   /** Custom slug for the share URL */
   slug?: string;
-  
+
   /** Original user query for metadata */
   query?: string;
 }

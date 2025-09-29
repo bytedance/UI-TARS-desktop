@@ -4,14 +4,14 @@ import { apiService } from '../../services/apiService';
 import { sessionsAtom, activeSessionIdAtom } from '../atoms/session';
 import { messagesAtom } from '../atoms/message';
 import { toolResultsAtom, toolCallResultMap } from '../atoms/tool';
-import { sessionAgentStatusAtom, sessionPanelContentAtom, sessionMetadataAtom } from '../atoms/ui';
+import { sessionPanelContentAtom, isProcessingAtom } from '../atoms/ui';
 import { processEventAction } from './eventProcessors';
 import { Message, SessionInfo } from '@/common/types';
 import { connectionStatusAtom } from '../atoms/ui';
 import { replayStateAtom } from '../atoms/replay';
 import { sessionFilesAtom, FileItem } from '../atoms/files';
 import { ChatCompletionContentPart, AgentEventStream } from '@tarko/agent-interface';
-import { createModelConfigFromEvent, createAgentInfoFromEvent } from '../../utils/metadataUtils';
+import { SessionItemMetadata } from '@tarko/interface';
 
 // Priority-based file selection for workspace display: HTML > Markdown > Others
 function selectBestFileToDisplay(files: FileItem[]): FileItem | null {
@@ -81,9 +81,9 @@ export const loadSessionsAction = atom(null, async (get, set) => {
   }
 });
 
-export const createSessionAction = atom(null, async (get, set) => {
+export const createSessionAction = atom(null, async (get, set, runtimeSettings?: Record<string, any>, agentOptions?: Record<string, any>) => {
   try {
-    const newSession = await apiService.createSession();
+    const { session: newSession, events: initializationEvents } = await apiService.createSession(runtimeSettings, agentOptions);
 
     set(sessionsAtom, (prev) => [newSession, ...prev]);
 
@@ -92,10 +92,8 @@ export const createSessionAction = atom(null, async (get, set) => {
       [newSession.id]: [],
     }));
 
-    // Update session metadata when creating session
-    if (newSession.metadata) {
-      set(sessionMetadataAtom, newSession.metadata);
-    }
+    // Session metadata is now stored in sessions array, no separate atom needed
+    console.log(`Created session ${newSession.id} with metadata:`, newSession.metadata);
 
     set(toolResultsAtom, (prev) => ({
       ...prev,
@@ -108,6 +106,17 @@ export const createSessionAction = atom(null, async (get, set) => {
       [newSession.id]: null,
     }));
     set(activeSessionIdAtom, newSession.id);
+
+    // Process initialization events if any were returned
+    if (initializationEvents && initializationEvents.length > 0) {
+      console.log(`Processing ${initializationEvents.length} initialization events for session ${newSession.id}`);
+      
+      const processedEvents = preprocessStreamingEvents(initializationEvents);
+      
+      for (const event of processedEvents) {
+        await set(processEventAction, { sessionId: newSession.id, event });
+      }
+    }
 
     return newSession.id;
   } catch (error) {
@@ -141,32 +150,11 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
       });
     }
 
-    // Update processing status based on current session state
-    try {
-      const status = await apiService.getSessionStatus(sessionId);
-      set(sessionAgentStatusAtom, (prev) => ({
-        ...prev,
-        [sessionId]: {
-          isProcessing: status.isProcessing,
-          state: status.state,
-          phase: status.phase,
-          message: status.message,
-          estimatedTime: status.estimatedTime,
-        },
-      }));
-    } catch (error) {
-      console.warn('Failed to get session status:', error);
-      set(sessionAgentStatusAtom, (prev) => ({
-        ...prev,
-        [sessionId]: {
-          isProcessing: false,
-        },
-      }));
-    }
+    // Processing state will be managed by SSE events
 
     toolCallResultMap.clear();
 
-    // Load events only if messages aren't already loaded
+    // Load session data - since server always provides modelConfig, we can simplify this
     const messages = get(messagesAtom);
     const hasExistingMessages = messages[sessionId] && messages[sessionId].length > 0;
 
@@ -179,67 +167,39 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
       for (const event of processedEvents) {
         await set(processEventAction, { sessionId, event });
       }
-    } else {
-      console.log(`Session ${sessionId} already has messages, skipping event loading`);
+    }
 
-      // Load session metadata and events to restore model/agent info
-      try {
-        console.log(`Loading session metadata for ${sessionId}`);
-        const sessionDetails = await apiService.getSessionDetails(sessionId);
-
-        // Restore session metadata
-        if (sessionDetails.metadata) {
-          set(sessionMetadataAtom, sessionDetails.metadata);
-          console.log(`Restored session metadata for ${sessionId}`);
-        }
-
-        // Load events to enrich metadata if needed
-        const events = await apiService.getSessionEvents(sessionId);
-        const runStartEvent = events.find((e) => e.type === 'agent_run_start');
-
-        if (runStartEvent) {
-          const enrichedMetadata = { ...sessionDetails.metadata };
-
-          // Enrich with model config if missing
-          if (!enrichedMetadata.modelConfig) {
-            const modelConfig = createModelConfigFromEvent(runStartEvent);
-            if (modelConfig) {
-              enrichedMetadata.modelConfig = modelConfig;
-            }
-          }
-
-          // Enrich with agent info if missing
-          if (!enrichedMetadata.agentInfo?.name) {
-            const agentInfo = createAgentInfoFromEvent(runStartEvent);
-            if (agentInfo) {
-              enrichedMetadata.agentInfo = agentInfo;
-            }
-          }
-
-          set(sessionMetadataAtom, enrichedMetadata);
-          console.log(`Enriched session metadata from events for ${sessionId}`);
-        }
-      } catch (error) {
-        console.warn(`Failed to load session metadata/events for info recovery:`, error);
+    // Always ensure we have the latest session metadata (including modelConfig)
+    // This is lightweight since server always provides it
+    try {
+      const sessionDetails = await apiService.getSessionDetails(sessionId);
+      if (sessionDetails.metadata) {
+        set(updateSessionMetadataAction, {
+          sessionId,
+          metadata: sessionDetails.metadata,
+        });
       }
+    } catch (error) {
+      console.warn(`Failed to load session metadata:`, error);
+      // Keep current state on error
     }
 
     set(activeSessionIdAtom, sessionId);
 
-    // Auto-select best file for workspace display
-    const sessionFiles = get(sessionFilesAtom);
-    const files = sessionFiles[sessionId] || [];
-    const bestFile = selectBestFileToDisplay(files);
+    // Auto-select best file for workspace display only if no panel content was set by events
+    const currentPanelContent = get(sessionPanelContentAtom);
+    const sessionPanelContent = currentPanelContent[sessionId];
+    
+    if (!sessionPanelContent) {
+      // No panel content was set by events, try to auto-select a file
+      const sessionFiles = get(sessionFilesAtom);
+      const files = sessionFiles[sessionId] || [];
+      const bestFile = selectBestFileToDisplay(files);
 
-    if (bestFile) {
-      console.log(`Auto-selecting file for workspace: ${bestFile.name} (${bestFile.path})`);
-      setWorkspacePanelForFile(set, sessionId, bestFile);
-    } else {
-      // Clear panel content for this session
-      set(sessionPanelContentAtom, (prev) => ({
-        ...prev,
-        [sessionId]: null,
-      }));
+      if (bestFile) {
+        setWorkspacePanelForFile(set, sessionId, bestFile);
+      }
+      // If no files and no panel content, leave it as null (don't explicitly clear)
     }
   } catch (error) {
     console.error('Failed to set active session:', error);
@@ -278,18 +238,34 @@ export const updateSessionAction = atom(
 function preprocessStreamingEvents(events: AgentEventStream.Event[]): AgentEventStream.Event[] {
   const messageStreams: Record<string, AgentEventStream.Event[]> = {};
 
-  events.forEach((event) => {
-    if (event.type === 'final_answer_streaming' && 'messageId' in event) {
-      const messageId = event.messageId as string;
-      if (!messageStreams[messageId]) {
-        messageStreams[messageId] = [];
-      }
-      messageStreams[messageId].push(event);
-    }
-  });
+  // No special preprocessing needed for current event types
 
   return events;
 }
+
+// Utility action to update session metadata without duplication
+export const updateSessionMetadataAction = atom(
+  null,
+  (get, set, params: { sessionId: string; metadata: Partial<SessionItemMetadata> }) => {
+    const { sessionId, metadata } = params;
+
+    set(sessionsAtom, (prev) =>
+      prev.map((session) =>
+        session.id === sessionId
+          ? {
+              ...session,
+              metadata: {
+                ...session.metadata,
+                ...metadata,
+              },
+            }
+          : session,
+      ),
+    );
+
+    console.log(`Updated metadata for session ${sessionId}:`, metadata);
+  },
+);
 
 export const deleteSessionAction = atom(null, async (get, set, sessionId: string) => {
   try {
@@ -321,12 +297,6 @@ export const deleteSessionAction = atom(null, async (get, set, sessionId: string
         delete newPanelContent[sessionId];
         return newPanelContent;
       });
-
-      set(sessionAgentStatusAtom, (prev) => {
-        const newAgentStatus = { ...prev };
-        delete newAgentStatus[sessionId];
-        return newAgentStatus;
-      });
     }
 
     return success;
@@ -345,14 +315,8 @@ export const sendMessageAction = atom(
       throw new Error('No active session');
     }
 
-    // Update processing state for active session
-    set(sessionAgentStatusAtom, (prev) => ({
-      ...prev,
-      [activeSessionId]: {
-        ...(prev[activeSessionId] || {}),
-        isProcessing: true,
-      },
-    }));
+    // Update processing state
+    set(isProcessingAtom, true);
 
     // Immediately add user message to UI for better UX
     // Server-side user_message events will be deduplicated in the handler
@@ -375,7 +339,8 @@ export const sendMessageAction = atom(
       const messages = get(messagesAtom)[activeSessionId] || [];
       const userMessageCount = messages.filter((m) => m.role === 'user').length;
 
-      if (userMessageCount === 1) { // Now we check for 1 since we just added the message
+      if (userMessageCount === 1) {
+        // Now we check for 1 since we just added the message
         let summary = '';
         if (typeof content === 'string') {
           summary = content.length > 50 ? content.substring(0, 47) + '...' : content;
@@ -415,14 +380,8 @@ export const sendMessageAction = atom(
       });
     } catch (error) {
       console.error('Error sending message:', error);
-      // Set processing to false for this session on error
-      set(sessionAgentStatusAtom, (prev) => ({
-        ...prev,
-        [activeSessionId]: {
-          ...(prev[activeSessionId] || {}),
-          isProcessing: false,
-        },
-      }));
+      // Set processing to false on error
+      set(isProcessingAtom, false);
       throw error;
     }
   },
@@ -440,48 +399,57 @@ export const abortQueryAction = atom(null, async (get, set) => {
 
     // Immediately set processing to false on successful abort to prevent flickering
     if (success) {
-      set(sessionAgentStatusAtom, (prev) => ({
-        ...prev,
-        [activeSessionId]: {
-          ...(prev[activeSessionId] || {}),
-          isProcessing: false,
-        },
-      }));
+      set(isProcessingAtom, false);
     }
 
     return success;
   } catch (error) {
     console.error('Error aborting query:', error);
     // Also set processing to false on error to ensure UI consistency
-    set(sessionAgentStatusAtom, (prev) => ({
-      ...prev,
-      [activeSessionId]: {
-        ...(prev[activeSessionId] || {}),
-        isProcessing: false,
-      },
-    }));
+    set(isProcessingAtom, false);
     return false;
   }
 });
 
+// Cache to prevent frequent status checks for the same session
+const statusCheckCache = new Map<string, { timestamp: number; promise?: Promise<any> }>();
+const STATUS_CACHE_TTL = 2000; // 2 seconds cache
+
 export const checkSessionStatusAction = atom(null, async (get, set, sessionId: string) => {
   if (!sessionId) return;
 
+  const now = Date.now();
+  const cached = statusCheckCache.get(sessionId);
+
+  // If we have a recent check or an ongoing request, skip
+  if (cached) {
+    if (cached.promise) {
+      // There's already an ongoing request for this session
+      return cached.promise;
+    }
+    if (now - cached.timestamp < STATUS_CACHE_TTL) {
+      // Recent check, skip
+      return;
+    }
+  }
+
   try {
-    const status = await apiService.getSessionStatus(sessionId);
-    set(sessionAgentStatusAtom, (prev) => ({
-      ...prev,
-      [sessionId]: {
-        isProcessing: status.isProcessing,
-        state: status.state,
-        phase: status.phase,
-        message: status.message,
-        estimatedTime: status.estimatedTime,
-      },
-    }));
+    // Mark that we're making a request
+    const promise = apiService.getSessionStatus(sessionId);
+    statusCheckCache.set(sessionId, { timestamp: now, promise });
+
+    const status = await promise;
+
+    // Update simple processing state
+    set(isProcessingAtom, status.isProcessing);
+
+    // Clear the promise and update timestamp
+    statusCheckCache.set(sessionId, { timestamp: now });
 
     return status;
   } catch (error) {
     console.error('Failed to check session status:', error);
+    // Clear the failed request
+    statusCheckCache.delete(sessionId);
   }
 });

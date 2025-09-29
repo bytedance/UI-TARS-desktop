@@ -95,13 +95,12 @@ export class ShareService {
       const builder = new AgentUIBuilder({
         events: keyFrameEvents,
         sessionInfo: metadata,
-        staticPath: this.appConfig.webui.staticPath,
         serverInfo,
         uiConfig: mergedWebUIConfig,
       });
 
       // Generate HTML
-      const html = builder.dump();
+      const html = await builder.dump();
 
       // Upload if requested and provider is configured
       if (upload && this.appConfig.share?.provider) {

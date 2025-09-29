@@ -8,7 +8,7 @@ import type { BaseAgentWebUIImplementation } from '@tarko/interface';
 const sandboxBaseUrl = location.host.includes('localhost') ? 'http://localhost:8080' : '';
 
 /**
- * Default Web UI configuration for standalone deployment
+ * Default Agent UI Configuration for standalone deployment
  */
 export const DEFAULT_WEBUI_CONFIG: BaseAgentWebUIImplementation = {
   logo: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/icon.png',

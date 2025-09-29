@@ -1,0 +1,17 @@
+[
+  {
+    "type": "file",
+    "name": "basic",
+    "label": "基础"
+  },
+  {
+    "type": "file",
+    "name": "management",
+    "label": "管理"
+  },
+  {
+    "type": "file",
+    "name": "tool-call-engine",
+    "label": "执行引擎"
+  }
+]

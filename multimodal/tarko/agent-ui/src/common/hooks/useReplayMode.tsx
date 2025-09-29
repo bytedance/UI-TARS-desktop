@@ -111,6 +111,8 @@ export const ReplayModeProvider: React.FC<{ children: ReactNode }> = ({ children
     console.log('[ReplayMode] Initializing with', events.length, 'events');
     console.log('[ReplayMode] Should auto play:', shouldReplay);
     console.log('[ReplayMode] Focus file:', focusFile);
+    console.log('[ReplayMode] Session data:', sessionData);
+    console.log('[ReplayMode] Session metadata:', sessionData?.metadata);
 
     if (!sessionData?.id) {
       console.error('[ReplayMode] Missing session data');

@@ -1,0 +1,243 @@
+---
+title: CLI Configuration
+description: Complete guide to configuring Tarko CLI
+---
+
+# CLI Configuration
+
+Tarko CLI 支持多种配置格式，优先级从高到低：CLI 参数 > 配置文件 > 环境变量。
+
+## 配置文件
+
+自动发现配置文件顺序：
+
+1. `tarko.config.ts` (TypeScript)
+2. `tarko.config.yaml` (YAML) 
+3. `tarko.config.json` (JSON)
+
+### TypeScript 配置
+
+```typescript
+// tarko.config.ts
+import { AgentAppConfig } from '@tarko/interface';
+
+const config: AgentAppConfig = {
+  // Model 配置
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY,
+    temperature: 0.7,
+  },
+  
+  // 服务器配置
+  server: {
+    port: 8888,
+    exclusive: false, // 独占模式
+  },
+  
+  // Tool 过滤
+  tool: {
+    include: ['file_*', 'web_*'],
+    exclude: ['dangerous_*'],
+  },
+  
+  // MCP Server 过滤
+  mcpServer: {
+    include: ['filesystem', 'browser'],
+    exclude: ['experimental_*'],
+  },
+  
+  // 分享配置
+  share: {
+    provider: 'https://share.example.com',
+  },
+};
+
+export default config;
+```
+
+### YAML 配置
+
+```yaml
+# tarko.config.yaml
+model:
+  provider: openai
+  id: gpt-4
+  apiKey: ${OPENAI_API_KEY}
+  temperature: 0.7
+
+server:
+  port: 8888
+  exclusive: false
+
+tool:
+  include:
+    - 'file_*'
+    - 'web_*'
+  exclude:
+    - 'dangerous_*'
+
+mcpServer:
+  include:
+    - filesystem
+    - browser
+  exclude:
+    - 'experimental_*'
+
+share:
+  provider: https://share.example.com
+```
+
+### JSON 配置
+
+```json
+{
+  "model": {
+    "provider": "openai",
+    "id": "gpt-4",
+    "apiKey": "${OPENAI_API_KEY}",
+    "temperature": 0.7
+  },
+  "server": {
+    "port": 8888,
+    "exclusive": false
+  },
+  "tool": {
+    "include": ["file_*", "web_*"],
+    "exclude": ["dangerous_*"]
+  },
+  "mcpServer": {
+    "include": ["filesystem", "browser"],
+    "exclude": ["experimental_*"]
+  },
+  "share": {
+    "provider": "https://share.example.com"
+  }
+}
+```
+
+## 配置优先级
+
+配置解析优先级（从高到低）：
+
+1. **CLI 参数**（最高优先级）
+2. **工作区配置**
+3. **用户配置文件**（`--config`）
+4. **默认配置**（最低优先级）
+
+### CLI 参数覆盖
+
+```bash
+# 覆盖 Model 配置
+tarko --model.provider openai --model.id gpt-4 --model.apiKey sk-xxx
+
+# 覆盖服务器设置
+tarko serve --port 3000
+
+# 覆盖工作区
+tarko --workspace ./custom-workspace
+
+# 覆盖 Tool 过滤
+tarko --tool.include "file_*,web_*" --tool.exclude "dangerous_*"
+```
+
+## 环境变量
+
+```bash
+# API Keys
+export OPENAI_API_KEY=your-openai-key
+export ANTHROPIC_API_KEY=your-anthropic-key
+export AZURE_OPENAI_API_KEY=your-azure-key
+
+# 服务器设置
+export TARKO_PORT=3000
+export TARKO_WORKSPACE=./my-workspace
+
+# 调试设置
+export DEBUG=tarko:*
+```
+
+## 主要配置选项
+
+### Model 配置
+
+```typescript
+model: {
+  provider: 'openai' | 'anthropic' | 'azure' | 'ollama',
+  id: string,              // Model ID (如 'gpt-4')
+  apiKey?: string,         // API key (建议使用环境变量)
+  temperature?: number,    // 创造性 (0-1)
+}
+```
+
+### Server 配置
+
+```typescript
+server: {
+  port?: number,           // 服务器端口 (默认: 8888)
+  exclusive?: boolean,     // 独占模式 (默认: false)
+}
+```
+
+### Tool 过滤
+
+```typescript
+tool: {
+  include?: string[],      // 包含的 Tool 模式
+  exclude?: string[],      // 排除的 Tool 模式
+}
+
+// 示例:
+// include: ['file_*', 'web_*'] - 包含所有文件和网络工具
+// exclude: ['dangerous_*'] - 排除危险工具
+```
+
+### MCP Server 过滤
+
+```typescript
+mcpServer: {
+  include?: string[],      // 包含的 MCP server 模式
+  exclude?: string[],      // 排除的 MCP server 模式
+}
+
+// 示例:
+// include: ['filesystem', 'browser'] - 包含特定服务器
+// exclude: ['experimental_*'] - 排除实验性服务器
+```
+
+## 配置示例
+
+### 开发环境
+
+```typescript
+// tarko.config.ts
+export default {
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  server: { port: 3000 },
+};
+```
+
+### 生产环境
+
+```typescript
+// tarko.config.ts
+export default {
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  server: {
+    port: 8080,
+    exclusive: true,
+  },
+  tool: {
+    exclude: ['dangerous_*'],
+  },
+};
+```

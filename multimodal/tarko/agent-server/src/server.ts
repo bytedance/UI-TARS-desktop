@@ -5,11 +5,9 @@
 
 import express from 'express';
 import http from 'http';
-import { Server as SocketIOServer } from 'socket.io';
 import { setupAPI } from './api';
 import { LogLevel } from '@tarko/interface';
 import { StorageProvider, createStorageProvider } from './storage';
-import { setupSocketIO } from './core/SocketHandlers';
 import type { AgentSession } from './core';
 import { resolveAgentImplementation } from './utils/agent-resolver';
 import type {
@@ -18,7 +16,6 @@ import type {
   AgentAppConfig,
   AgentResolutionResult,
   AgioProviderConstructor,
-  IAgent,
 } from './types';
 import { TARKO_CONSTANTS, GlobalDirectoryOptions } from '@tarko/interface';
 
@@ -41,7 +38,6 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   // Core server components
   private app: express.Application;
   private server: http.Server;
-  private io: SocketIOServer; // Socket.IO server
 
   // Server state
   private isRunning = false;
@@ -101,16 +97,19 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
       isDebug: this.isDebug,
     });
 
-    // Setup WebSocket functionality
-    this.io = setupSocketIO(this.server, this);
-
     // Make server instance available to request handlers
     this.app.locals.server = this;
   }
 
   /**
+   * Get the current agent resolution.
+   */
+  getCurrentAgentResolution(): AgentResolutionResult | undefined {
+    return this.currentAgentResolution;
+  }
+
+  /**
    * Get the custom AGIO provider if injected
-   * @returns Custom AGIO provider or undefined
    */
   getCustomAgioProvider(): AgioProviderConstructor | undefined {
     return this.currentAgentResolution?.agioProviderConstructor;
@@ -139,16 +138,6 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    */
   getCurrentAgentName(): string | undefined {
     return this.currentAgentResolution?.agentName;
-  }
-
-  /**
-   * Validate if a model configuration is still valid
-   * @deprecated With simplified model configuration, all provider/model combinations are considered valid
-   */
-  isModelConfigValid(provider: string, modelId: string): boolean {
-    // With simplified model configuration, we accept any provider/model combination
-    // The actual validation happens during model resolution
-    return true;
   }
 
   /**
@@ -206,14 +195,6 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    */
   getHttpServer(): http.Server {
     return this.server;
-  }
-
-  /**
-   * Get the Socket.IO server instance
-   * @returns Socket.IO server
-   */
-  getSocketIOServer(): SocketIOServer {
-    return this.io;
   }
 
   /**
@@ -318,20 +299,5 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     }
 
     return Promise.resolve();
-  }
-
-  /**
-   * Create a new Agent instance using the injected constructor
-   * @returns New Agent instance
-   */
-  createAgent(): IAgent {
-    if (!this.currentAgentResolution) {
-      throw new Error('Cannot found availble resolved agent');
-    }
-    const agentOptions: T = {
-      ...this.appConfig,
-      name: this.getCurrentAgentName(),
-    };
-    return new this.currentAgentResolution.agentConstructor(agentOptions);
   }
 }

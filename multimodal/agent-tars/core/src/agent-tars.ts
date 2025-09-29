@@ -4,33 +4,24 @@
  */
 
 import {
-  Client,
   AgentEventStream,
   MCPAgent,
-  MCPServerRegistry,
   LLMRequestHookPayload,
   LLMResponseHookPayload,
   ConsoleLogger,
   LoopTerminationCheckResult,
 } from '@tarko/mcp-agent';
-import {
-  AgentTARSOptions,
-  BuiltInMCPServers,
-  BuiltInMCPServerName,
-  AgentTARSPlannerOptions,
-  BrowserState,
-} from './types';
+import { AgentTARSOptions, BrowserState } from './types';
 import { DEFAULT_SYSTEM_PROMPT, generateBrowserRulesPrompt } from './prompt';
-import { BrowserGUIAgent, BrowserManager, BrowserToolsManager } from './browser';
-import { validateBrowserControlMode } from './browser/browser-control-validator';
-import { SearchToolProvider } from './search';
-import { FilesystemToolsManager } from './filesystem';
+import { BrowserManager } from './environments/local/browser';
+import { validateBrowserControlMode } from './environments/local/browser/browser-control-validator';
 import { applyDefaultOptions } from './shared/config-utils';
 import { MessageHistoryDumper } from './shared/message-history-dumper';
-import { WorkspacePathResolver } from './shared/workspace-path-resolver';
 import { AgentWebUIImplementation } from '@agent-tars/interface';
-import { AgentTARSInitializer } from './initializers/agent-tars-initializer';
-import { ToolLogger, ResourceCleaner } from './utils';
+import { AgentTARSLocalEnvironment, AgentTARSAIOEnvironment } from './environments';
+import { AgentTARSBaseEnvironment } from './environments/base';
+import { ToolLogger } from './utils';
+import { AGENT_TARS_WEBUI_CONFIG } from './webui-config';
 
 /**
  * AgentTARS - A multimodal AI agent with browser, filesystem, and search capabilities
@@ -42,49 +33,17 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   static label = '@agent-tars/core';
 
   /**
-   * Default Web UI configuration for Agent TARS
+   * Default Agent UI Configuration for Agent TARS
    */
-  static webuiConfig: AgentWebUIImplementation = {
-    logo: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png',
-    title: 'Agent TARS',
-    subtitle: 'Offering seamless integration with a wide range of real-world tools.',
-    welcomTitle: 'A multimodal AI agent',
-    welcomePrompts: [
-      'Search for the latest GUI Agent papers',
-      'Find information about UI TARS',
-      'Tell me the top 5 most popular projects on ProductHunt today',
-      'Please book me the earliest flight from Hangzhou to Shenzhen on 10.1',
-    ],
-    enableContextualSelector: true,
-    guiAgent: {
-      defaultScreenshotRenderStrategy: 'beforeAction',
-      enableScreenshotRenderStrategySwitch: true,
-      renderGUIAction: true,
-    },
-    layout: {
-      defaultLayout: 'narrow-chat',
-      enableLayoutSwitchButton: true,
-    },
-  };
+  static webuiConfig: AgentWebUIImplementation = AGENT_TARS_WEBUI_CONFIG;
 
   // Core configuration
   private readonly workspace: string;
   private readonly tarsOptions: AgentTARSOptions;
 
-  // Component managers
-  private readonly browserManager: BrowserManager;
-  private readonly workspacePathResolver: WorkspacePathResolver;
+  // Core utilities
   private readonly toolLogger: ToolLogger;
-  private readonly resourceCleaner: ResourceCleaner;
-  private readonly initializer: AgentTARSInitializer;
-
-  // Component instances (initialized during setup)
-  private browserToolsManager?: BrowserToolsManager;
-  private filesystemToolsManager?: FilesystemToolsManager;
-  private searchToolProvider?: SearchToolProvider;
-  private browserGUIAgent?: BrowserGUIAgent;
-  private inMemoryMCPClients: Partial<Record<BuiltInMCPServerName, Client>> = {};
-  private mcpServers: BuiltInMCPServers = {};
+  private readonly environment: AgentTARSBaseEnvironment;
 
   // State and utilities
   private browserState: BrowserState = {};
@@ -104,19 +63,31 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
     }
 
     const workspace = processedOptions.workspace ?? process.cwd();
-    const mcpServers = AgentTARS.buildMCPServerRegistry(options, workspace);
     const instructions = AgentTARS.buildInstructions(
       processedOptions,
       workspace,
       options.instructions,
     );
 
-    // Initialize parent class
+    // Create environment first to get MCP configuration
+    const environment = processedOptions.aioSandbox
+      ? new AgentTARSAIOEnvironment(
+          processedOptions,
+          workspace,
+          new ConsoleLogger(options.id || 'AgentTARS'),
+        )
+      : new AgentTARSLocalEnvironment(
+          processedOptions,
+          workspace,
+          new ConsoleLogger(options.id || 'AgentTARS'),
+        );
+
+    // Initialize parent class with environment-provided MCP configuration
     super({
       ...processedOptions,
       name: options.name ?? 'AgentTARS',
       instructions,
-      mcpServers,
+      mcpServers: environment.getMCPServerRegistry(),
       maxTokens: processedOptions.maxTokens,
     });
 
@@ -128,22 +99,17 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
     this.logger = this.logger.spawn('AgentTARS');
     this.logger.info(`🤖 AgentTARS initialized | Working directory: ${workspace}`);
 
-    // Initialize managers and utilities
-    this.browserManager = BrowserManager.getInstance(this.logger);
-    this.browserManager.lastLaunchOptions = {
-      headless: this.tarsOptions.browser?.headless,
-      cdpEndpoint: this.tarsOptions.browser?.cdpEndpoint,
-    };
-
-    this.workspacePathResolver = new WorkspacePathResolver({ workspace });
+    // Initialize core utilities
     this.toolLogger = new ToolLogger(this.logger);
-    this.resourceCleaner = new ResourceCleaner(this.logger);
-    this.initializer = new AgentTARSInitializer(
-      this.tarsOptions,
-      this.workspace,
-      this.browserManager,
-      this.logger,
-    );
+
+    // Use the environment created earlier (with updated logger)
+    this.environment = environment;
+    // Update environment logger to use the initialized logger
+    if ('logger' in this.environment) {
+      (this.environment as any).logger = this.logger.spawn(
+        processedOptions.aioSandbox ? 'AIOEnvironment' : 'LocalEnvironment',
+      );
+    }
 
     // Initialize optional features
     this.initializeOptionalFeatures();
@@ -157,19 +123,8 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
     this.logger.info('🚀 Initializing AgentTARS...');
 
     try {
-      // Initialize all components through the initializer
-      const components = await this.initializer.initialize(
-        (tool) => this.registerTool(tool),
-        this.eventStream,
-      );
-
-      // Store component references
-      this.browserToolsManager = components.browserToolsManager;
-      this.filesystemToolsManager = components.filesystemToolsManager;
-      this.searchToolProvider = components.searchToolProvider;
-      this.browserGUIAgent = components.browserGUIAgent;
-      this.inMemoryMCPClients = components.mcpClients;
-      this.mcpServers = this.initializer.getMCPServers();
+      // Initialize all components through the environment
+      await this.environment.initialize((tool) => this.registerTool(tool), this.eventStream);
 
       // Log registered tools
       this.toolLogger.logRegisteredTools(this.getTools());
@@ -185,46 +140,27 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   }
 
   /**
-   * Handle tool call preprocessing (lazy browser launch and path resolution)
+   * Handle tool call preprocessing - delegate to environment
    */
   override async onBeforeToolCall(
     id: string,
     toolCall: { toolCallId: string; name: string },
     args: any,
   ): Promise<any> {
-    // Handle browser tool calls with lazy initialization
-    if (toolCall.name.startsWith('browser')) {
-      await this.ensureBrowserReady();
-    }
-
-    // Resolve workspace paths for filesystem operations
-    if (this.workspacePathResolver.hasPathParameters(toolCall.name)) {
-      return this.workspacePathResolver.resolveToolPaths(toolCall.name, args);
-    }
-
-    return args;
+    return await this.environment.onBeforeToolCall(id, toolCall, args, this.isReplaySnapshot);
   }
 
   /**
-   * Handle agent loop start (GUI Agent screenshot if needed)
+   * Handle agent loop start - delegate to environment
    */
   override async onEachAgentLoopStart(sessionId: string): Promise<void> {
-    if (
-      this.tarsOptions.browser?.control !== 'dom' &&
-      this.browserGUIAgent &&
-      this.browserManager.isLaunchingComplete()
-    ) {
-      if (this.browserGUIAgent.setEventStream) {
-        this.browserGUIAgent.setEventStream(this.eventStream);
-      }
-      await this.browserGUIAgent.onEachAgentLoopStart(this.eventStream, this.isReplaySnapshot);
-    }
+    await this.environment.onEachAgentLoopStart(sessionId, this.eventStream, this.isReplaySnapshot);
 
     await super.onEachAgentLoopStart(sessionId);
   }
 
   /**
-   * Handle post-tool call processing (browser state updates)
+   * Handle post-tool call processing - delegate to environment
    */
   override async onAfterToolCall(
     id: string,
@@ -233,16 +169,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   ): Promise<any> {
     const processedResult = await super.onAfterToolCall(id, toolCall, result);
 
-    // Update browser state after navigation
-    if (
-      toolCall.name === 'browser_navigate' &&
-      this.browserManager.isLaunchingComplete() &&
-      (await this.browserManager.isBrowserAlive())
-    ) {
-      await this.updateBrowserState();
-    }
-
-    return processedResult;
+    return await this.environment.onAfterToolCall(id, toolCall, processedResult, this.browserState);
   }
 
   /**
@@ -256,13 +183,10 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   }
 
   /**
-   * Handle session disposal
+   * Handle session disposal - delegate to environment
    */
   override async onDispose(): Promise<void> {
-    if (this.browserManager?.isLaunchingComplete()) {
-      this.logger.info('🧹 Closing browser pages before session disposal');
-      await this.browserManager.closeAllPages();
-    }
+    await this.environment.onDispose();
     await super.onDispose();
   }
 
@@ -270,17 +194,8 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
    * Clean up all resources
    */
   async cleanup(): Promise<void> {
-    await this.resourceCleaner.cleanup(
-      this.inMemoryMCPClients,
-      this.mcpServers,
-      this.browserManager,
-      this.messageHistoryDumper,
-    );
-
-    // Clear references
-    this.inMemoryMCPClients = {};
-    this.mcpServers = {};
-    this.browserGUIAgent = undefined;
+    // Delegate cleanup to environment
+    await this.environment.onDispose();
   }
 
   // Public API methods
@@ -289,16 +204,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
    * Get browser control information
    */
   public getBrowserControlInfo(): { mode: string; tools: string[] } {
-    if (this.browserToolsManager) {
-      return {
-        mode: this.browserToolsManager.getMode(),
-        tools: this.browserToolsManager.getRegisteredTools(),
-      };
-    }
-    return {
-      mode: this.tarsOptions.browser?.control || 'default',
-      tools: [],
-    };
+    return this.environment.getBrowserControlInfo();
   }
 
   /**
@@ -325,8 +231,8 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   /**
    * Get the browser manager instance
    */
-  public getBrowserManager(): BrowserManager {
-    return this.browserManager;
+  public getBrowserManager(): BrowserManager | undefined {
+    return this.environment.getBrowserManager();
   }
 
   // Message history hooks for experimental features
@@ -340,33 +246,6 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   }
 
   // Private helper methods
-
-  /**
-   * Build MCP server registry based on implementation type
-   */
-  private static buildMCPServerRegistry(
-    options: AgentTARSOptions,
-    workspace: string,
-  ): MCPServerRegistry {
-    if (options.mcpImpl === 'stdio') {
-      return {
-        browser: {
-          command: 'npx',
-          args: ['-y', '@agent-infra/mcp-server-browser'],
-        },
-        filesystem: {
-          command: 'npx',
-          args: ['-y', '@agent-infra/mcp-server-filesystem', workspace],
-        },
-        commands: {
-          command: 'npx',
-          args: ['-y', '@agent-infra/mcp-server-commands'],
-        },
-        ...(options.mcpServers || {}),
-      };
-    }
-    return options.mcpServers || {};
-  }
 
   /**
    * Build system instructions
@@ -409,54 +288,5 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
         event._extra = this.browserState;
       }
     });
-  }
-
-  /**
-   * Ensure browser is ready for tool calls
-   */
-  private async ensureBrowserReady(): Promise<void> {
-    if (!this.browserManager.isLaunchingComplete()) {
-      if (!this.isReplaySnapshot) {
-        await this.browserManager.launchBrowser({
-          headless: this.tarsOptions.browser?.headless,
-          cdpEndpoint: this.tarsOptions.browser?.cdpEndpoint,
-        });
-      }
-    } else {
-      const isAlive = await this.browserManager.isBrowserAlive(true);
-      if (!isAlive && !this.isReplaySnapshot) {
-        this.logger.warn('🔄 Browser recovery needed, attempting explicit recovery...');
-        const recovered = await this.browserManager.recoverBrowser();
-        if (!recovered) {
-          this.logger.error('❌ Browser recovery failed - tool call may not work correctly');
-        }
-      }
-    }
-  }
-
-  /**
-   * Update browser state after navigation
-   */
-  private async updateBrowserState(): Promise<void> {
-    try {
-      if (this.tarsOptions.browser?.control === 'dom') {
-        const response = await this.inMemoryMCPClients.browser?.callTool({
-          name: 'browser_screenshot',
-          arguments: { highlight: true },
-        });
-
-        if (Array.isArray(response?.content)) {
-          const { data, type, mimeType } = response.content[1];
-          if (type === 'image') {
-            this.browserState.currentScreenshot = `data:${mimeType};base64,${data}`;
-          }
-        }
-      } else if (this.browserGUIAgent) {
-        const { compressedBase64 } = await this.browserGUIAgent.screenshot();
-        this.browserState.currentScreenshot = compressedBase64;
-      }
-    } catch (error) {
-      this.logger.warn('⚠️ Failed to update browser state:', error);
-    }
   }
 }

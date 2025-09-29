@@ -35,7 +35,7 @@ export async function sessionRestoreMiddleware(
       if (metadata) {
         try {
           // Recover sessions from storage using a custom AGIO provider
-          session = new AgentSession(server, sessionId, server.getCustomAgioProvider());
+          session = new AgentSession(server, sessionId, server.getCustomAgioProvider(), metadata);
 
           server.sessions[sessionId] = session;
 

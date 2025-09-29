@@ -93,6 +93,9 @@ export function bootstrapCli() {
     .option('--tag-prefix <prefix>', 'Prefix for git tags', {
       default: 'v',
     })
+    .option('--canary', 'Skip version/tag selection and auto-generate canary version', {
+      default: false,
+    })
     .option('--use-ai', 'Use AI to generate changelog', {
       default: false,
     })
@@ -111,6 +114,9 @@ export function bootstrapCli() {
       },
     )
     .option('--create-github-release', 'Create GitHub release after successful release', {
+      default: false,
+    })
+    .option('--auto-create-release-branch', 'Automatically create release branch before release', {
       default: false,
     })
     .alias('release')

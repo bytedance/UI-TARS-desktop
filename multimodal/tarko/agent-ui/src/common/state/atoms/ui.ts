@@ -1,11 +1,7 @@
 import { atom } from 'jotai';
-import { AgentProcessingPhase, AgentStatusInfo, SessionInfo, LayoutMode } from '@tarko/interface';
+import { SessionItemMetadata, LayoutMode } from '@tarko/interface';
 import { getDefaultLayoutMode } from '@/config/web-ui-config';
-import {
-  ConnectionStatus,
-  PanelContent,
-  SanitizedAgentOptions,
-} from '@/common/types';
+import { ConnectionStatus, PanelContent, SanitizedAgentOptions } from '@/common/types';
 import { activeSessionIdAtom } from './session';
 
 /**
@@ -45,15 +41,9 @@ export const connectionStatusAtom = atom<ConnectionStatus>({
 });
 
 /**
- * Session metadata atom using server-side SessionInfo metadata type
- * This eliminates type duplication and ensures consistency with persistence layer
+ * Atom for agent options (sanitized)
  */
-export const sessionMetadataAtom = atom<SessionInfo['metadata']>({});
-
-/**
- * Atom for agent options (sanitized configuration)
- */
-export const agentOptionsAtom = atom<SanitizedAgentOptions>({});
+export const agentOptionsAtom = atom<SanitizedAgentOptions | null>(null);
 
 /**
  * Atom for sidebar collapsed state
@@ -66,45 +56,9 @@ export const sidebarCollapsedAtom = atom<boolean>(true);
 export const workspacePanelCollapsedAtom = atom<boolean>(false);
 
 /**
- * Session-specific agent status storage
+ * Simple processing state atom based on SSE events
  */
-export const sessionAgentStatusAtom = atom<Record<string, AgentStatusInfo>>({});
-
-/**
- * Enhanced agent status atom for TTFT optimization with session isolation
- */
-export const agentStatusAtom = atom(
-  (get) => {
-    const activeSessionId = get(activeSessionIdAtom);
-    const sessionAgentStatus = get(sessionAgentStatusAtom);
-    return activeSessionId 
-      ? sessionAgentStatus[activeSessionId] || { isProcessing: false }
-      : { isProcessing: false };
-  },
-  (get, set, update: AgentStatusInfo | ((prev: AgentStatusInfo) => AgentStatusInfo)) => {
-    const activeSessionId = get(activeSessionIdAtom);
-    if (activeSessionId) {
-      set(sessionAgentStatusAtom, (prev) => {
-        const currentStatus = prev[activeSessionId] || { isProcessing: false };
-        const newStatus = typeof update === 'function' ? update(currentStatus) : update;
-        return {
-          ...prev,
-          [activeSessionId]: newStatus,
-        };
-      });
-    }
-  },
-);
-
-/**
- * Derived atom for backward compatibility with session isolation
- */
-export const isProcessingAtom = atom(
-  (get) => get(agentStatusAtom).isProcessing,
-  (get, set, update: boolean) => {
-    set(agentStatusAtom, (prev) => ({ ...prev, isProcessing: update }));
-  },
-);
+export const isProcessingAtom = atom<boolean>(false);
 
 /**
  * Atom for offline mode state (view-only when disconnected)
@@ -138,7 +92,7 @@ export const layoutModeAtom = atom(
 export const initializeLayoutModeAtom = atom(null, (get, set) => {
   try {
     const defaultLayout = getDefaultLayoutMode();
-    
+
     // Try to get from localStorage first
     const savedLayout = localStorage.getItem('tarko-layout-mode') as LayoutMode;
     if (savedLayout && (savedLayout === 'default' || savedLayout === 'narrow-chat')) {
@@ -150,4 +104,37 @@ export const initializeLayoutModeAtom = atom(null, (get, set) => {
     console.warn('Failed to initialize layout mode:', error);
     set(baseLayoutModeAtom, 'default');
   }
+});
+
+/**
+ * Mobile bottom sheet state
+ */
+export const mobileBottomSheetAtom = atom({
+  isOpen: false,
+  isFullscreen: false,
+});
+
+/**
+ * Actions for mobile bottom sheet
+ */
+export const openMobileBottomSheetAtom = atom(null, (get, set, fullscreen: boolean = false) => {
+  set(mobileBottomSheetAtom, {
+    isOpen: true,
+    isFullscreen: fullscreen,
+  });
+});
+
+export const closeMobileBottomSheetAtom = atom(null, (get, set) => {
+  set(mobileBottomSheetAtom, {
+    isOpen: false,
+    isFullscreen: false,
+  });
+});
+
+export const toggleMobileBottomSheetFullscreenAtom = atom(null, (get, set) => {
+  const current = get(mobileBottomSheetAtom);
+  set(mobileBottomSheetAtom, {
+    ...current,
+    isFullscreen: !current.isFullscreen,
+  });
 });

@@ -1,0 +1,48 @@
+{
+  "name": "@tarko/agent-server-next",
+  "version": "0.3.0-beta.12",
+  "description": "Next-generation server for Multimodal Agent using Hono framework.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "rslib build --watch",
+    "dev:s": "AGENT_DEBUG=true nodemon --watch src --watch examples/bootstrap.ts --ext ts,js,json --exec \"tsx examples/bootstrap.ts\"",
+    "build": "rslib build",
+    "prepublishOnly": "pnpm run build",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.7",
+    "@tarko/agent-ui-builder": "workspace:*",
+    "@tarko/context-engineer": "workspace:*",
+    "@omni-tars/agent": "workspace:*",
+    "hono": "^4.6.10",
+    "mongoose": "^8.8.4",
+    "transliteration": "^2.3.5",
+    "dotenv": "17.2.2",
+    "chalk": "5.6.2"
+  },
+  "devDependencies": {
+    "@agent-infra/shared": "0.0.2",
+    "@rslib/core": "0.10.0",
+    "@tarko/agent-snapshot": "workspace:*",
+    "@tarko/agio": "workspace:*",
+    "@tarko/interface": "workspace:*",
+    "@tarko/shared-utils": "workspace:*",
+    "@types/node": "22.15.30",
+    "lowdb": "^6.0.1",
+    "nanoid": "^5.0.8",
+    "nodemon": "^3.1.10",
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.3",
+    "vitest": "3.2.4"
+  }
+}

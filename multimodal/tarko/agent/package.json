@@ -1,6 +1,6 @@
 {
   "name": "@tarko/agent",
-  "version": "0.3.0-beta.11",
+  "version": "0.3.0-beta.12",
   "description": "An event-stream driven meta agent framework for building effective multimodal Agents.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

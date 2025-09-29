@@ -1,0 +1,51 @@
+[
+  {
+    "type": "dir",
+    "name": "get-started",
+    "label": "Get Started",
+    "collapsible": false,
+    "collapsed": false
+  },
+  {
+    "type": "dir",
+    "name": "basic",
+    "label": "Basic",
+    "collapsible": false,
+    "collapsed": false
+  },
+  {
+    "type": "dir",
+    "name": "server",
+    "label": "Server",
+    "collapsible": false,
+    "collapsed": false
+  },
+  {
+    "type": "dir",
+    "name": "cli",
+    "label": "CLI",
+    "collapsible": false,
+    "collapsed": false
+  },
+  {
+    "type": "dir",
+    "name": "tool",
+    "label": "Tool",
+    "collapsible": false,
+    "collapsed": false
+  },
+  {
+    "type": "dir",
+    "name": "advanced",
+    "label": "Advanced",
+    "collapsible": false,
+    "collapsed": false
+  },
+  {
+    "type": "dir",
+    "name": "deployment",
+    "label": "Deployment",
+    "collapsible": false,
+    "collapsed": false
+  }
+]

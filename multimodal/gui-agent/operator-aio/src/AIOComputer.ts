@@ -62,10 +62,21 @@ export class AIOComputer {
       };
     } catch (error) {
       logger.error('[AIOComputer] Action failed:', error);
-      return {
-        success: false,
-        message: error instanceof Error ? error.message : 'Unknown error',
-      };
+      // Extract key error message from HTTP 422 responses
+      let errorMessage = 'Unknown error';
+      if (error instanceof Error) {
+        const message = error.message;
+        logger.error('[AIOComputer] Action failed message:', message);
+        // Try to extract the key error message from HTTP 422 responses
+        const detailMatch = message.match(/"msg":"([^"]+)"/);
+        if (detailMatch && detailMatch[1]) {
+          errorMessage = detailMatch[1];
+        } else {
+          errorMessage = message;
+        }
+      }
+      // Throw a new error with the extracted key message
+      throw new Error(errorMessage);
     }
   }
 
@@ -287,3 +298,86 @@ export class AIOComputer {
     return this.request(action);
   }
 }
+
+// Comprehensive key name mapping for common key variations
+export const keyNameMap = {
+  // Arrow keys
+  arrowup: 'up',
+  arrowdown: 'down',
+  arrowleft: 'left',
+  arrowright: 'right',
+  // Common key aliases
+  space: ' ',
+  spacebar: ' ',
+  enter: 'enter',
+  return: 'return',
+  tab: 'tab',
+  escape: 'esc',
+  back: 'backspace',
+  backspace: 'backspace',
+  delete: 'del',
+  insert: 'insert',
+  home: 'home',
+  end: 'end',
+  pageup: 'pageup',
+  pagedown: 'pagedown',
+  // Function keys
+  // f1: 'f1', f2: 'f2', f3: 'f3', f4: 'f4', f5: 'f5', f6: 'f6',
+  // f7: 'f7', f8: 'f8', f9: 'f9', f10: 'f10', f11: 'f11', f12: 'f12',
+  // Modifier keys
+  ctrl: 'ctrl',
+  control: 'ctrl',
+  alt: 'alt',
+  shift: 'shift',
+  cmd: 'command',
+  command: 'command',
+  meta: 'command',
+  win: 'win',
+  windows: 'win',
+
+  // Number pad
+  numpad0: 'num0',
+  numpad1: 'num1',
+  numpad2: 'num2',
+  numpad3: 'num3',
+  numpad4: 'num4',
+  numpad5: 'num5',
+  numpad6: 'num6',
+  numpad7: 'num7',
+  numpad8: 'num8',
+  numpad9: 'num9',
+
+  // Special characters and punctuation
+  comma: ',',
+  period: '.',
+  semicolon: ';',
+  quote: "'",
+  doublequote: '"',
+  backquote: '`',
+  tilde: '~',
+  exclamation: '!',
+  at: '@',
+  hash: '#',
+  dollar: '$',
+  percent: '%',
+  caret: '^',
+  ampersand: '&',
+  asterisk: '*',
+  leftparen: '(',
+  rightparen: ')',
+  underscore: '_',
+  plus: '+',
+  minus: '-',
+  equal: '=',
+  leftbracket: '[',
+  rightbracket: ']',
+  backslash: '\\',
+  pipe: '|',
+  leftbrace: '{',
+  rightbrace: '}',
+  colon: ':',
+  less: '<',
+  greater: '>',
+  question: '?',
+  slash: '/',
+};

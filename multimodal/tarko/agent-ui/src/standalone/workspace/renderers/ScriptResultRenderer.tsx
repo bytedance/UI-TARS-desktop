@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { StandardPanelContent } from '../types/panelContent';
 import { motion } from 'framer-motion';
 import { FiPlay, FiCode, FiTerminal } from 'react-icons/fi';
-import { CodeEditor } from '@/sdk/code-editor';
+import { CodeEditor } from '@tarko/ui';
 import { TerminalOutput } from '../components/TerminalOutput';
 import { FileDisplayMode } from '../types';
 
@@ -78,10 +78,11 @@ export const ScriptResultRenderer: React.FC<ScriptResultRendererProps> = ({ pane
           <button
             type="button"
             onClick={() => setDisplayMode('both')}
-            className={`px-3 py-1.5 text-xs font-medium ${displayMode === 'both'
+            className={`px-3 py-1.5 text-xs font-medium ${
+              displayMode === 'both'
                 ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
                 : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/30'
-              } rounded-l-lg border border-gray-200 dark:border-gray-600`}
+            } rounded-l-lg border border-gray-200 dark:border-gray-600`}
           >
             <div className="flex items-center">
               <FiCode size={12} className="mr-1.5" />
@@ -91,10 +92,11 @@ export const ScriptResultRenderer: React.FC<ScriptResultRendererProps> = ({ pane
           <button
             type="button"
             onClick={() => setDisplayMode('script')}
-            className={`px-3 py-1.5 text-xs font-medium ${displayMode === 'script'
+            className={`px-3 py-1.5 text-xs font-medium ${
+              displayMode === 'script'
                 ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
                 : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/30'
-              } border-t border-b border-gray-200 dark:border-gray-600`}
+            } border-t border-b border-gray-200 dark:border-gray-600`}
           >
             <div className="flex items-center">
               <FiCode size={12} className="mr-1.5" />
@@ -104,10 +106,11 @@ export const ScriptResultRenderer: React.FC<ScriptResultRendererProps> = ({ pane
           <button
             type="button"
             onClick={() => setDisplayMode('execution')}
-            className={`px-3 py-1.5 text-xs font-medium ${displayMode === 'execution'
+            className={`px-3 py-1.5 text-xs font-medium ${
+              displayMode === 'execution'
                 ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
                 : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/30'
-              } rounded-r-lg border border-gray-200 dark:border-gray-600 border-l-0`}
+            } rounded-r-lg border border-gray-200 dark:border-gray-600 border-l-0`}
           >
             <div className="flex items-center">
               <FiTerminal size={12} className="mr-1.5" />

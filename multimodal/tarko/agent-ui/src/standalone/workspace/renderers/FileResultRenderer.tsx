@@ -1,14 +1,12 @@
 import React from 'react';
+import { MonacoCodeEditor } from '@tarko/ui';
 import { FileDisplayMode } from '../types';
 import { StandardPanelContent } from '../types/panelContent';
-import { MessageContent } from './generic/components/MessageContent';
-import { DisplayMode } from './generic/types';
-import { MonacoCodeEditor } from '@/sdk/code-editor';
+import { MessageContent } from '../components/shared';
 import { useStableCodeContent } from '@/common/hooks/useStableValue';
 import { ThrottledHtmlRenderer } from '../components/ThrottledHtmlRenderer';
 import { formatBytes } from '../utils/codeUtils';
 
-// Constants
 const MAX_HEIGHT_CALC = 'calc(100vh - 215px)';
 
 interface FileResultRendererProps {
@@ -22,14 +20,11 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
   onAction,
   displayMode,
 }) => {
-  // Extract file content from panelContent
   const fileContent = getFileContent(panelContent);
   const filePath = getFilePath(panelContent);
 
-  // Use stable content to prevent unnecessary re-renders during streaming
   const stableContent = useStableCodeContent(fileContent || '');
 
-  // File metadata parsing
   const fileName = filePath ? filePath.split('/').pop() || filePath : '';
   const fileExtension = fileName ? fileName.split('.').pop()?.toLowerCase() || '' : '';
 
@@ -43,15 +38,12 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
   const approximateSize =
     typeof fileContent === 'string' ? formatBytes(fileContent.length) : 'Unknown size';
 
-  // Determine if content is currently streaming
   const isStreaming = panelContent.isStreaming || false;
 
   return (
-    <div className="space-y-4">
-      {/* Content preview area */}
+    <div className="space-y-4 md:text-base text-sm">
       <div className="overflow-hidden">
-        {/* File content display */}
-        <div className="overflow-hidden">
+        <div className="overflow-hidden md:max-h-none max-h-96 overflow-auto">
           {isHtmlFile &&
           displayMode === 'rendered' &&
           // FIXME: For "str_replace_editor" "create", Found a better solution here,
@@ -91,11 +83,11 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
                 />
               </div>
             ) : (
-              <div className="prose dark:prose-invert prose-sm max-w-none p-4 pt-0">
+              <div className="prose dark:prose-invert prose-sm max-w-none p-4 pt-0 md:text-base text-sm md:[&_h1]:text-2xl [&_h1]:text-xl md:[&_h2]:text-xl [&_h2]:text-lg md:[&_h3]:text-lg [&_h3]:text-base md:[&_pre]:text-sm [&_pre]:text-xs md:[&_pre]:p-4 [&_pre]:p-3 md:[&_code]:text-sm [&_code]:text-xs md:[&_table]:text-base [&_table]:text-xs md:[&_th]:px-4 md:[&_th]:py-2 [&_th]:px-2 [&_th]:py-1 md:[&_td]:px-4 md:[&_td]:py-2 [&_td]:px-2 [&_td]:py-1">
                 <MessageContent
                   message={stableContent}
                   isMarkdown={true}
-                  displayMode={displayMode as DisplayMode}
+                  displayMode={displayMode}
                   isShortMessage={false}
                 />
               </div>
@@ -119,9 +111,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
   );
 };
 
-// Helper functions
 function getFileContent(panelContent: StandardPanelContent): string | null {
-  // Try arguments first (for file operations)
   if (panelContent.arguments?.content && typeof panelContent.arguments.content === 'string') {
     return panelContent.arguments.content;
   }
@@ -132,27 +122,22 @@ function getFileContent(panelContent: StandardPanelContent): string | null {
   }
 
   if (typeof panelContent.source === 'object') {
-    // Handle source array format
     if (Array.isArray(panelContent.source)) {
       return panelContent.source
         .filter((item) => item.type === 'text')
         .map((item) => item.text)
         .join('');
     } else {
-      // FIXME: For "str_replace_editor" "view"
       if (
         panelContent.arguments?.command === 'view' &&
         typeof panelContent.source === 'object' &&
         typeof panelContent.source.output === 'string'
       ) {
-        // Here's the result of running `cat -n` on /home/gem/ui-tars-website/index.html:\n     1\t<!DOCTYPE html>\n
-        // return panelContent.source.output.split('\n').slice(1).join('\n');
         return panelContent.source.output;
       }
     }
   }
 
-  // Try source as string (fallback for old format)
   if (typeof panelContent.source === 'string') {
     return panelContent.source;
   }
@@ -161,16 +146,13 @@ function getFileContent(panelContent: StandardPanelContent): string | null {
 }
 
 function getFilePath(panelContent: StandardPanelContent): string {
-  // Try arguments first
   if (panelContent.arguments?.path && typeof panelContent.arguments.path === 'string') {
     return panelContent.arguments.path;
   }
 
-  // Fallback to title
   return panelContent.title || 'Unknown file';
 }
 
-// Helper function for file type determination
 function determineFileType(extension: string): 'code' | 'document' | 'image' | 'other' {
   if (
     ['js', 'jsx', 'ts', 'tsx', 'py', 'java', 'c', 'cpp', 'php', 'html', 'css'].includes(extension)

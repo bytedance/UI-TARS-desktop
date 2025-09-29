@@ -1,0 +1,241 @@
+---
+title: Tool Call Engine
+description: 理解 Tarko 的 Tool Call Engine 类型和选择
+---
+
+# Tool Call Engine
+
+Tarko 的 **Tool Call Engine** 决定了 Agent 如何处理和执行工具调用。不同的引擎为各种 LLM 提供商和使用场景提供兼容性。
+
+## 概述
+
+Tool Call Engine 处理：
+
+- **函数调用解析**：如何从 LLM 响应中提取工具调用
+- **提供商兼容性**：与具有不同工具调用能力的模型兼容
+- **执行策略**：如何调用工具和处理结果
+- **错误处理**：管理失败的工具调用和重试
+
+## 可用的引擎类型
+
+基于源代码中实际的 `ToolCallEngineType`：
+
+### 1. Native 引擎
+
+**最适合**：支持原生函数调用的模型（GPT-4、Claude 3.5 等）
+
+```typescript
+import { Agent } from '@tarko/agent';
+
+const agent = new Agent({
+  toolCallEngine: 'native',
+  model: {
+    provider: 'openai',
+    id: 'gpt-4o',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  tools: [weatherTool],
+});
+```
+
+**工作原理**：
+- 使用模型的内置函数调用能力
+- 在 API 请求中将工具作为函数定义发送
+- 解析结构化的函数调用响应
+- 对支持的模型最可靠和高效
+
+### 2. Prompt Engineering 引擎
+
+**最适合**：没有原生函数调用或需要自定义解析的模型
+
+```typescript
+const agent = new Agent({
+  toolCallEngine: 'prompt_engineering',
+  model: {
+    provider: 'volcengine', 
+    id: 'ep-20250510145437-5sxhs',
+    apiKey: process.env.ARK_API_KEY,
+  },
+  tools: [weatherTool],
+});
+```
+
+**工作原理**：
+- 在系统提示中嵌入工具描述
+- 指示模型以特定格式输出工具调用
+- 使用正则表达式/模式从文本响应中解析工具调用
+- 为任何基于文本的模型提供后备兼容性
+
+### 3. Structured Outputs 引擎
+
+**最适合**：支持结构化输出但不支持函数调用的模型
+
+```typescript
+const agent = new Agent({
+  toolCallEngine: 'structured_outputs',
+  model: {
+    provider: 'anthropic',
+    id: 'claude-3-5-sonnet-20241022', 
+    apiKey: process.env.ANTHROPIC_API_KEY,
+  },
+  tools: [weatherTool],
+});
+```
+
+**工作原理**：
+- 使用结构化输出模式来强制工具调用格式
+- 比提示工程在解析方面更可靠
+- 减少解析错误并提高一致性
+- 适用于支持 JSON 模式约束的模型
+
+## 引擎选择指南
+
+### 自动选择
+
+Tarko 可以自动为您的模型选择最佳引擎：
+
+```typescript
+// Tarko 将根据模型提供商选择最优引擎
+const agent = new Agent({
+  // 未指定 toolCallEngine - 自动选择
+  model: {
+    provider: 'openai',
+    id: 'gpt-4o',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  tools: [weatherTool],
+});
+```
+
+### 手动选择
+
+根据您的需求明确选择：
+
+```typescript
+// 强制使用提示工程进行自定义控制
+const agent = new Agent({
+  toolCallEngine: 'prompt_engineering',
+  model: {
+    provider: 'openai', // 即使对于 OpenAI，也使用提示工程
+    id: 'gpt-4o',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  tools: [weatherTool],
+});
+```
+
+## 引擎比较
+
+| 引擎 | 可靠性 | 性能 | 兼容性 | 使用场景 |
+|------|--------|------|--------|----------|
+| `native` | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | 支持模型的生产环境 |
+| `structured_outputs` | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | 支持模式的模型 |
+| `prompt_engineering` | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | 通用兼容性 |
+
+## 源代码中的真实示例
+
+### 基本 Tool Call Engine 使用
+
+来自 `multimodal/tarko/agent/examples/tool-calls/basic.ts`：
+
+```typescript
+import { Agent, Tool, z, LogLevel } from '@tarko/agent';
+
+const agent = new Agent({
+  model: {
+    provider: 'volcengine',
+    id: 'ep-20250510145437-5sxhs',
+    apiKey: process.env.ARK_API_KEY,
+  },
+  tools: [locationTool, weatherTool],
+  logLevel: LogLevel.DEBUG,
+  // toolCallEngine 将根据模型能力自动选择
+});
+```
+
+### 流式 Tool Call Engine
+
+来自 `multimodal/tarko/agent/examples/streaming/tool-calls.ts`：
+
+```typescript
+const agent = new Agent({
+  model: {
+    provider: 'volcengine',
+    id: 'ep-20250510145437-5sxhs',
+    apiKey: process.env.ARK_API_KEY,
+  },
+  tools: [locationTool, weatherTool],
+  toolCallEngine: 'native',
+  enableStreamingToolCallEvents: true,
+});
+```
+
+## 调试 Tool Call Engine
+
+### 启用调试日志
+
+```typescript
+import { LogLevel } from '@tarko/agent';
+
+const agent = new Agent({
+  toolCallEngine: 'prompt_engineering',
+  logLevel: LogLevel.DEBUG, // 查看详细的工具调用解析
+  tools: [weatherTool],
+});
+```
+
+### 监控工具调用事件
+
+```typescript
+const response = await agent.run({
+  input: "天气如何？",
+  stream: true,
+});
+
+for await (const event of response) {
+  if (event.type === 'tool_call') {
+    console.log('工具调用:', event.toolCall.function.name);
+  }
+  if (event.type === 'tool_result') {
+    console.log('工具结果:', event.result);
+  }
+}
+```
+
+## 故障排除
+
+### 常见问题
+
+**工具调用未被检测到**：
+- 检查模型是否支持所选的引擎类型
+- 尝试切换到 `prompt_engineering` 以获得更广泛的兼容性
+- 验证工具描述是否清晰和具体
+
+**提示工程的解析错误**：
+- 模型可能没有遵循预期格式
+- 如果模型支持模式，尝试 `structured_outputs`
+- 简化工具参数模式
+
+**性能问题**：
+- `native` 引擎对支持的模型最快
+- `prompt_engineering` 增加解析开销
+- 考虑为昂贵的工具操作使用缓存
+
+### 引擎选择决策树
+
+```
+您的模型是否支持原生函数调用？
+├─ 是 → 使用 'native'（推荐）
+└─ 否
+   ├─ 是否支持结构化输出？
+   │  ├─ 是 → 使用 'structured_outputs'
+   │  └─ 否 → 使用 'prompt_engineering'
+   └─ 需要自定义解析逻辑？
+      └─ 考虑实现自定义引擎
+```
+
+## 下一步
+
+- [工具](/guide/basic/tools) - 学习如何创建工具
+- [配置](/guide/basic/configuration) - 配置工具调用引擎
+- [事件流](/guide/basic/event-stream) - 监控工具调用事件

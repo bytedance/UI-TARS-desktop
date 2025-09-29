@@ -4,19 +4,20 @@
  */
 
 import { AgentWebUIImplementation } from '@tarko/interface';
+import { deepMerge } from '@tarko/shared-utils';
 import type { AgentServer } from '../../server';
 
 /**
  * Merge web UI config with agent constructor config
  * This ensures consistent configuration merging across different contexts
- * @param baseWebUIConfig Base web UI configuration from app config
+ * @param baseWebUIConfig Base Agent UI Configuration from app config
  * @param server Optional agent server instance to get constructor config
- * @returns Merged web UI configuration
+ * @returns Merged Agent UI Configuration
  */
 export function mergeWebUIConfig(
   baseWebUIConfig: AgentWebUIImplementation,
   server?: AgentServer,
 ): AgentWebUIImplementation & Record<string, any> {
   const agentConstructorWebConfig = server?.getAgentConstructorWebConfig();
-  return { ...baseWebUIConfig, ...agentConstructorWebConfig };
+  return deepMerge(baseWebUIConfig, agentConstructorWebConfig || {});
 }

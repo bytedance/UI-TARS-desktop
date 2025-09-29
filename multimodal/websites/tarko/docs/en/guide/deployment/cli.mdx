@@ -1,0 +1,737 @@
+---
+title: CLI Deployment
+description: Production deployment strategies using Tarko CLI
+---
+
+# CLI Deployment
+
+This guide covers production deployment strategies using the Tarko CLI. For complete CLI reference and commands, see the [CLI Guide](/guide/cli/overview).
+
+## Overview
+
+Tarko CLI provides multiple deployment modes optimized for different environments:
+
+- **Production Server** (`tarko serve`) - Headless API server for production
+- **Development** (`tarko run`) - Interactive UI for development and testing
+- **Automation** (`tarko run --headless`) - Scripting and CI/CD integration
+
+For detailed command reference, see [CLI Commands](/guide/cli/commands).
+
+## Production Server Deployment
+
+### Basic Server Setup
+
+Deploy a headless API server for production use:
+
+```bash
+# Start production server
+tarko serve --port 8080 --host 0.0.0.0
+
+# With specific agent
+tarko serve agent-tars --port 8080
+
+# With production configuration
+tarko serve --config production.config.ts --port 8080
+```
+
+The server exposes REST and WebSocket APIs at:
+- `GET /api/v1/health` - Health check
+- `POST /api/v1/chat` - Chat endpoint
+- `GET /api/v1/events` - Event stream (WebSocket)
+
+### Production Configuration
+
+Create a production-optimized configuration:
+
+```typescript
+// production.config.ts
+import { AgentAppConfig } from '@tarko/interface';
+
+const config: AgentAppConfig = {
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  
+  server: {
+    port: 8080,
+    host: '0.0.0.0',
+    cors: true,
+    rateLimit: {
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 100, // requests per window
+    },
+  },
+  
+  ui: {
+    enabled: false, // Disable UI for production
+  },
+  
+  logging: {
+    level: 'info',
+    format: 'json',
+    output: {
+      console: false,
+      file: {
+        enabled: true,
+        path: './logs/agent.log',
+        maxSize: '100m',
+        maxFiles: 10,
+      },
+    },
+  },
+  
+  metrics: {
+    enabled: true,
+    endpoint: '/metrics',
+  },
+};
+
+export default config;
+```
+
+For complete configuration options, see [CLI Configuration](/guide/cli/configuration).
+
+## Container Deployment
+
+### Docker
+
+Create a production Docker image:
+
+```dockerfile
+# Dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install dependencies
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copy application code
+COPY . .
+
+# Install Tarko CLI globally
+RUN npm install -g @tarko/agent-cli
+
+# Create non-root user
+RUN addgroup -g 1001 -S tarko && \
+    adduser -S tarko -u 1001
+USER tarko
+
+# Expose port
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8080/api/v1/health || exit 1
+
+# Start server
+CMD ["tarko", "serve", "--port", "8080", "--host", "0.0.0.0"]
+```
+
+Build and run:
+
+```bash
+# Build image
+docker build -t my-agent:latest .
+
+# Run container
+docker run -d \
+  --name my-agent \
+  -p 8080:8080 \
+  -e OPENAI_API_KEY=${OPENAI_API_KEY} \
+  -v $(pwd)/logs:/app/logs \
+  --restart unless-stopped \
+  my-agent:latest
+
+# Check health
+docker exec my-agent curl -f http://localhost:8080/api/v1/health
+```
+
+### Docker Compose
+
+For multi-service deployments:
+
+```yaml
+# docker-compose.yml
+version: '3.8'
+
+services:
+  agent:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - NODE_ENV=production
+    volumes:
+      - ./workspace:/app/workspace
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - agent
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+```
+
+Deploy the stack:
+
+```bash
+# Start services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f agent
+
+# Scale agents
+docker-compose up -d --scale agent=3
+
+# Health check
+curl -f http://localhost:8080/api/v1/health
+```
+
+## Kubernetes Deployment
+
+### Basic Deployment
+
+```yaml
+# k8s/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tarko-agent
+  labels:
+    app: tarko-agent
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: tarko-agent
+  template:
+    metadata:
+      labels:
+        app: tarko-agent
+    spec:
+      containers:
+      - name: agent
+        image: my-agent:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-secrets
+              key: openai-key
+        - name: NODE_ENV
+          value: "production"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /api/v1/health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/v1/health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - name: workspace
+          mountPath: /app/workspace
+        - name: logs
+          mountPath: /app/logs
+      volumes:
+      - name: workspace
+        persistentVolumeClaim:
+          claimName: agent-workspace
+      - name: logs
+        persistentVolumeClaim:
+          claimName: agent-logs
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tarko-agent-service
+spec:
+  selector:
+    app: tarko-agent
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tarko-agent-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: agent.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: tarko-agent-service
+            port:
+              number: 80
+```
+
+Deploy to Kubernetes:
+
+```bash
+# Create secrets
+kubectl create secret generic api-secrets \
+  --from-literal=openai-key=${OPENAI_API_KEY}
+
+# Apply manifests
+kubectl apply -f k8s/
+
+# Check deployment
+kubectl get pods -l app=tarko-agent
+kubectl logs -l app=tarko-agent
+
+# Port forward for testing
+kubectl port-forward svc/tarko-agent-service 8080:80
+```
+
+## Process Management
+
+### PM2
+
+For traditional server deployments:
+
+```javascript
+// ecosystem.config.js
+module.exports = {
+  apps: [{
+    name: 'tarko-agent',
+    script: 'tarko',
+    args: 'serve --port 8080 --config production.config.ts',
+    instances: 'max', // Use all CPU cores
+    exec_mode: 'cluster',
+    autorestart: true,
+    watch: false,
+    max_memory_restart: '1G',
+    env: {
+      NODE_ENV: 'production',
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    },
+    error_file: './logs/err.log',
+    out_file: './logs/out.log',
+    log_file: './logs/combined.log',
+    time: true,
+  }]
+};
+```
+
+Deploy with PM2:
+
+```bash
+# Install PM2
+npm install -g pm2
+
+# Start application
+pm2 start ecosystem.config.js
+
+# Save PM2 configuration
+pm2 save
+
+# Setup startup script
+pm2 startup
+sudo env PATH=$PATH:/usr/bin pm2 startup systemd -u $USER --hp $HOME
+
+# Monitor
+pm2 monit
+pm2 logs tarko-agent
+
+# Restart
+pm2 restart tarko-agent
+
+# Stop
+pm2 stop tarko-agent
+```
+
+### Systemd Service
+
+Create a systemd service:
+
+```ini
+# /etc/systemd/system/tarko-agent.service
+[Unit]
+Description=Tarko Agent Server
+After=network.target
+
+[Service]
+Type=simple
+User=tarko
+WorkingDirectory=/opt/tarko-agent
+Environment=NODE_ENV=production
+Environment=OPENAI_API_KEY=your-api-key
+ExecStart=/usr/bin/tarko serve --port 8080 --config production.config.ts
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Manage the service:
+
+```bash
+# Enable and start
+sudo systemctl enable tarko-agent
+sudo systemctl start tarko-agent
+
+# Check status
+sudo systemctl status tarko-agent
+
+# View logs
+sudo journalctl -u tarko-agent -f
+
+# Restart
+sudo systemctl restart tarko-agent
+```
+
+## Load Balancing
+
+### Nginx Configuration
+
+```nginx
+# nginx.conf
+upstream tarko_agents {
+    least_conn;
+    server localhost:8080 max_fails=3 fail_timeout=30s;
+    server localhost:8081 max_fails=3 fail_timeout=30s;
+    server localhost:8082 max_fails=3 fail_timeout=30s;
+}
+
+server {
+    listen 80;
+    server_name agent.example.com;
+    
+    # Redirect HTTP to HTTPS
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name agent.example.com;
+    
+    # SSL configuration
+    ssl_certificate /etc/nginx/ssl/cert.pem;
+    ssl_certificate_key /etc/nginx/ssl/key.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    
+    # Security headers
+    add_header X-Frame-Options DENY;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+    
+    location / {
+        proxy_pass http://tarko_agents;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        proxy_read_timeout 86400;
+        
+        # Rate limiting
+        limit_req zone=api burst=20 nodelay;
+    }
+    
+    # Health check endpoint
+    location /health {
+        access_log off;
+        proxy_pass http://tarko_agents/api/v1/health;
+    }
+    
+    # Metrics endpoint (restrict access)
+    location /metrics {
+        allow 10.0.0.0/8;
+        deny all;
+        proxy_pass http://tarko_agents/metrics;
+    }
+}
+
+# Rate limiting
+http {
+    limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
+}
+```
+
+## Monitoring and Observability
+
+### Health Checks
+
+```bash
+# Basic health check
+curl -f http://localhost:8080/api/v1/health
+
+# Detailed status
+curl http://localhost:8080/api/v1/status
+
+# Metrics (Prometheus format)
+curl http://localhost:8080/metrics
+```
+
+### Logging
+
+Configure structured logging for production:
+
+```typescript
+// In production.config.ts
+logging: {
+  level: 'info',
+  format: 'json',
+  output: {
+    console: false,
+    file: {
+      enabled: true,
+      path: './logs/agent.log',
+      maxSize: '100m',
+      maxFiles: 10,
+    },
+  },
+}
+```
+
+Log aggregation with ELK stack or similar:
+
+```yaml
+# docker-compose.override.yml
+version: '3.8'
+services:
+  agent:
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=tarko-agent"
+```
+
+### Metrics and Alerting
+
+Enable Prometheus metrics:
+
+```typescript
+// In production.config.ts
+metrics: {
+  enabled: true,
+  endpoint: '/metrics',
+  collectors: {
+    requests: true,
+    responses: true,
+    toolCalls: true,
+    errors: true,
+    memory: true,
+    cpu: true,
+  },
+}
+```
+
+## CI/CD Integration
+
+### GitHub Actions
+
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy Agent
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Install Tarko CLI
+      run: npm install -g @tarko/agent-cli
+    
+    - name: Test agent
+      run: |
+        tarko run --headless --input "Health check" --format json
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    
+    - name: Build Docker image
+      run: |
+        docker build -t my-agent:${{ github.sha }} .
+        docker tag my-agent:${{ github.sha }} my-agent:latest
+    
+    - name: Deploy to production
+      run: |
+        # Deploy to your infrastructure
+        echo "Deploying to production..."
+```
+
+### Deployment Scripts
+
+```bash
+#!/bin/bash
+# deploy.sh
+
+set -e
+
+echo "Deploying Tarko Agent..."
+
+# Build and push image
+docker build -t my-agent:latest .
+docker push my-agent:latest
+
+# Update Kubernetes deployment
+kubectl set image deployment/tarko-agent agent=my-agent:latest
+kubectl rollout status deployment/tarko-agent
+
+# Verify deployment
+kubectl get pods -l app=tarko-agent
+echo "Deployment complete!"
+```
+
+## Security Considerations
+
+### Environment Variables
+
+```bash
+# Use secure environment variable management
+export OPENAI_API_KEY=$(cat /run/secrets/openai_key)
+export ANTHROPIC_API_KEY=$(cat /run/secrets/anthropic_key)
+
+# Or use container secrets
+docker run -d \
+  --secret openai_key \
+  --secret anthropic_key \
+  my-agent:latest
+```
+
+### Network Security
+
+```typescript
+// Restrict tool access in production
+tool: {
+  exclude: ['dangerous_*', 'system_*', 'network_*'],
+},
+
+// Enable CORS only for trusted domains
+server: {
+  cors: {
+    origin: ['https://trusted-domain.com'],
+    credentials: true,
+  },
+}
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**Port conflicts:**
+```bash
+# Check port usage
+lsof -i :8080
+
+# Use different port
+tarko serve --port 8081
+```
+
+**Memory issues:**
+```bash
+# Increase Node.js memory
+NODE_OPTIONS="--max-old-space-size=4096" tarko serve
+
+# Monitor memory usage
+top -p $(pgrep -f "tarko serve")
+```
+
+**Configuration errors:**
+```bash
+# Validate configuration
+tarko --show-config --dry-run
+
+# Debug configuration loading
+DEBUG=tarko:config tarko serve --debug
+```
+
+### Debug Mode
+
+```bash
+# Enable debug logging
+DEBUG=tarko:* tarko serve --debug
+
+# Monitor with verbose output
+tarko serve --debug --verbose
+
+# Performance profiling
+NODE_OPTIONS="--inspect" tarko serve
+```
+
+## Next Steps
+
+- [CLI Overview](/guide/cli/overview) - Complete CLI reference
+- [CLI Configuration](/guide/cli/configuration) - Advanced configuration
+- [Built-in Agents](/guide/cli/built-in-agents) - Using pre-built agents
+- [Server API](/guide/deployment/server) - Server API reference

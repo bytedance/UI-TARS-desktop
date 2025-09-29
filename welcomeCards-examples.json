@@ -1,0 +1,136 @@
+{
+  "welcomeCards": [
+    {
+      "title": "Code Analysis",
+      "prompt": "Analyze this codebase and provide insights on architecture, potential improvements, and code quality issues",
+      "image": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=200&fit=crop",
+      "category": "Development",
+      "agentOptions": {
+        "mode": "code-analysis",
+        "depth": "comprehensive",
+        "includeTests": true
+      }
+    },
+    {
+      "title": "Bug Finder",
+      "prompt": "Help me find and fix bugs in my code. Scan for common issues, memory leaks, and security vulnerabilities",
+      "image": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=200&fit=crop",
+      "category": "Development",
+      "agentOptions": {
+        "mode": "debug",
+        "scanDepth": "deep",
+        "includeSecurityCheck": true
+      }
+    },
+    {
+      "title": "API Documentation",
+      "prompt": "Generate comprehensive API documentation for my project including endpoints, request/response examples, and usage guides",
+      "image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=200&fit=crop",
+      "category": "Development",
+      "agentOptions": {
+        "outputFormat": "markdown",
+        "includeExamples": true,
+        "generateOpenAPI": true
+      }
+    },
+    {
+      "title": "Research Assistant",
+      "prompt": "Help me research the latest trends and best practices in my field. Provide detailed analysis and recommendations",
+      "image": "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=200&fit=crop",
+      "category": "Research",
+      "agentOptions": {
+        "searchDepth": "comprehensive",
+        "includeCitations": true,
+        "timeRange": "recent"
+      }
+    },
+    {
+      "title": "Market Analysis",
+      "prompt": "Analyze market trends, competitor landscape, and provide strategic insights for business decision making",
+      "image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=200&fit=crop",
+      "category": "Research",
+      "agentOptions": {
+        "analysisType": "market",
+        "includeCompetitors": true,
+        "timeframe": "quarterly"
+      }
+    },
+    {
+      "title": "Technical Writing",
+      "prompt": "Help me write clear, concise technical documentation, tutorials, and user guides",
+      "image": "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400&h=200&fit=crop",
+      "category": "Content",
+      "agentOptions": {
+        "style": "technical",
+        "audience": "developers",
+        "includeCodeExamples": true
+      }
+    },
+    {
+      "title": "Blog Post Creator",
+      "prompt": "Create engaging blog posts about technology, development practices, and industry insights",
+      "image": "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=400&h=200&fit=crop",
+      "category": "Content",
+      "agentOptions": {
+        "tone": "professional",
+        "length": "medium",
+        "includeSEO": true
+      }
+    },
+    {
+      "title": "Social Media Content",
+      "prompt": "Generate engaging social media content, posts, and campaigns for tech audiences",
+      "image": "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=200&fit=crop",
+      "category": "Content",
+      "agentOptions": {
+        "platforms": ["twitter", "linkedin"],
+        "tone": "engaging",
+        "includeHashtags": true
+      }
+    },
+    {
+      "title": "Data Visualization",
+      "prompt": "Help me create compelling data visualizations and charts to present insights effectively",
+      "image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=200&fit=crop",
+      "category": "Analytics",
+      "agentOptions": {
+        "chartTypes": ["bar", "line", "scatter"],
+        "interactive": true,
+        "exportFormat": "svg"
+      }
+    },
+    {
+      "title": "Performance Metrics",
+      "prompt": "Analyze application performance metrics and provide optimization recommendations",
+      "image": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=200&fit=crop",
+      "category": "Analytics",
+      "agentOptions": {
+        "metrics": ["speed", "memory", "cpu"],
+        "includeRecommendations": true,
+        "benchmarkComparison": true
+      }
+    },
+    {
+      "title": "Learning Path",
+      "prompt": "Create a personalized learning path for new technologies and skills development",
+      "image": "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400&h=200&fit=crop",
+      "category": "Education",
+      "agentOptions": {
+        "difficulty": "progressive",
+        "includeProjects": true,
+        "timeEstimate": true
+      }
+    },
+    {
+      "title": "Code Review",
+      "prompt": "Review my code for best practices, performance issues, and suggest improvements",
+      "image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=200&fit=crop",
+      "category": "Development",
+      "agentOptions": {
+        "reviewType": "comprehensive",
+        "includeSecurityCheck": true,
+        "suggestRefactoring": true
+      }
+    }
+  ]
+}

@@ -1,6 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { FiSend, FiRefreshCw, FiImage, FiSquare, FiX } from 'react-icons/fi';
-import { motion, AnimatePresence } from 'framer-motion';
+import { TbBulb, TbSearch, TbBook, TbSettings, TbBrain, TbBrowser } from 'react-icons/tb';
+import { AnimatePresence, motion } from 'framer-motion';
 import { ConnectionStatus } from '@/common/types';
 import { ChatCompletionContentPart } from '@tarko/agent-interface';
 import { useSession } from '@/common/hooks/useSession';
@@ -18,6 +19,12 @@ import { ImagePreviewInline } from './ImagePreviewInline';
 import { getAgentTitle, isContextualSelectorEnabled } from '@/config/web-ui-config';
 import { composeMessageContent, isMessageEmpty, parseContextualReferences } from './utils';
 import { handleMultimodalPaste } from '@/common/utils/clipboard';
+import { NavbarModelSelector } from '@/standalone/navbar/ModelSelector';
+import { AgentOptionsSelector, AgentOptionsSelectorRef } from './AgentOptionsSelector';
+import { HomeAgentOptionsSelector } from '@/standalone/home/HomeAgentOptionsSelector';
+import { HomeChatBottomSettings } from '@/standalone/home/HomeChatBottomSettings';
+import { ChatBottomSettings } from './ChatBottomSettings';
+import { useNavbarStyles } from '@tarko/ui';
 
 interface ChatInputProps {
   onSubmit: (content: string | ChatCompletionContentPart[]) => Promise<void>;
@@ -36,17 +43,6 @@ interface ChatInputProps {
   variant?: 'default' | 'home';
 }
 
-/**
- * ChatInput - Reusable chat input component with multimodal and contextual capabilities
- *
- * Features:
- * - Text input with auto-resize
- * - Image upload and paste support
- * - Contextual file/folder selector (@-mentions)
- * - Connection status handling
- * - Keyboard shortcuts (Ctrl+Enter to send)
- * - Customizable appearance and behavior
- */
 export const ChatInput: React.FC<ChatInputProps> = ({
   onSubmit,
   isDisabled = false,
@@ -66,6 +62,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const [uploadedImages, setUploadedImages] = useState<ChatCompletionContentPart[]>([]);
   const [isAborting, setIsAborting] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const [activeAgentOptions, setActiveAgentOptions] = useState<
+    Array<{ key: string; title: string; currentValue: any; displayValue?: string }>
+  >([]);
+  const [hasAgentOptions, setHasAgentOptions] = useState(false);
+  const agentOptionsSelectorRef = useRef<AgentOptionsSelectorRef | null>(null);
+
+  const { activeSessionId, sessionMetadata } = useSession();
+  const { isDarkMode } = useNavbarStyles();
 
   const [contextualState, setContextualState] = useAtom(contextualSelectorAtom);
   const addContextualItem = useSetAtom(addContextualItemAction);
@@ -77,10 +81,36 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   const { abortQuery } = useSession();
 
-  // Check if contextual selector is enabled
   const contextualSelectorEnabled = isContextualSelectorEnabled() && showContextualSelector;
 
-  // Initialize with initial value
+  // Clear active agent options when session changes
+  useEffect(() => {
+    setActiveAgentOptions([]);
+    setHasAgentOptions(false);
+  }, [sessionId]);
+
+  const handleSchemaChange = useCallback((hasOptions: boolean) => {
+    setHasAgentOptions(hasOptions);
+  }, []);
+
+  const handleActiveOptionsChange = useCallback(
+    (options: Array<{ key: string; title: string; currentValue: any; displayValue?: string }>) => {
+      setActiveAgentOptions(options);
+    },
+    [],
+  );
+
+  const handleToggleOption = useCallback((key: string, currentValue: any) => {
+    // Use the ref to call the toggle method on AgentOptionsSelector
+    if (agentOptionsSelectorRef.current) {
+      if (currentValue === undefined) {
+        // This is a remove operation - no need to toggle, just handled by AgentOptionsSelector
+        return;
+      }
+      agentOptionsSelectorRef.current.toggleOption(key);
+    }
+  }, []);
+
   useEffect(() => {
     if (initialValue && !contextualState.input) {
       setContextualState((prev) => ({
@@ -102,11 +132,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     const newValue = target.value;
     const newCursorPosition = target.selectionStart;
 
-    // Dynamic height adjustment
     target.style.height = 'auto';
     target.style.height = `${Math.min(target.scrollHeight, 200)}px`;
 
-    // Update contextual state with new input and cursor position
     setContextualState((prev) => ({
       ...prev,
       input: newValue,
@@ -116,19 +144,16 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
     if (!contextualSelectorEnabled) return;
 
-    // Check for @ symbol at cursor position
     const textBeforeCursor = newValue.slice(0, newCursorPosition);
     const lastAtIndex = textBeforeCursor.lastIndexOf('@');
 
     if (lastAtIndex !== -1) {
-      // Check if @ is at start of line or preceded by whitespace
       const charBeforeAt = lastAtIndex > 0 ? textBeforeCursor[lastAtIndex - 1] : ' ';
       const isValidAtPosition = /\s/.test(charBeforeAt) || lastAtIndex === 0;
 
       if (isValidAtPosition) {
         const queryAfterAt = textBeforeCursor.slice(lastAtIndex + 1);
 
-        // Only show selector if there's no space after @ and not already a complete reference
         if (!queryAfterAt.includes(' ') && !queryAfterAt.includes(':')) {
           updateSelectorState({
             showSelector: true,
@@ -139,7 +164,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       }
     }
 
-    // Hide selector if conditions are not met
     if (contextualState.showSelector) {
       updateSelectorState({
         showSelector: false,
@@ -148,12 +172,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     }
   };
 
-  // Parse contextual references from input text
-
   const handleContextualSelect = (item: ContextualItem) => {
     addContextualItem(item);
 
-    // Calculate the correct cursor position after insertion
     const textBeforeCursor = contextualState.input.slice(0, contextualState.cursorPosition);
     const lastAtIndex = textBeforeCursor.lastIndexOf('@');
 
@@ -169,15 +190,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       }
 
       const newInput = textBefore + tagText + ' ' + textAfter;
-      const newCursorPos = lastAtIndex + tagText.length + 1; // +1 for the space after
+      const newCursorPos = lastAtIndex + tagText.length + 1;
 
-      // Focus back to input and set correct cursor position
       setTimeout(() => {
         if (inputRef.current) {
           inputRef.current.focus();
           inputRef.current.setSelectionRange(newCursorPos, newCursorPos);
 
-          // Update contextual state with the new cursor position
           setContextualState((prev) => ({
             ...prev,
             cursorPosition: newCursorPos,
@@ -200,15 +219,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
     handleSelectorClose();
 
-    // Reset textarea height
     if (inputRef.current) {
       inputRef.current.style.height = 'auto';
     }
 
-    // Compose message content using utility function
     const messageContent = composeMessageContent(contextualState.input, uploadedImages);
 
-    // Clear both text input and images immediately after sending
     clearContextualState();
     setUploadedImages([]);
 
@@ -216,7 +232,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       await onSubmit(messageContent);
     } catch (error) {
       console.error('Failed to send message:', error);
-      // Note: We don't restore content on failure to keep UX simple
+
       return;
     }
   };
@@ -244,7 +260,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     } catch (error) {
       console.error('Failed to abort:', error);
     } finally {
-      // Add a small delay to prevent UI flickering
       setTimeout(() => setIsAborting(false), 100);
     }
   };
@@ -286,13 +301,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const handlePaste = async (e: React.ClipboardEvent) => {
     if (isDisabled || isProcessing) return;
 
-    // Prevent default paste behavior to handle it ourselves
     e.preventDefault();
 
     const handled = await handleMultimodalPaste(e.nativeEvent, {
       onTextPaste: (text: string) => {
-        // For regular text, let the default textarea paste behavior handle it
-        // by inserting at cursor position
         const textarea = inputRef.current;
         if (!textarea) return;
 
@@ -309,7 +321,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           contextualItems: parseContextualReferences(newValue),
         }));
 
-        // Set cursor position after state update
         setTimeout(() => {
           if (textarea) {
             textarea.setSelectionRange(newCursorPos, newCursorPos);
@@ -324,7 +335,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         : undefined,
       onMultimodalPaste: showAttachments
         ? (text: string, images: ChatCompletionContentPart[]) => {
-            // Handle Tarko multimodal protocol paste
             const textarea = inputRef.current;
             if (!textarea) return;
 
@@ -343,7 +353,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
             setUploadedImages((prev) => [...prev, ...images]);
 
-            // Set cursor position after state update
             setTimeout(() => {
               if (textarea) {
                 textarea.setSelectionRange(newCursorPos, newCursorPos);
@@ -359,8 +368,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     });
 
     if (!handled) {
-      // If our handler didn't process anything, fall back to default behavior
-      // This shouldn't happen often since we handle most cases
       console.log('Paste not handled by multimodal clipboard');
     }
   };
@@ -438,39 +445,90 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               onPaste={handlePaste}
               placeholder={placeholder || defaultPlaceholder}
               disabled={isDisabled}
-              className={`w-full px-5 ${uploadedImages.length > 0 ? 'pt-2' : 'pt-5'} pb-12 focus:outline-none resize-none ${uploadedImages.length > 0 ? (variant === 'home' ? 'min-h-[100px]' : 'min-h-[80px]') : variant === 'home' ? 'min-h-[120px]' : 'min-h-[100px]'} max-h-[220px] bg-transparent text-sm leading-relaxed rounded-[1.4rem]`}
+              className={`w-full px-5 ${
+                uploadedImages.length > 0 ? 'pt-2' : 'pt-5'
+              } pb-12 focus:outline-none resize-none ${
+                uploadedImages.length > 0
+                  ? variant === 'home'
+                    ? 'min-h-[100px]'
+                    : 'min-h-[80px]'
+                  : variant === 'home'
+                    ? 'min-h-[120px]'
+                    : 'min-h-[100px]'
+              } max-h-[220px] bg-transparent text-sm leading-relaxed rounded-[1.4rem]`}
               rows={2}
             />
 
-            {/* File upload button */}
-            {showAttachments && (
-              <div className="absolute left-3 bottom-3 flex items-center gap-2">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+            {/* Left side controls */}
+            <div className="absolute left-3 bottom-3 flex items-center gap-2">
+              {/* Home mode: Show home AgentOptionsSelector and HomeChatBottomSettings */}
+              {variant === 'home' && (
+                <>
+                  <HomeAgentOptionsSelector
+                    showAttachments={showAttachments}
+                    onFileUpload={handleFileUpload}
+                  />
+                  <HomeChatBottomSettings isDisabled={isDisabled} isProcessing={isProcessing} />
+                </>
+              )}
+
+              {/* Session mode: Show existing AgentOptionsSelector */}
+              {variant !== 'home' && (
+                <AgentOptionsSelector
+                  ref={agentOptionsSelectorRef}
+                  activeSessionId={sessionId}
+                  sessionMetadata={sessionMetadata}
+                  onActiveOptionsChange={handleActiveOptionsChange}
+                  onSchemaChange={handleSchemaChange}
+                  onToggleOption={handleToggleOption}
+                  showAttachments={showAttachments}
+                  onFileUpload={handleFileUpload}
+                  isDisabled={isDisabled}
+                  isProcessing={isProcessing}
+                />
+              )}
+
+              {/* Fallback image upload button when no agent options and not home mode */}
+              {variant !== 'home' && !hasAgentOptions && showAttachments && (
+                <button
                   type="button"
                   onClick={handleFileUpload}
                   disabled={isDisabled || isProcessing}
-                  className={`p-2 rounded-full transition-colors ${
-                    isDisabled || isProcessing
-                      ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
-                      : 'text-gray-400 hover:text-accent-500 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:text-gray-400'
-                  }`}
-                  title="Attach image (or paste directly)"
+                  className="p-2 rounded-full text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:text-gray-400 transition-all duration-200 hover:scale-105 active:scale-90"
+                  title="Add Images"
                 >
                   <FiImage size={18} />
-                </motion.button>
+                </button>
+              )}
 
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                  disabled={isDisabled || isProcessing}
+              {/* Unified chat bottom settings - only for session mode */}
+              {variant !== 'home' && (
+                <ChatBottomSettings
+                  activeSessionId={sessionId}
+                  sessionMetadata={sessionMetadata}
+                  activeOptions={activeAgentOptions}
+                  onRemoveOption={(key) => {
+                    if (agentOptionsSelectorRef.current) {
+                      agentOptionsSelectorRef.current.removeOption(key);
+                    }
+                  }}
+                  isDisabled={isDisabled}
+                  isProcessing={isProcessing}
                 />
-              </div>
+              )}
+            </div>
+
+            {/* Hidden file input for image upload */}
+            {showAttachments && (
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/*"
+                multiple
+                className="hidden"
+                disabled={isDisabled || isProcessing}
+              />
             )}
 
             {/* Action buttons */}
@@ -481,11 +539,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
-                  whileTap={{ scale: 0.9 }}
-                  whileHover={{ scale: 1.05 }}
                   type="button"
                   onClick={onReconnect}
-                  className="absolute right-3 bottom-3 p-2 rounded-full text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:text-gray-400 transition-all duration-200"
+                  className="absolute right-3 bottom-3 p-2 rounded-full text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:text-gray-400 transition-all duration-200 hover:scale-105 active:scale-90"
                   title="Try to reconnect"
                 >
                   <FiRefreshCw
@@ -500,16 +556,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.2 }}
-                  whileTap={{ scale: 0.95 }}
-                  whileHover={{ scale: 1.02 }}
                   type="button"
                   onClick={handleAbort}
                   disabled={isAborting}
-                  className={`absolute right-3 bottom-3 w-10 h-10 rounded-full flex items-center justify-center ${
+                  className={`absolute right-3 bottom-3 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 ${
                     isAborting
                       ? 'bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100 dark:from-indigo-800/30 dark:via-purple-800/30 dark:to-pink-800/30 text-indigo-400 dark:text-indigo-500 cursor-not-allowed border-2 border-indigo-200 dark:border-indigo-700/50'
                       : 'bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 hover:from-indigo-100 hover:via-purple-100 hover:to-pink-100 dark:from-indigo-900/20 dark:via-purple-900/20 dark:to-pink-900/20 dark:hover:from-indigo-900/30 dark:hover:via-purple-900/30 dark:hover:to-pink-900/30 text-indigo-600 dark:text-indigo-400 border-2 border-indigo-200 dark:border-indigo-700/50'
-                  } transition-all duration-200 shadow-sm bg-[length:200%_200%] animate-border-flow`}
+                  } shadow-sm bg-[length:200%_200%] animate-border-flow`}
                   title="Stop generation"
                 >
                   {isAborting ? (
@@ -524,15 +578,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
-                  whileTap={{ scale: 0.9 }}
-                  whileHover={{ scale: 1.05 }}
                   type="submit"
                   disabled={isMessageEmpty(contextualState.input, uploadedImages) || isDisabled}
-                  className={`absolute right-3 bottom-3 p-3 rounded-full ${
+                  className={`absolute right-3 bottom-3 p-3 rounded-full transition-all duration-200 hover:scale-105 active:scale-90 ${
                     isMessageEmpty(contextualState.input, uploadedImages) || isDisabled
                       ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
                       : 'bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 text-white dark:text-gray-900 shadow-sm'
-                  } transition-all duration-200`}
+                  }`}
                 >
                   <FiSend size={18} />
                 </motion.button>
@@ -546,34 +598,22 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       {showHelpText && (
         <div className="flex justify-center mt-2 text-xs">
           {connectionStatus && !connectionStatus.connected ? (
-            <motion.span
-              initial={{ opacity: 0.7 }}
-              animate={{ opacity: 1 }}
-              className="text-red-500 dark:text-red-400 flex items-center font-medium"
-            >
+            <span className="text-red-500 dark:text-red-400 flex items-center font-medium animate-in fade-in duration-300">
               {connectionStatus.reconnecting
                 ? 'Attempting to reconnect...'
                 : 'Server disconnected. Click the button to reconnect.'}
-            </motion.span>
+            </span>
           ) : isProcessing ? (
-            <motion.span
-              initial={{ opacity: 0.7 }}
-              whileHover={{ opacity: 1 }}
-              className="text-accent-500 dark:text-accent-400 flex items-center"
-            >
+            <span className="text-accent-500 dark:text-accent-400 flex items-center animate-in fade-in duration-300">
               <span className="typing-indicator mr-2">
                 <span></span>
                 <span></span>
                 <span></span>
               </span>
               Agent is processing your request...
-            </motion.span>
+            </span>
           ) : (
-            <motion.span
-              initial={{ opacity: 0.7 }}
-              whileHover={{ opacity: 1 }}
-              className="text-gray-500 dark:text-gray-400 transition-opacity"
-            >
+            <span className="text-gray-500 dark:text-gray-400 transition-opacity hover:opacity-100 animate-in fade-in duration-300">
               {contextualSelectorEnabled ? (
                 <>
                   Use @ to reference files/folders • Ctrl+Enter to send • You can also paste images
@@ -582,7 +622,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               ) : (
                 <>Use Ctrl+Enter to quickly send • You can also paste images directly</>
               )}
-            </motion.span>
+            </span>
           )}
         </div>
       )}

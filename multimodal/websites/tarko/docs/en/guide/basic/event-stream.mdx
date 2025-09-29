@@ -1,0 +1,181 @@
+---
+title: Event Stream
+description: Understanding Tarko's event-driven architecture
+---
+
+# Event Stream
+
+Tarko is built on an **event-driven architecture** where all Agent interactions are represented as events in a stream. This enables powerful capabilities like real-time monitoring, debugging, and context management.
+
+## Event Types
+
+Tarko defines several core event types:
+
+### User Events
+
+```typescript
+{
+  type: 'user_message',
+  data: {
+    content: 'Hello, can you help me?',
+    timestamp: '2025-01-01T00:00:00Z'
+  }
+}
+```
+
+### Agent Events
+
+```typescript
+{
+  type: 'agent_message',
+  data: {
+    content: 'I\'d be happy to help!',
+    timestamp: '2025-01-01T00:00:01Z'
+  }
+}
+```
+
+### Tool Events
+
+```typescript
+{
+  type: 'tool_call',
+  data: {
+    name: 'search',
+    parameters: { query: 'weather today' },
+    timestamp: '2025-01-01T00:00:02Z'
+  }
+}
+
+{
+  type: 'tool_result',
+  data: {
+    name: 'search',
+    result: { temperature: 72, condition: 'sunny' },
+    timestamp: '2025-01-01T00:00:03Z'
+  }
+}
+```
+
+### System Events
+
+```typescript
+{
+  type: 'context_updated',
+  data: {
+    reason: 'compression',
+    newLength: 8000,
+    timestamp: '2025-01-01T00:00:04Z'
+  }
+}
+```
+
+## Listening to Events
+
+Subscribe to events from your Agent:
+
+```typescript
+import { Agent } from '@tarko/agent';
+
+const agent = new Agent(config);
+
+// Listen to all events
+agent.on('event', (event) => {
+  console.log('Event:', event.type, event.data);
+});
+
+// Listen to specific event types
+agent.on('tool_call', (event) => {
+  console.log('Tool called:', event.data.name);
+});
+
+agent.on('agent_message', (event) => {
+  console.log('Agent response:', event.data.content);
+});
+```
+
+## Event Stream Processing
+
+Process events in real-time:
+
+```typescript
+const eventProcessor = {
+  async processEvent(event) {
+    switch (event.type) {
+      case 'tool_call':
+        // Log tool usage
+        await logToolUsage(event.data);
+        break;
+        
+      case 'agent_message':
+        // Update UI
+        await updateUI(event.data.content);
+        break;
+        
+      case 'error':
+        // Handle errors
+        await handleError(event.data);
+        break;
+    }
+  }
+};
+
+agent.on('event', eventProcessor.processEvent);
+```
+
+## Server-Sent Events (SSE)
+
+For web applications, events can be streamed via SSE:
+
+```typescript
+// Server
+app.get('/agent/stream', (req, res) => {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive'
+  });
+
+  agent.on('event', (event) => {
+    res.write(`data: ${JSON.stringify(event)}\n\n`);
+  });
+});
+```
+
+```javascript
+// Client
+const eventSource = new EventSource('/agent/stream');
+
+eventSource.onmessage = (event) => {
+  const agentEvent = JSON.parse(event.data);
+  handleAgentEvent(agentEvent);
+};
+```
+
+## Event Persistence
+
+Events can be persisted for replay and analysis:
+
+```typescript
+const agent = new Agent({
+  ...config,
+  persistence: {
+    enabled: true,
+    storage: 'file', // or 'redis', 'mongodb'
+    path: './agent-events.jsonl'
+  }
+});
+```
+
+## Event Filtering
+
+Filter events based on criteria:
+
+```typescript
+agent.on('event', (event) => {
+  // Only process tool-related events
+  if (event.type.startsWith('tool_')) {
+    processToolEvent(event);
+  }
+});
+```

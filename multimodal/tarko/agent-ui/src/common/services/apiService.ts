@@ -1,13 +1,14 @@
-import { API_BASE_URL, API_ENDPOINTS } from '@/common/constants';
+import { API_ENDPOINTS } from '@/common/constants';
 import {
   AgentEventStream,
   SessionInfo,
   SanitizedAgentOptions,
   WorkspaceInfo,
 } from '@/common/types';
-import { socketService } from './socketService';
-import { ChatCompletionContentPart } from '@tarko/agent-interface';
+
+import { ChatCompletionContentPart, AgentModel } from '@tarko/agent-interface';
 import { AgentServerVersionInfo } from '@agent-tars/interface';
+import { API_BASE_URL } from '@/config/web-ui-config';
 
 /**
  * Workspace item interface for contextual selector
@@ -17,21 +18,6 @@ export interface WorkspaceItem {
   path: string;
   type: 'file' | 'directory';
   relativePath: string;
-}
-
-/**
- * Available models response interface
- */
-export interface AvailableModelsResponse {
-  models: Array<{
-    provider: string;
-    models: string[];
-  }>;
-  defaultModel: {
-    provider: string;
-    modelId: string;
-  };
-  hasMultipleProviders: boolean;
 }
 
 /**
@@ -51,13 +37,7 @@ class ApiService {
    */
   async checkServerHealth(): Promise<boolean> {
     try {
-      // Try ping through socket if connected
-      if (socketService.isConnected()) {
-        const pingSuccessful = await socketService.ping();
-        if (pingSuccessful) return true;
-      }
-
-      // Fall back to API health endpoint
+      // Use API health endpoint
       const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.HEALTH}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
@@ -74,19 +54,23 @@ class ApiService {
   /**
    * Create a new session
    */
-  async createSession(): Promise<SessionInfo> {
+  async createSession(
+    runtimeSettings?: Record<string, any>,
+    agentOptions?: Record<string, any>,
+  ): Promise<{ session: SessionInfo; events: AgentEventStream.Event[] }> {
     try {
       const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.CREATE_SESSION}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ runtimeSettings, agentOptions }),
       });
 
       if (!response.ok) {
         throw new Error(`Failed to create session: ${response.statusText}`);
       }
 
-      const { sessionId, session } = await response.json();
-      return session as SessionInfo;
+      const { sessionId, session, events } = await response.json();
+      return { session: session as SessionInfo, events: events || [] };
     } catch (error) {
       console.error('Error creating session:', error);
       throw error;
@@ -276,10 +260,10 @@ class ApiService {
 
         // Process all complete events in the buffer
         let eventEndIndex;
-        while ((eventEndIndex = buffer.indexOf('\n\n')) !== -1) {
+        while ((eventEndIndex = buffer.search(/\r\n\r\n|\n\n|\r\r/)) !== -1) {
           const eventString = buffer.slice(0, eventEndIndex);
-          // Move buffer to the next event
-          buffer = buffer.slice(eventEndIndex + 2);
+          const sepLength = buffer.substr(eventEndIndex, 4) === '\r\n\r\n' ? 4 : 2;
+          buffer = buffer.slice(eventEndIndex + sepLength);
 
           if (eventString.startsWith('data: ')) {
             try {
@@ -507,10 +491,7 @@ class ApiService {
     }
   }
 
-  /**
-   * Get available model providers and configurations
-   */
-  async getAvailableModels(): Promise<AvailableModelsResponse> {
+  async getAvailableModels(): Promise<{ models: AgentModel[] }> {
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/models`, {
         method: 'GET',
@@ -525,53 +506,86 @@ class ApiService {
       return await response.json();
     } catch (error) {
       console.error('Error getting available models:', error);
-      return {
-        models: [],
-        defaultModel: { provider: '', modelId: '' },
-        hasMultipleProviders: false,
-      };
+      return { models: [] };
     }
   }
 
-  /**
-   * Update session model configuration
-   */
-  async updateSessionModel(sessionId: string, provider: string, modelId: string): Promise<boolean> {
+  async updateSessionModel(
+    sessionId: string,
+    model: AgentModel,
+  ): Promise<{ success: boolean; sessionInfo?: SessionInfo }> {
     try {
-      console.log('🔄 [ModelSelector] Updating session model:', {
-        sessionId,
-        provider,
-        modelId,
-        endpoint: `${API_BASE_URL}/api/v1/sessions/model`,
-      });
-
-      const requestBody = { sessionId, provider, modelId };
-      console.log('📤 [ModelSelector] Request payload:', requestBody);
-
       const response = await fetch(`${API_BASE_URL}/api/v1/sessions/model`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify({ sessionId, model }),
       });
 
-      console.log('📥 [ModelSelector] Response status:', response.status, response.statusText);
-
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('❌ [ModelSelector] Server error response:', errorText);
         throw new Error(`Failed to update session model: ${response.statusText}`);
       }
 
       const responseData = await response.json();
-      console.log('✅ [ModelSelector] Response data:', responseData);
-
-      const { success } = responseData;
-      console.log('🎯 [ModelSelector] Update result:', success ? 'SUCCESS' : 'FAILED');
-
-      return success;
+      return {
+        success: responseData.success,
+        sessionInfo: responseData.sessionInfo,
+      };
     } catch (error) {
-      console.error('💥 [ModelSelector] Error updating session model:', error);
-      return false;
+      console.error('Error updating session model:', error);
+      return { success: false };
+    }
+  }
+
+  async getSessionRuntimeSettings(sessionId?: string): Promise<{
+    schema: Record<string, any> | null;
+    currentValues: Record<string, any> | null;
+    message?: string;
+  }> {
+    try {
+      const url = sessionId
+        ? `${API_BASE_URL}/api/v1/runtime-settings?sessionId=${sessionId}`
+        : `${API_BASE_URL}/api/v1/runtime-settings`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(3000),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get runtime settings: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error getting runtime settings:', error);
+      return { schema: null, currentValues: null, message: 'Failed to load runtime settings' };
+    }
+  }
+
+  async updateSessionRuntimeSettings(
+    sessionId: string,
+    runtimeSettings: Record<string, any>,
+  ): Promise<{ success: boolean; sessionInfo?: SessionInfo }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/runtime-settings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId, runtimeSettings }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update runtime settings: ${response.statusText}`);
+      }
+
+      const responseData = await response.json();
+      return {
+        success: true,
+        sessionInfo: responseData.session,
+      };
+    } catch (error) {
+      console.error('Error updating runtime settings:', error);
+      return { success: false };
     }
   }
 }

@@ -1,0 +1,426 @@
+---
+title: 入门示例
+description: 帮助你快速开始使用 Tarko 的实用示例
+---
+
+# 入门示例
+
+本页面提供实用示例，帮助你快速开始使用 Tarko。
+
+## 基础 Agent
+
+创建一个具有基本功能的简单 Agent：
+
+```typescript
+import { Agent, Tool, z } from '@tarko/agent';
+
+// 创建一个简单的问候工具
+const greetingTool = new Tool({
+  id: 'greet_user',
+  description: '用用户的姓名问候用户',
+  parameters: z.object({
+    name: z.string().describe('用户的姓名')
+  }),
+  function: async ({ name }) => {
+    return `你好，${name}！很高兴见到你！`;
+  }
+});
+
+// 创建 Agent
+const agent = new Agent({
+  instructions: '你是一个友好的助手，帮助用户进行问候。',
+  model: {
+    provider: 'openai',
+    id: 'gpt-4o',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  tools: [greetingTool],
+});
+
+export default agent;
+```
+
+## 天气 Agent
+
+构建一个可以获取天气信息的 Agent：
+
+```typescript
+import { Agent, Tool, z } from '@tarko/agent';
+
+// 具有真实 API 集成的天气工具
+const weatherTool = new Tool({
+  id: 'get_weather',
+  description: '获取指定位置的当前天气信息',
+  parameters: z.object({
+    location: z.string().describe('城市名称或坐标（例如："北京" 或 "40.7128,-74.0060"）'),
+    units: z.enum(['metric', 'imperial']).default('metric').describe('温度单位')
+  }),
+  function: async ({ location, units = 'metric' }) => {
+    const apiKey = process.env.OPENWEATHER_API_KEY;
+    if (!apiKey) {
+      throw new Error('未配置 OpenWeather API 密钥');
+    }
+
+    try {
+      const response = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(location)}&appid=${apiKey}&units=${units}&lang=zh_cn`
+      );
+      
+      if (!response.ok) {
+        throw new Error(`天气 API 错误：${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      const temperature = Math.round(data.main.temp);
+      const description = data.weather[0].description;
+      const humidity = data.main.humidity;
+      const windSpeed = data.wind.speed;
+      const unitSymbol = units === 'metric' ? '°C' : '°F';
+      const speedUnit = units === 'metric' ? 'm/s' : 'mph';
+      
+      return `${data.name}，${data.sys.country} 的天气：
+🌡️ 温度：${temperature}${unitSymbol}
+🌤️ 天气：${description}
+💧 湿度：${humidity}%
+💨 风速：${windSpeed} ${speedUnit}`;
+    } catch (error) {
+      return `抱歉，无法获取 "${location}" 的天气数据。请检查位置名称并重试。`;
+    }
+  }
+});
+
+const weatherAgent = new Agent({
+  instructions: `你是一个有用的天气助手，可以为任何位置提供当前天气信息。
+当用户询问天气状况时，使用 get_weather 工具获取实时天气数据。
+始终保持有用并提供清晰、格式化的天气信息。`,
+  model: {
+    provider: 'openai',
+    id: 'gpt-4o',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  tools: [weatherTool],
+});
+
+export default weatherAgent;
+```
+
+## 计算器 Agent
+
+创建一个具有数学功能的 Agent：
+
+```typescript
+import { Agent, Tool, z } from '@tarko/agent';
+
+// 安全的数学计算工具
+const calculatorTool = new Tool({
+  id: 'calculate',
+  description: '安全地执行数学计算',
+  parameters: z.object({
+    expression: z.string().describe('数学表达式（例如："2 + 3 * 4"、"sqrt(16)"、"sin(pi/2)"）')
+  }),
+  function: async ({ expression }) => {
+    try {
+      // 基本安全验证
+      const allowedPattern = /^[0-9+\-*/().\s,sqrt,sin,cos,tan,log,ln,pi,e]+$/i;
+      if (!allowedPattern.test(expression)) {
+        throw new Error('表达式包含无效字符。只允许数字、基本运算符和常见数学函数。');
+      }
+      
+      // 替换常见的数学函数和常数
+      let safeExpression = expression
+        .replace(/pi/gi, 'Math.PI')
+        .replace(/e(?![0-9])/gi, 'Math.E')
+        .replace(/sqrt\(/gi, 'Math.sqrt(')
+        .replace(/sin\(/gi, 'Math.sin(')
+        .replace(/cos\(/gi, 'Math.cos(')
+        .replace(/tan\(/gi, 'Math.tan(')
+        .replace(/log\(/gi, 'Math.log10(')
+        .replace(/ln\(/gi, 'Math.log(');
+      
+      // 使用 Function 构造函数进行更安全的计算
+      const result = new Function('return ' + safeExpression)();
+      
+      if (typeof result !== 'number' || !isFinite(result)) {
+        throw new Error('无效的计算结果');
+      }
+      
+      return `${expression} = ${result}`;
+    } catch (error) {
+      return `计算 "${expression}" 时出错：${error.message}`;
+    }
+  }
+});
+
+// 单位转换工具
+const unitConverterTool = new Tool({
+  id: 'convert_units',
+  description: '在不同的测量单位之间进行转换',
+  parameters: z.object({
+    value: z.number().describe('要转换的数值'),
+    fromUnit: z.string().describe('源单位（例如："celsius"、"fahrenheit"、"meters"、"feet"、"kg"、"lbs"）'),
+    toUnit: z.string().describe('目标单位')
+  }),
+  function: async ({ value, fromUnit, toUnit }) => {
+    const conversions: Record<string, Record<string, (v: number) => number>> = {
+      // 温度
+      celsius: {
+        fahrenheit: (c) => (c * 9/5) + 32,
+        kelvin: (c) => c + 273.15
+      },
+      fahrenheit: {
+        celsius: (f) => (f - 32) * 5/9,
+        kelvin: (f) => ((f - 32) * 5/9) + 273.15
+      },
+      kelvin: {
+        celsius: (k) => k - 273.15,
+        fahrenheit: (k) => ((k - 273.15) * 9/5) + 32
+      },
+      // 长度
+      meters: {
+        feet: (m) => m * 3.28084,
+        inches: (m) => m * 39.3701,
+        kilometers: (m) => m / 1000
+      },
+      feet: {
+        meters: (ft) => ft / 3.28084,
+        inches: (ft) => ft * 12,
+        kilometers: (ft) => ft / 3280.84
+      },
+      // 重量
+      kg: {
+        lbs: (kg) => kg * 2.20462,
+        grams: (kg) => kg * 1000
+      },
+      lbs: {
+        kg: (lbs) => lbs / 2.20462,
+        grams: (lbs) => (lbs / 2.20462) * 1000
+      }
+    };
+    
+    const fromKey = fromUnit.toLowerCase();
+    const toKey = toUnit.toLowerCase();
+    
+    if (!conversions[fromKey] || !conversions[fromKey][toKey]) {
+      return `不支持从 ${fromUnit} 到 ${toUnit} 的转换。可用转换：温度（celsius、fahrenheit、kelvin）、长度（meters、feet、inches、kilometers）、重量（kg、lbs、grams）。`;
+    }
+    
+    const result = conversions[fromKey][toKey](value);
+    return `${value} ${fromUnit} = ${result.toFixed(4)} ${toUnit}`;
+  }
+});
+
+const calculatorAgent = new Agent({
+  instructions: `你是一个有用的数学助手，可以：
+1. 使用 calculate 工具执行计算
+2. 使用 convert_units 工具进行单位转换
+
+对于数学运算和单位转换，始终使用适当的工具。
+在有帮助时提供清晰的计算说明。`,
+  model: {
+    provider: 'openai',
+    id: 'gpt-4o',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  tools: [calculatorTool, unitConverterTool],
+});
+
+export default calculatorAgent;
+```
+
+## 文件系统 Agent
+
+构建一个可以与文件系统交互的 Agent：
+
+```typescript
+import { Agent, Tool, z } from '@tarko/agent';
+import { promises as fs } from 'fs';
+import path from 'path';
+
+// 文件读取工具
+const readFileTool = new Tool({
+  id: 'read_file',
+  description: '读取文本文件的内容',
+  parameters: z.object({
+    filePath: z.string().describe('要读取的文件路径')
+  }),
+  function: async ({ filePath }) => {
+    try {
+      // 基本安全检查 - 防止目录遍历
+      const resolvedPath = path.resolve(filePath);
+      const workingDir = process.cwd();
+      
+      if (!resolvedPath.startsWith(workingDir)) {
+        throw new Error('访问被拒绝：文件在工作目录之外');
+      }
+      
+      const content = await fs.readFile(resolvedPath, 'utf-8');
+      return `文件 ${filePath} 的内容：\n\n${content}`;
+    } catch (error) {
+      return `读取文件 ${filePath} 时出错：${error.message}`;
+    }
+  }
+});
+
+// 目录列表工具
+const listDirectoryTool = new Tool({
+  id: 'list_directory',
+  description: '列出指定路径中的文件和目录',
+  parameters: z.object({
+    dirPath: z.string().default('.').describe('要列出的目录路径')
+  }),
+  function: async ({ dirPath = '.' }) => {
+    try {
+      const resolvedPath = path.resolve(dirPath);
+      const workingDir = process.cwd();
+      
+      if (!resolvedPath.startsWith(workingDir)) {
+        throw new Error('访问被拒绝：目录在工作目录之外');
+      }
+      
+      const items = await fs.readdir(resolvedPath, { withFileTypes: true });
+      
+      const files = items.filter(item => item.isFile()).map(item => item.name);
+      const dirs = items.filter(item => item.isDirectory()).map(item => item.name);
+      
+      let result = `${dirPath} 的内容：\n\n`;
+      
+      if (dirs.length > 0) {
+        result += `📁 目录 (${dirs.length})：\n${dirs.map(d => `  ${d}/`).join('\n')}\n\n`;
+      }
+      
+      if (files.length > 0) {
+        result += `📄 文件 (${files.length})：\n${files.map(f => `  ${f}`).join('\n')}`;
+      }
+      
+      if (dirs.length === 0 && files.length === 0) {
+        result += '目录为空。';
+      }
+      
+      return result;
+    } catch (error) {
+      return `列出目录 ${dirPath} 时出错：${error.message}`;
+    }
+  }
+});
+
+// 文件写入工具
+const writeFileTool = new Tool({
+  id: 'write_file',
+  description: '将内容写入文件',
+  parameters: z.object({
+    filePath: z.string().describe('写入文件的路径'),
+    content: z.string().describe('要写入文件的内容')
+  }),
+  function: async ({ filePath, content }) => {
+    try {
+      const resolvedPath = path.resolve(filePath);
+      const workingDir = process.cwd();
+      
+      if (!resolvedPath.startsWith(workingDir)) {
+        throw new Error('访问被拒绝：文件在工作目录之外');
+      }
+      
+      // 确保目录存在
+      const dir = path.dirname(resolvedPath);
+      await fs.mkdir(dir, { recursive: true });
+      
+      await fs.writeFile(resolvedPath, content, 'utf-8');
+      return `成功将 ${content.length} 个字符写入 ${filePath}`;
+    } catch (error) {
+      return `写入文件 ${filePath} 时出错：${error.message}`;
+    }
+  }
+});
+
+const fileSystemAgent = new Agent({
+  instructions: `你是一个有用的文件系统助手，可以：
+1. 使用 read_file 读取文件内容
+2. 使用 list_directory 列出目录内容
+3. 使用 write_file 写入文件
+
+进行文件操作时要小心，并提供清晰的操作反馈。
+出于安全考虑，你只能访问当前工作目录内的文件。`,
+  model: {
+    provider: 'openai',
+    id: 'gpt-4o',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  tools: [readFileTool, listDirectoryTool, writeFileTool],
+});
+
+export default fileSystemAgent;
+```
+
+## 运行示例
+
+### 环境设置
+
+创建一个包含 API 密钥的 `.env` 文件：
+
+```bash
+# .env 文件
+# OpenAI API 密钥（所有示例都需要）
+OPENAI_API_KEY=your_openai_api_key_here
+
+# OpenWeather API 密钥（天气 Agent 需要）
+OPENWEATHER_API_KEY=your_openweather_api_key_here
+
+# 可选：使用不同的模型提供商
+# MODEL_PROVIDER=anthropic
+# ANTHROPIC_API_KEY=your_anthropic_key_here
+```
+
+### 程序化使用
+
+```typescript
+import weatherAgent from './weather-agent';
+
+async function main() {
+  // 开始对话
+  const response = await weatherAgent.run('东京的天气怎么样？');
+  console.log(response);
+  
+  // 继续对话
+  const followUp = await weatherAgent.run('伦敦呢？');
+  console.log(followUp);
+}
+
+main().catch(console.error);
+```
+
+### 测试示例
+
+```typescript
+import { describe, it, expect } from '@jest/globals';
+import calculatorAgent from './calculator-agent';
+
+describe('计算器 Agent', () => {
+  it('应该执行基本计算', async () => {
+    const response = await calculatorAgent.run('15 乘以 7 等于多少？');
+    expect(response).toContain('105');
+  });
+  
+  it('应该转换单位', async () => {
+    const response = await calculatorAgent.run('将 100 华氏度转换为摄氏度');
+    expect(response).toContain('37.7778');
+  });
+});
+```
+
+## 下一步
+
+- [自定义工具](/examples/custom-tools) - 学习构建更高级的工具
+- [服务器集成](/examples/server-integration) - 将 Agent 部署为服务器
+- [自定义钩子](/examples/custom-hooks) - 使用钩子添加自定义行为
+
+## 常见问题
+
+### 找不到 API 密钥
+确保你的 `.env` 文件在项目根目录中，并包含所需的 API 密钥。
+
+### 文件访问被拒绝
+出于安全原因，文件系统 Agent 只允许访问当前工作目录内的文件。
+
+### 工具调用失败
+检查你的网络连接和 API 密钥的有效性。工具会提供错误消息来帮助调试问题。

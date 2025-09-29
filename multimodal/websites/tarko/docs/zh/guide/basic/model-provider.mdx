@@ -1,0 +1,69 @@
+---
+title: 模型提供商
+description: 使用 Tarko 连接不同的 LLM 提供商
+---
+
+# 模型提供商
+
+Tarko 遵循 **OpenAI Compatible** 协议连接任意 LLM 提供商，包括 Volcengine、OpenAI、Anthropic、Gemini 等。
+
+## 配置
+
+在 Agent 配置中配置你的模型提供商：
+
+```typescript
+import { Agent } from '@tarko/agent';
+
+const agent = new Agent({
+  model: {
+    provider: 'openai',
+    apiKey: process.env.OPENAI_API_KEY,
+    model: 'gpt-4'
+  }
+});
+```
+
+## 支持的提供商
+
+### OpenAI
+
+```typescript
+{
+  provider: 'openai',
+  id: 'gpt-4',
+  apiKey: 'your-api-key',
+}
+```
+
+### Anthropic
+
+```typescript
+{
+  provider: 'anthropic',
+  id: 'claude-3-5-sonnet-20241022',
+  apiKey: 'your-api-key',
+}
+```
+
+### Volcengine（火山引擎）
+
+```typescript
+{
+  provider: 'volcengine',
+  id: 'ep-20250510145437-5sxhs',  // 或 'doubao-1.5-thinking-vision-pro'
+  apiKey: 'your-api-key',
+}
+```
+
+## 自定义提供商
+
+你也可以使用任何 OpenAI 兼容的端点：
+
+```typescript
+{
+  provider: 'openai',  // 使用 openai 兼容协议
+  baseURL: 'https://your-endpoint.com/v1',
+  id: 'your-model',
+  apiKey: 'your-api-key',
+}
+```

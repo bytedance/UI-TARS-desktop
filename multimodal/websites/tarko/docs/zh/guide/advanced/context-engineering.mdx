@@ -1,0 +1,332 @@
+---
+title: Context Engineering
+description: 掌握长程运行 Agent 操作的先进上下文管理
+---
+
+# Context Engineering
+
+**Context Engineering** 是 Tarko 构建长程运行 Agent 的核心能力。它通过智能消息历史管理来管理上下文窗口并优化内存使用。
+
+## 什么是 Context Engineering？
+
+传统 Agent 由于上下文窗口限制在长程任务中遇到困难。Tarko 的 Context Engineering 通过以下方式解决这个问题：
+
+- **消息历史管理**：智能地将事件流转换为 LLM 上下文
+- **图像限制**：控制上下文中的图像数量以防止溢出
+- **上下文感知**：可配置的多模态内容上下文管理
+- **事件流处理**：维护对话结构以获得最佳 LLM 上下文
+
+## 核心特性
+
+### 1. 上下文感知配置
+
+配置 Agent 如何管理上下文和多模态内容：
+
+```typescript
+import { Agent } from '@tarko/agent';
+
+const agent = new Agent({
+  context: {
+    maxImagesCount: 5, // 限制上下文中的图像数量（默认：5）
+  }
+});
+```
+
+### 2. 消息历史管理
+
+`MessageHistory` 类自动将事件流转换为消息历史：
+
+```typescript
+// 来自 multimodal/tarko/agent/src/agent/message-history.ts
+const messageHistory = new MessageHistory(
+  eventStream,
+  5 // maxImagesCount - 限制图像以防止上下文溢出
+);
+
+const messages = messageHistory.toMessageHistory(
+  toolCallEngine,
+  systemPrompt,
+  tools
+);
+```
+
+### 3. 图像上下文管理
+
+控制在长对话中如何处理图像：
+
+```typescript
+const agent = new Agent({
+  context: {
+    maxImagesCount: 10, // 允许上下文中最多 10 张图像
+  }
+});
+```
+
+**工作原理：**
+- 超出限制的图像被替换为文本占位符
+- 保留最新的图像，省略最旧的图像
+- 在减少 token 使用的同时维护上下文结构
+
+## 配置选项
+
+### 上下文感知配置
+
+基于实际的 `AgentContextAwarenessOptions` 接口：
+
+```typescript
+interface AgentContextAwarenessOptions {
+  /**
+   * 上下文中包含的最大图像数量
+   * 超出时，最旧的图像将被替换为文本占位符
+   * @default 5
+   */
+  maxImagesCount?: number;
+}
+```
+
+### Agent 配置
+
+```typescript
+const agent = new Agent({
+  context: {
+    maxImagesCount: 10, // 限制上下文中的图像
+  },
+  // 其他 Agent 选项...
+});
+```
+
+## 最佳实践
+
+### 1. 适当配置图像限制
+
+**对于文本密集型对话：**
+```typescript
+const agent = new Agent({
+  context: {
+    maxImagesCount: 3, // 为文本重点保留较少图像
+  },
+});
+```
+
+**对于视觉分析任务：**
+```typescript
+const agent = new Agent({
+  context: {
+    maxImagesCount: 15, // 允许更多图像用于视觉上下文
+  },
+});
+```
+
+### 2. 监控上下文使用
+
+使用事件流跟踪上下文变化：
+
+```typescript
+const response = await agent.run({
+  input: "分析这些图像",
+  stream: true,
+});
+
+for await (const event of response) {
+  if (event.type === 'user_message' || event.type === 'environment_input') {
+    console.log('上下文更新：', event.content);
+  }
+}
+```
+
+### 3. 处理多模态内容
+
+```typescript
+// 带图像的环境输入
+const response = await agent.run({
+  input: "你看到了什么？",
+  environmentInput: {
+    content: [
+      { type: 'text', text: '当前屏幕：' },
+      { type: 'image_url', image_url: { url: 'data:image/png;base64,...' } }
+    ],
+    description: '屏幕截图'
+  }
+});
+```
+
+## 高级用法
+
+### 自定义消息历史处理
+
+扩展 `MessageHistory` 类进行自定义上下文管理：
+
+```typescript
+import { MessageHistory } from '@tarko/agent';
+
+class CustomMessageHistory extends MessageHistory {
+  constructor(eventStream, maxImagesCount = 5) {
+    super(eventStream, maxImagesCount);
+  }
+
+  // 重写以添加带时间的自定义系统提示
+  getSystemPromptWithTime(instructions: string): string {
+    const customTime = new Date().toLocaleString('zh-CN', {
+      timeZone: 'Asia/Shanghai'
+    });
+    return `${instructions}\n\n当前时间（北京时间）：${customTime}`;
+  }
+}
+```
+
+### 使用事件流
+
+访问和操作事件流进行自定义上下文逻辑：
+
+```typescript
+const agent = new Agent({ /* 选项 */ });
+
+// 获取事件流
+const eventStream = agent.getEventStream();
+
+// 访问事件
+const events = eventStream.getEvents();
+console.log(`总事件数：${events.length}`);
+
+// 过滤特定事件类型
+const userMessages = events.filter(e => e.type === 'user_message');
+const toolCalls = events.filter(e => e.type === 'tool_call');
+```
+
+## 与 Agent Hooks 集成
+
+使用 Agent Hooks 自定义上下文行为：
+
+```typescript
+const agent = new Agent({
+  hooks: {
+    onBeforeToolCall: async (context) => {
+      // 在工具执行前记录上下文
+      console.log('工具调用前的上下文：', context.messages.length);
+    },
+    
+    onAfterToolCall: async (context) => {
+      // 监控工具执行后的上下文增长
+      console.log('工具调用后的上下文：', context.messages.length);
+    },
+    
+    onRetrieveTools: async (tools) => {
+      // 根据上下文大小过滤工具
+      const eventStream = agent.getEventStream();
+      const events = eventStream.getEvents();
+      
+      if (events.length > 50) {
+        // 为大型上下文减少工具
+        return tools.slice(0, 3);
+      }
+      return tools;
+    }
+  }
+});
+```
+
+## 性能考虑
+
+### 内存使用
+
+- 根据可用内存配置 `maxImagesCount`
+- 监控长时间对话的事件流大小
+- 考虑在长时间使用后处理 Agent
+
+### 上下文窗口管理
+
+- 图像消耗大量 token 空间
+- 文本占位符维护上下文结构
+- 平衡上下文丰富性和 token 限制
+
+### 最佳实践
+
+- 使用环境输入处理临时上下文
+- 为文本重点任务限制图像
+- 在生产环境中监控事件流增长
+
+## 调试上下文问题
+
+### 启用调试日志
+
+```typescript
+import { LogLevel } from '@tarko/agent';
+
+const agent = new Agent({
+  logLevel: LogLevel.DEBUG, // 启用详细日志
+});
+```
+
+### 上下文检查
+
+```typescript
+// 获取事件流进行分析
+const eventStream = agent.getEventStream();
+const events = eventStream.getEvents();
+
+console.log('总事件数：', events.length);
+console.log('事件类型：', [...new Set(events.map(e => e.type))]);
+
+// 计算上下文中的图像
+const imageCount = events.reduce((count, event) => {
+  if (event.type === 'user_message' && Array.isArray(event.content)) {
+    return count + event.content.filter(part => 
+      typeof part === 'object' && part.type === 'image_url'
+    ).length;
+  }
+  return count;
+}, 0);
+
+console.log('上下文中的图像：', imageCount);
+
+// 导出事件进行分析
+const fs = require('fs');
+fs.writeFileSync('events-dump.json', JSON.stringify(events, null, 2));
+```
+
+## 实际应用示例
+
+### 视觉分析 Agent
+
+```typescript
+const visualAgent = new Agent({
+  context: {
+    maxImagesCount: 20, // 为视觉任务允许许多图像
+  },
+  instructions: '你是一个视觉分析专家。分析图像并提供详细见解。',
+});
+```
+
+### 文本重点助手
+
+```typescript
+const textAssistant = new Agent({
+  context: {
+    maxImagesCount: 2, // 为文本重点最少图像
+  },
+  instructions: '你是一个专注于文本分析和生成的写作助手。',
+});
+```
+
+### 长时间对话 Agent
+
+```typescript
+const conversationAgent = new Agent({
+  context: {
+    maxImagesCount: 8, // 混合内容的平衡
+  },
+  instructions: '你是一个用于扩展对话的有用助手。',
+});
+
+// 监控上下文增长
+setInterval(() => {
+  const events = conversationAgent.getEventStream().getEvents();
+  console.log(`上下文事件：${events.length}`);
+}, 60000); // 每分钟检查一次
+```
+
+## 下一步
+
+- [Tool Call Engine](/guide/basic/tool-call-engine) - 了解工具集成
+- [Agent Protocol](/guide/advanced/agent-protocol) - 理解通信标准
+- [Agent Hooks](/guide/advanced/agent-hooks) - 扩展 Agent 行为

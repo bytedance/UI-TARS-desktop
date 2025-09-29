@@ -1,6 +1,6 @@
 {
   "name": "@tarko/agent-interface",
-  "version": "0.3.0-beta.11",
+  "version": "0.3.0-beta.12",
   "description": "Standard protocol, types, event stream and other specifications for `@tarko/agent`",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

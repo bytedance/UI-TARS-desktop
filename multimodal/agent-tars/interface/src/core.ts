@@ -168,4 +168,10 @@ export interface AgentTARSOptions extends MCPAgentOptions {
    * Experimental features configuration
    */
   experimental?: AgentTARSExperimentalOptions;
+
+  /**
+   * AIO Sandbox endpoint URL for remote execution
+   * When provided, disables local resource operations and connects to AIO sandbox MCP
+   */
+  aioSandbox?: string;
 }

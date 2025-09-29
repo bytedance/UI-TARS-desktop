@@ -3,10 +3,9 @@ import { Message as MessageType } from '@/common/types';
 import { Message } from '../index';
 import { isMultimodalContent } from '@/common/utils/typeGuards';
 import { MessageFooter } from './MessageFooter';
-import { ThinkingAnimation } from './ThinkingAnimation';
-import { SkeletonLoader } from './SkeletonLoader';
+import { ThinkingAnimation } from '@tarko/ui';
 import { useAtomValue } from 'jotai';
-import { agentStatusAtom } from '@/common/state/atoms/ui';
+import { isProcessingAtom } from '@/common/state/atoms/ui';
 import { getAgentTitle } from '@/config/web-ui-config';
 
 interface MessageGroupProps {
@@ -23,7 +22,7 @@ interface MessageGroupProps {
  * - Visual relationships between messages are implemented through styles rather than nesting
  */
 export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking }) => {
-  const agentStatus = useAtomValue(agentStatusAtom);
+  const isProcessing = useAtomValue(isProcessingAtom);
 
   // Filter out environment messages
   const filteredMessages = messages.filter((msg) => msg.role !== 'environment');
@@ -36,7 +35,7 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
   // Get user messages and assistant messages
   const userMessages = filteredMessages.filter((msg) => msg.role === 'user');
   const assistantMessages = filteredMessages.filter(
-    (msg) => msg.role === 'assistant' || msg.role === 'final_answer' || msg.role === 'system',
+    (msg) => msg.role === 'assistant' || msg.role === 'system',
   );
 
   // Get the final assistant message (only completed responses, not intermediate tool calls)
@@ -89,27 +88,10 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
         />
       ))}
 
-      {/* Enhanced thinking animation for TTFT optimization */}
+      {/* Simplified thinking animation */}
       {isThinking && (
         <div className="mt-4 space-y-4">
-          <ThinkingAnimation
-            text={agentStatus.message || `${getAgentTitle()} is running`}
-            phase={agentStatus.phase}
-            estimatedTime={agentStatus.estimatedTime}
-            showProgress={
-              agentStatus.phase === 'initializing' || agentStatus.phase === 'warming_up'
-            }
-            size="medium"
-          />
-
-          {/* Show skeleton loader during initial phases */}
-          {(agentStatus.phase === 'initializing' ||
-            agentStatus.phase === 'warming_up' ||
-            agentStatus.phase === 'processing') && (
-              <div className="ml-8">
-                <SkeletonLoader lines={2} showAvatar={false} className="opacity-50" />
-              </div>
-            )}
+          <ThinkingAnimation text={`${getAgentTitle()} is running`} size="medium" />
         </div>
       )}
 

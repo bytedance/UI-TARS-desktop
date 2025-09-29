@@ -1,0 +1,703 @@
+---
+title: UI 集成
+description: 为 Tarko Agent 构建 Web 界面
+---
+
+# UI 集成
+
+**Tarko** 提供灵活的 UI 集成选项，帮助你使用现代 Web 技术为 Agent 构建用户界面。
+
+## 集成选项
+
+### 1. **Tarko Agent UI**（推荐）
+
+官方 Web UI 实现，可与任何 **Tarko Agent** 开箱即用：
+
+```bash
+npm install @tarko/agent-ui
+```
+
+**功能特性：**
+- 实时 Agent 通信
+- 内置聊天界面
+- 工具执行可视化
+- 事件流监控
+- 响应式设计
+
+### 2. **自定义 Web UI**
+
+使用 **Agent Protocol** 构建自己的 Web 界面：
+
+```typescript
+import { AgentClient } from '@tarko/agent-client';
+
+const client = new AgentClient({
+  endpoint: 'http://localhost:3000',
+});
+
+// 向 Agent 发送消息
+const response = await client.sendMessage('你好，Agent！');
+```
+
+### 3. **原生应用**
+
+使用 HTTP/WebSocket API 与桌面或移动应用集成。
+
+## 架构概览
+
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   前端 UI       │◄──►│  Tarko Agent     │◄──►│  LLM Provider   │
+│                 │    │  Server          │    │                 │
+├─────────────────┤    ├──────────────────┤    ├─────────────────┤
+│ • 聊天界面      │    │ • Agent Protocol │    │ • OpenAI        │
+│ • 工具输出      │    │ • Event Stream   │    │ • Anthropic     │
+│ • 实时更新      │    │ • 工具执行       │    │ • Volcengine    │
+│                 │    │ • 上下文管理     │    │ • 其他          │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+```
+
+## 使用 Tarko Agent UI 快速开始
+
+为你的 Agent 获取 Web UI 的最快方式：
+
+### 1. 安装依赖
+
+```bash
+npm install @tarko/agent-ui
+```
+
+### 2. 基本设置
+
+```typescript
+import { AgentUI } from '@tarko/agent-ui';
+import '@tarko/agent-ui/styles.css';
+
+function App() {
+  return (
+    <AgentUI
+      endpoint="http://localhost:3000"
+      title="我的 Agent"
+      theme="light"
+    />
+  );
+}
+
+export default App;
+```
+
+### 3. 启动 Agent 服务器
+
+```bash
+tarko run --server
+```
+
+你的 Web UI 将自动连接到 Agent！
+
+## 通信协议
+
+### HTTP API
+
+用于基本 Agent 交互的 RESTful API：
+
+```typescript
+// 发送消息
+POST /api/chat
+{
+  "message": "你好，Agent！",
+  "sessionId": "session-123"
+}
+
+// 获取会话历史
+GET /api/sessions/session-123/messages
+```
+
+### WebSocket
+
+实时双向通信：
+
+```typescript
+const ws = new WebSocket('ws://localhost:3000/ws');
+
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  console.log('Agent 事件:', data);
+};
+```
+
+### Server-Sent Events (SSE)
+
+用于实时更新的流式响应：
+
+```typescript
+const eventSource = new EventSource('/api/stream/session-123');
+
+eventSource.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  console.log('流更新:', data);
+};
+```
+
+## Event Stream
+
+**Tarko** 使用标准化的事件流格式进行实时通信：
+
+```typescript
+interface AgentEvent {
+  type: 'message' | 'tool_call' | 'tool_result' | 'thinking' | 'error';
+  timestamp: string;
+  sessionId: string;
+  data: any;
+}
+```
+
+### 事件类型
+
+| 事件类型 | 描述 | 数据 |
+|----------|------|------|
+| `message` | Agent 响应消息 | `{ content: string, role: 'assistant' }` |
+| `tool_call` | 工具执行开始 | `{ name: string, args: object }` |
+| `tool_result` | 工具执行完成 | `{ result: any, success: boolean }` |
+| `thinking` | Agent 推理过程 | `{ content: string }` |
+| `error` | 发生错误 | `{ message: string, code?: string }` |
+
+## 自定义 Web UI 开发
+
+### React 集成
+
+构建自定义 React 界面：
+
+```typescript
+import React, { useState, useEffect } from 'react';
+import { AgentClient } from '@tarko/agent-client';
+
+const CustomAgentUI = () => {
+  const [client] = useState(() => new AgentClient({
+    endpoint: 'http://localhost:3000'
+  }));
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const sendMessage = async () => {
+    if (!input.trim()) return;
+    
+    setLoading(true);
+    const userMessage = { role: 'user', content: input };
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+
+    try {
+      const response = await client.sendMessage(input);
+      const assistantMessage = { role: 'assistant', content: response.content };
+      setMessages(prev => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error('发送消息时出错:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="agent-ui">
+      <div className="messages">
+        {messages.map((msg, idx) => (
+          <div key={idx} className={`message ${msg.role}`}>
+            {msg.content}
+          </div>
+        ))}
+      </div>
+      <div className="input-area">
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+          placeholder="输入你的消息..."
+          disabled={loading}
+        />
+        <button onClick={sendMessage} disabled={loading}>
+          {loading ? '发送中...' : '发送'}
+        </button>
+      </div>
+    </div>
+  );
+};
+```
+
+### Vue.js 集成
+
+```vue
+<template>
+  <div class="agent-ui">
+    <div class="messages">
+      <div
+        v-for="(message, index) in messages"
+        :key="index"
+        :class="`message ${message.role}`"
+      >
+        {{ message.content }}
+      </div>
+    </div>
+    <div class="input-area">
+      <input
+        v-model="input"
+        @keyup.enter="sendMessage"
+        placeholder="输入你的消息..."
+        :disabled="loading"
+      />
+      <button @click="sendMessage" :disabled="loading">
+        {{ loading ? '发送中...' : '发送' }}
+      </button>
+    </div>
+  </div>
+</template>
+
+<script>
+import { AgentClient } from '@tarko/agent-client';
+
+export default {
+  data() {
+    return {
+      client: new AgentClient({ endpoint: 'http://localhost:3000' }),
+      messages: [],
+      input: '',
+      loading: false
+    };
+  },
+  methods: {
+    async sendMessage() {
+      if (!this.input.trim()) return;
+      
+      this.loading = true;
+      this.messages.push({ role: 'user', content: this.input });
+      const message = this.input;
+      this.input = '';
+
+      try {
+        const response = await this.client.sendMessage(message);
+        this.messages.push({ role: 'assistant', content: response.content });
+      } catch (error) {
+        console.error('错误:', error);
+      } finally {
+        this.loading = false;
+      }
+    }
+  }
+};
+</script>
+```
+
+## 实时功能
+
+### WebSocket 连接
+
+实现实时通信：
+
+```typescript
+class AgentWebSocket {
+  private ws: WebSocket;
+  private eventHandlers: Map<string, Function[]> = new Map();
+
+  constructor(endpoint: string) {
+    this.ws = new WebSocket(endpoint.replace('http', 'ws') + '/ws');
+    this.setupEventHandlers();
+  }
+
+  private setupEventHandlers() {
+    this.ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      const handlers = this.eventHandlers.get(data.type) || [];
+      handlers.forEach(handler => handler(data));
+    };
+
+    this.ws.onopen = () => {
+      console.log('WebSocket 已连接');
+    };
+
+    this.ws.onclose = () => {
+      console.log('WebSocket 已断开');
+      // 实现重连逻辑
+    };
+  }
+
+  on(eventType: string, handler: Function) {
+    if (!this.eventHandlers.has(eventType)) {
+      this.eventHandlers.set(eventType, []);
+    }
+    this.eventHandlers.get(eventType)!.push(handler);
+  }
+
+  sendMessage(message: string) {
+    this.ws.send(JSON.stringify({ type: 'message', content: message }));
+  }
+}
+
+// 使用示例
+const agentWS = new AgentWebSocket('http://localhost:3000');
+
+agentWS.on('message', (data) => {
+  console.log('收到消息:', data.content);
+});
+
+agentWS.on('tool_call', (data) => {
+  console.log('工具调用:', data.name, data.args);
+});
+
+agentWS.on('tool_result', (data) => {
+  console.log('工具结果:', data.result);
+});
+```
+
+### Server-Sent Events
+
+使用 SSE 的替代方法：
+
+```typescript
+class AgentEventSource {
+  private eventSource: EventSource;
+  private sessionId: string;
+
+  constructor(endpoint: string, sessionId: string) {
+    this.sessionId = sessionId;
+    this.eventSource = new EventSource(`${endpoint}/api/stream/${sessionId}`);
+    this.setupEventHandlers();
+  }
+
+  private setupEventHandlers() {
+    this.eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      this.handleEvent(data);
+    };
+
+    this.eventSource.onerror = (error) => {
+      console.error('SSE 错误:', error);
+    };
+  }
+
+  private handleEvent(data: any) {
+    switch (data.type) {
+      case 'message':
+        this.onMessage(data);
+        break;
+      case 'tool_call':
+        this.onToolCall(data);
+        break;
+      case 'tool_result':
+        this.onToolResult(data);
+        break;
+    }
+  }
+
+  onMessage(data: any) {
+    // 在子类中重写或传递回调
+  }
+
+  onToolCall(data: any) {
+    // 在子类中重写或传递回调
+  }
+
+  onToolResult(data: any) {
+    // 在子类中重写或传递回调
+  }
+
+  close() {
+    this.eventSource.close();
+  }
+}
+```
+
+## UI 组件
+
+### 聊天界面
+
+基本聊天组件结构：
+
+```typescript
+interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+  toolCalls?: ToolCall[];
+}
+
+interface ToolCall {
+  id: string;
+  name: string;
+  args: object;
+  result?: any;
+  status: 'pending' | 'success' | 'error';
+}
+```
+
+### 工具执行可视化
+
+```typescript
+import React from 'react';
+
+interface ToolExecutionProps {
+  toolCall: {
+    name: string;
+    args: object;
+    result?: any;
+    status: 'pending' | 'success' | 'error';
+    startTime: Date;
+    endTime?: Date;
+  };
+}
+
+const ToolExecution: React.FC<ToolExecutionProps> = ({ toolCall }) => {
+  const duration = toolCall.endTime 
+    ? toolCall.endTime.getTime() - toolCall.startTime.getTime()
+    : null;
+
+  return (
+    <div className={`tool-execution ${toolCall.status}`}>
+      <div className="tool-header">
+        <span className="tool-name">{toolCall.name}</span>
+        <span className="tool-status">{toolCall.status}</span>
+        {duration && (
+          <span className="tool-duration">{duration}ms</span>
+        )}
+      </div>
+      
+      <details className="tool-args">
+        <summary>参数</summary>
+        <pre>{JSON.stringify(toolCall.args, null, 2)}</pre>
+      </details>
+      
+      {toolCall.result && (
+        <details className="tool-result">
+          <summary>结果</summary>
+          <pre>{JSON.stringify(toolCall.result, null, 2)}</pre>
+        </details>
+      )}
+    </div>
+  );
+};
+```
+
+### 思考过程显示
+
+```typescript
+const ThinkingProcess: React.FC<{ thoughts: string[] }> = ({ thoughts }) => {
+  return (
+    <div className="thinking-process">
+      <div className="thinking-header">
+        <span>🤔 Agent 正在思考...</span>
+      </div>
+      <div className="thoughts">
+        {thoughts.map((thought, idx) => (
+          <div key={idx} className="thought">
+            {thought}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+```
+
+## 样式和主题
+
+### CSS 变量
+
+```css
+:root {
+  --agent-primary: #007bff;
+  --agent-secondary: #6c757d;
+  --agent-success: #28a745;
+  --agent-danger: #dc3545;
+  --agent-warning: #ffc107;
+  --agent-info: #17a2b8;
+  
+  --agent-bg: #ffffff;
+  --agent-text: #333333;
+  --agent-border: #e9ecef;
+  
+  --agent-message-user-bg: #007bff;
+  --agent-message-user-text: #ffffff;
+  --agent-message-assistant-bg: #f8f9fa;
+  --agent-message-assistant-text: #333333;
+}
+
+[data-theme="dark"] {
+  --agent-bg: #1a1a1a;
+  --agent-text: #ffffff;
+  --agent-border: #333333;
+  
+  --agent-message-assistant-bg: #2d2d2d;
+  --agent-message-assistant-text: #ffffff;
+}
+```
+
+### 组件样式
+
+```css
+.agent-ui {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--agent-bg);
+  color: var(--agent-text);
+}
+
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.message {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  max-width: 80%;
+}
+
+.message.user {
+  background: var(--agent-message-user-bg);
+  color: var(--agent-message-user-text);
+  margin-left: auto;
+}
+
+.message.assistant {
+  background: var(--agent-message-assistant-bg);
+  color: var(--agent-message-assistant-text);
+}
+
+.input-area {
+  display: flex;
+  padding: 1rem;
+  border-top: 1px solid var(--agent-border);
+}
+
+.input-area input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid var(--agent-border);
+  border-radius: 0.25rem;
+  margin-right: 0.5rem;
+}
+
+.input-area button {
+  padding: 0.75rem 1.5rem;
+  background: var(--agent-primary);
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.input-area button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+```
+
+## 认证与安全
+
+### API 密钥
+
+安全的 API 密钥认证：
+
+```typescript
+const client = new AgentClient({
+  endpoint: 'http://localhost:3000',
+  apiKey: process.env.TARKO_API_KEY,
+});
+```
+
+### 会话管理
+
+管理用户会话和上下文：
+
+```typescript
+interface Session {
+  id: string;
+  userId?: string;
+  createdAt: Date;
+  lastActivity: Date;
+  context: AgentContext;
+}
+```
+
+## 部署考虑
+
+### CORS 配置
+
+对于 Web UI，在 Agent 服务器中配置 CORS：
+
+```typescript
+export default defineConfig({
+  server: {
+    cors: {
+      origin: ['http://localhost:3000', 'https://myapp.com'],
+      credentials: true,
+    },
+  },
+});
+```
+
+### 反向代理
+
+在生产部署中使用反向代理：
+
+```nginx
+location /api/ {
+    proxy_pass http://localhost:3001/;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host $host;
+    proxy_cache_bypass $http_upgrade;
+}
+```
+
+### 环境配置
+
+```typescript
+// config.ts
+export const config = {
+  apiEndpoint: process.env.REACT_APP_API_ENDPOINT || 'http://localhost:3000',
+  wsEndpoint: process.env.REACT_APP_WS_ENDPOINT || 'ws://localhost:3000',
+  apiKey: process.env.REACT_APP_API_KEY,
+};
+```
+
+### 构建和部署
+
+```bash
+# 生产构建
+npm run build
+
+# 部署到静态托管
+# (Vercel, Netlify, AWS S3 等)
+```
+
+### Docker 部署
+
+```dockerfile
+# Dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+
+COPY . .
+RUN npm run build
+
+FROM nginx:alpine
+COPY --from=0 /app/build /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/nginx.conf
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+## 下一步
+
+- [Agent Protocol →](/guide/advanced/agent-protocol)
+- [Event Stream →](/guide/basic/event-stream)
+- [配置 →](/guide/basic/configuration)

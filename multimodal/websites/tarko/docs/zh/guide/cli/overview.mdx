@@ -1,0 +1,130 @@
+---
+title: CLI 概述
+description: Tarko Agent CLI 介绍
+---
+
+# CLI 概述
+
+**Tarko Agent CLI** 是一个基于 **Agent Kernel** ([`@tarko/agent`](https://www.npmjs.com/package/@tarko/agent)) 构建的灵活框架。它提供了一个全面的命令行界面，用于轻松部署和运行 Agent，具有内置的 Web UI 和强大的可扩展性。
+
+## 安装
+
+通过 npm 全局安装：
+
+```bash
+npm install -g @tarko/agent-cli
+```
+
+或使用 npx 进行一次性执行：
+
+```bash
+npx @tarko/agent-cli run my-agent
+```
+
+## 快速开始
+
+```bash
+# 启动交互式 Web UI（默认）
+tarko
+
+# 运行内置 Agent
+tarko run agent-tars  # Agent TARS
+tarko run omni-tars   # Omni-TARS
+tarko run mcp-agent   # MCP Agent
+
+# 运行自定义 Agent
+tarko run ./my-agent.js
+
+# 启动无头 API 服务器
+tarko serve
+
+# 无头模式直接输入
+tarko run --headless --input "分析当前目录结构"
+
+# 管道输入
+echo "总结这段代码" | tarko run --headless
+```
+
+## 核心概念
+
+### 部署模式
+
+- **交互模式** (`tarko run`) - 用于开发和测试的 Web UI
+- **服务器模式** (`tarko serve`) - 用于生产的无头 API 服务器
+- **脚本模式** (`tarko run --headless`) - 用于自动化的静默执行
+
+### 内置 Agent
+
+Tarko CLI 包含几个即用型 Agent：
+
+- **`agent-tars`** - 高级任务自动化和推理系统
+- **`omni-tars`** - 具有综合能力的多模态 Agent
+- **`mcp-agent`** - 用于工具集成的模型上下文协议 Agent
+
+### 配置灵活性
+
+支持多种配置格式，自动发现：
+- `tarko.config.ts` - TypeScript 配置
+- `tarko.config.yaml` - YAML 配置
+- `tarko.config.json` - JSON 配置
+- 环境变量和 CLI 参数
+
+## 主要功能
+
+### Tool 和 MCP Server 过滤
+
+通过配置过滤可用的工具和 MCP 服务器：
+
+```bash
+tarko --tool.include "file_*,web_*" --tool.exclude "dangerous_*"
+tarko --mcpServer.include "filesystem" --mcpServer.exclude "experimental_*"
+```
+
+### 调试支持
+
+通过 `--debug` 参数启用详细日志：
+
+```bash
+# 启用调试模式
+tarko run --debug
+
+# 使用环境变量
+DEBUG=tarko:* tarko run
+```
+
+## 使用场景
+
+### 开发
+- 使用 Web UI 进行交互式 Agent 开发
+- 实时调试和测试
+- 热重载和开发模式
+
+### 生产
+- 无头 API 服务器部署
+- Docker 和 Kubernetes 集成
+- 负载均衡和扩展
+
+### 自动化
+- CI/CD 流水线集成
+- 批处理和脚本编写
+- 结构化输出的静默执行
+
+### 测试
+- 用于调试的直接 LLM 请求
+- Agent 行为验证
+- 性能测试和基准测试
+
+## 下一步
+
+- [命令参考](/guide/cli/commands) - 详细的命令文档
+- [配置指南](/guide/cli/configuration) - 高级配置选项
+- [内置 Agent](/guide/cli/built-in-agents) - 使用预构建的 Agent
+- [部署指南](/guide/deployment/cli) - 生产部署策略
+
+## API 参考
+
+详细的 TypeScript 定义：
+
+- [`@tarko/agent-interface`](https://www.npmjs.com/package/@tarko/agent-interface) - 核心 Agent 接口
+- [`@tarko/interface`](https://www.npmjs.com/package/@tarko/interface) - 应用层接口
+- [`@tarko/agent-cli`](https://www.npmjs.com/package/@tarko/agent-cli) - CLI 框架接口

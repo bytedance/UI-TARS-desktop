@@ -1,0 +1,347 @@
+---
+title: CLI Commands
+description: Complete reference for all Tarko CLI commands
+---
+
+# CLI Commands
+
+Complete reference for all Tarko Agent CLI commands and their options.
+
+## `tarko` / `tarko run`
+
+Launches **interactive Web UI** for real-time conversation and file browsing.
+
+### Basic Usage
+
+```bash
+# Start interactive Web UI (default)
+tarko
+
+# Equivalent explicit command
+tarko run
+
+# Run with specific agent
+tarko run ./my-agent.js
+
+# Run with built-in agents
+tarko run agent-tars
+tarko run omni-tars
+tarko run mcp-agent
+```
+
+### Options
+
+```bash
+# Custom port and auto-open browser
+tarko run --port 8888 --open
+
+# Development mode with hot reload
+tarko run --dev
+
+# Debug mode with verbose logging
+tarko run --debug
+
+# Custom configuration file
+tarko run --config ./custom-config.ts
+
+# Custom workspace
+tarko run --workspace ./my-workspace
+```
+
+### Headless Mode
+
+**Silent mode** execution with stdout output, perfect for scripting:
+
+```bash
+# Direct input with text output (default)
+tarko run --headless --input "Analyze current directory structure"
+
+# Pipeline input
+echo "Summarize this code" | tarko run --headless
+
+# JSON output for programmatic use
+tarko run --headless --input "Analyze files" --format json
+
+# Include debug logs in output
+tarko run --headless --input "Analyze files" --include-logs
+
+# Disable cache for fresh execution
+tarko run --headless --input "Analyze files" --use-cache false
+
+# Combine with built-in agents
+tarko run agent-tars --headless --input "List directory contents"
+```
+
+#### Headless Options
+
+| Option | Description | Default |
+|--------|-------------|----------|
+| `--input <text>` | Direct input text | - |
+| `--format <type>` | Output format: `text`, `json` | `text` |
+| `--include-logs` | Include debug logs in output | `false` |
+| `--use-cache <bool>` | Enable/disable caching | `true` |
+
+## `tarko serve`
+
+Starts **headless API server** for system integration and production deployment.
+
+### Basic Usage
+
+```bash
+# Start headless server
+tarko serve
+
+# Start server with specific agent
+tarko serve ./my-agent
+
+# Start server with built-in agent
+tarko serve omni-tars
+
+# Custom port and configuration
+tarko serve --port 8888 --config ./production.config.ts
+```
+
+### Options
+
+```bash
+# Custom port (default: 3000)
+tarko serve --port 8888
+
+# Custom host (default: localhost)
+tarko serve --host 0.0.0.0
+
+# Debug mode
+tarko serve --debug
+
+# Custom configuration
+tarko serve --config ./server.config.yaml
+
+# Custom workspace
+tarko serve --workspace ./server-workspace
+```
+
+### API Endpoints
+
+When running `tarko serve`, the following endpoints are available:
+
+- `GET /api/v1/health` - Health check
+- `GET /api/v1/status` - Detailed status
+- `POST /api/v1/chat` - Chat with agent
+- `GET /api/v1/events` - Event stream (WebSocket)
+- `GET /metrics` - Prometheus metrics (if enabled)
+
+## `tarko request`
+
+Direct **LLM requests** for debugging and testing purposes.
+
+### Basic Usage
+
+```bash
+# Basic request
+tarko request --provider openai --model gpt-4 --body '{"messages":[{"role":"user","content":"Hello"}]}'
+
+# Load request from file
+tarko request --provider openai --model gpt-4 --body ./request.json
+```
+
+### Advanced Options
+
+```bash
+# Custom API configuration
+tarko request --provider openai --model gpt-4 \
+  --apiKey sk-xxx \
+  --baseURL https://api.openai.com/v1 \
+  --body request.json
+
+# Streaming mode
+tarko request --provider openai --model gpt-4 --body request.json --stream
+
+# Reasoning mode (for supported models like o1)
+tarko request --provider openai --model o1-preview --body request.json --thinking
+
+# Semantic output format
+tarko request --provider openai --model gpt-4 --body request.json --format semantic
+```
+
+### Supported Providers
+
+- `openai` - OpenAI GPT models
+- `anthropic` - Anthropic Claude models
+- `azure` - Azure OpenAI Service
+- `ollama` - Local Ollama models
+- `gemini` - Google Gemini models
+
+### Request Body Format
+
+```json
+{
+  "messages": [
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": "Hello!"}
+  ],
+  "temperature": 0.7,
+  "max_tokens": 1000
+}
+```
+
+## `tarko workspace`
+
+**Workspace management** utilities for organizing agent projects.
+
+### Commands
+
+```bash
+# Initialize new workspace in current directory
+tarko workspace --init
+
+# Open workspace in VSCode
+tarko workspace --open
+
+# Enable global workspace
+tarko workspace --enable
+
+# Disable global workspace
+tarko workspace --disable
+
+# Show workspace status and configuration
+tarko workspace --status
+```
+
+### Workspace Structure
+
+Initializing a workspace creates:
+
+```
+my-workspace/
+├── tarko.config.ts          # Main configuration
+├── agents/                   # Custom agents
+├── tools/                    # Custom tools
+├── data/                     # Agent data and cache
+├── logs/                     # Execution logs
+└── .tarko/                   # Internal workspace data
+```
+
+## Global Options
+
+These options work with all commands:
+
+### Configuration
+
+```bash
+# Model configuration
+tarko --model.provider openai --model.id gpt-4 --model.apiKey sk-xxx
+
+# Custom configuration file
+tarko --config ./custom.config.ts
+
+# Custom workspace
+tarko --workspace ./my-workspace
+```
+
+### Debugging
+
+```bash
+# Enable debug logging
+tarko --debug
+
+# Verbose output
+tarko --verbose
+
+# Dry run (show what would be executed)
+tarko --dry-run
+
+# Show configuration and exit
+tarko --show-config
+```
+
+### Tool and MCP Filtering
+
+```bash
+# Include specific tools
+tarko --tool.include "file_*,web_*"
+
+# Exclude specific tools
+tarko --tool.exclude "dangerous_*"
+
+# Include specific MCP servers
+tarko --mcpServer.include "filesystem,browser"
+
+# Exclude specific MCP servers
+tarko --mcpServer.exclude "experimental_*"
+```
+
+## Environment Variables
+
+Alternative to CLI options:
+
+```bash
+# Model configuration
+export OPENAI_API_KEY=your-api-key
+export ANTHROPIC_API_KEY=your-api-key
+
+# Server configuration
+export TARKO_PORT=3000
+export TARKO_HOST=0.0.0.0
+
+# Debug settings
+export DEBUG=tarko:*
+export TARKO_LOG_LEVEL=debug
+
+# Workspace
+export TARKO_WORKSPACE=./my-workspace
+```
+
+## Exit Codes
+
+| Code | Description |
+|------|-------------|
+| 0 | Success |
+| 1 | General error |
+| 2 | Configuration error |
+| 3 | Network error |
+| 4 | Authentication error |
+| 5 | Agent execution error |
+
+## Examples
+
+### Development Workflow
+
+```bash
+# 1. Initialize workspace
+tarko workspace --init --name my-project
+
+# 2. Start development with UI
+tarko run --dev --open
+
+# 3. Test with headless mode
+tarko run --headless --input "Test my agent"
+
+# 4. Deploy to production
+tarko serve --port 3000 --config production.config.ts
+```
+
+### CI/CD Integration
+
+```bash
+# Test agent functionality
+tarko run agent-tars --headless --input "Run tests" --format json > results.json
+
+# Validate configuration
+tarko --dry-run --show-config
+
+# Health check
+curl -f http://localhost:3000/api/v1/health || exit 1
+```
+
+### Debugging
+
+```bash
+# Debug with verbose logging
+DEBUG=tarko:* tarko run --debug --verbose
+
+# Test direct LLM requests
+tarko request --provider openai --model gpt-4 --body '{"messages":[{"role":"user","content":"Hello"}]}' --debug
+
+# Inspect configuration
+tarko --show-config --debug
+```

@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { EventHandler, EventHandlerContext } from '../types';
 import { AgentEventStream, Message } from '@/common/types';
 import { messagesAtom } from '@/common/state/atoms/message';
-import { activePanelContentAtom } from '@/common/state/atoms/ui';
+import { sessionPanelContentAtom } from '@/common/state/atoms/ui';
 import { shouldUpdatePanelContent } from '../utils/panelContentUpdater';
 import { ChatCompletionContentPartImage } from '@tarko/agent-interface';
 
@@ -51,6 +51,11 @@ export class EnvironmentInputHandler
   ): void {
     const { get, set } = context;
 
+    // Check if this is the first environment_input event BEFORE adding the current message
+    const existingSessionMessages = get(messagesAtom)[sessionId] || [];
+    const isFirstEnvironmentInput =
+      existingSessionMessages.filter((msg) => msg.role === 'environment').length === 0;
+
     const environmentMessage: Message = {
       id: event.id,
       role: 'environment',
@@ -68,7 +73,7 @@ export class EnvironmentInputHandler
       };
     });
 
-    if (Array.isArray(event.content) && shouldUpdatePanelContent(get, sessionId)) {
+    if (Array.isArray(event.content)) {
       const imageContent = event.content.find(
         (item): item is ChatCompletionContentPartImage =>
           typeof item === 'object' &&
@@ -82,20 +87,45 @@ export class EnvironmentInputHandler
       );
 
       if (imageContent && imageContent.image_url) {
-        const currentPanel = get(activePanelContentAtom);
+        const currentPanelContent = get(sessionPanelContentAtom);
+        const currentSessionPanel = currentPanelContent[sessionId];
 
-        // Only update if current panel is browser_vision_control to maintain context
-        if (currentPanel && currentPanel.type === 'browser_vision_control') {
-          set(activePanelContentAtom, {
-            ...currentPanel,
+        // Common panel properties
+        const basePanelContent = {
+          title: event.description || 'Environment Screenshot',
+          timestamp: event.timestamp,
+          originalContent: event.content,
+          environmentId: event.id,
+        };
+
+        let panelContent = null;
+
+        if (isFirstEnvironmentInput) {
+          // First environment input: always show as simple image
+          panelContent = {
+            ...basePanelContent,
+            type: 'image',
+            source: imageContent.image_url.url,
+          };
+        } else if (
+          currentSessionPanel?.type === 'browser_vision_control' ||
+          shouldUpdatePanelContent(get, sessionId)
+        ) {
+          // Update existing browser_vision_control panel or create new one
+          panelContent = {
+            ...basePanelContent,
             type: 'browser_vision_control',
-            title: currentPanel.title,
-            timestamp: event.timestamp,
-            originalContent: event.content,
-            environmentId: event.id,
-          });
+            source: null,
+            title: event.description || 'Browser Screenshot',
+          };
         }
-        // Skip update for other panel types to avoid duplicate Browser Screenshot rendering
+
+        if (panelContent) {
+          set(sessionPanelContentAtom, (prev) => ({
+            ...prev,
+            [sessionId]: panelContent,
+          }));
+        }
       }
     }
   }

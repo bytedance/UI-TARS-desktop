@@ -4,15 +4,15 @@
  */
 
 import { Tool } from '@tarko/agent-interface';
-import { ConsoleLogger } from '@tarko/shared-utils';
+import { getLogger } from '@tarko/shared-utils';
 
 /**
  * Manages tools for the Agent, handling registration, lookup, and execution
  */
 export class ToolManager {
   private tools: Map<string, Tool> = new Map();
+  private logger = getLogger('ToolManager')
 
-  constructor(private logger: ConsoleLogger) {}
 
   /**
    * Registers a new tool that the agent can use during execution

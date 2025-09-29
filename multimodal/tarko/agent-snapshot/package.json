@@ -1,6 +1,6 @@
 {
   "name": "@tarko/agent-snapshot",
-  "version": "0.3.0-beta.11",
+  "version": "0.3.0-beta.12",
   "description": "A snapshot-based agent test framework for `@tarko/agent` based Agents",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

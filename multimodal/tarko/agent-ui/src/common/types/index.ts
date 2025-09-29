@@ -32,7 +32,7 @@ export interface ToolResult {
  */
 export interface Message {
   id: string;
-  role: 'user' | 'assistant' | 'system' | 'tool' | 'environment' | 'final_answer';
+  role: 'user' | 'assistant' | 'system' | 'tool' | 'environment';
   content: string | ChatCompletionContentPart[];
   timestamp: number;
   toolCalls?: ChatCompletionMessageToolCall[];
@@ -42,7 +42,7 @@ export interface Message {
   finishReason?: string;
   messageId?: string;
   description?: string; // Added for environment inputs
-  isDeepResearch?: boolean; // Added for final answer events
+
   title?: string; // Added for research report title
   ttftMs?: number; // Time to First Token (TTFT) in milliseconds
   ttltMs?: number; // Total response time in milliseconds
@@ -94,8 +94,7 @@ export interface PanelContent {
   originalContent?: string | ChatCompletionContentPart[];
   _extra?: { currentScreenshot: string };
   isStreaming?: boolean;
-  // FIXME: Consider whether to remove it
-  isDeepResearch?: boolean;
+
   messageId?: string;
 }
 

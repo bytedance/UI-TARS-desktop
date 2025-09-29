@@ -3,31 +3,58 @@
  * Enhanced to support multiple configuration sources with fallback strategy
  */
 
+import { extractActualBasename } from '@tarko/shared-utils';
 import { loadWebUIConfigSync } from './config-loader';
 import type { BaseAgentWebUIImplementation } from '@tarko/interface';
-
-let cachedConfig: BaseAgentWebUIImplementation | null = null;
-let lastConfigCheck = 0;
-const CONFIG_CACHE_TTL = 5000; // 5 seconds
+import { ENV_CONFIG } from '@/common/constants';
 
 /**
- * Get web UI configuration with enhanced multi-source loading
+ * Get Agent UI Configuration with enhanced multi-source loading
  */
 export function getWebUIConfig(): BaseAgentWebUIImplementation {
-  const now = Date.now();
+  const result = loadWebUIConfigSync();
+  return result.config;
+}
 
-  // Use cached config if available and fresh
-  if (cachedConfig && now - lastConfigCheck < CONFIG_CACHE_TTL) {
-    return cachedConfig;
+/**
+ * Get Agent UI Configuration with enhanced multi-source loading
+ */
+export function getWebUIRouteBase(): string {
+  // Extract actual basename from current URL using shared utility
+  const currentPath = window.location.pathname;
+  const config = getWebUIConfig();
+  const actualBasename = extractActualBasename(config.base, currentPath);
+  console.log('[Agent UI] base config:', config.base);
+  console.log('[Agent UI] current path:', currentPath);
+  console.log('[Agent UI] extracted basename:', actualBasename);
+  return actualBasename;
+}
+
+/**
+ * Get API Base URL.
+ */
+export function getAPIBaseUrl() {
+  const configuredBaseUrl = ENV_CONFIG.AGENT_BASE_URL ?? window.AGENT_BASE_URL;
+  /**
+   * Scene 1. The Agent Server and Agent UI are deployed together ()
+   * If routeBase exists, we should respect it
+   */
+  if (configuredBaseUrl === '') {
+    const routeBase = getWebUIRouteBase();
+    if (routeBase) {
+      return configuredBaseUrl + routeBase;
+    }
+    return configuredBaseUrl;
   }
 
-  // Load configuration from all sources
-  const result = loadWebUIConfigSync();
-  cachedConfig = result.config;
-  lastConfigCheck = now;
-
-  return cachedConfig;
+  /**
+   * Scene 1. The Agent Server and Agent UI are deployed in different locations
+   * We should directly respect the API Base URL
+   */
+  return configuredBaseUrl;
 }
+
+export const API_BASE_URL = getAPIBaseUrl();
 
 /**
  * Get agent title from web UI config with fallback
@@ -56,8 +83,16 @@ export function getLogoUrl(): string {
 /**
  * Get workspace navigation items from web UI config
  */
-export function getWorkspaceNavItems() {
-  return getWebUIConfig().workspace?.navItems || [];
+export function getWorkspaceNavItems(prefix?: string) {
+  const items = getWebUIConfig().workspace?.navItems || [];
+
+  if(prefix) {
+      items.forEach(item => {
+        item.link = item.link.replace('{prefix}', prefix);
+      });
+  }
+
+  return items;
 }
 
 /**
@@ -82,6 +117,8 @@ export function getLayoutConfig() {
     getWebUIConfig().layout || {
       defaultLayout: 'default',
       enableLayoutSwitchButton: false,
+      enableSidebar: true,
+      enableHome: true,
     }
   );
 }
@@ -98,4 +135,18 @@ export function isLayoutSwitchButtonEnabled(): boolean {
  */
 export function getDefaultLayoutMode() {
   return getLayoutConfig().defaultLayout || 'default';
+}
+
+/**
+ * Check if sidebar is enabled
+ */
+export function isSidebarEnabled(): boolean {
+  return getLayoutConfig().enableSidebar ?? true;
+}
+
+/**
+ * Check if home route is enabled
+ */
+export function isHomeEnabled(): boolean {
+  return getLayoutConfig().enableHome ?? true;
 }

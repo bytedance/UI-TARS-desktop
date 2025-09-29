@@ -1,10 +1,9 @@
 import React from 'react';
+import { useCopyToClipboard } from '@tarko/ui';
 import { FiClock, FiCheck, FiCopy, FiZap, FiActivity } from 'react-icons/fi';
-import { Tooltip } from '@mui/material';
 import { formatTimestamp } from '@/common/utils/formatters';
 import { Message as MessageType, ChatCompletionContentPart } from '@/common/types';
-import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
-import { getTooltipProps } from '@/common/components/TooltipConfig';
+import { Tooltip } from '@tarko/ui';
 
 interface MessageFooterProps {
   message: MessageType;
@@ -36,8 +35,6 @@ export const MessageFooter: React.FC<MessageFooterProps> = ({ message, className
     return `${ms}ms`;
   };
 
-  const tooltipProps = getTooltipProps();
-
   return (
     <div className={`mt-1 mb-2 ${className}`}>
       <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 px-2">
@@ -52,10 +49,7 @@ export const MessageFooter: React.FC<MessageFooterProps> = ({ message, className
           {showTTFT && (
             <div className="flex items-center gap-2">
               {/* TTFT */}
-              <Tooltip
-                title="Time to First Token (TTFT) - Time from request start to first token received"
-                {...tooltipProps}
-              >
+              <Tooltip title="Time to First Token (TTFT) - Time from request start to first token received">
                 <div className="flex items-center">
                   <FiZap size={10} className="mr-1 text-gray-500 dark:text-gray-400" />
                   <span className="text-gray-500 dark:text-gray-400">
@@ -66,10 +60,7 @@ export const MessageFooter: React.FC<MessageFooterProps> = ({ message, className
 
               {/* TTLT (if different from TTFT) */}
               {message.ttltMs && message.ttltMs !== message.ttftMs && (
-                <Tooltip
-                  title="Time to Last Token (TTLT) - Total time from request start to completion"
-                  {...tooltipProps}
-                >
+                <Tooltip title="Time to Last Token (TTLT) - Total time from request start to completion">
                   <div className="flex items-center">
                     <FiActivity size={10} className="mr-1 text-gray-500 dark:text-gray-400" />
                     <span className="text-gray-500 dark:text-gray-400">

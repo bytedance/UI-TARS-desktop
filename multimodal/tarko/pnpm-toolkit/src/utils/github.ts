@@ -42,6 +42,7 @@ export interface GitHubReleaseOptions {
 /**
  * Gets the previous tag for generating release notes
  * Handles mixed tag formats (v1.0.0 and @agent-tars@1.0.0)
+ * Filters out canary releases
  */
 export async function getPreviousTag(tagName: string, cwd: string): Promise<string | null> {
   try {
@@ -53,18 +54,25 @@ export async function getPreviousTag(tagName: string, cwd: string): Promise<stri
       return null;
     }
 
-    // Find the current tag in the list
-    const currentIndex = allTags.findIndex((tag) => tag === tagName);
+    // Filter out canary releases
+    const nonCanaryTags = allTags.filter((tag) => !tag.includes('canary'));
+
+    if (nonCanaryTags.length === 0) {
+      return null;
+    }
+
+    // Find the current tag in the filtered list
+    const currentIndex = nonCanaryTags.findIndex((tag) => tag === tagName);
 
     if (currentIndex === -1) {
       // If current tag not found, it might be a new tag
-      // Return the most recent tag (first in the list)
-      return allTags[0] || null;
+      // Return the most recent non-canary tag (first in the list)
+      return nonCanaryTags[0] || null;
     }
 
     // Return the next tag (previous in chronological order)
-    if (currentIndex < allTags.length - 1) {
-      return allTags[currentIndex + 1];
+    if (currentIndex < nonCanaryTags.length - 1) {
+      return nonCanaryTags[currentIndex + 1];
     }
 
     return null;

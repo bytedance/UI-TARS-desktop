@@ -1,0 +1,233 @@
+# Tool Management
+
+Filter and organize Agent tool capabilities for specific tasks and performance optimization.
+
+## Overview
+
+Tarko includes **32 built-in tools** across 4 categories: **general** (1), **browser** (18), **filesystem** (11), and **commands** (2). Tool management allows you to precisely control which tools are available to optimize performance and focus capabilities.
+
+## Quick Start
+
+```bash
+# Include only browser tools (18 tools)
+tarko --tool.include browser
+
+# Include filesystem but exclude file editing
+tarko --tool.include filesystem --tool.exclude edit_file
+
+# Multiple categories with specific exclusions
+tarko --tool.include "browser,filesystem" --tool.exclude "run_command,run_script"
+```
+
+## CLI Tool Filtering
+
+### Available Options
+
+| Option | Description | Example |
+|--------|-------------|----------|
+| `--tool.include <patterns>` | Include tools matching patterns | `--tool.include browser` |
+| `--tool.exclude <patterns>` | Exclude tools matching patterns | `--tool.exclude delete` |
+
+### Pattern Matching Rules
+
+- **Substring Matching**: Uses `string.includes()` for high performance
+- **Case Sensitive**: Patterns must match exact casing (`browser` not `Browser`)
+- **Execution Order**: Include filters applied first, then exclude filters
+- **Category Names**: Use category names for bulk operations
+
+### Common Use Cases
+
+#### Web Automation Only
+```bash
+# Browser tools + web search (19 tools)
+tarko --tool.include "browser,web_search"
+```
+
+#### Safe File Operations
+```bash
+# Filesystem without command execution (11 tools)
+tarko --tool.include filesystem --tool.exclude "run_command,run_script"
+```
+
+#### Read-Only Agent
+```bash
+# No file writing or command execution
+tarko --tool.exclude "write_file,edit_file,create_directory,move_file,run_command,run_script"
+```
+
+#### Minimal Agent
+```bash
+# Essential read-only tools only
+tarko --tool.include "read_file,read_multiple_files,list_directory,browser_screenshot,web_search"
+```
+
+## Programmatic Tool Management
+
+### Agent Configuration
+
+```typescript
+import { Agent } from '@tarko/agent';
+
+const agent = new Agent({
+  tool: {
+    include: ['browser', 'filesystem'],
+    exclude: ['browser_get_markdown', 'run_command']
+  }
+});
+```
+
+### Configuration File
+
+```json
+{
+  "tool": {
+    "include": ["browser", "filesystem"],
+    "exclude": ["delete", "remove"]
+  }
+}
+```
+
+### Tool Registration
+
+```typescript
+import { Agent, Tool } from '@tarko/agent';
+
+const agent = new Agent();
+
+// Register custom tools
+const customTool = new Tool({
+  id: 'custom_tool',
+  description: 'My custom tool',
+  parameters: {
+    type: 'object',
+    properties: {
+      input: { type: 'string', description: 'Input parameter' }
+    }
+  },
+  function: async (params) => {
+    return `Processed: ${params.input}`;
+  }
+});
+
+agent.registerTool(customTool);
+
+// Get all available tools
+const tools = agent.getTools();
+console.log(`Available tools: ${tools.length}`);
+```
+
+## Tool Categories
+
+### Built-in Categories
+
+#### 📦 general (1 tool)
+- `web_search` - Search the web for information
+
+#### 📦 browser (18 tools)
+- `browser_click` - Click on page elements
+- `browser_close_tab` - Close browser tab
+- `browser_evaluate` - Execute JavaScript code
+- `browser_form_input_fill` - Fill form inputs
+- `browser_get_clickable_elements` - Get clickable elements
+- `browser_get_markdown` - Extract page content as markdown
+- `browser_go_back` - Navigate back in history
+- `browser_go_forward` - Navigate forward in history
+- `browser_hover` - Hover over elements
+- `browser_navigate` - Navigate to URL
+- `browser_new_tab` - Open new browser tab
+- `browser_press_key` - Press keyboard keys
+- `browser_read_links` - Extract all page links
+- `browser_screenshot` - Take page screenshots
+- `browser_scroll` - Scroll page content
+- `browser_select` - Select dropdown options
+- `browser_switch_tab` - Switch between tabs
+- `browser_tab_list` - List all open tabs
+
+#### 📦 filesystem (11 tools)
+- `create_directory` - Create new directories
+- `directory_tree` - Get directory structure
+- `edit_file` - Edit existing files
+- `get_file_info` - Get file metadata
+- `list_allowed_directories` - List accessible directories
+- `list_directory` - List directory contents
+- `move_file` - Move or rename files
+- `read_file` - Read file contents
+- `read_multiple_files` - Read multiple files at once
+- `search_files` - Search for files by pattern
+- `write_file` - Write content to files
+
+#### 📦 commands (2 tools)
+- `run_command` - Execute shell commands
+- `run_script` - Run scripts with interpreters
+
+## Troubleshooting
+
+### Debug Tool Filtering
+
+```bash
+# See which tools are filtered
+tarko --debug --tool.include browser
+# Output: "Applied include filter with patterns [browser], 18/32 tools matched"
+```
+
+### Common Issues
+
+#### No Tools Available
+```bash
+# Use broader patterns
+tarko --tool.exclude "run_command" # Instead of strict includes
+```
+
+#### Pattern Not Working
+- Verify case sensitivity (`browser` not `Browser`)
+- Use exact tool names (`browser_click` not `click`)
+- Check category names: `browser`, `filesystem`, `commands`, `general`
+
+#### Tool Loading Errors
+```typescript
+try {
+  const agent = new Agent({
+    tool: { include: ['invalid_tool'] }
+  });
+} catch (error) {
+  console.error('Tool loading failed:', error.message);
+  // Fallback to default tools
+}
+```
+
+## Performance Considerations
+
+### Filter Implementation
+
+- **Complexity**: O(n×m) where n=tools, m=patterns
+- **Matching**: Simple `string.includes()` for optimal speed
+- **Logging**: Detailed filter operations logged for debugging
+- **Compatibility**: Fully backward compatible
+
+### Examples
+
+#### Browser-Only Agent
+```bash
+tarko --tool.include browser
+# Result: 18 browser tools (browser_click, browser_navigate, etc.)
+```
+
+#### File Operations Without Editing
+```bash
+tarko --tool.include filesystem --tool.exclude edit_file
+# Result: 10 filesystem tools (read_file, write_file, list_directory, etc.)
+```
+
+#### Specific Tool Exclusion
+```bash
+tarko --tool.include "browser,filesystem" --tool.exclude "browser_get_markdown,run_command"
+# Result: 28 tools (17 browser + 11 filesystem, excluding markdown and commands)
+```
+
+## Next Steps
+
+- Learn about [Tool Development](/guide/tool/basic) to create custom tools
+- Explore [Tool Call Engine](/guide/tool/tool-call-engine) for execution optimization
+
+{/* Placeholder: Add tool filtering flow diagram */}
+{/* Placeholder: Add performance comparison charts */}

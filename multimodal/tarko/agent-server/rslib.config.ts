@@ -28,7 +28,7 @@ export default defineConfig({
         peerDependencies: true,
       },
       output: {
-        externals: ['@tarko/context-engineer', '@tarko/context-engineer/node'],
+        externals: ['@tarko/context-engineer', '@tarko/context-engineer/node', '@tarko/agent-ui-builder'],
       },
     },
   ],

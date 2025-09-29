@@ -31,12 +31,11 @@ export default {
   snapshot: { storageDirectory: resolve(__dirname, 'snapshots'), enable: true },
   googleApiKey: process.env.GOOGLE_API_KEY,
   googleMcpUrl: process.env.GOOGLE_MCP_URL,
-  aioSandboxUrl: process.env.AIO_SANDBOX_URL,
+  sandboxUrl: process.env.AIO_SANDBOX_URL,
   // tavilyApiKey: process.env.TAVILY_API_KEY,
   linkReaderMcpUrl: process.env.LINK_READER_URL,
   linkReaderAK: process.env.LINK_READER_AK,
   ignoreSandboxCheck: true,
-  logLevel: LogLevel.DEBUG,
   thinking: {
     type: process.env.NATIVE_THINKING === 'true' ? 'enabled' : 'disabled',
   },
@@ -48,5 +47,54 @@ export default {
         dbName: process.env.MONGO_DB_NAME,
       },
     },
+    runtimeSettings: {
+        schema: {
+          type: 'object',
+          properties: {
+            agentMode: {
+              type: 'string',
+              title: 'Agent Mode',
+              enum: ['omni', 'gui', 'game'],
+              enumLabels: ['Omni', 'GUI', 'Game'],
+              default: 'omni',
+              placement: 'chat-bottom',
+            },
+            browserMode: {
+              type: 'string',
+              title: 'Browser Control',
+              enum: ['hybrid'],
+              enumLabels: ['Hybrid'],
+              default: 'hybrid',
+              placement: 'chat-bottom',
+              visible: {
+                dependsOn: 'agentMode',
+                when: 'gui',
+              },
+            },
+          },
+        },
+        transform: (runtimeSettings: Record<string, unknown>) => {
+          return {
+            agentMode: {
+              id: runtimeSettings.agentMode,
+              browserMode: runtimeSettings.browserMode,
+              link: 'http://example.com',
+            },
+          };
+        },
+      },
+  },
+  logLevel: LogLevel.DEBUG,
+  webui: {
+    logo: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png',
+    subtitle: 'Offering seamless integration with a wide range of real-world tools.',
+    welcomTitle: 'Omni Agent',
+    welcomePrompts: [
+      'Search for the latest GUI Agent papers',
+      'Find information about UI TARS',
+      'Tell me the top 5 most popular projects on ProductHunt today',
+      'Please book me the earliest flight from Hangzhou to Shenzhen on 10.1',
+      'What is Agent TARS',
+    ],
   },
 } as AgentAppConfig;

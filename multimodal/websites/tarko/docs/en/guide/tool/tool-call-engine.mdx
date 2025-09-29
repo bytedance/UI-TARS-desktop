@@ -1,0 +1,85 @@
+# Tool Call Engine
+
+Understanding tool execution in @agent-tars/core through the MCP framework.
+
+## Overview
+
+@agent-tars/core uses `@tarko/agent` for tool call execution, which provides different tool call engines:
+
+- `NativeToolCallEngine`: Uses model's native function calling
+- `PromptEngineeringToolCallEngine`: Prompt-based tool calling
+- `StructuredOutputsToolCallEngine`: Structured output parsing
+
+## Tool Call Engines
+
+The actual implementation is in `multimodal/tarko/agent/src/tool-call-engine/`:
+
+### Native Tool Calling
+
+Uses the model's built-in function calling capabilities:
+
+```typescript
+import { AgentTARS } from '@agent-tars/core';
+
+const agent = new AgentTARS({
+  model: {
+    provider: 'openai',
+    name: 'gpt-4'
+  }
+  // Uses NativeToolCallEngine by default for compatible models
+});
+```
+
+### Prompt Engineering
+
+Falls back to prompt-based tool calling for models without native support:
+
+```typescript
+const agent = new AgentTARS({
+  model: {
+    provider: 'custom',
+    name: 'custom-model'
+  }
+  // Automatically uses PromptEngineeringToolCallEngine
+});
+```
+
+## Browser Tool Management
+
+The main configuration for tool execution is through browser control strategies:
+
+```typescript
+import { AgentTARS } from '@agent-tars/core';
+
+const agent = new AgentTARS({
+  browser: {
+    control: 'hybrid' // 'hybrid', 'dom', 'visual-grounding'
+  }
+});
+```
+
+### Browser Control Modes
+
+- **hybrid**: Combines DOM and visual strategies
+- **dom**: DOM-based browser control only
+- **visual-grounding**: Vision-based control only
+
+These are implemented through `BrowserToolsManager` and strategy pattern.
+
+## Tool Execution Flow
+
+Tools are executed through the MCP framework:
+
+1. **Tool Registration**: Tools are registered via MCP servers
+2. **Tool Discovery**: Agent discovers available tools
+3. **Tool Calling**: Model decides which tools to call
+4. **Tool Execution**: MCP framework executes the tool
+5. **Result Processing**: Results are returned to the model
+
+## Next Steps
+
+- Learn about [Tool Development](/guide/tool/basic) to create custom tools
+- Explore [Tool Management](/guide/tool/management) for organizing and filtering tools
+
+{/* Placeholder: Add execution flow diagrams */}
+{/* Placeholder: Add performance monitoring dashboard screenshots */}

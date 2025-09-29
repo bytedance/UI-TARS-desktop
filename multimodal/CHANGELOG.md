@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.0-beta.12](https://github.com/bytedance/UI-TARS-desktop/compare/v0.3.0-beta.11-canary-e70d431f-20250917163005...v0.3.0-beta.12) (2025-09-18)
+
+### Features
+
+* **tarko-agent-ui:** new layout design ([#1553](https://github.com/bytedance/UI-TARS-desktop/pull/1553)) ([21d59fb](https://github.com/bytedance/UI-TARS-desktop/commit/21d59fb17)) [@ULIVZ](https://github.com/ULIVZ)
+
+### Bug Fixes
+
+* **tarko:** share service ([e70d431](https://github.com/bytedance/UI-TARS-desktop/commit/e70d431f2)) [@chenjian.bzh](https://github.com/chenjian.bzh)
+* **tarko-agent-ui:** support all SSE line separators in streaming ([#1568](https://github.com/bytedance/UI-TARS-desktop/pull/1568)) ([bdceb7c](https://github.com/bytedance/UI-TARS-desktop/commit/bdceb7ca1)) [@ULIVZ](https://github.com/ULIVZ)
+
 ## [0.3.0-beta.11](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.3.0-beta.10...v0.3.0-beta.11) (2025-09-09)
 
 ### Features

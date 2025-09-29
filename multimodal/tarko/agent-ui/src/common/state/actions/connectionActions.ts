@@ -1,12 +1,6 @@
 import { atom } from 'jotai';
-import { SOCKET_EVENTS } from '@/common/constants';
 import { apiService } from '@/common/services/apiService';
-import { socketService } from '@/common/services/socketService';
-import {
-  connectionStatusAtom,
-  sessionMetadataAtom,
-  agentOptionsAtom,
-} from '@/common/state/atoms/ui';
+import { connectionStatusAtom, agentOptionsAtom } from '@/common/state/atoms/ui';
 
 /**
  * Check server connection status
@@ -24,26 +18,14 @@ export const checkConnectionStatusAction = atom(null, async (get, set) => {
       lastError: isConnected ? null : currentStatus.lastError,
     });
 
-    // Load workspace info when connection is successful
-    // Agent info will be loaded from session metadata when a session is active
+    // Load agent options on successful connection
     if (isConnected) {
       try {
-        const agentOptions = await apiService.getAgentOptions();
-        set(agentOptionsAtom, agentOptions);
-
-        // Extract workspace info from agent options
-        set(sessionMetadataAtom, (prev) => ({
-          ...prev,
-          metadata: {
-            ...prev.metadata,
-            workspace: {
-              name: agentOptions.workspaceName || 'Unknown',
-              path: agentOptions.workspace || '',
-            },
-          },
-        }));
+        const options = await apiService.getAgentOptions();
+        set(agentOptionsAtom, options);
       } catch (error) {
-        console.warn('Failed to load agent options:', error);
+        console.error('Failed to load agent options:', error);
+        set(agentOptionsAtom, {});
       }
     }
 
@@ -66,42 +48,6 @@ export const initConnectionMonitoringAction = atom(null, (get, set) => {
   // Perform initial check
   set(checkConnectionStatusAction);
 
-  // Set up socket event listeners
-  socketService.on(SOCKET_EVENTS.CONNECT, () => {
-    set(connectionStatusAtom, (prev) => ({
-      ...prev,
-      connected: true,
-      lastConnected: Date.now(),
-      lastError: null,
-      reconnecting: false,
-    }));
-  });
-
-  socketService.on(SOCKET_EVENTS.DISCONNECT, (reason) => {
-    set(connectionStatusAtom, (prev) => ({
-      ...prev,
-      connected: false,
-      lastError: `Disconnected: ${reason}`,
-      reconnecting: true,
-    }));
-  });
-
-  socketService.on(SOCKET_EVENTS.RECONNECT_ATTEMPT, () => {
-    set(connectionStatusAtom, (prev) => ({
-      ...prev,
-      reconnecting: true,
-    }));
-  });
-
-  socketService.on(SOCKET_EVENTS.RECONNECT_FAILED, () => {
-    set(connectionStatusAtom, (prev) => ({
-      ...prev,
-      connected: false,
-      reconnecting: false,
-      lastError: 'Failed to reconnect after multiple attempts',
-    }));
-  });
-
   // Set up periodic health checks
   const intervalId = setInterval(() => {
     set(checkConnectionStatusAction);
@@ -110,9 +56,5 @@ export const initConnectionMonitoringAction = atom(null, (get, set) => {
   // Return cleanup function
   return () => {
     clearInterval(intervalId);
-    socketService.off(SOCKET_EVENTS.CONNECT, () => {});
-    socketService.off(SOCKET_EVENTS.DISCONNECT, () => {});
-    socketService.off(SOCKET_EVENTS.RECONNECT_ATTEMPT, () => {});
-    socketService.off(SOCKET_EVENTS.RECONNECT_FAILED, () => {});
   };
 });

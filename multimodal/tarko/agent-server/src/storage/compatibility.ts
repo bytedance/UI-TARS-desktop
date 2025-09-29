@@ -4,6 +4,7 @@
  */
 
 import { SessionInfo, LegacySessionItemInfo } from './types';
+import { AgentModel } from '../types';
 
 /**
  * Convert legacy SessionInfo to new JSON schema format
@@ -14,6 +15,7 @@ export function migrateLegacyToJsonSchema(legacy: LegacySessionItemInfo): Sessio
 
   if (legacy.name) metadata.name = legacy.name;
   if (legacy.tags) metadata.tags = legacy.tags;
+  // @ts-expect-error
   if (legacy.modelConfig) metadata.modelConfig = legacy.modelConfig;
 
   return {
@@ -52,8 +54,7 @@ export function createJsonSchemaSession(
     tags?: string[];
     modelConfig?: {
       provider: string;
-      modelId: string;
-      configuredAt: number;
+      id: string;
     };
   },
 ): SessionInfo {
@@ -62,6 +63,7 @@ export function createJsonSchemaSession(
 
   if (options?.name) metadata.name = options.name;
   if (options?.tags) metadata.tags = options.tags;
+  // @ts-expect-error
   if (options?.modelConfig) metadata.modelConfig = options.modelConfig;
 
   return {

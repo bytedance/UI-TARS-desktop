@@ -1,0 +1,103 @@
+---
+title: Introduction
+description: Learn about Tarko, a tool-augmented agent runtime kernel
+---
+
+# Introduction
+
+**Tarko** *(Tool-augmented Agent Runtime Kernel, Open-source)*, pronounced **`/ˈtɑːrkoʊ/`**, is a tool-call and event-stream driven Agent runtime framework with powerful **Context Engineering** capabilities.
+
+## What is Tarko?
+
+Tarko provides:
+
+- **[Context Engineering](/guide/advanced/context-engineering)**: Build agents capable of long-running operations
+- **[Tool Call Engine](/guide/basic/tool-call-engine)**: Support for multiple LLM providers with custom parsers
+- **[Event Stream Processing](/guide/basic/event-stream)**: Native streaming and Agent Protocol support
+- **[Agent Hooks](/guide/advanced/agent-hooks)**: Powerful extension capabilities
+- **[Agent Protocol](/guide/advanced/agent-protocol)**: Standard format definitions for agent lifecycle
+
+## Key Features
+
+### 🔧 [Tool Call Engine](/guide/basic/tool-call-engine)
+Support for multiple Tool Call engines including native Function Call, custom parsers, and models that don't support native Function Tool.
+
+### 🌊 [Event Stream](/guide/basic/event-stream)
+Built-in event stream processing with native streaming support and standardized Agent Protocol.
+
+### 🧠 [Context Engineering](/guide/advanced/context-engineering)
+Advanced context management for long-running agent operations with automatic context optimization.
+
+### 🔌 [Agent Hooks](/guide/advanced/agent-hooks)
+Extensible hook system for customizing agent behavior at every stage of execution.
+
+## Architecture Overview
+
+Tarko is built with a three-layer architecture:
+
+1. **Engineering Layer**: CLI, Server, and UI components
+2. **Application Layer**: Tarko-based Agent implementations
+3. **Kernel Layer**: Core runtime with Context Engineering and Agent Protocol
+
+## Who Uses Tarko?
+
+Tarko powers several production systems:
+
+- **[UI-TARS-2](https://seed-tars.com/showcase/ui-tars-2/)**: Advanced UI automation
+- **[UI-TARS-desktop](https://github.com/bytedance/UI-TARS-desktop)**: Desktop automation
+- **[Agent TARS](https://agent-tars.com/)**: General-purpose multimodal agent
+
+## Documentation Overview
+
+### Getting Started
+- [Quick Start](/guide/get-started/quick-start) - Create your first Tarko agent in minutes
+- [Architecture](/guide/get-started/architecture) - Understand Tarko's design principles
+- [SDK Reference](/guide/get-started/sdk) - Complete API reference and examples
+
+### Core Concepts
+- [Configuration](/guide/basic/configuration) - Configure agents, models, and runtime settings
+- [Model Providers](/guide/basic/model-provider) - OpenAI, Anthropic, Volcengine, and custom providers
+- [Tools](/guide/basic/tools) - Create and register custom tools for your agents
+- [Tool Call Engine](/guide/basic/tool-call-engine) - Native, prompt-engineering, and structured outputs
+- [Event Stream](/guide/basic/event-stream) - Real-time agent execution monitoring
+- [Troubleshooting](/guide/basic/troubleshooting) - Common issues and solutions
+
+### Advanced Features
+- [Agent Hooks](/guide/advanced/agent-hooks) - Customize agent behavior with lifecycle hooks
+- [Agent Protocol](/guide/advanced/agent-protocol) - Standard communication protocol
+- [Context Engineering](/guide/advanced/context-engineering) - Long-running agent context management
+- [Agent Snapshot](/guide/advanced/agent-snapshot) - Save and replay agent execution states
+
+### UI Integration
+- [UI Integration](/guide/basic/ui-integration) - Build web interfaces for your agents
+
+
+### Deployment
+- [CLI Deployment](/guide/deployment/cli) - Command-line tools and scripts
+- [Server Deployment](/guide/deployment/server) - Production server setup
+
+### API Reference
+- [Agent API](/api/agent) - Complete Agent class reference
+- [Hooks API](/api/hooks) - Agent lifecycle hooks
+- [Tool Call Engine API](/api/tool-call-engine) - Tool execution engines
+- [Context Engineering API](/api/context-engineering) - Context management
+- [Agent Server API](/api/agent-server) - Server endpoints and protocols
+
+### Examples
+- [Getting Started](/examples/getting-started) - Basic usage examples
+- [Custom Tools](/examples/custom-tools) - Building domain-specific tools
+- [Custom Hooks](/examples/custom-hooks) - Extending agent behavior
+- [Server Integration](/examples/server-integration) - Web server integration
+- [Protocol Integration](/examples/protocol-integration) - Custom protocol implementation
+
+## Quick Navigation
+
+**New to Tarko?** Start with [Quick Start](/guide/get-started/quick-start)
+
+**Building agents?** Check out [SDK Reference](/guide/get-started/sdk) and [Tools](/guide/basic/tools)
+
+**Need customization?** Explore [Agent Hooks](/guide/advanced/agent-hooks) and [Context Engineering](/guide/advanced/context-engineering)
+
+**Deploying to production?** See [Server Deployment](/guide/deployment/server) and [Agent Snapshot](/guide/advanced/agent-snapshot)
+
+**Building UI?** Start with [UI Integration](/guide/basic/ui-integration)

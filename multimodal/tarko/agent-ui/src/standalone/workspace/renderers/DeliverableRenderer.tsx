@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { FiFileText, FiCode, FiDownload, FiExternalLink, FiCopy, FiCheck } from 'react-icons/fi';
 import { StandardPanelContent } from '../types/panelContent';
-import { MarkdownRenderer } from '@/sdk/markdown-renderer';
+import { MarkdownRenderer } from '@tarko/ui';
 import { FileDisplayMode } from '../types';
 
 interface DeliverableRendererProps {

@@ -44,7 +44,6 @@ export const ContextualSelector: React.FC<ContextualSelectorProps> = ({
   const { activeSessionId } = useSession();
   const listRef = useRef<HTMLDivElement>(null);
 
-  // Search workspace items when query changes or selector opens
   useEffect(() => {
     if (!isOpen || !activeSessionId) {
       setItems([]);
@@ -57,10 +56,8 @@ export const ContextualSelector: React.FC<ContextualSelectorProps> = ({
         let results: WorkspaceItem[] = [];
 
         if (query.length === 0) {
-          // When no query (just @ entered), show comprehensive default options
           const workspaceFiles = await apiService.searchWorkspaceItems(activeSessionId, '', 'all');
 
-          // Create enhanced default entries
           const defaultEntries: WorkspaceItem[] = [
             {
               name: 'workspace',
@@ -70,17 +67,14 @@ export const ContextualSelector: React.FC<ContextualSelectorProps> = ({
             },
           ];
 
-          // Add common directories first
           const directories = workspaceFiles
             .filter((item) => item.type === 'directory')
-            .slice(0, 8); // Limit to 8 directories
+            .slice(0, 8);
 
-          // Add recent files
-          const files = workspaceFiles.filter((item) => item.type === 'file').slice(0, 10); // Limit to 10 files
+          const files = workspaceFiles.filter((item) => item.type === 'file').slice(0, 10);
 
           results = [...defaultEntries, ...directories, ...files];
         } else {
-          // Search with user query
           results = await apiService.searchWorkspaceItems(activeSessionId, query);
         }
 
@@ -94,7 +88,6 @@ export const ContextualSelector: React.FC<ContextualSelectorProps> = ({
       }
     };
 
-    // For empty query, show immediately. For search query, debounce
     if (query.length === 0) {
       searchItems();
     } else {
@@ -103,7 +96,6 @@ export const ContextualSelector: React.FC<ContextualSelectorProps> = ({
     }
   }, [isOpen, activeSessionId, query]);
 
-  // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
@@ -134,7 +126,6 @@ export const ContextualSelector: React.FC<ContextualSelectorProps> = ({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, items, selectedIndex, onClose]);
 
-  // Scroll selected item into view
   useEffect(() => {
     if (listRef.current) {
       const selectedElement = listRef.current.children[selectedIndex] as HTMLElement;
@@ -215,7 +206,6 @@ export const ContextualSelector: React.FC<ContextualSelectorProps> = ({
         exit={{ opacity: 0, y: 10, scale: 0.95 }}
         className="w-full bg-white dark:bg-gray-800 rounded-xl border border-gray-200/60 dark:border-gray-700/40 shadow-xl backdrop-blur-sm max-h-80 overflow-hidden"
       >
-        {/* Header */}
         <div className="px-3 py-2 bg-gray-50/70 dark:bg-gray-700/30 border-b border-gray-200/40 dark:border-gray-600/30">
           <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
             {loading ? (
@@ -233,7 +223,6 @@ export const ContextualSelector: React.FC<ContextualSelectorProps> = ({
           </div>
         </div>
 
-        {/* Items list */}
         <div ref={listRef} className="max-h-64 overflow-y-auto py-1">
           {items.length === 0 && !loading ? (
             <div className="px-3 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
@@ -266,7 +255,6 @@ export const ContextualSelector: React.FC<ContextualSelectorProps> = ({
           )}
         </div>
 
-        {/* Footer */}
         <div className="px-3 py-2 bg-gray-50/70 dark:bg-gray-700/30 border-t border-gray-200/40 dark:border-gray-600/30">
           <div className="text-xs text-gray-500 dark:text-gray-400">
             Use ↑↓ to navigate, Enter to select, Esc to close

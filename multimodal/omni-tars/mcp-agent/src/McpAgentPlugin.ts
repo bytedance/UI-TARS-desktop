@@ -30,7 +30,8 @@ export class McpAgentPlugin extends AgentPlugin {
   }
 
   async initialize(): Promise<void> {
-    await this.mcpManager.init();
+    //FIXME:Temporarily remove await to speed up the agent initialization process; the logic of mcpManager.getClient() needs to be added later
+    this.mcpManager.init();
 
     // Initialize tools
     this.tools = [

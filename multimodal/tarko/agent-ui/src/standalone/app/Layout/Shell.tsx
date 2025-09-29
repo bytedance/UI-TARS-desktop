@@ -9,15 +9,6 @@ interface ShellProps {
   className?: string;
 }
 
-/**
- * Shell Component - Container with consistent styling
- *
- * Design principles:
- * - Clean, minimal container with subtle backdrop blur
- * - Flexible container that adapts to content while maintaining visual harmony
- * - Optional header with consistent spacing and typography
- * - Transparent mode for seamless integration with parent components
- */
 export const Shell: React.FC<ShellProps> = ({
   children,
   title,
