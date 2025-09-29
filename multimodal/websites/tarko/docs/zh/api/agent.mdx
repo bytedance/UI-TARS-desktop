@@ -71,7 +71,7 @@ npm install @tarko/agent
 ### 🌐 多模型提供商
 支持 OpenAI、Claude、豆包等多种模型，支持高级配置和运行时切换。
 
-### ⚙️ 多工具调用引擎
+### ⚙️ 多 Tool Call Engine
 - `native`: OpenAI 兼容的原生函数调用
 - `prompt_engineering`: 基于提示的工具调用
 - `structured_outputs`: JSON Schema 结构化输出
@@ -183,7 +183,7 @@ const agent = new Agent({
 ##### 工具配置
 - `tools`: Agent 可用的工具数组
 - `tool`: 工具过滤选项，支持 `include`/`exclude` 模式
-- `toolCallEngine`: 工具调用引擎类型（默认: `'native'`）
+- `toolCallEngine`: Tool Call Engine 类型（默认: `'native'`）
   - `'native'`: OpenAI 兼容的原生函数调用
   - `'prompt_engineering'`: 基于提示的工具调用
   - `'structured_outputs'`: JSON Schema 结构化输出
@@ -495,7 +495,7 @@ class CustomAgent extends Agent {
 
 ## 最佳实践
 
-### 🎯 选择合适的工具调用引擎
+### 🎯 选择合适的 Tool Call Engine
 
 ```ts
 // 对于支持函数调用的模型（推荐）
