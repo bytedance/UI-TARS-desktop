@@ -69,3 +69,35 @@ export interface BrowserOperatorOptions {
    */
   onFinalAnswer?: (finalAnswer: string) => Promise<void>;
 }
+
+export interface LocalBrowserOperatorOptions {
+  /**
+   * Whether to highlight clickable elements before taking screenshots
+   * @default true
+   */
+  highlightClickableElements?: boolean;
+
+  /**
+   * Whether to show action information overlay
+   * @default false
+   */
+  showActionInfo?: boolean;
+
+  /**
+   * Whether to show water flow animation effects
+   * @default false
+   */
+  showWaterFlow?: boolean;
+
+  /**
+   * Search engine to use for search operations
+   * @default 'google'
+   */
+  searchEngine?: SearchEngine;
+
+  /**
+   * Logger instance for debugging and error reporting
+   * @default new ConsoleLogger(undefined, LogLevel.DEBUG)
+   */
+  logger?: Logger;
+}
