@@ -4,6 +4,7 @@ import { AIOGameOperator, AIOHybridOperator } from '@gui-agent/operator-aio';
 import { Operator } from '@gui-agent/shared/base';
 import { AgentMode, getAioUrl } from '@omni-tars/core';
 import { AioClient, CDPVersionResp } from '@agent-infra/sandbox';
+import { defaultLogger } from '@agent-infra/logger';
 
 export class OperatorManager {
   private agentMode: AgentMode;
@@ -22,7 +23,7 @@ export class OperatorManager {
     if (this.agentMode.id === 'game') {
       const targetUrl = this.agentMode.link;
       if (!targetUrl) {
-        throw new Error('Game agent mode link is required');
+        defaultLogger.warn('Game agent mode link is null');
       }
       this.operator = new AIOGameOperator({
         baseURL: this.sandboxUrl,

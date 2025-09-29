@@ -127,5 +127,5 @@ export interface AIOHybridOptions {
 }
 
 export interface AIOGameOptions extends AIOHybridOptions {
-  targetUrl: string;
+  targetUrl?: string;
 }
