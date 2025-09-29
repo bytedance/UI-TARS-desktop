@@ -3,4 +3,5 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 export { BrowserOperator, DefaultBrowserOperator, RemoteBrowserOperator } from './browser-operator';
+export { LocalBrowserOperator } from './LocalBrowserOperator';
 export * from './types';
