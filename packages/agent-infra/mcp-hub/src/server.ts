@@ -515,10 +515,10 @@ registerRoute(
   '/marketplace',
   'Get marketplace catalog with filtering and sorting',
   async (req: Request, res: Response) => {
-    const { search, category, tags, sort } = req.query;
+    const { search, query, category, tags, sort } = req.query;
     try {
       const servers = await marketplace.getCatalog({
-        search,
+        search: search || query,
         category,
         tags: tags ? (tags as string).split(',') : undefined,
         sort,
