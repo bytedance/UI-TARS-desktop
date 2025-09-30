@@ -13,7 +13,7 @@ const defaultLogger = new ConsoleLogger(undefined, LogLevel.DEBUG);
 export class AIOGameOperator extends AIOHybridOperator {
   readonly name = 'aio-game';
   readonly description = 'Operator for game environment';
-  private targetUrl: string;
+  private targetUrl?: string;
 
   constructor(options: AIOGameOptions, logger: ConsoleLogger = defaultLogger) {
     const operatorLogger = logger.spawn('[Game]');
@@ -44,6 +44,10 @@ export class AIOGameOperator extends AIOHybridOperator {
 
   protected async initialize(): Promise<void> {
     await super.initialize();
+    if (!this.targetUrl) {
+      this.logger.warn('targetUrl is null');
+      return;
+    }
     await this.aioBrowser?.handleNavigate({
       url: this.targetUrl,
     });
