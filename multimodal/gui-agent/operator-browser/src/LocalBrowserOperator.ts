@@ -6,9 +6,9 @@ import { ConsoleLogger, LogLevel } from '@agent-infra/logger';
 import { LocalBrowser, BrowserFinder, BrowserType } from '@agent-infra/browser';
 
 import { LocalBrowserOperatorOptions, SearchEngine, searchEngineUrlMap } from './types';
-import { RefactoredOperator } from './refactored-operator';
+import { BrowserOperator } from './browser-operator';
 
-export class LocalBrowserOperator extends RefactoredOperator {
+export class LocalBrowserOperator extends BrowserOperator {
   private browserPath: string;
   private browserType: BrowserType;
   private searchEngine?: SearchEngine;
