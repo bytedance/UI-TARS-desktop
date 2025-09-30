@@ -452,7 +452,7 @@ importers:
         version: 11.1.0
       zod:
         specifier: ^3.24.2
-        version: 3.25.76
+        version: 3.24.2
       zustand:
         specifier: ^5.0.0
         version: 5.0.3(@types/react@19.1.2)(react@19.1.0)(use-sync-external-store@1.5.0(react@19.1.0))
@@ -4489,8 +4489,8 @@ packages:
     engines: {node: '>=16.10.0'}
     hasBin: true
 
-  '@rsbuild/core@1.5.12':
-    resolution: {integrity: sha512-DpinE1If6WRTwQYqH+PRtJo3zshkDYHfIcWq4lTtfsPfPLrXshmRXBam3BS1RRu4v2gGT+LCNiUefftsmcmL0A==}
+  '@rsbuild/core@1.5.13':
+    resolution: {integrity: sha512-P+TCvZCVpBYZ3GDdnzR/tZKicE41khJIqIRlJYnEc9dwUfX1/eqRf8lA8yrsbB5iZbSfj1iOoH1N25cCQ3hhuA==}
     engines: {node: '>=18.12.0'}
     hasBin: true
 
@@ -4544,8 +4544,8 @@ packages:
     cpu: [arm64]
     os: [darwin]
 
-  '@rspack/binding-darwin-arm64@1.5.7':
-    resolution: {integrity: sha512-prQ/vgJxOPdlYiR4gVeOEKofTCEOu70JQIQApqFnw8lKM7rd9ag8ogDNqmc2L/GGXGHLAqds28oeKXRlzYf7+Q==}
+  '@rspack/binding-darwin-arm64@1.5.8':
+    resolution: {integrity: sha512-spJfpOSN3f7V90ic45/ET2NKB2ujAViCNmqb0iGurMNQtFRq+7Kd+jvVKKGXKBHBbsQrFhidSWbbqy2PBPGK8g==}
     cpu: [arm64]
     os: [darwin]
 
@@ -4559,8 +4559,8 @@ packages:
     cpu: [x64]
     os: [darwin]
 
-  '@rspack/binding-darwin-x64@1.5.7':
-    resolution: {integrity: sha512-FPqiWSbEEerqfJrGnYe68svvl6NyuQFAb3qqFe/Q0MqFhBYmAZwa0R2/ylugCdgFLZxmkFuWqpDgItpvJb/E3Q==}
+  '@rspack/binding-darwin-x64@1.5.8':
+    resolution: {integrity: sha512-YFOzeL1IBknBcri8vjUp43dfUBylCeQnD+9O9p0wZmLAw7DtpN5JEOe2AkGo8kdTqJjYKI+cczJPKIw6lu1LWw==}
     cpu: [x64]
     os: [darwin]
 
@@ -4574,8 +4574,8 @@ packages:
     cpu: [arm64]
     os: [linux]
 
-  '@rspack/binding-linux-arm64-gnu@1.5.7':
-    resolution: {integrity: sha512-fwy+NY+0CHrZqqzDrjPBlTuK53W4dG5EEg/QQFAE7KVM+okRqPk8tg45bJ5628rCNLe13GDmPIE107LmgspNqA==}
+  '@rspack/binding-linux-arm64-gnu@1.5.8':
+    resolution: {integrity: sha512-UAWCsOnpkvy8eAVRo0uipbHXDhnoDq5zmqWTMhpga0/a3yzCp2e+fnjZb/qnFNYb5MeL0O1mwMOYgn1M3oHILQ==}
     cpu: [arm64]
     os: [linux]
 
@@ -4589,8 +4589,8 @@ packages:
     cpu: [arm64]
     os: [linux]
 
-  '@rspack/binding-linux-arm64-musl@1.5.7':
-    resolution: {integrity: sha512-576u/0F4ZUzpHckFme4vQ0sSxjE+B/gVP4tNJ+P6bJaclXLFXV4icbjTUQwOIgmA1EQz/JFeKGGJZ4p6mowpBQ==}
+  '@rspack/binding-linux-arm64-musl@1.5.8':
+    resolution: {integrity: sha512-GnSvGT4GjokPSD45cTtE+g7LgghuxSP1MRmvd+Vp/I8pnxTVSTsebRod4TAqyiv+l11nuS8yqNveK9qiOkBLWw==}
     cpu: [arm64]
     os: [linux]
 
@@ -4604,8 +4604,8 @@ packages:
     cpu: [x64]
     os: [linux]
 
-  '@rspack/binding-linux-x64-gnu@1.5.7':
-    resolution: {integrity: sha512-brSHywXjjeuWkv0ywgxS4VgDgquarEb4XGr+eXhOaPcc8x2rNefyc4hErplrI7+oxPXVuGK5VE4ZH5bj3Yknvg==}
+  '@rspack/binding-linux-x64-gnu@1.5.8':
+    resolution: {integrity: sha512-XLxh5n/pzUfxsugz/8rVBv+Tx2nqEM+9rharK69kfooDsQNKyz7PANllBQ/v4svJ+W0BRHnDL4qXSGdteZeEjA==}
     cpu: [x64]
     os: [linux]
 
@@ -4619,13 +4619,13 @@ packages:
     cpu: [x64]
     os: [linux]
 
-  '@rspack/binding-linux-x64-musl@1.5.7':
-    resolution: {integrity: sha512-HcS0DzbLlWCwVfYcWMbTgILh4GELD6m4CZoFEhIr4fJCJi0p8NgLYycy1QtDhaUjs8TKalmyMwHrJwGnD141JA==}
+  '@rspack/binding-linux-x64-musl@1.5.8':
+    resolution: {integrity: sha512-gE0+MZmwF+01p9/svpEESkzkLpBkVUG2o03YMpwXYC/maeRRhWvF8BJ7R3i/Ls/jFGSE87dKX5NbRLVzqksq/w==}
     cpu: [x64]
     os: [linux]
 
-  '@rspack/binding-wasm32-wasi@1.5.7':
-    resolution: {integrity: sha512-uTRUEuK+TVlvUBSWXVoxD+6JTN+rvtRqVlO+A7I7VnOY7p9Rpvk1sXcHtEwg/XuDCq4DALnvlzbFLh7G3zILvw==}
+  '@rspack/binding-wasm32-wasi@1.5.8':
+    resolution: {integrity: sha512-cfg3niNHeJuxuml1Vy9VvaJrI/5TakzoaZvKX2g5S24wfzR50Eyy4JAsZ+L2voWQQp1yMJbmPYPmnTCTxdJQBQ==}
     cpu: [wasm32]
 
   '@rspack/binding-win32-arm64-msvc@1.2.8':
@@ -4638,8 +4638,8 @@ packages:
     cpu: [arm64]
     os: [win32]
 
-  '@rspack/binding-win32-arm64-msvc@1.5.7':
-    resolution: {integrity: sha512-dFHrXRUmMTkxEn/Uw2RLbIckKfi0Zmn2NnEXwedWdyRgZW4Vhk7+VBxM22O/CHZmAGt12Ol25yTuVv58ANLEKA==}
+  '@rspack/binding-win32-arm64-msvc@1.5.8':
+    resolution: {integrity: sha512-7i3ZTHFXKfU/9Jm9XhpMkrdkxO7lfeYMNVEGkuU5dyBfRMQj69dRgPL7zJwc2plXiqu9LUOl+TwDNTjap7Q36g==}
     cpu: [arm64]
     os: [win32]
 
@@ -4653,8 +4653,8 @@ packages:
     cpu: [ia32]
     os: [win32]
 
-  '@rspack/binding-win32-ia32-msvc@1.5.7':
-    resolution: {integrity: sha512-PNtnOIUzE9p/Fbl6l/1Zs7bhn8ccTlaHTgZgQq0sO/QxjLlbU0WPjRl+YLo27cAningSOAbANuYlN8vAcuimrw==}
+  '@rspack/binding-win32-ia32-msvc@1.5.8':
+    resolution: {integrity: sha512-7ZPPWO11J+soea1+mnfaPpQt7GIodBM7A86dx6PbXgVEoZmetcWPrCF2NBfXxQWOKJ9L3RYltC4z+ZyXRgMOrw==}
     cpu: [ia32]
     os: [win32]
 
@@ -4668,8 +4668,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@rspack/binding-win32-x64-msvc@1.5.7':
-    resolution: {integrity: sha512-22gTaYkwaIUvyXRxf1RVnFTJPqF2hD1pgAQNBIz7kYybe6vvSZ6KInW4WyG4vjYKrJg/cbS4QvtlLn0lYXrdIw==}
+  '@rspack/binding-win32-x64-msvc@1.5.8':
+    resolution: {integrity: sha512-N/zXQgzIxME3YUzXT8qnyzxjqcnXudWOeDh8CAG9zqTCnCiy16SFfQ/cQgEoLlD9geQntV6jx2GbDDI5kpDGMQ==}
     cpu: [x64]
     os: [win32]
 
@@ -4679,8 +4679,8 @@ packages:
   '@rspack/binding@1.4.0-beta.0':
     resolution: {integrity: sha512-Pk/T01umu934zxHzufRx1hgkHa/RlZo/M98BCGCWH8vPcD2Xu0bcBP8GoGPcxiJWtMtCsSWJfengz8UVmdAC4g==}
 
-  '@rspack/binding@1.5.7':
-    resolution: {integrity: sha512-/fFrf4Yu8Tc0yXBw33g2++turdld1MDphLiLg05bx92fOVI1MafocwPvm35e3y1z7CtlQJ2Bmvzhi6APJShKxg==}
+  '@rspack/binding@1.5.8':
+    resolution: {integrity: sha512-/91CzhRl9r5BIQCgGsS7jA6MDbw1I2BQpbfcUUdkdKl2P79K3Zo/Mw/TvKzS86catwLaUQEgkGRmYawOfPg7ow==}
 
   '@rspack/core@1.2.8':
     resolution: {integrity: sha512-ppj3uQQtkhgrYDLrUqb33YbpNEZCpAudpfVuOHGsvUrAnu1PijbfJJymoA5ZvUhM+HNMvPI5D1ie97TXyb0UVg==}
@@ -4703,8 +4703,8 @@ packages:
       '@swc/helpers':
         optional: true
 
-  '@rspack/core@1.5.7':
-    resolution: {integrity: sha512-57ey3wafK/g+B9zLdCiIrX3eTK8rFEM3yvxBUb2ro3ZtAaCGm4y7xERcXZJNn4D01pjzzCJ/u1ezpQmsZYLP7A==}
+  '@rspack/core@1.5.8':
+    resolution: {integrity: sha512-sUd2LfiDhqYVfvknuoz0+/c+wSpn693xotnG5g1CSWKZArbtwiYzBIVnNlcHGmuoBRsnj/TkSq8dTQ7gwfBroQ==}
     engines: {node: '>=18.12.0'}
     peerDependencies:
       '@swc/helpers': '>=0.5.1'
@@ -13961,7 +13961,7 @@ snapshots:
     dependencies:
       '@jimp/types': 1.6.0
       '@jimp/utils': 1.6.0
-      zod: 3.25.76
+      zod: 3.24.2
 
   '@jimp/plugin-blur@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13))':
     dependencies:
@@ -13981,7 +13981,7 @@ snapshots:
   '@jimp/plugin-circle@1.6.0':
     dependencies:
       '@jimp/types': 1.6.0
-      zod: 3.25.76
+      zod: 3.24.2
 
   '@jimp/plugin-color@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13))':
     dependencies:
@@ -13995,7 +13995,7 @@ snapshots:
       '@jimp/types': 1.6.0
       '@jimp/utils': 1.6.0
       tinycolor2: 1.6.0
-      zod: 3.25.76
+      zod: 3.24.2
 
   '@jimp/plugin-contain@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13))(@jimp/plugin-blit@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13)))(@jimp/plugin-resize@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13)))(@jimp/plugin-scale@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13))(@jimp/plugin-resize@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13))))':
     dependencies:
@@ -14012,7 +14012,7 @@ snapshots:
       '@jimp/plugin-resize': 1.6.0
       '@jimp/types': 1.6.0
       '@jimp/utils': 1.6.0
-      zod: 3.25.76
+      zod: 3.24.2
 
   '@jimp/plugin-cover@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13))(@jimp/plugin-crop@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13)))(@jimp/plugin-resize@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13)))(@jimp/plugin-scale@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13))(@jimp/plugin-resize@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13))))':
     dependencies:
@@ -14028,7 +14028,7 @@ snapshots:
       '@jimp/plugin-crop': 1.6.0
       '@jimp/plugin-resize': 1.6.0
       '@jimp/types': 1.6.0
-      zod: 3.25.76
+      zod: 3.24.2
 
   '@jimp/plugin-crop@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13))':
     dependencies:
@@ -14040,7 +14040,7 @@ snapshots:
       '@jimp/core': 1.6.0
       '@jimp/types': 1.6.0
       '@jimp/utils': 1.6.0
-      zod: 3.25.76
+      zod: 3.24.2
 
   '@jimp/plugin-displace@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13))':
     dependencies:
@@ -14051,7 +14051,7 @@ snapshots:
     dependencies:
       '@jimp/types': 1.6.0
       '@jimp/utils': 1.6.0
-      zod: 3.25.76
+      zod: 3.24.2
 
   '@jimp/plugin-dither@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13))':
     dependencies:
@@ -14071,7 +14071,7 @@ snapshots:
     dependencies:
       '@jimp/types': 1.6.0
       '@jimp/utils': 1.6.0
-      zod: 3.25.76
+      zod: 3.24.2
 
   '@jimp/plugin-flip@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13))(@jimp/plugin-rotate@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13))(@jimp/plugin-blit@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13)))(@jimp/plugin-crop@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13)))(@jimp/plugin-resize@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13))))':
     dependencies:
@@ -14082,7 +14082,7 @@ snapshots:
   '@jimp/plugin-flip@1.6.0':
     dependencies:
       '@jimp/types': 1.6.0
-      zod: 3.25.76
+      zod: 3.24.2
 
   '@jimp/plugin-gaussian@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13))':
     dependencies:
@@ -14115,7 +14115,7 @@ snapshots:
   '@jimp/plugin-mask@1.6.0':
     dependencies:
       '@jimp/types': 1.6.0
-      zod: 3.25.76
+      zod: 3.24.2
 
   '@jimp/plugin-normalize@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13))':
     dependencies:
@@ -14142,12 +14142,12 @@ snapshots:
       parse-bmfont-binary: 1.0.6
       parse-bmfont-xml: 1.1.6
       simple-xml-to-json: 1.2.3
-      zod: 3.25.76
+      zod: 3.24.2
 
   '@jimp/plugin-quantize@1.6.0':
     dependencies:
       image-q: 4.0.0
-      zod: 3.25.76
+      zod: 3.24.2
 
   '@jimp/plugin-resize@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13))':
     dependencies:
@@ -14158,7 +14158,7 @@ snapshots:
     dependencies:
       '@jimp/core': 1.6.0
       '@jimp/types': 1.6.0
-      zod: 3.25.76
+      zod: 3.24.2
 
   '@jimp/plugin-rotate@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13))(@jimp/plugin-blit@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13)))(@jimp/plugin-crop@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13)))(@jimp/plugin-resize@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13)))':
     dependencies:
@@ -14175,7 +14175,7 @@ snapshots:
       '@jimp/plugin-resize': 1.6.0
       '@jimp/types': 1.6.0
       '@jimp/utils': 1.6.0
-      zod: 3.25.76
+      zod: 3.24.2
 
   '@jimp/plugin-scale@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13))(@jimp/plugin-resize@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13)))':
     dependencies:
@@ -14204,7 +14204,7 @@ snapshots:
       '@jimp/plugin-hash': 1.6.0
       '@jimp/types': 1.6.0
       '@jimp/utils': 1.6.0
-      zod: 3.25.76
+      zod: 3.24.2
 
   '@jimp/plugins@0.22.12(@jimp/custom@0.22.12(encoding@0.1.13))':
     dependencies:
@@ -14257,7 +14257,7 @@ snapshots:
 
   '@jimp/types@1.6.0':
     dependencies:
-      zod: 3.25.76
+      zod: 3.24.2
 
   '@jimp/utils@0.22.12':
     dependencies:
@@ -14304,8 +14304,8 @@ snapshots:
       '@aws-sdk/client-kendra': 3.758.0
       '@aws-sdk/credential-provider-node': 3.758.0
       '@langchain/core': 0.3.42(openai@4.87.3(encoding@0.1.13)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2))
-      zod: 3.25.76
-      zod-to-json-schema: 3.24.3(zod@3.25.76)
+      zod: 3.24.2
+      zod-to-json-schema: 3.24.3(zod@3.24.2)
     transitivePeerDependencies:
       - aws-crt
 
@@ -14321,8 +14321,8 @@ snapshots:
       p-queue: 6.6.2
       p-retry: 4.6.2
       uuid: 10.0.0
-      zod: 3.25.76
-      zod-to-json-schema: 3.24.3(zod@3.25.76)
+      zod: 3.24.2
+      zod-to-json-schema: 3.24.3(zod@3.24.2)
     transitivePeerDependencies:
       - openai
 
@@ -14330,9 +14330,9 @@ snapshots:
     dependencies:
       '@langchain/core': 0.3.42(openai@4.87.3(encoding@0.1.13)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2))
       js-tiktoken: 1.0.19
-      openai: 4.93.0(encoding@0.1.13)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.25.76)
-      zod: 3.25.76
-      zod-to-json-schema: 3.24.3(zod@3.25.76)
+      openai: 4.93.0(encoding@0.1.13)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2)
+      zod: 3.24.2
+      zod-to-json-schema: 3.24.3(zod@3.24.2)
     transitivePeerDependencies:
       - encoding
       - ws
@@ -14357,10 +14357,10 @@ snapshots:
       globby: 11.1.0
       read-yaml-file: 1.1.0
 
-  '@mistralai/mistralai@1.5.1(zod@3.25.76)':
+  '@mistralai/mistralai@1.5.1(zod@3.24.2)':
     dependencies:
-      zod: 3.25.76
-      zod-to-json-schema: 3.24.3(zod@3.25.76)
+      zod: 3.24.2
+      zod-to-json-schema: 3.24.1(zod@3.24.2)
 
   '@mixmark-io/domino@2.2.0': {}
 
@@ -14376,8 +14376,8 @@ snapshots:
       express-rate-limit: 7.5.0(express@5.1.0)
       pkce-challenge: 5.0.0
       raw-body: 3.0.0
-      zod: 3.25.76
-      zod-to-json-schema: 3.24.3(zod@3.25.76)
+      zod: 3.24.2
+      zod-to-json-schema: 3.24.3(zod@3.24.2)
     transitivePeerDependencies:
       - supports-color
 
@@ -15373,9 +15373,9 @@ snapshots:
       core-js: 3.43.0
       jiti: 2.4.2
 
-  '@rsbuild/core@1.5.12':
+  '@rsbuild/core@1.5.13':
     dependencies:
-      '@rspack/core': 1.5.7(@swc/helpers@0.5.17)
+      '@rspack/core': 1.5.8(@swc/helpers@0.5.17)
       '@rspack/lite-tapable': 1.0.1
       '@swc/helpers': 0.5.17
       core-js: 3.45.1
@@ -15399,8 +15399,8 @@ snapshots:
 
   '@rslib/core@0.12.4(typescript@5.9.2)':
     dependencies:
-      '@rsbuild/core': 1.5.12
-      rsbuild-plugin-dts: 0.12.4(@rsbuild/core@1.5.12)(typescript@5.9.2)
+      '@rsbuild/core': 1.5.13
+      rsbuild-plugin-dts: 0.12.4(@rsbuild/core@1.5.13)(typescript@5.9.2)
       tinyglobby: 0.2.14
     optionalDependencies:
       typescript: 5.9.2
@@ -15421,7 +15421,7 @@ snapshots:
   '@rspack/binding-darwin-arm64@1.4.0-beta.0':
     optional: true
 
-  '@rspack/binding-darwin-arm64@1.5.7':
+  '@rspack/binding-darwin-arm64@1.5.8':
     optional: true
 
   '@rspack/binding-darwin-x64@1.2.8':
@@ -15430,7 +15430,7 @@ snapshots:
   '@rspack/binding-darwin-x64@1.4.0-beta.0':
     optional: true
 
-  '@rspack/binding-darwin-x64@1.5.7':
+  '@rspack/binding-darwin-x64@1.5.8':
     optional: true
 
   '@rspack/binding-linux-arm64-gnu@1.2.8':
@@ -15439,7 +15439,7 @@ snapshots:
   '@rspack/binding-linux-arm64-gnu@1.4.0-beta.0':
     optional: true
 
-  '@rspack/binding-linux-arm64-gnu@1.5.7':
+  '@rspack/binding-linux-arm64-gnu@1.5.8':
     optional: true
 
   '@rspack/binding-linux-arm64-musl@1.2.8':
@@ -15448,7 +15448,7 @@ snapshots:
   '@rspack/binding-linux-arm64-musl@1.4.0-beta.0':
     optional: true
 
-  '@rspack/binding-linux-arm64-musl@1.5.7':
+  '@rspack/binding-linux-arm64-musl@1.5.8':
     optional: true
 
   '@rspack/binding-linux-x64-gnu@1.2.8':
@@ -15457,7 +15457,7 @@ snapshots:
   '@rspack/binding-linux-x64-gnu@1.4.0-beta.0':
     optional: true
 
-  '@rspack/binding-linux-x64-gnu@1.5.7':
+  '@rspack/binding-linux-x64-gnu@1.5.8':
     optional: true
 
   '@rspack/binding-linux-x64-musl@1.2.8':
@@ -15466,10 +15466,10 @@ snapshots:
   '@rspack/binding-linux-x64-musl@1.4.0-beta.0':
     optional: true
 
-  '@rspack/binding-linux-x64-musl@1.5.7':
+  '@rspack/binding-linux-x64-musl@1.5.8':
     optional: true
 
-  '@rspack/binding-wasm32-wasi@1.5.7':
+  '@rspack/binding-wasm32-wasi@1.5.8':
     dependencies:
       '@napi-rs/wasm-runtime': 1.0.5
     optional: true
@@ -15480,7 +15480,7 @@ snapshots:
   '@rspack/binding-win32-arm64-msvc@1.4.0-beta.0':
     optional: true
 
-  '@rspack/binding-win32-arm64-msvc@1.5.7':
+  '@rspack/binding-win32-arm64-msvc@1.5.8':
     optional: true
 
   '@rspack/binding-win32-ia32-msvc@1.2.8':
@@ -15489,7 +15489,7 @@ snapshots:
   '@rspack/binding-win32-ia32-msvc@1.4.0-beta.0':
     optional: true
 
-  '@rspack/binding-win32-ia32-msvc@1.5.7':
+  '@rspack/binding-win32-ia32-msvc@1.5.8':
     optional: true
 
   '@rspack/binding-win32-x64-msvc@1.2.8':
@@ -15498,7 +15498,7 @@ snapshots:
   '@rspack/binding-win32-x64-msvc@1.4.0-beta.0':
     optional: true
 
-  '@rspack/binding-win32-x64-msvc@1.5.7':
+  '@rspack/binding-win32-x64-msvc@1.5.8':
     optional: true
 
   '@rspack/binding@1.2.8':
@@ -15525,18 +15525,18 @@ snapshots:
       '@rspack/binding-win32-ia32-msvc': 1.4.0-beta.0
       '@rspack/binding-win32-x64-msvc': 1.4.0-beta.0
 
-  '@rspack/binding@1.5.7':
+  '@rspack/binding@1.5.8':
     optionalDependencies:
-      '@rspack/binding-darwin-arm64': 1.5.7
-      '@rspack/binding-darwin-x64': 1.5.7
-      '@rspack/binding-linux-arm64-gnu': 1.5.7
-      '@rspack/binding-linux-arm64-musl': 1.5.7
-      '@rspack/binding-linux-x64-gnu': 1.5.7
-      '@rspack/binding-linux-x64-musl': 1.5.7
-      '@rspack/binding-wasm32-wasi': 1.5.7
-      '@rspack/binding-win32-arm64-msvc': 1.5.7
-      '@rspack/binding-win32-ia32-msvc': 1.5.7
-      '@rspack/binding-win32-x64-msvc': 1.5.7
+      '@rspack/binding-darwin-arm64': 1.5.8
+      '@rspack/binding-darwin-x64': 1.5.8
+      '@rspack/binding-linux-arm64-gnu': 1.5.8
+      '@rspack/binding-linux-arm64-musl': 1.5.8
+      '@rspack/binding-linux-x64-gnu': 1.5.8
+      '@rspack/binding-linux-x64-musl': 1.5.8
+      '@rspack/binding-wasm32-wasi': 1.5.8
+      '@rspack/binding-win32-arm64-msvc': 1.5.8
+      '@rspack/binding-win32-ia32-msvc': 1.5.8
+      '@rspack/binding-win32-x64-msvc': 1.5.8
 
   '@rspack/core@1.2.8(@swc/helpers@0.5.17)':
     dependencies:
@@ -15555,10 +15555,10 @@ snapshots:
     optionalDependencies:
       '@swc/helpers': 0.5.17
 
-  '@rspack/core@1.5.7(@swc/helpers@0.5.17)':
+  '@rspack/core@1.5.8(@swc/helpers@0.5.17)':
     dependencies:
       '@module-federation/runtime-tools': 0.18.0
-      '@rspack/binding': 1.5.7
+      '@rspack/binding': 1.5.8
       '@rspack/lite-tapable': 1.0.1
     optionalDependencies:
       '@swc/helpers': 0.5.17
@@ -16854,7 +16854,7 @@ snapshots:
       '@testing-library/user-event': 14.6.1(@testing-library/dom@10.4.0)
       '@vitest/mocker': 3.0.5(msw@2.7.0(@types/node@22.13.10)(typescript@5.7.3))(vite@6.2.2(@types/node@22.13.10)(jiti@2.6.0)(lightningcss@1.29.2)(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.2)(yaml@2.7.0))
       '@vitest/utils': 3.0.5
-      magic-string: 0.30.19
+      magic-string: 0.30.17
       msw: 2.7.0(@types/node@22.13.10)(typescript@5.7.3)
       sirv: 3.0.1
       tinyrainbow: 2.0.0
@@ -16875,7 +16875,7 @@ snapshots:
       '@testing-library/user-event': 14.6.1(@testing-library/dom@10.4.0)
       '@vitest/mocker': 3.0.5(msw@2.7.0(@types/node@22.13.10)(typescript@5.7.3))(vite@6.2.2(@types/node@22.13.10)(jiti@2.6.0)(lightningcss@1.29.2)(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.3)(yaml@2.7.0))
       '@vitest/utils': 3.0.5
-      magic-string: 0.30.19
+      magic-string: 0.30.17
       msw: 2.7.0(@types/node@22.13.10)(typescript@5.7.3)
       sirv: 3.0.1
       tinyrainbow: 2.0.0
@@ -17213,7 +17213,7 @@ snapshots:
       '@vue/compiler-ssr': 3.5.13
       '@vue/shared': 3.5.13
       estree-walker: 2.0.2
-      magic-string: 0.30.19
+      magic-string: 0.30.17
       postcss: 8.5.3
       source-map-js: 1.2.1
     optional: true
@@ -17791,7 +17791,7 @@ snapshots:
     dependencies:
       devtools-protocol: 0.0.1425554
       mitt: 3.0.1
-      zod: 3.25.76
+      zod: 3.24.2
 
   chromium-bidi@7.1.1(devtools-protocol@0.0.1464554):
     dependencies:
@@ -21200,7 +21200,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  openai@4.93.0(encoding@0.1.13)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.25.76):
+  openai@4.93.0(encoding@0.1.13)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2):
     dependencies:
       '@types/node': 18.19.75
       '@types/node-fetch': 2.6.12
@@ -21211,7 +21211,7 @@ snapshots:
       node-fetch: 2.7.0(encoding@0.1.13)
     optionalDependencies:
       ws: 8.18.3(bufferutil@4.0.9)(utf-8-validate@6.0.5)
-      zod: 3.25.76
+      zod: 3.24.2
     transitivePeerDependencies:
       - encoding
 
@@ -21230,7 +21230,7 @@ snapshots:
       '@clack/prompts': 0.6.3
       '@dqbd/tiktoken': 1.0.20
       '@google/generative-ai': 0.11.5
-      '@mistralai/mistralai': 1.5.1(zod@3.25.76)
+      '@mistralai/mistralai': 1.5.1(zod@3.24.2)
       '@octokit/webhooks-schemas': 6.11.0
       '@octokit/webhooks-types': 6.11.0
       axios: 1.7.9
@@ -21241,9 +21241,9 @@ snapshots:
       ignore: 5.3.2
       ini: 3.0.1
       inquirer: 9.3.7
-      openai: 4.93.0(encoding@0.1.13)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.25.76)
+      openai: 4.93.0(encoding@0.1.13)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2)
       punycode: 2.3.1
-      zod: 3.25.76
+      zod: 3.24.2
     transitivePeerDependencies:
       - debug
       - encoding
@@ -22109,10 +22109,10 @@ snapshots:
     optionalDependencies:
       typescript: 5.7.3
 
-  rsbuild-plugin-dts@0.12.4(@rsbuild/core@1.5.12)(typescript@5.9.2):
+  rsbuild-plugin-dts@0.12.4(@rsbuild/core@1.5.13)(typescript@5.9.2):
     dependencies:
       '@ast-grep/napi': 0.37.0
-      '@rsbuild/core': 1.5.12
+      '@rsbuild/core': 1.5.13
       magic-string: 0.30.19
       picocolors: 1.1.1
       tinyglobby: 0.2.14
