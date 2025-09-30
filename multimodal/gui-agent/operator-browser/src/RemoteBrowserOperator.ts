@@ -24,7 +24,7 @@ export class RemoteBrowserOperator extends RefactoredOperator {
 
     // Create logger with LocalBrowserOperator prefix
     const logger = (options?.logger || new ConsoleLogger(undefined, LogLevel.DEBUG)).spawn(
-      '[RemoteBrowserOperator]',
+      '[Remote]',
     );
     logger.debug('ctor: wsEndpoint: ', wsEndpoint);
 

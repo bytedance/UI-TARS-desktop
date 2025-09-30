@@ -304,7 +304,7 @@ export class RefactoredOperator extends Operator {
           this.uiHelper.cleanup();
           break;
         default:
-          this.logger.warn(`[BrowserOperator] Unsupported action: ${action_type}`);
+          this.logger.warn(`Unsupported action: ${action_type}`);
       }
       this.logger.info(`Action ${action_type} completed successfully`);
     } catch (error) {

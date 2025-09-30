@@ -23,10 +23,10 @@ export class LocalBrowserOperator extends RefactoredOperator {
 
     // Create logger with LocalBrowserOperator prefix
     const logger = (options?.logger || new ConsoleLogger(undefined, LogLevel.DEBUG)).spawn(
-      '[LocalBrowserOperator]',
+      '[Local]',
     );
 
-    const browserFinder = new BrowserFinder(logger.spawn('[Finder]'));
+    const browserFinder = new BrowserFinder(logger.spawn('[BrowserFinder]'));
     const { path, type } = browserFinder.findBrowser();
     logger.debug('ctor: browserData: ', { path, type });
 
