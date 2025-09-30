@@ -13,7 +13,7 @@ to = "https://preview.agent-tars.com/doc/*"
 
 [[redirects]]
 from = "/showcase/*"
-to = "/showcase"
+to = "/showcase/index.html"
 
 [[redirects]]
 from = "/replay/*"
