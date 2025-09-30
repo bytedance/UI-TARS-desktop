@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { ConsoleLogger, LogLevel } from '@agent-infra/logger';
-import { RefactoredOperator } from './refactored-operator';
+import { BrowserOperator } from './browser-operator';
 import { RemoteBrowserOperatorOptions, SearchEngine, searchEngineUrlMap } from './types';
 import { BrowserType, RemoteBrowser } from '@agent-infra/browser';
 
-export class RemoteBrowserOperator extends RefactoredOperator {
+export class RemoteBrowserOperator extends BrowserOperator {
   private wsEndpoint: string;
   private viewport?: { width: number; height: number };
   private searchEngine?: SearchEngine;
