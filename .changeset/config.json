@@ -8,7 +8,8 @@
       "!@ui-tars/visualizer"
     ],
     [
-      "@agent-infra/mcp-*"
+      "@agent-infra/mcp-*",
+      "!@agent-infra/mcp-hub"
     ]
   ],
   "linked": [],
@@ -19,7 +20,6 @@
     "ui-tars-desktop",
     "ui-tars-desktop-renderer",
     "@common/*",
-    "@agent-infra/mcp-benchmark",
-    "@agent-infra/mcp-hub"
+    "@agent-infra/mcp-benchmark"
   ]
 }
