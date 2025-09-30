@@ -4,7 +4,6 @@
  */
 import { Page } from '@agent-infra/browser';
 import { Logger } from '@agent-infra/logger';
-import { ParsedPrediction } from './types';
 import { BaseAction } from '@gui-agent/shared/types';
 
 /**
@@ -343,16 +342,7 @@ z-index: 2147483647;
    * Displays information about the current action being performed
    * @param prediction The parsed prediction containing action details
    */
-  async showActionInfo(prediction: ParsedPrediction) {
-    const { action_type, action_inputs, thought } = prediction;
-    try {
-      await this.showActionInfoInternal(action_type, action_inputs, thought);
-    } catch (error) {
-      this.logger.error('Failed to show action info:', error);
-    }
-  }
-
-  async showActionInfoByAction(action: BaseAction, thought: string) {
+  async showActionInfo(action: BaseAction, thought: string) {
     const { type: action_type, inputs: action_inputs } = action;
     try {
       await this.showActionInfoInternal(action_type, action_inputs, thought);
