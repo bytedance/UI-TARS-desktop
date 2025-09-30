@@ -228,7 +228,7 @@ export default defineConfig({
 import { useAgentHooks } from '@tarko/agent';
 
 export default defineConfig({
-  hooks: {
+  hook: {
     onBeforeToolCall: (context) => {
       console.log('工具调用:', context.toolName, context.args);
     },

@@ -1,6 +1,6 @@
 ---
 title: Agent Hooks
-description: 使用生命周期钩子扩展和自定义 Agent 行为
+description: 使用生命周期 Hook 扩展和自定义 Agent 行为
 ---
 
 # Agent Hooks
@@ -9,7 +9,7 @@ Tarko 的 **Agent Hooks** 系统在 Agent 生命周期的特定节点提供扩�
 
 ## 概述
 
-Agent Hooks 是在 Agent 运行特定节点执行的回调方法。所有 hooks 都在 `Agent` 类中定义，可以在自定义 Agent 实现中重写：
+Agent Hooks 是在 Agent 运行特定节点执行的回调方法。所有 Hook 都在 `Agent` 类中定义，可以在自定义 Agent 实现中重写：
 
 - **LLM Hooks**：请求/响应拦截和修改
 - **Tool Hooks**：工具调用执行生命周期管理
@@ -426,7 +426,7 @@ describe('Agent Hooks', () => {
     agent = new TestableAgent({});
   });
   
-  it('should call hooks in correct order', async () => {
+  it('should call Hook in correct order', async () => {
     // 测试 hook 执行顺序
     await agent.onLLMRequest('test-session', { model: 'gpt-4', messages: [] });
     await agent.onBeforeToolCall('test-session', { name: 'test-tool' }, {});
@@ -463,7 +463,7 @@ describe('Hook Integration', () => {
 ## 最佳实践
 
 ### 1. Hook 设计
-- 保持 hooks 专注和轻量级
+- 保持 Hook 专注和轻量级
 - 重写时始终调用 `super.hookMethod()`
 - 优雅处理错误而不破坏 Agent 执行
 - 对异步操作使用 async/await
@@ -474,7 +474,7 @@ describe('Hook Integration', () => {
 - 使用会话 ID 跟踪每个对话的状态
 
 ### 3. 性能
-- 避免在关键 hooks 中阻塞操作
+- 避免在关键 Hook 中阻塞操作
 - 对昂贵的计算使用缓存
 - 为外部调用实现超时
 
@@ -484,7 +484,7 @@ describe('Hook Integration', () => {
 - 记录错误以便调试，但不暴露敏感数据
 
 ### 5. 测试
-- 单独单元测试 hooks
+- 单独单元测试 Hook
 - 测试 hook 组合和顺序
 - 模拟外部依赖
 - 测试错误场景
@@ -501,6 +501,6 @@ describe('Hook Integration', () => {
 
 ## 下一步
 
-- [Agent Protocol](/guide/advanced/agent-protocol) - 了解 hooks 中的事件处理
+- [Agent Protocol](/guide/advanced/agent-protocol) - 了解 Hook 中的事件处理
 - [工具管理](/guide/basic/tools) - 学习工具注册和执行
 - [上下文工程](/guide/advanced/context-engineering) - 高级上下文管理

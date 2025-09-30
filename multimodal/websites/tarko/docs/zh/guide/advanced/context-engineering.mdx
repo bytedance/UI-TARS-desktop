@@ -199,7 +199,7 @@ const toolCalls = events.filter(e => e.type === 'tool_call');
 
 ```typescript
 const agent = new Agent({
-  hooks: {
+  hook: {
     onBeforeToolCall: async (context) => {
       // 在工具执行前记录上下文
       console.log('工具调用前的上下文：', context.messages.length);
