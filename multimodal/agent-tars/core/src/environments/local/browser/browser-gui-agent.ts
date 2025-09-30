@@ -9,8 +9,10 @@ import { BrowserOperator } from '@gui-agent/operator-browser';
 import { ConsoleLogger, AgentEventStream, Tool, z } from '@tarko/mcp-agent';
 import { ImageCompressor, formatBytes } from '@tarko/shared-media-utils';
 import { ActionInputs, PredictionParsed } from '@agent-tars/interface';
+import { ActionParserHelper } from '@gui-agent/action-parser';
 import {
   convertToGUIResponse,
+  convertToAgentUIAction,
   createGUIErrorResponse,
   GUIExecuteResult,
 } from '@tarko/shared-utils';
@@ -36,6 +38,8 @@ export interface GUIAgentOptions {
   /** Event stream instance for injecting environment info */
   eventStream?: AgentEventStream.Processor;
 }
+
+const actionParserHelper = new ActionParserHelper();
 
 /**
  * Browser GUI Agent for visual browser automation
@@ -109,30 +113,34 @@ wait()                                         - Wait 5 seconds and take a scree
       }),
       function: async ({ thought, step, action }) => {
         try {
-          const parsed = this.parseAction(action);
-          parsed.thought = thought;
+          const parsedAction = actionParserHelper.parseActionCallString(action);
+          if (!parsedAction) {
+            return createGUIErrorResponse(action, 'Invalid action format');
+          }
 
           this.logger.debug({
             thought,
             step,
             action,
-            parsedAction: JSON.stringify(parsed, null, 2),
+            parsedAction: JSON.stringify(parsedAction, null, 2),
             screenDimensions: {
               width: this.screenWidth,
               height: this.screenHeight,
             },
           });
 
-          const operatorResult: GUIExecuteResult = await this.browserOperator.execute({
-            parsedPrediction: parsed,
-            screenWidth: this.screenWidth || 1920,
-            screenHeight: this.screenHeight || 1080,
+          const operatorResult = await this.browserOperator.doExecute({
+            actions: [parsedAction],
           });
 
           await sleep(500);
 
-          const guiResponse = convertToGUIResponse(action, parsed, operatorResult);
-          return guiResponse;
+          return {
+            success: true,
+            action: action,
+            normalizedAction: convertToAgentUIAction(parsedAction),
+            observation: undefined, // Reserved for future implementation
+          };
         } catch (error) {
           this.logger.error(
             `Browser action failed: ${error instanceof Error ? error.message : String(error)}`,
@@ -164,7 +172,7 @@ wait()                                         - Wait 5 seconds and take a scree
     // Record screenshot start time
     const startTime = performance.now();
 
-    const output = await this.browserOperator.screenshot();
+    const output = await this.browserOperator.doScreenshot();
 
     // Calculate screenshot time
     const endTime = performance.now();
