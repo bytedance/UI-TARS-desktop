@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { Logger } from '@agent-infra/logger';
-import type { BrowserInterface, Page, BrowserType } from '@agent-infra/browser';
+import type { BrowserInterface, Page, BrowserType, BaseBrowser } from '@agent-infra/browser';
 import type { ScreenshotOutput, ExecuteParams } from '@ui-tars/sdk/core';
 
 export { StatusEnum } from '@ui-tars/sdk';
@@ -32,8 +32,12 @@ export interface BrowserOperatorOptions {
   /**
    * Browser instance to control
    */
-  browser: BrowserInterface;
+  browser: BaseBrowser;
 
+  /**
+   * Browser type to use for operations
+   * example: 'chrome', 'edge', 'firefox'
+   */
   browserType: BrowserType;
 
   /**
@@ -119,6 +123,13 @@ export interface RemoteBrowserOperatorOptions {
    * @example "ws://localhost:9222/devtools/browser/12345678-1234-1234-1234-123456789012"
    */
   wsEndpoint: string;
+
+  /**
+   * The viewport dimensions
+   * @property {number} width - Viewport width in pixels
+   * @property {number} height - Viewport height in pixels
+   */
+  viewport?: { width: number; height: number };
 
   /**
    * Whether to highlight clickable elements before taking screenshots

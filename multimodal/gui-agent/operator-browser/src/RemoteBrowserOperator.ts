@@ -9,11 +9,13 @@ import { BrowserType, RemoteBrowser } from '@agent-infra/browser';
 
 export class RemoteBrowserOperator extends RefactoredOperator {
   private wsEndpoint: string;
+  private viewport?: { width: number; height: number };
   private searchEngine?: SearchEngine;
 
   constructor(options: RemoteBrowserOperatorOptions) {
     const {
       wsEndpoint,
+      viewport,
       highlightClickableElements = false,
       showActionInfo = false,
       showWaterFlow = false,
@@ -44,12 +46,16 @@ export class RemoteBrowserOperator extends RefactoredOperator {
     logger.debug('super ctor done');
 
     this.wsEndpoint = wsEndpoint;
+    this.viewport = viewport;
     this.searchEngine = searchEngine;
   }
 
   protected async initialize(): Promise<void> {
     this.logger.debug('initialize: start');
-    await this.browser.launch();
+    await this.browser.launch({
+      timeout: 1000,
+      defaultViewport: this.viewport,
+    });
     this.logger.debug('initialize: browser launched');
 
     const openingPage = await this.browser?.getActivePage();
