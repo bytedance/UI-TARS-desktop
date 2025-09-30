@@ -235,7 +235,12 @@ export class MCPServerEndpoint {
   /**
    * Create a new MCP server instance for each connection
    */
-  createServer(): Server {
+  createServer(filters?: {
+    query?: string;
+    tags?: string;
+    category?: string;
+    sort?: string;
+  }): Server {
     // Create low-level MCP server instance with unique name
     const server = new Server(
       {
@@ -260,7 +265,7 @@ export class MCPServerEndpoint {
       logger.warn(`Hub Endpoint onerror: ${err.message}`);
     };
     // Setup request handlers for this server instance
-    this.setupRequestHandlers(server);
+    this.setupRequestHandlers(server, filters);
 
     return server;
   }
@@ -275,19 +280,35 @@ export class MCPServerEndpoint {
   /**
    * Setup MCP request handlers for a server instance
    */
-  setupRequestHandlers(server: Server): void {
+  setupRequestHandlers(
+    server: Server,
+    filters?: {
+      query?: string;
+      tags?: string;
+      category?: string;
+      sort?: string;
+    },
+  ): void {
     // Setup handlers for each capability type
     Object.values(CAPABILITY_TYPES).forEach((capType) => {
       const capId = capType.id;
 
       // Setup list handler if schema exists
       if (capType.listSchema) {
-        server.setRequestHandler(capType.listSchema, () => {
+        server.setRequestHandler(capType.listSchema, async () => {
           const capabilityMap = this.registeredCapabilities[capId];
-          const capabilities = Array.from(capabilityMap.values()).map(
-            (item) => item.definition,
-          );
-          return { [capId]: capabilities };
+          let capabilities = Array.from(capabilityMap.values());
+
+          // Filter capabilities based on server filters
+          if (filters && (filters.query || filters.tags || filters.category)) {
+            capabilities = await this.filterCapabilitiesByServer(
+              capabilities,
+              filters,
+            );
+          }
+
+          const capabilityDefs = capabilities.map((item) => item.definition);
+          return { [capId]: capabilityDefs };
         });
       }
 
@@ -343,6 +364,66 @@ export class MCPServerEndpoint {
     let key = request.params[uidField];
     const registeredCap = capabilityMap.get(key);
     return registeredCap;
+  }
+
+  /**
+   * Filter capabilities based on server-level filters
+   * Only includes capabilities from servers that match the filter criteria
+   */
+  async filterCapabilitiesByServer(
+    capabilities: CapabilityRegistration[],
+    filters: {
+      query?: string;
+      tags?: string;
+      category?: string;
+      sort?: string;
+    },
+  ): Promise<CapabilityRegistration[]> {
+    // Get unique server names from capabilities
+    const serverNames = new Set(capabilities.map((cap) => cap.serverName));
+
+    // Determine which servers match the filters
+    const allowedServers = new Set<string>();
+
+    for (const serverName of serverNames) {
+      const connection = this.mcpHub.connections.get(serverName);
+      if (!connection) continue;
+
+      let matches = true;
+
+      // Apply query/search filter (search in server name and description)
+      if (filters.query) {
+        const searchLower = filters.query.toLowerCase();
+        const nameMatches = serverName.toLowerCase().includes(searchLower);
+        const descMatches =
+          connection.config?.description?.toLowerCase().includes(searchLower) ||
+          false;
+        matches = nameMatches || descMatches;
+      }
+
+      // Apply category filter
+      if (matches && filters.category) {
+        // Check if server config has category metadata
+        const serverCategory = connection.config?.category;
+        matches = serverCategory === filters.category;
+      }
+
+      // Apply tags filter
+      if (matches && filters.tags) {
+        // Parse tags string into array
+        const requestedTags = filters.tags.split(',').map((t) => t.trim());
+        const serverTags = connection.config?.tags || [];
+        // Check if server has all requested tags
+        matches = requestedTags.every((tag) => serverTags.includes(tag));
+      }
+
+      if (matches) {
+        allowedServers.add(serverName);
+      }
+    }
+
+    // Filter capabilities to only include those from allowed servers
+    return capabilities.filter((cap) => allowedServers.has(cap.serverName));
   }
 
   /**
@@ -563,8 +644,16 @@ export class MCPServerEndpoint {
     const transport = new SSEServerTransport('/messages', res);
     const sessionId = transport.sessionId;
 
-    // Create a new server instance for this connection
-    const server = this.createServer();
+    // Parse filter parameters from query string
+    const filters = {
+      query: (req.query?.query as string) || (req.query?.search as string),
+      category: req.query?.category as string,
+      tags: req.query?.tags as string,
+      sort: req.query?.sort as string,
+    };
+
+    // Create a new server instance for this connection with filters
+    const server = this.createServer(filters);
 
     // Store transport and server together
     this.clients.set(sessionId, { transport, server });
@@ -672,8 +761,16 @@ export class MCPServerEndpoint {
         }
       };
 
-      // Create a new server instance
-      const server = this.createServer();
+      // Parse filter parameters from query string
+      const filters = {
+        query: (req.query?.query as string) || (req.query?.search as string),
+        category: req.query?.category as string,
+        tags: req.query?.tags as string,
+        sort: req.query?.sort as string,
+      };
+
+      // Create a new server instance with filters
+      const server = this.createServer(filters);
 
       // Connect to the MCP server
       await server.connect(transport);

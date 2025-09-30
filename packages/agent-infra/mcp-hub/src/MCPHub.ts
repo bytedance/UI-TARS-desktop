@@ -520,6 +520,103 @@ export class MCPHub extends EventEmitter {
       result.status === 'fulfilled' ? result.value : result.reason,
     );
   }
+
+  async searchServers(
+    options: {
+      search?: string;
+      category?: string;
+      tags?: string[];
+      sort?: 'newest' | 'stars' | 'name';
+    } = {},
+  ): Promise<any[]> {
+    const results = [];
+
+    // Get connected servers
+    const connectedServers = this.getAllServerStatuses();
+
+    // Filter connected servers based on search criteria
+    let filteredConnected = connectedServers;
+
+    if (options.search) {
+      const searchLower = options.search.toLowerCase();
+      filteredConnected = filteredConnected.filter(
+        (server) =>
+          server.name.toLowerCase().includes(searchLower) ||
+          (server.config?.description &&
+            server.config.description.toLowerCase().includes(searchLower)) ||
+          server.capabilities?.tools?.some(
+            (tool: any) =>
+              tool.name.toLowerCase().includes(searchLower) ||
+              tool.description?.toLowerCase().includes(searchLower),
+          ) ||
+          server.capabilities?.resources?.some(
+            (resource: any) =>
+              resource.name?.toLowerCase().includes(searchLower) ||
+              resource.uri?.toLowerCase().includes(searchLower),
+          ),
+      );
+    }
+
+    // Note: Connected servers typically don't have category/tags metadata
+    // Only add them if no category/tags filter is specified
+    if (!options.category && (!options.tags || options.tags.length === 0)) {
+      filteredConnected.forEach((server) => {
+        results.push({
+          ...server,
+          source: 'connected',
+          status: server.status || 'connected',
+        });
+      });
+    }
+
+    // Get marketplace servers if marketplace is available
+    if (this.marketplace) {
+      try {
+        const marketplaceServers = await this.marketplace.getCatalog(options);
+
+        // Filter out servers that are already connected (unless filtering by category/tags)
+        const connectedNames = new Set(
+          connectedServers.map((s) => s.name.toLowerCase()),
+        );
+        const uniqueMarketplace = marketplaceServers.filter(
+          (server: any) => !connectedNames.has(server.name.toLowerCase()),
+        );
+
+        // Add marketplace servers with 'available' status
+        uniqueMarketplace.forEach((server: any) => {
+          results.push({
+            ...server,
+            source: 'marketplace',
+            status: 'available',
+          });
+        });
+      } catch (error: any) {
+        logger.debug(`Failed to search marketplace: ${error.message}`);
+        // Continue with just connected servers if marketplace fails
+      }
+    }
+
+    // Apply sorting if requested
+    if (options.sort) {
+      switch (options.sort) {
+        case 'stars':
+          results.sort((a, b) => (b.stars || 0) - (a.stars || 0));
+          break;
+        case 'name':
+          results.sort((a, b) => a.name.localeCompare(b.name));
+          break;
+        case 'newest':
+          results.sort(
+            (a, b) =>
+              (b.lastCommit || b.updatedAt || 0) -
+              (a.lastCommit || a.updatedAt || 0),
+          );
+          break;
+      }
+    }
+
+    return results;
+  }
 }
 
 export { MCPConnection } from './MCPConnection.js';

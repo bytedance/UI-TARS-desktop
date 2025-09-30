@@ -421,6 +421,107 @@ The [ravitemer/mcphub.nvim](https://github.com/ravitemer/mcphub.nvim) plugin pro
 
 ## REST API
 
+### MCP Hub Search API
+
+The MCP Hub provides a powerful search API to find and filter MCP servers, both connected (currently running) and available (from the marketplace).
+
+#### Endpoint
+
+```
+GET /mcp?[query parameters]
+```
+
+#### Query Parameters
+
+| Parameter | Description | Example |
+|-----------|-------------|---------|
+| `query` or `search` | Text search across server names, descriptions, and tags | `?query=filesystem` |
+| `category` | Filter by server category | `?category=development` |
+| `tags` | Filter by tags (comma-separated) | `?tags=api,github` |
+| `sort` | Sort results by: `newest`, `stars`, or `name` | `?sort=stars` |
+
+Response Format
+
+```json
+{
+  "servers": [
+    {
+      "name": "File System",
+      "description": "Provides comprehensive filesystem operations",
+      "category": "development",
+      "tags": ["filesystem", "file-management"],
+      "status": "connected",
+      "source": "connected",
+      "capabilities": {
+        "tools": [...],
+        "resources": [...]
+      }
+    },
+    {
+      "name": "GitHub",
+      "description": "GitHub API integration",
+      "category": "development",
+      "tags": ["github", "api"],
+      "status": "available",
+      "source": "marketplace",
+      "stars": 1000
+    }
+  ],
+  "query": {
+    "search": "file",
+    "category": null,
+    "tags": null,
+    "sort": null
+  },
+  "timestamp": "2025-01-30T12:00:00.000Z",
+  "total": 2
+}
+```
+
+#### Server Status
+
+- **connected**: Server is currently running and connected to the hub
+- **available**: Server is available in the marketplace but not currently connected
+
+#### Server Source
+
+- **connected**: Server is from your local configuration and currently running
+- **marketplace**: Server is from the MCP marketplace registry
+
+#### Examples
+
+##### Search for servers by keyword
+```bash
+curl "http://localhost:3000/mcp?query=filesystem"
+```
+
+##### Filter by category
+```bash
+curl "http://localhost:3000/mcp?category=development"
+```
+
+##### Filter by multiple tags
+```bash
+curl "http://localhost:3000/mcp?tags=api,github,version-control"
+```
+
+##### Sort by popularity (stars)
+```bash
+curl "http://localhost:3000/mcp?sort=stars"
+```
+
+##### Complex query with multiple filters
+```bash
+curl "http://localhost:3000/mcp?search=code&category=development&tags=editor&sort=stars"
+```
+
+#### Notes
+
+1. The search is case-insensitive
+2. Connected servers take precedence over marketplace servers in deduplication
+3. If marketplace is unavailable, only connected servers will be returned
+4. The endpoint distinguishes between search requests (with query params) and MCP protocol requests (without query params)
+
 ### Health and Status
 
 #### Health Check
