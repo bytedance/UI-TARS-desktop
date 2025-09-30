@@ -1,15 +1,15 @@
 ---
-title: 模型提供商
-description: 使用 Tarko 连接不同的 LLM 提供商
+title: Model Provider
+description: 使用 Tarko 连接不同的 LLM Provider
 ---
 
-# 模型提供商
+# Model Provider
 
-Tarko 遵循 **OpenAI Compatible** 协议连接任意 LLM 提供商，包括 Volcengine、OpenAI、Anthropic、Gemini 等。
+Tarko 遵循 **OpenAI Compatible** 协议连接任意 LLM Provider，包括 Volcengine、OpenAI、Anthropic、Gemini 等。
 
 ## 配置
 
-在 Agent 配置中配置你的模型提供商：
+在 Agent 配置中配置你的 Model Provider：
 
 ```typescript
 import { Agent } from '@tarko/agent';
@@ -23,7 +23,7 @@ const agent = new Agent({
 });
 ```
 
-## 支持的提供商
+## 支持的 Provider
 
 ### OpenAI
 
@@ -55,7 +55,7 @@ const agent = new Agent({
 }
 ```
 
-## 自定义提供商
+## 自定义 Provider
 
 你也可以使用任何 OpenAI 兼容的端点：
 

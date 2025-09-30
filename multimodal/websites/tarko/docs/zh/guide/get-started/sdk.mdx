@@ -354,7 +354,7 @@ try {
     // 处理工具特定错误
     console.error('工具错误:', error.toolName, error.message);
   } else if (error instanceof ModelProviderError) {
-    // 处理模型提供商错误
+    // 处理 Model Provider 错误
     console.error('模型错误:', error.provider, error.message);
   } else {
     // 处理一般错误
