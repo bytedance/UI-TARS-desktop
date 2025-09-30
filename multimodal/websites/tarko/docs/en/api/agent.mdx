@@ -281,7 +281,7 @@ interface AssistantMessage {
   type: 'assistant_message';
   timestamp: number;
   content: string;
-  toolCalls?: ToolCall[];
+  toolCalls?: ChatCompletionMessageToolCall[];
   finishReason: 'stop' | 'tool_calls' | 'length';
   messageId: string;
 }
@@ -296,9 +296,13 @@ interface ToolCallEvent {
   timestamp: number;
   toolCallId: string;
   name: string;
-  arguments: any;
+  arguments: Record<string, any>;
   startTime: number;
-  tool: ToolDefinition;
+  tool: {
+    name: string;
+    description: string;
+    schema: any;
+  };
 }
 ```
 
