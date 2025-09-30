@@ -29,6 +29,7 @@
   },
   "devDependencies": {
     "@gui-agent/operator-browser": "workspace:*",
+    "@gui-agent/action-parser": "workspace:*",
     "@agent-infra/mcp-server-browser": "1.1.10",
     "@agent-infra/mcp-server-commands": "1.1.10",
     "@agent-infra/mcp-server-filesystem": "1.1.10",
