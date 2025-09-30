@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { Logger, defaultLogger } from '@agent-infra/logger';
-import { Page, BrowserInterface } from '@agent-infra/browser';
+import { Page, BaseBrowser } from '@agent-infra/browser';
 import { Hotkey, getEnvInfo } from '@agent-infra/puppeteer-enhance';
 
 import type {
@@ -27,7 +27,7 @@ import { BrowserOperatorOptions } from './types';
  */
 export class RefactoredOperator extends Operator {
   protected logger: Logger;
-  protected browser: BrowserInterface;
+  protected browser: BaseBrowser;
 
   // ui helper and related configs
   private uiHelper: UIHelper;
@@ -664,14 +664,53 @@ export class RefactoredOperator extends Operator {
    * @throws Error if no active page is found
    */
   private async getActivePage(): Promise<Page> {
-    const page = await this.browser.getActivePage();
-    if (!page) {
-      throw new Error('No active page found');
+    const pages = await this.browser.getBrowser().pages();
+    this.logger.info(`get active pages len: ${pages.length}`);
+    // First try to find a visible page without waiting
+    for (const page of pages) {
+      try {
+        // Check visibility state directly without waiting with timeout
+        const visibilityState = await Promise.race([
+          page.evaluate(() => document.visibilityState),
+          new Promise<string>((_, reject) => {
+            setTimeout(() => reject(new Error('Visibility check timed out after 3s')), 3000);
+          }),
+        ]);
+        if (visibilityState === 'visible') {
+          this.logger.success('Active visible page retrieved successfully (direct check)');
+          return page;
+        }
+      } catch (evalError) {
+        this.logger.warn('Warning: checking page visibility directly:', evalError);
+        // Continue to next page if direct check fails
+        continue;
+      }
     }
-    if (this.currentPage !== page) {
-      this.currentPage = page;
+
+    // If no visible page found with direct check, try with waitForFunction but increased timeout
+    for (const page of pages) {
+      try {
+        // Check if the page is visible with increased timeout
+        const isVisible = await page.waitForFunction(
+          () => {
+            return document.visibilityState === 'visible';
+          },
+          {
+            timeout: 3000, // Increased from 1000ms to 3000ms
+          },
+        );
+        if (isVisible) {
+          this.logger.success('Active visible page retrieved successfully');
+          return page;
+        }
+      } catch (waitError) {
+        this.logger.warn(`Visibility check timed out for page: ${page.url()}`);
+        // Continue to next page if this one times out
+        continue;
+      }
     }
-    return page;
+    this.logger.success('Active original page retrieved failed, fallback to active page');
+    return this.browser.getActivePage();
   }
 
   private async getHotkeyExecutor() {

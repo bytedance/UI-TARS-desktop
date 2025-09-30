@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { Logger } from '@agent-infra/logger';
-import type { BrowserInterface, Page, BrowserType, BaseBrowser } from '@agent-infra/browser';
+import type { Page, BrowserType, BaseBrowser } from '@agent-infra/browser';
 import type { ScreenshotOutput, ExecuteParams } from '@ui-tars/sdk/core';
 
 export { StatusEnum } from '@ui-tars/sdk';
