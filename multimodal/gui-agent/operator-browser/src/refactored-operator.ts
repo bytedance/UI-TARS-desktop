@@ -160,13 +160,7 @@ export class RefactoredOperator extends Operator {
   protected async screenshot(): Promise<ScreenshotOutput> {
     this.logger.info('Starting screenshot...');
 
-    if (this.showWaterFlowEffect) {
-      try {
-        await this.uiHelper.showWaterFlow();
-      } catch (error) {
-        this.logger.error('Failed to show water flow effect:', error);
-      }
-    }
+    if (this.showWaterFlowEffect) await this.uiHelper.showWaterFlow();
 
     const page = await this.getActivePage();
 
@@ -216,13 +210,7 @@ export class RefactoredOperator extends Operator {
       if (this.highlightClickableElements) {
         await this.uiHelper.removeClickableHighlights();
       }
-      if (this.showWaterFlowEffect) {
-        try {
-          await this.uiHelper.hideWaterFlow();
-        } catch (error) {
-          this.logger.error('Failed to hide water flow effect:', error);
-        }
-      }
+      if (this.showWaterFlowEffect) await this.uiHelper.hideWaterFlow();
     }
   }
 
