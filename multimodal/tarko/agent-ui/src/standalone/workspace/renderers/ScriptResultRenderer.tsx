@@ -253,17 +253,60 @@ function extractScriptData(panelContent: StandardPanelContent): {
       }
     }
 
+
+
     // Try arguments first for other tools
     if (panelContent.arguments) {
       const { script, interpreter = 'python', stdout, stderr, exitCode } = panelContent.arguments;
 
       if (script && typeof script === 'string') {
+        // Extract output from source if available
+        let extractedStdout = stdout ? String(stdout) : undefined;
+        let extractedStderr = stderr ? String(stderr) : undefined;
+        let extractedExitCode = typeof exitCode === 'number' ? exitCode : undefined;
+
+        // If no stdout in arguments but source exists, try to extract from source
+        if (!extractedStdout && panelContent.source) {
+          if (typeof panelContent.source === 'string') {
+            extractedStdout = panelContent.source;
+          } else if (Array.isArray(panelContent.source)) {
+            // Handle array format like [{"type": "text", "text": "False", "name": "STDOUT"}]
+            const stdoutItem = panelContent.source.find(
+              (item: any) =>
+                typeof item === 'object' &&
+                item !== null &&
+                'name' in item &&
+                item.name === 'STDOUT' &&
+                'text' in item,
+            );
+            const stderrItem = panelContent.source.find(
+              (item: any) =>
+                typeof item === 'object' &&
+                item !== null &&
+                'name' in item &&
+                item.name === 'STDERR' &&
+                'text' in item,
+            );
+            if (stdoutItem && typeof stdoutItem.text === 'string') {
+              extractedStdout = stdoutItem.text;
+            }
+            if (stderrItem && typeof stderrItem.text === 'string') {
+              extractedStderr = stderrItem.text;
+            }
+          } else if (typeof panelContent.source === 'object') {
+            const sourceObj = panelContent.source as any;
+            extractedStdout = sourceObj.stdout || sourceObj.output || sourceObj.result || extractedStdout;
+            extractedStderr = sourceObj.stderr || sourceObj.error || extractedStderr;
+            extractedExitCode = typeof sourceObj.exitCode === 'number' ? sourceObj.exitCode : extractedExitCode;
+          }
+        }
+
         return {
           script,
           interpreter: String(interpreter),
-          stdout: stdout ? String(stdout) : undefined,
-          stderr: stderr ? String(stderr) : undefined,
-          exitCode: typeof exitCode === 'number' ? exitCode : undefined,
+          stdout: extractedStdout,
+          stderr: extractedStderr,
+          exitCode: extractedExitCode,
         };
       }
     }
