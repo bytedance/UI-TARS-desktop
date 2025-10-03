@@ -1,6 +1,6 @@
 {
   "name": "@tarko/agent-snapshot",
-  "version": "0.3.0-beta.12",
+  "version": "0.3.0-beta.11",
   "description": "A snapshot-based agent test framework for `@tarko/agent` based Agents",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -29,7 +29,6 @@
     "@tarko/agent-interface": "workspace:*",
     "@agent-infra/logger": "0.0.2-beta.2",
     "fast-json-stable-stringify": "^2.1.0",
-    "snapshot-diff": "0.10.0",
     "chalk": "^4.1.2"
   },
   "devDependencies": {
