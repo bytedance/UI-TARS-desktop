@@ -25,11 +25,8 @@ export const App: React.FC = () => {
 
     const initialize = async () => {
       const cleanup = initConnectionMonitoring();
-
-      if (connectionStatus.connected) {
-        await loadSessions();
-      }
-
+      // Load sessions after connection monitoring is initialized
+      // The connection monitoring will handle loading sessions when connected
       return cleanup;
     };
 
@@ -42,7 +39,7 @@ export const App: React.FC = () => {
         }
       });
     };
-  }, [initConnectionMonitoring, loadSessions, connectionStatus.connected, isReplayMode]);
+  }, [initConnectionMonitoring, isReplayMode]);
 
   if (isReplayMode) {
     console.log('[ReplayMode] Rendering replay layout directly');
