@@ -1,7 +1,7 @@
 import { isProcessingAtom } from '@/common/state/atoms/ui';
+import { activeSessionIdAtom } from '@/common/state/atoms/session';
 import { AgentEventStream } from '@/common/types';
 import { EventHandler, EventHandlerContext } from '../types';
-import { shouldUpdateProcessingState } from '../utils/panelContentUpdater';
 
 export class AgentRunStartHandler implements EventHandler<AgentEventStream.AgentRunStartEvent> {
   canHandle(event: AgentEventStream.Event): event is AgentEventStream.AgentRunStartEvent {
@@ -13,10 +13,11 @@ export class AgentRunStartHandler implements EventHandler<AgentEventStream.Agent
     sessionId: string,
     event: AgentEventStream.AgentRunStartEvent,
   ): void {
-    const { set } = context;
-
-    // Update processing state
-    if (shouldUpdateProcessingState(sessionId)) {
+    const { get, set } = context;
+    
+    // Only update processing state for the active session
+    const activeSessionId = get(activeSessionIdAtom);
+    if (sessionId === activeSessionId) {
       set(isProcessingAtom, true);
     }
   }
@@ -28,10 +29,11 @@ export class AgentRunEndHandler implements EventHandler<AgentEventStream.Event> 
   }
 
   handle(context: EventHandlerContext, sessionId: string, event: AgentEventStream.Event): void {
-    const { set } = context;
-
-    // Update processing state
-    if (shouldUpdateProcessingState(sessionId)) {
+    const { get, set } = context;
+    
+    // Only update processing state for the active session
+    const activeSessionId = get(activeSessionIdAtom);
+    if (sessionId === activeSessionId) {
       set(isProcessingAtom, false);
     }
   }
