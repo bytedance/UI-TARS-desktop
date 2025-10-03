@@ -1,0 +1,366 @@
+# Global Workspace 迁移指南
+
+本指南将帮助你从 Tarko CLI 0.2 版本的自动 Global Workspace 迁移到 0.3 版本的手动配置管理模式。
+
+## 迁移概述
+
+**0.2 版本的 Global Workspace:**
+- 自动创建 `~/.tarko` 目录
+- 通过 `tarko workspace --init` 初始化
+- 自动应用全局配置
+- 集中管理所有项目的配置
+
+**0.3 版本的手动配置:**
+- 移除了 `tarko workspace` 命令
+- 支持项目级配置文件
+- 通过 `--config` 指定共享配置
+- 更灵活的配置管理方式
+
+## 步骤 1: 备份现有配置
+
+首先，备份你现有的 Global Workspace 配置：
+
+```bash
+# 检查是否存在 Global Workspace
+ls -la ~/.tarko
+
+# 备份整个目录
+cp -r ~/.tarko ~/.tarko-backup-$(date +%Y%m%d)
+
+# 查看现有配置文件
+find ~/.tarko -name "tarko.config.*" -o -name "agent-tars.config.*"
+```
+
+## 步骤 2: 分析现有配置
+
+检查你的配置文件内容，了解需要迁移的设置：
+
+```bash
+# 查看 TypeScript 配置
+cat ~/.tarko/tarko.config.ts
+
+# 或查看 JSON 配置
+cat ~/.tarko/tarko.config.json
+
+# 或查看 YAML 配置
+cat ~/.tarko/tarko.config.yaml
+```
+
+典型的 0.2 配置文件可能如下：
+
+```typescript
+// ~/.tarko/tarko.config.ts
+import { AgentAppConfig } from '@tarko/interface';
+
+const config: AgentAppConfig = {
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  workspace: '~/.tarko',
+  // 其他配置...
+};
+
+export default config;
+```
+
+## 步骤 3: 选择迁移策略
+
+根据你的使用场景选择合适的迁移策略：
+
+### 策略 A: 全局共享配置
+
+**适用场景:** 你希望在所有项目中使用相同的配置
+
+```bash
+# 创建共享配置目录
+mkdir -p ~/configs
+
+# 复制配置文件到新位置
+cp ~/.tarko/tarko.config.ts ~/configs/tarko-global.config.ts
+
+# 编辑配置文件，移除 workspace 设置
+vim ~/configs/tarko-global.config.ts
+```
+
+更新配置文件：
+
+```typescript
+// ~/configs/tarko-global.config.ts
+import { AgentAppConfig } from '@tarko/interface';
+
+const config: AgentAppConfig = {
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  // 移除 workspace 设置，让每个项目自己指定
+};
+
+export default config;
+```
+
+使用方式：
+
+```bash
+# 在任何目录下使用全局配置
+tarko --config ~/configs/tarko-global.config.ts
+
+# 指定特定的工作目录
+tarko --config ~/configs/tarko-global.config.ts --workspace ./my-project
+```
+
+### 策略 B: 项目特定配置
+
+**适用场景:** 不同项目需要不同的配置
+
+```bash
+# 为每个项目创建配置文件
+cd ~/projects/project1
+cp ~/.tarko/tarko.config.ts ./tarko.config.ts
+
+cd ~/projects/project2
+cp ~/.tarko/tarko.config.ts ./tarko.config.ts
+# 根据项目需求修改配置
+```
+
+项目配置示例：
+
+```typescript
+// ~/projects/project1/tarko.config.ts
+import { AgentAppConfig } from '@tarko/interface';
+
+const config: AgentAppConfig = {
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  // workspace 会自动设置为当前目录
+};
+
+export default config;
+```
+
+使用方式：
+
+```bash
+# 在项目目录下直接运行，自动使用项目配置
+cd ~/projects/project1
+tarko
+```
+
+### 策略 C: 混合模式
+
+**适用场景:** 既需要全局默认配置，又需要项目特定配置
+
+```bash
+# 创建基础全局配置
+mkdir -p ~/configs
+cp ~/.tarko/tarko.config.ts ~/configs/tarko-base.config.ts
+
+# 为特殊项目创建特定配置
+cd ~/projects/special-project
+cp ~/configs/tarko-base.config.ts ./tarko.config.ts
+# 修改项目特定设置
+```
+
+## 步骤 4: 环境变量设置
+
+将敏感信息迁移到环境变量：
+
+```bash
+# 编辑你的 shell 配置文件
+vim ~/.bashrc  # 或 ~/.zshrc
+
+# 添加环境变量
+export OPENAI_API_KEY="your-openai-api-key"
+export ANTHROPIC_API_KEY="your-anthropic-api-key"
+export VOLCENGINE_API_KEY="your-volcengine-api-key"
+
+# 重新加载配置
+source ~/.bashrc  # 或 source ~/.zshrc
+```
+
+## 步骤 5: 创建便捷脚本
+
+为了简化使用，可以创建一些便捷脚本：
+
+```bash
+# 创建全局 tarko 别名
+vim ~/.bashrc
+
+# 添加别名
+alias tarko-global='tarko --config ~/configs/tarko-global.config.ts'
+alias tarko-dev='tarko --config ~/configs/tarko-dev.config.ts'
+
+# 或创建函数
+tarko-with-workspace() {
+    local workspace_dir=${1:-.}
+    tarko --config ~/configs/tarko-global.config.ts --workspace "$workspace_dir"
+}
+```
+
+## 步骤 6: 验证迁移
+
+测试新的配置是否正常工作：
+
+```bash
+# 测试全局配置
+tarko --config ~/configs/tarko-global.config.ts --workspace /tmp/test-workspace
+
+# 测试项目配置
+cd ~/projects/project1
+tarko
+
+# 测试环境变量
+echo $OPENAI_API_KEY
+tarko --model.provider openai --headless --input "Hello"
+```
+
+## 步骤 7: 清理旧文件
+
+确认迁移成功后，可以清理旧的 Global Workspace：
+
+```bash
+# 确认新配置工作正常后再执行
+# rm -rf ~/.tarko
+
+# 或者重命名保留一段时间
+mv ~/.tarko ~/.tarko-deprecated-$(date +%Y%m%d)
+```
+
+## 常见问题与解决方案
+
+### Q1: 如何模拟原来的全局行为？
+
+**A:** 使用共享配置 + shell 别名：
+
+```bash
+# ~/.bashrc 或 ~/.zshrc
+alias tarko='tarko --config ~/configs/tarko-global.config.ts'
+
+# 这样就可以在任何目录下使用 tarko，效果类似原来的全局配置
+```
+
+### Q2: 如何在不同项目间共享部分配置？
+
+**A:** 创建配置模板和继承：
+
+```typescript
+// ~/configs/tarko-base.config.ts
+export const baseConfig = {
+  model: {
+    provider: 'openai',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+};
+
+// ~/projects/project1/tarko.config.ts
+import { baseConfig } from '~/configs/tarko-base.config.ts';
+
+export default {
+  ...baseConfig,
+  model: {
+    ...baseConfig.model,
+    id: 'gpt-4',  // 项目特定的模型
+  },
+};
+```
+
+### Q3: 如何处理团队协作？
+
+**A:** 使用版本控制 + 环境变量：
+
+```bash
+# 在项目根目录创建配置模板
+cat > tarko.config.template.ts << 'EOF'
+import { AgentAppConfig } from '@tarko/interface';
+
+const config: AgentAppConfig = {
+  model: {
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY, // 设置你的 API Key
+  },
+};
+
+export default config;
+EOF
+
+# 添加到 .gitignore
+echo "tarko.config.ts" >> .gitignore
+
+# 在 README 中说明如何设置
+cat >> README.md << 'EOF'
+## 开发环境设置
+
+1. 复制配置模板：`cp tarko.config.template.ts tarko.config.ts`
+2. 设置环境变量：`export OPENAI_API_KEY="your-key"`
+3. 运行：`tarko`
+EOF
+```
+
+### Q4: 如何在 CI/CD 中使用？
+
+**A:** 使用环境变量 + 临时配置：
+
+```yaml
+# .github/workflows/test.yml
+name: Test
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: Run Tarko Tests
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          # 创建临时配置
+          cat > tarko.config.ts << 'EOF'
+          export default {
+            model: {
+              provider: 'openai',
+              id: 'gpt-4',
+              apiKey: process.env.OPENAI_API_KEY,
+            },
+          };
+          EOF
+          
+          # 运行测试
+          tarko --workspace ./ci-workspace --headless --input "Run tests"
+```
+
+## 迁移检查清单
+
+- [ ] 备份了原有的 `~/.tarko` 目录
+- [ ] 分析了现有配置文件的内容
+- [ ] 选择了合适的迁移策略
+- [ ] 创建了新的配置文件
+- [ ] 设置了必要的环境变量
+- [ ] 测试了新配置的功能
+- [ ] 更新了团队文档（如适用）
+- [ ] 创建了便捷脚本或别名
+- [ ] 清理了旧的配置文件
+
+## 总结
+
+0.3 版本的手动配置管理虽然需要一些初始设置，但提供了更大的灵活性：
+
+- **更好的项目隔离**: 每个项目可以有自己的配置
+- **更灵活的配置**: 可以根据需要选择不同的配置策略
+- **更好的团队协作**: 配置可以版本控制，团队成员可以共享
+- **更简单的 CI/CD**: 不依赖全局状态，更容易在自动化环境中使用
+
+通过本迁移指南，你应该能够顺利从 0.2 版本的 Global Workspace 迁移到 0.3 版本的手动配置管理模式。

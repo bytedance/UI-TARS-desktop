@@ -30,111 +30,143 @@ agent-tars --workspace=./
 ![](/list-files-custom-workspace.png)
 
 
-## Global Workspace
+## 手动配置管理
 
-由于 Agent TARS 通常会安装到全局，因此，在全局安装的使用模式下，Agent TARS 还提供提供了一种通过统一的 Global Workspace 来管理 Config 和 File System 的便捷方式。
+为了在不同项目间保持配置一致性，你可以使用几种方法手动管理配置文件：
 
-Global Workspace 会被创建在 `~/.agent-tars-workspace`，用于存储你的 Config 和 Files。
+### 项目特定配置
 
-### 创建 Global Workspace
-
-要初始化一个新的 Agent TARS workspace：
-
-```bash
-agent-tars workspace --init
-```
-
-这将启动一个交互式的创建过程：
-
-<VideoPanel
-  src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/create-workspace.mp4"
-  loop
-  autoPlay
-/>
-
-我们推荐你使用 TypeScript 来维护配置，这将帮助你将获得自动补全和类型检查的额外好处：
+直接在项目目录中创建配置文件：
 
 ```typescript
-// ~/.agent-tars-workspace/agent-tars.config.ts
-import { defineConfig } from '@agent-tars/interface';
+// ./tarko.config.ts
+import { AgentAppConfig } from '@tarko/interface';
 
-export default defineConfig({
+const config: AgentAppConfig = {
   model: {
     provider: 'openai',
     id: 'gpt-4o',
-    apiKey: 'your-api-key', // 使用环境变量更好
+    apiKey: process.env.OPENAI_API_KEY, // 推荐使用环境变量
   },
-});
+};
+
+export default config;
 ```
 
----
+### 共享配置文件
 
-### Global Workspace 的具体影响
-
-当你完成 Global Workspace 的创建后，对你带来的具体影响是，无论你在什么目录下运行 `agent-tars`：
-
-1. Global Workspace 中的 Config File 都将生效；
-2. Agent 的 `workspace` 将会被设定为 `~/.agent-tars-workspace`；
-3. File System 将指向 Global Workspace，也就是说，LLM 通过 File 工具输出的文件都将位于这个目录；
-4. Agent TARS CLI 中一些依赖 File System 的能力也会指向这个目录，如 Snapshot。
-
-你可以通过 Global Workspace 中的配置文件来自定义配置：
-
-- `agent-tars.config.ts`（TypeScript，推荐）
-- `agent-tars.config.json`（JSON）
-- `agent-tars.config.yaml`（YAML）
-
----
-
-### 打开 Global Workspace
-
-要在 Visual Studio Code 中打开你的工作区：
+创建共享配置文件并使用 `--config` 标志引用：
 
 ```bash
-agent-tars workspace --open
+# 创建共享配置
+mkdir -p ~/configs
+cat > ~/configs/tarko.config.ts << 'EOF'
+import { AgentAppConfig } from '@tarko/interface';
+
+const config: AgentAppConfig = {
+  model: {
+    provider: 'openai',
+    id: 'gpt-4o',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+};
+
+export default config;
+EOF
+
+# 使用共享配置
+tarko --config ~/configs/tarko.config.ts
 ```
 
-如果已安装 VS Code，这将启动 VS Code 并打开你的工作区文件夹。如果 VS Code 不可用，CLI 将提供有关如何手动打开工作区的说明。
+### 环境变量
 
----
-
-### 临时禁用 Global Workspace
-
-如果你在某次使用中，不期望依赖 Global Workspace 的配置，你可以选择临时禁用：
+设置环境变量以保持模型提供商凭据的一致性：
 
 ```bash
-agent-tars workspace --disable
+# 添加到你的 shell 配置文件（.bashrc, .zshrc 等）
+export OPENAI_API_KEY="your-api-key"
+export ANTHROPIC_API_KEY="your-anthropic-key"
+
+# 在配置中使用环境变量
+tarko --model.provider openai --model.apiKey $OPENAI_API_KEY
+```
+
+### CLI 配置覆盖
+
+为每次执行覆盖特定设置：
+
+```bash
+# 覆盖模型提供商
+tarko --model.provider anthropic --model.id claude-3-5-sonnet-20241022
+
+# 覆盖工作区
+tarko --workspace ./my-project-workspace
+
+# 组合多个覆盖
+tarko --workspace ./data --model.provider openai --model.id gpt-4
 ```
 
 ## FAQ
 
-### 我可以有多个工作区吗？
+### 我可以有多个配置吗？
 
-`workspace` 命令在 `~/.agent-tars-workspace` 创建一个全局工作区。虽然你只能有一个全局工作区，但可以在不同的项目文件夹中创建和使用不同的配置，只需在运行其他命令时指定 `--workspace` 选项。
+是的！你可以为不同的项目或用例创建不同的配置文件：
+
+- **项目特定配置**：在每个项目目录中创建 `tarko.config.{ts,yaml,json}`
+- **共享配置**：创建多个配置文件并使用 `--config` 引用它们
+- **基于环境的配置**：使用环境变量在不同设置间切换
 
 ### 如何更新我的配置？
 
-只需使用任何文本编辑器编辑工作区目录中的配置文件。如果你使用 TypeScript，请确保首先安装任何必要的依赖项。
+只需使用任何文本编辑器编辑配置文件。如果你使用 TypeScript，请确保首先安装必要的依赖项：
 
-### 我可以与其他人共享我的工作区吗？
+```bash
+npm install @tarko/interface
+```
 
-是的！工作区只是一个包含配置文件的文件夹。你可以使用 Git 或任何其他版本控制系统共享它。只需确保排除包含敏感信息（如 API 密钥）的文件。
+### 我可以与其他人共享我的配置吗？
 
-### 如果我删除了工作区会怎样？
+是的！配置文件可以使用 Git 或任何其他版本控制系统共享。只需确保：
 
-你始终可以通过再次运行 `agent-tars workspace --init` 来重新创建工作区。但是，工作区中的任何配置或文件都将丢失，因此请确保备份重要文件。
+- 对敏感信息（如 API 密钥）使用环境变量
+- 在 README 中记录所需的环境变量
+- 考虑为其他人创建模板配置文件以供复制
 
 ### 如何指定不同的 API 密钥或模型提供商？
 
-你可以：
+你有几个选择：
 
-1. 编辑你的工作区配置文件
-2. 使用命令行选项在运行命令时覆盖设置：
-
+1. **环境变量**（推荐）：
 ```bash
-agent-tars --model.provider openai --model.apiKey YOUR_API_KEY
+export OPENAI_API_KEY="your-key"
+tarko --model.provider openai
 ```
 
-### 如何在 CI/CD 管道中使用工作区？
+2. **CLI 覆盖**：
+```bash
+tarko --model.provider openai --model.apiKey YOUR_API_KEY
+```
 
-对于持续集成环境，我们建议在你的项目中创建一个特定的工作区目录，并使用 `--workspace` 显式指定它，而不是依赖全局工作区。
+3. **配置文件**：
+```typescript
+// tarko.config.ts
+export default {
+  model: {
+    provider: 'openai',
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+};
+```
+
+### 如何在 CI/CD 管道中使用配置？
+
+对于持续集成环境：
+
+1. **创建项目特定配置**：将 `tarko.config.{ts,yaml,json}` 添加到你的仓库
+2. **使用环境变量**：将 API 密钥和其他机密设置为 CI 环境变量
+3. **显式工作区**：始终指定 `--workspace` 来控制文件操作
+
+```bash
+# CI 命令示例
+tarko --workspace ./ci-workspace --model.apiKey $CI_OPENAI_API_KEY
+```
