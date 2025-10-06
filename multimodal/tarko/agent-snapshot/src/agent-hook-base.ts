@@ -37,15 +37,33 @@ export abstract class AgentHookBase {
   private originalHooks: Partial<Agent> = {};
 
   // Protected access to original hooks for subclasses
-  protected get originalRequestHook() { return this.originalHooks.onLLMRequest; }
-  protected get originalResponseHook() { return this.originalHooks.onLLMResponse; }
-  protected get originalStreamingResponseHook() { return this.originalHooks.onLLMStreamingResponse; }
-  protected get originalLoopEndHook() { return this.originalHooks.onAgentLoopEnd; }
-  protected get originalEachLoopStartHook() { return this.originalHooks.onEachAgentLoopStart; }
-  protected get originalBeforeToolCallHook() { return this.originalHooks.onBeforeToolCall; }
-  protected get originalAfterToolCallHook() { return this.originalHooks.onAfterToolCall; }
-  protected get originalToolCallErrorHook() { return this.originalHooks.onToolCallError; }
-  protected get originalProcessToolCallsHook() { return this.originalHooks.onProcessToolCalls; }
+  protected get originalRequestHook() {
+    return this.originalHooks.onLLMRequest;
+  }
+  protected get originalResponseHook() {
+    return this.originalHooks.onLLMResponse;
+  }
+  protected get originalStreamingResponseHook() {
+    return this.originalHooks.onLLMStreamingResponse;
+  }
+  protected get originalLoopEndHook() {
+    return this.originalHooks.onAgentLoopEnd;
+  }
+  protected get originalEachLoopStartHook() {
+    return this.originalHooks.onEachAgentLoopStart;
+  }
+  protected get originalBeforeToolCallHook() {
+    return this.originalHooks.onBeforeToolCall;
+  }
+  protected get originalAfterToolCallHook() {
+    return this.originalHooks.onAfterToolCall;
+  }
+  protected get originalToolCallErrorHook() {
+    return this.originalHooks.onToolCallError;
+  }
+  protected get originalProcessToolCallsHook() {
+    return this.originalHooks.onProcessToolCalls;
+  }
 
   constructor(agent: Agent, options: HookOptions) {
     this.agent = agent;
@@ -86,13 +104,18 @@ export abstract class AgentHookBase {
 
     // Install our hooks
     this.agent.onLLMRequest = (id, payload) => this.safeHook(() => this.onLLMRequest(id, payload));
-    this.agent.onLLMResponse = (id, payload) => this.safeHook(() => this.onLLMResponse(id, payload));
-    this.agent.onLLMStreamingResponse = (id, payload) => this.safeHook(() => this.onLLMStreamingResponse(id, payload));
+    this.agent.onLLMResponse = (id, payload) =>
+      this.safeHook(() => this.onLLMResponse(id, payload));
+    this.agent.onLLMStreamingResponse = (id, payload) =>
+      this.safeHook(() => this.onLLMStreamingResponse(id, payload));
     this.agent.onAgentLoopEnd = (id) => this.safeHook(() => this.onAgentLoopEnd(id));
     this.agent.onEachAgentLoopStart = (id) => this.safeHook(() => this.onEachAgentLoopStart(id));
-    this.agent.onBeforeToolCall = (id, toolCall, args) => this.safeHook(() => this.onBeforeToolCall(id, toolCall, args));
-    this.agent.onAfterToolCall = (id, toolCall, result) => this.safeHook(() => this.onAfterToolCall(id, toolCall, result));
-    this.agent.onToolCallError = (id, toolCall, error) => this.safeHook(() => this.onToolCallError(id, toolCall, error));
+    this.agent.onBeforeToolCall = (id, toolCall, args) =>
+      this.safeHook(() => this.onBeforeToolCall(id, toolCall, args));
+    this.agent.onAfterToolCall = (id, toolCall, result) =>
+      this.safeHook(() => this.onAfterToolCall(id, toolCall, result));
+    this.agent.onToolCallError = (id, toolCall, error) =>
+      this.safeHook(() => this.onToolCallError(id, toolCall, error));
     this.agent.onProcessToolCalls = (id, toolCalls) => {
       const result = this.safeHook(() => this.onProcessToolCalls(id, toolCalls));
       // Handle the Promise<void | ToolCallResult[]> return type
@@ -113,10 +136,10 @@ export abstract class AgentHookBase {
 
     // Restore original hooks
     Object.assign(this.agent, this.originalHooks);
-    
+
     this.isHooked = false;
     this.originalHooks = {};
-    
+
     logger.debug(`Unhooked from agent: ${this.snapshotName}`);
   }
 
@@ -164,7 +187,7 @@ export abstract class AgentHookBase {
     }
 
     try {
-      const content = chunks.map(chunk => JSON.stringify(chunk)).join('\n');
+      const content = chunks.map((chunk) => JSON.stringify(chunk)).join('\n');
       fs.writeFileSync(filePath, content, 'utf-8');
       logger.debug(`Wrote ${chunks.length} streaming chunks to ${filePath}`);
     } catch (error) {
@@ -182,27 +205,33 @@ export abstract class AgentHookBase {
 
   // Abstract methods to be implemented by subclasses
   protected abstract onLLMRequest(id: string, payload: LLMRequestHookPayload): void | Promise<void>;
-  protected abstract onLLMResponse(id: string, payload: LLMResponseHookPayload): void | Promise<void>;
-  protected abstract onLLMStreamingResponse(id: string, payload: LLMStreamingResponseHookPayload): void;
+  protected abstract onLLMResponse(
+    id: string,
+    payload: LLMResponseHookPayload,
+  ): void | Promise<void>;
+  protected abstract onLLMStreamingResponse(
+    id: string,
+    payload: LLMStreamingResponseHookPayload,
+  ): void;
   protected abstract onAgentLoopEnd(id: string): void | Promise<void>;
   protected abstract onEachAgentLoopStart(id: string): void | Promise<void>;
   protected abstract onBeforeToolCall(
     id: string,
     toolCall: { toolCallId: string; name: string },
-    args: unknown
+    args: unknown,
   ): Promise<unknown> | unknown;
   protected abstract onAfterToolCall(
     id: string,
     toolCall: { toolCallId: string; name: string },
-    result: unknown
+    result: unknown,
   ): Promise<unknown> | unknown;
   protected abstract onToolCallError(
     id: string,
     toolCall: { toolCallId: string; name: string },
-    error: unknown
+    error: unknown,
   ): Promise<unknown> | unknown;
   protected abstract onProcessToolCalls(
     id: string,
-    toolCalls: ChatCompletionMessageToolCall[]
+    toolCalls: ChatCompletionMessageToolCall[],
   ): Promise<ToolCallResult[] | undefined> | ToolCallResult[] | undefined;
 }

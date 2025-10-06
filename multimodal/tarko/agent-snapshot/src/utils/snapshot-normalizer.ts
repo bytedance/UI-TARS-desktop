@@ -75,10 +75,7 @@ export class AgentSnapshotNormalizer {
         ...DEFAULT_CONFIG.fieldsToNormalize,
         ...(config?.fieldsToNormalize ?? []),
       ],
-      fieldsToIgnore: [
-        ...DEFAULT_CONFIG.fieldsToIgnore,
-        ...(config?.fieldsToIgnore ?? []),
-      ],
+      fieldsToIgnore: [...DEFAULT_CONFIG.fieldsToIgnore, ...(config?.fieldsToIgnore ?? [])],
       customNormalizers: [
         ...DEFAULT_CONFIG.customNormalizers,
         ...(config?.customNormalizers ?? []),
@@ -157,14 +154,14 @@ export class AgentSnapshotNormalizer {
     // Generate simple diff
     const diff = this.generateSimpleDiff(
       JSON.stringify(normalizedExpected, null, 2),
-      JSON.stringify(normalizedActual, null, 2)
+      JSON.stringify(normalizedActual, null, 2),
     );
 
     return { equal: false, diff };
   }
 
   private shouldIgnoreField(key: string, path: string): boolean {
-    return this.config.fieldsToIgnore.some(pattern => {
+    return this.config.fieldsToIgnore.some((pattern) => {
       if (pattern instanceof RegExp) {
         return pattern.test(key) || pattern.test(path);
       }
@@ -201,15 +198,15 @@ export class AgentSnapshotNormalizer {
     const expectedLines = expected.split('\n');
     const actualLines = actual.split('\n');
     const maxLines = Math.max(expectedLines.length, actualLines.length);
-    
+
     const diffLines: string[] = [];
     diffLines.push('Expected vs Actual:');
     diffLines.push('');
-    
+
     for (let i = 0; i < maxLines; i++) {
       const expectedLine = expectedLines[i] || '';
       const actualLine = actualLines[i] || '';
-      
+
       if (expectedLine !== actualLine) {
         if (expectedLine) {
           diffLines.push(`- ${expectedLine}`);
@@ -219,7 +216,7 @@ export class AgentSnapshotNormalizer {
         }
       }
     }
-    
+
     return diffLines.join('\n');
   }
 }

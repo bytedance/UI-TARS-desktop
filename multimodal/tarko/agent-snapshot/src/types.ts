@@ -163,17 +163,17 @@ export interface SnapshotCaseConfig {
    * Case name for identification
    */
   name: string;
-  
+
   /**
    * Path to the test case module
    */
   path: string;
-  
+
   /**
    * Directory where snapshots are stored
    */
   snapshotPath: string;
-  
+
   /**
    * Optional vitest snapshot path
    */
@@ -188,7 +188,7 @@ export interface SnapshotCase {
    * Agent instance to test
    */
   agent: import('@tarko/agent').Agent;
-  
+
   /**
    * Input options for the agent run
    */

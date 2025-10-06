@@ -549,7 +549,9 @@ export class AgentReplaySnapshotHook extends AgentHookBase {
       for (let i = 0; i < toolCalls.length; i++) {
         const toolCall = toolCalls[i];
         // Find matching saved tool call by name and args
-        const savedToolCall = savedToolCalls.find((stc: ToolCallData) => stc.name === toolCall.function.name);
+        const savedToolCall = savedToolCalls.find(
+          (stc: ToolCallData) => stc.name === toolCall.function.name,
+        );
 
         if (savedToolCall) {
           // Use result from saved tool call

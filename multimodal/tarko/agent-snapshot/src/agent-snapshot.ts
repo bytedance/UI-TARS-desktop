@@ -6,10 +6,7 @@
 import path from 'path';
 import fs from 'fs';
 import { Agent } from '@tarko/agent';
-import {
-  AgentRunOptions,
-  AgentEventStream,
-} from '@tarko/agent-interface';
+import { AgentRunOptions, AgentEventStream } from '@tarko/agent-interface';
 import {
   AgentSnapshotOptions,
   SnapshotGenerationResult,
@@ -24,7 +21,7 @@ import { AgentNormalizerConfig } from './utils/snapshot-normalizer';
 
 /**
  * AgentSnapshot - Snapshot-based testing for @tarko/agent
- * 
+ *
  * Provides a clean API for generating and testing agent snapshots without
  * complex inheritance or prototype manipulation.
  */
@@ -38,7 +35,7 @@ export class AgentSnapshot {
   constructor(agent: Agent, options: AgentSnapshotOptions) {
     this.agent = agent;
     this.options = { ...options };
-    
+
     this.snapshotPath = path.resolve(options.snapshotPath);
     this.snapshotName = options.snapshotName ?? path.basename(this.snapshotPath);
     this.snapshotManager = new SnapshotManager(this.snapshotPath, options.normalizerConfig);
@@ -60,9 +57,9 @@ export class AgentSnapshot {
 
     try {
       hook.hookAgent();
-      
+
       const response = await this.agent.run(input as any);
-      
+
       if (hook.hasError()) {
         throw hook.getLastError()!;
       }
@@ -95,17 +92,17 @@ export class AgentSnapshot {
    */
   async test(input: AgentRunOptions, config?: TestRunConfig): Promise<SnapshotTestResult> {
     logger.info(`Testing against snapshot: ${this.snapshotName}`);
-    
+
     if (!this.snapshotExists()) {
       throw new Error(
-        `Snapshot not found at ${this.snapshotPath}. Generate it first using .generate()`
+        `Snapshot not found at ${this.snapshotPath}. Generate it first using .generate()`,
       );
     }
 
     const startTime = Date.now();
     const updateSnapshots = config?.updateSnapshots ?? this.options.updateSnapshots ?? false;
     const verification = this.mergeVerificationSettings(config?.verification);
-    
+
     if (updateSnapshots) {
       logger.warn('Update mode enabled - snapshots will be updated instead of verified');
     }
@@ -135,7 +132,7 @@ export class AgentSnapshot {
       this.agent._setIsReplay();
 
       const response = await this.agent.run(input as any);
-      
+
       if (hook.hasError()) {
         throw hook.getLastError()!;
       }
@@ -146,7 +143,7 @@ export class AgentSnapshot {
       // Verify loop count consistency
       if (executedLoops !== loopCount) {
         throw new Error(
-          `Loop count mismatch: executed ${executedLoops} but snapshot has ${loopCount} loops`
+          `Loop count mismatch: executed ${executedLoops} but snapshot has ${loopCount} loops`,
         );
       }
 
@@ -218,9 +215,8 @@ export class AgentSnapshot {
     const loopDirs = fs
       .readdirSync(this.snapshotPath)
       .filter(
-        (dir) => 
-          dir.startsWith('loop-') && 
-          fs.statSync(path.join(this.snapshotPath, dir)).isDirectory()
+        (dir) =>
+          dir.startsWith('loop-') && fs.statSync(path.join(this.snapshotPath, dir)).isDirectory(),
       )
       .sort((a, b) => {
         const numA = parseInt(a.split('-')[1], 10);
@@ -233,18 +229,16 @@ export class AgentSnapshot {
 
   private mergeVerificationSettings(configVerification?: TestRunConfig['verification']) {
     return {
-      verifyLLMRequests: 
-        configVerification?.verifyLLMRequests ?? 
-        this.options.verification?.verifyLLMRequests ?? 
+      verifyLLMRequests:
+        configVerification?.verifyLLMRequests ??
+        this.options.verification?.verifyLLMRequests ??
         true,
-      verifyEventStreams: 
-        configVerification?.verifyEventStreams ?? 
-        this.options.verification?.verifyEventStreams ?? 
+      verifyEventStreams:
+        configVerification?.verifyEventStreams ??
+        this.options.verification?.verifyEventStreams ??
         true,
-      verifyToolCalls: 
-        configVerification?.verifyToolCalls ?? 
-        this.options.verification?.verifyToolCalls ?? 
-        true,
+      verifyToolCalls:
+        configVerification?.verifyToolCalls ?? this.options.verification?.verifyToolCalls ?? true,
     };
   }
 }

@@ -9,7 +9,7 @@ import { logger } from './utils/logger';
 
 /**
  * AgentSnapshotRunner - Batch operations for multiple snapshot test cases
- * 
+ *
  * Provides utilities for generating and testing multiple agent snapshots,
  * useful for comprehensive test suites.
  */
@@ -27,9 +27,9 @@ export class AgentSnapshotRunner {
   async cli(): Promise<void> {
     const args = process.argv.slice(2);
     const [command, caseName, ...flags] = args;
-    
+
     const updateSnapshots = flags.includes('-u') || flags.includes('--updateSnapshot');
-    
+
     if (updateSnapshots) {
       logger.info('Update snapshots mode enabled');
     }
@@ -39,12 +39,12 @@ export class AgentSnapshotRunner {
         case 'generate':
           await this.handleGenerateCommand(caseName);
           break;
-          
+
         case 'test':
         case 'replay': // backward compatibility
           await this.handleTestCommand(caseName, updateSnapshots);
           break;
-          
+
         default:
           this.printUsage();
           break;
@@ -70,7 +70,10 @@ export class AgentSnapshotRunner {
   /**
    * Test snapshot for a specific case or all cases
    */
-  async test(caseName?: string, updateSnapshots = false): Promise<SnapshotTestResult | Record<string, SnapshotTestResult>> {
+  async test(
+    caseName?: string,
+    updateSnapshots = false,
+  ): Promise<SnapshotTestResult | Record<string, SnapshotTestResult>> {
     if (caseName === 'all' || !caseName) {
       return this.testAll(updateSnapshots);
     } else {
@@ -84,7 +87,7 @@ export class AgentSnapshotRunner {
    */
   async generateAll(): Promise<void> {
     logger.info(`Generating snapshots for ${this.cases.length} cases`);
-    
+
     for (const caseConfig of this.cases) {
       try {
         await this.generateSnapshot(caseConfig);
@@ -93,7 +96,7 @@ export class AgentSnapshotRunner {
         throw error;
       }
     }
-    
+
     logger.success('All snapshots generated successfully');
   }
 
@@ -102,9 +105,9 @@ export class AgentSnapshotRunner {
    */
   async testAll(updateSnapshots = false): Promise<Record<string, SnapshotTestResult>> {
     logger.info(`Testing ${this.cases.length} snapshots`);
-    
+
     const results: Record<string, SnapshotTestResult> = {};
-    
+
     for (const caseConfig of this.cases) {
       try {
         results[caseConfig.name] = await this.testSnapshot(caseConfig, updateSnapshots);
@@ -113,7 +116,7 @@ export class AgentSnapshotRunner {
         throw error;
       }
     }
-    
+
     logger.success('All tests passed');
     return results;
   }
@@ -122,7 +125,7 @@ export class AgentSnapshotRunner {
    * Get case configuration by name
    */
   getCase(name: string): SnapshotCaseConfig | undefined {
-    return this.cases.find(c => c.name === name);
+    return this.cases.find((c) => c.name === name);
   }
 
   /**
@@ -157,7 +160,9 @@ export class AgentSnapshotRunner {
   private findCase(name: string): SnapshotCaseConfig {
     const caseConfig = this.getCase(name);
     if (!caseConfig) {
-      throw new Error(`Case "${name}" not found. Available cases: ${this.cases.map(c => c.name).join(', ')}`);
+      throw new Error(
+        `Case "${name}" not found. Available cases: ${this.cases.map((c) => c.name).join(', ')}`,
+      );
     }
     return caseConfig;
   }
@@ -165,19 +170,19 @@ export class AgentSnapshotRunner {
   private async loadSnapshotCase(caseConfig: SnapshotCaseConfig): Promise<SnapshotCase> {
     try {
       const importedModule = await import(caseConfig.path);
-      
+
       // Try default export first
       if (importedModule.default?.agent && importedModule.default?.runOptions) {
         return importedModule.default;
       }
-      
+
       // Try named exports
       if (importedModule.agent && importedModule.runOptions) {
         return importedModule;
       }
-      
+
       throw new Error(
-        `Invalid case module: must export 'agent' and 'runOptions' (either as named exports or default export)`
+        `Invalid case module: must export 'agent' and 'runOptions' (either as named exports or default export)`,
       );
     } catch (error) {
       throw new Error(`Failed to load case module "${caseConfig.path}": ${error}`);
@@ -186,9 +191,9 @@ export class AgentSnapshotRunner {
 
   private async generateSnapshot(caseConfig: SnapshotCaseConfig): Promise<void> {
     logger.info(`Generating snapshot: ${caseConfig.name}`);
-    
+
     const { agent, runOptions } = await this.loadSnapshotCase(caseConfig);
-    
+
     const snapshot = new AgentSnapshot(agent, {
       snapshotPath: caseConfig.snapshotPath,
       updateSnapshots: true,
@@ -200,10 +205,10 @@ export class AgentSnapshotRunner {
 
   private async testSnapshot(
     caseConfig: SnapshotCaseConfig,
-    updateSnapshots = false
+    updateSnapshots = false,
   ): Promise<SnapshotTestResult> {
     logger.info(`Testing snapshot: ${caseConfig.name}`);
-    
+
     if (updateSnapshots) {
       logger.warn('Update mode: snapshots will be updated instead of verified');
     }
@@ -217,7 +222,7 @@ export class AgentSnapshotRunner {
 
     const result = await snapshot.test(runOptions);
     logger.success(`Test passed: ${caseConfig.name}`);
-    
+
     return result;
   }
 
@@ -232,7 +237,7 @@ export class AgentSnapshotRunner {
     console.log('  -u, --updateSnapshot      Update snapshots during testing');
     console.log('');
     console.log('Available cases:');
-    this.cases.forEach(c => console.log(`  - ${c.name}`));
+    this.cases.forEach((c) => console.log(`  - ${c.name}`));
     console.log('  - all (all cases)');
   }
 }
