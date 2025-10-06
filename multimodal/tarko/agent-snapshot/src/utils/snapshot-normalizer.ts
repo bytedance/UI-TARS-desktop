@@ -160,6 +160,36 @@ export class AgentSnapshotNormalizer {
     return { equal: false, diff };
   }
 
+  /**
+   * Create a snapshot serializer for Vitest/Jest
+   */
+  createSnapshotSerializer() {
+    return {
+      test: (value: unknown) => {
+        // Test if this value should be serialized by this serializer
+        return (
+          typeof value === 'object' &&
+          value !== null &&
+          !Array.isArray(value) &&
+          (this.hasFieldsToNormalize(value as Record<string, unknown>) ||
+            this.hasFieldsToIgnore(value as Record<string, unknown>))
+        );
+      },
+      serialize: (
+        value: unknown,
+        config: unknown,
+        indentation: string,
+        depth: number,
+        refs: unknown,
+        printer: (val: unknown, cfg: unknown, ind: string, dep: number, ref: unknown) => string,
+      ) => {
+        // Normalize the value before printing
+        const normalized = this.normalize(value);
+        return printer(normalized, config, indentation, depth, refs);
+      },
+    };
+  }
+
   private shouldIgnoreField(key: string, path: string): boolean {
     return this.config.fieldsToIgnore.some((pattern) => {
       if (pattern instanceof RegExp) {
@@ -218,5 +248,17 @@ export class AgentSnapshotNormalizer {
     }
 
     return diffLines.join('\n');
+  }
+
+  private hasFieldsToNormalize(value: Record<string, unknown>): boolean {
+    return Object.keys(value).some((key) =>
+      this.config.fieldsToNormalize.some((field) => this.matchesPattern(field.pattern, key, key)),
+    );
+  }
+
+  private hasFieldsToIgnore(value: Record<string, unknown>): boolean {
+    return Object.keys(value).some((key) =>
+      this.config.fieldsToIgnore.some((pattern) => this.matchesPattern(pattern, key, key)),
+    );
   }
 }
