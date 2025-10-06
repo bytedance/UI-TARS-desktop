@@ -53,25 +53,25 @@ npm install @tarko/agent
 
 ## 核心特性
 
-### 🔧 工具集成
+### 工具集成
 在 Agent 响应中轻松创建和调用工具，支持复杂的多步骤工作流。
 
-### 📡 事件流驱动
+### 事件流驱动
 基于标准事件流协议，实时追踪 Agent 状态，高效构建上下文和 UI。
 
-### ⚡ 原生流式
+### 原生流式
 原生流式传输让你实时了解 Agent 的思考过程和输出结果。
 
-### 🎯 多模态分析
+### 多模态分析
 自动分析多模态工具结果（图像、文本、文件等），让你专注于业务逻辑。
 
-### 🔌 强大的扩展能力
+### 强大的扩展能力
 丰富的生命周期 Hook 设计，允许你实现更高级的 Agent 行为。
 
-### 🌐 多 Model Provider
+### 多 Model Provider
 支持 OpenAI、Claude、豆包等多种模型，支持高级配置和运行时切换。
 
-### ⚙️ 多 Tool Call Engine
+### 多 Tool Call Engine
 - `native`: OpenAI 兼容的原生函数调用
 - `prompt_engineering`: 基于提示的工具调用
 - `structured_outputs`: JSON Schema 结构化输出
@@ -412,7 +412,7 @@ class CustomAgent extends Agent {
 
 ## 最佳实践
 
-### 🎯 选择合适的 Tool Call Engine
+### 选择合适的 Tool Call Engine
 
 ```ts
 // 对于支持函数调用的模型（推荐）
@@ -431,7 +431,7 @@ const structuredAgent = new Agent({
 });
 ```
 
-### 🔧 工具设计原则
+### 工具设计原则
 
 ```ts
 // ✅ 好的工具设计
@@ -461,7 +461,7 @@ const badTool = new Tool({
 });
 ```
 
-### 📊 性能优化
+### 性能优化
 
 ```ts
 const optimizedAgent = new Agent({
@@ -483,7 +483,7 @@ const optimizedAgent = new Agent({
 });
 ```
 
-### 🛡️ 安全考虑
+### 安全考虑
 
 ```ts
 // 工具过滤

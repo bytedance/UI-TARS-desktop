@@ -53,25 +53,25 @@ npm install @tarko/agent
 
 ## Core Features
 
-### 🔧 Tool Integration
+### Tool Integration
 Effortlessly create and call tools within agent responses, supporting complex multi-step workflows.
 
-### 📡 Event-Stream Driven
+### Event-Stream Driven
 Based on standard event stream protocols, real-time tracking of Agent state for efficient context and UI building.
 
-### ⚡ Native Streaming
+### Native Streaming
 Native streaming transmission lets you understand the Agent's thinking process and output results in real time.
 
-### 🎯 Multimodal Analysis
+### Multimodal Analysis
 Automatically analyze multimodal tool results (images, text, files, etc.), letting you focus on business logic.
 
-### 🔌 Strong Extension Capabilities
+### Strong Extension Capabilities
 Rich lifecycle hook design allows you to implement more advanced Agent behaviors.
 
-### 🌐 Multiple Model Providers
+### Multiple Model Providers
 Supports OpenAI, Claude, Doubao and other models, with advanced configuration and runtime switching.
 
-### ⚙️ Multiple Tool Call Engines
+### Multiple Tool Call Engines
 - `native`: OpenAI-compatible native function calling
 - `prompt_engineering`: Prompt-based tool calling
 - `structured_outputs`: JSON Schema structured outputs
@@ -246,13 +246,13 @@ async function main() {
         process.stdout.write(event.content); // Real-time output
         break;
       case 'tool_call':
-        console.log(`🔧 Calling tool: ${event.name}`);
+        console.log(`Calling tool: ${event.name}`);
         break;
       case 'tool_result':
-        console.log(`✅ Tool result: ${event.elapsedMs}ms`);
+        console.log(`Tool result: ${event.elapsedMs}ms`);
         break;
       case 'assistant_message':
-        console.log(`\n💬 Complete response: ${event.content}`);
+        console.log(`\nComplete response: ${event.content}`);
         break;
     }
   }
@@ -430,7 +430,7 @@ class CustomAgent extends Agent {
 
 ## Best Practices
 
-### 🎯 Choose the Right Tool Call Engine
+### Choose the Right Tool Call Engine
 
 ```ts
 // For models supporting function calling (recommended)
@@ -449,7 +449,7 @@ const structuredAgent = new Agent({
 });
 ```
 
-### 🔧 Tool Design Principles
+### Tool Design Principles
 
 ```ts
 // ✅ Good tool design
@@ -479,7 +479,7 @@ const badTool = new Tool({
 });
 ```
 
-### 📊 Performance Optimization
+### Performance Optimization
 
 ```ts
 const optimizedAgent = new Agent({
@@ -501,7 +501,7 @@ const optimizedAgent = new Agent({
 });
 ```
 
-### 🛡️ Security Considerations
+### Security Considerations
 
 ```ts
 // Tool filtering
