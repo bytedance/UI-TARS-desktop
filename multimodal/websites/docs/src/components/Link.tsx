@@ -1,7 +1,6 @@
 import React from 'react';
-import { useNavigate } from '@rspress/core/runtime';
+import { useNavigate } from 'rspress/runtime';
 import { motion, HTMLMotionProps } from 'framer-motion';
-
 
 export interface LinkProps extends Omit<HTMLMotionProps<'a'>, 'href'> {
   /**
@@ -24,8 +23,6 @@ export interface LinkProps extends Omit<HTMLMotionProps<'a'>, 'href'> {
    * Child elements
    */
   children: React.ReactNode;
-
-
 }
 
 /**
@@ -62,12 +59,9 @@ export const Link: React.FC<LinkProps> = ({
 }) => {
   const navigate = useNavigate();
 
-
   // Check if the link is external
   const isExternalLink =
     href?.startsWith('http') || href?.startsWith('//') || href?.startsWith('#');
-
-
 
   // Handle click event
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
@@ -93,7 +87,6 @@ export const Link: React.FC<LinkProps> = ({
       href={href}
       className={className}
       onClick={handleClick}
-
       // If external link, add relevant attributes
       {...(isExternalLink ? { target: rest.target || '_blank', rel: 'noopener noreferrer' } : {})}
       {...rest}

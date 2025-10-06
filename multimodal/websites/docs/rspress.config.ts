@@ -1,5 +1,5 @@
 import * as path from 'node:path';
-import { defineConfig } from '@rspress/core';
+import { defineConfig } from 'rspress/config';
 import mermaid from 'rspress-plugin-mermaid';
 import { pluginClientRedirects } from '@rspress/plugin-client-redirects';
 import { SEO_CONFIG } from './src/shared/seoConfig';
@@ -78,9 +78,6 @@ export default defineConfig({
         // theme: 'base',
         fontSize: 16,
       },
-    }),
-    pluginClientRedirects({
-      redirects: [],
     }),
   ],
   themeConfig: {

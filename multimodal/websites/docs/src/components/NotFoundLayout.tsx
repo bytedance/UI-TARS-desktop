@@ -1,4 +1,4 @@
-import { useI18n } from '@rspress/core/runtime';
+import { useI18n } from 'rspress/runtime';
 import { isInSSR } from '../shared/env';
 import { ActionCard } from './ActionCard';
 
