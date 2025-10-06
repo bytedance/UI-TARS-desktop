@@ -17,9 +17,9 @@ Agent Hooks 是在 Agent 运行特定节点执行的回调方法。所有 Hook �
 - **Termination Hooks**：自定义完成条件强制执行
 - **Request Preparation**：动态系统提示和工具修改
 
-## 核心 Hooks
+## 核心 Hook
 
-### 与 LLM 交互的 Hooks
+### LLM 交互 Hook
 
 拦截和监控 LLM 请求和响应：
 
@@ -30,32 +30,32 @@ class MonitoringAgent extends Agent {
   // 在每个 LLM 请求之前调用
   override async onLLMRequest(id: string, payload: LLMRequestHookPayload) {
     console.log(`[${id}] 发送请求到 ${payload.model}`);
-    console.log('消息数量:', payload.messages.length);
+    console.log('Messages count:', payload.messages.length);
     
     // 记录 token 使用估算
     const tokenEstimate = this.estimateTokens(payload.messages);
-    console.log('预估 tokens:', tokenEstimate);
+    console.log('Estimated tokens:', tokenEstimate);
   }
   
   // 在每个 LLM 响应之后调用
   override async onLLMResponse(id: string, payload: LLMResponseHookPayload) {
     const response = payload.response;
     console.log(`[${id}] 收到响应:`);
-    console.log('使用情况:', response.usage);
-    console.log('完成原因:', response.choices[0]?.finish_reason);
+    console.log('Usage:', response.usage);
+    console.log('Finish reason:', response.choices[0]?.finish_reason);
     
     // 如果存在工具调用则记录
     const toolCalls = response.choices[0]?.message?.tool_calls;
     if (toolCalls?.length) {
-      console.log('工具调用:', toolCalls.map(tc => tc.function.name));
+      console.log('Tool calls:', toolCalls.map(tc => tc.function.name));
     }
   }
   
   // 在流式响应期间调用
   override onLLMStreamingResponse(id: string, payload: LLMStreamingResponseHookPayload) {
-    // 实时监控流式块
+    // 实时监控 streaming chunks
     const chunks = payload.chunks;
-    console.log(`[${id}] 收到 ${chunks.length} 个流式块`);
+    console.log(`[${id}] 收到 ${chunks.length} 个 streaming chunks`);
   }
 }
 ```
@@ -74,8 +74,8 @@ class ToolMonitoringAgent extends Agent {
     toolCall: { toolCallId: string; name: string },
     args: any
   ) {
-    console.log(`[${id}] 执行工具: ${toolCall.name}`);
-    console.log('参数:', JSON.stringify(args, null, 2));
+    console.log(`[${id}] Executing tool: ${toolCall.name}`);
+    console.log('Arguments:', JSON.stringify(args, null, 2));
     
     // 跟踪工具使用情况
     const currentCount = this.toolUsageStats.get(toolCall.name) || 0;
@@ -83,7 +83,7 @@ class ToolMonitoringAgent extends Agent {
     
     // 验证参数或应用速率限制
     if (toolCall.name === 'expensive_api' && currentCount >= 5) {
-      throw new Error('expensive_api 超出速率限制');
+      throw new Error('Rate limit exceeded for expensive_api');
     }
     
     // 返回可能修改的参数
@@ -96,14 +96,14 @@ class ToolMonitoringAgent extends Agent {
     toolCall: { toolCallId: string; name: string },
     result: any
   ) {
-    console.log(`[${id}] 工具 ${toolCall.name} 完成`);
-    console.log('结果类型:', typeof result);
+    console.log(`[${id}] Tool ${toolCall.name} completed`);
+    console.log('Result type:', typeof result);
     
     // 记录错误或成功结果
     if (result?.error) {
-      console.error('工具执行失败:', result.error);
+      console.error('Tool execution failed:', result.error);
     } else {
-      console.log('工具执行成功');
+      console.log('Tool execution successful');
     }
     
     // 返回可能修改的结果
@@ -116,14 +116,14 @@ class ToolMonitoringAgent extends Agent {
     toolCall: { toolCallId: string; name: string },
     error: any
   ) {
-    console.error(`[${id}] 工具 ${toolCall.name} 失败:`, error);
+    console.error(`[${id}] Tool ${toolCall.name} failed:`, error);
     
     // 实现重试逻辑或错误转换
     if (error.message?.includes('timeout')) {
-      return '工具执行超时。请稍后重试。';
+      return 'Tool execution timed out. Please try again later.';
     }
     
-    return `错误: ${error.message || error}`;
+    return `Error: ${error.message || error}`;
   }
   
   // 完全覆盖工具调用处理
@@ -138,7 +138,7 @@ class ToolMonitoringAgent extends Agent {
     if (process.env.NODE_ENV === 'test') {
       return toolCalls.map(tc => ({
         toolCallId: tc.id,
-        result: `${tc.function.name} 的模拟结果`,
+        result: `Mocked result for ${tc.function.name}`,
         success: true
       }));
     }
@@ -148,7 +148,7 @@ class ToolMonitoringAgent extends Agent {
 }
 ```
 
-### Agent-Loop Hooks
+### 循环生命周期 Hook
 
 控制 Agent 循环迭代和终止：
 
@@ -159,11 +159,11 @@ class LoopControlAgent extends Agent {
   // 在每个循环迭代开始时调用
   override async onEachAgentLoopStart(sessionId: string) {
     this.iterationStartTimes.set(sessionId, Date.now());
-    console.log(`[${sessionId}] 开始迭代 ${this.getCurrentLoopIteration()}`);
+    console.log(`[${sessionId}] Starting iteration ${this.getCurrentLoopIteration()}`);
     
     // 注入额外上下文或执行设置
     const currentTime = new Date().toISOString();
-    console.log(`当前时间: ${currentTime}`);
+    console.log(`Current time: ${currentTime}`);
   }
   
   // 在每个循环迭代结束时调用
@@ -171,18 +171,18 @@ class LoopControlAgent extends Agent {
     const startTime = this.iterationStartTimes.get(context.sessionId);
     if (startTime) {
       const duration = Date.now() - startTime;
-      console.log(`[${context.sessionId}] 迭代在 ${duration}ms 内完成`);
+      console.log(`[${context.sessionId}] Iteration completed in ${duration}ms`);
     }
     
     // 记录迭代结果
-    console.log('此迭代中的事件:', context.events?.length || 0);
-    console.log('进行的工具调用:', context.toolCallResults?.length || 0);
+    console.log('Events in this iteration:', context.events?.length || 0);
+    console.log('Tool calls made:', context.toolCallResults?.length || 0);
   }
   
   // 当整个 Agent 循环结束时调用
   override async onAgentLoopEnd(id: string) {
-    console.log(`[${id}] Agent 循环完成`);
-    console.log('总迭代次数:', this.getCurrentLoopIteration());
+    console.log(`[${id}] Agent loop completed`);
+    console.log('Total iterations:', this.getCurrentLoopIteration());
     
     // 清理迭代跟踪
     this.iterationStartTimes.delete(id);
