@@ -401,64 +401,7 @@ Understanding the hook execution sequence is crucial for proper implementation:
 
 ## Testing Hooks
 
-### Unit Testing Individual Hooks
-
-```typescript
-import { Agent, AgentOptions } from '@tarko/agent';
-
-class TestableAgent extends Agent {
-  public hookCallLog: string[] = [];
-  
-  override async onLLMRequest(id: string, payload: any) {
-    this.hookCallLog.push(`onLLMRequest:${id}`);
-  }
-  
-  override async onBeforeToolCall(id: string, toolCall: any, args: any) {
-    this.hookCallLog.push(`onBeforeToolCall:${toolCall.name}`);
-    return args;
-  }
-}
-
-describe('Agent Hooks', () => {
-  let agent: TestableAgent;
-  
-  beforeEach(() => {
-    agent = new TestableAgent({});
-  });
-  
-  it('should call hooks in correct order', async () => {
-    // Test hook execution order
-    await agent.onLLMRequest('test-session', { model: 'gpt-4', messages: [] });
-    await agent.onBeforeToolCall('test-session', { name: 'test-tool' }, {});
-    
-    expect(agent.hookCallLog).toEqual([
-      'onLLMRequest:test-session',
-      'onBeforeToolCall:test-tool'
-    ]);
-  });
-});
-```
-
-### Integration Testing
-
-```typescript
-describe('Hook Integration', () => {
-  it('should prevent termination when required', async () => {
-    const agent = new ValidatingAgent({
-      tools: [/* required tools */]
-    });
-    
-    // Mock a scenario where not all required tools are called
-    const result = await agent.onBeforeLoopTermination(
-      'test-session',
-      { content: 'Final answer' } as any
-    );
-    
-    expect(result.finished).toBe(false);
-    expect(result.message).toContain('Must call required tools');
-  });
-});
-```
+WIP
 
 ## Real-World Examples
 
