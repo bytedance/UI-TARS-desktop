@@ -399,67 +399,6 @@ class ResilientAgent extends Agent {
 9. [否则从步骤 2 重复]
 ```
 
-## 测试 Hooks
-
-### 单元测试单个 Hooks
-
-```typescript
-import { Agent, AgentOptions } from '@tarko/agent';
-
-class TestableAgent extends Agent {
-  public hookCallLog: string[] = [];
-  
-  override async onLLMRequest(id: string, payload: any) {
-    this.hookCallLog.push(`onLLMRequest:${id}`);
-  }
-  
-  override async onBeforeToolCall(id: string, toolCall: any, args: any) {
-    this.hookCallLog.push(`onBeforeToolCall:${toolCall.name}`);
-    return args;
-  }
-}
-
-describe('Agent Hooks', () => {
-  let agent: TestableAgent;
-  
-  beforeEach(() => {
-    agent = new TestableAgent({});
-  });
-  
-  it('should call Hook in correct order', async () => {
-    // 测试 hook 执行顺序
-    await agent.onLLMRequest('test-session', { model: 'gpt-4', messages: [] });
-    await agent.onBeforeToolCall('test-session', { name: 'test-tool' }, {});
-    
-    expect(agent.hookCallLog).toEqual([
-      'onLLMRequest:test-session',
-      'onBeforeToolCall:test-tool'
-    ]);
-  });
-});
-```
-
-### 集成测试
-
-```typescript
-describe('Hook Integration', () => {
-  it('should prevent termination when required', async () => {
-    const agent = new ValidatingAgent({
-      tools: [/* 必需工具 */]
-    });
-    
-    // 模拟未调用所有必需工具的场景
-    const result = await agent.onBeforeLoopTermination(
-      'test-session',
-      { content: '最终答案' } as any
-    );
-    
-    expect(result.finished).toBe(false);
-    expect(result.message).toContain('必须调用必需工具');
-  });
-});
-```
-
 
 ## 实际示例
 
