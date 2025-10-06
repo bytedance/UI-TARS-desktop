@@ -22,20 +22,20 @@ description: Complete API reference for @tarko/agent
 ## 架构概览
 
 ```mermaid
-graph TD
-    A[用户输入] --> B[Agent.run()]
-    B --> C[消息历史管理]
-    C --> D[LLM 请求]
-    D --> E{需要工具调用?}
+flowchart TD
+    A[用户输入] --> B[Agent.run]
+    B --> C[消息历史]
+    C --> D[LLM请求]
+    D --> E{工具调用?}
     E -->|是| F[工具执行]
     E -->|否| G[生成回复]
     F --> H[工具结果]
-    H --> I{达到最大迭代?}
+    H --> I{最大迭代?}
     I -->|否| D
     I -->|是| G
-    G --> J[事件流输出]
+    G --> J[事件流]
     
-    J --> K[实时 UI 更新]
+    J --> K[UI更新]
     J --> L[日志记录]
     J --> M[性能监控]
     

@@ -22,22 +22,22 @@ Unlike high-level frameworks, `@tarko/agent` gives you complete control to custo
 ## Architecture Overview
 
 ```mermaid
-graph TD
-    A[User Input] --> B[Agent.run()]
-    B --> C[Message History Management]
+flowchart TD
+    A[User Input] --> B[Agent.run]
+    B --> C[Message History]
     C --> D[LLM Request]
-    D --> E{Need Tool Calls?}
+    D --> E{Tool Calls?}
     E -->|Yes| F[Tool Execution]
     E -->|No| G[Generate Response]
     F --> H[Tool Results]
     H --> I{Max Iterations?}
     I -->|No| D
     I -->|Yes| G
-    G --> J[Event Stream Output]
+    G --> J[Event Stream]
     
-    J --> K[Real-time UI Updates]
+    J --> K[UI Updates]
     J --> L[Logging]
-    J --> M[Performance Monitoring]
+    J --> M[Monitoring]
     
     style A fill:#e1f5fe
     style G fill:#c8e6c9
