@@ -460,44 +460,9 @@ describe('Hook Integration', () => {
 });
 ```
 
-## Best Practices
-
-### 1. Hook Design
-- Keep hooks focused and lightweight
-- Always call `super.hookMethod()` when overriding
-- Handle errors gracefully without breaking agent execution
-- Use async/await for asynchronous operations
-
-### 2. State Management
-- Store hook-specific state in instance variables
-- Clean up state in `onAgentLoopEnd`
-- Use session IDs to track per-conversation state
-
-### 3. Performance
-- Avoid blocking operations in critical hooks
-- Use caching for expensive computations
-- Implement timeouts for external calls
-
-### 4. Error Handling
-- Always handle hook errors gracefully
-- Provide fallback behavior when possible
-- Log errors for debugging without exposing sensitive data
-
-### 5. Testing
-- Unit test hooks in isolation
-- Test hook composition and ordering
-- Mock external dependencies
-- Test error scenarios
-
 ## Real-World Examples
 
-The examples above demonstrate practical implementations of:
-
-- Analytics and metrics collection
-- User permission enforcement
-- Rate limiting and quota management
-- Multi-step workflow validation
-- Error recovery and retry mechanisms
+WIP
 
 ## Next Steps
 
