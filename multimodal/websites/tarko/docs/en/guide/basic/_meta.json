@@ -26,11 +26,6 @@
   },
   {
     "type": "file",
-    "name": "troubleshooting",
-    "label": "Troubleshooting"
-  },
-  {
-    "type": "file",
     "name": "ui-integration",
     "label": "UI Integration"
   }

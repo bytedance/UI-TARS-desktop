@@ -26,11 +26,6 @@
   },
   {
     "type": "file",
-    "name": "troubleshooting",
-    "label": "故障排除"
-  },
-  {
-    "type": "file",
     "name": "ui-integration",
     "label": "UI 集成"
   }
