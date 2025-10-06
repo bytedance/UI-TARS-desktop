@@ -17,9 +17,9 @@ Agent Hooks 是在 Agent 运行特定节点执行的回调方法。所有 Hook �
 - **Termination Hooks**：自定义完成条件强制执行
 - **Request Preparation**：动态系统提示和工具修改
 
-## 核心 Hook 类别
+## 核心 Hooks
 
-### LLM 通信 Hooks
+### 与 LLM 交互的 Hooks
 
 拦截和监控 LLM 请求和响应：
 
@@ -148,7 +148,7 @@ class ToolMonitoringAgent extends Agent {
 }
 ```
 
-### 循环生命周期 Hooks
+### Agent-Loop Hooks
 
 控制 Agent 循环迭代和终止：
 
