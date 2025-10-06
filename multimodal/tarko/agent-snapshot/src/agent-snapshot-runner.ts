@@ -22,6 +22,26 @@ export class AgentSnapshotRunner {
   }
 
   /**
+   * Get the list of examples (for backward compatibility with tests)
+   */
+  get examples(): SnapshotCaseConfig[] {
+    return [...this.cases];
+  }
+
+  /**
+   * Replay a snapshot for a specific case (for backward compatibility with tests)
+   */
+  async replaySnapshot(caseConfig: SnapshotCaseConfig): Promise<SnapshotTestResult> {
+    const { agent, runOptions } = await this.loadSnapshotCase(caseConfig);
+
+    const snapshot = new AgentSnapshot(agent, {
+      snapshotPath: caseConfig.snapshotPath,
+    });
+
+    return snapshot.test(runOptions);
+  }
+
+  /**
    * Command-line interface for snapshot operations
    */
   async cli(): Promise<void> {
