@@ -96,21 +96,28 @@ export class AgentSnapshotNormalizer {
       return obj;
     }
 
-    // Handle circular references
-    if (typeof obj === 'object' && obj !== null) {
-      if (this.seenObjects.has(obj)) {
-        return '[Circular]';
-      }
-      this.seenObjects.add(obj);
+    // Handle primitives and functions
+    if (typeof obj !== 'object') {
+      return obj;
     }
+
+    // Handle circular references
+    if (this.seenObjects.has(obj)) {
+      return '[Circular]';
+    }
+    this.seenObjects.add(obj);
 
     // Handle arrays
     if (Array.isArray(obj)) {
-      return obj.map((item, index) => this.normalize(item, `${path}[${index}]`));
+      try {
+        return obj.map((item, index) => this.normalize(item, `${path}[${index}]`));
+      } catch (error) {
+        return '[Array: normalization failed]';
+      }
     }
 
     // Handle objects
-    if (typeof obj === 'object' && obj !== null) {
+    try {
       const result: Record<string, unknown> = {};
 
       for (const [key, value] of Object.entries(obj)) {
@@ -131,10 +138,9 @@ export class AgentSnapshotNormalizer {
       }
 
       return result;
+    } catch (error) {
+      return `[Object: ${obj.constructor?.name || 'Unknown'} - normalization failed]`;
     }
-
-    // Return primitives as-is
-    return obj;
   }
 
   /**
@@ -183,9 +189,16 @@ export class AgentSnapshotNormalizer {
         refs: unknown,
         printer: (val: unknown, cfg: unknown, ind: string, dep: number, ref: unknown) => string,
       ) => {
-        // Normalize the value before printing
-        const normalized = this.normalize(value);
-        return printer(normalized, config, indentation, depth, refs);
+        // Use a simple safe serialization approach to avoid circular references
+        try {
+          // Create a fresh normalizer instance for each serialization to avoid circular reference issues
+          const freshNormalizer = new AgentSnapshotNormalizer(this.config);
+          const normalized = freshNormalizer.normalize(value);
+          return printer(normalized, config, indentation, depth, refs);
+        } catch (error) {
+          // Fallback to simple string representation if normalization fails
+          return `[Snapshot: ${typeof value === 'object' && value !== null ? value.constructor.name : typeof value}]`;
+        }
       },
     };
   }
