@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { FaGithub, FaCopy, FaCheck } from 'react-icons/fa';
-import CustomCursor from '@components/CustomCursor';
 import { Link } from '@components/Link';
 import { VideoPanel } from '@components/VideoPanel';
 import { usePageMeta, generatePageTitle, optimizeDescription } from '@components/hooks';
@@ -273,8 +272,7 @@ export const HomePage = () => {
       {/* Aurora background effect */}
       <div ref={auroraRef} className="aurora-container"></div>
 
-      {/* Custom mouse pointer */}
-      <CustomCursor />
+
 
       {/* GitHub icon in the top right corner */}
       <motion.div

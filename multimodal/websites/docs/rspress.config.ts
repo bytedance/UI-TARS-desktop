@@ -10,6 +10,7 @@ export default defineConfig({
   root: path.join(__dirname, 'docs'),
   lang: 'en',
   title: SEO_CONFIG.siteName,
+  ssg: false,
   icon: SEO_CONFIG.images.favicon,
   globalStyles: path.join(__dirname, 'src/styles/index.css'),
   logo: {

@@ -1,4 +1,3 @@
-import { CursorProvider } from '@components/CursorContext';
 import { Layout as BasicLayout } from 'rspress/theme';
 import { NotFoundLayout } from '../src/components';
 import { Showcase } from '../src/components/Showcase';
@@ -12,26 +11,26 @@ const Layout = () => {
 
   if (location.pathname.startsWith(DYNAMIC_ROUTE.Showcase)) {
     return (
-      <CursorProvider>
+      <>
         <Nav />
         <Showcase />
-      </CursorProvider>
+      </>
     );
   }
 
   if (location.pathname.startsWith(DYNAMIC_ROUTE.Replay)) {
     return (
-      <CursorProvider>
+      <>
         <Nav />
         <Replay />
-      </CursorProvider>
+      </>
     );
   }
 
   return (
-    <CursorProvider>
+    <>
       <BasicLayout NotFoundLayout={NotFoundLayout} />
-    </CursorProvider>
+    </>
   );
 };
 
