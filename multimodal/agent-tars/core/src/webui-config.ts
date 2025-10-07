@@ -146,4 +146,7 @@ export const AGENT_TARS_WEBUI_CONFIG: AgentWebUIImplementation = {
     defaultLayout: 'narrow-chat',
     enableLayoutSwitchButton: true,
   },
+  debug: {
+    enableEventStreamViewer: true,
+  },
 };
