@@ -21,28 +21,26 @@ export const checkConnectionStatusAction = atom(null, async (get, set) => {
       lastError: isConnected ? null : currentStatus.lastError,
     });
 
-    // Load agent options and sessions only on initial connection or reconnection
-    if (isNewConnection) {
+    // Load data based on connection state
+    if (isConnected) {
       try {
-        const [options, sessions] = await Promise.all([
-          apiService.getAgentOptions(),
-          apiService.getSessions()
-        ]);
-        set(agentOptionsAtom, options);
-        set(sessionsAtom, sessions);
-        console.log('Initial data loaded on connection');
+        if (isNewConnection) {
+          // Load both options and sessions on initial connection or reconnection
+          const [options, sessions] = await Promise.all([
+            apiService.getAgentOptions(),
+            apiService.getSessions()
+          ]);
+          set(agentOptionsAtom, options);
+          set(sessionsAtom, sessions);
+        } else {
+          // For periodic health checks when already connected, only update agent options
+          // Skip sessions reload to prevent unnecessary API calls
+          const options = await apiService.getAgentOptions();
+          set(agentOptionsAtom, options);
+        }
       } catch (error) {
-        console.error('Failed to load initial data:', error);
+        console.error('Failed to load data:', error);
         set(agentOptionsAtom, {});
-      }
-    } else if (isConnected && wasConnected) {
-      // For periodic health checks when already connected, only update agent options
-      // Skip sessions reload to prevent unnecessary API calls
-      try {
-        const options = await apiService.getAgentOptions();
-        set(agentOptionsAtom, options);
-      } catch (error) {
-        console.error('Failed to update agent options:', error);
       }
     }
 
