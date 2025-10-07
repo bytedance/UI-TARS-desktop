@@ -7,14 +7,194 @@ description: Complete API reference for Tarko Tool Call Engine
 
 Complete API reference for the Tarko Tool Call Engine.
 
-## Coming Soon
+## ToolCallEngineType
 
-This section is under development. Check back soon for detailed API documentation including:
+```typescript
+type ToolCallEngineType = 
+  | 'native'
+  | 'prompt_engineering' 
+  | 'structured_outputs'
+  | TConstructor<ToolCallEngine>;
+```
 
-- Tool Call Engine interfaces
-- Tool creation utilities
-- Parser configurations
-- Error handling types
-- Custom engine implementation
+Defines how the Agent processes and executes tool calls. Available options:
 
-For now, see [Tool Call Engine Guide](/guide/basic/tool-call-engine) for usage examples.
+- **`native`**: Uses model's built-in function calling capabilities
+- **`prompt_engineering`**: Embeds tool descriptions in system prompts for text-based parsing
+- **`structured_outputs`**: Uses structured output schemas for reliable parsing
+- **Custom constructor**: Implement your own `ToolCallEngine` class
+
+## ToolCallEngine Abstract Class
+
+```typescript
+export abstract class ToolCallEngine<T extends StreamProcessingState = StreamProcessingState> {
+  abstract preparePrompt(instructions: string, tools: Tool[]): string | string[];
+  abstract prepareRequest(context: ToolCallEnginePrepareRequestContext): ChatCompletionCreateParams;
+  abstract initStreamProcessingState(): T;
+  abstract processStreamingChunk(chunk: ChatCompletionChunk, state: T): StreamChunkResult;
+  abstract finalizeStreamProcessing(state: T): ParsedModelResponse;
+  abstract buildHistoricalAssistantMessage(currentLoopAssistantEvent: AgentEventStream.AssistantMessageEvent): ChatCompletionAssistantMessageParam;
+  abstract buildHistoricalToolCallResultMessages(toolResults: MultimodalToolCallResult[]): ChatCompletionMessageParam[];
+}
+```
+
+## Core Interfaces
+
+### ParsedModelResponse
+
+```typescript
+interface ParsedModelResponse {
+  content: string;
+  rawContent?: string;
+  reasoningContent?: string;
+  toolCalls?: ChatCompletionMessageToolCall[];
+  finishReason?: FinishReason;
+}
+```
+
+### StreamProcessingState
+
+```typescript
+interface StreamProcessingState {
+  contentBuffer: string;
+  toolCalls: ChatCompletionMessageToolCall[];
+  reasoningBuffer: string;
+  finishReason: FinishReason | null;
+  lastParsedContent?: string;
+}
+```
+
+### StreamChunkResult
+
+```typescript
+interface StreamChunkResult {
+  content: string;
+  reasoningContent: string;
+  hasToolCallUpdate: boolean;
+  toolCalls: ChatCompletionMessageToolCall[];
+  streamingToolCallUpdates?: StreamingToolCallUpdate[];
+}
+```
+
+## Built-in Engines
+
+### NativeToolCallEngine
+
+For models with native function calling support (GPT-4, Claude 3.5, etc.).
+
+```typescript
+import { NativeToolCallEngine } from '@tarko/agent';
+
+const engine = new NativeToolCallEngine();
+```
+
+### PromptEngineeringToolCallEngine
+
+For models without native function calling, uses prompt-based parsing.
+
+```typescript
+import { PromptEngineeringToolCallEngine } from '@tarko/agent';
+
+const engine = new PromptEngineeringToolCallEngine();
+```
+
+### StructuredOutputsToolCallEngine
+
+For models that support structured outputs but not function calling.
+
+```typescript
+import { StructuredOutputsToolCallEngine } from '@tarko/agent';
+
+const engine = new StructuredOutputsToolCallEngine();
+```
+
+## Custom Engine Implementation
+
+```typescript
+import { ToolCallEngine, StreamProcessingState } from '@tarko/agent';
+
+class MyCustomEngine extends ToolCallEngine {
+  preparePrompt(instructions: string, tools: Tool[]): string {
+    // Custom prompt preparation logic
+    return instructions;
+  }
+
+  prepareRequest(context: ToolCallEnginePrepareRequestContext): ChatCompletionCreateParams {
+    // Custom request preparation
+    return {
+      model: context.model,
+      messages: context.messages,
+      // ... other params
+    };
+  }
+
+  initStreamProcessingState(): StreamProcessingState {
+    return {
+      contentBuffer: '',
+      toolCalls: [],
+      reasoningBuffer: '',
+      finishReason: null,
+    };
+  }
+
+  processStreamingChunk(chunk: ChatCompletionChunk, state: StreamProcessingState): StreamChunkResult {
+    // Custom streaming logic
+    return {
+      content: '',
+      reasoningContent: '',
+      hasToolCallUpdate: false,
+      toolCalls: [],
+    };
+  }
+
+  finalizeStreamProcessing(state: StreamProcessingState): ParsedModelResponse {
+    // Final processing logic
+    return {
+      content: state.contentBuffer,
+      toolCalls: state.toolCalls,
+      finishReason: state.finishReason || 'stop',
+    };
+  }
+
+  buildHistoricalAssistantMessage(currentLoopAssistantEvent: AgentEventStream.AssistantMessageEvent): ChatCompletionAssistantMessageParam {
+    // Build message for history
+    return {
+      role: 'assistant',
+      content: currentLoopAssistantEvent.content,
+    };
+  }
+
+  buildHistoricalToolCallResultMessages(toolResults: MultimodalToolCallResult[]): ChatCompletionMessageParam[] {
+    // Build tool result messages for history
+    return toolResults.map(result => ({
+      role: 'tool',
+      content: JSON.stringify(result.content),
+      tool_call_id: result.toolCallId,
+    }));
+  }
+}
+```
+
+## Usage
+
+```typescript
+import { Agent } from '@tarko/agent';
+
+// Use built-in engine
+const agent = new Agent({
+  toolCallEngine: 'native',
+  tools: [myTool],
+});
+
+// Use custom engine
+const agent = new Agent({
+  toolCallEngine: MyCustomEngine,
+  tools: [myTool],
+});
+```
+
+## Related
+
+- [Tool Call Engine Guide](/guide/basic/tool-call-engine)
+- [Tools](/guide/basic/tools)
+- [Configuration](/guide/basic/configuration)

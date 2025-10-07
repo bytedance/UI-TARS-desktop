@@ -12,23 +12,16 @@ This page provides practical examples to help you get started with Tarko quickly
 Create a simple agent with basic functionality:
 
 ```typescript
-import { Agent, createTool } from '@tarko/agent';
+import { Agent, Tool, z } from '@tarko/agent';
 
 // Create a simple greeting tool
-const greetingTool = createTool({
-  name: 'greet_user',
+const greetingTool = new Tool({
+  id: 'greet_user',
   description: 'Greet a user with their name',
-  parameters: {
-    type: 'object',
-    properties: {
-      name: {
-        type: 'string',
-        description: 'The user\'s name'
-      }
-    },
-    required: ['name']
-  },
-  handler: async ({ name }) => {
+  parameters: z.object({
+    name: z.string().describe('The user\'s name')
+  }),
+  function: async ({ name }) => {
     return `Hello, ${name}! Nice to meet you!`;
   }
 });
@@ -39,9 +32,9 @@ const agent = new Agent({
   instructions: 'You are a friendly assistant that helps users with greetings.',
   tools: [greetingTool],
   model: {
-    apiKey: process.env.OPENAI_API_KEY,
-    baseURL: 'https://api.openai.com/v1',
-    model: 'gpt-4'
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY
   }
 });
 
@@ -53,29 +46,17 @@ export default agent;
 Build an agent that can fetch weather information:
 
 ```typescript
-import { Agent, createTool } from '@tarko/agent';
+import { Agent, Tool, z } from '@tarko/agent';
 
 // Weather tool with real API integration
-const weatherTool = createTool({
-  name: 'get_weather',
+const weatherTool = new Tool({
+  id: 'get_weather',
   description: 'Get current weather information for a location',
-  parameters: {
-    type: 'object',
-    properties: {
-      location: {
-        type: 'string',
-        description: 'City name or coordinates (e.g., "New York" or "40.7128,-74.0060")'
-      },
-      units: {
-        type: 'string',
-        enum: ['metric', 'imperial'],
-        default: 'metric',
-        description: 'Temperature units'
-      }
-    },
-    required: ['location']
-  },
-  handler: async ({ location, units = 'metric' }) => {
+  parameters: z.object({
+    location: z.string().describe('City name or coordinates (e.g., "New York" or "40.7128,-74.0060")'),
+    units: z.enum(['metric', 'imperial']).default('metric').describe('Temperature units')
+  }),
+  function: async ({ location, units = 'metric' }) => {
     const apiKey = process.env.OPENWEATHER_API_KEY;
     if (!apiKey) {
       throw new Error('OpenWeather API key not configured');
@@ -117,9 +98,9 @@ Use the get_weather tool to fetch real-time weather data when users ask about we
 Always be helpful and provide clear, formatted weather information.`,
   tools: [weatherTool],
   model: {
-    apiKey: process.env.OPENAI_API_KEY,
-    baseURL: 'https://api.openai.com/v1',
-    model: 'gpt-4'
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY
   }
 });
 
@@ -131,31 +112,22 @@ export default weatherAgent;
 Create an agent with mathematical capabilities:
 
 ```typescript
-import { Agent, createTool } from '@tarko/agent';
+import { Agent, Tool, z } from '@tarko/agent';
 
 // Safe math evaluation tool
-const calculatorTool = createTool({
-  name: 'calculate',
+const calculatorTool = new Tool({
+  id: 'calculate',
   description: 'Perform mathematical calculations safely',
-  parameters: {
-    type: 'object',
-    properties: {
-      expression: {
-        type: 'string',
-        description: 'Mathematical expression (e.g., "2 + 3 * 4", "sqrt(16)", "sin(pi/2)")'
-      }
-    },
-    required: ['expression']
-  },
-  validate: ({ expression }) => {
+  parameters: z.object({
+    expression: z.string().describe('Mathematical expression (e.g., "2 + 3 * 4", "sqrt(16)", "sin(pi/2)")')
+  }),
+  function: async ({ expression }) => {
     // Basic validation for safety
     const allowedPattern = /^[0-9+\-*/().\s,sqrt,sin,cos,tan,log,ln,pi,e]+$/i;
     if (!allowedPattern.test(expression)) {
       throw new Error('Expression contains invalid characters. Only numbers, basic operators, and common math functions are allowed.');
     }
-    return true;
-  },
-  handler: async ({ expression }) => {
+    
     try {
       // Replace common math functions and constants
       let safeExpression = expression
@@ -183,28 +155,15 @@ const calculatorTool = createTool({
 });
 
 // Unit conversion tool
-const unitConverterTool = createTool({
-  name: 'convert_units',
+const unitConverterTool = new Tool({
+  id: 'convert_units',
   description: 'Convert between different units of measurement',
-  parameters: {
-    type: 'object',
-    properties: {
-      value: {
-        type: 'number',
-        description: 'The numeric value to convert'
-      },
-      fromUnit: {
-        type: 'string',
-        description: 'Source unit (e.g., "celsius", "fahrenheit", "meters", "feet", "kg", "lbs")'
-      },
-      toUnit: {
-        type: 'string',
-        description: 'Target unit'
-      }
-    },
-    required: ['value', 'fromUnit', 'toUnit']
-  },
-  handler: async ({ value, fromUnit, toUnit }) => {
+  parameters: z.object({
+    value: z.number().describe('The numeric value to convert'),
+    fromUnit: z.string().describe('Source unit (e.g., "celsius", "fahrenheit", "meters", "feet", "kg", "lbs")'),
+    toUnit: z.string().describe('Target unit')
+  }),
+  function: async ({ value, fromUnit, toUnit }) => {
     const conversions: Record<string, Record<string, (v: number) => number>> = {
       // Temperature
       celsius: {
@@ -263,9 +222,9 @@ Always use the appropriate tool for mathematical operations and unit conversions
 Provide clear explanations of your calculations when helpful.`,
   tools: [calculatorTool, unitConverterTool],
   model: {
-    apiKey: process.env.OPENAI_API_KEY,
-    baseURL: 'https://api.openai.com/v1',
-    model: 'gpt-4'
+    provider: 'openai',
+    id: 'gpt-4',
+    apiKey: process.env.OPENAI_API_KEY
   }
 });
 
@@ -277,25 +236,18 @@ export default calculatorAgent;
 Build an agent that can interact with the file system:
 
 ```typescript
-import { Agent, createTool } from '@tarko/agent';
+import { Agent, Tool, z } from '@tarko/agent';
 import { promises as fs } from 'fs';
 import path from 'path';
 
 // File reading tool
-const readFileTool = createTool({
-  name: 'read_file',
+const readFileTool = new Tool({
+  id: 'read_file',
   description: 'Read the contents of a text file',
-  parameters: {
-    type: 'object',
-    properties: {
-      filePath: {
-        type: 'string',
-        description: 'Path to the file to read'
-      }
-    },
-    required: ['filePath']
-  },
-  handler: async ({ filePath }) => {
+  parameters: z.object({
+    filePath: z.string().describe('Path to the file to read')
+  }),
+  function: async ({ filePath }) => {
     try {
       // Basic security check - prevent directory traversal
       const resolvedPath = path.resolve(filePath);
@@ -314,8 +266,8 @@ const readFileTool = createTool({
 });
 
 // Directory listing tool
-const listDirectoryTool = createTool({
-  name: 'list_directory',
+const listDirectoryTool = new Tool({
+  id: 'list_directory',
   description: 'List files and directories in a given path',
   parameters: {
     type: 'object',
