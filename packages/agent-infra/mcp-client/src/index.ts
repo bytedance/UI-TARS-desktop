@@ -324,7 +324,6 @@ export class MCPClient<
       return;
     }
 
-    const errors: Error[] = [];
     for (const server of activeServers) {
       this.log('info', `[MCP] Activating server: ${server.name}`);
       try {
@@ -337,7 +336,6 @@ export class MCPClient<
           error,
         );
         this.emit('server-error', { name: server.name, error });
-        errors.push(error as Error);
       }
     }
 
@@ -345,12 +343,6 @@ export class MCPClient<
       'info',
       `[MCP] Loaded and activated ${Object.keys(this.clients).length} servers`,
     );
-
-    // If all servers failed to activate, throw an error
-    if (Object.keys(this.clients).length === 0 && activeServers.length > 0) {
-      const errorMessage = `Failed to activate any MCP servers. Errors: ${errors.map((e) => e.message).join('; ')}`;
-      throw new Error(errorMessage);
-    }
   }
 
   public async listAvailableServices(): Promise<MCPServer<ServerNames>[]> {
