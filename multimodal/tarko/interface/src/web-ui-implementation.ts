@@ -167,7 +167,6 @@ export interface DebugConfig {
    */
   enableEventStreamViewer?: boolean;
 }
-}
 
 /**
  * Base agent implementation interface
