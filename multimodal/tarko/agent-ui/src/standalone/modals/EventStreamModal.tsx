@@ -61,13 +61,10 @@ const EventItem: React.FC<EventItemProps> = ({ event, index }) => {
       
       {isExpanded && (
         <div className="px-4 pb-4 bg-gray-950">
-          {/* Override JsonRenderer styles for dark mode */}
-          <div className="[&_.text-gray-800]:!text-gray-200 [&_.text-gray-600]:!text-gray-400 [&_.text-gray-500]:!text-gray-400 [&_.bg-gray-50]:!bg-gray-900 [&_.bg-gray-100]:!bg-gray-800 [&_.border-gray-200]:!border-gray-700 [&_.hover\:bg-gray-50]:!hover:bg-gray-800 [&_.hover\:border-gray-200]:!hover:border-gray-600 [&_.border-transparent]:!border-transparent [&_.hover\:border-gray-600]:!hover:border-gray-600 [&_.bg-white]:!bg-gray-950 [&_.hover\:bg-white]:!hover:bg-gray-800">
-            <JsonRenderer 
-              data={event} 
-              className="text-sm"
-            />
-          </div>
+          <JsonRenderer 
+            data={event} 
+            className="text-sm"
+          />
         </div>
       )}
     </div>
