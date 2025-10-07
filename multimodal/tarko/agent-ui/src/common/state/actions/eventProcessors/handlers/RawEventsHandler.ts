@@ -1,4 +1,4 @@
-import { EventHandler } from '../types';
+import { EventHandler, EventHandlerContext } from '../types';
 import { rawEventsAtom } from '@/common/state/atoms/rawEvents';
 import { AgentEventStream } from '@/common/types';
 
@@ -13,7 +13,7 @@ export class RawEventsHandler implements EventHandler {
   }
 
   async handle(
-    context: any,
+    context: EventHandlerContext,
     sessionId: string,
     event: AgentEventStream.Event
   ): Promise<void> {
