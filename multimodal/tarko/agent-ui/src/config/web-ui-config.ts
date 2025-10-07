@@ -168,4 +168,3 @@ export function getDebugConfig() {
 export function isEventStreamViewerEnabled(): boolean {
   return getDebugConfig().enableEventStreamViewer ?? false;
 }
-}
