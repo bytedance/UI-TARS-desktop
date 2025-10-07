@@ -46,7 +46,19 @@ export class MCPClientV2 implements IMCPClient {
     try {
       this.logger.info(`Initializing MCP client v2 for ${this.serverName}`);
       await this.v2Client.init();
-      this.tools = await this.v2Client.listTools(this.serverName as string);
+
+      // Try to list tools - this will fail if the server didn't activate properly
+      try {
+        this.tools = await this.v2Client.listTools(this.serverName as string);
+      } catch (listToolsError) {
+        // If listTools fails with "not found", it means the server failed to activate
+        if (listToolsError instanceof Error && listToolsError.message.includes('not found')) {
+          throw new Error(
+            `MCP server ${this.serverName} failed to activate - check server configuration and connectivity`,
+          );
+        }
+        throw listToolsError;
+      }
 
       this.isInitialized = true;
       this.logger.success(
