@@ -120,7 +120,7 @@ export const ToolBar: React.FC = () => {
 
         <div className="flex flex-col items-center gap-4 pb-4">
           {/* Event stream viewer button */}
-          {!isReplayMode && enableEventStreamViewer && (
+          {!isReplayMode && enableEventStreamViewer && !isHomePage && (
             <motion.button
               whileHover={{
                 scale: 1.08,
@@ -128,14 +128,14 @@ export const ToolBar: React.FC = () => {
               whileTap={{ scale: 0.97 }}
               transition={{ type: 'spring', stiffness: 400, damping: 17 }}
               onClick={handleToggleEventStream}
-              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
+              className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all duration-200 ${
                 isEventStreamModalOpen
                   ? 'bg-blue-500 text-white shadow-md'
                   : 'bg-white dark:bg-gray-800 text-black dark:text-white hover:shadow-md'
               }`}
               title="Event Stream Viewer"
             >
-              <FiActivity size={16} />
+              <FiActivity size={12} />
             </motion.button>
           )}
 
