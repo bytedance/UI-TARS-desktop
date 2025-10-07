@@ -63,7 +63,7 @@ const EventItem: React.FC<EventItemProps> = ({ event, index }) => {
         <div className="px-4 pb-4 bg-gray-950">
           <JsonRenderer 
             data={event} 
-            className="text-sm"
+            className="text-sm p-3"
           />
         </div>
       )}
