@@ -95,7 +95,7 @@ const WelcomePage: React.FC = () => {
       // Navigate to creating page with runtime settings
       navigate('/creating', {
         state: {
-          query: typeof content === 'string' ? content : JSON.stringify(content),
+          query: content, // Keep original format for multimodal content
           runtimeSettings: selectedRuntimeSettings
         }
       });
