@@ -1,5 +1,6 @@
 import { EventHandler } from './types';
 import { AgentEventStream } from '@/common/types';
+import { isEventStreamViewerEnabled } from '@/config/web-ui-config';
 import {
   UserMessageHandler,
   AssistantMessageHandler,
@@ -52,8 +53,10 @@ export class EventHandlerRegistry {
     this.register(new AgentRunStartHandler());
     this.register(new AgentRunEndHandler());
 
-    // Raw events handler (should be registered last to capture all events)
-    this.register(new RawEventsHandler());
+    // Raw events handler (only register if event stream viewer is enabled)
+    if (isEventStreamViewerEnabled()) {
+      this.register(new RawEventsHandler());
+    }
   }
 
   /**
