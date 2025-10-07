@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface JsonRendererProps {
-  data: any;
+  data: unknown;
   className?: string;
 }
 
