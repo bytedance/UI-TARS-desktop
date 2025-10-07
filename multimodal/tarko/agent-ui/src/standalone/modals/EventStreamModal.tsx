@@ -23,13 +23,13 @@ const EventItem: React.FC<EventItemProps> = ({ event, index }) => {
   const getEventSummary = (event: AgentEventStream.Event): string => {
     switch (event.type) {
       case 'user_message':
-        return `User: ${(event as any).content?.slice(0, 50) || 'Message'}...`;
+        return `User: ${event.content?.slice(0, 50) || 'Message'}...`;
       case 'assistant_message':
-        return `Assistant: ${(event as any).content?.slice(0, 50) || 'Response'}...`;
+        return `Assistant: ${event.content?.slice(0, 50) || 'Response'}...`;
       case 'tool_call':
-        return `Tool Call: ${(event as any).name || 'Unknown'}`;
+        return `Tool Call: ${event.name || 'Unknown'}`;
       case 'tool_result':
-        return `Tool Result: ${(event as any).status || 'Completed'}`;
+        return `Tool Result: ${event.error ? 'Error' : 'Completed'}`;
       default:
         return event.type;
     }
@@ -53,20 +53,11 @@ const EventItem: React.FC<EventItemProps> = ({ event, index }) => {
             </span>
             <span className="text-blue-400 font-mono text-sm">{event.type}</span>
           </div>
-          <div className="text-gray-300 text-sm truncate">
-            {getEventSummary(event)}
-          </div>
+          <div className="text-gray-300 text-sm truncate">{getEventSummary(event)}</div>
         </div>
       </button>
-      
-      {isExpanded && (
-        <div className="px-4 pb-4 bg-gray-950">
-          <JsonRenderer 
-            data={event} 
-            className="text-sm p-3"
-          />
-        </div>
-      )}
+
+      {isExpanded && <JsonRenderer data={event} className="text-sm p-3" />}
     </div>
   );
 };
@@ -81,7 +72,7 @@ export const EventStreamModal: React.FC<EventStreamModalProps> = ({ isOpen, onCl
 
   // Get unique event types for filter
   const eventTypes = useMemo(() => {
-    const types = new Set(currentSessionEvents.map(event => event.type));
+    const types = new Set(currentSessionEvents.map((event) => event.type));
     return Array.from(types).sort();
   }, [currentSessionEvents]);
 
@@ -90,7 +81,7 @@ export const EventStreamModal: React.FC<EventStreamModalProps> = ({ isOpen, onCl
     if (selectedFilter === 'all') {
       return currentSessionEvents;
     }
-    return currentSessionEvents.filter(event => event.type === selectedFilter);
+    return currentSessionEvents.filter((event) => event.type === selectedFilter);
   }, [currentSessionEvents, selectedFilter]);
 
   // Auto-scroll to bottom when new events arrive
@@ -108,8 +99,8 @@ export const EventStreamModal: React.FC<EventStreamModalProps> = ({ isOpen, onCl
           <div className="flex items-center gap-4">
             <h2 className="text-lg font-mono">Event Stream Debug</h2>
             <span className="text-sm text-gray-400">
-              Session: {activeSessionId || 'None'} | 
-              Events: {filteredEvents.length}/{currentSessionEvents.length}
+              Session: {activeSessionId || 'None'} | Events: {filteredEvents.length}/
+              {currentSessionEvents.length}
             </span>
           </div>
 
@@ -123,43 +114,34 @@ export const EventStreamModal: React.FC<EventStreamModalProps> = ({ isOpen, onCl
                 className="bg-gray-800 text-white border border-gray-600 rounded px-3 py-1 text-sm font-mono focus:outline-none focus:border-blue-500"
               >
                 <option value="all">All Types</option>
-                {eventTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
+                {eventTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
                 ))}
               </select>
             </div>
 
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-800 rounded transition-colors"
-            >
+            <button onClick={onClose} className="p-2 hover:bg-gray-800 rounded transition-colors">
               <FiX size={20} />
             </button>
           </div>
         </div>
 
         {/* Content */}
-        <div
-          ref={scrollRef}
-          className="flex-1 overflow-auto"
-        >
+        <div ref={scrollRef} className="flex-1 overflow-auto">
           {filteredEvents.length === 0 ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-gray-500 font-mono">
-                {currentSessionEvents.length === 0 
-                  ? 'No events yet...' 
-                  : `No events of type "${selectedFilter}"`
-                }
+                {currentSessionEvents.length === 0
+                  ? 'No events yet...'
+                  : `No events of type "${selectedFilter}"`}
               </div>
             </div>
           ) : (
             <div>
               {filteredEvents.map((event, index) => (
-                <EventItem
-                  key={`${event.timestamp}-${index}`}
-                  event={event}
-                  index={index}
-                />
+                <EventItem key={`${event.timestamp}-${index}`} event={event} index={index} />
               ))}
             </div>
           )}

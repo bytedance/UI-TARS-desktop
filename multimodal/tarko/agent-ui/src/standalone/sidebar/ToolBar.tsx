@@ -7,7 +7,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useSession } from '@/common/hooks/useSession';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useLayout } from '@/common/hooks/useLayout';
-import { isLayoutSwitchButtonEnabled, getLogoUrl, getAgentTitle, isEventStreamViewerEnabled } from '@/config/web-ui-config';
+import {
+  isLayoutSwitchButtonEnabled,
+  getLogoUrl,
+  getAgentTitle,
+  isEventStreamViewerEnabled,
+} from '@/config/web-ui-config';
 import { AgentConfigViewer } from './AgentConfigViewer';
 import { LayoutSwitchButton } from './LayoutSwitchButton';
 import { useAtom } from 'jotai';

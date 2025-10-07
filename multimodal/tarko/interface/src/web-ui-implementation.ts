@@ -162,7 +162,7 @@ export interface DebugConfig {
   /**
    * Enable Event Stream Viewer for debugging
    * Shows real-time event stream in a modal accessible from sidebar
-   * 
+   *
    * @defaultValue false
    */
   enableEventStreamViewer?: boolean;
