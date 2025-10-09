@@ -16,6 +16,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
   const [isLoading, setIsLoading] = useState(false);
   const [shareResult, setShareResult] = useState<ShareResult | null>(null);
   const [copied, setCopied] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   console.log('ShareModal render', { isOpen, sessionId });
 
@@ -38,6 +39,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
   useEffect(() => {
     if (!isOpen) {
       setShareResult(null);
+      setLinkCopied(false);
     }
   }, [isOpen]);
 
@@ -93,6 +95,13 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
     }
   };
 
+  const handleCopyCurrentLink = () => {
+    const currentUrl = window.location.href;
+    navigator.clipboard.writeText(currentUrl);
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
+  };
+
   return (
     <Dialog open={isOpen} onClose={onClose} maxWidth="sm">
       <DialogPanel className="p-4 sm:p-6">
@@ -128,6 +137,40 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
             </p>
 
             <div className="space-y-3 sm:space-y-4">
+              <motion.button
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleCopyCurrentLink}
+                className="w-full flex items-center justify-between p-3 sm:p-4 bg-white dark:bg-gray-800 rounded-xl border border-[#E5E6EC] dark:border-gray-700/30 hover:border-gray-300 dark:hover:border-gray-600/70 transition-all duration-200"
+              >
+                <div className="flex items-center">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 mr-3">
+                    <FiLink size={16} className="sm:hidden" />
+                    <FiLink size={20} className="hidden sm:block" />
+                  </div>
+                  <div className="text-left">
+                    <h4 className="font-medium text-gray-800 dark:text-gray-200 text-sm sm:text-base">
+                      Copy Link
+                    </h4>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">
+                      Copy current conversation link
+                    </p>
+                  </div>
+                </div>
+                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                  {linkCopied ? (
+                    <FiCheck size={14} className="sm:hidden text-green-500 dark:text-green-400" />
+                  ) : (
+                    <FiShare2 size={14} className="sm:hidden text-gray-500 dark:text-gray-400" />
+                  )}
+                  {linkCopied ? (
+                    <FiCheck size={16} className="hidden sm:block text-green-500 dark:text-green-400" />
+                  ) : (
+                    <FiShare2 size={16} className="hidden sm:block text-gray-500 dark:text-gray-400" />
+                  )}
+                </div>
+              </motion.button>
+
               {shareConfig.hasShareProvider && (
                 <motion.button
                   whileHover={{ y: -2 }}
