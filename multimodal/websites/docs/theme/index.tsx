@@ -19,8 +19,10 @@ const Layout = () => {
     startsWithReplay: location.pathname.startsWith(DYNAMIC_ROUTE.Replay)
   });
 
+  // Handle showcase routes - both /showcase and /showcase/*
+  // This needs to be checked BEFORE BasicLayout to override rspress routing
   if (location.pathname.startsWith(DYNAMIC_ROUTE.Showcase)) {
-    console.log('✅ Rendering Showcase component');
+    console.log('✅ Rendering Showcase component for path:', location.pathname);
     return (
       <>
         <Nav />
@@ -29,8 +31,9 @@ const Layout = () => {
     );
   }
 
+  // Handle replay routes - both /replay and /replay/*
   if (location.pathname.startsWith(DYNAMIC_ROUTE.Replay)) {
-    console.log('✅ Rendering Replay component');
+    console.log('✅ Rendering Replay component for path:', location.pathname);
     return (
       <>
         <Nav />
@@ -39,7 +42,7 @@ const Layout = () => {
     );
   }
 
-  console.log('⚠️ Falling back to BasicLayout with NotFoundLayout');
+  console.log('⚠️ Falling back to BasicLayout with NotFoundLayout for path:', location.pathname);
   return <BasicLayout NotFoundLayout={NotFoundLayout} />;
 };
 
