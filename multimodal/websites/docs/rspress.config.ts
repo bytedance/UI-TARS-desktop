@@ -16,6 +16,8 @@ export default defineConfig({
     light: '/agent-tars-dark-logo.png',
     dark: '/agent-tars-dark-logo.png',
   },
+  // Disable SSG to allow client-side routing for dynamic paths
+  ssg: false,
   route: {
     exclude: isProd
       ? [
