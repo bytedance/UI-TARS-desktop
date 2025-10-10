@@ -20,7 +20,7 @@
         "./i18n.json"
       ],
       "@theme": [
-        "./node_modules/@rspress/theme-default"
+        "./theme/index.tsx"
       ],
       "@components/*": [
         "./src/components/*"
