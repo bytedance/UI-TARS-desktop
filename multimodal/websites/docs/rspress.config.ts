@@ -1,7 +1,7 @@
 import * as path from 'node:path';
 import { defineConfig } from '@rspress/core';
 import mermaid from 'rspress-plugin-mermaid';
-import { pluginClientRedirects } from '@rspress/plugin-client-redirects';
+
 import { SEO_CONFIG } from './src/shared/seoConfig';
 
 const isProd = process.env.NODE_ENV === 'production';
@@ -79,26 +79,7 @@ export default defineConfig({
         fontSize: 16,
       },
     }),
-    pluginClientRedirects({
-      redirects: [
-        {
-          from: '/showcase/*',
-          to: '/showcase',
-        },
-        {
-          from: '/replay/*',
-          to: '/replay',
-        },
-        {
-          from: '/beta',
-          to: '/blog/2025-06-25-introducing-agent-tars-beta.html',
-        },
-        {
-          from: '/quick-start',
-          to: '/guide/get-started/quick-start.html',
-        },
-      ],
-    }),
+
   ],
   themeConfig: {
     darkMode: false,
