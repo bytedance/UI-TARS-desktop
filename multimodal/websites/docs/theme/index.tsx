@@ -10,7 +10,17 @@ import { DYNAMIC_ROUTE } from '../src/shared/types';
 const Layout = () => {
   const location = useLocation();
 
+  // Debug logging
+  console.log('🔍 Layout Debug:', {
+    pathname: location.pathname,
+    showcaseRoute: DYNAMIC_ROUTE.Showcase,
+    replayRoute: DYNAMIC_ROUTE.Replay,
+    startsWithShowcase: location.pathname.startsWith(DYNAMIC_ROUTE.Showcase),
+    startsWithReplay: location.pathname.startsWith(DYNAMIC_ROUTE.Replay)
+  });
+
   if (location.pathname.startsWith(DYNAMIC_ROUTE.Showcase)) {
+    console.log('✅ Rendering Showcase component');
     return (
       <>
         <Nav />
@@ -20,6 +30,7 @@ const Layout = () => {
   }
 
   if (location.pathname.startsWith(DYNAMIC_ROUTE.Replay)) {
+    console.log('✅ Rendering Replay component');
     return (
       <>
         <Nav />
@@ -28,6 +39,7 @@ const Layout = () => {
     );
   }
 
+  console.log('⚠️ Falling back to BasicLayout with NotFoundLayout');
   return <BasicLayout NotFoundLayout={NotFoundLayout} />;
 };
 
