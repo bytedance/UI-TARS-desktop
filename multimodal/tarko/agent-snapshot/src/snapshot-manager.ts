@@ -9,18 +9,9 @@ import path from 'path';
 import { AgentEventStream } from '@tarko/agent-interface';
 import { logger } from './utils/logger';
 import { AgentNormalizerConfig, AgentSnapshotNormalizer } from './utils/snapshot-normalizer';
+import { ToolCallData } from './utils/tool-call-tracker';
 
-/**
- * Interface for tool call data
- */
-export interface ToolCallData {
-  toolCallId: string;
-  name: string;
-  args: unknown;
-  result?: unknown;
-  error?: unknown;
-  executionTime?: number;
-}
+
 
 /**
  * SnapshotManager - Manages test snapshots for agent testing
@@ -154,9 +145,6 @@ export class SnapshotManager {
     }
   }
 
-  /**
-   * Generic verification method to reduce code duplication
-   */
   private async verifySnapshot<T>(
     caseName: string,
     loopDir: string,
@@ -252,9 +240,6 @@ export class SnapshotManager {
     }
   }
 
-  /**
-   * Verify that an event stream state matches the expected snapshot
-   */
   async verifyEventStreamSnapshot(
     caseName: string,
     loopDir: string,
@@ -271,9 +256,6 @@ export class SnapshotManager {
     );
   }
 
-  /**
-   * Verify that a request matches the expected snapshot
-   */
   async verifyRequestSnapshot(
     caseName: string,
     loopDir: string,
@@ -291,9 +273,6 @@ export class SnapshotManager {
     );
   }
 
-  /**
-   * Verify that tool calls match the expected snapshot
-   */
   async verifyToolCallsSnapshot(
     caseName: string,
     loopDir: string,
