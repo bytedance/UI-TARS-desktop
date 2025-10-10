@@ -327,8 +327,7 @@ export class AgentReplaySnapshotHook extends AgentHookBase {
         await this.snapshotManager.verifyRequestSnapshot(
           path.basename(this.snapshotPath),
           loopDir,
-          // @ts-expect-error
-          payload,
+          payload as unknown as Record<string, unknown>,
           this.updateSnapshots,
         );
       } catch (error) {
