@@ -80,7 +80,24 @@ export default defineConfig({
       },
     }),
     pluginClientRedirects({
-      redirects: [],
+      redirects: [
+        {
+          from: '/showcase/*',
+          to: '/showcase',
+        },
+        {
+          from: '/replay/*',
+          to: '/replay',
+        },
+        {
+          from: '/beta',
+          to: '/blog/2025-06-25-introducing-agent-tars-beta.html',
+        },
+        {
+          from: '/quick-start',
+          to: '/guide/get-started/quick-start.html',
+        },
+      ],
     }),
   ],
   themeConfig: {
