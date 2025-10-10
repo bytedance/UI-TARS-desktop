@@ -7,7 +7,6 @@ import { SEO_CONFIG } from './src/shared/seoConfig';
 const isProd = process.env.NODE_ENV === 'production';
 
 export default defineConfig({
-  root: path.join(__dirname, 'docs'),
   lang: 'en',
   title: SEO_CONFIG.siteName,
   icon: SEO_CONFIG.images.favicon,
@@ -19,6 +18,7 @@ export default defineConfig({
   // Disable SSG to allow client-side routing for dynamic paths
   ssg: false,
   route: {
+    cleanUrls: true,
     exclude: isProd
       ? [
           'en/sdk/**',
@@ -81,7 +81,6 @@ export default defineConfig({
         fontSize: 16,
       },
     }),
-
   ],
   themeConfig: {
     darkMode: false,

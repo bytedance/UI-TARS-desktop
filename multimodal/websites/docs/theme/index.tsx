@@ -1,4 +1,3 @@
-
 import { Layout as BasicLayout } from '@rspress/core/theme';
 import { NotFoundLayout } from '../src/components';
 import { Showcase } from '../src/components/Showcase';
@@ -16,7 +15,7 @@ const Layout = () => {
     showcaseRoute: DYNAMIC_ROUTE.Showcase,
     replayRoute: DYNAMIC_ROUTE.Replay,
     startsWithShowcase: location.pathname.startsWith(DYNAMIC_ROUTE.Showcase),
-    startsWithReplay: location.pathname.startsWith(DYNAMIC_ROUTE.Replay)
+    startsWithReplay: location.pathname.startsWith(DYNAMIC_ROUTE.Replay),
   });
 
   // Handle showcase routes - both /showcase and /showcase/*
@@ -25,7 +24,6 @@ const Layout = () => {
     console.log('✅ Rendering Showcase component for path:', location.pathname);
     return (
       <>
-        <Nav />
         <Showcase />
       </>
     );
@@ -36,7 +34,6 @@ const Layout = () => {
     console.log('✅ Rendering Replay component for path:', location.pathname);
     return (
       <>
-        <Nav />
         <Replay />
       </>
     );
