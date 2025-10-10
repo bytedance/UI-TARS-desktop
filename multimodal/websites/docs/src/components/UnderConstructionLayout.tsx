@@ -23,7 +23,6 @@ export function UnderConstructionLayout({
 }: UnderConstructionLayoutProps) {
   const t = useI18n<typeof import('i18n')>();
   const currentLang = useLang();
-  debugger;
   const {
     siteData: { base },
     page: { routePath },
