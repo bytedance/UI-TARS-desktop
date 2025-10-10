@@ -3,7 +3,7 @@ import { NotFoundLayout } from '../src/components';
 import { Showcase } from '../src/components/Showcase';
 import { Replay } from '../src/components/Replay';
 import { useLocation } from '@rspress/core/runtime';
-import { Nav } from '@rspress/theme-default';
+import { Nav } from '@rspress/core/theme';
 import { DYNAMIC_ROUTE } from '../src/shared/types';
 
 const Layout = () => {
@@ -24,6 +24,7 @@ const Layout = () => {
     console.log('✅ Rendering Showcase component for path:', location.pathname);
     return (
       <>
+        <Nav />
         <Showcase />
       </>
     );
@@ -34,6 +35,7 @@ const Layout = () => {
     console.log('✅ Rendering Replay component for path:', location.pathname);
     return (
       <>
+        <Nav />
         <Replay />
       </>
     );
