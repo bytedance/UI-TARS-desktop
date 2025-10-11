@@ -3,7 +3,7 @@ import { shareAPI, ApiShareItem } from '../services/api';
 import { processShowcaseData, ProcessedShowcaseData, ShowcaseItem } from '../services/dataProcessor';
 
 // Import build-time data
-import { showcaseData } from '../data/showcase-data.generated';
+import { showcaseData } from 'showcase-data';
 
 interface UseShowcaseDataResult {
   items: ShowcaseItem[];
