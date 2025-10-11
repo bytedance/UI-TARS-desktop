@@ -360,14 +360,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Summary
 
-This release includes **294 commits** from `7e50908b6cfdba3d09744869a1f3fd5c6489d3ee` to latest, covering:
+This release includes **627 commits** from `7e50908b6cfdba3d09744869a1f3fd5c6489d3ee` to latest, covering:
 
-- **115 new features** across Tarko Agent UI, Tarko Agent, Agent TARS, Omni Agent, GUI Agent, and core infrastructure
-- **47 bug fixes** improving stability and user experience
-- **31 refactoring efforts** for better code maintainability and architecture
-- **35 documentation improvements** enhancing developer experience
-- **16 CI/CD enhancements** for better development workflow
-- **50 maintenance tasks** including releases, cleanups, and optimizations
+- **274 new features** across Tarko Agent UI, Tarko Agent, Agent TARS, Omni Agent, GUI Agent, and core infrastructure
+- **135 bug fixes** improving stability and user experience
+- **63 refactoring efforts** for better code maintainability and architecture
+- **44 documentation improvements** enhancing developer experience
+- **10 CI/CD and testing enhancements** for better development workflow
+- **59 maintenance tasks** including releases, cleanups, and optimizations
+- **42 other commits** including platform enhancements, releases, and miscellaneous improvements
 
 ### Key Highlights
 
