@@ -1,6 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { shareAPI, ApiShareItem } from '../services/api';
-import { processShowcaseData, ProcessedShowcaseData, ShowcaseItem } from '../services/dataProcessor';
+import {
+  processShowcaseData,
+  ProcessedShowcaseData,
+  ShowcaseItem,
+} from '../services/dataProcessor';
 
 // Import build-time data
 import { showcaseData } from 'showcase-data';
@@ -56,7 +60,7 @@ export function useShowcaseDataOptimized({
           // Fallback to runtime API if build-time data is not available
           console.log('⚠️ Build-time data not available, falling back to runtime API');
           const response = await shareAPI.getPublicShares(1, 100);
-          
+
           if (response.success) {
             setApiItems(response.data);
           } else {
