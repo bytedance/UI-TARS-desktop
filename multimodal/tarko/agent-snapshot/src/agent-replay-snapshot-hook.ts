@@ -231,7 +231,7 @@ export class AgentReplaySnapshotHook extends AgentHookBase {
 
             if (index < chunks.length) {
               const chunk = chunks[index];
-              logger.info(`Yielding chunk ${index + 1}/${chunks.length}`);
+              // logger.info(`Yielding chunk ${index + 1}/${chunks.length}`);
               index++;
               return { done: false, value: chunk };
             } else {
