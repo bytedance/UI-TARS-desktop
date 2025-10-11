@@ -152,7 +152,7 @@ export class AgentSnapshotRunner {
     });
 
     const response = await agentSnapshot.replay(runOptions);
-    console.log(`Snapshot test result for ${exampleConfig.name}:`, response);
+    // console.log(`Snapshot test result for ${exampleConfig.name}:`, response);
     return response;
   }
 
