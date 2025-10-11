@@ -3,6 +3,7 @@ import { defineConfig } from '@rspress/core';
 import mermaid from 'rspress-plugin-mermaid';
 
 import { SEO_CONFIG } from './src/shared/seoConfig';
+import { showcaseDataPlugin } from './plugins/showcase-data-plugin';
 
 const isProd = process.env.NODE_ENV === 'production';
 
@@ -81,6 +82,7 @@ export default defineConfig({
         fontSize: 16,
       },
     }),
+    showcaseDataPlugin(),
   ],
   themeConfig: {
     darkMode: false,
