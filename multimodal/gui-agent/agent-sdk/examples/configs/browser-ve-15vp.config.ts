@@ -6,14 +6,15 @@ import 'dotenv/config';
 import path from 'path';
 
 import { defineConfig } from '@tarko/agent-cli';
-import { browserOperator } from './operators';
+import { browserOperator, remoteBrowserOperator } from './operators';
 import { doubao_1_5_vp } from './models';
-import { systemPromptTemplate1 } from './promptTemps';
+import { systemPromptTemplate2 } from './promptTemps';
 
 export default defineConfig({
-  operator: browserOperator,
+  // operator: browserOperator,
+  operator: remoteBrowserOperator,
   model: doubao_1_5_vp,
-  systemPrompt: systemPromptTemplate1,
+  systemPrompt: systemPromptTemplate2,
   snapshot: {
     enable: true,
     storageDirectory: path.join(__dirname, '../snapshots/browser-ve-15vp'),
