@@ -8,6 +8,9 @@ node_modules
 dist/
 doc_build/
 
+# Generated files
+src/data/showcase-data.generated.ts
+
 # IDE
 .vscode/*
 !.vscode/extensions.json
