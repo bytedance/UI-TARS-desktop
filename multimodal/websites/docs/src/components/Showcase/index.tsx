@@ -7,7 +7,7 @@ import { ShowcaseCard } from './components/ShowcaseCard';
 import { CategoryFilter } from './components/CategoryFilter';
 import { ShowcaseHeader } from './components/ShowcaseHeader';
 import { ShowcaseDetail } from './components/ShowcaseDetail';
-import { useShowcaseDataOptimized } from '../../hooks/useShowcaseDataOptimized';
+import { useShowcaseData } from '../../hooks/useShowcaseData';
 import { ProcessedShowcaseData, ShowcaseItem } from '../../services/dataProcessor';
 import { extractIdFromPath } from '../../shared/urlUtils';
 import { isInSSR } from '../../shared/env';
@@ -63,7 +63,7 @@ export const Showcase: React.FC = () => {
       : { slug: pathInfo.value }
     : {};
 
-  const { items, processedData, isLoading, error, refetch } = useShowcaseDataOptimized(hookParams);
+  const { items, processedData, isLoading, error, refetch } = useShowcaseData(hookParams);
 
   // Set base meta tags for showcase
   usePageMeta({
