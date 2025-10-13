@@ -1,0 +1,4 @@
+[build]
+  base = "multimodal"
+  command = "pnpm bootstrap && pnpm --filter @agent-tars/docs... build"
+  publish = "websites/docs/doc_build"
