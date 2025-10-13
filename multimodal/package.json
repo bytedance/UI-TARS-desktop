@@ -4,7 +4,7 @@
   "version": "0.3.0-beta.12",
   "description": "Agent TARS",
   "scripts": {
-    "bootstrap": "pnpm install --prefer-offline && npm run build",
+    "bootstrap": "pnpm --filter \"./tarko/**\" build && pnpm --filter \"./gui-agent/**\" build && pnpm --filter \"./agent-tars/**\" build && pnpm --filter \"./omni-tars/**\" build",
     "docs": "doctoc --title '## Table of Contents' README.md",
     "clean": "pnpm run -r clean",
     "dev": "ptk d",
