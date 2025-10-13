@@ -7,7 +7,7 @@ import { toolResultsAtom, toolCallResultMap } from '../atoms/tool';
 import { sessionPanelContentAtom, isProcessingAtom } from '../atoms/ui';
 import { processEventAction } from './eventProcessors';
 import { Message, SessionInfo } from '@/common/types';
-import { connectionStatusAtom } from '../atoms/ui';
+import { connectionStatusAtom, loadingSessionEventsAtom } from '../atoms/ui';
 import { replayStateAtom } from '../atoms/replay';
 import { sessionFilesAtom, FileItem } from '../atoms/files';
 import { ChatCompletionContentPart, AgentEventStream } from '@tarko/agent-interface';
@@ -160,12 +160,28 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
 
     if (!hasExistingMessages) {
       console.log(`Loading events for session ${sessionId}`);
-      const events = await apiService.getSessionEvents(sessionId);
+      
+      // Set loading state
+      set(loadingSessionEventsAtom, (prev) => ({
+        ...prev,
+        [sessionId]: true,
+      }));
 
-      const processedEvents = preprocessStreamingEvents(events);
+      try {
+        const events = await apiService.getSessionEvents(sessionId);
 
-      for (const event of processedEvents) {
-        await set(processEventAction, { sessionId, event });
+        const processedEvents = preprocessStreamingEvents(events);
+
+        for (const event of processedEvents) {
+          await set(processEventAction, { sessionId, event });
+        }
+      } finally {
+        // Clear loading state
+        set(loadingSessionEventsAtom, (prev) => {
+          const newState = { ...prev };
+          delete newState[sessionId];
+          return newState;
+        });
       }
     }
 
