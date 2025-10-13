@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSession } from '@/common/hooks/useSession';
+import { useWorkspaceEnvironmentCheck } from '@/common/hooks/useWorkspaceEnvironmentCheck';
 import { MessageGroup } from './Message/components/MessageGroup';
 import { ChatInput } from './MessageInput';
 import { useAtomValue } from 'jotai';
@@ -12,6 +13,7 @@ import { ScrollToBottomButton } from './components/ScrollToBottomButton';
 import { EmptyState } from './components/EmptyState';
 import { OfflineBanner } from './components/OfflineBanner';
 import { SessionCreatingState } from './components/SessionCreatingState';
+import { WorkspaceEnvironmentWarning } from './components/WorkspaceEnvironmentWarning';
 
 import './ChatPanel.css';
 
@@ -19,6 +21,7 @@ export const ChatPanel: React.FC = () => {
   const { sessionId: urlSessionId } = useParams<{ sessionId: string }>();
   const { activeSessionId, isProcessing, connectionStatus, checkServerStatus, sendMessage } =
     useSession();
+  const { isWorkspaceMismatch, sessionWorkspace, serverWorkspace } = useWorkspaceEnvironmentCheck();
 
   const currentSessionId = urlSessionId || activeSessionId;
   const groupedMessages = useAtomValue(groupedMessagesAtom);
@@ -60,6 +63,12 @@ export const ChatPanel: React.FC = () => {
           onReconnect={checkServerStatus}
         />
 
+        <WorkspaceEnvironmentWarning
+          isVisible={isWorkspaceMismatch && !isReplayMode}
+          sessionWorkspace={sessionWorkspace}
+          serverWorkspace={serverWorkspace}
+        />
+
         {showEmptyState ? (
           <EmptyState replayState={replayState} isReplayMode={isReplayMode} />
         ) : (
@@ -90,7 +99,8 @@ export const ChatPanel: React.FC = () => {
               currentSessionId === 'creating' ||
               isProcessing ||
               !connectionStatus.connected ||
-              isReplayMode
+              isReplayMode ||
+              isWorkspaceMismatch
             }
             isProcessing={isProcessing}
             connectionStatus={connectionStatus}
@@ -100,6 +110,7 @@ export const ChatPanel: React.FC = () => {
             showContextualSelector={true}
             autoFocus={false}
             showHelpText={true}
+            isWorkspaceMismatch={isWorkspaceMismatch}
           />
         )}
       </div>
