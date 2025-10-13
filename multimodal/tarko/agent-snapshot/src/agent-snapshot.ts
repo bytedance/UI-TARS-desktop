@@ -6,10 +6,7 @@
 import path from 'path';
 import fs from 'fs';
 import { Agent } from '@tarko/agent';
-import {
-  AgentRunOptions,
-  AgentEventStream,
-} from '@tarko/agent-interface';
+import { AgentRunOptions, AgentEventStream } from '@tarko/agent-interface';
 import {
   AgentSnapshotOptions,
   SnapshotGenerationResult,
@@ -66,7 +63,8 @@ export class AgentSnapshot {
     const loopDirs = fs
       .readdirSync(this.snapshotPath)
       .filter(
-        (dir) => dir.startsWith('loop-') && fs.statSync(path.join(this.snapshotPath, dir)).isDirectory(),
+        (dir) =>
+          dir.startsWith('loop-') && fs.statSync(path.join(this.snapshotPath, dir)).isDirectory(),
       )
       .sort((a, b) => {
         const numA = parseInt(a.split('-')[1], 10);
@@ -82,7 +80,7 @@ export class AgentSnapshot {
    */
   async generate(runOptions: AgentRunOptions): Promise<SnapshotGenerationResult> {
     const startTime = Date.now();
-    
+
     this.generateHook = new AgentGenerateSnapshotHook(this.agent, {
       snapshotPath: this.snapshotPath,
       snapshotName: this.snapshotName,
@@ -151,8 +149,8 @@ export class AgentSnapshot {
     );
     logger.info(
       `Verification settings: LLM requests: ${verification.verifyLLMRequests ? 'enabled' : 'disabled'}, ` +
-      `Event streams: ${verification.verifyEventStreams ? 'enabled' : 'disabled'}, ` +
-      `Tool calls: ${verification.verifyToolCalls ? 'enabled' : 'disabled'}`,
+        `Event streams: ${verification.verifyEventStreams ? 'enabled' : 'disabled'}, ` +
+        `Tool calls: ${verification.verifyToolCalls ? 'enabled' : 'disabled'}`,
     );
     logger.info(`Found ${loopCount} loops in test case`);
 
@@ -174,6 +172,34 @@ export class AgentSnapshot {
       this.agent._setIsReplay();
 
       const response = await this.agent.run(runOptions as any);
+
+      // For streaming responses, consume the entire stream to ensure execution completes
+      if (response && typeof response[Symbol.asyncIterator] === 'function') {
+        // This is a streaming response, consume it fully
+        try {
+          let agentRunEndReceived = false;
+
+          for await (const chunk of response) {
+            // Track when we receive the agent_run_end event
+            if (chunk.type === 'agent_run_end') {
+              agentRunEndReceived = true;
+            }
+            // Just consume the chunks, the actual execution happens in the background
+          }
+
+          // Ensure we received the agent_run_end event
+          if (!agentRunEndReceived) {
+            logger.warn('Stream completed without receiving agent_run_end event');
+          }
+
+          // Additional wait to ensure all background processing is complete
+          // This ensures any final cleanup handlers are executed
+          await new Promise((resolve) => setTimeout(resolve, 50));
+        } catch (streamError) {
+          logger.error(`Error consuming stream: ${streamError}`);
+          throw streamError;
+        }
+      }
 
       if (this.replayHook.hasError()) {
         const error = this.replayHook.getLastError();
