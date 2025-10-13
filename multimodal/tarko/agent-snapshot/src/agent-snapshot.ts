@@ -174,14 +174,14 @@ export class AgentSnapshot {
       const response = await this.agent.run(runOptions as any);
 
       // For streaming responses, consume the entire stream to ensure execution completes
-      if (response && typeof response[Symbol.asyncIterator] === 'function') {
+      if (response && typeof (response as any)[Symbol.asyncIterator] === 'function') {
         // This is a streaming response, consume it fully
         try {
           let agentRunEndReceived = false;
 
-          for await (const chunk of response) {
+          for await (const chunk of response as unknown as AsyncIterable<any>) {
             // Track when we receive the agent_run_end event
-            if (chunk.type === 'agent_run_end') {
+            if (chunk && typeof chunk === 'object' && chunk.type === 'agent_run_end') {
               agentRunEndReceived = true;
             }
             // Just consume the chunks, the actual execution happens in the background
