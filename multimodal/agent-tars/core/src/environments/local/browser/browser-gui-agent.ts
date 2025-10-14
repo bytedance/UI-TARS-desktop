@@ -10,6 +10,7 @@ import { ConsoleLogger, AgentEventStream, Tool, z } from '@tarko/mcp-agent';
 import { ImageCompressor, formatBytes } from '@tarko/shared-media-utils';
 import { ActionInputs, PredictionParsed } from '@agent-tars/interface';
 import { ActionParserHelper } from '@gui-agent/action-parser';
+import { defaultNormalizeCoords, normalizeActionCoords } from '@gui-agent/shared/utils';
 import {
   convertToGUIResponse,
   convertToAgentUIAction,
@@ -117,12 +118,16 @@ wait()                                         - Wait 5 seconds and take a scree
           if (!parsedAction) {
             return createGUIErrorResponse(action, 'Invalid action format');
           }
+          const normalizedCoordsAction = normalizeActionCoords(
+            parsedAction,
+            defaultNormalizeCoords,
+          );
 
           this.logger.debug({
             thought,
             step,
             action,
-            parsedAction: JSON.stringify(parsedAction, null, 2),
+            normalizedCoordsAction: JSON.stringify(normalizedCoordsAction, null, 2),
             screenDimensions: {
               width: this.screenWidth,
               height: this.screenHeight,
@@ -130,15 +135,16 @@ wait()                                         - Wait 5 seconds and take a scree
           });
 
           const operatorResult = await this.browserOperator.doExecute({
-            actions: [parsedAction],
+            actions: [normalizedCoordsAction],
           });
+          this.logger.debug('Browser action completed', operatorResult);
 
           await sleep(500);
 
           return {
             success: true,
             action: action,
-            normalizedAction: convertToAgentUIAction(parsedAction),
+            normalizedAction: convertToAgentUIAction(normalizedCoordsAction),
             observation: undefined, // Reserved for future implementation
           };
         } catch (error) {

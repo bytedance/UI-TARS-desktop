@@ -103,6 +103,9 @@ importers:
       '@gui-agent/operator-browser':
         specifier: workspace:*
         version: link:../../gui-agent/operator-browser
+      '@gui-agent/shared':
+        specifier: workspace:*
+        version: link:../../gui-agent/shared
       '@rslib/core':
         specifier: 0.10.0
         version: 0.10.0(typescript@5.8.3)
