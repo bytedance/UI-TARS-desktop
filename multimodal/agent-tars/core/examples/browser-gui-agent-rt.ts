@@ -14,6 +14,7 @@ async function main() {
       apiKey: process.env.ARK_API_KEY,
       displayName: 'doubao-1.5-thinking-vision-pro',
     },
+    toolCallEngine: 'structured_outputs',
   });
   await localAgent.initialize();
   const tools = localAgent.getTools();
