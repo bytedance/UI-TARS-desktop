@@ -17,6 +17,12 @@ interface GuiAgentPluginOption {
 
 const guiLogger = new ConsoleLogger('[O-GUIAgent]', LogLevel.DEBUG);
 
+// Determine detail parameter based on image pixel count
+// detail:low mode: 1,048,576 px (1024×1024)
+// detail:high mode: 4,014,080 px (2048×1960)
+const LOW_DETAIL_THRESHOLD = 1024 * 1024; // 1,048,576 px
+const HIGH_DETAIL_THRESHOLD = 2048 * 1960; // 4,014,080 px
+
 /**
  * GUI Agent Plugin - handles COMPUTER_USE_ENVIRONMENT for screen interaction
  */
@@ -122,6 +128,9 @@ export class GuiAgentPlugin extends AgentPlugin {
     const originalBuffer = Buffer.from(output.base64, 'base64');
     const originalSize = originalBuffer.byteLength;
 
+    const { width, height } = base64Tool.getDimensions() || { width: -1, height: -1 };
+    guiLogger.debug(`emitScreenshotEvent: original image size: ${width}x${height}`);
+
     // Create image compressor with WebP format and 80% quality
     const compressor = new ImageCompressor({
       quality: 80,
@@ -132,10 +141,32 @@ export class GuiAgentPlugin extends AgentPlugin {
     const compressedSize = compressedBuffer.byteLength;
     const compressionRatio = (((originalSize - compressedSize) / originalSize) * 100).toFixed(2);
 
+    const compressedBase64Tool = new Base64ImageParser(compressedBase64);
+    const { width: compressedWidth, height: compressedHeight } =
+      compressedBase64Tool.getDimensions() || { width: -1, height: -1 };
+    guiLogger.debug(
+      `emitScreenshotEvent: compressed image size: ${compressedWidth}x${compressedHeight}`,
+    );
+
     guiLogger.debug(`emitScreenshotEvent compression stat: `, {
       originalSize: formatBytes(originalSize),
       compressedSize: formatBytes(compressedSize),
       compressionRatio: `${compressionRatio}% reduction`,
+    });
+
+    const pixelCount = compressedWidth * compressedHeight;
+    let detailLevel: 'low' | 'high';
+    if (pixelCount <= LOW_DETAIL_THRESHOLD) {
+      detailLevel = 'low';
+    } else if (pixelCount <= HIGH_DETAIL_THRESHOLD) {
+      detailLevel = 'high';
+    } else {
+      // For images larger than high detail threshold, use high detail
+      detailLevel = 'high';
+    }
+
+    guiLogger.debug(`emitScreenshotEvent: detail parameter selection`, {
+      selectedDetail: detailLevel,
     });
 
     const content: ChatCompletionContentPart[] = [
@@ -143,6 +174,7 @@ export class GuiAgentPlugin extends AgentPlugin {
         type: 'image_url',
         image_url: {
           url: compressedBase64,
+          detail: detailLevel,
         },
       },
     ];
