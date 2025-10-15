@@ -21,13 +21,12 @@ import {
 import {
   assembleSystemPrompt,
   isSystemPromptTemplate,
-  defaultNormalizeCoords,
   normalizeActionCoords,
   sleep,
 } from '@gui-agent/shared/utils';
 import { GUI_ADAPTED_TOOL_NAME } from './constants';
 import { convertToAgentUIAction, createGUIErrorResponse } from './utils';
-import { defaultDetailCalculator } from './defaultImpls';
+import { defaultNormalizeCoords, defaultDetailCalculator } from './defaultImpls';
 
 const defaultLogger = new ConsoleLogger('[GUIAgent]', LogLevel.DEBUG);
 

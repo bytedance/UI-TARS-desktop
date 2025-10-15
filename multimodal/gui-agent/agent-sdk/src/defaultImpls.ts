@@ -2,7 +2,27 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { ImageDetailCalculator } from '@gui-agent/shared/types';
+import { Coordinates, ImageDetailCalculator, NormalizeCoordinates } from '@gui-agent/shared/types';
+
+/**
+ * Default coordinate normalization function
+ * Normalizes raw coordinates by dividing by 1000 (simple scaling)
+ * @param rawCoords - The raw coordinates to normalize
+ * @returns Object containing normalized coordinates
+ */
+export const defaultNormalizeCoords: NormalizeCoordinates = (rawCoords: Coordinates) => {
+  if (!rawCoords.raw) {
+    return { normalized: rawCoords };
+  }
+  const normalizedCoords = {
+    ...rawCoords,
+    normalized: {
+      x: rawCoords.raw.x / 1000,
+      y: rawCoords.raw.y / 1000,
+    },
+  };
+  return { normalized: normalizedCoords };
+};
 
 /**
  * Default implementation for detail calculation based on pixel count
