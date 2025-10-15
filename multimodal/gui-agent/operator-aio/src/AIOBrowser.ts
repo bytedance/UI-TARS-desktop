@@ -117,6 +117,10 @@ export class AIOBrowser {
       waitUntil: [], // Wait for no event
     });
     this.logger.info('Navigation completed');
+
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    await page.bringToFront();
+    this.logger.info('Page brought to front');
   }
 
   public async handleNavigateBack(): Promise<void> {
