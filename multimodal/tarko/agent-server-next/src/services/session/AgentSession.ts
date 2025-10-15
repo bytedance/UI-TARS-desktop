@@ -193,6 +193,7 @@ export class AgentSession {
       ...baseAgentOptions,
       ...transformedOptions,
       ...(this.agentOptions || {}), // Apply one-time agent initialization options
+      ...(this.sessionInfo?.metadata?.agentOptions || {}),
     };
 
     // Create base agent
