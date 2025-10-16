@@ -10,7 +10,8 @@ import { ConsoleLogger, AgentEventStream, Tool, z } from '@tarko/mcp-agent';
 import { ImageCompressor, formatBytes } from '@tarko/shared-media-utils';
 import { ActionInputs, PredictionParsed } from '@agent-tars/interface';
 import { ActionParserHelper } from '@gui-agent/action-parser';
-import { defaultNormalizeCoords, normalizeActionCoords } from '@gui-agent/shared/utils';
+import { Coordinates, NormalizeCoordinates } from '@gui-agent/shared/types';
+import { normalizeActionCoords } from '@gui-agent/shared/utils';
 import {
   convertToGUIResponse,
   convertToAgentUIAction,
@@ -41,6 +42,20 @@ export interface GUIAgentOptions {
 }
 
 const actionParserHelper = new ActionParserHelper();
+
+const defaultNormalizeCoords: NormalizeCoordinates = (rawCoords: Coordinates) => {
+  if (!rawCoords.raw) {
+    return { normalized: rawCoords };
+  }
+  const normalizedCoords = {
+    ...rawCoords,
+    normalized: {
+      x: rawCoords.raw.x / 1000,
+      y: rawCoords.raw.y / 1000,
+    },
+  };
+  return { normalized: normalizedCoords };
+};
 
 /**
  * Browser GUI Agent for visual browser automation
