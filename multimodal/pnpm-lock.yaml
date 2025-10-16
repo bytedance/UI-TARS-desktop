@@ -691,9 +691,6 @@ importers:
       '@agent-infra/shared':
         specifier: 0.0.2
         version: 0.0.2
-      '@gui-agent/operator-browser':
-        specifier: workspace:*
-        version: link:../../gui-agent/operator-browser
       '@rslib/core':
         specifier: 0.10.0
         version: 0.10.0(typescript@5.8.3)
