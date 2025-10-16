@@ -6,26 +6,6 @@
 import { BaseAction, Coordinates, NormalizeCoordinates } from '../types';
 
 /**
- * Default coordinate normalization function
- * Normalizes raw coordinates by dividing by 1000 (simple scaling)
- * @param rawCoords - The raw coordinates to normalize
- * @returns Object containing normalized coordinates
- */
-export const defaultNormalizeCoords: NormalizeCoordinates = (rawCoords: Coordinates) => {
-  if (!rawCoords.raw) {
-    return { normalized: rawCoords };
-  }
-  const normalizedCoords = {
-    ...rawCoords,
-    normalized: {
-      x: rawCoords.raw.x / 1000,
-      y: rawCoords.raw.y / 1000,
-    },
-  };
-  return { normalized: normalizedCoords };
-};
-
-/**
  * Normalizes coordinates in a BaseAction object
  * Processes point, start, and end coordinate fields if they exist
  * @param action - The BaseAction object to normalize coordinates for

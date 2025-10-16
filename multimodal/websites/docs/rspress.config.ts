@@ -1,13 +1,13 @@
 import * as path from 'node:path';
 import { defineConfig } from '@rspress/core';
 import mermaid from 'rspress-plugin-mermaid';
-import { pluginClientRedirects } from '@rspress/plugin-client-redirects';
+
 import { SEO_CONFIG } from './src/shared/seoConfig';
+import { showcaseDataPlugin } from './plugins/showcase-data-plugin';
 
 const isProd = process.env.NODE_ENV === 'production';
 
 export default defineConfig({
-  root: path.join(__dirname, 'docs'),
   lang: 'en',
   title: SEO_CONFIG.siteName,
   icon: SEO_CONFIG.images.favicon,
@@ -16,7 +16,10 @@ export default defineConfig({
     light: '/agent-tars-dark-logo.png',
     dark: '/agent-tars-dark-logo.png',
   },
+  // Disable SSG to allow client-side routing for dynamic paths
+  ssg: false,
   route: {
+    cleanUrls: true,
     exclude: isProd
       ? [
           'en/sdk/**',
@@ -79,9 +82,7 @@ export default defineConfig({
         fontSize: 16,
       },
     }),
-    pluginClientRedirects({
-      redirects: [],
-    }),
+    showcaseDataPlugin(),
   ],
   themeConfig: {
     darkMode: false,

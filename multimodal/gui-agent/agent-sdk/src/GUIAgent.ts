@@ -13,16 +13,20 @@ import { GUIAgentToolCallEngine } from './ToolCallEngine';
 import { SYSTEM_PROMPT } from './prompts';
 import { Base64ImageParser } from '@agent-infra/media-utils';
 import { Operator, BaseGUIAgent } from '@gui-agent/shared/base';
-import { GUIAgentConfig, NormalizeCoordinates } from '@gui-agent/shared/types';
+import {
+  GUIAgentConfig,
+  NormalizeCoordinates,
+  ImageDetailCalculator,
+} from '@gui-agent/shared/types';
 import {
   assembleSystemPrompt,
   isSystemPromptTemplate,
-  defaultNormalizeCoords,
   normalizeActionCoords,
   sleep,
 } from '@gui-agent/shared/utils';
 import { GUI_ADAPTED_TOOL_NAME } from './constants';
 import { convertToAgentUIAction, createGUIErrorResponse } from './utils';
+import { defaultNormalizeCoords, defaultDetailCalculator } from './defaultImpls';
 
 const defaultLogger = new ConsoleLogger('[GUIAgent]', LogLevel.DEBUG);
 
@@ -31,6 +35,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent {
 
   private operator: Operator | undefined;
   private normalizeCoordinates: NormalizeCoordinates;
+  private detailCalculator: ImageDetailCalculator;
   private loopIntervalInMs: number;
 
   constructor(config: GUIAgentConfig<T>) {
@@ -40,6 +45,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent {
       systemPrompt,
       customeActionParser,
       normalizeCoordinates,
+      detailCalculator,
       maxLoopCount,
       loopIntervalInMs = 500,
     } = config;
@@ -69,6 +75,8 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent {
     });
     this.operator = operator;
     this.normalizeCoordinates = normalizeCoordinates ?? defaultNormalizeCoords;
+    // Default detail calculator implementation
+    this.detailCalculator = detailCalculator ?? defaultDetailCalculator;
     this.loopIntervalInMs = loopIntervalInMs;
     this.logger = this.logger.spawn('[GUIAgent]');
   }
@@ -163,11 +171,17 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent {
       return;
     }
 
+    const { width: imageWidth, height: imageHeight } = base64Tool.getDimensions() || {
+      width: -1,
+      height: -1,
+    };
+
     const content: ChatCompletionContentPart[] = [
       {
         type: 'image_url',
         image_url: {
           url: base64Uri,
+          detail: this.detailCalculator(imageWidth, imageHeight),
         },
       },
     ];

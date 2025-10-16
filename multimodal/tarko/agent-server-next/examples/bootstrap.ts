@@ -82,17 +82,17 @@ const server = new AgentServer({
         auth: true,
       },
       models: [
-        {
-          id: 'ep-20250905175225-hlrvd',
+         {
+          id: 'ep-20250926155907-tnrqq',
           provider: 'volcengine',
-          displayName: 'T5-RL',
+          displayName: 'T6.5-RL',
           baseURL: process.env.OMNI_TARS_BASE_URL,
           apiKey: process.env.OMNI_TARS_API_KEY,
         },
         {
-          id: 'ep-20250926155907-tnrqq',
+          id: 'ep-20250905175225-hlrvd',
           provider: 'volcengine',
-          displayName: 'T6.5-RL',
+          displayName: 'T5-RL',
           baseURL: process.env.OMNI_TARS_BASE_URL,
           apiKey: process.env.OMNI_TARS_API_KEY,
         },
