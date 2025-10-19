@@ -305,7 +305,32 @@ export class SQLiteDAOFactory implements IDAOFactory {
   }
 
   private ensureInitialized(): void {
-    if (!this.initialized || !this.db.isOpen) {
+    // If initialize() was called but the underlying DB isn't open for some reason,
+    // attempt to open it lazily. This covers subtle differences in sqlite implementations
+    // where `isOpen` might not be set immediately after calling open().
+    if (!this.initialized) {
+      throw new Error('SQLite DAO Factory not initialized. Call initialize() first.');
+    }
+
+    try {
+      // Some implementations expose `isOpen`, others may use `open` flag. Attempt to open
+      // the DB if it's not considered open yet.
+      const dbAny = this.db as any;
+      const isOpenFlag = Boolean(dbAny.isOpen || dbAny.open);
+      if (!isOpenFlag) {
+        try {
+          // Attempt to open synchronously if possible
+          this.db.open();
+        } catch (openErr) {
+          // ignore; we'll throw below with a clear message
+        }
+      }
+    } catch (err) {
+      // swallow and validate below
+    }
+
+    const dbAnyFinal = this.db as any;
+    if (!this.initialized || !(Boolean(dbAnyFinal.isOpen || dbAnyFinal.open))) {
       throw new Error('SQLite DAO Factory not initialized. Call initialize() first.');
     }
   }

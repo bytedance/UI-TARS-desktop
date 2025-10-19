@@ -383,7 +383,7 @@ class ApiService {
       };
     } catch (error) {
       console.error('Error getting version info:', error);
-      return { version: '0.0.0', buildTime: Date.now() };
+      return { version: '0.0.0', buildTime: Date.now(), gitHash: '' };
     }
   }
 
