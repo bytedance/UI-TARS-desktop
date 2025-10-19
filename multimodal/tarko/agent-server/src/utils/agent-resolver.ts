@@ -9,6 +9,7 @@ import {
   AgentResolutionResult,
   AgentConstructor,
 } from '@tarko/interface';
+import { pathToFileURL } from 'url';
 
 /**
  * Options for agent implementation resolution
@@ -51,8 +52,12 @@ export async function resolveAgentImplementation(
       // When workspace is provided, it will be used as the base path for relative imports
       const resolvedPath = require.resolve(agentModulePathIdentifier, resolveOptions);
 
-      // Use the resolved absolute path for import to ensure consistency
-      const agentModule = await import(resolvedPath);
+  // Convert resolved absolute path to a file:// URL before import.
+  // This avoids the ESM loader error on Windows where absolute paths
+  // like 'E:\foo\bar.js' are treated as an unknown protocol 'e:'.
+  const importPath = pathToFileURL(resolvedPath).href;
+  // Use the resolved file URL for dynamic import to ensure consistency
+  const agentModule = await import(importPath);
 
       // Handle nested default exports (common in transpiled modules)
       let agentConstructor = agentModule.default as AgentConstructor;
