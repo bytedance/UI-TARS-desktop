@@ -9,19 +9,19 @@ import { getComposableOption, OmniTarsOption } from './options';
 
 const sandboxBaseUrl = process.env.AIO_SANDBOX_URL ?? '.';
 export default class OmniTARSAgent extends ComposableAgent {
-  static label = 'Omni Agent';
+  static label = 'Neo-Mind';
 
   static webuiConfig: AgentWebUIImplementation = {
     logo: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/icon.png',
-    title: 'Omni Agent',
-    subtitle: 'Offering seamless integration with a wide range of real-world tools.',
+    title: 'Neo-Mind',
+    subtitle: 'The next-evolution of artificial intelligence',
     welcomTitle: 'Let’s work it out',
     welcomePrompts: [],
     welcomeCards: [
       {
         title: '2048',
         category: 'Game',
-        // prompt: `Play this game, your target score is 1024`,
+         prompt: `Play this game, your target score is 1024`,
         image:
           'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=628,height=628,fit=cover,f=auto/cb8c967c-4a78-4ffa-8506-cbac69746f4f/2048.png',
         agentOptions: {
@@ -35,7 +35,7 @@ export default class OmniTARSAgent extends ComposableAgent {
       {
         title: 'Four in a Row',
         category: 'Game',
-        // prompt: `Play this game, win the computer`,
+        prompt: `Play this game, win the computer`,
         image:
           'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=628,height=628,fit=cover,f=auto/e80686db-b0fb-4f2c-bd2f-3a89734f102a/four-in-a-row.jpg',
         agentOptions: {
@@ -49,7 +49,7 @@ export default class OmniTARSAgent extends ComposableAgent {
       {
         title: 'Block the Pig',
         category: 'Game',
-        // prompt: `Play this game, reach level 5`,
+        prompt: `Play this game, reach level 5`,
         image:
           'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=628,height=628,fit=cover,f=auto/9fec1234ce2afd5e789f56da463dcffc/block-the-pig.jpeg',
         agentOptions: {
@@ -63,7 +63,7 @@ export default class OmniTARSAgent extends ComposableAgent {
       {
         title: 'Factory Balls Forever',
         category: 'Game',
-        // prompt: `Play this game, reach level 5`,
+        prompt: `Play this game, reach level 5`,
         image:
           'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=628,height=628,fit=cover,f=auto/2a503d0a1d9475d6e62c7ea11caa429ab952aa8f500755613a34e66e2196fe82/factory-balls-forever.png',
         agentOptions: {
@@ -77,7 +77,7 @@ export default class OmniTARSAgent extends ComposableAgent {
       {
         title: 'Cubinko',
         category: 'Game',
-        // prompt: `Play this game, reach level 5`,
+        prompt: `Play this game, reach level 5`,
         image:
           'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=628,height=628,fit=cover,f=auto/894ed059623f65b643795d0e70ed41cd/cubinko.png',
         agentOptions: {
@@ -91,7 +91,7 @@ export default class OmniTARSAgent extends ComposableAgent {
       {
         title: 'Penalty Kicks',
         category: 'Game',
-        // prompt: `Play this game, your target score is 600`,
+        prompt: `Play this game, your target score is 600`,
         image:
           'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=628,height=628,fit=cover,f=auto/0770daaa8c4ff3c36dd53e6e41f59396/penalty-kicks.png',
         agentOptions: {
