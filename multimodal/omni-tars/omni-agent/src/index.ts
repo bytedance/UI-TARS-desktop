@@ -211,6 +211,11 @@ export default class OmniTARSAgent extends ComposableAgent {
           link: sandboxBaseUrl + '/vnc/index.html?autoconnect=true',
           icon: 'monitor',
         },
+         {
+          title: 'MCP',
+          link: sandboxBaseUrl + '/mcp',
+          icon: 'default',
+        },
       ],
     },
     guiAgent: {
