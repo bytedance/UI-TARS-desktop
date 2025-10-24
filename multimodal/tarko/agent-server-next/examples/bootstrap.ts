@@ -34,6 +34,7 @@ const server = new AgentServer({
       type: process.env.NATIVE_THINKING === 'true' ? 'enabled' : 'disabled',
     },
     server: {
+      port: 6000,
       runtimeSettings: {
         schema: {
           type: 'object',
