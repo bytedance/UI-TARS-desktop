@@ -213,7 +213,7 @@ export default class OmniTARSAgent extends ComposableAgent {
         },
          {
           title: 'MCP',
-          link: sandboxBaseUrl + '/mcp',
+          link: sandboxBaseUrl + '/v1/mcp',
           icon: 'default',
         },
       ],
