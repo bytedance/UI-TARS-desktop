@@ -71,17 +71,6 @@ const server = new AgentServer({
           };
         },
       },
-      storage: {
-        type: 'mongodb',
-        uri: process.env.MONGO_URI,
-        options: {
-          dbName: process.env.MONGO_DB_NAME,
-        },
-      },
-      tenant: {
-        mode: 'multi',
-        auth: true,
-      },
       models: [
          {
           id: 'ep-20250926155907-tnrqq',
@@ -122,8 +111,8 @@ const server = new AgentServer({
       },
     },
     webui: {
-      type: 'remote',
-      remoteUrl: process.env.WEBUI_REMOTE_URL,
+      type: 'static',
+      staticPath: process.env.WEBUI_STATIC_PATH,
     },
   },
 });
