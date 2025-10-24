@@ -22,9 +22,9 @@ export default defineConfig({
   dev: {
     writeToDisk: true,
   },
-  // server: {
-  //   base: '/p9fgsSryzeO5JtefS1bMfsa7G11S6pGKY',
-  // },
+   //server: {
+     //base: '/A',
+  //},
   output: {
     cleanDistPath: true,
     inlineScripts: true,
