@@ -36,21 +36,21 @@ module.exports = {
         ],
       },
       colors: {
-        // Refined neutral palette for an elegant, minimalist look
+        // Professional neutral palette with better contrast
         gray: {
-          50: '#f9fafb',
-          100: '#f3f4f6',
-          200: '#e5e7eb',
-          300: '#d1d5db',
-          400: '#9ca3af',
-          500: '#6b7280',
-          600: '#4b5563',
-          700: '#374151',
-          800: '#1f2937',
-          900: '#111827',
-          950: '#0b0f1a',
+          50: '#fafafa',
+          100: '#f5f5f5',
+          200: '#e5e5e5',
+          300: '#d4d4d4',
+          400: '#a3a3a3',
+          500: '#737373',
+          600: '#525252',
+          700: '#404040',
+          800: '#262626',
+          900: '#171717',
+          950: '#0a0a0a',
         },
-        // Subtle primary color: Elegant slate blue
+        // Modern primary color: Professional blue-gray
         primary: {
           50: '#f8fafc',
           100: '#f1f5f9',
@@ -64,19 +64,24 @@ module.exports = {
           900: '#0f172a',
           950: '#020617',
         },
-        // Accent color: Refined indigo tones
+        // Vibrant accent color: Modern gradient-friendly colors
         accent: {
-          50: '#eef2ff',
-          100: '#e0e7ff',
-          200: '#c7d2fe',
-          300: '#a5b4fc',
-          400: '#818cf8',
-          500: '#6366f1',
-          600: '#4f46e5',
-          700: '#4338ca',
-          800: '#3730a3',
-          900: '#312e81',
-          950: '#1e1b4b',
+          50: '#f0f9ff',
+          100: '#e0f2fe',
+          200: '#bae6fd',
+          300: '#7dd3fc',
+          400: '#38bdf8',
+          500: '#0ea5e9',
+          600: '#0284c7',
+          700: '#0369a1',
+          800: '#075985',
+          900: '#0c4a6e',
+          950: '#082f49',
+        },
+        // Additional professional colors
+        brand: {
+          light: '#60a5fa', // Light mode primary
+          dark: '#3b82f6', // Dark mode primary
         },
       },
       animation: {

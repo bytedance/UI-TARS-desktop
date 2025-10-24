@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSession } from '@/common/hooks/useSession';
 import { MessageGroup } from './Message/components/MessageGroup';
-import { ChatInput } from './MessageInput';
+import { ChatInput } from './MessageInput/ChatInput';
 import { useAtomValue } from 'jotai';
 import { groupedMessagesAtom } from '@/common/state/atoms/message';
 import { replayStateAtom } from '@/common/state/atoms/replay';

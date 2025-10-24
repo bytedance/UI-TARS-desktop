@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { FiArrowUpRight, FiRefreshCw } from 'react-icons/fi';
 import { useSession } from '@/common/hooks/useSession';
 import { getWebUIConfig, getLogoUrl, getAgentTitle } from '@/config/web-ui-config';
-import { ChatInput } from '@/standalone/chat/MessageInput';
+import { ChatInput } from '@/standalone/chat/MessageInput/ChatInput';
 import { ChatCompletionContentPart } from '@tarko/agent-interface';
 import { Tooltip } from '@tarko/ui';
 import { ThemeToggle } from '@/standalone/components';
@@ -126,8 +126,8 @@ const WelcomePage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      <div className="fixed inset-0 bg-gradient-to-b from-transparent to-gray-100/50 dark:to-gray-800/50 pointer-events-none"></div>
+    <div className="flex flex-col bg-gradient-to-br from-white via-blue-50/30 to-cyan-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-gray-900">
+      <div className="fixed inset-0 bg-gradient-to-b from-transparent via-blue-50/20 to-blue-100/30 dark:via-transparent dark:to-blue-950/20 pointer-events-none"></div>
 
       {/* Theme Toggle - Fixed Position */}
       <motion.div
@@ -186,14 +186,14 @@ const WelcomePage: React.FC = () => {
                 whileTap={{ scale: 0.98 }}
                 onClick={handleDirectChat}
                 disabled={isLoading || isDirectChatLoading}
-                className={`flex items-center gap-1.5 py-1.5 px-2 text-sm text-gray-500 dark:text-gray-400 relative group transition-colors duration-300 ${
+                className={`flex items-center gap-1.5 py-1.5 px-2 text-sm text-gray-600 dark:text-gray-400 relative group transition-colors duration-300 ${
                   isLoading || isDirectChatLoading
                     ? 'opacity-60 cursor-not-allowed'
-                    : 'cursor-pointer group-hover:text-gray-900 dark:group-hover:text-gray-100'
+                    : 'cursor-pointer hover:text-blue-600 dark:hover:text-blue-400'
                 }`}
                 type="button"
               >
-                <span className="group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors duration-300">
+                <span className="group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
                   Go to task history
                 </span>
                 {isDirectChatLoading ? (
@@ -219,11 +219,11 @@ const WelcomePage: React.FC = () => {
                   </motion.div>
                 ) : (
                   <FiArrowUpRight
-                    className="text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors duration-300"
+                    className="text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300"
                     size={14}
                   />
                 )}
-                <span className="absolute bottom-0 left-0 w-0 h-[1px] bg-gray-500 dark:bg-gray-400 group-hover:w-full group-hover:bg-gray-900 dark:group-hover:bg-gray-100 transition-all duration-300"></span>
+                <span className="absolute bottom-0 left-0 w-0 h-[1px] bg-gray-600 dark:bg-gray-400 group-hover:w-full group-hover:bg-blue-600 dark:group-hover:bg-blue-400 transition-all duration-300"></span>
               </motion.button>
             </motion.div>
 
@@ -253,7 +253,7 @@ const WelcomePage: React.FC = () => {
                       transition={{ duration: 0.3, delay: 0.4 + index * 0.1 }}
                       type="button"
                       onClick={() => handleChatSubmit(prompt)}
-                      className="text-sm px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/30 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300 transition-colors max-w-[280px] sm:max-w-sm md:max-w-md whitespace-nowrap overflow-hidden text-ellipsis"
+                      className="text-sm px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-blue-200/50 dark:border-blue-700/30 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-600/50 text-gray-700 dark:text-gray-200 transition-all duration-200 max-w-[280px] sm:max-w-sm md:max-w-md whitespace-nowrap overflow-hidden text-ellipsis shadow-sm hover:shadow-md"
                       disabled={isLoading || isDirectChatLoading}
                     >
                       {prompt}
@@ -279,7 +279,7 @@ const WelcomePage: React.FC = () => {
                     }}
                     type="button"
                     onClick={handleShuffle}
-                    className="text-sm px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/30 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300 transition-colors flex items-center gap-1.5"
+                    className="text-sm px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-blue-200/50 dark:border-blue-700/30 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-600/50 text-gray-700 dark:text-gray-200 transition-all duration-200 flex items-center gap-1.5 shadow-sm hover:shadow-md"
                     disabled={isLoading || isDirectChatLoading || isShuffling}
                     title="Shuffle"
                   >

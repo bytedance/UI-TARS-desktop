@@ -57,7 +57,7 @@ export default {
               enum: ['omni', 'gui', 'game'],
               enumLabels: ['Omni', 'GUI', 'Game'],
               default: 'omni',
-              placement: 'chat-bottom',
+              placement: 'dropdown-item',
             },
             browserMode: {
               type: 'string',
@@ -65,7 +65,7 @@ export default {
               enum: ['hybrid'],
               enumLabels: ['Hybrid'],
               default: 'hybrid',
-              placement: 'chat-bottom',
+              placement: 'dropdown-item',
               visible: {
                 dependsOn: 'agentMode',
                 when: 'gui',

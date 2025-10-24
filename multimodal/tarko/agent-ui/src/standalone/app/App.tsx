@@ -60,7 +60,7 @@ export const App: React.FC = () => {
         <Route
           path="/"
           element={
-            <div className="flex h-screen bg-[#F2F3F5] dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+            <div className="flex h-screen bg-gradient-to-br from-gray-50 to-blue-50/20 dark:from-gray-950 dark:to-gray-900 text-gray-900 dark:text-gray-100">
               {sidebarEnabled && <Sidebar />}
               <div className="flex-1 flex flex-col overflow-hidden">
                 <div className="flex-1 overflow-y-auto">
@@ -75,7 +75,7 @@ export const App: React.FC = () => {
         <Route
           path="/creating"
           element={
-            <div className="flex h-screen bg-[#F2F3F5] dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+            <div className="flex h-screen bg-gradient-to-br from-gray-50 to-blue-50/20 dark:from-gray-950 dark:to-gray-900 text-gray-900 dark:text-gray-100">
               {sidebarEnabled && <Sidebar />}
               <div className="flex-1 flex flex-col overflow-hidden">
                 <div className="flex-1 overflow-y-auto">
@@ -89,7 +89,7 @@ export const App: React.FC = () => {
       <Route
         path="/:sessionId"
         element={
-          <div className="flex h-screen bg-[#F2F3F5] dark:bg-gray-900 text-gray-900 dark:text-gray-100 overflow-hidden">
+          <div className="flex h-screen bg-gradient-to-br from-gray-50 to-blue-50/20 dark:from-gray-950 dark:to-gray-900 text-gray-900 dark:text-gray-100 overflow-hidden">
             {sidebarEnabled && <Sidebar />}
             <div className="flex-1 flex flex-col overflow-hidden">
               <Navbar />

@@ -411,7 +411,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       <form onSubmit={handleSubmit}>
         <div
           className={`relative overflow-hidden rounded-3xl transition-all duration-300 ${
-            isFocused ? 'shadow-md' : ''
+            isFocused ? 'shadow-lg shadow-blue-500/10 dark:shadow-blue-400/20' : 'shadow-sm'
           }`}
         >
           <div
@@ -420,13 +420,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               contextualState.input.trim() ||
               uploadedImages.length > 0 ||
               contextualState.contextualItems.length > 0
-                ? 'from-indigo-500 via-purple-500 to-pink-500 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 animate-border-flow'
-                : 'from-indigo-400 via-purple-400 to-pink-400 dark:from-indigo-300 dark:via-purple-300 dark:to-pink-300'
-            } bg-[length:200%_200%] ${isFocused ? 'opacity-100' : 'opacity-80'}`}
+                ? 'from-blue-500 via-cyan-500 to-blue-600 dark:from-blue-400 dark:via-cyan-400 dark:to-blue-500 animate-border-flow'
+                : 'from-blue-400 via-cyan-400 to-blue-500 dark:from-blue-500/50 dark:via-cyan-500/50 dark:to-blue-600/50'
+            } bg-[length:200%_200%] ${isFocused ? 'opacity-100' : 'opacity-70 dark:opacity-60'}`}
           ></div>
 
           <div
-            className={`relative m-[2px] rounded-[1.4rem] bg-white dark:bg-gray-800 backdrop-blur-sm ${
+            className={`relative m-[2px] rounded-[1.4rem] bg-white dark:bg-gray-900 backdrop-blur-sm ${
               isDisabled ? 'opacity-90' : ''
             }`}
           >
@@ -561,8 +561,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   disabled={isAborting}
                   className={`absolute right-3 bottom-3 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 ${
                     isAborting
-                      ? 'bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100 dark:from-indigo-800/30 dark:via-purple-800/30 dark:to-pink-800/30 text-indigo-400 dark:text-indigo-500 cursor-not-allowed border-2 border-indigo-200 dark:border-indigo-700/50'
-                      : 'bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 hover:from-indigo-100 hover:via-purple-100 hover:to-pink-100 dark:from-indigo-900/20 dark:via-purple-900/20 dark:to-pink-900/20 dark:hover:from-indigo-900/30 dark:hover:via-purple-900/30 dark:hover:to-pink-900/30 text-indigo-600 dark:text-indigo-400 border-2 border-indigo-200 dark:border-indigo-700/50'
+                      ? 'bg-gradient-to-r from-blue-100 via-cyan-100 to-blue-100 dark:from-blue-900/30 dark:via-cyan-900/30 dark:to-blue-900/30 text-blue-500 dark:text-blue-400 cursor-not-allowed border-2 border-blue-200 dark:border-blue-700/50'
+                      : 'bg-gradient-to-r from-blue-50 via-cyan-50 to-blue-50 hover:from-blue-100 hover:via-cyan-100 hover:to-blue-100 dark:from-blue-900/20 dark:via-cyan-900/20 dark:to-blue-900/20 dark:hover:from-blue-900/30 dark:hover:via-cyan-900/30 dark:hover:to-blue-900/30 text-blue-600 dark:text-blue-400 border-2 border-blue-200 dark:border-blue-700/50'
                   } shadow-sm bg-[length:200%_200%] animate-border-flow`}
                   title="Stop generation"
                 >
@@ -582,8 +582,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   disabled={isMessageEmpty(contextualState.input, uploadedImages) || isDisabled}
                   className={`absolute right-3 bottom-3 p-3 rounded-full transition-all duration-200 hover:scale-105 active:scale-90 ${
                     isMessageEmpty(contextualState.input, uploadedImages) || isDisabled
-                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 text-white dark:text-gray-900 shadow-sm'
+                      ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-blue-500 to-cyan-500 dark:from-blue-500 dark:to-cyan-500 text-white shadow-md hover:shadow-lg'
                   }`}
                 >
                   <FiSend size={18} />
@@ -604,7 +604,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 : 'Server disconnected. Click the button to reconnect.'}
             </span>
           ) : isProcessing ? (
-            <span className="text-accent-500 dark:text-accent-400 flex items-center animate-in fade-in duration-300">
+            <span className="text-blue-600 dark:text-blue-400 flex items-center animate-in fade-in duration-300">
               <span className="typing-indicator mr-2">
                 <span></span>
                 <span></span>

@@ -24,7 +24,7 @@
   }
 
   body {
-    @apply text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-900;
+    @apply text-gray-900 dark:text-gray-100 bg-gradient-to-br from-gray-50 to-blue-50/20 dark:from-gray-950 dark:to-gray-900;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
 }
@@ -130,10 +130,9 @@
 
 body {
   margin: 0;
+  padding: 0;
   -webkit-font-smoothing: antialiased;
   height: 100vh;
-  margin: 0;
-  padding: 0;
   overflow: hidden;
   overflow-x: hidden;
   line-height: 1.5;
