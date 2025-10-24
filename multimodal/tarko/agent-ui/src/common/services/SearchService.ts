@@ -287,17 +287,18 @@ export class SearchService {
   }
 
   private static isValidOmniTarsResponse(data: unknown): data is OmniTarsSearchResponse {
-    return (
-      typeof data === 'object' &&
-      data !== null &&
-      'searchParameters' in data &&
-      typeof (data as Record<string, unknown>).searchParameters === 'object' &&
-      (data as Record<string, unknown>).searchParameters !== null &&
-      'q' in (data as Record<string, unknown>).searchParameters &&
-      typeof ((data as Record<string, unknown>).searchParameters as Record<string, unknown>).q ===
-        'string' &&
-      'organic' in data &&
-      Array.isArray((data as Record<string, unknown>).organic)
-    );
+    if (typeof data !== 'object' || data === null) return false;
+
+    const d = data as Record<string, any>;
+
+    if (!('searchParameters' in d) || typeof d.searchParameters !== 'object' || d.searchParameters === null)
+      return false;
+
+    const sp = d.searchParameters as Record<string, any>;
+    if (!('q' in sp) || typeof sp.q !== 'string') return false;
+
+    if (!('organic' in d) || !Array.isArray(d.organic)) return false;
+
+    return true;
   }
 }

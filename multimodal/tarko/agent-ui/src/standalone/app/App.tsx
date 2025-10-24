@@ -9,6 +9,8 @@ import { SessionRouter } from './Router/SessionRouter';
 import { Sidebar } from '@/standalone/sidebar';
 import { Navbar } from '@/standalone/navbar';
 import { isSidebarEnabled, isHomeEnabled } from '@/config/web-ui-config';
+import { McpDashboard } from '@/standalone/mcp/McpDashboard';
+import { McpServerDetail } from '@/standalone/mcp/McpServerDetail';
 
 export const App: React.FC = () => {
   const { initConnectionMonitoring, loadSessions, connectionStatus, activeSessionId } =
@@ -86,6 +88,28 @@ export const App: React.FC = () => {
           }
         />
       )}
+      <Route
+        path="/mcp"
+        element={
+          <div className="flex h-screen bg-[#F2F3F5] dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+            {sidebarEnabled && <Sidebar />}
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <McpDashboard />
+            </div>
+          </div>
+        }
+      />
+      <Route
+        path="/mcp/:serverName"
+        element={
+          <div className="flex h-screen bg-[#F2F3F5] dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+            {sidebarEnabled && <Sidebar />}
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <McpServerDetail />
+            </div>
+          </div>
+        }
+      />
       <Route
         path="/:sessionId"
         element={

@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { motion } from 'framer-motion';
 
-import { FiPlus, FiHome, FiSettings, FiActivity } from 'react-icons/fi';
+import { FiPlus, FiHome, FiSettings, FiActivity, FiServer } from 'react-icons/fi';
 import { GoSidebarCollapse, GoSidebarExpand } from 'react-icons/go';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useSession } from '@/common/hooks/useSession';
@@ -30,7 +30,12 @@ export const ToolBar: React.FC = () => {
 
   const enableLayoutSwitchButton = isLayoutSwitchButtonEnabled();
   const isHomePage = location.pathname === '/';
+  const isMcpPage = location.pathname.startsWith('/mcp');
   const enableEventStreamViewer = isEventStreamViewerEnabled();
+
+  const handleNavigateMcp = useCallback(() => {
+    navigate('/mcp');
+  }, [navigate]);
 
   const handleNewSession = useCallback(async () => {
     if (isCreatingSession || !connectionStatus.connected) return;
@@ -124,6 +129,26 @@ export const ToolBar: React.FC = () => {
         <div className="flex-1" />
 
         <div className="flex flex-col items-center gap-4 pb-4">
+          {/* MCP Servers button */}
+          {!isReplayMode && (
+            <motion.button
+              whileHover={{
+                scale: 1.08,
+              }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+              onClick={handleNavigateMcp}
+              className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all duration-200 ${
+                isMcpPage
+                  ? 'bg-blue-500 text-white shadow-md'
+                  : 'bg-white dark:bg-gray-800 text-black dark:text-white hover:shadow-md'
+              }`}
+              title="MCP Servers"
+            >
+              <FiServer size={12} />
+            </motion.button>
+          )}
+
           {/* Event stream viewer button */}
           {!isReplayMode && enableEventStreamViewer && !isHomePage && (
             <motion.button
