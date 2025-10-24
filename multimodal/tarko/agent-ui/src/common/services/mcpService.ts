@@ -10,159 +10,6 @@ import type {
   MCPStreamEvent,
 } from '@/common/types/mcp';
 
-/*
- * Mock mode flag - set to true for Phase A development
- * Set to false when backend is ready (Phase B)
- */
-const USE_MOCK_DATA = false;
-
-/**
- * Mock MCP Servers for Phase A
- */
-const MOCK_SERVERS: MCPServer[] = [
-  {
-    name: 'tavily-search',
-    type: 'command',
-    status: 'active',
-    command: 'npx',
-    args: ['-y', '@modelcontextprotocol/server-tavily'],
-    env: { TAVILY_API_KEY: 'tvly-***' },
-    createdAt: Date.now() - 86400000,
-    updatedAt: Date.now() - 3600000,
-  },
-  {
-    name: 'filesystem',
-    type: 'command',
-    status: 'inactive',
-    command: 'npx',
-    args: ['-y', '@modelcontextprotocol/server-filesystem', '/workspace'],
-    createdAt: Date.now() - 172800000,
-    updatedAt: Date.now() - 7200000,
-  },
-  {
-    name: 'github-api',
-    type: 'http',
-    status: 'error',
-    url: 'https://api.github.com/mcp',
-    lastError: 'Connection timeout',
-    lastErrorTime: Date.now() - 1800000,
-    createdAt: Date.now() - 259200000,
-    updatedAt: Date.now() - 1800000,
-  },
-  {
-    name: 'postgres-db',
-    type: 'command',
-    status: 'activating',
-    command: 'npx',
-    args: ['-y', '@modelcontextprotocol/server-postgres'],
-    env: { DATABASE_URL: 'postgresql://localhost:5432/mydb' },
-    createdAt: Date.now() - 43200000,
-    updatedAt: Date.now() - 300000,
-  },
-];
-
-/**
- * Mock MCP Tools for Phase A
- */
-const MOCK_TOOLS: Record<string, MCPTool[]> = {
-  'tavily-search': [
-    {
-      id: 'search',
-      name: 'search',
-      description: 'Search the web using Tavily API',
-      parametersSchema: {
-        type: 'object',
-        properties: {
-          query: {
-            type: 'string',
-            description: 'Search query',
-          },
-          max_results: {
-            type: 'number',
-            description: 'Maximum number of results',
-            default: 5,
-            minimum: 1,
-            maximum: 20,
-          },
-          include_images: {
-            type: 'boolean',
-            description: 'Include images in results',
-            default: false,
-          },
-        },
-        required: ['query'],
-      },
-    },
-  ],
-  filesystem: [
-    {
-      id: 'read_file',
-      name: 'read_file',
-      description: 'Read contents of a file',
-      parametersSchema: {
-        type: 'object',
-        properties: {
-          path: {
-            type: 'string',
-            description: 'File path',
-          },
-        },
-        required: ['path'],
-      },
-    },
-    {
-      id: 'write_file',
-      name: 'write_file',
-      description: 'Write content to a file',
-      parametersSchema: {
-        type: 'object',
-        properties: {
-          path: {
-            type: 'string',
-            description: 'File path',
-          },
-          content: {
-            type: 'string',
-            description: 'File content',
-          },
-        },
-        required: ['path', 'content'],
-      },
-    },
-    {
-      id: 'list_directory',
-      name: 'list_directory',
-      description: 'List files in a directory',
-      parametersSchema: {
-        type: 'object',
-        properties: {
-          path: {
-            type: 'string',
-            description: 'Directory path',
-            default: '.',
-          },
-        },
-      },
-    },
-  ],
-  'postgres-db': [
-    {
-      id: 'query',
-      name: 'query',
-      description: 'Execute SQL query',
-      parametersSchema: {
-        type: 'object',
-        properties: {
-          sql: {
-            type: 'string',
-            description: 'SQL query to execute',
-          },
-        },
-        required: ['sql'],
-      },
-    },
-  ],
-};
 
 /**
  * MCP Service - Handles MCP server management and tool calls
@@ -172,12 +19,6 @@ class McpService {
    * Get all MCP servers
    */
   async getServers(): Promise<MCPServer[]> {
-    if (USE_MOCK_DATA) {
-      // Simulate network delay
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return [...MOCK_SERVERS];
-    }
-
     try {
   const response = await fetch(`${API_BASE_URL}/mcp/servers`, {
         method: 'GET',
@@ -201,19 +42,8 @@ class McpService {
    * Add a new MCP server
    */
   async addServer(server: Omit<MCPServer, 'createdAt' | 'updatedAt'>): Promise<MCPServer> {
-    if (USE_MOCK_DATA) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      const newServer: MCPServer = {
-        ...server,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      };
-      MOCK_SERVERS.push(newServer);
-      return newServer;
-    }
-
     try {
-  const response = await fetch(`${API_BASE_URL}/mcp/servers`, {
+  const response = await fetch(`${API_BASE_URL}/mcp/servers/add`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ server }),
@@ -238,20 +68,6 @@ class McpService {
     name: string,
     updates: Partial<Omit<MCPServer, 'name' | 'createdAt' | 'updatedAt'>>
   ): Promise<MCPServer> {
-    if (USE_MOCK_DATA) {
-      await new Promise((resolve) => setTimeout(resolve, 400));
-      const index = MOCK_SERVERS.findIndex((s) => s.name === name);
-      if (index === -1) {
-        throw new Error(`Server ${name} not found`);
-      }
-      MOCK_SERVERS[index] = {
-        ...MOCK_SERVERS[index],
-        ...updates,
-        updatedAt: Date.now(),
-      };
-      return MOCK_SERVERS[index];
-    }
-
     try {
   const response = await fetch(`${API_BASE_URL}/mcp/servers/${name}`, {
         method: 'PUT',
@@ -275,16 +91,6 @@ class McpService {
    * Delete an MCP server
    */
   async deleteServer(name: string): Promise<boolean> {
-    if (USE_MOCK_DATA) {
-      await new Promise((resolve) => setTimeout(resolve, 400));
-      const index = MOCK_SERVERS.findIndex((s) => s.name === name);
-      if (index === -1) {
-        throw new Error(`Server ${name} not found`);
-      }
-      MOCK_SERVERS.splice(index, 1);
-      return true;
-    }
-
     try {
   const response = await fetch(`${API_BASE_URL}/mcp/servers/${name}`, {
         method: 'DELETE',
@@ -307,17 +113,6 @@ class McpService {
    * Activate or deactivate a server
    */
   async setServerActive(name: string, activate: boolean): Promise<MCPServerStatusResponse> {
-    if (USE_MOCK_DATA) {
-      await new Promise((resolve) => setTimeout(resolve, 600));
-      const server = MOCK_SERVERS.find((s) => s.name === name);
-      if (!server) {
-        throw new Error(`Server ${name} not found`);
-      }
-      server.status = activate ? 'active' : 'inactive';
-      server.updatedAt = Date.now();
-      return { status: server.status };
-    }
-
     try {
   const response = await fetch(`${API_BASE_URL}/mcp/servers/${name}/activate`, {
         method: 'POST',
@@ -341,18 +136,7 @@ class McpService {
    * Get server status
    */
   async getServerStatus(name: string): Promise<MCPServerStatusResponse> {
-    if (USE_MOCK_DATA) {
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      const server = MOCK_SERVERS.find((s) => s.name === name);
-      if (!server) {
-        throw new Error(`Server ${name} not found`);
-      }
-      return {
-        status: server.status,
-        lastError: server.lastError,
-        detail: server.lastErrorTime ? { lastErrorTime: server.lastErrorTime } : undefined,
-      };
-    }
+ 
 
     try {
   const response = await fetch(`${API_BASE_URL}/mcp/servers/${name}/status`, {
@@ -376,10 +160,7 @@ class McpService {
    * Get tools for a server
    */
   async getServerTools(name: string): Promise<MCPTool[]> {
-    if (USE_MOCK_DATA) {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return MOCK_TOOLS[name] || [];
-    }
+  
 
     try {
   const response = await fetch(`${API_BASE_URL}/mcp/servers/${name}/tools`, {
@@ -404,19 +185,7 @@ class McpService {
    * Call a tool (non-streaming)
    */
   async callTool(serverName: string, toolId: string, args: any): Promise<MCPToolCallResult> {
-    if (USE_MOCK_DATA) {
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      return {
-        success: true,
-        result: {
-          message: `Mock result for ${toolId}`,
-          args,
-          timestamp: Date.now(),
-        },
-        timestamp: Date.now(),
-      };
-    }
-
+   
     try {
       const response = await fetch(
   `${API_BASE_URL}/mcp/servers/${serverName}/tools/${toolId}/call`,
@@ -456,25 +225,6 @@ class McpService {
     args: any,
     onEvent: (event: MCPStreamEvent) => void
   ): Promise<void> {
-    if (USE_MOCK_DATA) {
-      // Simulate streaming events
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      onEvent({ type: 'partial', data: { chunk: 'Processing request...' } });
-      
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      onEvent({ type: 'partial', data: { chunk: 'Executing tool...' } });
-      
-      await new Promise((resolve) => setTimeout(resolve, 400));
-      onEvent({
-        type: 'done',
-        data: {
-          result: `Mock streaming result for ${toolId}`,
-          args,
-          timestamp: Date.now(),
-        },
-      });
-      return;
-    }
 
     try {
       const response = await fetch(
@@ -533,15 +283,6 @@ class McpService {
    * Cleanup all servers
    */
   async cleanupServers(): Promise<boolean> {
-    if (USE_MOCK_DATA) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      MOCK_SERVERS.forEach((server) => {
-        server.status = 'inactive';
-        server.updatedAt = Date.now();
-      });
-      return true;
-    }
-
     try {
   const response = await fetch(`${API_BASE_URL}/mcp/cleanup`, {
         method: 'POST',

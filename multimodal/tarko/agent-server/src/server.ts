@@ -6,6 +6,7 @@
 import express from 'express';
 import http from 'http';
 import { setupAPI } from './api';
+import { createMcpManager } from './services/mcpManager';
 import { LogLevel } from '@tarko/interface';
 import { StorageProvider, createStorageProvider } from './storage';
 import type { AgentSession } from './core';
@@ -99,6 +100,15 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
 
     // Make server instance available to request handlers
     this.app.locals.server = this;
+
+    // Initialize MCP manager and attach to app locals (lazy init will be performed in start)
+    try {
+      const mcpManager = createMcpManager(this as any);
+      this.app.locals.mcpManager = mcpManager;
+    } catch (err) {
+      // Do not crash if MCP manager cannot be created; controllers will handle missing manager
+      console.warn('Warning: MCP manager not initialized:', err);
+    }
   }
 
   /**
@@ -252,6 +262,16 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
       } catch (error) {
         console.error('Failed to initialize storage provider:', error);
       }
+    }
+
+    // Initialize MCP manager if present
+    try {
+      const mcp = (this.app.locals as any).mcpManager;
+      if (mcp && typeof mcp.init === 'function') {
+        await mcp.init();
+      }
+    } catch (err) {
+      console.warn('MCP manager init failed:', err);
     }
 
     return new Promise((resolve) => {
