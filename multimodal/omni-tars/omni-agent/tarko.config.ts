@@ -8,11 +8,11 @@ import { resolve } from 'node:path';
 export default {
   model: {
     /** tars */
-    provider: 'volcengine',
+    provider: 'gemini',
     id: process.env.OMNI_TARS_MODEL_ID,
     baseURL: process.env.OMNI_TARS_BASE_URL,
     apiKey: process.env.OMNI_TARS_API_KEY,
-    displayName: 'UI-TARS-2',
+    displayName: 'gemini-1.5-tars',
     /** aws */
     // provider: 'azure-openai',
     // id: 'aws_sdk_claude4_sonnet',
