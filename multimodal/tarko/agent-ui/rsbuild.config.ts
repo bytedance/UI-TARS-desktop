@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [pluginReact()],
   source: {
     define: {
-      'process.env.AGENT_BASE_URL': JSON.stringify(process.env.AGENT_BASE_URL || ''),
+      'process.env.AGENT_BASE_URL': JSON.stringify(process.env.AGENT_BASE_URL || 'http://localhost:6000'),
       'process.env.AGENT_WEBUI_CONFIG': JSON.stringify(
         process.env.AGENT_WEBUI_CONFIG,
         // ||

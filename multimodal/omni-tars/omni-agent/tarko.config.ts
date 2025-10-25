@@ -8,11 +8,11 @@ import { resolve } from 'node:path';
 export default {
   model: {
     /** tars */
-    provider: 'gemini',
+    provider: 'openrouter',
     id: process.env.OMNI_TARS_MODEL_ID,
     baseURL: process.env.OMNI_TARS_BASE_URL,
     apiKey: process.env.OMNI_TARS_API_KEY,
-    displayName: 'gemini-1.5-tars',
+    displayName: 'Omni TARS',
     /** aws */
     // provider: 'azure-openai',
     // id: 'aws_sdk_claude4_sonnet',

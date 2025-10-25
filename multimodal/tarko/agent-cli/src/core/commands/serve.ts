@@ -6,7 +6,7 @@
 import http from 'http';
 import { LogLevel } from '@tarko/interface';
 import { AgentCLIServeCommandOptions } from '../../types';
-import { AgentServer } from '@tarko/agent-server';
+import { AgentServer } from '@tarko/agent-server-next';
 import { ensureServerConfig } from '../../utils';
 import boxen from 'boxen';
 import chalk from 'chalk';
