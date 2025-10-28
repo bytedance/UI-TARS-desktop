@@ -64,6 +64,11 @@ export type ExecuteOutput = {
   url?: string; // url of the page
 } & Record<string, any>;
 
+/**
+ * Function type for calculating detail level based on image dimensions
+ */
+export type ImageDetailCalculator = (width: number, height: number) => 'low' | 'high' | 'auto';
+
 export interface ScreenshotOutput extends ExecuteOutput {
   /** screenshot base64, `keep screenshot size as physical pixels` */
   base64: string;
@@ -113,6 +118,8 @@ export interface GUIAgentConfig<TOperator> extends AgentOptions {
   customeActionParser?: CustomActionParser;
   /** The function to normalize raw coordinates */
   normalizeCoordinates?: NormalizeCoordinates;
+  /** The function to calculate detail level based on image dimensions */
+  detailCalculator?: ImageDetailCalculator;
   /** Maximum number of turns for Agent to execute, @default 1000 */
   maxLoopCount?: number;
   /** Time interval between two loop iterations (in milliseconds), @default 0 */

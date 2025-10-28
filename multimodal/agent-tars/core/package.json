@@ -17,7 +17,7 @@
     "prepublishOnly": "pnpm run build",
     "test": "vitest run",
     "test:watch": "vitest",
-    "agent:snapshot:genreate": "npx tsx snapshot/runner.ts generate all",
+    "agent:snapshot:generate": "npx tsx snapshot/runner.ts generate all",
     "agent:snapshot:test": "npx vitest snapshot/index.test.ts",
     "benchmark:crawl": "cd benchmark/crawl && pnpm start"
   },
@@ -29,6 +29,8 @@
   },
   "devDependencies": {
     "@gui-agent/operator-browser": "workspace:*",
+    "@gui-agent/action-parser": "workspace:*",
+    "@gui-agent/shared": "workspace:*",
     "@agent-infra/mcp-server-browser": "1.1.10",
     "@agent-infra/mcp-server-commands": "1.1.10",
     "@agent-infra/mcp-server-filesystem": "1.1.10",

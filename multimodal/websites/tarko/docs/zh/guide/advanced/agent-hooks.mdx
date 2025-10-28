@@ -1,6 +1,6 @@
 ---
 title: Agent Hooks
-description: 使用生命周期钩子扩展和自定义 Agent 行为
+description: 使用生命周期 Hook 扩展和自定义 Agent 行为
 ---
 
 # Agent Hooks
@@ -9,7 +9,7 @@ Tarko 的 **Agent Hooks** 系统在 Agent 生命周期的特定节点提供扩�
 
 ## 概述
 
-Agent Hooks 是在 Agent 运行特定节点执行的回调方法。所有 hooks 都在 `Agent` 类中定义，可以在自定义 Agent 实现中重写：
+Agent Hooks 是在 Agent 运行特定节点执行的回调方法。所有 Hook 都在 `Agent` 类中定义，可以在自定义 Agent 实现中重写：
 
 - **LLM Hooks**：请求/响应拦截和修改
 - **Tool Hooks**：工具调用执行生命周期管理
@@ -17,9 +17,9 @@ Agent Hooks 是在 Agent 运行特定节点执行的回调方法。所有 hooks 
 - **Termination Hooks**：自定义完成条件强制执行
 - **Request Preparation**：动态系统提示和工具修改
 
-## 核心 Hook 类别
+## 核心 Hook
 
-### LLM 通信 Hooks
+### LLM 交互 Hook
 
 拦截和监控 LLM 请求和响应：
 
@@ -30,32 +30,32 @@ class MonitoringAgent extends Agent {
   // 在每个 LLM 请求之前调用
   override async onLLMRequest(id: string, payload: LLMRequestHookPayload) {
     console.log(`[${id}] 发送请求到 ${payload.model}`);
-    console.log('消息数量:', payload.messages.length);
+    console.log('Messages count:', payload.messages.length);
     
     // 记录 token 使用估算
     const tokenEstimate = this.estimateTokens(payload.messages);
-    console.log('预估 tokens:', tokenEstimate);
+    console.log('Estimated tokens:', tokenEstimate);
   }
   
   // 在每个 LLM 响应之后调用
   override async onLLMResponse(id: string, payload: LLMResponseHookPayload) {
     const response = payload.response;
     console.log(`[${id}] 收到响应:`);
-    console.log('使用情况:', response.usage);
-    console.log('完成原因:', response.choices[0]?.finish_reason);
+    console.log('Usage:', response.usage);
+    console.log('Finish reason:', response.choices[0]?.finish_reason);
     
     // 如果存在工具调用则记录
     const toolCalls = response.choices[0]?.message?.tool_calls;
     if (toolCalls?.length) {
-      console.log('工具调用:', toolCalls.map(tc => tc.function.name));
+      console.log('Tool calls:', toolCalls.map(tc => tc.function.name));
     }
   }
   
   // 在流式响应期间调用
   override onLLMStreamingResponse(id: string, payload: LLMStreamingResponseHookPayload) {
-    // 实时监控流式块
+    // 实时监控 streaming chunks
     const chunks = payload.chunks;
-    console.log(`[${id}] 收到 ${chunks.length} 个流式块`);
+    console.log(`[${id}] 收到 ${chunks.length} 个 streaming chunks`);
   }
 }
 ```
@@ -74,8 +74,8 @@ class ToolMonitoringAgent extends Agent {
     toolCall: { toolCallId: string; name: string },
     args: any
   ) {
-    console.log(`[${id}] 执行工具: ${toolCall.name}`);
-    console.log('参数:', JSON.stringify(args, null, 2));
+    console.log(`[${id}] Executing tool: ${toolCall.name}`);
+    console.log('Arguments:', JSON.stringify(args, null, 2));
     
     // 跟踪工具使用情况
     const currentCount = this.toolUsageStats.get(toolCall.name) || 0;
@@ -83,7 +83,7 @@ class ToolMonitoringAgent extends Agent {
     
     // 验证参数或应用速率限制
     if (toolCall.name === 'expensive_api' && currentCount >= 5) {
-      throw new Error('expensive_api 超出速率限制');
+      throw new Error('Rate limit exceeded for expensive_api');
     }
     
     // 返回可能修改的参数
@@ -96,14 +96,14 @@ class ToolMonitoringAgent extends Agent {
     toolCall: { toolCallId: string; name: string },
     result: any
   ) {
-    console.log(`[${id}] 工具 ${toolCall.name} 完成`);
-    console.log('结果类型:', typeof result);
+    console.log(`[${id}] Tool ${toolCall.name} completed`);
+    console.log('Result type:', typeof result);
     
     // 记录错误或成功结果
     if (result?.error) {
-      console.error('工具执行失败:', result.error);
+      console.error('Tool execution failed:', result.error);
     } else {
-      console.log('工具执行成功');
+      console.log('Tool execution successful');
     }
     
     // 返回可能修改的结果
@@ -116,14 +116,14 @@ class ToolMonitoringAgent extends Agent {
     toolCall: { toolCallId: string; name: string },
     error: any
   ) {
-    console.error(`[${id}] 工具 ${toolCall.name} 失败:`, error);
+    console.error(`[${id}] Tool ${toolCall.name} failed:`, error);
     
     // 实现重试逻辑或错误转换
     if (error.message?.includes('timeout')) {
-      return '工具执行超时。请稍后重试。';
+      return 'Tool execution timed out. Please try again later.';
     }
     
-    return `错误: ${error.message || error}`;
+    return `Error: ${error.message || error}`;
   }
   
   // 完全覆盖工具调用处理
@@ -138,7 +138,7 @@ class ToolMonitoringAgent extends Agent {
     if (process.env.NODE_ENV === 'test') {
       return toolCalls.map(tc => ({
         toolCallId: tc.id,
-        result: `${tc.function.name} 的模拟结果`,
+        result: `Mocked result for ${tc.function.name}`,
         success: true
       }));
     }
@@ -148,7 +148,7 @@ class ToolMonitoringAgent extends Agent {
 }
 ```
 
-### 循环生命周期 Hooks
+### 循环生命周期 Hook
 
 控制 Agent 循环迭代和终止：
 
@@ -159,11 +159,11 @@ class LoopControlAgent extends Agent {
   // 在每个循环迭代开始时调用
   override async onEachAgentLoopStart(sessionId: string) {
     this.iterationStartTimes.set(sessionId, Date.now());
-    console.log(`[${sessionId}] 开始迭代 ${this.getCurrentLoopIteration()}`);
+    console.log(`[${sessionId}] Starting iteration ${this.getCurrentLoopIteration()}`);
     
     // 注入额外上下文或执行设置
     const currentTime = new Date().toISOString();
-    console.log(`当前时间: ${currentTime}`);
+    console.log(`Current time: ${currentTime}`);
   }
   
   // 在每个循环迭代结束时调用
@@ -171,18 +171,18 @@ class LoopControlAgent extends Agent {
     const startTime = this.iterationStartTimes.get(context.sessionId);
     if (startTime) {
       const duration = Date.now() - startTime;
-      console.log(`[${context.sessionId}] 迭代在 ${duration}ms 内完成`);
+      console.log(`[${context.sessionId}] Iteration completed in ${duration}ms`);
     }
     
     // 记录迭代结果
-    console.log('此迭代中的事件:', context.events?.length || 0);
-    console.log('进行的工具调用:', context.toolCallResults?.length || 0);
+    console.log('Events in this iteration:', context.events?.length || 0);
+    console.log('Tool calls made:', context.toolCallResults?.length || 0);
   }
   
   // 当整个 Agent 循环结束时调用
   override async onAgentLoopEnd(id: string) {
-    console.log(`[${id}] Agent 循环完成`);
-    console.log('总迭代次数:', this.getCurrentLoopIteration());
+    console.log(`[${id}] Agent loop completed`);
+    console.log('Total iterations:', this.getCurrentLoopIteration());
     
     // 清理迭代跟踪
     this.iterationStartTimes.delete(id);
@@ -399,108 +399,13 @@ class ResilientAgent extends Agent {
 9. [否则从步骤 2 重复]
 ```
 
-## 测试 Hooks
-
-### 单元测试单个 Hooks
-
-```typescript
-import { Agent, AgentOptions } from '@tarko/agent';
-
-class TestableAgent extends Agent {
-  public hookCallLog: string[] = [];
-  
-  override async onLLMRequest(id: string, payload: any) {
-    this.hookCallLog.push(`onLLMRequest:${id}`);
-  }
-  
-  override async onBeforeToolCall(id: string, toolCall: any, args: any) {
-    this.hookCallLog.push(`onBeforeToolCall:${toolCall.name}`);
-    return args;
-  }
-}
-
-describe('Agent Hooks', () => {
-  let agent: TestableAgent;
-  
-  beforeEach(() => {
-    agent = new TestableAgent({});
-  });
-  
-  it('should call hooks in correct order', async () => {
-    // 测试 hook 执行顺序
-    await agent.onLLMRequest('test-session', { model: 'gpt-4', messages: [] });
-    await agent.onBeforeToolCall('test-session', { name: 'test-tool' }, {});
-    
-    expect(agent.hookCallLog).toEqual([
-      'onLLMRequest:test-session',
-      'onBeforeToolCall:test-tool'
-    ]);
-  });
-});
-```
-
-### 集成测试
-
-```typescript
-describe('Hook Integration', () => {
-  it('should prevent termination when required', async () => {
-    const agent = new ValidatingAgent({
-      tools: [/* 必需工具 */]
-    });
-    
-    // 模拟未调用所有必需工具的场景
-    const result = await agent.onBeforeLoopTermination(
-      'test-session',
-      { content: '最终答案' } as any
-    );
-    
-    expect(result.finished).toBe(false);
-    expect(result.message).toContain('必须调用必需工具');
-  });
-});
-```
-
-## 最佳实践
-
-### 1. Hook 设计
-- 保持 hooks 专注和轻量级
-- 重写时始终调用 `super.hookMethod()`
-- 优雅处理错误而不破坏 Agent 执行
-- 对异步操作使用 async/await
-
-### 2. 状态管理
-- 在实例变量中存储 hook 特定状态
-- 在 `onAgentLoopEnd` 中清理状态
-- 使用会话 ID 跟踪每个对话的状态
-
-### 3. 性能
-- 避免在关键 hooks 中阻塞操作
-- 对昂贵的计算使用缓存
-- 为外部调用实现超时
-
-### 4. 错误处理
-- 始终优雅处理 hook 错误
-- 在可能的情况下提供回退行为
-- 记录错误以便调试，但不暴露敏感数据
-
-### 5. 测试
-- 单独单元测试 hooks
-- 测试 hook 组合和顺序
-- 模拟外部依赖
-- 测试错误场景
 
 ## 实际示例
 
-查看我们的[示例](/examples/custom-hooks)部分以获取完整实现：
-
-- 分析和指标收集
-- 用户权限强制执行
-- 速率限制和配额管理
-- 多步骤工作流验证
-- 错误恢复和重试机制
+WIP
 
 ## 下一步
 
-- [Agent Protocol](/guide/advanced/agent-protocol) - 了解 hooks 中的事件处理
+- [Agent Protocol](/guide/advanced/agent-protocol) - 了解 Hook 中的事件处理
 - [工具管理](/guide/basic/tools) - 学习工具注册和执行
 - [上下文工程](/guide/advanced/context-engineering) - 高级上下文管理

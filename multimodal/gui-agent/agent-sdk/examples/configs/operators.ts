@@ -4,35 +4,27 @@
  */
 import { AdbOperator } from '@gui-agent/operator-adb';
 import { NutJSOperator } from '@gui-agent/operator-nutjs';
-import { Operator, ScreenContext } from '@gui-agent/shared/base';
 import {
-  SupportedActionType,
-  ScreenshotOutput,
-  ExecuteParams,
-  ExecuteOutput,
-} from 'gui-agent/shared/src/types';
+  LocalBrowserOperator,
+  RemoteBrowserOperator,
+  SearchEngine,
+} from '@gui-agent/operator-browser';
 
 const computerOperator = new NutJSOperator();
 const androidOperator = new AdbOperator();
+const browserOperator = new LocalBrowserOperator({
+  searchEngine: SearchEngine.GOOGLE,
+  showActionInfo: false,
+  showWaterFlow: false,
+  highlightClickableElements: false,
+});
 
-class MockedBrowserOperator extends Operator {
-  protected initialize(): Promise<void> {
-    throw new Error('Method not implemented.');
-  }
-  protected supportedActions(): Array<SupportedActionType> {
-    throw new Error('Method not implemented.');
-  }
-  protected screenContext(): ScreenContext {
-    throw new Error('Method not implemented.');
-  }
-  protected screenshot(): Promise<ScreenshotOutput> {
-    throw new Error('Method not implemented.');
-  }
-  protected execute(params: ExecuteParams): Promise<ExecuteOutput> {
-    throw new Error('Method not implemented.');
-  }
-}
+const remoteBrowserOperator = new RemoteBrowserOperator({
+  wsEndpoint: 'ws://localhost:9222/devtools/browser/<id>',
+  searchEngine: SearchEngine.GOOGLE,
+  showActionInfo: true,
+  showWaterFlow: true,
+  highlightClickableElements: true,
+});
 
-const browserOperator = new MockedBrowserOperator();
-
-export { computerOperator, androidOperator, browserOperator };
+export { computerOperator, androidOperator, browserOperator, remoteBrowserOperator };

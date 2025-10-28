@@ -26,7 +26,7 @@ export type TConstructor<T, U extends unknown[] = unknown[]> = new (...args: U) 
 export type FinishReason = 'stop' | 'length' | 'tool_calls' | 'content_filter' | 'function_call';
 
 /**
- * A interface to describe the parsed model reponse.
+ * A interface to describe the parsed model response.
  */
 export interface ParsedModelResponse {
   /**
@@ -198,7 +198,7 @@ export abstract class ToolCallEngine<T extends StreamProcessingState = StreamPro
   /**
    * Prepare a Chat Completion Request based on the current context
    *
-   * In NativeToolCallEngine, Agent's tools defintions needs to be converted into the "tools" settings recognized by LLM.
+   * In NativeToolCallEngine, Agent's tools definitions needs to be converted into the "tools" settings recognized by LLM.
    * In PromptToolengine, since the definition of Tool is already in System Prompt, it is generally not necessary to process.
    *
    * @param context input context

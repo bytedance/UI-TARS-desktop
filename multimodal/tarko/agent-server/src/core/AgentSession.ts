@@ -73,7 +73,6 @@ export class AgentSession {
   private storageUnsubscribeMap = new WeakMap<IAgent, () => void>();
   private pendingEventSaves = new Set<Promise<void>>();
 
-
   constructor(
     private server: AgentServer,
     sessionId: string,
@@ -89,7 +88,6 @@ export class AgentSession {
     // Agent will be created and initialized in initialize() method
     this.agent = null as any; // Temporary placeholder
   }
-
 
   async initialize() {
     // Create and initialize agent with all wrappers
@@ -113,18 +111,17 @@ export class AgentSession {
    */
   private createEventHandler() {
     return async (event: AgentEventStream.Event) => {
-      console.log('Receive event', event);
-
       // Save to storage if available and event should be stored
       if (this.server.storageProvider && shouldStoreEvent(event)) {
-        const savePromise = this.server.storageProvider.saveEvent(this.id, event)
-          .catch(error => {
+        const savePromise = this.server.storageProvider
+          .saveEvent(this.id, event)
+          .catch((error) => {
             console.error(`Failed to save event to storage: ${error}`);
           })
           .finally(() => {
             this.pendingEventSaves.delete(savePromise);
           });
-        
+
         this.pendingEventSaves.add(savePromise);
       }
 
@@ -297,8 +294,6 @@ export class AgentSession {
     return baseAgent;
   }
 
-
-
   /**
    * Get the current processing status of the agent
    * @returns Whether the agent is currently processing a request
@@ -306,7 +301,6 @@ export class AgentSession {
   getProcessingStatus(): boolean {
     return this.agent.status() === AgentStatus.EXECUTING;
   }
-
 
   /**
    * Run a query and return a strongly-typed response

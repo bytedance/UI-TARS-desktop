@@ -5,9 +5,10 @@ import { useSession } from '@/common/hooks/useSession';
 import { SessionCreatingState } from '@/standalone/chat/components/SessionCreatingState';
 import { globalRuntimeSettingsAtom, resetGlobalRuntimeSettingsAction } from '@/common/state/atoms/globalRuntimeSettings';
 import { createSessionAction } from '@/common/state/actions/sessionActions';
+import { ChatCompletionContentPart } from '@tarko/agent-interface';
 
 interface LocationState {
-  query?: string;
+  query?: string | ChatCompletionContentPart[];
   runtimeSettings?: Record<string, any>; // Persistent settings for the session
   agentOptions?: Record<string, any>; // One-time options for this specific task
 }
@@ -45,7 +46,7 @@ const CreatingPage: React.FC = () => {
         const state = location.state as LocationState | null;
         let runtimeSettings: Record<string, any> = {}; // Persistent session settings
         let agentOptions: Record<string, any> = {}; // One-time task options
-        let query: string | null = null;
+        let query: string | ChatCompletionContentPart[] | null = null;
 
         // Source 1: Router state (highest priority)
         if (state) {

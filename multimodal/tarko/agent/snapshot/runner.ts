@@ -38,7 +38,6 @@ export const examples: CaseConfig[] = [
   createCaseConfig('streaming/tool-calls'),
   createCaseConfig('streaming/tool-calls-prompt-engineering-impl'),
   createCaseConfig('streaming/tool-calls-structured-outputs-impl'),
-  createCaseConfig('gui-agent/basic'),
   // planner is not stable, comment it for now.
   // createCaseConfig('planner/basic'),
 ];

@@ -1,5 +1,6 @@
 import { EventHandler } from './types';
 import { AgentEventStream } from '@/common/types';
+import { isEventStreamViewerEnabled } from '@/config/web-ui-config';
 import {
   UserMessageHandler,
   AssistantMessageHandler,
@@ -16,6 +17,8 @@ import {
 import { SystemMessageHandler, EnvironmentInputHandler } from './handlers/SystemHandler';
 
 import { AgentRunStartHandler, AgentRunEndHandler } from './handlers/AgentRunHandler';
+
+import { RawEventsHandler } from './handlers/RawEventsHandler';
 
 /**
  * Event handler registry manages all event handlers
@@ -49,6 +52,11 @@ export class EventHandlerRegistry {
     // Agent run handlers
     this.register(new AgentRunStartHandler());
     this.register(new AgentRunEndHandler());
+
+    // Raw events handler (only register if event stream viewer is enabled)
+    if (isEventStreamViewerEnabled()) {
+      this.register(new RawEventsHandler());
+    }
   }
 
   /**
@@ -63,6 +71,13 @@ export class EventHandlerRegistry {
    */
   findHandler(event: AgentEventStream.Event): EventHandler | null {
     return this.handlers.find((handler) => handler.canHandle(event)) || null;
+  }
+
+  /**
+   * Find all handlers that can handle an event
+   */
+  findAllHandlers(event: AgentEventStream.Event): EventHandler[] {
+    return this.handlers.filter((handler) => handler.canHandle(event));
   }
 
   /**

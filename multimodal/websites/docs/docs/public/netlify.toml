@@ -14,10 +14,12 @@ to = "https://preview.agent-tars.com/doc/*"
 [[redirects]]
 from = "/showcase/*"
 to = "/showcase"
+status = 200
 
 [[redirects]]
 from = "/replay/*"
 to = "/replay"
+status = 200
 
 [[redirects]]
 from = "/wechat-intro"

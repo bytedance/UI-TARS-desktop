@@ -98,20 +98,6 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
       </div>
 
       <div className="ml-4 flex-shrink-0 flex items-center gap-3">
-        {/* Workspace display mode toggle */}
-        {showWorkspaceToggle && onWorkspaceDisplayModeChange && (
-          <ToggleSwitch<WorkspaceDisplayMode>
-            value={workspaceDisplayMode}
-            onChange={onWorkspaceDisplayModeChange}
-            leftValue="interaction"
-            rightValue="raw"
-            leftLabel="UI"
-            rightLabel="RAW"
-            leftIcon={<FiEye size={12} />}
-            rightIcon={<FiCode size={12} />}
-          />
-        )}
-
         {/* File display mode toggle */}
         {showToggle && toggleConfig && <ToggleSwitch<FileDisplayMode> {...toggleConfig} />}
 
@@ -127,6 +113,20 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
           >
             <FiMaximize size={16} />
           </button>
+        )}
+
+        {/* Workspace display mode toggle */}
+        {showWorkspaceToggle && onWorkspaceDisplayModeChange && (
+          <ToggleSwitch<WorkspaceDisplayMode>
+            value={workspaceDisplayMode}
+            onChange={onWorkspaceDisplayModeChange}
+            leftValue="interaction"
+            rightValue="raw"
+            leftLabel="UI"
+            rightLabel="RAW"
+            leftIcon={<FiEye size={12} />}
+            rightIcon={<FiCode size={12} />}
+          />
         )}
       </div>
     </div>

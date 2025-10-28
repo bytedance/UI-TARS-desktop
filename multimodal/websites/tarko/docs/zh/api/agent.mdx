@@ -22,27 +22,27 @@ description: Complete API reference for @tarko/agent
 ## 架构概览
 
 ```mermaid
-graph TD
-    A[用户输入] --> B[Agent.run()]
-    B --> C[消息历史管理]
-    C --> D[LLM 请求]
-    D --> E{需要工具调用?}
+flowchart TD
+    A[用户输入] --> B[Agent.run]
+    B --> C[消息历史]
+    C --> D[LLM请求]
+    D --> E{工具调用?}
     E -->|是| F[工具执行]
     E -->|否| G[生成回复]
     F --> H[工具结果]
-    H --> I{达到最大迭代?}
+    H --> I{最大迭代?}
     I -->|否| D
     I -->|是| G
-    G --> J[事件流输出]
+    G --> J[事件流]
     
-    K[事件流] --> L[实时 UI 更新]
-    K --> M[日志记录]
-    K --> N[性能监控]
+    J --> K[UI更新]
+    J --> L[日志记录]
+    J --> M[性能监控]
     
     style A fill:#e1f5fe
     style G fill:#c8e6c9
     style F fill:#fff3e0
-    style K fill:#f3e5f5
+    style J fill:#f3e5f5
 ```
 
 ## 安装
@@ -53,28 +53,13 @@ npm install @tarko/agent
 
 ## 核心特性
 
-### 🔧 工具集成
-在 Agent 响应中轻松创建和调用工具，支持复杂的多步骤工作流。
-
-### 📡 事件流驱动
-基于标准事件流协议，实时追踪 Agent 状态，高效构建上下文和 UI。
-
-### ⚡ 原生流式
-原生流式传输让你实时了解 Agent 的思考过程和输出结果。
-
-### 🎯 多模态分析
-自动分析多模态工具结果（图像、文本、文件等），让你专注于业务逻辑。
-
-### 🔌 强大的扩展能力
-丰富的生命周期钩子设计，允许你实现更高级的 Agent 行为。
-
-### 🌐 多模型提供商
-支持 OpenAI、Claude、豆包等多种模型，支持高级配置和运行时切换。
-
-### ⚙️ 多工具调用引擎
-- `native`: OpenAI 兼容的原生函数调用
-- `prompt_engineering`: 基于提示的工具调用
-- `structured_outputs`: JSON Schema 结构化输出
+1. **工具集成** - 在 Agent 响应中轻松创建和调用工具，支持复杂的多步骤工作流。
+2. **事件流驱动** - 基于标准事件流协议，实时追踪 Agent 状态，高效构建上下文和 UI。
+3. **原生流式** - 原生流式传输让你实时了解 Agent 的思考过程和输出结果。
+4. **多模态分析** - 自动分析多模态工具结果（图像、文本、文件等），让你专注于业务逻辑。
+5. **强大的扩展能力** - 丰富的生命周期 Hook 设计，允许你实现更高级的 Agent 行为。
+6. **多 Model Provider** - 支持 OpenAI、Claude、豆包等多种模型，支持高级配置和运行时切换。
+7. **多 Tool Call Engine** - `native`: OpenAI 兼容的原生函数调用；`prompt_engineering`: 基于提示的工具调用；`structured_outputs`: JSON Schema 结构化输出。
 
 ## 快速开始
 
@@ -183,7 +168,7 @@ const agent = new Agent({
 ##### 工具配置
 - `tools`: Agent 可用的工具数组
 - `tool`: 工具过滤选项，支持 `include`/`exclude` 模式
-- `toolCallEngine`: 工具调用引擎类型（默认: `'native'`）
+- `toolCallEngine`: Tool Call Engine 类型（默认: `'native'`）
   - `'native'`: OpenAI 兼容的原生函数调用
   - `'prompt_engineering'`: 基于提示的工具调用
   - `'structured_outputs'`: JSON Schema 结构化输出
@@ -263,7 +248,7 @@ interface AssistantMessage {
   type: 'assistant_message';
   timestamp: number;
   content: string;
-  toolCalls?: ToolCall[];
+  toolCalls?: ChatCompletionMessageToolCall[];
   finishReason: 'stop' | 'tool_calls' | 'length';
   messageId: string;
 }
@@ -278,9 +263,13 @@ interface ToolCallEvent {
   timestamp: number;
   toolCallId: string;
   name: string;
-  arguments: any;
+  arguments: Record<string, any>;
   startTime: number;
-  tool: ToolDefinition;
+  tool: {
+    name: string;
+    description: string;
+    schema: any;
+  };
 }
 ```
 
@@ -345,7 +334,7 @@ for await (const chunk of stream) {
 // 获取所有注册的工具
 const allTools = agent.getTools();
 
-// 获取经过钩子处理的可用工具
+// 获取经过 Hook 处理的可用工具
 const availableTools = await agent.getAvailableTools();
 
 console.log(`共有 ${availableTools.length} 个工具可用`);
@@ -382,96 +371,9 @@ if (agent.status() === 'running') {
 await agent.dispose();
 ```
 
-### 高级配置示例
+### 生命周期 Hook
 
-#### 生产环境配置
-
-```ts
-const productionAgent = new Agent({
-  // 基础配置
-  name: 'WeatherAssistant',
-  id: 'weather-v1.0',
-  instructions: `你是一个专业的天气助手。请遵循以下原则：
-1. 总是先获取用户位置，再查询天气
-2. 提供详细但简洁的天气信息
-3. 如果数据不准确，请说明
-4. 用友好的语气回复`,
-  
-  // 模型配置
-  model: {
-    provider: 'openai',
-    id: 'gpt-4o',
-    apiKey: process.env.OPENAI_API_KEY!, // 从环境变量获取
-  },
-  temperature: 0.3, // 更确定的回复
-  maxTokens: 2000,
-  
-  // 工具配置
-  tools: [locationTool, weatherTool, alertTool],
-  toolCallEngine: 'native',
-  tool: {
-    exclude: ['dangerousTool'], // 排除特定工具
-  },
-  
-  // 执行控制
-  maxIterations: 10, // 限制迭代次数
-  context: {
-    maxImagesCount: 3, // 限制图片数量
-  },
-  
-  // 监控配置
-  logLevel: LogLevel.INFO,
-  metric: {
-    enable: true, // 启用性能指标
-  },
-  
-  // 高级选项
-  enableStreamingToolCallEvents: true, // 调试模式
-});
-```
-
-#### 多模型切换
-
-```ts
-// 支持运行时切换模型
-const response1 = await agent.run({
-  input: "分析这张图片",
-  model: {
-    provider: 'openai',
-    id: 'gpt-4o', // 视觉模型
-  },
-});
-
-const response2 = await agent.run({
-  input: "生成代码",
-  model: {
-    provider: 'anthropic',
-    id: 'claude-3-5-sonnet-20241022', // 代码生成模型
-  },
-});
-```
-
-#### 错误处理和重试
-
-```ts
-try {
-  const response = await agent.run({
-    input: "今天天气怎么样？",
-    // 添加超时控制
-    abortSignal: AbortSignal.timeout(30000),
-  });
-} catch (error) {
-  if (error.name === 'AbortError') {
-    console.log('请求超时');
-  } else {
-    console.error('Agent 执行失败:', error.message);
-  }
-}
-```
-
-### 生命周期钩子
-
-`@tarko/agent` 提供丰富的钩子让你自定义 Agent 行为：
+`@tarko/agent` 提供丰富的 Hook 让你自定义 Agent 行为：
 
 ```ts
 class CustomAgent extends Agent {
@@ -495,7 +397,7 @@ class CustomAgent extends Agent {
 
 ## 最佳实践
 
-### 🎯 选择合适的工具调用引擎
+### 选择合适的 Tool Call Engine
 
 ```ts
 // 对于支持函数调用的模型（推荐）
@@ -514,7 +416,7 @@ const structuredAgent = new Agent({
 });
 ```
 
-### 🔧 工具设计原则
+### 工具设计原则
 
 ```ts
 // ✅ 好的工具设计
@@ -544,7 +446,7 @@ const badTool = new Tool({
 });
 ```
 
-### 📊 性能优化
+### 性能优化
 
 ```ts
 const optimizedAgent = new Agent({
@@ -566,7 +468,7 @@ const optimizedAgent = new Agent({
 });
 ```
 
-### 🛡️ 安全考虑
+### 安全考虑
 
 ```ts
 // 工具过滤

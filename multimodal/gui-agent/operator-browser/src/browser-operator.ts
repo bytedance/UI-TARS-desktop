@@ -3,39 +3,44 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { LocalBrowser } from '@agent-infra/browser';
-import { ConsoleLogger, Logger, defaultLogger } from '@agent-infra/logger';
-import { Operator, parseBoxToScreenCoords } from '@ui-tars/sdk/core';
-import { Page, KeyInput, BrowserType, BrowserInterface, RemoteBrowser } from '@agent-infra/browser';
-import type { ScreenshotOutput, ExecuteParams, ExecuteOutput } from '@ui-tars/sdk/core';
-import { BrowserOperatorOptions, SearchEngine } from './types';
-import { UIHelper } from './ui-helper';
-import { BrowserFinder } from '@agent-infra/browser';
+import { Logger, defaultLogger } from '@agent-infra/logger';
+import { Page, BaseBrowser } from '@agent-infra/browser';
 import { Hotkey, getEnvInfo } from '@agent-infra/puppeteer-enhance';
 
-import { KEY_MAPPINGS } from './key-map';
+import type {
+  ScreenshotOutput,
+  ExecuteParams,
+  ExecuteOutput,
+  SupportedActionType,
+  BaseAction,
+  Coordinates,
+} from '@gui-agent/shared/types';
+import { Operator, ScreenContext } from '@gui-agent/shared/base';
+import { sleep } from '@gui-agent/shared/utils';
+
+import { UIHelper } from './ui-helper';
+import { BrowserOperatorOptions } from './types';
 
 /**
  * BrowserOperator class that extends the base Operator
  * Provides functionality to control a browser instance for UI automation
  */
 export class BrowserOperator extends Operator {
-  private browser: BrowserInterface;
+  protected logger: Logger;
+  protected browser: BaseBrowser;
 
-  private currentPage: Page | null = null;
-
-  private logger: Logger;
-
+  // ui helper and related configs
   private uiHelper: UIHelper;
-
+  private showActionInfo = true;
+  private showWaterFlowEffect = true;
   private highlightClickableElements = true;
 
-  private showActionInfo = true;
-
-  private showWaterFlowEffect = true;
-
+  // device scale factor and screen context
   private deviceScaleFactor?: number;
+  private currentScreenContext?: ScreenContext;
 
+  // current page and hotkey executor
+  private currentPage: Page | null = null;
   private hotkeyExecutor?: Hotkey;
 
   /**
@@ -45,61 +50,22 @@ export class BrowserOperator extends Operator {
   constructor(private options: BrowserOperatorOptions) {
     super();
     this.browser = this.options.browser;
-
     this.logger = (this.options.logger ?? defaultLogger).spawn('[BrowserOperator]');
 
     // Initialize UIHelper with a function that gets the active page
     this.uiHelper = new UIHelper(() => this.getActivePage(), this.logger);
-
-    if (options.highlightClickableElements === false) {
-      this.highlightClickableElements = false;
-    }
-
-    if (options.showActionInfo === false) {
-      this.showActionInfo = false;
-    }
-
-    if (options.showWaterFlow === false) {
-      this.showWaterFlowEffect = false;
-    }
-  }
-
-  private async getHotkeyExecutor() {
-    if (this.hotkeyExecutor) {
-      return this.hotkeyExecutor;
-    }
-
-    const pptrBrowser = (await this.getActivePage()).browser();
-    // @ts-ignore
-    const envInfo = await getEnvInfo(pptrBrowser);
-
-    this.hotkeyExecutor = new Hotkey({
-      osName: envInfo.osName,
-      browserName: envInfo.browserName,
-    });
-
-    return this.hotkeyExecutor;
+    if (options.showActionInfo === false) this.showActionInfo = false;
+    if (options.showWaterFlow === false) this.showWaterFlowEffect = false;
+    if (options.highlightClickableElements === false) this.highlightClickableElements = false;
   }
 
   /**
-   * Gets the currently active browser page
-   * @returns Promise resolving to the active Page object
-   * @throws Error if no active page is found
+   * Sets whether to show action information overlay on the screen
+   * @param enable Whether to enable showing action information
    */
-  private async getActivePage(): Promise<Page> {
-    const page = await this.browser.getActivePage();
-    if (!page) {
-      throw new Error('No active page found');
-    }
-    if (this.currentPage !== page) {
-      this.currentPage = page;
-    }
-    return page;
-  }
-
-  public setHighlightClickableElements(enable: boolean): void {
-    this.highlightClickableElements = enable;
-    this.logger.info(`Clickable elements highlighting ${enable ? 'enabled' : 'disabled'}`);
+  public setShowActionInfo(enable: boolean): void {
+    this.showActionInfo = enable;
+    this.logger.info(`Show Action info ${enable ? 'enabled' : 'disabled'}`);
   }
 
   /**
@@ -112,37 +78,102 @@ export class BrowserOperator extends Operator {
   }
 
   /**
+   * Sets whether to highlight clickable elements on the screen
+   * @param enable Whether to enable highlighting clickable elements
+   */
+  public setHighlightClickableElements(enable: boolean): void {
+    this.highlightClickableElements = enable;
+    this.logger.info(`Clickable elements highlighting ${enable ? 'enabled' : 'disabled'}`);
+  }
+
+  /**
+   * Cleans up resources used by the BrowserOperator
+   * Closes the current page and performs cleanup operations
+   */
+  public async cleanup(): Promise<void> {
+    this.logger.info('Starting cleanup...');
+    await this.uiHelper.cleanup();
+    if (this.currentPage) {
+      await this.currentPage.close();
+      this.currentPage = null;
+      this.logger.info('Page closed successfully');
+    }
+    this.logger.info('Cleanup completed');
+  }
+
+  public async destroyInstance(): Promise<void> {
+    this.logger.debug('destroyInstance: start');
+    await this.cleanup();
+    if (this.browser) {
+      await this.browser.close();
+    }
+  }
+
+  protected async initialize(): Promise<void> {
+    this.logger.info('initialize: getting screen context info...');
+
+    const { width, height } = await this.getScreenRect();
+    const scaleFactor = await this.getDeviceScaleFactor();
+
+    this.currentScreenContext = {
+      screenWidth: width,
+      screenHeight: height,
+      scaleX: scaleFactor ?? 1,
+      scaleY: scaleFactor ?? 1,
+    };
+  }
+
+  protected supportedActions(): Array<SupportedActionType> {
+    return [
+      'drag',
+      'navigate',
+      'navigate_back',
+      'click',
+      // 'left_click',
+      // 'left_single',
+      'double_click',
+      // 'left_double',
+      'right_click',
+      'type',
+      'hotkey',
+      'press',
+      'release',
+      'scroll',
+      'wait',
+      'finished',
+      'call_user',
+      // 'user_stop',
+    ];
+  }
+
+  protected screenContext(): ScreenContext {
+    if (this.currentScreenContext) {
+      return this.currentScreenContext;
+    }
+    throw Error('Get screenContext failed.');
+  }
+
+  /**
    * Takes a screenshot of the current browser viewport
    * @returns Promise resolving to screenshot data
    */
-  public async screenshot(): Promise<ScreenshotOutput> {
+  protected async screenshot(): Promise<ScreenshotOutput> {
     this.logger.info('Starting screenshot...');
 
-    if (this.showWaterFlowEffect) {
-      try {
-        await this.uiHelper.showWaterFlow();
-      } catch (error) {
-        this.logger.error('Failed to show water flow effect:', error);
-      }
-    }
+    if (this.showWaterFlowEffect) await this.uiHelper.showWaterFlow();
 
     const page = await this.getActivePage();
 
     try {
-      // Get deviceScaleFactor
-      const deviceScaleFactor = await this.getDeviceScaleFactor();
-      this.logger.info('DeviceScaleFactor:', deviceScaleFactor);
-
       // Highlight clickable elements before taking screenshot if enabled
       if (this.highlightClickableElements) {
         this.logger.info('Highlighting clickable elements...');
         await this.uiHelper.highlightClickableElements();
         // Give the browser a moment to render the highlights
-        await this.delay(300);
+        await sleep(300);
       }
 
       // Take screenshot of visible area only
-      this.logger.info('Taking screenshot...');
       const startTime = Date.now();
 
       // Take screenshot
@@ -159,14 +190,10 @@ export class BrowserOperator extends Operator {
       const duration = Date.now() - startTime;
       this.logger.info(`Screenshot taken in ${duration}ms`);
 
-      // Remove highlights after taking screenshot
-      // if (this.highlightClickableElements) {
-      //   await this.uiHelper.removeClickableHighlights();
-      // }
-
       const output: ScreenshotOutput = {
+        status: 'success',
         base64: buffer.toString(),
-        scaleFactor: deviceScaleFactor || 1,
+        url: (await this.getMeta()).url,
       };
 
       this.logger.info('Screenshot Info', {
@@ -174,53 +201,44 @@ export class BrowserOperator extends Operator {
         base64: '<base64>',
       });
 
-      try {
-        await this.options.onScreenshot?.(output, page);
-      } catch (error) {
-        this.logger.error('Error in onScreenshot callback:', error);
-      }
       return output;
     } catch (error) {
-      // Ensure highlights are removed even if screenshot fails
+      this.logger.error('Screenshot failed:', error);
+      throw error;
+    } finally {
+      // Remove highlights after taking screenshot
       if (this.highlightClickableElements) {
         await this.uiHelper.removeClickableHighlights();
       }
-      this.logger.error('Screenshot failed:', error);
-      throw error;
+      if (this.showWaterFlowEffect) await this.uiHelper.hideWaterFlow();
     }
+  }
+
+  protected async execute(params: ExecuteParams): Promise<ExecuteOutput> {
+    const { actions, reasoningContent } = params;
+    for (const action of actions) {
+      if (this.showActionInfo) {
+        this.logger.info('Show action info');
+        await this.uiHelper?.showActionInfo(action, reasoningContent ?? '');
+      }
+      this.logger.info('Execute action', action);
+      await this.singleActionExecutor(action);
+    }
+    return {
+      status: 'success',
+    };
   }
 
   /**
    * Executes a specified action based on the parsed prediction
-   * @param params Parameters containing action details
+   * @param action Parameters containing action details
    * @returns Promise resolving to execution output
    */
-  public async execute(params: ExecuteParams): Promise<ExecuteOutput> {
-    this.logger.info('Starting execute with params:', params);
+  private async singleActionExecutor(action: BaseAction): Promise<ExecuteOutput> {
+    this.logger.info('Starting execute with action:', JSON.stringify(action));
 
-    const { parsedPrediction, screenWidth, screenHeight } = params;
+    const { type: action_type, inputs: action_inputs } = action;
 
-    // Show action info in UI
-    if (this.showActionInfo) {
-      await this.uiHelper?.showActionInfo(parsedPrediction);
-    }
-
-    // Add this line to trigger plugin hook
-    await this.options.onOperatorAction?.(parsedPrediction);
-
-    const { action_type, action_inputs } = parsedPrediction;
-    const startBoxStr = action_inputs?.start_box || '';
-
-    const deviceScaleFactor = await this.getDeviceScaleFactor();
-    const coords = parseBoxToScreenCoords({
-      boxStr: startBoxStr,
-      screenWidth,
-      screenHeight,
-    });
-    const startX = coords.x ? coords.x / deviceScaleFactor : null;
-    const startY = coords.y ? coords.y / deviceScaleFactor : null;
-
-    this.logger.info(`Parsed coordinates: (${startX}, ${startY})`);
     this.logger.info(`Executing action: ${action_type}`);
 
     try {
@@ -228,86 +246,53 @@ export class BrowserOperator extends Operator {
 
       switch (action_type) {
         case 'drag':
-          await this.handleDrag(action_inputs, deviceScaleFactor, screenWidth, screenHeight);
+          await this.handleDrag(action_inputs);
           break;
-
         case 'navigate':
-          if (!action_inputs.content) {
-            throw new Error('No target url specified for navigation');
-          }
-          await this.handleNavigate({ url: action_inputs.content });
+          await this.handleNavigate(action_inputs);
           break;
         case 'navigate_back':
           await this.handleNavigateBack();
           break;
-
         case 'click':
         case 'left_click':
         case 'left_single':
-          if (startX && startY) await this.handleClick(startX, startY);
-          else throw new Error(`Missing startX(${startX}) or startY${startX}.`);
+          await this.handleClick(action_inputs);
           break;
-
         case 'double_click':
         case 'left_double':
-          if (startX && startY) await this.handleDoubleClick(startX, startY);
-          else throw new Error(`Missing startX(${startX}) or startY${startX}.`);
+          await this.handleDoubleClick(action_inputs);
           break;
-
         case 'right_click':
-          if (startX && startY) await this.handleRightClick(startX, startY);
-          else throw new Error(`Missing startX(${startX}) or startY${startX}.`);
+          await this.handleRightClick(action_inputs);
           break;
-
         case 'type':
           await this.handleType(action_inputs);
-          await this.delay(1000);
+          await sleep(1000);
           break;
-
         case 'hotkey':
           await this.handleHotkey(action_inputs);
           break;
-
         case 'press':
           await this.handlePress(action_inputs);
           break;
-
         case 'release':
           await this.handleRelease(action_inputs);
           break;
-
         case 'scroll':
-          await this.handleScroll(
-            action_inputs,
-            deviceScaleFactor,
-            screenWidth,
-            screenHeight,
-            startX,
-            startY,
-          );
+          await this.handleScroll(action_inputs);
           break;
-
         case 'wait':
-          await this.delay(5000);
+          await sleep(action_inputs.time * 1000 || 5000);
           break;
-
         case 'finished':
-          if (this.options.onFinalAnswer && parsedPrediction.thought) {
-            await this.options.onFinalAnswer(parsedPrediction.thought);
-          }
           this.uiHelper.cleanup();
           break;
-
         case 'call_user':
           this.uiHelper.cleanup();
           break;
-
-        case 'user_stop':
-          this.uiHelper.cleanup();
-          break;
-
         default:
-          this.logger.warn(`[BrowserOperator] Unsupported action: ${action_type}`);
+          this.logger.warn(`Unsupported action: ${action_type}`);
       }
       this.logger.info(`Action ${action_type} completed successfully`);
     } catch (error) {
@@ -316,49 +301,29 @@ export class BrowserOperator extends Operator {
       throw error;
     }
 
-    // Calculate percentage coordinates for GUI Agent
-    const startXPercent = startX ? (startX * deviceScaleFactor) / screenWidth : null;
-    const startYPercent = startY ? (startY * deviceScaleFactor) / screenHeight : null;
-
     return {
-      // Hand it over to the upper layer to avoid redundancy
-      // @ts-expect-error fix type later
-      startX,
-      startY,
-      // Add percentage coordinates for new GUI Agent design
-      startXPercent,
-      startYPercent,
-      action_inputs,
+      status: 'success',
     };
   }
 
-  public async getMeta(): Promise<{ url: string }> {
-    try {
-      const page = await this.getActivePage();
-      return {
-        url: page.url(),
-      };
-    } catch (error) {
-      this.logger.error('Failed to get page meta:', error);
+  private async handleClick(inputs: Record<string, any>) {
+    if (!inputs.point) {
+      throw new Error(`Missing point for click.`);
     }
-    return {
-      url: '',
-    };
-  }
 
-  private async handleClick(x: number, y: number) {
+    const { realX: x, realY: y } = await this.calculateRealCoords(inputs.point);
     this.logger.info(`Clicking at (${x}, ${y})`);
-    const page = await this.getActivePage();
 
+    const page = await this.getActivePage();
     try {
       await this.uiHelper?.showClickIndicator(x, y);
-      await this.delay(300);
+      await sleep(300);
 
       await page.mouse.move(x, y);
-      await this.delay(100);
+      await sleep(100);
       await page.mouse.click(x, y);
 
-      await this.delay(800);
+      await sleep(800);
       this.logger.info('Click completed');
     } catch (error) {
       this.logger.error('Click operation failed:', error);
@@ -366,21 +331,26 @@ export class BrowserOperator extends Operator {
     }
   }
 
-  private async handleDoubleClick(x: number, y: number) {
-    this.logger.info(`Double clicking at (${x}, ${y})`);
-    const page = await this.getActivePage();
+  private async handleDoubleClick(inputs: Record<string, any>) {
+    if (!inputs.point) {
+      throw new Error(`Missing point for double click.`);
+    }
 
+    const { realX: x, realY: y } = await this.calculateRealCoords(inputs.point);
+    this.logger.info(`Double clicking at (${x}, ${y})`);
+
+    const page = await this.getActivePage();
     try {
       // Show indicator first
       await this.uiHelper?.showClickIndicator(x, y);
-      await this.delay(300);
+      await sleep(300);
 
       // Perform double click
       await page.mouse.move(x, y);
-      await this.delay(100);
+      await sleep(100);
       await page.mouse.click(x, y, { clickCount: 2 });
 
-      await this.delay(800);
+      await sleep(800);
       this.logger.info('Double click completed');
     } catch (error) {
       this.logger.error('Double click operation failed:', error);
@@ -388,22 +358,26 @@ export class BrowserOperator extends Operator {
     }
   }
 
-  private async handleRightClick(x: number, y: number) {
-    const page = await this.getActivePage();
+  private async handleRightClick(inputs: Record<string, any>) {
+    if (!inputs.point) {
+      throw new Error(`Missing point for right click.`);
+    }
 
+    const { realX: x, realY: y } = await this.calculateRealCoords(inputs.point);
     this.logger.info(`Right clicking at (${x}, ${y})`);
 
+    const page = await this.getActivePage();
     try {
       // Show indicator first
       await this.uiHelper?.showClickIndicator(x, y);
-      await this.delay(300);
+      await sleep(300);
 
       // Perform right click
       await page.mouse.move(x, y);
-      await this.delay(100);
+      await sleep(100);
       await page.mouse.click(x, y, { button: 'right' });
 
-      await this.delay(800);
+      await sleep(800);
       this.logger.info('Right click completed');
     } catch (error) {
       this.logger.error('Right click operation failed:', error);
@@ -428,7 +402,7 @@ export class BrowserOperator extends Operator {
 
     if (content.endsWith('\n') || content.endsWith('\\n')) {
       // Reduced pause before Enter
-      await this.delay(50);
+      await sleep(50);
 
       this.logger.info('Pressing Enter after content');
 
@@ -500,28 +474,27 @@ export class BrowserOperator extends Operator {
     this.logger.info('Release operation completed');
   }
 
-  private async handleScroll(
-    inputs: Record<string, any>,
-    deviceScaleFactor: number,
-    screenWidth: number,
-    screenHeight: number,
-    startX: number | null,
-    startY?: number | null,
-  ) {
+  private async handleScroll(inputs: Record<string, any>) {
     const page = await this.getActivePage();
 
     const direction = inputs.direction.toLowerCase();
 
+    if (!inputs.point) {
+      throw new Error(`No point specified for scroll`);
+    }
+    const { realX: startX, realY: startY } = await this.calculateRealCoords(inputs.point);
+
     if (startX && startY) {
       this.logger.info(`Moving mouse to scroll position: (${startX}, ${startY})`);
       await page.mouse.move(startX, startY);
-      await this.delay(100); // Small delay to ensure mouse position is set
+      await sleep(100); // Small delay to ensure mouse position is set
     }
 
+    const { screenWidth, screenHeight, scaleX, scaleY } = await this.getScreenContext();
     const scrollAmount =
       direction === 'up' || direction === 'down'
-        ? (screenHeight / deviceScaleFactor) * 0.8
-        : (screenWidth / deviceScaleFactor) * 0.8;
+        ? (screenHeight / scaleY) * 0.8
+        : (screenWidth / scaleX) * 0.8;
 
     this.logger.info(`Scrolling ${direction} by ${scrollAmount}px`);
 
@@ -545,73 +518,47 @@ export class BrowserOperator extends Operator {
     this.logger.info('Scroll completed');
   }
 
-  private async delay(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
   private async handleNavigate(inputs: Record<string, any>): Promise<void> {
-    const page = await this.getActivePage();
+    if (!inputs.url) {
+      throw new Error('No target url specified for navigation');
+    }
+
     let { url } = inputs;
-    // If the url does not start with http:// or If the url does not start with http:// or URL_ADDRESS automatically add https://
+    // If the url does not start with 'http://' or 'https://', automatically add 'https://'
     if (!/^https?:\/\//i.test(url)) {
       url = 'https://' + url;
     }
-
     this.logger.info(`Navigating to: ${url}`);
+
+    const page = await this.getActivePage();
     await page.goto(url, {
       waitUntil: [], // Wait for no event
     });
     this.logger.info('Navigation completed');
   }
 
-  private async handleDrag(
-    inputs: Record<string, any>,
-    deviceScaleFactor: number,
-    screenWidth: number,
-    screenHeight: number,
-  ) {
-    const page = await this.getActivePage();
-
-    // Get start and end points from inputs
-    const startBoxStr = inputs.start_box || '';
-    const endBoxStr = inputs.end_box || '';
-
-    if (!startBoxStr || !endBoxStr) {
+  private async handleDrag(inputs: Record<string, any>) {
+    if (!inputs.start || !inputs.end) {
       throw new Error('Missing start_point or end_point for drag operation');
     }
 
-    // Parse coordinates
-    const startCoords = parseBoxToScreenCoords({
-      boxStr: startBoxStr,
-      screenWidth,
-      screenHeight,
-    });
-    const endCoords = parseBoxToScreenCoords({
-      boxStr: endBoxStr,
-      screenWidth,
-      screenHeight,
-    });
-
-    // Adjust for device scale factor
-    const startX = startCoords.x ? startCoords.x / deviceScaleFactor : null;
-    const startY = startCoords.y ? startCoords.y / deviceScaleFactor : null;
-    const endX = endCoords.x ? endCoords.x / deviceScaleFactor : null;
-    const endY = endCoords.y ? endCoords.y / deviceScaleFactor : null;
+    const { realX: startX, realY: startY } = await this.calculateRealCoords(inputs.start);
+    const { realX: endX, realY: endY } = await this.calculateRealCoords(inputs.end);
 
     if (!startX || !startY || !endX || !endY) {
       throw new Error('Invalid coordinates for drag operation');
     }
 
-    this.logger.info(`Dragging from (${startX}, ${startY}) to (${endX}, ${endY})`);
-
     try {
+      const page = await this.getActivePage();
+
       // Show drag indicators
       await this.uiHelper?.showDragIndicator(startX, startY, endX, endY);
-      await this.delay(300);
+      await sleep(300);
 
       // Perform the drag operation
       await page.mouse.move(startX, startY);
-      await this.delay(100);
+      await sleep(100);
       await page.mouse.down();
 
       // Perform the drag movement in steps for a more natural drag
@@ -620,13 +567,13 @@ export class BrowserOperator extends Operator {
         const stepX = startX + ((endX - startX) * i) / steps;
         const stepY = startY + ((endY - startY) * i) / steps;
         await page.mouse.move(stepX, stepY);
-        await this.delay(30); // Short delay between steps
+        await sleep(30); // Short delay between steps
       }
 
-      await this.delay(100);
+      await sleep(100);
       await page.mouse.up();
 
-      await this.delay(800);
+      await sleep(800);
       this.logger.info('Drag completed');
     } catch (error) {
       this.logger.error('Drag operation failed:', error);
@@ -664,202 +611,145 @@ export class BrowserOperator extends Operator {
     this.logger.info('Navigation completed or timed out');
   }
 
+  private async getScreenRect() {
+    const page = await this.getActivePage();
+    const width = page.viewport()?.width;
+    const height = page.viewport()?.height;
+    if (!width || !height) {
+      throw Error('Get screen context failed.');
+    }
+    this.logger.debug('getScreenRect: w, h: ', `(${width} x ${height})`);
+    return { width, height };
+  }
+
   private async getDeviceScaleFactor() {
     if (this.deviceScaleFactor) {
       return this.deviceScaleFactor;
     }
 
-    this.logger.info('Getting deviceScaleFactor info...');
     const page = await this.getActivePage();
 
     const scaleFactor = page.viewport()?.deviceScaleFactor;
     if (scaleFactor) {
       this.deviceScaleFactor = scaleFactor;
+      this.logger.debug('getDeviceScaleFactor: deviceScaleFactor: ', scaleFactor);
       return scaleFactor;
     }
 
     const devicePixelRatio = await page.evaluate(() => window.devicePixelRatio);
     if (devicePixelRatio) {
       this.deviceScaleFactor = devicePixelRatio;
+      this.logger.debug('getDeviceScaleFactor: devicePixelRatio: ', devicePixelRatio);
       return devicePixelRatio;
     }
 
     throw Error('Get deviceScaleFactor failed.');
   }
 
-  public async cleanup(): Promise<void> {
-    this.logger.info('Starting cleanup...');
-    await this.uiHelper.cleanup();
-    if (this.currentPage) {
-      await this.currentPage.close();
-      this.currentPage = null;
-      this.logger.info('Page closed successfully');
-    }
-    this.logger.info('Cleanup completed');
-  }
-}
-
-export class DefaultBrowserOperator extends BrowserOperator {
-  private static instance: DefaultBrowserOperator | null = null;
-  private static browser: LocalBrowser | null = null;
-  private static browserPath: string;
-  private static browserType: BrowserType;
-  private static logger: Logger | null = null;
-
-  private constructor(options: BrowserOperatorOptions) {
-    super(options);
-  }
-
   /**
-   * Check whether the local environment has a browser available
-   * @returns {boolean}
+   * Gets the currently active browser page
+   * @returns Promise resolving to the active Page object
+   * @throws Error if no active page is found
    */
-  public static hasBrowser(browser?: BrowserType): boolean {
+  private async getActivePage(): Promise<Page> {
+    const pages = await this.browser.getBrowser().pages();
+    this.logger.info(`get active pages len: ${pages.length}`);
+    // First try to find a visible page without waiting
+    for (const page of pages) {
+      try {
+        // Check visibility state directly without waiting with timeout
+        const visibilityState = await Promise.race([
+          page.evaluate(() => document.visibilityState),
+          new Promise<string>((_, reject) => {
+            setTimeout(() => reject(new Error('Visibility check timed out after 3s')), 3000);
+          }),
+        ]);
+        if (visibilityState === 'visible') {
+          this.logger.success('Active visible page retrieved successfully (direct check)');
+          return page;
+        }
+      } catch (evalError) {
+        this.logger.warn('Warning: checking page visibility directly:', evalError);
+        // Continue to next page if direct check fails
+        continue;
+      }
+    }
+
+    // If no visible page found with direct check, try with waitForFunction but increased timeout
+    for (const page of pages) {
+      try {
+        // Check if the page is visible with increased timeout
+        const isVisible = await page.waitForFunction(
+          () => {
+            return document.visibilityState === 'visible';
+          },
+          {
+            timeout: 3000, // Increased from 1000ms to 3000ms
+          },
+        );
+        if (isVisible) {
+          this.logger.success('Active visible page retrieved successfully');
+          return page;
+        }
+      } catch (waitError) {
+        this.logger.warn(`Visibility check timed out for page: ${page.url()}`);
+        // Continue to next page if this one times out
+        continue;
+      }
+    }
+    this.logger.success('Active original page retrieved failed, fallback to active page');
+    return this.browser.getActivePage();
+  }
+
+  private async getHotkeyExecutor() {
+    if (this.hotkeyExecutor) {
+      return this.hotkeyExecutor;
+    }
+
+    const pptrBrowser = (await this.getActivePage()).browser();
+    // @ts-ignore
+    const envInfo = await getEnvInfo(pptrBrowser);
+
+    this.hotkeyExecutor = new Hotkey({
+      osName: envInfo.osName,
+      browserName: envInfo.browserName,
+    });
+
+    return this.hotkeyExecutor;
+  }
+
+  private async getMeta(): Promise<{ url: string }> {
     try {
-      if (this.browserPath) {
-        return true;
-      }
-
-      if (!this.logger) {
-        this.logger = new ConsoleLogger('[DefaultBrowserOperator]');
-      }
-
-      const browserFinder = new BrowserFinder(this.logger);
-      const browserData = browserFinder.findBrowser(browser);
-      this.browserPath = browserData.path;
-      this.browserType = browserData.type;
-
-      return true;
-    } catch (error) {
-      if (this.logger) {
-        this.logger.error('No available browser found:', error);
-      }
-      return false;
-    }
-  }
-
-  public static async getInstance(
-    highlight = false,
-    showActionInfo = false,
-    showWaterFlow = false,
-    isCallUser = false,
-    searchEngine = 'google' as SearchEngine,
-  ): Promise<DefaultBrowserOperator> {
-    if (!this.logger) {
-      this.logger = new ConsoleLogger('[DefaultBrowserOperator]');
-    }
-
-    if (this.browser) {
-      const isAlive = await this.browser.isBrowserAlive();
-      if (!isAlive) {
-        this.browser = null;
-        this.instance = null;
-      }
-    }
-
-    if (!this.browser) {
-      this.browser = new LocalBrowser({ logger: this.logger });
-      await this.browser.launch({
-        executablePath: this.browserPath,
-        browserType: this.browserType,
-      });
-    }
-
-    if (!this.instance) {
-      this.instance = new DefaultBrowserOperator({
-        browser: this.browser,
-        browserType: this.browserType,
-        logger: this.logger,
-        highlightClickableElements: highlight,
-        showActionInfo: showActionInfo,
-        showWaterFlow: showWaterFlow,
-      });
-    }
-
-    if (!isCallUser) {
-      const openingPage = await this.browser?.createPage();
-      const searchEngineUrls = {
-        [SearchEngine.GOOGLE]: 'https://www.google.com/',
-        [SearchEngine.BING]: 'https://www.bing.com/',
-        [SearchEngine.BAIDU]: 'https://www.baidu.com/',
+      const page = await this.getActivePage();
+      return {
+        url: page.url(),
       };
-      const targetUrl = searchEngineUrls[searchEngine];
-      await openingPage?.goto(targetUrl, {
-        waitUntil: 'networkidle2',
-      });
+    } catch (error) {
+      this.logger.error('Failed to get page meta:', error);
     }
-
-    this.instance.setHighlightClickableElements(highlight);
-
-    return this.instance;
+    return {
+      url: '',
+    };
   }
 
-  public static async destroyInstance(): Promise<void> {
-    if (this.instance) {
-      await this.instance.cleanup();
-      if (this.browser) {
-        await this.browser.close();
-        this.browser = null;
+  private async calculateRealCoords(
+    coords: Coordinates,
+  ): Promise<{ realX: number; realY: number }> {
+    if (!coords.normalized) {
+      if (!coords.raw) {
+        throw new Error('Invalide coordinates');
       }
-      this.instance = null;
+      return {
+        realX: coords.raw.x,
+        realY: coords.raw.y,
+      };
     }
-  }
-}
-
-export class RemoteBrowserOperator extends BrowserOperator {
-  private static instance: RemoteBrowserOperator | null = null;
-  private static browser: RemoteBrowser | null = null;
-  private static browserType: BrowserType;
-  private static logger: Logger | null = null;
-
-  private constructor(options: BrowserOperatorOptions) {
-    super(options);
-  }
-
-  public static async getInstance(
-    wsEndpoint: string,
-    highlight = false,
-    showActionInfo = false,
-    showWaterFlow = false,
-    isCallUser = false,
-    // searchEngine = 'baidu' as SearchEngine,
-  ): Promise<RemoteBrowserOperator> {
-    if (!this.logger) {
-      this.logger = new ConsoleLogger('[RemoteBrowserOperator]');
-    }
-
-    this.browser = new RemoteBrowser({
-      wsEndpoint: wsEndpoint,
-      logger: this.logger,
-    });
-    await this.browser.launch();
-
-    this.instance = new RemoteBrowserOperator({
-      browser: this.browser,
-      browserType: this.browserType,
-      logger: this.logger,
-      highlightClickableElements: highlight,
-      showActionInfo: showActionInfo,
-      showWaterFlow: showWaterFlow,
-    });
-
-    this.instance.setHighlightClickableElements(highlight);
-
-    return this.instance;
-  }
-
-  public static getRemoteBrowser(): RemoteBrowser | null {
-    return this.browser;
-  }
-
-  public static async destroyInstance(): Promise<void> {
-    if (this.instance) {
-      await this.instance.cleanup();
-      if (this.browser) {
-        await this.browser.close();
-        this.browser = null;
-      }
-      this.instance = null;
-    }
+    const screenContext = await this.getScreenContext();
+    return {
+      // realX: (coords.normalized.x * screenContext.screenWidth) / screenContext.scaleX,
+      // realY: (coords.normalized.y * screenContext.screenHeight) / screenContext.scaleY,
+      realX: coords.normalized.x * screenContext.screenWidth,
+      realY: coords.normalized.y * screenContext.screenHeight,
+    };
   }
 }

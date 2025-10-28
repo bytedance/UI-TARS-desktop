@@ -1,15 +1,18 @@
 import { atom } from 'jotai';
 import { apiService } from '@/common/services/apiService';
 import { connectionStatusAtom, agentOptionsAtom } from '@/common/state/atoms/ui';
+import { sessionsAtom } from '@/common/state/atoms/session';
 
 /**
  * Check server connection status
  */
 export const checkConnectionStatusAction = atom(null, async (get, set) => {
   const currentStatus = get(connectionStatusAtom);
+  const wasConnected = currentStatus.connected;
 
   try {
     const isConnected = await apiService.checkServerHealth();
+    const isNewConnection = !wasConnected && isConnected;
 
     set(connectionStatusAtom, {
       ...currentStatus,
@@ -18,13 +21,25 @@ export const checkConnectionStatusAction = atom(null, async (get, set) => {
       lastError: isConnected ? null : currentStatus.lastError,
     });
 
-    // Load agent options on successful connection
+    // Load data based on connection state
     if (isConnected) {
       try {
-        const options = await apiService.getAgentOptions();
-        set(agentOptionsAtom, options);
+        if (isNewConnection) {
+          // Load both options and sessions on initial connection or reconnection
+          const [options, sessions] = await Promise.all([
+            apiService.getAgentOptions(),
+            apiService.getSessions()
+          ]);
+          set(agentOptionsAtom, options);
+          set(sessionsAtom, sessions);
+        } else {
+          // For periodic health checks when already connected, only update agent options
+          // Skip sessions reload to prevent unnecessary API calls
+          const options = await apiService.getAgentOptions();
+          set(agentOptionsAtom, options);
+        }
       } catch (error) {
-        console.error('Failed to load agent options:', error);
+        console.error('Failed to load data:', error);
         set(agentOptionsAtom, {});
       }
     }

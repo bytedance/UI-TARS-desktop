@@ -78,7 +78,7 @@ export default {
             agentMode: {
               id: runtimeSettings.agentMode,
               browserMode: runtimeSettings.browserMode,
-              link: 'http://example.com',
+              link: runtimeSettings.link ?? undefined,
             },
           };
         },

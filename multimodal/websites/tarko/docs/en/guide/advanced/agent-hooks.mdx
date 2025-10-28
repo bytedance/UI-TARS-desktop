@@ -17,9 +17,9 @@ Agent Hooks are callback methods that execute at specific points during agent op
 - **Termination Hooks**: Custom completion criteria enforcement
 - **Request Preparation**: Dynamic system prompt and tool modification
 
-## Core Hook Categories
+## Core Hooks
 
-### LLM Communication Hooks
+### Hooks interacting with LLM
 
 Intercept and monitor LLM requests and responses:
 
@@ -401,103 +401,11 @@ Understanding the hook execution sequence is crucial for proper implementation:
 
 ## Testing Hooks
 
-### Unit Testing Individual Hooks
-
-```typescript
-import { Agent, AgentOptions } from '@tarko/agent';
-
-class TestableAgent extends Agent {
-  public hookCallLog: string[] = [];
-  
-  override async onLLMRequest(id: string, payload: any) {
-    this.hookCallLog.push(`onLLMRequest:${id}`);
-  }
-  
-  override async onBeforeToolCall(id: string, toolCall: any, args: any) {
-    this.hookCallLog.push(`onBeforeToolCall:${toolCall.name}`);
-    return args;
-  }
-}
-
-describe('Agent Hooks', () => {
-  let agent: TestableAgent;
-  
-  beforeEach(() => {
-    agent = new TestableAgent({});
-  });
-  
-  it('should call hooks in correct order', async () => {
-    // Test hook execution order
-    await agent.onLLMRequest('test-session', { model: 'gpt-4', messages: [] });
-    await agent.onBeforeToolCall('test-session', { name: 'test-tool' }, {});
-    
-    expect(agent.hookCallLog).toEqual([
-      'onLLMRequest:test-session',
-      'onBeforeToolCall:test-tool'
-    ]);
-  });
-});
-```
-
-### Integration Testing
-
-```typescript
-describe('Hook Integration', () => {
-  it('should prevent termination when required', async () => {
-    const agent = new ValidatingAgent({
-      tools: [/* required tools */]
-    });
-    
-    // Mock a scenario where not all required tools are called
-    const result = await agent.onBeforeLoopTermination(
-      'test-session',
-      { content: 'Final answer' } as any
-    );
-    
-    expect(result.finished).toBe(false);
-    expect(result.message).toContain('Must call required tools');
-  });
-});
-```
-
-## Best Practices
-
-### 1. Hook Design
-- Keep hooks focused and lightweight
-- Always call `super.hookMethod()` when overriding
-- Handle errors gracefully without breaking agent execution
-- Use async/await for asynchronous operations
-
-### 2. State Management
-- Store hook-specific state in instance variables
-- Clean up state in `onAgentLoopEnd`
-- Use session IDs to track per-conversation state
-
-### 3. Performance
-- Avoid blocking operations in critical hooks
-- Use caching for expensive computations
-- Implement timeouts for external calls
-
-### 4. Error Handling
-- Always handle hook errors gracefully
-- Provide fallback behavior when possible
-- Log errors for debugging without exposing sensitive data
-
-### 5. Testing
-- Unit test hooks in isolation
-- Test hook composition and ordering
-- Mock external dependencies
-- Test error scenarios
+WIP
 
 ## Real-World Examples
 
-See our [Examples](/examples/custom-hooks) section for complete implementations of:
-
-- Analytics and metrics collection
-- User permission enforcement
-- Rate limiting and quota management
-- Multi-step workflow validation
-- Error recovery and retry mechanisms
+WIP
 
 ## Next Steps
 

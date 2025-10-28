@@ -5,14 +5,14 @@ description: 理解 Tarko 的 Tool Call Engine 类型和选择
 
 # Tool Call Engine
 
-Tarko 的 **Tool Call Engine** 决定了 Agent 如何处理和执行工具调用。不同的引擎为各种 LLM 提供商和使用场景提供兼容性。
+Tarko 的 **Tool Call Engine** 决定了 Agent 如何处理和执行工具调用。不同的引擎为各种 LLM Provider 和使用场景提供兼容性。
 
 ## 概述
 
 Tool Call Engine 处理：
 
 - **函数调用解析**：如何从 LLM 响应中提取工具调用
-- **提供商兼容性**：与具有不同工具调用能力的模型兼容
+- **Provider 兼容性**：与具有不同工具调用能力的模型兼容
 - **执行策略**：如何调用工具和处理结果
 - **错误处理**：管理失败的工具调用和重试
 
@@ -53,7 +53,7 @@ const agent = new Agent({
   toolCallEngine: 'prompt_engineering',
   model: {
     provider: 'volcengine', 
-    id: 'ep-20250510145437-5sxhs',
+    id: 'doubao-seed-1-6-vision-250815',
     apiKey: process.env.ARK_API_KEY,
   },
   tools: [weatherTool],
@@ -95,7 +95,7 @@ const agent = new Agent({
 Tarko 可以自动为您的模型选择最佳引擎：
 
 ```typescript
-// Tarko 将根据模型提供商选择最优引擎
+// Tarko 将根据 Model Provider 选择最优引擎
 const agent = new Agent({
   // 未指定 toolCallEngine - 自动选择
   model: {
@@ -144,7 +144,7 @@ import { Agent, Tool, z, LogLevel } from '@tarko/agent';
 const agent = new Agent({
   model: {
     provider: 'volcengine',
-    id: 'ep-20250510145437-5sxhs',
+    id: 'doubao-seed-1-6-vision-250815',
     apiKey: process.env.ARK_API_KEY,
   },
   tools: [locationTool, weatherTool],
@@ -161,7 +161,7 @@ const agent = new Agent({
 const agent = new Agent({
   model: {
     provider: 'volcengine',
-    id: 'ep-20250510145437-5sxhs',
+    id: 'doubao-seed-1-6-vision-250815',
     apiKey: process.env.ARK_API_KEY,
   },
   tools: [locationTool, weatherTool],
@@ -237,5 +237,5 @@ for await (const event of response) {
 ## 下一步
 
 - [工具](/guide/basic/tools) - 学习如何创建工具
-- [配置](/guide/basic/configuration) - 配置工具调用引擎
+- [配置](/guide/basic/configuration) - 配置 Tool Call Engine
 - [事件流](/guide/basic/event-stream) - 监控工具调用事件

@@ -113,7 +113,7 @@ export default class MessageManager {
         args: {
           current_state: {
             page_summary:
-              'On the page are company a,b,c wtih their revenue 1,2,3.',
+              'On the page are company a,b,c with their revenue 1,2,3.',
             evaluation_previous_goal: 'Success - I opend the first page',
             memory: 'Starting with the new task. I have completed 1/10 steps',
             next_goal: 'Click on company a',

@@ -150,3 +150,21 @@ export function isSidebarEnabled(): boolean {
 export function isHomeEnabled(): boolean {
   return getLayoutConfig().enableHome ?? true;
 }
+
+/**
+ * Get debug configuration from web UI config
+ */
+export function getDebugConfig() {
+  return (
+    getWebUIConfig().debug || {
+      enableEventStreamViewer: false,
+    }
+  );
+}
+
+/**
+ * Check if Event Stream Viewer is enabled
+ */
+export function isEventStreamViewerEnabled(): boolean {
+  return getDebugConfig().enableEventStreamViewer ?? false;
+}
