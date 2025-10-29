@@ -17,6 +17,7 @@ import { ScrollArea } from '@renderer/components/ui/scroll-area';
 import { useStore } from '@renderer/hooks/useStore';
 import { useSession } from '@renderer/hooks/useSession';
 import { useRunAgent } from '@renderer/hooks/useRunAgent';
+import { useSetting } from '@renderer/hooks/useSetting';
 import Prompts from '../../components/Prompts';
 import { IMAGE_PLACEHOLDER } from '@ui-tars/shared/constants';
 import {
@@ -51,11 +52,12 @@ const LocalOperator = () => {
   const state = useLocation().state as RouterState;
   const navigate = useNavigate();
   const { setOpen } = useSidebar();
+  const { settings } = useSetting();
 
   const { status, messages = [], thinking, errorMsg } = useStore();
   const containerRef = useRef<HTMLDivElement>(null);
   const [showSuggestions, setShowSuggestions] = useState(true);
-  const suggestions: string[] = [
+  const defaultSuggestions: string[] = [
     '打开浏览器用携程搜索后天深圳飞往北京的机票',
     '用钉钉帮我创建一个今天晚上七点的会议日程',
     '打开浏览器用淘宝搜索65寸OLED电视',
@@ -63,6 +65,10 @@ const LocalOperator = () => {
     '用Word写一篇关于AI Agent的300字报告，并保存到桌面',
     '关闭所有浏览器窗口',
   ];
+  const suggestions =
+    settings.commandSuggestions && settings.commandSuggestions.length > 0
+      ? settings.commandSuggestions
+      : defaultSuggestions;
   const [selectImg, setSelectImg] = useState<number | undefined>(undefined);
   const [initId, setInitId] = useState('');
   const {

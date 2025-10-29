@@ -33,6 +33,9 @@ export const PresetSchema = z.object({
   reportStorageBaseUrl: z.string().url().optional(),
   utioBaseUrl: z.string().url().optional(),
   presetSource: PresetSourceSchema.optional(),
+
+  // Command Suggestions
+  commandSuggestions: z.array(z.string()).optional(),
 });
 
 export type PresetSource = z.infer<typeof PresetSourceSchema>;
