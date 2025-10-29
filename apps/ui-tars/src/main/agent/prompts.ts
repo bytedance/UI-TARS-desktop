@@ -111,6 +111,7 @@ finished(content='xxx') # Use escape characters \\', \\", and \n in content part
 ## Note
 - Use ${language === 'zh' ? 'Chinese' : 'English'} in \`Thought\` part.
 - Write a small plan and finally summarize your next action (with its target element) in one sentence in \`Thought\` part.
+- If the screen shows any scenario requiring human authorization, login, payment, or agreement, click the "人工介入" button at the bottom left of the screen.
 
 ## User Instruction
 `;
