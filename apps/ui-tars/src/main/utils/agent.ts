@@ -16,6 +16,8 @@ import {
   hideWidgetWindow,
   showScreenWaterFlow,
   showWidgetWindow,
+  showHumanInterventionWindow,
+  hideHumanInterventionWindow,
 } from '../window/ScreenMarker';
 import { hideMainWindow, showMainWindow } from '../window';
 import { SearchEngine } from '@ui-tars/operator-browser';
@@ -69,11 +71,13 @@ export const beforeAgentRun = async (operator: Operator) => {
     case Operator.LocalComputer:
       showWidgetWindow();
       showScreenWaterFlow();
+      showHumanInterventionWindow();
       hideMainWindow();
       break;
     case Operator.LocalBrowser:
       hideMainWindow();
       showWidgetWindow();
+      showHumanInterventionWindow();
       break;
     default:
       break;
@@ -88,12 +92,14 @@ export const afterAgentRun = (operator: Operator) => {
       break;
     case Operator.LocalComputer:
       hideWidgetWindow();
+      hideHumanInterventionWindow();
       closeScreenMarker();
       hideScreenWaterFlow();
       showMainWindow();
       break;
     case Operator.LocalBrowser:
       hideWidgetWindow();
+      hideHumanInterventionWindow();
       showMainWindow();
       break;
     default:

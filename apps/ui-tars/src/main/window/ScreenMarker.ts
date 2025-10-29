@@ -27,6 +27,7 @@ class ScreenMarker {
   private currentOverlay: BrowserWindow | null = null;
   private widgetWindow: BrowserWindow | null = null;
   private screenWaterFlow: BrowserWindow | null = null;
+  private humanInterventionWindow: BrowserWindow | null = null;
   private lastShowPredictionMarkerPos: { xPos: number; yPos: number } | null =
     null;
 
@@ -136,6 +137,57 @@ class ScreenMarker {
   hideWidgetWindow() {
     this.widgetWindow?.close();
     this.widgetWindow = null;
+  }
+
+  showHumanInterventionWindow() {
+    if (this.humanInterventionWindow) {
+      return;
+    }
+
+    const primaryDisplay = screen.getPrimaryDisplay();
+    const { height: screenHeight } = primaryDisplay.size;
+
+    this.humanInterventionWindow = new BrowserWindow({
+      width: 160,
+      height: 60,
+      transparent: true,
+      frame: false,
+      alwaysOnTop: true,
+      skipTaskbar: true,
+      focusable: true,
+      resizable: false,
+      type: 'toolbar',
+      visualEffectState: 'active', // macOS only
+      webPreferences: {
+        preload: path.join(__dirname, '../preload/index.js'),
+        sandbox: false,
+        webSecurity: !!env.isDev,
+      },
+    });
+
+    // 设置窗口位置在左下角
+    this.humanInterventionWindow.setPosition(
+      10, // 左边距10px
+      Math.floor(screenHeight - 60 - 50), // 底部距离50px
+    );
+
+    if (!app.isPackaged && env.rendererUrl) {
+      this.humanInterventionWindow.loadURL(env.rendererUrl + '#intervention');
+    } else {
+      this.humanInterventionWindow.loadFile(
+        path.join(__dirname, '../renderer/index.html'),
+        {
+          hash: '#intervention',
+        },
+      );
+    }
+
+    windowManager.registerWindow(this.humanInterventionWindow);
+  }
+
+  hideHumanInterventionWindow() {
+    this.humanInterventionWindow?.close();
+    this.humanInterventionWindow = null;
   }
 
   showWidgetWindow() {
@@ -293,6 +345,10 @@ class ScreenMarker {
       this.screenWaterFlow.close();
       this.screenWaterFlow = null;
     }
+    if (this.humanInterventionWindow) {
+      this.humanInterventionWindow.close();
+      this.humanInterventionWindow = null;
+    }
   }
 
   closeOverlay() {
@@ -335,4 +391,12 @@ export const hideScreenWaterFlow = () => {
 
 export const closeOverlay = () => {
   ScreenMarker.getInstance().closeOverlay();
+};
+
+export const showHumanInterventionWindow = () => {
+  ScreenMarker.getInstance().showHumanInterventionWindow();
+};
+
+export const hideHumanInterventionWindow = () => {
+  ScreenMarker.getInstance().hideHumanInterventionWindow();
 };
