@@ -16,6 +16,7 @@ import { ScrollArea } from '@renderer/components/ui/scroll-area';
 
 import { useStore } from '@renderer/hooks/useStore';
 import { useSession } from '@renderer/hooks/useSession';
+import { useRunAgent } from '@renderer/hooks/useRunAgent';
 import Prompts from '../../components/Prompts';
 import { IMAGE_PLACEHOLDER } from '@ui-tars/shared/constants';
 import {
@@ -53,7 +54,15 @@ const LocalOperator = () => {
 
   const { status, messages = [], thinking, errorMsg } = useStore();
   const containerRef = useRef<HTMLDivElement>(null);
-  const suggestions: string[] = [];
+  const [showSuggestions, setShowSuggestions] = useState(true);
+  const suggestions: string[] = [
+    '打开浏览器用携程搜索后天深圳飞往北京的机票',
+    '用钉钉帮我创建一个今天晚上七点的会议日程',
+    '打开浏览器用淘宝搜索65寸OLED电视',
+    '用钉钉给谢建辉发一条消息，内容是：你好，我是GUIAgent',
+    '用Word写一篇关于AI Agent的300字报告，并保存到桌面',
+    '关闭所有浏览器窗口',
+  ];
   const [selectImg, setSelectImg] = useState<number | undefined>(undefined);
   const [initId, setInitId] = useState('');
   const {
@@ -123,8 +132,49 @@ const LocalOperator = () => {
     }, 100);
   }, [messages, thinking, errorMsg]);
 
+  // Reset suggestions when there are new chat messages
+  useEffect(() => {
+    if (chatMessages?.length > 0) {
+      setShowSuggestions(false);
+    }
+  }, [chatMessages]);
+
+  const { run } = useRunAgent();
+  const { getSession, updateSession } = useSession();
+
   const handleSelect = async (suggestion: string) => {
-    await api.setInstructions({ instructions: suggestion });
+    // Update the session name
+    const session = await getSession(state.sessionId);
+    await updateSession(state.sessionId, {
+      name: suggestion,
+      meta: {
+        ...session!.meta,
+      },
+    });
+
+    // 在当前会话中插入用户消息
+    const newMessage = {
+      from: 'human',
+      value: suggestion,
+      timing: { start: Date.now(), end: Date.now(), cost: 0 },
+    };
+
+    // 更新会话消息
+    const updatedMessages = [...chatMessages, newMessage];
+    updateMessages(state.sessionId, updatedMessages);
+
+    // 隐藏建议区
+    setShowSuggestions(false);
+
+    // 滚动到底部以显示最新消息
+    setTimeout(() => {
+      containerRef.current?.scrollIntoView(false);
+    }, 100);
+
+    // 调用run函数启动agent
+    run(suggestion, updatedMessages, () => {
+      // Clear the instructions after run starts
+    });
   };
 
   const handleImageSelect = async (index: number) => {
@@ -161,6 +211,7 @@ const LocalOperator = () => {
       setNavDialogOpen(true);
     } else {
       onNewChat();
+      setShowSuggestions(true);
     }
   }, [needsConfirm]);
 
@@ -216,9 +267,11 @@ const LocalOperator = () => {
     return (
       <ScrollArea className="h-full px-4">
         <div ref={containerRef}>
-          {!chatMessages?.length && suggestions?.length > 0 && (
-            <Prompts suggestions={suggestions} onSelect={handleSelect} />
-          )}
+          {!chatMessages?.length &&
+            suggestions?.length > 0 &&
+            showSuggestions && (
+              <Prompts suggestions={suggestions} onSelect={handleSelect} />
+            )}
 
           {chatMessages?.map((message, idx) => {
             if (message?.from === 'human') {
