@@ -33,6 +33,9 @@ export class NutJSElectronOperator extends NutJSOperator {
     ],
   };
 
+  // Screenshot compression parameters (easily adjustable)
+  private readonly screenshotJpegQuality: number = 10; // JPEG quality percentage (0-100) default: 75
+
   public async screenshot(): Promise<ScreenshotOutput> {
     const {
       physicalSize,
@@ -72,13 +75,35 @@ export class NutJSElectronOperator extends NutJSOperator {
 
     const screenshot = primarySource.thumbnail;
 
+    // Log original screenshot dimensions before compression
+    const originalWidth = screenshot.getSize().width;
+    const originalHeight = screenshot.getSize().height;
+    logger.info(
+      '[screenshot] Original size before compression:',
+      `${originalWidth}x${originalHeight} (${originalWidth * originalHeight} pixels)`,
+    );
+
     const resized = screenshot.resize({
       width: physicalSize.width,
       height: physicalSize.height,
     });
 
+    // Convert to JPEG with configurable quality
+    const jpegBuffer = resized.toJPEG(this.screenshotJpegQuality);
+    const compressedBase64 = jpegBuffer.toString('base64');
+
+    // Log compressed image dimensions and size
+    const compressedWidth = physicalSize.width;
+    const compressedHeight = physicalSize.height;
+    logger.info(
+      '[screenshot] Compressed size after JPEG compression:',
+      `${compressedWidth}x${compressedHeight} (${compressedWidth * compressedHeight} pixels),`,
+      `Quality: ${this.screenshotJpegQuality}%,`,
+      `Base64 length: ${compressedBase64.length} characters`,
+    );
+
     return {
-      base64: resized.toJPEG(75).toString('base64'),
+      base64: compressedBase64,
       scaleFactor,
     };
   }

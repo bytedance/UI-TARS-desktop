@@ -297,6 +297,7 @@ export class UITarsModel extends Model {
           ? MAX_PIXELS_DOUBAO
           : MAX_PIXELS_V1_0;
     const compressedImages = await Promise.all(
+      // maxPixels 为最大像素数，这里可以根据情况压缩
       images.map((image) => preprocessResizeImage(image, maxPixels)),
     );
 

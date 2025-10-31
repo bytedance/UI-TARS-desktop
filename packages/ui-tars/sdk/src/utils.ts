@@ -190,6 +190,9 @@ export function replaceBase64Prefix(base64: string) {
   return base64.replace(/^data:image\/\w+;base64,/, '');
 }
 
+// Preprocessing image parameters (easily adjustable)
+const preprocessPngQuality: number = 60; // PNG quality percentage (0-100)
+
 export async function preprocessResizeImage(
   image_base64: string,
   maxPixels: number,
@@ -201,22 +204,31 @@ export async function preprocessResizeImage(
     const { width, height } = image.bitmap;
 
     const currentPixels = width * height;
+
+    // Log original image size before preprocessing
+    // console.log(`[preprocessResizeImage] Original image size: ${width}x${height} (${currentPixels} pixels), maxPixels: ${maxPixels}`);
+    // Original image size: 1470x956 (1405320 pixels), maxPixels: 4014080
+
     if (currentPixels > maxPixels) {
       const resizeFactor = Math.sqrt(maxPixels / currentPixels);
       const newWidth = Math.floor(width * resizeFactor);
       const newHeight = Math.floor(height * resizeFactor);
+
+      // console.log(`[preprocessResizeImage] Resizing image: ${width}x${height} -> ${newWidth}x${newHeight}, resize factor: ${resizeFactor.toFixed(4)}`);
 
       const resized = await image
         .resize({
           w: newWidth,
           h: newHeight,
         })
-        .getBuffer('image/png', { quality: 60 });
+        .getBuffer('image/png', { quality: preprocessPngQuality });
 
       return resized.toString('base64');
     }
 
-    const base64 = await image.getBase64('image/png', { quality: 60 });
+    const base64 = await image.getBase64('image/png', {
+      quality: preprocessPngQuality,
+    });
 
     return replaceBase64Prefix(base64);
   } catch (error) {

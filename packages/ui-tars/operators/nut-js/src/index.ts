@@ -169,8 +169,10 @@ export class NutJSOperator extends Operator {
 
     switch (action_type) {
       case 'wait':
+        const waitTime = 1000;
         logger.info('[NutjsOperator] wait', action_inputs);
-        await sleep(5000);
+        logger.info('[NutjsOperator] wait time', waitTime);
+        await sleep(waitTime);
         break;
 
       case 'mouse_move':
