@@ -330,7 +330,7 @@ const LocalOperator = () => {
   return (
     <div className="flex flex-col w-full h-full">
       <NavHeader
-        title={state.operator}
+        title="返回主页" //{state.operator}
         onBack={handleBack}
         docUrl="https://github.com/bytedance/UI-TARS-desktop/"
       ></NavHeader>
@@ -343,7 +343,7 @@ const LocalOperator = () => {
             ></SidebarTrigger>
             <Button variant="outline" size="sm" onClick={handleNewChat}>
               <MessageCirclePlus />
-              New Chat
+              新建对话
             </Button>
           </div>
           {renderChatList()}
@@ -357,7 +357,7 @@ const LocalOperator = () => {
         <Card className="flex-1 basis-3/5 p-3 h-[calc(100vh-76px)]">
           <Tabs defaultValue="screenshot" className="flex-1">
             <TabsList>
-              <TabsTrigger value="screenshot">ScreenShot</TabsTrigger>
+              <TabsTrigger value="screenshot">屏幕截图</TabsTrigger>
             </TabsList>
             <TabsContent value="screenshot">
               <ImageGallery

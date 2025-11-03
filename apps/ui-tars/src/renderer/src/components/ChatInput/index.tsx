@@ -221,7 +221,7 @@ const ChatInput = ({
                 ? `${savedInstructions}`
                 : running && lastHumanMessage && messages?.length > 1
                   ? lastHumanMessage
-                  : 'What can I do for you today?'
+                  : '请告诉我您需要什么帮助'
             }
             className="min-h-[120px] rounded-2xl resize-none px-4 pb-16" // 调整内边距
             value={localInstructions}
