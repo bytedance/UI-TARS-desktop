@@ -15,7 +15,7 @@ import {
 import { ActionIconMap } from '@renderer/const/actions';
 import { useSetting } from '@renderer/hooks/useSetting';
 
-import logo from '@resources/logo-full.png?url';
+import logo from '@resources/logo-yidao-research.png?url';
 import { Button } from '@renderer/components/ui/button';
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '@renderer/api';
