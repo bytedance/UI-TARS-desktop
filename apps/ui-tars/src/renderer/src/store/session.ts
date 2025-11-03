@@ -50,6 +50,7 @@ interface SessionState {
     updates: Partial<Pick<SessionItem, 'name' | 'meta'>>,
   ) => Promise<SessionItem | null>;
   deleteSession: (id: string) => Promise<boolean>;
+  deleteAllSessions: () => Promise<boolean>;
   setActiveSession: (sessionId: string) => Promise<void>;
 }
 
@@ -156,6 +157,33 @@ export const useSessionStore = create<SessionState>((set, get) => ({
       set({
         error:
           err instanceof Error ? err : new Error('Failed to delete session'),
+      });
+      return false;
+    }
+  },
+
+  deleteAllSessions: async () => {
+    try {
+      await api.clearHistory();
+      const deleted = await sessionManager.deleteAllSessions();
+      await chatManager.deleteAllMessages();
+
+      if (deleted) {
+        set({
+          sessions: [],
+          currentSessionId: '',
+          chatMessages: [],
+        });
+      }
+      return deleted;
+    } catch (err) {
+      console.error('deleteAllSessions', err);
+
+      set({
+        error:
+          err instanceof Error
+            ? err
+            : new Error('Failed to delete all sessions'),
       });
       return false;
     }

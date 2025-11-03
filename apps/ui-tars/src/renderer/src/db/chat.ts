@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 // /apps/ui-tars/src/renderer/src/db/chat.ts
-import { get, set, del, createStore } from 'idb-keyval';
+import { get, set, del, entries, createStore } from 'idb-keyval';
 import { ConversationWithSoM } from '@/main/shared/types';
 
 export interface ChatMetaInfo {
@@ -41,6 +41,20 @@ export class ChatManager {
     await del(sessionId, chatStore);
 
     return true;
+  }
+
+  // 删除所有会话的消息
+  async deleteAllMessages() {
+    try {
+      const items = await entries(chatStore);
+      for (const [key] of items) {
+        await del(key, chatStore);
+      }
+      return true;
+    } catch (error) {
+      console.error('Failed to delete all messages:', error);
+      return false;
+    }
   }
 }
 

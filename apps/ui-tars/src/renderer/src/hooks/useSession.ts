@@ -33,6 +33,7 @@ export const useSession = () => {
     getSession: store.getSession,
     updateSession: store.updateSession,
     deleteSession: store.deleteSession,
+    deleteAllSessions: store.deleteAllSessions,
     refreshSessions: store.fetchSessions,
   };
 };

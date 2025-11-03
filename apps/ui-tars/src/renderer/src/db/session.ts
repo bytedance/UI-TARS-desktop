@@ -82,6 +82,20 @@ export class SessionManager {
     await del(id, sessionStore);
     return true;
   }
+
+  // 删除所有会话
+  async deleteAllSessions(): Promise<boolean> {
+    try {
+      const items = await entries(sessionStore);
+      for (const [key] of items) {
+        await del(key, sessionStore);
+      }
+      return true;
+    } catch (error) {
+      console.error('Failed to delete all sessions:', error);
+      return false;
+    }
+  }
 }
 
 // 导出单例实例

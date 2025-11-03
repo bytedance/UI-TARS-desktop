@@ -1,17 +1,31 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@renderer/components/ui/button';
-import { RefreshCcw } from 'lucide-react';
+import { RefreshCcw, Trash2 } from 'lucide-react';
 import { api } from '@/renderer/src/api';
 import { toast } from 'sonner';
 import { Textarea } from '@renderer/components/ui/textarea';
 import { Label } from '@renderer/components/ui/label';
 import { useSetting } from '@renderer/hooks/useSetting';
+import { useSession } from '@renderer/hooks/useSession';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@renderer/components/ui/alert-dialog';
 
 import { REPO_OWNER, REPO_NAME } from '@main/shared/constants';
 
 export const GeneralSettings = () => {
   const { settings, updateSetting } = useSetting();
+  const { deleteAllSessions, sessions } = useSession();
   const [updateLoading, setUpdateLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [updateDetail, setUpdateDetail] = useState<{
     currentVersion: string;
     version: string;
@@ -76,6 +90,24 @@ export const GeneralSettings = () => {
     setSuggestions(value.split('\n').filter((s) => s.trim() !== ''));
   };
 
+  const handleDeleteAllSessions = async () => {
+    setDeleteLoading(true);
+    try {
+      const success = await deleteAllSessions();
+      if (success) {
+        toast.success('所有历史记录已清空');
+        setShowDeleteDialog(false);
+      } else {
+        toast.error('清空历史记录失败');
+      }
+    } catch (error) {
+      console.error('Failed to delete all sessions:', error);
+      toast.error('清空历史记录时发生错误');
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="space-y-4">
@@ -90,37 +122,75 @@ export const GeneralSettings = () => {
         <Button onClick={handleSaveSuggestions}>Save Suggestions</Button>
       </div>
 
-      <div className="border-t pt-6">
-        <Button
-          variant="outline"
-          type="button"
-          disabled={updateLoading}
-          onClick={handleCheckForUpdates}
-        >
-          <RefreshCcw
-            className={`h-4 w-4 mr-2 ${updateLoading ? 'animate-spin' : ''}`}
-          />
-          {updateLoading ? 'Checking...' : 'Check Updates'}
-        </Button>
-        {updateDetail?.version && (
-          <div className="text-sm text-gray-500 mt-2">
-            {`${updateDetail.currentVersion} -> ${updateDetail.version}(latest)`}
-          </div>
-        )}
-        {updateDetail?.link && (
-          <div className="text-sm text-gray-500 mt-1">
-            Release Notes:{' '}
-            <a
-              href={updateDetail.link}
-              target="_blank"
-              className="underline"
-              rel="noreferrer"
-            >
-              {updateDetail.link}
-            </a>
-          </div>
-        )}
+      <div className="border-t pt-6 space-y-4">
+        <div>
+          <Button
+            variant="destructive"
+            type="button"
+            disabled={deleteLoading || sessions.length === 0}
+            onClick={() => setShowDeleteDialog(true)}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            {deleteLoading ? '清空中...' : '清空所有历史记录'}
+          </Button>
+          {sessions.length === 0 && (
+            <div className="text-sm text-gray-500 mt-2">暂无历史记录</div>
+          )}
+        </div>
+
+        <div>
+          <Button
+            variant="outline"
+            type="button"
+            disabled={updateLoading}
+            onClick={handleCheckForUpdates}
+          >
+            <RefreshCcw
+              className={`h-4 w-4 mr-2 ${updateLoading ? 'animate-spin' : ''}`}
+            />
+            {updateLoading ? 'Checking...' : 'Check Updates'}
+          </Button>
+          {updateDetail?.version && (
+            <div className="text-sm text-gray-500 mt-2">
+              {`${updateDetail.currentVersion} -> ${updateDetail.version}(latest)`}
+            </div>
+          )}
+          {updateDetail?.link && (
+            <div className="text-sm text-gray-500 mt-1">
+              Release Notes:{' '}
+              <a
+                href={updateDetail.link}
+                target="_blank"
+                className="underline"
+                rel="noreferrer"
+              >
+                {updateDetail.link}
+              </a>
+            </div>
+          )}
+        </div>
       </div>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确认清空所有历史记录？</AlertDialogTitle>
+            <AlertDialogDescription>
+              此操作将永久删除所有历史会话记录和消息，无法恢复。确定要继续吗？
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteAllSessions}
+              disabled={deleteLoading}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {deleteLoading ? '删除中...' : '确认删除'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
