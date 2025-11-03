@@ -20,7 +20,7 @@ export function NavSettings({ onClick }: NavSettingsProps) {
       <SidebarMenu className="items-center">
         <SidebarMenuButton className="font-medium" onClick={onClick}>
           <Settings />
-          <span>Settings</span>
+          <span>设置</span>
         </SidebarMenuButton>
       </SidebarMenu>
     </SidebarGroup>

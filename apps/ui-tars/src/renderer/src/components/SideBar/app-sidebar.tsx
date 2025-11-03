@@ -150,7 +150,7 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
               onClick={handleHomeClick}
             >
               <Home />
-              Home
+              主页
             </SidebarMenuButton>
           </SidebarMenu>
         </SidebarHeader>

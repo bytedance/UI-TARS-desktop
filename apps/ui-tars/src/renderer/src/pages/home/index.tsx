@@ -158,16 +158,13 @@ const Home = () => {
     <div className="w-full h-full flex flex-col">
       <DragArea></DragArea>
       <div className="w-full h-full flex flex-col items-center justify-center">
-        <h1 className="text-2xl font-semibold mt-1 mb-8">
-          Welcome to UI-TARS Desktop
-        </h1>
-        <Alert className="mb-4 w-[824px]">
+        <h1 className="text-2xl font-semibold mt-1 mb-8">欢迎使用小亿助手</h1>
+        {/* <Alert className="mb-4 w-[824px]">
           <Info className="h-4 w-4 mt-2" />
           <AlertDescription>
             <div className="flex items-center">
               <p className="text-sm text-muted-foreground">
-                You can also experience the remote versions on Volcano
-                Engine:&nbsp;
+                您也可以通过火山引擎体验远程版本：&nbsp;
               </p>
               <Button
                 variant="link"
@@ -196,14 +193,15 @@ const Home = () => {
               </Button>
             </div>
           </AlertDescription>
-        </Alert>
+        </Alert> */}
         <div className="flex gap-6">
           <Card className="w-[400px] py-5">
             <CardHeader className="px-5">
-              <CardTitle>Computer Operator</CardTitle>
+              <CardTitle>电脑操作助手</CardTitle>
               <CardDescription>
-                Use the UI-TARS model to automate and complete tasks directly on
-                your computer with AI assistance.
+                基于先进的 UI-TARS 模型，打造新一代智能 GUI
+                Agent，可直接在您的电脑界面上自主感知、理解与操作，实现复杂任务的端到端自动化，让
+                AI 真正成为您数字生活的高效助手。
               </CardDescription>
             </CardHeader>
             <CardContent className="px-5">
@@ -218,16 +216,16 @@ const Home = () => {
                 onClick={() => handleLocalPress(Operator.LocalComputer)}
                 className="w-full"
               >
-                Use Local Computer
+                开始使用电脑操作助手
               </Button>
             </CardFooter>
           </Card>
           <Card className="w-[400px] py-5">
             <CardHeader className="px-5">
-              <CardTitle>Browser Operator</CardTitle>
+              <CardTitle>浏览器操作助手</CardTitle>
               <CardDescription>
-                Let the UI-TARS model help you automate browser tasks, from
-                navigating pages to filling out forms.
+                依托先进的 UI-TARS
+                模型，智能浏览器助手可自动完成网页导航、表单填写、数据提取等操作，让繁复的线上任务一键执行，高效、精准、无需人工干预。
               </CardDescription>
             </CardHeader>
             <CardContent className="px-5">
@@ -242,7 +240,7 @@ const Home = () => {
                 onClick={() => handleLocalPress(Operator.LocalBrowser)}
                 className="w-full"
               >
-                Use Local Browser
+                开始使用浏览器操作助手
               </Button>
             </CardFooter>
           </Card>

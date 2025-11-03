@@ -108,7 +108,7 @@ export function NavHistory({
                   onClick={handleHistory}
                 >
                   <History strokeWidth={2} />
-                  <span>History</span>
+                  <span>历史记录</span>
                   <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                 </SidebarMenuButton>
               </CollapsibleTrigger>
