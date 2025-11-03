@@ -1,0 +1,37 @@
+{
+  "name": "gui-agent-example",
+  "version": "0.0.1",
+  "description": "Example for GUI Agent SDK",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "gui-agent",
+    "example",
+    "cli",
+    "typescript"
+  ],
+  "author": "UI-TARS Team",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "@gui-agent/action-parser": "0.3.0-beta.12-canary-41702d44a-20250928105656",
+    "@gui-agent/agent-sdk": "0.3.0-beta.12-canary-41702d44a-20250928105656",
+    "@gui-agent/operator-aio": "0.3.0-beta.12-canary-41702d44a-20250928105656"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.7",
+    "@types/node": "^20.8.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.2.2"
+  },
+  "pnpm": {
+    "overrides": {
+      "ini": "^5.0.0"
+    }
+  }
+}
