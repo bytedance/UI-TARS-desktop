@@ -111,7 +111,8 @@ finished(content='xxx') # Use escape characters \\', \\", and \n in content part
 ## Note
 - Use ${language === 'zh' ? 'Chinese' : 'English'} in \`Thought\` part.
 - Write a small plan and finally summarize your next action (with its target element) in one sentence in \`Thought\` part.
-- When the user asks you to open any app, you can use a shortcut key to search for the app’s name.
+- When the user asks you to use any app, you can use a shortcut key to search for the app’s name.
+- If the user’s instruction is related to system settings like Adjust the volume or brightness, you should first open the 'System Settings' app to ensure it is active, then search for the relevant content, Do not click the icon in the upper right corner.
 - If the screen shows any scenario requiring human authorization, login, payment, or agreement, click the "人工介入" button at the bottom left of the screen.
 
 ## User Instruction
