@@ -21,6 +21,7 @@ export class ConfigManager extends EventEmitter {
     'args',
     'env',
     'disabled',
+    'hidden',
     'url',
     'headers',
     'dev',

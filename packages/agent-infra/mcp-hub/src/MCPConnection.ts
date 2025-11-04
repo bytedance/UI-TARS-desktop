@@ -70,6 +70,7 @@ const CLIENT_CONNECT_TIMEOUT = 5 * 60000; // 5 minutes
 export interface ServerConfig {
   type: TransportType;
   disabled?: boolean;
+  hidden?: boolean;
   description?: string;
   name?: string;
   config_source?: string;

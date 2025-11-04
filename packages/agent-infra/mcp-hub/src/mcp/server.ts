@@ -69,6 +69,7 @@ interface CapabilityRegistration {
   serverName: string;
   originalName: string;
   definition: any;
+  hidden: boolean;
 }
 
 interface CapabilityTypeConfig {
@@ -93,6 +94,14 @@ interface ClientInfo {
   transport: any;
   server: Server;
 }
+
+type CapabilityFilters = {
+  query?: string;
+  tags?: string;
+  category?: string;
+  sort?: string;
+  searchTerms?: string[];
+};
 
 // Comprehensive capability configuration
 const CAPABILITY_TYPES: Record<string, CapabilityTypeConfig> = {
@@ -235,12 +244,7 @@ export class MCPServerEndpoint {
   /**
    * Create a new MCP server instance for each connection
    */
-  createServer(filters?: {
-    query?: string;
-    tags?: string;
-    category?: string;
-    sort?: string;
-  }): Server {
+  createServer(filters?: CapabilityFilters): Server {
     // Create low-level MCP server instance with unique name
     const server = new Server(
       {
@@ -280,15 +284,7 @@ export class MCPServerEndpoint {
   /**
    * Setup MCP request handlers for a server instance
    */
-  setupRequestHandlers(
-    server: Server,
-    filters?: {
-      query?: string;
-      tags?: string;
-      category?: string;
-      sort?: string;
-    },
-  ): void {
+  setupRequestHandlers(server: Server, filters?: CapabilityFilters): void {
     // Setup handlers for each capability type
     Object.values(CAPABILITY_TYPES).forEach((capType) => {
       const capId = capType.id;
@@ -298,13 +294,33 @@ export class MCPServerEndpoint {
         server.setRequestHandler(capType.listSchema, async () => {
           const capabilityMap = this.registeredCapabilities[capId];
           let capabilities = Array.from(capabilityMap.values());
+          const searchTerms =
+            filters?.searchTerms ??
+            (typeof filters?.query === 'string'
+              ? filters.query
+                  .split(',')
+                  .map((term) => term.trim())
+                  .filter((term) => term.length > 0)
+              : []);
+          const hasSearchQuery = searchTerms.length > 0;
+          const hasTagsFilter =
+            typeof filters?.tags === 'string' && filters.tags.trim().length > 0;
+          const hasCategoryFilter =
+            typeof filters?.category === 'string' &&
+            filters.category.trim().length > 0;
+          const hasAdditionalFilters = hasTagsFilter || hasCategoryFilter;
+
+          // Exclude hidden capabilities when no search query is applied
+          if (!hasSearchQuery) {
+            capabilities = capabilities.filter((cap) => !cap.hidden);
+          }
 
           // Filter capabilities based on server filters
-          if (filters && (filters.query || filters.tags || filters.category)) {
-            capabilities = await this.filterCapabilitiesByServer(
-              capabilities,
-              filters,
-            );
+          if (filters && (hasSearchQuery || hasAdditionalFilters)) {
+            capabilities = await this.filterCapabilitiesByServer(capabilities, {
+              ...filters,
+              searchTerms,
+            });
           }
 
           const capabilityDefs = capabilities.map((item) => item.definition);
@@ -372,13 +388,19 @@ export class MCPServerEndpoint {
    */
   async filterCapabilitiesByServer(
     capabilities: CapabilityRegistration[],
-    filters: {
-      query?: string;
-      tags?: string;
-      category?: string;
-      sort?: string;
-    },
+    filters: CapabilityFilters,
   ): Promise<CapabilityRegistration[]> {
+    const searchTerms =
+      filters.searchTerms ??
+      (typeof filters.query === 'string'
+        ? filters.query
+            .split(',')
+            .map((term) => term.trim())
+            .filter((term) => term.length > 0)
+        : []);
+    const hasSearchQuery = searchTerms.length > 0;
+    const normalizedTerms = searchTerms.map((term) => term.toLowerCase());
+
     // Get unique server names from capabilities
     const serverNames = new Set(capabilities.map((cap) => cap.serverName));
 
@@ -390,15 +412,21 @@ export class MCPServerEndpoint {
       if (!connection) continue;
 
       let matches = true;
+      const isHidden = connection.config?.hidden === true;
+
+      if (isHidden && !hasSearchQuery) {
+        matches = false;
+      }
 
       // Apply query/search filter (search in server name and description)
-      if (filters.query) {
-        const searchLower = filters.query.toLowerCase();
-        const nameMatches = serverName.toLowerCase().includes(searchLower);
-        const descMatches =
-          connection.config?.description?.toLowerCase().includes(searchLower) ||
-          false;
-        matches = nameMatches || descMatches;
+      if (matches && hasSearchQuery) {
+        const nameLower = serverName.toLowerCase();
+        const description = connection.config?.description || '';
+        const descriptionLower = description.toLowerCase();
+        matches = normalizedTerms.some((term) => {
+          if (!term) return false;
+          return nameLower.includes(term) || descriptionLower.includes(term);
+        });
       }
 
       // Apply category filter
@@ -591,6 +619,7 @@ export class MCPServerEndpoint {
 
     // Get prefix from connection config
     const prefix = (connection.config as any)?.prefix;
+    const isHidden = connection.config?.hidden === true;
 
     // Register each capability with prefix if configured
     for (const cap of capabilities) {
@@ -611,6 +640,7 @@ export class MCPServerEndpoint {
         serverName,
         originalName: originalValue,
         definition: capDefinition,
+        hidden: isHidden,
       });
     }
   }
@@ -645,12 +675,18 @@ export class MCPServerEndpoint {
     const sessionId = transport.sessionId;
 
     // Parse filter parameters from query string
-    const filters = {
+    const filters: CapabilityFilters = {
       query: (req.query?.query as string) || (req.query?.search as string),
       category: req.query?.category as string,
       tags: req.query?.tags as string,
       sort: req.query?.sort as string,
     };
+    if (typeof filters.query === 'string') {
+      filters.searchTerms = filters.query
+        .split(',')
+        .map((term) => term.trim())
+        .filter((term) => term.length > 0);
+    }
 
     // Create a new server instance for this connection with filters
     const server = this.createServer(filters);
@@ -762,12 +798,18 @@ export class MCPServerEndpoint {
       };
 
       // Parse filter parameters from query string
-      const filters = {
+      const filters: CapabilityFilters = {
         query: (req.query?.query as string) || (req.query?.search as string),
         category: req.query?.category as string,
         tags: req.query?.tags as string,
         sort: req.query?.sort as string,
       };
+      if (typeof filters.query === 'string') {
+        filters.searchTerms = filters.query
+          .split(',')
+          .map((term) => term.trim())
+          .filter((term) => term.length > 0);
+      }
 
       // Create a new server instance with filters
       const server = this.createServer(filters);

@@ -101,6 +101,23 @@ describe('MCP Server Filtering', () => {
     } as any;
     mockConnections.set('simple', simpleConnection);
 
+    const hiddenConnection = {
+      name: 'secret',
+      status: 'connected',
+      disabled: false,
+      config: {
+        description: 'Hidden experimental tools',
+        hidden: true,
+      },
+      tools: [
+        { name: 'secret_tool', description: 'Secret functionality' },
+        { name: 'secret_admin', description: 'Administrative secret' },
+      ],
+      resources: [],
+      prompts: [],
+    } as any;
+    mockConnections.set('secret', hiddenConnection);
+
     mcpHub.connections = mockConnections;
 
     // Create MCP endpoint
@@ -150,6 +167,23 @@ describe('MCP Server Filtering', () => {
       );
 
       expect(result.tools).toHaveLength(0);
+    });
+
+    it('should support multiple search names separated by comma', async () => {
+      const server = mcpEndpoint.createServer({
+        query: 'filesystem, database',
+      });
+      const listHandler = getHandler(server, 'tools/list');
+      const result = await listHandler(
+        { method: 'tools/list', params: {} },
+        {},
+      );
+
+      const toolNames = result.tools.map((t: any) => t.name);
+      expect(result.tools).toHaveLength(4);
+      expect(toolNames).toEqual(
+        expect.arrayContaining(['read_file', 'write_file', 'query', 'migrate']),
+      );
     });
   });
 
@@ -320,6 +354,40 @@ describe('MCP Server Filtering', () => {
           'query',
           'migrate',
           'hello',
+        ]),
+      );
+    });
+  });
+
+  describe('Hidden servers', () => {
+    it('should exclude hidden servers when no filters provided', async () => {
+      const server = mcpEndpoint.createServer();
+      const listHandler = getHandler(server, 'tools/list');
+      const result = await listHandler(
+        { method: 'tools/list', params: {} },
+        {},
+      );
+
+      const toolNames = result.tools.map((t: any) => t.name);
+      expect(toolNames).not.toContain('secret_tool');
+      expect(toolNames).not.toContain('secret_admin');
+    });
+
+    it('should include hidden server when search matches name', async () => {
+      const server = mcpEndpoint.createServer({ query: 'secret,github' });
+      const listHandler = getHandler(server, 'tools/list');
+      const result = await listHandler(
+        { method: 'tools/list', params: {} },
+        {},
+      );
+
+      const toolNames = result.tools.map((t: any) => t.name);
+      expect(toolNames).toEqual(
+        expect.arrayContaining([
+          'secret_tool',
+          'secret_admin',
+          'create_issue',
+          'list_repos',
         ]),
       );
     });
