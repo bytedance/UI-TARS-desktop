@@ -1,6 +1,6 @@
 {
   "name": "@agent-infra/mcp-hub",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A manager server for MCP servers that handles process management and tool routing",
   "author": "Ravitemer",
   "license": "MIT",

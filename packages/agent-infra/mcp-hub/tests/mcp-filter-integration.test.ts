@@ -1,6 +1,4 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
-import express from 'express';
-import type { Server } from 'http';
 import { MCPHub } from '../src/MCPHub.js';
 import { MCPServerEndpoint } from '../src/mcp/server.js';
 
@@ -16,11 +14,9 @@ vi.mock('../src/utils/logger.js', () => ({
 }));
 
 describe('MCP Filter Integration Test', () => {
-  let app: express.Application;
-  let server: Server;
   let mcpHub: MCPHub;
   let mcpEndpoint: MCPServerEndpoint;
-  const port = 3456;
+  const port = 0;
 
   beforeAll(async () => {
     // Create test config
@@ -50,58 +46,22 @@ describe('MCP Filter Integration Test', () => {
       },
     };
 
-    // Initialize MCP Hub
+    // Initialize MCP Hub (no actual network binding required in tests)
     mcpHub = new MCPHub(testConfig, { port });
     mcpEndpoint = new MCPServerEndpoint(mcpHub);
 
-    // Create Express app
-    app = express();
-    app.use(express.json());
-
-    // Register endpoints
-    app.get('/mcp', async (req, res) => {
-      await mcpEndpoint.handleStreamableHttpRequest(req, res);
-    });
-
-    app.get('/sse', async (req, res) => {
-      await mcpEndpoint.handleSSEConnection(req, res);
-    });
-
-    // Start server
-    await new Promise<void>((resolve) => {
-      server = app.listen(port, () => resolve());
-    });
+    mcpHub.hubServerUrl = `http://localhost:${port}`;
   });
 
   afterAll(async () => {
-    // Clean up
     await mcpEndpoint.close();
-    await new Promise<void>((resolve) => {
-      server.close(() => resolve());
-    });
   });
 
   it('should filter servers when connecting with query params', async () => {
     // Test that query params are parsed correctly
-    const mockReq = {
-      query: {
-        query: 'github',
-        category: 'development',
-      },
-      headers: {},
-      method: 'GET',
-    } as any;
-
-    const mockRes = {
-      setHeader: vi.fn(),
-      write: vi.fn(),
-      end: vi.fn(),
-    } as any;
-
-    // Simulate SSE connection with filters
     const filters = {
-      query: mockReq.query.query,
-      category: mockReq.query.category,
+      query: 'github',
+      category: 'development',
       tags: undefined,
       sort: undefined,
     };
@@ -125,16 +85,10 @@ describe('MCP Filter Integration Test', () => {
   });
 
   it('should parse tags as comma-separated values', () => {
-    const mockReq = {
-      query: {
-        tags: 'api,github,vcs',
-      },
-    } as any;
-
     const filters = {
       query: undefined,
       category: undefined,
-      tags: mockReq.query.tags,
+      tags: 'api,github,vcs',
       sort: undefined,
     };
 
@@ -143,27 +97,15 @@ describe('MCP Filter Integration Test', () => {
   });
 
   it('should handle both query and search params', () => {
-    const mockReq1 = {
-      query: {
-        query: 'test',
-      },
-    } as any;
-
-    const mockReq2 = {
-      query: {
-        search: 'test',
-      },
-    } as any;
-
     const filters1 = {
-      query: mockReq1.query.query || mockReq1.query.search,
+      query: 'test',
       category: undefined,
       tags: undefined,
       sort: undefined,
     };
 
     const filters2 = {
-      query: mockReq2.query.query || mockReq2.query.search,
+      query: 'test',
       category: undefined,
       tags: undefined,
       sort: undefined,
@@ -172,5 +114,17 @@ describe('MCP Filter Integration Test', () => {
     // Both should result in the same filter value
     expect(filters1.query).toBe('test');
     expect(filters2.query).toBe('test');
+  });
+
+  it('should accept comma-separated search values', () => {
+    const filters = {
+      query: 'filesystem, github',
+      category: undefined,
+      tags: undefined,
+      sort: undefined,
+    };
+
+    const serverInstance = mcpEndpoint.createServer(filters);
+    expect(serverInstance).toBeDefined();
   });
 });

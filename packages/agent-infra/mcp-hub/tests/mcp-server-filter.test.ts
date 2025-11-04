@@ -374,7 +374,7 @@ describe('MCP Server Filtering', () => {
     });
 
     it('should include hidden server when search matches name', async () => {
-      const server = mcpEndpoint.createServer({ query: 'secret,github' });
+      const server = mcpEndpoint.createServer({ query: 'secret , github' });
       const listHandler = getHandler(server, 'tools/list');
       const result = await listHandler(
         { method: 'tools/list', params: {} },
@@ -390,6 +390,50 @@ describe('MCP Server Filtering', () => {
           'list_repos',
         ]),
       );
+    });
+
+    it('should include hidden server when searchTerms array provided', async () => {
+      const server = mcpEndpoint.createServer({
+        searchTerms: ['secret'],
+      } as any);
+      const listHandler = getHandler(server, 'tools/list');
+      const result = await listHandler(
+        { method: 'tools/list', params: {} },
+        {},
+      );
+
+      const toolNames = result.tools.map((t: any) => t.name);
+      expect(toolNames).toEqual(
+        expect.arrayContaining(['secret_tool', 'secret_admin']),
+      );
+    });
+  });
+
+  describe('filterCapabilitiesByServer', () => {
+    it('should include hidden servers when query contains their name', async () => {
+      const capabilityMap = (mcpEndpoint as any).registeredCapabilities.tools;
+      const capabilities = Array.from(capabilityMap.values());
+      const filtered = await (mcpEndpoint as any).filterCapabilitiesByServer(
+        capabilities,
+        { query: 'secret' },
+      );
+
+      const hasSecret = filtered.some(
+        (cap: any) => cap.serverName === 'secret',
+      );
+      expect(hasSecret).toBe(true);
+    });
+
+    it('should support comma-separated queries for multiple servers', async () => {
+      const capabilityMap = (mcpEndpoint as any).registeredCapabilities.tools;
+      const capabilities = Array.from(capabilityMap.values());
+      const filtered = await (mcpEndpoint as any).filterCapabilitiesByServer(
+        capabilities,
+        { query: 'filesystem, github' },
+      );
+
+      const serverNames = new Set(filtered.map((cap: any) => cap.serverName));
+      expect(serverNames).toEqual(new Set(['filesystem', 'github']));
     });
   });
 
