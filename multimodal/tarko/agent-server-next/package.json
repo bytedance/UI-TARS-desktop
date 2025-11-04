@@ -1,6 +1,6 @@
 {
   "name": "@tarko/agent-server-next",
-  "version": "0.3.0-beta.12",
+  "version": "0.3.0",
   "description": "Next-generation server for Multimodal Agent using Hono framework.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

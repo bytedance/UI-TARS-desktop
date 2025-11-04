@@ -1,6 +1,6 @@
 {
   "name": "@tarko/agent-ui",
-  "version": "0.3.0-beta.12",
+  "version": "0.3.0",
   "description": "Default Web UI for Tarko",
   "dependencies": {
     "@tarko/shared-utils": "workspace:*",

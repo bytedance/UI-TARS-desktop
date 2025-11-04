@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "agent-tars",
-  "version": "0.3.0-beta.12",
+  "version": "0.3.0",
   "description": "Agent TARS",
   "scripts": {
     "bootstrap": "pnpm --filter \"./tarko/**\" build && pnpm --filter \"./gui-agent/**\" build && pnpm --filter \"./agent-tars/**\" build && pnpm --filter \"./omni-tars/**\" build",
@@ -20,6 +20,7 @@
     "coverage": "vitest run --coverage",
     "format": "pnpm prettier --write .",
     "release": "ptk release --push-tag --build --ignore-scripts --auto-create-release-branch",
+    "release:dryrun": "ptk release --push-tag --build --ignore-scripts --auto-create-release-branch --dry-run",
     "release:canary": "ptk release --canary --push-tag --build --ignore-scripts --auto-create-release-branch",
     "release:full": "ptk release --push-tag --build --ignore-scripts --create-github-release",
     "release:ai": "ptk release --push-tag --build --ignore-scripts --use-ai --provider=azure-openai --model=aws_sdk_claude37_sonnet --baseURL=AWS_CLAUDE_API_BASE_URL",
@@ -27,7 +28,7 @@
     "release:ai:dryrun": "ptk release --push-tag --build --ignore-scripts --use-ai --provider=azure-openai --model=aws_sdk_claude37_sonnet --baseURL=AWS_CLAUDE_API_BASE_URL --dry-run",
     "github-release": "ptk github-release",
     "github-release:dryrun": "ptk github-release --dry-run",
-    "changelog": "ptk changelog --use-ai --provider=azure-openai --model=aws_sdk_claude37_sonnet --baseURL=AWS_CLAUDE_API_BASE_URL",
+    "changelog": "ptk changelog",
     "patch": "ptk patch"
   },
   "engines": {
