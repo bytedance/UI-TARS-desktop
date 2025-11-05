@@ -49,6 +49,10 @@ export class NutJSOperator extends Operator {
     ],
   };
 
+  // Resolution scaling factor for screenshots (1.0 = original size, 0.5 = half size)
+  // Reducing resolution can significantly improve inference latency
+  protected readonly resolutionScaleFactor: number = 1.0;
+
   public async screenshot(): Promise<ScreenshotOutput> {
     const { logger } = useContext();
     const grabImage = await screen.grab();
@@ -70,13 +74,21 @@ export class NutJSOperator extends Operator {
       data: Buffer.from(screenWithScale.data),
     });
 
-    const width = screenWithScale.width / screenWithScale.pixelDensity.scaleX;
-    const height = screenWithScale.height / screenWithScale.pixelDensity.scaleY;
+    const physicalWidth =
+      screenWithScale.width / screenWithScale.pixelDensity.scaleX;
+    const physicalHeight =
+      screenWithScale.height / screenWithScale.pixelDensity.scaleY;
+
+    // Apply resolution scaling to reduce image size for faster inference
+    const scaledWidth = Math.round(physicalWidth * this.resolutionScaleFactor);
+    const scaledHeight = Math.round(
+      physicalHeight * this.resolutionScaleFactor,
+    );
 
     const physicalScreenImage = await screenWithScaleImage
       .resize({
-        w: width,
-        h: height,
+        w: scaledWidth,
+        h: scaledHeight,
       })
       .getBuffer('image/png'); // Use png format to avoid compression
 
@@ -86,7 +98,11 @@ export class NutJSOperator extends Operator {
     };
 
     logger?.info(
-      `[NutjsOperator] screenshot: ${width}x${height}, scaleFactor: ${scaleFactor}`,
+      `[NutjsOperator] screenshot:`,
+      `Physical: ${physicalWidth}x${physicalHeight},`,
+      `Scaled: ${scaledWidth}x${scaledHeight},`,
+      `Resolution scale: ${this.resolutionScaleFactor},`,
+      `DPI scaleFactor: ${scaleFactor}`,
     );
     return output;
   }
@@ -301,7 +317,7 @@ export class NutJSOperator extends Operator {
 
         switch (direction?.toLowerCase()) {
           case 'up':
-            await mouse.scrollUp(5 * 100);
+            await mouse.scrollUp(2 * 100);
             break;
           case 'down':
             await mouse.scrollDown(5 * 100);
