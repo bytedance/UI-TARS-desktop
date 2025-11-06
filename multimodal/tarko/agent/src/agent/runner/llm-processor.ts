@@ -445,6 +445,10 @@ export class LLMProcessor {
       streamingMode, // Pass streaming mode to determine duration calculation
     );
 
+    // Extract usage from the last chunk (streaming APIs typically send usage in the final chunk)
+    const lastChunk = allChunks[allChunks.length - 1];
+    const usage = lastChunk?.usage;
+
     // Call response hooks with session ID
     this.agent.onLLMResponse(sessionId, {
       provider: currentModel.provider,
@@ -465,6 +469,7 @@ export class LLMProcessor {
         created: Date.now(),
         model: currentModel.id,
         object: 'chat.completion',
+        usage: usage,
       } as ChatCompletion,
     });
 
