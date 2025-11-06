@@ -6,7 +6,7 @@
 
 import { ConsoleLogger, LogLevel } from '@agent-infra/logger';
 import { BaseAction, Coordinates, isSupportedActionType } from '@gui-agent/shared/types';
-import { standardizeActionInputName, standardizeActionType } from '@gui-agent/shared/utils';
+import { unifyActionInputName, unifyActionType } from '@gui-agent/shared/utils';
 import { XMLBuilder } from 'fast-xml-parser';
 import isNumber from 'lodash.isnumber';
 
@@ -311,11 +311,11 @@ export class ActionParserHelper {
    * @returns The standardized parameters object for GUIAction(see: @gui-agent/shared/types)
    */
   public standardizeAction(roughType: string, roughInputs: Record<string, string>): BaseAction {
-    const stdType = standardizeActionType(roughType);
+    const stdType = unifyActionType(roughType);
     const stdInputs: Record<string, any> = {};
 
     for (const [roughInputName, roughInputStrValue] of Object.entries(roughInputs)) {
-      const stdInputName = standardizeActionInputName(stdType, roughInputName);
+      const stdInputName = unifyActionInputName(stdType, roughInputName);
       if (!roughInputStrValue) {
         this.logger.debug(`[standardizeAction] paramStr of ${roughInputName} is empty.`);
         if (
