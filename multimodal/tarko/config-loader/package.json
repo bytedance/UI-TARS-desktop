@@ -1,6 +1,6 @@
 {
   "name": "@tarko/config-loader",
-  "version": "0.3.0",
+  "version": "0.3.0-canary-3262c6416-20251106135418",
   "description": "A TypeScript SDK to load your configuration from various file formats.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

@@ -1,7 +1,7 @@
 {
   "name": "@gui-agent/operator-adb",
   "description": "Android operator based ADB for GUI Agent",
-  "version": "0.3.0",
+  "version": "0.3.0-canary-3262c6416-20251106135418",
   "repository": {
     "type": "git",
     "url": "https://github.com/bytedance/UI-TARS-desktop"

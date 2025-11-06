@@ -1,7 +1,7 @@
 {
   "name": "@tarko/pnpm-toolkit",
   "description": "PTK (pnpm toolkit), an pnpm workspace developement and publishing tool, designed for Agent TARS.",
-  "version": "0.3.0",
+  "version": "0.3.0-canary-3262c6416-20251106135418",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",

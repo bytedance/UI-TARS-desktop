@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "agent-tars",
-  "version": "0.3.0",
+  "version": "0.3.0-canary-3262c6416-20251106135418",
   "description": "Agent TARS",
   "scripts": {
     "bootstrap": "pnpm --filter \"./tarko/**\" build && pnpm --filter \"./gui-agent/**\" build && pnpm --filter \"./agent-tars/**\" build && pnpm --filter \"./omni-tars/**\" build",
