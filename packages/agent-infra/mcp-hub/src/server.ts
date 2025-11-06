@@ -39,6 +39,7 @@ type ServerConfig = {
   autoShutdown?: boolean;
   shutdownDelay?: number;
   watch?: boolean;
+  stateless?: boolean;
 };
 
 type ServiceManagerState =
@@ -92,6 +93,7 @@ class ServiceManager {
   public autoShutdown?: boolean;
   public shutdownDelay?: number;
   public watch?: boolean;
+  public stateless?: boolean;
   public mcpHub: MCPHub | null = null;
   public server: any = null;
   public workspaceCache: WorkspaceCacheManager;
@@ -104,6 +106,7 @@ class ServiceManager {
     this.autoShutdown = options.autoShutdown;
     this.shutdownDelay = options.shutdownDelay;
     this.watch = options.watch;
+    this.stateless = options.stateless;
     this.workspaceCache = new WorkspaceCacheManager(options);
     this.sseManager = new SSEManager({
       ...options,
@@ -239,7 +242,9 @@ class ServiceManager {
 
     // Initialize MCP server endpoint
     try {
-      mcpServerEndpoint = new MCPServerEndpoint(this.mcpHub);
+      mcpServerEndpoint = new MCPServerEndpoint(this.mcpHub, {
+        stateless: Boolean(this.stateless),
+      });
       logger.info(
         `Hub endpoint ready: Use \`${mcpServerEndpoint.getEndpointUrl()}\` endpoint with any other MCP clients`,
       );

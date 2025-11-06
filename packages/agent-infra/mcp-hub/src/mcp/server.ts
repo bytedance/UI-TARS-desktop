@@ -103,6 +103,10 @@ type CapabilityFilters = {
   searchTerms?: string[];
 };
 
+interface MCPServerEndpointOptions {
+  stateless?: boolean;
+}
+
 // Comprehensive capability configuration
 const CAPABILITY_TYPES: Record<string, CapabilityTypeConfig> = {
   TOOLS: {
@@ -213,16 +217,18 @@ export class MCPServerEndpoint {
   private clients: Map<string, ClientInfo>;
   private serversMap: Map<string, MCPConnection>;
   private streamableHttpTransports: Map<string, any>;
+  private readonly stateless: boolean;
   private registeredCapabilities: Record<
     string,
     Map<string, CapabilityRegistration>
   >;
 
-  constructor(mcpHub: MCPHub) {
+  constructor(mcpHub: MCPHub, options: MCPServerEndpointOptions = {}) {
     this.mcpHub = mcpHub;
     this.clients = new Map(); // sessionId -> { transport, server }
     this.serversMap = new Map(); // sessionId -> server instance
     this.streamableHttpTransports = new Map(); // sessionId -> StreamableHTTPServerTransport
+    this.stateless = Boolean(options.stateless);
 
     // Store registered capabilities by type
     this.registeredCapabilities = {};
@@ -778,24 +784,31 @@ export class MCPServerEndpoint {
       isInitializeRequest(req.body)
     ) {
       // New initialization request
-      transport = new StreamableHTTPServerTransport({
-        sessionIdGenerator: () => randomUUID(),
-        onsessioninitialized: (sessionId: string) => {
-          // Store the transport by session ID
-          this.streamableHttpTransports.set(sessionId, transport);
-        },
-        // DNS rebinding protection is disabled by default for backwards compatibility. If you are running this server
-        // locally, make sure to set:
-        // enableDnsRebindingProtection: true,
-        // allowedHosts: ['127.0.0.1'],
-      });
+      if (this.stateless) {
+        transport = new StreamableHTTPServerTransport({
+          enableJsonResponse: true,
+          sessionIdGenerator: undefined, // set to undefined for stateless servers
+        });
+      } else {
+        transport = new StreamableHTTPServerTransport({
+          sessionIdGenerator: () => randomUUID(),
+          onsessioninitialized: (sessionId: string) => {
+            // Store the transport by session ID
+            this.streamableHttpTransports.set(sessionId, transport);
+          },
+          // DNS rebinding protection is disabled by default for backwards compatibility. If you are running this server
+          // locally, make sure to set:
+          // enableDnsRebindingProtection: true,
+          // allowedHosts: ['127.0.0.1'],
+        });
 
-      // Clean up transport when closed
-      transport.onclose = () => {
-        if (transport.sessionId) {
-          this.streamableHttpTransports.delete(transport.sessionId);
-        }
-      };
+        // Clean up transport when closed
+        transport.onclose = () => {
+          if (transport.sessionId) {
+            this.streamableHttpTransports.delete(transport.sessionId);
+          }
+        };
+      }
 
       // Parse filter parameters from query string
       const filters: CapabilityFilters = {

@@ -23,6 +23,7 @@ interface ServerOptions {
   watch: boolean;
   autoShutdown: boolean;
   shutdownDelay: number;
+  stateless: boolean;
 }
 
 // VERSION will be injected from package.json during build
@@ -93,6 +94,12 @@ async function run(): Promise<void> {
         type: 'number',
         default: 0,
       },
+      stateless: {
+        describe:
+          'Enable stateless mode for MCP transport (no session identifiers required)',
+        type: 'boolean',
+        default: false,
+      },
     })
     .example(
       'mcp-hub --port 3000 --config ./global.json --config ./project.json',
@@ -108,6 +115,7 @@ async function run(): Promise<void> {
       watch: argv.watch,
       autoShutdown: argv['auto-shutdown'],
       shutdownDelay: argv['shutdown-delay'],
+      stateless: argv.stateless,
     } as ServerOptions);
   } catch (error) {
     process.exit(1);
