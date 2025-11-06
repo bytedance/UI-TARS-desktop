@@ -4,225 +4,225 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { standardizeActionType, standardizeActionInputName } from '../src/utils';
+import { unifyActionType, unifyActionInputName } from '../src/utils';
 
-describe('standardizeActionType', () => {
+describe('unifyActionType', () => {
   describe('Mouse Actions', () => {
     it('should standardize click action types', () => {
-      expect(standardizeActionType('click')).toBe('click');
-      expect(standardizeActionType('left_click')).toBe('click');
-      expect(standardizeActionType('left_single')).toBe('click');
-      expect(standardizeActionType('Click')).toBe('click');
-      expect(standardizeActionType('CLICK')).toBe('click');
+      expect(unifyActionType('click')).toBe('click');
+      expect(unifyActionType('left_click')).toBe('click');
+      expect(unifyActionType('left_single')).toBe('click');
+      expect(unifyActionType('Click')).toBe('click');
+      expect(unifyActionType('CLICK')).toBe('click');
     });
 
     it('should standardize double click action types', () => {
-      expect(standardizeActionType('double_click')).toBe('double_click');
-      expect(standardizeActionType('left_double')).toBe('double_click');
-      expect(standardizeActionType('Double_Click')).toBe('double_click');
+      expect(unifyActionType('double_click')).toBe('double_click');
+      expect(unifyActionType('left_double')).toBe('double_click');
+      expect(unifyActionType('Double_Click')).toBe('double_click');
     });
 
     it('should standardize right click action types', () => {
-      expect(standardizeActionType('right_click')).toBe('right_click');
-      expect(standardizeActionType('right_single')).toBe('right_click');
+      expect(unifyActionType('right_click')).toBe('right_click');
+      expect(unifyActionType('right_single')).toBe('right_click');
     });
 
     it('should standardize middle click action types', () => {
-      expect(standardizeActionType('middle_click')).toBe('middle_click');
+      expect(unifyActionType('middle_click')).toBe('middle_click');
     });
 
     it('should standardize mouse move action types', () => {
-      expect(standardizeActionType('move')).toBe('mouse_move');
-      expect(standardizeActionType('move_to')).toBe('mouse_move');
-      expect(standardizeActionType('mouse_move')).toBe('mouse_move');
-      expect(standardizeActionType('hover')).toBe('mouse_move');
+      expect(unifyActionType('move')).toBe('mouse_move');
+      expect(unifyActionType('move_to')).toBe('mouse_move');
+      expect(unifyActionType('mouse_move')).toBe('mouse_move');
+      expect(unifyActionType('hover')).toBe('mouse_move');
     });
 
     it('should standardize mouse down/up action types', () => {
-      expect(standardizeActionType('Mouse_Down')).toBe('mouse_down');
-      expect(standardizeActionType('mouse_up')).toBe('mouse_up');
-      expect(standardizeActionType('MOUSE_UP')).toBe('mouse_up');
+      expect(unifyActionType('Mouse_Down')).toBe('mouse_down');
+      expect(unifyActionType('mouse_up')).toBe('mouse_up');
+      expect(unifyActionType('MOUSE_UP')).toBe('mouse_up');
     });
 
     it('should standardize drag action types', () => {
-      expect(standardizeActionType('drag')).toBe('drag');
-      expect(standardizeActionType('select')).toBe('drag');
-      expect(standardizeActionType('left_click_drag')).toBe('drag');
-      // expect(standardizeActionType('swipe')).toBe('drag');
-      expect(standardizeActionType('swipe')).toBe('swipe');
+      expect(unifyActionType('drag')).toBe('drag');
+      expect(unifyActionType('select')).toBe('drag');
+      expect(unifyActionType('left_click_drag')).toBe('drag');
+      // expect(unifyActionType('swipe')).toBe('drag');
+      expect(unifyActionType('swipe')).toBe('swipe');
     });
 
     it('should standardize scroll action types', () => {
-      expect(standardizeActionType('scroll')).toBe('scroll');
-      expect(standardizeActionType('Scroll')).toBe('scroll');
-      expect(standardizeActionType('SCROLL')).toBe('scroll');
+      expect(unifyActionType('scroll')).toBe('scroll');
+      expect(unifyActionType('Scroll')).toBe('scroll');
+      expect(unifyActionType('SCROLL')).toBe('scroll');
     });
   });
 
   describe('Keyboard Actions', () => {
     it('should standardize keyboard action types', () => {
-      expect(standardizeActionType('type')).toBe('type');
-      expect(standardizeActionType('hotkey')).toBe('hotkey');
-      expect(standardizeActionType('press')).toBe('press');
-      expect(standardizeActionType('release')).toBe('release');
+      expect(unifyActionType('type')).toBe('type');
+      expect(unifyActionType('hotkey')).toBe('hotkey');
+      expect(unifyActionType('press')).toBe('press');
+      expect(unifyActionType('release')).toBe('release');
     });
   });
 
   describe('Browser Actions', () => {
     it('should standardize browser action types', () => {
-      expect(standardizeActionType('navigate')).toBe('navigate');
-      expect(standardizeActionType('navigate_back')).toBe('navigate_back');
+      expect(unifyActionType('navigate')).toBe('navigate');
+      expect(unifyActionType('navigate_back')).toBe('navigate_back');
     });
   });
 
   describe('App Actions', () => {
     it('should standardize app action types', () => {
-      expect(standardizeActionType('long_press')).toBe('long_press');
-      expect(standardizeActionType('home')).toBe('press_home');
-      expect(standardizeActionType('press_home')).toBe('press_home');
-      expect(standardizeActionType('back')).toBe('press_back');
-      expect(standardizeActionType('press_back')).toBe('press_back');
-      expect(standardizeActionType('open')).toBe('open_app');
-      expect(standardizeActionType('open_app')).toBe('open_app');
+      expect(unifyActionType('long_press')).toBe('long_press');
+      expect(unifyActionType('home')).toBe('press_home');
+      expect(unifyActionType('press_home')).toBe('press_home');
+      expect(unifyActionType('back')).toBe('press_back');
+      expect(unifyActionType('press_back')).toBe('press_back');
+      expect(unifyActionType('open')).toBe('open_app');
+      expect(unifyActionType('open_app')).toBe('open_app');
     });
   });
 
   describe('Unknown Actions', () => {
     it('should return original name for unknown action types', () => {
-      expect(standardizeActionType('unknown_action')).toBe('unknown_action');
-      expect(standardizeActionType('custom_action')).toBe('custom_action');
-      expect(standardizeActionType('')).toBe('');
+      expect(unifyActionType('unknown_action')).toBe('unknown_action');
+      expect(unifyActionType('custom_action')).toBe('custom_action');
+      expect(unifyActionType('')).toBe('');
     });
   });
 });
 
-describe('standardizeActionInputName', () => {
+describe('unifyActionInputName', () => {
   describe('General Input Name Mappings', () => {
     it('should standardize start related fields', () => {
-      expect(standardizeActionInputName('click', 'start')).toBe('start');
-      expect(standardizeActionInputName('click', 'start_box')).toBe('start');
-      expect(standardizeActionInputName('click', 'startBox')).toBe('start');
-      expect(standardizeActionInputName('click', 'start_point')).toBe('start');
-      expect(standardizeActionInputName('click', 'start_position')).toBe('start');
-      expect(standardizeActionInputName('click', 'start_coordinate')).toBe('start');
-      expect(standardizeActionInputName('click', 'start_coordinates')).toBe('start');
+      expect(unifyActionInputName('click', 'start')).toBe('start');
+      expect(unifyActionInputName('click', 'start_box')).toBe('start');
+      expect(unifyActionInputName('click', 'startBox')).toBe('start');
+      expect(unifyActionInputName('click', 'start_point')).toBe('start');
+      expect(unifyActionInputName('click', 'start_position')).toBe('start');
+      expect(unifyActionInputName('click', 'start_coordinate')).toBe('start');
+      expect(unifyActionInputName('click', 'start_coordinates')).toBe('start');
     });
 
     it('should standardize end related fields', () => {
-      expect(standardizeActionInputName('drag', 'end')).toBe('end');
-      expect(standardizeActionInputName('drag', 'end_box')).toBe('end');
-      expect(standardizeActionInputName('drag', 'endBox')).toBe('end');
-      expect(standardizeActionInputName('drag', 'end_point')).toBe('end');
-      expect(standardizeActionInputName('drag', 'end_position')).toBe('end');
-      expect(standardizeActionInputName('drag', 'end_coordinate')).toBe('end');
-      expect(standardizeActionInputName('drag', 'end_coordinates')).toBe('end');
+      expect(unifyActionInputName('drag', 'end')).toBe('end');
+      expect(unifyActionInputName('drag', 'end_box')).toBe('end');
+      expect(unifyActionInputName('drag', 'endBox')).toBe('end');
+      expect(unifyActionInputName('drag', 'end_point')).toBe('end');
+      expect(unifyActionInputName('drag', 'end_position')).toBe('end');
+      expect(unifyActionInputName('drag', 'end_coordinate')).toBe('end');
+      expect(unifyActionInputName('drag', 'end_coordinates')).toBe('end');
     });
 
     it('should standardize point related fields', () => {
-      expect(standardizeActionInputName('click', 'point')).toBe('point');
-      expect(standardizeActionInputName('click', 'position')).toBe('point');
-      expect(standardizeActionInputName('click', 'coordinate')).toBe('point');
-      expect(standardizeActionInputName('click', 'coordinates')).toBe('point');
+      expect(unifyActionInputName('click', 'point')).toBe('point');
+      expect(unifyActionInputName('click', 'position')).toBe('point');
+      expect(unifyActionInputName('click', 'coordinate')).toBe('point');
+      expect(unifyActionInputName('click', 'coordinates')).toBe('point');
     });
 
     it('should standardize button related fields', () => {
-      expect(standardizeActionInputName('click', 'button')).toBe('button');
-      expect(standardizeActionInputName('click', 'mouse_button')).toBe('button');
-      expect(standardizeActionInputName('click', 'mouseButton')).toBe('button');
+      expect(unifyActionInputName('click', 'button')).toBe('button');
+      expect(unifyActionInputName('click', 'mouse_button')).toBe('button');
+      expect(unifyActionInputName('click', 'mouseButton')).toBe('button');
     });
 
     it('should standardize direction related fields', () => {
-      expect(standardizeActionInputName('scroll', 'direction')).toBe('direction');
-      expect(standardizeActionInputName('scroll', 'dir')).toBe('direction');
-      expect(standardizeActionInputName('scroll', 'scroll_direction')).toBe('direction');
+      expect(unifyActionInputName('scroll', 'direction')).toBe('direction');
+      expect(unifyActionInputName('scroll', 'dir')).toBe('direction');
+      expect(unifyActionInputName('scroll', 'scroll_direction')).toBe('direction');
     });
 
     it('should standardize content related fields', () => {
-      expect(standardizeActionInputName('type', 'content')).toBe('content');
-      expect(standardizeActionInputName('type', 'text')).toBe('content');
-      expect(standardizeActionInputName('type', 'input_text')).toBe('content');
-      expect(standardizeActionInputName('type', 'type')).toBe('content');
+      expect(unifyActionInputName('type', 'content')).toBe('content');
+      expect(unifyActionInputName('type', 'text')).toBe('content');
+      expect(unifyActionInputName('type', 'input_text')).toBe('content');
+      expect(unifyActionInputName('type', 'type')).toBe('content');
     });
 
     it('should standardize key related fields', () => {
-      expect(standardizeActionInputName('press', 'key')).toBe('key');
-      expect(standardizeActionInputName('press', 'keyname')).toBe('key');
-      expect(standardizeActionInputName('press', 'hotkey')).toBe('key');
-      expect(standardizeActionInputName('press', 'keyboard_key')).toBe('key');
+      expect(unifyActionInputName('press', 'key')).toBe('key');
+      expect(unifyActionInputName('press', 'keyname')).toBe('key');
+      expect(unifyActionInputName('press', 'hotkey')).toBe('key');
+      expect(unifyActionInputName('press', 'keyboard_key')).toBe('key');
     });
 
     it('should standardize url related fields', () => {
-      expect(standardizeActionInputName('navigate', 'url')).toBe('url');
-      expect(standardizeActionInputName('navigate', 'link')).toBe('url');
-      expect(standardizeActionInputName('navigate', 'website')).toBe('url');
+      expect(unifyActionInputName('navigate', 'url')).toBe('url');
+      expect(unifyActionInputName('navigate', 'link')).toBe('url');
+      expect(unifyActionInputName('navigate', 'website')).toBe('url');
     });
 
     it('should standardize name related fields', () => {
-      expect(standardizeActionInputName('open_app', 'name')).toBe('name');
-      expect(standardizeActionInputName('open_app', 'appname')).toBe('name');
-      expect(standardizeActionInputName('open_app', 'app_name')).toBe('name');
-      expect(standardizeActionInputName('open_app', 'application')).toBe('name');
+      expect(unifyActionInputName('open_app', 'name')).toBe('name');
+      expect(unifyActionInputName('open_app', 'appname')).toBe('name');
+      expect(unifyActionInputName('open_app', 'app_name')).toBe('name');
+      expect(unifyActionInputName('open_app', 'application')).toBe('name');
     });
 
     it('should standardize time related fields', () => {
-      expect(standardizeActionInputName('wait', 'time')).toBe('time');
-      expect(standardizeActionInputName('wait', 'duration')).toBe('time');
-      expect(standardizeActionInputName('wait', 'wait_time')).toBe('time');
-      expect(standardizeActionInputName('wait', 'delay')).toBe('time');
+      expect(unifyActionInputName('wait', 'time')).toBe('time');
+      expect(unifyActionInputName('wait', 'duration')).toBe('time');
+      expect(unifyActionInputName('wait', 'wait_time')).toBe('time');
+      expect(unifyActionInputName('wait', 'delay')).toBe('time');
     });
   });
 
   describe('Action Type Specific Mappings', () => {
     it('should use navigate specific mappings', () => {
-      expect(standardizeActionInputName('navigate', 'url')).toBe('url');
-      expect(standardizeActionInputName('navigate', 'content')).toBe('url');
+      expect(unifyActionInputName('navigate', 'url')).toBe('url');
+      expect(unifyActionInputName('navigate', 'content')).toBe('url');
     });
 
     it('should use open_app specific mappings', () => {
-      expect(standardizeActionInputName('open_app', 'name')).toBe('name');
-      expect(standardizeActionInputName('open_app', 'content')).toBe('name');
-      expect(standardizeActionInputName('open_app', 'appname')).toBe('name');
-      expect(standardizeActionInputName('open_app', 'app_name')).toBe('name');
+      expect(unifyActionInputName('open_app', 'name')).toBe('name');
+      expect(unifyActionInputName('open_app', 'content')).toBe('name');
+      expect(unifyActionInputName('open_app', 'appname')).toBe('name');
+      expect(unifyActionInputName('open_app', 'app_name')).toBe('name');
     });
 
     it('should prioritize action type specific mappings over general mappings', () => {
       // For navigate action, 'content' should map to 'url' (specific) not 'content' (general)
-      expect(standardizeActionInputName('navigate', 'content')).toBe('url');
+      expect(unifyActionInputName('navigate', 'content')).toBe('url');
 
       // For open_app action, 'content' should map to 'name' (specific) not 'content' (general)
-      expect(standardizeActionInputName('open_app', 'content')).toBe('name');
+      expect(unifyActionInputName('open_app', 'content')).toBe('name');
 
       // For other actions, 'content' should use general mapping
-      expect(standardizeActionInputName('type', 'content')).toBe('content');
+      expect(unifyActionInputName('type', 'content')).toBe('content');
     });
   });
 
   describe('Unknown Input Names', () => {
     it('should return original name for unknown input names', () => {
-      expect(standardizeActionInputName('click', 'unknown_field')).toBe('unknown_field');
-      expect(standardizeActionInputName('type', 'custom_field')).toBe('custom_field');
-      expect(standardizeActionInputName('navigate', 'invalid_field')).toBe('invalid_field');
-      expect(standardizeActionInputName('unknown_action', 'unknown_field')).toBe('unknown_field');
+      expect(unifyActionInputName('click', 'unknown_field')).toBe('unknown_field');
+      expect(unifyActionInputName('type', 'custom_field')).toBe('custom_field');
+      expect(unifyActionInputName('navigate', 'invalid_field')).toBe('invalid_field');
+      expect(unifyActionInputName('unknown_action', 'unknown_field')).toBe('unknown_field');
     });
 
     it('should handle empty strings', () => {
-      expect(standardizeActionInputName('click', '')).toBe('');
-      expect(standardizeActionInputName('', 'point')).toBe('point');
-      expect(standardizeActionInputName('', '')).toBe('');
+      expect(unifyActionInputName('click', '')).toBe('');
+      expect(unifyActionInputName('', 'point')).toBe('point');
+      expect(unifyActionInputName('', '')).toBe('');
     });
   });
 
   describe('Edge Cases', () => {
     it('should handle case sensitivity', () => {
       // The function should be case sensitive based on the implementation
-      expect(standardizeActionInputName('click', 'Point')).toBe('point');
-      expect(standardizeActionInputName('Navigate', 'content')).toBe('url');
+      expect(unifyActionInputName('click', 'Point')).toBe('point');
+      expect(unifyActionInputName('Navigate', 'content')).toBe('url');
     });
 
     it('should handle special characters and numbers', () => {
-      expect(standardizeActionInputName('click', 'field_123')).toBe('field_123');
-      expect(standardizeActionInputName('click', 'field-name')).toBe('field-name');
-      expect(standardizeActionInputName('click', 'field.name')).toBe('field.name');
+      expect(unifyActionInputName('click', 'field_123')).toBe('field_123');
+      expect(unifyActionInputName('click', 'field-name')).toBe('field-name');
+      expect(unifyActionInputName('click', 'field.name')).toBe('field.name');
     });
   });
 });
