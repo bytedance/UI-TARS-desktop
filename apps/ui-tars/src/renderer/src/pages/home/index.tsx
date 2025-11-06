@@ -220,7 +220,7 @@ const Home = () => {
               </Button>
             </CardFooter>
           </Card>
-          <Card className="w-[400px] py-5">
+          {/* <Card className="w-[400px] py-5">
             <CardHeader className="px-5">
               <CardTitle>浏览器操作助手</CardTitle>
               <CardDescription>
@@ -243,7 +243,7 @@ const Home = () => {
                 开始使用浏览器操作助手
               </Button>
             </CardFooter>
-          </Card>
+          </Card> */}
         </div>
         <LocalSettingsDialog
           isOpen={localConfig.open}

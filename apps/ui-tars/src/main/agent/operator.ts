@@ -38,7 +38,7 @@ export class NutJSElectronOperator extends NutJSOperator {
 
   // Resolution scaling factor for screenshots (1.0 = original size, 0.5 = half size)
   // Reducing resolution can significantly improve inference latency
-  protected readonly resolutionScaleFactor: number = 0.5;
+  protected readonly resolutionScaleFactor: number = 0.7;
 
   public async screenshot(): Promise<ScreenshotOutput> {
     const {
