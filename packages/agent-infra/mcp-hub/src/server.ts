@@ -27,7 +27,6 @@ import {
   wrapError,
   MCPHubError,
 } from './utils/errors.js';
-import { getMarketplace } from './marketplace.js';
 import { MCPServerEndpoint } from './mcp/server.js';
 import { WorkspaceCacheManager } from './utils/workspace-cache.js';
 
@@ -84,8 +83,66 @@ function getStatusCode(error: MCPHubError): number {
 }
 
 let serviceManager: ServiceManager | null = null;
-let marketplace: any = null;
 let mcpServerEndpoint: MCPServerEndpoint | null = null;
+
+const MCP_ENDPOINT_WAIT_TIMEOUT_MS = 30_000;
+type MCPServerEndpointWaiter = {
+  resolve: (endpoint: MCPServerEndpoint) => void;
+  reject: (error: Error) => void;
+};
+const mcpEndpointWaiters = new Set<MCPServerEndpointWaiter>();
+
+function notifyMcpEndpointReady(endpoint: MCPServerEndpoint | null): void {
+  if (!endpoint || mcpEndpointWaiters.size === 0) {
+    return;
+  }
+  mcpEndpointWaiters.forEach((waiter) => waiter.resolve(endpoint));
+  mcpEndpointWaiters.clear();
+}
+
+function rejectMcpEndpointWaiters(error: Error): void {
+  if (mcpEndpointWaiters.size === 0) {
+    return;
+  }
+  mcpEndpointWaiters.forEach((waiter) => waiter.reject(error));
+  mcpEndpointWaiters.clear();
+}
+
+async function waitForMcpServerEndpoint(): Promise<MCPServerEndpoint> {
+  if (mcpServerEndpoint) {
+    return mcpServerEndpoint;
+  }
+  if (!serviceManager) {
+    throw new ServerError('MCP Hub has not been started yet');
+  }
+
+  return await new Promise<MCPServerEndpoint>((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      mcpEndpointWaiters.delete(waiter);
+      reject(
+        new ServerError('MCP server endpoint not initialized', {
+          state: serviceManager?.state,
+          reason: 'SERVER_NOT_READY',
+        }),
+      );
+    }, MCP_ENDPOINT_WAIT_TIMEOUT_MS);
+
+    const waiter: MCPServerEndpointWaiter = {
+      resolve: (endpoint) => {
+        clearTimeout(timeout);
+        mcpEndpointWaiters.delete(waiter);
+        resolve(endpoint);
+      },
+      reject: (error) => {
+        clearTimeout(timeout);
+        mcpEndpointWaiters.delete(waiter);
+        reject(error);
+      },
+    };
+
+    mcpEndpointWaiters.add(waiter);
+  });
+}
 
 class ServiceManager {
   public config: any;
@@ -177,20 +234,11 @@ class ServiceManager {
       });
     });
 
-    // Initialize marketplace second
-    logger.info('Initializing marketplace catalog');
-    marketplace = getMarketplace();
-    await marketplace.initialize();
-    logger.info(
-      `Marketplace initialized with ${marketplace.cache.registry?.servers?.length || 0}`,
-    );
-
     // Then initialize MCP Hub
     logger.info('Initializing MCP Hub');
     this.mcpHub = new MCPHub(this.config, {
       watch: this.watch,
       port: this.port,
-      marketplace,
     });
 
     // Setup event handlers
@@ -245,6 +293,7 @@ class ServiceManager {
       mcpServerEndpoint = new MCPServerEndpoint(this.mcpHub, {
         stateless: Boolean(this.stateless),
       });
+      notifyMcpEndpointReady(mcpServerEndpoint);
       logger.info(
         `Hub endpoint ready: Use \`${mcpServerEndpoint.getEndpointUrl()}\` endpoint with any other MCP clients`,
       );
@@ -393,6 +442,9 @@ class ServiceManager {
       try {
         await mcpServerEndpoint.close();
         mcpServerEndpoint = null;
+        rejectMcpEndpointWaiters(
+          new ServerError('MCP server endpoint stopped during shutdown'),
+        );
       } catch (error: any) {
         logger.debug(`Error closing MCP server endpoint: ${error.message}`);
       }
@@ -447,10 +499,8 @@ registerRoute(
 // Register MCP SSE endpoint
 app.get('/sse', async (req: Request, res: Response) => {
   try {
-    if (!mcpServerEndpoint) {
-      throw new ServerError('MCP server endpoint not initialized');
-    }
-    await mcpServerEndpoint.handleSSEConnection(req, res);
+    const endpoint = await waitForMcpServerEndpoint();
+    await endpoint.handleSSEConnection(req, res);
   } catch (error: any) {
     logger.warn(`Failed to setup MCP SSE connection: ${error.message}`);
     if (!res.headersSent) {
@@ -462,10 +512,8 @@ app.get('/sse', async (req: Request, res: Response) => {
 // Register MCP messages endpoint
 app.post('/messages', async (req: Request, res: Response) => {
   try {
-    if (!mcpServerEndpoint) {
-      throw new ServerError('MCP server endpoint not initialized');
-    }
-    await mcpServerEndpoint.handleMCPMessage(req, res);
+    const endpoint = await waitForMcpServerEndpoint();
+    await endpoint.handleMCPMessage(req, res);
   } catch (error: any) {
     logger.warn('Failed to handle MCP message');
     if (!res.headersSent) {
@@ -477,10 +525,8 @@ app.post('/messages', async (req: Request, res: Response) => {
 // Handle POST requests for client-to-server communication
 app.post('/mcp', async (req: Request, res: Response) => {
   try {
-    if (!mcpServerEndpoint) {
-      throw new ServerError('MCP server endpoint not initialized');
-    }
-    await mcpServerEndpoint.handleStreamableHttpRequest(req, res);
+    const endpoint = await waitForMcpServerEndpoint();
+    await endpoint.handleStreamableHttpRequest(req, res);
   } catch (error: any) {
     logger.warn(
       `Failed to handle MCP streamable HTTP POST request: ${error.message}`,
@@ -494,10 +540,8 @@ app.post('/mcp', async (req: Request, res: Response) => {
 // Reusable handler for GET and DELETE requests
 const handleSessionRequest = async (req: Request, res: Response) => {
   try {
-    if (!mcpServerEndpoint) {
-      throw new ServerError('MCP server endpoint not initialized');
-    }
-    await mcpServerEndpoint.handleStreamableHttpRequest(req, res);
+    const endpoint = await waitForMcpServerEndpoint();
+    await endpoint.handleStreamableHttpRequest(req, res);
   } catch (error: any) {
     logger.warn(
       `Failed to handle MCP streamable HTTP ${req.method} request: ${error.message}`,
@@ -513,60 +557,6 @@ app.get('/mcp', handleSessionRequest);
 
 // Handle DELETE requests for session termination
 app.delete('/mcp', handleSessionRequest);
-
-// Register marketplace endpoints
-registerRoute(
-  'GET',
-  '/marketplace',
-  'Get marketplace catalog with filtering and sorting',
-  async (req: Request, res: Response) => {
-    const { search, query, category, tags, sort } = req.query;
-    try {
-      const servers = await marketplace.getCatalog({
-        search: search || query,
-        category,
-        tags: tags ? (tags as string).split(',') : undefined,
-        sort,
-      });
-      res.json({
-        servers,
-        timestamp: new Date().toISOString(),
-      });
-    } catch (error: any) {
-      throw wrapError(error, 'MARKETPLACE_ERROR', {
-        query: req.query,
-      });
-    }
-  },
-);
-
-registerRoute(
-  'POST',
-  '/marketplace/details',
-  'Get detailed server information',
-  async (req: Request, res: Response) => {
-    const { mcpId } = req.body;
-    try {
-      if (!mcpId) {
-        throw new ValidationError('Missing mcpId in request body');
-      }
-
-      const details = await marketplace.getServerDetails(mcpId);
-      if (!details) {
-        throw new ValidationError('Server not found', { mcpId });
-      }
-
-      res.json({
-        server: details,
-        timestamp: new Date().toISOString(),
-      });
-    } catch (error: any) {
-      throw wrapError(error, 'MARKETPLACE_ERROR', {
-        mcpId: req.body.mcpId,
-      });
-    }
-  },
-);
 
 // Register workspaces endpoint
 registerRoute(
@@ -1140,6 +1130,11 @@ export async function startServer(options: ServerConfig = {}): Promise<void> {
       await serviceManager.shutdown();
     } catch (e) {
     } finally {
+      rejectMcpEndpointWaiters(
+        new ServerError('Failed to start MCP server endpoint', {
+          error: wrappedError.message,
+        }),
+      );
       logger.error(
         wrappedError.code,
         wrappedError.message,

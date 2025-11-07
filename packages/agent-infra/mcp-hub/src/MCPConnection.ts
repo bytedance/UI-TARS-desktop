@@ -96,25 +96,6 @@ export interface DevConfig {
 // Transport types
 export type TransportType = 'stdio' | 'sse' | 'http';
 
-// Interface for marketplace item
-export interface MarketplaceItem {
-  mcpId: string;
-  name?: string;
-  description?: string;
-}
-
-// Interface for marketplace cache
-export interface MarketplaceCache {
-  catalog?: {
-    items?: MarketplaceItem[];
-  };
-}
-
-// Interface for marketplace
-export interface Marketplace {
-  cache?: MarketplaceCache;
-}
-
 // Interface for server info
 export interface ServerInfo {
   name: string;
@@ -226,12 +207,7 @@ export class MCPConnection extends EventEmitter {
   // Dev watcher for file changes (stdio servers only)
   private devWatcher: DevWatcher | null;
 
-  constructor(
-    name: string,
-    config: ServerConfig,
-    marketplace?: Marketplace,
-    hubServerUrl?: string,
-  ) {
+  constructor(name: string, config: ServerConfig, hubServerUrl?: string) {
     super();
     this.name = name; // Keep as mcpId
 
@@ -243,26 +219,10 @@ export class MCPConnection extends EventEmitter {
     // Dev watcher for file changes (stdio servers only)
     this.devWatcher = null;
 
-    // Set display name from marketplace
-    this.displayName = name; // Default to mcpId
-    let serverDescription = '';
-    if (marketplace?.cache?.catalog?.items) {
-      const item = marketplace.cache.catalog.items.find(
-        (item) => item.mcpId === name,
-      );
-      if (item?.name) {
-        this.displayName = item.name;
-        serverDescription = item.description || '';
-        logger.debug(`Using marketplace name for server '${name}'`, {
-          name,
-          displayName: item.name,
-        });
-      }
-    }
+    // Default display name and description from config
+    this.displayName = config.name || name;
     this.config = config;
-    this.description = config.description
-      ? config.description
-      : serverDescription;
+    this.description = config.description || '';
     this.client = null;
     this.transport = null;
     this.transportType = config.type; // Store the transport type from config
@@ -902,7 +862,7 @@ export class MCPConnection extends EventEmitter {
   getServerInfo(): ServerInfo {
     return {
       name: this.name, // Original mcpId
-      displayName: this.displayName, // Friendly name from marketplace
+      displayName: this.displayName,
       description: this.description,
       transportType: this.transportType, // Include transport type in server info
       status: this.status,

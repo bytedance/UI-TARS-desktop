@@ -417,13 +417,12 @@ The [ravitemer/mcphub.nvim](https://github.com/ravitemer/mcphub.nvim) plugin pro
 - Execute MCP tools directly from Neovim
 - Access MCP resources within your editing workflow
 - Real-time status updates in Neovim
-- Auto install mcp servers with marketplace addition
 
 ## REST API
 
 ### MCP Hub Search API
 
-The MCP Hub provides a powerful search API to find and filter MCP servers, both connected (currently running) and available (from the marketplace).
+The MCP Hub provides a powerful search API to find and filter MCP servers that are currently running and connected to the hub.
 
 #### Endpoint
 
@@ -451,20 +450,10 @@ Response Format
       "category": "development",
       "tags": ["filesystem", "file-management"],
       "status": "connected",
-      "source": "connected",
       "capabilities": {
         "tools": [...],
         "resources": [...]
       }
-    },
-    {
-      "name": "GitHub",
-      "description": "GitHub API integration",
-      "category": "development",
-      "tags": ["github", "api"],
-      "status": "available",
-      "source": "marketplace",
-      "stars": 1000
     }
   ],
   "query": {
@@ -481,12 +470,10 @@ Response Format
 #### Server Status
 
 - **connected**: Server is currently running and connected to the hub
-- **available**: Server is available in the marketplace but not currently connected
 
 #### Server Source
 
 - **connected**: Server is from your local configuration and currently running
-- **marketplace**: Server is from the MCP marketplace registry
 
 #### Examples
 
@@ -518,9 +505,8 @@ curl "http://localhost:3000/mcp?search=code&category=development&tags=editor&sor
 #### Notes
 
 1. The search is case-insensitive
-2. Connected servers take precedence over marketplace servers in deduplication
-3. If marketplace is unavailable, only connected servers will be returned
-4. The endpoint distinguishes between search requests (with query params) and MCP protocol requests (without query params)
+2. Connected servers take precedence over duplicate entries
+3. The endpoint distinguishes between search requests (with query params) and MCP protocol requests (without query params)
 
 ### Health and Status
 
@@ -735,80 +721,6 @@ Response:
       "shutdownDelay": 600000
     }
   },
-  "timestamp": "2024-02-20T05:55:00.000Z"
-}
-```
-
-### Marketplace Integration
-
-#### List Available Servers
-
-```bash
-GET /api/marketplace
-```
-
-Query Parameters:
-
-- `search`: Filter by name, description, or tags
-- `category`: Filter by category
-- `tags`: Filter by comma-separated tags
-- `sort`: Sort by "newest", "stars", or "name"
-
-Response:
-
-```json
-{
-  "servers": [
-    {
-      "id": "example-server",
-      "name": "Example Server",
-      "description": "Description here",
-      "author": "example-author",
-      "url": "https://github.com/user/repo",
-      "category": "search",
-      "tags": ["search", "ai"],
-      "stars": 100,
-      "featured": true,
-      "verified": true,
-      "lastCommit": 1751257963,
-      "updatedAt": 1751265038
-    }
-  ],
-  "timestamp": "2024-02-20T05:55:00.000Z"
-}
-```
-
-#### Get Server Details
-
-```bash
-POST /api/marketplace/details
-Content-Type: application/json
-
-{
-  "mcpId": "example-server"
-}
-```
-
-Response:
-
-```json
-{
-  "server": {
-    "id": "example-server",
-    "name": "Example Server",
-    "description": "Description here",
-    "author": "example-author",
-    "url": "https://github.com/user/repo",
-    "category": "search",
-    "tags": ["search", "ai"],
-    "installations": [],
-    "stars": 100,
-    "featured": true,
-    "verified": true,
-    "lastCommit": 1751257963,
-    "updatedAt": 1751265038
-  },
-  "readmeContent": "# Server Documentation...",
   "timestamp": "2024-02-20T05:55:00.000Z"
 }
 ```
@@ -1348,21 +1260,8 @@ All client requests follow a standardized flow:
 
 - Node.js >= 18.0.0
 
-## MCP Registry
-
-MCP Hub now uses the [MCP Registry](https://github.com/ravitemer/mcp-registry) system for marketplace functionality. This provides:
-
-- **Decentralized Server Discovery**: Registry hosted on GitHub Pages for better reliability
-- **Direct GitHub Integration**: README documentation fetched directly from repositories
-- **Enhanced Metadata**: Comprehensive server information including stars, categories, and installation instructions
-- **Better Caching**: Improved cache system with 1-hour TTL for frequent updates
-- **Fallback Support**: Automatic fallback to curl when fetch fails (useful for proxy/VPN environments)
-
-The registry is updated regularly with new servers and improvements to existing entries.
-
 ## Todo
 
-- [x] Implement custom marketplace rather than depending on mcp-marketplace
 - [ ] TUI like mcphub.nvim
 - [ ] Web UI for managing servers
 
@@ -1370,5 +1269,4 @@ The registry is updated regularly with new servers and improvements to existing 
 
 Thanks to:
 
-- [ravitemer/mcp-registry](https://github.com/ravitemer/mcp-registry) - For providing the MCP server marketplace endpoints that power MCP Hub's marketplace integration
 - [ravitemer/mcp-hub](https://github.com/ravitemer/mcp-hub) - A centralized manager for Model Context Protocol (MCP) servers with dynamic server management and monitoring

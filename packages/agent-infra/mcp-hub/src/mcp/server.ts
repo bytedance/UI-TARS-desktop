@@ -775,42 +775,7 @@ export class MCPServerEndpoint {
     const sessionId = req.headers['mcp-session-id'] as string;
     let transport: any;
 
-    if (sessionId && this.streamableHttpTransports.has(sessionId)) {
-      // Reuse existing transport
-      transport = this.streamableHttpTransports.get(sessionId);
-    } else if (
-      !sessionId &&
-      req.method === 'POST' &&
-      isInitializeRequest(req.body)
-    ) {
-      // New initialization request
-      if (this.stateless) {
-        transport = new StreamableHTTPServerTransport({
-          enableJsonResponse: true,
-          sessionIdGenerator: undefined, // set to undefined for stateless servers
-        });
-      } else {
-        transport = new StreamableHTTPServerTransport({
-          sessionIdGenerator: () => randomUUID(),
-          onsessioninitialized: (sessionId: string) => {
-            // Store the transport by session ID
-            this.streamableHttpTransports.set(sessionId, transport);
-          },
-          // DNS rebinding protection is disabled by default for backwards compatibility. If you are running this server
-          // locally, make sure to set:
-          // enableDnsRebindingProtection: true,
-          // allowedHosts: ['127.0.0.1'],
-        });
-
-        // Clean up transport when closed
-        transport.onclose = () => {
-          if (transport.sessionId) {
-            this.streamableHttpTransports.delete(transport.sessionId);
-          }
-        };
-      }
-
-      // Parse filter parameters from query string
+    const buildFilters = (): CapabilityFilters => {
       const filters: CapabilityFilters = {
         query: (req.query?.query as string) || (req.query?.search as string),
         category: req.query?.category as string,
@@ -823,11 +788,44 @@ export class MCPServerEndpoint {
           .map((term) => term.trim())
           .filter((term) => term.length > 0);
       }
+      return filters;
+    };
 
-      // Create a new server instance with filters
-      const server = this.createServer(filters);
+    if (sessionId && this.streamableHttpTransports.has(sessionId)) {
+      // Reuse existing transport
+      transport = this.streamableHttpTransports.get(sessionId);
+    } else if (this.stateless) {
+      transport = new StreamableHTTPServerTransport({
+        enableJsonResponse: true,
+        sessionIdGenerator: undefined, // set to undefined for stateless servers
+      });
+      const server = this.createServer(buildFilters());
+      await server.connect(transport);
+    } else if (
+      !sessionId &&
+      req.method === 'POST' &&
+      isInitializeRequest(req.body)
+    ) {
+      transport = new StreamableHTTPServerTransport({
+        sessionIdGenerator: () => randomUUID(),
+        onsessioninitialized: (sessionId: string) => {
+          // Store the transport by session ID
+          this.streamableHttpTransports.set(sessionId, transport);
+        },
+        // DNS rebinding protection is disabled by default for backwards compatibility. If you are running this server
+        // locally, make sure to set:
+        // enableDnsRebindingProtection: true,
+        // allowedHosts: ['127.0.0.1'],
+      });
 
-      // Connect to the MCP server
+      // Clean up transport when closed
+      transport.onclose = () => {
+        if (transport.sessionId) {
+          this.streamableHttpTransports.delete(transport.sessionId);
+        }
+      };
+
+      const server = this.createServer(buildFilters());
       await server.connect(transport);
     } else {
       // Invalid request

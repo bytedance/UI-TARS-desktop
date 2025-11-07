@@ -20,7 +20,6 @@ import EventEmitter from 'events';
 interface MCPHubOptions {
   port?: number;
   watch?: boolean;
-  marketplace?: any;
 }
 
 interface ServerStartResult {
@@ -50,11 +49,10 @@ export class MCPHub extends EventEmitter {
   public hubServerUrl: string;
   public configManager: ConfigManager;
   public shouldWatchConfig: boolean;
-  public marketplace?: any;
 
   constructor(
     configPathOrObject: string | string[] | object,
-    { port, watch = false, marketplace }: MCPHubOptions = {},
+    { port, watch = false }: MCPHubOptions = {},
   ) {
     super();
     this.connections = new Map();
@@ -65,7 +63,6 @@ export class MCPHub extends EventEmitter {
       watch &&
       (typeof configPathOrObject === 'string' ||
         Array.isArray(configPathOrObject));
-    this.marketplace = marketplace;
   }
 
   async initialize(isRestarting?: boolean): Promise<void> {
@@ -123,7 +120,6 @@ export class MCPHub extends EventEmitter {
           const connection = new MCPConnection(
             name,
             serverConfig,
-            this.marketplace,
             this.hubServerUrl,
           );
           [
@@ -302,12 +298,7 @@ export class MCPHub extends EventEmitter {
   async connectServer(name: string, config: any): Promise<any> {
     let connection = this.getConnection(name);
     if (!connection) {
-      connection = new MCPConnection(
-        name,
-        config,
-        this.marketplace,
-        this.hubServerUrl,
-      );
+      connection = new MCPConnection(name, config, this.hubServerUrl);
       this.connections.set(name, connection);
     }
     await connection.connect(config);
@@ -567,33 +558,6 @@ export class MCPHub extends EventEmitter {
           status: server.status || 'connected',
         });
       });
-    }
-
-    // Get marketplace servers if marketplace is available
-    if (this.marketplace) {
-      try {
-        const marketplaceServers = await this.marketplace.getCatalog(options);
-
-        // Filter out servers that are already connected (unless filtering by category/tags)
-        const connectedNames = new Set(
-          connectedServers.map((s) => s.name.toLowerCase()),
-        );
-        const uniqueMarketplace = marketplaceServers.filter(
-          (server: any) => !connectedNames.has(server.name.toLowerCase()),
-        );
-
-        // Add marketplace servers with 'available' status
-        uniqueMarketplace.forEach((server: any) => {
-          results.push({
-            ...server,
-            source: 'marketplace',
-            status: 'available',
-          });
-        });
-      } catch (error: any) {
-        logger.debug(`Failed to search marketplace: ${error.message}`);
-        // Continue with just connected servers if marketplace fails
-      }
     }
 
     // Apply sorting if requested
