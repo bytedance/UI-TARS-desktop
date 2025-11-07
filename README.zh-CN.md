@@ -2,7 +2,6 @@
   <img alt="Agent TARS Banner" src="./images/tars.png">
 </picture>
 
-
 ## Introduction
 
 [English](./README.md) | 简体中文
@@ -69,6 +68,7 @@
 
 ## News
 
+- **\[2025-11-05\]** 🎉 我们很高兴地宣布 [Agent TARS CLI v0.3.0](https://github.com/bytedance/UI-TARS-desktop/releases/tag/v0.3.0) 正式发布！此版本新增了多种工具的流式调用支持（shell 命令、多文件结构化展示）、Runtime Setting 和耗时统计、Event Stream 可视化用于数据流追踪和调试，以及 AIO Sandbox 集成、支持隔离的执行环境。
 - **\[2025-06-25\]** 我们发布了 Agent TARS Beta 和 Agent TARS CLI - [Introducing Agent TARS Beta](https://agent-tars.com/blog/2025-06-25-introducing-agent-tars-beta.html)，这是一个多模态 AI agent，旨在通过丰富的多模态能力（如 GUI Agent、Vision）和与各种现实世界工具的无缝集成，探索更接近人类任务完成方式的工作形式。
 - **\[2025-06-12\]** - 🎁 我们很高兴宣布发布 UI-TARS Desktop v0.2.0！此次更新引入了两个强大的新功能：**Remote Computer Operator** 和 **Remote Browser Operator**—— 完全免费。无需配置：只需点击即可远程控制任何计算机或浏览器，体验全新的便利和智能水平。
 - **\[2025-04-17\]** - 🎉 我们很高兴宣布发布全新的 UI-TARS Desktop 应用程序 v0.1.0，具有重新设计的 Agent UI。该应用程序增强了计算机使用体验，引入了新的浏览器操作功能，并支持[先进的 UI-TARS-1.5 模型](https://seed-tars.com/1.5)以提供更好的性能和精确控制。
@@ -256,10 +256,10 @@ UI-TARS Desktop 是一个由 [UI-TARS](https://github.com/bytedance/UI-TARS) 和
 
 <!-- // FIXME: Choose only two demo, one local computer and one remote computer showcase. -->
 
-|                                                          指令                                                           |                                                本地操作器                                                |                                               远程操作器                                                |
-| :----------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------: |
+|                                           指令                                            |                                                  本地操作器                                                  |                                                  远程操作器                                                  |
+| :---------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------: |
 | 请帮我在 VS Code 设置中打开 VS Code 的自动保存功能，并将自动保存操作延迟设置为 500 毫秒。 | <video src="https://github.com/user-attachments/assets/e0914ce9-ad33-494b-bdec-0c25c1b01a27" height="300" /> | <video src="https://github.com/user-attachments/assets/01e49b69-7070-46c8-b3e3-2aaaaec71800" height="300" /> |
-|                    你能帮我查看一下 GitHub 上 UI-TARS-Desktop 项目的最新 open issue 吗？                     | <video src="https://github.com/user-attachments/assets/3d159f54-d24a-4268-96c0-e149607e9199" height="300" /> | <video src="https://github.com/user-attachments/assets/072fb72d-7394-4bfa-95f5-4736e29f7e58" height="300" /> |
+|           你能帮我查看一下 GitHub 上 UI-TARS-Desktop 项目的最新 open issue 吗？           | <video src="https://github.com/user-attachments/assets/3d159f54-d24a-4268-96c0-e149607e9199" height="300" /> | <video src="https://github.com/user-attachments/assets/072fb72d-7394-4bfa-95f5-4736e29f7e58" height="300" /> |
 
 ### Features
 
