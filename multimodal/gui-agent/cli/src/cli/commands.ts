@@ -18,7 +18,7 @@ export const run = () => {
     .command('start')
     .description('Start GUI Agent automation')
     .option('-p, --presets <url>', 'Load model configuration from preset URL')
-    .option('-t, --target <target>', 'Target automation type (nut-js, adb)')
+    .option('-t, --target <target>', 'Target automation type (computer, browser, android)')
     .option('-q, --query <query>', 'Instruction to execute (optional, will prompt if not provided)')
     .option('-c, --config <path>', 'Path to configuration file')
     .action(async (options: CliOptions) => {
@@ -50,7 +50,7 @@ export const run = () => {
     program.outputHelp();
     console.log('\nExamples:');
     console.log('  gui-agent start                    # Start with interactive prompts');
-    console.log('  gui-agent start -t adb             # Start with Android automation');
+    console.log('  gui-agent start -t android          # Start with Android automation');
     console.log('  gui-agent start -q "open calculator"  # Start with specific instruction');
     console.log('  gui-agent reset                    # Reset all configuration');
     console.log('  gui-agent reset -c custom.json     # Reset specific config file');

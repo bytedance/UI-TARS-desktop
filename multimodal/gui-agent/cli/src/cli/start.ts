@@ -13,6 +13,7 @@ import yaml from 'js-yaml';
 
 import { NutJSOperator } from '@gui-agent/operator-nutjs';
 import { AdbOperator } from '@gui-agent/operator-adb';
+import { BrowserOperator } from '@gui-agent/operator-browser';
 
 export interface CliOptions {
   presets?: string;
@@ -97,18 +98,26 @@ export const start = async (options: CliOptions) => {
     ((await p.select({
       message: 'Please select your operator target:',
       options: [
-        { value: 'nut-js', label: 'nut-js (Desktop automation)' },
-        { value: 'adb', label: 'adb (Android automation)' },
+        { value: 'computer', label: 'computer (Desktop automation)' },
+        { value: 'android', label: 'android (Android automation)' },
+        { value: 'browser', label: 'browser (Web automation)' },
       ],
     })) as string);
 
   switch (targetType) {
-    case 'adb':
+    case 'android':
       // Note: AdbOperator will auto-detect connected devices
       console.log('Initializing ADB operator...');
       targetOperator = new AdbOperator();
       break;
-    case 'nut-js':
+    case 'browser':
+      // Use default browser options
+      targetOperator = new BrowserOperator({
+        browserType: 'chrome' as any,
+        browser: null as any, // Will be initialized internally
+      });
+      break;
+    case 'computer':
     default:
       targetOperator = new NutJSOperator();
       break;

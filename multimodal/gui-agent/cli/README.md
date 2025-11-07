@@ -29,7 +29,7 @@ gui-agent start
 
 This will start an interactive prompt where you can:
 1. Configure your VLM model settings (provider, base URL, API key, model name)
-2. Select the target operator (desktop or mobile)
+2. Select the target operator (computer, browser, or android)
 3. Enter your automation instruction
 
 ### Available Commands
@@ -53,34 +53,78 @@ gui-agent start [options]
 #### Options:
 - `-p, --presets <url>` - Load model configuration from a remote YAML preset file
 - `-t, --target <target>` - Specify the target operator:
-  - `nut-js` - Desktop automation (default)
-  - `adb` - Android mobile automation
+  - `computer` - Desktop automation (default)
+  - `browser` - Web browser automation
+  - `android` - Android mobile automation
 - `-q, --query <query>` - Provide the automation instruction directly via command line
 - `-c, --config <path>` - Path to a custom configuration file (default: `~/.gui-agent-cli.json`)
 
 ### Examples
 
-#### Desktop Automation (nut-js)
+#### Computer Automation
 ```bash
-gui-agent start -t nut-js -q "Open Chrome browser and navigate to github.com"
+gui-agent start -t computer -q "Open Chrome browser and navigate to github.com"
 ```
 
-#### Android Mobile Automation (adb)
+#### Android Mobile Automation
 Make sure your Android device is connected via USB debugging:
 
 ```bash
-gui-agent start -t adb -q "Open WhatsApp and send a message to John"
+gui-agent start -t android -q "Open WhatsApp and send a message to John"
 ```
 
-### Examples
-
-#### Reset Configuration
+#### Browser Automation
 ```bash
-gui-agent reset                    # Reset all stored configuration
-gui-agent reset -c custom.json     # Reset specific configuration file
+gui-agent start -t browser -q "Search for 'GUI Agent automation' on Google"
 ```
 
-#### Desktop Automation (nut-js)
+#### Using Remote Presets
+```bash
+gui-agent start -p "https://example.com/config.yaml" -q "Automate the login process"
+```
+
+## Configuration
+
+### Model Configuration
+
+The CLI requires VLM (Vision Language Model) configuration. You can provide this via:
+
+1. **Interactive setup** - When you first run the CLI, it will prompt for:
+   - Model provider (volcengine, anthropic, openai, lm-studio, deepseek, ollama)
+   - Model base URL
+   - API key
+   - Model name
+
+2. **Configuration file** - Settings are saved to `~/.gui-agent-cli.json`:
+   ```json
+   {
+     "provider": "openai",
+     "baseURL": "https://api.openai.com/v1",
+     "apiKey": "your-api-key",
+     "model": "gpt-4-vision-preview",
+     "useResponsesApi": false
+   }
+   ```
+
+3. **Remote presets** - Load configuration from a YAML file:
+   ```yaml
+   vlmBaseUrl: "https://api.openai.com/v1"
+   vlmApiKey: "your-api-key"
+   vlmModelName: "gpt-4-vision-preview"
+   useResponsesApi: false
+   ```
+
+#### Supported Providers
+- **volcengine** - VolcEngine (ByteDance) models
+- **anthropic** - Anthropic Claude models
+- **openai** - OpenAI models (default)
+- **lm-studio** - LM Studio local models
+- **deepseek** - DeepSeek models
+- **ollama** - Ollama local models
+
+## Operators
+
+### Computer Automation (nut-js)
 
 #### Using Remote Presets
 ```bash
