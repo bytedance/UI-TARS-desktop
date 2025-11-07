@@ -29,6 +29,7 @@ export const start = async (options: CliOptions) => {
     baseURL: '',
     apiKey: '',
     model: '',
+    provider: 'openai', // Default provider
     useResponsesApi: false,
   };
 
@@ -56,6 +57,17 @@ export const start = async (options: CliOptions) => {
   if (!config.baseURL || !config.apiKey || !config.model) {
     const configAnswers = await p.group(
       {
+        provider: () => p.select({
+          message: 'Select model provider:',
+          options: [
+            { value: 'volcengine', label: 'VolcEngine' },
+            { value: 'anthropic', label: 'Anthropic Claude' },
+            { value: 'openai', label: 'OpenAI' },
+            { value: 'lm-studio', label: 'LM Studio' },
+            { value: 'deepseek', label: 'DeepSeek' },
+            { value: 'ollama', label: 'Ollama' },
+          ],
+        }),
         baseURL: () => p.text({ message: 'please input vlm model baseURL:' }),
         apiKey: () => p.text({ message: 'please input vlm model apiKey:' }),
         model: () => p.text({ message: 'please input vlm model name:' }),
@@ -124,7 +136,7 @@ export const start = async (options: CliOptions) => {
   const guiAgent = new GUIAgent({
     model: {
       id: config.model,
-      provider: 'openai', // Default provider
+      provider: config.provider as any, // Type assertion to avoid TypeScript error
       baseURL: config.baseURL,
       apiKey: config.apiKey,
     },
@@ -132,4 +144,22 @@ export const start = async (options: CliOptions) => {
   });
 
   await guiAgent.run(answers.instruction);
+};
+
+export const resetConfig = async (configPath?: string) => {
+  const CONFIG_PATH = configPath || path.join(os.homedir(), '.gui-agent-cli.json');
+
+  try {
+    if (fs.existsSync(CONFIG_PATH)) {
+      fs.unlinkSync(CONFIG_PATH);
+      console.log(`✓ Configuration file removed: ${CONFIG_PATH}`);
+    } else {
+      console.log(`No configuration file found at: ${CONFIG_PATH}`);
+    }
+
+    console.log('Configuration has been reset. The next time you run gui-agent, you will be prompted to configure your settings again.');
+  } catch (error) {
+    console.error('Failed to reset configuration:', error);
+    process.exit(1);
+  }
 };
