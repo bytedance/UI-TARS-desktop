@@ -291,6 +291,49 @@ importers:
         specifier: 3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.6.1)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
 
+  gui-agent/cli:
+    dependencies:
+      '@clack/prompts':
+        specifier: ^0.11.0
+        version: 0.11.0
+      '@gui-agent/agent-sdk':
+        specifier: workspace:*
+        version: link:../agent-sdk
+      '@gui-agent/operator-adb':
+        specifier: workspace:*
+        version: link:../operator-adb
+      '@gui-agent/operator-browser':
+        specifier: workspace:*
+        version: link:../operator-browser
+      '@gui-agent/operator-nutjs':
+        specifier: workspace:*
+        version: link:../operator-nutjs
+      commander:
+        specifier: ^14.0.0
+        version: 14.0.0
+      jimp:
+        specifier: 1.6.0
+        version: 1.6.0
+      js-yaml:
+        specifier: ^4.1.0
+        version: 4.1.0
+      node-fetch:
+        specifier: ^2.7.0
+        version: 2.7.0
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.10.0
+        version: 0.10.0(typescript@5.8.3)
+      '@types/js-yaml':
+        specifier: ^4.0.9
+        version: 4.0.9
+      typescript:
+        specifier: ^5.5.3
+        version: 5.8.3
+      vitest:
+        specifier: 3.2.4
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.6.1)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
+
   gui-agent/operator-adb:
     dependencies:
       '@agent-infra/browser':
@@ -19756,7 +19799,7 @@ snapshots:
     dependencies:
       '@rsbuild/core': 1.4.0-beta.3
       rsbuild-plugin-dts: 0.10.0(@rsbuild/core@1.4.0-beta.3)(typescript@5.8.3)
-      tinyglobby: 0.2.14
+      tinyglobby: 0.2.15
     optionalDependencies:
       typescript: 5.8.3
 
@@ -20301,7 +20344,7 @@ snapshots:
 
   '@rspress/shared@2.0.0-beta.31':
     dependencies:
-      '@rsbuild/core': 1.5.7
+      '@rsbuild/core': 1.5.16
       '@shikijs/rehype': 3.12.2
       gray-matter: 4.0.3
       lodash-es: 4.17.21
@@ -27436,7 +27479,7 @@ snapshots:
       '@rsbuild/core': 1.4.0-beta.3
       magic-string: 0.30.17
       picocolors: 1.1.1
-      tinyglobby: 0.2.14
+      tinyglobby: 0.2.15
       tsconfig-paths: 4.2.0
     optionalDependencies:
       typescript: 5.8.3

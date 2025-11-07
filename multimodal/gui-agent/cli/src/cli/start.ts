@@ -12,8 +12,7 @@ import * as p from '@clack/prompts';
 import yaml from 'js-yaml';
 
 import { NutJSOperator } from '@gui-agent/operator-nutjs';
-import { getAndroidDeviceId, AdbOperator } from '@gui-agent/operator-adb';
-import { BrowserOperator } from '@gui-agent/operator-browser';
+import { AdbOperator } from '@gui-agent/operator-adb';
 
 export interface CliOptions {
   presets?: string;
@@ -88,23 +87,14 @@ export const start = async (options: CliOptions) => {
       options: [
         { value: 'nut-js', label: 'nut-js (Desktop automation)' },
         { value: 'adb', label: 'adb (Android automation)' },
-        { value: 'browser', label: 'browser (Web automation)' },
       ],
     })) as string);
 
   switch (targetType) {
     case 'adb':
-      const deviceId = await getAndroidDeviceId();
-      if (deviceId == null) {
-        console.error(
-          'No Android devices found. Please connect a device and try again.',
-        );
-        process.exit(0);
-      }
-      targetOperator = new AdbOperator(deviceId);
-      break;
-    case 'browser':
-      targetOperator = new BrowserOperator();
+      // Note: AdbOperator will auto-detect connected devices
+      console.log('Initializing ADB operator...');
+      targetOperator = new AdbOperator();
       break;
     case 'nut-js':
     default:
@@ -133,19 +123,12 @@ export const start = async (options: CliOptions) => {
 
   const guiAgent = new GUIAgent({
     model: {
+      id: config.model,
+      provider: 'openai', // Default provider
       baseURL: config.baseURL,
       apiKey: config.apiKey,
-      model: config.model,
-      useResponsesApi: config.useResponsesApi,
     },
     operator: targetOperator,
-    signal: abortController.signal,
-    onData: ({ data }) => {
-      console.log('[Agent Data]', data);
-    },
-    onError: ({ data, error }) => {
-      console.error('[Agent Error]', error, data);
-    },
   });
 
   await guiAgent.run(answers.instruction);
