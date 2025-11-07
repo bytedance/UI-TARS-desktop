@@ -2,6 +2,9 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
@@ -58,17 +61,18 @@ export const start = async (options: CliOptions) => {
   if (!config.baseURL || !config.apiKey || !config.model) {
     const configAnswers = await p.group(
       {
-        provider: () => p.select({
-          message: 'Select model provider:',
-          options: [
-            { value: 'volcengine', label: 'VolcEngine' },
-            { value: 'anthropic', label: 'Anthropic Claude' },
-            { value: 'openai', label: 'OpenAI' },
-            { value: 'lm-studio', label: 'LM Studio' },
-            { value: 'deepseek', label: 'DeepSeek' },
-            { value: 'ollama', label: 'Ollama' },
-          ],
-        }),
+        provider: () =>
+          p.select({
+            message: 'Select model provider:',
+            options: [
+              { value: 'volcengine', label: 'VolcEngine' },
+              { value: 'anthropic', label: 'Anthropic Claude' },
+              { value: 'openai', label: 'OpenAI' },
+              { value: 'lm-studio', label: 'LM Studio' },
+              { value: 'deepseek', label: 'DeepSeek' },
+              { value: 'ollama', label: 'Ollama' },
+            ],
+          }),
         baseURL: () => p.text({ message: 'please input vlm model baseURL:' }),
         apiKey: () => p.text({ message: 'please input vlm model apiKey:' }),
         model: () => p.text({ message: 'please input vlm model name:' }),
@@ -166,7 +170,9 @@ export const resetConfig = async (configPath?: string) => {
       console.log(`No configuration file found at: ${CONFIG_PATH}`);
     }
 
-    console.log('Configuration has been reset. The next time you run gui-agent, you will be prompted to configure your settings again.');
+    console.log(
+      'Configuration has been reset. The next time you run gui-agent, you will be prompted to configure your settings again.',
+    );
   } catch (error) {
     console.error('Failed to reset configuration:', error);
     process.exit(1);

@@ -34,7 +34,10 @@ export const run = () => {
   program
     .command('reset')
     .description('Reset stored configuration (API keys, model settings, etc.)')
-    .option('-c, --config <path>', 'Reset specific configuration file (default: ~/.gui-agent-cli.json)')
+    .option(
+      '-c, --config <path>',
+      'Reset specific configuration file (default: ~/.gui-agent-cli.json)',
+    )
     .action(async (options) => {
       try {
         await resetConfig(options.config);
