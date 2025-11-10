@@ -18,6 +18,7 @@ import { getFileTypeInfo, getDefaultDisplayMode } from './utils/fileTypeUtils';
 import { ImageRenderer } from './renderers/ImageRenderer';
 import { LinkRenderer } from './renderers/LinkRenderer';
 import { LinkReaderRenderer } from './renderers/LinkReaderRenderer';
+import { BrowserGetMarkdownRenderer } from './renderers/BrowserGetMarkdownRenderer';
 import { SearchResultRenderer } from './renderers/SearchResultRenderer';
 import { CommandResultRenderer } from './renderers/CommandResultRenderer';
 import { ScriptResultRenderer } from './renderers/ScriptResultRenderer';
@@ -41,6 +42,7 @@ const CONTENT_RENDERERS: Record<
   image: ImageRenderer,
   link: LinkRenderer,
   link_reader: LinkReaderRenderer,
+  browser_get_markdown: BrowserGetMarkdownRenderer,
   search_result: SearchResultRenderer,
   command_result: CommandResultRenderer,
   script_result: ScriptResultRenderer,
