@@ -22,7 +22,7 @@ import { windowManager } from '../services/windowManager';
 
 let appUpdater;
 
-class ScreenMarker {
+export class ScreenMarker {
   private static instance: ScreenMarker;
   private currentOverlay: BrowserWindow | null = null;
   private widgetWindow: BrowserWindow | null = null;
@@ -243,6 +243,15 @@ class ScreenMarker {
     menuBuilder.buildMenu();
 
     windowManager.registerWindow(this.widgetWindow);
+
+    // 初始化鼠标穿透状态
+    this.widgetWindow.setIgnoreMouseEvents(true, { forward: true });
+  }
+
+  setWidgetMouseIgnore(ignore: boolean) {
+    if (this.widgetWindow && !this.widgetWindow.isDestroyed()) {
+      this.widgetWindow.setIgnoreMouseEvents(ignore, { forward: true });
+    }
   }
 
   // show Screen Marker in screen for prediction

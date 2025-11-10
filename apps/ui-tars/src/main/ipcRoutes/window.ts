@@ -7,6 +7,7 @@ import { initIpc } from '@ui-tars/electron-ipc/main';
 import { appUpdater } from '@main/window/createWindow';
 import { logger } from '../logger';
 import { showWindow } from '@main/window/index';
+import { ScreenMarker } from '@main/window/ScreenMarker';
 
 const t = initIpc.create();
 
@@ -30,4 +31,10 @@ export const windowRoute = t.router({
       updateInfo: null,
     };
   }),
+  setWidgetMouseIgnore: t.procedure
+    .input<{ ignore: boolean }>()
+    .handle(async ({ input }) => {
+      const screenMarker = ScreenMarker.getInstance();
+      screenMarker.setWidgetMouseIgnore(input.ignore);
+    }),
 });

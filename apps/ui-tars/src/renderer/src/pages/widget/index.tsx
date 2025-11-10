@@ -67,6 +67,9 @@ const Widget = () => {
   const currentOperator = settings.operator || 'nutjs';
 
   const [actions, setActions] = useState<Action[]>([]);
+  const [buttonAreaRef, setButtonAreaRef] = useState<HTMLDivElement | null>(
+    null,
+  );
 
   useEffect(() => {
     const lastMessage = messages[messages.length - 1];
@@ -126,6 +129,29 @@ const Widget = () => {
     }
   }, [status, isLoading]);
 
+  // 鼠标穿透控制
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!buttonAreaRef) return;
+
+      const rect = buttonAreaRef.getBoundingClientRect();
+      const isInButtonArea =
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right &&
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom;
+
+      // 当鼠标在按钮区域时禁用穿透，否则启用穿透
+      api.setWidgetMouseIgnore({ ignore: !isInButtonArea });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, [buttonAreaRef]);
+
   const handlePlayPauseClick = useCallback(async () => {
     if (isLoading) return;
 
@@ -145,46 +171,54 @@ const Widget = () => {
 
   return (
     <div
-      className="w-100 h-70 overflow-hidden p-4 bg-white/90 dark:bg-gray-800/90 rounded-[10px] border-gray-300 fixed bottom-0 left-0 right-0"
+      className="w-100 h-70 overflow-hidden p-4 bg-white/90 dark:bg-gray-800/90 rounded-[10px] border-gray-300 fixed bottom-0 left-0 right-0 pointer-events-none select-none"
       style={{ borderWidth: isWin ? '1px' : '0', opacity: 0.75 }}
     >
-      <div className="flex draggable-area">
+      <div className="flex draggable-area pointer-events-none">
         {/* Logo */}
-        <img src={logo} alt="logo" className="-ml-2 h-6 mr-auto" />
+        <img
+          src={logo}
+          alt="logo"
+          className="-ml-2 h-6 mr-auto pointer-events-none"
+        />
         {/* Mode Badge */}
-        <div className="flex justify-center items-center text-xs border px-2 rounded-full text-gray-500">
+        <div className="flex justify-center items-center text-xs border px-2 rounded-full text-gray-500 pointer-events-none">
           {getOperatorIcon(currentOperator)}
           {getOperatorLabel(currentOperator)}
         </div>
       </div>
 
-      {!!errorMsg && <div>{errorMsg}</div>}
+      {!!errorMsg && <div className="pointer-events-none">{errorMsg}</div>}
 
       {!!actions.length && !errorMsg && (
-        <div className="mt-4 max-h-70 overflow-scroll hide_scroll_bar">
+        <div className="mt-4 max-h-70 overflow-scroll hide_scroll_bar pointer-events-none">
           {actions.map((action, idx) => {
             const ActionIcon = ActionIconMap[action.type] || MousePointerClick;
             return (
-              <div key={idx}>
+              <div key={idx} className="pointer-events-none">
                 {/* Actions */}
                 {!!action.type && (
                   <>
-                    <div className="flex items-baseline">
-                      <div className="text-lg font-medium">{action.action}</div>
+                    <div className="flex items-baseline pointer-events-none">
+                      <div className="text-lg font-medium pointer-events-none">
+                        {action.action}
+                      </div>
                       {/* {action.cost && (
                         <span className="text-xs text-gray-500 ml-2">{`(${ms(action.cost)})`}</span>
                       )} */}
                     </div>
-                    <div className="flex items-center text-gray-500 text-sm">
+                    <div className="flex items-center text-gray-500 text-sm pointer-events-none">
                       {!!ActionIcon && (
                         <ActionIcon
-                          className="w-4 h-4 mr-1.5"
+                          className="w-4 h-4 mr-1.5 pointer-events-none"
                           strokeWidth={2}
                         />
                       )}
-                      <span className="text-gray-600">{action.type}</span>
+                      <span className="text-gray-600 pointer-events-none">
+                        {action.type}
+                      </span>
                       {action.input && (
-                        <span className="text-gray-600 break-all truncate">
+                        <span className="text-gray-600 break-all truncate pointer-events-none">
                           {action.input}
                         </span>
                       )}
@@ -194,8 +228,10 @@ const Widget = () => {
                 {/* Reflection */}
                 {!!action.reflection && (
                   <>
-                    <div className="text-lg font-medium mt-2">Reflection</div>
-                    <div className="text-gray-500 text-sm break-all">
+                    <div className="text-lg font-medium mt-2 pointer-events-none">
+                      Reflection
+                    </div>
+                    <div className="text-gray-500 text-sm break-all pointer-events-none">
                       {action.reflection}
                     </div>
                   </>
@@ -203,8 +239,10 @@ const Widget = () => {
                 {/* Thought */}
                 {!!action.thought && (
                   <>
-                    <div className="text-lg font-medium mt-2">Thought</div>
-                    <div className="text-gray-500 text-sm break-all mb-4">
+                    <div className="text-lg font-medium mt-2 pointer-events-none">
+                      Thought
+                    </div>
+                    <div className="text-gray-500 text-sm break-all mb-4 pointer-events-none">
                       {action.thought}
                     </div>
                   </>
@@ -212,8 +250,10 @@ const Widget = () => {
                 {/* Human Query */}
                 {!!action.query && (
                   <>
-                    <div className="text-lg font-medium">Human Query</div>
-                    <div className="text-gray-500 text-sm break-all">
+                    <div className="text-lg font-medium pointer-events-none">
+                      Human Query
+                    </div>
+                    <div className="text-gray-500 text-sm break-all pointer-events-none">
                       {action.query}
                     </div>
                   </>
@@ -223,7 +263,10 @@ const Widget = () => {
           })}
         </div>
       )}
-      <div className="absolute bottom-4 right-4 flex gap-2">
+      <div
+        ref={setButtonAreaRef}
+        className="absolute bottom-4 right-4 flex gap-2 pointer-events-auto"
+      >
         <Button
           variant="outline"
           size="icon"
