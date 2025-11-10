@@ -11,7 +11,7 @@ npm install -g @gui-agent/cli
 
 ### Use via npx (without installation)
 ```bash
-npx @gui-agent/cli start [options]
+npx @gui-agent/cli run [options]
 ```
 
 ### Local Installation
@@ -24,7 +24,7 @@ npm install @gui-agent/cli
 ### Basic Usage
 
 ```bash
-gui-agent start
+gui-agent run
 ```
 
 This will start an interactive prompt where you can:
@@ -34,8 +34,8 @@ This will start an interactive prompt where you can:
 
 ### Available Commands
 
-#### `gui-agent start`
-Start GUI Agent automation with optional parameters.
+#### `gui-agent run`
+Run GUI Agent automation with optional parameters.
 
 #### `gui-agent reset`
 Reset stored configuration (API keys, model settings, etc.).
@@ -47,7 +47,7 @@ gui-agent reset -c custom.json     # Reset specific configuration file
 ### Command Line Options
 
 ```bash
-gui-agent start [options]
+gui-agent run [options]
 ```
 
 #### Options:
@@ -63,24 +63,24 @@ gui-agent start [options]
 
 #### Computer Automation
 ```bash
-gui-agent start -t computer -q "Open Chrome browser and navigate to github.com"
+gui-agent run -t computer -q "Open Chrome browser and navigate to github.com"
 ```
 
 #### Android Mobile Automation
 Make sure your Android device is connected via USB debugging:
 
 ```bash
-gui-agent start -t android -q "Open WhatsApp and send a message to John"
+gui-agent run -t android -q "Open WhatsApp and send a message to John"
 ```
 
 #### Browser Automation
 ```bash
-gui-agent start -t browser -q "Search for 'GUI Agent automation' on Google"
+gui-agent run -t browser -q "Search for 'GUI Agent automation' on Google"
 ```
 
 #### Using Remote Presets
 ```bash
-gui-agent start -p "https://example.com/config.yaml" -q "Automate the login process"
+gui-agent run -p "https://example.com/config.yaml" -q "Automate the login process"
 ```
 
 ## Configuration
@@ -197,7 +197,7 @@ This will remove the configuration file (`~/.gui-agent-cli.json`) and the CLI wi
 ### Custom Configuration File
 You can specify a custom configuration file location:
 ```bash
-gui-agent start -c /path/to/custom-config.json
+gui-agent run -c /path/to/custom-config.json
 ```
 
 To reset a specific configuration file:
