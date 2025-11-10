@@ -21,6 +21,7 @@
     "dev": "rslib build --watch",
     "build": "rslib build",
     "build:watch": "rslib build --watch",
+    "cli": "node bin/index.js",
     "test": "vitest"
   },
   "license": "Apache-2.0",

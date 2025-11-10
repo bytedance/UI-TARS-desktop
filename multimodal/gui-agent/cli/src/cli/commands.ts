@@ -12,7 +12,7 @@ export const run = () => {
     .name('gui-agent')
     .description('CLI for GUI Agent automation')
     .usage('<command> [options]')
-    .version(version);
+    .version(`GUI Agent CLI v${version} 🚀`, '-v, --version', 'Display the version number');
 
   program
     .command('start')
