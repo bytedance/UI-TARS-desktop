@@ -327,6 +327,9 @@ importers:
       '@types/js-yaml':
         specifier: ^4.0.9
         version: 4.0.9
+      '@types/node-fetch':
+        specifier: ^2.6.2
+        version: 2.6.9
       typescript:
         specifier: ^5.5.3
         version: 5.8.3
