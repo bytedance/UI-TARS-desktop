@@ -299,8 +299,11 @@ const LocalOperator = () => {
               );
             }
 
-            const { predictionParsed, screenshotBase64WithElementMarker } =
-              message;
+            const {
+              predictionParsed,
+              screenshotBase64WithElementMarker,
+              value,
+            } = message;
 
             // Find the finished step (VL 1.5 Model)
             const finishedStep = getFinishedContent(predictionParsed);
@@ -316,6 +319,11 @@ const LocalOperator = () => {
                 ) : null}
 
                 {!!finishedStep && <AssistantTextMessage text={finishedStep} />}
+
+                {/* 显示没有 predictionParsed 但有 value 的 gpt 消息（如预测的下一步动作） */}
+                {!predictionParsed && value && (
+                  <AssistantTextMessage text={value} />
+                )}
               </div>
             );
           })}

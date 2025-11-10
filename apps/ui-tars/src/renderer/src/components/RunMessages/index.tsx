@@ -114,8 +114,11 @@ const RunMessages = () => {
               );
             }
 
-            const { predictionParsed, screenshotBase64WithElementMarker } =
-              message;
+            const {
+              predictionParsed,
+              screenshotBase64WithElementMarker,
+              value,
+            } = message;
 
             // Find the finished step
             const finishedStep = predictionParsed?.find(
@@ -143,6 +146,11 @@ const RunMessages = () => {
                     text={finishedStep.action_inputs.content}
                   />
                 ) : null}
+
+                {/* 显示没有 predictionParsed 但有 value 的 gpt 消息（如预测的下一步动作） */}
+                {!predictionParsed && value && (
+                  <AssistantTextMessage text={value} />
+                )}
               </div>
             );
           })}
