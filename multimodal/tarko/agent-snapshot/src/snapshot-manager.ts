@@ -9,18 +9,9 @@ import path from 'path';
 import { AgentEventStream } from '@tarko/agent-interface';
 import { logger } from './utils/logger';
 import { AgentNormalizerConfig, AgentSnapshotNormalizer } from './utils/snapshot-normalizer';
+import { ToolCallData } from './utils/tool-call-tracker';
 
-/**
- * Interface for tool call data
- */
-export interface ToolCallData {
-  toolCallId: string;
-  name: string;
-  args: unknown;
-  result?: unknown;
-  error?: unknown;
-  executionTime?: number;
-}
+
 
 /**
  * SnapshotManager - Manages test snapshots for agent testing
@@ -43,7 +34,6 @@ export class SnapshotManager {
    */
   private getSnapshotPath(caseName: string, loopDir: string, filename: string): string {
     if (loopDir === '') {
-      // Root level files are stored directly in the case directory
       return path.join(this.fixturesRoot, caseName, filename);
     }
     return path.join(this.fixturesRoot, caseName, loopDir, filename);
@@ -62,18 +52,13 @@ export class SnapshotManager {
     try {
       const content = fs.readFileSync(filePath, 'utf-8');
 
-      // Special handling for llm-response.jsonl files
       if (filename === 'llm-response.jsonl') {
         try {
-          // First try to parse as a single response object
           return JSON.parse(content) as T;
         } catch (parseError) {
-          // If that fails, try to parse as a streaming response (array of chunks)
-          // Split by newlines, filter out empty lines, and parse each line
           const lines = content.split('\n').filter((line) => line.trim());
           if (lines.length > 0) {
             try {
-              // Try parsing each line and combine into an array
               const chunks = lines.map((line) => JSON.parse(line));
               return chunks as unknown as T;
             } catch (lineParseError) {
@@ -85,7 +70,6 @@ export class SnapshotManager {
         }
       }
 
-      // Standard parsing for other file types
       return JSON.parse(content) as T;
     } catch (error) {
       logger.error(`Error reading snapshot from ${filePath}: ${error}`);
@@ -105,7 +89,6 @@ export class SnapshotManager {
     const filePath = this.getSnapshotPath(caseName, loopDir, filename);
     const dirPath = path.dirname(filePath);
 
-    // Ensure directory exists
     if (!fs.existsSync(dirPath)) {
       await fs.promises.mkdir(dirPath, { recursive: true });
     }
@@ -119,6 +102,10 @@ export class SnapshotManager {
     }
   }
 
+  private getActualFilename(filename: string): string {
+    return filename.replace(/(\.[^.]+)$/, '.actual$1');
+  }
+
   /**
    * Write actual data to a separate file when verification fails
    */
@@ -128,12 +115,10 @@ export class SnapshotManager {
     filename: string,
     data: T,
   ): Promise<string> {
-    // Generate actual filename by inserting .actual before the extension
-    const actualFilename = filename.replace(/(\.[^.]+)$/, '.actual$1');
+    const actualFilename = this.getActualFilename(filename);
     const actualFilePath = this.getSnapshotPath(caseName, loopDir, actualFilename);
 
     await this.writeSnapshot(caseName, loopDir, actualFilename, data);
-
     logger.info(`Actual data written to ${actualFilePath}`);
 
     return actualFilePath;
@@ -147,7 +132,7 @@ export class SnapshotManager {
     loopDir: string,
     filename: string,
   ): Promise<void> {
-    const actualFilename = filename.replace(/(\.[^.]+)$/, '.actual$1');
+    const actualFilename = this.getActualFilename(filename);
     const actualFilePath = this.getSnapshotPath(caseName, loopDir, actualFilename);
 
     if (fs.existsSync(actualFilePath)) {
@@ -160,11 +145,52 @@ export class SnapshotManager {
     }
   }
 
+  private async verifySnapshot<T>(
+    caseName: string,
+    loopDir: string,
+    filename: string,
+    actualData: T,
+    updateSnapshots: boolean,
+    dataType: string,
+  ): Promise<boolean> {
+    const expectedData = await this.readSnapshot<T>(caseName, loopDir, filename);
+
+    if (!expectedData) {
+      if (updateSnapshots) {
+        await this.writeSnapshot(caseName, loopDir, filename, actualData);
+        logger.success(`✅ Created new ${dataType} snapshot for ${caseName}/${loopDir}`);
+        return true;
+      }
+      throw new Error(`No ${dataType} snapshot found for ${caseName}/${loopDir}`);
+    }
+
+    if (updateSnapshots) {
+      await this.writeSnapshot(caseName, loopDir, filename, actualData);
+      logger.warn(
+        `⚠️ Skipping ${dataType} verification for ${caseName}/${loopDir}, updating snapshot directly`,
+      );
+      return true;
+    }
+
+    const result = this.normalizer.compare(expectedData, actualData);
+
+    if (!result.equal) {
+      await this.writeActualData(caseName, loopDir, filename, actualData);
+      logger.error(`❌ ${dataType} comparison failed for ${caseName}/${loopDir}:\n${result.diff}`);
+      
+      const actualPath = loopDir ? `${loopDir}/${this.getActualFilename(filename)}` : this.getActualFilename(filename);
+      throw new Error(
+        `${dataType} doesn't match for ${caseName}/${loopDir}. Actual data saved to ${actualPath}`,
+      );
+    }
+
+    await this.deleteActualDataIfExists(caseName, loopDir, filename);
+    logger.success(`✅ ${dataType} comparison passed for ${caseName}/${loopDir}`);
+    return true;
+  }
+
   /**
    * Clean up all .actual.jsonl files in a given snapshot directory and its subdirectories
-   *
-   * @param caseName The name of the test case
-   * @returns Number of files cleaned up
    */
   async cleanupAllActualFiles(caseName: string): Promise<number> {
     const casePath = path.join(this.fixturesRoot, caseName);
@@ -174,7 +200,6 @@ export class SnapshotManager {
     }
 
     try {
-      // Find all .actual.jsonl files in the snapshot directory and subdirectories
       const findActualFiles = (dir: string): string[] => {
         const results: string[] = [];
         const files = fs.readdirSync(dir);
@@ -193,7 +218,6 @@ export class SnapshotManager {
 
       const actualFiles = findActualFiles(casePath);
 
-      // Delete each actual file
       for (const file of actualFiles) {
         try {
           await fs.promises.unlink(file);
@@ -216,171 +240,54 @@ export class SnapshotManager {
     }
   }
 
-  /**
-   * Verify that an event stream state matches the expected snapshot
-   */
   async verifyEventStreamSnapshot(
     caseName: string,
     loopDir: string,
     actualEventStream: AgentEventStream.Event[],
     updateSnapshots = false,
   ): Promise<boolean> {
-    const filename = 'event-stream.jsonl';
-    const expectedEventStream = await this.readSnapshot<AgentEventStream.Event[]>(
+    return this.verifySnapshot(
       caseName,
       loopDir,
-      filename,
+      'event-stream.jsonl',
+      actualEventStream,
+      updateSnapshots,
+      'Event stream',
     );
-
-    if (!expectedEventStream) {
-      if (updateSnapshots) {
-        await this.writeSnapshot(caseName, loopDir, filename, actualEventStream);
-        logger.success(`✅ Created new event stream snapshot for ${caseName}/${loopDir}`);
-        return true;
-      }
-      throw new Error(`No event stream snapshot found for ${caseName}/${loopDir}`);
-    }
-
-    // Skip verification and directly update if updateSnapshots is true
-    if (updateSnapshots) {
-      await this.writeSnapshot(caseName, loopDir, filename, actualEventStream);
-      logger.warn(
-        `⚠️ Skipping event stream verification for ${caseName}/${loopDir}, updating snapshot directly`,
-      );
-      return true;
-    }
-
-    // Use the new normalizer to compare event streams
-    const result = this.normalizer.compare(expectedEventStream, actualEventStream);
-
-    if (!result.equal) {
-      // Always write actual data for diagnostics
-      await this.writeActualData(caseName, loopDir, filename, actualEventStream);
-
-      logger.error(`❌ Event stream comparison failed for ${caseName}/${loopDir}:\n${result.diff}`);
-
-      throw new Error(
-        `Event stream doesn't match for ${caseName}/${loopDir}. ` +
-          `Actual data saved to ${loopDir ? `${loopDir}/` : ''}event-stream.actual.jsonl`,
-      );
-    }
-
-    // Verification passed, clean up any actual data files
-    await this.deleteActualDataIfExists(caseName, loopDir, filename);
-    logger.success(`✅ Event stream comparison passed for ${caseName}/${loopDir}`);
-    return true;
   }
 
-  /**
-   * Verify that a request matches the expected snapshot
-   */
   async verifyRequestSnapshot(
     caseName: string,
     loopDir: string,
     actualRequest: Record<string, unknown>,
     updateSnapshots = false,
   ): Promise<boolean> {
-    // Clone the request to prevent modifications
-    actualRequest = JSON.parse(JSON.stringify(actualRequest));
-    const filename = 'llm-request.jsonl';
-
-    const expectedRequest = await this.readSnapshot<Record<string, unknown>>(
+    const clonedRequest = JSON.parse(JSON.stringify(actualRequest));
+    return this.verifySnapshot(
       caseName,
       loopDir,
-      filename,
+      'llm-request.jsonl',
+      clonedRequest,
+      updateSnapshots,
+      'Request',
     );
-
-    if (!expectedRequest) {
-      if (updateSnapshots) {
-        await this.writeSnapshot(caseName, loopDir, filename, actualRequest);
-        logger.success(`✅ Created new request snapshot for ${caseName}/${loopDir}`);
-        return true;
-      }
-      throw new Error(`No request snapshot found for ${caseName}/${loopDir}`);
-    }
-
-    // Skip verification and directly update if updateSnapshots is true
-    if (updateSnapshots) {
-      await this.writeSnapshot(caseName, loopDir, filename, actualRequest);
-      logger.warn(
-        `⚠️ Skipping request verification for ${caseName}/${loopDir}, updating snapshot directly`,
-      );
-      return true;
-    }
-
-    // Use the new normalizer for comparison
-    const result = this.normalizer.compare(expectedRequest, actualRequest);
-
-    if (!result.equal) {
-      // Always write actual data for diagnostics
-      await this.writeActualData(caseName, loopDir, filename, actualRequest);
-
-      logger.error(`❌ Request comparison failed for ${caseName}/${loopDir}:\n${result.diff}`);
-
-      throw new Error(
-        `Request doesn't match for ${caseName}/${loopDir}. ` +
-          `Actual data saved to ${loopDir}/llm-request.actual.jsonl`,
-      );
-    }
-
-    // Verification passed, clean up any actual data files
-    await this.deleteActualDataIfExists(caseName, loopDir, filename);
-    logger.success(`✅ LLM request comparison passed for ${caseName}/${loopDir}`);
-    return true;
   }
 
-  /**
-   * Verify that tool calls match the expected snapshot
-   */
   async verifyToolCallsSnapshot(
     caseName: string,
     loopDir: string,
     actualToolCalls: ToolCallData[],
     updateSnapshots = false,
   ): Promise<boolean> {
-    // Clone the tool calls to prevent modifications
-    actualToolCalls = JSON.parse(JSON.stringify(actualToolCalls));
-    const filename = 'tool-calls.jsonl';
-
-    const expectedToolCalls = await this.readSnapshot<ToolCallData[]>(caseName, loopDir, filename);
-
-    if (!expectedToolCalls) {
-      if (updateSnapshots) {
-        await this.writeSnapshot(caseName, loopDir, filename, actualToolCalls);
-        logger.success(`✅ Created new tool calls snapshot for ${caseName}/${loopDir}`);
-        return true;
-      }
-      throw new Error(`No tool calls snapshot found for ${caseName}/${loopDir}`);
-    }
-
-    // Skip verification and directly update if updateSnapshots is true
-    if (updateSnapshots) {
-      await this.writeSnapshot(caseName, loopDir, filename, actualToolCalls);
-      logger.warn(
-        `⚠️ Skipping tool calls verification for ${caseName}/${loopDir}, updating snapshot directly`,
-      );
-      return true;
-    }
-
-    // Use the normalizer for comparison
-    const result = this.normalizer.compare(expectedToolCalls, actualToolCalls);
-
-    if (!result.equal) {
-      // Always write actual data for diagnostics
-      await this.writeActualData(caseName, loopDir, filename, actualToolCalls);
-
-      logger.error(`❌ Tool calls comparison failed for ${caseName}/${loopDir}:\n${result.diff}`);
-
-      throw new Error(
-        `Tool calls don't match for ${caseName}/${loopDir}. ` +
-          `Actual data saved to ${loopDir}/tool-calls.actual.jsonl`,
-      );
-    }
-
-    // Verification passed, clean up any actual data files
-    await this.deleteActualDataIfExists(caseName, loopDir, filename);
-    logger.success(`✅ Tool calls comparison passed for ${caseName}/${loopDir}`);
-    return true;
+    const clonedToolCalls = JSON.parse(JSON.stringify(actualToolCalls));
+    return this.verifySnapshot(
+      caseName,
+      loopDir,
+      'tool-calls.jsonl',
+      clonedToolCalls,
+      updateSnapshots,
+      'Tool calls',
+    );
   }
 
   /**
@@ -389,12 +296,10 @@ export class SnapshotManager {
   async createTestCaseStructure(caseName: string, numLoops: number): Promise<string> {
     const caseDir = path.join(this.fixturesRoot, caseName);
 
-    // Create case directory
     if (!fs.existsSync(caseDir)) {
       await fs.promises.mkdir(caseDir, { recursive: true });
     }
 
-    // Create loop directories
     for (let i = 1; i <= numLoops; i++) {
       const loopDir = path.join(caseDir, `loop-${i}`);
       if (!fs.existsSync(loopDir)) {
@@ -402,7 +307,6 @@ export class SnapshotManager {
       }
     }
 
-    // Create initial directory for pre-loop state
     const initialDir = path.join(caseDir, 'initial');
     if (!fs.existsSync(initialDir)) {
       await fs.promises.mkdir(initialDir, { recursive: true });
@@ -424,19 +328,16 @@ export class SnapshotManager {
     const filePath = this.getSnapshotPath(caseName, loopDir, filename);
     const dirPath = path.dirname(filePath);
 
-    // Ensure directory exists
     if (!fs.existsSync(dirPath)) {
       await fs.promises.mkdir(dirPath, { recursive: true });
     }
 
-    // Check if file already exists and shouldn't be updated
     if (fs.existsSync(filePath) && !updateIfExists) {
       logger.info(`Skipping write to existing file: ${filePath}`);
       return;
     }
 
     try {
-      // Serialize each chunk as a separate JSON line
       const chunksAsJsonLines = chunks.map((chunk) => JSON.stringify(chunk)).join('\n');
       await fs.promises.writeFile(filePath, chunksAsJsonLines, 'utf-8');
       logger.info(`Stream chunks written to ${filePath} (${chunks.length} chunks)`);
@@ -458,14 +359,12 @@ export class SnapshotManager {
 
     try {
       const content = await fs.promises.readFile(filePath, 'utf-8');
-      // Split by lines, filter empty lines, parse each line
       const lines = content.split('\n').filter((line) => line.trim());
       if (lines.length === 0) {
         return [];
       }
 
       try {
-        // Parse each line as an object
         return lines.map((line) => JSON.parse(line)) as T[];
       } catch (lineParseError) {
         logger.error(`Error parsing streaming chunks: ${lineParseError}`);
