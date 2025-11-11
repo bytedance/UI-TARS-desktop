@@ -160,7 +160,7 @@ const LocalOperator = () => {
 
     // 在当前会话中插入用户消息
     const newMessage = {
-      from: 'human',
+      from: 'human' as const,
       value: suggestion,
       timing: { start: Date.now(), end: Date.now(), cost: 0 },
     };
@@ -303,10 +303,52 @@ const LocalOperator = () => {
               predictionParsed,
               screenshotBase64WithElementMarker,
               value,
-            } = message;
+              isPredictionSuggestions,
+            } = message as any;
 
             // Find the finished step (VL 1.5 Model)
             const finishedStep = getFinishedContent(predictionParsed);
+
+            // 检查是否是建议动作消息
+            if (isPredictionSuggestions && value) {
+              const lines = value
+                .split('\n')
+                .map((line) => line.trim())
+                .filter((line) => line);
+              const suggestions = lines.filter(
+                (line) =>
+                  !line.includes('接下来要不要我帮您') &&
+                  !line.includes('：') &&
+                  line.length > 0,
+              );
+
+              return (
+                <div key={idx} className="mb-4">
+                  <div className="flex justify-start mb-2">
+                    <div className="max-w-[80%] px-4 py-2 rounded-lg bg-gray-100 text-gray-700">
+                      <div className="font-medium mb-2">
+                        接下来要不要我帮您：
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        {suggestions.map((suggestion, sIdx) => (
+                          <button
+                            key={sIdx}
+                            onClick={() => handleSelect(suggestion)}
+                            className="px-4 py-2.5 bg-white rounded-lg shadow-sm border border-gray-200 
+                                     hover:bg-gray-50 hover:border-gray-300 hover:shadow-md
+                                     active:bg-gray-100 active:scale-[0.98]
+                                     transition-all duration-150 ease-in-out
+                                     text-left text-sm text-gray-700 cursor-pointer"
+                          >
+                            {suggestion}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
 
             return (
               <div key={idx}>
@@ -321,7 +363,7 @@ const LocalOperator = () => {
                 {!!finishedStep && <AssistantTextMessage text={finishedStep} />}
 
                 {/* 显示没有 predictionParsed 但有 value 的 gpt 消息（如预测的下一步动作） */}
-                {!predictionParsed && value && (
+                {!predictionParsed && value && !isPredictionSuggestions && (
                   <AssistantTextMessage text={value} />
                 )}
               </div>

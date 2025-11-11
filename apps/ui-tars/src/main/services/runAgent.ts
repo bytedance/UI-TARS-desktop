@@ -19,7 +19,7 @@ import {
   DefaultBrowserOperator,
   RemoteBrowserOperator,
 } from '@ui-tars/operator-browser';
-import { showPredictionMarker } from '@main/window/ScreenMarker';
+// import { showPredictionMarker } from '@main/window/ScreenMarker';
 import { SettingStore } from '@main/store/setting';
 import { AppState, Operator } from '@main/store/types';
 import { GUIAgentManager } from '../ipcRoutes/agent';
@@ -102,14 +102,14 @@ export const runAgent = async (
       '\n========',
     );
 
-    if (
-      settings.operator === Operator.LocalComputer &&
-      predictionParsed?.length &&
-      screenshotContext?.size &&
-      !abortController?.signal?.aborted
-    ) {
-      showPredictionMarker(predictionParsed, screenshotContext);
-    }
+    // if (
+    //   settings.operator === Operator.LocalComputer &&
+    //   predictionParsed?.length &&
+    //   screenshotContext?.size &&
+    //   !abortController?.signal?.aborted
+    // ) {
+    //   showPredictionMarker(predictionParsed, screenshotContext);
+    // }
 
     setState({
       ...getState(),
@@ -280,9 +280,12 @@ export const runAgent = async (
       // 构建新的 system prompt
       const predictionSystemPrompt = `你是一个GUI AGgent，帮助用户来执行任务，用户已经完成了${finishedContent}\n\n
       你需要根据当前已经完成的任务来预测用户接下来可能的1-4个动作，每个动作都用\n分开,动作内容保持精简。
+      请按照下面的格式回复：
+      接下来要不要我帮您：\n
+      xxxx\nxxxx\nxxxx\nxxxx
       例如：用户刚才完成了创建日程，接下来你需要这样回复：
-      已经帮您创建了日程，接下来是否需要帮助您：\n
-      1.添加会议参与者\n2.修改日程时间\n3.修改日程内容\n4.删除日程`;
+      接下来要不要我帮您：\n
+      添加会议参与者\n修改日程时间\n修改日程内容\n删除日程`;
 
       // 创建 OpenAI 客户端，使用与 guiAgent 相同的配置
       /* secretlint-disable */
@@ -336,6 +339,8 @@ export const runAgent = async (
             end: Date.now(),
             cost: 0,
           },
+          // 添加标记，表示这是可点击的建议动作
+          isPredictionSuggestions: true,
         };
 
         setState({
