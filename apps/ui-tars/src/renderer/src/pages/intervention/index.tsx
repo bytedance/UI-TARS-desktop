@@ -4,7 +4,7 @@
  */
 import { useCallback, useState, useEffect } from 'react';
 import { Button } from '@renderer/components/ui/button';
-import { Hand, Loader } from 'lucide-react';
+import { Loader, Play, Pause } from 'lucide-react';
 import { api } from '@renderer/api';
 import { useStore } from '@renderer/hooks/useStore';
 import { StatusEnum } from '@ui-tars/sdk';
@@ -49,16 +49,16 @@ const HumanIntervention = () => {
         {isLoading ? (
           <>
             <Loader className="h-4 w-4 mr-2 loader-icon" />
-            <span>处理中...</span>
+            <span>暂停中...</span>
           </>
         ) : isPaused ? (
           <>
-            <Hand className="h-4 w-4 mr-2" />
+            <Play className="h-4 w-4 mr-2" />
             <span>继续执行</span>
           </>
         ) : (
           <>
-            <Hand className="h-4 w-4 mr-2" />
+            <Pause className="h-4 w-4 mr-2" />
             <span>人工介入</span>
           </>
         )}

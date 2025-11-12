@@ -10,8 +10,8 @@
   
   .intervention-button {
     background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(59, 130, 246, 0.5);
-    color: rgb(59, 130, 246);
+    border: 1px solid rgba(236, 8, 8, 0.565);
+    color: rgb(248, 2, 2);
     font-weight: 500;
     padding: 12px 20px;
     border-radius: 8px;
@@ -25,9 +25,9 @@
   }
   
   .intervention-button:hover {
-    background: rgba(255, 255, 255, 1);
-    border-color: rgb(59, 130, 246);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    background: rgb(241, 216, 216);
+    border-color: rgb(160, 3, 3);
+    box-shadow: 0 4px 12px rgba(246, 59, 59, 0.3);
     transform: translateY(-1px);
   }
   

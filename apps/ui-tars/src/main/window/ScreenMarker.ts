@@ -168,7 +168,7 @@ export class ScreenMarker {
     // 设置窗口位置在左下角
     this.humanInterventionWindow.setPosition(
       10, // 左边距10px
-      Math.floor(screenHeight - 60 - 50), // 底部距离50px
+      Math.floor(screenHeight - 60 - 70), // 底部距离50px
     );
 
     if (!app.isPackaged && env.rendererUrl) {
@@ -220,8 +220,8 @@ export class ScreenMarker {
     this.widgetWindow.setFocusable(false);
     this.widgetWindow.setContentProtection(true); // not show for vlm model
     this.widgetWindow.setPosition(
-      Math.floor(screenWidth - 400 - 32),
-      Math.floor(screenHeight - 400 - 32 - 64),
+      Math.floor(screenWidth - 400 - 5),
+      Math.floor(screenHeight - 400 - 32 - 30),
     );
 
     if (!app.isPackaged && env.rendererUrl) {
