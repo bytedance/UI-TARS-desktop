@@ -746,6 +746,9 @@ importers:
       open:
         specifier: ^10.1.2
         version: 10.2.0
+      tsx:
+        specifier: ^4.19.2
+        version: 4.19.3
       uuid:
         specifier: ^11.1.0
         version: 11.1.0
@@ -9586,6 +9589,7 @@ packages:
   puppeteer@24.4.0:
     resolution: {integrity: sha512-E4JhJzjS8AAI+6N/b+Utwarhz6zWl3+MR725fal+s3UlOlX2eWdsvYYU+Q5bXMjs9eZEGkNQroLkn7j11s2k1Q==}
     engines: {node: '>=18'}
+    deprecated: < 24.15.0 is no longer supported
     hasBin: true
 
   qs@6.13.0:
@@ -16854,7 +16858,7 @@ snapshots:
       '@testing-library/user-event': 14.6.1(@testing-library/dom@10.4.0)
       '@vitest/mocker': 3.0.5(msw@2.7.0(@types/node@22.13.10)(typescript@5.7.3))(vite@6.2.2(@types/node@22.13.10)(jiti@2.6.0)(lightningcss@1.29.2)(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.2)(yaml@2.7.0))
       '@vitest/utils': 3.0.5
-      magic-string: 0.30.17
+      magic-string: 0.30.19
       msw: 2.7.0(@types/node@22.13.10)(typescript@5.7.3)
       sirv: 3.0.1
       tinyrainbow: 2.0.0
@@ -16875,7 +16879,7 @@ snapshots:
       '@testing-library/user-event': 14.6.1(@testing-library/dom@10.4.0)
       '@vitest/mocker': 3.0.5(msw@2.7.0(@types/node@22.13.10)(typescript@5.7.3))(vite@6.2.2(@types/node@22.13.10)(jiti@2.6.0)(lightningcss@1.29.2)(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.3)(yaml@2.7.0))
       '@vitest/utils': 3.0.5
-      magic-string: 0.30.17
+      magic-string: 0.30.19
       msw: 2.7.0(@types/node@22.13.10)(typescript@5.7.3)
       sirv: 3.0.1
       tinyrainbow: 2.0.0
@@ -17213,7 +17217,7 @@ snapshots:
       '@vue/compiler-ssr': 3.5.13
       '@vue/shared': 3.5.13
       estree-walker: 2.0.2
-      magic-string: 0.30.17
+      magic-string: 0.30.19
       postcss: 8.5.3
       source-map-js: 1.2.1
     optional: true

@@ -33,7 +33,7 @@
     "mcp-hub": "dist/cli.js"
   },
   "scripts": {
-    "start": "node ./src/utils/cli.ts --port 3000 --config ~/mcp-hub/mcp-servers.json",
+    "start": "rm -rf ~/.local/state/mcp-hub && tsx ./src/utils/cli.ts --port 3000 --config ./examples/config.json",
     "clean": "rm -rf dist",
     "prebuild": "npm run clean",
     "build": "rslib build",
@@ -59,6 +59,7 @@
   },
   "dependencies": {
     "uuid": "^11.1.0",
+    "tsx": "^4.19.2",
     "yargs": "^17.7.2",
     "chokidar": "^4.0.3",
     "fast-deep-equal": "^3.1.3",
