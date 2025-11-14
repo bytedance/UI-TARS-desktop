@@ -216,7 +216,7 @@ function createInMemoryFetch(
   };
 }
 
-describe('Server Startup Readiness with Real Config', () => {
+describe('Server Startup Readiness - Race Condition Test', () => {
   let MCPHubCtor: MCPHubConstructor;
   let MCPServerEndpointCtor: MCPServerEndpointConstructor;
   const baseUrl = 'http://mcp.local/mcp';
@@ -228,40 +228,35 @@ describe('Server Startup Readiness with Real Config', () => {
     ));
   });
 
-  it('should wait for all processes to be ready before accepting MCP connections (using examples/config.json)', async () => {
+  it('should NOT return empty tools list when connecting during server initialization (BUG TEST)', async () => {
     // Use the REAL config file from examples/config.json
     const hub = new MCPHubCtor(configPath, { port: 3100 });
 
-    // Initialize hub - this loads config and starts all configured servers
-    await hub.initialize();
-
-    // Verify that at least one server connected successfully
-    const connections = Array.from(hub.connections.values());
-    const connectedServers = connections.filter(
-      (c) => c.status === 'connected',
-    );
-
-    // At least one server from the config should be connected
-    expect(connectedServers.length).toBeGreaterThan(0);
-
-    // Create the MCP endpoint AFTER hub initialization
+    // Create the MCP endpoint IMMEDIATELY before starting initialization
+    // This simulates the race condition: endpoint is ready but servers are not
     const endpoint = new MCPServerEndpointCtor(hub, { stateless: true });
     const fetchImpl = createInMemoryFetch(endpoint);
 
-    // Now attempt to connect to the MCP endpoint
+    // Start hub initialization in the background (don't await yet)
+    const initPromise = hub.initialize();
+
+    // Immediately try to connect to the MCP endpoint while servers are still initializing
+    // This is where the bug occurs: endpoint accepts connection but servers aren't ready
     const transport = new StreamableHTTPClientTransport(new URL(baseUrl), {
       fetch: fetchImpl,
     });
     const client = new Client({
-      name: 'readiness-test-client',
+      name: 'race-condition-test-client',
       version: '1.0.0',
     });
 
     try {
       await client.connect(transport);
 
-      // Request tools list - this is the key test
-      const toolsResult = await client.request(
+      // Request tools list IMMEDIATELY - this should expose the race condition
+      // BUG: Without the fix, this returns empty list because servers aren't ready yet
+      // FIX: With the fix, this should wait for servers to be ready or return all tools
+      const toolsResultDuringInit = await client.request(
         {
           method: 'tools/list',
           params: {},
@@ -269,23 +264,40 @@ describe('Server Startup Readiness with Real Config', () => {
         ListToolsResultSchema,
       );
 
-      // The bug was: when service starts and immediately connects to /mcp,
-      // it returns empty list because processes aren't ready yet
-      // After fix: tools list should contain tools from connected servers
-      expect(toolsResult).toBeDefined();
-      expect(toolsResult.tools).toBeDefined();
-      expect(Array.isArray(toolsResult.tools)).toBe(true);
+      console.log(
+        `[DURING INIT] Received ${toolsResultDuringInit.tools.length} tools`,
+      );
 
-      // With real MCP servers from examples/config.json, tools.length should be > 0
-      expect(toolsResult.tools.length).toBeGreaterThan(0);
+      // Wait for initialization to complete
+      await initPromise;
+
+      // Now request tools list again after initialization is complete
+      const toolsResultAfterInit = await client.request(
+        {
+          method: 'tools/list',
+          params: {},
+        },
+        ListToolsResultSchema,
+      );
 
       console.log(
-        `✓ Successfully received ${toolsResult.tools.length} tools from MCP servers`,
+        `[AFTER INIT] Received ${toolsResultAfterInit.tools.length} tools`,
+      );
+
+      // THE KEY ASSERTION: Tools list should NEVER be empty
+      // This tests the bug: without the fix, toolsResultDuringInit.tools.length === 0
+      // With the fix, it should always return tools (either by waiting or by being ready)
+      expect(toolsResultDuringInit.tools.length).toBeGreaterThan(0);
+      expect(toolsResultAfterInit.tools.length).toBeGreaterThan(0);
+
+      // Both requests should return the same number of tools
+      expect(toolsResultDuringInit.tools.length).toBe(
+        toolsResultAfterInit.tools.length,
       );
     } finally {
       await client.close();
       await endpoint.close();
       await hub.disconnectAll();
     }
-  }, 60000); // Increased timeout for real server connections
+  }, 60000);
 });
