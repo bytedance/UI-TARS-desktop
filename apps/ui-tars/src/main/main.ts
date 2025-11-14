@@ -33,6 +33,10 @@ import { checkBrowserAvailability } from './services/browserCheck';
 
 const { isProd } = env;
 
+// 在应用初始化之前设置应用名称，用于 Dock 栏和状态栏显示
+// 必须在 app.whenReady() 之前调用，否则 macOS Dock 栏名称可能不会更新
+app.setName('Xiaoyi Assistant');
+
 // 在应用初始化之前启用辅助功能支持
 app.commandLine.appendSwitch('force-renderer-accessibility');
 

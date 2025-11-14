@@ -152,7 +152,7 @@ console.log('ignorePattern', ignorePattern);
 
 const config: ForgeConfig = {
   packagerConfig: {
-    name: 'UI TARS',
+    name: 'Xiaoyi Assistant',
     icon: 'resources/icon',
     extraResource: ['./resources/app-update.yml'],
     asar: {
@@ -199,7 +199,7 @@ const config: ForgeConfig = {
     new MakerZIP({}, ['darwin']),
     new MakerSquirrel({
       // CamelCase version without spaces
-      name: 'UiTars',
+      name: 'XiaoyiAssistant',
       setupIcon: 'resources/icon.ico',
     }),
     // https://github.com/electron/forge/issues/3712

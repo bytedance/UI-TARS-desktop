@@ -56,18 +56,19 @@ export default class MenuBuilder {
   }
 
   buildDarwinTemplate(): MenuItemConstructorOptions[] {
+    const appName = app.getName();
     const subMenuAbout: DarwinMenuItemConstructorOptions = {
-      label: 'UI-TARS Desktop',
+      label: appName,
       submenu: [
         {
-          label: 'About UI-TARS Desktop',
+          label: `About ${appName}`,
           selector: 'orderFrontStandardAboutPanel:',
         },
         { type: 'separator' },
         { label: 'Services', submenu: [] },
         { type: 'separator' },
         {
-          label: 'Hide UI-TARS Desktop',
+          label: `Hide ${appName}`,
           accelerator: 'Command+H',
           selector: 'hide:',
         },
