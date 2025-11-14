@@ -123,11 +123,14 @@ const Widget = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (status === StatusEnum.PAUSE && isLoading) {
+    // 响应全局状态变化，同步更新本地状态
+    if (status === StatusEnum.PAUSE) {
       setIsLoading(false);
       setIsPaused(true);
+    } else if (status === StatusEnum.RUNNING && isPaused) {
+      setIsPaused(false);
     }
-  }, [status, isLoading]);
+  }, [status, isPaused]);
 
   // 鼠标穿透控制
   useEffect(() => {
@@ -171,7 +174,7 @@ const Widget = () => {
 
   return (
     <div
-      className="w-100 h-70 overflow-hidden p-4 bg-white/90 dark:bg-gray-800/90 rounded-[10px] border-gray-300 fixed bottom-0 left-0 right-0 pointer-events-none select-none"
+      className="w-100 h-70 overflow-hidden p-4 bg-white/90 dark:bg-gray-800/90 rounded-[10px] border-gray-300 fixed bottom-0 left-0 right-0 pointer-events-none select-none flex flex-col"
       style={{ borderWidth: isWin ? '1px' : '0', opacity: 0.75 }}
     >
       <div className="flex draggable-area pointer-events-none">
@@ -190,7 +193,18 @@ const Widget = () => {
 
       {!!errorMsg && <div className="pointer-events-none">{errorMsg}</div>}
 
-      {!!actions.length && !errorMsg && (
+      {/* 显示人工介入提示 */}
+      {isPaused && (
+        <div className="flex-1 flex items-center justify-center pointer-events-none">
+          <div className="flex items-center gap-2 text-black dark:text-white text-xl font-bold">
+            <MousePointerClick className="h-5 w-5" />
+            <span>请接管电脑，手动完成操作</span>
+          </div>
+        </div>
+      )}
+
+      {/* 正常显示Action和Thought */}
+      {!isPaused && !!actions.length && !errorMsg && (
         <div className="mt-4 max-h-70 overflow-scroll hide_scroll_bar pointer-events-none">
           {actions.map((action, idx) => {
             const ActionIcon = ActionIconMap[action.type] || MousePointerClick;
