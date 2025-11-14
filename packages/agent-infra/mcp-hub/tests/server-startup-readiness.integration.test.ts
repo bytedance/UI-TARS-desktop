@@ -1,12 +1,16 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { Headers, Response } from 'undici';
 import type { HeadersInit, RequestInfo, RequestInit } from 'undici';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { ListToolsResultSchema } from '@modelcontextprotocol/sdk/types.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mcp-hub-tests-'));
 const stateDir = path.join(tempRoot, 'state');
@@ -20,6 +24,9 @@ const configDir = path.join(tempRoot, 'config');
 process.env.XDG_STATE_HOME = stateDir;
 process.env.XDG_DATA_HOME = dataDir;
 process.env.XDG_CONFIG_HOME = configDir;
+
+// Path to the real config file
+const configPath = path.join(__dirname, '..', 'examples', 'config.json');
 
 type MCPHubConstructor = (typeof import('../src/MCPHub.js'))['MCPHub'];
 type MCPServerEndpointConstructor =
@@ -209,7 +216,7 @@ function createInMemoryFetch(
   };
 }
 
-describe('Server Startup Readiness', () => {
+describe('Server Startup Readiness with Real Config', () => {
   let MCPHubCtor: MCPHubConstructor;
   let MCPServerEndpointCtor: MCPServerEndpointConstructor;
   const baseUrl = 'http://mcp.local/mcp';
@@ -221,42 +228,32 @@ describe('Server Startup Readiness', () => {
     ));
   });
 
-  it('should ensure all processes are ready before MCP endpoint accepts connections', async () => {
-    // Use a simplified test config that simulates real servers
-    const testConfig = {
-      mcpServers: {
-        'test-server-1': {
-          type: 'stdio',
-          command: 'echo',
-          args: ['test'],
-          disabled: false,
-        },
-        'test-server-2': {
-          type: 'stdio',
-          command: 'echo',
-          args: ['test'],
-          disabled: false,
-        },
-      },
-    };
+  it('should wait for all processes to be ready before accepting MCP connections (using examples/config.json)', async () => {
+    // Use the REAL config file from examples/config.json
+    const hub = new MCPHubCtor(configPath, { port: 3100 });
 
-    // Create hub with config object (not file path)
-    const hub = new MCPHubCtor(testConfig, { port: 3100 });
+    // Initialize hub - this loads config and starts all configured servers
+    await hub.initialize();
 
-    // For object-based config, we need to call startConfiguredServers directly
-    // instead of initialize() which expects config file paths
-    await hub.startConfiguredServers();
+    // Verify that at least one server connected successfully
+    const connections = Array.from(hub.connections.values());
+    const connectedServers = connections.filter(
+      (c) => c.status === 'connected',
+    );
+
+    // At least one server from the config should be connected
+    expect(connectedServers.length).toBeGreaterThan(0);
 
     // Create the MCP endpoint AFTER hub initialization
     const endpoint = new MCPServerEndpointCtor(hub, { stateless: true });
     const fetchImpl = createInMemoryFetch(endpoint);
 
-    // Create client and connect
+    // Now attempt to connect to the MCP endpoint
     const transport = new StreamableHTTPClientTransport(new URL(baseUrl), {
       fetch: fetchImpl,
     });
     const client = new Client({
-      name: 'startup-test-client',
+      name: 'readiness-test-client',
       version: '1.0.0',
     });
 
@@ -274,79 +271,21 @@ describe('Server Startup Readiness', () => {
 
       // The bug was: when service starts and immediately connects to /mcp,
       // it returns empty list because processes aren't ready yet
-      // After fix: tools list should be available (even if 0 tools, the structure should be valid)
+      // After fix: tools list should contain tools from connected servers
       expect(toolsResult).toBeDefined();
       expect(toolsResult.tools).toBeDefined();
       expect(Array.isArray(toolsResult.tools)).toBe(true);
 
-      // Since we're using echo commands, they won't provide real MCP tools
-      // But the important thing is the endpoint didn't return an error or empty response
-      // In a real scenario with actual MCP servers from examples/config.json,
-      // we would expect tools.length > 0
-    } finally {
-      await client.close();
-      await endpoint.close();
-      await hub.disconnectAll();
-    }
-  }, 30000);
-
-  it('should have tools available when using real config with remote MCP servers', async () => {
-    // Test with a real remote MCP server that should provide tools
-    const testConfig = {
-      mcpServers: {
-        deepwiki: {
-          type: 'streamable-http',
-          prefix: 'deepwiki',
-          tags: ['coding'],
-          url: 'https://mcp.deepwiki.com/mcp',
-        },
-      },
-    };
-
-    const hub = new MCPHubCtor(testConfig, { port: 3101 });
-
-    // Start all configured servers and wait for them to be ready
-    await hub.startConfiguredServers();
-
-    // Verify connections are established
-    const connection = hub.connections.get('deepwiki');
-    expect(connection).toBeDefined();
-    expect(connection?.status).toBe('connected');
-
-    // Create endpoint after initialization
-    const endpoint = new MCPServerEndpointCtor(hub, { stateless: true });
-    const fetchImpl = createInMemoryFetch(endpoint);
-
-    const transport = new StreamableHTTPClientTransport(new URL(baseUrl), {
-      fetch: fetchImpl,
-    });
-    const client = new Client({
-      name: 'real-config-test-client',
-      version: '1.0.0',
-    });
-
-    try {
-      await client.connect(transport);
-
-      const toolsResult = await client.request(
-        {
-          method: 'tools/list',
-          params: {},
-        },
-        ListToolsResultSchema,
-      );
-
-      // With a real MCP server, we should have tools available
-      expect(toolsResult.tools).toBeDefined();
-      expect(Array.isArray(toolsResult.tools)).toBe(true);
-
-      // The key assertion: tools list should not be empty
-      // This validates the fix - server waits for processes to be ready
+      // With real MCP servers from examples/config.json, tools.length should be > 0
       expect(toolsResult.tools.length).toBeGreaterThan(0);
+
+      console.log(
+        `✓ Successfully received ${toolsResult.tools.length} tools from MCP servers`,
+      );
     } finally {
       await client.close();
       await endpoint.close();
       await hub.disconnectAll();
     }
-  }, 30000);
+  }, 60000); // Increased timeout for real server connections
 });
