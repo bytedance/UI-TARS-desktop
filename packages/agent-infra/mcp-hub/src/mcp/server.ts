@@ -239,8 +239,17 @@ export class MCPServerEndpoint {
     // Setup capability synchronization once
     this.setupCapabilitySync();
 
-    // Initial capability registration
-    this.syncCapabilities();
+    // Initial capability registration - only sync if there are already connected servers
+    // This prevents empty tool lists during hub initialization
+    const hasConnectedServers = Array.from(
+      this.mcpHub.connections.values(),
+    ).some((conn) => conn.status === 'connected');
+
+    if (hasConnectedServers) {
+      this.syncCapabilities();
+    }
+    // If no servers are connected yet, syncCapabilities will be called automatically
+    // when servers connect via the hubStateChanged event listener
   }
 
   getEndpointUrl(): string {
@@ -298,6 +307,13 @@ export class MCPServerEndpoint {
       // Setup list handler if schema exists
       if (capType.listSchema) {
         server.setRequestHandler(capType.listSchema, async () => {
+          // Wait for servers to be ready before returning the list
+          // This handles the case where endpoint was created before servers finished connecting
+          await this.waitForServersReady();
+
+          // Sync capabilities after servers are ready
+          this.syncCapabilities([capId]);
+
           const capabilityMap = this.registeredCapabilities[capId];
           let capabilities = Array.from(capabilityMap.values());
           const searchTerms =
@@ -531,6 +547,90 @@ export class MCPServerEndpoint {
         }
       }
     });
+  }
+
+  /**
+   * Wait for all servers to be ready (connected or failed)
+   * This prevents returning empty capability lists during server initialization
+   */
+  async waitForServersReady(): Promise<void> {
+    const timeout = 30000; // 30 seconds total timeout
+    const startTime = Date.now();
+
+    // First, wait for connections to be created (if hub is still initializing)
+    while (true) {
+      const connections = Array.from(this.mcpHub.connections.values());
+
+      logger.debug(
+        `waitForServersReady: checking ${connections.length} connections`,
+      );
+
+      if (connections.length > 0) {
+        // Connections exist, break out of waiting loop
+        break;
+      }
+
+      if (Date.now() - startTime > timeout) {
+        // Timeout waiting for connections to be created
+        logger.debug(
+          'waitForServersReady: no connections created within timeout',
+        );
+        return;
+      }
+
+      // Wait a bit and check again
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+
+    // Now wait for all connections to finish connecting
+    const connections = Array.from(this.mcpHub.connections.values());
+
+    // Check if any servers are still connecting
+    const connectingServers = connections.filter(
+      (conn) => conn.status === 'connecting' && !conn.disabled,
+    );
+
+    logger.debug(
+      `waitForServersReady: ${connectingServers.length} servers still connecting`,
+      {
+        connecting: connectingServers.map((c) => c.name),
+      },
+    );
+
+    if (connectingServers.length === 0) {
+      // All servers are already in a final state (connected/disconnected)
+      logger.debug('waitForServersReady: all servers in final state');
+      return;
+    }
+
+    // Wait for all connecting servers to finish (reuse timeout from above)
+    logger.debug('waitForServersReady: waiting for servers to finish...');
+
+    while (true) {
+      const stillConnecting = Array.from(
+        this.mcpHub.connections.values(),
+      ).filter((conn) => conn.status === 'connecting' && !conn.disabled);
+
+      if (stillConnecting.length === 0) {
+        // All servers have finished connecting
+        logger.debug('waitForServersReady: all servers finished connecting');
+        break;
+      }
+
+      if (Date.now() - startTime > timeout) {
+        // Timeout - log warning but continue
+        logger.warn(
+          `Timeout waiting for ${stillConnecting.length} servers to connect`,
+          {
+            servers: stillConnecting.map((c) => c.name),
+          },
+        );
+        break;
+      }
+
+      // Wait a bit before checking again
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
   }
 
   /**

@@ -288,7 +288,10 @@ class ServiceManager {
       this.broadcastSubscriptionEvent(SubscriptionTypes.SERVERS_UPDATED, data);
     });
 
-    // Initialize MCP server endpoint
+    // Initialize MCP Hub and wait for all servers to be ready
+    await this.mcpHub.initialize();
+
+    // Initialize MCP server endpoint AFTER all servers are connected
     try {
       mcpServerEndpoint = new MCPServerEndpoint(this.mcpHub, {
         stateless: Boolean(this.stateless),
@@ -308,7 +311,6 @@ class ServiceManager {
       );
     }
 
-    await this.mcpHub.initialize();
     this.setState(HubState.READY);
   }
 
