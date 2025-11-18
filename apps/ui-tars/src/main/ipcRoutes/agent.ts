@@ -8,7 +8,11 @@ import { store } from '@main/store/create';
 import { runAgent } from '@main/services/runAgent';
 import { showWindow } from '@main/window/index';
 
-import { closeScreenMarker } from '@main/window/ScreenMarker';
+import {
+  closeScreenMarker,
+  changeScreenWaterFlowColorToYellow,
+  changeScreenWaterFlowColorToBlue,
+} from '@main/window/ScreenMarker';
 import { GUIAgent } from '@ui-tars/sdk';
 import { Operator } from '@ui-tars/sdk/core';
 
@@ -63,6 +67,8 @@ export const agentRoute = t.router({
     if (guiAgent instanceof GUIAgent) {
       guiAgent.pause();
       store.setState({ thinking: false });
+      // 改变 screenWaterFlow 颜色为深黄色
+      changeScreenWaterFlowColorToYellow();
     }
   }),
   resumeRun: t.procedure.input<void>().handle(async () => {
@@ -70,6 +76,8 @@ export const agentRoute = t.router({
     if (guiAgent instanceof GUIAgent) {
       guiAgent.resume();
       store.setState({ thinking: false });
+      // 恢复 screenWaterFlow 颜色为蓝色
+      changeScreenWaterFlowColorToBlue();
     }
   }),
   stopRun: t.procedure.input<void>().handle(async () => {

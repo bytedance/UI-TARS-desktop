@@ -134,6 +134,116 @@ export class ScreenMarker {
     this.screenWaterFlow = null;
   }
 
+  changeScreenWaterFlowColor(color: string) {
+    if (!this.screenWaterFlow || this.screenWaterFlow.isDestroyed()) {
+      // logger.warn('[changeScreenWaterFlowColor] screenWaterFlow 不存在或已销毁');
+      return;
+    }
+
+    // 预先计算不同透明度的颜色值
+    const color2 = color.replace('0.4)', '0.39)');
+    const color3 = color.replace('0.4)', '0.38)');
+
+    // logger.info('[changeScreenWaterFlowColor] 开始修改颜色:', { color, color2, color3 });
+
+    // 确保 webContents 已经加载完成
+    if (!this.screenWaterFlow.webContents.isLoading()) {
+      this.executeColorChange(color, color2, color3);
+    } else {
+      // 等待页面加载完成后再执行
+      this.screenWaterFlow.webContents.once('did-finish-load', () => {
+        this.executeColorChange(color, color2, color3);
+      });
+    }
+  }
+
+  private executeColorChange(color: string, color2: string, color3: string) {
+    if (!this.screenWaterFlow || this.screenWaterFlow.isDestroyed()) {
+      return;
+    }
+
+    // 直接生成新的 CSS 内容，而不是用正则替换
+    const cssContent = `
+      html::before {
+        content: "";
+        position: fixed;
+        top: 0; right: 0; bottom: 0; left: 0;
+        pointer-events: none;
+        z-index: 9999;
+        background:
+          linear-gradient(to right, ${color}, transparent 50%) left,
+          linear-gradient(to left, ${color}, transparent 50%) right,
+          linear-gradient(to bottom, ${color}, transparent 50%) top,
+          linear-gradient(to top, ${color}, transparent 50%) bottom;
+        background-repeat: no-repeat;
+        background-size: 10% 100%, 10% 100%, 100% 10%, 100% 10%;
+        animation: waterflow 5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        filter: blur(8px);
+      }
+
+      @keyframes waterflow {
+        0%, 100% {
+          background-image:
+            linear-gradient(to right, ${color}, transparent 50%),
+            linear-gradient(to left, ${color}, transparent 50%),
+            linear-gradient(to bottom, ${color}, transparent 50%),
+            linear-gradient(to top, ${color}, transparent 50%);
+          transform: scale(1);
+        }
+        25% {
+          background-image:
+            linear-gradient(to right, ${color2}, transparent 52%),
+            linear-gradient(to left, ${color2}, transparent 52%),
+            linear-gradient(to bottom, ${color2}, transparent 52%),
+            linear-gradient(to top, ${color2}, transparent 52%);
+          transform: scale(1.03);
+        }
+        50% {
+          background-image:
+            linear-gradient(to right, ${color3}, transparent 55%),
+            linear-gradient(to left, ${color3}, transparent 55%),
+            linear-gradient(to bottom, ${color3}, transparent 55%),
+            linear-gradient(to top, ${color3}, transparent 55%);
+          transform: scale(1.05);
+        }
+        75% {
+          background-image:
+            linear-gradient(to right, ${color2}, transparent 52%),
+            linear-gradient(to left, ${color2}, transparent 52%),
+            linear-gradient(to bottom, ${color2}, transparent 52%),
+            linear-gradient(to top, ${color2}, transparent 52%);
+          transform: scale(1.03);
+        }
+      }
+    `;
+
+    // 通过 executeJavaScript 动态修改 CSS 内容
+    this.screenWaterFlow.webContents
+      .executeJavaScript(
+        `
+      (function() {
+        // console.log('开始修改颜色:', '${color}');
+        const style = document.getElementById('water-flow-animation');
+        if (style) {
+          // console.log('找到 style 元素');
+          style.textContent = \`${cssContent}\`;
+          // console.log('CSS 内容已更新');
+          return { success: true };
+        } else {
+          // console.error('未找到 water-flow-animation style 元素');
+          return { success: false, error: 'style not found' };
+        }
+      })();
+    `,
+      )
+      .then(() => {
+        // logger.info('[changeScreenWaterFlowColor] 执行成功');
+      })
+      .catch((error) => {
+        logger.error('[changeScreenWaterFlowColor] 修改颜色失败:', error);
+      });
+  }
+
   hideWidgetWindow() {
     this.widgetWindow?.close();
     this.widgetWindow = null;
@@ -408,4 +518,16 @@ export const showHumanInterventionWindow = () => {
 
 export const hideHumanInterventionWindow = () => {
   ScreenMarker.getInstance().hideHumanInterventionWindow();
+};
+
+export const changeScreenWaterFlowColorToYellow = () => {
+  ScreenMarker.getInstance().changeScreenWaterFlowColor(
+    'rgba(218, 165, 32, 0.4)',
+  );
+};
+
+export const changeScreenWaterFlowColorToBlue = () => {
+  ScreenMarker.getInstance().changeScreenWaterFlowColor(
+    'rgba(30, 144, 255, 0.4)',
+  );
 };
