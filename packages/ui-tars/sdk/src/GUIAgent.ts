@@ -379,6 +379,17 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
               parsedPrediction.action_inputs,
               parsedPrediction.action_type,
             );
+
+            logger.info('[GUIAgent] factors:', this.model.factors);
+
+            logger.info('[GUIAgent] scaleFactor:', snapshot.scaleFactor);
+
+            logger.info(
+              '[GUIAgent] screenWidth:',
+              width,
+              '[GUIAgent] screenHeight:',
+              height,
+            );
             // TODO: pass executeOutput to onData
             const executeOutput = await asyncRetry(
               () =>

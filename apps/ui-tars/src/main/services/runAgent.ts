@@ -36,6 +36,7 @@ import { getAuthHeader } from '../remote/auth';
 import { ProxyClient } from '../remote/proxyClient';
 import { UITarsModelConfig } from '@ui-tars/sdk/core';
 import OpenAI from 'openai';
+import { SOPManager } from './sopManager';
 
 export const runAgent = async (
   setState: (state: AppState) => void,
@@ -49,6 +50,145 @@ export const runAgent = async (
   const language = settings.language ?? 'en';
 
   logger.info('settings.operator', settings.operator);
+
+  // 创建 operator 实例（用于 SOP 执行和 GUIAgent）
+  let operatorType: 'computer' | 'browser' = 'computer';
+  let operator:
+    | NutJSElectronOperator
+    | DefaultBrowserOperator
+    | RemoteComputerOperator
+    | RemoteBrowserOperator
+    | undefined = undefined;
+
+  switch (settings.operator) {
+    case Operator.LocalComputer:
+      operator = new NutJSElectronOperator();
+      operatorType = 'computer';
+      break;
+    case Operator.LocalBrowser:
+      await checkBrowserAvailability();
+      const { browserAvailable } = getState();
+      if (!browserAvailable) {
+        setState({
+          ...getState(),
+          status: StatusEnum.ERROR,
+          errorMsg:
+            'Browser is not available. Please install Chrome and try again.',
+        });
+        return;
+      }
+
+      operator = await DefaultBrowserOperator.getInstance(
+        false,
+        false,
+        false,
+        getState().status === StatusEnum.CALL_USER,
+        getLocalBrowserSearchEngine(settings.searchEngineForBrowser),
+      );
+      operatorType = 'browser';
+      break;
+    case Operator.RemoteComputer:
+      operator = await RemoteComputerOperator.create();
+      operatorType = 'computer';
+      break;
+    case Operator.RemoteBrowser:
+      operator = await createRemoteBrowserOperator();
+      operatorType = 'browser';
+      break;
+    default:
+      setState({
+        ...getState(),
+        status: StatusEnum.ERROR,
+        errorMsg: `不支持的 operator 类型: ${settings.operator}`,
+      });
+      return;
+  }
+
+  // 确保 operator 已定义
+  if (!operator) {
+    setState({
+      ...getState(),
+      status: StatusEnum.ERROR,
+      errorMsg: '无法创建 operator 实例',
+    });
+    return;
+  }
+
+  // 初始化 SOP 管理器并尝试匹配 SOP
+  const sopManager = SOPManager.getInstance();
+  await sopManager.loadSOPIndex();
+
+  const sopFilePath = sopManager.findMatchingSOP(instructions);
+
+  // 如果找到匹配的 SOP，则执行 SOP
+  if (sopFilePath && operator) {
+    try {
+      logger.info(`[runAgent] 找到匹配的 SOP: ${sopFilePath}，开始执行`);
+      const sop = await sopManager.loadSOP(sopFilePath);
+
+      if (sop) {
+        // 添加 SOP 执行开始的消息
+        setState({
+          ...getState(),
+          messages: [
+            ...(getState().messages || []),
+            {
+              from: 'gpt',
+              value: `正在执行标准操作程序: ${sop.title}`,
+              timing: {
+                start: Date.now(),
+                end: Date.now(),
+                cost: 0,
+              },
+            },
+          ],
+        });
+
+        await sopManager.executeSOP(sop, operator);
+
+        // SOP 执行完成后，等待 1000ms 再进行截图
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        // 添加 SOP 执行完成的消息
+        setState({
+          ...getState(),
+          messages: [
+            ...(getState().messages || []),
+            {
+              from: 'gpt',
+              value: `标准操作程序执行完成: ${sop.title}`,
+              timing: {
+                start: Date.now(),
+                end: Date.now(),
+                cost: 0,
+              },
+            },
+          ],
+        });
+
+        logger.info(`[runAgent] SOP 执行完成: ${sop.title}`);
+      }
+    } catch (error) {
+      logger.error(`[runAgent] SOP 执行失败:`, error);
+
+      // 添加 SOP 执行失败的消息
+      setState({
+        ...getState(),
+        messages: [
+          ...(getState().messages || []),
+          {
+            from: 'gpt',
+            value: `标准操作程序执行失败，将使用常规模式继续执行任务`,
+            timing: {
+              start: Date.now(),
+              end: Date.now(),
+              cost: 0,
+            },
+          },
+        ],
+      });
+    }
+  }
 
   const handleData: GUIAgentConfig<NutJSElectronOperator>['onData'] = async ({
     data,
@@ -118,52 +258,6 @@ export const runAgent = async (
       messages: [...(getState().messages || []), ...conversationsWithSoM],
     });
   };
-
-  let operatorType: 'computer' | 'browser' = 'computer';
-  let operator:
-    | NutJSElectronOperator
-    | DefaultBrowserOperator
-    | RemoteComputerOperator
-    | RemoteBrowserOperator;
-
-  switch (settings.operator) {
-    case Operator.LocalComputer:
-      operator = new NutJSElectronOperator();
-      operatorType = 'computer';
-      break;
-    case Operator.LocalBrowser:
-      await checkBrowserAvailability();
-      const { browserAvailable } = getState();
-      if (!browserAvailable) {
-        setState({
-          ...getState(),
-          status: StatusEnum.ERROR,
-          errorMsg:
-            'Browser is not available. Please install Chrome and try again.',
-        });
-        return;
-      }
-
-      operator = await DefaultBrowserOperator.getInstance(
-        false,
-        false,
-        false,
-        getState().status === StatusEnum.CALL_USER,
-        getLocalBrowserSearchEngine(settings.searchEngineForBrowser),
-      );
-      operatorType = 'browser';
-      break;
-    case Operator.RemoteComputer:
-      operator = await RemoteComputerOperator.create();
-      operatorType = 'computer';
-      break;
-    case Operator.RemoteBrowser:
-      operator = await createRemoteBrowserOperator();
-      operatorType = 'browser';
-      break;
-    default:
-      break;
-  }
 
   let modelVersion = getModelVersion(settings.vlmProvider);
   let modelConfig: UITarsModelConfig = {
