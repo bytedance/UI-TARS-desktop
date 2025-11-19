@@ -13,6 +13,7 @@ import yaml from 'js-yaml';
 
 import { NutJSOperator } from '@ui-tars/operator-nut-js';
 import { getAndroidDeviceId, AdbOperator } from '@ui-tars/operator-adb';
+import {  DefaultBrowserOperator } from '@ui-tars/operator-browser';
 
 export interface CliOptions {
   presets?: string;
@@ -86,6 +87,7 @@ export const start = async (options: CliOptions) => {
       options: [
         { value: 'nut-js', label: 'nut-js' },
         { value: 'adb', label: 'adb' },
+        { value: 'browser', label: 'browser' },
       ],
     })) as string);
 
@@ -100,9 +102,13 @@ export const start = async (options: CliOptions) => {
       }
       targetOperator = new AdbOperator(deviceId);
       break;
-    // case 'browser':
-    //   // TODO: implement browser operator
-    //   break;
+    case 'browser':
+      targetOperator = await DefaultBrowserOperator.getInstance(
+        false,
+        false,
+        false,
+      );
+      break;
     case 'nut-js':
     default:
       targetOperator = new NutJSOperator();
