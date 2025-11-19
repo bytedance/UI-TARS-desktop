@@ -100,9 +100,13 @@ export const start = async (options: CliOptions) => {
       }
       targetOperator = new AdbOperator(deviceId);
       break;
-    // case 'browser':
-    //   // TODO: implement browser operator
-    //   break;
+    case 'browser':
+      targetOperator = await DefaultBrowserOperator.getInstance(
+        false,
+        false,
+        false,
+      );
+      break;
     case 'nut-js':
     default:
       targetOperator = new NutJSOperator();
