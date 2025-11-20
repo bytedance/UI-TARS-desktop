@@ -24,16 +24,17 @@ interface MessageGroupProps {
 export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking }) => {
   const isProcessing = useAtomValue(isProcessingAtom);
 
-  // Filter out environment messages
-  const filteredMessages = messages.filter((msg) => msg.role !== 'environment');
+  // Keep all messages including environment messages
+  const filteredMessages = messages;
 
   // If no messages after filtering, render nothing
   if (filteredMessages.length === 0) {
     return null;
   }
 
-  // Get user messages and assistant messages
+  // Get user messages, environment messages, and assistant messages
   const userMessages = filteredMessages.filter((msg) => msg.role === 'user');
+  const environmentMessages = filteredMessages.filter((msg) => msg.role === 'environment');
   const assistantMessages = filteredMessages.filter(
     (msg) => msg.role === 'assistant' || msg.role === 'system',
   );
@@ -75,6 +76,11 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
         // Regular user message
         return <Message key={userMsg.id} message={userMsg} />;
       })}
+
+      {/* Render environment messages (inserted messages) */}
+      {environmentMessages.map((envMsg) => (
+        <Message key={envMsg.id} message={envMsg} />
+      ))}
 
       {/* Render all assistant messages - each message renders independently, supporting streaming display */}
       {assistantMessages.map((message, index) => (
