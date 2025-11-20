@@ -45,7 +45,8 @@ export class AIOHybridOperator extends Operator {
     });
     await this.aioBrowser?.launch({
       timeout: 1000,
-      defaultViewport: { width: this.screenshotWidth, height: this.screenshotHeight },
+      // @ts-ignore
+      defaultViewport: { width: 0, height: 0, deviceScaleFactor: 0 },
     });
     this.logger.info('AIOBrowser initialized successfully');
   }
