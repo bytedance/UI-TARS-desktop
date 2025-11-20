@@ -10,6 +10,7 @@ import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useScrollToBottom } from './hooks/useScrollToBottom';
 import { ScrollToBottomButton } from './components/ScrollToBottomButton';
 import { EmptyState } from './components/EmptyState';
+import { LoadingState } from './components/LoadingState';
 import { OfflineBanner } from './components/OfflineBanner';
 import { SessionCreatingState } from './components/SessionCreatingState';
 
@@ -17,7 +18,7 @@ import './ChatPanel.css';
 
 export const ChatPanel: React.FC = () => {
   const { sessionId: urlSessionId } = useParams<{ sessionId: string }>();
-  const { activeSessionId, isProcessing, connectionStatus, checkServerStatus, sendMessage } =
+  const { activeSessionId, isProcessing, connectionStatus, checkServerStatus, sendMessage, loadingSessionEvents } =
     useSession();
 
   const currentSessionId = urlSessionId || activeSessionId;
@@ -41,7 +42,8 @@ export const ChatPanel: React.FC = () => {
 
   const isCreatingSession = !currentSessionId || currentSessionId === 'creating';
   const hasMessages = activeMessages.length > 0;
-  const showEmptyState = !isCreatingSession && !hasMessages;
+  const isLoadingEvents = currentSessionId && loadingSessionEvents[currentSessionId];
+  const showEmptyState = !isCreatingSession && !hasMessages && !isLoadingEvents;
 
   if (isCreatingSession) {
     return <SessionCreatingState isCreating={currentSessionId === 'creating'} />;
@@ -60,7 +62,9 @@ export const ChatPanel: React.FC = () => {
           onReconnect={checkServerStatus}
         />
 
-        {showEmptyState ? (
+        {isLoadingEvents ? (
+          <LoadingState />
+        ) : showEmptyState ? (
           <EmptyState replayState={replayState} isReplayMode={isReplayMode} />
         ) : (
           <div className="space-y-4 pb-2">

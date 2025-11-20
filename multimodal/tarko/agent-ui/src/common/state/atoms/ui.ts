@@ -61,6 +61,11 @@ export const workspacePanelCollapsedAtom = atom<boolean>(false);
 export const isProcessingAtom = atom<boolean>(false);
 
 /**
+ * Atom for tracking when historical events are being loaded for a session
+ */
+export const loadingSessionEventsAtom = atom<Record<string, boolean>>({});
+
+/**
  * Atom for offline mode state (view-only when disconnected)
  */
 export const offlineModeAtom = atom<boolean>(false);
