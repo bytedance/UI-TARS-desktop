@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.3.0-canary-263cff2e9-20251120130823](https://github.com/bytedance/UI-TARS-desktop/compare/v0.3.0...v0.3.0-canary-263cff2e9-20251120130823) (2025-11-20)
+
+### Features
+
+* **gui-agent:** add CLI package for GUI Agent automation ([#1741](https://github.com/bytedance/UI-TARS-desktop/pull/1741)) ([95231aa](https://github.com/bytedance/UI-TARS-desktop/commit/95231aad5)) [@heh](https://github.com/heh)
+
+### Bug Fixes
+
+* **tarko:** support streaming usage on llm response ([#1737](https://github.com/bytedance/UI-TARS-desktop/pull/1737)) ([3262c64](https://github.com/bytedance/UI-TARS-desktop/commit/3262c6416)) [@Oanakiaja](https://github.com/Oanakiaja)
+
 ## [0.3.0](https://github.com/bytedance/UI-TARS-desktop/compare/v0.3.0-beta.11-canary-e70d431f-20250917163005...v0.3.0) (2025-11-07)
 
 ### Features
