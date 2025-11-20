@@ -146,7 +146,24 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
   const responseRef = useRef<JSONViewerRef>(null);
   const metadataRef = useRef<JSONViewerRef>(null);
 
-  const hasParameters = toolCall.arguments && Object.keys(toolCall.arguments).length > 0;
+  // Safety check: if toolCall is null or undefined, show error state
+  if (!toolCall) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <div className="text-red-400 mb-2">⚠️</div>
+          <p className="text-red-600 dark:text-red-400 font-medium mb-2">
+            Invalid Tool Call Data
+          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            The tool call data is missing or corrupted.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const hasParameters = toolCall?.arguments && Object.keys(toolCall.arguments).length > 0;
   const hasMetadata = toolResult?._extra && Object.keys(toolResult._extra).length > 0;
 
   return (
@@ -155,7 +172,7 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
       <CollapsibleSection
         title="Input"
         icon={<FiPlay size={16} className="text-blue-500" />}
-        timestamp={toolCall.timestamp ? formatTimestamp(toolCall.timestamp, true) : undefined}
+        timestamp={toolCall?.timestamp ? formatTimestamp(toolCall.timestamp, true) : undefined}
         defaultOpen={true}
       >
         <div className="space-y-4">
@@ -166,7 +183,7 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
               Tool
             </div>
             <div className="font-mono text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700">
-              {toolCall.name}
+              {toolCall?.name || 'Unknown Tool'}
             </div>
           </div>
 
@@ -180,7 +197,7 @@ export const RawModeRenderer: React.FC<RawModeRendererProps> = ({ toolMapping })
               <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-3">
                 <JSONViewer
                   ref={parametersRef}
-                  data={toolCall.arguments}
+                  data={toolCall?.arguments || {}}
                   emptyMessage="No parameters"
                 />
               </div>
