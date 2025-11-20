@@ -31,12 +31,20 @@ import {
   afterAgentRun,
   getLocalBrowserSearchEngine,
 } from '../utils/agent';
+import {
+  closeScreenMarker,
+  hideScreenWaterFlow,
+  hideWidgetWindow,
+  showScreenWaterFlow,
+  showWidgetWindow,
+} from '../window/ScreenMarker';
 import { FREE_MODEL_BASE_URL } from '../remote/shared';
 import { getAuthHeader } from '../remote/auth';
 import { ProxyClient } from '../remote/proxyClient';
 import { UITarsModelConfig } from '@ui-tars/sdk/core';
 import OpenAI from 'openai';
 import { SOPManager } from './sopManager';
+import { showMainWindow, hideMainWindow } from '../window';
 
 export const runAgent = async (
   setState: (state: AppState) => void,
@@ -127,6 +135,10 @@ export const runAgent = async (
       const sop = await sopManager.loadSOP(sopFilePath);
 
       if (sop) {
+        // SOP 命中匹配后，隐藏主窗口
+        showScreenWaterFlow();
+        hideMainWindow();
+
         // 添加 SOP 执行开始的消息
         setState({
           ...getState(),
@@ -146,8 +158,14 @@ export const runAgent = async (
 
         await sopManager.executeSOP(sop, operator);
 
+        // SOP 执行结束后，显示主窗口
+        hideWidgetWindow();
+        closeScreenMarker();
+        hideScreenWaterFlow();
+        showMainWindow();
+
         // SOP 执行完成后，等待 1000ms 再进行截图
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 2000));
 
         // 添加 SOP 执行完成的消息
         setState({
@@ -170,6 +188,9 @@ export const runAgent = async (
       }
     } catch (error) {
       logger.error(`[runAgent] SOP 执行失败:`, error);
+
+      // SOP 执行失败时，确保隐藏主窗口
+      hideMainWindow();
 
       // 添加 SOP 执行失败的消息
       setState({
