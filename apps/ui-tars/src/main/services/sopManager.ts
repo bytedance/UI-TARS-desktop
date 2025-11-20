@@ -175,6 +175,7 @@ export class SOPManager {
       | DefaultBrowserOperator
       | RemoteComputerOperator
       | RemoteBrowserOperator,
+    onActionExecute?: (action: SOPAction, index: number, total: number) => void,
   ): Promise<void> {
     logger.info(`[SOPManager] 开始执行 SOP: ${sop.title}`);
 
@@ -183,6 +184,11 @@ export class SOPManager {
       logger.info(
         `[SOPManager] 执行动作 ${i + 1}/${sop.actions.length}: ${action.action_type}`,
       );
+
+      // 在执行动作前，调用回调函数传递动作信息
+      if (onActionExecute) {
+        onActionExecute(action, i, sop.actions.length);
+      }
 
       try {
         await this.executeAction(action, operator);

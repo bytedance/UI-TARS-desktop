@@ -281,12 +281,45 @@ export const runAgent = async (
           ],
         });
 
-        await sopManager.executeSOP(sop, operator);
+        // 定义回调函数，用于在执行每个动作时显示thought和action
+        const onActionExecute = (action: any, index: number, total: number) => {
+          logger.info(
+            `[runAgent] 执行SOP动作 ${index + 1}/${total}: ${action.action_type}`,
+          );
+
+          // 将SOPAction转换为PredictionParsed格式
+          const predictionParsed = {
+            reflection: action.reflection || null,
+            thought: action.thought || '',
+            action_type: action.action_type,
+            action_inputs: action.action_inputs || {},
+          };
+
+          // 创建与GUIAgent相同格式的消息
+          const actionMessage: ConversationWithSoM = {
+            from: 'gpt',
+            value: '', // 这个值会被ThoughtChain组件忽略
+            timing: {
+              start: Date.now(),
+              end: Date.now(),
+              cost: 0,
+            },
+            predictionParsed: [predictionParsed], // 将SOP动作转换为predictionParsed格式
+          };
+
+          // 将消息添加到状态中
+          setState({
+            ...getState(),
+            messages: [...getState().messages, actionMessage],
+          });
+        };
+
+        // 执行SOP，传入回调函数
+        await sopManager.executeSOP(sop, operator, onActionExecute);
 
         // SOP 执行结束后，显示主窗口
-        hideWidgetWindow();
-        closeScreenMarker();
-        hideScreenWaterFlow();
+        //hideWidgetWindow();
+        //closeScreenMarker();
         showMainWindow();
 
         // SOP 执行完成后，等待 1000ms 再进行截图
@@ -314,8 +347,8 @@ export const runAgent = async (
     } catch (error) {
       logger.error(`[runAgent] SOP 执行失败:`, error);
 
-      // SOP 执行失败时，确保隐藏主窗口
-      hideMainWindow();
+      // SOP 执行失败时，确保显示主窗口
+      showMainWindow();
 
       // 添加 SOP 执行失败的消息
       setState({
