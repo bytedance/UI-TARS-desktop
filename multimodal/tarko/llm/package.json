@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "@tarko/llm",
-  "version": "0.3.0",
+  "version": "0.3.0-canary-263cff2e9-20251120130823",
   "description": "A TypeScript SDK to call multiple LLM Providers in OpenAI format.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

@@ -1,6 +1,6 @@
 {
   "name": "@tarko/ui",
-  "version": "0.3.0",
+  "version": "0.3.0-canary-263cff2e9-20251120130823",
   "exports": {
     ".": {
       "import": "./dist/index.mjs",

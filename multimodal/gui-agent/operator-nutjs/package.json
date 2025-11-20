@@ -1,7 +1,7 @@
 {
   "name": "@gui-agent/operator-nutjs",
   "description": "computer operator based NutJS for GUI Agent",
-  "version": "0.3.0",
+  "version": "0.3.0-canary-263cff2e9-20251120130823",
   "repository": {
     "type": "git",
     "url": "https://github.com/bytedance/UI-TARS-desktop"

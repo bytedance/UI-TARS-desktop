@@ -1,6 +1,6 @@
 {
   "name": "@tarko/context-engineer",
-  "version": "0.3.0",
+  "version": "0.3.0-canary-263cff2e9-20251120130823",
   "description": "Context engineering processors, compression tools, etc. for Tarko",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
