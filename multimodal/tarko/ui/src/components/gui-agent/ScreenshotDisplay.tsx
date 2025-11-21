@@ -34,6 +34,86 @@ function getSandboxUrl() {
   return sessionMetadata?.sandboxUrl;
 }
 
+const Placeholder: React.FC<{ renderBrowserShell: boolean; className?: string }> = React.memo(
+  ({ renderBrowserShell, className }) => {
+    const placeholderClassName = renderBrowserShell
+      ? 'flex items-center justify-center bg-gray-50 dark:bg-gray-900 min-h-[400px]'
+      : 'flex items-center justify-center bg-gray-50 dark:bg-gray-900 min-h-[400px] rounded-xl';
+
+    return (
+      <div className={`${placeholderClassName} ${className || ''}`}>
+        <div className="text-center">
+          <div className="text-gray-400 dark:text-gray-500 text-sm">
+            GUI Agent Environment Not Started
+          </div>
+        </div>
+      </div>
+    );
+  },
+);
+
+const VncViewer: React.FC<{ renderBrowserShell: boolean }> = React.memo(
+  ({ renderBrowserShell }) => {
+    const vncContainerRef = useRef<HTMLDivElement>(null);
+    const [scale, setScale] = useState(0.5);
+
+    useEffect(() => {
+      const container = vncContainerRef.current;
+      if (!container) return;
+
+      const updateScale = () => {
+        const containerWidth = container.offsetWidth;
+        if (containerWidth && VNC_WIDTH) {
+          const newScale = containerWidth / VNC_WIDTH;
+          setScale(newScale > 1 ? 1 : newScale);
+        }
+      };
+      updateScale();
+
+      const resizeObserver = new window.ResizeObserver(() => {
+        updateScale();
+      });
+      resizeObserver.observe(container);
+
+      return () => {
+        resizeObserver.disconnect();
+      };
+    }, []);
+
+    const scaledWidth = VNC_WIDTH * scale;
+    const scaledHeight = VNC_HEIGHT * scale;
+
+    const sandboxBaseUrl = getSandboxUrl();
+
+    if (!sandboxBaseUrl) {
+      return <Placeholder renderBrowserShell={renderBrowserShell} />;
+    }
+
+    return (
+      <div className="space-y-4" ref={vncContainerRef}>
+        <div
+          style={{
+            width: `${scaledWidth}px`,
+            height: `${scaledHeight}px`,
+          }}
+        >
+          <iframe
+            className="w-full"
+            src={`${sandboxBaseUrl + '/vnc/index.html?autoconnect=true'}`}
+            frameBorder="0"
+            style={{
+              width: `${VNC_WIDTH}px`,
+              height: `${VNC_HEIGHT}px`,
+              transform: `scale(${scale})`,
+              transformOrigin: 'top left',
+            }}
+          ></iframe>
+        </div>
+      </div>
+    );
+  },
+);
+
 export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
   strategy,
   relatedImage,
@@ -49,32 +129,6 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
   renderBrowserShell = true,
 }) => {
   const imageRef = useRef<HTMLImageElement>(null);
-  const vncContainerRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(0.5);
-
-  useEffect(() => {
-    if (strategy !== 'vnc') return;
-    const container = vncContainerRef.current;
-    if (!container) return;
-
-    const updateScale = () => {
-      const containerWidth = container.offsetWidth;
-      if (containerWidth && VNC_WIDTH) {
-        const newScale = containerWidth / VNC_WIDTH;
-        setScale(newScale > 1 ? 1 : newScale);
-      }
-    };
-    updateScale();
-
-    const resizeObserver = new window.ResizeObserver(() => {
-      updateScale();
-    });
-    resizeObserver.observe(container);
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [strategy]);
 
   const shouldShowMouseCursor = (imageType: 'before' | 'after' | 'single') => {
     if (!mousePosition || !showCoordinates) return false;
@@ -91,22 +145,6 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
       );
     }
     return content;
-  };
-
-  const renderPlaceholder = () => {
-    const placeholderClassName = renderBrowserShell
-      ? 'flex items-center justify-center bg-gray-50 dark:bg-gray-900 min-h-[400px]'
-      : 'flex items-center justify-center bg-gray-50 dark:bg-gray-900 min-h-[400px] rounded-xl';
-
-    return (
-      <div className={placeholderClassName}>
-        <div className="text-center">
-          <div className="text-gray-400 dark:text-gray-500 text-sm">
-            GUI Agent Environment Not Started
-          </div>
-        </div>
-      </div>
-    );
   };
 
   const renderImageContent = (
@@ -156,7 +194,7 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
       );
     }
 
-    return renderPlaceholder();
+    return <Placeholder renderBrowserShell={renderBrowserShell} />;
   };
 
   if (strategy === 'both') {
@@ -201,37 +239,7 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
   }
 
   if (strategy === 'vnc') {
-    const scaledWidth = VNC_WIDTH * scale;
-    const scaledHeight = VNC_HEIGHT * scale;
-
-    const sandboxBaseUrl = getSandboxUrl();
-
-    if (!sandboxBaseUrl) {
-      return renderPlaceholder();
-    }
-
-    return (
-      <div className="space-y-4" ref={vncContainerRef}>
-        <div
-          style={{
-            width: `${scaledWidth}px`,
-            height: `${scaledHeight}px`,
-          }}
-        >
-          <iframe
-            className="w-full"
-            src={`${sandboxBaseUrl + '/vnc/index.html?autoconnect=true'}`}
-            frameBorder="0"
-            style={{
-              width: `${VNC_WIDTH}px`,
-              height: `${VNC_HEIGHT}px`,
-              transform: `scale(${scale})`,
-              transformOrigin: 'top left',
-            }}
-          ></iframe>
-        </div>
-      </div>
-    );
+    return <VncViewer renderBrowserShell={renderBrowserShell} />;
   }
 
   return wrapWithBrowserShell(
