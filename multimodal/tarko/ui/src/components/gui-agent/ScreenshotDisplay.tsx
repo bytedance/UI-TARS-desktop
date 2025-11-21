@@ -22,7 +22,17 @@ interface ScreenshotDisplayProps {
 const VNC_WIDTH = 1280;
 const VNC_HEIGHT = 1024;
 
-const sandboxBaseUrl = location.host.includes('localhost') ? 'http://localhost:8080' : '';
+function getSandboxUrl() {
+  if (location.host.includes('localhost')) {
+    return 'http://localhost:8080';
+  }
+
+  const sessionMetadata = JSON.parse(localStorage.getItem('current_session_metadata') || '{}') as {
+    sandboxUrl?: string;
+  };
+
+  return sessionMetadata?.sandboxUrl;
+}
 
 export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
   strategy,
@@ -194,6 +204,12 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
     const scaledWidth = VNC_WIDTH * scale;
     const scaledHeight = VNC_HEIGHT * scale;
 
+    const sandboxBaseUrl = getSandboxUrl();
+
+    if (!sandboxBaseUrl) {
+      return renderPlaceholder();
+    }
+
     return (
       <div className="space-y-4" ref={vncContainerRef}>
         <div
@@ -204,7 +220,7 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
         >
           <iframe
             className="w-full"
-            src={`${'http://localhost:8080' + '/vnc/index.html?autoconnect=true'}`}
+            src={`${sandboxBaseUrl + '/vnc/index.html?autoconnect=true'}`}
             frameBorder="0"
             style={{
               width: `${VNC_WIDTH}px`,
