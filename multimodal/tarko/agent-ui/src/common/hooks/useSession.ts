@@ -41,7 +41,10 @@ export function useSession() {
   const sessionMetadata = useMemo(() => {
     if (!activeSessionId || !sessions.length) return {};
     const currentSession = sessions.find((s) => s.id === activeSessionId);
-    return currentSession?.metadata || {};
+    const metadata = currentSession?.metadata || {};
+
+    localStorage.setItem('current_session_metadata', JSON.stringify(metadata));
+    return metadata;
   }, [activeSessionId, sessions]);
 
   const { isReplayMode } = useReplayMode();
