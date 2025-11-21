@@ -1,5 +1,11 @@
 # @agent-infra/mcp-server-browser
 
+## 1.2.24
+
+### Patch Changes
+
+- feat: set remote browser viewport to default viewport
+
 ## 1.2.23
 
 ### Patch Changes
