@@ -27,9 +27,9 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
 }) => {
   const { activeSessionId, messages, toolResults } = useSession();
   const guiAgentConfig = getGUIAgentConfig();
-  const [currentStrategy, setCurrentStrategy] = useState<'both' | 'beforeAction' | 'afterAction'>(
-    guiAgentConfig.defaultScreenshotRenderStrategy,
-  );
+  const [currentStrategy, setCurrentStrategy] = useState<
+    'both' | 'beforeAction' | 'afterAction' | 'vnc'
+  >(guiAgentConfig.defaultScreenshotRenderStrategy);
 
   // Extract the visual operation details from panelContent
   const operationData = extractBrowserControlData(panelContent);

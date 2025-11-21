@@ -1,8 +1,8 @@
 import React from 'react';
-import { FiClock, FiCheckCircle, FiShuffle } from 'react-icons/fi';
+import { FiClock, FiCheckCircle, FiShuffle, FiMonitor } from 'react-icons/fi';
 import { Tooltip } from '../basic';
 
-type ScreenshotStrategy = 'both' | 'beforeAction' | 'afterAction';
+type ScreenshotStrategy = 'both' | 'beforeAction' | 'afterAction' | 'vnc';
 
 interface StrategySwitchProps {
   currentStrategy: ScreenshotStrategy;
@@ -25,13 +25,18 @@ const strategyConfig = {
     icon: <FiShuffle size={12} />,
     tooltip: 'Show screenshots before and after action execution',
   },
+  vnc: {
+    label: 'VNC',
+    icon: <FiMonitor size={12} />,
+    tooltip: 'Show realtime VNC stream',
+  },
 } as const;
 
 export const StrategySwitch: React.FC<StrategySwitchProps> = ({
   currentStrategy,
   onStrategyChange,
 }) => {
-  const strategies: ScreenshotStrategy[] = ['beforeAction', 'afterAction', 'both'];
+  const strategies: ScreenshotStrategy[] = ['beforeAction', 'afterAction', 'both', 'vnc'];
 
   return (
     <div className="flex items-center justify-center">

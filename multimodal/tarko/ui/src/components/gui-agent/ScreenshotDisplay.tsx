@@ -1,8 +1,8 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { MouseCursor } from './MouseCursor';
 import { BrowserShell } from '../ai';
 
-type ScreenshotStrategy = 'both' | 'beforeAction' | 'afterAction';
+type ScreenshotStrategy = 'both' | 'beforeAction' | 'afterAction' | 'vnc';
 
 interface ScreenshotDisplayProps {
   strategy: ScreenshotStrategy;
@@ -19,6 +19,11 @@ interface ScreenshotDisplayProps {
   renderBrowserShell?: boolean;
 }
 
+const VNC_WIDTH = 1280;
+const VNC_HEIGHT = 1024;
+
+const sandboxBaseUrl = location.host.includes('localhost') ? 'http://localhost:8080' : '';
+
 export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
   strategy,
   relatedImage,
@@ -34,6 +39,32 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
   renderBrowserShell = true,
 }) => {
   const imageRef = useRef<HTMLImageElement>(null);
+  const vncContainerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.5);
+
+  useEffect(() => {
+    if (strategy !== 'vnc') return;
+    const container = vncContainerRef.current;
+    if (!container) return;
+
+    const updateScale = () => {
+      const containerWidth = container.offsetWidth;
+      if (containerWidth && VNC_WIDTH) {
+        const newScale = containerWidth / VNC_WIDTH;
+        setScale(newScale > 1 ? 1 : newScale);
+      }
+    };
+    updateScale();
+
+    const resizeObserver = new window.ResizeObserver(() => {
+      updateScale();
+    });
+    resizeObserver.observe(container);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [strategy]);
 
   const shouldShowMouseCursor = (imageType: 'before' | 'after' | 'single') => {
     if (!mousePosition || !showCoordinates) return false;
@@ -154,6 +185,34 @@ export const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({
               afterActionImageUrl || undefined,
             )}
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (strategy === 'vnc') {
+    const scaledWidth = VNC_WIDTH * scale;
+    const scaledHeight = VNC_HEIGHT * scale;
+
+    return (
+      <div className="space-y-4" ref={vncContainerRef}>
+        <div
+          style={{
+            width: `${scaledWidth}px`,
+            height: `${scaledHeight}px`,
+          }}
+        >
+          <iframe
+            className="w-full"
+            src={`${'http://localhost:8080' + '/vnc/index.html?autoconnect=true'}`}
+            frameBorder="0"
+            style={{
+              width: `${VNC_WIDTH}px`,
+              height: `${VNC_HEIGHT}px`,
+              transform: `scale(${scale})`,
+              transformOrigin: 'top left',
+            }}
+          ></iframe>
         </div>
       </div>
     );
