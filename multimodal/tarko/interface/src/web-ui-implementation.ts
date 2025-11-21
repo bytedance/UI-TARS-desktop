@@ -98,7 +98,7 @@ export interface TarkoWebUIGUIAgentConfig {
    *
    * @defaultValue 'afterAction'
    */
-  defaultScreenshotRenderStrategy?: 'both' | 'beforeAction' | 'afterAction';
+  defaultScreenshotRenderStrategy?: 'both' | 'beforeAction' | 'afterAction' | 'vnc';
   /**
    * Whether to enable runtime screenshot rendering strategy switch
    *

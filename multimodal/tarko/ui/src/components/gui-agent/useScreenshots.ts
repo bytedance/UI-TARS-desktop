@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-type ScreenshotStrategy = 'both' | 'beforeAction' | 'afterAction';
+type ScreenshotStrategy = 'both' | 'beforeAction' | 'afterAction' | 'vnc';
 
 interface UseScreenshotsProps {
   activeSessionId?: string | null;
