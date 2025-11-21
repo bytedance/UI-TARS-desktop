@@ -334,8 +334,14 @@ export const runAgent = async (
             predictionParsed: [predictionParsed], // 将SOP动作转换为predictionParsed格式
           };
 
-          // 只添加到临时数组，不在执行过程中实时更新状态
+          // 添加到临时数组
           sopExecutionMessages.push(actionMessage);
+
+          // 实时更新状态，让widget窗口能够显示当前执行的action
+          setState({
+            ...getState(),
+            messages: [...getState().messages, actionMessage],
+          });
         };
 
         // 执行SOP，传入回调函数
@@ -364,19 +370,10 @@ export const runAgent = async (
         // 添加到临时数组
         sopExecutionMessages.push(endMessage);
 
-        // SOP执行成功，将剩余的SOP执行过程中的消息添加到状态中（跳过已添加的开始消息）
-        const remainingMessages = sopExecutionMessages.slice(1); // 跳过第一个消息（开始消息）
-
-        // 记录当前状态中的消息数量和即将添加的消息数量
-        const currentMessages = getState().messages;
-        logger.info(
-          `[runAgent] SOP执行完成，当前状态中有${currentMessages.length}条消息，即将添加${remainingMessages.length}条新消息`,
-        );
-
-        // 更新状态
+        // 更新状态显示结束消息
         setState({
           ...getState(),
-          messages: [...currentMessages, ...remainingMessages],
+          messages: [...getState().messages, endMessage],
         });
 
         // 将SOP执行过程中的消息转换为Message格式，并更新sessionHistoryMessages
@@ -401,12 +398,7 @@ export const runAgent = async (
           ],
         });
 
-        // 记录所有SOP执行消息，用于调试
-        logger.info(
-          `[runAgent] SOP执行完成，共添加了${sopExecutionMessages.length}条消息到状态中，${sopMessagesAsHistory.length}条消息到sessionHistoryMessages中`,
-        );
-
-        logger.info(`[runAgent] SOP 执行完成: ${sop.title}`);
+        logger.info(`[runAgent] SOP执行完成: ${sop.title}`);
       }
     } catch (error) {
       logger.error(`[runAgent] SOP 执行失败:`, error);
@@ -425,7 +417,6 @@ export const runAgent = async (
         },
       };
 
-      // 只添加失败消息，不添加SOP执行过程中的消息
       // 首先获取当前状态，然后移除可能已经添加的开始消息
       const currentMessages = getState().messages;
       const messagesWithoutSop = currentMessages.filter(
@@ -494,15 +485,6 @@ export const runAgent = async (
       '\n========',
     );
 
-    // if (
-    //   settings.operator === Operator.LocalComputer &&
-    //   predictionParsed?.length &&
-    //   screenshotContext?.size &&
-    //   !abortController?.signal?.aborted
-    // ) {
-    //   showPredictionMarker(predictionParsed, screenshotContext);
-    // }
-
     setState({
       ...getState(),
       status,
@@ -567,15 +549,9 @@ export const runAgent = async (
       });
     },
     retry: {
-      model: {
-        maxRetries: 5,
-      },
-      screenshot: {
-        maxRetries: 5,
-      },
-      execute: {
-        maxRetries: 1,
-      },
+      model: { maxRetries: 5 },
+      screenshot: { maxRetries: 5 },
+      execute: { maxRetries: 1 },
     },
     maxLoopCount: settings.maxLoopCount,
     loopIntervalInMs: settings.loopIntervalInMs,
@@ -621,45 +597,33 @@ export const runAgent = async (
 // 工具函数：清空temp文件夹
 const clearTempFolder = () => {
   try {
-    // 使用项目根目录下的apps/ui-tars/temp文件夹
     const tempPath = path.join(__dirname, '..', '..', 'temp');
 
-    // 如果temp文件夹不存在，则创建它
     if (!fs.existsSync(tempPath)) {
       fs.mkdirSync(tempPath, { recursive: true });
-      logger.info(`[clearTempFolder] Created temp folder: ${tempPath}`);
       return;
     }
 
-    // 读取文件夹中的所有文件
     const files = fs.readdirSync(tempPath);
 
-    // 删除每个文件
     files.forEach((file) => {
       const filePath = path.join(tempPath, file);
       const stat = fs.statSync(filePath);
 
       if (stat.isFile()) {
         fs.unlinkSync(filePath);
-        logger.info(`[clearTempFolder] Deleted file: ${filePath}`);
       }
     });
-
-    logger.info(
-      `[clearTempFolder] Cleared ${files.length} files from temp folder: ${tempPath}`,
-    );
   } catch (error) {
-    logger.error('[clearTempFolder] Error clearing temp folder:', error);
+    logger.error('[clearTempFolder] Error:', error);
   }
 };
 
 // 工具函数：保存模型请求到JSON文件
 const saveModelRequest = (requestId: string, messages: any[]) => {
   try {
-    // 使用项目根目录下的apps/ui-tars/temp文件夹
     const tempPath = path.join(__dirname, '..', '..', 'temp');
 
-    // 确保temp文件夹存在
     if (!fs.existsSync(tempPath)) {
       fs.mkdirSync(tempPath, { recursive: true });
     }
@@ -668,10 +632,8 @@ const saveModelRequest = (requestId: string, messages: any[]) => {
     const textOnlyMessages = messages.map((msg) => {
       const textMsg = { ...msg };
 
-      // 如果消息有content字段且是数组，过滤掉图片类型的content
       if (Array.isArray(textMsg.content)) {
         textMsg.content = textMsg.content.filter((item: any) => {
-          // 保留文本类型的content，过滤掉图片类型的content
           return item.type === 'text';
         });
       }
@@ -679,22 +641,17 @@ const saveModelRequest = (requestId: string, messages: any[]) => {
       return textMsg;
     });
 
-    // 创建请求数据
     const requestData = {
       id: requestId,
       timestamp: new Date().toISOString(),
       messages: textOnlyMessages,
     };
 
-    // 生成文件名
     const fileName = `request_${requestId}_${Date.now()}.json`;
     const filePath = path.join(tempPath, fileName);
 
-    // 写入文件
     fs.writeFileSync(filePath, JSON.stringify(requestData, null, 2));
-
-    logger.info(`[saveModelRequest] Saved model request to: ${filePath}`);
   } catch (error) {
-    logger.error('[saveModelRequest] Error saving model request:', error);
+    logger.error('[saveModelRequest] Error:', error);
   }
 };
