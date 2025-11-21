@@ -26,6 +26,18 @@ description: "存储所有标准操作程序(SOP)的索引信息"
       "file_path": "adjust_brightness.md",
       "title": "调高亮度",
       "description": "在 macOS 系统上调高屏幕亮度"
+    },
+    {
+      "user_instruction": "调低音量",
+      "file_path": "adjust_volume.md",
+      "title": "调低音量",
+      "description": "在 macOS 系统上调低音量"
+    },
+    {
+      "user_instruction": "调高亮度, 调低音量，开启勿扰模式",
+      "file_path": "conference_mode.md",
+      "title": "调高亮度, 调低音量，开启勿扰模式",
+      "description": "在 macOS 系统上进入会议模式"
     }
   ]
 }

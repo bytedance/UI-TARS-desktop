@@ -5,7 +5,7 @@
 import assert from 'assert';
 
 import { logger } from '@main/logger';
-import { StatusEnum } from '@ui-tars/shared/types';
+import { StatusEnum, type Message } from '@ui-tars/shared/types';
 import { type ConversationWithSoM } from '@main/shared/types';
 import { GUIAgent, type GUIAgentConfig } from '@ui-tars/sdk';
 import { markClickPosition } from '@main/utils/image';
@@ -31,19 +31,33 @@ import {
   afterAgentRun,
   getLocalBrowserSearchEngine,
 } from '../utils/agent';
-import {
-  closeScreenMarker,
-  hideScreenWaterFlow,
-  hideWidgetWindow,
-  showScreenWaterFlow,
-} from '../window/ScreenMarker';
+import { showWidgetWindow, showScreenWaterFlow } from '../window/ScreenMarker';
 import { FREE_MODEL_BASE_URL } from '../remote/shared';
 import { getAuthHeader } from '../remote/auth';
 import { ProxyClient } from '../remote/proxyClient';
-import { UITarsModelConfig } from '@ui-tars/sdk/core';
+import { UITarsModel, type UITarsModelConfig } from '@ui-tars/sdk/core';
 import OpenAI from 'openai';
 import { SOPManager } from './sopManager';
 import { showMainWindow, hideMainWindow } from '../window';
+import * as fs from 'fs';
+import * as path from 'path';
+import { InvokeParams, InvokeOutput } from '@ui-tars/sdk/core';
+
+// 创建一个自定义的UITarsModel子类，用于保存模型请求
+class RequestSavingUITarsModel extends UITarsModel {
+  constructor(modelConfig: UITarsModelConfig) {
+    super(modelConfig);
+  }
+
+  async invoke(params: InvokeParams): Promise<InvokeOutput> {
+    // 在调用父类方法之前保存请求
+    const requestId = `req_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+    saveModelRequest(requestId, params.conversations);
+
+    // 调用父类方法
+    return super.invoke(params);
+  }
+}
 
 // 创建一个新函数来处理finished之后的动作预测
 const predictNextActions = async (
@@ -176,6 +190,10 @@ export const runAgent = async (
   getState: () => AppState,
 ) => {
   logger.info('runAgent');
+
+  // 清空temp文件夹，为新的任务做准备
+  clearTempFolder();
+
   const settings = SettingStore.getStore();
   const { instructions, abortController } = getState();
   assert(instructions, 'instructions is required');
@@ -255,33 +273,42 @@ export const runAgent = async (
 
   // 如果找到匹配的 SOP，则执行 SOP
   if (sopFilePath && operator) {
+    // 创建一个临时数组来存储SOP执行过程中的消息
+    const sopExecutionMessages: ConversationWithSoM[] = [];
+    let sopTitle = ''; // 用于存储SOP标题，在catch块中使用
+
     try {
       logger.info(`[runAgent] 找到匹配的 SOP: ${sopFilePath}，开始执行`);
       const sop = await sopManager.loadSOP(sopFilePath);
+      sopTitle = sop?.title || ''; // 保存SOP标题
 
       if (sop) {
         // SOP 命中匹配后，隐藏主窗口
+        showWidgetWindow();
         showScreenWaterFlow();
         hideMainWindow();
 
         // 添加 SOP 执行开始的消息
+        const startMessage: ConversationWithSoM = {
+          from: 'gpt',
+          value: `正在执行标准操作程序: ${sop.title}`,
+          timing: {
+            start: Date.now(),
+            end: Date.now(),
+            cost: 0,
+          },
+        };
+
+        // 先添加到临时数组
+        sopExecutionMessages.push(startMessage);
+
+        // 更新状态显示开始消息
         setState({
           ...getState(),
-          messages: [
-            ...(getState().messages || []),
-            {
-              from: 'gpt',
-              value: `正在执行标准操作程序: ${sop.title}`,
-              timing: {
-                start: Date.now(),
-                end: Date.now(),
-                cost: 0,
-              },
-            },
-          ],
+          messages: [...getState().messages, startMessage],
         });
 
-        // 定义回调函数，用于在执行每个动作时显示thought和action
+        // 定义回调函数，用于在执行每个动作时收集thought和action信息
         const onActionExecute = (action: any, index: number, total: number) => {
           logger.info(
             `[runAgent] 执行SOP动作 ${index + 1}/${total}: ${action.action_type}`,
@@ -307,11 +334,8 @@ export const runAgent = async (
             predictionParsed: [predictionParsed], // 将SOP动作转换为predictionParsed格式
           };
 
-          // 将消息添加到状态中
-          setState({
-            ...getState(),
-            messages: [...getState().messages, actionMessage],
-          });
+          // 只添加到临时数组，不在执行过程中实时更新状态
+          sopExecutionMessages.push(actionMessage);
         };
 
         // 执行SOP，传入回调函数
@@ -320,27 +344,67 @@ export const runAgent = async (
         // SOP 执行结束后，显示主窗口
         //hideWidgetWindow();
         //closeScreenMarker();
+        //hideScreenWaterFlow();
         showMainWindow();
 
         // SOP 执行完成后，等待 1000ms 再进行截图
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
         // 添加 SOP 执行完成的消息
+        const endMessage: ConversationWithSoM = {
+          from: 'gpt',
+          value: `标准操作程序执行完成: ${sop.title}`,
+          timing: {
+            start: Date.now(),
+            end: Date.now(),
+            cost: 0,
+          },
+        };
+
+        // 添加到临时数组
+        sopExecutionMessages.push(endMessage);
+
+        // SOP执行成功，将剩余的SOP执行过程中的消息添加到状态中（跳过已添加的开始消息）
+        const remainingMessages = sopExecutionMessages.slice(1); // 跳过第一个消息（开始消息）
+
+        // 记录当前状态中的消息数量和即将添加的消息数量
+        const currentMessages = getState().messages;
+        logger.info(
+          `[runAgent] SOP执行完成，当前状态中有${currentMessages.length}条消息，即将添加${remainingMessages.length}条新消息`,
+        );
+
+        // 更新状态
         setState({
           ...getState(),
-          messages: [
-            ...(getState().messages || []),
-            {
-              from: 'gpt',
-              value: `标准操作程序执行完成: ${sop.title}`,
-              timing: {
-                start: Date.now(),
-                end: Date.now(),
-                cost: 0,
-              },
-            },
+          messages: [...currentMessages, ...remainingMessages],
+        });
+
+        // 将SOP执行过程中的消息转换为Message格式，并更新sessionHistoryMessages
+        const sopMessagesAsHistory: Message[] = sopExecutionMessages.map(
+          (msg) => ({
+            from: msg.from,
+            value:
+              msg.value ||
+              (msg.predictionParsed && msg.predictionParsed[0]
+                ? `Thought: ${msg.predictionParsed[0].thought}\nAction: ${msg.predictionParsed[0].action_type}(${JSON.stringify(msg.predictionParsed[0].action_inputs)})`
+                : ''),
+          }),
+        );
+
+        // 获取当前的sessionHistoryMessages并添加SOP执行过程中的消息
+        const currentSessionHistory = getState().sessionHistoryMessages;
+        setState({
+          ...getState(),
+          sessionHistoryMessages: [
+            ...currentSessionHistory,
+            ...sopMessagesAsHistory,
           ],
         });
+
+        // 记录所有SOP执行消息，用于调试
+        logger.info(
+          `[runAgent] SOP执行完成，共添加了${sopExecutionMessages.length}条消息到状态中，${sopMessagesAsHistory.length}条消息到sessionHistoryMessages中`,
+        );
 
         logger.info(`[runAgent] SOP 执行完成: ${sop.title}`);
       }
@@ -351,21 +415,30 @@ export const runAgent = async (
       showMainWindow();
 
       // 添加 SOP 执行失败的消息
+      const failureMessage: ConversationWithSoM = {
+        from: 'gpt',
+        value: `标准操作程序执行失败，将使用常规模式继续执行任务`,
+        timing: {
+          start: Date.now(),
+          end: Date.now(),
+          cost: 0,
+        },
+      };
+
+      // 只添加失败消息，不添加SOP执行过程中的消息
+      // 首先获取当前状态，然后移除可能已经添加的开始消息
+      const currentMessages = getState().messages;
+      const messagesWithoutSop = currentMessages.filter(
+        (msg) => msg.value !== `正在执行标准操作程序: ${sopTitle}`,
+      );
+
       setState({
         ...getState(),
-        messages: [
-          ...(getState().messages || []),
-          {
-            from: 'gpt',
-            value: `标准操作程序执行失败，将使用常规模式继续执行任务`,
-            timing: {
-              start: Date.now(),
-              end: Date.now(),
-              cost: 0,
-            },
-          },
-        ],
+        messages: [...messagesWithoutSop, failureMessage],
       });
+
+      // 清空临时数组，不保留SOP执行过程中的消息
+      sopExecutionMessages.length = 0;
     }
   }
 
@@ -470,8 +543,11 @@ export const runAgent = async (
     operatorType,
   );
 
+  // 创建自定义的UITarsModel实例
+  const customModel = new RequestSavingUITarsModel(modelConfig);
+
   const guiAgent = new GUIAgent({
-    model: modelConfig,
+    model: customModel,
     systemPrompt: systemPrompt,
     logger,
     signal: abortController?.signal,
@@ -509,6 +585,7 @@ export const runAgent = async (
   GUIAgentManager.getInstance().setAgent(guiAgent);
   UTIOService.getInstance().sendInstruction(instructions);
 
+  // 在SOP执行完成后重新获取sessionHistoryMessages，确保包含SOP执行过程中的消息
   const { sessionHistoryMessages } = getState();
 
   beforeAgentRun(settings.operator);
@@ -539,4 +616,85 @@ export const runAgent = async (
     modelAuthHdrs,
     settings,
   );
+};
+
+// 工具函数：清空temp文件夹
+const clearTempFolder = () => {
+  try {
+    // 使用项目根目录下的apps/ui-tars/temp文件夹
+    const tempPath = path.join(__dirname, '..', '..', 'temp');
+
+    // 如果temp文件夹不存在，则创建它
+    if (!fs.existsSync(tempPath)) {
+      fs.mkdirSync(tempPath, { recursive: true });
+      logger.info(`[clearTempFolder] Created temp folder: ${tempPath}`);
+      return;
+    }
+
+    // 读取文件夹中的所有文件
+    const files = fs.readdirSync(tempPath);
+
+    // 删除每个文件
+    files.forEach((file) => {
+      const filePath = path.join(tempPath, file);
+      const stat = fs.statSync(filePath);
+
+      if (stat.isFile()) {
+        fs.unlinkSync(filePath);
+        logger.info(`[clearTempFolder] Deleted file: ${filePath}`);
+      }
+    });
+
+    logger.info(
+      `[clearTempFolder] Cleared ${files.length} files from temp folder: ${tempPath}`,
+    );
+  } catch (error) {
+    logger.error('[clearTempFolder] Error clearing temp folder:', error);
+  }
+};
+
+// 工具函数：保存模型请求到JSON文件
+const saveModelRequest = (requestId: string, messages: any[]) => {
+  try {
+    // 使用项目根目录下的apps/ui-tars/temp文件夹
+    const tempPath = path.join(__dirname, '..', '..', 'temp');
+
+    // 确保temp文件夹存在
+    if (!fs.existsSync(tempPath)) {
+      fs.mkdirSync(tempPath, { recursive: true });
+    }
+
+    // 过滤消息，只保留文本内容，移除base64图片
+    const textOnlyMessages = messages.map((msg) => {
+      const textMsg = { ...msg };
+
+      // 如果消息有content字段且是数组，过滤掉图片类型的content
+      if (Array.isArray(textMsg.content)) {
+        textMsg.content = textMsg.content.filter((item: any) => {
+          // 保留文本类型的content，过滤掉图片类型的content
+          return item.type === 'text';
+        });
+      }
+
+      return textMsg;
+    });
+
+    // 创建请求数据
+    const requestData = {
+      id: requestId,
+      timestamp: new Date().toISOString(),
+      messages: textOnlyMessages,
+    };
+
+    // 生成文件名
+    const fileName = `request_${requestId}_${Date.now()}.json`;
+    const filePath = path.join(tempPath, fileName);
+
+    // 写入文件
+    fs.writeFileSync(filePath, JSON.stringify(requestData, null, 2));
+
+    logger.info(`[saveModelRequest] Saved model request to: ${filePath}`);
+  } catch (error) {
+    logger.error('[saveModelRequest] Error saving model request:', error);
+  }
 };
