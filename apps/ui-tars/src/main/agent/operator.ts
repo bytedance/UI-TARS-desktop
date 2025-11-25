@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { Key, keyboard } from '@computer-use/nut-js';
+import { Key, keyboard, screen } from '@computer-use/nut-js';
 import {
   type ScreenshotOutput,
   type ExecuteParams,
@@ -11,6 +11,7 @@ import {
 import { NutJSOperator } from '@ui-tars/operator-nut-js';
 import { clipboard } from 'electron';
 import { desktopCapturer } from 'electron';
+import { Jimp } from 'jimp';
 
 import * as env from '@main/env';
 import { logger } from '@main/logger';
@@ -40,7 +41,42 @@ export class NutJSElectronOperator extends NutJSOperator {
   // Reducing resolution can significantly improve inference latency
   protected readonly resolutionScaleFactor: number = 0.7;
 
-  public async screenshot(): Promise<ScreenshotOutput> {
+  // Performance threshold for auto-fallback to NutJS method (in milliseconds)
+  // If desktopCapturer.getSources takes longer than this, fallback to screen.grab()
+  private readonly performanceThreshold: number = 1000; // 1 second
+
+  // Track whether we should use NutJS method based on performance
+  private useNutJSMethod: boolean = false;
+
+  /**
+   * Screenshot using NutJS screen.grab() method
+   * This is typically faster on Windows than desktopCapturer.getSources()
+   */
+  private async screenshotWithNutJS(): Promise<ScreenshotOutput> {
+    const totalStartTime = Date.now();
+    
+    logger.info('[screenshot] Using NutJS method (parent class screenshot)');
+    
+    // Simply use the parent class's screenshot method which already handles
+    // screen.grab() and basic image processing
+    const result = await super.screenshot();
+    
+    const totalDuration = Date.now() - totalStartTime;
+    
+    logger.info(
+      '[screenshot] [NutJS method] Total screenshot time:',
+      `${totalDuration}ms, Base64 length: ${result.base64?.length || 0} characters`,
+    );
+    
+    return result;
+  }
+
+  /**
+   * Screenshot using Electron desktopCapturer.getSources() method
+   * This is typically faster on Mac than Windows
+   */
+  private async screenshotWithElectron(): Promise<ScreenshotOutput> {
+    const totalStartTime = Date.now();
     const {
       physicalSize,
       logicalSize,
@@ -56,13 +92,55 @@ export class NutJSElectronOperator extends NutJSOperator {
       scaleFactor,
     );
 
+    // Calculate target scaled dimensions upfront
+    // This allows us to use target size as thumbnailSize, reducing
+    // amount of pixels Windows needs to process
+    const scaledWidth = Math.round(
+      physicalSize.width * this.resolutionScaleFactor,
+    );
+    const scaledHeight = Math.round(
+      physicalSize.height * this.resolutionScaleFactor,
+    );
+
+    // For Windows, use much smaller thumbnailSize for better performance
+    // This is a more aggressive optimization for Windows
+    const thumbnailWidth = env.isWindows 
+      ? Math.round(scaledWidth * 0.6) // 40% smaller on Windows
+      : scaledWidth;
+    const thumbnailHeight = env.isWindows 
+      ? Math.round(scaledHeight * 0.6) // 40% smaller on Windows
+      : scaledHeight;
+
+    // Performance optimization for Windows:
+    // Use much smaller thumbnailSize to reduce pixel count
+    // This reduces load on Windows' screen capture API
+    const getSourcesStartTime = Date.now();
     const sources = await desktopCapturer.getSources({
       types: ['screen'],
       thumbnailSize: {
-        width: Math.round(logicalSize.width),
-        height: Math.round(logicalSize.height),
+        width: thumbnailWidth,
+        height: thumbnailHeight,
       },
     });
+    const getSourcesDuration = Date.now() - getSourcesStartTime;
+    logger.info(
+      `[screenshot] desktopCapturer.getSources took ${getSourcesDuration}ms`,
+    );
+
+    // Auto-fallback to NutJS method if performance is poor
+    if (
+      env.isWindows &&
+      getSourcesDuration > this.performanceThreshold &&
+      !this.useNutJSMethod
+    ) {
+      logger.warn(
+        `[screenshot] desktopCapturer.getSources took ${getSourcesDuration}ms (>${this.performanceThreshold}ms threshold), ` +
+          `switching to NutJS method for better performance`,
+      );
+      this.useNutJSMethod = true;
+      return await this.screenshotWithNutJS();
+    }
+
     const primarySource =
       sources.find(
         (source) => source.display_id === primaryDisplayId.toString(),
@@ -87,30 +165,41 @@ export class NutJSElectronOperator extends NutJSOperator {
       `${originalWidth}x${originalHeight} (${originalWidth * originalHeight} pixels)`,
     );
 
-    // Apply resolution scaling to reduce image size for faster inference
-    const scaledWidth = Math.round(
-      physicalSize.width * this.resolutionScaleFactor,
-    );
-    const scaledHeight = Math.round(
-      physicalSize.height * this.resolutionScaleFactor,
-    );
-
-    const resized = screenshot.resize({
-      width: scaledWidth,
-      height: scaledHeight,
-    });
+    // Check if resize is needed (thumbnailSize might already match target size)
+    let imageToEncode = screenshot;
+    if (
+      originalWidth !== scaledWidth ||
+      originalHeight !== scaledHeight
+    ) {
+      const resizeStartTime = Date.now();
+      imageToEncode = screenshot.resize({
+        width: scaledWidth,
+        height: scaledHeight,
+      });
+      const resizeDuration = Date.now() - resizeStartTime;
+      logger.info(`[screenshot] resize took ${resizeDuration}ms`);
+    } else {
+      logger.info('[screenshot] No resize needed, thumbnailSize matched target size');
+    }
 
     // Convert to JPEG with configurable quality
-    const jpegBuffer = resized.toJPEG(this.screenshotJpegQuality);
+    const jpegStartTime = Date.now();
+    const jpegBuffer = imageToEncode.toJPEG(this.screenshotJpegQuality);
+    const jpegDuration = Date.now() - jpegStartTime;
+    logger.info(`[screenshot] toJPEG encoding took ${jpegDuration}ms`);
+
     const compressedBase64 = jpegBuffer.toString('base64');
+
+    const totalDuration = Date.now() - totalStartTime;
 
     // Log compressed image dimensions and size
     logger.info(
-      '[screenshot] Compressed size after JPEG compression:',
+      '[screenshot] [Electron method] Compressed size after JPEG compression:',
       `${scaledWidth}x${scaledHeight} (${scaledWidth * scaledHeight} pixels),`,
       `Resolution scale: ${this.resolutionScaleFactor},`,
       `Quality: ${this.screenshotJpegQuality}%,`,
-      `Base64 length: ${compressedBase64.length} characters`,
+      `Base64 length: ${compressedBase64.length} characters,`,
+      `Total screenshot time: ${totalDuration}ms`,
     );
 
     // Return original scaleFactor (DPI scale), not modified by resolution scale
@@ -119,6 +208,17 @@ export class NutJSElectronOperator extends NutJSOperator {
       base64: compressedBase64,
       scaleFactor,
     };
+  }
+
+  public async screenshot(): Promise<ScreenshotOutput> {
+    // On Windows, use NutJS method if it has been determined to be faster
+    // On Mac, always use Electron method (it's faster there)
+    if (env.isWindows && this.useNutJSMethod) {
+      return await this.screenshotWithNutJS();
+    }
+
+    // Try Electron method first (with auto-fallback on Windows if slow)
+    return await this.screenshotWithElectron();
   }
 
   async execute(params: ExecuteParams): Promise<ExecuteOutput> {
@@ -159,3 +259,5 @@ export class NutJSElectronOperator extends NutJSOperator {
     }
   }
 }
+/ /   T e s t   c h a n g e  
+ 
