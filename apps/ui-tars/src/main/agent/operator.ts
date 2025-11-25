@@ -254,6 +254,12 @@ export class NutJSElectronOperator extends NutJSOperator {
       await keyboard.releaseKey(Key.LeftControl, Key.V);
       await sleep(50);
       clipboard.writeText(originalClipboard);
+      
+      // Check if content ends with \n and press Enter if it does
+      if (content.endsWith('\n') || content.endsWith('\\n')) {
+        await keyboard.pressKey(Key.Enter);
+        await keyboard.releaseKey(Key.Enter);
+      }
     } else {
       return await super.execute(restoredParams);
     }
