@@ -52,14 +52,6 @@ user_instruction: "调高亮度, 调低音量，开启勿扰模式""
       "start_coords": [1344, 84],
       "start_box": "[0.914,0.088,0.914,0.088]"
     }
-  },
-  {
-      "reflection":null,
-      "thought":"当前亮度已经被提高，音量也被调低了，模式也被开启了，因此任务已完成，下一步我需要告诉用户任务已经完成。",
-      "action_type":"finished",
-      "action_inputs":{
-         "content":"已为你调高屏幕亮度，调低音量，开启勿扰模式任务完成。"
-      }
-   }
+  }
 ]
 ```

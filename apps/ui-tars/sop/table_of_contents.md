@@ -28,9 +28,9 @@ description: "存储所有标准操作程序(SOP)的索引信息"
       "description": "在 macOS 系统上调高屏幕亮度"
     },
     {
-      "user_instruction": "调低音量",
+      "user_instruction": "调高屏幕亮度，把音量调到最低，开启勿扰模式",
       "file_path": "adjust_volume.md",
-      "title": "调低音量",
+      "title": "调高屏幕亮度，把音量调到最低，开启勿扰模式",
       "description": "在 macOS 系统上调低音量"
     },
     {
