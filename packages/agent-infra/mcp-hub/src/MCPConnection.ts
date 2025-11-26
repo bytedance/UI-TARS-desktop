@@ -65,6 +65,7 @@ export type ConnectionStatusType =
 
 // When a server is being installed for the first time, it might take some time to install the dependencies
 const CLIENT_CONNECT_TIMEOUT = 5 * 60000; // 5 minutes
+const STDIO_CLIENT_CONNECT_TIMEOUT = 10 * 60000; // 10 minutes
 
 // Interface for server configuration
 export interface ServerConfig {
@@ -326,7 +327,7 @@ export class MCPConnection extends EventEmitter {
           this.transport = await this._createStdioTransport(resolvedConfig);
           this.client = this._createClient();
           await this.client.connect(this.transport, {
-            timeout: CLIENT_CONNECT_TIMEOUT,
+            timeout: STDIO_CLIENT_CONNECT_TIMEOUT, // stdio might take longer
           });
         } else {
           // First try the new http transport with fallback to deprecated sse transport
