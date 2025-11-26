@@ -143,7 +143,10 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
       <Sidebar collapsible="icon" className="select-none" {...props}>
         <DragArea></DragArea>
         <SidebarHeader>
-          <UITarsHeader showTrigger={location.pathname === '/'} />
+          <UITarsHeader
+            showTrigger={location.pathname === '/'}
+            onLogoClick={handleHomeClick}
+          />
           <SidebarMenu className="items-center">
             <SidebarMenuButton
               className="font-medium"
