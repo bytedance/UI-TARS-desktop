@@ -124,7 +124,11 @@ export class NutJSOperator extends Operator {
     logger.info(`[NutjsOperator Position]: (${startX}, ${startY})`);
 
     // execute configs
-    mouse.config.mouseSpeed = 3600;
+    mouse.config.mouseSpeed = 3600; //3600;
+    logger.info(
+      '[NutjsOperator] mouse.config.mouseSpeed',
+      mouse.config.mouseSpeed,
+    );
 
     // if (startBoxStr) {
     //   const region = await nutScreen.highlight(
@@ -240,13 +244,18 @@ export class NutJSOperator extends Operator {
           });
 
           if (startX && startY && endX && endY) {
+            // 添加一个小的偏移量，让结束坐标稍微偏下方一点
+            // 偏移量可以根据屏幕高度调整，这里使用屏幕高度的1%作为偏移
+            const offsetY = Math.max(5, screenHeight * 0.01); // 至少偏移5像素
+            const adjustedEndY = endY; // + offsetY;
+
             logger.info(
-              `[NutjsOperator] drag coordinates: startX=${startX}, startY=${startY}, endX=${endX}, endY=${endY}`,
+              `[NutjsOperator] drag coordinates: startX=${startX}, startY=${startY}, endX=${endX}, endY=${endY}, adjustedEndY=${adjustedEndY}`,
             );
             // 先移动鼠标到 startX, startY 位置
             await moveStraightTo(startX, startY);
             await sleep(100);
-            await mouse.drag(straightTo(new Point(endX, endY)));
+            await mouse.drag(straightTo(new Point(endX, adjustedEndY)));
           }
         }
         break;
