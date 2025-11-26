@@ -9,7 +9,7 @@ import {
 } from '@renderer/components/ui/sidebar';
 
 // import logoVector from '@resources/logo-vector.png?url';
-import logoVector from '@resources/icon.png?url';
+import logoVector from '@resources/assistant.png?url';
 
 interface HeaderProps {
   showTrigger: boolean;
