@@ -622,6 +622,12 @@ const clearTempFolder = () => {
 // 工具函数：保存模型请求到JSON文件
 const saveModelRequest = (requestId: string, messages: any[]) => {
   try {
+    // 检查是否启用了保存请求到JSON的设置
+    const settings = SettingStore.getStore();
+    if (!settings.saveRequestsToJson) {
+      return;
+    }
+
     const tempPath = path.join(__dirname, '..', '..', 'temp');
 
     if (!fs.existsSync(tempPath)) {

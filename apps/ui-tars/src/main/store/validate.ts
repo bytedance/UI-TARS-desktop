@@ -36,6 +36,9 @@ export const PresetSchema = z.object({
 
   // Command Suggestions
   commandSuggestions: z.array(z.string()).optional(),
+
+  // Debug Settings
+  saveRequestsToJson: z.boolean().optional(),
 });
 
 export type PresetSource = z.infer<typeof PresetSourceSchema>;
