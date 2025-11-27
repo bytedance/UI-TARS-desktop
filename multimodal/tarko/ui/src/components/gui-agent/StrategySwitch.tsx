@@ -10,6 +10,11 @@ interface StrategySwitchProps {
 }
 
 const strategyConfig = {
+  vnc: {
+    label: 'VNC',
+    icon: <FiMonitor size={12} />,
+    tooltip: 'Show realtime VNC stream',
+  },
   beforeAction: {
     label: 'Before',
     icon: <FiClock size={12} />,
@@ -24,11 +29,6 @@ const strategyConfig = {
     label: 'Both',
     icon: <FiShuffle size={12} />,
     tooltip: 'Show screenshots before and after action execution',
-  },
-  vnc: {
-    label: 'VNC',
-    icon: <FiMonitor size={12} />,
-    tooltip: 'Show realtime VNC stream',
   },
 } as const;
 
