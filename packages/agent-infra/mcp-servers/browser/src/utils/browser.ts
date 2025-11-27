@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { Browser, Page } from 'puppeteer-core';
 import { LocalBrowser, RemoteBrowser } from '@agent-infra/browser';
 import { PuppeteerBlocker } from '@ghostery/adblocker-puppeteer';
@@ -185,7 +186,7 @@ export async function ensureBrowser() {
   }
 
   if (!store.initialBrowserSetDownloadBehavior) {
-    const client = await store.globalPage.createCDPSession();
+    const client = await store.globalBrowser.target().createCDPSession();
     const { outputDir } = store.globalConfig;
     await client.send('Browser.setDownloadBehavior', {
       behavior: 'allow',
@@ -201,7 +202,7 @@ export async function ensureBrowser() {
           guid: event.guid,
           url: event.url,
           suggestedFilename: event.suggestedFilename,
-          resourceUri: `download://${event.suggestedFilename}`,
+          resourceUri: path.join(outputDir!, event.suggestedFilename),
           createdAt: new Date().toISOString(),
           progress: 0,
           state: 'inProgress',
@@ -229,6 +230,14 @@ export async function ensureBrowser() {
         logger.info(
           `状态: ${event.state}, 已下载: ${event.receivedBytes}/${event.totalBytes}`,
         );
+
+        if (event.state === 'completed') {
+          // @ts-ignore
+          if (event.filePath) {
+            // @ts-ignore
+            downloadInfo.resourceUri = event.filePath;
+          }
+        }
 
         // canceled from browser
         if (event.state === 'canceled') {
