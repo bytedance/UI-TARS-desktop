@@ -195,7 +195,7 @@ export class SOPManager {
 
         // 每个动作之间等待 1000ms
         if (i < sop.actions.length - 1) {
-          await new Promise((resolve) => setTimeout(resolve, 500));
+          await new Promise((resolve) => setTimeout(resolve, 1000));
         }
       } catch (error) {
         logger.error(
