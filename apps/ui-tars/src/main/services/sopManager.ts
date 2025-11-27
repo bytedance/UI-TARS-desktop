@@ -67,7 +67,13 @@ export class SOPManager {
       const tocContent = readFileSync(tocPath, 'utf-8');
 
       // 提取 JSON 部分
-      const jsonMatch = tocContent.match(/```json\n([\s\S]*?)\n```/);
+      let jsonMatch = tocContent.match(/```json\n([\s\S]*?)\n```/);
+      
+      // 如果第一个模式不匹配，尝试第二个模式（没有换行符）
+      if (!jsonMatch) {
+        jsonMatch = tocContent.match(/```json\r?\n([\s\S]*?)\r?\n```/);
+      }
+      
       if (!jsonMatch) {
         throw new Error('无法解析 table_of_contents.md 中的 JSON 数据');
       }
@@ -127,7 +133,7 @@ export class SOPManager {
       const sopContent = readFileSync(sopPath, 'utf-8');
 
       // 提取前置元数据
-      const frontMatterMatch = sopContent.match(/^---\n([\s\S]*?)\n---/);
+      let frontMatterMatch = sopContent.match(/^---\r?\n([\s\S]*?)\r?\n---/);
       if (!frontMatterMatch) {
         throw new Error('无法解析 SOP 文件的前置元数据');
       }
@@ -140,7 +146,7 @@ export class SOPManager {
       );
 
       // 提取动作序列
-      const actionsMatch = sopContent.match(/```json\n([\s\S]*?)\n```/);
+      let actionsMatch = sopContent.match(/```json\r?\n([\s\S]*?)\r?\n```/);
       if (!actionsMatch) {
         throw new Error('无法解析 SOP 文件中的动作序列');
       }
