@@ -31,7 +31,11 @@ import {
   afterAgentRun,
   getLocalBrowserSearchEngine,
 } from '../utils/agent';
-import { showWidgetWindow, showScreenWaterFlow } from '../window/ScreenMarker';
+import {
+  showWidgetWindow,
+  showScreenWaterFlow,
+  showHumanInterventionWindow,
+} from '../window/ScreenMarker';
 import { FREE_MODEL_BASE_URL } from '../remote/shared';
 import { getAuthHeader } from '../remote/auth';
 import { ProxyClient } from '../remote/proxyClient';
@@ -286,6 +290,7 @@ export const runAgent = async (
         // SOP 命中匹配后，隐藏主窗口
         showWidgetWindow();
         showScreenWaterFlow();
+        showHumanInterventionWindow();
         hideMainWindow();
 
         // 添加 SOP 执行开始的消息
@@ -351,7 +356,7 @@ export const runAgent = async (
         //hideWidgetWindow();
         //closeScreenMarker();
         //hideScreenWaterFlow();
-        showMainWindow();
+        //showMainWindow();
 
         // SOP 执行完成后，等待 1000ms 再进行截图
         await new Promise((resolve) => setTimeout(resolve, 1000));
