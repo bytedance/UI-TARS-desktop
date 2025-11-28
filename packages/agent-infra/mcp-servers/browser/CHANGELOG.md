@@ -1,5 +1,11 @@
 # @agent-infra/mcp-server-browser
 
+## 1.2.25
+
+### Patch Changes
+
+- fix(browser-mcp): fix download list retrieval and path issues
+
 ## 1.2.24
 
 ### Patch Changes
