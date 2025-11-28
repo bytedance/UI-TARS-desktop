@@ -1,6 +1,6 @@
 {
   "name": "@agent-infra/mcp-server-browser",
-  "version": "1.2.23",
+  "version": "1.2.26",
   "mcpName": "io.github.bytedance/mcp-server-browser",
   "description": "MCP server for browser use access",
   "license": "MIT",
