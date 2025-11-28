@@ -39,6 +39,11 @@ export const PresetSchema = z.object({
 
   // Debug Settings
   saveRequestsToJson: z.boolean().optional(),
+
+  // ASR Settings
+  asrAppKey: z.string().optional(),
+  asrAccessKey: z.string().optional(),
+  asrWsUrl: z.string().optional(),
 });
 
 export type PresetSource = z.infer<typeof PresetSourceSchema>;

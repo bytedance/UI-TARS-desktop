@@ -12,6 +12,7 @@ import {
   FileText,
   Settings,
   Bug,
+  Mic,
 } from 'lucide-react';
 import {
   Dialog,
@@ -25,6 +26,7 @@ import { ScrollArea } from '@renderer/components/ui/scroll-area';
 
 import { VLMSettings } from './category/vlm';
 import { ChatSettings } from './category/chat';
+import { ASRSettings } from './category/asr';
 import { LocalBrowserSettings } from './category/localBrowser';
 import { ReportSettings } from './category/report';
 import { GeneralSettings } from './category/general';
@@ -72,6 +74,13 @@ export const GlobalSettings = () => {
                 Chat Settings
               </TabsTrigger>
               <TabsTrigger
+                value="asr"
+                className="w-full justify-start gap-2 px-2 py-1.5 mb-2 !shadow-none font-normal data-[state=active]:font-medium data-[state=active]:bg-accent data-[state=active]:text-accent-foreground hover:bg-accent/50"
+              >
+                <Mic strokeWidth={2} />
+                ASR Settings
+              </TabsTrigger>
+              <TabsTrigger
                 value="operator"
                 className="w-full justify-start gap-2 px-2 py-1.5 mb-2 !shadow-none font-normal data-[state=active]:font-medium data-[state=active]:bg-accent data-[state=active]:text-accent-foreground hover:bg-accent/50"
               >
@@ -115,6 +124,12 @@ export const GlobalSettings = () => {
               <h2 className="text-xl font-semibold mb-3">Chat Settings</h2>
               <Separator className="mb-4" />
               <ChatSettings />
+            </TabsContent>
+
+            <TabsContent value="asr" className="mt-0">
+              <h2 className="text-xl font-semibold mb-3">ASR Settings</h2>
+              <Separator className="mb-4" />
+              <ASRSettings />
             </TabsContent>
 
             <TabsContent value="operator" className="mt-0 flex-1">

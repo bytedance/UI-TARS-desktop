@@ -57,11 +57,16 @@ const formSchema = z.object({
   searchEngineForBrowser: z.nativeEnum(SearchEngineForSettings),
   reportStorageBaseUrl: z.string().optional(),
   utioBaseUrl: z.string().optional(),
+  // ASR Settings
+  asrAppKey: z.string().optional(),
+  asrAccessKey: z.string().optional(),
+  asrWsUrl: z.string().optional(),
 });
 
 const SECTIONS = {
   vlm: 'VLM Settings',
   chat: 'Chat Settings',
+  asr: 'ASR Settings',
   report: 'Report Settings',
   general: 'General',
 } as const;
@@ -127,6 +132,9 @@ export default function Settings() {
       reportStorageBaseUrl: '',
       searchEngineForBrowser: SearchEngineForSettings.GOOGLE,
       utioBaseUrl: '',
+      asrAppKey: '',
+      asrAccessKey: '',
+      asrWsUrl: 'wss://openspeech.bytedance.com/api/v3/sauc/bigmodel',
       ...settings,
     },
   });
@@ -143,6 +151,11 @@ export default function Settings() {
         searchEngineForBrowser: settings.searchEngineForBrowser,
         reportStorageBaseUrl: settings.reportStorageBaseUrl,
         utioBaseUrl: settings.utioBaseUrl,
+        asrAppKey: settings.asrAppKey,
+        asrAccessKey: settings.asrAccessKey,
+        asrWsUrl:
+          settings.asrWsUrl ||
+          'wss://openspeech.bytedance.com/api/v3/sauc/bigmodel',
       });
     }
   }, [settings, form]);
@@ -497,6 +510,82 @@ export default function Settings() {
                   )}
                 />
               </div>
+
+              {/* ASR Settings */}
+              <div
+                id="asr"
+                ref={(el) => {
+                  sectionRefs.current.asr = el;
+                }}
+                className="space-y-6 pt-6 ml-1 mr-4"
+              >
+                <h2 className="text-lg font-medium">{SECTIONS.asr}</h2>
+                {/* ASR APP Key */}
+                <FormField
+                  control={form.control}
+                  name="asrAppKey"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>APP Key</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter ASR APP Key" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* ASR Access Key */}
+                <FormField
+                  control={form.control}
+                  name="asrAccessKey"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Access Key</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="password"
+                          placeholder="Enter ASR Access Key"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* ASR WebSocket URL */}
+                <FormField
+                  control={form.control}
+                  name="asrWsUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>WebSocket URL</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select ASR WebSocket URL" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="wss://openspeech.bytedance.com/api/v3/sauc/bigmodel">
+                            实时识别（bigmodel）
+                          </SelectItem>
+                          <SelectItem value="wss://openspeech.bytedance.com/api/v3/sauc/bigmodel_async">
+                            异步识别（bigmodel_async）
+                          </SelectItem>
+                          <SelectItem value="wss://openspeech.bytedance.com/api/v3/sauc/bigmodel_nostream">
+                            非流式识别（bigmodel_nostream）
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
               <div
                 id="report"
                 ref={(el) => {

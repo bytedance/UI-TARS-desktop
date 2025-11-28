@@ -2,7 +2,13 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+} from 'react';
 
 import { IMAGE_PLACEHOLDER } from '@ui-tars/shared/constants';
 import { StatusEnum } from '@ui-tars/shared/types';
@@ -20,12 +26,21 @@ import { Button } from '@renderer/components/ui/button';
 // import { useScreenRecord } from '@renderer/hooks/useScreenRecord';
 import { api } from '@renderer/api';
 
-import { Play, Send, Square, Loader2 } from 'lucide-react';
+import { Play, Send, Square, Loader2, Mic, MicOff } from 'lucide-react';
 import { Textarea } from '@renderer/components/ui/textarea';
 import { useSession } from '@renderer/hooks/useSession';
 
 import { Operator } from '@main/store/types';
 import { useSetting } from '../../hooks/useSetting';
+
+// ASR 状态类型
+type ASRStatus = 'idle' | 'connecting' | 'recording' | 'error';
+
+// 默认配置
+const ASR_CONFIG = {
+  WS_URL: 'wss://openspeech.bytedance.com/api/v3/sauc/bigmodel',
+  SAMPLE_RATE: 16000,
+};
 
 const ChatInput = ({
   operator,
@@ -50,6 +65,218 @@ const ChatInput = ({
   const { settings, updateSetting } = useSetting();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const running = status === StatusEnum.RUNNING;
+
+  // ASR 相关状态
+  const [asrStatus, setAsrStatus] = useState<ASRStatus>('idle');
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const processorRef = useRef<ScriptProcessorNode | null>(null);
+  const isRecording = asrStatus === 'recording';
+
+  // ASR 文本状态：baseText 是录音开始前的文本 + 已确认的识别文本
+  const asrBaseTextRef = useRef<string>('');
+  // 当前正在识别的临时文本
+  const [pendingTranscript, setPendingTranscript] = useState<string>('');
+
+  // 设置 IPC 监听器
+  useEffect(() => {
+    const unsubStatus = window.electron.asr.onStatus((status: string) => {
+      console.log('[ASR] Status from main:', status);
+      setAsrStatus(status as ASRStatus);
+
+      // 当录音停止时，将临时文本确认
+      if (status === 'idle') {
+        if (pendingTranscript) {
+          setLocalInstructions(asrBaseTextRef.current + pendingTranscript);
+          asrBaseTextRef.current = asrBaseTextRef.current + pendingTranscript;
+          setPendingTranscript('');
+        }
+      }
+    });
+
+    const unsubTranscript = window.electron.asr.onTranscript(
+      (text: string, isDefinite: boolean) => {
+        console.log(
+          '[ASR] Transcript from main:',
+          text,
+          'isDefinite:',
+          isDefinite,
+        );
+
+        if (isDefinite) {
+          // 这句话已确定，更新 base text
+          asrBaseTextRef.current = asrBaseTextRef.current + text;
+          setLocalInstructions(asrBaseTextRef.current);
+          setPendingTranscript('');
+        } else {
+          // 临时结果，替换 pending text
+          setPendingTranscript(text);
+          setLocalInstructions(asrBaseTextRef.current + text);
+        }
+      },
+    );
+
+    const unsubError = window.electron.asr.onError((error: string) => {
+      console.error('[ASR] Error from main:', error);
+    });
+
+    return () => {
+      unsubStatus();
+      unsubTranscript();
+      unsubError();
+    };
+  }, [pendingTranscript]);
+
+  // Float32 转 16-bit PCM
+  const floatTo16BitPCM = useCallback(
+    (float32Array: Float32Array): number[] => {
+      const result: number[] = [];
+      for (let i = 0; i < float32Array.length; i++) {
+        const s = Math.max(-1, Math.min(1, float32Array[i]));
+        const val = s < 0 ? s * 0x8000 : s * 0x7fff;
+        // 转换为 little-endian 16-bit
+        result.push(val & 0xff);
+        result.push((val >> 8) & 0xff);
+      }
+      return result;
+    },
+    [],
+  );
+
+  // 开始录音
+  const startRecording = useCallback(async () => {
+    console.log('[ASR] Starting audio capture...');
+
+    try {
+      audioContextRef.current = new AudioContext({
+        sampleRate: ASR_CONFIG.SAMPLE_RATE,
+      });
+
+      mediaStreamRef.current = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          sampleRate: ASR_CONFIG.SAMPLE_RATE,
+          channelCount: 1,
+          echoCancellation: true,
+          noiseSuppression: true,
+        },
+      });
+
+      const source = audioContextRef.current.createMediaStreamSource(
+        mediaStreamRef.current,
+      );
+      processorRef.current = audioContextRef.current.createScriptProcessor(
+        4096,
+        1,
+        1,
+      );
+
+      processorRef.current.onaudioprocess = (e) => {
+        const inputData = e.inputBuffer.getChannelData(0);
+        const pcmData = floatTo16BitPCM(inputData);
+        // 发送音频数据到主进程
+        window.electron.asr.sendAudio(pcmData, false);
+      };
+
+      source.connect(processorRef.current);
+      processorRef.current.connect(audioContextRef.current.destination);
+
+      console.log('[ASR] Audio capture started');
+    } catch (err) {
+      console.error('[ASR] Error starting audio capture:', err);
+      throw err;
+    }
+  }, [floatTo16BitPCM]);
+
+  // 停止录音
+  const stopRecording = useCallback(async () => {
+    console.log('[ASR] Stopping audio capture...');
+
+    if (processorRef.current) {
+      processorRef.current.disconnect();
+      processorRef.current = null;
+    }
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+      mediaStreamRef.current = null;
+    }
+    if (audioContextRef.current) {
+      await audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+
+    console.log('[ASR] Audio capture stopped');
+  }, []);
+
+  // 语音按钮点击处理
+  const handleVoiceClick = useCallback(async () => {
+    console.log(
+      '[ASR] Voice button clicked, current status:',
+      asrStatus,
+      'isRecording:',
+      isRecording,
+    );
+    console.log('[ASR] Current settings:', {
+      asrAppKey: settings.asrAppKey ? '***configured***' : 'NOT SET',
+      asrAccessKey: settings.asrAccessKey ? '***configured***' : 'NOT SET',
+      asrWsUrl: settings.asrWsUrl || 'default',
+    });
+
+    if (isRecording) {
+      // 停止录音
+      console.log('[ASR] Stopping...');
+      await stopRecording();
+      await window.electron.asr.stop();
+    } else {
+      // 开始录音 - 保存当前文本作为 base text
+      asrBaseTextRef.current = localInstructions;
+      setPendingTranscript('');
+
+      const { asrAppKey, asrAccessKey, asrWsUrl } = settings;
+
+      if (!asrAppKey || !asrAccessKey) {
+        console.warn('[ASR] ASR 未配置，请在设置中配置 APP_KEY 和 ACCESS_KEY');
+        return;
+      }
+
+      console.log('[ASR] Starting...');
+
+      try {
+        // 先通过 IPC 启动主进程的 ASR 服务
+        const result = await window.electron.asr.start({
+          appKey: asrAppKey,
+          accessKey: asrAccessKey,
+          wsUrl: asrWsUrl || ASR_CONFIG.WS_URL,
+        });
+
+        if (!result.success) {
+          console.error('[ASR] Failed to start:', result.error);
+          return;
+        }
+
+        // 然后开始录音
+        await startRecording();
+        console.log('[ASR] Started successfully');
+      } catch (error) {
+        console.error('[ASR] Error starting:', error);
+        await window.electron.asr.stop();
+      }
+    }
+  }, [
+    isRecording,
+    asrStatus,
+    settings,
+    startRecording,
+    stopRecording,
+    localInstructions,
+  ]);
+
+  // 组件卸载时清理
+  useEffect(() => {
+    return () => {
+      stopRecording();
+      window.electron.asr.stop();
+    };
+  }, [stopRecording]);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -233,6 +460,36 @@ const ChatInput = ({
             {running && (
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
             )}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant={isRecording ? 'destructive' : 'ghost'}
+                    size="icon"
+                    className={`h-8 w-8 ${isRecording ? 'animate-pulse' : ''}`}
+                    onClick={handleVoiceClick}
+                    disabled={running || disabled || asrStatus === 'connecting'}
+                  >
+                    {asrStatus === 'connecting' ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : isRecording ? (
+                      <MicOff className="h-4 w-4" />
+                    ) : (
+                      <Mic className="h-4 w-4" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>
+                    {isRecording
+                      ? '点击停止语音识别'
+                      : settings.asrAppKey
+                        ? '点击开始语音识别'
+                        : '请先在设置中配置 ASR'}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             {renderButton()}
           </div>
         </div>

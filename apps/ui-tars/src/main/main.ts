@@ -27,6 +27,7 @@ import { store } from './store/create';
 import { SettingStore } from './store/setting';
 import { createTray } from './tray';
 import { registerSettingsHandlers } from './services/settings';
+import { registerASRHandlers } from './services/asr';
 import { sanitizeState } from './utils/sanitizeState';
 import { windowManager } from './services/windowManager';
 import { checkBrowserAvailability } from './services/browserCheck';
@@ -200,6 +201,7 @@ const registerIPCHandlers = (
   });
 
   registerSettingsHandlers();
+  registerASRHandlers();
   // register ipc services routes
   registerIpcMain(ipcRoutes);
 

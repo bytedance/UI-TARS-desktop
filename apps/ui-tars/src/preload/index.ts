@@ -51,6 +51,30 @@ const electronHandler = {
       ipcRenderer.on('setting-updated', (_, state) => callback(state));
     },
   },
+  asr: {
+    start: (config: { appKey: string; accessKey: string; wsUrl: string }) =>
+      ipcRenderer.invoke('asr:start', config),
+    sendAudio: (audioData: number[], isLast: boolean) =>
+      ipcRenderer.invoke('asr:sendAudio', audioData, isLast),
+    stop: () => ipcRenderer.invoke('asr:stop'),
+    isActive: () => ipcRenderer.invoke('asr:isActive'),
+    onStatus: (callback: (status: string) => void) => {
+      const handler = (_: IpcRendererEvent, status: string) => callback(status);
+      ipcRenderer.on('asr:status', handler);
+      return () => ipcRenderer.removeListener('asr:status', handler);
+    },
+    onTranscript: (callback: (text: string, isFinal: boolean) => void) => {
+      const handler = (_: IpcRendererEvent, text: string, isFinal: boolean) =>
+        callback(text, isFinal);
+      ipcRenderer.on('asr:transcript', handler);
+      return () => ipcRenderer.removeListener('asr:transcript', handler);
+    },
+    onError: (callback: (error: string) => void) => {
+      const handler = (_: IpcRendererEvent, error: string) => callback(error);
+      ipcRenderer.on('asr:error', handler);
+      return () => ipcRenderer.removeListener('asr:error', handler);
+    },
+  },
 };
 
 // Initialize zustand bridge
