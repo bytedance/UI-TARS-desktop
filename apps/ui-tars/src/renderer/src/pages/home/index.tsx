@@ -4,7 +4,6 @@
  */
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { Info } from 'lucide-react';
 
 import {
   Card,
@@ -15,7 +14,6 @@ import {
   CardTitle,
 } from '@renderer/components/ui/card';
 import { Button } from '@renderer/components/ui/button';
-import { Alert, AlertDescription } from '@renderer/components/ui/alert';
 
 import { Operator } from '@main/store/types';
 import { useSession } from '../../hooks/useSession';
@@ -25,12 +23,10 @@ import {
 } from '@renderer/components/Settings/local';
 
 import computerUseImg from '@resources/home_img/computer_use.png?url';
-import browserUseImg from '@resources/home_img/browser_use.png?url';
 import { sleep } from '@ui-tars/shared/utils';
 
 import { FreeTrialDialog } from '../../components/AlertDialog/freeTrialDialog';
 import { DragArea } from '../../components/Common/drag';
-import { OPERATOR_URL_MAP } from '../../const';
 
 const Home = () => {
   const navigate = useNavigate();

@@ -5,6 +5,7 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { app } from 'electron';
 import { logger } from '@main/logger';
 import { NutJSElectronOperator } from '@main/agent/operator';
 import {
@@ -13,6 +14,21 @@ import {
 } from '@ui-tars/operator-browser';
 import { RemoteComputerOperator } from '@main/remote/operators';
 import { getScreenSize } from '@main/utils/screen';
+
+/**
+ * 获取 SOP 目录路径
+ * 开发环境：使用相对路径
+ * 生产环境：使用 app.getAppPath() 获取应用根目录
+ */
+function getSOPDir(): string {
+  if (app.isPackaged) {
+    // 生产环境：app.getAppPath() 返回 app.asar 或解压后的目录
+    return join(app.getAppPath(), 'sop');
+  } else {
+    // 开发环境
+    return join(__dirname, '../../../ui-tars/sop');
+  }
+}
 
 interface SOPAction {
   reflection: any;
@@ -62,8 +78,9 @@ export class SOPManager {
    */
   async loadSOPIndex(): Promise<void> {
     try {
-      const sopDir = join(__dirname, '../../../ui-tars/sop');
+      const sopDir = getSOPDir();
       const tocPath = join(sopDir, 'table_of_contents.md');
+      logger.info(`[SOPManager] SOP 目录: ${sopDir}`);
       const tocContent = readFileSync(tocPath, 'utf-8');
 
       // 提取 JSON 部分
@@ -122,7 +139,7 @@ export class SOPManager {
     }
 
     try {
-      const sopDir = join(__dirname, '../../../ui-tars/sop');
+      const sopDir = getSOPDir();
       const sopPath = join(sopDir, filePath);
       const sopContent = readFileSync(sopPath, 'utf-8');
 
@@ -178,6 +195,7 @@ export class SOPManager {
     onActionExecute?: (action: SOPAction, index: number, total: number) => void,
   ): Promise<void> {
     logger.info(`[SOPManager] 开始执行 SOP: ${sop.title}`);
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     for (let i = 0; i < sop.actions.length; i++) {
       const action = sop.actions[i];
@@ -195,7 +213,7 @@ export class SOPManager {
 
         // 每个动作之间等待 1000ms
         if (i < sop.actions.length - 1) {
-          await new Promise((resolve) => setTimeout(resolve, 1000));
+          await new Promise((resolve) => setTimeout(resolve, 3000));
         }
       } catch (error) {
         logger.error(
