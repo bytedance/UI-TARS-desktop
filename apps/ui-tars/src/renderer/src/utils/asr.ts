@@ -236,14 +236,14 @@ class ASRProtocol {
       offset += 4;
     }
 
-    const payloadSize = view.getUint32(offset, false);
+    // Skip payload size field (4 bytes) - we don't need the value
     offset += 4;
 
-    let payloadData = payload.slice(offset);
+    let payloadData: Uint8Array = payload.slice(offset);
 
     if (compressionType === CompressionType.GZIP && payloadData.length > 0) {
       try {
-        payloadData = await this.gzipDecompress(payloadData);
+        payloadData = new Uint8Array(await this.gzipDecompress(payloadData));
       } catch (e) {
         console.error('Failed to decompress payload:', e);
       }

@@ -75,8 +75,10 @@ const ChatInput = ({
 
   // ASR 文本状态：baseText 是录音开始前的文本 + 已确认的识别文本
   const asrBaseTextRef = useRef<string>('');
-  // 当前正在识别的临时文本
-  const [pendingTranscript, setPendingTranscript] = useState<string>('');
+  // 当前正在识别的临时文本（使用 ref 避免闭包问题）
+  const pendingTranscriptRef = useRef<string>('');
+  // 追踪是否正在录音，用于忽略停止后的延迟 transcript
+  const isRecordingRef = useRef<boolean>(false);
 
   // 设置 IPC 监听器
   useEffect(() => {
@@ -84,18 +86,33 @@ const ChatInput = ({
       console.log('[ASR] Status from main:', status);
       setAsrStatus(status as ASRStatus);
 
-      // 当录音停止时，将临时文本确认
-      if (status === 'idle') {
-        if (pendingTranscript) {
-          setLocalInstructions(asrBaseTextRef.current + pendingTranscript);
-          asrBaseTextRef.current = asrBaseTextRef.current + pendingTranscript;
-          setPendingTranscript('');
+      if (status === 'recording') {
+        isRecordingRef.current = true;
+      } else if (status === 'idle') {
+        // 在处理之前先标记为非录音状态，忽略后续的延迟 transcript
+        isRecordingRef.current = false;
+
+        // 当录音停止时，将临时文本确认到 baseText
+        // 注意：localInstructions 已经是正确的值，不需要再次设置
+        if (pendingTranscriptRef.current) {
+          asrBaseTextRef.current =
+            asrBaseTextRef.current + pendingTranscriptRef.current;
+          pendingTranscriptRef.current = '';
         }
       }
     });
 
     const unsubTranscript = window.electron.asr.onTranscript(
       (text: string, isDefinite: boolean) => {
+        // 如果不在录音状态，忽略延迟到达的 transcript
+        if (!isRecordingRef.current) {
+          console.log(
+            '[ASR] Ignoring transcript after recording stopped:',
+            text,
+          );
+          return;
+        }
+
         console.log(
           '[ASR] Transcript from main:',
           text,
@@ -107,10 +124,10 @@ const ChatInput = ({
           // 这句话已确定，更新 base text
           asrBaseTextRef.current = asrBaseTextRef.current + text;
           setLocalInstructions(asrBaseTextRef.current);
-          setPendingTranscript('');
+          pendingTranscriptRef.current = '';
         } else {
           // 临时结果，替换 pending text
-          setPendingTranscript(text);
+          pendingTranscriptRef.current = text;
           setLocalInstructions(asrBaseTextRef.current + text);
         }
       },
@@ -125,7 +142,7 @@ const ChatInput = ({
       unsubTranscript();
       unsubError();
     };
-  }, [pendingTranscript]);
+  }, []);
 
   // Float32 转 16-bit PCM
   const floatTo16BitPCM = useCallback(
@@ -229,7 +246,7 @@ const ChatInput = ({
     } else {
       // 开始录音 - 保存当前文本作为 base text
       asrBaseTextRef.current = localInstructions;
-      setPendingTranscript('');
+      pendingTranscriptRef.current = '';
 
       const { asrAppKey, asrAccessKey, asrWsUrl } = settings;
 

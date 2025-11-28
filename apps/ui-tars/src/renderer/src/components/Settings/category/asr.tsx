@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -36,6 +36,7 @@ const DEFAULT_WS_URL = 'wss://openspeech.bytedance.com/api/v3/sauc/bigmodel';
 
 export function ASRSettings() {
   const { settings, updateSetting } = useSetting();
+  const isInitializedRef = useRef(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -52,36 +53,35 @@ export function ASRSettings() {
     'asrWsUrl',
   ]);
 
+  // 只在首次加载 settings 时初始化表单，之后不再重置
   useEffect(() => {
-    if (Object.keys(settings).length) {
+    if (Object.keys(settings).length && !isInitializedRef.current) {
       form.reset({
         asrAppKey: settings.asrAppKey || '',
         asrAccessKey: settings.asrAccessKey || '',
         asrWsUrl: settings.asrWsUrl || DEFAULT_WS_URL,
       });
+      isInitializedRef.current = true;
     }
   }, [settings, form]);
 
+  // 保存设置 - 只在初始化完成后才触发保存
   useEffect(() => {
-    if (!Object.keys(settings).length) {
+    if (!Object.keys(settings).length || !isInitializedRef.current) {
       return;
     }
 
-    const validAndSave = async () => {
-      if (newAppKey !== settings.asrAppKey) {
-        updateSetting({ ...settings, asrAppKey: newAppKey });
-      }
+    if (newAppKey !== settings.asrAppKey) {
+      updateSetting({ ...settings, asrAppKey: newAppKey });
+    }
 
-      if (newAccessKey !== settings.asrAccessKey) {
-        updateSetting({ ...settings, asrAccessKey: newAccessKey });
-      }
+    if (newAccessKey !== settings.asrAccessKey) {
+      updateSetting({ ...settings, asrAccessKey: newAccessKey });
+    }
 
-      if (newWsUrl !== settings.asrWsUrl) {
-        updateSetting({ ...settings, asrWsUrl: newWsUrl });
-      }
-    };
-
-    validAndSave();
+    if (newWsUrl !== settings.asrWsUrl) {
+      updateSetting({ ...settings, asrWsUrl: newWsUrl });
+    }
   }, [newAppKey, newAccessKey, newWsUrl, settings, updateSetting]);
 
   return (

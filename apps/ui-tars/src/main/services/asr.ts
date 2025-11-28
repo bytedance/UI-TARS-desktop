@@ -5,8 +5,6 @@
 import { ipcMain, BrowserWindow } from 'electron';
 import { randomUUID } from 'crypto';
 import { logger } from '../logger';
-import * as https from 'https';
-import * as http from 'http';
 
 // 协议常量
 const ProtocolVersion = {
@@ -186,14 +184,14 @@ class ASRProtocol {
       offset += 4;
     }
 
-    const payloadSize = payload.readUInt32BE(offset);
+    // Skip payload size field (4 bytes) - we don't need the value
     offset += 4;
 
-    let payloadData = Buffer.from(payload.subarray(offset));
+    let payloadData: Buffer = Buffer.from(payload.subarray(offset));
 
     if (compressionType === CompressionType.GZIP && payloadData.length > 0) {
       try {
-        payloadData = await gunzipAsync(payloadData);
+        payloadData = Buffer.from(await gunzipAsync(payloadData));
       } catch (e) {
         logger.error('[ASR] Failed to decompress payload:', e);
       }
