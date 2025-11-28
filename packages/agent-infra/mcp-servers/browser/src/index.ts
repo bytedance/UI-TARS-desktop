@@ -127,6 +127,7 @@ program
             },
           }),
           logger,
+          outputDir: options.outputDir,
           vision: options.vision,
           launchOptions: {
             headless: options.headless,
