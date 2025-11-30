@@ -1,1 +1,4 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/h"
+
 npx --no -- commitlint --edit "$1"
