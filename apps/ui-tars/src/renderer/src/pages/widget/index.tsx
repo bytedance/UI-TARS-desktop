@@ -175,7 +175,7 @@ const Widget = () => {
   return (
     <div
       className="w-100 h-70 overflow-hidden p-4 bg-white/90 dark:bg-gray-800/90 rounded-[10px] border-gray-300 fixed bottom-0 left-0 right-0 pointer-events-none select-none flex flex-col"
-      style={{ borderWidth: isWin ? '1px' : '0', opacity: 0.75 }}
+      style={{ borderWidth: isWin ? '1px' : '0', opacity: 0.95 }}
     >
       <div className="flex draggable-area pointer-events-none">
         {/* Logo */}
