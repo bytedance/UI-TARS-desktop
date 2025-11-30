@@ -349,8 +349,13 @@ export const runAgent = async (
           });
         };
 
-        // 执行SOP，传入回调函数
-        await sopManager.executeSOP(sop, operator, onActionExecute);
+        // 执行SOP，传入回调函数和abortController
+        await sopManager.executeSOP(
+          sop,
+          operator,
+          onActionExecute,
+          abortController || undefined,
+        );
 
         // SOP 执行结束后，显示主窗口
         //hideWidgetWindow();
@@ -411,10 +416,16 @@ export const runAgent = async (
       // SOP 执行失败时，确保显示主窗口
       showMainWindow();
 
+      // 检查是否是用户终止的情况
+      const isUserAborted =
+        error instanceof Error && error.message === 'SOP执行被用户终止';
+
       // 添加 SOP 执行失败的消息
       const failureMessage: ConversationWithSoM = {
         from: 'gpt',
-        value: `标准操作程序执行失败，将使用常规模式继续执行任务`,
+        value: isUserAborted
+          ? '标准操作程序已被用户终止'
+          : '标准操作程序执行失败，将使用常规模式继续执行任务',
         timing: {
           start: Date.now(),
           end: Date.now(),
@@ -431,10 +442,17 @@ export const runAgent = async (
       setState({
         ...getState(),
         messages: [...messagesWithoutSop, failureMessage],
+        // 如果是用户终止，设置状态为END
+        status: isUserAborted ? StatusEnum.END : getState().status,
       });
 
       // 清空临时数组，不保留SOP执行过程中的消息
       sopExecutionMessages.length = 0;
+
+      // 如果是用户终止，直接返回，不继续执行常规模式
+      if (isUserAborted) {
+        return;
+      }
     }
   }
 

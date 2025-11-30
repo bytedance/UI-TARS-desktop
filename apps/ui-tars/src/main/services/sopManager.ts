@@ -193,11 +193,18 @@ export class SOPManager {
       | RemoteComputerOperator
       | RemoteBrowserOperator,
     onActionExecute?: (action: SOPAction, index: number, total: number) => void,
+    abortController?: AbortController,
   ): Promise<void> {
     logger.info(`[SOPManager] 开始执行 SOP: ${sop.title}`);
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
     for (let i = 0; i < sop.actions.length; i++) {
+      // 检查是否收到终止信号
+      if (abortController?.signal.aborted) {
+        logger.info(`[SOPManager] 收到终止信号，停止执行 SOP: ${sop.title}`);
+        throw new Error('SOP执行被用户终止');
+      }
+
       const action = sop.actions[i];
       logger.info(
         `[SOPManager] 执行动作 ${i + 1}/${sop.actions.length}: ${action.action_type}`,
@@ -209,13 +216,38 @@ export class SOPManager {
       }
 
       try {
+        // 在执行动作前再次检查终止信号
+        if (abortController?.signal.aborted) {
+          logger.info(`[SOPManager] 收到终止信号，停止执行 SOP: ${sop.title}`);
+          throw new Error('SOP执行被用户终止');
+        }
+
         await this.executeAction(action, operator);
 
-        // 每个动作之间等待 1000ms
+        // 在等待期间也要检查终止信号
         if (i < sop.actions.length - 1) {
-          await new Promise((resolve) => setTimeout(resolve, 3000));
+          // 使用可中断的等待
+          const waitTime = 3000;
+          const checkInterval = 100; // 每100ms检查一次终止信号
+          let elapsed = 0;
+
+          while (elapsed < waitTime) {
+            if (abortController?.signal.aborted) {
+              logger.info(
+                `[SOPManager] 收到终止信号，停止执行 SOP: ${sop.title}`,
+              );
+              throw new Error('SOP执行被用户终止');
+            }
+            await new Promise((resolve) => setTimeout(resolve, checkInterval));
+            elapsed += checkInterval;
+          }
         }
       } catch (error) {
+        // 如果是用户终止的错误，直接抛出，不需要额外日志
+        if (error instanceof Error && error.message === 'SOP执行被用户终止') {
+          throw error;
+        }
+
         logger.error(
           `[SOPManager] 执行动作失败 (${i + 1}/${sop.actions.length}):`,
           error,
