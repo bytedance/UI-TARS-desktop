@@ -64,6 +64,7 @@ async function cleanSources(
     'node_modules',
     'package.json',
     'resources',
+    'sop',
   ]);
 
   if (platform === 'darwin' || platform === 'mas') {

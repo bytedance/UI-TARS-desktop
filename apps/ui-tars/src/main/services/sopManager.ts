@@ -5,6 +5,7 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { app } from 'electron';
 import { logger } from '@main/logger';
 import { NutJSElectronOperator } from '@main/agent/operator';
 import {
@@ -58,11 +59,25 @@ export class SOPManager {
   }
 
   /**
+   * 获取 SOP 目录的路径
+   */
+  private getSOPDir(): string {
+    // 在开发环境中，使用相对路径
+    if (process.env.NODE_ENV === 'development') {
+      return join(__dirname, '../../../ui-tars/sop');
+    }
+    
+    // 在生产环境中，使用 app.getAppPath() 获取应用程序路径
+    const appPath = app.getAppPath();
+    return join(appPath, 'sop');
+  }
+
+  /**
    * 加载 SOP 索引
    */
   async loadSOPIndex(): Promise<void> {
     try {
-      const sopDir = join(__dirname, '../../../ui-tars/sop');
+      const sopDir = this.getSOPDir();
       const tocPath = join(sopDir, 'table_of_contents.md');
       const tocContent = readFileSync(tocPath, 'utf-8');
 
@@ -128,7 +143,7 @@ export class SOPManager {
     }
 
     try {
-      const sopDir = join(__dirname, '../../../ui-tars/sop');
+      const sopDir = this.getSOPDir();
       const sopPath = join(sopDir, filePath);
       const sopContent = readFileSync(sopPath, 'utf-8');
 
