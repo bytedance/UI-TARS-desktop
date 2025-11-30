@@ -326,7 +326,7 @@ class ASRService {
     isLast: boolean = false,
   ): Promise<void> {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      logger.warn('[ASR] WebSocket not connected');
+      // logger.warn('[ASR] WebSocket not connected');
       return;
     }
 
