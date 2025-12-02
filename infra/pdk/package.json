@@ -1,7 +1,7 @@
 {
-  "name": "@tarko/pnpm-toolkit",
-  "description": "PTK (pnpm toolkit), an pnpm workspace developement and publishing tool, designed for Agent TARS.",
-  "version": "0.3.0",
+  "name": "pnpm-dev-kit",
+  "description": "PDK (pnpm dev kit), an efficient pnpm workspace development and publishing tool",
+  "version": "0.0.4",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -14,7 +14,7 @@
     "bin"
   ],
   "bin": {
-    "ptk": "bin/cli.js"
+    "pdk": "bin/cli.js"
   },
   "scripts": {
     "dev": "rslib build --watch",
@@ -22,7 +22,7 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@tarko/model-provider": "workspace:*",
+    "@tarko/model-provider": "0.3.0",
     "boxen": "4",
     "cac": "^6.5.10",
     "chalk": "2.4.1",
@@ -38,7 +38,7 @@
     "tiny-conventional-commits-parser": "^0.0.1"
   },
   "devDependencies": {
-    "@rslib/core": "0.10.0",
+    "@rslib/core": "0.15.1",
     "@types/fs-extra": "11.0.2",
     "@types/inquirer": "^8.2.5",
     "@types/js-yaml": "^4.0.5",

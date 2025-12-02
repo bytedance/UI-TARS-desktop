@@ -43,7 +43,9 @@ function createBuildProcess(pkg: WorkspacePackage): void {
 
   subProcess.on('exit', (code) => {
     if (code !== 0) {
-      console.log(chalk.yellow(`[${pkg.name}] build process exited with code ${code}`));
+      console.log(
+        chalk.yellow(`[${pkg.name}] build process exited with code ${code}`),
+      );
     }
     delete processes[pkg.name];
   });
@@ -52,14 +54,19 @@ function createBuildProcess(pkg: WorkspacePackage): void {
 /**
  * Watches for file changes in the workspace
  */
-function watchWorkspace(packages: WorkspacePackage[], exclude: string[] = []): void {
+function watchWorkspace(
+  packages: WorkspacePackage[],
+  exclude: string[] = [],
+): void {
   const watcher = chokidar.watch(process.cwd(), {
     ignoreInitial: true,
     ignored: [/\/node_modules\//, /\/dist\//, /\/lib\//, /\/esm\//],
   });
 
   watcher.on('change', (filePath) => {
-    const targetPkg = packages.find((pkg) => filePath.startsWith(`${pkg.dir}/src`));
+    const targetPkg = packages.find((pkg) =>
+      filePath.startsWith(`${pkg.dir}/src`),
+    );
 
     if (targetPkg && !exclude.includes(targetPkg.name)) {
       createBuildProcess(targetPkg);
@@ -70,7 +77,10 @@ function watchWorkspace(packages: WorkspacePackage[], exclude: string[] = []): v
 /**
  * Enables stdin interaction for manual package building
  */
-function enableStdinFeature(packages: WorkspacePackage[], exclude: string[] = []): void {
+function enableStdinFeature(
+  packages: WorkspacePackage[],
+  exclude: string[] = [],
+): void {
   if (!process.stdin.isTTY) {
     return;
   }
@@ -85,7 +95,9 @@ function enableStdinFeature(packages: WorkspacePackage[], exclude: string[] = []
     if (input === 'ps') {
       console.log('\nRunning processes:');
       Object.keys(processes).forEach((pkgName) => {
-        console.log(`  ${chalk.gray(processes[pkgName].pid?.toString())} ${pkgName}`);
+        console.log(
+          `  ${chalk.gray(processes[pkgName].pid?.toString())} ${pkgName}`,
+        );
       });
       console.log();
       return;
@@ -125,7 +137,9 @@ function enableStdinFeature(packages: WorkspacePackage[], exclude: string[] = []
           },
         ]);
 
-        const selectedPackage = packages.find((pkg) => pkg.name === packageName);
+        const selectedPackage = packages.find(
+          (pkg) => pkg.name === packageName,
+        );
         if (selectedPackage) {
           createBuildProcess(selectedPackage);
         }
@@ -176,7 +190,11 @@ export async function dev(options: DevOptions = {}): Promise<void> {
 
     // Start the specified package by default
     if (packagesToStart.length > 0) {
-      console.log(chalk.cyan(`Starting specified packages: ${packagesToStart.join(', ')}`));
+      console.log(
+        chalk.cyan(
+          `Starting specified packages: ${packagesToStart.join(', ')}`,
+        ),
+      );
 
       for (const packageName of packagesToStart) {
         // Supports simple name matching or full name matching
@@ -191,9 +209,13 @@ export async function dev(options: DevOptions = {}): Promise<void> {
           console.log(chalk.green(`Auto-starting package: ${pkg.name}`));
           createBuildProcess(pkg);
         } else if (!pkg) {
-          console.log(chalk.yellow(`Package ${packageName} not found in workspace`));
+          console.log(
+            chalk.yellow(`Package ${packageName} not found in workspace`),
+          );
         } else {
-          console.log(chalk.yellow(`Package ${packageName} is excluded from dev mode`));
+          console.log(
+            chalk.yellow(`Package ${packageName} is excluded from dev mode`),
+          );
         }
       }
     }
@@ -201,7 +223,9 @@ export async function dev(options: DevOptions = {}): Promise<void> {
     console.log();
     console.log(chalk.cyan('Development mode ready'));
     console.log(
-      chalk.gray('Modify code to trigger builds or type "n" to select a package manually'),
+      chalk.gray(
+        'Modify code to trigger builds or type "n" to select a package manually',
+      ),
     );
     console.log(chalk.gray('Type "ps" to list running processes'));
     console.log();

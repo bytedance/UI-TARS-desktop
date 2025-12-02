@@ -4,7 +4,7 @@
  */
 
 /**
- * Git utilities for PTK
+ * Git utilities for PDK
  */
 import * as execa from 'execa';
 import type { CommitAuthor } from '../types';
@@ -38,9 +38,15 @@ export async function gitPushTag(
 /**
  * Creates a git commit
  */
-export async function gitCommit(message: string, cwd = process.cwd()): Promise<void> {
+export async function gitCommit(
+  message: string,
+  cwd = process.cwd(),
+): Promise<void> {
   await execa.execa('git', ['add', '-A'], { cwd, stdio: 'inherit' });
-  await execa.execa('git', ['commit', '-m', message, '--no-verify'], { cwd, stdio: 'inherit' });
+  await execa.execa('git', ['commit', '-m', message, '--no-verify'], {
+    cwd,
+    stdio: 'inherit',
+  });
 }
 
 /**
@@ -51,14 +57,21 @@ export async function gitCreateTag(
   message: string,
   cwd = process.cwd(),
 ): Promise<void> {
-  await execa.execa('git', ['tag', '-a', tagName, '-m', message], { cwd, stdio: 'inherit' });
+  await execa.execa('git', ['tag', '-a', tagName, '-m', message], {
+    cwd,
+    stdio: 'inherit',
+  });
 }
 
 /**
  * Gets current git branch name
  */
 export async function getCurrentBranch(cwd = process.cwd()): Promise<string> {
-  const result = await execa.execa('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd });
+  const result = await execa.execa(
+    'git',
+    ['rev-parse', '--abbrev-ref', 'HEAD'],
+    { cwd },
+  );
   return result.stdout.trim();
 }
 
@@ -69,7 +82,10 @@ export async function createAndSwitchBranch(
   branchName: string,
   cwd = process.cwd(),
 ): Promise<void> {
-  await execa.execa('git', ['checkout', '-b', branchName], { cwd, stdio: 'inherit' });
+  await execa.execa('git', ['checkout', '-b', branchName], {
+    cwd,
+    stdio: 'inherit',
+  });
 }
 
 /**
@@ -85,11 +101,18 @@ export async function switchBranch(
 /**
  * Gets author information for a commit
  */
-export function getCommitAuthor(hash: string, cwd = process.cwd()): CommitAuthor {
+export function getCommitAuthor(
+  hash: string,
+  cwd = process.cwd(),
+): CommitAuthor {
   try {
-    const result = execa.execaSync('git', ['--no-pager', 'show', '-s', '--pretty=%an,%ae', hash], {
-      cwd,
-    });
+    const result = execa.execaSync(
+      'git',
+      ['--no-pager', 'show', '-s', '--pretty=%an,%ae', hash],
+      {
+        cwd,
+      },
+    );
     const [name, email] = result.stdout.split(',');
     const emailName = email.slice(0, email.indexOf('@'));
 
@@ -102,22 +125,30 @@ export function getCommitAuthor(hash: string, cwd = process.cwd()): CommitAuthor
 /**
  * Gets a map of commit hashes to authors
  */
-export function getCommitAuthorMap(cwd = process.cwd()): Record<string, CommitAuthor> {
+export function getCommitAuthorMap(
+  cwd = process.cwd(),
+): Record<string, CommitAuthor> {
   try {
-    const result = execa.execaSync('git', ['--no-pager', 'log', '--pretty=%h,%an,%ae'], { cwd });
+    const result = execa.execaSync(
+      'git',
+      ['--no-pager', 'log', '--pretty=%h,%an,%ae'],
+      { cwd },
+    );
 
-    return result.stdout.split('\n').reduce<Record<string, CommitAuthor>>((map, line) => {
-      const [hash, name, email] = line.split(',');
-      const emailName = email ? email.slice(0, email.indexOf('@')) : 'N/A';
+    return result.stdout
+      .split('\n')
+      .reduce<Record<string, CommitAuthor>>((map, line) => {
+        const [hash, name, email] = line.split(',');
+        const emailName = email ? email.slice(0, email.indexOf('@')) : 'N/A';
 
-      map[hash.slice(0, 7)] = {
-        name: name?.replace(/\s/g, '&nbsp;') || 'N/A',
-        email: email || 'N/A',
-        emailName: emailName || 'N/A',
-      };
+        map[hash.slice(0, 7)] = {
+          name: name?.replace(/\s/g, '&nbsp;') || 'N/A',
+          email: email || 'N/A',
+          emailName: emailName || 'N/A',
+        };
 
-      return map;
-    }, {});
+        return map;
+      }, {});
   } catch (err) {
     return {};
   }

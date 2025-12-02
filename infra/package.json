@@ -1,0 +1,34 @@
+{
+  "private": true,
+  "name": "infra",
+  "version": "0.0.4",
+  "description": "Agent TARS Infra",
+  "scripts": {
+    "bootstrap": "pnpm install && pnpm build",
+    "clean": "pnpm run -r clean",
+    "dev": "pdk d",
+    "build": "pnpm run -r build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage",
+    "format": "pnpm prettier --write .",
+    "release": "pdk release --tag-prefix 'pdk@' --push-tag --build --ignore-scripts --auto-create-release-branch",
+    "release:dryrun": "pdk release --tag-prefix 'pdk@' --push-tag --build --ignore-scripts --auto-create-release-branch --dry-run",
+    "release:canary": "pdk release --tag-prefix 'pdk@' --canary --push-tag --build --ignore-scripts --auto-create-release-branch",
+    "release:full": "pdk release --tag-prefix 'pdk@' --push-tag --build --ignore-scripts --create-github-release",
+    "github-release": "pdk github-release",
+    "github-release:dryrun": "pdk github-release --dry-run",
+    "changelog": "pdk changelog",
+    "patch": "pdk patch"
+  },
+  "engines": {
+    "node": ">=22",
+    "pnpm": "9"
+  },
+  "devDependencies": {
+    "pnpm-dev-kit": "workspace:*",
+    "@types/node": "22.15.30",
+    "prettier": "3.5.3",
+    "typescript": "5.8.3"
+  }
+}

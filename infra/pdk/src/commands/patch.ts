@@ -15,7 +15,10 @@ import textTable from 'text-table';
 import stringWidth from 'string-width';
 import chalk from 'chalk';
 
-import { loadWorkspacePackages, resolveWorkspaceConfig } from '../utils/workspace';
+import {
+  loadWorkspacePackages,
+  resolveWorkspaceConfig,
+} from '../utils/workspace';
 import { fetchPackageVersion } from '../utils/npm';
 import { logger } from '../utils/logger';
 import { publishPackage } from '../utils/npm';
@@ -45,9 +48,12 @@ function formatReleaseStatusTable(
   });
 
   table.unshift(
-    ['Package Name', `Remote Version (tag: ${tag})`, 'Published', 'Expected Version'].map((v) =>
-      chalk.dim(v),
-    ),
+    [
+      'Package Name',
+      `Remote Version (tag: ${tag})`,
+      'Published',
+      'Expected Version',
+    ].map((v) => chalk.dim(v)),
   );
 
   return textTable(table, { stringLength: stringWidth });
@@ -65,9 +71,14 @@ function cleanGitHead(packagePath: string): void {
  * Patch command implementation
  */
 export async function patch(options: PatchOptions = {}): Promise<void> {
-  const { cwd = process.cwd(), runInBand = false, ignoreScripts = false } = options;
+  const {
+    cwd = process.cwd(),
+    runInBand = false,
+    ignoreScripts = false,
+  } = options;
 
-  let { version, tag } = options;
+  let { version } = options;
+  const { tag } = options;
 
   logger.info('Patch Started');
 
@@ -132,7 +143,9 @@ export async function patch(options: PatchOptions = {}): Promise<void> {
   }
 
   // Find packages that need patching
-  const packagesToPatch = packagesWithRemote.filter((pkg) => pkg.remoteVersion !== version);
+  const packagesToPatch = packagesWithRemote.filter(
+    (pkg) => pkg.remoteVersion !== version,
+  );
 
   // Publish packages
   if (runInBand) {

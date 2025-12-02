@@ -14,7 +14,11 @@ import { logger } from './utils/logger';
  * Wraps a command execution with error handling
  */
 // eslint-disable-next-line @typescript-eslint/ban-types
-async function wrapCommand(command: Function, options: Record<string, unknown>) {
+async function wrapCommand(
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  command: Function,
+  options: Record<string, unknown>,
+) {
   options.cwd = options.cwd || process.cwd();
 
   try {
@@ -43,9 +47,13 @@ export function bootstrapCli() {
   cli
     .command('d', 'Quickly launch on-demand development build for monorepo')
     .alias('dev')
-    .option('--exclude <packages>', 'Comma-separated list of packages to exclude', {
-      default: '',
-    })
+    .option(
+      '--exclude <packages>',
+      'Comma-separated list of packages to exclude',
+      {
+        default: '',
+      },
+    )
     .option(
       '--packages, --pkg <packages>',
       'Comma-separated list of packages to start by default',
@@ -87,15 +95,23 @@ export function bootstrapCli() {
     .option('--run-in-band', 'Whether to publish package in series', {
       default: false,
     })
-    .option('--ignore-scripts', 'Ignore npm scripts during release and patch process', {
-      default: false,
-    })
+    .option(
+      '--ignore-scripts',
+      'Ignore npm scripts during release and patch process',
+      {
+        default: false,
+      },
+    )
     .option('--tag-prefix <prefix>', 'Prefix for git tags', {
       default: 'v',
     })
-    .option('--canary', 'Skip version/tag selection and auto-generate canary version', {
-      default: false,
-    })
+    .option(
+      '--canary',
+      'Skip version/tag selection and auto-generate canary version',
+      {
+        default: false,
+      },
+    )
     .option('--use-ai', 'Use AI to generate changelog', {
       default: false,
     })
@@ -103,9 +119,13 @@ export function bootstrapCli() {
     .option('--model <model>', 'LLM model to use (default: gpt-4o)')
     .option('--apiKey, --api-key <apiKey>', 'Custom API key for LLM')
     .option('--baseURL, --base-url <baseURL>', 'Custom base URL for LLM')
-    .option('--filter-scopes <scopes>', 'Comma-separated list of scopes to include in changelog', {
-      default: 'tars,agent,tarko,o-agent,tars-stack,browser,infra,mcp,all',
-    })
+    .option(
+      '--filter-scopes <scopes>',
+      'Comma-separated list of scopes to include in changelog',
+      {
+        default: 'tars,agent,tarko,o-agent,tars-stack,browser,infra,mcp,all',
+      },
+    )
     .option(
       '--filter-types <types>',
       'Comma-separated list of commit types to include in changelog',
@@ -113,20 +133,32 @@ export function bootstrapCli() {
         default: 'feat,fix',
       },
     )
-    .option('--create-github-release', 'Create GitHub release after successful release', {
-      default: false,
-    })
-    .option('--auto-create-release-branch', 'Automatically create release branch before release', {
-      default: false,
-    })
+    .option(
+      '--create-github-release',
+      'Create GitHub release after successful release',
+      {
+        default: false,
+      },
+    )
+    .option(
+      '--auto-create-release-branch',
+      'Automatically create release branch before release',
+      {
+        default: false,
+      },
+    )
     .alias('release')
     .action((opts) => {
       // Process filter options
       if (opts.filterScopes) {
-        opts.filterScopes = opts.filterScopes.split(',').map((s: string) => s.trim());
+        opts.filterScopes = opts.filterScopes
+          .split(',')
+          .map((s: string) => s.trim());
       }
       if (opts.filterTypes && opts.filterTypes.trim()) {
-        opts.filterTypes = opts.filterTypes.split(',').map((s: string) => s.trim());
+        opts.filterTypes = opts.filterTypes
+          .split(',')
+          .map((s: string) => s.trim());
       } else {
         opts.filterTypes = [];
       }
@@ -136,9 +168,13 @@ export function bootstrapCli() {
   // Patch command
   cli
     .command('p', 'Patch the failure of release process')
-    .option('--patch-version <version>', 'Version (e.g. 1.0.0, 2.0.0-alpha.9)', {
-      // There is no default value here, because the default is read from package.json
-    })
+    .option(
+      '--patch-version <version>',
+      'Version (e.g. 1.0.0, 2.0.0-alpha.9)',
+      {
+        // There is no default value here, because the default is read from package.json
+      },
+    )
     .option('--tag <tag>', 'Tag (e.g. latest, next, beta)')
     .option('--run-in-band', 'Whether to publish package in series', {
       default: false,
@@ -158,6 +194,9 @@ export function bootstrapCli() {
   // Changelog command
   cli
     .command('changelog', 'Create changelog')
+    .option('--dry-run', 'Preview execution without making changes', {
+      default: false,
+    })
     .option('--changelog-version <version>', 'Version', {
       // There is no default value here, because the default is read from package.json
     })
@@ -186,9 +225,13 @@ export function bootstrapCli() {
     .option('--model <model>', 'LLM model to use (default: gpt-4o)')
     .option('--apiKey, --api-key <apiKey>', 'Custom API key for LLM')
     .option('--baseURL, --base-url <baseURL>', 'Custom base URL for LLM')
-    .option('--filter-scopes <scopes>', 'Comma-separated list of scopes to include in changelog', {
-      default: 'tars,agent,tarko,o-agent,tars-stack,browser,infra,mcp,all',
-    })
+    .option(
+      '--filter-scopes <scopes>',
+      'Comma-separated list of scopes to include in changelog',
+      {
+        default: 'tars,agent,tarko,o-agent,tars-stack,browser,infra,mcp,all',
+      },
+    )
     .option(
       '--filter-types <types>',
       'Comma-separated list of commit types to include in changelog',
@@ -203,10 +246,14 @@ export function bootstrapCli() {
       }
       // Process filter options
       if (opts.filterScopes) {
-        opts.filterScopes = opts.filterScopes.split(',').map((s: string) => s.trim());
+        opts.filterScopes = opts.filterScopes
+          .split(',')
+          .map((s: string) => s.trim());
       }
       if (opts.filterTypes && opts.filterTypes.trim()) {
-        opts.filterTypes = opts.filterTypes.split(',').map((s: string) => s.trim());
+        opts.filterTypes = opts.filterTypes
+          .split(',')
+          .map((s: string) => s.trim());
       } else {
         opts.filterTypes = [];
       }

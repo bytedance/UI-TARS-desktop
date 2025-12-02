@@ -4,7 +4,7 @@
  */
 
 /**
- * Workspace utilities for PTK
+ * Workspace utilities for PDK
  * Provides functions to interact with pnpm workspaces
  */
 import { existsSync, readFileSync, promises as fsPromises } from 'fs';
@@ -66,10 +66,14 @@ export function resolveWorkspaceConfig(cwd = process.cwd()): WorkspaceConfig {
 
   // Fallback to package.json workspaces if pnpm workspace not found
   const patterns =
-    workspacePatterns.length > 0 ? workspacePatterns : rootPackageJson.workspaces || [];
+    workspacePatterns.length > 0
+      ? workspacePatterns
+      : rootPackageJson.workspaces || [];
 
   if (patterns.length === 0) {
-    throw new Error('No workspace patterns found in pnpm-workspace.yaml or package.json');
+    throw new Error(
+      'No workspace patterns found in pnpm-workspace.yaml or package.json',
+    );
   }
 
   return {
@@ -82,7 +86,9 @@ export function resolveWorkspaceConfig(cwd = process.cwd()): WorkspaceConfig {
 /**
  * Loads all packages in the workspace
  */
-export async function loadWorkspacePackages(cwd = process.cwd()): Promise<WorkspacePackage[]> {
+export async function loadWorkspacePackages(
+  cwd = process.cwd(),
+): Promise<WorkspacePackage[]> {
   const config = resolveWorkspaceConfig(cwd);
 
   // console.time('glob-search');
