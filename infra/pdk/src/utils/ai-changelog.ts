@@ -10,7 +10,6 @@ interface CommitEntry {
   message: string;
   body?: string;
   prNumber?: string;
-  prLink?: string;
 }
 
 interface ChangelogSection {
@@ -19,9 +18,7 @@ interface ChangelogSection {
   commits: {
     message: string;
     hash: string;
-    link?: string;
     prNumber?: string;
-    prLink?: string;
   }[];
 }
 
@@ -51,25 +48,31 @@ export class AIChangelogGenerator {
   /**
    * Retrieves git commits between two tags
    */
-  private async getCommitsBetweenTags(fromTag?: string, toTag = 'HEAD'): Promise<CommitEntry[]> {
+  private async getCommitsBetweenTags(
+    fromTag?: string,
+    toTag = 'HEAD',
+  ): Promise<CommitEntry[]> {
     try {
       const range = fromTag ? `${fromTag}..${toTag}` : toTag;
-      let gitArgs = ['log', range, '--pretty=format:%H|%an|%ad|%s|%b', '--date=short'];
+      let gitArgs = [
+        'log',
+        range,
+        '--pretty=format:%H|%an|%ad|%s|%b',
+        '--date=short',
+      ];
 
       try {
-        // 尝试执行 git 命令
         await execa('git', ['rev-parse', fromTag || toTag], { cwd: this.cwd });
-      } catch (error) {
-        // 如果 tag 不存在，则获取最近 100 条与 tagPrefix 相关的提交
-        logger.warn(`Tag ${fromTag || toTag} not found. Falling back to recent commits.`);
-
-        // 修改为获取最近 100 条提交
-        gitArgs = ['log', '--max-count=100', '--pretty=format:%H|%an|%ad|%s|%b', '--date=short'];
-
-        // 如果有 tagPrefix，尝试过滤与前缀相关的提交
-        if (this.tagPrefix) {
-          logger.info(`Looking for commits related to tag prefix: ${this.tagPrefix}`);
-        }
+      } catch {
+        logger.warn(
+          `Tag ${fromTag || toTag} not found. Falling back to recent commits.`,
+        );
+        gitArgs = [
+          'log',
+          '--max-count=100',
+          '--pretty=format:%H|%an|%ad|%s|%b',
+          '--date=short',
+        ];
       }
 
       const { stdout } = await execa('git', gitArgs, { cwd: this.cwd });
@@ -85,8 +88,7 @@ export class AIChangelogGenerator {
           const [hash, author, date, message, ...bodyParts] = line.split('|');
           const body = bodyParts.join('|').trim();
 
-          // Extract PR number if available (e.g., "#123")
-          const prMatch = message.match(/#(\d+)/);
+          const prMatch = `${message}\n${body}`.match(/#(\d+)/);
           const prNumber = prMatch ? prMatch[1] : undefined;
 
           return {
@@ -94,9 +96,7 @@ export class AIChangelogGenerator {
             author,
             date,
             message,
-            body,
             prNumber,
-            prLink: prNumber ? `https://github.com/user/repo/pull/${prNumber}` : undefined,
           };
         });
     } catch (error) {
@@ -110,16 +110,17 @@ export class AIChangelogGenerator {
    */
   private async getRepoUrl(): Promise<string> {
     try {
-      const { stdout } = await execa('git', ['config', '--get', 'remote.origin.url'], {
-        cwd: this.cwd,
-      });
+      const { stdout } = await execa(
+        'git',
+        ['config', '--get', 'remote.origin.url'],
+        { cwd: this.cwd },
+      );
 
-      // Convert SSH URL to HTTPS URL if needed
       return stdout
         .trim()
         .replace(/^git@github\.com:/, 'https://github.com/')
         .replace(/\.git$/, '');
-    } catch (error) {
+    } catch {
       return '';
     }
   }
@@ -127,10 +128,12 @@ export class AIChangelogGenerator {
   /**
    * Generates a comparison URL between two versions
    */
-  private async getCompareLink(fromTag?: string, toTag?: string): Promise<string> {
+  private async getCompareLink(
+    fromTag?: string,
+    toTag?: string,
+  ): Promise<string> {
     const repoUrl = await this.getRepoUrl();
     if (!repoUrl || !fromTag) return '';
-
     return `${repoUrl}/compare/${fromTag}...${toTag || 'HEAD'}`;
   }
 
@@ -143,7 +146,6 @@ export class AIChangelogGenerator {
     fromTag?: string,
     toTag?: string,
   ): Promise<ChangelogData> {
-    // If no commits, return an empty changelog
     if (commits.length === 0) {
       return {
         version,
@@ -154,42 +156,26 @@ export class AIChangelogGenerator {
     }
 
     const { createLLMClient } = await import('@tarko/model-provider');
-
     const llm = createLLMClient(this.model as AgentModel);
 
-    // Prepare prompt for LLM
-    const prompt = `Analyze these git commits and generate a structured changelog:
+    const { buildChangelogPrompt } = await import('./prompts');
+    const prompt = buildChangelogPrompt(
+      commits.map(({ hash, author, date, message, prNumber }) => ({
+        hash,
+        author,
+        date,
+        message,
+        prNumber,
+      })),
+    );
 
-${JSON.stringify(commits, null, 2)}
-
-Group similar commits into sections (e.g., Features, Bug Fixes, etc.).
-If there are major architectural changes or breaking changes, highlight them in a summary.
-Provide a concise, professional changelog in JSON format with the following structure:
-{
-  "sections": [
-    {
-      "type": "feat", // One of: feat, fix, docs, chore, refactor, perf, etc.
-      "title": "Features",
-      "commits": [
-        {
-          "message": "Clear description of the change",
-          "hash": "commit hash",
-          "prNumber": "PR number if available",
-          "prLink": "PR link if available"
-        }
-      ]
-    }
-  ],
-  "summary": "Optional overall summary for significant releases"
-}`;
-
-    // Call LLM with JSON mode
     const response = await llm.chat.completions.create({
       model: this.model.id,
       messages: [
         {
           role: 'system',
-          content: 'You are a changelog generator that produces structured JSON output.',
+          content:
+            'You are a changelog generator that produces structured JSON output.',
         },
         { role: 'user', content: prompt },
       ],
@@ -197,15 +183,12 @@ Provide a concise, professional changelog in JSON format with the following stru
     });
 
     const content = response.choices[0].message.content;
-
     if (!content) {
       throw new Error('Failed to generate changelog: Empty response from LLM');
     }
 
     try {
       const result = JSON.parse(content);
-
-      // Compose final changelog data
       return {
         version,
         date: new Date().toISOString().split('T')[0],
@@ -222,8 +205,9 @@ Provide a concise, professional changelog in JSON format with the following stru
   /**
    * Formats changelog data into Markdown
    */
-  private formatChangelogMarkdown(data: ChangelogData): string {
+  private async formatChangelogMarkdown(data: ChangelogData): Promise<string> {
     const { version, date, compareLink, sections, summary } = data;
+    const repoUrl = await this.getRepoUrl();
 
     let markdown = `## [${version}](${compareLink}) (${date})\n\n`;
 
@@ -236,15 +220,10 @@ Provide a concise, professional changelog in JSON format with the following stru
 
       for (const commit of section.commits) {
         let commitText = `* ${commit.message}`;
-
-        // Add PR reference if available
         if (commit.prNumber) {
-          commitText += ` ([#${commit.prNumber}](${commit.prLink}))`;
+          commitText += ` ([#${commit.prNumber}](${repoUrl}/pull/${commit.prNumber}))`;
         }
-
-        // Add commit hash reference
-        commitText += ` ([${commit.hash.substring(0, 7)}](${this.getRepoUrl()}/commit/${commit.hash}))`;
-
+        commitText += ` ([${commit.hash.substring(0, 7)}](${repoUrl}/commit/${commit.hash}))`;
         markdown += `${commitText}\n`;
       }
 
@@ -257,10 +236,12 @@ Provide a concise, professional changelog in JSON format with the following stru
   /**
    * Generates changelog for a specific version
    */
-  public async generate(version: string, previousTag?: string): Promise<string> {
+  public async generate(
+    version: string,
+    previousTag?: string,
+  ): Promise<string> {
     const currentTag = `${this.tagPrefix}${version}`;
 
-    // If previous tag not specified, try to find it
     if (!previousTag) {
       try {
         const { stdout } = await execa(
@@ -269,18 +250,16 @@ Provide a concise, professional changelog in JSON format with the following stru
           { cwd: this.cwd },
         );
         previousTag = stdout.trim();
-      } catch (error) {
-        // If no previous tag, use the first commit
+      } catch {
         previousTag = undefined;
       }
     }
 
-    logger.info(`Generating changelog from ${previousTag || 'initial commit'} to ${currentTag}`);
+    logger.info(
+      `Generating changelog from ${previousTag || 'initial commit'} to ${currentTag}`,
+    );
 
-    // Get commits between tags
     const commits = await this.getCommitsBetweenTags(previousTag, currentTag);
-
-    // Generate changelog data using AI
     const changelogData = await this.generateChangelogWithAI(
       commits,
       version,
@@ -288,8 +267,7 @@ Provide a concise, professional changelog in JSON format with the following stru
       currentTag,
     );
 
-    // Format changelog as Markdown
-    return this.formatChangelogMarkdown(changelogData);
+    return await this.formatChangelogMarkdown(changelogData);
   }
 
   /**
@@ -301,26 +279,24 @@ Provide a concise, professional changelog in JSON format with the following stru
     changelogPath: string,
   ): Promise<void> {
     let existingContent = '';
-
-    // Read existing changelog if it exists
     if (existsSync(changelogPath)) {
       existingContent = readFileSync(changelogPath, 'utf-8');
     }
 
-    // Create new changelog content
     let updatedContent = `# Changelog\n\n${newContent}`;
 
-    // For incremental updates, append after the header
     if (existingContent) {
       const headerMatch = existingContent.match(/^# Changelog\n\n/);
       if (headerMatch) {
-        updatedContent = existingContent.replace(headerMatch[0], `# Changelog\n\n${newContent}\n`);
+        updatedContent = existingContent.replace(
+          headerMatch[0],
+          `# Changelog\n\n${newContent}\n`,
+        );
       } else {
         updatedContent = `# Changelog\n\n${newContent}\n\n${existingContent}`;
       }
     }
 
-    // Write updated changelog
     writeFileSync(changelogPath, updatedContent, 'utf-8');
     logger.success(`Updated changelog for version ${version}`);
   }

@@ -4,7 +4,7 @@
  */
 
 /**
- * Logger utility for PTK
+ * Logger utility for PDK
  */
 import chalk from 'chalk';
 
