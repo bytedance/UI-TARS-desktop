@@ -1,6 +1,6 @@
 {
   "name": "@agent-infra/mcp-server-search",
-  "version": "1.2.23",
+  "version": "1.2.26",
   "mcpName": "io.github.bytedance/mcp-server-search",
   "description": "MCP server for web search operations",
   "type": "module",
