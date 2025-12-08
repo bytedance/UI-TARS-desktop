@@ -53,6 +53,7 @@ export const Navbar: React.FC = () => {
   const [showAboutModal, setShowAboutModal] = React.useState(false);
   const [showShareModal, setShowShareModal] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [hasAutoActivated, setHasAutoActivated] = React.useState(false);
   const workspaceNavItems = getWorkspaceNavItems(sessionMetadata?.sandboxUrl);
   const showEmbedFrame = useSetAtom(showEmbedFrameAtom);
   const hideEmbedFrame = useSetAtom(hideEmbedFrameAtom);
@@ -62,15 +63,26 @@ export const Navbar: React.FC = () => {
   // Auto-activate embed frames with autoActive: true
   // Only activate once when nav items are loaded and no active frame exists
   useEffect(() => {
-    if (workspaceDisplayState.mode !== 'embed-frame' && workspaceNavItems.length > 0 && activeSessionId) {
+    if (
+      !hasAutoActivated && 
+      workspaceDisplayState.mode !== 'embed-frame' && 
+      workspaceNavItems.length > 0 && 
+      activeSessionId
+    ) {
       const autoActiveItem = workspaceNavItems.find(
         item => item.behavior === 'embed-frame' && item.autoActive
       );
       if (autoActiveItem) {
         showEmbedFrame(autoActiveItem);
+        setHasAutoActivated(true);
       }
     }
-  }, [workspaceNavItems, workspaceDisplayState.mode, showEmbedFrame, activeSessionId]);
+  }, [workspaceNavItems, workspaceDisplayState.mode, showEmbedFrame, activeSessionId, hasAutoActivated]);
+
+  // Reset auto-activation flag when session changes
+  useEffect(() => {
+    setHasAutoActivated(false);
+  }, [activeSessionId]);
 
   const handleNavigateHome = useCallback(() => {
     navigate('/');
@@ -102,15 +114,13 @@ export const Navbar: React.FC = () => {
   }, [isDarkMode]);
 
   const handleNavItemClick = (navItem: WorkspaceNavItem) => {
-    console.log('handleNavItemClick called:', navItem.title, 'Current state:', workspaceDisplayState);
-    
     if (navItem.behavior === 'embed-frame') {
       // Toggle embed frame state
       if (workspaceDisplayState.mode === 'embed-frame' && workspaceDisplayState.embedFrame?.title === navItem.title) {
-        console.log('Hiding embed frame, calling hideEmbedFrame');
         hideEmbedFrame();
+        // Reset auto-activation flag when user manually hides
+        setHasAutoActivated(true); // Prevent re-activation
       } else {
-        console.log('Showing embed frame:', navItem.title);
         showEmbedFrame(navItem);
       }
     } else {
