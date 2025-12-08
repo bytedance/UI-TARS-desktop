@@ -1,27 +1,4 @@
-/**
- * Git commit utilities
- */
-
-/**
- * Extract scope from conventional commit message
- * @param commitMessage - The commit message to extract scope from
- * @returns The extracted scope or empty string if no scope found
- */
-export function extractScopeFromCommit(commitMessage: string): string {
-  const match = commitMessage.match(/^(\w+)(\([^)]+\))?:\s*(.+)$/);
-  if (!match) {
-    return '';
-  }
-
-  const [, , scopeStr] = match;
-  
-  if (!scopeStr) {
-    return '';
-  }
-
-  const scopeMatch = scopeStr.match(/^\(([^)]+)\)$/);
-  return scopeMatch ? scopeMatch[1] : '';
-}
+import { parseCommit, parseRawCommit } from 'tiny-conventional-commits-parser';
 
 /**
  * Check if a commit should be included based on scope filters
@@ -38,8 +15,23 @@ export function shouldIncludeCommitByScope(
     return true;
   }
 
-  const scope = extractScopeFromCommit(commitMessage);
-  
-  // Include if no scope or scope matches filter
-  return !scope || filterScopes.includes(scope) || filterScopes.includes('all');
+  // Parse the commit using tiny-conventional-commits-parser
+  const rawCommit = {
+    message: commitMessage,
+    body: '',
+    shortHash: '',
+    author: { name: '', email: '' },
+    data: '',
+  };
+
+  try {
+    const parsedCommit = parseCommit(rawCommit);
+    const scope = parsedCommit.scope;
+    
+    // Include if no scope or scope matches filter
+    return !scope || filterScopes.includes(scope) || filterScopes.includes('all');
+  } catch {
+    // If parsing fails, include the commit
+    return true;
+  }
 }
