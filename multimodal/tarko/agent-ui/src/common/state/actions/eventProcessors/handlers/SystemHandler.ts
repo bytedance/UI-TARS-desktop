@@ -5,6 +5,7 @@ import { messagesAtom } from '@/common/state/atoms/message';
 import { sessionPanelContentAtom } from '@/common/state/atoms/ui';
 import { shouldUpdatePanelContent } from '../utils/panelContentUpdater';
 import { ChatCompletionContentPartImage } from '@tarko/agent-interface';
+import { StandardPanelContent } from '@/standalone/workspace/types/index';
 
 export class SystemMessageHandler implements EventHandler<AgentEventStream.SystemEvent> {
   canHandle(event: AgentEventStream.Event): event is AgentEventStream.SystemEvent {
@@ -91,21 +92,20 @@ export class EnvironmentInputHandler
         const currentSessionPanel = currentPanelContent[sessionId];
 
         // Common panel properties
-        const basePanelContent = {
+        const basePanelContent: Partial<StandardPanelContent> = {
           title: event.description || 'Environment Screenshot',
           timestamp: event.timestamp,
-          originalContent: event.content,
           environmentId: event.id,
         };
 
-        let panelContent = null;
+        let panelContent: StandardPanelContent | null = null;
 
         if (isFirstEnvironmentInput) {
           // First environment input: always show as simple image
           panelContent = {
             ...basePanelContent,
             type: 'image',
-            source: imageContent.image_url.url,
+            source: imageContent.image_url.url as string,
           };
         } else if (
           currentSessionPanel?.type === 'browser_vision_control' ||
@@ -115,7 +115,7 @@ export class EnvironmentInputHandler
           panelContent = {
             ...basePanelContent,
             type: 'browser_vision_control',
-            source: null,
+            source: undefined,
             title: event.description || 'Browser Screenshot',
           };
         }

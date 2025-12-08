@@ -11,8 +11,9 @@ import { MultimodalContent } from './components/MultimodalContent';
 import { ToolCalls } from './components/ToolCalls';
 import { ModernThinkingToggle } from './components/ModernThinkingToggle';
 
-import { useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { replayStateAtom } from '@/common/state/atoms/replay';
+import { showToolContentAtom } from '@/common/state/atoms/ui';
 
 import { messagesAtom } from '@/common/state/atoms/message';
 
@@ -29,10 +30,11 @@ export const Message: React.FC<MessageProps> = ({
 }) => {
   const [showThinking, setShowThinking] = useState(true);
   const [showSteps, setShowSteps] = useState(false);
-  const { setActivePanelContent, activeSessionId } = useSession();
+  const { activeSessionId } = useSession();
   const { getToolIcon } = useTool();
   const replayState = useAtomValue(replayStateAtom);
   const allMessages = useAtomValue(messagesAtom);
+  const showToolContent = useSetAtom(showToolContentAtom);
 
   const isMultimodal = isMultimodalContent(message.content);
   const isEnvironment = message.role === 'environment';
@@ -44,7 +46,7 @@ export const Message: React.FC<MessageProps> = ({
     if (message.toolResults && message.toolResults.length > 0) {
       const result = message.toolResults.find((r) => r.toolCallId === toolCall.id);
       if (result) {
-        setActivePanelContent({
+        showToolContent({
           type: result.type,
           source: result.content,
           title: result.name,
@@ -64,7 +66,6 @@ export const Message: React.FC<MessageProps> = ({
         <MultimodalContent
           content={message.content as ChatCompletionContentPart[]}
           timestamp={message.timestamp}
-          setActivePanelContent={setActivePanelContent}
         />
       );
     }

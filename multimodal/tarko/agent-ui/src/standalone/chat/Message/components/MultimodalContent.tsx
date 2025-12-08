@@ -2,18 +2,16 @@ import { ChatCompletionContentPart } from '@tarko/agent-interface';
 import React from 'react';
 import { motion } from 'framer-motion';
 import { MarkdownRenderer } from '@tarko/ui';
+import { useSetAtom } from 'jotai';
+import { showToolContentAtom } from '@/common/state/atoms/ui';
 
 interface MultimodalContentProps {
   content: ChatCompletionContentPart[];
   timestamp: number;
-  setActivePanelContent: any;
 }
 
-export const MultimodalContent: React.FC<MultimodalContentProps> = ({
-  content,
-  timestamp,
-  setActivePanelContent,
-}) => {
+export const MultimodalContent: React.FC<MultimodalContentProps> = ({ content, timestamp }) => {
+  const showToolContent = useSetAtom(showToolContentAtom);
   const imageContents = content.filter((part) => part.type === 'image_url');
   const textContents = content.filter((part) => part.type === 'text');
 
@@ -30,7 +28,7 @@ export const MultimodalContent: React.FC<MultimodalContentProps> = ({
               key={`image-${index}`}
               whileHover={{ scale: 1.02 }}
               onClick={() =>
-                setActivePanelContent({
+                showToolContent({
                   type: 'image',
                   source: part.image_url.url,
                   title: 'Image',

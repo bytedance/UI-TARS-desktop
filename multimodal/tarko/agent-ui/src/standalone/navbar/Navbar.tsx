@@ -1,3 +1,4 @@
+/* eslint-disable no-debugger */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDarkMode } from '@tarko/ui';
 import { ShareButton } from '@/standalone/share';
@@ -30,8 +31,10 @@ import { useNavigate } from 'react-router-dom';
 import { apiService } from '@/common/services/apiService';
 import { NavbarModelSelector } from './ModelSelector';
 import { getLogoUrl, getAgentTitle, getWorkspaceNavItems } from '@/config/web-ui-config';
-import type { WorkspaceNavItemIcon } from '@tarko/interface';
+import type { WorkspaceNavItemIcon, WorkspaceNavItem } from '@tarko/interface';
 import { getModelDisplayName } from '@/common/utils/modelUtils';
+import { showEmbedFrameAtom, hideEmbedFrameAtom } from '@/common/state/atoms/ui';
+import { useSetAtom } from 'jotai';
 import {
   Box,
   IconButton,
@@ -45,15 +48,96 @@ import {
 import './Navbar.css';
 
 export const Navbar: React.FC = () => {
-  const { activeSessionId, isProcessing, sessionMetadata } = useSession();
+  const { activeSessionId, isProcessing, sessionMetadata, workspaceDisplayState } = useSession();
   const { isReplayMode } = useReplayMode();
   const { isDarkMode } = useNavbarStyles();
   const [showAboutModal, setShowAboutModal] = React.useState(false);
   const [showShareModal, setShowShareModal] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [hasAutoActivated, setHasAutoActivated] = React.useState(false);
+  const [runtimeSettings, setRuntimeSettings] = React.useState<Record<string, any>>({});
   const workspaceNavItems = getWorkspaceNavItems(sessionMetadata?.sandboxUrl);
+  const showEmbedFrame = useSetAtom(showEmbedFrameAtom);
+  const hideEmbedFrame = useSetAtom(hideEmbedFrameAtom);
 
   const navigate = useNavigate();
+
+  // Auto-activate embed frames with autoActive: true or function returning true
+  // Only activate once when nav items are loaded and no active frame exists
+  useEffect(() => {
+    if (
+      !hasAutoActivated &&
+      workspaceDisplayState.mode !== 'embed-frame' &&
+      workspaceNavItems.length > 0 &&
+      activeSessionId
+    ) {
+      const autoActiveItem = workspaceNavItems.find((item) => {
+        if (item.behavior !== 'embed-frame' || !item.autoActive) {
+          return false;
+        }
+
+        // Handle both boolean and string expression forms of autoActive
+        if (typeof item.autoActive === 'boolean') {
+          return item.autoActive;
+        } else if (typeof item.autoActive === 'string') {
+          try {
+            // Create a function from the string expression
+            // const evaluateExpression = new Function('runtimeSettings', `return ${item.autoActive}`);
+            const evaluateExpression = new Function(
+              'runtimeSettings',
+              'debug',
+              `"use strict"; 
+              console.log('[Runtime Settings]', runtimeSettings);
+              return (${item.autoActive});
+              `,
+            );
+            return evaluateExpression(runtimeSettings, (runtimeSettings: Record<string, any>) => {
+              debugger;
+              return true;
+            });
+          } catch (error) {
+            console.error(`Failed to evaluate autoActive expression "${item.autoActive}":`, error);
+            return false;
+          }
+        }
+
+        return false;
+      });
+
+      if (autoActiveItem) {
+        showEmbedFrame(autoActiveItem);
+        setHasAutoActivated(true);
+      }
+    }
+  }, [
+    workspaceNavItems,
+    workspaceDisplayState.mode,
+    showEmbedFrame,
+    activeSessionId,
+    hasAutoActivated,
+    runtimeSettings, // Add runtimeSettings to dependency array
+  ]);
+
+  // Fetch runtime settings when session changes
+  useEffect(() => {
+    const fetchRuntimeSettings = async () => {
+      if (activeSessionId && !isReplayMode) {
+        try {
+          const response = await apiService.getSessionRuntimeSettings(activeSessionId);
+          if (response.currentValues) {
+            setRuntimeSettings(response.currentValues);
+          }
+        } catch (error) {
+          console.error('Failed to fetch runtime settings:', error);
+        }
+      } else {
+        setRuntimeSettings({});
+      }
+    };
+
+    fetchRuntimeSettings();
+    setHasAutoActivated(false); // Reset auto-activation flag when session changes
+  }, [activeSessionId, isReplayMode]);
 
   const handleNavigateHome = useCallback(() => {
     navigate('/');
@@ -84,8 +168,23 @@ export const Navbar: React.FC = () => {
     localStorage.setItem('agent-tars-theme', newMode ? 'dark' : 'light');
   }, [isDarkMode]);
 
-  const handleNavItemClick = (link: string) => {
-    window.open(link, '_blank', 'noopener,noreferrer');
+  const handleNavItemClick = (navItem: WorkspaceNavItem) => {
+    if (navItem.behavior === 'embed-frame') {
+      // Toggle embed frame state
+      if (
+        workspaceDisplayState.mode === 'embed-frame' &&
+        workspaceDisplayState.embedFrame?.title === navItem.title
+      ) {
+        hideEmbedFrame();
+        // Reset auto-activation flag when user manually hides
+        setHasAutoActivated(true); // Prevent re-activation
+      } else {
+        showEmbedFrame(navItem);
+      }
+    } else {
+      // Default behavior: open in new tab
+      window.open(navItem.link, '_blank', 'noopener,noreferrer');
+    }
   };
 
   const handleMobileMenuOpen = () => {
@@ -176,15 +275,60 @@ export const Navbar: React.FC = () => {
                 {workspaceNavItems.map((navItem) => {
                   const IconComponent = getNavItemIcon(navItem.icon);
                   const { className } = getNavItemStyle(navItem.icon);
+                  const isActive =
+                    workspaceDisplayState.mode === 'embed-frame' &&
+                    workspaceDisplayState.embedFrame?.title === navItem.title;
+                  const title =
+                    navItem.behavior === 'embed-frame'
+                      ? isActive
+                        ? `Hide ${navItem.title}`
+                        : `Show ${navItem.title} in workspace`
+                      : `Open ${navItem.title} in new tab`;
+
                   return (
                     <button
                       key={navItem.title}
-                      onClick={() => handleNavItemClick(navItem.link)}
-                      className={`${className} hover:scale-[1.02] active:scale-[0.98] transition-transform`}
-                      title={`Open ${navItem.title} in new tab`}
+                      onClick={() => handleNavItemClick(navItem)}
+                      className={`
+                        ${className} 
+                        ${
+                          isActive
+                            ? `
+                          relative overflow-hidden
+                          before:absolute before:inset-0 before:rounded-lg
+                          before:bg-gradient-to-r before:from-blue-500/20 before:via-purple-500/20 before:to-pink-500/20
+                          before:animate-pulse before:opacity-75
+                          shadow-lg shadow-blue-500/25 dark:shadow-blue-500/40
+                          ring-2 ring-blue-500/50 ring-offset-2 ring-offset-white dark:ring-offset-gray-900
+                          scale-[1.05] hover:scale-[1.08] active:scale-[1.02]
+                          border-blue-400/60 dark:border-blue-500/60
+                          bg-gradient-to-r from-blue-50/90 via-white/90 to-purple-50/90
+                          dark:from-blue-900/40 dark:via-gray-800/40 dark:to-purple-900/40
+                          text-blue-800 dark:text-blue-200
+                          font-semibold
+                          backdrop-blur-md
+                        `
+                            : 'hover:scale-[1.02] active:scale-[0.98]'
+                        }
+                        transition-all duration-300 ease-out
+                        relative
+                      `}
+                      title={title}
                     >
-                      <IconComponent size={12} className="opacity-70" />
+                      <IconComponent
+                        size={12}
+                        className={`${
+                          isActive
+                            ? 'text-blue-600 dark:text-blue-300 drop-shadow-sm animate-pulse'
+                            : 'opacity-70'
+                        } 
+                          transition-all duration-300
+                        `}
+                      />
                       {navItem.title}
+                      {isActive && (
+                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-ping" />
+                      )}
                     </button>
                   );
                 })}
@@ -222,16 +366,55 @@ export const Navbar: React.FC = () => {
                 <>
                   {workspaceNavItems.map((navItem) => {
                     const IconComponent = getNavItemIcon(navItem.icon);
+                    const isActive =
+                      workspaceDisplayState.mode === 'embed-frame' &&
+                      workspaceDisplayState.embedFrame?.title === navItem.title;
+                    const title =
+                      navItem.behavior === 'embed-frame'
+                        ? isActive
+                          ? `Hide ${navItem.title}`
+                          : `Show ${navItem.title} in workspace`
+                        : `Open ${navItem.title} in new tab`;
+
                     return (
                       <MenuItem
                         key={navItem.title}
                         onClick={() => {
-                          handleNavItemClick(navItem.link);
+                          handleNavItemClick(navItem);
                           handleMobileMenuClose();
                         }}
-                        icon={<IconComponent size={16} />}
+                        icon={
+                          <div className="relative">
+                            <IconComponent
+                              size={16}
+                              className={
+                                isActive ? 'text-blue-500 dark:text-blue-400 animate-pulse' : ''
+                              }
+                            />
+                            {isActive && (
+                              <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-ping" />
+                            )}
+                          </div>
+                        }
+                        className={
+                          isActive
+                            ? `
+                          bg-gradient-to-r from-blue-50/80 via-white/80 to-purple-50/80 
+                          dark:from-blue-900/30 dark:via-gray-800/30 dark:to-purple-900/30
+                          border-l-2 border-l-blue-500 dark:border-l-blue-400
+                          text-blue-700 dark:text-blue-300 font-medium
+                        `
+                            : ''
+                        }
                       >
-                        {navItem.title}
+                        <div className="flex items-center justify-between w-full">
+                          <span className={isActive ? 'font-semibold' : ''}>{navItem.title}</span>
+                          {isActive && (
+                            <span className="ml-2 text-xs text-blue-600 dark:text-blue-400 font-medium bg-blue-100/60 dark:bg-blue-900/40 px-2 py-0.5 rounded-full">
+                              Active
+                            </span>
+                          )}
+                        </div>
                       </MenuItem>
                     );
                   })}
@@ -271,7 +454,8 @@ export const Navbar: React.FC = () => {
                     <div className="flex flex-col gap-1">
                       <span className="text-xs text-gray-500 dark:text-gray-400">Model</span>
                       <span className="text-sm font-medium">
-                        {getModelDisplayName(sessionMetadata.modelConfig)} • {sessionMetadata.modelConfig.provider}
+                        {getModelDisplayName(sessionMetadata.modelConfig)} •{' '}
+                        {sessionMetadata.modelConfig.provider}
                       </span>
                     </div>
                   </MenuItem>

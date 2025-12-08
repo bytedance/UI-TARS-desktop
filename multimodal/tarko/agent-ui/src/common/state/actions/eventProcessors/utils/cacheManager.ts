@@ -6,11 +6,11 @@ import { ToolCallArgumentsCache, StreamingToolCallCache } from '../types';
 class ToolCallArgumentsCacheImpl implements ToolCallArgumentsCache {
   private cache = new Map<string, unknown>();
 
-  get(toolCallId: string): unknown {
-    return this.cache.get(toolCallId);
+  get(toolCallId: string): Record<string, unknown> {
+    return this.cache.get(toolCallId) as Record<string, unknown>;
   }
 
-  set(toolCallId: string, args: unknown): void {
+  set(toolCallId: string, args: Record<string, unknown>): void {
     this.cache.set(toolCallId, args);
   }
 

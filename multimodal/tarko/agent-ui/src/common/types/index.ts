@@ -80,25 +80,6 @@ export interface ConnectionStatus {
 }
 
 /**
- * Content to be displayed in the workspace panel
- */
-export interface PanelContent {
-  type: string;
-  source: string | ChatCompletionContentPart[] | null;
-  title: string;
-  timestamp: number;
-  toolCallId?: string;
-  error?: string;
-  arguments?: any;
-  environmentId?: string;
-  originalContent?: string | ChatCompletionContentPart[];
-  _extra?: { currentScreenshot: string };
-  isStreaming?: boolean;
-
-  messageId?: string;
-}
-
-/**
  * Replay event marker for visual timeline display
  */
 export interface ReplayEventMarker {

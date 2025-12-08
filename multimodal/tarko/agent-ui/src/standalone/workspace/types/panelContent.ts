@@ -2,7 +2,7 @@ import { ChatCompletionContentPart } from '@tarko/agent-interface';
 import { FileDisplayMode } from '../types';
 
 export interface PanelContentSource {
-  [key: string]: unknown;
+  [key: string]: any;
 }
 
 export interface PanelContentArguments {
@@ -23,15 +23,15 @@ export interface PanelContentExtra {
 
 export interface StandardPanelContent {
   type: string;
-  source: string | PanelContentSource | ChatCompletionContentPart[];
-  title: string;
-  timestamp: number;
+  source?: string | PanelContentSource | ChatCompletionContentPart[];
+  title?: string;
+  link?: string;
+  timestamp?: number;
   toolCallId?: string;
   error?: string;
   arguments?: PanelContentArguments;
   _extra?: PanelContentExtra;
   isStreaming?: boolean;
-  originalContent?: string | ChatCompletionContentPart[];
   environmentId?: string;
 }
 

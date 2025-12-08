@@ -24,6 +24,11 @@ export type WorkspaceNavItemIcon =
   | 'default';
 
 /**
+ * Navigation item behavior type
+ */
+export type WorkspaceNavItemBehavior = 'new-page' | 'embed-frame';
+
+/**
  * Navigation item configuration for workspace
  */
 export interface WorkspaceNavItem {
@@ -32,7 +37,7 @@ export interface WorkspaceNavItem {
    */
   title: string;
   /**
-   * Link URL to open in new tab
+   * Link URL to open in new tab or embed in workspace
    */
   link: string;
   /**
@@ -40,6 +45,23 @@ export interface WorkspaceNavItem {
    * @defaultValue 'default'
    */
   icon?: WorkspaceNavItemIcon;
+  /**
+   * Behavior when clicking the navigation item
+   * @defaultValue 'new-page'
+   */
+  behavior?: WorkspaceNavItemBehavior;
+  /**
+   * Auto-activate the navigation item when true
+   * Only applicable when behavior is 'embed-frame'
+   * Can be a boolean or a string expression that evaluates runtime settings
+   * String expressions can reference runtimeSettings properties and use JavaScript operators
+   * @defaultValue false
+   * @example
+   * true // Static boolean
+   * "runtimeSettings.devMode === true" // Simple expression
+   * "runtimeSettings.sessionType === 'debugging' || runtimeSettings.autoActivateVNC === true" // Complex expression
+   */
+  autoActive?: boolean | string;
 }
 
 /**

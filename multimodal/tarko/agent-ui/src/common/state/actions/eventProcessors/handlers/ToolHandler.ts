@@ -5,12 +5,17 @@ import { AgentEventStream, ToolResult, Message } from '@/common/types';
 import { determineToolRendererType } from '@/common/utils/tool-renderers';
 import { messagesAtom } from '@/common/state/atoms/message';
 import { toolResultsAtom, toolCallResultMap } from '@/common/state/atoms/tool';
-import { sessionPanelContentAtom } from '@/common/state/atoms/ui';
+import {
+  sessionPanelContentAtom,
+  showToolContentAtom,
+  workspaceDisplayStateAtom,
+} from '@/common/state/atoms/ui';
 import { rawToolMappingAtom } from '@/common/state/atoms/rawEvents';
 import { toolCallArgumentsCache, streamingToolCallCache } from '../utils/cacheManager';
 import { collectFileInfo } from '../utils/fileCollector';
 import { normalizeSearchResult } from '../utils/searchNormalizer';
 import { shouldUpdatePanelContent } from '../utils/panelContentUpdater';
+import { StandardPanelContent } from '@/standalone/workspace/types/panelContent';
 
 export class ToolCallHandler implements EventHandler<AgentEventStream.ToolCallEvent> {
   canHandle(event: AgentEventStream.Event): event is AgentEventStream.ToolCallEvent {
@@ -126,58 +131,63 @@ export class ToolResultHandler implements EventHandler<AgentEventStream.ToolResu
 
     // Update panel content only for active session
     if (shouldUpdatePanelContent(get, sessionId)) {
+      const panelContent: StandardPanelContent = {
+        type: result.type,
+        source: result.content,
+        title: result.name,
+        timestamp: result.timestamp,
+        toolCallId: result.toolCallId,
+        error: result.error,
+        arguments: args,
+        _extra: result._extra,
+      };
+
+      // Check if embed frame is currently active - if so, don't override it
+      const workspaceState = get(workspaceDisplayStateAtom);
+      const isEmbedFrameActive = workspaceState.mode === 'embed-frame';
+
       // Special handling for browser vision control to preserve environment context
       if (result.type === 'browser_vision_control') {
-        set(sessionPanelContentAtom, (prev) => {
-          const currentContent = prev[sessionId];
-          if (currentContent && currentContent.type === 'image' && currentContent.environmentId) {
-            const environmentId = currentContent.environmentId;
+        const currentContent = get(sessionPanelContentAtom)[sessionId];
+        if (currentContent && currentContent.type === 'image' && currentContent.environmentId) {
+          const environmentId = currentContent.environmentId;
 
-            return {
-              ...prev,
-              [sessionId]: {
-                ...currentContent,
-                type: 'browser_vision_control',
-                source: event.content,
-                title: currentContent.title,
-                timestamp: event.timestamp,
-                toolCallId: event.toolCallId,
-                error: event.error,
-                arguments: args,
-                originalContent: currentContent.source,
-                environmentId: environmentId,
-                processedEnvironmentIds: [environmentId], // Track processed environment IDs
-              },
-            };
-          } else {
-            return {
-              ...prev,
-              [sessionId]: {
-                type: result.type,
-                source: result.content,
-                title: result.name,
-                timestamp: result.timestamp,
-                toolCallId: result.toolCallId,
-                error: result.error,
-                arguments: args,
-              },
-            };
+          const enhancedPanelContent: StandardPanelContent = {
+            ...panelContent,
+            type: 'browser_vision_control' as const,
+            environmentId: environmentId,
+          };
+
+          set(sessionPanelContentAtom, (prev) => ({
+            ...prev,
+            [sessionId]: enhancedPanelContent,
+          }));
+
+          // Only update workspace display state if embed frame is not active
+          if (!isEmbedFrameActive) {
+            set(showToolContentAtom, enhancedPanelContent);
           }
-        });
+        } else {
+          set(sessionPanelContentAtom, (prev) => ({
+            ...prev,
+            [sessionId]: panelContent,
+          }));
+
+          // Only update workspace display state if embed frame is not active
+          if (!isEmbedFrameActive) {
+            set(showToolContentAtom, panelContent);
+          }
+        }
       } else {
         set(sessionPanelContentAtom, (prev) => ({
           ...prev,
-          [sessionId]: {
-            type: result.type,
-            source: result.content,
-            title: result.name,
-            timestamp: result.timestamp,
-            toolCallId: result.toolCallId,
-            error: result.error,
-            arguments: args,
-            _extra: result._extra,
-          },
+          [sessionId]: panelContent,
         }));
+
+        // Only update workspace display state if embed frame is not active
+        if (!isEmbedFrameActive) {
+          set(showToolContentAtom, panelContent);
+        }
       }
     }
 
@@ -227,7 +237,7 @@ export class StreamingToolCallHandler
     streamingToolCallCache.set(toolCallId, newArgs);
 
     // Safe JSON parsing with repair fallback
-    let parsedArgs: unknown = {};
+    let parsedArgs: Record<string, unknown> = {};
     try {
       if (newArgs) {
         const repairedJson = jsonrepair(newArgs);
@@ -344,18 +354,29 @@ export class StreamingToolCallHandler
       const content = 'content' in parsedArgs ? parsedArgs.content : '';
 
       if (typeof path === 'string') {
+        const panelContent: StandardPanelContent = {
+          type: 'file' as const,
+          source: typeof content === 'string' ? content : '',
+          title: `Writing: ${path.split('/').pop()}`,
+          timestamp: event.timestamp,
+          toolCallId,
+          arguments: parsedArgs as StandardPanelContent['arguments'],
+          isStreaming: !isComplete,
+        };
+
         set(sessionPanelContentAtom, (prev) => ({
           ...prev,
-          [sessionId]: {
-            type: 'file',
-            source: typeof content === 'string' ? content : '',
-            title: `Writing: ${path.split('/').pop()}`,
-            timestamp: event.timestamp,
-            toolCallId,
-            arguments: parsedArgs,
-            isStreaming: !isComplete,
-          },
+          [sessionId]: panelContent,
         }));
+
+        // Check if embed frame is currently active - if so, don't override it
+        const workspaceState = get(workspaceDisplayStateAtom);
+        const isEmbedFrameActive = workspaceState.mode === 'embed-frame';
+
+        // Only update workspace display state if embed frame is not active
+        if (!isEmbedFrameActive) {
+          set(showToolContentAtom, panelContent);
+        }
       }
     }
 
