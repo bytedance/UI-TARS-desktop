@@ -87,8 +87,11 @@ export const WorkspacePanel: React.FC = () => {
   }, [focusParam, activePanelContent, focusProcessed]);
 
   // Clear embed frame when tool call content is shown
+  // Only clear if it's a real tool call result, not loading states
   useEffect(() => {
-    if (activePanelContent && activeEmbedFrame) {
+    if (activePanelContent && activeEmbedFrame && 
+        activePanelContent.type !== 'embed_frame' && 
+        !activePanelContent.source?.includes('loading')) {
       setActiveEmbedFrame(null);
     }
   }, [activePanelContent, activeEmbedFrame, setActiveEmbedFrame]);

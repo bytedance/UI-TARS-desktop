@@ -56,8 +56,9 @@ export const Navbar: React.FC = () => {
   const navigate = useNavigate();
 
   // Auto-activate embed frames with autoActive: true
+  // Only activate once when nav items are loaded and no active frame exists
   useEffect(() => {
-    if (!activeEmbedFrame && workspaceNavItems.length > 0) {
+    if (!activeEmbedFrame && workspaceNavItems.length > 0 && activeSessionId) {
       const autoActiveItem = workspaceNavItems.find(
         item => item.behavior === 'embed-frame' && item.autoActive
       );
@@ -65,7 +66,7 @@ export const Navbar: React.FC = () => {
         setActiveEmbedFrame(autoActiveItem);
       }
     }
-  }, [workspaceNavItems, activeEmbedFrame, setActiveEmbedFrame]);
+  }, [workspaceNavItems, activeEmbedFrame, setActiveEmbedFrame, activeSessionId]);
 
   const handleNavigateHome = useCallback(() => {
     navigate('/');
