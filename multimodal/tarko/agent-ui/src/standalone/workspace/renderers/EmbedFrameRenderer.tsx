@@ -25,6 +25,13 @@ export const EmbedFrameRenderer: React.FC<EmbedFrameRendererProps> = ({
     panelContent 
   });
 
+  // Reset loading state when src changes
+  useEffect(() => {
+    console.log('EmbedFrameRenderer: src changed, resetting loading state');
+    setIsLoading(true);
+    setError(null);
+  }, [src]);
+
   useEffect(() => {
     const iframe = iframeRef.current;
     if (!iframe) return;
@@ -43,6 +50,7 @@ export const EmbedFrameRenderer: React.FC<EmbedFrameRendererProps> = ({
       setError('Failed to load content');
     };
 
+    // Add event listeners to the iframe
     iframe.addEventListener('load', handleLoad);
     iframe.addEventListener('error', handleError);
 
@@ -51,7 +59,7 @@ export const EmbedFrameRenderer: React.FC<EmbedFrameRendererProps> = ({
       iframe.removeEventListener('load', handleLoad);
       iframe.removeEventListener('error', handleError);
     };
-  }, [src]);
+  }, []); // Only run once on mount
 
   if (!src) {
     return (
