@@ -98,34 +98,12 @@ export async function changelog(options: ChangelogOptions = {}): Promise<void> {
   let releaseNotes: string;
 
   if (options.useAi) {
-    // Validate provider
-    const providerName = options.provider || 'openai';
-    const validProviders: ModelProviderName[] = [
-      'openai',
-      'openai-non-streaming',
-      'ai21',
-      'anthropic',
-      'gemini',
-      'mistral',
-      'groq',
-      'perplexity',
-      'openrouter',
-      'ollama',
-      'lm-studio',
-      'volcengine',
-      'deepseek',
-    ];
+    // Use AI changelog generator with type-safe provider
+    const providerName = (options.provider || 'openai') as ModelProviderName;
 
-    if (!validProviders.includes(providerName as ModelProviderName)) {
-      throw new Error(
-        `Invalid provider: ${providerName}. Valid providers: ${validProviders.join(', ')}`,
-      );
-    }
-
-    // Use AI changelog generator
     const aiGenerator = new AIChangelogGenerator(cwd, tagPrefix, {
       id: options.model || 'gpt-4o',
-      provider: providerName as ModelProviderName,
+      provider: providerName,
       // secretlint-disable-next-line @secretlint/secretlint-rule-pattern
       apiKey: options.apiKey,
       baseURL: options.baseURL,
