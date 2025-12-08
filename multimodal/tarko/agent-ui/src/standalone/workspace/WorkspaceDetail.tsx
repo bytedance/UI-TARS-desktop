@@ -29,6 +29,7 @@ import { DeliverableRenderer } from './renderers/DeliverableRenderer';
 import { DiffRenderer } from './renderers/DiffRenderer';
 import { FileResultRenderer } from './renderers/FileResultRenderer';
 import { TabbedFilesRenderer } from './renderers/TabbedFilesRenderer';
+import { EmbedFrameRenderer } from './renderers/EmbedFrameRenderer';
 
 const CONTENT_RENDERERS: Record<
   string,
@@ -54,6 +55,7 @@ const CONTENT_RENDERERS: Record<
   diff_result: DiffRenderer,
   file: FileResultRenderer,
   tabbed_files: TabbedFilesRenderer,
+  embed_frame: EmbedFrameRenderer,
 };
 
 export const WorkspaceDetail: React.FC = () => {

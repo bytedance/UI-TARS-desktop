@@ -8,6 +8,8 @@ import { FullscreenModal } from './components/FullscreenModal';
 import { AnimatePresence } from 'framer-motion';
 import { FullscreenFileData } from './types/panelContent';
 import { getFileTypeInfo } from './utils/fileTypeUtils';
+import { WorkspaceNavItem } from '@tarko/interface';
+import { EmbedFrameRenderer } from './renderers/EmbedFrameRenderer';
 import './Workspace.css';
 
 function getFocusParam(): string | null {
@@ -19,8 +21,37 @@ function shouldShowFullscreen(filePath: string): boolean {
   return getFileTypeInfo(filePath).isRenderableFile;
 }
 
+interface EmbedFrameViewProps {
+  navItem: WorkspaceNavItem;
+}
+
+const EmbedFrameView: React.FC<EmbedFrameViewProps> = ({ navItem }) => {
+  const panelContent = {
+    type: 'embed_frame',
+    source: navItem.link,
+    title: navItem.title,
+    timestamp: Date.now(),
+    link: navItem.link,
+  };
+
+  return (
+    <div className="h-full flex flex-col bg-white dark:bg-gray-900/20 animate-in fade-in duration-200">
+      <div className="md:px-4 md:py-3 px-3 py-2 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+            {navItem.title}
+          </h3>
+        </div>
+      </div>
+      <div className="flex-1 overflow-hidden">
+        <EmbedFrameRenderer panelContent={panelContent} />
+      </div>
+    </div>
+  );
+};
+
 export const WorkspacePanel: React.FC = () => {
-  const { activeSessionId, activePanelContent, setActivePanelContent } = useSession();
+  const { activeSessionId, activePanelContent, setActivePanelContent, activeEmbedFrame, setActiveEmbedFrame } = useSession();
   const { replayState } = useReplay();
   const [fullscreenData, setFullscreenData] = React.useState<FullscreenFileData | null>(null);
   const [focusProcessed, setFocusProcessed] = React.useState(false);
@@ -55,11 +86,18 @@ export const WorkspacePanel: React.FC = () => {
     }
   }, [focusParam, activePanelContent, focusProcessed]);
 
+  // Clear embed frame when tool call content is shown
+  useEffect(() => {
+    if (activePanelContent && activeEmbedFrame) {
+      setActiveEmbedFrame(null);
+    }
+  }, [activePanelContent, activeEmbedFrame, setActiveEmbedFrame]);
+
   return (
     <>
       <div className="flex flex-col h-full">
         <div className="flex-1 overflow-hidden">
-          {activePanelContent ? <WorkspaceDetail /> : <WorkspaceContent />}
+          {activeEmbedFrame ? <EmbedFrameView navItem={activeEmbedFrame} /> : activePanelContent ? <WorkspaceDetail /> : <WorkspaceContent />}
         </div>
 
         <AnimatePresence>{isReplayActive && <ReplayControlPanel />}</AnimatePresence>

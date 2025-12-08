@@ -158,8 +158,8 @@
   ],
   "workspace": {
     "navItems": [
-      { "title": "Code Server", "link": "{prefix}/code-server/", "icon": "code" },
-      { "title": "VNC", "link": "{prefix}/vnc/index.html?autoconnect=true", "icon": "monitor" }
+      { "title": "Code Server", "link": "{prefix}/code-server/", "icon": "code", "behavior": "new-page" },
+      { "title": "VNC", "link": "{prefix}/vnc/index.html?autoconnect=true", "icon": "monitor", "behavior": "embed-frame", "autoActive": true }
     ]
   },
   "guiAgent": {

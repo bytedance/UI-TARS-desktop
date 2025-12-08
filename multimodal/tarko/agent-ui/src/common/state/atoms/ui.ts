@@ -1,5 +1,5 @@
 import { atom } from 'jotai';
-import { SessionItemMetadata, LayoutMode } from '@tarko/interface';
+import { SessionItemMetadata, LayoutMode, WorkspaceNavItem } from '@tarko/interface';
 import { getDefaultLayoutMode } from '@/config/web-ui-config';
 import { ConnectionStatus, PanelContent, SanitizedAgentOptions } from '@/common/types';
 import { activeSessionIdAtom } from './session';
@@ -59,6 +59,32 @@ export const workspacePanelCollapsedAtom = atom<boolean>(false);
  * Simple processing state atom based on SSE events
  */
 export const isProcessingAtom = atom<boolean>(false);
+
+/**
+ * Session-specific active embed frame nav item storage
+ */
+export const sessionActiveEmbedFrameAtom = atom<Record<string, WorkspaceNavItem | null>>({});
+
+/**
+ * Derived atom for the currently active embed frame nav item
+ * Automatically isolates state by active session
+ */
+export const activeEmbedFrameAtom = atom(
+  (get) => {
+    const activeSessionId = get(activeSessionIdAtom);
+    const sessionActiveEmbedFrame = get(sessionActiveEmbedFrameAtom);
+    return activeSessionId ? sessionActiveEmbedFrame[activeSessionId] || null : null;
+  },
+  (get, set, update: WorkspaceNavItem | null) => {
+    const activeSessionId = get(activeSessionIdAtom);
+    if (activeSessionId) {
+      set(sessionActiveEmbedFrameAtom, (prev) => ({
+        ...prev,
+        [activeSessionId]: update,
+      }));
+    }
+  },
+);
 
 /**
  * Atom for offline mode state (view-only when disconnected)

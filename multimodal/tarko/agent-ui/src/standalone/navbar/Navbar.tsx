@@ -30,7 +30,7 @@ import { useNavigate } from 'react-router-dom';
 import { apiService } from '@/common/services/apiService';
 import { NavbarModelSelector } from './ModelSelector';
 import { getLogoUrl, getAgentTitle, getWorkspaceNavItems } from '@/config/web-ui-config';
-import type { WorkspaceNavItemIcon } from '@tarko/interface';
+import type { WorkspaceNavItemIcon, WorkspaceNavItem } from '@tarko/interface';
 import { getModelDisplayName } from '@/common/utils/modelUtils';
 import {
   Box,
@@ -45,7 +45,7 @@ import {
 import './Navbar.css';
 
 export const Navbar: React.FC = () => {
-  const { activeSessionId, isProcessing, sessionMetadata } = useSession();
+  const { activeSessionId, isProcessing, sessionMetadata, activeEmbedFrame, setActiveEmbedFrame } = useSession();
   const { isReplayMode } = useReplayMode();
   const { isDarkMode } = useNavbarStyles();
   const [showAboutModal, setShowAboutModal] = React.useState(false);
@@ -54,6 +54,18 @@ export const Navbar: React.FC = () => {
   const workspaceNavItems = getWorkspaceNavItems(sessionMetadata?.sandboxUrl);
 
   const navigate = useNavigate();
+
+  // Auto-activate embed frames with autoActive: true
+  useEffect(() => {
+    if (!activeEmbedFrame && workspaceNavItems.length > 0) {
+      const autoActiveItem = workspaceNavItems.find(
+        item => item.behavior === 'embed-frame' && item.autoActive
+      );
+      if (autoActiveItem) {
+        setActiveEmbedFrame(autoActiveItem);
+      }
+    }
+  }, [workspaceNavItems, activeEmbedFrame, setActiveEmbedFrame]);
 
   const handleNavigateHome = useCallback(() => {
     navigate('/');
@@ -84,8 +96,18 @@ export const Navbar: React.FC = () => {
     localStorage.setItem('agent-tars-theme', newMode ? 'dark' : 'light');
   }, [isDarkMode]);
 
-  const handleNavItemClick = (link: string) => {
-    window.open(link, '_blank', 'noopener,noreferrer');
+  const handleNavItemClick = (navItem: WorkspaceNavItem) => {
+    if (navItem.behavior === 'embed-frame') {
+      // Toggle embed frame state
+      if (activeEmbedFrame?.title === navItem.title) {
+        setActiveEmbedFrame(null);
+      } else {
+        setActiveEmbedFrame(navItem);
+      }
+    } else {
+      // Default behavior: open in new tab
+      window.open(navItem.link, '_blank', 'noopener,noreferrer');
+    }
   };
 
   const handleMobileMenuOpen = () => {
@@ -176,12 +198,18 @@ export const Navbar: React.FC = () => {
                 {workspaceNavItems.map((navItem) => {
                   const IconComponent = getNavItemIcon(navItem.icon);
                   const { className } = getNavItemStyle(navItem.icon);
+                  const isActive = activeEmbedFrame?.title === navItem.title;
+                  const activeClassName = isActive ? 'ring-2 ring-blue-500 ring-offset-1' : '';
+                  const title = navItem.behavior === 'embed-frame' 
+                    ? (isActive ? `Hide ${navItem.title}` : `Show ${navItem.title} in workspace`)
+                    : `Open ${navItem.title} in new tab`;
+                  
                   return (
                     <button
                       key={navItem.title}
-                      onClick={() => handleNavItemClick(navItem.link)}
-                      className={`${className} hover:scale-[1.02] active:scale-[0.98] transition-transform`}
-                      title={`Open ${navItem.title} in new tab`}
+                      onClick={() => handleNavItemClick(navItem)}
+                      className={`${className} ${activeClassName} hover:scale-[1.02] active:scale-[0.98] transition-transform`}
+                      title={title}
                     >
                       <IconComponent size={12} className="opacity-70" />
                       {navItem.title}
@@ -222,16 +250,24 @@ export const Navbar: React.FC = () => {
                 <>
                   {workspaceNavItems.map((navItem) => {
                     const IconComponent = getNavItemIcon(navItem.icon);
+                    const isActive = activeEmbedFrame?.title === navItem.title;
+                    const title = navItem.behavior === 'embed-frame' 
+                      ? (isActive ? `Hide ${navItem.title}` : `Show ${navItem.title} in workspace`)
+                      : `Open ${navItem.title} in new tab`;
+                    
                     return (
                       <MenuItem
                         key={navItem.title}
                         onClick={() => {
-                          handleNavItemClick(navItem.link);
+                          handleNavItemClick(navItem);
                           handleMobileMenuClose();
                         }}
                         icon={<IconComponent size={16} />}
                       >
                         {navItem.title}
+                        {isActive && (
+                          <span className="ml-auto text-xs text-blue-500 font-medium">Active</span>
+                        )}
                       </MenuItem>
                     );
                   })}
