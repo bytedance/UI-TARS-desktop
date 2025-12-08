@@ -106,11 +106,6 @@ export async function release(options: ReleaseOptions = {}): Promise<void> {
     // Set environment variable for build scripts
     process.env.RELEASE_VERSION = version;
 
-    // Run build script if specified
-    if (build) {
-      await runBuildScript(build, cwd, dryRun);
-    }
-
     // Load workspace packages
     const packages = await loadWorkspacePackages(cwd);
 
@@ -133,7 +128,8 @@ export async function release(options: ReleaseOptions = {}): Promise<void> {
       return;
     }
 
-    // Update all package versions (without committing)
+    // Update all package versions FIRST (before build)
+    // This ensures build scripts can read the correct version from package.json
     packages.forEach((pkg) => {
       const packageJsonPath = join(pkg.dir, 'package.json');
       if (dryRun) {
@@ -159,6 +155,11 @@ export async function release(options: ReleaseOptions = {}): Promise<void> {
           `[dry-run] Would update root package.json to version ${version}`,
         );
       }
+    }
+
+    // Run build script if specified (now with updated version)
+    if (build) {
+      await runBuildScript(build, cwd, dryRun);
     }
 
     // Publish packages with workspace dependency management
