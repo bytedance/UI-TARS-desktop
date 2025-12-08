@@ -22,9 +22,9 @@ export const EmbedFrameRenderer: React.FC<EmbedFrameRendererProps> = ({
         const containerWidth = containerRef.current.clientWidth;
         const containerHeight = containerRef.current.clientHeight;
         
-        // Use 80% of container size, but cap at 1280x958
-        const width = Math.min(containerWidth * 0.8, 1280);
-        const height = Math.min(containerHeight * 0.8, 958);
+        // Use 100% of container size, but cap at 1280x958
+        const width = Math.min(containerWidth, 1280);
+        const height = Math.min(containerHeight, 958);
         
         // Maintain 4:3 aspect ratio
         const aspectRatio = 4 / 3;
