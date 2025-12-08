@@ -13,8 +13,15 @@ export const EmbedFrameRenderer: React.FC<EmbedFrameRendererProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 1280, height: 958 });
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const src = typeof panelContent.source === 'string' ? panelContent.source : (panelContent as any).link || '';
+
+  const handleOpenInNewTab = () => {
+    if (src) {
+      window.open(src, '_blank');
+    }
+  };
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -49,7 +56,7 @@ export const EmbedFrameRenderer: React.FC<EmbedFrameRendererProps> = ({
     return () => {
       window.removeEventListener('resize', updateDimensions);
     };
-  }, []);
+  }, [isFullscreen]);
 
   if (!src) {
     return (
@@ -67,16 +74,68 @@ export const EmbedFrameRenderer: React.FC<EmbedFrameRendererProps> = ({
     );
   }
 
+  if (isFullscreen) {
+    return (
+      <div className="fixed inset-0 z-50 bg-white dark:bg-gray-900">
+        <div className="absolute top-4 right-4 z-10 flex gap-2">
+          <button
+            onClick={handleOpenInNewTab}
+            className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors flex items-center gap-2"
+            title="Open in new tab"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+            Open
+          </button>
+          <button
+            onClick={() => setIsFullscreen(false)}
+            className="px-3 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors flex items-center gap-2"
+            title="Close fullscreen"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            Close
+          </button>
+        </div>
+        <div className="w-full h-full flex items-start justify-center pt-16">
+          <iframe
+            src={src}
+            className="border-0"
+            style={{ width: `${dimensions.width}px`, height: `${dimensions.height}px` }}
+            title={panelContent.title}
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+            loading="lazy"
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div ref={containerRef} className="w-full h-full flex items-center justify-center">
-      <iframe
-        src={src}
-        className="border-0"
-        style={{ width: `${dimensions.width}px`, height: `${dimensions.height}px` }}
-        title={panelContent.title}
-        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
-        loading="lazy"
-      />
+    <div ref={containerRef} className="w-full h-full relative">
+      <div className="absolute top-2 right-2 z-10 flex gap-2">
+        <button
+          onClick={handleOpenInNewTab}
+          className="p-2 bg-white dark:bg-gray-800 rounded shadow hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          title="Open in new tab"
+        >
+          <svg className="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+        </button>
+      </div>
+      <div className="w-full h-full flex items-start justify-center">
+        <iframe
+          src={src}
+          className="border-0"
+          style={{ width: `${dimensions.width}px`, height: `${dimensions.height}px` }}
+          title={panelContent.title}
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+          loading="lazy"
+        />
+      </div>
     </div>
   );
 };
