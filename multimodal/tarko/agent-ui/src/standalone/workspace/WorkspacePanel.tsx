@@ -95,16 +95,21 @@ export const WorkspacePanel: React.FC = () => {
   }, [workspaceDisplayState]);
 
   const renderWorkspaceContent = () => {
+    console.log('renderWorkspaceContent called, current mode:', workspaceDisplayState.mode);
+    
     switch (workspaceDisplayState.mode) {
       case 'embed-frame':
+        console.log('Rendering embed frame:', workspaceDisplayState.embedFrame?.title);
         return workspaceDisplayState.embedFrame ? (
           <EmbedFrameView navItem={workspaceDisplayState.embedFrame} />
         ) : null;
       
       case 'tool-content':
+        console.log('Rendering tool content:', workspaceDisplayState.toolContent?.title);
         return workspaceDisplayState.toolContent ? <WorkspaceDetail /> : null;
       
       default:
+        console.log('Rendering default WorkspaceContent');
         return <WorkspaceContent />;
     }
   };

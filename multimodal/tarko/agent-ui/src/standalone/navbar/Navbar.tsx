@@ -102,11 +102,15 @@ export const Navbar: React.FC = () => {
   }, [isDarkMode]);
 
   const handleNavItemClick = (navItem: WorkspaceNavItem) => {
+    console.log('handleNavItemClick called:', navItem.title, 'Current state:', workspaceDisplayState);
+    
     if (navItem.behavior === 'embed-frame') {
       // Toggle embed frame state
       if (workspaceDisplayState.mode === 'embed-frame' && workspaceDisplayState.embedFrame?.title === navItem.title) {
+        console.log('Hiding embed frame, calling hideEmbedFrame');
         hideEmbedFrame();
       } else {
+        console.log('Showing embed frame:', navItem.title);
         showEmbedFrame(navItem);
       }
     } else {
