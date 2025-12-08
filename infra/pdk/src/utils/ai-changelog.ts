@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { execa } from 'execa';
 import { logger } from './logger';
+import { shouldIncludeCommitByScope } from './commit';
 import { AgentModel } from '@tarko/model-provider';
 
 interface CommitEntry {
@@ -103,26 +104,9 @@ export class AIChangelogGenerator {
 
       // Apply scope filter if provided
       if (filterScopes && filterScopes.length > 0) {
-        return commits.filter((commit) => {
-          const match = commit.message.match(/^(\w+)(\([^)]+\))?:\s*(.+)$/);
-          if (match) {
-            const [, , scopeStr] = match;
-            
-            // Extract scope from scopeStr (remove parentheses)
-            let scope = '';
-            if (scopeStr) {
-              const scopeMatch = scopeStr.match(/^\(([^)]+)\)$/);
-              scope = scopeMatch ? scopeMatch[1] : '';
-            }
-            
-            // Include if no scope or scope matches filter
-            if (!scope || filterScopes.includes(scope) || filterScopes.includes('all')) {
-              return true;
-            }
-            return false;
-          }
-          return true; // Include non-conventional commits
-        });
+        return commits.filter((commit) => 
+          shouldIncludeCommitByScope(commit.message, filterScopes)
+        );
       }
 
       return commits;

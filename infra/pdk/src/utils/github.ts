@@ -8,6 +8,7 @@
  */
 import { execa } from 'execa';
 import { logger } from './logger';
+import { shouldIncludeCommitByScope } from './commit';
 
 // Username mapping for commit authors to correct GitHub usernames
 const USERNAME_MAP: Record<string, string> = {
@@ -138,20 +139,11 @@ export async function generateReleaseNotes(
     commits.forEach((commit) => {
       const match = commit.subject.match(/^(\w+)(\([^)]+\))?:\s*(.+)$/);
       if (match) {
-        const [, type, scopeStr] = match;
-        
-        // Extract scope from scopeStr (remove parentheses)
-        let scope = '';
-        if (scopeStr) {
-          const scopeMatch = scopeStr.match(/^\(([^)]+)\)$/);
-          scope = scopeMatch ? scopeMatch[1] : '';
-        }
+        const [, type] = match;
         
         // Apply scope filter if provided
-        if (filterScopes && filterScopes.length > 0 && scope) {
-          if (!filterScopes.includes(scope) && !filterScopes.includes('all')) {
-            return; // Skip this commit
-          }
+        if (!shouldIncludeCommitByScope(commit.subject, filterScopes)) {
+          return; // Skip this commit
         }
         
         if (type in groups) {
