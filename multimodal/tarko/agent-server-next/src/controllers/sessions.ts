@@ -162,61 +162,56 @@ export async function getSessionStatus(c: HonoContext) {
     const isProcessing = session.getProcessingStatus();
     const agentStatus = session.agent.status();
 
-    // Enhanced processing status detection for streaming mode
-    // This addresses the core issue where agent status briefly shows as IDLE during tool execution
-    // in streaming mode, causing the Stop button to flicker in the UI
+    // Root cause fix: The core issue is that Agent status briefly switches to IDLE during tool execution
+    // in streaming mode, causing UI Stop button flicker. This is a timing issue where AgentStatus.EXECUTING
+    // doesn't accurately reflect the actual processing state during async operations.
+    
+    // Solution: Use event-based detection as the primary source of truth for processing state
+    // rather than relying solely on Agent.status() which has timing gaps
     let actualIsProcessing = isProcessing;
     
-    // If agent reports not processing, double-check with recent events to detect active work
-    if (!isProcessing) {
-      try {
-        const eventStream = session.agent.getEventStream();
-        const recentEvents = eventStream.getEvents().slice(-10); // Get last 10 events for better detection
-        
-        // Check for active tool calls (tool_call_start without corresponding tool_call_end)
-        const activeToolCallIds = new Set<string>();
-        const completedToolCallIds = new Set<string>();
-        
-        recentEvents.forEach((event: any) => {
-          if (event.type === 'tool_call_start' && event.data?.toolCallId) {
-            activeToolCallIds.add(event.data.toolCallId);
-          } else if (event.type === 'tool_call_end' && event.data?.toolCallId) {
-            completedToolCallIds.add(event.data.toolCallId);
-          }
-        });
-        
-        // Tool calls that started but haven't ended yet
-        const hasActiveToolCalls = Array.from(activeToolCallIds).some(id => !completedToolCallIds.has(id));
-        
-        // Check for streaming activity (text generation or tool streaming)
-        const hasStreamingActivity = recentEvents.some((event: any) => 
-          event.type === 'assistant_streaming_message' || 
-          event.type === 'assistant_streaming_tool_call' ||
-          event.type === 'assistant_streaming_thinking_message'
-        );
-        
-        // Check for recent agent run activity (within last few seconds)
-        const recentRunStart = recentEvents.some((event: any) => 
-          event.type === 'agent_run_start' && 
-          Date.now() - event.timestamp < 30000 // Within last 30 seconds
-        );
-        
-        // Check if there's a pending user message being processed
-        const hasPendingUserMessage = recentEvents.some((event: any) => 
-          event.type === 'user_message' && 
-          !recentEvents.some((endEvent: any, index) => 
-            index > recentEvents.indexOf(event) && endEvent.type === 'assistant_message'
-          )
-        );
-        
-        // Consider as processing if any of these conditions are true
-        if (hasActiveToolCalls || hasStreamingActivity || recentRunStart || hasPendingUserMessage) {
-          actualIsProcessing = true;
+    try {
+      const eventStream = session.agent.getEventStream();
+      const recentEvents = eventStream.getEvents().slice(-5); // Last 5 events for efficiency
+      
+      // Primary check: Active tool calls (most reliable indicator)
+      const activeToolCallIds = new Set<string>();
+      const completedToolCallIds = new Set<string>();
+      
+      recentEvents.forEach((event: any) => {
+        if (event.type === 'tool_call_start' && event.data?.toolCallId) {
+          activeToolCallIds.add(event.data.toolCallId);
+        } else if (event.type === 'tool_call_end' && event.data?.toolCallId) {
+          completedToolCallIds.add(event.data.toolCallId);
         }
-      } catch (error) {
-        // If we can't check events, fall back to original status
-        console.warn('Failed to check recent events for status:', error);
+      });
+      
+      // Tool calls that started but haven't ended yet = definitely processing
+      const hasActiveToolCalls = Array.from(activeToolCallIds).some(id => !completedToolCallIds.has(id));
+      
+      // Secondary check: Streaming activity
+      const hasStreamingActivity = recentEvents.some((event: any) => 
+        event.type === 'assistant_streaming_message' || 
+        event.type === 'assistant_streaming_tool_call' ||
+        event.type === 'assistant_streaming_thinking_message'
+      );
+      
+      // Final check: Recent agent run within reasonable timeframe
+      const hasRecentRunActivity = recentEvents.some((event: any) => 
+        (event.type === 'agent_run_start' || event.type === 'user_message') && 
+        Date.now() - event.timestamp < 10000 // Within last 10 seconds
+      );
+      
+      // Event-based detection takes precedence over Agent.status()
+      // This eliminates the timing gap that causes UI flicker
+      if (hasActiveToolCalls || hasStreamingActivity || hasRecentRunActivity) {
+        actualIsProcessing = true;
       }
+      
+    } catch (error) {
+      // Fallback to original Agent.status() if event stream is unavailable
+      console.warn('Event stream unavailable for status detection, using Agent.status():', error);
+      actualIsProcessing = isProcessing;
     }
 
     return c.json(
