@@ -46,58 +46,60 @@ export interface CommandOptions {
   cwd?: string;
 }
 
-// Dev command options
-export interface DevOptions extends CommandOptions {
-  exclude?: string[];
-  packages?: string[];
-}
-
-// Release command options
-export interface ReleaseOptions extends CommandOptions {
+// Common options shared across commands
+export interface CommonOptions {
+  cwd?: string;
   dryRun?: boolean;
-  changelog?: boolean;
   runInBand?: boolean;
   ignoreScripts?: boolean;
-  build?: boolean | string;
-  pushTag?: boolean;
   tagPrefix?: string;
-  canary?: boolean;
+}
+
+// AI-related options
+export interface AIOptions {
   useAi?: boolean;
   model?: string;
   apiKey?: string;
   baseURL?: string;
   provider?: string;
+}
+
+// Filter options for changelog
+export interface FilterOptions {
   filterScopes?: string[];
   filterTypes?: string[];
+}
+
+// Dev command options
+export interface DevOptions extends CommonOptions {
+  exclude?: string[];
+  packages?: string[];
+}
+
+// Release command options
+export interface ReleaseOptions extends CommonOptions, AIOptions, FilterOptions {
+  changelog?: boolean;
+  build?: boolean | string;
+  pushTag?: boolean;
+  canary?: boolean;
   createGithubRelease?: boolean;
   autoCreateReleaseBranch?: boolean;
 }
 
 // Patch command options
-export interface PatchOptions extends CommandOptions {
+export interface PatchOptions extends CommonOptions {
   version?: string;
   tag?: string;
-  runInBand?: boolean;
-  ignoreScripts?: boolean;
 }
 
 // Changelog command options
-export interface ChangelogOptions extends CommandOptions {
+export interface ChangelogOptions extends CommonOptions, AIOptions, FilterOptions {
   version?: string;
   beautify?: boolean;
   commit?: boolean;
   gitPush?: boolean;
   attachAuthor?: boolean;
   authorNameType?: 'name' | 'email';
-  useAi?: boolean;
-  model?: string;
-  apiKey?: string;
-  baseURL?: string;
-  tagPrefix?: string;
-  dryRun?: boolean;
-  provider?: string;
-  filterScopes?: string[];
-  filterTypes?: string[];
 }
 
 // Commit author information
@@ -114,8 +116,72 @@ export interface ChangelogSection {
 }
 
 // GitHub Release command options
-export interface GitHubReleaseOptions extends CommandOptions {
+export interface GitHubReleaseOptions extends CommonOptions {
   version?: string;
-  tagPrefix?: string;
-  dryRun?: boolean;
+}
+
+/**
+ * PDK Configuration interface
+ * Common options are at the top level, command-specific options are namespaced
+ */
+export interface PDKConfig {
+  /**
+   * Common options shared across all commands
+   */
+  common?: Partial<CommonOptions>;
+  
+  /**
+   * AI-related options
+   */
+  ai?: Partial<AIOptions>;
+  
+  /**
+   * Filter options for changelog generation
+   */
+  filter?: Partial<FilterOptions>;
+  
+  /**
+   * Development configuration
+   */
+  dev?: Partial<Pick<DevOptions, 'exclude' | 'packages'>>;
+  
+  /**
+   * Release configuration
+   */
+  release?: Partial<Pick<ReleaseOptions, 'changelog' | 'build' | 'pushTag' | 'canary' | 'createGithubRelease' | 'autoCreateReleaseBranch'>>;
+  
+  /**
+   * Changelog configuration
+   */
+  changelog?: Partial<Pick<ChangelogOptions, 'beautify' | 'commit' | 'gitPush' | 'attachAuthor' | 'authorNameType'>>;
+  
+  /**
+   * Patch configuration
+   */
+  patch?: Partial<PatchOptions>;
+  
+  /**
+   * GitHub release configuration
+   */
+  githubRelease?: Partial<GitHubReleaseOptions>;
+}
+
+/**
+ * Loaded configuration with resolved defaults
+ */
+export interface LoadedConfig extends PDKConfig {
+  /**
+   * The resolved common options
+   */
+  resolvedCommon: CommonOptions;
+  
+  /**
+   * The resolved AI options
+   */
+  resolvedAi: AIOptions;
+  
+  /**
+   * The resolved filter options
+   */
+  resolvedFilter: FilterOptions;
 }
