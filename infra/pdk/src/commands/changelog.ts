@@ -98,12 +98,9 @@ export async function changelog(options: ChangelogOptions = {}): Promise<void> {
   let releaseNotes: string;
 
   if (options.useAi) {
-    // Use AI changelog generator with type-safe provider
-    const providerName = (options.provider || 'openai') as ModelProviderName;
-
     const aiGenerator = new AIChangelogGenerator(cwd, tagPrefix, {
       id: options.model || 'gpt-4o',
-      provider: providerName,
+      provider: options.provider as ModelProviderName,
       // secretlint-disable-next-line @secretlint/secretlint-rule-pattern
       apiKey: options.apiKey,
       baseURL: options.baseURL,
