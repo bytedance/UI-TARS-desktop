@@ -162,32 +162,55 @@ export async function getSessionStatus(c: HonoContext) {
     const isProcessing = session.getProcessingStatus();
     const agentStatus = session.agent.status();
 
-    // Fix for streaming mode: Check if agent is actually processing by looking at both status and recent events
-    // This addresses the issue where agent status shows as IDLE during tool execution in streaming mode
+    // Enhanced processing status detection for streaming mode
+    // This addresses the core issue where agent status briefly shows as IDLE during tool execution
+    // in streaming mode, causing the Stop button to flicker in the UI
     let actualIsProcessing = isProcessing;
     
-    // If agent reports IDLE but we're in streaming mode, double-check with recent events
-    if (!isProcessing && agentStatus === 'idle') {
+    // If agent reports not processing, double-check with recent events to detect active work
+    if (!isProcessing) {
       try {
         const eventStream = session.agent.getEventStream();
-        const recentEvents = eventStream.getEvents().slice(-5); // Get last 5 events
+        const recentEvents = eventStream.getEvents().slice(-10); // Get last 10 events for better detection
         
-        // Check if there are any active tool calls or streaming messages
-        const hasActiveToolCalls = recentEvents.some((event: any) => 
-          event.type === 'tool_call_start' && 
-          !recentEvents.some((endEvent: any) => 
-            endEvent.type === 'tool_call_end' && 
-            endEvent.data?.toolCallId === event.data?.toolCallId
+        // Check for active tool calls (tool_call_start without corresponding tool_call_end)
+        const activeToolCallIds = new Set<string>();
+        const completedToolCallIds = new Set<string>();
+        
+        recentEvents.forEach((event: any) => {
+          if (event.type === 'tool_call_start' && event.data?.toolCallId) {
+            activeToolCallIds.add(event.data.toolCallId);
+          } else if (event.type === 'tool_call_end' && event.data?.toolCallId) {
+            completedToolCallIds.add(event.data.toolCallId);
+          }
+        });
+        
+        // Tool calls that started but haven't ended yet
+        const hasActiveToolCalls = Array.from(activeToolCallIds).some(id => !completedToolCallIds.has(id));
+        
+        // Check for streaming activity (text generation or tool streaming)
+        const hasStreamingActivity = recentEvents.some((event: any) => 
+          event.type === 'assistant_streaming_message' || 
+          event.type === 'assistant_streaming_tool_call' ||
+          event.type === 'assistant_streaming_thinking_message'
+        );
+        
+        // Check for recent agent run activity (within last few seconds)
+        const recentRunStart = recentEvents.some((event: any) => 
+          event.type === 'agent_run_start' && 
+          Date.now() - event.timestamp < 30000 // Within last 30 seconds
+        );
+        
+        // Check if there's a pending user message being processed
+        const hasPendingUserMessage = recentEvents.some((event: any) => 
+          event.type === 'user_message' && 
+          !recentEvents.some((endEvent: any, index) => 
+            index > recentEvents.indexOf(event) && endEvent.type === 'assistant_message'
           )
         );
         
-        const hasStreamingMessages = recentEvents.some((event: any) => 
-          event.type === 'assistant_streaming_message' || 
-          event.type === 'assistant_streaming_tool_call'
-        );
-        
-        // If there are active tool calls or streaming messages, consider as processing
-        if (hasActiveToolCalls || hasStreamingMessages) {
+        // Consider as processing if any of these conditions are true
+        if (hasActiveToolCalls || hasStreamingActivity || recentRunStart || hasPendingUserMessage) {
           actualIsProcessing = true;
         }
       } catch (error) {
