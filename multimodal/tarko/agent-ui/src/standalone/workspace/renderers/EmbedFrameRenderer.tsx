@@ -30,21 +30,12 @@ export const EmbedFrameRenderer: React.FC<EmbedFrameRendererProps> = ({
   }
 
   return (
-    <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
-      <iframe
-        src={src}
-        className="border-0 max-w-full max-h-full"
-        style={{ 
-          width: '1280px', 
-          height: '958px',
-          maxWidth: '100%',
-          maxHeight: '100%',
-          objectFit: 'contain'
-        }}
-        title={panelContent.title}
-        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
-        loading="lazy"
-      />
-    </div>
+    <iframe
+      src={src}
+      className="w-full h-full border-0"
+      title={panelContent.title}
+      sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+      loading="lazy"
+    />
   );
 };
