@@ -15,16 +15,30 @@ export const EmbedFrameRenderer: React.FC<EmbedFrameRendererProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const src = typeof panelContent.source === 'string' ? panelContent.source : (panelContent as any).link || '';
+  
+  console.log('EmbedFrameRenderer render:', { 
+    title: panelContent.title, 
+    src, 
+    isLoading, 
+    error,
+    panelContent 
+  });
+
   useEffect(() => {
     const iframe = iframeRef.current;
     if (!iframe) return;
 
+    console.log('EmbedFrameRenderer: Setting up event listeners for iframe:', src);
+
     const handleLoad = () => {
+      console.log('EmbedFrameRenderer: iframe loaded successfully');
       setIsLoading(false);
       setError(null);
     };
 
     const handleError = () => {
+      console.log('EmbedFrameRenderer: iframe failed to load');
       setIsLoading(false);
       setError('Failed to load content');
     };
@@ -33,12 +47,11 @@ export const EmbedFrameRenderer: React.FC<EmbedFrameRendererProps> = ({
     iframe.addEventListener('error', handleError);
 
     return () => {
+      console.log('EmbedFrameRenderer: Cleaning up event listeners');
       iframe.removeEventListener('load', handleLoad);
       iframe.removeEventListener('error', handleError);
     };
-  }, []);
-
-  const src = typeof panelContent.source === 'string' ? panelContent.source : (panelContent as any).link || '';
+  }, [src]);
 
   if (!src) {
     return (
