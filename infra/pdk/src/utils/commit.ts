@@ -1,4 +1,8 @@
-import { parseCommit, parseRawCommit } from 'tiny-conventional-commits-parser';
+import { parseCommit } from 'tiny-conventional-commits-parser';
+
+/**
+ * Git commit utilities
+ */
 
 /**
  * Check if a commit should be included based on scope filters
@@ -27,9 +31,11 @@ export function shouldIncludeCommitByScope(
   try {
     const parsedCommit = parseCommit(rawCommit);
     const scope = parsedCommit.scope;
-    
+
     // Include if no scope or scope matches filter
-    return !scope || filterScopes.includes(scope) || filterScopes.includes('all');
+    return (
+      !scope || filterScopes.includes(scope) || filterScopes.includes('all')
+    );
   } catch {
     // If parsing fails, include the commit
     return true;

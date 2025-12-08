@@ -104,8 +104,8 @@ export class AIChangelogGenerator {
 
       // Apply scope filter if provided
       if (filterScopes && filterScopes.length > 0) {
-        return commits.filter((commit) => 
-          shouldIncludeCommitByScope(commit.message, filterScopes)
+        return commits.filter((commit) =>
+          shouldIncludeCommitByScope(commit.message, filterScopes),
         );
       }
 
@@ -271,7 +271,11 @@ export class AIChangelogGenerator {
       `Generating changelog from ${previousTag || 'initial commit'} to ${currentTag}`,
     );
 
-    const commits = await this.getCommitsBetweenTags(previousTag, currentTag, filterScopes);
+    const commits = await this.getCommitsBetweenTags(
+      previousTag,
+      currentTag,
+      filterScopes,
+    );
     const changelogData = await this.generateChangelogWithAI(
       commits,
       version,

@@ -7,7 +7,7 @@
  * CLI entry point for PTK
  */
 import { cac } from 'cac';
-import { dev, release, patch, changelog, githubRelease } from './index';
+import { dev, release, patch, changelog, githubRelease } from './commands';
 import { logger } from './utils/logger';
 
 /**
