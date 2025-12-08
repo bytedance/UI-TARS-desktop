@@ -100,6 +100,7 @@ export async function generateReleaseNotes(
   previousTag: string | null,
   cwd: string,
   repoInfo?: { owner: string; repo: string },
+  filterScopes?: string[],
 ): Promise<string> {
   try {
     // Get commits between tags
@@ -137,7 +138,22 @@ export async function generateReleaseNotes(
     commits.forEach((commit) => {
       const match = commit.subject.match(/^(\w+)(\([^)]+\))?:\s*(.+)$/);
       if (match) {
-        const [, type] = match;
+        const [, type, scopeStr] = match;
+        
+        // Extract scope from scopeStr (remove parentheses)
+        let scope = '';
+        if (scopeStr) {
+          const scopeMatch = scopeStr.match(/^\(([^)]+)\)$/);
+          scope = scopeMatch ? scopeMatch[1] : '';
+        }
+        
+        // Apply scope filter if provided
+        if (filterScopes && filterScopes.length > 0 && scope) {
+          if (!filterScopes.includes(scope) && !filterScopes.includes('all')) {
+            return; // Skip this commit
+          }
+        }
+        
         if (type in groups) {
           groups[type as keyof typeof groups].push(commit);
         } else {

@@ -121,9 +121,9 @@ export function bootstrapCli() {
     .option('--baseURL, --base-url <baseURL>', 'Custom base URL for LLM')
     .option(
       '--filter-scopes <scopes>',
-      'Comma-separated list of scopes to include in changelog',
+      'Comma-separated list of scopes to include in changelog (empty for all)',
       {
-        default: 'tars,agent,tarko,o-agent,tars-stack,browser,infra,mcp,all',
+        default: '',
       },
     )
     .option(
@@ -227,9 +227,9 @@ export function bootstrapCli() {
     .option('--baseURL, --base-url <baseURL>', 'Custom base URL for LLM')
     .option(
       '--filter-scopes <scopes>',
-      'Comma-separated list of scopes to include in changelog',
+      'Comma-separated list of scopes to include in changelog (empty for all)',
       {
-        default: 'tars,agent,tarko,o-agent,tars-stack,browser,infra,mcp,all',
+        default: '',
       },
     )
     .option(
