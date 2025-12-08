@@ -155,20 +155,54 @@ export async function getSessionStatus(c: HonoContext) {
   const session = c.get('session');
 
   try {
-
     if (!session) {
       return c.json({ error: 'Session not found' }, 404);
     }
 
     const isProcessing = session.getProcessingStatus();
+    const agentStatus = session.agent.status();
+
+    // Fix for streaming mode: Check if agent is actually processing by looking at both status and recent events
+    // This addresses the issue where agent status shows as IDLE during tool execution in streaming mode
+    let actualIsProcessing = isProcessing;
+    
+    // If agent reports IDLE but we're in streaming mode, double-check with recent events
+    if (!isProcessing && agentStatus === 'idle') {
+      try {
+        const eventStream = session.agent.getEventStream();
+        const recentEvents = eventStream.getEvents().slice(-5); // Get last 5 events
+        
+        // Check if there are any active tool calls or streaming messages
+        const hasActiveToolCalls = recentEvents.some((event: any) => 
+          event.type === 'tool_call_start' && 
+          !recentEvents.some((endEvent: any) => 
+            endEvent.type === 'tool_call_end' && 
+            endEvent.data?.toolCallId === event.data?.toolCallId
+          )
+        );
+        
+        const hasStreamingMessages = recentEvents.some((event: any) => 
+          event.type === 'assistant_streaming_message' || 
+          event.type === 'assistant_streaming_tool_call'
+        );
+        
+        // If there are active tool calls or streaming messages, consider as processing
+        if (hasActiveToolCalls || hasStreamingMessages) {
+          actualIsProcessing = true;
+        }
+      } catch (error) {
+        // If we can't check events, fall back to original status
+        console.warn('Failed to check recent events for status:', error);
+      }
+    }
 
     return c.json(
       {
         sessionId: session.id,
         status: {
-          isProcessing,
-        state: session.agent.status(),
-      },
+          isProcessing: actualIsProcessing,
+          state: agentStatus,
+        },
       },
       200,
     );
