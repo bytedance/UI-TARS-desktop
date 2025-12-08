@@ -9,20 +9,29 @@
 import { cac } from 'cac';
 import { dev, release, patch, changelog, githubRelease } from './commands';
 import { logger } from './utils/logger';
+import { loadPDKConfig, mergeOptions } from './utils/config';
+import type { DevOptions, ReleaseOptions, PatchOptions, ChangelogOptions, GitHubReleaseOptions } from './types';
 
 /**
- * Wraps a command execution with error handling
+ * Wraps a command execution with error handling and config loading
  */
 // eslint-disable-next-line @typescript-eslint/ban-types
 async function wrapCommand(
   // eslint-disable-next-line @typescript-eslint/ban-types
   command: Function,
   options: Record<string, unknown>,
+  commandType: 'dev' | 'release' | 'patch' | 'changelog' | 'githubRelease',
 ) {
   options.cwd = options.cwd || process.cwd();
 
   try {
-    await command(options);
+    // Load configuration
+    const config = await loadPDKConfig({ cwd: options.cwd as string });
+    
+    // Merge CLI options with configuration
+    const mergedOptions = mergeOptions(options, config, commandType);
+    
+    await command(mergedOptions);
   } catch (err) {
     console.log();
     process.exitCode = 1;
@@ -74,7 +83,7 @@ export function bootstrapCli() {
         opts.exclude = [];
       }
 
-      return wrapCommand(dev, opts);
+      return wrapCommand(dev, opts, 'dev');
     });
 
   // Release command
@@ -162,7 +171,7 @@ export function bootstrapCli() {
       } else {
         opts.filterTypes = [];
       }
-      return wrapCommand(release, opts);
+      return wrapCommand(release, opts, 'release');
     });
 
   // Patch command
@@ -188,7 +197,7 @@ export function bootstrapCli() {
       if (opts.patchVersion) {
         opts.version = opts.patchVersion;
       }
-      return wrapCommand(patch, opts);
+      return wrapCommand(patch, opts, 'patch');
     });
 
   // Changelog command
@@ -257,7 +266,7 @@ export function bootstrapCli() {
       } else {
         opts.filterTypes = [];
       }
-      return wrapCommand(changelog, opts);
+      return wrapCommand(changelog, opts, 'changelog');
     });
 
   // GitHub Release command
@@ -279,7 +288,7 @@ export function bootstrapCli() {
       if (opts.releaseVersion) {
         opts.version = opts.releaseVersion;
       }
-      return wrapCommand(githubRelease, opts);
+      return wrapCommand(githubRelease, opts, 'githubRelease');
     });
 
   cli.version(pkg.version);
