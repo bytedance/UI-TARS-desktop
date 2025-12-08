@@ -5,7 +5,7 @@ import { AgentEventStream, ToolResult, Message } from '@/common/types';
 import { determineToolRendererType } from '@/common/utils/tool-renderers';
 import { messagesAtom } from '@/common/state/atoms/message';
 import { toolResultsAtom, toolCallResultMap } from '@/common/state/atoms/tool';
-import { sessionPanelContentAtom } from '@/common/state/atoms/ui';
+import { sessionPanelContentAtom, showToolContentAtom } from '@/common/state/atoms/ui';
 import { rawToolMappingAtom } from '@/common/state/atoms/rawEvents';
 import { toolCallArgumentsCache, streamingToolCallCache } from '../utils/cacheManager';
 import { collectFileInfo } from '../utils/fileCollector';
@@ -126,58 +126,55 @@ export class ToolResultHandler implements EventHandler<AgentEventStream.ToolResu
 
     // Update panel content only for active session
     if (shouldUpdatePanelContent(get, sessionId)) {
+      const panelContent = {
+        type: result.type,
+        source: result.content,
+        title: result.name,
+        timestamp: result.timestamp,
+        toolCallId: result.toolCallId,
+        error: result.error,
+        arguments: args,
+        _extra: result._extra,
+      };
+
       // Special handling for browser vision control to preserve environment context
       if (result.type === 'browser_vision_control') {
-        set(sessionPanelContentAtom, (prev) => {
-          const currentContent = prev[sessionId];
-          if (currentContent && currentContent.type === 'image' && currentContent.environmentId) {
-            const environmentId = currentContent.environmentId;
+        const currentContent = get(sessionPanelContentAtom)[sessionId];
+        if (currentContent && currentContent.type === 'image' && currentContent.environmentId) {
+          const environmentId = currentContent.environmentId;
 
-            return {
-              ...prev,
-              [sessionId]: {
-                ...currentContent,
-                type: 'browser_vision_control',
-                source: event.content,
-                title: currentContent.title,
-                timestamp: event.timestamp,
-                toolCallId: event.toolCallId,
-                error: event.error,
-                arguments: args,
-                originalContent: currentContent.source,
-                environmentId: environmentId,
-                processedEnvironmentIds: [environmentId], // Track processed environment IDs
-              },
-            };
-          } else {
-            return {
-              ...prev,
-              [sessionId]: {
-                type: result.type,
-                source: result.content,
-                title: result.name,
-                timestamp: result.timestamp,
-                toolCallId: result.toolCallId,
-                error: result.error,
-                arguments: args,
-              },
-            };
-          }
-        });
+          const enhancedPanelContent = {
+            ...panelContent,
+            type: 'browser_vision_control' as const,
+            originalContent: currentContent.source,
+            environmentId: environmentId,
+            processedEnvironmentIds: [environmentId], // Track processed environment IDs
+          };
+
+          set(sessionPanelContentAtom, (prev) => ({
+            ...prev,
+            [sessionId]: enhancedPanelContent,
+          }));
+
+          // Also update workspace display state
+          set(showToolContentAtom, enhancedPanelContent);
+        } else {
+          set(sessionPanelContentAtom, (prev) => ({
+            ...prev,
+            [sessionId]: panelContent,
+          }));
+
+          // Also update workspace display state
+          set(showToolContentAtom, panelContent);
+        }
       } else {
         set(sessionPanelContentAtom, (prev) => ({
           ...prev,
-          [sessionId]: {
-            type: result.type,
-            source: result.content,
-            title: result.name,
-            timestamp: result.timestamp,
-            toolCallId: result.toolCallId,
-            error: result.error,
-            arguments: args,
-            _extra: result._extra,
-          },
+          [sessionId]: panelContent,
         }));
+
+        // Also update workspace display state
+        set(showToolContentAtom, panelContent);
       }
     }
 
@@ -344,18 +341,23 @@ export class StreamingToolCallHandler
       const content = 'content' in parsedArgs ? parsedArgs.content : '';
 
       if (typeof path === 'string') {
+        const panelContent = {
+          type: 'file' as const,
+          source: typeof content === 'string' ? content : '',
+          title: `Writing: ${path.split('/').pop()}`,
+          timestamp: event.timestamp,
+          toolCallId,
+          arguments: parsedArgs,
+          isStreaming: !isComplete,
+        };
+
         set(sessionPanelContentAtom, (prev) => ({
           ...prev,
-          [sessionId]: {
-            type: 'file',
-            source: typeof content === 'string' ? content : '',
-            title: `Writing: ${path.split('/').pop()}`,
-            timestamp: event.timestamp,
-            toolCallId,
-            arguments: parsedArgs,
-            isStreaming: !isComplete,
-          },
+          [sessionId]: panelContent,
         }));
+
+        // Also update workspace display state
+        set(showToolContentAtom, panelContent);
       }
     }
 

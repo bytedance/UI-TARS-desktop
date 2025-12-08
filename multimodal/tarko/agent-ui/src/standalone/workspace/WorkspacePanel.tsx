@@ -51,7 +51,7 @@ const EmbedFrameView: React.FC<EmbedFrameViewProps> = ({ navItem }) => {
 };
 
 export const WorkspacePanel: React.FC = () => {
-  const { activeSessionId, activePanelContent, setActivePanelContent, activeEmbedFrame, setActiveEmbedFrame } = useSession();
+  const { activeSessionId, workspaceDisplayState, setWorkspaceDisplayState } = useSession();
   const { replayState } = useReplay();
   const [fullscreenData, setFullscreenData] = React.useState<FullscreenFileData | null>(null);
   const [focusProcessed, setFocusProcessed] = React.useState(false);
@@ -60,10 +60,10 @@ export const WorkspacePanel: React.FC = () => {
   const focusParam = getFocusParam();
 
   useEffect(() => {
-    if (focusParam && activePanelContent && activePanelContent.type === 'file' && !focusProcessed) {
-      const filePath = activePanelContent.arguments?.path || activePanelContent.title;
+    if (focusParam && workspaceDisplayState.toolContent && workspaceDisplayState.toolContent.type === 'file' && !focusProcessed) {
+      const filePath = workspaceDisplayState.toolContent.arguments?.path || workspaceDisplayState.toolContent.title;
       const fileName = filePath.split('/').pop() || filePath;
-      const content = activePanelContent.arguments?.content || activePanelContent.source;
+      const content = workspaceDisplayState.toolContent.arguments?.content || workspaceDisplayState.toolContent.source;
 
       if (
         (fileName === focusParam || filePath === focusParam) &&
@@ -84,23 +84,36 @@ export const WorkspacePanel: React.FC = () => {
         setFocusProcessed(true);
       }
     }
-  }, [focusParam, activePanelContent, focusProcessed]);
+  }, [focusParam, workspaceDisplayState.toolContent, focusProcessed]);
 
-  // Clear embed frame when tool call content is shown
-  // Only clear if it's a real tool call result, not loading states
+  // Auto-clear embed frame when tool content is shown
   useEffect(() => {
-    if (activePanelContent && activeEmbedFrame && 
-        activePanelContent.type !== 'embed_frame' && 
-        !activePanelContent.source?.includes('loading')) {
-      setActiveEmbedFrame(null);
+    if (workspaceDisplayState.mode === 'tool-content' && workspaceDisplayState.toolContent) {
+      // This is already handled by the unified state management
+      // No need for additional logic here
     }
-  }, [activePanelContent, activeEmbedFrame, setActiveEmbedFrame]);
+  }, [workspaceDisplayState]);
+
+  const renderWorkspaceContent = () => {
+    switch (workspaceDisplayState.mode) {
+      case 'embed-frame':
+        return workspaceDisplayState.embedFrame ? (
+          <EmbedFrameView navItem={workspaceDisplayState.embedFrame} />
+        ) : null;
+      
+      case 'tool-content':
+        return workspaceDisplayState.toolContent ? <WorkspaceDetail /> : null;
+      
+      default:
+        return <WorkspaceContent />;
+    }
+  };
 
   return (
     <>
       <div className="flex flex-col h-full">
         <div className="flex-1 overflow-hidden">
-          {activeEmbedFrame ? <EmbedFrameView navItem={activeEmbedFrame} /> : activePanelContent ? <WorkspaceDetail /> : <WorkspaceContent />}
+          {renderWorkspaceContent()}
         </div>
 
         <AnimatePresence>{isReplayActive && <ReplayControlPanel />}</AnimatePresence>

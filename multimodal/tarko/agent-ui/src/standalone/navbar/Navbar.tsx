@@ -32,6 +32,8 @@ import { NavbarModelSelector } from './ModelSelector';
 import { getLogoUrl, getAgentTitle, getWorkspaceNavItems } from '@/config/web-ui-config';
 import type { WorkspaceNavItemIcon, WorkspaceNavItem } from '@tarko/interface';
 import { getModelDisplayName } from '@/common/utils/modelUtils';
+import { showEmbedFrameAtom, hideEmbedFrameAtom } from '@/common/state/atoms/ui';
+import { useSetAtom } from 'jotai';
 import {
   Box,
   IconButton,
@@ -45,28 +47,30 @@ import {
 import './Navbar.css';
 
 export const Navbar: React.FC = () => {
-  const { activeSessionId, isProcessing, sessionMetadata, activeEmbedFrame, setActiveEmbedFrame } = useSession();
+  const { activeSessionId, isProcessing, sessionMetadata, workspaceDisplayState } = useSession();
   const { isReplayMode } = useReplayMode();
   const { isDarkMode } = useNavbarStyles();
   const [showAboutModal, setShowAboutModal] = React.useState(false);
   const [showShareModal, setShowShareModal] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const workspaceNavItems = getWorkspaceNavItems(sessionMetadata?.sandboxUrl);
+  const showEmbedFrame = useSetAtom(showEmbedFrameAtom);
+  const hideEmbedFrame = useSetAtom(hideEmbedFrameAtom);
 
   const navigate = useNavigate();
 
   // Auto-activate embed frames with autoActive: true
   // Only activate once when nav items are loaded and no active frame exists
   useEffect(() => {
-    if (!activeEmbedFrame && workspaceNavItems.length > 0 && activeSessionId) {
+    if (workspaceDisplayState.mode !== 'embed-frame' && workspaceNavItems.length > 0 && activeSessionId) {
       const autoActiveItem = workspaceNavItems.find(
         item => item.behavior === 'embed-frame' && item.autoActive
       );
       if (autoActiveItem) {
-        setActiveEmbedFrame(autoActiveItem);
+        showEmbedFrame(autoActiveItem);
       }
     }
-  }, [workspaceNavItems, activeEmbedFrame, setActiveEmbedFrame, activeSessionId]);
+  }, [workspaceNavItems, workspaceDisplayState.mode, showEmbedFrame, activeSessionId]);
 
   const handleNavigateHome = useCallback(() => {
     navigate('/');
@@ -100,10 +104,10 @@ export const Navbar: React.FC = () => {
   const handleNavItemClick = (navItem: WorkspaceNavItem) => {
     if (navItem.behavior === 'embed-frame') {
       // Toggle embed frame state
-      if (activeEmbedFrame?.title === navItem.title) {
-        setActiveEmbedFrame(null);
+      if (workspaceDisplayState.mode === 'embed-frame' && workspaceDisplayState.embedFrame?.title === navItem.title) {
+        hideEmbedFrame();
       } else {
-        setActiveEmbedFrame(navItem);
+        showEmbedFrame(navItem);
       }
     } else {
       // Default behavior: open in new tab
@@ -199,7 +203,7 @@ export const Navbar: React.FC = () => {
                 {workspaceNavItems.map((navItem) => {
                   const IconComponent = getNavItemIcon(navItem.icon);
                   const { className } = getNavItemStyle(navItem.icon);
-                  const isActive = activeEmbedFrame?.title === navItem.title;
+                  const isActive = workspaceDisplayState.mode === 'embed-frame' && workspaceDisplayState.embedFrame?.title === navItem.title;
                   const activeClassName = isActive ? 'ring-2 ring-blue-500 ring-offset-1' : '';
                   const title = navItem.behavior === 'embed-frame' 
                     ? (isActive ? `Hide ${navItem.title}` : `Show ${navItem.title} in workspace`)
@@ -251,7 +255,7 @@ export const Navbar: React.FC = () => {
                 <>
                   {workspaceNavItems.map((navItem) => {
                     const IconComponent = getNavItemIcon(navItem.icon);
-                    const isActive = activeEmbedFrame?.title === navItem.title;
+                    const isActive = workspaceDisplayState.mode === 'embed-frame' && workspaceDisplayState.embedFrame?.title === navItem.title;
                     const title = navItem.behavior === 'embed-frame' 
                       ? (isActive ? `Hide ${navItem.title}` : `Show ${navItem.title} in workspace`)
                       : `Open ${navItem.title} in new tab`;

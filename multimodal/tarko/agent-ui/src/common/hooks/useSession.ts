@@ -4,7 +4,7 @@ import { messagesAtom, groupedMessagesAtom } from '../state/atoms/message';
 import { toolResultsAtom } from '../state/atoms/tool';
 
 import { sessionFilesAtom } from '../state/atoms/files';
-import { isProcessingAtom, activePanelContentAtom, connectionStatusAtom, activeEmbedFrameAtom } from '../state/atoms/ui';
+import { isProcessingAtom, activePanelContentAtom, connectionStatusAtom, activeEmbedFrameAtom, workspaceDisplayStateAtom } from '../state/atoms/ui';
 import { replayStateAtom } from '../state/atoms/replay';
 import {
   loadSessionsAction,
@@ -36,6 +36,7 @@ export function useSession() {
   const [activePanelContent, setActivePanelContent] = useAtom(activePanelContentAtom);
   const [connectionStatus, setConnectionStatus] = useAtom(connectionStatusAtom);
   const [activeEmbedFrame, setActiveEmbedFrame] = useAtom(activeEmbedFrameAtom);
+  const [workspaceDisplayState, setWorkspaceDisplayState] = useAtom(workspaceDisplayStateAtom);
 
   const [replayState, setReplayState] = useAtom(replayStateAtom);
 
@@ -93,6 +94,7 @@ export function useSession() {
       activePanelContent,
       connectionStatus,
       activeEmbedFrame,
+      workspaceDisplayState,
 
       replayState,
       sessionMetadata,
@@ -109,6 +111,7 @@ export function useSession() {
 
       setActivePanelContent,
       setActiveEmbedFrame,
+      setWorkspaceDisplayState,
 
       initConnectionMonitoring,
       checkServerStatus,
@@ -126,6 +129,7 @@ export function useSession() {
       activePanelContent,
       connectionStatus,
       activeEmbedFrame,
+      workspaceDisplayState,
       replayState,
       sessionMetadata,
       loadSessions,
@@ -138,6 +142,7 @@ export function useSession() {
       abortQuery,
       setActivePanelContent,
       setActiveEmbedFrame,
+      setWorkspaceDisplayState,
       initConnectionMonitoring,
       checkServerStatus,
       checkSessionStatus,
