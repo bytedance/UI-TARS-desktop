@@ -33,6 +33,7 @@ export const EmbedFrameRenderer: React.FC<EmbedFrameRendererProps> = ({
     <iframe
       src={src}
       className="w-full h-full border-0"
+      style={{ width: '1280px', height: '958px' }}
       title={panelContent.title}
       sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
       loading="lazy"
