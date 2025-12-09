@@ -13,6 +13,7 @@ export const EmbedFrameRenderer: React.FC<EmbedFrameRendererProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 1280, height: 958 });
+  const [scale, setScale] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const src = typeof panelContent.source === 'string' ? panelContent.source : (panelContent as any).link || '';
@@ -29,23 +30,24 @@ export const EmbedFrameRenderer: React.FC<EmbedFrameRendererProps> = ({
         const containerWidth = containerRef.current.clientWidth;
         const containerHeight = containerRef.current.clientHeight;
         
-        // Use 100% of container size, but cap at 1280x958
-        const width = Math.min(containerWidth, 1280);
-        const height = Math.min(containerHeight, 958);
+        // Original iframe dimensions
+        const originalWidth = 1280;
+        const originalHeight = 958;
         
-        // Maintain 4:3 aspect ratio
-        const aspectRatio = 4 / 3;
-        let finalWidth = width;
-        let finalHeight = width / aspectRatio;
+        // Calculate scale to fit entire iframe within container
+        const scaleX = containerWidth / originalWidth;
+        const scaleY = containerHeight / originalHeight;
+        const newScale = Math.min(scaleX, scaleY, 1); // Don't scale up, only down
         
-        if (finalHeight > height) {
-          finalHeight = height;
-          finalWidth = height * aspectRatio;
-        }
+        setScale(newScale);
+        
+        // Set actual dimensions after scaling
+        const scaledWidth = originalWidth * newScale;
+        const scaledHeight = originalHeight * newScale;
         
         setDimensions({
-          width: Math.round(finalWidth),
-          height: Math.round(finalHeight)
+          width: Math.round(scaledWidth),
+          height: Math.round(scaledHeight)
         });
       }
     };
@@ -99,15 +101,24 @@ export const EmbedFrameRenderer: React.FC<EmbedFrameRendererProps> = ({
             Close
           </button>
         </div>
-        <div className="w-full h-full flex items-start justify-center pt-16">
-          <iframe
-            src={src}
-            className="border-0"
-            style={{ width: `${dimensions.width}px`, height: `${dimensions.height}px` }}
-            title={panelContent.title}
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
-            loading="lazy"
-          />
+        <div className="w-full h-full flex items-center justify-center pt-16">
+          <div 
+            style={{
+              transform: `scale(${scale})`,
+              transformOrigin: 'center center',
+              width: '1280px',
+              height: '958px'
+            }}
+          >
+            <iframe
+              src={src}
+              className="border-0"
+              style={{ width: '1280px', height: '958px' }}
+              title={panelContent.title}
+              sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+              loading="lazy"
+            />
+          </div>
         </div>
       </div>
     );
@@ -126,15 +137,24 @@ export const EmbedFrameRenderer: React.FC<EmbedFrameRendererProps> = ({
           </svg>
         </button>
       </div>
-      <div className="w-full h-full flex items-start justify-center">
-        <iframe
-          src={src}
-          className="border-0"
-          style={{ width: `${dimensions.width}px`, height: `${dimensions.height}px` }}
-          title={panelContent.title}
-          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
-          loading="lazy"
-        />
+      <div className="w-full h-full flex items-center justify-center">
+        <div 
+          style={{
+            transform: `scale(${scale})`,
+            transformOrigin: 'center center',
+            width: '1280px',
+            height: '958px'
+          }}
+        >
+          <iframe
+            src={src}
+            className="border-0"
+            style={{ width: '1280px', height: '958px' }}
+            title={panelContent.title}
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+            loading="lazy"
+          />
+        </div>
       </div>
     </div>
   );
