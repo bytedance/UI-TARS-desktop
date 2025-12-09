@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "infra",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Agent TARS Infra",
   "scripts": {
     "bootstrap": "pnpm install && pnpm build",
