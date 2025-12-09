@@ -34,13 +34,30 @@ const EmbedFrameView: React.FC<EmbedFrameViewProps> = ({ navItem }) => {
     link: navItem.link,
   };
 
+  const handleOpenInNewTab = () => {
+    if (navItem.link) {
+      window.open(navItem.link, '_blank');
+    }
+  };
+
   return (
     <div className="h-full flex flex-col bg-white dark:bg-gray-900/20 animate-in fade-in duration-200">
       <div className="md:px-4 md:py-3 px-3 py-2 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
-            {navItem.title}
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+              {navItem.title}
+            </h3>
+            <button
+              onClick={handleOpenInNewTab}
+              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+              title="Open in new tab"
+            >
+              <svg className="w-3 h-3 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
       <div className="flex-1 overflow-hidden">

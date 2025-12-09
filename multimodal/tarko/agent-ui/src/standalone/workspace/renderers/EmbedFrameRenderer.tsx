@@ -53,9 +53,21 @@ export const EmbedFrameRenderer: React.FC<EmbedFrameRendererProps> = ({
     };
 
     updateDimensions();
+    
+    // Use ResizeObserver for better container width change detection
+    const resizeObserver = new ResizeObserver(() => {
+      updateDimensions();
+    });
+    
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+    
+    // Also listen to window resize as fallback
     window.addEventListener('resize', updateDimensions);
     
     return () => {
+      resizeObserver.disconnect();
       window.removeEventListener('resize', updateDimensions);
     };
   }, [isFullscreen]);
@@ -101,11 +113,11 @@ export const EmbedFrameRenderer: React.FC<EmbedFrameRendererProps> = ({
             Close
           </button>
         </div>
-        <div className="w-full h-full flex items-center justify-center pt-16">
+        <div className="w-full h-full flex items-start justify-center pt-16">
           <div 
             style={{
               transform: `scale(${scale})`,
-              transformOrigin: 'center center',
+              transformOrigin: 'top center',
               width: '1280px',
               height: '958px'
             }}
@@ -126,22 +138,11 @@ export const EmbedFrameRenderer: React.FC<EmbedFrameRendererProps> = ({
 
   return (
     <div ref={containerRef} className="w-full h-full relative">
-      <div className="absolute top-2 right-2 z-10 flex gap-2">
-        <button
-          onClick={handleOpenInNewTab}
-          className="p-2 bg-white dark:bg-gray-800 rounded shadow hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-          title="Open in new tab"
-        >
-          <svg className="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-          </svg>
-        </button>
-      </div>
-      <div className="w-full h-full flex items-center justify-center">
+      <div className="w-full h-full flex items-start justify-center">
         <div 
           style={{
             transform: `scale(${scale})`,
-            transformOrigin: 'center center',
+            transformOrigin: 'top center',
             width: '1280px',
             height: '958px'
           }}
