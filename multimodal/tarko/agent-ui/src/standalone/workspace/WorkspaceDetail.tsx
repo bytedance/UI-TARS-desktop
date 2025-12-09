@@ -59,12 +59,14 @@ const CONTENT_RENDERERS: Record<
 };
 
 export const WorkspaceDetail: React.FC = () => {
-  const { activePanelContent, setActivePanelContent, activeSessionId } = useSession();
+  const { workspaceDisplayState, setWorkspaceDisplayState, activeSessionId } = useSession();
   const { isReplayMode } = useReplayMode();
   const [workspaceDisplayMode, setWorkspaceDisplayMode] = useAtom(workspaceDisplayModeAtom);
   const [rawToolMapping] = useAtom(rawToolMappingAtom);
   const [zoomedImage, setZoomedImage] = useState<ZoomedImageData | null>(null);
   const [fullscreenData, setFullscreenData] = useState<FullscreenFileData | null>(null);
+
+  const activePanelContent = workspaceDisplayState.mode === 'tool-content' ? workspaceDisplayState.toolContent : null;
 
   const getInitialDisplayMode = (): FileDisplayMode => {
     if (
@@ -145,7 +147,7 @@ export const WorkspaceDetail: React.FC = () => {
   };
 
   const handleBack = () => {
-    setActivePanelContent(null);
+    setWorkspaceDisplayState({ mode: 'idle' });
   };
 
   const handleFullscreen = () => {
