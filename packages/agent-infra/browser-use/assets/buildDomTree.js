@@ -736,7 +736,7 @@ window.buildDomTree = (
       };
 
       // Add viewport and scroll information
-      nodeData.viewport = {
+      nodeData.viewportInfo = {
         scrollX: Math.round(scrollX),
         scrollY: Math.round(scrollY),
         width: window.innerWidth,
