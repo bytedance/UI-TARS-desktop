@@ -3,14 +3,19 @@ import { defineConfig } from '@rslib/core';
 export default defineConfig({
   source: {
     entry: {
-      index: ['src/**/*.ts', '!src/**/*.{test,bench}.ts'],
+      index: 'src/index.ts',
     },
   },
   lib: [
     {
       format: 'cjs',
       syntax: 'es2021',
-      bundle: false,
+      bundle: true,
+      autoExternal: {
+        dependencies: false, // Enable bundling to include tiny-conventional-commits-parser
+        optionalDependencies: true,
+        peerDependencies: true,
+      },
       dts: true,
     },
   ],

@@ -16,11 +16,20 @@ import type { GitHubReleaseOptions } from '../types';
 /**
  * GitHub Release command implementation
  */
-export async function githubRelease(options: GitHubReleaseOptions = {}): Promise<void> {
-  const { cwd = process.cwd(), version, tagPrefix = 'v', dryRun = false } = options;
+export async function githubRelease(
+  options: GitHubReleaseOptions = {},
+): Promise<void> {
+  const {
+    cwd = process.cwd(),
+    version,
+    tagPrefix = 'v',
+    dryRun = false,
+  } = options;
 
   if (dryRun) {
-    logger.info('Dry run mode enabled - no actual GitHub release will be created');
+    logger.info(
+      'Dry run mode enabled - no actual GitHub release will be created',
+    );
   }
 
   try {

@@ -4,16 +4,23 @@
  */
 
 /**
- * NPM utilities for PTK
+ * NPM utilities for PDK
  */
 import * as execa from 'execa';
 
 /**
  * Fetches package version from npm registry
  */
-export async function fetchPackageVersion(name: string, tag: string): Promise<string> {
+export async function fetchPackageVersion(
+  name: string,
+  tag: string,
+): Promise<string> {
   try {
-    const result = await execa.execa('npm', ['view', `${name}@${tag}`, 'version']);
+    const result = await execa.execa('npm', [
+      'view',
+      `${name}@${tag}`,
+      'version',
+    ]);
     return result.stdout.toString();
   } catch (err) {
     return '- (1st release)';

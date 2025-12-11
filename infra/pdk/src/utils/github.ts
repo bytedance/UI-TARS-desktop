@@ -8,6 +8,7 @@
  */
 import { execa } from 'execa';
 import { logger } from './logger';
+import { shouldIncludeCommitByScope } from './commit';
 
 // Username mapping for commit authors to correct GitHub usernames
 const USERNAME_MAP: Record<string, string> = {
@@ -18,13 +19,18 @@ const USERNAME_MAP: Record<string, string> = {
 /**
  * Extract GitHub username from noreply email or apply manual mapping
  */
-function resolveGitHubUsername(authorName: string, authorEmail: string): string {
+function resolveGitHubUsername(
+  authorName: string,
+  authorEmail: string,
+): string {
   // Extract from GitHub noreply email pattern: {id}+{username}@users.noreply.github.com
-  const emailMatch = authorEmail.match(/^\d+\+([^@]+)@users\.noreply\.github\.com$/);
+  const emailMatch = authorEmail.match(
+    /^\d+\+([^@]+)@users\.noreply\.github\.com$/,
+  );
   if (emailMatch) {
     return emailMatch[1];
   }
-  
+
   // Fallback to manual mapping
   return USERNAME_MAP[authorName] || authorName;
 }
@@ -41,13 +47,18 @@ export interface GitHubReleaseOptions {
 
 /**
  * Gets the previous tag for generating release notes
- * Handles mixed tag formats (v1.0.0 and @agent-tars@1.0.0)
+ * Handles mixed tag formats (v1.0.0 and @sailors@1.0.0)
  * Filters out canary releases
  */
-export async function getPreviousTag(tagName: string, cwd: string): Promise<string | null> {
+export async function getPreviousTag(
+  tagName: string,
+  cwd: string,
+): Promise<string | null> {
   try {
     // Get all tags sorted by creation date (chronological order, newest first)
-    const { stdout } = await execa('git', ['tag', '--sort=-creatordate'], { cwd });
+    const { stdout } = await execa('git', ['tag', '--sort=-creatordate'], {
+      cwd,
+    });
     const allTags = stdout.trim().split('\n').filter(Boolean);
 
     if (allTags.length === 0) {
@@ -90,6 +101,7 @@ export async function generateReleaseNotes(
   previousTag: string | null,
   cwd: string,
   repoInfo?: { owner: string; repo: string },
+  filterScopes?: string[],
 ): Promise<string> {
   try {
     // Get commits between tags
@@ -128,6 +140,12 @@ export async function generateReleaseNotes(
       const match = commit.subject.match(/^(\w+)(\([^)]+\))?:\s*(.+)$/);
       if (match) {
         const [, type] = match;
+        
+        // Apply scope filter if provided
+        if (!shouldIncludeCommitByScope(commit.subject, filterScopes)) {
+          return; // Skip this commit
+        }
+        
         if (type in groups) {
           groups[type as keyof typeof groups].push(commit);
         } else {
@@ -224,7 +242,9 @@ export async function generateReleaseNotes(
 
     return releaseNotes;
   } catch (error) {
-    logger.warn(`Failed to generate release notes: ${(error as Error).message}`);
+    logger.warn(
+      `Failed to generate release notes: ${(error as Error).message}`,
+    );
     return `## What's Changed\n\nRelease ${tagName}`;
   }
 }
@@ -236,7 +256,11 @@ export async function getRepositoryInfo(
   cwd: string,
 ): Promise<{ owner: string; repo: string } | null> {
   try {
-    const { stdout } = await execa('git', ['config', '--get', 'remote.origin.url'], { cwd });
+    const { stdout } = await execa(
+      'git',
+      ['config', '--get', 'remote.origin.url'],
+      { cwd },
+    );
     const url = stdout.trim();
 
     // Parse GitHub URL (both HTTPS and SSH)
@@ -260,7 +284,9 @@ export async function getRepositoryInfo(
 /**
  * Creates a GitHub release using GitHub CLI with native release notes generation
  */
-export async function createGitHubRelease(options: GitHubReleaseOptions): Promise<void> {
+export async function createGitHubRelease(
+  options: GitHubReleaseOptions,
+): Promise<void> {
   const { version, tagName, cwd, dryRun = false } = options;
 
   try {
@@ -277,7 +303,9 @@ export async function createGitHubRelease(options: GitHubReleaseOptions): Promis
     try {
       await execa('gh', ['auth', 'status'], { cwd });
     } catch (error) {
-      throw new Error('Not authenticated with GitHub CLI. Please run "gh auth login" first.');
+      throw new Error(
+        'Not authenticated with GitHub CLI. Please run "gh auth login" first.',
+      );
     }
 
     // Get repository info
@@ -314,7 +342,12 @@ export async function createGitHubRelease(options: GitHubReleaseOptions): Promis
       // Generate and show release notes preview
       logger.info(`\n[dry-run] Release notes preview:`);
       logger.info(`${'='.repeat(50)}`);
-      const releaseNotes = await generateReleaseNotes(tagName, previousTag, cwd, repoInfo);
+      const releaseNotes = await generateReleaseNotes(
+        tagName,
+        previousTag,
+        cwd,
+        repoInfo,
+      );
       console.log(releaseNotes);
       logger.info(`${'='.repeat(50)}`);
       return;
@@ -324,17 +357,30 @@ export async function createGitHubRelease(options: GitHubReleaseOptions): Promis
     try {
       await execa(
         'gh',
-        ['release', 'view', tagName, '--repo', `${repoInfo.owner}/${repoInfo.repo}`],
+        [
+          'release',
+          'view',
+          tagName,
+          '--repo',
+          `${repoInfo.owner}/${repoInfo.repo}`,
+        ],
         { cwd },
       );
-      logger.warn(`GitHub release for tag ${tagName} already exists, skipping creation`);
+      logger.warn(
+        `GitHub release for tag ${tagName} already exists, skipping creation`,
+      );
       return;
     } catch {
       // Release doesn't exist, proceed with creation
     }
 
     // Generate beautiful release notes
-    const releaseNotes = await generateReleaseNotes(tagName, previousTag, cwd, repoInfo);
+    const releaseNotes = await generateReleaseNotes(
+      tagName,
+      previousTag,
+      cwd,
+      repoInfo,
+    );
 
     // Create the release with custom formatted notes
 
@@ -381,6 +427,8 @@ export async function createGitHubRelease(options: GitHubReleaseOptions): Promis
       // Ignore if we can't get the URL
     }
   } catch (error) {
-    throw new Error(`Failed to create GitHub release: ${(error as Error).message}`);
+    throw new Error(
+      `Failed to create GitHub release: ${(error as Error).message}`,
+    );
   }
 }

@@ -4,7 +4,7 @@
  */
 
 /**
- * Type definitions for PTK
+ * Type definitions for PDK
  */
 
 // Package.json interface with minimal required fields
