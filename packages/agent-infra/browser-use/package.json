@@ -1,6 +1,6 @@
 {
   "name": "@agent-infra/browser-use",
-  "version": "0.1.3",
+  "version": "0.1.7",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
