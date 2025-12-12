@@ -12,7 +12,7 @@ pnpm install
 
 echo "3. commit version update..."
 git add .
-git commit -m "release: publish packages"
+git commit -m "release: publish packages" || true
 
 echo "4. publish to npm..."
 pnpm publish -r --no-git-checks --access public
