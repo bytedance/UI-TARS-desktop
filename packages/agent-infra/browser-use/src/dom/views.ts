@@ -8,8 +8,18 @@
  */
 import type { ViewportInfo, CoordinateSet } from './history/views';
 
+/**
+ * Abstract base class for DOM nodes
+ * Provides common properties and functionality for all DOM node types
+ */
 export abstract class DOMBaseNode {
+  /**
+   * Whether the node is visible in the viewport
+   */
   isVisible: boolean;
+  /**
+   * Parent element node reference (null for root nodes)
+   */
   parent?: DOMElementNode | null;
 
   constructor(isVisible: boolean, parent?: DOMElementNode | null) {
@@ -19,8 +29,15 @@ export abstract class DOMBaseNode {
   }
 }
 
+/**
+ * Represents a text node in the DOM tree
+ * Contains text content and visibility information
+ */
 export class DOMTextNode extends DOMBaseNode {
   type = 'TEXT_NODE' as const;
+  /**
+   * The text content of the node
+   */
   text: string;
 
   constructor(
@@ -32,6 +49,11 @@ export class DOMTextNode extends DOMBaseNode {
     this.text = text;
   }
 
+  /**
+   * Checks if any parent element has a highlight index assigned
+   * Used to determine if text content is already part of a highlighted element
+   * @returns true if a parent has a highlight index
+   */
   hasParentWithHighlightIndex(): boolean {
     let current = this.parent;
     while (current != null) {
@@ -133,7 +155,7 @@ export class DOMElementNode extends DOMBaseNode {
           const text = node.getEnhancedText();
           let output = `[${node.highlightIndex}]`;
 
-          // 如果指定了 includeAttributes，直接使用这些属性，不使用智能判断
+          // If includeAttributes is specified, use these attributes directly without smart detection
           if (includeAttributes.length > 0) {
             const attributesStr = includeAttributes
               .map((key) =>
@@ -146,14 +168,14 @@ export class DOMElementNode extends DOMBaseNode {
               output += ` [${attributesStr}]`;
             }
           } else {
-            // 使用增强格式的智能上下文信息
+            // Use enhanced format smart context information
             const contextInfo = node.getEnhancedContextInfo();
             if (contextInfo.length > 0) {
               output += ` [${contextInfo.join(' ')}]`;
             }
           }
 
-          // 添加标签和文本内容
+          // Add tag and text content
           output += ` <${node.tagName}>${text}</${node.tagName}>`;
 
           formattedText.push(output);
@@ -175,7 +197,7 @@ export class DOMElementNode extends DOMBaseNode {
   }
 
   getEnhancedText(): string {
-    // 优先级：aria-label > title > alt > 内部文本 > placeholder > value > href描述 > 兜底
+    // Priority: aria-label > title > alt > inner text > placeholder > value > href description > fallback
     const ariaLabel = this.attributes['aria-label'];
     const title = this.attributes['title'];
     const alt = this.attributes['alt'];
@@ -225,9 +247,9 @@ export class DOMElementNode extends DOMBaseNode {
     const accept = this.attributes['accept'];
     const autocomplete = this.attributes['autocomplete'];
 
-    // 确定元素类别和主要类型
+    // Determine element category and main type
     if (this.tagName === 'a') {
-      // 链接类型判断
+      // Link type determination
       if (href) {
         if (href.startsWith('mailto:')) {
           context.push('email');
@@ -242,20 +264,20 @@ export class DOMElementNode extends DOMBaseNode {
         } else {
           context.push('link');
         }
-        // 总是显示href
+        // Always show href
         context.push(`href="${href}"`);
       } else {
         context.push('link');
       }
 
-      // 目标属性
+      // Target attribute
       if (target === '_blank') {
         context.push('new-window');
       } else if (target) {
         context.push(`target="${target}"`);
       }
     } else if (this.tagName === 'button') {
-      // 按钮类型
+      // Button type
       if (type === 'submit') {
         context.push('submit');
       } else if (type === 'reset') {
@@ -264,16 +286,16 @@ export class DOMElementNode extends DOMBaseNode {
         context.push('button');
       }
 
-      // 按钮状态
+      // Button state
       if (disabled !== undefined) {
         context.push('disabled');
       }
     } else if (this.tagName === 'input') {
-      // 输入框类型
+      // Input type
       const inputType = type || 'text';
       context.push(inputType);
 
-      // 特殊输入框状态
+      // Special input states
       if (inputType === 'checkbox' || inputType === 'radio') {
         if (checked !== undefined) {
           context.push('checked');
@@ -297,7 +319,7 @@ export class DOMElementNode extends DOMBaseNode {
         }
       }
 
-      // 通用输入框状态
+      // Common input states
       if (required !== undefined) {
         context.push('required');
       }
@@ -314,7 +336,7 @@ export class DOMElementNode extends DOMBaseNode {
         context.push(`autocomplete="${autocomplete}"`);
       }
     } else if (this.tagName === 'select') {
-      // 下拉选择
+      // Dropdown selection
       context.push('select');
       if (required !== undefined) {
         context.push('required');
@@ -326,7 +348,7 @@ export class DOMElementNode extends DOMBaseNode {
         context.push('disabled');
       }
     } else if (this.tagName === 'textarea') {
-      // 多行文本
+      // Multi-line text
       context.push('textarea');
       if (placeholder) {
         context.push(`placeholder="${placeholder}"`);
@@ -341,19 +363,19 @@ export class DOMElementNode extends DOMBaseNode {
         context.push('disabled');
       }
     } else if (this.tagName === 'img') {
-      // 图片
+      // Image
       context.push('image');
       if (alt) {
         context.push(`alt="${alt}"`);
       }
     } else if (this.tagName === 'video') {
-      // 视频
+      // Video
       context.push('video');
       if (this.attributes['controls'] !== undefined) {
         context.push('has-controls');
       }
     } else if (this.tagName === 'audio') {
-      // 音频
+      // Audio
       context.push('audio');
       if (this.attributes['controls'] !== undefined) {
         context.push('has-controls');
@@ -365,22 +387,22 @@ export class DOMElementNode extends DOMBaseNode {
         context.push(`src="${this.attributes['src']}"`);
       }
     } else if (this.tagName === 'form') {
-      // 表单
+      // Form
       context.push('form');
       if (this.attributes['method']) {
         context.push(`method="${this.attributes['method']}"`);
       }
     } else if (this.tagName === 'label') {
-      // 标签
+      // Label
       context.push('label');
       if (this.attributes['for']) {
         context.push(`for="${this.attributes['for']}"`);
       }
     } else if (role) {
-      // 自定义角色元素
+      // Custom role elements
       context.push(`role=${role}`);
 
-      // ARIA 状态
+      // ARIA states
       if (role === 'button' || role === 'link') {
         if (disabled !== undefined) {
           context.push('disabled');
@@ -402,22 +424,22 @@ export class DOMElementNode extends DOMBaseNode {
       }
     }
 
-    // 添加ID属性（如果存在）
+    // Add ID attribute (if exists)
     if (id) {
       context.push(`id="${id}"`);
     }
 
-    // 添加标题信息
+    // Add title information
     if (title) {
       context.push(`title="${title}"`);
     }
 
-    // ARIA 标签信息（重要的语义信息）
+    // ARIA label information (important semantic information)
     if (ariaLabel && !context.includes(`placeholder="${ariaLabel}"`)) {
       context.push(`aria-label="${ariaLabel}"`);
     }
 
-    // 值信息（对于某些元素类型）
+    // Value information (for certain element types)
     if (
       value &&
       this.tagName !== 'input' &&
