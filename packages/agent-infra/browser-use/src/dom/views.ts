@@ -8,8 +8,18 @@
  */
 import type { ViewportInfo, CoordinateSet } from './history/views';
 
+/**
+ * Abstract base class for DOM nodes
+ * Provides common properties and functionality for all DOM node types
+ */
 export abstract class DOMBaseNode {
+  /**
+   * Whether the node is visible in the viewport
+   */
   isVisible: boolean;
+  /**
+   * Parent element node reference (null for root nodes)
+   */
   parent?: DOMElementNode | null;
 
   constructor(isVisible: boolean, parent?: DOMElementNode | null) {
@@ -19,8 +29,15 @@ export abstract class DOMBaseNode {
   }
 }
 
+/**
+ * Represents a text node in the DOM tree
+ * Contains text content and visibility information
+ */
 export class DOMTextNode extends DOMBaseNode {
   type = 'TEXT_NODE' as const;
+  /**
+   * The text content of the node
+   */
   text: string;
 
   constructor(
@@ -32,6 +49,11 @@ export class DOMTextNode extends DOMBaseNode {
     this.text = text;
   }
 
+  /**
+   * Checks if any parent element has a highlight index assigned
+   * Used to determine if text content is already part of a highlighted element
+   * @returns true if a parent has a highlight index
+   */
   hasParentWithHighlightIndex(): boolean {
     let current = this.parent;
     while (current != null) {
@@ -130,19 +152,33 @@ export class DOMElementNode extends DOMBaseNode {
       if (node instanceof DOMElementNode) {
         // Add element with highlight_index
         if (node.highlightIndex !== undefined) {
-          let attributesStr = '';
-          if (includeAttributes.length) {
-            attributesStr = ` ${includeAttributes
+          const text = node.getEnhancedText();
+          let output = `[${node.highlightIndex}]`;
+
+          // If includeAttributes is specified, use these attributes directly without smart detection
+          if (includeAttributes.length > 0) {
+            const attributesStr = includeAttributes
               .map((key) =>
                 node.attributes[key] ? `${key}="${node.attributes[key]}"` : '',
               )
               .filter(Boolean)
-              .join(' ')}`;
+              .join(' ');
+
+            if (attributesStr) {
+              output += ` [${attributesStr}]`;
+            }
+          } else {
+            // Use enhanced format smart context information
+            const contextInfo = node.getEnhancedContextInfo();
+            if (contextInfo.length > 0) {
+              output += ` [${contextInfo.join(' ')}]`;
+            }
           }
 
-          formattedText.push(
-            `[${node.highlightIndex}]<${node.tagName}${attributesStr}>${node.getAllTextTillNextClickableElement()}</${node.tagName}>`,
-          );
+          // Add tag and text content
+          output += ` <${node.tagName}>${text}</${node.tagName}>`;
+
+          formattedText.push(output);
         }
         // Process children regardless
         for (const child of node.children) {
@@ -158,6 +194,262 @@ export class DOMElementNode extends DOMBaseNode {
 
     processNode(this, 0);
     return formattedText.join('\n');
+  }
+
+  getEnhancedText(): string {
+    // Priority: aria-label > title > alt > inner text > placeholder > value > href description > fallback
+    const ariaLabel = this.attributes['aria-label'];
+    const title = this.attributes['title'];
+    const alt = this.attributes['alt'];
+    const placeholder = this.attributes['placeholder'];
+    const value = this.attributes['value'];
+    const href = this.attributes['href'];
+
+    if (ariaLabel) return ariaLabel;
+    if (title) return title;
+    if (alt) return alt;
+
+    const innerText = this.getAllTextTillNextClickableElement().trim();
+    if (innerText) return innerText;
+
+    if (placeholder) return `[placeholder: ${placeholder}]`;
+    if (value && this.tagName !== 'input') return `[value: ${value}]`;
+    if (href) return `[link]`;
+
+    return `[${this.tagName || 'element'}]`;
+  }
+
+  getEnhancedContextInfo(): string[] {
+    const context: string[] = [];
+
+    const role = this.attributes['role'];
+    const type = this.attributes['type'];
+    const href = this.attributes['href'];
+    const ariaLabel = this.attributes['aria-label'];
+    const ariaChecked = this.attributes['aria-checked'];
+    const ariaSelected = this.attributes['aria-selected'];
+    const placeholder = this.attributes['placeholder'];
+    const disabled = this.attributes['disabled'];
+    const required = this.attributes['required'];
+    const readonly = this.attributes['readonly'];
+    const checked = this.attributes['checked'];
+    const value = this.attributes['value'];
+    const min = this.attributes['min'];
+    const max = this.attributes['max'];
+    const pattern = this.attributes['pattern'];
+    const name = this.attributes['name'];
+    const id = this.attributes['id'];
+    const title = this.attributes['title'];
+    const alt = this.attributes['alt'];
+    const target = this.attributes['target'];
+    const download = this.attributes['download'];
+    const multiple = this.attributes['multiple'];
+    const accept = this.attributes['accept'];
+    const autocomplete = this.attributes['autocomplete'];
+
+    // Determine element category and main type
+    if (this.tagName === 'a') {
+      // Link type determination
+      if (href) {
+        if (href.startsWith('mailto:')) {
+          context.push('email');
+        } else if (href.startsWith('tel:')) {
+          context.push('phone');
+        } else if (href.startsWith('#')) {
+          context.push('anchor');
+        } else if (href.startsWith('javascript:')) {
+          context.push('javascript');
+        } else if (download !== undefined) {
+          context.push('download');
+        } else {
+          context.push('link');
+        }
+        // Always show href
+        context.push(`href="${href}"`);
+      } else {
+        context.push('link');
+      }
+
+      // Target attribute
+      if (target === '_blank') {
+        context.push('new-window');
+      } else if (target) {
+        context.push(`target="${target}"`);
+      }
+    } else if (this.tagName === 'button') {
+      // Button type
+      if (type === 'submit') {
+        context.push('submit');
+      } else if (type === 'reset') {
+        context.push('reset');
+      } else {
+        context.push('button');
+      }
+
+      // Button state
+      if (disabled !== undefined) {
+        context.push('disabled');
+      }
+    } else if (this.tagName === 'input') {
+      // Input type
+      const inputType = type || 'text';
+      context.push(inputType);
+
+      // Special input states
+      if (inputType === 'checkbox' || inputType === 'radio') {
+        if (checked !== undefined) {
+          context.push('checked');
+        }
+        if (name) {
+          context.push(`name="${name}"`);
+        }
+      } else if (inputType === 'file') {
+        if (multiple !== undefined) {
+          context.push('multiple');
+        }
+        if (accept) {
+          context.push(`accept="${accept}"`);
+        }
+      } else if (inputType === 'number' || inputType === 'range') {
+        if (min) {
+          context.push(`min="${min}"`);
+        }
+        if (max) {
+          context.push(`max="${max}"`);
+        }
+      }
+
+      // Common input states
+      if (required !== undefined) {
+        context.push('required');
+      }
+      if (readonly !== undefined) {
+        context.push('readonly');
+      }
+      if (placeholder) {
+        context.push(`placeholder="${placeholder}"`);
+      }
+      if (pattern) {
+        context.push('has-pattern');
+      }
+      if (autocomplete && autocomplete !== 'off') {
+        context.push(`autocomplete="${autocomplete}"`);
+      }
+    } else if (this.tagName === 'select') {
+      // Dropdown selection
+      context.push('select');
+      if (required !== undefined) {
+        context.push('required');
+      }
+      if (multiple !== undefined) {
+        context.push('multiple');
+      }
+      if (disabled !== undefined) {
+        context.push('disabled');
+      }
+    } else if (this.tagName === 'textarea') {
+      // Multi-line text
+      context.push('textarea');
+      if (placeholder) {
+        context.push(`placeholder="${placeholder}"`);
+      }
+      if (required !== undefined) {
+        context.push('required');
+      }
+      if (readonly !== undefined) {
+        context.push('readonly');
+      }
+      if (disabled !== undefined) {
+        context.push('disabled');
+      }
+    } else if (this.tagName === 'img') {
+      // Image
+      context.push('image');
+      if (alt) {
+        context.push(`alt="${alt}"`);
+      }
+    } else if (this.tagName === 'video') {
+      // Video
+      context.push('video');
+      if (this.attributes['controls'] !== undefined) {
+        context.push('has-controls');
+      }
+    } else if (this.tagName === 'audio') {
+      // Audio
+      context.push('audio');
+      if (this.attributes['controls'] !== undefined) {
+        context.push('has-controls');
+      }
+    } else if (this.tagName === 'iframe') {
+      // iframe
+      context.push('iframe');
+      if (this.attributes['src']) {
+        context.push(`src="${this.attributes['src']}"`);
+      }
+    } else if (this.tagName === 'form') {
+      // Form
+      context.push('form');
+      if (this.attributes['method']) {
+        context.push(`method="${this.attributes['method']}"`);
+      }
+    } else if (this.tagName === 'label') {
+      // Label
+      context.push('label');
+      if (this.attributes['for']) {
+        context.push(`for="${this.attributes['for']}"`);
+      }
+    } else if (role) {
+      // Custom role elements
+      context.push(`role=${role}`);
+
+      // ARIA states
+      if (role === 'button' || role === 'link') {
+        if (disabled !== undefined) {
+          context.push('disabled');
+        }
+      } else if (role === 'checkbox' || role === 'radio') {
+        if (ariaChecked === 'true') {
+          context.push('checked');
+        } else if (ariaChecked === 'false') {
+          context.push('unchecked');
+        }
+      } else if (role === 'option') {
+        if (ariaSelected === 'true') {
+          context.push('selected');
+        }
+      } else if (role === 'tab') {
+        if (ariaSelected === 'true') {
+          context.push('active-tab');
+        }
+      }
+    }
+
+    // Add ID attribute (if exists)
+    if (id) {
+      context.push(`id="${id}"`);
+    }
+
+    // Add title information
+    if (title) {
+      context.push(`title="${title}"`);
+    }
+
+    // ARIA label information (important semantic information)
+    if (ariaLabel && !context.includes(`placeholder="${ariaLabel}"`)) {
+      context.push(`aria-label="${ariaLabel}"`);
+    }
+
+    // Value information (for certain element types)
+    if (
+      value &&
+      this.tagName !== 'input' &&
+      this.tagName !== 'button' &&
+      value.length < 50
+    ) {
+      context.push(`value="${value}"`);
+    }
+
+    return context;
   }
 
   getFileUploadElement(checkSiblings = true): DOMElementNode | null {

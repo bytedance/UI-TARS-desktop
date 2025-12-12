@@ -734,6 +734,9 @@ importers:
       '@agent-infra/browser-context':
         specifier: 0.1.2
         version: 0.1.2(bufferutil@4.0.9)(jsdom@26.1.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))(utf-8-validate@6.0.5)
+      '@agent-infra/browser-use':
+        specifier: workspace:*
+        version: link:../../browser-use
       '@agent-infra/logger':
         specifier: workspace:*
         version: link:../../logger
@@ -753,9 +756,6 @@ importers:
       '@agent-infra/browser':
         specifier: workspace:*
         version: link:../../browser
-      '@agent-infra/browser-use':
-        specifier: workspace:*
-        version: link:../../browser-use
       '@ghostery/adblocker-puppeteer':
         specifier: 2.5.2
         version: 2.5.2(puppeteer@24.4.0(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))
@@ -9124,6 +9124,7 @@ packages:
   phin@3.7.1:
     resolution: {integrity: sha512-GEazpTWwTZaEQ9RhL7Nyz0WwqilbqgLahDM3D0hxWwmVDI52nXEybHqiN6/elwpkJBhcuj+WbBu+QfT0uhPGfQ==}
     engines: {node: '>= 8'}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
 
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
@@ -9302,6 +9303,7 @@ packages:
   puppeteer@24.4.0:
     resolution: {integrity: sha512-E4JhJzjS8AAI+6N/b+Utwarhz6zWl3+MR725fal+s3UlOlX2eWdsvYYU+Q5bXMjs9eZEGkNQroLkn7j11s2k1Q==}
     engines: {node: '>=18'}
+    deprecated: < 24.15.0 is no longer supported
     hasBin: true
 
   qs@6.13.0:

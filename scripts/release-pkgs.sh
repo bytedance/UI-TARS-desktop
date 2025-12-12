@@ -10,7 +10,7 @@ pnpm changeset version
 echo "2. update dependencies..."
 pnpm install
 
-echo "3. commit version update..."
+echo "3. commit version update...(ensure execute "pnpm changeset" before release)"
 git add .
 git commit -m "release: publish packages"
 

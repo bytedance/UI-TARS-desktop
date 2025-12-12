@@ -1,5 +1,7 @@
 # @agent-infra/mcp-server-filesystem
 
+## 1.2.28
+
 ## 1.2.26
 
 ## 1.2.25
