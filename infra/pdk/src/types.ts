@@ -6,28 +6,6 @@
 /**
  * Type definitions for PDK (Package Development Kit)
  * 
- * DESIGN PHILOSOPHY:
- * 
- * 1. ISOMORPHIC API DESIGN
- *    All APIs (CLI, Node.js, Config) share the exact same type structure.
- *    This eliminates conversion overhead and ensures consistency across usage patterns.
- *    No more complex scope resolution or option mapping - what you see is what you get.
- * 
- * 2. FLATTENED CONFIGURATION
- *    Configuration is intentionally flat rather than nested by command scope.
- *    This makes it easy to understand, maintain, and extends naturally from CLI usage.
- *    Command-specific options are documented but not namespaced, allowing natural reuse.
- * 
- * 3. PROGRESSIVE ENHANCEMENT
- *    Common options are available everywhere, command-specific options only where relevant.
- *    The type system guides users to appropriate options while maintaining flexibility.
- *    All options have sensible defaults, making the kit work out-of-the-box.
- * 
- * 4. MONOREPO-FIRST
- *    Designed specifically for monorepo workflows with workspace awareness.
- *    Handles package interdependencies, version synchronization, and publishing coordination.
- *    Supports complex release patterns like canary releases and selective publishing.
- * 
  * USAGE PATTERNS:
  * 
  * CLI:          ptk release --changelog --use-ai --dry-run
@@ -49,23 +27,41 @@
  * fields that are essential for workspace management and publishing.
  */
 export interface PackageJson {
-  /** Package name for identification and publishing */
+  /**
+   * Package name for identification and publishing
+   */
   name: string;
-  /** Current semantic version */
+  /**
+   * Current semantic version
+   */
   version: string;
-  /** Whether this package should be excluded from publishing */
+  /**
+   * Whether this package should be excluded from publishing
+   */
   private?: boolean;
-  /** Workspace patterns for monorepo coordination */
+  /**
+   * Workspace patterns for monorepo coordination
+   */
   workspaces?: string[];
-  /** Runtime dependencies that affect publishing order */
+  /**
+   * Runtime dependencies that affect publishing order
+   */
   dependencies?: Record<string, string>;
-  /** Development dependencies (not published) */
+  /**
+   * Development dependencies (not published)
+   */
   devDependencies?: Record<string, string>;
-  /** Peer dependencies that require version coordination */
+  /**
+   * Peer dependencies that require version coordination
+   */
   peerDependencies?: Record<string, string>;
-  /** Build and development scripts */
+  /**
+   * Build and development scripts
+   */
   scripts?: Record<string, string>;
-  /** Allow other package.json extensions without type conflicts */
+  /**
+   * Allow other package.json extensions without type conflicts
+   */
   [key: string]: unknown;
 }
 
@@ -76,15 +72,25 @@ export interface PackageJson {
  * package during release operations, including its location and metadata.
  */
 export interface WorkspacePackage {
-  /** Package identifier for publishing and dependency resolution */
+  /**
+   * Package identifier for publishing and dependency resolution
+   */
   name: string;
-  /** Current version before release */
+  /**
+   * Current version before release
+   */
   version: string;
-  /** File system location relative to workspace root */
+  /**
+   * File system location relative to workspace root
+   */
   dir: string;
-  /** Parsed package.json content for dependency analysis */
+  /**
+   * Parsed package.json content for dependency analysis
+   */
   packageJson: PackageJson;
-  /** Whether this package should be skipped during publishing */
+  /**
+   * Whether this package should be skipped during publishing
+   */
   isPrivate: boolean;
 }
 
@@ -95,11 +101,17 @@ export interface WorkspacePackage {
  * package discovery and root package information for coordination.
  */
 export interface WorkspaceConfig {
-  /** Absolute path to workspace root directory */
+  /**
+   * Absolute path to workspace root directory
+   */
   rootPath: string;
-  /** Root package.json containing workspace configuration */
+  /**
+   * Root package.json containing workspace configuration
+   */
   rootPackageJson: PackageJson;
-  /** Glob patterns used to discover workspace packages */
+  /**
+   * Glob patterns used to discover workspace packages
+   */
   patterns: string[];
 }
 
@@ -110,7 +122,9 @@ export interface WorkspaceConfig {
  * in the remote registry, preventing duplicate publishes.
  */
 export interface PackageWithRemoteInfo extends WorkspacePackage {
-  /** Version currently published to the remote registry */
+  /**
+   * Version currently published to the remote registry
+   */
   remoteVersion: string;
 }
 
@@ -125,7 +139,9 @@ export interface PackageWithRemoteInfo extends WorkspacePackage {
  * handling and basic operational context.
  */
 export interface CommandOptions {
-  /** Working directory for command execution */
+  /**
+   * Working directory for command execution
+   */
   cwd?: string;
 }
 
@@ -142,33 +158,57 @@ export interface CommandOptions {
  * inheritance hierarchies.
  */
 export interface CommonOptions {
-  /** Working directory (defaults to process.cwd()) */
+  /**
+   * Working directory (defaults to process.cwd())
+   */
   cwd?: string;
-  /** Preview mode without making actual changes */
+  /**
+   * Preview mode without making actual changes
+   */
   dryRun?: boolean;
-  /** Publish packages sequentially instead of in parallel */
+  /**
+   * Publish packages sequentially instead of in parallel
+   */
   runInBand?: boolean;
-  /** Skip npm scripts during operations */
+  /**
+   * Skip npm scripts during operations
+   */
   ignoreScripts?: boolean;
-  /** Prefix for git tags (e.g., 'v' for v1.0.0) */
+  /**
+   * Prefix for git tags (e.g., 'v' for v1.0.0)
+   */
   tagPrefix?: string;
   
   // AI-powered changelog generation options
-  /** Enable AI-powered changelog generation */
+  /**
+   * Enable AI-powered changelog generation
+   */
   useAi?: boolean;
-  /** LLM model for AI changelog (default: gpt-4o) */
+  /**
+   * LLM model for AI changelog (default: gpt-4o)
+   */
   model?: string;
-  /** API key for LLM service */
+  /**
+   * API key for LLM service
+   */
   apiKey?: string;
-  /** Custom base URL for LLM API */
+  /**
+   * Custom base URL for LLM API
+   */
   baseURL?: string;
-  /** LLM provider (default: openai) */
+  /**
+   * LLM provider (default: openai)
+   */
   provider?: string;
   
   // Changelog filtering options
-  /** Scopes to include in changelog (empty = all scopes) */
+  /**
+   * Scopes to include in changelog (empty = all scopes)
+   */
   filterScopes?: string[];
-  /** Commit types to include in changelog (default: ['feat', 'fix']) */
+  /**
+   * Commit types to include in changelog (default: ['feat', 'fix'])
+   */
   filterTypes?: string[];
 }
 
@@ -183,9 +223,13 @@ export interface CommonOptions {
  * while excluding others to save resources and focus development effort.
  */
 export interface DevOptions extends CommonOptions {
-  /** Packages to explicitly exclude from development */
+  /**
+   * Packages to explicitly exclude from development
+   */
   exclude?: string[];
-  /** Packages to start by default (empty = start all) */
+  /**
+   * Packages to start by default (empty = start all)
+   */
   packages?: string[];
 }
 
@@ -200,17 +244,29 @@ export interface DevOptions extends CommonOptions {
  * release succeeds or it fails cleanly with rollback capabilities.
  */
 export interface ReleaseOptions extends CommonOptions {
-  /** Generate changelog as part of release process */
+  /**
+   * Generate changelog as part of release process
+   */
   changelog?: boolean;
-  /** Execute custom build script before publishing */
+  /**
+   * Execute custom build script before publishing
+   */
   build?: boolean | string;
-  /** Automatically push git tags to remote */
+  /**
+   * Automatically push git tags to remote
+   */
   pushTag?: boolean;
-  /** Generate canary version without prompts */
+  /**
+   * Generate canary version without prompts
+   */
   canary?: boolean;
-  /** Create GitHub release after successful release */
+  /**
+   * Create GitHub release after successful release
+   */
   createGithubRelease?: boolean;
-  /** Automatically create release branch before release */
+  /**
+   * Automatically create release branch before release
+   */
   autoCreateReleaseBranch?: boolean;
 }
 
@@ -248,9 +304,13 @@ export interface ReleaseOptions extends CommonOptions {
  * a release without re-running the entire release process.
  */
 export interface PatchOptions extends CommonOptions {
-  /** Specific version to patch (reads from package.json if not provided) */
+  /**
+   * Specific version to patch (reads from package.json if not provided)
+   */
   version?: string;
-  /** Distribution tag for patch release (e.g., latest, next, beta) */
+  /**
+   * Distribution tag for patch release (e.g., latest, next, beta)
+   */
   tag?: string;
 }
 
@@ -265,17 +325,29 @@ export interface PatchOptions extends CommonOptions {
  * version range, not just releases.
  */
 export interface ChangelogOptions extends CommonOptions {
-  /** Target version for changelog (reads from package.json if not provided) */
+  /**
+   * Target version for changelog (reads from package.json if not provided)
+   */
   version?: string;
-  /** Format changelog with markdown enhancements */
+  /**
+   * Format changelog with markdown enhancements
+   */
   beautify?: boolean;
-  /** Create git commit for generated changelog */
+  /**
+   * Create git commit for generated changelog
+   */
   commit?: boolean;
-  /** Push changelog commit to remote repository */
+  /**
+   * Push changelog commit to remote repository
+   */
   gitPush?: boolean;
-  /** Include author information in changelog entries */
+  /**
+   * Include author information in changelog entries
+   */
   attachAuthor?: boolean;
-  /** Format for author names in changelog */
+  /**
+   * Format for author names in changelog
+   */
   authorNameType?: 'name' | 'email';
 }
 
@@ -289,7 +361,9 @@ export interface ChangelogOptions extends CommonOptions {
  * and version tagging after a successful release process.
  */
 export interface GitHubReleaseOptions extends CommonOptions {
-  /** Version for GitHub release (reads from package.json if not provided) */
+  /**
+   * Version for GitHub release (reads from package.json if not provided)
+   */
   version?: string;
 }
 
@@ -304,11 +378,17 @@ export interface GitHubReleaseOptions extends CommonOptions {
  * The emailName field provides a display-friendly version of the email.
  */
 export interface CommitAuthor {
-  /** Full author name from git config */
+  /**
+   * Full author name from git config
+   */
   name: string;
-  /** Author email address */
+  /**
+   * Author email address
+   */
   email: string;
-  /** Email portion before @ for display purposes */
+  /**
+   * Email portion before @ for display purposes
+   */
   emailName: string;
 }
 
@@ -319,11 +399,17 @@ export interface CommitAuthor {
  * such as "Features", "Bug Fixes", or "Performance Improvements".
  */
 export interface ChangelogSection {
-  /** Conventional commit type (feat, fix, perf, etc.) */
+  /**
+   * Conventional commit type (feat, fix, perf, etc.)
+   */
   type: string;
-  /** Human-readable section title */
+  /**
+   * Human-readable section title
+   */
   title: string;
-  /** Commits belonging to this section */
+  /**
+   * Commits belonging to this section
+   */
   commits: import('tiny-conventional-commits-parser').GitCommit[];
 }
 
@@ -368,33 +454,57 @@ export interface PDKConfig {
   // COMMON OPTIONS (available in ALL commands)
   // =========================================================================
   
-  /** Working directory for all operations (default: process.cwd()) */
+  /**
+   * Working directory for all operations (default: process.cwd())
+   */
   cwd?: string;
-  /** Preview mode without making actual changes (default: false) */
+  /**
+   * Preview mode without making actual changes (default: false)
+   */
   dryRun?: boolean;
-  /** Publish packages sequentially instead of in parallel (default: false) */
+  /**
+   * Publish packages sequentially instead of in parallel (default: false)
+   */
   runInBand?: boolean;
-  /** Skip npm scripts during operations (default: false) */
+  /**
+   * Skip npm scripts during operations (default: false)
+   */
   ignoreScripts?: boolean;
-  /** Prefix for git tags like 'v' for v1.0.0 (default: 'v') */
+  /**
+   * Prefix for git tags like 'v' for v1.0.0 (default: 'v')
+   */
   tagPrefix?: string;
   
   // AI-powered changelog generation (used by release, changelog commands)
-  /** Enable AI-powered changelog generation (default: false) */
+  /**
+   * Enable AI-powered changelog generation (default: false)
+   */
   useAi?: boolean;
-  /** LLM model for AI changelog generation (default: 'gpt-4o') */
+  /**
+   * LLM model for AI changelog generation (default: 'gpt-4o')
+   */
   model?: string;
-  /** API key for LLM service (can be set via environment) */
+  /**
+   * API key for LLM service (can be set via environment)
+   */
   apiKey?: string;
-  /** Custom base URL for LLM API (for custom endpoints) */
+  /**
+   * Custom base URL for LLM API (for custom endpoints)
+   */
   baseURL?: string;
-  /** LLM provider (default: 'openai') */
+  /**
+   * LLM provider (default: 'openai')
+   */
   provider?: string;
   
   // Changelog filtering (used by release, changelog commands)
-  /** Scopes to include in changelog (empty array = include all) */
+  /**
+   * Scopes to include in changelog (empty array = include all)
+   */
   filterScopes?: string[];
-  /** Commit types to include in changelog (default: ['feat', 'fix']) */
+  /**
+   * Commit types to include in changelog (default: ['feat', 'fix'])
+   */
   filterTypes?: string[];
   
   // =========================================================================
@@ -402,41 +512,71 @@ export interface PDKConfig {
   // =========================================================================
   
   // Development mode (dev command only)
-  /** Packages to exclude from development startup */
+  /**
+   * Packages to exclude from development startup
+   */
   exclude?: string[];
-  /** Packages to start by default (empty = start all packages) */
+  /**
+   * Packages to start by default (empty = start all packages)
+   */
   packages?: string[];
   
   // Release workflow (release command only)
-  /** Generate changelog during release (default: true) */
+  /**
+   * Generate changelog during release (default: true)
+   */
   changelog?: boolean;
-  /** Execute build script before publishing (false = skip, string = custom script) */
+  /**
+   * Execute build script before publishing (false = skip, string = custom script)
+   */
   build?: boolean | string;
-  /** Automatically push git tags to remote (default: false) */
+  /**
+   * Automatically push git tags to remote (default: false)
+   */
   pushTag?: boolean;
-  /** Generate canary version without prompts (default: false) */
+  /**
+   * Generate canary version without prompts (default: false)
+   */
   canary?: boolean;
-  /** Create GitHub release after successful release (default: false) */
+  /**
+   * Create GitHub release after successful release (default: false)
+   */
   createGithubRelease?: boolean;
-  /** Automatically create release branch before release (default: false) */
+  /**
+   * Automatically create release branch before release (default: false)
+   */
   autoCreateReleaseBranch?: boolean;
   
   // Changelog generation (changelog command only)
-  /** Target version for changelog generation */
+  /**
+   * Target version for changelog generation
+   */
   version?: string;
-  /** Format changelog with markdown enhancements (default: false) */
+  /**
+   * Format changelog with markdown enhancements (default: false)
+   */
   beautify?: boolean;
-  /** Create git commit for generated changelog (default: false) */
+  /**
+   * Create git commit for generated changelog (default: false)
+   */
   commit?: boolean;
-  /** Push changelog commit to remote (default: false) */
+  /**
+   * Push changelog commit to remote (default: false)
+   */
   gitPush?: boolean;
-  /** Include author information in changelog (default: false) */
+  /**
+   * Include author information in changelog (default: false)
+   */
   attachAuthor?: boolean;
-  /** Author name format: 'name' or 'email' (default: 'name') */
+  /**
+   * Author name format: 'name' or 'email' (default: 'name')
+   */
   authorNameType?: 'name' | 'email';
   
   // Patch operations (patch command only)
-  /** Distribution tag for patch release (e.g., latest, next, beta) */
+  /**
+   * Distribution tag for patch release (e.g., latest, next, beta)
+   */
   tag?: string;
 }
 
