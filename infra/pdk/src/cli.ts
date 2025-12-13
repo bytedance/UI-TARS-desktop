@@ -4,7 +4,7 @@
  */
 
 /**
- * CLI entry point for PTK
+ * CLI entry point for PDK
  */
 import { cac } from 'cac';
 import { dev, release, patch, changelog, githubRelease } from './commands';
@@ -44,7 +44,7 @@ async function wrapCommand(
  * Bootstrap the CLI
  */
 export function bootstrapCli() {
-  const cli = cac('ptk');
+  const cli = cac('pdk');
   const pkg = require('../package.json');
 
   // Global options

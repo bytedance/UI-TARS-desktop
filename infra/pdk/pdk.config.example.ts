@@ -1,4 +1,4 @@
-import { defineConfig } from 'pnpm-dev-kit';
+import { defineConfig } from './src/index';
 
 export default defineConfig({
   // Common options shared across all commands
