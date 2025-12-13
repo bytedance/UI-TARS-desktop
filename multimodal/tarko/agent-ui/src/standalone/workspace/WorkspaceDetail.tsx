@@ -29,6 +29,7 @@ import { DeliverableRenderer } from './renderers/DeliverableRenderer';
 import { DiffRenderer } from './renderers/DiffRenderer';
 import { FileResultRenderer } from './renderers/FileResultRenderer';
 import { TabbedFilesRenderer } from './renderers/TabbedFilesRenderer';
+import { EmbedFrameRenderer } from './renderers/EmbedFrameRenderer';
 
 const CONTENT_RENDERERS: Record<
   string,
@@ -54,15 +55,19 @@ const CONTENT_RENDERERS: Record<
   diff_result: DiffRenderer,
   file: FileResultRenderer,
   tabbed_files: TabbedFilesRenderer,
+  embed_frame: EmbedFrameRenderer,
 };
 
 export const WorkspaceDetail: React.FC = () => {
-  const { activePanelContent, setActivePanelContent, activeSessionId } = useSession();
+  const { workspaceDisplayState, setWorkspaceDisplayState, activeSessionId } = useSession();
   const { isReplayMode } = useReplayMode();
   const [workspaceDisplayMode, setWorkspaceDisplayMode] = useAtom(workspaceDisplayModeAtom);
   const [rawToolMapping] = useAtom(rawToolMappingAtom);
   const [zoomedImage, setZoomedImage] = useState<ZoomedImageData | null>(null);
   const [fullscreenData, setFullscreenData] = useState<FullscreenFileData | null>(null);
+
+  const activePanelContent =
+    workspaceDisplayState.mode === 'tool-content' ? workspaceDisplayState.toolContent : null;
 
   const getInitialDisplayMode = (): FileDisplayMode => {
     if (
@@ -143,7 +148,7 @@ export const WorkspaceDetail: React.FC = () => {
   };
 
   const handleBack = () => {
-    setActivePanelContent(null);
+    setWorkspaceDisplayState({ mode: 'idle' });
   };
 
   const handleFullscreen = () => {
@@ -267,7 +272,9 @@ export const WorkspaceDetail: React.FC = () => {
             isReplayMode={isReplayMode}
           />
         </div>
-        <div className="flex-1 overflow-auto md:p-4 md:pt-2 px-3 py-2 workspace-scrollbar">{renderContent()}</div>
+        <div className="flex-1 overflow-auto md:p-4 md:pt-2 px-3 py-2 workspace-scrollbar">
+          {renderContent()}
+        </div>
       </div>
 
       <ImageModal imageData={zoomedImage} onClose={() => setZoomedImage(null)} />

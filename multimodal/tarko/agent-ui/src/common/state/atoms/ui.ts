@@ -1,5 +1,5 @@
 import { atom } from 'jotai';
-import { SessionItemMetadata, LayoutMode } from '@tarko/interface';
+import { SessionItemMetadata, LayoutMode, WorkspaceNavItem } from '@tarko/interface';
 import { getDefaultLayoutMode } from '@/config/web-ui-config';
 import { ConnectionStatus, PanelContent, SanitizedAgentOptions } from '@/common/types';
 import { activeSessionIdAtom } from './session';
@@ -83,6 +83,98 @@ export const isProcessingAtom = atom(
 );
 
 /**
+ * Workspace display mode - determines what content is shown in the workspace
+ */
+export type WorkspaceDisplayMode =
+  | 'idle' // Empty state
+  | 'embed-frame' // Show embed frame (VNC, Code Server, etc.)
+  | 'tool-content'; // Show tool call result
+
+/**
+ * Workspace display state - unified state for workspace content
+ */
+export interface WorkspaceDisplayState {
+  mode: WorkspaceDisplayMode;
+  embedFrame?: WorkspaceNavItem; // Only when mode is 'embed-frame'
+  toolContent?: PanelContent; // Only when mode is 'tool-content'
+}
+
+/**
+ * Session-specific workspace display state storage
+ */
+export const sessionWorkspaceDisplayStateAtom = atom<Record<string, WorkspaceDisplayState>>({});
+
+/**
+ * Derived atom for current workspace display state
+ * Automatically isolates state by active session
+ */
+export const workspaceDisplayStateAtom = atom(
+  (get) => {
+    const activeSessionId = get(activeSessionIdAtom);
+    const sessionWorkspaceDisplayState = get(sessionWorkspaceDisplayStateAtom);
+    return activeSessionId
+      ? sessionWorkspaceDisplayState[activeSessionId] || { mode: 'idle' }
+      : { mode: 'idle' };
+  },
+  (get, set, update: Partial<WorkspaceDisplayState> | WorkspaceDisplayState) => {
+    const activeSessionId = get(activeSessionIdAtom);
+    if (activeSessionId) {
+      const currentState = get(workspaceDisplayStateAtom);
+      const newState =
+        'mode' in update ? (update as WorkspaceDisplayState) : { ...currentState, ...update };
+      set(sessionWorkspaceDisplayStateAtom, (prev) => ({
+        ...prev,
+        [activeSessionId]: newState,
+      }));
+    }
+  },
+);
+
+/**
+ * Convenience atoms for specific actions
+ */
+export const showEmbedFrameAtom = atom(null, (get, set, navItem: WorkspaceNavItem) => {
+  set(workspaceDisplayStateAtom, {
+    mode: 'embed-frame',
+    embedFrame: navItem,
+  });
+});
+
+export const hideEmbedFrameAtom = atom(null, (get, set) => {
+  set(workspaceDisplayStateAtom, { mode: 'idle' });
+});
+
+export const showToolContentAtom = atom(null, (get, set, content: PanelContent) => {
+  set(workspaceDisplayStateAtom, {
+    mode: 'tool-content',
+    toolContent: content,
+  });
+});
+
+export const clearWorkspaceAtom = atom(null, (get, set) => {
+  set(workspaceDisplayStateAtom, { mode: 'idle' });
+});
+
+/**
+ * Backward compatibility - derived atoms for existing code
+ */
+export const sessionActiveEmbedFrameAtom = atom<Record<string, WorkspaceNavItem | null>>({});
+
+export const activeEmbedFrameAtom = atom(
+  (get) => {
+    const workspaceState = get(workspaceDisplayStateAtom);
+    return workspaceState.mode === 'embed-frame' ? workspaceState.embedFrame || null : null;
+  },
+  (get, set, update: WorkspaceNavItem | null) => {
+    if (update) {
+      set(showEmbedFrameAtom, update);
+    } else {
+      set(hideEmbedFrameAtom);
+    }
+  },
+);
+
+/**
  * Atom for offline mode state (view-only when disconnected)
  */
 export const offlineModeAtom = atom<boolean>(false);
@@ -139,7 +231,7 @@ export const mobileBottomSheetAtom = atom({
 /**
  * Actions for mobile bottom sheet
  */
-export const openMobileBottomSheetAtom = atom(null, (get, set, fullscreen: boolean = false) => {
+export const openMobileBottomSheetAtom = atom(null, (get, set, fullscreen = false) => {
   set(mobileBottomSheetAtom, {
     isOpen: true,
     isFullscreen: fullscreen,
