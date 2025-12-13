@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { execa } from 'execa';
-import { logger } from './logger.js';
-import { shouldIncludeCommitByScope } from './commit.js';
+import { logger } from './logger';
+import { shouldIncludeCommitByScope } from './commit';
 import { AgentModel } from '@tarko/model-provider';
 
 interface CommitEntry {
@@ -169,7 +169,7 @@ export class AIChangelogGenerator {
     const { createLLMClient } = await import('@tarko/model-provider');
     const llm = createLLMClient(this.model as AgentModel);
 
-    const { buildChangelogPrompt } = await import('./prompts.js');
+    const { buildChangelogPrompt } = await import('./prompts');
     const prompt = buildChangelogPrompt(
       commits.map(({ hash, author, date, message, prNumber }) => ({
         hash,

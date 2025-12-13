@@ -12,7 +12,7 @@ import { join } from 'path';
 
 import fastGlob from 'fast-glob';
 import yaml from 'js-yaml';
-import type { PackageJson, WorkspacePackage, WorkspaceConfig } from '../types.js';
+import type { PackageJson, WorkspacePackage, WorkspaceConfig } from '../types';
 
 /**
  * Reads package.json from a given directory (async version)

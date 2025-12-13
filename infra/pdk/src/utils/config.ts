@@ -8,8 +8,11 @@
  * Uses @tarko/config-loader to load and validate configuration
  */
 
-import { loadConfig, type LoadConfigOptions } from '../utils/config-loader.js';
-import type { PDKConfig, LoadedConfig } from '../types.js';
+import { loadConfig } from '@tarko/config-loader';
+import type { LoadConfigOptions } from '@tarko/config-loader';
+import { join } from 'path';
+
+import type { PDKConfig, LoadedConfig } from '../types';
 
 /**
  * Default configuration values
@@ -27,12 +30,12 @@ const DEFAULT_CONFIG: Partial<PDKConfig> = {
   runInBand: false,      // Optimize for speed by default
   ignoreScripts: false,   // Respect build scripts by default
   tagPrefix: 'v',        // Most common git tag convention
-
+  
   // AI defaults - opt-in for security and cost reasons
   useAi: false,         // Prevent unexpected API calls/costs
   provider: 'openai',    // Most common LLM provider
   model: 'gpt-4o',      // Current best general-purpose model
-
+  
   // Chelog filtering defaults
   filterScopes: [],      // Include all scopes by default
   filterTypes: ['feat', 'fix'],  // Most important change types

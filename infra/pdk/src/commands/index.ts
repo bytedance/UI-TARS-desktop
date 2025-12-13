@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export * from './dev.js';
-export * from './release.js';
-export * from './patch.js';
-export * from './changelog.js';
-export * from './github-release.js';
+export * from './dev';
+export * from './release';
+export * from './patch';
+export * from './changelog';
+export * from './github-release';
