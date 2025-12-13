@@ -3,7 +3,6 @@
   "description": "PDK (pnpm dev kit), an efficient pnpm workspace development and publishing tool",
   "version": "0.0.4",
   "main": "dist/index.js",
-  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "publishConfig": {
     "access": "public",

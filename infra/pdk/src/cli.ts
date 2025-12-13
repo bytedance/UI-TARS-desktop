@@ -10,7 +10,6 @@ import { cac } from 'cac';
 import { dev, release, patch, changelog, githubRelease } from './commands';
 import { logger } from './utils/logger';
 import { loadPDKConfig, mergeOptions } from './utils/config';
-import type { DevOptions, ReleaseOptions, PatchOptions, ChangelogOptions, GitHubReleaseOptions } from './types';
 
 /**
  * Wraps a command execution with error handling and config loading
