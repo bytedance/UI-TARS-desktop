@@ -3,9 +3,10 @@
     "src",
   ],
   "compilerOptions": {
-    "module": "ESNext",
+    "module": "NodeNext",
     "target": "ESNext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "NodeNext",
+    "resolveJsonModule": true,
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,

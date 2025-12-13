@@ -11,9 +11,9 @@
 import chokidar from 'chokidar';
 import * as execa from 'execa';
 import chalk from 'chalk';
-import inquirer from 'inquirer';
-import { loadWorkspacePackages } from '../utils/workspace';
-import type { DevOptions, WorkspacePackage } from '../types';
+import { rawlist } from '@inquirer/prompts';
+import { loadWorkspacePackages } from '../utils/workspace.js';
+import type { DevOptions, WorkspacePackage } from '../types.js';
 
 // Manages running build processes
 const processes: Record<string, ReturnType<execa.ExecaMethod>> = {};
@@ -125,17 +125,15 @@ function enableStdinFeature(
           return;
         }
 
-        const { packageName } = await inquirer.prompt([
+        const packageName = await rawlist(
           {
-            type: 'list',
-            name: 'packageName',
             message: 'Choose a package to build:',
             choices: availablePackages.map((pkg) => ({
               name: `${pkg.name}`,
               value: pkg.name,
             })),
           },
-        ]);
+        );
 
         const selectedPackage = packages.find(
           (pkg) => pkg.name === packageName,

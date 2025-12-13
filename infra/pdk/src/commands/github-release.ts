@@ -7,11 +7,11 @@
  * GitHub Release command implementation
  * Creates GitHub releases independently from npm publishing
  */
-import { resolveWorkspaceConfig } from '../utils/workspace';
-import { createGitHubRelease } from '../utils/github';
-import { logger } from '../utils/logger';
+import { resolveWorkspaceConfig } from '../utils/workspace.js';
+import { createGitHubRelease } from '../utils/github.js';
+import { logger } from '../utils/logger.js';
 
-import type { GitHubReleaseOptions } from '../types';
+import type { GitHubReleaseOptions } from '../types.js';
 
 /**
  * GitHub Release command implementation

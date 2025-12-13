@@ -9,18 +9,17 @@
  */
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { resolveWorkspaceConfig } from '../utils/workspace';
-import { gitCommit, gitPush } from '../utils/git';
-import { logger } from '../utils/logger';
+import { resolveWorkspaceConfig } from '../utils/workspace.js';
+import { gitCommit, gitPush } from '../utils/git.js';
+import { logger } from '../utils/logger.js';
 import {
   getPreviousTag,
   generateReleaseNotes,
   getRepositoryInfo,
-} from '../utils/github';
-import { AIChangelogGenerator } from '../utils/ai-changelog';
+} from '../utils/github.js';
+import { AIChangelogGenerator } from '../utils/ai-changelog.js';
 import type { ModelProviderName } from '@tarko/model-provider';
-
-import type { ChangelogOptions } from '../types';
+import type { ChangelogOptions } from '../types.js';
 
 /**
  * Creates or updates CHANGELOG.md
