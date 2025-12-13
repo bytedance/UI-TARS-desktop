@@ -4,7 +4,7 @@ import { apiService } from '../../services/apiService';
 import { sessionsAtom, activeSessionIdAtom } from '../atoms/session';
 import { messagesAtom } from '../atoms/message';
 import { toolResultsAtom, toolCallResultMap } from '../atoms/tool';
-import { sessionPanelContentAtom, isProcessingAtom } from '../atoms/ui';
+import { sessionPanelContentAtom, sessionProcessingStatesAtom, isProcessingAtom } from '../atoms/ui';
 import { processEventAction } from './eventProcessors';
 import { Message, SessionInfo } from '@/common/types';
 import { connectionStatusAtom } from '../atoms/ui';
@@ -150,7 +150,7 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
       });
     }
 
-    // Processing state will be managed by SSE events
+
 
     toolCallResultMap.clear();
 
@@ -166,6 +166,27 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
 
       for (const event of processedEvents) {
         await set(processEventAction, { sessionId, event });
+      }
+    }
+
+    // Status recovery with higher priority - always called after events processing
+    // This ensures accurate processing state when SSE connection is established
+    // and overrides any incorrect state from events processing
+    if (!replayState.isActive) {
+      try {
+        const status = await apiService.getSessionStatus(sessionId);
+        set(sessionProcessingStatesAtom, (prev) => ({
+          ...prev,
+          [sessionId]: status.isProcessing,
+        }));
+        console.log(`Recovered processing state for session ${sessionId}: ${status.isProcessing}`);
+      } catch (error) {
+        console.warn(`Failed to recover session status for ${sessionId}:`, error);
+        // Default to false on error to avoid stuck processing state
+        set(sessionProcessingStatesAtom, (prev) => ({
+          ...prev,
+          [sessionId]: false,
+        }));
       }
     }
 
@@ -408,48 +429,5 @@ export const abortQueryAction = atom(null, async (get, set) => {
     // Also set processing to false on error to ensure UI consistency
     set(isProcessingAtom, false);
     return false;
-  }
-});
-
-// Cache to prevent frequent status checks for the same session
-const statusCheckCache = new Map<string, { timestamp: number; promise?: Promise<any> }>();
-const STATUS_CACHE_TTL = 2000; // 2 seconds cache
-
-export const checkSessionStatusAction = atom(null, async (get, set, sessionId: string) => {
-  if (!sessionId) return;
-
-  const now = Date.now();
-  const cached = statusCheckCache.get(sessionId);
-
-  // If we have a recent check or an ongoing request, skip
-  if (cached) {
-    if (cached.promise) {
-      // There's already an ongoing request for this session
-      return cached.promise;
-    }
-    if (now - cached.timestamp < STATUS_CACHE_TTL) {
-      // Recent check, skip
-      return;
-    }
-  }
-
-  try {
-    // Mark that we're making a request
-    const promise = apiService.getSessionStatus(sessionId);
-    statusCheckCache.set(sessionId, { timestamp: now, promise });
-
-    const status = await promise;
-
-    // Update simple processing state
-    set(isProcessingAtom, status.isProcessing);
-
-    // Clear the promise and update timestamp
-    statusCheckCache.set(sessionId, { timestamp: now });
-
-    return status;
-  } catch (error) {
-    console.error('Failed to check session status:', error);
-    // Clear the failed request
-    statusCheckCache.delete(sessionId);
   }
 });

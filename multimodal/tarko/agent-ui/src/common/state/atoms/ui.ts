@@ -57,9 +57,31 @@ export const sidebarCollapsedAtom = atom<boolean>(true);
 export const workspacePanelCollapsedAtom = atom<boolean>(false);
 
 /**
- * Simple processing state atom based on SSE events
+ * Session-isolated processing state atom based on SSE events
+ * Maps session IDs to their processing states
  */
-export const isProcessingAtom = atom<boolean>(false);
+export const sessionProcessingStatesAtom = atom<Record<string, boolean>>({});
+
+/**
+ * Derived atom for the current active session's processing state
+ * Automatically isolates state by active session
+ */
+export const isProcessingAtom = atom(
+  (get) => {
+    const activeSessionId = get(activeSessionIdAtom);
+    const sessionProcessingStates = get(sessionProcessingStatesAtom);
+    return activeSessionId ? sessionProcessingStates[activeSessionId] ?? false : false;
+  },
+  (get, set, update: boolean) => {
+    const activeSessionId = get(activeSessionIdAtom);
+    if (activeSessionId) {
+      set(sessionProcessingStatesAtom, (prev) => ({
+        ...prev,
+        [activeSessionId]: update,
+      }));
+    }
+  },
+);
 
 /**
  * Workspace display mode - determines what content is shown in the workspace
