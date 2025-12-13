@@ -1,3 +1,3 @@
 #!/usr/bin/env node
 
-require('../dist/cli').bootstrapCli();
+require('../dist/index').bootstrapCli();

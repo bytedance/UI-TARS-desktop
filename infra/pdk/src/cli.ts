@@ -4,25 +4,32 @@
  */
 
 /**
- * CLI entry point for PTK
+ * CLI entry point for PDK
  */
 import { cac } from 'cac';
 import { dev, release, patch, changelog, githubRelease } from './commands';
 import { logger } from './utils/logger';
+import { loadPDKConfig, mergeOptions } from './utils/config';
 
 /**
- * Wraps a command execution with error handling
+ * Wraps a command execution with error handling and config loading
  */
 // eslint-disable-next-line @typescript-eslint/ban-types
 async function wrapCommand(
   // eslint-disable-next-line @typescript-eslint/ban-types
   command: Function,
-  options: Record<string, unknown>,
+  cliOptions: Record<string, unknown>,
 ) {
-  options.cwd = options.cwd || process.cwd();
+  cliOptions.cwd = cliOptions.cwd || process.cwd();
 
   try {
-    await command(options);
+    // Load configuration
+    const config = await loadPDKConfig({ cwd: cliOptions.cwd as string });
+
+    // Merge CLI options with configuration
+    const mergedOptions = mergeOptions(cliOptions, config);
+
+    await command(mergedOptions);
   } catch (err) {
     console.log();
     process.exitCode = 1;
@@ -35,13 +42,11 @@ async function wrapCommand(
  * Bootstrap the CLI
  */
 export function bootstrapCli() {
-  const cli = cac('ptk');
+  const cli = cac('pdk');
   const pkg = require('../package.json');
 
   // Global options
-  cli.option('--cwd <cwd>', 'Current working directory', {
-    default: process.cwd(),
-  });
+  cli.option('--cwd <cwd>', 'Current working directory');
 
   // Dev command
   cli
@@ -50,16 +55,10 @@ export function bootstrapCli() {
     .option(
       '--exclude <packages>',
       'Comma-separated list of packages to exclude',
-      {
-        default: '',
-      },
     )
     .option(
       '--packages, --pkg <packages>',
       'Comma-separated list of packages to start by default',
-      {
-        default: '',
-      },
     )
     .action((opts) => {
       if (opts.packages && typeof opts.packages === 'string') {
@@ -80,41 +79,21 @@ export function bootstrapCli() {
   // Release command
   cli
     .command('r', 'Release your monorepo')
-    .option('--changelog', 'Whether to generate changelog', {
-      default: true,
-    })
-    .option('--push-tag', 'Automatically push git tag to remote', {
-      default: false,
-    })
-    .option('--build [build]', 'Execute custom build script before release', {
-      default: false,
-    })
-    .option('--dry-run', 'Preview execution without making changes', {
-      default: false,
-    })
-    .option('--run-in-band', 'Whether to publish package in series', {
-      default: false,
-    })
+    .option('--changelog', 'Whether to generate changelog')
+    .option('--push-tag', 'Automatically push git tag to remote')
+    .option('--build [build]', 'Execute custom build script before release')
+    .option('--dry-run', 'Preview execution without making changes')
+    .option('--run-in-band', 'Whether to publish package in series')
     .option(
       '--ignore-scripts',
       'Ignore npm scripts during release and patch process',
-      {
-        default: false,
-      },
     )
-    .option('--tag-prefix <prefix>', 'Prefix for git tags', {
-      default: 'v',
-    })
+    .option('--tag-prefix <prefix>', 'Prefix for git tags')
     .option(
       '--canary',
       'Skip version/tag selection and auto-generate canary version',
-      {
-        default: false,
-      },
     )
-    .option('--use-ai', 'Use AI to generate changelog', {
-      default: false,
-    })
+    .option('--use-ai', 'Use AI to generate changelog')
     .option('--provider <provider>', 'LLM provider to use (default: openai)')
     .option('--model <model>', 'LLM model to use (default: gpt-4o)')
     .option('--apiKey, --api-key <apiKey>', 'Custom API key for LLM')
@@ -122,30 +101,18 @@ export function bootstrapCli() {
     .option(
       '--filter-scopes <scopes>',
       'Comma-separated list of scopes to include in changelog (empty for all)',
-      {
-        default: '',
-      },
     )
     .option(
       '--filter-types <types>',
       'Comma-separated list of commit types to include in changelog',
-      {
-        default: 'feat,fix',
-      },
     )
     .option(
       '--create-github-release',
       'Create GitHub release after successful release',
-      {
-        default: false,
-      },
     )
     .option(
       '--auto-create-release-branch',
       'Automatically create release branch before release',
-      {
-        default: false,
-      },
     )
     .alias('release')
     .action((opts) => {
@@ -176,12 +143,8 @@ export function bootstrapCli() {
       },
     )
     .option('--tag <tag>', 'Tag (e.g. latest, next, beta)')
-    .option('--run-in-band', 'Whether to publish package in series', {
-      default: false,
-    })
-    .option('--ignore-scripts', 'Ignore npm scripts under patch process', {
-      default: false,
-    })
+    .option('--run-in-band', 'Whether to publish package in series')
+    .option('--ignore-scripts', 'Ignore npm scripts under patch process')
     .alias('patch')
     .action((opts) => {
       // Map patch-version to version for compatibility
@@ -194,33 +157,17 @@ export function bootstrapCli() {
   // Changelog command
   cli
     .command('changelog', 'Create changelog')
-    .option('--dry-run', 'Preview execution without making changes', {
-      default: false,
-    })
+    .option('--dry-run', 'Preview execution without making changes')
     .option('--changelog-version <version>', 'Version', {
       // There is no default value here, because the default is read from package.json
     })
-    .option('--tag-prefix <prefix>', 'Prefix for git tags', {
-      default: 'v',
-    })
-    .option('--beautify', 'Beautify changelog or not', {
-      default: false,
-    })
-    .option('--commit', 'Create git commit or not', {
-      default: false,
-    })
-    .option('--git-push', 'Execute git push or not', {
-      default: false,
-    })
-    .option('--attach-author', 'Add author or not', {
-      default: false,
-    })
-    .option('--author-name-type <type>', 'Type of author name: name or email', {
-      default: 'name',
-    })
-    .option('--use-ai', 'Use AI to generate changelog', {
-      default: false,
-    })
+    .option('--tag-prefix <prefix>', 'Prefix for git tags')
+    .option('--beautify', 'Beautify changelog or not')
+    .option('--commit', 'Create git commit or not')
+    .option('--git-push', 'Execute git push or not')
+    .option('--attach-author', 'Add author or not')
+    .option('--author-name-type <type>', 'Type of author name: name or email')
+    .option('--use-ai', 'Use AI to generate changelog')
     .option('--provider <provider>', 'LLM provider to use (default: openai)')
     .option('--model <model>', 'LLM model to use (default: gpt-4o)')
     .option('--apiKey, --api-key <apiKey>', 'Custom API key for LLM')
@@ -228,16 +175,10 @@ export function bootstrapCli() {
     .option(
       '--filter-scopes <scopes>',
       'Comma-separated list of scopes to include in changelog (empty for all)',
-      {
-        default: '',
-      },
     )
     .option(
       '--filter-types <types>',
       'Comma-separated list of commit types to include in changelog',
-      {
-        default: 'feat,fix',
-      },
     )
     .action((opts) => {
       // Map changelog-version to version for compatibility
@@ -267,12 +208,8 @@ export function bootstrapCli() {
       '--release-version <version>',
       'Version to release (reads from package.json if not provided)',
     )
-    .option('--tag-prefix <prefix>', 'Prefix for git tags', {
-      default: 'v',
-    })
-    .option('--dry-run', 'Preview execution without creating actual release', {
-      default: false,
-    })
+    .option('--tag-prefix <prefix>', 'Prefix for git tags')
+    .option('--dry-run', 'Preview execution without creating actual release')
     .alias('gh-release')
     .action((opts) => {
       // Map release-version to version for compatibility
