@@ -13,7 +13,7 @@
     "bin"
   ],
   "bin": {
-    "pdk": "bin/cli.cjs"
+    "pdk": "bin/cli.js"
   },
   "scripts": {
     "dev": "rslib build --watch",
@@ -22,16 +22,17 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
+    "@tarko/config-loader": "0.3.0",
     "@tarko/model-provider": "0.3.0",
     "boxen": "4",
-    "cac": "6.7.14",
-    "chalk": "5.6.2",
+    "cac": "^6.5.10",
+    "chalk": "2.4.1",
     "chokidar": "3.4.0",
-    "execa": "9.6.1",
+    "execa": "9.6.0",
     "fast-glob": "^3.3.2",
-    "@inquirer/prompts": "8.0.2",
+    "fs-extra": "^11.1.1",
+    "inquirer": "^8.2.5",
     "js-yaml": "^4.1.0",
-    "jiti": "2.4.2",
     "semver": "^7.5.4",
     "string-width": "^4.2.0",
     "text-table": "^0.2.0",
@@ -40,6 +41,7 @@
   "devDependencies": {
     "@rslib/core": "0.15.1",
     "@types/fs-extra": "11.0.2",
+    "@types/inquirer": "^8.2.5",
     "@types/js-yaml": "^4.0.5",
     "@types/node": "22.15.30",
     "@types/semver": "^7.5.0",

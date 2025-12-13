@@ -7,7 +7,8 @@
  * Logger utility for PDK
  */
 import chalk from 'chalk';
-import pkg from '../../package.json' with { type: 'json' };
+
+const pkg = require('../../package.json');
 const PREFIX = `${chalk.cyan('❯')} ${chalk.gray(pkg.name)}`;
 
 export const logger = {

@@ -7,10 +7,10 @@
  * CLI entry point for PDK
  */
 import { cac } from 'cac';
-import { dev, release, patch, changelog, githubRelease } from './commands/index.js';
-import { logger } from './utils/logger.js';
-import { loadPDKConfig, mergeOptions } from './utils/config.js';
-import pkg from '../package.json' with { type: 'json' };
+import { dev, release, patch, changelog, githubRelease } from './commands';
+import { logger } from './utils/logger';
+import { loadPDKConfig, mergeOptions } from './utils/config';
+import type { DevOptions, ReleaseOptions, PatchOptions, ChangelogOptions, GitHubReleaseOptions } from './types';
 
 /**
  * Wraps a command execution with error handling and config loading
@@ -27,10 +27,10 @@ async function wrapCommand(
   try {
     // Load configuration
     const config = await loadPDKConfig({ cwd: options.cwd as string });
-
+    
     // Merge CLI options with configuration
     const mergedOptions = mergeOptions(options, config, commandType);
-
+    
     await command(mergedOptions);
   } catch (err) {
     console.log();
@@ -45,6 +45,7 @@ async function wrapCommand(
  */
 export function bootstrapCli() {
   const cli = cac('pdk');
+  const pkg = require('../package.json');
 
   // Global options
   cli.option('--cwd <cwd>', 'Current working directory', {

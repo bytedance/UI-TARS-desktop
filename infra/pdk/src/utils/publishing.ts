@@ -8,16 +8,16 @@
  */
 
 import { join } from 'path';
-import { readJsonSync, writeJsonSync } from '../utils/json.js';
-import type { WorkspacePackage } from '../types.js';
-import { logger } from './logger.js';
-import { publishPackage } from './npm.js';
+import { readJsonSync } from 'fs-extra';
+import type { WorkspacePackage } from '../types';
+import { logger } from './logger';
+import { publishPackage } from './npm';
 import {
   replaceWorkspaceDependencies,
   restorePackageDependencies,
   checkUnreplacedDeps,
   type DependencyBackup,
-} from './dependencies.js';
+} from './dependencies';
 
 /**
  * Publishes a single package with workspace dependency management

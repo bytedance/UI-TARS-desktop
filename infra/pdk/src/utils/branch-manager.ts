@@ -8,8 +8,8 @@
  */
 
 import chalk from 'chalk';
-import { getCurrentBranch, createAndSwitchBranch, switchBranch } from './git.js';
-import { logger } from './logger.js';
+import { getCurrentBranch, createAndSwitchBranch, switchBranch } from './git';
+import { logger } from './logger';
 
 /**
  * Manages release branch creation and restoration

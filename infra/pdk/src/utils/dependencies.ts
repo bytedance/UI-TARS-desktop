@@ -8,9 +8,10 @@
  */
 
 import { join } from 'path';
-import type { WorkspacePackage } from '../types.js';
-import { logger } from './logger.js';
-import { readJsonSync, writeJsonSync } from '../utils/json.js';
+import { readJsonSync, writeJsonSync } from 'fs-extra';
+
+import type { WorkspacePackage } from '../types';
+import { logger } from './logger';
 
 // Keeps track of original dependencies to restore after publishing
 export interface DependencyBackup {
@@ -24,8 +25,8 @@ export interface DependencyBackup {
  * Helper function to check for unreplaced workspace dependencies
  */
 export const checkUnreplacedDeps = (
-  deps: Record<string, string> | undefined,
-  pkgName: string,
+  deps: Record<string, string> | undefined, 
+  pkgName: string, 
   type = 'dependencies'
 ): void => {
   if (!deps) return;
@@ -46,8 +47,8 @@ export const hasWorkspaceDependencies = (packageJson: any): boolean => {
     packageJson.dependencies,
     packageJson.devDependencies,
     packageJson.peerDependencies,
-  ].some((deps) =>
-    deps && Object.values(deps).some((depVersion) =>
+  ].some((deps) => 
+    deps && Object.values(deps).some((depVersion) => 
       depVersion && typeof depVersion === 'string' && depVersion.startsWith('workspace:')
     )
   );
@@ -120,8 +121,8 @@ export async function replaceWorkspaceDependencies(
   updateDeps(packageJson.devDependencies);
   updateDeps(packageJson.peerDependencies);
 
-  writeJsonSync(packageJsonPath, packageJson);
-
+  writeJsonSync(packageJsonPath, packageJson, { spaces: 2 });
+  
   return backup;
 }
 
@@ -155,7 +156,7 @@ export async function restorePackageDependencies(
       packageJson.peerDependencies = backup.peerDependencies;
     }
 
-    writeJsonSync(backup.packagePath, packageJson);
+    writeJsonSync(backup.packagePath, packageJson, { spaces: 2 });
   } catch (err) {
     logger.error(
       `Failed to restore dependencies for ${backup.packagePath}: ${(err as Error).message}`,

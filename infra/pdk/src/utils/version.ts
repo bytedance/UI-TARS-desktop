@@ -7,11 +7,11 @@
  * Version management utilities
  */
 
-import { readJsonSync, writeJsonSync } from '../utils/json.js';
 import { execa } from 'execa';
 import semver from 'semver';
-import { input, rawlist } from '@inquirer/prompts';
-import { logger } from './logger.js';
+import inquirer from 'inquirer';
+
+import { logger } from './logger';
 
 /**
  * Generates canary version with format: {version}-canary-{commitHash}-{timestamp}
@@ -39,17 +39,13 @@ export async function generateCanaryVersion(
   };
 }
 
-const CUSTOM = { name: 'Custom', value: 'custom' };
-const NEXT = { name: 'Next', value: 'next' };
-const BETA = { name: 'Beta', value: 'beta' };
-const LATEST = { name: 'Latest', value: 'latest' };
-
 /**
  * Prompts user to select version and tag
  */
 export async function selectVersionAndTag(
   currentVersion: string,
 ): Promise<{ version: string; tag: string }> {
+  const customItem = { name: 'Custom', value: 'custom' };
   const bumps = ['patch', 'minor', 'major', 'prerelease', 'premajor'] as const;
 
   const versions = bumps.reduce<Record<string, string>>((acc, bump) => {
@@ -64,33 +60,40 @@ export async function selectVersionAndTag(
 
   const getNpmTags = (version: string) => {
     if (semver.prerelease(version)) {
-      return [NEXT, LATEST, BETA, CUSTOM];
+      return ['next', 'latest', 'beta', customItem];
     }
-    return [LATEST, NEXT, BETA, CUSTOM];
+    return ['latest', 'next', 'beta', customItem];
   };
 
-  const bump = await rawlist({
-    message: 'Select release type:',
-    choices: [...bumpChoices, CUSTOM],
-  });
-
-  let customVersion: string | undefined;
-  if (bump === 'custom') {
-    customVersion = await input({
+  const { bump, customVersion, npmTag, customNpmTag } = await inquirer.prompt([
+    {
+      name: 'bump',
+      message: 'Select release type:',
+      type: 'list',
+      choices: [...bumpChoices, customItem],
+    },
+    {
+      name: 'customVersion',
       message: 'Input version:',
+      type: 'input',
+      when: (answers) => answers.bump === 'custom',
       validate: (input) =>
         semver.valid(input) ? true : 'Please enter a valid semver version',
-    });
-  }
-
-  const npmTag = await rawlist({
-    message: 'Input npm tag:',
-    choices: getNpmTags(customVersion || versions[bump]),
-  });
-
-  const customNpmTag = npmTag === 'custom'
-    ? await input({ message: 'Input customized npm tag:' })
-    : undefined;
+    },
+    {
+      name: 'npmTag',
+      message: 'Input npm tag:',
+      type: 'list',
+      choices: (answers) =>
+        getNpmTags(answers.customVersion || versions[answers.bump]),
+    },
+    {
+      name: 'customNpmTag',
+      message: 'Input customized npm tag:',
+      type: 'input',
+      when: (answers) => answers.npmTag === 'custom',
+    },
+  ]);
 
   const version = customVersion || versions[bump];
   const tag = customNpmTag || npmTag;
@@ -111,7 +114,8 @@ export async function updatePackageVersion(
     return;
   }
 
+  const { readJsonSync, writeJsonSync } = await import('fs-extra');
   const packageJson = readJsonSync(packagePath);
   packageJson.version = version;
-  writeJsonSync(packagePath, packageJson);
+  writeJsonSync(packagePath, packageJson, { spaces: 2 });
 }

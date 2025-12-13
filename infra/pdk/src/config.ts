@@ -7,7 +7,7 @@
  * Configuration definition utilities for PDK
  */
 
-import type { PDKConfig } from './types.js';
+import type { PDKConfig } from './types';
 
 /**
  * Defines PDK configuration with TypeScript support

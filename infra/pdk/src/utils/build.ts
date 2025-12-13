@@ -8,7 +8,8 @@
  */
 
 import { execa } from 'execa';
-import { logger } from './logger.js';
+
+import { logger } from './logger';
 
 /**
  * Runs build script with proper environment variables

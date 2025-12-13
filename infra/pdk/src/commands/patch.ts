@@ -9,8 +9,8 @@
  * Fixes failed package publishing
  */
 import { join } from 'path';
-import { readFileSync, writeFileSync } from 'fs';
-import { rawlist } from '@inquirer/prompts';
+import { readFileSync, writeFileSync } from 'fs-extra';
+import inquirer from 'inquirer';
 import textTable from 'text-table';
 import stringWidth from 'string-width';
 import chalk from 'chalk';
@@ -18,13 +18,13 @@ import chalk from 'chalk';
 import {
   loadWorkspacePackages,
   resolveWorkspaceConfig,
-} from '../utils/workspace.js';
-import { fetchPackageVersion } from '../utils/npm.js';
-import { logger } from '../utils/logger.js';
-import { publishPackage } from '../utils/npm.js';
-import { removeGitHeadField } from '../utils/npm.js';
+} from '../utils/workspace';
+import { fetchPackageVersion } from '../utils/npm';
+import { logger } from '../utils/logger';
+import { publishPackage } from '../utils/npm';
+import { removeGitHeadField } from '../utils/npm';
 
-import type { PatchOptions, PackageWithRemoteInfo } from '../types.js';
+import type { PatchOptions, PackageWithRemoteInfo } from '../types';
 
 /**
  * Formats the release status table
@@ -128,10 +128,14 @@ export async function patch(options: PatchOptions = {}): Promise<void> {
   console.log();
 
   // Confirm patch operation
-  const confirm = await rawlist({
-    message: 'Continue to patch?',
-    choices: ['No', 'Yes'],
-  });
+  const { confirm } = await inquirer.prompt([
+    {
+      name: 'confirm',
+      message: 'Continue to patch?',
+      type: 'list',
+      choices: ['No', 'Yes'],
+    },
+  ]);
 
   if (confirm !== 'Yes') {
     logger.info('Patch cancelled.');
