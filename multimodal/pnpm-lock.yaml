@@ -18,8 +18,8 @@ importers:
         specifier: 2.2.1
         version: 2.2.1
       pnpm-dev-kit:
-        specifier: 0.0.4
-        version: 0.0.4(ws@8.18.3)
+        specifier: 0.0.5-canary-7d05b7ce-20251213170600
+        version: 0.0.5-canary-7d05b7ce-20251213170600(ws@8.18.3)
       prettier:
         specifier: 3.5.3
         version: 3.5.3
@@ -3259,12 +3259,6 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
-  '@manet/llm-client@0.0.4':
-    resolution: {integrity: sha512-Sbv/6RIBDlWbRaj5wIosXhgY108wcuiw3vb7+uZWa6puKIpORrv7nNdZWwM8/+MU2ryjNB0iew5p/y6vhF37mg==}
-
-  '@manet/model-provider@0.0.4':
-    resolution: {integrity: sha512-2Av1pQs4wkwppyPF8SeN7T1w8d4wBTKZonP8kYOu8HGjlQv1GGokM7dNa2YyBbrkrn9p03f33XWnqBKGuuxZKA==}
-
   '@mdx-js/loader@3.1.0':
     resolution: {integrity: sha512-xU/lwKdOyfXtQGqn3VnJjlDrmKXEvMi1mgYxVmukEUtVycIz1nh7oQ40bKTd4cA7rLStqu0740pnhGYxGoqsCg==}
     peerDependencies:
@@ -5804,6 +5798,15 @@ packages:
 
   '@tanstack/virtual-core@3.13.12':
     resolution: {integrity: sha512-1YBOJfRHV4sXUmWsFSf5rQor4Ss82G8dQWLRbnk3GA4jeP8hQt1hxXh0tmflpC0dz3VgEv/1+qwPyLeWkQuPFA==}
+
+  '@tarko/config-loader@0.3.0':
+    resolution: {integrity: sha512-AvhSE0KRixOigb4udPYcx0e0I2ODV5UvTx5UtsaoTol+28OIN/hsSX0ICkYCxb1mpTTeX4Cf8HHZXLThg9uYVA==}
+
+  '@tarko/llm-client@0.3.0':
+    resolution: {integrity: sha512-HsfLxYQx1rKSvDGAlBOBAG1wfCLmyNt0QK6U/RoeK+L+L+dXlb62XtpyZTMNYxatNi/8sZkO81VuFsFrFAULTg==}
+
+  '@tarko/model-provider@0.3.0':
+    resolution: {integrity: sha512-QEwxbYpBmByWNBI4WrpjkqCPafIJHhaNm4EudHmgxb56b4r6MaE8oPDQhoGKeu1JK3GQTL0NOmu4PTn/nfDXVw==}
 
   '@tavily/core@0.3.1':
     resolution: {integrity: sha512-7jyvPWG4Zjst0s4v0FMLO1f/dfHqs4FnqvKm86zOGYzXxSfxHu0isbLzlwjJad0csYwF0kifdlECTuNouHfr5A==}
@@ -10339,8 +10342,8 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
-  pnpm-dev-kit@0.0.4:
-    resolution: {integrity: sha512-ELwa0susr1SoleUkuEq5D8mwO0VaJ59Uolp1kQd2Bn/V1vNzfFv4LBDpsHuKHxanJB7rBRa7wFq66mpSYSVUTg==}
+  pnpm-dev-kit@0.0.5-canary-7d05b7ce-20251213170600:
+    resolution: {integrity: sha512-pdA+vl1fZE319wrSkY9cNFWq9DOx+zAN9nXjlhkggu7uwiBlYd7Ycba3ZzjjxBj2bkDj/g4pDKaom28J5MMwUA==}
     hasBin: true
 
   possible-typed-array-names@1.1.0:
@@ -14704,31 +14707,6 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
-
-  '@manet/llm-client@0.0.4(ws@8.18.3)(zod@3.25.36)':
-    dependencies:
-      '@anthropic-ai/sdk': 0.24.3
-      '@google/generative-ai': 0.14.1
-      '@mistralai/mistralai': 0.5.0
-      mime-types: 2.1.35
-      nanoid: 5.1.5
-      openai: 4.93.0(ws@8.18.3)(zod@3.25.36)
-    transitivePeerDependencies:
-      - encoding
-      - ws
-      - zod
-
-  '@manet/model-provider@0.0.4(ws@8.18.3)':
-    dependencies:
-      '@manet/llm-client': 0.0.4(ws@8.18.3)(zod@3.25.36)
-      '@modelcontextprotocol/sdk': 1.16.0
-      '@types/json-schema': 7.0.15
-      openai: 4.93.0(ws@8.18.3)(zod@3.25.36)
-      zod: 3.25.36
-    transitivePeerDependencies:
-      - encoding
-      - supports-color
-      - ws
 
   '@mdx-js/loader@3.1.0(webpack@5.99.9)':
     dependencies:
@@ -20759,6 +20737,36 @@ snapshots:
 
   '@tanstack/virtual-core@3.13.12': {}
 
+  '@tarko/config-loader@0.3.0':
+    dependencies:
+      jiti: 2.4.2
+      js-yaml: 4.1.0
+
+  '@tarko/llm-client@0.3.0(ws@8.18.3)(zod@3.25.36)':
+    dependencies:
+      '@anthropic-ai/sdk': 0.24.3
+      '@google/generative-ai': 0.14.1
+      '@mistralai/mistralai': 0.5.0
+      mime-types: 2.1.35
+      nanoid: 5.1.5
+      openai: 4.93.0(ws@8.18.3)(zod@3.25.36)
+    transitivePeerDependencies:
+      - encoding
+      - ws
+      - zod
+
+  '@tarko/model-provider@0.3.0(ws@8.18.3)':
+    dependencies:
+      '@modelcontextprotocol/sdk': 1.16.0
+      '@tarko/llm-client': 0.3.0(ws@8.18.3)(zod@3.25.36)
+      '@types/json-schema': 7.0.15
+      openai: 4.93.0(ws@8.18.3)(zod@3.25.36)
+      zod: 3.25.36
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
+      - ws
+
   '@tavily/core@0.3.1':
     dependencies:
       axios: 1.9.0
@@ -25161,7 +25169,7 @@ snapshots:
 
   mcp-http-server@1.1.5:
     dependencies:
-      '@modelcontextprotocol/sdk': 1.12.1
+      '@modelcontextprotocol/sdk': 1.16.0
       express: 5.1.0
     transitivePeerDependencies:
       - supports-color
@@ -26569,9 +26577,10 @@ snapshots:
       bin-wrapper: 4.1.0
       execa: 4.1.0
 
-  pnpm-dev-kit@0.0.4(ws@8.18.3):
+  pnpm-dev-kit@0.0.5-canary-7d05b7ce-20251213170600(ws@8.18.3):
     dependencies:
-      '@manet/model-provider': 0.0.4(ws@8.18.3)
+      '@tarko/config-loader': 0.3.0
+      '@tarko/model-provider': 0.3.0(ws@8.18.3)
       boxen: 4.2.0
       cac: 6.7.14
       chalk: 2.4.1
