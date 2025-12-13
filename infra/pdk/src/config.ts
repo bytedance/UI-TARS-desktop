@@ -11,34 +11,42 @@ import type { PDKConfig } from './types';
 
 /**
  * Defines PDK configuration with TypeScript support
+ * CLI, Node.js API, and Config API are completely isomorphic
  * 
  * @example
  * ```typescript
  * import { defineConfig } from 'pnpm-dev-kit';
  * 
  * export default defineConfig({
- *   common: {
- *     tagPrefix: 'v',
- *     dryRun: false,
- *   },
- *   ai: {
- *     useAi: true,
- *     model: 'gpt-4o',
- *     provider: 'openai',
- *   },
- *   filter: {
- *     filterTypes: ['feat', 'fix', 'perf'],
- *     filterScopes: ['core', 'ui'],
- *   },
- *   release: {
- *     changelog: true,
- *     pushTag: true,
- *     createGithubRelease: true,
- *   },
- *   changelog: {
- *     beautify: true,
- *     commit: true,
- *   },
+ *   // Common options shared across all commands
+ *   tagPrefix: 'v',
+ *   dryRun: false,
+ *   runInBand: false,
+ *   ignoreScripts: false,
+ *   
+ *   // AI-related options for changelog generation
+ *   useAi: true,
+ *   model: 'gpt-4o',
+ *   provider: 'openai',
+ *   // secretlint-disable-next-line @secretlint/secretlint-rule-pattern
+ *   apiKey: process.env.OPENAI_API_KEY,
+ *   
+ *   // Filter options for changelog generation
+ *   filterTypes: ['feat', 'fix', 'perf'],
+ *   filterScopes: ['core', 'ui'],
+ *   
+ *   // Development mode configuration (dev command only)
+ *   exclude: ['@scope/package-to-exclude'],
+ *   packages: ['@scope/package-to-start'],
+ *   
+ *   // Release command configuration (release command only)
+ *   changelog: true,
+ *   pushTag: true,
+ *   createGithubRelease: true,
+ *   
+ *   // Changelog command configuration (changelog command only)
+ *   beautify: true,
+ *   commit: true,
  * });
  * ```
  */
