@@ -1,7 +1,7 @@
 {
   "name": "pnpm-dev-kit",
   "description": "PDK (pnpm dev kit), an efficient pnpm workspace development and publishing tool",
-  "version": "0.0.5",
+  "version": "0.0.5-canary-7d05b7ce-20251213170600",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "publishConfig": {
