@@ -64,20 +64,26 @@ export const Navbar: React.FC = () => {
   // Only activate once when nav items are loaded and no active frame exists
   useEffect(() => {
     if (
-      !hasAutoActivated && 
-      workspaceDisplayState.mode !== 'embed-frame' && 
-      workspaceNavItems.length > 0 && 
+      !hasAutoActivated &&
+      workspaceDisplayState.mode !== 'embed-frame' &&
+      workspaceNavItems.length > 0 &&
       activeSessionId
     ) {
       const autoActiveItem = workspaceNavItems.find(
-        item => item.behavior === 'embed-frame' && item.autoActive
+        (item) => item.behavior === 'embed-frame' && item.autoActive,
       );
       if (autoActiveItem) {
         showEmbedFrame(autoActiveItem);
         setHasAutoActivated(true);
       }
     }
-  }, [workspaceNavItems, workspaceDisplayState.mode, showEmbedFrame, activeSessionId, hasAutoActivated]);
+  }, [
+    workspaceNavItems,
+    workspaceDisplayState.mode,
+    showEmbedFrame,
+    activeSessionId,
+    hasAutoActivated,
+  ]);
 
   // Reset auto-activation flag when session changes
   useEffect(() => {
@@ -116,7 +122,10 @@ export const Navbar: React.FC = () => {
   const handleNavItemClick = (navItem: WorkspaceNavItem) => {
     if (navItem.behavior === 'embed-frame') {
       // Toggle embed frame state
-      if (workspaceDisplayState.mode === 'embed-frame' && workspaceDisplayState.embedFrame?.title === navItem.title) {
+      if (
+        workspaceDisplayState.mode === 'embed-frame' &&
+        workspaceDisplayState.embedFrame?.title === navItem.title
+      ) {
         hideEmbedFrame();
         // Reset auto-activation flag when user manually hides
         setHasAutoActivated(true); // Prevent re-activation
@@ -217,18 +226,25 @@ export const Navbar: React.FC = () => {
                 {workspaceNavItems.map((navItem) => {
                   const IconComponent = getNavItemIcon(navItem.icon);
                   const { className } = getNavItemStyle(navItem.icon);
-                  const isActive = workspaceDisplayState.mode === 'embed-frame' && workspaceDisplayState.embedFrame?.title === navItem.title;
-                  const title = navItem.behavior === 'embed-frame' 
-                    ? (isActive ? `Hide ${navItem.title}` : `Show ${navItem.title} in workspace`)
-                    : `Open ${navItem.title} in new tab`;
-                  
+                  const isActive =
+                    workspaceDisplayState.mode === 'embed-frame' &&
+                    workspaceDisplayState.embedFrame?.title === navItem.title;
+                  const title =
+                    navItem.behavior === 'embed-frame'
+                      ? isActive
+                        ? `Hide ${navItem.title}`
+                        : `Show ${navItem.title} in workspace`
+                      : `Open ${navItem.title} in new tab`;
+
                   return (
                     <button
                       key={navItem.title}
                       onClick={() => handleNavItemClick(navItem)}
                       className={`
                         ${className} 
-                        ${isActive ? `
+                        ${
+                          isActive
+                            ? `
                           relative overflow-hidden
                           before:absolute before:inset-0 before:rounded-lg
                           before:bg-gradient-to-r before:from-blue-500/20 before:via-purple-500/20 before:to-pink-500/20
@@ -242,19 +258,23 @@ export const Navbar: React.FC = () => {
                           text-blue-800 dark:text-blue-200
                           font-semibold
                           backdrop-blur-md
-                        ` : 'hover:scale-[1.02] active:scale-[0.98]'}
+                        `
+                            : 'hover:scale-[1.02] active:scale-[0.98]'
+                        }
                         transition-all duration-300 ease-out
                         relative
                       `}
                       title={title}
                     >
-                      <IconComponent 
-                        size={12} 
-                        className={`${isActive 
-                          ? 'text-blue-600 dark:text-blue-300 drop-shadow-sm animate-pulse' 
-                          : 'opacity-70'} 
+                      <IconComponent
+                        size={12}
+                        className={`${
+                          isActive
+                            ? 'text-blue-600 dark:text-blue-300 drop-shadow-sm animate-pulse'
+                            : 'opacity-70'
+                        } 
                           transition-all duration-300
-                        `} 
+                        `}
                       />
                       {navItem.title}
                       {isActive && (
@@ -297,11 +317,16 @@ export const Navbar: React.FC = () => {
                 <>
                   {workspaceNavItems.map((navItem) => {
                     const IconComponent = getNavItemIcon(navItem.icon);
-                    const isActive = workspaceDisplayState.mode === 'embed-frame' && workspaceDisplayState.embedFrame?.title === navItem.title;
-                    const title = navItem.behavior === 'embed-frame' 
-                      ? (isActive ? `Hide ${navItem.title}` : `Show ${navItem.title} in workspace`)
-                      : `Open ${navItem.title} in new tab`;
-                    
+                    const isActive =
+                      workspaceDisplayState.mode === 'embed-frame' &&
+                      workspaceDisplayState.embedFrame?.title === navItem.title;
+                    const title =
+                      navItem.behavior === 'embed-frame'
+                        ? isActive
+                          ? `Hide ${navItem.title}`
+                          : `Show ${navItem.title} in workspace`
+                        : `Open ${navItem.title} in new tab`;
+
                     return (
                       <MenuItem
                         key={navItem.title}
@@ -311,24 +336,27 @@ export const Navbar: React.FC = () => {
                         }}
                         icon={
                           <div className="relative">
-                            <IconComponent 
-                              size={16} 
-                              className={isActive 
-                                ? 'text-blue-500 dark:text-blue-400 animate-pulse' 
-                                : ''
-                              } 
+                            <IconComponent
+                              size={16}
+                              className={
+                                isActive ? 'text-blue-500 dark:text-blue-400 animate-pulse' : ''
+                              }
                             />
                             {isActive && (
                               <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-ping" />
                             )}
                           </div>
                         }
-                        className={isActive ? `
+                        className={
+                          isActive
+                            ? `
                           bg-gradient-to-r from-blue-50/80 via-white/80 to-purple-50/80 
                           dark:from-blue-900/30 dark:via-gray-800/30 dark:to-purple-900/30
                           border-l-2 border-l-blue-500 dark:border-l-blue-400
                           text-blue-700 dark:text-blue-300 font-medium
-                        ` : ''}
+                        `
+                            : ''
+                        }
                       >
                         <div className="flex items-center justify-between w-full">
                           <span className={isActive ? 'font-semibold' : ''}>{navItem.title}</span>
@@ -377,7 +405,8 @@ export const Navbar: React.FC = () => {
                     <div className="flex flex-col gap-1">
                       <span className="text-xs text-gray-500 dark:text-gray-400">Model</span>
                       <span className="text-sm font-medium">
-                        {getModelDisplayName(sessionMetadata.modelConfig)} • {sessionMetadata.modelConfig.provider}
+                        {getModelDisplayName(sessionMetadata.modelConfig)} •{' '}
+                        {sessionMetadata.modelConfig.provider}
                       </span>
                     </div>
                   </MenuItem>

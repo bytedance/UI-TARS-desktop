@@ -5,7 +5,11 @@ import { AgentEventStream, ToolResult, Message } from '@/common/types';
 import { determineToolRendererType } from '@/common/utils/tool-renderers';
 import { messagesAtom } from '@/common/state/atoms/message';
 import { toolResultsAtom, toolCallResultMap } from '@/common/state/atoms/tool';
-import { sessionPanelContentAtom, showToolContentAtom, workspaceDisplayStateAtom } from '@/common/state/atoms/ui';
+import {
+  sessionPanelContentAtom,
+  showToolContentAtom,
+  workspaceDisplayStateAtom,
+} from '@/common/state/atoms/ui';
 import { rawToolMappingAtom } from '@/common/state/atoms/rawEvents';
 import { toolCallArgumentsCache, streamingToolCallCache } from '../utils/cacheManager';
 import { collectFileInfo } from '../utils/fileCollector';
@@ -369,7 +373,7 @@ export class StreamingToolCallHandler
         // Check if embed frame is currently active - if so, don't override it
         const workspaceState = get(workspaceDisplayStateAtom);
         const isEmbedFrameActive = workspaceState.mode === 'embed-frame';
-        
+
         // Only update workspace display state if embed frame is not active
         if (!isEmbedFrameActive) {
           set(showToolContentAtom, panelContent);

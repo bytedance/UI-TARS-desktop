@@ -66,7 +66,8 @@ export const WorkspaceDetail: React.FC = () => {
   const [zoomedImage, setZoomedImage] = useState<ZoomedImageData | null>(null);
   const [fullscreenData, setFullscreenData] = useState<FullscreenFileData | null>(null);
 
-  const activePanelContent = workspaceDisplayState.mode === 'tool-content' ? workspaceDisplayState.toolContent : null;
+  const activePanelContent =
+    workspaceDisplayState.mode === 'tool-content' ? workspaceDisplayState.toolContent : null;
 
   const getInitialDisplayMode = (): FileDisplayMode => {
     if (
@@ -271,7 +272,9 @@ export const WorkspaceDetail: React.FC = () => {
             isReplayMode={isReplayMode}
           />
         </div>
-        <div className="flex-1 overflow-auto md:p-4 md:pt-2 px-3 py-2 workspace-scrollbar">{renderContent()}</div>
+        <div className="flex-1 overflow-auto md:p-4 md:pt-2 px-3 py-2 workspace-scrollbar">
+          {renderContent()}
+        </div>
       </div>
 
       <ImageModal imageData={zoomedImage} onClose={() => setZoomedImage(null)} />

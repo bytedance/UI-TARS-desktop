@@ -54,7 +54,7 @@ const EmbedFrameView: React.FC<EmbedFrameViewProps> = ({ navItem }) => {
             </h3>
           </div>
         </div>
-        
+
         {/* Action Buttons */}
         <div className="flex items-center gap-1">
           <button
@@ -67,7 +67,7 @@ const EmbedFrameView: React.FC<EmbedFrameViewProps> = ({ navItem }) => {
           </button>
         </div>
       </div>
-      
+
       {/* Content Area */}
       <div className="flex-1 overflow-hidden relative bg-gradient-to-br from-gray-50/30 to-white/50 dark:from-gray-900/30 dark:to-gray-800/50">
         <EmbedFrameRenderer panelContent={panelContent} />
@@ -86,10 +86,19 @@ export const WorkspacePanel: React.FC = () => {
   const focusParam = getFocusParam();
 
   useEffect(() => {
-    if (focusParam && workspaceDisplayState.toolContent && workspaceDisplayState.toolContent.type === 'file' && !focusProcessed) {
-      const filePath = workspaceDisplayState.toolContent.arguments?.path || workspaceDisplayState.toolContent.title;
+    if (
+      focusParam &&
+      workspaceDisplayState.toolContent &&
+      workspaceDisplayState.toolContent.type === 'file' &&
+      !focusProcessed
+    ) {
+      const filePath =
+        workspaceDisplayState.toolContent.arguments?.path ||
+        workspaceDisplayState.toolContent.title;
       const fileName = filePath.split('/').pop() || filePath;
-      const content = workspaceDisplayState.toolContent.arguments?.content || workspaceDisplayState.toolContent.source;
+      const content =
+        workspaceDisplayState.toolContent.arguments?.content ||
+        workspaceDisplayState.toolContent.source;
 
       if (
         (fileName === focusParam || filePath === focusParam) &&
@@ -126,10 +135,10 @@ export const WorkspacePanel: React.FC = () => {
         return workspaceDisplayState.embedFrame ? (
           <EmbedFrameView navItem={workspaceDisplayState.embedFrame} />
         ) : null;
-      
+
       case 'tool-content':
         return workspaceDisplayState.toolContent ? <WorkspaceDetail /> : null;
-      
+
       default:
         return <WorkspaceContent />;
     }
@@ -138,9 +147,7 @@ export const WorkspacePanel: React.FC = () => {
   return (
     <>
       <div className="flex flex-col h-full">
-        <div className="flex-1 overflow-hidden">
-          {renderWorkspaceContent()}
-        </div>
+        <div className="flex-1 overflow-hidden">{renderWorkspaceContent()}</div>
 
         <AnimatePresence>{isReplayActive && <ReplayControlPanel />}</AnimatePresence>
       </div>

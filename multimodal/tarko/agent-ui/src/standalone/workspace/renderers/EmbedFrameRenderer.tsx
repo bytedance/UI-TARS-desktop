@@ -16,7 +16,9 @@ export const EmbedFrameRenderer: React.FC<EmbedFrameRendererProps> = ({
   const [scale, setScale] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const src = typeof panelContent.source === 'string' ? panelContent.source : (panelContent as any).link || '';
+  const src =
+    // @ts-expect-error
+    typeof panelContent.source === 'string' ? panelContent.source : panelContent.link || '';
 
   const handleOpenInNewTab = () => {
     if (src) {
@@ -29,43 +31,43 @@ export const EmbedFrameRenderer: React.FC<EmbedFrameRendererProps> = ({
       if (containerRef.current) {
         const containerWidth = containerRef.current.clientWidth;
         const containerHeight = containerRef.current.clientHeight;
-        
+
         // Original iframe dimensions
         const originalWidth = 1280;
         const originalHeight = 958;
-        
+
         // Calculate scale to fit entire iframe within container
         const scaleX = containerWidth / originalWidth;
         const scaleY = containerHeight / originalHeight;
         const newScale = Math.min(scaleX, scaleY, 1); // Don't scale up, only down
-        
+
         setScale(newScale);
-        
+
         // Set actual dimensions after scaling
         const scaledWidth = originalWidth * newScale;
         const scaledHeight = originalHeight * newScale;
-        
+
         setDimensions({
           width: Math.round(scaledWidth),
-          height: Math.round(scaledHeight)
+          height: Math.round(scaledHeight),
         });
       }
     };
 
     updateDimensions();
-    
+
     // Use ResizeObserver for better container width change detection
     const resizeObserver = new ResizeObserver(() => {
       updateDimensions();
     });
-    
+
     if (containerRef.current) {
       resizeObserver.observe(containerRef.current);
     }
-    
+
     // Also listen to window resize as fallback
     window.addEventListener('resize', updateDimensions);
-    
+
     return () => {
       resizeObserver.disconnect();
       window.removeEventListener('resize', updateDimensions);
@@ -77,9 +79,7 @@ export const EmbedFrameRenderer: React.FC<EmbedFrameRendererProps> = ({
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <div className="text-gray-400 mb-2">⚠️</div>
-          <p className="text-gray-600 dark:text-gray-400 font-medium mb-2">
-            No URL Provided
-          </p>
+          <p className="text-gray-600 dark:text-gray-400 font-medium mb-2">No URL Provided</p>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             This embed frame doesn't have a valid URL.
           </p>
@@ -98,7 +98,12 @@ export const EmbedFrameRenderer: React.FC<EmbedFrameRendererProps> = ({
             title="Open in new tab"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+              />
             </svg>
             Open
           </button>
@@ -108,18 +113,23 @@ export const EmbedFrameRenderer: React.FC<EmbedFrameRendererProps> = ({
             title="Close fullscreen"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
             Close
           </button>
         </div>
         <div className="w-full h-full flex items-start justify-center pt-16">
-          <div 
+          <div
             style={{
               transform: `scale(${scale})`,
               transformOrigin: 'top center',
               width: '1280px',
-              height: '958px'
+              height: '958px',
             }}
           >
             <iframe
@@ -139,12 +149,12 @@ export const EmbedFrameRenderer: React.FC<EmbedFrameRendererProps> = ({
   return (
     <div ref={containerRef} className="w-full h-full relative">
       <div className="w-full h-full flex items-start justify-center">
-        <div 
+        <div
           style={{
             transform: `scale(${scale})`,
             transformOrigin: 'top center',
             width: '1280px',
-            height: '958px'
+            height: '958px',
           }}
         >
           <iframe

@@ -10,10 +10,7 @@ interface MultimodalContentProps {
   timestamp: number;
 }
 
-export const MultimodalContent: React.FC<MultimodalContentProps> = ({
-  content,
-  timestamp,
-}) => {
+export const MultimodalContent: React.FC<MultimodalContentProps> = ({ content, timestamp }) => {
   const showToolContent = useSetAtom(showToolContentAtom);
   const imageContents = content.filter((part) => part.type === 'image_url');
   const textContents = content.filter((part) => part.type === 'text');

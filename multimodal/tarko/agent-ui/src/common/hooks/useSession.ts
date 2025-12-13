@@ -4,7 +4,13 @@ import { messagesAtom, groupedMessagesAtom } from '../state/atoms/message';
 import { toolResultsAtom } from '../state/atoms/tool';
 
 import { sessionFilesAtom } from '../state/atoms/files';
-import { isProcessingAtom, activePanelContentAtom, connectionStatusAtom, activeEmbedFrameAtom, workspaceDisplayStateAtom } from '../state/atoms/ui';
+import {
+  isProcessingAtom,
+  activePanelContentAtom,
+  connectionStatusAtom,
+  activeEmbedFrameAtom,
+  workspaceDisplayStateAtom,
+} from '../state/atoms/ui';
 import { replayStateAtom } from '../state/atoms/replay';
 import {
   loadSessionsAction,
