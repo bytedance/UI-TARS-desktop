@@ -8,37 +8,37 @@
  * Manages version updates and package publishing
  */
 
+import { readJsonSync, writeJsonSync } from '../utils/json.js';
 import { join } from 'path';
-import { readJsonSync, writeJsonSync } from 'fs-extra';
 import { execa } from 'execa';
 
 // Utils
 import {
   loadWorkspacePackages,
   resolveWorkspaceConfig,
-} from '../utils/workspace';
-import { gitCommit, gitCreateTag, gitPushTag } from '../utils/git';
-import { logger } from '../utils/logger';
-import { createGitHubRelease } from '../utils/github';
-import { patch } from './patch';
-import { changelog } from './changelog';
+} from '../utils/workspace.js';
+import { gitCommit, gitCreateTag, gitPushTag } from '../utils/git.js';
+import { logger } from '../utils/logger.js';
+import { createGitHubRelease } from '../utils/github.js';
+import { patch } from './patch.js';
+import { changelog } from './changelog.js';
 
 // New extracted utilities
 import {
   generateCanaryVersion,
   selectVersionAndTag,
   updatePackageVersion,
-} from '../utils/version';
-import { publishPackages } from '../utils/publishing';
-import { runBuildScript } from '../utils/build';
+} from '../utils/version.js';
+import { publishPackages } from '../utils/publishing.js';
+import { runBuildScript } from '../utils/build.js';
 import {
   confirmRelease,
   confirmPackagesToPublish,
   confirmTagPush,
-} from '../utils/interactive';
-import { ReleaseBranchManager } from '../utils/branch-manager';
+} from '../utils/interactive.js';
+import { ReleaseBranchManager } from '../utils/branch-manager.js';
 
-import type { ReleaseOptions } from '../types';
+import type { ReleaseOptions } from '../types.js';
 
 /**
  * Release command implementation
@@ -143,7 +143,7 @@ export async function release(options: ReleaseOptions = {}): Promise<void> {
       } else {
         const packageJson = readJsonSync(packageJsonPath);
         packageJson.version = version;
-        writeJsonSync(packageJsonPath, packageJson, { spaces: 2 });
+        writeJsonSync(packageJsonPath, packageJson);
       }
     });
 
@@ -153,7 +153,7 @@ export async function release(options: ReleaseOptions = {}): Promise<void> {
       const rootPackageJson = readJsonSync(rootPackageJsonPath);
       rootPackageJson.version = version;
       if (!dryRun) {
-        writeJsonSync(rootPackageJsonPath, rootPackageJson, { spaces: 2 });
+        writeJsonSync(rootPackageJsonPath, rootPackageJson);
       } else {
         logger.info(
           `[dry-run] Would update root package.json to version ${version}`,

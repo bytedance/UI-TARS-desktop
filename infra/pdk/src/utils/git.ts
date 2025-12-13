@@ -7,7 +7,7 @@
  * Git utilities for PDK
  */
 import * as execa from 'execa';
-import type { CommitAuthor } from '../types';
+import type { CommitAuthor } from '../types.js';
 
 /**
  * Pushes changes to remote

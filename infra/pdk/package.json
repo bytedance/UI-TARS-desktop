@@ -2,6 +2,7 @@
   "name": "pnpm-dev-kit",
   "description": "PDK (pnpm dev kit), an efficient pnpm workspace development and publishing tool",
   "version": "0.0.4",
+  "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -14,7 +15,7 @@
     "bin"
   ],
   "bin": {
-    "pdk": "bin/cli.js"
+    "pdk": "bin/cli.cjs"
   },
   "scripts": {
     "dev": "rslib build --watch",
@@ -23,17 +24,16 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@tarko/config-loader": "0.3.0",
     "@tarko/model-provider": "0.3.0",
     "boxen": "4",
-    "cac": "^6.5.10",
-    "chalk": "2.4.1",
+    "cac": "6.7.14",
+    "chalk": "5.6.2",
     "chokidar": "3.4.0",
-    "execa": "9.6.0",
+    "execa": "9.6.1",
     "fast-glob": "^3.3.2",
-    "fs-extra": "^11.1.1",
-    "inquirer": "^8.2.5",
+    "@inquirer/prompts": "8.0.2",
     "js-yaml": "^4.1.0",
+    "jiti": "2.4.2",
     "semver": "^7.5.4",
     "string-width": "^4.2.0",
     "text-table": "^0.2.0",
@@ -42,7 +42,6 @@
   "devDependencies": {
     "@rslib/core": "0.15.1",
     "@types/fs-extra": "11.0.2",
-    "@types/inquirer": "^8.2.5",
     "@types/js-yaml": "^4.0.5",
     "@types/node": "22.15.30",
     "@types/semver": "^7.5.0",

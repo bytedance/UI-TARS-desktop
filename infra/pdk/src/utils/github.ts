@@ -7,8 +7,8 @@
  * GitHub utilities for creating releases
  */
 import { execa } from 'execa';
-import { logger } from './logger';
-import { shouldIncludeCommitByScope } from './commit';
+import { logger } from './logger.js';
+import { shouldIncludeCommitByScope } from './commit.js';
 
 // Username mapping for commit authors to correct GitHub usernames
 const USERNAME_MAP: Record<string, string> = {

@@ -7,11 +7,10 @@
  * Interactive confirmation utilities
  */
 
-import inquirer from 'inquirer';
+import { rawlist } from '@inquirer/prompts';
 import chalk from 'chalk';
-
-import { logger } from './logger';
-import type { WorkspacePackage } from '../types';
+import { logger } from './logger.js';
+import type { WorkspacePackage } from '../types.js';
 
 /**
  * Confirms release version and tag
@@ -20,14 +19,10 @@ export async function confirmRelease(
   version: string,
   tag: string,
 ): Promise<boolean> {
-  const { yes } = await inquirer.prompt([
-    {
-      name: 'yes',
-      message: `Confirm releasing ${version} (${tag})?`,
-      type: 'list',
-      choices: ['N', 'Y'],
-    },
-  ]);
+  const yes = await rawlist({
+    message: `Confirm releasing ${version} (${tag})?`,
+    choices: ['N', 'Y'],
+  });
 
   if (yes === 'N') {
     logger.info('Release cancelled.');
@@ -54,14 +49,10 @@ export async function confirmPackagesToPublish(
     return true; // Skip confirmation in canary mode
   }
 
-  const { confirmPublish } = await inquirer.prompt([
-    {
-      name: 'confirmPublish',
-      message: 'Are these the correct packages to publish?',
-      type: 'list',
-      choices: ['Y', 'N'],
-    },
-  ]);
+  const confirmPublish = await rawlist({
+    message: 'Are these the correct packages to publish?',
+    choices: ['Y', 'N'],
+  });
 
   if (confirmPublish === 'N') {
     logger.info('Publication cancelled.');
@@ -82,14 +73,10 @@ export async function confirmTagPush(
     return true; // Auto-push in canary mode
   }
 
-  const { pushToRemote } = await inquirer.prompt([
-    {
-      name: 'pushToRemote',
-      message: `Push tag ${tagName} to remote repository?`,
-      type: 'list',
-      choices: ['Yes', 'No'],
-    },
-  ]);
+  const pushToRemote = await rawlist({
+    message: `Push tag ${tagName} to remote repository?`,
+    choices: ['Yes', 'No'],
+  });
 
   return pushToRemote === 'Yes';
 }
