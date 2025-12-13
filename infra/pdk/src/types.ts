@@ -4,11 +4,11 @@
  */
 
 /**
- * Type definitions for PDK (Package Development Kit)
+ * Type definitions for PDK (PNPM Dev Kit)
  * 
  * USAGE PATTERNS:
  * 
- * CLI:          ptk release --changelog --use-ai --dry-run
+ * CLI:          pdk release --changelog --use-ai --dry-run
  * Node.js API:  release({ changelog: true, useAi: true, dryRun: true })
  * Config API:  { changelog: true, useAi: true, dryRun: true }
  * 
@@ -427,7 +427,7 @@ export interface ChangelogSection {
  * mapping, or conversion between different usage patterns.
  * 
  * ISOMORPHIC GUARANTEE:
- * - CLI: ptk release --changelog --use-ai --dry-run
+ * - CLI: pdk release --changelog --use-ai --dry-run
  * - Node.js: release({ changelog: true, useAi: true, dryRun: true })
  * - Config: { changelog: true, useAi: true, dryRun: true })
  * 
