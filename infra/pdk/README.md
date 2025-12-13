@@ -115,78 +115,66 @@ import { defineConfig } from 'pnpm-dev-kit';
 
 export default defineConfig({
   // Common options shared across all commands
-  common: {
-    tagPrefix: 'v',
-    dryRun: false,
-    runInBand: false,
-    ignoreScripts: false,
-  },
-
+  tagPrefix: 'v',
+  dryRun: false,
+  runInBand: false,
+  ignoreScripts: false,
+  
   // AI-related options for changelog generation
-  ai: {
-    useAi: true,
-    model: 'gpt-4o',
-    provider: 'openai',
-    // secretlint-disable-next-line @secretlint/secretlint-rule-pattern
-    apiKey: process.env.OPENAI_API_KEY,
-  },
-
+  useAi: true,
+  model: 'gpt-4o',
+  provider: 'openai',
+  // secretlint-disable-next-line @secretlint/secretlint-rule-pattern
+  apiKey: process.env.OPENAI_API_KEY,
+  
   // Filter options for changelog generation
-  filter: {
-    filterTypes: ['feat', 'fix', 'perf'],
-    filterScopes: ['core', 'ui', 'api'],
-  },
-
-  // Development mode configuration
-  dev: {
-    exclude: ['@scope/package-to-exclude'],
-    packages: ['@scope/package-to-start'],
-  },
-
-  // Release command configuration
-  release: {
-    changelog: true,
-    pushTag: true,
-    createGithubRelease: true,
-    autoCreateReleaseBranch: false,
-  },
-
-  // Changelog command configuration
-  changelog: {
-    beautify: true,
-    commit: true,
-    gitPush: false,
-    attachAuthor: true,
-  },
+  filterTypes: ['feat', 'fix', 'perf'],
+  filterScopes: ['core', 'ui', 'api'],
+  
+  // Development mode configuration (dev command only)
+  exclude: ['@scope/package-to-exclude'],
+  packages: ['@scope/package-to-start'],
+  
+  // Release command configuration (release command only)
+  changelog: true,
+  pushTag: true,
+  createGithubRelease: true,
+  autoCreateReleaseBranch: false,
+  
+  // Changelog command configuration (changelog command only)
+  beautify: true,
+  commit: true,
+  gitPush: false,
+  attachAuthor: true,
 });
 ```
 
 ### Configuration Options
 
-**Common Options** (`common`):
+**Common Options** (shared across all commands):
 - `cwd`: Working directory (default: `process.cwd()`)
 - `dryRun`: Preview mode without making changes (default: `false`)
 - `runInBand`: Publish packages in series (default: `false`)
 - `ignoreScripts`: Skip npm scripts (default: `false`)
 - `tagPrefix`: Git tag prefix (default: `'v'`)
 
-**AI Options** (`ai`):
+**AI Options** (for changelog generation):
 - `useAi`: Enable AI-powered changelog (default: `false`)
 - `model`: LLM model (default: `'gpt-4o'`)
 - `provider`: LLM provider (default: `'openai'`)
 - `apiKey`: API key for LLM service
 - `baseURL`: Custom base URL for LLM API
 
-**Filter Options** (`filter`):
+**Filter Options** (for changelog generation):
 - `filterTypes`: Commit types to include in changelog (default: `['feat', 'fix']`)
 - `filterScopes`: Scopes to include in changelog (default: `[]`)
 
 **Command-Specific Options**:
-- `dev`: Development mode options (`exclude`, `packages`)
-- `release`: Release options (`changelog`, `pushTag`, `createGithubRelease`, `autoCreateReleaseBranch`, `build`, `canary`)
-- `changelog`: Changelog options (`beautify`, `commit`, `gitPush`, `attachAuthor`, `authorNameType`)
-- `patch`: Patch options (`runInBand`, `ignoreScripts`)
-- `githubRelease`: GitHub release options (`dryRun`)
+- `exclude`, `packages`: Development mode (dev command only)
+- `changelog`, `pushTag`, `createGithubRelease`, `autoCreateReleaseBranch`, `build`, `canary`: Release options (release command only)
+- `beautify`, `commit`, `gitPush`, `attachAuthor`, `authorNameType`: Changelog options (changelog command only)
+- `tag`: Patch options (patch command only)
+- `version`: Version options (changelog, patch, github-release commands)
 
 ### Priority Order
 
@@ -206,9 +194,9 @@ import { loadPDKConfig, dev, release } from 'pnpm-dev-kit';
 // Load configuration
 const config = await loadPDKConfig({ cwd: './my-project' });
 
-// Use configuration with commands
-await dev(config.resolvedCommon);
-await release({ ...config.resolvedCommon, ...config.release });
+// Use configuration with commands (CLI, Node.js API, and Config API are isomorphic)
+await dev(config.resolved);
+await release(config.resolved);
 ```
 
 **package.json Scripts:**
