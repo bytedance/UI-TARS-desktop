@@ -25,9 +25,12 @@ async function wrapCommand(
   try {
     // Load configuration
     const config = await loadPDKConfig({ cwd: cliOptions.cwd as string });
+    console.log('config', config);
+    console.log('cliOptions', cliOptions);
 
     // Merge CLI options with configuration
     const mergedOptions = mergeOptions(cliOptions, config);
+    console.log('mergedOptions', mergedOptions);
 
     await command(mergedOptions);
   } catch (err) {
