@@ -18,11 +18,4 @@ export function shouldUpdatePanelContent(get: Getter, sessionId: string): boolea
   return true;
 }
 
-/**
- * Helper function to determine if processing state should be updated for a session
- * Always allow processing state updates for the session that owns the event
- */
-export function shouldUpdateProcessingState(sessionId: string): boolean {
-  // Processing state is now session-isolated, so we always update for the event's session
-  return Boolean(sessionId);
-}
+// Removed shouldUpdateProcessingState - processing state is now directly managed per session

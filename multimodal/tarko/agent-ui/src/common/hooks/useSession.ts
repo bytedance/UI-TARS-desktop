@@ -15,7 +15,6 @@ import {
   deleteSessionAction,
   sendMessageAction,
   abortQueryAction,
-  checkSessionStatusAction,
 } from '../state/actions/sessionActions';
 import {
   initConnectionMonitoringAction,
@@ -59,29 +58,7 @@ export function useSession() {
   const abortQuery = useSetAtom(abortQueryAction);
   const initConnectionMonitoring = useSetAtom(initConnectionMonitoringAction);
   const checkServerStatus = useSetAtom(checkConnectionStatusAction);
-  const checkSessionStatus = useSetAtom(checkSessionStatusAction);
-
-  const statusCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    if (!activeSessionId || !connectionStatus.connected || isReplayMode) return;
-
-    if (statusCheckTimeoutRef.current) {
-      clearTimeout(statusCheckTimeoutRef.current);
-    }
-
-    statusCheckTimeoutRef.current = setTimeout(() => {
-      if (activeSessionId && connectionStatus.connected && !isReplayMode) {
-        checkSessionStatus(activeSessionId);
-      }
-    }, 200);
-
-    return () => {
-      if (statusCheckTimeoutRef.current) {
-        clearTimeout(statusCheckTimeoutRef.current);
-      }
-    };
-  }, [activeSessionId, connectionStatus.connected, checkSessionStatus, isReplayMode]);
+  // Removed polling mechanism - now fully relies on SSE events for real-time updates
 
   const sessionState = useMemo(
     () => ({
@@ -113,7 +90,7 @@ export function useSession() {
       initConnectionMonitoring,
       checkServerStatus,
 
-      checkSessionStatus,
+
     }),
     [
       sessions,
@@ -138,7 +115,6 @@ export function useSession() {
       setActivePanelContent,
       initConnectionMonitoring,
       checkServerStatus,
-      checkSessionStatus,
     ],
   );
 
