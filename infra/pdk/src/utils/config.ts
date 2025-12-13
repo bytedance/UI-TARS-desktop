@@ -150,7 +150,6 @@ function resolveConfig(config: PDKConfig, cwd: string): LoadedConfig {
 export function mergeOptions<T extends Record<string, any>>(
   cliOptions: T,
   config: LoadedConfig,
-  _commandType: 'dev' | 'release' | 'patch' | 'changelog' | 'githubRelease',
 ): T {
   // Simple spread merge with clear precedence:
   // 1. Start with resolved config (includes defaults)
