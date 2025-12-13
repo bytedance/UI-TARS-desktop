@@ -53,19 +53,11 @@ export interface CommonOptions {
   runInBand?: boolean;
   ignoreScripts?: boolean;
   tagPrefix?: string;
-}
-
-// AI-related options
-export interface AIOptions {
   useAi?: boolean;
   model?: string;
   apiKey?: string;
   baseURL?: string;
   provider?: string;
-}
-
-// Filter options for changelog
-export interface FilterOptions {
   filterScopes?: string[];
   filterTypes?: string[];
 }
@@ -77,7 +69,7 @@ export interface DevOptions extends CommonOptions {
 }
 
 // Release command options
-export interface ReleaseOptions extends CommonOptions, AIOptions, FilterOptions {
+export interface ReleaseOptions extends CommonOptions {
   changelog?: boolean;
   build?: boolean | string;
   pushTag?: boolean;
@@ -93,7 +85,7 @@ export interface PatchOptions extends CommonOptions {
 }
 
 // Changelog command options
-export interface ChangelogOptions extends CommonOptions, AIOptions, FilterOptions {
+export interface ChangelogOptions extends CommonOptions {
   version?: string;
   beautify?: boolean;
   commit?: boolean;
@@ -122,48 +114,45 @@ export interface GitHubReleaseOptions extends CommonOptions {
 
 /**
  * PDK Configuration interface
- * Common options are at the top level, command-specific options are namespaced
+ * CLI, Node.js API, and Config API are completely isomorphic
  */
 export interface PDKConfig {
-  /**
-   * Common options shared across all commands
-   */
-  common?: Partial<CommonOptions>;
+  // Common options (shared across all commands)
+  cwd?: string;
+  dryRun?: boolean;
+  runInBand?: boolean;
+  ignoreScripts?: boolean;
+  tagPrefix?: string;
+  useAi?: boolean;
+  model?: string;
+  apiKey?: string;
+  baseURL?: string;
+  provider?: string;
+  filterScopes?: string[];
+  filterTypes?: string[];
   
-  /**
-   * AI-related options
-   */
-  ai?: Partial<AIOptions>;
+  // Dev command only options
+  exclude?: string[];
+  packages?: string[];
   
-  /**
-   * Filter options for changelog generation
-   */
-  filter?: Partial<FilterOptions>;
+  // Release command only options
+  changelog?: boolean;
+  build?: boolean | string;
+  pushTag?: boolean;
+  canary?: boolean;
+  createGithubRelease?: boolean;
+  autoCreateReleaseBranch?: boolean;
   
-  /**
-   * Development configuration
-   */
-  dev?: Partial<Pick<DevOptions, 'exclude' | 'packages'>>;
+  // Changelog command only options
+  version?: string;
+  beautify?: boolean;
+  commit?: boolean;
+  gitPush?: boolean;
+  attachAuthor?: boolean;
+  authorNameType?: 'name' | 'email';
   
-  /**
-   * Release configuration
-   */
-  release?: Partial<Pick<ReleaseOptions, 'changelog' | 'build' | 'pushTag' | 'canary' | 'createGithubRelease' | 'autoCreateReleaseBranch'>>;
-  
-  /**
-   * Changelog configuration
-   */
-  changelog?: Partial<Pick<ChangelogOptions, 'beautify' | 'commit' | 'gitPush' | 'attachAuthor' | 'authorNameType'>>;
-  
-  /**
-   * Patch configuration
-   */
-  patch?: Partial<PatchOptions>;
-  
-  /**
-   * GitHub release configuration
-   */
-  githubRelease?: Partial<GitHubReleaseOptions>;
+  // Patch command only options
+  tag?: string;
 }
 
 /**
@@ -171,17 +160,7 @@ export interface PDKConfig {
  */
 export interface LoadedConfig extends PDKConfig {
   /**
-   * The resolved common options
+   * The resolved configuration with defaults applied
    */
-  resolvedCommon: CommonOptions;
-  
-  /**
-   * The resolved AI options
-   */
-  resolvedAi: AIOptions;
-  
-  /**
-   * The resolved filter options
-   */
-  resolvedFilter: FilterOptions;
+  resolved: PDKConfig;
 }
