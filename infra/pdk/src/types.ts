@@ -6,13 +6,10 @@
 /**
  * Type definitions for PDK (PNPM Dev Kit)
  * 
- * USAGE PATTERNS:
- * 
- * CLI:          pdk release --changelog --use-ai --dry-run
- * Node.js API:  release({ changelog: true, useAi: true, dryRun: true })
- * Config API:  { changelog: true, useAi: true, dryRun: true }
- * 
- * All three use identical option names and structures.
+ * CLI, Node.js API, and Config API are completely isomorphic:
+ * - CLI: pdk release --changelog --use-ai --dry-run
+ * - Node.js: release({ changelog: true, useAi: true, dryRun: true })
+ * - Config: { changelog: true, useAi: true, dryRun: true }
  */
 
 // =============================================================================
@@ -20,11 +17,7 @@
 // =============================================================================
 
 /**
- * Minimal package.json interface containing only the fields PDK needs
- * 
- * This interface is intentionally minimal to avoid type conflicts with
- * the many possible extensions of package.json. We only care about the
- * fields that are essential for workspace management and publishing.
+ * Minimal package.json interface with only essential fields for PDK
  */
 export interface PackageJson {
   /**
@@ -66,10 +59,7 @@ export interface PackageJson {
 }
 
 /**
- * Represents a package within a workspace context
- * 
- * This type encapsulates everything PDK needs to know about an individual
- * package during release operations, including its location and metadata.
+ * Package information within a workspace
  */
 export interface WorkspacePackage {
   /**
@@ -96,9 +86,6 @@ export interface WorkspacePackage {
 
 /**
  * Workspace configuration and metadata
- * 
- * Provides context for the entire monorepo, including patterns for
- * package discovery and root package information for coordination.
  */
 export interface WorkspaceConfig {
   /**
@@ -117,9 +104,6 @@ export interface WorkspaceConfig {
 
 /**
  * Package with remote version information from registry
- * 
- * Used during publishing to determine if a package version already exists
- * in the remote registry, preventing duplicate publishes.
  */
 export interface PackageWithRemoteInfo extends WorkspacePackage {
   /**
@@ -301,10 +285,7 @@ export interface GitHubReleaseSpecificOptions {
 // =============================================================================
 
 /**
- * Common options available across ALL commands
- * 
- * This interface combines all option groups that are commonly used
- * across multiple commands, providing a comprehensive base for all operations.
+ * Common options available across all commands
  */
 export interface CommonOptions extends 
   CoreOptions, 
@@ -312,60 +293,27 @@ export interface CommonOptions extends
   ChangelogFilterOptions {}
 
 /**
- * Development mode command options
- * 
- * The dev command focuses on selective package development in monorepos.
- * It's designed for rapid iteration on specific packages while maintaining
- * the full workspace context.
- * 
- * PRIMARY USE CASE: Start development servers for specific packages
- * while excluding others to save resources and focus development effort.
+ * Development mode command options for selective package development
  */
 export interface DevOptions extends CommonOptions, DevSpecificOptions {}
 
 /**
  * Release command options for version management and publishing
- * 
- * The release command orchestrates the complete release workflow:
- * version updates, changelog generation, git operations, and package publishing.
- * It's the most complex command, handling coordination across the entire workspace.
- * 
- * DESIGN PHILOSOPHY: Release is atomic and comprehensive. Either the entire
- * release succeeds or it fails cleanly with rollback capabilities.
  */
 export interface ReleaseOptions extends CommonOptions, ReleaseSpecificOptions {}
 
 /**
  * Patch command options for fixing failed releases
- * 
- * The patch command is specifically designed to recover from release failures.
- * It provides targeted fixes without requiring a full re-release.
- * 
- * PRIMARY USE CASE: Fix specific packages that failed to publish during
- * a release without re-running the entire release process.
  */
 export interface PatchOptions extends CommonOptions, PatchSpecificOptions {}
 
 /**
  * Changelog generation command options
- * 
- * The changelog command focuses specifically on generating and managing
- * changelog content. It can be used independently or as part of the release process.
- * 
- * DESIGN NOTE: Changelog generation is deliberately decoupled from release
- * to allow flexible usage patterns. Users can generate changelogs for any
- * version range, not just releases.
  */
 export interface ChangelogOptions extends CommonOptions, ChangelogSpecificOptions {}
 
 /**
  * GitHub release command options
- * 
- * The github-release command creates GitHub releases from existing changelogs.
- * It's designed to integrate with the release workflow but can be used independently.
- * 
- * PRIMARY USE CASE: Create GitHub releases with proper changelog content
- * and version tagging after a successful release process.
  */
 export interface GitHubReleaseOptions extends CommonOptions, GitHubReleaseSpecificOptions {}
 
@@ -375,9 +323,6 @@ export interface GitHubReleaseOptions extends CommonOptions, GitHubReleaseSpecif
 
 /**
  * Commit author information extracted from git history
- * 
- * Used for attributing changes in changelogs and release notes.
- * The emailName field provides a display-friendly version of the email.
  */
 export interface CommitAuthor {
   /**
@@ -396,9 +341,6 @@ export interface CommitAuthor {
 
 /**
  * Changelog section grouping commits by type
- * 
- * Represents a logical section in the generated changelog,
- * such as "Features", "Bug Fixes", or "Performance Improvements".
  */
 export interface ChangelogSection {
   /**
@@ -420,113 +362,13 @@ export interface ChangelogSection {
 // =============================================================================
 
 /**
- * PDK Configuration interface - THE SINGLE SOURCE OF TRUTH
+ * PDK Configuration interface
  * 
- * CRITICAL DESIGN PRINCIPLE: This interface defines the EXACT structure
- * used by ALL APIs (CLI, Node.js, Config). There is NO transformation,
- * mapping, or conversion between different usage patterns.
+ * CLI, Node.js API, and Config API are completely isomorphic.
+ * All three use identical option names and structures.
  * 
- * ISOMORPHIC GUARANTEE:
- * - CLI: pdk release --changelog --use-ai --dry-run
- * - Node.js: release({ changelog: true, useAi: true, dryRun: true })
- * - Config: { changelog: true, useAi: true, dryRun: true })
- * 
- * All three use IDENTICAL option names and structures. No more
- * tagPrefix vs common.tagPrefix confusion.
- * 
- * =============================================================================
- * CONFIGURATION DESIGN PHILOSOPHY
- * =============================================================================
- * 
- * 1. COMPOSITION OVER REDUNDANCY: Configuration is composed from
- *    focused, reusable option groups rather than duplicating fields.
- *    This eliminates redundancy while maintaining the flat structure.
- * 
- * 2. FLAT OVER NESTED: Despite internal composition, the resulting
- *    configuration remains flat for natural reading and writing.
- * 
- * 3. DOCUMENTED SCOPE: Options are documented by their primary command
- *    usage but can be used anywhere they make sense. The type system
- *    provides guidance without artificial restrictions.
- * 
- * 4. SENSIBLE DEFAULTS: All options have reasonable defaults, making
- *    the kit work out-of-the-box while remaining highly configurable.
- * 
- * 5. PROGRESSIVE DISCOVERY: Common options are always available,
- *    command-specific options appear where relevant. Users can start
- *    simple and gradually discover advanced options.
- * 
- * =============================================================================
- * CONFIGURATION VS CLI: DESIGN GUIDELINES
- * =============================================================================
- * 
- * 🎯 CONFIG FILE PREFERENCES (Ideal for pdk.config.*):
- * 
- * 📋 PROJECT-LEVEL SETTINGS:
- * - tagPrefix: 'v' | 'release-' | Project-specific tag conventions
- * - filterTypes: ['feat', 'fix', 'perf'] | Project commit type standards
- * - filterScopes: ['core', 'ui', 'api'] | Project scope organization
- * - runInBand: true | false | Resource constraints for CI/CD
- * - ignoreScripts: true | false | Build script preferences
- * 
- * 🤖 AI CONFIGURATION:
- * - useAi: true | false | Team's changelog generation preference
- * - model: 'gpt-4o' | 'claude-3' | Team's preferred LLM
- * - provider: 'openai' | 'anthropic' | Team's AI provider
- * - baseURL: Custom endpoints | Enterprise AI setups
- * 
- * 🏗️ WORKFLOW DEFAULTS:
- * - changelog: true | false | Always generate changelog on release
- * - pushTag: true | false | Auto-push git tags preference
- * - createGithubRelease: true | false | GitHub integration preference
- * - autoCreateReleaseBranch: true | false | Release workflow preference
- * 
- * ⚠️ CLI PREFERENCES (Better suited for command-line):
- * 
- * 🔧 ENVIRONMENT-SPECIFIC OPTIONS:
- * - dryRun: true | false | Preview mode (temporary testing)
- * - cwd: '/path/to/project' | Different working directories
- * - version: '1.2.3' | Specific version overrides
- * 
- * 🎯 ONE-TIME OPERATIONS:
- * - exclude: ['@scope/pkg'] | Temporary package exclusions
- * - packages: ['@scope/pkg'] | Specific package selection
- * - build: 'custom:build' | One-time build script overrides
- * - canary: true | false | Canary release decisions
- * 
- * 🚨 SENSITIVE DATA:
- * - apiKey: 'sk-...' | API keys (use environment variables instead)
- * 
- * =============================================================================
- * RATIONALE
- * =============================================================================
- * 
- * 🏢 CONFIG FILE ADVANTAGES:
- * ✅ Team consistency - Everyone uses same project settings
- * ✅ Documentation - Config serves as living documentation
- * ✅ Reproducibility - CI/CD uses exact same configuration
- * ✅ Discoverability - New team members understand project conventions
- * ✅ Maintenance - Single place to update project-wide settings
- * 
- * ⚡ CLI ADVANTAGES:
- * ✅ Flexibility - Override config for specific situations
- * ✅ Security - Avoid committing sensitive data
- * ✅ Experimentation - Try different options without config changes
- * ✅ Automation - Script different workflows dynamically
- * ✅ Context-aware - Adapt to different environments (dev/staging/prod)
- * 
- * 🚫 CONFIG FILE ANTI-PATTERNS:
- * ❌ Sensitive credentials in version control
- * ❌ Environment-specific values (use env vars instead)
- * ❌ Temporary experimental settings
- * ❌ Overly restrictive defaults that hinder flexibility
- * 
- * 🎯 BEST PRACTICES:
- * ✅ Use config file for project conventions and team preferences
- * ✅ Use CLI for environment-specific overrides and temporary changes
- * ✅ Keep sensitive data in environment variables
- * ✅ Document configuration decisions in team wiki
- * ✅ Review config changes in pull requests
+ * Config file preferences: project conventions, team settings, AI configuration
+ * CLI preferences: environment-specific options, one-time operations, sensitive data
  */
 export interface PDKConfig extends 
   CoreOptions, 
@@ -540,14 +382,6 @@ export interface PDKConfig extends
 
 /**
  * Loaded configuration with resolved defaults
- * 
- * This type represents the result of loading and processing a PDK configuration.
- * The 'resolved' field contains the final configuration with all defaults applied,
- * while the base fields preserve the original user configuration for reference.
- * 
- * DESIGN NOTE: The separation between original config and resolved config allows
- * for debugging and introspection while providing a clean, fully-populated
- * configuration object for actual use.
  */
 export interface LoadedConfig extends PDKConfig {
   /**

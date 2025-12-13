@@ -5,7 +5,6 @@
 
 /**
  * Configuration loader for PDK
- * Uses @tarko/config-loader to load and validate configuration
  */
 
 import { loadConfig } from '@tarko/config-loader';
