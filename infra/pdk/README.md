@@ -176,6 +176,76 @@ export default defineConfig({
 - `tag`: Patch options (patch command only)
 - `version`: Version options (changelog, patch, github-release commands)
 
+### Configuration Philosophy
+
+#### 🎯 What to Put in Config File
+
+**Project-Level Settings:**
+- `tagPrefix`: Your project's tag convention (`'v'`, `'release-'`)
+- `filterTypes`: Standard commit types for your project (`['feat', 'fix', 'perf']`)
+- `filterScopes`: Your project's scope organization (`['core', 'ui', 'api']`)
+- `runInBand`: Resource constraints for your CI/CD environment
+- `ignoreScripts`: Your team's build script preferences
+
+**AI Configuration:**
+- `useAi`: Team's preference for AI-powered changelogs
+- `model`: Team's preferred LLM (`'gpt-4o'`, `'claude-3'`)
+- `provider`: Your organization's AI provider (`'openai'`, `'anthropic'`)
+- `baseURL`: Custom endpoints for enterprise AI setups
+
+**Workflow Defaults:**
+- `changelog`: Always generate changelog on releases
+- `pushTag`: Auto-push git tags to remote
+- `createGithubRelease`: Automatic GitHub release creation
+- `autoCreateReleaseBranch`: Release workflow preferences
+
+#### ⚡ What to Use CLI For
+
+**Environment-Specific Options:**
+- `dryRun`: Preview mode for testing (`--dry-run`)
+- `cwd`: Different working directories (`--cwd /path/to/project`)
+- `version`: Specific version overrides (`--version 1.2.3`)
+
+**One-Time Operations:**
+- `exclude`: Temporary package exclusions (`--exclude @scope/pkg`)
+- `packages`: Specific package selection (`--packages @scope/pkg`)
+- `build`: One-time build script overrides (`--build custom:build`)
+- `canary`: Canary release decisions (`--canary`)
+
+**Sensitive Data:**
+- `apiKey`: Never commit API keys, use environment variables
+
+#### 🏢 Why This Design?
+
+**Config File Benefits:**
+✅ **Team Consistency** - Everyone uses the same project settings
+✅ **Living Documentation** - Config serves as project convention documentation
+✅ **CI/CD Reproducibility** - Automated builds use exact same configuration
+✅ **Team Onboarding** - New members understand project conventions instantly
+✅ **Maintenance** - Single place to update project-wide settings
+
+**CLI Benefits:**
+✅ **Flexibility** - Override config for specific situations
+✅ **Security** - Avoid committing sensitive data to version control
+✅ **Experimentation** - Try different options without config file changes
+✅ **Automation** - Script different workflows dynamically
+✅ **Environment Adaptation** - Different settings for dev/staging/prod
+
+#### 🚫 Anti-Patterns to Avoid
+
+**In Config Files:**
+❌ Sensitive credentials or API keys
+❌ Environment-specific values (use env vars instead)
+❌ Temporary experimental settings
+❌ Overly restrictive defaults that hinder flexibility
+
+**Best Practices:**
+✅ Use config file for project conventions and team preferences
+✅ Use CLI for environment-specific overrides and temporary changes
+✅ Keep sensitive data in environment variables
+✅ Document configuration decisions in team wiki
+✅ Review config changes in pull requests
+
 ### Priority Order
 
 Configuration is applied in the following priority order (highest to lowest):

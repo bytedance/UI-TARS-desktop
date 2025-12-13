@@ -434,7 +434,9 @@ export interface ChangelogSection {
  * All three use IDENTICAL option names and structures. No more
  * tagPrefix vs common.tagPrefix confusion.
  * 
- * CONFIGURATION PHILOSOPHY:
+ * =============================================================================
+ * CONFIGURATION DESIGN PHILOSOPHY
+ * =============================================================================
  * 
  * 1. COMPOSITION OVER REDUNDANCY: Configuration is composed from
  *    focused, reusable option groups rather than duplicating fields.
@@ -453,6 +455,78 @@ export interface ChangelogSection {
  * 5. PROGRESSIVE DISCOVERY: Common options are always available,
  *    command-specific options appear where relevant. Users can start
  *    simple and gradually discover advanced options.
+ * 
+ * =============================================================================
+ * CONFIGURATION VS CLI: DESIGN GUIDELINES
+ * =============================================================================
+ * 
+ * 🎯 CONFIG FILE PREFERENCES (Ideal for pdk.config.*):
+ * 
+ * 📋 PROJECT-LEVEL SETTINGS:
+ * - tagPrefix: 'v' | 'release-' | Project-specific tag conventions
+ * - filterTypes: ['feat', 'fix', 'perf'] | Project commit type standards
+ * - filterScopes: ['core', 'ui', 'api'] | Project scope organization
+ * - runInBand: true | false | Resource constraints for CI/CD
+ * - ignoreScripts: true | false | Build script preferences
+ * 
+ * 🤖 AI CONFIGURATION:
+ * - useAi: true | false | Team's changelog generation preference
+ * - model: 'gpt-4o' | 'claude-3' | Team's preferred LLM
+ * - provider: 'openai' | 'anthropic' | Team's AI provider
+ * - baseURL: Custom endpoints | Enterprise AI setups
+ * 
+ * 🏗️ WORKFLOW DEFAULTS:
+ * - changelog: true | false | Always generate changelog on release
+ * - pushTag: true | false | Auto-push git tags preference
+ * - createGithubRelease: true | false | GitHub integration preference
+ * - autoCreateReleaseBranch: true | false | Release workflow preference
+ * 
+ * ⚠️ CLI PREFERENCES (Better suited for command-line):
+ * 
+ * 🔧 ENVIRONMENT-SPECIFIC OPTIONS:
+ * - dryRun: true | false | Preview mode (temporary testing)
+ * - cwd: '/path/to/project' | Different working directories
+ * - version: '1.2.3' | Specific version overrides
+ * 
+ * 🎯 ONE-TIME OPERATIONS:
+ * - exclude: ['@scope/pkg'] | Temporary package exclusions
+ * - packages: ['@scope/pkg'] | Specific package selection
+ * - build: 'custom:build' | One-time build script overrides
+ * - canary: true | false | Canary release decisions
+ * 
+ * 🚨 SENSITIVE DATA:
+ * - apiKey: 'sk-...' | API keys (use environment variables instead)
+ * 
+ * =============================================================================
+ * RATIONALE
+ * =============================================================================
+ * 
+ * 🏢 CONFIG FILE ADVANTAGES:
+ * ✅ Team consistency - Everyone uses same project settings
+ * ✅ Documentation - Config serves as living documentation
+ * ✅ Reproducibility - CI/CD uses exact same configuration
+ * ✅ Discoverability - New team members understand project conventions
+ * ✅ Maintenance - Single place to update project-wide settings
+ * 
+ * ⚡ CLI ADVANTAGES:
+ * ✅ Flexibility - Override config for specific situations
+ * ✅ Security - Avoid committing sensitive data
+ * ✅ Experimentation - Try different options without config changes
+ * ✅ Automation - Script different workflows dynamically
+ * ✅ Context-aware - Adapt to different environments (dev/staging/prod)
+ * 
+ * 🚫 CONFIG FILE ANTI-PATTERNS:
+ * ❌ Sensitive credentials in version control
+ * ❌ Environment-specific values (use env vars instead)
+ * ❌ Temporary experimental settings
+ * ❌ Overly restrictive defaults that hinder flexibility
+ * 
+ * 🎯 BEST PRACTICES:
+ * ✅ Use config file for project conventions and team preferences
+ * ✅ Use CLI for environment-specific overrides and temporary changes
+ * ✅ Keep sensitive data in environment variables
+ * ✅ Document configuration decisions in team wiki
+ * ✅ Review config changes in pull requests
  */
 export interface PDKConfig extends 
   CoreOptions, 
