@@ -92,7 +92,6 @@ function resolveConfig(config: PDKConfig, cwd: string): LoadedConfig {
 export function mergeOptions<T extends Record<string, any>>(
   cliOptions: T,
   config: LoadedConfig,
-  _commandType: 'dev' | 'release' | 'patch' | 'changelog' | 'githubRelease',
 ): T {
   return {
     ...config.resolved,
