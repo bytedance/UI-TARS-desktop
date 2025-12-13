@@ -45,15 +45,15 @@ set(isProcessingAtom, status.isProcessing); // checkSessionStatus
 
 #### 2. **全局状态与会话隔离冲突**
 ```typescript
-// 单一全局状态
+// 单一全局状态 (与其他状态不一致)
 export const isProcessingAtom = atom<boolean>(false);
 
-// 但需要按会话处理
-if (shouldUpdateProcessingState(sessionId)) {
-  set(isProcessingAtom, true);
-}
+// 其他状态都是按会话隔离的
+export const messagesAtom = atom<Record<string, Message[]>>({});
+export const toolResultsAtom = atom<Record<string, ToolResult[]>>({});
+export const sessionPanelContentAtom = atom<Record<string, PanelContent | null>>({});
 ```
-当前实现是全局状态，但实际需要按会话隔离。
+只有 `isProcessingAtom` 是全局的，与其他按会话隔离的状态不一致。
 
 #### 3. **浏览器刷新场景处理不当**
 - 刷新后 SSE 连接断开，仅依赖轮询可能导致状态延迟
@@ -137,10 +137,10 @@ export const checkSessionStatusAction = atom(null, async (get, set, sessionId: s
 });
 ```
 
-### 🎯 方案三：按会话隔离状态
+### 🎯 方案二：统一状态架构 (按会话隔离)
 
 ```typescript
-// 替换全局状态为按会话隔离
+// 将 isProcessingAtom 改为按会话隔离，与其他状态保持一致
 export const sessionProcessingStatesAtom = atom<Record<string, boolean>>({});
 
 // 在 AgentRunHandler 中
@@ -149,24 +149,22 @@ set(sessionProcessingStatesAtom, (prev) => ({
   [sessionId]: true
 }));
 
-// 在组件中使用
-const isCurrentSessionProcessing = useAtomValue(
-  atom(
-    (get) => {
-      const activeSessionId = get(activeSessionIdAtom);
-      const states = get(sessionProcessingStatesAtom);
-      return activeSessionId ? states[activeSessionId] ?? false : false;
-    }
-  )
+// 在组件中使用 (与 activePanelContentAtom 模式一致)
+export const activeSessionProcessingAtom = atom(
+  (get) => {
+    const activeSessionId = get(activeSessionIdAtom);
+    const states = get(sessionProcessingStatesAtom);
+    return activeSessionId ? states[activeSessionId] ?? false : false;
+  }
 );
 ```
 
 ## 推荐方案
 
-**建议采用方案一 + 方案三的组合：**
+**建议采用方案一 + 方案二的组合：**
 
 1. **移除 `checkSessionStatusAction`**，完全依赖 SSE
-2. **实现按会话隔离的状态管理**
+2. **统一状态架构**：将 `isProcessingAtom` 改为按会话隔离
 3. **优化页面刷新时的状态恢复**
 4. **增强 SSE 重连机制**
 
@@ -178,6 +176,6 @@ const isCurrentSessionProcessing = useAtomValue(
 
 ## 实施优先级
 
-1. **高优先级**: 实现按会话状态隔离
+1. **高优先级**: 统一状态架构 - 将 `isProcessingAtom` 改为按会话隔离
 2. **中优先级**: 优化页面刷新状态恢复
 3. **低优先级**: 移除轮询机制（需要充分测试 SSE 稳定性）
