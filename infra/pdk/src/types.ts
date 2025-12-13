@@ -129,81 +129,67 @@ export interface PackageWithRemoteInfo extends WorkspacePackage {
 }
 
 // =============================================================================
-// COMMAND OPTION TYPES
+// OPTION GROUP TYPES (COMPOSABLE BUILDING BLOCKS)
 // =============================================================================
 
 /**
- * Base command interface providing common context
- * 
- * All commands inherit from this to ensure consistent working directory
- * handling and basic operational context.
+ * Core operational options used across all commands
  */
-export interface CommandOptions {
+export interface CoreOptions {
   /**
-   * Working directory for command execution
-   */
-  cwd?: string;
-}
-
-/**
- * Common options available across ALL commands
- * 
- * These options form the foundation of PDK's consistent API design.
- * They are available in every command and provide the core functionality
- * needed for monorepo management operations.
- * 
- * DESIGN NOTE: This interface represents the "intersection" of all command
- * capabilities - the options that make sense everywhere. Command-specific
- * options are added through interface extension rather than complex
- * inheritance hierarchies.
- */
-export interface CommonOptions {
-  /**
-   * Working directory (defaults to process.cwd())
+   * Working directory for all operations (default: process.cwd())
    */
   cwd?: string;
   /**
-   * Preview mode without making actual changes
+   * Preview mode without making actual changes (default: false)
    */
   dryRun?: boolean;
   /**
-   * Publish packages sequentially instead of in parallel
+   * Publish packages sequentially instead of in parallel (default: false)
    */
   runInBand?: boolean;
   /**
-   * Skip npm scripts during operations
+   * Skip npm scripts during operations (default: false)
    */
   ignoreScripts?: boolean;
   /**
-   * Prefix for git tags (e.g., 'v' for v1.0.0)
+   * Prefix for git tags like 'v' for v1.0.0 (default: 'v')
    */
   tagPrefix?: string;
-  
-  // AI-powered changelog generation options
+}
+
+/**
+ * AI-powered changelog generation options
+ */
+export interface AIOptions {
   /**
-   * Enable AI-powered changelog generation
+   * Enable AI-powered changelog generation (default: false)
    */
   useAi?: boolean;
   /**
-   * LLM model for AI changelog (default: gpt-4o)
+   * LLM model for AI changelog generation (default: 'gpt-4o')
    */
   model?: string;
   /**
-   * API key for LLM service
+   * API key for LLM service (can be set via environment)
    */
   apiKey?: string;
   /**
-   * Custom base URL for LLM API
+   * Custom base URL for LLM API (for custom endpoints)
    */
   baseURL?: string;
   /**
-   * LLM provider (default: openai)
+   * LLM provider (default: 'openai')
    */
   provider?: string;
-  
-  // Changelog filtering options
+}
+
+/**
+ * Changelog filtering and formatting options
+ */
+export interface ChangelogFilterOptions {
   /**
-   * Scopes to include in changelog (empty = all scopes)
+   * Scopes to include in changelog (empty array = include all)
    */
   filterScopes?: string[];
   /**
@@ -213,97 +199,53 @@ export interface CommonOptions {
 }
 
 /**
- * Development mode command options
- * 
- * The dev command focuses on selective package development in monorepos.
- * It's designed for rapid iteration on specific packages while maintaining
- * the full workspace context.
- * 
- * PRIMARY USE CASE: Start development servers for specific packages
- * while excluding others to save resources and focus development effort.
+ * Development mode specific options
  */
-export interface DevOptions extends CommonOptions {
+export interface DevSpecificOptions {
   /**
-   * Packages to explicitly exclude from development
+   * Packages to exclude from development startup
    */
   exclude?: string[];
   /**
-   * Packages to start by default (empty = start all)
+   * Packages to start by default (empty = start all packages)
    */
   packages?: string[];
 }
 
 /**
- * Release command options for version management and publishing
- * 
- * The release command orchestrates the complete release workflow:
- * version updates, changelog generation, git operations, and package publishing.
- * It's the most complex command, handling coordination across the entire workspace.
- * 
- * DESIGN PHILOSOPHY: Release is atomic and comprehensive. Either the entire
- * release succeeds or it fails cleanly with rollback capabilities.
+ * Release workflow specific options
  */
-export interface ReleaseOptions extends CommonOptions {
+export interface ReleaseSpecificOptions {
   /**
-   * Generate changelog as part of release process
+   * Generate changelog during release (default: true)
    */
   changelog?: boolean;
   /**
-   * Execute custom build script before publishing
+   * Execute build script before publishing (false = skip, string = custom script)
    */
   build?: boolean | string;
   /**
-   * Automatically push git tags to remote
+   * Automatically push git tags to remote (default: false)
    */
   pushTag?: boolean;
   /**
-   * Generate canary version without prompts
+   * Generate canary version without prompts (default: false)
    */
   canary?: boolean;
   /**
-   * Create GitHub release after successful release
+   * Create GitHub release after successful release (default: false)
    */
   createGithubRelease?: boolean;
   /**
-   * Automatically create release branch before release
+   * Automatically create release branch before release (default: false)
    */
   autoCreateReleaseBranch?: boolean;
 }
 
 /**
- * Patch command options for fixing failed releases
- * 
- * The patch command is specifically designed to recover from release failures.
- * It provides targeted fixes without requiring a full re-release.
- * 
- * PRIMARY USE CASE: Fix specific packages that failed to publish during
- * a release without re-running the entire release process.
+ * Patch operation specific options
  */
-export interface ReleaseOptions extends CommonOptions {
-  /** Generate changelog as part of release process */
-  changelog?: boolean;
-  /** Execute custom build script before publishing */
-  build?: boolean | string;
-  /** Automatically push git tags to remote */
-  pushTag?: boolean;
-  /** Generate canary version without prompts */
-  canary?: boolean;
-  /** Create GitHub release after successful release */
-  createGithubRelease?: boolean;
-  /** Automatically create release branch before release */
-  autoCreateReleaseBranch?: boolean;
-}
-
-/**
- * Patch command options for fixing failed releases
- * 
- * The patch command is specifically designed to recover from release failures.
- * It provides targeted fixes without requiring a full re-release.
- * 
- * PRIMARY USE CASE: Fix specific packages that failed to publish during
- * a release without re-running the entire release process.
- */
-export interface PatchOptions extends CommonOptions {
+export interface PatchSpecificOptions {
   /**
    * Specific version to patch (reads from package.json if not provided)
    */
@@ -315,6 +257,96 @@ export interface PatchOptions extends CommonOptions {
 }
 
 /**
+ * Changelog generation specific options
+ */
+export interface ChangelogSpecificOptions {
+  /**
+   * Target version for changelog generation
+   */
+  version?: string;
+  /**
+   * Format changelog with markdown enhancements (default: false)
+   */
+  beautify?: boolean;
+  /**
+   * Create git commit for generated changelog (default: false)
+   */
+  commit?: boolean;
+  /**
+   * Push changelog commit to remote (default: false)
+   */
+  gitPush?: boolean;
+  /**
+   * Include author information in changelog (default: false)
+   */
+  attachAuthor?: boolean;
+  /**
+   * Author name format: 'name' or 'email' (default: 'name')
+   */
+  authorNameType?: 'name' | 'email';
+}
+
+/**
+ * GitHub release specific options
+ */
+export interface GitHubReleaseSpecificOptions {
+  /**
+   * Version for GitHub release (reads from package.json if not provided)
+   */
+  version?: string;
+}
+
+// =============================================================================
+// COMMAND OPTION TYPES (COMPOSED FROM BUILDING BLOCKS)
+// =============================================================================
+
+/**
+ * Common options available across ALL commands
+ * 
+ * This interface combines all option groups that are commonly used
+ * across multiple commands, providing a comprehensive base for all operations.
+ */
+export interface CommonOptions extends 
+  CoreOptions, 
+  AIOptions, 
+  ChangelogFilterOptions {}
+
+/**
+ * Development mode command options
+ * 
+ * The dev command focuses on selective package development in monorepos.
+ * It's designed for rapid iteration on specific packages while maintaining
+ * the full workspace context.
+ * 
+ * PRIMARY USE CASE: Start development servers for specific packages
+ * while excluding others to save resources and focus development effort.
+ */
+export interface DevOptions extends CommonOptions, DevSpecificOptions {}
+
+/**
+ * Release command options for version management and publishing
+ * 
+ * The release command orchestrates the complete release workflow:
+ * version updates, changelog generation, git operations, and package publishing.
+ * It's the most complex command, handling coordination across the entire workspace.
+ * 
+ * DESIGN PHILOSOPHY: Release is atomic and comprehensive. Either the entire
+ * release succeeds or it fails cleanly with rollback capabilities.
+ */
+export interface ReleaseOptions extends CommonOptions, ReleaseSpecificOptions {}
+
+/**
+ * Patch command options for fixing failed releases
+ * 
+ * The patch command is specifically designed to recover from release failures.
+ * It provides targeted fixes without requiring a full re-release.
+ * 
+ * PRIMARY USE CASE: Fix specific packages that failed to publish during
+ * a release without re-running the entire release process.
+ */
+export interface PatchOptions extends CommonOptions, PatchSpecificOptions {}
+
+/**
  * Changelog generation command options
  * 
  * The changelog command focuses specifically on generating and managing
@@ -324,32 +356,7 @@ export interface PatchOptions extends CommonOptions {
  * to allow flexible usage patterns. Users can generate changelogs for any
  * version range, not just releases.
  */
-export interface ChangelogOptions extends CommonOptions {
-  /**
-   * Target version for changelog (reads from package.json if not provided)
-   */
-  version?: string;
-  /**
-   * Format changelog with markdown enhancements
-   */
-  beautify?: boolean;
-  /**
-   * Create git commit for generated changelog
-   */
-  commit?: boolean;
-  /**
-   * Push changelog commit to remote repository
-   */
-  gitPush?: boolean;
-  /**
-   * Include author information in changelog entries
-   */
-  attachAuthor?: boolean;
-  /**
-   * Format for author names in changelog
-   */
-  authorNameType?: 'name' | 'email';
-}
+export interface ChangelogOptions extends CommonOptions, ChangelogSpecificOptions {}
 
 /**
  * GitHub release command options
@@ -360,12 +367,7 @@ export interface ChangelogOptions extends CommonOptions {
  * PRIMARY USE CASE: Create GitHub releases with proper changelog content
  * and version tagging after a successful release process.
  */
-export interface GitHubReleaseOptions extends CommonOptions {
-  /**
-   * Version for GitHub release (reads from package.json if not provided)
-   */
-  version?: string;
-}
+export interface GitHubReleaseOptions extends CommonOptions, GitHubReleaseSpecificOptions {}
 
 // =============================================================================
 // CHANGELOG AND GIT TYPES
@@ -414,7 +416,7 @@ export interface ChangelogSection {
 }
 
 // =============================================================================
-// CONFIGURATION TYPES
+// CONFIGURATION TYPES (COMPREHENSIVE COMPOSITION)
 // =============================================================================
 
 /**
@@ -427,158 +429,40 @@ export interface ChangelogSection {
  * ISOMORPHIC GUARANTEE:
  * - CLI: ptk release --changelog --use-ai --dry-run
  * - Node.js: release({ changelog: true, useAi: true, dryRun: true })
- * - Config: { changelog: true, useAi: true, dryRun: true }
+ * - Config: { changelog: true, useAi: true, dryRun: true })
  * 
  * All three use IDENTICAL option names and structures. No more
  * tagPrefix vs common.tagPrefix confusion.
  * 
  * CONFIGURATION PHILOSOPHY:
  * 
- * 1. FLAT OVER NESTED: Configuration is intentionally flat rather than
- *    scoped by command. This makes it natural to read and write, and
- *    eliminates the need for complex scope resolution logic.
+ * 1. COMPOSITION OVER REDUNDANCY: Configuration is composed from
+ *    focused, reusable option groups rather than duplicating fields.
+ *    This eliminates redundancy while maintaining the flat structure.
  * 
- * 2. DOCUMENTED SCOPE: Options are documented by their primary command
+ * 2. FLAT OVER NESTED: Despite internal composition, the resulting
+ *    configuration remains flat for natural reading and writing.
+ * 
+ * 3. DOCUMENTED SCOPE: Options are documented by their primary command
  *    usage but can be used anywhere they make sense. The type system
  *    provides guidance without artificial restrictions.
  * 
- * 3. SENSIBLE DEFAULTS: All options have reasonable defaults, making
+ * 4. SENSIBLE DEFAULTS: All options have reasonable defaults, making
  *    the kit work out-of-the-box while remaining highly configurable.
  * 
- * 4. PROGRESSIVE DISCOVERY: Common options are always available,
+ * 5. PROGRESSIVE DISCOVERY: Common options are always available,
  *    command-specific options appear where relevant. Users can start
  *    simple and gradually discover advanced options.
  */
-export interface PDKConfig {
-  // =========================================================================
-  // COMMON OPTIONS (available in ALL commands)
-  // =========================================================================
-  
-  /**
-   * Working directory for all operations (default: process.cwd())
-   */
-  cwd?: string;
-  /**
-   * Preview mode without making actual changes (default: false)
-   */
-  dryRun?: boolean;
-  /**
-   * Publish packages sequentially instead of in parallel (default: false)
-   */
-  runInBand?: boolean;
-  /**
-   * Skip npm scripts during operations (default: false)
-   */
-  ignoreScripts?: boolean;
-  /**
-   * Prefix for git tags like 'v' for v1.0.0 (default: 'v')
-   */
-  tagPrefix?: string;
-  
-  // AI-powered changelog generation (used by release, changelog commands)
-  /**
-   * Enable AI-powered changelog generation (default: false)
-   */
-  useAi?: boolean;
-  /**
-   * LLM model for AI changelog generation (default: 'gpt-4o')
-   */
-  model?: string;
-  /**
-   * API key for LLM service (can be set via environment)
-   */
-  apiKey?: string;
-  /**
-   * Custom base URL for LLM API (for custom endpoints)
-   */
-  baseURL?: string;
-  /**
-   * LLM provider (default: 'openai')
-   */
-  provider?: string;
-  
-  // Changelog filtering (used by release, changelog commands)
-  /**
-   * Scopes to include in changelog (empty array = include all)
-   */
-  filterScopes?: string[];
-  /**
-   * Commit types to include in changelog (default: ['feat', 'fix'])
-   */
-  filterTypes?: string[];
-  
-  // =========================================================================
-  // COMMAND-SPECIFIC OPTIONS (documented by primary usage)
-  // =========================================================================
-  
-  // Development mode (dev command only)
-  /**
-   * Packages to exclude from development startup
-   */
-  exclude?: string[];
-  /**
-   * Packages to start by default (empty = start all packages)
-   */
-  packages?: string[];
-  
-  // Release workflow (release command only)
-  /**
-   * Generate changelog during release (default: true)
-   */
-  changelog?: boolean;
-  /**
-   * Execute build script before publishing (false = skip, string = custom script)
-   */
-  build?: boolean | string;
-  /**
-   * Automatically push git tags to remote (default: false)
-   */
-  pushTag?: boolean;
-  /**
-   * Generate canary version without prompts (default: false)
-   */
-  canary?: boolean;
-  /**
-   * Create GitHub release after successful release (default: false)
-   */
-  createGithubRelease?: boolean;
-  /**
-   * Automatically create release branch before release (default: false)
-   */
-  autoCreateReleaseBranch?: boolean;
-  
-  // Changelog generation (changelog command only)
-  /**
-   * Target version for changelog generation
-   */
-  version?: string;
-  /**
-   * Format changelog with markdown enhancements (default: false)
-   */
-  beautify?: boolean;
-  /**
-   * Create git commit for generated changelog (default: false)
-   */
-  commit?: boolean;
-  /**
-   * Push changelog commit to remote (default: false)
-   */
-  gitPush?: boolean;
-  /**
-   * Include author information in changelog (default: false)
-   */
-  attachAuthor?: boolean;
-  /**
-   * Author name format: 'name' or 'email' (default: 'name')
-   */
-  authorNameType?: 'name' | 'email';
-  
-  // Patch operations (patch command only)
-  /**
-   * Distribution tag for patch release (e.g., latest, next, beta)
-   */
-  tag?: string;
-}
+export interface PDKConfig extends 
+  CoreOptions, 
+  AIOptions, 
+  ChangelogFilterOptions,
+  DevSpecificOptions,
+  ReleaseSpecificOptions,
+  PatchSpecificOptions,
+  ChangelogSpecificOptions,
+  GitHubReleaseSpecificOptions {}
 
 /**
  * Loaded configuration with resolved defaults
