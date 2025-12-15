@@ -295,7 +295,7 @@ describe('Browser MCP Server', () => {
         arguments: {},
       });
       expect(getClickableElements.content?.[0]?.text).toContain(
-        '[4]<button>Open Popup</button>',
+        '[4] [button id="openPopup"] <button>Open Popup</button>',
       );
 
       const clickResult = await client.callTool({
@@ -352,7 +352,7 @@ describe('Browser MCP Server', () => {
         arguments: {},
       });
       expect(getClickableElements.content?.[0]?.text).toContain(
-        '[2]<a>Go to Page 2</a>',
+        '[2] [link href="/page2"] <a>Go to Page 2</a>',
       );
 
       const clickResult = await client.callTool({
