@@ -5,3 +5,6 @@
 
 export * from './commands';
 export * from './cli';
+export * from './config';
+export * from './utils/config';
+export * from './types';

@@ -3,7 +3,6 @@
   "description": "PDK (pnpm dev kit), an efficient pnpm workspace development and publishing tool",
   "version": "0.0.5",
   "main": "dist/index.js",
-  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "publishConfig": {
     "access": "public",
@@ -19,9 +18,11 @@
   "scripts": {
     "dev": "rslib build --watch",
     "build": "rslib build",
+    "test": "vitest run",
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
+    "@tarko/config-loader": "0.3.0",
     "@tarko/model-provider": "0.3.0",
     "boxen": "4",
     "cac": "^6.5.10",
@@ -47,6 +48,7 @@
     "@types/string-width": "^4.0.1",
     "@types/text-table": "^0.2.0",
     "rimraf": "4.1.0",
-    "typescript": "5.8.3"
+    "typescript": "5.8.3",
+    "vitest": "3.2.4"
   }
 }
