@@ -107,14 +107,7 @@ export async function selectVersionAndTag(
       name: 'bump',
       message: 'Select release type:',
       type: 'list',
-      choices: [...bumpChoices, { name: 'Prerelease', value: 'prerelease' }, customItem],
-    },
-    {
-      name: 'prereleaseType',
-      message: 'Select prerelease type:',
-      type: 'list',
-      choices: prereleaseVersions,
-      when: (answers) => answers.bump === 'prerelease',
+      choices: [...bumpChoices, ...prereleaseVersions, customItem],
     },
     {
       name: 'customVersion',
@@ -129,8 +122,8 @@ export async function selectVersionAndTag(
       message: 'Select npm tag:',
       type: 'list',
       choices: (answers) => {
-        const version = answers.prereleaseType 
-          ? semver.inc(currentVersion, 'prerelease', answers.prereleaseType)
+        const version = (answers.bump === 'beta' || answers.bump === 'alpha' || answers.bump === 'rc' || answers.bump === 'next' || answers.bump === 'dev')
+          ? semver.inc(currentVersion, 'prerelease', answers.bump)
           : answers.customVersion || versions[answers.bump];
         return getNpmTags(version);
       },
@@ -144,8 +137,8 @@ export async function selectVersionAndTag(
   ]);
 
   let version: string;
-  if (bump === 'prerelease') {
-    version = semver.inc(currentVersion, 'prerelease', prereleaseType) || '';
+  if (bump === 'beta' || bump === 'alpha' || bump === 'rc' || bump === 'next' || bump === 'dev') {
+    version = semver.inc(currentVersion, 'prerelease', bump) || '';
   } else {
     version = customVersion || versions[bump];
   }
