@@ -107,9 +107,8 @@ export async function generateReleaseNotes(
     // Get commits between tags
     const gitRange = previousTag ? `${previousTag}..${tagName}` : tagName;
     const { stdout } = await execa(
-      'git',
-      ['log', gitRange, '--pretty=format:%H|%s|%an|%ae', '--no-merges'],
-      { cwd },
+      `git log "${gitRange}" --pretty=format:'%H|%s|%an|%ae' --no-merges`,
+      { cwd, shell: true },
     );
 
     if (!stdout.trim()) {
