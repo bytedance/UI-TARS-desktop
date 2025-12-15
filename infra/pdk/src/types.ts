@@ -232,6 +232,10 @@ export interface ReleaseSpecificOptions {
    * Directly specify release tag (skips interactive selection)
    */
   releaseTag?: string;
+  /**
+   * Skip confirmation prompts during release
+   */
+  skipConfirm?: boolean;
 }
 
 /**

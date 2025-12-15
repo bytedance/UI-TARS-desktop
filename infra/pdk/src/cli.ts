@@ -122,6 +122,10 @@ export function bootstrapCli() {
       '--release-tag <tag>',
       'Directly specify release tag (skips interactive selection)',
     )
+    .option(
+      '--skip-confirm',
+      'Skip confirmation prompts during release',
+    )
     .alias('release')
     .action((opts) => {
       // Process filter options

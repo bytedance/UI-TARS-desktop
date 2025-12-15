@@ -59,6 +59,7 @@ export async function release(options: ReleaseOptions = {}): Promise<void> {
     autoCreateReleaseBranch = false,
     releaseVersion,
     releaseTag,
+    skipConfirm = false,
   } = options;
 
   if (dryRun) {
@@ -99,10 +100,12 @@ export async function release(options: ReleaseOptions = {}): Promise<void> {
       
       logger.info(`Direct release: ${version} (${tag})`);
       
-      // Confirm release
-      const confirmed = await confirmRelease(version, tag);
-      if (!confirmed) {
-        return;
+      // Confirm release unless skip-confirm is enabled
+      if (!skipConfirm) {
+        const confirmed = await confirmRelease(version, tag);
+        if (!confirmed) {
+          return;
+        }
       }
     } else {
       // Prompt for version and tag
@@ -113,10 +116,12 @@ export async function release(options: ReleaseOptions = {}): Promise<void> {
       version = result.version;
       tag = result.tag;
 
-      // Confirm release
-      const confirmed = await confirmRelease(version, tag);
-      if (!confirmed) {
-        return;
+      // Confirm release unless skip-confirm is enabled
+      if (!skipConfirm) {
+        const confirmed = await confirmRelease(version, tag);
+        if (!confirmed) {
+          return;
+        }
       }
     }
 
@@ -141,13 +146,15 @@ export async function release(options: ReleaseOptions = {}): Promise<void> {
       return;
     }
 
-    // Confirm packages to publish
-    const packagesConfirmed = await confirmPackagesToPublish(
-      packagesToPublish,
-      canary,
-    );
-    if (!packagesConfirmed) {
-      return;
+    // Confirm packages to publish unless skip-confirm is enabled
+    if (!skipConfirm) {
+      const packagesConfirmed = await confirmPackagesToPublish(
+        packagesToPublish,
+        canary,
+      );
+      if (!packagesConfirmed) {
+        return;
+      }
     }
 
     // Update all package versions FIRST (before build)
@@ -213,6 +220,7 @@ export async function release(options: ReleaseOptions = {}): Promise<void> {
       pushTag,
       canary,
       changelogGenerated,
+      skipConfirm,
     );
 
     // Create GitHub release if requested
@@ -244,6 +252,7 @@ async function handleGitOperations(
   pushTag: boolean,
   canary: boolean,
   changelogGenerated = false,
+  skipConfirm = false,
 ): Promise<void> {
   const tagName = `${tagPrefix}${version}`;
 
@@ -279,7 +288,7 @@ async function handleGitOperations(
     logger.success(`Created git tag: ${tagName}`);
 
     // Handle tag pushing
-    await handleTagPush(tagName, cwd, pushTag, canary);
+    await handleTagPush(tagName, cwd, pushTag, canary, skipConfirm);
   } catch (err) {
     logger.error(`Failed to create git tag: ${(err as Error).message}`);
   }
@@ -293,9 +302,13 @@ async function handleTagPush(
   cwd: string,
   pushTag: boolean,
   canary: boolean,
+  skipConfirm = false,
 ): Promise<void> {
   const shouldPush =
-    pushTag || (canary ? true : await confirmTagPush(tagName, canary));
+    pushTag || 
+    canary || 
+    skipConfirm || 
+    await confirmTagPush(tagName, canary);
 
   if (!shouldPush) {
     return;
