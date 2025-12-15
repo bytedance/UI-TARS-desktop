@@ -23,6 +23,7 @@ const DEFAULT_CONFIG: Partial<PDKConfig> = {
   runInBand: false,      // Optimize for speed by default
   ignoreScripts: false,   // Respect build scripts by default
   tagPrefix: 'v',        // Most common git tag convention
+  commit: true,          // Most common git tag convention
   
   // AI defaults - opt-in for security and cost reasons
   useAi: false,         // Prevent unexpected API calls/costs
