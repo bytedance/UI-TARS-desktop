@@ -136,8 +136,7 @@ export async function changelog(options: ChangelogOptions = {}): Promise<void> {
   }
 
   // Compose final changelog entry with version header
-  const versionHeader = tagName.startsWith('v') ? tagName : tagName;
-  const entry = `## ${versionHeader} (${today})\n\n${releaseNotes}\n`;
+  const entry = `## ${tagName} (${today})\n\n${releaseNotes}\n`;
 
   if (dryRun) {
     logger.info(`[dry-run] Would update CHANGELOG.md with:`);
