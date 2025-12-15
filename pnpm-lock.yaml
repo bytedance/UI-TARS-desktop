@@ -734,9 +734,6 @@ importers:
       '@agent-infra/browser-context':
         specifier: 0.1.2
         version: 0.1.2(bufferutil@4.0.9)(jsdom@26.1.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))(utf-8-validate@6.0.5)
-      '@agent-infra/browser-use':
-        specifier: workspace:*
-        version: link:../../browser-use
       '@agent-infra/logger':
         specifier: workspace:*
         version: link:../../logger
@@ -756,6 +753,9 @@ importers:
       '@agent-infra/browser':
         specifier: workspace:*
         version: link:../../browser
+      '@agent-infra/browser-use':
+        specifier: workspace:*
+        version: link:../../browser-use
       '@ghostery/adblocker-puppeteer':
         specifier: 2.5.2
         version: 2.5.2(puppeteer@24.4.0(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))

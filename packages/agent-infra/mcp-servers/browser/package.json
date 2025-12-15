@@ -49,7 +49,6 @@
   "dependencies": {
     "@agent-infra/logger": "workspace:*",
     "@agent-infra/browser-context": "0.1.2",
-    "@agent-infra/browser-use": "workspace:*",
     "@modelcontextprotocol/sdk": "~1.15.1",
     "@ui-tars/action-parser": "workspace:^",
     "mcp-http-server": "workspace:^",
@@ -57,6 +56,7 @@
   },
   "devDependencies": {
     "@agent-infra/browser": "workspace:*",
+    "@agent-infra/browser-use": "workspace:*",
     "@ghostery/adblocker-puppeteer": "2.5.2",
     "@rslib/core": "0.10.0",
     "@types/diff": "^5.0.9",
