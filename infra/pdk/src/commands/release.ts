@@ -57,6 +57,8 @@ export async function release(options: ReleaseOptions = {}): Promise<void> {
     useAi = false,
     createGithubRelease = false,
     autoCreateReleaseBranch = false,
+    releaseVersion,
+    releaseTag,
   } = options;
 
   if (dryRun) {
@@ -85,9 +87,29 @@ export async function release(options: ReleaseOptions = {}): Promise<void> {
       version = canaryResult.version;
       tag = canaryResult.tag;
       logger.info(`Canary release: ${version} (${tag})`);
+    } else if (releaseVersion && releaseTag) {
+      // Use directly specified version and tag
+      version = releaseVersion;
+      tag = releaseTag;
+      
+      // Validate version
+      if (!require('semver').valid(version)) {
+        throw new Error(`Invalid version: ${version}`);
+      }
+      
+      logger.info(`Direct release: ${version} (${tag})`);
+      
+      // Confirm release
+      const confirmed = await confirmRelease(version, tag);
+      if (!confirmed) {
+        return;
+      }
     } else {
       // Prompt for version and tag
-      const result = await selectVersionAndTag(currentVersion);
+      const result = await selectVersionAndTag(currentVersion, {
+        version: releaseVersion,
+        tag: releaseTag,
+      });
       version = result.version;
       tag = result.tag;
 

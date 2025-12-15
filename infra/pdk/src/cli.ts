@@ -7,7 +7,7 @@
  * CLI entry point for PDK
  */
 import { cac } from 'cac';
-import { dev, release, patch, changelog, githubRelease } from './commands';
+import { dev, release, patch, changelog, githubRelease, nextVersion } from './commands';
 import { logger } from './utils/logger';
 import { loadPDKConfig, mergeOptions } from './utils/config';
 
@@ -114,6 +114,14 @@ export function bootstrapCli() {
       '--auto-create-release-branch',
       'Automatically create release branch before release',
     )
+    .option(
+      '--release-version <version>',
+      'Directly specify release version (skips interactive selection)',
+    )
+    .option(
+      '--release-tag <tag>',
+      'Directly specify release tag (skips interactive selection)',
+    )
     .alias('release')
     .action((opts) => {
       // Process filter options
@@ -217,6 +225,14 @@ export function bootstrapCli() {
         opts.version = opts.releaseVersion;
       }
       return wrapCommand(githubRelease, opts);
+    });
+
+  // Next Version command
+  cli
+    .command('next-version', 'Show next version options based on current version')
+    .option('--cwd <cwd>', 'Current working directory')
+    .action((opts) => {
+      return wrapCommand(nextVersion, opts);
     });
 
   cli.version(pkg.version);
