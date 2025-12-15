@@ -62,7 +62,7 @@ export async function selectVersionAndTag(
   }
 
   const customItem = { name: 'Custom', value: 'custom' };
-  const bumps = ['patch', 'minor', 'major', 'prerelease', 'premajor'] as const;
+  const bumps = ['patch', 'minor', 'major', 'prerelease'] as const;
 
   const versions = bumps.reduce<Record<string, string>>((acc, bump) => {
     acc[bump] = semver.inc(currentVersion, bump) || '';
@@ -178,7 +178,7 @@ export async function updatePackageVersion(
  * Get next version options for current version
  */
 export function getNextVersionOptions(currentVersion: string): Record<string, string> {
-  const bumps = ['patch', 'minor', 'major', 'prerelease', 'premajor'] as const;
+  const bumps = ['patch', 'minor', 'major', 'prerelease'] as const;
   
   const versions = bumps.reduce<Record<string, string>>((acc, bump) => {
     acc[bump] = semver.inc(currentVersion, bump) || '';
