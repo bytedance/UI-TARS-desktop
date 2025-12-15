@@ -49,10 +49,15 @@ export interface GitHubReleaseOptions {
  * Gets the previous tag for generating release notes
  * Handles mixed tag formats (v1.0.0 and @sailors@1.0.0)
  * Filters out canary releases
+ * 
+ * @param tagName Current tag name
+ * @param cwd Working directory
+ * @param tagPrefix Tag prefix to filter matching tags (optional)
  */
 export async function getPreviousTag(
   tagName: string,
   cwd: string,
+  tagPrefix?: string,
 ): Promise<string | null> {
   try {
     // Get all tags sorted by creation date (chronological order, newest first)
@@ -66,7 +71,22 @@ export async function getPreviousTag(
     }
 
     // Filter out canary releases
-    const nonCanaryTags = allTags.filter((tag) => !tag.includes('canary'));
+    let nonCanaryTags = allTags.filter((tag) => !tag.includes('canary'));
+
+    // If tagPrefix is provided, filter tags by the same prefix pattern
+    if (tagPrefix) {
+      if (tagPrefix === '@') {
+        // For package@version format, filter tags that contain @ followed by version
+        nonCanaryTags = nonCanaryTags.filter((tag) => {
+          // Match pattern like package@version
+          const match = tag.match(/@\d+\.\d+\.\d+/);
+          return match !== null;
+        });
+      } else {
+        // For v prefix format, filter tags that start with the prefix
+        nonCanaryTags = nonCanaryTags.filter((tag) => tag.startsWith(tagPrefix));
+      }
+    }
 
     if (nonCanaryTags.length === 0) {
       return null;

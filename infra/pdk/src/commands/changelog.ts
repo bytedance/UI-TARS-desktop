@@ -88,8 +88,17 @@ export async function changelog(options: ChangelogOptions = {}): Promise<void> {
   
   // Try to find the actual git tag that matches this version
   try {
-    const { stdout } = await execa('git', ['tag', '--list', `*@${version}`], { cwd });
-    const matchingTags = stdout.trim().split('\n').filter(Boolean);
+    let searchPattern: string;
+    if (tagPrefix === '@') {
+      // For package@version format
+      searchPattern = `*@${version}`;
+    } else {
+      // For v prefix format
+      searchPattern = `${tagPrefix}${version}`;
+    }
+    
+    const result = await execa('git', ['tag', '--list', searchPattern], { cwd });
+    const matchingTags = result.stdout.trim().split('\n').filter(Boolean);
     if (matchingTags.length > 0) {
       // Use the actual tag that exists
       tagName = matchingTags[0];
@@ -101,8 +110,8 @@ export async function changelog(options: ChangelogOptions = {}): Promise<void> {
   // Resolve repo info
   const repoInfo = await getRepositoryInfo(cwd);
 
-  // Get previous tag (non-canary)
-  const previousTag = await getPreviousTag(tagName, cwd);
+  // Get previous tag (non-canary) with tagPrefix filtering
+  const previousTag = await getPreviousTag(tagName, cwd, tagPrefix);
 
   logger.info(
     `📝 Generating unified changelog from ${previousTag || 'repository start'} to ${tagName}`,
