@@ -35,7 +35,7 @@ export async function nextVersion(options: CommonOptions = {}): Promise<void> {
     console.log();
 
     // Display standard versions
-    const standardVersions = ['patch', 'minor', 'major', 'prerelease', 'premajor'];
+    const standardVersions = ['patch', 'minor', 'major', 'prerelease'];
     standardVersions.forEach((type) => {
       const version = nextVersions[type];
       if (version) {
