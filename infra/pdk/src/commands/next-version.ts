@@ -47,7 +47,7 @@ export async function nextVersion(options: CommonOptions = {}): Promise<void> {
 
     // Display prerelease variants
     console.log('Prerelease variants:');
-    const prereleaseTypes = ['beta', 'alpha', 'rc', 'next', 'dev'];
+    const prereleaseTypes = ['beta', 'alpha', 'rc'];
     prereleaseTypes.forEach((type) => {
       const version = nextVersions[`prerelease-${type}`];
       if (version) {

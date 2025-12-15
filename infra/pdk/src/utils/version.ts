@@ -74,8 +74,6 @@ export async function selectVersionAndTag(
     { name: `beta (${semver.inc(currentVersion, 'prerelease', 'beta')})`, value: 'beta' },
     { name: `alpha (${semver.inc(currentVersion, 'prerelease', 'alpha')})`, value: 'alpha' },
     { name: `rc (${semver.inc(currentVersion, 'prerelease', 'rc')})`, value: 'rc' },
-    { name: `next (${semver.inc(currentVersion, 'prerelease', 'next')})`, value: 'next' },
-    { name: `dev (${semver.inc(currentVersion, 'prerelease', 'dev')})`, value: 'dev' },
   ];
 
   const bumpChoices = bumps
@@ -91,15 +89,13 @@ export async function selectVersionAndTag(
       const prereleaseType = prerelease?.[0] as string;
       
       // Return appropriate tags based on prerelease type
-      if (prereleaseType === 'beta') return ['beta', 'next', 'latest', customItem];
-      if (prereleaseType === 'alpha') return ['alpha', 'next', 'latest', customItem];
-      if (prereleaseType === 'rc') return ['rc', 'next', 'latest', customItem];
-      if (prereleaseType === 'next') return ['next', 'latest', customItem];
-      if (prereleaseType === 'dev') return ['dev', 'next', 'latest', customItem];
+      if (prereleaseType === 'beta') return ['beta', 'latest', customItem];
+      if (prereleaseType === 'alpha') return ['alpha', 'latest', customItem];
+      if (prereleaseType === 'rc') return ['rc', 'latest', customItem];
       
-      return ['next', 'latest', 'beta', 'alpha', 'rc', 'dev', customItem];
+      return ['latest', 'beta', 'alpha', 'rc', customItem];
     }
-    return ['latest', 'next', 'beta', 'alpha', 'rc', 'dev', customItem];
+    return ['latest', 'beta', 'alpha', 'rc', customItem];
   };
 
   const { bump, customVersion, prereleaseType, npmTag, customNpmTag } = await inquirer.prompt([
@@ -122,7 +118,7 @@ export async function selectVersionAndTag(
       message: 'Select npm tag:',
       type: 'list',
       choices: (answers) => {
-        const version = (answers.bump === 'beta' || answers.bump === 'alpha' || answers.bump === 'rc' || answers.bump === 'next' || answers.bump === 'dev')
+        const version = (answers.bump === 'beta' || answers.bump === 'alpha' || answers.bump === 'rc')
           ? semver.inc(currentVersion, 'prerelease', answers.bump)
           : answers.customVersion || versions[answers.bump];
         return getNpmTags(version);
@@ -137,7 +133,7 @@ export async function selectVersionAndTag(
   ]);
 
   let version: string;
-  if (bump === 'beta' || bump === 'alpha' || bump === 'rc' || bump === 'next' || bump === 'dev') {
+  if (bump === 'beta' || bump === 'alpha' || bump === 'rc') {
     version = semver.inc(currentVersion, 'prerelease', bump) || '';
   } else {
     version = customVersion || versions[bump];
@@ -182,8 +178,6 @@ export function getNextVersionOptions(currentVersion: string): Record<string, st
   versions['prerelease-beta'] = semver.inc(currentVersion, 'prerelease', 'beta') || '';
   versions['prerelease-alpha'] = semver.inc(currentVersion, 'prerelease', 'alpha') || '';
   versions['prerelease-rc'] = semver.inc(currentVersion, 'prerelease', 'rc') || '';
-  versions['prerelease-next'] = semver.inc(currentVersion, 'prerelease', 'next') || '';
-  versions['prerelease-dev'] = semver.inc(currentVersion, 'prerelease', 'dev') || '';
 
   return versions;
 }
