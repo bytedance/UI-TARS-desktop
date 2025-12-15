@@ -62,12 +62,13 @@ export async function selectVersionAndTag(
   }
 
   const customItem = { name: 'Custom', value: 'custom' };
-  const bumps = ['patch', 'minor', 'major', 'prerelease'] as const;
+  const bumps = ['patch', 'minor', 'major'] as const;
 
-  const versions = bumps.reduce<Record<string, string>>((acc, bump) => {
-    acc[bump] = semver.inc(currentVersion, bump) || '';
-    return acc;
-  }, {});
+  const versions = {
+    patch: semver.inc(currentVersion, 'patch') || '',
+    minor: semver.inc(currentVersion, 'minor') || '',
+    major: semver.inc(currentVersion, 'major') || '',
+  };
 
   // Generate improved prerelease options
   const prereleaseVersions = [
@@ -76,12 +77,11 @@ export async function selectVersionAndTag(
     { name: `rc (${semver.inc(currentVersion, 'prerelease', 'rc')})`, value: 'rc' },
   ];
 
-  const bumpChoices = bumps
-    .filter(bump => bump !== 'prerelease')
-    .map((bump) => ({
-      name: `${bump} (${versions[bump]})`,
-      value: bump,
-    }));
+  const bumpChoices = [
+    { name: `patch (${versions.patch})`, value: 'patch' },
+    { name: `minor (${versions.minor})`, value: 'minor' },
+    { name: `major (${versions.major})`, value: 'major' },
+  ];
 
   const getNpmTags = (version: string) => {
     if (semver.prerelease(version)) {
@@ -98,7 +98,7 @@ export async function selectVersionAndTag(
     return ['latest', 'beta', 'alpha', 'rc', customItem];
   };
 
-  const { bump, customVersion, prereleaseType, npmTag, customNpmTag } = await inquirer.prompt([
+  const { bump, customVersion, npmTag, customNpmTag } = await inquirer.prompt([
     {
       name: 'bump',
       message: 'Select release type:',
@@ -167,12 +167,12 @@ export async function updatePackageVersion(
  * Get next version options for current version
  */
 export function getNextVersionOptions(currentVersion: string): Record<string, string> {
-  const bumps = ['patch', 'minor', 'major', 'prerelease'] as const;
-  
-  const versions = bumps.reduce<Record<string, string>>((acc, bump) => {
-    acc[bump] = semver.inc(currentVersion, bump) || '';
-    return acc;
-  }, {});
+  const versions = {
+    patch: semver.inc(currentVersion, 'patch') || '',
+    minor: semver.inc(currentVersion, 'minor') || '',
+    major: semver.inc(currentVersion, 'major') || '',
+    prerelease: semver.inc(currentVersion, 'prerelease') || '',
+  };
 
   // Add prerelease variants
   versions['prerelease-beta'] = semver.inc(currentVersion, 'prerelease', 'beta') || '';
