@@ -1,5 +1,10 @@
 # Changelog
 
+## pdk@0.0.6-beta.3 (2025-12-15)
+
+## What's Changed
+
+Release pdk@0.0.6-beta.3
 ## pdk@0.0.6-beta.2 (2025-12-15)
 
 ## What's Changed

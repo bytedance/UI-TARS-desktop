@@ -9,7 +9,6 @@
 
 import { loadConfig } from '@tarko/config-loader';
 import type { LoadConfigOptions } from '@tarko/config-loader';
-import { join } from 'path';
 
 import type { PDKConfig, LoadedConfig } from '../types';
 
