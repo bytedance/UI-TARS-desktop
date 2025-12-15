@@ -231,7 +231,7 @@ export async function release(options: ReleaseOptions = {}): Promise<void> {
 
     // Create GitHub release if requested
     if (createGithubRelease && version && tag) {
-      await handleGitHubRelease(version, tag, cwd, dryRun);
+      await handleGitHubRelease(version, tag, cwd, dryRun, tagPrefix);
     }
 
     // Switch back to original branch if auto-create release branch was used
@@ -386,6 +386,7 @@ async function handleGitHubRelease(
   tagName: string,
   cwd: string,
   dryRun: boolean,
+  tagPrefix?: string,
 ): Promise<void> {
   try {
     await createGitHubRelease({
@@ -393,6 +394,7 @@ async function handleGitHubRelease(
       tagName,
       cwd,
       dryRun,
+      tagPrefix,
     });
   } catch (error) {
     logger.error(

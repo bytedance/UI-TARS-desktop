@@ -43,16 +43,18 @@ export interface GitHubReleaseOptions {
   tagName: string;
   cwd: string;
   dryRun?: boolean;
+  tagPrefix?: string;
 }
 
 /**
  * Gets the previous tag for generating release notes
  * Handles mixed tag formats (v1.0.0 and @sailors@1.0.0)
- * Filters out canary releases
+ * Filters out canary releases and filters by tagPrefix
  */
 export async function getPreviousTag(
   tagName: string,
   cwd: string,
+  tagPrefix?: string,
 ): Promise<string | null> {
   try {
     // Get all tags sorted by creation date (chronological order, newest first)
@@ -65,25 +67,30 @@ export async function getPreviousTag(
       return null;
     }
 
-    // Filter out canary releases
-    const nonCanaryTags = allTags.filter((tag) => !tag.includes('canary'));
+    // Filter out canary releases and apply tagPrefix filter if provided
+    let filteredTags = allTags.filter((tag) => !tag.includes('canary'));
+    
+    // Apply tagPrefix filter if provided
+    if (tagPrefix) {
+      filteredTags = filteredTags.filter((tag) => tag.startsWith(tagPrefix));
+    }
 
-    if (nonCanaryTags.length === 0) {
+    if (filteredTags.length === 0) {
       return null;
     }
 
     // Find the current tag in the filtered list
-    const currentIndex = nonCanaryTags.findIndex((tag) => tag === tagName);
+    const currentIndex = filteredTags.findIndex((tag) => tag === tagName);
 
     if (currentIndex === -1) {
       // If current tag not found, it might be a new tag
-      // Return the most recent non-canary tag (first in the list)
-      return nonCanaryTags[0] || null;
+      // Return the most recent filtered tag (first in the list)
+      return filteredTags[0] || null;
     }
 
     // Return the next tag (previous in chronological order)
-    if (currentIndex < nonCanaryTags.length - 1) {
-      return nonCanaryTags[currentIndex + 1];
+    if (currentIndex < filteredTags.length - 1) {
+      return filteredTags[currentIndex + 1];
     }
 
     return null;
@@ -216,26 +223,11 @@ export async function generateReleaseNotes(
     // Add Full Changelog link if repository info is available
     if (repoInfo) {
       if (previousTag) {
-        // Extract version from tag (ensure v prefix for display)
-        const previousVersion = previousTag.startsWith('v')
-          ? previousTag
-          : previousTag.startsWith('@')
-            ? previousTag
-            : `v${previousTag}`;
-        const currentVersion = tagName.startsWith('v')
-          ? tagName
-          : tagName.startsWith('@')
-            ? tagName
-            : `v${tagName}`;
-        const changelogText = `${previousVersion}...${currentVersion}`;
+        // Use the original tags for display to preserve custom formats
+        const changelogText = `${previousTag}...${tagName}`;
         releaseNotes += `\n**Full Changelog**: [${changelogText}](https://github.com/${repoInfo.owner}/${repoInfo.repo}/compare/${previousTag}...${tagName})`;
       } else {
-        const currentVersion = tagName.startsWith('v')
-          ? tagName
-          : tagName.startsWith('@')
-            ? tagName
-            : `v${tagName}`;
-        releaseNotes += `\n**Full Changelog**: [${currentVersion}](https://github.com/${repoInfo.owner}/${repoInfo.repo}/commits/${tagName})`;
+        releaseNotes += `\n**Full Changelog**: [${tagName}](https://github.com/${repoInfo.owner}/${repoInfo.repo}/commits/${tagName})`;
       }
     }
 
@@ -286,7 +278,7 @@ export async function getRepositoryInfo(
 export async function createGitHubRelease(
   options: GitHubReleaseOptions,
 ): Promise<void> {
-  const { version, tagName, cwd, dryRun = false } = options;
+  const { version, tagName, cwd, dryRun = false, tagPrefix } = options;
 
   try {
     // Check if GitHub CLI is available
@@ -317,7 +309,7 @@ export async function createGitHubRelease(
     const isPrerelease = version.includes('-');
 
     // Get previous tag for generating release notes
-    const previousTag = await getPreviousTag(tagName, cwd);
+    const previousTag = await getPreviousTag(tagName, cwd, tagPrefix);
 
     // Extract version from tag name for display purposes
     const releaseTitle = tagName.startsWith('@')
