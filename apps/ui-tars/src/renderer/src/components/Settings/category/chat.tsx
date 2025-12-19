@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
 import { useSetting } from '@renderer/hooks/useSetting';
+import { useTranslation } from '@renderer/hooks/useTranslation';
 import {
   Form,
   FormControl,
@@ -34,6 +35,7 @@ const formSchema = z.object({
 
 export function ChatSettings() {
   const { settings, updateSetting } = useSetting();
+  const { t } = useTranslation();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -97,10 +99,8 @@ export function ChatSettings() {
             render={({ field }) => {
               return (
                 <FormItem>
-                  <FormLabel>Language</FormLabel>
-                  <FormDescription>
-                    Control the language used in LLM conversations
-                  </FormDescription>
+                  <FormLabel>{t('chat.language')}</FormLabel>
+                  <FormDescription>{t('chat.language_desc')}</FormDescription>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select language" />
@@ -121,7 +121,7 @@ export function ChatSettings() {
               // console.log('field', field);
               return (
                 <FormItem>
-                  <FormLabel>Max Loop</FormLabel>
+                  <FormLabel>{t('chat.max_loop')}</FormLabel>
                   <FormDescription>
                     Enter a number between 25-200
                   </FormDescription>
@@ -143,8 +143,8 @@ export function ChatSettings() {
             name="loopIntervalInMs"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Loop Wait Time (ms)</FormLabel>
-                <FormDescription>Enter a number between 0-3000</FormDescription>
+                <FormLabel>{t('chat.loop_interval')}</FormLabel>
+                <FormDescription>{t('chat.loop_desc')}</FormDescription>
                 <FormControl>
                   <Input
                     type="number"
