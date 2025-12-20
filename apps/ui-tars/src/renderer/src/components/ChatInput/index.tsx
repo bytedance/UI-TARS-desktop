@@ -26,6 +26,7 @@ import { useSession } from '@renderer/hooks/useSession';
 
 import { Operator } from '@main/store/types';
 import { useSetting } from '../../hooks/useSetting';
+import { useTranslation } from '@renderer/hooks/useTranslation';
 
 const ChatInput = ({
   operator,
@@ -48,6 +49,7 @@ const ChatInput = ({
   const { run, stopAgentRuning } = useRunAgent();
   const { getSession, updateSession, chatMessages } = useSession();
   const { settings, updateSetting } = useSetting();
+  const { t } = useTranslation();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const running = status === StatusEnum.RUNNING;
 
@@ -188,8 +190,7 @@ const ChatInput = ({
             </TooltipTrigger>
             <TooltipContent>
               <p className="whitespace-pre-line">
-                send last instructions when you done for ui-tars&apos;s
-                &apos;CALL_USER&apos;
+                当 UI-TARS 处于 &apos;CALL_USER&apos; 状态时发送最后的指令
               </p>
             </TooltipContent>
           </Tooltip>
@@ -221,7 +222,7 @@ const ChatInput = ({
                 ? `${savedInstructions}`
                 : running && lastHumanMessage && messages?.length > 1
                   ? lastHumanMessage
-                  : 'What can I do for you today?'
+                  : t('chat.input.placeholder')
             }
             className="min-h-[120px] rounded-2xl resize-none px-4 pb-16" // 调整内边距
             value={localInstructions}

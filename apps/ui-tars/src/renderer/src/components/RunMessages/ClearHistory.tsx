@@ -17,10 +17,12 @@ import {
 } from '@renderer/components/ui/alert-dialog';
 import { useState } from 'react';
 import { useSession } from '@renderer/hooks/useSession';
+import { useTranslation } from '@renderer/hooks/useTranslation';
 
 export const ClearHistory = () => {
   const [open, setOpen] = useState(false);
   const { currentSessionId, deleteMessages } = useSession();
+  const { t } = useTranslation();
 
   if (!currentSessionId) {
     return null;
@@ -38,25 +40,25 @@ export const ClearHistory = () => {
           variant="ghost"
           size="icon"
           className="mr-1 text-red-400 hover:bg-red-50 hover:text-red-500"
-          aria-label="Clear Messages"
+          aria-label={t('clear_history.aria_clear_messages')}
         >
           <Trash2 className="h-4 w-4" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Clear Chat History</AlertDialogTitle>
+          <AlertDialogTitle>{t('clear_history.title')}</AlertDialogTitle>
           <AlertDialogDescription>
-            This will clear all chat messages. This action cannot be undone.
+            {t('clear_history.description')}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleClearMessages}
             className=" bg-red-500 hover:bg-red-600"
           >
-            Clear
+            {t('common.clear')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

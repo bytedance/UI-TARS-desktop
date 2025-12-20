@@ -10,6 +10,7 @@ import { LocalStore } from '@main/store/validate';
 
 import { VLMSettings, VLMSettingsRef } from './category/vlm';
 import { useRef } from 'react';
+import { useTranslation } from '@renderer/hooks/useTranslation';
 
 interface LocalSettingsDialogProps {
   isOpen: boolean;
@@ -36,6 +37,7 @@ export const LocalSettingsDialog = ({
   onSubmit,
   onClose,
 }: LocalSettingsDialogProps) => {
+  const { t } = useTranslation();
   const vlmSettingsRef = useRef<VLMSettingsRef>(null);
 
   const handleGetStart = async () => {
@@ -51,15 +53,14 @@ export const LocalSettingsDialog = ({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-[480]">
         <DialogHeader>
-          <DialogTitle>VLM Settings</DialogTitle>
+          <DialogTitle>{t('local_settings.title')}</DialogTitle>
           <DialogDescription>
-            Enter VLM settings to enable the model to control the local computer
-            or browser.
+            {t('local_settings.description')}
           </DialogDescription>
         </DialogHeader>
         <VLMSettings ref={vlmSettingsRef} />
         <Button className="mt-8 mx-8" onClick={handleGetStart}>
-          Get Start
+          {t('local_settings.get_started')}
         </Button>
       </DialogContent>
     </Dialog>

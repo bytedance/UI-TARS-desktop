@@ -188,7 +188,7 @@ export function ShareOptions({ sessionId }: { sessionId: string }) {
         ) : (
           <SquareArrowOutUpRight />
         )}
-        <span>Share</span>
+        <span>分享</span>
       </DropdownMenuItem>
       <AlertDialog
         open={isShareConfirmOpen}
@@ -196,22 +196,21 @@ export function ShareOptions({ sessionId }: { sessionId: string }) {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Share Report</AlertDialogTitle>
+            <AlertDialogTitle>分享报告</AlertDialogTitle>
             <AlertDialogDescription>
-              📢 Would you like to share your report to help us improve{' '}
-              <b>UI-TARS</b>? This includes your screen recordings and actions.
+              📢 您愿意分享您的报告以帮助我们改进 <b>UI-TARS</b>{' '}
+              吗？这包括您的屏幕录制和操作。
               <br />
               <br />
-              💡 We encourage you to create a clean and privacy-free desktop
-              environment before each use.
+              💡 我们鼓励您在每次使用前创建一个干净且无隐私的桌面环境。
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={(e) => processShare(false, e)}>
-              No, just download
+              不，仅下载
             </AlertDialogCancel>
             <AlertDialogAction onClick={(e) => processShare(true, e)}>
-              Yes, continue!
+              好的，继续！
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

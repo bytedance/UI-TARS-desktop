@@ -19,6 +19,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from '@renderer/components/ui/sidebar';
+import { useTranslation } from '@renderer/hooks/useTranslation';
 
 export function NavMain({
   items,
@@ -34,9 +35,10 @@ export function NavMain({
     }[];
   }[];
 }) {
+  const { t } = useTranslation();
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarGroupLabel>{t('sidebar.platform')}</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible

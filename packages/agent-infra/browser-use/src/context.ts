@@ -18,7 +18,7 @@ export enum LLMProviderEnum {
 }
 
 export interface ProviderConfig {
-  apiKey: string;
+  apiKey: string; // @secretlint-disable-line
   baseUrl?: string;
   endpoint?: string;
 }

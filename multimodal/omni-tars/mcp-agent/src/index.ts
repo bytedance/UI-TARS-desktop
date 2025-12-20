@@ -13,8 +13,8 @@ export { McpToolCallEngineProvider } from './McpToolCallEngineProvider';
 
 export type MCPTarsExtraOption = {
   googleMcpUrl: string;
-  googleApiKey: string;
-  tavilyApiKey?: string;
+  googleApiKey: string; // @secretlint-disable-line
+  tavilyApiKey?: string; // @secretlint-disable-line
   linkReaderMcpUrl?: string;
   linkReaderAK?: string;
 };
