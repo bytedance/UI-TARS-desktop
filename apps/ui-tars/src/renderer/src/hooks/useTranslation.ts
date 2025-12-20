@@ -27,6 +27,15 @@ const translations: Record<Language, Record<string, string>> = {
     'chat.loop_interval': 'Loop Interval (ms)',
     'chat.loop_desc': 'The interval between each action loop.',
 
+    'chat.input.placeholder': 'What can I do for you today?',
+
+    'sidebar.home': 'Home',
+    'sidebar.history': 'History',
+    'sidebar.settings': 'Settings',
+    'sidebar.more': 'More',
+    'sidebar.delete': 'Delete',
+    'sidebar.platform': 'Platform',
+
     'preset.import_title': 'Import Preset',
     'preset.description': 'Import the preset model configuration file.',
     'preset.local_file': 'Local File',
@@ -42,6 +51,29 @@ const translations: Record<Language, Record<string, string>> = {
       'When using remote preset, settings will be read-only',
     'preset.update': 'Update Preset',
     'preset.reset': 'Reset to Manual',
+
+    'home.welcome': 'Welcome to UI-TARS Desktop',
+    'home.experience_remote':
+      'You can also experience the remote versions on Volcano Engine:',
+    'home.computer_operator': 'Computer Operator',
+    'home.browser_operator': 'Browser Operator',
+    'home.computer_desc':
+      'Use the UI-TARS model to automate and complete tasks directly on your computer with AI assistance.',
+    'home.browser_desc':
+      'Let the UI-TARS model help you automate browser tasks, from navigating pages to filling out forms.',
+    'home.use_local_computer': 'Use Local Computer',
+    'home.use_local_browser': 'Use Local Browser',
+    'home.and': 'and',
+
+    'local_settings.title': 'VLM Settings',
+    'local_settings.description':
+      'Enter VLM settings to enable the model to control the local computer or browser.',
+    'local_settings.get_started': 'Get Started',
+
+    'run.action': 'Action',
+    'run.waiting_user': 'Waiting for user to take control',
+    'run.thinking': 'Thinking...',
+    'run.screenshot': 'Screenshot',
   },
   zh: {
     'settings.title': '设置',
@@ -63,6 +95,15 @@ const translations: Record<Language, Record<string, string>> = {
     'chat.loop_interval': '循环间隔 (ms)',
     'chat.loop_desc': '每次操作循环之间的间隔。',
 
+    'chat.input.placeholder': '今天我可以为您做什么？',
+
+    'sidebar.home': '首页',
+    'sidebar.history': '历史记录',
+    'sidebar.settings': '设置',
+    'sidebar.more': '更多',
+    'sidebar.delete': '删除',
+    'sidebar.platform': '平台',
+
     'general.current_version': '当前版本',
     'general.latest_version': '最新版本',
     'general.release_notes': '发布说明',
@@ -81,6 +122,28 @@ const translations: Record<Language, Record<string, string>> = {
     'preset.read_only_tooltip': '使用远程预设时，设置将为只读',
     'preset.update': '更新预设',
     'preset.reset': '重置为手动',
+
+    'home.welcome': '欢迎使用 UI-TARS Desktop',
+    'home.experience_remote': '您也可以在火山引擎上体验远程版本：',
+    'home.computer_operator': '电脑操作',
+    'home.browser_operator': '浏览器操作',
+    'home.computer_desc':
+      '使用 UI-TARS 模型在 AI 辅助下直接在电脑上自动化完成任务。',
+    'home.browser_desc':
+      '让 UI-TARS 模型帮助您自动化浏览器任务，从页面导航到表单填写。',
+    'home.use_local_computer': '使用本地电脑',
+    'home.use_local_browser': '使用本地浏览器',
+    'home.and': '和',
+
+    'local_settings.title': '模型设置',
+    'local_settings.description':
+      '输入模型设置以启用模型控制本地电脑或浏览器。',
+    'local_settings.get_started': '开始使用',
+
+    'run.action': '操作',
+    'run.waiting_user': '等待用户接管',
+    'run.thinking': '思考中...',
+    'run.screenshot': '截图',
   },
 };
 

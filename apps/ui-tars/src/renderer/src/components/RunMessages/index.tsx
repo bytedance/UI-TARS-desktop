@@ -19,6 +19,7 @@ import { ShareOptions } from '@/renderer/src/components/RunMessages/ShareOptions
 import { ClearHistory } from '@/renderer/src/components/RunMessages/ClearHistory';
 import { useStore } from '@renderer/hooks/useStore';
 import { useSession } from '@renderer/hooks/useSession';
+import { useTranslation } from '@renderer/hooks/useTranslation';
 
 import ImageGallery from '../ImageGallery';
 import {
@@ -31,6 +32,7 @@ import {
 
 const RunMessages = () => {
   const { messages = [], thinking, errorMsg } = useStore();
+  const { t } = useTranslation();
   const containerRef = React.useRef<HTMLDivElement>(null);
   const suggestions: string[] = [];
   const [selectImg, setSelectImg] = useState<number | undefined>(undefined);
@@ -147,7 +149,7 @@ const RunMessages = () => {
             );
           })}
 
-          {thinking && <LoadingText text={'Thinking...'} />}
+          {thinking && <LoadingText text={t('run.thinking')} />}
           {errorMsg && <ErrorMessage text={errorMsg} />}
         </div>
       </div>
