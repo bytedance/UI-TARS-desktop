@@ -18,6 +18,7 @@ import {
 } from './category/remoteComputer';
 import { Operator } from '@main/store/types';
 import { cn } from '@renderer/utils';
+import { useTranslation } from '@renderer/hooks/useTranslation';
 
 interface RemoteSettingsDialogProps {
   isOpen: boolean;
@@ -63,12 +64,15 @@ const Steps = ({
   classname?: string;
   children: string;
 }) => {
+  const { t } = useTranslation();
   return (
     <div
       className={cn('flex items-center gap-2 font-semibold mb-3', classname)}
     >
       <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></span>
-      <span className="mr-1">{`Step ${step}`}</span>
+      <span className="mr-1">
+        {t('remote_settings.step').replace('{step}', String(step))}
+      </span>
       <span className="whitespace-nowrap">{children}</span>
     </div>
   );
@@ -80,6 +84,7 @@ export const RemoteSettingsDialog = ({
   onSubmit,
   onClose,
 }: RemoteSettingsDialogProps) => {
+  const { t } = useTranslation();
   const remoteComputerRef = useRef<RemoteComputerSettingsRef>(null);
   const vlmSettingsRef = useRef<VLMSettingsRef>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -134,10 +139,11 @@ export const RemoteSettingsDialog = ({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-[480px] max-h-[80vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>{operator} Settings</DialogTitle>
+          <DialogTitle>
+            {t('remote_settings.title').replace('{operator}', operator)}
+          </DialogTitle>
           <DialogDescription>
-            If you need to use for a long - term and stable period, You can log
-            in to the Volcengine FaaS console to upgrade.
+            {t('remote_settings.description')}
           </DialogDescription>
         </DialogHeader>
         <div
@@ -150,22 +156,22 @@ export const RemoteSettingsDialog = ({
             }`}
           />
           <Steps step={1} classname="mt-[-40px]">
-            Read Remote Document
+            {t('remote_settings.read_document')}
           </Steps>
           <div className="ml-4 mb-6 bg-[#f6f9ffff] p-5 rounded-md">
             <Button className="w-full" variant={'outline'}>
-              View document guide
+              {t('remote_settings.view_document_guide')}
               <SquareArrowOutUpRight />
             </Button>
           </div>
-          <Steps step={2}>Remote Settings</Steps>
+          <Steps step={2}>{t('remote_settings.remote_settings')}</Steps>
           {operator === Operator.RemoteComputer && (
             <RemoteComputerSettings
               ref={remoteComputerRef}
               className="ml-4 mb-6 bg-[#f6f9ffff] p-5 rounded-md"
             />
           )}
-          <Steps step={3}>VLM Settings</Steps>
+          <Steps step={3}>{t('remote_settings.vlm_settings')}</Steps>
           <VLMSettings
             ref={vlmSettingsRef}
             className="ml-4 bg-[#f6f9ffff] p-5 rounded-md"
@@ -177,7 +183,7 @@ export const RemoteSettingsDialog = ({
           />
         </div>
         <Button className="mt-8 mx-8" onClick={handleGetStart}>
-          Get Start
+          {t('remote_settings.get_started')}
         </Button>
       </DialogContent>
     </Dialog>

@@ -66,12 +66,12 @@ export function PresetImport({ isOpen, onClose }: PresetImportProps) {
       });
 
       await importPresetFromText(yamlText);
-      toast.success('Preset imported successfully');
+      toast.success(t('preset.import_success'));
       onClose();
     } catch (error) {
-      toast.error('Failed to import preset', {
+      toast.error(t('preset.import_failed'), {
         description:
-          error instanceof Error ? error.message : 'Unknown error occurred',
+          error instanceof Error ? error.message : t('common.unknown_error'),
       });
     }
   };
@@ -79,12 +79,12 @@ export function PresetImport({ isOpen, onClose }: PresetImportProps) {
   const handleRemoteImport = async () => {
     try {
       await importPresetFromUrl(remoteUrl, autoUpdate);
-      toast.success('Preset imported successfully');
+      toast.success(t('preset.import_success'));
       onClose();
     } catch (error) {
-      toast.error('Failed to import preset', {
+      toast.error(t('preset.import_failed'), {
         description:
-          error instanceof Error ? error.message : 'Unknown error occurred',
+          error instanceof Error ? error.message : t('common.unknown_error'),
       });
     }
   };
@@ -130,7 +130,7 @@ export function PresetImport({ isOpen, onClose }: PresetImportProps) {
                   id="preset-url"
                   value={remoteUrl}
                   onChange={(e) => setRemoteUrl(e.target.value)}
-                  placeholder="https://example.com/preset.yaml"
+                  placeholder={t('preset.remote_url_placeholder')}
                 />
               </div>
               <div className="flex items-center space-x-2">
@@ -181,7 +181,10 @@ export function PresetBanner(props: PresetBannerProps) {
           <p className="text-sm text-gray-600 line-clamp-2">{props.url}</p>
           {props.date && (
             <p className="text-xs text-gray-500 mt-1">
-              {`Last updated: ${new Date(props.date).toLocaleString()}`}
+              {t('preset.last_updated').replace(
+                '{date}',
+                new Date(props.date).toLocaleString(),
+              )}
             </p>
           )}
         </div>

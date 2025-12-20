@@ -103,7 +103,7 @@ export function ChatSettings() {
                   <FormDescription>{t('chat.language_desc')}</FormDescription>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select language" />
+                      <SelectValue placeholder={t('common.select_language')} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="en">English</SelectItem>
@@ -122,9 +122,7 @@ export function ChatSettings() {
               return (
                 <FormItem>
                   <FormLabel>{t('chat.max_loop')}</FormLabel>
-                  <FormDescription>
-                    Enter a number between 25-200
-                  </FormDescription>
+                  <FormDescription>{t('chat.max_loop_desc')}</FormDescription>
                   <FormControl>
                     <Input
                       type="number"
@@ -148,7 +146,7 @@ export function ChatSettings() {
                 <FormControl>
                   <Input
                     type="number"
-                    placeholder="Enter a number between 0-3000"
+                    placeholder={t('chat.loop_interval_placeholder')}
                     {...field}
                     value={field.value === 0 ? '' : field.value}
                     onChange={(e) => field.onChange(Number(e.target.value))}

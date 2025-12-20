@@ -13,7 +13,7 @@ export enum ModelProvider {
 export interface ModelSettings {
   provider: ModelProvider;
   model: string;
-  apiKey: string;
+  apiKey: string; // @secretlint-disable-line
   apiVersion?: string;
   endpoint?: string;
 }

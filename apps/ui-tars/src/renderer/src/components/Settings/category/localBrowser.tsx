@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
 import { useSetting } from '@renderer/hooks/useSetting';
+import { useTranslation } from '@renderer/hooks/useTranslation';
 import {
   Form,
   FormControl,
@@ -35,6 +36,7 @@ const formSchema = z.object({
 
 export function LocalBrowserSettings() {
   const { settings, updateSetting } = useSetting();
+  const { t } = useTranslation();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -82,11 +84,13 @@ export function LocalBrowserSettings() {
             name="searchEngineForBrowser"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Default Search Engine:</FormLabel>
+                <FormLabel>{t('operator.default_search_engine')}:</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger className="w-[124px]">
-                      <SelectValue placeholder="Select a search engine" />
+                      <SelectValue
+                        placeholder={t('common.select_search_engine')}
+                      />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>

@@ -9,6 +9,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
 import { useSetting } from '@renderer/hooks/useSetting';
+import { useTranslation } from '@renderer/hooks/useTranslation';
 import {
   Form,
   FormControl,
@@ -22,7 +23,7 @@ import { cn } from '@renderer/utils';
 
 const formSchema = z.object({
   url: z.string().url(),
-  token: z.string().min(1),
+  token: z.string().min(1), // @secretlint-disable-line
   server: z.string().min(1),
   ip: z.string().min(1),
 });
@@ -43,6 +44,7 @@ export function RemoteComputerSettings({
   className,
 }: RemoteComputerSettingsProps) {
   const { settings } = useSetting();
+  const { t } = useTranslation();
 
   // console.log('initialValues', settings);
 
@@ -50,7 +52,7 @@ export function RemoteComputerSettings({
     resolver: zodResolver(formSchema),
     defaultValues: {
       url: '',
-      token: '',
+      token: '', // @secretlint-disable-line
       server: '',
       ip: '',
     },
@@ -91,6 +93,7 @@ export function RemoteComputerSettings({
 
       const isTokenValid = await form.trigger('token');
       if (isTokenValid && newToken !== settings.vlmApiKey) {
+        // @secretlint-disable-line
         // updateSetting({ ...settings, vlmApiKey: newApiKey });
       }
 
@@ -121,7 +124,7 @@ export function RemoteComputerSettings({
     console.log('onSubmit', values);
 
     // updateSetting({ ...settings, ...values });
-    toast.success('Settings saved successfully');
+    toast.success(t('common.settings_saved'));
   };
 
   useImperativeHandle(ref, () => ({
@@ -149,11 +152,15 @@ export function RemoteComputerSettings({
             name="url"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Sandbox Manager URL</FormLabel>
+                <FormLabel>
+                  {t('remote_computer.sandbox_manager_url')}
+                </FormLabel>
                 <FormControl>
                   <Input
                     className="bg-white"
-                    placeholder="Enter Sandbox Manager URL"
+                    placeholder={t(
+                      'remote_computer.sandbox_manager_url_placeholder',
+                    )}
                     {...field}
                   />
                 </FormControl>
@@ -166,11 +173,11 @@ export function RemoteComputerSettings({
             name="token"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>User Token</FormLabel>
+                <FormLabel>{t('remote_computer.user_token')}</FormLabel>
                 <FormControl>
                   <Input
                     className="bg-white"
-                    placeholder="Enter User Token"
+                    placeholder={t('remote_computer.user_token_placeholder')}
                     {...field}
                   />
                 </FormControl>
@@ -183,11 +190,13 @@ export function RemoteComputerSettings({
             name="server"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>VNC Proxy Server</FormLabel>
+                <FormLabel>{t('remote_computer.vnc_proxy_server')}</FormLabel>
                 <FormControl>
                   <Input
                     className="bg-white"
-                    placeholder="Enter VNC Proxy Server"
+                    placeholder={t(
+                      'remote_computer.vnc_proxy_server_placeholder',
+                    )}
                     {...field}
                   />
                 </FormControl>
@@ -199,11 +208,11 @@ export function RemoteComputerSettings({
             name="ip"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Establish IP</FormLabel>
+                <FormLabel>{t('remote_computer.establish_ip')}</FormLabel>
                 <FormControl>
                   <Input
                     className="bg-white"
-                    placeholder="Enter Establish IP"
+                    placeholder={t('remote_computer.establish_ip_placeholder')}
                     {...field}
                   />
                 </FormControl>

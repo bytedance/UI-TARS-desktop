@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { useEffect, useState, useImperativeHandle } from 'react';
+import { useEffect, useMemo, useState, useImperativeHandle } from 'react';
 import { CheckCircle, XCircle, Loader2, EyeOff, Eye } from 'lucide-react';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 
 import { VLMProviderV2 } from '@main/store/types';
 import { useSetting } from '@renderer/hooks/useSetting';
+import { useTranslation } from '@renderer/hooks/useTranslation';
 import { Button } from '@renderer/components/ui/button';
 import {
   Form,
@@ -35,18 +36,21 @@ import { cn } from '@renderer/utils';
 import { PresetImport, PresetBanner } from './preset';
 import { api } from '@/renderer/src/api';
 
-const formSchema = z.object({
-  vlmProvider: z.nativeEnum(VLMProviderV2, {
-    message: 'Please select a VLM Provider to enhance resolution',
-  }),
-  vlmBaseUrl: z.string().url(),
-  vlmApiKey: z.string().min(1),
-  vlmModelName: z.string().min(1),
-  useResponsesApi: z.boolean().default(false),
-});
+const createFormSchema = (t: (key: string) => string) =>
+  z.object({
+    vlmProvider: z.nativeEnum(VLMProviderV2, {
+      message: t('vlm.select_provider_error'),
+    }),
+    vlmBaseUrl: z.string().url(),
+    vlmApiKey: z.string().min(1),
+    vlmModelName: z.string().min(1),
+    useResponsesApi: z.boolean().default(false),
+  });
+
+type VLMFormValues = z.infer<ReturnType<typeof createFormSchema>>;
 
 export interface VLMSettingsRef {
-  submit: () => Promise<z.infer<typeof formSchema>>;
+  submit: () => Promise<VLMFormValues>;
 }
 
 interface VLMSettingsProps {
@@ -61,6 +65,8 @@ export function VLMSettings({
   className,
 }: VLMSettingsProps) {
   const { settings, updateSetting, updatePresetFromRemote } = useSetting();
+  const { t } = useTranslation();
+  const formSchema = useMemo(() => createFormSchema(t), [t]);
   const [isPresetModalOpen, setPresetModalOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [responseApiSupported, setResponseApiSupported] = useState<
@@ -72,7 +78,7 @@ export function VLMSettings({
     settings?.presetSource?.type === 'remote' &&
     settings.presetSource.autoUpdate;
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<VLMFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       vlmProvider: undefined,
@@ -135,7 +141,7 @@ export function VLMSettings({
 
       const isKeyValid = await form.trigger('vlmApiKey');
       if (isKeyValid && newApiKey !== settings.vlmApiKey) {
-        updateSetting({ ...settings, vlmApiKey: newApiKey });
+        updateSetting({ ...settings, vlmApiKey: newApiKey }); // @secretlint-disable-line
       }
 
       const isNameValid = await form.trigger('vlmModelName');
@@ -184,9 +190,9 @@ export function VLMSettings({
       await updatePresetFromRemote();
       // toast.success('Preset updated successfully');
     } catch (error) {
-      toast.error('Failed to update preset', {
+      toast.error(t('vlm.update_preset_failed'), {
         description:
-          error instanceof Error ? error.message : 'Unknown error occurred',
+          error instanceof Error ? error.message : t('vlm.unknown_error'),
       });
     }
   };
@@ -196,7 +202,7 @@ export function VLMSettings({
     e.stopPropagation();
 
     await window.electron.setting.resetPreset();
-    toast.success('Reset to manual mode successfully', {
+    toast.success(t('vlm.reset_manual_success'), {
       duration: 1500,
     });
   };
@@ -207,7 +213,7 @@ export function VLMSettings({
         setIsCheckingResponseApi(true);
         const modelConfig = {
           baseUrl: newBaseUrl,
-          apiKey: newApiKey,
+          apiKey: newApiKey, // @secretlint-disable-line
           modelName: newModelName,
         };
 
@@ -216,9 +222,7 @@ export function VLMSettings({
           !modelConfig.apiKey ||
           !modelConfig.modelName
         ) {
-          toast.error(
-            'Please fill in all required fields before enabling Response API',
-          );
+          toast.error(t('vlm.fill_required_before_responses_api'));
           setIsCheckingResponseApi(false);
           return;
         }
@@ -240,16 +244,16 @@ export function VLMSettings({
     }
   };
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: VLMFormValues) => {
     console.log('onSubmit', values);
 
     updateSetting({ ...settings, ...values });
-    toast.success('Settings saved successfully');
+    toast.success(t('vlm.settings_saved'));
   };
 
   useImperativeHandle(ref, () => ({
     submit: async () => {
-      return new Promise<z.infer<typeof formSchema>>((resolve, reject) => {
+      return new Promise<VLMFormValues>((resolve, reject) => {
         form.handleSubmit(
           (values) => {
             onSubmit(values);
@@ -274,7 +278,7 @@ export function VLMSettings({
         <form className={cn('space-y-8 px-[1px]', className)}>
           {!isRemoteAutoUpdatedPreset && (
             <Button type="button" variant="outline" onClick={handlePresetModal}>
-              Import Preset Config
+              {t('vlm.import_preset')}
             </Button>
           )}
           {isRemoteAutoUpdatedPreset && (
@@ -293,14 +297,14 @@ export function VLMSettings({
             render={({ field }) => {
               return (
                 <FormItem>
-                  <FormLabel>VLM Provider</FormLabel>
+                  <FormLabel>{t('vlm.provider')}</FormLabel>
                   <Select
                     disabled={isRemoteAutoUpdatedPreset}
                     onValueChange={field.onChange}
                     value={field.value}
                   >
                     <SelectTrigger className="w-full bg-white">
-                      <SelectValue placeholder="Select VLM provider" />
+                      <SelectValue placeholder={t('vlm.select_provider')} />
                     </SelectTrigger>
                     <SelectContent>
                       {Object.values(VLMProviderV2).map((provider) => (
@@ -321,11 +325,11 @@ export function VLMSettings({
             name="vlmBaseUrl"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>VLM Base URL</FormLabel>
+                <FormLabel>{t('vlm.base_url')}</FormLabel>
                 <FormControl>
                   <Input
                     className="bg-white"
-                    placeholder="Enter VLM Base URL"
+                    placeholder={t('vlm.base_url_placeholder')}
                     {...field}
                     disabled={isRemoteAutoUpdatedPreset}
                   />
@@ -340,13 +344,13 @@ export function VLMSettings({
             name="vlmApiKey"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>VLM API Key</FormLabel>
+                <FormLabel>{t('vlm.api_key')}</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Input
                       type={showPassword ? 'text' : 'password'}
                       className="bg-white"
-                      placeholder="Enter VLM API_Key"
+                      placeholder={t('vlm.api_key_placeholder')}
                       {...field}
                       disabled={isRemoteAutoUpdatedPreset}
                     />
@@ -375,11 +379,11 @@ export function VLMSettings({
             name="vlmModelName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>VLM Model Name</FormLabel>
+                <FormLabel>{t('vlm.model_name')}</FormLabel>
                 <FormControl>
                   <Input
                     className="bg-white"
-                    placeholder="Enter VLM Model Name"
+                    placeholder={t('vlm.model_name_placeholder')}
                     {...field}
                     disabled={isRemoteAutoUpdatedPreset}
                   />
@@ -392,7 +396,7 @@ export function VLMSettings({
           <ModelAvailabilityCheck
             modelConfig={{
               baseUrl: newBaseUrl,
-              apiKey: newApiKey,
+              apiKey: newApiKey, // @secretlint-disable-line
               modelName: newModelName,
             }}
             onResponseApiSupportChange={setResponseApiSupported}
@@ -404,7 +408,7 @@ export function VLMSettings({
             name="useResponsesApi"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Use Responses API</FormLabel>
+                <FormLabel>{t('vlm.use_responses_api')}</FormLabel>
                 <FormControl>
                   <div className="flex items-center gap-3">
                     <Switch
@@ -415,13 +419,13 @@ export function VLMSettings({
                     />
                     {responseApiSupported === false && (
                       <p className="text-sm text-red-500">
-                        Response API is not supported by this model
+                        {t('vlm.responses_api_not_supported')}
                       </p>
                     )}
                     {isCheckingResponseApi && (
                       <p className="text-sm text-muted-foreground flex items-center">
                         <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                        Checking Response API support...
+                        {t('vlm.responses_api_checking')}
                       </p>
                     )}
                   </div>
@@ -443,7 +447,7 @@ export function VLMSettings({
 interface ModelAvailabilityCheckProps {
   modelConfig: {
     baseUrl: string;
-    apiKey: string;
+    apiKey: string; // @secretlint-disable-line
     modelName: string;
   };
   disabled?: boolean;
@@ -466,6 +470,7 @@ export function ModelAvailabilityCheck({
   onResponseApiSupportChange,
 }: ModelAvailabilityCheckProps) {
   const [checkState, setCheckState] = useState<CheckState>({ status: 'idle' });
+  const { t } = useTranslation();
 
   const { baseUrl, apiKey, modelName } = modelConfig;
   const isConfigValid = baseUrl && apiKey && modelName;
@@ -492,9 +497,7 @@ export function ModelAvailabilityCheck({
     e.stopPropagation();
 
     if (!isConfigValid) {
-      toast.error(
-        'Please fill in all required fields before checking model availability',
-      );
+      toast.error(t('vlm.fill_required_before_check'));
       return;
     }
 
@@ -509,11 +512,15 @@ export function ModelAvailabilityCheck({
       onResponseApiSupportChange?.(responseApiSupported);
 
       if (isAvailable) {
-        const successMessage = `Model "${modelName}" is available and working correctly${
-          responseApiSupported
-            ? '. Response API is supported.'
-            : '. But Response API is not supported.'
-        }`;
+        const successMessage = responseApiSupported
+          ? t('vlm.model_check_success_supported').replace(
+              '{modelName}',
+              modelName,
+            )
+          : t('vlm.model_check_success_not_supported').replace(
+              '{modelName}',
+              modelName,
+            );
         setCheckState({
           status: 'success',
           message: successMessage,
@@ -523,7 +530,10 @@ export function ModelAvailabilityCheck({
           responseApiSupported,
         });
       } else {
-        const errorMessage = `Model "${modelName}" is not responding correctly`;
+        const errorMessage = t('vlm.model_check_error_not_responding').replace(
+          '{modelName}',
+          modelName,
+        );
         setCheckState({
           status: 'error',
           message: errorMessage,
@@ -533,8 +543,8 @@ export function ModelAvailabilityCheck({
       }
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error occurred';
-      const fullErrorMessage = `Failed to connect to model: ${errorMessage}`;
+        error instanceof Error ? error.message : t('common.unknown_error');
+      const fullErrorMessage = `${t('vlm.failed_connect_model')}: ${errorMessage}`;
 
       setCheckState({
         status: 'error',
@@ -564,10 +574,10 @@ export function ModelAvailabilityCheck({
         {checkState.status === 'checking' ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Checking Model...
+            {t('vlm.checking_model')}
           </>
         ) : (
-          'Check Model Availability'
+          t('vlm.check_model_availability')
         )}
       </Button>
 

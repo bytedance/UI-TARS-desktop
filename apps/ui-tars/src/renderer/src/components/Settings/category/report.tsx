@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
 import { useSetting } from '@renderer/hooks/useSetting';
+import { useTranslation } from '@renderer/hooks/useTranslation';
 import {
   Form,
   FormControl,
@@ -29,6 +30,7 @@ export interface VLMSettingsRef {
 
 export function ReportSettings() {
   const { settings, updateSetting } = useSetting();
+  const { t } = useTranslation();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -85,10 +87,10 @@ export function ReportSettings() {
             name="reportStorageBaseUrl"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Report Storage Base URL</FormLabel>
+                <FormLabel>{t('report.storage_base_url')}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="https://your-report-storage-endpoint.com/upload"
+                    placeholder={t('report.storage_base_url_placeholder')}
                     {...field}
                   />
                 </FormControl>
@@ -102,10 +104,10 @@ export function ReportSettings() {
             name="utioBaseUrl"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>UTIO Base URL</FormLabel>
+                <FormLabel>{t('report.utio_base_url')}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="https://your-utio-endpoint.com/collect"
+                    placeholder={t('report.utio_base_url_placeholder')}
                     {...field}
                   />
                 </FormControl>

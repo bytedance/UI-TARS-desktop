@@ -48,7 +48,7 @@ const Home = () => {
 
   const toRemoteComputer = async (value: 'free' | 'paid') => {
     console.log('toRemoteComputer', value);
-    const session = await createSession('New Session', {
+    const session = await createSession(t('session.new_session'), {
       operator: Operator.RemoteComputer,
       isFree: value === 'free',
     });
@@ -79,7 +79,7 @@ const Home = () => {
   const toRemoteBrowser = async (value: 'free' | 'paid') => {
     console.log('toRemoteBrowser', value);
 
-    const session = await createSession('New Session', {
+    const session = await createSession(t('session.new_session'), {
       operator: Operator.RemoteBrowser,
       isFree: value === 'free',
     });
@@ -108,7 +108,7 @@ const Home = () => {
 
   /** local click logic start */
   const toLocal = async (operator: Operator) => {
-    const session = await createSession('New Session', {
+    const session = await createSession(t('session.new_session'), {
       operator: operator,
     });
 

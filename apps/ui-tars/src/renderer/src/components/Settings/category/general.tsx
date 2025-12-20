@@ -66,7 +66,7 @@ export const GeneralSettings = () => {
           }
         >
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select Language" />
+            <SelectValue placeholder={t('common.select_language')} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="en">English</SelectItem>
