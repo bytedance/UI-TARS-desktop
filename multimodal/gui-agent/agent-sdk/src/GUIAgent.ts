@@ -124,8 +124,47 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent {
   }
 
   async onLLMRequest(id: string, payload: LLMRequestHookPayload): Promise<void> {
-    // this.logger.log('onLLMRequest', id, payload);
-    // await ImageSaver.saveImagesFromPayload(id, payload);
+    try {
+      const safeStringify = (obj: any, max = 800) => {
+        try {
+          const s = JSON.stringify(obj);
+          return s.length > max ? s.slice(0, max) + '…(truncated)' : s;
+        } catch {
+          return '[unserializable]';
+        }
+      };
+
+      const summary = {
+        id,
+        model: (payload as any)?.model || (payload as any)?.modelId || 'unknown',
+        messagesCount: Array.isArray((payload as any)?.messages)
+          ? (payload as any).messages.length
+          : undefined,
+        hasImages: (() => {
+          try {
+            const msgs = (payload as any)?.messages || [];
+            let cnt = 0;
+            for (const m of msgs) {
+              if (Array.isArray(m?.content)) {
+                cnt += m.content.filter((c: any) => c?.type === 'image_url').length;
+              }
+            }
+            return cnt;
+          } catch {
+            return undefined;
+          }
+        })(),
+      };
+
+      this.logger.info('[GUIAgent] onLLMRequest summary:', safeStringify(summary));
+      // Log a compact preview of the first message
+      const firstMsg = (payload as any)?.messages?.[0];
+      if (firstMsg) {
+        this.logger.debug('[GUIAgent] onLLMRequest first message:', safeStringify(firstMsg, 1200));
+      }
+    } catch (e) {
+      this.logger.error('[GUIAgent] onLLMRequest logging failed:', e);
+    }
   }
 
   async onEachAgentLoopStart(sessionId: string) {

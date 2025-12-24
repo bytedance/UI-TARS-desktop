@@ -304,17 +304,45 @@ export class LLMProcessor {
     this.logger.info(`llm stream start`);
 
     // Process each incoming chunk
-    for await (const chunk of stream) {
+    for await (const rawChunk of stream) {
       // Check if operation was aborted
       if (abortSignal?.aborted) {
         this.logger.info(`[LLM] Streaming response processing aborted`);
         break;
       }
 
-      allChunks.push(chunk);
+      // Normalize chunk: some providers wrap SSE as { event, data }
+      const chunk: any = (rawChunk as any)?.data ? (rawChunk as any).data : rawChunk;
+
+      allChunks.push(chunk as ChatCompletionChunk);
+
+      // Validate streaming chunk shape to avoid runtime errors on non-OpenAI formats
+      try {
+        const hasChoicesArray = Array.isArray((chunk as any)?.choices);
+        if (!hasChoicesArray) {
+          const preview = (() => {
+            try {
+              const s = JSON.stringify(rawChunk);
+              return s.length > 500 ? s.slice(0, 500) + '…(truncated)' : s;
+            } catch {
+              return '[unserializable chunk]';
+            }
+          })();
+          this.logger.error('[LLM] Non-standard streaming chunk: missing choices[]');
+          this.logger.error('[LLM] Chunk preview:', preview);
+          throw new TypeError('Unexpected streaming chunk format: missing choices');
+        }
+      } catch (e) {
+        this.logger.error('[LLM] Streaming chunk validation error:', e);
+        // Stop processing further to surface error to caller
+        throw e;
+      }
 
       // Process the chunk using the tool call engine
-      const chunkResult = toolCallEngine.processStreamingChunk(chunk, processingState);
+      const chunkResult = toolCallEngine.processStreamingChunk(
+        chunk as ChatCompletionChunk,
+        processingState,
+      );
 
       // Track first token time only if metrics are enabled
       if (

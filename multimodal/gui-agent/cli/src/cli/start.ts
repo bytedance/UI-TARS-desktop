@@ -98,6 +98,93 @@ export const start = async (options: CliOptions) => {
     }
   }
 
+  // Diagnostic: print model config loaded
+  try {
+    const maskedKey = config.apiKey
+      ? `${config.apiKey.slice(0, 6)}...${config.apiKey.slice(-4)}`
+      : '(empty)';
+    console.log('[CLI] Loaded model config:');
+    console.log(`  provider: ${config.provider}`);
+    console.log(`  baseURL: ${config.baseURL}`);
+    console.log(`  model: ${config.model}`);
+    console.log(`  apiKey: ${maskedKey}`);
+    console.log(`  useResponsesApi: ${Boolean((config as any).useResponsesApi)}`);
+  } catch (e) {
+    console.warn('[CLI] Failed to print model config diagnostics:', e);
+  }
+
+  // Basic baseURL validation and hints for OpenAI-compatible servers
+  try {
+    if (config.baseURL) {
+      let parsed: URL | null = null;
+      try {
+        parsed = new URL(config.baseURL);
+      } catch (_) {
+        console.warn('[CLI] Warning: baseURL is not a valid URL:', config.baseURL);
+      }
+      if (parsed) {
+        const endsWithV1 = /\/v1\/?$/.test(parsed.pathname);
+        if (!endsWithV1) {
+          console.warn(
+            '[CLI] Hint: OpenAI-compatible endpoints typically end with "/v1" (e.g. https://host/v1).',
+          );
+        }
+        if (parsed.protocol !== 'https:') {
+          console.warn('[CLI] Hint: use HTTPS for most providers. Current:', parsed.protocol);
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('[CLI] baseURL validation failed:', e);
+  }
+
+  // Preflight: check Chat Completions non-streaming response shape for OpenAI-compatible servers
+  try {
+    if (config.provider === 'openai' && config.baseURL && config.model) {
+      const url = new URL(config.baseURL.replace(/\/$/, ''));
+      url.pathname = url.pathname.replace(/\/$/, '') + '/chat/completions';
+      console.log('[CLI] Preflight: POST', url.toString());
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 6000);
+      const resp = await fetch(url.toString(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${config.apiKey}`,
+        },
+        body: JSON.stringify({
+          model: config.model,
+          messages: [{ role: 'user', content: 'ping' }],
+          stream: false,
+        }),
+        signal: controller.signal,
+      } as any);
+      clearTimeout(timeout);
+      const text = await resp.text();
+      if (!resp.ok) {
+        console.warn('[CLI] Preflight failed:', resp.status, resp.statusText);
+        console.warn('[CLI] Preflight response body:', text.slice(0, 500));
+      } else {
+        try {
+          const json = JSON.parse(text);
+          const hasChoices = Array.isArray(json?.choices) && json.choices.length > 0;
+          console.log('[CLI] Preflight ok. choices[0] exists:', hasChoices);
+          if (!hasChoices) {
+            console.warn('[CLI] Preflight: response does not contain choices[]. Service may not implement Chat Completions.');
+          }
+        } catch (_) {
+          console.warn('[CLI] Preflight ok but response is not JSON:', text.slice(0, 200));
+        }
+      }
+    }
+  } catch (e: any) {
+    if (e?.name === 'AbortError') {
+      console.warn('[CLI] Preflight check timed out (6s). Proceeding without preflight.');
+    } else {
+      console.warn('[CLI] Preflight check error:', e);
+    }
+  }
+
   let targetOperator = null;
   const targetType =
     options.target ||
@@ -261,7 +348,31 @@ export const start = async (options: CliOptions) => {
     return;
   }
 
-  const resultEvent = await guiAgent.run(answers.instruction);
+  // Enhanced error logging around agent run
+  let resultEvent: any;
+  try {
+    console.log('[CLI] Starting GUIAgent run with instruction:', answers.instruction || options.query);
+    resultEvent = await guiAgent.run(answers.instruction);
+    console.log('[CLI] GUIAgent run completed.');
+  } catch (err: any) {
+    console.error('[CLI] GUIAgent run failed.');
+    // Try to surface common OpenAI-compatible errors
+    const errMsg = err?.message || String(err);
+    console.error('[CLI] Error message:', errMsg);
+    if (err?.status) console.error('[CLI] HTTP status:', err.status);
+    if (err?.code) console.error('[CLI] Error code:', err.code);
+    const respData = err?.response?.data || err?.response?.body || err?.data;
+    if (respData) {
+      try {
+        const text = typeof respData === 'string' ? respData : JSON.stringify(respData);
+        console.error('[CLI] Response body:', text.slice(0, 500));
+      } catch (_) {
+        console.error('[CLI] Response body: [unprintable]');
+      }
+    }
+    // Re-throw to keep existing behavior
+    throw err;
+  }
 
   try {
     const eventStream = guiAgent.getEventStream();
