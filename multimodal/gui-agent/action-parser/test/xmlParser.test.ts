@@ -426,4 +426,30 @@ Action: click(start_box='<bbox>637 964 637 964</bbox>')`;
         '<point>500 500</point>需要模拟向上滚动的动作，使用scroll工具，direction设为up，point可以随便选一个页面内的坐标，比如。这样就能完成向上滚动的操作了。',
     });
   });
+
+  it('(20) should parse XML with dynamic suffixes', () => {
+    const input = `<think_never_used_123>Thinking...</think_never_used_123>
+<seed:tool_call_never_used_123>
+<function_never_used_123=click>
+<parameter_never_used_123=point><point>10 47</point></parameter_never_used_123=point>
+</function_never_used_123=click>
+</seed:tool_call_never_used_123>`;
+    const parser = new XMLFormatParser(logger);
+    const result = parser.parse(input);
+    expect(result).toEqual({
+      reasoningContent: 'Thinking...',
+      rawActionStrings: ["click(point='(10, 47)')"],
+      actions: [
+        {
+          type: 'click',
+          inputs: {
+            point: {
+              raw: { x: 10, y: 47 },
+              referenceBox: { x1: 10, x2: 10, y1: 47, y2: 47 },
+            },
+          },
+        },
+      ],
+    });
+  });
 });

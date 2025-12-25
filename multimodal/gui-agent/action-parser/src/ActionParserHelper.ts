@@ -486,7 +486,7 @@ export class ActionParserHelper {
     for (const [key, value] of Object.entries(object as Record<string, unknown>)) {
       // Check if key is in format like "function=scroll", "function=type", etc.
       // Extract the function name and process accordingly
-      const functionMatch = key.match(/^function=(.+)$/);
+      const functionMatch = key.match(/^function.*=(.+)$/);
       if (!functionMatch) continue;
 
       const functionName = functionMatch[1]; // Extract function name (e.g., "scroll", "type")
@@ -544,7 +544,7 @@ export class ActionParserHelper {
     for (const [key, value] of Object.entries(object as Record<string, string>)) {
       // Check if key is in format like "parameter=content", "parameter=point", etc.
       // Extract the parameter name and process accordingly
-      const parameterMatch = key.match(/^parameter=(.+)$/);
+      const parameterMatch = key.match(/^parameter.*=(.+)$/);
       if (!parameterMatch) continue;
 
       const paramName = parameterMatch[1];

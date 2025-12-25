@@ -53,6 +53,10 @@ export class GUIAgentToolCallEngine extends ToolCallEngine {
    * FIXME: move to base tool call engine.
    */
   prepareRequest(context: ToolCallEnginePrepareRequestContext): ChatCompletionCreateParams {
+    defaultLogger.log(
+      "【New Sys Prompt'】 System Prompt:",
+      JSON.stringify(context.messages.find((m) => m.role === 'system')?.content || ''),
+    );
     return {
       model: context.model,
       messages: context.messages,
@@ -117,6 +121,7 @@ export class GUIAgentToolCallEngine extends ToolCallEngine {
    */
   finalizeStreamProcessing(state: StreamProcessingState): ParsedModelResponse {
     const fullContent = state.contentBuffer;
+    defaultLogger.log("【New Sys Prompt'】 Model Response:", fullContent);
     defaultLogger.log('[finalizeStreamProcessing] fullContent', fullContent);
 
     // Try custom action parser first if available

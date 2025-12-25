@@ -253,7 +253,7 @@ export const start = async (options: CliOptions) => {
       apiKey: config.apiKey, // secretlint-disable-line
     },
     operator: targetOperator,
-    systemPrompt: systemPrompts,
+    systemPrompt: systemPrompts.join('\n\n'),
   });
 
   if (useTasksFile) {
