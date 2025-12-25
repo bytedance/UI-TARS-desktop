@@ -65,6 +65,10 @@ export class DefaultActionParser extends BaseActionParser {
 
     this.logger.debug('[parsePrediction] reasoningContent:', reasoningContent);
     this.logger.debug('[parsePrediction] actions lenth:', actions.length);
+    this.logger.info(
+      "【New Sys Prompt'】 Parsing Result:",
+      JSON.stringify({ reasoningContent, actions }),
+    );
 
     return {
       rawContent: originInput,

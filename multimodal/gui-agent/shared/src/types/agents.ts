@@ -111,9 +111,10 @@ export interface GUIAgentConfig<TOperator> extends AgentOptions {
   /**
    * System prompt configuration. Can be either:
    * - A simple string (legacy mode)
+   * - An array of strings or chat messages (will be concatenated)
    * - A SystemPromptTemplate object with template and actionsToString function
    */
-  systemPrompt?: string | SystemPromptTemplate;
+  systemPrompt?: string | Array<string | { role: string; content: string }> | SystemPromptTemplate;
   /** The handler function to parse model output into PredictionParsed object */
   customeActionParser?: CustomActionParser;
   /** The function to normalize raw coordinates */

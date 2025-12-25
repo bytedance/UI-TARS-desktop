@@ -193,13 +193,22 @@ export class NutJSOperator extends Operator {
         const stripContent = content.replace(/\\n$/, '').replace(/\n$/, '');
         keyboard.config.autoDelayMs = 0;
         if (process.platform === 'win32') {
-          const originalClipboard = await clipboard.getContent();
+          let originalClipboard: string | undefined;
+          try {
+            originalClipboard = await clipboard.getContent();
+          } catch (error) {
+            this.logger.warn('Failed to get clipboard content (likely non-text), skipping restore');
+          }
+
           await clipboard.setContent(stripContent);
           await keyboard.pressKey(Key.LeftControl, Key.V);
           await sleep(50);
           await keyboard.releaseKey(Key.LeftControl, Key.V);
           await sleep(50);
-          await clipboard.setContent(originalClipboard);
+
+          if (originalClipboard !== undefined) {
+            await clipboard.setContent(originalClipboard);
+          }
         } else {
           await keyboard.type(stripContent);
         }

@@ -52,6 +52,10 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent {
     let finalSystemPrompt = SYSTEM_PROMPT;
     if (typeof systemPrompt === 'string') {
       finalSystemPrompt = systemPrompt;
+    } else if (Array.isArray(systemPrompt)) {
+      finalSystemPrompt = systemPrompt
+        .map((p) => (typeof p === 'string' ? p : p.content))
+        .join('\n\n');
     } else if (systemPrompt && isSystemPromptTemplate(systemPrompt)) {
       finalSystemPrompt = assembleSystemPrompt(systemPrompt, operator.getSupportedActions());
     }
@@ -124,8 +128,53 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent {
   }
 
   async onLLMRequest(id: string, payload: LLMRequestHookPayload): Promise<void> {
-    // this.logger.log('onLLMRequest', id, payload);
-    // await ImageSaver.saveImagesFromPayload(id, payload);
+    try {
+      const safeStringify = (obj: unknown, max = 800): string => {
+        try {
+          const s = JSON.stringify(obj);
+          return s.length > max ? s.slice(0, max) + '…(truncated)' : s;
+        } catch {
+          return '[unserializable]';
+        }
+      };
+
+      const req = payload?.request;
+      const messages = req && Array.isArray(req.messages) ? req.messages : [];
+      const model = req && typeof req.model === 'string' ? req.model : 'unknown';
+
+      const hasImages = (() => {
+        try {
+          let cnt = 0;
+          for (const m of messages as Array<{ content?: unknown }>) {
+            const content = m?.content;
+            if (Array.isArray(content)) {
+              for (const part of content as Array<{ type?: string }>) {
+                if (part?.type === 'image_url') cnt++;
+              }
+            }
+          }
+          return cnt;
+        } catch {
+          return undefined as unknown as number | undefined;
+        }
+      })();
+
+      const summary = {
+        id,
+        model,
+        messagesCount: messages.length,
+        hasImages,
+      };
+
+      this.logger.info('[GUIAgent] onLLMRequest summary:', safeStringify(summary));
+
+      const firstMsg = messages[0];
+      if (firstMsg) {
+        this.logger.debug('[GUIAgent] onLLMRequest first message:', safeStringify(firstMsg, 1200));
+      }
+    } catch (e) {
+      this.logger.error('[GUIAgent] onLLMRequest logging failed:', e);
+    }
   }
 
   async onEachAgentLoopStart(sessionId: string) {

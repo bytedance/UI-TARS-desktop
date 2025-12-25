@@ -21,6 +21,11 @@ export const run = () => {
     .option('-t, --target <target>', 'Target automation type (computer, browser, android)')
     .option('-q, --query <query>', 'Instruction to execute (optional, will prompt if not provided)')
     .option('-c, --config <path>', 'Path to configuration file')
+    .option('-o, --output <dir>', 'Directory to store execution results')
+    .option(
+      '--tasks <file>',
+      "Path to tasks JSON file containing a list of {taskId, query}. Use 'demo' to run built-in sample tasks",
+    )
     .action(async (options: CliOptions) => {
       try {
         await start(options);
