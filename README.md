@@ -147,7 +147,7 @@ For more use cases, please check out [#842](https://github.com/bytedance/UI-TARS
 <img alt="Agent TARS CLI" src="https://agent-tars.com/agent-tars-cli.png">
 
 ```bash
-# Luanch with `npx`.
+# Launch with `npx`.
 npx @agent-tars/cli@latest
 
 # Install globally, required Node.js >= 22
