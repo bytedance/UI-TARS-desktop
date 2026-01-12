@@ -108,11 +108,20 @@ export async function getOrCreateUserConfig(c: HonoContext) {
 
 /**
  * Delete user configuration
+ * 
+ * SECURITY: Only allows the authenticated user to delete their own configuration.
+ * The userId is obtained from the authenticated session, not from request body.
  */
 export async function deleteUserConfig(c: HonoContext) {
   try {
     const user = requireAuth(c);
     const userConfigService = getUserConfigService(c);
+    
+    // Verify that the authenticated user is performing the operation on their own account
+    if (!user?.userId) {
+      return c.json({ error: 'Unauthorized' }, 401);
+    }
+    
     const deleted = await userConfigService.deleteUserConfig(user.userId);
 
     if (!deleted) {
