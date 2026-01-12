@@ -5,8 +5,81 @@
 import { NextResponse } from 'next/server';
 import { GUIAgent, StatusEnum } from '@ui-tars/sdk';
 import { BrowserbaseOperator } from '@ui-tars/operator-browserbase';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+
+// Request rate limiting map: tracks requests per API key
+const requestRateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
+const MAX_REQUESTS_PER_WINDOW = 10;
+
+// Request body schema validation
+const AgentRequestSchema = z.object({
+  goal: z.string().min(1).max(5000),
+  sessionId: z.string().min(1).max(256),
+});
+
+type AgentRequest = z.infer<typeof AgentRequestSchema>;
+
+/**
+ * Verify API authentication via Authorization header
+ * SECURITY: Requires valid authorization token to prevent unauthorized access
+ */
+function verifyAuthentication(request: Request): string | null {
+  const authHeader = request.headers.get('authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return null;
+  }
+  const token = authHeader.substring(7);
+  const expectedToken = process.env.AGENT_API_SECRET;
+  if (!expectedToken || token !== expectedToken) {
+    return null;
+  }
+  return token;
+}
+
+/**
+ * Check rate limiting for the request
+ * SECURITY: Prevents abuse by limiting requests per authentication token
+ */
+function checkRateLimit(apiKey: string): boolean {
+  const now = Date.now();
+  const record = requestRateLimitMap.get(apiKey);
+  
+  if (!record || now >= record.resetTime) {
+    requestRateLimitMap.set(apiKey, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+    return true;
+  }
+  
+  if (record.count >= MAX_REQUESTS_PER_WINDOW) {
+    return false;
+  }
+  
+  record.count++;
+  return true;
+}
+
+/**
+ * Structured logging for security audit trail
+ * SECURITY: Provides comprehensive audit logs for forensic analysis
+ */
+function logSecurityEvent(
+  eventType: string,
+  clientIp: string | null,
+  userId: string | null,
+  details: Record<string, unknown>,
+) {
+  const timestamp = new Date().toISOString();
+  const logEntry = {
+    timestamp,
+    eventType,
+    clientIp: clientIp || 'unknown',
+    userId: userId || 'unauthenticated',
+    ...details,
+  };
+  console.log(JSON.stringify(logEntry));
+}
 
 const SYSTEM_PROMPT = `You are a GUI agent. You are given a task and your action history, with screenshots. You need to perform the next action to complete the task.
 
@@ -37,18 +110,49 @@ export async function POST(request: Request) {
   const responseStream = new TransformStream();
   const writer = responseStream.writable.getWriter();
   const encoder = new TextEncoder();
+  
+  // Extract client IP for logging (SECURITY: for audit trail)
+  const clientIp = request.headers.get('x-forwarded-for') || 
+                   request.headers.get('x-real-ip') || 
+                   'unknown';
 
   try {
-    console.log('request', request);
-    const body = await request.json();
-    const { goal, sessionId } = body;
-
-    if (!sessionId) {
+    // SECURITY: Verify authentication before processing
+    const apiToken = verifyAuthentication(request);
+    if (!apiToken) {
+      logSecurityEvent('auth_failed', clientIp, null, { reason: 'missing_or_invalid_token' });
       return NextResponse.json(
-        { error: 'Missing sessionId in request body' },
+        { error: 'Unauthorized: Missing or invalid authorization token' },
+        { status: 401 },
+      );
+    }
+
+    // SECURITY: Check rate limiting
+    if (!checkRateLimit(apiToken)) {
+      logSecurityEvent('rate_limit_exceeded', clientIp, apiToken, {});
+      return NextResponse.json(
+        { error: 'Rate limit exceeded' },
+        { status: 429 },
+      );
+    }
+
+    // SECURITY: Validate request body schema
+    let parsedBody: AgentRequest;
+    try {
+      const body = await request.json();
+      parsedBody = AgentRequestSchema.parse(body);
+    } catch (error) {
+      logSecurityEvent('validation_failed', clientIp, apiToken, { 
+        error: error instanceof Error ? error.message : 'Invalid request body' 
+      });
+      return NextResponse.json(
+        { error: 'Invalid request body: goal and sessionId are required' },
         { status: 400 },
       );
     }
+
+    const { goal, sessionId } = parsedBody;
+    logSecurityEvent('request_accepted', clientIp, apiToken, { goal: goal.substring(0, 100) });
 
     console.log('sessionIdsessionIdsessionId', sessionId);
     const operator = new BrowserbaseOperator({
@@ -104,8 +208,10 @@ export async function POST(request: Request) {
 
     guiAgent.run(goal);
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logSecurityEvent('processing_error', clientIp, null, { error: errorMessage });
     console.error('Error in agent endpoint:', error);
-    writer.write(encoder.encode(JSON.stringify({ error })));
+    writer.write(encoder.encode(JSON.stringify({ error: 'Internal server error' })));
     writer.close();
   }
 
