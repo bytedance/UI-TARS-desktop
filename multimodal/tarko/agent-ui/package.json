@@ -39,7 +39,7 @@
   },
   "scripts": {
     "dev": "rsbuild dev",
-    "dev:w": "AGENT_BASE_URL=http://localhost:3000 ENV=development pnpm dev",
+    "dev:w": "AGENT_BASE_URL=http://localhost:3003 ENV=development pnpm dev",
     "prepublishOnly": "npm run build",
     "build": "rsbuild build",
     "preview": "rsbuild preview"

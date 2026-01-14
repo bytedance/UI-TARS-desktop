@@ -3,7 +3,10 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useSession } from '@/common/hooks/useSession';
 import { SessionCreatingState } from '@/standalone/chat/components/SessionCreatingState';
-import { globalRuntimeSettingsAtom, resetGlobalRuntimeSettingsAction } from '@/common/state/atoms/globalRuntimeSettings';
+import {
+  globalRuntimeSettingsAtom,
+  resetGlobalRuntimeSettingsAction,
+} from '@/common/state/atoms/globalRuntimeSettings';
 import { createSessionAction } from '@/common/state/actions/sessionActions';
 import { ChatCompletionContentPart } from '@tarko/agent-interface';
 
@@ -42,7 +45,6 @@ const CreatingPage: React.FC = () => {
         // 1. Router state (internal navigation from home page)
         // 2. Global runtime settings (from home page)
         // 3. URL search params (deployment users)
-        
         const state = location.state as LocationState | null;
         let runtimeSettings: Record<string, any> = {}; // Persistent session settings
         let agentOptions: Record<string, any> = {}; // One-time task options
@@ -63,7 +65,7 @@ const CreatingPage: React.FC = () => {
         else {
           const runtimeSettingsParam = searchParams.get('runtimeSettings');
           const agentOptionsParam = searchParams.get('agentOptions');
-          
+
           if (runtimeSettingsParam) {
             try {
               runtimeSettings = JSON.parse(decodeURIComponent(runtimeSettingsParam));
@@ -71,7 +73,7 @@ const CreatingPage: React.FC = () => {
               console.error('Failed to parse runtimeSettings from URL:', error);
             }
           }
-          
+
           if (agentOptionsParam) {
             try {
               agentOptions = JSON.parse(decodeURIComponent(agentOptionsParam));
@@ -79,7 +81,7 @@ const CreatingPage: React.FC = () => {
               console.error('Failed to parse agentOptions from URL:', error);
             }
           }
-          
+
           query = searchParams.get('q');
         }
 
@@ -88,7 +90,7 @@ const CreatingPage: React.FC = () => {
         // Create session with runtime settings (persistent) and agent options (one-time)
         const sessionId = await createSession(
           Object.keys(runtimeSettings).length > 0 ? runtimeSettings : undefined,
-          Object.keys(agentOptions).length > 0 ? agentOptions : undefined
+          Object.keys(agentOptions).length > 0 ? agentOptions : undefined,
         );
 
         // Clear global settings after successful session creation
@@ -99,9 +101,11 @@ const CreatingPage: React.FC = () => {
         // Navigate to the new session
         navigate(`/${sessionId}`, { replace: true });
 
-        // Send the initial query
+        // Send the initial query or auto-start if autoPlay is enabled
         if (query) {
           await sendMessage(query);
+        } else if (agentOptions?.agentMode?.autoPlay) {
+          await sendMessage('start to play');
         }
       } catch (error) {
         console.error('Failed to create session:', error);
