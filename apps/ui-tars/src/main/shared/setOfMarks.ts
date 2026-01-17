@@ -17,6 +17,14 @@ export interface Overlay {
   svg: string;
 }
 
+const escapeSvgText = (value: string): string =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
 /**
  * set of marks overlays, action highlights
  * @param predictions PredictionParsed[]
@@ -40,6 +48,7 @@ export const setOfMarksOverlays = ({
   const { width, height } = screenshotContext?.size || {};
 
   for (const prediction of predictions) {
+    const safeActionType = escapeSvgText(String(prediction.action_type || ''));
     let boxWidth: number;
     let boxHeight: number;
     switch (prediction.action_type) {
@@ -100,11 +109,11 @@ export const setOfMarksOverlays = ({
                 x="${boxWidth / 2 + 65}"
                 y="${boxHeight / 2}"
                 font-family="-apple-system, BlinkMacSystemFont, Arial, sans-serif"
-                font-size="16"
-                fill="red"
-                text-anchor="middle"
-                dominant-baseline="middle"
-              >${prediction.action_type}</text>
+              font-size="16"
+              fill="red"
+              text-anchor="middle"
+              dominant-baseline="middle"
+              >${safeActionType}</text>
             </svg>`,
           });
         }
@@ -114,6 +123,7 @@ export const setOfMarksOverlays = ({
         boxHeight = 100;
 
         const { content } = prediction.action_inputs || {};
+        const safeContent = escapeSvgText(String(content || ''));
 
         overlays.push({
           prediction,
@@ -132,7 +142,7 @@ export const setOfMarksOverlays = ({
             fill="red"
             text-anchor="middle"
             dominant-baseline="middle"
-          >Typing: "${content}"</text>
+          >Typing: "${safeContent}"</text>
         </svg>`,
         });
         break;
@@ -142,6 +152,7 @@ export const setOfMarksOverlays = ({
 
         const { key = '' } = prediction.action_inputs || {};
         const keys = key.split(' ').join(' + ');
+        const safeKeys = escapeSvgText(keys);
 
         overlays.push({
           prediction,
@@ -160,7 +171,7 @@ export const setOfMarksOverlays = ({
             fill="red"
             text-anchor="middle"
             dominant-baseline="middle"
-          >Hotkey: ${keys}</text>
+          >Hotkey: ${safeKeys}</text>
         </svg>`,
         });
         break;
@@ -195,7 +206,7 @@ export const setOfMarksOverlays = ({
             fill="red"
             text-anchor="middle"
             dominant-baseline="middle"
-          >${prediction.action_type}</text>
+          >${safeActionType}</text>
         </svg>`,
         });
         break;
