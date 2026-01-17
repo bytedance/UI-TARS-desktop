@@ -54,6 +54,7 @@ export function registerSettingsHandlers() {
    */
   ipcMain.handle('setting:importPresetFromUrl', async (_, url, autoUpdate) => {
     try {
+      await SettingStore.validatePresetUrl(url);
       const newSettings = await SettingStore.fetchPresetFromUrl(url);
       SettingStore.setStore({
         ...newSettings,
