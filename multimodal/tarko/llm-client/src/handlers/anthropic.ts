@@ -39,6 +39,30 @@ import {
   isEmptyObject,
 } from './utils.js';
 
+const isNonEmptyTextBlock = (block: { type: string; text?: string }): boolean =>
+  block.type !== 'text' || (!!block.text && block.text.trim().length > 0);
+
+const sanitizeEmptyTextBlocks = (
+  messages: MessageCreateParamsNonStreaming['messages'],
+): MessageCreateParamsNonStreaming['messages'] => {
+  return messages.map((message) => {
+    if (!Array.isArray(message.content)) {
+      return message;
+    }
+
+    const filteredContent = message.content.filter(isNonEmptyTextBlock);
+
+    if (filteredContent.length === 0) {
+      return {
+        ...message,
+        content: [{ type: 'text', text: '[No content]' }] as typeof message.content,
+      };
+    }
+
+    return { ...message, content: filteredContent };
+  });
+};
+
 export const createCompletionResponseNonStreaming = (
   response: Message,
   created: number,
@@ -543,7 +567,7 @@ export class AnthropicHandler extends BaseHandler<AnthropicModel> {
 
     const stream = typeof body.stream === 'boolean' ? body.stream : undefined;
     const maxTokens = body.max_tokens ?? getDefaultMaxTokens(body.model);
-    const client = new Anthropic({ 
+    const client = new Anthropic({
       apiKey: getApiKey(this.opts.apiKey)!,
       defaultHeaders: this.opts.defaultHeaders,
     });
@@ -555,7 +579,8 @@ export class AnthropicHandler extends BaseHandler<AnthropicModel> {
           // 0 to 2.
           body.temperature / 2
         : undefined;
-    const { messages, systemMessage } = await convertMessages(body.messages);
+    const { messages: rawMessages, systemMessage } = await convertMessages(body.messages);
+    const messages = sanitizeEmptyTextBlocks(rawMessages);
     const { toolChoice, tools } = convertToolParams(body.tool_choice, body.tools);
 
     if (stream === true) {
