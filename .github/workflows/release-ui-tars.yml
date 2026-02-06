@@ -19,14 +19,14 @@ jobs:
   publish_on_mac:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
       - name: Show operating system info
         run: |
           echo "Operating System:"
           uname -a
       - name: Install pnpm
         run: npm install -g pnpm@9
-      - uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238  # v6.2.0
         with:
           node-version: 20
           cache: 'pnpm'
@@ -76,7 +76,7 @@ jobs:
         run: |
           cd apps/ui-tars && pnpm run publish:mac-arm64
       - name: Save latest-mac-arm64.yml as an artifact
-        uses: actions/upload-artifact@6027e3dd177782cd8ab9af838c04fd81a07f1d47
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6.0.0
         with:
           name: latest-mac-${{ github.sha }}-arm64
           path: apps/ui-tars/out/latest-mac-arm64.yml
@@ -85,14 +85,14 @@ jobs:
   publish_on_mac_x64:
     runs-on: macos-13
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
       - name: Show operating system info
         run: |
           echo "Operating System:"
           uname -a
       - name: Install pnpm
         run: npm install -g pnpm@9
-      - uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238  # v6.2.0
         with:
           node-version: 20
           cache: 'pnpm'
@@ -142,7 +142,7 @@ jobs:
         run: |
           cd apps/ui-tars && pnpm run publish:mac-x64
       - name: Save latest-mac-x64.yml as an artifact
-        uses: actions/upload-artifact@6027e3dd177782cd8ab9af838c04fd81a07f1d47
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6.0.0
         with:
           name: latest-mac-${{ github.sha }}-x64
           path: apps/ui-tars/out/latest-mac-x64.yml
@@ -154,21 +154,21 @@ jobs:
       - publish_on_mac_x64
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
       - name: Show operating system info
         run: |
           echo "Operating System:"
           uname -a
       - name: Install pnpm
         run: npm install -g pnpm@9
-      - uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238  # v6.2.0
         with:
           node-version: 20
           cache: 'pnpm'
       - name: install dependencies
         run: pnpm i tsx js-yaml -w
       - name: Download All Artifacts
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131  # v7.0.0
         with:
           path: scripts/merge-yml
           pattern: latest-mac-${{ github.sha }}-*
@@ -189,14 +189,14 @@ jobs:
   publish_on_win:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
       - name: Show operating system info
         run: |
           echo "Operating System:"
           cmd /c ver
       - name: Install pnpm
         run: npm install -g pnpm@9
-      - uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238  # v6.2.0
         with:
           node-version: 20
           cache: 'pnpm'
