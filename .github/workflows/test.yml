@@ -47,7 +47,7 @@ jobs:
         with:
           node-version: 20
           cache: 'pnpm'
-      - uses: browser-actions/setup-chrome@v1
+      - uses: browser-actions/setup-chrome@v2
         with:
           chrome-version: 120
           install-dependencies: true
@@ -58,7 +58,7 @@ jobs:
       - name: Run test
         run: npm exec turbo run coverage
       - name: Upload coverage data
-        uses: codecov/codecov-action@13ce06bfc6bbe3ecf90edbbf1bc32fe5978ca1d3 # v5.3.1
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de  # v5.5.2
         with:
           fail_ci_if_error: true
           disable_search: true
