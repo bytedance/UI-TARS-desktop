@@ -24,6 +24,8 @@ const OAUTH_SCOPE = 'openid profile email offline_access';
 const SESSION_FILE_NAME = 'codex-oauth.session.json';
 const LOGIN_TIMEOUT_MS = 3 * 60 * 1000;
 const REFRESH_LEEWAY_MS = 60 * 1000;
+const CALLBACK_HEALTH_PATH = '/auth/health';
+const CALLBACK_REACHABILITY_TIMEOUT_MS = 1500;
 
 type CodexOAuthStoredSession = {
   accessToken: string;
@@ -184,6 +186,9 @@ export class CodexAuthService {
       let timeout: NodeJS.Timeout;
       const redirectUri = new URL(REDIRECT_URI);
       const callbackPort = Number(redirectUri.port || '80');
+      const callbackHealthUrl = new URL(redirectUri.toString());
+      callbackHealthUrl.pathname = CALLBACK_HEALTH_PATH;
+      callbackHealthUrl.search = '';
       const servers: ReturnType<typeof createServer>[] = [];
 
       const closeServers = () => {
@@ -224,6 +229,12 @@ export class CodexAuthService {
 
       const handleRequest = (req: IncomingMessage, res: ServerResponse) => {
         const requestUrl = new URL(req.url || '/', REDIRECT_URI);
+        if (requestUrl.pathname === CALLBACK_HEALTH_PATH) {
+          res.statusCode = 204;
+          res.end();
+          return;
+        }
+
         if (requestUrl.pathname !== '/auth/callback') {
           res.statusCode = 404;
           res.end('Not Found');
@@ -284,29 +295,44 @@ export class CodexAuthService {
       Promise.allSettled([
         listenOnHost(ipv4Server, '127.0.0.1'),
         listenOnHost(ipv6Server, '::1'),
-      ]).then((results) => {
-        const hasListener = results.some(
-          (result) => result.status === 'fulfilled',
-        );
-        if (!hasListener) {
-          const firstError =
-            results[0]?.status === 'rejected'
-              ? results[0].reason
-              : new Error('Failed to bind OAuth callback listeners');
-          rejectWith(firstError);
-          return;
-        }
+      ])
+        .then(async (results) => {
+          const hasListener = results.some(
+            (result) => result.status === 'fulfilled',
+          );
+          if (!hasListener) {
+            const firstError =
+              results[0]?.status === 'rejected'
+                ? results[0].reason
+                : new Error('Failed to bind OAuth callback listeners');
+            rejectWith(firstError);
+            return;
+          }
 
-        for (const [index, result] of results.entries()) {
-          if (result.status === 'rejected') {
-            const host = index === 0 ? '127.0.0.1' : '::1';
-            logger.warn(
-              `[CodexAuthService] OAuth callback listener unavailable on ${host}`,
-              result.reason,
+          for (const [index, result] of results.entries()) {
+            if (result.status === 'rejected') {
+              const host = index === 0 ? '127.0.0.1' : '::1';
+              logger.warn(
+                `[CodexAuthService] OAuth callback listener unavailable on ${host}`,
+                result.reason,
+              );
+            }
+          }
+
+          try {
+            await fetch(callbackHealthUrl, {
+              method: 'GET',
+              signal: AbortSignal.timeout(CALLBACK_REACHABILITY_TIMEOUT_MS),
+            });
+          } catch {
+            rejectWith(
+              new Error(
+                'OAuth callback listener is not reachable via localhost',
+              ),
             );
           }
-        }
-      });
+        })
+        .catch(rejectWith);
     });
 
     return {
