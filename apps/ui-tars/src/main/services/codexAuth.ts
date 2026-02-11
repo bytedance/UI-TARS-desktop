@@ -27,6 +27,7 @@ const REFRESH_LEEWAY_MS = 60 * 1000;
 const CALLBACK_HEALTH_PATH = '/auth/health';
 const CALLBACK_REACHABILITY_TIMEOUT_MS = 1500;
 const CALLBACK_HEALTH_HEADER = 'x-ui-tars-codex-health';
+const OAUTH_TOKEN_REQUEST_TIMEOUT_MS = 30 * 1000;
 
 type CodexOAuthStoredSession = {
   accessToken: string;
@@ -393,19 +394,31 @@ export class CodexAuthService {
     code: string,
     verifier: string,
   ): Promise<CodexOAuthStoredSession> {
-    const response = await fetch(OAUTH_EXCHANGE_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        grant_type: 'authorization_code',
-        client_id: CLIENT_ID,
-        code,
-        code_verifier: verifier,
-        redirect_uri: REDIRECT_URI,
-      }),
-    });
+    let response: Response;
+    try {
+      response = await fetch(OAUTH_EXCHANGE_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          grant_type: 'authorization_code',
+          client_id: CLIENT_ID,
+          code,
+          code_verifier: verifier,
+          redirect_uri: REDIRECT_URI,
+        }),
+        signal: AbortSignal.timeout(OAUTH_TOKEN_REQUEST_TIMEOUT_MS),
+      });
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        (error.name === 'TimeoutError' || error.name === 'AbortError')
+      ) {
+        throw new Error('Token exchange timed out');
+      }
+      throw error;
+    }
 
     if (!response.ok) {
       throw new Error(`Token exchange failed with status ${response.status}`);
@@ -418,17 +431,29 @@ export class CodexAuthService {
   private async refreshAccessToken(
     refreshToken: string,
   ): Promise<CodexOAuthStoredSession> {
-    const response = await fetch(OAUTH_EXCHANGE_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        grant_type: 'refresh_token',
-        refresh_token: refreshToken,
-        client_id: CLIENT_ID,
-      }),
-    });
+    let response: Response;
+    try {
+      response = await fetch(OAUTH_EXCHANGE_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          grant_type: 'refresh_token',
+          refresh_token: refreshToken,
+          client_id: CLIENT_ID,
+        }),
+        signal: AbortSignal.timeout(OAUTH_TOKEN_REQUEST_TIMEOUT_MS),
+      });
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        (error.name === 'TimeoutError' || error.name === 'AbortError')
+      ) {
+        throw new Error('Token refresh timed out');
+      }
+      throw error;
+    }
 
     if (!response.ok) {
       throw new Error(`Token refresh failed with status ${response.status}`);
