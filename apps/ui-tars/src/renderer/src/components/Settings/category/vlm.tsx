@@ -677,31 +677,47 @@ export function VLMSettings({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>VLM Model Name</FormLabel>
-                <FormControl>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    disabled={
-                      isRemoteAutoUpdatedPreset ||
-                      !newProvider ||
-                      providerModels.length === 0
-                    }
-                  >
-                    <SelectTrigger className="w-full bg-white">
-                      <SelectValue placeholder="Select VLM model" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {providerModels.map((modelName) => (
-                        <SelectItem key={modelName} value={modelName}>
-                          {modelName}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
+                {newProvider === VLMProviderV2.openai_codex_oauth ? (
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={
+                        isRemoteAutoUpdatedPreset ||
+                        !newProvider ||
+                        providerModels.length === 0
+                      }
+                    >
+                      <SelectTrigger className="w-full bg-white">
+                        <SelectValue placeholder="Select VLM model" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {providerModels.map((modelName) => (
+                          <SelectItem key={modelName} value={modelName}>
+                            {modelName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                ) : (
+                  <FormControl>
+                    <Input
+                      className="bg-white"
+                      placeholder="Enter VLM model name"
+                      {...field}
+                      disabled={isRemoteAutoUpdatedPreset || !newProvider}
+                    />
+                  </FormControl>
+                )}
                 {!newProvider && (
                   <p className="text-xs text-muted-foreground">
                     Select a provider first to load available models.
+                  </p>
+                )}
+                {newProvider === VLMProviderV2.openai_codex_oauth && (
+                  <p className="text-xs text-muted-foreground">
+                    Codex OAuth supports only the listed model names.
                   </p>
                 )}
               </FormItem>

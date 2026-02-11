@@ -94,4 +94,17 @@ describe('PresetSchema with Codex OAuth provider', () => {
       }),
     ).toThrowError(/Model is not supported by Codex OAuth provider/);
   });
+
+  it('allows custom model names for non-Codex providers', () => {
+    const parsed = PresetSchema.parse({
+      vlmProvider: VLMProviderV2.doubao_1_5,
+      vlmBaseUrl: 'https://example.com/v1',
+      vlmApiKey: 'test-key',
+      vlmModelName: 'my-custom-alias',
+      useResponsesApi: false,
+      operator: Operator.LocalComputer,
+    });
+
+    expect(parsed.vlmModelName).toBe('my-custom-alias');
+  });
 });
