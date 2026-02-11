@@ -266,11 +266,31 @@ export class CodexAuthService {
         rejectWith(new Error('OpenAI Codex OAuth timeout'));
       }, LOGIN_TIMEOUT_MS);
 
-      Promise.all([
+      Promise.allSettled([
         listenOnHost(ipv4Server, '127.0.0.1'),
         listenOnHost(ipv6Server, '::1'),
-      ]).catch((error) => {
-        rejectWith(error);
+      ]).then((results) => {
+        const hasListener = results.some(
+          (result) => result.status === 'fulfilled',
+        );
+        if (!hasListener) {
+          const firstError =
+            results[0]?.status === 'rejected'
+              ? results[0].reason
+              : new Error('Failed to bind OAuth callback listeners');
+          rejectWith(firstError);
+          return;
+        }
+
+        for (const [index, result] of results.entries()) {
+          if (result.status === 'rejected') {
+            const host = index === 0 ? '127.0.0.1' : '::1';
+            logger.warn(
+              `[CodexAuthService] OAuth callback listener unavailable on ${host}`,
+              result.reason,
+            );
+          }
+        }
       });
     });
 
@@ -326,23 +346,25 @@ export class CodexAuthService {
     }
 
     const payload = (await response.json()) as TokenExchangeResponse;
-    return this.toStoredSession(payload);
+    return this.toStoredSession(payload, refreshToken);
   }
 
   private toStoredSession(
     payload: TokenExchangeResponse,
+    fallbackRefreshToken?: string,
   ): CodexOAuthStoredSession {
-    if (
-      !payload.access_token ||
-      !payload.refresh_token ||
-      typeof payload.expires_in !== 'number'
-    ) {
+    if (!payload.access_token || typeof payload.expires_in !== 'number') {
+      throw new Error('OAuth token response is incomplete');
+    }
+
+    const nextRefreshToken = payload.refresh_token || fallbackRefreshToken;
+    if (!nextRefreshToken) {
       throw new Error('OAuth token response is incomplete');
     }
 
     return {
       accessToken: payload.access_token,
-      refreshToken: payload.refresh_token,
+      refreshToken: nextRefreshToken,
       expiresAt: Date.now() + payload.expires_in * 1000,
     };
   }
