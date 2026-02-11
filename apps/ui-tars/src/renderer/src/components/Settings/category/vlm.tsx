@@ -2,7 +2,13 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from 'react';
 import { CheckCircle, XCircle, Loader2, EyeOff, Eye } from 'lucide-react';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -217,6 +223,31 @@ export function VLMSettings({
     }
   };
 
+  const ensureCodexOAuthConnected = useCallback(async () => {
+    try {
+      const nextState = await window.electron.codexAuth.status();
+      setCodexAuthState(nextState);
+
+      if (nextState.status === 'authenticated') {
+        return true;
+      }
+
+      toast.error('Please connect OpenAI Codex OAuth before saving settings');
+      return false;
+    } catch (error) {
+      const description =
+        error instanceof Error ? error.message : 'Unknown error occurred';
+      setCodexAuthState({
+        status: 'error',
+        error: description,
+      });
+      toast.error('OpenAI Codex OAuth status check failed', {
+        description,
+      });
+      return false;
+    }
+  }, []);
+
   useEffect(() => {
     if (!autoSave) {
       return;
@@ -254,6 +285,13 @@ export function VLMSettings({
           !isResponsesApiValid
         ) {
           return;
+        }
+
+        if (newProvider === VLMProviderV2.openai_codex_oauth) {
+          const isCodexConnected = await ensureCodexOAuthConnected();
+          if (!isCodexConnected) {
+            return;
+          }
         }
 
         updateSetting({
@@ -306,6 +344,7 @@ export function VLMSettings({
     updateSetting,
     form,
     isRemoteAutoUpdatedPreset,
+    ensureCodexOAuthConnected,
   ]);
 
   const handlePresetModal = async (e: React.MouseEvent) => {
@@ -397,9 +436,8 @@ export function VLMSettings({
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (
       values.vlmProvider === VLMProviderV2.openai_codex_oauth &&
-      codexAuthState?.status !== 'authenticated'
+      !(await ensureCodexOAuthConnected())
     ) {
-      toast.error('Please connect OpenAI Codex OAuth before saving settings');
       throw new Error('OpenAI Codex OAuth is not connected');
     }
 
