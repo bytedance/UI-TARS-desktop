@@ -460,12 +460,6 @@ export function VLMSettings({
                         );
                       }
 
-                      if (!nextProviderConfig.requiresApiKey) {
-                        form.setValue('vlmApiKey', '', {
-                          shouldValidate: true,
-                        });
-                      }
-
                       if (!nextProviderConfig.supportsResponsesApi) {
                         form.setValue('useResponsesApi', false, {
                           shouldValidate: true,
