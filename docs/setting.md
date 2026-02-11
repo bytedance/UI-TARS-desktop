@@ -26,7 +26,7 @@ Select the backend VLM provider to ensure more accurate execution of GUI actions
 | Property    | Details                |
 | ----------- | ---------------------- |
 | **Type**    | `string`               |
-| **Options** | - `Hugging Face for UI-TARS-1.0`<br /> - `Hugging Face for UI-TARS-1.5`<br /> - `VolcEngine Ark for Doubao-1.5-UI-TARS`<br /> - `VolcEngine Ark for Doubao-1.5-thinking-vision-pro` |
+| **Options** | - `Hugging Face for UI-TARS-1.0`<br /> - `Hugging Face for UI-TARS-1.5`<br /> - `VolcEngine Ark for Doubao-1.5-UI-TARS`<br /> - `VolcEngine Ark for Doubao-1.5-thinking-vision-pro`<br /> - `OpenAI Codex OAuth` |
 | **Required** | `true`         |
 
 > [!NOTE]
@@ -46,7 +46,7 @@ For UI TARS deployment, please check out [Deployment](./deployment.md).
 | Property     | Details  |
 | ------------ | -------- |
 | **Type**     | `string` |
-| **Required** | `true`   |
+| **Required** | `true` (except `OpenAI Codex OAuth`) |
 
 > [!NOTE]
 > VLM Base URL should be OpenAI compatible API endpoints (see [OpenAI API protocol document](https://platform.openai.com/docs/guides/vision/uploading-base-64-encoded-images) for more details).
@@ -75,6 +75,21 @@ Specify the requested module name.
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | `true`   |
+
+
+<br>
+
+#### OpenAI Codex OAuth
+
+When provider is `OpenAI Codex OAuth`, use account login instead of API key:
+
+1. Click `Connect` and complete browser login.
+2. Confirm status is connected.
+3. Select an available model and save settings.
+
+Supported models include `gpt-5.1-codex`, `gpt-5.1-codex-max`, `gpt-5.1-codex-mini`, `gpt-5.2`, `gpt-5.2-codex`, `gpt-5.3`, and `gpt-5.3-codex`.
+
+See [Codex OAuth and Teach Mode Guide](./codex-oauth-teach.md) for complete details.
 
 
 <br>

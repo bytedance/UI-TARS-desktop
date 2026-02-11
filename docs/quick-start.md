@@ -157,5 +157,6 @@ VLM Model Name: doubao-1.5-ui-tars-250328
 At this point, you should have successfully launched the UI-TARS-Desktop App! To get the most out of UI-TARS and ensure stable usage, we recommend reviewing the following documentation:
 
 - Read the [Settings Configuration Guide](./setting.md) and set up VLM/Chat parameters. Selecting the appropriate VLM Provider can optimize desktop app performance when using model.
+- Read the [Codex OAuth and Teach Mode Guide](./codex-oauth-teach.md) for OpenAI account login setup, supported GPT-5.3 variants, and skill recording/replay workflow.
 - Read the [UI-TARS-1.5 Deployment Guide](https://github.com/bytedance/UI-TARS/blob/main/README_deploy.md) for more detail about the UI-TARS-1.5's latest deployment methods.
 - Read the [UI-TARS 模型部署教程](https://bytedance.sg.larkoffice.com/docx/TCcudYwyIox5vyxiSDLlgIsTgWf) for more detail about the Doubao-1.5-UI-TARS's latest deployment methods.
