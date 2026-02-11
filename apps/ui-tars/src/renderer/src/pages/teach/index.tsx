@@ -260,6 +260,11 @@ export default function TeachModePage() {
       return;
     }
 
+    if (pendingStep) {
+      toast.error('Save or skip the pending step before finishing training');
+      return;
+    }
+
     setIsSaving(true);
     try {
       const payloadSteps: TeachSkillStepInput[] = steps.map((step) => ({
@@ -390,7 +395,7 @@ export default function TeachModePage() {
                     </Button>
                     <Button
                       onClick={finishTraining}
-                      disabled={isSaving || !steps.length}
+                      disabled={isSaving || !steps.length || !!pendingStep}
                     >
                       {isSaving ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
