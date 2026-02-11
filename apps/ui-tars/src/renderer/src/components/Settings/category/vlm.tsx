@@ -61,7 +61,10 @@ const formSchema = z
       });
     }
 
-    const modelPool = getProviderModels(value.vlmProvider);
+    const modelPool =
+      value.vlmProvider === VLMProviderV2.openai_codex_oauth
+        ? getProviderModels(value.vlmProvider)
+        : [];
     if (modelPool.length && !modelPool.includes(value.vlmModelName)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -438,6 +441,13 @@ export function VLMSettings({
                     disabled={isRemoteAutoUpdatedPreset}
                     onValueChange={(value) => {
                       const provider = value as VLMProviderV2;
+                      const previousProvider = field.value as
+                        | VLMProviderV2
+                        | undefined;
+                      const previousProviderConfig = previousProvider
+                        ? VLM_PROVIDER_REGISTRY[previousProvider]
+                        : undefined;
+                      const previousBaseUrl = form.getValues('vlmBaseUrl');
                       const nextProviderConfig =
                         VLM_PROVIDER_REGISTRY[provider];
                       field.onChange(provider);
@@ -458,6 +468,15 @@ export function VLMSettings({
                             shouldValidate: true,
                           },
                         );
+                      } else if (
+                        previousProvider === VLMProviderV2.openai_codex_oauth &&
+                        previousProviderConfig?.defaultBaseUrl &&
+                        previousBaseUrl ===
+                          previousProviderConfig.defaultBaseUrl
+                      ) {
+                        form.setValue('vlmBaseUrl', '', {
+                          shouldValidate: true,
+                        });
                       }
 
                       if (!nextProviderConfig.supportsResponsesApi) {
