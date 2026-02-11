@@ -463,8 +463,25 @@ export const deleteTeachSkill = async (
     };
   }
 
-  const filePath = path.join(getTeachRootDir(), toSkillFileName(skill.id));
-  const assetsDirPath = path.join(getTeachRootDir(), skill.assetsDir);
+  const teachRootDir = getTeachRootDir();
+  const teachAssetsRootDir = getTeachAssetsRootDir();
+  const filePath = path.join(teachRootDir, toSkillFileName(skill.id));
+  const assetsDirPath = path.resolve(teachRootDir, skill.assetsDir);
+  const relativeAssetsPath = path.relative(teachAssetsRootDir, assetsDirPath);
+
+  if (
+    !relativeAssetsPath ||
+    relativeAssetsPath === '.' ||
+    relativeAssetsPath.startsWith('..') ||
+    path.isAbsolute(relativeAssetsPath)
+  ) {
+    logger.warn('[TeachSkills] Refusing to delete invalid assets directory', {
+      skillId: skill.id,
+      assetsDir: skill.assetsDir,
+      resolvedAssetsDir: assetsDirPath,
+    });
+    throw new Error('Teach skill assets directory is invalid');
+  }
 
   await fs.rm(filePath, { force: true });
   await fs.rm(assetsDirPath, { recursive: true, force: true });
