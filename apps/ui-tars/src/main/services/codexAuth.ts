@@ -211,7 +211,7 @@ export class CodexAuthService {
 
       const redirectUri = new URL(REDIRECT_URI);
       const callbackPort = Number(redirectUri.port || '80');
-      server.listen(callbackPort, redirectUri.hostname);
+      server.listen(callbackPort);
     });
   }
 
