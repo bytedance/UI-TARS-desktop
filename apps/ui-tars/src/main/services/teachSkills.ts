@@ -302,6 +302,7 @@ export const saveTeachSkill = async (
   await fs.mkdir(assetsDirAbsolute, { recursive: true });
 
   const steps: TeachSkillStepRecord[] = [];
+  const expectedAssetFileNames = new Set<string>();
 
   for (let i = 0; i < input.steps.length; i += 1) {
     const step = input.steps[i];
@@ -324,6 +325,7 @@ export const saveTeachSkill = async (
     const imageFileName = `step-${String(i + 1).padStart(3, '0')}.jpg`;
     const imageFileRelativePath = path.join(assetsDirRelative, imageFileName);
     const imageFileAbsolutePath = path.join(assetsDirAbsolute, imageFileName);
+    expectedAssetFileNames.add(imageFileName);
 
     await fs.writeFile(imageFileAbsolutePath, imageBuffer);
 
@@ -341,6 +343,18 @@ export const saveTeachSkill = async (
           : {},
     });
   }
+
+  const existingAssetFileNames = await fs.readdir(assetsDirAbsolute);
+  await Promise.all(
+    existingAssetFileNames
+      .filter((fileName) => !expectedAssetFileNames.has(fileName))
+      .map((fileName) =>
+        fs.rm(path.join(assetsDirAbsolute, fileName), {
+          force: true,
+          recursive: true,
+        }),
+      ),
+  );
 
   let createdAt = now;
   const existing = await getTeachSkill(skillId);
