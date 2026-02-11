@@ -92,9 +92,18 @@ export class CodexAuthService {
       }
 
       const payload = this.decodeJwtPayload(session.accessToken);
+      const accountId =
+        payload?.['https://api.openai.com/auth']?.chatgpt_account_id;
+      if (!accountId) {
+        return {
+          status: 'unauthenticated',
+          error: 'OpenAI Codex OAuth account id is missing',
+        };
+      }
+
       return {
         status: 'authenticated',
-        accountId: payload?.['https://api.openai.com/auth']?.chatgpt_account_id,
+        accountId,
         email: payload?.email,
         expiresAt: session.expiresAt,
       };
@@ -117,9 +126,15 @@ export class CodexAuthService {
     }
 
     const payload = this.decodeJwtPayload(session.accessToken);
+    const accountId =
+      payload?.['https://api.openai.com/auth']?.chatgpt_account_id;
+    if (!accountId) {
+      return null;
+    }
+
     return {
       accessToken: session.accessToken,
-      accountId: payload?.['https://api.openai.com/auth']?.chatgpt_account_id,
+      accountId,
     };
   }
 
