@@ -79,6 +79,15 @@ const validateSkillSchema = async (absoluteFilePath, raw) => {
     }
 
     const assetFilePath = path.resolve(parentDir, step.assetPath);
+    const relativeAssetPath = path.relative(parentDir, assetFilePath);
+    if (
+      !relativeAssetPath ||
+      relativeAssetPath.startsWith('..') ||
+      path.isAbsolute(relativeAssetPath)
+    ) {
+      fail(`Field "${prefix}.assetPath" must stay within skill directory`);
+    }
+
     try {
       const stat = await fs.stat(assetFilePath);
       if (!stat.isFile()) {
