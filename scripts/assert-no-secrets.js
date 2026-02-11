@@ -61,7 +61,6 @@ const isLikelyPlaceholder = (value) => {
     normalized.includes('redacted') ||
     normalized.includes('mock') ||
     normalized.includes('dummy') ||
-    normalized.includes('test') ||
     normalized.includes('xxxx') ||
     normalized.includes('sample')
   );
