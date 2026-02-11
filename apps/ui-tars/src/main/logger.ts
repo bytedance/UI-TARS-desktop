@@ -6,9 +6,24 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { BrowserWindow, app, dialog, shell } from 'electron';
 import log from 'electron-log';
+import { redactSensitiveData } from './utils/redactSensitiveData';
 
 export const logger = log.scope('main');
 log.initialize();
+
+log.hooks.push((message) => {
+  const messageWithData = message as typeof message & {
+    data?: unknown[];
+  };
+
+  if (Array.isArray(messageWithData.data)) {
+    messageWithData.data = messageWithData.data.map((entry) =>
+      redactSensitiveData(entry),
+    );
+  }
+
+  return messageWithData;
+});
 
 log.transports.file.level =
   process.env.NODE_ENV === 'development' ? 'debug' : 'info';
