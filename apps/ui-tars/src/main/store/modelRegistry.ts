@@ -80,6 +80,12 @@ export const getProviderModels = (
   return VLM_PROVIDER_REGISTRY[provider]?.models ?? [];
 };
 
+export const isKnownVLMProvider = (
+  provider: string,
+): provider is VLMProviderV2 => {
+  return Object.hasOwn(VLM_PROVIDER_REGISTRY, provider);
+};
+
 export const getDefaultModelNameForProvider = (
   provider?: VLMProviderV2,
 ): string => {

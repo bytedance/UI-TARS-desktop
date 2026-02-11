@@ -17,18 +17,24 @@ import {
   RemoteComputerSettingsRef,
 } from './category/remoteComputer';
 import { Operator, VLMProviderV2 } from '@main/store/types';
-import { VLM_PROVIDER_REGISTRY } from '@main/store/modelRegistry';
+import {
+  isKnownVLMProvider,
+  VLM_PROVIDER_REGISTRY,
+} from '@main/store/modelRegistry';
 import { cn } from '@renderer/utils';
 
 const isVLMReadyForOperator = async (setting: Partial<LocalStore>) => {
   const { vlmApiKey, vlmBaseUrl, vlmModelName, vlmProvider } = setting;
-  const providerConfig = vlmProvider
-    ? VLM_PROVIDER_REGISTRY[vlmProvider]
-    : undefined;
 
   if (!vlmBaseUrl || !vlmModelName || !vlmProvider) {
     return false;
   }
+
+  if (!isKnownVLMProvider(vlmProvider)) {
+    return false;
+  }
+
+  const providerConfig = VLM_PROVIDER_REGISTRY[vlmProvider];
 
   if (vlmProvider === VLMProviderV2.openai_codex_oauth) {
     try {
@@ -40,7 +46,7 @@ const isVLMReadyForOperator = async (setting: Partial<LocalStore>) => {
     }
   }
 
-  if (!providerConfig?.requiresApiKey) {
+  if (!providerConfig.requiresApiKey) {
     return true;
   }
 

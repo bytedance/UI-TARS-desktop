@@ -7,7 +7,10 @@ import {
 } from '@renderer/components/ui/dialog';
 import { Button } from '@renderer/components/ui/button';
 import { LocalStore } from '@main/store/validate';
-import { VLM_PROVIDER_REGISTRY } from '@main/store/modelRegistry';
+import {
+  isKnownVLMProvider,
+  VLM_PROVIDER_REGISTRY,
+} from '@main/store/modelRegistry';
 import { VLMProviderV2 } from '@main/store/types';
 
 import { VLMSettings, VLMSettingsRef } from './category/vlm';
@@ -25,13 +28,16 @@ export const checkVLMSettings = async () => {
   const currentSetting = ((await settingRpc.getSetting()) ||
     {}) as Partial<LocalStore>;
   const { vlmApiKey, vlmBaseUrl, vlmModelName, vlmProvider } = currentSetting;
-  const providerConfig = vlmProvider
-    ? VLM_PROVIDER_REGISTRY[vlmProvider]
-    : undefined;
 
   if (!vlmBaseUrl || !vlmModelName || !vlmProvider) {
     return false;
   }
+
+  if (!isKnownVLMProvider(vlmProvider)) {
+    return false;
+  }
+
+  const providerConfig = VLM_PROVIDER_REGISTRY[vlmProvider];
 
   if (vlmProvider === VLMProviderV2.openai_codex_oauth) {
     try {
@@ -43,7 +49,7 @@ export const checkVLMSettings = async () => {
     }
   }
 
-  if (!providerConfig?.requiresApiKey) {
+  if (!providerConfig.requiresApiKey) {
     return true;
   }
 

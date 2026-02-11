@@ -11,6 +11,7 @@ import {
   getCodexReasoningEffortByModel,
   getDefaultModelNameForProvider,
   getProviderModels,
+  isKnownVLMProvider,
   isKnownModelForProvider,
 } from './modelRegistry';
 import { Operator, VLMProviderV2 } from './types';
@@ -47,6 +48,11 @@ describe('modelRegistry', () => {
         'ui-tars-unknown',
       ),
     ).toBe(false);
+  });
+
+  it('rejects unknown provider values', () => {
+    expect(isKnownVLMProvider(VLMProviderV2.openai_codex_oauth)).toBe(true);
+    expect(isKnownVLMProvider('unknown-provider')).toBe(false);
   });
 
   it('provides Codex transport constants', () => {
