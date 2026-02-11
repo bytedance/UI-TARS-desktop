@@ -44,6 +44,19 @@ const validateSkillSchema = async (absoluteFilePath, raw) => {
   }
 
   const parentDir = path.dirname(absoluteFilePath);
+  if (path.isAbsolute(raw.assetsDir)) {
+    fail('Field "assetsDir" must be relative');
+  }
+
+  const declaredAssetsDirPath = path.resolve(parentDir, raw.assetsDir);
+  const relativeAssetsDirPath = path.relative(parentDir, declaredAssetsDirPath);
+  if (
+    !relativeAssetsDirPath ||
+    relativeAssetsDirPath.startsWith('..') ||
+    path.isAbsolute(relativeAssetsDirPath)
+  ) {
+    fail('Field "assetsDir" must stay within skill directory');
+  }
 
   for (let i = 0; i < raw.steps.length; i += 1) {
     const step = raw.steps[i];
@@ -86,6 +99,18 @@ const validateSkillSchema = async (absoluteFilePath, raw) => {
       path.isAbsolute(relativeAssetPath)
     ) {
       fail(`Field "${prefix}.assetPath" must stay within skill directory`);
+    }
+
+    const relativeToDeclaredAssetsDir = path.relative(
+      declaredAssetsDirPath,
+      assetFilePath,
+    );
+    if (
+      !relativeToDeclaredAssetsDir ||
+      relativeToDeclaredAssetsDir.startsWith('..') ||
+      path.isAbsolute(relativeToDeclaredAssetsDir)
+    ) {
+      fail(`Field "${prefix}.assetPath" must stay within assetsDir`);
     }
 
     try {
