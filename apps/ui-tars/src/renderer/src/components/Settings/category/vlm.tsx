@@ -475,6 +475,14 @@ export function VLMSettings({
                       const previousBaseUrl = form.getValues('vlmBaseUrl');
                       const nextProviderConfig =
                         VLM_PROVIDER_REGISTRY[provider];
+
+                      setIsCheckingResponseApi(false);
+                      setResponseApiSupported(
+                        provider === VLMProviderV2.openai_codex_oauth
+                          ? true
+                          : null,
+                      );
+
                       field.onChange(provider);
 
                       form.setValue(
