@@ -4,7 +4,7 @@
  */
 import { useCallback, useState, type ComponentProps } from 'react';
 import { useNavigate, useLocation } from 'react-router';
-import { Home } from 'lucide-react';
+import { GraduationCap, Home } from 'lucide-react';
 
 import {
   Sidebar,
@@ -42,7 +42,7 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   const { status } = useStore();
   const [isNavDialogOpen, setNavDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<
-    'home' | { type: 'session'; id: string } | null
+    'home' | 'teach' | { type: 'session'; id: string } | null
   >(null);
 
   const needsConfirm =
@@ -54,6 +54,10 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
     await navigate('/');
     await setActiveSession('');
   }, [navigate, setActiveSession]);
+
+  const goTeach = useCallback(async () => {
+    await navigate('/teach');
+  }, [navigate]);
 
   const onSessionClick = useCallback(
     async (sessionId: string) => {
@@ -110,18 +114,29 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
     [needsConfirm],
   );
 
+  const handleTeachClick = useCallback(() => {
+    if (needsConfirm) {
+      setPendingAction('teach');
+      setNavDialogOpen(true);
+    } else {
+      goTeach();
+    }
+  }, [goTeach, needsConfirm]);
+
   const onConfirm = useCallback(async () => {
     await api.stopRun();
     await api.clearHistory();
 
     if (pendingAction === 'home') {
       await goHome();
+    } else if (pendingAction === 'teach') {
+      await goTeach();
     } else if (pendingAction?.type === 'session') {
       await onSessionClick(pendingAction.id);
     }
     setPendingAction(null);
     setNavDialogOpen(false);
-  }, [pendingAction, goHome, onSessionClick]);
+  }, [pendingAction, goHome, goTeach, onSessionClick]);
 
   const onCancel = useCallback(() => {
     setPendingAction(null);
@@ -151,6 +166,13 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
             >
               <Home />
               Home
+            </SidebarMenuButton>
+            <SidebarMenuButton
+              className="font-medium"
+              onClick={handleTeachClick}
+            >
+              <GraduationCap />
+              Teach
             </SidebarMenuButton>
           </SidebarMenu>
         </SidebarHeader>
