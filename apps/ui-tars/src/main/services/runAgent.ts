@@ -187,8 +187,21 @@ export const runAgent = async (
   let modelAuthHdrs: Record<string, string> = {};
 
   if (isCodexOAuthProvider && !isRemoteOperator) {
-    const codexAuthContext =
-      await CodexAuthService.getInstance().getAccessContext();
+    let codexAuthContext: { accessToken: string; accountId?: string } | null;
+    try {
+      codexAuthContext =
+        await CodexAuthService.getInstance().getAccessContext();
+    } catch (error) {
+      logger.error('[runAgent] failed to read Codex OAuth session', error);
+      setState({
+        ...getState(),
+        status: StatusEnum.ERROR,
+        errorMsg:
+          'Failed to read OpenAI Codex OAuth session. Please reconnect in Settings > VLM.',
+      });
+      return;
+    }
+
     const codexProviderConfig =
       VLM_PROVIDER_REGISTRY[VLMProviderV2.openai_codex_oauth];
 
