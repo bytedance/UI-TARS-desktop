@@ -239,7 +239,32 @@ export function VLMSettings({
 
     const validAndSave = async () => {
       if (newProvider !== settings.vlmProvider) {
-        updateSetting({ ...settings, vlmProvider: newProvider });
+        const [isUrlValid, isKeyValid, isNameValid, isResponsesApiValid] =
+          await Promise.all([
+            form.trigger('vlmBaseUrl'),
+            form.trigger('vlmApiKey'),
+            form.trigger('vlmModelName'),
+            form.trigger('useResponsesApi'),
+          ]);
+
+        if (
+          !isUrlValid ||
+          !isKeyValid ||
+          !isNameValid ||
+          !isResponsesApiValid
+        ) {
+          return;
+        }
+
+        updateSetting({
+          ...settings,
+          vlmProvider: newProvider,
+          vlmBaseUrl: newBaseUrl,
+          vlmApiKey: newApiKey,
+          vlmModelName: newModelName,
+          useResponsesApi: newUseResponsesApi,
+        });
+        return;
       }
 
       const isUrlValid = await form.trigger('vlmBaseUrl');
