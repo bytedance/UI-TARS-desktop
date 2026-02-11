@@ -99,6 +99,41 @@ const getTeachAssetsRootDir = () => {
   return path.join(getTeachRootDir(), 'assets');
 };
 
+const resolveTeachAssetsDirPath = (assetsDir: string) => {
+  const teachRootDir = getTeachRootDir();
+  const teachAssetsRootDir = getTeachAssetsRootDir();
+  const assetsDirPath = path.resolve(teachRootDir, assetsDir);
+  const relativeAssetsPath = path.relative(teachAssetsRootDir, assetsDirPath);
+
+  if (
+    !relativeAssetsPath ||
+    relativeAssetsPath === '.' ||
+    relativeAssetsPath.startsWith('..') ||
+    path.isAbsolute(relativeAssetsPath)
+  ) {
+    throw new Error('Teach skill assets directory is invalid');
+  }
+
+  return assetsDirPath;
+};
+
+const resolveTeachAssetFilePath = (assetsDir: string, assetPath: string) => {
+  const teachRootDir = getTeachRootDir();
+  const assetsDirPath = resolveTeachAssetsDirPath(assetsDir);
+  const assetFilePath = path.resolve(teachRootDir, assetPath);
+  const relativeAssetPath = path.relative(assetsDirPath, assetFilePath);
+
+  if (
+    !relativeAssetPath ||
+    relativeAssetPath.startsWith('..') ||
+    path.isAbsolute(relativeAssetPath)
+  ) {
+    throw new Error('Teach skill asset path is invalid');
+  }
+
+  return assetFilePath;
+};
+
 const toSkillFileName = (skillId: string) => `${skillId}${SKILL_FILE_SUFFIX}`;
 
 const parseDataUrl = (input: string) => {
@@ -422,7 +457,10 @@ export const exportTeachSkill = async (
   const steps: TeachSkillStepInput[] = [];
 
   for (const step of skill.steps) {
-    const assetFilePath = path.join(getTeachRootDir(), step.assetPath);
+    const assetFilePath = resolveTeachAssetFilePath(
+      skill.assetsDir,
+      step.assetPath,
+    );
     const screenshotBuffer = await fs.readFile(assetFilePath);
     steps.push({
       id: step.id,
@@ -464,23 +502,17 @@ export const deleteTeachSkill = async (
   }
 
   const teachRootDir = getTeachRootDir();
-  const teachAssetsRootDir = getTeachAssetsRootDir();
   const filePath = path.join(teachRootDir, toSkillFileName(skill.id));
-  const assetsDirPath = path.resolve(teachRootDir, skill.assetsDir);
-  const relativeAssetsPath = path.relative(teachAssetsRootDir, assetsDirPath);
-
-  if (
-    !relativeAssetsPath ||
-    relativeAssetsPath === '.' ||
-    relativeAssetsPath.startsWith('..') ||
-    path.isAbsolute(relativeAssetsPath)
-  ) {
+  let assetsDirPath = '';
+  try {
+    assetsDirPath = resolveTeachAssetsDirPath(skill.assetsDir);
+  } catch (error) {
     logger.warn('[TeachSkills] Refusing to delete invalid assets directory', {
       skillId: skill.id,
       assetsDir: skill.assetsDir,
-      resolvedAssetsDir: assetsDirPath,
+      error,
     });
-    throw new Error('Teach skill assets directory is invalid');
+    throw error;
   }
 
   await fs.rm(filePath, { force: true });
