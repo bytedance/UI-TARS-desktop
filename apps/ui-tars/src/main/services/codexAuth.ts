@@ -26,6 +26,7 @@ const LOGIN_TIMEOUT_MS = 3 * 60 * 1000;
 const REFRESH_LEEWAY_MS = 60 * 1000;
 const CALLBACK_HEALTH_PATH = '/auth/health';
 const CALLBACK_REACHABILITY_TIMEOUT_MS = 1500;
+const CALLBACK_HEALTH_HEADER = 'x-ui-tars-codex-health';
 
 type CodexOAuthStoredSession = {
   accessToken: string;
@@ -186,9 +187,7 @@ export class CodexAuthService {
       let timeout: NodeJS.Timeout;
       const redirectUri = new URL(REDIRECT_URI);
       const callbackPort = Number(redirectUri.port || '80');
-      const callbackHealthUrl = new URL(redirectUri.toString());
-      callbackHealthUrl.pathname = CALLBACK_HEALTH_PATH;
-      callbackHealthUrl.search = '';
+      const healthToken = randomBytes(8).toString('hex');
       const servers: ReturnType<typeof createServer>[] = [];
 
       const closeServers = () => {
@@ -231,6 +230,7 @@ export class CodexAuthService {
         const requestUrl = new URL(req.url || '/', REDIRECT_URI);
         if (requestUrl.pathname === CALLBACK_HEALTH_PATH) {
           res.statusCode = 204;
+          res.setHeader(CALLBACK_HEALTH_HEADER, healthToken);
           res.end();
           return;
         }
@@ -284,6 +284,13 @@ export class CodexAuthService {
         });
       };
 
+      const toCallbackHealthUrl = (host: '127.0.0.1' | '::1') => {
+        const loopbackHost = host === '::1' ? '[::1]' : host;
+        return new URL(
+          `http://${loopbackHost}:${callbackPort}${CALLBACK_HEALTH_PATH}`,
+        );
+      };
+
       const ipv4Server = createServer(handleRequest);
       const ipv6Server = createServer(handleRequest);
       servers.push(ipv4Server, ipv6Server);
@@ -297,6 +304,14 @@ export class CodexAuthService {
         listenOnHost(ipv6Server, '::1'),
       ])
         .then(async (results) => {
+          const boundHosts = results.flatMap((result, index) => {
+            if (result.status !== 'fulfilled') {
+              return [];
+            }
+
+            return [index === 0 ? '127.0.0.1' : '::1'] as const;
+          });
+
           const hasListener = results.some(
             (result) => result.status === 'fulfilled',
           );
@@ -319,20 +334,53 @@ export class CodexAuthService {
             }
           }
 
-          try {
-            await fetch(callbackHealthUrl, {
-              method: 'GET',
-              signal: AbortSignal.timeout(CALLBACK_REACHABILITY_TIMEOUT_MS),
-            });
-          } catch {
+          const healthChecks = await Promise.allSettled(
+            boundHosts.map(async (host) => {
+              const response = await fetch(toCallbackHealthUrl(host), {
+                method: 'GET',
+                signal: AbortSignal.timeout(CALLBACK_REACHABILITY_TIMEOUT_MS),
+              });
+
+              if (
+                response.status !== 204 ||
+                response.headers.get(CALLBACK_HEALTH_HEADER) !== healthToken
+              ) {
+                throw new Error(`Unexpected health response on ${host}`);
+              }
+
+              return host;
+            }),
+          );
+
+          const hasHealthyHost = healthChecks.some(
+            (result) => result.status === 'fulfilled',
+          );
+          if (!hasHealthyHost) {
             rejectWith(
               new Error(
-                'OAuth callback listener is not reachable via localhost',
+                'OAuth callback listener health check failed for bound loopback hosts',
               ),
             );
+            return;
+          }
+
+          for (const [index, result] of healthChecks.entries()) {
+            if (result.status === 'rejected') {
+              logger.warn(
+                `[CodexAuthService] OAuth callback listener health probe failed on ${boundHosts[index]}`,
+                result.reason,
+              );
+            }
           }
         })
-        .catch(rejectWith);
+        .catch((error) => {
+          if (error instanceof Error) {
+            rejectWith(error);
+            return;
+          }
+
+          rejectWith(new Error(String(error)));
+        });
     });
 
     return {
