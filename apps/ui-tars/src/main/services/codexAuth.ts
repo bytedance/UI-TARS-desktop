@@ -209,7 +209,9 @@ export class CodexAuthService {
         });
       }, LOGIN_TIMEOUT_MS);
 
-      server.listen(1455, '127.0.0.1');
+      const redirectUri = new URL(REDIRECT_URI);
+      const callbackPort = Number(redirectUri.port || '80');
+      server.listen(callbackPort, redirectUri.hostname);
     });
   }
 
