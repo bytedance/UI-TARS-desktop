@@ -372,7 +372,7 @@ export function VLMSettings({
       codexAuthState?.status !== 'authenticated'
     ) {
       toast.error('Please connect OpenAI Codex OAuth before saving settings');
-      return;
+      throw new Error('OpenAI Codex OAuth is not connected');
     }
 
     console.log('onSubmit', values);
@@ -385,9 +385,13 @@ export function VLMSettings({
     submit: async () => {
       return new Promise<z.infer<typeof formSchema>>((resolve, reject) => {
         form.handleSubmit(
-          (values) => {
-            onSubmit(values);
-            resolve(values);
+          async (values) => {
+            try {
+              await onSubmit(values);
+              resolve(values);
+            } catch (error) {
+              reject(error);
+            }
           },
           (errors) => {
             reject(errors);
