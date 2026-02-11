@@ -269,6 +269,8 @@ export default function TeachModePage() {
         expectedOutcome: step.expectedOutcome,
         capturedAt: step.capturedAt,
         screenshotBase64: step.screenshotBase64,
+        actionType: step.actionType,
+        actionInputs: step.actionInputs,
       }));
 
       const summary = await api.teachSaveSkill({
