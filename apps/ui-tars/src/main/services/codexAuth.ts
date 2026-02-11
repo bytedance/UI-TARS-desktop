@@ -285,7 +285,7 @@ export class CodexAuthService {
         });
       };
 
-      const toCallbackHealthUrl = (host: '127.0.0.1' | '::1') => {
+      const toCallbackHealthUrl = (host: '127.0.0.1' | '::1' | 'localhost') => {
         const loopbackHost = host === '::1' ? '[::1]' : host;
         return new URL(
           `http://${loopbackHost}:${callbackPort}${CALLBACK_HEALTH_PATH}`,
@@ -372,6 +372,36 @@ export class CodexAuthService {
                 result.reason,
               );
             }
+          }
+
+          try {
+            const localhostResponse = await fetch(
+              toCallbackHealthUrl('localhost'),
+              {
+                method: 'GET',
+                signal: AbortSignal.timeout(CALLBACK_REACHABILITY_TIMEOUT_MS),
+              },
+            );
+
+            if (
+              localhostResponse.status !== 204 ||
+              localhostResponse.headers.get(CALLBACK_HEALTH_HEADER) !==
+                healthToken
+            ) {
+              rejectWith(
+                new Error(
+                  'OAuth callback listener is not healthy on localhost-resolved host',
+                ),
+              );
+              return;
+            }
+          } catch {
+            rejectWith(
+              new Error(
+                'OAuth callback listener is not reachable on localhost-resolved host',
+              ),
+            );
+            return;
           }
         })
         .catch((error) => {
