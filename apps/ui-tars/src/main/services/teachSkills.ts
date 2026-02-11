@@ -153,6 +153,16 @@ const parseDataUrl = (input: string) => {
   };
 };
 
+const getDecodedBase64ByteLength = (rawBase64: string) => {
+  const base64 = rawBase64.replace(/\s+/g, '');
+  if (!base64) {
+    return 0;
+  }
+
+  const padding = base64.endsWith('==') ? 2 : base64.endsWith('=') ? 1 : 0;
+  return Math.floor((base64.length * 3) / 4) - padding;
+};
+
 const sanitizeSkillId = (rawId?: string) => {
   const safe = (rawId || '').trim().replace(/[^a-zA-Z0-9_-]/g, '-');
   if (safe.length > 0) {
@@ -296,6 +306,13 @@ export const saveTeachSkill = async (
   for (let i = 0; i < input.steps.length; i += 1) {
     const step = input.steps[i];
     const parsed = parseDataUrl(step.screenshotBase64);
+
+    if (getDecodedBase64ByteLength(parsed.base64) > MAX_SCREENSHOT_BYTES) {
+      throw new Error(
+        `Step ${i + 1} screenshot exceeds ${MAX_SCREENSHOT_BYTES} bytes`,
+      );
+    }
+
     const imageBuffer = Buffer.from(parsed.base64, 'base64');
 
     if (imageBuffer.byteLength > MAX_SCREENSHOT_BYTES) {
