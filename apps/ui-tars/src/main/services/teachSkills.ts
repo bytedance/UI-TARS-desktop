@@ -199,18 +199,16 @@ const toSummary = (record: TeachSkillRecord): TeachSkillSummary => {
 };
 
 export const captureTeachSnapshot = async (): Promise<TeachSnapshot> => {
-  const {
-    physicalSize,
-    logicalSize,
-    scaleFactor,
-    id: primaryDisplayId,
-  } = getScreenSize();
+  const { physicalSize, scaleFactor, id: primaryDisplayId } = getScreenSize();
+
+  const targetWidth = Math.max(1, Math.round(physicalSize.width));
+  const targetHeight = Math.max(1, Math.round(physicalSize.height));
 
   const sources = await desktopCapturer.getSources({
     types: ['screen'],
     thumbnailSize: {
-      width: Math.round(logicalSize.width),
-      height: Math.round(logicalSize.height),
+      width: targetWidth,
+      height: targetHeight,
     },
   });
 
@@ -223,16 +221,20 @@ export const captureTeachSnapshot = async (): Promise<TeachSnapshot> => {
     throw new Error('Unable to capture primary display snapshot');
   }
 
-  const resized = primarySource.thumbnail.resize({
-    width: physicalSize.width,
-    height: physicalSize.height,
-  });
+  const sourceSize = primarySource.thumbnail.getSize();
+  const image =
+    sourceSize.width === targetWidth && sourceSize.height === targetHeight
+      ? primarySource.thumbnail
+      : primarySource.thumbnail.resize({
+          width: targetWidth,
+          height: targetHeight,
+        });
 
   return {
-    base64: resized.toJPEG(75).toString('base64'),
+    base64: image.toJPEG(75).toString('base64'),
     mime: 'image/jpeg',
-    width: physicalSize.width,
-    height: physicalSize.height,
+    width: targetWidth,
+    height: targetHeight,
     scaleFactor,
   };
 };
