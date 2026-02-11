@@ -8,6 +8,7 @@ import {
 import { Button } from '@renderer/components/ui/button';
 import { LocalStore } from '@main/store/validate';
 import { VLM_PROVIDER_REGISTRY } from '@main/store/modelRegistry';
+import { VLMProviderV2 } from '@main/store/types';
 
 import { VLMSettings, VLMSettingsRef } from './category/vlm';
 import { useRef } from 'react';
@@ -30,6 +31,16 @@ export const checkVLMSettings = async () => {
 
   if (!vlmBaseUrl || !vlmModelName || !vlmProvider) {
     return false;
+  }
+
+  if (vlmProvider === VLMProviderV2.openai_codex_oauth) {
+    try {
+      const codexState = await window.electron.codexAuth.status();
+      return codexState.status === 'authenticated';
+    } catch (error) {
+      console.error('Failed to validate Codex OAuth status:', error);
+      return false;
+    }
   }
 
   if (!providerConfig?.requiresApiKey) {

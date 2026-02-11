@@ -16,11 +16,11 @@ import {
   RemoteComputerSettings,
   RemoteComputerSettingsRef,
 } from './category/remoteComputer';
-import { Operator } from '@main/store/types';
+import { Operator, VLMProviderV2 } from '@main/store/types';
 import { VLM_PROVIDER_REGISTRY } from '@main/store/modelRegistry';
 import { cn } from '@renderer/utils';
 
-const isVLMReadyForOperator = (setting: Partial<LocalStore>) => {
+const isVLMReadyForOperator = async (setting: Partial<LocalStore>) => {
   const { vlmApiKey, vlmBaseUrl, vlmModelName, vlmProvider } = setting;
   const providerConfig = vlmProvider
     ? VLM_PROVIDER_REGISTRY[vlmProvider]
@@ -28,6 +28,16 @@ const isVLMReadyForOperator = (setting: Partial<LocalStore>) => {
 
   if (!vlmBaseUrl || !vlmModelName || !vlmProvider) {
     return false;
+  }
+
+  if (vlmProvider === VLMProviderV2.openai_codex_oauth) {
+    try {
+      const codexState = await window.electron.codexAuth.status();
+      return codexState.status === 'authenticated';
+    } catch (error) {
+      console.error('Failed to validate Codex OAuth status:', error);
+      return false;
+    }
   }
 
   if (!providerConfig?.requiresApiKey) {
@@ -49,7 +59,7 @@ export const checkRemoteComputer = async () => {
 
   const currentSetting = ((await settingRpc.getSetting()) ||
     {}) as Partial<LocalStore>;
-  return isVLMReadyForOperator(currentSetting);
+  return await isVLMReadyForOperator(currentSetting);
 };
 
 export const checkRemoteBrowser = async () => {
@@ -57,7 +67,7 @@ export const checkRemoteBrowser = async () => {
 
   const currentSetting = ((await settingRpc.getSetting()) ||
     {}) as Partial<LocalStore>;
-  return isVLMReadyForOperator(currentSetting);
+  return await isVLMReadyForOperator(currentSetting);
 };
 
 const Steps = ({
