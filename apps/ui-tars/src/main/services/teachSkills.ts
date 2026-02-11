@@ -493,22 +493,24 @@ export const importTeachSkill = async (
 export const deleteTeachSkill = async (
   skillId: string,
 ): Promise<TeachSkillDeleteResult> => {
-  const skill = await getTeachSkill(skillId);
+  const safeSkillId = sanitizeSkillId(skillId);
+  const skill = await getTeachSkill(safeSkillId);
   if (!skill) {
     return {
-      id: skillId,
+      id: safeSkillId,
       deleted: false,
     };
   }
 
   const teachRootDir = getTeachRootDir();
-  const filePath = path.join(teachRootDir, toSkillFileName(skill.id));
+  const filePath = path.join(teachRootDir, toSkillFileName(safeSkillId));
   let assetsDirPath = '';
   try {
     assetsDirPath = resolveTeachAssetsDirPath(skill.assetsDir);
   } catch (error) {
     logger.warn('[TeachSkills] Refusing to delete invalid assets directory', {
-      skillId: skill.id,
+      skillId: safeSkillId,
+      recordSkillId: skill.id,
       assetsDir: skill.assetsDir,
       error,
     });
@@ -519,7 +521,7 @@ export const deleteTeachSkill = async (
   await fs.rm(assetsDirPath, { recursive: true, force: true });
 
   return {
-    id: skill.id,
+    id: safeSkillId,
     deleted: true,
   };
 };
