@@ -53,4 +53,21 @@ describe('redactSensitiveData', () => {
     expect((result[1] as { text: string }).text).toBe('plain text');
     expect(result[2]).toBe('[REDACTED]');
   });
+
+  it('keeps Error diagnostics while redacting sensitive fields', () => {
+    const error = new Error('Request failed with Bearer top-secret-token');
+    (error as Error & { authToken?: string }).authToken = 'secret-token';
+
+    const result = redactSensitiveData(error) as {
+      name: string;
+      message: string;
+      stack?: string;
+      authToken?: string;
+    };
+
+    expect(result.name).toBe('Error');
+    expect(result.message).toContain('Bearer [REDACTED]');
+    expect(result.authToken).toBe('[REDACTED]');
+    expect(result.stack).toContain('Bearer [REDACTED]');
+  });
 });

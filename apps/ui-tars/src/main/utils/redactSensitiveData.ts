@@ -60,6 +60,41 @@ const redactInternal = (value: unknown, seen: WeakSet<object>): unknown => {
 
   seen.add(value);
 
+  if (value instanceof Error) {
+    const redactedError: Record<string, unknown> = {
+      name: value.name,
+      message: redactString(value.message),
+    };
+
+    if (typeof value.stack === 'string') {
+      redactedError.stack = redactString(value.stack);
+    }
+
+    const errorWithCause = value as Error & { cause?: unknown };
+    if (errorWithCause.cause !== undefined) {
+      redactedError.cause = redactInternal(errorWithCause.cause, seen);
+    }
+
+    for (const [key, entryValue] of Object.entries(value)) {
+      if (
+        key === 'name' ||
+        key === 'message' ||
+        key === 'stack' ||
+        key === 'cause'
+      ) {
+        continue;
+      }
+
+      if (shouldRedactKey(key)) {
+        redactedError[key] = REDACTED_VALUE;
+      } else {
+        redactedError[key] = redactInternal(entryValue, seen);
+      }
+    }
+
+    return redactedError;
+  }
+
   if (Array.isArray(value)) {
     return value.map((item) => redactInternal(item, seen));
   }

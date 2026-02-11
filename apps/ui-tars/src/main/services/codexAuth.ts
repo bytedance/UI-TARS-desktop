@@ -327,7 +327,13 @@ export class CodexAuthService {
     const serialized = JSON.stringify(session);
 
     if (!safeStorage.isEncryptionAvailable()) {
-      throw new Error('OS secure storage is unavailable');
+      logger.warn(
+        '[CodexAuthService] secure storage unavailable, session will be stored without encryption',
+      );
+      return JSON.stringify({
+        encrypted: false,
+        value: serialized,
+      });
     }
 
     const encrypted = safeStorage.encryptString(serialized);
@@ -337,18 +343,43 @@ export class CodexAuthService {
     });
   }
 
-  private decodeSession(raw: string): CodexOAuthStoredSession {
-    const payload = JSON.parse(raw) as { encrypted?: boolean; value: string };
-    if (!payload.encrypted) {
-      return JSON.parse(payload.value) as CodexOAuthStoredSession;
+  private decodeSession(raw: string): CodexOAuthStoredSession | null {
+    const payload = JSON.parse(raw) as unknown;
+
+    if (
+      payload &&
+      typeof payload === 'object' &&
+      'accessToken' in payload &&
+      'refreshToken' in payload &&
+      'expiresAt' in payload
+    ) {
+      return payload as CodexOAuthStoredSession;
+    }
+
+    if (
+      !payload ||
+      typeof payload !== 'object' ||
+      !('value' in payload) ||
+      typeof payload.value !== 'string'
+    ) {
+      throw new Error('Codex OAuth session payload is invalid');
+    }
+
+    const wrappedPayload = payload as { encrypted?: boolean; value: string };
+
+    if (!wrappedPayload.encrypted) {
+      return JSON.parse(wrappedPayload.value) as CodexOAuthStoredSession;
     }
 
     if (!safeStorage.isEncryptionAvailable()) {
-      throw new Error('OS secure storage is unavailable');
+      logger.warn(
+        '[CodexAuthService] secure storage unavailable, encrypted session cannot be decrypted',
+      );
+      return null;
     }
 
     const decrypted = safeStorage.decryptString(
-      Buffer.from(payload.value, 'base64'),
+      Buffer.from(wrappedPayload.value, 'base64'),
     );
     return JSON.parse(decrypted) as CodexOAuthStoredSession;
   }
