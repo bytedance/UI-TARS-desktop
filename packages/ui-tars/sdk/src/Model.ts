@@ -27,8 +27,12 @@ import {
   MAX_PIXELS_DOUBAO,
 } from '@ui-tars/shared/types';
 import type {
+  Response,
   ResponseCreateParamsNonStreaming,
+  ResponseCreateParamsStreaming,
+  ResponseIncludable,
   ResponseInputItem,
+  ResponseStreamEvent,
 } from 'openai/resources/responses/responses';
 
 type OpenAIChatCompletionCreateParams = Omit<ClientOptions, 'maxRetries'> &
@@ -40,6 +44,12 @@ type OpenAIChatCompletionCreateParams = Omit<ClientOptions, 'maxRetries'> &
 export interface UITarsModelConfig extends OpenAIChatCompletionCreateParams {
   /** Whether to use OpenAI Response API instead of Chat Completions API */
   useResponsesApi?: boolean;
+  codexResponses?: {
+    enabled: boolean;
+    store?: boolean;
+    include?: string[];
+    reasoningEffort?: 'low' | 'medium' | 'high';
+  };
 }
 
 export interface ThinkingVisionProModelConfig
@@ -77,6 +87,66 @@ export class UITarsModel extends Model {
    */
   reset() {
     this.headImageContext = null;
+  }
+
+  private get isCodexResponsesEnabled(): boolean {
+    return this.modelConfig.codexResponses?.enabled ?? false;
+  }
+
+  private normalizeCodexInclude(): ResponseIncludable[] {
+    const configuredInclude = this.modelConfig.codexResponses?.include ?? [];
+    const mergedInclude = Array.from(
+      new Set([...configuredInclude, 'reasoning.encrypted_content']),
+    );
+
+    return mergedInclude as unknown as ResponseIncludable[];
+  }
+
+  private async invokeCodexResponseStream(
+    openai: OpenAI,
+    responseParams: ResponseCreateParamsStreaming,
+    requestOptions: {
+      signal?: AbortSignal;
+      timeout: number;
+      headers?: Record<string, string>;
+    },
+    fallbackResponseId?: string,
+  ): Promise<{
+    prediction: string;
+    costTokens: number;
+    responseId?: string;
+  }> {
+    const stream = await openai.responses.create(
+      responseParams,
+      requestOptions,
+    );
+    let prediction = '';
+    let costTokens = 0;
+    let responseId = fallbackResponseId;
+
+    for await (const event of stream) {
+      const streamEvent = event as ResponseStreamEvent;
+
+      if (streamEvent.type === 'response.output_text.delta') {
+        prediction += streamEvent.delta;
+      }
+
+      if (streamEvent.type === 'response.completed') {
+        const completedResponse = streamEvent.response as Response;
+        responseId = completedResponse.id || responseId;
+        costTokens = completedResponse.usage?.total_tokens ?? costTokens;
+
+        if (!prediction && completedResponse.output_text) {
+          prediction = completedResponse.output_text;
+        }
+      }
+    }
+
+    return {
+      prediction,
+      costTokens,
+      responseId,
+    };
   }
 
   /**
@@ -185,8 +255,9 @@ export class UITarsModel extends Model {
         }
       }
 
-      let result;
+      let prediction = '';
       let responseId = previousResponseId;
+      let costTokens = 0;
       for (const input of inputs) {
         const truncated = JSON.stringify(
           [input],
@@ -198,37 +269,93 @@ export class UITarsModel extends Model {
           },
           2,
         );
-        const responseParams: ResponseCreateParamsNonStreaming = {
+        const responseRequestOptions = {
+          ...options,
+          timeout: 1000 * 30,
+          headers,
+        };
+
+        const isCodexResponses = this.isCodexResponsesEnabled;
+
+        const responseParamsBase = {
           input: [input],
           model,
           temperature,
           top_p,
-          stream: false,
           max_output_tokens: max_tokens,
           ...(responseId && {
             previous_response_id: responseId,
           }),
-          // @ts-expect-error
-          thinking: {
-            type: 'disabled',
-          },
         };
-        logger.info(
-          '[ResponseAPI] [input]: ',
-          truncated,
-          'previous_response_id',
-          responseParams?.previous_response_id,
-          'headImageMessageIndex',
-          headImageMessageIndex,
-        );
 
-        result = await openai.responses.create(responseParams, {
-          ...options,
-          timeout: 1000 * 30,
-          headers,
-        });
-        logger.info('[ResponseAPI] [result]: ', result);
-        responseId = result?.id;
+        if (isCodexResponses) {
+          const streamResponseParams: ResponseCreateParamsStreaming = {
+            ...responseParamsBase,
+            stream: true,
+            store: this.modelConfig.codexResponses?.store ?? false,
+            include: this.normalizeCodexInclude(),
+            reasoning: {
+              effort:
+                this.modelConfig.codexResponses?.reasoningEffort ?? 'high',
+              generate_summary: null,
+            },
+          };
+
+          logger.info(
+            '[ResponseAPI/Codex] [input]: ',
+            truncated,
+            'previous_response_id',
+            streamResponseParams?.previous_response_id,
+            'headImageMessageIndex',
+            headImageMessageIndex,
+          );
+
+          const streamResult = await this.invokeCodexResponseStream(
+            openai,
+            streamResponseParams,
+            responseRequestOptions,
+            responseId,
+          );
+          prediction = streamResult.prediction;
+          responseId = streamResult.responseId ?? responseId;
+          costTokens = streamResult.costTokens;
+
+          logger.info('[ResponseAPI/Codex] [result]: ', {
+            responseId,
+            predictionLength: prediction.length,
+            costTokens,
+          });
+        } else {
+          const responseParams: ResponseCreateParamsNonStreaming & {
+            thinking?: {
+              type: 'enabled' | 'disabled';
+            };
+          } = {
+            ...responseParamsBase,
+            stream: false,
+            thinking: {
+              type: 'disabled',
+            },
+          };
+
+          logger.info(
+            '[ResponseAPI] [input]: ',
+            truncated,
+            'previous_response_id',
+            responseParams?.previous_response_id,
+            'headImageMessageIndex',
+            headImageMessageIndex,
+          );
+
+          const result = await openai.responses.create(
+            responseParams,
+            responseRequestOptions,
+          );
+          logger.info('[ResponseAPI] [result]: ', result);
+          responseId = result?.id;
+          prediction = result?.output_text ?? '';
+          costTokens = result?.usage?.total_tokens ?? 0;
+        }
         logger.info('[ResponseAPI] [responseId]: ', responseId);
 
         // head image changed
@@ -249,9 +376,9 @@ export class UITarsModel extends Model {
       }
 
       return {
-        prediction: result?.output_text ?? '',
+        prediction,
         costTime: Date.now() - startTime,
-        costTokens: result?.usage?.total_tokens ?? 0,
+        costTokens,
         responseId,
       };
     }

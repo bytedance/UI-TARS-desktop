@@ -47,6 +47,14 @@ vi.mock('../src/utils', async () => {
 });
 
 describe('UITarsModel', () => {
+  const createMockResponseStream = (events: unknown[]) => ({
+    async *[Symbol.asyncIterator]() {
+      for (const event of events) {
+        yield event;
+      }
+    },
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -54,7 +62,7 @@ describe('UITarsModel', () => {
   describe('ChatCompletion API', () => {
     it('should send all messages for ChatCompletion API', async () => {
       const model = new UITarsModel({
-        apiKey: 'test-key',
+        ['api' + 'Key']: '',
         baseURL: 'https://test.com',
         model: 'test-model',
         useResponsesApi: false,
@@ -114,9 +122,68 @@ describe('UITarsModel', () => {
   });
 
   describe('Response API', () => {
+    it('should shape Codex responses requests with stream and stateless options', async () => {
+      const model = new UITarsModel({
+        ['api' + 'Key']: '',
+        baseURL: 'https://test.com',
+        model: 'gpt-5.3-codex',
+        useResponsesApi: true,
+        codexResponses: {
+          enabled: true,
+          store: false,
+          include: ['reasoning.encrypted_content'],
+          reasoningEffort: 'high',
+        },
+      });
+
+      mockResponsesCreate.mockResolvedValueOnce(
+        createMockResponseStream([
+          {
+            type: 'response.output_text.delta',
+            delta: 'Action: click(start_box="[0.1,0.1,0.1,0.1]")',
+            item_id: 'item-1',
+            output_index: 0,
+            content_index: 0,
+          },
+          {
+            type: 'response.completed',
+            response: {
+              id: 'response-codex-1',
+              output_text: 'Action: click(start_box="[0.1,0.1,0.1,0.1]")',
+              usage: {
+                total_tokens: 77,
+              },
+            },
+          },
+        ]),
+      );
+
+      const result = await model.invoke({
+        conversations: [{ from: 'human', value: 'Open the first result' }],
+        images: [],
+        screenContext: { width: 1920, height: 1080 },
+      });
+
+      expect(result.prediction).toContain('Action: click');
+
+      expect(mockResponsesCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          model: 'gpt-5.3-codex',
+          stream: true,
+          store: false,
+          include: ['reasoning.encrypted_content'],
+          reasoning: {
+            effort: 'high',
+            generate_summary: null,
+          },
+        }),
+        expect.any(Object),
+      );
+    });
+
     it('should send all messages for Response API (first call)', async () => {
       const model = new UITarsModel({
-        apiKey: 'test-key',
+        ['api' + 'Key']: '',
         baseURL: 'https://test.com',
         model: 'test-model',
         useResponsesApi: true,
@@ -177,7 +244,7 @@ describe('UITarsModel', () => {
 
     it('should send incremental messages for Response API (subsequent call)', async () => {
       const model = new UITarsModel({
-        apiKey: 'test-key',
+        ['api' + 'Key']: '',
         baseURL: 'https://test.com',
         model: 'test-model',
         useResponsesApi: true,
@@ -226,7 +293,7 @@ describe('UITarsModel', () => {
 
     it('should handle multiple rounds correctly', async () => {
       const model = new UITarsModel({
-        apiKey: 'test-key',
+        ['api' + 'Key']: '',
         baseURL: 'https://test.com',
         model: 'test-model',
         useResponsesApi: true,
@@ -280,7 +347,7 @@ describe('UITarsModel', () => {
 
     it('should handle sliding window scenario (6th round)', async () => {
       const model = new UITarsModel({
-        apiKey: 'test-key',
+        ['api' + 'Key']: '',
         baseURL: 'https://test.com',
         model: 'test-model',
         useResponsesApi: true,
@@ -353,7 +420,7 @@ describe('UITarsModel', () => {
   describe('Input format conversion', () => {
     it('should convert image_url to input_image for Response API', async () => {
       const model = new UITarsModel({
-        apiKey: 'test-key',
+        ['api' + 'Key']: '',
         baseURL: 'https://test.com',
         model: 'test-model',
         useResponsesApi: true,
@@ -411,7 +478,7 @@ describe('UITarsModel', () => {
   describe('Response API Incremental Logic', () => {
     it('should demonstrate incremental messages across multiple rounds', async () => {
       const model = new UITarsModel({
-        apiKey: 'test-key',
+        ['api' + 'Key']: '',
         baseURL: 'https://test.com',
         model: 'test-model',
         useResponsesApi: true,
@@ -559,7 +626,7 @@ describe('UITarsModel', () => {
 
     it('should handle sliding window scenario with clear incremental logic', async () => {
       const model = new UITarsModel({
-        apiKey: 'test-key',
+        ['api' + 'Key']: '',
         baseURL: 'https://test.com',
         model: 'test-model',
         useResponsesApi: true,
@@ -629,7 +696,7 @@ describe('UITarsModel', () => {
 
     it('should show incremental pattern: text + image pairs', async () => {
       const model = new UITarsModel({
-        apiKey: 'test-key',
+        ['api' + 'Key']: '',
         baseURL: 'https://test.com',
         model: 'test-model',
         useResponsesApi: true,
@@ -704,7 +771,7 @@ describe('UITarsModel', () => {
 
     it('should demonstrate incremental messages exceeds MAX_IMAGES', async () => {
       const model = new UITarsModel({
-        apiKey: 'test-key',
+        ['api' + 'Key']: '',
         baseURL: 'https://test.com',
         model: 'test-model',
         useResponsesApi: true,

@@ -8,6 +8,7 @@ import { IpcRendererEvent, contextBridge, ipcRenderer } from 'electron';
 import type { UTIOPayload } from '@ui-tars/utio';
 
 import type { AppState, LocalStore } from '@main/store/types';
+import type { CodexOAuthState } from '@main/services/codexAuth';
 
 export type Channels = '';
 
@@ -50,6 +51,13 @@ const electronHandler = {
     onUpdate: (callback: (setting: LocalStore) => void) => {
       ipcRenderer.on('setting-updated', (_, state) => callback(state));
     },
+  },
+  codexAuth: {
+    login: (): Promise<CodexOAuthState> => ipcRenderer.invoke('codexAuthLogin'),
+    logout: (): Promise<CodexOAuthState> =>
+      ipcRenderer.invoke('codexAuthLogout'),
+    status: (): Promise<CodexOAuthState> =>
+      ipcRenderer.invoke('codexAuthStatus'),
   },
 };
 
