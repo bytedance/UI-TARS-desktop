@@ -3,7 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { createHash, randomBytes } from 'node:crypto';
-import { createServer } from 'node:http';
+import {
+  createServer,
+  type IncomingMessage,
+  type ServerResponse,
+} from 'node:http';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { app, safeStorage, shell } from 'electron';
@@ -136,8 +140,16 @@ export class CodexAuthService {
     authUrl.searchParams.set('codex_cli_simplified_flow', 'true');
     authUrl.searchParams.set('originator', 'codex_cli_rs');
 
-    const codePromise = this.waitForAuthorizationCode(state);
-    await shell.openExternal(authUrl.toString());
+    const { codePromise, cancel } = this.waitForAuthorizationCode(state);
+    try {
+      await shell.openExternal(authUrl.toString());
+    } catch (error) {
+      cancel(new Error('OpenAI Codex OAuth launch failed'));
+      await codePromise.catch(() => undefined);
+      logger.error('[CodexAuthService] failed to open external browser', error);
+      throw new Error('Failed to open browser for OpenAI Codex OAuth login');
+    }
+
     const code = await codePromise;
 
     const session = await this.exchangeAuthorizationCode(code, verifier);
@@ -146,11 +158,24 @@ export class CodexAuthService {
     return this.getStatus();
   }
 
-  private async waitForAuthorizationCode(
-    expectedState: string,
-  ): Promise<string> {
-    return new Promise((resolve, reject) => {
+  private waitForAuthorizationCode(expectedState: string): {
+    codePromise: Promise<string>;
+    cancel: (error?: Error) => void;
+  } {
+    let cancel = (_error?: Error) => {};
+
+    const codePromise = new Promise<string>((resolve, reject) => {
       let settled = false;
+      let timeout: NodeJS.Timeout;
+      const redirectUri = new URL(REDIRECT_URI);
+      const callbackPort = Number(redirectUri.port || '80');
+      const servers: ReturnType<typeof createServer>[] = [];
+
+      const closeServers = () => {
+        for (const server of servers) {
+          server.close();
+        }
+      };
 
       const settle = (callback: () => void) => {
         if (settled) {
@@ -160,7 +185,29 @@ export class CodexAuthService {
         callback();
       };
 
-      const server = createServer((req, res) => {
+      const rejectWith = (error: unknown) => {
+        const normalized =
+          error instanceof Error ? error : new Error(String(error));
+        settle(() => {
+          clearTimeout(timeout);
+          closeServers();
+          reject(normalized);
+        });
+      };
+
+      const resolveWith = (code: string) => {
+        settle(() => {
+          clearTimeout(timeout);
+          closeServers();
+          resolve(code);
+        });
+      };
+
+      cancel = (error?: Error) => {
+        rejectWith(error || new Error('OpenAI Codex OAuth cancelled'));
+      };
+
+      const handleRequest = (req: IncomingMessage, res: ServerResponse) => {
         const requestUrl = new URL(req.url || '/', REDIRECT_URI);
         if (requestUrl.pathname !== '/auth/callback') {
           res.statusCode = 404;
@@ -174,11 +221,7 @@ export class CodexAuthService {
         if (!code || state !== expectedState) {
           res.statusCode = 400;
           res.end('OAuth login failed. You can close this window.');
-          settle(() => {
-            clearTimeout(timeout);
-            server.close();
-            reject(new Error('Invalid OAuth callback response'));
-          });
+          rejectWith(new Error('Invalid OAuth callback response'));
           return;
         }
 
@@ -188,31 +231,53 @@ export class CodexAuthService {
           '<h1>OpenAI Codex OAuth connected. You can close this tab.</h1>',
         );
 
-        settle(() => {
-          clearTimeout(timeout);
-          server.close();
-          resolve(code);
-        });
-      });
+        resolveWith(code);
+      };
 
-      server.on('error', (error) => {
-        settle(() => {
-          clearTimeout(timeout);
-          reject(error);
-        });
-      });
+      const listenOnHost = (
+        server: ReturnType<typeof createServer>,
+        host: '127.0.0.1' | '::1',
+      ) => {
+        return new Promise<void>((resolveListen, rejectListen) => {
+          const onError = (error: Error) => {
+            server.off('listening', onListening);
+            rejectListen(error);
+          };
+          const onListening = () => {
+            server.off('error', onError);
+            resolveListen();
+          };
 
-      const timeout = setTimeout(() => {
-        settle(() => {
-          server.close();
-          reject(new Error('OpenAI Codex OAuth timeout'));
+          server.once('error', onError);
+          server.once('listening', onListening);
+          server.listen({
+            port: callbackPort,
+            host,
+            ...(host === '::1' ? { ipv6Only: true } : {}),
+          });
         });
+      };
+
+      const ipv4Server = createServer(handleRequest);
+      const ipv6Server = createServer(handleRequest);
+      servers.push(ipv4Server, ipv6Server);
+
+      timeout = setTimeout(() => {
+        rejectWith(new Error('OpenAI Codex OAuth timeout'));
       }, LOGIN_TIMEOUT_MS);
 
-      const redirectUri = new URL(REDIRECT_URI);
-      const callbackPort = Number(redirectUri.port || '80');
-      server.listen(callbackPort);
+      Promise.all([
+        listenOnHost(ipv4Server, '127.0.0.1'),
+        listenOnHost(ipv6Server, '::1'),
+      ]).catch((error) => {
+        rejectWith(error);
+      });
     });
+
+    return {
+      codePromise,
+      cancel,
+    };
   }
 
   private async exchangeAuthorizationCode(
