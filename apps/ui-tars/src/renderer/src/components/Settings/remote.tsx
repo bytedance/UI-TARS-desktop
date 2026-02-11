@@ -17,7 +17,25 @@ import {
   RemoteComputerSettingsRef,
 } from './category/remoteComputer';
 import { Operator } from '@main/store/types';
+import { VLM_PROVIDER_REGISTRY } from '@main/store/modelRegistry';
 import { cn } from '@renderer/utils';
+
+const isVLMReadyForOperator = (setting: Partial<LocalStore>) => {
+  const { vlmApiKey, vlmBaseUrl, vlmModelName, vlmProvider } = setting;
+  const providerConfig = vlmProvider
+    ? VLM_PROVIDER_REGISTRY[vlmProvider]
+    : undefined;
+
+  if (!vlmBaseUrl || !vlmModelName || !vlmProvider) {
+    return false;
+  }
+
+  if (!providerConfig?.requiresApiKey) {
+    return true;
+  }
+
+  return !!vlmApiKey?.trim();
+};
 
 interface RemoteSettingsDialogProps {
   isOpen: boolean;
@@ -31,13 +49,7 @@ export const checkRemoteComputer = async () => {
 
   const currentSetting = ((await settingRpc.getSetting()) ||
     {}) as Partial<LocalStore>;
-  const { vlmApiKey, vlmBaseUrl, vlmModelName, vlmProvider } = currentSetting;
-
-  if (vlmApiKey && vlmBaseUrl && vlmModelName && vlmProvider) {
-    return true;
-  }
-
-  return false;
+  return isVLMReadyForOperator(currentSetting);
 };
 
 export const checkRemoteBrowser = async () => {
@@ -45,13 +57,7 @@ export const checkRemoteBrowser = async () => {
 
   const currentSetting = ((await settingRpc.getSetting()) ||
     {}) as Partial<LocalStore>;
-  const { vlmApiKey, vlmBaseUrl, vlmModelName, vlmProvider } = currentSetting;
-
-  if (vlmApiKey && vlmBaseUrl && vlmModelName && vlmProvider) {
-    return true;
-  }
-
-  return false;
+  return isVLMReadyForOperator(currentSetting);
 };
 
 const Steps = ({

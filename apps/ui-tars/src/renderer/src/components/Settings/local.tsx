@@ -7,6 +7,7 @@ import {
 } from '@renderer/components/ui/dialog';
 import { Button } from '@renderer/components/ui/button';
 import { LocalStore } from '@main/store/validate';
+import { VLM_PROVIDER_REGISTRY } from '@main/store/modelRegistry';
 
 import { VLMSettings, VLMSettingsRef } from './category/vlm';
 import { useRef } from 'react';
@@ -23,12 +24,19 @@ export const checkVLMSettings = async () => {
   const currentSetting = ((await settingRpc.getSetting()) ||
     {}) as Partial<LocalStore>;
   const { vlmApiKey, vlmBaseUrl, vlmModelName, vlmProvider } = currentSetting;
+  const providerConfig = vlmProvider
+    ? VLM_PROVIDER_REGISTRY[vlmProvider]
+    : undefined;
 
-  if (vlmApiKey && vlmBaseUrl && vlmModelName && vlmProvider) {
+  if (!vlmBaseUrl || !vlmModelName || !vlmProvider) {
+    return false;
+  }
+
+  if (!providerConfig?.requiresApiKey) {
     return true;
   }
 
-  return false;
+  return !!vlmApiKey?.trim();
 };
 
 export const LocalSettingsDialog = ({
