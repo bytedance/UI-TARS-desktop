@@ -345,6 +345,10 @@ function findActionMarkers(
       }
 
       if (char === quote) {
+        if (quote === "'" && isInWordApostrophe(text, i)) {
+          continue;
+        }
+
         quote = null;
       }
 
@@ -390,6 +394,12 @@ function isApostrophe(text: string, index: number): boolean {
   }
 
   return next === '' || /[\s,.;:!?)}\]]/.test(next);
+}
+
+function isInWordApostrophe(text: string, index: number): boolean {
+  const prev = text[index - 1] ?? '';
+  const next = text[index + 1] ?? '';
+  return /[A-Za-z0-9]/.test(prev) && /[A-Za-z0-9]/.test(next);
 }
 
 /**
