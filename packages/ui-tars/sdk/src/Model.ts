@@ -185,22 +185,23 @@ export class UITarsModel extends Model {
   private extractCodexInstructions(
     messages: Array<ChatCompletionMessageParam>,
   ): string | undefined {
-    for (let i = messages.length - 1; i >= 0; i--) {
-      const message = messages[i];
+    const userTexts: string[] = [];
+
+    for (const message of messages) {
       if (message.role !== 'user') {
         continue;
       }
 
       if (typeof message.content === 'string' && message.content.trim()) {
-        return message.content;
+        userTexts.push(message.content);
+        continue;
       }
 
       if (!Array.isArray(message.content)) {
         continue;
       }
 
-      for (let j = message.content.length - 1; j >= 0; j--) {
-        const item = message.content[j];
+      for (const item of message.content) {
         const part = item as unknown as {
           type?: string;
           text?: string;
@@ -211,12 +212,33 @@ export class UITarsModel extends Model {
           typeof part.text === 'string' &&
           part.text.trim()
         ) {
-          return part.text;
+          userTexts.push(part.text);
         }
       }
     }
 
-    return undefined;
+    if (userTexts.length === 0) {
+      return undefined;
+    }
+
+    const baseInstruction = userTexts[0];
+    const latestInstruction = userTexts[userTexts.length - 1];
+
+    if (baseInstruction === latestInstruction) {
+      return baseInstruction;
+    }
+
+    const userInstructionMarker = '## User Instruction';
+    const markerIndex = baseInstruction.lastIndexOf(userInstructionMarker);
+
+    if (markerIndex >= 0) {
+      const prefix = baseInstruction
+        .slice(0, markerIndex + userInstructionMarker.length)
+        .trimEnd();
+      return `${prefix}\n${latestInstruction}`;
+    }
+
+    return `${baseInstruction}\n\n## Latest User Instruction\n${latestInstruction}`;
   }
 
   private async invokeCodexResponseStream(

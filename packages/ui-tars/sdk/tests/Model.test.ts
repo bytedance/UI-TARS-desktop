@@ -253,7 +253,7 @@ describe('UITarsModel', () => {
       expect(mockResponsesCreate).toHaveBeenCalledTimes(1);
     });
 
-    it('should use the latest user text for Codex instructions', async () => {
+    it('should preserve system prompt contract and apply latest user instruction', async () => {
       const model = new UITarsModel({
         ['api' + 'Key']: 'codex-token',
         baseURL: 'https://test.com',
@@ -283,7 +283,11 @@ describe('UITarsModel', () => {
 
       await model.invoke({
         conversations: [
-          { from: 'human', value: 'Open browser and search weather' },
+          {
+            from: 'human',
+            value:
+              'System action contract\n## User Instruction\nOpen browser and search weather',
+          },
           { from: 'human', value: '<image>' },
           { from: 'gpt', value: 'Action: call_user()' },
           { from: 'human', value: 'Actually open calculator instead' },
@@ -293,7 +297,9 @@ describe('UITarsModel', () => {
       });
 
       const requestBody = mockResponsesCreate.mock.calls[0]?.[0] ?? {};
-      expect(requestBody.instructions).toBe('Actually open calculator instead');
+      expect(requestBody.instructions).toBe(
+        'System action contract\n## User Instruction\nActually open calculator instead',
+      );
     });
 
     it('should keep explicit authorization header for Codex stream requests', async () => {
