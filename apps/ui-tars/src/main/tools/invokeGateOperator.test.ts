@@ -36,7 +36,11 @@ describe('InvokeGateOperator', () => {
     } as unknown as Operator;
   };
 
-  const buildExecuteParams = (actionType: string, startBox = '[1,1,1,1]') => {
+  const buildExecuteParams = (
+    actionType: string,
+    startBox = '[1,1,1,1]',
+    loopCount?: number,
+  ) => {
     return {
       prediction: 'Action output',
       parsedPrediction: {
@@ -45,6 +49,7 @@ describe('InvokeGateOperator', () => {
         reflection: null,
         thought: 'execute action',
       },
+      loopCount,
       screenWidth: 1920,
       screenHeight: 1080,
       scaleFactor: 1,
@@ -61,6 +66,7 @@ describe('InvokeGateOperator', () => {
         reflection: null,
         thought: 'navigate action',
       },
+      loopCount: 1,
       screenWidth: 1920,
       screenHeight: 1080,
       scaleFactor: 1,
@@ -154,5 +160,37 @@ describe('InvokeGateOperator', () => {
     expect(
       (innerOperator as never as { execute: ReturnType<typeof vi.fn> }).execute,
     ).toHaveBeenCalledTimes(1);
+  });
+
+  it('tracks invoke-gate budget by loop count, not action count', async () => {
+    const innerOperator = createInnerOperator();
+    const gatedOperator = new InvokeGateOperator({
+      innerOperator,
+      featureFlags: {
+        ffToolRegistry: true,
+        ffInvokeGate: true,
+        ffToolFirstRouting: false,
+      },
+      sessionId: 'session-5',
+      authState: 'valid',
+      maxLoopCount: 1,
+    });
+
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 1) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 1) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 2) as never,
+      ),
+    ).rejects.toThrow('loop_budget_exhausted');
   });
 });

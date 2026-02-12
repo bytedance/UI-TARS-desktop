@@ -36,6 +36,7 @@ export class InvokeGateOperator extends Operator {
   private readonly sessionId: string;
   private readonly authState: GateAuthState;
   private remainingLoopBudget: number;
+  private lastEvaluatedLoopCount: number | null = null;
 
   constructor(config: InvokeGateOperatorConfig) {
     super();
@@ -43,7 +44,9 @@ export class InvokeGateOperator extends Operator {
     this.featureFlags = config.featureFlags;
     this.sessionId = config.sessionId;
     this.authState = config.authState;
-    this.remainingLoopBudget = config.maxLoopCount;
+    this.remainingLoopBudget = Number.isFinite(config.maxLoopCount)
+      ? Math.max(0, config.maxLoopCount)
+      : 0;
 
     (this.constructor as typeof InvokeGateOperator).MANUAL = (
       this.innerOperator.constructor as typeof Operator
@@ -55,6 +58,13 @@ export class InvokeGateOperator extends Operator {
   }
 
   async execute(params: ExecuteParams): Promise<ExecuteOutput> {
+    const loopCount = (params as ExecuteParams & { loopCount?: number })
+      .loopCount;
+
+    if (this.featureFlags.ffInvokeGate) {
+      this.advanceLoopBudget(loopCount);
+    }
+
     const intent = buildActionIntentV1({
       sessionId: this.sessionId,
       parsedPrediction: params.parsedPrediction,
@@ -79,10 +89,22 @@ export class InvokeGateOperator extends Operator {
       );
     }
 
-    if (this.featureFlags.ffInvokeGate) {
+    return this.innerOperator.execute(params);
+  }
+
+  private advanceLoopBudget(loopCount?: number): void {
+    if (typeof loopCount !== 'number') {
+      this.remainingLoopBudget = Math.max(0, this.remainingLoopBudget - 1);
+      return;
+    }
+
+    if (
+      this.lastEvaluatedLoopCount !== null &&
+      loopCount !== this.lastEvaluatedLoopCount
+    ) {
       this.remainingLoopBudget = Math.max(0, this.remainingLoopBudget - 1);
     }
 
-    return this.innerOperator.execute(params);
+    this.lastEvaluatedLoopCount = loopCount;
   }
 }

@@ -19,6 +19,8 @@ import { Factors } from './constants';
 export interface ExecuteParams {
   prediction: string;
   parsedPrediction: PredictionParsed;
+  /** GUIAgent loop index (1-based), used for loop-scoped guards */
+  loopCount?: number;
   /** Device Physical Resolution */
   screenWidth: number;
   /** Device Physical Resolution */

@@ -122,4 +122,29 @@ describe('invokeGate', () => {
     expect(releaseDecision.decision).toBe('allow');
     expect(releaseDecision.reasonCodes).toEqual([]);
   });
+
+  it('accepts fractional loop budget values without schema failure', () => {
+    const intent = buildActionIntentV1({
+      sessionId: 'session-6',
+      parsedPrediction: {
+        action_type: 'click',
+        action_inputs: { start_box: '[1,1,1,1]' },
+        reflection: null,
+        thought: 'fractional budget test',
+      },
+    });
+
+    const decision = evaluateInvokeGate(intent, {
+      featureFlags: {
+        ffToolRegistry: true,
+        ffInvokeGate: true,
+        ffToolFirstRouting: false,
+      },
+      authState: 'valid',
+      loopBudgetRemaining: 25.5,
+    });
+
+    expect(decision.decision).toBe('allow');
+    expect(decision.loopBudgetRemaining).toBe(25.5);
+  });
 });

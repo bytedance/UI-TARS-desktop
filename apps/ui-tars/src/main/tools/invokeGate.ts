@@ -90,7 +90,7 @@ const GateDecisionV1Schema = z.object({
   decision: z.enum(['allow', 'deny']),
   reasonCodes: z.array(z.enum(INVOKE_GATE_DENY_REASONS)),
   authState: z.enum(['unknown', 'valid', 'invalid']),
-  loopBudgetRemaining: z.number().int(),
+  loopBudgetRemaining: z.number().finite(),
   evaluatedAt: z.number().int(),
 });
 
@@ -165,6 +165,9 @@ export const evaluateInvokeGate = (
   context: GateContext,
 ): GateDecisionV1 => {
   const reasonCodes: InvokeGateDenyReason[] = [];
+  const loopBudgetRemaining = Number.isFinite(context.loopBudgetRemaining)
+    ? Math.max(0, context.loopBudgetRemaining)
+    : 0;
 
   if (!context.featureFlags.ffInvokeGate) {
     return GateDecisionV1Schema.parse({
@@ -173,12 +176,12 @@ export const evaluateInvokeGate = (
       decision: 'allow',
       reasonCodes: ['invoke_gate_disabled'],
       authState: context.authState,
-      loopBudgetRemaining: context.loopBudgetRemaining,
+      loopBudgetRemaining,
       evaluatedAt: Date.now(),
     });
   }
 
-  if (context.loopBudgetRemaining <= 0) {
+  if (loopBudgetRemaining <= 0) {
     reasonCodes.push('loop_budget_exhausted');
   }
 
@@ -207,7 +210,7 @@ export const evaluateInvokeGate = (
     decision: reasonCodes.length > 0 ? 'deny' : 'allow',
     reasonCodes,
     authState: context.authState,
-    loopBudgetRemaining: context.loopBudgetRemaining,
+    loopBudgetRemaining,
     evaluatedAt: Date.now(),
   });
 };

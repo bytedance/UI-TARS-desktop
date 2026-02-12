@@ -415,6 +415,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
                 operator.execute({
                   prediction,
                   parsedPrediction,
+                  loopCount: loopCnt,
                   screenWidth: width,
                   screenHeight: height,
                   scaleFactor: snapshot.scaleFactor,
@@ -511,6 +512,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
             action_type: 'user_stop',
             thought: '',
           },
+          loopCount: loopCnt,
           screenWidth: 0,
           screenHeight: 0,
           scaleFactor: 1,

@@ -85,6 +85,7 @@ describe('GUIAgent', () => {
     expect(operator.execute).toBeCalledTimes(2);
     expect(operator.execute.mock.calls[0][0]).toEqual({
       factors: DEFAULT_FACTORS,
+      loopCount: 1,
       parsedPrediction: {
         action_inputs: {
           start_box: '[0.072,0.646,0.072,0.646]',
@@ -468,6 +469,7 @@ describe('GUIAgent', () => {
     expect(operator.execute).toBeCalledTimes(2);
     expect(operator.execute.mock.calls[0][0]).toEqual({
       factors: DEFAULT_FACTORS,
+      loopCount: 1,
       parsedPrediction: {
         action_inputs: {
           start_box: '[0.072,0.646,0.072,0.646]',
