@@ -45,6 +45,9 @@ const SUPPORTED_ACTION_TYPES = new Set<string>([
   'type',
   'hotkey',
   'press',
+  'release',
+  'navigate',
+  'navigate_back',
   'scroll',
   'error_env',
   'call_user',
@@ -102,7 +105,16 @@ type GateContext = {
 
 const getRiskTierByActionType = (actionType: string): ActionRiskTier => {
   if (
-    ['type', 'hotkey', 'press', 'drag', 'left_click_drag'].includes(actionType)
+    [
+      'type',
+      'hotkey',
+      'press',
+      'release',
+      'navigate',
+      'navigate_back',
+      'drag',
+      'left_click_drag',
+    ].includes(actionType)
   ) {
     return 'high';
   }

@@ -52,6 +52,22 @@ describe('InvokeGateOperator', () => {
     };
   };
 
+  const buildNavigateExecuteParams = () => {
+    return {
+      prediction: 'Action output',
+      parsedPrediction: {
+        action_type: 'navigate',
+        action_inputs: { content: 'https://example.com' },
+        reflection: null,
+        thought: 'navigate action',
+      },
+      screenWidth: 1920,
+      screenHeight: 1080,
+      scaleFactor: 1,
+      factors: [1, 1],
+    };
+  };
+
   it('blocks unsupported actions when invoke gate is enabled', async () => {
     const innerOperator = createInnerOperator();
     const gatedOperator = new InvokeGateOperator({
@@ -115,5 +131,28 @@ describe('InvokeGateOperator', () => {
     await expect(
       gatedOperator.execute(buildExecuteParams('click', '') as never),
     ).rejects.toThrow('start_box_required');
+  });
+
+  it('allows navigate action when invoke gate is enabled', async () => {
+    const innerOperator = createInnerOperator();
+    const gatedOperator = new InvokeGateOperator({
+      innerOperator,
+      featureFlags: {
+        ffToolRegistry: true,
+        ffInvokeGate: true,
+        ffToolFirstRouting: false,
+      },
+      sessionId: 'session-4',
+      authState: 'valid',
+      maxLoopCount: 5,
+    });
+
+    await expect(
+      gatedOperator.execute(buildNavigateExecuteParams() as never),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+
+    expect(
+      (innerOperator as never as { execute: ReturnType<typeof vi.fn> }).execute,
+    ).toHaveBeenCalledTimes(1);
   });
 });

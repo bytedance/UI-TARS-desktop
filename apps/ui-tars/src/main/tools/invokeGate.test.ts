@@ -79,4 +79,47 @@ describe('invokeGate', () => {
     expect(decision.decision).toBe('deny');
     expect(decision.reasonCodes).toContain('auth_state_invalid');
   });
+
+  it('allows modeled navigate and release actions when invoke gate is enabled', () => {
+    const flags = {
+      ffToolRegistry: true,
+      ffInvokeGate: true,
+      ffToolFirstRouting: false,
+    };
+
+    const navigateIntent = buildActionIntentV1({
+      sessionId: 'session-4',
+      parsedPrediction: {
+        action_type: 'navigate',
+        action_inputs: { content: 'https://example.com' },
+        reflection: null,
+        thought: 'navigate',
+      },
+    });
+    const releaseIntent = buildActionIntentV1({
+      sessionId: 'session-5',
+      parsedPrediction: {
+        action_type: 'release',
+        action_inputs: { key: 'ctrl' },
+        reflection: null,
+        thought: 'release key',
+      },
+    });
+
+    const navigateDecision = evaluateInvokeGate(navigateIntent, {
+      featureFlags: flags,
+      authState: 'valid',
+      loopBudgetRemaining: 10,
+    });
+    const releaseDecision = evaluateInvokeGate(releaseIntent, {
+      featureFlags: flags,
+      authState: 'valid',
+      loopBudgetRemaining: 10,
+    });
+
+    expect(navigateDecision.decision).toBe('allow');
+    expect(navigateDecision.reasonCodes).toEqual([]);
+    expect(releaseDecision.decision).toBe('allow');
+    expect(releaseDecision.reasonCodes).toEqual([]);
+  });
 });
