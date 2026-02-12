@@ -372,7 +372,16 @@ function findActionMarkers(
 function isApostrophe(text: string, index: number): boolean {
   const prev = text[index - 1] ?? '';
   const next = text[index + 1] ?? '';
-  return /[A-Za-z0-9]/.test(prev) && /[A-Za-z0-9]/.test(next);
+
+  if (!/[A-Za-z0-9]/.test(prev)) {
+    return false;
+  }
+
+  if (/[A-Za-z0-9]/.test(next)) {
+    return true;
+  }
+
+  return next === '' || /[\s,.;:!?)}\]]/.test(next);
 }
 
 /**

@@ -511,6 +511,23 @@ Action: type(content='Action: wait()')`;
       ]);
     });
 
+    it('should still detect Action marker after possessive apostrophe in thought', () => {
+      const input = `Thought: Open users' settings and continue.
+Action: click(start_box='(100,200)')`;
+      const result = parseActionVlm(input);
+
+      expect(result).toEqual([
+        {
+          action_inputs: {
+            start_box: '[0.1,0.2,0.1,0.2]',
+          },
+          action_type: 'click',
+          reflection: null,
+          thought: "Open users' settings and continue.",
+        },
+      ]);
+    });
+
     it('should handle with Chinese colon', () => {
       const input = `Thought: I need to click this button
 Action：click(start_box='(100,200)')`;
