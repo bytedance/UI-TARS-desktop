@@ -8,20 +8,19 @@ import { type PredictionParsed } from '@ui-tars/shared/types';
 import { z } from 'zod';
 
 import type { ToolFirstFeatureFlags } from '@main/store/featureFlags';
+import {
+  INVOKE_GATE_DENY_REASONS,
+  type InvokeGateDenyReason,
+} from './invokeGateReasons';
+
+export {
+  INVOKE_GATE_DENY_REASONS,
+  INVOKE_GATE_DENY_REASON_CATALOG,
+} from './invokeGateReasons';
+export type { InvokeGateDenyReason } from './invokeGateReasons';
 
 export const ACTION_INTENT_VERSION = 'v1';
 export const GATE_DECISION_VERSION = 'v1';
-
-export const INVOKE_GATE_DENY_REASONS = [
-  'invoke_gate_disabled',
-  'loop_budget_exhausted',
-  'action_type_missing',
-  'action_type_unsupported',
-  'start_box_required',
-  'auth_state_invalid',
-] as const;
-
-export type InvokeGateDenyReason = (typeof INVOKE_GATE_DENY_REASONS)[number];
 export type GateAuthState = 'unknown' | 'valid' | 'invalid';
 
 const RISK_TIERS = ['low', 'medium', 'high'] as const;
