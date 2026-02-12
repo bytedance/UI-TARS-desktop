@@ -323,7 +323,6 @@ function findActionMarkers(
   const markers: Array<{ index: number; marker: string }> = [];
   let quote: "'" | '"' | null = null;
   let escaping = false;
-  let seenActionMarker = false;
 
   for (let i = 0; i < text.length; i++) {
     const char = text[i];
@@ -334,7 +333,7 @@ function findActionMarkers(
         continue;
       }
 
-      if ((char === '\n' || char === '\r') && !seenActionMarker) {
+      if (char === '\n' || char === '\r') {
         quote = null;
         continue;
       }
@@ -366,14 +365,12 @@ function findActionMarkers(
 
     if (text.startsWith('Action:', i)) {
       markers.push({ index: i, marker: 'Action:' });
-      seenActionMarker = true;
       i += 'Action:'.length - 1;
       continue;
     }
 
     if (text.startsWith('Action：', i)) {
       markers.push({ index: i, marker: 'Action：' });
-      seenActionMarker = true;
       i += 'Action：'.length - 1;
     }
   }

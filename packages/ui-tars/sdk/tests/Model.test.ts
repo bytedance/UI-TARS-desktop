@@ -418,6 +418,48 @@ describe('UITarsModel', () => {
       );
     });
 
+    it('should send previous_response_id in stateful Codex requests', async () => {
+      const model = new UITarsModel({
+        ['api' + 'Key']: 'codex-token',
+        baseURL: 'https://test.com',
+        model: 'gpt-5.3-codex',
+        useResponsesApi: true,
+        codexResponses: {
+          enabled: true,
+          store: true,
+          include: ['reasoning.encrypted_content'],
+          reasoningEffort: 'high',
+        },
+      });
+
+      mockResponsesCreate.mockResolvedValueOnce(
+        createMockCodexStream([
+          { type: 'response.output_text.delta', delta: 'Action: wait()' },
+          {
+            type: 'response.completed',
+            response: {
+              id: 'resp-codex-stateful',
+              output_text: 'Action: wait()',
+              usage: { total_tokens: 13 },
+            },
+          },
+        ]),
+      );
+
+      await model.invoke({
+        conversations: [
+          { from: 'human', value: 'Continue from prior state' },
+          { from: 'human', value: '<image>' },
+        ],
+        images: ['base64image1'],
+        screenContext: { width: 1920, height: 1080 },
+        previousResponseId: 'response-from-last-round',
+      });
+
+      const firstBody = mockResponsesCreate.mock.calls[0]?.[0] ?? {};
+      expect(firstBody.previous_response_id).toBe('response-from-last-round');
+    });
+
     it('should track Codex image responses for cleanup when store is enabled', async () => {
       const model = new UITarsModel({
         ['api' + 'Key']: 'codex-token',

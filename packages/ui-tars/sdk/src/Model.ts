@@ -410,6 +410,8 @@ export class UITarsModel extends Model {
       let responseId = previousResponseId;
       let costTokens = 0;
       if (isCodexResponses) {
+        const isCodexStatefulResponses =
+          this.modelConfig.codexResponses?.store === true;
         const codexInputItems = inputs.map((input) =>
           this.normalizeCodexInput(input),
         );
@@ -434,6 +436,9 @@ export class UITarsModel extends Model {
           model,
           stream: true,
           store: this.modelConfig.codexResponses?.store ?? false,
+          ...(isCodexStatefulResponses && responseId
+            ? { previous_response_id: responseId }
+            : {}),
           include: this.normalizeCodexInclude(),
           ...(codexInstructions ? { instructions: codexInstructions } : {}),
           reasoning: {

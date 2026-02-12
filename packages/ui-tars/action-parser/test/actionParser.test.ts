@@ -561,6 +561,24 @@ Action: click(start_box='(100,200)')`;
       ]);
     });
 
+    it('should recover final Action marker after broken quoted argument in earlier action block', () => {
+      const input = `Thought: Continue after malformed action
+Action: type(content='broken
+Action: click(start_box='(100,200)')`;
+      const result = parseActionVlm(input);
+
+      expect(result).toEqual([
+        {
+          action_inputs: {
+            start_box: '[0.1,0.2,0.1,0.2]',
+          },
+          action_type: 'click',
+          reflection: null,
+          thought: 'Continue after malformed action',
+        },
+      ]);
+    });
+
     it('should handle with Chinese colon', () => {
       const input = `Thought: I need to click this button
 Action：click(start_box='(100,200)')`;
