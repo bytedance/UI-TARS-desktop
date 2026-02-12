@@ -112,4 +112,66 @@ describe('systemRunTool', () => {
       vi.useRealTimers();
     }
   });
+
+  it('returns structured spawn_error when spawn throws synchronously', async () => {
+    const call = buildSystemRunToolCall({
+      intentId: 'intent-7',
+      argv: ['invalid-command'],
+      idempotencyKey: 'idem-7',
+      timeoutMs: 100,
+    });
+
+    const result = await runSystemRunToolCall(call, {
+      spawnImpl: () => {
+        throw new Error('sync spawn failure');
+      },
+    });
+
+    expect(result.status).toBe('error');
+    expect(result.errorClass).toBe('spawn_error');
+    expect(result.stderr).toContain('sync spawn failure');
+  });
+
+  it('uses canonical timeout value instead of top-level timeout field', async () => {
+    vi.useFakeTimers();
+    try {
+      const fakeChild = new EventEmitter() as EventEmitter & {
+        stdout: EventEmitter;
+        stderr: EventEmitter;
+        kill: ReturnType<typeof vi.fn>;
+      };
+      fakeChild.stdout = new EventEmitter();
+      fakeChild.stderr = new EventEmitter();
+      fakeChild.kill = vi.fn().mockReturnValue(true);
+
+      const builtCall = buildSystemRunToolCall({
+        intentId: 'intent-8',
+        argv: ['fake-command'],
+        idempotencyKey: 'idem-8',
+        timeoutMs: 25,
+      });
+      const mutatedCall = {
+        ...builtCall,
+        timeoutMs: 5000,
+      };
+
+      const resultPromise = runSystemRunToolCall(mutatedCall, {
+        spawnImpl: () => fakeChild as never,
+        hardKillGraceMs: 10,
+        forceResolveGraceMs: 20,
+      });
+
+      await vi.advanceTimersByTimeAsync(24);
+      expect(fakeChild.kill).toHaveBeenCalledTimes(0);
+
+      await vi.advanceTimersByTimeAsync(1);
+      expect(fakeChild.kill).toHaveBeenCalledTimes(1);
+
+      await vi.advanceTimersByTimeAsync(100);
+      const result = await resultPromise;
+      expect(result.status).toBe('timeout');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });

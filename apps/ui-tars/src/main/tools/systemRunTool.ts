@@ -156,6 +156,7 @@ export const runSystemRunToolCall = async (
     options.forceResolveGraceMs >= 0
       ? options.forceResolveGraceMs
       : SYSTEM_RUN_FORCE_RESOLVE_GRACE_MS;
+  const executionTimeoutMs = parsedCall.canonicalArgs.timeoutMs;
 
   const [command, ...args] = parsedCall.canonicalArgs.argv;
   const stdoutChunks: Buffer[] = [];
@@ -239,12 +240,28 @@ export const runSystemRunToolCall = async (
       });
     };
 
-    const child = spawnImpl(command, args, {
-      cwd: parsedCall.canonicalArgs.cwd,
-      shell: false,
-      windowsHide: true,
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
+    let child: ReturnType<typeof spawn>;
+    try {
+      child = spawnImpl(command, args, {
+        cwd: parsedCall.canonicalArgs.cwd,
+        shell: false,
+        windowsHide: true,
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      resolveOnce(
+        toResult({
+          status: 'error',
+          errorClass: 'spawn_error',
+          exitCode: null,
+          stdout: '',
+          stderr: message,
+          deltaObserved: false,
+        }),
+      );
+      return;
+    }
 
     if (!child.stdout || !child.stderr) {
       resolveOnce(
@@ -283,7 +300,7 @@ export const runSystemRunToolCall = async (
           }),
         );
       }, hardKillGraceMs + forceResolveGraceMs);
-    }, parsedCall.timeoutMs);
+    }, executionTimeoutMs);
 
     child.stdout.on('data', (chunk: Buffer | string) => {
       const data = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
