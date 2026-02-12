@@ -87,17 +87,34 @@ export class NutJSElectronOperator extends NutJSOperator {
     const { action_type, action_inputs } = params.parsedPrediction;
 
     if (action_type === 'type' && env.isWindows && action_inputs?.content) {
-      const content = action_inputs.content?.trim();
+      const rawContent = action_inputs.content;
+      const content = rawContent.trim();
+      if (!content) {
+        return await super.execute(params);
+      }
+      const shouldSubmit =
+        rawContent.endsWith('\n') || rawContent.endsWith('\\n');
 
       logger.info('[device] type', content);
-      const stripContent = content.replace(/\\n$/, '').replace(/\n$/, '');
-      const originalClipboard = clipboard.readText();
-      clipboard.writeText(stripContent);
-      await keyboard.pressKey(Key.LeftControl, Key.V);
-      await sleep(50);
-      await keyboard.releaseKey(Key.LeftControl, Key.V);
-      await sleep(50);
-      clipboard.writeText(originalClipboard);
+      const originalAutoDelayMs = keyboard.config.autoDelayMs;
+      keyboard.config.autoDelayMs = 0;
+      try {
+        const stripContent = content.replace(/\\n$/, '').replace(/\n$/, '');
+        const originalClipboard = clipboard.readText();
+        clipboard.writeText(stripContent);
+        await keyboard.pressKey(Key.LeftControl, Key.V);
+        await sleep(50);
+        await keyboard.releaseKey(Key.LeftControl, Key.V);
+        await sleep(50);
+        clipboard.writeText(originalClipboard);
+
+        if (shouldSubmit) {
+          await keyboard.pressKey(Key.Enter);
+          await keyboard.releaseKey(Key.Enter);
+        }
+      } finally {
+        keyboard.config.autoDelayMs = originalAutoDelayMs;
+      }
     } else {
       return await super.execute(params);
     }

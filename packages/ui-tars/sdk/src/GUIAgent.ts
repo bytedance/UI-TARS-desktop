@@ -325,6 +325,27 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
           JSON.stringify(parsedPredictions),
         );
 
+        const actionablePredictions = parsedPredictions.filter(
+          (parsedPrediction) =>
+            typeof parsedPrediction?.action_type === 'string' &&
+            parsedPrediction.action_type.trim().length > 0,
+        );
+
+        if (actionablePredictions.length === 0) {
+          logger.error(
+            '[GUIAgent] Non-actionable prediction, stopping loop:',
+            prediction,
+          );
+          Object.assign(data, {
+            status: StatusEnum.ERROR,
+            error: this.guiAgentErrorParser(
+              ErrorStatusEnum.ENVIRONMENT_ERROR,
+              new Error('Model output did not include any actionable action'),
+            ),
+          });
+          break;
+        }
+
         if (!prediction) {
           logger.error('[GUIAgent] Response Empty:', prediction);
           continue;
@@ -358,7 +379,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
         });
 
         // start execute action
-        for (const parsedPrediction of parsedPredictions) {
+        for (const parsedPrediction of actionablePredictions) {
           const actionType = parsedPrediction.action_type;
 
           logger.info('[GUIAgent] Action:', actionType);

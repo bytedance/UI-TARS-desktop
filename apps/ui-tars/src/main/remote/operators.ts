@@ -19,6 +19,26 @@ import { BaseRemoteComputer } from './shared';
 import { ProxyClient, RemoteComputer, SandboxInfo } from './proxyClient';
 import { SubsRemoteComputer } from './subscriptionClient';
 
+const INVALID_COORDINATE_ERROR_CODE = 'REMOTE_COORDINATES_INVALID';
+
+const requireStartCoordinates = (
+  actionType: string,
+  startX: number | null,
+  startY: number | null,
+): { startX: number; startY: number } => {
+  if (
+    startX === null ||
+    startY === null ||
+    !Number.isFinite(startX) ||
+    !Number.isFinite(startY)
+  ) {
+    throw new Error(
+      `[${INVALID_COORDINATE_ERROR_CODE}] ${actionType} requires valid coordinates, got (${startX}, ${startY})`,
+    );
+  }
+  return { startX, startY };
+};
+
 export class RemoteComputerOperator extends Operator {
   static MANUAL = {
     ACTION_SPACES: [
@@ -178,36 +198,33 @@ export class RemoteComputerOperator extends Operator {
       case 'mouse_move':
       case 'hover':
         logger.info('[RemoteComputerOperator] mouse_move');
-        if (startX !== null && startY !== null) {
-          await this.remoteComputer.moveMouse(startX, startY);
-        } else {
-          // TODO: make the error as observation for LLM
-          logger.error(
-            '[RemoteComputerOperator] mouse_move error: ',
-            `startX or startY is null: (${startX}, ${startY})`,
-          );
-        }
+        const mouseMoveCoords = requireStartCoordinates(
+          action_type,
+          startX,
+          startY,
+        );
+        await this.remoteComputer.moveMouse(
+          mouseMoveCoords.startX,
+          mouseMoveCoords.startY,
+        );
         break;
 
       case 'click':
       case 'left_click':
       case 'left_single':
         logger.info('[RemoteComputerOperator] left_click');
-        if (startX !== null && startY !== null) {
-          await this.remoteComputer.clickMouse(
-            startX,
-            startY,
-            'Left',
-            true,
-            true,
-          );
-        } else {
-          // TODO: make the error as observation for LLM
-          logger.error(
-            '[RemoteComputerOperator] left_click error: ',
-            `startX or startY is null: (${startX}, ${startY})`,
-          );
-        }
+        const leftClickCoords = requireStartCoordinates(
+          action_type,
+          startX,
+          startY,
+        );
+        await this.remoteComputer.clickMouse(
+          leftClickCoords.startX,
+          leftClickCoords.startY,
+          'Left',
+          true,
+          true,
+        );
         break;
 
       case 'left_double':
@@ -215,80 +232,98 @@ export class RemoteComputerOperator extends Operator {
         logger.info(
           `[RemoteComputerOperator] ${action_type}(${startX}, ${startY})`,
         );
-        if (startX !== null && startY !== null) {
-          await this.remoteComputer.clickMouse(
-            startX,
-            startY,
-            'DoubleLeft',
-            true,
-            true,
-          );
-        } else {
-          // TODO: make the error as observation for LLM
-          logger.error(
-            '[RemoteComputerOperator] double_click error: ',
-            `startX or startY is null: (${startX}, ${startY})`,
-          );
-        }
+        const doubleClickCoords = requireStartCoordinates(
+          action_type,
+          startX,
+          startY,
+        );
+        await this.remoteComputer.clickMouse(
+          doubleClickCoords.startX,
+          doubleClickCoords.startY,
+          'DoubleLeft',
+          true,
+          true,
+        );
         break;
 
       case 'right_click':
       case 'right_single':
         logger.info('[RemoteComputerOperator] right_click');
-        if (startX !== null && startY !== null) {
-          await this.remoteComputer.clickMouse(
-            startX,
-            startY,
-            'Right',
-            true,
-            true,
-          );
-        } else {
-          // TODO: make the error as observation for LLM
-          logger.error(
-            '[RemoteComputerOperator] right_click error: ',
-            `startX or startY is null: (${startX}, ${startY})`,
-          );
-        }
+        const rightClickCoords = requireStartCoordinates(
+          action_type,
+          startX,
+          startY,
+        );
+        await this.remoteComputer.clickMouse(
+          rightClickCoords.startX,
+          rightClickCoords.startY,
+          'Right',
+          true,
+          true,
+        );
         break;
 
       case 'middle_click':
         logger.info('[RemoteComputerOperator] middle_click');
-        if (startX !== null && startY !== null) {
-          await this.remoteComputer.clickMouse(
-            startX,
-            startY,
-            'Middle',
-            true,
-            true,
-          );
-        } else {
-          // TODO: make the error as observation for LLM
-          logger.error(
-            '[RemoteComputerOperator] middle_click error: ',
-            `startX or startY is null: (${startX}, ${startY})`,
-          );
-        }
+        const middleClickCoords = requireStartCoordinates(
+          action_type,
+          startX,
+          startY,
+        );
+        await this.remoteComputer.clickMouse(
+          middleClickCoords.startX,
+          middleClickCoords.startY,
+          'Middle',
+          true,
+          true,
+        );
         break;
 
       case 'left_click_drag':
       case 'drag':
       case 'select': {
         logger.info('[RemoteComputerOperator] drag', action_inputs);
-        // end_box
-        if (action_inputs?.end_box) {
-          const { x: rawEndX, y: rawEndY } = parseBoxToScreenCoords({
-            boxStr: action_inputs.end_box,
-            screenWidth,
-            screenHeight,
-          });
-          const endX = rawEndX !== null ? Math.round(rawEndX) : null;
-          const endY = rawEndY !== null ? Math.round(rawEndY) : null;
+        const dragStartCoords = requireStartCoordinates(
+          action_type,
+          startX,
+          startY,
+        );
 
-          if (startX && startY && endX && endY) {
-            await this.remoteComputer.dragMouse(startX, startY, endX, endY);
-          }
+        if (!action_inputs?.end_box) {
+          throw new Error(
+            `[${INVALID_COORDINATE_ERROR_CODE}] ${action_type} requires valid end coordinates, got (null, null)`,
+          );
         }
+
+        const { x: rawEndX, y: rawEndY } = parseBoxToScreenCoords({
+          boxStr: action_inputs.end_box,
+          screenWidth,
+          screenHeight,
+        });
+        const endX = rawEndX !== null ? Math.round(rawEndX) : null;
+        const endY = rawEndY !== null ? Math.round(rawEndY) : null;
+
+        if (
+          endX === null ||
+          endY === null ||
+          !Number.isFinite(endX) ||
+          !Number.isFinite(endY)
+        ) {
+          logger.error(
+            '[RemoteComputerOperator] drag end coords error: ',
+            `endX or endY is null: (${endX}, ${endY})`,
+          );
+          throw new Error(
+            `[${INVALID_COORDINATE_ERROR_CODE}] ${action_type} requires valid end coordinates, got (${endX}, ${endY})`,
+          );
+        }
+
+        await this.remoteComputer.dragMouse(
+          dragStartCoords.startX,
+          dragStartCoords.startY,
+          endX,
+          endY,
+        );
         break;
       }
 
@@ -315,30 +350,32 @@ export class RemoteComputerOperator extends Operator {
 
       case 'scroll': {
         const { direction } = action_inputs;
-        // if startX and startY is not null, move mouse to startX, startY
-        if (startX !== null && startY !== null) {
-          const directionMap: Record<string, 'Up' | 'Down' | 'Left' | 'Right'> =
-            {
-              up: 'Up',
-              down: 'Down',
-              left: 'Left',
-              right: 'Right',
-            };
-          const normalizedDirection = direction?.toLowerCase() || '';
-          const mappedDirection = directionMap[normalizedDirection];
+        const scrollStartCoords = requireStartCoordinates(
+          action_type,
+          startX,
+          startY,
+        );
 
-          if (mappedDirection) {
-            await this.remoteComputer.scroll(
-              startX,
-              startY,
-              mappedDirection,
-              5 * 100,
-            );
-          } else {
-            logger.warn(
-              `[RemoteComputerOperator] 不支持的滚动方向: ${direction}`,
-            );
-          }
+        const directionMap: Record<string, 'Up' | 'Down' | 'Left' | 'Right'> = {
+          up: 'Up',
+          down: 'Down',
+          left: 'Left',
+          right: 'Right',
+        };
+        const normalizedDirection = direction?.toLowerCase() || '';
+        const mappedDirection = directionMap[normalizedDirection];
+
+        if (mappedDirection) {
+          await this.remoteComputer.scroll(
+            scrollStartCoords.startX,
+            scrollStartCoords.startY,
+            mappedDirection,
+            5 * 100,
+          );
+        } else {
+          logger.warn(
+            `[RemoteComputerOperator] 不支持的滚动方向: ${direction}`,
+          );
         }
         break;
       }
