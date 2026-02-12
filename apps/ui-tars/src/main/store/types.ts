@@ -4,7 +4,7 @@
  */
 import { GUIAgentData, Message } from '@ui-tars/shared/types';
 
-import { LocalStore, PresetSource } from './validate';
+import type { LocalStore, PresetSource } from './validate';
 import { ConversationWithSoM } from '@main/shared/types';
 
 export type NextAction =
@@ -46,6 +46,7 @@ export enum VLMProviderV2 {
   ui_tars_1_5 = 'Hugging Face for UI-TARS-1.5',
   doubao_1_5 = 'VolcEngine Ark for Doubao-1.5-UI-TARS',
   doubao_1_5_vl = 'VolcEngine Ark for Doubao-1.5-thinking-vision-pro',
+  openai_codex_oauth = 'OpenAI Codex OAuth',
 }
 
 export enum SearchEngineForSettings {

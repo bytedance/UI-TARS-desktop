@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "id": "teach-demo",
+  "name": "Teach Demo",
+  "goal": "Demonstrate a single recorded step",
+  "plan": "Open app and wait",
+  "model": "gpt-5.3-codex",
+  "assetsDir": "assets/teach-demo",
+  "createdAt": "2026-02-10T00:00:00.000Z",
+  "updatedAt": "2026-02-10T00:00:00.000Z",
+  "steps": [
+    {
+      "id": "step-1",
+      "title": "Wait for UI",
+      "explanation": "Simple wait step",
+      "expectedOutcome": "UI remains stable",
+      "capturedAt": "2026-02-10T00:00:00.000Z",
+      "assetPath": "assets/teach-demo/step-001.jpg",
+      "actionType": "wait",
+      "actionInputs": {}
+    }
+  ]
+}

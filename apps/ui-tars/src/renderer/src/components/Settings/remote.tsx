@@ -16,8 +16,42 @@ import {
   RemoteComputerSettings,
   RemoteComputerSettingsRef,
 } from './category/remoteComputer';
-import { Operator } from '@main/store/types';
+import { Operator, VLMProviderV2 } from '@main/store/types';
+import {
+  isKnownVLMProvider,
+  VLM_PROVIDER_REGISTRY,
+} from '@main/store/modelRegistry';
 import { cn } from '@renderer/utils';
+
+const isVLMReadyForOperator = async (setting: Partial<LocalStore>) => {
+  const { vlmApiKey, vlmBaseUrl, vlmModelName, vlmProvider } = setting;
+
+  if (!vlmBaseUrl || !vlmModelName || !vlmProvider) {
+    return false;
+  }
+
+  if (!isKnownVLMProvider(vlmProvider)) {
+    return false;
+  }
+
+  const providerConfig = VLM_PROVIDER_REGISTRY[vlmProvider];
+
+  if (vlmProvider === VLMProviderV2.openai_codex_oauth) {
+    try {
+      const codexState = await window.electron.codexAuth.status();
+      return codexState.status === 'authenticated';
+    } catch (error) {
+      console.error('Failed to validate Codex OAuth status:', error);
+      return false;
+    }
+  }
+
+  if (!providerConfig.requiresApiKey) {
+    return true;
+  }
+
+  return !!vlmApiKey?.trim();
+};
 
 interface RemoteSettingsDialogProps {
   isOpen: boolean;
@@ -31,13 +65,7 @@ export const checkRemoteComputer = async () => {
 
   const currentSetting = ((await settingRpc.getSetting()) ||
     {}) as Partial<LocalStore>;
-  const { vlmApiKey, vlmBaseUrl, vlmModelName, vlmProvider } = currentSetting;
-
-  if (vlmApiKey && vlmBaseUrl && vlmModelName && vlmProvider) {
-    return true;
-  }
-
-  return false;
+  return await isVLMReadyForOperator(currentSetting);
 };
 
 export const checkRemoteBrowser = async () => {
@@ -45,13 +73,7 @@ export const checkRemoteBrowser = async () => {
 
   const currentSetting = ((await settingRpc.getSetting()) ||
     {}) as Partial<LocalStore>;
-  const { vlmApiKey, vlmBaseUrl, vlmModelName, vlmProvider } = currentSetting;
-
-  if (vlmApiKey && vlmBaseUrl && vlmModelName && vlmProvider) {
-    return true;
-  }
-
-  return false;
+  return await isVLMReadyForOperator(currentSetting);
 };
 
 const Steps = ({

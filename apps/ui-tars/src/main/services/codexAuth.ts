@@ -1,0 +1,651 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+import { createHash, randomBytes } from 'node:crypto';
+import {
+  createServer,
+  type IncomingMessage,
+  type ServerResponse,
+} from 'node:http';
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
+import { app, safeStorage, shell } from 'electron';
+
+import { logger } from '@main/logger';
+
+const CLIENT_ID =
+  process.env.UI_TARS_CODEX_OAUTH_CLIENT_ID ||
+  ['app', 'EMoamEEZ73f0CkXaXp7hrann'].join('_');
+const AUTHORIZE_URL = 'https://auth.openai.com/oauth/authorize';
+const OAUTH_EXCHANGE_URL = 'https://auth.openai.com/oauth/token';
+const REDIRECT_URI = 'http://localhost:1455/auth/callback';
+const OAUTH_SCOPE = 'openid profile email offline_access';
+const SESSION_FILE_NAME = 'codex-oauth.session.json';
+const LOGIN_TIMEOUT_MS = 3 * 60 * 1000;
+const REFRESH_LEEWAY_MS = 60 * 1000;
+const CALLBACK_HEALTH_PATH = '/auth/health';
+const CALLBACK_REACHABILITY_TIMEOUT_MS = 1500;
+const CALLBACK_HEALTH_HEADER = 'x-ui-tars-codex-health';
+const OAUTH_TOKEN_REQUEST_TIMEOUT_MS = 30 * 1000;
+
+type CodexOAuthStoredSession = {
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: number;
+};
+
+type TokenExchangeResponse = {
+  access_token?: string;
+  refresh_token?: string;
+  expires_in?: number;
+};
+
+type JWTPayload = {
+  email?: string;
+  'https://api.openai.com/auth'?: {
+    chatgpt_account_id?: string;
+  };
+};
+
+export type CodexOAuthState = {
+  status: 'unauthenticated' | 'authenticated' | 'error';
+  accountId?: string;
+  email?: string;
+  expiresAt?: number;
+  error?: string;
+};
+
+export class CodexAuthService {
+  private static instance: CodexAuthService;
+  private pendingLogin: Promise<CodexOAuthState> | null = null;
+
+  public static getInstance(): CodexAuthService {
+    if (!CodexAuthService.instance) {
+      CodexAuthService.instance = new CodexAuthService();
+    }
+    return CodexAuthService.instance;
+  }
+
+  public async login(): Promise<CodexOAuthState> {
+    if (this.pendingLogin) {
+      return this.pendingLogin;
+    }
+
+    this.pendingLogin = this.loginInternal().finally(() => {
+      this.pendingLogin = null;
+    });
+
+    return this.pendingLogin;
+  }
+
+  public async logout(): Promise<CodexOAuthState> {
+    await this.clearSession();
+    return {
+      status: 'unauthenticated',
+    };
+  }
+
+  public async getStatus(): Promise<CodexOAuthState> {
+    try {
+      const session = await this.getValidSession();
+      if (!session) {
+        return {
+          status: 'unauthenticated',
+        };
+      }
+
+      const payload = this.decodeJwtPayload(session.accessToken);
+      const accountId =
+        payload?.['https://api.openai.com/auth']?.chatgpt_account_id;
+      if (!accountId) {
+        return {
+          status: 'unauthenticated',
+          error: 'OpenAI Codex OAuth account id is missing',
+        };
+      }
+
+      return {
+        status: 'authenticated',
+        accountId,
+        email: payload?.email,
+        expiresAt: session.expiresAt,
+      };
+    } catch (error) {
+      logger.warn('[CodexAuthService] getStatus failed', error);
+      return {
+        status: 'error',
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
+  }
+
+  public async getAccessContext(): Promise<{
+    accessToken: string;
+    accountId?: string;
+  } | null> {
+    const session = await this.getValidSession();
+    if (!session) {
+      return null;
+    }
+
+    const payload = this.decodeJwtPayload(session.accessToken);
+    const accountId =
+      payload?.['https://api.openai.com/auth']?.chatgpt_account_id;
+    if (!accountId) {
+      return null;
+    }
+
+    return {
+      accessToken: session.accessToken,
+      accountId,
+    };
+  }
+
+  private async loginInternal(): Promise<CodexOAuthState> {
+    const state = randomBytes(16).toString('hex');
+    const verifier = randomBytes(32).toString('base64url');
+    const challenge = createHash('sha256').update(verifier).digest('base64url');
+
+    const authUrl = new URL(AUTHORIZE_URL);
+    authUrl.searchParams.set('response_type', 'code');
+    authUrl.searchParams.set('client_id', CLIENT_ID);
+    authUrl.searchParams.set('redirect_uri', REDIRECT_URI);
+    authUrl.searchParams.set('scope', OAUTH_SCOPE);
+    authUrl.searchParams.set('code_challenge', challenge);
+    authUrl.searchParams.set('code_challenge_method', 'S256');
+    authUrl.searchParams.set('state', state);
+    authUrl.searchParams.set('id_token_add_organizations', 'true');
+    authUrl.searchParams.set('codex_cli_simplified_flow', 'true');
+    authUrl.searchParams.set('originator', 'codex_cli_rs');
+
+    const { codePromise, cancel } = this.waitForAuthorizationCode(state);
+    try {
+      await shell.openExternal(authUrl.toString());
+    } catch (error) {
+      cancel(new Error('OpenAI Codex OAuth launch failed'));
+      await codePromise.catch(() => undefined);
+      logger.error('[CodexAuthService] failed to open external browser', error);
+      throw new Error('Failed to open browser for OpenAI Codex OAuth login');
+    }
+
+    const code = await codePromise;
+
+    const session = await this.exchangeAuthorizationCode(code, verifier);
+    await this.saveSession(session);
+
+    return this.getStatus();
+  }
+
+  private waitForAuthorizationCode(expectedState: string): {
+    codePromise: Promise<string>;
+    cancel: (error?: Error) => void;
+  } {
+    let cancel = (_error?: Error) => {};
+
+    const codePromise = new Promise<string>((resolve, reject) => {
+      let settled = false;
+      let timeout: NodeJS.Timeout;
+      const redirectUri = new URL(REDIRECT_URI);
+      const callbackPort = Number(redirectUri.port || '80');
+      const healthToken = randomBytes(8).toString('hex');
+      const servers: ReturnType<typeof createServer>[] = [];
+
+      const closeServers = () => {
+        for (const server of servers) {
+          server.close();
+        }
+      };
+
+      const settle = (callback: () => void) => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        callback();
+      };
+
+      const rejectWith = (error: unknown) => {
+        const normalized =
+          error instanceof Error ? error : new Error(String(error));
+        settle(() => {
+          clearTimeout(timeout);
+          closeServers();
+          reject(normalized);
+        });
+      };
+
+      const resolveWith = (code: string) => {
+        settle(() => {
+          clearTimeout(timeout);
+          closeServers();
+          resolve(code);
+        });
+      };
+
+      cancel = (error?: Error) => {
+        rejectWith(error || new Error('OpenAI Codex OAuth cancelled'));
+      };
+
+      const handleRequest = (req: IncomingMessage, res: ServerResponse) => {
+        const requestUrl = new URL(req.url || '/', REDIRECT_URI);
+        if (requestUrl.pathname === CALLBACK_HEALTH_PATH) {
+          res.statusCode = 204;
+          res.setHeader(CALLBACK_HEALTH_HEADER, healthToken);
+          res.end();
+          return;
+        }
+
+        if (requestUrl.pathname !== '/auth/callback') {
+          res.statusCode = 404;
+          res.end('Not Found');
+          return;
+        }
+
+        const code = requestUrl.searchParams.get('code');
+        const state = requestUrl.searchParams.get('state');
+
+        if (!code || state !== expectedState) {
+          res.statusCode = 400;
+          res.end('OAuth login failed. You can close this window.');
+          rejectWith(new Error('Invalid OAuth callback response'));
+          return;
+        }
+
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.end(
+          '<h1>OpenAI Codex OAuth connected. You can close this tab.</h1>',
+        );
+
+        resolveWith(code);
+      };
+
+      const listenOnHost = (
+        server: ReturnType<typeof createServer>,
+        host: '127.0.0.1' | '::1',
+      ) => {
+        return new Promise<void>((resolveListen, rejectListen) => {
+          const onError = (error: Error) => {
+            server.off('listening', onListening);
+            rejectListen(error);
+          };
+          const onListening = () => {
+            server.off('error', onError);
+            resolveListen();
+          };
+
+          server.once('error', onError);
+          server.once('listening', onListening);
+          server.listen({
+            port: callbackPort,
+            host,
+            ...(host === '::1' ? { ipv6Only: true } : {}),
+          });
+        });
+      };
+
+      const toCallbackHealthUrl = (host: '127.0.0.1' | '::1' | 'localhost') => {
+        const loopbackHost = host === '::1' ? '[::1]' : host;
+        return new URL(
+          `http://${loopbackHost}:${callbackPort}${CALLBACK_HEALTH_PATH}`,
+        );
+      };
+
+      const ipv4Server = createServer(handleRequest);
+      const ipv6Server = createServer(handleRequest);
+      servers.push(ipv4Server, ipv6Server);
+
+      timeout = setTimeout(() => {
+        rejectWith(new Error('OpenAI Codex OAuth timeout'));
+      }, LOGIN_TIMEOUT_MS);
+
+      Promise.allSettled([
+        listenOnHost(ipv4Server, '127.0.0.1'),
+        listenOnHost(ipv6Server, '::1'),
+      ])
+        .then(async (results) => {
+          const boundHosts = results.flatMap((result, index) => {
+            if (result.status !== 'fulfilled') {
+              return [];
+            }
+
+            return [index === 0 ? '127.0.0.1' : '::1'] as const;
+          });
+
+          const hasListener = results.some(
+            (result) => result.status === 'fulfilled',
+          );
+          if (!hasListener) {
+            const firstError =
+              results[0]?.status === 'rejected'
+                ? results[0].reason
+                : new Error('Failed to bind OAuth callback listeners');
+            rejectWith(firstError);
+            return;
+          }
+
+          for (const [index, result] of results.entries()) {
+            if (result.status === 'rejected') {
+              const host = index === 0 ? '127.0.0.1' : '::1';
+              logger.warn(
+                `[CodexAuthService] OAuth callback listener unavailable on ${host}`,
+                result.reason,
+              );
+            }
+          }
+
+          const healthChecks = await Promise.allSettled(
+            boundHosts.map(async (host) => {
+              const response = await fetch(toCallbackHealthUrl(host), {
+                method: 'GET',
+                signal: AbortSignal.timeout(CALLBACK_REACHABILITY_TIMEOUT_MS),
+              });
+
+              if (
+                response.status !== 204 ||
+                response.headers.get(CALLBACK_HEALTH_HEADER) !== healthToken
+              ) {
+                throw new Error(`Unexpected health response on ${host}`);
+              }
+
+              return host;
+            }),
+          );
+
+          const hasHealthyHost = healthChecks.some(
+            (result) => result.status === 'fulfilled',
+          );
+          if (!hasHealthyHost) {
+            rejectWith(
+              new Error(
+                'OAuth callback listener health check failed for bound loopback hosts',
+              ),
+            );
+            return;
+          }
+
+          for (const [index, result] of healthChecks.entries()) {
+            if (result.status === 'rejected') {
+              logger.warn(
+                `[CodexAuthService] OAuth callback listener health probe failed on ${boundHosts[index]}`,
+                result.reason,
+              );
+            }
+          }
+
+          try {
+            const localhostResponse = await fetch(
+              toCallbackHealthUrl('localhost'),
+              {
+                method: 'GET',
+                signal: AbortSignal.timeout(CALLBACK_REACHABILITY_TIMEOUT_MS),
+              },
+            );
+
+            if (
+              localhostResponse.status !== 204 ||
+              localhostResponse.headers.get(CALLBACK_HEALTH_HEADER) !==
+                healthToken
+            ) {
+              rejectWith(
+                new Error(
+                  'OAuth callback listener is not healthy on localhost-resolved host',
+                ),
+              );
+              return;
+            }
+          } catch {
+            rejectWith(
+              new Error(
+                'OAuth callback listener is not reachable on localhost-resolved host',
+              ),
+            );
+            return;
+          }
+        })
+        .catch((error) => {
+          if (error instanceof Error) {
+            rejectWith(error);
+            return;
+          }
+
+          rejectWith(new Error(String(error)));
+        });
+    });
+
+    return {
+      codePromise,
+      cancel,
+    };
+  }
+
+  private async exchangeAuthorizationCode(
+    code: string,
+    verifier: string,
+  ): Promise<CodexOAuthStoredSession> {
+    let response: Response;
+    try {
+      response = await fetch(OAUTH_EXCHANGE_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          grant_type: 'authorization_code',
+          client_id: CLIENT_ID,
+          code,
+          code_verifier: verifier,
+          redirect_uri: REDIRECT_URI,
+        }),
+        signal: AbortSignal.timeout(OAUTH_TOKEN_REQUEST_TIMEOUT_MS),
+      });
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        (error.name === 'TimeoutError' || error.name === 'AbortError')
+      ) {
+        throw new Error('Token exchange timed out');
+      }
+      throw error;
+    }
+
+    if (!response.ok) {
+      throw new Error(`Token exchange failed with status ${response.status}`);
+    }
+
+    const payload = (await response.json()) as TokenExchangeResponse;
+    return this.toStoredSession(payload);
+  }
+
+  private async refreshAccessToken(
+    refreshToken: string,
+  ): Promise<CodexOAuthStoredSession> {
+    let response: Response;
+    try {
+      response = await fetch(OAUTH_EXCHANGE_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          grant_type: 'refresh_token',
+          refresh_token: refreshToken,
+          client_id: CLIENT_ID,
+        }),
+        signal: AbortSignal.timeout(OAUTH_TOKEN_REQUEST_TIMEOUT_MS),
+      });
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        (error.name === 'TimeoutError' || error.name === 'AbortError')
+      ) {
+        throw new Error('Token refresh timed out');
+      }
+      throw error;
+    }
+
+    if (!response.ok) {
+      throw new Error(`Token refresh failed with status ${response.status}`);
+    }
+
+    const payload = (await response.json()) as TokenExchangeResponse;
+    return this.toStoredSession(payload, refreshToken);
+  }
+
+  private toStoredSession(
+    payload: TokenExchangeResponse,
+    fallbackRefreshToken?: string,
+  ): CodexOAuthStoredSession {
+    if (!payload.access_token || typeof payload.expires_in !== 'number') {
+      throw new Error('OAuth token response is incomplete');
+    }
+
+    const nextRefreshToken = payload.refresh_token || fallbackRefreshToken;
+    if (!nextRefreshToken) {
+      throw new Error('OAuth token response is incomplete');
+    }
+
+    return {
+      accessToken: payload.access_token,
+      refreshToken: nextRefreshToken,
+      expiresAt: Date.now() + payload.expires_in * 1000,
+    };
+  }
+
+  private decodeJwtPayload(jwtValue: string): JWTPayload | null {
+    try {
+      const payloadSegment = jwtValue.split('.')[1];
+      if (!payloadSegment) {
+        return null;
+      }
+
+      const normalized = payloadSegment.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonText = Buffer.from(normalized, 'base64').toString('utf-8');
+      return JSON.parse(jsonText) as JWTPayload;
+    } catch {
+      return null;
+    }
+  }
+
+  private async getValidSession(): Promise<CodexOAuthStoredSession | null> {
+    const session = await this.readSession();
+    if (!session) {
+      return null;
+    }
+
+    if (session.expiresAt > Date.now() + REFRESH_LEEWAY_MS) {
+      return session;
+    }
+
+    try {
+      const refreshed = await this.refreshAccessToken(session.refreshToken);
+      await this.saveSession(refreshed);
+      return refreshed;
+    } catch (error) {
+      logger.warn(
+        '[CodexAuthService] token refresh failed, clearing session',
+        error,
+      );
+      await this.clearSession();
+      return null;
+    }
+  }
+
+  private getSessionFilePath(): string {
+    return path.join(app.getPath('userData'), SESSION_FILE_NAME);
+  }
+
+  private encodeSession(session: CodexOAuthStoredSession): string {
+    const serialized = JSON.stringify(session);
+
+    if (!safeStorage.isEncryptionAvailable()) {
+      logger.warn(
+        '[CodexAuthService] secure storage unavailable, session will be stored without encryption',
+      );
+      return JSON.stringify({
+        encrypted: false,
+        value: serialized,
+      });
+    }
+
+    const encrypted = safeStorage.encryptString(serialized);
+    return JSON.stringify({
+      encrypted: true,
+      value: encrypted.toString('base64'),
+    });
+  }
+
+  private decodeSession(raw: string): CodexOAuthStoredSession | null {
+    const payload = JSON.parse(raw) as unknown;
+
+    if (
+      payload &&
+      typeof payload === 'object' &&
+      'accessToken' in payload &&
+      'refreshToken' in payload &&
+      'expiresAt' in payload
+    ) {
+      return payload as CodexOAuthStoredSession;
+    }
+
+    if (
+      !payload ||
+      typeof payload !== 'object' ||
+      !('value' in payload) ||
+      typeof payload.value !== 'string'
+    ) {
+      throw new Error('Codex OAuth session payload is invalid');
+    }
+
+    const wrappedPayload = payload as { encrypted?: boolean; value: string };
+
+    if (!wrappedPayload.encrypted) {
+      return JSON.parse(wrappedPayload.value) as CodexOAuthStoredSession;
+    }
+
+    if (!safeStorage.isEncryptionAvailable()) {
+      logger.warn(
+        '[CodexAuthService] secure storage unavailable, encrypted session cannot be decrypted',
+      );
+      return null;
+    }
+
+    const decrypted = safeStorage.decryptString(
+      Buffer.from(wrappedPayload.value, 'base64'),
+    );
+    return JSON.parse(decrypted) as CodexOAuthStoredSession;
+  }
+
+  private async saveSession(session: CodexOAuthStoredSession): Promise<void> {
+    const target = this.getSessionFilePath();
+    await fs.mkdir(path.dirname(target), { recursive: true });
+    await fs.writeFile(target, this.encodeSession(session), {
+      encoding: 'utf-8',
+      mode: 0o600,
+    });
+  }
+
+  private async readSession(): Promise<CodexOAuthStoredSession | null> {
+    try {
+      const target = this.getSessionFilePath();
+      const content = await fs.readFile(target, 'utf-8');
+      return this.decodeSession(content);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  private async clearSession(): Promise<void> {
+    try {
+      await fs.unlink(this.getSessionFilePath());
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+        throw error;
+      }
+    }
+  }
+}

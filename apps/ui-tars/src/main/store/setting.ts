@@ -43,9 +43,10 @@ export class SettingStore {
       });
 
       SettingStore.instance.onDidAnyChange((newValue, oldValue) => {
-        logger.log(
-          `SettingStore: ${JSON.stringify(oldValue)} changed to ${JSON.stringify(newValue)}`,
-        );
+        logger.log('SettingStore changed', {
+          previous: oldValue,
+          next: newValue,
+        });
         // Notify that value updated
         BrowserWindow.getAllWindows().forEach((win) => {
           win.webContents.send('setting-updated', newValue);

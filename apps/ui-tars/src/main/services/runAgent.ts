@@ -21,8 +21,9 @@ import {
 } from '@ui-tars/operator-browser';
 import { showPredictionMarker } from '@main/window/ScreenMarker';
 import { SettingStore } from '@main/store/setting';
-import { AppState, Operator } from '@main/store/types';
+import { AppState, Operator, VLMProviderV2 } from '@main/store/types';
 import { GUIAgentManager } from '../ipcRoutes/agent';
+import { CodexAuthService } from '@main/services/codexAuth';
 import { checkBrowserAvailability } from './browserCheck';
 import {
   getModelVersion,
@@ -35,6 +36,12 @@ import { FREE_MODEL_BASE_URL } from '../remote/shared';
 import { getAuthHeader } from '../remote/auth';
 import { ProxyClient } from '../remote/proxyClient';
 import { UITarsModelConfig } from '@ui-tars/sdk/core';
+import {
+  CODEX_OPENAI_BETA,
+  CODEX_ORIGINATOR,
+  VLM_PROVIDER_REGISTRY,
+  getCodexReasoningEffortByModel,
+} from '@main/store/modelRegistry';
 
 export const runAgent = async (
   setState: (state: AppState) => void,
@@ -165,22 +172,76 @@ export const runAgent = async (
   }
 
   let modelVersion = getModelVersion(settings.vlmProvider);
+  const isRemoteOperator =
+    settings.operator === Operator.RemoteComputer ||
+    settings.operator === Operator.RemoteBrowser;
+  const isCodexOAuthProvider =
+    settings.vlmProvider === VLMProviderV2.openai_codex_oauth;
+  const authField = 'apiKey' as const;
   let modelConfig: UITarsModelConfig = {
     baseURL: settings.vlmBaseUrl,
-    apiKey: settings.vlmApiKey,
+    [authField]: settings.vlmApiKey || '',
     model: settings.vlmModelName,
-    useResponsesApi: settings.useResponsesApi,
+    useResponsesApi: isCodexOAuthProvider ? true : settings.useResponsesApi,
   };
   let modelAuthHdrs: Record<string, string> = {};
 
-  if (
-    settings.operator === Operator.RemoteComputer ||
-    settings.operator === Operator.RemoteBrowser
-  ) {
+  if (isCodexOAuthProvider && !isRemoteOperator) {
+    let codexAuthContext: { accessToken: string; accountId?: string } | null;
+    try {
+      codexAuthContext =
+        await CodexAuthService.getInstance().getAccessContext();
+    } catch (error) {
+      logger.error('[runAgent] failed to read Codex OAuth session', error);
+      setState({
+        ...getState(),
+        status: StatusEnum.ERROR,
+        errorMsg:
+          'Failed to read OpenAI Codex OAuth session. Please reconnect in Settings > VLM.',
+      });
+      return;
+    }
+
+    const codexProviderConfig =
+      VLM_PROVIDER_REGISTRY[VLMProviderV2.openai_codex_oauth];
+
+    if (!codexAuthContext?.accessToken || !codexAuthContext.accountId) {
+      setState({
+        ...getState(),
+        status: StatusEnum.ERROR,
+        errorMsg:
+          'OpenAI Codex OAuth is not connected. Please connect in Settings > VLM.',
+      });
+      return;
+    }
+
+    modelConfig = {
+      ...modelConfig,
+      baseURL: settings.vlmBaseUrl || codexProviderConfig.defaultBaseUrl,
+      [authField]: settings.vlmApiKey || '',
+      useResponsesApi: true,
+      codexResponses: {
+        enabled: true,
+        store: false,
+        include: ['reasoning.encrypted_content'],
+        reasoningEffort: getCodexReasoningEffortByModel(settings.vlmModelName),
+      },
+    };
+
+    modelAuthHdrs = {
+      Authorization: `Bearer ${codexAuthContext.accessToken}`,
+      'chatgpt-account-id': codexAuthContext.accountId,
+      'OpenAI-Beta': CODEX_OPENAI_BETA,
+      originator: CODEX_ORIGINATOR,
+      accept: 'text/event-stream',
+    };
+  }
+
+  if (isRemoteOperator) {
     const useResponsesApi = await ProxyClient.getRemoteVLMResponseApiSupport();
     modelConfig = {
       baseURL: FREE_MODEL_BASE_URL,
-      apiKey: '',
+      [authField]: '',
       model: '',
       useResponsesApi,
     };

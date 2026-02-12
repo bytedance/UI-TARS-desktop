@@ -7,6 +7,11 @@ import {
 } from '@renderer/components/ui/dialog';
 import { Button } from '@renderer/components/ui/button';
 import { LocalStore } from '@main/store/validate';
+import {
+  isKnownVLMProvider,
+  VLM_PROVIDER_REGISTRY,
+} from '@main/store/modelRegistry';
+import { VLMProviderV2 } from '@main/store/types';
 
 import { VLMSettings, VLMSettingsRef } from './category/vlm';
 import { useRef } from 'react';
@@ -24,11 +29,31 @@ export const checkVLMSettings = async () => {
     {}) as Partial<LocalStore>;
   const { vlmApiKey, vlmBaseUrl, vlmModelName, vlmProvider } = currentSetting;
 
-  if (vlmApiKey && vlmBaseUrl && vlmModelName && vlmProvider) {
+  if (!vlmBaseUrl || !vlmModelName || !vlmProvider) {
+    return false;
+  }
+
+  if (!isKnownVLMProvider(vlmProvider)) {
+    return false;
+  }
+
+  const providerConfig = VLM_PROVIDER_REGISTRY[vlmProvider];
+
+  if (vlmProvider === VLMProviderV2.openai_codex_oauth) {
+    try {
+      const codexState = await window.electron.codexAuth.status();
+      return codexState.status === 'authenticated';
+    } catch (error) {
+      console.error('Failed to validate Codex OAuth status:', error);
+      return false;
+    }
+  }
+
+  if (!providerConfig.requiresApiKey) {
     return true;
   }
 
-  return false;
+  return !!vlmApiKey?.trim();
 };
 
 export const LocalSettingsDialog = ({

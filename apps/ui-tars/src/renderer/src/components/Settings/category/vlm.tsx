@@ -2,7 +2,13 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { useEffect, useState, useImperativeHandle } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from 'react';
 import { CheckCircle, XCircle, Loader2, EyeOff, Eye } from 'lucide-react';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,6 +16,11 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
 import { VLMProviderV2 } from '@main/store/types';
+import type { CodexOAuthState } from '@main/services/codexAuth';
+import {
+  getProviderModels,
+  VLM_PROVIDER_REGISTRY,
+} from '@main/store/modelRegistry';
 import { useSetting } from '@renderer/hooks/useSetting';
 import { Button } from '@renderer/components/ui/button';
 import {
@@ -35,15 +46,39 @@ import { cn } from '@renderer/utils';
 import { PresetImport, PresetBanner } from './preset';
 import { api } from '@/renderer/src/api';
 
-const formSchema = z.object({
-  vlmProvider: z.nativeEnum(VLMProviderV2, {
-    message: 'Please select a VLM Provider to enhance resolution',
-  }),
-  vlmBaseUrl: z.string().url(),
-  vlmApiKey: z.string().min(1),
-  vlmModelName: z.string().min(1),
-  useResponsesApi: z.boolean().default(false),
-});
+const formSchema = z
+  .object({
+    vlmProvider: z.nativeEnum(VLMProviderV2, {
+      message: 'Please select a VLM Provider to enhance resolution',
+    }),
+    vlmBaseUrl: z.string().url(),
+    vlmApiKey: z.string(),
+    vlmModelName: z.string().min(1),
+    useResponsesApi: z.boolean().default(false),
+  })
+  .superRefine((value, ctx) => {
+    const providerConfig = VLM_PROVIDER_REGISTRY[value.vlmProvider];
+
+    if (providerConfig.requiresApiKey && !value.vlmApiKey.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'API key is required for this provider',
+        path: ['vlmApiKey'],
+      });
+    }
+
+    const modelPool =
+      value.vlmProvider === VLMProviderV2.openai_codex_oauth
+        ? getProviderModels(value.vlmProvider)
+        : [];
+    if (modelPool.length && !modelPool.includes(value.vlmModelName)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Selected model is not supported by this provider',
+        path: ['vlmModelName'],
+      });
+    }
+  });
 
 export interface VLMSettingsRef {
   submit: () => Promise<z.infer<typeof formSchema>>;
@@ -60,6 +95,7 @@ export function VLMSettings({
   autoSave = false,
   className,
 }: VLMSettingsProps) {
+  const authField = 'apiKey' as const;
   const { settings, updateSetting, updatePresetFromRemote } = useSetting();
   const [isPresetModalOpen, setPresetModalOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -67,6 +103,10 @@ export function VLMSettings({
     boolean | null
   >(null);
   const [isCheckingResponseApi, setIsCheckingResponseApi] = useState(false);
+  const [codexAuthState, setCodexAuthState] = useState<CodexOAuthState | null>(
+    null,
+  );
+  const [isCodexAuthLoading, setIsCodexAuthLoading] = useState(false);
 
   const isRemoteAutoUpdatedPreset =
     settings?.presetSource?.type === 'remote' &&
@@ -103,6 +143,111 @@ export function VLMSettings({
       'useResponsesApi',
     ]);
 
+  const providerConfig = newProvider
+    ? VLM_PROVIDER_REGISTRY[newProvider]
+    : undefined;
+
+  const providerModels = useMemo(() => {
+    if (!newProvider) {
+      return [];
+    }
+
+    const modelSet = new Set(getProviderModels(newProvider));
+    if (newModelName && !modelSet.has(newModelName)) {
+      modelSet.add(newModelName);
+    }
+
+    return Array.from(modelSet);
+  }, [newModelName, newProvider]);
+
+  useEffect(() => {
+    if (newProvider !== VLMProviderV2.openai_codex_oauth) {
+      return;
+    }
+
+    let mounted = true;
+    window.electron.codexAuth
+      .status()
+      .then((status) => {
+        if (mounted) {
+          setCodexAuthState(status);
+        }
+      })
+      .catch((error) => {
+        if (mounted) {
+          setCodexAuthState({
+            status: 'error',
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [newProvider]);
+
+  const handleCodexLogin = async () => {
+    setIsCodexAuthLoading(true);
+    try {
+      const nextState = await window.electron.codexAuth.login();
+      setCodexAuthState(nextState);
+      if (nextState.status === 'authenticated') {
+        toast.success('OpenAI Codex OAuth connected');
+      } else {
+        toast.error('OpenAI Codex OAuth login was not completed');
+      }
+    } catch (error) {
+      toast.error('OpenAI Codex OAuth login failed', {
+        description:
+          error instanceof Error ? error.message : 'Unknown error occurred',
+      });
+    } finally {
+      setIsCodexAuthLoading(false);
+    }
+  };
+
+  const handleCodexLogout = async () => {
+    setIsCodexAuthLoading(true);
+    try {
+      const nextState = await window.electron.codexAuth.logout();
+      setCodexAuthState(nextState);
+      toast.success('OpenAI Codex OAuth disconnected');
+    } catch (error) {
+      toast.error('OpenAI Codex OAuth logout failed', {
+        description:
+          error instanceof Error ? error.message : 'Unknown error occurred',
+      });
+    } finally {
+      setIsCodexAuthLoading(false);
+    }
+  };
+
+  const ensureCodexOAuthConnected = useCallback(async () => {
+    try {
+      const nextState = await window.electron.codexAuth.status();
+      setCodexAuthState(nextState);
+
+      if (nextState.status === 'authenticated') {
+        return true;
+      }
+
+      toast.error('Please connect OpenAI Codex OAuth before saving settings');
+      return false;
+    } catch (error) {
+      const description =
+        error instanceof Error ? error.message : 'Unknown error occurred';
+      setCodexAuthState({
+        status: 'error',
+        error: description,
+      });
+      toast.error('OpenAI Codex OAuth status check failed', {
+        description,
+      });
+      return false;
+    }
+  }, []);
+
   useEffect(() => {
     if (!autoSave) {
       return;
@@ -125,7 +270,39 @@ export function VLMSettings({
 
     const validAndSave = async () => {
       if (newProvider !== settings.vlmProvider) {
-        updateSetting({ ...settings, vlmProvider: newProvider });
+        const [isUrlValid, isKeyValid, isNameValid, isResponsesApiValid] =
+          await Promise.all([
+            form.trigger('vlmBaseUrl'),
+            form.trigger('vlmApiKey'),
+            form.trigger('vlmModelName'),
+            form.trigger('useResponsesApi'),
+          ]);
+
+        if (
+          !isUrlValid ||
+          !isKeyValid ||
+          !isNameValid ||
+          !isResponsesApiValid
+        ) {
+          return;
+        }
+
+        if (newProvider === VLMProviderV2.openai_codex_oauth) {
+          const isCodexConnected = await ensureCodexOAuthConnected();
+          if (!isCodexConnected) {
+            return;
+          }
+        }
+
+        updateSetting({
+          ...settings,
+          vlmProvider: newProvider,
+          vlmBaseUrl: newBaseUrl,
+          vlmApiKey: newApiKey,
+          vlmModelName: newModelName,
+          useResponsesApi: newUseResponsesApi,
+        });
+        return;
       }
 
       const isUrlValid = await form.trigger('vlmBaseUrl');
@@ -167,6 +344,8 @@ export function VLMSettings({
     updateSetting,
     form,
     isRemoteAutoUpdatedPreset,
+    ensureCodexOAuthConnected,
+    codexAuthState?.status,
   ]);
 
   const handlePresetModal = async (e: React.MouseEvent) => {
@@ -202,18 +381,29 @@ export function VLMSettings({
   };
 
   const handleResponseApiChange = async (checked: boolean) => {
+    if (providerConfig && !providerConfig.supportsResponsesApi) {
+      form.setValue('useResponsesApi', false);
+      return;
+    }
+
+    if (newProvider === VLMProviderV2.openai_codex_oauth) {
+      setResponseApiSupported(true);
+      form.setValue('useResponsesApi', checked);
+      return;
+    }
+
     if (checked) {
       if (responseApiSupported === null) {
         setIsCheckingResponseApi(true);
         const modelConfig = {
           baseUrl: newBaseUrl,
-          apiKey: newApiKey,
+          keyValue: newApiKey,
           modelName: newModelName,
         };
 
         if (
           !modelConfig.baseUrl ||
-          !modelConfig.apiKey ||
+          !modelConfig.keyValue ||
           !modelConfig.modelName
         ) {
           toast.error(
@@ -223,7 +413,11 @@ export function VLMSettings({
           return;
         }
 
-        const isSupported = await api.checkVLMResponseApiSupport(modelConfig);
+        const isSupported = await api.checkVLMResponseApiSupport({
+          baseUrl: modelConfig.baseUrl,
+          [authField]: modelConfig.keyValue,
+          modelName: modelConfig.modelName,
+        });
         setResponseApiSupported(isSupported);
         setIsCheckingResponseApi(false);
 
@@ -241,6 +435,13 @@ export function VLMSettings({
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (
+      values.vlmProvider === VLMProviderV2.openai_codex_oauth &&
+      !(await ensureCodexOAuthConnected())
+    ) {
+      throw new Error('OpenAI Codex OAuth is not connected');
+    }
+
     console.log('onSubmit', values);
 
     updateSetting({ ...settings, ...values });
@@ -251,9 +452,13 @@ export function VLMSettings({
     submit: async () => {
       return new Promise<z.infer<typeof formSchema>>((resolve, reject) => {
         form.handleSubmit(
-          (values) => {
-            onSubmit(values);
-            resolve(values);
+          async (values) => {
+            try {
+              await onSubmit(values);
+              resolve(values);
+            } catch (error) {
+              reject(error);
+            }
           },
           (errors) => {
             reject(errors);
@@ -265,6 +470,8 @@ export function VLMSettings({
 
   const switchDisabled =
     isRemoteAutoUpdatedPreset ||
+    !newProvider ||
+    (providerConfig && !providerConfig.supportsResponsesApi) ||
     responseApiSupported === false ||
     isCheckingResponseApi;
 
@@ -296,7 +503,66 @@ export function VLMSettings({
                   <FormLabel>VLM Provider</FormLabel>
                   <Select
                     disabled={isRemoteAutoUpdatedPreset}
-                    onValueChange={field.onChange}
+                    onValueChange={(value) => {
+                      const provider = value as VLMProviderV2;
+                      const previousProvider = field.value as
+                        | VLMProviderV2
+                        | undefined;
+                      const previousProviderConfig = previousProvider
+                        ? VLM_PROVIDER_REGISTRY[previousProvider]
+                        : undefined;
+                      const previousBaseUrl = form.getValues('vlmBaseUrl');
+                      const nextProviderConfig =
+                        VLM_PROVIDER_REGISTRY[provider];
+
+                      setIsCheckingResponseApi(false);
+                      setResponseApiSupported(
+                        provider === VLMProviderV2.openai_codex_oauth
+                          ? true
+                          : null,
+                      );
+
+                      field.onChange(provider);
+
+                      form.setValue(
+                        'vlmModelName',
+                        nextProviderConfig.defaultModel,
+                        {
+                          shouldValidate: true,
+                        },
+                      );
+
+                      if (nextProviderConfig.defaultBaseUrl) {
+                        form.setValue(
+                          'vlmBaseUrl',
+                          nextProviderConfig.defaultBaseUrl,
+                          {
+                            shouldValidate: true,
+                          },
+                        );
+                      } else if (
+                        previousProvider === VLMProviderV2.openai_codex_oauth &&
+                        previousProviderConfig?.defaultBaseUrl &&
+                        previousBaseUrl ===
+                          previousProviderConfig.defaultBaseUrl
+                      ) {
+                        form.setValue('vlmBaseUrl', '', {
+                          shouldValidate: true,
+                        });
+                      }
+
+                      if (!nextProviderConfig.supportsResponsesApi) {
+                        form.setValue('useResponsesApi', false, {
+                          shouldValidate: true,
+                        });
+                      } else if (
+                        provider === VLMProviderV2.openai_codex_oauth
+                      ) {
+                        form.setValue('useResponsesApi', true, {
+                          shouldValidate: true,
+                        });
+                      }
+                    }}
                     value={field.value}
                   >
                     <SelectTrigger className="w-full bg-white">
@@ -315,6 +581,68 @@ export function VLMSettings({
               );
             }}
           />
+
+          {newProvider === VLMProviderV2.openai_codex_oauth && (
+            <Alert
+              className={cn(
+                codexAuthState?.status === 'authenticated'
+                  ? 'border-green-200 bg-green-50'
+                  : 'border-amber-200 bg-amber-50',
+              )}
+            >
+              <AlertDescription className="space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    {codexAuthState?.status === 'authenticated' ? (
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <XCircle className="h-4 w-4 text-amber-600" />
+                    )}
+                    <span>
+                      {codexAuthState?.status === 'authenticated'
+                        ? 'Connected to OpenAI Codex OAuth'
+                        : 'Not connected to OpenAI Codex OAuth'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleCodexLogin}
+                      disabled={isCodexAuthLoading}
+                    >
+                      {isCodexAuthLoading ? (
+                        <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                      ) : null}
+                      Connect
+                    </Button>
+                    {codexAuthState?.status === 'authenticated' && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleCodexLogout}
+                        disabled={isCodexAuthLoading}
+                      >
+                        Disconnect
+                      </Button>
+                    )}
+                  </div>
+                </div>
+                {codexAuthState?.accountId && (
+                  <p className="text-xs text-muted-foreground">
+                    Account: {codexAuthState.accountId}
+                    {codexAuthState.email ? ` (${codexAuthState.email})` : ''}
+                  </p>
+                )}
+                {codexAuthState?.status === 'error' && codexAuthState.error && (
+                  <p className="text-xs text-red-600">{codexAuthState.error}</p>
+                )}
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* VLM Base URL */}
           <FormField
             control={form.control}
@@ -341,6 +669,12 @@ export function VLMSettings({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>VLM API Key</FormLabel>
+                {providerConfig && !providerConfig.requiresApiKey && (
+                  <p className="text-xs text-muted-foreground">
+                    This provider uses OAuth account authentication. API key is
+                    not required.
+                  </p>
+                )}
                 <FormControl>
                   <div className="relative">
                     <Input
@@ -348,7 +682,10 @@ export function VLMSettings({
                       className="bg-white"
                       placeholder="Enter VLM API_Key"
                       {...field}
-                      disabled={isRemoteAutoUpdatedPreset}
+                      disabled={
+                        isRemoteAutoUpdatedPreset ||
+                        (providerConfig && !providerConfig.requiresApiKey)
+                      }
                     />
                     <Button
                       type="button"
@@ -356,7 +693,10 @@ export function VLMSettings({
                       size="sm"
                       className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                       onClick={() => setShowPassword(!showPassword)}
-                      disabled={isRemoteAutoUpdatedPreset}
+                      disabled={
+                        isRemoteAutoUpdatedPreset ||
+                        (providerConfig && !providerConfig.requiresApiKey)
+                      }
                     >
                       {showPassword ? (
                         <Eye className="h-4 w-4 text-gray-500" />
@@ -376,14 +716,49 @@ export function VLMSettings({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>VLM Model Name</FormLabel>
-                <FormControl>
-                  <Input
-                    className="bg-white"
-                    placeholder="Enter VLM Model Name"
-                    {...field}
-                    disabled={isRemoteAutoUpdatedPreset}
-                  />
-                </FormControl>
+                {newProvider === VLMProviderV2.openai_codex_oauth ? (
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={
+                        isRemoteAutoUpdatedPreset ||
+                        !newProvider ||
+                        providerModels.length === 0
+                      }
+                    >
+                      <SelectTrigger className="w-full bg-white">
+                        <SelectValue placeholder="Select VLM model" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {providerModels.map((modelName) => (
+                          <SelectItem key={modelName} value={modelName}>
+                            {modelName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                ) : (
+                  <FormControl>
+                    <Input
+                      className="bg-white"
+                      placeholder="Enter VLM model name"
+                      {...field}
+                      disabled={isRemoteAutoUpdatedPreset || !newProvider}
+                    />
+                  </FormControl>
+                )}
+                {!newProvider && (
+                  <p className="text-xs text-muted-foreground">
+                    Select a provider first to load available models.
+                  </p>
+                )}
+                {newProvider === VLMProviderV2.openai_codex_oauth && (
+                  <p className="text-xs text-muted-foreground">
+                    Codex OAuth supports only the listed model names.
+                  </p>
+                )}
               </FormItem>
             )}
           />
@@ -392,9 +767,13 @@ export function VLMSettings({
           <ModelAvailabilityCheck
             modelConfig={{
               baseUrl: newBaseUrl,
-              apiKey: newApiKey,
+              keyValue: newApiKey,
               modelName: newModelName,
             }}
+            disabled={
+              isRemoteAutoUpdatedPreset ||
+              newProvider === VLMProviderV2.openai_codex_oauth
+            }
             onResponseApiSupportChange={setResponseApiSupported}
           />
 
@@ -443,7 +822,7 @@ export function VLMSettings({
 interface ModelAvailabilityCheckProps {
   modelConfig: {
     baseUrl: string;
-    apiKey: string;
+    keyValue: string;
     modelName: string;
   };
   disabled?: boolean;
@@ -465,10 +844,11 @@ export function ModelAvailabilityCheck({
   className,
   onResponseApiSupportChange,
 }: ModelAvailabilityCheckProps) {
+  const authField = 'apiKey' as const;
   const [checkState, setCheckState] = useState<CheckState>({ status: 'idle' });
 
-  const { baseUrl, apiKey, modelName } = modelConfig;
-  const isConfigValid = baseUrl && apiKey && modelName;
+  const { baseUrl, keyValue, modelName } = modelConfig;
+  const isConfigValid = baseUrl && keyValue && modelName;
 
   useEffect(() => {
     if (checkState.status === 'success' || checkState.status === 'error') {
@@ -501,9 +881,15 @@ export function ModelAvailabilityCheck({
     setCheckState({ status: 'checking' });
 
     try {
+      const requestPayload = {
+        baseUrl,
+        [authField]: keyValue,
+        modelName,
+      };
+
       const [isAvailable, responseApiSupported] = await Promise.all([
-        api.checkModelAvailability(modelConfig),
-        api.checkVLMResponseApiSupport(modelConfig),
+        api.checkModelAvailability(requestPayload),
+        api.checkVLMResponseApiSupport(requestPayload),
       ]);
 
       onResponseApiSupportChange?.(responseApiSupported);
@@ -519,7 +905,7 @@ export function ModelAvailabilityCheck({
           message: successMessage,
           responseApiSupported,
         });
-        console.log('[VLM Model Check] Success:', modelConfig, {
+        console.log('[VLM Model Check] Success:', requestPayload, {
           responseApiSupported,
         });
       } else {
@@ -529,7 +915,10 @@ export function ModelAvailabilityCheck({
           message: errorMessage,
           responseApiSupported,
         });
-        console.error('[VLM Model Check] Model not responding:', modelConfig);
+        console.error(
+          '[VLM Model Check] Model not responding:',
+          requestPayload,
+        );
       }
     } catch (error) {
       const errorMessage =
