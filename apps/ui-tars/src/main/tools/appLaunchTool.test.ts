@@ -30,6 +30,23 @@ describe('appLaunchTool', () => {
     ]);
   });
 
+  it('launches notepad on win32 via Start-Process wrapper', () => {
+    const call = buildAppLaunchToolCall({
+      intentId: 'intent-1a',
+      targetApp: 'notepad',
+      platform: 'win32',
+      idempotencyKey: 'idem-1a',
+    });
+
+    expect(call.canonicalArgs.argv).toEqual([
+      'powershell',
+      '-NoProfile',
+      '-Command',
+      'Start-Process',
+      'notepad.exe',
+    ]);
+  });
+
   it('rejects unsupported target/platform combinations', () => {
     expect(() =>
       buildAppLaunchToolCall({

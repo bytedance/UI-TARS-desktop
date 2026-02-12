@@ -62,7 +62,13 @@ const APP_LAUNCH_CATALOG: Record<AppLaunchTarget, AppLaunchCatalogEntry> = {
   notepad: {
     displayName: 'Notepad',
     argvByPlatform: {
-      win32: ['notepad.exe'],
+      win32: [
+        'powershell',
+        '-NoProfile',
+        '-Command',
+        'Start-Process',
+        'notepad.exe',
+      ],
       darwin: ['open', '-a', 'TextEdit'],
       linux: ['gedit'],
     },
