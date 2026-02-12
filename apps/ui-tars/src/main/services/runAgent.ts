@@ -42,6 +42,8 @@ import {
   VLM_PROVIDER_REGISTRY,
   resolveCodexReasoningEffort,
 } from '@main/store/modelRegistry';
+import { resolveToolFirstFeatureFlags } from '@main/store/featureFlags';
+import { createDefaultToolRegistry } from '@main/tools/toolRegistry';
 
 export const runAgent = async (
   setState: (state: AppState) => void,
@@ -55,6 +57,18 @@ export const runAgent = async (
   const language = settings.language ?? 'en';
 
   logger.info('settings.operator', settings.operator);
+  const toolFlags = resolveToolFirstFeatureFlags(settings);
+
+  if (toolFlags.ffToolRegistry) {
+    const registry = createDefaultToolRegistry();
+    logger.info(
+      '[tool-registry] initialized',
+      registry
+        .list()
+        .map((tool) => `${tool.name}@${tool.toolVersion}`)
+        .join(', '),
+    );
+  }
 
   const handleData: GUIAgentConfig<NutJSElectronOperator>['onData'] = async ({
     data,
