@@ -1,0 +1,117 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+import { describe, expect, it, vi } from 'vitest';
+
+import {
+  type WindowFocusToolCallV1,
+  buildWindowFocusToolCall,
+  runWindowFocusToolCall,
+} from './windowFocusTool';
+
+describe('windowFocusTool', () => {
+  it('builds deterministic window.focus call for supported target', () => {
+    const call = buildWindowFocusToolCall({
+      intentId: 'intent-1',
+      targetWindow: 'notepad',
+      platform: 'win32',
+      idempotencyKey: 'idem-1',
+    });
+
+    expect(call.toolName).toBe('window.focus');
+    expect(call.canonicalArgs.targetWindow).toBe('notepad');
+    expect(call.canonicalArgs.argv[0]).toBe('powershell');
+    expect(call.canonicalArgs.argv.join(' ')).toContain('AppActivate');
+  });
+
+  it('rejects unsupported target/platform combinations', () => {
+    expect(() =>
+      buildWindowFocusToolCall({
+        intentId: 'intent-2',
+        targetWindow: 'settings',
+        platform: 'linux',
+        idempotencyKey: 'idem-2',
+      }),
+    ).toThrow('[WINDOW_FOCUS_UNSUPPORTED_TARGET]');
+  });
+
+  it('maps successful system.run execution to focused=true', async () => {
+    const call = buildWindowFocusToolCall({
+      intentId: 'intent-3',
+      targetWindow: 'notepad',
+      platform: 'win32',
+      idempotencyKey: 'idem-3',
+    });
+
+    const result = await runWindowFocusToolCall(call, {
+      runSystemRun: vi.fn().mockResolvedValue({
+        version: 'v1',
+        callId: 'sys-call-1',
+        toolName: 'system.run',
+        toolVersion: '1.0.0',
+        status: 'ok',
+        errorClass: 'none',
+        exitCode: 0,
+        stdout: 'ok',
+        stderr: '',
+        durationMs: 15,
+        deltaObserved: true,
+        artifacts: {
+          stdoutBytes: 2,
+          stderrBytes: 0,
+          stdoutTruncated: false,
+          stderrTruncated: false,
+        },
+      }),
+    });
+
+    expect(result.status).toBe('ok');
+    expect(result.errorClass).toBe('none');
+    expect(result.focused).toBe(true);
+    expect(result.systemRunCallId).toBe('sys-call-1');
+  });
+
+  it('maps non-zero exit to window_not_found', async () => {
+    const call = buildWindowFocusToolCall({
+      intentId: 'intent-4',
+      targetWindow: 'notepad',
+      platform: 'win32',
+      idempotencyKey: 'idem-4',
+    });
+
+    const result = await runWindowFocusToolCall(call, {
+      runSystemRun: vi.fn().mockResolvedValue({
+        version: 'v1',
+        callId: 'sys-call-2',
+        toolName: 'system.run',
+        toolVersion: '1.0.0',
+        status: 'error',
+        errorClass: 'non_zero_exit',
+        exitCode: 3,
+        stdout: '',
+        stderr: 'not found',
+        durationMs: 20,
+        deltaObserved: false,
+        artifacts: {
+          stdoutBytes: 0,
+          stderrBytes: 9,
+          stdoutTruncated: false,
+          stderrTruncated: false,
+        },
+      }),
+    });
+
+    expect(result.status).toBe('error');
+    expect(result.errorClass).toBe('window_not_found');
+    expect(result.focused).toBe(false);
+  });
+
+  it('returns validation_error for malformed window.focus call', async () => {
+    const result = await runWindowFocusToolCall({} as WindowFocusToolCallV1);
+
+    expect(result.status).toBe('error');
+    expect(result.errorClass).toBe('validation_error');
+    expect(result.focused).toBe(false);
+  });
+});
