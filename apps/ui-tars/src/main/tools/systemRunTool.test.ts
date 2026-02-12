@@ -2,7 +2,8 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { describe, expect, it } from 'vitest';
+import { EventEmitter } from 'events';
+import { describe, expect, it, vi } from 'vitest';
 
 import { buildSystemRunToolCall, runSystemRunToolCall } from './systemRunTool';
 
@@ -72,5 +73,43 @@ describe('systemRunTool', () => {
     expect(result.status).toBe('timeout');
     expect(result.errorClass).toBe('timeout');
     expect(result.exitCode).toBeNull();
+  });
+
+  it('uses hard-kill fallback and resolves when close never arrives', async () => {
+    vi.useFakeTimers();
+    try {
+      const fakeChild = new EventEmitter() as EventEmitter & {
+        stdout: EventEmitter;
+        stderr: EventEmitter;
+        kill: ReturnType<typeof vi.fn>;
+      };
+      fakeChild.stdout = new EventEmitter();
+      fakeChild.stderr = new EventEmitter();
+      fakeChild.kill = vi.fn().mockReturnValue(true);
+
+      const call = buildSystemRunToolCall({
+        intentId: 'intent-6',
+        argv: ['fake-command'],
+        idempotencyKey: 'idem-6',
+        timeoutMs: 50,
+      });
+
+      const resultPromise = runSystemRunToolCall(call, {
+        spawnImpl: () => fakeChild as never,
+        hardKillGraceMs: 10,
+        forceResolveGraceMs: 20,
+      });
+
+      await vi.advanceTimersByTimeAsync(100);
+      const result = await resultPromise;
+
+      expect(fakeChild.kill).toHaveBeenNthCalledWith(1);
+      expect(fakeChild.kill).toHaveBeenNthCalledWith(2, 'SIGKILL');
+      expect(result.status).toBe('timeout');
+      expect(result.errorClass).toBe('timeout');
+      expect(result.stderr).toContain('[SYSTEM_RUN_TIMEOUT]');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

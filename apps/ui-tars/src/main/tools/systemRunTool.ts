@@ -15,6 +15,8 @@ const SYSTEM_RUN_TOOL_RESULT_VERSION = 'v1';
 const SYSTEM_RUN_DEFAULT_TIMEOUT_MS = 15000;
 const SYSTEM_RUN_MAX_TIMEOUT_MS = 60000;
 const SYSTEM_RUN_MAX_OUTPUT_BYTES = 64 * 1024;
+const SYSTEM_RUN_HARD_KILL_GRACE_MS = 500;
+const SYSTEM_RUN_FORCE_RESOLVE_GRACE_MS = 1500;
 
 const SystemRunInputSchema = z.object({
   intentId: z.string().min(1),
@@ -76,6 +78,12 @@ const SystemRunToolResultSchema = z.object({
 export type SystemRunToolCallV1 = z.infer<typeof SystemRunToolCallSchema>;
 export type SystemRunToolResultV1 = z.infer<typeof SystemRunToolResultSchema>;
 
+type SystemRunExecutionOptions = {
+  spawnImpl?: typeof spawn;
+  hardKillGraceMs?: number;
+  forceResolveGraceMs?: number;
+};
+
 const normalizeArgv = (argv: string[]): string[] => {
   return argv.map((item) => item.trim()).filter((item) => item.length > 0);
 };
@@ -131,9 +139,23 @@ const pushChunk = (
 
 export const runSystemRunToolCall = async (
   call: SystemRunToolCallV1,
+  options?: SystemRunExecutionOptions,
 ): Promise<SystemRunToolResultV1> => {
   const parsedCall = SystemRunToolCallSchema.parse(call);
   const startedAt = Date.now();
+  const spawnImpl = options?.spawnImpl ?? spawn;
+  const hardKillGraceMs =
+    typeof options?.hardKillGraceMs === 'number' &&
+    Number.isFinite(options.hardKillGraceMs) &&
+    options.hardKillGraceMs >= 0
+      ? options.hardKillGraceMs
+      : SYSTEM_RUN_HARD_KILL_GRACE_MS;
+  const forceResolveGraceMs =
+    typeof options?.forceResolveGraceMs === 'number' &&
+    Number.isFinite(options.forceResolveGraceMs) &&
+    options.forceResolveGraceMs >= 0
+      ? options.forceResolveGraceMs
+      : SYSTEM_RUN_FORCE_RESOLVE_GRACE_MS;
 
   const [command, ...args] = parsedCall.canonicalArgs.argv;
   const stdoutChunks: Buffer[] = [];
@@ -143,19 +165,124 @@ export const runSystemRunToolCall = async (
   let stdoutTruncated = false;
   let stderrTruncated = false;
 
-  return await new Promise<SystemRunToolResultV1>((resolve) => {
-    let timedOut = false;
+  const readStdout = () => Buffer.concat(stdoutChunks).toString('utf8');
+  const readStderr = () => Buffer.concat(stderrChunks).toString('utf8');
+  const withNote = (stderr: string, note: string) => {
+    return stderr ? `${stderr}\n${note}` : note;
+  };
 
-    const child = spawn(command, args, {
+  return await new Promise<SystemRunToolResultV1>((resolve) => {
+    let settled = false;
+    let timedOut = false;
+    let timedOutWithoutClose = false;
+
+    let timeoutHandle: NodeJS.Timeout | null = null;
+    let hardKillHandle: NodeJS.Timeout | null = null;
+    let forceResolveHandle: NodeJS.Timeout | null = null;
+
+    const clearHandles = () => {
+      if (timeoutHandle) {
+        clearTimeout(timeoutHandle);
+        timeoutHandle = null;
+      }
+      if (hardKillHandle) {
+        clearTimeout(hardKillHandle);
+        hardKillHandle = null;
+      }
+      if (forceResolveHandle) {
+        clearTimeout(forceResolveHandle);
+        forceResolveHandle = null;
+      }
+    };
+
+    const resolveOnce = (result: SystemRunToolResultV1) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      clearHandles();
+      resolve(result);
+    };
+
+    const toResult = (params: {
+      status: 'ok' | 'error' | 'timeout';
+      errorClass:
+        | 'none'
+        | 'validation_error'
+        | 'policy_error'
+        | 'spawn_error'
+        | 'timeout'
+        | 'non_zero_exit';
+      exitCode: number | null;
+      stdout: string;
+      stderr: string;
+      deltaObserved: boolean;
+    }): SystemRunToolResultV1 => {
+      return SystemRunToolResultSchema.parse({
+        version: SYSTEM_RUN_TOOL_RESULT_VERSION,
+        callId: parsedCall.callId,
+        toolName: parsedCall.toolName,
+        toolVersion: parsedCall.toolVersion,
+        status: params.status,
+        errorClass: params.errorClass,
+        exitCode: params.exitCode,
+        stdout: params.stdout,
+        stderr: params.stderr,
+        durationMs: Date.now() - startedAt,
+        deltaObserved: params.deltaObserved,
+        artifacts: {
+          stdoutBytes,
+          stderrBytes,
+          stdoutTruncated,
+          stderrTruncated,
+        },
+      });
+    };
+
+    const child = spawnImpl(command, args, {
       cwd: parsedCall.canonicalArgs.cwd,
       shell: false,
       windowsHide: true,
       stdio: ['ignore', 'pipe', 'pipe'],
     });
 
-    const timeoutHandle = setTimeout(() => {
+    if (!child.stdout || !child.stderr) {
+      resolveOnce(
+        toResult({
+          status: 'error',
+          errorClass: 'spawn_error',
+          exitCode: null,
+          stdout: '',
+          stderr:
+            '[SYSTEM_RUN_SPAWN_ERROR] stdout/stderr streams are unavailable',
+          deltaObserved: false,
+        }),
+      );
+      return;
+    }
+
+    timeoutHandle = setTimeout(() => {
       timedOut = true;
       child.kill();
+      hardKillHandle = setTimeout(() => {
+        child.kill('SIGKILL');
+      }, hardKillGraceMs);
+      forceResolveHandle = setTimeout(() => {
+        timedOutWithoutClose = true;
+        resolveOnce(
+          toResult({
+            status: 'timeout',
+            errorClass: 'timeout',
+            exitCode: null,
+            stdout: readStdout(),
+            stderr: withNote(
+              readStderr(),
+              '[SYSTEM_RUN_TIMEOUT] Process did not close after SIGTERM/SIGKILL fallback',
+            ),
+            deltaObserved: false,
+          }),
+        );
+      }, hardKillGraceMs + forceResolveGraceMs);
     }, parsedCall.timeoutMs);
 
     child.stdout.on('data', (chunk: Buffer | string) => {
@@ -173,55 +300,36 @@ export const runSystemRunToolCall = async (
     });
 
     child.once('error', (error) => {
-      clearTimeout(timeoutHandle);
-      resolve(
-        SystemRunToolResultSchema.parse({
-          version: SYSTEM_RUN_TOOL_RESULT_VERSION,
-          callId: parsedCall.callId,
-          toolName: parsedCall.toolName,
-          toolVersion: parsedCall.toolVersion,
+      resolveOnce(
+        toResult({
           status: 'error',
           errorClass: 'spawn_error',
           exitCode: null,
           stdout: '',
           stderr: error.message,
-          durationMs: Date.now() - startedAt,
           deltaObserved: false,
-          artifacts: {
-            stdoutBytes,
-            stderrBytes,
-            stdoutTruncated,
-            stderrTruncated,
-          },
         }),
       );
     });
 
     child.once('close', (code) => {
-      clearTimeout(timeoutHandle);
-      const stdout = Buffer.concat(stdoutChunks).toString('utf8');
-      const stderr = Buffer.concat(stderrChunks).toString('utf8');
+      const stdout = readStdout();
+      const stderr = readStderr();
 
       if (timedOut) {
-        resolve(
-          SystemRunToolResultSchema.parse({
-            version: SYSTEM_RUN_TOOL_RESULT_VERSION,
-            callId: parsedCall.callId,
-            toolName: parsedCall.toolName,
-            toolVersion: parsedCall.toolVersion,
+        resolveOnce(
+          toResult({
             status: 'timeout',
             errorClass: 'timeout',
             exitCode: null,
             stdout,
-            stderr,
-            durationMs: Date.now() - startedAt,
+            stderr: timedOutWithoutClose
+              ? withNote(
+                  stderr,
+                  '[SYSTEM_RUN_TIMEOUT] close event arrived after forced timeout resolution',
+                )
+              : stderr,
             deltaObserved: false,
-            artifacts: {
-              stdoutBytes,
-              stderrBytes,
-              stdoutTruncated,
-              stderrTruncated,
-            },
           }),
         );
         return;
@@ -230,25 +338,14 @@ export const runSystemRunToolCall = async (
       const exitCode = typeof code === 'number' ? code : null;
       const success = exitCode === 0;
 
-      resolve(
-        SystemRunToolResultSchema.parse({
-          version: SYSTEM_RUN_TOOL_RESULT_VERSION,
-          callId: parsedCall.callId,
-          toolName: parsedCall.toolName,
-          toolVersion: parsedCall.toolVersion,
+      resolveOnce(
+        toResult({
           status: success ? 'ok' : 'error',
           errorClass: success ? 'none' : 'non_zero_exit',
           exitCode,
           stdout,
           stderr,
-          durationMs: Date.now() - startedAt,
           deltaObserved: success,
-          artifacts: {
-            stdoutBytes,
-            stderrBytes,
-            stdoutTruncated,
-            stderrTruncated,
-          },
         }),
       );
     });
