@@ -463,6 +463,20 @@ Action: click(start_box='[130,226]')`;
       ]);
     });
 
+    it('should not extract inline function-like text without Action marker', () => {
+      const input = 'I should wait() until the page is stable.';
+      const result = parseActionVlm(input);
+
+      expect(result).toEqual([
+        {
+          action_inputs: {},
+          action_type: '',
+          reflection: null,
+          thought: '',
+        },
+      ]);
+    });
+
     it('should handle with Chinese colon', () => {
       const input = `Thought: I need to click this button
 Action：click(start_box='(100,200)')`;

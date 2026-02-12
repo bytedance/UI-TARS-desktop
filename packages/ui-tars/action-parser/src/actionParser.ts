@@ -191,8 +191,11 @@ export function parseActionVlm(
 
   // Parse actions
   let allActions: string[] = [];
+  const hasExplicitActionBlock = mode === 'o1' || actionMarkerCount > 0;
 
-  allActions = extractFunctionCalls(actionStr);
+  if (hasExplicitActionBlock) {
+    allActions = extractFunctionCalls(actionStr);
+  }
 
   if (allActions.length === 0) {
     allActions = actionStr
