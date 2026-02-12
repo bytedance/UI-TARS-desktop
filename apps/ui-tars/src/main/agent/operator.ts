@@ -96,21 +96,25 @@ export class NutJSElectronOperator extends NutJSOperator {
         rawContent.endsWith('\n') || rawContent.endsWith('\\n');
 
       logger.info('[device] type', content);
+      const originalAutoDelayMs = keyboard.config.autoDelayMs;
       keyboard.config.autoDelayMs = 0;
-      const stripContent = content.replace(/\\n$/, '').replace(/\n$/, '');
-      const originalClipboard = clipboard.readText();
-      clipboard.writeText(stripContent);
-      await keyboard.pressKey(Key.LeftControl, Key.V);
-      await sleep(50);
-      await keyboard.releaseKey(Key.LeftControl, Key.V);
-      await sleep(50);
-      clipboard.writeText(originalClipboard);
+      try {
+        const stripContent = content.replace(/\\n$/, '').replace(/\n$/, '');
+        const originalClipboard = clipboard.readText();
+        clipboard.writeText(stripContent);
+        await keyboard.pressKey(Key.LeftControl, Key.V);
+        await sleep(50);
+        await keyboard.releaseKey(Key.LeftControl, Key.V);
+        await sleep(50);
+        clipboard.writeText(originalClipboard);
 
-      if (shouldSubmit) {
-        await keyboard.pressKey(Key.Enter);
-        await keyboard.releaseKey(Key.Enter);
+        if (shouldSubmit) {
+          await keyboard.pressKey(Key.Enter);
+          await keyboard.releaseKey(Key.Enter);
+        }
+      } finally {
+        keyboard.config.autoDelayMs = originalAutoDelayMs;
       }
-      keyboard.config.autoDelayMs = 500;
     } else {
       return await super.execute(params);
     }

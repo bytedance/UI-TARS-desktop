@@ -170,5 +170,23 @@ describe('NutJSElectronOperator', () => {
 
       expect(superExecuteSpy).toHaveBeenCalledTimes(1);
     });
+
+    it('restores keyboard delay when Windows paste throws', async () => {
+      keyboard.config.autoDelayMs = 321;
+      vi.mocked(clipboard.writeText).mockImplementationOnce(() => {
+        throw new Error('paste failed');
+      });
+
+      await expect(
+        operator.execute({
+          parsedPrediction: {
+            action_type: 'type',
+            action_inputs: { content: 'hello' },
+          },
+        } as never),
+      ).rejects.toThrow('paste failed');
+
+      expect(keyboard.config.autoDelayMs).toBe(321);
+    });
   });
 });
