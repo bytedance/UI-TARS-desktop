@@ -217,9 +217,9 @@ export class UITarsModel extends Model {
       const isCodexResponses = this.isCodexResponsesEnabled;
       const isStatelessCodexResponses =
         isCodexResponses && this.modelConfig.codexResponses?.store === false;
-      const shouldUseResponseId = !isStatelessCodexResponses;
+      const shouldDeleteStoredResponses = !isStatelessCodexResponses;
 
-      if (!shouldUseResponseId) {
+      if (!shouldDeleteStoredResponses) {
         this.headImageContext = null;
       }
 
@@ -237,7 +237,7 @@ export class UITarsModel extends Model {
       // find the first image message
       const headImageMessageIndex = messages.findIndex(isMessageImage);
       if (
-        shouldUseResponseId &&
+        shouldDeleteStoredResponses &&
         this.headImageContext?.responseIds.length &&
         this.headImageContext?.messageIndex !== headImageMessageIndex
       ) {
@@ -291,10 +291,9 @@ export class UITarsModel extends Model {
           temperature,
           top_p,
           max_output_tokens: max_tokens,
-          ...(shouldUseResponseId &&
-            responseId && {
-              previous_response_id: responseId,
-            }),
+          ...(responseId && {
+            previous_response_id: responseId,
+          }),
         };
 
         if (isCodexResponses) {
@@ -326,9 +325,7 @@ export class UITarsModel extends Model {
             responseId,
           );
           prediction = streamResult.prediction;
-          if (shouldUseResponseId) {
-            responseId = streamResult.responseId ?? responseId;
-          }
+          responseId = streamResult.responseId ?? responseId;
           costTokens = streamResult.costTokens;
 
           logger.info('[ResponseAPI/Codex] [result]: ', {
@@ -370,7 +367,11 @@ export class UITarsModel extends Model {
         logger.info('[ResponseAPI] [responseId]: ', responseId);
 
         // head image changed
-        if (shouldUseResponseId && responseId && isMessageImage(input)) {
+        if (
+          shouldDeleteStoredResponses &&
+          responseId &&
+          isMessageImage(input)
+        ) {
           this.headImageContext = {
             messageIndex: headImageMessageIndex,
             responseIds: [
