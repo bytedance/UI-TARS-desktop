@@ -463,6 +463,136 @@ Action: click(start_box='[130,226]')`;
       ]);
     });
 
+    it('should not extract inline function-like text without Action marker', () => {
+      const input = 'I should wait() until the page is stable.';
+      const result = parseActionVlm(input);
+
+      expect(result).toEqual([
+        {
+          action_inputs: {},
+          action_type: '',
+          reflection: null,
+          thought: '',
+        },
+      ]);
+    });
+
+    it('should ignore additional inline calls after first action in same block', () => {
+      const input = `Thought: Click then explain
+Action: click(start_box='(100,200)') then wait()`;
+      const result = parseActionVlm(input);
+
+      expect(result).toEqual([
+        {
+          action_inputs: {
+            start_box: '[0.1,0.2,0.1,0.2]',
+          },
+          action_type: 'click',
+          reflection: null,
+          thought: 'Click then explain',
+        },
+      ]);
+    });
+
+    it('should ignore Action marker text inside quoted action arguments', () => {
+      const input = `Thought: Type raw text exactly
+Action: type(content='Action: wait()')`;
+      const result = parseActionVlm(input);
+
+      expect(result).toEqual([
+        {
+          action_inputs: {
+            content: 'Action: wait()',
+          },
+          action_type: 'type',
+          reflection: null,
+          thought: 'Type raw text exactly',
+        },
+      ]);
+    });
+
+    it('should still detect Action marker after possessive apostrophe in thought', () => {
+      const input = `Thought: Open users' settings and continue.
+Action: click(start_box='(100,200)')`;
+      const result = parseActionVlm(input);
+
+      expect(result).toEqual([
+        {
+          action_inputs: {
+            start_box: '[0.1,0.2,0.1,0.2]',
+          },
+          action_type: 'click',
+          reflection: null,
+          thought: "Open users' settings and continue.",
+        },
+      ]);
+    });
+
+    it('should recover Action marker after unterminated quote in thought text', () => {
+      const input = `Thought: click "Settings
+Action: wait()`;
+      const result = parseActionVlm(input);
+
+      expect(result).toEqual([
+        {
+          action_inputs: {},
+          action_type: 'wait',
+          reflection: null,
+          thought: 'click "Settings',
+        },
+      ]);
+    });
+
+    it('should recover Action marker after same-line unterminated quote in thought', () => {
+      const input = `Thought: click "Settings Action: wait()`;
+      const result = parseActionVlm(input);
+
+      expect(result).toEqual([
+        {
+          action_inputs: {},
+          action_type: 'wait',
+          reflection: null,
+          thought: 'click "Settings',
+        },
+      ]);
+    });
+
+    it('should ignore inner Action marker inside contracted text argument', () => {
+      const input = `Thought: Type text and then click
+Action: type(content='don\'t Action: wait()')
+Action: click(start_box='(100,200)')`;
+      const result = parseActionVlm(input);
+
+      expect(result).toEqual([
+        {
+          action_inputs: {
+            start_box: '[0.1,0.2,0.1,0.2]',
+          },
+          action_type: 'click',
+          reflection: null,
+          thought: 'Type text and then click',
+        },
+      ]);
+    });
+
+    it('should recover final Action marker after broken quoted argument in earlier action block', () => {
+      const input = `Thought: Continue after malformed action
+Action: type(content='broken
+Action: click(start_box='(100,200)')`;
+      const result = parseActionVlm(input);
+
+      expect(result).toEqual([
+        {
+          action_inputs: {
+            start_box: '[0.1,0.2,0.1,0.2]',
+          },
+          action_type: 'click',
+          reflection: null,
+          thought: 'Continue after malformed action',
+        },
+      ]);
+    });
+
     it('should handle with Chinese colon', () => {
       const input = `Thought: I need to click this button
 Action：click(start_box='(100,200)')`;
@@ -594,6 +724,81 @@ Action: click(start_box='[0, 964, 10, 984]')`;
             start_coords: [12.8, 1402.56],
           },
         },
+      ]);
+    });
+
+    it('should parse box marker coordinates as absolute pixels when exceeding factors', () => {
+      const input = `Thought: Click open
+Action: click(start_box='<|box_start|>(1290,718)<|box_end|>(1350,747)<|box_end|>')`;
+
+      const result = parseActionVlm(input, [1000, 1000], 'bc', {
+        width: 2560,
+        height: 1440,
+      });
+
+      expect(result).toEqual([
+        {
+          reflection: null,
+          thought: 'Click open',
+          action_type: 'click',
+          action_inputs: {
+            start_box: '[0.50390625,0.4986111111111111,0.52734375,0.51875]',
+            start_coords: [1320, 732.5],
+          },
+        },
+      ]);
+    });
+
+    it('should not mutate non-box payload containing parenthesis sequences', () => {
+      const input = `Thought: Type literal parentheses
+Action: type(content='()()')`;
+      const result = parseActionVlm(input);
+
+      expect(result).toEqual([
+        {
+          action_inputs: {
+            content: '()()',
+          },
+          action_type: 'type',
+          reflection: null,
+          thought: 'Type literal parentheses',
+        },
+      ]);
+    });
+
+    it('should parse action from the final explicit Action marker', () => {
+      const input = `Thought: Open Start menu first.
+Action: hotkey(key='ctrl esc')Thought: Type Cursor in search.
+Action: type(content='Cursor\\n')Thought: Wait for window.
+Action: wait()Thought: Finish if opened.
+Action: finished()`;
+
+      const result = parseActionVlm(input);
+
+      expect(result).toEqual([
+        {
+          action_inputs: {},
+          action_type: 'finished',
+          reflection: null,
+          thought: 'Open Start menu first.',
+        },
+      ]);
+    });
+
+    it('should ignore Action keyword inside thought text and parse final action block', () => {
+      const input = `Thought: I should avoid writing "Action: wait()" in reasoning.
+Action: click(start_box='[100,200]')`;
+
+      const result = parseActionVlm(input, [1000, 1000]);
+
+      expect(result).toEqual([
+        expect.objectContaining({
+          action_inputs: {
+            start_box: '[0.1,0.2,0.1,0.2]',
+          },
+          action_type: 'click',
+          reflection: null,
+        }),
       ]);
     });
   });

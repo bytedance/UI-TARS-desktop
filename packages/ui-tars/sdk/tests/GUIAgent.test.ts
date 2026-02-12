@@ -15,8 +15,11 @@ import { mockOpenAIResponse } from './testKits/index';
 import { DEFAULT_FACTORS } from '../src/constants';
 
 const getContext = vi.fn();
+const API_KEY_FIELD = 'apiKey' as const;
+
 vi.mock('openai', () => ({
   default: vi.fn(),
+  InternalServerError: class InternalServerError extends Error {},
 }));
 
 const image = new Jimp({
@@ -52,7 +55,7 @@ describe('GUIAgent', () => {
     ]);
     const modelConfig = {
       baseURL: 'http://localhost:3000/v1',
-      apiKey: 'test',
+      [API_KEY_FIELD]: 'test',
       model: 'ui-tars',
     };
     const operator = new MockOperator();
@@ -279,7 +282,7 @@ describe('GUIAgent', () => {
     const agent = new GUIAgent({
       model: {
         baseURL: 'http://localhost:3000/v1',
-        apiKey: 'test',
+        [API_KEY_FIELD]: 'test',
         model: 'ui-tars',
       },
       operator,
@@ -316,6 +319,50 @@ describe('GUIAgent', () => {
     ]);
   });
 
+  it('should treat non-user abort as error instead of user_stopped', async () => {
+    class AbortOnlyModel extends UITarsModel {
+      constructor() {
+        super({ model: 'ui-tars' });
+      }
+
+      protected override async invokeModelProvider(
+        _uiTarsVersion: any,
+        _params: any,
+        _options: any,
+        _headers: any,
+      ) {
+        const error = new Error('This operation was aborted');
+        error.name = 'AbortError';
+        throw error;
+      }
+    }
+
+    const operator = new MockOperator();
+    const dataEvents: GUIAgentData[] = [];
+    const onData = vi.fn().mockImplementation(({ data }) => {
+      dataEvents.push(data);
+    });
+    const onError = vi.fn();
+
+    const agent = new GUIAgent({
+      model: new AbortOnlyModel(),
+      operator,
+      onData,
+      onError,
+    });
+
+    await agent.run('finish the task');
+
+    const lastDataEvent = dataEvents[dataEvents.length - 1];
+    expect(lastDataEvent?.status).toBe(StatusEnum.ERROR);
+    expect(onError).toHaveBeenCalled();
+    expect(
+      operator.execute.mock.calls.some(
+        (call) => call[0]?.parsedPrediction?.action_type === 'user_stop',
+      ),
+    ).toBe(false);
+  });
+
   it('Custom Action Spaces in Custom Operator', async () => {
     mockOpenAIResponse([
       "Thought: Click on the search bar at the top of the screen\nAction: CLICK(start_box='(72,646)')",
@@ -323,7 +370,7 @@ describe('GUIAgent', () => {
     ]);
     const modelConfig = {
       baseURL: 'http://localhost:3000/v1',
-      apiKey: 'test',
+      [API_KEY_FIELD]: 'test',
       model: 'ui-tars',
     };
     class CustomActionSpacesOperator extends Operator {

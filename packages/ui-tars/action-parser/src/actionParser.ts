@@ -103,6 +103,7 @@ export function parseActionVlm(
   let reflection: string | null = null;
   let thought: string | null = null;
   let actionStr = '';
+  let actionMarkerCount = 0;
 
   let smartResizeFactors: [number, number] | null = null;
   if (
@@ -144,12 +145,27 @@ export function parseActionVlm(
       }
     }
 
-    if (!['Action:', 'Action：'].some((keyword) => text.includes(keyword))) {
+    const actionMarkers = findActionMarkers(text);
+    actionMarkerCount = actionMarkers.length;
+
+    if (actionMarkerCount === 0) {
       //   throw new Error('No Action found in text');
       actionStr = text;
     } else {
-      const actionParts = text.split(/Action[:：]/);
-      actionStr = actionParts[actionParts.length - 1];
+      for (let i = actionMarkers.length - 1; i >= 0; i--) {
+        const actionMarker = actionMarkers[i];
+        const candidate = text.slice(
+          actionMarker.index + actionMarker.marker.length,
+        );
+        if (extractLeadingFunctionCall(candidate)) {
+          actionStr = candidate;
+          break;
+        }
+
+        if (!actionStr) {
+          actionStr = candidate;
+        }
+      }
     }
   } else if (mode === 'o1') {
     // Parse o1 format
@@ -170,7 +186,31 @@ export function parseActionVlm(
   }
 
   // Parse actions
-  const allActions = actionStr.split('\n\n');
+  let allActions: string[] = [];
+  const hasExplicitActionBlock = mode === 'o1' || actionMarkerCount > 0;
+
+  if (hasExplicitActionBlock) {
+    allActions = actionStr
+      .split('\n\n')
+      .map((segment) => segment.trim())
+      .filter((segment) => segment.length > 0)
+      .flatMap((segment) => {
+        const leadingAction = extractLeadingFunctionCall(segment);
+        return leadingAction ? [leadingAction.value] : [];
+      });
+  }
+
+  if (allActions.length === 0) {
+    allActions = actionStr
+      .split('\n\n')
+      .map((action) => action.trim())
+      .filter((action) => action.length > 0);
+  }
+
+  if (allActions.length === 0) {
+    allActions = [''];
+  }
+
   const actions: PredictionParsed[] = [];
 
   for (const rawStr of allActions) {
@@ -190,17 +230,34 @@ export function parseActionVlm(
 
         if (paramName.includes('start_box') || paramName.includes('end_box')) {
           const oriBox = trimmedParam;
+          const normalizedBox = oriBox.replace(/\)\s*\(/g, ',');
           // Remove parentheses and split
-          const numbers = oriBox
+          const numbers = normalizedBox
             .replace(/[()[\]]/g, '')
             .split(',')
             .filter((ori) => ori !== '');
+
+          const useAbsolutePixelCoords =
+            !!screenContext &&
+            numbers.some((num, idx) => {
+              const parsed = Number.parseFloat(num);
+              if (!isNumber(parsed)) {
+                return false;
+              }
+              const factorIndex = idx % 2;
+              return parsed > factors[factorIndex];
+            });
 
           // Convert to float and scale
           const floatNumbers = numbers.map((num, idx) => {
             const factorIndex = idx % 2;
             if (modelVer === UITarsModelVersion.V1_5 && smartResizeFactors) {
               return Number.parseFloat(num) / smartResizeFactors[factorIndex];
+            }
+            if (useAbsolutePixelCoords && screenContext) {
+              const axisSize =
+                factorIndex === 0 ? screenContext.width : screenContext.height;
+              return Number.parseFloat(num) / axisSize;
             }
             return Number.parseFloat(num) / factors[factorIndex];
           });
@@ -259,6 +316,133 @@ export function parseActionVlm(
 
   return actions;
 }
+
+function findActionMarkers(
+  text: string,
+): Array<{ index: number; marker: string }> {
+  const markers: Array<{ index: number; marker: string }> = [];
+  let quote: "'" | '"' | null = null;
+  let escaping = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+
+    if (quote) {
+      if (escaping) {
+        escaping = false;
+        continue;
+      }
+
+      if (char === '\n' || char === '\r') {
+        quote = null;
+        continue;
+      }
+
+      if (char === '\\') {
+        escaping = true;
+        continue;
+      }
+
+      if (char === quote) {
+        if (quote === "'" && isInWordApostrophe(text, i)) {
+          continue;
+        }
+
+        quote = null;
+        continue;
+      }
+
+      if (
+        (text.startsWith('Action:', i) || text.startsWith('Action：', i)) &&
+        !hasClosingQuoteBeforeLineBreak(text, i, quote)
+      ) {
+        quote = null;
+      } else {
+        continue;
+      }
+    }
+
+    if (char === "'" && isApostrophe(text, i)) {
+      continue;
+    }
+
+    if (char === '"' || char === "'") {
+      quote = char as "'" | '"';
+      continue;
+    }
+
+    if (text.startsWith('Action:', i)) {
+      markers.push({ index: i, marker: 'Action:' });
+      i += 'Action:'.length - 1;
+      continue;
+    }
+
+    if (text.startsWith('Action：', i)) {
+      markers.push({ index: i, marker: 'Action：' });
+      i += 'Action：'.length - 1;
+    }
+  }
+
+  return markers;
+}
+
+function isApostrophe(text: string, index: number): boolean {
+  const prev = text[index - 1] ?? '';
+  const next = text[index + 1] ?? '';
+
+  if (!/[A-Za-z0-9]/.test(prev)) {
+    return false;
+  }
+
+  if (/[A-Za-z0-9]/.test(next)) {
+    return true;
+  }
+
+  return next === '' || /[\s,.;:!?)}\]]/.test(next);
+}
+
+function isInWordApostrophe(text: string, index: number): boolean {
+  const prev = text[index - 1] ?? '';
+  const next = text[index + 1] ?? '';
+  return /[A-Za-z0-9]/.test(prev) && /[A-Za-z0-9]/.test(next);
+}
+
+function hasClosingQuoteBeforeLineBreak(
+  text: string,
+  fromIndex: number,
+  quote: "'" | '"',
+): boolean {
+  let escaping = false;
+
+  for (let i = fromIndex; i < text.length; i++) {
+    const char = text[i];
+
+    if (char === '\n' || char === '\r') {
+      return false;
+    }
+
+    if (escaping) {
+      escaping = false;
+      continue;
+    }
+
+    if (char === '\\') {
+      escaping = true;
+      continue;
+    }
+
+    if (char === quote) {
+      if (quote === "'" && isInWordApostrophe(text, i)) {
+        continue;
+      }
+
+      return true;
+    }
+  }
+
+  return false;
+}
+
 /**
  * Parses an action string into a structured object
  * @param {string} actionStr - The action string to parse (e.g. "click(start_box='(279,81)')")
@@ -327,4 +511,73 @@ function parseAction(actionStr: string) {
     console.error(`Failed to parse action '${actionStr}': ${e}`);
     return null;
   }
+}
+
+function extractLeadingFunctionCall(
+  text: string,
+  allowOffset = false,
+): { value: string; end: number } | null {
+  const fnPattern = allowOffset
+    ? /[A-Za-z_][A-Za-z0-9_]*\s*\(/
+    : /^[\s\n\r]*([A-Za-z_][A-Za-z0-9_]*)\s*\(/;
+  const match = fnPattern.exec(text);
+
+  if (!match || match.index == null) {
+    return null;
+  }
+
+  const start = allowOffset ? match.index : text.search(/[A-Za-z_]/);
+  if (start < 0) {
+    return null;
+  }
+
+  const openParenIndex = text.indexOf('(', start);
+  if (openParenIndex < 0) {
+    return null;
+  }
+
+  let depth = 0;
+  let quote: "'" | '"' | null = null;
+  let escaping = false;
+
+  for (let i = openParenIndex; i < text.length; i++) {
+    const char = text[i];
+
+    if (quote) {
+      if (escaping) {
+        escaping = false;
+        continue;
+      }
+      if (char === '\\') {
+        escaping = true;
+        continue;
+      }
+      if (char === quote) {
+        quote = null;
+      }
+      continue;
+    }
+
+    if (char === '"' || char === "'") {
+      quote = char as "'" | '"';
+      continue;
+    }
+
+    if (char === '(') {
+      depth += 1;
+      continue;
+    }
+
+    if (char === ')') {
+      depth -= 1;
+      if (depth === 0) {
+        return {
+          value: text.slice(start, i + 1).trim(),
+          end: i + 1,
+        };
+      }
+    }
+  }
+
+  return null;
 }

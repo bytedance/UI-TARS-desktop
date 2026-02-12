@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { VLMProviderV2 } from '@main/store/types';
 import type { CodexOAuthState } from '@main/services/codexAuth';
 import {
+  type CodexReasoningEffortPreference,
   getProviderModels,
   VLM_PROVIDER_REGISTRY,
 } from '@main/store/modelRegistry';
@@ -46,6 +47,45 @@ import { cn } from '@renderer/utils';
 import { PresetImport, PresetBanner } from './preset';
 import { api } from '@/renderer/src/api';
 
+const CODEX_REASONING_VALUES = [
+  'none',
+  'low',
+  'medium',
+  'high',
+  'xhigh',
+] as const;
+
+const getCodexReasoningOptionsByModel = (
+  modelName: string,
+): ReadonlyArray<(typeof CODEX_REASONING_VALUES)[number]> => {
+  const normalized = modelName.toLowerCase();
+
+  if (!normalized) {
+    return ['low', 'medium', 'high'];
+  }
+
+  if (normalized.includes('codex-mini')) {
+    return ['medium', 'high'];
+  }
+
+  if (normalized.includes('codex-max')) {
+    return ['low', 'medium', 'high', 'xhigh'];
+  }
+
+  if (normalized.includes('codex')) {
+    if (normalized.includes('gpt-5.2') || normalized.includes('gpt-5.3')) {
+      return ['low', 'medium', 'high', 'xhigh'];
+    }
+    return ['low', 'medium', 'high'];
+  }
+
+  if (normalized.includes('gpt-5.2') || normalized.includes('gpt-5.3')) {
+    return ['none', 'low', 'medium', 'high', 'xhigh'];
+  }
+
+  return ['none', 'low', 'medium', 'high'];
+};
+
 const formSchema = z
   .object({
     vlmProvider: z.nativeEnum(VLMProviderV2, {
@@ -55,6 +95,9 @@ const formSchema = z
     vlmApiKey: z.string(),
     vlmModelName: z.string().min(1),
     useResponsesApi: z.boolean().default(false),
+    codexReasoningEffort: z
+      .enum(['auto', ...CODEX_REASONING_VALUES] as const)
+      .default('auto'),
   })
   .superRefine((value, ctx) => {
     const providerConfig = VLM_PROVIDER_REGISTRY[value.vlmProvider];
@@ -120,6 +163,7 @@ export function VLMSettings({
       vlmApiKey: '',
       vlmModelName: '',
       useResponsesApi: false,
+      codexReasoningEffort: 'auto',
     },
   });
   useEffect(() => {
@@ -130,18 +174,26 @@ export function VLMSettings({
         vlmApiKey: settings.vlmApiKey,
         vlmModelName: settings.vlmModelName,
         useResponsesApi: settings.useResponsesApi,
+        codexReasoningEffort: settings.codexReasoningEffort ?? 'auto',
       });
     }
   }, [settings, form]);
 
-  const [newProvider, newBaseUrl, newApiKey, newModelName, newUseResponsesApi] =
-    form.watch([
-      'vlmProvider',
-      'vlmBaseUrl',
-      'vlmApiKey',
-      'vlmModelName',
-      'useResponsesApi',
-    ]);
+  const [
+    newProvider,
+    newBaseUrl,
+    newApiKey,
+    newModelName,
+    newUseResponsesApi,
+    newCodexReasoningEffort,
+  ] = form.watch([
+    'vlmProvider',
+    'vlmBaseUrl',
+    'vlmApiKey',
+    'vlmModelName',
+    'useResponsesApi',
+    'codexReasoningEffort',
+  ]);
 
   const providerConfig = newProvider
     ? VLM_PROVIDER_REGISTRY[newProvider]
@@ -159,6 +211,29 @@ export function VLMSettings({
 
     return Array.from(modelSet);
   }, [newModelName, newProvider]);
+
+  const codexReasoningOptions = useMemo(() => {
+    if (newProvider !== VLMProviderV2.openai_codex_oauth) {
+      return [] as ReadonlyArray<(typeof CODEX_REASONING_VALUES)[number]>;
+    }
+
+    return getCodexReasoningOptionsByModel(newModelName || '');
+  }, [newModelName, newProvider]);
+
+  useEffect(() => {
+    if (newProvider !== VLMProviderV2.openai_codex_oauth) {
+      return;
+    }
+
+    if (
+      newCodexReasoningEffort !== 'auto' &&
+      !codexReasoningOptions.includes(newCodexReasoningEffort)
+    ) {
+      form.setValue('codexReasoningEffort', 'auto', {
+        shouldValidate: true,
+      });
+    }
+  }, [codexReasoningOptions, form, newCodexReasoningEffort, newProvider]);
 
   useEffect(() => {
     if (newProvider !== VLMProviderV2.openai_codex_oauth) {
@@ -294,29 +369,30 @@ export function VLMSettings({
           }
         }
 
-        updateSetting({
+        await updateSetting({
           vlmProvider: newProvider,
           vlmBaseUrl: newBaseUrl,
           vlmApiKey: newApiKey,
           vlmModelName: newModelName,
           useResponsesApi: newUseResponsesApi,
+          codexReasoningEffort: newCodexReasoningEffort,
         });
         return;
       }
 
       const isUrlValid = await form.trigger('vlmBaseUrl');
       if (isUrlValid && newBaseUrl !== settings.vlmBaseUrl) {
-        updateSetting({ vlmBaseUrl: newBaseUrl });
+        await updateSetting({ vlmBaseUrl: newBaseUrl });
       }
 
       const isKeyValid = await form.trigger('vlmApiKey');
       if (isKeyValid && newApiKey !== settings.vlmApiKey) {
-        updateSetting({ vlmApiKey: newApiKey });
+        await updateSetting({ vlmApiKey: newApiKey });
       }
 
       const isNameValid = await form.trigger('vlmModelName');
       if (isNameValid && newModelName !== settings.vlmModelName) {
-        updateSetting({ vlmModelName: newModelName });
+        await updateSetting({ vlmModelName: newModelName });
       }
 
       const isResponsesApiValid = await form.trigger('useResponsesApi');
@@ -324,7 +400,17 @@ export function VLMSettings({
         isResponsesApiValid &&
         newUseResponsesApi !== settings.useResponsesApi
       ) {
-        updateSetting({ useResponsesApi: newUseResponsesApi });
+        await updateSetting({ useResponsesApi: newUseResponsesApi });
+      }
+
+      if (
+        newCodexReasoningEffort !== settings.codexReasoningEffort &&
+        (newProvider === VLMProviderV2.openai_codex_oauth ||
+          settings.vlmProvider === VLMProviderV2.openai_codex_oauth)
+      ) {
+        await updateSetting({
+          codexReasoningEffort: newCodexReasoningEffort,
+        });
       }
     };
 
@@ -336,6 +422,7 @@ export function VLMSettings({
     newApiKey,
     newModelName,
     newUseResponsesApi,
+    newCodexReasoningEffort,
     settings,
     updateSetting,
     form,
@@ -440,7 +527,7 @@ export function VLMSettings({
 
     console.log('onSubmit', values);
 
-    updateSetting(values);
+    await updateSetting(values);
     toast.success('Settings saved successfully');
   };
 
@@ -555,6 +642,28 @@ export function VLMSettings({
                         provider === VLMProviderV2.openai_codex_oauth
                       ) {
                         form.setValue('useResponsesApi', true, {
+                          shouldValidate: true,
+                        });
+                      }
+
+                      if (provider === VLMProviderV2.openai_codex_oauth) {
+                        const currentEffort = form.getValues(
+                          'codexReasoningEffort',
+                        );
+                        const availableEfforts =
+                          getCodexReasoningOptionsByModel(
+                            nextProviderConfig.defaultModel,
+                          );
+                        if (
+                          currentEffort !== 'auto' &&
+                          !availableEfforts.includes(currentEffort)
+                        ) {
+                          form.setValue('codexReasoningEffort', 'auto', {
+                            shouldValidate: true,
+                          });
+                        }
+                      } else {
+                        form.setValue('codexReasoningEffort', 'auto', {
                           shouldValidate: true,
                         });
                       }
@@ -758,6 +867,45 @@ export function VLMSettings({
               </FormItem>
             )}
           />
+
+          {newProvider === VLMProviderV2.openai_codex_oauth && (
+            <FormField
+              control={form.control}
+              name="codexReasoningEffort"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Thinking Effort</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={(value) =>
+                        field.onChange(value as CodexReasoningEffortPreference)
+                      }
+                      value={field.value}
+                      disabled={isRemoteAutoUpdatedPreset}
+                    >
+                      <SelectTrigger className="w-full bg-white">
+                        <SelectValue placeholder="Select thinking effort" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="auto">
+                          Auto (model default)
+                        </SelectItem>
+                        {codexReasoningOptions.map((effort) => (
+                          <SelectItem key={effort} value={effort}>
+                            {effort}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <p className="text-xs text-muted-foreground">
+                    Matches Codex plugin behavior: options depend on selected
+                    model.
+                  </p>
+                </FormItem>
+              )}
+            />
+          )}
 
           {/* Model Availability Check */}
           <ModelAvailabilityCheck

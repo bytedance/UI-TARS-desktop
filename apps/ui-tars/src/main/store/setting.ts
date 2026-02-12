@@ -24,6 +24,7 @@ export const DEFAULT_SETTING: LocalStore = {
   vlmApiKey: env.vlmApiKey || '',
   vlmModelName: env.vlmModelName || '',
   useResponsesApi: false,
+  codexReasoningEffort: 'auto',
   maxLoopCount: 100,
   loopIntervalInMs: 1000,
   searchEngineForBrowser: SearchEngineForSettings.GOOGLE,

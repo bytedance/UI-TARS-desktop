@@ -6,12 +6,16 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { UITarsModel } from '../src/Model';
 
 // Mock OpenAI
-const mockCreate = vi.fn();
-const mockResponsesCreate = vi.fn();
-const mockResponsesDelete = vi.fn();
-
-vi.mock('openai', () => ({
-  default: vi.fn().mockImplementation(() => ({
+const {
+  mockCreate,
+  mockResponsesCreate,
+  mockResponsesDelete,
+  mockOpenAIConstructor,
+} = vi.hoisted(() => {
+  const mockCreate = vi.fn();
+  const mockResponsesCreate = vi.fn();
+  const mockResponsesDelete = vi.fn();
+  const mockOpenAIConstructor = vi.fn().mockImplementation(() => ({
     chat: {
       completions: {
         create: mockCreate,
@@ -21,7 +25,18 @@ vi.mock('openai', () => ({
       create: mockResponsesCreate,
       delete: mockResponsesDelete,
     },
-  })),
+  }));
+
+  return {
+    mockCreate,
+    mockResponsesCreate,
+    mockResponsesDelete,
+    mockOpenAIConstructor,
+  };
+});
+
+vi.mock('openai', () => ({
+  default: mockOpenAIConstructor,
 }));
 
 // Mock context
@@ -46,17 +61,21 @@ vi.mock('../src/utils', async () => {
   };
 });
 
-describe('UITarsModel', () => {
-  const createMockResponseStream = (events: unknown[]) => ({
-    async *[Symbol.asyncIterator]() {
-      for (const event of events) {
-        yield event;
-      }
-    },
-  });
+const createMockCodexStream = (events: Array<Record<string, unknown>>) => ({
+  async *[Symbol.asyncIterator]() {
+    for (const event of events) {
+      yield event;
+    }
+  },
+});
 
+describe('UITarsModel', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockOpenAIConstructor.mockClear();
+    mockCreate.mockReset();
+    mockResponsesCreate.mockReset();
+    mockResponsesDelete.mockReset();
   });
 
   describe('ChatCompletion API', () => {
@@ -124,7 +143,7 @@ describe('UITarsModel', () => {
   describe('Response API', () => {
     it('should shape Codex responses requests with stream and stateless options', async () => {
       const model = new UITarsModel({
-        ['api' + 'Key']: '',
+        ['api' + 'Key']: 'codex-token',
         baseURL: 'https://test.com',
         model: 'gpt-5.3-codex',
         useResponsesApi: true,
@@ -137,22 +156,17 @@ describe('UITarsModel', () => {
       });
 
       mockResponsesCreate.mockResolvedValueOnce(
-        createMockResponseStream([
+        createMockCodexStream([
           {
             type: 'response.output_text.delta',
             delta: 'Action: click(start_box="[0.1,0.1,0.1,0.1]")',
-            item_id: 'item-1',
-            output_index: 0,
-            content_index: 0,
           },
           {
             type: 'response.completed',
             response: {
               id: 'response-codex-1',
               output_text: 'Action: click(start_box="[0.1,0.1,0.1,0.1]")',
-              usage: {
-                total_tokens: 77,
-              },
+              usage: { total_tokens: 77 },
             },
           },
         ]),
@@ -166,17 +180,348 @@ describe('UITarsModel', () => {
 
       expect(result.prediction).toContain('Action: click');
 
+      expect(mockResponsesCreate).toHaveBeenCalledTimes(1);
       expect(mockResponsesCreate).toHaveBeenCalledWith(
         expect.objectContaining({
           model: 'gpt-5.3-codex',
           stream: true,
           store: false,
           include: ['reasoning.encrypted_content'],
+          instructions: 'Open the first result',
           reasoning: {
             effort: 'high',
-            generate_summary: null,
           },
         }),
+        expect.objectContaining({
+          timeout: 1000 * 30,
+        }),
+      );
+
+      const requestBody = mockResponsesCreate.mock.calls[0]?.[0] ?? {};
+      expect(requestBody.input?.[0]).toEqual(
+        expect.objectContaining({
+          type: 'message',
+          role: 'user',
+        }),
+      );
+    });
+
+    it('should preserve custom OpenAI transport options for Codex streams', async () => {
+      const customFetch = vi.fn();
+      const model = new UITarsModel({
+        ['api' + 'Key']: 'codex-token',
+        baseURL: 'https://test.com',
+        model: 'gpt-5.3-codex',
+        fetch: customFetch as unknown as typeof fetch,
+        useResponsesApi: true,
+        codexResponses: {
+          enabled: true,
+          store: false,
+          include: ['reasoning.encrypted_content'],
+          reasoningEffort: 'high',
+        },
+      });
+
+      mockResponsesCreate.mockResolvedValueOnce(
+        createMockCodexStream([
+          { type: 'response.output_text.delta', delta: 'Action: wait()' },
+          {
+            type: 'response.completed',
+            response: {
+              id: 'response-codex-transport',
+              output_text: 'Action: wait()',
+              usage: { total_tokens: 9 },
+            },
+          },
+        ]),
+      );
+
+      await model.invoke({
+        conversations: [{ from: 'human', value: 'Wait for completion' }],
+        images: [],
+        screenContext: { width: 1920, height: 1080 },
+      });
+
+      expect(mockOpenAIConstructor).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fetch: customFetch,
+          baseURL: 'https://test.com',
+          ['api' + 'Key']: 'codex-token',
+          maxRetries: 0,
+        }),
+      );
+      expect(mockResponsesCreate).toHaveBeenCalledTimes(1);
+    });
+
+    it('should preserve system prompt contract and apply latest user instruction', async () => {
+      const model = new UITarsModel({
+        ['api' + 'Key']: 'codex-token',
+        baseURL: 'https://test.com',
+        model: 'gpt-5.3-codex',
+        useResponsesApi: true,
+        codexResponses: {
+          enabled: true,
+          store: false,
+          include: ['reasoning.encrypted_content'],
+          reasoningEffort: 'high',
+        },
+      });
+
+      mockResponsesCreate.mockResolvedValueOnce(
+        createMockCodexStream([
+          { type: 'response.output_text.delta', delta: 'Action: wait()' },
+          {
+            type: 'response.completed',
+            response: {
+              id: 'response-codex-latest',
+              output_text: 'Action: wait()',
+              usage: { total_tokens: 21 },
+            },
+          },
+        ]),
+      );
+
+      await model.invoke({
+        conversations: [
+          {
+            from: 'human',
+            value:
+              'System action contract\n## User Instruction\nOpen browser and search weather',
+          },
+          { from: 'human', value: '<image>' },
+          { from: 'gpt', value: 'Action: call_user()' },
+          { from: 'human', value: 'Actually open calculator instead' },
+        ],
+        images: ['base64image1'],
+        screenContext: { width: 1920, height: 1080 },
+      });
+
+      const requestBody = mockResponsesCreate.mock.calls[0]?.[0] ?? {};
+      expect(requestBody.instructions).toBe(
+        'System action contract\n## User Instruction\nActually open calculator instead',
+      );
+    });
+
+    it('should keep explicit authorization header for Codex stream requests', async () => {
+      const model = new UITarsModel({
+        ['api' + 'Key']: 'fallback-token',
+        baseURL: 'https://test.com',
+        model: 'gpt-5.3-codex',
+        useResponsesApi: true,
+        codexResponses: {
+          enabled: true,
+          store: false,
+          include: ['reasoning.encrypted_content'],
+          reasoningEffort: 'high',
+        },
+      });
+
+      mockResponsesCreate.mockResolvedValueOnce(
+        createMockCodexStream([
+          { type: 'response.output_text.delta', delta: 'Action: wait()' },
+          {
+            type: 'response.completed',
+            response: {
+              id: 'response-codex-auth',
+              output_text: 'Action: wait()',
+              usage: { total_tokens: 12 },
+            },
+          },
+        ]),
+      );
+
+      await model.invoke({
+        conversations: [{ from: 'human', value: 'Wait for content to load' }],
+        images: [],
+        screenContext: { width: 1920, height: 1080 },
+        headers: {
+          Authorization: 'Bearer explicit-token',
+        },
+      });
+
+      const requestOptions = mockResponsesCreate.mock.calls[0]?.[1] ?? {};
+      const requestHeaders =
+        (requestOptions.headers as Record<string, string> | undefined) ?? {};
+      const authorizationHeader = Object.entries(requestHeaders).find(
+        ([key]) => key.toLowerCase() === 'authorization',
+      )?.[1];
+      expect(authorizationHeader).toBe('Bearer explicit-token');
+    });
+
+    it('should not send previous_response_id in Codex requests', async () => {
+      const model = new UITarsModel({
+        ['api' + 'Key']: '',
+        baseURL: 'https://test.com',
+        model: 'gpt-5.3-codex',
+        useResponsesApi: true,
+        codexResponses: {
+          enabled: true,
+          store: false,
+          include: ['reasoning.encrypted_content'],
+          reasoningEffort: 'high',
+        },
+      });
+
+      mockResponsesCreate.mockResolvedValueOnce(
+        createMockCodexStream([
+          {
+            type: 'response.output_text.delta',
+            delta: 'Thought: analyze. Action: wait()',
+          },
+          {
+            type: 'response.completed',
+            response: {
+              id: 'resp-codex-1',
+              output_text: 'Thought: analyze. Action: wait()',
+              usage: { total_tokens: 10 },
+            },
+          },
+        ]),
+      );
+
+      await model.invoke({
+        conversations: [
+          { from: 'human', value: 'Open calculator' },
+          { from: 'human', value: '<image>' },
+        ],
+        images: ['base64image1'],
+        screenContext: { width: 1920, height: 1080 },
+        previousResponseId: 'response-from-previous-round',
+      });
+
+      expect(mockResponsesCreate).toHaveBeenCalledTimes(1);
+      const firstBody = mockResponsesCreate.mock.calls[0]?.[0] ?? {};
+
+      expect(firstBody.previous_response_id).toBeUndefined();
+      expect(firstBody.instructions).toBe('Open calculator');
+      expect(firstBody.input).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: 'message',
+            role: 'user',
+            content: expect.arrayContaining([
+              expect.objectContaining({
+                type: 'input_text',
+              }),
+            ]),
+          }),
+          expect.objectContaining({
+            type: 'message',
+            role: 'user',
+            content: expect.arrayContaining([
+              expect.objectContaining({
+                type: 'input_image',
+              }),
+            ]),
+          }),
+        ]),
+      );
+    });
+
+    it('should send previous_response_id in stateful Codex requests', async () => {
+      const model = new UITarsModel({
+        ['api' + 'Key']: 'codex-token',
+        baseURL: 'https://test.com',
+        model: 'gpt-5.3-codex',
+        useResponsesApi: true,
+        codexResponses: {
+          enabled: true,
+          store: true,
+          include: ['reasoning.encrypted_content'],
+          reasoningEffort: 'high',
+        },
+      });
+
+      mockResponsesCreate.mockResolvedValueOnce(
+        createMockCodexStream([
+          { type: 'response.output_text.delta', delta: 'Action: wait()' },
+          {
+            type: 'response.completed',
+            response: {
+              id: 'resp-codex-stateful',
+              output_text: 'Action: wait()',
+              usage: { total_tokens: 13 },
+            },
+          },
+        ]),
+      );
+
+      await model.invoke({
+        conversations: [
+          { from: 'human', value: 'Continue from prior state' },
+          { from: 'human', value: '<image>' },
+        ],
+        images: ['base64image1'],
+        screenContext: { width: 1920, height: 1080 },
+        previousResponseId: 'response-from-last-round',
+      });
+
+      const firstBody = mockResponsesCreate.mock.calls[0]?.[0] ?? {};
+      expect(firstBody.previous_response_id).toBe('response-from-last-round');
+    });
+
+    it('should track Codex image responses for cleanup when store is enabled', async () => {
+      const model = new UITarsModel({
+        ['api' + 'Key']: 'codex-token',
+        baseURL: 'https://test.com',
+        model: 'gpt-5.3-codex',
+        useResponsesApi: true,
+        codexResponses: {
+          enabled: true,
+          store: true,
+          include: ['reasoning.encrypted_content'],
+          reasoningEffort: 'high',
+        },
+      });
+
+      mockResponsesCreate
+        .mockResolvedValueOnce(
+          createMockCodexStream([
+            { type: 'response.output_text.delta', delta: 'Action: wait()' },
+            {
+              type: 'response.completed',
+              response: {
+                id: 'resp-codex-1',
+                output_text: 'Action: wait()',
+                usage: { total_tokens: 10 },
+              },
+            },
+          ]),
+        )
+        .mockResolvedValueOnce(
+          createMockCodexStream([
+            { type: 'response.output_text.delta', delta: 'Action: wait()' },
+            {
+              type: 'response.completed',
+              response: {
+                id: 'resp-codex-2',
+                output_text: 'Action: wait()',
+                usage: { total_tokens: 10 },
+              },
+            },
+          ]),
+        );
+
+      await model.invoke({
+        conversations: [
+          { from: 'human', value: 'Open settings' },
+          { from: 'human', value: '<image>' },
+        ],
+        images: ['base64image1'],
+        screenContext: { width: 1920, height: 1080 },
+      });
+
+      expect(mockResponsesDelete).not.toHaveBeenCalled();
+
+      await model.invoke({
+        conversations: [{ from: 'human', value: '<image>' }],
+        images: ['base64image2'],
+        screenContext: { width: 1920, height: 1080 },
+      });
+
+      expect(mockResponsesDelete).toHaveBeenCalledTimes(1);
+      expect(mockResponsesDelete).toHaveBeenCalledWith(
+        'resp-codex-1',
         expect.any(Object),
       );
     });

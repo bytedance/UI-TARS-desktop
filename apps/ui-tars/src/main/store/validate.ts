@@ -22,6 +22,9 @@ export const PresetSchema = z
     vlmApiKey: z.string().default(''),
     vlmModelName: z.string().min(1),
     useResponsesApi: z.boolean().optional(),
+    codexReasoningEffort: z
+      .enum(['auto', 'none', 'low', 'medium', 'high', 'xhigh'])
+      .optional(),
 
     // Chat Settings
     operator: z.nativeEnum(Operator),

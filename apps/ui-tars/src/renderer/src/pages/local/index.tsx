@@ -213,6 +213,13 @@ const LocalOperator = () => {
   };
 
   const renderChatList = () => {
+    const thinkingLabel =
+      status === StatusEnum.PAUSE
+        ? 'Paused. Resume to continue...'
+        : status === StatusEnum.CALL_USER
+          ? 'Waiting for your instruction...'
+          : 'Model is thinking...';
+
     return (
       <ScrollArea className="h-full px-4">
         <div ref={containerRef}>
@@ -261,7 +268,7 @@ const LocalOperator = () => {
             );
           })}
 
-          {thinking && <LoadingText text={'Thinking...'} />}
+          {thinking && <LoadingText text={thinkingLabel} />}
           {errorMsg && <ErrorMessage text={errorMsg} />}
         </div>
       </ScrollArea>
