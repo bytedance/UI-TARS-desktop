@@ -88,8 +88,15 @@ type SystemRunExecutionOptions = {
   ) => void;
 };
 
-const normalizeArgv = (argv: string[]): string[] => {
-  return argv.map((item) => item.trim()).filter((item) => item.length > 0);
+const canonicalizeArgv = (argv: string[]): string[] => {
+  const hasWhitespaceOnlyArg = argv.some((item) => item.trim().length === 0);
+  if (hasWhitespaceOnlyArg) {
+    throw new Error(
+      '[SYSTEM_RUN_INVALID_ARGS] argv entries must not be whitespace-only',
+    );
+  }
+
+  return [...argv];
 };
 
 export const buildSystemRunToolCall = (params: {
@@ -100,7 +107,7 @@ export const buildSystemRunToolCall = (params: {
   idempotencyKey: string;
 }): SystemRunToolCallV1 => {
   const parsed = SystemRunInputSchema.parse(params);
-  const canonicalArgv = normalizeArgv(parsed.argv);
+  const canonicalArgv = canonicalizeArgv(parsed.argv);
 
   if (canonicalArgv.length === 0) {
     throw new Error('[SYSTEM_RUN_INVALID_ARGS] argv must include command');

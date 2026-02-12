@@ -15,7 +15,7 @@ describe('systemRunTool', () => {
   it('builds deterministic call envelope with canonical argv', () => {
     const call = buildSystemRunToolCall({
       intentId: 'intent-1',
-      argv: ['  cmd  ', ' /c ', ' echo ', ' hello '],
+      argv: ['cmd', '/c', 'echo', 'hello'],
       idempotencyKey: 'idem-1',
     });
 
@@ -23,14 +23,26 @@ describe('systemRunTool', () => {
     expect(call.canonicalArgs.argv).toEqual(['cmd', '/c', 'echo', 'hello']);
   });
 
-  it('rejects empty argv after canonicalization', () => {
+  it('preserves non-empty argv entries verbatim', () => {
+    const call = buildSystemRunToolCall({
+      intentId: 'intent-1b',
+      argv: ['cmd', '  --flag  ', ' value '],
+      idempotencyKey: 'idem-1b',
+    });
+
+    expect(call.canonicalArgs.argv).toEqual(['cmd', '  --flag  ', ' value ']);
+  });
+
+  it('rejects whitespace-only argv entries explicitly', () => {
     expect(() =>
       buildSystemRunToolCall({
         intentId: 'intent-2',
-        argv: ['   '],
+        argv: ['cmd', '   ', '--flag1'],
         idempotencyKey: 'idem-2',
       }),
-    ).toThrow('[SYSTEM_RUN_INVALID_ARGS]');
+    ).toThrow(
+      '[SYSTEM_RUN_INVALID_ARGS] argv entries must not be whitespace-only',
+    );
   });
 
   it('returns ok result for successful command', async () => {
