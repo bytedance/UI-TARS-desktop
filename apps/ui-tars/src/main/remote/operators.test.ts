@@ -97,4 +97,31 @@ describe('RemoteComputerOperator coordinate validation', () => {
       ).remoteComputer.dragMouse,
     ).not.toHaveBeenCalled();
   });
+
+  it('fails fast on non-finite drag coordinates from malformed boxes', async () => {
+    const operator = createOperator();
+
+    await expect(
+      operator.execute({
+        parsedPrediction: {
+          action_type: 'drag',
+          action_inputs: {
+            start_box: '[10,10,10,10]',
+            end_box: '[a,b,c,d]',
+          },
+        },
+        screenWidth: 1920,
+        screenHeight: 1080,
+        scaleFactor: 1,
+      } as never),
+    ).rejects.toThrow('[REMOTE_COORDINATES_INVALID]');
+
+    expect(
+      (
+        operator as never as {
+          remoteComputer: { dragMouse: ReturnType<typeof vi.fn> };
+        }
+      ).remoteComputer.dragMouse,
+    ).not.toHaveBeenCalled();
+  });
 });

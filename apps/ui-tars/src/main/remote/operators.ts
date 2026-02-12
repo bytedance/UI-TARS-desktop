@@ -26,7 +26,12 @@ const requireStartCoordinates = (
   startX: number | null,
   startY: number | null,
 ): { startX: number; startY: number } => {
-  if (startX === null || startY === null) {
+  if (
+    startX === null ||
+    startY === null ||
+    !Number.isFinite(startX) ||
+    !Number.isFinite(startY)
+  ) {
     throw new Error(
       `[${INVALID_COORDINATE_ERROR_CODE}] ${actionType} requires valid coordinates, got (${startX}, ${startY})`,
     );
@@ -298,7 +303,12 @@ export class RemoteComputerOperator extends Operator {
         const endX = rawEndX !== null ? Math.round(rawEndX) : null;
         const endY = rawEndY !== null ? Math.round(rawEndY) : null;
 
-        if (endX === null || endY === null) {
+        if (
+          endX === null ||
+          endY === null ||
+          !Number.isFinite(endX) ||
+          !Number.isFinite(endY)
+        ) {
           logger.error(
             '[RemoteComputerOperator] drag end coords error: ',
             `endX or endY is null: (${endX}, ${endY})`,
