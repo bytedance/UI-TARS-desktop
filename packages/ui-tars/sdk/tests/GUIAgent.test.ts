@@ -10,6 +10,7 @@ import { Jimp } from 'jimp';
 import { useContext } from '../src/context/useContext';
 import { GUIAgentData, StatusEnum } from '../src';
 import { IMAGE_PLACEHOLDER } from '@ui-tars/shared/constants';
+import { ErrorStatusEnum } from '@ui-tars/shared/types';
 import { UITarsModel } from '../src/Model';
 import { mockOpenAIResponse } from './testKits/index';
 import { DEFAULT_FACTORS } from '../src/constants';
@@ -361,6 +362,39 @@ describe('GUIAgent', () => {
         (call) => call[0]?.parsedPrediction?.action_type === 'user_stop',
       ),
     ).toBe(false);
+  });
+
+  it('should fail fast on non-actionable predictions', async () => {
+    mockOpenAIResponse(['Thought: I need more context before any action']);
+
+    const operator = new MockOperator();
+    const dataEvents: GUIAgentData[] = [];
+    const onData = vi.fn().mockImplementation(({ data }) => {
+      dataEvents.push(data);
+    });
+    const onError = vi.fn();
+
+    const agent = new GUIAgent({
+      model: {
+        baseURL: 'http://localhost:3000/v1',
+        [API_KEY_FIELD]: 'test',
+        model: 'ui-tars',
+      },
+      operator,
+      onData,
+      onError,
+      maxLoopCount: 3,
+    });
+
+    await agent.run('do something');
+
+    const lastDataEvent = dataEvents[dataEvents.length - 1];
+    expect(lastDataEvent?.status).toBe(StatusEnum.ERROR);
+    expect(lastDataEvent?.error?.status).toBe(
+      ErrorStatusEnum.ENVIRONMENT_ERROR,
+    );
+    expect(onError).toHaveBeenCalledTimes(1);
+    expect(operator.execute).not.toHaveBeenCalled();
   });
 
   it('Custom Action Spaces in Custom Operator', async () => {
