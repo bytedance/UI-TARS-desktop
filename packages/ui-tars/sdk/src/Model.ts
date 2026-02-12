@@ -214,6 +214,15 @@ export class UITarsModel extends Model {
     const startTime = Date.now();
 
     if (this.modelConfig.useResponsesApi) {
+      const isCodexResponses = this.isCodexResponsesEnabled;
+      const isStatelessCodexResponses =
+        isCodexResponses && this.modelConfig.codexResponses?.store === false;
+      const shouldUseResponseId = !isStatelessCodexResponses;
+
+      if (!shouldUseResponseId) {
+        this.headImageContext = null;
+      }
+
       const lastAssistantIndex = messages.findLastIndex(
         (c) => c.role === 'assistant',
       );
@@ -228,6 +237,7 @@ export class UITarsModel extends Model {
       // find the first image message
       const headImageMessageIndex = messages.findIndex(isMessageImage);
       if (
+        shouldUseResponseId &&
         this.headImageContext?.responseIds.length &&
         this.headImageContext?.messageIndex !== headImageMessageIndex
       ) {
@@ -275,17 +285,16 @@ export class UITarsModel extends Model {
           headers,
         };
 
-        const isCodexResponses = this.isCodexResponsesEnabled;
-
         const responseParamsBase = {
           input: [input],
           model,
           temperature,
           top_p,
           max_output_tokens: max_tokens,
-          ...(responseId && {
-            previous_response_id: responseId,
-          }),
+          ...(shouldUseResponseId &&
+            responseId && {
+              previous_response_id: responseId,
+            }),
         };
 
         if (isCodexResponses) {
@@ -317,7 +326,9 @@ export class UITarsModel extends Model {
             responseId,
           );
           prediction = streamResult.prediction;
-          responseId = streamResult.responseId ?? responseId;
+          if (shouldUseResponseId) {
+            responseId = streamResult.responseId ?? responseId;
+          }
           costTokens = streamResult.costTokens;
 
           logger.info('[ResponseAPI/Codex] [result]: ', {
@@ -359,7 +370,7 @@ export class UITarsModel extends Model {
         logger.info('[ResponseAPI] [responseId]: ', responseId);
 
         // head image changed
-        if (responseId && isMessageImage(input)) {
+        if (shouldUseResponseId && responseId && isMessageImage(input)) {
           this.headImageContext = {
             messageIndex: headImageMessageIndex,
             responseIds: [
