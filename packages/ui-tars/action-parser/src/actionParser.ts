@@ -349,9 +349,17 @@ function findActionMarkers(
         }
 
         quote = null;
+        continue;
       }
 
-      continue;
+      if (
+        (text.startsWith('Action:', i) || text.startsWith('Action：', i)) &&
+        !hasClosingQuoteBeforeLineBreak(text, i, quote)
+      ) {
+        quote = null;
+      } else {
+        continue;
+      }
     }
 
     if (char === "'" && isApostrophe(text, i)) {
@@ -397,6 +405,42 @@ function isInWordApostrophe(text: string, index: number): boolean {
   const prev = text[index - 1] ?? '';
   const next = text[index + 1] ?? '';
   return /[A-Za-z0-9]/.test(prev) && /[A-Za-z0-9]/.test(next);
+}
+
+function hasClosingQuoteBeforeLineBreak(
+  text: string,
+  fromIndex: number,
+  quote: "'" | '"',
+): boolean {
+  let escaping = false;
+
+  for (let i = fromIndex; i < text.length; i++) {
+    const char = text[i];
+
+    if (char === '\n' || char === '\r') {
+      return false;
+    }
+
+    if (escaping) {
+      escaping = false;
+      continue;
+    }
+
+    if (char === '\\') {
+      escaping = true;
+      continue;
+    }
+
+    if (char === quote) {
+      if (quote === "'" && isInWordApostrophe(text, i)) {
+        continue;
+      }
+
+      return true;
+    }
+  }
+
+  return false;
 }
 
 /**

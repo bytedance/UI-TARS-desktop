@@ -543,6 +543,20 @@ Action: wait()`;
       ]);
     });
 
+    it('should recover Action marker after same-line unterminated quote in thought', () => {
+      const input = `Thought: click "Settings Action: wait()`;
+      const result = parseActionVlm(input);
+
+      expect(result).toEqual([
+        {
+          action_inputs: {},
+          action_type: 'wait',
+          reflection: null,
+          thought: 'click "Settings',
+        },
+      ]);
+    });
+
     it('should ignore inner Action marker inside contracted text argument', () => {
       const input = `Thought: Type text and then click
 Action: type(content='don\'t Action: wait()')
