@@ -189,6 +189,56 @@ describe('UITarsModel', () => {
       fetchMock.mockRestore();
     });
 
+    it('should use the latest user text for Codex instructions', async () => {
+      const model = new UITarsModel({
+        ['api' + 'Key']: 'codex-token',
+        baseURL: 'https://test.com',
+        model: 'gpt-5.3-codex',
+        useResponsesApi: true,
+        codexResponses: {
+          enabled: true,
+          store: false,
+          include: ['reasoning.encrypted_content'],
+          reasoningEffort: 'high',
+        },
+      });
+
+      const encoder = new TextEncoder();
+      const codexSseBody = [
+        'data: {"type":"response.output_text.delta","delta":"Action: wait()"}\n\n',
+        'data: {"type":"response.completed","response":{"id":"response-codex-latest","output_text":"Action: wait()","usage":{"total_tokens":21}}}\n\n',
+        'data: [DONE]\n\n',
+      ].join('');
+      const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        body: new ReadableStream<Uint8Array>({
+          start(controller) {
+            controller.enqueue(encoder.encode(codexSseBody));
+            controller.close();
+          },
+        }),
+      } as Response);
+
+      await model.invoke({
+        conversations: [
+          { from: 'human', value: 'Open browser and search weather' },
+          { from: 'human', value: '<image>' },
+          { from: 'gpt', value: 'Action: call_user()' },
+          { from: 'human', value: 'Actually open calculator instead' },
+        ],
+        images: ['base64image1'],
+        screenContext: { width: 1920, height: 1080 },
+      });
+
+      const body = JSON.parse(
+        (fetchMock.mock.calls[0]?.[1]?.body as string) ?? '{}',
+      );
+      expect(body.instructions).toBe('Actually open calculator instead');
+
+      fetchMock.mockRestore();
+    });
+
     it('should keep explicit authorization header for Codex stream requests', async () => {
       const model = new UITarsModel({
         ['api' + 'Key']: 'fallback-token',

@@ -477,6 +477,23 @@ Action: click(start_box='[130,226]')`;
       ]);
     });
 
+    it('should ignore additional inline calls after first action in same block', () => {
+      const input = `Thought: Click then explain
+Action: click(start_box='(100,200)') then wait()`;
+      const result = parseActionVlm(input);
+
+      expect(result).toEqual([
+        {
+          action_inputs: {
+            start_box: '[0.1,0.2,0.1,0.2]',
+          },
+          action_type: 'click',
+          reflection: null,
+          thought: 'Click then explain',
+        },
+      ]);
+    });
+
     it('should handle with Chinese colon', () => {
       const input = `Thought: I need to click this button
 Action：click(start_box='(100,200)')`;

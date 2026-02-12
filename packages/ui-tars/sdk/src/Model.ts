@@ -185,7 +185,8 @@ export class UITarsModel extends Model {
   private extractCodexInstructions(
     messages: Array<ChatCompletionMessageParam>,
   ): string | undefined {
-    for (const message of messages) {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const message = messages[i];
       if (message.role !== 'user') {
         continue;
       }
@@ -198,7 +199,8 @@ export class UITarsModel extends Model {
         continue;
       }
 
-      for (const item of message.content) {
+      for (let j = message.content.length - 1; j >= 0; j--) {
+        const item = message.content[j];
         const part = item as unknown as {
           type?: string;
           text?: string;

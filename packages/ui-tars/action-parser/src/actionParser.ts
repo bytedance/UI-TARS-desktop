@@ -194,7 +194,14 @@ export function parseActionVlm(
   const hasExplicitActionBlock = mode === 'o1' || actionMarkerCount > 0;
 
   if (hasExplicitActionBlock) {
-    allActions = extractFunctionCalls(actionStr);
+    allActions = actionStr
+      .split('\n\n')
+      .map((segment) => segment.trim())
+      .filter((segment) => segment.length > 0)
+      .flatMap((segment) => {
+        const leadingAction = extractLeadingFunctionCall(segment);
+        return leadingAction ? [leadingAction.value] : [];
+      });
   }
 
   if (allActions.length === 0) {
@@ -381,22 +388,6 @@ function parseAction(actionStr: string) {
     console.error(`Failed to parse action '${actionStr}': ${e}`);
     return null;
   }
-}
-
-function extractFunctionCalls(text: string): string[] {
-  const actions: string[] = [];
-  let cursor = 0;
-
-  while (cursor < text.length) {
-    const nextCall = extractLeadingFunctionCall(text.slice(cursor), true);
-    if (!nextCall) {
-      break;
-    }
-    actions.push(nextCall.value);
-    cursor += nextCall.end;
-  }
-
-  return actions;
 }
 
 function extractLeadingFunctionCall(
