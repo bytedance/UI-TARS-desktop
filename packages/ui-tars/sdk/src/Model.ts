@@ -220,6 +220,7 @@ export class UITarsModel extends Model {
   }
 
   private async invokeCodexResponseStream(
+    openai: OpenAI,
     responseParams: CodexResponseCreateParamsStreaming,
     requestOptions: {
       signal?: AbortSignal;
@@ -232,88 +233,29 @@ export class UITarsModel extends Model {
     costTokens: number;
     responseId?: string;
   }> {
-    const baseURL = this.modelConfig.baseURL?.replace(/\/+$/, '');
-    if (!baseURL) {
-      throw new Error('Codex baseURL is not configured');
-    }
-
-    const timeoutSignal = AbortSignal.timeout(requestOptions.timeout);
-    const signal = requestOptions.signal
-      ? AbortSignal.any([requestOptions.signal, timeoutSignal])
-      : timeoutSignal;
-
-    const response = await fetch(`${baseURL}/responses`, {
-      method: 'POST',
-      headers: this.buildCodexFetchHeaders(requestOptions.headers),
-      body: JSON.stringify(responseParams),
-      signal,
-    });
-
-    if (!response.ok) {
-      const errorBody = await response.text().catch(() => '');
-      throw new Error(
-        `Codex responses request failed (${response.status}): ${errorBody || 'empty body'}`,
-      );
-    }
-
-    if (!response.body) {
-      throw new Error('Codex responses stream body is missing');
-    }
-
     let prediction = '';
     let costTokens = 0;
     let responseId = fallbackResponseId;
 
-    const decoder = new TextDecoder();
-    const reader = response.body.getReader();
-    let buffer = '';
+    const stream = await openai.responses.create(
+      responseParams,
+      requestOptions,
+    );
 
-    const processChunk = (chunk: string) => {
-      const eventLines = chunk
-        .split('\n')
-        .map((line) => line.trim())
-        .filter((line) => line.startsWith('data:'));
-
-      for (const line of eventLines) {
-        const payload = line.slice('data:'.length).trim();
-        if (!payload || payload === '[DONE]') {
-          continue;
-        }
-
-        const streamEvent = JSON.parse(payload) as ResponseStreamEvent;
-
-        if (streamEvent.type === 'response.output_text.delta') {
-          prediction += streamEvent.delta;
-        }
-
-        if (streamEvent.type === 'response.completed') {
-          const completedResponse = streamEvent.response as Response;
-          responseId = completedResponse.id || responseId;
-          costTokens = completedResponse.usage?.total_tokens ?? costTokens;
-
-          if (!prediction && completedResponse.output_text) {
-            prediction = completedResponse.output_text;
-          }
-        }
-      }
-    };
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) {
-        break;
+    for await (const streamEvent of stream as AsyncIterable<ResponseStreamEvent>) {
+      if (streamEvent.type === 'response.output_text.delta') {
+        prediction += streamEvent.delta;
       }
 
-      buffer += decoder.decode(value, { stream: true });
-      const segments = buffer.split('\n\n');
-      buffer = segments.pop() ?? '';
-      for (const segment of segments) {
-        processChunk(segment);
-      }
-    }
+      if (streamEvent.type === 'response.completed') {
+        const completedResponse = streamEvent.response as Response;
+        responseId = completedResponse.id || responseId;
+        costTokens = completedResponse.usage?.total_tokens ?? costTokens;
 
-    if (buffer.trim()) {
-      processChunk(buffer);
+        if (!prediction && completedResponse.output_text) {
+          prediction = completedResponse.output_text;
+        }
+      }
     }
 
     return {
@@ -321,31 +263,6 @@ export class UITarsModel extends Model {
       costTokens,
       responseId,
     };
-  }
-
-  private buildCodexFetchHeaders(
-    requestHeaders?: Record<string, string>,
-  ): Record<string, string> {
-    const headers = {
-      'content-type': 'application/json',
-      ...(requestHeaders ?? {}),
-    };
-
-    const hasAuthorizationHeader = Object.keys(headers).some(
-      (key) => key.toLowerCase() === 'authorization',
-    );
-
-    const apiKeyField = `api${'Key'}` as const;
-    const authToken = this.modelConfig[apiKeyField];
-    if (
-      !hasAuthorizationHeader &&
-      typeof authToken === 'string' &&
-      authToken.trim()
-    ) {
-      headers.Authorization = `Bearer ${authToken}`;
-    }
-
-    return headers;
   }
 
   /**
@@ -510,6 +427,7 @@ export class UITarsModel extends Model {
         );
 
         const streamResult = await this.invokeCodexResponseStream(
+          openai,
           streamResponseParams,
           responseRequestOptions,
           responseId,

@@ -6,12 +6,16 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { UITarsModel } from '../src/Model';
 
 // Mock OpenAI
-const mockCreate = vi.fn();
-const mockResponsesCreate = vi.fn();
-const mockResponsesDelete = vi.fn();
-
-vi.mock('openai', () => ({
-  default: vi.fn().mockImplementation(() => ({
+const {
+  mockCreate,
+  mockResponsesCreate,
+  mockResponsesDelete,
+  mockOpenAIConstructor,
+} = vi.hoisted(() => {
+  const mockCreate = vi.fn();
+  const mockResponsesCreate = vi.fn();
+  const mockResponsesDelete = vi.fn();
+  const mockOpenAIConstructor = vi.fn().mockImplementation(() => ({
     chat: {
       completions: {
         create: mockCreate,
@@ -21,7 +25,18 @@ vi.mock('openai', () => ({
       create: mockResponsesCreate,
       delete: mockResponsesDelete,
     },
-  })),
+  }));
+
+  return {
+    mockCreate,
+    mockResponsesCreate,
+    mockResponsesDelete,
+    mockOpenAIConstructor,
+  };
+});
+
+vi.mock('openai', () => ({
+  default: mockOpenAIConstructor,
 }));
 
 // Mock context
@@ -46,9 +61,18 @@ vi.mock('../src/utils', async () => {
   };
 });
 
+const createMockCodexStream = (events: Array<Record<string, unknown>>) => ({
+  async *[Symbol.asyncIterator]() {
+    for (const event of events) {
+      yield event;
+    }
+  },
+});
+
 describe('UITarsModel', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockOpenAIConstructor.mockClear();
     mockCreate.mockReset();
     mockResponsesCreate.mockReset();
     mockResponsesDelete.mockReset();
@@ -131,22 +155,22 @@ describe('UITarsModel', () => {
         },
       });
 
-      const encoder = new TextEncoder();
-      const codexSseBody = [
-        'data: {"type":"response.output_text.delta","delta":"Action: click(start_box=\\"[0.1,0.1,0.1,0.1]\\")"}\n\n',
-        'data: {"type":"response.completed","response":{"id":"response-codex-1","output_text":"Action: click(start_box=\\"[0.1,0.1,0.1,0.1]\\")","usage":{"total_tokens":77}}}\n\n',
-        'data: [DONE]\n\n',
-      ].join('');
-      const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        body: new ReadableStream<Uint8Array>({
-          start(controller) {
-            controller.enqueue(encoder.encode(codexSseBody));
-            controller.close();
+      mockResponsesCreate.mockResolvedValueOnce(
+        createMockCodexStream([
+          {
+            type: 'response.output_text.delta',
+            delta: 'Action: click(start_box="[0.1,0.1,0.1,0.1]")',
           },
-        }),
-      } as Response);
+          {
+            type: 'response.completed',
+            response: {
+              id: 'response-codex-1',
+              output_text: 'Action: click(start_box="[0.1,0.1,0.1,0.1]")',
+              usage: { total_tokens: 77 },
+            },
+          },
+        ]),
+      );
 
       const result = await model.invoke({
         conversations: [{ from: 'human', value: 'Open the first result' }],
@@ -156,18 +180,8 @@ describe('UITarsModel', () => {
 
       expect(result.prediction).toContain('Action: click');
 
-      expect(fetchMock).toHaveBeenCalledTimes(1);
-      const [url, requestInit] = fetchMock.mock.calls[0] ?? [];
-      expect(url).toBe('https://test.com/responses');
-      const requestHeaders =
-        (requestInit?.headers as Record<string, string> | undefined) ?? {};
-      const authorizationHeader = Object.entries(requestHeaders).find(
-        ([key]) => key.toLowerCase() === 'authorization',
-      )?.[1];
-      expect(authorizationHeader).toBe('Bearer codex-token');
-
-      const body = JSON.parse((requestInit?.body as string) ?? '{}');
-      expect(body).toEqual(
+      expect(mockResponsesCreate).toHaveBeenCalledTimes(1);
+      expect(mockResponsesCreate).toHaveBeenCalledWith(
         expect.objectContaining({
           model: 'gpt-5.3-codex',
           stream: true,
@@ -178,15 +192,65 @@ describe('UITarsModel', () => {
             effort: 'high',
           },
         }),
+        expect.objectContaining({
+          timeout: 1000 * 30,
+        }),
       );
-      expect(body.input?.[0]).toEqual(
+
+      const requestBody = mockResponsesCreate.mock.calls[0]?.[0] ?? {};
+      expect(requestBody.input?.[0]).toEqual(
         expect.objectContaining({
           type: 'message',
           role: 'user',
         }),
       );
+    });
 
-      fetchMock.mockRestore();
+    it('should preserve custom OpenAI transport options for Codex streams', async () => {
+      const customFetch = vi.fn();
+      const model = new UITarsModel({
+        ['api' + 'Key']: 'codex-token',
+        baseURL: 'https://test.com',
+        model: 'gpt-5.3-codex',
+        fetch: customFetch as unknown as typeof fetch,
+        useResponsesApi: true,
+        codexResponses: {
+          enabled: true,
+          store: false,
+          include: ['reasoning.encrypted_content'],
+          reasoningEffort: 'high',
+        },
+      });
+
+      mockResponsesCreate.mockResolvedValueOnce(
+        createMockCodexStream([
+          { type: 'response.output_text.delta', delta: 'Action: wait()' },
+          {
+            type: 'response.completed',
+            response: {
+              id: 'response-codex-transport',
+              output_text: 'Action: wait()',
+              usage: { total_tokens: 9 },
+            },
+          },
+        ]),
+      );
+
+      await model.invoke({
+        conversations: [{ from: 'human', value: 'Wait for completion' }],
+        images: [],
+        screenContext: { width: 1920, height: 1080 },
+      });
+
+      expect(mockOpenAIConstructor).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fetch: customFetch,
+          baseURL: 'https://test.com',
+          ['api' + 'Key']: 'codex-token',
+          maxRetries: 0,
+        }),
+      );
+      expect(mockResponsesCreate).toHaveBeenCalledTimes(1);
     });
 
     it('should use the latest user text for Codex instructions', async () => {
@@ -203,22 +267,19 @@ describe('UITarsModel', () => {
         },
       });
 
-      const encoder = new TextEncoder();
-      const codexSseBody = [
-        'data: {"type":"response.output_text.delta","delta":"Action: wait()"}\n\n',
-        'data: {"type":"response.completed","response":{"id":"response-codex-latest","output_text":"Action: wait()","usage":{"total_tokens":21}}}\n\n',
-        'data: [DONE]\n\n',
-      ].join('');
-      const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        body: new ReadableStream<Uint8Array>({
-          start(controller) {
-            controller.enqueue(encoder.encode(codexSseBody));
-            controller.close();
+      mockResponsesCreate.mockResolvedValueOnce(
+        createMockCodexStream([
+          { type: 'response.output_text.delta', delta: 'Action: wait()' },
+          {
+            type: 'response.completed',
+            response: {
+              id: 'response-codex-latest',
+              output_text: 'Action: wait()',
+              usage: { total_tokens: 21 },
+            },
           },
-        }),
-      } as Response);
+        ]),
+      );
 
       await model.invoke({
         conversations: [
@@ -231,12 +292,8 @@ describe('UITarsModel', () => {
         screenContext: { width: 1920, height: 1080 },
       });
 
-      const body = JSON.parse(
-        (fetchMock.mock.calls[0]?.[1]?.body as string) ?? '{}',
-      );
-      expect(body.instructions).toBe('Actually open calculator instead');
-
-      fetchMock.mockRestore();
+      const requestBody = mockResponsesCreate.mock.calls[0]?.[0] ?? {};
+      expect(requestBody.instructions).toBe('Actually open calculator instead');
     });
 
     it('should keep explicit authorization header for Codex stream requests', async () => {
@@ -253,22 +310,19 @@ describe('UITarsModel', () => {
         },
       });
 
-      const encoder = new TextEncoder();
-      const codexSseBody = [
-        'data: {"type":"response.output_text.delta","delta":"Action: wait()"}\n\n',
-        'data: {"type":"response.completed","response":{"id":"response-codex-auth","output_text":"Action: wait()","usage":{"total_tokens":12}}}\n\n',
-        'data: [DONE]\n\n',
-      ].join('');
-      const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        body: new ReadableStream<Uint8Array>({
-          start(controller) {
-            controller.enqueue(encoder.encode(codexSseBody));
-            controller.close();
+      mockResponsesCreate.mockResolvedValueOnce(
+        createMockCodexStream([
+          { type: 'response.output_text.delta', delta: 'Action: wait()' },
+          {
+            type: 'response.completed',
+            response: {
+              id: 'response-codex-auth',
+              output_text: 'Action: wait()',
+              usage: { total_tokens: 12 },
+            },
           },
-        }),
-      } as Response);
+        ]),
+      );
 
       await model.invoke({
         conversations: [{ from: 'human', value: 'Wait for content to load' }],
@@ -279,15 +333,13 @@ describe('UITarsModel', () => {
         },
       });
 
-      const requestInit = fetchMock.mock.calls[0]?.[1];
+      const requestOptions = mockResponsesCreate.mock.calls[0]?.[1] ?? {};
       const requestHeaders =
-        (requestInit?.headers as Record<string, string> | undefined) ?? {};
+        (requestOptions.headers as Record<string, string> | undefined) ?? {};
       const authorizationHeader = Object.entries(requestHeaders).find(
         ([key]) => key.toLowerCase() === 'authorization',
       )?.[1];
       expect(authorizationHeader).toBe('Bearer explicit-token');
-
-      fetchMock.mockRestore();
     });
 
     it('should not send previous_response_id in Codex requests', async () => {
@@ -304,31 +356,22 @@ describe('UITarsModel', () => {
         },
       });
 
-      const encoder = new TextEncoder();
-      const createSseResponse = (responseId: string, text: string) => {
-        const body = [
-          `data: {"type":"response.output_text.delta","delta":"${text}"}\n\n`,
-          `data: {"type":"response.completed","response":{"id":"${responseId}","output_text":"${text}","usage":{"total_tokens":10}}}\n\n`,
-          'data: [DONE]\n\n',
-        ].join('');
-
-        return {
-          ok: true,
-          status: 200,
-          body: new ReadableStream<Uint8Array>({
-            start(controller) {
-              controller.enqueue(encoder.encode(body));
-              controller.close();
+      mockResponsesCreate.mockResolvedValueOnce(
+        createMockCodexStream([
+          {
+            type: 'response.output_text.delta',
+            delta: 'Thought: analyze. Action: wait()',
+          },
+          {
+            type: 'response.completed',
+            response: {
+              id: 'resp-codex-1',
+              output_text: 'Thought: analyze. Action: wait()',
+              usage: { total_tokens: 10 },
             },
-          }),
-        } as Response;
-      };
-
-      const fetchMock = vi
-        .spyOn(globalThis, 'fetch')
-        .mockResolvedValueOnce(
-          createSseResponse('resp-codex-1', 'Thought: analyze. Action: wait()'),
-        );
+          },
+        ]),
+      );
 
       await model.invoke({
         conversations: [
@@ -340,10 +383,8 @@ describe('UITarsModel', () => {
         previousResponseId: 'response-from-previous-round',
       });
 
-      expect(fetchMock).toHaveBeenCalledTimes(1);
-      const firstBody = JSON.parse(
-        (fetchMock.mock.calls[0]?.[1]?.body as string) ?? '{}',
-      );
+      expect(mockResponsesCreate).toHaveBeenCalledTimes(1);
+      const firstBody = mockResponsesCreate.mock.calls[0]?.[0] ?? {};
 
       expect(firstBody.previous_response_id).toBeUndefined();
       expect(firstBody.instructions).toBe('Open calculator');
@@ -369,8 +410,6 @@ describe('UITarsModel', () => {
           }),
         ]),
       );
-
-      fetchMock.mockRestore();
     });
 
     it('should track Codex image responses for cleanup when store is enabled', async () => {
@@ -387,33 +426,32 @@ describe('UITarsModel', () => {
         },
       });
 
-      const encoder = new TextEncoder();
-      const createSseResponse = (responseId: string, text: string) => {
-        const body = [
-          `data: {"type":"response.output_text.delta","delta":"${text}"}\n\n`,
-          `data: {"type":"response.completed","response":{"id":"${responseId}","output_text":"${text}","usage":{"total_tokens":10}}}\n\n`,
-          'data: [DONE]\n\n',
-        ].join('');
-
-        return {
-          ok: true,
-          status: 200,
-          body: new ReadableStream<Uint8Array>({
-            start(controller) {
-              controller.enqueue(encoder.encode(body));
-              controller.close();
-            },
-          }),
-        } as Response;
-      };
-
-      const fetchMock = vi
-        .spyOn(globalThis, 'fetch')
+      mockResponsesCreate
         .mockResolvedValueOnce(
-          createSseResponse('resp-codex-1', 'Action: wait()'),
+          createMockCodexStream([
+            { type: 'response.output_text.delta', delta: 'Action: wait()' },
+            {
+              type: 'response.completed',
+              response: {
+                id: 'resp-codex-1',
+                output_text: 'Action: wait()',
+                usage: { total_tokens: 10 },
+              },
+            },
+          ]),
         )
         .mockResolvedValueOnce(
-          createSseResponse('resp-codex-2', 'Action: wait()'),
+          createMockCodexStream([
+            { type: 'response.output_text.delta', delta: 'Action: wait()' },
+            {
+              type: 'response.completed',
+              response: {
+                id: 'resp-codex-2',
+                output_text: 'Action: wait()',
+                usage: { total_tokens: 10 },
+              },
+            },
+          ]),
         );
 
       await model.invoke({
@@ -438,8 +476,6 @@ describe('UITarsModel', () => {
         'resp-codex-1',
         expect.any(Object),
       );
-
-      fetchMock.mockRestore();
     });
 
     it('should send all messages for Response API (first call)', async () => {
