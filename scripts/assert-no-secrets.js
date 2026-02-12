@@ -49,7 +49,8 @@ const secretChecks = [
   },
   {
     id: 'api-key-assignment',
-    regex: /(?:api[_-]?key|authorization)\s*[:=]\s*"[A-Za-z0-9._~+/=-]{20,}"/gi,
+    regex:
+      /(?:"(?:api[_-]?key|authorization)"|(?:api[_-]?key|authorization))\s*[:=]\s*"[A-Za-z0-9._~+/=-]{20,}"/gi,
   },
 ];
 
