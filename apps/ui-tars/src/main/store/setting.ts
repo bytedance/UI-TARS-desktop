@@ -16,6 +16,7 @@ import {
 } from './types';
 import { validatePreset } from './validate';
 import { BrowserWindow } from 'electron';
+import { TOOL_FIRST_FEATURE_FLAG_DEFAULTS } from './featureFlags';
 
 export const DEFAULT_SETTING: LocalStore = {
   language: 'en',
@@ -31,6 +32,7 @@ export const DEFAULT_SETTING: LocalStore = {
   operator: Operator.LocalComputer,
   reportStorageBaseUrl: '',
   utioBaseUrl: '',
+  ...TOOL_FIRST_FEATURE_FLAG_DEFAULTS,
 };
 
 export class SettingStore {
