@@ -63,12 +63,12 @@ export function ReportSettings() {
     const validAndSave = async () => {
       const isReportValid = await form.trigger('reportStorageBaseUrl');
       if (isReportValid && newReportUrl !== settings.reportStorageBaseUrl) {
-        updateSetting({ ...settings, reportStorageBaseUrl: newReportUrl });
+        updateSetting({ reportStorageBaseUrl: newReportUrl });
       }
 
       const isUTIOValid = await form.trigger('utioBaseUrl');
       if (isUTIOValid && newUtioUrl !== settings.utioBaseUrl) {
-        updateSetting({ ...settings, utioBaseUrl: newUtioUrl });
+        updateSetting({ utioBaseUrl: newUtioUrl });
       }
     };
 

@@ -914,10 +914,8 @@ export function VLMSettings({
               keyValue: newApiKey,
               modelName: newModelName,
             }}
-            disabled={
-              isRemoteAutoUpdatedPreset ||
-              newProvider === VLMProviderV2.openai_codex_oauth
-            }
+            provider={newProvider}
+            disabled={isRemoteAutoUpdatedPreset}
             onResponseApiSupportChange={setResponseApiSupported}
           />
 
@@ -969,6 +967,7 @@ interface ModelAvailabilityCheckProps {
     keyValue: string;
     modelName: string;
   };
+  provider?: VLMProviderV2;
   disabled?: boolean;
   className?: string;
   onResponseApiSupportChange?: (supported: boolean) => void;
@@ -984,6 +983,7 @@ interface CheckState {
 
 export function ModelAvailabilityCheck({
   modelConfig,
+  provider,
   disabled = false,
   className,
   onResponseApiSupportChange,
@@ -992,7 +992,10 @@ export function ModelAvailabilityCheck({
   const [checkState, setCheckState] = useState<CheckState>({ status: 'idle' });
 
   const { baseUrl, keyValue, modelName } = modelConfig;
-  const isConfigValid = baseUrl && keyValue && modelName;
+  const isCodexOAuthProvider = provider === VLMProviderV2.openai_codex_oauth;
+  const isConfigValid = isCodexOAuthProvider
+    ? Boolean(baseUrl && modelName)
+    : Boolean(baseUrl && keyValue && modelName);
 
   useEffect(() => {
     if (checkState.status === 'success' || checkState.status === 'error') {
@@ -1025,6 +1028,28 @@ export function ModelAvailabilityCheck({
     setCheckState({ status: 'checking' });
 
     try {
+      if (isCodexOAuthProvider) {
+        const codexState = await window.electron.codexAuth.status();
+
+        if (codexState.status === 'authenticated') {
+          onResponseApiSupportChange?.(true);
+          setCheckState({
+            status: 'success',
+            message: 'OpenAI Codex OAuth is connected and ready.',
+            responseApiSupported: true,
+          });
+        } else {
+          onResponseApiSupportChange?.(false);
+          setCheckState({
+            status: 'error',
+            message: 'OpenAI Codex OAuth is not connected. Please reconnect.',
+            responseApiSupported: false,
+          });
+        }
+
+        return;
+      }
+
       const requestPayload = {
         baseUrl,
         [authField]: keyValue,
@@ -1097,8 +1122,10 @@ export function ModelAvailabilityCheck({
         {checkState.status === 'checking' ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Checking Model...
+            {isCodexOAuthProvider ? 'Checking OAuth...' : 'Checking Model...'}
           </>
+        ) : isCodexOAuthProvider ? (
+          'Check OAuth Connection'
         ) : (
           'Check Model Availability'
         )}

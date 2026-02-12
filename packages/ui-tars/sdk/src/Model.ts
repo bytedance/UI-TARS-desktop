@@ -242,10 +242,7 @@ export class UITarsModel extends Model {
 
     const response = await fetch(`${baseURL}/responses`, {
       method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        ...(requestOptions.headers ?? {}),
-      },
+      headers: this.buildCodexFetchHeaders(requestOptions.headers),
       body: JSON.stringify(responseParams),
       signal,
     });
@@ -322,6 +319,31 @@ export class UITarsModel extends Model {
       costTokens,
       responseId,
     };
+  }
+
+  private buildCodexFetchHeaders(
+    requestHeaders?: Record<string, string>,
+  ): Record<string, string> {
+    const headers = {
+      'content-type': 'application/json',
+      ...(requestHeaders ?? {}),
+    };
+
+    const hasAuthorizationHeader = Object.keys(headers).some(
+      (key) => key.toLowerCase() === 'authorization',
+    );
+
+    const apiKeyField = `api${'Key'}` as const;
+    const authToken = this.modelConfig[apiKeyField];
+    if (
+      !hasAuthorizationHeader &&
+      typeof authToken === 'string' &&
+      authToken.trim()
+    ) {
+      headers.Authorization = `Bearer ${authToken}`;
+    }
+
+    return headers;
   }
 
   /**

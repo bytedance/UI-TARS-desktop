@@ -119,7 +119,7 @@ describe('UITarsModel', () => {
   describe('Response API', () => {
     it('should shape Codex responses requests with stream and stateless options', async () => {
       const model = new UITarsModel({
-        ['api' + 'Key']: '',
+        ['api' + 'Key']: 'codex-token',
         baseURL: 'https://test.com',
         model: 'gpt-5.3-codex',
         useResponsesApi: true,
@@ -159,6 +159,13 @@ describe('UITarsModel', () => {
       expect(fetchMock).toHaveBeenCalledTimes(1);
       const [url, requestInit] = fetchMock.mock.calls[0] ?? [];
       expect(url).toBe('https://test.com/responses');
+      const requestHeaders =
+        (requestInit?.headers as Record<string, string> | undefined) ?? {};
+      const authorizationHeader = Object.entries(requestHeaders).find(
+        ([key]) => key.toLowerCase() === 'authorization',
+      )?.[1];
+      expect(authorizationHeader).toBe('Bearer codex-token');
+
       const body = JSON.parse((requestInit?.body as string) ?? '{}');
       expect(body).toEqual(
         expect.objectContaining({
@@ -178,6 +185,57 @@ describe('UITarsModel', () => {
           role: 'user',
         }),
       );
+
+      fetchMock.mockRestore();
+    });
+
+    it('should keep explicit authorization header for Codex stream requests', async () => {
+      const model = new UITarsModel({
+        ['api' + 'Key']: 'fallback-token',
+        baseURL: 'https://test.com',
+        model: 'gpt-5.3-codex',
+        useResponsesApi: true,
+        codexResponses: {
+          enabled: true,
+          store: false,
+          include: ['reasoning.encrypted_content'],
+          reasoningEffort: 'high',
+        },
+      });
+
+      const encoder = new TextEncoder();
+      const codexSseBody = [
+        'data: {"type":"response.output_text.delta","delta":"Action: wait()"}\n\n',
+        'data: {"type":"response.completed","response":{"id":"response-codex-auth","output_text":"Action: wait()","usage":{"total_tokens":12}}}\n\n',
+        'data: [DONE]\n\n',
+      ].join('');
+      const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        body: new ReadableStream<Uint8Array>({
+          start(controller) {
+            controller.enqueue(encoder.encode(codexSseBody));
+            controller.close();
+          },
+        }),
+      } as Response);
+
+      await model.invoke({
+        conversations: [{ from: 'human', value: 'Wait for content to load' }],
+        images: [],
+        screenContext: { width: 1920, height: 1080 },
+        headers: {
+          Authorization: 'Bearer explicit-token',
+        },
+      });
+
+      const requestInit = fetchMock.mock.calls[0]?.[1];
+      const requestHeaders =
+        (requestInit?.headers as Record<string, string> | undefined) ?? {};
+      const authorizationHeader = Object.entries(requestHeaders).find(
+        ([key]) => key.toLowerCase() === 'authorization',
+      )?.[1];
+      expect(authorizationHeader).toBe('Bearer explicit-token');
 
       fetchMock.mockRestore();
     });

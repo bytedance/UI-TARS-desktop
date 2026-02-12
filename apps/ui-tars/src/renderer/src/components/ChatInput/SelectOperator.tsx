@@ -72,10 +72,7 @@ export const SelectOperator = () => {
   // is not available, automatically switched to COMPUTER OPERATOR mode.
   useEffect(() => {
     if (settings.operator === Operator.LocalBrowser && !browserAvailable) {
-      updateSetting({
-        ...settings,
-        operator: Operator.LocalComputer,
-      });
+      updateSetting({ operator: Operator.LocalComputer });
       toast.info(`Automatically switched to ${COMPUTER_OPERATOR} mode`, {
         description: 'Browser mode is not available',
       });
@@ -87,10 +84,7 @@ export const SelectOperator = () => {
       return;
     }
 
-    updateSetting({
-      ...settings,
-      operator: type,
-    });
+    updateSetting({ operator: type });
   };
 
   const handleRetryBrowserCheck = async () => {
