@@ -345,6 +345,7 @@ export function VLMSettings({
     form,
     isRemoteAutoUpdatedPreset,
     ensureCodexOAuthConnected,
+    codexAuthState?.status,
   ]);
 
   const handlePresetModal = async (e: React.MouseEvent) => {
