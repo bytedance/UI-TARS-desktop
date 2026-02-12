@@ -40,7 +40,7 @@ import {
   CODEX_OPENAI_BETA,
   CODEX_ORIGINATOR,
   VLM_PROVIDER_REGISTRY,
-  getCodexReasoningEffortByModel,
+  resolveCodexReasoningEffort,
 } from '@main/store/modelRegistry';
 
 export const runAgent = async (
@@ -224,7 +224,10 @@ export const runAgent = async (
         enabled: true,
         store: false,
         include: ['reasoning.encrypted_content'],
-        reasoningEffort: getCodexReasoningEffortByModel(settings.vlmModelName),
+        reasoningEffort: resolveCodexReasoningEffort(
+          settings.vlmModelName,
+          settings.codexReasoningEffort,
+        ),
       },
     };
 

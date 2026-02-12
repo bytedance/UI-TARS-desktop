@@ -13,7 +13,8 @@ type VLMProviderRegistryItem = {
   requiresOAuth: boolean;
 };
 
-export type CodexReasoningEffort = 'low' | 'medium' | 'high';
+export type CodexReasoningEffort = 'none' | 'low' | 'medium' | 'high' | 'xhigh';
+export type CodexReasoningEffortPreference = CodexReasoningEffort | 'auto';
 
 export const CODEX_ORIGINATOR = 'codex_cli_rs';
 export const CODEX_OPENAI_BETA = 'responses=experimental';
@@ -114,6 +115,10 @@ export const getCodexReasoningEffortByModel = (
 ): CodexReasoningEffort => {
   const normalized = modelName.toLowerCase();
 
+  if (normalized.includes('codex-mini')) {
+    return 'medium';
+  }
+
   if (
     normalized.includes('gpt-5.3') ||
     normalized.includes('gpt-5.2') ||
@@ -127,4 +132,47 @@ export const getCodexReasoningEffortByModel = (
   }
 
   return 'medium';
+};
+
+const supportsXHighEffort = (modelName: string): boolean => {
+  const normalized = modelName.toLowerCase();
+  return (
+    normalized.includes('codex-max') ||
+    normalized.includes('gpt-5.2') ||
+    normalized.includes('gpt-5.3')
+  );
+};
+
+export const normalizeCodexReasoningEffortForModel = (
+  modelName: string,
+  effort: CodexReasoningEffort,
+): CodexReasoningEffort => {
+  const normalized = modelName.toLowerCase();
+  const isCodexModel = normalized.includes('codex');
+  const isCodexMini = normalized.includes('codex-mini');
+
+  if (isCodexMini) {
+    return effort === 'high' || effort === 'xhigh' ? 'high' : 'medium';
+  }
+
+  if (isCodexModel && effort === 'none') {
+    return 'low';
+  }
+
+  if (effort === 'xhigh' && !supportsXHighEffort(modelName)) {
+    return 'high';
+  }
+
+  return effort;
+};
+
+export const resolveCodexReasoningEffort = (
+  modelName: string,
+  preference?: CodexReasoningEffortPreference,
+): CodexReasoningEffort => {
+  if (!preference || preference === 'auto') {
+    return getCodexReasoningEffortByModel(modelName);
+  }
+
+  return normalizeCodexReasoningEffortForModel(modelName, preference);
 };

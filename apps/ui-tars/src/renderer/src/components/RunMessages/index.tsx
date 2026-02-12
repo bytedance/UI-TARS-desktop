@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 import { cn } from '@renderer/utils';
 import { Button } from '@renderer/components/ui/button';
+import { StatusEnum } from '@ui-tars/shared/types';
 
 import { IMAGE_PLACEHOLDER } from '@ui-tars/shared/constants';
 import Prompts from '../Prompts';
@@ -30,7 +31,7 @@ import {
 } from './Messages';
 
 const RunMessages = () => {
-  const { messages = [], thinking, errorMsg } = useStore();
+  const { messages = [], thinking, errorMsg, status } = useStore();
   const containerRef = React.useRef<HTMLDivElement>(null);
   const suggestions: string[] = [];
   const [selectImg, setSelectImg] = useState<number | undefined>(undefined);
@@ -87,6 +88,13 @@ const RunMessages = () => {
   };
 
   const renderChatList = () => {
+    const thinkingLabel =
+      status === StatusEnum.PAUSE
+        ? 'Paused. Resume to continue...'
+        : status === StatusEnum.CALL_USER
+          ? 'Waiting for your instruction...'
+          : 'Model is thinking...';
+
     return (
       <div className="flex-1 w-full px-12 py-0 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
         <div ref={containerRef}>
@@ -147,7 +155,7 @@ const RunMessages = () => {
             );
           })}
 
-          {thinking && <LoadingText text={'Thinking...'} />}
+          {thinking && <LoadingText text={thinkingLabel} />}
           {errorMsg && <ErrorMessage text={errorMsg} />}
         </div>
       </div>

@@ -47,16 +47,11 @@ vi.mock('../src/utils', async () => {
 });
 
 describe('UITarsModel', () => {
-  const createMockResponseStream = (events: unknown[]) => ({
-    async *[Symbol.asyncIterator]() {
-      for (const event of events) {
-        yield event;
-      }
-    },
-  });
-
   beforeEach(() => {
     vi.clearAllMocks();
+    mockCreate.mockReset();
+    mockResponsesCreate.mockReset();
+    mockResponsesDelete.mockReset();
   });
 
   describe('ChatCompletion API', () => {
@@ -136,27 +131,22 @@ describe('UITarsModel', () => {
         },
       });
 
-      mockResponsesCreate.mockResolvedValueOnce(
-        createMockResponseStream([
-          {
-            type: 'response.output_text.delta',
-            delta: 'Action: click(start_box="[0.1,0.1,0.1,0.1]")',
-            item_id: 'item-1',
-            output_index: 0,
-            content_index: 0,
+      const encoder = new TextEncoder();
+      const codexSseBody = [
+        'data: {"type":"response.output_text.delta","delta":"Action: click(start_box=\\"[0.1,0.1,0.1,0.1]\\")"}\n\n',
+        'data: {"type":"response.completed","response":{"id":"response-codex-1","output_text":"Action: click(start_box=\\"[0.1,0.1,0.1,0.1]\\")","usage":{"total_tokens":77}}}\n\n',
+        'data: [DONE]\n\n',
+      ].join('');
+      const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        body: new ReadableStream<Uint8Array>({
+          start(controller) {
+            controller.enqueue(encoder.encode(codexSseBody));
+            controller.close();
           },
-          {
-            type: 'response.completed',
-            response: {
-              id: 'response-codex-1',
-              output_text: 'Action: click(start_box="[0.1,0.1,0.1,0.1]")',
-              usage: {
-                total_tokens: 77,
-              },
-            },
-          },
-        ]),
-      );
+        }),
+      } as Response);
 
       const result = await model.invoke({
         conversations: [{ from: 'human', value: 'Open the first result' }],
@@ -166,19 +156,113 @@ describe('UITarsModel', () => {
 
       expect(result.prediction).toContain('Action: click');
 
-      expect(mockResponsesCreate).toHaveBeenCalledWith(
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const [url, requestInit] = fetchMock.mock.calls[0] ?? [];
+      expect(url).toBe('https://test.com/responses');
+      const body = JSON.parse((requestInit?.body as string) ?? '{}');
+      expect(body).toEqual(
         expect.objectContaining({
           model: 'gpt-5.3-codex',
           stream: true,
           store: false,
           include: ['reasoning.encrypted_content'],
+          instructions: 'Open the first result',
           reasoning: {
             effort: 'high',
-            generate_summary: null,
           },
         }),
-        expect.any(Object),
       );
+      expect(body.input?.[0]).toEqual(
+        expect.objectContaining({
+          type: 'message',
+          role: 'user',
+        }),
+      );
+
+      fetchMock.mockRestore();
+    });
+
+    it('should not send previous_response_id in Codex requests', async () => {
+      const model = new UITarsModel({
+        ['api' + 'Key']: '',
+        baseURL: 'https://test.com',
+        model: 'gpt-5.3-codex',
+        useResponsesApi: true,
+        codexResponses: {
+          enabled: true,
+          store: false,
+          include: ['reasoning.encrypted_content'],
+          reasoningEffort: 'high',
+        },
+      });
+
+      const encoder = new TextEncoder();
+      const createSseResponse = (responseId: string, text: string) => {
+        const body = [
+          `data: {"type":"response.output_text.delta","delta":"${text}"}\n\n`,
+          `data: {"type":"response.completed","response":{"id":"${responseId}","output_text":"${text}","usage":{"total_tokens":10}}}\n\n`,
+          'data: [DONE]\n\n',
+        ].join('');
+
+        return {
+          ok: true,
+          status: 200,
+          body: new ReadableStream<Uint8Array>({
+            start(controller) {
+              controller.enqueue(encoder.encode(body));
+              controller.close();
+            },
+          }),
+        } as Response;
+      };
+
+      const fetchMock = vi
+        .spyOn(globalThis, 'fetch')
+        .mockResolvedValueOnce(
+          createSseResponse('resp-codex-1', 'Thought: analyze. Action: wait()'),
+        );
+
+      await model.invoke({
+        conversations: [
+          { from: 'human', value: 'Open calculator' },
+          { from: 'human', value: '<image>' },
+        ],
+        images: ['base64image1'],
+        screenContext: { width: 1920, height: 1080 },
+        previousResponseId: 'response-from-previous-round',
+      });
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const firstBody = JSON.parse(
+        (fetchMock.mock.calls[0]?.[1]?.body as string) ?? '{}',
+      );
+
+      expect(firstBody.previous_response_id).toBeUndefined();
+      expect(firstBody.instructions).toBe('Open calculator');
+      expect(firstBody.input).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: 'message',
+            role: 'user',
+            content: expect.arrayContaining([
+              expect.objectContaining({
+                type: 'input_text',
+              }),
+            ]),
+          }),
+          expect.objectContaining({
+            type: 'message',
+            role: 'user',
+            content: expect.arrayContaining([
+              expect.objectContaining({
+                type: 'input_image',
+              }),
+            ]),
+          }),
+        ]),
+      );
+
+      fetchMock.mockRestore();
     });
 
     it('should send all messages for Response API (first call)', async () => {

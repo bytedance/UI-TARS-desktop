@@ -270,16 +270,25 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
               const result = await model.invoke(vlmParams);
               return result;
             } catch (error: unknown) {
-              if (
+              const isAbortError =
                 error instanceof Error &&
                 (error?.name === 'APIUserAbortError' ||
-                  error?.message?.includes('aborted'))
-              ) {
+                  error?.name === 'AbortError' ||
+                  error?.message?.includes('aborted'));
+              const isUserInitiatedStop = !!(signal?.aborted || this.isStopped);
+
+              if (isAbortError && isUserInitiatedStop) {
                 bail(error as unknown as Error);
                 return {
                   prediction: '',
                   parsedPredictions: [],
                 };
+              }
+
+              if (isAbortError) {
+                logger.warn(
+                  '[GUIAgent] Model invoke aborted without user stop signal, retrying',
+                );
               }
 
               Object.assign(data, {
@@ -433,12 +442,28 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
       }
     } catch (error) {
       logger.error('[GUIAgent] Catch error', error);
-      if (
+      const isAbortError =
         error instanceof Error &&
-        (error.name === 'AbortError' || error.message?.includes('aborted'))
-      ) {
+        (error.name === 'AbortError' ||
+          error.name === 'APIUserAbortError' ||
+          error.message?.includes('aborted'));
+      const isUserInitiatedStop = !!(signal?.aborted || this.isStopped);
+
+      if (isAbortError && isUserInitiatedStop) {
         logger.info('[GUIAgent] Catch: request was aborted');
         data.status = StatusEnum.USER_STOPPED;
+        return;
+      }
+
+      if (isAbortError) {
+        logger.error(
+          '[GUIAgent] Catch: unexpected abort, treated as invoke error',
+        );
+        data.status = StatusEnum.ERROR;
+        data.error = this.guiAgentErrorParser(
+          ErrorStatusEnum.INVOKE_RETRY_ERROR,
+          error as Error,
+        );
         return;
       }
 

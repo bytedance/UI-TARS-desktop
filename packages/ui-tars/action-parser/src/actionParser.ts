@@ -103,6 +103,7 @@ export function parseActionVlm(
   let reflection: string | null = null;
   let thought: string | null = null;
   let actionStr = '';
+  let actionMarkerCount = 0;
 
   let smartResizeFactors: [number, number] | null = null;
   if (
@@ -144,12 +145,19 @@ export function parseActionVlm(
       }
     }
 
-    if (!['Action:', 'Action：'].some((keyword) => text.includes(keyword))) {
+    const actionMarkerMatch = Array.from(text.matchAll(/Action[:：]/g));
+    actionMarkerCount = actionMarkerMatch.length;
+
+    if (actionMarkerCount === 0) {
       //   throw new Error('No Action found in text');
       actionStr = text;
     } else {
-      const actionParts = text.split(/Action[:：]/);
-      actionStr = actionParts[actionParts.length - 1];
+      const firstActionMarker = actionMarkerMatch[0];
+      if (firstActionMarker?.index != null) {
+        actionStr = text.slice(
+          firstActionMarker.index + firstActionMarker[0].length,
+        );
+      }
     }
   } else if (mode === 'o1') {
     // Parse o1 format
@@ -170,7 +178,28 @@ export function parseActionVlm(
   }
 
   // Parse actions
-  const allActions = actionStr.split('\n\n');
+  let allActions: string[] = [];
+
+  if (actionMarkerCount > 1) {
+    const leadingAction = extractLeadingFunctionCall(actionStr);
+    if (leadingAction) {
+      allActions = [leadingAction.value];
+    }
+  } else {
+    allActions = extractFunctionCalls(actionStr);
+  }
+
+  if (allActions.length === 0) {
+    allActions = actionStr
+      .split('\n\n')
+      .map((action) => action.trim())
+      .filter((action) => action.length > 0);
+  }
+
+  if (allActions.length === 0) {
+    allActions = [''];
+  }
+
   const actions: PredictionParsed[] = [];
 
   for (const rawStr of allActions) {
@@ -196,11 +225,27 @@ export function parseActionVlm(
             .split(',')
             .filter((ori) => ori !== '');
 
+          const useAbsolutePixelCoords =
+            !!screenContext &&
+            numbers.some((num, idx) => {
+              const parsed = Number.parseFloat(num);
+              if (!isNumber(parsed)) {
+                return false;
+              }
+              const factorIndex = idx % 2;
+              return parsed > factors[factorIndex];
+            });
+
           // Convert to float and scale
           const floatNumbers = numbers.map((num, idx) => {
             const factorIndex = idx % 2;
             if (modelVer === UITarsModelVersion.V1_5 && smartResizeFactors) {
               return Number.parseFloat(num) / smartResizeFactors[factorIndex];
+            }
+            if (useAbsolutePixelCoords && screenContext) {
+              const axisSize =
+                factorIndex === 0 ? screenContext.width : screenContext.height;
+              return Number.parseFloat(num) / axisSize;
             }
             return Number.parseFloat(num) / factors[factorIndex];
           });
@@ -268,6 +313,9 @@ function parseAction(actionStr: string) {
   try {
     // Support format: click(start_box='<|box_start|>(x1,y1)<|box_end|>')
     actionStr = actionStr.replace(/<\|box_start\|>|<\|box_end\|>/g, '');
+    // Normalize format after marker removal:
+    // '(x1,y1)(x2,y2)' -> '(x1,y1,x2,y2)'
+    actionStr = actionStr.replace(/\)\s*\(/g, ',');
 
     // Support format: click(point='<point>510 150</point>') => click(start_box='<point>510 150</point>')
     // Support format: drag(start_point='<point>458 328</point>', end_point='<point>350 309</point>') => drag(start_box='<point>458 328</point>', end_box='<point>350 309</point>')
@@ -327,4 +375,89 @@ function parseAction(actionStr: string) {
     console.error(`Failed to parse action '${actionStr}': ${e}`);
     return null;
   }
+}
+
+function extractFunctionCalls(text: string): string[] {
+  const actions: string[] = [];
+  let cursor = 0;
+
+  while (cursor < text.length) {
+    const nextCall = extractLeadingFunctionCall(text.slice(cursor), true);
+    if (!nextCall) {
+      break;
+    }
+    actions.push(nextCall.value);
+    cursor += nextCall.end;
+  }
+
+  return actions;
+}
+
+function extractLeadingFunctionCall(
+  text: string,
+  allowOffset = false,
+): { value: string; end: number } | null {
+  const fnPattern = allowOffset
+    ? /[A-Za-z_][A-Za-z0-9_]*\s*\(/
+    : /^[\s\n\r]*([A-Za-z_][A-Za-z0-9_]*)\s*\(/;
+  const match = fnPattern.exec(text);
+
+  if (!match || match.index == null) {
+    return null;
+  }
+
+  const start = allowOffset ? match.index : text.search(/[A-Za-z_]/);
+  if (start < 0) {
+    return null;
+  }
+
+  const openParenIndex = text.indexOf('(', start);
+  if (openParenIndex < 0) {
+    return null;
+  }
+
+  let depth = 0;
+  let quote: "'" | '"' | null = null;
+  let escaping = false;
+
+  for (let i = openParenIndex; i < text.length; i++) {
+    const char = text[i];
+
+    if (quote) {
+      if (escaping) {
+        escaping = false;
+        continue;
+      }
+      if (char === '\\') {
+        escaping = true;
+        continue;
+      }
+      if (char === quote) {
+        quote = null;
+      }
+      continue;
+    }
+
+    if (char === '"' || char === "'") {
+      quote = char as "'" | '"';
+      continue;
+    }
+
+    if (char === '(') {
+      depth += 1;
+      continue;
+    }
+
+    if (char === ')') {
+      depth -= 1;
+      if (depth === 0) {
+        return {
+          value: text.slice(start, i + 1).trim(),
+          end: i + 1,
+        };
+      }
+    }
+  }
+
+  return null;
 }

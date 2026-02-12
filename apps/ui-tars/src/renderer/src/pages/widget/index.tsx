@@ -10,6 +10,8 @@ import {
   Play,
   Square,
   Loader,
+  Loader2,
+  AlertCircle,
   MousePointerClick,
 } from 'lucide-react';
 import { ActionIconMap } from '@renderer/const/actions';
@@ -61,7 +63,7 @@ const getOperatorLabel = (type: string) => {
 };
 
 const Widget = () => {
-  const { messages = [], errorMsg, status } = useStore();
+  const { messages = [], errorMsg, status, thinking } = useStore();
   const { settings } = useSetting();
 
   const currentOperator = settings.operator || 'nutjs';
@@ -119,6 +121,34 @@ const Widget = () => {
   const [isPaused, setIsPaused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const getThinkingLabel = useCallback(() => {
+    if (status === StatusEnum.PAUSE) {
+      return 'Paused. Resume to continue.';
+    }
+
+    if (status === StatusEnum.CALL_USER) {
+      return 'Waiting for your instruction...';
+    }
+
+    return 'Model is thinking and planning next step...';
+  }, [status]);
+
+  const formatError = useCallback((raw: string) => {
+    try {
+      const parsed = JSON.parse(raw) as {
+        message?: string;
+        status?: string | number;
+      };
+      if (typeof parsed?.message === 'string' && parsed.message.trim()) {
+        return parsed.message;
+      }
+    } catch {
+      // use raw fallback
+    }
+
+    return raw;
+  }, []);
+
   useEffect(() => {
     if (status === StatusEnum.PAUSE && isLoading) {
       setIsLoading(false);
@@ -158,7 +188,27 @@ const Widget = () => {
         </div>
       </div>
 
-      {!!errorMsg && <div>{errorMsg}</div>}
+      {!!errorMsg && (
+        <div className="mt-4 rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
+          <div className="flex items-center gap-2 font-medium">
+            <AlertCircle className="h-4 w-4" />
+            Agent error
+          </div>
+          <div className="mt-1 max-h-32 overflow-auto break-all text-xs">
+            {formatError(errorMsg)}
+          </div>
+        </div>
+      )}
+
+      {!errorMsg && thinking && (
+        <div className="mt-4 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700">
+          <div className="flex items-center gap-2 font-medium">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Working
+          </div>
+          <div className="mt-1 text-xs">{getThinkingLabel()}</div>
+        </div>
+      )}
 
       {!!actions.length && !errorMsg && (
         <div className="mt-4 max-h-70 overflow-scroll hide_scroll_bar">

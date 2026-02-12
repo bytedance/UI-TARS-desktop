@@ -35,6 +35,17 @@ import type {
   ResponseStreamEvent,
 } from 'openai/resources/responses/responses';
 
+type CodexReasoningEffort = 'none' | 'low' | 'medium' | 'high' | 'xhigh';
+
+type CodexResponseCreateParamsStreaming = Omit<
+  ResponseCreateParamsStreaming,
+  'reasoning'
+> & {
+  reasoning?: {
+    effort?: CodexReasoningEffort;
+  };
+};
+
 type OpenAIChatCompletionCreateParams = Omit<ClientOptions, 'maxRetries'> &
   Pick<
     ChatCompletionCreateParamsBase,
@@ -48,7 +59,7 @@ export interface UITarsModelConfig extends OpenAIChatCompletionCreateParams {
     enabled: boolean;
     store?: boolean;
     include?: string[];
-    reasoningEffort?: 'low' | 'medium' | 'high';
+    reasoningEffort?: CodexReasoningEffort;
   };
 }
 
@@ -102,9 +113,112 @@ export class UITarsModel extends Model {
     return mergedInclude as unknown as ResponseIncludable[];
   }
 
+  private normalizeCodexInput(input: ResponseInputItem): ResponseInputItem {
+    if (!('role' in input)) {
+      return input;
+    }
+
+    const normalizedContent = Array.isArray(input.content)
+      ? input.content.map((entry) => {
+          const item = entry as unknown as {
+            type?: string;
+            text?: string;
+            image_url?: {
+              url?: string;
+            };
+          };
+
+          if (typeof entry === 'string') {
+            return {
+              type: 'input_text',
+              text: entry,
+            };
+          }
+
+          if (item.type === 'input_text') {
+            return entry;
+          }
+
+          if (
+            item.type === 'input_image' &&
+            typeof item.image_url === 'string'
+          ) {
+            return entry;
+          }
+
+          if (item.type === 'text' && typeof item.text === 'string') {
+            return {
+              type: 'input_text',
+              text: item.text,
+            };
+          }
+
+          if (
+            item.type === 'image_url' &&
+            typeof item.image_url?.url === 'string'
+          ) {
+            return {
+              type: 'input_image',
+              image_url: item.image_url.url,
+            };
+          }
+
+          return entry;
+        })
+      : [
+          {
+            type: 'input_text',
+            text:
+              typeof input.content === 'string'
+                ? input.content
+                : JSON.stringify(input.content),
+          },
+        ];
+
+    return {
+      type: 'message',
+      role: input.role,
+      content: normalizedContent,
+    } as ResponseInputItem;
+  }
+
+  private extractCodexInstructions(
+    messages: Array<ChatCompletionMessageParam>,
+  ): string | undefined {
+    for (const message of messages) {
+      if (message.role !== 'user') {
+        continue;
+      }
+
+      if (typeof message.content === 'string' && message.content.trim()) {
+        return message.content;
+      }
+
+      if (!Array.isArray(message.content)) {
+        continue;
+      }
+
+      for (const item of message.content) {
+        const part = item as unknown as {
+          type?: string;
+          text?: string;
+        };
+
+        if (
+          (part.type === 'text' || part.type === 'input_text') &&
+          typeof part.text === 'string' &&
+          part.text.trim()
+        ) {
+          return part.text;
+        }
+      }
+    }
+
+    return undefined;
+  }
+
   private async invokeCodexResponseStream(
-    openai: OpenAI,
-    responseParams: ResponseCreateParamsStreaming,
+    responseParams: CodexResponseCreateParamsStreaming,
     requestOptions: {
       signal?: AbortSignal;
       timeout: number;
@@ -116,30 +230,91 @@ export class UITarsModel extends Model {
     costTokens: number;
     responseId?: string;
   }> {
-    const stream = await openai.responses.create(
-      responseParams,
-      requestOptions,
-    );
+    const baseURL = this.modelConfig.baseURL?.replace(/\/+$/, '');
+    if (!baseURL) {
+      throw new Error('Codex baseURL is not configured');
+    }
+
+    const timeoutSignal = AbortSignal.timeout(requestOptions.timeout);
+    const signal = requestOptions.signal
+      ? AbortSignal.any([requestOptions.signal, timeoutSignal])
+      : timeoutSignal;
+
+    const response = await fetch(`${baseURL}/responses`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        ...(requestOptions.headers ?? {}),
+      },
+      body: JSON.stringify(responseParams),
+      signal,
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text().catch(() => '');
+      throw new Error(
+        `Codex responses request failed (${response.status}): ${errorBody || 'empty body'}`,
+      );
+    }
+
+    if (!response.body) {
+      throw new Error('Codex responses stream body is missing');
+    }
+
     let prediction = '';
     let costTokens = 0;
     let responseId = fallbackResponseId;
 
-    for await (const event of stream) {
-      const streamEvent = event as ResponseStreamEvent;
+    const decoder = new TextDecoder();
+    const reader = response.body.getReader();
+    let buffer = '';
 
-      if (streamEvent.type === 'response.output_text.delta') {
-        prediction += streamEvent.delta;
-      }
+    const processChunk = (chunk: string) => {
+      const eventLines = chunk
+        .split('\n')
+        .map((line) => line.trim())
+        .filter((line) => line.startsWith('data:'));
 
-      if (streamEvent.type === 'response.completed') {
-        const completedResponse = streamEvent.response as Response;
-        responseId = completedResponse.id || responseId;
-        costTokens = completedResponse.usage?.total_tokens ?? costTokens;
+      for (const line of eventLines) {
+        const payload = line.slice('data:'.length).trim();
+        if (!payload || payload === '[DONE]') {
+          continue;
+        }
 
-        if (!prediction && completedResponse.output_text) {
-          prediction = completedResponse.output_text;
+        const streamEvent = JSON.parse(payload) as ResponseStreamEvent;
+
+        if (streamEvent.type === 'response.output_text.delta') {
+          prediction += streamEvent.delta;
+        }
+
+        if (streamEvent.type === 'response.completed') {
+          const completedResponse = streamEvent.response as Response;
+          responseId = completedResponse.id || responseId;
+          costTokens = completedResponse.usage?.total_tokens ?? costTokens;
+
+          if (!prediction && completedResponse.output_text) {
+            prediction = completedResponse.output_text;
+          }
         }
       }
+    };
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        break;
+      }
+
+      buffer += decoder.decode(value, { stream: true });
+      const segments = buffer.split('\n\n');
+      buffer = segments.pop() ?? '';
+      for (const segment of segments) {
+        processChunk(segment);
+      }
+    }
+
+    if (buffer.trim()) {
+      processChunk(buffer);
     }
 
     return {
@@ -233,6 +408,9 @@ export class UITarsModel extends Model {
           ? messages.slice(lastAssistantIndex + 1)
           : messages,
       );
+      const codexInstructions = isCodexResponses
+        ? this.extractCodexInstructions(messages)
+        : undefined;
 
       // find the first image message
       const headImageMessageIndex = messages.findIndex(isMessageImage);
@@ -268,6 +446,73 @@ export class UITarsModel extends Model {
       let prediction = '';
       let responseId = previousResponseId;
       let costTokens = 0;
+      if (isCodexResponses) {
+        const codexInputItems = inputs.map((input) =>
+          this.normalizeCodexInput(input),
+        );
+        const truncated = JSON.stringify(
+          codexInputItems,
+          (key, value) => {
+            if (typeof value === 'string' && value.startsWith('data:image/')) {
+              return value.slice(0, 50) + '...[truncated]';
+            }
+            return value;
+          },
+          2,
+        );
+
+        const responseRequestOptions = {
+          ...options,
+          timeout: 1000 * 30,
+          headers,
+        };
+        const streamResponseParams: CodexResponseCreateParamsStreaming = {
+          input: codexInputItems,
+          model,
+          stream: true,
+          store: this.modelConfig.codexResponses?.store ?? false,
+          include: this.normalizeCodexInclude(),
+          ...(codexInstructions ? { instructions: codexInstructions } : {}),
+          reasoning: {
+            effort: this.modelConfig.codexResponses?.reasoningEffort ?? 'high',
+          },
+        };
+
+        logger.info(
+          '[ResponseAPI/Codex] [input]: ',
+          truncated,
+          'headImageMessageIndex',
+          headImageMessageIndex,
+        );
+
+        const streamResult = await this.invokeCodexResponseStream(
+          streamResponseParams,
+          responseRequestOptions,
+          responseId,
+        );
+        prediction = streamResult.prediction;
+        responseId = streamResult.responseId ?? responseId;
+        costTokens = streamResult.costTokens;
+
+        logger.info('[ResponseAPI/Codex] [result]: ', {
+          responseId,
+          predictionLength: prediction.length,
+          costTokens,
+        });
+        logger.info('[ResponseAPI] [responseId]: ', responseId);
+        logger.info(
+          '[ResponseAPI] [headImageContext]: ',
+          this.headImageContext,
+        );
+
+        return {
+          prediction,
+          costTime: Date.now() - startTime,
+          costTokens,
+          responseId,
+        };
+      }
+
       for (const input of inputs) {
         const truncated = JSON.stringify(
           [input],
@@ -288,82 +533,43 @@ export class UITarsModel extends Model {
         const responseParamsBase = {
           input: [input],
           model,
-          temperature,
-          top_p,
-          max_output_tokens: max_tokens,
           ...(responseId && {
             previous_response_id: responseId,
           }),
         };
 
-        if (isCodexResponses) {
-          const streamResponseParams: ResponseCreateParamsStreaming = {
-            ...responseParamsBase,
-            stream: true,
-            store: this.modelConfig.codexResponses?.store ?? false,
-            include: this.normalizeCodexInclude(),
-            reasoning: {
-              effort:
-                this.modelConfig.codexResponses?.reasoningEffort ?? 'high',
-              generate_summary: null,
-            },
+        const responseParams: ResponseCreateParamsNonStreaming & {
+          thinking?: {
+            type: 'enabled' | 'disabled';
           };
+        } = {
+          ...responseParamsBase,
+          stream: false,
+          temperature,
+          top_p,
+          max_output_tokens: max_tokens,
+          thinking: {
+            type: 'disabled',
+          },
+        };
 
-          logger.info(
-            '[ResponseAPI/Codex] [input]: ',
-            truncated,
-            'previous_response_id',
-            streamResponseParams?.previous_response_id,
-            'headImageMessageIndex',
-            headImageMessageIndex,
-          );
+        logger.info(
+          '[ResponseAPI] [input]: ',
+          truncated,
+          'previous_response_id',
+          responseParams?.previous_response_id,
+          'headImageMessageIndex',
+          headImageMessageIndex,
+        );
 
-          const streamResult = await this.invokeCodexResponseStream(
-            openai,
-            streamResponseParams,
-            responseRequestOptions,
-            responseId,
-          );
-          prediction = streamResult.prediction;
-          responseId = streamResult.responseId ?? responseId;
-          costTokens = streamResult.costTokens;
-
-          logger.info('[ResponseAPI/Codex] [result]: ', {
-            responseId,
-            predictionLength: prediction.length,
-            costTokens,
-          });
-        } else {
-          const responseParams: ResponseCreateParamsNonStreaming & {
-            thinking?: {
-              type: 'enabled' | 'disabled';
-            };
-          } = {
-            ...responseParamsBase,
-            stream: false,
-            thinking: {
-              type: 'disabled',
-            },
-          };
-
-          logger.info(
-            '[ResponseAPI] [input]: ',
-            truncated,
-            'previous_response_id',
-            responseParams?.previous_response_id,
-            'headImageMessageIndex',
-            headImageMessageIndex,
-          );
-
-          const result = await openai.responses.create(
-            responseParams,
-            responseRequestOptions,
-          );
-          logger.info('[ResponseAPI] [result]: ', result);
-          responseId = result?.id;
-          prediction = result?.output_text ?? '';
-          costTokens = result?.usage?.total_tokens ?? 0;
-        }
+        const result = await openai.responses.create(
+          responseParams,
+          responseRequestOptions,
+        );
+        logger.info('[ResponseAPI] [result]: ', result);
+        responseId = result?.id;
+        prediction = result?.output_text ?? '';
+        costTokens = result?.usage?.total_tokens ?? 0;
         logger.info('[ResponseAPI] [responseId]: ', responseId);
 
         // head image changed

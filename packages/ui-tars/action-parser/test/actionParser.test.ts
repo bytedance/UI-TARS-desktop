@@ -596,5 +596,48 @@ Action: click(start_box='[0, 964, 10, 984]')`;
         },
       ]);
     });
+
+    it('should parse box marker coordinates as absolute pixels when exceeding factors', () => {
+      const input = `Thought: Click open
+Action: click(start_box='<|box_start|>(1290,718)<|box_end|>(1350,747)<|box_end|>')`;
+
+      const result = parseActionVlm(input, [1000, 1000], 'bc', {
+        width: 2560,
+        height: 1440,
+      });
+
+      expect(result).toEqual([
+        {
+          reflection: null,
+          thought: 'Click open',
+          action_type: 'click',
+          action_inputs: {
+            start_box: '[0.50390625,0.4986111111111111,0.52734375,0.51875]',
+            start_coords: [1320, 732.5],
+          },
+        },
+      ]);
+    });
+
+    it('should prefer first action when multiple Action markers are concatenated', () => {
+      const input = `Thought: Open Start menu first.
+Action: hotkey(key='ctrl esc')Thought: Type Cursor in search.
+Action: type(content='Cursor\\n')Thought: Wait for window.
+Action: wait()Thought: Finish if opened.
+Action: finished()`;
+
+      const result = parseActionVlm(input);
+
+      expect(result).toEqual([
+        {
+          action_inputs: {
+            key: 'ctrl esc',
+          },
+          action_type: 'hotkey',
+          reflection: null,
+          thought: 'Open Start menu first.',
+        },
+      ]);
+    });
   });
 });
