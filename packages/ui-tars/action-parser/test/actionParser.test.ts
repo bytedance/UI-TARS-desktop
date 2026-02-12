@@ -528,6 +528,21 @@ Action: click(start_box='(100,200)')`;
       ]);
     });
 
+    it('should recover Action marker after unterminated quote in thought text', () => {
+      const input = `Thought: click "Settings
+Action: wait()`;
+      const result = parseActionVlm(input);
+
+      expect(result).toEqual([
+        {
+          action_inputs: {},
+          action_type: 'wait',
+          reflection: null,
+          thought: 'click "Settings',
+        },
+      ]);
+    });
+
     it('should handle with Chinese colon', () => {
       const input = `Thought: I need to click this button
 Action：click(start_box='(100,200)')`;
