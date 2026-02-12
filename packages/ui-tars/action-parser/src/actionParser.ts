@@ -219,8 +219,9 @@ export function parseActionVlm(
 
         if (paramName.includes('start_box') || paramName.includes('end_box')) {
           const oriBox = trimmedParam;
+          const normalizedBox = oriBox.replace(/\)\s*\(/g, ',');
           // Remove parentheses and split
-          const numbers = oriBox
+          const numbers = normalizedBox
             .replace(/[()[\]]/g, '')
             .split(',')
             .filter((ori) => ori !== '');
@@ -313,9 +314,6 @@ function parseAction(actionStr: string) {
   try {
     // Support format: click(start_box='<|box_start|>(x1,y1)<|box_end|>')
     actionStr = actionStr.replace(/<\|box_start\|>|<\|box_end\|>/g, '');
-    // Normalize format after marker removal:
-    // '(x1,y1)(x2,y2)' -> '(x1,y1,x2,y2)'
-    actionStr = actionStr.replace(/\)\s*\(/g, ',');
 
     // Support format: click(point='<point>510 150</point>') => click(start_box='<point>510 150</point>')
     // Support format: drag(start_point='<point>458 328</point>', end_point='<point>350 309</point>') => drag(start_box='<point>458 328</point>', end_box='<point>350 309</point>')

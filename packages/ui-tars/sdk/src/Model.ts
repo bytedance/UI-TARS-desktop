@@ -516,6 +516,20 @@ export class UITarsModel extends Model {
         responseId = streamResult.responseId ?? responseId;
         costTokens = streamResult.costTokens;
 
+        if (
+          shouldDeleteStoredResponses &&
+          responseId &&
+          codexInputItems.some((input) => isMessageImage(input))
+        ) {
+          this.headImageContext = {
+            messageIndex: headImageMessageIndex,
+            responseIds: [
+              ...(this.headImageContext?.responseIds || []),
+              responseId,
+            ],
+          };
+        }
+
         logger.info('[ResponseAPI/Codex] [result]: ', {
           responseId,
           predictionLength: prediction.length,

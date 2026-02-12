@@ -323,6 +323,75 @@ describe('UITarsModel', () => {
       fetchMock.mockRestore();
     });
 
+    it('should track Codex image responses for cleanup when store is enabled', async () => {
+      const model = new UITarsModel({
+        ['api' + 'Key']: 'codex-token',
+        baseURL: 'https://test.com',
+        model: 'gpt-5.3-codex',
+        useResponsesApi: true,
+        codexResponses: {
+          enabled: true,
+          store: true,
+          include: ['reasoning.encrypted_content'],
+          reasoningEffort: 'high',
+        },
+      });
+
+      const encoder = new TextEncoder();
+      const createSseResponse = (responseId: string, text: string) => {
+        const body = [
+          `data: {"type":"response.output_text.delta","delta":"${text}"}\n\n`,
+          `data: {"type":"response.completed","response":{"id":"${responseId}","output_text":"${text}","usage":{"total_tokens":10}}}\n\n`,
+          'data: [DONE]\n\n',
+        ].join('');
+
+        return {
+          ok: true,
+          status: 200,
+          body: new ReadableStream<Uint8Array>({
+            start(controller) {
+              controller.enqueue(encoder.encode(body));
+              controller.close();
+            },
+          }),
+        } as Response;
+      };
+
+      const fetchMock = vi
+        .spyOn(globalThis, 'fetch')
+        .mockResolvedValueOnce(
+          createSseResponse('resp-codex-1', 'Action: wait()'),
+        )
+        .mockResolvedValueOnce(
+          createSseResponse('resp-codex-2', 'Action: wait()'),
+        );
+
+      await model.invoke({
+        conversations: [
+          { from: 'human', value: 'Open settings' },
+          { from: 'human', value: '<image>' },
+        ],
+        images: ['base64image1'],
+        screenContext: { width: 1920, height: 1080 },
+      });
+
+      expect(mockResponsesDelete).not.toHaveBeenCalled();
+
+      await model.invoke({
+        conversations: [{ from: 'human', value: '<image>' }],
+        images: ['base64image2'],
+        screenContext: { width: 1920, height: 1080 },
+      });
+
+      expect(mockResponsesDelete).toHaveBeenCalledTimes(1);
+      expect(mockResponsesDelete).toHaveBeenCalledWith(
+        'resp-codex-1',
+        expect.any(Object),
+      );
+
+      fetchMock.mockRestore();
+    });
+
     it('should send all messages for Response API (first call)', async () => {
       const model = new UITarsModel({
         ['api' + 'Key']: '',

@@ -619,6 +619,23 @@ Action: click(start_box='<|box_start|>(1290,718)<|box_end|>(1350,747)<|box_end|>
       ]);
     });
 
+    it('should not mutate non-box payload containing parenthesis sequences', () => {
+      const input = `Thought: Type literal parentheses
+Action: type(content='()()')`;
+      const result = parseActionVlm(input);
+
+      expect(result).toEqual([
+        {
+          action_inputs: {
+            content: '()()',
+          },
+          action_type: 'type',
+          reflection: null,
+          thought: 'Type literal parentheses',
+        },
+      ]);
+    });
+
     it('should prefer first action when multiple Action markers are concatenated', () => {
       const input = `Thought: Open Start menu first.
 Action: hotkey(key='ctrl esc')Thought: Type Cursor in search.
