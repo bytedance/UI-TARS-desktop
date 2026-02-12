@@ -82,6 +82,10 @@ type SystemRunExecutionOptions = {
   spawnImpl?: typeof spawn;
   hardKillGraceMs?: number;
   forceResolveGraceMs?: number;
+  processTreeKiller?: (
+    child: ReturnType<typeof spawn>,
+    signal: 'SIGTERM' | 'SIGKILL',
+  ) => void;
 };
 
 const normalizeArgv = (argv: string[]): string[] => {
@@ -141,9 +145,101 @@ export const runSystemRunToolCall = async (
   call: SystemRunToolCallV1,
   options?: SystemRunExecutionOptions,
 ): Promise<SystemRunToolResultV1> => {
-  const parsedCall = SystemRunToolCallSchema.parse(call);
   const startedAt = Date.now();
+
+  const callRecord =
+    typeof call === 'object' && call !== null
+      ? (call as Record<string, unknown>)
+      : null;
+  const fallbackCallId =
+    typeof callRecord?.callId === 'string' &&
+    callRecord.callId.trim().length > 0
+      ? callRecord.callId
+      : randomUUID();
+  const fallbackToolVersion =
+    typeof callRecord?.toolVersion === 'string' &&
+    callRecord.toolVersion.trim().length > 0
+      ? callRecord.toolVersion
+      : TOOL_REGISTRY_VERSION;
+
+  const parsedCallResult = SystemRunToolCallSchema.safeParse(call);
+  if (!parsedCallResult.success) {
+    return SystemRunToolResultSchema.parse({
+      version: SYSTEM_RUN_TOOL_RESULT_VERSION,
+      callId: fallbackCallId,
+      toolName: SYSTEM_RUN_TOOL_NAME,
+      toolVersion: fallbackToolVersion,
+      status: 'error',
+      errorClass: 'validation_error',
+      exitCode: null,
+      stdout: '',
+      stderr: parsedCallResult.error.issues
+        .map((issue) => {
+          return `${issue.path.join('.') || '<root>'}: ${issue.message}`;
+        })
+        .join('; '),
+      durationMs: Date.now() - startedAt,
+      deltaObserved: false,
+      artifacts: {
+        stdoutBytes: 0,
+        stderrBytes: 0,
+        stdoutTruncated: false,
+        stderrTruncated: false,
+      },
+    });
+  }
+
+  const parsedCall = parsedCallResult.data;
   const spawnImpl = options?.spawnImpl ?? spawn;
+  const processTreeKiller =
+    options?.processTreeKiller ??
+    ((child: ReturnType<typeof spawn>, signal: 'SIGTERM' | 'SIGKILL') => {
+      const pid = child.pid;
+
+      if (!pid) {
+        try {
+          child.kill(signal === 'SIGTERM' ? undefined : signal);
+        } catch {
+          // best effort fallback
+        }
+        return;
+      }
+
+      if (process.platform === 'win32') {
+        const args = ['/PID', String(pid), '/T'];
+        if (signal === 'SIGKILL') {
+          args.push('/F');
+        }
+
+        try {
+          const killer = spawn('taskkill', args, {
+            shell: false,
+            windowsHide: true,
+            stdio: 'ignore',
+          });
+          killer.unref();
+          return;
+        } catch {
+          try {
+            child.kill(signal === 'SIGTERM' ? undefined : signal);
+          } catch {
+            // best effort fallback
+          }
+          return;
+        }
+      }
+
+      try {
+        process.kill(-pid, signal);
+        return;
+      } catch {
+        try {
+          child.kill(signal === 'SIGTERM' ? undefined : signal);
+        } catch {
+          // best effort fallback
+        }
+      }
+    });
   const hardKillGraceMs =
     typeof options?.hardKillGraceMs === 'number' &&
     Number.isFinite(options.hardKillGraceMs) &&
@@ -245,6 +341,7 @@ export const runSystemRunToolCall = async (
       child = spawnImpl(command, args, {
         cwd: parsedCall.canonicalArgs.cwd,
         shell: false,
+        detached: process.platform !== 'win32',
         windowsHide: true,
         stdio: ['ignore', 'pipe', 'pipe'],
       });
@@ -280,9 +377,9 @@ export const runSystemRunToolCall = async (
 
     timeoutHandle = setTimeout(() => {
       timedOut = true;
-      child.kill();
+      processTreeKiller(child, 'SIGTERM');
       hardKillHandle = setTimeout(() => {
-        child.kill('SIGKILL');
+        processTreeKiller(child, 'SIGKILL');
       }, hardKillGraceMs);
       forceResolveHandle = setTimeout(() => {
         timedOutWithoutClose = true;

@@ -5,7 +5,11 @@
 import { EventEmitter } from 'events';
 import { describe, expect, it, vi } from 'vitest';
 
-import { buildSystemRunToolCall, runSystemRunToolCall } from './systemRunTool';
+import {
+  type SystemRunToolCallV1,
+  buildSystemRunToolCall,
+  runSystemRunToolCall,
+} from './systemRunTool';
 
 describe('systemRunTool', () => {
   it('builds deterministic call envelope with canonical argv', () => {
@@ -79,13 +83,16 @@ describe('systemRunTool', () => {
     vi.useFakeTimers();
     try {
       const fakeChild = new EventEmitter() as EventEmitter & {
+        pid: number;
         stdout: EventEmitter;
         stderr: EventEmitter;
         kill: ReturnType<typeof vi.fn>;
       };
+      fakeChild.pid = 321;
       fakeChild.stdout = new EventEmitter();
       fakeChild.stderr = new EventEmitter();
       fakeChild.kill = vi.fn().mockReturnValue(true);
+      const processTreeKiller = vi.fn();
 
       const call = buildSystemRunToolCall({
         intentId: 'intent-6',
@@ -98,13 +105,22 @@ describe('systemRunTool', () => {
         spawnImpl: () => fakeChild as never,
         hardKillGraceMs: 10,
         forceResolveGraceMs: 20,
+        processTreeKiller,
       });
 
       await vi.advanceTimersByTimeAsync(100);
       const result = await resultPromise;
 
-      expect(fakeChild.kill).toHaveBeenNthCalledWith(1);
-      expect(fakeChild.kill).toHaveBeenNthCalledWith(2, 'SIGKILL');
+      expect(processTreeKiller).toHaveBeenNthCalledWith(
+        1,
+        fakeChild,
+        'SIGTERM',
+      );
+      expect(processTreeKiller).toHaveBeenNthCalledWith(
+        2,
+        fakeChild,
+        'SIGKILL',
+      );
       expect(result.status).toBe('timeout');
       expect(result.errorClass).toBe('timeout');
       expect(result.stderr).toContain('[SYSTEM_RUN_TIMEOUT]');
@@ -173,5 +189,14 @@ describe('systemRunTool', () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it('returns structured validation_error instead of throwing', async () => {
+    const result = await runSystemRunToolCall({} as SystemRunToolCallV1);
+
+    expect(result.status).toBe('error');
+    expect(result.errorClass).toBe('validation_error');
+    expect(result.callId.length).toBeGreaterThan(0);
+    expect(result.toolName).toBe('system.run');
   });
 });
