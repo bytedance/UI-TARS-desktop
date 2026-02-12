@@ -15,13 +15,17 @@ export function useSetting() {
       setSettings(currentSetting);
     };
 
-    settingRpc.onUpdate((newState) => {
+    const unsubscribe = settingRpc.onUpdate((newState) => {
       setSettings(newState);
     });
 
     initSetting();
 
-    // FIXME: clear setting update listener
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
   }, []);
 
   const {
