@@ -31,6 +31,14 @@ type WindowFocusCatalogEntry = {
   focusArgvByPlatform: Partial<Record<WindowFocusPlatform, string[]>>;
 };
 
+const buildDarwinFocusArgv = (applicationName: string): string[] => {
+  return [
+    'osascript',
+    '-e',
+    `if application "${applicationName}" is running then tell application "${applicationName}" to activate else error "WINDOW_NOT_FOUND"`,
+  ];
+};
+
 const WINDOW_FOCUS_CATALOG: Record<WindowFocusTarget, WindowFocusCatalogEntry> =
   {
     cursor: {
@@ -42,7 +50,7 @@ const WINDOW_FOCUS_CATALOG: Record<WindowFocusTarget, WindowFocusCatalogEntry> =
           '-Command',
           "$wshell = New-Object -ComObject WScript.Shell; if ($wshell.AppActivate('Cursor')) { exit 0 } else { exit 3 }",
         ],
-        darwin: ['osascript', '-e', 'tell application "Cursor" to activate'],
+        darwin: buildDarwinFocusArgv('Cursor'),
       },
     },
     settings: {
@@ -54,11 +62,7 @@ const WINDOW_FOCUS_CATALOG: Record<WindowFocusTarget, WindowFocusCatalogEntry> =
           '-Command',
           "$wshell = New-Object -ComObject WScript.Shell; if ($wshell.AppActivate('Settings')) { exit 0 } else { exit 3 }",
         ],
-        darwin: [
-          'osascript',
-          '-e',
-          'tell application "System Settings" to activate',
-        ],
+        darwin: buildDarwinFocusArgv('System Settings'),
       },
     },
     notepad: {
@@ -70,7 +74,7 @@ const WINDOW_FOCUS_CATALOG: Record<WindowFocusTarget, WindowFocusCatalogEntry> =
           '-Command',
           "$wshell = New-Object -ComObject WScript.Shell; if ($wshell.AppActivate('Notepad')) { exit 0 } else { exit 3 }",
         ],
-        darwin: ['osascript', '-e', 'tell application "TextEdit" to activate'],
+        darwin: buildDarwinFocusArgv('TextEdit'),
       },
     },
   };

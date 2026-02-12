@@ -16,13 +16,56 @@ describe('windowWaitReadyTool', () => {
       intentId: 'intent-1',
       targetWindow: 'notepad',
       platform: 'win32',
-      idempotencyKey: 'idem-1',
     });
 
     expect(call.toolName).toBe('window.wait_ready');
     expect(call.canonicalArgs.targetWindow).toBe('notepad');
     expect(call.canonicalArgs.checkArgv[0]).toBe('powershell');
     expect(call.canonicalArgs.pollIntervalMs).toBe(500);
+    expect(call.idempotencyKey).toContain('window.wait_ready:intent-1:notepad');
+  });
+
+  it('accepts call envelope without idempotency key (registry-compatible)', async () => {
+    const baseCall = buildWindowWaitReadyToolCall({
+      intentId: 'intent-1a',
+      targetWindow: 'notepad',
+      platform: 'win32',
+      idempotencyKey: 'idem-1a',
+    });
+
+    const callWithoutKey: WindowWaitReadyToolCallV1 = {
+      ...baseCall,
+      idempotencyKey: undefined,
+    };
+
+    const runSystemRun = vi.fn().mockResolvedValue({
+      version: 'v1',
+      callId: 'sys-call-1a',
+      toolName: 'system.run',
+      toolVersion: '1.0.0',
+      status: 'ok',
+      errorClass: 'none',
+      exitCode: 0,
+      stdout: 'ready',
+      stderr: '',
+      durationMs: 5,
+      deltaObserved: true,
+      artifacts: {
+        stdoutBytes: 5,
+        stderrBytes: 0,
+        stdoutTruncated: false,
+        stderrTruncated: false,
+      },
+    });
+
+    const result = await runWindowWaitReadyToolCall(callWithoutKey, {
+      runSystemRun,
+      sleepMs: vi.fn().mockResolvedValue(undefined),
+    });
+
+    expect(result.status).toBe('ok');
+    const firstCall = runSystemRun.mock.calls[0]?.[0];
+    expect(firstCall?.idempotencyKey).toContain('window.wait_ready:intent-1a');
   });
 
   it('returns ok when check command succeeds on first attempt', async () => {

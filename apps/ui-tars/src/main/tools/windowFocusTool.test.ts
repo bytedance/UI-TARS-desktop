@@ -25,6 +25,19 @@ describe('windowFocusTool', () => {
     expect(call.canonicalArgs.argv.join(' ')).toContain('AppActivate');
   });
 
+  it('uses non-launching darwin focus command for existing app windows', () => {
+    const call = buildWindowFocusToolCall({
+      intentId: 'intent-1b',
+      targetWindow: 'cursor',
+      platform: 'darwin',
+      idempotencyKey: 'idem-1b',
+    });
+
+    expect(call.canonicalArgs.argv[0]).toBe('osascript');
+    expect(call.canonicalArgs.argv.join(' ')).toContain('is running');
+    expect(call.canonicalArgs.argv.join(' ')).toContain('WINDOW_NOT_FOUND');
+  });
+
   it('rejects unsupported target/platform combinations', () => {
     expect(() =>
       buildWindowFocusToolCall({

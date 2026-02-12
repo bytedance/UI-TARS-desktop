@@ -94,7 +94,7 @@ const WindowWaitReadyInputSchema = z.object({
     .int()
     .min(WINDOW_WAIT_READY_MIN_POLL_INTERVAL_MS)
     .default(WINDOW_WAIT_READY_DEFAULT_POLL_INTERVAL_MS),
-  idempotencyKey: z.string().min(1),
+  idempotencyKey: z.string().min(1).optional(),
 });
 
 const WindowWaitReadyCanonicalArgsSchema = z.object({
@@ -120,7 +120,7 @@ const WindowWaitReadyToolCallSchema = z.object({
   toolName: z.literal(WINDOW_WAIT_READY_TOOL_NAME),
   toolVersion: z.string().min(1),
   canonicalArgs: WindowWaitReadyCanonicalArgsSchema,
-  idempotencyKey: z.string().min(1),
+  idempotencyKey: z.string().min(1).optional(),
   timeoutMs: z
     .number()
     .finite()
@@ -230,11 +230,14 @@ export const buildWindowWaitReadyToolCall = (params: {
   platform?: WindowWaitReadyPlatform;
   timeoutMs?: number;
   pollIntervalMs?: number;
-  idempotencyKey: string;
+  idempotencyKey?: string;
 }): WindowWaitReadyToolCallV1 => {
   const parsed = WindowWaitReadyInputSchema.parse(params);
   const platform = resolvePlatform(parsed.platform);
   const checkArgv = resolveCheckArgv(parsed.targetWindow, platform);
+  const idempotencyKey =
+    parsed.idempotencyKey ||
+    `window.wait_ready:${parsed.intentId}:${parsed.targetWindow}:${platform}`;
 
   if (!checkArgv) {
     throw new Error(
@@ -255,7 +258,7 @@ export const buildWindowWaitReadyToolCall = (params: {
       timeoutMs: parsed.timeoutMs,
       pollIntervalMs: parsed.pollIntervalMs,
     },
-    idempotencyKey: parsed.idempotencyKey,
+    idempotencyKey,
     timeoutMs: parsed.timeoutMs,
   });
 };
@@ -345,6 +348,9 @@ export const runWindowWaitReadyToolCall = async (
   let attempts = 0;
   let lastResult: SystemRunToolResultV1 | null = null;
   let lastCallId: string | null = null;
+  const idempotencyPrefix =
+    parsedCall.idempotencyKey ||
+    `window.wait_ready:${parsedCall.intentId}:${parsedCall.canonicalArgs.targetWindow}:${parsedCall.canonicalArgs.platform}`;
 
   while (Date.now() - startedAt < parsedCall.canonicalArgs.timeoutMs) {
     attempts += 1;
@@ -364,7 +370,7 @@ export const runWindowWaitReadyToolCall = async (
       intentId: parsedCall.intentId,
       argv: checkArgv,
       timeoutMs: systemRunTimeoutMs,
-      idempotencyKey: `${parsedCall.idempotencyKey}:window.wait_ready:${parsedCall.canonicalArgs.targetWindow}:${attempts}`,
+      idempotencyKey: `${idempotencyPrefix}:window.wait_ready:${parsedCall.canonicalArgs.targetWindow}:${attempts}`,
     });
     lastCallId = systemRunCall.callId;
 
