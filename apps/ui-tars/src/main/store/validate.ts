@@ -6,6 +6,7 @@ import { z } from 'zod';
 
 import { SearchEngineForSettings, VLMProviderV2, Operator } from './types';
 import { isKnownModelForProvider } from './modelRegistry';
+import { TOOL_FIRST_FEATURE_FLAG_DEFAULTS } from './featureFlags';
 
 const PresetSourceSchema = z.object({
   type: z.enum(['local', 'remote']),
@@ -38,6 +39,15 @@ export const PresetSchema = z
     reportStorageBaseUrl: z.string().url().optional(),
     utioBaseUrl: z.string().url().optional(),
     presetSource: PresetSourceSchema.optional(),
+    ffToolRegistry: z
+      .boolean()
+      .default(TOOL_FIRST_FEATURE_FLAG_DEFAULTS.ffToolRegistry),
+    ffInvokeGate: z
+      .boolean()
+      .default(TOOL_FIRST_FEATURE_FLAG_DEFAULTS.ffInvokeGate),
+    ffToolFirstRouting: z
+      .boolean()
+      .default(TOOL_FIRST_FEATURE_FLAG_DEFAULTS.ffToolFirstRouting),
   })
   .superRefine((value, ctx) => {
     if (!value.vlmProvider) {
