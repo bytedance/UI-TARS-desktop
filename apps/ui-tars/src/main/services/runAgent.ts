@@ -35,7 +35,7 @@ import {
 import { FREE_MODEL_BASE_URL } from '../remote/shared';
 import { getAuthHeader } from '../remote/auth';
 import { ProxyClient } from '../remote/proxyClient';
-import { UITarsModelConfig } from '@ui-tars/sdk/core';
+import { Operator as SDKOperator, UITarsModelConfig } from '@ui-tars/sdk/core';
 import {
   CODEX_OPENAI_BETA,
   CODEX_ORIGINATOR,
@@ -44,6 +44,8 @@ import {
 } from '@main/store/modelRegistry';
 import { resolveToolFirstFeatureFlags } from '@main/store/featureFlags';
 import { createDefaultToolRegistry } from '@main/tools/toolRegistry';
+import { InvokeGateOperator } from '@main/tools/invokeGateOperator';
+import { type GateAuthState } from '@main/tools/invokeGate';
 
 export const runAgent = async (
   setState: (state: AppState) => void,
@@ -55,6 +57,7 @@ export const runAgent = async (
   assert(instructions, 'instructions is required');
 
   const language = settings.language ?? 'en';
+  const maxLoopCount = settings.maxLoopCount ?? 100;
 
   logger.info('settings.operator', settings.operator);
   const toolFlags = resolveToolFirstFeatureFlags(settings);
@@ -70,7 +73,7 @@ export const runAgent = async (
     );
   }
 
-  const handleData: GUIAgentConfig<NutJSElectronOperator>['onData'] = async ({
+  const handleData: GUIAgentConfig<SDKOperator>['onData'] = async ({
     data,
   }) => {
     const lastConv = getState().messages[getState().messages.length - 1];
@@ -144,7 +147,8 @@ export const runAgent = async (
     | NutJSElectronOperator
     | DefaultBrowserOperator
     | RemoteComputerOperator
-    | RemoteBrowserOperator;
+    | RemoteBrowserOperator
+    | null = null;
 
   switch (settings.operator) {
     case Operator.LocalComputer:
@@ -185,6 +189,10 @@ export const runAgent = async (
       break;
   }
 
+  if (!operator) {
+    throw new Error(`Unsupported operator setting: ${settings.operator}`);
+  }
+
   let modelVersion = getModelVersion(settings.vlmProvider);
   const isRemoteOperator =
     settings.operator === Operator.RemoteComputer ||
@@ -199,6 +207,11 @@ export const runAgent = async (
     useResponsesApi: isCodexOAuthProvider ? true : settings.useResponsesApi,
   };
   let modelAuthHdrs: Record<string, string> = {};
+  let invokeGateAuthState: GateAuthState = 'unknown';
+
+  if (!isCodexOAuthProvider && !isRemoteOperator && settings.vlmApiKey.trim()) {
+    invokeGateAuthState = 'valid';
+  }
 
   if (isCodexOAuthProvider && !isRemoteOperator) {
     let codexAuthContext: { accessToken: string; accountId?: string } | null;
@@ -252,6 +265,7 @@ export const runAgent = async (
       originator: CODEX_ORIGINATOR,
       accept: 'text/event-stream',
     };
+    invokeGateAuthState = 'valid';
   }
 
   if (isRemoteOperator) {
@@ -264,6 +278,18 @@ export const runAgent = async (
     };
     modelAuthHdrs = await getAuthHeader();
     modelVersion = await ProxyClient.getRemoteVLMProvider();
+    invokeGateAuthState = 'valid';
+  }
+
+  let runtimeOperator: SDKOperator = operator;
+  if (toolFlags.ffInvokeGate) {
+    runtimeOperator = new InvokeGateOperator({
+      innerOperator: operator,
+      featureFlags: toolFlags,
+      sessionId: `main-${Date.now()}`,
+      authState: invokeGateAuthState,
+      maxLoopCount,
+    });
   }
 
   const systemPrompt = getSpByModelVersion(
@@ -277,7 +303,7 @@ export const runAgent = async (
     systemPrompt: systemPrompt,
     logger,
     signal: abortController?.signal,
-    operator: operator!,
+    operator: runtimeOperator,
     onData: handleData,
     onError: (params) => {
       const { error } = params;
@@ -303,7 +329,7 @@ export const runAgent = async (
         maxRetries: 1,
       },
     },
-    maxLoopCount: settings.maxLoopCount,
+    maxLoopCount,
     loopIntervalInMs: settings.loopIntervalInMs,
     uiTarsVersion: modelVersion,
   });
