@@ -47,7 +47,7 @@ const ChatInput = ({
   const [localInstructions, setLocalInstructions] = useState('');
   const { run, stopAgentRuning } = useRunAgent();
   const { getSession, updateSession, chatMessages } = useSession();
-  const { settings, updateSetting } = useSetting();
+  const { updateSetting } = useSetting();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const running = status === StatusEnum.RUNNING;
 
@@ -66,19 +66,19 @@ const ChatInput = ({
   useEffect(() => {
     switch (operator) {
       case Operator.RemoteComputer:
-        updateSetting({ ...settings, operator: Operator.RemoteComputer });
+        updateSetting({ operator: Operator.RemoteComputer });
         break;
       case Operator.RemoteBrowser:
-        updateSetting({ ...settings, operator: Operator.RemoteBrowser });
+        updateSetting({ operator: Operator.RemoteBrowser });
         break;
       case Operator.LocalComputer:
-        updateSetting({ ...settings, operator: Operator.LocalComputer });
+        updateSetting({ operator: Operator.LocalComputer });
         break;
       case Operator.LocalBrowser:
-        updateSetting({ ...settings, operator: Operator.LocalBrowser });
+        updateSetting({ operator: Operator.LocalBrowser });
         break;
       default:
-        updateSetting({ ...settings, operator: Operator.LocalComputer });
+        updateSetting({ operator: Operator.LocalComputer });
         break;
     }
   }, [operator]);

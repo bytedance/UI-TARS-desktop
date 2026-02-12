@@ -70,17 +70,17 @@ export function ChatSettings() {
 
     const validAndSave = async () => {
       if (newLanguage !== settings.language) {
-        updateSetting({ ...settings, language: newLanguage });
+        updateSetting({ language: newLanguage });
       }
 
       const isLoopValid = await form.trigger('maxLoopCount');
       if (isLoopValid && newCount !== settings.maxLoopCount) {
-        updateSetting({ ...settings, maxLoopCount: newCount });
+        updateSetting({ maxLoopCount: newCount });
       }
 
       const isIntervalValid = await form.trigger('loopIntervalInMs');
       if (isIntervalValid && newInterval !== settings.loopIntervalInMs) {
-        updateSetting({ ...settings, loopIntervalInMs: newInterval });
+        updateSetting({ loopIntervalInMs: newInterval });
       }
     };
 
