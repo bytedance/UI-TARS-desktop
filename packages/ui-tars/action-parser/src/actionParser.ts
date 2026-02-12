@@ -152,11 +152,23 @@ export function parseActionVlm(
       //   throw new Error('No Action found in text');
       actionStr = text;
     } else {
-      const firstActionMarker = actionMarkerMatch[0];
-      if (firstActionMarker?.index != null) {
-        actionStr = text.slice(
-          firstActionMarker.index + firstActionMarker[0].length,
+      for (let i = actionMarkerMatch.length - 1; i >= 0; i--) {
+        const actionMarker = actionMarkerMatch[i];
+        if (actionMarker?.index == null) {
+          continue;
+        }
+
+        const candidate = text.slice(
+          actionMarker.index + actionMarker[0].length,
         );
+        if (extractLeadingFunctionCall(candidate)) {
+          actionStr = candidate;
+          break;
+        }
+
+        if (!actionStr) {
+          actionStr = candidate;
+        }
       }
     }
   } else if (mode === 'o1') {
@@ -180,14 +192,7 @@ export function parseActionVlm(
   // Parse actions
   let allActions: string[] = [];
 
-  if (actionMarkerCount > 1) {
-    const leadingAction = extractLeadingFunctionCall(actionStr);
-    if (leadingAction) {
-      allActions = [leadingAction.value];
-    }
-  } else {
-    allActions = extractFunctionCalls(actionStr);
-  }
+  allActions = extractFunctionCalls(actionStr);
 
   if (allActions.length === 0) {
     allActions = actionStr

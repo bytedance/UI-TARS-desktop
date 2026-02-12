@@ -636,7 +636,7 @@ Action: type(content='()()')`;
       ]);
     });
 
-    it('should prefer first action when multiple Action markers are concatenated', () => {
+    it('should parse action from the final explicit Action marker', () => {
       const input = `Thought: Open Start menu first.
 Action: hotkey(key='ctrl esc')Thought: Type Cursor in search.
 Action: type(content='Cursor\\n')Thought: Wait for window.
@@ -647,13 +647,28 @@ Action: finished()`;
 
       expect(result).toEqual([
         {
-          action_inputs: {
-            key: 'ctrl esc',
-          },
-          action_type: 'hotkey',
+          action_inputs: {},
+          action_type: 'finished',
           reflection: null,
           thought: 'Open Start menu first.',
         },
+      ]);
+    });
+
+    it('should ignore Action keyword inside thought text and parse final action block', () => {
+      const input = `Thought: I should avoid writing "Action: wait()" in reasoning.
+Action: click(start_box='[100,200]')`;
+
+      const result = parseActionVlm(input, [1000, 1000]);
+
+      expect(result).toEqual([
+        expect.objectContaining({
+          action_inputs: {
+            start_box: '[0.1,0.2,0.1,0.2]',
+          },
+          action_type: 'click',
+          reflection: null,
+        }),
       ]);
     });
   });
