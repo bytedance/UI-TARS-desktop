@@ -137,6 +137,7 @@ const WindowWaitReadyToolResultSchema = z.object({
   errorClass: z.enum([
     'none',
     'validation_error',
+    'policy_error',
     'unsupported_target',
     'window_not_ready',
     'spawn_error',
@@ -165,6 +166,33 @@ export type WindowWaitReadyToolCallV1 = z.infer<
 export type WindowWaitReadyToolResultV1 = z.infer<
   typeof WindowWaitReadyToolResultSchema
 >;
+
+const mapSystemRunErrorClass = (
+  errorClass: SystemRunToolResultV1['errorClass'],
+):
+  | 'validation_error'
+  | 'policy_error'
+  | 'spawn_error'
+  | 'timeout'
+  | 'non_zero_exit'
+  | 'none' => {
+  if (errorClass === 'validation_error') {
+    return 'validation_error';
+  }
+  if (errorClass === 'policy_error') {
+    return 'policy_error';
+  }
+  if (errorClass === 'timeout') {
+    return 'timeout';
+  }
+  if (errorClass === 'non_zero_exit') {
+    return 'non_zero_exit';
+  }
+  if (errorClass === 'none') {
+    return 'none';
+  }
+  return 'spawn_error';
+};
 
 type WindowWaitReadyExecutionOptions = {
   runSystemRun?: (call: SystemRunToolCallV1) => Promise<SystemRunToolResultV1>;
@@ -393,6 +421,62 @@ export const runWindowWaitReadyToolCall = async (
       });
     }
 
+    if (
+      lastResult.status === 'timeout' ||
+      lastResult.errorClass === 'timeout'
+    ) {
+      return WindowWaitReadyToolResultSchema.parse({
+        version: WINDOW_WAIT_READY_TOOL_RESULT_VERSION,
+        callId: parsedCall.callId,
+        toolName: parsedCall.toolName,
+        toolVersion: parsedCall.toolVersion,
+        status: 'timeout',
+        errorClass: 'timeout',
+        ready: false,
+        systemRunCallId: lastResult.callId,
+        attempts,
+        stdout: lastResult.stdout,
+        stderr: lastResult.stderr,
+        durationMs: Date.now() - startedAt,
+        artifacts: {
+          targetWindow: parsedCall.canonicalArgs.targetWindow,
+          platform: parsedCall.canonicalArgs.platform,
+          stdoutBytes: lastResult.artifacts.stdoutBytes,
+          stderrBytes: lastResult.artifacts.stderrBytes,
+          stdoutTruncated: lastResult.artifacts.stdoutTruncated,
+          stderrTruncated: lastResult.artifacts.stderrTruncated,
+        },
+      });
+    }
+
+    if (
+      lastResult.status === 'error' &&
+      lastResult.errorClass !== 'non_zero_exit'
+    ) {
+      return WindowWaitReadyToolResultSchema.parse({
+        version: WINDOW_WAIT_READY_TOOL_RESULT_VERSION,
+        callId: parsedCall.callId,
+        toolName: parsedCall.toolName,
+        toolVersion: parsedCall.toolVersion,
+        status: 'error',
+        errorClass: mapSystemRunErrorClass(lastResult.errorClass),
+        ready: false,
+        systemRunCallId: lastResult.callId,
+        attempts,
+        stdout: lastResult.stdout,
+        stderr: lastResult.stderr,
+        durationMs: Date.now() - startedAt,
+        artifacts: {
+          targetWindow: parsedCall.canonicalArgs.targetWindow,
+          platform: parsedCall.canonicalArgs.platform,
+          stdoutBytes: lastResult.artifacts.stdoutBytes,
+          stderrBytes: lastResult.artifacts.stderrBytes,
+          stdoutTruncated: lastResult.artifacts.stdoutTruncated,
+          stderrTruncated: lastResult.artifacts.stderrTruncated,
+        },
+      });
+    }
+
     const elapsed = Date.now() - startedAt;
     const nextSleepMs = Math.min(
       parsedCall.canonicalArgs.pollIntervalMs,
@@ -411,10 +495,6 @@ export const runWindowWaitReadyToolCall = async (
     stdoutTruncated: false,
     stderrTruncated: false,
   };
-  const timeoutErrorClass =
-    lastResult?.status === 'timeout' || lastResult?.errorClass === 'timeout'
-      ? 'timeout'
-      : 'window_not_ready';
 
   return WindowWaitReadyToolResultSchema.parse({
     version: WINDOW_WAIT_READY_TOOL_RESULT_VERSION,
@@ -422,7 +502,7 @@ export const runWindowWaitReadyToolCall = async (
     toolName: parsedCall.toolName,
     toolVersion: parsedCall.toolVersion,
     status: 'timeout',
-    errorClass: timeoutErrorClass,
+    errorClass: 'window_not_ready',
     ready: false,
     systemRunCallId: lastCallId,
     attempts,

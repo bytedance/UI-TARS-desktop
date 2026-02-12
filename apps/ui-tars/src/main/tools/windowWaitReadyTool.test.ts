@@ -156,4 +156,47 @@ describe('windowWaitReadyTool', () => {
     const firstCall = runSystemRun.mock.calls[0]?.[0];
     expect(firstCall?.canonicalArgs.timeoutMs).toBeLessThanOrEqual(60000);
   });
+
+  it('returns spawn_error immediately instead of masking as not-ready timeout', async () => {
+    const call = buildWindowWaitReadyToolCall({
+      intentId: 'intent-5',
+      targetWindow: 'notepad',
+      platform: 'win32',
+      timeoutMs: 10000,
+      pollIntervalMs: 500,
+      idempotencyKey: 'idem-5',
+    });
+
+    const runSystemRun = vi.fn().mockResolvedValue({
+      version: 'v1',
+      callId: 'sys-call-spawn-error',
+      toolName: 'system.run',
+      toolVersion: '1.0.0',
+      status: 'error',
+      errorClass: 'spawn_error',
+      exitCode: null,
+      stdout: '',
+      stderr: 'spawn failed',
+      durationMs: 5,
+      deltaObserved: false,
+      artifacts: {
+        stdoutBytes: 0,
+        stderrBytes: 12,
+        stdoutTruncated: false,
+        stderrTruncated: false,
+      },
+    });
+    const sleepMs = vi.fn().mockResolvedValue(undefined);
+
+    const result = await runWindowWaitReadyToolCall(call, {
+      runSystemRun,
+      sleepMs,
+    });
+
+    expect(result.status).toBe('error');
+    expect(result.errorClass).toBe('spawn_error');
+    expect(result.ready).toBe(false);
+    expect(result.attempts).toBe(1);
+    expect(sleepMs).not.toHaveBeenCalled();
+  });
 });
