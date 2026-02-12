@@ -63,10 +63,7 @@ export function LocalBrowserSettings() {
 
     const validAndSave = async () => {
       if (newSearchEngine !== settings.searchEngineForBrowser) {
-        updateSetting({
-          ...settings,
-          searchEngineForBrowser: newSearchEngine,
-        });
+        updateSetting({ searchEngineForBrowser: newSearchEngine });
       }
     };
 

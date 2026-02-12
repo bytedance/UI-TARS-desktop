@@ -295,7 +295,6 @@ export function VLMSettings({
         }
 
         updateSetting({
-          ...settings,
           vlmProvider: newProvider,
           vlmBaseUrl: newBaseUrl,
           vlmApiKey: newApiKey,
@@ -307,17 +306,17 @@ export function VLMSettings({
 
       const isUrlValid = await form.trigger('vlmBaseUrl');
       if (isUrlValid && newBaseUrl !== settings.vlmBaseUrl) {
-        updateSetting({ ...settings, vlmBaseUrl: newBaseUrl });
+        updateSetting({ vlmBaseUrl: newBaseUrl });
       }
 
       const isKeyValid = await form.trigger('vlmApiKey');
       if (isKeyValid && newApiKey !== settings.vlmApiKey) {
-        updateSetting({ ...settings, vlmApiKey: newApiKey });
+        updateSetting({ vlmApiKey: newApiKey });
       }
 
       const isNameValid = await form.trigger('vlmModelName');
       if (isNameValid && newModelName !== settings.vlmModelName) {
-        updateSetting({ ...settings, vlmModelName: newModelName });
+        updateSetting({ vlmModelName: newModelName });
       }
 
       const isResponsesApiValid = await form.trigger('useResponsesApi');
@@ -325,10 +324,7 @@ export function VLMSettings({
         isResponsesApiValid &&
         newUseResponsesApi !== settings.useResponsesApi
       ) {
-        updateSetting({
-          ...settings,
-          useResponsesApi: newUseResponsesApi,
-        });
+        updateSetting({ useResponsesApi: newUseResponsesApi });
       }
     };
 
@@ -444,7 +440,7 @@ export function VLMSettings({
 
     console.log('onSubmit', values);
 
-    updateSetting({ ...settings, ...values });
+    updateSetting(values);
     toast.success('Settings saved successfully');
   };
 
@@ -770,10 +766,8 @@ export function VLMSettings({
               keyValue: newApiKey,
               modelName: newModelName,
             }}
-            disabled={
-              isRemoteAutoUpdatedPreset ||
-              newProvider === VLMProviderV2.openai_codex_oauth
-            }
+            provider={newProvider}
+            disabled={isRemoteAutoUpdatedPreset}
             onResponseApiSupportChange={setResponseApiSupported}
           />
 
@@ -825,6 +819,7 @@ interface ModelAvailabilityCheckProps {
     keyValue: string;
     modelName: string;
   };
+  provider?: VLMProviderV2;
   disabled?: boolean;
   className?: string;
   onResponseApiSupportChange?: (supported: boolean) => void;
@@ -840,6 +835,7 @@ interface CheckState {
 
 export function ModelAvailabilityCheck({
   modelConfig,
+  provider,
   disabled = false,
   className,
   onResponseApiSupportChange,
@@ -848,7 +844,10 @@ export function ModelAvailabilityCheck({
   const [checkState, setCheckState] = useState<CheckState>({ status: 'idle' });
 
   const { baseUrl, keyValue, modelName } = modelConfig;
-  const isConfigValid = baseUrl && keyValue && modelName;
+  const isCodexOAuthProvider = provider === VLMProviderV2.openai_codex_oauth;
+  const isConfigValid = isCodexOAuthProvider
+    ? Boolean(baseUrl && modelName)
+    : Boolean(baseUrl && keyValue && modelName);
 
   useEffect(() => {
     if (checkState.status === 'success' || checkState.status === 'error') {
@@ -881,6 +880,28 @@ export function ModelAvailabilityCheck({
     setCheckState({ status: 'checking' });
 
     try {
+      if (isCodexOAuthProvider) {
+        const codexState = await window.electron.codexAuth.status();
+
+        if (codexState.status === 'authenticated') {
+          onResponseApiSupportChange?.(true);
+          setCheckState({
+            status: 'success',
+            message: 'OpenAI Codex OAuth is connected and ready.',
+            responseApiSupported: true,
+          });
+        } else {
+          onResponseApiSupportChange?.(false);
+          setCheckState({
+            status: 'error',
+            message: 'OpenAI Codex OAuth is not connected. Please reconnect.',
+            responseApiSupported: false,
+          });
+        }
+
+        return;
+      }
+
       const requestPayload = {
         baseUrl,
         [authField]: keyValue,
@@ -953,8 +974,10 @@ export function ModelAvailabilityCheck({
         {checkState.status === 'checking' ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Checking Model...
+            {isCodexOAuthProvider ? 'Checking OAuth...' : 'Checking Model...'}
           </>
+        ) : isCodexOAuthProvider ? (
+          'Check OAuth Connection'
         ) : (
           'Check Model Availability'
         )}
