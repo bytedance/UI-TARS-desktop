@@ -115,4 +115,45 @@ describe('windowWaitReadyTool', () => {
     expect(result.errorClass).toBe('validation_error');
     expect(result.ready).toBe(false);
   });
+
+  it('caps per-attempt system.run timeout when pollInterval exceeds 60s', async () => {
+    const call = buildWindowWaitReadyToolCall({
+      intentId: 'intent-4',
+      targetWindow: 'notepad',
+      platform: 'win32',
+      timeoutMs: 60000,
+      pollIntervalMs: 120000,
+      idempotencyKey: 'idem-4',
+    });
+
+    const runSystemRun = vi.fn().mockResolvedValue({
+      version: 'v1',
+      callId: 'sys-call-cap',
+      toolName: 'system.run',
+      toolVersion: '1.0.0',
+      status: 'ok',
+      errorClass: 'none',
+      exitCode: 0,
+      stdout: 'ready',
+      stderr: '',
+      durationMs: 10,
+      deltaObserved: true,
+      artifacts: {
+        stdoutBytes: 5,
+        stderrBytes: 0,
+        stdoutTruncated: false,
+        stderrTruncated: false,
+      },
+    });
+
+    const result = await runWindowWaitReadyToolCall(call, {
+      runSystemRun,
+      sleepMs: vi.fn().mockResolvedValue(undefined),
+    });
+
+    expect(result.status).toBe('ok');
+    expect(runSystemRun).toHaveBeenCalledTimes(1);
+    const firstCall = runSystemRun.mock.calls[0]?.[0];
+    expect(firstCall?.canonicalArgs.timeoutMs).toBeLessThanOrEqual(60000);
+  });
 });

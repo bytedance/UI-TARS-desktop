@@ -320,10 +320,22 @@ export const runWindowWaitReadyToolCall = async (
 
   while (Date.now() - startedAt < parsedCall.canonicalArgs.timeoutMs) {
     attempts += 1;
+    const elapsedMs = Date.now() - startedAt;
+    const remainingMs = parsedCall.canonicalArgs.timeoutMs - elapsedMs;
+    if (remainingMs <= 0) {
+      break;
+    }
+
+    const systemRunTimeoutMs = Math.min(
+      parsedCall.canonicalArgs.pollIntervalMs,
+      parsedCall.canonicalArgs.timeoutMs,
+      remainingMs,
+    );
+
     const systemRunCall = buildSystemRunToolCall({
       intentId: parsedCall.intentId,
       argv: checkArgv,
-      timeoutMs: parsedCall.canonicalArgs.pollIntervalMs,
+      timeoutMs: systemRunTimeoutMs,
       idempotencyKey: `${parsedCall.idempotencyKey}:window.wait_ready:${parsedCall.canonicalArgs.targetWindow}:${attempts}`,
     });
     lastCallId = systemRunCall.callId;
