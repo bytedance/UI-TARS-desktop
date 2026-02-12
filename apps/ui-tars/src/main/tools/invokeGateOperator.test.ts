@@ -74,6 +74,23 @@ describe('InvokeGateOperator', () => {
     };
   };
 
+  const buildScrollExecuteParams = () => {
+    return {
+      prediction: 'Action output',
+      parsedPrediction: {
+        action_type: 'scroll',
+        action_inputs: { direction: 'down' },
+        reflection: null,
+        thought: 'scroll down',
+      },
+      loopCount: 1,
+      screenWidth: 1920,
+      screenHeight: 1080,
+      scaleFactor: 1,
+      factors: [1, 1],
+    };
+  };
+
   it('blocks unsupported actions when invoke gate is enabled', async () => {
     const innerOperator = createInnerOperator();
     const gatedOperator = new InvokeGateOperator({
@@ -192,5 +209,28 @@ describe('InvokeGateOperator', () => {
         buildExecuteParams('click', '[1,1,1,1]', 2) as never,
       ),
     ).rejects.toThrow('loop_budget_exhausted');
+  });
+
+  it('allows scroll action without start_box when invoke gate is enabled', async () => {
+    const innerOperator = createInnerOperator();
+    const gatedOperator = new InvokeGateOperator({
+      innerOperator,
+      featureFlags: {
+        ffToolRegistry: true,
+        ffInvokeGate: true,
+        ffToolFirstRouting: false,
+      },
+      sessionId: 'session-6',
+      authState: 'valid',
+      maxLoopCount: 5,
+    });
+
+    await expect(
+      gatedOperator.execute(buildScrollExecuteParams() as never),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+
+    expect(
+      (innerOperator as never as { execute: ReturnType<typeof vi.fn> }).execute,
+    ).toHaveBeenCalledTimes(1);
   });
 });

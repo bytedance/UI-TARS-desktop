@@ -147,4 +147,29 @@ describe('invokeGate', () => {
     expect(decision.decision).toBe('allow');
     expect(decision.loopBudgetRemaining).toBe(25.5);
   });
+
+  it('allows scroll action without start_box when invoke gate is enabled', () => {
+    const intent = buildActionIntentV1({
+      sessionId: 'session-7',
+      parsedPrediction: {
+        action_type: 'scroll',
+        action_inputs: { direction: 'down' },
+        reflection: null,
+        thought: 'scroll down',
+      },
+    });
+
+    const decision = evaluateInvokeGate(intent, {
+      featureFlags: {
+        ffToolRegistry: true,
+        ffInvokeGate: true,
+        ffToolFirstRouting: false,
+      },
+      authState: 'valid',
+      loopBudgetRemaining: 10,
+    });
+
+    expect(decision.decision).toBe('allow');
+    expect(decision.reasonCodes).toEqual([]);
+  });
 });

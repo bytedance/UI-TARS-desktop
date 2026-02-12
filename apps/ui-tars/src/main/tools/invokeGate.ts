@@ -69,7 +69,6 @@ const ACTION_TYPES_REQUIRING_START_BOX = new Set<string>([
   'left_click_drag',
   'drag',
   'select',
-  'scroll',
 ]);
 
 const ActionIntentV1Schema = z.object({
