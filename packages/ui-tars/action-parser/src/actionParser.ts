@@ -145,21 +145,17 @@ export function parseActionVlm(
       }
     }
 
-    const actionMarkerMatch = Array.from(text.matchAll(/Action[:：]/g));
-    actionMarkerCount = actionMarkerMatch.length;
+    const actionMarkers = findActionMarkers(text);
+    actionMarkerCount = actionMarkers.length;
 
     if (actionMarkerCount === 0) {
       //   throw new Error('No Action found in text');
       actionStr = text;
     } else {
-      for (let i = actionMarkerMatch.length - 1; i >= 0; i--) {
-        const actionMarker = actionMarkerMatch[i];
-        if (actionMarker?.index == null) {
-          continue;
-        }
-
+      for (let i = actionMarkers.length - 1; i >= 0; i--) {
+        const actionMarker = actionMarkers[i];
         const candidate = text.slice(
-          actionMarker.index + actionMarker[0].length,
+          actionMarker.index + actionMarker.marker.length,
         );
         if (extractLeadingFunctionCall(candidate)) {
           actionStr = candidate;
@@ -320,6 +316,65 @@ export function parseActionVlm(
 
   return actions;
 }
+
+function findActionMarkers(
+  text: string,
+): Array<{ index: number; marker: string }> {
+  const markers: Array<{ index: number; marker: string }> = [];
+  let quote: "'" | '"' | null = null;
+  let escaping = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+
+    if (quote) {
+      if (escaping) {
+        escaping = false;
+        continue;
+      }
+
+      if (char === '\\') {
+        escaping = true;
+        continue;
+      }
+
+      if (char === quote) {
+        quote = null;
+      }
+
+      continue;
+    }
+
+    if (char === "'" && isApostrophe(text, i)) {
+      continue;
+    }
+
+    if (char === '"' || char === "'") {
+      quote = char as "'" | '"';
+      continue;
+    }
+
+    if (text.startsWith('Action:', i)) {
+      markers.push({ index: i, marker: 'Action:' });
+      i += 'Action:'.length - 1;
+      continue;
+    }
+
+    if (text.startsWith('Action：', i)) {
+      markers.push({ index: i, marker: 'Action：' });
+      i += 'Action：'.length - 1;
+    }
+  }
+
+  return markers;
+}
+
+function isApostrophe(text: string, index: number): boolean {
+  const prev = text[index - 1] ?? '';
+  const next = text[index + 1] ?? '';
+  return /[A-Za-z0-9]/.test(prev) && /[A-Za-z0-9]/.test(next);
+}
+
 /**
  * Parses an action string into a structured object
  * @param {string} actionStr - The action string to parse (e.g. "click(start_box='(279,81)')")

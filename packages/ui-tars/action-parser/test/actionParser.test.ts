@@ -494,6 +494,23 @@ Action: click(start_box='(100,200)') then wait()`;
       ]);
     });
 
+    it('should ignore Action marker text inside quoted action arguments', () => {
+      const input = `Thought: Type raw text exactly
+Action: type(content='Action: wait()')`;
+      const result = parseActionVlm(input);
+
+      expect(result).toEqual([
+        {
+          action_inputs: {
+            content: 'Action: wait()',
+          },
+          action_type: 'type',
+          reflection: null,
+          thought: 'Type raw text exactly',
+        },
+      ]);
+    });
+
     it('should handle with Chinese colon', () => {
       const input = `Thought: I need to click this button
 Action：click(start_box='(100,200)')`;
