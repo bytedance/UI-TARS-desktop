@@ -7,6 +7,10 @@ import { StatusEnum, Conversation, Message } from '@ui-tars/shared/types';
 import { store } from '@main/store/create';
 import { runAgent } from '@main/services/runAgent';
 import { showWindow } from '@main/window/index';
+import {
+  CheckpointRecoveryService,
+  buildResumeInputFromCheckpoint,
+} from '@main/services/checkpointRecovery';
 
 import { closeScreenMarker } from '@main/window/ScreenMarker';
 import { GUIAgent } from '@ui-tars/sdk';
@@ -102,7 +106,34 @@ export const agentRoute = t.router({
     .handle(async ({ input }) => {
       store.setState({ sessionHistoryMessages: input.messages });
     }),
+  getRecoveryCheckpoint: t.procedure.input<void>().handle(async () => {
+    return CheckpointRecoveryService.getInstance().getRecoverableCheckpoint();
+  }),
+  recoverFromCheckpoint: t.procedure.input<void>().handle(async () => {
+    const checkpoint =
+      CheckpointRecoveryService.getInstance().getRecoverableCheckpoint();
+    if (!checkpoint) {
+      throw new Error('[RECOVERY_CHECKPOINT_MISSING]');
+    }
+
+    const resumeInput = buildResumeInputFromCheckpoint(checkpoint);
+    store.setState({
+      ...store.getState(),
+      status: StatusEnum.INIT,
+      errorMsg: null,
+      instructions: resumeInput.instruction,
+      sessionHistoryMessages: resumeInput.sessionHistoryMessages,
+    });
+
+    return {
+      checkpointId: checkpoint.checkpointId,
+      sessionId: checkpoint.sessionId,
+      restoredMessageCount: resumeInput.sessionHistoryMessages.length,
+    };
+  }),
   clearHistory: t.procedure.input<void>().handle(async () => {
+    CheckpointRecoveryService.getInstance().clearCheckpoint();
+
     store.setState({
       status: StatusEnum.END,
       messages: [],
