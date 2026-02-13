@@ -13,6 +13,7 @@ import { logger } from '@main/logger';
 import type { ToolFirstFeatureFlags } from '@main/store/featureFlags';
 
 import {
+  type ActionIntentV1,
   type GateAuthState,
   buildActionIntentV1,
   evaluateInvokeGate,
@@ -36,6 +37,11 @@ type InvokeGateOperatorConfig = {
   }) => Promise<ToolFirstRouteResult>;
 };
 
+const REPEATED_INTENT_DERIVED_ARG_KEYS = new Set<string>([
+  'start_coords',
+  'end_coords',
+]);
+
 export class InvokeGateOperator extends Operator {
   static MANUAL = {
     ACTION_SPACES: [] as string[],
@@ -50,6 +56,8 @@ export class InvokeGateOperator extends Operator {
   >;
   private remainingLoopBudget: number;
   private lastEvaluatedLoopCount: number | null = null;
+  private previousIntentSignature: string | null = null;
+  private repeatedIntentStreak = 0;
 
   constructor(config: InvokeGateOperatorConfig) {
     super();
@@ -83,11 +91,16 @@ export class InvokeGateOperator extends Operator {
       sessionId: this.sessionId,
       parsedPrediction: params.parsedPrediction,
     });
+    const { signature: intentSignature, streak: repeatedIntentStreak } =
+      this.previewRepeatedIntentStreak(intent);
+    const shouldCommitRepeatedIntent =
+      this.shouldTrackRepeatedIntentStreak(intent);
 
     const gateDecision = evaluateInvokeGate(intent, {
       featureFlags: this.featureFlags,
       authState: this.authState,
       loopBudgetRemaining: this.remainingLoopBudget,
+      repeatedIntentStreak,
     });
 
     logger.info('[invoke-gate] decision', {
@@ -95,6 +108,7 @@ export class InvokeGateOperator extends Operator {
       decision: gateDecision.decision,
       reasonCodes: gateDecision.reasonCodes,
       remainingLoopBudget: this.remainingLoopBudget,
+      repeatedIntentStreak,
     });
 
     if (gateDecision.decision === 'deny') {
@@ -114,6 +128,11 @@ export class InvokeGateOperator extends Operator {
       });
 
       if (toolFirstResult.handled) {
+        this.commitRepeatedIntent(
+          intentSignature,
+          repeatedIntentStreak,
+          shouldCommitRepeatedIntent,
+        );
         logger.info('[tool-first-routing] tool path handled action', {
           actionType: params.parsedPrediction.action_type,
           toolName: toolFirstResult.toolName,
@@ -134,7 +153,70 @@ export class InvokeGateOperator extends Operator {
       });
     }
 
-    return this.innerOperator.execute(params);
+    const output = await this.innerOperator.execute(params);
+    this.commitRepeatedIntent(
+      intentSignature,
+      repeatedIntentStreak,
+      shouldCommitRepeatedIntent,
+    );
+    return output;
+  }
+
+  private previewRepeatedIntentStreak(intent: ActionIntentV1): {
+    signature: string;
+    streak: number;
+  } {
+    const signature = this.buildIntentSignature(intent);
+
+    if (!this.featureFlags.ffLoopGuardrails) {
+      return {
+        signature,
+        streak: 0,
+      };
+    }
+
+    const streak =
+      this.previousIntentSignature === signature
+        ? this.repeatedIntentStreak + 1
+        : 1;
+
+    return {
+      signature,
+      streak,
+    };
+  }
+
+  private commitRepeatedIntent(
+    signature: string,
+    streak: number,
+    shouldCommit: boolean,
+  ): void {
+    if (!this.featureFlags.ffLoopGuardrails || !shouldCommit) {
+      return;
+    }
+
+    this.repeatedIntentStreak = streak;
+    this.previousIntentSignature = signature;
+  }
+
+  private shouldTrackRepeatedIntentStreak(intent: ActionIntentV1): boolean {
+    return intent.riskTier !== 'low' && intent.actionType !== 'wait';
+  }
+
+  private buildIntentSignature(intent: ActionIntentV1): string {
+    const normalizedArgs = Object.entries(intent.args)
+      .filter(([key]) => !REPEATED_INTENT_DERIVED_ARG_KEYS.has(key))
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([key, value]) => {
+        if (typeof value === 'string') {
+          return `${key}:${value}`;
+        }
+
+        return `${key}:${JSON.stringify(value)}`;
+      })
+      .join('|');
+
+    return `${intent.actionType}|${normalizedArgs}`;
   }
 
   private advanceLoopBudget(loopCount?: number): void {

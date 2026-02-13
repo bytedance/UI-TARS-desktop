@@ -51,6 +51,9 @@ export const PresetSchema = z
     ffConfidenceLayer: z
       .boolean()
       .default(TOOL_FIRST_FEATURE_FLAG_DEFAULTS.ffConfidenceLayer),
+    ffLoopGuardrails: z
+      .boolean()
+      .default(TOOL_FIRST_FEATURE_FLAG_DEFAULTS.ffLoopGuardrails),
   })
   .superRefine((value, ctx) => {
     if (!value.vlmProvider) {

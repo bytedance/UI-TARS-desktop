@@ -27,6 +27,7 @@ describe('tool-first feature flags', () => {
       ffInvokeGate: true,
       ffToolFirstRouting: false,
       ffConfidenceLayer: false,
+      ffLoopGuardrails: false,
     });
   });
 });

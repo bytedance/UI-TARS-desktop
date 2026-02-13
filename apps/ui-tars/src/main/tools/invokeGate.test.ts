@@ -319,6 +319,34 @@ describe('invokeGate', () => {
     });
   });
 
+  it('denies repeated medium/high-risk intent pattern when loop guardrails are enabled', () => {
+    const intent = buildActionIntentV1({
+      sessionId: 'session-5g',
+      parsedPrediction: {
+        action_type: 'click',
+        action_inputs: { start_box: '[1,1,1,1]' },
+        reflection: null,
+        thought: 'stuck repeated click',
+      },
+    });
+
+    const decision = evaluateInvokeGate(intent, {
+      featureFlags: {
+        ffToolRegistry: true,
+        ffInvokeGate: true,
+        ffToolFirstRouting: false,
+        ffConfidenceLayer: false,
+        ffLoopGuardrails: true,
+      },
+      authState: 'valid',
+      loopBudgetRemaining: 10,
+      repeatedIntentStreak: 3,
+    });
+
+    expect(decision.decision).toBe('deny');
+    expect(decision.reasonCodes).toContain('loop_pattern_repeated');
+  });
+
   it('allows mutating tool action with explicit target when confidence layer is enabled', () => {
     withMockedPlatform('win32', () => {
       const intent = buildActionIntentV1({

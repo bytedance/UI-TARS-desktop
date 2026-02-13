@@ -40,12 +40,13 @@ describe('InvokeGateOperator', () => {
     actionType: string,
     startBox = '[1,1,1,1]',
     loopCount?: number,
+    extraActionInputs: Record<string, unknown> = {},
   ) => {
     return {
       prediction: 'Action output',
       parsedPrediction: {
         action_type: actionType,
-        action_inputs: { start_box: startBox },
+        action_inputs: { start_box: startBox, ...extraActionInputs },
         reflection: null,
         thought: 'execute action',
       },
@@ -105,6 +106,23 @@ describe('InvokeGateOperator', () => {
         thought: 'scroll down',
       },
       loopCount: 1,
+      screenWidth: 1920,
+      screenHeight: 1080,
+      scaleFactor: 1,
+      factors: [1, 1],
+    };
+  };
+
+  const buildWaitExecuteParams = (loopCount?: number) => {
+    return {
+      prediction: 'Action output',
+      parsedPrediction: {
+        action_type: 'wait',
+        action_inputs: {},
+        reflection: null,
+        thought: 'wait',
+      },
+      loopCount,
       screenWidth: 1920,
       screenHeight: 1080,
       scaleFactor: 1,
@@ -230,6 +248,292 @@ describe('InvokeGateOperator', () => {
         buildExecuteParams('click', '[1,1,1,1]', 2) as never,
       ),
     ).rejects.toThrow('loop_budget_exhausted');
+  });
+
+  it('blocks repeated action patterns when loop guardrails are enabled', async () => {
+    const innerOperator = createInnerOperator();
+    const gatedOperator = new InvokeGateOperator({
+      innerOperator,
+      featureFlags: {
+        ffToolRegistry: true,
+        ffInvokeGate: true,
+        ffToolFirstRouting: false,
+        ffLoopGuardrails: true,
+      },
+      sessionId: 'session-5-loop',
+      authState: 'valid',
+      maxLoopCount: 10,
+    });
+
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 1) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 2) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 3) as never,
+      ),
+    ).rejects.toThrow('loop_pattern_repeated');
+
+    expect(
+      (innerOperator as never as { execute: ReturnType<typeof vi.fn> }).execute,
+    ).toHaveBeenCalledTimes(2);
+  });
+
+  it('counts repeated intents per loop iteration, not per retry', async () => {
+    const innerOperator = createInnerOperator();
+    const innerExecute = (
+      innerOperator as never as {
+        execute: ReturnType<typeof vi.fn>;
+      }
+    ).execute;
+    innerExecute
+      .mockRejectedValueOnce(new Error('transient-loop-1'))
+      .mockResolvedValueOnce({ status: StatusEnum.RUNNING })
+      .mockRejectedValueOnce(new Error('transient-loop-2'))
+      .mockResolvedValueOnce({ status: StatusEnum.RUNNING });
+
+    const gatedOperator = new InvokeGateOperator({
+      innerOperator,
+      featureFlags: {
+        ffToolRegistry: true,
+        ffInvokeGate: true,
+        ffToolFirstRouting: false,
+        ffLoopGuardrails: true,
+      },
+      sessionId: 'session-5-retry',
+      authState: 'valid',
+      maxLoopCount: 10,
+    });
+
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 1) as never,
+      ),
+    ).rejects.toThrow('transient-loop-1');
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 1) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 2) as never,
+      ),
+    ).rejects.toThrow('transient-loop-2');
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 2) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 3) as never,
+      ),
+    ).rejects.toThrow('loop_pattern_repeated');
+
+    expect(innerExecute).toHaveBeenCalledTimes(4);
+  });
+
+  it('tracks repeated intents for each action within the same loop iteration', async () => {
+    const innerOperator = createInnerOperator();
+    const gatedOperator = new InvokeGateOperator({
+      innerOperator,
+      featureFlags: {
+        ffToolRegistry: true,
+        ffInvokeGate: true,
+        ffToolFirstRouting: false,
+        ffLoopGuardrails: true,
+      },
+      sessionId: 'session-5-same-loop-actions',
+      authState: 'valid',
+      maxLoopCount: 10,
+    });
+
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 1) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 1) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 1) as never,
+      ),
+    ).rejects.toThrow('loop_pattern_repeated');
+
+    expect(
+      (innerOperator as never as { execute: ReturnType<typeof vi.fn> }).execute,
+    ).toHaveBeenCalledTimes(2);
+  });
+
+  it('ignores derived coordinate args when tracking repeated intents', async () => {
+    const innerOperator = createInnerOperator();
+    const gatedOperator = new InvokeGateOperator({
+      innerOperator,
+      featureFlags: {
+        ffToolRegistry: true,
+        ffInvokeGate: true,
+        ffToolFirstRouting: false,
+        ffLoopGuardrails: true,
+      },
+      sessionId: 'session-5-derived-coords',
+      authState: 'valid',
+      maxLoopCount: 10,
+    });
+
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 1, {
+          start_coords: [100, 100],
+          end_coords: [120, 120],
+        }) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 2, {
+          start_coords: [150, 150],
+          end_coords: [170, 170],
+        }) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 3, {
+          start_coords: [200, 200],
+          end_coords: [220, 220],
+        }) as never,
+      ),
+    ).rejects.toThrow('loop_pattern_repeated');
+
+    expect(
+      (innerOperator as never as { execute: ReturnType<typeof vi.fn> }).execute,
+    ).toHaveBeenCalledTimes(2);
+  });
+
+  it('preserves repeated-intent streak across low-risk wait actions', async () => {
+    const innerOperator = createInnerOperator();
+    const gatedOperator = new InvokeGateOperator({
+      innerOperator,
+      featureFlags: {
+        ffToolRegistry: true,
+        ffInvokeGate: true,
+        ffToolFirstRouting: false,
+        ffLoopGuardrails: true,
+      },
+      sessionId: 'session-5-wait-filler',
+      authState: 'valid',
+      maxLoopCount: 10,
+    });
+
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 1) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+    await expect(
+      gatedOperator.execute(buildWaitExecuteParams(1) as never),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 2) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+    await expect(
+      gatedOperator.execute(buildWaitExecuteParams(2) as never),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 3) as never,
+      ),
+    ).rejects.toThrow('loop_pattern_repeated');
+
+    expect(
+      (innerOperator as never as { execute: ReturnType<typeof vi.fn> }).execute,
+    ).toHaveBeenCalledTimes(4);
+  });
+
+  it('treats case-sensitive retry inputs as distinct intent signatures', async () => {
+    const innerOperator = createInnerOperator();
+    const gatedOperator = new InvokeGateOperator({
+      innerOperator,
+      featureFlags: {
+        ffToolRegistry: true,
+        ffInvokeGate: true,
+        ffToolFirstRouting: false,
+        ffLoopGuardrails: true,
+      },
+      sessionId: 'session-5-case',
+      authState: 'valid',
+      maxLoopCount: 10,
+    });
+
+    await expect(
+      gatedOperator.execute(
+        buildToolExecuteParams('type', 'Password', 1) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+    await expect(
+      gatedOperator.execute(
+        buildToolExecuteParams('type', 'password', 2) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+    await expect(
+      gatedOperator.execute(
+        buildToolExecuteParams('type', 'PASSWORD', 3) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+
+    expect(
+      (innerOperator as never as { execute: ReturnType<typeof vi.fn> }).execute,
+    ).toHaveBeenCalledTimes(3);
+  });
+
+  it('treats whitespace-variant retry inputs as distinct intent signatures', async () => {
+    const innerOperator = createInnerOperator();
+    const gatedOperator = new InvokeGateOperator({
+      innerOperator,
+      featureFlags: {
+        ffToolRegistry: true,
+        ffInvokeGate: true,
+        ffToolFirstRouting: false,
+        ffLoopGuardrails: true,
+      },
+      sessionId: 'session-5-space',
+      authState: 'valid',
+      maxLoopCount: 10,
+    });
+
+    await expect(
+      gatedOperator.execute(
+        buildToolExecuteParams('type', 'password', 1) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+    await expect(
+      gatedOperator.execute(
+        buildToolExecuteParams('type', ' password', 2) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+    await expect(
+      gatedOperator.execute(
+        buildToolExecuteParams('type', 'password ', 3) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+
+    expect(
+      (innerOperator as never as { execute: ReturnType<typeof vi.fn> }).execute,
+    ).toHaveBeenCalledTimes(3);
   });
 
   it('allows scroll action without start_box when invoke gate is enabled', async () => {
