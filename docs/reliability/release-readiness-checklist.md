@@ -50,3 +50,4 @@ Use this checklist to decide if the migration plan is fully complete.
 - Regression evidence: `docs/reliability/artifacts/2026-02-13-phase-regression-evidence.md`
 - Rollback rehearsal evidence: `docs/reliability/artifacts/2026-02-13-rollback-rehearsal-002.md`
 - Final approval note: `docs/reliability/artifacts/2026-02-13-final-approval-note.md` (`Decision: APPROVED`)
+- Org-trace closure record: `docs/reliability/closure/2026-02-13-org-trace-record.md`
