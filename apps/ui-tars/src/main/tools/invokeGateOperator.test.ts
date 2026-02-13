@@ -270,6 +270,17 @@ describe('InvokeGateOperator', () => {
 
   it('counts repeated intents per loop iteration, not per retry', async () => {
     const innerOperator = createInnerOperator();
+    const innerExecute = (
+      innerOperator as never as {
+        execute: ReturnType<typeof vi.fn>;
+      }
+    ).execute;
+    innerExecute
+      .mockRejectedValueOnce(new Error('transient-loop-1'))
+      .mockResolvedValueOnce({ status: StatusEnum.RUNNING })
+      .mockRejectedValueOnce(new Error('transient-loop-2'))
+      .mockResolvedValueOnce({ status: StatusEnum.RUNNING });
+
     const gatedOperator = new InvokeGateOperator({
       innerOperator,
       featureFlags: {
@@ -287,7 +298,7 @@ describe('InvokeGateOperator', () => {
       gatedOperator.execute(
         buildExecuteParams('click', '[1,1,1,1]', 1) as never,
       ),
-    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+    ).rejects.toThrow('transient-loop-1');
     await expect(
       gatedOperator.execute(
         buildExecuteParams('click', '[1,1,1,1]', 1) as never,
@@ -297,7 +308,7 @@ describe('InvokeGateOperator', () => {
       gatedOperator.execute(
         buildExecuteParams('click', '[1,1,1,1]', 2) as never,
       ),
-    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+    ).rejects.toThrow('transient-loop-2');
     await expect(
       gatedOperator.execute(
         buildExecuteParams('click', '[1,1,1,1]', 2) as never,
@@ -309,9 +320,43 @@ describe('InvokeGateOperator', () => {
       ),
     ).rejects.toThrow('loop_pattern_repeated');
 
+    expect(innerExecute).toHaveBeenCalledTimes(4);
+  });
+
+  it('tracks repeated intents for each action within the same loop iteration', async () => {
+    const innerOperator = createInnerOperator();
+    const gatedOperator = new InvokeGateOperator({
+      innerOperator,
+      featureFlags: {
+        ffToolRegistry: true,
+        ffInvokeGate: true,
+        ffToolFirstRouting: false,
+        ffLoopGuardrails: true,
+      },
+      sessionId: 'session-5-same-loop-actions',
+      authState: 'valid',
+      maxLoopCount: 10,
+    });
+
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 1) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 1) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 1) as never,
+      ),
+    ).rejects.toThrow('loop_pattern_repeated');
+
     expect(
       (innerOperator as never as { execute: ReturnType<typeof vi.fn> }).execute,
-    ).toHaveBeenCalledTimes(4);
+    ).toHaveBeenCalledTimes(2);
   });
 
   it('treats case-sensitive retry inputs as distinct intent signatures', async () => {

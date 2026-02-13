@@ -51,7 +51,6 @@ export class InvokeGateOperator extends Operator {
   >;
   private remainingLoopBudget: number;
   private lastEvaluatedLoopCount: number | null = null;
-  private lastTrackedIntentLoopCount: number | null = null;
   private previousIntentSignature: string | null = null;
   private repeatedIntentStreak = 0;
 
@@ -87,9 +86,8 @@ export class InvokeGateOperator extends Operator {
       sessionId: this.sessionId,
       parsedPrediction: params.parsedPrediction,
     });
-    const repeatedIntentStreak = this.featureFlags.ffLoopGuardrails
-      ? this.trackRepeatedIntent(intent, loopCount)
-      : 0;
+    const { signature: intentSignature, streak: repeatedIntentStreak } =
+      this.previewRepeatedIntentStreak(intent);
 
     const gateDecision = evaluateInvokeGate(intent, {
       featureFlags: this.featureFlags,
@@ -123,6 +121,7 @@ export class InvokeGateOperator extends Operator {
       });
 
       if (toolFirstResult.handled) {
+        this.commitRepeatedIntent(intentSignature, repeatedIntentStreak);
         logger.info('[tool-first-routing] tool path handled action', {
           actionType: params.parsedPrediction.action_type,
           toolName: toolFirstResult.toolName,
@@ -143,34 +142,42 @@ export class InvokeGateOperator extends Operator {
       });
     }
 
-    return this.innerOperator.execute(params);
+    const output = await this.innerOperator.execute(params);
+    this.commitRepeatedIntent(intentSignature, repeatedIntentStreak);
+    return output;
   }
 
-  private trackRepeatedIntent(
-    intent: ActionIntentV1,
-    loopCount?: number,
-  ): number {
-    if (
-      typeof loopCount === 'number' &&
-      this.lastTrackedIntentLoopCount !== null &&
-      loopCount === this.lastTrackedIntentLoopCount
-    ) {
-      return this.repeatedIntentStreak;
-    }
-
+  private previewRepeatedIntentStreak(intent: ActionIntentV1): {
+    signature: string;
+    streak: number;
+  } {
     const signature = this.buildIntentSignature(intent);
 
-    if (this.previousIntentSignature === signature) {
-      this.repeatedIntentStreak += 1;
-    } else {
-      this.repeatedIntentStreak = 1;
+    if (!this.featureFlags.ffLoopGuardrails) {
+      return {
+        signature,
+        streak: 0,
+      };
     }
 
-    if (typeof loopCount === 'number') {
-      this.lastTrackedIntentLoopCount = loopCount;
+    const streak =
+      this.previousIntentSignature === signature
+        ? this.repeatedIntentStreak + 1
+        : 1;
+
+    return {
+      signature,
+      streak,
+    };
+  }
+
+  private commitRepeatedIntent(signature: string, streak: number): void {
+    if (!this.featureFlags.ffLoopGuardrails) {
+      return;
     }
+
+    this.repeatedIntentStreak = streak;
     this.previousIntentSignature = signature;
-    return this.repeatedIntentStreak;
   }
 
   private buildIntentSignature(intent: ActionIntentV1): string {
