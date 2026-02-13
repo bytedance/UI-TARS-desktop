@@ -14,7 +14,6 @@ import {
 } from '@ui-tars/shared/types';
 import { IMAGE_PLACEHOLDER, MAX_LOOP_COUNT } from '@ui-tars/shared/constants';
 import { sleep } from '@ui-tars/shared/utils';
-import asyncRetry from 'async-retry';
 import { Jimp } from 'jimp';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -35,6 +34,7 @@ import {
   SYSTEM_PROMPT_TEMPLATE,
 } from './constants';
 import { InternalServerError } from 'openai';
+import { runWithRetryBudget } from './retryEngine';
 
 export class GUIAgent<T extends Operator> extends BaseGUIAgent<
   GUIAgentConfig<T>
@@ -182,9 +182,9 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
         loopCnt += 1;
         const start = Date.now();
 
-        const snapshot = await asyncRetry(() => operator.screenshot(), {
-          retries: retry?.screenshot?.maxRetries ?? 0,
-          minTimeout: 5000,
+        const snapshot = await runWithRetryBudget(() => operator.screenshot(), {
+          maxRetries: retry?.screenshot?.maxRetries ?? 0,
+          minTimeoutMs: 5000,
           onRetry: retry?.screenshot?.onRetry,
         });
 
@@ -264,8 +264,8 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
           costTime,
           costTokens,
           responseId,
-        } = await asyncRetry(
-          async (bail) => {
+        } = await runWithRetryBudget(
+          async () => {
             try {
               const result = await model.invoke(vlmParams);
               return result;
@@ -278,11 +278,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
               const isUserInitiatedStop = !!(signal?.aborted || this.isStopped);
 
               if (isAbortError && isUserInitiatedStop) {
-                bail(error as unknown as Error);
-                return {
-                  prediction: '',
-                  parsedPredictions: [],
-                };
+                throw error;
               }
 
               if (isAbortError) {
@@ -302,9 +298,18 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
             }
           },
           {
-            retries: retry?.model?.maxRetries ?? 0,
-            minTimeout: 1000 * 30,
+            maxRetries: retry?.model?.maxRetries ?? 0,
+            minTimeoutMs: 1000 * 30,
             onRetry: retry?.model?.onRetry,
+            isRetryable: (error: unknown) => {
+              const isAbortError =
+                error instanceof Error &&
+                (error?.name === 'APIUserAbortError' ||
+                  error?.name === 'AbortError' ||
+                  error?.message?.includes('aborted'));
+              const isUserInitiatedStop = !!(signal?.aborted || this.isStopped);
+              return !(isAbortError && isUserInitiatedStop);
+            },
           },
         );
 
@@ -410,7 +415,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
               parsedPrediction.action_type,
             );
             // TODO: pass executeOutput to onData
-            const executeOutput = await asyncRetry(
+            const executeOutput = await runWithRetryBudget(
               () =>
                 operator.execute({
                   prediction,
@@ -422,8 +427,8 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
                   factors: this.model.factors,
                 }),
               {
-                retries: retry?.execute?.maxRetries ?? 0,
-                minTimeout: 5000,
+                maxRetries: retry?.execute?.maxRetries ?? 0,
+                minTimeoutMs: 5000,
                 onRetry: retry?.execute?.onRetry,
               },
             ).catch((e) => {
@@ -474,6 +479,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
       if (isAbortError && isUserInitiatedStop) {
         logger.info('[GUIAgent] Catch: request was aborted');
         data.status = StatusEnum.USER_STOPPED;
+        data.error = undefined;
         return;
       }
 

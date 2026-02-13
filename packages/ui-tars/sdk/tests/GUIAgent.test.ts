@@ -316,9 +316,13 @@ describe('GUIAgent', () => {
         ],
       }),
       expect.objectContaining({
+        status: StatusEnum.USER_STOPPED,
         conversations: [],
       }),
     ]);
+
+    const lastDataEvent = dataEvents[dataEvents.length - 1];
+    expect(lastDataEvent?.error).toBeUndefined();
   });
 
   it('should treat non-user abort as error instead of user_stopped', async () => {
