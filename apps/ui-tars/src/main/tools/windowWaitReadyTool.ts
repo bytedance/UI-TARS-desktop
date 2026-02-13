@@ -194,6 +194,21 @@ const mapSystemRunErrorClass = (
   return 'spawn_error';
 };
 
+const isNotReadyProbeExit = (
+  platform: WindowWaitReadyPlatform,
+  result: SystemRunToolResultV1,
+): boolean => {
+  if (result.errorClass !== 'non_zero_exit') {
+    return false;
+  }
+
+  if (platform === 'win32') {
+    return result.exitCode === 3;
+  }
+
+  return result.exitCode === 1;
+};
+
 type WindowWaitReadyExecutionOptions = {
   runSystemRun?: (call: SystemRunToolCallV1) => Promise<SystemRunToolResultV1>;
   sleepMs?: (ms: number) => Promise<void>;
@@ -455,10 +470,23 @@ export const runWindowWaitReadyToolCall = async (
       });
     }
 
-    if (
-      lastResult.status === 'error' &&
-      lastResult.errorClass !== 'non_zero_exit'
-    ) {
+    if (lastResult.status === 'error') {
+      const retryableNotReady = isNotReadyProbeExit(
+        parsedCall.canonicalArgs.platform,
+        lastResult,
+      );
+      if (retryableNotReady) {
+        const elapsed = Date.now() - startedAt;
+        const nextSleepMs = Math.min(
+          parsedCall.canonicalArgs.pollIntervalMs,
+          parsedCall.canonicalArgs.timeoutMs - elapsed,
+        );
+        if (nextSleepMs > 0) {
+          await sleepMs(nextSleepMs);
+        }
+        continue;
+      }
+
       return WindowWaitReadyToolResultSchema.parse({
         version: WINDOW_WAIT_READY_TOOL_RESULT_VERSION,
         callId: parsedCall.callId,

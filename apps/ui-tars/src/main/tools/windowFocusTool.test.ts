@@ -85,7 +85,7 @@ describe('windowFocusTool', () => {
     expect(result.systemRunCallId).toBe('sys-call-1');
   });
 
-  it('maps non-zero exit to window_not_found', async () => {
+  it('maps not-found sentinel exit to window_not_found', async () => {
     const call = buildWindowFocusToolCall({
       intentId: 'intent-4',
       targetWindow: 'notepad',
@@ -117,6 +117,41 @@ describe('windowFocusTool', () => {
 
     expect(result.status).toBe('error');
     expect(result.errorClass).toBe('window_not_found');
+    expect(result.focused).toBe(false);
+  });
+
+  it('preserves non-sentinel non_zero_exit from focus command', async () => {
+    const call = buildWindowFocusToolCall({
+      intentId: 'intent-4b',
+      targetWindow: 'notepad',
+      platform: 'win32',
+      idempotencyKey: 'idem-4b',
+    });
+
+    const result = await runWindowFocusToolCall(call, {
+      runSystemRun: vi.fn().mockResolvedValue({
+        version: 'v1',
+        callId: 'sys-call-2b',
+        toolName: 'system.run',
+        toolVersion: '1.0.0',
+        status: 'error',
+        errorClass: 'non_zero_exit',
+        exitCode: 1,
+        stdout: '',
+        stderr: 'powershell runtime failure',
+        durationMs: 20,
+        deltaObserved: false,
+        artifacts: {
+          stdoutBytes: 0,
+          stderrBytes: 25,
+          stdoutTruncated: false,
+          stderrTruncated: false,
+        },
+      }),
+    });
+
+    expect(result.status).toBe('error');
+    expect(result.errorClass).toBe('non_zero_exit');
     expect(result.focused).toBe(false);
   });
 

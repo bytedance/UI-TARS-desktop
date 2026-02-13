@@ -242,4 +242,47 @@ describe('windowWaitReadyTool', () => {
     expect(result.attempts).toBe(1);
     expect(sleepMs).not.toHaveBeenCalled();
   });
+
+  it('returns non_zero_exit immediately when probe exit is not the not-ready sentinel', async () => {
+    const call = buildWindowWaitReadyToolCall({
+      intentId: 'intent-6',
+      targetWindow: 'notepad',
+      platform: 'win32',
+      timeoutMs: 10000,
+      pollIntervalMs: 500,
+      idempotencyKey: 'idem-6',
+    });
+
+    const runSystemRun = vi.fn().mockResolvedValue({
+      version: 'v1',
+      callId: 'sys-call-non-sentinel',
+      toolName: 'system.run',
+      toolVersion: '1.0.0',
+      status: 'error',
+      errorClass: 'non_zero_exit',
+      exitCode: 2,
+      stdout: '',
+      stderr: 'probe execution failure',
+      durationMs: 5,
+      deltaObserved: false,
+      artifacts: {
+        stdoutBytes: 0,
+        stderrBytes: 23,
+        stdoutTruncated: false,
+        stderrTruncated: false,
+      },
+    });
+    const sleepMs = vi.fn().mockResolvedValue(undefined);
+
+    const result = await runWindowWaitReadyToolCall(call, {
+      runSystemRun,
+      sleepMs,
+    });
+
+    expect(result.status).toBe('error');
+    expect(result.errorClass).toBe('non_zero_exit');
+    expect(result.ready).toBe(false);
+    expect(result.attempts).toBe(1);
+    expect(sleepMs).not.toHaveBeenCalled();
+  });
 });

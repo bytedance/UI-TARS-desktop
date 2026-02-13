@@ -168,6 +168,25 @@ const resolveFocusArgv = (
   return Array.isArray(argv) && argv.length > 0 ? [...argv] : null;
 };
 
+const isWindowNotFoundExit = (
+  platform: WindowFocusPlatform,
+  result: SystemRunToolResultV1,
+): boolean => {
+  if (result.errorClass !== 'non_zero_exit') {
+    return false;
+  }
+
+  if (platform === 'win32') {
+    return result.exitCode === 3;
+  }
+
+  if (platform === 'darwin') {
+    return result.stderr.includes('WINDOW_NOT_FOUND');
+  }
+
+  return false;
+};
+
 export const buildWindowFocusToolCall = (params: {
   intentId: string;
   targetWindow: WindowFocusTarget;
@@ -316,13 +335,19 @@ export const runWindowFocusToolCall = async (
   }
 
   const status = systemRunResult.status;
+  const notFoundExit = isWindowNotFoundExit(
+    parsedCall.canonicalArgs.platform,
+    systemRunResult,
+  );
   const errorClass =
     systemRunResult.errorClass === 'none'
       ? 'none'
       : systemRunResult.errorClass === 'timeout'
         ? 'timeout'
         : systemRunResult.errorClass === 'non_zero_exit'
-          ? 'window_not_found'
+          ? notFoundExit
+            ? 'window_not_found'
+            : 'non_zero_exit'
           : systemRunResult.errorClass === 'validation_error'
             ? 'validation_error'
             : 'spawn_error';
