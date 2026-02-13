@@ -33,7 +33,7 @@ export type ReliabilityRendererState =
 type ReliabilityEvent = {
   type: ReliabilityEventType;
   timestamp: number;
-  sessionId: string;
+  sessionId?: string;
   intentId?: string;
   callId?: string;
   toolName?: string;
@@ -86,6 +86,22 @@ const createRendererStateCountMap = (): Record<
   );
 };
 
+type ReleaseGateEvidence = {
+  observedEventCounts: Record<ReliabilityEventType, number>;
+  startedToolCalls: number;
+  resolvedToolCalls: number;
+  eventsMissingRequiredTags: number;
+};
+
+const createReleaseGateEvidence = (): ReleaseGateEvidence => {
+  return {
+    observedEventCounts: createEventCountMap(),
+    startedToolCalls: 0,
+    resolvedToolCalls: 0,
+    eventsMissingRequiredTags: 0,
+  };
+};
+
 const normalizeOptionalString = (value: unknown): string | undefined => {
   if (typeof value !== 'string') {
     return undefined;
@@ -108,7 +124,9 @@ const ensureReasonCodes = (value: unknown): string[] | undefined => {
 };
 
 const hasRequiredCommonTags = (event: ReliabilityEvent): boolean => {
-  return event.sessionId.trim().length > 0;
+  return (
+    typeof event.sessionId === 'string' && event.sessionId.trim().length > 0
+  );
 };
 
 const hasRequiredTypeSpecificTags = (event: ReliabilityEvent): boolean => {
@@ -153,6 +171,8 @@ export class ReliabilityObservabilityService {
 
   private readonly events: ReliabilityEvent[] = [];
   private readonly rendererStateTransitions: RendererStateTransition[] = [];
+  private releaseGateEvidence: ReleaseGateEvidence =
+    createReleaseGateEvidence();
 
   private constructor() {}
 
@@ -167,7 +187,7 @@ export class ReliabilityObservabilityService {
 
   public emitEvent(event: {
     type: ReliabilityEventType;
-    sessionId: string;
+    sessionId?: string;
     intentId?: string;
     callId?: string;
     toolName?: string;
@@ -176,12 +196,10 @@ export class ReliabilityObservabilityService {
     errorClass?: string;
     reasonCodes?: string[];
   }): void {
-    const sessionId =
-      normalizeOptionalString(event.sessionId) || 'unknown-session';
-    this.events.push({
+    const emittedEvent: ReliabilityEvent = {
       type: event.type,
       timestamp: Date.now(),
-      sessionId,
+      sessionId: normalizeOptionalString(event.sessionId),
       intentId: normalizeOptionalString(event.intentId),
       callId: normalizeOptionalString(event.callId),
       toolName: normalizeOptionalString(event.toolName),
@@ -189,7 +207,28 @@ export class ReliabilityObservabilityService {
       status: normalizeOptionalString(event.status),
       errorClass: normalizeOptionalString(event.errorClass),
       reasonCodes: ensureReasonCodes(event.reasonCodes),
-    });
+    };
+
+    this.events.push(emittedEvent);
+    this.releaseGateEvidence.observedEventCounts[emittedEvent.type] += 1;
+
+    if (emittedEvent.type === 'tool.call.started') {
+      this.releaseGateEvidence.startedToolCalls += 1;
+    }
+
+    if (
+      emittedEvent.type === 'tool.call.finished' ||
+      emittedEvent.type === 'tool.call.failed'
+    ) {
+      this.releaseGateEvidence.resolvedToolCalls += 1;
+    }
+
+    if (
+      !hasRequiredCommonTags(emittedEvent) ||
+      !hasRequiredTypeSpecificTags(emittedEvent)
+    ) {
+      this.releaseGateEvidence.eventsMissingRequiredTags += 1;
+    }
 
     if (this.events.length > MAX_EVENT_HISTORY) {
       this.events.splice(0, this.events.length - MAX_EVENT_HISTORY);
@@ -251,7 +290,6 @@ export class ReliabilityObservabilityService {
     checkedAt: number;
     checks: ReleaseGateCheck[];
   } {
-    const snapshot = this.getDashboardSnapshot();
     const requiredEventTypes: ReliabilityEventType[] = [
       'intent.created',
       'gate.decision',
@@ -263,19 +301,14 @@ export class ReliabilityObservabilityService {
     ];
 
     const missingRequiredEventTypes = requiredEventTypes.filter(
-      (eventType) => snapshot.eventCounts[eventType] === 0,
+      (eventType) =>
+        this.releaseGateEvidence.observedEventCounts[eventType] === 0,
     );
 
-    const startedToolCalls = snapshot.eventCounts['tool.call.started'];
-    const resolvedToolCalls =
-      snapshot.eventCounts['tool.call.finished'] +
-      snapshot.eventCounts['tool.call.failed'];
-
-    const eventsWithMissingTags = this.events.filter((event) => {
-      return (
-        !hasRequiredCommonTags(event) || !hasRequiredTypeSpecificTags(event)
-      );
-    });
+    const startedToolCalls = this.releaseGateEvidence.startedToolCalls;
+    const resolvedToolCalls = this.releaseGateEvidence.resolvedToolCalls;
+    const eventsWithMissingTags =
+      this.releaseGateEvidence.eventsMissingRequiredTags;
 
     const checks: ReleaseGateCheck[] = [
       {
@@ -296,11 +329,11 @@ export class ReliabilityObservabilityService {
       },
       {
         name: 'required_tags_present',
-        ok: eventsWithMissingTags.length === 0,
+        ok: eventsWithMissingTags === 0,
         details:
-          eventsWithMissingTags.length === 0
+          eventsWithMissingTags === 0
             ? 'all required event tags present'
-            : `events missing required tags: ${eventsWithMissingTags.length}`,
+            : `events missing required tags: ${eventsWithMissingTags}`,
       },
     ];
 
@@ -318,5 +351,6 @@ export class ReliabilityObservabilityService {
       0,
       this.rendererStateTransitions.length,
     );
+    this.releaseGateEvidence = createReleaseGateEvidence();
   }
 }

@@ -8,6 +8,58 @@ import { StatusEnum } from '@ui-tars/shared/types';
 
 import { ReliabilityObservabilityService } from './reliabilityObservability';
 
+const emitMinimumPassingEvents = (
+  observability: ReliabilityObservabilityService,
+  sessionId: string,
+) => {
+  observability.emitEvent({
+    type: 'recovery.started',
+    sessionId,
+    status: StatusEnum.RUNNING,
+  });
+  observability.emitEvent({
+    type: 'intent.created',
+    sessionId,
+    intentId: `${sessionId}-intent`,
+  });
+  observability.emitEvent({
+    type: 'gate.decision',
+    sessionId,
+    intentId: `${sessionId}-intent`,
+    status: 'allow',
+    reasonCodes: [],
+  });
+  observability.emitEvent({
+    type: 'tool.call.started',
+    sessionId,
+    intentId: `${sessionId}-intent`,
+    callId: `${sessionId}-call`,
+    toolName: 'app.launch',
+    toolVersion: '1.0.0',
+    status: 'started',
+  });
+  observability.emitEvent({
+    type: 'tool.call.finished',
+    sessionId,
+    intentId: `${sessionId}-intent`,
+    callId: `${sessionId}-call`,
+    toolName: 'app.launch',
+    toolVersion: '1.0.0',
+    status: 'ok',
+    errorClass: 'none',
+  });
+  observability.emitEvent({
+    type: 'checkpoint.saved',
+    sessionId,
+    status: StatusEnum.RUNNING,
+  });
+  observability.emitEvent({
+    type: 'recovery.finished',
+    sessionId,
+    status: StatusEnum.END,
+  });
+};
+
 describe('ReliabilityObservabilityService', () => {
   it('aggregates dashboard counters for events and renderer states', () => {
     const observability = ReliabilityObservabilityService.getInstance();
@@ -48,52 +100,7 @@ describe('ReliabilityObservabilityService', () => {
     const observability = ReliabilityObservabilityService.getInstance();
     observability.resetForTests();
 
-    observability.emitEvent({
-      type: 'recovery.started',
-      sessionId: 'session-2',
-      status: StatusEnum.RUNNING,
-    });
-    observability.emitEvent({
-      type: 'intent.created',
-      sessionId: 'session-2',
-      intentId: 'intent-2',
-    });
-    observability.emitEvent({
-      type: 'gate.decision',
-      sessionId: 'session-2',
-      intentId: 'intent-2',
-      status: 'allow',
-      reasonCodes: [],
-    });
-    observability.emitEvent({
-      type: 'tool.call.started',
-      sessionId: 'session-2',
-      intentId: 'intent-2',
-      callId: 'call-2',
-      toolName: 'app.launch',
-      toolVersion: '1.0.0',
-      status: 'started',
-    });
-    observability.emitEvent({
-      type: 'tool.call.finished',
-      sessionId: 'session-2',
-      intentId: 'intent-2',
-      callId: 'call-2',
-      toolName: 'app.launch',
-      toolVersion: '1.0.0',
-      status: 'ok',
-      errorClass: 'none',
-    });
-    observability.emitEvent({
-      type: 'checkpoint.saved',
-      sessionId: 'session-2',
-      status: StatusEnum.RUNNING,
-    });
-    observability.emitEvent({
-      type: 'recovery.finished',
-      sessionId: 'session-2',
-      status: StatusEnum.END,
-    });
+    emitMinimumPassingEvents(observability, 'session-2');
 
     const evaluation = observability.evaluateReleaseGates();
 
@@ -158,5 +165,51 @@ describe('ReliabilityObservabilityService', () => {
       evaluation.checks.find((check) => check.name === 'required_tags_present')
         ?.ok,
     ).toBe(false);
+  });
+
+  it('fails release gates when event sessionId is blank', () => {
+    const observability = ReliabilityObservabilityService.getInstance();
+    observability.resetForTests();
+
+    emitMinimumPassingEvents(observability, 'session-blank');
+    observability.emitEvent({
+      type: 'intent.created',
+      sessionId: '',
+      intentId: 'intent-blank',
+    });
+
+    const evaluation = observability.evaluateReleaseGates();
+
+    expect(evaluation.ok).toBe(false);
+    expect(
+      evaluation.checks.find((check) => check.name === 'required_tags_present')
+        ?.ok,
+    ).toBe(false);
+  });
+
+  it('keeps release-gate evidence after event history eviction', () => {
+    const observability = ReliabilityObservabilityService.getInstance();
+    observability.resetForTests();
+
+    emitMinimumPassingEvents(observability, 'session-evict');
+
+    for (let index = 0; index < 1200; index += 1) {
+      observability.emitEvent({
+        type: 'intent.created',
+        sessionId: `session-evict-${index}`,
+        intentId: `intent-evict-${index}`,
+      });
+    }
+
+    const snapshot = observability.getDashboardSnapshot();
+    const evaluation = observability.evaluateReleaseGates();
+
+    expect(snapshot.eventCounts['recovery.started']).toBe(0);
+    expect(evaluation.ok).toBe(true);
+    expect(
+      evaluation.checks.find(
+        (check) => check.name === 'required_events_present',
+      )?.ok,
+    ).toBe(true);
   });
 });
