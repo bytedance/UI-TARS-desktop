@@ -8,6 +8,7 @@ export const INVOKE_GATE_DENY_REASONS = [
   'loop_budget_exhausted',
   'action_type_missing',
   'action_type_unsupported',
+  'loop_pattern_repeated',
   'identity_confidence_low',
   'start_box_required',
   'auth_state_invalid',
@@ -50,6 +51,13 @@ export const INVOKE_GATE_DENY_REASON_CATALOG: Record<
     retryable: true,
     message: 'Action type is not in invoke gate allowlist.',
     guidance: 'Add modeled action to allowlist or change planner output.',
+  },
+  loop_pattern_repeated: {
+    severity: 'warning',
+    retryable: true,
+    message: 'Repeated action pattern detected in current run loop.',
+    guidance:
+      'Change target or action strategy; repeated intents are blocked for safety.',
   },
   identity_confidence_low: {
     severity: 'warning',

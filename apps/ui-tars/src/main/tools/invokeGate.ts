@@ -119,6 +119,7 @@ type GateContext = {
   featureFlags: ToolFirstFeatureFlags;
   authState: GateAuthState;
   loopBudgetRemaining: number;
+  repeatedIntentStreak?: number;
 };
 
 const getRiskTierByActionType = (actionType: string): ActionRiskTier => {
@@ -252,6 +253,15 @@ export const evaluateInvokeGate = (
 
   if (intent.actionType && !actionSupported) {
     reasonCodes.push('action_type_unsupported');
+  }
+
+  if (
+    context.featureFlags.ffLoopGuardrails &&
+    intent.riskTier !== 'low' &&
+    intent.actionType !== 'wait' &&
+    (context.repeatedIntentStreak || 0) >= 3
+  ) {
+    reasonCodes.push('loop_pattern_repeated');
   }
 
   if (
