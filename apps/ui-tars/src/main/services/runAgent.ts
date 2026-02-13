@@ -46,6 +46,7 @@ import { resolveToolFirstFeatureFlags } from '@main/store/featureFlags';
 import { createDefaultToolRegistry } from '@main/tools/toolRegistry';
 import { InvokeGateOperator } from '@main/tools/invokeGateOperator';
 import { type GateAuthState } from '@main/tools/invokeGate';
+import { classifyRuntimeErrorV1 } from '@main/tools/errorTaxonomy';
 
 export const runAgent = async (
   setState: (state: AppState) => void,
@@ -320,6 +321,7 @@ export const runAgent = async (
     onData: handleData,
     onError: (params) => {
       const { error } = params;
+      const taxonomy = classifyRuntimeErrorV1(error);
       logger.error('[onGUIAgentError]', settings, error);
       setState({
         ...getState(),
@@ -328,6 +330,10 @@ export const runAgent = async (
           status: error?.status,
           message: error?.message,
           stack: error?.stack,
+          errorClass: taxonomy.errorClass,
+          errorSource: taxonomy.source,
+          errorCode: taxonomy.code,
+          retryable: taxonomy.retryable,
         }),
       });
     },
@@ -358,12 +364,24 @@ export const runAgent = async (
 
   await guiAgent
     .run(instructions, sessionHistoryMessages, modelAuthHdrs)
-    .catch((e) => {
-      logger.error('[runAgentLoop error]', e);
+    .catch((e: unknown) => {
+      const taxonomy = classifyRuntimeErrorV1(e);
+      logger.error('[runAgentLoop error]', {
+        error: e,
+        taxonomy,
+      });
+
+      const message = e instanceof Error ? e.message : String(e);
       setState({
         ...getState(),
         status: StatusEnum.ERROR,
-        errorMsg: e.message,
+        errorMsg: JSON.stringify({
+          message,
+          errorClass: taxonomy.errorClass,
+          errorSource: taxonomy.source,
+          errorCode: taxonomy.code,
+          retryable: taxonomy.retryable,
+        }),
       });
     });
 
