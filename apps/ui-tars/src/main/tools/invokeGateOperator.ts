@@ -37,6 +37,11 @@ type InvokeGateOperatorConfig = {
   }) => Promise<ToolFirstRouteResult>;
 };
 
+const REPEATED_INTENT_DERIVED_ARG_KEYS = new Set<string>([
+  'start_coords',
+  'end_coords',
+]);
+
 export class InvokeGateOperator extends Operator {
   static MANUAL = {
     ACTION_SPACES: [] as string[],
@@ -182,6 +187,7 @@ export class InvokeGateOperator extends Operator {
 
   private buildIntentSignature(intent: ActionIntentV1): string {
     const normalizedArgs = Object.entries(intent.args)
+      .filter(([key]) => !REPEATED_INTENT_DERIVED_ARG_KEYS.has(key))
       .sort(([left], [right]) => left.localeCompare(right))
       .map(([key, value]) => {
         if (typeof value === 'string') {

@@ -40,12 +40,13 @@ describe('InvokeGateOperator', () => {
     actionType: string,
     startBox = '[1,1,1,1]',
     loopCount?: number,
+    extraActionInputs: Record<string, unknown> = {},
   ) => {
     return {
       prediction: 'Action output',
       parsedPrediction: {
         action_type: actionType,
-        action_inputs: { start_box: startBox },
+        action_inputs: { start_box: startBox, ...extraActionInputs },
         reflection: null,
         thought: 'execute action',
       },
@@ -351,6 +352,51 @@ describe('InvokeGateOperator', () => {
     await expect(
       gatedOperator.execute(
         buildExecuteParams('click', '[1,1,1,1]', 1) as never,
+      ),
+    ).rejects.toThrow('loop_pattern_repeated');
+
+    expect(
+      (innerOperator as never as { execute: ReturnType<typeof vi.fn> }).execute,
+    ).toHaveBeenCalledTimes(2);
+  });
+
+  it('ignores derived coordinate args when tracking repeated intents', async () => {
+    const innerOperator = createInnerOperator();
+    const gatedOperator = new InvokeGateOperator({
+      innerOperator,
+      featureFlags: {
+        ffToolRegistry: true,
+        ffInvokeGate: true,
+        ffToolFirstRouting: false,
+        ffLoopGuardrails: true,
+      },
+      sessionId: 'session-5-derived-coords',
+      authState: 'valid',
+      maxLoopCount: 10,
+    });
+
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 1, {
+          start_coords: [100, 100],
+          end_coords: [120, 120],
+        }) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 2, {
+          start_coords: [150, 150],
+          end_coords: [170, 170],
+        }) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 3, {
+          start_coords: [200, 200],
+          end_coords: [220, 220],
+        }) as never,
       ),
     ).rejects.toThrow('loop_pattern_repeated');
 
