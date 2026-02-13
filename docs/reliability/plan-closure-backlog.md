@@ -20,6 +20,7 @@ Close all remaining non-code evidence gaps so the migration plan can be marked c
    - Store artifact in-repo (or tracked artifact path with checksum and retrieval instructions).
 
 2. **KPI gate evidence (two consecutive runs)**
+   - Progress: KPI report generation and gate-check scripts added; real run artifacts pending.
    - Run controlled measurement twice.
    - Record per-run raw data + aggregate summary against targets:
      - wrong-click rate < 1%
@@ -27,6 +28,7 @@ Close all remaining non-code evidence gaps so the migration plan can be marked c
    - Attach exact run commands/configs and timestamps.
 
 3. **Rollback rehearsal evidence for phase/global DoD**
+   - Progress: first test-level rollback rehearsal artifact added (`2026-02-13-baseline-run-001.rollback.md`).
    - Execute explicit rollback rehearsal for currently used reliability flags:
      - `ffToolRegistry`, `ffInvokeGate`, `ffToolFirstRouting`, `ffConfidenceLayer`, `ffLoopGuardrails`
    - Prove fallback behavior for new sessions when flags are disabled.

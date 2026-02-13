@@ -50,7 +50,20 @@ For every run, persist at minimum:
 - wrong-click boolean/count
 - max-loop termination boolean
 - auth hard-failure boolean
-- active feature flags and provider/model settings
+- row-level provenance fields (required on every row and must be consistent across batch):
+  - `environment.git.repo`
+  - `environment.git.branch`
+  - `environment.git.commit`
+  - `environment.model.provider`
+  - `environment.model.name`
+  - `environment.app.version`
+- active feature flags (required on every row and must be consistent across batch):
+  - `featureFlags.ffToolRegistry`
+  - `featureFlags.ffInvokeGate`
+  - `featureFlags.ffToolFirstRouting`
+  - `featureFlags.ffConfidenceLayer`
+  - `featureFlags.ffLoopGuardrails`
+- provider/model settings
 
 Store artifacts in `docs/reliability/artifacts/` using timestamped file names.
 
@@ -58,9 +71,56 @@ Store artifacts in `docs/reliability/artifacts/` using timestamped file names.
 
 For each measurement batch produce:
 
-1. Raw runs file (JSON or NDJSON)
+1. Raw runs file (NDJSON or JSON array)
 2. Aggregated report JSON (see template file)
 3. Short markdown summary with conclusions and known caveats
+
+### KPI automation commands
+
+```bash
+node scripts/reliability/compute-kpi-report.mjs \
+  --raw docs/reliability/artifacts/<timestamp>-raw-runs.ndjson \
+  --out docs/reliability/artifacts/<timestamp>-report.json \
+  --runId <run-id> \
+  --repo <owner/repo> \
+  --runType gate \
+  --minSampleCount 200 \
+  --branch main \
+  --commit <commit-sha> \
+  --provider <provider-name> \
+  --model <model-name> \
+  --appVersion <app-version>
+```
+
+`compute-kpi-report` writes `executionStatus.rawRunsPath` relative to the report location.
+
+```bash
+node scripts/reliability/check-kpi-gate.mjs \
+  --first docs/reliability/artifacts/<run-1>.report.json \
+  --second docs/reliability/artifacts/<run-2>.report.json
+```
+
+The report must fail coverage when either condition is not met:
+
+- sample count is below target (`200` by default)
+- one or more canonical scenarios are missing from the batch
+
+The generator enforces a hard minimum of `200` runs for coverage (`--minSampleCount` cannot lower this floor).
+
+The two-run gate check must also fail if provenance metadata differs between reports:
+
+- `environment.git.repo`
+- `environment.git.branch`
+- `environment.git.commit`
+- `environment.model.provider`
+- `environment.model.name`
+- `environment.app.version`
+
+The two-run gate check must also fail when:
+
+- `environment.featureFlags` values differ between reports (`ffToolRegistry`, `ffInvokeGate`, `ffToolFirstRouting`, `ffConfidenceLayer`, `ffLoopGuardrails`)
+- `executionStatus.rawRunsPath` is missing on either report
+- both reports reference the same raw-runs evidence path (including equivalent paths after resolving each one relative to its report file)
 
 ## 6. Acceptance thresholds
 

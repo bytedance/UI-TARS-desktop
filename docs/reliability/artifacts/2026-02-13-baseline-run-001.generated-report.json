@@ -1,0 +1,68 @@
+{
+  "reportVersion": "v1",
+  "generatedAt": "2026-02-13T13:38:38.357Z",
+  "scope": {
+    "runId": "baseline-run-001-generated",
+    "runType": "baseline",
+    "sampleCount": 1,
+    "scenarios": [
+      "open_cursor",
+      "open_settings",
+      "focus_existing_browser_window",
+      "recover_from_intentional_timeout"
+    ],
+    "scenarioCounts": {
+      "open_cursor": 1
+    }
+  },
+  "environment": {
+    "platform": "win32",
+    "git": {
+      "repo": "Proven1902/UI-TARS-desktop",
+      "branch": "main",
+      "commit": "929ecc3ed6e670a010a53bc0cadd4e0dad5ac0c3"
+    },
+    "model": {
+      "provider": "pending",
+      "name": "pending"
+    },
+    "app": {
+      "version": "pending"
+    },
+    "featureFlags": {
+      "ffToolRegistry": true,
+      "ffInvokeGate": true,
+      "ffToolFirstRouting": true,
+      "ffConfidenceLayer": true,
+      "ffLoopGuardrails": true
+    }
+  },
+  "metrics": {
+    "openAppFirstAttemptSuccessRate": 0,
+    "wrongClickRate": 0,
+    "maxLoopTerminationRate": 0,
+    "authHardFailureRate": 0
+  },
+  "targets": {
+    "openAppFirstAttemptSuccessRate": ">=0.95",
+    "wrongClickRate": "<0.01"
+  },
+  "targetResult": {
+    "openAppFirstAttemptSuccessRatePass": false,
+    "wrongClickRatePass": true,
+    "sampleCountPass": false,
+    "scenarioCoveragePass": false,
+    "coveragePass": false,
+    "minSampleCount": 200,
+    "missingScenarioIds": [
+      "open_settings",
+      "focus_existing_browser_window",
+      "recover_from_intentional_timeout"
+    ],
+    "allPass": false
+  },
+  "executionStatus": {
+    "state": "executed",
+    "rawRunsPath": "2026-02-13-baseline-run-001.raw-runs.ndjson"
+  }
+}

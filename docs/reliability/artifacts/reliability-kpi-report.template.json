@@ -23,6 +23,9 @@
       "provider": "<provider>",
       "name": "<model-name>"
     },
+    "app": {
+      "version": "<app-version>"
+    },
     "featureFlags": {
       "ffToolRegistry": true,
       "ffInvokeGate": true,

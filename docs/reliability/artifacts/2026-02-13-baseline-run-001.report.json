@@ -23,6 +23,9 @@
       "provider": "pending",
       "name": "pending"
     },
+    "app": {
+      "version": "pending"
+    },
     "featureFlags": {
       "ffToolRegistry": true,
       "ffInvokeGate": true,
