@@ -32,6 +32,7 @@ export type ToolFirstRouteResult = {
 
 type ToolFirstRouteParams = {
   sessionId: string;
+  intentId?: string;
   loopCount?: number;
   parsedPrediction: PredictionParsed;
 };
@@ -54,6 +55,14 @@ const WINDOW_WAIT_READY_ACTION_TYPES = new Set<string>([
 
 const normalizeActionType = (actionType: string): string => {
   return actionType.trim().toLowerCase();
+};
+
+const resolveIntentId = (intentId?: string): string => {
+  if (typeof intentId === 'string' && intentId.trim().length > 0) {
+    return intentId;
+  }
+
+  return randomUUID();
 };
 
 const buildIdempotencyKey = (params: {
@@ -121,7 +130,7 @@ export const executeToolFirstRoute = async (
     target,
   });
 
-  const intentId = randomUUID();
+  const intentId = resolveIntentId(params.intentId);
 
   try {
     if (APP_LAUNCH_ACTION_TYPES.has(actionType)) {

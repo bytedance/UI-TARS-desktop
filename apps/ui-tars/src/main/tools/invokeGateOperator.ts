@@ -33,6 +33,7 @@ type InvokeGateOperatorConfig = {
   maxLoopCount: number;
   toolFirstRouter?: (params: {
     sessionId: string;
+    intentId?: string;
     loopCount?: number;
     parsedPrediction: ExecuteParams['parsedPrediction'];
   }) => Promise<ToolFirstRouteResult>;
@@ -148,6 +149,7 @@ export class InvokeGateOperator extends Operator {
     ) {
       const toolFirstResult = await this.toolFirstRouter({
         sessionId: this.sessionId,
+        intentId: intent.intentId,
         loopCount,
         parsedPrediction: params.parsedPrediction,
       });

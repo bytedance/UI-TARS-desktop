@@ -2,11 +2,15 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { StatusEnum } from '@ui-tars/shared/types';
 
 import { executeToolFirstRoute } from './toolFirstRouter';
+
+const { emitEvent } = vi.hoisted(() => ({
+  emitEvent: vi.fn(),
+}));
 
 vi.mock('@main/logger', () => ({
   logger: {
@@ -16,7 +20,19 @@ vi.mock('@main/logger', () => ({
   },
 }));
 
+vi.mock('@main/services/reliabilityObservability', () => ({
+  ReliabilityObservabilityService: {
+    getInstance: () => ({
+      emitEvent,
+    }),
+  },
+}));
+
 describe('toolFirstRouter', () => {
+  beforeEach(() => {
+    emitEvent.mockReset();
+  });
+
   it('handles app.launch through deterministic tool path', async () => {
     const result = await executeToolFirstRoute(
       {
@@ -213,6 +229,53 @@ describe('toolFirstRouter', () => {
     expect(firstIdempotencyKey).toBe(secondIdempotencyKey);
     expect(firstIdempotencyKey).toBe(
       'tool-first:session-retry:7:app.launch:notepad',
+    );
+  });
+
+  it('reuses provided intentId for tool call and telemetry events', async () => {
+    const runAppLaunch = vi.fn().mockResolvedValue({
+      version: 'v1',
+      callId: 'call-intent',
+      toolName: 'app.launch',
+      toolVersion: '1.0.0',
+      status: 'ok',
+      errorClass: 'none',
+      launched: true,
+      systemRunCallId: 'sys-intent',
+      stdout: '',
+      stderr: '',
+      durationMs: 1,
+      artifacts: {
+        targetApp: 'notepad',
+        platform: 'win32',
+        stdoutBytes: 0,
+        stderrBytes: 0,
+        stdoutTruncated: false,
+        stderrTruncated: false,
+      },
+    });
+
+    await executeToolFirstRoute(
+      {
+        sessionId: 'session-intent',
+        intentId: 'intent-upstream-1',
+        loopCount: 1,
+        parsedPrediction: {
+          action_type: 'app.launch',
+          action_inputs: { content: 'notepad' },
+          reflection: null,
+          thought: 'launch app',
+        },
+      },
+      { runAppLaunch },
+    );
+
+    expect(runAppLaunch.mock.calls[0]?.[0]?.intentId).toBe('intent-upstream-1');
+    expect(emitEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'tool.call.started',
+        intentId: 'intent-upstream-1',
+      }),
     );
   });
 });
