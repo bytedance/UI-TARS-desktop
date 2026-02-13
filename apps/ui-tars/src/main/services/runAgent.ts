@@ -197,6 +197,19 @@ export const runAgent = async (
   const isRemoteOperator =
     settings.operator === Operator.RemoteComputer ||
     settings.operator === Operator.RemoteBrowser;
+  const runtimeToolFlags = isRemoteOperator
+    ? {
+        ...toolFlags,
+        ffToolFirstRouting: false,
+      }
+    : toolFlags;
+
+  if (isRemoteOperator && toolFlags.ffToolFirstRouting) {
+    logger.info(
+      '[tool-first-routing] disabled for remote operator runtime',
+      settings.operator,
+    );
+  }
   const isCodexOAuthProvider =
     settings.vlmProvider === VLMProviderV2.openai_codex_oauth;
   const authField = 'apiKey' as const;
@@ -282,10 +295,10 @@ export const runAgent = async (
   }
 
   let runtimeOperator: SDKOperator = operator;
-  if (toolFlags.ffInvokeGate) {
+  if (runtimeToolFlags.ffInvokeGate) {
     runtimeOperator = new InvokeGateOperator({
       innerOperator: operator,
-      featureFlags: toolFlags,
+      featureFlags: runtimeToolFlags,
       sessionId: `main-${Date.now()}`,
       authState: invokeGateAuthState,
       maxLoopCount,

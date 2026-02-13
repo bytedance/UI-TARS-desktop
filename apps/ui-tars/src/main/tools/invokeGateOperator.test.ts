@@ -57,6 +57,27 @@ describe('InvokeGateOperator', () => {
     };
   };
 
+  const buildToolExecuteParams = (
+    actionType: string,
+    target: string,
+    loopCount?: number,
+  ) => {
+    return {
+      prediction: 'Action output',
+      parsedPrediction: {
+        action_type: actionType,
+        action_inputs: { content: target },
+        reflection: null,
+        thought: 'execute tool action',
+      },
+      loopCount,
+      screenWidth: 1920,
+      screenHeight: 1080,
+      scaleFactor: 1,
+      factors: [1, 1],
+    };
+  };
+
   const buildNavigateExecuteParams = () => {
     return {
       prediction: 'Action output',
@@ -229,6 +250,221 @@ describe('InvokeGateOperator', () => {
       gatedOperator.execute(buildScrollExecuteParams() as never),
     ).resolves.toEqual({ status: StatusEnum.RUNNING });
 
+    expect(
+      (innerOperator as never as { execute: ReturnType<typeof vi.fn> }).execute,
+    ).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses tool-first routing result when handled', async () => {
+    const innerOperator = createInnerOperator();
+    const toolFirstRouter = vi.fn().mockResolvedValue({
+      handled: true,
+      status: StatusEnum.RUNNING,
+      toolName: 'app.launch',
+      fallbackReason: null,
+    });
+
+    const gatedOperator = new InvokeGateOperator({
+      innerOperator,
+      featureFlags: {
+        ffToolRegistry: true,
+        ffInvokeGate: true,
+        ffToolFirstRouting: true,
+      },
+      sessionId: 'session-7',
+      authState: 'valid',
+      maxLoopCount: 5,
+      toolFirstRouter,
+    });
+
+    await expect(
+      gatedOperator.execute(
+        buildToolExecuteParams('app.launch', 'notepad', 1) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+
+    expect(toolFirstRouter).toHaveBeenCalledTimes(1);
+    expect(
+      (innerOperator as never as { execute: ReturnType<typeof vi.fn> }).execute,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('falls back to visual operator when tool-first route is not handled', async () => {
+    const innerOperator = createInnerOperator();
+    const toolFirstRouter = vi.fn().mockResolvedValue({
+      handled: false,
+      status: StatusEnum.RUNNING,
+      toolName: null,
+      fallbackReason: 'unsupported_action_type',
+    });
+
+    const gatedOperator = new InvokeGateOperator({
+      innerOperator,
+      featureFlags: {
+        ffToolRegistry: true,
+        ffInvokeGate: false,
+        ffToolFirstRouting: true,
+      },
+      sessionId: 'session-8',
+      authState: 'valid',
+      maxLoopCount: 5,
+      toolFirstRouter,
+    });
+
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 1) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+
+    expect(toolFirstRouter).toHaveBeenCalledTimes(1);
+    expect(
+      (innerOperator as never as { execute: ReturnType<typeof vi.fn> }).execute,
+    ).toHaveBeenCalledTimes(1);
+  });
+
+  it('applies invoke-gate deny before running tool-first route', async () => {
+    const innerOperator = createInnerOperator();
+    const toolFirstRouter = vi.fn().mockResolvedValue({
+      handled: true,
+      status: StatusEnum.RUNNING,
+      toolName: 'app.launch',
+      fallbackReason: null,
+    });
+
+    const gatedOperator = new InvokeGateOperator({
+      innerOperator,
+      featureFlags: {
+        ffToolRegistry: true,
+        ffInvokeGate: true,
+        ffToolFirstRouting: true,
+      },
+      sessionId: 'session-9',
+      authState: 'valid',
+      maxLoopCount: 0,
+      toolFirstRouter,
+    });
+
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('app.launch', '[1,1,1,1]', 1) as never,
+      ),
+    ).rejects.toThrow('loop_budget_exhausted');
+
+    expect(toolFirstRouter).not.toHaveBeenCalled();
+    expect(
+      (innerOperator as never as { execute: ReturnType<typeof vi.fn> }).execute,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('advances loop budget even when tool-first route handles action', async () => {
+    const innerOperator = createInnerOperator();
+    const toolFirstRouter = vi.fn().mockResolvedValue({
+      handled: true,
+      status: StatusEnum.RUNNING,
+      toolName: 'window.focus',
+      fallbackReason: null,
+    });
+
+    const gatedOperator = new InvokeGateOperator({
+      innerOperator,
+      featureFlags: {
+        ffToolRegistry: true,
+        ffInvokeGate: true,
+        ffToolFirstRouting: true,
+      },
+      sessionId: 'session-10',
+      authState: 'valid',
+      maxLoopCount: 1,
+      toolFirstRouter,
+    });
+
+    await expect(
+      gatedOperator.execute(
+        buildToolExecuteParams('window.focus', 'cursor', 1) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+    await expect(
+      gatedOperator.execute(
+        buildToolExecuteParams('window.focus', 'cursor', 1) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+
+    await expect(
+      gatedOperator.execute(
+        buildToolExecuteParams('window.focus', 'cursor', 2) as never,
+      ),
+    ).rejects.toThrow('loop_budget_exhausted');
+
+    expect(toolFirstRouter).toHaveBeenCalledTimes(2);
+    expect(
+      (innerOperator as never as { execute: ReturnType<typeof vi.fn> }).execute,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('rejects unhandled tool-only action instead of visual fallback', async () => {
+    const innerOperator = createInnerOperator();
+    const toolFirstRouter = vi.fn().mockResolvedValue({
+      handled: false,
+      status: StatusEnum.RUNNING,
+      toolName: 'app.launch',
+      fallbackReason: 'target_unresolved',
+    });
+
+    const gatedOperator = new InvokeGateOperator({
+      innerOperator,
+      featureFlags: {
+        ffToolRegistry: true,
+        ffInvokeGate: true,
+        ffToolFirstRouting: true,
+      },
+      sessionId: 'session-11',
+      authState: 'valid',
+      maxLoopCount: 5,
+      toolFirstRouter,
+    });
+
+    await expect(
+      gatedOperator.execute(
+        buildToolExecuteParams('app.launch', 'notepad', 1) as never,
+      ),
+    ).rejects.toThrow('[TOOL_FIRST_ROUTE_UNHANDLED]');
+
+    expect(toolFirstRouter).toHaveBeenCalledTimes(1);
+    expect(
+      (innerOperator as never as { execute: ReturnType<typeof vi.fn> }).execute,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('skips tool-first routing when ffToolFirstRouting is disabled', async () => {
+    const innerOperator = createInnerOperator();
+    const toolFirstRouter = vi.fn().mockResolvedValue({
+      handled: true,
+      status: StatusEnum.RUNNING,
+      toolName: 'app.launch',
+      fallbackReason: null,
+    });
+
+    const gatedOperator = new InvokeGateOperator({
+      innerOperator,
+      featureFlags: {
+        ffToolRegistry: true,
+        ffInvokeGate: true,
+        ffToolFirstRouting: false,
+      },
+      sessionId: 'session-12',
+      authState: 'valid',
+      maxLoopCount: 5,
+      toolFirstRouter,
+    });
+
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 1) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+
+    expect(toolFirstRouter).not.toHaveBeenCalled();
     expect(
       (innerOperator as never as { execute: ReturnType<typeof vi.fn> }).execute,
     ).toHaveBeenCalledTimes(1);

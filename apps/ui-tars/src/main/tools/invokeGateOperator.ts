@@ -16,7 +16,12 @@ import {
   type GateAuthState,
   buildActionIntentV1,
   evaluateInvokeGate,
+  isToolOnlyActionType,
 } from './invokeGate';
+import {
+  executeToolFirstRoute,
+  type ToolFirstRouteResult,
+} from './toolFirstRouter';
 
 type InvokeGateOperatorConfig = {
   innerOperator: Operator;
@@ -24,6 +29,11 @@ type InvokeGateOperatorConfig = {
   sessionId: string;
   authState: GateAuthState;
   maxLoopCount: number;
+  toolFirstRouter?: (params: {
+    sessionId: string;
+    loopCount?: number;
+    parsedPrediction: ExecuteParams['parsedPrediction'];
+  }) => Promise<ToolFirstRouteResult>;
 };
 
 export class InvokeGateOperator extends Operator {
@@ -35,6 +45,9 @@ export class InvokeGateOperator extends Operator {
   private readonly featureFlags: ToolFirstFeatureFlags;
   private readonly sessionId: string;
   private readonly authState: GateAuthState;
+  private readonly toolFirstRouter: NonNullable<
+    InvokeGateOperatorConfig['toolFirstRouter']
+  >;
   private remainingLoopBudget: number;
   private lastEvaluatedLoopCount: number | null = null;
 
@@ -44,6 +57,7 @@ export class InvokeGateOperator extends Operator {
     this.featureFlags = config.featureFlags;
     this.sessionId = config.sessionId;
     this.authState = config.authState;
+    this.toolFirstRouter = config.toolFirstRouter ?? executeToolFirstRoute;
     this.remainingLoopBudget = Number.isFinite(config.maxLoopCount)
       ? Math.max(0, config.maxLoopCount)
       : 0;
@@ -87,6 +101,37 @@ export class InvokeGateOperator extends Operator {
       throw new Error(
         `[INVOKE_GATE_DENY] ${gateDecision.reasonCodes.join(',')}`,
       );
+    }
+
+    if (
+      this.featureFlags.ffToolFirstRouting &&
+      this.featureFlags.ffToolRegistry
+    ) {
+      const toolFirstResult = await this.toolFirstRouter({
+        sessionId: this.sessionId,
+        loopCount,
+        parsedPrediction: params.parsedPrediction,
+      });
+
+      if (toolFirstResult.handled) {
+        logger.info('[tool-first-routing] tool path handled action', {
+          actionType: params.parsedPrediction.action_type,
+          toolName: toolFirstResult.toolName,
+          status: toolFirstResult.status,
+        });
+        return { status: toolFirstResult.status };
+      }
+
+      if (isToolOnlyActionType(params.parsedPrediction.action_type)) {
+        throw new Error(
+          `[TOOL_FIRST_ROUTE_UNHANDLED] ${toolFirstResult.fallbackReason || 'unknown'}`,
+        );
+      }
+
+      logger.info('[tool-first-routing] fallback to visual operator', {
+        actionType: params.parsedPrediction.action_type,
+        fallbackReason: toolFirstResult.fallbackReason,
+      });
     }
 
     return this.innerOperator.execute(params);

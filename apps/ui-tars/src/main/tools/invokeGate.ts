@@ -12,6 +12,10 @@ import {
   INVOKE_GATE_DENY_REASONS,
   type InvokeGateDenyReason,
 } from './invokeGateReasons';
+import {
+  isToolOnlyActionTargetSupported,
+  resolveToolFirstTarget,
+} from './toolFirstTarget';
 
 export {
   INVOKE_GATE_DENY_REASONS,
@@ -52,6 +56,15 @@ const SUPPORTED_ACTION_TYPES = new Set<string>([
   'call_user',
   'finished',
   'user_stop',
+]);
+
+const TOOL_ONLY_ACTION_TYPES = new Set<string>([
+  'app.launch',
+  'app_launch',
+  'window.focus',
+  'window_focus',
+  'window.wait_ready',
+  'window_wait_ready',
 ]);
 
 const ACTION_TYPES_REQUIRING_START_BOX = new Set<string>([
@@ -110,6 +123,8 @@ const getRiskTierByActionType = (actionType: string): ActionRiskTier => {
       'release',
       'navigate',
       'navigate_back',
+      'app.launch',
+      'app_launch',
       'drag',
       'left_click_drag',
     ].includes(actionType)
@@ -129,6 +144,8 @@ const getRiskTierByActionType = (actionType: string): ActionRiskTier => {
       'right_click',
       'right_single',
       'middle_click',
+      'window.focus',
+      'window_focus',
       'scroll',
       'select',
     ].includes(actionType)
@@ -187,7 +204,24 @@ export const evaluateInvokeGate = (
     reasonCodes.push('action_type_missing');
   }
 
-  if (intent.actionType && !SUPPORTED_ACTION_TYPES.has(intent.actionType)) {
+  const toolRoutingEnabled =
+    context.featureFlags.ffToolRegistry &&
+    context.featureFlags.ffToolFirstRouting;
+  const toolTarget = resolveToolFirstTarget(intent.args);
+  const toolTargetSupported =
+    !!toolTarget &&
+    isToolOnlyActionTargetSupported({
+      actionType: intent.actionType,
+      target: toolTarget,
+      platform: process.platform,
+    });
+  const actionSupported =
+    SUPPORTED_ACTION_TYPES.has(intent.actionType) ||
+    (toolRoutingEnabled &&
+      TOOL_ONLY_ACTION_TYPES.has(intent.actionType) &&
+      toolTargetSupported);
+
+  if (intent.actionType && !actionSupported) {
     reasonCodes.push('action_type_unsupported');
   }
 
@@ -211,4 +245,8 @@ export const evaluateInvokeGate = (
     loopBudgetRemaining,
     evaluatedAt: Date.now(),
   });
+};
+
+export const isToolOnlyActionType = (actionType: string): boolean => {
+  return TOOL_ONLY_ACTION_TYPES.has(actionType.trim().toLowerCase());
 };
