@@ -221,12 +221,21 @@ const sleep = async (ms: number): Promise<void> => {
 };
 
 const resolvePlatform = (platform?: string): WindowWaitReadyPlatform => {
-  const fallback = process.platform;
-  const candidate = platform || fallback;
-  if (SUPPORTED_PLATFORMS.includes(candidate as WindowWaitReadyPlatform)) {
-    return candidate as WindowWaitReadyPlatform;
+  if (
+    platform &&
+    SUPPORTED_PLATFORMS.includes(platform as WindowWaitReadyPlatform)
+  ) {
+    return platform as WindowWaitReadyPlatform;
   }
-  return 'win32';
+
+  const hostPlatform = process.platform;
+  if (SUPPORTED_PLATFORMS.includes(hostPlatform as WindowWaitReadyPlatform)) {
+    return hostPlatform as WindowWaitReadyPlatform;
+  }
+
+  throw new Error(
+    `[WINDOW_WAIT_READY_UNSUPPORTED_PLATFORM] platform=${hostPlatform}`,
+  );
 };
 
 const resolveCheckArgv = (

@@ -119,6 +119,7 @@ const WindowFocusToolResultSchema = z.object({
   errorClass: z.enum([
     'none',
     'validation_error',
+    'policy_error',
     'unsupported_target',
     'window_not_found',
     'spawn_error',
@@ -353,13 +354,15 @@ export const runWindowFocusToolCall = async (
       ? 'none'
       : systemRunResult.errorClass === 'timeout'
         ? 'timeout'
-        : systemRunResult.errorClass === 'non_zero_exit'
-          ? notFoundExit
-            ? 'window_not_found'
-            : 'non_zero_exit'
-          : systemRunResult.errorClass === 'validation_error'
-            ? 'validation_error'
-            : 'spawn_error';
+        : systemRunResult.errorClass === 'policy_error'
+          ? 'policy_error'
+          : systemRunResult.errorClass === 'non_zero_exit'
+            ? notFoundExit
+              ? 'window_not_found'
+              : 'non_zero_exit'
+            : systemRunResult.errorClass === 'validation_error'
+              ? 'validation_error'
+              : 'spawn_error';
 
   return WindowFocusToolResultSchema.parse({
     version: WINDOW_FOCUS_TOOL_RESULT_VERSION,

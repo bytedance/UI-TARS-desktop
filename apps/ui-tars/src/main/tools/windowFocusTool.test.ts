@@ -182,6 +182,41 @@ describe('windowFocusTool', () => {
     expect(result.focused).toBe(false);
   });
 
+  it('preserves policy_error from system.run in focus result', async () => {
+    const call = buildWindowFocusToolCall({
+      intentId: 'intent-4c',
+      targetWindow: 'notepad',
+      platform: 'win32',
+      idempotencyKey: 'idem-4c',
+    });
+
+    const result = await runWindowFocusToolCall(call, {
+      runSystemRun: vi.fn().mockResolvedValue({
+        version: 'v1',
+        callId: 'sys-call-policy',
+        toolName: 'system.run',
+        toolVersion: '1.0.0',
+        status: 'error',
+        errorClass: 'policy_error',
+        exitCode: null,
+        stdout: '',
+        stderr: 'policy denied',
+        durationMs: 10,
+        deltaObserved: false,
+        artifacts: {
+          stdoutBytes: 0,
+          stderrBytes: 13,
+          stdoutTruncated: false,
+          stderrTruncated: false,
+        },
+      }),
+    });
+
+    expect(result.status).toBe('error');
+    expect(result.errorClass).toBe('policy_error');
+    expect(result.focused).toBe(false);
+  });
+
   it('returns validation_error for malformed window.focus call', async () => {
     const result = await runWindowFocusToolCall({} as WindowFocusToolCallV1);
 

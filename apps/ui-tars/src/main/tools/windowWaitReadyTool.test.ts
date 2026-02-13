@@ -10,6 +10,21 @@ import {
   runWindowWaitReadyToolCall,
 } from './windowWaitReadyTool';
 
+const withMockedPlatform = async <T>(
+  platform: NodeJS.Platform,
+  run: () => Promise<T> | T,
+): Promise<T> => {
+  const descriptor = Object.getOwnPropertyDescriptor(process, 'platform');
+  Object.defineProperty(process, 'platform', { value: platform });
+  try {
+    return await run();
+  } finally {
+    if (descriptor) {
+      Object.defineProperty(process, 'platform', descriptor);
+    }
+  }
+};
+
 describe('windowWaitReadyTool', () => {
   it('builds deterministic window.wait_ready call for supported target', () => {
     const call = buildWindowWaitReadyToolCall({
@@ -66,6 +81,17 @@ describe('windowWaitReadyTool', () => {
     expect(result.status).toBe('ok');
     const firstCall = runSystemRun.mock.calls[0]?.[0];
     expect(firstCall?.idempotencyKey).toContain('window.wait_ready:intent-1a');
+  });
+
+  it('rejects omitted platform when host platform is unsupported', async () => {
+    await withMockedPlatform('freebsd' as NodeJS.Platform, () => {
+      expect(() =>
+        buildWindowWaitReadyToolCall({
+          intentId: 'intent-1b',
+          targetWindow: 'notepad',
+        }),
+      ).toThrow('[WINDOW_WAIT_READY_UNSUPPORTED_PLATFORM]');
+    });
   });
 
   it('returns ok when check command succeeds on first attempt', async () => {
