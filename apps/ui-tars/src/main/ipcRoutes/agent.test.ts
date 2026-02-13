@@ -20,6 +20,7 @@ import { agentRoute } from './agent';
 import { store } from '@main/store/create';
 import { Message, StatusEnum } from '@ui-tars/shared/types';
 import { CheckpointRecoveryService } from '@main/services/checkpointRecovery';
+import { ReliabilityObservabilityService } from '@main/services/reliabilityObservability';
 
 describe('agentRoute recovery integration', () => {
   beforeEach(() => {
@@ -34,10 +35,12 @@ describe('agentRoute recovery integration', () => {
       abortController: null,
     });
     CheckpointRecoveryService.getInstance().resetForTests();
+    ReliabilityObservabilityService.getInstance().resetForTests();
   });
 
   afterEach(() => {
     CheckpointRecoveryService.getInstance().resetForTests();
+    ReliabilityObservabilityService.getInstance().resetForTests();
   });
 
   it('restores instruction/history from recoverable checkpoint after forced crash state', async () => {
@@ -106,5 +109,31 @@ describe('agentRoute recovery integration', () => {
       context: {} as never,
     });
     expect(checkpoint).toBeNull();
+  });
+
+  it('returns reliability dashboard snapshot and release-gate evaluation', async () => {
+    const observability = ReliabilityObservabilityService.getInstance();
+    observability.emitEvent({
+      type: 'intent.created',
+      sessionId: 'session-dashboard',
+      intentId: 'intent-dashboard',
+    });
+
+    const snapshot = await agentRoute.getReliabilityDashboard.handle({
+      input: undefined,
+      context: {} as never,
+    });
+
+    expect(snapshot.eventCounts['intent.created']).toBe(1);
+
+    const releaseGate = await agentRoute.evaluateReliabilityReleaseGates.handle(
+      {
+        input: undefined,
+        context: {} as never,
+      },
+    );
+
+    expect(releaseGate.version).toBe('v1');
+    expect(Array.isArray(releaseGate.checks)).toBe(true);
   });
 });

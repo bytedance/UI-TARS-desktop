@@ -588,6 +588,13 @@ describe('InvokeGateOperator', () => {
     ).resolves.toEqual({ status: StatusEnum.RUNNING });
 
     expect(toolFirstRouter).toHaveBeenCalledTimes(1);
+    expect(toolFirstRouter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sessionId: 'session-7',
+        intentId: expect.any(String),
+        loopCount: 1,
+      }),
+    );
     expect(
       (innerOperator as never as { execute: ReturnType<typeof vi.fn> }).execute,
     ).not.toHaveBeenCalled();

@@ -51,6 +51,25 @@ import {
   CheckpointRecoveryService,
   deriveRecoveryFsmState,
 } from '@main/services/checkpointRecovery';
+import {
+  ReliabilityObservabilityService,
+  type ReliabilityRendererState,
+} from '@main/services/reliabilityObservability';
+
+const mapStatusToRendererState = (
+  status: StatusEnum,
+): ReliabilityRendererState => {
+  if (status === StatusEnum.CALL_USER) {
+    return 'blocked';
+  }
+  if (status === StatusEnum.ERROR) {
+    return 'error';
+  }
+  if (status === StatusEnum.END || status === StatusEnum.USER_STOPPED) {
+    return 'completed';
+  }
+  return 'executing_tool';
+};
 
 export const runAgent = async (
   setState: (state: AppState) => void,
@@ -63,6 +82,7 @@ export const runAgent = async (
   assert(instructions, 'instructions is required');
   const runtimeSessionId = `main-${Date.now()}`;
   const checkpointRecovery = CheckpointRecoveryService.getInstance();
+  const observability = ReliabilityObservabilityService.getInstance();
 
   const language = settings.language ?? 'en';
   const maxLoopCount = settings.maxLoopCount ?? 100;
@@ -87,6 +107,11 @@ export const runAgent = async (
     const lastConv = getState().messages[getState().messages.length - 1];
     const { status, conversations, ...restUserData } = data;
     logger.info('[onGUIAgentData] status', status, conversations.length);
+    observability.emitRendererState({
+      state: mapStatusToRendererState(status),
+      sessionId: runtimeSessionId,
+      status,
+    });
 
     // add SoM to conversations
     const conversationsWithSoM: ConversationWithSoM[] = await Promise.all(
@@ -346,6 +371,11 @@ export const runAgent = async (
     instruction: instructions,
     sessionHistoryMessages,
   });
+  observability.emitRendererState({
+    state: 'thinking',
+    sessionId: runtimeSessionId,
+    status: StatusEnum.RUNNING,
+  });
 
   const systemPrompt = getSpByModelVersion(
     modelVersion,
@@ -364,6 +394,11 @@ export const runAgent = async (
       const { error } = params;
       const taxonomy = classifyRuntimeErrorV1(error);
       logger.error('[onGUIAgentError]', settings, error);
+      observability.emitRendererState({
+        state: 'error',
+        sessionId: runtimeSessionId,
+        status: StatusEnum.ERROR,
+      });
       setState({
         ...getState(),
         status: StatusEnum.ERROR,
@@ -437,6 +472,17 @@ export const runAgent = async (
     });
 
   const finalStatus = getState().status;
+  observability.emitEvent({
+    type: 'recovery.finished',
+    sessionId: runtimeSessionId,
+    status: finalStatus,
+  });
+  observability.emitRendererState({
+    state: mapStatusToRendererState(finalStatus),
+    sessionId: runtimeSessionId,
+    status: finalStatus,
+  });
+
   if (
     finalStatus === StatusEnum.END ||
     finalStatus === StatusEnum.USER_STOPPED

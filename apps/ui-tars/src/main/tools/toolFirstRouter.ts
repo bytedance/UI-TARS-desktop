@@ -7,6 +7,7 @@ import { randomUUID } from 'crypto';
 import { type PredictionParsed, StatusEnum } from '@ui-tars/shared/types';
 
 import { logger } from '@main/logger';
+import { ReliabilityObservabilityService } from '@main/services/reliabilityObservability';
 
 import { buildAppLaunchToolCall, runAppLaunchToolCall } from './appLaunchTool';
 import {
@@ -31,6 +32,7 @@ export type ToolFirstRouteResult = {
 
 type ToolFirstRouteParams = {
   sessionId: string;
+  intentId?: string;
   loopCount?: number;
   parsedPrediction: PredictionParsed;
 };
@@ -53,6 +55,14 @@ const WINDOW_WAIT_READY_ACTION_TYPES = new Set<string>([
 
 const normalizeActionType = (actionType: string): string => {
   return actionType.trim().toLowerCase();
+};
+
+const resolveIntentId = (intentId?: string): string => {
+  if (typeof intentId === 'string' && intentId.trim().length > 0) {
+    return intentId;
+  }
+
+  return randomUUID();
 };
 
 const buildIdempotencyKey = (params: {
@@ -88,6 +98,8 @@ const fallback = (
   };
 };
 
+const observability = ReliabilityObservabilityService.getInstance();
+
 export const executeToolFirstRoute = async (
   params: ToolFirstRouteParams,
   options?: ToolFirstRouteOptions,
@@ -118,7 +130,7 @@ export const executeToolFirstRoute = async (
     target,
   });
 
-  const intentId = randomUUID();
+  const intentId = resolveIntentId(params.intentId);
 
   try {
     if (APP_LAUNCH_ACTION_TYPES.has(actionType)) {
@@ -127,10 +139,50 @@ export const executeToolFirstRoute = async (
         targetApp: target,
         idempotencyKey,
       });
-      const result = await (options?.runAppLaunch ?? runAppLaunchToolCall)(
-        call,
-      );
+      observability.emitEvent({
+        type: 'tool.call.started',
+        sessionId: params.sessionId,
+        intentId,
+        callId: call.callId,
+        toolName: call.toolName,
+        toolVersion: call.toolVersion,
+        status: 'started',
+      });
+
+      let result: Awaited<ReturnType<typeof runAppLaunchToolCall>>;
+      try {
+        result = await (options?.runAppLaunch ?? runAppLaunchToolCall)(call);
+      } catch (error) {
+        observability.emitEvent({
+          type: 'tool.call.failed',
+          sessionId: params.sessionId,
+          intentId,
+          callId: call.callId,
+          toolName: call.toolName,
+          toolVersion: call.toolVersion,
+          status: 'error',
+          errorClass: 'tool_exception',
+        });
+        logger.warn(
+          '[tool-first-routing] app.launch crashed, fallback to visual',
+          {
+            error: error instanceof Error ? error.message : String(error),
+          },
+        );
+        return fallback('app.launch', 'tool_exception');
+      }
+
       if (result.status === 'ok') {
+        observability.emitEvent({
+          type: 'tool.call.finished',
+          sessionId: params.sessionId,
+          intentId,
+          callId: result.callId,
+          toolName: result.toolName,
+          toolVersion: result.toolVersion,
+          status: result.status,
+          errorClass: result.errorClass,
+        });
         return {
           handled: true,
           status: StatusEnum.RUNNING,
@@ -139,6 +191,16 @@ export const executeToolFirstRoute = async (
         };
       }
 
+      observability.emitEvent({
+        type: 'tool.call.failed',
+        sessionId: params.sessionId,
+        intentId,
+        callId: result.callId,
+        toolName: result.toolName,
+        toolVersion: result.toolVersion,
+        status: result.status,
+        errorClass: result.errorClass,
+      });
       logger.warn(
         '[tool-first-routing] app.launch failed, fallback to visual',
         {
@@ -155,10 +217,52 @@ export const executeToolFirstRoute = async (
         targetWindow: target,
         idempotencyKey,
       });
-      const result = await (options?.runWindowFocus ?? runWindowFocusToolCall)(
-        call,
-      );
+      observability.emitEvent({
+        type: 'tool.call.started',
+        sessionId: params.sessionId,
+        intentId,
+        callId: call.callId,
+        toolName: call.toolName,
+        toolVersion: call.toolVersion,
+        status: 'started',
+      });
+
+      let result: Awaited<ReturnType<typeof runWindowFocusToolCall>>;
+      try {
+        result = await (options?.runWindowFocus ?? runWindowFocusToolCall)(
+          call,
+        );
+      } catch (error) {
+        observability.emitEvent({
+          type: 'tool.call.failed',
+          sessionId: params.sessionId,
+          intentId,
+          callId: call.callId,
+          toolName: call.toolName,
+          toolVersion: call.toolVersion,
+          status: 'error',
+          errorClass: 'tool_exception',
+        });
+        logger.warn(
+          '[tool-first-routing] window.focus crashed, fallback to visual',
+          {
+            error: error instanceof Error ? error.message : String(error),
+          },
+        );
+        return fallback('window.focus', 'tool_exception');
+      }
+
       if (result.status === 'ok') {
+        observability.emitEvent({
+          type: 'tool.call.finished',
+          sessionId: params.sessionId,
+          intentId,
+          callId: result.callId,
+          toolName: result.toolName,
+          toolVersion: result.toolVersion,
+          status: result.status,
+          errorClass: result.errorClass,
+        });
         return {
           handled: true,
           status: StatusEnum.RUNNING,
@@ -167,6 +271,16 @@ export const executeToolFirstRoute = async (
         };
       }
 
+      observability.emitEvent({
+        type: 'tool.call.failed',
+        sessionId: params.sessionId,
+        intentId,
+        callId: result.callId,
+        toolName: result.toolName,
+        toolVersion: result.toolVersion,
+        status: result.status,
+        errorClass: result.errorClass,
+      });
       logger.warn(
         '[tool-first-routing] window.focus failed, fallback to visual',
         {
@@ -182,10 +296,52 @@ export const executeToolFirstRoute = async (
       targetWindow: target,
       idempotencyKey,
     });
-    const result = await (
-      options?.runWindowWaitReady ?? runWindowWaitReadyToolCall
-    )(call);
+    observability.emitEvent({
+      type: 'tool.call.started',
+      sessionId: params.sessionId,
+      intentId,
+      callId: call.callId,
+      toolName: call.toolName,
+      toolVersion: call.toolVersion,
+      status: 'started',
+    });
+
+    let result: Awaited<ReturnType<typeof runWindowWaitReadyToolCall>>;
+    try {
+      result = await (
+        options?.runWindowWaitReady ?? runWindowWaitReadyToolCall
+      )(call);
+    } catch (error) {
+      observability.emitEvent({
+        type: 'tool.call.failed',
+        sessionId: params.sessionId,
+        intentId,
+        callId: call.callId,
+        toolName: call.toolName,
+        toolVersion: call.toolVersion,
+        status: 'error',
+        errorClass: 'tool_exception',
+      });
+      logger.warn(
+        '[tool-first-routing] window.wait_ready crashed, fallback to visual',
+        {
+          error: error instanceof Error ? error.message : String(error),
+        },
+      );
+      return fallback('window.wait_ready', 'tool_exception');
+    }
+
     if (result.status === 'ok') {
+      observability.emitEvent({
+        type: 'tool.call.finished',
+        sessionId: params.sessionId,
+        intentId,
+        callId: result.callId,
+        toolName: result.toolName,
+        toolVersion: result.toolVersion,
+        status: result.status,
+        errorClass: result.errorClass,
+      });
       return {
         handled: true,
         status: StatusEnum.RUNNING,
@@ -194,6 +350,16 @@ export const executeToolFirstRoute = async (
       };
     }
 
+    observability.emitEvent({
+      type: 'tool.call.failed',
+      sessionId: params.sessionId,
+      intentId,
+      callId: result.callId,
+      toolName: result.toolName,
+      toolVersion: result.toolVersion,
+      status: result.status,
+      errorClass: result.errorClass,
+    });
     logger.warn(
       '[tool-first-routing] window.wait_ready failed, fallback to visual',
       {

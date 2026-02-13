@@ -10,6 +10,7 @@ import {
 } from '@ui-tars/sdk/core';
 
 import { logger } from '@main/logger';
+import { ReliabilityObservabilityService } from '@main/services/reliabilityObservability';
 import type { ToolFirstFeatureFlags } from '@main/store/featureFlags';
 
 import {
@@ -32,6 +33,7 @@ type InvokeGateOperatorConfig = {
   maxLoopCount: number;
   toolFirstRouter?: (params: {
     sessionId: string;
+    intentId?: string;
     loopCount?: number;
     parsedPrediction: ExecuteParams['parsedPrediction'];
   }) => Promise<ToolFirstRouteResult>;
@@ -58,6 +60,8 @@ export class InvokeGateOperator extends Operator {
   private lastEvaluatedLoopCount: number | null = null;
   private previousIntentSignature: string | null = null;
   private repeatedIntentStreak = 0;
+  private readonly observability =
+    ReliabilityObservabilityService.getInstance();
 
   constructor(config: InvokeGateOperatorConfig) {
     super();
@@ -91,16 +95,38 @@ export class InvokeGateOperator extends Operator {
       sessionId: this.sessionId,
       parsedPrediction: params.parsedPrediction,
     });
+    this.observability.emitEvent({
+      type: 'intent.created',
+      sessionId: this.sessionId,
+      intentId: intent.intentId,
+      status: intent.actionType,
+    });
+
     const { signature: intentSignature, streak: repeatedIntentStreak } =
       this.previewRepeatedIntentStreak(intent);
     const shouldCommitRepeatedIntent =
       this.shouldTrackRepeatedIntentStreak(intent);
+
+    if (repeatedIntentStreak > 1) {
+      this.observability.emitRendererState({
+        state: 'retrying',
+        sessionId: this.sessionId,
+        reason: `repeated_intent_streak:${repeatedIntentStreak}`,
+      });
+    }
 
     const gateDecision = evaluateInvokeGate(intent, {
       featureFlags: this.featureFlags,
       authState: this.authState,
       loopBudgetRemaining: this.remainingLoopBudget,
       repeatedIntentStreak,
+    });
+    this.observability.emitEvent({
+      type: 'gate.decision',
+      sessionId: this.sessionId,
+      intentId: gateDecision.intentId,
+      status: gateDecision.decision,
+      reasonCodes: gateDecision.reasonCodes,
     });
 
     logger.info('[invoke-gate] decision', {
@@ -123,6 +149,7 @@ export class InvokeGateOperator extends Operator {
     ) {
       const toolFirstResult = await this.toolFirstRouter({
         sessionId: this.sessionId,
+        intentId: intent.intentId,
         loopCount,
         parsedPrediction: params.parsedPrediction,
       });
@@ -133,6 +160,14 @@ export class InvokeGateOperator extends Operator {
           repeatedIntentStreak,
           shouldCommitRepeatedIntent,
         );
+        this.observability.emitRendererState({
+          state:
+            toolFirstResult.toolName === 'window.wait_ready'
+              ? 'waiting_external_condition'
+              : 'executing_tool',
+          sessionId: this.sessionId,
+          status: toolFirstResult.status,
+        });
         logger.info('[tool-first-routing] tool path handled action', {
           actionType: params.parsedPrediction.action_type,
           toolName: toolFirstResult.toolName,
@@ -150,6 +185,11 @@ export class InvokeGateOperator extends Operator {
       logger.info('[tool-first-routing] fallback to visual operator', {
         actionType: params.parsedPrediction.action_type,
         fallbackReason: toolFirstResult.fallbackReason,
+      });
+      this.observability.emitRendererState({
+        state: 'fallback_to_visual',
+        sessionId: this.sessionId,
+        reason: toolFirstResult.fallbackReason || undefined,
       });
     }
 
