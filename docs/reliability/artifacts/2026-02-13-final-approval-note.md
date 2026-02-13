@@ -1,6 +1,6 @@
 # Reliability Migration Final Approval
 
-- Base branch/commit: `main` / `ce12f9571e24315ed0f349be75997525fab85857`
+- Base branch/commit: `main` / `1269c08926c787f60e2fbd880d3dbe31efcad478`
 - Closure PRs:
   - `#20` traceability + baseline scaffold
   - `#21` KPI automation + gate hardening
@@ -16,5 +16,5 @@
 - Phase regression evidence:
   - `docs/reliability/artifacts/2026-02-13-phase-regression-evidence.md`
 
-Decision: `BLOCKED`
-Reason: waiting for `#23` review/merge before final green sign-off on `main`.
+Decision: `APPROVED`
+Reason: all closure evidence is merged on `main` via `#23`; release readiness checklist is fully satisfied.
