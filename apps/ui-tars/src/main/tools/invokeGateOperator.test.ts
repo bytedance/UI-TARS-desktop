@@ -232,6 +232,42 @@ describe('InvokeGateOperator', () => {
     ).rejects.toThrow('loop_budget_exhausted');
   });
 
+  it('blocks repeated action patterns when loop guardrails are enabled', async () => {
+    const innerOperator = createInnerOperator();
+    const gatedOperator = new InvokeGateOperator({
+      innerOperator,
+      featureFlags: {
+        ffToolRegistry: true,
+        ffInvokeGate: true,
+        ffToolFirstRouting: false,
+        ffLoopGuardrails: true,
+      },
+      sessionId: 'session-5-loop',
+      authState: 'valid',
+      maxLoopCount: 10,
+    });
+
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 1) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 2) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+    await expect(
+      gatedOperator.execute(
+        buildExecuteParams('click', '[1,1,1,1]', 3) as never,
+      ),
+    ).rejects.toThrow('loop_pattern_repeated');
+
+    expect(
+      (innerOperator as never as { execute: ReturnType<typeof vi.fn> }).execute,
+    ).toHaveBeenCalledTimes(2);
+  });
+
   it('allows scroll action without start_box when invoke gate is enabled', async () => {
     const innerOperator = createInnerOperator();
     const gatedOperator = new InvokeGateOperator({

@@ -13,6 +13,7 @@ import { logger } from '@main/logger';
 import type { ToolFirstFeatureFlags } from '@main/store/featureFlags';
 
 import {
+  type ActionIntentV1,
   type GateAuthState,
   buildActionIntentV1,
   evaluateInvokeGate,
@@ -50,6 +51,8 @@ export class InvokeGateOperator extends Operator {
   >;
   private remainingLoopBudget: number;
   private lastEvaluatedLoopCount: number | null = null;
+  private previousIntentSignature: string | null = null;
+  private repeatedIntentStreak = 0;
 
   constructor(config: InvokeGateOperatorConfig) {
     super();
@@ -83,11 +86,15 @@ export class InvokeGateOperator extends Operator {
       sessionId: this.sessionId,
       parsedPrediction: params.parsedPrediction,
     });
+    const repeatedIntentStreak = this.featureFlags.ffLoopGuardrails
+      ? this.trackRepeatedIntent(intent)
+      : 0;
 
     const gateDecision = evaluateInvokeGate(intent, {
       featureFlags: this.featureFlags,
       authState: this.authState,
       loopBudgetRemaining: this.remainingLoopBudget,
+      repeatedIntentStreak,
     });
 
     logger.info('[invoke-gate] decision', {
@@ -95,6 +102,7 @@ export class InvokeGateOperator extends Operator {
       decision: gateDecision.decision,
       reasonCodes: gateDecision.reasonCodes,
       remainingLoopBudget: this.remainingLoopBudget,
+      repeatedIntentStreak,
     });
 
     if (gateDecision.decision === 'deny') {
@@ -135,6 +143,34 @@ export class InvokeGateOperator extends Operator {
     }
 
     return this.innerOperator.execute(params);
+  }
+
+  private trackRepeatedIntent(intent: ActionIntentV1): number {
+    const signature = this.buildIntentSignature(intent);
+
+    if (this.previousIntentSignature === signature) {
+      this.repeatedIntentStreak += 1;
+    } else {
+      this.repeatedIntentStreak = 1;
+    }
+
+    this.previousIntentSignature = signature;
+    return this.repeatedIntentStreak;
+  }
+
+  private buildIntentSignature(intent: ActionIntentV1): string {
+    const normalizedArgs = Object.entries(intent.args)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([key, value]) => {
+        if (typeof value === 'string') {
+          return `${key}:${value.trim().toLowerCase()}`;
+        }
+
+        return `${key}:${JSON.stringify(value)}`;
+      })
+      .join('|');
+
+    return `${intent.actionType}|${normalizedArgs}`;
   }
 
   private advanceLoopBudget(loopCount?: number): void {
