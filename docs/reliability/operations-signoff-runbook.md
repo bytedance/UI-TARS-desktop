@@ -101,3 +101,20 @@ The gate is expected to fail if reports are not comparable, including:
 Decision: `<APPROVED|BLOCKED>`
 Reason: `<short reason>`
 ```
+
+## 6) Latest measured evidence snapshot (2026-02-13)
+
+- baseline report: `docs/reliability/artifacts/2026-02-13-baseline-run-002.report.json`
+- gate reports:
+  - `docs/reliability/artifacts/2026-02-13-gate-run-003.report.json`
+  - `docs/reliability/artifacts/2026-02-13-gate-run-004.report.json`
+- two-run gate output: `docs/reliability/artifacts/2026-02-13-gate-run-003-004.gate.json`
+- summaries:
+  - `docs/reliability/artifacts/2026-02-13-baseline-run-002.summary.md`
+  - `docs/reliability/artifacts/2026-02-13-gate-run-003-004.summary.md`
+- rollback rehearsal:
+  - `docs/reliability/artifacts/2026-02-13-rollback-rehearsal-002.md`
+- phase regression evidence:
+  - `docs/reliability/artifacts/2026-02-13-phase-regression-evidence.md`
+- final approval note:
+  - `docs/reliability/artifacts/2026-02-13-final-approval-note.md`

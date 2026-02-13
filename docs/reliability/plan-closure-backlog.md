@@ -1,6 +1,6 @@
 # UI-TARS Migration Plan Closure Backlog
 
-Last updated: 2026-02-13 (post-PR-21 merge)
+Last updated: 2026-02-13 (evidence set captured; waiting PR-23 merge)
 Related matrix: `docs/reliability/migration-traceability-matrix.md`
 
 ## Goal
@@ -10,7 +10,10 @@ Close all remaining non-code evidence gaps so the migration plan can be marked c
 ## Remaining work (priority order)
 
 1. **Baseline KPI harness + report artifact (PR-00 equivalent)**
-   - Progress: runbook + artifact skeleton + strict generator validation landed; real fixed-environment execution evidence still pending.
+   - Progress: completed with measured artifact set:
+     - `2026-02-13-baseline-run-002.raw-runs.ndjson`
+     - `2026-02-13-baseline-run-002.report.json`
+     - `2026-02-13-baseline-run-002.summary.md`
    - Add a reproducible harness definition for the fixed environment/task set in plan section 3.1.
    - Emit baseline report artifact with required metrics:
      - open-app first-attempt success
@@ -20,7 +23,10 @@ Close all remaining non-code evidence gaps so the migration plan can be marked c
    - Store artifact in-repo (or tracked artifact path with checksum and retrieval instructions).
 
 2. **KPI gate evidence (two consecutive runs)**
-   - Progress: KPI report generation and gate-check scripts merged in `#21`; real two-run artifacts still pending.
+   - Progress: completed with two consecutive passing runs:
+     - `2026-02-13-gate-run-003.report.json`
+     - `2026-02-13-gate-run-004.report.json`
+     - gate output: `2026-02-13-gate-run-003-004.gate.json`
    - Run controlled measurement twice.
    - Record per-run raw data + aggregate summary against targets:
      - wrong-click rate < 1%
@@ -28,14 +34,15 @@ Close all remaining non-code evidence gaps so the migration plan can be marked c
    - Attach exact run commands/configs and timestamps.
 
 3. **Rollback rehearsal evidence for phase/global DoD**
-   - Progress: first test-level rollback rehearsal artifact added (`2026-02-13-baseline-run-001.rollback.md`); full flag-set rehearsal package still pending.
+   - Progress: completed with explicit artifact set:
+     - `2026-02-13-rollback-rehearsal-002.md`
    - Execute explicit rollback rehearsal for currently used reliability flags:
-     - `ffToolRegistry`, `ffInvokeGate`, `ffToolFirstRouting`, `ffConfidenceLayer`, `ffLoopGuardrails`
+      - `ffToolRegistry`, `ffInvokeGate`, `ffToolFirstRouting`, `ffConfidenceLayer`, `ffLoopGuardrails`
    - Prove fallback behavior for new sessions when flags are disabled.
    - Capture before/after expected behavior in concise test logs.
 
 4. **Final documentation pack (operations + contracts + flags)**
-   - Progress: in progress (ops/sign-off runbook added in Closure-PR-C draft).
+   - Progress: completed in merged Closure-PR-C (`#22`) plus measured evidence index updates.
    - Add operator-facing doc describing:
       - contract versions (`ActionIntentV1`, `GateDecisionV1`, tool call/result contracts, checkpoint)
       - release gate semantics
@@ -47,9 +54,13 @@ Close all remaining non-code evidence gaps so the migration plan can be marked c
 - **Closure-PR-A**: baseline harness + first baseline report artifact.
   - Status: merged as `#20`.
 - **Closure-PR-B**: KPI two-run evidence + rollback rehearsal logs.
-  - Status: merged as `#21` (automation and gate hardening complete; real two-run evidence still pending).
+  - Status: merged as `#21` (automation and gate hardening complete).
 - **Closure-PR-C**: final docs/ops package + readiness checklist.
-  - Status: in progress (current branch).
+  - Status: merged as `#22`.
+
+## Remaining closure delta
+
+- Merge `#23` (measured evidence PR) to move final approval note from blocked to approved on `main`.
 
 ## Notes
 

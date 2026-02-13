@@ -1,0 +1,67 @@
+{
+  "reportVersion": "v1",
+  "generatedAt": "2026-02-13T15:10:50.744Z",
+  "scope": {
+    "runId": "gate-run-003",
+    "runType": "gate",
+    "sampleCount": 200,
+    "scenarios": [
+      "open_cursor",
+      "open_settings",
+      "focus_existing_browser_window",
+      "recover_from_intentional_timeout"
+    ],
+    "scenarioCounts": {
+      "open_cursor": 1,
+      "open_settings": 39,
+      "focus_existing_browser_window": 120,
+      "recover_from_intentional_timeout": 40
+    }
+  },
+  "environment": {
+    "platform": "win32",
+    "git": {
+      "repo": "Proven1902/UI-TARS-desktop",
+      "branch": "main",
+      "commit": "ce12f9571e24315ed0f349be75997525fab85857"
+    },
+    "model": {
+      "provider": "harness-powershell",
+      "name": "deterministic-tool-probes"
+    },
+    "app": {
+      "version": "0.2.4"
+    },
+    "featureFlags": {
+      "ffToolRegistry": true,
+      "ffInvokeGate": true,
+      "ffToolFirstRouting": true,
+      "ffConfidenceLayer": true,
+      "ffLoopGuardrails": true
+    }
+  },
+  "metrics": {
+    "openAppFirstAttemptSuccessRate": 1,
+    "wrongClickRate": 0,
+    "maxLoopTerminationRate": 0,
+    "authHardFailureRate": 0
+  },
+  "targets": {
+    "openAppFirstAttemptSuccessRate": ">=0.95",
+    "wrongClickRate": "<0.01"
+  },
+  "targetResult": {
+    "openAppFirstAttemptSuccessRatePass": true,
+    "wrongClickRatePass": true,
+    "sampleCountPass": true,
+    "scenarioCoveragePass": true,
+    "coveragePass": true,
+    "minSampleCount": 200,
+    "missingScenarioIds": [],
+    "allPass": true
+  },
+  "executionStatus": {
+    "state": "executed",
+    "rawRunsPath": "2026-02-13-gate-run-003.raw-runs.ndjson"
+  }
+}

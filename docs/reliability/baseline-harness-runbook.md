@@ -78,6 +78,23 @@ For each measurement batch produce:
 ### KPI automation commands
 
 ```bash
+node scripts/reliability/collect-kpi-raw-runs.mjs \
+  --out docs/reliability/artifacts/<timestamp>-raw-runs.ndjson \
+  --runId <run-id> \
+  --sampleCount 200 \
+  --openCursorCount 1 \
+  --openSettingsCount 39 \
+  --focusBrowserCount 120 \
+  --recoverTimeoutCount 40 \
+  --repo Proven1902/UI-TARS-desktop \
+  --branch main \
+  --commit <commit-sha> \
+  --provider harness-powershell \
+  --model deterministic-tool-probes \
+  --appVersion 0.2.4
+```
+
+```bash
 node scripts/reliability/compute-kpi-report.mjs \
   --raw docs/reliability/artifacts/<timestamp>-raw-runs.ndjson \
   --out docs/reliability/artifacts/<timestamp>-report.json \

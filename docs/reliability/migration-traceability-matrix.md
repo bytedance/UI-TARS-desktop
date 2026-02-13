@@ -1,6 +1,6 @@
 # UI-TARS Reliability Migration Traceability Matrix
 
-Last updated: 2026-02-13
+Last updated: 2026-02-13 (post-PR-22 with measured KPI evidence)
 Source requirements reference: `docs/reliability/plan-closure-backlog.md`
 Target repo: `https://github.com/Proven1902/UI-TARS-desktop`
 
@@ -18,7 +18,7 @@ Plan PR IDs and GitHub PR numbers are different namespaces.
 
 | Plan slice | GitHub PR | Merge commit | Status | Evidence (code/tests) |
 |---|---|---|---|---|
-| PR-00 baseline KPI harness + report artifact | N/A | N/A | In progress (scaffolded) | Harness/docs scaffolding exists: `docs/reliability/baseline-harness-runbook.md`, `docs/reliability/artifacts/reliability-kpi-report.template.json`, `docs/reliability/artifacts/2026-02-13-baseline-run-001.*`; execution evidence still pending |
+| PR-00 baseline KPI harness + report artifact | Closure evidence update | N/A | Implemented + measured | Baseline evidence: `docs/reliability/artifacts/2026-02-13-baseline-run-002.raw-runs.ndjson`, `docs/reliability/artifacts/2026-02-13-baseline-run-002.report.json`, `docs/reliability/artifacts/2026-02-13-baseline-run-002.summary.md` |
 | PR-01 P0 local operator correctness | #4 | `ff463306` | Implemented | `apps/ui-tars/src/main/agent/operator.ts`, `apps/ui-tars/src/main/agent/operator.test.ts` |
 | PR-02 P0 renderer permission gate fix | #4 | `ff463306` | Implemented | `apps/ui-tars/src/renderer/src/hooks/useRunAgent.ts` |
 | PR-03 P0 remote invalid-coordinate fail-fast | #4 | `ff463306` | Implemented | `apps/ui-tars/src/main/remote/operators.ts`, `apps/ui-tars/src/main/remote/operators.test.ts` |
@@ -46,14 +46,13 @@ Plan PR IDs and GitHub PR numbers are different namespaces.
 |---|---|---|---|---|
 | Closure-PR-A | #20 | `929ecc3e` | Merged | Traceability + baseline scaffolding updates in reliability docs/artifacts |
 | Closure-PR-B | #21 | `1f8c5bbf` | Merged | KPI automation scripts + provenance/gate hardening (`scripts/reliability/*.mjs`) |
-| Closure-PR-C | Pending | N/A | In progress | Final operations/sign-off docs and readiness checklist completion |
+| Closure-PR-C | #22 | `ce12f957` | Merged | Final operations/sign-off docs and readiness checklist snapshot |
+| Closure-PR-D | #23 | Pending | In review | Measured KPI evidence capture, rollback rehearsal evidence, and final sign-off bundle |
 
-## DoD/evidence status (post-PR-21)
+## DoD/evidence status (post-PR-22)
 
 - Implemented code slices: P0/P1/P2/P3 are functionally present.
 - Closure automation: KPI compute/gate scripts merged and hardened in `#21`.
+- Measured KPI evidence: baseline + two consecutive passing gate runs captured in 2026-02-13 artifact set.
 - Missing completion evidence from plan:
-  - Baseline KPI execution evidence (`PR-00` scaffolding exists, measured results pending).
-  - KPI gate evidence for two consecutive runs.
-  - Explicit rollback rehearsal artifacts for phase/global DoD.
-  - Final sign-off completion with real run artifacts and approval note links.
+  - Final on-main sign-off confirmation after `#23` merge.
