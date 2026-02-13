@@ -7,12 +7,14 @@ export const TOOL_FIRST_FEATURE_FLAG_DEFAULTS = Object.freeze({
   ffToolRegistry: false,
   ffInvokeGate: false,
   ffToolFirstRouting: false,
+  ffConfidenceLayer: false,
 });
 
 export type ToolFirstFeatureFlags = {
   ffToolRegistry: boolean;
   ffInvokeGate: boolean;
   ffToolFirstRouting: boolean;
+  ffConfidenceLayer?: boolean;
 };
 
 export const resolveToolFirstFeatureFlags = (

@@ -48,6 +48,9 @@ export const PresetSchema = z
     ffToolFirstRouting: z
       .boolean()
       .default(TOOL_FIRST_FEATURE_FLAG_DEFAULTS.ffToolFirstRouting),
+    ffConfidenceLayer: z
+      .boolean()
+      .default(TOOL_FIRST_FEATURE_FLAG_DEFAULTS.ffConfidenceLayer),
   })
   .superRefine((value, ctx) => {
     if (!value.vlmProvider) {

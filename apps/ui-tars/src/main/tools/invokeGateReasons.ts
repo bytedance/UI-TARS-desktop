@@ -8,6 +8,7 @@ export const INVOKE_GATE_DENY_REASONS = [
   'loop_budget_exhausted',
   'action_type_missing',
   'action_type_unsupported',
+  'identity_confidence_low',
   'start_box_required',
   'auth_state_invalid',
 ] as const;
@@ -49,6 +50,13 @@ export const INVOKE_GATE_DENY_REASON_CATALOG: Record<
     retryable: true,
     message: 'Action type is not in invoke gate allowlist.',
     guidance: 'Add modeled action to allowlist or change planner output.',
+  },
+  identity_confidence_low: {
+    severity: 'warning',
+    retryable: true,
+    message: 'Target identity confidence is too low for mutating action.',
+    guidance:
+      'Provide an explicit target identifier (target/window/app) before retrying.',
   },
   start_box_required: {
     severity: 'warning',

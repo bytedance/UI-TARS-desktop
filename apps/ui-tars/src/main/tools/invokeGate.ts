@@ -14,7 +14,7 @@ import {
 } from './invokeGateReasons';
 import {
   isToolOnlyActionTargetSupported,
-  resolveToolFirstTarget,
+  resolveToolFirstTargetWithConfidence,
 } from './toolFirstTarget';
 
 export {
@@ -65,6 +65,13 @@ const TOOL_ONLY_ACTION_TYPES = new Set<string>([
   'window_focus',
   'window.wait_ready',
   'window_wait_ready',
+]);
+
+const TOOL_ONLY_MUTATING_ACTION_TYPES = new Set<string>([
+  'app.launch',
+  'app_launch',
+  'window.focus',
+  'window_focus',
 ]);
 
 const ACTION_TYPES_REQUIRING_START_BOX = new Set<string>([
@@ -156,11 +163,30 @@ const getRiskTierByActionType = (actionType: string): ActionRiskTier => {
   return 'low';
 };
 
+const resolveParserConfidence = (value: unknown): number => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return Math.max(0, Math.min(1, value));
+  }
+
+  if (typeof value === 'string') {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) {
+      return Math.max(0, Math.min(1, parsed));
+    }
+  }
+
+  return 1;
+};
+
 export const buildActionIntentV1 = (params: {
   sessionId: string;
   parsedPrediction: PredictionParsed;
 }): ActionIntentV1 => {
   const actionType = params.parsedPrediction.action_type.trim().toLowerCase();
+  const actionInputs = (params.parsedPrediction.action_inputs || {}) as Record<
+    string,
+    unknown
+  >;
 
   return ActionIntentV1Schema.parse({
     version: ACTION_INTENT_VERSION,
@@ -169,9 +195,9 @@ export const buildActionIntentV1 = (params: {
     operation: `legacy.action.${actionType || 'unknown'}`,
     actionType,
     riskTier: getRiskTierByActionType(actionType),
-    confidence: 1,
+    confidence: resolveParserConfidence(actionInputs.confidence),
     source: 'parser',
-    args: { ...(params.parsedPrediction.action_inputs || {}) },
+    args: { ...actionInputs },
   });
 };
 
@@ -207,7 +233,10 @@ export const evaluateInvokeGate = (
   const toolRoutingEnabled =
     context.featureFlags.ffToolRegistry &&
     context.featureFlags.ffToolFirstRouting;
-  const toolTarget = resolveToolFirstTarget(intent.args);
+  const toolTargetResolution = resolveToolFirstTargetWithConfidence(
+    intent.args,
+  );
+  const toolTarget = toolTargetResolution?.target || null;
   const toolTargetSupported =
     !!toolTarget &&
     isToolOnlyActionTargetSupported({
@@ -223,6 +252,16 @@ export const evaluateInvokeGate = (
 
   if (intent.actionType && !actionSupported) {
     reasonCodes.push('action_type_unsupported');
+  }
+
+  if (
+    context.featureFlags.ffConfidenceLayer &&
+    TOOL_ONLY_MUTATING_ACTION_TYPES.has(intent.actionType)
+  ) {
+    const targetConfidence = toolTargetResolution?.confidence ?? 0;
+    if (targetConfidence < 0.75) {
+      reasonCodes.push('identity_confidence_low');
+    }
   }
 
   if (ACTION_TYPES_REQUIRING_START_BOX.has(intent.actionType)) {

@@ -291,6 +291,62 @@ describe('invokeGate', () => {
     });
   });
 
+  it('denies mutating tool action with ambiguous target when confidence layer is enabled', () => {
+    withMockedPlatform('win32', () => {
+      const intent = buildActionIntentV1({
+        sessionId: 'session-5e',
+        parsedPrediction: {
+          action_type: 'app.launch',
+          action_inputs: { content: 'open cursor or settings' },
+          reflection: null,
+          thought: 'ambiguous target',
+        },
+      });
+
+      const decision = evaluateInvokeGate(intent, {
+        featureFlags: {
+          ffToolRegistry: true,
+          ffInvokeGate: true,
+          ffToolFirstRouting: true,
+          ffConfidenceLayer: true,
+        },
+        authState: 'valid',
+        loopBudgetRemaining: 10,
+      });
+
+      expect(decision.decision).toBe('deny');
+      expect(decision.reasonCodes).toContain('identity_confidence_low');
+    });
+  });
+
+  it('allows mutating tool action with explicit target when confidence layer is enabled', () => {
+    withMockedPlatform('win32', () => {
+      const intent = buildActionIntentV1({
+        sessionId: 'session-5f',
+        parsedPrediction: {
+          action_type: 'app.launch',
+          action_inputs: { content: 'settings' },
+          reflection: null,
+          thought: 'explicit target',
+        },
+      });
+
+      const decision = evaluateInvokeGate(intent, {
+        featureFlags: {
+          ffToolRegistry: true,
+          ffInvokeGate: true,
+          ffToolFirstRouting: true,
+          ffConfidenceLayer: true,
+        },
+        authState: 'valid',
+        loopBudgetRemaining: 10,
+      });
+
+      expect(decision.decision).toBe('allow');
+      expect(decision.reasonCodes).toEqual([]);
+    });
+  });
+
   it('accepts fractional loop budget values without schema failure', () => {
     const intent = buildActionIntentV1({
       sessionId: 'session-6',
