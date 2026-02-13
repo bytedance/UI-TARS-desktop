@@ -270,7 +270,9 @@ export function VLMSettings({
       if (nextState.status === 'authenticated') {
         toast.success('OpenAI Codex OAuth connected');
       } else {
-        toast.error('OpenAI Codex OAuth login was not completed');
+        toast.error('OpenAI Codex OAuth login was not completed', {
+          description: nextState.error,
+        });
       }
     } catch (error) {
       toast.error('OpenAI Codex OAuth login failed', {
@@ -307,7 +309,10 @@ export function VLMSettings({
         return true;
       }
 
-      toast.error('Please connect OpenAI Codex OAuth before saving settings');
+      toast.error(
+        nextState.error ||
+          'Please connect OpenAI Codex OAuth before saving settings',
+      );
       return false;
     } catch (error) {
       const description =
@@ -1039,10 +1044,13 @@ export function ModelAvailabilityCheck({
             responseApiSupported: true,
           });
         } else {
+          const message =
+            codexState.error ||
+            'OpenAI Codex OAuth is not connected. Please reconnect.';
           onResponseApiSupportChange?.(false);
           setCheckState({
             status: 'error',
-            message: 'OpenAI Codex OAuth is not connected. Please reconnect.',
+            message,
             responseApiSupported: false,
           });
         }

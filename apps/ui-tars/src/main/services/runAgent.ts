@@ -250,17 +250,30 @@ export const runAgent = async (
   }
 
   if (isCodexOAuthProvider && !isRemoteOperator) {
+    const codexAuthService = CodexAuthService.getInstance();
     let codexAuthContext: { accessToken: string; accountId?: string } | null;
     try {
-      codexAuthContext =
-        await CodexAuthService.getInstance().getAccessContext();
+      codexAuthContext = await codexAuthService.getAccessContext();
     } catch (error) {
       logger.error('[runAgent] failed to read Codex OAuth session', error);
+      let authMessage =
+        error instanceof Error ? error.message : String(error ?? 'unknown');
+      try {
+        const authState = await codexAuthService.getStatus();
+        if (authState.status === 'error' && authState.error) {
+          authMessage = authState.error;
+        }
+      } catch (statusError) {
+        logger.warn(
+          '[runAgent] failed to read Codex OAuth status',
+          statusError,
+        );
+      }
+
       setState({
         ...getState(),
         status: StatusEnum.ERROR,
-        errorMsg:
-          'Failed to read OpenAI Codex OAuth session. Please reconnect in Settings > VLM.',
+        errorMsg: authMessage,
       });
       return;
     }

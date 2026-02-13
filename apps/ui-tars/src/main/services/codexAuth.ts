@@ -13,6 +13,7 @@ import path from 'node:path';
 import { app, safeStorage, shell } from 'electron';
 
 import { logger } from '@main/logger';
+import { CodexAuthCooldown } from '@main/services/codexAuthCooldown';
 
 const CLIENT_ID =
   process.env.UI_TARS_CODEX_OAUTH_CLIENT_ID ||
@@ -54,11 +55,15 @@ export type CodexOAuthState = {
   email?: string;
   expiresAt?: number;
   error?: string;
+  reauthRequired?: boolean;
+  cooldownUntil?: number;
+  cooldownRemainingMs?: number;
 };
 
 export class CodexAuthService {
   private static instance: CodexAuthService;
   private pendingLogin: Promise<CodexOAuthState> | null = null;
+  private readonly cooldown = new CodexAuthCooldown();
 
   public static getInstance(): CodexAuthService {
     if (!CodexAuthService.instance) {
@@ -81,6 +86,7 @@ export class CodexAuthService {
 
   public async logout(): Promise<CodexOAuthState> {
     await this.clearSession();
+    this.cooldown.clear();
     return {
       status: 'unauthenticated',
     };
@@ -88,8 +94,38 @@ export class CodexAuthService {
 
   public async getStatus(): Promise<CodexOAuthState> {
     try {
+      const toCooldownErrorState = (): CodexOAuthState | null => {
+        const cooldown = this.cooldown.snapshot();
+        if (!cooldown.active) {
+          return null;
+        }
+
+        const remainingSeconds = Math.max(
+          1,
+          Math.ceil((cooldown.remainingMs || 0) / 1000),
+        );
+
+        return {
+          status: 'error',
+          error: `OpenAI Codex OAuth is cooling down after auth failure. Please reconnect and retry in ${remainingSeconds}s.${cooldown.reason ? ` ${cooldown.reason}` : ''}`,
+          reauthRequired: true,
+          cooldownUntil: cooldown.until,
+          cooldownRemainingMs: cooldown.remainingMs,
+        };
+      };
+
+      const preflightCooldownState = toCooldownErrorState();
+      if (preflightCooldownState) {
+        return preflightCooldownState;
+      }
+
       const session = await this.getValidSession();
       if (!session) {
+        const postRefreshCooldownState = toCooldownErrorState();
+        if (postRefreshCooldownState) {
+          return postRefreshCooldownState;
+        }
+
         return {
           status: 'unauthenticated',
         };
@@ -124,8 +160,11 @@ export class CodexAuthService {
     accessToken: string;
     accountId?: string;
   } | null> {
+    this.cooldown.assertReady();
+
     const session = await this.getValidSession();
     if (!session) {
+      this.cooldown.assertReady();
       return null;
     }
 
@@ -173,6 +212,7 @@ export class CodexAuthService {
 
     const session = await this.exchangeAuthorizationCode(code, verifier);
     await this.saveSession(session);
+    this.cooldown.clear();
 
     return this.getStatus();
   }
@@ -541,6 +581,7 @@ export class CodexAuthService {
     try {
       const refreshed = await this.refreshAccessToken(session.refreshToken);
       await this.saveSession(refreshed);
+      this.cooldown.clear();
       return refreshed;
     } catch (error) {
       logger.warn(
@@ -548,6 +589,7 @@ export class CodexAuthService {
         error,
       );
       await this.clearSession();
+      this.cooldown.activate('Reconnect OpenAI Codex OAuth to continue.');
       return null;
     }
   }
