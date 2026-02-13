@@ -23,10 +23,10 @@ References:
 
 Run each scenario with deterministic setup and consistent prompts.
 
-- `open Cursor`
-- `open Settings`
-- `focus existing browser window`
-- `recover from intentional timeout`
+- `open_cursor` (open Cursor)
+- `open_settings` (open Settings)
+- `focus_existing_browser_window`
+- `recover_from_intentional_timeout`
 
 For baseline and KPI gates, target total volume of 200 runs across the scenario pack.
 
@@ -43,7 +43,7 @@ Collect and report these metrics per run set:
 
 For every run, persist at minimum:
 
-- `runId`, timestamp, scenario name
+- `runId`, timestamp, `scenarioId` (must use canonical IDs from section 2)
 - session id
 - final status (`completed`, `blocked`, `error`, etc.)
 - first-attempt success boolean for open-app scenarios
