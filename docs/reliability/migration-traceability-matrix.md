@@ -40,11 +40,20 @@ Plan PR IDs and GitHub PR numbers are different namespaces.
 | PR-16 P3 loop guardrails + anti-repeat | #18 | `22858dea` | Implemented | `apps/ui-tars/src/main/tools/invokeGateOperator.ts`, `apps/ui-tars/src/main/tools/invokeGate.ts`, tests `invokeGateOperator.test.ts`, `invokeGate.test.ts` |
 | PR-17 P3 observability dashboards + release gates | #19 | `e0d75379` | Implemented (backend service + IPC) | `apps/ui-tars/src/main/services/reliabilityObservability.ts`, `apps/ui-tars/src/main/ipcRoutes/agent.ts`, tests `reliabilityObservability.test.ts`, `agent.test.ts` |
 
-## DoD/evidence status (post-PR-19)
+## Closure PR tracking (post plan slices)
+
+| Closure slice | GitHub PR | Merge commit | Status | Evidence |
+|---|---|---|---|---|
+| Closure-PR-A | #20 | `929ecc3e` | Merged | Traceability + baseline scaffolding updates in reliability docs/artifacts |
+| Closure-PR-B | #21 | `1f8c5bbf` | Merged | KPI automation scripts + provenance/gate hardening (`scripts/reliability/*.mjs`) |
+| Closure-PR-C | Pending | N/A | In progress | Final operations/sign-off docs and readiness checklist completion |
+
+## DoD/evidence status (post-PR-21)
 
 - Implemented code slices: P0/P1/P2/P3 are functionally present.
+- Closure automation: KPI compute/gate scripts merged and hardened in `#21`.
 - Missing completion evidence from plan:
   - Baseline KPI execution evidence (`PR-00` scaffolding exists, measured results pending).
   - KPI gate evidence for two consecutive runs.
   - Explicit rollback rehearsal artifacts for phase/global DoD.
-  - Dedicated ops/docs update package for final sign-off.
+  - Final sign-off completion with real run artifacts and approval note links.
