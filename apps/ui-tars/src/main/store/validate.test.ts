@@ -23,6 +23,7 @@ describe('PresetSchema tool-first flags', () => {
     expect(parsed.ffInvokeGate).toBe(false);
     expect(parsed.ffToolFirstRouting).toBe(false);
     expect(parsed.ffConfidenceLayer).toBe(false);
+    expect(parsed.ffLoopGuardrails).toBe(false);
   });
 
   it('accepts explicit tool-first flag values', () => {
@@ -32,11 +33,13 @@ describe('PresetSchema tool-first flags', () => {
       ffInvokeGate: true,
       ffToolFirstRouting: true,
       ffConfidenceLayer: true,
+      ffLoopGuardrails: true,
     });
 
     expect(parsed.ffToolRegistry).toBe(true);
     expect(parsed.ffInvokeGate).toBe(true);
     expect(parsed.ffToolFirstRouting).toBe(true);
     expect(parsed.ffConfidenceLayer).toBe(true);
+    expect(parsed.ffLoopGuardrails).toBe(true);
   });
 });
