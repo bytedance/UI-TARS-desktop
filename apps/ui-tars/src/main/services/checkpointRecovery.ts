@@ -4,6 +4,8 @@
  */
 import { Message, StatusEnum } from '@ui-tars/shared/types';
 
+import { ReliabilityObservabilityService } from './reliabilityObservability';
+
 export const CHECKPOINT_VERSION = 'v1' as const;
 
 export type RecoveryFsmState =
@@ -69,6 +71,8 @@ export const deriveRecoveryFsmState = (
 export class CheckpointRecoveryService {
   private static instance: CheckpointRecoveryService;
   private checkpoint: RecoveryCheckpointV1 | null = null;
+  private readonly observability =
+    ReliabilityObservabilityService.getInstance();
 
   public static getInstance(): CheckpointRecoveryService {
     if (!CheckpointRecoveryService.instance) {
@@ -90,6 +94,16 @@ export class CheckpointRecoveryService {
     };
 
     this.checkpoint = checkpoint;
+    this.observability.emitEvent({
+      type: 'recovery.started',
+      sessionId: params.sessionId,
+      status: checkpoint.status,
+    });
+    this.observability.emitEvent({
+      type: 'checkpoint.saved',
+      sessionId: params.sessionId,
+      status: checkpoint.status,
+    });
     return checkpoint;
   }
 
@@ -105,6 +119,12 @@ export class CheckpointRecoveryService {
       errorMsg: params.errorMsg,
       timestamp: Date.now(),
     };
+
+    this.observability.emitEvent({
+      type: 'checkpoint.saved',
+      sessionId: params.sessionId,
+      status: params.status,
+    });
 
     return this.checkpoint;
   }

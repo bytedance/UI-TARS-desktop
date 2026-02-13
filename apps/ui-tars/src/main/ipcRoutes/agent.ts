@@ -11,6 +11,7 @@ import {
   CheckpointRecoveryService,
   buildResumeInputFromCheckpoint,
 } from '@main/services/checkpointRecovery';
+import { ReliabilityObservabilityService } from '@main/services/reliabilityObservability';
 
 import { closeScreenMarker } from '@main/window/ScreenMarker';
 import { GUIAgent } from '@ui-tars/sdk';
@@ -142,4 +143,12 @@ export const agentRoute = t.router({
       instructions: '',
     });
   }),
+  getReliabilityDashboard: t.procedure.input<void>().handle(async () => {
+    return ReliabilityObservabilityService.getInstance().getDashboardSnapshot();
+  }),
+  evaluateReliabilityReleaseGates: t.procedure
+    .input<void>()
+    .handle(async () => {
+      return ReliabilityObservabilityService.getInstance().evaluateReleaseGates();
+    }),
 });
