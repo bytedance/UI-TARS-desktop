@@ -11,6 +11,7 @@ Scope: final organizational traceability bundle after migration closure.
    - `#22` -> `ce12f957`
    - `#23` -> `1269c089`
    - `#24` -> `974eb2de`
+   - `#25` -> `87e4ba3c`
 2. Final approval note is approved:
    - `docs/reliability/artifacts/2026-02-13-final-approval-note.md`
 3. Release tag + release notes are created:

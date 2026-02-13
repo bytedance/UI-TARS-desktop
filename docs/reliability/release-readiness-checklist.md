@@ -41,7 +41,7 @@ Use this checklist to decide if the migration plan is fully complete.
 
 ## F. Current closure snapshot (2026-02-13)
 
-- Merged closure PRs: `#20`, `#21`, `#22`, `#23`
+- Merged closure PRs: `#20`, `#21`, `#22`, `#23`, `#24`, `#25`
 - Ops/sign-off runbook: `docs/reliability/operations-signoff-runbook.md`
 - New measured KPI evidence set:
   - baseline: `docs/reliability/artifacts/2026-02-13-baseline-run-002.report.json`
@@ -51,3 +51,7 @@ Use this checklist to decide if the migration plan is fully complete.
 - Rollback rehearsal evidence: `docs/reliability/artifacts/2026-02-13-rollback-rehearsal-002.md`
 - Final approval note: `docs/reliability/artifacts/2026-02-13-final-approval-note.md` (`Decision: APPROVED`)
 - Org-trace closure record: `docs/reliability/closure/2026-02-13-org-trace-record.md`
+- Release tag and packaged archive:
+  - tag/release: `reliability-migration-closed-2026-02-13`
+  - archive: `docs/reliability/closure/2026-02-13-reliability-evidence.tar.gz`
+  - checksums: `docs/reliability/closure/2026-02-13-evidence-checksums.sha256`

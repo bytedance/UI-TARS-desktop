@@ -1,6 +1,6 @@
 # UI-TARS Reliability Migration Traceability Matrix
 
-Last updated: 2026-02-13 (post-PR-23 final closure merge)
+Last updated: 2026-02-13 (post-PR-25 org-trace closure merge)
 Source requirements reference: `docs/reliability/plan-closure-backlog.md`
 Target repo: `https://github.com/Proven1902/UI-TARS-desktop`
 
@@ -48,11 +48,13 @@ Plan PR IDs and GitHub PR numbers are different namespaces.
 | Closure-PR-B | #21 | `1f8c5bbf` | Merged | KPI automation scripts + provenance/gate hardening (`scripts/reliability/*.mjs`) |
 | Closure-PR-C | #22 | `ce12f957` | Merged | Final operations/sign-off docs and readiness checklist snapshot |
 | Closure-PR-D | #23 | `1269c089` | Merged | Measured KPI evidence capture, rollback rehearsal evidence, and final sign-off bundle |
+| Closure-PR-E | #24, #25 | `974eb2de`, `87e4ba3c` | Merged | Final status cleanup + org-trace package + release/tag/checksum archive |
 
-## DoD/evidence status (post-PR-23)
+## DoD/evidence status (post-PR-25)
 
 - Implemented code slices: P0/P1/P2/P3 are functionally present.
 - Closure automation: KPI compute/gate scripts merged and hardened in `#21`.
 - Measured KPI evidence: baseline + two consecutive passing gate runs captured in 2026-02-13 artifact set.
+- Org-trace closure package and release record are merged on `main` (`#25`) with release tag `reliability-migration-closed-2026-02-13`.
 - Missing completion evidence from plan:
   - None.

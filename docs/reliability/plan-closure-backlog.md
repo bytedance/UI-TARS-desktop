@@ -1,6 +1,6 @@
 # UI-TARS Migration Plan Closure Backlog
 
-Last updated: 2026-02-13 (post-PR-23 merge; closure complete)
+Last updated: 2026-02-13 (post-PR-25 merge; closure + org-trace complete)
 Related matrix: `docs/reliability/migration-traceability-matrix.md`
 
 ## Goal
@@ -59,6 +59,8 @@ Close all remaining non-code evidence gaps so the migration plan can be marked c
   - Status: merged as `#22`.
 - **Closure-PR-D**: measured evidence + final sign-off artifacts.
   - Status: merged as `#23`.
+- **Closure-PR-E**: closure status cleanup + org-trace package + release/tag/checksum archive.
+  - Status: merged as `#24` and `#25`.
 
 ## Remaining closure delta
 
@@ -67,4 +69,4 @@ Close all remaining non-code evidence gaps so the migration plan can be marked c
 ## Notes
 
 - Plan IDs and GitHub PR numbers drift (because of `06a` and `13a` slices). Keep plan IDs as source-of-truth labels in closure docs.
-- Current observability implementation remains session-scoped; formal completion is now covered by in-repo measured KPI, regression, rollback, and approval artifacts.
+- Current observability implementation remains session-scoped; formal completion is covered by measured KPI, regression, rollback, approval, and org-trace release artifacts.
