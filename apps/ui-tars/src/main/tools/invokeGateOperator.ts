@@ -163,7 +163,7 @@ export class InvokeGateOperator extends Operator {
       .sort(([left], [right]) => left.localeCompare(right))
       .map(([key, value]) => {
         if (typeof value === 'string') {
-          return `${key}:${value.trim()}`;
+          return `${key}:${value}`;
         }
 
         return `${key}:${JSON.stringify(value)}`;

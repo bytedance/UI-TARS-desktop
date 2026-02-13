@@ -304,6 +304,42 @@ describe('InvokeGateOperator', () => {
     ).toHaveBeenCalledTimes(3);
   });
 
+  it('treats whitespace-variant retry inputs as distinct intent signatures', async () => {
+    const innerOperator = createInnerOperator();
+    const gatedOperator = new InvokeGateOperator({
+      innerOperator,
+      featureFlags: {
+        ffToolRegistry: true,
+        ffInvokeGate: true,
+        ffToolFirstRouting: false,
+        ffLoopGuardrails: true,
+      },
+      sessionId: 'session-5-space',
+      authState: 'valid',
+      maxLoopCount: 10,
+    });
+
+    await expect(
+      gatedOperator.execute(
+        buildToolExecuteParams('type', 'password', 1) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+    await expect(
+      gatedOperator.execute(
+        buildToolExecuteParams('type', ' password', 2) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+    await expect(
+      gatedOperator.execute(
+        buildToolExecuteParams('type', 'password ', 3) as never,
+      ),
+    ).resolves.toEqual({ status: StatusEnum.RUNNING });
+
+    expect(
+      (innerOperator as never as { execute: ReturnType<typeof vi.fn> }).execute,
+    ).toHaveBeenCalledTimes(3);
+  });
+
   it('allows scroll action without start_box when invoke gate is enabled', async () => {
     const innerOperator = createInnerOperator();
     const gatedOperator = new InvokeGateOperator({
