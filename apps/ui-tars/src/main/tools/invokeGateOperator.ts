@@ -93,6 +93,8 @@ export class InvokeGateOperator extends Operator {
     });
     const { signature: intentSignature, streak: repeatedIntentStreak } =
       this.previewRepeatedIntentStreak(intent);
+    const shouldCommitRepeatedIntent =
+      this.shouldTrackRepeatedIntentStreak(intent);
 
     const gateDecision = evaluateInvokeGate(intent, {
       featureFlags: this.featureFlags,
@@ -126,7 +128,11 @@ export class InvokeGateOperator extends Operator {
       });
 
       if (toolFirstResult.handled) {
-        this.commitRepeatedIntent(intentSignature, repeatedIntentStreak);
+        this.commitRepeatedIntent(
+          intentSignature,
+          repeatedIntentStreak,
+          shouldCommitRepeatedIntent,
+        );
         logger.info('[tool-first-routing] tool path handled action', {
           actionType: params.parsedPrediction.action_type,
           toolName: toolFirstResult.toolName,
@@ -148,7 +154,11 @@ export class InvokeGateOperator extends Operator {
     }
 
     const output = await this.innerOperator.execute(params);
-    this.commitRepeatedIntent(intentSignature, repeatedIntentStreak);
+    this.commitRepeatedIntent(
+      intentSignature,
+      repeatedIntentStreak,
+      shouldCommitRepeatedIntent,
+    );
     return output;
   }
 
@@ -176,13 +186,21 @@ export class InvokeGateOperator extends Operator {
     };
   }
 
-  private commitRepeatedIntent(signature: string, streak: number): void {
-    if (!this.featureFlags.ffLoopGuardrails) {
+  private commitRepeatedIntent(
+    signature: string,
+    streak: number,
+    shouldCommit: boolean,
+  ): void {
+    if (!this.featureFlags.ffLoopGuardrails || !shouldCommit) {
       return;
     }
 
     this.repeatedIntentStreak = streak;
     this.previousIntentSignature = signature;
+  }
+
+  private shouldTrackRepeatedIntentStreak(intent: ActionIntentV1): boolean {
+    return intent.riskTier !== 'low' && intent.actionType !== 'wait';
   }
 
   private buildIntentSignature(intent: ActionIntentV1): string {
