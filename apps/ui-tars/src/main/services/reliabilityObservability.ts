@@ -171,8 +171,11 @@ export class ReliabilityObservabilityService {
 
   private readonly events: ReliabilityEvent[] = [];
   private readonly rendererStateTransitions: RendererStateTransition[] = [];
-  private releaseGateEvidence: ReleaseGateEvidence =
-    createReleaseGateEvidence();
+  private readonly releaseGateEvidenceBySession = new Map<
+    string,
+    ReleaseGateEvidence
+  >();
+  private activeReleaseGateSessionId: string | null = null;
 
   private constructor() {}
 
@@ -196,10 +199,11 @@ export class ReliabilityObservabilityService {
     errorClass?: string;
     reasonCodes?: string[];
   }): void {
+    const normalizedSessionId = normalizeOptionalString(event.sessionId);
     const emittedEvent: ReliabilityEvent = {
       type: event.type,
       timestamp: Date.now(),
-      sessionId: normalizeOptionalString(event.sessionId),
+      sessionId: normalizedSessionId,
       intentId: normalizeOptionalString(event.intentId),
       callId: normalizeOptionalString(event.callId),
       toolName: normalizeOptionalString(event.toolName),
@@ -210,24 +214,35 @@ export class ReliabilityObservabilityService {
     };
 
     this.events.push(emittedEvent);
-    this.releaseGateEvidence.observedEventCounts[emittedEvent.type] += 1;
 
-    if (emittedEvent.type === 'tool.call.started') {
-      this.releaseGateEvidence.startedToolCalls += 1;
+    if (normalizedSessionId) {
+      this.activeReleaseGateSessionId = normalizedSessionId;
     }
 
-    if (
-      emittedEvent.type === 'tool.call.finished' ||
-      emittedEvent.type === 'tool.call.failed'
-    ) {
-      this.releaseGateEvidence.resolvedToolCalls += 1;
-    }
+    const scopedSessionId =
+      emittedEvent.sessionId || this.activeReleaseGateSessionId;
+    if (scopedSessionId) {
+      const scopedEvidence =
+        this.getOrCreateReleaseGateEvidence(scopedSessionId);
+      scopedEvidence.observedEventCounts[emittedEvent.type] += 1;
 
-    if (
-      !hasRequiredCommonTags(emittedEvent) ||
-      !hasRequiredTypeSpecificTags(emittedEvent)
-    ) {
-      this.releaseGateEvidence.eventsMissingRequiredTags += 1;
+      if (emittedEvent.type === 'tool.call.started') {
+        scopedEvidence.startedToolCalls += 1;
+      }
+
+      if (
+        emittedEvent.type === 'tool.call.finished' ||
+        emittedEvent.type === 'tool.call.failed'
+      ) {
+        scopedEvidence.resolvedToolCalls += 1;
+      }
+
+      if (
+        !hasRequiredCommonTags(emittedEvent) ||
+        !hasRequiredTypeSpecificTags(emittedEvent)
+      ) {
+        scopedEvidence.eventsMissingRequiredTags += 1;
+      }
     }
 
     if (this.events.length > MAX_EVENT_HISTORY) {
@@ -284,40 +299,55 @@ export class ReliabilityObservabilityService {
     };
   }
 
-  public evaluateReleaseGates(): {
+  public evaluateReleaseGates(sessionId?: string): {
     version: 'v1';
     ok: boolean;
     checkedAt: number;
     checks: ReleaseGateCheck[];
   } {
+    const scopedSessionId =
+      normalizeOptionalString(sessionId) || this.activeReleaseGateSessionId;
+    const scopedEvidence = scopedSessionId
+      ? this.releaseGateEvidenceBySession.get(scopedSessionId) ||
+        createReleaseGateEvidence()
+      : createReleaseGateEvidence();
+
     const requiredEventTypes: ReliabilityEventType[] = [
       'intent.created',
       'gate.decision',
       'tool.call.started',
-      'tool.call.finished',
       'checkpoint.saved',
       'recovery.started',
       'recovery.finished',
     ];
 
     const missingRequiredEventTypes = requiredEventTypes.filter(
-      (eventType) =>
-        this.releaseGateEvidence.observedEventCounts[eventType] === 0,
+      (eventType) => scopedEvidence.observedEventCounts[eventType] === 0,
     );
 
-    const startedToolCalls = this.releaseGateEvidence.startedToolCalls;
-    const resolvedToolCalls = this.releaseGateEvidence.resolvedToolCalls;
-    const eventsWithMissingTags =
-      this.releaseGateEvidence.eventsMissingRequiredTags;
+    const hasAnyToolCallResult = scopedEvidence.resolvedToolCalls > 0;
+
+    const startedToolCalls = scopedEvidence.startedToolCalls;
+    const resolvedToolCalls = scopedEvidence.resolvedToolCalls;
+    const eventsWithMissingTags = scopedEvidence.eventsMissingRequiredTags;
 
     const checks: ReleaseGateCheck[] = [
       {
         name: 'required_events_present',
-        ok: missingRequiredEventTypes.length === 0,
+        ok: missingRequiredEventTypes.length === 0 && hasAnyToolCallResult,
         details:
-          missingRequiredEventTypes.length === 0
+          missingRequiredEventTypes.length === 0 && hasAnyToolCallResult
             ? 'all required reliability events observed'
-            : `missing events: ${missingRequiredEventTypes.join(', ')}`,
+            : [
+                missingRequiredEventTypes.length > 0
+                  ? `missing events: ${missingRequiredEventTypes.join(', ')}`
+                  : null,
+                hasAnyToolCallResult
+                  ? null
+                  : 'missing events: tool.call.result',
+              ]
+                .filter(Boolean)
+                .join('; '),
       },
       {
         name: 'tool_call_result_coverage',
@@ -351,6 +381,20 @@ export class ReliabilityObservabilityService {
       0,
       this.rendererStateTransitions.length,
     );
-    this.releaseGateEvidence = createReleaseGateEvidence();
+    this.releaseGateEvidenceBySession.clear();
+    this.activeReleaseGateSessionId = null;
+  }
+
+  private getOrCreateReleaseGateEvidence(
+    sessionId: string,
+  ): ReleaseGateEvidence {
+    const existingEvidence = this.releaseGateEvidenceBySession.get(sessionId);
+    if (existingEvidence) {
+      return existingEvidence;
+    }
+
+    const createdEvidence = createReleaseGateEvidence();
+    this.releaseGateEvidenceBySession.set(sessionId, createdEvidence);
+    return createdEvidence;
   }
 }
