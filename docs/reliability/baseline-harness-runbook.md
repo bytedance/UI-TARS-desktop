@@ -2,7 +2,10 @@
 
 This runbook defines the baseline/KPI measurement protocol for the reliability migration plan.
 
-Plan reference: `.sisyphus/plans/ui-tars-computer-use-openclaw-migration.md` (section 3.1 and section 11).
+References:
+
+- `docs/reliability/plan-closure-backlog.md`
+- `docs/reliability/migration-traceability-matrix.md`
 
 ## 1. Fixed environment
 

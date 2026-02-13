@@ -1,7 +1,7 @@
 # UI-TARS Reliability Migration Traceability Matrix
 
 Last updated: 2026-02-13
-Source plan: `.sisyphus/plans/ui-tars-computer-use-openclaw-migration.md`
+Source requirements reference: `docs/reliability/plan-closure-backlog.md`
 Target repo: `https://github.com/Proven1902/UI-TARS-desktop`
 
 ## Numbering drift note
@@ -18,7 +18,7 @@ Plan PR IDs and GitHub PR numbers are different namespaces.
 
 | Plan slice | GitHub PR | Merge commit | Status | Evidence (code/tests) |
 |---|---|---|---|---|
-| PR-00 baseline KPI harness + report artifact | N/A | N/A | Missing | No baseline/kpi artifact found under `.sisyphus` or repo docs; only runtime observability service exists (`apps/ui-tars/src/main/services/reliabilityObservability.ts`) |
+| PR-00 baseline KPI harness + report artifact | N/A | N/A | In progress (scaffolded) | Harness/docs scaffolding exists: `docs/reliability/baseline-harness-runbook.md`, `docs/reliability/artifacts/reliability-kpi-report.template.json`, `docs/reliability/artifacts/2026-02-13-baseline-run-001.*`; execution evidence still pending |
 | PR-01 P0 local operator correctness | #4 | `ff463306` | Implemented | `apps/ui-tars/src/main/agent/operator.ts`, `apps/ui-tars/src/main/agent/operator.test.ts` |
 | PR-02 P0 renderer permission gate fix | #4 | `ff463306` | Implemented | `apps/ui-tars/src/renderer/src/hooks/useRunAgent.ts` |
 | PR-03 P0 remote invalid-coordinate fail-fast | #4 | `ff463306` | Implemented | `apps/ui-tars/src/main/remote/operators.ts`, `apps/ui-tars/src/main/remote/operators.test.ts` |
@@ -44,7 +44,7 @@ Plan PR IDs and GitHub PR numbers are different namespaces.
 
 - Implemented code slices: P0/P1/P2/P3 are functionally present.
 - Missing completion evidence from plan:
-  - Baseline KPI harness/report artifact (`PR-00`).
+  - Baseline KPI execution evidence (`PR-00` scaffolding exists, measured results pending).
   - KPI gate evidence for two consecutive runs.
   - Explicit rollback rehearsal artifacts for phase/global DoD.
   - Dedicated ops/docs update package for final sign-off.
