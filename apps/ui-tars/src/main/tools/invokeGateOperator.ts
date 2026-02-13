@@ -51,6 +51,7 @@ export class InvokeGateOperator extends Operator {
   >;
   private remainingLoopBudget: number;
   private lastEvaluatedLoopCount: number | null = null;
+  private lastTrackedIntentLoopCount: number | null = null;
   private previousIntentSignature: string | null = null;
   private repeatedIntentStreak = 0;
 
@@ -87,7 +88,7 @@ export class InvokeGateOperator extends Operator {
       parsedPrediction: params.parsedPrediction,
     });
     const repeatedIntentStreak = this.featureFlags.ffLoopGuardrails
-      ? this.trackRepeatedIntent(intent)
+      ? this.trackRepeatedIntent(intent, loopCount)
       : 0;
 
     const gateDecision = evaluateInvokeGate(intent, {
@@ -145,7 +146,18 @@ export class InvokeGateOperator extends Operator {
     return this.innerOperator.execute(params);
   }
 
-  private trackRepeatedIntent(intent: ActionIntentV1): number {
+  private trackRepeatedIntent(
+    intent: ActionIntentV1,
+    loopCount?: number,
+  ): number {
+    if (
+      typeof loopCount === 'number' &&
+      this.lastTrackedIntentLoopCount !== null &&
+      loopCount === this.lastTrackedIntentLoopCount
+    ) {
+      return this.repeatedIntentStreak;
+    }
+
     const signature = this.buildIntentSignature(intent);
 
     if (this.previousIntentSignature === signature) {
@@ -154,6 +166,9 @@ export class InvokeGateOperator extends Operator {
       this.repeatedIntentStreak = 1;
     }
 
+    if (typeof loopCount === 'number') {
+      this.lastTrackedIntentLoopCount = loopCount;
+    }
     this.previousIntentSignature = signature;
     return this.repeatedIntentStreak;
   }
