@@ -1,0 +1,64 @@
+{
+  "reportVersion": "v1",
+  "generatedAt": "2026-02-13T12:00:00.000Z",
+  "scope": {
+    "runType": "baseline",
+    "sampleCount": 0,
+    "scenarios": [
+      "open_cursor",
+      "open_settings",
+      "focus_existing_browser_window",
+      "recover_from_intentional_timeout"
+    ]
+  },
+  "environment": {
+    "platform": "windows",
+    "displayMode": "single_and_multi_required",
+    "git": {
+      "repo": "Proven1902/UI-TARS-desktop",
+      "branch": "main",
+      "commit": "e0d753799e3da1f7db2c1617833d43f73938e073"
+    },
+    "model": {
+      "provider": "pending",
+      "name": "pending"
+    },
+    "featureFlags": {
+      "ffToolRegistry": true,
+      "ffInvokeGate": true,
+      "ffToolFirstRouting": true,
+      "ffConfidenceLayer": true,
+      "ffLoopGuardrails": true
+    }
+  },
+  "metrics": {
+    "openAppFirstAttemptSuccessRate": null,
+    "wrongClickRate": null,
+    "maxLoopTerminationRate": null,
+    "authHardFailureRate": null
+  },
+  "targets": {
+    "openAppFirstAttemptSuccessRate": ">=0.95",
+    "wrongClickRate": "<0.01"
+  },
+  "targetResult": {
+    "openAppFirstAttemptSuccessRatePass": null,
+    "wrongClickRatePass": null,
+    "allPass": null
+  },
+  "executionStatus": {
+    "state": "pending_execution",
+    "reason": "Harness/report structure initialized. Controlled baseline runs not executed yet.",
+    "requiredBeforeSignoff": true
+  },
+  "evidence": {
+    "rawRunsFile": "docs/reliability/artifacts/2026-02-13-baseline-run-001.raw-runs.ndjson",
+    "summaryFile": "docs/reliability/artifacts/2026-02-13-baseline-run-001.summary.md",
+    "rollbackRehearsalFile": "docs/reliability/artifacts/2026-02-13-baseline-run-001.rollback.md"
+  },
+  "notes": [
+    "This artifact is an initialized baseline report shell.",
+    "Populate metrics only after collecting raw runs per runbook.",
+    "Do not treat this report as KPI gate evidence."
+  ]
+}
