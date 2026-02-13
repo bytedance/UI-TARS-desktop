@@ -150,12 +150,21 @@ type WindowFocusExecutionOptions = {
 };
 
 const resolvePlatform = (platform?: string): WindowFocusPlatform => {
-  const fallback = process.platform;
-  const candidate = platform || fallback;
-  if (SUPPORTED_PLATFORMS.includes(candidate as WindowFocusPlatform)) {
-    return candidate as WindowFocusPlatform;
+  if (
+    platform &&
+    SUPPORTED_PLATFORMS.includes(platform as WindowFocusPlatform)
+  ) {
+    return platform as WindowFocusPlatform;
   }
-  return 'win32';
+
+  const hostPlatform = process.platform;
+  if (SUPPORTED_PLATFORMS.includes(hostPlatform as WindowFocusPlatform)) {
+    return hostPlatform as WindowFocusPlatform;
+  }
+
+  throw new Error(
+    `[WINDOW_FOCUS_UNSUPPORTED_PLATFORM] platform=${hostPlatform}`,
+  );
 };
 
 const resolveFocusArgv = (

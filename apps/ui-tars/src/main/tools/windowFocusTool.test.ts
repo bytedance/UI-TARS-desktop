@@ -10,6 +10,21 @@ import {
   runWindowFocusToolCall,
 } from './windowFocusTool';
 
+const withMockedPlatform = async <T>(
+  platform: NodeJS.Platform,
+  run: () => Promise<T> | T,
+): Promise<T> => {
+  const descriptor = Object.getOwnPropertyDescriptor(process, 'platform');
+  Object.defineProperty(process, 'platform', { value: platform });
+  try {
+    return await run();
+  } finally {
+    if (descriptor) {
+      Object.defineProperty(process, 'platform', descriptor);
+    }
+  }
+};
+
 describe('windowFocusTool', () => {
   it('builds deterministic window.focus call for supported target', () => {
     const call = buildWindowFocusToolCall({
@@ -47,6 +62,18 @@ describe('windowFocusTool', () => {
         idempotencyKey: 'idem-2',
       }),
     ).toThrow();
+  });
+
+  it('rejects omitted platform when host platform is unsupported', async () => {
+    await withMockedPlatform('linux', () => {
+      expect(() =>
+        buildWindowFocusToolCall({
+          intentId: 'intent-2b',
+          targetWindow: 'settings',
+          idempotencyKey: 'idem-2b',
+        }),
+      ).toThrow('[WINDOW_FOCUS_UNSUPPORTED_PLATFORM]');
+    });
   });
 
   it('maps successful system.run execution to focused=true', async () => {
