@@ -1,0 +1,55 @@
+{
+  "reportVersion": "v1",
+  "generatedAt": "2026-02-13T00:00:00.000Z",
+  "scope": {
+    "runType": "baseline_or_gate",
+    "sampleCount": 200,
+    "scenarios": [
+      "open_cursor",
+      "open_settings",
+      "focus_existing_browser_window",
+      "recover_from_intentional_timeout"
+    ]
+  },
+  "environment": {
+    "platform": "windows",
+    "displayMode": "single_or_multi",
+    "git": {
+      "repo": "Proven1902/UI-TARS-desktop",
+      "branch": "main",
+      "commit": "<commit-sha>"
+    },
+    "model": {
+      "provider": "<provider>",
+      "name": "<model-name>"
+    },
+    "featureFlags": {
+      "ffToolRegistry": true,
+      "ffInvokeGate": true,
+      "ffToolFirstRouting": true,
+      "ffConfidenceLayer": true,
+      "ffLoopGuardrails": true
+    }
+  },
+  "metrics": {
+    "openAppFirstAttemptSuccessRate": 0.0,
+    "wrongClickRate": 0.0,
+    "maxLoopTerminationRate": 0.0,
+    "authHardFailureRate": 0.0
+  },
+  "targets": {
+    "openAppFirstAttemptSuccessRate": ">=0.95",
+    "wrongClickRate": "<0.01"
+  },
+  "targetResult": {
+    "openAppFirstAttemptSuccessRatePass": false,
+    "wrongClickRatePass": false,
+    "allPass": false
+  },
+  "evidence": {
+    "rawRunsFile": "docs/reliability/artifacts/<timestamp>-raw-runs.json",
+    "summaryFile": "docs/reliability/artifacts/<timestamp>-summary.md",
+    "rollbackRehearsalFile": "docs/reliability/artifacts/<timestamp>-rollback-rehearsal.md"
+  },
+  "notes": []
+}
