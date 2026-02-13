@@ -20,7 +20,7 @@ const WINDOW_FOCUS_TOOL_RESULT_VERSION = 'v1';
 const WINDOW_FOCUS_DEFAULT_TIMEOUT_MS = 8000;
 const WINDOW_FOCUS_MAX_TIMEOUT_MS = 30000;
 
-const SUPPORTED_PLATFORMS = ['win32', 'darwin', 'linux'] as const;
+const SUPPORTED_PLATFORMS = ['win32', 'darwin'] as const;
 const WINDOW_FOCUS_TARGETS = ['cursor', 'settings', 'notepad'] as const;
 
 type WindowFocusTarget = (typeof WINDOW_FOCUS_TARGETS)[number];

@@ -38,15 +38,15 @@ describe('windowFocusTool', () => {
     expect(call.canonicalArgs.argv.join(' ')).toContain('WINDOW_NOT_FOUND');
   });
 
-  it('rejects unsupported target/platform combinations', () => {
+  it('rejects linux platform at input validation boundary', () => {
     expect(() =>
       buildWindowFocusToolCall({
         intentId: 'intent-2',
         targetWindow: 'settings',
-        platform: 'linux',
+        platform: 'linux' as never,
         idempotencyKey: 'idem-2',
       }),
-    ).toThrow('[WINDOW_FOCUS_UNSUPPORTED_TARGET]');
+    ).toThrow();
   });
 
   it('maps successful system.run execution to focused=true', async () => {
