@@ -34,17 +34,9 @@ import type {
   ResponseInputItem,
   ResponseStreamEvent,
 } from 'openai/resources/responses/responses';
+import type { ReasoningEffort } from 'openai/resources/shared';
 
 type CodexReasoningEffort = 'none' | 'low' | 'medium' | 'high' | 'xhigh';
-
-type CodexResponseCreateParamsStreaming = Omit<
-  ResponseCreateParamsStreaming,
-  'reasoning'
-> & {
-  reasoning?: {
-    effort?: CodexReasoningEffort;
-  };
-};
 
 type OpenAIChatCompletionCreateParams = Omit<ClientOptions, 'maxRetries'> &
   Pick<
@@ -243,7 +235,7 @@ export class UITarsModel extends Model {
 
   private async invokeCodexResponseStream(
     openai: OpenAI,
-    responseParams: CodexResponseCreateParamsStreaming,
+    responseParams: ResponseCreateParamsStreaming,
     requestOptions: {
       signal?: AbortSignal;
       timeout: number;
@@ -287,6 +279,20 @@ export class UITarsModel extends Model {
     };
   }
 
+  private normalizeCodexReasoningEffort(
+    effort?: CodexReasoningEffort,
+  ): ReasoningEffort {
+    if (effort === 'none' || typeof effort === 'undefined') {
+      return null;
+    }
+
+    if (effort === 'xhigh') {
+      return 'high';
+    }
+
+    return effort;
+  }
+
   /**
    * call real LLM / VLM Model
    * @param params
@@ -315,7 +321,7 @@ export class UITarsModel extends Model {
       baseURL,
       apiKey,
       model,
-      max_tokens = uiTarsVersion == UITarsModelVersion.V1_5 ? 65535 : 1000,
+      max_tokens = uiTarsVersion === UITarsModelVersion.V1_5 ? 65535 : 1000,
       temperature = 0,
       top_p = 0.7,
       ...restOptions
@@ -431,7 +437,7 @@ export class UITarsModel extends Model {
           timeout: 1000 * 30,
           headers,
         };
-        const streamResponseParams: CodexResponseCreateParamsStreaming = {
+        const streamResponseParams: ResponseCreateParamsStreaming = {
           input: codexInputItems,
           model,
           stream: true,
@@ -442,7 +448,9 @@ export class UITarsModel extends Model {
           include: this.normalizeCodexInclude(),
           ...(codexInstructions ? { instructions: codexInstructions } : {}),
           reasoning: {
-            effort: this.modelConfig.codexResponses?.reasoningEffort ?? 'high',
+            effort: this.normalizeCodexReasoningEffort(
+              this.modelConfig.codexResponses?.reasoningEffort,
+            ),
           },
         };
 
