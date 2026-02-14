@@ -33,6 +33,7 @@
     "@agent-tars/core": "workspace:*",
     "@omni-tars/agent": "workspace:*",
     "@tarko/mcp-agent": "workspace:*",
+    "node-fetch": "^3.3.0",
     "dotenv": "^16.3.1"
   },
   "devDependencies": {

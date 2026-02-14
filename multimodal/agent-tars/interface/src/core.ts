@@ -5,6 +5,7 @@
  */
 
 import type { MCPServerRegistry, MCPAgentOptions } from '@tarko/mcp-agent-interface';
+import type { SkillAgentOptions } from '@tarko/skill-agent';
 
 export type LocalBrowserSearchEngine = 'google' | 'bing' | 'baidu' | 'sogou';
 
@@ -131,7 +132,7 @@ export interface AgentTARSExperimentalOptions {
 /**
  * Common options interface for all Agent TARS implementations
  */
-export interface AgentTARSOptions extends MCPAgentOptions {
+export interface AgentTARSOptions extends SkillAgentOptions {
   /**
    * Search settings.
    */

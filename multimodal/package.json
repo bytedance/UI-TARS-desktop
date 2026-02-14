@@ -33,7 +33,13 @@
   },
   "engines": {
     "node": ">=22",
-    "pnpm": "9"
+    "pnpm": ">=9"
+  },
+  "pnpm": {
+    "overrides": {
+      "node-fetch": "^3.3.2",
+      "@types/node-fetch": "npm:@types/node-fetch@^3.0.0"
+    }
   },
   "devDependencies": {
     "pnpm-dev-kit": "0.0.5-canary-7d05b7ce-20251213170600",
