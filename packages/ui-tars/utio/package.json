@@ -7,9 +7,9 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "prepare": "npm run build",
-    "dev": "rslib build --watch",
-    "build": "rslib build",
-    "build:watch": "rslib build --watch"
+    "dev": "pnpm exec rslib build --watch",
+    "build": "pnpm exec rslib build",
+    "build:watch": "pnpm exec rslib build --watch"
   },
   "keywords": [
     "UI-TARS"

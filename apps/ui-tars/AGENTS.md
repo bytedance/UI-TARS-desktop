@@ -37,11 +37,7 @@ pnpm run build
 - Use existing ipc route pattern under `src/main/ipcRoutes` instead of ad-hoc channels.
 - Keep renderer state logic in hooks/store modules; avoid direct platform calls in UI components.
 
-## SKILLS MEMORY
-- Inherit skills baseline and invocation policy from `UI-TARS-desktop/AGENTS.md`.
-- Lock source of truth: workspace `.agents/skills-lock.json` (outside this repo root).
-- Explicit-only skills: `debugging-strategies`, `e2e-testing-patterns`, `git-master`, `playwright-cli`, `using-git-worktrees`, `finishing-a-development-branch`.
-- Replacement mapping: `root-cause-tracing -> debugging-strategies`, `condition-based-waiting -> e2e-testing-patterns`, `defense-in-depth -> threat-mitigation-mapping`.
+Global policies (GO gate, lock sources, explicit-only rules, setup anti-drift) are inherited from root `AGENTS.md`.
 
 ## ANTI-PATTERNS
 - Do not expose `ipcRenderer` directly to renderer.

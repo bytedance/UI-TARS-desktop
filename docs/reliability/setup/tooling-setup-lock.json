@@ -1,0 +1,225 @@
+{
+	"schemaVersion": 1,
+	"generatedAt": "2026-02-15T05:10:00+05:00",
+	"planPath": "../.sisyphus/plans/ui-tars-next-vector-hybrid-stabilization-exec-host.md",
+	"canonicalWorkdir": "C:\\Users\\admin\\Desktop\\projects\\ui-tars-mod\\UI-TARS-desktop",
+	"domains": {
+		"mcp": {
+			"mode": "trusted-baseline",
+			"selected": [
+				{
+					"name": "@modelcontextprotocol/sdk",
+					"version": "1.26.0",
+					"apply": "now"
+				},
+				{
+					"name": "@modelcontextprotocol/conformance",
+					"version": "0.1.14",
+					"apply": "now"
+				},
+				{
+					"name": "@modelcontextprotocol/inspector",
+					"version": "0.20.0",
+					"apply": "now"
+				}
+			],
+			"externalGovernance": [
+				"Azure API Management for MCP",
+				"Docker MCP Gateway",
+				"Microsoft MCP Gateway"
+			],
+			"externalProvisioning": {
+				"status": "closed-docker-only",
+				"operatingMode": "docker-only",
+				"closurePolicy": {
+					"requiredConcreteFieldCount": 4,
+					"allowDeferredCloudTargets": true,
+					"deferredTargets": [
+						"Azure API Management for MCP",
+						"Microsoft MCP Gateway"
+					],
+					"forbidPlaceholderToken": "<required>",
+					"requireSmokeTestEvidence": true,
+					"evidenceRunbookSection": "docs/reliability/operations-signoff-runbook.md#9-mcp-external-governance-closure-procedure-windows"
+				},
+				"targets": [
+					{
+						"name": "Azure API Management for MCP",
+						"status": "deferred",
+						"subscriptionId": "deferred-no-subscription",
+						"resourceGroup": "deferred-no-subscription",
+						"serviceName": "deferred-no-subscription",
+						"gatewayEndpoint": "deferred-no-subscription",
+						"policyPin": "deferred-no-subscription",
+						"actionToClose": "Acquire Azure subscription access, provision APIM gateway, attach auth policy pin, then replace deferred values with concrete IDs/endpoints and update runbook evidence."
+					},
+					{
+						"name": "Docker MCP Gateway",
+						"status": "closed",
+						"imageRef": "docker/mcp-gateway:v2",
+						"containerDigest": "sha256:a1a422c40c23392459d25f63a0a4322160848d8c22b728e5c29dc2517706c937",
+						"listenEndpoint": "http://localhost:8811/sse",
+						"networkPolicyPin": "bridge:f4986a70bd2176cd2aca61f5681f615a0b63da9f52f04719f3bd4e790d69ce62",
+						"actionToClose": "Closed in docker-only mode. Keep digest pinned and endpoint smoke-tested."
+					},
+					{
+						"name": "Microsoft MCP Gateway",
+						"status": "deferred",
+						"gatewayId": "deferred-no-subscription",
+						"endpoint": "deferred-no-subscription",
+						"authProfilePin": "deferred-no-subscription",
+						"actionToClose": "Acquire Azure subscription access, provision Microsoft gateway profile, then replace deferred values with concrete IDs/endpoints/auth pins and update runbook evidence."
+					}
+				]
+			},
+			"denylistPolicy": [
+				"No runtime installs directly from MCP directories/marketplaces",
+				"No dynamic self-extending MCP orchestrators without explicit allowlist and pinning"
+			]
+		},
+		"lsp": {
+			"mode": "cli-first",
+			"servers": [
+				{
+					"name": "typescript-language-server",
+					"version": "5.1.3",
+					"command": "pnpm exec typescript-language-server --stdio"
+				},
+				{
+					"name": "vscode-langservers-extracted",
+					"version": "4.10.0",
+					"command": "pnpm exec vscode-json-language-server --stdio"
+				},
+				{
+					"name": "yaml-language-server",
+					"version": "1.18.0",
+					"command": "pnpm exec yaml-language-server --stdio"
+				},
+				{
+					"name": "remark-language-server",
+					"version": "3.0.0",
+					"command": "pnpm exec remark-language-server --stdio"
+				}
+			],
+			"probeScript": "tools/lsp/lsp-probe.mjs",
+			"fallbacks": {
+				"typescript": "pnpm --filter @ui-tars/sdk exec tsc --noEmit -p tsconfig.json",
+				"json": "biome check <file.json>",
+				"yaml": "python -m yamllint --strict <file.yml>",
+				"markdown": "pnpm exec prettier --check <file.md>"
+			}
+		},
+		"ast": {
+			"mode": "minimal",
+			"selected": [
+				{
+					"name": "@ast-grep/cli",
+					"version": "0.40.5",
+					"policy": "Use --threads 1 in gate mode"
+				},
+				{
+					"name": "jscodeshift",
+					"version": "17.3.0",
+					"policy": "Start with --dry --print --run-in-band"
+				},
+				{
+					"name": "jsonc-parser",
+					"version": "3.3.1",
+					"policy": "Use modify/applyEdits for minimal JSON diff"
+				}
+			],
+			"denylistPolicy": [
+				"No regex-based mass code replacements for refactors",
+				"No semgrep autofix by default"
+			]
+		},
+		"plugins": {
+			"mode": "runtime-applied",
+			"mandatory": [
+				{
+					"id": "opencode-shell-strategy",
+					"version": "1f83c6e477d2d2f1cb791d7cc9be7f165a4f670b",
+					"explicitOnly": false,
+					"source": "github-local-instruction",
+					"installTarget": "https://github.com/JRedeker/opencode-shell-strategy.git",
+					"runtimeStatus": "applied"
+				},
+				{
+					"id": "opencode-worktree",
+					"version": "475a7386e98accdb87e8b0c3c63b93b98407786f",
+					"explicitOnly": true,
+					"source": "github-local-plugin",
+					"installTarget": "file:///C:/Users/admin/.config/opencode/plugins/opencode-worktree/src/plugin/worktree.ts",
+					"runtimeStatus": "applied"
+				},
+				{
+					"id": "opencode-notifier",
+					"version": "0.1.19",
+					"explicitOnly": false,
+					"source": "npm-scoped",
+					"installTarget": "@mohak34/opencode-notifier@0.1.19",
+					"resolvedTarball": "https://registry.npmjs.org/@mohak34/opencode-notifier/-/opencode-notifier-0.1.19.tgz",
+					"integrity": "sha512-PjB0qx9RRIZxQrkJ/TNpXDgDDb9T+LarPhjOEcO8rYxv1S0IicLkzdYPC5GwVC+3K6fNR8+07i3bVwdOzAcBag==",
+					"runtimeStatus": "applied"
+				},
+				{
+					"id": "commit-commands",
+					"version": "2cd88e7947b7",
+					"explicitOnly": true,
+					"source": "anthropic-claude-code-plugin",
+					"installTarget": "commit-commands@claude-plugins-official",
+					"runtimeStatus": "applied"
+				},
+				{
+					"id": "security-guidance",
+					"version": "2cd88e7947b7",
+					"explicitOnly": false,
+					"source": "anthropic-claude-code-plugin",
+					"installTarget": "security-guidance@claude-plugins-official",
+					"runtimeStatus": "applied"
+				}
+			],
+			"runtimeApplied": {
+				"opencodeConfig": "C:\\Users\\admin\\.config\\opencode\\opencode.json",
+				"plugins": [
+					"oh-my-opencode@3.5.3",
+					"file:///C:/Users/admin/.config/opencode/plugins/opencode-worktree/src/plugin/worktree.ts",
+					"@mohak34/opencode-notifier@0.1.19"
+				],
+				"instructions": [
+					"~/.config/opencode/plugins/shell-strategy/shell_strategy.md"
+				],
+				"evidenceCommand": "opencode debug config"
+			},
+			"claudeRuntimeApplied": {
+				"marketplace": "claude-plugins-official",
+				"pluginListCommand": "claude plugin list",
+				"installedPluginsFile": "C:\\Users\\admin\\.claude\\plugins\\installed_plugins.json",
+				"plugins": [
+					{
+						"id": "commit-commands",
+						"version": "2cd88e7947b7",
+						"gitCommitSha": "2cd88e7947b7382e045666abee790c7f55f669f3"
+					},
+					{
+						"id": "security-guidance",
+						"version": "2cd88e7947b7",
+						"gitCommitSha": "2cd88e7947b7382e045666abee790c7f55f669f3"
+					}
+				]
+			},
+			"gaps": [],
+			"optional": [
+				"opencode-devcontainers",
+				"claude-create-worktrees",
+				"claude-testing-suite"
+			],
+			"denylist": [
+				"planning-prd-agent",
+				"sprint-prioritizer",
+				"ceo-quality-controller-agent"
+			],
+			"installationPolicy": "Install and update plugins manually outside this repo, then sync this lock file and AGENTS memory"
+		}
+	}
+}

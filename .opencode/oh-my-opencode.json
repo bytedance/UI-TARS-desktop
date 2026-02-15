@@ -1,0 +1,16 @@
+{
+  "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/master/assets/oh-my-opencode.schema.json",
+  "lsp": {
+    "remark-markdown": {
+      "command": [
+        "C:/Users/admin/Desktop/projects/ui-tars-mod/UI-TARS-desktop/node_modules/.bin/remark-language-server.cmd",
+        "--stdio"
+      ],
+      "extensions": [
+        ".md",
+        ".markdown"
+      ],
+      "priority": 50
+    }
+  }
+}

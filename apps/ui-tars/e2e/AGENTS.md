@@ -14,11 +14,7 @@ Playwright end-to-end tests for packaged Electron app behavior and UI workflows.
 - Reuse shared app-launch patterns (`findLatestBuild`, `parseElectronApp`) where present.
 - Keep tests resilient to CI by following existing retry/trace behavior from Playwright config.
 
-## SKILLS MEMORY
-- Inherit skills baseline and invocation policy from `UI-TARS-desktop/AGENTS.md`.
-- Lock source of truth: workspace `.agents/skills-lock.json` (outside this repo root).
-- E2E reliability work should prefer: `playwright`, `e2e-testing-patterns`.
-- Replacement mapping: `condition-based-waiting -> e2e-testing-patterns`.
+Global policies (GO gate, lock sources, explicit-only rules, setup anti-drift) are inherited from root `AGENTS.md`.
 
 ## ANTI-PATTERNS
 - Do not depend on local-only machine state that CI cannot reproduce.

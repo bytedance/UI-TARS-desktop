@@ -16,11 +16,7 @@ Preload bridge layer for Electron security boundary. Exposes safe renderer-facin
 - Keep API names stable (`window.electron`, `window.zustandBridge`, `window.platform`).
 - Prefer typed payloads and typed return promises for bridge methods.
 
-## SKILLS MEMORY
-- Inherit skills baseline and invocation policy from `UI-TARS-desktop/AGENTS.md`.
-- Lock source of truth: workspace `.agents/skills-lock.json` (outside this repo root).
-- Preload hardening should prefer: `git-master`, `threat-mitigation-mapping`.
-- Replacement mapping: `defense-in-depth -> threat-mitigation-mapping`.
+Global policies (GO gate, lock sources, explicit-only rules, setup anti-drift) are inherited from root `AGENTS.md`.
 
 ## ANTI-PATTERNS
 - Do not expose raw privileged objects beyond controlled wrappers.

@@ -17,11 +17,7 @@ Main process layer: Electron lifecycle, window/tray, permissions, agent runtime,
 - Sanitize state before broadcasting to renderer (`utils/sanitizeState.ts` pattern).
 - Keep OS-specific logic behind utility/services modules.
 
-## SKILLS MEMORY
-- Inherit skills baseline and invocation policy from `UI-TARS-desktop/AGENTS.md`.
-- Lock source of truth: workspace `.agents/skills-lock.json` (outside this repo root).
-- Main-process policy/debug work should prefer: `git-master`, `debugging-strategies`, `threat-mitigation-mapping`.
-- Replacement mapping: `root-cause-tracing -> debugging-strategies`, `defense-in-depth -> threat-mitigation-mapping`.
+Global policies (GO gate, lock sources, explicit-only rules, setup anti-drift) are inherited from root `AGENTS.md`.
 
 ## ANTI-PATTERNS
 - Do not call renderer internals from main.

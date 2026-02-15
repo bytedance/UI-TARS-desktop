@@ -15,10 +15,7 @@ Renderer layer: React app shell, routes/pages/components, local stores/hooks, an
 - State is hook/store-first (zustand + custom hooks); keep side effects in hooks.
 - UI primitives are centralized under `components/ui/*` and reused across features.
 
-## SKILLS MEMORY
-- Inherit skills baseline and invocation policy from `UI-TARS-desktop/AGENTS.md`.
-- Lock source of truth: workspace `.agents/skills-lock.json` (outside this repo root).
-- Renderer tasks should keep preload boundary assumptions from `apps/ui-tars/src/preload/AGENTS.md` and avoid policy bypasses.
+Global policies (GO gate, lock sources, explicit-only rules, setup anti-drift) are inherited from root `AGENTS.md`.
 
 ## ANTI-PATTERNS
 - Do not access Node/Electron privileged APIs directly from components.
