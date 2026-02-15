@@ -10,6 +10,11 @@ import {
 } from '@ui-tars/sdk/core';
 
 import { logger } from '@main/logger';
+import {
+  adaptExecPolicyV1ToLegacyAllowDeny,
+  evaluateExecPolicyV1,
+  type ExecPolicyConfigV1Input,
+} from '@main/services/execPolicy';
 import { ReliabilityObservabilityService } from '@main/services/reliabilityObservability';
 import type { ToolFirstFeatureFlags } from '@main/store/featureFlags';
 
@@ -31,6 +36,7 @@ type InvokeGateOperatorConfig = {
   sessionId: string;
   authState: GateAuthState;
   maxLoopCount: number;
+  execPolicyConfig?: ExecPolicyConfigV1Input;
   toolFirstRouter?: (params: {
     sessionId: string;
     intentId?: string;
@@ -53,6 +59,7 @@ export class InvokeGateOperator extends Operator {
   private readonly featureFlags: ToolFirstFeatureFlags;
   private readonly sessionId: string;
   private readonly authState: GateAuthState;
+  private readonly execPolicyConfig?: ExecPolicyConfigV1Input;
   private readonly toolFirstRouter: NonNullable<
     InvokeGateOperatorConfig['toolFirstRouter']
   >;
@@ -69,6 +76,7 @@ export class InvokeGateOperator extends Operator {
     this.featureFlags = config.featureFlags;
     this.sessionId = config.sessionId;
     this.authState = config.authState;
+    this.execPolicyConfig = config.execPolicyConfig;
     this.toolFirstRouter = config.toolFirstRouter ?? executeToolFirstRoute;
     this.remainingLoopBudget = Number.isFinite(config.maxLoopCount)
       ? Math.max(0, config.maxLoopCount)
@@ -135,6 +143,31 @@ export class InvokeGateOperator extends Operator {
       reasonCodes: gateDecision.reasonCodes,
       remainingLoopBudget: this.remainingLoopBudget,
       repeatedIntentStreak,
+    });
+
+    const execPolicyDecision = evaluateExecPolicyV1({
+      intent: {
+        intentId: intent.intentId,
+        operation: intent.operation,
+        actionType: intent.actionType,
+      },
+      config: this.execPolicyConfig,
+    });
+    const legacyPolicyDecision =
+      adaptExecPolicyV1ToLegacyAllowDeny(execPolicyDecision);
+    this.observability.emitEvent({
+      type: 'gate.decision',
+      sessionId: this.sessionId,
+      intentId: intent.intentId,
+      status: execPolicyDecision.decision,
+      reasonCodes: execPolicyDecision.reasonCodes,
+    });
+    logger.info('[exec-policy] dry-run decision', {
+      actionType: intent.actionType,
+      decision: execPolicyDecision.decision,
+      reasonCodes: execPolicyDecision.reasonCodes,
+      legacyDecision: legacyPolicyDecision.decision,
+      mappedFrom: legacyPolicyDecision.mappedFrom,
     });
 
     if (gateDecision.decision === 'deny') {
