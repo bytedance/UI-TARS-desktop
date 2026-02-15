@@ -123,6 +123,8 @@ const formSchema = z
     }
   });
 
+type VLMFormValues = z.infer<typeof formSchema>;
+
 export interface VLMSettingsRef {
   submit: () => Promise<z.infer<typeof formSchema>>;
 }
@@ -155,8 +157,10 @@ export function VLMSettings({
     settings?.presetSource?.type === 'remote' &&
     settings.presetSource.autoUpdate;
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<VLMFormValues>({
+    resolver: zodResolver<VLMFormValues, unknown, VLMFormValues>(
+      formSchema as never,
+    ),
     defaultValues: {
       vlmProvider: undefined,
       vlmBaseUrl: '',
@@ -433,7 +437,6 @@ export function VLMSettings({
     form,
     isRemoteAutoUpdatedPreset,
     ensureCodexOAuthConnected,
-    codexAuthState?.status,
   ]);
 
   const handlePresetModal = async (e: React.MouseEvent) => {

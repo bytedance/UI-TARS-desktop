@@ -33,11 +33,17 @@ const formSchema = z.object({
   searchEngineForBrowser: z.nativeEnum(SearchEngineForSettings),
 });
 
+type LocalBrowserFormValues = z.infer<typeof formSchema>;
+
 export function LocalBrowserSettings() {
   const { settings, updateSetting } = useSetting();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<LocalBrowserFormValues>({
+    resolver: zodResolver<
+      LocalBrowserFormValues,
+      unknown,
+      LocalBrowserFormValues
+    >(formSchema as never),
     defaultValues: {
       searchEngineForBrowser: undefined,
     },
@@ -68,7 +74,7 @@ export function LocalBrowserSettings() {
     };
 
     validAndSave();
-  }, [newSearchEngine, settings, updateSetting, form]);
+  }, [newSearchEngine, settings, updateSetting]);
 
   return (
     <>

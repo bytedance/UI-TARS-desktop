@@ -22,10 +22,12 @@ import { cn } from '@renderer/utils';
 
 const formSchema = z.object({
   url: z.string().url(),
-  token: z.string().min(1),
+  credential: z.string().min(1),
   server: z.string().min(1),
   ip: z.string().min(1),
 });
+
+type RemoteComputerFormValues = z.infer<typeof formSchema>;
 
 export interface RemoteComputerSettingsRef {
   submit: () => Promise<z.infer<typeof formSchema>>;
@@ -46,11 +48,15 @@ export function RemoteComputerSettings({
 
   // console.log('initialValues', settings);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<RemoteComputerFormValues>({
+    resolver: zodResolver<
+      RemoteComputerFormValues,
+      unknown,
+      RemoteComputerFormValues
+    >(formSchema as never),
     defaultValues: {
       url: '',
-      token: '',
+      credential: '',
       server: '',
       ip: '',
     },
@@ -65,9 +71,9 @@ export function RemoteComputerSettings({
   //   }
   // }, [settings, form]);
 
-  const [newUrl, newToken, newServer, newIP] = form.watch([
+  const [newUrl, newCredential, newServer, newIP] = form.watch([
     'url',
-    'token',
+    'credential',
     'server',
     'ip',
   ]);
@@ -79,7 +85,12 @@ export function RemoteComputerSettings({
     if (!Object.keys(settings).length) {
       return;
     }
-    if (newUrl === '' && newToken === '' && newServer === '' && newIP === '') {
+    if (
+      newUrl === '' &&
+      newCredential === '' &&
+      newServer === '' &&
+      newIP === ''
+    ) {
       return;
     }
 
@@ -89,8 +100,8 @@ export function RemoteComputerSettings({
         // updateSetting({ ...settings, vlmBaseUrl: newBaseUrl });
       }
 
-      const isTokenValid = await form.trigger('token');
-      if (isTokenValid && newToken !== settings.vlmApiKey) {
+      const isCredentialValid = await form.trigger('credential');
+      if (isCredentialValid && newCredential !== settings.vlmApiKey) {
         // updateSetting({ ...settings, vlmApiKey: newApiKey });
       }
 
@@ -109,7 +120,7 @@ export function RemoteComputerSettings({
   }, [
     autoSave,
     newUrl,
-    newToken,
+    newCredential,
     newServer,
     newIP,
     settings,
@@ -163,14 +174,14 @@ export function RemoteComputerSettings({
           />
           <FormField
             control={form.control}
-            name="token"
+            name="credential"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>User Token</FormLabel>
+                <FormLabel>User Credential</FormLabel>
                 <FormControl>
                   <Input
                     className="bg-white"
-                    placeholder="Enter User Token"
+                    placeholder="Enter User Credential"
                     {...field}
                   />
                 </FormControl>

@@ -51,25 +51,11 @@ import {
   CheckpointRecoveryService,
   deriveRecoveryFsmState,
 } from '@main/services/checkpointRecovery';
+import { ReliabilityObservabilityService } from '@main/services/reliabilityObservability';
 import {
-  ReliabilityObservabilityService,
-  type ReliabilityRendererState,
-} from '@main/services/reliabilityObservability';
-
-const mapStatusToRendererState = (
-  status: StatusEnum,
-): ReliabilityRendererState => {
-  if (status === StatusEnum.CALL_USER) {
-    return 'blocked';
-  }
-  if (status === StatusEnum.ERROR) {
-    return 'error';
-  }
-  if (status === StatusEnum.END || status === StatusEnum.USER_STOPPED) {
-    return 'completed';
-  }
-  return 'executing_tool';
-};
+  applyRuntimeErrorState,
+  mapStatusToRendererState,
+} from './runAgentRuntime';
 
 export const runAgent = async (
   setState: (state: AppState) => void,
@@ -203,7 +189,7 @@ export const runAgent = async (
       operator = new NutJSElectronOperator();
       operatorType = 'computer';
       break;
-    case Operator.LocalBrowser:
+    case Operator.LocalBrowser: {
       await checkBrowserAvailability();
       const { browserAvailable } = getState();
       if (!browserAvailable) {
@@ -225,6 +211,7 @@ export const runAgent = async (
       );
       operatorType = 'browser';
       break;
+    }
     case Operator.RemoteComputer:
       operator = await RemoteComputerOperator.create();
       operatorType = 'computer';
@@ -399,9 +386,11 @@ export const runAgent = async (
         sessionId: runtimeSessionId,
         status: StatusEnum.ERROR,
       });
-      setState({
-        ...getState(),
-        status: StatusEnum.ERROR,
+      applyRuntimeErrorState({
+        setState,
+        getState,
+        checkpointRecovery,
+        sessionId: runtimeSessionId,
         errorMsg: JSON.stringify({
           status: error?.status,
           message: error?.message,
@@ -411,12 +400,7 @@ export const runAgent = async (
           errorCode: taxonomy.code,
           retryable: taxonomy.retryable,
         }),
-      });
-      checkpointRecovery.updateStatus({
-        sessionId: runtimeSessionId,
-        status: StatusEnum.ERROR,
-        fsmState: 'error',
-        errorMsg: error?.message,
+        checkpointErrorMsg: error?.message,
       });
     },
     retry: {
@@ -452,9 +436,11 @@ export const runAgent = async (
       });
 
       const message = e instanceof Error ? e.message : String(e);
-      setState({
-        ...getState(),
-        status: StatusEnum.ERROR,
+      applyRuntimeErrorState({
+        setState,
+        getState,
+        checkpointRecovery,
+        sessionId: runtimeSessionId,
         errorMsg: JSON.stringify({
           message,
           errorClass: taxonomy.errorClass,
@@ -462,12 +448,7 @@ export const runAgent = async (
           errorCode: taxonomy.code,
           retryable: taxonomy.retryable,
         }),
-      });
-      checkpointRecovery.updateStatus({
-        sessionId: runtimeSessionId,
-        status: StatusEnum.ERROR,
-        fsmState: 'error',
-        errorMsg: message,
+        checkpointErrorMsg: message,
       });
     });
 

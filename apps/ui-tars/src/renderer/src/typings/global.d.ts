@@ -3,11 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { ElectronHandler } from '../../preload/index';
+import { ZustandBridge } from '../../preload/index';
 
 interface Window {
   electron: ElectronHandler;
   platform: NodeJS.Platform;
-  zutron: any;
+  zustandBridge: ZustandBridge;
 }
 
 declare module 'react' {

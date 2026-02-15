@@ -59,6 +59,8 @@ const formSchema = z.object({
   utioBaseUrl: z.string().optional(),
 });
 
+type SettingsFormValues = z.infer<typeof formSchema>;
+
 const SECTIONS = {
   vlm: 'VLM Settings',
   chat: 'Chat Settings',
@@ -115,8 +117,10 @@ export default function Settings() {
 
   console.log('initialValues', settings);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<SettingsFormValues>({
+    resolver: zodResolver<SettingsFormValues, unknown, SettingsFormValues>(
+      formSchema as never,
+    ),
     defaultValues: {
       language: 'en',
       vlmBaseUrl: '',

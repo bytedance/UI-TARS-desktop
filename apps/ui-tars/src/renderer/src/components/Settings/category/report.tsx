@@ -23,6 +23,8 @@ const formSchema = z.object({
   utioBaseUrl: z.string().optional(),
 });
 
+type ReportFormValues = z.infer<typeof formSchema>;
+
 export interface VLMSettingsRef {
   submit: () => Promise<z.infer<typeof formSchema>>;
 }
@@ -30,8 +32,10 @@ export interface VLMSettingsRef {
 export function ReportSettings() {
   const { settings, updateSetting } = useSetting();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<ReportFormValues>({
+    resolver: zodResolver<ReportFormValues, unknown, ReportFormValues>(
+      formSchema as never,
+    ),
     defaultValues: {
       reportStorageBaseUrl: '',
       utioBaseUrl: '',

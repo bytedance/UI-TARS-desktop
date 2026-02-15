@@ -32,11 +32,15 @@ const formSchema = z.object({
   loopIntervalInMs: z.number().min(0).max(3000),
 });
 
+type ChatFormValues = z.infer<typeof formSchema>;
+
 export function ChatSettings() {
   const { settings, updateSetting } = useSetting();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<ChatFormValues>({
+    resolver: zodResolver<ChatFormValues, unknown, ChatFormValues>(
+      formSchema as never,
+    ),
     defaultValues: {
       language: undefined,
       maxLoopCount: 0,
