@@ -1,8 +1,6 @@
 # Quick Start
 
-We're excited to announce the support for UI-TARS-1.5! 🎉🎉🎉
-
-The previous version of UI-TARS Desktop version 0.0.8 will be upgraded to a new Desktop App 0.1.0 with support for both Computer and Browser operator.
+UI-TARS Desktop supports local computer and browser operators, plus optional remote operators when a remote service is available.
 
 <br />
 
@@ -52,7 +50,7 @@ You can download the [latest release](https://github.com/bytedance/UI-TARS-deskt
 
 ## Run remote operator
 
-The Remote Operator service will be discontinued on August 20, 2025. If you wish to deploy your own Remote Computer and Browser Agent after the free trial, you can explore Volcano Engine's OS Agent Services.
+Remote operator usage depends on reachable remote services. For stable long-term usage, deploy your own Remote Computer and Browser Agent services.
 
 Deployment Links (in Chinese): [Computer Use Agent](https://console.volcengine.com/vefaas/region:vefaas+cn-beijing/application/create?templateId=680b0a890e881f000862d9f0&channel=github&source=ui-tars) and [Browser Use Agent](https://console.volcengine.com/vefaas/region:vefaas+cn-beijing/application/create?templateId=67f7b4678af5a6000850556c&channel=github&source=ui-tars)
 

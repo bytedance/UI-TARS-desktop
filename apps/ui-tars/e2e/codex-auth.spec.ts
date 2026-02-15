@@ -2,33 +2,18 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import {
-  ElectronApplication,
-  Page,
-  _electron as electron,
-  expect,
-  test,
-} from '@playwright/test';
-import { findLatestBuild, parseElectronApp } from 'electron-playwright-helpers';
+import { ElectronApplication, Page, expect, test } from '@playwright/test';
+import { launchPackagedElectronApp } from './helpers/electronApp';
+
+const APP_BOOT_TIMEOUT_MS = 30_000;
 
 let electronApp: ElectronApplication;
 let page: Page;
 
 test.beforeAll(async () => {
-  const latestBuild = findLatestBuild();
-  const { executable: executablePath, main } = parseElectronApp(latestBuild);
-  process.env.CI = 'e2e';
-
-  electronApp = await electron.launch({
-    args: [main],
-    executablePath,
-    env: {
-      ...process.env,
-      CI: 'e2e',
-    },
-  });
-
-  page = await electronApp.firstWindow();
+  const launched = await launchPackagedElectronApp();
+  electronApp = launched.electronApp;
+  page = launched.page;
 });
 
 test.afterAll(async () => {
@@ -36,7 +21,9 @@ test.afterAll(async () => {
 });
 
 test('settings exposes OpenAI Codex OAuth provider', async () => {
-  await page.waitForLoadState('domcontentloaded', { timeout: 0 });
+  await page.waitForLoadState('domcontentloaded', {
+    timeout: APP_BOOT_TIMEOUT_MS,
+  });
   await page.getByRole('button', { name: 'Settings' }).click();
 
   await expect(
