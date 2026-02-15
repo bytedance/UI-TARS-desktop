@@ -14,6 +14,7 @@ import { ObjectEncodingOptions } from 'node:fs';
 import { promisify } from 'node:util';
 import {
   CallToolResult,
+  GetPromptResult,
   PromptMessage,
 } from '@modelcontextprotocol/sdk/types.js';
 
@@ -26,16 +27,42 @@ import {
 
 // TODO use .promises? in node api
 const execAsync = promisify(exec);
+const runCommandPromptArgsSchema = {
+  command: z.string().describe('Command with args'),
+};
+
+type ToolInputSchema = Record<string, z.ZodTypeAny>;
+type PromptInputSchema = Record<
+  string,
+  z.ZodType<string> | z.ZodOptional<z.ZodType<string>>
+>;
 
 function createServer(serverConfig?: { cwd?: string }): McpServer {
   const server = new McpServer({
     name: 'Run Commands',
     version: process.env.VERSION || '0.0.1',
   });
+  const registerTool = server.registerTool.bind(server) as (
+    name: string,
+    config: {
+      title?: string;
+      description?: string;
+      inputSchema?: ToolInputSchema;
+    },
+    cb: (args: Record<string, unknown>) => Promise<CallToolResult>,
+  ) => unknown;
+  const registerPrompt = server.registerPrompt.bind(server) as (
+    name: string,
+    config: {
+      title?: string;
+      description?: string;
+      argsSchema?: PromptInputSchema;
+    },
+    cb: (args: Record<string, string | undefined>) => Promise<GetPromptResult>,
+  ) => unknown;
 
   // === Tools ===
-  // @ts-ignore
-  server.registerTool(
+  registerTool(
     'run_command',
     {
       description: 'Run a command on this ' + os.platform() + ' machine',
@@ -51,7 +78,7 @@ function createServer(serverConfig?: { cwd?: string }): McpServer {
     async (args) => await runCommand(args),
   );
 
-  server.registerTool(
+  registerTool(
     'run_script',
     {
       description: 'Run a script on this ' + os.platform() + ' machine',
@@ -74,17 +101,18 @@ function createServer(serverConfig?: { cwd?: string }): McpServer {
   );
 
   // ==== Prompts ====
-  server.registerPrompt(
+  registerPrompt(
     'run_command',
     {
       title: 'Run Command',
       description:
         'Include command output in the prompt. Instead of a tool call, the user decides what commands are relevant.',
-      argsSchema: {
-        command: z.string().describe('Command with args'),
-      },
+      argsSchema: runCommandPromptArgsSchema,
     },
     async ({ command }) => {
+      if (!command) {
+        throw new Error('Command is required');
+      }
       const { stdout, stderr } = await execAsync(command);
       // TODO gracefully handle errors and turn them into a prompt message that can be used by LLM to troubleshoot the issue, currently errors result in nothing inserted into the prompt and instead it shows the Zed's chat panel as a failure
 

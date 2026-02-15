@@ -9,13 +9,16 @@ import { defineConfig } from 'vitest/config';
 import { parse } from 'yaml';
 
 const workspaceFile = readFileSync(resolve(__dirname, 'pnpm-workspace.yaml'), 'utf8');
-const workspaceConfig = parse(workspaceFile);
+const workspaceConfig = parse(workspaceFile) as { packages?: string[] };
+const workspaceProjects = (workspaceConfig.packages ?? []).map(
+  (workspacePattern) => `${workspacePattern}/vitest.config.mts`,
+);
 
 export default defineConfig({
   test: {
     coverage: {
       provider: 'istanbul', // or 'v8'
     },
-    projects: workspaceConfig.packages,
+    projects: workspaceProjects,
   },
 });
