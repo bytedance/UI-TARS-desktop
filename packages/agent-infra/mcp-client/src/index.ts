@@ -16,10 +16,9 @@ import {
   StdioClientTransport,
 } from '@modelcontextprotocol/sdk/client/stdio.js';
 import {
+  type CompatibilityCallToolResult,
   type Tool,
-  CompatibilityCallToolResultSchema,
 } from '@modelcontextprotocol/sdk/types.js';
-import { z } from 'zod';
 import type {
   BuiltInMCPServer,
   MCPServer,
@@ -641,7 +640,7 @@ export class MCPClient<
     client: ServerNames;
     name: string;
     args: any;
-  }): Promise<z.infer<typeof CompatibilityCallToolResultSchema>> {
+  }): Promise<CompatibilityCallToolResult> {
     await this.ensureInitialized();
     try {
       const { client, name, args } = params;
