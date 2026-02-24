@@ -5,7 +5,6 @@
 
 import {
   AgentEventStream,
-  MCPAgent,
   LLMRequestHookPayload,
   LLMResponseHookPayload,
   ConsoleLogger,
@@ -23,13 +22,18 @@ import { AgentTARSBaseEnvironment } from './environments/base';
 import { ToolLogger } from './utils';
 import { AGENT_TARS_WEBUI_CONFIG } from './webui-config';
 
+// Skill-related imports
+import { SkillAgent, SkillAgentOptions } from '@tarko/skill-agent';
+
 /**
  * AgentTARS - A multimodal AI agent with browser, filesystem, and search capabilities
  *
- * This class provides a comprehensive AI agent built on the Tarko framework,
+ * This class provides a comprehensive AI agent built on Tarko framework,
  * offering seamless integration with browsers, file systems, and search providers.
+ *
+ * Extends SkillAgent to provide skill management capabilities out of the box.
  */
-export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MCPAgent<T> {
+export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends SkillAgent<T> {
   static label = '@agent-tars/core';
 
   /**
@@ -82,14 +86,19 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
           new ConsoleLogger(options.id || 'AgentTARS'),
         );
 
-    // Initialize parent class with environment-provided MCP configuration
-    super({
+    // Build options for parent SkillAgent
+    const skillAgentOptions: T = {
       ...processedOptions,
       name: options.name ?? 'AgentTARS',
       instructions,
       mcpServers: environment.getMCPServerRegistry(),
       maxTokens: processedOptions.maxTokens,
-    });
+      // Merge skills option if provided
+      // skills:false,
+    } as T;
+
+    // Call parent constructor (SkillAgent -> MCPAgent)
+    super(skillAgentOptions);
 
     // Store configuration
     this.tarsOptions = processedOptions;
@@ -102,9 +111,9 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
     // Initialize core utilities
     this.toolLogger = new ToolLogger(this.logger);
 
-    // Use the environment created earlier (with updated logger)
+    // Use the environment created earlier
     this.environment = environment;
-    // Update environment logger to use the initialized logger
+    // Update environment logger to use initialized logger
     if ('logger' in this.environment) {
       (this.environment as any).logger = this.logger.spawn(
         processedOptions.aioSandbox ? 'AIOEnvironment' : 'LocalEnvironment',
@@ -117,14 +126,17 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   }
 
   /**
-   * Initialize the agent and all its components
+   * Initialize agent and all its components
    */
   async initialize(): Promise<void> {
     this.logger.info('🚀 Initializing AgentTARS...');
 
     try {
-      // Initialize all components through the environment
+      // Initialize all components through environment
       await this.environment.initialize((tool) => this.registerTool(tool), this.eventStream);
+
+      // Call parent initialize (SkillAgent) which will initialize skills
+      await super.initialize();
 
       // Log registered tools
       this.toolLogger.logRegisteredTools(this.getTools());
@@ -135,8 +147,6 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
       await this.cleanup();
       throw error;
     }
-
-    await super.initialize();
   }
 
   /**
@@ -208,28 +218,28 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   }
 
   /**
-   * Get the current working directory
+   * Get current working directory
    */
   public getWorkingDirectory(): string {
     return this.workspace;
   }
 
   /**
-   * Get the logger instance
+   * Get logger instance
    */
   public getLogger(): ConsoleLogger {
     return this.logger;
   }
 
   /**
-   * Get the current abort signal
+   * Get current abort signal
    */
   public getAbortSignal(): AbortSignal | undefined {
     return this.executionController.getAbortSignal();
   }
 
   /**
-   * Get the browser manager instance
+   * Get browser manager instance
    */
   public getBrowserManager(): BrowserManager | undefined {
     return this.environment.getBrowserManager();

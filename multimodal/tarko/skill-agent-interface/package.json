@@ -1,0 +1,26 @@
+{
+  "name": "@tarko/skill-agent-interface",
+  "version": "0.0.1",
+  "description": "Skill agent interface for Tarko",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "rslib build",
+    "dev": "rslib build --watch",
+    "test": "vitest run",
+    "test:watch": "vitest watch"
+  },
+  "dependencies": {
+    "@tarko/agent-interface": "workspace:*"
+  },
+  "devDependencies": {
+  }
+}

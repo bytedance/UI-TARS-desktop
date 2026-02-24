@@ -35,7 +35,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   const [openImage, setOpenImage] = useState<string | null>(null);
   const [renderError, setRenderError] = useState<Error | null>(null);
   const isDarkMode = useDarkMode();
-  const themeClass = forceDarkTheme ? 'dark' : (isDarkMode ? 'dark' : 'light');
+  const themeClass = forceDarkTheme ? 'dark' : isDarkMode ? 'dark' : 'light';
 
   const handleImageClick = (src: string) => {
     setOpenImage(src);
@@ -87,7 +87,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     return (
       <div className={markdownContentClass}>
         <ReactMarkdown
-          remarkPlugins={[remarkGfm, remarkMath, remarkAlert]}
+          remarkPlugins={[remarkGfm, remarkMath, remarkAlert as any]}
           rehypePlugins={[rehypeKatex, [rehypeHighlight, { detect: true, ignoreMissing: true }]]}
           components={components}
         >
