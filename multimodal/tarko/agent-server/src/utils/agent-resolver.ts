@@ -21,23 +21,23 @@ interface AgentResolutionOptions {
 }
 
 export async function resolveAgentImplementation(
-  implementaion?: AgentImplementation,
+  implementation?: AgentImplementation,
   options?: AgentResolutionOptions,
 ): Promise<AgentResolutionResult> {
-  if (!implementaion) {
-    throw new Error(`Missing agent implmentation`);
+  if (!implementation) {
+    throw new Error(`Missing agent implementation`);
   }
 
-  if (isAgentImplementationType(implementaion, 'module')) {
+  if (isAgentImplementationType(implementation, 'module')) {
     return {
-      agentName: implementaion.label ?? implementaion.constructor.label ?? 'Anonymous',
-      agentConstructor: implementaion.constructor,
-      agioProviderConstructor: implementaion.agio,
+      agentName: implementation.label ?? implementation.constructor.label ?? 'Anonymous',
+      agentConstructor: implementation.constructor,
+      agioProviderConstructor: implementation.agio,
     };
   }
 
-  if (isAgentImplementationType(implementaion, 'modulePath')) {
-    const agentModulePathIdentifier = implementaion.value;
+  if (isAgentImplementationType(implementation, 'modulePath')) {
+    const agentModulePathIdentifier = implementation.value;
 
     try {
       // Build resolve options with workspace path if provided
@@ -74,9 +74,9 @@ export async function resolveAgentImplementation(
       }
 
       return {
-        agentName: implementaion.label ?? agentConstructor.label ?? 'Anonymous',
+        agentName: implementation.label ?? agentConstructor.label ?? 'Anonymous',
         agentConstructor,
-        agioProviderConstructor: implementaion.agio,
+        agioProviderConstructor: implementation.agio,
       };
     } catch (error) {
       throw new Error(
@@ -85,5 +85,5 @@ export async function resolveAgentImplementation(
     }
   }
 
-  throw new Error(`Non-supported agent type: ${implementaion.type}`);
+  throw new Error(`Non-supported agent type: ${implementation.type}`);
 }

@@ -170,8 +170,6 @@ const DetailPanel = (): JSX.Element => {
           (nextTask.timing.start - activeTask.timing.start) / playbackSpeed;
       }
 
-      console.log('nextIndex', nextIndex, nextTask);
-
       timeoutId = setTimeout(() => {
         setActiveTask(nextTask);
       }, delay);
@@ -227,8 +225,6 @@ const DetailPanel = (): JSX.Element => {
       value: type,
     };
   });
-
-  console.log('startReplay', startReplay);
 
   return (
     <div className="detail-panel">
