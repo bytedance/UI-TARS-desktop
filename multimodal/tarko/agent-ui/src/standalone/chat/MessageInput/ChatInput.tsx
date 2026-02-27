@@ -41,6 +41,7 @@ interface ChatInputProps {
   autoFocus?: boolean;
   showHelpText?: boolean;
   variant?: 'default' | 'home';
+  isWorkspaceMismatch?: boolean;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
@@ -58,6 +59,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   autoFocus = true,
   showHelpText = true,
   variant = 'default',
+  isWorkspaceMismatch = false,
 }) => {
   const [uploadedImages, setUploadedImages] = useState<ChatCompletionContentPart[]>([]);
   const [isAborting, setIsAborting] = useState(false);
@@ -379,11 +381,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const defaultPlaceholder =
     connectionStatus && !connectionStatus.connected
       ? 'Server disconnected...'
-      : isProcessing
-        ? `${getAgentTitle()} is running...`
-        : contextualSelectorEnabled
-          ? `Ask ${getAgentTitle()} something... (Use @ to reference files/folders, Ctrl+Enter to send)`
-          : `Ask ${getAgentTitle()} something... (Ctrl+Enter to send)`;
+      : isWorkspaceMismatch
+        ? 'Preview mode - workspace environment mismatch'
+        : isProcessing
+          ? `${getAgentTitle()} is running...`
+          : contextualSelectorEnabled
+            ? `Ask ${getAgentTitle()} something... (Use @ to reference files/folders, Ctrl+Enter to send)`
+            : `Ask ${getAgentTitle()} something... (Ctrl+Enter to send)`;
 
   return (
     <div className={`relative ${className}`}>
