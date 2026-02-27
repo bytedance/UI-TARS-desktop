@@ -164,4 +164,28 @@ describe('resolveModel', () => {
       baseProvider: 'azure-openai',
     });
   });
+
+  it('should handle custom OpenAI-compatible providers like kimi', () => {
+    // Test case for issue #1822: custom providers should default to openai-compatible
+    const agentModel: AgentModel = {
+      provider: 'kimi' as any, // Custom provider not in predefined list
+      id: 'kimi-k2.5',
+      displayName: 'kimi k2.5',
+      apiKey: 'kimi-api-key',
+      baseURL: 'https://api.moonshot.cn/v1',
+    };
+
+    const result = resolveModel(agentModel);
+
+    expect(result).toEqual({
+      provider: 'kimi',
+      id: 'kimi-k2.5',
+      displayName: 'kimi k2.5',
+      baseURL: 'https://api.moonshot.cn/v1',
+      apiKey: 'kimi-api-key',
+      headers: {},
+      params: undefined,
+      baseProvider: 'openai-compatible', // Should default to openai-compatible for unknown providers
+    });
+  });
 });

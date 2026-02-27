@@ -7,13 +7,32 @@ import { AgentModel, ModelProviderName, BaseModelProviderName } from './types';
 import { HIGH_LEVEL_MODEL_PROVIDER_CONFIGS } from './constants';
 import { addClaudeHeadersIfNeeded } from './claude-headers';
 import { addAzureClaudeParamsIfNeeded } from './azure-claude-params';
+import { models } from '@tarko/llm-client';
+
+/**
+ * Known base model providers from llm-client
+ */
+const KNOWN_BASE_PROVIDERS = new Set(Object.keys(models));
 
 /**
  * Get the actual provider implementation name
+ * For unknown providers (like 'kimi'), defaults to 'openai-compatible'
  */
 function getActualProvider(providerName: ModelProviderName): BaseModelProviderName {
+  // First check if there's a high-level config that extends a base provider
   const config = HIGH_LEVEL_MODEL_PROVIDER_CONFIGS.find((c) => c.name === providerName);
-  return (config?.extends || providerName) as BaseModelProviderName;
+  if (config?.extends) {
+    return config.extends;
+  }
+
+  // If the provider is a known base provider, use it directly
+  if (KNOWN_BASE_PROVIDERS.has(providerName)) {
+    return providerName as BaseModelProviderName;
+  }
+
+  // For unknown providers, default to 'openai-compatible'
+  // This handles custom providers like 'kimi' that use OpenAI-compatible APIs
+  return 'openai-compatible';
 }
 
 /**
