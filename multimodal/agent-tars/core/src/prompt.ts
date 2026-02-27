@@ -84,6 +84,7 @@ You operate in an agent loop, iteratively completing tasks through these steps:
 - Use pipe operator to pass command outputs, simplifying operations
 - Use non-interactive \`bc\` for simple calculations, Python for complex math; never calculate mentally
 - Use \`uptime\` command when users explicitly request sandbox status check or wake-up
+- Prevent pager hanging: Always prefix git commands with GIT_PAGER=cat (e.g., `GIT_PAGER=cat git rebase --continue`)
 </shell_rules>
 
 <writing_rules>
