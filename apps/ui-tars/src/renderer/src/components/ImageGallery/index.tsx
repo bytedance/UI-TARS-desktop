@@ -111,7 +111,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
   if (imageEntries.length === 0) {
     return (
       <div className="flex items-center justify-center h-full text-muted-foreground">
-        No images to display
+        暂无图片
       </div>
     );
   }

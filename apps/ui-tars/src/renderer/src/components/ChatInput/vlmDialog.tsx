@@ -1,4 +1,5 @@
 import { Button } from '@renderer/components/ui/button';
+import { useTranslation } from '@renderer/hooks/useTranslation';
 
 import {
   Dialog,
@@ -16,6 +17,8 @@ interface VLMDialogProps {
 }
 
 export function VLMDialog({ open, onOpenChange }: VLMDialogProps) {
+  const { t } = useTranslation();
+
   const handleConfigureClick = () => {
     onOpenChange(false);
   };
@@ -24,18 +27,17 @@ export function VLMDialog({ open, onOpenChange }: VLMDialogProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>VLM Configuration Required</DialogTitle>
+          <DialogTitle>{t('vlm_dialog.title')}</DialogTitle>
           <DialogDescription className="text-foreground">
-            Missing VLM configuration. Operator requires these settings to run.
-            Would you like to configure VLM parameters?
+            {t('vlm_dialog.description')}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline">{t('common.cancel')}</Button>
           </DialogClose>
           <Button type="button" onClick={handleConfigureClick}>
-            Confirm
+            {t('common.confirm')}
           </Button>
         </DialogFooter>
       </DialogContent>

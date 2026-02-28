@@ -41,19 +41,18 @@ export const NavDialog = memo(
       <AlertDialog open={open} onOpenChange={onOpenChange}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Navigation Alert</AlertDialogTitle>
+            <AlertDialogTitle>导航提示</AlertDialogTitle>
             <AlertDialogDescription>
-              The current instance is running. Navigating away will forcibly
-              stop the instance. Do you still want to proceed?
+              当前实例正在运行。离开页面将强制停止实例。是否继续？
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>取消</AlertDialogCancel>
             <AlertDialogAction
               className="bg-red-500 hover:bg-red-600"
               onClick={onConfirm}
             >
-              Confirm
+              确认
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
