@@ -35,6 +35,6 @@ export default defineConfig({
   output: {
     target: 'node',
     cleanDistPath: false,
-    sourceMap: true,
+    sourceMap: false,
   },
 });
