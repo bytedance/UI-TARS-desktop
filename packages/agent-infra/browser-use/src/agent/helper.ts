@@ -44,8 +44,8 @@ export function createChatModel(
         };
       }
 
-      // O series models have different parameters
-      if (modelName.startsWith('o')) {
+      // O series and gpt-5 models require max_completion_tokens instead of max_tokens
+      if (modelName.startsWith('o') || modelName.startsWith('gpt-5')) {
         args.modelKwargs = {
           max_completion_tokens: maxCompletionTokens,
         };
