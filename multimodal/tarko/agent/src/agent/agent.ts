@@ -616,9 +616,11 @@ Provide concise and accurate responses.`;
 
     // End execution if not already ended
     if (this.executionController.isExecuting()) {
-      this.executionController.endExecution(AgentStatus.IDLE).catch((err) => {
+      try {
+        await this.executionController.endExecution(AgentStatus.IDLE);
+      } catch (err) {
         this.logger.error(`Error ending execution: ${err}`);
-      });
+      }
     }
   }
 
