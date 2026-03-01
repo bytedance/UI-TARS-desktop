@@ -560,6 +560,45 @@ ${JSON.stringify(schema)}
   }
 
   /**
+   * Repair truncated JSON by closing unterminated strings and missing braces.
+   * Handles cases where LLM output was cut off mid-string (e.g. long HTML content).
+   */
+  private repairTruncatedJson(content: string): string {
+    if (!content) return content;
+
+    let repaired = content;
+
+    // Count unescaped double quotes to detect unterminated strings
+    let inString = false;
+    for (let i = 0; i < repaired.length; i++) {
+      if (repaired[i] === '\\' && inString) {
+        i++; // skip escaped character
+        continue;
+      }
+      if (repaired[i] === '"') {
+        inString = !inString;
+      }
+    }
+
+    // Close unterminated string
+    if (inString) {
+      repaired += '"';
+      this.logger.debug('Closed unterminated string in truncated JSON');
+    }
+
+    // Close missing braces
+    const openBraces = (repaired.match(/\{/g) || []).length;
+    const closeBraces = (repaired.match(/\}/g) || []).length;
+    const missingBraces = openBraces - closeBraces;
+    if (missingBraces > 0) {
+      repaired += '}'.repeat(missingBraces);
+      this.logger.debug(`Added ${missingBraces} closing braces to complete JSON`);
+    }
+
+    return repaired;
+  }
+
+  /**
    * Complete a tool call when closing tag is found
    */
   private completeToolCall(state: ExtendedStreamProcessingState): StreamingToolCallUpdate | null {
@@ -618,18 +657,8 @@ ${JSON.stringify(schema)}
         // Add closing brace if it seems like valid JSON that was truncated
         let toolCallContent = this.extractCleanJsonContent(extendedState.currentToolCallBuffer);
 
-        // Attempt to repair incomplete JSON
-        if (toolCallContent && !toolCallContent.endsWith('}')) {
-          // Simple heuristic: if it looks like JSON and has opening braces, try to close them
-          const openBraces = (toolCallContent.match(/\{/g) || []).length;
-          const closeBraces = (toolCallContent.match(/\}/g) || []).length;
-          const missingBraces = openBraces - closeBraces;
-
-          if (missingBraces > 0) {
-            toolCallContent += '}'.repeat(missingBraces);
-            this.logger.debug(`Added ${missingBraces} closing braces to complete JSON`);
-          }
-        }
+        // Attempt to repair incomplete JSON (unterminated strings + missing braces)
+        toolCallContent = this.repairTruncatedJson(toolCallContent);
 
         const toolCallData = JSON.parse(toolCallContent);
 
