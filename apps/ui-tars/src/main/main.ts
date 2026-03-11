@@ -106,7 +106,12 @@ const initializeApp = async () => {
           (source) => source.display_id === primaryDisplay.id.toString(),
         );
 
-        callback({ video: primarySource!, audio: 'loopback' });
+        if (!primarySource) {
+          logger.warn('Primary display source not found, using first available source');
+          callback({ video: sources[0] || null, audio: 'loopback' });
+        } else {
+          callback({ video: primarySource, audio: 'loopback' });
+        }
       });
     },
     { useSystemPicker: false },
@@ -202,18 +207,6 @@ const registerIPCHandlers = (
   return { unsubscribe };
 };
 
-/**
- * Add event listeners...
- */
-
-app.on('window-all-closed', () => {
-  // Respect the OSX convention of having the application in memory even
-  // after all windows have been closed
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
-});
-
 app
   .whenReady()
   .then(async () => {
@@ -231,4 +224,4 @@ app
     logger.info('app.whenReady end');
   })
 
-  .catch(console.log);
+  .catch(logger.error);
