@@ -37,7 +37,10 @@ function getChromeOnLinux(
       const path = which.sync(name);
       return path;
     }
-  } catch (e) {}
+  } catch (e) {
+    // which.sync() throws when command not found - this is expected
+    // when Chrome is not installed on the system. Continue trying other methods.
+  }
 
   return null;
 }
