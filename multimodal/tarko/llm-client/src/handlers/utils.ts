@@ -27,6 +27,7 @@ import { OpenAICompatibleHandler } from './openai-compatible.js';
 import { OpenAIHandler } from './openai.js';
 import { OpenAINonStreamingHandler } from './openai-non-streaming.js';
 import { OpenRouterHandler } from './openrouter.js';
+import { MiniMaxHandler } from './minimax.js';
 import { PerplexityHandler } from './perplexity.js';
 import { InputError, MIMEType } from './types.js';
 import { AzureOpenAIHandler } from './azure-openai.js';
@@ -122,6 +123,16 @@ export const Handlers: Record<string, (opts: ConfigOptions) => any> = {
       models.openrouter.supportsToolCalls,
       models.openrouter.supportsN,
       models.openrouter.supportsStreaming,
+    ),
+  ['minimax']: (opts: ConfigOptions) =>
+    new MiniMaxHandler(
+      opts,
+      models.minimax.models,
+      models.minimax.supportsJSON,
+      models.minimax.supportsImages,
+      models.minimax.supportsToolCalls,
+      models.minimax.supportsN,
+      models.minimax.supportsStreaming,
     ),
   ['openai-compatible']: (opts: ConfigOptions) =>
     new OpenAICompatibleHandler(

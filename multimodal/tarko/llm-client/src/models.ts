@@ -419,4 +419,14 @@ export const models = {
     supportsN: true,
     generateDocs: false,
   },
+  minimax: {
+    models: ['MiniMax-M2.5', 'MiniMax-M2.5-highspeed'] as const,
+    supportsCompletion: true,
+    supportsStreaming: ['MiniMax-M2.5', 'MiniMax-M2.5-highspeed'] as const,
+    supportsJSON: [] as const,
+    supportsImages: ['MiniMax-M2.5', 'MiniMax-M2.5-highspeed'] as const,
+    supportsToolCalls: ['MiniMax-M2.5', 'MiniMax-M2.5-highspeed'] as const,
+    supportsN: false,
+    generateDocs: true,
+  },
 };
