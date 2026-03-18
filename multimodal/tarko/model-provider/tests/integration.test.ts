@@ -193,10 +193,36 @@ describe('Integration Tests', () => {
       expect(resolved.baseProvider).toBe('minimax');
     });
 
+    it('should resolve MiniMax-M2.7 model', () => {
+      const agentModel: AgentModel = {
+        provider: 'minimax',
+        id: 'MiniMax-M2.7',
+        apiKey: 'test-minimax-key',
+      };
+
+      const resolved = resolveModel(agentModel);
+      expect(resolved.provider).toBe('minimax');
+      expect(resolved.id).toBe('MiniMax-M2.7');
+      expect(resolved.baseProvider).toBe('minimax');
+    });
+
+    it('should resolve MiniMax-M2.7-highspeed model', () => {
+      const agentModel: AgentModel = {
+        provider: 'minimax',
+        id: 'MiniMax-M2.7-highspeed',
+        apiKey: 'test-minimax-key',
+      };
+
+      const resolved = resolveModel(agentModel);
+      expect(resolved.provider).toBe('minimax');
+      expect(resolved.id).toBe('MiniMax-M2.7-highspeed');
+      expect(resolved.baseProvider).toBe('minimax');
+    });
+
     it('should create LLM client for MiniMax without throwing', () => {
       const agentModel: AgentModel = {
         provider: 'minimax',
-        id: 'MiniMax-M2.5',
+        id: 'MiniMax-M2.7',
         apiKey: 'test-minimax-key',
       };
 
@@ -207,7 +233,7 @@ describe('Integration Tests', () => {
     it('should support custom baseURL for MiniMax', () => {
       const agentModel: AgentModel = {
         provider: 'minimax',
-        id: 'MiniMax-M2.5',
+        id: 'MiniMax-M2.7',
         apiKey: 'test-minimax-key',
         baseURL: 'https://custom-proxy.example.com/v1',
       };
