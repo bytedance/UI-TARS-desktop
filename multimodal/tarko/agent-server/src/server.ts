@@ -95,6 +95,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     setupAPI(this.app, {
       workspacePath: this.getCurrentWorkspace(),
       isDebug: this.isDebug,
+      port: this.port,
     });
 
     // Make server instance available to request handlers

@@ -32,6 +32,88 @@ export interface WorkspaceItem {
  * - Workspace file search
  */
 class ApiService {
+  private csrfToken: string | null = null;
+  private csrfTokenPromise: Promise<string> | null = null;
+
+  /**
+   * Fetch a CSRF token from the server.
+   * Caches the token and deduplicates concurrent requests.
+   */
+  private async fetchCsrfToken(): Promise<string> {
+    if (this.csrfToken) {
+      return this.csrfToken;
+    }
+
+    // Deduplicate concurrent token fetches
+    if (this.csrfTokenPromise) {
+      return this.csrfTokenPromise;
+    }
+
+    this.csrfTokenPromise = (async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/v1/csrf-token`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          signal: AbortSignal.timeout(5000),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch CSRF token: ${response.statusText}`);
+        }
+
+        const { token } = await response.json();
+        this.csrfToken = token;
+        return token;
+      } catch (error) {
+        console.error('Error fetching CSRF token:', error);
+        throw error;
+      } finally {
+        this.csrfTokenPromise = null;
+      }
+    })();
+
+    return this.csrfTokenPromise;
+  }
+
+  /**
+   * Get headers for mutation requests (POST/PUT/DELETE) that include CSRF token.
+   */
+  private async getMutationHeaders(): Promise<Record<string, string>> {
+    try {
+      const token = await this.fetchCsrfToken();
+      return {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': token,
+      };
+    } catch {
+      // Fall back to headers without CSRF token if fetch fails
+      return { 'Content-Type': 'application/json' };
+    }
+  }
+
+  /**
+   * Perform a mutation fetch with CSRF token. Retries once on 403 (token expired).
+   */
+  private async mutationFetch(url: string, init: RequestInit): Promise<Response> {
+    const headers = await this.getMutationHeaders();
+    const response = await fetch(url, {
+      ...init,
+      headers: { ...headers, ...(init.headers as Record<string, string>) },
+    });
+
+    // If 403, try refreshing the CSRF token and retry once
+    if (response.status === 403) {
+      this.csrfToken = null;
+      const freshHeaders = await this.getMutationHeaders();
+      return fetch(url, {
+        ...init,
+        headers: { ...freshHeaders, ...(init.headers as Record<string, string>) },
+      });
+    }
+
+    return response;
+  }
+
   /**
    * Check server health status
    */
@@ -59,9 +141,8 @@ class ApiService {
     agentOptions?: Record<string, any>,
   ): Promise<{ session: SessionInfo; events: AgentEventStream.Event[] }> {
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.CREATE_SESSION}`, {
+      const response = await this.mutationFetch(`${API_BASE_URL}${API_ENDPOINTS.CREATE_SESSION}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ runtimeSettings, agentOptions }),
       });
 
@@ -183,9 +264,8 @@ class ApiService {
    */
   async updateSessionInfo(sessionId: string, updates: Partial<SessionInfo>): Promise<SessionInfo> {
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.UPDATE_SESSION}`, {
+      const response = await this.mutationFetch(`${API_BASE_URL}${API_ENDPOINTS.UPDATE_SESSION}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId, ...updates }),
       });
 
@@ -206,9 +286,8 @@ class ApiService {
    */
   async deleteSession(sessionId: string): Promise<boolean> {
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.DELETE_SESSION}`, {
+      const response = await this.mutationFetch(`${API_BASE_URL}${API_ENDPOINTS.DELETE_SESSION}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId }),
       });
 
@@ -233,9 +312,8 @@ class ApiService {
     onEvent: (event: AgentEventStream.Event) => void,
   ): Promise<void> {
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.QUERY_STREAM}`, {
+      const response = await this.mutationFetch(`${API_BASE_URL}${API_ENDPOINTS.QUERY_STREAM}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId, query }),
       });
 
@@ -286,9 +364,8 @@ class ApiService {
    */
   async sendQuery(sessionId: string, query: string | ChatCompletionContentPart[]): Promise<string> {
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.QUERY}`, {
+      const response = await this.mutationFetch(`${API_BASE_URL}${API_ENDPOINTS.QUERY}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId, query }),
       });
 
@@ -309,9 +386,8 @@ class ApiService {
    */
   async abortQuery(sessionId: string): Promise<boolean> {
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.ABORT}`, {
+      const response = await this.mutationFetch(`${API_BASE_URL}${API_ENDPOINTS.ABORT}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId }),
       });
 
@@ -332,9 +408,8 @@ class ApiService {
    */
   async generateSummary(sessionId: string, messages: any[]): Promise<string> {
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.GENERATE_SUMMARY}`, {
+      const response = await this.mutationFetch(`${API_BASE_URL}${API_ENDPOINTS.GENERATE_SUMMARY}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId, messages }),
       });
 
@@ -469,11 +544,10 @@ class ApiService {
     Array<{ path: string; exists: boolean; type?: 'file' | 'directory'; error?: string }>
   > {
     try {
-      const response = await fetch(
+      const response = await this.mutationFetch(
         `${API_BASE_URL}${API_ENDPOINTS.WORKSPACE_VALIDATE}?sessionId=${sessionId}`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ paths }),
           signal: AbortSignal.timeout(3000),
         },
@@ -515,9 +589,8 @@ class ApiService {
     model: AgentModel,
   ): Promise<{ success: boolean; sessionInfo?: SessionInfo }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/sessions/model`, {
+      const response = await this.mutationFetch(`${API_BASE_URL}/api/v1/sessions/model`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId, model }),
       });
 
@@ -568,9 +641,8 @@ class ApiService {
     runtimeSettings: Record<string, any>,
   ): Promise<{ success: boolean; sessionInfo?: SessionInfo }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/runtime-settings`, {
+      const response = await this.mutationFetch(`${API_BASE_URL}/api/v1/runtime-settings`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId, runtimeSettings }),
       });
 

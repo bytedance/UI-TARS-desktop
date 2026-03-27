@@ -27,6 +27,7 @@ import {
   createSessionRoutes,
   createShareRoutes,
   createSystemRoutes,
+  createCsrfRoutes,
 } from './routes';
 import { createUserConfigRoutes } from './routes/user';
 import { HookManager, BuiltInPriorities, type HookRegistrationOptions } from './hooks';
@@ -166,6 +167,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    */
   private setupRoutes(): void {
     // Register all API routes
+    this.app.route('/', createCsrfRoutes());
     this.app.route('/', createQueryRoutes());
     this.app.route('/', createSessionRoutes());
     this.app.route('/', createShareRoutes());

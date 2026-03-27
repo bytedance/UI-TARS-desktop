@@ -3,7 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { getContext } from 'hono/context-storage';
-import { AuthHook, CorsHook, AgentServer, ContextStorageHook } from '../src/index';
+import {
+  AuthHook,
+  AgentServer,
+  ContextStorageHook,
+  createCorsHook,
+  createCsrfProtectionHook,
+  SecurityHeadersHook,
+} from '../src/index';
 import { resolve } from 'path';
 import { ContextVariables } from '../src/types';
 
@@ -140,8 +147,10 @@ const logger = {
 };
 
 server.setLogger(logger);
+server.registerHook(SecurityHeadersHook);
 server.registerHook(AuthHook);
-server.registerHook(CorsHook);
+server.registerHook(createCorsHook(server.port));
+server.registerHook(createCsrfProtectionHook());
 server.registerHook(ContextStorageHook);
 
 console.log('🚀 Starting TARS Agent Server...');

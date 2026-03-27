@@ -5,3 +5,4 @@
 
 export { sessionRestoreMiddleware } from './session-restore';
 export { exclusiveModeMiddleware } from './exclusive-mode';
+export { csrfProtectionMiddleware, generateCsrfToken } from './csrf-protection';
