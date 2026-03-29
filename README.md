@@ -297,3 +297,8 @@ If you find our paper and code useful in your research, please consider giving a
   year={2025}
 }
 ```
+
+## Hosted deployment
+
+A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/agent-infra-mcp-server-browser).
+
