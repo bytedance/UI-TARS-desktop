@@ -161,7 +161,7 @@ export const runAgent = async (
       operatorType = 'browser';
       break;
     default:
-      break;
+      throw new Error(`Unsupported operator type: ${settings.operator}`);
   }
 
   let modelVersion = getModelVersion(settings.vlmProvider);
