@@ -16,6 +16,9 @@ export const run = () => {
     .option('-p, --presets <url>', 'Model Config Presets')
     .option('-t, --target <target>', 'The target operator')
     .option('-q, --query <query>', "Use's query")
+    .option('-l, --auto-learn', 'Automatically learn the app map before running (requires --target adb and --package)')
+    .option('-r, --force-relearn', 'Force regenerating the app map even if cached')
+    .option('--package <pkg>', 'Android app package name (required with --auto-learn)')
     .action(async (options: CliOptions) => {
       try {
         await start(options);

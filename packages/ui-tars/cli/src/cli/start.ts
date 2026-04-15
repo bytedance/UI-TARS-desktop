@@ -13,11 +13,22 @@ import yaml from 'js-yaml';
 
 import { NutJSOperator } from '@ui-tars/operator-nut-js';
 import { getAndroidDeviceId, AdbOperator } from '@ui-tars/operator-adb';
+import { autoLearnAndRun } from '../auto-learn';
+
+interface PresetConfig {
+  vlmApiKey?: string;
+  vlmBaseUrl?: string;
+  vlmModelName?: string;
+  useResponsesApi?: boolean;
+}
 
 export interface CliOptions {
   presets?: string;
   target?: string;
   query?: string;
+  autoLearn?: boolean;
+  forceRelearn?: boolean;
+  package?: string;
 }
 export const start = async (options: CliOptions) => {
   const CONFIG_PATH = path.join(os.homedir(), '.ui-tars-cli.json');
@@ -37,11 +48,11 @@ export const start = async (options: CliOptions) => {
     }
 
     const yamlText = await response.text();
-    const preset = yaml.load(yamlText) as any;
+    const preset = yaml.load(yamlText) as PresetConfig;
 
-    config.apiKey = preset?.vlmApiKey;
-    config.baseURL = preset?.vlmBaseUrl;
-    config.model = preset?.vlmModelName;
+    config.apiKey = preset?.vlmApiKey ?? '';
+    config.baseURL = preset?.vlmBaseUrl ?? '';
+    config.model = preset?.vlmModelName ?? '';
     config.useResponsesApi = preset?.useResponsesApi ?? false;
   } else if (fs.existsSync(CONFIG_PATH)) {
     try {
@@ -79,6 +90,34 @@ export const start = async (options: CliOptions) => {
   }
 
   let targetOperator = null;
+
+  // Auto-learn phase (only for ADB target)
+  if (options.autoLearn && options.target === 'adb') {
+    if (!options.package) {
+      console.error('--package is required when using --auto-learn with --target adb');
+      process.exit(1);
+    }
+
+    const deviceId = await getAndroidDeviceId();
+    if (deviceId == null) {
+      console.error('No Android devices found. Please connect a device and try again.');
+      process.exit(0);
+    }
+
+    const map = await autoLearnAndRun({
+      pkg: options.package,
+      deviceId,
+      modelConfig: config,
+      forceRelearn: options.forceRelearn,
+    });
+
+    if (map) {
+      console.log(
+        `\n[Auto-Learn] App map ready: ${map.meta.package} (${Object.keys(map.pages).length} pages, ${map.navigation.tabs.length} tabs)`,
+      );
+    }
+  }
+
   const targetType =
     options.target ||
     ((await p.select({
