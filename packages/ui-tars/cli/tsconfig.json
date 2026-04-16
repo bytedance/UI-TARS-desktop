@@ -3,6 +3,11 @@
     "target": "esnext",
     "module": "esnext",
     "moduleResolution": "Bundler",
+    "baseUrl": ".",
+    "paths": {
+      "@ui-tars/sdk": ["../sdk/src/index.ts"],
+      "@ui-tars/sdk/core": ["../sdk/src/core.ts"]
+    },
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,

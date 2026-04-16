@@ -53,7 +53,15 @@ export interface Element {
   name?: string;
   description?: string;
   text?: string;
-  action: 'navigate' | 'filter' | 'toggle' | 'input' | 'unknown';
+  action:
+    | 'click'
+    | 'navigate'
+    | 'filter'
+    | 'toggle'
+    | 'input'
+    | 'close'
+    | 'confirm'
+    | 'unknown';
   target?: string;
   status: 'reliable' | 'unreliable';
   retryCount: number;

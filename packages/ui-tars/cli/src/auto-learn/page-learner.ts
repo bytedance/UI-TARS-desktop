@@ -14,10 +14,25 @@ import {
   guessActionType,
   generateElementId,
   deduplicateElements,
+  describeVerticalPosition,
   saveScreenshot,
 } from './utils';
 import { SS_DIR } from './map-storage';
 import { getLayoutType } from './page-signatures';
+
+const CLICK_SAVE_INTERVAL = 5;
+const TOP_REGION_RATIO = 8;
+const DEFAULT_PAGE_LEARN_TIMEOUT_MS = 600_000;
+
+function createEmptyPageMap(pageName: string, depth: number): PageMap {
+  return {
+    name: pageName,
+    depth,
+    layout: getLayoutType(pageName),
+    regions: [],
+    backAction: { type: 'hotkey', key: 'back' },
+  };
+}
 
 /**
  * Phase 2: Learn page elements by instructing the agent to explore interactive elements.
@@ -76,25 +91,25 @@ export async function learnPageElements(
 
   await withTimeout(
     agent.run(
-      '探索当前页面的可交互元素。\n\n' +
-        '**【绝对禁止】点击屏幕顶部 1/8 区域（y坐标小于屏幕高度的 1/8）！**\n' +
-        '这个区域通常是Logo、品牌名称、导航栏，不可交互。\n' +
-        '你必须从屏幕中间或下半部分开始探索。\n\n' +
-        '**重要：在Thought中用【元素名称】标注你点击的是什么！**\n' +
-        '例如：Thought: 我要点击【推荐卡片】来查看详情。Action: click(...)\n\n' +
-        '**探索规则：**\n' +
-        '1. 首先观察屏幕下半部分的卡片、按钮、列表\n' +
-        '2. 点击第一个看起来有功能的元素（如推荐卡片、角色列表项）\n' +
-        '3. 用【名称】标注元素，如【推荐卡片】【签到按钮】【角色卡片】\n' +
-        '4. 点击后如果进入新页面，立即hotkey(key="back")返回\n' +
-        '5. 如果出现弹窗，关闭后换下一个元素\n' +
-        '6. 向上滚动探索更多内容\n' +
-        '7. 探索完 5-8 个主要元素后执行 finished()\n\n' +
-        '**记住：目标是发现有功能的交互元素！从屏幕中间开始，不要点击顶部！**',
+      'Explore the interactive elements on the current page.\n\n' +
+        `**Do not click inside the top ${1}/${TOP_REGION_RATIO} of the screen (y < screen height / ${TOP_REGION_RATIO}).**\n` +
+        'That region often contains status bars, branding, or non-essential headers.\n' +
+        'Start from the middle or lower content area.\n\n' +
+        '**Important: in Thought, label each clicked target using 【label】 or "label".**\n' +
+        'Example: Thought: I will click 【featured card】 to inspect it. Action: click(...)\n\n' +
+        '**Exploration rules:**\n' +
+        '1. Observe cards, buttons, lists, and inputs in the main content area first\n' +
+        '2. Click the first likely interactive target\n' +
+        '3. Label the target clearly, for example 【featured card】, 【primary button】, or "search input"\n' +
+        '4. If the click opens a new page, call hotkey(key="back") immediately to return\n' +
+        '5. If a dialog or modal appears, close it and continue with another target\n' +
+        '6. Scroll upward to discover more content when needed\n' +
+        '7. After exploring 5-8 major interactive targets, call finished()\n\n' +
+        '**Goal: identify functional interactive elements without relying on app-specific labels.**',
       [],
       {},
     ),
-    600_000, // 10 minutes
+    DEFAULT_PAGE_LEARN_TIMEOUT_MS,
     'learnPageElements',
   );
 
@@ -103,28 +118,17 @@ export async function learnPageElements(
   const scrolls = actions.filter((a) => a.type === 'scroll');
   const backs = actions.filter((a) => a.type === 'hotkey' && a.inputs.key === 'back');
 
-  const elements: Array<{
-    id: string;
-    name: string;
-    description: string;
-    coords: number[];
-    bbox: number[];
-    type: string;
-    action: string;
-    status: 'reliable' | 'unreliable';
-    retryCount: number;
-    target?: string;
-  }> = [];
+  const elements: Element[] = [];
   const jumpTargets: JumpTarget[] = [];
   let jumpIdx = 0;
   let filteredCount = 0;
-  const TOP_REGION_THRESHOLD = Math.floor(screenHeight / 8);
+  const topRegionThreshold = Math.floor(screenHeight / TOP_REGION_RATIO);
 
   for (const click of clicks) {
     const coords = extractCoords(click.inputs);
 
     // Filter clicks in the top region (likely nav bar/logo)
-    if (coords.length >= 2 && coords[1] < TOP_REGION_THRESHOLD) {
+    if (coords.length >= 2 && coords[1] < topRegionThreshold) {
       filteredCount++;
       continue;
     }
@@ -145,30 +149,18 @@ export async function learnPageElements(
       (b) => b.loopIndex > click.loopIndex && b.loopIndex < click.loopIndex + 5,
     );
 
-    const yPos = coords.length >= 2 ? Math.round(coords[1]) : 0;
-    const positionDesc =
-      yPos < 800 ? '上部区域' : yPos < 1600 ? '中部区域' : '下部区域';
+    const yPos = coords.length >= 2 ? Math.round(coords[1]) : -1;
+    const positionDesc = describeVerticalPosition(yPos, screenHeight);
 
-    const elem: {
-      id: string;
-      name: string;
-      description: string;
-      coords: number[];
-      bbox: number[];
-      type: string;
-      action: string;
-      status: 'reliable' | 'unreliable';
-      retryCount: number;
-      target?: string;
-    } = {
+    const elem: Element = {
       id: elemId,
       name: elementName,
-      description: `${elementName} - 位于${positionDesc}，${click.thought.substring(0, 80)}`,
+      description: `${elementName} - located in the ${positionDesc}, ${click.thought.substring(0, 80)}`,
       coords,
       bbox: [],
       type: elemType,
       action: guessActionType(click.thought, pageChanged),
-      status: 'reliable' as const,
+      status: 'reliable',
       retryCount: 0,
     };
 
@@ -191,7 +183,7 @@ export async function learnPageElements(
 
   if (filteredCount > 0) {
     console.log(
-      `[Filter] Filtered out ${filteredCount} clicks in top region (y < ${TOP_REGION_THRESHOLD})`,
+      `[Filter] Filtered out ${filteredCount} clicks in top region (y < ${topRegionThreshold})`,
     );
   }
 
@@ -206,17 +198,14 @@ export async function learnPageElements(
       bbox: [0, 0, screenWidth, screenHeight],
       type: scrolls.length > 0 ? 'scrollable-grid' : 'static',
       scrollable: scrolls.length > 0,
-      elements: uniqueElements as Element[],
+      elements: uniqueElements,
       description: 'Main content area',
     });
   }
 
   const pageMap: PageMap = {
-    name: pageName,
-    depth,
-    layout: getLayoutType(pageName),
+    ...createEmptyPageMap(pageName, depth),
     regions,
-    backAction: { type: 'hotkey', key: 'back' },
   };
 
   console.log(`Found ${uniqueElements.length} elements, ${jumpTargets.length} jump targets`);

@@ -7,13 +7,24 @@ import path from 'node:path';
 import os from 'node:os';
 
 import fetch from 'node-fetch';
-import { GUIAgent } from '@ui-tars/sdk';
+import { GUIAgent, type GUIAgentData } from '@ui-tars/sdk';
+import type { Operator as GUIOperator } from '@ui-tars/sdk/core';
 import * as p from '@clack/prompts';
 import yaml from 'js-yaml';
 
 import { NutJSOperator } from '@ui-tars/operator-nut-js';
 import { getAndroidDeviceId, AdbOperator } from '@ui-tars/operator-adb';
-import { autoLearnAndRun } from '../auto-learn';
+import {
+  autoLearnAndRun,
+  buildAppMapContextPrompt,
+  buildNavigationGoalPrompt,
+  buildOnPageActionPrompt,
+  buildOnPageHistoryMessages,
+  extractNavigationSubtask,
+  extractTargetPageName,
+  loadMap,
+  shouldUseAppMapContext,
+} from '../auto-learn';
 
 interface PresetConfig {
   vlmApiKey?: string;
@@ -22,14 +33,53 @@ interface PresetConfig {
   useResponsesApi?: boolean;
 }
 
+type HistoryMessage = {
+  from: 'gpt' | 'human';
+  value: string;
+};
+
 export interface CliOptions {
   presets?: string;
   target?: string;
   query?: string;
   autoLearn?: boolean;
   forceRelearn?: boolean;
+  appMapMode?: 'off' | 'navigation' | 'two-phase';
   package?: string;
 }
+
+function resolveAppMapMode(
+  mode: CliOptions['appMapMode'],
+): NonNullable<CliOptions['appMapMode']> {
+  return mode || 'two-phase';
+}
+
+async function runAgentInstruction(params: {
+  config: { baseURL: string; apiKey: string; model: string; useResponsesApi: boolean };
+  operator: GUIOperator;
+  signal: AbortSignal;
+  instruction: string;
+  systemPromptSuffix?: string;
+  historyMessages?: HistoryMessage[];
+}) {
+  const guiAgent = new GUIAgent({
+    model: {
+      baseURL: params.config.baseURL,
+      apiKey: params.config.apiKey,
+      model: params.config.model,
+      useResponsesApi: params.config.useResponsesApi,
+    },
+    operator: params.operator,
+    systemPromptSuffix: params.systemPromptSuffix,
+    signal: params.signal,
+    onError: ({ data, error }: { data: GUIAgentData; error: Error }) => {
+      console.error(error, data);
+    },
+  });
+
+  await guiAgent.run(params.instruction, params.historyMessages);
+}
+
 export const start = async (options: CliOptions) => {
   const CONFIG_PATH = path.join(os.homedir(), '.ui-tars-cli.json');
 
@@ -90,31 +140,76 @@ export const start = async (options: CliOptions) => {
   }
 
   let targetOperator = null;
+  const appMapMode = resolveAppMapMode(options.appMapMode);
+  let navigationInstruction: string | undefined;
+  let followUpInstruction: string | undefined;
+  let targetPageName: string | undefined;
+  let systemPromptSuffix: string | undefined;
+  let followUpPromptSuffix: string | undefined;
 
   // Auto-learn phase (only for ADB target)
-  if (options.autoLearn && options.target === 'adb') {
+  if (options.target === 'adb' && options.package && appMapMode !== 'off') {
+    let map = null;
+
+    if (options.autoLearn) {
+      if (!options.package) {
+        console.error('--package is required when using --auto-learn with --target adb');
+        process.exit(1);
+      }
+
+      const deviceId = await getAndroidDeviceId();
+      if (deviceId == null) {
+        console.error('No Android devices found. Please connect a device and try again.');
+        process.exit(0);
+      }
+
+      map = await autoLearnAndRun({
+        pkg: options.package,
+        deviceId,
+        modelConfig: config,
+        forceRelearn: options.forceRelearn,
+      });
+
+      if (map) {
+        console.log(
+          `\n[Auto-Learn] App map ready: ${map.meta.package} (${Object.keys(map.pages).length} pages, ${map.navigation.tabs.length} tabs)`,
+        );
+      }
+    } else {
+      map = loadMap(options.package);
+      if (map) {
+        console.log(
+          `\n[Auto-Learn] Using cached app map: ${map.meta.package} (${Object.keys(map.pages).length} pages, ${map.navigation.tabs.length} tabs)`,
+        );
+      }
+    }
+
+    if (map && options.query) {
+      const navigationSubtask =
+        appMapMode === 'two-phase'
+          ? extractNavigationSubtask(options.query, map)
+          : null;
+
+      if (navigationSubtask) {
+        navigationInstruction = navigationSubtask.navigationQuery;
+        followUpInstruction = navigationSubtask.remainingQuery;
+        targetPageName =
+          extractTargetPageName(navigationInstruction, map) || 'target page';
+        systemPromptSuffix = buildNavigationGoalPrompt(map, targetPageName);
+        followUpPromptSuffix = buildOnPageActionPrompt(
+          targetPageName,
+          followUpInstruction,
+        );
+      } else if (shouldUseAppMapContext(options.query, map)) {
+        targetPageName =
+          extractTargetPageName(options.query, map) || 'target page';
+        systemPromptSuffix = buildNavigationGoalPrompt(map, targetPageName);
+      }
+    }
+  } else if (options.autoLearn && options.target === 'adb') {
     if (!options.package) {
       console.error('--package is required when using --auto-learn with --target adb');
       process.exit(1);
-    }
-
-    const deviceId = await getAndroidDeviceId();
-    if (deviceId == null) {
-      console.error('No Android devices found. Please connect a device and try again.');
-      process.exit(0);
-    }
-
-    const map = await autoLearnAndRun({
-      pkg: options.package,
-      deviceId,
-      modelConfig: config,
-      forceRelearn: options.forceRelearn,
-    });
-
-    if (map) {
-      console.log(
-        `\n[Auto-Learn] App map ready: ${map.meta.package} (${Object.keys(map.pages).length} pages, ${map.navigation.tabs.length} tabs)`,
-      );
     }
   }
 
@@ -167,30 +262,30 @@ export const start = async (options: CliOptions) => {
     abortController.abort();
   });
 
-  const guiAgent = new GUIAgent({
-    model: {
-      baseURL: config.baseURL,
-      apiKey: config.apiKey,
-      model: config.model,
-      useResponsesApi: config.useResponsesApi,
-    },
+  if (navigationInstruction && followUpInstruction) {
+    await runAgentInstruction({
+      config,
+      operator: targetOperator,
+      signal: abortController.signal,
+      instruction: navigationInstruction,
+      systemPromptSuffix,
+    });
+    await runAgentInstruction({
+      config,
+      operator: targetOperator,
+      signal: abortController.signal,
+      instruction: followUpInstruction,
+      systemPromptSuffix: followUpPromptSuffix,
+      historyMessages: buildOnPageHistoryMessages(targetPageName || 'target page'),
+    });
+    return;
+  }
+
+  await runAgentInstruction({
+    config,
     operator: targetOperator,
     signal: abortController.signal,
-    // onData: ({ data }) => {
-    // console.log(
-    //   '[======data======]',
-    //   inspect(data, {
-    //     showHidden: false,
-    //     depth: null,
-    //     colors: true,
-    //     maxStringLength: 100,
-    //   }),
-    // );
-    // },
-    onError: ({ data, error }) => {
-      console.error(error, data);
-    },
+    instruction: answers.instruction,
+    systemPromptSuffix,
   });
-
-  await guiAgent.run(answers.instruction);
 };

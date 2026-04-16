@@ -18,7 +18,7 @@ describe('RecordingOperator', () => {
   const createExecuteParams = (
     actionType = 'click',
     coords = [100, 200],
-    thought = '我要点击【按钮】',
+    thought = 'I will click 【button】',
   ): ExecuteParams =>
     ({
       parsedPrediction: {
@@ -63,12 +63,12 @@ describe('RecordingOperator', () => {
       expect(actions).toHaveLength(1);
       expect(actions[0].type).toBe('click');
       expect(actions[0].inputs).toEqual({ start_coords: [100, 200] });
-      expect(actions[0].thought).toBe('我要点击【按钮】');
+      expect(actions[0].thought).toBe('I will click 【button】');
       expect(actions[0].screenshotBefore).toBe('mock-screenshot');
     });
 
     it('should record non-click actions', async () => {
-      await recordingOp.execute(createExecuteParams('scroll', [200, 300], '向上滚动'));
+      await recordingOp.execute(createExecuteParams('scroll', [200, 300], 'scroll upward'));
 
       const actions = recordingOp.getActions();
       expect(actions[0].type).toBe('scroll');

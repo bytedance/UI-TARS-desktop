@@ -459,4 +459,28 @@ describe('GUIAgent', () => {
 
     expect(onError).not.toHaveBeenCalled();
   });
+
+  it('appends system prompt suffix to the default system prompt', async () => {
+    mockOpenAIResponse(['Thought: finished.\nAction: finished()']);
+    const operator = new MockOperator();
+    const dataEvents: GUIAgentData[] = [];
+
+    const agent = new GUIAgent({
+      model: {
+        baseURL: 'http://localhost:3000/v1',
+        apiKey: 'test',
+        model: 'ui-tars',
+      },
+      operator,
+      systemPromptSuffix: '## App Map Context\n- Known page: Home',
+      onData: vi.fn().mockImplementation(({ data }) => {
+        dataEvents.push(data);
+      }),
+    });
+
+    await agent.run('open home');
+
+    expect(dataEvents[0]?.systemPrompt).toContain('## App Map Context');
+    expect(dataEvents[0]?.systemPrompt).toContain('- Known page: Home');
+  });
 });

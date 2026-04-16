@@ -60,7 +60,11 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
         : new UITarsModel(config.model);
     this.logger = config.logger || console;
     this.uiTarsVersion = config.uiTarsVersion;
-    this.systemPrompt = config.systemPrompt || this.buildSystemPrompt();
+    const baseSystemPrompt = config.systemPrompt || this.buildSystemPrompt();
+    const suffix = config.systemPromptSuffix?.trim();
+    this.systemPrompt = suffix
+      ? `${baseSystemPrompt.trimEnd()}\n\n${suffix}`
+      : baseSystemPrompt;
   }
 
   async run(

@@ -8,76 +8,76 @@ import {
   getLayoutType,
   isSecondaryPage,
 } from '../page-signatures';
+import type { PageSignature } from '../types';
+
+const GENERIC_SIGNATURES: PageSignature[] = [
+  {
+    name: 'RootFeed',
+    features: ['banner', 'card', 'carousel'],
+    notFeatures: ['filter rail'],
+    layout: 'scrollable-feed',
+  },
+  {
+    name: 'SearchResults',
+    features: ['search', 'result'],
+    layout: 'list',
+    parentTypes: ['RootFeed'],
+  },
+  {
+    name: 'DetailPage',
+    features: ['hero image', 'summary', 'play'],
+    layout: 'form',
+    parentTypes: ['RootFeed'],
+  },
+];
 
 describe('matchPageSignature', () => {
-  it('should match home page features', () => {
-    expect(matchPageSignature('推荐卡片和banner轮播')).toBe('首页');
-    expect(matchPageSignature('banner推荐内容')).toBe('首页');
+  it('returns Unknown when no signatures are configured', () => {
+    expect(matchPageSignature('banner carousel with cards')).toBe('Unknown');
+    expect(matchPageSignature('search input with result list', 'RootFeed')).toBe('Unknown');
   });
 
-  it('should match theater page features', () => {
-    expect(matchPageSignature('左侧分类筛选列表')).toBe('剧场');
-    expect(matchPageSignature('剧目卡片和分类筛选')).toBe('剧场');
+  it('matches caller-provided generic signatures', () => {
+    expect(
+      matchPageSignature('banner carousel with cards', undefined, GENERIC_SIGNATURES),
+    ).toBe('RootFeed');
+    expect(
+      matchPageSignature('search input with result list', 'RootFeed', GENERIC_SIGNATURES),
+    ).toBe('SearchResults');
   });
 
-  it('should match messages page features', () => {
-    expect(matchPageSignature('消息列表聊天记录')).toBe('消息');
-  });
-
-  it('should match profile page features', () => {
-    expect(matchPageSignature('用户头像和钻石余额')).toBe('我的');
-    expect(matchPageSignature('个人中心设置')).toBe('我的');
-  });
-
-  it('should match secondary pages based on parent context', () => {
-    expect(matchPageSignature('剧目封面播放按钮', '剧场')).toBe('剧目详情');
-    expect(matchPageSignature('搜索框搜索结果', '首页')).toBe('搜索页');
-    expect(matchPageSignature('播放器全屏', '剧目详情')).toBe('播放页');
-  });
-
-  it('should return Unknown for unrecognized pages', () => {
-    expect(matchPageSignature('随机未知页面')).toBe('Unknown');
-  });
-
-  it('should use notFeatures to reduce false positives', () => {
-    // "推荐" would match 首页, but "左侧筛选" is a notFeature for 首页
-    // So this should match 剧场 instead
-    const result = matchPageSignature('左侧筛选和剧目列表');
-    expect(result).toBe('剧场');
+  it('uses negative features to reduce false positives', () => {
+    const result = matchPageSignature(
+      'banner carousel with filter rail',
+      undefined,
+      GENERIC_SIGNATURES,
+    );
+    expect(result).toBe('Unknown');
   });
 });
 
 describe('getLayoutType', () => {
-  it('should return correct layout for known pages', () => {
-    expect(getLayoutType('首页')).toBe('scrollable-feed');
-    expect(getLayoutType('剧场')).toBe('split-view');
-    expect(getLayoutType('消息')).toBe('list');
-    expect(getLayoutType('我的')).toBe('form');
+  it('returns unknown without configured signatures', () => {
+    expect(getLayoutType('RootFeed')).toBe('unknown');
+    expect(getLayoutType('Unknown')).toBe('unknown');
   });
 
-  it('should return unknown for pages without layout definition', () => {
-    expect(getLayoutType('AI伴侣')).toBe('unknown');
-    expect(getLayoutType('Unknown')).toBe('unknown');
+  it('returns the configured layout for known generic pages', () => {
+    expect(getLayoutType('RootFeed', GENERIC_SIGNATURES)).toBe('scrollable-feed');
+    expect(getLayoutType('SearchResults', GENERIC_SIGNATURES)).toBe('list');
+    expect(getLayoutType('DetailPage', GENERIC_SIGNATURES)).toBe('form');
   });
 });
 
 describe('isSecondaryPage', () => {
-  it('should return true for secondary pages', () => {
-    expect(isSecondaryPage('剧目详情')).toBe(true);
-    expect(isSecondaryPage('搜索页')).toBe(true);
-    expect(isSecondaryPage('播放页')).toBe(true);
-    expect(isSecondaryPage('设置页')).toBe(true);
-  });
-
-  it('should return false for primary pages', () => {
-    expect(isSecondaryPage('首页')).toBe(false);
-    expect(isSecondaryPage('剧场')).toBe(false);
-    expect(isSecondaryPage('AI伴侣')).toBe(false);
-    expect(isSecondaryPage('消息')).toBe(false);
-    expect(isSecondaryPage('我的')).toBe(false);
-  });
-
-  it('should return false for unknown pages', () => {
+  it('returns false without configured signatures', () => {
+    expect(isSecondaryPage('DetailPage')).toBe(false);
     expect(isSecondaryPage('Unknown')).toBe(false);
+  });
+
+  it('returns true only for pages with parentTypes', () => {
+    expect(isSecondaryPage('RootFeed', GENERIC_SIGNATURES)).toBe(false);
+    expect(isSecondaryPage('SearchResults', GENERIC_SIGNATURES)).toBe(true);
+    expect(isSecondaryPage('DetailPage', GENERIC_SIGNATURES)).toBe(true);
   });
 });

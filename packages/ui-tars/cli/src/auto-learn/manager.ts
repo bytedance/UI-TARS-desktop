@@ -8,7 +8,45 @@ import { AppMap, JumpTarget } from './types';
 import { launchApp, adbClick, adbWake, adbHome, adbBack, adbScreenSize, sleep } from './app-launcher';
 import { learnTabs } from './tab-learner';
 import { learnPageElements } from './page-learner';
-import { saveScreenshot } from './utils';
+import {
+  deriveAppName,
+  generateLandingPageName,
+  generatePageName,
+  generateSecondaryPageName,
+  saveScreenshot,
+} from './utils';
+
+function renameJumpTargets(
+  map: AppMap,
+  pageName: string,
+  jumpTargets: JumpTarget[],
+): string[] {
+  const existingNames = [
+    ...Object.keys(map.pages),
+    ...Object.keys(map.secondaryPages || {}),
+  ];
+
+  const targetNames = jumpTargets.map((_, idx) =>
+    generateSecondaryPageName(pageName, idx + 1, existingNames),
+  );
+
+  const pageMap = map.pages[pageName];
+  if (!pageMap) {
+    return targetNames;
+  }
+
+  for (const region of pageMap.regions) {
+    for (const element of region.elements) {
+      const match = element.target?.match(/^SecondaryPage_(\d+)$/);
+      const targetIndex = match ? Number.parseInt(match[1], 10) - 1 : -1;
+      if (targetIndex >= 0 && targetIndex < targetNames.length) {
+        element.target = targetNames[targetIndex];
+      }
+    }
+  }
+
+  return targetNames;
+}
 
 export interface AutoLearnConfig {
   /** Android app package name */
@@ -28,7 +66,7 @@ export interface AutoLearnConfig {
   screenWidth?: number;
   /** Screen physical height (default 2400) */
   screenHeight?: number;
-  /** Maximum number of tabs to learn (default 3) */
+  /** Maximum number of navigation items to learn; omit to explore all discovered items */
   maxTabs?: number;
 }
 
@@ -42,7 +80,7 @@ export async function autoLearnAndRun(config: AutoLearnConfig): Promise<AppMap |
   const { pkg, deviceId, modelConfig, forceRelearn } = config;
   const screenWidth = config.screenWidth || 1080;
   const screenHeight = config.screenHeight || 2400;
-  const maxTabs = config.maxTabs ?? 3;
+  const maxTabs = config.maxTabs;
 
   // Check cache first
   if (!forceRelearn) {
@@ -115,7 +153,7 @@ export async function autoLearnAndRun(config: AutoLearnConfig): Promise<AppMap |
   // Initialize empty map structure
   const map: AppMap = {
     meta: {
-      appName: 'Unknown',
+      appName: deriveAppName(pkg),
       package: pkg,
       screenWidth: actualWidth,
       screenHeight: actualHeight,
@@ -132,29 +170,61 @@ export async function autoLearnAndRun(config: AutoLearnConfig): Promise<AppMap |
   // Phase 1: Learn tabs
   try {
     const tabs = await learnTabs(op, modelConfig);
-    if (tabs.length === 0) {
-      console.log('[Phase 1 Error] No tabs discovered, aborting learning');
-      return null;
-    }
     map.navigation.tabs = tabs;
     saveMap(pkg, map);
-    console.log(`[Phase 1 Complete] ${tabs.length} tabs discovered`);
+    if (tabs.length === 0) {
+      console.log('[Phase 1 Complete] No persistent navigation items discovered, using the current screen as the landing page');
+    } else {
+      console.log(`[Phase 1 Complete] ${tabs.length} navigation items discovered`);
+    }
   } catch (err) {
     console.error('[Phase 1 Error] Failed to learn tabs:', err);
     return null;
   }
 
-  // Restart app to ensure we're in the target app
-  console.log('\nRestarting app to ensure we are in target app...');
-  try {
-    launchApp(deviceId, pkg);
-  } catch (err) {
-    console.error('[Error] Failed to restart app:', err);
-    return null;
-  }
-  await sleep(3000);
-
   // Phase 2: Learn elements on each tab
+  if (map.navigation.tabs.length === 0) {
+    const landingPageName = generateLandingPageName(Object.keys(map.pages));
+    try {
+      const landingResult = await learnPageElements(
+        op,
+        modelConfig,
+        landingPageName,
+        1,
+        map,
+        pkg,
+        10,
+        actualWidth,
+        actualHeight,
+        (partialMap) => saveMap(pkg, partialMap),
+      );
+      map.pages[landingPageName] = landingResult.pageMap;
+      if (landingResult.jumpTargets.length > 0) {
+        map.navigationGraph[landingPageName] = renameJumpTargets(
+          map,
+          landingPageName,
+          landingResult.jumpTargets,
+        );
+      }
+      saveMap(pkg, map);
+    } catch (err) {
+      console.error('[Error learning landing page]', err);
+      return null;
+    }
+  }
+
+  if (map.navigation.tabs.length > 0) {
+    // Restart app to ensure we are in the target app
+    console.log('\nRestarting app to ensure we are in target app...');
+    try {
+      launchApp(deviceId, pkg);
+    } catch (err) {
+      console.error('[Error] Failed to restart app:', err);
+      return null;
+    }
+    await sleep(3000);
+  }
+
   for (let t = 0; t < map.navigation.tabs.length; t++) {
     const tab = map.navigation.tabs[t];
     if (tab.coords.length < 2) continue;
@@ -172,8 +242,11 @@ export async function autoLearnAndRun(config: AutoLearnConfig): Promise<AppMap |
         saveScreenshot(pageSS.base64, `tab_${tab.index}_page`, SS_DIR);
       }
 
-      const pageName = `Page_${tab.index}`;
-      tab.name = pageName;
+      const pageName = generatePageName(
+        tab.name,
+        tab.index,
+        Object.keys(map.pages),
+      );
 
       const pageResult = await learnPageElements(
         op,
@@ -192,9 +265,8 @@ export async function autoLearnAndRun(config: AutoLearnConfig): Promise<AppMap |
 
       // Handle jump targets (secondary pages)
       if (pageResult.jumpTargets.length > 0) {
-        map.navigationGraph[pageName] = pageResult.jumpTargets.map(
-          (j: JumpTarget) => `SecondaryPage_from_${pageName}`,
-        );
+        const targetNames = renameJumpTargets(map, pageName, pageResult.jumpTargets);
+        map.navigationGraph[pageName] = targetNames;
 
         // Explore the first secondary page
         const firstJump = pageResult.jumpTargets[0];
@@ -205,7 +277,7 @@ export async function autoLearnAndRun(config: AutoLearnConfig): Promise<AppMap |
 
           const enterSS = await op.screenshot();
           if (enterSS?.base64) {
-            saveScreenshot(enterSS.base64, `SecondaryPage_from_${pageName}_enter`, SS_DIR);
+            saveScreenshot(enterSS.base64, `${targetNames[0]}_enter`, SS_DIR);
           }
 
           // Go back
@@ -221,7 +293,7 @@ export async function autoLearnAndRun(config: AutoLearnConfig): Promise<AppMap |
       await sleep(300);
 
       // Limit to configured maxTabs
-      if (t >= maxTabs - 1) {
+      if (maxTabs !== undefined && t >= maxTabs - 1) {
         if (maxTabs < map.navigation.tabs.length) {
           console.log(`[Limit] Only processing first ${maxTabs} tabs for faster learning`);
         }

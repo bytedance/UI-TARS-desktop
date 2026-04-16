@@ -18,6 +18,10 @@ export const run = () => {
     .option('-q, --query <query>', "Use's query")
     .option('-l, --auto-learn', 'Automatically learn the app map before running (requires --target adb and --package)')
     .option('-r, --force-relearn', 'Force regenerating the app map even if cached')
+    .option(
+      '--app-map-mode <mode>',
+      'App map usage mode: off, navigation, or two-phase (default: two-phase)',
+    )
     .option('--package <pkg>', 'Android app package name (required with --auto-learn)')
     .action(async (options: CliOptions) => {
       try {

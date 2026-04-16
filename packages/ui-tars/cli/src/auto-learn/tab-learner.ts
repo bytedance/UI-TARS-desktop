@@ -10,7 +10,7 @@ import { extractCoords, generateTabName, DEDUP_THRESHOLD } from './utils';
 import { withTimeout } from './app-launcher';
 
 /**
- * Phase 1: Learn navigation tabs by instructing the agent to click all bottom nav tabs.
+ * Phase 1: Learn primary navigation items by instructing the agent to click unique nav targets.
  */
 export async function learnTabs(
   op: Operator,
@@ -31,11 +31,12 @@ export async function learnTabs(
 
   await withTimeout(
     agent.run(
-      '依次点击底部导航栏所有tab，从左到右。\n\n' +
-        '**重要：在Thought中用【tab名称】标注你点击的tab！**\n' +
-        '例如：Thought: 我要点击【首页】tab。Action: click(...)\n' +
-        '例如：Thought: 我要点击【剧场】tab。Action: click(...)\n\n' +
-        '点击完所有tab后回到第一个，然后执行finished()',
+      'Explore the app\'s primary navigation items.\n\n' +
+        'Look for persistent navigation controls, typically along the bottom, top, or side edges.\n' +
+        '**Important: in Thought, label each clicked navigation target using 【label】 or "label".**\n' +
+        'Example: Thought: I will click 【Discover】 navigation item. Action: click(...)\n' +
+        'Example: Thought: I will click "Profile" navigation item. Action: click(...)\n\n' +
+        'Click each unique primary navigation target once. After exploring them, return to the first one and call finished().',
       [],
       {},
     ),

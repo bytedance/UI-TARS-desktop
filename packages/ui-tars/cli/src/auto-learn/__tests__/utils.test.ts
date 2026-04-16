@@ -11,9 +11,14 @@ import {
   extractElementName,
   generateElementId,
   generateTabName,
+  deriveAppName,
+  generatePageName,
+  generateLandingPageName,
+  generateSecondaryPageName,
   isSameElement,
   deduplicateTabs,
   deduplicateElements,
+  describeVerticalPosition,
   mapFile,
   saveScreenshot,
   DEDUP_THRESHOLD,
@@ -51,37 +56,42 @@ describe('parseBbox', () => {
 
 describe('guessElementType', () => {
   it('should recognize button type', () => {
-    expect(guessElementType('我要点击【按钮】')).toBe('button');
+    expect(guessElementType('I will click the button')).toBe('button');
     expect(guessElementType('click the button')).toBe('button');
   });
 
   it('should recognize card type', () => {
-    expect(guessElementType('点击【推荐卡片】')).toBe('card');
+    expect(guessElementType('click the featured card')).toBe('card');
     expect(guessElementType('click card')).toBe('card');
   });
 
   it('should recognize list-item type', () => {
-    expect(guessElementType('点击列表项')).toBe('list-item');
+    expect(guessElementType('click list item')).toBe('list-item');
     expect(guessElementType('click list item')).toBe('list-item');
   });
 
   it('should recognize input type', () => {
-    expect(guessElementType('输入框')).toBe('input');
+    expect(guessElementType('search input')).toBe('input');
     expect(guessElementType('type input')).toBe('input');
   });
 
   it('should recognize icon type', () => {
-    expect(guessElementType('点击图标')).toBe('icon');
+    expect(guessElementType('click icon')).toBe('icon');
     expect(guessElementType('click icon')).toBe('icon');
   });
 
   it('should recognize tab/button for navigation', () => {
-    expect(guessElementType('点击tab导航')).toBe('button');
-    expect(guessElementType('点击导航栏')).toBe('button');
+    expect(guessElementType('click tab navigation')).toBe('button');
+    expect(guessElementType('select profile tab')).toBe('button');
   });
 
   it('should return unknown for unrecognized types', () => {
     expect(guessElementType('some random text')).toBe('unknown');
+  });
+
+  it('should retain multilingual element type support', () => {
+    expect(guessElementType('点击按钮')).toBe('button');
+    expect(guessElementType('输入框')).toBe('input');
   });
 });
 
@@ -91,29 +101,34 @@ describe('guessActionType', () => {
   });
 
   it('should recognize filter action', () => {
-    expect(guessActionType('筛选内容', false)).toBe('filter');
+    expect(guessActionType('filter content', false)).toBe('filter');
     expect(guessActionType('apply filter', false)).toBe('filter');
   });
 
   it('should recognize toggle action', () => {
-    expect(guessActionType('切换状态', false)).toBe('toggle');
+    expect(guessActionType('toggle state', false)).toBe('toggle');
     expect(guessActionType('toggle option', false)).toBe('toggle');
   });
 
   it('should recognize input action', () => {
-    expect(guessActionType('输入文字', false)).toBe('input');
+    expect(guessActionType('type text', false)).toBe('input');
     expect(guessActionType('type text', false)).toBe('input');
   });
 
   it('should return click for unknown actions', () => {
     expect(guessActionType('click here', false)).toBe('click');
   });
+
+  it('should retain multilingual action support', () => {
+    expect(guessActionType('筛选内容', false)).toBe('filter');
+    expect(guessActionType('切换状态', false)).toBe('toggle');
+  });
 });
 
 describe('extractElementName', () => {
   it('should extract name from 【name】 pattern', () => {
-    expect(extractElementName('我要点击【首页】')).toBe('首页');
-    expect(extractElementName('Thought: 我要点击【推荐卡片】')).toBe('推荐卡片');
+    expect(extractElementName('I will click 【Discover】')).toBe('Discover');
+    expect(extractElementName('Thought: click 【featured card】')).toBe('featured card');
   });
 
   it('should extract name from "name" pattern', () => {
@@ -125,42 +140,44 @@ describe('extractElementName', () => {
   });
 
   it('should extract name from keyword-based pattern', () => {
-    expect(extractElementName('点击推荐卡片查看详情')).toBe('点击推荐卡片');
-    // Keyword-based extraction returns prefix + keyword
-    expect(extractElementName('点击按钮确认')).toBe('点击按钮');
+    expect(extractElementName('click featured card to view details')).toBe('element');
+    expect(extractElementName('tap the primary button to confirm')).toBe('element');
   });
 
   it('should return "element" when no pattern matches', () => {
     expect(extractElementName('some random action')).toBe('element');
   });
 
+  it('should support localized labels inside 【name】 patterns', () => {
+    expect(extractElementName('我会点击【发现】')).toBe('发现');
+  });
+
   it('should accept names from 【name】 pattern within length limit (<=20)', () => {
-    // The 【name】 pattern checks for min length > 1 AND max length <= 20
-    const longName = '这是一个非常非常长的名称超过限制';
+    const longName = 'long-valid-label';
     expect(extractElementName(`【${longName}】`)).toBe(longName);
   });
 });
 
 describe('generateElementId', () => {
   it('should generate element ID with page name and element name', () => {
-    const id = generateElementId('Page_0', '推荐卡片', 1, 'card', 0);
+    const id = generateElementId('Page_0', 'featured_card', 1, 'card', 0);
     expect(id).toContain('Page_0');
-    expect(id).toContain('推荐卡片');
+    expect(id).toContain('featured_card');
     expect(id).toContain('_card');
   });
 
   it('should handle unknown element type', () => {
-    const id = generateElementId('Page_0', '元素', 1, 'unknown', 0);
+    const id = generateElementId('Page_0', 'item', 1, 'unknown', 0);
     expect(id).not.toContain('_unknown');
   });
 
   it('should add count suffix for duplicate names', () => {
-    const id = generateElementId('Page_0', '按钮', 1, 'button', 2);
+    const id = generateElementId('Page_0', 'button', 1, 'button', 2);
     expect(id).toContain('_3');
   });
 
   it('should sanitize special characters in element name', () => {
-    const id = generateElementId('Page_0', '特殊@字符#', 1, 'unknown', 0);
+    const id = generateElementId('Page_0', 'special@chars#', 1, 'unknown', 0);
     expect(id).not.toContain('@');
     expect(id).not.toContain('#');
   });
@@ -168,17 +185,77 @@ describe('generateElementId', () => {
 
 describe('generateTabName', () => {
   it('should extract tab name from 【name】 pattern', () => {
-    expect(generateTabName('我要点击【首页】', 1)).toBe('首页');
-    expect(generateTabName('点击【剧场】tab', 2)).toBe('剧场');
+    expect(generateTabName('点击【Discover】tab', 1)).toBe('Discover');
+    expect(generateTabName('select 【Profile】 tab', 2)).toBe('Profile');
   });
 
-  it('should recognize common tab patterns', () => {
-    expect(generateTabName('navigate to 首页', 1)).toBe('首页');
-    expect(generateTabName('click 我的 tab', 2)).toBe('我的');
+  it('should derive generic tab names from tab wording', () => {
+    expect(generateTabName('navigate to profile tab', 1)).toBe('profile');
+    expect(generateTabName('click settings tab', 2)).toBe('settings');
   });
 
   it('should fallback to Tab_N when no pattern matches', () => {
-    expect(generateTabName('random text', 3)).toBe('Tab_3');
+    expect(generateTabName('switch to the next navigation target', 3)).toBe('Tab_3');
+  });
+});
+
+describe('deriveAppName', () => {
+  it('should derive a readable app name from the package id', () => {
+    expect(deriveAppName('com.example.reader')).toBe('reader');
+    expect(deriveAppName('org.sample.my_app')).toBe('my_app');
+  });
+
+  it('should fall back to Unknown for empty package ids', () => {
+    expect(deriveAppName('')).toBe('Unknown');
+  });
+});
+
+describe('generatePageName', () => {
+  it('should preserve learned tab labels for root page names', () => {
+    expect(generatePageName('Discover', 1)).toBe('Discover');
+    expect(generatePageName('Profile', 2)).toBe('Profile');
+  });
+
+  it('should fall back to Page_N for generated tab labels', () => {
+    expect(generatePageName('Tab_3', 3)).toBe('Page_3');
+    expect(generatePageName('', 4)).toBe('Page_4');
+  });
+
+  it('should make duplicate page names unique', () => {
+    expect(generatePageName('Discover', 2, ['Discover'])).toBe('Discover_2');
+  });
+
+  it('should sanitize unsafe characters in learned page names', () => {
+    expect(generatePageName('Profile / Settings', 2)).toBe('Profile_Settings');
+    expect(generatePageName('  Search:Results  ', 3)).toBe('Search_Results');
+  });
+});
+
+describe('generateSecondaryPageName', () => {
+  it('should generate source-aware child page names', () => {
+    expect(generateSecondaryPageName('Discover', 1)).toBe('Discover__child_1');
+  });
+
+  it('should avoid collisions with existing names', () => {
+    expect(
+      generateSecondaryPageName('Discover', 1, ['Discover__child_1']),
+    ).toBe('Discover__child_1_2');
+  });
+
+  it('should sanitize unsafe source page names', () => {
+    expect(generateSecondaryPageName('Profile / Settings', 1)).toBe(
+      'Profile_Settings__child_1',
+    );
+  });
+});
+
+describe('generateLandingPageName', () => {
+  it('should use a stable landing page name', () => {
+    expect(generateLandingPageName()).toBe('LandingPage');
+  });
+
+  it('should avoid collisions with existing page names', () => {
+    expect(generateLandingPageName(['LandingPage'])).toBe('LandingPage_2');
   });
 });
 
@@ -266,5 +343,18 @@ describe('DEDUP_THRESHOLD', () => {
     ];
     expect(deduplicateElements(elements)).toHaveLength(1);
     expect(deduplicateElements(elements, 50)).toHaveLength(2);
+  });
+});
+
+describe('describeVerticalPosition', () => {
+  it('should describe positions using screen height ratios', () => {
+    expect(describeVerticalPosition(100, 900)).toBe('top area');
+    expect(describeVerticalPosition(450, 900)).toBe('middle area');
+    expect(describeVerticalPosition(800, 900)).toBe('bottom area');
+  });
+
+  it('should handle invalid inputs defensively', () => {
+    expect(describeVerticalPosition(-1, 900)).toBe('unknown area');
+    expect(describeVerticalPosition(100, 0)).toBe('unknown area');
   });
 });

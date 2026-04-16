@@ -4,6 +4,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import type { Element } from './types';
 
 /** Deduplication thresholds */
 export const DEDUP_THRESHOLD = {
@@ -54,7 +55,10 @@ export function guessElementType(
 /**
  * Guess action type from thought and whether page changed
  */
-export function guessActionType(thought: string, pageChanged: boolean): string {
+export function guessActionType(
+  thought: string,
+  pageChanged: boolean,
+): Element['action'] {
   const lower = thought.toLowerCase();
   if (pageChanged) return 'navigate';
   if (lower.includes('筛选') || lower.includes('过滤') || lower.includes('filter')) return 'filter';
@@ -152,12 +156,89 @@ export function generateTabName(thought: string, idx: number): string {
     if (name.length > 1 && name.length <= 10) return name;
   }
 
-  const tabPatterns = ['首页', '剧场', 'AI伴侣', '消息', '我的', '设置', '个人'];
-  for (const pattern of tabPatterns) {
-    if (thought.includes(pattern)) return pattern;
+  const quoteMatch = thought.match(/"([^"]+)"/);
+  if (quoteMatch && quoteMatch[1]) {
+    const name = quoteMatch[1].trim();
+    if (name.length > 1 && name.length <= 20) return name;
+  }
+
+  const genericPatterns = [
+    /(?:click|open|select|tap|navigate to)\s+(.+?)\s+tab\b/i,
+    /tab\s+(.+?)\b/i,
+  ];
+  for (const pattern of genericPatterns) {
+    const match = thought.match(pattern);
+    const candidate = match?.[1]?.trim();
+    if (candidate && candidate.length > 0 && candidate.length <= 20) {
+      return candidate.replace(/[.,!?;:]+$/g, '').trim();
+    }
   }
 
   return `Tab_${idx}`;
+}
+
+function normalizeLearnedName(name: string): string {
+  return name
+    .trim()
+    .replace(/[^\p{L}\p{N}_-]+/gu, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
+function makeUniqueName(baseName: string, existingNames: string[] = []): string {
+  if (!existingNames.includes(baseName)) {
+    return baseName;
+  }
+
+  let suffix = 2;
+  let candidate = `${baseName}_${suffix}`;
+  while (existingNames.includes(candidate)) {
+    suffix++;
+    candidate = `${baseName}_${suffix}`;
+  }
+  return candidate;
+}
+
+/**
+ * Derive a readable app name from an app package identifier.
+ */
+export function deriveAppName(pkg: string): string {
+  const parts = pkg.split(/[./:]/).filter(Boolean);
+  return parts.at(-1) || 'Unknown';
+}
+
+/**
+ * Generate a stable page name from a learned tab label.
+ */
+export function generatePageName(
+  tabName: string,
+  idx: number,
+  existingNames: string[] = [],
+): string {
+  const normalized = normalizeLearnedName(tabName);
+  const baseName = normalized && !/^tab_\d+$/i.test(normalized)
+    ? normalized
+    : `Page_${idx}`;
+  return makeUniqueName(baseName, existingNames);
+}
+
+/**
+ * Generate a stable child page name derived from its source page.
+ */
+export function generateSecondaryPageName(
+  sourcePageName: string,
+  jumpIdx: number,
+  existingNames: string[] = [],
+): string {
+  const baseName = `${normalizeLearnedName(sourcePageName) || 'Page'}__child_${jumpIdx}`;
+  return makeUniqueName(baseName, existingNames);
+}
+
+/**
+ * Generate a stable landing page name when no navigation tabs are discovered.
+ */
+export function generateLandingPageName(existingNames: string[] = []): string {
+  return makeUniqueName('LandingPage', existingNames);
 }
 
 /**
@@ -177,11 +258,11 @@ export function isSameElement(
 /**
  * Deduplicate tabs by coordinate proximity
  */
-export function deduplicateTabs(
-  tabs: Array<{ coords: number[]; name: string }>,
+export function deduplicateTabs<T extends { coords: number[]; name: string }>(
+  tabs: T[],
   threshold = 80,
-): typeof tabs {
-  const unique: typeof tabs = [];
+): T[] {
+  const unique: T[] = [];
   for (const tab of tabs) {
     const isDuplicate = unique.some(
       (u) => isSameElement(tab.coords, u.coords, threshold),
@@ -196,11 +277,11 @@ export function deduplicateTabs(
 /**
  * Deduplicate elements by coordinate proximity
  */
-export function deduplicateElements(
-  elements: Array<{ coords: number[] }>,
+export function deduplicateElements<T extends { coords: number[] }>(
+  elements: T[],
   threshold = DEDUP_THRESHOLD.ELEMENT,
-): typeof elements {
-  const unique: typeof elements = [];
+): T[] {
+  const unique: T[] = [];
   const seenCoords: number[][] = [];
   for (const elem of elements) {
     const isDuplicate = seenCoords.some(
@@ -212,6 +293,25 @@ export function deduplicateElements(
     }
   }
   return unique;
+}
+
+/**
+ * Describe a vertical screen position using screen-relative buckets.
+ */
+export function describeVerticalPosition(yPos: number, screenHeight: number): string {
+  if (yPos < 0 || screenHeight <= 0) {
+    return 'unknown area';
+  }
+
+  if (yPos < screenHeight / 3) {
+    return 'top area';
+  }
+
+  if (yPos < (screenHeight * 2) / 3) {
+    return 'middle area';
+  }
+
+  return 'bottom area';
 }
 
 /**
