@@ -3,138 +3,180 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { describe, expect, it } from 'vitest';
-import type { AppMap } from '../types';
+import type { RuntimeMapView } from '../types';
+import { DEFAULT_RUNTIME_LOCALE } from '../runtime-locale';
 import {
-  buildAppMapContextPrompt,
-  buildOnPageHistoryMessages,
   buildNavigationGoalPrompt,
+  buildOnPageHistoryMessages,
   buildOnPageActionPrompt,
-  extractNavigationSubtask,
-  extractTargetPageName,
-  shouldUseAppMapContext,
+  extractNavigationSubtaskFromRuntimeMapView,
+  extractTargetPageLabelFromRuntimeMapView,
+  parseRuntimeIntent,
+  shouldUseRuntimeMapView,
 } from '../map-context';
 
-const MAP: AppMap = {
-  meta: {
-    appName: 'demo-app',
-    package: 'com.example.demo',
-    screenWidth: 1080,
-    screenHeight: 2400,
-    learnTime: 1234,
-    learnDate: '2026-04-16T00:00:00.000Z',
-    device: 'device-1',
+const RUNTIME_VIEW: RuntimeMapView = {
+  mode: 'focused',
+  budget: {
+    mode: 'focused',
+    maxPageCandidates: 3,
+    maxElementsPerPage: 12,
+    maxTotalElements: 24,
+    maxLocatorsPerElement: 3,
+    maxSignatureTextsPerPage: 3,
+    includeNavigationElements: true,
+    includePrimaryActionElements: true,
+    includeInputElements: true,
+    includeAnchorElements: true,
+    includeContentTemplates: false,
+    includeNeighborRelations: false,
+    includePageTransitions: true,
+    minPageConfidence: 0.5,
+    minElementConfidence: 0.55,
+    minLocatorConfidence: 0.6,
   },
-  navigation: {
-    tabs: [
-      { index: 1, name: 'Home', coords: [100, 2200], bbox: [], status: 'reliable' },
-      { index: 2, name: 'Messages', coords: [700, 2200], bbox: [], status: 'reliable' },
-    ],
-    topButtons: [],
-  },
-  pages: {
-    Home: {
-      name: 'Home',
-      depth: 1,
-      layout: 'unknown',
-      regions: [],
+  currentPageCandidates: [{ id: 'page_1', label: 'Home', aliases: ['Start'], confidence: 0.9, score: 1 }],
+  targetPageCandidates: [{ id: 'page_2', label: 'Messages', aliases: ['Inbox'], confidence: 0.88, score: 0.9 }],
+  pages: {},
+  elements: {
+    element_1: {
+      id: 'element_1',
+      pageId: 'page_2',
+      role: 'action',
+      action: 'click',
+      label: 'Chat',
+      aliases: ['Conversation'],
+      confidence: 0.86,
+      score: 0.82,
+      locators: [],
     },
-    Messages: {
-      name: 'Messages',
-      depth: 1,
-      layout: 'unknown',
-      regions: [],
+    element_2: {
+      id: 'element_2',
+      pageId: 'page_2',
+      role: 'input',
+      action: 'input',
+      label: 'Message',
+      aliases: ['Reply'],
+      confidence: 0.81,
+      score: 0.8,
+      locators: [],
     },
   },
-  secondaryPages: {},
-  navigationGraph: {
-    Home: ['Messages'],
-  },
+  transitions: [],
+  truncated: false,
+  expansionHints: [],
 };
 
-describe('buildAppMapContextPrompt', () => {
-  it('includes known tabs, pages, and routes', () => {
-    const prompt = buildAppMapContextPrompt(MAP);
-    expect(prompt).toContain('## App Map Context');
-    expect(prompt).toContain('Tab 1: Home');
-    expect(prompt).toContain('Home -> Messages');
-  });
-});
-
-describe('shouldUseAppMapContext', () => {
-  it('returns true for single-step navigation tasks to known targets', () => {
-    expect(shouldUseAppMapContext('switch to the Messages tab', MAP)).toBe(true);
-    expect(shouldUseAppMapContext('go to Home', MAP)).toBe(true);
+describe('runtime map navigation helpers', () => {
+  it('uses runtime candidates for navigation tasks', () => {
+    expect(shouldUseRuntimeMapView('switch to the Messages tab', RUNTIME_VIEW)).toBe(true);
+    expect(shouldUseRuntimeMapView('go to Home', RUNTIME_VIEW)).toBe(true);
+    expect(shouldUseRuntimeMapView('open the first conversation', RUNTIME_VIEW)).toBe(false);
   });
 
-  it('returns false for composite tasks', () => {
-    expect(shouldUseAppMapContext('switch to Messages, then open the first conversation', MAP)).toBe(
-      false,
-    );
+  it('extracts a target page label from runtime candidates', () => {
+    expect(extractTargetPageLabelFromRuntimeMapView('switch to the Messages tab', RUNTIME_VIEW)).toBe('Messages');
+    expect(extractTargetPageLabelFromRuntimeMapView('go to Settings', RUNTIME_VIEW)).toBeNull();
   });
 
-  it('returns false for page-level interaction tasks', () => {
-    expect(shouldUseAppMapContext('open the first conversation in Messages', MAP)).toBe(false);
-    expect(shouldUseAppMapContext('go to Home and click the first card', MAP)).toBe(false);
-  });
-
-  it('returns false when the query does not mention a known target', () => {
-    expect(shouldUseAppMapContext('switch to Settings', MAP)).toBe(false);
-  });
-
-  it('still supports non-English navigation labels', () => {
-    const localizedMap: AppMap = {
-      ...MAP,
-      navigation: {
-        ...MAP.navigation,
-        tabs: [{ index: 1, name: '消息', coords: [700, 2200], bbox: [], status: 'reliable' }],
-      },
-      pages: {
-        消息: {
-          name: '消息',
-          depth: 1,
-          layout: 'unknown',
-          regions: [],
-        },
-      },
-      navigationGraph: {},
-    };
-    expect(shouldUseAppMapContext('切换到消息页', localizedMap)).toBe(true);
-  });
-});
-
-describe('extractNavigationSubtask', () => {
   it('extracts navigation and follow-up actions from composite tasks', () => {
     expect(
-      extractNavigationSubtask('switch to the Messages tab, then open the first conversation', MAP),
+      extractNavigationSubtaskFromRuntimeMapView(
+        'switch to the Messages tab, then open the first conversation',
+        RUNTIME_VIEW,
+        DEFAULT_RUNTIME_LOCALE,
+      ),
     ).toEqual({
       navigationQuery: 'switch to the Messages tab',
       remainingQuery: 'open the first conversation',
     });
   });
 
-  it('returns null for pure navigation tasks', () => {
-    expect(extractNavigationSubtask('switch to the Messages tab', MAP)).toBeNull();
+  it('parses structured runtime intent for composite navigation tasks', () => {
+    expect(
+      parseRuntimeIntent(
+        'switch to the Messages tab, then open the first conversation',
+        RUNTIME_VIEW,
+        DEFAULT_RUNTIME_LOCALE,
+      ),
+    ).toMatchObject({
+      kind: 'navigate_then_act',
+      rawQuery: 'switch to the Messages tab, then open the first conversation',
+      navigationQuery: 'switch to the Messages tab',
+      remainingQuery: 'open the first conversation',
+      targetPage: {
+        id: 'page_2',
+        label: 'Messages',
+        aliases: ['Inbox'],
+      },
+      targetElements: [
+        {
+          elementId: 'element_1',
+          pageId: 'page_2',
+          role: 'action',
+          action: 'click',
+          label: 'Chat',
+          aliases: ['Conversation'],
+        },
+      ],
+      completionPolicy: 'stop_on_target_open',
+    });
   });
 
-  it('returns null when the first segment is not a known navigation target', () => {
-    expect(extractNavigationSubtask('open the profile editor, then change the nickname', MAP)).toBeNull();
+  it('uses runtime element candidates before locale fallback for action tasks', () => {
+    expect(
+      parseRuntimeIntent('type a reply in Message', RUNTIME_VIEW, DEFAULT_RUNTIME_LOCALE),
+    ).toMatchObject({
+      kind: 'act',
+      targetPage: { id: 'page_2', label: 'Messages' },
+      targetElements: [
+        {
+          elementId: 'element_2',
+          pageId: 'page_2',
+          role: 'input',
+        },
+      ],
+      completionPolicy: 'stop_after_content_action',
+    });
   });
-});
 
-describe('extractTargetPageName', () => {
-  it('extracts a known page name from a navigation query', () => {
-    expect(extractTargetPageName('switch to the Messages tab', MAP)).toBe('Messages');
-    expect(extractTargetPageName('go to Home', MAP)).toBe('Home');
+  it('treats a direct page label mention as navigation without locale intent words', () => {
+    expect(parseRuntimeIntent('Messages', RUNTIME_VIEW, DEFAULT_RUNTIME_LOCALE)).toMatchObject({
+      kind: 'navigate',
+      rawQuery: 'Messages',
+      targetPage: {
+        id: 'page_2',
+        label: 'Messages',
+        aliases: ['Inbox'],
+      },
+      completionPolicy: 'stop_on_page_arrival',
+    });
   });
 
-  it('returns null when no known target appears in the query', () => {
-    expect(extractTargetPageName('switch to Settings', MAP)).toBeNull();
+  it('uses locale packs only as fallback for content-action policy', () => {
+    expect(parseRuntimeIntent('Messages send', RUNTIME_VIEW, DEFAULT_RUNTIME_LOCALE)).toMatchObject({
+      kind: 'act',
+      rawQuery: 'Messages send',
+      targetPage: {
+        id: 'page_2',
+        label: 'Messages',
+        aliases: ['Inbox'],
+      },
+      targetElements: [
+        {
+          elementId: 'element_2',
+          pageId: 'page_2',
+          role: 'input',
+        },
+      ],
+      completionPolicy: 'stop_after_content_action',
+    });
   });
 });
 
 describe('stage prompts', () => {
   it('builds a navigation prompt with conservative arrival rules', () => {
-    const prompt = buildNavigationGoalPrompt(MAP, 'Messages');
+    const prompt = buildNavigationGoalPrompt('Messages');
     expect(prompt).toContain('Navigation Goal');
     expect(prompt).toContain('Target Page: Messages');
     expect(prompt).toContain('two independent signals');
@@ -142,12 +184,18 @@ describe('stage prompts', () => {
   });
 
   it('builds an on-page action prompt that prevents extra navigation', () => {
-    const prompt = buildOnPageActionPrompt('Messages', 'open the first conversation');
+    const prompt = buildOnPageActionPrompt('Messages', 'open the first conversation', 'stop_on_target_open');
     expect(prompt).toContain('Current Page Anchor');
     expect(prompt).toContain('You are already on the target page: Messages');
     expect(prompt).toContain('Remaining Task: open the first conversation');
     expect(prompt).toContain('Do not switch tabs');
     expect(prompt).toContain('Do not repeat the same click');
+    expect(prompt).toContain('Do not type, send, or continue deeper');
+  });
+
+  it('allows deeper progression for explicit input tasks', () => {
+    const prompt = buildOnPageActionPrompt('Messages', 'type hello to the conversation', 'stop_after_content_action');
+    expect(prompt).toContain('Continue until the requested content action is complete');
   });
 
   it('builds handoff history messages for the on-page stage', () => {

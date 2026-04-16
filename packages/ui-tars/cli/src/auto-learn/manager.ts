@@ -3,34 +3,37 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { AdbOperator } from '@ui-tars/operator-adb';
-import { loadMap, saveMap, SS_DIR } from './map-storage';
-import { AppMap, JumpTarget } from './types';
+import { loadUIMap, saveUIMap, SS_DIR } from './map-storage';
+import { JumpTarget, PageMap, UIMap } from './types';
 import { launchApp, adbClick, adbWake, adbHome, adbBack, adbScreenSize, sleep } from './app-launcher';
 import { learnTabs } from './tab-learner';
 import { learnPageElements } from './page-learner';
 import {
+  createEmptyUIMap,
+  ensureNavigationArtifacts,
+  ensureUIPage,
+  syncPageArtifactsToUIMap,
+} from './ui-map-sync';
+import {
   deriveAppName,
   generateLandingPageName,
   generatePageName,
+  generatePageId,
+  generateSecondaryPageId,
   generateSecondaryPageName,
   saveScreenshot,
 } from './utils';
 
 function renameJumpTargets(
-  map: AppMap,
+  pageMap: PageMap | undefined,
   pageName: string,
   jumpTargets: JumpTarget[],
+  existingNames: string[],
 ): string[] {
-  const existingNames = [
-    ...Object.keys(map.pages),
-    ...Object.keys(map.secondaryPages || {}),
-  ];
-
   const targetNames = jumpTargets.map((_, idx) =>
     generateSecondaryPageName(pageName, idx + 1, existingNames),
   );
 
-  const pageMap = map.pages[pageName];
   if (!pageMap) {
     return targetNames;
   }
@@ -46,6 +49,10 @@ function renameJumpTargets(
   }
 
   return targetNames;
+}
+
+function persistMaps(pkg: string, uiMap: UIMap): void {
+  saveUIMap(pkg, uiMap);
 }
 
 export interface AutoLearnConfig {
@@ -72,11 +79,11 @@ export interface AutoLearnConfig {
 
 /**
  * Main orchestrator for the auto-learn feature.
- * 1. Checks cache (unless forceRelearn)
+ * 1. Checks the UIMap cache (unless forceRelearn)
  * 2. Launches app, learns tabs, learns elements on each tab
- * 3. Saves the resulting AppMap
+ * 3. Saves the primary UIMap asset
  */
-export async function autoLearnAndRun(config: AutoLearnConfig): Promise<AppMap | null> {
+export async function autoLearnAndRun(config: AutoLearnConfig): Promise<UIMap | null> {
   const { pkg, deviceId, modelConfig, forceRelearn } = config;
   const screenWidth = config.screenWidth || 1080;
   const screenHeight = config.screenHeight || 2400;
@@ -84,11 +91,12 @@ export async function autoLearnAndRun(config: AutoLearnConfig): Promise<AppMap |
 
   // Check cache first
   if (!forceRelearn) {
-    const cached = loadMap(pkg);
+    const cached = loadUIMap(pkg);
     if (cached) {
-      console.log(`\n[Auto-Learn] Using cached app map for: ${pkg}`);
-      console.log(`  Tabs: ${cached.navigation.tabs.length}`);
-      console.log(`  Pages: ${Object.keys(cached.pages).length}`);
+      console.log(`\n[Auto-Learn] Using cached UI map for: ${pkg}`);
+      console.log(
+        `  Pages: ${Object.keys(cached.pages).length}, Elements: ${Object.keys(cached.elements).length}`,
+      );
       return cached;
     }
   } else {
@@ -151,27 +159,29 @@ export async function autoLearnAndRun(config: AutoLearnConfig): Promise<AppMap |
   saveScreenshot(initialSS.base64, 'launch', SS_DIR);
 
   // Initialize empty map structure
-  const map: AppMap = {
-    meta: {
-      appName: deriveAppName(pkg),
-      package: pkg,
-      screenWidth: actualWidth,
-      screenHeight: actualHeight,
-      learnTime: 0,
-      learnDate: new Date().toISOString(),
-      device: deviceId,
-    },
-    navigation: { tabs: [], topButtons: [] },
-    pages: {},
-    secondaryPages: {},
-    navigationGraph: {},
-  };
+  const uiMap = createEmptyUIMap(pkg, deviceId, deriveAppName(pkg), actualWidth, actualHeight);
+  const learnedTabs = [] as Awaited<ReturnType<typeof learnTabs>>;
+  const learnedPages: Record<string, PageMap> = {};
+  const secondaryPageNames = new Set<string>();
 
   // Phase 1: Learn tabs
   try {
     const tabs = await learnTabs(op, modelConfig);
-    map.navigation.tabs = tabs;
-    saveMap(pkg, map);
+    learnedTabs.push(...tabs);
+    for (const tab of tabs) {
+      ensureUIPage(
+        uiMap,
+        generatePageId(tab.index),
+        tab.name,
+        1,
+        'unknown',
+        { type: 'hotkey', key: 'back' },
+      );
+    }
+    for (const tab of tabs) {
+      ensureNavigationArtifacts(uiMap, generatePageId(tab.index), tabs, actualWidth, actualHeight);
+    }
+    persistMaps(pkg, uiMap);
     if (tabs.length === 0) {
       console.log('[Phase 1 Complete] No persistent navigation items discovered, using the current screen as the landing page');
     } else {
@@ -183,37 +193,63 @@ export async function autoLearnAndRun(config: AutoLearnConfig): Promise<AppMap |
   }
 
   // Phase 2: Learn elements on each tab
-  if (map.navigation.tabs.length === 0) {
-    const landingPageName = generateLandingPageName(Object.keys(map.pages));
+  if (learnedTabs.length === 0) {
+    const landingPageName = generateLandingPageName(Object.keys(learnedPages));
     try {
       const landingResult = await learnPageElements(
         op,
         modelConfig,
         landingPageName,
         1,
-        map,
-        pkg,
         10,
         actualWidth,
         actualHeight,
-        (partialMap) => saveMap(pkg, partialMap),
+        () => persistMaps(pkg, uiMap),
       );
-      map.pages[landingPageName] = landingResult.pageMap;
+      learnedPages[landingPageName] = landingResult.pageMap;
+      const landingPageId = generatePageId(1);
+      syncPageArtifactsToUIMap({
+        uiMap,
+        pageId: landingPageId,
+        label: undefined,
+        pageMap: landingResult.pageMap,
+        tabs: learnedTabs,
+        screenWidth: actualWidth,
+        screenHeight: actualHeight,
+      });
       if (landingResult.jumpTargets.length > 0) {
-        map.navigationGraph[landingPageName] = renameJumpTargets(
-          map,
+        const targetNames = renameJumpTargets(
+          landingResult.pageMap,
           landingPageName,
           landingResult.jumpTargets,
+          [...Object.keys(learnedPages), ...secondaryPageNames],
         );
+        const targetNameToPageId = new Map<string, string>();
+        targetNames.forEach((targetName, idx) => {
+          secondaryPageNames.add(targetName);
+          const targetPageId = generateSecondaryPageId(landingPageId, idx + 1);
+          targetNameToPageId.set(targetName, targetPageId);
+          ensureUIPage(uiMap, targetPageId, targetName, 2, 'unknown', { type: 'hotkey', key: 'back' });
+        });
+        syncPageArtifactsToUIMap({
+          uiMap,
+          pageId: landingPageId,
+          label: undefined,
+          pageMap: landingResult.pageMap,
+          tabs: learnedTabs,
+          screenWidth: actualWidth,
+          screenHeight: actualHeight,
+          targetNameToPageId,
+        });
       }
-      saveMap(pkg, map);
+      persistMaps(pkg, uiMap);
     } catch (err) {
       console.error('[Error learning landing page]', err);
       return null;
     }
   }
 
-  if (map.navigation.tabs.length > 0) {
+  if (learnedTabs.length > 0) {
     // Restart app to ensure we are in the target app
     console.log('\nRestarting app to ensure we are in target app...');
     try {
@@ -225,8 +261,8 @@ export async function autoLearnAndRun(config: AutoLearnConfig): Promise<AppMap |
     await sleep(3000);
   }
 
-  for (let t = 0; t < map.navigation.tabs.length; t++) {
-    const tab = map.navigation.tabs[t];
+  for (let t = 0; t < learnedTabs.length; t++) {
+    const tab = learnedTabs[t];
     if (tab.coords.length < 2) continue;
 
     console.log(`\nNavigating to Tab ${tab.index}`);
@@ -245,7 +281,7 @@ export async function autoLearnAndRun(config: AutoLearnConfig): Promise<AppMap |
       const pageName = generatePageName(
         tab.name,
         tab.index,
-        Object.keys(map.pages),
+        Object.keys(learnedPages),
       );
 
       const pageResult = await learnPageElements(
@@ -253,20 +289,49 @@ export async function autoLearnAndRun(config: AutoLearnConfig): Promise<AppMap |
         modelConfig,
         pageName,
         1,
-        map,
-        pkg,
         10,
         actualWidth,
         actualHeight,
-        (partialMap) => saveMap(pkg, partialMap),
+        () => persistMaps(pkg, uiMap),
       );
 
-      map.pages[pageName] = pageResult.pageMap;
+      learnedPages[pageName] = pageResult.pageMap;
+      const pageId = generatePageId(tab.index);
+      syncPageArtifactsToUIMap({
+        uiMap,
+        pageId,
+        label: tab.name,
+        pageMap: pageResult.pageMap,
+        tabs: learnedTabs,
+        screenWidth: actualWidth,
+        screenHeight: actualHeight,
+      });
 
       // Handle jump targets (secondary pages)
       if (pageResult.jumpTargets.length > 0) {
-        const targetNames = renameJumpTargets(map, pageName, pageResult.jumpTargets);
-        map.navigationGraph[pageName] = targetNames;
+        const targetNames = renameJumpTargets(
+          pageResult.pageMap,
+          pageName,
+          pageResult.jumpTargets,
+          [...Object.keys(learnedPages), ...secondaryPageNames],
+        );
+        const targetNameToPageId = new Map<string, string>();
+        targetNames.forEach((targetName, idx) => {
+          secondaryPageNames.add(targetName);
+          const targetPageId = generateSecondaryPageId(pageId, idx + 1);
+          targetNameToPageId.set(targetName, targetPageId);
+          ensureUIPage(uiMap, targetPageId, targetName, 2, 'unknown', { type: 'hotkey', key: 'back' });
+        });
+        syncPageArtifactsToUIMap({
+          uiMap,
+          pageId,
+          label: tab.name,
+          pageMap: pageResult.pageMap,
+          tabs: learnedTabs,
+          screenWidth: actualWidth,
+          screenHeight: actualHeight,
+          targetNameToPageId,
+        });
 
         // Explore the first secondary page
         const firstJump = pageResult.jumpTargets[0];
@@ -287,14 +352,14 @@ export async function autoLearnAndRun(config: AutoLearnConfig): Promise<AppMap |
       }
 
       // Incremental save after each page
-      saveMap(pkg, map);
+      persistMaps(pkg, uiMap);
       console.log(`[Incremental save] Map saved after completing page: ${pageName}`);
 
       await sleep(300);
 
       // Limit to configured maxTabs
       if (maxTabs !== undefined && t >= maxTabs - 1) {
-        if (maxTabs < map.navigation.tabs.length) {
+        if (maxTabs < learnedTabs.length) {
           console.log(`[Limit] Only processing first ${maxTabs} tabs for faster learning`);
         }
         break;
@@ -306,17 +371,17 @@ export async function autoLearnAndRun(config: AutoLearnConfig): Promise<AppMap |
   }
 
   const endTime = Date.now();
-  map.meta.learnTime = endTime - startTime;
+  uiMap.meta.learnTime = endTime - startTime;
 
   // Final save
-  saveMap(pkg, map);
+  persistMaps(pkg, uiMap);
 
   console.log('\n========================================');
   console.log('LEARNING COMPLETE');
   console.log(`Time: ${((endTime - startTime) / 1000).toFixed(1)}s`);
-  console.log(`Tabs: ${map.navigation.tabs.length}`);
-  console.log(`Pages: ${Object.keys(map.pages).length}`);
+  console.log(`Tabs: ${learnedTabs.length}`);
+  console.log(`Pages: ${Object.keys(uiMap.pages).length}`);
   console.log('========================================');
 
-  return map;
+  return uiMap;
 }

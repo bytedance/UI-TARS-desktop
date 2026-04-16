@@ -19,23 +19,36 @@ function commandWithTimeout(cmd: string, timeout = 3000) {
   return command(cmd, { timeout });
 }
 
+function parseAdbDeviceIds(stdout: string): string[] {
+  return stdout
+    .split('\n')
+    .slice(1)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => line.split(/\s+/))
+    .filter((parts) => parts.length >= 2 && parts[1] === 'device')
+    .map((parts) => parts[0]);
+}
+
+function resolveScrollStartPoint(
+  startX: number | null,
+  startY: number | null,
+  screenWidth: number,
+  screenHeight: number,
+) {
+  return {
+    x: startX ?? screenWidth / 2,
+    y: startY ?? screenHeight / 2,
+  };
+}
+
 // Get android device
 export async function getAndroidDeviceId() {
   const getDevices = await commandWithTimeout('adb devices').catch(() => ({
     stdout: '',
   }));
 
-  const devices = getDevices.stdout
-    .split('\n')
-    .map((value, index) => {
-      // Filter first line description
-      if (index === 0) {
-        return false;
-      }
-
-      return value.split('\t')?.[0].trim();
-    })
-    .filter(Boolean);
+  const devices = parseAdbDeviceIds(getDevices.stdout);
 
   if (devices.length === 0) {
     return null;
@@ -200,31 +213,34 @@ export class AdbOperator extends Operator {
           break;
         case 'scroll':
           const { direction } = action_inputs;
-          if (startX == null || startY == null) {
-            throw Error('The start_box is required for scroll action.');
-          }
-          let endX = startX,
-            endY = startY;
+          const { x: scrollStartX, y: scrollStartY } = resolveScrollStartPoint(
+            startX,
+            startY,
+            screenWidth,
+            screenHeight,
+          );
+          let endX = scrollStartX,
+            endY = scrollStartY;
           switch (direction) {
             case 'up':
-              endX = startX;
-              endY = startY - 100; // Scroll up, decrease Y coordinate
+              endX = scrollStartX;
+              endY = scrollStartY - 100; // Scroll up, decrease Y coordinate
               break;
             case 'down':
-              endX = startX;
-              endY = startY + 100; // Scroll down, increase Y coordinate
+              endX = scrollStartX;
+              endY = scrollStartY + 100; // Scroll down, increase Y coordinate
               break;
             case 'left':
-              endX = startX - 100; // Scroll left, decrease X coordinate
-              endY = startY;
+              endX = scrollStartX - 100; // Scroll left, decrease X coordinate
+              endY = scrollStartY;
               break;
             case 'right':
-              endX = startX + 100; // Scroll right, increase X coordinate
-              endY = startY;
+              endX = scrollStartX + 100; // Scroll right, increase X coordinate
+              endY = scrollStartY;
               break;
           }
           await commandWithTimeout(
-            `adb -s ${this.deviceId} shell input swipe ${Math.round(startX)} ${Math.round(startY)} ${Math.round(endX)} ${Math.round(endY)} 300`,
+            `adb -s ${this.deviceId} shell input swipe ${Math.round(scrollStartX)} ${Math.round(scrollStartY)} ${Math.round(endX)} ${Math.round(endY)} 300`,
           );
           break;
         case 'press_home':

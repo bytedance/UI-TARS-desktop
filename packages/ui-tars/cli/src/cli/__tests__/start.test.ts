@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { AppMap } from '../../auto-learn';
+import type { UIMap } from '../../auto-learn';
 
 const mockRun = vi.fn();
 const mockGUIAgent = vi.fn().mockImplementation((config) => ({
@@ -11,14 +11,14 @@ const mockGUIAgent = vi.fn().mockImplementation((config) => ({
   config,
 }));
 const mockAutoLearnAndRun = vi.fn();
-const mockLoadMap = vi.fn();
-const mockBuildAppMapContextPrompt = vi.fn();
+const mockLoadUIMap = vi.fn();
+const mockBuildRuntimeMapView = vi.fn();
+const mockBuildRuntimeMapViewPrompt = vi.fn();
+const mockParseRuntimeIntent = vi.fn();
+const mockResolveRuntimeLocale = vi.fn();
 const mockBuildNavigationGoalPrompt = vi.fn();
 const mockBuildOnPageActionPrompt = vi.fn();
 const mockBuildOnPageHistoryMessages = vi.fn();
-const mockShouldUseAppMapContext = vi.fn();
-const mockExtractNavigationSubtask = vi.fn();
-const mockExtractTargetPageName = vi.fn();
 const mockGetAndroidDeviceId = vi.fn();
 const mockAdbOperator = vi.fn();
 
@@ -56,14 +56,23 @@ vi.mock('@ui-tars/operator-nut-js', () => ({
 
 vi.mock('../../auto-learn', () => ({
   autoLearnAndRun: mockAutoLearnAndRun,
-  loadMap: mockLoadMap,
-  buildAppMapContextPrompt: mockBuildAppMapContextPrompt,
+  loadUIMap: mockLoadUIMap,
+  buildRuntimeMapView: mockBuildRuntimeMapView,
+  buildRuntimeMapViewPrompt: mockBuildRuntimeMapViewPrompt,
+  parseRuntimeIntent: mockParseRuntimeIntent,
+  resolveRuntimeLocale: mockResolveRuntimeLocale,
+  DEFAULT_RUNTIME_LOCALE: {
+    compositeDelimiters: ['then', 'after', '然后', '之后'],
+    contentActionTerms: ['chat', 'conversation', '会话', '对话', 'send', 'reply', '输入'],
+  },
+  RUNTIME_BUDGETS: {
+    small: {
+      mode: 'focused',
+    },
+  },
   buildNavigationGoalPrompt: mockBuildNavigationGoalPrompt,
   buildOnPageActionPrompt: mockBuildOnPageActionPrompt,
   buildOnPageHistoryMessages: mockBuildOnPageHistoryMessages,
-  shouldUseAppMapContext: mockShouldUseAppMapContext,
-  extractNavigationSubtask: mockExtractNavigationSubtask,
-  extractTargetPageName: mockExtractTargetPageName,
 }));
 
 describe('start', () => {
@@ -72,12 +81,92 @@ describe('start', () => {
     mockGetAndroidDeviceId.mockResolvedValue('device-1');
     mockAdbOperator.mockImplementation(() => ({ kind: 'adb' }));
     mockRun.mockResolvedValue(undefined);
-    mockBuildAppMapContextPrompt.mockReturnValue(
-      '## App Map Context\n- Known page: Home\n- Home -> Messages',
-    );
     mockBuildNavigationGoalPrompt.mockImplementation(
-      (_map, targetPageName: string) => `## Navigation Goal\nTarget Page: ${targetPageName}`,
+      (targetPageName: string) => `## Navigation Goal\nTarget Page: ${targetPageName}`,
     );
+    mockBuildRuntimeMapView.mockReturnValue({
+      mode: 'focused',
+      budget: {},
+      currentPageCandidates: [{ id: 'page_1', label: 'Home', confidence: 0.9, score: 1 }],
+      targetPageCandidates: [{ id: 'page_2', label: 'Messages', confidence: 0.88, score: 0.9 }],
+      pages: {},
+      elements: {
+        element_1: {
+          id: 'element_1',
+          pageId: 'page_2',
+          role: 'action',
+          action: 'click',
+          label: 'Conversation',
+          confidence: 0.88,
+          score: 0.86,
+          locators: [],
+        },
+      },
+      truncated: false,
+      expansionHints: [],
+    });
+    mockBuildRuntimeMapViewPrompt.mockReturnValue(
+      '## Runtime Map View\nCurrent Page Candidates:\n- page_1 (Home)\nTarget Page Candidates:\n- page_2 (Messages)',
+    );
+    mockResolveRuntimeLocale.mockImplementation((locale?: string) => ({
+      compositeDelimiters: locale === 'en' ? ['then', 'after'] : ['then', 'after', '然后', '之后'],
+      contentActionTerms: ['chat', 'conversation', '会话', '对话', 'send', 'reply', '输入'],
+    }));
+    mockParseRuntimeIntent.mockImplementation((query: string) =>
+      query.includes('then')
+        ? {
+            kind: 'navigate_then_act',
+            rawQuery: query,
+            navigationQuery: 'switch to the Messages tab',
+            remainingQuery: 'open the first conversation',
+            targetPage: {
+              id: 'page_2',
+              label: 'Messages',
+              confidence: 0.88,
+              score: 0.9,
+            },
+            targetElements: [
+              {
+                elementId: 'element_1',
+                pageId: 'page_2',
+                role: 'action',
+                action: 'click',
+                label: 'Conversation',
+                confidence: 0.88,
+                score: 0.86,
+              },
+            ],
+            completionPolicy: 'stop_on_target_open',
+          }
+        : {
+            kind: 'navigate',
+            rawQuery: query,
+            targetPage: {
+              id: query.includes('Home') ? 'page_1' : 'page_2',
+              label: query.includes('Home') ? 'Home' : 'Messages',
+              confidence: query.includes('Home') ? 0.9 : 0.88,
+              score: query.includes('Home') ? 1 : 0.9,
+            },
+            completionPolicy: 'stop_on_page_arrival',
+          },
+    );
+    mockLoadUIMap.mockReturnValue({
+      meta: {
+        schemaVersion: 2,
+        appId: 'com.example.demo',
+        appName: 'demo-app',
+        platform: 'android',
+        screenWidth: 1080,
+        screenHeight: 2400,
+        learnTime: 1234,
+        learnDate: '2026-04-16T00:00:00.000Z',
+        device: 'device-1',
+      },
+      pages: {},
+      regions: {},
+      elements: {},
+      navigation: [],
+    } satisfies UIMap);
     mockBuildOnPageActionPrompt.mockReturnValue(
       '## Current Page Anchor\nYou are already on the target page: Messages\nRemaining Task: open the first conversation',
     );
@@ -87,51 +176,46 @@ describe('start', () => {
         value: 'Navigation stage result: the target page Messages has been reached.',
       },
     ]);
-    mockShouldUseAppMapContext.mockReturnValue(true);
-    mockExtractNavigationSubtask.mockReturnValue(null);
-    mockExtractTargetPageName.mockImplementation((query: string) =>
-      query.includes('Home') ? 'Home' : 'Messages',
-    );
   });
 
-  it('injects learned app map context into GUIAgent for navigation tasks', async () => {
-    const map: AppMap = {
+  it('injects learned UI map context into GUIAgent for navigation tasks', async () => {
+    const uiMap: UIMap = {
       meta: {
+        schemaVersion: 2,
+        appId: 'com.example.demo',
         appName: 'demo-app',
-        package: 'com.example.demo',
+        platform: 'android',
         screenWidth: 1080,
         screenHeight: 2400,
         learnTime: 1234,
         learnDate: '2026-04-16T00:00:00.000Z',
         device: 'device-1',
       },
-      navigation: {
-        tabs: [
-          { index: 1, name: 'Home', coords: [100, 2200], bbox: [], status: 'reliable' },
-          { index: 2, name: 'Messages', coords: [300, 2200], bbox: [], status: 'reliable' },
-        ],
-        topButtons: [],
-      },
       pages: {
-        Home: {
-          name: 'Home',
+        page_1: {
+          id: 'page_1',
+          label: { primary: 'Home' },
           depth: 1,
           layout: 'unknown',
-          regions: [],
+          status: 'reliable',
+          confidence: 0.9,
+          regionIds: [],
         },
-        Messages: {
-          name: 'Messages',
+        page_2: {
+          id: 'page_2',
+          label: { primary: 'Messages' },
           depth: 1,
           layout: 'unknown',
-          regions: [],
+          status: 'reliable',
+          confidence: 0.88,
+          regionIds: [],
         },
       },
-      secondaryPages: {},
-      navigationGraph: {
-        Home: ['Messages'],
-      },
+      regions: {},
+      elements: {},
+      navigation: [],
     };
-    mockAutoLearnAndRun.mockResolvedValue(map);
+    mockAutoLearnAndRun.mockResolvedValue(uiMap);
 
     const { start } = await import('../start');
     await start({
@@ -142,31 +226,78 @@ describe('start', () => {
     });
 
     expect(mockAutoLearnAndRun).toHaveBeenCalled();
+    expect(mockBuildRuntimeMapView).toHaveBeenCalled();
     expect(mockGUIAgent).toHaveBeenCalledWith(
       expect.objectContaining({
         systemPromptSuffix: expect.stringContaining('Navigation Goal'),
       }),
     );
     expect(mockGUIAgent.mock.calls[0][0].systemPromptSuffix).toContain('Home');
+    expect(mockGUIAgent.mock.calls[0][0].systemPromptSuffix).toContain('Runtime Map View');
     expect(mockRun).toHaveBeenCalledWith('switch to the Home tab', undefined);
   });
 
-  it('does not inject app map context when the task is not purely navigational', async () => {
-    mockShouldUseAppMapContext.mockReturnValue(false);
+  it('passes the configured runtime locale preset into runtime parsing', async () => {
     mockAutoLearnAndRun.mockResolvedValue({
       meta: {
+        schemaVersion: 2,
+        appId: 'com.example.demo',
         appName: 'demo-app',
-        package: 'com.example.demo',
+        platform: 'android',
         screenWidth: 1080,
         screenHeight: 2400,
         learnTime: 1234,
         learnDate: '2026-04-16T00:00:00.000Z',
         device: 'device-1',
       },
-      navigation: { tabs: [], topButtons: [] },
       pages: {},
-      secondaryPages: {},
-      navigationGraph: {},
+      regions: {},
+      elements: {},
+      navigation: [],
+    });
+
+    const { start } = await import('../start');
+    await start({
+      target: 'adb',
+      query: 'switch to the Home tab',
+      autoLearn: true,
+      package: 'com.example.demo',
+      runtimeLocale: 'en',
+    });
+
+    expect(mockParseRuntimeIntent).toHaveBeenCalledWith(
+      'switch to the Home tab',
+      expect.any(Object),
+      expect.objectContaining({
+        compositeDelimiters: ['then', 'after'],
+      }),
+    );
+  });
+
+  it('does not inject navigation goal when the task is not purely navigational', async () => {
+    mockParseRuntimeIntent.mockReturnValue({
+      kind: 'act',
+      rawQuery: 'switch to the Messages tab, then open the first conversation',
+      actionQuery: 'switch to the Messages tab, then open the first conversation',
+      targetElements: [],
+      completionPolicy: 'stop_on_target_open',
+    });
+    mockAutoLearnAndRun.mockResolvedValue({
+      meta: {
+        schemaVersion: 2,
+        appId: 'com.example.demo',
+        appName: 'demo-app',
+        platform: 'android',
+        screenWidth: 1080,
+        screenHeight: 2400,
+        learnTime: 1234,
+        learnDate: '2026-04-16T00:00:00.000Z',
+        device: 'device-1',
+      },
+      pages: {},
+      regions: {},
+      elements: {},
+      navigation: [],
     });
 
     const { start } = await import('../start');
@@ -179,7 +310,7 @@ describe('start', () => {
 
     expect(mockGUIAgent).toHaveBeenCalledWith(
       expect.not.objectContaining({
-        systemPromptSuffix: expect.stringContaining('App Map Context'),
+        systemPromptSuffix: expect.stringContaining('Navigation Goal'),
       }),
     );
   });
@@ -187,18 +318,20 @@ describe('start', () => {
   it('disables app map usage entirely when appMapMode is off', async () => {
     mockAutoLearnAndRun.mockResolvedValue({
       meta: {
+        schemaVersion: 2,
+        appId: 'com.example.demo',
         appName: 'demo-app',
-        package: 'com.example.demo',
+        platform: 'android',
         screenWidth: 1080,
         screenHeight: 2400,
         learnTime: 1234,
         learnDate: '2026-04-16T00:00:00.000Z',
         device: 'device-1',
       },
-      navigation: { tabs: [], topButtons: [] },
       pages: {},
-      secondaryPages: {},
-      navigationGraph: {},
+      regions: {},
+      elements: {},
+      navigation: [],
     });
 
     const { start } = await import('../start');
@@ -218,25 +351,22 @@ describe('start', () => {
   });
 
   it('runs composite tasks in two stages when a navigation subtask can be extracted', async () => {
-    mockShouldUseAppMapContext.mockReturnValue(false);
-    mockExtractNavigationSubtask.mockReturnValue({
-      navigationQuery: 'switch to the Messages tab',
-      remainingQuery: 'open the first conversation',
-    });
     mockAutoLearnAndRun.mockResolvedValue({
       meta: {
+        schemaVersion: 2,
+        appId: 'com.example.demo',
         appName: 'demo-app',
-        package: 'com.example.demo',
+        platform: 'android',
         screenWidth: 1080,
         screenHeight: 2400,
         learnTime: 1234,
         learnDate: '2026-04-16T00:00:00.000Z',
         device: 'device-1',
       },
-      navigation: { tabs: [], topButtons: [] },
       pages: {},
-      secondaryPages: {},
-      navigationGraph: {},
+      regions: {},
+      elements: {},
+      navigation: [],
     });
 
     const { start } = await import('../start');
@@ -272,22 +402,23 @@ describe('start', () => {
     ]);
   });
 
-  it('injects cached app map context for navigation tasks when package is provided without auto-learn', async () => {
-    mockLoadMap.mockResolvedValue?.(undefined);
-    mockLoadMap.mockReturnValue({
+  it('injects cached UI map context for navigation tasks when package is provided without auto-learn', async () => {
+    mockLoadUIMap.mockReturnValue({
       meta: {
+        schemaVersion: 2,
+        appId: 'com.example.demo',
         appName: 'demo-app',
-        package: 'com.example.demo',
+        platform: 'android',
         screenWidth: 1080,
         screenHeight: 2400,
         learnTime: 1234,
         learnDate: '2026-04-16T00:00:00.000Z',
         device: 'device-1',
       },
-      navigation: { tabs: [], topButtons: [] },
       pages: {},
-      secondaryPages: {},
-      navigationGraph: {},
+      regions: {},
+      elements: {},
+      navigation: [],
     });
 
     const { start } = await import('../start');
@@ -297,7 +428,7 @@ describe('start', () => {
       package: 'com.example.demo',
     });
 
-    expect(mockLoadMap).toHaveBeenCalledWith('com.example.demo');
+    expect(mockLoadUIMap).toHaveBeenCalledWith('com.example.demo');
     expect(mockGUIAgent).toHaveBeenCalledWith(
       expect.objectContaining({
         systemPromptSuffix: expect.stringContaining('Navigation Goal'),
@@ -305,25 +436,61 @@ describe('start', () => {
     );
   });
 
+  it('runs without map-derived navigation prompts when no UI map is available', async () => {
+    mockLoadUIMap.mockReturnValue(null);
+
+    const { start } = await import('../start');
+    await start({
+      target: 'adb',
+      query: 'switch to the Home tab',
+      package: 'com.example.demo',
+    });
+
+    expect(mockBuildRuntimeMapView).not.toHaveBeenCalled();
+    expect(mockGUIAgent.mock.calls[0][0].systemPromptSuffix).toBeUndefined();
+  });
+
   it('does not split composite tasks when appMapMode is navigation', async () => {
-    mockExtractNavigationSubtask.mockReturnValue({
+    mockParseRuntimeIntent.mockReturnValue({
+      kind: 'navigate_then_act',
+      rawQuery: 'switch to the Messages tab, then open the first conversation',
       navigationQuery: 'switch to the Messages tab',
       remainingQuery: 'open the first conversation',
+      targetPage: {
+        id: 'page_2',
+        label: 'Messages',
+        confidence: 0.88,
+        score: 0.9,
+      },
+      targetElements: [
+        {
+          elementId: 'element_1',
+          pageId: 'page_2',
+          role: 'action',
+          action: 'click',
+          label: 'Conversation',
+          confidence: 0.88,
+          score: 0.86,
+        },
+      ],
+      completionPolicy: 'stop_on_target_open',
     });
     mockAutoLearnAndRun.mockResolvedValue({
       meta: {
+        schemaVersion: 2,
+        appId: 'com.example.demo',
         appName: 'demo-app',
-        package: 'com.example.demo',
+        platform: 'android',
         screenWidth: 1080,
         screenHeight: 2400,
         learnTime: 1234,
         learnDate: '2026-04-16T00:00:00.000Z',
         device: 'device-1',
       },
-      navigation: { tabs: [], topButtons: [] },
       pages: {},
-      secondaryPages: {},
-      navigationGraph: {},
+      regions: {},
+      elements: {},
+      navigation: [],
     });
 
     const { start } = await import('../start');

@@ -5,6 +5,8 @@
     "moduleResolution": "Bundler",
     "baseUrl": ".",
     "paths": {
+      "@ui-tars/operator-adb": ["../operators/adb/src/index.ts"],
+      "@ui-tars/operator-nut-js": ["../operators/nut-js/src/index.ts"],
       "@ui-tars/sdk": ["../sdk/src/index.ts"],
       "@ui-tars/sdk/core": ["../sdk/src/core.ts"]
     },

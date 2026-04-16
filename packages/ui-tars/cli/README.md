@@ -2,6 +2,8 @@
 
 CLI for UI-TARS.
 
+`auto-learn` architecture notes live in `src/auto-learn/README.md`.
+
 ## Use adb operator in CLI
 
 Connect an Android device to your computer and run the following command:

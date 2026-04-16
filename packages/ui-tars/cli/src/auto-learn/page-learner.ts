@@ -5,9 +5,10 @@
 import { GUIAgent } from '@ui-tars/sdk';
 import { Operator } from '@ui-tars/sdk/core';
 import { RecordingOperator } from './recording-operator';
-import { AppMap, JumpTarget, PageMap, Region, Element } from './types';
+import { JumpTarget, PageMap, Region, Element } from './types';
 import { withTimeout } from './app-launcher';
 import {
+  extractActionBbox,
   extractCoords,
   extractElementName,
   guessElementType,
@@ -42,12 +43,10 @@ export async function learnPageElements(
   modelConfig: { baseURL: string; apiKey: string; model: string; useResponsesApi?: boolean },
   pageName: string,
   depth: number,
-  map: AppMap,
-  pkg: string,
   maxLoops = 10,
   screenWidth = 1080,
   screenHeight = 2400,
-  onIncrementalSave?: (partialMap: AppMap) => void,
+  onIncrementalSave?: () => void,
 ): Promise<{ pageMap: PageMap; jumpTargets: JumpTarget[] }> {
   console.log(`\n[Phase 2] Learning Page: ${pageName} (depth=${depth})`);
 
@@ -57,18 +56,9 @@ export async function learnPageElements(
   let lastSaveCount = 0;
   const checkAndSave = async () => {
     const currentClicks = recordingOp.getActions().filter((a) => a.type === 'click');
-    if (currentClicks.length >= lastSaveCount + 5) {
+    if (currentClicks.length >= lastSaveCount + CLICK_SAVE_INTERVAL) {
       lastSaveCount = currentClicks.length;
-      if (!map.pages[pageName]) {
-        map.pages[pageName] = {
-          name: pageName,
-          depth,
-          layout: getLayoutType(pageName),
-          regions: [],
-          backAction: { type: 'hotkey', key: 'back' },
-        };
-      }
-      onIncrementalSave?.(map);
+      onIncrementalSave?.();
       console.log(`[Incremental save] Map saved after ${currentClicks.length} clicks on ${pageName}`);
     }
   };
@@ -126,6 +116,7 @@ export async function learnPageElements(
 
   for (const click of clicks) {
     const coords = extractCoords(click.inputs);
+    const bbox = extractActionBbox(click.inputs);
 
     // Filter clicks in the top region (likely nav bar/logo)
     if (coords.length >= 2 && coords[1] < topRegionThreshold) {
@@ -157,7 +148,7 @@ export async function learnPageElements(
       name: elementName,
       description: `${elementName} - located in the ${positionDesc}, ${click.thought.substring(0, 80)}`,
       coords,
-      bbox: [],
+      bbox,
       type: elemType,
       action: guessActionType(click.thought, pageChanged),
       status: 'reliable',

@@ -16,14 +16,15 @@ import { NutJSOperator } from '@ui-tars/operator-nut-js';
 import { getAndroidDeviceId, AdbOperator } from '@ui-tars/operator-adb';
 import {
   autoLearnAndRun,
-  buildAppMapContextPrompt,
   buildNavigationGoalPrompt,
   buildOnPageActionPrompt,
   buildOnPageHistoryMessages,
-  extractNavigationSubtask,
-  extractTargetPageName,
-  loadMap,
-  shouldUseAppMapContext,
+  buildRuntimeMapView,
+  buildRuntimeMapViewPrompt,
+  loadUIMap,
+  parseRuntimeIntent,
+  RUNTIME_BUDGETS,
+  resolveRuntimeLocale,
 } from '../auto-learn';
 
 interface PresetConfig {
@@ -45,6 +46,7 @@ export interface CliOptions {
   autoLearn?: boolean;
   forceRelearn?: boolean;
   appMapMode?: 'off' | 'navigation' | 'two-phase';
+  runtimeLocale?: string;
   package?: string;
 }
 
@@ -82,6 +84,7 @@ async function runAgentInstruction(params: {
 
 export const start = async (options: CliOptions) => {
   const CONFIG_PATH = path.join(os.homedir(), '.ui-tars-cli.json');
+  const runtimeLocale = resolveRuntimeLocale(options.runtimeLocale);
 
   // read config file
   let config = {
@@ -149,7 +152,8 @@ export const start = async (options: CliOptions) => {
 
   // Auto-learn phase (only for ADB target)
   if (options.target === 'adb' && options.package && appMapMode !== 'off') {
-    let map = null;
+    let uiMap = null;
+    let runtimeView = null;
 
     if (options.autoLearn) {
       if (!options.package) {
@@ -163,47 +167,74 @@ export const start = async (options: CliOptions) => {
         process.exit(0);
       }
 
-      map = await autoLearnAndRun({
+      uiMap = await autoLearnAndRun({
         pkg: options.package,
         deviceId,
         modelConfig: config,
         forceRelearn: options.forceRelearn,
       });
 
-      if (map) {
+      if (uiMap) {
         console.log(
-          `\n[Auto-Learn] App map ready: ${map.meta.package} (${Object.keys(map.pages).length} pages, ${map.navigation.tabs.length} tabs)`,
+          `\n[Auto-Learn] UI map ready: ${uiMap.meta.appId} (${Object.keys(uiMap.pages).length} pages, ${Object.keys(uiMap.elements).length} elements)`,
         );
       }
     } else {
-      map = loadMap(options.package);
-      if (map) {
+      uiMap = loadUIMap(options.package);
+      if (uiMap) {
         console.log(
-          `\n[Auto-Learn] Using cached app map: ${map.meta.package} (${Object.keys(map.pages).length} pages, ${map.navigation.tabs.length} tabs)`,
+          `\n[Auto-Learn] Using cached UI map: ${uiMap.meta.appId} (${Object.keys(uiMap.pages).length} pages, ${Object.keys(uiMap.elements).length} elements)`,
         );
       }
     }
 
-    if (map && options.query) {
-      const navigationSubtask =
-        appMapMode === 'two-phase'
-          ? extractNavigationSubtask(options.query, map)
-          : null;
+    if (uiMap && options.query) {
+      runtimeView = buildRuntimeMapView(uiMap, RUNTIME_BUDGETS.small, {
+        query: options.query,
+      });
+      const runtimePrompt = buildRuntimeMapViewPrompt(runtimeView);
+      systemPromptSuffix = systemPromptSuffix
+        ? `${systemPromptSuffix}\n\n${runtimePrompt}`
+        : runtimePrompt;
+    }
 
-      if (navigationSubtask) {
-        navigationInstruction = navigationSubtask.navigationQuery;
-        followUpInstruction = navigationSubtask.remainingQuery;
-        targetPageName =
-          extractTargetPageName(navigationInstruction, map) || 'target page';
-        systemPromptSuffix = buildNavigationGoalPrompt(map, targetPageName);
+    if (options.query) {
+      const runtimeIntent = runtimeView
+        ? parseRuntimeIntent(options.query, runtimeView, runtimeLocale)
+        : null;
+
+      if (appMapMode === 'two-phase' && runtimeIntent?.kind === 'navigate_then_act') {
+        navigationInstruction = runtimeIntent.navigationQuery;
+        followUpInstruction = runtimeIntent.remainingQuery;
+        targetPageName = runtimeIntent.targetPage.label || 'target page';
+        const navigationPrompt = buildNavigationGoalPrompt(targetPageName);
+        systemPromptSuffix = systemPromptSuffix
+          ? `${navigationPrompt}\n\n${systemPromptSuffix}`
+          : navigationPrompt;
         followUpPromptSuffix = buildOnPageActionPrompt(
           targetPageName,
           followUpInstruction,
+          runtimeIntent.completionPolicy,
         );
-      } else if (shouldUseAppMapContext(options.query, map)) {
-        targetPageName =
-          extractTargetPageName(options.query, map) || 'target page';
-        systemPromptSuffix = buildNavigationGoalPrompt(map, targetPageName);
+        if (uiMap) {
+          const followUpRuntimeView = buildRuntimeMapView(uiMap, RUNTIME_BUDGETS.small, {
+            query: followUpInstruction,
+            currentPageId: runtimeIntent.targetPage.id,
+            targetPageId: runtimeIntent.targetPage.id,
+            targetElementText: runtimeIntent.targetElements[0]?.label,
+            preferredRoles:
+              runtimeIntent.completionPolicy === 'stop_after_content_action'
+                ? ['input', 'action', 'confirm']
+                : ['action', 'content', 'navigation'],
+          });
+          followUpPromptSuffix = `${followUpPromptSuffix}\n\n${buildRuntimeMapViewPrompt(followUpRuntimeView)}`;
+        }
+      } else if (runtimeIntent?.kind === 'navigate') {
+        targetPageName = runtimeIntent.targetPage.label || 'target page';
+        const navigationPrompt = buildNavigationGoalPrompt(targetPageName);
+        systemPromptSuffix = systemPromptSuffix
+          ? `${navigationPrompt}\n\n${systemPromptSuffix}`
+          : navigationPrompt;
       }
     }
   } else if (options.autoLearn && options.target === 'adb') {

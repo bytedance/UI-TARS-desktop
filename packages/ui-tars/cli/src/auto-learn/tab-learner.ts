@@ -6,7 +6,7 @@ import { GUIAgent } from '@ui-tars/sdk';
 import { Operator } from '@ui-tars/sdk/core';
 import { RecordingOperator } from './recording-operator';
 import { TabElement } from './types';
-import { extractCoords, generateTabName, DEDUP_THRESHOLD } from './utils';
+import { extractActionBbox, extractCoords, generateTabName, DEDUP_THRESHOLD } from './utils';
 import { withTimeout } from './app-launcher';
 
 /**
@@ -50,13 +50,14 @@ export async function learnTabs(
   const tabs: TabElement[] = [];
   clicks.forEach((click, idx) => {
     const coords = extractCoords(click.inputs);
+    const bbox = extractActionBbox(click.inputs);
     const tabName = generateTabName(click.thought, idx + 1);
 
     tabs.push({
       index: idx + 1,
       name: tabName,
       coords,
-      bbox: [],
+      bbox,
       status: 'reliable',
     });
   });

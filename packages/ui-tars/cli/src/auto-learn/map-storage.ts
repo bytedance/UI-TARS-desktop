@@ -4,31 +4,62 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { AppMap } from './types';
+import { UIMap, UI_MAP_SCHEMA_VERSION } from './types';
 import { mapFile, mkdirSafe } from './utils';
 
 export const MAP_DIR = path.join(process.cwd(), '.ui-tars', 'app-maps');
 export const SS_DIR = path.join(process.cwd(), '.ui-tars', 'screenshots');
 
-// Ensure directories exist
 mkdirSafe(MAP_DIR);
 mkdirSafe(SS_DIR);
 
-/**
- * Load a cached app map for the given package
- */
-export function loadMap(pkg: string): AppMap | null {
-  const fp = path.join(MAP_DIR, mapFile(pkg));
+function readJsonFile<T>(fp: string): T | null {
   if (!fs.existsSync(fp)) return null;
-  return JSON.parse(fs.readFileSync(fp, 'utf8')) as AppMap;
+
+  try {
+    return JSON.parse(fs.readFileSync(fp, 'utf8')) as T;
+  } catch {
+    return null;
+  }
+}
+
+function writeJsonFile(fp: string, value: unknown): void {
+  fs.writeFileSync(fp, JSON.stringify(value, null, 2));
+}
+
+export function uiMapFile(pkg: string): string {
+  return `${mapFile(pkg).replace(/\.json$/i, '')}.ui-map.v${UI_MAP_SCHEMA_VERSION}.json`;
+}
+
+export function isUIMap(value: unknown): value is UIMap {
+  if (!value || typeof value !== 'object') return false;
+
+  const candidate = value as Partial<UIMap>;
+  return (
+    !!candidate.meta &&
+    candidate.meta.schemaVersion === UI_MAP_SCHEMA_VERSION &&
+    !!candidate.pages &&
+    !!candidate.regions &&
+    !!candidate.elements &&
+    Array.isArray(candidate.navigation)
+  );
 }
 
 /**
- * Save an app map to JSON file
+ * Load a cached UI map for the given package.
  */
-export function saveMap(pkg: string, map: AppMap): string {
-  const fp = path.join(MAP_DIR, mapFile(pkg));
-  fs.writeFileSync(fp, JSON.stringify(map, null, 2));
-  console.log(`App map saved: ${fp}`);
+export function loadUIMap(pkg: string): UIMap | null {
+  const fp = path.join(MAP_DIR, uiMapFile(pkg));
+  const parsed = readJsonFile<unknown>(fp);
+  return isUIMap(parsed) ? parsed : null;
+}
+
+/**
+ * Save a UI map to JSON file.
+ */
+export function saveUIMap(pkg: string, map: UIMap): string {
+  const fp = path.join(MAP_DIR, uiMapFile(pkg));
+  writeJsonFile(fp, map);
+  console.log(`UI map saved: ${fp}`);
   return fp;
 }

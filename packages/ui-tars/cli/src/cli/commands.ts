@@ -22,6 +22,10 @@ export const run = () => {
       '--app-map-mode <mode>',
       'App map usage mode: off, navigation, or two-phase (default: two-phase)',
     )
+    .option(
+      '--runtime-locale <locale>',
+      'Runtime locale preset for map-assisted parsing: default, en, or zh-CN (default: default)',
+    )
     .option('--package <pkg>', 'Android app package name (required with --auto-learn)')
     .action(async (options: CliOptions) => {
       try {

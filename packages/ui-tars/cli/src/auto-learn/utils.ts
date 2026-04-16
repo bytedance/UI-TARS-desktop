@@ -4,7 +4,15 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import type { Element } from './types';
+import type {
+  Element,
+  ElementAction,
+  ElementRole,
+  ElementType,
+  LearnedLabel,
+  LocatorStrategy,
+  NormalizedBox,
+} from './types';
 
 /** Deduplication thresholds */
 export const DEDUP_THRESHOLD = {
@@ -31,7 +39,14 @@ export function parseBbox(bboxStr: string): number[] {
   if (!bboxStr) return [];
   const match = bboxStr.match(/\[([0-9., ]+)\]/);
   if (!match) return [];
-  return match[1].split(',').map((s) => parseFloat(s.trim()));
+  return match[1].split(',').map((s) => Number.parseFloat(s.trim()));
+}
+
+export function extractActionBbox(inputs: Record<string, unknown>): number[] {
+  if (typeof inputs.start_box !== 'string') {
+    return [];
+  }
+  return parseBbox(inputs.start_box);
 }
 
 /**
@@ -39,7 +54,7 @@ export function parseBbox(bboxStr: string): number[] {
  */
 export function guessElementType(
   thought: string,
-): 'button' | 'card' | 'list-item' | 'icon' | 'input' | 'unknown' {
+): ElementType {
   const lower = thought.toLowerCase();
   if (lower.includes('按钮') || lower.includes('button')) return 'button';
   if (lower.includes('卡片') || lower.includes('card')) return 'card';
@@ -69,29 +84,28 @@ export function guessActionType(
   return 'click';
 }
 
+export function classifyElementType(thought: string): ElementType {
+  return guessElementType(thought);
+}
+
+export function classifyElementAction(
+  thought: string,
+  pageChanged: boolean,
+): ElementAction {
+  return guessActionType(thought, pageChanged);
+}
+
 /**
  * Extract element name from VLM thought (supports 【name】 and "name" patterns)
  */
 export function extractElementName(thought: string): string {
   if (!thought) return 'unknown';
 
-  // Try 【name】 pattern
-  const start = thought.indexOf('【');
-  const end = thought.indexOf('】');
-  if (start >= 0 && end > start) {
-    const name = thought.substring(start + 1, end).trim();
-    if (name.length > 1 && name.length <= 20) return name;
+  const explicitLabel = extractLearnedLabel(thought)?.primary;
+  if (explicitLabel) {
+    return explicitLabel;
   }
 
-  // Try "name" pattern
-  const q1 = thought.indexOf('"');
-  const q2 = thought.lastIndexOf('"');
-  if (q1 >= 0 && q2 > q1) {
-    const name = thought.substring(q1 + 1, q2).trim();
-    if (name.length > 1 && name.length <= 20) return name;
-  }
-
-  // Keyword-based extraction
   const keywords = ['按钮', '卡片', '头像', '菜单', '返回', '图标', '标签', '列表', '输入框', '图片', '弹窗', '横幅', '选项', '聊天'];
   for (const kw of keywords) {
     const kwIdx = thought.indexOf(kw);
@@ -110,7 +124,6 @@ export function extractElementName(thought: string): string {
     }
   }
 
-  // Try "点击XXX" pattern
   const clickIdx = thought.indexOf('点击');
   if (clickIdx >= 0) {
     const afterClick = thought.substring(clickIdx + 2).trim();
@@ -127,6 +140,28 @@ export function extractElementName(thought: string): string {
   }
 
   return 'element';
+}
+
+export function extractLearnedLabel(thought: string): LearnedLabel | undefined {
+  if (!thought) return undefined;
+
+  const bracketMatch = thought.match(/【([^】]+)】/);
+  if (bracketMatch?.[1]) {
+    const primary = bracketMatch[1].trim();
+    if (primary) {
+      return { primary, aliases: [] };
+    }
+  }
+
+  const quoteMatch = thought.match(/"([^"]+)"/);
+  if (quoteMatch?.[1]) {
+    const primary = quoteMatch[1].trim();
+    if (primary) {
+      return { primary, aliases: [] };
+    }
+  }
+
+  return undefined;
 }
 
 /**
@@ -146,20 +181,38 @@ export function generateElementId(
   return `${pageName}_${finalName}${typeSuffix}${countSuffix}`;
 }
 
+export function generatePageId(idx: number): string {
+  return `page_${idx}`;
+}
+
+export function generateSecondaryPageId(parentPageId: string, idx: number): string {
+  return `${parentPageId}__child_${idx}`;
+}
+
+export function generateRegionId(pageId: string, regionName: string): string {
+  const safeRegionName = regionName
+    .trim()
+    .replace(/[^a-zA-Z0-9_-]+/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '') || 'region';
+  return `region_${pageId}_${safeRegionName}`;
+}
+
+export function generateElementStableId(pageId: string, idx: number): string {
+  return `element_${pageId}_${idx}`;
+}
+
+export function generateLocatorId(elementId: string, type: string, idx: number): string {
+  return `locator_${elementId}_${type}_${idx}`;
+}
+
 /**
  * Generate tab name from VLM thought
  */
 export function generateTabName(thought: string, idx: number): string {
-  const bracketMatch = thought.match(/【([^】]+)】/);
-  if (bracketMatch && bracketMatch[1]) {
-    const name = bracketMatch[1].trim();
-    if (name.length > 1 && name.length <= 10) return name;
-  }
-
-  const quoteMatch = thought.match(/"([^"]+)"/);
-  if (quoteMatch && quoteMatch[1]) {
-    const name = quoteMatch[1].trim();
-    if (name.length > 1 && name.length <= 20) return name;
+  const explicitLabel = extractLearnedLabel(thought)?.primary;
+  if (explicitLabel && explicitLabel.length <= 20) {
+    return explicitLabel;
   }
 
   const genericPatterns = [
@@ -239,6 +292,98 @@ export function generateSecondaryPageName(
  */
 export function generateLandingPageName(existingNames: string[] = []): string {
   return makeUniqueName('LandingPage', existingNames);
+}
+
+export function toNormalizedBox(
+  bbox: number[],
+  screenWidth: number,
+  screenHeight: number,
+): NormalizedBox | undefined {
+  if (bbox.length < 4 || screenWidth <= 0 || screenHeight <= 0) {
+    return undefined;
+  }
+
+  const [x1, y1, x2, y2] = bbox;
+  return {
+    left: x1 / screenWidth,
+    top: y1 / screenHeight,
+    width: (x2 - x1) / screenWidth,
+    height: (y2 - y1) / screenHeight,
+  };
+}
+
+export function toNormalizedPointBox(
+  coords: number[],
+  screenWidth: number,
+  screenHeight: number,
+  radius = 24,
+): NormalizedBox | undefined {
+  if (coords.length < 2 || screenWidth <= 0 || screenHeight <= 0) {
+    return undefined;
+  }
+
+  const [x, y] = coords;
+  const x1 = Math.max(0, x - radius);
+  const y1 = Math.max(0, y - radius);
+  const x2 = Math.min(screenWidth, x + radius);
+  const y2 = Math.min(screenHeight, y + radius);
+  return toNormalizedBox([x1, y1, x2, y2], screenWidth, screenHeight);
+}
+
+export function deriveElementRole(
+  type: ElementType,
+  action: ElementAction,
+): ElementRole {
+  if (action === 'navigate') return 'navigation';
+  if (type === 'input' || action === 'input') return 'input';
+  if (action === 'close') return 'dismiss';
+  if (action === 'confirm') return 'confirm';
+  if (type === 'card' || type === 'list-item') return 'content';
+  if (action === 'click' || action === 'toggle' || action === 'filter') return 'action';
+  return 'unknown';
+}
+
+export function buildLocatorStrategies(input: {
+  elementId: string;
+  label?: LearnedLabel;
+  textCandidates?: string[];
+  normalizedBox?: NormalizedBox;
+}): LocatorStrategy[] {
+  const strategies: LocatorStrategy[] = [];
+  let idx = 1;
+  const seenText = new Set<string>();
+
+  const textLikeCandidates = [
+    input.label?.primary,
+    ...(input.label?.aliases || []),
+    ...(input.textCandidates || []),
+  ]
+    .map((value) => value?.trim())
+    .filter((value): value is string => Boolean(value));
+
+  for (const value of textLikeCandidates) {
+    if (seenText.has(value)) continue;
+    seenText.add(value);
+    strategies.push({
+      id: generateLocatorId(input.elementId, 'text', idx++),
+      type: 'text',
+      value,
+      confidence: 0.9,
+      enabled: true,
+    });
+  }
+
+  if (input.normalizedBox) {
+    strategies.push({
+      id: generateLocatorId(input.elementId, 'normalized_box', idx++),
+      type: 'normalized-box',
+      value: input.normalizedBox,
+      confidence: 0.65,
+      enabled: true,
+    });
+  }
+
+  return strategies;
 }
 
 /**
@@ -336,7 +481,7 @@ export function mkdirSafe(dir: string): void {
  * Save base64 screenshot to file
  */
 export function saveScreenshot(b64: string, name: string, dir: string): string {
-  const p = path.join(dir, name + '.png');
+  const p = path.join(dir, `${name}.png`);
   fs.writeFileSync(p, Buffer.from(b64, 'base64'));
   return p;
 }

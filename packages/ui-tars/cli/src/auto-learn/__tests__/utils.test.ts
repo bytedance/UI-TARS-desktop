@@ -5,16 +5,25 @@
 import { describe, it, expect } from 'vitest';
 import {
   extractCoords,
+  extractActionBbox,
   parseBbox,
   guessElementType,
   guessActionType,
   extractElementName,
+  extractLearnedLabel,
   generateElementId,
+  generateElementStableId,
+  generatePageId,
+  generateSecondaryPageId,
+  generateRegionId,
   generateTabName,
   deriveAppName,
   generatePageName,
   generateLandingPageName,
   generateSecondaryPageName,
+  toNormalizedBox,
+  buildLocatorStrategies,
+  deriveElementRole,
   isSameElement,
   deduplicateTabs,
   deduplicateElements,
@@ -51,6 +60,17 @@ describe('parseBbox', () => {
   it('should return empty array for invalid input', () => {
     expect(parseBbox('')).toEqual([]);
     expect(parseBbox('invalid')).toEqual([]);
+  });
+});
+
+describe('extractActionBbox', () => {
+  it('should extract bbox from start_box action input', () => {
+    expect(extractActionBbox({ start_box: '[10, 20, 30, 40]' })).toEqual([10, 20, 30, 40]);
+  });
+
+  it('should return empty array when start_box is missing or invalid', () => {
+    expect(extractActionBbox({})).toEqual([]);
+    expect(extractActionBbox({ start_box: 'invalid' })).toEqual([]);
   });
 });
 
@@ -183,6 +203,19 @@ describe('generateElementId', () => {
   });
 });
 
+describe('stable ID generators', () => {
+  it('should generate stable page ids', () => {
+    expect(generatePageId(1)).toBe('page_1');
+    expect(generateSecondaryPageId('page_2', 3)).toBe('page_2__child_3');
+  });
+
+  it('should generate stable region and element ids', () => {
+    expect(generateRegionId('page_1', 'main')).toBe('region_page_1_main');
+    expect(generateRegionId('page_2', 'hero banner')).toBe('region_page_2_hero_banner');
+    expect(generateElementStableId('page_3', 4)).toBe('element_page_3_4');
+  });
+});
+
 describe('generateTabName', () => {
   it('should extract tab name from 【name】 pattern', () => {
     expect(generateTabName('点击【Discover】tab', 1)).toBe('Discover');
@@ -196,6 +229,20 @@ describe('generateTabName', () => {
 
   it('should fallback to Tab_N when no pattern matches', () => {
     expect(generateTabName('switch to the next navigation target', 3)).toBe('Tab_3');
+  });
+});
+
+describe('extractLearnedLabel', () => {
+  it('should extract a learned label from bracket syntax', () => {
+    expect(extractLearnedLabel('I will click 【Inbox】')?.primary).toBe('Inbox');
+  });
+
+  it('should extract a learned label from quoted syntax', () => {
+    expect(extractLearnedLabel('click "Search" input')?.primary).toBe('Search');
+  });
+
+  it('should return undefined when there is no explicit label', () => {
+    expect(extractLearnedLabel('click the likely button')).toBeUndefined();
   });
 });
 
@@ -256,6 +303,51 @@ describe('generateLandingPageName', () => {
 
   it('should avoid collisions with existing page names', () => {
     expect(generateLandingPageName(['LandingPage'])).toBe('LandingPage_2');
+  });
+});
+
+describe('toNormalizedBox', () => {
+  it('should normalize absolute bbox coordinates', () => {
+    expect(toNormalizedBox([108, 240, 324, 720], 1080, 2400)).toEqual({
+      left: 0.1,
+      top: 0.1,
+      width: 0.2,
+      height: 0.2,
+    });
+  });
+
+  it('should return undefined for invalid bbox input', () => {
+    expect(toNormalizedBox([], 1080, 2400)).toBeUndefined();
+    expect(toNormalizedBox([0, 0, 10, 10], 0, 2400)).toBeUndefined();
+  });
+});
+
+describe('buildLocatorStrategies', () => {
+  it('should prioritize text and normalized-box locators', () => {
+    expect(
+      buildLocatorStrategies({
+        elementId: 'element_page_1_1',
+        label: { primary: 'Inbox', aliases: ['Messages'] },
+        textCandidates: ['Inbox', 'Chat'],
+        normalizedBox: { left: 0.5, top: 0.8, width: 0.2, height: 0.1 },
+      }),
+    ).toEqual([
+      expect.objectContaining({ type: 'text', value: 'Inbox' }),
+      expect.objectContaining({ type: 'text', value: 'Messages' }),
+      expect.objectContaining({ type: 'text', value: 'Chat' }),
+      expect.objectContaining({ type: 'normalized-box' }),
+    ]);
+  });
+});
+
+describe('deriveElementRole', () => {
+  it('should derive navigation roles from navigate actions', () => {
+    expect(deriveElementRole('button', 'navigate')).toBe('navigation');
+  });
+
+  it('should derive input and confirm roles', () => {
+    expect(deriveElementRole('input', 'input')).toBe('input');
+    expect(deriveElementRole('button', 'confirm')).toBe('confirm');
   });
 });
 
