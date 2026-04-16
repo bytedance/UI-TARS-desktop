@@ -8,7 +8,7 @@ import os from 'node:os';
 
 import fetch from 'node-fetch';
 import { GUIAgent, type GUIAgentData } from '@ui-tars/sdk';
-import type { Operator as GUIOperator } from '@ui-tars/sdk/core';
+import { StatusEnum, type ExecuteOutput, type Operator as GUIOperator } from '@ui-tars/sdk/core';
 import * as p from '@clack/prompts';
 import yaml from 'js-yaml';
 
@@ -26,6 +26,7 @@ import {
   RUNTIME_BUDGETS,
   resolveRuntimeLocale,
 } from '../auto-learn';
+import type { CompletionPolicy } from '../auto-learn';
 
 interface PresetConfig {
   vlmApiKey?: string;
@@ -63,7 +64,12 @@ async function runAgentInstruction(params: {
   instruction: string;
   systemPromptSuffix?: string;
   historyMessages?: HistoryMessage[];
+  completionPolicy?: CompletionPolicy;
 }) {
+  const operator = createCompletionAwareOperator(
+    params.operator,
+    params.completionPolicy,
+  );
   const guiAgent = new GUIAgent({
     model: {
       baseURL: params.config.baseURL,
@@ -71,7 +77,7 @@ async function runAgentInstruction(params: {
       model: params.config.model,
       useResponsesApi: params.config.useResponsesApi,
     },
-    operator: params.operator,
+    operator,
     systemPromptSuffix: params.systemPromptSuffix,
     signal: params.signal,
     onError: ({ data, error }: { data: GUIAgentData; error: Error }) => {
@@ -80,6 +86,44 @@ async function runAgentInstruction(params: {
   });
 
   await guiAgent.run(params.instruction, params.historyMessages);
+}
+
+function createCompletionAwareOperator(
+  baseOperator: GUIOperator,
+  completionPolicy?: CompletionPolicy,
+): GUIOperator {
+  if (!completionPolicy) {
+    return baseOperator;
+  }
+
+  return {
+    constructor: baseOperator.constructor,
+    screenshot: (...args) => baseOperator.screenshot(...args as []),
+    execute: async (params) => {
+      const result = (await baseOperator.execute(params)) as ExecuteOutput | void;
+      const actionType = params.parsedPrediction.action_type;
+
+      if (
+        completionPolicy === 'stop_on_target_open' &&
+        actionType === 'click' &&
+        result?.status !== StatusEnum.ERROR &&
+        result?.status !== StatusEnum.CALL_USER
+      ) {
+        return { ...(result || {}), status: StatusEnum.END };
+      }
+
+      if (
+        completionPolicy === 'stop_after_content_action' &&
+        actionType === 'type' &&
+        result?.status !== StatusEnum.ERROR &&
+        result?.status !== StatusEnum.CALL_USER
+      ) {
+        return { ...(result || {}), status: StatusEnum.END };
+      }
+
+      return result;
+    },
+  } as GUIOperator;
 }
 
 export const start = async (options: CliOptions) => {
@@ -146,6 +190,7 @@ export const start = async (options: CliOptions) => {
   const appMapMode = resolveAppMapMode(options.appMapMode);
   let navigationInstruction: string | undefined;
   let followUpInstruction: string | undefined;
+  let followUpCompletionPolicy: CompletionPolicy | undefined;
   let targetPageName: string | undefined;
   let systemPromptSuffix: string | undefined;
   let followUpPromptSuffix: string | undefined;
@@ -206,6 +251,7 @@ export const start = async (options: CliOptions) => {
       if (appMapMode === 'two-phase' && runtimeIntent?.kind === 'navigate_then_act') {
         navigationInstruction = runtimeIntent.navigationQuery;
         followUpInstruction = runtimeIntent.remainingQuery;
+        followUpCompletionPolicy = runtimeIntent.completionPolicy;
         targetPageName = runtimeIntent.targetPage.label || 'target page';
         const navigationPrompt = buildNavigationGoalPrompt(targetPageName);
         systemPromptSuffix = systemPromptSuffix
@@ -308,6 +354,7 @@ export const start = async (options: CliOptions) => {
       instruction: followUpInstruction,
       systemPromptSuffix: followUpPromptSuffix,
       historyMessages: buildOnPageHistoryMessages(targetPageName || 'target page'),
+      completionPolicy: followUpCompletionPolicy,
     });
     return;
   }
