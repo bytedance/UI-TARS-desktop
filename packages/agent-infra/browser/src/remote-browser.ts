@@ -60,8 +60,20 @@ export class RemoteBrowser extends BaseBrowser {
     if (!browserWSEndpoint) {
       const cdpEndpoint =
         this.options?.cdpEndpoint || `http://127.0.0.1:9222/json/version`;
-      const response = await fetch(cdpEndpoint);
+      const response = await fetch(cdpEndpoint, {
+        signal: AbortSignal.timeout(10_000),
+      });
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch CDP endpoint ${cdpEndpoint}: ${response.status} ${response.statusText}`,
+        );
+      }
       const { webSocketDebuggerUrl } = await response.json();
+      if (!webSocketDebuggerUrl) {
+        throw new Error(
+          `CDP endpoint ${cdpEndpoint} did not return a webSocketDebuggerUrl`,
+        );
+      }
       browserWSEndpoint = webSocketDebuggerUrl;
     }
 
