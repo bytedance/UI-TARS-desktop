@@ -413,7 +413,8 @@ export const convertMessages = async (
       };
       currentParams.push(toolResult);
     } else if (message.role === 'assistant') {
-      if (typeof message.content === 'string') {
+      // Anthropic rejects empty text content blocks; skip when content is "".
+      if (typeof message.content === 'string' && message.content) {
         currentParams.push({
           text: message.content,
           type: 'text',
@@ -424,7 +425,9 @@ export const convertMessages = async (
         const convertedContent: Array<ToolUseBlockParam> = message.tool_calls.map((toolCall) => {
           return {
             id: toolCall.id,
-            input: JSON.parse(toolCall.function.arguments),
+            // Anthropic streaming emits "" for arguments when the tool input is
+            // an empty object; JSON.parse("") throws — fall back to "{}".
+            input: JSON.parse(toolCall.function.arguments || '{}'),
             name: toolCall.function.name,
             type: 'tool_use',
           };
