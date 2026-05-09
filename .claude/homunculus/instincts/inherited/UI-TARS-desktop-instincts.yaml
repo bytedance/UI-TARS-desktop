@@ -1,0 +1,403 @@
+# Instincts generated from https://github.com/Abdullakala/UI-TARS-desktop
+# Generated: 2026-05-09T15:21:35.295Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: UI-TARS-desktop-commit-conventional
+trigger: "when writing a commit message"
+confidence: 0.85
+domain: git
+source: repo-analysis
+source_repo: https://github.com/Abdullakala/UI-TARS-desktop
+---
+
+# UI TARS Desktop Commit Conventional
+
+## Action
+
+Use conventional commit format with prefixes: feat
+
+## Evidence
+
+- 5 commits analyzed
+- Detected conventional commit pattern
+- Examples: feat: build Agent TARS web replica app, feat: complete Agent TARS web application
+
+---
+id: UI-TARS-desktop-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/Abdullakala/UI-TARS-desktop
+---
+
+# UI TARS Desktop Commit Length
+
+## Action
+
+Keep commit messages concise (~42 characters)
+
+## Evidence
+
+- Average commit message length: 42 chars
+- Based on 5 commits
+
+---
+id: UI-TARS-desktop-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/Abdullakala/UI-TARS-desktop
+---
+
+# UI TARS Desktop Naming Files
+
+## Action
+
+Use camelCase naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: camelCase
+
+---
+id: UI-TARS-desktop-import-alias
+trigger: "when importing modules"
+confidence: 0.85
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/Abdullakala/UI-TARS-desktop
+---
+
+# UI TARS Desktop Import Alias
+
+## Action
+
+Use path aliases (@/, ~/) instead of relative imports
+
+## Evidence
+
+- Import analysis shows alias pattern
+- Example: import { x } from '@/lib/x'
+
+---
+id: UI-TARS-desktop-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/Abdullakala/UI-TARS-desktop
+---
+
+# UI TARS Desktop Export Style
+
+## Action
+
+Prefer named exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: named
+
+---
+id: UI-TARS-desktop-test-separate
+trigger: "when writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/Abdullakala/UI-TARS-desktop
+---
+
+# UI TARS Desktop Test Separate
+
+## Action
+
+Place tests in the tests/ or __tests__/ directory, mirroring src structure
+
+## Evidence
+
+- Separate test directory pattern detected
+- Tests live in dedicated test folders
+
+---
+id: UI-TARS-desktop-workflow-feature-development
+trigger: "when implementing a new feature"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/Abdullakala/UI-TARS-desktop
+---
+
+# UI TARS Desktop Workflow Feature Development
+
+## Action
+
+Follow the feature-development workflow:
+1. Add feature implementation
+2. Add tests for feature
+3. Update documentation
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~30x per month
+- Files: apps/agent-tars-web/app/[sessionid]/*, apps/agent-tars-web/app/api/sessions/[sessionid]/abort/*, apps/agent-tars-web/app/api/sessions/[sessionid]/messages/*
+
+---
+id: UI-TARS-desktop-workflow-feature-development-with-docs-and-implementation
+trigger: "when doing feature development with docs and implementation"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/Abdullakala/UI-TARS-desktop
+---
+
+# UI TARS Desktop Workflow Feature Development With Docs And Implementation
+
+## Action
+
+Follow the feature-development-with-docs-and-implementation workflow:
+1. Create or update multiple implementation files (e.g., components, API routes, utilities, state management).
+2. Add or update related documentation files (e.g., README, guides, overview, deliverables, quickstart).
+3. Update configuration files as needed (e.g., tsconfig, package.json, .env.example).
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: apps/agent-tars-web/app/**/*.tsx, apps/agent-tars-web/app/api/**/*.ts, apps/agent-tars-web/components/**/*.tsx
+
+---
+id: UI-TARS-desktop-workflow-project-setup-and-deployment-workflow
+trigger: "when doing project setup and deployment workflow"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/Abdullakala/UI-TARS-desktop
+---
+
+# UI TARS Desktop Workflow Project Setup And Deployment Workflow
+
+## Action
+
+Follow the project-setup-and-deployment-workflow workflow:
+1. Add or update environment and configuration files (e.g., .env.example, .eslintrc.json, .gitignore, next.config.ts).
+2. Add or update deployment and dockerization files (e.g., Dockerfile, docker-compose.yml, DEPLOY_VERCEL.md, DOCKER.md).
+3. Add or update setup, testing, and verification scripts and guides (e.g., TESTING.md, VERIFY_BUILD.sh, MASTER_GUIDE.md).
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: apps/agent-tars-web/.env.example, apps/agent-tars-web/.eslintrc.json, apps/agent-tars-web/.gitignore
+
+---
+id: UI-TARS-desktop-workflow-dependency-and-startup-fix-workflow
+trigger: "when doing dependency and startup fix workflow"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/Abdullakala/UI-TARS-desktop
+---
+
+# UI TARS Desktop Workflow Dependency And Startup Fix Workflow
+
+## Action
+
+Follow the dependency-and-startup-fix-workflow workflow:
+1. Update package.json and package-lock.json with missing or updated dependencies.
+2. Update Next.js configuration files as needed.
+3. Add or update type declaration files (e.g., next-env.d.ts).
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: apps/agent-tars-web/package.json, apps/agent-tars-web/package-lock.json, apps/agent-tars-web/next.config.ts
+
+---
+id: ui-tars-desktop-instinct-naming-conventions
+trigger: "When creating or renaming files, functions, classes, or constants in TypeScript code"
+confidence: 0.85
+domain: code-style
+source: repo-analysis
+source_repo: Abdullakala/UI-TARS-desktop
+---
+
+# Ui Tars Desktop Instinct Naming Conventions
+
+## Action
+
+Use camelCase for files and functions, PascalCase for classes, and SCREAMING_SNAKE_CASE for constants
+
+## Evidence
+
+- Pattern in codeStyle.namingConventions
+- Consistent usage in apps/agent-tars-web/app/**/*.tsx
+
+---
+id: ui-tars-desktop-instinct-import-export-style
+trigger: "When importing or exporting modules in TypeScript files"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: Abdullakala/UI-TARS-desktop
+---
+
+# Ui Tars Desktop Instinct Import Export Style
+
+## Action
+
+Use alias-based imports and named exports
+
+## Evidence
+
+- Pattern in codeStyle.importStyle and exportStyle
+- Alias imports and named exports found in apps/agent-tars-web/app/**/*.tsx
+
+---
+id: ui-tars-desktop-instinct-testing-location
+trigger: "When adding or updating tests for a feature"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: Abdullakala/UI-TARS-desktop
+---
+
+# Ui Tars Desktop Instinct Testing Location
+
+## Action
+
+Place test files in a separate location from implementation files, following the monorepo structure
+
+## Evidence
+
+- Pattern in architecture.folderStructure.testLocation
+- Feature development workflow includes **/*.test.* files
+
+---
+id: ui-tars-desktop-instinct-testing-pattern
+trigger: "When implementing a new feature"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: Abdullakala/UI-TARS-desktop
+---
+
+# Ui Tars Desktop Instinct Testing Pattern
+
+## Action
+
+Add corresponding test files for new or updated features, following the commit sequence: implementation, then tests, then docs
+
+## Evidence
+
+- Feature development workflow commitSequence: Add feature implementation → Add tests for feature → Update documentation
+- Example files: **/*.test.*
+
+---
+id: ui-tars-desktop-instinct-git-commit-format
+trigger: "When writing a commit message"
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: Abdullakala/UI-TARS-desktop
+---
+
+# Ui Tars Desktop Instinct Git Commit Format
+
+## Action
+
+Use the conventional commit format with the 'feat' prefix for features, followed by a concise description
+
+## Evidence
+
+- Pattern in commits.type: conventional, prefixes: ["feat"]
+- Examples: 'feat: build Agent TARS web replica app'
+
+---
+id: ui-tars-desktop-instinct-feature-development-workflow
+trigger: "When implementing a new feature or updating an existing one"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: Abdullakala/UI-TARS-desktop
+---
+
+# Ui Tars Desktop Instinct Feature Development Workflow
+
+## Action
+
+Follow the sequence: add implementation files, add tests, update documentation
+
+## Evidence
+
+- Feature development workflow commitSequence and example
+- Files: apps/agent-tars-web/app/[sessionId]/page.tsx, **/*.test.*
+
+---
+id: ui-tars-desktop-instinct-feature-with-docs-workflow
+trigger: "When developing a significant new feature or completing a major milestone (including code and documentation)"
+confidence: 0.95
+domain: workflow
+source: repo-analysis
+source_repo: Abdullakala/UI-TARS-desktop
+---
+
+# Ui Tars Desktop Instinct Feature With Docs Workflow
+
+## Action
+
+Create or update multiple implementation files, then add or update related documentation, then update configuration files as needed
+
+## Evidence
+
+- feature-development-with-docs-and-implementation workflow steps and filesInvolved
+- Example commit sequences and files
+
+---
+id: ui-tars-desktop-instinct-setup-deployment-workflow
+trigger: "When preparing the project for deployment or onboarding (environment setup, Docker, deployment guides)"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: Abdullakala/UI-TARS-desktop
+---
+
+# Ui Tars Desktop Instinct Setup Deployment Workflow
+
+## Action
+
+Add or update environment/config files, deployment/docker files, and setup/testing scripts and guides
+
+## Evidence
+
+- project-setup-and-deployment-workflow steps and filesInvolved
+- Example commit sequences and files
+
+---
+id: ui-tars-desktop-instinct-dependency-fix-workflow
+trigger: "When encountering startup errors or missing dependencies"
+confidence: 0.85
+domain: workflow
+source: repo-analysis
+source_repo: Abdullakala/UI-TARS-desktop
+---
+
+# Ui Tars Desktop Instinct Dependency Fix Workflow
+
+## Action
+
+Update package.json and package-lock.json, update Next.js config files, and add/update type declaration files
+
+## Evidence
+
+- dependency-and-startup-fix-workflow steps and filesInvolved
+- Example commit sequences and files
+
