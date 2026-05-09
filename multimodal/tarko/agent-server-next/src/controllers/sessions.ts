@@ -49,7 +49,8 @@ export async function createSession(c: HonoContext) {
     const sessionFactory = server.getSessionFactory();
     const sessionPool = server.getSessionPool();
 
-    const { session, events, sessionInfo, storageUnsubscribe } = await sessionFactory.createSession(c);
+    const { session, events, sessionInfo, storageUnsubscribe } =
+      await sessionFactory.createSession(c);
 
     sessionPool.set(session.id, session);
 
@@ -62,7 +63,7 @@ export async function createSession(c: HonoContext) {
       {
         sessionId: session.id,
         session: sessionInfo,
-        events
+        events,
       },
       201,
     );
@@ -99,7 +100,7 @@ export async function getSessionDetails(c: HonoContext) {
 
     return c.json({ error: 'Session not found' }, 404);
   } catch (error) {
-    console.error(`Error getting session details for ${sessionId}:`, error);
+    console.error('Error getting session details for %s:', sessionId, error);
     return c.json({ error: 'Failed to get session details' }, 500);
   }
 }
@@ -108,8 +109,6 @@ export async function getSessionDetails(c: HonoContext) {
  * Get session events
  */
 export async function getSessionEvents(c: HonoContext) {
-
-
   const server = c.get('server');
   const sessionId = c.req.query('sessionId');
 
@@ -122,7 +121,7 @@ export async function getSessionEvents(c: HonoContext) {
 
     return c.json({ events }, 200);
   } catch (error) {
-    console.error(`Error getting events for session ${sessionId}:`, error);
+    console.error('Error getting events for session %s:', sessionId, error);
     return c.json({ error: 'Failed to get session events' }, 500);
   }
 }
@@ -155,7 +154,6 @@ export async function getSessionStatus(c: HonoContext) {
   const session = c.get('session');
 
   try {
-
     if (!session) {
       return c.json({ error: 'Session not found' }, 404);
     }
@@ -167,13 +165,13 @@ export async function getSessionStatus(c: HonoContext) {
         sessionId: session.id,
         status: {
           isProcessing,
-        state: session.agent.status(),
-      },
+          state: session.agent.status(),
+        },
       },
       200,
     );
   } catch (error) {
-    console.error(`Error getting session status (${session?.id}):`, error);
+    console.error('Error getting session status (%s):', session?.id, error);
     return c.json({ error: 'Failed to get session status' }, 500);
   }
 }
@@ -194,7 +192,7 @@ export async function updateSession(c: HonoContext) {
     if (!sessionId) {
       return c.json({ error: 'SessionId not found' }, 404);
     }
-    
+
     const sessionInfo = await server.daoFactory.getSessionInfo(sessionId);
     if (!sessionInfo) {
       return c.json({ error: 'Session not found' }, 404);
@@ -209,7 +207,7 @@ export async function updateSession(c: HonoContext) {
 
     return c.json({ session: updatedMetadata }, 200);
   } catch (error) {
-    console.error(`Error updating session ${sessionId}:`, error);
+    console.error('Error updating session %s:', sessionId, error);
     return c.json({ error: 'Failed to update session' }, 500);
   }
 }
@@ -219,7 +217,7 @@ export async function updateSession(c: HonoContext) {
  */
 export async function deleteSession(c: HonoContext) {
   const server = c.get('server');
-  const sessionId = (await c.req.json())?.sessionId
+  const sessionId = (await c.req.json())?.sessionId;
 
   if (!sessionId) {
     return c.json({ error: 'sessionId not found' }, 404);
@@ -237,11 +235,11 @@ export async function deleteSession(c: HonoContext) {
       delete server.storageUnsubscribes[sessionId];
     }
 
-    await server.daoFactory.deleteSession(sessionId);   
+    await server.daoFactory.deleteSession(sessionId);
 
     return c.json({ success: true, message: 'Session deleted successfully' }, 200);
   } catch (error) {
-    console.error(`Error deleting session ${sessionId}:`, error);
+    console.error('Error deleting session %s:', sessionId, error);
     return c.json({ error: 'Failed to delete session' }, 500);
   }
 }
@@ -280,7 +278,7 @@ export async function generateSummary(c: HonoContext) {
     // Return the summary
     c.json(summaryResponse, 200);
   } catch (error) {
-    console.error(`Error generating summary for session ${sessionId}:`, error);
+    console.error('Error generating summary for session %s:', sessionId, error);
     c.json(
       {
         error: 'Failed to generate summary',
@@ -295,7 +293,7 @@ export async function generateSummary(c: HonoContext) {
  * Share a session
  */
 export async function shareSession(c: HonoContext) {
-  const { sessionId, upload } = await c.req.json()
+  const { sessionId, upload } = await c.req.json();
 
   if (!sessionId) {
     return c.json({ error: 'Session ID is required' }, 400);
@@ -311,12 +309,15 @@ export async function shareSession(c: HonoContext) {
     if (result.success) {
       return c.json(result, 200);
     } else {
-      return c.json({
-        error: result.error || 'Failed to share session',
-      }, 500);
+      return c.json(
+        {
+          error: result.error || 'Failed to share session',
+        },
+        500,
+      );
     }
   } catch (error) {
-    console.error(`Error sharing session ${sessionId}:`, error);
+    console.error('Error sharing session %s:', sessionId, error);
     return c.json({ error: 'Failed to share session' }, 500);
   }
 }

@@ -41,7 +41,8 @@ export function resolveWorkspacePath(baseDir: string, workspacePath?: string): s
     resolvedPath = path.resolve(baseDir, workspacePath);
   }
 
-  return resolvedPath;
+  // Ensure the resolved path is absolute and normalized
+  return path.resolve(resolvedPath);
 }
 
 /**
