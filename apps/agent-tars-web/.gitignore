@@ -1,0 +1,13 @@
+node_modules/
+.next/
+dist/
+build/
+.env.local
+.env.*.local
+.DS_Store
+*.log
+*.swp
+*.swo
+.turbo/
+.vercel/
+coverage/

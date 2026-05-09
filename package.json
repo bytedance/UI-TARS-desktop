@@ -7,6 +7,7 @@
   "main": "./dist/main/main.js",
   "author": "ByteDance",
   "scripts": {
+    "dev": "cd apps/agent-tars-web && npm run dev",
     "commit": "oco",
     "bootstrap": "pnpm i",
     "dev:ui-tars": "turbo run ui-tars-desktop#dev",
