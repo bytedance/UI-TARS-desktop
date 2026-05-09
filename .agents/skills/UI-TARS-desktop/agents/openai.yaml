@@ -1,0 +1,6 @@
+interface:
+  display_name: "UI TARS Desktop"
+  short_description: "Repo-specific patterns and workflows for UI-TARS-desktop"
+  default_prompt: "Use the UI-TARS-desktop repo skill to follow existing architecture, testing, and workflow conventions."
+policy:
+  allow_implicit_invocation: true

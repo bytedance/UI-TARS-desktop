@@ -1,0 +1,188 @@
+@import 'tailwindcss';
+
+@theme inline {
+  --font-sans: 'Inter', 'Inter Fallback', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Menlo', monospace;
+
+  /* Colors - Dark theme matching Agent TARS desktop */
+  --color-background: #0a0a0a;
+  --color-foreground: #fafafa;
+  --color-card: #141414;
+  --color-card-foreground: #fafafa;
+  --color-popover: #141414;
+  --color-popover-foreground: #fafafa;
+  --color-primary: #6366f1;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #27272a;
+  --color-secondary-foreground: #fafafa;
+  --color-muted: #27272a;
+  --color-muted-foreground: #a1a1aa;
+  --color-accent: #27272a;
+  --color-accent-foreground: #fafafa;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #fafafa;
+  --color-border: #27272a;
+  --color-input: #27272a;
+  --color-ring: #6366f1;
+  
+  /* Sidebar specific */
+  --color-sidebar: #0f0f0f;
+  --color-sidebar-foreground: #fafafa;
+  --color-sidebar-border: #1f1f1f;
+  --color-sidebar-accent: #1a1a1a;
+  --color-sidebar-accent-foreground: #fafafa;
+  
+  /* Agent specific colors */
+  --color-agent-thinking: #8b5cf6;
+  --color-agent-tool: #22c55e;
+  --color-agent-error: #ef4444;
+  --color-agent-success: #10b981;
+  
+  /* Gradient colors for accent elements */
+  --color-gradient-start: #6366f1;
+  --color-gradient-mid: #8b5cf6;
+  --color-gradient-end: #ec4899;
+
+  --radius: 0.5rem;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted-foreground);
+}
+
+/* Selection color */
+::selection {
+  background-color: var(--color-primary);
+  color: var(--color-primary-foreground);
+}
+
+/* Gradient border animation */
+@keyframes gradient-rotate {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.gradient-border {
+  background: linear-gradient(
+    90deg,
+    var(--color-gradient-start),
+    var(--color-gradient-mid),
+    var(--color-gradient-end),
+    var(--color-gradient-start)
+  );
+  background-size: 300% 300%;
+  animation: gradient-rotate 3s ease infinite;
+}
+
+/* Thinking pulse animation */
+@keyframes thinking-pulse {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.thinking-pulse {
+  animation: thinking-pulse 2s ease-in-out infinite;
+}
+
+/* Code block styling */
+pre {
+  background-color: var(--color-card) !important;
+  border-radius: var(--radius);
+  padding: 1rem;
+  overflow-x: auto;
+  font-size: 0.875rem;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+}
+
+/* Markdown styling */
+.markdown-body {
+  color: var(--color-foreground);
+  line-height: 1.6;
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.markdown-body p {
+  margin-bottom: 0.75rem;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.markdown-body li {
+  margin-bottom: 0.25rem;
+}
+
+.markdown-body a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.markdown-body a:hover {
+  color: var(--color-gradient-mid);
+}
+
+.markdown-body blockquote {
+  border-left: 3px solid var(--color-border);
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: var(--color-muted-foreground);
+}
+
+.markdown-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.markdown-body th,
+.markdown-body td {
+  border: 1px solid var(--color-border);
+  padding: 0.5rem;
+  text-align: left;
+}
+
+.markdown-body th {
+  background-color: var(--color-muted);
+}
