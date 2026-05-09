@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  agent-tars-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agent-tars-web
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_API_BASE_URL: ${OPENAI_API_BASE_URL:-https://api.openai.com/v1}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4-turbo}
+      BROWSER_HEADLESS: ${BROWSER_HEADLESS:-true}
+      BROWSERBASE_API_KEY: ${BROWSERBASE_API_KEY}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: PostgreSQL for session persistence (commented out by default)
+  # postgres:
+  #   image: postgres:16-alpine
+  #   container_name: agent-tars-db
+  #   environment:
+  #     POSTGRES_USER: agent_tars
+  #     POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+  #     POSTGRES_DB: agent_tars
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   restart: unless-stopped
+
+volumes:
+  postgres_data:
