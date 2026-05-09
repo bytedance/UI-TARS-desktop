@@ -22,8 +22,8 @@ interface YamlData {
   releaseDate?: string;
 }
 
-const x64Data = yaml.load(x64Content) as YamlData;
-const arm64Data = yaml.load(arm64Content) as YamlData;
+const x64Data = yaml.load(x64Content, { schema: yaml.DEFAULT_SAFE_SCHEMA }) as YamlData;
+const arm64Data = yaml.load(arm64Content, { schema: yaml.DEFAULT_SAFE_SCHEMA }) as YamlData;
 
 // Merge files field from both x64 and arm64
 const mergedFiles = [...(x64Data.files || []), ...(arm64Data.files || [])];
