@@ -18,6 +18,11 @@ import type { AddressInfo } from 'node:net';
 
 export { BaseLogger };
 
+export interface AuthConfig {
+  /** API key for Bearer token authentication. When set, all requests must include Authorization: Bearer <apiKey> header. */
+  apiKey?: string;
+}
+
 export interface RoutesConfig {
   /** Route prefix for all endpoints. Default is '/' */
   prefix?: string;
@@ -53,6 +58,8 @@ interface StartSseAndStreamableHttpMcpServerParams {
   middlewares?: MiddlewareFunction[];
   /** Routes configuration */
   routes?: RoutesConfig;
+  /** Authentication configuration. When provided, requests must include a valid Authorization header. */
+  auth?: AuthConfig;
   logger?: Logger;
   createMcpServer: (req: RequestContext) => Promise<McpServer | Server>;
 }
@@ -67,6 +74,7 @@ export async function startSseAndStreamableHttpMcpServer(
     stateless = true,
     middlewares,
     routes = {},
+    auth,
     logger = new ConsoleLogger(),
   } = params;
 
@@ -96,6 +104,26 @@ export async function startSseAndStreamableHttpMcpServer(
 
   const app = express();
   app.use(express.json());
+
+  // Authentication middleware
+  if (auth?.apiKey) {
+    const apiKey = auth.apiKey;
+    app.use((req: Request, res: Response, next: NextFunction) => {
+      const authHeader = req.headers['authorization'];
+      if (!authHeader || authHeader !== `Bearer ${apiKey}`) {
+        res.status(401).json({
+          jsonrpc: '2.0',
+          error: {
+            code: ErrorCode.InternalError,
+            message: 'Unauthorized: Invalid or missing Authorization header',
+          },
+          id: null,
+        });
+        return;
+      }
+      next();
+    });
+  }
 
   app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
     if (
@@ -259,7 +287,7 @@ export async function startSseAndStreamableHttpMcpServer(
     },
   );
 
-  const HOST = host || '::';
+  const HOST = host || 'localhost';
   const PORT = Number(port || process.env.PORT || 8080);
 
   return new Promise((resolve, reject) => {
