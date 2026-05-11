@@ -37,6 +37,9 @@ type OpenAIChatCompletionCreateParams = Omit<ClientOptions, 'maxRetries'> &
     'model' | 'max_tokens' | 'temperature' | 'top_p'
   >;
 
+const DEFAULT_MAX_TOKENS = 1000;
+const DEFAULT_MAX_TOKENS_V1_5 = 8192;
+
 export interface UITarsModelConfig extends OpenAIChatCompletionCreateParams {
   /** Whether to use OpenAI Response API instead of Chat Completions API */
   useResponsesApi?: boolean;
@@ -107,7 +110,9 @@ export class UITarsModel extends Model {
       baseURL,
       apiKey,
       model,
-      max_tokens = uiTarsVersion == UITarsModelVersion.V1_5 ? 65535 : 1000,
+      max_tokens = uiTarsVersion === UITarsModelVersion.V1_5
+        ? DEFAULT_MAX_TOKENS_V1_5
+        : DEFAULT_MAX_TOKENS,
       temperature = 0,
       top_p = 0.7,
       ...restOptions

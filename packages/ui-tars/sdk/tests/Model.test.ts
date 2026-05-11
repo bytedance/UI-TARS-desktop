@@ -4,6 +4,7 @@
  */
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { UITarsModel } from '../src/Model';
+import { UITarsModelVersion } from '@ui-tars/shared/types';
 
 // Mock OpenAI
 const mockCreate = vi.fn();
@@ -111,6 +112,63 @@ describe('UITarsModel', () => {
         expect.any(Object),
       );
     });
+
+    it('uses a provider-safe default max_tokens for UI-TARS 1.5', async () => {
+      const model = new UITarsModel({
+        apiKey: 'test-key',
+        baseURL: 'https://test.com',
+        model: 'test-model',
+        useResponsesApi: false,
+      });
+
+      mockCreate.mockResolvedValue({
+        choices: [{ message: { content: 'test response' } }],
+        usage: { total_tokens: 100 },
+      });
+
+      await model.invoke({
+        conversations: [{ from: 'human', value: 'test' }],
+        images: [],
+        screenContext: { width: 1920, height: 1080 },
+        uiTarsVersion: UITarsModelVersion.V1_5,
+      });
+
+      expect(mockCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          max_tokens: 8192,
+        }),
+        expect.any(Object),
+      );
+    });
+
+    it('preserves explicit max_tokens overrides for UI-TARS 1.5', async () => {
+      const model = new UITarsModel({
+        apiKey: 'test-key',
+        baseURL: 'https://test.com',
+        model: 'test-model',
+        useResponsesApi: false,
+        max_tokens: 12000,
+      });
+
+      mockCreate.mockResolvedValue({
+        choices: [{ message: { content: 'test response' } }],
+        usage: { total_tokens: 100 },
+      });
+
+      await model.invoke({
+        conversations: [{ from: 'human', value: 'test' }],
+        images: [],
+        screenContext: { width: 1920, height: 1080 },
+        uiTarsVersion: UITarsModelVersion.V1_5,
+      });
+
+      expect(mockCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          max_tokens: 12000,
+        }),
+        expect.any(Object),
+      );
+    });
   });
 
   describe('Response API', () => {
@@ -170,6 +228,35 @@ describe('UITarsModel', () => {
               ],
             },
           ],
+        }),
+        expect.any(Object),
+      );
+    });
+
+    it('uses the same safe UI-TARS 1.5 default for Response API max_output_tokens', async () => {
+      const model = new UITarsModel({
+        apiKey: 'test-key',
+        baseURL: 'https://test.com',
+        model: 'test-model',
+        useResponsesApi: true,
+      });
+
+      mockResponsesCreate.mockResolvedValue({
+        id: 'response-1',
+        output_text: 'test response',
+        usage: { total_tokens: 50 },
+      });
+
+      await model.invoke({
+        conversations: [{ from: 'human', value: 'test' }],
+        images: [],
+        screenContext: { width: 1920, height: 1080 },
+        uiTarsVersion: UITarsModelVersion.V1_5,
+      });
+
+      expect(mockResponsesCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          max_output_tokens: 8192,
         }),
         expect.any(Object),
       );
