@@ -14,7 +14,7 @@
  *    which is a time-consuming operation (taking up to 6 seconds on my computer!).
  *    Since this process is performed during the app's startup, such a delay is unacceptable.
  */
-import { existsSync } from 'fs';
+import { existsSync, readdirSync } from 'fs';
 import { sep, join } from 'path';
 import which from 'which';
 
@@ -36,6 +36,52 @@ function getChromeOnLinux(
     for (const name of list) {
       const path = which.sync(name);
       return path;
+    }
+  } catch (e) {}
+
+  return null;
+}
+
+function getChromeFromEnv(): string | null {
+  const envPath =
+    process.env.PUPPETEER_EXECUTABLE_PATH ||
+    process.env.CHROME_PATH ||
+    process.env.GOOGLE_CHROME_BIN;
+
+  if (envPath && existsSync(envPath)) {
+    return envPath;
+  }
+
+  return null;
+}
+
+function getPuppeteerCacheChrome(): string | null {
+  if (platform !== 'linux') {
+    return null;
+  }
+
+  const cacheDir =
+    process.env.PUPPETEER_CACHE_DIR ||
+    join(process.env.HOME || '', '.cache', 'puppeteer');
+
+  const chromeDir = join(cacheDir, 'chrome');
+
+  if (!existsSync(chromeDir)) {
+    return null;
+  }
+
+  try {
+    const builds = readdirSync(chromeDir, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .sort()
+      .reverse();
+
+    for (const build of builds) {
+      const chromePath = join(chromeDir, build, 'chrome-linux64', 'chrome');
+      if (existsSync(chromePath)) {
+        return chromePath;
+      }
     }
   } catch (e) {}
 
@@ -107,6 +153,11 @@ const chromePaths = {
 };
 
 function getChromePath() {
+  const envChrome = getChromeFromEnv();
+  if (envChrome) {
+    return envChrome;
+  }
+
   const chrome = chromePaths.chrome;
 
   if (platform && Object.keys(chrome).includes(platform)) {
@@ -114,6 +165,11 @@ function getChromePath() {
     if (pth) {
       return pth;
     }
+  }
+
+  const cachedChrome = getPuppeteerCacheChrome();
+  if (cachedChrome) {
+    return cachedChrome;
   }
 }
 

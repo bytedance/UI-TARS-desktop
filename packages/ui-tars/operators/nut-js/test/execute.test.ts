@@ -33,19 +33,49 @@ vi.mock('@ui-tars/sdk/core', async (importOriginal) => {
   };
 });
 
-// Mock @computer-use/nut-js
-vi.mock('@computer-use/nut-js', async (importOriginal) => {
-  const actual: any = await importOriginal();
+vi.mock('@computer-use/nut-js', () => {
+  class Point {
+    constructor(
+      public x: number,
+      public y: number,
+    ) {}
+  }
+
+  class Region {
+    constructor(
+      public x: number,
+      public y: number,
+      public width: number,
+      public height: number,
+    ) {}
+  }
+
   return {
     mouse: {
       move: vi.fn(),
       click: vi.fn(),
+      doubleClick: vi.fn(),
       config: {
         mouseSpeed: 1500,
       },
       drag: vi.fn(),
     },
-    Key: actual.Key,
+    Key: {
+      Comma: 'comma',
+      Enter: 'enter',
+      LeftAlt: 'left-alt',
+      LeftCmd: 'left-cmd',
+      LeftControl: 'left-control',
+      LeftShift: 'left-shift',
+      LeftWin: 'left-win',
+      PageDown: 'page-down',
+      PageUp: 'page-up',
+      Up: 'up',
+      Down: 'down',
+      Left: 'left',
+      Right: 'right',
+      V: 'v',
+    },
     keyboard: {
       type: vi.fn(),
       pressKey: vi.fn(),
@@ -54,13 +84,20 @@ vi.mock('@computer-use/nut-js', async (importOriginal) => {
         autoDelayMs: 0,
       },
     },
+    screen: {
+      grab: vi.fn(),
+    },
+    clipboard: {
+      getContent: vi.fn(),
+      setContent: vi.fn(),
+    },
     Button: {
       LEFT: 'left',
       RIGHT: 'right',
       MIDDLE: 'middle',
     },
-    Point: actual.Point,
-    Region: actual.Region,
+    Point,
+    Region,
     straightTo: vi.fn((point) => point),
     centerOf: vi.fn((region) => region),
     randomPointIn: vi.fn((region) => region),
