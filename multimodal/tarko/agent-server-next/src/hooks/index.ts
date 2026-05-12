@@ -10,8 +10,10 @@ export {
   AuthHook,
   ContextStorageHook,
   SecurityHeadersHook,
+  buildAllowedHosts,
   createCorsHook,
   createCsrfProtectionHook,
+  createHostValidationHook,
   generateCsrfToken,
 } from './builtInHooks'
 export * from './types';

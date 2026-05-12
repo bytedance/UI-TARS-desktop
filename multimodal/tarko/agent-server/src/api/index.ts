@@ -46,6 +46,63 @@ function isAllowedOrigin(origin: string | undefined, port: number): boolean {
 }
 
 /**
+ * Build the set of Host header values that this server is willing to answer on.
+ *
+ * The CORS Origin check alone does not protect against DNS rebinding: an
+ * attacker-controlled domain (e.g. `evil.example`) can be rebound to
+ * `127.0.0.1` after the initial page load, and same-origin GET fetches from
+ * the attacker's page will arrive at the local server **without an Origin
+ * header**, bypassing the Origin allowlist. Validating that the request's
+ * `Host` header is one we actually serve catches this — a DNS-rebound request
+ * carries `Host: evil.example:<port>`, not `localhost:<port>`.
+ *
+ * Operators that deliberately expose the server to other names (e.g. behind a
+ * reverse proxy or a custom hostname) can extend the allowlist via
+ * `TARKO_ALLOWED_HOSTS` (comma-separated).
+ */
+function buildAllowedHosts(port: number): Set<string> {
+  const allowed = new Set<string>([
+    `localhost:${port}`,
+    `127.0.0.1:${port}`,
+    `[::1]:${port}`,
+    `[::ffff:127.0.0.1]:${port}`,
+  ]);
+  const extra = process.env.TARKO_ALLOWED_HOSTS;
+  if (extra) {
+    for (const h of extra.split(',')) {
+      const trimmed = h.trim();
+      if (trimmed) allowed.add(trimmed.toLowerCase());
+    }
+  }
+  return allowed;
+}
+
+/**
+ * Host header validation middleware — DNS rebinding defense.
+ *
+ * Returns 403 if the inbound `Host` header is not one of the values returned
+ * by `buildAllowedHosts(port)`. Comparison is case-insensitive (per RFC 9110
+ * the host component is case-insensitive). Missing `Host` (legal under
+ * HTTP/0.9, but virtually never seen in practice from a real client) is
+ * rejected as well: every modern HTTP/1.1+ client sends it.
+ */
+function hostValidationMiddleware(port: number) {
+  const allowedHosts = buildAllowedHosts(port);
+  return (req: express.Request, res: express.Response, next: express.NextFunction): void => {
+    const host = (req.headers.host || '').toLowerCase();
+    if (!host || !allowedHosts.has(host)) {
+      res.status(403).json({
+        error: 'Invalid Host header',
+        message:
+          'Request Host header does not match the server. Set TARKO_ALLOWED_HOSTS to allow additional hostnames.',
+      });
+      return;
+    }
+    next();
+  };
+}
+
+/**
  * Get CORS options with origin whitelist based on server port.
  */
 export function getDefaultCorsOptions(port: number): cors.CorsOptions {
@@ -94,6 +151,11 @@ export function setupAPI(
 
   // Apply security headers
   app.use(securityHeadersMiddleware);
+
+  // Apply Host header validation (DNS rebinding defense, must run before CORS
+  // so attacker-controlled hostnames are rejected even when Origin is absent,
+  // e.g. same-origin GET from a DNS-rebound iframe).
+  app.use(hostValidationMiddleware(port));
 
   // Apply CORS middleware with origin whitelist
   app.use(cors(getDefaultCorsOptions(port)));
