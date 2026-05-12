@@ -37,6 +37,7 @@ import { BROWSER_OPERATOR } from '@renderer/const';
 import { PresetImport } from './PresetImport';
 import { Tabs, TabsList, TabsTrigger } from '@renderer/components/ui/tabs';
 import { PresetBanner } from './PresetBanner';
+import { ProxySettings } from '@renderer/components/Settings/category/proxy';
 
 import googleIcon from '@resources/icons/google-color.svg?url';
 import bingIcon from '@resources/icons/bing-color.svg?url';
@@ -57,11 +58,17 @@ const formSchema = z.object({
   searchEngineForBrowser: z.nativeEnum(SearchEngineForSettings),
   reportStorageBaseUrl: z.string().optional(),
   utioBaseUrl: z.string().optional(),
+  proxyEnabled: z.boolean().optional(),
+  proxyMode: z.enum(['system', 'custom']).optional(),
+  httpProxy: z.string().optional(),
+  httpsProxy: z.string().optional(),
+  noProxy: z.string().optional(),
 });
 
 const SECTIONS = {
   vlm: 'VLM Settings',
   chat: 'Chat Settings',
+  proxy: 'Proxy Settings',
   report: 'Report Settings',
   general: 'General',
 } as const;
@@ -127,6 +134,11 @@ export default function Settings() {
       reportStorageBaseUrl: '',
       searchEngineForBrowser: SearchEngineForSettings.GOOGLE,
       utioBaseUrl: '',
+      proxyEnabled: false,
+      proxyMode: 'system',
+      httpProxy: '',
+      httpsProxy: '',
+      noProxy: '',
       ...settings,
     },
   });
@@ -143,6 +155,11 @@ export default function Settings() {
         searchEngineForBrowser: settings.searchEngineForBrowser,
         reportStorageBaseUrl: settings.reportStorageBaseUrl,
         utioBaseUrl: settings.utioBaseUrl,
+        proxyEnabled: settings.proxyEnabled,
+        proxyMode: settings.proxyMode,
+        httpProxy: settings.httpProxy,
+        httpsProxy: settings.httpsProxy,
+        noProxy: settings.noProxy,
       });
     }
   }, [settings, form]);
@@ -496,6 +513,17 @@ export default function Settings() {
                     </FormItem>
                   )}
                 />
+              </div>
+              {/* Proxy Settings */}
+              <div
+                id="proxy"
+                ref={(el) => {
+                  sectionRefs.current.proxy = el;
+                }}
+                className="space-y-6 pt-6 ml-1 mr-4"
+              >
+                <h2 className="text-lg font-medium">{SECTIONS.proxy}</h2>
+                <ProxySettings />
               </div>
               <div
                 id="report"
