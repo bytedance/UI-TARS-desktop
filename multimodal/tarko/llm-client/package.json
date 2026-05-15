@@ -2,6 +2,7 @@
   "name": "@tarko/llm-client",
   "version": "0.3.0",
   "description": "A TypeScript SDK to call multiple LLM Providers in OpenAI format.",
+  "license": "MIT",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -17,7 +18,8 @@
     "registry": "https://registry.npmjs.org"
   },
   "files": [
-    "dist"
+    "dist",
+    "LICENSE"
   ],
   "scripts": {
     "dev": "rslib build --watch",
