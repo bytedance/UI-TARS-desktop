@@ -23,6 +23,14 @@ export function expandHome(filepath: string): string {
   return filepath;
 }
 
+export function isPathInsideOrEqual(parentPath: string, childPath: string): boolean {
+  const relative = path.relative(parentPath, childPath);
+  return (
+    relative === '' ||
+    (!!relative && !relative.startsWith('..') && !path.isAbsolute(relative))
+  );
+}
+
 // file editing and diffing utilities
 function normalizeLineEndings(text: string): string {
   return text.replace(/\r\n/g, '\n');

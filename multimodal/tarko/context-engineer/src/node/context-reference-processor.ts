@@ -8,6 +8,14 @@ import path from 'path';
 import type { ChatCompletionContentPart } from '@tarko/agent-interface';
 import { WorkspacePack } from './workspace-pack';
 
+function isPathInsideOrEqual(parentPath: string, childPath: string): boolean {
+  const relative = path.relative(parentPath, childPath);
+  return (
+    relative === '' ||
+    (!!relative && !relative.startsWith('..') && !path.isAbsolute(relative))
+  );
+}
+
 /**
  * ContextReferenceProcessor - Processes contextual references in agent queries
  *
@@ -106,7 +114,7 @@ export class ContextReferenceProcessor {
         const normalizedWorkspace = path.resolve(workspacePath);
         const normalizedTarget = path.resolve(absolutePath);
 
-        if (!normalizedTarget.startsWith(normalizedWorkspace)) {
+        if (!isPathInsideOrEqual(normalizedWorkspace, normalizedTarget)) {
           console.warn(`File reference outside workspace: ${fileRef}`);
           expandedContents.push(
             `<file path="${fileRef}">\nError: File reference outside workspace\n</file>`,
@@ -150,7 +158,7 @@ export class ContextReferenceProcessor {
             const normalizedWorkspace = path.resolve(workspacePath);
             const normalizedTarget = path.resolve(absolutePath);
 
-            if (!normalizedTarget.startsWith(normalizedWorkspace)) {
+            if (!isPathInsideOrEqual(normalizedWorkspace, normalizedTarget)) {
               console.warn(`Directory reference outside workspace: ${dirRef}`);
               return null;
             }

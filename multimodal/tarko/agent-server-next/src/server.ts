@@ -32,7 +32,15 @@ import {
 import { createUserConfigRoutes } from './routes/user';
 import { HookManager, BuiltInPriorities, type HookRegistrationOptions } from './hooks';
 import { config } from 'dotenv';
-import { ContextStorageHook, ErroHandlingHook, RequestIdHook } from './hooks/builtInHooks';
+import {
+  AuthHook,
+  ContextStorageHook,
+  ErroHandlingHook,
+  RequestIdHook,
+  SecurityHeadersHook,
+  createCorsHook,
+  createCsrfProtectionHook,
+} from './hooks/builtInHooks';
 import { resetLogger } from './utils/logger';
 import chalk from 'chalk';
 
@@ -130,8 +138,13 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
       },
     });
 
+    this.hookManager.register(SecurityHeadersHook);
+    this.hookManager.register(createCorsHook(this.port));
+    this.hookManager.register(ContextStorageHook);
     this.hookManager.register(ErroHandlingHook);
     this.hookManager.register(RequestIdHook);
+    this.hookManager.register(AuthHook);
+    this.hookManager.register(createCsrfProtectionHook());
   }
 
 

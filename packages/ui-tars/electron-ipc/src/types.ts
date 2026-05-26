@@ -13,7 +13,12 @@ export type HandleFunction<TInput = any, TResult = any> = (args: {
 
 export type HandleContext = { sender: WebContents | null };
 
-export type RouterType = Record<string, { handle: HandleFunction }>;
+export type Procedure<TInput = any, TResult = any> = {
+  handle: HandleFunction<TInput, TResult>;
+  schema?: ZodSchema<TInput>;
+};
+
+export type RouterType = Record<string, Procedure>;
 
 export type ClientFromRouter<Router extends RouterType> = {
   [K in keyof Router]: Router[K]['handle'] extends (options: {

@@ -77,4 +77,18 @@ describe('@ui-tars/electron-ipc', () => {
 
     expect(result).toBe('Hello Server');
   });
+
+  it('should reject invalid Zod input on server-side calls', () => {
+    const t = initIpc.create();
+
+    const router = t.router({
+      greet: t.procedure
+        .input(z.object({ name: z.string() }))
+        .handle(async ({ input }) => `Hello ${input.name}`),
+    });
+
+    const server = createServer(router);
+
+    expect(() => server.greet({ name: 123 } as any)).toThrow();
+  });
 });

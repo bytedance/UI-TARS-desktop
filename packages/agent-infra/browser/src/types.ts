@@ -79,6 +79,13 @@ export interface LaunchOptions {
    * for more info.
    */
   userDataDir?: string;
+
+  /**
+   * Disable browser web security. This weakens origin isolation and should only
+   * be enabled for controlled automation environments that explicitly need it.
+   * @default false
+   */
+  disableWebSecurity?: boolean;
 }
 
 /**

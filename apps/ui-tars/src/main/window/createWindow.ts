@@ -37,7 +37,7 @@ export function createWindow({
     webPreferences: {
       preload: path.join(__dirname, '../preload/index.js'),
       sandbox: false,
-      webSecurity: !!env.isDev,
+      webSecurity: true,
     },
   };
 
