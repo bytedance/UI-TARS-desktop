@@ -4,17 +4,14 @@
 
 [![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=filesystem&config=eyJjb21tYW5kIjoibnB4IEBhZ2VudC1pbmZyYS9tY3Atc2VydmVyLWNvbW1hbmRzQGxhdGVzdCJ9) [<img src="https://img.shields.io/badge/VS_Code-VS_Code?style=flat-square&label=Install%20Server&color=0098FF" alt="Install in VS Code">](https://insiders.vscode.dev/redirect?url=vscode%253Amcp%252Finstall%253F%257B%2522name%2522%253A%2522commands%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522%2540agent-infra%252Fmcp-server-commands%2540latest%2522%255D%257D) [<img alt="Install in VS Code Insiders" src="https://img.shields.io/badge/VS_Code_Insiders-VS_Code_Insiders?style=flat-square&label=Install%20Server&color=24bfa5">](https://insiders.vscode.dev/redirect?url=vscode-insiders%253Amcp%252Finstall%253F%257B%2522name%2522%253A%2522commands%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522%2540agent-infra%252Fmcp-server-commands%2540latest%2522%255D%257D)
 
-
 A Model Context Protocol (MCP) server that provides execuate arbitrary commands.
 
 ![](https://github.com/user-attachments/assets/ee8df75f-04f4-46c8-8b57-0e32e4373c3e)
-
 
 ### Requirements
 
 - Node.js 18 or newer
 - VS Code, Cursor, Windsurf, Claude Desktop or any other MCP client
-
 
 ### Getting started
 
@@ -48,6 +45,7 @@ code --add-mcp '{"name":"commands","command":"npx","args":["@agent-infra/mcp-ser
 ```
 
 After installation, the Commands MCP server will be available for use with your GitHub Copilot agent in VS Code.
+
 </details>
 
 <details>
@@ -68,6 +66,7 @@ Go to `Cursor Settings` -> `MCP` -> `Add new MCP Server`. Name to your liking, u
   }
 }
 ```
+
 </details>
 
 <details>
@@ -88,6 +87,7 @@ Follow Windsuff MCP [documentation](https://docs.windsurf.com/windsurf/cascade/m
   }
 }
 ```
+
 </details>
 
 <details>
@@ -108,6 +108,7 @@ Follow the MCP install [guide](https://modelcontextprotocol.io/quickstart/user),
   }
 }
 ```
+
 </details>
 
 #### Remote (SSE / Streamable HTTP)
@@ -120,9 +121,9 @@ npx @agent-infra/mcp-server-commands --port 8089
 ```
 
 You can use one of the two MCP Server remote endpoint:
+
 - Streamable HTTP(Recommended): `http://127.0.0.1::8089/mcp`
 - SSE: `http://127.0.0.1::8089/sse`
-
 
 And then in MCP client config, set the `url` to the SSE endpoint:
 
@@ -194,6 +195,38 @@ const toolResult = await client.callTool({
 });
 console.log(toolResult);
 ```
+
+### Safety policy
+
+Commands MCP includes a server-side safety policy for high-risk command
+execution. Commands that match the default destructive patterns are not
+executed immediately; the tool returns an `approval_required` result with the
+matched rule id and approval request id.
+
+Default approval-required categories include recursive or forceful deletion,
+disk or partition mutation, shutdown or restart operations, privileged command
+execution, destructive git commands, and remote script execution such as
+`curl | sh`.
+
+In-process callers can customize the policy:
+
+```js
+const server = createServer({
+  safety: {
+    rules: [
+      {
+        id: 'allow-known-cleanup',
+        action: 'allow',
+        reason: 'This cleanup command is handled by the host approval flow.',
+        patterns: [String.raw`git\s+clean\s+-fd\s+build`],
+      },
+    ],
+  },
+});
+```
+
+Set `COMMANDS_SAFETY_ENABLED=false` to disable the policy for trusted,
+externally sandboxed environments.
 
 ### Developement
 
