@@ -23,15 +23,26 @@ import {
   messagesFor,
   always_log,
 } from './exec-utils.js';
+import {
+  evaluateCommandSafety,
+  formatSafetyDecision,
+  type CommandSafetyPolicyConfig,
+} from './safety-policy.js';
 
 // TODO use .promises? in node api
 const execAsync = promisify(exec);
 
-function createServer(serverConfig?: { cwd?: string }): McpServer {
+type CommandServerConfig = {
+  cwd?: string;
+  safety?: CommandSafetyPolicyConfig;
+};
+
+function createServer(serverConfig?: CommandServerConfig): McpServer {
   const server = new McpServer({
     name: 'Run Commands',
     version: process.env.VERSION || '0.0.1',
   });
+  const safetyPolicy = serverConfig?.safety;
 
   // === Tools ===
   // @ts-ignore
@@ -48,7 +59,7 @@ function createServer(serverConfig?: { cwd?: string }): McpServer {
           .describe('Current working directory, leave empty in most cases'),
       },
     },
-    async (args) => await runCommand(args),
+    async (args) => await runCommand(args, safetyPolicy),
   );
 
   server.registerTool(
@@ -70,7 +81,7 @@ function createServer(serverConfig?: { cwd?: string }): McpServer {
           .describe('Current working directory, leave empty in most cases'),
       },
     },
-    async (args) => await runScript(args),
+    async (args) => await runScript(args, safetyPolicy),
   );
 
   // ==== Prompts ====
@@ -85,6 +96,31 @@ function createServer(serverConfig?: { cwd?: string }): McpServer {
       },
     },
     async ({ command }) => {
+      const safetyDecision = evaluateCommandSafety(
+        {
+          toolName: 'prompt/run_command',
+          command,
+        },
+        safetyPolicy,
+      );
+      if (safetyDecision.action !== 'allow') {
+        const messages: PromptMessage[] = [
+          {
+            role: 'user',
+            content: {
+              type: 'text',
+              text: formatSafetyDecision(safetyDecision),
+            },
+          },
+        ];
+        always_log('WARN: run_command prompt blocked by safety policy', {
+          action: safetyDecision.action,
+          ruleId: safetyDecision.ruleId,
+          approvalRequestId: safetyDecision.approvalRequestId,
+        });
+        return { messages };
+      }
+
       const { stdout, stderr } = await execAsync(command);
       // TODO gracefully handle errors and turn them into a prompt message that can be used by LLM to troubleshoot the issue, currently errors result in nothing inserted into the prompt and instead it shows the Zed's chat panel as a failure
 
@@ -127,15 +163,29 @@ function createServer(serverConfig?: { cwd?: string }): McpServer {
 
 async function runCommand(
   args: Record<string, unknown> | undefined,
+  safetyPolicy?: CommandSafetyPolicyConfig,
 ): Promise<CallToolResult> {
-  const command = String(args?.command);
-  if (!command) {
+  const command = stringArg(args?.command);
+  if (!command?.trim()) {
     throw new Error('Command is required');
   }
 
+  const cwd = stringArg(args?.cwd);
+  const safetyDecision = evaluateCommandSafety(
+    {
+      toolName: 'run_command',
+      command,
+      cwd,
+    },
+    safetyPolicy,
+  );
+  if (safetyDecision.action !== 'allow') {
+    return blockedToolResult(safetyDecision);
+  }
+
   const options: ExecOptions = {};
-  if (args?.cwd) {
-    options.cwd = String(args.cwd);
+  if (cwd) {
+    options.cwd = cwd;
     // ENOENT is thrown if the cwd doesn't exist, and I think LLMs can understand that?
   }
 
@@ -160,9 +210,10 @@ async function runCommand(
 
 async function runScript(
   args: Record<string, unknown> | undefined,
+  safetyPolicy?: CommandSafetyPolicyConfig,
 ): Promise<CallToolResult> {
-  const interpreter = String(args?.interpreter);
-  if (!interpreter) {
+  const interpreter = stringArg(args?.interpreter);
+  if (!interpreter?.trim()) {
     throw new Error('Interpreter is required');
   }
 
@@ -171,14 +222,28 @@ async function runScript(
     // constrains typescript too, to string based overload
     encoding: 'utf8',
   };
-  if (args?.cwd) {
-    options.cwd = String(args.cwd);
+  const cwd = stringArg(args?.cwd);
+  if (cwd) {
+    options.cwd = cwd;
     // ENOENT is thrown if the cwd doesn't exist, and I think LLMs can understand that?
   }
 
-  const script = String(args?.script);
-  if (!script) {
+  const script = stringArg(args?.script);
+  if (!script?.trim()) {
     throw new Error('Script is required');
+  }
+
+  const safetyDecision = evaluateCommandSafety(
+    {
+      toolName: 'run_script',
+      interpreter,
+      script,
+      cwd,
+    },
+    safetyPolicy,
+  );
+  if (safetyDecision.action !== 'allow') {
+    return blockedToolResult(safetyDecision);
   }
 
   try {
@@ -197,4 +262,42 @@ async function runScript(
   }
 }
 
+function blockedToolResult(
+  safetyDecision: ReturnType<typeof evaluateCommandSafety>,
+): CallToolResult {
+  const response = {
+    isError: true,
+    content: [
+      {
+        type: 'text' as const,
+        name: 'SAFETY_POLICY',
+        text: formatSafetyDecision(safetyDecision),
+      },
+    ],
+  };
+  always_log('WARN: command blocked by safety policy', {
+    action: safetyDecision.action,
+    ruleId: safetyDecision.ruleId,
+    approvalRequestId: safetyDecision.approvalRequestId,
+  });
+  return response;
+}
+
+function stringArg(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined;
+}
+
 export { createServer };
+export {
+  evaluateCommandSafety,
+  formatSafetyDecision,
+  DEFAULT_COMMAND_SAFETY_RULES,
+} from './safety-policy.js';
+export type {
+  CommandSafetyAction,
+  CommandSafetyDecision,
+  CommandSafetyPolicyConfig,
+  CommandSafetyRule,
+  CommandSafetySubject,
+} from './safety-policy.js';
+export type { CommandServerConfig };
