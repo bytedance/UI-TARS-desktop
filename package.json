@@ -23,20 +23,19 @@
     "patchedDependencies": {}
   },
   "devDependencies": {
-    "@common/configs": "workspace:*",
-    "turbo": "^2.4.4",
     "@changesets/cli": "^2.27.11",
-    "secretlint": "^10.2.1",
     "@commitlint/cli": "^19.6.1",
     "@commitlint/config-conventional": "^19.6.0",
+    "@common/configs": "workspace:*",
     "@electron-toolkit/tsconfig": "^1.0.1",
     "@playwright/test": "^1.49.1",
     "@trivago/prettier-plugin-sort-imports": "^5.2.1",
     "@types/node": "^20.14.8",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
-    "@vitest/coverage-v8": "^3.0.8",
     "@vitest/coverage-istanbul": "^3.0.3",
+    "@vitest/coverage-v8": "^3.0.8",
+    "bufferutil": "^4.1.0",
     "cross-env": "^7.0.3",
     "electron-playwright-helpers": "^1.7.1",
     "eslint": "^8.57.0",
@@ -48,9 +47,12 @@
     "prettier": "^3.3.2",
     "rimraf": "^6.0.1",
     "sass-embedded": "^1.83.1",
+    "secretlint": "^10.2.1",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "turbo": "^2.4.4",
+    "typescript": "^5.7.2",
+    "utf-8-validate": "^6.0.6"
   },
   "engines": {
     "node": ">=20.x"

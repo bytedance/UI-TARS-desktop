@@ -23,8 +23,8 @@ describe('VLMProviderV2', () => {
     );
   });
 
-  it('should contain exactly three providers', () => {
+  it('should contain exactly five providers', () => {
     const providerCount = Object.keys(VLMProviderV2).length;
-    expect(providerCount).toBe(3);
+    expect(providerCount).toBe(5);
   });
 });
