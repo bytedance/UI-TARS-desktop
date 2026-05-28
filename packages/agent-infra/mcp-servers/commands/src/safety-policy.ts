@@ -32,6 +32,19 @@ type CommandSafetyDecision = {
   approvalRequestId?: string;
 };
 
+type CommandApprovalRiskLevel = 'low' | 'medium' | 'high' | 'critical';
+
+type CommandApprovalRequest = {
+  id: string;
+  title: string;
+  reason: string;
+  source: 'commands';
+  riskLevel: CommandApprovalRiskLevel;
+  ruleId?: string;
+  subject: CommandSafetySubject;
+  createdAt: string;
+};
+
 const DEFAULT_COMMAND_SAFETY_RULES: CommandSafetyRule[] = [
   {
     id: 'destructive-file-removal',
@@ -171,10 +184,67 @@ function formatSafetyDecision(decision: CommandSafetyDecision): string {
   return lines.join('\n');
 }
 
+function createCommandApprovalRequest(
+  decision: CommandSafetyDecision,
+  subject: CommandSafetySubject,
+  createdAt = new Date().toISOString(),
+): CommandApprovalRequest | undefined {
+  if (decision.action !== 'require_approval' || !decision.approvalRequestId) {
+    return undefined;
+  }
+
+  return {
+    id: decision.approvalRequestId,
+    title: createApprovalTitle(subject),
+    reason: decision.reason ?? 'The command requires explicit approval.',
+    source: 'commands',
+    riskLevel: getApprovalRiskLevel(decision.ruleId),
+    ruleId: decision.ruleId,
+    subject,
+    createdAt,
+  };
+}
+
 function getExecutableText(subject: CommandSafetySubject): string {
   return [subject.command, subject.interpreter, subject.script]
     .filter((part): part is string => Boolean(part))
     .join('\n');
+}
+
+function createApprovalTitle(subject: CommandSafetySubject): string {
+  if (subject.toolName === 'run_script') {
+    return `Approve script execution: ${subject.interpreter ?? 'unknown interpreter'}`;
+  }
+
+  if (subject.toolName === 'prompt/run_command') {
+    return `Approve command prompt: ${truncate(subject.command ?? 'unknown command')}`;
+  }
+
+  return `Approve command: ${truncate(subject.command ?? 'unknown command')}`;
+}
+
+function getApprovalRiskLevel(ruleId?: string): CommandApprovalRiskLevel {
+  switch (ruleId) {
+    case 'destructive-file-removal':
+    case 'disk-or-partition-mutation':
+    case 'system-power-action':
+      return 'critical';
+    case 'destructive-git-operation':
+    case 'privileged-or-recursive-permission-change':
+    case 'remote-script-execution':
+      return 'high';
+    default:
+      return 'medium';
+  }
+}
+
+function truncate(value: string): string {
+  const normalized = value.replace(/\s+/g, ' ').trim();
+  if (normalized.length <= 80) {
+    return normalized;
+  }
+
+  return `${normalized.slice(0, 77)}...`;
 }
 
 function matchesPattern(pattern: string, value: string): boolean {
@@ -210,10 +280,13 @@ function createApprovalRequestId(
 
 export {
   DEFAULT_COMMAND_SAFETY_RULES,
+  createCommandApprovalRequest,
   evaluateCommandSafety,
   formatSafetyDecision,
 };
 export type {
+  CommandApprovalRequest,
+  CommandApprovalRiskLevel,
   CommandSafetyAction,
   CommandSafetyDecision,
   CommandSafetyPolicyConfig,

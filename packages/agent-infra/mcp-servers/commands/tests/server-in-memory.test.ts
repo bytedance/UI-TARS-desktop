@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -137,6 +137,85 @@ describe('MCP Server in memory', () => {
     expect(serialized).toContain('approval_required');
     expect(serialized).toContain('test-command-approval');
     expect(serialized).not.toContain('EXECUTED_COMMAND');
+  });
+
+  test('run_command should publish approval requests to the producer hook', async () => {
+    const onApprovalRequired = vi.fn();
+    const server = createServer({
+      safety: {
+        rules: [
+          {
+            id: 'test-command-approval',
+            action: 'require_approval',
+            reason: 'Test command requires user approval.',
+            patterns: [String.raw`node\s+-e`],
+          },
+        ],
+      },
+      approvals: {
+        onApprovalRequired,
+        now: () => new Date('2026-05-26T00:00:00.000Z'),
+      },
+    });
+    const client = await createConnectedClient(server);
+
+    const result = await client.callTool({
+      name: 'run_command',
+      arguments: {
+        command: `node -e "console.log('EXECUTED_COMMAND')"`,
+        cwd: '/repo',
+      },
+    });
+
+    expect(result.isError).toBe(true);
+    expect(onApprovalRequired).toHaveBeenCalledTimes(1);
+    expect(onApprovalRequired).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Approve command: node -e "console.log(\'EXECUTED_COMMAND\')"',
+        reason: 'Test command requires user approval.',
+        source: 'commands',
+        riskLevel: 'medium',
+        ruleId: 'test-command-approval',
+        createdAt: '2026-05-26T00:00:00.000Z',
+        subject: expect.objectContaining({
+          toolName: 'run_command',
+          command: `node -e "console.log('EXECUTED_COMMAND')"`,
+          cwd: '/repo',
+        }),
+      }),
+    );
+  });
+
+  test('approved approval requests should execute on retry', async () => {
+    const onApprovalRequired = vi.fn();
+    const server = createServer({
+      safety: {
+        rules: [
+          {
+            id: 'test-command-approval',
+            action: 'require_approval',
+            reason: 'Test command requires user approval.',
+            patterns: [String.raw`APPROVED_COMMAND`],
+          },
+        ],
+      },
+      approvals: {
+        getDecision: () => 'approved',
+        onApprovalRequired,
+      },
+    });
+    const client = await createConnectedClient(server);
+
+    const result = await client.callTool({
+      name: 'run_command',
+      arguments: {
+        command: `node -e "console.log('APPROVED_COMMAND')"`,
+      },
+    });
+
+    expect(result.isError).toBe(false);
+    expect(JSON.stringify(result)).toContain('APPROVED_COMMAND');
+    expect(onApprovalRequired).not.toHaveBeenCalled();
   });
 
   test('run_script should return an approval request without executing', async () => {
