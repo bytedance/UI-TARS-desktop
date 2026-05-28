@@ -4,7 +4,7 @@
  */
 import { useCallback, useState, type ComponentProps } from 'react';
 import { useNavigate, useLocation } from 'react-router';
-import { Home } from 'lucide-react';
+import { Building2, FileClock, Home, ShieldAlert } from 'lucide-react';
 
 import {
   Sidebar,
@@ -42,7 +42,12 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   const { status } = useStore();
   const [isNavDialogOpen, setNavDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<
-    'home' | { type: 'session'; id: string } | null
+    | 'home'
+    | 'proofpilot'
+    | 'approvals'
+    | 'team'
+    | { type: 'session'; id: string }
+    | null
   >(null);
 
   const needsConfirm =
@@ -54,6 +59,18 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
     await navigate('/');
     await setActiveSession('');
   }, [navigate, setActiveSession]);
+
+  const goProofPilot = useCallback(async () => {
+    await navigate('/proofpilot');
+  }, [navigate]);
+
+  const goApprovals = useCallback(async () => {
+    await navigate('/approvals');
+  }, [navigate]);
+
+  const goTeam = useCallback(async () => {
+    await navigate('/team');
+  }, [navigate]);
 
   const onSessionClick = useCallback(
     async (sessionId: string) => {
@@ -96,7 +113,34 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
     } else {
       goHome();
     }
-  }, [needsConfirm]);
+  }, [goHome, needsConfirm]);
+
+  const handleProofPilotClick = useCallback(() => {
+    if (needsConfirm) {
+      setPendingAction('proofpilot');
+      setNavDialogOpen(true);
+    } else {
+      goProofPilot();
+    }
+  }, [goProofPilot, needsConfirm]);
+
+  const handleApprovalsClick = useCallback(() => {
+    if (needsConfirm) {
+      setPendingAction('approvals');
+      setNavDialogOpen(true);
+    } else {
+      goApprovals();
+    }
+  }, [goApprovals, needsConfirm]);
+
+  const handleTeamClick = useCallback(() => {
+    if (needsConfirm) {
+      setPendingAction('team');
+      setNavDialogOpen(true);
+    } else {
+      goTeam();
+    }
+  }, [goTeam, needsConfirm]);
 
   const handleSessionClick = useCallback(
     (sessionId: string) => {
@@ -107,7 +151,7 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
         onSessionClick(sessionId);
       }
     },
-    [needsConfirm],
+    [needsConfirm, onSessionClick],
   );
 
   const onConfirm = useCallback(async () => {
@@ -116,12 +160,25 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
 
     if (pendingAction === 'home') {
       await goHome();
+    } else if (pendingAction === 'proofpilot') {
+      await goProofPilot();
+    } else if (pendingAction === 'approvals') {
+      await goApprovals();
+    } else if (pendingAction === 'team') {
+      await goTeam();
     } else if (pendingAction?.type === 'session') {
       await onSessionClick(pendingAction.id);
     }
     setPendingAction(null);
     setNavDialogOpen(false);
-  }, [pendingAction, goHome, onSessionClick]);
+  }, [
+    pendingAction,
+    goHome,
+    goProofPilot,
+    goApprovals,
+    goTeam,
+    onSessionClick,
+  ]);
 
   const onCancel = useCallback(() => {
     setPendingAction(null);
@@ -147,10 +204,35 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
           <SidebarMenu className="items-center">
             <SidebarMenuButton
               className="font-medium"
+              isActive={location.pathname === '/'}
               onClick={handleHomeClick}
             >
               <Home />
               Home
+            </SidebarMenuButton>
+            <SidebarMenuButton
+              className="font-medium"
+              isActive={location.pathname === '/proofpilot'}
+              onClick={handleProofPilotClick}
+            >
+              <FileClock />
+              ProofPilot
+            </SidebarMenuButton>
+            <SidebarMenuButton
+              className="font-medium"
+              isActive={location.pathname === '/approvals'}
+              onClick={handleApprovalsClick}
+            >
+              <ShieldAlert />
+              Approvals
+            </SidebarMenuButton>
+            <SidebarMenuButton
+              className="font-medium"
+              isActive={location.pathname === '/team'}
+              onClick={handleTeamClick}
+            >
+              <Building2 />
+              Team
             </SidebarMenuButton>
           </SidebarMenu>
         </SidebarHeader>

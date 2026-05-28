@@ -12,7 +12,7 @@ import { useSetting } from './useSetting';
 import { api } from '@renderer/api';
 import { ConversationWithSoM } from '@/main/shared/types';
 import { Message } from '@ui-tars/shared/types';
-import { Operator } from '@/main/store/types';
+import { type AgentRunMode, Operator } from '@/main/store/types';
 
 const filterAndTransformWithMap = (
   history: ConversationWithSoM[],
@@ -61,10 +61,13 @@ export const useRunAgent = () => {
     value: string,
     history: ConversationWithSoM[],
     callback: () => void = () => {},
+    sessionId?: string,
+    mode: AgentRunMode = 'live',
   ) => {
     const operator = settings.operator;
     if (
-      (operator === Operator.LocalBrowser || Operator.LocalComputer) &&
+      (operator === Operator.LocalBrowser ||
+        operator === Operator.LocalComputer) &&
       !(ensurePermissions?.accessibility && ensurePermissions?.screenCapture)
     ) {
       const permissionsText = [
@@ -102,7 +105,7 @@ export const useRunAgent = () => {
       }),
     ]);
 
-    await api.runAgent();
+    await api.runAgent({ sessionId, mode });
 
     callback();
   };

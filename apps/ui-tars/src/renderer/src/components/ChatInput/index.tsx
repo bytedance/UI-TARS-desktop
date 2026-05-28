@@ -17,10 +17,11 @@ import {
   TooltipTrigger,
 } from '@renderer/components/ui/tooltip';
 import { Button } from '@renderer/components/ui/button';
+import { Switch } from '@renderer/components/ui/switch';
 // import { useScreenRecord } from '@renderer/hooks/useScreenRecord';
 import { api } from '@renderer/api';
 
-import { Play, Send, Square, Loader2 } from 'lucide-react';
+import { FlaskConical, Play, Send, Square, Loader2 } from 'lucide-react';
 import { Textarea } from '@renderer/components/ui/textarea';
 import { useSession } from '@renderer/hooks/useSession';
 
@@ -45,6 +46,7 @@ const ChatInput = ({
     restUserData,
   } = useStore();
   const [localInstructions, setLocalInstructions] = useState('');
+  const [simulationMode, setSimulationMode] = useState(false);
   const { run, stopAgentRuning } = useRunAgent();
   const { getSession, updateSession, chatMessages } = useSession();
   const { settings, updateSetting } = useSetting();
@@ -119,9 +121,15 @@ const ChatInput = ({
       },
     });
 
-    run(instructions, history, () => {
-      setLocalInstructions('');
-    });
+    run(
+      instructions,
+      history,
+      () => {
+        setLocalInstructions('');
+      },
+      sessionId,
+      simulationMode ? 'simulation' : 'live',
+    );
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -235,6 +243,15 @@ const ChatInput = ({
             )}
             {renderButton()}
           </div>
+          <label className="absolute bottom-4 left-4 flex items-center gap-2 rounded-md border bg-background/90 px-2 py-1 text-xs text-muted-foreground shadow-sm">
+            <FlaskConical className="size-3.5" />
+            <span>Simulate</span>
+            <Switch
+              checked={simulationMode}
+              disabled={running || disabled}
+              onCheckedChange={setSimulationMode}
+            />
+          </label>
         </div>
       </div>
     </div>

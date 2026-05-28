@@ -14,6 +14,9 @@ const Home = lazy(() => import('./pages/home'));
 const LocalOperator = lazy(() => import('./pages/local'));
 const FreeRemoteOperator = lazy(() => import('./pages/remote/free'));
 // const PaidRemoteOperator = lazy(() => import('./pages/remote/paid'));
+const ProofPilot = lazy(() => import('./pages/proofpilot'));
+const Approvals = lazy(() => import('./pages/approvals'));
+const TeamConsole = lazy(() => import('./pages/team'));
 
 const Widget = lazy(() => import('./pages/widget'));
 
@@ -33,6 +36,9 @@ export default function App() {
             <Route path="/local" element={<LocalOperator />} />
             <Route path="/free-remote" element={<FreeRemoteOperator />} />
             {/* <Route path="/paid-remote" element={<PaidRemoteOperator />} /> */}
+            <Route path="/proofpilot" element={<ProofPilot />} />
+            <Route path="/approvals" element={<Approvals />} />
+            <Route path="/team" element={<TeamConsole />} />
           </Route>
 
           <Route path="/widget" element={<Widget />} />
