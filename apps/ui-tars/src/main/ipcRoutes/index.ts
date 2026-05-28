@@ -11,6 +11,7 @@ import { browserRoute } from './browser';
 import { remoteResourceRouter } from './remoteResource';
 import { settingRoute } from './setting';
 import { proofPilotRoute } from './proofPilot';
+import { approvalRoute } from './approval';
 
 const t = initIpc.create();
 
@@ -23,6 +24,7 @@ export const ipcRoutes = t.router({
   ...browserRoute,
   ...settingRoute,
   ...proofPilotRoute,
+  ...approvalRoute,
 });
 export type Router = typeof ipcRoutes;
 
