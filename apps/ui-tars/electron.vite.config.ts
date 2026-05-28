@@ -16,12 +16,13 @@ import pkg from './package.json';
 import { getExternalPkgs } from './scripts/getExternalPkgs';
 import tailwindcss from '@tailwindcss/vite';
 
+const appPrivateKeyBase64 = process.env.UI_TARS_APP_PRIVATE_KEY_BASE64;
+
 export default defineConfig({
   main: {
     define: {
-      'process.env.UI_TARS_APP_PRIVATE_KEY_BASE64': JSON.stringify(
-        process.env.UI_TARS_APP_PRIVATE_KEY_BASE64,
-      ),
+      'process.env.UI_TARS_APP_PRIVATE_KEY_BASE64':
+        JSON.stringify(appPrivateKeyBase64),
     },
     build: {
       outDir: 'dist/main',
@@ -40,10 +41,14 @@ export default defineConfig({
       },
     },
     plugins: [
-      bytecodePlugin({
-        chunkAlias: 'app_private',
-        protectedStrings: [process.env.UI_TARS_APP_PRIVATE_KEY_BASE64!],
-      }),
+      ...(appPrivateKeyBase64
+        ? [
+            bytecodePlugin({
+              chunkAlias: 'app_private',
+              protectedStrings: [appPrivateKeyBase64],
+            }),
+          ]
+        : []),
       tsconfigPaths(),
       externalizeDepsPlugin({
         include: [...getExternalPkgs()],
