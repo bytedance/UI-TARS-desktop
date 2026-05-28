@@ -11,6 +11,7 @@ import { showWindow } from '@main/window/index';
 import { closeScreenMarker } from '@main/window/ScreenMarker';
 import { GUIAgent } from '@ui-tars/sdk';
 import { Operator } from '@ui-tars/sdk/core';
+import type { AgentRunMode } from '@main/store/types';
 
 const t = initIpc.create();
 
@@ -42,22 +43,26 @@ export class GUIAgentManager {
 }
 
 export const agentRoute = t.router({
-  runAgent: t.procedure.input<void>().handle(async () => {
-    const { thinking } = store.getState();
-    if (thinking) {
-      return;
-    }
+  runAgent: t.procedure
+    .input<{ sessionId?: string; mode?: AgentRunMode } | void>()
+    .handle(async ({ input }) => {
+      const { thinking } = store.getState();
+      if (thinking) {
+        return;
+      }
 
-    store.setState({
-      abortController: new AbortController(),
-      thinking: true,
-      errorMsg: null,
-    });
+      store.setState({
+        abortController: new AbortController(),
+        activeSessionId: input?.sessionId ?? null,
+        runMode: input?.mode === 'simulation' ? 'simulation' : 'live',
+        thinking: true,
+        errorMsg: null,
+      });
 
-    await runAgent(store.setState, store.getState);
+      await runAgent(store.setState, store.getState);
 
-    store.setState({ thinking: false });
-  }),
+      store.setState({ thinking: false });
+    }),
   pauseRun: t.procedure.input<void>().handle(async () => {
     const guiAgent = GUIAgentManager.getInstance().getAgent();
     if (guiAgent instanceof GUIAgent) {
@@ -109,6 +114,8 @@ export const agentRoute = t.router({
       thinking: false,
       errorMsg: null,
       instructions: '',
+      activeSessionId: null,
+      runMode: 'live',
     });
   }),
 });
