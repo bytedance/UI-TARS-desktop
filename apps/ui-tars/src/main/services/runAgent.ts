@@ -35,6 +35,8 @@ import { FREE_MODEL_BASE_URL } from '../remote/shared';
 import { getAuthHeader } from '../remote/auth';
 import { ProxyClient } from '../remote/proxyClient';
 import { UITarsModelConfig } from '@ui-tars/sdk/core';
+import { FlightRecorder, type FlightRecording } from './flightRecorder';
+import { createSimulationOperator } from './simulationOperator';
 
 export const runAgent = async (
   setState: (state: AppState) => void,
@@ -44,6 +46,20 @@ export const runAgent = async (
   const settings = SettingStore.getStore();
   const { instructions, abortController } = getState();
   assert(instructions, 'instructions is required');
+  const activeSessionId = getState().activeSessionId;
+  const runMode = getState().runMode;
+  const isSimulation = runMode === 'simulation';
+  let flightRecording: FlightRecording | null = null;
+
+  const recordFlight = async (
+    operation: () => Promise<void> | undefined,
+  ): Promise<void> => {
+    try {
+      await operation();
+    } catch (error) {
+      logger.warn('[FlightRecorder] failed to record event', error);
+    }
+  };
 
   const language = settings.language ?? 'en';
 
@@ -109,6 +125,13 @@ export const runAgent = async (
     ) {
       showPredictionMarker(predictionParsed, screenshotContext);
     }
+
+    await recordFlight(() =>
+      flightRecording?.recordAgentData({
+        ...data,
+        conversations: conversationsWithSoM,
+      }),
+    );
 
     setState({
       ...getState(),
@@ -193,10 +216,44 @@ export const runAgent = async (
     language,
     operatorType,
   );
+  const effectiveSystemPrompt = isSimulation
+    ? `${systemPrompt}\n\nSimulation mode is active. Plan the workflow normally, but no UI action will be executed and the screen may not change. Stop once the planned workflow is sufficiently represented.`
+    : systemPrompt;
+  const maxLoopCount = isSimulation
+    ? Math.min(settings.maxLoopCount ?? 25, 5)
+    : settings.maxLoopCount;
+
+  try {
+    flightRecording = await FlightRecorder.getInstance().startRun({
+      sessionId: activeSessionId,
+      mode: runMode,
+      instruction: instructions,
+      operator: settings.operator,
+      modelName: modelConfig.model,
+      modelProvider: modelVersion ?? settings.vlmProvider,
+    });
+    logger.info(
+      '[FlightRecorder] started',
+      flightRecording.runId,
+      flightRecording.directory,
+    );
+  } catch (error) {
+    logger.warn('[FlightRecorder] failed to start recording', error);
+  }
+
+  if (isSimulation) {
+    operator = createSimulationOperator(
+      operator!,
+      async ({ parsedPrediction }) =>
+        recordFlight(() =>
+          flightRecording?.recordSimulationActionSkipped(parsedPrediction),
+        ),
+    );
+  }
 
   const guiAgent = new GUIAgent({
     model: modelConfig,
-    systemPrompt: systemPrompt,
+    systemPrompt: effectiveSystemPrompt,
     logger,
     signal: abortController?.signal,
     operator: operator!,
@@ -204,6 +261,7 @@ export const runAgent = async (
     onError: (params) => {
       const { error } = params;
       logger.error('[onGUIAgentError]', settings, error);
+      void recordFlight(() => flightRecording?.recordError(error));
       setState({
         ...getState(),
         status: StatusEnum.ERROR,
@@ -225,7 +283,7 @@ export const runAgent = async (
         maxRetries: 1,
       },
     },
-    maxLoopCount: settings.maxLoopCount,
+    maxLoopCount,
     loopIntervalInMs: settings.loopIntervalInMs,
     uiTarsVersion: modelVersion,
   });
@@ -239,18 +297,27 @@ export const runAgent = async (
 
   const startTime = Date.now();
 
-  await guiAgent
-    .run(instructions, sessionHistoryMessages, modelAuthHdrs)
-    .catch((e) => {
-      logger.error('[runAgentLoop error]', e);
-      setState({
-        ...getState(),
-        status: StatusEnum.ERROR,
-        errorMsg: e.message,
+  try {
+    await guiAgent
+      .run(instructions, sessionHistoryMessages, modelAuthHdrs)
+      .catch((e) => {
+        logger.error('[runAgentLoop error]', e);
+        void recordFlight(() => flightRecording?.recordError(e));
+        setState({
+          ...getState(),
+          status: StatusEnum.ERROR,
+          errorMsg: e.message,
+        });
       });
-    });
+  } finally {
+    await recordFlight(() => flightRecording?.finish(getState().status));
 
-  logger.info('[runAgent Totoal cost]: ', (Date.now() - startTime) / 1000, 's');
+    logger.info(
+      '[runAgent Totoal cost]: ',
+      (Date.now() - startTime) / 1000,
+      's',
+    );
 
-  afterAgentRun(settings.operator);
+    afterAgentRun(settings.operator);
+  }
 };

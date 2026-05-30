@@ -15,6 +15,8 @@ export const store = createStore<AppState>(
       restUserData: null,
       instructions: '',
       status: StatusEnum.INIT,
+      activeSessionId: null,
+      runMode: 'live',
       sessionHistoryMessages: [],
       messages: [],
       errorMsg: null,

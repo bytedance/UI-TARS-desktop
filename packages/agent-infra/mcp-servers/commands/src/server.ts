@@ -23,15 +23,47 @@ import {
   messagesFor,
   always_log,
 } from './exec-utils.js';
+import {
+  createCommandApprovalRequest,
+  evaluateCommandSafety,
+  formatSafetyDecision,
+  type CommandApprovalRequest,
+  type CommandSafetyPolicyConfig,
+  type CommandSafetyDecision,
+  type CommandSafetySubject,
+} from './safety-policy.js';
 
 // TODO use .promises? in node api
 const execAsync = promisify(exec);
 
-function createServer(serverConfig?: { cwd?: string }): McpServer {
+type CommandServerConfig = {
+  cwd?: string;
+  safety?: CommandSafetyPolicyConfig;
+  approvals?: CommandApprovalHooks;
+};
+
+type CommandApprovalDecision = 'pending' | 'approved' | 'denied';
+
+type CommandApprovalHooks = {
+  onApprovalRequired?: (
+    request: CommandApprovalRequest,
+  ) => void | Promise<void>;
+  getDecision?: (
+    approvalRequestId: string,
+  ) =>
+    | CommandApprovalDecision
+    | undefined
+    | Promise<CommandApprovalDecision | undefined>;
+  now?: () => Date;
+};
+
+function createServer(serverConfig?: CommandServerConfig): McpServer {
   const server = new McpServer({
     name: 'Run Commands',
     version: process.env.VERSION || '0.0.1',
   });
+  const safetyPolicy = serverConfig?.safety;
+  const approvalHooks = serverConfig?.approvals;
 
   // === Tools ===
   // @ts-ignore
@@ -48,7 +80,7 @@ function createServer(serverConfig?: { cwd?: string }): McpServer {
           .describe('Current working directory, leave empty in most cases'),
       },
     },
-    async (args) => await runCommand(args),
+    async (args) => await runCommand(args, safetyPolicy, approvalHooks),
   );
 
   server.registerTool(
@@ -70,7 +102,7 @@ function createServer(serverConfig?: { cwd?: string }): McpServer {
           .describe('Current working directory, leave empty in most cases'),
       },
     },
-    async (args) => await runScript(args),
+    async (args) => await runScript(args, safetyPolicy, approvalHooks),
   );
 
   // ==== Prompts ====
@@ -85,6 +117,33 @@ function createServer(serverConfig?: { cwd?: string }): McpServer {
       },
     },
     async ({ command }) => {
+      const subject = {
+        toolName: 'prompt/run_command',
+        command,
+      };
+      const safetyDecision = await evaluateSafetyWithApprovals(
+        subject,
+        safetyPolicy,
+        approvalHooks,
+      );
+      if (safetyDecision.action !== 'allow') {
+        const messages: PromptMessage[] = [
+          {
+            role: 'user',
+            content: {
+              type: 'text',
+              text: formatSafetyDecision(safetyDecision),
+            },
+          },
+        ];
+        always_log('WARN: run_command prompt blocked by safety policy', {
+          action: safetyDecision.action,
+          ruleId: safetyDecision.ruleId,
+          approvalRequestId: safetyDecision.approvalRequestId,
+        });
+        return { messages };
+      }
+
       const { stdout, stderr } = await execAsync(command);
       // TODO gracefully handle errors and turn them into a prompt message that can be used by LLM to troubleshoot the issue, currently errors result in nothing inserted into the prompt and instead it shows the Zed's chat panel as a failure
 
@@ -127,15 +186,32 @@ function createServer(serverConfig?: { cwd?: string }): McpServer {
 
 async function runCommand(
   args: Record<string, unknown> | undefined,
+  safetyPolicy?: CommandSafetyPolicyConfig,
+  approvalHooks?: CommandApprovalHooks,
 ): Promise<CallToolResult> {
-  const command = String(args?.command);
-  if (!command) {
+  const command = stringArg(args?.command);
+  if (!command?.trim()) {
     throw new Error('Command is required');
   }
 
+  const cwd = stringArg(args?.cwd);
+  const subject = {
+    toolName: 'run_command',
+    command,
+    cwd,
+  };
+  const safetyDecision = await evaluateSafetyWithApprovals(
+    subject,
+    safetyPolicy,
+    approvalHooks,
+  );
+  if (safetyDecision.action !== 'allow') {
+    return blockedToolResult(safetyDecision);
+  }
+
   const options: ExecOptions = {};
-  if (args?.cwd) {
-    options.cwd = String(args.cwd);
+  if (cwd) {
+    options.cwd = cwd;
     // ENOENT is thrown if the cwd doesn't exist, and I think LLMs can understand that?
   }
 
@@ -160,9 +236,11 @@ async function runCommand(
 
 async function runScript(
   args: Record<string, unknown> | undefined,
+  safetyPolicy?: CommandSafetyPolicyConfig,
+  approvalHooks?: CommandApprovalHooks,
 ): Promise<CallToolResult> {
-  const interpreter = String(args?.interpreter);
-  if (!interpreter) {
+  const interpreter = stringArg(args?.interpreter);
+  if (!interpreter?.trim()) {
     throw new Error('Interpreter is required');
   }
 
@@ -171,14 +249,30 @@ async function runScript(
     // constrains typescript too, to string based overload
     encoding: 'utf8',
   };
-  if (args?.cwd) {
-    options.cwd = String(args.cwd);
+  const cwd = stringArg(args?.cwd);
+  if (cwd) {
+    options.cwd = cwd;
     // ENOENT is thrown if the cwd doesn't exist, and I think LLMs can understand that?
   }
 
-  const script = String(args?.script);
-  if (!script) {
+  const script = stringArg(args?.script);
+  if (!script?.trim()) {
     throw new Error('Script is required');
+  }
+
+  const subject = {
+    toolName: 'run_script',
+    interpreter,
+    script,
+    cwd,
+  };
+  const safetyDecision = await evaluateSafetyWithApprovals(
+    subject,
+    safetyPolicy,
+    approvalHooks,
+  );
+  if (safetyDecision.action !== 'allow') {
+    return blockedToolResult(safetyDecision);
   }
 
   try {
@@ -197,4 +291,116 @@ async function runScript(
   }
 }
 
+async function evaluateSafetyWithApprovals(
+  subject: CommandSafetySubject,
+  safetyPolicy?: CommandSafetyPolicyConfig,
+  approvalHooks?: CommandApprovalHooks,
+): Promise<CommandSafetyDecision> {
+  const safetyDecision = evaluateCommandSafety(subject, safetyPolicy);
+  if (
+    safetyDecision.action !== 'require_approval' ||
+    !safetyDecision.approvalRequestId
+  ) {
+    return safetyDecision;
+  }
+
+  const approvalDecision = await approvalHooks?.getDecision?.(
+    safetyDecision.approvalRequestId,
+  );
+
+  if (approvalDecision === 'approved') {
+    always_log('INFO: command safety approval accepted', {
+      approvalRequestId: safetyDecision.approvalRequestId,
+      ruleId: safetyDecision.ruleId,
+    });
+    return {
+      action: 'allow',
+      reason: 'The approval request was approved.',
+      ruleId: safetyDecision.ruleId,
+      approvalRequestId: safetyDecision.approvalRequestId,
+    };
+  }
+
+  if (approvalDecision === 'denied') {
+    return {
+      ...safetyDecision,
+      action: 'deny',
+      reason: 'The approval request was denied.',
+    };
+  }
+
+  await publishApprovalRequired(safetyDecision, subject, approvalHooks);
+
+  return safetyDecision;
+}
+
+async function publishApprovalRequired(
+  safetyDecision: CommandSafetyDecision,
+  subject: CommandSafetySubject,
+  approvalHooks?: CommandApprovalHooks,
+): Promise<void> {
+  if (!approvalHooks?.onApprovalRequired) {
+    return;
+  }
+
+  const request = createCommandApprovalRequest(
+    safetyDecision,
+    subject,
+    approvalHooks.now?.().toISOString(),
+  );
+  if (!request) {
+    return;
+  }
+
+  try {
+    await approvalHooks.onApprovalRequired(request);
+  } catch (error) {
+    always_log('ERROR: approval producer failed', {
+      error: error instanceof Error ? error.message : String(error),
+      approvalRequestId: safetyDecision.approvalRequestId,
+    });
+  }
+}
+
+function blockedToolResult(
+  safetyDecision: CommandSafetyDecision,
+): CallToolResult {
+  const response = {
+    isError: true,
+    content: [
+      {
+        type: 'text' as const,
+        name: 'SAFETY_POLICY',
+        text: formatSafetyDecision(safetyDecision),
+      },
+    ],
+  };
+  always_log('WARN: command blocked by safety policy', {
+    action: safetyDecision.action,
+    ruleId: safetyDecision.ruleId,
+    approvalRequestId: safetyDecision.approvalRequestId,
+  });
+  return response;
+}
+
+function stringArg(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined;
+}
+
 export { createServer };
+export {
+  evaluateCommandSafety,
+  formatSafetyDecision,
+  createCommandApprovalRequest,
+  DEFAULT_COMMAND_SAFETY_RULES,
+} from './safety-policy.js';
+export type {
+  CommandApprovalRequest,
+  CommandApprovalRiskLevel,
+  CommandSafetyAction,
+  CommandSafetyDecision,
+  CommandSafetyPolicyConfig,
+  CommandSafetyRule,
+  CommandSafetySubject,
+} from './safety-policy.js';
+export type { CommandServerConfig };

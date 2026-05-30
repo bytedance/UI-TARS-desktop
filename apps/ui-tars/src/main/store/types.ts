@@ -21,6 +21,8 @@ export type NextAction =
   | { type: 'finish' }
   | { type: 'error'; message: string };
 
+export type AgentRunMode = 'live' | 'simulation';
+
 export type AppState = {
   theme: 'dark' | 'light';
   ensurePermissions: { screenCapture?: boolean; accessibility?: boolean };
@@ -28,6 +30,8 @@ export type AppState = {
   restUserData: Omit<GUIAgentData, 'status' | 'conversations'> | null;
   status: GUIAgentData['status'];
   errorMsg: string | null;
+  activeSessionId: string | null;
+  runMode: AgentRunMode;
   sessionHistoryMessages: Message[];
   messages: ConversationWithSoM[];
   abortController: AbortController | null;
