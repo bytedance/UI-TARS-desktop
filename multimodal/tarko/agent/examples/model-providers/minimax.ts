@@ -9,10 +9,9 @@
  * @default baseUrl https://api.minimax.io/v1
  *
  * Available models:
- * - MiniMax-M2.7 (latest flagship model with enhanced reasoning and coding)
+ * - MiniMax-M3 (latest flagship model with 512K context, up to 128K output, and image input)
+ * - MiniMax-M2.7 (previous generation flagship)
  * - MiniMax-M2.7-highspeed (high-speed version of M2.7 for low-latency scenarios)
- * - MiniMax-M2.5 (204K context window)
- * - MiniMax-M2.5-highspeed (204K context window, optimized for speed)
  */
 
 import { Agent } from '../../src';
@@ -22,7 +21,7 @@ async function main() {
     model: {
       provider: 'minimax',
       apiKey: process.env.MINIMAX_API_KEY,
-      id: 'MiniMax-M2.7',
+      id: 'MiniMax-M3',
     },
   });
   const answer = await agent.run('Hello, what is your name?');

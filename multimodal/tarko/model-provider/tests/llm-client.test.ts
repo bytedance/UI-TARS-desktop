@@ -215,7 +215,7 @@ describe('createLLMClient', () => {
   it('should extend model list for minimax provider', () => {
     const model: AgentModel = {
       provider: 'minimax',
-      id: 'MiniMax-M2.5',
+      id: 'MiniMax-M3',
       baseProvider: 'minimax',
       apiKey: 'minimax-key',
     };
@@ -224,7 +224,7 @@ describe('createLLMClient', () => {
 
     expect(mockTokenJSInstance.extendModelList).toHaveBeenCalledWith(
       'minimax',
-      'MiniMax-M2.5',
+      'MiniMax-M3',
       {
         streaming: true,
         json: true,
@@ -237,7 +237,7 @@ describe('createLLMClient', () => {
   it('should create MiniMax client with correct configuration', () => {
     const model: AgentModel = {
       provider: 'minimax',
-      id: 'MiniMax-M2.5',
+      id: 'MiniMax-M3',
       apiKey: 'minimax-key',
       baseURL: 'https://api.minimax.io/v1',
     };

@@ -168,29 +168,16 @@ describe('Integration Tests', () => {
     it('should resolve MiniMax model as a native base provider', () => {
       const agentModel: AgentModel = {
         provider: 'minimax',
-        id: 'MiniMax-M2.5',
+        id: 'MiniMax-M3',
         apiKey: 'test-minimax-key',
       };
 
       const resolved = resolveModel(agentModel);
       expect(resolved.provider).toBe('minimax');
-      expect(resolved.id).toBe('MiniMax-M2.5');
+      expect(resolved.id).toBe('MiniMax-M3');
       expect(resolved.baseProvider).toBe('minimax');
       expect(resolved.apiKey).toBe('test-minimax-key');
       expect(resolved.baseURL).toBeUndefined();
-    });
-
-    it('should resolve MiniMax-M2.5-highspeed model', () => {
-      const agentModel: AgentModel = {
-        provider: 'minimax',
-        id: 'MiniMax-M2.5-highspeed',
-        apiKey: 'test-minimax-key',
-      };
-
-      const resolved = resolveModel(agentModel);
-      expect(resolved.provider).toBe('minimax');
-      expect(resolved.id).toBe('MiniMax-M2.5-highspeed');
-      expect(resolved.baseProvider).toBe('minimax');
     });
 
     it('should resolve MiniMax-M2.7 model', () => {
@@ -222,7 +209,7 @@ describe('Integration Tests', () => {
     it('should create LLM client for MiniMax without throwing', () => {
       const agentModel: AgentModel = {
         provider: 'minimax',
-        id: 'MiniMax-M2.7',
+        id: 'MiniMax-M3',
         apiKey: 'test-minimax-key',
       };
 
@@ -233,7 +220,7 @@ describe('Integration Tests', () => {
     it('should support custom baseURL for MiniMax', () => {
       const agentModel: AgentModel = {
         provider: 'minimax',
-        id: 'MiniMax-M2.7',
+        id: 'MiniMax-M3',
         apiKey: 'test-minimax-key',
         baseURL: 'https://custom-proxy.example.com/v1',
       };

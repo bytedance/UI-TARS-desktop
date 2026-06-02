@@ -168,7 +168,7 @@ describe('resolveModel', () => {
   it('should handle minimax provider correctly', () => {
     const agentModel: AgentModel = {
       provider: 'minimax',
-      id: 'MiniMax-M2.5',
+      id: 'MiniMax-M3',
       apiKey: 'minimax-key',
     };
 
@@ -176,7 +176,7 @@ describe('resolveModel', () => {
 
     expect(result).toEqual({
       provider: 'minimax',
-      id: 'MiniMax-M2.5',
+      id: 'MiniMax-M3',
       displayName: undefined,
       baseURL: undefined,
       apiKey: 'minimax-key',
