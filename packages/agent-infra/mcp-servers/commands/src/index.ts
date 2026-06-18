@@ -20,7 +20,7 @@ program
   .option('--cwd <cwd>', 'current working directory')
   .option(
     '--host <host>',
-    'host to bind server to. Default is localhost. Use 0.0.0.0 to bind to all interfaces.',
+    'host to bind server to. Default is 127.0.0.1 (loopback). Use 0.0.0.0 to bind to all interfaces.',
   )
   .option('--port <port>', 'port to listen on for SSE and HTTP transport.')
   .action(async (options) => {
