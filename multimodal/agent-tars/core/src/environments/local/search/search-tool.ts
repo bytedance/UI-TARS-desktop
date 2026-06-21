@@ -4,13 +4,7 @@
  */
 
 import { ConsoleLogger, Tool, z } from '@tarko/mcp-agent';
-import {
-  SearchClient,
-  SearchConfig,
-  SearchProvider,
-  firecrawl,
-  Firecrawl,
-} from '@agent-infra/search';
+import { SearchClient, SearchConfig, SearchProvider } from '@agent-infra/search';
 import { AgentTARSSearchOptions } from '@agent-tars/interface';
 import { LocalBrowser, RemoteBrowser } from '@agent-infra/browser';
 
@@ -83,7 +77,6 @@ export class SearchToolProvider {
     const providerMap: Record<string, SearchProvider> = {
       browser_search: SearchProvider.BrowserSearch,
       bing: SearchProvider.BingSearch,
-      bing_search: SearchProvider.BingSearch,
       tavily: SearchProvider.Tavily,
       searxng: SearchProvider.SearXNG,
       duckduckgo: SearchProvider.DuckduckgoSearch,
@@ -140,97 +133,6 @@ export class SearchToolProvider {
           this.logger.error(`Search error: ${error}`);
           return {
             error: `Search failed: ${error instanceof Error ? error.message : String(error)}`,
-          };
-        }
-      },
-    });
-  }
-
-  /**
-   * Whether the configured provider can scrape arbitrary URLs to clean
-   * content. Currently only Firecrawl exposes a managed scrape API; other
-   * providers rely on the headless browser (`browser_get_markdown`) which only
-   * reads the page the browser is already on.
-   */
-  supportsScrape(): boolean {
-    return this.mapProviderString(this.config.provider) === SearchProvider.Firecrawl;
-  }
-
-  /**
-   * Create a `web_scrape` tool that fetches the full, LLM-ready content of a
-   * specific URL without navigating the browser. Complements `web_search`
-   * (discovery) and `browser_get_markdown` (current-tab read) by letting the
-   * agent read any URL it already knows about — docs, an article, a PDF — in
-   * one call.
-   *
-   * Only meaningful when the configured provider is Firecrawl; guard with
-   * {@link supportsScrape} before registering.
-   *
-   * @returns Tool definition for agent registration
-   */
-  createScrapeTool(): Tool {
-    const client: Firecrawl = firecrawl({
-      apiKey: this.config.apiKey,
-      apiUrl: this.config.baseUrl,
-    });
-
-    return new Tool({
-      id: 'web_scrape',
-      description:
-        'Fetch the full content of a specific web page as clean, LLM-ready ' +
-        'markdown — without opening it in the browser. Use this when you ' +
-        'already have a URL (e.g. from web_search results) and need its full ' +
-        'text, not just a snippet. Handles JavaScript-rendered pages and PDFs.',
-      parameters: z.object({
-        url: z
-          .string()
-          .describe('The full URL to scrape (must start with http or https).'),
-        formats: z
-          .array(z.enum(['markdown', 'html', 'links']))
-          .optional()
-          .describe('Output formats to return. Defaults to ["markdown"].'),
-      }),
-      function: async ({ url, formats }) => {
-        if (!url || url.trim() === '') {
-          return { error: 'A url is required' };
-        }
-
-        // Enforce the http(s) contract stated in the description, and reject
-        // other schemes (file:, javascript:, ...) before spending a request.
-        let parsed: URL;
-        try {
-          parsed = new URL(url);
-        } catch {
-          return { error: 'A valid URL is required' };
-        }
-        if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-          return { error: 'URL must start with http:// or https://' };
-        }
-
-        // Log only origin + path — query strings may carry tokens / signed-link
-        // credentials that should not land in logs.
-        const safeUrl = `${parsed.origin}${parsed.pathname}`;
-
-        try {
-          this.logger.info(`Scraping: "${safeUrl}"`);
-
-          const doc = await client.scrape(url, {
-            formats: formats?.length ? formats : ['markdown'],
-            onlyMainContent: true,
-          });
-
-          return {
-            url,
-            title: doc.metadata?.title,
-            markdown: doc.markdown,
-            html: doc.html,
-            links: doc.links,
-            metadata: doc.metadata,
-          };
-        } catch (error) {
-          this.logger.error(`Scrape error for "${safeUrl}": ${error}`);
-          return {
-            error: `Scrape failed: ${error instanceof Error ? error.message : String(error)}`,
           };
         }
       },

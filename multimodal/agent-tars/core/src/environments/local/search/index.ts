@@ -4,3 +4,4 @@
  */
 
 export * from './search-tool';
+export * from './fetch-tool';

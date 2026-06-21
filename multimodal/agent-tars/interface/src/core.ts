@@ -71,7 +71,7 @@ export interface AgentTARSSearchOptions {
   count?: number;
   /**
    * Optional api key, required for tavily and bing_search. Optional for
-   * firecrawl: both `web_search` and `web_scrape` work on the keyless free
+   * firecrawl: both `web_search` and `web_fetch` work on the keyless free
    * tier; provide `fc-...` for higher rate limits.
    */
   apiKey?: string;

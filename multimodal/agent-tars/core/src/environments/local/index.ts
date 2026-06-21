@@ -15,7 +15,7 @@ import {
 import { ResourceCleaner } from '../../utils';
 import { AgentTARSOptions, BuiltInMCPServers, BuiltInMCPServerName } from '../../types';
 import { BrowserGUIAgent, BrowserManager, BrowserToolsManager } from './browser';
-import { SearchToolProvider } from './search';
+import { SearchToolProvider, FetchToolProvider } from './search';
 import { FilesystemToolsManager } from './filesystem';
 import { WorkspacePathResolver } from '../../shared/workspace-path-resolver';
 import { AgentTARSBaseEnvironment } from '../base';
@@ -42,6 +42,7 @@ export class AgentTARSLocalEnvironment extends AgentTARSBaseEnvironment {
   private browserToolsManager?: BrowserToolsManager;
   private filesystemToolsManager?: FilesystemToolsManager;
   private searchToolProvider?: SearchToolProvider;
+  private fetchToolProvider?: FetchToolProvider;
   private browserGUIAgent?: BrowserGUIAgent;
   private mcpServers: BuiltInMCPServers = {};
   private mcpClients: Partial<Record<BuiltInMCPServerName, Client>> = {};
@@ -134,12 +135,16 @@ export class AgentTARSLocalEnvironment extends AgentTARSBaseEnvironment {
     const searchTool = this.searchToolProvider.createSearchTool();
     registerToolFn(searchTool);
 
-    // Providers with a managed scrape API (Firecrawl) also expose a
-    // `web_scrape` tool so the agent can read any URL to clean markdown
-    // without navigating the browser.
-    if (this.searchToolProvider.supportsScrape()) {
-      registerToolFn(this.searchToolProvider.createScrapeTool());
-      this.logger.info('✅ Scrape tool (web_scrape) registered');
+    // Firecrawl additionally exposes a managed scrape API, so register a
+    // `web_fetch` tool that reads any URL to clean markdown without navigating
+    // the browser.
+    if (this.options.search!.provider === 'firecrawl') {
+      this.fetchToolProvider = new FetchToolProvider(this.logger, {
+        apiKey: this.options.search!.apiKey,
+        baseUrl: this.options.search!.baseUrl,
+      });
+      registerToolFn(this.fetchToolProvider.createFetchTool());
+      this.logger.info('✅ Fetch tool (web_fetch) registered');
     }
 
     this.logger.info('✅ Search tools initialized successfully');
