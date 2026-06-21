@@ -260,36 +260,40 @@ export class SearchClient<T extends SearchProvider> {
 
         // Firecrawl groups results by source type (web/news/images). Flatten
         // web + news into the unified page list. When `scrapeOptions` was set,
-        // each result carries full-page `markdown`; otherwise fall back to the
-        // snippet (`description`). The SDK types items as a union of plain
-        // results and scraped `Document`s, so widen via `unknown`.
-        const web = (response.web ?? []) as unknown as Array<{
-          url: string;
-          title?: string;
-          description?: string;
-          markdown?: string;
-        }>;
-        const news = (response.news ?? []) as unknown as Array<{
+        // each result is a scraped `Document` carrying full-page `markdown` and
+        // its URL under `metadata.sourceURL` (no top-level `url`); plain results
+        // carry a top-level `url` + `description`. Read both shapes, then drop
+        // any item we couldn't resolve a URL for.
+        type FirecrawlItem = {
           url?: string;
           title?: string;
+          description?: string;
           snippet?: string;
-        }>;
+          markdown?: string;
+          metadata?: { sourceURL?: string; title?: string };
+        };
+        const web = (response.web ?? []) as FirecrawlItem[];
+        const news = (response.news ?? []) as FirecrawlItem[];
+
+        const isResolved = (page: {
+          title: string;
+          url?: string;
+          content: string;
+        }): page is PageResult => !!page.url;
 
         return {
           pages: [
             ...web.map((item) => ({
-              title: item.title || '',
-              url: item.url,
+              title: item.title || item.metadata?.title || '',
+              url: item.url || item.metadata?.sourceURL,
               content: item.markdown || item.description || '',
             })),
-            ...news
-              .filter((item) => !!item.url)
-              .map((item) => ({
-                title: item.title || '',
-                url: item.url as string,
-                content: item.snippet || '',
-              })),
-          ],
+            ...news.map((item) => ({
+              title: item.title || item.metadata?.title || '',
+              url: item.url || item.metadata?.sourceURL,
+              content: item.snippet || item.description || '',
+            })),
+          ].filter(isResolved),
         };
       }
 

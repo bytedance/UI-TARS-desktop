@@ -195,8 +195,24 @@ export class SearchToolProvider {
           return { error: 'A url is required' };
         }
 
+        // Enforce the http(s) contract stated in the description, and reject
+        // other schemes (file:, javascript:, ...) before spending a request.
+        let parsed: URL;
         try {
-          this.logger.info(`Scraping: "${url}"`);
+          parsed = new URL(url);
+        } catch {
+          return { error: 'A valid URL is required' };
+        }
+        if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+          return { error: 'URL must start with http:// or https://' };
+        }
+
+        // Log only origin + path — query strings may carry tokens / signed-link
+        // credentials that should not land in logs.
+        const safeUrl = `${parsed.origin}${parsed.pathname}`;
+
+        try {
+          this.logger.info(`Scraping: "${safeUrl}"`);
 
           const doc = await client.scrape(url, {
             formats: formats?.length ? formats : ['markdown'],
@@ -212,7 +228,7 @@ export class SearchToolProvider {
             metadata: doc.metadata,
           };
         } catch (error) {
-          this.logger.error(`Scrape error: ${error}`);
+          this.logger.error(`Scrape error for "${safeUrl}": ${error}`);
           return {
             error: `Scrape failed: ${error instanceof Error ? error.message : String(error)}`,
           };
