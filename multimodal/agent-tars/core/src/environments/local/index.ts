@@ -90,6 +90,11 @@ export class AgentTARSLocalEnvironment extends AgentTARSBaseEnvironment {
       await this.initializeSearchTools(registerToolFn);
     }
 
+    // Initialize fetch tool (independent of search)
+    if (this.options.fetch) {
+      await this.initializeFetchTools(registerToolFn);
+    }
+
     // Initialize MCP servers if using in-memory implementation
     if (this.options.mcpImpl === 'in-memory') {
       await this.initializeInMemoryMCP(registerToolFn);
@@ -136,19 +141,26 @@ export class AgentTARSLocalEnvironment extends AgentTARSBaseEnvironment {
     const searchTool = this.searchToolProvider.createSearchTool();
     registerToolFn(searchTool);
 
-    // Firecrawl additionally exposes a managed scrape API, so register a
-    // `web_fetch` tool that reads any URL to clean markdown without navigating
-    // the browser.
-    if (this.options.search!.provider === 'firecrawl') {
-      this.fetchToolProvider = new FetchToolProvider(this.logger, {
-        apiKey: this.options.search!.apiKey,
-        baseUrl: this.options.search!.baseUrl,
-      });
-      registerToolFn(this.fetchToolProvider.createFetchTool());
-      this.logger.info('✅ Fetch tool (web_fetch) registered');
-    }
-
     this.logger.info('✅ Search tools initialized successfully');
+  }
+
+  /**
+   * Initialize the fetch tool (`web_fetch`).
+   *
+   * Standalone capability — reads any URL to clean markdown via Firecrawl's
+   * scrape API. Independent of the search provider; configured via
+   * `options.fetch`.
+   */
+  private async initializeFetchTools(registerToolFn: (tool: Tool) => void): Promise<void> {
+    this.logger.info('📄 Initializing fetch tool');
+
+    this.fetchToolProvider = new FetchToolProvider(this.logger, {
+      apiKey: this.options.fetch!.apiKey,
+      baseUrl: this.options.fetch!.baseUrl,
+    });
+    registerToolFn(this.fetchToolProvider.createFetchTool());
+
+    this.logger.info('✅ Fetch tool (web_fetch) initialized successfully');
   }
 
   /**

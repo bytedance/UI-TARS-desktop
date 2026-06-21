@@ -27,24 +27,33 @@ await client.search(
 );
 ```
 
-In Agent TARS:
+In Agent TARS, **search and fetch are independent capabilities** — enable
+either, both, or neither:
 
 ```ts
 {
+  // web_search — Firecrawl as the search provider
   search: {
     provider: 'firecrawl',
     apiKey: process.env.FIRECRAWL_API_KEY, // optional
     count: 10,
   },
+  // web_fetch — standalone, NOT tied to the search provider
+  fetch: {
+    apiKey: process.env.FIRECRAWL_API_KEY, // optional
+  },
 }
 ```
 
-When `provider: 'firecrawl'`, the agent gets **two** tools:
+Because they're decoupled, you can mix freely — e.g. `browser_search` (or
+`tavily`) for search **and** Firecrawl `fetch` for reading URLs, or `fetch`
+alone with no search provider at all.
 
-- `web_search` — discovery, optionally with full-page content per result.
-- `web_fetch` — fetch any single URL as clean markdown without navigating the
-  browser. Complements the existing `browser_get_markdown` (which only reads the
-  tab the browser is already on).
+- `web_search` (from `search`) — discovery, optionally with full-page content
+  per result.
+- `web_fetch` (from `fetch`) — fetch any single URL as clean markdown without
+  navigating the browser. Complements the existing `browser_get_markdown`
+  (which only reads the tab the browser is already on).
 
 ## Why Firecrawl fits
 

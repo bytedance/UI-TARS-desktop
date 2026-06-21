@@ -71,12 +71,11 @@ export interface AgentTARSSearchOptions {
   count?: number;
   /**
    * Optional api key, required for tavily and bing_search. Optional for
-   * firecrawl: both `web_search` and `web_fetch` work on the keyless free
-   * tier; provide `fc-...` for higher rate limits.
+   * firecrawl (keyless free tier available; provide `fc-...` for higher limits).
    */
   apiKey?: string;
   /**
-   * Optional api key, required for tavily and bing_search.
+   * Optional base url override (e.g. a self-hosted provider instance).
    */
   baseUrl?: string;
   /**
@@ -94,6 +93,28 @@ export interface AgentTARSSearchOptions {
      */
     needVisitedUrls?: boolean;
   };
+}
+
+/**
+ * Fetch options for Agent TARS.
+ *
+ * Configures the `web_fetch` tool, which reads the full, LLM-ready content of a
+ * single URL (markdown/html/links) without driving the browser. This is an
+ * independent capability from search — it can be enabled on its own, alongside
+ * any (or no) search provider.
+ *
+ * Backed by Firecrawl's scrape API. An api key is optional (keyless free tier
+ * available); provide `fc-...` for higher rate limits.
+ */
+export interface AgentTARSFetchOptions {
+  /**
+   * Optional Firecrawl api key (`fc-...`). Optional on the keyless free tier.
+   */
+  apiKey?: string;
+  /**
+   * Optional base url override (e.g. a self-hosted Firecrawl instance).
+   */
+  baseUrl?: string;
 }
 
 /**
@@ -138,6 +159,12 @@ export interface AgentTARSOptions extends MCPAgentOptions {
    * Search settings.
    */
   search?: AgentTARSSearchOptions;
+
+  /**
+   * Fetch settings. Enables the standalone `web_fetch` tool (read any URL to
+   * clean markdown). Independent of `search`.
+   */
+  fetch?: AgentTARSFetchOptions;
 
   /**
    * Browser options
