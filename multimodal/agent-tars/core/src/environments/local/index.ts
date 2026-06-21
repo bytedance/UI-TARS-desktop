@@ -15,7 +15,8 @@ import {
 import { ResourceCleaner } from '../../utils';
 import { AgentTARSOptions, BuiltInMCPServers, BuiltInMCPServerName } from '../../types';
 import { BrowserGUIAgent, BrowserManager, BrowserToolsManager } from './browser';
-import { SearchToolProvider, FetchToolProvider } from './search';
+import { SearchToolProvider } from './search';
+import { FetchToolProvider } from './fetch';
 import { FilesystemToolsManager } from './filesystem';
 import { WorkspacePathResolver } from '../../shared/workspace-path-resolver';
 import { AgentTARSBaseEnvironment } from '../base';
