@@ -3,9 +3,9 @@
 [Firecrawl](https://firecrawl.dev) is a web-data API for AI agents: it searches
 the web and returns **clean, LLM-ready markdown** for every result in a single
 call. This package wires Firecrawl in as a first-class `SearchProvider`
-(alongside `browser_search`, `tavily`, `bing_search`, `duckduckgo`, `searxng`)
-and Agent TARS additionally exposes a `web_fetch` tool when Firecrawl is the
-configured provider.
+(alongside `browser_search`, `tavily`, `bing_search`, `duckduckgo`, `searxng`).
+Separately, Agent TARS exposes a standalone `web_fetch` tool (configured via the
+independent `fetch` option — not tied to the search provider).
 
 ## Usage
 
@@ -79,6 +79,7 @@ This PR ships **search + scrape**. The other endpoints were evaluated:
 ## Cost note
 
 Plain search is 2 credits / 10 results. Adding `scrapeOptions` applies scrape
-costs per result (1 credit/page basic). `web_fetch` is 1 credit/page. Keep
-`scrapeOptions` off `web_search` unless you need content from *every* result;
-otherwise search first, then `web_fetch` only the URLs you want.
+costs per result (1 credit/page basic). `web_fetch` calls Firecrawl's `/scrape`
+endpoint (1 credit/page). Keep `scrapeOptions` off `web_search` unless you need
+content from *every* result; otherwise search first, then `web_fetch` only the
+URLs you want.
