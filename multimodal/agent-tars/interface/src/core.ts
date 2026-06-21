@@ -62,7 +62,7 @@ export interface AgentTARSSearchOptions {
    *
    * @defaultValue 'browser_search'
    */
-  provider: 'browser_search' | 'tavily' | 'bing_search';
+  provider: 'browser_search' | 'tavily' | 'bing_search' | 'firecrawl';
   /**
    * Search result count
    *
@@ -70,7 +70,9 @@ export interface AgentTARSSearchOptions {
    */
   count?: number;
   /**
-   * Optional api key, required for tavily and bing_search.
+   * Optional api key, required for tavily and bing_search. Optional for
+   * firecrawl (keyless free tier available; provide `fc-...` for higher limits
+   * and to enable the `web_scrape` tool).
    */
   apiKey?: string;
   /**

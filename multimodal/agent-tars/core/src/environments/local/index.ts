@@ -134,6 +134,14 @@ export class AgentTARSLocalEnvironment extends AgentTARSBaseEnvironment {
     const searchTool = this.searchToolProvider.createSearchTool();
     registerToolFn(searchTool);
 
+    // Providers with a managed scrape API (Firecrawl) also expose a
+    // `web_scrape` tool so the agent can read any URL to clean markdown
+    // without navigating the browser.
+    if (this.searchToolProvider.supportsScrape()) {
+      registerToolFn(this.searchToolProvider.createScrapeTool());
+      this.logger.info('✅ Scrape tool (web_scrape) registered');
+    }
+
     this.logger.info('✅ Search tools initialized successfully');
   }
 

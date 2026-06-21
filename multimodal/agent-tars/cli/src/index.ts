@@ -85,7 +85,7 @@ export class AgentTARSCLI extends AgentCLI {
         .option('--search <search>', 'Search config')
         .option(
           '--search.provider [provider]',
-          'Search provider (browser_search, tavily, bing_search)',
+          'Search provider (browser_search, tavily, bing_search, firecrawl)',
         )
         .option('--search.count [count]', 'Search result count', { default: 10 })
         .option('--search.apiKey [apiKey]', 'Search API key')

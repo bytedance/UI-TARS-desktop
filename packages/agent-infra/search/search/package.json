@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@tavily/core": "0.3.1",
+    "firecrawl": "^4.28.2",
     "@agent-infra/browser-search": "workspace:*",
     "@agent-infra/bing-search": "workspace:*",
     "@agent-infra/duckduckgo-search": "workspace:*",

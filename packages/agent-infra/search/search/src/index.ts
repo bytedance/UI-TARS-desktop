@@ -22,6 +22,11 @@ import {
 import { Logger, defaultLogger } from '@agent-infra/logger';
 import { TavilySearchConfig, TavilySearchOptions, tavily } from './tavily';
 import { SearXNGSearchConfig, SearXNGSearchOptions, searxng } from './searxng';
+import {
+  FirecrawlSearchConfig,
+  FirecrawlSearchOptions,
+  firecrawl,
+} from './firecrawl';
 
 export { SearchProvider };
 export interface SearchProviderConfigMap {
@@ -30,6 +35,7 @@ export interface SearchProviderConfigMap {
   [SearchProvider.Tavily]: TavilySearchConfig;
   [SearchProvider.DuckduckgoSearch]: DuckDuckGoSearchClientConfig;
   [SearchProvider.SearXNG]: SearXNGSearchConfig;
+  [SearchProvider.Firecrawl]: FirecrawlSearchConfig;
 }
 
 export type SearchProviderConfig<T> = T extends SearchProvider
@@ -42,6 +48,7 @@ export interface SearchProviderSearchOptionsMap {
   [SearchProvider.Tavily]: TavilySearchOptions;
   [SearchProvider.DuckduckgoSearch]: DuckDuckGoSearchOptions;
   [SearchProvider.SearXNG]: SearXNGSearchOptions;
+  [SearchProvider.Firecrawl]: FirecrawlSearchOptions;
 }
 
 export type SearchProviderSearchOptions<T> = T extends SearchProvider
@@ -239,6 +246,53 @@ export class SearchClient<T extends SearchProvider> {
         };
       }
 
+      case SearchProvider.Firecrawl: {
+        const client = firecrawl(
+          this.config.providerConfig as FirecrawlSearchConfig,
+        );
+        const firecrawlOptions =
+          (originalOptions as FirecrawlSearchOptions) || {};
+
+        const response = await client.search(options.query, {
+          limit: options.count,
+          ...firecrawlOptions,
+        });
+
+        // Firecrawl groups results by source type (web/news/images). Flatten
+        // web + news into the unified page list. When `scrapeOptions` was set,
+        // each result carries full-page `markdown`; otherwise fall back to the
+        // snippet (`description`). The SDK types items as a union of plain
+        // results and scraped `Document`s, so widen via `unknown`.
+        const web = (response.web ?? []) as unknown as Array<{
+          url: string;
+          title?: string;
+          description?: string;
+          markdown?: string;
+        }>;
+        const news = (response.news ?? []) as unknown as Array<{
+          url?: string;
+          title?: string;
+          snippet?: string;
+        }>;
+
+        return {
+          pages: [
+            ...web.map((item) => ({
+              title: item.title || '',
+              url: item.url,
+              content: item.markdown || item.description || '',
+            })),
+            ...news
+              .filter((item) => !!item.url)
+              .map((item) => ({
+                title: item.title || '',
+                url: item.url as string,
+                content: item.snippet || '',
+              })),
+          ],
+        };
+      }
+
       default:
         throw new Error(`Unsupported search provider: ${this.config.provider}`);
     }
@@ -246,3 +300,4 @@ export class SearchClient<T extends SearchProvider> {
 }
 
 export * from './tavily';
+export * from './firecrawl';
