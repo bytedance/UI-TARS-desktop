@@ -147,7 +147,7 @@ export class SearchClient<T extends SearchProvider> {
           ...(this.config.providerConfig as BrowserSearchConfig),
         });
         const searchOptions: BrowserSearchOptions = {
-          ...((originalOptions as BrowserSearchOptions) || {}),
+          ...((originalOptions as unknown as BrowserSearchOptions) || {}),
           query: options.query,
           count: options.count,
         };
@@ -206,7 +206,7 @@ export class SearchClient<T extends SearchProvider> {
         );
         const searchOptions: SearXNGSearchOptions = {
           count: options.count,
-          ...((originalOptions as SearXNGSearchOptions) || {}),
+          ...((originalOptions as unknown as SearXNGSearchOptions) || {}),
           query: options.query,
         };
 
@@ -225,7 +225,7 @@ export class SearchClient<T extends SearchProvider> {
           this.config.providerConfig as DuckDuckGoSearchClientConfig,
         );
         const searchOptions: DuckDuckGoSearchOptions = {
-          ...((originalOptions as DuckDuckGoSearchOptions) || {}),
+          ...((originalOptions as unknown as DuckDuckGoSearchOptions) || {}),
         };
 
         const response = await client.search({
