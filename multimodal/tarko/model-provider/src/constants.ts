@@ -32,4 +32,9 @@ export const HIGH_LEVEL_MODEL_PROVIDER_CONFIGS: readonly ProviderConfig[] = [
     extends: 'openai',
     baseURL: 'https://api.deepseek.com/v1',
   },
+  {
+    name: 'atlascloud',
+    extends: 'openai',
+    baseURL: 'https://api.atlascloud.ai/v1',
+  },
 ] as const;

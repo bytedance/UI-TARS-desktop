@@ -22,7 +22,8 @@ export type ModelProviderName =
   | 'ollama'
   | 'lm-studio'
   | 'volcengine'
-  | 'deepseek';
+  | 'deepseek'
+  | 'atlascloud';
 
 /**
  * Basic Model configuration

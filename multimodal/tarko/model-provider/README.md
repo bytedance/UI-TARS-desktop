@@ -52,6 +52,7 @@ const response = await client.chat.completions.create({
 | `lm-studio` | http://127.0.0.1:1234/v1 | 1234 |
 | `volcengine` | https://ark.cn-beijing.volces.com/api/v3 | - |
 | `deepseek` | https://api.deepseek.com/v1 | - |
+| `atlascloud` | https://api.atlascloud.ai/v1 | - |
 
 ### Advanced Configuration
 
@@ -126,7 +127,7 @@ interface AgentModel {
 ```typescript
 type ModelProviderName = 
   | 'openai' | 'anthropic' | 'azure-openai'
-  | 'ollama' | 'lm-studio' | 'volcengine' | 'deepseek';
+  | 'ollama' | 'lm-studio' | 'volcengine' | 'deepseek' | 'atlascloud';
 ```
 
 ### Functions
