@@ -2,6 +2,33 @@
   <img alt="Agent TARS Banner" src="./images/tars.png">
 </picture>
 
+<p align="center">
+  <a href="https://www.atlascloud.ai/?utm_source=github&utm_medium=link&utm_campaign=UI-TARS-desktop">
+    <img src="./images/atlas-cloud-logo.png" alt="Atlas Cloud" width="120">
+  </a>
+</p>
+
+> 🎁 `atlascloud` provider 可以让 TARS 指向 [Atlas Cloud](https://www.atlascloud.ai/?utm_source=github&utm_medium=link&utm_campaign=UI-TARS-desktop) —— 一个全模态、OpenAI 兼容的推理平台，单个 API 即可访问 DeepSeek、Qwen、GLM、Kimi、MiniMax 等模型。像其它 OpenAI 兼容后端一样配置即可（`baseURL: https://api.atlascloud.ai/v1`，模型如 `deepseek-ai/deepseek-v4-pro`）。价格见 [coding plan](https://www.atlascloud.ai/console/coding-plan)。
+>
+> <details>
+> <summary>Atlas Cloud 全部对话模型（59）</summary>
+>
+> - Anthropic (Claude): `anthropic/claude-haiku-4.5-20251001`, `anthropic/claude-opus-4.8`, `anthropic/claude-sonnet-4.6`
+> - OpenAI (GPT): `openai/gpt-5.4`, `openai/gpt-5.5`
+> - Google (Gemini): `google/gemini-3.1-flash-lite`, `google/gemini-3.1-pro-preview`, `google/gemini-3.5-flash`
+> - 阿里 (Qwen): `qwen/qwen2.5-7b-instruct`, `Qwen/Qwen3-235B-A22B-Instruct-2507`, `qwen/qwen3-235b-a22b-thinking-2507`, `qwen/qwen3-30b-a3b`, `Qwen/Qwen3-30B-A3B-Instruct-2507`, `qwen/qwen3-30b-a3b-thinking-2507`, `qwen/qwen3-32b`, `qwen/qwen3-8b`, `Qwen/Qwen3-Coder`, `qwen/qwen3-coder-next`, `qwen/qwen3-max-2026-01-23`, `Qwen/Qwen3-Next-80B-A3B-Instruct`, `Qwen/Qwen3-Next-80B-A3B-Thinking`, `Qwen/Qwen3-VL-235B-A22B-Instruct`, `qwen/qwen3-vl-235b-a22b-thinking`, `qwen/qwen3-vl-30b-a3b-instruct`, `qwen/qwen3-vl-30b-a3b-thinking`, `qwen/qwen3-vl-8b-instruct`, `qwen/qwen3.5-122b-a10b`, `qwen/qwen3.5-27b`, `qwen/qwen3.5-35b-a3b`, `qwen/qwen3.5-397b-a17b`, `qwen/qwen3.6-35b-a3b`, `qwen/qwen3.6-plus`
+> - DeepSeek: `deepseek-ai/deepseek-ocr`, `deepseek-ai/deepseek-r1-0528`, `deepseek-ai/DeepSeek-V3-0324`, `deepseek-ai/DeepSeek-V3.1`, `deepseek-ai/DeepSeek-V3.1-Terminus`, `deepseek-ai/deepseek-v3.2`, `deepseek-ai/DeepSeek-V3.2-Exp`, `deepseek-ai/deepseek-v4-flash`, `deepseek-ai/deepseek-v4-pro`
+> - Moonshot (Kimi): `moonshotai/Kimi-K2-Instruct`, `moonshotai/Kimi-K2-Instruct-0905`, `moonshotai/Kimi-K2-Thinking`, `moonshotai/kimi-k2.5`, `moonshotai/kimi-k2.6`
+> - 智谱 (GLM): `zai-org/GLM-4.6`, `zai-org/glm-4.7`, `zai-org/glm-5`, `zai-org/glm-5-turbo`, `zai-org/glm-5.1`, `zai-org/glm-5v-turbo`
+> - MiniMax: `MiniMaxAI/MiniMax-M2`, `minimaxai/minimax-m2.1`, `minimaxai/minimax-m2.5`, `minimaxai/minimax-m2.7`
+> - xAI: `xai/grok-4.3`
+> - 快手 (KAT): `kwaipilot/kat-coder-pro-v2`
+> - 其他: `owl`
+>
+> `deepseek-ai/deepseek-v4-pro` 是推理模型，请给足 `max_tokens`（>= 512）。
+>
+> </details>
+
 ## Introduction
 
 [English](./README.md) | 简体中文

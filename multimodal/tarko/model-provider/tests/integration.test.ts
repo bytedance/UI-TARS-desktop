@@ -57,6 +57,7 @@ describe('Integration Tests', () => {
         'lm-studio',
         'volcengine',
         'deepseek',
+        'atlascloud',
       ];
 
       expectedProviders.forEach((provider) => {
