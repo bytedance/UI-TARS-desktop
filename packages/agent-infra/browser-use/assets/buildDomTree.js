@@ -377,10 +377,54 @@ window.buildDomTree = (
     // Get computed style
     const style = getCachedComputedStyle(element);
 
-    // Check if element has click-like styling
-    // const hasClickStyling = style.cursor === 'pointer' ||
-    //     element.style.cursor === 'pointer' ||
-    //     style.pointerEvents !== 'none';
+    // Define interactive cursors
+    const interactiveCursors = new Set([
+      'pointer', // Link/clickable elements
+      'move', // Movable elements
+      'text', // Text selection
+      'grab', // Grabbable elements
+      'grabbing', // Currently grabbing
+      'cell', // Table cell selection
+      'copy', // Copy operation
+      'alias', // Alias creation
+      'all-scroll', // Scrollable content
+      'col-resize', // Column resize
+      'context-menu', // Context menu available
+      'crosshair', // Precise selection
+      'e-resize', // East resize
+      'ew-resize', // East-west resize
+      'help', // Help available
+      'n-resize', // North resize
+      'ne-resize', // Northeast resize
+      'nesw-resize', // Northeast-southwest resize
+      'ns-resize', // North-south resize
+      'nw-resize', // Northwest resize
+      'nwse-resize', // Northwest-southeast resize
+      'row-resize', // Row resize
+      's-resize', // South resize
+      'se-resize', // Southeast resize
+      'sw-resize', // Southwest resize
+      'vertical-text', // Vertical text selection
+      'w-resize', // West resize
+      'zoom-in', // Zoom in
+      'zoom-out', // Zoom out
+    ]);
+
+    /**
+     * Checks if an element has an interactive pointer.
+     *
+     * @param {HTMLElement} element - The element to check.
+     * @returns {boolean} Whether the element has an interactive pointer.
+     */
+    function doesElementHaveInteractivePointer(element) {
+      if (element.tagName.toLowerCase() === 'body') return false;
+
+      if (style?.cursor && interactiveCursors.has(style.cursor)) return true;
+
+      return false;
+    }
+
+    const hasClickStyling = doesElementHaveInteractivePointer(element);
 
     // Check for event listeners
     const hasClickHandler =
@@ -467,7 +511,7 @@ window.buildDomTree = (
 
     return (
       hasAriaProps ||
-      // hasClickStyling ||
+      hasClickStyling ||
       hasClickHandler ||
       hasClickListeners ||
       // isFormRelated ||
