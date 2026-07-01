@@ -4,7 +4,7 @@
   "private": true,
   "main": "./dist/main/main.js",
   "packageManager": "pnpm@9.10.0",
-  "description": "A GUI Agent application based on UI-TARS(Vision-Lanuage Model) that allows you to control your computer using natural language.",
+  "description": "A GUI Agent application based on UI-TARS(Vision-Language Model) that allows you to control your computer using natural language.",
   "author": "ByteDance",
   "scripts": {
     "format": "prettier --write .",
