@@ -164,6 +164,72 @@ describe('Integration Tests', () => {
     });
   });
 
+  describe('MiniMax provider', () => {
+    it('should resolve MiniMax model as a native base provider', () => {
+      const agentModel: AgentModel = {
+        provider: 'minimax',
+        id: 'MiniMax-M3',
+        apiKey: 'test-minimax-key',
+      };
+
+      const resolved = resolveModel(agentModel);
+      expect(resolved.provider).toBe('minimax');
+      expect(resolved.id).toBe('MiniMax-M3');
+      expect(resolved.baseProvider).toBe('minimax');
+      expect(resolved.apiKey).toBe('test-minimax-key');
+      expect(resolved.baseURL).toBeUndefined();
+    });
+
+    it('should resolve MiniMax-M2.7 model', () => {
+      const agentModel: AgentModel = {
+        provider: 'minimax',
+        id: 'MiniMax-M2.7',
+        apiKey: 'test-minimax-key',
+      };
+
+      const resolved = resolveModel(agentModel);
+      expect(resolved.provider).toBe('minimax');
+      expect(resolved.id).toBe('MiniMax-M2.7');
+      expect(resolved.baseProvider).toBe('minimax');
+    });
+
+    it('should resolve MiniMax-M2.7-highspeed model', () => {
+      const agentModel: AgentModel = {
+        provider: 'minimax',
+        id: 'MiniMax-M2.7-highspeed',
+        apiKey: 'test-minimax-key',
+      };
+
+      const resolved = resolveModel(agentModel);
+      expect(resolved.provider).toBe('minimax');
+      expect(resolved.id).toBe('MiniMax-M2.7-highspeed');
+      expect(resolved.baseProvider).toBe('minimax');
+    });
+
+    it('should create LLM client for MiniMax without throwing', () => {
+      const agentModel: AgentModel = {
+        provider: 'minimax',
+        id: 'MiniMax-M3',
+        apiKey: 'test-minimax-key',
+      };
+
+      const resolved = resolveModel(agentModel);
+      expect(() => createLLMClient(resolved)).not.toThrow();
+    });
+
+    it('should support custom baseURL for MiniMax', () => {
+      const agentModel: AgentModel = {
+        provider: 'minimax',
+        id: 'MiniMax-M3',
+        apiKey: 'test-minimax-key',
+        baseURL: 'https://custom-proxy.example.com/v1',
+      };
+
+      const resolved = resolveModel(agentModel);
+      expect(resolved.baseURL).toBe('https://custom-proxy.example.com/v1');
+    });
+  });
+
   describe('Error handling', () => {
     it('should handle unknown provider by falling back to openai-compatible', () => {
       // Unknown providers (like 'kimi') should default to openai-compatible

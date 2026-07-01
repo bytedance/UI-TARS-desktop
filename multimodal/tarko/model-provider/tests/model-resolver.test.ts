@@ -165,6 +165,27 @@ describe('resolveModel', () => {
     });
   });
 
+  it('should handle minimax provider correctly', () => {
+    const agentModel: AgentModel = {
+      provider: 'minimax',
+      id: 'MiniMax-M3',
+      apiKey: 'minimax-key',
+    };
+
+    const result = resolveModel(agentModel);
+
+    expect(result).toEqual({
+      provider: 'minimax',
+      id: 'MiniMax-M3',
+      displayName: undefined,
+      baseURL: undefined,
+      apiKey: 'minimax-key',
+      headers: {},
+      params: undefined,
+      baseProvider: 'minimax',
+    });
+  });
+
   it('should handle custom OpenAI-compatible providers like kimi', () => {
     // Test case for issue #1822: custom providers should default to openai-compatible
     const agentModel: AgentModel = {

@@ -212,6 +212,44 @@ describe('createLLMClient', () => {
     });
   });
 
+  it('should extend model list for minimax provider', () => {
+    const model: AgentModel = {
+      provider: 'minimax',
+      id: 'MiniMax-M3',
+      baseProvider: 'minimax',
+      apiKey: 'minimax-key',
+    };
+
+    createLLMClient(model);
+
+    expect(mockTokenJSInstance.extendModelList).toHaveBeenCalledWith(
+      'minimax',
+      'MiniMax-M3',
+      {
+        streaming: true,
+        json: true,
+        toolCalls: true,
+        images: true,
+      },
+    );
+  });
+
+  it('should create MiniMax client with correct configuration', () => {
+    const model: AgentModel = {
+      provider: 'minimax',
+      id: 'MiniMax-M3',
+      apiKey: 'minimax-key',
+      baseURL: 'https://api.minimax.io/v1',
+    };
+
+    createLLMClient(model);
+
+    expect(mockTokenJSConstructor).toHaveBeenCalledWith({
+      apiKey: 'minimax-key',
+      baseURL: 'https://api.minimax.io/v1',
+    });
+  });
+
   it('should handle undefined baseURL and apiKey', () => {
     const model: AgentModel = {
       provider: 'openai',
