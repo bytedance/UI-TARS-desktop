@@ -85,10 +85,18 @@ export class AgentTARSCLI extends AgentCLI {
         .option('--search <search>', 'Search config')
         .option(
           '--search.provider [provider]',
-          'Search provider (browser_search, tavily, bing_search)',
+          'Search provider (browser_search, tavily, bing_search, firecrawl)',
         )
         .option('--search.count [count]', 'Search result count', { default: 10 })
         .option('--search.apiKey [apiKey]', 'Search API key')
+
+        // Fetch configuration (standalone `web_fetch` tool, independent of search)
+        .option('--fetch <fetch>', 'Fetch config')
+        .option(
+          '--fetch.apiKey [apiKey]',
+          'Firecrawl API key for web_fetch (optional; keyless tier available)',
+        )
+        .option('--fetch.baseUrl [baseUrl]', 'Firecrawl base URL override (self-hosted)')
     );
   }
 
