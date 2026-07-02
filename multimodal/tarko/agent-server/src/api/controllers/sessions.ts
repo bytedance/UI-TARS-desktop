@@ -12,6 +12,14 @@ import { getDefaultModel } from '../../utils/model-utils';
 import * as path from 'path';
 import * as fs from 'fs';
 
+function isPathInsideOrEqual(parentPath: string, childPath: string): boolean {
+  const relative = path.relative(parentPath, childPath);
+  return (
+    relative === '' ||
+    (!!relative && !relative.startsWith('..') && !path.isAbsolute(relative))
+  );
+}
+
 /**
  * Get all sessions
  */
@@ -464,7 +472,10 @@ export async function getSessionWorkspaceFiles(req: Request, res: Response) {
       const normalizedWorkspace = path.resolve(baseWorkspacePath);
 
       // Security check
-      if (normalizedPath.startsWith(normalizedWorkspace) && fs.existsSync(normalizedPath)) {
+      if (
+        isPathInsideOrEqual(normalizedWorkspace, normalizedPath) &&
+        fs.existsSync(normalizedPath)
+      ) {
         targetPath = normalizedPath;
         break;
       }
@@ -757,7 +768,7 @@ export async function validateWorkspacePaths(req: Request, res: Response) {
         const normalizedWorkspace = path.resolve(baseWorkspacePath);
 
         // Security check
-        if (!normalizedPath.startsWith(normalizedWorkspace)) {
+        if (!isPathInsideOrEqual(normalizedWorkspace, normalizedPath)) {
           return { path: relativePath, exists: false, error: 'Path outside workspace' };
         }
 

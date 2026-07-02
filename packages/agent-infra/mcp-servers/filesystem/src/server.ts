@@ -28,6 +28,7 @@ import {
   expandHome,
   applyFileEdits,
   getFileStats,
+  isPathInsideOrEqual,
 } from './utils.js';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
@@ -73,7 +74,7 @@ async function validatePath(requestedPath: string): Promise<string> {
 
   // Check if path is within allowed directories
   const isAllowed = allowedDirectories.some((dir) =>
-    normalizedRequested.startsWith(dir),
+    isPathInsideOrEqual(dir, normalizedRequested),
   );
   if (!isAllowed) {
     throw new Error(
@@ -86,7 +87,7 @@ async function validatePath(requestedPath: string): Promise<string> {
     const realPath = await fs.realpath(absolute);
     const normalizedReal = normalizePath(realPath);
     const isRealPathAllowed = allowedDirectories.some((dir) =>
-      normalizedReal.startsWith(dir),
+      isPathInsideOrEqual(dir, normalizedReal),
     );
     if (!isRealPathAllowed) {
       throw new Error(
@@ -103,7 +104,7 @@ async function validatePath(requestedPath: string): Promise<string> {
       const realParentPath = await fs.realpath(parentDir);
       const normalizedParent = normalizePath(realParentPath);
       const isParentAllowed = allowedDirectories.some((dir) =>
-        normalizedParent.startsWith(dir),
+        isPathInsideOrEqual(dir, normalizedParent),
       );
       if (!isParentAllowed) {
         throw new Error(
