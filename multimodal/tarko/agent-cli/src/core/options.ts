@@ -101,6 +101,20 @@ export function addCommonOptions(command: Command): Command {
       },
     )
 
+    // MCP JSON config import
+    .option(
+      '--mcp-config <path>',
+      `Path to a standard MCP JSON configuration file
+
+                            Import MCP servers from a standard JSON config file.
+                            Supports the standard format:
+                              {"mcpServers": {"name": {"command": "...", "args": [...]}}}
+
+                            Example:
+                              --mcp-config ./mcp.json
+      `,
+    )
+
     // Workspace configuration
     .option('--workspace <path>', 'workspace path')
 

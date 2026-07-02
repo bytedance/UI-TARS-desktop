@@ -15,6 +15,9 @@ import {
 } from '@tarko/interface';
 import { resolveValue, loadWorkspaceConfig } from '../utils';
 import { logDeprecatedWarning, logConfigComplete } from './display';
+import fs from 'fs';
+import path from 'path';
+import { parseMCPJsonConfig } from '@agent-infra/shared';
 
 /**
  * Handler for processing deprecated CLI options
@@ -81,6 +84,36 @@ export function buildAppConfig<
     server,
     ...cliConfigProps
   } = cliArguments;
+
+  // Handle --mcp-config: load MCP servers from JSON config file
+  if ((cliArguments as any).mcpConfig) {
+    const mcpConfigPath = (cliArguments as any).mcpConfig as string;
+    const resolvedPath = path.resolve(mcpConfigPath);
+    if (fs.existsSync(resolvedPath)) {
+      try {
+        const mcpJsonText = fs.readFileSync(resolvedPath, 'utf-8').trim();
+        const result = parseMCPJsonConfig(mcpJsonText);
+        if (result.errors.length > 0) {
+          console.warn(`Warning: MCP config parse errors: ${result.errors.join('; ')}`);
+        }
+        if (result.servers.length > 0) {
+          if (!cliConfigProps.mcpServers) {
+            (cliConfigProps as any).mcpServers = {};
+          }
+          for (const server of result.servers) {
+            const { id, name, ...serverConfig } = server as any;
+            (cliConfigProps as any).mcpServers[name] = serverConfig;
+          }
+        }
+      } catch (error) {
+        console.warn(
+          `Warning: Failed to load MCP config from ${resolvedPath}: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+    } else {
+      console.warn(`Warning: MCP config file not found: ${resolvedPath}`);
+    }
+  }
 
   // Handle deprecated options
   const deprecatedOptionValues = {
