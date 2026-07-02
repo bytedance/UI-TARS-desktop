@@ -8,6 +8,10 @@ import { IpcRendererEvent, contextBridge, ipcRenderer } from 'electron';
 import type { UTIOPayload } from '@ui-tars/utio';
 
 import type { AppState, LocalStore } from '@main/store/types';
+import type {
+  ScheduledTask,
+  CreateScheduledTaskInput,
+} from '@main/shared/scheduledTasks';
 
 export type Channels = '';
 
@@ -49,6 +53,23 @@ const electronHandler = {
     resetPreset: () => ipcRenderer.invoke('setting:resetPreset'),
     onUpdate: (callback: (setting: LocalStore) => void) => {
       ipcRenderer.on('setting-updated', (_, state) => callback(state));
+    },
+  },
+  scheduledTask: {
+    listScheduledTasks: () => ipcRenderer.invoke('listScheduledTasks'),
+    createScheduledTask: (task: CreateScheduledTaskInput) =>
+      ipcRenderer.invoke('createScheduledTask', task),
+    updateScheduledTask: (id: string, updates: Partial<ScheduledTask>) =>
+      ipcRenderer.invoke('updateScheduledTask', { id, updates }),
+    deleteScheduledTask: (id: string) =>
+      ipcRenderer.invoke('deleteScheduledTask', { id }),
+    runScheduledTaskNow: (id: string) =>
+      ipcRenderer.invoke('runScheduledTaskNow', { id }),
+    onUpdate: (callback: (tasks: ScheduledTask[]) => void) => {
+      ipcRenderer.on('scheduled-tasks-updated', (_, tasks) => callback(tasks));
+    },
+    onStarted: (callback: (task: ScheduledTask) => void) => {
+      ipcRenderer.on('scheduled-task-started', (_, task) => callback(task));
     },
   },
 };
