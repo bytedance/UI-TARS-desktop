@@ -4,7 +4,7 @@
 
 ## Introduction
 
-[English](./README.md) | 简体中文
+[English](./README.md) | 简体中文 | [Deutsch](./README.de-DE.md)
 
 [![](https://trendshift.io/api/badge/repositories/13584)](https://trendshift.io/repositories/13584)
 
