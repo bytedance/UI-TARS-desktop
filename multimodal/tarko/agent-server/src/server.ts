@@ -5,6 +5,8 @@
 
 import express from 'express';
 import http from 'http';
+import https from 'https';
+import rateLimit from 'express-rate-limit';
 import { setupAPI } from './api';
 import { LogLevel } from '@tarko/interface';
 import { StorageProvider, createStorageProvider } from './storage';
@@ -37,10 +39,27 @@ export { express };
 export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   // Core server components
   private app: express.Application;
-  private server: http.Server;
+  private server: http.Server | https.Server;
 
   // Server state
   private isRunning = false;
+
+  // SECURITY: Rate limiting configuration to prevent DoS attacks
+  private readonly globalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 1000, // 1000 requests per windowMs
+    message: 'Too many requests from this IP, please try again later.',
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
+  private readonly apiLimiter = rateLimit({
+    windowMs: 1 * 60 * 1000, // 1 minute
+    max: 100, // 100 requests per minute for API endpoints
+    message: 'Too many API requests from this IP, please try again later.',
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
 
   // Session management
   public sessions: Record<string, AgentSession> = {};
@@ -85,6 +104,20 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     // Initialize Express app and HTTP server
     this.app = express();
     this.server = http.createServer(this.app);
+
+    // SECURITY: Apply rate limiting middleware to all requests
+    this.app.use(this.globalLimiter);
+
+    // SECURITY: Add HSTS header for HTTPS connections
+    // This enforces HTTPS usage and prevents downgrade attacks
+    this.app.use((req, res, next) => {
+      // Only set HSTS if using HTTPS or if explicitly configured
+      const useHttps = appConfig.server?.https?.enabled || process.env.NODE_ENV === 'production';
+      if (useHttps || req.protocol === 'https') {
+        res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+      }
+      next();
+    });
 
     // Initialize storage if provided
     if (appConfig.server?.storage) {
