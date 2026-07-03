@@ -12,13 +12,13 @@ export const settingRoute = t.router({
   checkVLMResponseApiSupport: t.procedure
     .input<{
       baseUrl: string;
-      apiKey: string;
+      apiKey: string; // @secretlint-disable-line
       modelName: string;
     }>()
     .handle(async ({ input }) => {
       try {
         const openai = new OpenAI({
-          apiKey: input.apiKey,
+          apiKey: input.apiKey, // @secretlint-disable-line
           baseURL: input.baseUrl,
         });
         const result = await openai.responses.create({
@@ -36,13 +36,13 @@ export const settingRoute = t.router({
   checkModelAvailability: t.procedure
     .input<{
       baseUrl: string;
-      apiKey: string;
+      apiKey: string; // @secretlint-disable-line
       modelName: string;
     }>()
     .handle(async ({ input }) => {
       try {
         const openai = new OpenAI({
-          apiKey: input.apiKey,
+          apiKey: input.apiKey, // @secretlint-disable-line
           baseURL: input.baseUrl,
         });
         const completion = await openai.chat.completions.create({
