@@ -136,6 +136,8 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
               : '';
         case 'run_command':
           return args.command || (status === 'constructing' ? 'preparing command...' : '');
+        case 'run_script':
+          return args.script || (status === 'constructing' ? 'preparing script...' : '');
         case 'read_file':
         case 'write_file':
         case 'edit_file':
@@ -203,6 +205,8 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
         return 'List Files';
       case 'run_command':
         return 'Run Command';
+      case 'run_script':
+        return 'Run Script';
       case 'read_file':
         return 'Read File';
       case 'write_file':
