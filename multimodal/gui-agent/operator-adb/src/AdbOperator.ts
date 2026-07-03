@@ -5,7 +5,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { exec } from 'node:child_process';
+import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 
 import {
@@ -27,6 +27,14 @@ const yadbCommand =
   'app_process -Djava.class.path=/data/local/tmp/yadb /data/local/tmp com.ysbing.yadb.Main';
 const screenshotPathOnAndroid = '/data/local/tmp/ui_tars_screenshot.png';
 const screenshotPathOnLocal = path.join(os.homedir(), 'Downloads', 'ui_tars_screenshot.png');
+
+/**
+ * Escapes a string for safe inclusion in a shell command argument.
+ * Wraps the value in single quotes and escapes any existing single quotes.
+ */
+function shellEscape(str: string): string {
+  return "'" + str.replace(/'/g, "'\\''") + "'";
+}
 
 export class AdbOperator extends Operator {
   private logger: ConsoleLogger;
@@ -188,9 +196,9 @@ export class AdbOperator extends Operator {
    * @throws Error when unable to retrieve device list
    */
   private async getConnectedDevices(): Promise<string> {
-    const execPromise = promisify(exec);
+    const execFilePromise = promisify(execFile);
     try {
-      const { stdout } = await execPromise('adb devices');
+      const { stdout } = await execFilePromise('adb', ['devices']);
       const devices = stdout
         .split('\n')
         .slice(1) // Skip the first line "List of devices attached"
@@ -267,7 +275,7 @@ export class AdbOperator extends Operator {
         this.logger.debug('screenshotWithFallback result of screencap:', result);
       } catch (error) {
         // screenshot which is forbidden by app
-        await this.executeWithYadb(`-screenshot ${screenshotPathOnAndroid}`);
+        await this.executeWithYadb(['-screenshot', screenshotPathOnAndroid]);
       }
       await this._adb!.pull(screenshotPathOnAndroid, screenshotPathOnLocal);
       screenshotBuffer = await fs.promises.readFile(screenshotPathOnLocal);
@@ -280,8 +288,12 @@ export class AdbOperator extends Operator {
   }
 
   private async handleClick(x: number, y: number): Promise<void> {
-    // Use adjusted coordinates
-    await this._adb!.shell(`input tap ${x} ${y}`);
+    // Use adjusted coordinates - validate numeric values to prevent injection
+    if (!Number.isFinite(x) || !Number.isFinite(y)) {
+      throw new Error(`Invalid click coordinates: x=${x}, y=${y}`);
+    }
+    // Math.round ensures integer output; Number.isFinite ensures no injection via NaN/Infinity
+    await this._adb!.shell(`input tap ${Math.round(x)} ${Math.round(y)}`);
   }
 
   private async handleType(text: string): Promise<void> {
@@ -296,7 +308,8 @@ export class AdbOperator extends Operator {
       return;
     }
     // for non-ASCII characters, use yadb
-    await this.executeWithYadb(`-keyboard "${text}"`);
+    // Pass text as separate argument to avoid shell injection via string interpolation
+    await this.executeWithYadb(['-keyboard', text]);
   }
 
   private async handleHotkey(keyStr: string) {
@@ -340,7 +353,13 @@ export class AdbOperator extends Operator {
     to: { x: number; y: number },
     duration: number, // ms
   ): Promise<void> {
-    await this._adb!.shell(`input swipe ${from.x} ${from.y} ${to.x} ${to.y} ${duration}`);
+    // Validate numeric values to prevent injection
+    if (!Number.isFinite(from.x) || !Number.isFinite(from.y) ||
+        !Number.isFinite(to.x) || !Number.isFinite(to.y) ||
+        !Number.isFinite(duration)) {
+      throw new Error(`Invalid swipe parameters: from=${JSON.stringify(from)}, to=${JSON.stringify(to)}, duration=${duration}`);
+    }
+    await this._adb!.shell(`input swipe ${Math.round(from.x)} ${Math.round(from.y)} ${Math.round(to.x)} ${Math.round(to.y)} ${Math.round(duration)}`);
   }
 
   private async handleScroll(direction: string, point?: Coordinates) {
@@ -374,16 +393,19 @@ export class AdbOperator extends Operator {
   }
 
   /**
-   * @param subCommand, such as:
-   * -keyboard "${keyboardContent}
+   * Execute a command via yadb. Uses proper shell escaping to prevent
+   * shell injection through user-controlled text.
+   * @param args - Command arguments as an array of strings
    */
-  private async executeWithYadb(subCommand: string): Promise<void> {
+  private async executeWithYadb(args: string[]): Promise<void> {
     if (!this._hasPushedYadb) {
       // the size of yadb just 12kB, just adb push it every time initailied
       const yadbBin = path.join(__dirname, '../bin/yadb');
       await this._adb!.push(yadbBin, '/data/local/tmp');
       this._hasPushedYadb = true;
     }
-    await this._adb!.shell(`${yadbCommand} ${subCommand}`);
+    // Escape each argument to prevent shell injection
+    const escapedArgs = args.map(shellEscape).join(' ');
+    await this._adb!.shell(`${yadbCommand} ${escapedArgs}`);
   }
 }
