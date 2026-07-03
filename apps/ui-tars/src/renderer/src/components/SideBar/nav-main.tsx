@@ -19,6 +19,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from '@renderer/components/ui/sidebar';
+import { useI18n } from '../../i18n';
 
 export function NavMain({
   items,
@@ -34,9 +35,11 @@ export function NavMain({
     }[];
   }[];
 }) {
+  const { t } = useI18n();
+
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarGroupLabel>{t('platform')}</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible

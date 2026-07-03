@@ -39,6 +39,7 @@ import { ShareOptions } from './share';
 
 import { Operator } from '@main/store/types';
 import { DeleteSessionDialog } from '@renderer/components/AlertDialog/delSessionDialog';
+import { useI18n } from '../../i18n';
 
 const getIcon = (operator: Operator, isActive: boolean) => {
   const isRemote =
@@ -71,6 +72,7 @@ export function NavHistory({
   onSessionClick: (id: string) => void;
   onSessionDelete: (id: string) => void;
 }) {
+  const { t } = useI18n();
   const [isShareConfirmOpen, setIsShareConfirmOpen] = useState(false);
   const [id, setId] = useState('');
   const [isHistoryOpen, setIsHistoryOpen] = useState(true);
@@ -108,7 +110,7 @@ export function NavHistory({
                   onClick={handleHistory}
                 >
                   <History strokeWidth={2} />
-                  <span>History</span>
+                  <span>{t('history')}</span>
                   <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                 </SidebarMenuButton>
               </CollapsibleTrigger>
@@ -130,7 +132,7 @@ export function NavHistory({
                         <DropdownMenuTrigger asChild>
                           <SidebarMenuAction className="invisible group-hover/item:visible [&[data-state=open]]:visible mt-1">
                             <MoreHorizontal />
-                            <span className="sr-only">More</span>
+                            <span className="sr-only">{t('more')}</span>
                           </SidebarMenuAction>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
@@ -144,7 +146,7 @@ export function NavHistory({
                             onClick={() => handleDelete(item.id)}
                           >
                             <Trash2 className="text-red-400" />
-                            <span>Delete</span>
+                            <span>{t('delete')}</span>
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>

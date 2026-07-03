@@ -37,6 +37,8 @@ import {
   LocalSettingsDialog,
 } from '../../components/Settings/local';
 import { sleep } from '@ui-tars/shared/utils';
+import { useI18n } from '../../i18n';
+import { Operator } from '@main/store/types';
 
 const getFinishedContent = (predictionParsed?: PredictionParsed[]) =>
   predictionParsed?.find(
@@ -46,7 +48,15 @@ const getFinishedContent = (predictionParsed?: PredictionParsed[]) =>
       step.action_inputs.content.trim() !== '',
   )?.action_inputs?.content as string | undefined;
 
+const operatorTitleKeyMap = {
+  [Operator.LocalComputer]: 'localComputerOperator',
+  [Operator.LocalBrowser]: 'localBrowserOperator',
+  [Operator.RemoteComputer]: 'remoteComputerOperator',
+  [Operator.RemoteBrowser]: 'remoteBrowserOperator',
+} as const;
+
 const LocalOperator = () => {
+  const { t } = useI18n();
   const state = useLocation().state as RouterState;
   const navigate = useNavigate();
   const { setOpen } = useSidebar();
@@ -138,7 +148,7 @@ const LocalOperator = () => {
     status === StatusEnum.PAUSE;
 
   const onNewChat = useCallback(async () => {
-    const session = await createSession('New Session', {
+    const session = await createSession(t('newSession'), {
       operator: state.operator,
     });
 
@@ -261,7 +271,7 @@ const LocalOperator = () => {
             );
           })}
 
-          {thinking && <LoadingText text={'Thinking...'} />}
+          {thinking && <LoadingText text={t('thinking')} />}
           {errorMsg && <ErrorMessage text={errorMsg} />}
         </div>
       </ScrollArea>
@@ -271,7 +281,7 @@ const LocalOperator = () => {
   return (
     <div className="flex flex-col w-full h-full">
       <NavHeader
-        title={state.operator}
+        title={t(operatorTitleKeyMap[state.operator])}
         onBack={handleBack}
         docUrl="https://github.com/bytedance/UI-TARS-desktop/"
       ></NavHeader>
@@ -284,7 +294,7 @@ const LocalOperator = () => {
             ></SidebarTrigger>
             <Button variant="outline" size="sm" onClick={handleNewChat}>
               <MessageCirclePlus />
-              New Chat
+              {t('newChat')}
             </Button>
           </div>
           {renderChatList()}
@@ -298,7 +308,7 @@ const LocalOperator = () => {
         <Card className="flex-1 basis-3/5 p-3 h-[calc(100vh-76px)]">
           <Tabs defaultValue="screenshot" className="flex-1">
             <TabsList>
-              <TabsTrigger value="screenshot">ScreenShot</TabsTrigger>
+              <TabsTrigger value="screenshot">{t('screenshot')}</TabsTrigger>
             </TabsList>
             <TabsContent value="screenshot">
               <ImageGallery

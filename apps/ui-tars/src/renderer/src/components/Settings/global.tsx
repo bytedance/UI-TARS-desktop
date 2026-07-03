@@ -27,6 +27,7 @@ import { ChatSettings } from './category/chat';
 import { LocalBrowserSettings } from './category/localBrowser';
 import { ReportSettings } from './category/report';
 import { GeneralSettings } from './category/general';
+import { useI18n } from '../../i18n';
 
 interface GlobalSettingsStore {
   isOpen: boolean;
@@ -43,13 +44,14 @@ export const useGlobalSettings = create<GlobalSettingsStore>((set) => ({
 }));
 
 export const GlobalSettings = () => {
+  const { t } = useI18n();
   const { isOpen, toggleSettings } = useGlobalSettings();
 
   return (
     <Dialog open={isOpen} onOpenChange={toggleSettings}>
       <DialogContent className="min-w-4/5 xl:min-w-3/5 h-4/5 [&>button:last-child]:hidden">
         <DialogHeader className="hidden">
-          <DialogTitle>Settings</DialogTitle>
+          <DialogTitle>{t('settings')}</DialogTitle>
           <DialogDescription className="hidden" />
         </DialogHeader>
         <Tabs defaultValue="vlm" className="w-full gap-6 flex-row">
@@ -60,35 +62,35 @@ export const GlobalSettings = () => {
                 className="w-full justify-start gap-2 px-2 py-1.5 mb-2 !shadow-none font-normal data-[state=active]:font-medium data-[state=active]:bg-accent data-[state=active]:text-accent-foreground hover:bg-accent/50"
               >
                 <Sparkles strokeWidth={2} />
-                VLM Settings
+                {t('vlmSettings')}
               </TabsTrigger>
               <TabsTrigger
                 value="chat"
                 className="w-full justify-start gap-2 px-2 py-1.5 mb-2 !shadow-none font-normal data-[state=active]:font-medium data-[state=active]:bg-accent data-[state=active]:text-accent-foreground hover:bg-accent/50"
               >
                 <MessagesSquare strokeWidth={2} />
-                Chat Settings
+                {t('chatSettings')}
               </TabsTrigger>
               <TabsTrigger
                 value="operator"
                 className="w-full justify-start gap-2 px-2 py-1.5 mb-2 !shadow-none font-normal data-[state=active]:font-medium data-[state=active]:bg-accent data-[state=active]:text-accent-foreground hover:bg-accent/50"
               >
                 <Cpu strokeWidth={2} />
-                Operator Settings
+                {t('operatorSettings')}
               </TabsTrigger>
               <TabsTrigger
                 value="report"
                 className="w-full justify-start gap-2 px-2 py-1.5 mb-2 !shadow-none font-normal data-[state=active]:font-medium data-[state=active]:bg-accent data-[state=active]:text-accent-foreground hover:bg-accent/50"
               >
                 <FileText strokeWidth={2} />
-                Report Settings
+                {t('reportSettings')}
               </TabsTrigger>
               <TabsTrigger
                 value="general"
                 className="w-full justify-start gap-2 px-2 py-1.5 mb-2 !shadow-none font-normal data-[state=active]:font-medium data-[state=active]:bg-accent data-[state=active]:text-accent-foreground hover:bg-accent/50"
               >
                 <Settings strokeWidth={2} />
-                General Settings
+                {t('generalSettings')}
               </TabsTrigger>
             </TabsList>
           </div>
@@ -96,14 +98,18 @@ export const GlobalSettings = () => {
           <div className="flex-1">
             <TabsContent value="vlm" className="mt-0">
               <ScrollArea className="h-[calc(80vh-48px)]">
-                <h2 className="text-xl font-semibold mb-3">VLM Settings</h2>
+                <h2 className="text-xl font-semibold mb-3">
+                  {t('vlmSettings')}
+                </h2>
                 <Separator className="mb-4" />
                 <VLMSettings autoSave={true} />
               </ScrollArea>
             </TabsContent>
 
             <TabsContent value="chat" className="mt-0">
-              <h2 className="text-xl font-semibold mb-3">Chat Settings</h2>
+              <h2 className="text-xl font-semibold mb-3">
+                {t('chatSettings')}
+              </h2>
               <Separator className="mb-4" />
               <ChatSettings />
             </TabsContent>
@@ -111,22 +117,26 @@ export const GlobalSettings = () => {
             <TabsContent value="operator" className="mt-0 flex-1">
               <ScrollArea className="h-[calc(80vh-48px)]">
                 <h2 className="text-xl font-semibold mb-3">
-                  Local Operator Settings
+                  {t('localOperatorSettings')}
                 </h2>
                 <Separator className="mb-4" />
                 <h3 className="text-lg font-semibold mt-5 mb-3">
-                  Local Browser Operator
+                  {t('localBrowserOperator')}
                 </h3>
                 <LocalBrowserSettings />
               </ScrollArea>
             </TabsContent>
             <TabsContent value="report" className="mt-0">
-              <h2 className="text-xl font-semibold mb-3">Report Settings</h2>
+              <h2 className="text-xl font-semibold mb-3">
+                {t('reportSettings')}
+              </h2>
               <Separator className="mb-4" />
               <ReportSettings />
             </TabsContent>
             <TabsContent value="general" className="mt-0">
-              <h2 className="text-xl font-semibold mb-3">General Settings</h2>
+              <h2 className="text-xl font-semibold mb-3">
+                {t('generalSettings')}
+              </h2>
               <Separator className="mb-4" />
               <GeneralSettings />
             </TabsContent>
