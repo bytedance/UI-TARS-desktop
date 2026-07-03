@@ -8,7 +8,8 @@
       "!@ui-tars/visualizer"
     ],
     [
-      "@agent-infra/mcp-*"
+      "@agent-infra/mcp-*",
+      "!@agent-infra/mcp-hub"
     ]
   ],
   "linked": [],
