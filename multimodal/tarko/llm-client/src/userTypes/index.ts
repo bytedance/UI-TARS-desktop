@@ -27,6 +27,14 @@ export type ConfigOptions = Pick<ClientOptions, 'apiKey' | 'baseURL'> & {
     apiVersion?: string;
     azureADTokenProvider?: any;
   };
+  vertexAI?: {
+    project?: string;
+    location?: string;
+    googleAuthOptions?: {
+      keyFile?: string;
+      credentials?: Record<string, unknown>;
+    };
+  };
 };
 
 export type ChatCompletionChoice = Omit<ChatCompletion.Choice, 'finish_reason'> & {
