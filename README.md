@@ -257,7 +257,6 @@ UI-TARS Desktop is a native GUI agent for your local computer, driven by [UI-TAR
 
 ### Showcase
 
-<!-- // FIXME: Choose only two demo, one local computer and one remote computer showcase. -->
 
 |                                                          Instruction                                                           |                                                Local Operator                                                |                                               Remote Operator                                                |
 | :----------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------: |
