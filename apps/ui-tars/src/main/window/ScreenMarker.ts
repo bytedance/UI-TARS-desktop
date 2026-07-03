@@ -22,6 +22,13 @@ import { windowManager } from '../services/windowManager';
 
 let appUpdater;
 
+// Encode the HTML payload as a base64 data URL so the URL parser does not
+// percent-decode the body. Combined with HTML escaping in setOfMarks.ts and
+// the locked-down webPreferences below, this prevents prompt-injected VLM
+// output from escaping the SVG text node into executable HTML.
+const toBase64DataUrl = (html: string): string =>
+  `data:text/html;charset=UTF-8;base64,${Buffer.from(html, 'utf-8').toString('base64')}`;
+
 class ScreenMarker {
   private static instance: ScreenMarker;
   private currentOverlay: BrowserWindow | null = null;
@@ -59,15 +66,18 @@ class ScreenMarker {
       thickFrame: false,
       paintWhenInitiallyHidden: true,
       type: 'panel',
-      webPreferences: { nodeIntegration: true, contextIsolation: false },
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true,
+        sandbox: true,
+      },
     });
 
     this.screenWaterFlow.setFocusable(false);
     this.screenWaterFlow.setContentProtection(false);
     this.screenWaterFlow.setIgnoreMouseEvents(true);
 
-    this.screenWaterFlow.loadURL(`data:text/html;charset=UTF-8,
-      <html>
+    const waterFlowHtml = `<html>
         <head>
           <style id="water-flow-animation">
             html::before {
@@ -124,8 +134,8 @@ class ScreenMarker {
           </style>
         </head>
         <body></body>
-      </html>
-    `);
+      </html>`;
+    this.screenWaterFlow.loadURL(toBase64DataUrl(waterFlowHtml));
   }
 
   hideScreenWaterFlow() {
@@ -226,7 +236,11 @@ class ScreenMarker {
           thickFrame: false,
           paintWhenInitiallyHidden: true,
           type: 'panel',
-          webPreferences: { nodeIntegration: true, contextIsolation: false },
+          webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true,
+            sandbox: true,
+          },
           ...(overlay.xPos &&
             overlay.yPos && {
               // logical pixels
@@ -261,13 +275,8 @@ class ScreenMarker {
         }
 
         if (overlay.svg) {
-          this.currentOverlay.loadURL(`data:text/html;charset=UTF-8,
-    <html>
-      <body style="background: transparent; margin: 0;">
-        ${overlay.svg}
-      </body>
-    </html>
-    `);
+          const overlayHtml = `<html><body style="background: transparent; margin: 0;">${overlay.svg}</body></html>`;
+          this.currentOverlay.loadURL(toBase64DataUrl(overlayHtml));
 
           // max 5s close overlay
           setTimeout(() => {

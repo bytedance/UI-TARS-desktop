@@ -3,8 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import escape from 'escape-html';
+
 import { Conversation, PredictionParsed } from '@ui-tars/shared/types';
 import { parseBoxToScreenCoords } from '@ui-tars/sdk/core';
+
+// VLM-controlled strings are interpolated into SVG/HTML markup that is later
+// rendered inside an Electron BrowserWindow. Escape them to keep injected
+// </text>/</svg>/<script> payloads from breaking out of the text node.
+// Wraps the escape-html package so callers can pass null/undefined safely
+// (the upstream lib coerces those to the literal strings 'null'/'undefined').
+export const escapeHtml = (input: unknown): string => {
+  if (input === null || input === undefined) return '';
+  return escape(String(input));
+};
 
 export interface Overlay {
   prediction: PredictionParsed;
@@ -104,7 +116,7 @@ export const setOfMarksOverlays = ({
                 fill="red"
                 text-anchor="middle"
                 dominant-baseline="middle"
-              >${prediction.action_type}</text>
+              >${escapeHtml(prediction.action_type)}</text>
             </svg>`,
           });
         }
@@ -132,7 +144,7 @@ export const setOfMarksOverlays = ({
             fill="red"
             text-anchor="middle"
             dominant-baseline="middle"
-          >Typing: "${content}"</text>
+          >Typing: "${escapeHtml(content)}"</text>
         </svg>`,
         });
         break;
@@ -160,7 +172,7 @@ export const setOfMarksOverlays = ({
             fill="red"
             text-anchor="middle"
             dominant-baseline="middle"
-          >Hotkey: ${keys}</text>
+          >Hotkey: ${escapeHtml(keys)}</text>
         </svg>`,
         });
         break;
@@ -195,7 +207,7 @@ export const setOfMarksOverlays = ({
             fill="red"
             text-anchor="middle"
             dominant-baseline="middle"
-          >${prediction.action_type}</text>
+          >${escapeHtml(prediction.action_type)}</text>
         </svg>`,
         });
         break;

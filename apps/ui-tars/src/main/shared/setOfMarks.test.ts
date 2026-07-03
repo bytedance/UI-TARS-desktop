@@ -2,8 +2,8 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { test, expect } from 'vitest';
-import { setOfMarksOverlays } from './setOfMarks';
+import { test, expect, describe } from 'vitest';
+import { escapeHtml, setOfMarksOverlays } from './setOfMarks';
 
 const testMakeScreenMarker = () => {
   let xPos;
@@ -129,4 +129,130 @@ const testMakeScreenMarker = () => {
 
 test('not throw error', () => {
   expect(() => testMakeScreenMarker()).not.toThrow();
+});
+
+describe('escapeHtml', () => {
+  test('escapes the five HTML metacharacters', () => {
+    expect(escapeHtml(`& < > " '`)).toBe(`&amp; &lt; &gt; &quot; &#39;`);
+  });
+
+  test('returns empty string for null/undefined', () => {
+    expect(escapeHtml(null)).toBe('');
+    expect(escapeHtml(undefined)).toBe('');
+  });
+
+  test('coerces non-strings via String(...)', () => {
+    expect(escapeHtml(42)).toBe('42');
+    expect(escapeHtml(true)).toBe('true');
+  });
+});
+
+describe('setOfMarksOverlays — prompt-injection regression', () => {
+  const screenshotContext = {
+    size: { width: 2560, height: 1440 },
+    scaleFactor: 1,
+  };
+
+  // Reproduces the payload from the public 1-click RCE PoC.
+  const rcePayload =
+    '</text></svg><script>require("node:child_process").exec("open -a Calculator")</script><svg><text>';
+
+  test('escapes malicious type() content so <script> cannot escape the SVG text node', () => {
+    const { overlays } = setOfMarksOverlays({
+      predictions: [
+        {
+          action_type: 'type',
+          action_inputs: { content: rcePayload },
+          reflection: null,
+          thought: '',
+        },
+      ],
+      screenshotContext,
+      xPos: 100,
+      yPos: 100,
+    });
+
+    expect(overlays).toHaveLength(1);
+    const { svg } = overlays[0];
+    expect(svg).not.toContain('<script>');
+    expect(svg).not.toContain('</text></svg>');
+    expect(svg).not.toContain('require(');
+    expect(svg).toContain('&lt;script&gt;');
+    expect(svg).toContain('&lt;/text&gt;&lt;/svg&gt;');
+  });
+
+  test('escapes malicious hotkey key strings', () => {
+    const { overlays } = setOfMarksOverlays({
+      predictions: [
+        {
+          action_type: 'hotkey',
+          action_inputs: { key: '"><script>alert(1)</script>' },
+          reflection: null,
+          thought: '',
+        },
+      ],
+      screenshotContext,
+    });
+
+    const { svg } = overlays[0];
+    expect(svg).not.toContain('<script>');
+    expect(svg).toContain('&lt;script&gt;');
+    expect(svg).toContain('&quot;');
+  });
+
+  test('escapes a malicious action_type in default branch overlays', () => {
+    const { overlays } = setOfMarksOverlays({
+      predictions: [
+        {
+          action_type: 'wait</text><script>1</script>',
+          action_inputs: {},
+          reflection: null,
+          thought: '',
+        },
+      ],
+      screenshotContext,
+    });
+
+    const { svg } = overlays[0];
+    expect(svg).not.toContain('<script>');
+    expect(svg).toContain('&lt;script&gt;');
+  });
+
+  test('escapes a malicious action_type in click overlays', () => {
+    const { overlays } = setOfMarksOverlays({
+      predictions: [
+        {
+          action_type: 'click<script>1</script>',
+          action_inputs: {
+            start_box: '[0.1171875,0.20833333,0.1171875,0.20833333]',
+          },
+          reflection: null,
+          thought: '',
+        } as unknown as Parameters<
+          typeof setOfMarksOverlays
+        >[0]['predictions'][number],
+      ],
+      screenshotContext,
+    });
+
+    if (overlays.length === 0) return;
+    const { svg } = overlays[0];
+    expect(svg).not.toContain('<script>');
+  });
+
+  test('keeps benign content untouched apart from HTML metas', () => {
+    const { overlays } = setOfMarksOverlays({
+      predictions: [
+        {
+          action_type: 'type',
+          action_inputs: { content: 'Hello, world!' },
+          reflection: null,
+          thought: '',
+        },
+      ],
+      screenshotContext,
+    });
+
+    expect(overlays[0].svg).toContain('Typing: "Hello, world!"');
+  });
 });
