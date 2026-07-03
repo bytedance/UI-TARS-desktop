@@ -13,6 +13,9 @@ export * from './agent';
 // Export tool call engine.
 export * from './tool-call-engine';
 
+// Export context compression
+export * from './context-compression';
+
 // Export logger
 export { getLogger, LogLevel, ConsoleLogger } from '@tarko/shared-utils';
 
