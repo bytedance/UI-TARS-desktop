@@ -15,6 +15,7 @@ const TOOL_TO_RENDERER_CONFIG: ToolToRendererCondition[] = [
   { toolName: 'edit_file', renderer: 'diff_result' },
   { toolName: 'run_command', renderer: 'command_result' },
   { toolName: 'run_script', renderer: 'script_result' },
+  { toolName: 'search_files', renderer: 'command_result' },
   { toolName: 'LinkReader', renderer: 'link_reader' },
   { toolName: 'Search', renderer: 'search_result' },
   { toolName: 'execute_bash', renderer: 'command_result' },
