@@ -97,7 +97,7 @@ export class SettingStore {
       }
 
       const yamlText = await response.text();
-      const preset = yaml.load(yamlText);
+      const preset = yaml.load(yamlText, { schema: yaml.DEFAULT_SAFE_SCHEMA });
       const validatedPreset = validatePreset(preset);
 
       SettingStore.setStore({
@@ -142,7 +142,7 @@ export class SettingStore {
 }
 
 async function parsePresetYaml(yamlContent: string): Promise<LocalStore> {
-  const preset = yaml.load(yamlContent);
+  const preset = yaml.load(yamlContent, { schema: yaml.DEFAULT_SAFE_SCHEMA });
   const validatedPreset = validatePreset(preset);
   return validatedPreset;
 }

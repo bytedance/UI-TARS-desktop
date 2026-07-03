@@ -49,7 +49,7 @@ export function readWorkspacePatterns(cwd = process.cwd()): string[] {
     }
 
     const content = readFileSync(workspacePath, 'utf-8');
-    const parsed = yaml.load(content) as { packages?: string[] };
+    const parsed = yaml.load(content, { schema: yaml.DEFAULT_SAFE_SCHEMA }) as { packages?: string[] };
     return parsed?.packages || [];
   } catch (error) {
     console.error('Failed to read pnpm-workspace.yaml:', error);
