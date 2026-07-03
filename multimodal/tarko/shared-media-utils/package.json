@@ -24,13 +24,9 @@
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
-    "imagemin-mozjpeg": "^10.0.0",
-    "imagemin-webp": "^8.0.0"
+    "sharp": "^0.33.0"
   },
   "devDependencies": {
-    "@types/imagemin": "^8.0.5",
-    "imagemin-pngquant": "^9.0.2",
-    "imagemin": "^8.0.1",
     "@rslib/core": "0.10.0",
     "@types/js-yaml": "4.0.9",
     "@types/node": "22.15.30",
