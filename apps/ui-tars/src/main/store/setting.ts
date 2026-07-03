@@ -132,6 +132,9 @@ export class SettingStore {
   public static async fetchPresetFromUrl(url: string): Promise<LocalStore> {
     try {
       const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
       const yamlContent = await response.text();
       return await this.importPresetFromText(yamlContent);
     } catch (error) {
