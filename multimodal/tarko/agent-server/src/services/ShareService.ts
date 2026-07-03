@@ -31,6 +31,34 @@ export class ShareService {
     private server?: AgentServer,
   ) {}
 
+  private resolveWorkspaceImagePath(workspace: string, relativePath: string): string | null {
+    if (!relativePath || path.isAbsolute(relativePath)) {
+      return null;
+    }
+
+    const normalized = path.normalize(relativePath);
+    if (normalized.split(path.sep).includes('..')) {
+      return null;
+    }
+
+    const candidatePath = path.resolve(workspace, normalized);
+    if (!fs.existsSync(candidatePath)) {
+      return null;
+    }
+
+    try {
+      const realWorkspace = fs.realpathSync(workspace);
+      const realCandidate = fs.realpathSync(candidatePath);
+      const relative = path.relative(realWorkspace, realCandidate);
+      if (relative.startsWith('..') || path.isAbsolute(relative)) {
+        return null;
+      }
+      return realCandidate;
+    } catch (error) {
+      return null;
+    }
+  }
+
   /**
    * Share a session
    * @param sessionId Session ID to share
@@ -239,8 +267,11 @@ export class ShareService {
       }
 
       try {
-        // Resolve absolute path
-        const absolutePath = path.resolve(workspace, relativePath);
+        // Resolve absolute path with workspace boundary checks
+        const absolutePath = this.resolveWorkspaceImagePath(workspace, relativePath);
+        if (!absolutePath) {
+          continue;
+        }
 
         // Check if file exists and is an image
         if (fs.existsSync(absolutePath) && this.isImageFile(absolutePath)) {
