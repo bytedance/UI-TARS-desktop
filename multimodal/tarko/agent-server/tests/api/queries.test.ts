@@ -10,7 +10,13 @@ import { Request, Response } from 'express';
 const { mockContextProcessor, mockImageProcessor, mockSession, mockServer } = vi.hoisted(() => ({
   mockContextProcessor: { processContextualReferences: vi.fn() },
   mockImageProcessor: { compressImagesInQuery: vi.fn() },
-  mockSession: { runQuery: vi.fn(), runQueryStreaming: vi.fn(), abortQuery: vi.fn() },
+  mockSession: { 
+    runQuery: vi.fn(), 
+    runQueryStreaming: vi.fn(), 
+    abortQuery: vi.fn(),
+    getProcessingStatus: vi.fn().mockReturnValue(false),
+    insertEnvironmentInput: vi.fn()
+  },
   mockServer: { getCurrentWorkspace: vi.fn().mockReturnValue('/test/workspace') },
 }));
 
@@ -53,9 +59,35 @@ const mockProcessing = (expandedContext: string | null, compressedQuery: any = n
 describe('Queries Controller', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Reset to default: agent not running
+    mockSession.getProcessingStatus.mockReturnValue(false);
   });
 
   describe('executeQuery', () => {
+    it('should insert environment input when agent is running', async () => {
+      const userQuery = 'User interrupt message';
+      const req = createRequest(userQuery);
+      const res = createResponse();
+
+      mockSession.getProcessingStatus.mockReturnValue(true);
+      mockSession.insertEnvironmentInput.mockResolvedValue(undefined);
+
+      await executeQuery(req as Request, res as Response);
+
+      expect(mockSession.getProcessingStatus).toHaveBeenCalled();
+      expect(mockSession.insertEnvironmentInput).toHaveBeenCalledWith(
+        userQuery,
+        'User interrupt message during agent execution'
+      );
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        type: 'environment_input_inserted',
+        message: 'User input inserted as environment input during agent execution'
+      });
+      expect(mockSession.runQuery).not.toHaveBeenCalled();
+    });
+
     it('should process context and pass environmentInput when references exist', async () => {
       const userQuery = 'Test query with @file reference';
       const expandedContext = 'File content: function test() { return true; }';
@@ -164,6 +196,31 @@ describe('Queries Controller', () => {
   });
 
   describe('executeStreamingQuery', () => {
+    it('should insert environment input when agent is running', async () => {
+      const userQuery = 'User interrupt streaming message';
+      const req = createRequest(userQuery);
+      const res = createResponse();
+
+      mockSession.getProcessingStatus.mockReturnValue(true);
+      mockSession.insertEnvironmentInput.mockResolvedValue(undefined);
+
+      await executeStreamingQuery(req as Request, res as Response);
+
+      expect(mockSession.getProcessingStatus).toHaveBeenCalled();
+      expect(mockSession.insertEnvironmentInput).toHaveBeenCalledWith(
+        userQuery,
+        'User interrupt message during agent execution'
+      );
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        type: 'environment_input_inserted',
+        message: 'User input inserted as environment input during agent execution'
+      });
+      expect(mockSession.runQueryStreaming).not.toHaveBeenCalled();
+      expect(res.setHeader).not.toHaveBeenCalled();
+    });
+
     it('should process context and stream with environmentInput', async () => {
       const userQuery = 'Streaming query with @dir reference';
       const expandedContext = 'Directory listing: file1.js, file2.ts';

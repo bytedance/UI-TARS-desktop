@@ -43,6 +43,23 @@ export async function executeQuery(req: Request, res: Response) {
   }
 
   try {
+    // Check if agent is currently running
+    const session = req.session!;
+    const isAgentRunning = session.getProcessingStatus();
+
+    if (isAgentRunning) {
+      // Agent is running - insert as environment input instead of starting new query
+      await session.insertEnvironmentInput(query, 'User interrupt message during agent execution');
+      
+      // Return success response for environment input insertion
+      return res.status(200).json({ 
+        success: true, 
+        type: 'environment_input_inserted',
+        message: 'User input inserted as environment input during agent execution'
+      });
+    }
+
+    // Agent is not running - proceed with normal query
     // Get server instance to access workspace path
     const server = req.app.locals.server;
     const workspacePath = server.getCurrentWorkspace();
@@ -71,7 +88,7 @@ export async function executeQuery(req: Request, res: Response) {
     };
 
     // Use enhanced error handling in runQuery with environment input
-    const response = await req.session!.runQuery(runOptions);
+    const response = await session.runQuery(runOptions);
 
     if (response.success) {
       res.status(200).json({ result: response.result });
@@ -97,6 +114,23 @@ export async function executeStreamingQuery(req: Request, res: Response) {
   }
 
   try {
+    // Check if agent is currently running
+    const session = req.session!;
+    const isAgentRunning = session.getProcessingStatus();
+
+    if (isAgentRunning) {
+      // Agent is running - insert as environment input instead of starting new query
+      await session.insertEnvironmentInput(query, 'User interrupt message during agent execution');
+      
+      // Return success response for environment input insertion
+      return res.status(200).json({ 
+        success: true, 
+        type: 'environment_input_inserted',
+        message: 'User input inserted as environment input during agent execution'
+      });
+    }
+
+    // Agent is not running - proceed with normal streaming query
     // Set response headers for streaming
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
@@ -130,7 +164,7 @@ export async function executeStreamingQuery(req: Request, res: Response) {
     };
 
     // Get streaming response with environment input - any errors will be returned as events
-    const eventStream = await req.session!.runQueryStreaming(runOptions);
+    const eventStream = await session.runQueryStreaming(runOptions);
 
     // Stream events one by one
     for await (const event of eventStream) {

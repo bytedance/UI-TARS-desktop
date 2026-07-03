@@ -386,6 +386,13 @@ export namespace AgentEventStream {
   }
 
   /**
+   * User interrupt metadata
+   */
+  export interface UserInterruptMetadata extends BaseEnvironmentInputMetadata {
+    type: 'user_interrupt';
+  }
+
+  /**
    * Generic metadata for other types
    */
   export interface GenericMetadata extends BaseEnvironmentInputMetadata {
@@ -399,6 +406,7 @@ export namespace AgentEventStream {
     | ScreenshotMetadata
     | TextMetadata
     | CodebaseMetadata
+    | UserInterruptMetadata
     | GenericMetadata;
 
   /**
