@@ -1,15 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import imagemin from 'imagemin';
-import imageminPngquant from 'imagemin-pngquant';
-// @ts-expect-error
-import imageminMozjpeg from 'imagemin-mozjpeg';
-// @ts-expect-error
-import imageminWebp from 'imagemin-webp';
+import sharp from 'sharp';
 
 export interface ImageCompressionOptions {
   quality: number; // Compression quality (1-100)
@@ -48,35 +42,29 @@ export class ImageCompressor {
    * @param imageBuffer Image Buffer
    */
   async compressToBuffer(imageBuffer: Buffer): Promise<Buffer> {
-    // Choose appropriate compression plugin
-    const plugins = this.getPluginsForFormat();
+    let instance = sharp(imageBuffer);
 
-    // Compress image
-    return await imagemin.buffer(imageBuffer, {
-      plugins,
-    });
-  }
-
-  /**
-   * Select plugins based on target format
-   */
-  private getPluginsForFormat() {
-    const quality = this.options.quality / 100; // Convert to 0-1 range (required by some plugins)
+    if (this.options.width || this.options.height) {
+      instance = instance.resize(this.options.width, this.options.height, {
+        fit: 'inside',
+        withoutEnlargement: true,
+      });
+    }
 
     switch (this.options.format) {
       case 'jpeg':
-        return [imageminMozjpeg({ quality: this.options.quality })];
+        instance = instance.jpeg({ quality: this.options.quality, mozjpeg: true });
+        break;
       case 'png':
-        return [
-          imageminPngquant({
-            quality: [quality, Math.min(quality + 0.2, 1)],
-          }),
-        ];
+        instance = instance.png({ quality: this.options.quality, compressionLevel: 9 });
+        break;
       case 'webp':
-        return [imageminWebp({ quality: this.options.quality })];
       default:
-        return [imageminWebp({ quality: this.options.quality })];
+        instance = instance.webp({ quality: this.options.quality });
+        break;
     }
+
+    return instance.toBuffer();
   }
 
   /**
