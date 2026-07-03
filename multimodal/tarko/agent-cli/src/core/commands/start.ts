@@ -4,7 +4,7 @@
  */
 
 import path from 'path';
-import { exec } from 'child_process';
+import { exec, spawn } from 'child_process';
 import fs from 'fs';
 import http from 'http';
 import {
@@ -97,10 +97,17 @@ export async function startInteractiveWebUI(
           : process.platform === 'win32'
             ? 'start'
             : 'xdg-open';
-      exec(`${command} ${url}`, (err) => {
-        if (err) {
-          console.error(`Failed to open browser: ${err.message}`);
-        }
+
+      const child = spawn(command, [url], {
+        detached: true,
+        stdio: 'ignore',
+        shell: process.platform === 'win32',
+      });
+
+      child.unref();
+
+      child.on('error', (err) => {
+        console.error('Failed to open browser:', err.message);
       });
     }
   }
@@ -115,7 +122,7 @@ function setupUI(
   app: express.Application,
   isDebug = false,
   staticPath: string,
-  mergedWebUIConfig: AgentWebUIImplementation & Record<string, any>,
+  mergedWebUIConfig: AgentWebUIImplementation & Record<string, unknown>,
 ): void {
   if (isDebug) {
     logger.debug(`Using static files from: ${staticPath}`);
