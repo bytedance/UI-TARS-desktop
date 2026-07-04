@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/bytedance-ui-tars-desktop-badge.png)](https://mseep.ai/app/bytedance-ui-tars-desktop)
+
 <picture>
   <img alt="Agent TARS Banner" src="./images/tars.png">
 </picture>
