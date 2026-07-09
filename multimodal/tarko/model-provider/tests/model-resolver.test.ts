@@ -142,6 +142,27 @@ describe('resolveModel', () => {
     });
   });
 
+  it('should handle minimax provider correctly', () => {
+    const agentModel: AgentModel = {
+      provider: 'minimax',
+      id: 'MiniMax-M3',
+      apiKey: 'minimax-key',
+    };
+
+    const result = resolveModel(agentModel);
+
+    expect(result).toEqual({
+      provider: 'minimax',
+      id: 'MiniMax-M3',
+      displayName: undefined,
+      baseURL: 'https://api.minimax.io/v1',
+      apiKey: 'minimax-key',
+      headers: {},
+      params: undefined,
+      baseProvider: 'openai',
+    });
+  });
+
   it('should add anthropic_beta params for azure-openai provider with gcp-claude4-sonnet model', () => {
     const agentModel: AgentModel = {
       provider: 'azure-openai',
