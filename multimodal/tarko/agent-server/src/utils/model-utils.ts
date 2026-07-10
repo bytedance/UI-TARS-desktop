@@ -17,9 +17,12 @@ export function getAvailableModels(appConfig: AgentAppConfig): AgentModel[] {
     ...(appConfig.server?.models || []),
   ];
 
-  // Deduplicate by model.id, keeping the first occurrence
+  // Deduplicate by (provider, id), keeping the first occurrence. Model identity
+  // is the provider+id pair (see isModelConfigValid), so the same model id under
+  // two different providers must be kept as distinct entries.
   const uniqueModels = allModels.filter(
-    (model, index, arr) => arr.findIndex((m) => m.id === model.id) === index,
+    (model, index, arr) =>
+      arr.findIndex((m) => m.id === model.id && m.provider === model.provider) === index,
   );
 
   return uniqueModels;
