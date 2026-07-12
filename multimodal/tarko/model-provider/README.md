@@ -10,7 +10,7 @@ npm install @tarko/model-provider
 
 ## Features
 
-- 🔌 **Multi-Provider Support**: OpenAI, Ollama, LM Studio, Volcengine, DeepSeek, and more
+- 🔌 **Multi-Provider Support**: OpenAI, Ollama, LM Studio, Volcengine, DeepSeek, MiniMax, and more
 - 🎯 **Unified Interface**: Single API for all providers with OpenAI-compatible interface
 - ⚙️ **Smart Resolution**: Automatic model configuration resolution with fallbacks
 - 🔧 **Extensible**: Easy to add new providers through configuration
@@ -52,6 +52,27 @@ const response = await client.chat.completions.create({
 | `lm-studio` | http://127.0.0.1:1234/v1 | 1234 |
 | `volcengine` | https://ark.cn-beijing.volces.com/api/v3 | - |
 | `deepseek` | https://api.deepseek.com/v1 | - |
+| `minimax` | https://api.minimax.io/v1 | - |
+
+### MiniMax Configuration
+
+The `minimax` provider supports `MiniMax-M3` and `MiniMax-M2.7`. It defaults to the global OpenAI-compatible endpoint. Override `baseURL` when using the China endpoint or the Anthropic-compatible protocol:
+
+| Protocol             | Global                             | China                                |
+| -------------------- | ---------------------------------- | ------------------------------------ |
+| OpenAI-compatible    | `https://api.minimax.io/v1`        | `https://api.minimaxi.com/v1`        |
+| Anthropic-compatible | `https://api.minimax.io/anthropic` | `https://api.minimaxi.com/anthropic` |
+
+Use `provider: 'minimax'` with the OpenAI-compatible endpoints. For Anthropic-compatible requests, use `provider: 'anthropic'` and one of the Anthropic base URLs above. The Anthropic SDK appends `/v1/messages` to that base URL.
+
+```typescript
+const model = resolveModel({
+  provider: 'anthropic',
+  id: 'MiniMax-M3',
+  baseURL: 'https://api.minimax.io/anthropic',
+  apiKey: 'your-api-key',
+});
+```
 
 ### Advanced Configuration
 
@@ -126,7 +147,7 @@ interface AgentModel {
 ```typescript
 type ModelProviderName = 
   | 'openai' | 'anthropic' | 'azure-openai'
-  | 'ollama' | 'lm-studio' | 'volcengine' | 'deepseek';
+  | 'ollama' | 'lm-studio' | 'volcengine' | 'deepseek' | 'minimax';
 ```
 
 ### Functions
