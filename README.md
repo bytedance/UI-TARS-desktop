@@ -1,3 +1,5 @@
+[![mcpindex](https://mcpindex.ai/api/v1/badge/io-github-bytedance-mcp-server-browser)](https://mcpindex.ai/server/io-github-bytedance-mcp-server-browser)
+
 <picture>
   <img alt="Agent TARS Banner" src="./images/tars.png">
 </picture>
