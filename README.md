@@ -1,3 +1,5 @@
+[![MCP Toplist](https://mcptoplist.com/badge/mcp.so%2FUI-TARS-desktop%2Fbytedance.svg)](https://mcptoplist.com/server/mcp.so%2FUI-TARS-desktop%2Fbytedance)
+
 <picture>
   <img alt="Agent TARS Banner" src="./images/tars.png">
 </picture>
