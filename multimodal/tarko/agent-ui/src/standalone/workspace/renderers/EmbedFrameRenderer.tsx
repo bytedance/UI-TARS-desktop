@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import type { StandardPanelContent } from '../types/panelContent';
 import { FileDisplayMode } from '../types';
+import { resolveEmbedFrameSandbox } from '@/common/constants/iframeSandbox';
 
 interface EmbedFrameRendererProps {
   panelContent: StandardPanelContent;
@@ -18,6 +19,8 @@ export const EmbedFrameRenderer: React.FC<EmbedFrameRendererProps> = ({
 
   const src =
     typeof panelContent.source === 'string' ? panelContent.source : panelContent.link || '';
+
+  const sandbox = resolveEmbedFrameSandbox(src);
 
   const handleOpenInNewTab = () => {
     if (src) {
@@ -136,7 +139,7 @@ export const EmbedFrameRenderer: React.FC<EmbedFrameRendererProps> = ({
               className="border-0"
               style={{ width: '1280px', height: '958px' }}
               title={panelContent.title}
-              sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+              sandbox={sandbox}
               loading="lazy"
             />
           </div>
@@ -161,7 +164,7 @@ export const EmbedFrameRenderer: React.FC<EmbedFrameRendererProps> = ({
             className="border-0"
             style={{ width: '1280px', height: '958px' }}
             title={panelContent.title}
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+            sandbox={sandbox}
             loading="lazy"
           />
         </div>
