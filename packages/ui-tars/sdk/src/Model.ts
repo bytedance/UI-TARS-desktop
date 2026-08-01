@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import OpenAI, { type ClientOptions } from 'openai';
+import { SpanStatusCode, trace } from '@opentelemetry/api';
 import {
   type ChatCompletionCreateParamsNonStreaming,
   type ChatCompletionCreateParamsBase,
@@ -30,6 +31,8 @@ import type {
   ResponseCreateParamsNonStreaming,
   ResponseInputItem,
 } from 'openai/resources/responses/responses';
+
+const tracer = trace.getTracer('@ui-tars/sdk');
 
 type OpenAIChatCompletionCreateParams = Omit<ClientOptions, 'maxRetries'> &
   Pick<
@@ -306,17 +309,49 @@ export class UITarsModel extends Model {
     });
 
     const startTime = Date.now();
-    const result = await this.invokeModelProvider(
-      uiTarsVersion,
-      {
-        messages,
-        previousResponseId,
-      },
-      {
-        signal,
-      },
-      headers,
-    )
+    const result = await tracer
+      .startActiveSpan(
+        'ui-tars.model.invoke',
+        {
+          attributes: {
+            'openinference.span.kind': 'LLM',
+            'llm.model_name': this.modelName,
+            'llm.provider': 'openai-compatible',
+          },
+        },
+        async (span) => {
+          try {
+            const modelResult = await this.invokeModelProvider(
+              uiTarsVersion,
+              {
+                messages,
+                previousResponseId,
+              },
+              {
+                signal,
+              },
+              headers,
+            );
+            if (modelResult.costTokens !== undefined) {
+              span.setAttribute(
+                'llm.token_count.total',
+                modelResult.costTokens,
+              );
+            }
+            span.setStatus({ code: SpanStatusCode.OK });
+            return modelResult;
+          } catch (error: unknown) {
+            span.setStatus({ code: SpanStatusCode.ERROR });
+            span.setAttribute(
+              'error.type',
+              error instanceof Error ? error.name : 'UnknownError',
+            );
+            throw error;
+          } finally {
+            span.end();
+          }
+        },
+      )
       .catch((e) => {
         logger?.error('[UITarsModel] error', e);
         throw e;

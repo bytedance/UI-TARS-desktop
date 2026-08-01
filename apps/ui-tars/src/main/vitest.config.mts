@@ -11,18 +11,18 @@ import { defineProject } from 'vitest/config';
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
 export default defineProject({
-  root: './',
+  root: __dirname,
   test: {
     globals: true,
-    setupFiles: [resolve(__dirname, '../../scripts/vitest-setup.ts')],
+    setupFiles: [resolve(__dirname, '../../../../scripts/vitest-setup.ts')],
     environment: 'node',
-    includeSource: [resolve(__dirname, '.')],
+    includeSource: ['**/*.{js,ts}'],
   },
 
   plugins: [
     // @ts-ignore
     tsconfigPath({
-      projects: ['../../tsconfig.node.json'],
+      projects: [resolve(__dirname, '../../tsconfig.node.json')],
     }),
   ],
 });

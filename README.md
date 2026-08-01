@@ -277,6 +277,22 @@ UI-TARS Desktop is a native GUI agent for your local computer, driven by [UI-TAR
 
 See [Quick Start](./docs/quick-start.md)
 
+### Optional local model tracing
+
+UI-TARS Desktop can write OpenInference model spans to an AgentPond
+environment through the Files SDK. Tracing is disabled by default:
+
+```bash
+npx --yes --min-release-age=0 agentpond@latest init
+npx --yes --min-release-age=0 agentpond@latest env init local --provider fs --root "$PWD/.agentpond/envs/local/objects"
+set -a; . .agentpond/envs/local.env; set +a
+AGENTPOND_ENABLED=1 pnpm run dev:ui-tars
+```
+
+Spans contain the model name, timing, total token count, and safe error type.
+Prompts, screenshots, model responses, provider URLs, headers, and API keys are
+not recorded.
+
 ## Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md).

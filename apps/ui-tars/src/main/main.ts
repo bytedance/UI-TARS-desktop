@@ -30,6 +30,7 @@ import { registerSettingsHandlers } from './services/settings';
 import { sanitizeState } from './utils/sanitizeState';
 import { windowManager } from './services/windowManager';
 import { checkBrowserAvailability } from './services/browserCheck';
+import { initializeAgentPondTracing } from './services/agentPond';
 
 const { isProd } = env;
 
@@ -42,6 +43,7 @@ if (squirrelStartup) {
 }
 
 logger.debug('[env]', env);
+void initializeAgentPondTracing();
 
 ElectronStore.initRenderer();
 

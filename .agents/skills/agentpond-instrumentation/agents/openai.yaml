@@ -1,0 +1,4 @@
+interface:
+  display_name: "AgentPond Instrumentation"
+  short_description: "Trace provider-hosted AI apps"
+  default_prompt: "Use $agentpond-instrumentation to add OpenInference tracing to this Firebase, Supabase, or Vercel application."
