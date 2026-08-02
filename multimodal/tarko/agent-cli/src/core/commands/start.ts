@@ -17,7 +17,7 @@ import boxen from 'boxen';
 import chalk from 'chalk';
 import gradient from 'gradient-string';
 import { logger, toUserFriendlyPath, ensureServerConfig } from '../../utils';
-import { createPathMatcher } from '@tarko/shared-utils';
+import { createPathMatcher, formatServerUrl, isExternallyReachableHost } from '@tarko/shared-utils';
 import { AgentCLIRunInteractiveUICommandOptions } from '../../types';
 
 /**
@@ -56,7 +56,7 @@ export async function startInteractiveWebUI(
   }
 
   const port = appConfig.server!.port!;
-  const serverUrl = `http://localhost:${port}`;
+  const serverUrl = formatServerUrl(server.host, port);
 
   if (appConfig.logLevel !== LogLevel.SILENT) {
     // Define brand colors
@@ -75,6 +75,12 @@ export async function startInteractiveWebUI(
         chalk.underline(brandGradient(serverUrl)),
       '',
       `📁 ${chalk.gray('Workspace:')} ${brandGradient(workspaceDir)}`,
+      '',
+      `🔌 ${chalk.gray('Bound to:')} ${brandGradient(`${server.host}:${port}`)}${
+        isExternallyReachableHost(server.host)
+          ? ` ${chalk.red('- reachable from the network, and unauthenticated')}`
+          : ''
+      }`,
       '',
       `🤖 ${chalk.gray('Model:')} ${appConfig.model?.provider ? brandGradient(`${provider} | ${modelId}`) : chalk.gray('Not specified')}`,
     ].join('\n');
