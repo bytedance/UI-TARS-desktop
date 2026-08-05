@@ -142,7 +142,7 @@ export function filterDeclaredRuntimeSettings(
   }
 
   const properties = schema?.properties;
-  const filtered: Record<string, unknown> = {};
+  const filtered: Record<string, unknown> = Object.create(null);
   const rejectedKeys: string[] = [];
 
   for (const key of Object.keys(input)) {
