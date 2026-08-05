@@ -21,6 +21,9 @@ export type AgentCLIArguments = Pick<
   /** Server port number - maps to server.port */
   port?: number;
 
+  /** Network interface to bind - maps to server.host, defaults to 127.0.0.1 */
+  host?: string;
+
   // Deprecated options, for backward compatible
   provider?: string;
   apiKey?: string;

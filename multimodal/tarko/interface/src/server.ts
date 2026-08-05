@@ -183,6 +183,17 @@ export interface AgentServerOptions {
      */
     port?: number;
     /**
+     * Network interface the server binds to.
+     *
+     * Defaults to `127.0.0.1`. The server has no authentication, so binding a
+     * non-loopback address exposes session creation and agent execution to
+     * anyone who can reach the port; use `0.0.0.0` only behind a proxy that
+     * authenticates requests.
+     *
+     * @default '127.0.0.1'
+     */
+    host?: string;
+    /**
      * Server Storage options.
      */
     storage?: AgentStorageImplementation;

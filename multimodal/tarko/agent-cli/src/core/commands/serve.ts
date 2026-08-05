@@ -8,6 +8,7 @@ import { LogLevel } from '@tarko/interface';
 import { AgentCLIServeCommandOptions } from '../../types';
 import { AgentServer } from '@tarko/agent-server';
 import { ensureServerConfig } from '../../utils';
+import { formatServerUrl, isExternallyReachableHost } from '@tarko/shared-utils';
 import boxen from 'boxen';
 import chalk from 'chalk';
 
@@ -27,13 +28,19 @@ export async function startHeadlessServer(
   const httpServer = await server.start();
 
   const port = appConfig.server!.port!;
-  const serverUrl = `http://localhost:${port}`;
+  const serverUrl = formatServerUrl(server.host, port);
 
   if (appConfig.logLevel !== LogLevel.SILENT) {
     const boxContent = [
       `${chalk.bold(`${server.getCurrentAgentName()} Headless Server`)}`,
       '',
       `${chalk.cyan('API URL:')} ${chalk.underline(serverUrl)}`,
+      '',
+      `${chalk.cyan('Bound to:')} ${chalk.yellow(`${server.host}:${port}`)}${
+        isExternallyReachableHost(server.host)
+          ? ` ${chalk.red('- reachable from the network, and unauthenticated')}`
+          : ''
+      }`,
       '',
       `${chalk.cyan('Mode:')} ${chalk.yellow('Headless (API only)')}`,
     ].join('\n');

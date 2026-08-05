@@ -9,6 +9,11 @@ import { SessionInfo } from '../../storage';
 import { AgentSession } from '../../core';
 import { ShareService } from '../../services';
 import { getDefaultModel } from '../../utils/model-utils';
+import {
+  ALLOWED_SESSION_AGENT_OPTION_KEYS,
+  filterDeclaredRuntimeSettings,
+  sanitizeSessionAgentOptions,
+} from '@tarko/shared-utils';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -45,10 +50,33 @@ export async function getAllSessions(req: Request, res: Response) {
 export async function createSession(req: Request, res: Response) {
   try {
     const server = req.app.locals.server;
-    const { runtimeSettings, agentOptions } = req.body as {
-      runtimeSettings?: Record<string, any>;
-      agentOptions?: Record<string, any>;
-    };
+    const { runtimeSettings: requestedRuntimeSettings, agentOptions: requestedAgentOptions } =
+      req.body as {
+        runtimeSettings?: Record<string, any>;
+        agentOptions?: Record<string, any>;
+      };
+
+    // Session creation options are merged into the Agent constructor, so accept
+    // only the allowlisted keys instead of whatever the caller sent.
+    const { value: agentOptions, rejectedKeys } =
+      sanitizeSessionAgentOptions(requestedAgentOptions);
+    if (rejectedKeys.length > 0) {
+      return res.status(400).json({
+        error: 'Unsupported agentOptions',
+        message: `agentOptions may only contain ${ALLOWED_SESSION_AGENT_OPTION_KEYS.join(', ')}; rejected: ${rejectedKeys.join(', ')}. Configure anything else on the server.`,
+        allowed: ALLOWED_SESSION_AGENT_OPTION_KEYS,
+        rejected: rejectedKeys,
+      });
+    }
+
+    // Runtime settings reach the same constructor, so keep only the keys the
+    // server declared in its runtime settings schema.
+    const { value: runtimeSettings } = filterDeclaredRuntimeSettings(
+      requestedRuntimeSettings,
+      server.appConfig?.server?.runtimeSettings?.schema,
+    );
+    const hasRuntimeSettings = Object.keys(runtimeSettings).length > 0;
+
     const sessionId = nanoid();
 
     // Get session metadata if it exists (for restored sessions)
@@ -81,7 +109,7 @@ export async function createSession(req: Request, res: Response) {
             modelConfig: defaultModel,
           }),
           // Include runtime settings if provided (persistent session settings)
-          ...(runtimeSettings && {
+          ...(hasRuntimeSettings && {
             runtimeSettings,
           }),
           // Include agent options if provided (one-time initialization options)
