@@ -4,6 +4,7 @@ import {
   SessionInfo,
   SanitizedAgentOptions,
   WorkspaceInfo,
+  UploadedFileInfo,
 } from '@/common/types';
 
 import { ChatCompletionContentPart, AgentModel } from '@tarko/agent-interface';
@@ -78,16 +79,16 @@ class ApiService {
   /**
    * Get headers for mutation requests (POST/PUT/DELETE) that include CSRF token.
    */
-  private async getMutationHeaders(): Promise<Record<string, string>> {
+  private async getMutationHeaders(isMultipart = false): Promise<Record<string, string>> {
     try {
       const token = await this.fetchCsrfToken();
       return {
-        'Content-Type': 'application/json',
+        ...(!isMultipart && { 'Content-Type': 'application/json' }),
         'X-CSRF-Token': token,
       };
     } catch {
       // Fall back to headers without CSRF token if fetch fails
-      return { 'Content-Type': 'application/json' };
+      return isMultipart ? {} : { 'Content-Type': 'application/json' };
     }
   }
 
@@ -95,7 +96,8 @@ class ApiService {
    * Perform a mutation fetch with CSRF token. Retries once on 403 (token expired).
    */
   private async mutationFetch(url: string, init: RequestInit): Promise<Response> {
-    const headers = await this.getMutationHeaders();
+    const isMultipart = typeof FormData !== 'undefined' && init.body instanceof FormData;
+    const headers = await this.getMutationHeaders(isMultipart);
     const response = await fetch(url, {
       ...init,
       headers: { ...headers, ...(init.headers as Record<string, string>) },
@@ -104,7 +106,7 @@ class ApiService {
     // If 403, try refreshing the CSRF token and retry once
     if (response.status === 403) {
       this.csrfToken = null;
-      const freshHeaders = await this.getMutationHeaders();
+      const freshHeaders = await this.getMutationHeaders(isMultipart);
       return fetch(url, {
         ...init,
         headers: { ...freshHeaders, ...(init.headers as Record<string, string>) },
@@ -112,6 +114,44 @@ class ApiService {
     }
 
     return response;
+  }
+
+  /**
+   * Persist files in the Agent workspace and return paths that can be passed to
+   * the Agent. The browser supplies the multipart boundary automatically.
+   */
+  async uploadFiles(files: File[]): Promise<UploadedFileInfo[]> {
+    if (files.length === 0) {
+      return [];
+    }
+
+    const formData = new FormData();
+    files.forEach((file) => formData.append('files', file, file.name));
+
+    const response = await this.mutationFetch(`${API_BASE_URL}${API_ENDPOINTS.FILE_UPLOAD}`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      let message = `Failed to upload files: ${response.statusText}`;
+      try {
+        const payload = await response.json();
+        if (typeof payload.error === 'string') {
+          message = payload.error;
+        }
+      } catch {
+        // Preserve the HTTP status text when the server did not return JSON.
+      }
+      throw new Error(message);
+    }
+
+    const payload = (await response.json()) as { files?: UploadedFileInfo[] };
+    if (!Array.isArray(payload.files)) {
+      throw new Error('Upload response did not include file metadata');
+    }
+
+    return payload.files;
   }
 
   /**
@@ -408,10 +448,13 @@ class ApiService {
    */
   async generateSummary(sessionId: string, messages: any[]): Promise<string> {
     try {
-      const response = await this.mutationFetch(`${API_BASE_URL}${API_ENDPOINTS.GENERATE_SUMMARY}`, {
-        method: 'POST',
-        body: JSON.stringify({ sessionId, messages }),
-      });
+      const response = await this.mutationFetch(
+        `${API_BASE_URL}${API_ENDPOINTS.GENERATE_SUMMARY}`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ sessionId, messages }),
+        },
+      );
 
       if (!response.ok) {
         throw new Error(`Failed to generate summary: ${response.statusText}`);

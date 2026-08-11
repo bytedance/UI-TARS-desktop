@@ -32,10 +32,12 @@
     "diff": "^8.0.2",
     "postcss": "^8.4.49",
     "react-router-dom": "^6.26.1",
-    "tailwindcss": "^3.4.15"
+    "tailwindcss": "^3.4.15",
+    "vitest": "3.2.4"
   },
   "scripts": {
     "dev": "rsbuild dev",
+    "test": "vitest run",
     "prepublishOnly": "npm run build",
     "build": "rsbuild build",
     "preview": "rsbuild preview"

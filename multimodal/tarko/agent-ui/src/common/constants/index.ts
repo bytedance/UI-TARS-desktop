@@ -26,6 +26,7 @@ export const API_ENDPOINTS = {
   ABORT: '/api/v1/sessions/abort',
   GENERATE_SUMMARY: '/api/v1/sessions/generate-summary',
   HEALTH: '/api/v1/health',
+  FILE_UPLOAD: '/api/v1/files/upload',
 
   // Share endpoints
   SHARE_CONFIG: '/api/v1/share/config',

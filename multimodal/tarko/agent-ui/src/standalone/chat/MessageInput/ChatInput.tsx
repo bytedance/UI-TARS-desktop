@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { FiSend, FiRefreshCw, FiImage, FiSquare, FiX } from 'react-icons/fi';
-import { TbBulb, TbSearch, TbBook, TbSettings, TbBrain, TbBrowser } from 'react-icons/tb';
+import { FiSend, FiRefreshCw, FiPaperclip } from 'react-icons/fi';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ConnectionStatus } from '@/common/types';
 import { ChatCompletionContentPart } from '@tarko/agent-interface';
@@ -16,15 +15,16 @@ import {
 import { ContextualSelector } from '../ContextualSelector';
 import { MessageAttachments } from './MessageAttachments';
 import { ImagePreviewInline } from './ImagePreviewInline';
+import { FilePreviewInline } from './FilePreviewInline';
 import { getAgentTitle, isContextualSelectorEnabled } from '@/config/web-ui-config';
 import { composeMessageContent, isMessageEmpty, parseContextualReferences } from './utils';
 import { handleMultimodalPaste } from '@/common/utils/clipboard';
-import { NavbarModelSelector } from '@/standalone/navbar/ModelSelector';
 import { AgentOptionsSelector, AgentOptionsSelectorRef } from './AgentOptionsSelector';
 import { HomeAgentOptionsSelector } from '@/standalone/home/HomeAgentOptionsSelector';
 import { HomeChatBottomSettings } from '@/standalone/home/HomeChatBottomSettings';
 import { ChatBottomSettings } from './ChatBottomSettings';
-import { useNavbarStyles } from '@tarko/ui';
+import { apiService } from '@/common/services/apiService';
+import type { UploadedFileInfo } from '@/common/types';
 
 interface ChatInputProps {
   onSubmit: (content: string | ChatCompletionContentPart[]) => Promise<void>;
@@ -60,6 +60,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   variant = 'default',
 }) => {
   const [uploadedImages, setUploadedImages] = useState<ChatCompletionContentPart[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFileInfo[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [isAborting, setIsAborting] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [activeAgentOptions, setActiveAgentOptions] = useState<
@@ -68,8 +71,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const [hasAgentOptions, setHasAgentOptions] = useState(false);
   const agentOptionsSelectorRef = useRef<AgentOptionsSelectorRef | null>(null);
 
-  const { activeSessionId, sessionMetadata } = useSession();
-  const { isDarkMode } = useNavbarStyles();
+  const { sessionMetadata } = useSession();
 
   const [contextualState, setContextualState] = useAtom(contextualSelectorAtom);
   const addContextualItem = useSetAtom(addContextualItemAction);
@@ -82,6 +84,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const { abortQuery } = useSession();
 
   const contextualSelectorEnabled = isContextualSelectorEnabled() && showContextualSelector;
+  const hasInlineAttachments = uploadedImages.length > 0 || uploadedFiles.length > 0;
 
   // Clear active agent options when session changes
   useEffect(() => {
@@ -215,7 +218,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isMessageEmpty(contextualState.input, uploadedImages) || isDisabled) return;
+    if (
+      isMessageEmpty(contextualState.input, uploadedImages, uploadedFiles) ||
+      isDisabled ||
+      isUploading
+    )
+      return;
 
     handleSelectorClose();
 
@@ -223,10 +231,16 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       inputRef.current.style.height = 'auto';
     }
 
-    const messageContent = composeMessageContent(contextualState.input, uploadedImages);
+    const messageContent = composeMessageContent(
+      contextualState.input,
+      uploadedImages,
+      uploadedFiles,
+    );
 
     clearContextualState();
     setUploadedImages([]);
+    setUploadedFiles([]);
+    setUploadError(null);
 
     try {
       await onSubmit(messageContent);
@@ -265,36 +279,70 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   const handleFileUpload = () => {
-    if (fileInputRef.current) {
+    if (!isDisabled && !isProcessing && !isUploading && fileInputRef.current) {
       fileInputRef.current.click();
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    Array.from(files).forEach((file) => {
-      if (!file.type.startsWith('image/')) return;
-
+  const readImage = (file: File): Promise<ChatCompletionContentPart> =>
+    new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (event) => {
-        if (event.target?.result) {
-          const newImage: ChatCompletionContentPart = {
-            type: 'image_url',
-            image_url: {
-              url: event.target.result as string,
-              detail: 'auto',
-            },
-          };
-          setUploadedImages((prev) => [...prev, newImage]);
+        if (typeof event.target?.result !== 'string') {
+          reject(new Error(`Failed to read ${file.name}`));
+          return;
         }
+
+        resolve({
+          type: 'image_url',
+          image_url: {
+            url: event.target.result,
+            detail: 'auto',
+          },
+        });
       };
+      reader.onerror = () => reject(reader.error || new Error(`Failed to read ${file.name}`));
       reader.readAsDataURL(file);
     });
 
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const selectedFiles = Array.from(files);
+    const imageFiles = selectedFiles.filter((file) => file.type.startsWith('image/'));
+    const dataFiles = selectedFiles.filter((file) => !file.type.startsWith('image/'));
+
+    setUploadError(null);
+    setIsUploading(true);
+
+    try {
+      const [imageResult, uploadResult] = await Promise.allSettled([
+        Promise.all(imageFiles.map(readImage)),
+        apiService.uploadFiles(dataFiles),
+      ]);
+
+      if (imageResult.status === 'fulfilled' && imageResult.value.length > 0) {
+        setUploadedImages((previous) => [...previous, ...imageResult.value]);
+      }
+      if (uploadResult.status === 'fulfilled' && uploadResult.value.length > 0) {
+        setUploadedFiles((previous) => [...previous, ...uploadResult.value]);
+      }
+
+      const failure = [imageResult, uploadResult].find(
+        (result): result is PromiseRejectedResult => result.status === 'rejected',
+      );
+      if (failure) {
+        throw failure.reason;
+      }
+    } catch (error) {
+      console.error('Failed to attach files:', error);
+      setUploadError(error instanceof Error ? error.message : 'Failed to attach files');
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -376,6 +424,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     setUploadedImages((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handleRemoveFile = (index: number) => {
+    setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const defaultPlaceholder =
     connectionStatus && !connectionStatus.connected
       ? 'Server disconnected...'
@@ -387,7 +439,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   return (
     <div className={`relative ${className}`}>
-      {/* Only show contextual items outside, images are now inside input */}
+      {/* Contextual references stay outside; uploaded previews render inside the input. */}
       {showAttachments && contextualState.contextualItems.length > 0 && (
         <MessageAttachments
           images={[]}
@@ -418,7 +470,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             className={`absolute inset-0 bg-gradient-to-r ${
               isFocused ||
               contextualState.input.trim() ||
-              uploadedImages.length > 0 ||
+              hasInlineAttachments ||
               contextualState.contextualItems.length > 0
                 ? 'from-indigo-500 via-purple-500 to-pink-500 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 animate-border-flow'
                 : 'from-indigo-400 via-purple-400 to-pink-400 dark:from-indigo-300 dark:via-purple-300 dark:to-pink-300'
@@ -430,9 +482,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               isDisabled ? 'opacity-90' : ''
             }`}
           >
-            {/* Image previews inside input */}
+            {/* Uploaded previews inside input */}
             {showAttachments && (
-              <ImagePreviewInline images={uploadedImages} onRemoveImage={handleRemoveImage} />
+              <>
+                <ImagePreviewInline images={uploadedImages} onRemoveImage={handleRemoveImage} />
+                <FilePreviewInline files={uploadedFiles} onRemoveFile={handleRemoveFile} />
+              </>
             )}
 
             <textarea
@@ -446,9 +501,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               placeholder={placeholder || defaultPlaceholder}
               disabled={isDisabled}
               className={`w-full px-5 ${
-                uploadedImages.length > 0 ? 'pt-2' : 'pt-5'
+                hasInlineAttachments ? 'pt-2' : 'pt-5'
               } pb-12 focus:outline-none resize-none ${
-                uploadedImages.length > 0
+                hasInlineAttachments
                   ? variant === 'home'
                     ? 'min-h-[100px]'
                     : 'min-h-[80px]'
@@ -467,6 +522,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   <HomeAgentOptionsSelector
                     showAttachments={showAttachments}
                     onFileUpload={handleFileUpload}
+                    isDisabled={isDisabled || isUploading}
                   />
                   <HomeChatBottomSettings isDisabled={isDisabled} isProcessing={isProcessing} />
                 </>
@@ -483,7 +539,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   onToggleOption={handleToggleOption}
                   showAttachments={showAttachments}
                   onFileUpload={handleFileUpload}
-                  isDisabled={isDisabled}
+                  isDisabled={isDisabled || isUploading}
                   isProcessing={isProcessing}
                 />
               )}
@@ -493,11 +549,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 <button
                   type="button"
                   onClick={handleFileUpload}
-                  disabled={isDisabled || isProcessing}
+                  disabled={isDisabled || isProcessing || isUploading}
                   className="p-2 rounded-full text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:text-gray-400 transition-all duration-200 hover:scale-105 active:scale-90"
-                  title="Add Images"
+                  title={isUploading ? 'Uploading files...' : 'Add files'}
                 >
-                  <FiImage size={18} />
+                  {isUploading ? (
+                    <div className="h-[18px] w-[18px] animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  ) : (
+                    <FiPaperclip size={18} />
+                  )}
                 </button>
               )}
 
@@ -524,10 +584,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 type="file"
                 ref={fileInputRef}
                 onChange={handleFileChange}
-                accept="image/*"
                 multiple
                 className="hidden"
-                disabled={isDisabled || isProcessing}
+                disabled={isDisabled || isProcessing || isUploading}
               />
             )}
 
@@ -579,9 +638,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
                   type="submit"
-                  disabled={isMessageEmpty(contextualState.input, uploadedImages) || isDisabled}
+                  disabled={
+                    isMessageEmpty(contextualState.input, uploadedImages, uploadedFiles) ||
+                    isDisabled ||
+                    isUploading
+                  }
                   className={`absolute right-3 bottom-3 p-3 rounded-full transition-all duration-200 hover:scale-105 active:scale-90 ${
-                    isMessageEmpty(contextualState.input, uploadedImages) || isDisabled
+                    isMessageEmpty(contextualState.input, uploadedImages, uploadedFiles) ||
+                    isDisabled ||
+                    isUploading
                       ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
                       : 'bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 text-white dark:text-gray-900 shadow-sm'
                   }`}
@@ -593,6 +658,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           </div>
         </div>
       </form>
+
+      {uploadError && (
+        <div className="mt-2 px-2 text-xs text-red-500 dark:text-red-400" role="alert">
+          {uploadError}
+        </div>
+      )}
 
       {/* Status text */}
       {showHelpText && (
@@ -616,11 +687,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             <span className="text-gray-500 dark:text-gray-400 transition-opacity hover:opacity-100 animate-in fade-in duration-300">
               {contextualSelectorEnabled ? (
                 <>
-                  Use @ to reference files/folders • Ctrl+Enter to send • You can also paste images
-                  directly
+                  Use @ to reference files/folders • Ctrl+Enter to send • Paste images or upload
+                  files directly
                 </>
               ) : (
-                <>Use Ctrl+Enter to quickly send • You can also paste images directly</>
+                <>Use Ctrl+Enter to quickly send • Paste images or upload files directly</>
               )}
             </span>
           )}
