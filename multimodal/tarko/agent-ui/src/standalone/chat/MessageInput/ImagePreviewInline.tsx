@@ -42,6 +42,7 @@ export const ImagePreviewInline: React.FC<ImagePreviewInlineProps> = ({
                   className="w-full h-full object-cover rounded-lg"
                 />
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     onRemoveImage(index);

@@ -11,6 +11,15 @@ export type { SanitizedAgentOptions, WorkspaceInfo, SessionInfo };
 
 export type { ChatCompletionContentPart, ChatCompletionMessageToolCall };
 
+/** A file persisted inside the Agent workspace by the upload API. */
+export interface UploadedFileInfo {
+  name: string;
+  storedName: string;
+  relativePath: string;
+  size: number;
+  mimeType: string;
+}
+
 /**
  * Tool result type with categorization and timing information
  */

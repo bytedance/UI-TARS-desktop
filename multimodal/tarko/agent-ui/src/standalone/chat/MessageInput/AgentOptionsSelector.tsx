@@ -11,8 +11,7 @@ import {
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 import { useAtomValue } from 'jotai';
 import { isProcessingAtom } from '@/common/state/atoms/ui';
-import { FiPlus, FiCheck, FiChevronRight, FiImage, FiPaperclip, FiLoader } from 'react-icons/fi';
-import { TbPhoto } from 'react-icons/tb';
+import { FiPlus, FiCheck, FiChevronRight, FiPaperclip, FiLoader } from 'react-icons/fi';
 import { Dropdown, DropdownItem, DropdownHeader, DropdownDivider } from '@tarko/ui';
 import { createPortal } from 'react-dom';
 import { getAgentOptionIcon } from './agentIconUtils';
@@ -565,11 +564,11 @@ export const AgentOptionsSelector = forwardRef<AgentOptionsSelectorRef, AgentOpt
         {/* File upload option */}
         {showAttachments && (
           <DropdownItem
-            icon={<TbPhoto className="w-4 h-4" />}
+            icon={<FiPaperclip className="w-4 h-4" />}
             onClick={onFileUpload}
             disabled={isDisabled}
           >
-            <div className="font-medium text-sm">Add Images</div>
+            <div className="font-medium text-sm">Add Files</div>
           </DropdownItem>
         )}
 

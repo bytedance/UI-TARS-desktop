@@ -19,12 +19,13 @@ interface HomeAgentOptionsSelectorProps {
   showAttachments?: boolean;
   onFileUpload?: () => void;
   className?: string;
+  isDisabled?: boolean;
 }
 
 export const HomeAgentOptionsSelector = forwardRef<
   HomeAgentOptionsSelectorRef,
   HomeAgentOptionsSelectorProps
->(({ showAttachments = true, onFileUpload, className }, ref) => {
+>(({ showAttachments = true, onFileUpload, className, isDisabled = false }, ref) => {
   const [globalSettings] = useAtom(globalRuntimeSettingsAtom);
   const updateGlobalSettings = useSetAtom(updateGlobalRuntimeSettingsAction);
   const resetGlobalSettings = useSetAtom(resetGlobalRuntimeSettingsAction);
@@ -66,6 +67,7 @@ export const HomeAgentOptionsSelector = forwardRef<
       onToggleOption={handleToggleOption}
       showAttachments={showAttachments}
       onFileUpload={onFileUpload}
+      isDisabled={isDisabled}
     />
   );
 });
