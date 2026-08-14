@@ -198,14 +198,134 @@ describe('StructuredOutputsToolCallEngine', () => {
     it('should handle malformed JSON gracefully', () => {
       const state = engine.initStreamProcessingState();
 
-      // Simulate malformed JSON
-      state.contentBuffer = '{"content": "Hello", "toolCall": {"name": "test"'; // Incomplete JSON
+      const rawContent = '{"content": "Hello", "toolCall": {"name": "test"';
+      state.contentBuffer = rawContent;
 
       const result = engine.finalizeStreamProcessing(state);
 
-      // Should not crash and provide reasonable defaults
-      expect(result.content).toBeDefined();
-      expect(result.finishReason).toBe('tool_calls');
+      expect(result.content).toBe('Hello');
+      expect(result.rawContent).toBe(rawContent);
+      expect(result.toolCalls).toBeUndefined();
+      expect(result.finishReason).toBe('stop');
+    });
+
+    it('should never construct a tool call from malformed or incomplete toolCall data', () => {
+      const state = engine.initStreamProcessingState();
+      const rawContent =
+        '{"content":"I can still explain this","toolCall":{"name":"calculator","args":{"op":"add"';
+      const chunk: ChatCompletionChunk = {
+        id: 'chunk-malformed-tool',
+        choices: [
+          {
+            delta: { content: rawContent },
+            index: 0,
+            finish_reason: 'stop',
+          },
+        ],
+        created: Date.now(),
+        model: 'test-model',
+        object: 'chat.completion.chunk',
+      };
+
+      const streamed = engine.processStreamingChunk(chunk, state);
+      const result = engine.finalizeStreamProcessing(state);
+
+      expect(streamed.content).toBe('I can still explain this');
+      expect(streamed.hasToolCallUpdate).toBe(false);
+      expect(result.content).toBe('I can still explain this');
+      expect(result.rawContent).toBe(rawContent);
+      expect(result.toolCalls).toBeUndefined();
+      expect(result.finishReason).toBe('stop');
+    });
+
+    it('should preserve escaped content across chunk and unicode escape boundaries', () => {
+      const state = engine.initStreamProcessingState();
+      const rawContent =
+        '{"content":"A \\"quote\\", newline\\nemoji: \\uD83D\\uDE00","toolCall":null}';
+      const escapeQuote = rawContent.indexOf('\\"');
+      const escapedNewline = rawContent.indexOf('\\n');
+      const highSurrogate = rawContent.indexOf('\\uD83D');
+      const lowSurrogate = rawContent.indexOf('\\uDE00');
+      const boundaries = [
+        escapeQuote + 1,
+        escapedNewline + 1,
+        highSurrogate + 4,
+        lowSurrogate,
+        lowSurrogate + 3,
+      ];
+      const chunks = boundaries
+        .concat(rawContent.length)
+        .map((end, index, ends) => rawContent.slice(index === 0 ? 0 : ends[index - 1], end));
+      let streamedContent = '';
+
+      for (const [index, chunkContent] of chunks.entries()) {
+        const chunk: ChatCompletionChunk = {
+          id: `chunk-escape-${index}`,
+          choices: [
+            {
+              delta: { content: chunkContent },
+              index: 0,
+              finish_reason: null,
+            },
+          ],
+          created: Date.now(),
+          model: 'test-model',
+          object: 'chat.completion.chunk',
+        };
+
+        streamedContent += engine.processStreamingChunk(chunk, state).content;
+      }
+
+      expect(streamedContent).toBe('A "quote", newline\nemoji: 😀');
+      expect(state.lastParsedContent).toBe(streamedContent);
+    });
+
+    it('should extract only the top-level content string', () => {
+      const state = engine.initStreamProcessingState();
+      const chunk: ChatCompletionChunk = {
+        id: 'chunk-top-level-content',
+        choices: [
+          {
+            delta: {
+              content: '{"metadata":{"content":"nested"},"content":"top level"}',
+            },
+            index: 0,
+            finish_reason: 'stop',
+          },
+        ],
+        created: Date.now(),
+        model: 'test-model',
+        object: 'chat.completion.chunk',
+      };
+
+      expect(engine.processStreamingChunk(chunk, state).content).toBe('top level');
+    });
+
+    it('should fall back to lastParsedContent and preserve rawContent when final repair fails', () => {
+      const state = engine.initStreamProcessingState();
+      const rawContent = '{"content":"Visible fallback"} trailing {';
+      const chunk: ChatCompletionChunk = {
+        id: 'chunk-finalize-fallback',
+        choices: [
+          {
+            delta: { content: rawContent },
+            index: 0,
+            finish_reason: 'stop',
+          },
+        ],
+        created: Date.now(),
+        model: 'test-model',
+        object: 'chat.completion.chunk',
+      };
+
+      expect(engine.processStreamingChunk(chunk, state).content).toBe('Visible fallback');
+
+      const result = engine.finalizeStreamProcessing(state);
+
+      expect(result.content).toBe('Visible fallback');
+      expect(result.rawContent).toBe(rawContent);
+      expect(result.toolCalls).toBeUndefined();
+      expect(result.finishReason).toBe('stop');
     });
   });
 
