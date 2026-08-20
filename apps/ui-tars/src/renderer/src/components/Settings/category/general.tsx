@@ -38,6 +38,10 @@ export const GeneralSettings = () => {
       }
     } catch (error) {
       console.error('Failed to check for updates:', error);
+      toast.error('Failed to check for updates', {
+        description:
+          error instanceof Error ? error.message : 'Unknown error occurred',
+      });
     } finally {
       setUpdateLoading(false);
     }
