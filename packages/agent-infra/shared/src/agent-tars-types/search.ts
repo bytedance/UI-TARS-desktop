@@ -22,6 +22,10 @@ export enum SearchProvider {
    * SearXNG Search API
    */
   SearXNG = 'searxng',
+  /**
+   * Xquik X post search API
+   */
+  Xquik = 'xquik',
 }
 
 export type LocalBrowserSearchEngine = 'google' | 'bing' | 'baidu' | 'sogou';

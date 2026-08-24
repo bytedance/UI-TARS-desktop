@@ -32,7 +32,8 @@
     "@agent-infra/bing-search": "workspace:*",
     "@agent-infra/duckduckgo-search": "workspace:*",
     "@agent-infra/logger": "workspace:*",
-    "@agent-infra/shared": "workspace:*"
+    "@agent-infra/shared": "workspace:*",
+    "x-twitter-scraper": "0.12.4"
   },
   "devDependencies": {
     "@agent-infra/browser": "workspace:*",

@@ -22,6 +22,7 @@ import {
 import { Logger, defaultLogger } from '@agent-infra/logger';
 import { TavilySearchConfig, TavilySearchOptions, tavily } from './tavily';
 import { SearXNGSearchConfig, SearXNGSearchOptions, searxng } from './searxng';
+import { XquikSearchConfig, XquikSearchOptions, xquik } from './xquik';
 
 export { SearchProvider };
 export interface SearchProviderConfigMap {
@@ -30,6 +31,7 @@ export interface SearchProviderConfigMap {
   [SearchProvider.Tavily]: TavilySearchConfig;
   [SearchProvider.DuckduckgoSearch]: DuckDuckGoSearchClientConfig;
   [SearchProvider.SearXNG]: SearXNGSearchConfig;
+  [SearchProvider.Xquik]: XquikSearchConfig;
 }
 
 export type SearchProviderConfig<T> = T extends SearchProvider
@@ -42,6 +44,7 @@ export interface SearchProviderSearchOptionsMap {
   [SearchProvider.Tavily]: TavilySearchOptions;
   [SearchProvider.DuckduckgoSearch]: DuckDuckGoSearchOptions;
   [SearchProvider.SearXNG]: SearXNGSearchOptions;
+  [SearchProvider.Xquik]: XquikSearchOptions;
 }
 
 export type SearchProviderSearchOptions<T> = T extends SearchProvider
@@ -140,7 +143,7 @@ export class SearchClient<T extends SearchProvider> {
           ...(this.config.providerConfig as BrowserSearchConfig),
         });
         const searchOptions: BrowserSearchOptions = {
-          ...((originalOptions as BrowserSearchOptions) || {}),
+          ...((originalOptions as Partial<BrowserSearchOptions>) || {}),
           query: options.query,
           count: options.count,
         };
@@ -199,7 +202,7 @@ export class SearchClient<T extends SearchProvider> {
         );
         const searchOptions: SearXNGSearchOptions = {
           count: options.count,
-          ...((originalOptions as SearXNGSearchOptions) || {}),
+          ...((originalOptions as Partial<SearXNGSearchOptions>) || {}),
           query: options.query,
         };
 
@@ -217,8 +220,8 @@ export class SearchClient<T extends SearchProvider> {
         const client = new DuckDuckGoSearchClient(
           this.config.providerConfig as DuckDuckGoSearchClientConfig,
         );
-        const searchOptions: DuckDuckGoSearchOptions = {
-          ...((originalOptions as DuckDuckGoSearchOptions) || {}),
+        const searchOptions: Partial<DuckDuckGoSearchOptions> = {
+          ...((originalOptions as Partial<DuckDuckGoSearchOptions>) || {}),
         };
 
         const response = await client.search({
@@ -239,6 +242,19 @@ export class SearchClient<T extends SearchProvider> {
         };
       }
 
+      case SearchProvider.Xquik: {
+        const client = xquik(this.config.providerConfig as XquikSearchConfig);
+        const searchOptions: XquikSearchOptions = {
+          ...((originalOptions as XquikSearchOptions) || {}),
+          count: options.count,
+        };
+        const response = await client.search(options.query, searchOptions);
+
+        return {
+          pages: response.results,
+        };
+      }
+
       default:
         throw new Error(`Unsupported search provider: ${this.config.provider}`);
     }
@@ -246,3 +262,4 @@ export class SearchClient<T extends SearchProvider> {
 }
 
 export * from './tavily';
+export * from './xquik';
