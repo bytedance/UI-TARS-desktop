@@ -12,11 +12,12 @@ Use Xquik when an agent needs structured Twitter search results from current X
 posts. The provider returns text, authors, timestamps, engagement counts, and
 canonical URLs.
 
-Set the API key through the environment. This keeps it out of shell history and
-process arguments.
+Read the API key without echoing it or placing it in shell history. Then pass it
+through the environment instead of a process argument.
 
 ```sh
-export X_TWITTER_SCRAPER_API_KEY="your-api-key"
+read -s X_TWITTER_SCRAPER_API_KEY
+export X_TWITTER_SCRAPER_API_KEY
 npx @agent-infra/mcp-server-search --provider=xquik --count=10
 ```
 
