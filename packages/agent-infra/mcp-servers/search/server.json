@@ -1,30 +1,46 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
   "name": "io.github.bytedance/mcp-server-search",
-  "description": "MCP server for web search operations",
+  "description": "MCP server for web and X post search operations",
   "status": "active",
   "repository": {
     "url": "https://github.com/bytedance/UI-TARS-desktop",
     "source": "github",
     "subfolder": "packages/agent-infra/mcp-servers/search"
   },
-  "version": "1.0.0",
+  "version": "1.3.0",
   "packages": [
     {
       "registry_type": "npm",
       "registry_base_url": "https://registry.npmjs.org",
       "identifier": "@agent-infra/mcp-server-search",
-      "version": "latest",
+      "version": "1.3.0",
       "transport": {
         "type": "stdio"
       },
       "package_arguments": [
         {
           "type": "named",
+          "name": "provider",
+          "description": "Search provider (browser_search, bing, tavily, searxng, duckduckgo, or xquik)",
+          "format": "string",
+          "default": "browser_search",
+          "is_required": false
+        },
+        {
+          "type": "named",
           "name": "engine",
           "description": "Search engine to use for browser search (default: google)",
           "format": "string",
           "default": "google",
+          "is_required": false
+        },
+        {
+          "type": "named",
+          "name": "count",
+          "description": "Maximum number of search results",
+          "format": "number",
+          "default": "10",
           "is_required": false
         },
         {
@@ -41,13 +57,29 @@
           "format": "string",
           "is_required": false
         }
+      ],
+      "environment_variables": [
+        {
+          "name": "X_TWITTER_SCRAPER_API_KEY",
+          "description": "Xquik API key when provider is xquik",
+          "format": "string",
+          "is_required": false,
+          "is_secret": true
+        },
+        {
+          "name": "X_TWITTER_SCRAPER_BASE_URL",
+          "description": "Optional Xquik API base URL override",
+          "format": "string",
+          "is_required": false,
+          "is_secret": false
+        }
       ]
     },
     {
       "registry_type": "npm",
       "registry_base_url": "https://registry.npmjs.org",
       "identifier": "@agent-infra/mcp-server-search",
-      "version": "latest",
+      "version": "1.3.0",
       "runtime_hint": "npx",
       "transport": {
         "type": "sse",
@@ -57,10 +89,26 @@
       "package_arguments": [
         {
           "type": "named",
+          "name": "provider",
+          "description": "Search provider (browser_search, bing, tavily, searxng, duckduckgo, or xquik)",
+          "format": "string",
+          "default": "browser_search",
+          "is_required": false
+        },
+        {
+          "type": "named",
           "name": "engine",
           "description": "Search engine to use for browser search (default: google)",
           "format": "string",
           "default": "google",
+          "is_required": false
+        },
+        {
+          "type": "named",
+          "name": "count",
+          "description": "Maximum number of search results",
+          "format": "number",
+          "default": "10",
           "is_required": false
         },
         {
@@ -86,13 +134,28 @@
           "default": "8089"
         }
       ],
-      "environment_variables": []
+      "environment_variables": [
+        {
+          "name": "X_TWITTER_SCRAPER_API_KEY",
+          "description": "Xquik API key when provider is xquik",
+          "format": "string",
+          "is_required": false,
+          "is_secret": true
+        },
+        {
+          "name": "X_TWITTER_SCRAPER_BASE_URL",
+          "description": "Optional Xquik API base URL override",
+          "format": "string",
+          "is_required": false,
+          "is_secret": false
+        }
+      ]
     },
     {
       "registry_type": "npm",
       "registry_base_url": "https://registry.npmjs.org",
       "identifier": "@agent-infra/mcp-server-search",
-      "version": "latest",
+      "version": "1.3.0",
       "runtime_hint": "npx",
       "transport": {
         "type": "streamable-http",
@@ -102,10 +165,26 @@
       "package_arguments": [
         {
           "type": "named",
+          "name": "provider",
+          "description": "Search provider (browser_search, bing, tavily, searxng, duckduckgo, or xquik)",
+          "format": "string",
+          "default": "browser_search",
+          "is_required": false
+        },
+        {
+          "type": "named",
           "name": "engine",
           "description": "Search engine to use for browser search (default: google)",
           "format": "string",
           "default": "google",
+          "is_required": false
+        },
+        {
+          "type": "named",
+          "name": "count",
+          "description": "Maximum number of search results",
+          "format": "number",
+          "default": "10",
           "is_required": false
         },
         {
@@ -131,7 +210,22 @@
           "default": "8089"
         }
       ],
-      "environment_variables": []
+      "environment_variables": [
+        {
+          "name": "X_TWITTER_SCRAPER_API_KEY",
+          "description": "Xquik API key when provider is xquik",
+          "format": "string",
+          "is_required": false,
+          "is_secret": true
+        },
+        {
+          "name": "X_TWITTER_SCRAPER_BASE_URL",
+          "description": "Optional Xquik API base URL override",
+          "format": "string",
+          "is_required": false,
+          "is_secret": false
+        }
+      ]
     }
   ]
 }

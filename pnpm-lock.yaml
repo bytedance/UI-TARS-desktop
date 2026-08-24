@@ -1111,6 +1111,9 @@ importers:
       '@tavily/core':
         specifier: 0.3.1
         version: 0.3.1
+      x-twitter-scraper:
+        specifier: 0.12.4
+        version: 0.12.4
     devDependencies:
       '@agent-infra/browser':
         specifier: workspace:*
@@ -11107,6 +11110,10 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
+
+  x-twitter-scraper@0.12.4:
+    resolution: {integrity: sha512-OTIteHnIYAD/2N7M58JqChr6wNAZ3pyJBPvUnsvr9c0H0dKFSyC67lMO0/Hxs5PejdmGVpR2Hys3cRBcAENzhw==}
+    engines: {node: '>=20.0.0'}
 
   xhr@2.6.0:
     resolution: {integrity: sha512-/eCGLb5rxjx5e3mF1A7s+pLlR6CGyqWN91fv1JgER5mVWg1MZmlhBvy9kjcsOdRk8RrIujotWyJamfyrp+WIcA==}
@@ -23405,6 +23412,8 @@ snapshots:
     optionalDependencies:
       bufferutil: 4.0.9
       utf-8-validate: 6.0.5
+
+  x-twitter-scraper@0.12.4: {}
 
   xhr@2.6.0:
     dependencies:

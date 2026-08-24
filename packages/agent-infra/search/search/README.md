@@ -11,7 +11,7 @@ An isomorphic search client that unifies multiple search providers into a single
 
 ## Features
 
-- **Multi-provider support**: Use **Browser Search**, **Bing Search**, or **Tavily** with the same interface
+- **Multi-provider support**: Use **Browser Search**, **Bing Search**, **Tavily**, or **Xquik** with the same interface
 - **Unified API**: Consistent response format across all providers
 - **Configurable**: Customize search parameters for each provider
 - **Type-safe**: Full TypeScript support with comprehensive type definitions
@@ -125,6 +125,7 @@ enum SearchProvider {
   BingSearch = 'bing',
   Tavily = 'tavily',
   BrowserSearch = 'browser',
+  Xquik = 'xquik',
 }
 ```
 
@@ -232,6 +233,39 @@ const results = await client.search(
   },
 );
 ```
+
+### Xquik
+
+Use Xquik to search tweets and current X posts without a logged-in browser
+profile. The provider maps text, authors, timestamps, engagement counts, and
+canonical URLs into the unified page result.
+
+```typescript
+const client = new SearchClient({
+  provider: SearchProvider.Xquik,
+  providerConfig: {
+    apiKey: process.env.X_TWITTER_SCRAPER_API_KEY,
+  },
+});
+
+const results = await client.search(
+  {
+    query: 'from:openai "agent tools"',
+    count: 10,
+  },
+  {
+    queryType: 'Latest',
+    verifiedOnly: true,
+  },
+);
+```
+
+The API key needs enough Xquik credits. Each returned post uses 1 credit. See
+the [Xquik search API](https://docs.xquik.com/api-reference/x/search-tweets) for
+supported filters.
+
+Xquik is an independent third-party service. Not affiliated with X Corp.
+"Twitter" and "X" are trademarks of X Corp.
 
 ## Examples
 

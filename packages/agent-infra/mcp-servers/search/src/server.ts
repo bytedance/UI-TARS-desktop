@@ -45,6 +45,7 @@ const API_KEY_ENV_MAP = {
   [SearchProvider.BrowserSearch]: undefined,
   [SearchProvider.SearXNG]: undefined,
   [SearchProvider.DuckduckgoSearch]: undefined,
+  [SearchProvider.Xquik]: process.env.X_TWITTER_SCRAPER_API_KEY,
 };
 
 const API_BASE_URL_ENV_MAP = {
@@ -53,6 +54,7 @@ const API_BASE_URL_ENV_MAP = {
   [SearchProvider.BrowserSearch]: undefined,
   [SearchProvider.SearXNG]: undefined,
   [SearchProvider.DuckduckgoSearch]: undefined,
+  [SearchProvider.Xquik]: process.env.X_TWITTER_SCRAPER_BASE_URL,
 };
 
 /**
@@ -178,7 +180,7 @@ export function createServer(config?: SearchSettings): McpServer {
   // === Tools ===
   server.tool(
     'web_search',
-    'Search the web for information',
+    'Search the web or X posts with the configured provider',
     {
       query: z.string().describe('Search query'),
       count: z

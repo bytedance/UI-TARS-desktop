@@ -11,11 +11,13 @@ import { SearchProvider } from '@agent-infra/search';
 
 program
   .name(process.env.NAME || 'mcp-server-search')
-  .description(process.env.DESCRIPTION || 'MCP server for web search')
+  .description(
+    process.env.DESCRIPTION || 'MCP server for web and X post search',
+  )
   .version(process.env.VERSION || '0.0.1')
   .option(
     '--provider <provider>',
-    'Search provider to use (default: browser_search)',
+    'Search provider to use (browser_search, bing, tavily, searxng, duckduckgo, or xquik)',
     'browser_search',
   )
   .option(
@@ -35,6 +37,7 @@ program
         tavily: SearchProvider.Tavily,
         searxng: SearchProvider.SearXNG,
         duckduckgo: SearchProvider.DuckduckgoSearch,
+        xquik: SearchProvider.Xquik,
       };
 
       const provider =
