@@ -444,6 +444,9 @@ export class AgentSession {
       // Wrap the stream to clear running session when done
       return this.wrapStreamForExclusiveMode(stream);
     } catch (error) {
+      // No stream was created, so release the exclusive slot before returning an error stream
+      this.server.clearRunningSession(this.id);
+
       // Emit error event
       this.eventBridge.emit('error', {
         message: error instanceof Error ? error.message : String(error),
