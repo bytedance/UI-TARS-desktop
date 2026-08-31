@@ -55,47 +55,69 @@ export class MCPAgent<T extends MCPAgentOptions = MCPAgentOptions> extends Agent
 
     // Initialize MCP clients and register tools
     for (const [serverName, config] of Object.entries(filteredMcpServerConfig)) {
+      this.logger.info(`🔌 Connecting to MCP server: ${serverName}`);
+
+      const defaultTimeout = this.options.defaultConnectionTimeout ?? 60;
+      let mcpClient: MCPClientV2 | undefined;
+
       try {
-        this.logger.info(`🔌 Connecting to MCP server: ${serverName}`);
-
-        // Create MCP client using v2
-        const defaultTimeout = this.options.defaultConnectionTimeout ?? 60;
-        const mcpClient = new MCPClientV2(serverName, config, this.logger, defaultTimeout);
-
-        // Initialize the client and get tools
+        mcpClient = new MCPClientV2(serverName, config, this.logger, defaultTimeout);
         await mcpClient.initialize();
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const message = `Failed to initialize MCP server "${serverName}": ${errorMessage}`;
 
-        // Store the client for later use
-        this.mcpClients.set(serverName, mcpClient);
+        this.logger.error(`❌ ${message}`);
 
-        // Create and register tools directly
-        const mcpTools = mcpClient.getTools();
-        for (const mcpTool of mcpTools) {
-          const tool = new Tool({
-            id: mcpTool.name,
-            description: `[${serverName}] ${mcpTool.description}`,
-            parameters: (mcpTool.inputSchema || {
-              type: 'object',
-              properties: {},
-            }) as JSONSchema7,
-            function: async (args: Record<string, unknown>) => {
-              return await mcpClient.callTool(mcpTool.name, args);
+        const eventStream = this.getEventStream();
+        eventStream.sendEvent(
+          eventStream.createEvent('system', {
+            level: 'error',
+            message,
+            details: {
+              source: 'mcp',
+              phase: 'initialization',
+              serverName,
             },
-          });
-          this.registerTool(tool as unknown as Tool);
+          }),
+        );
+
+        if (mcpClient) {
+          try {
+            await mcpClient.close();
+          } catch (cleanupError) {
+            this.logger.error(
+              `Failed to clean up MCP client ${serverName}: ${cleanupError instanceof Error ? cleanupError.message : String(cleanupError)}`,
+            );
+          }
         }
 
-        const toolCount = mcpTools.length;
-
-        this.logger.success(`✅ Connected to MCP server ${serverName} with ${toolCount} tools`);
-      } catch (error) {
-        this.logger.error(
-          `❌ Failed to connect to MCP server ${serverName}: ${error instanceof Error ? error.message : JSON.stringify(error)}`,
-        );
-        throw new Error(
-          `❌ Failed to connect to MCP server ${serverName}: ${error instanceof Error ? error.message : JSON.stringify(error)}`,
-        );
+        continue;
       }
+
+      // Store the client for later use
+      this.mcpClients.set(serverName, mcpClient);
+
+      // Create and register tools directly
+      const mcpTools = mcpClient.getTools();
+      for (const mcpTool of mcpTools) {
+        const tool = new Tool({
+          id: mcpTool.name,
+          description: `[${serverName}] ${mcpTool.description}`,
+          parameters: (mcpTool.inputSchema || {
+            type: 'object',
+            properties: {},
+          }) as JSONSchema7,
+          function: async (args: Record<string, unknown>) => {
+            return await mcpClient.callTool(mcpTool.name, args);
+          },
+        });
+        this.registerTool(tool as unknown as Tool);
+      }
+
+      const toolCount = mcpTools.length;
+
+      this.logger.success(`✅ Connected to MCP server ${serverName} with ${toolCount} tools`);
     }
 
     super.initialize();
