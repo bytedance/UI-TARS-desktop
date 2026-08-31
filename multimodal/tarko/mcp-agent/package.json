@@ -23,6 +23,8 @@
     "dev": "rslib build --watch",
     "build": "rslib build",
     "prepublishOnly": "pnpm run build",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "agent:snapshot:genreate": "npx tsx snapshot/runner.ts generate all",
     "agent:snapshot:test": "npx vitest snapshot/index.test.ts"
   },
@@ -38,6 +40,7 @@
   "devDependencies": {
     "@rslib/core": "0.10.0",
     "@types/node": "22.15.30",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.3",
+    "vitest": "3.2.4"
   }
 }
