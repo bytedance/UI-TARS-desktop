@@ -25,8 +25,21 @@ const normalizeDomain = (domain: string) => {
   if (!value) return null;
 
   const parsed = parseUrl(value.includes('://') ? value : `https://${value}`);
-  return parsed?.hostname.replace(/\.$/, '') || null;
+  return parsed?.hostname.replace(/^\*\./, '').replace(/\.$/, '') || null;
 };
+
+/**
+ * Normalizes and deduplicates excluded domains before they are used in search
+ * engine queries or compared with result URLs.
+ */
+export const normalizeExcludedDomains = (domains: string[]) =>
+  Array.from(
+    new Set(
+      domains
+        .map(normalizeDomain)
+        .filter((domain): domain is string => domain !== null),
+    ),
+  );
 
 /**
  * Determines whether a URL belongs to one of the caller-provided excluded

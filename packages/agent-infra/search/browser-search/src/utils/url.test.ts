@@ -30,13 +30,23 @@ describe('shouldExcludeDomain', () => {
   });
 
   it('normalizes schemes, paths, wildcards, case, and trailing dots', () => {
-    const excludedDomains = [' HTTPS://Example.COM/path ', '*.blocked.test'];
+    const excludedDomains = [
+      ' HTTPS://Example.COM/path ',
+      '*.blocked.test',
+      'https://*.wildcard.example/path',
+    ];
 
     expect(shouldExcludeDomain('https://EXAMPLE.com./', excludedDomains)).toBe(
       true,
     );
     expect(
       shouldExcludeDomain('https://api.blocked.test/', excludedDomains),
+    ).toBe(true);
+    expect(
+      shouldExcludeDomain('https://wildcard.example/', excludedDomains),
+    ).toBe(true);
+    expect(
+      shouldExcludeDomain('https://docs.wildcard.example/', excludedDomains),
     ).toBe(true);
   });
 

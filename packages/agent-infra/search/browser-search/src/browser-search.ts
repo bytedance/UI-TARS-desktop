@@ -14,7 +14,11 @@ import {
   extractPageInformation,
   toMarkdown,
 } from '@agent-infra/shared';
-import { shouldExcludeDomain, shouldSkipDomain } from './utils/url';
+import {
+  normalizeExcludedDomains,
+  shouldExcludeDomain,
+  shouldSkipDomain,
+} from './utils/url';
 import { interceptRequest } from './utils/misc';
 import { getSearchEngine } from './engines';
 import type {
@@ -56,7 +60,9 @@ export class BrowserSearch {
     const queries = Array.isArray(options.query)
       ? options.query
       : [options.query];
-    const excludeDomains = options.excludeDomains || [];
+    const excludeDomains = normalizeExcludedDomains(
+      options.excludeDomains || [],
+    );
     const count =
       options.count && Math.max(3, Math.floor(options.count / queries.length));
     const engine = options.engine || this.defaultEngine;
