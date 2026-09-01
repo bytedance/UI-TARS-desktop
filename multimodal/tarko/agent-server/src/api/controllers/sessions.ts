@@ -112,7 +112,6 @@ export async function createSession(req: Request, res: Response) {
       server.storageUnsubscribes[sessionId] = storageUnsubscribe;
     }
 
-
     // Wait a short time to ensure all initialization events are persisted
     // This handles the async nature of event storage during agent initialization
     await session.waitForEventSavesToComplete();
@@ -633,8 +632,26 @@ async function searchWorkspaceItemsRecursive(
 
   await searchInDirectory(basePath);
 
+  // Keep dist searchable, but avoid generated artifacts outranking source matches.
+  const sourceItems = new Set(
+    items.filter((item) => hasPathSegment(item.relativePath, SOURCE_DIRECTORY)),
+  );
+  const shouldPrioritizeSourceItems =
+    !hasPathSegment(query, GENERATED_OUTPUT_DIRECTORY) &&
+    sourceItems.size > 0 &&
+    items.some((item) => hasPathSegment(item.relativePath, GENERATED_OUTPUT_DIRECTORY));
+
   // Smart relevance-based sorting
   return items.sort((a, b) => {
+    if (shouldPrioritizeSourceItems) {
+      const sourceA = sourceItems.has(a);
+      const sourceB = sourceItems.has(b);
+
+      if (sourceA !== sourceB) {
+        return sourceA ? -1 : 1;
+      }
+    }
+
     const scoreA = calculateRelevanceScore(a, query);
     const scoreB = calculateRelevanceScore(b, query);
 
@@ -651,6 +668,13 @@ async function searchWorkspaceItemsRecursive(
     // Finally, sort by name
     return a.name.localeCompare(b.name);
   });
+}
+
+const SOURCE_DIRECTORY = 'src';
+const GENERATED_OUTPUT_DIRECTORY = 'dist';
+
+function hasPathSegment(value: string, segment: string): boolean {
+  return value.toLowerCase().replace(/\\/g, '/').split('/').filter(Boolean).includes(segment);
 }
 
 /**
