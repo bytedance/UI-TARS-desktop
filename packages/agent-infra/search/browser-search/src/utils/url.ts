@@ -17,6 +17,37 @@ const parseUrl = (url: string) => {
 };
 
 /**
+ * Converts a user-provided domain (with or without a scheme/path) to a
+ * hostname that can be compared safely.
+ */
+const normalizeDomain = (domain: string) => {
+  const value = domain.trim().toLowerCase().replace(/^\*\./, '');
+  if (!value) return null;
+
+  const parsed = parseUrl(value.includes('://') ? value : `https://${value}`);
+  return parsed?.hostname.replace(/\.$/, '') || null;
+};
+
+/**
+ * Determines whether a URL belongs to one of the caller-provided excluded
+ * domains. Subdomains are excluded as well, while lookalike hostnames such as
+ * `example.com.evil.test` are not.
+ */
+export const shouldExcludeDomain = (url: string, excludedDomains: string[]) => {
+  const hostname = parseUrl(url)?.hostname.toLowerCase().replace(/\.$/, '');
+  if (!hostname) return false;
+
+  return excludedDomains.some((domain) => {
+    const excludedHostname = normalizeDomain(domain);
+    return (
+      excludedHostname !== null &&
+      (hostname === excludedHostname ||
+        hostname.endsWith(`.${excludedHostname}`))
+    );
+  });
+};
+
+/**
  * Determines if a domain should be skipped based on a blocklist
  * @param url - The URL to check
  * @returns True if the domain should be skipped, false otherwise
