@@ -484,7 +484,7 @@ export class BrowserOperator extends Operator {
     }
     const { realX: startX, realY: startY } = await this.calculateRealCoords(inputs.point);
 
-    if (startX !== null && startY !== null) {
+    if (Number.isFinite(startX) && Number.isFinite(startY)) {
       this.logger.info(`Moving mouse to scroll position: (${startX}, ${startY})`);
       await page.mouse.move(startX, startY);
       await sleep(100); // Small delay to ensure mouse position is set
@@ -545,7 +545,12 @@ export class BrowserOperator extends Operator {
     const { realX: startX, realY: startY } = await this.calculateRealCoords(inputs.start);
     const { realX: endX, realY: endY } = await this.calculateRealCoords(inputs.end);
 
-    if (startX === null || startY === null || endX === null || endY === null) {
+    if (
+      !Number.isFinite(startX) ||
+      !Number.isFinite(startY) ||
+      !Number.isFinite(endX) ||
+      !Number.isFinite(endY)
+    ) {
       throw new Error('Invalid coordinates for drag operation');
     }
 
