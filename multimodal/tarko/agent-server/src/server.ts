@@ -18,6 +18,7 @@ import type {
   AgioProviderConstructor,
 } from './types';
 import { TARKO_CONSTANTS, GlobalDirectoryOptions } from '@tarko/interface';
+import { resolveServerHost } from '@tarko/shared-utils';
 
 export { express };
 
@@ -48,6 +49,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
 
   // Configuration
   public readonly port: number;
+  public readonly host: string;
   public readonly isDebug: boolean;
   public readonly isExclusive: boolean;
   public readonly storageProvider: StorageProvider | null = null;
@@ -79,6 +81,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
 
     // Extract server configuration from agent options
     this.port = appConfig.server?.port ?? 3000;
+    this.host = resolveServerHost(appConfig.server?.host);
     this.isDebug = appConfig.logLevel === LogLevel.DEBUG;
     this.isExclusive = appConfig.server?.exclusive ?? false;
 
@@ -256,7 +259,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
     }
 
     return new Promise((resolve) => {
-      this.server.listen(this.port, () => {
+      this.server.listen(this.port, this.host, () => {
         this.isRunning = true;
         resolve(this.server);
       });
