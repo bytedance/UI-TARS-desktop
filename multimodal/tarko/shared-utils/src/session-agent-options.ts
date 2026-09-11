@@ -99,7 +99,7 @@ export function sanitizeSessionAgentOptions(
   }
 
   const allowed = new Set<string>(ALLOWED_SESSION_AGENT_OPTION_KEYS);
-  const sanitized: Record<string, unknown> = {};
+  const sanitized = new Map<string, unknown>();
   const rejectedKeys: string[] = [];
 
   for (const key of Object.keys(input)) {
@@ -107,11 +107,11 @@ export function sanitizeSessionAgentOptions(
       rejectedKeys.push(key);
       continue;
     }
-    sanitized[key] = input[key];
+    sanitized.set(key, input[key]);
   }
 
   return {
-    value: Object.keys(sanitized).length > 0 ? sanitized : undefined,
+    value: sanitized.size > 0 ? Object.fromEntries(sanitized) : undefined,
     rejectedKeys,
   };
 }
@@ -142,7 +142,7 @@ export function filterDeclaredRuntimeSettings(
   }
 
   const properties = schema?.properties;
-  const filtered: Record<string, unknown> = Object.create(null);
+  const filtered = new Map<string, unknown>();
   const rejectedKeys: string[] = [];
 
   for (const key of Object.keys(input)) {
@@ -165,8 +165,8 @@ export function filterDeclaredRuntimeSettings(
       continue;
     }
 
-    filtered[key] = value;
+    filtered.set(key, value);
   }
 
-  return { value: filtered, rejectedKeys };
+  return { value: Object.fromEntries(filtered), rejectedKeys };
 }
