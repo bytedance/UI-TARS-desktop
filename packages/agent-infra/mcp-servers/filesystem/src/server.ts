@@ -118,6 +118,21 @@ async function validatePath(requestedPath: string): Promise<string> {
   }
 }
 
+async function ensureDestinationDoesNotExist(
+  destinationPath: string,
+): Promise<void> {
+  try {
+    await fs.lstat(destinationPath);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return;
+    }
+    throw error;
+  }
+
+  throw new Error(`Destination already exists: ${destinationPath}`);
+}
+
 async function searchFiles(
   rootPath: string,
   pattern: string,
@@ -396,6 +411,7 @@ function createServer(args: { allowedDirectories: string[] }): McpServer {
       }
       const validSourcePath = await validatePath(parsed.data.source);
       const validDestPath = await validatePath(parsed.data.destination);
+      await ensureDestinationDoesNotExist(validDestPath);
       await fs.rename(validSourcePath, validDestPath);
       return {
         content: [
