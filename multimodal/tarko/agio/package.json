@@ -22,7 +22,7 @@
   "scripts": {
     "dev": "rslib build --watch",
     "build": "rslib build && pnpm build:json-schema",
-    "build:json-schema": "ts-json-schema-generator --path 'src/index.ts' --type 'AgioEvent.Event' --no-type-check -o agio-schema.json",
+    "build:json-schema": "ts-json-schema-generator --path src/index.ts --type AgioEvent.Event --no-type-check -o agio-schema.json",
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
