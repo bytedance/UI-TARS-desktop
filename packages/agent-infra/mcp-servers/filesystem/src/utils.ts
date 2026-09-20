@@ -63,7 +63,10 @@ export async function applyFileEdits(
 
     // If exact match exists, use it
     if (modifiedContent.includes(normalizedOld)) {
-      modifiedContent = modifiedContent.replace(normalizedOld, normalizedNew);
+      modifiedContent = modifiedContent.replace(
+        normalizedOld,
+        () => normalizedNew,
+      );
       continue;
     }
 
