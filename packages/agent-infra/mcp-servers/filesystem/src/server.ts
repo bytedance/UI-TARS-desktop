@@ -61,7 +61,10 @@ function getAllowedDirectories() {
 }
 
 // Security utilities
-async function validatePath(requestedPath: string): Promise<string> {
+async function validatePath(
+  requestedPath: string,
+  allowMissingAncestors = false,
+): Promise<string> {
   console.log('requestedPath', requestedPath);
   const expandedPath = expandHome(requestedPath);
   const absolute = path.isAbsolute(expandedPath)
@@ -96,6 +99,40 @@ async function validatePath(requestedPath: string): Promise<string> {
     return realPath;
   } catch (error) {
     console.error('[validatePath] error', error);
+    if (allowMissingAncestors) {
+      let ancestor = path.dirname(absolute);
+
+      while (ancestor !== '') {
+        let realAncestor: string;
+        try {
+          realAncestor = await fs.realpath(ancestor);
+        } catch (ancestorError) {
+          const code = (ancestorError as NodeJS.ErrnoException).code;
+          if (code !== 'ENOENT' && code !== 'ENOTDIR') {
+            throw ancestorError;
+          }
+
+          const parent = path.dirname(ancestor);
+          if (parent === ancestor) {
+            break;
+          }
+          ancestor = parent;
+          continue;
+        }
+
+        const normalizedAncestor = normalizePath(realAncestor);
+        const isAncestorAllowed = allowedDirectories.some((dir) =>
+          normalizedAncestor.startsWith(dir),
+        );
+        if (!isAncestorAllowed) {
+          throw new Error(
+            'Access denied - existing ancestor outside allowed directories',
+          );
+        }
+        return absolute;
+      }
+    }
+
     // For new files that don't exist yet, verify parent directory
     const parentDir = path.dirname(absolute);
     console.log('parentDir', parentDir);
@@ -286,7 +323,7 @@ function createServer(args: { allowedDirectories: string[] }): McpServer {
           `Invalid arguments for create_directory: ${parsed.error}`,
         );
       }
-      const validPath = await validatePath(parsed.data.path);
+      const validPath = await validatePath(parsed.data.path, true);
       await fs.mkdir(validPath, { recursive: true });
       return {
         content: [
