@@ -61,7 +61,10 @@ function getAllowedDirectories() {
 }
 
 // Security utilities
-async function validatePath(requestedPath: string): Promise<string> {
+async function validatePath(
+  requestedPath: string,
+  allowMissingParents = false,
+): Promise<string> {
   console.log('requestedPath', requestedPath);
   const expandedPath = expandHome(requestedPath);
   const absolute = path.isAbsolute(expandedPath)
@@ -82,8 +85,10 @@ async function validatePath(requestedPath: string): Promise<string> {
   }
 
   // Handle symlinks by checking their real path
+  let existingPathResolved = false;
   try {
     const realPath = await fs.realpath(absolute);
+    existingPathResolved = true;
     const normalizedReal = normalizePath(realPath);
     const isRealPathAllowed = allowedDirectories.some((dir) =>
       normalizedReal.startsWith(dir),
@@ -95,9 +100,52 @@ async function validatePath(requestedPath: string): Promise<string> {
     }
     return realPath;
   } catch (error) {
+    if (
+      allowMissingParents &&
+      (existingPathResolved ||
+        (error as NodeJS.ErrnoException).code !== 'ENOENT')
+    ) {
+      throw error;
+    }
+
     console.error('[validatePath] error', error);
     // For new files that don't exist yet, verify parent directory
     const parentDir = path.dirname(absolute);
+
+    if (allowMissingParents) {
+      let existingParent = parentDir;
+      let reachedRoot = false;
+
+      while (!reachedRoot) {
+        try {
+          const realParentPath = await fs.realpath(existingParent);
+          const normalizedParent = normalizePath(realParentPath);
+          const isParentAllowed = allowedDirectories.some((dir) =>
+            normalizedParent.startsWith(dir),
+          );
+          if (!isParentAllowed) {
+            throw new Error(
+              'Access denied - parent directory outside allowed directories',
+            );
+          }
+          return absolute;
+        } catch (error) {
+          if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+            throw error;
+          }
+
+          const nextParent = path.dirname(existingParent);
+          if (nextParent === existingParent) {
+            reachedRoot = true;
+          } else {
+            existingParent = nextParent;
+          }
+        }
+      }
+
+      throw new Error(`Parent directory does not exist: ${existingParent}`);
+    }
+
     console.log('parentDir', parentDir);
     try {
       const realParentPath = await fs.realpath(parentDir);
@@ -286,7 +334,7 @@ function createServer(args: { allowedDirectories: string[] }): McpServer {
           `Invalid arguments for create_directory: ${parsed.error}`,
         );
       }
-      const validPath = await validatePath(parsed.data.path);
+      const validPath = await validatePath(parsed.data.path, true);
       await fs.mkdir(validPath, { recursive: true });
       return {
         content: [
