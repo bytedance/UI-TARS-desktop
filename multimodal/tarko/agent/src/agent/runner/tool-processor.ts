@@ -13,7 +13,7 @@ import {
   ChatCompletionMessageToolCall,
 } from '@tarko/agent-interface';
 import { getLogger } from '@tarko/shared-utils';
-import { zodToJsonSchema } from '../../utils';
+import { coerceToolCallArguments, parseToolCallArguments, zodToJsonSchema } from '../../utils';
 
 /**
  * ToolProcessor - Responsible for tool calls and processing
@@ -181,14 +181,16 @@ export class ToolProcessor {
           const toolCallId = toolCall.id;
 
           // Parse arguments
-          let args = JSON.parse(toolCall.function.arguments || '{}');
+          let args: Record<string, any> = parseToolCallArguments(toolCall.function.arguments);
 
           // Trigger onBeforeToolCall hook
           try {
-            args = await this.agent.onBeforeToolCall(
-              sessionId,
-              { toolCallId, name: toolName },
-              args,
+            args = coerceToolCallArguments(
+              await this.agent.onBeforeToolCall(
+                sessionId,
+                { toolCallId, name: toolName },
+                args,
+              ),
             );
           } catch (hookError) {
             this.logger.error(`[Hook] Error in onBeforeToolCall during interception: ${hookError}`);
@@ -257,10 +259,12 @@ export class ToolProcessor {
 
       try {
         // Parse arguments
-        let args = JSON.parse(toolCall.function.arguments || '{}');
+        let args: Record<string, any> = parseToolCallArguments(toolCall.function.arguments);
 
         try {
-          args = await this.agent.onBeforeToolCall(sessionId, { toolCallId, name: toolName }, args);
+          args = coerceToolCallArguments(
+            await this.agent.onBeforeToolCall(sessionId, { toolCallId, name: toolName }, args),
+          );
         } catch (hookError) {
           this.logger.error(`[Hook] Error in onBeforeToolCall: ${hookError}`);
         }

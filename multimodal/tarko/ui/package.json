@@ -39,6 +39,7 @@
     "remark-math": "^6.0.0"
   },
   "devDependencies": {
+    "@rsbuild/plugin-react": "1.1.1",
     "@rslib/core": "0.10.0",
     "@types/node": "22.15.30",
     "@types/react": "^18.2.75",

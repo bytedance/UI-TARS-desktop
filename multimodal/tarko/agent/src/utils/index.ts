@@ -8,3 +8,4 @@ export * from './common';
 export * from './multimodal';
 export * from './llm-requester';
 export * from './tool-filter';
+export * from './parse-tool-call-arguments';

@@ -264,6 +264,14 @@ node .\agent-tars\cli\bin\cli.js --provider openai --model <模型名> --baseURL
 
 `agio` 包若仅需跳过 schema 生成调试，仓库内已有 `agio-schema.json`；正式修复仍建议改 `package.json` 后执行 `pnpm --filter @tarko/agio build`。
 
+### 6.4 修改后进行重新编译
+
+使用该命令对 agent-tars 栈修改后的源码重新编译
+
+```sh
+npx rslib build
+```
+
 ---
 
 ## 7. UI-TARS Desktop：VLM 与本地 OpenAI 兼容接口

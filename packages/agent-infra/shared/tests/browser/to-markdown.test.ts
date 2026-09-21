@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { toMarkdown } from '../../src/browser/to-markdown';
+import {
+  htmlToPlainText,
+  looksLikeHtml,
+  toMarkdown,
+} from '../../src/browser/to-markdown';
 
 describe('toMarkdown', () => {
   it('should convert HTML to Markdown', () => {
@@ -40,5 +44,23 @@ describe('toMarkdown', () => {
       .toEqual(`[![](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAM0AAABgCAYAAAC)](/explore)
 
 Hello World`);
+  });
+
+  it('falls back to plain text instead of raw HTML when GFM conversion throws', () => {
+    const html =
+      '<table><thead><tr><th>A</th></tr></thead><tbody><tr><td>cell</td></tr><tr></tr></tbody></table>';
+    const markdown = toMarkdown(html);
+    expect(looksLikeHtml(markdown)).toBe(false);
+    expect(markdown.length).toBeLessThan(html.length);
+    expect(markdown).toContain('cell');
+  });
+
+  it('detects HTML-like strings', () => {
+    expect(looksLikeHtml('<div><p>Hello</p></div>')).toBe(true);
+    expect(looksLikeHtml('# Hello\n\nWorld')).toBe(false);
+  });
+
+  it('strips tags in htmlToPlainText', () => {
+    expect(htmlToPlainText('<p>Hello <strong>world</strong></p>')).toBe('Hello world');
   });
 });

@@ -1,4 +1,4 @@
-import { zodToJsonSchema } from '../utils';
+import { normalizeToolCallArgumentsString, zodToJsonSchema } from '../utils';
 import { getLogger } from '@tarko/shared-utils';
 import {
   Tool,
@@ -203,6 +203,16 @@ export class NativeToolCallEngine extends ToolCallEngine {
    * Finalize the stream processing and extract the final response
    */
   finalizeStreamProcessing(state: StreamProcessingState): ParsedModelResponse {
+    if (state.toolCalls.length > 0) {
+      for (const toolCall of state.toolCalls) {
+        if (toolCall.function) {
+          toolCall.function.arguments = normalizeToolCallArgumentsString(
+            toolCall.function.arguments,
+          );
+        }
+      }
+    }
+
     return {
       // We do not send "rawContent" here because, in the native engine,
       // the raw content is identical to the content.
@@ -224,7 +234,13 @@ export class NativeToolCallEngine extends ToolCallEngine {
 
     // For OpenAI, directly use the tool_calls field
     if (toolCalls && toolCalls.length > 0) {
-      message.tool_calls = toolCalls;
+      message.tool_calls = toolCalls.map((toolCall) => ({
+        ...toolCall,
+        function: {
+          ...toolCall.function,
+          arguments: normalizeToolCallArgumentsString(toolCall.function.arguments),
+        },
+      }));
       this.logger.debug(`Adding ${toolCalls.length} tool calls to assistant message`);
     }
 
