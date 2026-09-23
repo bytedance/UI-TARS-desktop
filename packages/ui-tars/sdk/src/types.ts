@@ -101,7 +101,7 @@ export interface GUIAgentConfig<TOperator> {
     screenshot?: RetryConfig;
     execute?: RetryConfig;
   };
-  /** Maximum number of turns for Agent to execute, @default 25 */
+  /** Maximum number of turns for Agent to execute, @default 100 */
   maxLoopCount?: number;
   /** Time interval between two loop iterations (in milliseconds), @default 0 */
   loopIntervalInMs?: number;
