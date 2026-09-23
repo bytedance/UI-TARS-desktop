@@ -18,7 +18,9 @@ export function resolveValue(value: string | undefined, label = 'value'): string
   // If value is in all uppercase, treat it as an environment variable
   if (/^[A-Z][A-Z0-9_]*$/.test(value)) {
     const envValue = process.env[value];
-    if (envValue) {
+    // A defined-but-empty variable must resolve to '' and not fall through,
+    // which would hand back the variable's own name as if it were the secret.
+    if (envValue !== undefined) {
       logger.debug(`Using ${label} from environment variable: ${value}`);
       return envValue;
     } else {
