@@ -160,24 +160,31 @@ export class ContextReferenceProcessor {
           .filter((p): p is { relativePath: string; absolutePath: string } => p !== null);
 
         if (absoluteDirPaths.length > 0) {
-          const packResult = await this.workspacePack.packPaths(
-            absoluteDirPaths.map((p) => p.absolutePath),
-            workspacePath,
-          );
+          let totalFiles = 0;
+          let totalSize = 0;
+          let errorCount = 0;
 
-          // Add packed content for each directory reference
-          for (const { relativePath } of absoluteDirPaths) {
+          // Pack each reference on its own: `packedContent` is one combined document covering
+          // every path handed to `packPaths()`, so packing all references in a single call
+          // made each `<directory>` block expand to the content of all the others.
+          for (const { relativePath, absolutePath } of absoluteDirPaths) {
+            const packResult = await this.workspacePack.packPaths([absolutePath], workspacePath);
+
             expandedContents.push(
               `<directory path="${relativePath}">\n${packResult.packedContent}\n</directory>`,
             );
+
+            totalFiles += packResult.stats.totalFiles;
+            totalSize += packResult.stats.totalSize;
+            errorCount += packResult.stats.errorCount;
           }
 
           // Log packing statistics
           console.log('Workspace packing completed:', {
-            paths: packResult.processedPaths.length,
-            files: packResult.stats.totalFiles,
-            totalSize: packResult.stats.totalSize,
-            errors: packResult.stats.errorCount,
+            paths: absoluteDirPaths.length,
+            files: totalFiles,
+            totalSize,
+            errors: errorCount,
           });
         }
       } catch (error) {
