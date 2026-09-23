@@ -73,7 +73,7 @@
 - **\[2025-06-12\]** - 🎁 我们很高兴宣布发布 UI-TARS Desktop v0.2.0！此次更新引入了两个强大的新功能：**Remote Computer Operator** 和 **Remote Browser Operator**—— 完全免费。无需配置：只需点击即可远程控制任何计算机或浏览器，体验全新的便利和智能水平。
 - **\[2025-04-17\]** - 🎉 我们很高兴宣布发布全新的 UI-TARS Desktop 应用程序 v0.1.0，具有重新设计的 Agent UI。该应用程序增强了计算机使用体验，引入了新的浏览器操作功能，并支持[先进的 UI-TARS-1.5 模型](https://seed-tars.com/1.5)以提供更好的性能和精确控制。
 - **\[2025-02-20\]** - 📦 推出了 [UI TARS SDK](./docs/sdk.md)，这是一个强大的跨平台工具包，用于构建 GUI 自动化 agent。
-- **\[2025-01-23\]** - 🚀 我们更新了**[Cloud Deployment](./docs/deployment.md#cloud-deployment)**部分的中文版：[GUI模型部署教程](https://bytedance.sg.larkoffice.com/docx/TCcuNPlHL21gNb)，其中包含与 ModelScope 平台相关的新信息。你现在可以使用 ModelScope 平台进行部署。
+- **\[2025-01-23\]** - 🚀 我们更新了**[Cloud Deployment](./docs/deployment.md)**部分的中文版：[GUI模型部署教程](https://bytedance.sg.larkoffice.com/docx/TCcuNPlHL21gNb)，其中包含与 ModelScope 平台相关的新信息。你现在可以使用 ModelScope 平台进行部署。
 
 <br>
 
