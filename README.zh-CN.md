@@ -39,7 +39,8 @@
         <br>
         <br>
         它主要提供
-        <a href="https://github.com/bytedance/UI-TARS-desktop/blob/docs/new-readme/docs/quick-start.md#get-model-and-run" target="_blank">本地</a>计算机以及浏览器操作器。
+        <a href="https://github.com/bytedance/UI-TARS-desktop/blob/main/docs/quick-start.md#get-model-and-run-local-operator" target="_blank">本地</a>以及
+        <a href="https://github.com/bytedance/UI-TARS-desktop/blob/main/docs/quick-start.md#run-remote-operator" target="_blank">远程</a>计算机与浏览器操作器。
       </td>
     </tr>
   </tbody>
