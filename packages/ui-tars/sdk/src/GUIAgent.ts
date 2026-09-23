@@ -118,6 +118,11 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
     let totalTime = 0;
     let previousResponseId: string | undefined;
 
+    // a loop parked in pause() only wakes up from resume(), so aborting has to
+    // wake it as well
+    const releasePauseOnAbort = () => this.resume();
+    signal?.addEventListener('abort', releasePauseOnAbort, { once: true });
+
     // start running agent
     data.status = StatusEnum.RUNNING;
     await onData?.({ data: { ...data, conversations: [] } });
@@ -155,6 +160,9 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
           signal?.aborted
         ) {
           // check if stop or aborted
+          if (this.isStopped && data.status === StatusEnum.RUNNING) {
+            data.status = StatusEnum.USER_STOPPED;
+          }
           signal?.aborted && (data.status = StatusEnum.USER_STOPPED);
           break;
         }
@@ -454,6 +462,8 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
     } finally {
       logger.info('[GUIAgent] Finally: status', data.status);
 
+      signal?.removeEventListener('abort', releasePauseOnAbort);
+
       this.model?.reset();
 
       if (data.status === StatusEnum.USER_STOPPED) {
@@ -493,6 +503,9 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
   }
 
   public pause() {
+    if (this.isPaused) {
+      return;
+    }
     this.isPaused = true;
     this.resumePromise = new Promise((resolve) => {
       this.resolveResume = resolve;
@@ -510,6 +523,8 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
 
   public stop() {
     this.isStopped = true;
+    // wake a loop parked in pause(); the next loop check breaks out
+    this.resume();
   }
 
   private buildSystemPrompt() {
