@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "UI-TARS-desktop": {
+      "command": "npx",
+      "args": [
+        "bytedance-UI-TARS-desktop"
+      ]
+    }
+  }
+}
