@@ -43,7 +43,7 @@ You can download the [latest release](https://github.com/bytedance/UI-TARS-deskt
 
 ### Windows
 
-**Still to run** the application, you can see the following interface:
+Run the application, and you can see the following interface:
 
 <img src="../apps/ui-tars/images/windows_install.png" width="400px" style="margin-left: 4em;" />
 
@@ -52,7 +52,7 @@ You can download the [latest release](https://github.com/bytedance/UI-TARS-deskt
 
 ## Run remote operator
 
-The Remote Operator service will be discontinued on August 20, 2025. If you wish to deploy your own Remote Computer and Browser Agent after the free trial, you can explore Volcano Engine's OS Agent Services.
+The Remote Operator service was discontinued on August 20, 2025. If you wish to deploy your own Remote Computer or Browser Agent, you can explore Volcano Engine's OS Agent Services.
 
 Deployment Links (in Chinese): [Computer Use Agent](https://console.volcengine.com/vefaas/region:vefaas+cn-beijing/application/create?templateId=680b0a890e881f000862d9f0&channel=github&source=ui-tars) and [Browser Use Agent](https://console.volcengine.com/vefaas/region:vefaas+cn-beijing/application/create?templateId=67f7b4678af5a6000850556c&channel=github&source=ui-tars)
 
@@ -72,7 +72,7 @@ Deployment Links (in Chinese): [Computer Use Agent](https://console.volcengine.c
 
 3. Refer to [README_deploy.md](https://github.com/bytedance/UI-TARS/blob/main/README_deploy.md) for detailed deployment instructions to obtain the **Base URL**, **API Key**, and **Model Name**.
 
-4. Open the UI-TARS Desktop App [Settings]((./setting.md)) and configure:
+4. Open the UI-TARS Desktop App [Settings](./setting.md) and configure:
 
 ```yaml
 Language: en
@@ -122,7 +122,7 @@ VLM Model Name: xxx
 5. In STEP 2, authenticate your user info and switch to the OpenAI SDK tab to obtain **Base Url** and **Model name**：
   <img src="../apps/ui-tars/images/quick_start/volcengine_api_info.png" width="500px" />
 
-6. Open the UI-TARS Desktop App [Settings]((./setting.md)) and configure:
+6. Open the UI-TARS Desktop App [Settings](./setting.md) and configure:
 
 ```yaml
 Language: cn
