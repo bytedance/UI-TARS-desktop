@@ -22,7 +22,8 @@ export type ModelProviderName =
   | 'ollama'
   | 'lm-studio'
   | 'volcengine'
-  | 'deepseek';
+  | 'deepseek'
+  | 'minimax';
 
 /**
  * Basic Model configuration
