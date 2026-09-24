@@ -32,6 +32,9 @@ export const getModelVersion = (
       return UITarsModelVersion.DOUBAO_1_5_15B;
     case VLMProviderV2.doubao_1_5_vl:
       return UITarsModelVersion.DOUBAO_1_5_20B;
+    case VLMProviderV2.astraflow:
+    case VLMProviderV2.astraflow_cn:
+      return UITarsModelVersion.V1_5;
     default:
       return UITarsModelVersion.V1_0;
   }
