@@ -4,14 +4,14 @@
  */
 import { HandleFunction, RouterType, ZodSchema } from '../types';
 
-const createChainProdure = <TInput>() => {
+const createChainProdure = <TInput>(schema?: ZodSchema<TInput>) => {
   const chain = {
-    input<TInput>(_schema?: ZodSchema<TInput>) {
-      return createChainProdure<TInput>();
+    input<TNextInput>(_schema?: ZodSchema<TNextInput>) {
+      return createChainProdure<TNextInput>(_schema);
     },
 
     handle: <TResult>(handle: HandleFunction<TInput, TResult>) => {
-      return { handle };
+      return { handle, schema };
     },
   };
 

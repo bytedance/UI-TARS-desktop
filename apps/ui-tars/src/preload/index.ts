@@ -11,10 +11,40 @@ import type { AppState, LocalStore } from '@main/store/types';
 
 export type Channels = '';
 
+const ipcRouteChannels = new Set([
+  'getScreenSize',
+  'showMainWindow',
+  'checkForUpdatesDetail',
+  'getEnsurePermissions',
+  'runAgent',
+  'pauseRun',
+  'resumeRun',
+  'stopRun',
+  'setInstructions',
+  'setMessages',
+  'setSessionHistoryMessages',
+  'clearHistory',
+  'allocRemoteResource',
+  'getRemoteResourceRDPUrl',
+  'releaseRemoteResource',
+  'getTimeBalance',
+  'checkBrowserAvailability',
+  'checkVLMResponseApiSupport',
+  'checkModelAvailability',
+]);
+
+function assertIpcRouteChannel(channel: string): void {
+  if (!ipcRouteChannels.has(channel)) {
+    throw new Error(`IPC channel is not allowed: ${channel}`);
+  }
+}
+
 const electronHandler = {
   ipcRenderer: {
-    invoke: (channel: string, ...args: unknown[]) =>
-      ipcRenderer.invoke(channel, ...args),
+    invoke: (channel: string, ...args: unknown[]) => {
+      assertIpcRouteChannel(channel);
+      return ipcRenderer.invoke(channel, ...args);
+    },
     sendMessage(channel: Channels, ...args: unknown[]) {
       ipcRenderer.send(channel, ...args);
     },
@@ -48,7 +78,13 @@ const electronHandler = {
       ipcRenderer.invoke('setting:updatePresetFromRemote'),
     resetPreset: () => ipcRenderer.invoke('setting:resetPreset'),
     onUpdate: (callback: (setting: LocalStore) => void) => {
-      ipcRenderer.on('setting-updated', (_, state) => callback(state));
+      const subscription = (_: IpcRendererEvent, state: LocalStore) =>
+        callback(state);
+      ipcRenderer.on('setting-updated', subscription);
+
+      return () => {
+        ipcRenderer.removeListener('setting-updated', subscription);
+      };
     },
   },
 };

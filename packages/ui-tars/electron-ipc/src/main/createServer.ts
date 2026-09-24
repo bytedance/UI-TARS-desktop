@@ -10,7 +10,11 @@ export const createServer = <Router extends RouterType>(router: Router) => {
     get: (_, prop: string) => {
       const route = router[prop];
       return (input: any, sender?: WebContents) => {
-        return route.handle({ context: { sender: sender || null }, input });
+        const parsedInput = route.schema ? route.schema.parse(input) : input;
+        return route.handle({
+          context: { sender: sender || null },
+          input: parsedInput,
+        });
       };
     },
   });
