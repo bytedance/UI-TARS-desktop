@@ -21,6 +21,7 @@ export type GeminiModel = (typeof models.gemini.models)[number];
 export type MistralModel = (typeof models.mistral.models)[number];
 export type PerplexityModel = (typeof models.perplexity.models)[number];
 export type GroqModel = (typeof models.groq.models)[number];
+export type MiniMaxModel = (typeof models.minimax.models)[number];
 export type OpenRouterModel = string;
 export type OpenAICompatibleModel = string;
 export type AzureOpenAIModel = string;
@@ -34,6 +35,7 @@ export type LLMChatModel =
   | MistralModel
   | PerplexityModel
   | GroqModel
+  | MiniMaxModel
   | OpenRouterModel
   | OpenAICompatibleModel;
 
@@ -48,6 +50,7 @@ type ProviderModelMap = {
   mistral: MistralModel;
   perplexity: PerplexityModel;
   groq: GroqModel;
+  minimax: MiniMaxModel;
   openrouter: OpenRouterModel;
   'openai-compatible': OpenAICompatibleModel;
   'azure-openai': AzureOpenAIModel;
