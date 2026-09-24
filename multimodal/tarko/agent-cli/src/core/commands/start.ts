@@ -59,8 +59,7 @@ export async function startInteractiveWebUI(
   const serverUrl = formatServerUrl(server.host, port);
   // The token rides in the URL so opening the link is enough to get the web UI
   // authenticated; it stores the value and sends it as a header from then on.
-  const tokenQuery = server.auth.required ? `/?token=${server.auth.token}` : '';
-  const webUIUrl = `${serverUrl}${tokenQuery}`;
+  const webUIUrl = server.auth.required ? `${serverUrl}/?token=${server.auth.token}` : serverUrl;
 
   if (appConfig.logLevel !== LogLevel.SILENT) {
     // Define brand colors
@@ -76,7 +75,7 @@ export async function startInteractiveWebUI(
         brandGradient.multiline(` is available at: `, {
           interpolation: 'hsv',
         }) +
-        chalk.underline(brandGradient(webUIUrl)),
+        chalk.underline(brandGradient(serverUrl)),
       '',
       `📁 ${chalk.gray('Workspace:')} ${brandGradient(workspaceDir)}`,
       '',
@@ -101,6 +100,15 @@ export async function startInteractiveWebUI(
         dimBorder: true,
       }),
     );
+
+    if (server.auth.required) {
+      // Outside the box on purpose: boxen clips a line that exceeds the
+      // terminal width, and a link missing the tail of its token is worse than
+      // no link at all.
+      console.log(chalk.gray('Open this link to sign the web UI in:'));
+      console.log(chalk.underline(webUIUrl));
+      console.log();
+    }
 
     if (options.open && server.auth.required) {
       // Handing the URL to the OS opener would put the token in a command line,
