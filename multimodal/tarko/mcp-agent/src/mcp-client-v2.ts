@@ -15,6 +15,7 @@ export class MCPClientV2 implements IMCPClient {
   private v2Client: V2Client;
   private serverName: string;
   private tools: Tool[] = [];
+  private hasStarted = false;
   private isInitialized = false;
 
   constructor(
@@ -45,6 +46,7 @@ export class MCPClientV2 implements IMCPClient {
 
     try {
       this.logger.info(`Initializing MCP client v2 for ${this.serverName}`);
+      this.hasStarted = true;
       await this.v2Client.init();
       this.tools = await this.v2Client.listTools(this.serverName as string);
       this.isInitialized = true;
@@ -75,18 +77,28 @@ export class MCPClientV2 implements IMCPClient {
       return result.content;
     } catch (error) {
       this.logger.error(`Error calling MCP tool ${toolName}:`, error);
-      throw new Error(`Failed to execute tool ${toolName}: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Failed to execute tool ${toolName}: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
   async close(): Promise<void> {
-    if (this.isInitialized) {
-      this.logger.info(`Closing MCP client v2 for ${this.serverName}`);
+    if (!this.hasStarted) {
+      return;
+    }
+
+    this.logger.info(`Closing MCP client v2 for ${this.serverName}`);
+
+    try {
       await this.v2Client.cleanup();
+    } finally {
+      this.hasStarted = false;
       this.isInitialized = false;
       this.tools = [];
-      this.logger.success(`MCP client v2 closed successfully for ${this.serverName}`);
     }
+
+    this.logger.success(`MCP client v2 closed successfully for ${this.serverName}`);
   }
 
   getTools(): Tool[] {
