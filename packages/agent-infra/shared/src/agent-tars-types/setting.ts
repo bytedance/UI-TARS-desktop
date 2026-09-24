@@ -5,6 +5,7 @@ export enum ModelProvider {
   OPENAI = 'openai',
   ANTHROPIC = 'anthropic',
   GEMINI = 'gemini',
+  VERTEX_AI = 'vertex-ai',
   MISTRAL = 'mistral',
   AZURE_OPENAI = 'azure_openai',
   DEEPSEEK = 'deepseek',

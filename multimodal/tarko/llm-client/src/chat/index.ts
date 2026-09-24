@@ -18,6 +18,7 @@ export type OpenAINonStreamingModel = (typeof models)['openai-non-streaming']['m
 export type AI21Model = (typeof models.ai21.models)[number];
 export type AnthropicModel = (typeof models.anthropic.models)[number];
 export type GeminiModel = (typeof models.gemini.models)[number];
+export type VertexAIModel = (typeof models)['vertex-ai']['models'][number];
 export type MistralModel = (typeof models.mistral.models)[number];
 export type PerplexityModel = (typeof models.perplexity.models)[number];
 export type GroqModel = (typeof models.groq.models)[number];
@@ -31,6 +32,7 @@ export type LLMChatModel =
   | AI21Model
   | AnthropicModel
   | GeminiModel
+  | VertexAIModel
   | MistralModel
   | PerplexityModel
   | GroqModel
@@ -45,6 +47,7 @@ type ProviderModelMap = {
   ai21: AI21Model;
   anthropic: AnthropicModel;
   gemini: GeminiModel;
+  'vertex-ai': VertexAIModel;
   mistral: MistralModel;
   perplexity: PerplexityModel;
   groq: GroqModel;

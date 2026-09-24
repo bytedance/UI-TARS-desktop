@@ -38,6 +38,8 @@ body:
       - label: Volcengine
       - label: Anthropic
       - label: OpenAI
+      - label: Google Gemini
+      - label: Google Vertex AI
       - label: Azure OpenAI
       - label: Other (please specify in description)
 - type: textarea
