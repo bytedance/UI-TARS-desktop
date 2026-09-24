@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "deepwiki": {
+      "type": "streamable-http",
+      "prefix": "deepwiki",
+      "tags": [
+        "coding"
+      ],
+      "url": "https://mcp.deepwiki.com/mcp"
+    },
+    "chrome-devtools": {
+      "type": "stdio",
+      "prefix": "chrome_devtools",
+      "tags": [
+        "browser"
+      ],
+      "command": "npx",
+      "args": [
+        "chrome-devtools-mcp@latest"
+      ]
+    }
+  }
+}
