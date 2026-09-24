@@ -7,8 +7,6 @@
   <a href="https://github.com/web-infra-dev/rsbuild/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square&colorA=564341&colorB=EDED91" alt="license" /></a>
 </p>
 
-English | [简体中文](./README.zh-CN.md)
-
 A tiny stealth-mode web search and content extraction library built on top of Puppeteer, inspired by [EGOIST](https://github.com/egoist)'s [local-web-search](https://github.com/egoist/local-web-search).
 
 ## Features
