@@ -85,7 +85,7 @@ export async function showMainWindow() {
       mainWindow?.setAlwaysOnTop(false);
     }, 100);
     mainWindow?.setFocusable(true);
-    mainWindow?.show();
+    mainWindow?.showInactive();
   } catch (error) {
     logger.error('[showMainWindow]', error);
   }
