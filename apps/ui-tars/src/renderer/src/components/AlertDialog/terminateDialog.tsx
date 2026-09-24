@@ -13,6 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@renderer/components/ui/alert-dialog';
+import { useI18n } from '../../i18n';
 
 interface TerminateDialogProps {
   open: boolean;
@@ -22,25 +23,24 @@ interface TerminateDialogProps {
 
 export const TerminateDialog = memo(
   ({ open, onOpenChange, onConfirm }: TerminateDialogProps) => {
+    const { t } = useI18n();
+
     return (
       <AlertDialog open={open} onOpenChange={onOpenChange}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              Terminate the current instance ?
-            </AlertDialogTitle>
+            <AlertDialogTitle>{t('terminateCurrentInstance')}</AlertDialogTitle>
             <AlertDialogDescription>
-              After termination, the current remote instance will be reclaimed,
-              and the task will be paused
+              {t('terminateDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-red-500 hover:bg-red-600"
               onClick={onConfirm}
             >
-              Terminate
+              {t('terminate')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

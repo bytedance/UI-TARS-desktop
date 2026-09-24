@@ -14,6 +14,7 @@ import {
   AlertDialogTitle,
 } from '@renderer/components/ui/alert-dialog';
 import { memo } from 'react';
+import { useI18n } from '../../i18n';
 
 interface NavDialogStore {
   isOpen: boolean;
@@ -37,23 +38,24 @@ export const useNavDialog = create<NavDialogStore>((set) => ({
 
 export const NavDialog = memo(
   ({ open, onOpenChange, onConfirm }: NavDialogProps) => {
+    const { t } = useI18n();
+
     return (
       <AlertDialog open={open} onOpenChange={onOpenChange}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Navigation Alert</AlertDialogTitle>
+            <AlertDialogTitle>{t('navigationAlert')}</AlertDialogTitle>
             <AlertDialogDescription>
-              The current instance is running. Navigating away will forcibly
-              stop the instance. Do you still want to proceed?
+              {t('navigationAlertDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-red-500 hover:bg-red-600"
               onClick={onConfirm}
             >
-              Confirm
+              {t('confirm')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

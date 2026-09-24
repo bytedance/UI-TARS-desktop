@@ -28,12 +28,14 @@ import { SearchEngineForSettings } from '@/main/store/types';
 import googleIcon from '@resources/icons/google-color.svg?url';
 import bingIcon from '@resources/icons/bing-color.svg?url';
 import baiduIcon from '@resources/icons/baidu-color.svg?url';
+import { useI18n } from '../../../i18n';
 
 const formSchema = z.object({
   searchEngineForBrowser: z.nativeEnum(SearchEngineForSettings),
 });
 
 export function LocalBrowserSettings() {
+  const { t } = useI18n();
   const { settings, updateSetting } = useSetting();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -82,11 +84,11 @@ export function LocalBrowserSettings() {
             name="searchEngineForBrowser"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Default Search Engine:</FormLabel>
+                <FormLabel>{t('defaultSearchEngine')}</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger className="w-[124px]">
-                      <SelectValue placeholder="Select a search engine" />
+                      <SelectValue placeholder={t('selectSearchEngine')} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>

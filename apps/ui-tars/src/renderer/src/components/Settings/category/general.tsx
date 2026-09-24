@@ -5,8 +5,10 @@ import { api } from '@/renderer/src/api';
 import { toast } from 'sonner';
 
 import { REPO_OWNER, REPO_NAME } from '@main/shared/constants';
+import { useI18n } from '../../../i18n';
 
 export const GeneralSettings = () => {
+  const { t } = useI18n();
   const [updateLoading, setUpdateLoading] = useState(false);
   const [updateDetail, setUpdateDetail] = useState<{
     currentVersion: string;
@@ -28,10 +30,12 @@ export const GeneralSettings = () => {
         });
         return;
       } else if (!detail.isPackaged) {
-        toast.info('Unpackaged version does not support update check!');
+        toast.info(t('unpackagedNoUpdate'));
       } else {
-        toast.success('No update available', {
-          description: `current version: ${detail.currentVersion} is the latest version`,
+        toast.success(t('noUpdateAvailable'), {
+          description: t('currentVersionLatest', {
+            version: detail.currentVersion,
+          }),
           position: 'top-right',
           richColors: true,
         });
@@ -54,7 +58,7 @@ export const GeneralSettings = () => {
         <RefreshCcw
           className={`h-4 w-4 mr-2 ${updateLoading ? 'animate-spin' : ''}`}
         />
-        {updateLoading ? 'Checking...' : 'Check Updates'}
+        {updateLoading ? t('checking') : t('checkUpdates')}
       </Button>
       {updateDetail?.version && (
         <div className="text-sm text-gray-500">
@@ -63,7 +67,7 @@ export const GeneralSettings = () => {
       )}
       {updateDetail?.link && (
         <div className="text-sm text-gray-500">
-          Release Notes:{' '}
+          {t('releaseNotes')}{' '}
           <a
             href={updateDetail.link}
             target="_blank"

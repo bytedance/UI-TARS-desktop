@@ -27,8 +27,10 @@ import { useStore } from '../../hooks/useStore';
 import { StatusEnum } from '@ui-tars/sdk';
 import { NavDialog } from '../AlertDialog/navDialog';
 import { api } from '../../api';
+import { useI18n } from '../../i18n';
 
 export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
+  const { t } = useI18n();
   const {
     currentSessionId,
     sessions,
@@ -150,7 +152,7 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
               onClick={handleHomeClick}
             >
               <Home />
-              Home
+              {t('home')}
             </SidebarMenuButton>
           </SidebarMenu>
         </SidebarHeader>
