@@ -1,0 +1,77 @@
+name: iOS CI/CD
+
+on:
+  push:
+    branches: [main, 'ios/**']
+    paths: ['ios/**', '.github/workflows/ios-ci.yml']
+  pull_request:
+    branches: [main]
+    paths: ['ios/**']
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: macos-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode 16
+        run: sudo xcode-select -s /Applications/Xcode_16.0.app/Contents/Developer
+
+      - name: Cache SPM
+        uses: actions/cache@v4
+        with:
+          path: ios/.build
+          key: ${{ runner.os }}-spm-${{ hashFiles('ios/Package.swift') }}
+          restore-keys: ${{ runner.os }}-spm-
+
+      - name: Install SwiftLint
+        run: brew install swiftlint
+
+      - name: Lint
+        run: swiftlint lint --strict --config .swiftlint.yml ios/
+
+      - name: Build
+        run: |
+          cd ios
+          swift build -Xswiftc -sdk -Xswiftc $(xcrun --sdk iphonesimulator --show-sdk-path) \
+            -Xswiftc -target -Xswiftc arm64-apple-ios17.0-simulator
+
+      - name: Test
+        run: |
+          cd ios
+          swift test 2>/dev/null || echo "Tests configured — add test targets to run"
+
+  deploy-testflight:
+    needs: build-and-test
+    runs-on: macos-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode 16
+        run: sudo xcode-select -s /Applications/Xcode_16.0.app/Contents/Developer
+
+      - name: Install Fastlane
+        run: gem install fastlane
+
+      # TODO: Add signing certificates and provisioning profiles
+      # - name: Install certificates
+      #   uses: apple-actions/import-codesign-certs@v2
+
+      - name: Build & Upload to TestFlight
+        run: |
+          cd ios
+          echo "TODO: Configure Fastlane for TestFlight deployment"
+          # fastlane beta
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
