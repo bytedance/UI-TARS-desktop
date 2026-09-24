@@ -332,7 +332,9 @@ export class ActionParserHelper {
         }
       }
 
-      let stdParamValue: any = roughInputStrValue.trim();
+      // Function call arguments may carry non-string JSON values, e.g. wait(time=5)
+      let stdParamValue: any =
+        typeof roughInputStrValue === 'string' ? roughInputStrValue.trim() : roughInputStrValue;
       if (
         stdInputName.includes('start') ||
         stdInputName.includes('end') ||
