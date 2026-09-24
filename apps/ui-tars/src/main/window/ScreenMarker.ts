@@ -167,6 +167,7 @@ class ScreenMarker {
 
     this.widgetWindow.setFocusable(false);
     this.widgetWindow.setContentProtection(true); // not show for vlm model
+    this.widgetWindow.setIgnoreMouseEvents(true, { forward: true });
     this.widgetWindow.setPosition(
       Math.floor(screenWidth - 400 - 32),
       Math.floor(screenHeight - 400 - 32 - 64),
