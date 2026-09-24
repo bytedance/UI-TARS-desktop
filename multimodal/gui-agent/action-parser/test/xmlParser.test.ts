@@ -426,4 +426,26 @@ Action: click(start_box='<bbox>637 964 637 964</bbox>')`;
         '<point>500 500</point>需要模拟向上滚动的动作，使用scroll工具，direction设为up，point可以随便选一个页面内的坐标，比如。这样就能完成向上滚动的操作了。',
     });
   });
+
+  it('(20) should preserve numeric-looking action parameter values', () => {
+    const input = `<thinkt>Type the visible number.</thinkt><seed:tool_call>
+<function=type>
+<parameter=content>12345</parameter>
+</function>
+</seed:tool_call>`;
+    const parser = new XMLFormatParser(logger);
+    const result = parser.parse(input);
+    expect(result).toEqual({
+      actions: [
+        {
+          inputs: {
+            content: '12345',
+          },
+          type: 'type',
+        },
+      ],
+      rawActionStrings: ["type(content='12345')"],
+      reasoningContent: 'Type the visible number.',
+    });
+  });
 });
