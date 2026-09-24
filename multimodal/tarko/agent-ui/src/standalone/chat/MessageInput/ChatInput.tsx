@@ -380,7 +380,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     connectionStatus && !connectionStatus.connected
       ? 'Server disconnected...'
       : isProcessing
-        ? `${getAgentTitle()} is running...`
+        ? `Insert a message while ${getAgentTitle()} is running... (Ctrl+Enter to send)`
         : contextualSelectorEnabled
           ? `Ask ${getAgentTitle()} something... (Use @ to reference files/folders, Ctrl+Enter to send)`
           : `Ask ${getAgentTitle()} something... (Ctrl+Enter to send)`;
@@ -532,64 +532,78 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             )}
 
             {/* Action buttons */}
-            <AnimatePresence mode="wait">
-              {connectionStatus && !connectionStatus.connected ? (
-                <motion.button
-                  key="reconnect-btn"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  type="button"
-                  onClick={onReconnect}
-                  className="absolute right-3 bottom-3 p-2 rounded-full text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:text-gray-400 transition-all duration-200 hover:scale-105 active:scale-90"
-                  title="Try to reconnect"
-                >
-                  <FiRefreshCw
-                    size={20}
-                    className={connectionStatus.reconnecting ? 'animate-spin' : ''}
-                  />
-                </motion.button>
-              ) : isProcessing ? (
-                <motion.button
-                  key="abort-btn"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  type="button"
-                  onClick={handleAbort}
-                  disabled={isAborting}
-                  className={`absolute right-3 bottom-3 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 ${
-                    isAborting
-                      ? 'bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100 dark:from-indigo-800/30 dark:via-purple-800/30 dark:to-pink-800/30 text-indigo-400 dark:text-indigo-500 cursor-not-allowed border-2 border-indigo-200 dark:border-indigo-700/50'
-                      : 'bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 hover:from-indigo-100 hover:via-purple-100 hover:to-pink-100 dark:from-indigo-900/20 dark:via-purple-900/20 dark:to-pink-900/20 dark:hover:from-indigo-900/30 dark:hover:via-purple-900/30 dark:hover:to-pink-900/30 text-indigo-600 dark:text-indigo-400 border-2 border-indigo-200 dark:border-indigo-700/50'
-                  } shadow-sm bg-[length:200%_200%] animate-border-flow`}
-                  title="Stop generation"
-                >
-                  {isAborting ? (
-                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <div className="w-3 h-3 bg-current rounded-sm" />
-                  )}
-                </motion.button>
-              ) : (
-                <motion.button
-                  key="send-btn"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  type="submit"
-                  disabled={isMessageEmpty(contextualState.input, uploadedImages) || isDisabled}
-                  className={`absolute right-3 bottom-3 p-3 rounded-full transition-all duration-200 hover:scale-105 active:scale-90 ${
-                    isMessageEmpty(contextualState.input, uploadedImages) || isDisabled
-                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 text-white dark:text-gray-900 shadow-sm'
-                  }`}
-                >
-                  <FiSend size={18} />
-                </motion.button>
-              )}
-            </AnimatePresence>
+            <div className="absolute right-3 bottom-3 flex items-center gap-2">
+              {/* Reconnect button */}
+              <AnimatePresence>
+                {connectionStatus && !connectionStatus.connected && (
+                  <motion.button
+                    key="reconnect-btn"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    type="button"
+                    onClick={onReconnect}
+                    className="p-2 rounded-full text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:text-gray-400 transition-all duration-200 hover:scale-105 active:scale-90"
+                    title="Try to reconnect"
+                  >
+                    <FiRefreshCw
+                      size={20}
+                      className={connectionStatus.reconnecting ? 'animate-spin' : ''}
+                    />
+                  </motion.button>
+                )}
+              </AnimatePresence>
+
+              {/* Abort button - show when processing */}
+              <AnimatePresence>
+                {isProcessing && (
+                  <motion.button
+                    key="abort-btn"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.2 }}
+                    type="button"
+                    onClick={handleAbort}
+                    disabled={isAborting}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 ${
+                      isAborting
+                        ? 'bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100 dark:from-indigo-800/30 dark:via-purple-800/30 dark:to-pink-800/30 text-indigo-400 dark:text-indigo-500 cursor-not-allowed border-2 border-indigo-200 dark:border-indigo-700/50'
+                        : 'bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 hover:from-indigo-100 hover:via-purple-100 hover:to-pink-100 dark:from-indigo-900/20 dark:via-purple-900/20 dark:to-pink-900/20 dark:hover:from-indigo-900/30 dark:hover:via-purple-900/30 dark:hover:to-pink-900/30 text-indigo-600 dark:text-indigo-400 border-2 border-indigo-200 dark:border-indigo-700/50'
+                    } shadow-sm bg-[length:200%_200%] animate-border-flow`}
+                    title="Stop generation"
+                  >
+                    {isAborting ? (
+                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <div className="w-3 h-3 bg-current rounded-sm" />
+                    )}
+                  </motion.button>
+                )}
+              </AnimatePresence>
+
+              {/* Send button - always show when not reconnecting */}
+              <AnimatePresence>
+                {!(connectionStatus && !connectionStatus.connected) && (
+                  <motion.button
+                    key="send-btn"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    type="submit"
+                    disabled={isMessageEmpty(contextualState.input, uploadedImages) || isDisabled}
+                    className={`p-3 rounded-full transition-all duration-200 hover:scale-105 active:scale-90 ${
+                      isMessageEmpty(contextualState.input, uploadedImages) || isDisabled
+                        ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 text-white dark:text-gray-900 shadow-sm'
+                    }`}
+                    title={isProcessing ? 'Insert message' : 'Send message'}
+                  >
+                    <FiSend size={18} />
+                  </motion.button>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </form>

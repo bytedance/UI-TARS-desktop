@@ -90,6 +90,24 @@
   @apply px-2 text-gray-700 dark:text-gray-300 max-w-full mx-auto;
 }
 
+.environment-message-minimal {
+  @apply bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 text-amber-800 dark:text-amber-200 px-4 py-3 rounded-lg mx-auto max-w-fit text-sm;
+  position: relative;
+}
+
+.environment-message-minimal::before {
+  content: '💬';
+  @apply mr-2 opacity-70;
+}
+
+.environment-message-minimal .prose {
+  @apply text-amber-800 dark:text-amber-200 m-0;
+}
+
+.environment-message-minimal .prose p {
+  @apply m-0 text-amber-800 dark:text-amber-200;
+}
+
 .message-gap {
   margin-bottom: 1rem;
   position: relative;
