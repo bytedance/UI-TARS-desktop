@@ -3,6 +3,8 @@ import cors from 'cors';
 import { registerAllRoutes } from './routes';
 import { setupWorkspaceStaticServer } from '../utils/workspace-static-server';
 import { csrfProtectionMiddleware } from './middleware/csrf-protection';
+import { createHostValidationMiddleware } from './middleware/host-validation';
+import { createNetworkAuthMiddleware } from './middleware/network-auth';
 import { registerCsrfRoutes } from './routes/csrf';
 
 /**
@@ -12,7 +14,10 @@ import { registerCsrfRoutes } from './routes/csrf';
  */
 function isAllowedOrigin(origin: string | undefined, port: number): boolean {
   if (!origin) {
-    // Allow requests with no Origin header (e.g., curl, same-origin)
+    // Non-browser clients send no Origin, and neither does a same-origin GET,
+    // so this cannot be a decision point on its own. The Host check ahead of it
+    // is what rejects a rebound hostname, and the auth token is what a caller
+    // outside the browser has to present.
     return true;
   }
 
@@ -50,7 +55,10 @@ function isAllowedOrigin(origin: string | undefined, port: number): boolean {
  */
 export function getDefaultCorsOptions(port: number): cors.CorsOptions {
   return {
-    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    origin: (
+      origin: string | undefined,
+      callback: (err: Error | null, allow?: boolean) => void,
+    ) => {
       if (isAllowedOrigin(origin, port)) {
         callback(null, true);
       } else {
@@ -88,18 +96,35 @@ export function setupAPI(
     workspacePath?: string;
     isDebug?: boolean;
     port?: number;
+    host?: string;
+    authToken?: string;
   },
 ) {
   const port = options?.port ?? 3000;
+  const host = options?.host ?? '127.0.0.1';
 
   // Apply security headers
   app.use(securityHeadersMiddleware);
+
+  // Reject rebound hostnames before CORS, which cannot see them: a same-origin
+  // request from the attacker's page arrives with no Origin header at all.
+  app.use(createHostValidationMiddleware({ port, host }));
 
   // Apply CORS middleware with origin whitelist
   app.use(cors(getDefaultCorsOptions(port)));
 
   // Apply JSON body parser middleware
   app.use(express.json({ limit: '20mb' }));
+
+  // Guards the whole API, the CSRF token endpoint included: that token defends
+  // against cross-site requests, it does not identify a caller. Scoped to /api
+  // so the web UI shell still loads and can then present the token itself.
+  const authMiddleware = options?.authToken
+    ? createNetworkAuthMiddleware(options.authToken)
+    : undefined;
+  if (authMiddleware) {
+    app.use('/api', authMiddleware);
+  }
 
   // Register CSRF token endpoint (before CSRF protection so GET is accessible)
   registerCsrfRoutes(app);
@@ -125,6 +150,6 @@ export function setupAPI(
 
   // Setup workspace static server (lower priority, after API routes)
   if (options?.workspacePath) {
-    setupWorkspaceStaticServer(app, options.workspacePath, options.isDebug);
+    setupWorkspaceStaticServer(app, options.workspacePath, options.isDebug, authMiddleware);
   }
 }

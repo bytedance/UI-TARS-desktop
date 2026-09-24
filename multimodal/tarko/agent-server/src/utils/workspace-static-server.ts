@@ -260,6 +260,11 @@ export function setupWorkspaceStaticServer(
   app: express.Application,
   workspacePath: string,
   isDebug = false,
+  /**
+   * Applied only once a request resolves to a real workspace file, so the web
+   * UI shell keeps loading unauthenticated while workspace contents do not.
+   */
+  authMiddleware?: express.RequestHandler,
 ): void {
   if (!workspacePath || !fs.existsSync(workspacePath)) {
     if (isDebug) {
@@ -303,35 +308,43 @@ export function setupWorkspaceStaticServer(
       return next();
     }
 
-    try {
-      const stats = fs.statSync(resolvedPath);
+    const serveResolvedPath = () => {
+      try {
+        const stats = fs.statSync(resolvedPath);
 
-      if (stats.isFile()) {
-        // Serve the file
-        return res.sendFile(resolvedPath);
-      } else if (stats.isDirectory()) {
-        // For directories, try to serve index.html or provide directory listing
-        const indexPath = path.join(resolvedPath, 'index.html');
-        if (fs.existsSync(indexPath)) {
-          return res.sendFile(indexPath);
-        } else {
-          // Provide directory listing with session context
-          return handleDirectoryListing(
-            req,
-            res,
-            resolvedPath,
-            fileResolver,
-            sessionId,
-            workspacePath,
-          );
+        if (stats.isFile()) {
+          // Serve the file
+          return res.sendFile(resolvedPath);
+        } else if (stats.isDirectory()) {
+          // For directories, try to serve index.html or provide directory listing
+          const indexPath = path.join(resolvedPath, 'index.html');
+          if (fs.existsSync(indexPath)) {
+            return res.sendFile(indexPath);
+          } else {
+            // Provide directory listing with session context
+            return handleDirectoryListing(
+              req,
+              res,
+              resolvedPath,
+              fileResolver,
+              sessionId,
+              workspacePath,
+            );
+          }
         }
+      } catch (error) {
+        // File access error, continue to next middleware
+        return next();
       }
-    } catch (error) {
-      // File access error, continue to next middleware
-      return next();
+
+      // File not found, continue to next middleware
+      next();
+    };
+
+    if (authMiddleware) {
+      return authMiddleware(req, res, (err?: unknown) => (err ? next(err) : serveResolvedPath()));
     }
 
-    // File not found, continue to next middleware
-    next();
+    return serveResolvedPath();
   });
 }

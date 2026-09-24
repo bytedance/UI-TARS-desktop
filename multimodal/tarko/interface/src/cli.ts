@@ -24,6 +24,9 @@ export type AgentCLIArguments = Pick<
   /** Network interface to bind - maps to server.host, defaults to 127.0.0.1 */
   host?: string;
 
+  /** Token callers must present - maps to server.auth.token */
+  authToken?: string;
+
   // Deprecated options, for backward compatible
   provider?: string;
   apiKey?: string;

@@ -57,6 +57,10 @@ export async function startInteractiveWebUI(
 
   const port = appConfig.server!.port!;
   const serverUrl = formatServerUrl(server.host, port);
+  // The token rides in the URL so opening the link is enough to get the web UI
+  // authenticated; it stores the value and sends it as a header from then on.
+  const tokenQuery = server.auth.required ? `/?token=${server.auth.token}` : '';
+  const webUIUrl = `${serverUrl}${tokenQuery}`;
 
   if (appConfig.logLevel !== LogLevel.SILENT) {
     // Define brand colors
@@ -72,15 +76,18 @@ export async function startInteractiveWebUI(
         brandGradient.multiline(` is available at: `, {
           interpolation: 'hsv',
         }) +
-        chalk.underline(brandGradient(serverUrl)),
+        chalk.underline(brandGradient(webUIUrl)),
       '',
       `📁 ${chalk.gray('Workspace:')} ${brandGradient(workspaceDir)}`,
       '',
       `🔌 ${chalk.gray('Bound to:')} ${brandGradient(`${server.host}:${port}`)}${
-        isExternallyReachableHost(server.host)
+        isExternallyReachableHost(server.host) && !server.auth.required
           ? ` ${chalk.red('- reachable from the network, and unauthenticated')}`
           : ''
       }`,
+      ...(server.auth.required
+        ? ['', `🔑 ${chalk.gray('Access token:')} ${brandGradient(server.auth.token!)}`]
+        : []),
       '',
       `🤖 ${chalk.gray('Model:')} ${appConfig.model?.provider ? brandGradient(`${provider} | ${modelId}`) : chalk.gray('Not specified')}`,
     ].join('\n');
@@ -96,7 +103,7 @@ export async function startInteractiveWebUI(
     );
 
     if (options.open) {
-      const url = `http://localhost:${port}`;
+      const url = `http://localhost:${port}${tokenQuery}`;
       const command =
         process.platform === 'darwin'
           ? 'open'
