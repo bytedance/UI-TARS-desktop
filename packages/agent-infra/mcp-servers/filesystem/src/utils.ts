@@ -63,7 +63,13 @@ export async function applyFileEdits(
 
     // If exact match exists, use it
     if (modifiedContent.includes(normalizedOld)) {
-      modifiedContent = modifiedContent.replace(normalizedOld, normalizedNew);
+      // A replacer function keeps `newText` literal — String.replace would
+      // otherwise expand `$&`, `$'`, "$`" and `$$` patterns into text taken from
+      // the surrounding content, silently corrupting the edit.
+      modifiedContent = modifiedContent.replace(
+        normalizedOld,
+        () => normalizedNew,
+      );
       continue;
     }
 
