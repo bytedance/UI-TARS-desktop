@@ -260,11 +260,6 @@ export function setupWorkspaceStaticServer(
   app: express.Application,
   workspacePath: string,
   isDebug = false,
-  /**
-   * Applied only once a request resolves to a real workspace file, so the web
-   * UI shell keeps loading unauthenticated while workspace contents do not.
-   */
-  authMiddleware?: express.RequestHandler,
 ): void {
   if (!workspacePath || !fs.existsSync(workspacePath)) {
     if (isDebug) {
@@ -282,17 +277,7 @@ export function setupWorkspaceStaticServer(
   // Serve workspace files with lower priority (after web UI)
   // Use a middleware function to handle directory listing and file serving
   app.use('/', (req, res, next) => {
-    // Skip if this looks like an API request
-    if (req.path.startsWith('/api/')) {
-      return next();
-    }
-
-    // Skip if this looks like a web UI route (no file extension and not a static asset)
-    if (
-      !req.path.includes('.') &&
-      !req.path.startsWith('/static/') &&
-      !req.path.startsWith('/assets/')
-    ) {
+    if (!isWorkspaceFileRequest(req.path)) {
       return next();
     }
 
@@ -308,43 +293,55 @@ export function setupWorkspaceStaticServer(
       return next();
     }
 
-    const serveResolvedPath = () => {
-      try {
-        const stats = fs.statSync(resolvedPath);
+    try {
+      const stats = fs.statSync(resolvedPath);
 
-        if (stats.isFile()) {
-          // Serve the file
-          return res.sendFile(resolvedPath);
-        } else if (stats.isDirectory()) {
-          // For directories, try to serve index.html or provide directory listing
-          const indexPath = path.join(resolvedPath, 'index.html');
-          if (fs.existsSync(indexPath)) {
-            return res.sendFile(indexPath);
-          } else {
-            // Provide directory listing with session context
-            return handleDirectoryListing(
-              req,
-              res,
-              resolvedPath,
-              fileResolver,
-              sessionId,
-              workspacePath,
-            );
-          }
+      if (stats.isFile()) {
+        // Serve the file
+        return res.sendFile(resolvedPath);
+      } else if (stats.isDirectory()) {
+        // For directories, try to serve index.html or provide directory listing
+        const indexPath = path.join(resolvedPath, 'index.html');
+        if (fs.existsSync(indexPath)) {
+          return res.sendFile(indexPath);
+        } else {
+          // Provide directory listing with session context
+          return handleDirectoryListing(
+            req,
+            res,
+            resolvedPath,
+            fileResolver,
+            sessionId,
+            workspacePath,
+          );
         }
-      } catch (error) {
-        // File access error, continue to next middleware
-        return next();
       }
-
-      // File not found, continue to next middleware
-      next();
-    };
-
-    if (authMiddleware) {
-      return authMiddleware(req, res, (err?: unknown) => (err ? next(err) : serveResolvedPath()));
+    } catch (error) {
+      // File access error, continue to next middleware
+      return next();
     }
 
-    return serveResolvedPath();
+    // File not found, continue to next middleware
+    next();
   });
+}
+
+/**
+ * Whether a request is one the workspace static server would try to answer:
+ * not an API call, and either carrying a file extension or sitting under a
+ * static asset prefix. Anything else falls through to the web UI shell.
+ *
+ * Exported so authentication can be placed in front of exactly these requests
+ * without a second copy of the rule drifting out of step with this one.
+ */
+export function isWorkspaceFileRequest(requestPath: string): boolean {
+  if (requestPath.startsWith('/api/')) {
+    return false;
+  }
+
+  return (
+    requestPath.includes('.') ||
+    requestPath.startsWith('/static/') ||
+    requestPath.startsWith('/assets/')
+  );
 }

@@ -103,18 +103,26 @@ export async function startInteractiveWebUI(
     );
 
     if (options.open) {
-      const url = `http://localhost:${port}${tokenQuery}`;
-      const command =
-        process.platform === 'darwin'
-          ? 'open'
-          : process.platform === 'win32'
-            ? 'start'
-            : 'xdg-open';
-      exec(`${command} ${url}`, (err) => {
-        if (err) {
-          console.error(`Failed to open browser: ${err.message}`);
-        }
-      });
+      if (server.auth.required) {
+        // Handing the URL to the OS opener would put the token in a command
+        // line, which other local users can read. Leave it to the operator.
+        console.log(
+          chalk.yellow('Not opening a browser: the URL carries an access token. Open it yourself.'),
+        );
+      } else {
+        const url = `http://localhost:${port}`;
+        const command =
+          process.platform === 'darwin'
+            ? 'open'
+            : process.platform === 'win32'
+              ? 'start'
+              : 'xdg-open';
+        exec(`${command} ${url}`, (err) => {
+          if (err) {
+            console.error(`Failed to open browser: ${err.message}`);
+          }
+        });
+      }
     }
   }
 

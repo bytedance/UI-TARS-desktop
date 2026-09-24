@@ -1,7 +1,10 @@
 import express from 'express';
 import cors from 'cors';
 import { registerAllRoutes } from './routes';
-import { setupWorkspaceStaticServer } from '../utils/workspace-static-server';
+import {
+  isWorkspaceFileRequest,
+  setupWorkspaceStaticServer,
+} from '../utils/workspace-static-server';
 import { csrfProtectionMiddleware } from './middleware/csrf-protection';
 import { createHostValidationMiddleware } from './middleware/host-validation';
 import { createNetworkAuthMiddleware } from './middleware/network-auth';
@@ -150,6 +153,15 @@ export function setupAPI(
 
   // Setup workspace static server (lower priority, after API routes)
   if (options?.workspacePath) {
-    setupWorkspaceStaticServer(app, options.workspacePath, options.isDebug, authMiddleware);
+    // Workspace files are session data and need the token too, but only those:
+    // everything else here falls through to the web UI shell, which has to stay
+    // loadable so the page can present a token in the first place.
+    if (authMiddleware) {
+      app.use('/', (req, res, next) =>
+        isWorkspaceFileRequest(req.path) ? authMiddleware(req, res, next) : next(),
+      );
+    }
+
+    setupWorkspaceStaticServer(app, options.workspacePath, options.isDebug);
   }
 }

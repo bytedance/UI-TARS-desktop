@@ -14,6 +14,7 @@ import {
   createNetworkAuthMiddleware,
   resolveServerAuth,
 } from '../../src/api/middleware/network-auth';
+import { isWorkspaceFileRequest } from '../../src/utils/workspace-static-server';
 
 const PORT = 8888;
 
@@ -232,5 +233,19 @@ describe('createNetworkAuthMiddleware', () => {
     expect(run({ method: 'GET', originalUrl: '/api/v1/health' }).next).toHaveBeenCalledOnce();
     expect(run({ method: 'GET', originalUrl: '/api/v1/health?x=1' }).next).toHaveBeenCalledOnce();
     expect(run({ method: 'OPTIONS' }).next).toHaveBeenCalledOnce();
+  });
+});
+
+describe('isWorkspaceFileRequest', () => {
+  it('claims the workspace files that authentication has to cover', () => {
+    for (const path of ['/notes.md', '/nested/report.pdf', '/static/app.js', '/assets/logo.svg']) {
+      expect(isWorkspaceFileRequest(path)).toBe(true);
+    }
+  });
+
+  it('leaves API calls and web UI routes to their own handlers', () => {
+    for (const path of ['/api/v1/sessions', '/', '/settings', '/session/abc123']) {
+      expect(isWorkspaceFileRequest(path)).toBe(false);
+    }
   });
 });
