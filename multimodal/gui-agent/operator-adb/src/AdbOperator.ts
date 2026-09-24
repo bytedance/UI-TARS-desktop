@@ -110,7 +110,7 @@ export class AdbOperator extends Operator {
           throw new Error('point is required when click');
         }
         const { realX, realY } = await this.calculateRealCoords(point);
-        this.handleSwipe({ x: realX, y: realY }, { x: realX, y: realY }, 1500);
+        await this.handleSwipe({ x: realX, y: realY }, { x: realX, y: realY }, 1500);
         break;
       }
       case 'swipe':
@@ -124,7 +124,7 @@ export class AdbOperator extends Operator {
         }
         const { realX: startX, realY: startY } = await this.calculateRealCoords(startPoint);
         const { realX: endX, realY: endY } = await this.calculateRealCoords(endPoint);
-        this.handleSwipe({ x: startX, y: startY }, { x: endX, y: endY }, 300);
+        await this.handleSwipe({ x: startX, y: startY }, { x: endX, y: endY }, 300);
         break;
       }
       case 'scroll': {
@@ -132,12 +132,12 @@ export class AdbOperator extends Operator {
         if (!direction) {
           throw new Error(`Direction required when scroll`);
         }
-        this.handleScroll(direction, point);
+        await this.handleScroll(direction, point);
         break;
       }
       case 'type': {
         const { content } = actionInputs;
-        this.handleType(content);
+        await this.handleType(content);
         break;
       }
       case 'hotkey': {
@@ -332,7 +332,7 @@ export class AdbOperator extends Operator {
     if (!keyCode) {
       throw new Error(`Unsupported key: ${keyStr}`);
     }
-    this._adb!.keyevent(keyCode);
+    await this._adb!.keyevent(keyCode);
   }
 
   private async handleSwipe(
@@ -370,7 +370,7 @@ export class AdbOperator extends Operator {
       default:
         throw new Error(`Unsupported scroll direction: ${direction}`);
     }
-    this.handleSwipe({ x: startX, y: startY }, { x: endX, y: endY }, 300);
+    await this.handleSwipe({ x: startX, y: startY }, { x: endX, y: endY }, 300);
   }
 
   /**
