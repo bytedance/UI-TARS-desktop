@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { describe, it, expect } from 'vitest';
+import { UITarsModelVersion } from '@ui-tars/shared/types';
 import { parseActionVlm } from '../src/actionParser';
 
 describe('parseActionVlm', () => {
@@ -303,6 +304,35 @@ Action: click(start_box='[637,964,637,964]')`;
   });
 
   describe('Box coordinates normalization', () => {
+    it('should match Python smart_resize rounding for UI-TARS 1.5', () => {
+      const input = `Thought: I need to click on the bottom-right corner
+Action: click(start_box='(1512,1008)')`;
+
+      const result = parseActionVlm(
+        input,
+        [1000, 1000],
+        'bc',
+        {
+          width: 1522,
+          height: 1022,
+        },
+        1,
+        UITarsModelVersion.V1_5,
+      );
+
+      expect(result).toEqual([
+        {
+          action_inputs: {
+            start_box: '[1,1,1,1]',
+            start_coords: [1522, 1022],
+          },
+          action_type: 'click',
+          reflection: null,
+          thought: 'I need to click on the bottom-right corner',
+        },
+      ]);
+    });
+
     it('should correctly normalize box with four coordinates', () => {
       const input = `Thought: I need to click on this element
 Action: click(start_box='[130,226]')`;

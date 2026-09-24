@@ -13,8 +13,24 @@ import {
 } from '@ui-tars/shared/types';
 import isNumber from 'lodash.isnumber';
 
+function roundHalfToEven(num: number): number {
+  const integerPart = Math.trunc(num);
+  const fraction = Math.abs(num - integerPart);
+
+  if (fraction !== 0.5) {
+    return Math.round(num);
+  }
+
+  const evenInteger =
+    Math.abs(integerPart) % 2 === 0
+      ? integerPart
+      : integerPart + Math.sign(num);
+
+  return evenInteger;
+}
+
 function roundByFactor(num: number, factor: number): number {
-  return Math.round(num / factor) * factor;
+  return roundHalfToEven(num / factor) * factor;
 }
 
 function floorByFactor(num: number, factor: number): number {
