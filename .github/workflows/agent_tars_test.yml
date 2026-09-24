@@ -5,7 +5,7 @@ on:
       - '**'
     paths:
       - 'multimodal/**'
-      - '.github/workflows/agent_tars_build.yml'
+      - '.github/workflows/agent_tars_test.yml'
 
 permissions:
   id-token: write
