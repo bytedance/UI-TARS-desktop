@@ -57,6 +57,7 @@ export class LLMProcessor {
     this.messageHistory = new MessageHistory(
       this.eventStream,
       this.contextAwarenessOptions?.maxImagesCount,
+      this.contextAwarenessOptions?.contextCompression,
     );
     this.enableStreamingToolCallEvents = enableStreamingToolCallEvents;
     this.enableMetrics = enableMetrics;
@@ -189,10 +190,12 @@ export class LLMProcessor {
     }
 
     // Build messages for current iteration including enhanced system message
-    const messages = this.messageHistory.toMessageHistory(
+    const messages = await this.messageHistory.toMessageHistory(
       toolCallEngine,
       finalSystemPrompt,
       finalTools,
+      sessionId,
+      iteration,
     );
 
     this.logger.info(`[LLM] Requesting ${currentModel.provider}/${currentModel.id}`);

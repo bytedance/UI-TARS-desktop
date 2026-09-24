@@ -10,9 +10,11 @@ import {
   ChatCompletionMessageParam,
   ChatCompletionContentPart,
   ToolCallResult,
+  ContextCompressionOptions,
 } from '@tarko/agent-interface';
 import { convertToMultimodalToolCallResult } from '../utils/multimodal';
 import { getLogger, isTest } from '@tarko/shared-utils';
+import { ContextCompressionManager } from '../context-compression';
 
 /**
  * Interface for image information in messages
@@ -35,6 +37,7 @@ interface ImageReference {
  */
 export class MessageHistory {
   private logger = getLogger('MessageHistory');
+  private compressionManager?: ContextCompressionManager;
 
   /**
    * Creates a new MessageHistory instance
@@ -44,11 +47,26 @@ export class MessageHistory {
    *                         When specified, limits the total number of images in the conversation history
    *                         to prevent context window overflow. Images beyond this limit will be
    *                         replaced with text placeholders to preserve context while reducing token usage.
+   *                         @deprecated Use contextCompressionOptions.maxImages instead
+   * @param contextCompressionOptions - Advanced context compression configuration
    */
   constructor(
     private eventStream: AgentEventStream.Processor,
     private maxImagesCount?: number,
-  ) {}
+    contextCompressionOptions?: ContextCompressionOptions,
+  ) {
+    // Initialize compression manager if options provided
+    if (contextCompressionOptions) {
+      this.compressionManager = new ContextCompressionManager(contextCompressionOptions);
+    } else if (maxImagesCount !== undefined) {
+      // Backward compatibility: convert maxImagesCount to compression options
+      this.compressionManager = new ContextCompressionManager({
+        enabled: true,
+        level: 'conservative',
+        maxImages: maxImagesCount,
+      });
+    }
+  }
 
   /**
    * Convert events to message history format for LLM context
@@ -62,8 +80,38 @@ export class MessageHistory {
   toMessageHistory(
     toolCallEngine: ToolCallEngine,
     customSystemPrompt: string,
+    tools?: Tool[],
+  ): ChatCompletionMessageParam[];
+  
+  /**
+   * Convert events to message history format for LLM context with async compression support
+   * This method uses the provided toolCallEngine to format messages
+   * according to the specific requirements of the underlying LLM
+   *
+   * @param toolCallEngine The tool call engine to use for message formatting
+   * @param systemPrompt The base system prompt to include
+   * @param tools Available tools to enhance the system prompt
+   * @param sessionId Session ID for compression context
+   * @param iteration Iteration number for compression context
+   */
+  toMessageHistory(
+    toolCallEngine: ToolCallEngine,
+    customSystemPrompt: string,
+    tools: Tool[],
+    sessionId: string,
+    iteration: number,
+  ): Promise<ChatCompletionMessageParam[]>;
+  
+  /**
+   * Implementation of toMessageHistory with optional async compression
+   */
+  toMessageHistory(
+    toolCallEngine: ToolCallEngine,
+    customSystemPrompt: string,
     tools: Tool[] = [],
-  ): ChatCompletionMessageParam[] {
+    sessionId?: string,
+    iteration?: number,
+  ): ChatCompletionMessageParam[] | Promise<ChatCompletionMessageParam[]> {
     const baseSystemPrompt = this.getSystemPromptWithTime(customSystemPrompt);
     // Start with the enhanced system message
     const enhancedSystemPrompt = toolCallEngine.preparePrompt(baseSystemPrompt, tools);
@@ -83,6 +131,29 @@ export class MessageHistory {
     // Create a unified processing path with optional image limiting
     this.processEvents(events, messages, toolCallEngine);
 
+    // Apply context compression if configured and sessionId/iteration are provided
+    if (this.compressionManager && sessionId && iteration !== undefined) {
+      // Return async version with compression
+      return this.compressionManager.compressIfNeeded(
+        messages,
+        sessionId,
+        iteration,
+        events
+      ).then(compressionResult => {
+        if (compressionResult.wasCompressed) {
+          this.logger.info(
+            `Context compressed | Original: ${compressionResult.stats.originalTokens} tokens | ` +
+            `Compressed: ${compressionResult.stats.compressedTokens} tokens | ` +
+            `Ratio: ${(compressionResult.stats.compressionRatio * 100).toFixed(1)}% | ` +
+            `Strategies: ${compressionResult.stats.appliedStrategies.join(', ')}`
+          );
+        }
+        
+        return compressionResult.messages;
+      });
+    }
+
+    // Return sync version without compression
     return messages;
   }
 
