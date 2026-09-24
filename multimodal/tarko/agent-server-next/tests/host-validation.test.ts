@@ -5,10 +5,7 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { Hono } from 'hono';
-import {
-  buildAllowedHosts,
-  createHostValidationHook,
-} from '../src/hooks/builtInHooks';
+import { buildAllowedHosts, createHostValidationHook } from '../src/hooks/builtInHooks';
 
 const PORT = 3000;
 
@@ -93,7 +90,7 @@ describe('createHostValidationHook', () => {
     // the gate that catches it.
     const res = await fetchWith(`evil.example:${PORT}`);
     expect(res.status).toBe(403);
-    expect((await res.json()).error).toBe('Invalid Host header');
+    expect(await res.json()).toMatchObject({ error: 'Invalid Host header' });
   });
 
   it('rejects a DNS-rebinding POST with valid CSRF (Host: evil.example:<port>)', async () => {
