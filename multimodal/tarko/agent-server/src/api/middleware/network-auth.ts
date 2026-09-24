@@ -105,8 +105,29 @@ function matchesToken(expected: Buffer, presented: string): boolean {
   return timingSafeEqual(presentedBuffer, expected);
 }
 
-export function createNetworkAuthMiddleware(token: string) {
+/**
+ * Whether a request carries the access token.
+ *
+ * Separate from the middleware so the workspace static server can ask the same
+ * question inline, instead of a second catch-all mount sitting in front of it.
+ */
+export function createRequestAuthorizer(token: string) {
   const expected = Buffer.from(token);
+
+  return (req: Request): boolean => {
+    const presented = readPresentedToken(req);
+    return presented !== undefined && matchesToken(expected, presented);
+  };
+}
+
+export const UNAUTHENTICATED_RESPONSE = {
+  error: 'Authentication required',
+  message:
+    'This server requires an access token because it is reachable beyond this machine. Send it as `Authorization: Bearer <token>` or a `token` query parameter.',
+};
+
+export function createNetworkAuthMiddleware(token: string) {
+  const isAuthorized = createRequestAuthorizer(token);
 
   return (req: Request, res: Response, next: NextFunction): void => {
     // `originalUrl` because this runs mounted on /api, which strips req.path.
@@ -118,37 +139,11 @@ export function createNetworkAuthMiddleware(token: string) {
       return;
     }
 
-    const presented = readPresentedToken(req);
-    if (presented !== undefined && matchesToken(expected, presented)) {
+    if (isAuthorized(req)) {
       next();
       return;
     }
 
-    res.status(401).json({
-      error: 'Authentication required',
-      message:
-        'This server requires an access token because it is reachable beyond this machine. Send it as `Authorization: Bearer <token>` or a `token` query parameter.',
-    });
-  };
-}
-
-/**
- * Narrows an auth middleware to the requests `isProtected` claims.
- *
- * Needed where a catch-all mount covers two different things: workspace files,
- * which carry session data and need the token, and everything falling through
- * to the web UI shell, which has to stay loadable so the page can present one.
- */
-export function createScopedAuthMiddleware(
-  authMiddleware: (req: Request, res: Response, next: NextFunction) => void,
-  isProtected: (requestPath: string) => boolean,
-) {
-  return (req: Request, res: Response, next: NextFunction): void => {
-    if (!isProtected(req.path)) {
-      next();
-      return;
-    }
-
-    authMiddleware(req, res, next);
+    res.status(401).json(UNAUTHENTICATED_RESPONSE);
   };
 }

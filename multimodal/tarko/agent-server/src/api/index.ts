@@ -1,13 +1,10 @@
 import express from 'express';
 import cors from 'cors';
 import { registerAllRoutes } from './routes';
-import {
-  isWorkspaceFileRequest,
-  setupWorkspaceStaticServer,
-} from '../utils/workspace-static-server';
+import { setupWorkspaceStaticServer } from '../utils/workspace-static-server';
 import { csrfProtectionMiddleware } from './middleware/csrf-protection';
 import { createHostValidationMiddleware } from './middleware/host-validation';
-import { createNetworkAuthMiddleware, createScopedAuthMiddleware } from './middleware/network-auth';
+import { createNetworkAuthMiddleware, createRequestAuthorizer } from './middleware/network-auth';
 import { registerCsrfRoutes } from './routes/csrf';
 
 /**
@@ -129,10 +126,6 @@ export function setupAPI(
     app.use('/api', authMiddleware);
   }
 
-  const workspaceAuthGate = authMiddleware
-    ? createScopedAuthMiddleware(authMiddleware, isWorkspaceFileRequest)
-    : undefined;
-
   // Register CSRF token endpoint (before CSRF protection so GET is accessible)
   registerCsrfRoutes(app);
 
@@ -157,13 +150,11 @@ export function setupAPI(
 
   // Setup workspace static server (lower priority, after API routes)
   if (options?.workspacePath) {
-    // Workspace files are session data and need the token too, but only those:
-    // everything else here falls through to the web UI shell, which has to stay
-    // loadable so the page can present a token in the first place.
-    if (workspaceAuthGate) {
-      app.use('/', workspaceAuthGate);
-    }
-
-    setupWorkspaceStaticServer(app, options.workspacePath, options.isDebug);
+    setupWorkspaceStaticServer(
+      app,
+      options.workspacePath,
+      options.isDebug,
+      options.authToken ? createRequestAuthorizer(options.authToken) : undefined,
+    );
   }
 }

@@ -12,7 +12,7 @@ import {
 } from '../../src/api/middleware/host-validation';
 import {
   createNetworkAuthMiddleware,
-  createScopedAuthMiddleware,
+  createRequestAuthorizer,
   resolveServerAuth,
 } from '../../src/api/middleware/network-auth';
 import { isWorkspaceFileRequest } from '../../src/utils/workspace-static-server';
@@ -259,29 +259,21 @@ describe('isWorkspaceFileRequest', () => {
   });
 });
 
-describe('createScopedAuthMiddleware', () => {
-  const build = () => {
-    const inner = vi.fn((_req: Request, _res: Response, next: () => void) => next());
-    const middleware = createScopedAuthMiddleware(inner, isWorkspaceFileRequest);
-    return { inner, middleware };
-  };
+describe('createRequestAuthorizer', () => {
+  const TOKEN = 'a'.repeat(64);
+  const isAuthorized = createRequestAuthorizer(TOKEN);
 
-  const call = (path: string) => {
-    const { inner, middleware } = build();
-    const next = vi.fn();
-    middleware({ path } as unknown as Request, createResponse(), next);
-    return { inner, next };
-  };
+  const req = (headers: Record<string, string> = {}, query: Record<string, unknown> = {}) =>
+    ({ headers, query }) as unknown as Request;
 
-  it('checks the token for workspace files', () => {
-    const { inner, next } = call('/notes.md');
-    expect(inner).toHaveBeenCalledOnce();
-    expect(next).toHaveBeenCalledOnce();
+  it('accepts the token from a header or the query string', () => {
+    expect(isAuthorized(req({ authorization: `Bearer ${TOKEN}` }))).toBe(true);
+    expect(isAuthorized(req({}, { token: TOKEN }))).toBe(true);
   });
 
-  it('lets web UI routes through without a check', () => {
-    const { inner, next } = call('/settings');
-    expect(inner).not.toHaveBeenCalled();
-    expect(next).toHaveBeenCalledOnce();
+  it('refuses a missing, wrong or truncated token', () => {
+    expect(isAuthorized(req())).toBe(false);
+    expect(isAuthorized(req({ authorization: `Bearer ${'b'.repeat(64)}` }))).toBe(false);
+    expect(isAuthorized(req({ authorization: `Bearer ${'a'.repeat(63)}` }))).toBe(false);
   });
 });
