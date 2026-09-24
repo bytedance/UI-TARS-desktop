@@ -29,6 +29,7 @@ export default defineConfig({
     cleanDistPath: true,
     inlineScripts: true,
     inlineStyles: true,
+    sourceMap: false,
     distPath: {
       root: resolve(__dirname, '../agent-ui-builder/static'),
     },

@@ -35,7 +35,7 @@ export default defineConfig({
   output: {
     target: 'node',
     cleanDistPath: true,
-    sourceMap: true,
+    sourceMap: false,
   },
   tools: {
     rspack: {
