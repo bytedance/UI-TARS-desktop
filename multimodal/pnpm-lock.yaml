@@ -929,6 +929,9 @@ importers:
       express:
         specifier: 4.21.2
         version: 4.21.2
+      express-rate-limit:
+        specifier: ^7.5.0
+        version: 7.5.0(express@4.21.2)
       http-proxy-middleware:
         specifier: ^2.0.6
         version: 2.0.9(@types/express@4.17.22)
@@ -23188,6 +23191,10 @@ snapshots:
       jest-matcher-utils: 29.7.0
       jest-message-util: 29.7.0
       jest-util: 29.7.0
+
+  express-rate-limit@7.5.0(express@4.21.2):
+    dependencies:
+      express: 4.21.2
 
   express-rate-limit@7.5.0(express@5.1.0):
     dependencies:

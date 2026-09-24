@@ -9,6 +9,23 @@ import {
 import { ChatCompletionContentPart, AgentModel } from '@tarko/agent-interface';
 import { AgentServerVersionInfo } from '@agent-tars/interface';
 import { API_BASE_URL } from '@/config/web-ui-config';
+import { getAuthHeaders } from './authToken';
+
+/**
+ * Single place the access token is attached, so no call site has to remember.
+ * A loopback server requires none and this stays a plain fetch.
+ */
+function apiFetch(input: string, init: RequestInit = {}): Promise<Response> {
+  const authHeaders = getAuthHeaders();
+  if (Object.keys(authHeaders).length === 0) {
+    return fetch(input, init);
+  }
+
+  return fetch(input, {
+    ...init,
+    headers: { ...authHeaders, ...(init.headers as Record<string, string> | undefined) },
+  });
+}
 
 /**
  * Workspace item interface for contextual selector
@@ -51,7 +68,7 @@ class ApiService {
 
     this.csrfTokenPromise = (async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/v1/csrf-token`, {
+        const response = await apiFetch(`${API_BASE_URL}/api/v1/csrf-token`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
           signal: AbortSignal.timeout(5000),
@@ -96,7 +113,7 @@ class ApiService {
    */
   private async mutationFetch(url: string, init: RequestInit): Promise<Response> {
     const headers = await this.getMutationHeaders();
-    const response = await fetch(url, {
+    const response = await apiFetch(url, {
       ...init,
       headers: { ...headers, ...(init.headers as Record<string, string>) },
     });
@@ -105,7 +122,7 @@ class ApiService {
     if (response.status === 403) {
       this.csrfToken = null;
       const freshHeaders = await this.getMutationHeaders();
-      return fetch(url, {
+      return apiFetch(url, {
         ...init,
         headers: { ...freshHeaders, ...(init.headers as Record<string, string>) },
       });
@@ -120,7 +137,7 @@ class ApiService {
   async checkServerHealth(): Promise<boolean> {
     try {
       // Use API health endpoint
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.HEALTH}`, {
+      const response = await apiFetch(`${API_BASE_URL}${API_ENDPOINTS.HEALTH}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         signal: AbortSignal.timeout(3000),
@@ -163,7 +180,7 @@ class ApiService {
    */
   async getSessions(): Promise<SessionInfo[]> {
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SESSIONS}`, {
+      const response = await apiFetch(`${API_BASE_URL}${API_ENDPOINTS.SESSIONS}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -185,7 +202,7 @@ class ApiService {
    */
   async getSessionDetails(sessionId: string): Promise<SessionInfo> {
     try {
-      const response = await fetch(
+      const response = await apiFetch(
         `${API_BASE_URL}${API_ENDPOINTS.SESSION_DETAILS}?sessionId=${sessionId}`,
         {
           method: 'GET',
@@ -212,7 +229,7 @@ class ApiService {
    */
   async getSessionEvents(sessionId: string): Promise<AgentEventStream.Event[]> {
     try {
-      const response = await fetch(
+      const response = await apiFetch(
         `${API_BASE_URL}${API_ENDPOINTS.SESSION_EVENTS}?sessionId=${sessionId}`,
         {
           method: 'GET',
@@ -238,7 +255,7 @@ class ApiService {
    */
   async getSessionStatus(sessionId: string): Promise<{ isProcessing: boolean; state: string }> {
     try {
-      const response = await fetch(
+      const response = await apiFetch(
         `${API_BASE_URL}${API_ENDPOINTS.SESSION_STATUS}?sessionId=${sessionId}`,
         {
           method: 'GET',
@@ -408,10 +425,13 @@ class ApiService {
    */
   async generateSummary(sessionId: string, messages: any[]): Promise<string> {
     try {
-      const response = await this.mutationFetch(`${API_BASE_URL}${API_ENDPOINTS.GENERATE_SUMMARY}`, {
-        method: 'POST',
-        body: JSON.stringify({ sessionId, messages }),
-      });
+      const response = await this.mutationFetch(
+        `${API_BASE_URL}${API_ENDPOINTS.GENERATE_SUMMARY}`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ sessionId, messages }),
+        },
+      );
 
       if (!response.ok) {
         throw new Error(`Failed to generate summary: ${response.statusText}`);
@@ -437,7 +457,7 @@ class ApiService {
 
     // Fallback to API request for normal mode
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.VERSION}`, {
+      const response = await apiFetch(`${API_BASE_URL}${API_ENDPOINTS.VERSION}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         signal: AbortSignal.timeout(3000),
@@ -467,7 +487,7 @@ class ApiService {
    */
   async getAgentOptions(): Promise<SanitizedAgentOptions> {
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.AGENT_OPTIONS}`, {
+      const response = await apiFetch(`${API_BASE_URL}${API_ENDPOINTS.AGENT_OPTIONS}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         signal: AbortSignal.timeout(3000),
@@ -516,11 +536,14 @@ class ApiService {
         ...(type && { type }),
       });
 
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.WORKSPACE_SEARCH}?${params}`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        signal: AbortSignal.timeout(3000),
-      });
+      const response = await apiFetch(
+        `${API_BASE_URL}${API_ENDPOINTS.WORKSPACE_SEARCH}?${params}`,
+        {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          signal: AbortSignal.timeout(3000),
+        },
+      );
 
       if (!response.ok) {
         throw new Error(`Failed to search workspace items: ${response.statusText}`);
@@ -567,7 +590,7 @@ class ApiService {
 
   async getAvailableModels(): Promise<{ models: AgentModel[] }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/models`, {
+      const response = await apiFetch(`${API_BASE_URL}/api/v1/models`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         signal: AbortSignal.timeout(3000),
@@ -619,7 +642,7 @@ class ApiService {
         ? `${API_BASE_URL}/api/v1/runtime-settings?sessionId=${sessionId}`
         : `${API_BASE_URL}/api/v1/runtime-settings`;
 
-      const response = await fetch(url, {
+      const response = await apiFetch(url, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         signal: AbortSignal.timeout(3000),
