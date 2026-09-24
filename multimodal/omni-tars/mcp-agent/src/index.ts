@@ -10,6 +10,12 @@ import { McpToolCallEngine } from './McpToolCallEngine';
 import { AgentOptions } from '@tarko/agent';
 export { McpAgentPlugin } from './McpAgentPlugin';
 export { McpToolCallEngineProvider } from './McpToolCallEngineProvider';
+export {
+  McpJsonParser,
+  DynamicMcpToolRegistry,
+  type McpToolDefinition,
+  type McpJsonSchema,
+} from './tools/mcp-json-parser';
 
 export type MCPTarsExtraOption = {
   googleMcpUrl: string;
