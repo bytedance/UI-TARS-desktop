@@ -37,6 +37,10 @@ export class XMLFormatParser implements FormatParser {
     const builder = new XMLBuilder();
     const parser = new XMLParser({
       ignoreAttributes: false,
+      // Everything downstream is string-typed, and fast-xml-parser coerces a
+      // numeric-looking tag to a number by default, which silently drops the
+      // action input.
+      parseTagValue: false,
     });
     const object = parser.parse(text);
 
