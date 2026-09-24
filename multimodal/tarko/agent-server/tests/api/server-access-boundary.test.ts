@@ -12,6 +12,7 @@ import {
 } from '../../src/api/middleware/host-validation';
 import {
   createNetworkAuthMiddleware,
+  createScopedAuthMiddleware,
   resolveServerAuth,
 } from '../../src/api/middleware/network-auth';
 import { isWorkspaceFileRequest } from '../../src/utils/workspace-static-server';
@@ -247,5 +248,32 @@ describe('isWorkspaceFileRequest', () => {
     for (const path of ['/api/v1/sessions', '/', '/settings', '/session/abc123']) {
       expect(isWorkspaceFileRequest(path)).toBe(false);
     }
+  });
+});
+
+describe('createScopedAuthMiddleware', () => {
+  const build = () => {
+    const inner = vi.fn((_req: Request, _res: Response, next: () => void) => next());
+    const middleware = createScopedAuthMiddleware(inner, isWorkspaceFileRequest);
+    return { inner, middleware };
+  };
+
+  const call = (path: string) => {
+    const { inner, middleware } = build();
+    const next = vi.fn();
+    middleware({ path } as unknown as Request, createResponse(), next);
+    return { inner, next };
+  };
+
+  it('checks the token for workspace files', () => {
+    const { inner, next } = call('/notes.md');
+    expect(inner).toHaveBeenCalledOnce();
+    expect(next).toHaveBeenCalledOnce();
+  });
+
+  it('lets web UI routes through without a check', () => {
+    const { inner, next } = call('/settings');
+    expect(inner).not.toHaveBeenCalled();
+    expect(next).toHaveBeenCalledOnce();
   });
 });

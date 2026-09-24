@@ -116,3 +116,24 @@ export function createNetworkAuthMiddleware(token: string) {
     });
   };
 }
+
+/**
+ * Narrows an auth middleware to the requests `isProtected` claims.
+ *
+ * Needed where a catch-all mount covers two different things: workspace files,
+ * which carry session data and need the token, and everything falling through
+ * to the web UI shell, which has to stay loadable so the page can present one.
+ */
+export function createScopedAuthMiddleware(
+  authMiddleware: (req: Request, res: Response, next: NextFunction) => void,
+  isProtected: (requestPath: string) => boolean,
+) {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    if (!isProtected(req.path)) {
+      next();
+      return;
+    }
+
+    authMiddleware(req, res, next);
+  };
+}

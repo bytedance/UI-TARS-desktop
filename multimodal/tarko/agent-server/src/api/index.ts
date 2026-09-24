@@ -7,7 +7,7 @@ import {
 } from '../utils/workspace-static-server';
 import { csrfProtectionMiddleware } from './middleware/csrf-protection';
 import { createHostValidationMiddleware } from './middleware/host-validation';
-import { createNetworkAuthMiddleware } from './middleware/network-auth';
+import { createNetworkAuthMiddleware, createScopedAuthMiddleware } from './middleware/network-auth';
 import { registerCsrfRoutes } from './routes/csrf';
 
 /**
@@ -157,9 +157,7 @@ export function setupAPI(
     // everything else here falls through to the web UI shell, which has to stay
     // loadable so the page can present a token in the first place.
     if (authMiddleware) {
-      app.use('/', (req, res, next) =>
-        isWorkspaceFileRequest(req.path) ? authMiddleware(req, res, next) : next(),
-      );
+      app.use('/', createScopedAuthMiddleware(authMiddleware, isWorkspaceFileRequest));
     }
 
     setupWorkspaceStaticServer(app, options.workspacePath, options.isDebug);
