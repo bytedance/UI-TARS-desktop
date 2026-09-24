@@ -5,6 +5,7 @@
 
 import { getLogger } from '@tarko/shared-utils';
 import os from 'os';
+import path from 'path';
 
 // Export logger for use throughout the application
 export const logger = getLogger('AgentCLI');
@@ -35,9 +36,15 @@ export function resolveValue(value: string | undefined, label = 'value'): string
 export function toUserFriendlyPath(absolutePath: string): string {
   const homedir = os.homedir();
 
-  if (absolutePath.startsWith(homedir)) {
-    return absolutePath.replace(homedir, '~');
+  if (absolutePath === homedir) {
+    return '~';
   }
 
-  return absolutePath;
+  // Requiring a separator after the home directory keeps a sibling whose name extends
+  // it out of the rewrite: `/home/user2/project` is not under `/home/user`.
+  const insideHome =
+    absolutePath.startsWith(homedir) &&
+    (homedir.endsWith(path.sep) || absolutePath[homedir.length] === path.sep);
+
+  return insideHome ? absolutePath.replace(homedir, '~') : absolutePath;
 }
