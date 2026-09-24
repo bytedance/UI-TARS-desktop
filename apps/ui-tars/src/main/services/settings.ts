@@ -6,6 +6,7 @@ import { ipcMain } from 'electron';
 import { SettingStore } from '../store/setting';
 import { logger } from '../logger';
 import { LocalStore } from '@main/store/validate';
+import { applyProxySettings } from './proxy';
 
 export function registerSettingsHandlers() {
   /**
@@ -34,6 +35,7 @@ export function registerSettingsHandlers() {
    */
   ipcMain.handle('setting:update', async (_, settings: LocalStore) => {
     SettingStore.setStore(settings);
+    await applyProxySettings(settings);
   });
 
   /**

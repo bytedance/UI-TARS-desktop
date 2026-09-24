@@ -27,6 +27,7 @@ import { store } from './store/create';
 import { SettingStore } from './store/setting';
 import { createTray } from './tray';
 import { registerSettingsHandlers } from './services/settings';
+import { applyProxySettings, registerProxySettingsWatcher } from './services/proxy';
 import { sanitizeState } from './utils/sanitizeState';
 import { windowManager } from './services/windowManager';
 import { checkBrowserAvailability } from './services/browserCheck';
@@ -87,6 +88,10 @@ const initializeApp = async () => {
   // if (env.isDev) {
   await loadDevDebugTools();
   // }
+
+  // Apply proxy settings before any network requests
+  await applyProxySettings();
+  registerProxySettingsWatcher();
 
   logger.info('createTray');
   // Tray
