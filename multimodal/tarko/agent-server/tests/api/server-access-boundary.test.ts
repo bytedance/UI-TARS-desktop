@@ -151,17 +151,25 @@ describe('resolveServerAuth', () => {
   });
 
   it('uses a configured token, and requires it even on loopback', () => {
-    const resolved = resolveServerAuth({ host: '127.0.0.1', token: 'configured-token' });
+    const resolved = resolveServerAuth({ host: '127.0.0.1', token: 'configured-token-value' });
     expect(resolved).toEqual({
       required: true,
-      token: 'configured-token',
+      token: 'configured-token-value',
       reason: 'configured',
     });
   });
 
   it('reads TARKO_AUTH_TOKEN when no token is configured', () => {
-    process.env.TARKO_AUTH_TOKEN = 'from-env';
-    expect(resolveServerAuth({ host: '0.0.0.0' }).token).toBe('from-env');
+    process.env.TARKO_AUTH_TOKEN = 'token-from-environment';
+    expect(resolveServerAuth({ host: '0.0.0.0' }).token).toBe('token-from-environment');
+  });
+
+  it('refuses a token short enough to guess', () => {
+    expect(() => resolveServerAuth({ host: '0.0.0.0', token: 'short' })).toThrow(
+      /at least 16 characters/,
+    );
+    process.env.TARKO_AUTH_TOKEN = 'also-short';
+    expect(() => resolveServerAuth({ host: '0.0.0.0' })).toThrow(/at least 16 characters/);
   });
 
   it('honours always and never regardless of the bind address', () => {

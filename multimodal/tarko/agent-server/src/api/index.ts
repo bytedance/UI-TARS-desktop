@@ -129,6 +129,10 @@ export function setupAPI(
     app.use('/api', authMiddleware);
   }
 
+  const workspaceAuthGate = authMiddleware
+    ? createScopedAuthMiddleware(authMiddleware, isWorkspaceFileRequest)
+    : undefined;
+
   // Register CSRF token endpoint (before CSRF protection so GET is accessible)
   registerCsrfRoutes(app);
 
@@ -156,8 +160,8 @@ export function setupAPI(
     // Workspace files are session data and need the token too, but only those:
     // everything else here falls through to the web UI shell, which has to stay
     // loadable so the page can present a token in the first place.
-    if (authMiddleware) {
-      app.use('/', createScopedAuthMiddleware(authMiddleware, isWorkspaceFileRequest));
+    if (workspaceAuthGate) {
+      app.use('/', workspaceAuthGate);
     }
 
     setupWorkspaceStaticServer(app, options.workspacePath, options.isDebug);

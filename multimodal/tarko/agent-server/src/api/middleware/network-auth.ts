@@ -24,6 +24,16 @@ import { isExternallyReachableHost } from '@tarko/shared-utils';
 
 export type AgentServerAuthMode = 'auto' | 'always' | 'never';
 
+/**
+ * Shortest token accepted from configuration.
+ *
+ * The token is the only thing between a reachable server and agent execution,
+ * so a guessable one is worse than none: it reads as protection while offering
+ * none. Rejecting it outright at startup is clearer than throttling guesses
+ * later, and the generated default is far longer than this.
+ */
+const MIN_CONFIGURED_TOKEN_LENGTH = 16;
+
 /** Liveness only, and carries no session data, so probes work before a token. */
 const PUBLIC_PATHS = new Set(['/api/v1/health']);
 
@@ -48,6 +58,11 @@ export function resolveServerAuth(options: ResolveServerAuthOptions): ResolvedSe
   }
 
   const configuredToken = (options.token ?? process.env.TARKO_AUTH_TOKEN)?.trim() || undefined;
+  if (configuredToken !== undefined && configuredToken.length < MIN_CONFIGURED_TOKEN_LENGTH) {
+    throw new Error(
+      `Access token must be at least ${MIN_CONFIGURED_TOKEN_LENGTH} characters. Leave it unset to have one generated.`,
+    );
+  }
 
   // Configuring a token is itself a request for authentication, so honour it
   // even on a loopback bind.
